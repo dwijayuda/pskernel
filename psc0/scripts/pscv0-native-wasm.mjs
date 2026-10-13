@@ -1,5 +1,5 @@
 // Independent format/engine checks. Production emission never invokes these tools.
-import { observations } from './pscv0-native-observations.mjs';
+import { observations, panicObservations } from './pscv0-native-observations.mjs';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -54,7 +54,7 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
   } else if (name === 'natural-probe' || name === 'observations') {
     for (const [foreign] of exportsOf(declared)) {
       const internal = foreign.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
-      if (name === 'observations' && internal === 'wasmBangTrap') {
+      if (name === 'observations' && panicObservations.some(({wasm}) => wasm === internal)) {
         assert.throws(() => instance.exports[internal](), WebAssembly.RuntimeError,
           'outOfBounds must trap under V8 Wasm GC');
         for (const args of [

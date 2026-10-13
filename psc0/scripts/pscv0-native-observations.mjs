@@ -228,3 +228,10 @@ export const observations = [
   { name: "signedArithmetic", type: "int", argTypes: ["int", "int"], args: [5n, 2n], expected: -5n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];
+
+// Negative runtime contracts share the same source calls on every target.
+export const panicObservations = [
+  { name: "bangDefaultTrap", wasm: "wasmBangTrap" },
+  { name: "listBangPanic", wasm: "wasmListBangTrap" },
+  { name: "finBangPanic", wasm: "wasmFinBangTrap" }
+];

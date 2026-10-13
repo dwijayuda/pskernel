@@ -817,8 +817,8 @@ private def application : String :=
   "const finProofRuntime: Nat := [487, 491][finIndexSeed]\n" ++
   "const finLawfulRuntime: Nat := finLawful(n := 10, xs := [499, 503])\n" ++
   "const finListGetRuntime: Nat := listFinChecked([509, 521], Fin.mk(1, PsStandard.natBleReflects(2, 2)))\n" ++
-  "function listBangPanic(unit: Unit): Nat := ([] : List Nat)[0]!\n" ++
-  "function finBangPanic(unit: Unit): Nat := [523][finIndexSeed]!\n"
+  "function listBangPanic(unit: Nat): Nat := ([] : List Nat)[0]!\n" ++
+  "function finBangPanic(unit: Nat): Nat := [523][finIndexSeed]!\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

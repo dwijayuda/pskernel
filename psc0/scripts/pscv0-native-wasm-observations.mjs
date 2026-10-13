@@ -1,6 +1,6 @@
 // Reuse the shared expected-value table; wrappers execute the actual compiled
 // source operation, then compare its result inside the GC runtime.
-import { observations } from './pscv0-native-observations.mjs';
+import { observations, panicObservations } from './pscv0-native-observations.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 const directory = path.resolve(process.argv[2]);
@@ -20,8 +20,9 @@ const wrappers = observations.map(({name, type, args, expected}, i) => {
 });
 await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' +
   wrappers.join('\n') + '\n' +
-  'const wasmBangTrap: Bool := Nat.beq(bangDefaultTrap(0), 0)\n');
+  panicObservations.map(({name, wasm}) =>
+    'const ' + wasm + ': Bool := Nat.beq(' + name + '(0), 0)\n').join(''));
 await writeFile(path.join(directory, 'wasm/observations.exports.json'),
-  JSON.stringify([...observations.map((_, i) => 'wasmCheck' + i), 'wasmBangTrap']));
+  JSON.stringify([...observations.map((_, i) => 'wasmCheck' + i), ...panicObservations.map(({wasm}) => wasm)]));
 
 await writeFile(path.join(directory, 'wasm/observation-count.txt'), String(observations.length));

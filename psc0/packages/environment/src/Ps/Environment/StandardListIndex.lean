@@ -168,8 +168,8 @@ def psStandardOptionalFromBranchesDeclaration : PsDeclaration :=
           (psLogicLam 6 "d" (psDecisionType p) body)))))) .implicit
   .definitionDecl (psDecisionName "PsStandard.optionalFromBranches") [w] type value
 
-// RC4 public proof access takes Fin length. The internal worker keeps the
-// structural major visible to the existing checked recursion/erasure plan.
+-- RC4 public proof access takes Fin length. The internal worker keeps the
+-- structural major visible to the existing checked recursion/erasure plan.
 def psStandardListIndexPublicDeclarations : List PsDeclaration :=
   let alpha := PsExpr.fvar 0
   let xs := PsExpr.fvar 1

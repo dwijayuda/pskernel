@@ -30,15 +30,16 @@ def psKernelC0HistoryOrdinaryAxioms :
       | _ =>
           psKernelC0HistoryOrdinaryAxioms earlier
 
-/-- Mathematical exact-name membership, with a decidable proof for
-    every ordinary axiom in the immutable source history. This deliberately
-    does not depend on the portable Boolean name comparator. -/
+/-- The entire finite history must satisfy *decidable structural*
+    membership in the approved list. The result is a Lean proposition
+    asserting every Boolean `decide (name ∈ allowed)` was true, not the
+    portable `psKernelNameMember` comparator. -/
 def psKernelC0HistoryAxiomsApproved
     {env : PsKernelEnvironment}
     (history : PsKernelC0SourceEnvironmentHistory env)
     (allowed : List PsKernelName) : Prop :=
-  (psKernelC0HistoryOrdinaryAxioms history).Forall
-    (fun name => name ∈ allowed)
+  (psKernelC0HistoryOrdinaryAxioms history).all
+    (fun name => decide (name ∈ allowed)) = true
 
 instance {env : PsKernelEnvironment}
     (history : PsKernelC0SourceEnvironmentHistory env)

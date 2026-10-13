@@ -49,6 +49,7 @@ def psDefEqReadOnly
     (localContext : PsLocalContext)
     (left : PsExpr)
     (right : PsExpr) : Bool :=
+  if psExprAlphaEq left right then true else
   let leftValue := psWhnfCore metaContext localContext left;
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
@@ -132,6 +133,12 @@ def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
     (environment : PsEnvironment) (metaContext : PsMetaContext)
     (proofEq : PsLocalContext → PsExpr → PsExpr → Bool)
     (fuel : Nat) (localContext : PsLocalContext) (left right : PsExpr) : Bool :=
+  -- Reflexivity needs no evaluation. In particular dictionary targets may
+  -- contain identical expensive runtime computations beneath dependent types.
+  -- Follow Lean ExprDefEq.isDefEqQuickOther before considering delta reduction.
+  let left := psMetaInstantiate metaContext left
+  let right := psMetaInstantiate metaContext right
+  if psExprAlphaEq left right then true else
   let left := psWhnfWithTransparency transparency environment metaContext localContext left
   let right := psWhnfWithTransparency transparency environment metaContext localContext right
   if psExprAlphaEq left right then true else

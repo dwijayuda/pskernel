@@ -26,6 +26,15 @@ def kernelExceptionSummary : Lean.Kernel.Exception -> String
   | .deepRecursion => "deep-recursion"
   | .interrupted => "interrupted"
 
+-- Keep structured kernel failure context for authoring imported Core assets.
+-- This changes diagnostics only; admission still checks every declaration.
+def kernelExceptionContext : Lean.Kernel.Exception → String
+  | .appTypeMismatch _ _ app functionType argumentType =>
+    "\napplication: " ++ app.dbgToString ++ "\nfunction type: " ++
+      functionType.dbgToString ++ "\nargument type: " ++ argumentType.dbgToString
+  | .declTypeMismatch _ _ type => "\ngiven type: " ++ type.dbgToString
+  | _ => ""
+
 def findConstructorInfo : List PsDeclaration -> PsName -> Option PsConstructorInfo
   | [], _ => none
   | declaration :: rest, name =>
@@ -135,7 +144,7 @@ def tryPreludeDeclaration
           throw (preludeMismatch
             ("official Lean kernel rejected portable Standard declaration " ++
               psNameToString (psDeclarationName declaration) ++
-              " (" ++ kernelExceptionSummary error ++ ")"))
+              " (" ++ kernelExceptionSummary error ++ ")" ++ kernelExceptionContext error))
 
 def replayPreludePass
     (allDeclarations : List PsDeclaration) :

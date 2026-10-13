@@ -170,6 +170,11 @@ def psUnifyWithFuelWorker (transparency : PsTransparency)
           (context : PsMetaContext)
           (left : PsExpr)
           (right : PsExpr) =>
+        -- Structural reflexivity is sufficient and must precede speculative
+        -- congruence, proof inference and normalization. No assignments arise.
+        let left := psMetaInstantiate context left
+        let right := psMetaInstantiate context right
+        if psExprAlphaEq left right then psUnifySuccess context else
         let smaller :
             PsEnvironment ->
             PsLocalContext ->

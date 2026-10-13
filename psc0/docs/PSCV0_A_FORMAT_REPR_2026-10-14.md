@@ -474,3 +474,24 @@ FNV `fnv1a64:16989132783207094075`, SHA
 `sha256:be1c0bcd7657628f0efc6e24164ff1439cda6162c0b85f3e96448f22806a0ecf`.
 The source guard's native inventory previously omitted the authoring audit;
 it is corrected to include the audit/export roots in the next change.
+
+
+### Avoid evaluation for reflexive conversion
+
+The green /57 run exposed a performance defect: elaborating the shared Wasm
+observation wrappers took 536,228 ms, while erasure/emission took 137/334 ms.
+Conversion and unification normalized identical expressions before testing
+reflexivity. Checked arithmetic bodies made this avoidable work expensive.
+The shared read-only conversion and assigning unifier now instantiate the
+current metavariable context, then accept structural alpha equality before
+normalization/congruence/proof inference. This sufficient equality rule neither
+assigns a metavariable nor relies on transparency; unequal terms retain every
+existing typed, scoped and resource-limited check. The environment-free walker
+also avoids normalizing equal syntax.
+
+Pinned source: `Lean/Meta/ExprDefEq.lean`, especially
+`isDefEqQuickOther` and `isExprDefEqAuxImpl`. Studied regression references:
+`tests/elab/isDefEqPerfIssue.lean`, `isDefEqProjPerfIssue.lean`,
+`isDefEqCheckAssignmentBug.lean`. Reuse the existing independent semantics,
+negative inference/search gates and all runtime wrappers to measure the result;
+do not raise limits, bypass proof checks or change the test expressions.

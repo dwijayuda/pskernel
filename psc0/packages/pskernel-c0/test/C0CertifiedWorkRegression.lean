@@ -33,6 +33,11 @@ def main : IO Unit := do
     psKernelC0CertifiedRootIndex_correct certified
   let _storeWF : psKernelC0StoreWF certified.owner.store :=
     psKernelC0CertifiedRootStore_wf certified
+  let _uniqueNodes :
+      ∀ i j : Fin certified.owner.store.nodes.size,
+        (certified.owner.store.nodes[i]).node =
+          (certified.owner.store.nodes[j]).node → i = j :=
+    psKernelC0CertifiedStoreUnique certified.owner
   if psKernelC0NodeTopological 0 (.app 0 0) then
     throw (IO.userError "forward-ref node satisfied topology invariant")
   let _exact :
@@ -80,6 +85,12 @@ def main : IO Unit := do
   -- The mathematical StoreWF propositions independently reject changed
   -- derived columns or forged indices; canonical replay is still required
   -- for the *entire* radix trie, including ghost entries.
+  let duplicateStore : PsKernelC0TermStore :=
+    { rawStore with nodes := rawStore.nodes.push rootNode }
+  if psKernelC0StoreWF duplicateStore then
+    throw (IO.userError "StoreWF admitted two identical canonical nodes")
+  if (psKernelC0CertifyStore duplicateStore).isSome then
+    throw (IO.userError "duplicate interning acquired certified uniqueness")
   let wrongDepthNode : PsKernelC0StoredNode :=
     { rootNode with depth := rootNode.depth + 1 }
   let wrongDepthStore : PsKernelC0TermStore :=

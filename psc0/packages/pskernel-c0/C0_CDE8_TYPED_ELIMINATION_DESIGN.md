@@ -5,6 +5,8 @@
 **Branch:** `perf/pskernel-c0-v7-rust-20261012`.  
 **Scope:** native Lean under `psc0/packages/pskernel-c0/`; no original `pskernel-core`, compiler, Rust/Wasm or bootstrap edits.
 
+**CDE-8 executable qualification update (2026-10-14):** The latest bounded implementation [`d5a179dc`](https://github.com/dwijayuda/pskernel/commit/d5a179dc08cd361f70a5d34001d1eea4cc99e736) has **full native [CI 38448498595](https://github.com/dwijayuda/pskernel/actions/runs/38448498595) SUCCESS**, including Lean 4.35 compilation, official source/reject fixtures, the mandatory bounded-resource and K/eta observation regressions, negative/resource/migration checks, microbenchmarks and independently rebuilt original checker comparison. The scope is **candidate work-budget foundation and source-typed observation only**; globally complete allocation metering, positive real-checked K/eta coverage, Phase C/D/E exits, full Phase B acceptance and formal soundness remain outstanding. Documentation commits after `d5a179dc` do not represent new executable qualification.
+
 ## Current implementation checkpoint (2026-10-14)
 
 * `Architecture/Budget.lean` and mandatory `C0ArchitectureBudgetRegression.lean` implement an **opt-in readback/syntax-traversal work quota**. Exact expression-node walks, captured closure/environment readback, conservative pre-instantiation reserve, final spine precharge and demand-step active syntax consumption share one operation-scoped quota. Source WHNF is still computed independently first in preview and is unaffected by candidate declines.

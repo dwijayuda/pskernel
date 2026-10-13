@@ -1,0 +1,60 @@
+# PSKernel-C0 architecture-first execution plan — C → D → E, then B → F → G
+
+**Decision:** 2026-10-13. Architecture-first development is authoritative for the native C0 workstream.  
+**Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
+**Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
+
+## Decision and bounded evidence freeze
+
+Phase B's **exhaustive compatibility exit gate is deferred, not waived**. Preserve all official identical-byte accepted/rejected fixtures, real Init export digest, strict unsupported/rejected/resource distinctions and the independently verified accepted 79,416-record prefix. Preserve the known false rejection at record 86,383 (`Std.PRange.UpwardEnumerable.succMany?_add`) as an open regression. The native [CI 38395502669](https://github.com/dwijayuda/pskernel/actions/runs/38395502669) and real [CI 38395528602](https://github.com/dwijayuda/pskernel/actions/runs/38395528602) both passed on their explicit bounded gates, **not full Init acceptance**.
+
+The full `Init` source is 6,452,982 exported records, 57,919 declarations, 345,690,182 bytes, pinned to Lean 4.35.0 and `lean4export` `5a9a355d`; the official Lean checker accepts it. C0 currently accepts an independently gated *prefix*, not this corpus. Documentation-only commits are not executable qualification.
+
+## Clean architectural choices
+
+**No historical architecture lock-in.** Evaluate three implementations on the same complete checked workload and identical source semantics: (A) lean-native shared recursive expressions, (B) canonical persistent/scratch indexed handles, (C) lazy closure/value execution. Pick a source/arena/closure hybrid only where measured costs, semantic clarity and resource behavior justify it. Never equate a syntax DAG microbenchmark with checker throughput.
+
+**One coherent authority boundary.** A source-checked declaration is valid only if the accepting checked-session implementation has admitted it. The optional closure/arena executor is *not* a checked judgment or proof certificate. Candidate evaluation may produce diagnostic observations only, not admission, proof receipts or build artifacts. Failures classified as malformed, unsupported, resource-exhausted and rejected-invalid remain distinct.
+
+**Cache ownership and invalidation.** A cache key must include all relevant environment revision, local scope, reduction/eager policy, universe instantiation, fuel semantics, safety policy and term ownership. No WHNF/DefEq/type cache can be transported across unqualified environment extensions; provisional mutual declarations are especially sensitive. Source-side syntax-only canonical caches may be shared across contexts only after exact structural equality.
+
+## C: representation and ownership
+
+- Keep source `PsKernelExpr` as independent oracle; introduce private execution terms with explicit provenance (persistent immutable base and disposable scratch lifetimes).
+- Enforce acyclic children-before-parents, persistent-to-persistent edges, checked hash collision behavior, immutable abort, selected-root promotion and strict whole-store readback. No externally supplied raw Nat handle determines semantic equality across stores.
+- Define a compact execution-state interface independent of source substitution, with explicit resource accounting. Begin with operation-local ownership, then evaluate packed/tagged handle representation against native structural sharing.
+- **C exit:** whole-operation benchmarks and error-category equivalence plus an auditable `StoreWF` contract. Formal proof is Phase G; no accepting indexed result until then.
+
+## D: closure/value weak-head evaluator
+
+- Establish an evaluation machine with explicit control closure, delayed environment substitutions, and argument spine. Reduce β and ζ without eagerly reconstructing the entire application spine. Distinguish neutral value, lambda closure, unsupported form and exhausted resource.
+- Add typed handling of local binders, constants and universe application, projection, primitive numerals, quotation, recursors and transparency policy as separate coherent families. For any unqualified family, return an explicit decline and use the authoritative checker instead.
+- Source reification must be capture avoiding; compare exact β/ζ/metadata behavior and resource/error classes against source WHNF. Never assume absence of syntactic target names proves absence under δ reduction.
+- **D exit:** checked evaluator semantics for the supported Lean 4.35 closure; all actual source forms have positive/negative differential tests and bounded resource behavior.
+
+## E: one accepting checker
+
+- Connect the selected engine to one WHNF/DefEq/inference/proof/admission pipeline with explicit trusted boundary. The candidate may accelerate only operations whose complete context and semantic equivalence are qualified.
+- Preserve full binder, universe, proof irrelevance, quotient, inductive, recursor, local, literal and safety semantics. Admission must be atomic: a failed mandatory check leaves the preceding environment intact.
+- Remove duplicated historical fast paths only after broad positive and negative qualification; never add fallback acceptance based on an unchecked candidate.
+- **E exit:** complete coherent accepting kernel over the planned scope, independent same-byte differential CI and resource/error equivalence. Passing only a small synthetic slice does not qualify E.
+
+## Phase B after E
+
+Resume complete pinned `Init` acceptance, then Std and Mathlib with known unsupported features and independent negative cases. Zero false acceptance is mandatory. Treat out-of-fuel as computational failure, not a logical rejection. The record-86,383 counterexample is a regression fixture, not something to bypass.
+
+## F and G
+
+F: independently measure Lean 4.35 official, project-local original, con-leche, con-ron and C0 on identical *fully checked* corpora with p50/p95 time, allocation bytes/events, RSS, memory lifetime, cold/warm and error rates. Do not assert a competitive ranking from unequal datasets.
+
+G: prove source/optimized denotation, substitution/reification, canonical-store invariants and sound refinement or connect an independent verified acceptance gate. Consistency is a theorem under explicit axioms, not inferred from green tests.
+
+## Milestone order and current first slice
+
+1. Freeze existing B acceptance evidence and the counterexample (done).
+2. **C/D foundation:** implement a separately compiled candidate evaluator using explicit control closure, delayed environment and argument stack. Initially handle only syntactic β/ζ/metadata and neutral heads, not delta/recursors. No trusted emission.
+3. **C/D differential gate:** compare that candidate against source-owned WHNF on closed and appropriately scoped terms, including negative resource and binder cases. Keep source authority.
+4. Extend coherent type/recursor/equality families with controlled ablations, then implement E end-to-end.
+5. Return to Phase B and complete full-library conformance before qualifying performance or formal assurance.
+
+**Current status:** architecture first approved; C–E implementation is ongoing, none of C–E may be declared complete on the basis of this plan or its initial candidate engine.

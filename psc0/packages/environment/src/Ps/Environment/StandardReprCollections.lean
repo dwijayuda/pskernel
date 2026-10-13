@@ -3,7 +3,7 @@ Collection display follows Lean 4.35.0 Init/Data/Repr.lean,
 Init/Data/Format/Instances.lean and Init/Data/Array/Basic.lean.
 Copyright (c) Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: checked Core builders; Prod/Array retain the selected Type-0 model.
+Modified: checked Core builders; Array retains the selected Type-0 model.
 -/
 import Ps.Environment.StandardRepr
 import Ps.Environment.StandardArray
@@ -32,23 +32,30 @@ def psReprTupleDefault : PsDeclaration :=
 
 def psFormatProductDefinition (name leftClass rightClass : String)
     (result value : PsExpr) : PsDeclaration :=
-  let left := psFormatClassType leftClass (.fvar 0)
-  let right := psFormatClassType rightClass (.fvar 1)
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let ul := PsLevel.param u
+  let vl := PsLevel.param v
+  let left := psFormatClassType leftClass (.fvar 0) ul
+  let right := psFormatClassType rightClass (.fvar 1) vl
   let close := fun body lambda =>
     let bind := fun id name type body binder =>
       if lambda then psLogicLam id name type body binder else psLogicPi id name type body binder
-    bind 0 "α" psPreludeTypeType (bind 1 "β" psPreludeTypeType
+    bind 0 "α" (.sortE (.succ ul)) (bind 1 "β" (.sortE (.succ vl))
       (bind 2 "left" left (bind 3 "right" right body .instanceImplicit) .instanceImplicit)
       .implicit) .implicit
-  .definitionDecl (psDecisionName name) [] (close result false) (close value true)
+  .definitionDecl (psDecisionName name) [u, v] (close result false) (close value true)
 
 def psReprProductDeclarations : List PsDeclaration :=
+  let ul := PsLevel.param (psRootName "u")
+  let vl := PsLevel.param (psRootName "v")
+  let level := PsLevel.max ul vl
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let prod := psStandardProductOf alpha beta
+  let prod := psStandardProductOf alpha beta ul vl
   let list := psSelfHostListOf psFormatType
-  let first := psReprPrec alpha (.fvar 2) (.proj psProdName 0 (.fvar 4)) (psFormatNat 0)
-  let second := psFormatClassMethod "ReprTuple" "reprTuple" beta (.fvar 3)
+  let first := psReprPrec alpha (.fvar 2) (.proj psProdName 0 (.fvar 4)) (psFormatNat 0) ul
+  let second := psFormatClassMethod "ReprTuple" "reprTuple" beta (.fvar 3) vl
   let gather := fun tail => psLogicApply second
     [.proj psProdName 1 (.fvar 4), psSelfHostListConsOf psFormatType first tail]
   let tupleType := psLogicPi 4 "value" prod (psLogicPi 5 "tail" list list)
@@ -64,26 +71,31 @@ def psReprProductDeclarations : List PsDeclaration :=
   let reprMethod := psLogicLam 4 "value" prod (psLogicLam 5 "prec" psOrderNat
     (psFormatCall "bracket" [.lit (.string "("), joined, .lit (.string ")")]))
   let make := fun name result value => psFormatProductDefinition name "Repr" "ReprTuple" result value
+  let call := fun name => psLogicApply (.constE (psDecisionName name) [ul, vl])
+    [alpha, beta, .fvar 2, .fvar 3]
   [ make "Prod.reprTuple" tupleType tupleMethod,
     make "Prod.repr" reprType reprMethod,
-    make "PsStandard.instReprTupleProd" (psFormatClassType "ReprTuple" prod)
-      (psFormatClassValue "ReprTuple" prod (psOrderCall "Prod.reprTuple" [alpha, beta, .fvar 2, .fvar 3])),
-    make "PsStandard.instReprProd" (psFormatClassType "Repr" prod)
-      (psFormatClassValue "Repr" prod (psOrderCall "Prod.repr" [alpha, beta, .fvar 2, .fvar 3])) ]
+    make "PsStandard.instReprTupleProd" (psFormatClassType "ReprTuple" prod level)
+      (psFormatClassValue "ReprTuple" prod (call "Prod.reprTuple") level),
+    make "PsStandard.instReprProd" (psFormatClassType "Repr" prod level)
+      (psFormatClassValue "Repr" prod (call "Prod.repr") level) ]
 
 def psToFormatProductInstance : PsDeclaration :=
+  let ul := PsLevel.param (psRootName "u")
+  let vl := PsLevel.param (psRootName "v")
+  let level := PsLevel.max ul vl
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let prod := psStandardProductOf alpha beta
-  let left := PsExpr.app (psFormatClassMethod "Std.ToFormat" "format" alpha (.fvar 2))
+  let prod := psStandardProductOf alpha beta ul vl
+  let left := PsExpr.app (psFormatClassMethod "Std.ToFormat" "format" alpha (.fvar 2) ul)
     (.proj psProdName 0 (.fvar 4))
-  let right := PsExpr.app (psFormatClassMethod "Std.ToFormat" "format" beta (.fvar 3))
+  let right := PsExpr.app (psFormatClassMethod "Std.ToFormat" "format" beta (.fvar 3) vl)
     (.proj psProdName 1 (.fvar 4))
   let append := fun a b => psFormatCall "append" [a, b]
   let method := psLogicLam 4 "value" prod
     (psFormatCall "paren" [append (append (append left (psReprText ",")) (psFormatCall "line")) right])
   psFormatProductDefinition "PsStandard.instToFormatProd" "Std.ToFormat" "Std.ToFormat"
-    (psFormatClassType "Std.ToFormat" prod) (psFormatClassValue "Std.ToFormat" prod method)
+    (psFormatClassType "Std.ToFormat" prod level) (psFormatClassValue "Std.ToFormat" prod method level)
 
 def psDisplayArrayDeclarations : List PsDeclaration :=
   let alpha := PsExpr.fvar 0

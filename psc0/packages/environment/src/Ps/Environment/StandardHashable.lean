@@ -2,7 +2,7 @@
 Hash instances adapted from Lean 4.35.0 Init/Data/Hashable.lean.
 Copyright (c) 2016 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: portable checked Core builders and selected Type-0 Array/Prod.
+Modified: portable checked Core builders and selected Type-0 Array.
 -/
 import Ps.Environment.StandardHashFoundationData
 import Ps.Environment.StandardClass
@@ -100,20 +100,13 @@ def psHashContainerInstances : List PsDeclaration :=
     psHashContainer "Array" array arrayMethod .zero [] ]
 
 def psHashProductInstance : PsDeclaration :=
-  let alpha := PsExpr.fvar 0
-  let beta := PsExpr.fvar 1
-  let prod := psStandardProductOf alpha beta
-  let close := fun body lambda =>
-    let bind := fun id name type body binder =>
-      if lambda then psLogicLam id name type body binder else psLogicPi id name type body binder
-    bind 0 "α" psPreludeTypeType (bind 1 "β" psPreludeTypeType
-      (bind 2 "left" (psHashClass alpha) (bind 3 "right" (psHashClass beta)
-        body .instanceImplicit) .instanceImplicit) .implicit) .implicit
-  let method := psLogicLam 4 "value" prod
-    (psHashMix (psHashMethod alpha (.fvar 2) (.proj psProdName 0 (.fvar 4)))
-      (psHashMethod beta (.fvar 3) (.proj psProdName 1 (.fvar 4))))
-  .definitionDecl (psDecisionName "PsStandard.instHashableProd") []
-    (close (psHashClass prod) false) (close (psHashValue prod method) true)
+  psStandardProductInstance "Prod" "Hashable"
+    (fun type level => psHashClass type (.succ level))
+    (fun type level method => psHashValue type method (.succ level))
+    (fun alpha beta prod ul vl => psLogicLam 4 "value" prod
+      (psHashMix
+        (psHashMethod alpha (.fvar 2) (.proj psProdName 0 (.fvar 4)) (.succ ul))
+        (psHashMethod beta (.fvar 3) (.proj psProdName 1 (.fvar 4)) (.succ vl))))
 
 def psHashFinInstance : PsDeclaration :=
   let fin := psStandardFinOf (.fvar 0)

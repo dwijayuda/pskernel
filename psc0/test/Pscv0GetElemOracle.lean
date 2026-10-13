@@ -584,3 +584,26 @@ def integerCases (value : Int) : Nat :=
 #guard integerCases 0 == 71
 #guard integerCases 17 == 89
 end Hashing
+
+
+-- One shared fixture covers independent product levels and checked dictionaries.
+namespace ProductLevels
+universe u v
+structure High : Type 1 where
+  value : Nat
+deriving Inhabited, BEq, Repr, Hashable
+instance : Std.ToFormat High where
+  format _ := Std.Format.text "hi"
+def first {A : Type u} {B : Type v} (pair : A × B) : A := pair.fst
+def second {A : Type u} {B : Type v} (pair : A × B) : B :=
+  match pair with | (a, b) => b
+example {A : Type u} {B : Type v} (a : A) (b : B) : (a, b).fst = a := rfl
+#guard (first (High.mk 5, true)).value == 5
+#guard (second (true, High.mk 7)).value == 7
+#guard (default : High × Nat).fst.value == 0
+#guard (High.mk 5, true) == (High.mk 5, true)
+#guard !((true, High.mk 5) == (true, High.mk 7))
+#guard reprStr (High.mk 5, true) == "({ value := 5 }, true)"
+#guard (Std.format (true, High.mk 5)).pretty == "(true, hi)"
+#guard hash (High.mk 5, true) == mixHash (hash (High.mk 5)) (hash true)
+end ProductLevels

@@ -1,5 +1,13 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "productHighLeft", args: null, expected: 5n },
+  { name: "productHighRight", args: null, expected: 7n },
+  { name: "productHighDefault", args: null, expected: 0n },
+  { name: "productHighEqual", args: null, expected: true },
+  { name: "productHighUnequal", args: null, expected: false },
+  { name: "productHighRepr", args: null, expected: "({ value := 5 }, true)" },
+  { name: "productHighFormat", args: null, expected: "(true, hi)" },
+  { name: "productHighHash", args: null, expected: true },
   {name:"hashText",args:[""],expected:9877294847684254529n},
   {name:"hashText",args:["a"],expected:15917291556903334389n},
   {name:"hashText",args:["ab"],expected:1859847562730075588n},

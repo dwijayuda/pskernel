@@ -1,76 +1,96 @@
 import Ps.Environment.StandardInhabited
 
--- Type-0 built-in product constructors are defined once for both the
--- kernel-facing prelude and the selected Standard dictionary instances.
-def psStandardProductOf (alpha beta : PsExpr) : PsExpr :=
-  psLogicApply (.constE psProdName []) [alpha, beta]
+-- Lean 4.35.0 Init/Prelude.lean: two independent element universes,
+-- maximum result universe, and an independent recursor motive sort.
+def psStandardProductOf (alpha beta : PsExpr)
+    (leftLevel rightLevel : PsLevel := .zero) : PsExpr :=
+  psLogicApply (.constE psProdName [leftLevel, rightLevel]) [alpha, beta]
 
-def psStandardProductMkOf (alpha beta fst snd : PsExpr) : PsExpr :=
-  psLogicApply (.constE psProdMkName []) [alpha, beta, fst, snd]
+def psStandardProductMkOf (alpha beta fst snd : PsExpr)
+    (leftLevel rightLevel : PsLevel := .zero) : PsExpr :=
+  psLogicApply (.constE psProdMkName [leftLevel, rightLevel]) [alpha, beta, fst, snd]
 
--- The two component dictionaries are actual required arguments. There is
--- no universal default or BEq for a product whose fields lack the instances.
-def psStandardProductInhabitedInstance : PsDeclaration :=
+def psStandardProductDataDeclarations : List PsDeclaration :=
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let w := psRootName "u_1"
+  let ul := PsLevel.param u
+  let vl := PsLevel.param v
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let classAlpha := psStandardInhabitedType alpha
-  let classBeta := psStandardInhabitedType beta
-  let leftDefault := psStandardInhabitedDefault (.succ .zero) alpha (.fvar 2)
-  let rightDefault := psStandardInhabitedDefault (.succ .zero) beta (.fvar 3)
-  let product := psStandardProductOf alpha beta
-  let result := psStandardInhabitedValue product
-    (psStandardProductMkOf alpha beta leftDefault rightDefault)
-  let type := psLogicPi 0 "α" psPreludeTypeType
-    (psLogicPi 1 "β" psPreludeTypeType
-      (psLogicPi 2 "left" classAlpha
-        (psLogicPi 3 "right" classBeta
-          (psStandardInhabitedType product) .instanceImplicit)
-        .instanceImplicit) .implicit) .implicit
-  let value := psLogicLam 0 "α" psPreludeTypeType
-    (psLogicLam 1 "β" psPreludeTypeType
-      (psLogicLam 2 "left" classAlpha
-        (psLogicLam 3 "right" classBeta result .instanceImplicit)
-        .instanceImplicit) .implicit) .implicit
-  .definitionDecl (psNameAppendStr (psRootName "PsStandard") "instInhabitedProd")
-    [] type value
+  let product := psStandardProductOf alpha beta ul vl
+  let bind := fun body binder => psLogicPi 0 "α" (.sortE (.succ ul))
+    (psLogicPi 1 "β" (.sortE (.succ vl)) body binder) binder
+  let bindLams := fun body => psLogicLam 0 "α" (.sortE (.succ ul))
+    (psLogicLam 1 "β" (.sortE (.succ vl)) body .implicit) .implicit
+  let constructor := psStandardProductMkOf alpha beta (.fvar 4) (.fvar 5) ul vl
+  let motive := PsExpr.fvar 2
+  let recursorType := bind
+    (psLogicPi 2 "motive" (psLogicPi 6 "value" product (.sortE (.param w)))
+      (psLogicPi 3 "mk" (psLogicPi 4 "fst" alpha
+        (psLogicPi 5 "snd" beta (.app motive constructor)))
+        (psLogicPi 6 "value" product (.app motive (.fvar 6)))) .implicit) .implicit
+  let projection := fun name index result =>
+    PsDeclaration.definitionDecl name [u, v]
+      (bind (psLogicPi 6 "self" product result) .implicit)
+      (bindLams (psLogicLam 6 "self" product (.proj psProdName index (.fvar 6))))
+  [ .inductiveDecl (.mk psProdName [u, v]
+      (bind (.sortE (.succ (.max ul vl))) .explicit) 2 0 [psProdMkName] true),
+    .constructorDecl (.mk psProdMkName [u, v]
+      (bind (psLogicPi 4 "fst" alpha (psLogicPi 5 "snd" beta product)) .implicit)
+      psProdName 0 2 2 []),
+    .recursorDecl (.mk (psNameAppendStr psProdName "rec") [w, u, v]
+      recursorType [psProdName] 2 0 1 1),
+    projection psProdFstName 0 alpha,
+    projection psProdSndName 1 beta ]
+
+-- Shared telescope for checked product dictionaries, with actual component
+-- levels. Register the same universe parameters used by the declaration.
+def psStandardProductInstance (name className : String)
+    (classAt : PsExpr → PsLevel → PsExpr)
+    (valueAt : PsExpr → PsLevel → PsExpr → PsExpr)
+    (method : PsExpr → PsExpr → PsExpr → PsLevel → PsLevel → PsExpr) : PsDeclaration :=
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let ul := PsLevel.param u
+  let vl := PsLevel.param v
+  let alpha := PsExpr.fvar 0
+  let beta := PsExpr.fvar 1
+  let product := psStandardProductOf alpha beta ul vl
+  let close := fun body lambda =>
+    let bind := fun id name type body binder =>
+      if lambda then psLogicLam id name type body binder else psLogicPi id name type body binder
+    bind 0 "α" (.sortE (.succ ul)) (bind 1 "β" (.sortE (.succ vl))
+      (bind 2 "left" (classAt alpha ul)
+        (bind 3 "right" (classAt beta vl) body .instanceImplicit) .instanceImplicit)
+      .implicit) .implicit
+  .definitionDecl (psNameAppendStr (psRootName "PsStandard") ("inst" ++ className ++ name))
+    [u, v] (close (classAt product (.max ul vl)) false)
+    (close (valueAt product (.max ul vl) (method alpha beta product ul vl)) true)
+
+def psStandardProductInhabitedInstance : PsDeclaration :=
+  psStandardProductInstance "Prod" "Inhabited"
+    (fun type level => psStandardInhabitedType type (.succ level))
+    (fun type level value => psStandardInhabitedValue type value (.succ level))
+    (fun alpha beta _ ul vl => psStandardProductMkOf alpha beta
+      (psStandardInhabitedDefault (.succ ul) alpha (.fvar 2))
+      (psStandardInhabitedDefault (.succ vl) beta (.fvar 3)) ul vl)
 
 def psStandardProductBEqInstance : PsDeclaration :=
-  let alpha := PsExpr.fvar 0
-  let beta := PsExpr.fvar 1
   let className := psRootName "BEq"
-  let classAlpha := PsExpr.app (.constE className [.zero]) alpha
-  let classBeta := PsExpr.app (.constE className [.zero]) beta
-  let product := psStandardProductOf alpha beta
-  let leftFst := PsExpr.proj psProdName 0 (.fvar 4)
-  let rightFst := PsExpr.proj psProdName 0 (.fvar 5)
-  let leftSnd := PsExpr.proj psProdName 1 (.fvar 4)
-  let rightSnd := PsExpr.proj psProdName 1 (.fvar 5)
-  let beq := PsExpr.constE (psNameAppendStr className "beq") [.zero]
-  let fstEqual := psLogicApply beq [alpha, .fvar 2, leftFst, rightFst]
-  let sndEqual := psLogicApply beq [beta, .fvar 3, leftSnd, rightSnd]
-  let bool := PsExpr.constE psBoolName []
-  let boolMotive := psLogicLam 6 "_" bool bool
-  -- False short-circuits; a true first component selects the second check.
-  let both := psLogicApply
-    (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
-    [boolMotive, .constE psBoolFalseName [], sndEqual, fstEqual]
-  let method := psLogicLam 4 "left" product
-    (psLogicLam 5 "right" product both)
-  let dictionaryType := PsExpr.app (.constE className [.zero]) product
-  let dictionary := psLogicApply
-    (.constE (psNameAppendStr className "mk") [.zero]) [product, method]
-  let type := psLogicPi 0 "α" psPreludeTypeType
-    (psLogicPi 1 "β" psPreludeTypeType
-      (psLogicPi 2 "left" classAlpha
-        (psLogicPi 3 "right" classBeta dictionaryType .instanceImplicit)
-        .instanceImplicit) .implicit) .implicit
-  let value := psLogicLam 0 "α" psPreludeTypeType
-    (psLogicLam 1 "β" psPreludeTypeType
-      (psLogicLam 2 "left" classAlpha
-        (psLogicLam 3 "right" classBeta dictionary .instanceImplicit)
-        .instanceImplicit) .implicit) .implicit
-  .definitionDecl (psNameAppendStr (psRootName "PsStandard") "instBEqProd")
-    [] type value
+  psStandardProductInstance "Prod" "BEq"
+    (fun type level => .app (.constE className [level]) type)
+    (fun type level method => psLogicApply
+      (.constE (psNameAppendStr className "mk") [level]) [type, method])
+    (fun alpha beta product ul vl =>
+      let compare := fun type level dictionary index =>
+        psLogicApply (.constE (psNameAppendStr className "beq") [level])
+          [type, dictionary, .proj psProdName index (.fvar 4), .proj psProdName index (.fvar 5)]
+      let bool := PsExpr.constE psBoolName []
+      let both := psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
+        [psLogicLam 6 "_" bool bool, .constE psBoolFalseName [],
+          compare beta vl (.fvar 3) 1, compare alpha ul (.fvar 2) 0]
+      psLogicLam 4 "left" product (psLogicLam 5 "right" product both))
 
 def psStandardProductInstances : List (PsDeclaration × PsName) :=
   [(psStandardProductInhabitedInstance, psRootName "Inhabited"),
@@ -79,14 +99,14 @@ def psStandardProductInstances : List (PsDeclaration × PsName) :=
 def psStandardProductDeclarations : List PsDeclaration :=
   psStandardProductInstances.map Prod.fst
 
--- The product inductive/constructor/recursor must be installed before these
--- definitions: registration cannot supply a missing dependent family.
 def psStandardProductExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardProductDeclarations.foldl
     (fun env declaration => (psEnvironmentAdd env declaration).getD env) environment
   let instances := psStandardProductInstances.foldl (fun index (declaration, className) =>
+    let levels := psDeclarationLevelParams declaration
     psInstanceIndexAdd index {
-      value := .constE (psDeclarationName declaration) []
+      value := .constE (psDeclarationName declaration) (levels.map PsLevel.param)
+      levelParams := levels
       type := psDeclarationType declaration
       className := some className }) environment.instances
   { environment with instances }

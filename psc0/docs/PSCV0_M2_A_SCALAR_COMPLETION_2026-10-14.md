@@ -2,7 +2,7 @@
 
 Status: unsigned conversion /59 and Hashable /60 are qualified. Shared word
 lowering and logical foundation support are under qualification; the complete
-unsigned operation slice is blocked on explicit foundation approval. Float, signed words and expanded BitVec operations
+unsigned operation slice is under native kernel qualification after explicit foundation approval. Float, signed words and expanded BitVec operations
 are not enabled by this document.
 
 All Lean references below use commit
@@ -216,3 +216,57 @@ Lean assumptions.” The unsigned candidate now has exactly this per-slice
 allowlist. Earlier blocked/pending statements above record the review history;
 there is no remaining approval blocker for this delta. Candidate export,
 public admission and full qualification remain separate subsequent steps.
+
+## Signed and platform-word study (implementation still pending)
+
+Pinned sources studied: `Init/Data/SInt/Basic.lean`, `SInt/Bitwise.lean`,
+`SInt/IntToBitVec.lean`, `Init/System/Platform.lean`, and the `USize` and
+`System.Platform.getNumBits` sections of `Init/Prelude.lean`. Independent
+references include `tests/elab/sint_basic.lean`, `sint_conversions.lean`
+and `sint_div_overflow.lean`.
+
+Signed wrappers contain the corresponding unsigned bit pattern. ofInt wraps,
+toInt interprets the sign, toNatClampNeg clamps negatives, and widening signed
+conversions sign-extend. Division truncates toward zero and remainder follows
+the dividend sign. MIN/-1 wraps and MIN%-1 is zero. Signed shifts take a
+nonnegative modulo-width count and right shift sign-extends. Reuse the shared
+word-operation lowering; give conversions explicit typed semantics rather than
+silently reusing unsigned conversions.
+
+Platform width is a separate semantic input. Native getNumBits is a checked
+opaque function returning a subtype whose witness proves width is 32 or 64;
+its 64-valued inhabitant is not a theorem that the runtime width is 64. The
+existing Rust usize/isize printers and Wasm host stack width must not silently
+decide source semantics. Before enabling USize/ISize, select and record the
+portable target's word width in one shared configuration and carry that choice
+to IR normalization, all emitters, ABI planning and conformance metadata. A
+64-bit qualification does not establish 32-bit behavior. No new platform
+assumption is authorized by the propext/Quot.sound approval.
+
+## Universe-general product foundation
+
+Candidate replay38470857650 validated the isolated quotient foundation,
+including lift/ind kernel computation, forged-signature refusal and primitive
+name-collision refusal. It then rejected a native arithmetic proof using
+Prod.{u,v}: PSC0's existing Prod was restricted to Type0. This is a shared
+foundation mismatch, not a property of that individual proof.
+
+Pinned references: Init/Prelude.lean:Prod, Init/Data/Repr.lean:Prod.reprTuple,
+Init/Data/Format/Instances.lean, Init/Data/Hashable.lean, and
+Lean/Elab/Structure.lean's projection reducibility. The native regression
+tests/elab/grind_product_eta_and_split.lean also exercises product
+elimination/eta, but is not evidence for PSC0's universe implementation.
+
+One shared builder now owns Prod, mk, rec and its two checked projections.
+Element levels are independent, the result is Type(max u v), and the recursor
+has an independent motive sort. The same levels flow through Inhabited, BEq,
+ReprTuple, Repr, ToFormat and Hashable. Remove the old projection assumptions
+and exact Type0 signature exceptions; native signature comparison now audits
+all five product declarations. Ground consumers still instantiate zero levels.
+
+The focused fixture compares mixed-universe left/right projections and pattern
+elimination, defaults, equality/inequality, display and hash composition with
+the official pinned native classes. Existing all-target observations are
+retained. This change awaits native compilation, strict snapshot review,
+candidate replay and the broader integration gate; no completed qualification
+or M2+A completion is claimed here.

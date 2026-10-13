@@ -37,8 +37,6 @@ private def modeledSignatures : List (String × String × String) := [
   ("Array.size", "forall {α : Type}, (Array α) -> Nat", "forall {α : Type.{u}}, ([mdata borrowed:1 Array.{u} α]) -> Nat"),
   ("Array.emptyWithCapacity", "forall {α : Type}, Nat -> (Array α)", "forall {α : Type.{u}}, ([mdata borrowed:1 Nat]) -> (Array.{u} α)"),
   ("Array", "Type -> Type", "Type.{u} -> Type.{u}"),
-  ("Prod.snd", "forall {α : Type} {β : Type}, (Prod α β) -> β", "forall {α : Type.{u}} {β : Type.{v}}, (Prod.{u, v} α β) -> β"),
-  ("Prod.fst", "forall {α : Type} {β : Type}, (Prod α β) -> α", "forall {α : Type.{u}} {β : Type.{v}}, (Prod.{u, v} α β) -> α"),
   ("String.Pos.Raw.byteIdx", "Nat -> Nat", "String.Pos.Raw -> Nat"),
   ("String.Pos.Raw.mk", "Nat -> Nat", "Nat -> String.Pos.Raw"),
   ("String.Internal.extract", "String -> Nat -> Nat -> String", "([mdata borrowed:1 String]) -> ([mdata borrowed:1 String.Pos.Raw]) -> ([mdata borrowed:1 String.Pos.Raw]) -> String"),
@@ -59,7 +57,9 @@ def primitiveAudit : IO Lean.Json := do
     let opaquePrimitive := ["mixHash", "String.hash"].contains (psNameToString name)
     let logicalAssumption := ["propext", "Quot.sound"].contains (psNameToString name)
     let kernelQuotient := match declaration with | .quotientDecl .. => true | _ => false
-    if assumption || reviewed || opaquePrimitive || kernelQuotient then
+    let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd"].contains
+      (psNameToString name)
+    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -83,6 +83,7 @@ def primitiveAudit : IO Lean.Json := do
         ("bodyTrust", Lean.toJson (if logicalAssumption then "approved-pinned-Lean-logical-assumption"
           else if kernelQuotient then "kernel-generated-quotient-primitive"
           else if assumption then "assumption/runtime-primitive"
+          else if checkedFoundation then "checked-native-signature-foundation"
           else if opaquePrimitive then "checked-opaque-inhabitant/runtime-primitive"
           else "checked-logical-model/runtime-override"))] :: entries
   -- Newly exposed representation conversions and proof-taking operations have

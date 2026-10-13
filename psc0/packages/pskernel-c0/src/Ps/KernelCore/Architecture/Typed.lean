@@ -109,7 +109,8 @@ def psKernelC0ArchitectureSourceTypedRecursorMajor
 
 /-- Source owns the first and only checked WHNF observation. The optional
     typed candidate reconstructs the same input with a source-justified major,
-    then uses the already fuel/work-accounted demand evaluator. Disagreement
+    then uses the already fuel/work-accounted demand evaluator with
+    **only the quota remaining after typed wrapper reconstruction**. Disagreement
     and exhausted candidate resources remain observational failures. -/
 def psKernelC0ArchitectureObserveTypedDemand
     (fuel quota : Nat)
@@ -122,9 +123,9 @@ def psKernelC0ArchitectureObserveTypedDemand
   let candidate : Except String (PsKernelExpr × Nat × Nat) :=
     match psKernelC0ChargeExpr candidateExpr quota with
     | none => .error "typed major candidate work quota exhausted"
-    | some _ =>
+    | some remaining =>
         psKernelC0ArchitectureCandidateDemandMetered
-          fuel quota session.context candidateExpr
+          fuel remaining session.context candidateExpr
   let observation : PsKernelC0ExecutionObservation :=
     match candidate with
     | .ok (result, steps, _) =>

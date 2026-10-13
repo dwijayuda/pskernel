@@ -10,7 +10,8 @@ conservative expansion bound based on the source node count and the total
 size of the fully quoted substitutions, so duplication cannot bypass the
 quota. These are *candidate* limits, not kernel typing/acceptance decisions.
 
-Demand-step source-syntax traversal and final quotation now consume one
+Demand-step active syntax, retained continuation frames, delayed captured
+environments, String UTF-8 storage, and final quotation now consume one
 quota. Intermediate primitive/delta/projection/recursor allocation remains
 outside complete accounting; this is a bounded *candidate work* foundation,
 not the final allocation/refinement contract.
@@ -40,6 +41,9 @@ def psKernelC0ChargeExpr
           psKernelC0ChargeExpr body afterValue
       | .mdata _ body => psKernelC0ChargeExpr body remaining
       | .proj _ _ struct => psKernelC0ChargeExpr struct remaining
+      | .lit (.str value) =>
+          let bytes := String.utf8ByteSize value
+          if bytes > remaining then none else some (remaining - bytes)
       | _ => some remaining
 
 /-- A conservative quota is also charged for *possible* binder-occurrence
@@ -89,19 +93,66 @@ def psKernelC0QuoteMachineMetered
     let result := psKernelExprApplyArgsCheap head reversed.reverse
     some (result, afterArgs - machine.arguments.length)
 
-/-- Charge the active syntactic control and the stored argument spine.
-    Each transition reuses one operation quota. This is a conservative
-    work-footprint allowance, NOT a complete accounting of temporary
-    reconstructions inside the unchanged source-rule callbacks. -/
+/-- Charge source syntax and all captured binder closures under the
+    same finite depth and monotonically decreasing work quota. This
+    includes environment entries previously omitted from the step footprint.
+    Shared closures may be charged again: conservative decline is allowed
+    in this observational evaluator, but a resource failure cannot reject
+    a theorem. -/
+def psKernelC0ChargeClosureSyntax :
+    Nat → PsKernelC0Closure → Nat → Option Nat
+  | 0, _, _ => none
+  | depth + 1, .mk expr env, quota => do
+      let afterExpr ← psKernelC0ChargeExpr expr quota
+      env.foldlM
+        (fun remaining captured =>
+          psKernelC0ChargeClosureSyntax depth captured remaining)
+        afterExpr
+
+/-- Charge an active machine including the delayed argument environments,
+    rather than only the outer expressions. -/
 def psKernelC0ChargeMachineSyntax
-    (machine : PsKernelC0Machine) (quota : Nat) : Option Nat := do
-  let (.mk expr _) := machine.control
-  let left ← psKernelC0ChargeExpr expr quota
+    (depth : Nat) (machine : PsKernelC0Machine)
+    (quota : Nat) : Option Nat := do
+  let afterControl ←
+    psKernelC0ChargeClosureSyntax depth machine.control quota
   machine.arguments.foldlM
     (fun remaining closure =>
-      match closure with
-      | .mk argument _ => psKernelC0ChargeExpr argument remaining)
-    left
+      psKernelC0ChargeClosureSyntax depth closure remaining)
+    afterControl
+
+/-- A continuation retains parent control and argument environments.
+    The work budget charges those retained references on every transition
+    as a deliberately conservative bound on the traversal footprint.
+    The source recursor metadata is borrowed from the immutable checked
+    environment and is not considered a fresh candidate allocation. -/
+def psKernelC0ChargeFrameSyntax
+    (depth : Nat) (frame : PsKernelC0DemandFrame)
+    (quota : Nat) : Option Nat :=
+  match frame with
+  | .natSucc parent => psKernelC0ChargeMachineSyntax depth parent quota
+  | .natLeft parent right => do
+      let left ← psKernelC0ChargeMachineSyntax depth parent quota
+      psKernelC0ChargeClosureSyntax depth right left
+  | .natRight parent _ => psKernelC0ChargeMachineSyntax depth parent quota
+  | .projection parent _ _ =>
+      psKernelC0ChargeMachineSyntax depth parent quota
+  | .quotient parent _ =>
+      psKernelC0ChargeMachineSyntax depth parent quota
+  | .recursor parent _ _ =>
+      psKernelC0ChargeMachineSyntax depth parent quota
+
+/-- Charge the whole reachable demand-stack syntax from one shared quota.
+    No untrusted candidate cache or proof judgment is produced. -/
+def psKernelC0ChargeDemandStateSyntax
+    (depth : Nat) (state : PsKernelC0DemandState)
+    (quota : Nat) : Option Nat := do
+  let afterActive ←
+    psKernelC0ChargeMachineSyntax depth state.machine quota
+  state.frames.foldlM
+    (fun remaining frame =>
+      psKernelC0ChargeFrameSyntax depth frame remaining)
+    afterActive
 
 /-- One transition loop and one remaining quota. This delegates *all*
     reduction rules to the existing demand dispatcher and therefore cannot
@@ -112,7 +163,7 @@ def psKernelC0DemandRunWithBudget :
   | 0, _, _, _, _ =>
       .error "candidate shared-demand transition budget exhausted"
   | fuel + 1, depth, quota, context, state => do
-      let some rest := psKernelC0ChargeMachineSyntax state.machine quota
+      let some rest := psKernelC0ChargeDemandStateSyntax depth state quota
         | throw "candidate shared syntactic-work quota exhausted"
       match psKernelC0DemandTransition depth context state with
       | .next next =>

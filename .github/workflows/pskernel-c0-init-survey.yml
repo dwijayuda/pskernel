@@ -262,6 +262,7 @@ jobs:
           path: |
             ${{ runner.temp }}/Init-4.35.0-survey.json
             ${{ runner.temp }}/Init-first-inductive.ndjson
+            ${{ runner.temp }}/Init-first-nested.ndjson
             ${{ runner.temp }}/first-inductive-official.txt
             ${{ runner.temp }}/leanchecker-result.txt
             ${{ runner.temp }}/c0-real-init-435-result.txt

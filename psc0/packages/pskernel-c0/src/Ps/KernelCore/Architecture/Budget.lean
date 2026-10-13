@@ -232,38 +232,53 @@ def psKernelC0DemandStringReserve
       (String.utf8ByteSize value + 1) * 16
   | _, _ => 0
 
-/-- Before δ unfolds a source definition, reserve the syntax traversal
-    of its body and the application-spine construction. This is deliberately
-    conservative, so a too-small candidate quota declines before source
-    substitution or source-universe instantiation can allocate the result.
-    The accepting source checker is unaffected. -/
+/-- Account for source-body traversal and every occurrence-level
+    instantiation without allocating the substituted result first.
+    Levels can be a tree of max/imax/succ/parameters, not a constant-cost
+    field. Each source node may refer to all supplied universe expressions,
+    so the extra preflight conservatively reserves sourceWork * levelWork.
+
+    This is a syntactic-work bound, not a claim about the Lean runtime heap. -/
+def psKernelC0ReserveLevelInstantiation
+    (body : PsKernelExpr)
+    (levels : List PsKernelLevel)
+    (quota : Nat) : Option Nat := do
+  let afterBody ← psKernelC0ChargeExpr body quota
+  let afterLevels ← psKernelC0ChargeLevelList levels afterBody
+  let sourceWork := quota - afterBody
+  let levelWork := afterBody - afterLevels
+  psKernelC0SpendWork afterLevels (sourceWork * levelWork)
+
+/-- Source δ may instantiate a declaration body at a nontrivial universe
+    substitution and then append the original application spine. Reserve
+    both work families from the same candidate operation allowance before
+    calling the existing source reduction helper. -/
 def psKernelC0ReserveDeltaSyntax
     (context : PsKernelCheckerContext)
     (machine : PsKernelC0Machine)
     (quota : Nat) : Option Nat := do
   match machine.control with
-  | .mk (.const name _) _ =>
+  | .mk (.const name levels) _ =>
       match psKernelEnvironmentFind context.environment name with
       | some declaration =>
           match psKernelConstantInfoDeltaValue declaration with
           | none => some quota
           | some body => do
-              let afterBody ← psKernelC0ChargeExpr body quota
-              if machine.arguments.length > afterBody then none
-              else some (afterBody - machine.arguments.length)
+              let afterLevels ←
+                psKernelC0ReserveLevelInstantiation body levels quota
+              psKernelC0SpendWork afterLevels machine.arguments.length
       | none => some quota
   | _ => some quota
 
-/-- Charge recursor RHS source syntax before the selected constructor-rule
-    computation. The rule is taken from the saved environment metadata and
-    is never guessed by constructor-name convention. This does not meter
-    every temporary allocation; it is an explicit candidate-only preflight
-    for the source RHS clone performed by the existing iota helper. -/
+/-- A selected iota rule clones the instantiated recursor RHS, applies
+    fixed arguments and selected constructor fields, then restores surplus
+    arguments. Preflight universe substitution plus those future app nodes
+    under the same quota; unsupported constructor shapes remain neutral. -/
 def psKernelC0ReserveRecursorSyntax
     (state : PsKernelC0DemandState)
     (quota : Nat) : Option Nat := do
   match state.frames with
-  | .recursor _ metadata _ :: _ =>
+  | .recursor parent metadata levels :: _ =>
       let ruleName : Option PsKernelName :=
         match state.machine.control with
         | .mk (.const name _) _ => some name
@@ -274,7 +289,14 @@ def psKernelC0ReserveRecursorSyntax
       | none => some quota
       | some name =>
           match psKernelFindRecursorRule name metadata.rules with
-          | some rule => psKernelC0ChargeExpr rule.rhs quota
+          | some rule => do
+              let afterLevels ←
+                psKernelC0ReserveLevelInstantiation rule.rhs levels quota
+              let fixedArgs :=
+                metadata.numParams + metadata.numMotives + metadata.numMinors
+              let appNodes := fixedArgs + rule.nFields +
+                parent.arguments.length
+              psKernelC0SpendWork afterLevels appNodes
           | none => some quota
   | _ => some quota
 

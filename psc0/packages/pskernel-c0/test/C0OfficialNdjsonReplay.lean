@@ -787,10 +787,6 @@ def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
       | .ok next => state := next
   return c0ExportFinish state
 
-/-- File-backed single-pass NDJSON consumption. Only one physical line is
-    read per iteration, so this does NOT retain the entire 345 MB input String.
-    Tables of decoded expressions/names/levels and the checked environment are
-    still retained and must be profiled on a real Init corpus. -/
 /-- Result and one-based physical NDJSON record count, including a
     failed record. This is a diagnostic, never a proof receipt. -/
 def c0ExportVerdictFromFileTrace

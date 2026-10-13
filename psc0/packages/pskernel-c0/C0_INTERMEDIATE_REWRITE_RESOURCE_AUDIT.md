@@ -5,6 +5,8 @@
 **Authority:** source `psKernelSessionWhnf`, inference, DefEq and checked admission only.  
 **Non-goal:** This is **not** a demonstrated bound on all Lean runtime heap allocations, nor a kernel soundness/refinement proof.
 
+**Qualification:** executable [`bf95088c`](https://github.com/dwijayuda/pskernel/commit/bf95088c338c8e9b8dda7686ce8f26e4f323dac6) — **full [native CI 38459330291](https://github.com/dwijayuda/pskernel/actions/runs/38459330291) SUCCESS**. This qualifies the candidate abstract syntactic-work accounting and regression coverage described here, **not a proven Lean runtime peak-heap bound or theorem-checker replacement**.
+
 ## 1. Resource contract
 
 The experimental candidate execution has two independent finite limits:

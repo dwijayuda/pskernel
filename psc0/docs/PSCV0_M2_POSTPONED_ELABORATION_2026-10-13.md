@@ -65,3 +65,11 @@ Intentional Standard expansion: exactly five declarations (class, constructor,
 projection, Nat/Int dictionaries), one class and two instances. There is no new
 axiom, primitive or alias. Update strict registry digests only after reviewing
 the independently observed values from Linux qualification.
+
+The five-declaration OfNat expansion compiled on Linux run 38424001519.
+Its strict registry guard independently reported FNV
+`fnv1a64:4206739069382061916` and SHA-256
+`sha256:00c6142b5f5b0e47abb8b317dc4fff3d595ab9f5e931822c4f48fca809758647`.
+Review confirms only OfNat/constructor/projection and Nat/Int dictionaries,
+plus one class and two instance registrations; no new axiom or primitive.
+These exact values are now pinned; full numeric qualification is pending.

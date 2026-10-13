@@ -175,7 +175,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- and deliberately changes with every intentional registered semantic update.
 -- The official kernel is still the authority for checking its declarations.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:8231265721298810139"
+  "fnv1a64:4206739069382061916"
 
 
 -- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing
@@ -313,11 +313,12 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- It covers *only* the encoded closed prelude/declaration/class/instance/
 -- alias roster, not source notation, deriving handlers, imported Lean
 -- extensions, effects or the whole trusted execution base.
--- Reviewed M2+A equality expansion: two checked definitions, DecidableEq and
--- decEq. No new axiom, primitive, class, instance or alias registration.
--- Observed independently at native Linux run 38416389933; guards stay strict.
+-- Reviewed M2+A numeric expansion: OfNat, its constructor/projection and
+-- checked Nat/Int dictionaries. Five declarations, one class, two instances;
+-- no new axiom, primitive or alias. Independently observed on Linux at
+-- 38424001519; both guards remain strict.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:89c4125cc3ca36bf198421e64673659a0acdf0207004af46738d36d32fcfd540"
+  "sha256:00c6142b5f5b0e47abb8b317dc4fff3d595ab9f5e931822c4f48fca809758647"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

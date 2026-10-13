@@ -245,10 +245,10 @@ def psKernelC0CertifyPromotedRoots
   if checked.length == roots.length then some (owner, checked)
   else none
 
-/-- Compute actual structural propositional equality for source terms.
-    Unlike the project's two Boolean cache/equality helpers, this
-    DecidableEq is generated directly from the constructors of Name, Level,
-    Literal, BinderInfo and Expr, including all source binder metadata. -/
+/- Compute actual structural propositional equality for source terms.
+   Unlike the project's two Boolean cache/equality helpers, this
+   DecidableEq is generated directly from the constructors of Name, Level,
+   Literal, BinderInfo and Expr, including all source binder metadata. -/
 deriving instance DecidableEq for PsKernelName
 deriving instance DecidableEq for PsKernelLevel
 deriving instance DecidableEq for PsKernelBinderInfo

@@ -66,6 +66,17 @@ def main : IO Unit := do
       nodes := rawStore.nodes.set! id
         { rootNode with checkerHash := rootNode.checkerHash + 1 }
     }
+  -- Canonical replay certifies the ENTIRE radix index, not merely
+  -- the root's hash and per-node metadata. Ghost bucket entries fail.
+  let candidates := psKernelC0TermTrieBucket
+    psKernelC0IndexDepth rawStore.index rootNode.hash
+  let forgedIndex := psKernelC0TermTrieReplace
+    psKernelC0IndexDepth rawStore.index rootNode.hash
+    ((rawStore.nodes.size + 5) :: candidates)
+  let ghostStore : PsKernelC0TermStore :=
+    { rawStore with index := forgedIndex }
+  if (psKernelC0CertifyStore ghostStore).isSome then
+    throw (IO.userError "forged canonical trie acquired proof certificate")
   if (psKernelC0CertifyStore malformed).isSome then
     throw (IO.userError "tampered store hash acquired replay certificate")
   if (psKernelC0CertifyRoot malformed id).isSome then

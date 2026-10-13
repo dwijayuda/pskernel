@@ -16,7 +16,7 @@ lean_lib PsKernelLean where
 
 lean_lib PsV7Host where
   srcDir := "../host/src"
-  roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit]
+  roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit, `Ps.Host.StandardClosure]
 
 lean_lib PsV7ParserChecks where
   srcDir := "../scripts"

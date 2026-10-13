@@ -13,32 +13,36 @@ A–E, C5 and all future development; do not preserve obsolete internals merely
 for compatibility.
 
 
-## Current qualified boundary — stable Lean and pure Format (14 October 2026)
+## Current qualified boundary — ToFormat/Repr (14 October 2026)
 
-Executable `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`;
-[green Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672).
-**313 shared runtime observations**, four panic contracts, **198 portable /
-206 native modules**, profile `pscv0-v7-native-bounded/55`.
-Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
-independent oracle, official kernel, semantic/refusal and graph gates, strict IR,
-JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and existing performance
-gates passed. These measurements do not establish performance parity.
+Executable `e565bbe6bab75baf4fa511640e1f82744f400032`;
+[green Linux 38451656694](https://github.com/dwijayuda/pskernel/actions/runs/38451656694).
+**341 shared runtime observations**, four panic contracts, **204 portable /
+212 native modules**, profile `pscv0-v7-native-bounded/56`.
+Official **Lean 4.35.0**, independent oracle, semantic/refusal/search checks,
+strict IR, JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, projects and
+existing performance gates pass. Performance parity is not established.
 
-Standard: **394 declarations /18 classes /54 instances**, canonical v2:
-FNV `fnv1a64:17804548636281664114`;
-SHA `sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1`.
-The pure Std.Format algebra, measurement and renderer are ordinary checked
-definitions over the shared IR, including hard-line/fill behavior, Unicode
-columns, signed nesting, alignment and initial column. No formatting axiom,
-backend formatter or new runtime primitive. WAT constructor discriminator names
-are allocated separately from payload fields; physical indices are unchanged.
+Standard: **460 declarations /22 classes /88 instances**.
+FNV `fnv1a64:2548399426123262483`;
+SHA `sha256:79e34c4fd2bb8e491d624c86ccb644bf96b2442e090137d01b3c74ca72bfaeaf`.
 
-Quoting and checked Int.toNat remain qualified. Quoting comparisons use native
-evaluation because upstream String.Internal.append is kernel-opaque; they are
-not kernel equality proofs. Int runtime conversion preserves arbitrary precision.
-Historical RC4 receipts retain their original identities.
+Genuine ToFormat/Repr/ReprAtom/ReprTuple classes, checked scalar/collection
+display methods, selected nonrecursive Repr deriving, precedence, quoting,
+proof/type placeholders, UTF-8 soft lines, tuple flattening and fill layouts
+are qualified. List and selected APIs/defaults/BEq retain element universes;
+map/folds retain independent result universes. Array/Prod and proof-taking
+List indexing retain their documented Type-0 boundary.
 
-Full M2+A is **not complete**. Next: ToFormat/Repr and remaining A/M2.
+Shared fixes preserve aliases' actual raw lambda entry prefixes, complete
+omitted defaults under unknown expected types, and retain empty Type-valued
+class dictionaries as runtime singletons. Explicit OfNat Id follows upstream;
+no broader instance transparency or special literal rewrite was introduced.
+
+[Design, sources and qualification](docs/PSCV0_A_FORMAT_REPR_2026-10-14.md).
+**Full M2+A remains incomplete.** Continue Hashable/scalar dependencies,
+remaining selected Standard APIs, comprehensive manifest, broader M2 evidence
+and C5 semantic retention. Recursive/indexed/dependent deriving remains M3+B.
 
 ## Active request and execution contract
 
@@ -123,28 +127,21 @@ explicit refusals. Do not bypass unknown-type IR checks.
 
 ## Active next implementation
 
-Quoting, integer conversion and pure Format are complete at the boundary above.
-[Format/Repr design and qualification](docs/PSCV0_A_FORMAT_REPR_2026-10-14.md)
-documents the separate algebra, Unicode scan, measurement, work groups and
-input-weight-bounded rendering modules. The bound is algorithmically justified
-and exercised; no formal termination/correspondence proof is claimed.
+ToFormat/Repr is qualified above. Continue genuine Hashable with UInt64's
+bounded-value model and audited modular operations/mixHash; no substitute public
+Nat/String types, no invented bound proofs. The native-only StandardClosure
+authoring audit measures pinned upstream dependency closures before choosing
+manual adaptation versus a small checked Core library import. Existing names
+are collision boundaries, not evidence that importing is compatible. The audit
+does not admit declarations and is outside the portable dependency graph.
 
-Continue the genuine ToFormat/Repr classes, instances and Repr handler through
-the existing deriving telescope/eliminator mechanisms. Do not replace Format
-with String or public joinSep with a monomorphic API. The current selected List
-remains Type-0: universe-polymorphic collection APIs require its coherent
-promotion within M2+A. Effectful prettyM callbacks remain separate from the
-qualified pure renderer; pure tags are inert exactly as in native Lean.
-Then implement Hashable with real UInt64/modular operations/mixHash. No String/Nat replacements
-for their public types. Other A exits: faithful Float/Float32/scientific,
-fixed-width/BitVec/bytes/string/collection APIs and comprehensive cryptographic
-module/public/import/notation/handler/class/instance/tactic/effect/axiom manifest.
-The current selected snapshot is not that full manifest.
-
-Remaining M2 includes broader scope/depth/resource parity and measurements plus
-C5 semantic retention at binder/resolution/implicit/default/occurrence owners.
-Current coarse declaration maps are not occurrence retention. Do not claim
-full host elaborator parity or infer completeness from a green bounded run.
+Other A exits: Float/Float32/scientific, fixed-width/BitVec, selected bytes/string/
+collection APIs and the comprehensive cryptographic module/public/import/
+notation/handler/class/instance/tactic/effect/axiom manifest. The selected
+declaration snapshot is not that complete manifest. Remaining M2 includes broader
+scope/depth/resource parity and measurements plus C5 retention at
+binder/resolution/implicit/default/occurrence owners. Coarse declaration maps
+are not occurrence retention.
 
 ## Outputs, evidence and performance
 

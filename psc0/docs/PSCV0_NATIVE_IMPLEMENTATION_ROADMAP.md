@@ -1,6 +1,37 @@
 # PSCV0 v7 native implementation roadmap
 
-## Current qualified boundary — stable Lean and pure Format (14 October 2026)
+## Current qualified boundary — ToFormat/Repr (14 October 2026)
+
+Executable `e565bbe6bab75baf4fa511640e1f82744f400032`;
+[green Linux 38451656694](https://github.com/dwijayuda/pskernel/actions/runs/38451656694).
+**341 shared runtime observations**, four panic contracts, **204 portable /
+212 native modules**, profile `pscv0-v7-native-bounded/56`.
+Official **Lean 4.35.0**, independent oracle, semantic/refusal/search checks,
+strict IR, JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, projects and
+existing performance gates pass. Performance parity is not established.
+
+Standard: **460 declarations /22 classes /88 instances**.
+FNV `fnv1a64:2548399426123262483`;
+SHA `sha256:79e34c4fd2bb8e491d624c86ccb644bf96b2442e090137d01b3c74ca72bfaeaf`.
+
+Genuine ToFormat/Repr/ReprAtom/ReprTuple classes, checked scalar/collection
+display methods, selected nonrecursive Repr deriving, precedence, quoting,
+proof/type placeholders, UTF-8 soft lines, tuple flattening and fill layouts
+are qualified. List and selected APIs/defaults/BEq retain element universes;
+map/folds retain independent result universes. Array/Prod and proof-taking
+List indexing retain their documented Type-0 boundary.
+
+Shared fixes preserve aliases' actual raw lambda entry prefixes, complete
+omitted defaults under unknown expected types, and retain empty Type-valued
+class dictionaries as runtime singletons. Explicit OfNat Id follows upstream;
+no broader instance transparency or special literal rewrite was introduced.
+
+[Design, sources and qualification](PSCV0_A_FORMAT_REPR_2026-10-14.md).
+**Full M2+A remains incomplete.** Continue Hashable/scalar dependencies,
+remaining selected Standard APIs, comprehensive manifest, broader M2 evidence
+and C5 semantic retention. Recursive/indexed/dependent deriving remains M3+B.
+
+## Historical qualified boundary — stable Lean and pure Format (14 October 2026)
 
 Executable `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`;
 [green Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672).

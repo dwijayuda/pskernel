@@ -46,3 +46,9 @@ Init/Data/List/Basic.lean, with explicit independent element/result universes.
 StandardFormatString and StandardReprCollections adapt the same Format/Repr
 sources and Init/Data/Array/Basic.lean. Modifications: single total UTF-8 scan,
 checked collection projections and existing Array conversion adapters.
+
+The host-only StandardClosure dependency audit follows the traversal invariant
+of Lean/Util/CollectAxioms.lean (Copyright (c) 2020 Microsoft Corporation;
+author Leonardo de Moura; Apache-2.0). Modifications: explicit native worklist,
+recursor-rule/mutual-family closure and portable-name collision reporting.
+It exports no declarations and changes no compiler trust boundary.

@@ -79,14 +79,18 @@ synthetic-obligation refusal, shared polymorphic local dictionaries specialized 
 and Bool by later subgoals, mandatory-default conflict, resource rollback,
 and expected/default/instance wake-up. Global arbitrary-output instances are
 refused, matching the pinned registration oracle. Three runtime observations extend the
-shared target table. The independent pinned Lean oracle covers the same source
+shared target table. Runtime answer sharing uses distinct Nat output indices;
+type-polymorphic local dictionaries are independently kernel-qualified and
+explicitly refused at erasure because higher-rank runtime functions are outside
+the current IR. Neither this new boundary nor any previous refusal is relaxed. The independent pinned Lean oracle covers the same source
 semantics. Existing cycle/diamond/growth and all prior acceptance criteria remain.
 
 ## Remaining boundaries
 
 This closes a selected answer-template/application-queue slice, not all M2 or A.
 Arbitrary postponed syntax, full tactic scheduling/metavariable-depth parity,
-more general scoped answer abstraction and broader elaboration/search performance
+more general scoped answer abstraction, higher-rank runtime dictionary values,
+and broader elaboration/search performance
 qualification remain open. Repr/DecidableEq/Hashable and other Phase A gaps stay
 on M2+A. Dependent/indexed/recursive deriving and the associated matching work
 remain M3+B. C5 source provenance follows the semantic owners; no printer is

@@ -152,11 +152,14 @@ private def getElemFoundationCases : IO Unit := do
 private def generalizedFixture : String :=
   "namespace Generalized\nuniverse u\nclass Evidence(A: outParam(Type u)): Type u where { value: Nat }\nfunction generic(A: Type u): Evidence A := { value := 773 }\nclass Select(n: Nat, A: outParam(Type)) where { value: Nat }\ninstance selectNat: Select 0 Nat where { value := 5 }\ninstance selectBool: Select 1 Bool where { value := 7 }\nclass Branch(n: Nat) where { value: Nat }\ninstance branch{n: Nat}{A: Type}[Evidence A][Select n A]: Branch n where { value := Nat.add(Evidence.value(A := A), Select.value(n := n, A := A)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(n := 0), Branch.value(n := 1)) }\nfunction combined[poly: forall(A: Type), Evidence A](unit: Unit): Nat := Result.value\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend Generalized\n"
 
+private def generalizedRuntimeFixture : String :=
+  "namespace GeneralizedRuntime\nclass Evidence(n: outParam(Nat)) where { value: Nat }\nfunction generic(n: Nat): Evidence n := { value := n }\nclass Select(key: Nat, n: outParam(Nat)) where { value: Nat }\ninstance selectFirst: Select 0 5 where { value := 773 }\ninstance selectSecond: Select 1 7 where { value := 773 }\nclass Branch(key: Nat) where { value: Nat }\ninstance branch{key: Nat}{n: Nat}[Evidence n][Select key n]: Branch key where { value := Nat.add(Evidence.value(n := n), Select.value(key := key, n := n)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(key := 0), Branch.value(key := 1)) }\nfunction combined[poly: forall(n: Nat), Evidence n](unit: Unit): Nat := Result.value\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend GeneralizedRuntime\n"
+
 private def application : String :=
-  generalizedFixture ++
-  "const generalizedSharedRuntime: Nat := Generalized.combined(poly := Generalized.generic, unit := ())\n" ++
-  "const syntheticDefaultRuntime: Nat := Generalized.selected()\n" ++
-  "const syntheticExpectedRuntime: Bool := Generalized.expected(())\n" ++
+  generalizedRuntimeFixture ++
+  "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
+  "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
+  "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
   "function emptyElim{A: Type}(value: Empty): A := nomatch value\n" ++
   "function falseElim{A: Type}(proof: False): A := nomatch proof\n" ++
   "inductive Void(A: Type) where { }\n" ++
@@ -1999,7 +2002,7 @@ private def syntheticBoundaries : IO Unit := do
       psExprAlphaEq (psMetaInstantiate incompatible.context defaultType.expr) nat do
     throw (IO.userError "expected result replaced a mandatory omitted default")
   let exhausted := psSyntheticSolve environment environment.instances dictionary.context
-    constraints true 1
+    constraints true 4
   unless exhausted.resourceExceeded &&
       exhausted.context.assignments.length == dictionary.context.assignments.length do
     throw (IO.userError "synthetic resource refusal leaked assignments")
@@ -2025,10 +2028,29 @@ private def syntheticBoundaries : IO Unit := do
     { source := generalizedFixture ++ "function bad[poly: forall(A: Type), Generalized.Evidence A](unit: Unit): Nat := Generalized.Evidence.value\n" },
     { source := generalizedFixture ++ "const bad: Bool := Generalized.selected()\n" },
     { source := generalizedFixture ++ "instance bad{A: Type}: Generalized.Evidence A where { value := 0 }\n" }]
-  let batch ← match ← PsV7Native.runBatch requests with
+  -- Type-polymorphic local dictionaries are kernel-qualified. Passing them
+  -- as runtime values still needs higher-rank IR; Nat-indexed local dictionaries
+  -- above exercise the same answer sharing through the existing runtime IR.
+  let positive : PsV7Native.Request := {
+    source := generalizedFixture ++
+      "const answer: Nat := Generalized.combined(poly := Generalized.generic, unit := ())\n" }
+  let rankBoundary := { positive with targets := [.typescript] }
+  let batch ← match ← PsV7Native.runBatch (#[positive, rankBoundary] ++ requests) with
     | .ok batch => pure batch
     | .error error => throw (IO.userError ("synthetic host prelude: " ++ error.message))
-  for result in batch.results do
+  let some positiveResult := batch.results[0]? |
+    throw (IO.userError "generalized type qualification missing")
+  match positiveResult with
+  | .ok _ => pure ()
+  | .error error => throw (IO.userError ("generalized type qualification: " ++ error.message))
+  let some rankResult := batch.results[1]? |
+    throw (IO.userError "higher-rank emission boundary missing")
+  match rankResult with
+  | .error error =>
+    unless error.phase == "erase" do
+      throw (IO.userError ("higher-rank refusal escaped erasure: " ++ error.message))
+  | .ok _ => throw (IO.userError "higher-rank runtime dictionary crossed its IR boundary")
+  for result in batch.results.toList.drop 2 do
     match result with
     | .error error =>
       unless error.phase == "elaborate" do

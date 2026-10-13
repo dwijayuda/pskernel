@@ -211,3 +211,25 @@ example [poly : (A : Type) → Evidence A] : True := by
   fail_if_success have : Bool := selected
   trivial
 end Pscv0GeneralizedOracle
+
+namespace Pscv0GeneralizedIndexOracle
+class Evidence (n : outParam Nat) where
+  value : Nat
+def generic (n : Nat) : Evidence n := ⟨n⟩
+class Select (key : Nat) (n : outParam Nat) where
+  value : Nat
+instance : Select 0 5 where
+  value := 773
+instance : Select 1 7 where
+  value := 773
+class Branch (key : Nat) where
+  value : Nat
+instance {key n : Nat} [Evidence n] [Select key n] : Branch key where
+  value := Evidence.value (n := n) + Select.value (key := key) (n := n)
+class Result where
+  value : Nat
+instance [Branch 0] [Branch 1] : Result where
+  value := Branch.value (key := 0) + Branch.value (key := 1)
+def combined [poly : (n : Nat) → Evidence n] (_ : Unit) : Nat := Result.value
+example : combined (poly := generic) () = 1558 := rfl
+end Pscv0GeneralizedIndexOracle

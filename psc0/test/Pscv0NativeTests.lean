@@ -1240,8 +1240,11 @@ private def projectBoundaries : IO Unit := do
   let a := psStandardInhabitedType (.constE psNatName [])
   let b := psStandardInhabitedType (.constE (psRootName "Bool") [])
   let resultGoal := psStandardInhabitedType (.constE (psRootName "String") [])
-  let idNat := PsExpr.app (.constE (psRootName "Id") [.zero]) (.constE psNatName [])
-  let aliasA := psStandardInhabitedType idNat
+  -- optParam is reducible in RC4. Id is implicit-reducible and therefore
+  -- cannot serve as an instance-search alias without a bridging instance.
+  let aliasNat := psLogicApply (.constE psOptParamName [.succ .zero])
+    [.constE psNatName [], .lit (.natural 0)]
+  let aliasA := psStandardInhabitedType aliasNat
   let need := fun domain result =>
     PsExpr.forallE (psRootName "dictionary") domain result .instanceImplicit
   let add := fun locals name type =>
@@ -1319,6 +1322,12 @@ private def projectBoundaries : IO Unit := do
         " partitioned=" ++ toString partitioned ++
         " comparisons=" ++ toString measured.table.goalComparisons ++
         " candidates=" ++ toString measured.table.candidateChecks)
+  let hiddenAlias := psStandardInhabitedType
+    (.app (.constE (psRootName "Id") [.zero]) (.constE psNatName []))
+  let hiddenSearch := psSynthInstanceWithTable environment (add psLocalEmpty "seed" a)
+    psInstanceIndexEmpty psMetaEmpty 64 hiddenAlias
+  unless hiddenSearch.result.value.isNone && !hiddenSearch.table.resourceExceeded do
+    throw (IO.userError "implicit-reducible alias was used by instance search")
   let unseeded := add (add psLocalEmpty "aFromB" (need b a)) "bFromA" (need a b)
   let cycle := psSynthInstanceWithTable environment unseeded psInstanceIndexEmpty
     psMetaEmpty 64 a

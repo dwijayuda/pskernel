@@ -55,3 +55,10 @@ The 36 upstream nondefault statuses are explicit; registered portable helper
 instances use instanceReducible, all other portable definitions use semireducible.
 No new axiom, primitive or assumption. Both expected hashes are now repinned;
 full runtime qualification remains pending.
+
+The existing synthetic diamond used `Id Nat` as its convertible duplicate.
+RC4 marks Id implicit-reducible, above instance-search transparency. That old
+expectation was incorrect. The same cycle/diamond/growth acceptance assertions
+now use the genuinely reducible `optParam Nat 0`; a separate source-oracle
+and graph refusal retain coverage of Id at the restricted policy. No resource,
+sharing, replay or evidence-height assertion was weakened.

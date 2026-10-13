@@ -348,4 +348,10 @@ example : True := by
   fail_if_success have : Inhabited Hidden := inferInstance
   fail_if_success have : Hidden := 937
   trivial
+class Evidence (A : Type) where
+  value : A
+example [Evidence Nat] : Evidence (optParam Nat 0) := inferInstance
+example [Evidence Nat] : True := by
+  fail_if_success have : Evidence (Id Nat) := inferInstance
+  trivial
 end Pscv0TransparencyOracle

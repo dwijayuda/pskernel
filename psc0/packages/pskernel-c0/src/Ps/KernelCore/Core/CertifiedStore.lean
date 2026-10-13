@@ -130,6 +130,49 @@ instance (store : PsKernelC0TermStore) :
   unfold psKernelC0StoreWF
   infer_instance
 
+/-- Mathematical canonical uniqueness follows from exact derived
+    hashes and exact canonical-index lookup. If two nodes are propositionally
+    equal, they have the same computed hash and therefore the same lookup
+    result, forcing their Fin indices to coincide.
+
+    This proof adds NO quadratic comparison to store certification. It
+    relies on the already certified per-node metadata and lookup facts,
+    not on trusting a hash match or on assuming the Boolean node comparator
+    is definitionally complete. -/
+theorem psKernelC0StoreWF_uniqueNodes
+    (store : PsKernelC0TermStore)
+    (wf : psKernelC0StoreWF store)
+    (i j : Fin store.nodes.size)
+    (equalNode : (store.nodes[i]).node = (store.nodes[j]).node) :
+    i = j := by
+  have metadataI := wf.2.1 i
+  have metadataJ := wf.2.1 j
+  dsimp [psKernelC0NodeColumnsCorrect] at metadataI metadataJ
+  have hashEq : (store.nodes[i]).hash = (store.nodes[j]).hash := by
+    calc
+      (store.nodes[i]).hash =
+          (psKernelC0NodeHashes store (store.nodes[i]).node).fst :=
+        metadataI.1
+      _ = (psKernelC0NodeHashes store (store.nodes[j]).node).fst := by
+        rw [equalNode]
+      _ = (store.nodes[j]).hash := metadataJ.1.symm
+  have lookupI := wf.2.2 i
+  have lookupJ := wf.2.2 j
+  dsimp [psKernelC0NodeIndexedAt] at lookupI lookupJ
+  have sameResult : some i.val = some j.val := by
+    calc
+      some i.val =
+          psKernelC0FindNode store (store.nodes[i]).node
+            (psKernelC0TermTrieBucket
+              psKernelC0IndexDepth store.index (store.nodes[i]).hash) :=
+        lookupI.symm
+      _ = psKernelC0FindNode store (store.nodes[j]).node
+            (psKernelC0TermTrieBucket
+              psKernelC0IndexDepth store.index (store.nodes[j]).hash) := by
+        rw [equalNode, hashEq]
+      _ = some j.val := lookupJ
+  exact Fin.ext (Option.some.inj sameResult)
+
 /-- An immutable store together with a proof that deterministic canonical
     replay accepts its entire node graph and index. A hash alone is never
     sufficient to construct this value. -/
@@ -155,6 +198,16 @@ def psKernelC0CertifyStoreOwned
 def psKernelC0CertifyStore
     (store : PsKernelC0TermStore) : Option PsKernelC0CertifiedStore :=
   (psKernelC0CertifyStoreOwned store).map Subtype.val
+
+/-- Canonical uniqueness is preserved in every immutable
+    certified store. Structural equality of nodes implies equality of
+    store-local indices, even in the presence of hash collisions. -/
+theorem psKernelC0CertifiedStoreUnique
+    (cert : PsKernelC0CertifiedStore)
+    (i j : Fin cert.store.nodes.size)
+    (h : (cert.store.nodes[i]).node = (cert.store.nodes[j]).node) :
+    i = j :=
+  psKernelC0StoreWF_uniqueNodes cert.store cert.wellFormed i j h
 
 /-- The owner snapshot, root-in-bounds witness, and exact decoded syntax are
     bound together. A bare Nat handle cannot cross snapshot boundaries. -/

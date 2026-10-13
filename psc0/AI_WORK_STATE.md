@@ -1,6 +1,40 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
-## Current qualified checkpoint — M1 natural order (13 October 2026)
+## Current qualified checkpoint — M1 universes and bounded index proofs (13 October 2026)
+
+This section supersedes older checkpoint claims below.
+
+- **Executable:** [4fe35ca32b8f3b49f85b89bb9b699d95f7fd7b7d](https://github.com/dwijayuda/pskernel/commit/4fe35ca32b8f3b49f85b89bb9b699d95f7fd7b7d).
+- **Green Linux qualification:** [38382777891](https://github.com/dwijayuda/pskernel/actions/runs/38382777891), official Lean 4.35.0-rc4.
+- **Selected Standard:** 258 declarations, 14 classes, 43 ordered instances; 171 portable / 179 native Lean modules.
+- **Frozen FNV:** `fnv1a64:7381279441732502588`.
+- **Frozen SHA-256:** `sha256:c1444324de1014fa01b9c82fb09f2a6ab96b824ac08ae6b6e548e2145fd61c85`.
+- **215 shared runtime observations** passed in direct JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 observations remain.
+
+Qualified: universe-polymorphic Option constructors/recursor, map/bind/getD/filter,
+BEq and Inhabited; GetElem?, default implementation and both LawfulGetElem laws
+at the element universe; higher-universe dictionary synthesis and erasure.
+Explicit Option.bind may change universes; monadic Option do fixes a single
+universe as RC4 does. An independent oracle and a negative do case cover that boundary.
+
+Index automation now constructs checked natural-order proofs from definitional
+normalization, closed comparisons, successor rules and bounded local transitivity
+search. It is not full omega. Large natural indices remain arbitrary precision.
+The unifier first tries congruence for a shared named application head, retaining
+dictionary argument identity; failure rolls back and uses ordinary reduction.
+This avoids unfolding an inferable dictionary argument into applied metavariables.
+
+The official kernel admitted the selected definitions and source proofs; strict
+IR and all existing runtime gates passed. Single-run all-target timings: parse
+110 ms, elaborate 93 ms, prepare 121 ms, kernel 70 ms, erase 251 ms, emit 494 ms.
+These are observations, not a controlled performance comparison.
+
+**M1 remains incomplete.** Next: checked List/Fin indexing and optimized optional
+laws, Array logical model and genuine size bounds, panic/alias/large-index coverage,
+and controlled representative performance comparisons. Full M2 waiter tabling,
+C5, pskernel-core and self-hosting remain excluded. Read live HEAD and CI first.
+
+## Prior qualified checkpoint — M1 natural order (13 October 2026)
 
 This section supersedes older status statements below; historical evidence is preserved.
 

@@ -791,21 +791,31 @@ def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
     read per iteration, so this does NOT retain the entire 345 MB input String.
     Tables of decoded expressions/names/levels and the checked environment are
     still retained and must be profiled on a real Init corpus. -/
-def c0ExportVerdictFromFile
+/-- Result and one-based physical NDJSON record count, including a
+    failed record. This is a diagnostic, never a proof receipt. -/
+def c0ExportVerdictFromFileTrace
     (path : System.FilePath) (fuel : Nat := 4096) :
-    IO C0ExportVerdict := do
+    IO (C0ExportVerdict × Nat) := do
   let handle ← IO.FS.Handle.mk path .read
   let mut state : C0ExportOnlineState := {}
+  let mut consumed := 0
   let mut reading := true
   while reading do
     let line ← handle.getLine
     if line.isEmpty then
       reading := false
     else if line != "\n" then
+      consumed := consumed + 1
       match c0ExportStep state line fuel with
-      | .error verdict => return verdict
+      | .error verdict => return (verdict, consumed)
       | .ok next => state := next
-  return c0ExportFinish state
+  return (c0ExportFinish state, consumed)
+
+def c0ExportVerdictFromFile
+    (path : System.FilePath) (fuel : Nat := 4096) :
+    IO C0ExportVerdict := do
+  let result ← c0ExportVerdictFromFileTrace path fuel
+  return result.fst
 
 def c0ExportVerdictOf (input : String) : C0ExportVerdict :=
   c0ExportVerdictOnline input
@@ -893,8 +903,8 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
 def main (args : List String) : IO Unit := do
   match args with
   | [path] =>
-      let outcome ← c0ExportVerdictFromFile path
-      IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome}"
+      let (outcome, lines) ← c0ExportVerdictFromFileTrace path
+      IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome} consumed_records={lines}"
       return ()
   | [] => pure ()
   | _ => throw (IO.userError "expected zero arguments or one NDJSON path")

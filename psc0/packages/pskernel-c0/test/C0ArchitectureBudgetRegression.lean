@@ -43,6 +43,30 @@ def main : IO Unit := do
   match psKernelC0QuoteMachineMetered 64 2 machine with
   | none => pure ()
   | some _ => throw (IO.userError "spine reconstruction exceeded quota")
+  -- Exact node charge is global across siblings, not reset per branch.
+  match psKernelC0ChargeExpr (.app v v) 3 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "exact three-node charge changed")
+  if (psKernelC0ChargeExpr (.app v v) 2).isSome then
+    throw (IO.userError "wide expression reused sibling quota")
+  -- Repeated captures must reserve enough capacity for both copies of
+  -- their quoted values before source substitution reconstructs syntax.
+  let deepValue : PsKernelExpr := .app (.app neutral v) v
+  let repeated : PsKernelC0Closure :=
+    .mk (.app (.bvar 0) (.bvar 0)) [.mk deepValue []]
+  c0BudgetAssertQuote "wide-repeated-capture" 64 256 repeated
+    (.app deepValue deepValue)
+  if (psKernelC0QuoteClosureMetered 64 repeated 7).isSome then
+    throw (IO.userError "repeated captured syntax bypassed expansion quota")
+  let doublyNested : PsKernelC0Closure := .mk (.bvar 0)
+    [.mk (.bvar 0) [.mk v []]]
+  c0BudgetAssertQuote "nested-captured-environments" 64 128
+    doublyNested v
+  -- Binder metadata, names and sort levels remain source-exact.
+  let polymorphic : PsKernelExpr :=
+    .lam x (.sort (.succ .zero)) (.bvar 0) .implicit
+  c0BudgetAssertQuote "binder-exact-readback" 64 128
+    (.mk polymorphic []) polymorphic
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app

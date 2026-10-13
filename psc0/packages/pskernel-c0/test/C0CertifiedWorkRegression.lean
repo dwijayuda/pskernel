@@ -25,6 +25,10 @@ def main : IO Unit := do
   let _canonical :
       psKernelC0ReplayValidateStore certified.owner.store = true :=
     psKernelC0CertifiedRootStore_canonical certified
+  let _topology : psKernelC0StoreTopological certified.owner.store :=
+    psKernelC0CertifiedRootStore_topological certified
+  if psKernelC0NodeTopological 0 (.app 0 0) then
+    throw (IO.userError "forward-ref node satisfied topology invariant")
   let _exact :
       psKernelC0DecodeExpr certified.owner.store certified.root =
         some (psKernelC0CertifiedRootRead certified) :=
@@ -66,6 +70,14 @@ def main : IO Unit := do
       nodes := rawStore.nodes.set! id
         { rootNode with checkerHash := rootNode.checkerHash + 1 }
     }
+  let forwardRef : PsKernelC0TermStore := {
+    rawStore with
+    nodes := rawStore.nodes.set! id { rootNode with node := .app id id }
+  }
+  if psKernelC0StoreTopological forwardRef then
+    throw (IO.userError "topological proof admitted a self-reference")
+  if (psKernelC0CertifyStore forwardRef).isSome then
+    throw (IO.userError "self-referential store acquired topology certificate")
   -- Canonical replay certifies the ENTIRE radix index, not merely
   -- the root's hash and per-node metadata. Ghost bucket entries fail.
   let candidates := psKernelC0TermTrieBucket

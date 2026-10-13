@@ -359,7 +359,7 @@ def psErasureIsErasedDictionary (environment : PsEnvironment) (fuel : Nat)
       psErasureIsErasedDictionary environment fuel pushed.context
         (psExprInstantiate1 body (.fvar pushed.id))
     | _ => Id.run do
-      let view := psExprAppView type
+      let view := psInferAppView type
       let .constE name levels := view.head | return false
       if !environment.classes.any (psNameEq name) then return false
       let some info := psEnvironmentFindInductive environment name | return false
@@ -780,7 +780,7 @@ def psErasureReifyInductiveArgumentsWithFuel
 
 def psErasureUnboxedFieldType (environment : PsEnvironment)
     (scope : PsErasureScope) (type : PsExpr) : Option PsExpr := do
-  let view := psExprAppView type
+  let view := psInferAppView type
   let .constE name levels := view.head | none
   let info ← psErasureLookupStructure scope.runtimeStructures name
   if !info.unboxed || view.args.length != info.numParams then none else do
@@ -794,19 +794,33 @@ def psErasureUnboxedFieldType (environment : PsEnvironment)
 -- Projection templates of unboxed families are instantiated at the use site.
 -- They have no generic runtime signature: their erased type former is resolved
 -- before a concrete field type is admitted to IR.
-def psErasureUnboxedProjection (scope : PsErasureScope) : PsExpr → Bool
-  | .lam _ _ body _ => psErasureUnboxedProjection scope body
-  | .proj family 0 _ =>
-    ((psErasureLookupStructure scope.runtimeStructures family).map (·.unboxed)).getD false
-  | _ => false
+def psErasureUnboxedProjection (environment : PsEnvironment) (scope : PsErasureScope)
+    (fuel : Nat) (locals : PsLocalContext) (indices : List Nat) (value : PsExpr) : Bool :=
+  match fuel with
+  | 0 => false
+  | fuel + 1 => match value with
+    | .lam name domain body binder =>
+      let pushed := psLocalPushBinding locals name domain binder
+      let indices := match psErasureClassifyBinder environment locals domain with
+        | .index => pushed.id :: indices
+        | _ => indices
+      psErasureUnboxedProjection environment scope fuel pushed.context indices
+        (psExprInstantiate1 body (.fvar pushed.id))
+    | .proj family 0 target =>
+      if !((psErasureLookupStructure scope.runtimeStructures family).map (·.unboxed)).getD false
+      then false else
+      match psInferType environment psMetaEmpty locals (.proj family 0 target) with
+      | .error _ => false
+      | .ok type => (psExprFVarIds type).any indices.contains
+    | _ => false
 
 def psErasureExpandUnboxedProjection (environment : PsEnvironment)
     (scope : PsErasureScope) (value : PsExpr) : Option PsExpr := do
-  let view := psExprAppView value
+  let view := psInferAppView value
   let .constE name levels := view.head | none
   let declaration ← psEnvironmentFind environment name
   let body ← psDeclarationValue declaration
-  if !psErasureUnboxedProjection scope body then none else
+  if !psErasureUnboxedProjection environment scope 4096 psLocalEmpty [] body then none else
     return psWhnfCore psMetaEmpty scope.localContext
       (psExprApplyMany (psExprInstantiateLevelParams
         (psDeclarationLevelParams declaration) levels body) view.args)

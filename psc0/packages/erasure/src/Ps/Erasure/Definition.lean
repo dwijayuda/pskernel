@@ -360,7 +360,7 @@ def psEraseDefinition
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
   if psErasureIsNonRuntimeDeclaration environment type ||
       psErasureIsErasedDictionary environment 4096 psLocalEmpty type ||
-      psErasureUnboxedProjection scope value then
+      psErasureUnboxedProjection environment scope 4096 psLocalEmpty [] value then
     Except.ok Option.none
   else
     let outputName : String :=

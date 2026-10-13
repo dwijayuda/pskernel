@@ -391,6 +391,67 @@ def main : IO Unit := do
   c0DemandCheck "demand-unrelated-structure-preserves-original"
     ctorSession (.proj badType 1 (.app idRecord pairValue))
     (.proj badType 1 (.app idRecord pairValue))
+  -- CDE-5: quotient computation is enabled only by source environment
+  -- initialization. These are WHNF-only syntax fixtures, not declarations.
+  let quotEnvironment := psKernelEnvironmentMarkQuotInitialized env2
+  let quotSession := psKernelMkCheckerSession quotEnvironment []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let quotRelation : PsKernelExpr :=
+    .const (c0DeltaName "SyntheticQuotRelation") []
+  let quotWitness : PsKernelExpr :=
+    .const (c0DeltaName "SyntheticQuotSoundness") []
+  let quotMk : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotMkName [.zero])
+      [sort, quotRelation, c0DeltaNatLit 41]
+  let quotFunction : PsKernelExpr :=
+    .lam (c0DeltaName "quotValue") sort (.bvar 0) .default
+  let quotLift : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotLiftName [.zero, .zero])
+      [sort, quotRelation, sort, quotFunction, quotWitness, quotMk]
+  let quotInd : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotIndName [.zero])
+      [sort, quotRelation, sort, quotFunction, quotMk]
+  c0DemandCheck "quot-lift-direct-constructor" quotSession
+    quotLift (c0DeltaNatLit 41)
+  c0DemandCheck "quot-ind-direct-constructor" quotSession
+    quotInd (c0DeltaNatLit 41)
+  let quotBinder := c0DeltaName "quotMajor"
+  let quotIdentity : PsKernelExpr :=
+    .lam quotBinder sort (.bvar 0) .default
+  let delayedMajor : PsKernelExpr :=
+    .app quotIdentity quotMk
+  let quotLiftDelayed : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotLiftName [.zero, .zero])
+      [sort, quotRelation, sort, quotFunction, quotWitness, delayedMajor]
+  c0DemandCheck "quot-lift-beta-major" quotSession
+    quotLiftDelayed (c0DeltaNatLit 41)
+  let quotIndDelayed : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotIndName [.zero])
+      [sort, quotRelation, sort, quotFunction,
+        .letE quotBinder sort quotMk (.bvar 0) false]
+  c0DemandCheck "quot-ind-zeta-major" quotSession
+    quotIndDelayed (c0DeltaNatLit 41)
+  c0DemandCheck "quot-lift-extra-argument" quotSession
+    (.app quotLift (c0DeltaNatLit 8))
+    (.app (c0DeltaNatLit 41) (c0DeltaNatLit 8))
+  -- No quotient computation may occur without initialization.
+  c0DemandCheck "quot-uninitialized-neutral" session
+    quotLift quotLift
+  let quotMkTooShort : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotMkName [.zero])
+      [sort, quotRelation]
+  let quotLiftStuck : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotLiftName [.zero, .zero])
+      [sort, quotRelation, sort, quotFunction, quotWitness, quotMkTooShort]
+  c0DemandCheck "quot-constructor-wrong-arity" quotSession
+    quotLiftStuck quotLiftStuck
+  match psKernelC0ArchitectureCandidateDemand 2 quotSession.context
+      quotLiftDelayed with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "nested Quot demand ignored shared fuel")
+  IO.println "C0_ARCHITECTURE shared_budget_quot_lift_ind_differential=pass"
+
   match psKernelC0ArchitectureCandidateDemand 3 ctorSession.context
       (c0DeltaNatBinary psKernelNatAddName
         (c0DeltaNatLit 1)

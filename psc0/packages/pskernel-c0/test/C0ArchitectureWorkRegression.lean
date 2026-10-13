@@ -58,6 +58,25 @@ def main : IO Unit := do
     hints := .abbrevHint
     safety := .safe
   }
+  -- Fresh checking caches after admission must NOT silently reset a
+  -- caller-selected reduction policy. The transaction owns both policy and
+  -- environment revision; source checking still performs the admission.
+  let eagerChecker : PsKernelCheckerSession := {
+    initial.checker with
+    context := { initial.checker.context with eagerReduce := true }
+  }
+  let eagerInitial : PsKernelC0ArchitectureWork := {
+    initial with checker := eagerChecker
+  }
+  match psKernelC0ArchitectureAdmit 4096 eagerInitial
+      (.definition alias) with
+  | .error reason =>
+      throw (IO.userError ("checked eager admission failed: " ++ reason))
+  | .ok eagerAdmitted =>
+      if !eagerAdmitted.checker.context.eagerReduce ||
+          !psKernelC0ArchitectureWorkValid eagerAdmitted then
+        throw (IO.userError
+          "checked admission reset reduction policy or invalidated work")
   match psKernelC0ArchitectureAdmit 4096 initial (.definition alias) with
   | .error err =>
       throw (IO.userError ("C0 source declaration admission failed: " ++ err))

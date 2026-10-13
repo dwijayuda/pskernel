@@ -312,7 +312,7 @@ jobs:
           if line_num != target:
               raise RuntimeError("did not reach record 86383")
           PY
-      - name: Compare optimized and original theorem checking at real Init mismatch
+      - name: Compare historical and optimized C0 theorem check on corrected source
         shell: bash
         run: |
           set -euo pipefail

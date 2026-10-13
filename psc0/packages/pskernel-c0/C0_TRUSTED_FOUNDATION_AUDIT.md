@@ -112,8 +112,23 @@ dependencies have an independently verified trusted computing base.**
 - [CI 38484702307](https://github.com/dwijayuda/pskernel/actions/runs/38484702307):
   full axiom-type/universe/safety signature matching and negative checks.
 
-Subsequent direct-membership and empty-policy mathematical theorems are
-**not marked qualified until their exact full native CI completes**.
+- [CI 38485235073](https://github.com/dwijayuda/pskernel/actions/runs/38485235073):
+  complete successful native qualification of direct history-membership
+  and zero-permission/no-admitted-event mathematical theorems.
+- [CI 38485455649](https://github.com/dwijayuda/pskernel/actions/runs/38485455649):
+  complete family-wide unsafe mutual/nested capability enforcement.
+- [CI 38485620934](https://github.com/dwijayuda/pskernel/actions/runs/38485620934):
+  the **latest fully qualified executable** at
+  [`572c99a7`](https://github.com/dwijayuda/pskernel/commit/572c99a78834bc1219fc462046b023fad1b762f5),
+  including a matched incremental-vs-whole-history audit microbenchmark.
+
+**Observed audit microbenchmark:** after 96 safe source-checked definitions,
+112 identical native source WHNF queries consumed 1 ms with incremental
+admission-proof transport and 3 ms with full-history re-audit after each
+query. This is a single millisecond-resolution timing sample on one native
+CI runner—not proof of worst-case complexity, throughput at millions of
+declarations, or speed relative to Lean/con-leche/con-ron on matched
+whole-checker workloads.
 
 Each qualifying workflow also includes the official Lean 4.35 accepted/rejected
 export fixtures, negative kernel tests, C0 architecture regressions,

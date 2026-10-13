@@ -70,17 +70,28 @@ type is not rejected simply for being staged.
 operation. It validates and promotes selected roots to an immutable candidate
 store, then runs the source declaration-level checks for free variables,
 metavariables and permitted universe parameters, followed by **full source
-term checking for every selected root**. It returns the store/roots/observed
-source types only when *all* checks succeed; one failure returns an error and
-does not publish a partially accepted result. The input transaction and its
-persistent prefix remain immutable.
+term checking for every selected root**. It returns the store and a
+`PsKernelC0SourceCheckedRoot` witness **for each root** only when all checks
+succeed; one failure returns an error and does not publish a partially
+accepted result. The input transaction and its persistent prefix remain
+immutable.
+
+Each witness contains its exact owner-bound decoded expression, active
+source-checker context, pre-check state, checked fuel, resulting type and
+post-check state, with an actual Lean equality proof:
+`psKernelCheckerCheck fuel context stateBefore root.expression =
+  .ok (checkedType, stateAfter)`.
+This records one real full source-check result, not a guessed or synthesized
+typing judgment. In a successful batch the witnesses are produced in source
+order using the evolving checker state. It is still **not** an independent
+proof that the source checker implementation is sound.
 
 A term may be well-typed in a **local hypothesis context** while being
 ineligible for closed publication; the publication path rejects such `fvar`
 terms. Bare syntax hashes, candidate WHNF, and type inference alone cannot
-bypass this gate. These returned source type observations are not
-forge-resistant declaration receipts and must not be treated as executable
-artifact authorization.
+bypass this gate. These source-check equality witnesses are context- and fuel-bound evidence
+of the actual source checker result; they are not independently verified
+kernel soundness proofs or universally portable executable-artifact receipts.
 
 ## 5. Native regression and negative cases
 
@@ -108,6 +119,15 @@ negative Lean export fixtures, architecture/source differentials, malformed
 kernel cases, C0 native microbenchmarks and independently rebuilt
 original-versus-C0 checker comparison.
 
+## 5A. Matched source-operation overhead benchmark
+
+`test/C0CertifiedWorkPerfMicrobench.lean` runs exactly the same source
+WHNF and DefEq operations against a large validated shared-DAG store,
+comparing the prior replay-per-query work interface with the new
+certificate-preserving interface. The timings are recorded by one
+native Lean process and are informational: this is not a proof of a speedup,
+nor a matched Lean/con-leche/con-ron whole-workload comparison.
+
 ## 6. Exact remaining scope
 
 This milestone improves **Phase C representation provenance** and
@@ -121,7 +141,9 @@ This milestone improves **Phase C representation provenance** and
 - Competitive whole-checked-workload performance or formal soundness
   and refinement assurance.
 
-The current native CI for the final extended regression must complete before
-claiming the complete checkpoint as qualified. The latest independently
+The CDE-9 base and closed-publication regressions passed native
+[CI 38472570733](https://github.com/dwijayuda/pskernel/actions/runs/38472570733).
+The newer source-check equality-witness and matched source-operation
+benchmark regressions require their own complete native CI qualification. The latest independently
 qualified predecessor is tracked in `AI_WORK_STATE.md`. No original
 `pskernel-core`, PSC0 compiler, Rust/Wasm, or self-hosting change is involved.

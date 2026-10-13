@@ -1,12 +1,28 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
+## NEW CHAT: AUTHORITATIVE M1 → M2 HANDOFF (13 October 2026)
+
+**Working branch:** `psc0/pscv0-v7-native-lean-v1` · draft PR [#109](https://github.com/dwijayuda/pskernel/pull/109). **Live HEAD at this handoff preparation:** `216ac7770c8b6c16fca9cb22ca3a1fc87a7f7ea1` (documentation-only since the checked source below); **always re-query GitHub** because this handoff itself creates another documentation commit. Do **not** treat a documentation HEAD as a newly qualified executable.
+
+**Exact last GREEN executable:** [`fc8bc8b1f16ed993fb144e2d396c0760c068630b`](https://github.com/dwijayuda/pskernel/commit/fc8bc8b1f16ed993fb144e2d396c0760c068630b), [Linux GitHub Actions **38323422371**](https://github.com/dwijayuda/pskernel/actions/runs/38323422371) — passed. Upstream Lean **4.35.0-rc4** at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; **170 portable / 178 native `.lean` modules**, **198 shared runtime observations** (TS, direct JS, Rust, and V8 Wasm GC/Wasmtime workflow); selected Standard **230 declarations, 14 classes, 40 ordered instances**, FNV `fnv1a64:17137083495666611555`, SHA-256 `sha256:b0ddaa7acc463b9457aac13bd8f08a2f6f8e64bba32b76f7e469ebf1a973f08f`.
+
+**M1 QUALIFIED SUBSET, NOT COMPLETE:** Core `GetElem` with real proof obligations, erased dependent validity predicates, selected Type-0 `GetElem?` and superclass, low-priority default optional instance from an actual `GetElem` dictionary **plus `∀ xs i, Decidable(valid xs i)`**, checked `Decidable True/False`, optional successes and `none`, and target-runtime nonreturning `outOfBounds` panic (though definitional `default` for proof reasoning). **Lawfulness blocker is fundamental:** `LawfulGetElem` is a real checked proof class with two equality fields, but the **generic instance was NOT admitted**. The independent `Decidable` parameter quantified in the law cannot be equated to the closed-over dependent decision function by `rfl`; official Lean correctly rejected that attempt. Need a genuine propositional coherence proof (likely sound `Decidable` subsingleton/irrelevance), or stay unproved. Also need faithful List/Array/Fin index propositions and checked lawful instances, selected Option/universe generalization, and more proof-producing `get_elem_tactic`.
+
+**M2 QUALIFIED SUBSET, NOT COMPLETE:** Native `Ps.Meta.SynthInstance` has one clean checked priority solver, per-invocation positive-answer table keyed by resolved full goals, witness re-inference + unification before reuse, snapshot rollback and local scope isolation, dependent Pi synthesis, postponement until input meta constraints are ready, independently bounded **4096 goal visits / 4096 candidate checks**, fail-closed exhaustion. Missing **Lean's actual generator/consumer suspended waiter graph and recursive answer propagation**, full expected-type/universe/synthetic-mvar scheduling, well-designed cross-scope goal normalization, and measured Lean parity.
+
+**Continuation order:** Read `psc0/AI_CONTINUE_PROMPT.md` and [M1/M2 audit](docs/PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). (1) M1 proof-theoretic lawfulness, real collection indexing, Type-0 limitation, negative/panic path. (2) M2 true tabled recursive waiters and coherent constraint engine. (3) Minimal targeted tests first and existing official Lean + JS/TS/Rust/Wasm GC/Wasmtime CI at **architectural** milestones. Update exact SHA/CI, frozen environment digest, roadmap and evidence after each qualified change. **Full M1, M2, v7, Lean performance parity and verified emission remain open.**
+
+**Keep:** native portable `.lean` only; official Lean checker; approved selected trust/prelude; fail-closed proofs, erasure, strict IR and runtime; GitHub-first and Linux CI. **Do not** integrate pskernel-core, C5, self-hosting, compiler-source `.ps` migration or Desktop Commander; do not force push, merge or delete branches. Work systematically and fix architectural root causes, not isolated test failures. Historical milestone paragraphs below are not current. Ready-to-paste new-chat instructions are committed at [`psc0/AI_CONTINUE_PROMPT.md`](AI_CONTINUE_PROMPT.md).
+
+---
+
 **Date:** 13 October 2026 · **Status:** implementation in progress, NOT full v7 conformance.
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** `psc0/pscv0-v7-native-lean-v1`
 **Existing draft PR:** https://github.com/dwijayuda/pskernel/pull/109
 **Last qualified EXECUTABLE source commit:** `fc8bc8b1f16ed993fb144e2d396c0760c068630b`
 **Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38323422371 — all jobs passed.
-**Prior documentation-only commit:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`.
+**Documentation-only branch checkpoint before this handoff:** `216ac7770c8b6c16fca9cb22ca3a1fc87a7f7ea1`; not an executable qualification.
 **Official checker:** Lean `4.35.0-rc4`, upstream SHA `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 **Source qualification profile:** `pscv0-v7-native-bounded/48`. Profile 49's module foundation is not a claim of completed language conformance.
 **Canonical language spec:** `psc0/PSCV0_LANGUAGE_REFERENCE.md`; follow its stated RC4 semantics, restrictions and phase-sensitive refusals.

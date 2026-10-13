@@ -208,8 +208,8 @@ private def highUniverseHashableCases : IO Unit := do
       "const mixedPairHash: UInt64 := hash(Prod.mk(ProductLevels.High.mk(5), true))\\n"),
     ("mixed-universe hash equality",
       "const mixedPairCheck: Bool := hash(Prod.mk(ProductLevels.High.mk(5), true)) == mixHash(hash(ProductLevels.High.mk(5)), hash(true))\\n")]
-  let requests := samples.map fun (_, source) =>
-    { source := base ++ source, targets := ([] : List PsV7Native.Target) : PsV7Native.Request }
+  let requests : Array PsV7Native.Request := samples.map fun (_, source) =>
+    { source := base ++ source }
   let result ← PsV7Native.runBatch requests
   let batch ← match result with
     | .error error => throw (IO.userError ("Hashable universe batch: " ++ error.message))

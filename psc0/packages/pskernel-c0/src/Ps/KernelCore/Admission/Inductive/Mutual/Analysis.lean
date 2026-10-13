@@ -395,6 +395,28 @@ def psKernelReverseMutualRecursiveFields
     values
     List.nil
 
+/-- Conservative, checked neutral-form shortcut. An application whose
+    head is an already admitted *inductive type* (not a definition, primitive,
+    recursor, let, or local value) cannot perform a head delta/beta/iota step.
+    This is only used when the complete source syntax has no occurrence of
+    any fresh type being declared. Thus its WHNF is the same expression for
+    the purposes of recursive-occurrence classification, and no positivity
+    condition or checked constructor judgment is bypassed. Unknown heads,
+    definitions and domains mentioning any target take the full WHNF path. -/
+def psKernelMutualInductiveNeutralDomain
+    (session : PsKernelCheckerSession)
+    (targets : List PsKernelName)
+    (domain : PsKernelExpr) : Bool :=
+  if psKernelSimpleMutualContainsConst targets domain then
+    false
+  else
+    match psKernelExprGetAppFn domain with
+    | PsKernelExpr.const name _ =>
+        match psKernelEnvironmentFind session.context.environment name with
+        | some (.inductInfo _) => true
+        | _ => false
+    | _ => false
+
 def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
     (fuel : Nat) :
     PsKernelCheckerSession ->
@@ -453,11 +475,12 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                     directInfo.target
                     directInfo.indices)))
         | Option.none =>
-            match
-                psKernelSessionWhnf
-                  remaining
-                  session
-                  domain with
+            let whnfResult : Except String (Prod PsKernelExpr PsKernelCheckerSession) :=
+              if psKernelMutualInductiveNeutralDomain session targets domain then
+                Except.ok (Prod.mk domain session)
+              else
+                psKernelSessionWhnf remaining session domain
+            match whnfResult with
             | Except.error error =>
                 -- Pure diagnostic distinction: an occurrence-free constructor
                 -- domain and a domain mentioning an in-progress inductive

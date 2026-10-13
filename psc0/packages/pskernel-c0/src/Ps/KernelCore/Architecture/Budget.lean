@@ -11,8 +11,8 @@ size of the fully quoted substitutions, so duplication cannot bypass the
 quota. These are *candidate* limits, not kernel typing/acceptance decisions.
 
 Demand-step active syntax, retained continuation frames, delayed captured
-environments, String UTF-8 storage, and final quotation now consume one
-quota. Intermediate primitive/delta/projection/recursor allocation remains
+environments, String UTF-8 storage, pre-expansion String.ofList reservations, and final
+quotation now consume one quota. Intermediate primitive/delta/projection/recursor allocation remains
 outside complete accounting; this is a bounded *candidate work* foundation,
 not the final allocation/refinement contract.
 -/
@@ -154,6 +154,21 @@ def psKernelC0ChargeDemandStateSyntax
       psKernelC0ChargeFrameSyntax depth frame remaining)
     afterActive
 
+/-- String.ofList materialization in a demanded projection/recursor
+    creates several AST nodes per UTF-8 byte. Reserve a deliberately high,
+    fixed per-byte allowance *before* invoking the existing transition,
+    rather than letting a small quota trigger large unchecked expansion.
+    This is a conservative candidate work bound, not a measured heap-byte
+    guarantee. Every extra reservation can only cause candidate decline. -/
+def psKernelC0DemandStringReserve
+    (state : PsKernelC0DemandState) : Nat :=
+  match state.machine.control, state.frames with
+  | .mk (.lit (.str value)) _, .projection _ _ _ :: _ =>
+      (String.utf8ByteSize value + 1) * 16
+  | .mk (.lit (.str value)) _, .recursor _ _ _ :: _ =>
+      (String.utf8ByteSize value + 1) * 16
+  | _, _ => 0
+
 /-- One transition loop and one remaining quota. This delegates *all*
     reduction rules to the existing demand dispatcher and therefore cannot
     introduce separate candidate reduction semantics. -/
@@ -165,10 +180,14 @@ def psKernelC0DemandRunWithBudget :
   | fuel + 1, depth, quota, context, state => do
       let some rest := psKernelC0ChargeDemandStateSyntax depth state quota
         | throw "candidate shared syntactic-work quota exhausted"
+      let reserve := psKernelC0DemandStringReserve state
+      if reserve > rest then
+        throw "candidate String expansion work quota exhausted"
+      let afterReserve := rest - reserve
       match psKernelC0DemandTransition depth context state with
       | .next next =>
-          psKernelC0DemandRunWithBudget fuel depth rest context next
-      | .halted => return (state, rest)
+          psKernelC0DemandRunWithBudget fuel depth afterReserve context next
+      | .halted => return (state, afterReserve)
       | .declined reason => throw reason
 
 /-- Non-accepting, explicit-quota candidate bridge. The existing demand

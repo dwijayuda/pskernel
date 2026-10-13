@@ -165,7 +165,7 @@ jobs:
           output.write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
-      - name: Identify the first C0 semantic divergence in actual Init source
+      - name: Inspect the first real Init nested-inductive metadata
         shell: bash
         run: |
           set -euo pipefail
@@ -175,7 +175,7 @@ jobs:
           from pathlib import Path
 
           source = Path(sys.argv[1])
-          target = 12244
+          target = 79416
           names = {0: ""}
           levels = {0: "0"}
           expressions = {}

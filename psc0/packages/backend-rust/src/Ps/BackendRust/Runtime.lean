@@ -7,6 +7,36 @@ use num_traits::{ToPrimitive, Zero};
 use std::rc::Rc;
 use std::str::FromStr;
 
+// Adapted from Lean 4.35.0 runtime/hash.h and hash.cpp (Microsoft, Apache-2.0).
+// Canonical little-endian MurmurHash2 bytes; pair mixing uses Lean's XOR step.
+const HASH_MULTIPLIER: u64 = 0xc6a4a7935bd1e995;
+pub(super) fn __ps_hash_mix(seed: u64, mut key: u64) -> u64 {
+    key = key.wrapping_mul(HASH_MULTIPLIER);
+    key ^= key >> 47;
+    key ^= HASH_MULTIPLIER;
+    (seed ^ key).wrapping_mul(HASH_MULTIPLIER)
+}
+pub(super) fn __ps_string_hash(text: &str) -> u64 {
+    let bytes = text.as_bytes();
+    let mut hash = 11 ^ (bytes.len() as u64).wrapping_mul(HASH_MULTIPLIER);
+    let mut chunks = bytes.chunks_exact(8);
+    for chunk in &mut chunks {
+        let mut key = u64::from_le_bytes(chunk.try_into().expect("eight-byte chunk"));
+        key = key.wrapping_mul(HASH_MULTIPLIER);
+        key ^= key >> 47;
+        key = key.wrapping_mul(HASH_MULTIPLIER);
+        hash = (hash ^ key).wrapping_mul(HASH_MULTIPLIER);
+    }
+    let tail = chunks.remainder();
+    for (index, byte) in tail.iter().enumerate() {
+        hash ^= (*byte as u64) << (index * 8);
+    }
+    if !tail.is_empty() { hash = hash.wrapping_mul(HASH_MULTIPLIER); }
+    hash ^= hash >> 47;
+    hash = hash.wrapping_mul(HASH_MULTIPLIER);
+    hash ^ (hash >> 47)
+}
+
 pub type PsArray<T> = Rc<Vec<T>>;
 
 pub(super) fn __ps_nat_lit(text: &str) -> PsNat {

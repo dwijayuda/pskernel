@@ -173,6 +173,14 @@ def psRustEmitIntrinsicFromPrinted
     (arguments : List String) :
     Except PsRustEmitError String :=
   match operation with
+  | .hashMix =>
+      match arguments with
+      | [a, b] => .ok ("__ps_hash_mix(" ++ a ++ ", " ++ b ++ ")")
+      | _ => .error .intrinsicArity
+  | .stringHash =>
+      match arguments with
+      | [value] => .ok ("__ps_string_hash(&(" ++ value ++ "))")
+      | _ => .error .intrinsicArity
   | .unsignedOfNat type =>
       match arguments with
       | [value] =>

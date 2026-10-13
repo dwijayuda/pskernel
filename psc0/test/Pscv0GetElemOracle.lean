@@ -518,3 +518,58 @@ example (value : UInt64) : Nat.lt (UInt64.toNat value) UInt64.size := Fin.isLt (
 #guard Nat.pow 0 0 == 1
 #guard Nat.pow 3 40 == 12157665459056928801
 end Pscv0UnsignedOracle
+
+-- Independent pinned native Hashable/deriving and runtime vectors.
+namespace Hashing
+universe u
+structure Box (A : Type u) where
+  value : A
+deriving Hashable
+structure Checked where
+  value : Nat
+  witness : value = value
+deriving Hashable
+inductive Choice where
+  | none
+  | value (payload : Nat)
+deriving Hashable
+inductive Hidden where
+  | value {secret : Nat} (payload : Nat)
+deriving Hashable
+inductive Void where
+deriving Hashable
+def generic {A : Type u} [Hashable A] (value : A) : UInt64 := hash value
+#eval show IO Unit from do
+  let cases : List (UInt64 × Nat) := [
+    (hash "", 9877294847684254529),
+    (hash "a", 15917291556903334389),
+    (hash "ab", 1859847562730075588),
+    (hash "abc", 13471000911841882655),
+    (hash "abcd", 11774739814239950349),
+    (hash "abcde", 9879683515900917099),
+    (hash "abcdef", 3908226602854121306),
+    (hash "abcdefg", 934485623504580153),
+    (hash "abcdefgh", 4343876127666658534),
+    (hash "abcdefghi", 4853633868021991863),
+    (hash "abcdefghijklmnopq", 10292012499202201976),
+    (hash "λ😀\x00é\n", 15482805639210198390),
+    (hash (Box.mk (23 : Nat)), 8486839563459890144),
+    (hash (Checked.mk 19 rfl), 15733078348733311027),
+    (hash (Choice.value 29), 14764169408134674840),
+    (hash Choice.none, 0),
+    (hash (Hidden.value (secret := 31) 37), 1856007804885025338),
+    (mixHash 18446744073709551615 18446744073709551615, 5932200832493835139),
+    (hash (some (41 : Nat)), 5933301429565888292),
+    (hash ([1, 2, 3] : List Nat), 3064673849197682702),
+    (hash (#[1, 2, 3] : Array Nat), 3064673849197682702),
+    (hash ((43 : Nat), true), 16816133431411836267),
+    (hash True.intro, 0), (hash (-17 : Int), 33),
+    (hash (18446744073709551619 : Nat), 3),
+    (hash (⟨3, by decide⟩ : Fin 4), 3),
+    (generic (47 : Nat), 47), (hash (255 : UInt8), 255),
+    (hash (Char.ofNat 128512), 128512), (hash (), 11),
+    (hash64 53, 11678754115747718645)]
+  for (actual, expected) in cases do
+    unless actual.toNat == expected do
+      throw (IO.userError s!"hash oracle mismatch: {actual.toNat} != {expected}")
+end Hashing

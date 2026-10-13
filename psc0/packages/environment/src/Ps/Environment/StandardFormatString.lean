@@ -62,6 +62,6 @@ def psStandardFormatStringDeclarations : List PsDeclaration :=
 
 def psStandardFormatStringExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardFormatStringDeclarations.foldl psPreludeAdd environment
-  let environment := psFormatRegister environment "HAppend" [psFormatAppendInstance]
-  let environment := psFormatRegister environment "Coe" [psFormatCoeInstance]
-  psFormatRegister environment "Inhabited" psFormatInhabitedInstances
+  let environment := psStandardRegisterInstances environment "HAppend" [psFormatAppendInstance]
+  let environment := psStandardRegisterInstances environment "Coe" [psFormatCoeInstance]
+  psStandardRegisterInstances environment "Inhabited" psFormatInhabitedInstances

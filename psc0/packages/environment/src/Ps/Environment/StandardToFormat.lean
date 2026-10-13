@@ -123,9 +123,9 @@ def psStandardToFormatDeclarations : List PsDeclaration :=
 
 def psStandardToFormatExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardToFormatDeclarations.foldl psPreludeAdd environment
-  let environment := psFormatRegisterClass environment "Std.ToFormat"
-  let environment := psFormatRegister environment "Std.ToFormat" [psToFormatFallback] 100
-  let environment := psFormatRegister environment "Std.ToFormat"
+  let environment := psStandardRegisterClass environment "Std.ToFormat"
+  let environment := psStandardRegisterInstances environment "Std.ToFormat" [psToFormatFallback] 100
+  let environment := psStandardRegisterInstances environment "Std.ToFormat"
     (psToFormatGroundInstances ++ psToFormatContainerDeclarations)
   { environment with exportedAliases :=
       (psDecisionName "Std.format", psDecisionName "Std.ToFormat.format") :: environment.exportedAliases }

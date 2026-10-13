@@ -40,6 +40,8 @@ def arrayAt : Expr := .nonnull (.index (id "__ps_array") (call "Number" [id "__p
 def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args : List Expr) :
     Except String Expr := do
   match op, args with
+  | .hashMix, [a,b] => pure (call "__ps$hashMix" [a,b])
+  | .stringHash, [a] => pure (call "__ps$stringHash" [a])
   | .unsignedOfNat type, [value] => do
     let width ← match type with
       | .uint8 => pure 8 | .uint16 => pure 16 | .uint32 => pure 32 | .uint64 => pure 64

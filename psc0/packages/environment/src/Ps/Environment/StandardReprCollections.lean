@@ -138,15 +138,15 @@ def psStandardReprCollectionDeclarations : List PsDeclaration :=
 
 def psStandardReprCollectionsExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardReprCollectionDeclarations.foldl psPreludeAdd environment
-  let environment := psFormatRegisterClass environment "ReprTuple"
+  let environment := psStandardRegisterClass environment "ReprTuple"
   let pick := fun declarations suffix => declarations.filter fun declaration =>
     psNameLastComponent (psDeclarationName declaration) == suffix
-  let environment := psFormatRegister environment "ReprTuple"
+  let environment := psStandardRegisterInstances environment "ReprTuple"
     ([psReprTupleDefault] ++ pick psReprProductDeclarations "instReprTupleProd")
-  let environment := psFormatRegister environment "Repr"
+  let environment := psStandardRegisterInstances environment "Repr"
     (pick psReprProductDeclarations "instReprProd" ++ pick psDisplayArrayDeclarations "instReprArray" ++
      [psReprFinInstance, psReprIdInstance])
-  let environment := psFormatRegister environment "Std.ToFormat"
+  let environment := psStandardRegisterInstances environment "Std.ToFormat"
     ([psToFormatProductInstance] ++ pick psDisplayArrayDeclarations "instToFormatArray")
   { environment with exportedAliases :=
       (psRootName "reprTuple", psDecisionName "ReprTuple.reprTuple") :: environment.exportedAliases }

@@ -1,5 +1,6 @@
 import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardUnsigned
+import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
 import Ps.Environment.StandardReprCollections
@@ -143,8 +144,11 @@ def psSelfHostProdCorePreludeEnvironment : PsEnvironment :=
 def psSelfHostProdScalarPreludeEnvironment : PsEnvironment :=
   psStandardScalarArithmeticExtend psSelfHostProdCorePreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+def psSelfHostProdUnsignedPreludeEnvironment : PsEnvironment :=
   psStandardUnsignedExtend psSelfHostProdScalarPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardHashableExtend psSelfHostProdUnsignedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
@@ -159,7 +163,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
             psSelfHostProdRecName with
         | none => []
         | some recursor => [prod, constructor, recursor]
-  psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure

@@ -736,6 +736,12 @@ def psErasePrimitiveApplication
                     Except.ok (Option.some
                       (PsVerifiedIrExpr.intrinsic PsVerifiedIrIntrinsic.natAdd []
                         [value, PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)]))
+      else if psStringEq text "mixHash" then
+        binary .hashMix
+      else if psStringEq text "String.hash" then
+        if view.args.length == 1 then
+          (psEraseMappedIntrinsic erase .stringHash view.args).map some
+        else .error .unsupportedApplication
       else if psStringEq text "Nat.add" then
         binary PsVerifiedIrIntrinsic.natAdd
       else if psStringEq text "Nat.sub" then
@@ -1827,10 +1833,10 @@ def psErasureSpecialEntry
       ["Int.ofNat", "Int.repr", "Int.toNat", "Int.negSucc", "Int.neg", "Nat.succ",
         "Bool.not", "Char.ofNat", "Char.toNat", "String.Pos.Raw.mk",
         "String.Pos.Raw.byteIdx", "String.singleton", "String.Internal.length",
-        "String.utf8ByteSize"] then
+        "String.utf8ByteSize", "String.hash"] then
     Option.some (PsErasureSpecialEntry.mk 1 true)
   else if psListAny named
-      ["Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
+      ["mixHash", "Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
         "Nat.pow", "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
         "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
         "String.Internal.get", "String.Internal.atEnd", "Array.emptyWithCapacity",

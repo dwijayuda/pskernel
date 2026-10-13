@@ -1,4 +1,5 @@
 import Ps.BackendTs.Analysis
+import Ps.BackendEcma.Hash
 
 def psTsEmitTypeArguments (arguments : List PsVerifiedIrType) : Except PsTsEmitError String :=
   match psListMapExcept psTsEmitType arguments with
@@ -158,6 +159,15 @@ def psTsPrinted5 (emit : String -> String -> String -> String -> String -> Excep
 def psTsEmitIntrinsicFromPrinted
     (operation : PsVerifiedIrIntrinsic) (arguments : List String) : Except PsTsEmitError String :=
   match operation with
+  | .hashMix | .stringHash => do
+      let (parameters, body) := match operation with
+        | .hashMix => (PsEcma.hashMixParameters, PsEcma.hashMixBody)
+        | _ => ([{ name := "text", type := "string" }], PsEcma.stringHashBody)
+      if parameters.length != arguments.length then throw .intrinsicArity
+      let expression := PsEcma.invoke parameters "bigint" body (arguments.map PsEcma.id)
+      let doc ← (PsEcma.exprDoc .typescript 4096 expression).mapError (fun _ => .intrinsicArity)
+      let result ← (psRenderDoc doc).mapError (fun _ => .intrinsicArity)
+      return result.text
   | .unsignedOfNat type =>
       psTsPrinted1 (fun value =>
         let width := match type with

@@ -492,6 +492,9 @@ def psIrCheckIntrinsicSignature
   let char := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char;
   let string := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string;
   match operation with
+  | .hashMix => psIrCheckSignatureNoTypes typeArguments
+      [.primitive .uint64, .primitive .uint64] (.primitive .uint64)
+  | .stringHash => psIrCheckSignatureNoTypes typeArguments [string] (.primitive .uint64)
   | .unsignedOfNat type => do
       psIrCheckSignatureNoTypes typeArguments [nat] (← psIrUnsignedType type)
   | .unsignedToNat type => do

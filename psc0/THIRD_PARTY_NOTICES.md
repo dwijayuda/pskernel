@@ -79,3 +79,20 @@ Init/Data/UInt/BasicAux.lean. Copyright (c) 2018, 2020 Microsoft Corporation;
 authors Leonardo de Moura and Mario Carneiro; Apache-2.0. Conversion removes
 expression metadata and records the dependency boundary; kernel checking
 retains the original definitions, proof bodies and universe/binder semantics.
+
+### Hashable and runtime hashing
+
+StandardHashFoundationData is converted closed Core from Lean 4.35.0
+Init/Prelude.lean (2020 Microsoft Corporation; Leonardo de Moura and Mario
+Carneiro; Apache-2.0), preserving opaque values as opaque. StandardHashable
+adapts Init/Data/Hashable.lean (2016 Microsoft; Leonardo de Moura).
+DerivingHashable adapts Lean/Elab/Deriving/Hashable.lean (2021 Microsoft;
+Dany Fabian), using the shared Core telescope/eliminator infrastructure.
+
+BackendEcma/Hash, BackendWasm/Hash and the Rust runtime hashing routines adapt
+src/runtime/hash.h and hash.cpp (2013 Microsoft; Leonardo de Moura;
+Apache-2.0), whose string algorithm credits MurmurHash2 by Austin Appleby.
+Modifications: explicit fixed-width arithmetic and little-endian UTF-8 byte
+decoding, GC byte arrays in Wasm and target-native loops. The original
+runtime's host-endian memcpy is deliberately replaced with canonical little
+endian; conformance is qualified against the pinned little-endian Linux host.

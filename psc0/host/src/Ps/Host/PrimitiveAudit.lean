@@ -56,7 +56,8 @@ def primitiveAudit : IO Lean.Json := do
     let type := psDeclarationType declaration
     let assumption := match declaration with | .axiomDecl .. => true | _ => false
     let reviewed := modeledSignatures.any (fun entry => entry.1 == psNameToString name)
-    if assumption || reviewed then
+    let opaquePrimitive := ["mixHash", "String.hash"].contains (psNameToString name)
+    if assumption || reviewed || opaquePrimitive then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -78,6 +79,7 @@ def primitiveAudit : IO Lean.Json := do
         ("portableType", Lean.toJson portable.dbgToString),
         ("nativeType", Lean.toJson (original.map (fun info => info.type.dbgToString))),
         ("bodyTrust", Lean.toJson (if assumption then "assumption/runtime-primitive"
+          else if opaquePrimitive then "checked-opaque-inhabitant/runtime-primitive"
           else "checked-logical-model/runtime-override"))] :: entries
   -- Newly exposed representation conversions and proof-taking operations have
   -- checked portable models. Record both signatures without claiming alpha

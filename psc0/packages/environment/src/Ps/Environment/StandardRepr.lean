@@ -187,10 +187,10 @@ def psStandardReprDeclarations : List PsDeclaration :=
 
 def psStandardReprExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardReprDeclarations.foldl psPreludeAdd environment
-  let environment := psFormatRegisterClass (psFormatRegisterClass environment "Repr") "ReprAtom"
-  let environment := psFormatRegister environment "Repr" (psReprGroundInstances ++ psReprContainerInstances ++
+  let environment := psStandardRegisterClass (psStandardRegisterClass environment "Repr") "ReprAtom"
+  let environment := psStandardRegisterInstances environment "Repr" (psReprGroundInstances ++ psReprContainerInstances ++
       psReprDecidableDeclarations.filter (fun d =>
         psNameLastComponent (psDeclarationName d) == "instReprDecidable"))
-  let environment := psFormatRegister environment "ReprAtom" psReprAtomInstances
+  let environment := psStandardRegisterInstances environment "ReprAtom" psReprAtomInstances
   { environment with exportedAliases :=
       (psRootName "reprPrec", psDecisionName "Repr.reprPrec") :: environment.exportedAliases }

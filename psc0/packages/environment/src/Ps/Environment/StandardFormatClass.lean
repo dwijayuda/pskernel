@@ -4,6 +4,7 @@ Copyright (c) Microsoft Corporation. Apache-2.0; see THIRD_PARTY_NOTICES.md.
 Modified: ordinary portable Core declarations and shared dictionary registration.
 -/
 import Ps.Environment.StandardFormat
+import Ps.Environment.StandardClass
 
 -- One-field Type-universe class. alpha is local 0, dictionary local 1;
 -- method builders own their remaining locals. No host elaborator is imported.
@@ -32,24 +33,6 @@ def psFormatClassValue (name : String) (type method : PsExpr)
 def psFormatClassMethod (name method : String) (type dictionary : PsExpr)
     (level : PsLevel := .zero) : PsExpr :=
   psLogicApply (.constE (psNameAppendStr (psDecisionName name) method) [level]) [type, dictionary]
-
-def psFormatRegister (environment : PsEnvironment) (className : String)
-    (declarations : List PsDeclaration) (priority : Nat := 1000) : PsEnvironment :=
-  let instances := declarations.foldl (fun index declaration =>
-    psInstanceIndexAdd index {
-      value := .constE (psDeclarationName declaration)
-        ((psDeclarationLevelParams declaration).map PsLevel.param)
-      levelParams := psDeclarationLevelParams declaration
-      type := psDeclarationType declaration
-      className := some (psDecisionName className)
-      priority }) environment.instances
-  { environment with instances }
-
-def psFormatRegisterClass (environment : PsEnvironment) (name : String) : PsEnvironment :=
-  let name := psDecisionName name
-  { environment with
-    classes := name :: environment.classes
-    classParameters := (name, { outputs := [], outputLevels := [] }) :: environment.classParameters }
 
 def psToFormatName : PsName := psDecisionName "Std.ToFormat"
 

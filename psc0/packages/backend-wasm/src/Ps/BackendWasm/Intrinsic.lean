@@ -1,5 +1,6 @@
 import Ps.BackendWasm.Array
 import Ps.BackendWasm.LowerInt
+import Ps.BackendWasm.Hash
 
 namespace PsWasm
 
@@ -18,6 +19,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     (fun e => "PSCV0-WASM-INTRINSIC: " ++ e.detail)
   let runtime : String ← match op with
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
+    | .hashMix => pure "hash_mix" | .stringHash => pure "string_hash"
     | .natPow => pure "nat_pow"
     | .natDiv => pure "nat_div" | .natMod => pure "nat_mod"
     | .natEq => pure "nat_eq" | .natNe => pure "nat_ne" | .natLt => pure "nat_lt" | .natLe => pure "nat_le"
@@ -54,6 +56,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   return { parameters := signature.parameters, result := signature.resultType, instructions }
 
 def runtimeDefinitions : Except String (List RuntimeDefinition) := do
-  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime)
+  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime)
 
 end PsWasm

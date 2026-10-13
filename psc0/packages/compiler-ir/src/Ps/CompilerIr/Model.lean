@@ -86,6 +86,8 @@ inductive PsVerifiedIrLiteral where
   | unit
 
 inductive PsVerifiedIrIntrinsic where
+  | hashMix
+  | stringHash
   | unsignedOfNat (type : PsVerifiedIrMachineIntegerType)
   | unsignedToNat (type : PsVerifiedIrMachineIntegerType)
   | machineIntBinary

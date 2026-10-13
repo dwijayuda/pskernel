@@ -83,7 +83,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardExcept,
     `Ps.Environment.StandardGetElem,
     `Ps.Environment.StandardNatOrder,
-    `Ps.Environment.StandardUnsignedFoundationData, `Ps.Environment.StandardUnsigned,
+    `Ps.Environment.StandardHashable, `Ps.Environment.StandardHashFoundationData, `Ps.Environment.StandardUnsignedFoundationData, `Ps.Environment.StandardUnsigned,
     `Ps.Environment.StandardScalarArithmeticData, `Ps.Environment.StandardScalarArithmetic,
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
@@ -97,7 +97,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatWork,
     `Ps.Environment.StandardFormatRender,
     `Ps.Environment.StandardFormat,
-    `Ps.Environment.StandardFormatClass,
+    `Ps.Environment.StandardClass, `Ps.Environment.StandardFormatClass,
     `Ps.Environment.StandardToFormat,
     `Ps.Environment.StandardRepr,
     `Ps.Environment.StandardFormatString,
@@ -171,7 +171,7 @@ lean_lib PsBackendTs where
 
 lean_lib PsBackendEcma where
   srcDir := "packages/backend-ecma/src"
-  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Runtime,
+  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime,
     `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
 
 lean_lib PsBackendRust where
@@ -192,7 +192,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
-    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Intrinsic,
+    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Intrinsic,
     `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.Type,
     `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,
@@ -263,7 +263,7 @@ lean_lib PsElab where
     `Ps.Elab.Class,
     `Ps.Elab.DerivingContext,
     `Ps.Elab.DerivingInhabited,
-    `Ps.Elab.DerivingBEq,
+    `Ps.Elab.DerivingHashable, `Ps.Elab.DerivingBEq,
     `Ps.Elab.DerivingDecEq,
     `Ps.Elab.DerivingRepr,
     `Ps.Elab.Deriving,

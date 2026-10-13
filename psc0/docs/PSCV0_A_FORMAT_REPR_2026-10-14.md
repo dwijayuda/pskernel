@@ -614,3 +614,44 @@ alignment, element size, flatten_type, flatten_variant/join and lift_flat
 (read 14 October 2026); format qualification retains pinned wasm-tools 1.261.0
 and Wasmtime 49.0.2. Existing aggregate fixtures now also cover mixed u8/u64
 records, joined variants, and repeated i64 result/post-return lifetimes.
+
+## Unsigned runtime qualification and Hashable implementation
+
+Unsigned profile /59 is green at fd554c4612d14ff154bced721a4ea6e5dd16df64,
+[Linux 38463484850](https://github.com/dwijayuda/pskernel/actions/runs/38463484850):
+359 shared observations, four panic contracts; 637 declarations/22 classes/
+92 instances; 211 portable/221 native modules. All existing kernel, native
+oracle, semantic/refusal/search, strict IR, JS/TS/Rust, GC Wasm, component,
+ABI, project and performance gates pass. This includes UInt64 wide generic
+boxing, wrapping of arbitrary Nat values, genuine BitVec/Fin conversions and
+UInt64-containing public records/variants, typed Canonical ABI flat slots,
+compact scalar storage and i64 post-return signatures.
+
+Hashable /60 implementation is submitted for qualification; it is not yet
+validated. Lean sources: Init/Prelude.lean, Init/Data/Hashable.lean,
+Lean/Elab/Deriving/Hashable.lean, runtime/hash.h, runtime/hash.cpp and
+tests/elab/derivingHashable{,2}.lean at the pinned commit.
+
+The 17-declaration native foundation was independently exported and checked
+by the official trust-level-zero kernel at Linux38462478718. Hashable accepts
+Sort u; mixHash and String.hash remain opaque. Candidate logical dependencies
+do not automatically register instances or executable code. The exporter
+replays against the frozen pre-hash unsigned stage and regeneration is strict.
+
+Ordinary checked instance builders cover the selected scalar, proof,
+Option/List, Array/Prod, Fin, Unit/Empty profile; Array/Prod retain the existing
+Type-0 scope. Shared registration helpers were extracted from formatting
+ownership into StandardClass. Deriving uses the shared telescope, universe,
+instance and eliminator mechanisms. It starts with the constructor ordinal
+and mixes every field, including implicit and proof fields. Dependent proof
+dictionaries are synthesized in the opened branch context. Recursive/indexed/
+dependent computational fields remain in M3+B.
+
+Two typed runtime operations own hashing: hashMix(UInt64,UInt64) and
+stringHash(String). Pair mixing preserves Lean's unusual XOR-by-multiplier
+step. String hashing follows MurmurHash64A over UTF-8 bytes with seed 11 and
+explicit little-endian decoding. No big-endian native parity is claimed.
+JS/TS share an AST implementation; Rust uses wrapping u64 arithmetic;
+Wasm traverses GC bytes with i64 operations, with no linear memory.
+The existing native oracle and shared backend observation table receive
+boundary, tail-byte, Unicode/NUL, proof-field, implicit-field and container cases.

@@ -124,7 +124,8 @@ jobs:
           cmp ../packages/environment/src/Ps/Environment/StandardScalarArithmeticData.lean ../dist/pscv0-native/StandardScalarArithmeticData.lean
           .lake/build/bin/pscv0_native --export-unsigned-foundation ../dist/pscv0-native/StandardUnsignedFoundationData.lean > ../dist/pscv0-native/unsigned-export.log
           cmp ../packages/environment/src/Ps/Environment/StandardUnsignedFoundationData.lean ../dist/pscv0-native/StandardUnsignedFoundationData.lean
-          .lake/build/bin/pscv0_native --export-hash-foundation ../dist/pscv0-native/StandardHashFoundationData.lean | tee ../dist/pscv0-native/hash-export.log
+          .lake/build/bin/pscv0_native --export-hash-foundation ../dist/pscv0-native/StandardHashFoundationData.lean > ../dist/pscv0-native/hash-export.log
+          cmp ../packages/environment/src/Ps/Environment/StandardHashFoundationData.lean ../dist/pscv0-native/StandardHashFoundationData.lean
           .lake/build/bin/pscv0_native_checks | tee ../dist/pscv0-native/checks.log
           .lake/build/bin/pscv0_native --version | tee ../dist/pscv0-native/native-version.json
           .lake/build/bin/pscv0_native --emit-all ../dist/pscv0-native/application.ps ../dist/pscv0-native/application | tee ../dist/pscv0-native/emit.log

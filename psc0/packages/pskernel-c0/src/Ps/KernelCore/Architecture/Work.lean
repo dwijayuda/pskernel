@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Demand
+import Ps.KernelCore.Architecture.Budget
 import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Admission.Declaration.Admission
 
@@ -102,6 +102,21 @@ def psKernelC0ArchitecturePreviewDemand
     throw "invalid candidate architecture transaction"
   let (observation, session) ←
     psKernelC0ArchitectureObserveDemand fuel work.checker expr
+  return (observation, { work with checker := session })
+
+/-- Opt-in, quota-bounded candidate readback. The trusted source WHNF
+    is computed first and remains the only checked session result. A quota
+    decline is reported as candidate absence, never rejection of a proof. -/
+def psKernelC0ArchitecturePreviewDemandMetered
+    (fuel quoteQuota : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0ExecutionObservation × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveDemandMetered
+      fuel quoteQuota work.checker expr
   return (observation, { work with checker := session })
 
 /-- Phase E authority seam. On failure no next work exists: the caller retains

@@ -46,8 +46,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          head -n 69 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-first-inductive.ndjson"
-          # This prefix includes the first real exported inductive group.
+          head -n 153 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-first-inductive.ndjson"
+          # This prefix includes the first three real exported inductive groups.
           # A verdict on the prefix is separate from the full Init check.
           (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$RUNNER_TEMP/Init-first-inductive.ndjson") > "$RUNNER_TEMP/first-inductive-official.txt" 2>&1 || {
             cat "$RUNNER_TEMP/first-inductive-official.txt"

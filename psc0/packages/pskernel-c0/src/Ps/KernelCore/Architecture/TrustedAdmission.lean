@@ -112,3 +112,65 @@ def psKernelC0TrustedSourceAdmit
     certified := step.result
     history := .admitted work.history step
   }
+
+/-- Source checking may advance caches and other checker STATE, but a
+    correctly scoped checked operation must not replace its ENVIRONMENT.
+    One private transition helper transports the mathematical admission
+    history by the certified environment-ownership proof. -/
+private def psKernelC0TrustedSourceRun
+    {α : Type}
+    (work : PsKernelC0TrustedSourceWork)
+    (source :
+      PsKernelCheckerContext → PsKernelCheckerState →
+        Except String (α × PsKernelCheckerState)) :
+    Except String (α × PsKernelC0TrustedSourceWork) := do
+  let (value, state) ← source
+    work.certified.raw.checker.context work.certified.raw.checker.state
+  let ⟨certified, unchanged⟩ ←
+    pure (psKernelC0CertifiedWorkWithStateOwned work.certified state)
+  let history :
+      PsKernelC0SourceEnvironmentHistory
+        certified.raw.checker.context.environment := by
+    rw [unchanged]
+    exact work.history
+  return (value, { certified := certified, history := history })
+
+/-- An ordinary source-checked WHNF query preserves the exact checked
+    environment history. WHNF is an observation, never proof-term approval. -/
+def psKernelC0TrustedSourceWhnf
+    (fuel : Nat)
+    (work : PsKernelC0TrustedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
+  psKernelC0TrustedSourceRun work
+    (fun context state => psKernelCheckerWhnf fuel context state expr)
+
+/-- Source inference synthesizes types but does not certify arbitrary
+    applications; full checking must still be used for accepting roots. -/
+def psKernelC0TrustedSourceInfer
+    (fuel : Nat)
+    (work : PsKernelC0TrustedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
+  psKernelC0TrustedSourceRun work
+    (fun context state => psKernelCheckerInfer fuel context state expr)
+
+/-- Only the original FULL source checker may approve a term. Neither
+    metadata, candidate reduction nor provenance alone authorizes it. -/
+def psKernelC0TrustedSourceCheck
+    (fuel : Nat)
+    (work : PsKernelC0TrustedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
+  psKernelC0TrustedSourceRun work
+    (fun context state => psKernelCheckerCheck fuel context state expr)
+
+/-- Definitional equality remains the original source judgment, with the
+    same environment/history across its state update. -/
+def psKernelC0TrustedSourceDefEq
+    (fuel : Nat)
+    (work : PsKernelC0TrustedSourceWork)
+    (left right : PsKernelExpr) :
+    Except String (Bool × PsKernelC0TrustedSourceWork) :=
+  psKernelC0TrustedSourceRun work
+    (fun context state => psKernelIsDefEq fuel context state left right)

@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Structural
+import Ps.KernelCore.Architecture.Demand
 import Ps.KernelCore.Admission.Declaration.Admission
 
 def c0DeltaName (name : String) : PsKernelName :=
@@ -40,6 +40,20 @@ def c0StructuralCheck
           !psKernelExprEqual observation.sourceValue expected ||
           !observation.candidateValue.any (psKernelExprEqual expected) then
         throw (IO.userError (label ++ ": structural/source disagreement"))
+
+/-- One global-budget, nested-demand source WHNF regression. -/
+def c0DemandCheck
+    (label : String)
+    (session : PsKernelCheckerSession)
+    (input expected : PsKernelExpr) : IO Unit := do
+  match psKernelC0ArchitectureObserveDemand 4096 session input with
+  | .error reason =>
+      throw (IO.userError (label ++ ": source demand WHNF failed: " ++ reason))
+  | .ok (observation, _) =>
+      if !observation.agrees ||
+          !psKernelExprEqual observation.sourceValue expected ||
+          !observation.candidateValue.any (psKernelExprEqual expected) then
+        throw (IO.userError (label ++ ": shared-demand/source disagreement"))
 
 def main : IO Unit := do
   let type := PsKernelExpr.sort (.succ .zero)
@@ -330,6 +344,55 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ =>
       throw (IO.userError "structural candidate accepted exhausted fuel")
+  -- CDE-4: nested major premises use one operation-local transition loop.
+  let idRecord : PsKernelExpr :=
+    .lam recordBinder type (.bvar 0) .default
+  c0DemandCheck "nat-demand-nested-add" ctorSession
+    (c0DeltaNatBinary psKernelNatAddName (c0DeltaNatLit 1)
+      (c0DeltaNatBinary psKernelNatMulName
+        (c0DeltaNatLit 6) (c0DeltaNatLit 7)))
+    (c0DeltaNatLit 43)
+  c0DemandCheck "nat-demand-nested-both-operands" ctorSession
+    (c0DeltaNatBinary psKernelNatAddName
+      (c0DeltaNatBinary psKernelNatAddName
+        (c0DeltaNatLit 5) (c0DeltaNatLit 6))
+      (c0DeltaNatBinary psKernelNatMulName
+        (c0DeltaNatLit 2) (c0DeltaNatLit 3)))
+    (c0DeltaNatLit 17)
+  c0DemandCheck "projection-demand-beta-major" ctorSession
+    (.proj pairType 1 (.app idRecord pairValue)) (c0DeltaNatLit 22)
+  c0DemandCheck "projection-demand-zeta-major" ctorSession
+    (.proj pairType 0
+      (.letE recordBinder type pairValue (.bvar 0) false))
+    (c0DeltaNatLit 11)
+  c0DemandCheck "nat-demand-projection-major" ctorSession
+    (c0DeltaNatBinary psKernelNatAddName
+      (.proj pairType 1 (.app idRecord pairValue)) (c0DeltaNatLit 20))
+    (c0DeltaNatLit 42)
+  c0DemandCheck "nat-demand-local-let" localSession
+    (c0DeltaNatBinary psKernelNatAddName
+      (c0DeltaNatLit 1)
+      (.app (.const psKernelNatSuccName []) (c0DeltaNatLit 40)))
+    (c0DeltaNatLit 42)
+  let nestedNeutral : PsKernelExpr :=
+    c0DeltaNatBinary psKernelNatAddName
+      (c0DeltaNatBinary psKernelNatAddName
+        (.const (c0DeltaName "UnboundNat") []) (c0DeltaNatLit 2))
+      (c0DeltaNatLit 3)
+  c0DemandCheck "nested-nat-neutral-preserves-original" ctorSession
+    nestedNeutral nestedNeutral
+  c0DemandCheck "demand-unrelated-structure-preserves-original"
+    ctorSession (.proj badType 1 (.app idRecord pairValue))
+    (.proj badType 1 (.app idRecord pairValue))
+  match psKernelC0ArchitectureCandidateDemand 3 ctorSession.context
+      (c0DeltaNatBinary psKernelNatAddName
+        (c0DeltaNatLit 1)
+        (c0DeltaNatBinary psKernelNatMulName
+          (c0DeltaNatLit 6) (c0DeltaNatLit 7))) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "nested demand reset or ignored shared fuel")
+  IO.println "C0_ARCHITECTURE shared_demand_stack_source_differential=pass"
   IO.println "C0_ARCHITECTURE local_let_constructor_projection_differential=pass"
   IO.println "C0_ARCHITECTURE checked_delta_and_closure_spine_differential=pass"
   IO.println "C0_ARCHITECTURE bounded_nat_literal_spine_differential=pass"

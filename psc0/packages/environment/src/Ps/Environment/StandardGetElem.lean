@@ -562,7 +562,7 @@ def psStandardLawfulGetElemOptionalDefaultDeclarations : List PsDeclaration :=
     [proposition, ownDecision, decision]
   let other := PsExpr.fvar 25
   let motive := psLogicLam 25 "other" (psDecisionType proposition)
-    (psLogicPi 26 "equal" (psLogicEq (.succ .zero)
+    (psLogicLam 26 "equal" (psLogicEq (.succ .zero)
       (psDecisionType proposition) ownDecision other)
       (optEq getOptionalMethod (decideOptional other)))
   let proofOpt := psLogicApply (.constE (psNameAppendStr psEqName "rec")

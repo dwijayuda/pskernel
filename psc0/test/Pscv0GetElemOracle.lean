@@ -46,8 +46,8 @@ example : (⟨23⟩ : IndexBox)[0]? = some 23 := by decide
 example : (⟨23⟩ : IndexBox)[1]? = none := by decide
 
 -- Independent order oracle for the M1 successor/inversion/reflection contract.
-example : Nat.le 2 5 := by decide
-example : ¬Nat.le 5 2 := by decide
+example : Nat.le 2 5 := show 2 ≤ 5 from by decide
+example : ¬Nat.le 5 2 := show ¬(5 ≤ 2) from by decide
 example (n : Nat) : Nat.le 0 n := Nat.zero_le n
 example (n m : Nat) (h : Nat.le n m) :
     Nat.le (Nat.succ n) (Nat.succ m) := Nat.succ_le_succ h
@@ -58,6 +58,6 @@ example (n m k : Nat) (h : Nat.le n m) (q : Nat.le m k) :
     Nat.le n k := Nat.le_trans h q
 example (n m : Nat) (h : Nat.lt (Nat.succ n) (Nat.succ m)) :
     Nat.lt n m := Nat.lt_of_succ_lt_succ h
-example : decide (Nat.le 184467440737095516170 184467440737095516171) = true := rfl
+example : decide (184467440737095516170 ≤ 184467440737095516171) = true := rfl
 
 end Pscv0GetElemOracle

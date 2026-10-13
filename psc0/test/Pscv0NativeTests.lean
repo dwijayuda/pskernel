@@ -155,8 +155,11 @@ private def generalizedFixture : String :=
 private def generalizedRuntimeFixture : String :=
   "namespace GeneralizedRuntime\nclass Evidence(n: outParam(Nat)) where { value: Nat }\nfunction generic(n: Nat): Evidence n := { value := n }\nclass Select(key: Nat, n: outParam(Nat)) where { value: Nat }\ninstance selectFirst: Select 0 5 where { value := 773 }\ninstance selectSecond: Select 1 7 where { value := 773 }\nclass Branch(key: Nat) where { value: Nat }\ninstance branch{key: Nat}{n: Nat}[Evidence n][Select key n]: Branch key where { value := Nat.add(Evidence.value(n := n), Select.value(key := key, n := n)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(key := 0), Branch.value(key := 1)) }\nfunction combined[poly: forall(n: Nat), Evidence n](unit: Unit): Nat := Result.value\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend GeneralizedRuntime\n"
 
+private def derivingEqualityFixture : String :=
+  "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
+
 private def application : String :=
-  generalizedRuntimeFixture ++
+  derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -1926,7 +1929,13 @@ private def derivingBoundaries : IO Unit := do
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
     { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
-    { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: Chain A) } deriving BEq\n" }
+    { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: Chain A) } deriving BEq\n" },
+    { source := "structure Bad where { f: Nat -> Nat } deriving DecidableEq\n" },
+    { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\n" },
+    { source := "inductive Bad where { | nil | cons(next: Bad) } deriving DecidableEq\n" },
+    { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\n" },
+    { source := "structure Bad where { value: Nat := true } deriving Inhabited\n" },
+    { source := "structure Required where { value: Nat }\nconst bad: Required := {}\n" }
   ]
   let batch ← match ← PsV7Native.runBatch (#[projection] ++ requests) with
     | .ok batch => pure batch
@@ -1942,7 +1951,7 @@ private def derivingBoundaries : IO Unit := do
       unless error.phase == "elaborate" do
         throw (IO.userError ("deriving refusal escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
     | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
-  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS missing parameter dictionary, dependent field, recursive family"
+  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS dictionaries, dependent runtime fields, recursion, indices, ill-typed defaults and missing required fields"
 
 private def syntheticBoundaries : IO Unit := do
   let environment := psSelfHostProdPreludeEnvironment

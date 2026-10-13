@@ -262,6 +262,17 @@ export const observations = [
   { name: "generalizedSharedRuntime", args: null, expected: 1558n },
   { name: "syntheticDefaultRuntime", args: null, expected: 0n },
   { name: "syntheticExpectedRuntime", args: null, expected: false },
+  { name: "derivedDecisionEqual", args: null, expected: true },
+  { name: "derivedDecisionDifferent", args: null, expected: false },
+  { name: "derivedDecisionTag", args: null, expected: false },
+  { name: "derivedDecisionString", args: null, expected: true },
+  { name: "derivedDefaultRuntime", args: null, expected: 797n },
+  { name: "derivedDefaultRecordRuntime", args: null, expected: 797n },
+  { name: "derivedDefaultOverrideRuntime", args: null, expected: 809n },
+  { name: "derivedSeedRuntime", args: null, expected: 811n },
+  { name: "derivedProofBEq", args: null, expected: true },
+  { name: "derivedProofDecision", args: null, expected: true },
+  { name: "derivedProofDifferent", args: null, expected: false },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];
 

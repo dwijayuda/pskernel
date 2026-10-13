@@ -8,7 +8,8 @@ def psPscv0DataParameters (fuel : Nat) (cursor : PsTokenCursor) :
     fuel true false false cursor []
 
 -- Structure fields have native named groups, not declaration comma groups.
--- Defaults and field methods require their own structure semantics later.
+-- Defaults reuse the scoped optional-type node and checked constructor telescope;
+-- field methods remain a separate source feature.
 def psPscv0StructureField (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (Prod PsSyntaxBinderHead PsSyntaxTerm)) := do
   let field ←
@@ -19,12 +20,12 @@ def psPscv0StructureField (fuel : Nat) (cursor : PsTokenCursor) :
         throw (psProofScriptExpectedError "explicit, implicit or named instance structure field" cursor)
       | _ => pure ()
       let entry ← psPscv0BinderEntry (psPscv0ParseTerm true) (psPscv0ParseTerm false)
-        fuel opening.kind true false true opening.cursor
+        fuel opening.kind true true true opening.cursor
       let close ← psParseBinderClosing opening entry.cursor
       pure (PsParseResult.mk ({ entry.value.fst with span := close.value }, entry.value.snd) close.cursor)
     else
       psPscv0BinderEntry (psPscv0ParseTerm true) (psPscv0ParseTerm false)
-        fuel .explicit true false false cursor
+        fuel .explicit true true false cursor
   if psTokenCursorAtText field.cursor "}" then return field
   if psTokenCursorAtText field.cursor ";" || psTokenCursorAtText field.cursor "," then
     throw (psProofScriptExpectedError "newline-separated structure field" field.cursor)

@@ -88,8 +88,8 @@ def psElabRecord (elaborate : PsElaborator) (context : PsElabContext)
     | throw (.invalidArgument "record requires an expected nominal structure type")
   let shape ← psElabRecordShape context target
   let names ← psElabRecordFields shape fields
-  if names.length != shape.fieldNames.length then
-    throw (.invalidArgument "missing required record field")
+  -- The shared application queue fills declared defaults and instance fields;
+  -- any missing required field leaves an unapplied telescope and is rejected.
   psElabBuildRecord elaborate context shape target (names.map fun (name, value) =>
     (name, PsElabRecordArgument.source value))
 

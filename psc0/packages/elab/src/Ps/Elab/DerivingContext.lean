@@ -101,3 +101,74 @@ def psElabDeriveFinish (plan : PsElabDeriveContext) (suffix : String)
   if !psExprFVarsInContext psLocalEmpty value || !psExprFVarsInContext psLocalEmpty type then
     throw (.data "derived declaration contains an unbound local")
   return .definitionDecl (psNameAppendStr plan.info.name suffix) plan.info.levelParams type value
+
+// Runtime fields must have homogeneous types in the parameter telescope.
+// Proof fields may depend on earlier values: they carry no comparison payload,
+// and DecidableEq transports them with the existing dependent-context machinery.
+structure PsElabDeriveFields where
+  constructor : PsConstructorInfo
+  cursor : PsExpr
+  fields : List PsElabTypedBinder
+  proofs : List Bool
+
+def psElabDeriveFields (plan : PsElabDeriveContext) (name : PsName) :
+    Except PsElabError PsElabDeriveFields := do
+  let some constructor := psEnvironmentFindConstructor plan.context.environment name
+    | throw (.data "deriving constructor missing")
+  if !constructor.recursiveFields.isEmpty then
+    throw (.data "recursive deriving requires the M3 data machinery")
+  let (_, cursor) ← psElabDeriveConstructor plan constructor
+  let opened ← psElabOpenCoreTelescope 4096 plan.context cursor (some constructor.numFields)
+  let fields := opened.bindersRev.reverse
+  let proofs ← fields.mapM fun field => do
+    let level ← psElabExpressionSort opened.context field.type
+    if psLevelEquivalent level .zero then return true
+    if !psExprFVarsInContext plan.context.localContext field.type then
+      throw (.data "deriving requires independent runtime field types")
+    if psExprHasConst plan.info.name field.type then
+      throw (.data "recursive deriving requires the M3 data machinery")
+    return false
+  if !psDefEqReadOnlyWithEnv plan.context.environment plan.context.metaContext
+      opened.context.localContext opened.body plan.family then
+    throw (.data "deriving constructor result mismatch")
+  return { constructor, cursor, fields, proofs }
+
+-- One eliminator builder owns motive universes and the actual minor telescope.
+-- The callback receives fresh local fields and the reconstructed constructor.
+-- Empty families work without a special inhabitant or fabricated branch.
+def psElabDeriveEliminate (plan : PsElabDeriveContext) (context : PsElabContext)
+    (result : PsExpr → PsExpr)
+    (branch : PsElabContext → PsConstructorInfo → List PsElabTypedBinder →
+      PsExpr → Except PsElabError PsExpr) : Except PsElabError PsExpr := do
+  let recName := psNameAppendStr plan.info.name "rec"
+  let some recursor := psEnvironmentFindRecursor context.environment recName
+    | throw (.data "deriving recursor missing")
+  let major := psLocalPushBinding context.localContext (psRootName "value") plan.family .explicit
+  let inner := psElabContextWithLocal context major.context
+  let level ← psElabExpressionSort inner (result (.fvar major.id))
+  let levels ← psElabRecursorLevels plan.info recursor
+    (plan.info.levelParams.map PsLevel.param) level
+  let parameters := psElabBinderArguments plan.parametersRev
+  let motive := psLogicLam major.id "value" plan.family (result (.fvar major.id))
+  let recType := psExprInstantiateLevelParams recursor.levelParams levels recursor.type
+  let some cursor := psReduceApplyType
+    (psWhnf context.environment context.metaContext context.localContext)
+    recType (parameters ++ [motive]) | throw .matchRecursorUnsupported
+  let (_, branches) ← plan.info.constructors.foldlM
+    (fun (state : PsExpr × List PsExpr) name => do
+      let some ctor := psEnvironmentFindConstructor context.environment name
+        | throw (.data "deriving constructor missing")
+      if !ctor.recursiveFields.isEmpty then
+        throw (.data "recursive deriving requires the M3 data machinery")
+      let minor ← (psInferEnsureForall context.environment context.metaContext
+        context.localContext state.fst).mapError PsElabError.infer
+      let opened ← psElabOpenCoreTelescope 4096 context minor.domain (some ctor.numFields)
+      let fields := opened.bindersRev.reverse
+      let value := psExprApplyMany (.constE name (plan.info.levelParams.map PsLevel.param))
+        (parameters ++ fields.map (fun field => .fvar field.id))
+      let body ← branch opened.context ctor fields value
+      let body := psCloseElabLambdaBinders context.metaContext opened.bindersRev body
+      pure (psExprInstantiate1 minor.body body, body :: state.snd)) (cursor, [])
+  return psLogicLam major.id "value" plan.family
+    (psExprApplyMany (.constE recName levels)
+      (parameters ++ [motive] ++ branches.reverse ++ [.fvar major.id]))

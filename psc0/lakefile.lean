@@ -244,6 +244,7 @@ lean_lib PsElab where
     `Ps.Elab.DerivingContext,
     `Ps.Elab.DerivingInhabited,
     `Ps.Elab.DerivingBEq,
+    `Ps.Elab.DerivingDecEq,
     `Ps.Elab.Deriving,
     `Ps.Elab.Scope,
     `Ps.Elab.Command

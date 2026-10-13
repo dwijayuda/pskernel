@@ -233,3 +233,40 @@ instance [Branch 0] [Branch 1] : Result where
 def combined [poly : (n : Nat) → Evidence n] (_ : Unit) : Nat := Result.value
 example : combined (poly := generic) () = 1558 := rfl
 end Pscv0GeneralizedIndexOracle
+
+-- Equality/defaults oracle uses upstream handlers, independently of Core generation.
+namespace Pscv0DerivingEqualityOracle
+universe u v
+structure Pair (A : Type u) (B : Type v) where
+  first : A
+  second : B
+deriving DecidableEq, BEq
+inductive Event (A : Type u) : Type u where
+  | empty
+  | value (payload : A)
+  | label (text : String)
+deriving DecidableEq, BEq
+structure Lift (A : Type) : Type 1 where
+  value : A
+deriving DecidableEq
+structure Checked where
+  count : Nat := 797
+  witness : count = count := by rfl
+deriving Inhabited, BEq, DecidableEq
+structure Seeded (A : Type u) (seed : A) where
+  value : A := seed
+deriving Inhabited
+inductive Void where
+deriving BEq, DecidableEq
+example : decide (Pair.mk (Lift.mk 787) "x" = Pair.mk (Lift.mk 787) "x") = true := rfl
+example : decide (Event.value 787 = Event.value 788) = false := rfl
+example : decide (Event.value 787 = Event.label "x") = false := rfl
+example : decide ((Event.label "λ😀" : Event Nat) = Event.label "λ😀") = true := rfl
+example : (default : Checked).count = 797 := rfl
+example : ({} : Checked).count = 797 := rfl
+example : ({ count := 809 } : Checked).count = 809 := rfl
+example {A : Type u} (seed : A) : (default : Seeded A seed).value = seed := rfl
+example : (({} : Checked) == {}) = true := rfl
+example : decide (({} : Checked) = {}) = true := rfl
+example : decide (({} : Checked) = { count := 809 }) = false := rfl
+end Pscv0DerivingEqualityOracle

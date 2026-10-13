@@ -210,6 +210,24 @@ def psDecisionUniqueDeclaration : PsDeclaration :=
       (psLogicLam 2 "right" family body))
   .definitionDecl (psDecisionName "PsStandard.decidableUnique") [] type value
 
+-- DecidableEq is a reducible function alias in RC4, not a new structure
+-- class. Search introduces its two arguments and solves the ordinary Decidable
+-- goal; deriving instances therefore use the existing Pi-aware instance graph.
+def psDecisionEqualityDeclarations : List PsDeclaration :=
+  let u := psRootName "u"
+  let alpha := PsExpr.fvar 0
+  let sort := PsExpr.sortE (.param u)
+  let decision := psDecisionType (psLogicEq (.param u) alpha (.fvar 2) (.fvar 3))
+  let method := psLogicPi 2 "a" alpha (psLogicPi 3 "b" alpha decision)
+  let alias := PsExpr.app (.constE (psRootName "DecidableEq") [.param u]) alpha
+  [ .definitionDecl (psRootName "DecidableEq") [u]
+      (psLogicPi 0 "α" sort (.sortE (.max (.succ .zero) (.param u))))
+      (psLogicLam 0 "α" sort method),
+    .definitionDecl (psRootName "decEq") [u]
+      (psLogicPi 0 "α" sort (psLogicPi 1 "inst" alias method .instanceImplicit) .implicit)
+      (psLogicLam 0 "α" sort
+        (psLogicLam 1 "inst" alias (.fvar 1) .instanceImplicit) .implicit) ]
+
 def psDecisionDeclarations : List PsDeclaration :=
   let decEq := fun (name : String) (type : PsExpr) =>
     PsDeclaration.axiomDecl (psDecisionName name) []
@@ -221,7 +239,7 @@ def psDecisionDeclarations : List PsDeclaration :=
       (psLogicLam 0 "α" (.sortE (.param (psRootName "u"))) (.fvar 0)),
     psDecisionReflectsDeclaration ] ++
   psDecisionCheckedClass ++ psDecisionCheckedConstructors ++
-  [psDecisionUniqueDeclaration] ++
+  [psDecisionUniqueDeclaration] ++ psDecisionEqualityDeclarations ++
   [decEq "Nat.decEq" (.constE psNatName []),
    decEq "String.decEq" (.constE psStringName []),
    psDecisionDiteDeclaration]

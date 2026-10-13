@@ -12,9 +12,16 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
   for _ in [:constructor.numFields] do
     let field ← (psInferEnsureForall context.environment context.metaContext
       context.localContext cursor).mapError PsElabError.infer
-    let level ← psElabExpressionSort context field.domain
-    let dictionary ← psElabDeriveInstance context (psStandardInhabitedType field.domain level)
-    let defaultValue := psStandardInhabitedDefault level field.domain dictionary
+    let defaultValue ← match psElabDefaultValue context field.domain with
+      | some value => do
+        -- A declared structure default wins over Inhabited synthesis and is
+        -- checked after preceding fields have been substituted into its type.
+        let checked ← psElabResolvedTerm context value (some field.domain)
+        pure checked.term
+      | none => do
+        let level ← psElabExpressionSort context field.domain
+        let dictionary ← psElabDeriveInstance context (psStandardInhabitedType field.domain level)
+        pure (psStandardInhabitedDefault level field.domain dictionary)
     cursor := psExprInstantiate1 field.body defaultValue
     value := .app value defaultValue
   if !psDefEqReadOnlyWithEnv context.environment context.metaContext

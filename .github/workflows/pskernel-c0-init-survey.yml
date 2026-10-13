@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Determine fresh target occurrence in failing recursive WHNF domain
+      - name: Qualify neutral inductive head preservation on first real nested Init
         shell: bash
         run: |
           set -euo pipefail

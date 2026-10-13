@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Qualify neutral inductive head preservation on first real nested Init
+      - name: Identify real nested recursive domain head declaration kind
         shell: bash
         run: |
           set -euo pipefail

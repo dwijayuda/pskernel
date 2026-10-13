@@ -21,6 +21,7 @@ frontend and does not silently drop mdata, FVar, MVar or inductive records.
 inductive C0ExportInductiveSource where
   | ordinary (decl : PsKernelSimpleInductiveDecl)
   | mutual (decl : PsKernelSimpleMutualInductiveDecl)
+  | nested (decl : PsKernelSimpleMutualInductiveDecl)
 
 structure C0ExportInductiveGroup where
   source : C0ExportInductiveSource
@@ -364,8 +365,9 @@ def c0ExportReadInductiveGroup
   let some first := types.head?
     | throw "malformed NDJSON empty inductive group"
   let names := types.map (fun t => t.base.name)
-  if types.any (fun t => t.numNested != 0) then
-    throw "unsupported NDJSON nested inductive group"
+  let hasNested := types.any (fun t => t.numNested != 0)
+  if hasNested && types.length != 1 then
+    throw "unsupported NDJSON nested mutual group"
   if types.any (fun t => t.isUnsafe) ||
       expectedCtors.any (fun c => c.isUnsafe) ||
       expectedRecs.any (fun c => c.isUnsafe) then
@@ -399,9 +401,25 @@ def c0ExportReadInductiveGroup
   let toCtor (c : PsKernelConstructorInfo) :
       PsKernelSimpleConstructorDecl :=
     { name := c.base.name, type := c.base.type }
+  let mutualDecl : PsKernelSimpleMutualInductiveDecl := {
+    levelParams := first.base.levelParams
+    numParams := first.numParams
+    types := types.map (fun ty => {
+      name := ty.base.name
+      type := ty.base.type
+      ctors := (expectedCtors.filter (fun c =>
+        psKernelNameEq c.induct ty.base.name)).map toCtor
+    })
+    isUnsafe := false
+  }
   let source : C0ExportInductiveSource :=
-    if types.length == 1 then
-      C0ExportInductiveSource.ordinary {
+    if hasNested then
+      -- The native nested-admission subsystem independently discovers
+      -- auxiliary families and checks its restoration; metadata remains
+      -- a post-admission comparator, never an axiom.
+      .nested mutualDecl
+    else if types.length == 1 then
+      .ordinary {
         levelParams := first.base.levelParams
         name := first.base.name
         type := first.base.type
@@ -410,17 +428,7 @@ def c0ExportReadInductiveGroup
         numParams := first.numParams
       }
     else
-      C0ExportInductiveSource.mutual {
-        levelParams := first.base.levelParams
-        numParams := first.numParams
-        types := types.map (fun ty => {
-          name := ty.base.name
-          type := ty.base.type
-          ctors := (expectedCtors.filter (fun c =>
-            psKernelNameEq c.induct ty.base.name)).map toCtor
-        })
-        isUnsafe := false
-      }
+      .mutual mutualDecl
   return {
     source := source
     expectedTypes := types
@@ -664,6 +672,9 @@ def c0ExportCheckOne
               4096 psKernelLeanNatMaxSizeDefault
         | .mutual decl =>
             psKernelAddSimpleMutualInductive fuel env decl
+              4096 psKernelLeanNatMaxSizeDefault
+        | .nested decl =>
+            psKernelAddSimpleNestedInductive fuel env decl
               4096 psKernelLeanNatMaxSizeDefault
     | .quotientGroup _ =>
         psKernelAddQuot env

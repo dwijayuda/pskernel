@@ -311,6 +311,41 @@ theorem psKernelC0AuditedCapabilityAllowed
   have h := List.all_eq_true.mp work.capabilitiesApproved event member
   exact of_decide_eq_true h
 
+/-- Empty ordinary-axiom permission means the entire source-checked
+    history contains NO ordinary axiom declarations at all. This is a
+    mathematical consequence of the pinned full-signature manifest. -/
+theorem psKernelC0AuditedNoOrdinaryAxioms
+    (work : PsKernelC0AuditedSourceWork)
+    (hEmpty : work.allowedAxioms = []) :
+    psKernelC0HistoryAxiomSignatures work.trusted.history = [] := by
+  cases h : psKernelC0HistoryAxiomSignatures work.trusted.history with
+  | nil => exact h
+  | cons head tail =>
+      have hMember :
+          head ∈ psKernelC0HistoryAxiomSignatures work.trusted.history := by
+        rw [h]
+        simp
+      have approved :=
+        psKernelC0AuditedAxiomSignatureAllowed work head hMember
+      simp [hEmpty] at approved
+
+/-- With no additional capability permissions, no Quot/unsafe/partial
+    trust event can have entered a successful source-admission history. -/
+theorem psKernelC0AuditedNoTrustCapabilities
+    (work : PsKernelC0AuditedSourceWork)
+    (hEmpty : work.allowedCapabilities = []) :
+    psKernelC0HistoryTrustCapabilities work.trusted.history = [] := by
+  cases h : psKernelC0HistoryTrustCapabilities work.trusted.history with
+  | nil => exact h
+  | cons head tail =>
+      have hMember :
+          head ∈ psKernelC0HistoryTrustCapabilities work.trusted.history := by
+        rw [h]
+        simp
+      have approved :=
+        psKernelC0AuditedCapabilityAllowed work head hMember
+      simp [hEmpty] at approved
+
 /-- A checked state or staged syntax may change, but its exact
     source environment is fixed. Transport the *whole* approved history
     package across that environment equality, rather than rescanning every

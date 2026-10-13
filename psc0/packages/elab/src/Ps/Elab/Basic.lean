@@ -493,37 +493,33 @@ def psElabReference
           psElabNamedReference context sourceName expected
 
 def psElabNatural
-    (context : PsElabContext)
-    (text : String)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match psParseNaturalText text with
-  | none => Except.error (PsElabError.invalidNatural text)
-  | some value =>
-      let natural := PsExpr.lit (PsLiteral.natural value);
-      match expected with
-      | some expectedType =>
-          let reducedExpected :=
-            psWhnf
-              context.environment
-              context.metaContext
-              context.localContext
-              expectedType;
-          match reducedExpected with
-          | .constE name _ =>
-              if psNameEq name psIntName then
-                psElabResolvedTerm
-                  context
-                  (PsExpr.app
-                    (PsExpr.constE psIntOfNatName [])
-                    natural)
-                  expected
-              else
-                psElabResolvedTerm context natural expected
-          | _ =>
-              psElabResolvedTerm context natural expected
-      | none =>
-          psElabResolvedTerm context natural Option.none
+    (context : PsElabContext) (text : String) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let some value := psParseNaturalText text | throw (.invalidNatural text)
+  let natural := PsExpr.lit (.natural value)
+  let some expectedType := expected | psElabResolvedTerm context natural none
+  let reduced := psWhnf context.environment context.metaContext
+    context.localContext expectedType
+  -- An unconstrained numeral defaults only at the scheduler's default phase.
+  -- Nat literals keep their kernel representation; all other types use OfNat.
+  match reduced with
+  | .mvar _ => psElabResolvedTerm context natural expected
+  | .constE name _ =>
+    if psNameEq name psNatName then psElabResolvedTerm context natural expected
+    else elabOfNat natural expectedType
+  | _ => elabOfNat natural expectedType
+where
+  elabOfNat (natural expectedType : PsExpr) : Except PsElabError PsElabTermResult := do
+    let fresh := psMetaFreshLevel context.metaContext
+    let target := psExprApplyMany (.constE (psRootName "OfNat") [fresh.level])
+      [expectedType, natural]
+    let synthesized := psSynthInstance context.environment context.localContext
+      context.instances fresh.context target
+    let some dictionary := synthesized.value | throw .typeMismatch
+    let term := psExprApplyMany
+      (.constE (psNameAppendStr (psRootName "OfNat") "ofNat") [fresh.level])
+      [expectedType, natural, dictionary]
+    psElabResolvedTerm (psElabContextWithMeta context synthesized.context) term expected
 
 def psElabString
     (context : PsElabContext)

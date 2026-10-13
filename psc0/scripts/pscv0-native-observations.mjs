@@ -1,5 +1,8 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "numericTicket", args: null, expected: 859n },
+  { name: "numericGeneric", args: null, expected: 857n },
+  { name: "numericHigh", args: null, expected: 863n },
   { name: "postponedRecord", args: null, expected: 821n },
   { name: "postponedLambda", args: null, expected: 827n },
   { name: "postponedProof", args: null, expected: 823n },

@@ -285,3 +285,18 @@ example : choose 829 (Int.ofNat 0) = (829 : Int) := rfl
 example : choose 839 0 = 839 := rfl
 example : (choose (second := Box.mk 0) (first := { value := 853 })).value = 853 := rfl
 end Pscv0PostponedOracle
+
+namespace Pscv0NumericOracle
+structure Ticket where
+  value : Nat
+instance {n : Nat} : OfNat Ticket n where
+  ofNat := Ticket.mk n
+def generic {A : Type} [OfNat A 857] (_ : Unit) : A := 857
+structure Lift (A : Type) : Type 1 where
+  value : A
+instance {n : Nat} : OfNat (Lift Nat) n where
+  ofNat := Lift.mk n
+example : (859 : Ticket).value = 859 := rfl
+example : (generic () : Ticket).value = 857 := rfl
+example : (863 : Lift Nat).value = 863 := rfl
+end Pscv0NumericOracle

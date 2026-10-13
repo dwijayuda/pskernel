@@ -1,6 +1,9 @@
 # M2: scoped postponed elaboration
 
-Implementation in progress; no qualification claim yet.
+Postponement and lookup qualified at `083c3139f95d8ab7fd64b91ad261364eef36d1cd`,
+[Linux 38423408362](https://github.com/dwijayuda/pskernel/actions/runs/38423408362).
+282 runtime observations; existing kernel/backend/integration gates passed.
+The OfNat extension below is in progress and is not yet qualified.
 
 The missing capability is a common scheduling boundary: an early argument,
 projection or tactic may require information supplied by a later argument.
@@ -48,3 +51,17 @@ goals and the deliberate same-head/different-input comparison workload, alongsid
 existing cycle/diamond/generalized-answer and resource rollback checks.
 Same-head buckets can still require quadratic comparisons; bounded work and
 actual operation counts are reported instead of asserting general linearity.
+
+## Type-directed numerals
+
+OfNat is a checked universe-polymorphic structure class with Nat and Int
+instances. A numeral with a known non-Nat expected type uses the ordinary
+instance graph; its result is checked by the same term inference/conversion path.
+An unknown type is postponed before Nat defaulting. No guessed value, coercion
+chain or runtime cast is introduced. The selected Nat kernel literal remains
+unchanged.
+
+Intentional Standard expansion: exactly five declarations (class, constructor,
+projection, Nat/Int dictionaries), one class and two instances. There is no new
+axiom, primitive or alias. Update strict registry digests only after reviewing
+the independently observed values from Linux qualification.

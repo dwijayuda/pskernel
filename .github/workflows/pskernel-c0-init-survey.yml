@@ -238,6 +238,80 @@ jobs:
           output.write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
+      - name: Inspect first post-nested C0 application disagreement
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/Init-4.35.0.ndjson" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          target = 86383
+          names = {0: ""}
+          levels = {0: "0"}
+          exprs = {}
+          seen_declarations = 0
+          def label(n):
+              return names.get(n, f"?{n}")
+          def render_expr(n, depth=0):
+              if depth > 14:
+                  return f"…@{n}"
+              x = exprs.get(n)
+              if x is None:
+                  return f"<missing@{n}>"
+              if "sort" in x: return f"Sort({levels.get(x['sort'], '?')})"
+              if "bvar" in x: return f"#{x['bvar']}"
+              if "const" in x:
+                  c = x["const"]
+                  return label(c["name"]) + "[" + ",".join(levels.get(u, "?") for u in c["us"]) + "]"
+              if "app" in x:
+                  a = x["app"]
+                  return f"({render_expr(a['fn'], depth+1)} {render_expr(a['arg'],depth+1)})"
+              for k in ("forallE","lam"):
+                  if k in x:
+                      v=x[k]
+                      return f"({k} {label(v['name'])}:{render_expr(v['type'],depth+1)}. {render_expr(v['body'],depth+1)})"
+              if "letE" in x:
+                  v=x["letE"]
+                  return f"(let {label(v['name'])}:{render_expr(v['type'],depth+1)} := {render_expr(v['value'],depth+1)}; {render_expr(v['body'],depth+1)})"
+              if "proj" in x:
+                  return f"proj@{n}={x['proj']}"
+              return f"expr@{n}={str(x)[:200]}"
+          with path.open(encoding="utf-8") as source:
+              for line_num, raw in enumerate(source, 1):
+                  rec=json.loads(raw)
+                  if "in" in rec:
+                      v=rec.get("str") or rec.get("num")
+                      name_part=v.get("str",v.get("i"))
+                      prior=label(v["pre"]) if v["pre"] else ""
+                      names[rec["in"]]=prior + ("." if prior else "") + str(name_part)
+                  elif "il" in rec:
+                      k=rec["il"]
+                      if "succ" in rec: levels[k]=f"succ({levels.get(rec['succ'],'?')})"
+                      elif "param" in rec: levels[k]=label(rec["param"])
+                      elif "max" in rec: levels[k]="max("+",".join(levels.get(t,"?") for t in rec["max"])+")"
+                      elif "imax" in rec: levels[k]="imax("+",".join(levels.get(t,"?") for t in rec["imax"])+")"
+                  elif "ie" in rec: exprs[rec["ie"]]=rec
+                  elif set(rec) & {"def","thm","axiom","opaque","quot","inductive"}:
+                      seen_declarations += 1
+                  if line_num == target:
+                      print(f"C0_REAL_INIT_NEXT_FAILURE record={line_num} prior_declarations={seen_declarations} source_tags={list(rec)}")
+                      print("  exact_source_record="+raw[:15000].rstrip())
+                      for family in ("def","thm","axiom","opaque","quot"):
+                          if family in rec:
+                              d=rec[family]
+                              print(f"  declaration={label(d['name'])} kind={family} levels={[label(n) for n in d.get('levelParams',[])]}")
+                              print(f"  type={render_expr(d['type'])}")
+                              if "value" in d: print(f"  value={render_expr(d['value'])}")
+                      if "inductive" in rec:
+                          for d in rec["inductive"]["types"]:
+                              print(f"  inductive={label(d['name'])} type={render_expr(d['type'])}")
+                      break
+          else:
+              raise RuntimeError("did not reach record 86383")
+          PY
       - name: C0 native streaming boundary diagnostic after max-offset normalization
         shell: bash
         run: |

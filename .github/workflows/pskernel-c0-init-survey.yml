@@ -312,7 +312,7 @@ jobs:
           if line_num != target:
               raise RuntimeError("did not reach record 86383")
           PY
-      - name: C0 native streaming boundary diagnostic after max-offset normalization
+      - name: Compare optimized and original theorem checking at real Init mismatch
         shell: bash
         run: |
           set -euo pipefail
@@ -320,7 +320,7 @@ jobs:
           # declines unsupported declarations; it now includes a first-failure
           # record offset and typed rejection reason. A timeout/host failure must
           # not be represented as a kernel rejection.
-          if timeout 240s bash -c 'cd "$1" && lake build PsKernelC0 && lake env lean --run test/C0OfficialNdjsonReplay.lean "$2"' _ \
+          if timeout 480s bash -c 'cd "$1" && lake build PsKernelC0 && lake env lean --run test/C0OfficialNdjsonReplay.lean "$2"' _ \
               "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" \
               "$RUNNER_TEMP/Init-4.35.0.ndjson" \
               > "$RUNNER_TEMP/c0-real-init-435-result.txt" 2>&1; then

@@ -21,9 +21,23 @@ private def parserCases : IO Unit := do
       ("safe optional indexing", "const result: Option Nat := xs[0]?\n"),
       ("panic/default indexing", "const result: Nat := xs[0]!\n"),
       ("nested optional indexing", "const result: Option Nat := nested[0][1]?\n"),
-      ("ordinary char literal", "const mark: Char := 'x'\n")] do
+      ("ordinary char literal", "const mark: Char := 'x'\n"),
+      ("projection on parenthesized call",
+        "structure Container where { value: Nat }\nconst result: Nat := (Container.mk(21)).value\n"),
+      ("chained projection on computed expression",
+        "structure Inner where { value: Nat }\nstructure Outer where { inner: Inner }\nconst result: Nat := (Outer.mk(Inner.mk(34))).inner.value\n"),
+      ("projection following a call",
+        "structure Container where { value: Nat }\nfunction make(): Container := Container.mk(55)\nconst result: Nat := make().value\n")] do
     unless (psPscv0ParseProgram input).isOk do
       throw (IO.userError ("GetElem parser rejected " ++ label))
+  -- Lean's trailing projection is deliberately adjacent on BOTH sides.
+  -- The parser must refuse whitespace rather than interpreting it as
+  -- implicit application or silently selecting a different field.
+  for input in [
+      "structure Container where { value: Nat }\nconst result: Nat := (Container.mk(21)) .value\n",
+      "structure Container where { value: Nat }\nconst result: Nat := (Container.mk(21)). value\n"] do
+    if (psPscv0ParseProgram input).isOk then
+      throw (IO.userError "nonadjacent postfix field was accepted")
   let json ← get "parser corpus" (Lean.Json.parse
     (← IO.FS.readFile "../scripts/pscv0-m1-cases.json"))
   let good ← get "good cases" ((json.getObjVal? "good").bind Lean.Json.getArr?)

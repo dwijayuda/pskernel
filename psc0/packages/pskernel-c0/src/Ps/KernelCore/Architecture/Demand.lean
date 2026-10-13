@@ -1,7 +1,7 @@
 import Ps.KernelCore.Architecture.Structural
 
 /-!
-CDE-4: one fuel-accounted demand stack for the experimental candidate WHNF.
+CDE-4/5: fuel-accounted Nat, projection, and Quot demand for candidate WHNF.
 
 This small-step machine evaluates the major premise of a projection and the
 necessary operands of a recognized Nat primitive without borrowing the source
@@ -11,7 +11,8 @@ bounds *every* transition, including entering and resuming a premise.
 
 Every result is an observation. The authoritative checker continues to
 compute typing, WHNF, definitional equality and declaration admission.
-Recursor and quotient major premises are not implemented here.
+Ordinary recursor major premises remain unimplemented here. Quotient demand
+matches the already existing source reduction's arity and initialization rules.
 -/
 
 /-- A saved parent expression is preserved verbatim when a demanded operand
@@ -23,6 +24,7 @@ inductive PsKernelC0DemandFrame where
   | natRight (parent : PsKernelC0Machine) (left : Nat)
   | projection (parent : PsKernelC0Machine)
       (typeName : PsKernelName) (fieldIndex : Nat)
+  | quotient (parent : PsKernelC0Machine) (majorIndex : Nat)
 
 structure PsKernelC0DemandState where
   machine : PsKernelC0Machine
@@ -82,6 +84,7 @@ def psKernelC0DemandValue
 /-- Enter a relevant premise only after the simple lazy, δ and primitive
     steps have halted. Unrecognized heads never quote their arguments. -/
 def psKernelC0DemandStart
+    (context : PsKernelCheckerContext)
     (state : PsKernelC0DemandState) :
     Option PsKernelC0DemandStep :=
   match state.machine.control with
@@ -101,6 +104,16 @@ def psKernelC0DemandStart
             some (psKernelC0DemandEnter state left
               (.natLeft state.machine right))
         | _ => none
+      else if context.environment.quotInitialized &&
+          (psKernelNameEq name psKernelQuotLiftName ||
+            psKernelNameEq name psKernelQuotIndName) then
+        let majorIndex :=
+          if psKernelNameEq name psKernelQuotLiftName then 5 else 4
+        match state.machine.arguments[majorIndex]? with
+        | some major =>
+            some (psKernelC0DemandEnter state major
+              (.quotient state.machine majorIndex))
+        | none => none
       else none
   | _ => none
 
@@ -148,6 +161,30 @@ def psKernelC0DemandResume
           | some result =>
               psKernelC0DemandValue state parent result parent.arguments remaining
           | none => psKernelC0DemandStuck state parent remaining
+      | .quotient parent majorIndex =>
+          -- Reuse the source's exact Quot.mk arity and representative index.
+          -- An invalid/unfinished major remains unchanged.
+          if psKernelExprGetAppNumArgs reduced != 3 then
+            psKernelC0DemandStuck state parent remaining
+          else
+            match psKernelExprGetAppFn reduced with
+            | .const mkName _ =>
+                if !psKernelNameEq mkName psKernelQuotMkName then
+                  psKernelC0DemandStuck state parent remaining
+                else
+                  match (psKernelExprGetAppArgs reduced)[2]?,
+                      parent.arguments[3]? with
+                  | some representative, some functionClosure =>
+                      match psKernelC0QuoteClosure quoteFuel functionClosure with
+                      | none =>
+                          .declined "candidate quotient function quotation budget exhausted"
+                      | some functionValue =>
+                          psKernelC0DemandValue state parent
+                            (.app functionValue representative)
+                            (parent.arguments.drop (majorIndex + 1))
+                            remaining
+                  | _, _ => psKernelC0DemandStuck state parent remaining
+            | _ => psKernelC0DemandStuck state parent remaining
 
 /-- One total transition. 'blocked' means the finished subexpression must
     return to its saved caller rather than retrying an already failed head. -/
@@ -170,7 +207,7 @@ def psKernelC0DemandTransition
         }
     | .declined reason => .declined reason
     | .halted =>
-        match psKernelC0DemandStart state with
+        match psKernelC0DemandStart context state with
         | some transition => transition
         | none =>
             match state.frames with
@@ -178,8 +215,8 @@ def psKernelC0DemandTransition
             | frame :: rest =>
                 psKernelC0DemandResume quoteFuel context state frame rest
 
-/-- Structural recursion on the one operation-local fuel. A nested
-    projection or primitive can never reset the shared reduction budget. -/
+/-- Structural recursion on the one operation-local fuel. Nested
+    projection, Nat, or quotient majors cannot reset the reduction budget. -/
 def psKernelC0DemandRun :
     Nat → Nat → PsKernelCheckerContext → PsKernelC0DemandState →
       Except String PsKernelC0DemandState

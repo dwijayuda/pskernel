@@ -604,9 +604,6 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
   | [] => throw "NDJSON missing a supported declaration"
   | declarations => pure declarations.reverse
 
-/-- Independent post-admission comparison with all emitted inductive,
-    constructor and recursor metadata. No exported derived item gets admitted
-    unchecked; any divergence declines the input and preserves the old env. -/
 /-- Independent metadata fidelity: each exported generated declaration
     must exactly match a declaration produced by native kernel admission.
     Report the first mismatching *field family* for real-library conformance

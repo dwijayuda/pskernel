@@ -1,8 +1,7 @@
 # M1 checked natural-order closure — 13 October 2026
 
-Qualification candidate based on eb23c231120a1080209906ba2f11039579cc80f6
-(green Linux run 38375506139). This document describes the implementation;
-it does not claim M1 completion.
+Qualified executable 064baf31641ff19785feae1416eb353b38737794,
+green Linux run 38379674588. This milestone does not claim M1 completion.
 
 ## Invariant and dependency order
 
@@ -32,7 +31,7 @@ Full M2 waiter tabling remains outside M1.
 The existing kernel, fingerprint, strict IR and multi-target gates are retained.
 Focused source tests cover positive and negative reflection, symbolic bounds,
 inversion, contradiction and composition. An independent Init oracle checks
-the corresponding RC4 declarations. Six shared runtime observations include
+the corresponding RC4 declarations. Eight shared runtime observations include
 arbitrary-precision bounds; the previous 198 are retained.
 
 A changed registry digest is expected and must be extracted from Linux CI,

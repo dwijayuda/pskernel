@@ -1,5 +1,40 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
+## Current qualified checkpoint — M1 natural order (13 October 2026)
+
+This section supersedes older status statements below; historical evidence is preserved.
+
+- **Executable:** [064baf31641ff19785feae1416eb353b38737794](https://github.com/dwijayuda/pskernel/commit/064baf31641ff19785feae1416eb353b38737794).
+- **Green Linux qualification:** [38379674588](https://github.com/dwijayuda/pskernel/actions/runs/38379674588), official Lean 4.35.0-rc4.
+- **Selected Standard:** 258 declarations, 14 classes, 43 ordered instances.
+- **Frozen FNV:** `fnv1a64:10485782345918084284`.
+- **Frozen SHA-256:** `sha256:37a8c7e027c548b59a82060556e194051867ee10d02e5b02b1f20c4875693ce5`.
+- **Native closure:** 171 portable / 179 total Lean modules.
+- **Runtime observations:** 206 shared cases, preserving the previous 198; direct JS, strict TS, Rust, Wasm GC and Wasmtime component gates passed.
+
+Qualified additions: Prop-only Nat.le recursor; checked zero, successor,
+transitivity, predecessor/inversion and impossible-zero proofs; checked
+Nat.ble logical model; checked Boolean reflection; Nat.decLe/Nat.decLt
+dictionaries. Decidable.intro and its computational projection now erase
+consistently to Bool. The reflection field is erased, not trusted as an
+unchecked witness. Runtime comparison keeps the existing Nat.ble intrinsic.
+
+The same run checked the independent RC4 source oracle and false-bound
+rejection, admitted source proofs with the official kernel, validated strict
+IR and qualified emitted artifacts. This is **not a compiler correctness
+proof or full M1 completion**. A single measured all-target application run
+reported prelude 10 ms, parse 98 ms, elaborate 93 ms, prepare 297 ms,
+kernel 66 ms, erase 112 ms and emit 455 ms; these are observations, not
+controlled performance comparisons.
+
+**Next M1 dependencies:** universe-polymorphic Option/GetElem?/laws and
+universe-aware do binding; bounded proof-producing index automation; complete
+List/Array/Fin indexing, optimized optional laws, coherent panic behavior and
+representative performance comparisons. Full M2 tabling, C5, pskernel-core
+and self-hosting remain excluded. Re-read live HEAD and CI before editing.
+Do not repeat the older Decidable-uniqueness work: it was already qualified.
+
+
 ## Latest qualified selected roster — 13 October 2026
 
 **Newest independently qualified executable:** [`e0ac8c69c928261e21e9593ed3f2f4aa5157385a`](https://github.com/dwijayuda/pskernel/commit/e0ac8c69c928261e21e9593ed3f2f4aa5157385a), Linux GitHub Actions [38335736466](https://github.com/dwijayuda/pskernel/actions/runs/38335736466) **passed** (13 October 2026). This supersedes older executable-status statements below, which remain as preserved history. The pinned upstream is Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`). The selected Standard now contains **234 declarations, 14 classes, 40 instances**, FNV `fnv1a64:403111548970955669`, SHA-256 `sha256:6e6f1fad15d4f0cb401a09c1ebc219c3f60dd50acb21061ca9eee4ab782bd85e`; portable/native closure remains 170/178 `.lean` modules with 198 shared runtime observations on TS, direct JS, Rust, and Wasm GC/Wasmtime.

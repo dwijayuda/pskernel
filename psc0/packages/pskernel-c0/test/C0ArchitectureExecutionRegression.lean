@@ -1,4 +1,5 @@
 import Ps.KernelCore.Architecture.Execution
+import Ps.KernelCore.Admission.Declaration.Admission
 
 def c0ArchitectureName (name : String) : PsKernelName :=
   .str .anonymous name
@@ -38,6 +39,11 @@ def main : IO Unit := do
   c0ArchitectureAssertWhnf "captured-closure"
     (.app (.app (.lam x ty
       (.lam y ty (.bvar 1) .default) .default) a) b) a
+  c0ArchitectureAssertWhnf "captured-lambda-readback"
+    (.app (.lam x ty (.lam y ty (.bvar 1) .default) .default) a)
+    (.lam y ty a .default)
+  c0ArchitectureAssertWhnf "nested-let-closure"
+    (.letE x ty a (.letE y ty (.bvar 0) (.app id (.bvar 0)) false) false) a
   c0ArchitectureAssertWhnf "neutral-spine"
     (.app (.const (c0ArchitectureName "f") []) (.app id a))
     (.app (.const (c0ArchitectureName "f") []) (.app id a))
@@ -59,4 +65,32 @@ def main : IO Unit := do
       throw (IO.userError ("source-checked architecture seam failed: " ++ err))
   | .ok (_, _) => pure ()
   IO.println "C0_ARCHITECTURE lazy_closure_beta_zeta_source_differential=pass"
+  -- The candidate does not perform environment-dependent delta unfolding.
+  -- A source-checked reducible definition must still be reduced by the
+  -- trusted evaluator, even when the candidate reports a disagreement.
+  let alias := c0ArchitectureName "deltaAlias"
+  let defn : PsKernelDefinitionInfo := {
+    base := { name := alias
+              levelParams := []
+              type := .sort (.succ .zero) }
+    value := .sort .zero
+    hints := .abbrevHint
+    safety := .safe
+  }
+  match psKernelAddDefinition 4096 psKernelEnvironmentEmpty defn
+      4096 psKernelLeanNatMaxSizeDefault with
+  | .error err =>
+      throw (IO.userError ("C0 source definition setup failed: " ++ err))
+  | .ok environment =>
+      let session := psKernelMkCheckerSession environment []
+        .safe 4096 psKernelLeanNatMaxSizeDefault
+      match psKernelC0ObserveWhnf 4096 session (.const alias []) with
+      | .error err =>
+          throw (IO.userError ("C0 source delta checking failed: " ++ err))
+      | .ok (observation, _) =>
+          if observation.agrees ||
+              !psKernelExprEqual observation.sourceValue (.sort .zero) then
+            throw (IO.userError
+              "C0 candidate incorrectly controlled source delta semantics")
+  IO.println "C0_ARCHITECTURE source_delta_disagreement_remains_untrusted=pass"
   IO.println "C0_ARCHITECTURE checked_session_authority=pass"

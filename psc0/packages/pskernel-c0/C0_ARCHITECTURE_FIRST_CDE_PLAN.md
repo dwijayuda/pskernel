@@ -113,6 +113,10 @@ Mandatory source-WHNF differentials exercise direct and β/ζ-major constructors
 
 `Budget.lean` now charges the live closure environment, delayed argument environments and retained parent continuation frames at every transition using one shared finite-depth work quota. It additionally charges UTF-8 String literal storage and pre-reserves conservative `String.ofList` expansion work before the existing reduction dispatcher materializes it. Final quotation receives the remaining quota. Negative regressions cover hidden captures, saved frames, string bytes, and source-authoritative decline. The implementation is opt-in, not a new accepting kernel, and the cost units are conservative syntactic-work units rather than proved heap bytes. Latest code `57cbdd4e`; native qualification run [38452517448](https://github.com/dwijayuda/pskernel/actions/runs/38452517448) must finish before claiming the full gate. Remaining: meter *all* intermediate rewrites under a stated cost model, validate large checked workloads, then typed K/eta and trusted integration.
 
+## CDE-8A.3 — source-rule rewrite preflight (2026-10-14)
+
+The opt-in metered candidate now reserves budget before source `δ` definition body reconstruction and selected non-K recursor RHS instantiation. A missing constructor rule is a neutral candidate case, never logical rejection or resource-exhausted by assumption. Tests cover positive/small-budget and negative/unmatched rule outcomes. Corrected source [`d76e2cc4`](https://github.com/dwijayuda/pskernel/commit/d76e2cc4d5d2a0b5f107f37847c75e280c15c060), full native [CI 38453561566](https://github.com/dwijayuda/pskernel/actions/runs/38453561566) must be examined before declaring this bounded slice qualified. Internal source-rule temporary allocations and typed K/eta semantics are not globally metered or independently accepting.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

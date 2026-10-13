@@ -417,6 +417,17 @@ def psKernelMutualInductiveNeutralDomain
         | _ => false
     | _ => false
 
+/-- Render the failing *head only*, never the full (potentially huge)
+    type expression. No source-level identifier is used as an acceptance rule. -/
+def psKernelMutualDiagnosticName : PsKernelName → String
+  | .anonymous => ""
+  | .str parent suffix =>
+      let head := psKernelMutualDiagnosticName parent
+      if head.isEmpty then suffix else head ++ "." ++ suffix
+  | .num parent suffix =>
+      let head := psKernelMutualDiagnosticName parent
+      if head.isEmpty then toString suffix else head ++ "." ++ toString suffix
+
 /-- Diagnostics only: classify the already resolved head *declaration* kind
     of the first exhausting recursive field. No reduction or type judgment
     changes, and unknown heads never gain an accepting shortcut. -/
@@ -426,7 +437,8 @@ def psKernelMutualRecursiveDomainHeadKind
   match psKernelExprGetAppFn domain with
   | .const name _ =>
       match psKernelEnvironmentFind session.context.environment name with
-      | some (.defnInfo _) => "definition"
+      | some (.defnInfo _) =>
+          "definition-" ++ psKernelMutualDiagnosticName name
       | some (.inductInfo _) => "inductive"
       | some (.recInfo _) => "recursor"
       | some (.ctorInfo _) => "constructor"

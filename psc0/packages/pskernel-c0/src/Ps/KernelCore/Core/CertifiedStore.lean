@@ -38,6 +38,21 @@ def psKernelC0StoreTopological (store : PsKernelC0TermStore) : Prop :=
     | some entry => psKernelC0NodeTopological i.val entry.node
     | none => False
 
+/-- The indexed lookup is decidable for each specific Fin index,
+    including the (unreachable in a valid store) missing-node branch. -/
+private instance (store : PsKernelC0TermStore)
+    (i : Fin store.nodes.size) :
+    Decidable
+      (match psKernelC0StoreGet store i.val with
+      | some entry => psKernelC0NodeTopological i.val entry.node
+      | none => False) := by
+  cases h : psKernelC0StoreGet store i.val with
+  | none =>
+      simpa [h] using (inferInstance : Decidable False)
+  | some entry =>
+      simpa [h] using
+        (inferInstance : Decidable (psKernelC0NodeTopological i.val entry.node))
+
 instance (store : PsKernelC0TermStore) :
     Decidable (psKernelC0StoreTopological store) := by
   unfold psKernelC0StoreTopological

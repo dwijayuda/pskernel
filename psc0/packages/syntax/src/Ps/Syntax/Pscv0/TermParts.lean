@@ -207,6 +207,27 @@ def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
       let span := psSyntaxSpanJoin (psSyntaxTermSpan current) lastSpan
       return ← psPscv0Postfix read fuel
         (psPscv0IndexMethod method args span) finalCursor
+    -- Lean 4.35.0 Parser.Term.proj accepts a no-whitespace trailing
+    -- projection on ANY term, not only on a bare identifier. PSCV0 keeps
+    -- exactly one typed projection elaborator (psElabProjectionChain).
+    -- Bind the receiver once under a source-inaccessible hygienic name and
+    -- reuse that elaborator, preserving evaluation count, dependent field
+    -- types and the existing projection diagnostics. No new parser-only
+    -- field lookup, untyped IR node or backend-specific implementation.
+    if psTokenCursorAtText cursor "." &&
+        psProofScriptCallAdjacent current cursor then
+      let dot ← psTokenCursorExpectText cursor "."
+      let field ← psTokenCursorExpectKind dot.cursor .identifier
+      if field.token.span.start.byteOffset != dot.token.span.stop.byteOffset then
+        throw (psProofScriptExpectedError "adjacent field name" dot.cursor)
+      let span := psSyntaxSpanJoin (psSyntaxTermSpan current) field.token.span
+      let binderText := "$psc0PostfixProjection" ++
+        toString dot.token.span.start.byteOffset
+      let binder := PsSyntaxName.mk [binderText] dot.token.span
+      let projected := PsSyntaxTerm.reference
+        (PsSyntaxName.mk [binderText, field.token.text] span)
+      let result := PsSyntaxTerm.letE binder none current projected span
+      return ← psPscv0Postfix read fuel result field.cursor
     if !(psTokenCursorAtText cursor "(" && psProofScriptCallAdjacent current cursor) then
       return { value := current, cursor }
     let opening ← psTokenCursorExpectText cursor "("

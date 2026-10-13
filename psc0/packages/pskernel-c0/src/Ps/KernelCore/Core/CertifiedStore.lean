@@ -138,11 +138,9 @@ structure PsKernelC0CertifiedStore where
   canonical : psKernelC0ReplayValidateStore store = true
   wellFormed : psKernelC0StoreWF store
 
-/-- Check exactly once at construction. Future code using the same immutable
-    value may rely on the proof, not on an untrusted cache or a hash. -/
-/-- Keep the certified immutable store tied to the EXACT argument
-    snapshot with propositional equality, not just the same hash or a
-    coincidentally equal numeric root handle. -/
+/-- Check once at construction and preserve the EXACT argument
+    snapshot with propositional equality, not just a matching hash or
+    numeric handle. Future clients may reuse this immutable certificate. -/
 def psKernelC0CertifyStoreOwned
     (store : PsKernelC0TermStore) :
     Option { cert : PsKernelC0CertifiedStore // cert.store = store } :=

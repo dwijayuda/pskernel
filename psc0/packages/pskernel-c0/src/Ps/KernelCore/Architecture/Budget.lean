@@ -12,9 +12,9 @@ quota. These are *candidate* limits, not kernel typing/acceptance decisions.
 
 Demand-step active syntax, retained continuation frames, delayed captured
 environments, String UTF-8 storage, pre-expansion String.ofList reservations, source-delta and recursor-RHS
-preflight traversals, and final quotation now consume one quota. Intermediate primitive/delta/projection/recursor allocation remains
-outside complete accounting; this is a bounded *candidate work* foundation,
-not the final allocation/refinement contract.
+preflight traversals, and final quotation now consume one quota. Intermediate quotation and resulting machine syntax are now also
+charged against the operation quota. This remains a candidate *syntactic
+work* model, not a formally proven bound on Lean runtime/heap allocations.
 -/
 
 /-- Consume one unit per visited expression node, traversing immediate
@@ -226,6 +226,68 @@ def psKernelC0ReserveSourceRewrites
     psKernelC0ReserveDeltaSyntax context state.machine quota
   psKernelC0ReserveRecursorSyntax state afterDelta
 
+/-- Before a step that can inspect its scrutinee or a resumed
+    continuation, reify that intermediate using the *metered* quotation
+    path. This gives every source quotation inside the existing demand
+    dispatcher a conservative charge against the SAME operation quota.
+    No checked value or proof is produced by this speculative preflight.
+
+    Syntactic β/ζ/app transitions do not need eager quotation and remain
+    lazy; unsupported neutral heads may conservatively decline at very low
+    budgets without affecting the authoritative source checker. -/
+def psKernelC0ReserveIntermediateReadbacks
+    (depth : Nat)
+    (state : PsKernelC0DemandState)
+    (quota : Nat) : Option Nat := do
+  if state.blocked then
+    match state.frames with
+    | [] => some quota
+    | _ =>
+        let (_, left) ←
+          psKernelC0QuoteMachineMetered depth quota state.machine
+        some left
+  else
+    match psKernelC0MachineStep state.machine with
+    | .next _ => some quota
+    | .declined _ => some quota
+    | .halted =>
+        let afterProjection ←
+          match state.machine.control with
+          | .mk (.proj _ _ struct) captured => do
+              let (_, left) ←
+                psKernelC0QuoteClosureMetered depth
+                  (.mk struct captured) quota
+              some left
+          | _ => some quota
+        let afterHead ←
+          match state.machine.control with
+          | .mk (.const _ _) _ => do
+              let (_, left) ←
+                psKernelC0QuoteMachineMetered
+                  depth afterProjection state.machine
+              some left
+          | _ => some afterProjection
+        match state.frames with
+        | [] => some afterHead
+        | frame :: _ => do
+            let (_, afterResume) ←
+              psKernelC0QuoteMachineMetered
+                depth afterHead state.machine
+            match frame with
+            | .recursor parent _ _ => do
+                let (_, left) ←
+                  psKernelC0QuoteMachineMetered
+                    depth afterResume parent
+                some left
+            | .quotient parent _ =>
+                match parent.arguments[3]? with
+                | none => some afterResume
+                | some fn => do
+                    let (_, left) ←
+                      psKernelC0QuoteClosureMetered depth fn afterResume
+                    some left
+            | _ => some afterResume
+
 /-- One transition loop and one remaining quota. This delegates *all*
     reduction rules to the existing demand dispatcher and therefore cannot
     introduce separate candidate reduction semantics. -/
@@ -244,10 +306,19 @@ def psKernelC0DemandRunWithBudget :
       let some afterRewrites :=
           psKernelC0ReserveSourceRewrites context state afterReserve
         | throw "candidate source-rewrite work quota exhausted"
+      let some afterQuotes :=
+          psKernelC0ReserveIntermediateReadbacks depth state afterRewrites
+        | throw "candidate intermediate quotation work quota exhausted"
       match psKernelC0DemandTransition depth context state with
       | .next next =>
-          psKernelC0DemandRunWithBudget fuel depth afterRewrites context next
-      | .halted => return (state, afterRewrites)
+          -- A transition may create a fresh intermediate expression. Count
+          -- the entire reachable result (including its saved frames) before
+          -- allowing the next candidate transition to consume it.
+          let some afterResult :=
+              psKernelC0ChargeDemandStateSyntax depth next afterQuotes
+            | throw "candidate intermediate rewrite work quota exhausted"
+          psKernelC0DemandRunWithBudget fuel depth afterResult context next
+      | .halted => return (state, afterQuotes)
       | .declined reason => throw reason
 
 /-- Non-accepting, explicit-quota candidate bridge. The existing demand

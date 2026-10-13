@@ -197,6 +197,38 @@ def main : IO Unit := do
       (.definition declaration) with
     | .ok next => pure next
     | .error e => throw (IO.userError ("certified source admission failed: " ++ e))
+  -- The certified transaction now supports every source-checked
+  -- observation and the same opt-in typed-demand candidate, without a
+  -- redundant whole-store replay on an immutable checking-only update.
+  let (isProp, classifiedWork) ← match
+      psKernelC0CertifiedWorkIsProp 4096 admitted (.sort .zero) with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("certified proposition query failed: " ++ e))
+  if isProp then
+    throw (IO.userError "certified proposition query mistyped Sort0")
+  let (_, _) ← match psKernelC0CertifiedWorkPreviewTypedDemand
+      4096 32768 classifiedWork (.const defName []) with
+    | .ok (observation, next) =>
+        if !observation.agrees ||
+            !psKernelExprEqual observation.sourceValue (.sort .zero) then
+          throw (IO.userError "certified typed preview lost source WHNF")
+        pure (observation, next)
+    | .error e =>
+        throw (IO.userError ("certified typed preview failed: " ++ e))
+  match psKernelC0CertifiedWorkPreviewTypedDemand
+      4096 1 classifiedWork (.const defName []) with
+  | .error e =>
+      throw (IO.userError ("candidate budget changed source: " ++ e))
+  | .ok (observation, _) =>
+      if observation.candidateValue.isSome ||
+          !psKernelExprEqual observation.sourceValue (.sort .zero) then
+        throw (IO.userError "certified typed preview bypassed resource isolation")
+  match psKernelC0CertifiedWorkObserveTypedMajor
+      4096 classifiedWork defName (.sort .zero) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "non-recursor metadata received typed K judgment")
   let (unfolded, _) ← match psKernelC0CertifiedWorkWhnf 4096
       admitted (.const defName []) with
     | .ok x => pure x

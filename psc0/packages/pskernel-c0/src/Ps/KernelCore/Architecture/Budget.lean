@@ -10,9 +10,10 @@ conservative expansion bound based on the source node count and the total
 size of the fully quoted substitutions, so duplication cannot bypass the
 quota. These are *candidate* limits, not kernel typing/acceptance decisions.
 
-This module does not yet meter primitive/delta/projection/recursor allocation
-inside the CDE-4/7 transition loop. Full operation resource accounting is
-a later integration gate, not established by this readback foundation.
+Demand-step source-syntax traversal and final quotation now consume one
+quota. Intermediate primitive/delta/projection/recursor allocation remains
+outside complete accounting; this is a bounded *candidate work* foundation,
+not the final allocation/refinement contract.
 -/
 
 /-- Consume one unit per visited expression node, traversing immediate
@@ -88,6 +89,37 @@ def psKernelC0QuoteMachineMetered
     let result := psKernelExprApplyArgsCheap head reversed.reverse
     some (result, afterArgs - machine.arguments.length)
 
+/-- Charge the active syntactic control and the stored argument spine.
+    Each transition reuses one operation quota. This is a conservative
+    work-footprint allowance, NOT a complete accounting of temporary
+    reconstructions inside the unchanged source-rule callbacks. -/
+def psKernelC0ChargeMachineSyntax
+    (machine : PsKernelC0Machine) (quota : Nat) : Option Nat := do
+  let (.mk expr _) := machine.control
+  let left ← psKernelC0ChargeExpr expr quota
+  machine.arguments.foldlM
+    (fun remaining closure =>
+      match closure with
+      | .mk argument _ => psKernelC0ChargeExpr argument remaining)
+    left
+
+/-- One transition loop and one remaining quota. This delegates *all*
+    reduction rules to the existing demand dispatcher and therefore cannot
+    introduce separate candidate reduction semantics. -/
+def psKernelC0DemandRunWithBudget :
+    Nat → Nat → Nat → PsKernelCheckerContext → PsKernelC0DemandState →
+      Except String (PsKernelC0DemandState × Nat)
+  | 0, _, _, _, _ =>
+      .error "candidate shared-demand transition budget exhausted"
+  | fuel + 1, depth, quota, context, state => do
+      let some rest := psKernelC0ChargeMachineSyntax state.machine quota
+        | throw "candidate shared syntactic-work quota exhausted"
+      match psKernelC0DemandTransition depth context state with
+      | .next next =>
+          psKernelC0DemandRunWithBudget fuel depth rest context next
+      | .halted => return (state, rest)
+      | .declined reason => throw reason
+
 /-- Non-accepting, explicit-quota candidate bridge. The existing demand
     execution still owns its independent transition budget; this new API
     qualifies the *readback* resource scope only. -/
@@ -95,9 +127,10 @@ def psKernelC0ArchitectureCandidateDemandMetered
     (fuel quoteQuota : Nat)
     (context : PsKernelCheckerContext)
     (expr : PsKernelExpr) : Except String (PsKernelExpr × Nat × Nat) := do
-  let final ← psKernelC0DemandRun fuel fuel context
-    { machine := { control := .mk expr [] } }
-  match psKernelC0QuoteMachineMetered fuel quoteQuota final.machine with
+  let (final, afterSteps) ←
+    psKernelC0DemandRunWithBudget fuel fuel quoteQuota context
+      { machine := { control := .mk expr [] } }
+  match psKernelC0QuoteMachineMetered fuel afterSteps final.machine with
   | some (value, remaining) =>
       return (value, final.steps, remaining)
   | none =>

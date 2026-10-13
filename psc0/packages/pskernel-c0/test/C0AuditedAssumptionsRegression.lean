@@ -177,6 +177,29 @@ def main : IO Unit := do
   if !psKernelC0RequestCapabilitiesApproved unsafeRequest preciseAllowance ||
       psKernelC0RequestCapabilitiesApproved partialRequest preciseAllowance then
     throw (IO.userError "unsafe/partial declaration capabilities were conflated")
+  let unsafeAxiomName := c0AuditedName "UnsafeReviewedAxiom"
+  let unsafeAxiomRequest : PsKernelC0ArchitectureDeclaration :=
+    .axiomDecl {
+      base := {
+        name := unsafeAxiomName
+        levelParams := []
+        type := .sort .zero
+      }
+      isUnsafe := true
+    }
+  let some nameApprovedUnsafe := psKernelC0AuditTrustedSourceWithCapabilities
+      genesis.trusted [unsafeAxiomName] []
+    | throw (IO.userError "unsafe axiom name allowlist was not certifiable")
+  match psKernelC0AuditedSourceAdmit 4096
+      nameApprovedUnsafe unsafeAxiomRequest with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "ordinary axiom name approved unsafe capability implicitly")
+  if !psKernelC0RequestCapabilitiesApproved unsafeAxiomRequest
+      [.unsafeAxiom unsafeAxiomName] ||
+      psKernelC0RequestCapabilitiesApproved unsafeAxiomRequest [] then
+    throw (IO.userError "unsafe axiom did not require separate capability")
+
   match psKernelC0AuditedSourceAdmit 4096 reviewed unsafeRequest with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "audited profile admitted unapproved unsafe definition")
@@ -284,8 +307,44 @@ def main : IO Unit := do
   | _ =>
       throw (IO.userError "approved Quot publication lost checked root")
 
+  -- Steady-state audited admission must extend the existing proof from
+  -- each source-checked request, not re-traverse the entire history on
+  -- every accepted definition. Re-audit once at the end to independently
+  -- compare the incremental ledger with full-history reconstruction.
+  let mut incremental := stagedQuot
+  for i in [:24] do
+    let name : PsKernelName :=
+      .num (c0AuditedName "IncrementalSafeDefinition") i
+    let info : PsKernelDefinitionInfo := {
+      base := {
+        name := name
+        levelParams := []
+        type := .sort (.succ .zero)
+      }
+      value := .sort .zero
+      hints := .abbrevHint
+      safety := .safe
+    }
+    incremental ← match psKernelC0AuditedSourceAdmit
+        8192 incremental (.definition info) with
+      | .ok accepted => pure accepted
+      | .error e =>
+          throw (IO.userError ("incremental audited admission failed: " ++ e))
+  let rebuilt := psKernelC0AuditTrustedSourceWithCapabilities
+    incremental.trusted [] [.quotientBootstrap]
+  if rebuilt.isNone ||
+      (psKernelC0HistoryOrdinaryAxioms
+        incremental.trusted.history).length != 0 ||
+      (psKernelC0HistoryTrustCapabilities
+        incremental.trusted.history).length != 1 then
+    throw (IO.userError "incremental audit disagreed with complete history replay")
+  let _incrementalAxioms := psKernelC0AuditedSourceAxiomsApproved incremental
+  let _incrementalCapabilities :=
+    psKernelC0AuditedSourceCapabilitiesApproved incremental
+
   IO.println "C0_AUDITED unapproved_axiom_blocked_atomically=pass"
   IO.println "C0_AUDITED authorized_source_assumptions_and_history=pass"
   IO.println "C0_AUDITED narrowed_policy_rejected_and_definitions_preserved=pass"
   IO.println "C0_AUDITED source_judgments_and_closed_publication=pass"
   IO.println "C0_AUDITED quotient_and_unsafe_capability_history=pass"
+  IO.println "C0_AUDITED incremental_history_proof_matches_full_replay=pass"

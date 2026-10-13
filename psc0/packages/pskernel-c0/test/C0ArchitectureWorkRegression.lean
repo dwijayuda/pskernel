@@ -81,6 +81,22 @@ def main : IO Unit := do
               !psKernelExprEqual observation.sourceValue (.sort .zero) then
             throw (IO.userError
               "C0 environment-aware lazy delta did not match source WHNF")
+      match psKernelC0ArchitecturePreviewStructural
+          4096 admitted (.const aliasName []) with
+      | .error err =>
+          throw (IO.userError ("C0 structural preview rejected: " ++ err))
+      | .ok (observation, _) =>
+          if !observation.agrees ||
+              !psKernelExprEqual observation.sourceValue (.sort .zero) then
+            throw (IO.userError
+              "C0 structural candidate was not source-authoritative")
+      -- A preview must never make an ill-typed expression admissible.
+      match psKernelC0ArchitectureCheckWork 4096 admitted
+          (.app (.sort .zero) (.sort .zero)) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError
+            "C0 structural preview polluted trusted checker admission")
       -- Re-admitting the same name must reject atomically.
       match psKernelC0ArchitectureAdmit 4096 admitted (.definition alias) with
       | .error _ => pure ()

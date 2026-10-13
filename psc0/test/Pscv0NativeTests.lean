@@ -1103,7 +1103,28 @@ private def metavariableBoundary : IO Unit := do
     throw (IO.userError "cycle through delayed scope accepted")
   if (psMetaAssign context childId goal.expr).isSome then
     throw (IO.userError "goal alias escaped its captured context")
-  IO.println "PSCV0_NATIVE_SCOPE_BOUNDARY: PASS delayed cycle and goal scope refusal"
+  let environment := psSelfHostProdPreludeEnvironment
+  let proposition := psLocalPushBinding psLocalEmpty (psRootName "P") (.sortE .zero) .explicit
+  let first := psLocalPushBinding proposition.context (psRootName "first") (.fvar proposition.id) .explicit
+  let second := psLocalPushBinding first.context (psRootName "second") (.fvar proposition.id) .explicit
+  let expectedProof := psLogicEq .zero (.fvar proposition.id) (.fvar first.id) (.fvar first.id)
+  let function := psLocalPushBinding second.context (psRootName "consume")
+    (.forallE .anonymous expectedProof type .explicit) .explicit
+  let otherProof := psLogicRefl .zero (.fvar proposition.id) (.fvar second.id)
+  unless (psInferType environment psMetaEmpty function.context
+      (.app (.fvar function.id) otherProof)).isOk &&
+      (psInferType environment psMetaEmpty second.context
+        (.letE .anonymous expectedProof otherProof (.lit (.natural 0)))).isOk do
+    throw (IO.userError "typed inference rejected convertible proof fields")
+  if (psInferType environment psMetaEmpty function.context
+      (.app (.fvar function.id) (psLogicRefl (.succ .zero) type (.lit (.natural 0))))).isOk then
+    throw (IO.userError "proof irrelevance identified different propositions")
+  let locals := (psLocalPushBinding psLocalEmpty (psRootName "consume")
+    (.forallE .anonymous (psLogicEq (.succ .zero) type (.lit (.natural 0)) (.lit (.natural 0))) type .explicit))
+  if (psInferType environment psMetaEmpty locals.context
+      (.app (.fvar locals.id) (psLogicRefl (.succ .zero) type (.lit (.natural 1))))).isOk then
+    throw (IO.userError "proof irrelevance identified runtime values")
+  IO.println "PSCV0_NATIVE_SCOPE_BOUNDARY: PASS delayed cycles, goal scopes and typed proof conversion"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [

@@ -95,26 +95,10 @@ def psUnifyLevelLists
 -- Defer when metavariables are unresolved instead of guessing assignments.
 -- The official Lean kernel remains the final checker of constructed terms.
 def psUnifyGroundProofIrrelevance
-    (environment : PsEnvironment)
-    (localContext : PsLocalContext)
-    (context : PsMetaContext)
-    (left right : PsExpr) : Bool :=
-  if psExprHasUnresolvedMeta left || psExprHasUnresolvedMeta right then false else
-  match psInferType environment context localContext left,
-        psInferType environment context localContext right with
-  | .ok leftType, .ok rightType =>
-    if psExprHasUnresolvedMeta leftType ||
-        psExprHasUnresolvedMeta rightType ||
-        !psDefEqReadOnlyWithEnv environment context localContext leftType rightType then
-      false
-    else
-      match psInferType environment context localContext leftType with
-      | .ok sort =>
-        match psWhnf environment context localContext sort with
-        | .sortE level => psLevelEquivalent level .zero
-        | _ => false
-      | .error _ => false
-  | _, _ => false
+    (environment : PsEnvironment) (localContext : PsLocalContext)
+    (context : PsMetaContext) (left right : PsExpr) : Bool :=
+  psInferGroundProofIrrelevance (psInferType environment context)
+    environment context localContext left right
 
 -- Try congruence before delta-reducing a shared named head. Expanding a
 -- dictionary constructor function too early turns its argument metavariables

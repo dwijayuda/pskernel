@@ -119,74 +119,44 @@ def psWhnf
     (expr : PsExpr) : PsExpr :=
   psWhnfWithFuel environment metaContext localContext 256 expr
 
-def psDefEqReadOnlyWithEnvFuel
-    (environment : PsEnvironment)
-    (metaContext : PsMetaContext)
-    (localContext : PsLocalContext)
-    (fuel : Nat) : PsExpr -> PsExpr -> Bool :=
+-- Structural conversion owns reduction and congruence. A caller with a type
+-- inference capability may supply typed proof irrelevance as an additional
+-- closed rule; plain reduction callers use the same walker without that rule.
+-- Bodies are opened in a real local context before invoking the typed rule.
+def psDefEqReadOnlyWithProofs
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (proofEq : PsLocalContext → PsExpr → PsExpr → Bool)
+    (fuel : Nat) (localContext : PsLocalContext) (left right : PsExpr) : Bool :=
+  let left := psWhnf environment metaContext localContext left
+  let right := psWhnf environment metaContext localContext right
+  if psExprAlphaEq left right then true else
   match fuel with
-  | Nat.zero =>
-      fun (left : PsExpr) (right : PsExpr) =>
-        psExprAlphaEq
-          (psWhnf environment metaContext localContext left)
-          (psWhnf environment metaContext localContext right)
-  | Nat.succ remaining =>
-      fun (left : PsExpr) (right : PsExpr) =>
-        let smaller : PsExpr -> PsExpr -> Bool :=
-          psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;
-        let leftValue :=
-          psWhnf environment metaContext localContext left;
-        let rightValue :=
-          psWhnf environment metaContext localContext right;
-        if psExprAlphaEq leftValue rightValue then
-          true
-        else
-          match leftValue with
-          | .sortE a =>
-              match rightValue with
-              | .sortE b => psLevelEquivalent a b
-              | _ => false
-          | .constE a levels =>
-              match rightValue with
-              | .constE b other => psNameEq a b && levels.length == other.length &&
-                  (levels.zip other).all (fun pair => psLevelEquivalent pair.fst pair.snd)
-              | _ => false
-          | .app leftFn leftArg =>
-              match rightValue with
-              | .app rightFn rightArg =>
-                  if smaller leftFn rightFn then
-                    smaller leftArg rightArg
-                  else
-                    false
-              | _ => false
-          | .lam _ leftType leftBody _ =>
-              match rightValue with
-              | .lam _ rightType rightBody _ =>
-                  if smaller leftType rightType then
-                    smaller leftBody rightBody
-                  else
-                    false
-              | _ => false
-          | .forallE _ leftType leftBody _ =>
-              match rightValue with
-              | .forallE _ rightType rightBody _ =>
-                  if smaller leftType rightType then
-                    smaller leftBody rightBody
-                  else
-                    false
-              | _ => false
-          | .proj leftType leftIndex leftValue =>
-              match rightValue with
-              | .proj rightType rightIndex rightValue =>
-                  if psNameEq leftType rightType then
-                    if Nat.beq leftIndex rightIndex then
-                      smaller leftValue rightValue
-                    else
-                      false
-                  else
-                    false
-              | _ => false
-          | _ => false
+  | 0 => false
+  | fuel + 1 =>
+    let smaller := psDefEqReadOnlyWithProofs environment metaContext proofEq fuel
+    let structural := match left, right with
+      | .sortE a, .sortE b => psLevelEquivalent a b
+      | .constE a levels, .constE b other =>
+        psNameEq a b && levels.length == other.length &&
+          (levels.zip other).all (fun pair => psLevelEquivalent pair.fst pair.snd)
+      | .app fn arg, .app otherFn otherArg =>
+        smaller localContext fn otherFn && smaller localContext arg otherArg
+      | .lam name domain body binder, .lam _ otherDomain otherBody _
+      | .forallE name domain body binder, .forallE _ otherDomain otherBody _ =>
+        if !smaller localContext domain otherDomain then false else
+          let pushed := psLocalPushBinding localContext name domain binder
+          smaller pushed.context (psExprInstantiate1 body (.fvar pushed.id))
+            (psExprInstantiate1 otherBody (.fvar pushed.id))
+      | .proj owner index value, .proj otherOwner otherIndex otherValue =>
+        psNameEq owner otherOwner && index == otherIndex && smaller localContext value otherValue
+      | _, _ => false
+    structural || proofEq localContext left right
+
+def psDefEqReadOnlyWithEnvFuel
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (localContext : PsLocalContext) (fuel : Nat) (left right : PsExpr) : Bool :=
+  psDefEqReadOnlyWithProofs environment metaContext (fun _ _ _ => false)
+    fuel localContext left right
 
 def psDefEqReadOnlyWithEnv
     (environment : PsEnvironment)

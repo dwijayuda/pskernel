@@ -317,6 +317,34 @@ def psInferProjectionType
                       Except.error PsInferError.projectionUnsupported
   | _ => Except.error PsInferError.projectionUnsupported
 
+-- Shared by application inference, let checking and unification. Only closed
+-- terms with convertible inferred propositions may use proof irrelevance.
+-- The inference callback is fuel-decreasing at recursive inference call sites;
+-- this rule never assigns a metavariable or treats runtime data as proof.
+def psInferGroundProofIrrelevance
+    (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
+    (environment : PsEnvironment) (context : PsMetaContext)
+    (locals : PsLocalContext) (left right : PsExpr) : Bool :=
+  if psExprHasUnresolvedMeta left || psExprHasUnresolvedMeta right then false else
+  match infer locals left, infer locals right with
+  | .ok leftType, .ok rightType =>
+    if psExprHasUnresolvedMeta leftType || psExprHasUnresolvedMeta rightType ||
+        !psDefEqReadOnlyWithEnv environment context locals leftType rightType then false else
+    match infer locals leftType with
+    | .ok sort =>
+      match psWhnf environment context locals sort with
+      | .sortE level => psLevelEquivalent level .zero
+      | _ => false
+    | .error _ => false
+  | _, _ => false
+
+def psInferDefEq
+    (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
+    (environment : PsEnvironment) (context : PsMetaContext)
+    (locals : PsLocalContext) (left right : PsExpr) : Bool :=
+  psDefEqReadOnlyWithProofs environment context
+    (psInferGroundProofIrrelevance infer environment context) 256 locals left right
+
 def psInferTypeWithFuelWorker
     (remainingFuel : Nat) :
     PsEnvironment ->
@@ -390,7 +418,7 @@ def psInferTypeWithFuelWorker
                           match smaller environment metaContext localContext arg with
                           | Except.error error => Except.error error
                           | Except.ok argType =>
-                              if psDefEqReadOnlyWithEnv
+                              if psInferDefEq (smaller environment metaContext)
                                   environment
                                   metaContext
                                   localContext
@@ -460,7 +488,7 @@ def psInferTypeWithFuelWorker
                           match smaller environment metaContext localContext value with
                           | Except.error error => Except.error error
                           | Except.ok valueType =>
-                              if psDefEqReadOnlyWithEnv
+                              if psInferDefEq (smaller environment metaContext)
                                   environment
                                   metaContext
                                   localContext

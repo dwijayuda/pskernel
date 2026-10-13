@@ -68,6 +68,18 @@ No equality is inferred from BEq, and no new noConfusion axiom or unchecked
 proof is introduced. Nested decisions share the existing Decidable model and
 erasure; no backend-specific equality generator is added.
 
+## M2 typed conversion
+
+Application/let inference formerly used structural-only conversion, while
+unification already had a typed proof-irrelevance rule. That split rejected
+Eq.rec applications whose base differed from the expected value only in proof
+fields. Reduction/congruence now has one shared walker with an optional typed
+proof rule. Binder bodies are opened in their actual local context.
+Inference and unification share the same closed, inferred-Prop rule; inference
+uses a decreasing-fuel callback. No assignment or runtime equality is added.
+Focused checks admit differing proofs of the same proposition and reject
+different propositions and unequal runtime indices.
+
 ## Structure defaults
 
 The existing scoped optional-type syntax carries explicit field defaults.

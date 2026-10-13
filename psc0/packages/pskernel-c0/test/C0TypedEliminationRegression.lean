@@ -147,6 +147,13 @@ def main : IO Unit := do
     | .ok next => pure next
   c0TypedExpectRecursor propWork.checker.context.environment
     c0TypedPropName true
+  match psKernelC0ArchitectureIsPropWork 8192 propWork
+      (.const c0TypedPropName []) with
+  | .error reason =>
+      throw (IO.userError ("checked Prop classification failed: " ++ reason))
+  | .ok (isProp, _) =>
+      if !isProp then
+        throw (IO.userError "checked Prop inductive not recognized as Prop")
 
   let proofLocal := c0TypedName "verifiedProof"
   let proofLocals := psKernelLocalContextAddLocal

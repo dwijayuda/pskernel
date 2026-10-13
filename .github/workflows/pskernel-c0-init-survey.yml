@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Qualify real Init prefix through first nested inductive
+      - name: Qualify real Init nested group at explicit 16384-fuel profile
         shell: bash
         run: |
           set -euo pipefail

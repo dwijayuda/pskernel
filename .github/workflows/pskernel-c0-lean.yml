@@ -16,6 +16,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0TrustedAdmissionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0SealedStateRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0SealedAuditedStateRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0VerifiedSessionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkPerfMicrobench.lean'
@@ -118,6 +119,9 @@ jobs:
       - name: C0 exact audited checker-state lineage and signed assumption policy
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0SealedAuditedStateRegression.lean
+      - name: C0 public verified-session admission, state lineage and atomic publication
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0VerifiedSessionRegression.lean
       - name: C0 typed K/eta on source-admitted inductive declarations
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0TypedEliminationRegression.lean

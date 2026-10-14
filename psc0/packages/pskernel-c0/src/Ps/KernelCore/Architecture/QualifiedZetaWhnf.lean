@@ -174,6 +174,7 @@ theorem psKernelC0ZetaSortWhnf_source
                                           simpa [psKernelWhnfCoreWithFuel,
                                             psKernelWhnfCoreWithFuelRanges,
                                             psKernelWhnfCoreFinishWithKnownHash,
+                                            psKernelExprMapInsert,
                                             hlong, depth, coreCache, opened,
                                             childDepth, bodyCore, term,
                                             normalized, coreState]
@@ -204,19 +205,19 @@ theorem psKernelC0ZetaSortWhnf_source
                                           (match psKernelExprMapGet
                                               state.whnf term with
                                           | some cached =>
-                                              .ok (cached, state)
+                                              Except.ok (cached, state)
                                           | none =>
                                               match psKernelWhnfCoreWithFuel
                                                   (Nat.succ (Nat.succ remaining))
                                                   whnfChild reduceRecursor
                                                   context state term false false with
-                                              | .error reason => .error reason
+                                              | .error reason => Except.error reason
                                               | .ok coreResult =>
                                                   psKernelWhnfAfterCore
                                                     whnfChild context
                                                     coreResult.snd term
                                                     coreResult.fst) =
-                                            .ok (normalized, nextState)
+                                            Except.ok (normalized, nextState)
                                         simp only [publicCache, letCore,
                                           afterCore]
                                     | bvar _ => simp [psKernelC0ZetaSortWhnfWithFuel,

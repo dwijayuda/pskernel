@@ -139,6 +139,10 @@ theorem psKernelC0MetadataInfer_source
                                 (.mdata md body) none = none := by
                             change psKernelExprMapGet cache term = none
                             exact cached
+                          change psKernelInferCoreWithFuelUsingSourceFrames
+                            remaining onCheckedApp [] [] whnf defeq
+                            entered state body inferOnly =
+                              .ok (ty, checkedState) at hinner
                           simpa [psKernelInferCoreWithFuelUsing,
                             psKernelInferCoreWithFuelUsingSourceFrames,
                             psKernelInferCacheEligible, hcache, depth,

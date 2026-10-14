@@ -406,3 +406,16 @@ def psKernelNameListLength
   | List.cons _ rest =>
       Nat.succ
         (psKernelNameListLength rest)
+
+/-! Shared universe-parameter lookup for the kernel and admission validators. -/
+def psKernelNameMember
+    (target : PsKernelName)
+    (values : List PsKernelName) : Bool :=
+  match values with
+  | List.nil =>
+      false
+  | List.cons head tail =>
+      if psKernelNameEq target head then
+        true
+      else
+        psKernelNameMember target tail

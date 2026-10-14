@@ -1,5 +1,24 @@
 # PSCV0 v7 native implementation roadmap
 
+## 15 October — list conversion/extract fully qualified; append candidate
+
+Commit `070d7d4d2c72b52cecc39f576128119ed2261b19` passed
+[Linux CI 38618782594](https://github.com/dwijayuda/pskernel/actions/runs/38618782594),
+all 27 gates (official Lean, replay, strict registry, native oracle,
+direct JS/TS/Rust, Wasm GC/components/Wasmtime, performance). Selected
+`List.toByteArray` and `ByteArray.extract` are now the last **fully
+qualified executable** extension; no packed-buffer performance claim.
+
+**Next pending candidate:** `ByteArray.append` follows the exact native
+Lean 4.35.0 `Init/Data/ByteArray/Bootstrap.lean` logical expression:
+`⟨⟨a.data.toList ++ b.data.toList⟩⟩`, reusing checked List.append
+and List.toArray without a new backend primitive. General native
+Lean proofs of list-to-byte-array representation and append
+definitional equality complement three shared target observations.
+Do not promote until separate strict FNV/SHA review and full CI.
+Remaining Float F1–F4, USize/ISize profiles, selected deriving/search,
+and comprehensive Standard manifest are still open.
+
 ## 15 October — qualified toList and next checked conversion/slice candidate
 
 Commit `314b0cd67d70a4664da1957fd96f4676ad6e1524` passed all 27

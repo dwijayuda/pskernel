@@ -1,5 +1,25 @@
 # PSC0 Phase A — Lean 4.35.0 ByteArray logical baseline
 
+## 15 October — qualified slicing, append candidate
+
+The exact native `List.toByteArray` and half-open `ByteArray.extract`
+logical operations passed [CI 38618782594](https://github.com/dwijayuda/pskernel/actions/runs/38618782594)
+at `070d7d4d2c72b52cecc39f576128119ed2261b19`.
+
+Pinned `Init/Data/ByteArray/Bootstrap.lean` defines
+`ByteArray.append a b = ⟨⟨a.data.toList ++ b.data.toList⟩⟩`.
+The new candidate uses the *same logical sequence* through the
+existing checked `Array.toList`, `List.append`, and `List.toArray`.
+The native oracle now contains an all-input theorem showing
+`⟨xs.toArray⟩ = xs.toByteArray` using upstream
+`List.data_toByteArray`, plus the exact append equation by `rfl`.
+These theorems support model correspondence; they do not prove the
+compiler's JS/Rust/Wasm backend preservation. Native packed
+`fastAppend` remains unimplemented.
+
+This is a **candidate only** pending independent strict FNV/SHA
+measurement and all source/typed-IR/runtime/Wasmtime gates.
+
 ## 15 October — toList green, checked conversion and extraction candidate
 
 The preceding `ByteArray.toList` operation is qualified at

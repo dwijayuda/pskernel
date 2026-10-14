@@ -235,6 +235,24 @@ def psStandardByteArraySliceDeclarations : List PsDeclaration :=
           (psStandardByteArrayMk (arrayOfList slice)))))
   [toBytes, extract]
 
+-- Pinned Lean 4.35.0 Init/Data/ByteArray/Bootstrap.lean:
+--   protected def append a b := ⟨⟨a.data.toList ++ b.data.toList⟩⟩
+-- Use the already checked Array/List representations and List.append.
+-- Packed/native fastAppend is a distinct runtime optimization, not claimed.
+def psStandardByteArrayAppendDeclaration : PsDeclaration :=
+  let bytes := psStandardByteArrayType
+  let uint8 := psStandardByteArrayElement
+  let a : PsExpr := .fvar 0
+  let b : PsExpr := .fvar 1
+  let list := fun x => psOrderCall "Array.toList"
+    [uint8, psStandardByteArrayData x]
+  let appended := psStandardListCall "append" [uint8, list a, list b]
+  .definitionDecl (psNameAppendStr psStandardByteArrayName "append") []
+    (psLogicPi 0 "left" bytes (psLogicPi 1 "right" bytes bytes))
+    (psLogicLam 0 "left" bytes (psLogicLam 1 "right" bytes
+      (psStandardByteArrayMk
+        (psOrderCall "List.toArray" [uint8, appended]))))
+
 -- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=
   let bytes := psStandardByteArrayType
@@ -256,6 +274,7 @@ def psStandardByteArrayCollectionDeclarations : List PsDeclaration :=
     psStandardByteArrayCheckedIndexDeclarations ++
     [psStandardByteArrayToListDeclaration] ++
     psStandardByteArraySliceDeclarations ++
+    [psStandardByteArrayAppendDeclaration] ++
     psStandardByteArrayIndexInstances
 
 def psStandardByteArrayCollectionExtend
@@ -263,6 +282,8 @@ def psStandardByteArrayCollectionExtend
   let environment := psStandardByteArrayCollectionDeclarations.foldl
     psEnvironmentInsert environment
   -- Pinned Lean marks get implicit_reducible; set is ordinary semireducible.
+  let environment := psEnvironmentSetReducibility environment
+    (psNameAppendStr psStandardByteArrayName "append") .implicitReducible
   let environment := psEnvironmentSetReducibility environment
     (psDecisionName "List.toByteArray") .implicitReducible
   let environment := psEnvironmentSetReducibility environment

@@ -24,6 +24,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0LiteralDefEqRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedLocalInferenceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0QualifiedConstantInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -151,6 +152,9 @@ jobs:
       - name: C0 source-exact local variable infer and full checked typing
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedLocalInferenceRegression.lean
+      - name: C0 source-proved constant checked inference cache and provider isolation
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0QualifiedConstantInferenceRegression.lean
       - name: C0 Lean 4.35 full checking enforces declared universe parameters
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0UniverseParameterRegression.lean

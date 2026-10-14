@@ -129,7 +129,13 @@ theorem psKernelC0ConstPostDelta_source
   | none =>
       simp [psKernelWhnfAfterCore, psKernelReduceNatWith, hdelta]
   | some unfolded =>
-      simp [psKernelWhnfAfterCore, psKernelReduceNatWith, hdelta]
+      simp only [psKernelWhnfAfterCore, psKernelReduceNatWith,
+        hdelta, Option.some.injEq, dite_true]
+      cases answer : callback context state unfolded with
+      | error reason => simp [answer]
+      | ok pair =>
+          rcases pair with ⟨value, after⟩
+          simp [answer]
 
 /-- Full source-refinement of the NEW compositional public WHNF
     controller. All successful direct and nested delta/beta/zeta paths
@@ -229,9 +235,9 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                           psKernelWhnfWithFuel remaining
                             reduceRecursor ctx st ex
                     have sourceCore :
-                        psKernelWhnfCoreWithFuel remaining callback
-                          reduceRecursor context state expr false false =
-                            .ok (core, coreState) := by
+                        psKernelWhnfCoreWithFuelRanges remaining []
+                          callback reduceRecursor context state expr
+                          false false = .ok (core, coreState) := by
                       exact psKernelC0RecursiveBetaZetaCore_source
                         remaining callback reduceRecursor context state
                         expr (core, coreState) coreCheck

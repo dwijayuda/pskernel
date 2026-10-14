@@ -94,11 +94,78 @@ def psStandardStringQuote : PsDeclaration :=
   psOrderDecl "String.quote" (psLogicPi 0 "s" str str)
     (psLogicLam 0 "s" str (psLogicApply (.constE psStringAppendName []) [inner, quote]))
 
+-- Pinned Lean 4.35.0 Init/Data/String/Defs.lean: String.join and
+-- String.intercalate. Copyright (c) 2016 Microsoft Corporation,
+-- Leonardo de Moura and Mario Carneiro; Apache-2.0.
+-- Adaptation: total, kernel-checkable List.rec/List.foldl Core construction.
+-- These are real definitions, not compiler heuristics or runtime-only APIs.
+-- The separator is placed only BETWEEN elements; empty strings are retained.
+def psStandardStringJoin : PsDeclaration :=
+  let str := PsExpr.constE psStringName []
+  let list := psSelfHostListOf str .zero
+  let append := fun a b => psLogicApply (.constE psStringAppendName []) [a, b]
+  let step := psLogicLam 2 "acc" str
+    (psLogicLam 3 "piece" str (append (.fvar 2) (.fvar 3)))
+  let body := psStandardListCall "foldl"
+    [str, str, step, .lit (.string ""), .fvar 0] [.zero, .zero]
+  psOrderDecl "String.join" (psLogicPi 0 "parts" list str)
+    (psLogicLam 0 "parts" list body)
+
+-- The private accumulator worker matches Lean's intercalate.go:
+--   go acc sep [] = acc
+--   go acc sep (item :: rest) = go (acc ++ sep ++ item) sep rest
+-- List.rec returns the accumulator transformation (String -> String);
+-- its structural recursive hypothesis is checked and remains total.
+def psStandardStringIntercalateWorkerName : PsName :=
+  psNameAppendStr (psRootName "$psc0Standard") "stringIntercalateWorker"
+
+def psStandardStringIntercalateWorker : PsDeclaration :=
+  let str := PsExpr.constE psStringName []
+  let list := psSelfHostListOf str .zero
+  let arrow := psLogicPi 7 "acc" str str
+  let motive := psLogicLam 6 "_" list arrow
+  let initial := psLogicLam 7 "acc" str (.fvar 7)
+  let append := fun a b => psLogicApply (.constE psStringAppendName []) [a, b]
+  let next := append (append (.fvar 7) (.fvar 1)) (.fvar 3)
+  let step := psLogicLam 3 "piece" str
+    (psLogicLam 4 "rest" list
+      (psLogicLam 5 "ih" arrow
+        (psLogicLam 7 "acc" str (.app (.fvar 5) next))))
+  let run := psLogicApply (psStandardListRecursor .zero (.succ .zero))
+    [str, motive, initial, step, .fvar 2]
+  let body := .app run (.fvar 0)
+  .definitionDecl psStandardStringIntercalateWorkerName []
+    (psLogicPi 0 "acc" str
+      (psLogicPi 1 "separator" str
+        (psLogicPi 2 "parts" list str)))
+    (psLogicLam 0 "acc" str
+      (psLogicLam 1 "separator" str
+        (psLogicLam 2 "parts" list body)))
+
+def psStandardStringIntercalate : PsDeclaration :=
+  let str := PsExpr.constE psStringName []
+  let list := psSelfHostListOf str .zero
+  let motive := psLogicLam 6 "_" list str
+  let first := psLogicLam 2 "head" str
+    (psLogicLam 3 "tail" list
+      (psLogicLam 4 "ih" str
+        (psLogicApply (.constE psStandardStringIntercalateWorkerName [])
+          [.fvar 2, .fvar 0, .fvar 3])))
+  let result := psLogicApply (psStandardListRecursor .zero (.succ .zero))
+    [str, motive, .lit (.string ""), first, .fvar 1]
+  psOrderDecl "String.intercalate"
+    (psLogicPi 0 "separator" str
+      (psLogicPi 1 "parts" list str))
+    (psLogicLam 0 "separator" str
+      (psLogicLam 1 "parts" list result))
+
 def psStandardStringDeclarations : List PsDeclaration :=
   [psStandardCharQuoteCore, psStandardCharQuote,
    psOrderDecl "Char.repr" (psLogicPi 0 "c" (.constE psCharName []) (.constE psStringName []))
      (.constE (psDecisionName "Char.quote") []),
-   psStandardStringQuoteWorker, psStandardStringQuote]
+   psStandardStringQuoteWorker, psStandardStringQuote,
+   psStandardStringJoin, psStandardStringIntercalateWorker,
+   psStandardStringIntercalate]
 
 def psStandardStringExtend (environment : PsEnvironment) : PsEnvironment :=
   psStandardStringDeclarations.foldl psPreludeAdd environment

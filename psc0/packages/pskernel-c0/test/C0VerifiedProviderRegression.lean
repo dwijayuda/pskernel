@@ -46,6 +46,38 @@ def main : IO Unit := do
   | .error (.rejectedInvalid _) => pure ()
   | _ => throw (IO.userError "verified provider did not reject loose bound variable")
 
+  -- Negative cache-provenance conformance: raw caller-built checker states
+  -- are not a source of verified judgments. A fabricated positive DefEq
+  -- cache entry can alter a raw query, but the verified provider must start
+  -- with its independently generated checked-state lineage.
+  let sort0 : PsKernelExpr := .sort .zero
+  let sort1 : PsKernelExpr := .sort (.succ .zero)
+  let raw := psKernelMkCheckerSession
+    psKernelEnvironmentEmpty [] .safe
+    resources.maxRecDepth resources.maxNatSize
+  let fabricatedCache :=
+    psKernelExprPairSetInsert raw.state.success sort0 sort1
+  let contaminated : PsKernelCheckerSession := {
+    raw with
+    state := psKernelCheckerStateWithSuccess raw.state fabricatedCache
+  }
+  let (rawResult, _) ← match psKernelSessionIsDefEq
+      resources.fuel contaminated sort0 sort1 with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("raw cache fixture failed: " ++ e))
+  if !rawResult then
+    throw (IO.userError "negative fixture did not reach raw success-cache lookup")
+  let (verifiedResult, cleanSession) ← match
+      psKernelC0VerifiedProviderDefEq first sort0 sort1 with
+    | .ok result => pure result
+    | .error _ =>
+        throw (IO.userError "verified source DefEq unexpectedly declined sorts")
+  if verifiedResult then
+    throw (IO.userError "verified provider adopted an externally supplied cache entry")
+  if !(psKernelC0HistoryAxiomSignatures
+      cleanSession.verified.sealed.audited.trusted.history).isEmpty then
+    throw (IO.userError "negative cache test introduced a trusted axiom")
+
   let name : PsKernelName := .str .anonymous "VerifiedProviderAxiom"
   let signedAxiom : PsKernelAxiomInfo := {
     base := {

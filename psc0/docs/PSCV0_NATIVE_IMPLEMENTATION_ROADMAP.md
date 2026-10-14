@@ -1,5 +1,15 @@
 # PSCV0 v7 native implementation roadmap
 
+## Qualified /61 checkpoint — 14 October 2026
+
+Executable `34ff236b6fe9f936d7d44b8ace1c70612c7cc66e` passed all established Linux gates in [run 38515443060](https://github.com/dwijayuda/pskernel/actions/runs/38515443060).
+Selected Standard: 1516 declarations, 23 classes, 153 instances; FNV `fnv1a64:6333670853941549394`; SHA `sha256:ebf02f5f8dfecf3769cbaeaa52e39dac3ba9c8dc034ea5284655da324bc75d60`.
+426 shared runtime observations for JS/TS/Rust, GC Wasm/Wasmtime component, source/official kernel, negative conformance and existing performance gates passed.
+APP-03 PUnit empty invocation now resolves only known Unit/PUnit universe constraints via checked unification and validates the inserted inhabitant; it does not invent arbitrary empty arguments.
+This is a qualified selected /61 integration; remaining M2+A, full v7, C5, self-hosting, and formal backend preservation are not complete.
+Pinned upstream Lean 4.35.0 commit: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Earlier /60 and failed /61 evidence below is historical.
+
+
 ## Current qualified boundary — Hashable and stable erased calls (14 October 2026)
 
 Executable `d72fc7779b2e8d130915dfe4ace339634ba0addd`;

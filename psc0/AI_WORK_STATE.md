@@ -1,5 +1,27 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — Float32/64 bit classification fully qualified; two equalities candidate
+
+Commit `5bb8c9c9f3c731263d910cfed8eda394b1d75ac6` passed all
+[27 Linux CI 38646612366](https://github.com/dwijayuda/pskernel/actions/runs/38646612366)
+steps, qualifying four additional `isInf*` and `isFinite*` checked
+UInt32/UInt64 bit helper declarations and sixteen shared target observations
+against pinned native Lean 4.35.0 reference behavior. The earlier
+`canonical*` and `isNaN*` helpers are unchanged, and full Float F1,
+arithmetic and scientific syntax remain unimplemented.
+
+**Next candidate only:** two distinct Bool-valued bit models per width:
+`beqFloat32/64Bits` reflects upstream IEEE BEq (NaN never equal,
+positive/negative zero equal, other canonical bit encodings compared);
+`logicalEqFloat32/64Bits` models *canonical structural bit identity*
+(NaN payloads normalize, signed zero distinct). Both use checked existing
+UInt, Nat.beq and Bool.rec definitions with one shared recursion helper.
+They **do not** supply an Eq proof or selected BEq/DecidableEq Float
+instance and must pass separate native reference, kernel/erasure,
+JS/TS/Rust/Wasm GC/Wasmtime and performance checks. The strict Standard
+FNV/SHA changes must first be measured independently, never guessed.
+Full M2+A remains open; no pskernel-core, self-hosting, or C5.
+
 ## 15 October — checked F1 bit canonicalization fully qualified; finite/inf candidate
 
 Commit `832764c6ec47b34e330e25441c258c4f4cbcfe05` passed all 27

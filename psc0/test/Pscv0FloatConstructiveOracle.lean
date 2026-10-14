@@ -43,3 +43,10 @@ run_cmd do
 #guard !(Float32.ofBits 2143289344).isFinite
 #guard (Float32.ofBits 2147483648).isFinite
 #guard (Float32.ofBits 1).isFinite
+
+-- Pinned Lean 4.35.0 tests/elab/floatEquality.lean: IEEE BEq and
+-- propositional equality disagree specifically for signed zero and NaN.
+#guard (Float32.ofBits 0) == (Float32.ofBits 2147483648)
+#guard !((Float32.ofBits 2143289344) == (Float32.ofBits 4290772992))
+#guard decide ((Float32.ofBits 0) ≠ (Float32.ofBits 2147483648))
+#guard decide ((Float32.ofBits 2143289344) = (Float32.ofBits 4290772992))

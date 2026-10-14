@@ -66,6 +66,7 @@ def psKernelC0ScalarInferWithFuel
     operational refinement, NOT proof of the validity of forged raw caches. -/
 theorem psKernelC0ScalarInfer_source
     (fuel : Nat)
+    (onCheckedApp : Option PsKernelC0CheckedAppHook)
     (whnf :
       PsKernelCheckerContext → PsKernelCheckerState → PsKernelExpr →
         Except String (PsKernelExpr × PsKernelCheckerState))
@@ -80,8 +81,8 @@ theorem psKernelC0ScalarInfer_source
     (result : PsKernelExpr × PsKernelCheckerState)
     (h : psKernelC0ScalarInferWithFuel fuel context state expr inferOnly =
       some result) :
-    psKernelInferCoreWithFuel fuel whnf defeq context state expr inferOnly =
-      .ok result := by
+    psKernelInferCoreWithFuelUsing fuel onCheckedApp
+      whnf defeq context state expr inferOnly = .ok result := by
   cases fuel with
   | zero =>
       simp [psKernelC0ScalarInferWithFuel] at h
@@ -95,7 +96,7 @@ theorem psKernelC0ScalarInfer_source
           | some ty =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
-                  simp [psKernelC0ScalarInferWithFuel, cached, depth] at h
+                  simp only [psKernelC0ScalarInferWithFuel, cached, depth] at h
               | ok nextContext =>
                   have hresult : result = (ty, state) := by
                     have hx : some (ty, state) = some result := by
@@ -103,16 +104,19 @@ theorem psKernelC0ScalarInfer_source
                         cache, expr] using h
                     exact (Option.some.inj hx).symm
                   rw [hresult]
-                  simp [psKernelInferCoreWithFuel,
-                    psKernelInferCoreWithFuelUsing,
+                  have hcache :
+                      psKernelExprMapGetWithKnownHash
+                        (if inferOnly then state.inferOnly else state.checkedInfer)
+                        (.sort level) none = some ty := by
+                    change psKernelExprMapGet cache expr = some ty
+                    exact cached
+                  simpa only [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, psKernelExprMapGet,
-                    psKernelExprMapGetWithKnownHash, cached, depth,
-                    cache, expr]
+                    psKernelInferCacheEligible, hcache, depth]
           | none =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
-                  simp [psKernelC0ScalarInferWithFuel, cached, depth] at h
+                  simp only [psKernelC0ScalarInferWithFuel, cached, depth] at h
               | ok nextContext =>
                   let ty : PsKernelExpr := .sort (.succ level)
                   have hresult :
@@ -125,12 +129,15 @@ theorem psKernelC0ScalarInfer_source
                         cache, expr, ty] using h
                     exact (Option.some.inj hx).symm
                   rw [hresult]
-                  simp [psKernelInferCoreWithFuel,
-                    psKernelInferCoreWithFuelUsing,
+                  have hcache :
+                      psKernelExprMapGetWithKnownHash
+                        (if inferOnly then state.inferOnly else state.checkedInfer)
+                        (.sort level) none = none := by
+                    change psKernelExprMapGet cache expr = none
+                    exact cached
+                  simpa only [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, psKernelExprMapGet,
-                    psKernelExprMapGetWithKnownHash, cached, depth,
-                    cache, expr, ty]
+                    psKernelInferCacheEligible, hcache, depth]
       | lit literal =>
           cases depth : psKernelCheckerContextEnterRecDepth context with
           | error reason =>
@@ -155,8 +162,7 @@ theorem psKernelC0ScalarInfer_source
                             expr, ty] using h
                         exact (Option.some.inj hx).symm
                       rw [hresult]
-                      simp [psKernelInferCoreWithFuel,
-                        psKernelInferCoreWithFuelUsing,
+                      simp [psKernelInferCoreWithFuelUsing,
                         psKernelInferCoreWithFuelUsingSourceFrames,
                         psKernelInferCacheEligible, depth, size, expr, ty]
               | str value =>
@@ -172,8 +178,7 @@ theorem psKernelC0ScalarInfer_source
                         using h
                     exact (Option.some.inj hx).symm
                   rw [hresult]
-                  simp [psKernelInferCoreWithFuel,
-                    psKernelInferCoreWithFuelUsing,
+                  simp [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
                     psKernelInferCacheEligible, depth, expr, ty]
       | bvar _ => simp [psKernelC0ScalarInferWithFuel] at h
@@ -197,8 +202,8 @@ theorem psKernelC0ScalarInfer_checkerInfer
       some (ty, nextState)) :
     psKernelCheckerInfer fuel context state expr = .ok (ty, nextState) := by
   unfold psKernelCheckerInfer psKernelInferWithRecursorFuel
-    psKernelInferWithFuel
-  exact psKernelC0ScalarInfer_source fuel
+    psKernelInferWithFuel psKernelInferCoreWithFuel
+  exact psKernelC0ScalarInfer_source fuel none
     (psKernelWhnfWithRecursorFuel fuel
       (psKernelIsDefEqWithFuel fuel))
     (psKernelIsDefEqWithFuel fuel) context state expr true
@@ -212,35 +217,46 @@ theorem psKernelC0ScalarInfer_checkerCheck
     (h : psKernelC0ScalarInferWithFuel fuel context state expr false =
       some (ty, nextState)) :
     psKernelCheckerCheck fuel context state expr = .ok (ty, nextState) := by
-  unfold psKernelCheckerCheck psKernelCheckWithFuel
-  -- Source fully checked application-specialization is irrelevant
-  -- to Sort/Nat/String heads.
-  cases expr with
-  | app _ _ =>
-      simp [psKernelC0ScalarInferWithFuel] at h
-  | sort level =>
-      simp only [reduceCtorEq, Bool.false_eq_true, dite_false, ite_false]
-      exact psKernelC0ScalarInfer_source fuel
-        (psKernelWhnfWithRecursorFuel fuel
-          (psKernelIsDefEqWithFuel fuel))
-        (psKernelIsDefEqWithFuel fuel) context state
-        (.sort level) false (ty, nextState) h
-  | lit literal =>
-      simp only [reduceCtorEq, Bool.false_eq_true, dite_false, ite_false]
-      exact psKernelC0ScalarInfer_source fuel
-        (psKernelWhnfWithRecursorFuel fuel
-          (psKernelIsDefEqWithFuel fuel))
-        (psKernelIsDefEqWithFuel fuel) context state
-        (.lit literal) false (ty, nextState) h
-  | bvar _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | fvar _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | mvar _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | const _ _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | lam _ _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | forallE _ _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | letE _ _ _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | mdata _ _ => simp [psKernelC0ScalarInferWithFuel] at h
-  | proj _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+  cases fuel with
+  | zero => simp [psKernelC0ScalarInferWithFuel] at h
+  | succ remaining =>
+      cases expr with
+      | sort level =>
+          change psKernelInferCoreWithFuelUsing
+            (Nat.succ remaining) (some psKernelC0CheckAppRecursiveResummarized)
+            (psKernelWhnfWithRecursorFuel (Nat.succ remaining)
+              (psKernelIsDefEqWithFuel (Nat.succ remaining)))
+            (psKernelIsDefEqWithFuel (Nat.succ remaining))
+            context state (.sort level) false = .ok (ty, nextState)
+          exact psKernelC0ScalarInfer_source (Nat.succ remaining)
+            (some psKernelC0CheckAppRecursiveResummarized)
+            (psKernelWhnfWithRecursorFuel (Nat.succ remaining)
+              (psKernelIsDefEqWithFuel (Nat.succ remaining)))
+            (psKernelIsDefEqWithFuel (Nat.succ remaining))
+            context state (.sort level) false (ty, nextState) h
+      | lit literal =>
+          change psKernelInferCoreWithFuelUsing
+            (Nat.succ remaining) (some psKernelC0CheckAppRecursiveResummarized)
+            (psKernelWhnfWithRecursorFuel (Nat.succ remaining)
+              (psKernelIsDefEqWithFuel (Nat.succ remaining)))
+            (psKernelIsDefEqWithFuel (Nat.succ remaining))
+            context state (.lit literal) false = .ok (ty, nextState)
+          exact psKernelC0ScalarInfer_source (Nat.succ remaining)
+            (some psKernelC0CheckAppRecursiveResummarized)
+            (psKernelWhnfWithRecursorFuel (Nat.succ remaining)
+              (psKernelIsDefEqWithFuel (Nat.succ remaining)))
+            (psKernelIsDefEqWithFuel (Nat.succ remaining))
+            context state (.lit literal) false (ty, nextState) h
+      | bvar _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | fvar _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | mvar _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | const _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | app _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | lam _ _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | forallE _ _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | letE _ _ _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | mdata _ _ => simp [psKernelC0ScalarInferWithFuel] at h
+      | proj _ _ _ => simp [psKernelC0ScalarInferWithFuel] at h
 
 /-- Source-equation-backed inference for the scalar fragment and all
     fallback terms. Even a successful inferred type is NOT a checked
@@ -257,7 +273,7 @@ def psKernelC0CertifiedWorkInferQualifiedOwned
   | none =>
       match source : psKernelC0CertifiedWorkInfer fuel work expr with
       | .error reason => .error reason
-      | .ok result => .ok ⟨result, source⟩
+      | .ok result => .ok ⟨result, rfl⟩
   | some (ty, nextState) =>
       .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned work nextState).val),
         by

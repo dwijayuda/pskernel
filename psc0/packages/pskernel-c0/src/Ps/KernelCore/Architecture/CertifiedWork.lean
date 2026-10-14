@@ -486,10 +486,12 @@ theorem psKernelC0WhnfReceiptValue_source
     {expr : PsKernelExpr}
     (receipt : PsKernelC0WhnfRefinementReceipt fuel before expr) :
     psKernelC0WhnfReceiptValue receipt = receipt.sourceValue := by
-  cases receipt.candidate with
-  | agreed proof => exact proof.property
-  | mismatch _ => rfl
-  | declined _ => rfl
+  cases receipt with
+  | mk sourceValue sourceWork sourceCheck candidate =>
+      cases candidate with
+      | agreed proof => exact proof.property
+      | mismatch _ => rfl
+      | declined _ => rfl
 
 /-- Exact successful source WHNF and its checker state are preserved by
     the candidate selection; the receipt is *not* a theorem/proof verdict. -/

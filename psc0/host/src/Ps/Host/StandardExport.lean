@@ -298,7 +298,7 @@ structure StandardExportSpec where
   -- F0: replacing a legacy primitive type *axiom* by its pinned Lean
   -- structure is an explicit, independently checked identity migration.
   -- Do not apply to ordinary type names or unchecked/custom structures.
-  replaceInductiveAxioms : Bool := false
+  replaceInductiveAxioms : List Lean.Name := []
   shareSource : Bool := false
 
 -- One conversion, admission and source-rendering pipeline for reviewed library
@@ -323,7 +323,7 @@ private def exportStandardCore (spec : StandardExportSpec)
     let replace := match declaration, native.find? name with
       | .axiomDecl .., some (.defnInfo _) => spec.replaceDefinitionAxioms
       | .axiomDecl .., some (.thmInfo _) => spec.replaceDefinitionAxioms
-      | .axiomDecl .., some (.inductInfo _) => spec.replaceInductiveAxioms
+      | .axiomDecl .., some (.inductInfo _) => spec.replaceInductiveAxioms.contains name
       | _, _ => false
     if replace then names else names.insert name) {}
   let mut seen : Lean.NameSet := {}
@@ -480,7 +480,7 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     boundary := existing.map psDeclarationName
     baseDeclarations := existing
     allowedAssumptions := [`propext, `Quot.sound]
-    replaceInductiveAxioms := true
+    replaceInductiveAxioms := [`Float, `Float32]
     shareSource := true
     publicPrefix := "psStandardFloatIdentity"
     privatePrefix := "floatIdentityDecl"

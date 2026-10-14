@@ -104,8 +104,10 @@ theorem psKernelC0FVarInfer_source
               cases found : psKernelLocalContextFind
                   entered.localContext name with
               | none =>
-                  simp [psKernelC0FVarInferWithFuel,
-                    cached, depth, found] at h
+                  simp only [psKernelC0FVarInferWithFuel,
+                    depth, found] at h
+                  rw [cached] at h
+                  cases h
               | some decl =>
                   let ty : PsKernelExpr := psKernelLocalDeclType decl
                   have hresult :
@@ -189,7 +191,7 @@ def psKernelC0CertifiedWorkInferWithLocalsOwned
   | .fvar name =>
       match h : psKernelC0FVarInferWithFuel fuel
           work.raw.checker.context work.raw.checker.state name true with
-      | none => psKernelC0CertifiedWorkInferQualifiedOwned fuel work expr
+      | none => psKernelC0CertifiedWorkInferQualifiedOwned fuel work (.fvar name)
       | some (ty, nextState) =>
           .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned
               work nextState).val), by
@@ -202,7 +204,7 @@ def psKernelC0CertifiedWorkInferWithLocalsOwned
             unfold psKernelC0CertifiedWorkInfer psKernelSessionInfer
             simp only [source]
             rfl⟩
-  | _ => psKernelC0CertifiedWorkInferQualifiedOwned fuel work expr
+  | other => psKernelC0CertifiedWorkInferQualifiedOwned fuel work other
 
 /-- Source-equivalent FULL checked local-variable typing, with source-proof
     equality for the original checker result. A loose/unknown local context
@@ -218,7 +220,7 @@ def psKernelC0CertifiedWorkCheckWithLocalsOwned
   | .fvar name =>
       match h : psKernelC0FVarInferWithFuel fuel
           work.raw.checker.context work.raw.checker.state name false with
-      | none => psKernelC0CertifiedWorkCheckQualifiedOwned fuel work expr
+      | none => psKernelC0CertifiedWorkCheckQualifiedOwned fuel work (.fvar name)
       | some (ty, nextState) =>
           .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned
               work nextState).val), by
@@ -231,4 +233,4 @@ def psKernelC0CertifiedWorkCheckWithLocalsOwned
             unfold psKernelC0CertifiedWorkCheck psKernelSessionCheck
             simp only [source]
             rfl⟩
-  | _ => psKernelC0CertifiedWorkCheckQualifiedOwned fuel work expr
+  | other => psKernelC0CertifiedWorkCheckQualifiedOwned fuel work other

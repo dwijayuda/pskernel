@@ -6,6 +6,7 @@ import Ps.Environment.StandardSignedIdentity
 import Ps.Environment.StandardSignedOperations
 import Ps.Environment.StandardFloatToBits
 import Ps.Environment.StandardSignedScalar
+import Ps.Environment.StandardSignedToInt
 import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
@@ -58,13 +59,16 @@ def psSelfHostProdPreSignedScalarPreludeEnvironment : PsEnvironment :=
   psStandardFloatToBitsExtend <|
     psStandardSignedOperationsExtend psSelfHostProdPreM2AMethodPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+def psSelfHostProdPreSignedToIntPreludeEnvironment : PsEnvironment :=
   psStandardSignedScalarExtend psSelfHostProdPreSignedScalarPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardSignedToIntExtend psSelfHostProdPreSignedToIntPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
   let prodDeclarations := psStandardProductDataDeclarations
-  psStandardSignedScalarRuntimeDeclarations ++ psStandardUnsignedOperationsRuntimeDeclarations ++ psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  psStandardSignedToIntRuntimeDeclarations ++ psStandardSignedScalarRuntimeDeclarations ++ psStandardUnsignedOperationsRuntimeDeclarations ++ psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure

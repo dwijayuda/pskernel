@@ -182,3 +182,13 @@ pinned Lean 4.35.0 `Init/Prelude.lean` and `Init/Data/SInt/Basic.lean`
 (Henrik Böving), copyright Lean FRO, LLC, Apache-2.0. Implemented as
 portable checked Core over previously admitted signed methods; no
 upstream proof text is replaced and no new foundation axiom is added.
+
+### Signed-to-Int constructive conversion
+
+`StandardSignedToInt.lean` uses pinned Lean 4.35.0
+`Init/Data/SInt/Basic.lean` and `Init/Data/BitVec/Basic.lean`
+(copyright Lean FRO, LLC; Apache-2.0). Four independent native Lean
+`rfl` certificates establish exact model equivalence. The new
+source module reifies the same constructive formula in checked Core.
+No proprietary code, axiom, unknown term or unverified semantic
+assumption is introduced.

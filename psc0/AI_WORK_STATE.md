@@ -1,5 +1,25 @@
 # PSCV0 v7 — AI work state
 
+## M2+A native-checked signed toInt conversion stage — pending independent qualification
+
+Pinned Lean 4.35.0 `BitVec.toInt` defines mathematical signed conversion
+using exactly `if 2 * encodedBits < 2 ^ width then encodedBits else
+encodedBits - 2 ^ width`. Four kernel-definitional-equality (`rfl`)
+certificates are accepted at `fe88e7fcd388ef036f64dd03228574cf5c7efcf9`
+([Linux run 38562328951](https://github.com/dwijayuda/pskernel/actions/runs/38562328951)).
+`StandardSignedToInt.lean` now implements that precise formula over the
+already checked unsigned `UIntN.toNat`, `Nat.mul/Nat.lt/Nat.decLt`
+and `Int.ofNat/Int.sub` Core definitions using a single explicit
+`ite` with native decision evidence. It adds four checked definitions,
+with no external proof import, axiom, untrusted cast or new search instance,
+and includes them in runtime support. Ten common-source JS/TS/Rust/Wasm
+comparison vectors cover zero, sign transition, min and max for every
+fixed width, including 64-bit extremes. **This integration still
+requires the independently observed FNV/SHA registry update and full
+Linux runtime and native-kernel requalification; it is not yet a
+qualified release.** Platform-width Int and Float remain separate.
+
+
 ## M2+A signed dictionary candidate — independently measured strict registry (14 October 2026)
 
 Linux [run 38556955048](https://github.com/dwijayuda/pskernel/actions/runs/38556955048)

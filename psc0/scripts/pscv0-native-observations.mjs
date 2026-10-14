@@ -2,6 +2,16 @@
 // The signed vectors are also computed independently by pinned native Lean
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
+  {name:"signedToInt8",args:[0n],type:"int",expected:0n},
+  {name:"signedToInt8",args:[127n],type:"int",expected:127n},
+  {name:"signedToInt8",args:[128n],type:"int",expected:-128n},
+  {name:"signedToInt8",args:[255n],type:"int",expected:-1n},
+  {name:"signedToInt16",args:[32767n],type:"int",expected:32767n},
+  {name:"signedToInt16",args:[32768n],type:"int",expected:-32768n},
+  {name:"signedToInt32",args:[2147483648n],type:"int",expected:-2147483648n},
+  {name:"signedToInt32",args:[4294967295n],type:"int",expected:-1n},
+  {name:"signedToInt64",args:[9223372036854775808n],type:"int",expected:-9223372036854775808n},
+  {name:"signedToInt64",args:[18446744073709551615n],type:"int",expected:-1n},
   {name:"signedLiteral8",args:null,type:"int8",expected:-1},
   {name:"signedOperator8",argTypes:["int8","int8"],args:[127,1],type:"int8",expected:-128},
   {name:"signedOperator8",argTypes:["int8","int8"],args:[-1,2],type:"int8",expected:1},

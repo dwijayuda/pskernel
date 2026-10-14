@@ -350,7 +350,12 @@ private def exportStandardCore (spec : StandardExportSpec)
   let declarations ← entries.toList.mapM fun info => do
     match exportDeclaration native spec.allowedAssumptions info with
     | .ok value => pure value
-    | .error reason => throw (IO.userError (toString info.name ++ ": " ++ reason))
+    | .error reason =>
+      let path := standardDependencyPath native spec.roots info.name boundary
+      throw (IO.userError
+        (toString info.name ++ ": " ++ reason ++
+          " | upstream dependency path: " ++
+          String.intercalate " -> " (path.map toString)))
   -- The cut names are frozen, but current implementations of cut declarations
   -- may acquire new checked helper dependencies. Replay the complete declared
   -- pre-admission stage, excluding every replacement. Keep its extra helpers

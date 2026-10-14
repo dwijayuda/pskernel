@@ -113,10 +113,24 @@ def psKernelC0TrustedSourceAdmit
     history := .admitted work.history step
   }
 
-/-- Source checking may advance caches and other checker STATE, but a
-    correctly scoped checked operation must not replace its ENVIRONMENT.
-    One private transition helper transports the mathematical admission
-    history by the certified environment-ownership proof. -/
+/-- A single owner for environment-equality proof transport across
+    source and source-equivalent fast WHNF state transitions. The exact
+    checked admission history is carried, not reconstructed or re-audited. -/
+private def psKernelC0TrustedSourceWithState
+    (work : PsKernelC0TrustedSourceWork)
+    (state : PsKernelCheckerState) : PsKernelC0TrustedSourceWork :=
+  let ⟨certified, unchanged⟩ :=
+    psKernelC0CertifiedWorkWithStateOwned work.certified state
+  let history :
+      PsKernelC0SourceEnvironmentHistory
+        certified.raw.checker.context.environment := by
+    rw [unchanged]
+    exact work.history
+  { certified := certified, history := history }
+
+/-- Source checking may advance caches and other checker STATE, but must not
+    replace its ENVIRONMENT. Proof transport shares the same owner as the
+    independently refined canonical WHNF path. -/
 private def psKernelC0TrustedSourceRun
     {α : Type}
     (work : PsKernelC0TrustedSourceWork)
@@ -126,24 +140,24 @@ private def psKernelC0TrustedSourceRun
     Except String (α × PsKernelC0TrustedSourceWork) := do
   let (value, state) ← source
     work.certified.raw.checker.context work.certified.raw.checker.state
-  let ⟨certified, unchanged⟩ ←
-    pure (psKernelC0CertifiedWorkWithStateOwned work.certified state)
-  let history :
-      PsKernelC0SourceEnvironmentHistory
-        certified.raw.checker.context.environment := by
-    rw [unchanged]
-    exact work.history
-  return (value, { certified := certified, history := history })
+  return (value, psKernelC0TrustedSourceWithState work state)
 
-/-- An ordinary source-checked WHNF query preserves the exact checked
-    environment history. WHNF is an observation, never proof-term approval. -/
+/-- Source-equivalent checked WHNF. Five irreducible syntactic heads are
+    handled independently without source WHNF execution when fuel is positive;
+    contextual forms and zero fuel retain the original checker. The
+    dependent-typed receipt proves that the complete successful result is
+    exactly source WHNF in the original context/state. No term admission
+    follows from WHNF, and trusted history is preserved unchanged. -/
 def psKernelC0TrustedSourceWhnf
     (fuel : Nat)
     (work : PsKernelC0TrustedSourceWork)
     (expr : PsKernelExpr) :
-    Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
-  psKernelC0TrustedSourceRun work
-    (fun context state => psKernelCheckerWhnf fuel context state expr)
+    Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) := do
+  let receipt ← psKernelC0CertifiedWorkWhnfCanonicalFastOwned
+    fuel work.certified expr
+  let (value, checked) := receipt.val
+  return (value,
+    psKernelC0TrustedSourceWithState work checked.raw.checker.state)
 
 /-- Source inference synthesizes types but does not certify arbitrary
     applications; full checking must still be used for accepting roots. -/

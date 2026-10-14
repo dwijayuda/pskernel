@@ -60,6 +60,13 @@ def main : IO Unit := do
     .forallE binder sort1
       (.forallE binder (.bvar 0) (.bvar 1) .default) .default
   let piWrapped : PsKernelExpr := .mdata 201 piDependent
+  let lambdaSimple : PsKernelExpr :=
+    .lam binder sort1 (.bvar 0) .default
+  let lambdaDependent : PsKernelExpr :=
+    .lam binder sort1
+      (.lam binder (.bvar 0) (.bvar 0) .default) .default
+  let lambdaApplied : PsKernelExpr := .app lambdaSimple sort0
+  let lambdaMetadata : PsKernelExpr := .mdata 211 lambdaApplied
   for expr in [application, wrapped] do
     let (.app fn arg) := expr
       | throw (IO.userError "independent checked app malformed test")
@@ -191,6 +198,37 @@ def main : IO Unit := do
         source.context source.state expr).isSome then
       throw (IO.userError "dependent Pi bypassed recursive fuel")
 
+  -- The independent checker opens real local binders, validates
+  -- domain sorts and recursively checks lambda bodies, including
+  -- dependent nested lambdas whose second domain is the outer local.
+  for expr in [lambdaSimple, lambdaDependent, lambdaApplied,
+      lambdaMetadata] do
+    let some (qualifiedType, _) := psKernelC0RecursiveCheckedAppWithFuel
+        4096 source.context source.state expr
+      | throw (IO.userError "independent recursive lambda declined")
+    let (sourceType, _) ← match psKernelCheckerCheck
+        4096 source.context source.state expr with
+      | .ok result => pure result
+      | .error e => throw (IO.userError ("source lambda failed: " ++ e))
+    if !psKernelExprEqual qualifiedType sourceType then
+      throw (IO.userError "independent lambda result differs from source")
+    let some raw := psKernelC0ArchitectureBegin source
+      | throw (IO.userError "independent lambda genesis failed")
+    let some work := psKernelC0ArchitectureCertifyWork raw
+      | throw (IO.userError "independent lambda certification failed")
+    let proof ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+        4096 work expr with
+      | .ok receipt => pure receipt
+      | .error e => throw (IO.userError ("independent lambda checked error: " ++ e))
+    let _exact :
+        psKernelC0CertifiedWorkCheck 4096 work expr = .ok proof.val :=
+      proof.property
+    if !psKernelExprEqual proof.val.fst sourceType then
+      throw (IO.userError "independent lambda source receipt diverged")
+    if (psKernelC0RecursiveCheckedAppWithFuel 1
+        source.context source.state expr).isSome then
+      throw (IO.userError "independent lambda bypassed child fuel")
+
   let mismatch : PsKernelExpr :=
     .app (.const identity []) sort1
   let unknown : PsKernelExpr :=
@@ -242,12 +280,13 @@ def main : IO Unit := do
   | _ => throw (IO.userError "provider accepted mismatched app")
   let publication ← match psKernelC0VerifiedProviderPublishRoots
       admittedCurry [application, wrapped, nestedFn, nestedArg,
-        nestedMetadata, metadataArgument, piSimple, piDependent, piWrapped] with
+        nestedMetadata, metadataArgument, piSimple, piDependent, piWrapped,
+        lambdaSimple, lambdaDependent, lambdaApplied, lambdaMetadata] with
     | .ok result => pure result
     | .error _ => throw (IO.userError "independent app root publication failed")
   let _exactPublication :=
     psKernelC0VerifiedProviderPublicationCheckExact publication
-  if publication.checked.roots.length != 9 ||
+  if publication.checked.roots.length != 13 ||
       !(psKernelC0HistoryAxiomSignatures
         publication.staged.verified.sealed.audited.trusted.history).isEmpty then
     throw (IO.userError "independent app weakened atomic audited roots")
@@ -256,5 +295,6 @@ def main : IO Unit := do
   IO.println "C0_RECURSIVE_CHECKED_APP function_argument_trees_source_proved=pass"
   IO.println "C0_RECURSIVE_CHECKED_METADATA wrapped_application_trees_source_proved=pass"
   IO.println "C0_RECURSIVE_CHECKED_PI dependent_binders_and_source_states=pass"
+  IO.println "C0_RECURSIVE_CHECKED_LAMBDA dependent_local_bodies_and_applications=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP exact_source_errors_states_fuel=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP audited_publication=pass"

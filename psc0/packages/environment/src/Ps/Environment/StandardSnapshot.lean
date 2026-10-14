@@ -208,6 +208,10 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited. Both hashes
 -- were independently observed after genuine strict drift refusal at
 -- a4fdce40, Linux Actions 38556955048; no new assumptions.
+-- Independently observed strict v7 Standard FNV/SHA values at Linux
+-- 38607411114, after adding checked ByteArray.get/set and actual
+-- GetElem, GetElem? and LawfulGetElem dictionaries. This accepts no runtime
+-- behavior: source/erasure/JS/TS/Rust/Wasm qualification must still pass.
 -- Reviewed ByteArray equality with a checked Nat-index recursive worker
 -- after the erased-local failure of earlier candidates. Linux 38600798961
 -- built the native source and oracles, replayed the selected signature/status
@@ -217,7 +221,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- statuses. These precise FNV/SHA are from independent strict drift
 -- refusal in Linux 38563557310 at 09965258; never infer expected hashes.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:15859367573410187426"
+  "fnv1a64:18073559988743207974"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -379,7 +383,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:a00e1522c1d63acf48a9e29732e7e0a33c290e70c0c1324d84753b552b90694f"
+  "sha256:bbf06e5a2091c8cb1af14a0b7c35177b9ce029aea402e853072cccc1d43abfac"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

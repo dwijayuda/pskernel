@@ -332,6 +332,9 @@ jobs:
           grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/first-mismatch-official.txt"
           echo "C0_REAL_INIT_FIRST_FALSE_OFFICIAL verdict=accepted records=86383"
           sha256sum "$prefix" | tee "$RUNNER_TEMP/first-mismatch-prefix-sha256.txt"
+      # This stage is diagnostic and MUST NOT alter C0's accepting verdict.
+      # The updated replay helper separates the failed Eq application into
+      # independently checked type, function and argument conversions.
       - name: Dissect first false Eq application arguments at post-nested theorem
         shell: bash
         run: |

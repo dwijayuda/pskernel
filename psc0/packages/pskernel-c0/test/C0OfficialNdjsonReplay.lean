@@ -855,6 +855,53 @@ def c0ExportMismatchOutline (expr : PsKernelExpr) : String :=
   " arg1=" ++ c0ExportMismatchArgument args 1 ++
   " arg2=" ++ c0ExportMismatchArgument args 2
 
+/-- Non-accepting diagnostic for the FIRST false DefEq application.
+    Compare the corresponding head and argument pairs independently under
+    the SAME source context/state. These additional observations never
+    change the checker verdict, its environment or its trusted caches.
+    Distinguishing Pi-type beta from function-eta is essential for the
+    real Lean 4.35 Init record-86,383 false rejection. -/
+def c0ExportMismatchDefEqComponent
+    (defeq :
+      PsKernelCheckerContext → PsKernelCheckerState →
+        PsKernelExpr → PsKernelExpr →
+          Except String (Bool × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (index : Nat) : String :=
+  let lhs := psKernelExprGetAppArgs left
+  let rhs := psKernelExprGetAppArgs right
+  match psKernelExprListGet lhs index, psKernelExprListGet rhs index with
+  | some a, some b =>
+      let verdict := match defeq context state a b with
+        | .ok (true, _) => "equal"
+        | .ok (false, _) => "different"
+        | .error e => "error:" ++ e
+      "arg" ++ toString index ++ "=" ++ verdict ++
+        " lhs=" ++ c0ExportMismatchTerm 5 a ++
+        " rhs=" ++ c0ExportMismatchTerm 5 b
+  | _, _ => "arg" ++ toString index ++ "=missing"
+
+def c0ExportMismatchDefEqComponents
+    (defeq :
+      PsKernelCheckerContext → PsKernelCheckerState →
+        PsKernelExpr → PsKernelExpr →
+          Except String (Bool × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : String :=
+  let headLeft := psKernelExprGetAppFn left
+  let headRight := psKernelExprGetAppFn right
+  let headVerdict := match defeq context state headLeft headRight with
+    | .ok (true, _) => "equal"
+    | .ok (false, _) => "different"
+    | .error e => "error:" ++ e
+  "head=" ++ headVerdict ++
+    " | " ++ c0ExportMismatchDefEqComponent defeq context state left right 0 ++
+    " | " ++ c0ExportMismatchDefEqComponent defeq context state left right 1 ++
+    " | " ++ c0ExportMismatchDefEqComponent defeq context state left right 2
+
 /-- Only invoked *after* authoritative rejection, never for admission.
     Diagnose whether the theorem's type or proof body failed and compare the
     optimized checked-application engine against its original source-owned
@@ -901,7 +948,10 @@ def c0ExportDiagnosticTheoremMismatch
                           c0ExportMismatchTerm 7 left ++
                           " rhs=" ++ c0ExportMismatchTerm 7 right ++
                           " | lhs-parts: " ++ c0ExportMismatchOutline left ++
-                          " | rhs-parts: " ++ c0ExportMismatchOutline right)
+                          " | rhs-parts: " ++ c0ExportMismatchOutline right ++
+                          " | components: " ++
+                            c0ExportMismatchDefEqComponents defeq ctx st
+                              left right)
                     | result => result
                   let witnessWhnf := psKernelWhnfWithRecursorFuel fuel witnessDefEq
                   match psKernelInferCoreWithFuel fuel witnessWhnf witnessDefEq

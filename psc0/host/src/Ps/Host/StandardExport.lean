@@ -320,12 +320,11 @@ private def exportStandardCore (spec : StandardExportSpec)
   -- only the reached declarations. Unrelated primitives stay in the base.
   let boundary := originalBase.foldl (fun (names : Lean.NameSet) declaration =>
     let name := PsKernelLean.toLeanName (psDeclarationName declaration)
-    let replace := spec.replaceDefinitionAxioms && match declaration, native.find? name with
-      | .axiomDecl .., some (.defnInfo _) => true
-      | .axiomDecl .., some (.thmInfo _) => true
-      | _, _ => spec.replaceInductiveAxioms && match declaration, native.find? name with
-        | .axiomDecl .., some (.inductInfo _) => true
-        | _, _ => false
+    let replace := match declaration, native.find? name with
+      | .axiomDecl .., some (.defnInfo _) => spec.replaceDefinitionAxioms
+      | .axiomDecl .., some (.thmInfo _) => spec.replaceDefinitionAxioms
+      | .axiomDecl .., some (.inductInfo _) => spec.replaceInductiveAxioms
+      | _, _ => false
     if replace then names else names.insert name) {}
   let mut seen : Lean.NameSet := {}
   let mut entries : Array Lean.ConstantInfo := #[]
@@ -485,7 +484,7 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     shareSource := true
     publicPrefix := "psStandardFloatIdentity"
     privatePrefix := "floatIdentityDecl"
-    provenance := "/-\\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\\nApache-2.0; see THIRD_PARTY_NOTICES.md.\\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\\nModified: selected Core conversion, closure/cut and independent kernel audit.\\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\\n-/\\nimport Ps.Environment.Basic\\n\\nset_option maxRecDepth 20000\\n\\n"
+    provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nModified: selected Core conversion, closure/cut and independent kernel audit.\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
 end PsV7Native

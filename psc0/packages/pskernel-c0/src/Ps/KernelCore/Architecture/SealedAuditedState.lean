@@ -20,7 +20,7 @@ The prior legacy constructors remain public until their migration completes.
     A standalone raw PsKernelCheckerState or approved axiom list cannot
     construct such a history without a proof of these equations. -/
 inductive PsKernelC0AuditedStateLineage :
-    PsKernelC0AuditedSourceWork → Type where
+    PsKernelC0AuditedSourceWork → Prop where
   | genesis
       (maxRecDepth maxNatSize : Nat)
       (axioms : List PsKernelAxiomInfo)

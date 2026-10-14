@@ -27,6 +27,16 @@ and `Lean.collectAxioms` fails compilation if the alternate theorem
 still reaches `Classical.choice` or `sorryAx`. This is a research-only
 checked witness, not a replacement theorem in the frozen Standard.
 
+## 15 October — checked constructive theorem and opt-in proof-cut research
+
+The standalone Lean 4.35.0 theorem/axiom audit passed
+[CI 38636902147](https://github.com/dwijayuda/pskernel/actions/runs/38636902147).
+The next authoring-only proof cut validates definitional equality against
+the original `Nat.pow_eq_zero` type with the official native kernel,
+retains a strict theorem-only whitelist, then independently replays
+the proof in the portable kernel. No trust expansion or Float runtime
+admission. Independent research CI is separate from the main native gate.
+
 ## Required next gates before F1 authorization
 
 1. Qualify this proof/axiom audit in the full unchanged native CI matrix.

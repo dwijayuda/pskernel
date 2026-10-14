@@ -8,6 +8,7 @@ This tool is not imported by the portable compiler.
 import Ps.Host.StandardClosure
 import Ps.Meta.Reduce
 import Ps.Host.StandardSource
+import Ps.Host.FloatConstructive
 
 namespace PsV7Native
 
@@ -310,6 +311,11 @@ structure StandardExportSpec where
   -- environment; exported declarations are also re-admitted independently.
   eraseAutoParams : Bool := false
   shareSource : Bool := false
+  -- Host-only, opt-in. All established pinned assets continue importing Init.
+  nativeModules : Array Lean.Import := #[{ module := `Init }]
+  -- Source theorem → original theorem name; native type equality and portable
+  -- proof replay are compulsory. Never replace computational definitions.
+  checkedTheoremRenames : List (Lean.Name × Lean.Name) := []
 
 -- Every changed *native signature* must be definitionally equivalent to the
 -- original in the OFFICIAL pinned kernel. A fresh checked alias proves the
@@ -382,7 +388,7 @@ private def checkFloatAnnotationPolicy (native : Lean.Environment) : IO Unit := 
 private def exportStandardCore (spec : StandardExportSpec)
     (output : System.FilePath) : IO Unit := do
   Lean.initSearchPath (← Lean.findSysroot)
-  let native ← Lean.importModules #[{ module := `Init }] {}
+  let native ← Lean.importModules spec.nativeModules {}
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "Standard export requires the pinned Lean 4.35.0 commit")
   if spec.eraseAutoParams then checkFloatAnnotationPolicy native
@@ -424,16 +430,48 @@ private def exportStandardCore (spec : StandardExportSpec)
     ("axioms", Lean.toJson ((entries.filter Lean.ConstantInfo.isAxiom).map (fun info => toString info.name))),
     ("quotientPrimitives", Lean.toJson (entries.filterMap fun info =>
       match info with | .quotInfo _ => some (toString info.name) | _ => none))]).compress
+  if (spec.checkedTheoremRenames.map (·.snd)).eraseDups.length !=
+      spec.checkedTheoremRenames.length ||
+      (spec.checkedTheoremRenames.map (·.fst)).eraseDups.length !=
+        spec.checkedTheoremRenames.length ||
+      !spec.checkedTheoremRenames.all (fun pair => spec.roots.contains pair.fst) then
+    throw (IO.userError "theorem-only proof substitutions are duplicate or unrooted")
   let declarations ← entries.toList.mapM fun info => do
     if spec.eraseAutoParams then checkAutoParamSignature native info
-    match exportDeclaration native spec.allowedAssumptions info spec.eraseAutoParams with
-    | .ok value => pure value
-    | .error reason =>
-      let path := standardDependencyPath native spec.roots info.name boundary spec.eraseAutoParams
-      throw (IO.userError
-        (toString info.name ++ ": " ++ reason ++
-          " | upstream dependency path: " ++
-          String.intercalate " -> " (path.map toString)))
+    let exported ← match exportDeclaration native spec.allowedAssumptions info spec.eraseAutoParams with
+      | .ok value => pure value
+      | .error reason =>
+        let path := standardDependencyPath native spec.roots info.name boundary spec.eraseAutoParams
+        throw (IO.userError
+          (toString info.name ++ ": " ++ reason ++
+            " | upstream dependency path: " ++
+            String.intercalate " -> " (path.map toString)))
+    match spec.checkedTheoremRenames.find? (fun pair => pair.fst == info.name) with
+    | none => pure exported
+    | some (_, target) => do
+      if originalBoundary.contains target || seen.contains target then
+        throw (IO.userError "theorem-only proof cut would collide with active Standard")
+      let some (.thmInfo upstream) := native.find? target
+        | throw (IO.userError ("proof-cut destination not an upstream theorem: " ++
+            toString target))
+      let .thmInfo _ := info
+        | throw (IO.userError "proof-cut source is not an upstream theorem")
+      let witness : Lean.Declaration := .defnDecl {
+        name := `_pscv0ConstructiveTheoremTypeWitness
+        levelParams := info.levelParams
+        type := upstream.type
+        value := .const info.name (info.levelParams.map Lean.Level.param)
+        hints := .opaque
+        safety := .safe }
+      match native.checked.get.addDeclCore 2000000 20000 witness none with
+      | .error error =>
+        throw (IO.userError ("official kernel refused proof-cut type: " ++
+          PsKernelLean.kernelExceptionSummary error))
+      | .ok _ => pure ()
+      match exported with
+      | .theoremDecl _ levels type value =>
+        pure (.theoremDecl (exportName target) levels type value)
+      | _ => throw (IO.userError "proof cut changed theorem declaration kind")
   -- The cut names are frozen, but current implementations of cut declarations
   -- may acquire new checked helper dependencies. Replay the complete declared
   -- pre-admission stage, excluding every replacement. Keep its extra helpers
@@ -569,6 +607,25 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     publicPrefix := "psStandardFloatIdentity"
     privatePrefix := "floatIdentityDecl"
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nModified: selected Core conversion, closure/cut and independent kernel audit.\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+-- Research-only constructive theorem authoring cut. This never changes
+-- the selected Standard, its strict fingerprints, or the Float runtime.
+def exportFloatConstructivePowCandidate (output : System.FilePath) : IO Unit := do
+  let base := psSelfHostProdPreludeEnvironment.declarations
+  if base.any (fun d => psNameToString (psDeclarationName d) == "Nat.pow_eq_zero") then
+    throw (IO.userError "proof-cut destination collides with selected Standard")
+  exportStandardCore {
+    roots := [`PsV7Native.FloatConstructive.powEqZero]
+    boundary := base.map psDeclarationName
+    baseDeclarations := base
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames := [(`PsV7Native.FloatConstructive.powEqZero, `Nat.pow_eq_zero)]
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardFloatConstructivePow"
+    privatePrefix := "floatConstructivePowDecl"
+    provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nConstructive Nat.pow_eq_zero: proof-only, unselected F1 research.\nNative kernel type witness and portable proof replay required.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
 -- F1 authoring candidate: exact pinned Float and Float32 bit constructors,

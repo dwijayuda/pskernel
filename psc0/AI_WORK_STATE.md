@@ -1,5 +1,21 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — constructive Float F1 theorem green; proof-only exporter research
+
+Commit `2677ba11f240f950c96be95e3ad5e9bf35b19393` passed all
+[27 Linux CI 38636902147](https://github.com/dwijayuda/pskernel/actions/runs/38636902147)
+checks, including the native Lean 4.35.0 theorem and strict transitive
+`Classical.choice`/`sorryAx` refusal. Selected Standard and all
+JS/TS/Rust/Wasm GC/Wasmtime behavior remained unchanged.
+
+**Unqualified experimental authoring:** move the constructive theorem to
+host-only `Ps.Host.FloatConstructive` and supply a theorem-only proof cut.
+The official Lean native kernel must check signature definitional equality
+with `Nat.pow_eq_zero`, then the portable kernel independently replays the
+renamed proof with the existing approved assumption allowlist. A separate
+research CI workflow qualifies this study; no F1 acceptance or executable
+Float is implied. No new axiom, pskernel-core, self-hosting or C5.
+
 ## 15 October — selected Standard manifest qualified; F1 constructive oracle candidate
 
 Commit `2f97571130954eeadb9d9941f0c8fb4bdfef81b8` passed all 27

@@ -1,0 +1,75 @@
+name: PSCV0 F1 constructive authoring (research only)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1]
+    paths:
+      - 'psc0/host/src/Ps/Host/FloatConstructive.lean'
+      - 'psc0/host/src/Ps/Host/StandardExport.lean'
+      - 'psc0/scripts/Pscv0Native.lean'
+      - 'psc0/v7-native/lakefile.lean'
+      - '.github/workflows/psc0-pscv0-f1-constructive.yml'
+permissions:
+  contents: read
+concurrency:
+  group: pscv0-f1-constructive-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/v7-native/
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/scripts/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Check native theorem type and portable replay
+        run: |
+          set -euo pipefail
+          lake build pscv0_native
+          mkdir -p ../dist/pscv0-f1-constructive
+          .lake/build/bin/pscv0_native --export-float-constructive-pow-candidate ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          sha256sum ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/source.sha256
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-f1-constructive-${{ github.sha }}
+          path: psc0/dist/pscv0-f1-constructive/
+          if-no-files-found: warn
+          retention-days: 30

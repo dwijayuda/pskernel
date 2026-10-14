@@ -416,6 +416,29 @@ def psKernelC0AuditedSourceWhnf
   psKernelC0AuditedSourceContinue work
     (fun context state => psKernelCheckerWhnf fuel context state expr)
 
+/-- An opt-in, proof-carrying WHNF route through the complete AUDITED
+    admission-history interface. Successful values carry an exact source
+    WHNF equation before their proof is erased. Five irreducible heads use
+    the independent direct evaluator; every other head is source-first
+    with exact candidate cross-check and conservative fallback.
+
+    Crucially, only the source-equivalent result's checker STATE is
+    transported. The environment, full checked-admission history and both
+    incremental authorization proofs are re-used via precise equality, not
+    re-audited or weakened. This is WHNF observation, not term admission. -/
+def psKernelC0AuditedSourceWhnfQualified
+    (fuel quota : Nat)
+    (work : PsKernelC0AuditedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) := do
+  let qualified ← psKernelC0CertifiedWorkWhnfQualified
+    fuel quota work.trusted.certified expr
+  let (value, checked) := qualified.val
+  let ⟨certified, unchanged⟩ :=
+    psKernelC0CertifiedWorkWithStateOwned
+      work.trusted.certified checked.raw.checker.state
+  return (value, psKernelC0AuditedSourceRebind work certified unchanged)
+
 def psKernelC0AuditedSourceInfer
     (fuel : Nat)
     (work : PsKernelC0AuditedSourceWork)

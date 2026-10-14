@@ -96,3 +96,33 @@ def psKernelC0VerifiedProviderCheck
     | .ok result => pure result
     | .error reason => throw (psKernelErrorFromMessage reason)
   return (ty, { session with verified := next })
+
+/-- Provider-level WHNF matches KernelContract-v1's checked-expression
+    precondition. Normalization alone is not evidence of well-typedness:
+    first run the full checked-expression operation, then source-equivalent
+    WHNF under the SAME verified checker-state lineage. -/
+def psKernelC0VerifiedProviderWhnf
+    (session : PsKernelC0VerifiedProviderSession)
+    (expr : PsKernelExpr) :
+    Except PsKernelError (PsKernelExpr × PsKernelC0VerifiedProviderSession) := do
+  let (_, checked) ← psKernelC0VerifiedProviderCheck session expr
+  let (value, next) ← match psKernelC0VerifiedWhnf
+      session.resources.fuel checked.verified expr with
+    | .ok result => pure result
+    | .error reason => throw (psKernelErrorFromMessage reason)
+  return (value, { checked with verified := next })
+
+/-- As with the v1 provider, DefEq is never used as a stand-alone
+    certificate for malformed expressions. Both inputs must first pass
+    full term checking under the same audited state-lineage session. -/
+def psKernelC0VerifiedProviderDefEq
+    (session : PsKernelC0VerifiedProviderSession)
+    (left right : PsKernelExpr) :
+    Except PsKernelError (Bool × PsKernelC0VerifiedProviderSession) := do
+  let (_, first) ← psKernelC0VerifiedProviderCheck session left
+  let (_, second) ← psKernelC0VerifiedProviderCheck first right
+  let (same, next) ← match psKernelC0VerifiedDefEq
+      session.resources.fuel second.verified left right with
+    | .ok result => pure result
+    | .error reason => throw (psKernelErrorFromMessage reason)
+  return (same, { second with verified := next })

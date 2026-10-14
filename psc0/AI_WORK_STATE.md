@@ -1,5 +1,27 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — selected Standard manifest qualified; F1 constructive oracle candidate
+
+Commit `2f97571130954eeadb9d9941f0c8fb4bdfef81b8` passed all 27
+[Linux CI 38635410220](https://github.com/dwijayuda/pskernel/actions/runs/38635410220)
+steps. The host-only selected Standard surface manifest is now qualified:
+live notation precedence audit (22 spellings), five deriving handlers, 19
+proof tactic spellings, bounded effects, module policy, registered axioms
+and the existing strict FNV/SHA roster. This is **selected**, not complete
+Lean-wide module/notation/effect closure.
+
+**F1 constructive research candidate (not qualified):** separately prove
+the exact pinned `Nat.pow_eq_zero` logical statement in native Lean 4.35.0
+using Nat constructor and positivity cases, then invoke the official
+`Lean.collectAxioms` on its complete proof dependency graph, strictly
+rejecting `Classical.choice` and `sorryAx`. Historical native F1 export
+[CI 38543575033](https://github.com/dwijayuda/pskernel/actions/runs/38543575033)
+reported the upstream path via a generated private `Nat.pow_eq_zero`
+simp proof. Passing this independent proof does **not** authorize
+replacement of upstream theorem bodies, construction of floats or changes
+to the F1 publisher; those remain explicitly blocked until separate kernel
+and runtime acceptance. No pskernel-core, self-hosting, C5 or new assumptions.
+
 ## 15 October — checked ByteArray copySlice fully qualified
 
 Commit `e871e4024d7ca9e3e3b85adc2b028ea7f9c33173` passed

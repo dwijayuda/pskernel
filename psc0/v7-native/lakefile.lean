@@ -28,6 +28,12 @@ lean_lib PsV7GetElemOracle where
   srcDir := "../test"
   roots := #[`Pscv0GetElemOracle]
 
+-- Independently checked native Float F1 constructive dependency oracle.
+-- This remains outside the selected Standard and executable compiler.
+lean_lib PsV7FloatConstructiveOracle where
+  srcDir := "../test"
+  roots := #[`Pscv0FloatConstructiveOracle]
+
 @[default_target]
 lean_exe pscv0_native where
   srcDir := "../scripts"

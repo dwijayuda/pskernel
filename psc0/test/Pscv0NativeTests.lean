@@ -4,6 +4,7 @@ import Ps.Compiler.Pscv0Modules
 import Ps.Environment.StandardSnapshot
 import Pscv0M1Harness
 import Pscv0GetElemOracle
+import Pscv0FloatConstructiveOracle
 import Init.Data.ByteArray.Lemmas
 
 -- General Lean 4.35.0 kernel proofs for the canonical selected ByteArray
@@ -2928,6 +2929,7 @@ private def selectedStandardManifestCases : IO Unit := do
 
 def main : IO Unit := do
   selectedStandardManifestCases
+  IO.println "PSCV0_FLOAT_CONSTRUCTIVE_ORACLE: PASS independent pinned Nat.pow_eq_zero statement and axiom audit"
   emissionBoundary
   metavariableBoundary
   parserCases

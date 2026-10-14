@@ -100,6 +100,9 @@ def psStandardByteArrayDeclarations : List PsDeclaration :=
 def psStandardByteArrayExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardByteArrayDeclarations.foldl
     psEnvironmentInsert environment
+  -- Lean 4.35.0's field projection is generated @[reducible].
+  let environment := psEnvironmentSetReducibility environment
+    psStandardByteArrayDataName .reducible
   (["emptyWithCapacity", "empty", "push", "size"]).foldl
     (fun env method =>
       psEnvironmentSetReducibility env

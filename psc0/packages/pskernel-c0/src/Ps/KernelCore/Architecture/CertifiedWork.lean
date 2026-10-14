@@ -332,6 +332,51 @@ def psKernelC0CertifiedWorkCommitChecked
 
 
 /-!
+Phase E: direct source-exact irreducible-head WHNF.
+
+Lean 4.35's native checker returns BVar, Sort, MVar, Pi and literal heads
+without consulting a cache or reducing an environment declaration. C0's
+source WHNF has the same direct cases (Reduction/Whnf.lean). They can be
+implemented without calling the source reduction worker, provided a source
+equivalence theorem preserves the complete checked transaction and fuel
+behavior. Constants, local free variables, lambdas and projections are
+*excluded*: their reduction and cache effects are context-dependent.
+-/
+
+/-- A real, source-checker-free shortcut for five irreducible WHNF heads.
+    Fuel zero is delegated unchanged; only positive-fuel direct forms
+    bypass the source reducer. There is no speculative candidate result. -/
+def psKernelC0CertifiedWorkWhnfCanonicalFast
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0CertifiedWork) :=
+  match fuel with
+  | 0 => psKernelC0CertifiedWorkWhnf fuel work expr
+  | Nat.succ _ =>
+      match expr with
+      | .bvar _ => .ok (expr, work)
+      | .sort _ => .ok (expr, work)
+      | .mvar _ => .ok (expr, work)
+      | .forallE _ _ _ _ => .ok (expr, work)
+      | .lit _ => .ok (expr, work)
+      | _ => psKernelC0CertifiedWorkWhnf fuel work expr
+
+/-- This proves an all-contexts source implementation equivalence of the
+    optimized accepting fast path, including its exact source state,
+    not just agreement on a collection of example terms. -/
+theorem psKernelC0CertifiedWorkWhnfCanonicalFast_exact
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    psKernelC0CertifiedWorkWhnfCanonicalFast fuel work expr =
+      psKernelC0CertifiedWorkWhnf fuel work expr := by
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      cases expr <;> rfl
+
+/-!
 Phase E: proof-carrying, source-exact candidate-to-accepting WHNF bridge.
 
 A candidate can be selected as the returned WHNF expression ONLY when Lean's

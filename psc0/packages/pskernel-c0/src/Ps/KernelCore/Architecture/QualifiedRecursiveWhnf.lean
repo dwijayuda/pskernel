@@ -185,10 +185,9 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                     remaining entered state body = some result := by
                 simpa only [psKernelC0RecursiveBetaZetaCoreWithFuel,
                   depth] using h
-              change psKernelWhnfCoreWithFuelRanges remaining []
-                publicWhnf reduceRecursor entered state body false false =
-                  .ok result
-              exact ih entered state body result hchild
+              rw [psKernelWhnfCoreWithFuelRanges]
+              simpa only [depth] using
+                (ih entered state body result hchild)
           | letE name ty value body nondep =>
               let term : PsKernelExpr := .letE name ty value body nondep
               by_cases hlong : psKernelC0HasLetPrefix 12 term = true
@@ -425,8 +424,8 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                             Except.ok (value,
                               psKernelCheckerStateWithWhnf coreState
                                 (psKernelExprMapInsert coreState.whnf term value))
-                        simp only [cache, sourceCore, sourcePost]
-                        rfl
+                        simp only [cache, psKernelWhnfCoreWithFuel,
+                          sourceCore, sourcePost]
                       · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
                           cache, coreCheck, stable, term] at h
       | letE name ty value body nondep =>
@@ -489,8 +488,8 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                             Except.ok (reduced,
                               psKernelCheckerStateWithWhnf coreState
                                 (psKernelExprMapInsert coreState.whnf term reduced))
-                        simp only [cache, sourceCore, sourcePost]
-                        rfl
+                        simp only [cache, psKernelWhnfCoreWithFuel,
+                          sourceCore, sourcePost]
                       · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
                           cache, coreCheck, stable, term] at h
       | bvar _ => simp [psKernelC0RecursiveBetaZetaWhnfWithFuel] at h

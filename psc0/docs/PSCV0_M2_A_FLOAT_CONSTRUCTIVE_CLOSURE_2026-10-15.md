@@ -1,5 +1,21 @@
 # M2+A Float F1 constructive dependency closure — research candidate
 
+## 15 October — full Float proof-cut root collision corrected (candidate)
+
+[Linux research 38642547802](https://github.com/dwijayuda/pskernel/actions/runs/38642547802)
+independently replayed the unchanged two-declaration constructive theorem
+successfully, then refused the larger F1 experiment because `Float.toBits`
+is already in the selected checked Standard boundary. This refusal is
+correct: a selected declaration must not be silently duplicated.
+
+The native F1 authoring candidate now explicitly requires the selected
+`Float.toBits` and `Float32.toBits` declarations to exist at the frozen
+boundary and exports only the missing `ofBits/isNaN/isFinite` roots plus
+the constructive theorem proof. Original `Nat.pow_eq_zero` is still cut
+only as a theorem, all other dependencies remain checked, and the
+allowed assumption list stays `propext`/`Quot.sound`. No executable
+Float was enabled; the new full-F1 experiment remains **unqualified**.
+
 ## 15 October — pinned executable reference cases (native only)
 
 The official Lean 4.35.0 sources `tests/elab/floatBits.lean` and

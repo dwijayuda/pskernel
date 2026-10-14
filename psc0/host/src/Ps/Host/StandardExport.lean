@@ -665,9 +665,17 @@ def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
 -- Never change the allowed assumption list to make a candidate pass.
 def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit := do
   let existing := psSelfHostProdPreludeEnvironment.declarations
+  -- These two checked F1a projection declarations are already in the exact
+  -- frozen Standard. Require their presence; do not duplicate source roots
+  -- or pretend the candidate separately requalifies their definitions.
+  let frozenNames := existing.map (fun d =>
+    PsKernelLean.toLeanName (psDeclarationName d))
+  unless frozenNames.contains `Float.toBits &&
+      frozenNames.contains `Float32.toBits do
+    throw (IO.userError "F1a checked toBits projection missing from frozen Standard")
   exportStandardCore {
-    roots := [`Float.ofBits, `Float.toBits, `Float.isNaN, `Float.isFinite,
-              `Float32.ofBits, `Float32.toBits, `Float32.isNaN, `Float32.isFinite,
+    roots := [`Float.ofBits, `Float.isNaN, `Float.isFinite,
+              `Float32.ofBits, `Float32.isNaN, `Float32.isFinite,
               `PsV7Native.FloatConstructive.powEqZero]
     boundary := existing.map psDeclarationName
     baseDeclarations := existing

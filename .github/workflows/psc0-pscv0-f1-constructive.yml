@@ -59,6 +59,15 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-f1-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-f1-${{ runner.os }}-${{ runner.arch }}-
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-
       - name: Check native theorem type and portable replay
         run: |
           set -euo pipefail
@@ -76,6 +85,13 @@ jobs:
           # additional unapproved axiom, unsupported inductive, or erased type.
           lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-bits-constructive-candidate ../dist/pscv0-f1-constructive/FloatBitsConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/full-f1-authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
           sha256sum ../dist/pscv0-f1-constructive/FloatBitsConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/full-f1-source.sha256
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: always()
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-f1-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

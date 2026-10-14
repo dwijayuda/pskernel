@@ -1,5 +1,44 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — unsigned power and Int wrapping source candidate (not qualified)
+
+Official Lean 4.35.0 `Init/Data/UInt/Basic.lean` defines
+`UInt8/16/32/64.pow` by primitive recursion on Nat and
+`UInt8/16/32/64.ofInt` by nonnegative remainder modulo `2^width`.
+The native-only `.lean` closure adds the four UInt powers and four
+unsigned `ofInt` constructors without a compiler primitive or
+new foundation assumption. Reuse exactly the already checked Core
+builders for the corresponding signed word methods:
+`psStandardFixedWidthPower` and `psStandardWrappingOfIntDeclaration`.
+The signed declarations retain identical ordered binder/recursor terms
+and their original reducibility status.
+
+Twenty-one independent native Lean reference values and twenty-one
+common-source JS/TS/Rust/Wasm vectors cover exponent zero, modulo-width
+overflow, negative Int wrapping and 64-bit boundaries. Structural
+recursion uses the same typed erasure as the qualified signed methods.
+
+**Candidate only:** no new Standard fingerprints are guessed. Independently
+measure the strict FNV/SHA refusal, retain official kernel/source audits,
+then pass the complete native, JS/TS/Rust and Wasmtime component workflow.
+This does not complete Phase A, Float F1-F4, USize/ISize or the v7
+assurance scope. No pskernel-core, self-hosting or C5.
+
+## 14 October — unsigned fixed-width LT/LE qualified
+
+Commit `2021d7cd673622aacaf528b1161654393403fa4d` passed
+[Linux 38588137709](https://github.com/dwijayuda/pskernel/actions/runs/38588137709):
+1,775 checked declarations, 25 classes, 221 registered instances,
+587 shared target runtime observations, 138 pinned native word oracle
+values and seven strict typed-IR refusals. Checked `UIntN.lt/le`,
+`UIntN.decLt/decLe` and explicit LT/LE dictionary registrations
+preserve the unsigned bit-carrier order at every fixed width, with
+no additional axiom. FNV `fnv1a64:8114939059249220600`, SHA-256
+`sha256:fd5b96380ccec059f57a3210374cad31778d93d720be913508ddfb4f1edb12f8`.
+This is bounded runtime differential conformance, not compiler-wide
+semantic preservation.
+
+
 ## 14 October — unsigned machine comparison source/decision candidate
 
 Pinned official Lean 4.35.0 commit

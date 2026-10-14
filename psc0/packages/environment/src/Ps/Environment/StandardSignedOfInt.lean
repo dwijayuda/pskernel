@@ -14,26 +14,31 @@ and signed fixed-width arithmetic. This adds no assumption, unsafe cast
 or trusted primitive; runtime equivalence is checked separately.
 -/
 
+-- Signed and unsigned fixed-width ofInt both wrap the Int constructors
+-- through the same checked modular arithmetic. Keep one binder-exact Core
+-- construction and let each family choose its native reducibility metadata.
+def psStandardWrappingOfIntDeclaration (owner : String) : PsDeclaration :=
+  let resultType : PsExpr := .constE (psRootName owner) []
+  let inputType : PsExpr := .constE psIntName []
+  let input : PsExpr := .fvar 0
+  let natural : PsExpr := .fvar 1
+  let positive : PsExpr :=
+    psLogicLam 1 "n" psOrderNat
+      (psOrderCall (owner ++ ".ofNat") [natural])
+  let negative : PsExpr :=
+    psLogicLam 1 "n" psOrderNat
+      (psOrderCall (owner ++ ".neg")
+        [psOrderCall (owner ++ ".ofNat") [psOrderSucc natural]])
+  let body : PsExpr :=
+    psLogicApply (.constE (psNameAppendStr psIntName "rec") [.succ .zero])
+      [psLogicLam 4 "_" inputType resultType,
+       positive, negative, input]
+  .definitionDecl (psNameAppendStr (psRootName owner) "ofInt") []
+    (psLogicPi 0 "value" inputType resultType)
+    (psLogicLam 0 "value" inputType body)
+
 def psStandardSignedOfIntDeclarations : List PsDeclaration :=
-  ["Int8", "Int16", "Int32", "Int64"].map fun owner =>
-    let resultType : PsExpr := .constE (psRootName owner) []
-    let inputType : PsExpr := .constE psIntName []
-    let input : PsExpr := .fvar 0
-    let natural : PsExpr := .fvar 1
-    let positive : PsExpr :=
-      psLogicLam 1 "n" psOrderNat
-        (psOrderCall (owner ++ ".ofNat") [natural])
-    let negative : PsExpr :=
-      psLogicLam 1 "n" psOrderNat
-        (psOrderCall (owner ++ ".neg")
-          [psOrderCall (owner ++ ".ofNat") [psOrderSucc natural]])
-    let body : PsExpr :=
-      psLogicApply (.constE (psNameAppendStr psIntName "rec") [.succ .zero])
-        [psLogicLam 4 "_" inputType resultType,
-         positive, negative, input]
-    .definitionDecl (psNameAppendStr (psRootName owner) "ofInt") []
-      (psLogicPi 0 "value" inputType resultType)
-      (psLogicLam 0 "value" inputType body)
+  ["Int8", "Int16", "Int32", "Int64"].map psStandardWrappingOfIntDeclaration
 
 def psStandardSignedOfIntExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardSignedOfIntDeclarations.foldl

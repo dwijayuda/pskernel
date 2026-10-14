@@ -19,6 +19,26 @@ qualified independently before these methods are a release capability.
 def psStandardSignedNumericWidths : List (String × Nat) :=
   [("Int8", 8), ("Int16", 16), ("Int32", 32), ("Int64", 64)]
 
+-- Both signed and unsigned Lean 4.35.0 powers use precisely this
+-- checked Nat.rec equation. Keep binder identities/argument evaluation in
+-- one portable Core builder; extension to a width needs only its owner name.
+def psStandardFixedWidthPower (owner : String) : PsDeclaration :=
+  let name := psRootName owner
+  let type : PsExpr := .constE name []
+  let ofNat := psOrderCall (owner ++ ".ofNat") [.lit (.natural 1)]
+  let result := psOrderNatRec (.succ .zero)
+    (psLogicLam 4 "_" psOrderNat type)
+    ofNat
+    (psLogicLam 2 "previous" psOrderNat
+      (psLogicLam 3 "ih" type
+        (psOrderCall (owner ++ ".mul") [.fvar 3, .fvar 0])))
+    (.fvar 1)
+  .definitionDecl (psNameAppendStr name "pow") []
+    (psLogicPi 0 "value" type
+      (psLogicPi 1 "exponent" psOrderNat type))
+    (psLogicLam 0 "value" type
+      (psLogicLam 1 "exponent" psOrderNat result))
+
 def psStandardSignedNumericDeclarations : List PsDeclaration :=
   psStandardSignedNumericWidths.flatMap fun (owner, width) =>
     let name := psRootName owner
@@ -33,20 +53,7 @@ def psStandardSignedNumericDeclarations : List PsDeclaration :=
       (psNameAppendStr name "minValue") [] signedType (ofNat half)
     let maximum : PsDeclaration := .definitionDecl
       (psNameAppendStr name "maxValue") [] signedType (ofNat (half - 1))
-    let result := psOrderNatRec (.succ .zero)
-      (psLogicLam 4 "_" psOrderNat signedType)
-      (ofNat 1)
-      (psLogicLam 2 "previous" psOrderNat
-        (psLogicLam 3 "ih" signedType
-          (psOrderCall (owner ++ ".mul") [.fvar 3, .fvar 0])))
-      (.fvar 1)
-    let pow : PsDeclaration := .definitionDecl
-      (psNameAppendStr name "pow") []
-      (psLogicPi 0 "value" signedType
-        (psLogicPi 1 "exponent" psOrderNat signedType))
-      (psLogicLam 0 "value" signedType
-        (psLogicLam 1 "exponent" psOrderNat result))
-    [size, minimum, maximum, pow]
+    [size, minimum, maximum, psStandardFixedWidthPower owner]
 
 def psStandardSignedNumericExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardSignedNumericDeclarations.foldl

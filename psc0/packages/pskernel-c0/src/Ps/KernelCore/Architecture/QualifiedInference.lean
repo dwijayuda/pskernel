@@ -96,7 +96,8 @@ theorem psKernelC0ScalarInfer_source
           | some ty =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
-                  simp only [psKernelC0ScalarInferWithFuel, cached, depth] at h
+                  simp only [psKernelC0ScalarInferWithFuel, depth] at h
+                  split at h <;> cases h
               | ok nextContext =>
                   have hresult : result = (ty, state) := by
                     have hx : some (ty, state) = some result := by
@@ -110,13 +111,14 @@ theorem psKernelC0ScalarInfer_source
                         (.sort level) none = some ty := by
                     change psKernelExprMapGet cache expr = some ty
                     exact cached
-                  simpa only [psKernelInferCoreWithFuelUsing,
+                  simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
                     psKernelInferCacheEligible, hcache, depth]
           | none =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
-                  simp only [psKernelC0ScalarInferWithFuel, cached, depth] at h
+                  simp only [psKernelC0ScalarInferWithFuel, depth] at h
+                  split at h <;> cases h
               | ok nextContext =>
                   let ty : PsKernelExpr := .sort (.succ level)
                   have hresult :
@@ -135,7 +137,7 @@ theorem psKernelC0ScalarInfer_source
                         (.sort level) none = none := by
                     change psKernelExprMapGet cache expr = none
                     exact cached
-                  simpa only [psKernelInferCoreWithFuelUsing,
+                  simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
                     psKernelInferCacheEligible, hcache, depth]
       | lit literal =>
@@ -302,7 +304,7 @@ def psKernelC0CertifiedWorkCheckQualifiedOwned
   | none =>
       match source : psKernelC0CertifiedWorkCheck fuel work expr with
       | .error reason => .error reason
-      | .ok result => .ok ⟨result, source⟩
+      | .ok result => .ok ⟨result, rfl⟩
   | some (ty, nextState) =>
       .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned work nextState).val),
         by

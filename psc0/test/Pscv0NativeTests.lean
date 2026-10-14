@@ -2506,6 +2506,41 @@ private def transparencyBoundaries : IO Unit := do
     throw (IO.userError "reducibility missing from frozen semantic payload")
   IO.println "PSCV0_TRANSPARENCY: PASS source/imported abbreviations, local evidence, rigid refusal and metadata drift"
 
+-- Pinned Lean 4.35.0 BitVec.toInt gives this exact two's-complement
+-- decomposition; these are definitional kernel certificates, not runtime
+-- observations or newly assumed arithmetic identities.
+private theorem signedToInt8_model (x : Int8) :
+    x.toInt =
+      (if 2 * x.toUInt8.toNat < 2 ^ 8 then
+        (x.toUInt8.toNat : Int)
+      else
+        (x.toUInt8.toNat : Int) - (2 ^ 8 : Nat)) := by
+  rfl
+
+private theorem signedToInt16_model (x : Int16) :
+    x.toInt =
+      (if 2 * x.toUInt16.toNat < 2 ^ 16 then
+        (x.toUInt16.toNat : Int)
+      else
+        (x.toUInt16.toNat : Int) - (2 ^ 16 : Nat)) := by
+  rfl
+
+private theorem signedToInt32_model (x : Int32) :
+    x.toInt =
+      (if 2 * x.toUInt32.toNat < 2 ^ 32 then
+        (x.toUInt32.toNat : Int)
+      else
+        (x.toUInt32.toNat : Int) - (2 ^ 32 : Nat)) := by
+  rfl
+
+private theorem signedToInt64_model (x : Int64) :
+    x.toInt =
+      (if 2 * x.toUInt64.toNat < 2 ^ 64 then
+        (x.toUInt64.toNat : Int)
+      else
+        (x.toUInt64.toNat : Int) - (2 ^ 64 : Nat)) := by
+  rfl
+
 -- The expected results are fixed by the pinned official Lean 4.35.0
 -- SInt/Basic logical implementations, NOT inferred from generated targets.
 -- Compare exactly the same input vectors as JS/TS/Rust observations.

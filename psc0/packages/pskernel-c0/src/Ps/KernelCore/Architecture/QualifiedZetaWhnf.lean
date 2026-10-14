@@ -161,12 +161,16 @@ theorem psKernelC0ZetaStableWhnf_source
                                             whnfChild reduceRecursor context state
                                             term false false =
                                               .ok (normalized, coreState) := by
-                                        simpa [psKernelWhnfCoreWithFuel,
-                                          psKernelWhnfCoreWithFuelRanges,
-                                          psKernelWhnfCoreFinishWithKnownHash,
-                                          psKernelExprMapInsert, hlong, depth,
-                                          coreCache, childDepth, bodyCore,
-                                          term, coreState, normalized]
+                                        change psKernelWhnfCoreWithFuelRanges
+                                          (Nat.succ (Nat.succ remaining)) []
+                                          whnfChild reduceRecursor context state
+                                          term false false =
+                                            .ok (normalized, coreState)
+                                        rw [psKernelWhnfCoreWithFuelRanges]
+                                        simp [depth, hlong, coreCache,
+                                          bodyCore, psKernelWhnfCoreFinishWithKnownHash,
+                                          psKernelExprMapInsert, term,
+                                          coreState, normalized]
                                       have afterCore :
                                           psKernelWhnfAfterCore whnfChild
                                             context coreState term normalized =

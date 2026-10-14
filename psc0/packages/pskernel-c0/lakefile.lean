@@ -35,6 +35,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.QualifiedBetaWhnf,
     `Ps.KernelCore.Architecture.QualifiedRecursiveWhnf,
     `Ps.KernelCore.Architecture.QualifiedRecursiveDeltaWhnf,
+    `Ps.KernelCore.Architecture.QualifiedRecursiveMetadataDefEq,
     `Ps.KernelCore.Architecture.TrustedAdmission,
     `Ps.KernelCore.Architecture.SealedState,
     `Ps.KernelCore.Architecture.SealedAuditedState,

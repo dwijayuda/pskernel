@@ -934,3 +934,23 @@ def psKernelC0CertifiedWorkDefEqSortOwned
         unfold psKernelC0CertifiedWorkDefEq psKernelSessionIsDefEq
         simp only [source]
         rfl⟩
+
+
+/-- One checked DefEq receipt interface. Sorts take the independently
+    proved level comparison, structurally reflexive other terms use the
+    independently proved quick rule, and all remaining source expressions
+    retain the original source checker and error/resource semantics. -/
+def psKernelC0CertifiedWorkDefEqQualifiedOwned
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (left right : PsKernelExpr) :
+    Except String
+      { result : Bool × PsKernelC0CertifiedWork //
+        psKernelC0CertifiedWorkDefEq fuel work left right = .ok result } :=
+  match left, right with
+  | .sort leftLevel, .sort rightLevel =>
+      psKernelC0CertifiedWorkDefEqSortOwned
+        fuel work leftLevel rightLevel
+  | _, _ =>
+      psKernelC0CertifiedWorkDefEqCanonicalFastOwned
+        fuel work left right

@@ -4,7 +4,15 @@
 **Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
 **Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
 
-## Latest native-qualified E.4X — independent recursive short application trees
+## Latest native-qualified E.4AG — one shared stable-terminal β/ζ fragment
+
+The current fully qualified source is [d2f2053e](https://github.com/dwijayuda/pskernel/commit/d2f2053e61eda6114eba0a21a16cfc652abf2b65), [full Lean 4.35 CI 38602806954](https://github.com/dwijayuda/pskernel/actions/runs/38602806954) **SUCCESS** (53 successful, 0 failed, four optional skipped); consult [AI_WORK_STATE.md](AI_WORK_STATE.md) for exact source theorem and regression evidence.
+
+**Architectural advance:** one shared terminal-head WHNF module now factors proof of original core and post-core behavior for BVar/Sort/MVar/Pi/lambda/literal values, used by independent one-step β and ζ evaluation. These paths return checked-work receipts proving original complete checker state/cache, resource/recursion behavior and output under arbitrary source callback and initial context. Prior E.4AF/AE supported only Sort results. The trusted/audited APIs keep exact source fallbacks for all other forms and do not permit an isolated WHNF fact to authorize proof admission.
+
+**Next phase:** stop expanding this via special-case wrappers; implement a coherent fuel-/context-/state-accounted recursive evaluator spanning intermediate β/ζ/δ and independent DefEq, with capture-avoiding reification, exact source refinement and full accepting integration. Preserve separate real Init/Std/Mathlib corpus and matched performance/assurance gates. Full C → D → E → B → F → G phase exits remain open; no kernel consistency theorem or whole-library throughput win is claimed.
+
+## Historical qualified E.4X — independent recursive short application trees
 
 [Executable 75442ce6](https://github.com/dwijayuda/pskernel/commit/75442ce6faf94feb7e4ea69df6a56404951751a5) has **full native Lean 4.35 CI SUCCESS**: [38570230710](https://github.com/dwijayuda/pskernel/actions/runs/38570230710), 48 successful steps and zero failures, including new source theorem/recursive function-and-argument regression, mandatory official export/negative/resource suite, performance diagnostics and independently rebuilt original-C0 checker comparison. This supersedes the bounded E.4W completed milestone below without invalidating its proofs.
 

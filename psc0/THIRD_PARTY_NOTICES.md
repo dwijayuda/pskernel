@@ -159,3 +159,17 @@ complete constructor/recursor metadata for `Int8/Int16/Int32/Int64/ISize`,
 replaces exactly five prior type axioms without inventing assumptions,
 and compares each iota rule to the kernel-generated reference. It is a
 logical Standard asset, NOT an executable signed runtime or ABI guarantee.
+
+### Signed arithmetic and Float bit-read checked Core assets
+
+`StandardSignedOperationsData.lean` reifies the 62 kernel-checked
+closed BitVec/signed operations from pinned Lean 4.35.0
+`Init/Data/SInt/Basic.lean`, Henrik Böving, and
+`Init/Data/BitVec/Basic.lean`, Lean FRO, LLC, Apache-2.0.
+`StandardFloatToBitsData.lean` reifies six checked Float/Float32
+bit projections from pinned `Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean`,
+copyright Microsoft Corporation and Lean FRO, LLC, Apache-2.0.
+The exports retain original checked definition/proof bodies, exact
+reducibility and immutable dependency cuts; each is independently
+admitted through official kernel replay. Neither confers runtime IR/ABI
+capabilities or semantic-preservation proof.

@@ -3,6 +3,8 @@ import Ps.Environment.StandardUnsigned
 import Ps.Environment.StandardUnsignedOperations
 import Ps.Environment.StandardFloatIdentity
 import Ps.Environment.StandardSignedIdentity
+import Ps.Environment.StandardSignedOperations
+import Ps.Environment.StandardFloatToBits
 import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
@@ -46,8 +48,14 @@ def psSelfHostProdPreFloatPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreSignedPreludeEnvironment : PsEnvironment :=
   psStandardFloatIdentityExtend psSelfHostProdPreFloatPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Both independent checked method assets are generated against this
+-- immutable pre-method boundary. Replaying either cannot depend on itself.
+def psSelfHostProdPreM2AMethodPreludeEnvironment : PsEnvironment :=
   psStandardSignedIdentityExtend psSelfHostProdPreSignedPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardFloatToBitsExtend <|
+    psStandardSignedOperationsExtend psSelfHostProdPreM2AMethodPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

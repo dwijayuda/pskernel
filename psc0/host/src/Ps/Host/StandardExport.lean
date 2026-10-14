@@ -611,7 +611,7 @@ def exportSignedIdentityCandidate (output : System.FilePath) : IO Unit := do
 -- definitions use model-carrying structure projections. This does not
 -- authorize construction, arithmetic or a Float runtime ABI.
 def exportFloatToBitsCandidate (output : System.FilePath) : IO Unit := do
-  let existing := psSelfHostProdPreludeEnvironment.declarations
+  let existing := psSelfHostProdPreM2AMethodPreludeEnvironment.declarations
   exportStandardCore {
     roots := [`Float.toBits, `Float32.toBits]
     boundary := existing.map psDeclarationName
@@ -641,7 +641,7 @@ def exportSignedOperationsCandidate (output : System.FilePath) : IO Unit := do
                   "land", "lor", "xor"]
   let roots := owners.flatMap fun owner =>
     methods.map (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method)
-  let existing := psSelfHostProdPreludeEnvironment.declarations
+  let existing := psSelfHostProdPreM2AMethodPreludeEnvironment.declarations
   exportStandardCore {
     roots, boundary := existing.map psDeclarationName
     baseDeclarations := existing

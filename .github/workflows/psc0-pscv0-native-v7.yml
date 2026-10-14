@@ -157,12 +157,14 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          .lake/build/bin/pscv0_native --export-float-tobits-candidate ../dist/pscv0-native/StandardFloatToBitsCandidate.lean | tee ../dist/pscv0-native/float-tobits-candidate.log
+          .lake/build/bin/pscv0_native --export-float-tobits-candidate ../dist/pscv0-native/StandardFloatToBitsCandidate.lean | tee ../dist/pscv0-native/float-tobits-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatToBitsData.lean ../dist/pscv0-native/StandardFloatToBitsCandidate.lean
       - name: Kernel-review pure signed BitVec arithmetic closure
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          .lake/build/bin/pscv0_native --export-signed-operations-candidate ../dist/pscv0-native/StandardSignedOperationsCandidate.lean | tee ../dist/pscv0-native/signed-operations-candidate.log
+          .lake/build/bin/pscv0_native --export-signed-operations-candidate ../dist/pscv0-native/StandardSignedOperationsCandidate.lean | tee ../dist/pscv0-native/signed-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardSignedOperationsData.lean ../dist/pscv0-native/StandardSignedOperationsCandidate.lean
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

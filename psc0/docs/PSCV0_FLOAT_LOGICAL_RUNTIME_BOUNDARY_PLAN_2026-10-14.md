@@ -118,3 +118,37 @@ Do not copy the entire upstream elaborator, proof engine or floating model if th
 - Zero unresolved runtime IR types, absent ABI representations, unchecked proof/effect/assumption obligations or invisible widening conversions.
 - A complete green Linux workflow at one exact source SHA, frozen registry fingerprints, new cross-target observation count and performance evidence.
 - Explicitly document what remains unsupported (e.g. full arbitrary-precision floating proofs or extensive math libraries), rather than claiming total Lean compatibility.
+
+## F0 annotation dependency root-cause and pending kernel qualification (14 October 2026)
+
+At commit `8da4ea23065227a01b36a1a93786e9a4f073bab6`, CI `38523254776`
+strictly refused the F0 candidate via `Float.Model.Format.mk → autoParam → Lean.Syntax`.
+The pinned `src/Init/Data/Float/Model/Format/Basic.lean` introduces two
+proof-bearing `Format` fields with automatic tactic defaults; pinned
+`src/Lean/Elab/Structure.lean` wraps such constructor parameters in
+`autoParam`. Pinned `src/Lean/Expr.lean` explicitly treats `autoParam` as a
+reducible *type annotation*, distinct from a logical proof obligation.
+Importing a large mutual syntax family merely to represent tactic metadata
+is not the minimal kernel semantic cut.
+
+An opt-in native exporter change is under independent qualification:
+
+1. Recursively consume only fully applied `autoParam` annotations in closed
+   dependency types and constructor signatures; preserve `optParam`,
+   `outParam`, all proof fields and all actual datatype dependencies.
+2. For each changed signature, synthesize an ephemeral typed alias to the
+   **original upstream constant** and require official Lean 4.35.0
+   `Kernel.Environment.addDeclCore` to accept the normalized type.
+   No alias is published; mismatched annotations cannot bypass the kernel.
+3. Refuse changed term bodies without a separate independent equality
+   certificate, rather than assuming that term rewrites are harmless.
+4. Independently replay the complete portable candidate and compare
+   kernel-regenerated constructors, recursors and iota rules. Retain existing
+   exact assumption allowlist and strict unsupported-family rejection.
+5. Do not publish or enable executable floats until all F0 checks, asset
+   freeze and the subsequent F1–F4 runtime gates pass.
+
+This section describes the **candidate implementation contract**, not a
+successful F0 kernel qualification. Any CI failure leaves the last fully
+green `/61` executable at `64a79a738d279e973839c624468fbec222212eb5`
+unchanged for release claims.

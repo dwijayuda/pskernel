@@ -9,15 +9,40 @@ import Lean.Util.CollectAxioms
 
 namespace PsV7Native
 
-private def closureDependencies (info : Lean.ConstantInfo) : Array Lean.Name :=
-  let expressions := info.type.getUsedConstants ++
-    ((info.value? true).map Lean.Expr.getUsedConstants).getD #[]
+-- Lean 4.35.0 src/Lean/Expr.lean defines autoParam as a type annotation,
+-- erased by Expr.consumeTypeAnnotations. Elaboration tactics are NOT kernel
+-- dependencies. Keep optParam/outParam intact: their source elaboration and
+-- instance-selection behavior belongs to a separate import contract.
+-- This rewrite is opt-in; native kernel alias replay certifies transformed
+-- declaration types before exported Core is ever offered for publication.
+partial def standardEraseAutoParam (expression : Lean.Expr) : Lean.Expr :=
+  if expression.isAutoParam then
+    standardEraseAutoParam expression.appFn!.appArg!
+  else
+    match expression with
+    | .app fn arg => .app (standardEraseAutoParam fn) (standardEraseAutoParam arg)
+    | .lam name type body binder =>
+        .lam name (standardEraseAutoParam type) (standardEraseAutoParam body) binder
+    | .forallE name type body binder =>
+        .forallE name (standardEraseAutoParam type) (standardEraseAutoParam body) binder
+    | .letE name type value body nonDep =>
+        .letE name (standardEraseAutoParam type) (standardEraseAutoParam value)
+          (standardEraseAutoParam body) nonDep
+    | .mdata data value => .mdata data (standardEraseAutoParam value)
+    | .proj name index value => .proj name index (standardEraseAutoParam value)
+    | other => other
+
+private def closureDependencies (info : Lean.ConstantInfo)
+    (eraseAutoParams : Bool := false) : Array Lean.Name :=
+  let coreExpr := fun e => if eraseAutoParams then standardEraseAutoParam e else e
+  let expressions := (coreExpr info.type).getUsedConstants ++
+    ((info.value? true).map (fun e => (coreExpr e).getUsedConstants)).getD #[]
   let family := match info with
     | .inductInfo v => v.all.toArray ++ v.ctors.toArray ++ #[.str v.name "rec"]
     | .ctorInfo v => #[v.induct]
     | .quotInfo _ => #[`Quot, `Quot.mk, `Quot.lift, `Quot.ind]
     | .recInfo v => v.all.toArray ++
-        (v.rules.toArray.flatMap fun rule => #[rule.ctor] ++ rule.rhs.getUsedConstants)
+        (v.rules.toArray.flatMap fun rule => #[rule.ctor] ++ (coreExpr rule.rhs).getUsedConstants)
     | _ => #[]
   expressions ++ family
 
@@ -34,7 +59,7 @@ private def closureKind : Lean.ConstantInfo → String
 -- Worklist with a visited set handles inductive/constructor/recursor cycles
 -- without imposing the compiler's elaboration resource policy on this audit.
 def standardDependencyClosure (environment : Lean.Environment) (root : Lean.Name)
-    (boundary : Lean.NameSet := {}) :
+    (boundary : Lean.NameSet := {}) (eraseAutoParams : Bool := false) :
     IO (Array Lean.ConstantInfo) := do
   let mut pending := [root]
   let mut seen : Lean.NameSet := {}
@@ -48,7 +73,7 @@ def standardDependencyClosure (environment : Lean.Environment) (root : Lean.Name
         | throw (IO.userError ("missing upstream closure declaration: " ++ toString name))
       entries := entries.push info
       if !boundary.contains name then
-        pending := (closureDependencies info).toList ++ pending
+        pending := (closureDependencies info eraseAutoParams).toList ++ pending
   return entries.qsort (fun a b => Lean.Name.lt a.name b.name)
 
 -- Smallest imported dependency path for diagnosing a rejected native
@@ -56,7 +81,7 @@ def standardDependencyClosure (environment : Lean.Environment) (root : Lean.Name
 -- closure collector and stops at the same frozen boundary.
 def standardDependencyPath (environment : Lean.Environment)
     (roots : List Lean.Name) (target : Lean.Name)
-    (boundary : Lean.NameSet := {}) : List Lean.Name := Id.run do
+    (boundary : Lean.NameSet := {}) (eraseAutoParams : Bool := false) : List Lean.Name := Id.run do
   let mut frontier : Array (List Lean.Name) :=
     roots.toArray.map (fun root => [root])
   let mut seen : Lean.NameSet := {}
@@ -70,7 +95,7 @@ def standardDependencyPath (environment : Lean.Environment)
     seen := seen.insert name
     if boundary.contains name then continue
     if let some info := environment.find? name then
-      for dependency in closureDependencies info do
+      for dependency in closureDependencies info eraseAutoParams do
         unless seen.contains dependency do
           frontier := frontier.push (path ++ [dependency])
   return []

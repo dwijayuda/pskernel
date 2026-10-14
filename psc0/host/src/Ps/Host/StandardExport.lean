@@ -50,6 +50,10 @@ private def exportExpr : Lean.Expr → Except String PsExpr
   | .mdata _ value => exportExpr value
   | .proj name index value => return .proj (exportName name) index (← exportExpr value)
 
+private def exportCoreExpr (eraseAutoParams : Bool) (expression : Lean.Expr) :
+    Except String PsExpr :=
+  exportExpr (if eraseAutoParams then standardEraseAutoParam expression else expression)
+
 -- Single-family recursor fields follow kernel/inductive.cpp is_rec_argument:
 -- peel a dependent Pi telescope, then require the family at its result head.
 -- Nested occurrences remain refused; official replay checks positivity.
@@ -71,16 +75,16 @@ private def recursiveFields (family : Lean.Name) (parameters fields : Nat)
   collect fields 0 (← skip parameters type)
 
 private def exportDeclaration (native : Lean.Environment) (allowedAssumptions : List Lean.Name)
-    (info : Lean.ConstantInfo) :
+    (info : Lean.ConstantInfo) (eraseAutoParams : Bool := false) :
     Except String PsDeclaration := do
   if info.isUnsafe || info.isPartial then throw "unsafe or partial Standard declaration"
   let name := exportName info.name
   let levels := info.levelParams.map exportName
-  let type ← exportExpr info.type
+  let type ← exportCoreExpr eraseAutoParams info.type
   match info with
-  | .defnInfo value => return .definitionDecl name levels type (← exportExpr value.value)
-  | .thmInfo value => return .theoremDecl name levels type (← exportExpr value.value)
-  | .opaqueInfo value => return .opaqueDecl name levels type (← exportExpr value.value)
+  | .defnInfo value => return .definitionDecl name levels type (← exportCoreExpr eraseAutoParams value.value)
+  | .thmInfo value => return .theoremDecl name levels type (← exportCoreExpr eraseAutoParams value.value)
+  | .opaqueInfo value => return .opaqueDecl name levels type (← exportCoreExpr eraseAutoParams value.value)
   | .inductInfo value =>
     let logical := match value.type.getForallBody with
       | .sort .zero => true
@@ -96,7 +100,8 @@ private def exportDeclaration (native : Lean.Environment) (allowedAssumptions : 
     return .constructorDecl {
       name, levelParams := levels, type, inductiveName := exportName value.induct,
       constructorIndex := value.cidx, numParams := value.numParams, numFields := value.numFields,
-      recursiveFields := ← recursiveFields value.induct value.numParams value.numFields value.type }
+      recursiveFields := ← recursiveFields value.induct value.numParams value.numFields
+         (if eraseAutoParams then standardEraseAutoParam value.type else value.type) }
   | .recInfo value =>
     unless value.all.length == 1 && value.numMotives == 1 do
       throw "mutual recursor is outside Standard asset policy"
@@ -167,7 +172,8 @@ private def checkCandidate (declarations candidates : List PsDeclaration) : IO U
 -- pinned kernel-generated rule. Symbolic typed locals keep this independent of
 -- concrete examples and cover every recursive field telescope in the asset.
 private def checkRecursorRules (native : Lean.Environment)
-    (declarations candidates : List PsDeclaration) : IO Nat := do
+    (declarations candidates : List PsDeclaration)
+    (eraseAutoParams : Bool := false) : IO Nat := do
   let environment := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
   let mut count := 0
   for declaration in candidates do
@@ -177,7 +183,7 @@ private def checkRecursorRules (native : Lean.Environment)
     for rule in original.rules do
       let some constructor := psEnvironmentFindConstructor environment (exportName rule.ctor)
         | throw (IO.userError "missing exported rule constructor")
-      let mut expected ← match exportExpr rule.rhs with
+      let mut expected ← match exportCoreExpr eraseAutoParams rule.rhs with
         | .ok expr => pure expr
         | .error error => throw (IO.userError error)
       let fixedCount := info.numParams + info.numMotives + info.numMinors
@@ -299,7 +305,41 @@ structure StandardExportSpec where
   -- structure is an explicit, independently checked identity migration.
   -- Do not apply to ordinary type names or unchecked/custom structures.
   replaceInductiveAxioms : List Lean.Name := []
+  -- Export Core by removing only fully applied *elaboration tactic* annotations.
+  -- The pinned official kernel checks each changed signature in its native
+  -- environment; exported declarations are also re-admitted independently.
+  eraseAutoParams : Bool := false
   shareSource : Bool := false
+
+-- Every changed *native signature* must be definitionally equivalent to the
+-- original in the OFFICIAL pinned kernel. A fresh checked alias proves the
+-- native constant can inhabit the annotation-free type; the returned
+-- environment is discarded, and the alias is never exported. This is not
+-- unchecked insertion, axiom admission or string-based dependency exclusion.
+private def checkAutoParamSignature (native : Lean.Environment)
+    (info : Lean.ConstantInfo) : IO Unit := do
+  let normalized := standardEraseAutoParam info.type
+  if normalized != info.type then
+    let witness : Lean.Declaration := .defnDecl {
+      name := `_pscv0AutoParamDefeqWitness
+      levelParams := info.levelParams
+      type := normalized
+      value := .const info.name (info.levelParams.map Lean.Level.param)
+      hints := .opaque
+      safety := .safe
+    }
+    match native.checked.get.addDeclCore 2000000 20000 witness none with
+    | .ok _ => pure ()
+    | .error error =>
+      throw (IO.userError (toString info.name ++
+        ": official native kernel refused autoParam definitional equivalence: " ++
+        PsKernelLean.kernelExceptionSummary error))
+  -- Do not silently rewrite proof terms or executable definitions: doing so
+  -- would require a separate kernel-checked value-convertibility certificate.
+  if let some value := info.value? true then
+    if standardEraseAutoParam value != value then
+      throw (IO.userError (toString info.name ++
+        ": autoParam in a declaration body requires independent value-equivalence proof"))
 
 -- One conversion, admission and source-rendering pipeline for reviewed library
 -- slices. Profiles choose roots and a boundary; they cannot bypass checking.
@@ -331,7 +371,7 @@ private def exportStandardCore (spec : StandardExportSpec)
   for root in spec.roots do
     if boundary.contains root then
       throw (IO.userError ("export root was incorrectly cut at boundary: " ++ toString root))
-    for info in ← standardDependencyClosure native root boundary do
+    for info in ← standardDependencyClosure native root boundary spec.eraseAutoParams do
       if !boundary.contains info.name && !seen.contains info.name then
         seen := seen.insert info.name
         entries := entries.push info
@@ -348,10 +388,11 @@ private def exportStandardCore (spec : StandardExportSpec)
     ("quotientPrimitives", Lean.toJson (entries.filterMap fun info =>
       match info with | .quotInfo _ => some (toString info.name) | _ => none))]).compress
   let declarations ← entries.toList.mapM fun info => do
-    match exportDeclaration native spec.allowedAssumptions info with
+    if spec.eraseAutoParams then checkAutoParamSignature native info
+    match exportDeclaration native spec.allowedAssumptions info spec.eraseAutoParams with
     | .ok value => pure value
     | .error reason =>
-      let path := standardDependencyPath native spec.roots info.name boundary
+      let path := standardDependencyPath native spec.roots info.name boundary spec.eraseAutoParams
       throw (IO.userError
         (toString info.name ++ ": " ++ reason ++
           " | upstream dependency path: " ++
@@ -363,7 +404,7 @@ private def exportStandardCore (spec : StandardExportSpec)
   let replayBase := spec.baseDeclarations.filter
     (fun d => !seen.contains (PsKernelLean.toLeanName (psDeclarationName d)))
   checkCandidate (declarations ++ replayBase) declarations
-  let recursorRules ← checkRecursorRules native (declarations ++ replayBase) declarations
+  let recursorRules ← checkRecursorRules native (declarations ++ replayBase) declarations spec.eraseAutoParams
   let boundaryNames := (base.map psDeclarationName).mergeSort
     (fun a b => Lean.Name.lt (PsKernelLean.toLeanName a) (PsKernelLean.toLeanName b))
   let mut pool : StandardSource.Pool := {
@@ -486,6 +527,7 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     baseDeclarations := existing
     allowedAssumptions := [`propext, `Quot.sound]
     replaceInductiveAxioms := [`Float, `Float32]
+    eraseAutoParams := true
     shareSource := true
     publicPrefix := "psStandardFloatIdentity"
     privatePrefix := "floatIdentityDecl"

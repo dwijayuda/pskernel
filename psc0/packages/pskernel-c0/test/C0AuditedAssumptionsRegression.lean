@@ -93,6 +93,31 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "audited optimized WHNF bypassed source zero fuel")
 
+  -- The DEFAULT audited operation now uses independently source-proved
+  -- irreducible WHNF heads, not optional candidate evaluation. Other
+  -- heads retain the original source reducer and exact trust ledger.
+  let (defaultDirect, defaultAudit) ← match
+      psKernelC0AuditedSourceWhnf 4096 reviewed (.sort .zero) with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("default audited fast WHNF failed: " ++ e))
+  if !psKernelExprEqual defaultDirect directWhnf then
+    throw (IO.userError "audited default disagreed with qualified Sort WHNF")
+  let _defaultAxiomProof := psKernelC0AuditedSourceAxiomsApproved defaultAudit
+  let _defaultCapabilityProof :=
+    psKernelC0AuditedSourceCapabilitiesApproved defaultAudit
+  let (defaultNeutral, afterDefaultNeutral) ← match
+      psKernelC0AuditedSourceWhnf 4096 defaultAudit (.const firstName []) with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("audited source neutral WHNF failed: " ++ e))
+  if !psKernelExprEqual defaultNeutral (.const firstName []) ||
+      (psKernelC0HistoryAxiomSignatures
+        afterDefaultNeutral.trusted.history).length != 1 then
+    throw (IO.userError "default audited WHNF changed axiom or proof history")
+  let _neutralApproved :=
+    psKernelC0AuditedSourceAxiomsApproved afterDefaultNeutral
+
   -- An approved AXIOM NAME must not authorize a different proposition,
   -- universe signature, or safety classification at the same name.
   let approvedSignature := c0AuditedAxiom firstName

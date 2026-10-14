@@ -22,7 +22,7 @@ def main : IO Unit := do
   | _ => throw (IO.userError "verified provider did not reject loose bound variable")
 
   let name : PsKernelName := .str .anonymous "VerifiedProviderAxiom"
-  let axiom : PsKernelAxiomInfo := {
+  let signedAxiom : PsKernelAxiomInfo := {
     base := {
       name := name
       levelParams := []
@@ -30,20 +30,20 @@ def main : IO Unit := do
     }
     isUnsafe := false
   }
-  match psKernelC0VerifiedProviderAdmit first (.axiomDecl axiom) with
+  match psKernelC0VerifiedProviderAdmit first (.axiomDecl signedAxiom) with
   | .error _ => pure ()
-  | .ok _ => throw (IO.userError "verified provider admitted unsigned axiom")
+  | .ok _ => throw (IO.userError "verified provider admitted unsigned signedAxiom")
 
   match psKernelC0VerifiedProviderAdmit first (.mutualDefinitions []) with
   | .error (.declinedUnsupported _) => pure ()
   | _ => throw (IO.userError "verified provider invented mutual-definition admission")
-  let some policySession := psKernelC0VerifiedChangePolicy first.verified [axiom] []
+  let some policySession := psKernelC0VerifiedChangePolicy first.verified [signedAxiom] []
     | throw (IO.userError "verified policy expansion failed")
   let withPolicy : PsKernelC0VerifiedProviderSession :=
     { first with verified := policySession }
-  let accepted ← match psKernelC0VerifiedProviderAdmit withPolicy (.axiomDecl axiom) with
+  let accepted ← match psKernelC0VerifiedProviderAdmit withPolicy (.axiomDecl signedAxiom) with
     | .ok session => pure session
-    | .error _ => throw (IO.userError "verified provider rejected approved checked axiom")
+    | .error _ => throw (IO.userError "verified provider rejected approved checked signedAxiom")
   if psKernelEnvironmentSize
       accepted.verified.sealed.audited.trusted.certified.raw.checker.context.environment != 1 then
     throw (IO.userError "verified provider lost checked declaration")
@@ -55,7 +55,7 @@ def main : IO Unit := do
     }
     isUnsafe := false
   }
-  let some widened := psKernelC0VerifiedChangePolicy accepted.verified [axiom, second] []
+  let some widened := psKernelC0VerifiedChangePolicy accepted.verified [signedAxiom, second] []
     | throw (IO.userError "verified provider second explicit policy expansion failed")
   let full : PsKernelC0VerifiedProviderSession := { accepted with verified := widened }
   match psKernelC0VerifiedProviderAdmit full (.axiomDecl second) with

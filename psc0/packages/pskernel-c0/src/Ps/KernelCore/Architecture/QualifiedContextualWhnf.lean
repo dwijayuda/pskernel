@@ -154,8 +154,8 @@ theorem psKernelC0ContextualHeadWhnf_source
                         psKernelWhnfCoreWithFuel,
                         psKernelWhnfCoreWithFuelRanges,
                         psKernelWhnfAfterCore, psKernelReduceNatWith,
-                        psKernelUnfoldDefinition, psKernelWhnfFinish,
-                        cache, depth, term, nextState]
+                        psKernelUnfoldDefinition, psKernelExprGetAppFn,
+                        psKernelWhnfFinish, cache, depth, term, nextState]
       | bvar _ => simp [psKernelC0ContextualHeadWhnfWithFuel] at h
       | sort _ => simp [psKernelC0ContextualHeadWhnfWithFuel] at h
       | mvar _ => simp [psKernelC0ContextualHeadWhnfWithFuel] at h

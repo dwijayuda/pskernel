@@ -89,6 +89,12 @@ def psKernelC0RequestTrustCapabilities :
       | .safe => []
       | .unsafeDef => [.unsafeDefinition info.base.name]
       | .partialDef => [.partialDefinition info.base.name]
+  | .mutualDefinitions values =>
+      values.flatMap (fun info =>
+        match info.safety with
+        | .safe => []
+        | .unsafeDef => [.unsafeDefinition info.base.name]
+        | .partialDef => [.partialDefinition info.base.name])
   | .opaqueDecl info =>
       if info.isUnsafe then [.unsafeOpaque info.base.name] else []
   | .ordinaryInductive info =>

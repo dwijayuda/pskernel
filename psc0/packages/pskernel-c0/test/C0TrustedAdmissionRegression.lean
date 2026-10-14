@@ -60,6 +60,26 @@ def main : IO Unit := do
   | .ok _ =>
       throw (IO.userError "trusted direct WHNF bypassed source fuel exhaustion")
 
+  -- The source-free metadata-chain evaluator also preserves the complete
+  -- checked empty-genesis provenance, with source-identical fuel behavior.
+  let nestedMetadata : PsKernelExpr :=
+    .mdata 11 (.mdata 12 (.sort .zero))
+  let (unwrapped, afterMetadata) ← match psKernelC0TrustedSourceWhnf
+      3 genesis nestedMetadata with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("trusted nested metadata failed: " ++ e))
+  if !psKernelExprEqual unwrapped (.sort .zero) then
+    throw (IO.userError "trusted metadata changed exact source value")
+  let _metadataHistory :
+      PsKernelC0SourceEnvironmentHistory
+        afterMetadata.certified.raw.checker.context.environment :=
+    afterMetadata.history
+  match psKernelC0TrustedSourceWhnf 2 genesis nestedMetadata with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "trusted nested metadata ignored source fuel")
+
   let nameOne := c0TrustName "TrustedSourceOne"
   let nameTwo := c0TrustName "TrustedSourceTwo"
   let first : PsKernelC0ArchitectureDeclaration :=

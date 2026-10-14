@@ -93,6 +93,25 @@ def main : IO Unit := do
       4096 letSession.context letSession.state rigid).isSome then
     throw (IO.userError "uncached let-fvar was independently accepted")
 
+  -- Warm source-owned let-fvar WHNF cache is eligible without repeating
+  -- zeta evaluation. This is never an externally imported success cache.
+  let (letValue, warmedLetState) ← match psKernelCheckerWhnf 4096
+      letSession.context letSession.state rigid with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("source let-fvar failed: " ++ e))
+  if !psKernelExprEqual letValue sort0 then
+    throw (IO.userError "source let-fvar zeta result changed")
+  let some (cachedLet, identicalState) :=
+      psKernelC0ContextualHeadWhnfWithFuel 1
+        letSession.context warmedLetState rigid
+    | throw (IO.userError "warm let-fvar cache declined")
+  if !psKernelExprEqual cachedLet sort0 ||
+      (psKernelExprMapGet identicalState.whnf rigid).isNone then
+    throw (IO.userError "warm let-fvar cache lost source value")
+  if (psKernelC0ContextualHeadWhnfWithFuel
+      0 letSession.context warmedLetState rigid).isSome then
+    throw (IO.userError "warm let-fvar bypassed zero public fuel")
+
   let blocked : PsKernelCheckerSession := {
     source with
     context := { source.context with recDepth := 1000000, maxRecDepth := 1 }

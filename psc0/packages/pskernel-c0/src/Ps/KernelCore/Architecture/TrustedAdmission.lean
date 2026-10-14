@@ -179,15 +179,22 @@ def psKernelC0TrustedSourceCheck
   psKernelC0TrustedSourceRun work
     (fun context state => psKernelCheckerCheck fuel context state expr)
 
-/-- Definitional equality remains the original source judgment, with the
-    same environment/history across its state update. -/
+/-- The source-proved structurally reflexive DefEq fragment now runs
+    independently on valid fuel/context, with exact original cache updates.
+    Other comparisons retain full source semantics and error classification.
+    This is a convertibility observation, never full term validation. -/
 def psKernelC0TrustedSourceDefEq
     (fuel : Nat)
     (work : PsKernelC0TrustedSourceWork)
     (left right : PsKernelExpr) :
     Except String (Bool × PsKernelC0TrustedSourceWork) :=
-  psKernelC0TrustedSourceRun work
-    (fun context state => psKernelIsDefEq fuel context state left right)
+  match psKernelC0CertifiedWorkDefEqCanonicalFastOwned
+      fuel work.certified left right with
+  | .error reason => .error reason
+  | .ok receipt =>
+      let (same, certified) := receipt.val
+      .ok (same, psKernelC0TrustedSourceWithState
+        work certified.raw.checker.state)
 
 /-- Stage syntax without discarding proven source-admission provenance.
     The stage operation carries an exact proof that the checked environment

@@ -58,7 +58,7 @@ def psStandardByteArrayCoreOperations : List PsDeclaration :=
 -- used at indices 0..size-1 after the checked length check; its default
 -- cannot affect equality. This construction shares the already qualified
 -- Nat/UInt/Array erasure and does not special-case targets.
-def psStandardByteArrayBeqDeclaration : PsDeclaration :=
+def psStandardByteArrayBeqModelDeclaration : PsDeclaration :=
   let byteArray := psStandardByteArrayType
   let uint8 := psStandardByteArrayElement
   let bool : PsExpr := .constE psBoolName []
@@ -87,9 +87,21 @@ def psStandardByteArrayBeqDeclaration : PsDeclaration :=
   let allBytes := psOrderNatRec (.succ .zero)
     (psLogicLam 4 "_" psOrderNat bool)
     trueValue step leftSize
+  .definitionDecl (psNameAppendStr psStandardByteArrayName "beq") []
+    (psLogicPi 0 "left" byteArray
+      (psLogicPi 1 "right" byteArray bool))
+    (psLogicLam 0 "left" byteArray
+      (psLogicLam 1 "right" byteArray
+        (boolAnd sameLength allBytes)))
+
+-- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
+-- The runtime recursion is owned by one top-level value, not duplicated or
+-- embedded inside every dictionary application.
+def psStandardByteArrayBeqDeclaration : PsDeclaration :=
+  let byteArray := psStandardByteArrayType
   let method := psLogicLam 0 "left" byteArray
     (psLogicLam 1 "right" byteArray
-      (boolAnd sameLength allBytes))
+      (psOrderCall "ByteArray.beq" [.fvar 0, .fvar 1]))
   psStandardBEqInstance "ByteArray" byteArray method
 
 def psStandardByteArrayInhabitedDeclaration : PsDeclaration :=
@@ -98,7 +110,8 @@ def psStandardByteArrayInhabitedDeclaration : PsDeclaration :=
 
 def psStandardByteArrayCollectionDeclarations : List PsDeclaration :=
   psStandardByteArrayCoreOperations ++
-    [psStandardByteArrayBeqDeclaration,
+    [psStandardByteArrayBeqModelDeclaration,
+     psStandardByteArrayBeqDeclaration,
      psStandardByteArrayInhabitedDeclaration]
 
 def psStandardByteArrayCollectionExtend

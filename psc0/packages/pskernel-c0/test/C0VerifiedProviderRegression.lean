@@ -12,6 +12,31 @@ def main : IO Unit := do
   let first ← match psKernelC0VerifiedProviderBegin resources provider with
     | .ok session => pure session
     | .error _ => throw (IO.userError "verified provider genesis refused valid policy")
+  let beta : PsKernelExpr :=
+    .app (.lam (.str .anonymous "betaArgument") (.sort .zero)
+      (.bvar 0) .default) (.sort .zero)
+  -- These are reductions/comparisons of CHECKED expressions; an invalid
+  -- application may not become a provider-authorized WHNF or DefEq result.
+  let (normalized, _) ← match psKernelC0VerifiedProviderWhnf
+      first (.sort .zero) with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "verified provider WHNF rejected Sort")
+  if !psKernelExprEqual normalized (.sort .zero) then
+    throw (IO.userError "verified provider WHNF changed source Sort")
+  let (sameSort, _) ← match psKernelC0VerifiedProviderDefEq
+      first (.sort .zero) (.sort .zero) with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "verified provider DefEq rejected Sorts")
+  if !sameSort then
+    throw (IO.userError "verified provider DefEq denied checked identical inputs")
+  match psKernelC0VerifiedProviderWhnf first beta with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "verified provider WHNF accepted a malformed typed beta")
+  match psKernelC0VerifiedProviderDefEq first beta beta with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "verified provider DefEq accepted malformed arguments")
   let (ty, afterCheck) ← match psKernelC0VerifiedProviderCheck first (.sort .zero) with
     | .ok value => pure value
     | .error _ => throw (IO.userError "verified provider rejected well-typed Sort")

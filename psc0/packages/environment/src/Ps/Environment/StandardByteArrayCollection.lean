@@ -184,6 +184,21 @@ def psStandardByteArrayIndexInstances : List PsDeclaration :=
       (family "PsStandard.instLawfulGetElemOptionalDefault"
         [checked, decision]) ]
 
+-- The pinned ByteArray.toList loop yields the bytes in logical index
+-- order. On PSC0's checked logical representation the same finite sequence
+-- is already available through the existing Array.toList definition.
+-- This is a semantic implementation; equivalence to the upstream executable
+-- loop still warrants a separate general theorem beyond bounded oracles.
+def psStandardByteArrayToListDeclaration : PsDeclaration :=
+  let bytes := psStandardByteArrayType
+  let a : PsExpr := .fvar 0
+  .definitionDecl (psNameAppendStr psStandardByteArrayName "toList") []
+    (psLogicPi 0 "bytes" bytes
+      (psSelfHostListOf psStandardByteArrayElement))
+    (psLogicLam 0 "bytes" bytes
+      (psOrderCall "Array.toList"
+        [psStandardByteArrayElement, psStandardByteArrayData a]))
+
 -- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=
   let bytes := psStandardByteArrayType
@@ -203,6 +218,7 @@ def psStandardByteArrayCollectionDeclarations : List PsDeclaration :=
      psStandardByteArrayBeqDeclaration,
      psStandardByteArrayInhabitedDeclaration] ++
     psStandardByteArrayCheckedIndexDeclarations ++
+    [psStandardByteArrayToListDeclaration] ++
     psStandardByteArrayIndexInstances
 
 def psStandardByteArrayCollectionExtend

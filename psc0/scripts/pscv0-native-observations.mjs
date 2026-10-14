@@ -8,6 +8,8 @@ export const observations = [
   {name:"byteEmptyLength",args:null,type:"nat",expected:0n},
   {name:"byteRoundtrip",argTypes:["uint8"],args:[255],type:"uint8",expected:255},
   {name:"byteTwoLength",argTypes:["uint8","uint8"],args:[1,255],type:"nat",expected:2n},
+  {name:"byteListLength",argTypes:["uint8"],args:[233],type:"nat",expected:1n},
+  {name:"byteListFirst",argTypes:["uint8"],args:[233],type:"uint8",expected:233},
   {name:"byteCheckedRead",argTypes:["uint8"],args:[201],type:"uint8",expected:201},
   {name:"byteCheckedWrite",argTypes:["uint8"],args:[77],type:"uint8",expected:77},
   {name:"byteOptionalSome",args:null,type:"uint8",expected:6},

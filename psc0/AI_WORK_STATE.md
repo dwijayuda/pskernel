@@ -1,5 +1,31 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — checked ByteArray indexed API fully qualified
+
+Commit `05d4c1cec39bf7cb93089041982e60f802563c5d` passed all 27
+[Linux CI 38607736899](https://github.com/dwijayuda/pskernel/actions/runs/38607736899)
+steps. The approved selected Standard fingerprint is FNV
+`fnv1a64:18073559988743207974`, SHA-256
+`sha256:bbf06e5a2091c8cb1af14a0b7c35177b9ce029aea402e853072cccc1d43abfac`.
+Native Lean checked the proof-indexed `ByteArray.get`/`set`, genuine
+`GetElem ByteArray Nat UInt8`/`GetElem?`/`LawfulGetElem` dictionaries,
+registered instances and metadata. Independent native checks and shared
+JS/TypeScript/Rust/Wasm executions (including Wasmtime) passed. It is the
+last fully qualified executable checkpoint until a newer run succeeds.
+
+**Next checked candidate:** the logical `ByteArray.toList` conversion
+reuses the existing checked Array/List representation and has bounded
+native / cross-target observations. It remains pending full kernel,
+registry, erasure, runtime and performance qualification. The logical
+construction alone is not a proof of general equivalence with Lean's
+native optimized toList loop.
+
+Outstanding M2+A: further pinned collection APIs; Float/Float32 F1–F4
+without unapproved `Classical.choice`; explicit USize/ISize profiles;
+selected deriving corner cases; remaining instance/search fidelity;
+a reproducible complete Standard module/notation/effect/assumption
+manifest. No pskernel-core, self-hosting or C5 has been started.
+
 ## 15 October — ByteArray cross-target green and indexed API next
 
 **Last fully qualified executable:** `4ae7631c18ef9062f8a552015624b6af2d2a341d`;

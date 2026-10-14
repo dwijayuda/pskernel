@@ -1,5 +1,22 @@
 # PSC0 Phase A — Lean 4.35.0 ByteArray logical baseline
 
+## 15 October 2026 — accepted indexed API, next toList candidate
+
+The verified indexed ByteArray source, dictionaries, erasure and target
+executions passed at `05d4c1cec39bf7cb93089041982e60f802563c5d`,
+[Linux 38607736899](https://github.com/dwijayuda/pskernel/actions/runs/38607736899)
+(all 27 steps). The previous strict snapshot was intentionally updated
+to the CI-measured FNV and SHA-256 values. Nat indexing and its
+lawfulness evidence are qualified; USize indexing is not.
+
+The next candidate adds `ByteArray.toList : ByteArray → List UInt8`,
+implemented through checked `Array.toList` of the logical `data`
+field. It conserves index order. The corresponding pinned Lean function
+iterates and reverses its accumulator; general equivalence still
+requires a separate theorem, and native/cross-target tests are bounded
+observations. Do not claim native packed-buffer optimization.
+This new extension is pending full independent CI qualification.
+
 ## 15 October 2026 — checked indexed ByteArray candidate
 
 The **fully qualified** existing logical collection baseline is commit

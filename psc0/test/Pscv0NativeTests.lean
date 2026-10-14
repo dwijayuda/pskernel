@@ -2920,9 +2920,9 @@ private def selectedStandardManifestCases : IO Unit := do
   | .ok () => pure ()
   let manifest := PsV7Native.standardSurfaceManifestJson environment
   let repr := manifest.compress
-  unless repr.contains "selectedStandardSHA256" &&
-      repr.contains "selectedNotation" &&
-      repr.contains "registeredAxioms" do
+  unless (repr.splitOn "selectedStandardSHA256").length > 1 &&
+      (repr.splitOn "selectedNotation").length > 1 &&
+      (repr.splitOn "registeredAxioms").length > 1 do
     throw (IO.userError "PSCV0-MANIFEST: missing selected boundary")
   IO.println s!"PSCV0_STANDARD_MANIFEST: PASS selected notation, deriving, tactics, effects, module boundaries and {environment.declarations.length} strict declarations"
 

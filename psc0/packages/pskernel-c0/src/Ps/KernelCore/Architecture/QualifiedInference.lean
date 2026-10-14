@@ -130,8 +130,10 @@ theorem psKernelC0ScalarInfer_source
                         (psKernelFindUndefLevelParam
                           level nextContext.levelParams).isSome) with
                   | true =>
-                      simp [psKernelC0ScalarInferWithFuel,
+                      simp only [psKernelC0ScalarInferWithFuel,
                         depth, invalid] at h
+                      rw [cached] at h
+                      cases h
                   | false =>
                       let ty : PsKernelExpr := .sort (.succ level)
                       have hresult :
@@ -150,10 +152,18 @@ theorem psKernelC0ScalarInfer_source
                             (.sort level) none = none := by
                         change psKernelExprMapGet cache expr = none
                         exact cached
-                      simpa [psKernelInferCoreWithFuelUsing,
+                      simp [psKernelInferCoreWithFuelUsing,
                         psKernelInferCoreWithFuelUsingSourceFrames,
                         psKernelInferCacheEligible, hcache, depth, invalid,
                         ty, expr]
+                      all_goals
+                        intro hChecked
+                        cases hparameter :
+                            psKernelFindUndefLevelParam
+                              level nextContext.levelParams with
+                        | none => rfl
+                        | some name =>
+                            simp [hChecked, hparameter] at invalid
       | lit literal =>
           cases depth : psKernelCheckerContextEnterRecDepth context with
           | error reason =>

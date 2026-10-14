@@ -454,7 +454,7 @@ def psKernelC0AuditedSourceInfer
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
-  match psKernelC0CertifiedWorkInferMetadataOwned
+  match psKernelC0CertifiedWorkInferBinderOwned
       fuel work.trusted.certified expr with
   | .error reason => .error reason
   | .ok receipt =>

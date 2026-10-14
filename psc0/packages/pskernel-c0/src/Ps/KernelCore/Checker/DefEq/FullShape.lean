@@ -91,6 +91,12 @@ def psKernelDefEqFullShapeWith
                   (Prod.mk
                     Option.none
                     (Prod.snd result))
+      | PsKernelExpr.lam _ _ _ _ =>
+          -- Lean 4.35 type_checker.cpp::is_def_eq_core attempts function
+          -- eta after application congruence, even when the non-lambda
+          -- side is an application. The former catchall omitted this case.
+          psKernelDefEqLambdaEtaRightWith
+            defeq inferType whnf context state left right
       | _ =>
           Except.ok
             (Prod.mk Option.none state)

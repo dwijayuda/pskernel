@@ -5,6 +5,8 @@ on:
       - perf/pskernel-c0-v7-rust-20261012
     paths:
       - '.github/workflows/pskernel-c0-init-survey.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/**'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Inference/**'
   workflow_dispatch:
 permissions:
   contents: read

@@ -148,7 +148,7 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          .lake/build/bin/pscv0_native --export-signed-identity-candidate ../dist/pscv0-native/StandardSignedIdentityCandidate.lean | tee ../dist/pscv0-native/signed-identity-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          .lake/build/bin/pscv0_native --export-signed-identity-candidate ../dist/pscv0-native/StandardSignedIdentityCandidate.lean | tee ../dist/pscv0-native/signed-identity-candidate.log
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

@@ -9,6 +9,7 @@ import Ps.Host.StandardClosure
 import Ps.Meta.Reduce
 import Ps.Host.StandardSource
 import Ps.Host.FloatConstructive
+import Ps.Host.FloatCanonical
 
 namespace PsV7Native
 
@@ -688,6 +689,25 @@ def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit :=
     publicPrefix := "psStandardFloatBitsConstructive"
     privatePrefix := "floatBitsConstructiveDecl"
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 Float model and verified constructive Nat.pow_eq_zero proof cut.\nKernel replay and approved propext/Quot.sound assumptions only.\nF1 research-only; not selected Standard or executable Float.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+-- Small native constructive F1 authoring closure. Replay all reached
+-- declarations in the portable kernel against the frozen Standard;
+-- refuse any incompatible dependencies, unapproved axioms or opaque casts.
+def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`PsV7Native.FloatCanonical.fromBits64,
+              `PsV7Native.FloatCanonical.fromBits32,
+              `PsV7Native.FloatCanonical.canonicalPacked_idempotent]
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonical }]
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardFloatCanonicalModel"
+    privatePrefix := "floatCanonicalModelDecl"
+    provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nNative kernel-checked Float canonical-model research, not executable Float.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
 -- Pinned Lean 4.35.0 SInt/Basic: each signed type is a checked

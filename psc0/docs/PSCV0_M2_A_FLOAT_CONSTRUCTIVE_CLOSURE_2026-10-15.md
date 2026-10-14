@@ -1,5 +1,23 @@
 # M2+A Float F1 constructive dependency closure — research candidate
 
+## 15 October — reusable constructive Float proof-model candidate
+
+The last green executable checkpoint is `1fd22ead9f5c32e57e189251be94db7c1245a542`,
+[27-step CI 38648695550](https://github.com/dwijayuda/pskernel/actions/runs/38648695550).
+A native all-bitpattern `Format.Valid` theorem and real Float32/Float64
+constructors passed kernel, axiom and existing runtime regression gates.
+
+**New unqualified authoring batch:** move this proof and constructors from
+the native oracle into `Ps.Host.FloatCanonical`; add universal
+`canonicalPacked_of_valid` and `canonicalPacked_idempotent` theorems.
+An isolated research workflow attempts portable-kernel replay of this
+small proof-bearing model against the unmodified frozen Standard, instead
+of importing the 1,038-declaration original Float.ofBits dependency graph
+that was correctly refused for List/Int model mismatches. Never weaken
+the strict assumption allowlist or publisher. Source-level Float
+construction, F2 arithmetic, F3 scientific syntax, F4 ABI/runtime and
+full Phase A/M2+A remain unqualified. No pskernel-core/self-hosting/C5.
+
 ## 15 October — F2 bit equalities green; constructive Format.Valid candidate
 
 The checked Float32/Float64 *bit-level* two-equality models passed all

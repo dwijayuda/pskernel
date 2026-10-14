@@ -208,6 +208,13 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited. Both hashes
 -- were independently observed after genuine strict drift refusal at
 -- a4fdce40, Linux Actions 38556955048; no new assumptions.
+-- Four additional checked Float32/64 bit classifiers: isInf and
+-- isFinite. Exact IEEE exponent/fraction logic over admitted UInt32/64,
+-- preserving both signed zeros, all subnormals, ±Inf, canonical NaN.
+-- No Float constructor, external primitive, class/instance or new axiom.
+-- Both digests independently observed after native build and strict
+-- registry refusal in Linux 38646329990. Final source/typed-IR/runtime
+-- qualification remains mandatory; this pin alone is not acceptance.
 -- Four checked F1 Float32/Float64 *bit helper* declarations, each built
 -- from existing UInt32/UInt64 bitwise, Nat.beq, and Bool.rec operations.
 -- No Float constructor/unchecked valid proof, new axiom, instance or runtime
@@ -252,7 +259,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- statuses. These precise FNV/SHA are from independent strict drift
 -- refusal in Linux 38563557310 at 09965258; never infer expected hashes.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:472916921099067688"
+  "fnv1a64:16794493833312288355"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -414,7 +421,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:55e02ab15a27d74bde186901694b6729a07a6adb9c4263b0a2b3a891df7a4d50"
+  "sha256:d4fa7bebd270b0c08f5a71edee048f43ff5400ae30bf5c352fe3ff430d85f2f8"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

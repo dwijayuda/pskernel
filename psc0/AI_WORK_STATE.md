@@ -1,5 +1,25 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — four checked signed Nat clamping methods (qualification pending)
+
+An M2+A native portable `.lean` stage implements Lean 4.35.0
+`Int8/16/32/64.toNatClampNeg`, using exactly the already selected
+kernel-checked `IntN.toInt` and `Int.toNat` bodies. Twelve values
+at the signed limits, zero and minus one are covered both in the
+pinned native Lean oracle and in shared JS/TS/Rust/Wasm observations.
+There is no new trusted assumption, extra runtime primitive, host-width
+dependency, `pskernel-core`, self-hosting or C5 feature.
+
+**Pending:** Native official-kernel qualification, independently observed
+FNV/SHA Standard fingerprint drift and the complete Linux backend gates.
+Do not claim this candidate qualified until the new exact digests are
+measured and full CI passes. The preceding selected signed-shift stage
+passed all Linux gates at `86faead` in
+[Actions 38569444828](https://github.com/dwijayuda/pskernel/actions/runs/38569444828).
+Signed comparisons, Float F1–F4, portable target-sized integer profiles and
+comprehensive Phase A exit remain open.
+
+
 ## 14 October — signed shift candidate; ofInt now qualified
 
 The four wrapping `Int8/16/32/64.ofInt` declarations are **fully green** at commit `75b8787584339f3ea54d5b673aa3211f37589329`, [Linux 38567308280](https://github.com/dwijayuda/pskernel/actions/runs/38567308280). Selected Standard 1,687 declarations, 23 classes, 189 instances; independently measured FNV `fnv1a64:18408272372580449619` and SHA-256 `sha256:52a6343fe02345259225f17386182d73cf452bb6df5b44987e79b80468aee543`; 479 JS/TS/Rust shared observations, Wasm GC and Wasmtime component host qualified. Pinned native Lean signed oracle 30 values, seven typed-IR negative checks.

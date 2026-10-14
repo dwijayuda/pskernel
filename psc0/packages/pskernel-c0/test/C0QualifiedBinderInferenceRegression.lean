@@ -107,7 +107,8 @@ def main : IO Unit := do
   let limited : PsKernelCheckerSession := {
     session with
     context := {
-      session.context with maxRecDepth := 1
+      session.context with
+      maxRecDepth := 1
       recDepth := 1000000
     }
   }

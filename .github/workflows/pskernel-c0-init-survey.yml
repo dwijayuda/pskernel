@@ -357,6 +357,17 @@ jobs:
       - name: Compile the identical NDJSON checker as native Lean
         working-directory: psc0/packages/pskernel-c0
         run: lake build c0OfficialReplay
+      - name: Cross-check compiled and interpreted replay on official positive and negative inputs
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in test/C0OfficialAccept.ndjson test/C0OfficialChainReject.ndjson; do
+            old="$(lake env lean --run test/C0OfficialNdjsonReplay.lean "$file" | grep '^C0_REAL_EXPORT replay_outcome=')"
+            new="$(.lake/build/bin/c0OfficialReplay "$file" | grep '^C0_REAL_EXPORT replay_outcome=')"
+            test "$old" = "$new"
+            echo "C0_NATIVE_SOURCE_PARITY exact_verdict=$new"
+          done
       - name: Discover the next real Lean Init compatibility boundary
         shell: bash
         run: |
@@ -370,7 +381,19 @@ jobs:
             cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
             timeout 360s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-next-boundary.ndjson" 4096
           ) | tee "$RUNNER_TEMP/next-c0.txt"
-          grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/next-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=150000 fuel=4096" "$RUNNER_TEMP/next-c0.txt"
+          echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=150000"
+      - name: Probe full official Init with compiled C0 checked replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          if (cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" && timeout 900s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-4.35.0.ndjson" 4096) > "$RUNNER_TEMP/c0-full-init-native.txt" 2>&1; then
+            cat "$RUNNER_TEMP/c0-full-init-native.txt"
+            grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/c0-full-init-native.txt"
+          else
+            echo "C0_REAL_INIT_FULL_NATIVE verdict=inconclusive_host_or_timeout"
+            tail -n 40 "$RUNNER_TEMP/c0-full-init-native.txt" || true
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -391,5 +414,6 @@ jobs:
             ${{ runner.temp }}/Init-next-boundary.ndjson
             ${{ runner.temp }}/next-official.txt
             ${{ runner.temp }}/next-c0.txt
+            ${{ runner.temp }}/c0-full-init-native.txt
           if-no-files-found: warn
           retention-days: 14

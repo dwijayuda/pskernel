@@ -64,7 +64,13 @@ jobs:
           set -euo pipefail
           lake build pscv0_native
           mkdir -p ../dist/pscv0-f1-constructive
-          lake env .lake/build/bin/pscv0_native --export-float-constructive-pow-candidate ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          test -f .lake/build/lib/lean/Ps/Host/FloatConstructive.olean
+          # The native-only host library lives in this Lake package; the
+          # portable dependency package is separately under ../.lake.
+          # Preserve all Lake-provided imports while preferring this package
+          # for dynamic Lean.importModules during the authoring experiment.
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-constructive-pow-candidate ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
           sha256sum ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/source.sha256
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

@@ -426,6 +426,7 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                                 (psKernelExprMapInsert coreState.whnf term value))
                         simp only [cache, psKernelWhnfCoreWithFuel,
                           sourceCore, sourcePost]
+                        rfl
                       · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
                           cache, coreCheck, stable, term] at h
       | letE name ty value body nondep =>
@@ -490,6 +491,7 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                                 (psKernelExprMapInsert coreState.whnf term reduced))
                         simp only [cache, psKernelWhnfCoreWithFuel,
                           sourceCore, sourcePost]
+                        rfl
                       · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
                           cache, coreCheck, stable, term] at h
       | bvar _ => simp [psKernelC0RecursiveBetaZetaWhnfWithFuel] at h

@@ -357,6 +357,62 @@ def main : IO Unit := do
       psKernelC0ArchitectureWorkValid whnfWork.raw = true :=
     whnfWork.valid
 
+  -- An optimized candidate can enter the checked WHNF result only with
+  -- exact *propositional* equality to the independently checked source.
+  -- This is an accepting integration seam, not optimized-kernel soundness.
+  let betaExpr : PsKernelExpr :=
+    .app (.lam (c0CertificateName "x") (.sort .zero)
+      (.bvar 0) .default) (.sort .zero)
+  let agreedReceipt ← match psKernelC0CertifiedWorkRefineWhnf
+      4096 32768 defeqWork betaExpr with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("WHNF refinement source failed: " ++ e))
+  let _exactSourceReceipt :
+      psKernelC0CertifiedWorkWhnf 4096 defeqWork betaExpr =
+        .ok (psKernelC0WhnfReceiptValue agreedReceipt,
+          agreedReceipt.sourceWork) :=
+    psKernelC0WhnfReceipt_sourceCheck agreedReceipt
+  match agreedReceipt.candidate with
+  | .agreed _ => pure ()
+  | .mismatch _ =>
+      throw (IO.userError "candidate β-ζ evaluation disagreed with source WHNF")
+  | .declined e =>
+      throw (IO.userError ("candidate unexpectedly declined simple β: " ++ e))
+  if !psKernelExprEqual (psKernelC0WhnfReceiptValue agreedReceipt)
+      (.sort .zero) then
+    throw (IO.userError "source-equal candidate produced wrong β value")
+  let _refinedWF : psKernelC0StoreWF
+      agreedReceipt.sourceWork.raw.scratch.working :=
+    psKernelC0CertifiedWorkStoreWF agreedReceipt.sourceWork
+
+  -- A stricter candidate budget cannot reject a successful source WHNF
+  -- judgment or change the successful checker state/output.
+  let underbudget ← match psKernelC0CertifiedWorkRefineWhnf
+      4096 0 defeqWork betaExpr with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("candidate quota vetoed source: " ++ e))
+  match underbudget.candidate with
+  | .declined _ => pure ()
+  | _ =>
+      throw (IO.userError "zero candidate quota did not decline evaluation")
+  let (fallback, fallbackWork) ← match
+      psKernelC0CertifiedWorkWhnfRefined 4096 0 defeqWork betaExpr with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("WHNF fallback rejected source: " ++ e))
+  if !psKernelExprEqual fallback (.sort .zero) then
+    throw (IO.userError "candidate decline changed authoritative WHNF")
+  let _fallbackValid :
+      psKernelC0ArchitectureWorkValid fallbackWork.raw = true :=
+    fallbackWork.valid
+
+  -- Resource failure of the *source* is terminal, even with a generous
+  -- candidate quota; no checked result or receipt can be manufactured.
+  match psKernelC0CertifiedWorkRefineWhnf
+      0 32768 defeqWork betaExpr with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "candidate bypassed source WHNF fuel exhaustion")
+
   -- Admit only a source-checked definition. Admission must refresh the
   -- checker state while retaining the proof about the unchanged syntax.
   let defName := c0CertificateName "CertifiedDefinition"

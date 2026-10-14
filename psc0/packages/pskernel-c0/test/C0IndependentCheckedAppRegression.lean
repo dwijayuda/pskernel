@@ -50,6 +50,10 @@ def main : IO Unit := do
     .app (.app (.const curry []) sort0) sort0
   let nestedArg : PsKernelExpr :=
     .app (.const identity []) (.app (.const identity []) sort0)
+  let nestedMetadata : PsKernelExpr :=
+    .mdata 101 (.mdata 102 nestedFn)
+  let metadataArgument : PsKernelExpr :=
+    .app (.const identity []) nestedMetadata
   for expr in [application, wrapped] do
     let (.app fn arg) := expr
       | throw (IO.userError "independent checked app malformed test")
@@ -119,6 +123,38 @@ def main : IO Unit := do
         source.context source.state expr).isSome then
       throw (IO.userError "recursive app bypassed nested fuel accounting")
 
+  -- This family was previously declined because metadata terminated at
+  -- an application rather than a scalar/local/constant. Each wrapper must
+  -- charge one source fuel/depth step and publish the checked outer cache.
+  for expr in [nestedMetadata, metadataArgument] do
+    if (psKernelC0MetadataInferWithFuel 4096
+        source.context source.state expr false).isSome then
+      throw (IO.userError "old metadata-only fragment unexpectedly qualified app")
+    let some (qualifiedType, qualifiedState) :=
+        psKernelC0RecursiveCheckedAppWithFuel
+          4096 source.context source.state expr
+      | throw (IO.userError "metadata-wrapped app tree unexpectedly declined")
+    if !psKernelExprEqual qualifiedType sort1 then
+      throw (IO.userError "metadata-wrapped independent app has wrong type")
+    if (psKernelExprMapGet qualifiedState.checkedInfer nestedMetadata).isNone then
+      throw (IO.userError "metadata app lost exact outer checked cache")
+    let some raw := psKernelC0ArchitectureBegin source
+      | throw (IO.userError "metadata app source work unavailable")
+    let some work := psKernelC0ArchitectureCertifyWork raw
+      | throw (IO.userError "metadata app canonical work unavailable")
+    let proof ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+        4096 work expr with
+      | .ok value => pure value
+      | .error e => throw (IO.userError ("metadata independent app failed: " ++ e))
+    let _exact :
+        psKernelC0CertifiedWorkCheck 4096 work expr = .ok proof.val :=
+      proof.property
+    if !psKernelExprEqual proof.val.fst sort1 then
+      throw (IO.userError "metadata source type mismatch")
+    if (psKernelC0RecursiveCheckedAppWithFuel 1
+        source.context source.state expr).isSome then
+      throw (IO.userError "metadata app bypassed fuel")
+
   let mismatch : PsKernelExpr :=
     .app (.const identity []) sort1
   let unknown : PsKernelExpr :=
@@ -169,17 +205,19 @@ def main : IO Unit := do
   | .error (.rejectedInvalid _) => pure ()
   | _ => throw (IO.userError "provider accepted mismatched app")
   let publication ← match psKernelC0VerifiedProviderPublishRoots
-      admittedCurry [application, wrapped, nestedFn, nestedArg] with
+      admittedCurry [application, wrapped, nestedFn, nestedArg,
+        nestedMetadata, metadataArgument] with
     | .ok result => pure result
     | .error _ => throw (IO.userError "independent app root publication failed")
   let _exactPublication :=
     psKernelC0VerifiedProviderPublicationCheckExact publication
-  if publication.checked.roots.length != 4 ||
+  if publication.checked.roots.length != 6 ||
       !(psKernelC0HistoryAxiomSignatures
         publication.staged.verified.sealed.audited.trusted.history).isEmpty then
     throw (IO.userError "independent app weakened atomic audited roots")
 
   IO.println "C0_INDEPENDENT_CHECKED_APP two_independent_child_judgments=pass"
   IO.println "C0_RECURSIVE_CHECKED_APP function_argument_trees_source_proved=pass"
+  IO.println "C0_RECURSIVE_CHECKED_METADATA wrapped_application_trees_source_proved=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP exact_source_errors_states_fuel=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP audited_publication=pass"

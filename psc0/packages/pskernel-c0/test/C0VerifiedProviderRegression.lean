@@ -88,8 +88,8 @@ def main : IO Unit := do
     isUnsafe := false
   }
   match psKernelC0VerifiedProviderAdmit first (.axiomDecl signedAxiom) with
-  | .error _ => pure ()
-  | .ok _ => throw (IO.userError "verified provider admitted unsigned signedAxiom")
+  | .error (.declinedUnsupported _) => pure ()
+  | _ => throw (IO.userError "verified provider misclassified an unsigned axiom")
 
   match psKernelC0VerifiedProviderAdmit first (.mutualDefinitions []) with
   | .error (.rejectedInvalid _) => pure ()
@@ -155,16 +155,16 @@ def main : IO Unit := do
   let mutualRequest : PsKernelDeclarationRequest :=
     .mutualDefinitions [mutualFirst, mutualSecond]
   match psKernelC0VerifiedProviderAdmit mutualGenesis mutualRequest with
-  | .error _ => pure ()
-  | .ok _ => throw (IO.userError "unapproved mutual family entered trusted environment")
+  | .error (.declinedUnsupported _) => pure ()
+  | _ => throw (IO.userError "unapproved mutual family did not decline")
   let some halfPolicy := psKernelC0VerifiedChangePolicy
       mutualGenesis.verified [] [.unsafeDefinition mutualOne]
     | throw (IO.userError "one-member policy review failed")
   let halfSession : PsKernelC0VerifiedProviderSession :=
     { mutualGenesis with verified := halfPolicy }
   match psKernelC0VerifiedProviderAdmit halfSession mutualRequest with
-  | .error _ => pure ()
-  | .ok _ => throw (IO.userError "one permission authorized entire unsafe mutual family")
+  | .error (.declinedUnsupported _) => pure ()
+  | _ => throw (IO.userError "one permission authorized or misclassified mutual family")
   let some bothPolicy := psKernelC0VerifiedChangePolicy
       mutualGenesis.verified []
         [.unsafeDefinition mutualOne, .unsafeDefinition mutualTwo]

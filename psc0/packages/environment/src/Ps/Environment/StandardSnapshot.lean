@@ -200,8 +200,12 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- 15 genuine native declarations replace exactly five legacy type axioms.
 -- Independently observed during strict drift refusal at bdfdb6 successor
 -- 8bee79d6 / Linux 38545886718. No classes, instances or new assumptions.
+-- M2+A checked-only signed BitVec + Float read-model extension.
+-- Exactly 62+6 declarations; full source/assets replayed by the official
+-- kernel before the independent frozen-digest refusal in CI 38549762258.
+-- No new classes, instances, assumptions, or executable primitive claims.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:545524655185859287"
+  "fnv1a64:2992617569121253333"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -363,7 +367,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:2675059835d6278a4c7ac8871a3df937835d2ee57912dfd7b9b296576df30c1f"
+  "sha256:4fc70a9fac595be03500185122459263e1a9e75141bc8fd39a680785d682e8a3"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

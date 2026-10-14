@@ -1,5 +1,28 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
+## M2+A signed dictionary candidate — independently measured strict registry (14 October 2026)
+
+Linux [run 38556955048](https://github.com/dwijayuda/pskernel/actions/runs/38556955048)
+at `a4fdce4089f544311487048c6d773e4754eff1d7` compiled
+the complete new signed dictionary source, regenerated all prior
+reviewed logical assets, and correctly refused the outdated Standard
+hashes before source/runtime admission. The newly observed selected
+Standard fingerprints are **FNV
+`fnv1a64:11697716145196202262`** and **SHA-256
+`sha256:47b1598e2faa1ccbe80d183aeeaaa9f1a5444d1fd2878ae40f4bbe21c3d25cc4`**.
+These exact independent values are now pinned in both strict snapshot
+guards; **the new stage is not yet fully qualified**. Its 36 checked
+HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited dictionary declarations
+and 36 explicit registrations should extend the preceding
+1,643-declaration /23-class /153-instance roster; do not assert
+new counts or cross-target parity until the next full green Linux run.
+The previous fully green accepted executable remains `514f537`,
+[CI 38555495881](https://github.com/dwijayuda/pskernel/actions/runs/38555495881)
+(448 shared observations, native Lean signed oracle, V8 GC and Wasmtime).
+No new axioms, psKernel-core, self-hosting, or Float-ofBits approval.
+
+
+
 ## M2+A checked signed operations and Float bit reads — snapshot review (14 October 2026)
 
 At commit `7bea16a0614be79e51c1ebbb99f926eda342b1fa`, [Linux CI 38549762258](https://github.com/dwijayuda/pskernel/actions/runs/38549762258) compiled and independently regenerated the two disjoint selected Core assets **byte-for-byte**: 62 checked Int8/Int16/Int32/Int64/BitVec method definitions and six Float/Float32 read-only bit-model definitions. The original frozen /61+signed identity prelude was preserved as the noncircular export boundary; no axiom, choice, source acceptance exception, instance or class was added. Official kernel replay and candidate checks passed before the selected Standard correctly refused the old digest. The observed next snapshot is **FNV `fnv1a64:2992617569121253333`** and **SHA-256 `sha256:4fc70a9fac595be03500185122459263e1a9e75141bc8fd39a680785d682e8a3`**. The expected 1,643 declarations (previously 1,575 plus 68, unchanged 23 classes and 153 instances) are subject to full regression confirmation; this edit pins only these independently measured hashes.

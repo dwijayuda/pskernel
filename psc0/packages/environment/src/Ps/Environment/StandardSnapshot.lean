@@ -204,8 +204,12 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- Exactly 62+6 declarations; full source/assets replayed by the official
 -- kernel before the independent frozen-digest refusal in CI 38549762258.
 -- No new classes, instances, assumptions, or executable primitive claims.
+-- Added 36 checked generic Int8/Int16/Int32/Int64 dictionaries:
+-- HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited. Both hashes
+-- were independently observed after genuine strict drift refusal at
+-- a4fdce40, Linux Actions 38556955048; no new assumptions.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:2992617569121253333"
+  "fnv1a64:11697716145196202262"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -367,7 +371,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:4fc70a9fac595be03500185122459263e1a9e75141bc8fd39a680785d682e8a3"
+  "sha256:47b1598e2faa1ccbe80d183aeeaaa9f1a5444d1fd2878ae40f4bbe21c3d25cc4"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

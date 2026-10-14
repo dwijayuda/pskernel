@@ -1,5 +1,28 @@
 # PSCV0 v7 — Continue M2+A from the 14 October 2026 checkpoint
 
+## M2+A signed dictionary candidate — independently measured strict registry (14 October 2026)
+
+Linux [run 38556955048](https://github.com/dwijayuda/pskernel/actions/runs/38556955048)
+at `a4fdce4089f544311487048c6d773e4754eff1d7` compiled
+the complete new signed dictionary source, regenerated all prior
+reviewed logical assets, and correctly refused the outdated Standard
+hashes before source/runtime admission. The newly observed selected
+Standard fingerprints are **FNV
+`fnv1a64:11697716145196202262`** and **SHA-256
+`sha256:47b1598e2faa1ccbe80d183aeeaaa9f1a5444d1fd2878ae40f4bbe21c3d25cc4`**.
+These exact independent values are now pinned in both strict snapshot
+guards; **the new stage is not yet fully qualified**. Its 36 checked
+HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited dictionary declarations
+and 36 explicit registrations should extend the preceding
+1,643-declaration /23-class /153-instance roster; do not assert
+new counts or cross-target parity until the next full green Linux run.
+The previous fully green accepted executable remains `514f537`,
+[CI 38555495881](https://github.com/dwijayuda/pskernel/actions/runs/38555495881)
+(448 shared observations, native Lean signed oracle, V8 GC and Wasmtime).
+No new axioms, psKernel-core, self-hosting, or Float-ofBits approval.
+
+
+
 ## M2+A signed typeclasses: current authoring/qualification checkpoint (14 October 2026)
 
 **Latest fully green native four-width signed runtime:** `514f53785b7c2aa1717d000efa5c64a08ccfe9a8`,

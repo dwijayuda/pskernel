@@ -173,16 +173,22 @@ theorem psKernelC0CheckedAppLeaf_checkerCheck
       context state fn arg = some result) :
     psKernelCheckerCheck fuel context state (.app fn arg) =
       .ok result := by
-  change psKernelInferCoreWithFuelUsing fuel
-    (some psKernelC0CheckAppRecursiveResummarized)
-    (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
-    (psKernelIsDefEqWithFuel fuel)
-    context state (.app fn arg) false = .ok result
-  exact psKernelC0CheckedAppLeaf_source fuel
-    (some psKernelC0CheckAppRecursiveResummarized)
+  -- Unlike nested checked subterms, short ROOT applications use the
+  -- historical callback-free infer worker in psKernelCheckWithFuel.
+  -- This optimization deliberately declines the >=16-argument route.
+  have hshort : ¬ psKernelExprGetAppNumArgs (.app fn arg) >= 16 := by
+    cases fuel with
+    | zero => simp [psKernelC0CheckedAppLeafWithFuel] at h
+    | succ remaining =>
+        by_contra hlong
+        simp [psKernelC0CheckedAppLeafWithFuel, hlong] at h
+  have exactSource := psKernelC0CheckedAppLeaf_source fuel
+    none
     (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
     (psKernelIsDefEqWithFuel fuel)
     context state fn arg result h
+  simpa [psKernelCheckerCheck, psKernelCheckWithFuel, hshort,
+    psKernelInferCoreWithFuel, psKernelInferCoreWithFuelUsing] using exactSource
 
 /-- Public-source-equivalent checked-work operation. On an independently
     qualified success, the dependent receipt proves the full original
@@ -200,13 +206,13 @@ def psKernelC0CertifiedWorkCheckIndependentAppOwned
       match h : psKernelC0CheckedAppLeafWithFuel fuel
           work.raw.checker.context work.raw.checker.state fn arg with
       | none =>
-          psKernelC0CertifiedWorkCheckProjectionOwned fuel work expr
+          psKernelC0CertifiedWorkCheckProjectionOwned fuel work (.app fn arg)
       | some (ty, checkedState) =>
           .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned
             work checkedState).val), by
               have source : psKernelCheckerCheck fuel
-                  work.raw.checker.context work.raw.checker.state expr =
-                    .ok (ty, checkedState) :=
+                  work.raw.checker.context work.raw.checker.state
+                  (.app fn arg) = .ok (ty, checkedState) :=
                 psKernelC0CheckedAppLeaf_checkerCheck fuel
                   work.raw.checker.context work.raw.checker.state fn arg
                   (ty, checkedState) h

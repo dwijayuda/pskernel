@@ -91,7 +91,7 @@ def psStandardSignedOrderExtend (environment : PsEnvironment) : PsEnvironment :=
     psStandardSignedOrderInstances.map Prod.snd).foldl
       psEnvironmentInsert environment
   let environment := ["LT", "LE"].foldl (fun env className =>
-    if env.classes.contains (psRootName className) then env
+    if env.classes.any (fun name => psNameToString name == className) then env
     else psStandardRegisterClass env className) environment
   let environment := psStandardSignedOrderInstances.foldl
     (fun env (className, decl) =>

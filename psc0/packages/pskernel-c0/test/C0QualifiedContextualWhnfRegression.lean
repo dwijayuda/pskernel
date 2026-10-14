@@ -16,11 +16,11 @@ def main : IO Unit := do
   let rigid : PsKernelExpr := .fvar name
   let source := psKernelMkCheckerSession
     psKernelEnvironmentEmpty [] .safe 4096 psKernelLeanNatMaxSizeDefault
-  let local := psKernelLocalContextAddLocal source.context.localContext
+  let rigidLocalContext := psKernelLocalContextAddLocal source.context.localContext
     name name sort1 .default
   let rigidSession : PsKernelCheckerSession := {
     source with
-    context := psKernelCheckerContextWithLocalContext source.context local
+    context := psKernelCheckerContextWithLocalContext source.context rigidLocalContext
   }
   let letLocal := psKernelLocalContextAddLet source.context.localContext
     name name sort1 sort0

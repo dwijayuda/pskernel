@@ -666,3 +666,132 @@ def psKernelC0CertifiedWorkWhnfRefined
     Except String (PsKernelExpr × PsKernelC0CertifiedWork) := do
   let receipt ← psKernelC0CertifiedWorkRefineWhnf fuel quota work expr
   return (psKernelC0WhnfReceiptValue receipt, receipt.sourceWork)
+
+
+/-!
+Phase E.4G: proof-qualified reflexive definitional equality.
+
+Lean 4.35's quick DefEq path recognizes structural equality before
+normalization, but the C0 native source algorithm first consumes its fuel
+and checks the recursion-depth policy; on success, it also inserts the
+exact original comparison into the positive-pair cache.
+
+The independent path below reproduces all those observable steps without
+running the source DefEq worker for qualifying terms. Every other input,
+including a resource-declined query, remains source authoritative.
+-/
+
+/-- Complete structurally reflexive quick-DefEq fragment. Not a typing
+    judgment. Its positive result is valid only for this exact algorithm's
+    checked recursion-depth and fuel boundary; it never uses imported
+    unqualified cache pairs or computes their transitive closure. -/
+def psKernelC0DefEqReflexiveWithFuel
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) :
+    Option (Bool × PsKernelCheckerState) :=
+  match fuel with
+  | 0 => none
+  | Nat.succ _ =>
+      match psKernelCheckerContextEnterRecDepth context with
+      | .error _ => none
+      | .ok _ =>
+          if psKernelExprEq left right then
+            some (psKernelDefEqFinish state left right true)
+          else none
+
+/-- Exact result and positive-cache state preservation against the full
+    original source DefEq worker for every context/state, including
+    source recursion guards. This theorem requires no candidate oracle. -/
+theorem psKernelC0DefEqReflexive_source
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr)
+    (result : Bool × PsKernelCheckerState)
+    (h : psKernelC0DefEqReflexiveWithFuel
+      fuel context state left right = some result) :
+    psKernelIsDefEq fuel context state left right = .ok result := by
+  cases fuel with
+  | zero =>
+      simp [psKernelC0DefEqReflexiveWithFuel] at h
+  | succ remaining =>
+      cases depth : psKernelCheckerContextEnterRecDepth context with
+      | error reason =>
+          simp [psKernelC0DefEqReflexiveWithFuel, depth] at h
+      | ok entered =>
+          by_cases same : psKernelExprEq left right = true
+          · have hresult :
+                result = psKernelDefEqFinish state left right true := by
+              have hsome : some (psKernelDefEqFinish state left right true) =
+                  some result := by
+                simpa [psKernelC0DefEqReflexiveWithFuel, depth, same] using h
+              exact (Option.some.inj hsome).symm
+            rw [hresult]
+            change psKernelIsDefEqWithFuel (Nat.succ remaining)
+              context state left right =
+                .ok (psKernelDefEqFinish state left right true)
+            simp [psKernelIsDefEqWithFuel, depth, same]
+          · simp [psKernelC0DefEqReflexiveWithFuel, depth, same] at h
+
+/-- Qualified accepting DefEq execution for reflexive inputs; no candidate
+    or externally built cache is authoritative. Every declined pure case
+    delegates unchanged to source DefEq and its original error taxonomy. -/
+def psKernelC0CertifiedWorkDefEqCanonicalFast
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (left right : PsKernelExpr) :
+    Except String (Bool × PsKernelC0CertifiedWork) :=
+  match psKernelC0DefEqReflexiveWithFuel fuel
+      work.raw.checker.context work.raw.checker.state left right with
+  | none => psKernelC0CertifiedWorkDefEq fuel work left right
+  | some (same, checkedState) =>
+      .ok (same,
+        psKernelC0CertifiedWorkWithSession work
+          { work.raw.checker with state := checkedState })
+
+/-- The optimized/reflexive and original checked-session DefEq operations
+    are identical for ALL inputs, including source failures, state updates
+    and positive-cache results. -/
+theorem psKernelC0CertifiedWorkDefEqCanonicalFast_exact
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (left right : PsKernelExpr) :
+    psKernelC0CertifiedWorkDefEqCanonicalFast fuel work left right =
+      psKernelC0CertifiedWorkDefEq fuel work left right := by
+  unfold psKernelC0CertifiedWorkDefEqCanonicalFast
+  cases h : psKernelC0DefEqReflexiveWithFuel fuel
+      work.raw.checker.context work.raw.checker.state left right with
+  | none => rfl
+  | some result =>
+      cases result with
+      | mk same checkedState =>
+          have hsource :
+              psKernelIsDefEq fuel
+                work.raw.checker.context work.raw.checker.state
+                left right = .ok (same, checkedState) :=
+            psKernelC0DefEqReflexive_source fuel
+              work.raw.checker.context work.raw.checker.state
+              left right (same, checkedState) h
+          unfold psKernelC0CertifiedWorkDefEq psKernelSessionIsDefEq
+          simp only [hsource]
+          rfl
+
+/-- A successfully selected DefEq result carries its exact source
+    checked-session equation. A cache hint or Boolean verdict alone is
+    insufficient to construct this receipt. -/
+def psKernelC0CertifiedWorkDefEqCanonicalFastOwned
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (left right : PsKernelExpr) :
+    Except String
+      { result : Bool × PsKernelC0CertifiedWork //
+        psKernelC0CertifiedWorkDefEq fuel work left right = .ok result } :=
+  match h : psKernelC0CertifiedWorkDefEqCanonicalFast fuel work left right with
+  | .error reason => .error reason
+  | .ok result =>
+      .ok ⟨result, by
+        rw [← psKernelC0CertifiedWorkDefEqCanonicalFast_exact
+          fuel work left right]
+        exact h⟩

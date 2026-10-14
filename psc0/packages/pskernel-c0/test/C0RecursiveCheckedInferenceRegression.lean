@@ -229,6 +229,35 @@ def main : IO Unit := do
         source.context source.state expr).isSome then
       throw (IO.userError "independent lambda bypassed child fuel")
 
+  -- The original source binder-spine accelerator has different
+  -- operation-local frame semantics on long lambda/Pi prefixes. The
+  -- independent checker must decline rather than reconstruct guesses.
+  let mut longLambda : PsKernelExpr := sort0
+  let mut longPi : PsKernelExpr := sort0
+  for _ in [:12] do
+    longLambda := .lam binder sort1 longLambda .default
+    longPi := .forallE binder sort1 longPi .default
+  for expr in [longLambda, longPi] do
+    if (psKernelC0RecursiveCheckedWithFuel
+        4096 source.context source.state expr).isSome then
+      throw (IO.userError "independent checker bypassed long binder guard")
+    let some raw := psKernelC0ArchitectureBegin source
+      | throw (IO.userError "long binder genesis failed")
+    let some work := psKernelC0ArchitectureCertifyWork raw
+      | throw (IO.userError "long binder certified work unavailable")
+    let original ← match psKernelC0CertifiedWorkCheck 4096 work expr with
+      | .ok result => pure result
+      | .error e => throw (IO.userError ("source long binder failed: " ++ e))
+    let accepted ← match psKernelC0CertifiedWorkCheckRecursiveOwned
+        4096 work expr with
+      | .ok proof => pure proof
+      | .error e => throw (IO.userError ("qualified fallback long binder failed: " ++ e))
+    let _exact :
+        psKernelC0CertifiedWorkCheck 4096 work expr = .ok accepted.val :=
+      accepted.property
+    if !psKernelExprEqual original.fst accepted.val.fst then
+      throw (IO.userError "long binder fallback changed checked type")
+
   let mismatch : PsKernelExpr :=
     .app (.const identity []) sort1
   let unknown : PsKernelExpr :=
@@ -296,5 +325,6 @@ def main : IO Unit := do
   IO.println "C0_RECURSIVE_CHECKED_METADATA wrapped_application_trees_source_proved=pass"
   IO.println "C0_RECURSIVE_CHECKED_PI dependent_binders_and_source_states=pass"
   IO.println "C0_RECURSIVE_CHECKED_LAMBDA dependent_local_bodies_and_applications=pass"
+  IO.println "C0_RECURSIVE_CHECKED_BINDERS long_spines_original_source_fallback=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP exact_source_errors_states_fuel=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP audited_publication=pass"

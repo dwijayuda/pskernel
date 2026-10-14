@@ -3,6 +3,23 @@
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
   {name:"signedToInt8",args:[0n],type:"int",expected:0n},
+  {name:"unsignedClamp8",argTypes:["nat"],args:[0n],type:"uint8",expected:0},
+  {name:"unsignedClamp8",argTypes:["nat"],args:[255n],type:"uint8",expected:255},
+  {name:"unsignedClamp8",argTypes:["nat"],args:[256n],type:"uint8",expected:255},
+  {name:"unsignedTruncate8",argTypes:["nat"],args:[256n],type:"uint8",expected:255},
+  {name:"unsignedClamp16",argTypes:["nat"],args:[0n],type:"uint16",expected:0},
+  {name:"unsignedClamp16",argTypes:["nat"],args:[65535n],type:"uint16",expected:65535},
+  {name:"unsignedClamp16",argTypes:["nat"],args:[65536n],type:"uint16",expected:65535},
+  {name:"unsignedTruncate16",argTypes:["nat"],args:[65536n],type:"uint16",expected:65535},
+  {name:"unsignedClamp32",argTypes:["nat"],args:[0n],type:"uint32",expected:0},
+  {name:"unsignedClamp32",argTypes:["nat"],args:[4294967295n],type:"uint32",expected:4294967295},
+  {name:"unsignedClamp32",argTypes:["nat"],args:[4294967296n],type:"uint32",expected:4294967295},
+  {name:"unsignedTruncate32",argTypes:["nat"],args:[4294967296n],type:"uint32",expected:4294967295},
+  {name:"unsignedClamp64",argTypes:["nat"],args:[0n],type:"uint64",expected:0n},
+  {name:"unsignedClamp64",argTypes:["nat"],args:[18446744073709551615n],type:"uint64",expected:18446744073709551615n},
+  {name:"unsignedClamp64",argTypes:["nat"],args:[18446744073709551616n],type:"uint64",expected:18446744073709551615n},
+  {name:"unsignedTruncate64",argTypes:["nat"],args:[18446744073709551616n],type:"uint64",expected:18446744073709551615n},
+
   {name:"unsignedLT8",argTypes:["uint8","uint8"],args:[0,255],type:"bool",expected:true},
   {name:"unsignedLT8",argTypes:["uint8","uint8"],args:[255,0],type:"bool",expected:false},
   {name:"unsignedLE8",argTypes:["uint8","uint8"],args:[255,255],type:"bool",expected:true},

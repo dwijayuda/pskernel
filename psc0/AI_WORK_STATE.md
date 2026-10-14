@@ -1,5 +1,41 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — native unsigned saturating conversions candidate
+
+Source study: pinned official Lean 4.35.0
+`Init/Data/UInt/BasicAux.lean` and `Init/Data/BitVec/BasicAux.lean`,
+commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Unlike `UIntN.ofNat` (wrapping), `UIntN.ofNatClamp` saturates:
+`n < 2^width ? n : (2^width - 1)`. In the same pinned version,
+`UIntN.ofNatTruncate` is a deprecated synonym for the clamp,
+not the ordinary wrapping conversion.
+
+The selected candidate builds eight checked `.lean` definitions for
+four fixed unsigned widths using existing `Nat.lt`/`Nat.decLt`,
+`ite` and `UIntN.ofNat`. Sixteen pinned native Lean and
+common-source JS/TypeScript/Rust/Wasm observations cover zero,
+largest representable value, first overflowing Nat and the alias.
+No new axiom, unchecked runtime operation, compiler backend or
+platform-sized assumption. **Pending** fresh official kernel replay,
+native metadata audit, independent strict FNV/SHA snapshot measurement
+and all full Linux runtime gates before qualification.
+
+## 14 October — unsigned power and wrapping-ofInt fully qualified
+
+Commit `b28ccbe8ddf0fc6528bbae04e50a2f485373121b` passed
+[Linux 38590570467](https://github.com/dwijayuda/pskernel/actions/runs/38590570467).
+The selected Standard contains 1,783 declarations, 25 classes and
+221 instances; 608 shared JS/TS/Rust runtime observations and
+159 independent native fixed-width reference cases passed, alongside
+seven strict IR refusals, Wasm GC and Wasmtime component gates.
+Both checked power-recursion and Int-wrapping builders are shared
+between the four signed and four unsigned widths. Frozen FNV
+`fnv1a64:16486742924065107304` and SHA-256
+`sha256:c991c6c6f80bc9575c0d1a9dcaf89816380469464fd9424b063aec7bbeeaf2ed`.
+This does not complete M2+A, Float F1-F4, USize/ISize or the
+comprehensive Phase A/standard manifest. No pskernel-core or self-hosting.
+
+
 ## 14 October — unsigned power and Int wrapping source candidate (not qualified)
 
 Official Lean 4.35.0 `Init/Data/UInt/Basic.lean` defines

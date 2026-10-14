@@ -24,6 +24,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.QualifiedBinderInference,
     `Ps.KernelCore.Architecture.QualifiedBinderInferOnly,
     `Ps.KernelCore.Architecture.QualifiedApplicationInference,
+    `Ps.KernelCore.Architecture.QualifiedLetInference,
     `Ps.KernelCore.Architecture.TrustedAdmission,
     `Ps.KernelCore.Architecture.SealedState,
     `Ps.KernelCore.Architecture.SealedAuditedState,

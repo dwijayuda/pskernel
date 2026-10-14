@@ -208,6 +208,15 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited. Both hashes
 -- were independently observed after genuine strict drift refusal at
 -- a4fdce40, Linux Actions 38556955048; no new assumptions.
+-- Four checked Float32/64 bit Bool-valued equality models,
+-- distinct from source BEq/DecidableEq instance registration. IEEE beq
+-- refuses NaN and equates signed zeros; canonical structural bit identity
+-- normalizes NaNs and distinguishes signed zeros. Only selected UIntN.land,
+-- UIntN.toNat, Nat.beq, Bool.rec and prior checked bit helpers are used.
+-- No axiom, runtime intrinsic, new class or instance. Linux 38647562675
+-- independently compiled, checked signatures and observed both strict
+-- FNV/SHA before correctly refusing the prior selected snapshot.
+-- These hashes alone do not qualify executable semantics.
 -- Four additional checked Float32/64 bit classifiers: isInf and
 -- isFinite. Exact IEEE exponent/fraction logic over admitted UInt32/64,
 -- preserving both signed zeros, all subnormals, ±Inf, canonical NaN.
@@ -259,7 +268,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- statuses. These precise FNV/SHA are from independent strict drift
 -- refusal in Linux 38563557310 at 09965258; never infer expected hashes.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:16794493833312288355"
+  "fnv1a64:15322921429207463536"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -421,7 +430,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:d4fa7bebd270b0c08f5a71edee048f43ff5400ae30bf5c352fe3ff430d85f2f8"
+  "sha256:824f30eb624810924735f514ae6e5843859bcba3249b1a2aca6c69b64bbca4ce"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

@@ -42,8 +42,11 @@ def main : IO Unit := do
   let _stageHistory := psKernelC0SealedSourceHasLineage staged
   let declName : PsKernelName := .str .anonymous "SealedCheckedDefinition"
   let info : PsKernelDefinitionInfo := {
-    base := { name := declName, levelParams := [],
-      type := .sort (.succ .zero) }
+    base := {
+      name := declName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
     value := sort0
     hints := .abbrevHint
     safety := .safe

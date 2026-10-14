@@ -378,6 +378,56 @@ private def hAddPolymorphicCases : IO Unit := do
   unless failures == 0 do
     throw (IO.userError (toString failures ++ " HAdd generic source cases failed"))
 
+-- APP-03 follows pinned Lean 4.35.0's `Unit := PUnit` definition,
+-- not a spelling-only check. Test the positive reduction and negative
+-- explicit-argument families without special-casing Coercion.boxed.
+private def unitEmptyCallCases : IO Unit := do
+  let good : Array (String × String) := #[
+    ("Unit empty call",
+      "function run(value: Unit): Nat := 3\nconst result: Nat := run()\n"),
+    ("PUnit empty call",
+      "function run(value: PUnit): Nat := 5\nconst result: Nat := run()\n"),
+    ("explicit Unit call",
+      "function run(value: Unit): Nat := 7\nconst result: Nat := run(Unit.unit)\n"),
+    ("parenthesized Unit callable",
+      "function run(value: Unit): Nat := 11\nconst result: Nat := (run)()\n"),
+    ("namespace Unit callable",
+      "namespace Coercion\nfunction boxed(unit: Unit): Nat := 877\nend Coercion\nconst result: Nat := Coercion.boxed()\n")]
+  let bad : Array (String × String) := #[
+    ("Nat needs argument",
+      "function run(value: Nat): Nat := value\nconst result: Nat := run()\n"),
+    ("required second Nat",
+      "function run(value: Unit, n: Nat): Nat := n\nconst result: Nat := run()\n"),
+    ("required second Unit",
+      "function run(a: Unit, b: Unit): Nat := 0\nconst result: Nat := run()\n"),
+    ("noncallable Nat",
+      "const value: Nat := 0\nconst result: Nat := value()\n")]
+  let requests : Array PsV7Native.Request := (good ++ bad).map fun (_, source) => { source }
+  let result ← PsV7Native.runBatch requests
+  let batch ← match result with
+    | .ok batch => pure batch
+    | .error problem => throw (IO.userError ("APP-03 batch: " ++ problem.message))
+  let mut failures := 0
+  for i in [:good.size] do
+    let some (label, _) := good[i]? | throw (IO.userError "missing APP-03 positive label")
+    let some response := batch.results[i]? | throw (IO.userError "missing APP-03 result")
+    match response with
+    | .ok _ => IO.println ("PSCV0_UNIT_EMPTY_CALL: PASS " ++ label)
+    | .error failure =>
+      failures := failures + 1
+      IO.println ("PSCV0_UNIT_EMPTY_CALL: " ++ label ++
+        " refused at " ++ failure.phase ++ ": " ++ failure.message)
+  for i in [:bad.size] do
+    let some (label, _) := bad[i]? | throw (IO.userError "missing APP-03 negative label")
+    let some response := batch.results[good.size + i]? | throw (IO.userError "missing APP-03 refusal")
+    match response with
+    | .ok _ =>
+      failures := failures + 1
+      IO.println ("PSCV0_UNIT_EMPTY_CALL: incorrectly accepted " ++ label)
+    | .error _ => IO.println ("PSCV0_UNIT_EMPTY_CALL: PASS negative " ++ label)
+  if failures != 0 then
+    throw (IO.userError (toString failures ++ " APP-03 acceptance/refusal cases failed"))
+
 private def wordFixture : String :=
   "function wordOperations8(a: Nat, b: Nat): String := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y), UInt8.toNat(x - y), UInt8.toNat(x * y), UInt8.toNat(x / y), UInt8.toNat(x % y), UInt8.toNat(-x), UInt8.toNat(UInt8.complement(x)), UInt8.toNat(UInt8.land(x, y)), UInt8.toNat(UInt8.lor(x, y)), UInt8.toNat(UInt8.xor(x, y)), UInt8.toNat(UInt8.shiftLeft(x, y)), UInt8.toNat(UInt8.shiftRight(x, y))])) }\nfunction wordOperations16(a: Nat, b: Nat): String := { let x: UInt16 := UInt16.ofNat(a)\n let y: UInt16 := UInt16.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt16.toNat(x + y), UInt16.toNat(x - y), UInt16.toNat(x * y), UInt16.toNat(x / y), UInt16.toNat(x % y), UInt16.toNat(-x), UInt16.toNat(UInt16.complement(x)), UInt16.toNat(UInt16.land(x, y)), UInt16.toNat(UInt16.lor(x, y)), UInt16.toNat(UInt16.xor(x, y)), UInt16.toNat(UInt16.shiftLeft(x, y)), UInt16.toNat(UInt16.shiftRight(x, y))])) }\nfunction wordOperations32(a: Nat, b: Nat): String := { let x: UInt32 := UInt32.ofNat(a)\n let y: UInt32 := UInt32.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt32.toNat(x + y), UInt32.toNat(x - y), UInt32.toNat(x * y), UInt32.toNat(x / y), UInt32.toNat(x % y), UInt32.toNat(-x), UInt32.toNat(UInt32.complement(x)), UInt32.toNat(UInt32.land(x, y)), UInt32.toNat(UInt32.lor(x, y)), UInt32.toNat(UInt32.xor(x, y)), UInt32.toNat(UInt32.shiftLeft(x, y)), UInt32.toNat(UInt32.shiftRight(x, y))])) }\nfunction wordOperations64(a: Nat, b: Nat): String := { let x: UInt64 := UInt64.ofNat(a)\n let y: UInt64 := UInt64.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt64.toNat(x + y), UInt64.toNat(x - y), UInt64.toNat(x * y), UInt64.toNat(x / y), UInt64.toNat(x % y), UInt64.toNat(-x), UInt64.toNat(UInt64.complement(x)), UInt64.toNat(UInt64.land(x, y)), UInt64.toNat(UInt64.lor(x, y)), UInt64.toNat(UInt64.xor(x, y)), UInt64.toNat(UInt64.shiftLeft(x, y)), UInt64.toNat(UInt64.shiftRight(x, y))])) }\nfunction wordApply(operation: UInt64 -> UInt64 -> UInt64, left: UInt64, right: UInt64): Nat := UInt64.toNat(operation(left)(right))\nconst wordHigherOrder: Nat := wordApply(UInt64.shiftLeft, (3 : UInt64), (65 : UInt64))\nfunction wordGeneric{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\nconst wordGenericWrap: Nat := UInt8.toNat(wordGeneric((255 : UInt8), (2 : UInt8)))\ntheorem wordModel: UInt8.toNat(UInt8.add((255 : UInt8), (2 : UInt8))) = 1 := by { rfl }\n"
 
@@ -2454,6 +2504,7 @@ def main : IO Unit := do
   stringJoinIntercalateCases
   unsignedOperatorSourceCases
   hAddPolymorphicCases
+  unitEmptyCallCases
   semanticCases
   doBoundaries
   projectBoundaries

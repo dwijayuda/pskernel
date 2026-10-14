@@ -594,7 +594,7 @@ def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
 -- wrapper around an unsigned two's-complement carrier. This is a
 -- native-only authoring candidate, NOT executable signed arithmetic.
 def exportSignedIdentityCandidate (output : System.FilePath) : IO Unit := do
-  let existing := psSelfHostProdPreludeEnvironment.declarations
+  let existing := psSelfHostProdPreSignedPreludeEnvironment.declarations
   exportStandardCore {
     roots := [`Int8, `Int16, `Int32, `Int64, `ISize]
     boundary := existing.map psDeclarationName

@@ -2,6 +2,7 @@ import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardUnsigned
 import Ps.Environment.StandardUnsignedOperations
 import Ps.Environment.StandardFloatIdentity
+import Ps.Environment.StandardSignedIdentity
 import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
@@ -40,8 +41,13 @@ def psSelfHostProdHashPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreFloatPreludeEnvironment : PsEnvironment :=
   psStandardUnsignedOperationsExtend psSelfHostProdHashPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen pre-signed environment serves as the authoring boundary for
+-- exact checked SInt family regeneration. Do not close over its own output.
+def psSelfHostProdPreSignedPreludeEnvironment : PsEnvironment :=
   psStandardFloatIdentityExtend psSelfHostProdPreFloatPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardSignedIdentityExtend psSelfHostProdPreSignedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

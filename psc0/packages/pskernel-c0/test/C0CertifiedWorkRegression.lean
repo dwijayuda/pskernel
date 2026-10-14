@@ -470,6 +470,47 @@ def main : IO Unit := do
     | .ok _ =>
         throw (IO.userError "qualified WHNF was mistaken for full checked term")
 
+  -- Arbitrary nested metadata is a COMPLETE fuel-accounted direct
+  -- reduction family when its eventual head is syntactically irreducible.
+  -- Unlike observational candidates, the exact checked-source equation
+  -- is proved for every environment and state, not just these examples.
+  let metadataHead : PsKernelExpr :=
+    .mdata 71 (.mdata 72 (.mdata 73 (.sort .zero)))
+  let some stripped := psKernelC0IrreducibleWhnfWithFuel 4 metadataHead
+    | throw (IO.userError "nested metadata was not independently reducible")
+  if !psKernelExprEqual stripped (.sort .zero) then
+    throw (IO.userError "nested metadata fast WHNF returned wrong head")
+  let metadataReceipt ← match psKernelC0CertifiedWorkWhnfQualified
+      4 0 defeqWork metadataHead with
+    | .ok receipt => pure receipt
+    | .error e =>
+        throw (IO.userError ("qualified metadata WHNF failed: " ++ e))
+  let _sourceMetadata :
+      psKernelC0CertifiedWorkWhnf 4 defeqWork metadataHead =
+        .ok metadataReceipt.val :=
+    metadataReceipt.property
+  if !psKernelExprEqual metadataReceipt.val.fst (.sort .zero) then
+    throw (IO.userError "metadata result lost exact source WHNF")
+  for smallFuel in [:4] do
+    if (psKernelC0IrreducibleWhnfWithFuel smallFuel metadataHead).isSome then
+      throw (IO.userError "metadata fragment overran source fuel")
+    match psKernelC0CertifiedWorkWhnfCanonicalFast
+        smallFuel defeqWork metadataHead with
+    | .error _ => pure ()
+    | .ok _ =>
+        throw (IO.userError "metadata shortcut bypassed resource failure")
+  let contextualMetadata : PsKernelExpr :=
+    .mdata 81 (.lam (c0CertificateName "z")
+      (.sort .zero) (.bvar 0) .default)
+  if (psKernelC0IrreducibleWhnfWithFuel 4096 contextualMetadata).isSome then
+    throw (IO.userError "contextual lambda was wrongly treated as direct head")
+  let _contextualMetadataProof :
+      psKernelC0CertifiedWorkWhnfCanonicalFast 4096 defeqWork
+          contextualMetadata =
+        psKernelC0CertifiedWorkWhnf 4096 defeqWork contextualMetadata :=
+    psKernelC0CertifiedWorkWhnfCanonicalFast_exact
+      4096 defeqWork contextualMetadata
+
   if psKernelC0WhnfIrreducibleHead betaExpr then
     throw (IO.userError "context-dependent β application was wrongly direct")
   let qualifiedBeta ← match psKernelC0CertifiedWorkWhnfQualified

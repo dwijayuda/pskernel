@@ -175,6 +175,7 @@ theorem psKernelC0BetaSortWhnf_source
                                               psKernelExprGetAppArgsWorker,
                                               psKernelC0BetaSpinePlan,
                                               psKernelC0BetaSpineWorker,
+                                              psKernelWhnfCoreFinish,
                                               psKernelWhnfCoreFinishWithKnownHash,
                                               psKernelExprMapInsert,
                                               depth, coreCache, childDepth,

@@ -185,103 +185,66 @@ def psKernelInferCoreWithFuelUsingSourceFrames
                               expr
                               result))
                 | PsKernelExpr.sort level =>
-                    let result :=
-                      PsKernelExpr.sort
-                        (PsKernelLevel.succ level);
-                    Except.ok
-                      (Prod.mk
-                        result
-                        (psKernelCacheInferResult
-                          state
-                          inferOnly
-                          expr
-                          result))
+                    -- Lean 4.35 infer_type_core checks universe
+                    -- parameter membership only on the fully checked
+                    -- route. Infer-only intentionally does not reject
+                    -- undeclared universe names.
+                    if !inferOnly &&
+                        (psKernelFindUndefLevelParam
+                          level nextContext.levelParams).isSome then
+                      Except.error
+                        "invalid reference to undefined universe level parameter"
+                    else
+                      let result :=
+                        PsKernelExpr.sort (PsKernelLevel.succ level)
+                      Except.ok
+                        (Prod.mk
+                          result
+                          (psKernelCacheInferResult
+                            state inferOnly expr result))
                 | PsKernelExpr.const name levels =>
-                    match
-                        psKernelEnvironmentFind
-                          nextContext.environment
-                          name with
+                    match psKernelEnvironmentFind
+                        nextContext.environment name with
                     | Option.none =>
-                        Except.error
-                          "unknown constant"
+                        Except.error "unknown constant"
                     | Option.some info =>
                         let params :=
-                          psKernelConstantInfoLevelParams
-                            info;
-                        if
-                            Nat.beq
-                              (psKernelNameListLength params)
-                              (psKernelLevelListLength levels) then
-                          if inferOnly then
-                            let result :=
-                              psKernelExprInstantiateLevelParams
-                                (psKernelConstantInfoType info)
-                                params
-                                levels;
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResult
-                                  state
-                                  inferOnly
-                                  expr
-                                  result))
-                          else if
-                              psKernelConstantInfoIsUnsafe info then
-                            if
-                                psKernelDefinitionSafetyIsUnsafe
-                                  nextContext.safety then
-                              let result :=
-                                psKernelExprInstantiateLevelParams
-                                  (psKernelConstantInfoType info)
-                                  params
-                                  levels;
-                              Except.ok
-                                (Prod.mk
-                                  result
-                                  (psKernelCacheInferResult
-                                    state
-                                    inferOnly
-                                    expr
-                                    result))
-                            else
-                              Except.error
-                                "safe declaration uses unsafe constant"
-                          else if
-                              psKernelConstantInfoIsPartial info then
-                            if
-                                psKernelDefinitionSafetyIsSafe
-                                  nextContext.safety then
-                              Except.error
-                                "safe declaration uses partial constant"
-                            else
-                              let result :=
-                                psKernelExprInstantiateLevelParams
-                                  (psKernelConstantInfoType info)
-                                  params
-                                  levels;
-                              Except.ok
-                                (Prod.mk
-                                  result
-                                  (psKernelCacheInferResult
-                                    state
-                                    inferOnly
-                                    expr
-                                    result))
+                          psKernelConstantInfoLevelParams info
+                        if Nat.beq
+                            (psKernelNameListLength params)
+                            (psKernelLevelListLength levels) then
+                          -- Preserve the original safety precedence and
+                          -- only validate declared level parameters AFTER
+                          -- a fully checked use has passed safety checks.
+                          -- Lean 4.35::infer_constant checks levels only
+                          -- on the checked path, never infer-only.
+                          if !inferOnly &&
+                              psKernelConstantInfoIsUnsafe info &&
+                              !psKernelDefinitionSafetyIsUnsafe
+                                nextContext.safety then
+                            Except.error
+                              "safe declaration uses unsafe constant"
+                          else if !inferOnly &&
+                              !psKernelConstantInfoIsUnsafe info &&
+                              psKernelConstantInfoIsPartial info &&
+                              psKernelDefinitionSafetyIsSafe
+                                nextContext.safety then
+                            Except.error
+                              "safe declaration uses partial constant"
+                          else if !inferOnly &&
+                              (psKernelFindUndefInLevels
+                                levels nextContext.levelParams).isSome then
+                            Except.error
+                              "invalid reference to undefined universe level parameter"
                           else
                             let result :=
                               psKernelExprInstantiateLevelParams
                                 (psKernelConstantInfoType info)
-                                params
-                                levels;
+                                params levels
                             Except.ok
-                              (Prod.mk
-                                result
+                              (Prod.mk result
                                 (psKernelCacheInferResult
-                                  state
-                                  inferOnly
-                                  expr
-                                  result))
+                                  state inferOnly expr result))
                         else
                           Except.error
                             "incorrect number of universe levels"

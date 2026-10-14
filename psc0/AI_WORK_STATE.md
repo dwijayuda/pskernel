@@ -1,5 +1,46 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — ByteArray checked read/write, equality and defaults candidate
+
+Pinned Lean 4.35.0 `Init/Data/ByteArray/Basic.lean` declares
+`ByteArray.get!`, `set!`, `isEmpty`, `beq` and an
+`Inhabited ByteArray` instance. A new portable native
+`StandardByteArrayCollection.lean` maps these through the already
+checked `Array.get!Internal`, `Array.setIfInBounds`,
+`Array.toList`/`List.beq`, `Nat.beq` and the ordinary
+Inhabited dictionary. The `BEq` instance compares canonical bytes,
+not host object identity. Ordinary checked declarations and explicit
+instance indexes preserve class ownership; there is no new primitive,
+unchecked cast, duplicate array datatype, or kernel assumption.
+
+Seven native oracle checks and eight common-source JS/TS/Rust/Wasm
+observations cover successful byte reads and replacements, preserved
+contents after out-of-bounds writes, empty/nonempty tests, defaults,
+and equal/different byte sequences. A fifth negative runtime panic
+contract checks `get!` out of bounds. **Candidate only:**
+do not promote until the native source and kernel audits, independent
+FNV/SHA drift measurements and every existing runtime/Wasm/Wasmtime
+gate pass. Generalized `GetElem` proof and optional-index APIs,
+packed-buffer optimization and remaining ByteArray methods are
+separate Phase A obligations.
+
+## 14 October — ByteArray baseline fully qualified
+
+Commit `a92f5ad8a0670d0077ec47080d75446675ab90fc`
+passed [native CI 38596014627](https://github.com/dwijayuda/pskernel/actions/runs/38596014627).
+Selected Standard: 1,803 declarations, 25 classes, 221 instances,
+629 JS/TypeScript/Rust common-source observations, 175 native
+integer oracle values, seven strict IR refusals and a separate
+ByteArray empty/push/size/data native oracle. Wasm GC and Wasmtime
+component/host, source admission, recursor metadata, strict digest
+and existing performance checks passed. FNV
+`fnv1a64:3178543072286617803`, SHA-256
+`sha256:6d0c19b50e0074b4cd59361c25a4d3c3630da49855c39e6615994b9da73ebe48`.
+The packed-byte runtime optimization is not claimed; ByteArray is
+still erased as a distinct checked one-field structure. M2+A,
+Float F1-F4, platform words and full Phase A manifest remain open.
+
+
 ## 14 October — native ByteArray structure and basic APIs (candidate)
 
 Pinned `Init/Prelude.lean` and `Init/Data/ByteArray/Basic.lean` in

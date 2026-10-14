@@ -8,6 +8,15 @@ export const observations = [
   {name:"byteEmptyLength",args:null,type:"nat",expected:0n},
   {name:"byteRoundtrip",argTypes:["uint8"],args:[255],type:"uint8",expected:255},
   {name:"byteTwoLength",argTypes:["uint8","uint8"],args:[1,255],type:"nat",expected:2n},
+  {name:"byteReadSaved",argTypes:["uint8"],args:[255],type:"uint8",expected:255},
+  {name:"byteReplaceSaved",argTypes:["uint8"],args:[42],type:"uint8",expected:42},
+  {name:"byteReplaceOutside",argTypes:["uint8"],args:[37],type:"uint8",expected:37},
+  {name:"byteEmptyIsEmpty",args:null,type:"bool",expected:true},
+  {name:"byteNonEmptyIsEmpty",args:null,type:"bool",expected:false},
+  {name:"byteDefaultLength",args:null,type:"nat",expected:0n},
+  {name:"byteEqualSame",args:null,type:"bool",expected:true},
+  {name:"byteEqualDifferent",args:null,type:"bool",expected:false},
+
 
 
   {name:"unsignedClamp8",argTypes:["nat"],args:[0n],type:"uint8",expected:0},
@@ -647,5 +656,6 @@ export const panicObservations = [
   { name: "bangDefaultTrap", wasm: "wasmBangTrap" },
   { name: "listBangPanic", wasm: "wasmListBangTrap" },
   { name: "finBangPanic", wasm: "wasmFinBangTrap" },
-  { name: "arrayBangPanic", wasm: "wasmArrayBangTrap" }
+  { name: "arrayBangPanic", wasm: "wasmArrayBangTrap" },
+  { name: "byteGetOutside", wasm: "wasmByteBangTrap" }
 ];

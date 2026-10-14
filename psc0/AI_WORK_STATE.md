@@ -1,5 +1,21 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — checked Float-bit native reference vectors (qualification pending)
+
+The independent theorem-only F1 authoring cut passed
+[CI 38641629995](https://github.com/dwijayuda/pskernel/actions/runs/38641629995)
+with two official-kernel/portable-kernel checked declarations and no new
+axioms. Commit `8e42d13ff92f58872ae36639ff1cec7b46b9258d` also
+passed all 27 [main native regression gates](https://github.com/dwijayuda/pskernel/actions/runs/38642547796)
+after extending research entry points to the full F1 model graph.
+
+This next **reference-oracle candidate** adds ten small independent
+Lean 4.35.0 cases for NaN normalization, negative zero, subnormals,
+IEEE Boolean BEq and distinct propositional equality. They are not
+compiler Float support; target parity remains unqualified until F1–F4
+complete. The full proof closure research is independently running
+under the existing no-`Classical.choice` approval policy.
+
 ## 15 October — checked constructive theorem cut green; full F1 closure research
 
 The isolated theorem-only authoring/export candidate passed

@@ -1,5 +1,21 @@
 # M2+A Float F1 constructive dependency closure — research candidate
 
+## 15 October — pinned executable reference cases (native only)
+
+The official Lean 4.35.0 sources `tests/elab/floatBits.lean` and
+`tests/elab/floatEquality.lean` explicitly define the required
+canonical quiet-NaN outputs, retention of signed-zero bit patterns,
+Boolean equality treating signed zeros equal and NaNs unequal,
+and propositional identity distinguishing signed zero while
+identifying canonical NaNs.
+
+The `Pscv0FloatConstructiveOracle.lean` native oracle now includes
+ten focused tests on the pinned Lean implementation, including both
+Float64 and Float32. The new checks are **independent native reference
+evidence**, not newly accepted PSC0 executable semantics. Each target
+must be qualified separately before the M2+A Float exit criteria
+can be marked complete.
+
 ## Scope and authoritative sources
 
 Lean 4.35.0 pinned to `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.

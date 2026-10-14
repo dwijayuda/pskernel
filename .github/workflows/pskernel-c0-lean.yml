@@ -31,6 +31,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0BinderSourceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedBinderInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedBinderInferOnlyRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ApplicationSourceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -179,6 +180,9 @@ jobs:
       - name: C0 independently source-proved Pi and lambda infer-only caches
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedBinderInferOnlyRegression.lean
+      - name: C0 full checked and infer-only source application and long spine rules
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ApplicationSourceRegression.lean
       - name: C0 Lean 4.35 full checking enforces declared universe parameters
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0UniverseParameterRegression.lean

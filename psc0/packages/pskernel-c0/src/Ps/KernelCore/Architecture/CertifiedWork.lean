@@ -376,6 +376,31 @@ theorem psKernelC0CertifiedWorkWhnfCanonicalFast_exact
   | succ remaining =>
       cases expr <;> rfl
 
+/-- A successful WHNF output with its exact source-evaluation equality.
+    Unlike an observational candidate, this can be carried through checked
+    work APIs without guessing a cache key or changing the source state. -/
+abbrev PsKernelC0SourceExactWhnfOutput
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :=
+  { result : PsKernelExpr × PsKernelC0CertifiedWork //
+      psKernelC0CertifiedWorkWhnf fuel work expr = .ok result }
+
+/-- The direct-head implementation returns a source-exact certificate
+    WITHOUT invoking the source WHNF evaluator for positive-fuel direct
+    heads. The theorem above establishes the result in every context. -/
+def psKernelC0CertifiedWorkWhnfCanonicalFastOwned
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0SourceExactWhnfOutput fuel work expr) :=
+  match h : psKernelC0CertifiedWorkWhnfCanonicalFast fuel work expr with
+  | .error error => .error error
+  | .ok result =>
+      .ok ⟨result, by
+        rw [← psKernelC0CertifiedWorkWhnfCanonicalFast_exact fuel work expr]
+        exact h⟩
+
 /-!
 Phase E: proof-carrying, source-exact candidate-to-accepting WHNF bridge.
 

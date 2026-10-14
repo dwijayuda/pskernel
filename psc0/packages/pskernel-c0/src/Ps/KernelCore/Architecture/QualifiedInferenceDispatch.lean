@@ -4,7 +4,7 @@ import Ps.KernelCore.Architecture.QualifiedConstantInference
 Phase E.4N — one proof-qualified direct-head inference dispatcher.
 
 Three preceding native-qualified fragments handle Sort/Nat/String scalars,
-FVar local lookup, and warm constant inference caches. The previous
+FVar local lookup, and warm and cold constant inference. The previous
 incremental wrappers tested each layer and then fell back through another
 layer, incurring redundant source-cache probes for cold or unsupported terms.
 
@@ -21,7 +21,8 @@ sessions remain rooted in audited checked genesis and lineage.
 
 /-- Direct source-equivalent inference for exactly the qualified families.
     The declaration/safety/cold-constant rules are not invented or guessed:
-    a cold cache continues through the original source worker. -/
+    a cold cache executes the mechanically extracted, source-exact
+    constant inference decision with complete checker-state proof. -/
 def psKernelC0QualifiedInferHeadWithFuel
     (fuel : Nat)
     (context : PsKernelCheckerContext)
@@ -37,7 +38,7 @@ def psKernelC0QualifiedInferHeadWithFuel
   | .fvar name =>
       psKernelC0FVarInferWithFuel fuel context state name inferOnly
   | .const name levels =>
-      psKernelC0ConstantCachedInferWithFuel
+      psKernelC0ConstantCompleteInferWithFuel
         fuel context state name levels inferOnly
   | _ => none
 
@@ -76,7 +77,7 @@ theorem psKernelC0QualifiedInferHead_source
         context state name inferOnly result
         (by simpa only [psKernelC0QualifiedInferHeadWithFuel] using h)
   | const name levels =>
-      exact psKernelC0ConstantCachedInfer_source fuel onCheckedApp
+      exact psKernelC0ConstantCompleteInfer_source fuel onCheckedApp
         whnf defeq context state name levels inferOnly result
         (by simpa only [psKernelC0QualifiedInferHeadWithFuel] using h)
   | bvar _ => simp [psKernelC0QualifiedInferHeadWithFuel] at h

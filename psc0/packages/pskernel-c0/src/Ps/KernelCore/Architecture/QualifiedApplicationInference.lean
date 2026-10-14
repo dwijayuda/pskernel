@@ -100,20 +100,61 @@ theorem psKernelC0AppInferOnly_source
       context state (.app fn arg) true := by
   cases fuel <;> rfl
 
-/-- Exact source checked-app result for real independent C0 public/check
-    callback arrangement. Under this theorem no new proof/term is accepted
-    simply because the application has syntactically matched Pi domains. -/
+/-- A root checked application is NOT the same operation as a recursive
+    checked subapplication: the original source checker selects the
+    independent suffix-resummarization worker at 16 or more arguments.
+    Short roots use the historical hook-free inference worker. This exact
+    decision belongs here, not in the accepting proof or test fixture. -/
+def psKernelC0AppCheckedRootWithFuel
+    (fuel : Nat)
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (fn arg : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelCheckerState) :=
+  let expr : PsKernelExpr := .app fn arg
+  if psKernelExprGetAppNumArgs expr >= 16 then
+    psKernelC0CheckAppRecursiveResummarized
+      fuel whnf defeq context state expr
+  else
+    psKernelC0AppFullWithFuel fuel none
+      whnf defeq context state fn arg
+
+/-- The complete root checked application operation is literally the
+    original C0 source checking choice. The older generic app-head theorem
+    remains valid for child inference with a chosen optional callback,
+    but is NOT sufficient to characterize the public checked root. -/
+theorem psKernelC0AppCheckedRoot_source
+    (fuel : Nat)
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (fn arg : PsKernelExpr) :
+    psKernelC0AppCheckedRootWithFuel fuel whnf defeq
+      context state fn arg =
+    psKernelCheckWithFuel fuel whnf defeq
+      context state (.app fn arg) := by
+  unfold psKernelC0AppCheckedRootWithFuel psKernelCheckWithFuel
+  split
+  · rfl
+  · exact psKernelC0AppFull_source fuel none
+      whnf defeq context state fn arg
+
+/-- Exact source checking equation: successful short and long root
+    applications retain their original complete state/error semantics.
+    Full checking still requires an externally qualified checked session. -/
 theorem psKernelC0AppFull_checkerCheck
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (fn arg : PsKernelExpr) :
-    psKernelC0AppFullWithFuel fuel
-      (some psKernelC0CheckAppRecursiveResummarized)
+    psKernelC0AppCheckedRootWithFuel fuel
       (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
       (psKernelIsDefEqWithFuel fuel) context state fn arg =
     psKernelCheckerCheck fuel context state (.app fn arg) := by
-  rw [psKernelC0AppFull_source]
+  rw [psKernelC0AppCheckedRoot_source]
   rfl
 
 theorem psKernelC0AppInferOnly_checkerInfer
@@ -140,8 +181,7 @@ def psKernelC0CertifiedWorkCheckAppOwned
         psKernelC0CertifiedWorkCheck fuel work expr = .ok result } :=
   match expr with
   | .app fn arg =>
-      match h : psKernelC0AppFullWithFuel fuel
-          (some psKernelC0CheckAppRecursiveResummarized)
+      match h : psKernelC0AppCheckedRootWithFuel fuel
           (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
           (psKernelIsDefEqWithFuel fuel)
           work.raw.checker.context work.raw.checker.state fn arg with

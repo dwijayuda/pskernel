@@ -134,7 +134,7 @@ def main : IO Unit := do
     | .error _ => throw (IO.userError "checked let provider genesis failed")
   let (checkedType, _) ← match psKernelC0VerifiedProviderCheck genesis valid with
     | .ok result => pure result
-    | .error e => throw (IO.userError ("verified let checking failed: " ++ toString e))
+    | .error _ => throw (IO.userError "verified let checking failed")
   if !psKernelExprEqual checkedType sort1 then
     throw (IO.userError "verified checked let type was altered")
   match psKernelC0VerifiedProviderCheck genesis wrong with

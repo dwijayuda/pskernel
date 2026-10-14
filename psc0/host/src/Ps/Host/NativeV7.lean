@@ -71,7 +71,7 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
     | .error error =>
       -- Preserve the exact rejected declaration and kernel category. This is
       -- diagnostic evidence, not an alternate admission or retry path.
-      let names := String.intercalate "," (declaration.getNames.toList.map toString)
+      let names := String.intercalate "," (declaration.getNames.map toString)
       throw ("official kernel rejected " ++ names ++
         " (" ++ PsKernelLean.kernelExceptionSummary error ++ ")" ++
         PsKernelLean.kernelExceptionContext error)

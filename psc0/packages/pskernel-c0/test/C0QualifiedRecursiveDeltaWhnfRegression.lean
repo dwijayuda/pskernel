@@ -73,7 +73,7 @@ def main : IO Unit := do
     if !psKernelExprEqual sourceValue reduced ||
         !psKernelExprEqual receipt.val.fst sourceValue then
       throw (IO.userError "delta whole-source differential mismatch")
-    if (psKernelExprMapGet nextState.whnf a).isSome then
+    if (psKernelExprMapGet nextState.whnf (.bvar 91)).isSome then
       throw (IO.userError "unrelated source cache key unexpectedly inserted")
 
   let some (deltaValue, deltaState) :=

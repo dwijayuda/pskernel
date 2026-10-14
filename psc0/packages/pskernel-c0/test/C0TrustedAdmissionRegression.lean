@@ -40,6 +40,26 @@ def main : IO Unit := do
       psKernelC0StoreWF genesis.certified.raw.scratch.working :=
     psKernelC0CertifiedWorkStoreWF genesis.certified
 
+  -- The default trusted WHNF now uses the source-proved direct fragment.
+  -- Unlike a checker judgment, normalization of a Sort proves no term.
+  let (head, afterDirect) ← match psKernelC0TrustedSourceWhnf
+      4096 genesis (.sort .zero) with
+    | .ok result => pure result
+    | .error error =>
+        throw (IO.userError ("trusted direct WHNF failed: " ++ error))
+  if !psKernelExprEqual head (.sort .zero) then
+    throw (IO.userError "trusted direct WHNF changed irreducible source head")
+  let _directHistory :
+      PsKernelC0SourceEnvironmentHistory
+        afterDirect.certified.raw.checker.context.environment :=
+    afterDirect.history
+  if psKernelEnvironmentSize afterDirect.certified.raw.checker.context.environment != 0 then
+    throw (IO.userError "trusted direct WHNF changed source empty genesis")
+  match psKernelC0TrustedSourceWhnf 0 genesis (.sort .zero) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "trusted direct WHNF bypassed source fuel exhaustion")
+
   let nameOne := c0TrustName "TrustedSourceOne"
   let nameTwo := c0TrustName "TrustedSourceTwo"
   let first : PsKernelC0ArchitectureDeclaration :=

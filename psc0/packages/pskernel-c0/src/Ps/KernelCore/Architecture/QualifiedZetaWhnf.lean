@@ -1,14 +1,14 @@
-import Ps.KernelCore.Architecture.QualifiedContextualWhnf
+import Ps.KernelCore.Architecture.QualifiedWhnfTerminal
 
 /-!
-Phase E.4AE — fully source-refined cold one-step ζ normalization.
+Phase E.4AG — source-refined cold one-step ζ normalization to stable WHNF heads.
 
 Official Lean 4.35 WHNF performs structural ζ before Nat primitives
 and δ unfolding. The C0 source semantics include a public fuel step,
 a core fuel/depth step, a recursive body fuel/depth step, a WHNF-core
 cache write and a public WHNF cache write. This module directly executes
 that entire bounded operation for a let whose ONE substitution produces
-a Sort; it never calls the original WHNF evaluator on a successful path.
+an irreducible WHNF terminal; it never calls source WHNF on a successful path.
 
 The source's low-cost consecutive-let range accelerator is excluded
 rather than approximated. Existing cache hits, exhausted fuel/depth and
@@ -29,8 +29,8 @@ def psKernelC0ColdOneStepWhnfState
 
 /-- Pure successful ζ: check the same source-fuel/depth and existing cache
     misses as the original C0 public WHNF, substitute the one binder, and
-    accept ONLY a resulting Sort. No source normalization worker runs. -/
-def psKernelC0ZetaSortWhnfWithFuel
+    accept only a stable WHNF terminal. No source normalization worker runs. -/
+def psKernelC0ZetaStableWhnfWithFuel
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
@@ -54,20 +54,19 @@ def psKernelC0ZetaSortWhnfWithFuel
                         match psKernelCheckerContextEnterRecDepth entered with
                         | .error _ => none
                         | .ok _ =>
-                            match psKernelExprInstantiate1 body value with
-                            | .sort level =>
-                                let reduced : PsKernelExpr := .sort level
-                                some (reduced,
-                                  psKernelC0ColdOneStepWhnfState
-                                    state expr reduced)
-                            | _ => none
+                            let reduced := psKernelExprInstantiate1 body value
+                            if psKernelC0StableWhnfTerminal reduced then
+                              some (reduced,
+                                psKernelC0ColdOneStepWhnfState
+                                  state expr reduced)
+                            else none
       | _ => none
   | _ => none
 
 /-- Every independent ζ success is EXACTLY the C0 public WHNF outcome
     including both cache states, for arbitrary environment, recursor
     callback, cache, fuel and local-context/recursion policy. -/
-theorem psKernelC0ZetaSortWhnf_source
+theorem psKernelC0ZetaStableWhnf_source
     (fuel : Nat)
     (reduceRecursor :
       PsKernelCheckerContext → PsKernelCheckerState → PsKernelExpr →
@@ -77,202 +76,144 @@ theorem psKernelC0ZetaSortWhnf_source
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr)
     (result : PsKernelExpr × PsKernelCheckerState)
-    (h : psKernelC0ZetaSortWhnfWithFuel
+    (h : psKernelC0ZetaStableWhnfWithFuel
       fuel context state expr = some result) :
     psKernelWhnfWithFuel fuel reduceRecursor context state expr =
       .ok result := by
   cases fuel with
-  | zero =>
-      simp [psKernelC0ZetaSortWhnfWithFuel] at h
+  | zero => simp [psKernelC0ZetaStableWhnfWithFuel] at h
   | succ first =>
       cases first with
-      | zero =>
-          simp [psKernelC0ZetaSortWhnfWithFuel] at h
+      | zero => simp [psKernelC0ZetaStableWhnfWithFuel] at h
       | succ second =>
           cases second with
-          | zero =>
-              simp [psKernelC0ZetaSortWhnfWithFuel] at h
+          | zero => simp [psKernelC0ZetaStableWhnfWithFuel] at h
           | succ remaining =>
               cases expr with
               | letE name ty value body nondep =>
-                  let term : PsKernelExpr :=
-                    .letE name ty value body nondep
+                  let term : PsKernelExpr := .letE name ty value body nondep
                   by_cases hlong : psKernelC0HasLetPrefix 12 term = true
-                  · simp [psKernelC0ZetaSortWhnfWithFuel,
+                  · simp [psKernelC0ZetaStableWhnfWithFuel,
                       hlong, term] at h
-                  · cases publicCache :
-                      psKernelExprMapGet state.whnf term with
+                  · cases publicCache : psKernelExprMapGet state.whnf term with
                     | some cached =>
-                        simp [psKernelC0ZetaSortWhnfWithFuel,
+                        simp [psKernelC0ZetaStableWhnfWithFuel,
                           hlong, publicCache, term] at h
                     | none =>
                         cases depth :
                             psKernelCheckerContextEnterRecDepth context with
                         | error reason =>
-                            simp [psKernelC0ZetaSortWhnfWithFuel,
+                            simp [psKernelC0ZetaStableWhnfWithFuel,
                               hlong, publicCache, depth, term] at h
                         | ok entered =>
                             cases coreCache :
                                 psKernelExprMapGet state.whnfCore term with
                             | some cached =>
-                                simp [psKernelC0ZetaSortWhnfWithFuel,
-                                  hlong, publicCache, depth, coreCache,
-                                  term] at h
+                                simp [psKernelC0ZetaStableWhnfWithFuel,
+                                  hlong, publicCache, depth, coreCache, term] at h
                             | none =>
                                 cases childDepth :
                                     psKernelCheckerContextEnterRecDepth entered with
                                 | error reason =>
-                                    simp [psKernelC0ZetaSortWhnfWithFuel,
+                                    simp [psKernelC0ZetaStableWhnfWithFuel,
                                       hlong, publicCache, depth, coreCache,
                                       childDepth, term] at h
                                 | ok child =>
-                                    cases opened :
-                                        psKernelExprInstantiate1 body value with
-                                    | sort u =>
-                                        let normalized : PsKernelExpr := .sort u
-                                        let nextState :=
-                                          psKernelC0ColdOneStepWhnfState
-                                            state term normalized
-                                        have hr : result = (normalized, nextState) := by
-                                          have hx :
-                                              some (normalized, nextState) =
-                                                some result := by
-                                            simpa [psKernelC0ZetaSortWhnfWithFuel,
-                                              hlong, publicCache, depth, coreCache,
-                                              childDepth, opened, term,
-                                              normalized, nextState] using h
-                                          exact (Option.some.inj hx).symm
-                                        rw [hr]
-                                        -- Qualify each source stage in isolation.
-                                        -- Expanding public/core/Nat/delta at
-                                        -- once creates exponential simplifier
-                                        -- work and obscures fuel/cache effects.
-                                        let whnfChild :=
-                                          fun (ctx : PsKernelCheckerContext)
-                                            (st : PsKernelCheckerState)
-                                            (ex : PsKernelExpr) =>
-                                              psKernelWhnfWithFuel
-                                                (Nat.succ (Nat.succ remaining))
-                                                reduceRecursor ctx st ex
-                                        let coreState := psKernelCheckerStateWithWhnfCore
-                                          state (psKernelExprMapInsert
-                                            state.whnfCore term normalized)
-                                        have bodyCore :
-                                            psKernelWhnfCoreWithFuelRanges
-                                              (Nat.succ remaining) []
-                                              whnfChild reduceRecursor
-                                              entered state normalized false false =
-                                                .ok (normalized, state) := by
-                                          simpa [psKernelWhnfCoreWithFuelRanges,
-                                            childDepth, normalized, whnfChild]
-                                        have letCore :
-                                            psKernelWhnfCoreWithFuel
+                                    let normalized : PsKernelExpr :=
+                                      psKernelExprInstantiate1 body value
+                                    by_cases stable :
+                                        psKernelC0StableWhnfTerminal normalized = true
+                                    · let nextState :=
+                                        psKernelC0ColdOneStepWhnfState
+                                          state term normalized
+                                      have hr : result = (normalized, nextState) := by
+                                        have hx : some (normalized, nextState) =
+                                            some result := by
+                                          simpa [psKernelC0ZetaStableWhnfWithFuel,
+                                            hlong, publicCache, depth, coreCache,
+                                            childDepth, stable, normalized,
+                                            term, nextState] using h
+                                        exact (Option.some.inj hx).symm
+                                      rw [hr]
+                                      let whnfChild :=
+                                        fun (ctx : PsKernelCheckerContext)
+                                          (st : PsKernelCheckerState)
+                                          (ex : PsKernelExpr) =>
+                                            psKernelWhnfWithFuel
                                               (Nat.succ (Nat.succ remaining))
-                                              whnfChild reduceRecursor context state
-                                              term false false =
-                                                .ok (normalized, coreState) := by
-                                          simpa [psKernelWhnfCoreWithFuel,
-                                            psKernelWhnfCoreWithFuelRanges,
-                                            psKernelWhnfCoreFinishWithKnownHash,
-                                            psKernelExprMapInsert,
-                                            hlong, depth, coreCache, opened,
-                                            childDepth, bodyCore, term,
-                                            normalized, coreState]
-                                        have natSort :
-                                            psKernelReduceNatWith whnfChild
-                                              context coreState normalized =
-                                                .ok (none, coreState) := by
-                                          rfl
-                                        have noDelta :
-                                            psKernelUnfoldDefinition
-                                              context normalized = none := by
-                                          rfl
-                                        have afterCore :
-                                            psKernelWhnfAfterCore whnfChild
-                                              context coreState term normalized =
-                                                .ok (normalized, nextState) := by
-                                          simpa [psKernelWhnfAfterCore,
-                                            natSort, noDelta, psKernelWhnfFinish,
-                                            psKernelC0ColdOneStepWhnfState,
-                                            nextState, normalized, coreState]
-                                        -- Expose ONLY the outer public
-                                        -- WHNF match. Rewriting the recursive
-                                        -- definition as a simp rule would
-                                        -- eagerly unfold whnfChild and make
-                                        -- the already proved core equation
-                                        -- syntactically unreachable.
-                                        change
-                                          (match psKernelExprMapGet
-                                              state.whnf term with
-                                          | some cached =>
-                                              Except.ok (cached, state)
-                                          | none =>
-                                              match psKernelWhnfCoreWithFuel
-                                                  (Nat.succ (Nat.succ remaining))
-                                                  whnfChild reduceRecursor
-                                                  context state term false false with
-                                              | .error reason => Except.error reason
-                                              | .ok coreResult =>
-                                                  psKernelWhnfAfterCore
-                                                    whnfChild context
-                                                    coreResult.snd term
-                                                    coreResult.fst) =
-                                            Except.ok (normalized, nextState)
-                                        simp only [publicCache, letCore,
-                                          afterCore]
-                                    | bvar _ => simp [psKernelC0ZetaSortWhnfWithFuel,
+                                              reduceRecursor ctx st ex
+                                      let coreState := psKernelCheckerStateWithWhnfCore
+                                        state (psKernelExprMapInsert
+                                          state.whnfCore term normalized)
+                                      have bodyCore :
+                                          psKernelWhnfCoreWithFuelRanges
+                                            (Nat.succ remaining) []
+                                            whnfChild reduceRecursor
+                                            entered state normalized false false =
+                                              .ok (normalized, state) :=
+                                        psKernelC0StableWhnfTerminal_core
+                                          remaining whnfChild reduceRecursor
+                                          entered state normalized child
+                                          childDepth stable
+                                      have letCore :
+                                          psKernelWhnfCoreWithFuel
+                                            (Nat.succ (Nat.succ remaining))
+                                            whnfChild reduceRecursor context state
+                                            term false false =
+                                              .ok (normalized, coreState) := by
+                                        simpa [psKernelWhnfCoreWithFuel,
+                                          psKernelWhnfCoreWithFuelRanges,
+                                          psKernelWhnfCoreFinishWithKnownHash,
+                                          psKernelExprMapInsert, hlong, depth,
+                                          coreCache, childDepth, bodyCore,
+                                          term, coreState, normalized]
+                                      have afterCore :
+                                          psKernelWhnfAfterCore whnfChild
+                                            context coreState term normalized =
+                                              .ok (normalized, nextState) := by
+                                        rw [psKernelC0StableWhnfTerminal_post
+                                          whnfChild context coreState term
+                                          normalized stable]
+                                        rfl
+                                      change
+                                        (match psKernelExprMapGet state.whnf term with
+                                        | some cached => Except.ok (cached, state)
+                                        | none =>
+                                            match psKernelWhnfCoreWithFuel
+                                                (Nat.succ (Nat.succ remaining))
+                                                whnfChild reduceRecursor
+                                                context state term false false with
+                                            | .error reason => Except.error reason
+                                            | .ok coreResult =>
+                                                psKernelWhnfAfterCore
+                                                  whnfChild context
+                                                  coreResult.snd term
+                                                  coreResult.fst) =
+                                          Except.ok (normalized, nextState)
+                                      simp only [publicCache, letCore, afterCore]
+                                    · simp [psKernelC0ZetaStableWhnfWithFuel,
                                         hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | fvar _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | mvar _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | const _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | app _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | lam _ _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | forallE _ _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | letE _ _ _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | lit _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | mdata _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-                                    | proj _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
-                                        childDepth, opened, term] at h
-              | bvar _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | fvar _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | mvar _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | sort _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | const _ _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | app _ _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | lam _ _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | forallE _ _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | lit _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | mdata _ _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
-              | proj _ _ _ => simp [psKernelC0ZetaSortWhnfWithFuel] at h
+                                        childDepth, stable, normalized, term] at h
+              | bvar _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | fvar _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | mvar _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | sort _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | const _ _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | app _ _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | lam _ _ _ _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | forallE _ _ _ _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | lit _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | mdata _ _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
+              | proj _ _ _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
 
 /-- Carry successful source-equivalent ζ results through the same owned
     checked-work equation and immutable environmental lineage. -/
-theorem psKernelC0ZetaSortWhnf_certified
+theorem psKernelC0ZetaStableWhnf_certified
     (fuel : Nat)
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr)
     (result : PsKernelExpr × PsKernelCheckerState)
-    (h : psKernelC0ZetaSortWhnfWithFuel fuel
+    (h : psKernelC0ZetaStableWhnfWithFuel fuel
       work.raw.checker.context work.raw.checker.state expr = some result) :
     psKernelC0CertifiedWorkWhnf fuel work expr =
       .ok (result.fst,
@@ -284,7 +225,7 @@ theorem psKernelC0ZetaSortWhnf_certified
       (psKernelReduceRecursorBoundedWithFuel fuel
         (psKernelIsDefEqWithFuel fuel))
       work.raw.checker.context work.raw.checker.state expr = .ok result
-    exact psKernelC0ZetaSortWhnf_source fuel
+    exact psKernelC0ZetaStableWhnf_source fuel
       (psKernelReduceRecursorBoundedWithFuel fuel
         (psKernelIsDefEqWithFuel fuel))
       work.raw.checker.context work.raw.checker.state expr result h
@@ -301,12 +242,12 @@ def psKernelC0CertifiedWorkWhnfZetaOwned
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelC0SourceExactWhnfOutput fuel work expr) :=
-  match h : psKernelC0ZetaSortWhnfWithFuel fuel
+  match h : psKernelC0ZetaStableWhnfWithFuel fuel
       work.raw.checker.context work.raw.checker.state expr with
   | none =>
       psKernelC0CertifiedWorkWhnfContextualOwned fuel work expr
   | some result =>
       .ok ⟨(result.fst,
         (psKernelC0CertifiedWorkWithStateOwned work result.snd).val),
-        psKernelC0ZetaSortWhnf_certified
+        psKernelC0ZetaStableWhnf_certified
           fuel work expr result h⟩

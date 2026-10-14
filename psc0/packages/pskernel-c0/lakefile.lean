@@ -30,6 +30,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.QualifiedRecursiveLetInference,
     `Ps.KernelCore.Architecture.QualifiedRecursiveProjectionInference,
     `Ps.KernelCore.Architecture.QualifiedContextualWhnf,
+    `Ps.KernelCore.Architecture.QualifiedWhnfTerminal,
     `Ps.KernelCore.Architecture.QualifiedZetaWhnf,
     `Ps.KernelCore.Architecture.QualifiedBetaWhnf,
     `Ps.KernelCore.Architecture.TrustedAdmission,

@@ -476,7 +476,7 @@ def exportUnsignedOperationsCandidate (output : System.FilePath) : IO Unit :=
 def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
   let existing := psSelfHostProdPreludeEnvironment.declarations
   exportStandardCore {
-    roots := [`Float, `Float32, `Float.toBits, `Float32.toBits]
+    roots := [`Float, `Float32]
     boundary := existing.map psDeclarationName
     baseDeclarations := existing
     allowedAssumptions := [`propext, `Quot.sound]

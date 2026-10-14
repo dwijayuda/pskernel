@@ -354,6 +354,9 @@ jobs:
           ) | tee "$RUNNER_TEMP/c0-first-86383-result.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=86383 fuel=4096"             "$RUNNER_TEMP/c0-first-86383-result.txt"
           echo "C0_REAL_INIT_ETA_PREFIX parity=accepted records=86383"
+      - name: Compile the identical NDJSON checker as native Lean
+        working-directory: psc0/packages/pskernel-c0
+        run: lake build c0OfficialReplay
       - name: Discover the next real Lean Init compatibility boundary
         shell: bash
         run: |
@@ -365,7 +368,7 @@ jobs:
           echo "C0_NEXT_INIT_OFFICIAL verdict=accepted records=150000"
           (
             cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
-            timeout 360s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-next-boundary.ndjson" 4096
+            timeout 360s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-next-boundary.ndjson" 4096
           ) | tee "$RUNNER_TEMP/next-c0.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/next-c0.txt"
       - uses: actions/upload-artifact@v4

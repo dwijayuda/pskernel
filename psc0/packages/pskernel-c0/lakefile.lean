@@ -128,3 +128,11 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
     `Ps.KernelCore.SelfHost
   ]
+
+-- Execute the exact strict export replay's existing Lean main as native code.
+-- This builds the *same* test/C0OfficialNdjsonReplay.lean source and invokes
+-- the same source-admission checker; native compilation changes only runtime
+-- cost, never validation, resource limits, or verdict classification.
+lean_exe c0OfficialReplay where
+  srcDir := "test"
+  root := `C0OfficialNdjsonReplay

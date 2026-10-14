@@ -1,5 +1,34 @@
 # PSCV0 v7 — AI work state
 
+## M2+A signed typeclasses: current authoring/qualification checkpoint (14 October 2026)
+
+**Latest fully green native four-width signed runtime:** `514f53785b7c2aa1717d000efa5c64a08ccfe9a8`,
+[Linux 38555495881](https://github.com/dwijayuda/pskernel/actions/runs/38555495881).
+All 27 Linux steps passed, including the official Lean 4.35.0 oracle (22
+signed bit-level vectors, seven strict IR negative checks), **448 shared
+JS/strict TS/Rust runtime observations**, full signed GC Wasm/Wasmtime
+component interop, WIT s8/s16/s32/s64 scalar flattening and round trips.
+The selected Standard remains **1,643 declarations / 23 classes / 153
+instances**, strict FNV `fnv1a64:2992617569121253333` and SHA-256
+`sha256:4fc70a9fac595be03500185122459263e1a9e75141bc8fd39a680785d682e8a3`.
+This is bounded differential evidence, not a formal backend-preservation proof.
+
+**New checked generic signed typeclass stage (qualification pending):**
+ordinary portable Lean dictionaries now provide HAdd/HSub/HMul/HDiv/HMod,
+Neg, OfNat, BEq and Inhabited for all four pinned Int8/16/32/64 logical
+wrappers, reusing precisely the general unsigned architecture and the
+kernel-checked signed methods. BEq compares the canonical unsigned carrier
+as Nat (sign-independent bit identity); Inhabited uses checked zero.
+The stage adds **36 dictionary declarations and registrations** to the
+selected environment and executable prelude, without extending the trusted
+axiom set. Source fixture exercises generic operators, negative/literal
+syntax, equality and defaults. **Do not mark the new selected stage qualified
+until its strict fingerprint is independently observed and its full Linux
+regression passes.** Signed shifts/lt/le/Int-valued conversions, ISize/USize,
+Float ofBits/BEq/arithmetic/scientific and remaining Phase A manifest/library
+closure remain open. No pskernel-core, self-hosting or C5.
+
+
 ## M2+A checked signed operations and Float bit reads — snapshot review (14 October 2026)
 
 At commit `7bea16a0614be79e51c1ebbb99f926eda342b1fa`, [Linux CI 38549762258](https://github.com/dwijayuda/pskernel/actions/runs/38549762258) compiled and independently regenerated the two disjoint selected Core assets **byte-for-byte**: 62 checked Int8/Int16/Int32/Int64/BitVec method definitions and six Float/Float32 read-only bit-model definitions. The original frozen /61+signed identity prelude was preserved as the noncircular export boundary; no axiom, choice, source acceptance exception, instance or class was added. Official kernel replay and candidate checks passed before the selected Standard correctly refused the old digest. The observed next snapshot is **FNV `fnv1a64:2992617569121253333`** and **SHA-256 `sha256:4fc70a9fac595be03500185122459263e1a9e75141bc8fd39a680785d682e8a3`**. The expected 1,643 declarations (previously 1,575 plus 68, unchanged 23 classes and 153 instances) are subject to full regression confirmation; this edit pins only these independently measured hashes.

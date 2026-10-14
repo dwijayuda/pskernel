@@ -634,3 +634,16 @@ low N bits, retaining every signed case. Unsized ISize and arbitrary
 floating operations remain refused. An independent nine-function Wasm
 GC/component fixture also exercises signed s8/s16/s32/s64 with negative
 edges and direct binary/WAT round trips.
+
+## Generic fixed-width signed class registration (M2+A)
+
+The signed class-registration stage intentionally shares
+`psStandardBinarySpecs`, `psStandardBinaryInstance` and
+`psStandardRegisterInstances` with UInt and Nat. It declares per-width
+HAdd/HSub/HMul/HDiv/HMod/Neg using real kernel-checked signed BitVec
+methods and `OfNat` via the checked `IntN.ofNat` construction.
+`BEq` compares the exact canonical two's-complement `UIntN` carrier,
+which is injective for signed wrappers; `Inhabited` constructs zero.
+No parser-specific behavior, fabricated proofs, unsafe coercions or new
+assumptions. Source/operator and runtime parity await a full Linux pass
+and newly independently observed Standard snapshot digests.

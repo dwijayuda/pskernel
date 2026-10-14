@@ -173,3 +173,12 @@ The exports retain original checked definition/proof bodies, exact
 reducibility and immutable dependency cuts; each is independently
 admitted through official kernel replay. Neither confers runtime IR/ABI
 capabilities or semantic-preservation proof.
+
+### Fixed-width signed class dictionaries
+
+The selected `StandardSignedScalar.lean` module creates generic
+OfNat/Neg/HAdd/HSub/HMul/HDiv/HMod/BEq/Inhabited dictionaries using
+pinned Lean 4.35.0 `Init/Prelude.lean` and `Init/Data/SInt/Basic.lean`
+(Henrik Böving), copyright Lean FRO, LLC, Apache-2.0. Implemented as
+portable checked Core over previously admitted signed methods; no
+upstream proof text is replaced and no new foundation axiom is added.

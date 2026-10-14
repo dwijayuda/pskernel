@@ -90,6 +90,11 @@ def psStandardSignedOrderExtend (environment : PsEnvironment) : PsEnvironment :=
     psStandardSignedOrderDeciders ++
     psStandardSignedOrderInstances.map Prod.snd).foldl
       psEnvironmentInsert environment
+  -- Lean 4.35.0 annotates each native IntN.decLt/decLe
+  -- @[instance_reducible]; preserve that checked instance-search boundary.
+  let environment := psStandardSignedOrderDeciders.foldl (fun env declaration =>
+    psEnvironmentSetReducibility env (psDeclarationName declaration)
+      .instanceReducible) environment
   let environment := ["LT", "LE"].foldl (fun env className =>
     if env.classes.any (fun name => psNameToString name == className) then env
     else psStandardRegisterClass env className) environment

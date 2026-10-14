@@ -1,5 +1,28 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — native signed numeric boundaries and power candidate
+
+Study: Lean 4.35.0 pinned `Init/Data/SInt/Basic.lean`.
+The existing checked `IntN.ofNat`, `IntN.mul` and `Nat.rec`
+provide one ordinary portable Lean construction for four widths'
+`size`, `minValue`, `maxValue` and `pow`. Power follows the
+actual upstream recursion equations, and minimum and maximum are
+two's-complement residues at the sign bit boundary. This adds sixteen
+portable Core declarations in one new native `.lean` module rather
+than backend-specific numeric operator cases. Runtime support reuses
+the existing target-neutral IR, and twenty signed-boundary/power
+vectors are independently specified by native Lean 4.35.0 and the
+shared runtime observations.
+
+**Candidate, not qualified:** preserve the strict FNV/SHA guards
+until CI independently measures the new selected Standard, then
+fully requalify JS/TS/Rust/Wasm GC/Wasmtime and official native
+replay. If a structural Nat recursion cannot be lowered faithfully,
+do not replace it with a guessed primitive or weaken source checks.
+This does not activate platform-sized integers or float F1-F4, and
+does not start pskernel-core, compiler self-hosting or C5.
+
+
 ## 14 October — signed < / ≤ / LT/LE and native deciders (qualification pending)
 
 Pinned Lean 4.35.0 `SInt/Basic.lean` defines each fixed-width

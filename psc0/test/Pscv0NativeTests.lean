@@ -462,6 +462,10 @@ private def signedAbsFixture : String :=
 private def signedOrderFixture : String :=
   "function signedLT8(a: Int8, b: Int8): Bool := Decidable.decide(self := Int8.decLt(a, b))\nfunction signedLE8(a: Int8, b: Int8): Bool := Decidable.decide(self := Int8.decLe(a, b))\nfunction signedLT16(a: Int16, b: Int16): Bool := Decidable.decide(self := Int16.decLt(a, b))\nfunction signedLE16(a: Int16, b: Int16): Bool := Decidable.decide(self := Int16.decLe(a, b))\nfunction signedLT32(a: Int32, b: Int32): Bool := Decidable.decide(self := Int32.decLt(a, b))\nfunction signedLE32(a: Int32, b: Int32): Bool := Decidable.decide(self := Int32.decLe(a, b))\nfunction signedLT64(a: Int64, b: Int64): Bool := Decidable.decide(self := Int64.decLt(a, b))\nfunction signedLE64(a: Int64, b: Int64): Bool := Decidable.decide(self := Int64.decLe(a, b))\n"
 
+-- Pinned SInt size/extrema and Nat-recursive wrapping power.
+private def signedNumericFixture : String :=
+  "function signedPow8(value: Int8, exponent: Nat): Int8 := Int8.pow(value, exponent)\nfunction signedPow16(value: Int16, exponent: Nat): Int16 := Int16.pow(value, exponent)\nfunction signedPow32(value: Int32, exponent: Nat): Int32 := Int32.pow(value, exponent)\nfunction signedPow64(value: Int64, exponent: Nat): Int64 := Int64.pow(value, exponent)\nconst signedSize8: Nat := Int8.size\nconst signedSize16: Nat := Int16.size\nconst signedSize32: Nat := Int32.size\nconst signedSize64: Nat := Int64.size\nconst signedMin8: Int8 := Int8.minValue\nconst signedMin16: Int16 := Int16.minValue\nconst signedMin32: Int32 := Int32.minValue\nconst signedMin64: Int64 := Int64.minValue\nconst signedMax8: Int8 := Int8.maxValue\nconst signedMax16: Int16 := Int16.maxValue\nconst signedMax32: Int32 := Int32.maxValue\nconst signedMax64: Int64 := Int64.maxValue\n"
+
 private def unsignedFixture : String :=
   "function unsigned8(value: Nat): Nat := UInt8.toNat(UInt8.ofNat(value))\nfunction unsigned16(value: Nat): Nat := UInt16.toNat(UInt16.ofNat(value))\nfunction unsigned32(value: Nat): Nat := UInt32.toNat(UInt32.ofNat(value))\nfunction unsigned64(value: Nat): Nat := UInt64.toNat(UInt64.ofNat(value))\nconst unsignedLiteral: Nat := UInt64.toNat((18446744073709551619 : UInt64))\nfunction unsignedIdentity{A: Type}(value: A): A := value\nfunction unsignedGeneric(value: Nat): Nat := UInt64.toNat(unsignedIdentity(UInt64.ofNat(value)))\nfunction unsignedViaBits(value: Nat): Nat := BitVec.toNat(UInt32.toBitVec(UInt32.ofNat(value)))\nfunction unsignedViaFin(value: Nat): Nat := Fin.val(UInt16.toFin(UInt16.ofNat(value)))\nfunction unsignedRebuild(value: Nat): Nat := UInt8.toNat(UInt8.ofBitVec(UInt8.toBitVec(UInt8.ofNat(value))))\nfunction unsignedMatch(value: Nat): Nat := match UInt64.ofNat(value) with { | UInt64.ofBitVec bits => BitVec.toNat(bits) }\nfunction unsignedUse(convert: Nat -> UInt64, value: Nat): Nat := UInt64.toNat(convert(value))\nfunction unsignedHigher(value: Nat): Nat := unsignedUse(UInt64.ofNat, value)\nfunction bitvecConvert(width: Nat, value: Nat): Nat := BitVec.toNat(BitVec.ofNat(width, value))\nfunction naturalPower(base: Nat, exponent: Nat): Nat := Nat.pow(base, exponent)\ntheorem unsignedBound(value: UInt64): Nat.lt(UInt64.toNat(value), UInt64.size) := Fin.isLt(UInt64.toFin(value))\n"
 
@@ -484,7 +488,7 @@ private def derivingEqualityFixture : String :=
   "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nfunction derivedExplicitDecision(a: Nat, b: Nat): Bool := Decidable.decide(self := decEq(a, b))\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
 
 private def application : String :=
-  productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -2566,6 +2570,26 @@ private theorem signedToInt64_model (x : Int64) :
 -- Compare exactly the same input vectors as JS/TS/Rust observations.
 private def signedNativeOracle : IO Unit := do
   let checks : List (String × Int × Int) := [
+    ("signedSize8", Int.ofNat Int8.size, 256),
+    ("signedSize16", Int.ofNat Int16.size, 65536),
+    ("signedSize32", Int.ofNat Int32.size, 4294967296),
+    ("signedSize64", Int.ofNat Int64.size, 18446744073709551616),
+    ("signedMin8", Int8.toInt Int8.minValue, -128),
+    ("signedMin16", Int16.toInt Int16.minValue, -32768),
+    ("signedMin32", Int32.toInt Int32.minValue, -2147483648),
+    ("signedMin64", Int64.toInt Int64.minValue, -9223372036854775808),
+    ("signedMax8", Int8.toInt Int8.maxValue, 127),
+    ("signedMax16", Int16.toInt Int16.maxValue, 32767),
+    ("signedMax32", Int32.toInt Int32.maxValue, 2147483647),
+    ("signedMax64", Int64.toInt Int64.maxValue, 9223372036854775807),
+    ("signedPow8(-2,3)", Int8.toInt (Int8.pow (Int8.ofInt (-2)) 3), -8),
+    ("signedPow8(-128,2)", Int8.toInt (Int8.pow (Int8.ofInt (-128)) 2), 0),
+    ("signedPow16(-2,3)", Int16.toInt (Int16.pow (Int16.ofInt (-2)) 3), -8),
+    ("signedPow16(32767,2)", Int16.toInt (Int16.pow (Int16.ofInt 32767) 2), 1),
+    ("signedPow32(-2,31)", Int32.toInt (Int32.pow (Int32.ofInt (-2)) 31), -2147483648),
+    ("signedPow32(2147483647,2)", Int32.toInt (Int32.pow (Int32.ofInt 2147483647) 2), 1),
+    ("signedPow64(-2,63)", Int64.toInt (Int64.pow (Int64.ofInt (-2)) 63), -9223372036854775808),
+    ("signedPow64(9223372036854775807,2)", Int64.toInt (Int64.pow (Int64.ofInt 9223372036854775807) 2), 1),
     ("signedLT8(-128,127)", if (Int8.ofInt (-128)) < (Int8.ofInt 127) then 1 else 0, 1),
     ("signedLT8(127,-128)", if (Int8.ofInt 127) < (Int8.ofInt (-128)) then 1 else 0, 0),
     ("signedLE8(-128,-128)", if (Int8.ofInt (-128)) ≤ (Int8.ofInt (-128)) then 1 else 0, 1),

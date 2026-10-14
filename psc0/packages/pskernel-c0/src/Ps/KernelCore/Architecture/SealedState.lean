@@ -21,7 +21,7 @@ prove source kernel soundness or the semantic validity of imported caches.
 /-- Reachable checked sessions, indexed by the ENTIRE trusted work value,
     including checker state and exact certified syntax snapshot. -/
 inductive PsKernelC0CheckedStateLineage :
-    PsKernelC0TrustedSourceWork → Type where
+    PsKernelC0TrustedSourceWork → Prop where
   | genesis
       (maxRecDepth maxNatSize : Nat)
       (work : PsKernelC0TrustedSourceWork)

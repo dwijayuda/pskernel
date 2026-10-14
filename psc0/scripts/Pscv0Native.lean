@@ -1,4 +1,5 @@
 import Ps.Host.StandardExport
+import Ps.Host.StandardManifest
 import Ps.Host.NativeV7
 import Ps.Host.PrimitiveAudit
 

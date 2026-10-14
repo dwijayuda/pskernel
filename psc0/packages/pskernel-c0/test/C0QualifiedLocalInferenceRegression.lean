@@ -113,7 +113,9 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "zero source fuel checked a local")
   let blockedContext : PsKernelCheckerContext := {
-    contextual.context with maxRecDepth := 1; recDepth := 1000000
+    contextual.context with
+    maxRecDepth := 1
+    recDepth := 1000000
   }
   if (psKernelC0FVarInferWithFuel 4096 blockedContext
       contextual.state name false).isSome then

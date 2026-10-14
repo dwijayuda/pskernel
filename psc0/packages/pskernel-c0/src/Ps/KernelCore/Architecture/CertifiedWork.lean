@@ -951,6 +951,6 @@ def psKernelC0CertifiedWorkDefEqQualifiedOwned
   | .sort leftLevel, .sort rightLevel =>
       psKernelC0CertifiedWorkDefEqSortOwned
         fuel work leftLevel rightLevel
-  | _, _ =>
+  | remainingLeft, remainingRight =>
       psKernelC0CertifiedWorkDefEqCanonicalFastOwned
-        fuel work left right
+        fuel work remainingLeft remainingRight

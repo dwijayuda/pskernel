@@ -167,9 +167,13 @@ theorem psKernelC0BetaStableWhnf_source
                                               whnfChild reduceRecursor
                                               context state term false false =
                                                 .ok (normalized, coreState) := by
-                                          simpa [psKernelWhnfCoreWithFuel,
-                                            psKernelWhnfCoreWithFuelRanges,
-                                            psKernelExprGetAppFn,
+                                          change psKernelWhnfCoreWithFuelRanges
+                                            (Nat.succ (Nat.succ remaining)) []
+                                            whnfChild reduceRecursor context state
+                                            term false false =
+                                              .ok (normalized, coreState)
+                                          rw [psKernelWhnfCoreWithFuelRanges]
+                                          simp [psKernelExprGetAppFn,
                                             psKernelExprGetAppArgs,
                                             psKernelExprGetAppArgsWorker,
                                             psKernelC0BetaSpinePlan,

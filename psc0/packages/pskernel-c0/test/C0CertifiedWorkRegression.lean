@@ -499,6 +499,33 @@ def main : IO Unit := do
     | .error _ => pure ()
     | .ok _ =>
         throw (IO.userError "metadata shortcut bypassed resource failure")
+  -- Whole-family regression: every metadata depth 0..32, including
+  -- exactly sufficient fuel and the immediate underbudget boundary.
+  -- The general theorem above (not this finite loop) ensures all-depth
+  -- equivalence, while these cases validate executable resource plumbing.
+  for depth in [:33] do
+    let mut nested : PsKernelExpr := .sort .zero
+    for i in [:depth] do
+      nested := .mdata (100 + i) nested
+    let enough := depth + 1
+    let exact ← match psKernelC0CertifiedWorkWhnfQualified
+        enough 0 defeqWork nested with
+      | .ok witness => pure witness
+      | .error e =>
+          throw (IO.userError ("qualified metadata depth failed: " ++ e))
+    let _sourceEquation :
+        psKernelC0CertifiedWorkWhnf enough defeqWork nested =
+          .ok exact.val :=
+      exact.property
+    if !psKernelExprEqual exact.val.fst (.sort .zero) then
+      throw (IO.userError "metadata depth traversal changed terminal Sort")
+    if depth > 0 then
+      match psKernelC0CertifiedWorkWhnfCanonicalFast
+          depth defeqWork nested with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError "metadata depth accepted inadequate source fuel")
+
   let contextualMetadata : PsKernelExpr :=
     .mdata 81 (.lam (c0CertificateName "z")
       (.sort .zero) (.bvar 0) .default)

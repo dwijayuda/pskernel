@@ -197,3 +197,126 @@ def psKernelC0CertifiedWorkCheckWithConstantsOwned
             simp only [source]
             rfl⟩
   | other => psKernelC0CertifiedWorkCheckWithLocalsOwned fuel work other
+
+
+/-!
+Phase E.4O — complete source-exact constant inference for cache hits AND
+cold environment resolution, without invoking the source inference walker.
+
+Unlike the older warm-only fragment, this one uses the single mechanically
+extracted, Lean 4.35-compatible cold constant rule from
+Checker/Inference/Constant.lean. There is one source-cache lookup and
+one recursion-depth check; cold success runs the full source primitive
+environment/safety/arity/universe/type instantiation logic. The returned
+value is admitted ONLY with a source-result AND complete state equality
+witness, never by unchecked candidate agreement.
+-/
+
+/-- Full constant-head source algorithm, independent of the enclosing
+    syntax-directed inference worker. A declined branch must still call the
+    original source worker for its exact failure/error/resource semantics.
+    Inference-only and fully checked caches remain distinct. -/
+def psKernelC0ConstantCompleteInferWithFuel
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (levels : List PsKernelLevel)
+    (inferOnly : Bool) :
+    Option (PsKernelExpr × PsKernelCheckerState) :=
+  match fuel with
+  | 0 => none
+  | Nat.succ _ =>
+      let expr : PsKernelExpr := .const name levels
+      let cache := if inferOnly then state.inferOnly else state.checkedInfer
+      match psKernelExprMapGet cache expr with
+      | some ty =>
+          match psKernelCheckerContextEnterRecDepth context with
+          | .ok _ => some (ty, state)
+          | .error _ => none
+      | none =>
+          match psKernelCheckerContextEnterRecDepth context with
+          | .error _ => none
+          | .ok nextContext =>
+              match psKernelInferConstantHead
+                  nextContext state name levels inferOnly with
+              | .error _ => none
+              | .ok value => some value
+
+/-- On EVERY successful independent constant inference branch, the entire
+    result (including warm/cold infer and checked cache state) equals the
+    original C0 source checker under any environment, local context, checked
+    application hook or WHNF/DefEq callbacks. Negative/cancelled resource
+    paths retain the original checker as the source of exact diagnostics. -/
+theorem psKernelC0ConstantCompleteInfer_source
+    (fuel : Nat)
+    (onCheckedApp : Option PsKernelC0CheckedAppHook)
+    (whnf : PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → Except String (PsKernelExpr × PsKernelCheckerState))
+    (defeq : PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → PsKernelExpr →
+      Except String (Bool × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (levels : List PsKernelLevel)
+    (inferOnly : Bool)
+    (result : PsKernelExpr × PsKernelCheckerState)
+    (h : psKernelC0ConstantCompleteInferWithFuel
+      fuel context state name levels inferOnly = some result) :
+    psKernelInferCoreWithFuelUsing fuel onCheckedApp whnf defeq
+      context state (.const name levels) inferOnly = .ok result := by
+  cases fuel with
+  | zero => simp [psKernelC0ConstantCompleteInferWithFuel] at h
+  | succ remaining =>
+      let expr : PsKernelExpr := .const name levels
+      let cache := if inferOnly then state.inferOnly else state.checkedInfer
+      cases cached : psKernelExprMapGet cache expr with
+      | some ty =>
+          cases depth : psKernelCheckerContextEnterRecDepth context with
+          | error reason =>
+              simp [psKernelC0ConstantCompleteInferWithFuel, cached,
+                depth, cache, expr] at h
+          | ok entered =>
+              have hresult : result = (ty, state) := by
+                have hx : some (ty, state) = some result := by
+                  simpa [psKernelC0ConstantCompleteInferWithFuel,
+                    cached, depth, cache, expr] using h
+                exact (Option.some.inj hx).symm
+              rw [hresult]
+              have hcache :
+                  psKernelExprMapGetWithKnownHash
+                    (if inferOnly then state.inferOnly else state.checkedInfer)
+                    (.const name levels) none = some ty := by
+                change psKernelExprMapGet cache expr = some ty
+                exact cached
+              simpa [psKernelInferCoreWithFuelUsing,
+                psKernelInferCoreWithFuelUsingSourceFrames,
+                psKernelInferCacheEligible, hcache, depth]
+      | none =>
+          cases depth : psKernelCheckerContextEnterRecDepth context with
+          | error reason =>
+              simp [psKernelC0ConstantCompleteInferWithFuel, cached,
+                depth, cache, expr] at h
+          | ok entered =>
+              cases chosen : psKernelInferConstantHead
+                  entered state name levels inferOnly with
+              | error reason =>
+                  simp [psKernelC0ConstantCompleteInferWithFuel,
+                    cached, depth, chosen, cache, expr] at h
+              | ok value =>
+                  have hresult : result = value := by
+                    have hx : some value = some result := by
+                      simpa [psKernelC0ConstantCompleteInferWithFuel,
+                        cached, depth, chosen, cache, expr] using h
+                    exact (Option.some.inj hx).symm
+                  rw [hresult]
+                  have hcache :
+                      psKernelExprMapGetWithKnownHash
+                        (if inferOnly then state.inferOnly else state.checkedInfer)
+                        (.const name levels) none = none := by
+                    change psKernelExprMapGet cache expr = none
+                    exact cached
+                  simpa [psKernelInferCoreWithFuelUsing,
+                    psKernelInferCoreWithFuelUsingSourceFrames,
+                    psKernelInferCacheEligible, hcache, depth, chosen]

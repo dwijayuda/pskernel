@@ -28,6 +28,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0QualifiedInferenceDispatchRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ColdConstantInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedMetadataInferenceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0BinderSourceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -167,6 +168,9 @@ jobs:
       - name: C0 source-proved recursive metadata full checking and atomic publication
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedMetadataInferenceRegression.lean
+      - name: C0 source-exact dependent Pi and lambda binder rules
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0BinderSourceRegression.lean
       - name: C0 Lean 4.35 full checking enforces declared universe parameters
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0UniverseParameterRegression.lean

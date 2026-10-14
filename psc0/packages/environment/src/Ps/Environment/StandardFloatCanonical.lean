@@ -43,7 +43,7 @@ def psStandardFloatCanonicalPair (owner floatName : String)
     PsDeclaration.definitionDecl (psDecisionName ("PsStandard." ++ name ++ floatName ++ "Bits")) []
       (psLogicPi 0 "bits" word result)
       (psLogicLam 0 "bits" word body)
-  [declare "is" bool nanFlag, declare "canonical" word normalized]
+  [declare "isNaN" bool nanFlag, declare "canonical" word normalized]
 
 def psStandardFloatCanonicalDeclarations : List PsDeclaration :=
   psStandardFloatCanonicalPair "UInt64" "Float64"

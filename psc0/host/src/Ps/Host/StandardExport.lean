@@ -557,7 +557,7 @@ def exportUnsignedOperationsCandidate (output : System.FilePath) : IO Unit :=
 -- closure shows those require an unapproved Classical.choice dependency.
 -- No proof replacement, unsafe insertion, or expanded assumption allowlist.
 def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
-  let existing := psSelfHostProdPreludeEnvironment.declarations
+  let existing := psSelfHostProdPreFloatPreludeEnvironment.declarations
   exportStandardCore {
     roots := [`Float, `Float32]
     boundary := existing.map psDeclarationName

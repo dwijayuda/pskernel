@@ -1,6 +1,7 @@
 import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardUnsigned
 import Ps.Environment.StandardUnsignedOperations
+import Ps.Environment.StandardFloatIdentity
 import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
@@ -34,8 +35,13 @@ def psSelfHostProdUnsignedPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdHashPreludeEnvironment : PsEnvironment :=
   psStandardHashableExtend psSelfHostProdUnsignedPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Separate immutable exporter stage: the selected F0 environment must
+-- never serve as its own checked-asset boundary.
+def psSelfHostProdPreFloatPreludeEnvironment : PsEnvironment :=
   psStandardUnsignedOperationsExtend psSelfHostProdHashPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardFloatIdentityExtend psSelfHostProdPreFloatPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

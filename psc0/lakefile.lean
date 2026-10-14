@@ -85,6 +85,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardNatOrder,
     `Ps.Environment.StandardHashable, `Ps.Environment.StandardHashFoundationData, `Ps.Environment.StandardUnsignedFoundationData, `Ps.Environment.StandardUnsigned,
     `Ps.Environment.StandardUnsignedOperationsData, `Ps.Environment.StandardUnsignedOperations,
+    `Ps.Environment.StandardFloatIdentityData, `Ps.Environment.StandardFloatIdentity,
     `Ps.Environment.StandardScalarArithmeticData, `Ps.Environment.StandardScalarArithmetic,
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,

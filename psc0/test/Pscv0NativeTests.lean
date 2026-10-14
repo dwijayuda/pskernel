@@ -343,6 +343,41 @@ private def stringJoinIntercalateCases : IO Unit := do
   if failures != 0 then
     throw (IO.userError (toString failures ++ " String API checks failed"))
 
+-- Lean 4.35.0 Init/Prelude.lean HAdd: an output-param class with an
+-- ordinary method and local instance semantics. Check the entire resolution
+-- family so a polymorphic class error cannot be hidden by a Nat/UInt shortcut.
+private def hAddPolymorphicCases : IO Unit := do
+  let cases : Array (String × String) := #[
+    ("generic identity",
+      "function generic{A: Type}(left: A, right: A): A := left\n"),
+    ("generic instance unused",
+      "function generic{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left\n"),
+    ("generic operator",
+      "function generic{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\n"),
+    ("generic direct projection",
+      "function generic{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := HAdd.hAdd(left, right, self := operation)\n"),
+    ("generic structure method",
+      "function generic{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := operation.hAdd(left, right)\n"),
+    ("Nat local instance",
+      "function generic[operation: HAdd(Nat, Nat, Nat)](left: Nat, right: Nat): Nat := left + right\n")]
+  let requests : Array PsV7Native.Request := cases.map fun (_, source) => { source }
+  let result ← PsV7Native.runBatch requests
+  let batch ← match result with
+    | .error problem => throw (IO.userError ("HAdd local/generic batch: " ++ problem.message))
+    | .ok result => pure result
+  let mut failures := 0
+  for i in [:cases.size] do
+    let some (label, _) := cases[i]? | throw (IO.userError "missing HAdd label")
+    let some result := batch.results[i]? | throw (IO.userError "missing HAdd result")
+    match result with
+    | .ok _ => IO.println ("PSCV0_HADD_GENERIC: PASS " ++ label)
+    | .error problem =>
+      failures := failures + 1
+      IO.println ("PSCV0_HADD_GENERIC: " ++ label ++
+        " refused at " ++ problem.phase ++ ": " ++ problem.message)
+  unless failures == 0 do
+    throw (IO.userError (toString failures ++ " HAdd generic source cases failed"))
+
 private def wordFixture : String :=
   "function wordOperations8(a: Nat, b: Nat): String := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y), UInt8.toNat(x - y), UInt8.toNat(x * y), UInt8.toNat(x / y), UInt8.toNat(x % y), UInt8.toNat(-x), UInt8.toNat(UInt8.complement(x)), UInt8.toNat(UInt8.land(x, y)), UInt8.toNat(UInt8.lor(x, y)), UInt8.toNat(UInt8.xor(x, y)), UInt8.toNat(UInt8.shiftLeft(x, y)), UInt8.toNat(UInt8.shiftRight(x, y))])) }\nfunction wordOperations16(a: Nat, b: Nat): String := { let x: UInt16 := UInt16.ofNat(a)\n let y: UInt16 := UInt16.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt16.toNat(x + y), UInt16.toNat(x - y), UInt16.toNat(x * y), UInt16.toNat(x / y), UInt16.toNat(x % y), UInt16.toNat(-x), UInt16.toNat(UInt16.complement(x)), UInt16.toNat(UInt16.land(x, y)), UInt16.toNat(UInt16.lor(x, y)), UInt16.toNat(UInt16.xor(x, y)), UInt16.toNat(UInt16.shiftLeft(x, y)), UInt16.toNat(UInt16.shiftRight(x, y))])) }\nfunction wordOperations32(a: Nat, b: Nat): String := { let x: UInt32 := UInt32.ofNat(a)\n let y: UInt32 := UInt32.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt32.toNat(x + y), UInt32.toNat(x - y), UInt32.toNat(x * y), UInt32.toNat(x / y), UInt32.toNat(x % y), UInt32.toNat(-x), UInt32.toNat(UInt32.complement(x)), UInt32.toNat(UInt32.land(x, y)), UInt32.toNat(UInt32.lor(x, y)), UInt32.toNat(UInt32.xor(x, y)), UInt32.toNat(UInt32.shiftLeft(x, y)), UInt32.toNat(UInt32.shiftRight(x, y))])) }\nfunction wordOperations64(a: Nat, b: Nat): String := { let x: UInt64 := UInt64.ofNat(a)\n let y: UInt64 := UInt64.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt64.toNat(x + y), UInt64.toNat(x - y), UInt64.toNat(x * y), UInt64.toNat(x / y), UInt64.toNat(x % y), UInt64.toNat(-x), UInt64.toNat(UInt64.complement(x)), UInt64.toNat(UInt64.land(x, y)), UInt64.toNat(UInt64.lor(x, y)), UInt64.toNat(UInt64.xor(x, y)), UInt64.toNat(UInt64.shiftLeft(x, y)), UInt64.toNat(UInt64.shiftRight(x, y))])) }\nfunction wordApply(operation: UInt64 -> UInt64 -> UInt64, left: UInt64, right: UInt64): Nat := UInt64.toNat(operation(left)(right))\nconst wordHigherOrder: Nat := wordApply(UInt64.shiftLeft, (3 : UInt64), (65 : UInt64))\nfunction wordGeneric{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\nconst wordGenericWrap: Nat := UInt8.toNat(wordGeneric((255 : UInt8), (2 : UInt8)))\ntheorem wordModel: UInt8.toNat(UInt8.add((255 : UInt8), (2 : UInt8))) = 1 := by { rfl }\n"
 
@@ -2418,6 +2453,7 @@ def main : IO Unit := do
   highUniverseHashableCases
   stringJoinIntercalateCases
   unsignedOperatorSourceCases
+  hAddPolymorphicCases
   semanticCases
   doBoundaries
   projectBoundaries

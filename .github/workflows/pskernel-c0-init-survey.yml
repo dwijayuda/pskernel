@@ -354,23 +354,20 @@ jobs:
           ) | tee "$RUNNER_TEMP/c0-first-86383-result.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=86383 fuel=4096"             "$RUNNER_TEMP/c0-first-86383-result.txt"
           echo "C0_REAL_INIT_ETA_PREFIX parity=accepted records=86383"
-      - name: Dissect first false Eq application arguments at post-nested theorem
+      - name: Discover the next real Lean Init compatibility boundary
         shell: bash
         run: |
           set -euo pipefail
-          # This is not an acceptance gate: the current adapter deliberately
-          # declines unsupported declarations; it now includes a first-failure
-          # record offset and typed rejection reason. A timeout/host failure must
-          # not be represented as a kernel rejection.
-          if timeout 480s bash -c 'cd "$1" && lake build PsKernelC0 && lake env lean --run test/C0OfficialNdjsonReplay.lean "$2"' _ \
-              "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" \
-              "$RUNNER_TEMP/Init-4.35.0.ndjson" \
-              > "$RUNNER_TEMP/c0-real-init-435-result.txt" 2>&1; then
-            cat "$RUNNER_TEMP/c0-real-init-435-result.txt"
-            grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/c0-real-init-435-result.txt"
-          else
-            echo "C0_REAL_EXPORT diagnostic_process_failed_or_timed_out" | tee -a "$RUNNER_TEMP/c0-real-init-435-result.txt"
-          fi
+          head -n 150000 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-next-boundary.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/Init-next-boundary.ndjson")" -eq 150000
+          (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$RUNNER_TEMP/Init-next-boundary.ndjson") > "$RUNNER_TEMP/next-official.txt" 2>&1
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/next-official.txt"
+          echo "C0_NEXT_INIT_OFFICIAL verdict=accepted records=150000"
+          (
+            cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+            timeout 360s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-next-boundary.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/next-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/next-c0.txt"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -388,5 +385,8 @@ jobs:
             ${{ runner.temp }}/c0-first-12244-result.txt
             ${{ runner.temp }}/c0-first-nested-result.txt
             ${{ runner.temp }}/c0-first-86383-result.txt
+            ${{ runner.temp }}/Init-next-boundary.ndjson
+            ${{ runner.temp }}/next-official.txt
+            ${{ runner.temp }}/next-c0.txt
           if-no-files-found: warn
           retention-days: 14

@@ -465,13 +465,21 @@ def psKernelC0AuditedSourceCheck
   psKernelC0AuditedSourceContinue work
     (fun context state => psKernelCheckerCheck fuel context state expr)
 
+/-- Source-equivalent independent reflexive DefEq plus exact checked
+    state and assumption-proof transport. All non-reflexive and
+    resource-declined cases remain source-authoritative. -/
 def psKernelC0AuditedSourceDefEq
     (fuel : Nat)
     (work : PsKernelC0AuditedSourceWork)
     (left right : PsKernelExpr) :
     Except String (Bool × PsKernelC0AuditedSourceWork) :=
-  psKernelC0AuditedSourceContinue work
-    (fun context state => psKernelIsDefEq fuel context state left right)
+  match psKernelC0CertifiedWorkDefEqCanonicalFastOwned
+      fuel work.trusted.certified left right with
+  | .error reason => .error reason
+  | .ok receipt =>
+      let (same, certified) := receipt.val
+      .ok (same, psKernelC0AuditedSourceWithState
+        work certified.raw.checker.state)
 
 /-- Staging changes only syntax and the working store. The certified
     staging operation supplies the SAME environment-equality proof so the

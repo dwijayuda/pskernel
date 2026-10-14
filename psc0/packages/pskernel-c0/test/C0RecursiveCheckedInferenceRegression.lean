@@ -1,8 +1,8 @@
 import Ps.KernelCore.API.VerifiedProvider
-import Ps.KernelCore.Architecture.QualifiedIndependentCheckedApp
+import Ps.KernelCore.Architecture.QualifiedRecursiveInference
 
 /-!
-E.4W: prove source-exact checked application with BOTH children inferred
+E.4AA: source-exact recursive checked applications, metadata and binders
 without the historical recursive source worker. Unsupported applications
 remain exclusively source checked. No new assumptions or unchecked roots.
 -/
@@ -79,7 +79,7 @@ def main : IO Unit := do
       | throw (IO.userError "independent checked app work failed")
     let some work := psKernelC0ArchitectureCertifyWork raw
       | throw (IO.userError "independent checked app certification failed")
-    let checked ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+    let checked ← match psKernelC0CertifiedWorkCheckRecursiveOwned
         4096 work expr with
       | .ok proof => pure proof
       | .error e => throw (IO.userError ("checked receipt failed: " ++ e))
@@ -113,7 +113,7 @@ def main : IO Unit := do
     if (psKernelC0CheckedAppLeafWithFuel 4096
         source.context source.state fn arg).isSome then
       throw (IO.userError "old shallow app path unexpectedly checked nested tree")
-    let some (qualifiedType, _) := psKernelC0RecursiveCheckedAppWithFuel
+    let some (qualifiedType, _) := psKernelC0RecursiveCheckedWithFuel
         4096 source.context source.state expr
       | throw (IO.userError "recursive independent app tree declined valid input")
     if !psKernelExprEqual qualifiedType sort1 then
@@ -122,7 +122,7 @@ def main : IO Unit := do
       | throw (IO.userError "recursive app checked work unavailable")
     let some work := psKernelC0ArchitectureCertifyWork raw
       | throw (IO.userError "recursive app checked work not certified")
-    let receipt ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+    let receipt ← match psKernelC0CertifiedWorkCheckRecursiveOwned
         4096 work expr with
       | .ok value => pure value
       | .error e =>
@@ -132,7 +132,7 @@ def main : IO Unit := do
       receipt.property
     if !psKernelExprEqual receipt.val.fst sort1 then
       throw (IO.userError "recursive app source equation changed type")
-    if (psKernelC0RecursiveCheckedAppWithFuel 1
+    if (psKernelC0RecursiveCheckedWithFuel 1
         source.context source.state expr).isSome then
       throw (IO.userError "recursive app bypassed nested fuel accounting")
 
@@ -144,7 +144,7 @@ def main : IO Unit := do
         source.context source.state expr false).isSome then
       throw (IO.userError "old metadata-only fragment unexpectedly qualified app")
     let some (qualifiedType, qualifiedState) :=
-        psKernelC0RecursiveCheckedAppWithFuel
+        psKernelC0RecursiveCheckedWithFuel
           4096 source.context source.state expr
       | throw (IO.userError "metadata-wrapped app tree unexpectedly declined")
     if !psKernelExprEqual qualifiedType sort1 then
@@ -155,7 +155,7 @@ def main : IO Unit := do
       | throw (IO.userError "metadata app source work unavailable")
     let some work := psKernelC0ArchitectureCertifyWork raw
       | throw (IO.userError "metadata app canonical work unavailable")
-    let proof ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+    let proof ← match psKernelC0CertifiedWorkCheckRecursiveOwned
         4096 work expr with
       | .ok value => pure value
       | .error e => throw (IO.userError ("metadata independent app failed: " ++ e))
@@ -164,7 +164,7 @@ def main : IO Unit := do
       proof.property
     if !psKernelExprEqual proof.val.fst sort1 then
       throw (IO.userError "metadata source type mismatch")
-    if (psKernelC0RecursiveCheckedAppWithFuel 1
+    if (psKernelC0RecursiveCheckedWithFuel 1
         source.context source.state expr).isSome then
       throw (IO.userError "metadata app bypassed fuel")
 
@@ -172,7 +172,7 @@ def main : IO Unit := do
   -- inference for either the domain or opened body, including a dependent
   -- domain/body under two successive fresh local contexts.
   for expr in [piSimple, piDependent, piWrapped] do
-    let some (qualifiedType, _) := psKernelC0RecursiveCheckedAppWithFuel
+    let some (qualifiedType, _) := psKernelC0RecursiveCheckedWithFuel
         4096 source.context source.state expr
       | throw (IO.userError "independent recursive Pi formation declined")
     let (sourceType, _) ← match psKernelCheckerCheck
@@ -185,7 +185,7 @@ def main : IO Unit := do
       | throw (IO.userError "dependent Pi source genesis failed")
     let some work := psKernelC0ArchitectureCertifyWork raw
       | throw (IO.userError "dependent Pi certified work unavailable")
-    let checked ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+    let checked ← match psKernelC0CertifiedWorkCheckRecursiveOwned
         4096 work expr with
       | .ok receipt => pure receipt
       | .error e => throw (IO.userError ("dependent Pi check failed: " ++ e))
@@ -194,7 +194,7 @@ def main : IO Unit := do
       checked.property
     if !psKernelExprEqual checked.val.fst sourceType then
       throw (IO.userError "dependent Pi exact source receipt changed type")
-    if (psKernelC0RecursiveCheckedAppWithFuel 1
+    if (psKernelC0RecursiveCheckedWithFuel 1
         source.context source.state expr).isSome then
       throw (IO.userError "dependent Pi bypassed recursive fuel")
 
@@ -203,7 +203,7 @@ def main : IO Unit := do
   -- dependent nested lambdas whose second domain is the outer local.
   for expr in [lambdaSimple, lambdaDependent, lambdaApplied,
       lambdaMetadata] do
-    let some (qualifiedType, _) := psKernelC0RecursiveCheckedAppWithFuel
+    let some (qualifiedType, _) := psKernelC0RecursiveCheckedWithFuel
         4096 source.context source.state expr
       | throw (IO.userError "independent recursive lambda declined")
     let (sourceType, _) ← match psKernelCheckerCheck
@@ -216,7 +216,7 @@ def main : IO Unit := do
       | throw (IO.userError "independent lambda genesis failed")
     let some work := psKernelC0ArchitectureCertifyWork raw
       | throw (IO.userError "independent lambda certification failed")
-    let proof ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+    let proof ← match psKernelC0CertifiedWorkCheckRecursiveOwned
         4096 work expr with
       | .ok receipt => pure receipt
       | .error e => throw (IO.userError ("independent lambda checked error: " ++ e))
@@ -225,7 +225,7 @@ def main : IO Unit := do
       proof.property
     if !psKernelExprEqual proof.val.fst sourceType then
       throw (IO.userError "independent lambda source receipt diverged")
-    if (psKernelC0RecursiveCheckedAppWithFuel 1
+    if (psKernelC0RecursiveCheckedWithFuel 1
         source.context source.state expr).isSome then
       throw (IO.userError "independent lambda bypassed child fuel")
 
@@ -243,7 +243,7 @@ def main : IO Unit := do
       | throw (IO.userError "negative checked app source setup failed")
     let some work := psKernelC0ArchitectureCertifyWork raw
       | throw (IO.userError "negative checked app source proof failed")
-    match psKernelC0CertifiedWorkCheckIndependentAppOwned 4096 work bad,
+    match psKernelC0CertifiedWorkCheckRecursiveOwned 4096 work bad,
           psKernelC0CertifiedWorkCheck 4096 work bad with
     | .error observed, .error authoritative =>
         if observed != authoritative then

@@ -35,7 +35,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0QualifiedApplicationInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedLetInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedProjectionInferenceRegression.lean'
-      - 'psc0/packages/pskernel-c0/test/C0IndependentCheckedAppRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0RecursiveCheckedInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -197,9 +197,9 @@ jobs:
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedProjectionInferenceRegression.lean
 
-      - name: C0 independent checked application child typing and source proof
+      - name: C0 recursive checked inference across applications metadata and dependent binders
         working-directory: psc0/packages/pskernel-c0
-        run: lake env lean --run test/C0IndependentCheckedAppRegression.lean
+        run: lake env lean --run test/C0RecursiveCheckedInferenceRegression.lean
       - name: C0 Lean 4.35 full checking enforces declared universe parameters
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0UniverseParameterRegression.lean

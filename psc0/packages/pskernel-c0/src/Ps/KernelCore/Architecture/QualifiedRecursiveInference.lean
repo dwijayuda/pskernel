@@ -1,6 +1,17 @@
 import Ps.KernelCore.Architecture.QualifiedProjectionInference
 
 /-!
+Qualified recursive checked expression inference — native Lean 4.35.
+
+One fuel-recursive, state-accounted accepting fragment now handles checked
+application trees, transparent metadata and dependent Pi/lambda binders.
+All successful results carry Lean-checked exact source-result and complete
+checker-state refinement; unsupported conversion and other families retain
+the independent original source checker as the authoritative fallback.
+The earlier leaf-app implementation remains solely as a regression oracle.
+-/
+
+/-!
 Phase E.4W — a checked application with independently typed children.
 
 Lean 4.35 type_checker.cpp::infer_app checks a function's Pi type,
@@ -218,7 +229,7 @@ resource cases decline and preserve authoritative source checking.
 /-- Independent bounded recursive checked inference over application trees,
     with independently qualified metadata/scalar/local/constant terminals.
     Neither recursive child calls the original C0 inference worker. -/
-def psKernelC0RecursiveCheckedAppWithFuel :
+def psKernelC0RecursiveCheckedWithFuel :
     Nat → PsKernelCheckerContext → PsKernelCheckerState →
       PsKernelExpr → Option (PsKernelExpr × PsKernelCheckerState)
   | 0, _, _, _ => none
@@ -230,13 +241,13 @@ def psKernelC0RecursiveCheckedAppWithFuel :
             match psKernelCheckerContextEnterRecDepth context with
             | .error _ => none
             | .ok entered =>
-                match psKernelC0RecursiveCheckedAppWithFuel
+                match psKernelC0RecursiveCheckedWithFuel
                     remaining entered state fn with
                 | none => none
                 | some (fnType, fnState) =>
                     match fnType with
                     | .forallE _ domain body _ =>
-                        match psKernelC0RecursiveCheckedAppWithFuel
+                        match psKernelC0RecursiveCheckedWithFuel
                             remaining entered fnState arg with
                         | none => none
                         | some (argType, argState) =>
@@ -257,7 +268,7 @@ def psKernelC0RecursiveCheckedAppWithFuel :
             match psKernelCheckerContextEnterRecDepth context with
             | .error _ => none
             | .ok entered =>
-                match psKernelC0RecursiveCheckedAppWithFuel
+                match psKernelC0RecursiveCheckedWithFuel
                     remaining entered state domain with
                 | some (.sort _, domainState) =>
                     let freshResult := psKernelCheckerStateFreshName
@@ -270,7 +281,7 @@ def psKernelC0RecursiveCheckedAppWithFuel :
                       entered childLocal
                     let openedBody := psKernelExprInstantiate1 body
                       (.fvar fresh)
-                    match psKernelC0RecursiveCheckedAppWithFuel
+                    match psKernelC0RecursiveCheckedWithFuel
                         remaining child state1 openedBody with
                     | some (bodyType, bodyState) =>
                         let reducedBody := psKernelExprCheapBetaReduce bodyType
@@ -292,7 +303,7 @@ def psKernelC0RecursiveCheckedAppWithFuel :
             match psKernelCheckerContextEnterRecDepth context with
             | .error _ => none
             | .ok entered =>
-                match psKernelC0RecursiveCheckedAppWithFuel
+                match psKernelC0RecursiveCheckedWithFuel
                     remaining entered state domain with
                 | some (.sort domainLevel, domainState) =>
                     let freshResult := psKernelCheckerStateFreshName
@@ -305,7 +316,7 @@ def psKernelC0RecursiveCheckedAppWithFuel :
                       entered childLocal
                     let openedBody := psKernelExprInstantiate1 body
                       (.fvar fresh)
-                    match psKernelC0RecursiveCheckedAppWithFuel
+                    match psKernelC0RecursiveCheckedWithFuel
                         remaining child state1 openedBody with
                     | some (.sort bodyLevel, bodyState) =>
                         let ty : PsKernelExpr :=
@@ -325,7 +336,7 @@ def psKernelC0RecursiveCheckedAppWithFuel :
               match psKernelCheckerContextEnterRecDepth context with
               | .error _ => none
               | .ok entered =>
-                  match psKernelC0RecursiveCheckedAppWithFuel
+                  match psKernelC0RecursiveCheckedWithFuel
                       remaining entered state body with
                   | none => none
                   | some (ty, checkedState) =>
@@ -340,7 +351,7 @@ def psKernelC0RecursiveCheckedAppWithFuel :
     This uses strong fuel induction for BOTH recursive child judgments.
     Successful base judgments use the previously proved metadata fragment;
     WHNF and DefEq remain source callbacks, not independent observations. -/
-theorem psKernelC0RecursiveCheckedApp_source
+theorem psKernelC0RecursiveChecked_source
     (fuel : Nat)
     (onCheckedApp : Option PsKernelC0CheckedAppHook)
     (whnf : PsKernelC0BinderWhnf)
@@ -349,37 +360,37 @@ theorem psKernelC0RecursiveCheckedApp_source
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr)
     (result : PsKernelExpr × PsKernelCheckerState)
-    (h : psKernelC0RecursiveCheckedAppWithFuel
+    (h : psKernelC0RecursiveCheckedWithFuel
       fuel context state expr = some result) :
     psKernelInferCoreWithFuelUsing fuel onCheckedApp whnf defeq
       context state expr false = .ok result := by
   induction fuel generalizing context state expr result with
   | zero =>
-      simp [psKernelC0RecursiveCheckedAppWithFuel] at h
+      simp [psKernelC0RecursiveCheckedWithFuel] at h
   | succ remaining ih =>
       cases expr with
       | app fn arg =>
           by_cases hlong : psKernelExprGetAppNumArgs (.app fn arg) >= 16
-          · simp [psKernelC0RecursiveCheckedAppWithFuel, hlong] at h
+          · simp [psKernelC0RecursiveCheckedWithFuel, hlong] at h
           · cases depth : psKernelCheckerContextEnterRecDepth context with
             | error reason =>
-                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                simp [psKernelC0RecursiveCheckedWithFuel,
                   hlong, depth] at h
             | ok entered =>
-                cases head : psKernelC0RecursiveCheckedAppWithFuel
+                cases head : psKernelC0RecursiveCheckedWithFuel
                     remaining entered state fn with
                 | none =>
-                    simp [psKernelC0RecursiveCheckedAppWithFuel,
+                    simp [psKernelC0RecursiveCheckedWithFuel,
                       hlong, depth, head] at h
                 | some headResult =>
                     cases headResult with
                     | mk fnType fnState =>
                         cases fnType with
                         | forallE name domain body binderInfo =>
-                            cases argument : psKernelC0RecursiveCheckedAppWithFuel
+                            cases argument : psKernelC0RecursiveCheckedWithFuel
                                 remaining entered fnState arg with
                             | none =>
-                                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                simp [psKernelC0RecursiveCheckedWithFuel,
                                   hlong, depth, head, argument] at h
                             | some argumentResult =>
                                 cases argumentResult with
@@ -392,7 +403,7 @@ theorem psKernelC0RecursiveCheckedApp_source
                                       have hr : result = (codomain, nextState) := by
                                         have hx : some (codomain, nextState) =
                                             some result := by
-                                          simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                                          simpa [psKernelC0RecursiveCheckedWithFuel,
                                             hlong, depth, head, argument, same,
                                             codomain, nextState] using h
                                         exact (Option.some.inj hx).symm
@@ -438,60 +449,60 @@ theorem psKernelC0RecursiveCheckedApp_source
                                             psKernelInferAppHead, psKernelEnsureForallWith,
                                             hlong, depth, checkedFn, checkedArg, same,
                                             codomain, nextState]
-                                    · simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    · simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, head, argument, same] at h
-                        | bvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | bvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | fvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | fvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | mvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | mvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | sort _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | sort _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | const _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | const _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | app _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | app _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | lit _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | lit _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | mdata _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | mdata _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
-                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, head] at h
       | sort u =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.sort u) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | lit v =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.lit v) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | fvar name =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.fvar name) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | const name levels =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.const name levels) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | lam name domain body binderInfo =>
           let term : PsKernelExpr := .lam name domain body binderInfo
           by_cases hlong : psKernelC0HasBinderPrefix 12 true term = true
-          · simp [psKernelC0RecursiveCheckedAppWithFuel,
+          · simp [psKernelC0RecursiveCheckedWithFuel,
               hlong, term] at h
           · cases depth : psKernelCheckerContextEnterRecDepth context with
             | error reason =>
-                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                simp [psKernelC0RecursiveCheckedWithFuel,
                   hlong, depth, term] at h
             | ok entered =>
-                cases hd : psKernelC0RecursiveCheckedAppWithFuel
+                cases hd : psKernelC0RecursiveCheckedWithFuel
                     remaining entered state domain with
                 | none =>
-                    simp [psKernelC0RecursiveCheckedAppWithFuel,
+                    simp [psKernelC0RecursiveCheckedWithFuel,
                       hlong, depth, hd, term] at h
                 | some domainResult =>
                     cases domainResult with
@@ -508,10 +519,10 @@ theorem psKernelC0RecursiveCheckedApp_source
                               entered childLocal
                             let openedBody := psKernelExprInstantiate1 body
                               (.fvar fresh)
-                            cases hb : psKernelC0RecursiveCheckedAppWithFuel
+                            cases hb : psKernelC0RecursiveCheckedWithFuel
                                 remaining child state1 openedBody with
                             | none =>
-                                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                simp [psKernelC0RecursiveCheckedWithFuel,
                                   hlong, depth, hd, hb, term, child,
                                   openedBody, freshResult, fresh, state1,
                                   childLocal] at h
@@ -530,7 +541,7 @@ theorem psKernelC0RecursiveCheckedApp_source
                                     have hr : result = (ty, nextState) := by
                                       have hx : some (ty, nextState) =
                                           some result := by
-                                        simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                                        simpa [psKernelC0RecursiveCheckedWithFuel,
                                           hlong, depth, hd, hb, term, child,
                                           openedBody, freshResult, fresh,
                                           state1, childLocal, reducedBody,
@@ -587,42 +598,42 @@ theorem psKernelC0RecursiveCheckedApp_source
                                           openedBody, freshResult, fresh,
                                           state1, childLocal, reducedBody,
                                           closedBody, ty, nextState]
-                        | bvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | bvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | fvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | fvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | mvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | mvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | const _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | const _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | app _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | app _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | lit _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | lit _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | mdata _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | mdata _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
       | forallE name domain body binderInfo =>
           let term : PsKernelExpr := .forallE name domain body binderInfo
           by_cases hlong : psKernelC0HasBinderPrefix 12 false term = true
-          · simp [psKernelC0RecursiveCheckedAppWithFuel,
+          · simp [psKernelC0RecursiveCheckedWithFuel,
               hlong, term] at h
           · cases depth : psKernelCheckerContextEnterRecDepth context with
             | error reason =>
-                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                simp [psKernelC0RecursiveCheckedWithFuel,
                   hlong, depth, term] at h
             | ok entered =>
-                cases hd : psKernelC0RecursiveCheckedAppWithFuel
+                cases hd : psKernelC0RecursiveCheckedWithFuel
                     remaining entered state domain with
                 | none =>
-                    simp [psKernelC0RecursiveCheckedAppWithFuel,
+                    simp [psKernelC0RecursiveCheckedWithFuel,
                       hlong, depth, hd, term] at h
                 | some domainResult =>
                     cases domainResult with
@@ -639,10 +650,10 @@ theorem psKernelC0RecursiveCheckedApp_source
                               entered childLocal
                             let openedBody := psKernelExprInstantiate1 body
                               (.fvar fresh)
-                            cases hb : psKernelC0RecursiveCheckedAppWithFuel
+                            cases hb : psKernelC0RecursiveCheckedWithFuel
                                 remaining child state1 openedBody with
                             | none =>
-                                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                simp [psKernelC0RecursiveCheckedWithFuel,
                                   hlong, depth, hd, hb, term, child,
                                   openedBody, freshResult, fresh, state1,
                                   childLocal] at h
@@ -660,7 +671,7 @@ theorem psKernelC0RecursiveCheckedApp_source
                                         have hr : result = (ty, nextState) := by
                                           have hx : some (ty, nextState) =
                                               some result := by
-                                            simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                                            simpa [psKernelC0RecursiveCheckedWithFuel,
                                               hlong, depth, hd, hb, term, child,
                                               openedBody, freshResult, fresh,
                                               state1, childLocal, ty,
@@ -715,71 +726,71 @@ theorem psKernelC0RecursiveCheckedApp_source
                                               sourceBody, term, child,
                                               openedBody, freshResult, fresh,
                                               state1, childLocal, ty, nextState]
-                                    | bvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | bvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | fvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | fvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | mvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | mvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | const _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | const _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | app _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | app _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | lit _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | lit _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | mdata _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | mdata _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                                    | proj _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                    | proj _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                                         hlong, depth, hd, hb, child, openedBody,
                                         freshResult, fresh, state1, childLocal,
                                         term] at h
-                        | bvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | bvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | fvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | fvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | mvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | mvar _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | const _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | const _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | app _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | app _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | lit _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | lit _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | mdata _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | mdata _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
-                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedWithFuel,
                             hlong, depth, hd, term] at h
       | mdata md body =>
           let term : PsKernelExpr := .mdata md body
@@ -787,12 +798,12 @@ theorem psKernelC0RecursiveCheckedApp_source
           | some ty =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
-                  simp [psKernelC0RecursiveCheckedAppWithFuel,
+                  simp [psKernelC0RecursiveCheckedWithFuel,
                     cached, depth, term] at h
               | ok entered =>
                   have hr : result = (ty, state) := by
                     have hx : some (ty, state) = some result := by
-                      simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                      simpa [psKernelC0RecursiveCheckedWithFuel,
                         cached, depth, term] using h
                     exact (Option.some.inj hx).symm
                   rw [hr]
@@ -807,13 +818,13 @@ theorem psKernelC0RecursiveCheckedApp_source
           | none =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
-                  simp [psKernelC0RecursiveCheckedAppWithFuel,
+                  simp [psKernelC0RecursiveCheckedWithFuel,
                     cached, depth, term] at h
               | ok entered =>
-                  cases nested : psKernelC0RecursiveCheckedAppWithFuel
+                  cases nested : psKernelC0RecursiveCheckedWithFuel
                       remaining entered state body with
                   | none =>
-                      simp [psKernelC0RecursiveCheckedAppWithFuel,
+                      simp [psKernelC0RecursiveCheckedWithFuel,
                         cached, depth, nested, term] at h
                   | some nestedResult =>
                       cases nestedResult with
@@ -823,7 +834,7 @@ theorem psKernelC0RecursiveCheckedApp_source
                                 checkedState false term ty) := by
                             have hx : some (ty, psKernelCacheInferResult
                                 checkedState false term ty) = some result := by
-                              simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                              simpa [psKernelC0RecursiveCheckedWithFuel,
                                 cached, depth, nested, term] using h
                             exact (Option.some.inj hx).symm
                           rw [hr]
@@ -848,41 +859,41 @@ theorem psKernelC0RecursiveCheckedApp_source
       | bvar n =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.bvar n) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | mvar name =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.mvar name) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | letE name ty value body nondep =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state
             (.letE name ty value body nondep) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
       | proj ty idx body =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state
             (.proj ty idx body) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+            (by simpa only [psKernelC0RecursiveCheckedWithFuel] using h)
 
 /-- The public checker uses a distinct hook-free entry for short root
     applications. All successful recursive short-app trees match that route
     exactly, including complete caches and resource-state results. -/
-theorem psKernelC0RecursiveCheckedApp_checkerCheck
+theorem psKernelC0RecursiveCheckedAppRoot_checkerCheck
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (fn arg : PsKernelExpr)
     (result : PsKernelExpr × PsKernelCheckerState)
-    (h : psKernelC0RecursiveCheckedAppWithFuel fuel
+    (h : psKernelC0RecursiveCheckedWithFuel fuel
       context state (.app fn arg) = some result) :
     psKernelCheckerCheck fuel context state (.app fn arg) = .ok result := by
   have hshort : ¬ psKernelExprGetAppNumArgs (.app fn arg) >= 16 := by
     cases fuel with
-    | zero => simp [psKernelC0RecursiveCheckedAppWithFuel] at h
+    | zero => simp [psKernelC0RecursiveCheckedWithFuel] at h
     | succ remaining =>
         intro hlong
-        simp [psKernelC0RecursiveCheckedAppWithFuel, hlong] at h
-  have source := psKernelC0RecursiveCheckedApp_source fuel
+        simp [psKernelC0RecursiveCheckedWithFuel, hlong] at h
+  have source := psKernelC0RecursiveChecked_source fuel
     none
     (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
     (psKernelIsDefEqWithFuel fuel)
@@ -905,23 +916,23 @@ theorem psKernelC0RecursiveCheckedApp_checkerCheck
     root applications, and the checked-hook route for ALL other root
     constructors. The recursive independent engine refines the correct
     complete public checker in BOTH cases, including source cache states. -/
-theorem psKernelC0RecursiveCheckedTerm_checkerCheck
+theorem psKernelC0RecursiveChecked_checkerCheck
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr)
     (result : PsKernelExpr × PsKernelCheckerState)
-    (h : psKernelC0RecursiveCheckedAppWithFuel fuel
+    (h : psKernelC0RecursiveCheckedWithFuel fuel
       context state expr = some result) :
     psKernelCheckerCheck fuel context state expr = .ok result := by
-  have source := psKernelC0RecursiveCheckedApp_source fuel
+  have source := psKernelC0RecursiveChecked_source fuel
     (some psKernelC0CheckAppRecursiveResummarized)
     (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
     (psKernelIsDefEqWithFuel fuel)
     context state expr result h
   cases expr with
   | app fn arg =>
-      exact psKernelC0RecursiveCheckedApp_checkerCheck
+      exact psKernelC0RecursiveCheckedAppRoot_checkerCheck
         fuel context state fn arg result h
   | bvar _ => exact source
   | fvar _ => exact source
@@ -939,14 +950,14 @@ theorem psKernelC0RecursiveCheckedTerm_checkerCheck
     qualified success, the dependent receipt proves the full original
     checker equation. For every other term and every decline, run the
     existing projection/binder/application/let/metadata/source fallback. -/
-def psKernelC0CertifiedWorkCheckIndependentAppOwned
+def psKernelC0CertifiedWorkCheckRecursiveOwned
     (fuel : Nat)
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr) :
     Except String
       { result : PsKernelExpr × PsKernelC0CertifiedWork //
         psKernelC0CertifiedWorkCheck fuel work expr = .ok result } :=
-  match h : psKernelC0RecursiveCheckedAppWithFuel fuel
+  match h : psKernelC0RecursiveCheckedWithFuel fuel
       work.raw.checker.context work.raw.checker.state expr with
   | none =>
       psKernelC0CertifiedWorkCheckProjectionOwned fuel work expr
@@ -956,7 +967,7 @@ def psKernelC0CertifiedWorkCheckIndependentAppOwned
           have source : psKernelCheckerCheck fuel
               work.raw.checker.context work.raw.checker.state expr =
                 .ok (ty, checkedState) :=
-            psKernelC0RecursiveCheckedTerm_checkerCheck fuel
+            psKernelC0RecursiveChecked_checkerCheck fuel
               work.raw.checker.context work.raw.checker.state expr
               (ty, checkedState) h
           unfold psKernelC0CertifiedWorkCheck psKernelSessionCheck

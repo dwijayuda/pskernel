@@ -241,6 +241,31 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                       exact psKernelC0RecursiveBetaZetaCore_source
                         remaining callback reduceRecursor context state
                         expr (core, coreState) coreCheck
+                    -- One reusable exact source outer-core equation.
+                    -- It is intentionally opaque to the three post-core
+                    -- branches: recursively unfolding the kernel worker
+                    -- would discard the strong source-refinement proof.
+                    have publicAfterCore :
+                        (match psKernelWhnfCoreWithFuel remaining
+                            callback reduceRecursor context state expr
+                            false false with
+                        | .error reason => Except.error reason
+                        | .ok result =>
+                            psKernelWhnfAfterCore callback context
+                              result.snd expr result.fst) =
+                          psKernelWhnfAfterCore callback context
+                            coreState expr core := by
+                      change
+                        (match psKernelWhnfCoreWithFuelRanges remaining []
+                            callback reduceRecursor context state expr
+                            false false with
+                        | .error reason => Except.error reason
+                        | .ok result =>
+                            psKernelWhnfAfterCore callback context
+                              result.snd expr result.fst) =
+                          psKernelWhnfAfterCore callback context
+                            coreState expr core
+                      rw [sourceCore]
                     by_cases stable : psKernelC0StableWhnfTerminal core = true
                     · let afterState :=
                         psKernelC0RecursiveDeltaWhnfFinish
@@ -256,9 +281,8 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                             expr core = psKernelWhnfFinish expr core coreState :=
                         psKernelC0StableWhnfTerminal_post
                           callback context coreState expr core stable
-                      rw [hr, sourceOuter]
-                      simp only [cache, psKernelWhnfCoreWithFuel,
-                        sourceCore, sourcePost]
+                      rw [hr]
+                      simp only [cache, publicAfterCore, sourcePost]
                       rfl
                     · cases core with
                       | const name levels =>
@@ -281,9 +305,8 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                 psKernelC0ConstPostDelta_source
                                   callback context coreState expr name levels
                                   none unfolding
-                              rw [hr, sourceOuter]
-                              simp only [cache, psKernelWhnfCoreWithFuel,
-                                sourceCore, sourcePost]
+                              rw [hr]
+                              simp only [cache, publicAfterCore, sourcePost]
                               rfl
                           | some opened =>
                               cases child : psKernelC0RecursiveDeltaWhnfWithFuel
@@ -313,9 +336,9 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                     psKernelC0ConstPostDelta_source
                                       callback context coreState expr
                                       name levels (some opened) unfolding
-                                  rw [hr, sourceOuter]
-                                  simp only [cache, psKernelWhnfCoreWithFuel,
-                                    sourceCore, sourcePost, sourceChild]
+                                  rw [hr]
+                                  simp only [cache, publicAfterCore, sourcePost,
+                                    sourceChild]
                                   rfl
                       | bvar _ =>
                           simp [psKernelC0RecursiveDeltaWhnfWithFuel,

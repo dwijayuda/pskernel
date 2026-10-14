@@ -171,7 +171,7 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          .lake/build/bin/pscv0_native --export-signed-shiftleft-candidate ../dist/pscv0-native/StandardSignedShiftLeftCandidate.lean | tee ../dist/pscv0-native/signed-shiftleft-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          .lake/build/bin/pscv0_native --export-signed-shiftleft-candidate ../dist/pscv0-native/StandardSignedShiftLeftCandidate.lean | tee ../dist/pscv0-native/signed-shiftleft-candidate.log
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

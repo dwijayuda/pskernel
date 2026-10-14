@@ -454,16 +454,26 @@ def psKernelC0AuditedSourceInfer
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
-  psKernelC0AuditedSourceContinue work
-    (fun context state => psKernelCheckerInfer fuel context state expr)
+  match psKernelC0CertifiedWorkInferQualifiedOwned
+      fuel work.trusted.certified expr with
+  | .error reason => .error reason
+  | .ok receipt =>
+      let (ty, certified) := receipt.val
+      .ok (ty, psKernelC0AuditedSourceWithState
+        work certified.raw.checker.state)
 
 def psKernelC0AuditedSourceCheck
     (fuel : Nat)
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
-  psKernelC0AuditedSourceContinue work
-    (fun context state => psKernelCheckerCheck fuel context state expr)
+  match psKernelC0CertifiedWorkCheckQualifiedOwned
+      fuel work.trusted.certified expr with
+  | .error reason => .error reason
+  | .ok receipt =>
+      let (ty, certified) := receipt.val
+      .ok (ty, psKernelC0AuditedSourceWithState
+        work certified.raw.checker.state)
 
 /-- Source-equivalent independent reflexive DefEq plus exact checked
     state and assumption-proof transport. All non-reflexive and

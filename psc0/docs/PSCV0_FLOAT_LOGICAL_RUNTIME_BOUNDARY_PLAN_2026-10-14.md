@@ -166,3 +166,19 @@ The standalone candidate passed all 24 Linux gates at `9b5f04ed5b87707410dd859a2
 ## F0 selected Standard asset — qualification pending
 
 The 51 checked Float/Float32 logical identity declarations have been frozen as a separate Standard stage, using the original selected /61 boundary for reproducible authoring. The 254,044-byte source has SHA-256 `47e9e2ac59dc256d108e801e38c57a238c7cdfa1d1f06c16df2fd3390cf50501`. It replaces only the two Float type axioms (net 49 declarations) without adding instances, classes, new assumptions or runtime implementations. Last full-green candidate: `bb2dbbcc6432401fedf7f73f1b174d7ee765c3ab` in [CI 38532887281](https://github.com/dwijayuda/pskernel/actions/runs/38532887281). **The selected asset and its new registry digests require a fresh end-to-end CI qualification before publication can be claimed.** Then complete F1–F4 separately.
+
+## F1 logical bit-contract candidate (next dependency)
+
+The pinned Lean 4.35.0 sources `src/Init/Data/Float/{Float,Float32}.lean`,
+`src/Init/Data/Float/Model/{Float,Float32}.lean`, and
+`src/Init/Data/Float/Model/Unpacked/Pack/Basic.lean` define checked
+`ofBits` through canonical NaN unpack/repack and `toBits` through
+the model's genuine proof-carrying bit field. An F1 authoring-only
+exporter now selects exactly eight roots covering both directions plus
+`isNaN`/`isFinite` for binary32 and binary64. It starts from the
+independently qualified F0 checked Standard, admits no new assumptions,
+and requires complete official-kernel re-admission and recursor-rule
+comparison. The probe is intentionally a mandatory CI gate; any rejected
+constructive dependency must be studied and resolved, not admitted as
+an axiom. F1 is not qualified merely because the F0 type identities
+are qualified.

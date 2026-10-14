@@ -571,4 +571,23 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nModified: selected Core conversion, closure/cut and independent kernel audit.\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- F1 authoring candidate: exact pinned Float and Float32 bit constructors,
+-- projections and classifications. A rejected dependency is a hard error,
+-- NEVER an occasion to add Classical.choice or to turn proofs into axioms.
+-- Existing /F0 Standard is the immutable input cut and is not mutated.
+def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
+  let existing := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`Float.ofBits, `Float.toBits, `Float.isNaN, `Float.isFinite,
+              `Float32.ofBits, `Float32.toBits, `Float32.isNaN, `Float32.isFinite]
+    boundary := existing.map psDeclarationName
+    baseDeclarations := existing
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardFloatBits"
+    privatePrefix := "floatBitsDecl"
+    provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Float logical bits and classification at Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nExperimental kernel-checked F1 candidate, not yet selected or runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

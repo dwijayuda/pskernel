@@ -413,6 +413,38 @@ def main : IO Unit := do
   | .ok _ =>
       throw (IO.userError "candidate bypassed source WHNF fuel exhaustion")
 
+  -- These five source-independent WHNF heads are proven exactly equivalent
+  -- to the original checker for EVERY context, source state, and positive
+  -- fuel budget (not merely for these examples).
+  let irreducibleHeads : List PsKernelExpr := [
+    .bvar 0,
+    .sort .zero,
+    .mvar (c0CertificateName "unknown"),
+    .forallE (c0CertificateName "binder") (.sort .zero)
+      (.sort .zero) .default,
+    .lit (.nat 5),
+    .lit (.str "certified")
+  ]
+  for head in irreducibleHeads do
+    let _equivalent :
+        psKernelC0CertifiedWorkWhnfCanonicalFast 4096 defeqWork head =
+          psKernelC0CertifiedWorkWhnf 4096 defeqWork head :=
+      psKernelC0CertifiedWorkWhnfCanonicalFast_exact 4096 defeqWork head
+    match psKernelC0CertifiedWorkWhnfCanonicalFast 4096 defeqWork head with
+    | .ok (actual, _) =>
+        if !psKernelExprEqual actual head then
+          throw (IO.userError "certified direct WHNF changed irreducible head")
+    | .error e =>
+        throw (IO.userError ("certified direct WHNF failed: " ++ e))
+  let _zeroExact :
+      psKernelC0CertifiedWorkWhnfCanonicalFast 0 defeqWork (.sort .zero) =
+        psKernelC0CertifiedWorkWhnf 0 defeqWork (.sort .zero) :=
+    psKernelC0CertifiedWorkWhnfCanonicalFast_exact 0 defeqWork (.sort .zero)
+  match psKernelC0CertifiedWorkWhnfCanonicalFast 0 defeqWork (.sort .zero) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "certified direct WHNF bypassed zero-fuel rejection")
+
   -- Admit only a source-checked definition. Admission must refresh the
   -- checker state while retaining the proof about the unchanged syntax.
   let defName := c0CertificateName "CertifiedDefinition"

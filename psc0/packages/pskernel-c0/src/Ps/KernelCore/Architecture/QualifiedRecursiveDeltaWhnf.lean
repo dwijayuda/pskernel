@@ -137,6 +137,30 @@ theorem psKernelC0ConstPostDelta_source
           rcases pair with ⟨value, after⟩
           simp [answer]
 
+/-- The source public post-core delta rule for one explicitly
+    unfolded constant. This direct equation does not carry a dependent
+    Option-indexed match and composes with recursive child proofs. -/
+theorem psKernelC0ConstPostDeltaSome_source
+    (callback :
+      PsKernelCheckerContext → PsKernelCheckerState → PsKernelExpr →
+        Except String (PsKernelExpr × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (original : PsKernelExpr)
+    (name : PsKernelName)
+    (levels : List PsKernelLevel)
+    (unfolded : PsKernelExpr)
+    (hdelta :
+      psKernelUnfoldDefinition context (.const name levels) =
+        some unfolded) :
+    psKernelWhnfAfterCore callback context state original
+        (.const name levels) =
+      match callback context state unfolded with
+      | .error reason => Except.error reason
+      | .ok result =>
+          psKernelWhnfFinish original result.fst result.snd := by
+  simp [psKernelWhnfAfterCore, psKernelReduceNatWith, hdelta]
+
 /-- Full source-refinement of the NEW compositional public WHNF
     controller. All successful direct and nested delta/beta/zeta paths
     have the identical source result and complete checker/cache state.
@@ -353,10 +377,20 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                     ih context coreState opened
                                       (value, childState) child
                                   have sourcePost :=
-                                    psKernelC0ConstPostDelta_source
+                                    psKernelC0ConstPostDeltaSome_source
                                       callback context coreState expr
-                                      name levels (some opened) unfolding
-                                  rw [hr, sourceAtCore, sourcePost, sourceChild]
+                                      name levels opened unfolding
+                                  rw [hr, sourceAtCore, sourcePost]
+                                  change
+                                    (match psKernelWhnfWithFuel remaining
+                                        reduceRecursor context coreState
+                                        opened with
+                                    | .error reason => Except.error reason
+                                    | .ok childResult =>
+                                        psKernelWhnfFinish expr
+                                          childResult.fst childResult.snd) =
+                                      Except.ok (value, afterState)
+                                  rw [sourceChild]
                                   rfl
                       | bvar _ =>
                           simp [psKernelC0RecursiveDeltaWhnfWithFuel,

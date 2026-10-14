@@ -63,6 +63,36 @@ def main : IO Unit := do
       psKernelC0HistoryAxiomsApproved reviewed.trusted.history
         reviewed.allowedAxioms :=
     psKernelC0AuditedSourceAxiomsApproved reviewed
+  -- The optimized WHNF route must preserve full mathematically audited
+  -- admission history. Irreducible Sort is source-free; constant lookup
+  -- remains source-authoritative, even under zero candidate work quota.
+  let (directWhnf, directAudit) ← match psKernelC0AuditedSourceWhnfQualified
+      4096 0 reviewed (.sort .zero) with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("audited direct WHNF failed: " ++ e))
+  if !psKernelExprEqual directWhnf (.sort .zero) then
+    throw (IO.userError "audited optimized direct WHNF changed Sort")
+  let _directAxiomProof := psKernelC0AuditedSourceAxiomsApproved directAudit
+  let _directCapabilitiesProof :=
+    psKernelC0AuditedSourceCapabilitiesApproved directAudit
+  let (neutralWhnf, neutralAudit) ← match psKernelC0AuditedSourceWhnfQualified
+      4096 0 directAudit (.const firstName []) with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("audited candidate decline vetoed source: " ++ e))
+  if !psKernelExprEqual neutralWhnf (.const firstName []) then
+    throw (IO.userError "audited WHNF altered approved axiom head")
+  let _neutralAxiomProof :=
+    psKernelC0AuditedSourceAxiomsApproved neutralAudit
+  let _neutralCapabilitiesProof :=
+    psKernelC0AuditedSourceCapabilitiesApproved neutralAudit
+  if (psKernelC0HistoryAxiomSignatures neutralAudit.trusted.history).length != 1 then
+    throw (IO.userError "optimized audited WHNF lost source axiom history")
+  match psKernelC0AuditedSourceWhnfQualified
+      0 32768 neutralAudit (.sort .zero) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "audited optimized WHNF bypassed source zero fuel")
+
   -- An approved AXIOM NAME must not authorize a different proposition,
   -- universe signature, or safety classification at the same name.
   let approvedSignature := c0AuditedAxiom firstName

@@ -4,7 +4,15 @@
 **Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
 **Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
 
-## Latest native-qualified E.4AG — one shared stable-terminal β/ζ fragment
+## Latest native-qualified E.4AH — recursive source-proved β/ζ WHNF core
+
+**Exact qualified source:** [04687393](https://github.com/dwijayuda/pskernel/commit/04687393a36db001e42b1e3140626b66913f6ef2) and [Lean 4.35 native CI 38605943276](https://github.com/dwijayuda/pskernel/actions/runs/38605943276) **SUCCESS (54 passed, zero failures)**. Full qualification details and mathematical proof scope: [AI_WORK_STATE.md](AI_WORK_STATE.md).
+
+[QualifiedRecursiveWhnf.lean](src/Ps/KernelCore/Architecture/QualifiedRecursiveWhnf.lean) implements ONE state-/context-/source-fuel-threaded independent beta/zeta evaluator, not repeated terminal-only wrappers. Its recursive source theorem covers exact original results and intermediate *core-only* cache writes for arbitrary beta/zeta chains, metadata, curried application spines and short lets; public source refinement proves the final cache/result. The normal audited/trusted checked-work entry uses this theorem; all unsupported syntax/WHNF/DefEq cases retain the original source oracle and error policy.
+
+**Next:** integrate independently verified δ/DefEq and real Init→Std→Mathlib same-byte full workload; keep C/D/E whole independent accepting scope, F whole-library performance and G consistency open. No source refinement of a limited evaluator establishes general soundness/consistency.
+
+## Historical native-qualified E.4AG — one shared stable-terminal β/ζ fragment
 
 The current fully qualified source is [d2f2053e](https://github.com/dwijayuda/pskernel/commit/d2f2053e61eda6114eba0a21a16cfc652abf2b65), [full Lean 4.35 CI 38602806954](https://github.com/dwijayuda/pskernel/actions/runs/38602806954) **SUCCESS** (53 successful, 0 failed, four optional skipped); consult [AI_WORK_STATE.md](AI_WORK_STATE.md) for exact source theorem and regression evidence.
 

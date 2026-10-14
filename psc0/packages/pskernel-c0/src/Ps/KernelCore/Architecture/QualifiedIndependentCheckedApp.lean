@@ -180,15 +180,28 @@ theorem psKernelC0CheckedAppLeaf_checkerCheck
     cases fuel with
     | zero => simp [psKernelC0CheckedAppLeafWithFuel] at h
     | succ remaining =>
-        by_contra hlong
+        intro hlong
         simp [psKernelC0CheckedAppLeafWithFuel, hlong] at h
   have exactSource := psKernelC0CheckedAppLeaf_source fuel
     none
     (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
     (psKernelIsDefEqWithFuel fuel)
     context state fn arg result h
-  simpa [psKernelCheckerCheck, psKernelCheckWithFuel, hshort,
-    psKernelInferCoreWithFuel, psKernelInferCoreWithFuelUsing] using exactSource
+  -- Reduce only the public checker entry point. In the short case its
+  -- recursive worker is definitionally the callback-free source route.
+  change
+    (if psKernelExprGetAppNumArgs (.app fn arg) >= 16 then
+      psKernelC0CheckAppRecursiveResummarized fuel
+        (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)
+        context state (.app fn arg)
+    else
+      psKernelInferCoreWithFuel fuel
+        (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
+        (psKernelIsDefEqWithFuel fuel)
+        context state (.app fn arg) false) = .ok result
+  simp only [if_neg hshort]
+  exact exactSource
 
 /-- Public-source-equivalent checked-work operation. On an independently
     qualified success, the dependent receipt proves the full original

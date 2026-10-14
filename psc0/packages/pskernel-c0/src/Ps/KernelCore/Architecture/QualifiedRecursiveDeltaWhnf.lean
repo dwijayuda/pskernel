@@ -215,7 +215,6 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                 cases expr <;>
                   simp [psKernelC0DeltaCoreEligible] at eligible <;>
                   rfl
-            rw [sourceOuter]
             cases cache : psKernelExprMapGet state.whnf expr with
             | some cached =>
                 simp [psKernelC0RecursiveDeltaWhnfWithFuel,
@@ -266,6 +265,29 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                           psKernelWhnfAfterCore callback context
                             coreState expr core
                       rw [sourceCore]
+                    -- Bind the actual outer source operator to its
+                    -- completely qualified core result ONCE, before
+                    -- considering stable and delta-unfolding branches.
+                    -- The original public equation is not pre-rewritten
+                    -- in the goal, so each branch can use this directly.
+                    have sourceAtCore :
+                        psKernelWhnfWithFuel (Nat.succ remaining)
+                          reduceRecursor context state expr =
+                          psKernelWhnfAfterCore callback context
+                            coreState expr core := by
+                      rw [sourceOuter]
+                      simp only [cache]
+                      change
+                        (match psKernelWhnfCoreWithFuel remaining
+                            callback reduceRecursor context state expr
+                            false false with
+                        | .error reason => Except.error reason
+                        | .ok result =>
+                            psKernelWhnfAfterCore callback context
+                              result.snd expr result.fst) =
+                          psKernelWhnfAfterCore callback context
+                            coreState expr core
+                      exact publicAfterCore
                     by_cases stable : psKernelC0StableWhnfTerminal core = true
                     · let afterState :=
                         psKernelC0RecursiveDeltaWhnfFinish
@@ -281,8 +303,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                             expr core = psKernelWhnfFinish expr core coreState :=
                         psKernelC0StableWhnfTerminal_post
                           callback context coreState expr core stable
-                      rw [hr]
-                      simp only [cache, publicAfterCore, sourcePost]
+                      rw [hr, sourceAtCore, sourcePost]
                       rfl
                     · cases core with
                       | const name levels =>
@@ -305,8 +326,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                 psKernelC0ConstPostDelta_source
                                   callback context coreState expr name levels
                                   none unfolding
-                              rw [hr]
-                              simp only [cache, publicAfterCore, sourcePost]
+                              rw [hr, sourceAtCore, sourcePost]
                               rfl
                           | some opened =>
                               cases child : psKernelC0RecursiveDeltaWhnfWithFuel
@@ -336,9 +356,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                     psKernelC0ConstPostDelta_source
                                       callback context coreState expr
                                       name levels (some opened) unfolding
-                                  rw [hr]
-                                  simp only [cache, publicAfterCore, sourcePost,
-                                    sourceChild]
+                                  rw [hr, sourceAtCore, sourcePost, sourceChild]
                                   rfl
                       | bvar _ =>
                           simp [psKernelC0RecursiveDeltaWhnfWithFuel,

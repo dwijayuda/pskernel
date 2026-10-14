@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.AuditedAssumptions
+import Ps.KernelCore.API.VerifiedProvider
 
 /-!
 E.4AK: checked-source-equivalent reflection through independently

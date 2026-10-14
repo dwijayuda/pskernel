@@ -1,5 +1,42 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — native Lean 4.35 Sum type/recursor candidate (not yet qualified)
+
+Official Lean 4.35.0 `Init/Core.lean`, pinned
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, defines
+`Sum (α : Type u) (β : Type v)` as a two-constructor disjoint union.
+`StandardSum.lean` adds the actual kernel inductive, `Sum.inl`,
+`Sum.inr` and dependent `Sum.rec`, retaining the independent
+element universes, motive universe, exact constructor indices and
+two one-field minor premises. Source uses the ordinary `match` and
+typed erasure paths already qualified for Option/Except rather than
+inventing a new syntax or target-specific union representation.
+See `docs/PSCV0_A_SUM_CORE_2026-10-14.md`.
+
+Two native Lean and shared JS/TS/Rust/Wasm source observations cover
+both constructors and match branches. **Candidate only** until the
+official-kernel constructor/recursor/iota replay, native signature
+audit, independently measured strict registry fingerprints and full
+target/component CI pass. No new axioms, pskernel-core, C5 or
+self-hosting. Float F1-F4, platform-sized integers, ByteArray and the
+complete Phase A manifest still remain outside this narrow slice.
+
+## 14 October — unsigned Nat saturation qualified
+
+Commit `893e323dda53a741f78c6de707b12ac05e42587b`, full
+[Linux run 38592521197](https://github.com/dwijayuda/pskernel/actions/runs/38592521197),
+passed kernel checks, source/asset audits, direct JS/TypeScript/Rust,
+Wasm GC/Wasmtime and performance gates. Selected Standard:
+1,791 declarations, 25 classes and 221 instances. The same 624
+shared runtime observations passed across native targets and 175
+native Lean scalar oracle cases plus seven IR negative checks passed.
+`UInt8/16/32/64.ofNatClamp` saturate to the largest representable
+value; deprecated `ofNatTruncate` is the same clamp, **not** a
+wrapping alias. FNV `fnv1a64:10558131214179396941`;
+SHA-256 `sha256:5385a2bab77090b84ce8c7483be0c88726ed8a9382b739078d741e07f7d6ac50`.
+No trust expansion or change to the native .lean-only policy.
+
+
 ## 14 October — native unsigned saturating conversions candidate
 
 Source study: pinned official Lean 4.35.0

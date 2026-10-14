@@ -3,6 +3,9 @@
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
   {name:"signedToInt8",args:[0n],type:"int",expected:0n},
+  {name:"sumLeftScore",args:null,type:"nat",expected:17n},
+  {name:"sumRightScore",args:null,type:"nat",expected:123n},
+
   {name:"unsignedClamp8",argTypes:["nat"],args:[0n],type:"uint8",expected:0},
   {name:"unsignedClamp8",argTypes:["nat"],args:[255n],type:"uint8",expected:255},
   {name:"unsignedClamp8",argTypes:["nat"],args:[256n],type:"uint8",expected:255},

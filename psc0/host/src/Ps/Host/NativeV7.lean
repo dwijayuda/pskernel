@@ -60,8 +60,8 @@ private def fromResult {α : Type} (phase : String)
 -- Use the established canonical bridge, including nested-recursion adaptation.
 -- Kernel submission is synchronous and explicitly enables checking.
 -- No elaborator recovery, unchecked admission, or alternate checker fallback.
-private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
-    Except String Unit := do
+private def check (prelude : Lean.Kernel.Environment) (admissions : String)
+    (heartbeatDeadline : USize) : Except String Unit := do
   let declarations ← (PsKernelLean.decodeCanonicalAdmissions admissions).mapError
     (fun error => error.kind.code ++ ": " ++ error.message)
   let mut environment := prelude
@@ -69,7 +69,7 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
     -- Source definitions use the same Lean kernel lazy-delta strategy as the
     -- checked Standard, but keep finite 2m/20k admission budgets and fail closed.
     let declaration := PsKernelLean.psKernelWithDefinitionHeight environment original
-    match environment.addDeclCore 2000000 20000 declaration none with
+    match environment.addDeclCore heartbeatDeadline 20000 declaration none with
     | .ok next => environment := next
     | .error error =>
       -- Preserve the exact rejected declaration and kernel category. This is
@@ -84,9 +84,20 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
 -- surrounding ExceptT diagnostic transformer. The heartbeat reset must occur
 -- inside this real IO boundary, not in a lazy pure declaration term.
 private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
-    (admissions : String) : IO (Except String Unit) :=
-  PsKernelLean.withFreshKernelHeartbeatScope (ε := String) (α := Unit)
-    (fun _ => check prelude admissions)
+    (admissions : String) : IO (Except String Unit) := do
+  let previous ← IO.getNumHeartbeats
+  IO.setNumHeartbeats 0
+  try
+    -- Lean CoreM combines the *current* heartbeat origin and a relative
+    -- budget; lean_add_decl itself accepts an absolute thread-local deadline.
+    -- Derive the deadline from IO AFTER resetting it. This dependency also
+    -- forces the pure, externally checked addDeclCore operation to execute
+    -- within the IO admission scope, rather than being floated outside it.
+    let start ← IO.getNumHeartbeats
+    let heartbeatDeadline : USize := (start + 2000000).toUSize
+    return check prelude admissions heartbeatDeadline
+  finally
+    IO.setNumHeartbeats previous
 
 private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do

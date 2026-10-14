@@ -18,6 +18,16 @@ The full `Init` source is 6,452,982 exported records, 57,919 declarations, 345,6
 
 **Cache ownership and invalidation.** A cache key must include all relevant environment revision, local scope, reduction/eager policy, universe instantiation, fuel semantics, safety policy and term ownership. No WHNF/DefEq/type cache can be transported across unqualified environment extensions; provisional mutual declarations are especially sensitive. Source-side syntax-only canonical caches may be shared across contexts only after exact structural equality.
 
+## Phase E refinement checkpoint — source-equivalence proof boundary (2026-10-14, native CI pending)
+
+The opt-in checked-work WHNF bridge is implemented in Architecture/CertifiedWork.lean, checkpoints [7d85cc5d](https://github.com/dwijayuda/pskernel/commit/7d85cc5d69e035a12d7c719948568b38fc63cad1) and [8b3c453c](https://github.com/dwijayuda/pskernel/commit/8b3c453c5fd973ac3723afbc2283afe7367a4f2c). **Not yet native CI qualified.**
+
+**Proved selection invariant (Lean definitions/theorems subject to native compilation):** any candidate value selected by the accepting work API carries a propositional equality witness that it is the exact successful source WHNF result for the same input fuel, immutable certified work, active context and source cache state. The source result is computed first, the source follow-up state is the only returned session, and decline/mismatch is a non-vetoing source fallback. The receipt preserves the exact source WHNF function equation. Neither a Boolean expression comparison nor a shared hash constitutes proof authority.
+
+**Lean 4.35 reference choice:** src/kernel/type_checker.cpp orders structural/core WHNF, native/Nat reductions and delta; src/kernel/type_checker.h owns environment-scoped caches and keeps algorithmic DefEq success/failure sets without transitive closure because its semidecision procedure is not transitive. C0 retains its exact source order, context and state; no unqualified fast result reaches full term checking or admission.
+
+**Do not count this bridge as independent accepting-kernel completion.** It still invokes source WHNF, hence incurs extra cost and does not justify dropping the source oracle. For Phase E exit, establish and native-qualify a general WHNF refinement property across closures, universes, local contexts, recursor/K/eta, Quot, native primitives, reduction policy, fuel/resource/error behavior; after that, replace source evaluation only for fully qualified cases, then integrate independent DefEq/inference/admission without an unchecked source-term promotion. Preserve same-byte positive/negative export gates.
+
 ## C: representation and ownership
 
 - Keep source `PsKernelExpr` as independent oracle; introduce private execution terms with explicit provenance (persistent immutable base and disposable scratch lifetimes).

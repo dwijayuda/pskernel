@@ -258,7 +258,7 @@ def psStandardByteArraySliceDeclarations : List PsDeclaration :=
           (psLogicLam 3 "destOff" psOrderNat
             (psLogicLam 4 "len" psOrderNat
               (psLogicLam 5 "exact" exactType
-                (psStandardByteArrayMk (arrayOfList copied)))))))
+                (psStandardByteArrayMk (arrayOfList copied))))))))
   -- Preserve Lean's defining equation: extract is a copy into empty.
   let extract : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "extract") []

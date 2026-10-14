@@ -151,7 +151,7 @@ def psKernelC0SealedSourceStage
 
 /-- A sealed session also carries the existing, separately proved exact
     source-environment admission history. -/
-theorem psKernelC0SealedSourceEnvironmentHistory
+def psKernelC0SealedSourceEnvironmentHistory
     (work : PsKernelC0SealedSourceWork) :
     PsKernelC0SourceEnvironmentHistory
       work.trusted.certified.raw.checker.context.environment :=
@@ -159,7 +159,7 @@ theorem psKernelC0SealedSourceEnvironmentHistory
 
 /-- No independent cache judgment is made by staging or lineage receipt.
     Every successful step is tied to one exact checked operation equation. -/
-theorem psKernelC0SealedSourceHasLineage
+def psKernelC0SealedSourceHasLineage
     (work : PsKernelC0SealedSourceWork) :
     PsKernelC0CheckedStateLineage work.trusted :=
   work.lineage

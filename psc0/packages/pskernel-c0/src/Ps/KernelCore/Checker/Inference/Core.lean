@@ -1,4 +1,4 @@
-import Ps.KernelCore.Checker.Inference.App
+import Ps.KernelCore.Checker.Inference.Let
 
 /-
 Syntax-directed core inference.
@@ -88,17 +88,7 @@ def psKernelInferCoreWithFuelUsingSourceFrames
         -- immutable source summaries through a consecutive let suffix.
         -- The hook-free historical oracle retains its original behavior.
         let currentFrames :=
-          match expr, onCheckedApp with
-          | .letE _ _ _ _ _, some _ =>
-              match letFrames with
-              | [] =>
-                  if psKernelC0HasLetPrefix 12 expr then
-                    match psKernelC0LetCacheFramesWithFuel 1024 expr with
-                    | some (_, _, frames) => frames
-                    | none => []
-                  else []
-              | _ => letFrames
-          | _, _ => []
+          psKernelInferCurrentLetFrames expr onCheckedApp letFrames
         -- Exact syntactic binder ranges are already used by the DefEq
         -- spine worker. Fully checked inference can reuse those *read-only*
         -- ranges to avoid repeated no-op substitutions under closed bodies.
@@ -245,136 +235,9 @@ def psKernelInferCoreWithFuelUsingSourceFrames
                       nextContext state name domain body binderInfo
                       inferOnly currentBinderRanges
                 | PsKernelExpr.letE name type value body nondep =>
-                    let checked :=
-                      if inferOnly then
-                        Except.ok
-                          (Prod.mk
-                            type
-                            state)
-                      else
-                        match
-                            smaller [] []
-                              whnf
-                              defeq
-                              nextContext
-                              state
-                              type
-                              false with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok typeResult =>
-                            match
-                                psKernelEnsureSortWith
-                                  whnf
-                                  nextContext
-                                  (Prod.snd typeResult)
-                                  (Prod.fst typeResult) with
-                            | Except.error error =>
-                                Except.error error
-                            | Except.ok typeSort =>
-                                match
-                                    smaller [] []
-                                      whnf
-                                      defeq
-                                      nextContext
-                                      (Prod.snd typeSort)
-                                      value
-                                      false with
-                                | Except.error error =>
-                                    Except.error error
-                                | Except.ok valueResult =>
-                                    match
-                                        defeq
-                                          nextContext
-                                          (Prod.snd valueResult)
-                                          (Prod.fst valueResult)
-                                          type with
-                                    | Except.error error =>
-                                        Except.error error
-                                    | Except.ok eqResult =>
-                                        if Prod.fst eqResult then
-                                          Except.ok
-                                            (Prod.mk
-                                              type
-                                              (Prod.snd eqResult))
-                                        else
-                                          Except.error
-                                            "let value type mismatch";
-                    match checked with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok checkedResult =>
-                        let freshResult :=
-                          psKernelCheckerStateFreshName
-                            (Prod.snd checkedResult)
-                            name;
-                        let fresh :=
-                          Prod.fst freshResult;
-                        let state1 :=
-                          Prod.snd freshResult;
-                        let childLocal :=
-                          psKernelLocalContextAddLet
-                            nextContext.localContext
-                            fresh
-                            name
-                            type
-                            value;
-                        let child :=
-                          psKernelCheckerContextWithLocalContext
-                            nextContext
-                            childLocal;
-                        let (openedBody, remainingFrames) :=
-                          match currentFrames with
-                          | (range, _) :: tail =>
-                              if range == 0 then (body, tail)
-                              else
-                                (psKernelExprInstantiate1 body
-                                  (PsKernelExpr.fvar fresh), [])
-                          | [] =>
-                              (psKernelExprInstantiate1 body
-                                (PsKernelExpr.fvar fresh), []);
-                        match
-                            smaller remainingFrames []
-                              whnf
-                              defeq
-                              child
-                              state1
-                              openedBody
-                              inferOnly with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok bodyResult =>
-                            let bodyType :=
-                              psKernelExprCheapBetaReduce
-                                (Prod.fst bodyResult);
-                            let closedBody :=
-                              psKernelExprAbstractFVars
-                                bodyType
-                                (List.cons
-                                  fresh
-                                  List.nil);
-                            let result :=
-                              if
-                                  psKernelExprHasLooseBVarAt
-                                    closedBody
-                                    0 then
-                                PsKernelExpr.letE
-                                  name
-                                  type
-                                  value
-                                  closedBody
-                                  nondep
-                              else
-                                bodyType;
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResultWithKnownHash
-                                  (Prod.snd bodyResult)
-                                  inferOnly
-                                  expr
-                                  result
-                                  currentHash))
+                    psKernelInferLetHead smaller whnf defeq
+                      nextContext state name type value body nondep
+                      inferOnly currentFrames currentHash
                 | PsKernelExpr.proj typeName index structValue =>
                     let inferType :=
                       fun

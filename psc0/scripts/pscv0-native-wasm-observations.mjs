@@ -6,7 +6,12 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 const directory = path.resolve(process.argv[2]);
 const source = await readFile(path.join(directory, 'application.ps'), 'utf8');
-const sourceLiteral = value => typeof value === 'string' ? quotedSourceString(value) : String(value);
+// The source elaborator must see a Bool-typed operand, not a context-free
+// literal, when this call is nested inside a target-independent result check.
+// This preserves the exact observed function, inputs and expectation.
+const sourceLiteral = value => typeof value === 'string'
+  ? quotedSourceString(value)
+  : typeof value === 'boolean' ? '(' + String(value) + ' : Bool)' : String(value);
 const signedWidths = {
   int8: ['Int8', 'UInt8', 8], int16: ['Int16', 'UInt16', 16],
   int32: ['Int32', 'UInt32', 32], int64: ['Int64', 'UInt64', 64]

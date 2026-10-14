@@ -388,9 +388,19 @@ private def psKernelC0AuditedSourceRebind
     capabilitiesApproved := next.property.2
   }
 
+/-- The one state-only rebinding operation for audited checked judgments.
+    Neither independently verified direct WHNF nor source-first candidate
+    observation may change the environment, foundation ledger or permissions. -/
+private def psKernelC0AuditedSourceWithState
+    (work : PsKernelC0AuditedSourceWork)
+    (state : PsKernelCheckerState) : PsKernelC0AuditedSourceWork :=
+  let ⟨certified, unchanged⟩ :=
+    psKernelC0CertifiedWorkWithStateOwned work.trusted.certified state
+  psKernelC0AuditedSourceRebind work certified unchanged
+
 /-- Checked source judgments update only their checked state. One exact
-    environment-equality witness transports the previously certified
-    admission history and both permissions with *no history scan*. -/
+    environment-equality witness transports the previous admission history
+    and both permissions, avoiding a full history scan. -/
 private def psKernelC0AuditedSourceContinue
     {α : Type}
     (work : PsKernelC0AuditedSourceWork)
@@ -401,43 +411,37 @@ private def psKernelC0AuditedSourceContinue
   let (result, state) ← source
     work.trusted.certified.raw.checker.context
     work.trusted.certified.raw.checker.state
-  let ⟨certified, unchanged⟩ :=
-    psKernelC0CertifiedWorkWithStateOwned work.trusted.certified state
-  return (result, psKernelC0AuditedSourceRebind work certified unchanged)
+  return (result, psKernelC0AuditedSourceWithState work state)
 
-/-- The source kernel exclusively owns WHNF, inference, full term checking,
-    and DefEq. All preserve the exact checked environment and audited
-    assumption histories in the same immutable stateful workflow. -/
+/-- Default audited WHNF now uses the independently proved direct-head
+    fragment, falling back to the authoritative source on all contextual
+    forms. It consumes no speculative candidate budget or unchecked cache.
+    The exact source-equation witness is required by the operation's
+    dependent-typed result, then erased after sound history transport. -/
 def psKernelC0AuditedSourceWhnf
     (fuel : Nat)
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
-    Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
-  psKernelC0AuditedSourceContinue work
-    (fun context state => psKernelCheckerWhnf fuel context state expr)
+    Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) := do
+  let receipt ← psKernelC0CertifiedWorkWhnfCanonicalFastOwned
+    fuel work.trusted.certified expr
+  let (value, checked) := receipt.val
+  return (value,
+    psKernelC0AuditedSourceWithState work checked.raw.checker.state)
 
-/-- An opt-in, proof-carrying WHNF route through the complete AUDITED
-    admission-history interface. Successful values carry an exact source
-    WHNF equation before their proof is erased. Five irreducible heads use
-    the independent direct evaluator; every other head is source-first
-    with exact candidate cross-check and conservative fallback.
-
-    Crucially, only the source-equivalent result's checker STATE is
-    transported. The environment, full checked-admission history and both
-    incremental authorization proofs are re-used via precise equality, not
-    re-audited or weakened. This is WHNF observation, not term admission. -/
+/-- Optional source-first, exact-proved candidate WHNF observations. The
+    ordinary audited WHNF above does NOT execute candidates, so inspection
+    overhead and stricter candidate quota cannot alter accepting behavior. -/
 def psKernelC0AuditedSourceWhnfQualified
     (fuel quota : Nat)
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) := do
-  let qualified ← psKernelC0CertifiedWorkWhnfQualified
+  let receipt ← psKernelC0CertifiedWorkWhnfQualified
     fuel quota work.trusted.certified expr
-  let (value, checked) := qualified.val
-  let ⟨certified, unchanged⟩ :=
-    psKernelC0CertifiedWorkWithStateOwned
-      work.trusted.certified checked.raw.checker.state
-  return (value, psKernelC0AuditedSourceRebind work certified unchanged)
+  let (value, checked) := receipt.val
+  return (value,
+    psKernelC0AuditedSourceWithState work checked.raw.checker.state)
 
 def psKernelC0AuditedSourceInfer
     (fuel : Nat)

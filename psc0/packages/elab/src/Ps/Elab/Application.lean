@@ -296,11 +296,29 @@ def psElabCompleteEmpty (elaborate : PsElaborator) (application : PsElabApplicat
     -- Reuse the same checked read-only conversion as typed applications.
     -- Reject unconstrained metavariables and non-Unit domains; do not insert
     -- Unit for unrelated functions or change the APP-03 acceptance policy.
-    if psExprHasUnresolvedMeta (psMetaInstantiate current.context.metaContext domain) ||
-        !psDefEqReadOnlyWithEnv current.context.environment current.context.metaContext
-          current.context.localContext domain (.constE psUnitName []) then
+    -- Lean's PUnit is universe-polymorphic: a fresh *universe* variable
+    -- produced by elaborating `PUnit` in a binder must be unified with the
+    -- Unit alias's fixed universe. It is not an unresolved term argument.
+    -- Never solve an unknown term type to Unit merely to accept `f()`.
+    let instantiated := psMetaInstantiate current.context.metaContext domain
+    if psExprHasTermMeta instantiated then throw .emptyCallUnsupported
+    let normalized := psWhnf current.context.environment current.context.metaContext
+      current.context.localContext instantiated
+    let isUnitFamily := match normalized with
+      | .constE name _ =>
+        psNameEq name psUnitName || psNameEq name (psRootName "PUnit")
+      | _ => false
+    if !isUnitFamily then throw .emptyCallUnsupported
+    let unified := psUnify current.context.environment current.context.localContext
+      current.context.metaContext domain (.constE psUnitName [])
+    if !unified.success then throw .emptyCallUnsupported
+    let context := psElabContextWithMeta current.context unified.context
+    let domain := psMetaInstantiate unified.context domain
+    if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+        context.localContext domain (.constE psUnitName []) then
       throw .emptyCallUnsupported
-    let unit ← psElabUnit current.context (some domain)
+    let current := { current with context }
+    let unit ← psElabUnit context (some domain)
     let completed ← psElabApplyOrdered elaborate 4096
       (psElabApplyValue current unit body) [] [] application.constraintsRev
     match psWhnf completed.result.context.environment completed.result.context.metaContext

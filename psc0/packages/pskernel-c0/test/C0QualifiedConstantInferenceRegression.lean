@@ -97,7 +97,8 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "cached constant accepted zero source fuel")
   let blockedContext : PsKernelCheckerContext := {
-    warm.context with maxRecDepth := 1
+    warm.context with
+    maxRecDepth := 1
     recDepth := 1000000
   }
   if (psKernelC0ConstantCachedInferWithFuel

@@ -969,10 +969,17 @@ def c0ExportVerdictFromFileTrace
   let handle ← IO.FS.Handle.mk path .read
   let mut state : C0ExportOnlineState := {}
   let mut consumed := 0
-  -- Benchmark observations are never included in trusted kernel state.
-  -- Read the source runtime's monotonic clock only once per 50k records.
+  -- Diagnostic timings are outside the pure checker and never affect
+  -- source verdicts, admitted environments, resource budgets or cache state.
+  -- Time ONLY declaration records and the 50k-record interval boundaries;
+  -- avoid a clock call for each of the millions of ordinary table records.
   let started ← IO.monoMsNow
   let mut previousProgress := started
+  let mut intervalDeclMs : Nat := 0
+  let mut intervalDeclCount : Nat := 0
+  let mut slowestDeclMs : Nat := 0
+  let mut slowestDeclRecord : Nat := 0
+  let mut slowestDeclKind : String := "none"
   let mut reading := true
   while reading do
     let line ← handle.getLine
@@ -980,7 +987,29 @@ def c0ExportVerdictFromFileTrace
       reading := false
     else if line != "\n" then
       consumed := consumed + 1
-      match c0ExportStep state line fuel with
+      -- Official lean4export emits one declaration tag as the initial
+      -- JSON key. No parser or semantic path is changed for profiling.
+      let declKind :=
+        if line.startsWith "{\"thm\":" then "thm"
+        else if line.startsWith "{\"def\":" then "def"
+        else if line.startsWith "{\"inductive\":" then "inductive"
+        else if line.startsWith "{\"axiom\":" then "axiom"
+        else if line.startsWith "{\"opaque\":" then "opaque"
+        else if line.startsWith "{\"quot\":" then "quot"
+        else ""
+      let began ← if declKind.isEmpty then pure 0 else IO.monoMsNow
+      let outcome := c0ExportStep state line fuel
+      if !declKind.isEmpty then
+        let elapsed := (← IO.monoMsNow) - began
+        intervalDeclMs := intervalDeclMs + elapsed
+        intervalDeclCount := intervalDeclCount + 1
+        if elapsed > slowestDeclMs then
+          slowestDeclMs := elapsed
+          slowestDeclRecord := consumed
+          slowestDeclKind := declKind
+        if elapsed >= 3000 then
+          IO.println s!"C0_REAL_EXPORT_SLOW_DECL record={consumed} kind={declKind} elapsed_ms={elapsed}"
+      match outcome with
       | .error verdict =>
           -- Diagnostics are computed *after* the authoritative failure.
           -- Keep malformed/unsupported/resource reasons separate from a
@@ -1017,8 +1046,14 @@ def c0ExportVerdictFromFileTrace
           -- real corpus later times out or exhausts host resources.
           if consumed % 50000 == 0 then
             let now ← IO.monoMsNow
-            IO.println s!"C0_REAL_EXPORT_PROGRESS consumed_records={consumed} checked_declarations={state.checkedCount} elapsed_ms={now - started} interval_ms={now - previousProgress}"
+            let interval := now - previousProgress
+            IO.println s!"C0_REAL_EXPORT_PROGRESS consumed_records={consumed} checked_declarations={state.checkedCount} elapsed_ms={now - started} interval_ms={interval} measured_decl_ms={intervalDeclMs} other_ms={interval - intervalDeclMs} measured_decls={intervalDeclCount} slowest_decl_record={slowestDeclRecord} slowest_decl_kind={slowestDeclKind} slowest_decl_ms={slowestDeclMs}"
             previousProgress := now
+            intervalDeclMs := 0
+            intervalDeclCount := 0
+            slowestDeclMs := 0
+            slowestDeclRecord := 0
+            slowestDeclKind := "none"
   return (c0ExportFinish state, consumed)
 
 def c0ExportVerdictFromFile

@@ -108,11 +108,11 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "oversize Nat acquired checked source type")
 
-  let exhaustedContext := {
+  let exhaustedContext : PsKernelCheckerContext := {
     checker.context with
     maxRecDepth := 1
     recDepth := 1000000
-  : PsKernelCheckerContext }
+  }
   if (psKernelC0ScalarInferWithFuel 4096
       exhaustedContext checker.state sort0 false).isSome then
     throw (IO.userError "scalar inference bypassed source recursion depth")

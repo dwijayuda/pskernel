@@ -652,4 +652,23 @@ def exportSignedOperationsCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned src/Init/Data/SInt/Basic.lean, Henrik Böving, Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative-only checked signed operation candidate, not runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- The pinned Lean 4.35.0 SInt model defines left shift via
+-- a.toBitVec <<< (b.toBitVec.smod width). The exact signed-modular count
+-- is a real BitVec algorithm, not generic unsigned shift. Review only this
+-- independent closure; right shift still reaches Int-valued reductions.
+def exportSignedShiftLeftCandidate (output : System.FilePath) : IO Unit := do
+  let owners := ["Int8", "Int16", "Int32", "Int64"]
+  let roots := owners.map fun owner =>
+    Lean.Name.str (Lean.Name.str .anonymous owner) "shiftLeft"
+  let existing := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots, boundary := existing.map psDeclarationName
+    baseDeclarations := existing
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardSignedShiftLeft"
+    privatePrefix := "signedShiftLeftDecl"
+    provenance := "/-\nCopyright (c) 2024 Lean FRO, LLC. Apache-2.0.\nPinned Lean 4.35.0 src/Init/Data/SInt/Basic.lean, Henrik Böving.\nExact signed-modular left shift: native checked Core candidate, not runtime-qualified.\nSee psc0/THIRD_PARTY_NOTICES.md.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

@@ -1,5 +1,22 @@
 # PSCV0 v7 — AI work state
 
+## Pinned Lean 4.35.0 modular signed shift-left authoring experiment
+
+An independent M2+A branch `psc0/m2a-signed-shiftleft-lean435`
+isolates this feature from concurrent work on the main M2+A PR.
+Lean 4.35.0 `src/Init/Data/SInt/Basic.lean` defines signed left
+shift as `a.toBitVec <<< (b.toBitVec.smod width)`, while
+`src/Init/Data/BitVec/Basic.lean` defines `smod` from the
+two's-complement sign bit and unsigned remainder operations.
+The new `--export-signed-shiftleft-candidate` selects all four
+actual upstream Int8/16/32/64 roots, imports **no new axioms** and
+requires official-kernel replay and metadata comparison. The
+selected signed Standard is unchanged pending qualification;
+`BitVec.sshiftRight'`/signed right shift, Int-valued conversions,
+signed comparisons and platform-sized values remain separate
+requirements. An authoring experiment is not a release capability.
+
+
 ## M2+A signed dictionary candidate — independently measured strict registry (14 October 2026)
 
 Linux [run 38556955048](https://github.com/dwijayuda/pskernel/actions/runs/38556955048)

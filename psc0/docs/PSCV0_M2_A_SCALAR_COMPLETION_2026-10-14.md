@@ -647,3 +647,19 @@ which is injective for signed wrappers; `Inhabited` constructs zero.
 No parser-specific behavior, fabricated proofs, unsafe coercions or new
 assumptions. Source/operator and runtime parity await a full Linux pass
 and newly independently observed Standard snapshot digests.
+
+## Pinned Lean 4.35.0 modular signed shift-left authoring experiment
+
+An independent M2+A branch `psc0/m2a-signed-shiftleft-lean435`
+isolates this feature from concurrent work on the main M2+A PR.
+Lean 4.35.0 `src/Init/Data/SInt/Basic.lean` defines signed left
+shift as `a.toBitVec <<< (b.toBitVec.smod width)`, while
+`src/Init/Data/BitVec/Basic.lean` defines `smod` from the
+two's-complement sign bit and unsigned remainder operations.
+The new `--export-signed-shiftleft-candidate` selects all four
+actual upstream Int8/16/32/64 roots, imports **no new axioms** and
+requires official-kernel replay and metadata comparison. The
+selected signed Standard is unchanged pending qualification;
+`BitVec.sshiftRight'`/signed right shift, Int-valued conversions,
+signed comparisons and platform-sized values remain separate
+requirements. An authoring experiment is not a release capability.

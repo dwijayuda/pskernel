@@ -1,7 +1,7 @@
 name: PSC0 v7 native Lean development (Linux)
 on:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/m2a-signed-shiftleft-lean435]
     paths:
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
@@ -165,6 +165,13 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_native --export-signed-operations-candidate ../dist/pscv0-native/StandardSignedOperationsCandidate.lean | tee ../dist/pscv0-native/signed-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
           cmp ../packages/environment/src/Ps/Environment/StandardSignedOperationsData.lean ../dist/pscv0-native/StandardSignedOperationsCandidate.lean
+      # Fail closed if the pinned independent signed shift-left source
+      # closure cannot replay under the official 4.35.0 Lean kernel.
+      - name: Kernel-review signed modular left shift
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-signed-shiftleft-candidate ../dist/pscv0-native/StandardSignedShiftLeftCandidate.lean | tee ../dist/pscv0-native/signed-shiftleft-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

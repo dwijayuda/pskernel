@@ -51,58 +51,71 @@ def psStandardByteArrayCoreOperations : List PsDeclaration :=
   [getBang, setBang, isEmpty]
 
 -- Lean's native ByteArray.beq delegates to Array UInt8 equality.
--- Instead of importing a second runtime list-recursion model, compare the
--- canonical UInt8 carriers positionwise with one checked Nat.rec worker.
--- This is definitionally independent of capacity and matches Array.isEqv:
--- equal lengths and equal bytes at every valid index. Array.getD is only
--- used at indices 0..size-1 after the checked length check; its default
--- cannot affect equality. This construction shares the already qualified
--- Nat/UInt/Array erasure and does not special-case targets.
-def psStandardByteArrayBeqModelDeclaration : PsDeclaration :=
-  let byteArray := psStandardByteArrayType
+-- A recursive worker with an explicit Nat major is required: the source
+-- recursor is executable only when its predecessor/IH are the actual changing
+-- parameter of a checked recursive function. Capturing a computed size in a
+-- Nat.rec directly under ByteArray.beq incorrectly erases its runtime IH.
+-- This is the same architectural normalization used by signed/unsigned pow.
+def psStandardByteArrayBeqWorkerDeclaration : PsDeclaration :=
+  let bytes := psStandardByteArrayType
   let uint8 := psStandardByteArrayElement
   let bool : PsExpr := .constE psBoolName []
   let left : PsExpr := .fvar 0
   let right : PsExpr := .fvar 1
+  let count : PsExpr := .fvar 2
+  let index : PsExpr := .fvar 3
+  let previousEqual : PsExpr := .fvar 4
   let leftData := psStandardByteArrayData left
   let rightData := psStandardByteArrayData right
-  let leftSize := psOrderCall "ByteArray.size" [left]
-  let rightSize := psOrderCall "ByteArray.size" [right]
   let falseValue : PsExpr := .constE psBoolFalseName []
   let trueValue : PsExpr := .constE psBoolTrueName []
   let boolAnd := fun (a b : PsExpr) =>
     psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
       [psLogicLam 19 "_" bool bool, falseValue, b, a]
-  let sameLength := psOrderCall "Nat.beq" [leftSize, rightSize]
   let zero := psOrderCall "UInt8.ofNat" [.lit (.natural 0)]
-  let index : PsExpr := .fvar 2
   let byteAt := fun data =>
     psOrderCall "UInt8.toNat"
       [psOrderCall "Array.getD" [uint8, data, index, zero]]
-  let sameByte := psOrderCall "Nat.beq"
+  let equalByte := psOrderCall "Nat.beq"
     [byteAt leftData, byteAt rightData]
-  let step := psLogicLam 2 "index" psOrderNat
-    (psLogicLam 3 "previousEqual" bool
-      (boolAnd (.fvar 3) sameByte))
-  let allBytes := psOrderNatRec (.succ .zero)
-    (psLogicLam 4 "_" psOrderNat bool)
-    trueValue step leftSize
+  let step := psLogicLam 3 "index" psOrderNat
+    (psLogicLam 4 "previousEqual" bool
+      (boolAnd previousEqual equalByte))
+  let body := psOrderNatRec (.succ .zero)
+    (psLogicLam 5 "_" psOrderNat bool) trueValue step count
+  .definitionDecl (psDecisionName "ByteArray.beq.go") []
+    (psLogicPi 0 "left" bytes
+      (psLogicPi 1 "right" bytes
+        (psLogicPi 2 "count" psOrderNat bool)))
+    (psLogicLam 0 "left" bytes
+      (psLogicLam 1 "right" bytes
+        (psLogicLam 2 "count" psOrderNat body)))
+
+def psStandardByteArrayBeqModelDeclaration : PsDeclaration :=
+  let bytes := psStandardByteArrayType
+  let bool : PsExpr := .constE psBoolName []
+  let left : PsExpr := .fvar 0
+  let right : PsExpr := .fvar 1
+  let leftSize := psOrderCall "ByteArray.size" [left]
+  let rightSize := psOrderCall "ByteArray.size" [right]
+  let sameLength := psOrderCall "Nat.beq" [leftSize, rightSize]
+  let allBytes := psOrderCall "ByteArray.beq.go" [left, right, leftSize]
+  let falseValue : PsExpr := .constE psBoolFalseName []
+  let guarded := psLogicApply
+    (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
+    [psLogicLam 19 "_" bool bool, falseValue, allBytes, sameLength]
   .definitionDecl (psNameAppendStr psStandardByteArrayName "beq") []
-    (psLogicPi 0 "left" byteArray
-      (psLogicPi 1 "right" byteArray bool))
-    (psLogicLam 0 "left" byteArray
-      (psLogicLam 1 "right" byteArray
-        (boolAnd sameLength allBytes)))
+    (psLogicPi 0 "left" bytes (psLogicPi 1 "right" bytes bool))
+    (psLogicLam 0 "left" bytes
+      (psLogicLam 1 "right" bytes guarded))
 
 -- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
--- The runtime recursion is owned by one top-level value, not duplicated or
--- embedded inside every dictionary application.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=
-  let byteArray := psStandardByteArrayType
-  let method := psLogicLam 0 "left" byteArray
-    (psLogicLam 1 "right" byteArray
+  let bytes := psStandardByteArrayType
+  let method := psLogicLam 0 "left" bytes
+    (psLogicLam 1 "right" bytes
       (psOrderCall "ByteArray.beq" [.fvar 0, .fvar 1]))
-  psStandardBEqInstance "ByteArray" byteArray method
+  psStandardBEqInstance "ByteArray" bytes method
 
 def psStandardByteArrayInhabitedDeclaration : PsDeclaration :=
   psStandardInhabitedGround "ByteArray" psStandardByteArrayType
@@ -110,7 +123,8 @@ def psStandardByteArrayInhabitedDeclaration : PsDeclaration :=
 
 def psStandardByteArrayCollectionDeclarations : List PsDeclaration :=
   psStandardByteArrayCoreOperations ++
-    [psStandardByteArrayBeqModelDeclaration,
+    [psStandardByteArrayBeqWorkerDeclaration,
+     psStandardByteArrayBeqModelDeclaration,
      psStandardByteArrayBeqDeclaration,
      psStandardByteArrayInhabitedDeclaration]
 

@@ -33,6 +33,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0QualifiedBinderInferOnlyRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ApplicationSourceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedApplicationInferenceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0QualifiedLetInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -187,6 +188,9 @@ jobs:
       - name: C0 independently source-proved checked and inferred application head states
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedApplicationInferenceRegression.lean
+      - name: C0 independently source-equivalent dependent let inference and full checking
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0QualifiedLetInferenceRegression.lean
       - name: C0 Lean 4.35 full checking enforces declared universe parameters
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0UniverseParameterRegression.lean

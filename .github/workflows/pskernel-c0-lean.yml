@@ -197,7 +197,8 @@ jobs:
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedProjectionInferenceRegression.lean
 
-      - name: Independent checked app child typing and source proof
+      - name: C0 independent checked application child typing and source proof
+        working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0IndependentCheckedAppRegression.lean
       - name: C0 Lean 4.35 full checking enforces declared universe parameters
         working-directory: psc0/packages/pskernel-c0

@@ -97,7 +97,9 @@ private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
     let heartbeatDeadline : USize := (start + 2000000).toUSize
     -- Pattern matching on the pure result forces the kernel C++ call BEFORE
     -- sampling the heartbeat counter. No source is accepted by this audit.
-    match check prelude admissions heartbeatDeadline with
+    let result ← IO.lazyPure (fun _ =>
+      check prelude admissions heartbeatDeadline)
+    match result with
     | .ok value =>
       let finish ← IO.getNumHeartbeats
       IO.println ("PSCV0_KERNEL_BUDGET: accepted before=" ++ toString start ++

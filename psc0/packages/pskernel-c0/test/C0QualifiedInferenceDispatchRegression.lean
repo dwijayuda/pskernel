@@ -60,8 +60,9 @@ def main : IO Unit := do
   if !psKernelExprEqual checkedLocal.val.fst sort0 then
     throw (IO.userError "unified direct source local type mismatch")
 
-  -- Safe constant has to be admitted by the original checker first.
-  -- Cold lookup must not be mistaken for a proven direct cache hit.
+  -- Safe constant must be SOURCE-ADMITTED before its whole cold
+  -- checking rule is available. The cold rule is now independently run,
+  -- with exact source-result and state equations, not an unchecked cache.
   let constName : PsKernelName := .str .anonymous "UnifiedCheckedDefinition"
   let constInfo : PsKernelDefinitionInfo := {
     base := {
@@ -81,8 +82,18 @@ def main : IO Unit := do
     [] .safe 4096 psKernelLeanNatMaxSizeDefault
   let constant : PsKernelExpr := .const constName []
   if (psKernelC0QualifiedInferHeadWithFuel 4096
-      constantSession.context constantSession.state constant false).isSome then
-    throw (IO.userError "cold constant bypassed source checking")
+      constantSession.context constantSession.state constant false).isNone then
+    throw (IO.userError "checked cold constant was not independently qualified")
+  let some coldRaw := psKernelC0ArchitectureBegin constantSession
+    | throw (IO.userError "cold constant source snapshot failed")
+  let some coldWork := psKernelC0ArchitectureCertifyWork coldRaw
+    | throw (IO.userError "cold constant source certification failed")
+  let coldReceipt ← match psKernelC0CertifiedWorkCheckDirectOwned
+      4096 coldWork constant with
+    | .ok receipt => pure receipt
+    | .error e => throw (IO.userError ("cold constant direct failed: " ++ e))
+  let _coldEq : psKernelC0CertifiedWorkCheck 4096 coldWork constant =
+    .ok coldReceipt.val := coldReceipt.property
   let (constantType, warm) ← match psKernelSessionCheck
       4096 constantSession constant with
     | .ok value => pure value

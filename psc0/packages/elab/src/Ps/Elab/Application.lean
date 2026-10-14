@@ -289,9 +289,17 @@ def psElabCompleteEmpty (elaborate : PsElaborator) (application : PsElabApplicat
       current.context.localContext current.type with
   | .forallE _ domain body binder =>
     if !psBinderAcceptsExplicitArgument binder then throw .emptyCallUnsupported
-    let domain := psWhnf current.context.environment current.context.metaContext
-      current.context.localContext domain
-    if !psExprAlphaEq domain (.constE psUnitName []) then throw .emptyCallUnsupported
+    -- Pinned Lean 4.35.0 Init/Prelude.lean defines `Unit := PUnit`
+    -- and `Unit.unit := PUnit.unit` as reducible abbreviations. An empty
+    -- invocation is legal precisely when the explicit domain is DEFINITIONALLY
+    -- Unit, not only when its weak-head normal form still prints "Unit".
+    -- Reuse the same checked read-only conversion as typed applications.
+    -- Reject unconstrained metavariables and non-Unit domains; do not insert
+    -- Unit for unrelated functions or change the APP-03 acceptance policy.
+    if psExprHasUnresolvedMeta (psMetaInstantiate current.context.metaContext domain) ||
+        !psDefEqReadOnlyWithEnv current.context.environment current.context.metaContext
+          current.context.localContext domain (.constE psUnitName []) then
+      throw .emptyCallUnsupported
     let unit ← psElabUnit current.context (some domain)
     let completed ← psElabApplyOrdered elaborate 4096
       (psElabApplyValue current unit body) [] [] application.constraintsRev

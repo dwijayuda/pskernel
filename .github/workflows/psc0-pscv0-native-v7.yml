@@ -133,6 +133,15 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_native --export-unsigned-operations-candidate ../dist/pscv0-native/StandardUnsignedOperationsData.lean | tee ../dist/pscv0-native/unsigned-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
           cmp ../packages/environment/src/Ps/Environment/StandardUnsignedOperationsData.lean ../dist/pscv0-native/StandardUnsignedOperationsData.lean
+      # F0 is an authoring-only candidate, not part of the selected Standard.
+      # Native closure, allowed assumptions, metadata and every candidate
+      # declaration are checked by the official kernel before the source
+      # file can be emitted. Never infer runtime Float support from this gate.
+      - name: Review kernel-checked Float and Float32 identity candidate
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-float-identity-candidate ../dist/pscv0-native/StandardFloatIdentityCandidate.lean | tee ../dist/pscv0-native/float-identity-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

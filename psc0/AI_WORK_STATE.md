@@ -1,5 +1,37 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — signed M2+A order/numeric fully qualified
+
+Executable commit `930e48d330d5d67da0911eba083a83aa730ef70d`,
+[Linux run 38583446893](https://github.com/dwijayuda/pskernel/actions/runs/38583446893)
+passed all native/kernel, strict-source, JSON/WIT/WAT/Wasm GC component,
+V8/Wasmtime, TypeScript 7, direct JS, Rust, and performance CI steps.
+**1,743 declarations, 25 classes, 205 instances; 555 shared runtime
+observations; 106 native Lean signed oracle values and seven negative
+typed-IR checks.** Snapshot FNV `fnv1a64:4732508156583495274`;
+SHA-256 `sha256:4b7d09a378f650f9b5a3fc0ecf28553331380a3f7dfde07a6980d0fce2608222`.
+Native Lean metadata audit requalified all signed order deciders as
+`instance_reducible` and signed size/extrema abbreviations as
+`reducible`. The changed root families and cross-target observations
+passed without adding any axioms, pskernel-core or self-hosting.
+
+## 14 October — native Bool-to-eight-fixed-word conversions (candidate only)
+
+The new portable `.lean` module composes exactly the native Lean
+4.35.0 `Bool.toUInt8/16/32/64` and `Bool.toInt8/16/32/64`
+true/false equations using the already checked Bool.rec and word
+constructors. Eight ordinary definitions enter selected Standard and
+the shared executable prelude; sixteen native Lean/runtime observations
+test both possible inputs for every target width. No new primitive,
+axiom, backend-specific operator, source edition or target-size promise.
+
+**Unqualified until:** first compile and official metadata/source audit,
+independently observe strict FNV/SHA registry drift, pin unchanged guard
+values, and pass the full existing multi-target Linux pipeline. Float
+F1-F4, explicit USize/ISize profiles and full Phase A manifest/libraries
+remain separate exit gates.
+
+
 ## 14 October — native signed numeric boundaries and power candidate
 
 Study: Lean 4.35.0 pinned `Init/Data/SInt/Basic.lean`.

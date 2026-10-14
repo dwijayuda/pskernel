@@ -3,6 +3,23 @@
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
   {name:"signedToInt8",args:[0n],type:"int",expected:0n},
+  {name:"boolWordUInt8",args:[false],type:"uint8",expected:0},
+  {name:"boolWordUInt8",args:[true],type:"uint8",expected:1},
+  {name:"boolWordUInt16",args:[false],type:"uint16",expected:0},
+  {name:"boolWordUInt16",args:[true],type:"uint16",expected:1},
+  {name:"boolWordUInt32",args:[false],type:"uint32",expected:0},
+  {name:"boolWordUInt32",args:[true],type:"uint32",expected:1},
+  {name:"boolWordUInt64",args:[false],type:"uint64",expected:0n},
+  {name:"boolWordUInt64",args:[true],type:"uint64",expected:1n},
+  {name:"boolWordInt8",args:[false],type:"int8",expected:0},
+  {name:"boolWordInt8",args:[true],type:"int8",expected:1},
+  {name:"boolWordInt16",args:[false],type:"int16",expected:0},
+  {name:"boolWordInt16",args:[true],type:"int16",expected:1},
+  {name:"boolWordInt32",args:[false],type:"int32",expected:0},
+  {name:"boolWordInt32",args:[true],type:"int32",expected:1},
+  {name:"boolWordInt64",args:[false],type:"int64",expected:0n},
+  {name:"boolWordInt64",args:[true],type:"int64",expected:1n},
+
   {name:"signedSize8",args:null,type:"nat",expected:256n},
   {name:"signedSize16",args:null,type:"nat",expected:65536n},
   {name:"signedSize32",args:null,type:"nat",expected:4294967296n},

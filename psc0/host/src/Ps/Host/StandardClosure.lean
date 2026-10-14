@@ -140,8 +140,13 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
 def standardClosureAudit : IO Lean.Json := do
   Lean.initSearchPath (← Lean.findSysroot)
   let native ← Lean.importModules #[{ module := `Init }] {}
+  -- F0: read-only pinned model, bits, equality and scientific closure.
+  -- No source Float declarations are enabled by this inventory.
   let roots := [`Nat.mod_lt, `BitVec.ofNat, `UInt64.ofNat, `UInt64.xor,
-    `mixHash, `String.hash, `Float, `Float.ofScientific]
+    `mixHash, `String.hash, `Float, `Float32,
+    `Float.ofBits, `Float.toBits, `Float.beq, `Float.ofScientific,
+    `Float32.ofBits, `Float32.toBits, `Float32.beq,
+    `OfScientific.ofScientific]
   let portableNames := psSelfHostProdPreludeEnvironment.declarations.foldl
     (fun (names : Lean.NameSet) d => names.insert (PsKernelLean.toLeanName (psDeclarationName d))) {}
   let reports ← roots.mapM fun root => do

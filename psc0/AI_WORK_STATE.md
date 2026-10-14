@@ -1,5 +1,42 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — unsigned machine comparison source/decision candidate
+
+Pinned official Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`:
+`Init/Prelude.lean` defines `UInt8.lt/le/decLt/decLe`, and
+`Init/Data/UInt/Basic.lean` defines the corresponding 16/32/64-bit
+families over `BitVec`. The unsigned carrier `UIntN.toNat` preserves
+their unsigned order; the existing checked Nat comparisons and
+`Nat.decLt/decLe` provide their portable propositions/decisions.
+
+`StandardUnsignedOrder.lean` stages 8 checked relation declarations,
+8 checked deciders, 8 ordinary LT/LE dictionary definitions and explicit
+class/Decidable registrations, with no new axiom, trust permission or
+target-specific primitive. The native oracle and the common-source
+JS/TypeScript/Rust/Wasm observations exercise 16 unsigned equal/extreme
+and reversed-order boundaries, including the full UInt64 range.
+This is a coherent native `.lean` feature family, not a new backend.
+
+**Not qualified:** independently capture any actual strict FNV/SHA
+registry drift, preserve signature/reducibility and native-kernel replay,
+then require every Linux/source/target/Wasmtime gate to pass before
+promotion. M2+A, F1-F4 Float, explicit platform-width ABI and full Phase A
+manifest/library closure remain open. No pskernel-core, self-hosting or C5.
+
+## 14 October — Bool-to-fixed-width stage fully qualified
+
+Commit `aab53c217d244884c39a13436db7fef5ed1815eb` passed
+[Linux 38586225475](https://github.com/dwijayuda/pskernel/actions/runs/38586225475):
+1,751 declarations, 25 classes, 205 instances, 571 common-source
+runtime observations across JS, TS7 and Rust, official kernel checks,
+V8/Wasmtime GC component and linked-project qualification. The checked
+Bool recursor supplies all eight fixed-width conversions with no new
+assumptions; shared observation marshalling preserves unsigned scalars.
+Native signed oracle: 122 reference cases and seven strict typed-IR
+refusals. The result is bounded and does not imply M2+A completion.
+
+
 ## 14 October — signed M2+A order/numeric fully qualified
 
 Executable commit `930e48d330d5d67da0911eba083a83aa730ef70d`,

@@ -3,6 +3,23 @@
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
   {name:"signedToInt8",args:[0n],type:"int",expected:0n},
+  {name:"unsignedLT8",argTypes:["uint8","uint8"],args:[0,255],type:"bool",expected:true},
+  {name:"unsignedLT8",argTypes:["uint8","uint8"],args:[255,0],type:"bool",expected:false},
+  {name:"unsignedLE8",argTypes:["uint8","uint8"],args:[255,255],type:"bool",expected:true},
+  {name:"unsignedLE8",argTypes:["uint8","uint8"],args:[255,0],type:"bool",expected:false},
+  {name:"unsignedLT16",argTypes:["uint16","uint16"],args:[0,65535],type:"bool",expected:true},
+  {name:"unsignedLT16",argTypes:["uint16","uint16"],args:[65535,0],type:"bool",expected:false},
+  {name:"unsignedLE16",argTypes:["uint16","uint16"],args:[65535,65535],type:"bool",expected:true},
+  {name:"unsignedLE16",argTypes:["uint16","uint16"],args:[65535,0],type:"bool",expected:false},
+  {name:"unsignedLT32",argTypes:["uint32","uint32"],args:[0,4294967295],type:"bool",expected:true},
+  {name:"unsignedLT32",argTypes:["uint32","uint32"],args:[4294967295,0],type:"bool",expected:false},
+  {name:"unsignedLE32",argTypes:["uint32","uint32"],args:[4294967295,4294967295],type:"bool",expected:true},
+  {name:"unsignedLE32",argTypes:["uint32","uint32"],args:[4294967295,0],type:"bool",expected:false},
+  {name:"unsignedLT64",argTypes:["uint64","uint64"],args:[0n,18446744073709551615n],type:"bool",expected:true},
+  {name:"unsignedLT64",argTypes:["uint64","uint64"],args:[18446744073709551615n,0n],type:"bool",expected:false},
+  {name:"unsignedLE64",argTypes:["uint64","uint64"],args:[18446744073709551615n,18446744073709551615n],type:"bool",expected:true},
+  {name:"unsignedLE64",argTypes:["uint64","uint64"],args:[18446744073709551615n,0n],type:"bool",expected:false},
+
   {name:"boolWordUInt8",args:[false],type:"uint8",expected:0},
   {name:"boolWordUInt8",args:[true],type:"uint8",expected:1},
   {name:"boolWordUInt16",args:[false],type:"uint16",expected:0},

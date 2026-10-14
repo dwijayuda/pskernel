@@ -607,4 +607,44 @@ def exportSignedIdentityCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned src/Init/Data/SInt/Basic.lean (Henrik Böving), Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nExperimental checked signed wrappers, not runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- F1a native logical read-only bit projections. The genuine pinned Lean
+-- definitions use model-carrying structure projections. This does not
+-- authorize construction, arithmetic or a Float runtime ABI.
+def exportFloatToBitsCandidate (output : System.FilePath) : IO Unit := do
+  let existing := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`Float.toBits, `Float32.toBits]
+    boundary := existing.map psDeclarationName
+    baseDeclarations := existing
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardFloatToBits"
+    privatePrefix := "floatToBitsDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 Float/Float32.toBits, eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative-only checked F1 read projection candidate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+-- Four portable signed widths share one checked 20-method logical family.
+-- ISize's platform-dependent runtime representation is deliberately separate.
+-- Methods and typeclass dictionaries do not become executable merely because
+-- Lean's kernel checked their original logical Core definitions.
+def exportSignedOperationsCandidate (output : System.FilePath) : IO Unit := do
+  let owners := ["Int8", "Int16", "Int32", "Int64"]
+  let methods := ["ofNat", "ofInt", "toInt", "toBitVec", "ofBitVec",
+                  "add", "sub", "mul", "div", "mod", "neg", "complement",
+                  "land", "lor", "xor", "shiftLeft", "shiftRight",
+                  "lt", "le", "instOfNat"]
+  let roots := owners.flatMap fun owner =>
+    methods.map (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method)
+  let existing := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots, boundary := existing.map psDeclarationName
+    baseDeclarations := existing
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardSignedOperations"
+    privatePrefix := "signedOperationsDecl"
+    provenance := "/-\nCopyright (c) 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned src/Init/Data/SInt/Basic.lean, Henrik Böving, Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative-only checked signed operation candidate, not runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

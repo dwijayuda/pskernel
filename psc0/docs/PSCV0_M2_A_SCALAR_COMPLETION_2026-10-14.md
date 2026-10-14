@@ -548,3 +548,22 @@ That run also reached a newly added fixture whose List.foldl call put named
 arguments before positional ones. PSCV0 APP-03 deliberately requires the opposite
 order. The fixture now places α/β last; parser acceptance criteria are unchanged.
 The full /61 integration matrix remains pending.
+
+## Four-width signed operations and checked Float toBits candidates
+
+The pinned `src/Init/Data/SInt/Basic.lean` defines Int8/16/32/64
+as wrappers over UInt8/16/32/64 and implements add/sub/mul modulo 2^width;
+sdiv/srem via `BitVec.sdiv/srem`; shifts via signed modular reduction.
+The pinned `src/Init/Data/BitVec/Basic.lean` defines `smod` as Euclidean
+signed modulus; `src/include/lean/lean.h` applies the matching
+`((int8_t)amount % 8 + 8) % 8` rule before shifting.
+This justifies using a width mask for power-of-two signed shift counts
+in the checked runtime planner, **but does not qualify it without differential
+tests including negative shift amounts**.
+
+The native-only current candidate selects all source operation families
+for four fixed widths while keeping ISize target width separate. Independent
+F1a `toBits` projection export probes whether checked read-only bit
+transport can avoid the `Classical.choice` dependency of `ofBits`.
+Both are subject to official kernel replay, exact assumption review and
+all existing negative conformance; neither automatically enables runtime IR.

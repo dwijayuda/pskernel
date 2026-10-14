@@ -1,5 +1,13 @@
 # PSCV0 v7 — AI work state
 
+## M2+A logical-operation dependency qualification — 14 October 2026
+
+**Latest green selected Standard:** `d1125803720ceb347a23acdd6f21f8140355fac5`, [Linux 38546207955](https://github.com/dwijayuda/pskernel/actions/runs/38546207955), full 25-step workflow passed. The selected environment includes checked native Float/Float32 models and `Int8/Int16/Int32/Int64/ISize` identity structures: **1,575 declarations, 23 classes, 153 instances** and unchanged 426 prior cross-target observations. FNV `fnv1a64:545524655185859287`, SHA-256 `sha256:2675059835d6278a4c7ac8871a3df937835d2ee57912dfd7b9b296576df30c1f`. Source/runtime Float and signed arithmetic remain disabled until qualified.
+
+Next independent native Lean 4.35.0 reference slices, now under strict candidate review: (1) F1a logical `Float.toBits` and `Float32.toBits` projections, deliberately excluding `ofBits` whose full proof closure needs unapproved `Classical.choice`; and (2) a four-width coherent signed `ofNat/ofInt/toInt`, BitVec, arithmetic, division, modulus, bitwise, shift, comparison and `OfNat` root family. The 20 source methods per width are selected directly from pinned `src/Init/Data/SInt/Basic.lean` and checked against `tests/elab/test_extern_int.lean`. A green candidate would qualify source/Core authoring only; complete typed erasure, integer/Float IR validation, JS/TS/Rust/Wasm GC/ABI behavior and official native runtime observations are separate mandatory gates. No new trusted foundation assumptions, pskernel-core, self-hosting or release claim.
+
+
+
 ## Current signed selected Standard — independent digest review (14 October 2026)
 
 At commit `8bee79d6c116ef102d0bc5bc4b4be7ae97f135e7`, [Linux 38545886718](https://github.com/dwijayuda/pskernel/actions/runs/38545886718) compiled the checked 15-entry SInt family asset, regenerated it **byte-for-byte** from the original pre-signed Standard, and rechecked all five recursor rule contracts. Its selected-Standard guard correctly refused the previous snapshot and independently reported **1,575 declarations, 23 classes and 153 instances** (net +10 actual declarations replacing five axioms); FNV `fnv1a64:545524655185859287`; SHA-256 `sha256:2675059835d6278a4c7ac8871a3df937835d2ee57912dfd7b9b296576df30c1f`. These precise observed values are now pinned without weakening the two strict registry guards. **This revision still needs its next complete green Linux regression.** No new trusted axioms, signed runtime arithmetic, portable USize/ISize execution or F1 Float bit interfaces are claimed. F1 awaits a sound resolution of the `Classical.choice` proof dependency; other M2+A exits remain open.

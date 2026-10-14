@@ -914,3 +914,63 @@ def psKernelLevelInstantiateParams
           changedLeft
           changedRight
 
+/-! Shared universe-parameter lookup for the kernel and admission validators. -/
+def psKernelFindUndefLevelParam
+    (level : PsKernelLevel)
+    (allowed : List PsKernelName) :
+    Option PsKernelName :=
+  match level with
+  | PsKernelLevel.zero =>
+      Option.none
+  | PsKernelLevel.mvar _ =>
+      Option.none
+  | PsKernelLevel.param name =>
+      if psKernelNameMember name allowed then
+        Option.none
+      else
+        Option.some name
+  | PsKernelLevel.succ inner =>
+      psKernelFindUndefLevelParam
+        inner
+        allowed
+  | PsKernelLevel.max left right =>
+      match
+          psKernelFindUndefLevelParam
+            left
+            allowed with
+      | Option.some name =>
+          Option.some name
+      | Option.none =>
+          psKernelFindUndefLevelParam
+            right
+            allowed
+  | PsKernelLevel.imax left right =>
+      match
+          psKernelFindUndefLevelParam
+            left
+            allowed with
+      | Option.some name =>
+          Option.some name
+      | Option.none =>
+          psKernelFindUndefLevelParam
+            right
+            allowed
+
+def psKernelFindUndefInLevels
+    (levels : List PsKernelLevel)
+    (allowed : List PsKernelName) :
+    Option PsKernelName :=
+  match levels with
+  | List.nil =>
+      Option.none
+  | List.cons head tail =>
+      match
+          psKernelFindUndefLevelParam
+            head
+            allowed with
+      | Option.some name =>
+          Option.some name
+      | Option.none =>
+          psKernelFindUndefInLevels
+            tail
+            allowed

@@ -112,26 +112,7 @@ def psKernelInferCoreWithFuelUsingSourceFrames
         -- ranges to avoid repeated no-op substitutions under closed bodies.
         -- The historical hook-free worker remains untouched.
         let currentBinderRanges :=
-          match expr, onCheckedApp with
-          | .lam _ _ _ _, some _ =>
-              match binderRanges with
-              | [] =>
-                  if psKernelC0HasBinderPrefix 12 true expr then
-                    match psKernelC0BinderBodyRangesWithFuel 1024 expr with
-                    | some (_, ranges) => ranges
-                    | none => []
-                  else []
-              | _ => binderRanges
-          | .forallE _ _ _ _, some _ =>
-              match binderRanges with
-              | [] =>
-                  if psKernelC0HasBinderPrefix 12 false expr then
-                    match psKernelC0BinderBodyRangesWithFuel 1024 expr with
-                    | some (_, ranges) => ranges
-                    | none => []
-                  else []
-              | _ => binderRanges
-          | _, _ => []
+          psKernelInferCurrentBinderRanges expr onCheckedApp binderRanges
         let currentHash :=
           match currentFrames with
           | (_, hash) :: _ => some hash

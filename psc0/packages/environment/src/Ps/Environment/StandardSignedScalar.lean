@@ -22,19 +22,19 @@ def psStandardSignedScalarInstances : List (String × PsDeclaration) :=
       let .str _ method := methodName | none
       return (spec.className, psStandardBinaryInstance spec name
         (psNameAppendStr name method))
-    let negative := .definitionDecl
+    let negative : PsDeclaration := .definitionDecl
       (psDecisionName ("PsStandard.instNeg" ++ owner)) []
       (.app (.constE (psRootName "Neg") [.zero]) type)
       (psLogicApply (.constE (psDecisionName "Neg.mk") [.zero])
-        [type, .constE (psNameAppendStr name "neg") []]) : PsDeclaration
+        [type, .constE (psNameAppendStr name "neg") []])
     let n := PsExpr.fvar 1
-    let ofNat := .definitionDecl
+    let ofNat : PsDeclaration := .definitionDecl
       (psDecisionName ("PsStandard.instOfNat" ++ owner)) []
       (psLogicPi 1 "n" psOrderNat
         (psLogicApply (.constE (psRootName "OfNat") [.zero]) [type, n]))
       (psLogicLam 1 "n" psOrderNat
         (psLogicApply (.constE (psDecisionName "OfNat.mk") [.zero])
-          [type, n, psOrderCall (owner ++ ".ofNat") [n]])) : PsDeclaration
+          [type, n, psOrderCall (owner ++ ".ofNat") [n]]))
     let bytes := owner.replace "Int" "UInt"
     let bits := fun value => psOrderCall (bytes ++ ".toNat")
       [psOrderCall (owner ++ ".to" ++ bytes) [value]]

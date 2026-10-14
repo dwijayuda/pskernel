@@ -45,7 +45,7 @@ def main : IO Unit := do
     throw (IO.userError "lambda binder abstraction changed source type")
 
   -- The source checked application must still enforce argument types.
-  let application : PsKernelExpr := .app identity sort0
+  let application : PsKernelExpr := .app identity depPi
   let (appType, _) ← match psKernelSessionCheck 4096 source application with
     | .ok x => pure x
     | .error e => throw (IO.userError ("checked identity application failed: " ++ e))

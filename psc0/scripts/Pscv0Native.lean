@@ -130,6 +130,51 @@ private def readProjectManifest (manifest : String) :
     | throw (IO.userError ("PSCV0-PROJECT-MANIFEST: missing entry " ++ entry))
   return (entry, selected, sources.filter (fun item => item.name != entry))
 
+-- Independently reproduce the source-level import graph seen by project
+-- compilation. Checked native source parsing/graph refusal is reused; this
+-- receipt is not proof authority or target semantic preservation.
+private def auditProjectSourceGraph (manifestPath : String) : IO UInt32 := do
+  let (entry, selected, dependencies) ← readProjectManifest manifestPath
+  let parsed ← match psPscv0ProjectParse (selected :: dependencies) with
+    | .error message => throw (IO.userError message)
+    | .ok value => pure value
+  let ordered ← match psPscv0ProjectOrder (parsed.length + 1) parsed [] with
+    | .error message => throw (IO.userError message)
+    | .ok value => pure value
+  let reachable ← match psPscv0ProjectReachable
+      (parsed.length * (parsed.length + 1) + 1) parsed [entry] [] with
+    | .error message => throw (IO.userError message)
+    | .ok value => pure value
+  let env := psSelfHostProdPreludeEnvironment
+  match standardSurfaceManifestAudit env with
+  | .error message => throw (IO.userError message)
+  | .ok () => pure ()
+  let modulePayload := fun (item : PsPscv0ParsedModule) =>
+    psStandardSnapshotNode "module" [
+      item.name, item.sourceName, psStandardSnapshotSHA256 item.source,
+      psStandardSnapshotList id (item.program.imports.map psPscv0ImportKey),
+      psStandardSnapshotBool (reachable.contains item.name)]
+  let payload := psStandardSnapshotNode "PSCV0-PROJECT-SOURCE-GRAPH-v1" [
+    leanCommit, standardSurfaceManifestSHA256 env, entry,
+    psStandardSnapshotList modulePayload ordered]
+  let digest := "sha256:" ++ psStandardSnapshotSHA256 payload
+  let rows := (ordered.zipIdx.map fun (item, rank) => Lean.Json.mkObj [
+    ("module", toJson item.name),
+    ("sourcePath", toJson item.sourceName),
+    ("sourceSHA256", toJson ("sha256:" ++ psStandardSnapshotSHA256 item.source)),
+    ("imports", toJson (item.program.imports.map psPscv0ImportKey)),
+    ("buildOrder", toJson rank),
+    ("reachableFromEntry", toJson (reachable.contains item.name))]).toArray
+  IO.println (Lean.Json.mkObj [
+    ("schema", toJson ("pscv0-project-source-graph/1" : String)),
+    ("status", toJson ("source-graph-only; kernel/runtime evidence is separate" : String)),
+    ("leanCommit", toJson leanCommit),
+    ("entry", toJson entry),
+    ("selectedSurfaceSHA256", toJson (standardSurfaceManifestSHA256 env)),
+    ("sourceGraphSHA256", toJson digest),
+    ("modules", Lean.Json.arr rows)]).compress
+  return 0
+
 private def runProject (manifest : String)
     (outputs : List (PsEmissionTarget × String))
     (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
@@ -224,6 +269,8 @@ def main (args : List String) : IO UInt32 := do
           ("leanVersion", toJson Lean.versionString), ("leanCommit", toJson Lean.githash),
           ("profile", toJson profile)]).compress
         return 0
+    | ["--audit-project-graph", manifest] =>
+        auditProjectSourceGraph manifest
     | ["--check-project", manifest] =>
         runProject manifest []
     | ["--emit-project", manifest, output] =>
@@ -269,7 +316,7 @@ def main (args : List String) : IO UInt32 := do
     | ["--emit-both", input, stem] =>
         run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --audit-standard-surface | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-canonical-model-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
+        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --audit-project-graph <manifest.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --audit-standard-surface | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-canonical-model-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

@@ -1,5 +1,24 @@
 # PSCV0 v7 native implementation roadmap
 
+## 15 October — surface digest frozen and per-project source graph candidate
+
+The selected source-surface SHA-256 from complete CI 38653018583
+(commit 078ec135da8b205400ba14a8ac3d68ac3fd23f71) is now frozen
+to sha256:0bc4bfaa0f9afb9e0c1c58d652c51db8732530cd1b50b9e8772cca90f5bac0cf.
+That independent strict gate complements both existing FNV/SHA checks
+over the underlying selected Standard Core/instances/aliases.
+
+New candidate: the native --audit-project-graph command consumes the
+same path-safe source manifest and source-owned imports as the real project
+compiler, refuses duplicate/missing/cyclic dependencies, resolves a
+deterministic topological order and entry reachability, and hashes
+actual source bytes, imported module identities, source paths, and the
+selected global Standard-surface SHA into one project source-graph SHA-256.
+The three-module CI fixture now emits project-source-graph.json.
+This is a source-graph identity receipt, not a kernel proof, published
+ABI-equivalence claim, or full transitive Lean import manifest.
+Full M2+A remains incomplete; no pskernel-core, self-hosting, C5.
+
 ## 15 October — canonical Float model replay qualified; full selected-surface digest candidate
 
 The native Float canonical proof model produced 24 officially checked

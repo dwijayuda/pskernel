@@ -179,6 +179,7 @@ jobs:
         run: |
           set -euo pipefail
           MANIFEST=../v7-native/module-fixture/project.json
+          .lake/build/bin/pscv0_native --audit-project-graph "$MANIFEST" > ../dist/pscv0-native/project-source-graph.json
           .lake/build/bin/pscv0_native --check-project "$MANIFEST"
           .lake/build/bin/pscv0_native --emit-project-all "$MANIFEST" ../dist/pscv0-native/modules/app
           node ../scripts/pscv0-native-project.mjs ../dist/pscv0-native/modules/app

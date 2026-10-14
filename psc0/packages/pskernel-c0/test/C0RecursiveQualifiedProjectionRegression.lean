@@ -45,6 +45,8 @@ def main : IO Unit := do
   let invalidFamily : PsKernelExpr :=
     .proj (recProjName "WrongProjectionBox") 0 constructor
   let invalidMajor : PsKernelExpr := .proj recProjBox 0 sort0
+  let unknownMajor : PsKernelExpr :=
+    .proj recProjBox 0 (.mvar (recProjName "unknownMajor"))
 
   let start := psKernelMkCheckerSession
     psKernelEnvironmentEmpty [] .safe 8192 psKernelLeanNatMaxSizeDefault
@@ -88,7 +90,7 @@ def main : IO Unit := do
     if (psKernelExprMapGet result.snd.checkedInfer expr).isNone then
       throw (IO.userError "qualified projection omitted source checked cache")
 
-  for expr in [invalidIndex, invalidFamily, invalidMajor] do
+  for expr in [invalidIndex, invalidFamily, invalidMajor, unknownMajor] do
     match psKernelC0CertifiedWorkCheckRecursiveProjectionOwned 8192 work expr,
           psKernelC0CertifiedWorkCheck 8192 work expr with
     | .error actual, .error expected =>
@@ -101,6 +103,27 @@ def main : IO Unit := do
       if actual != expected then
         throw (IO.userError "projection zero-fuel diagnostic changed")
   | _, _ => throw (IO.userError "projection bypassed source zero fuel")
+  -- Arbitrarily exhausted original checker recursion must not become
+  -- an independent accepted projection or a forged cached result.
+  let blocked : PsKernelCheckerSession := {
+    admitted.checker with
+    context := {
+      admitted.checker.context with
+      recDepth := 1000000
+      maxRecDepth := 1
+    }
+  }
+  let some blockedRaw := psKernelC0ArchitectureBegin blocked
+    | throw (IO.userError "blocked projection source work unavailable")
+  let some blockedWork := psKernelC0ArchitectureCertifyWork blockedRaw
+    | throw (IO.userError "blocked projection proof unavailable")
+  match psKernelC0CertifiedWorkCheckRecursiveProjectionOwned
+          8192 blockedWork first,
+        psKernelC0CertifiedWorkCheck 8192 blockedWork first with
+  | .error actual, .error expected =>
+      if actual != expected then
+        throw (IO.userError "qualified projection changed recursion diagnostic")
+  | _, _ => throw (IO.userError "qualified projection bypassed depth guard")
 
   let policy : PsKernelResourcePolicy := {
     fuel := 8192

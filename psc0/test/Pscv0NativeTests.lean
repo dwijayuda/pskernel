@@ -386,7 +386,7 @@ private def unitEmptyCallCases : IO Unit := do
     ("Unit empty call",
       "function run(value: Unit): Nat := 3\nconst result: Nat := run()\n"),
     ("PUnit empty call",
-      "function run(value: PUnit): Nat := 5\nconst result: Nat := run()\n"),
+      "function run(value: (PUnit : Type)): Nat := 5\nconst result: Nat := run()\n"),
     ("explicit Unit call",
       "function run(value: Unit): Nat := 7\nconst result: Nat := run(Unit.unit)\n"),
     ("parenthesized Unit callable",

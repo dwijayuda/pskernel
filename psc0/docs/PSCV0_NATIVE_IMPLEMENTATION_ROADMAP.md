@@ -1,5 +1,23 @@
 # PSCV0 v7 native implementation roadmap
 
+## 15 October — qualified toList and next checked conversion/slice candidate
+
+Commit `314b0cd67d70a4664da1957fd96f4676ad6e1524` passed all 27
+[Linux CI 38616800244](https://github.com/dwijayuda/pskernel/actions/runs/38616800244)
+steps: the selected logical `ByteArray.toList` passed official kernel,
+strict FNV/SHA, native oracle, shared JS/TS/Rust/Wasm GC/Wasmtime and
+performance gates. It is the last fully green executable checkpoint.
+
+**Next candidate only:** add the Lean 4.35.0-pinned
+`List.toByteArray : List UInt8 → ByteArray` and
+`ByteArray.extract : ByteArray → Nat → Nat → ByteArray`.
+Use checked List/Array conversions and `take (stop-start) (drop start xs)`
+for exact half-open, bounded index semantics; no packed-buffer shortcut,
+unchecked assumption, new kernel, self-hosting or C5. Native oracle and
+shared-target cases cover order, empty/reversed range and out-of-range stop.
+Qualify independently; the next registry FNV/SHA must be measured by
+strict CI before updating its expected values. This new slice is not green.
+
 ## 15 October — checked ByteArray indexed API fully qualified
 
 Commit `05d4c1cec39bf7cb93089041982e60f802563c5d` passed all 27

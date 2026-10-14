@@ -199,6 +199,42 @@ def psStandardByteArrayToListDeclaration : PsDeclaration :=
       (psOrderCall "Array.toList"
         [psStandardByteArrayElement, psStandardByteArrayData a]))
 
+
+-- Lean 4.35.0 native List.toByteArray uses an order-preserving push loop.
+-- Checked Array.mk/List.toArray is its logical representation.
+-- ByteArray.extract is the half-open slice [start, stop), clipped to size.
+-- Convert through the same checked Array/List storage: no new byte
+-- runtime opcode or unchecked bounds/coercion shortcuts.
+def psStandardByteArraySliceDeclarations : List PsDeclaration :=
+  let uint8 := psStandardByteArrayElement
+  let bytes := psStandardByteArrayType
+  let list := psSelfHostListOf uint8
+  let xs : PsExpr := .fvar 0
+  let a : PsExpr := .fvar 0
+  let start : PsExpr := .fvar 1
+  let stop : PsExpr := .fvar 2
+  let arrayOfList := fun xs => psOrderCall "List.toArray" [uint8, xs]
+  let byteList := psOrderCall "Array.toList"
+    [uint8, psStandardByteArrayData a]
+  let count := psOrderCall "Nat.sub" [stop, start]
+  let slice := psStandardListCall "take"
+    [uint8, count, psStandardListCall "drop" [uint8, start, byteList]]
+  let toBytes : PsDeclaration := .definitionDecl
+    (psDecisionName "List.toByteArray") []
+    (psLogicPi 0 "bytes" list bytes)
+    (psLogicLam 0 "bytes" list
+      (psStandardByteArrayMk (arrayOfList xs)))
+  let extract : PsDeclaration := .definitionDecl
+    (psNameAppendStr psStandardByteArrayName "extract") []
+    (psLogicPi 0 "bytes" bytes
+      (psLogicPi 1 "start" psOrderNat
+        (psLogicPi 2 "stop" psOrderNat bytes)))
+    (psLogicLam 0 "bytes" bytes
+      (psLogicLam 1 "start" psOrderNat
+        (psLogicLam 2 "stop" psOrderNat
+          (psStandardByteArrayMk (arrayOfList slice)))))
+  [toBytes, extract]
+
 -- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=
   let bytes := psStandardByteArrayType
@@ -219,6 +255,7 @@ def psStandardByteArrayCollectionDeclarations : List PsDeclaration :=
      psStandardByteArrayInhabitedDeclaration] ++
     psStandardByteArrayCheckedIndexDeclarations ++
     [psStandardByteArrayToListDeclaration] ++
+    psStandardByteArraySliceDeclarations ++
     psStandardByteArrayIndexInstances
 
 def psStandardByteArrayCollectionExtend
@@ -226,6 +263,8 @@ def psStandardByteArrayCollectionExtend
   let environment := psStandardByteArrayCollectionDeclarations.foldl
     psEnvironmentInsert environment
   -- Pinned Lean marks get implicit_reducible; set is ordinary semireducible.
+  let environment := psEnvironmentSetReducibility environment
+    (psDecisionName "List.toByteArray") .implicitReducible
   let environment := psEnvironmentSetReducibility environment
     (psNameAppendStr psStandardByteArrayName "get") .implicitReducible
   let environment := psStandardRegisterInstances environment "BEq"

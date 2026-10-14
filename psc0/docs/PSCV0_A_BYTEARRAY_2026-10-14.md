@@ -1,5 +1,26 @@
 # PSC0 Phase A — Lean 4.35.0 ByteArray logical baseline
 
+## 15 October — toList green, checked conversion and extraction candidate
+
+The preceding `ByteArray.toList` operation is qualified at
+`314b0cd67d70a4664da1957fd96f4676ad6e1524`,
+[CI 38616800244](https://github.com/dwijayuda/pskernel/actions/runs/38616800244).
+
+Upstream Lean 4.35.0 `Init/Prelude.lean` defines
+`List.toByteArray` by an order-preserving push loop; the PSC0
+logical representation may equivalently use `ByteArray.mk` of checked
+`List.toArray`. Upstream `Init/Data/ByteArray/Basic.lean`
+defines `ByteArray.extract a b e` as a copy slice of `e-b` bytes.
+PSC0's checked logical equivalent is
+`ByteArray.mk (List.toArray (List.take (e-b) (List.drop b a.data.toList)))`.
+This copies the bytes in logical order, clamps out-of-range stops,
+returns empty if stop precedes start, and does not claim native packing.
+
+Both new declarations are **candidates** until native kernel,
+type/reducibility audit, independently frozen FNV/SHA, source/IR,
+JS/TS/Rust/Wasm GC/Wasmtime and performance gates succeed.
+No additional trusted assumption or primitive is introduced.
+
 ## 15 October 2026 — accepted indexed API, next toList candidate
 
 The verified indexed ByteArray source, dictionaries, erasure and target

@@ -19,7 +19,9 @@ def admitDeclarationList :
     Nat -> List Lean.Declaration -> Lean.Kernel.Environment ->
     Except PsKernelLeanError Lean.Kernel.Environment
   | _, [], env => .ok env
-  | declarationIndex, declaration :: rest, env =>
+  | declarationIndex, original :: rest, env =>
+      -- The reusable provider owns the same checked definition-height policy.
+      let declaration := psKernelWithDefinitionHeight env original
       match env.addDeclCore 2000000 20000 declaration none with
       | .ok next =>
           admitDeclarationList (declarationIndex + 1) rest next

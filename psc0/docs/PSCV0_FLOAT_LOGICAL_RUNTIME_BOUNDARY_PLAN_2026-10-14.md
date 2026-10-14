@@ -2,6 +2,77 @@
 
 Status: **research and implementation contract only; not implemented or qualified by this document**. The latest green executable baseline is `34ff236b6fe9f936d7d44b8ace1c70612c7cc66e`, [Linux 38515443060](https://github.com/dwijayuda/pskernel/actions/runs/38515443060): profile /61, selected Standard 1516 declarations / 23 classes / 153 instances, 426 shared runtime observations.
 
+## F0 inventory verified against the /61 repository (14 October 2026)
+
+**This section is a checked design/audit checkpoint, not a Float implementation.**
+Last full-green executable is `34ff236b6fe9f936d7d44b8ace1c70612c7cc66e`,
+CI `38515443060`. The current float plan is documentation-only after that
+executable, with no new float build or conformance acceptance.
+
+### Existing PSC0 substrate and the missing interface
+
+| Boundary | Code | F0 finding |
+| --- | --- | --- |
+| Source/Core names | `packages/core/src/Ps/Core/Builtin.lean` | `psFloatName` and `psFloat32Name` are defined as identifiers only |
+| Checked selected Standard | `packages/environment/src/Ps/Environment/SelfHostPrelude.lean`, `SelfHostProd.lean`, `StandardUnsigned*.lean` | No registered checked logical Float/Float32 inductive families, constructors, methods or instances; F0 must define/import them before any source-level promise |
+| Erasure | `packages/erasure/src/Ps/Erasure/Basic.lean` | The type classifier recognizes Float and Float32 as primitive types, but this does **not** admit unregistered source declarations or establish a logical-to-runtime model |
+| Strict typed IR | `packages/compiler-ir/src/Ps/CompilerIr/Model.lean` | `float`/`float32` types, `floatBinary` and `floatCompare` operation categories exist; they are a transport substrate, not proven semantic equivalence |
+| Native kernel | `packages/pskernel-lean/provider/PsKernelLean/Prelude.lean`; `host/src/Ps/Host/NativeV7.lean` | A newly selected logical family must be rechecked with Lean 4.35.0 `Kernel.Environment.addDeclCore`. Source programs remain strictly kernel checked with their independent finite budgets |
+| Output | JS/TS/Rust and Wasm GC/Canonical ABI modules | No source Float feature can be declared qualified until all typed and ABI paths have exact signed-zero/NaN/f32-rounding evidence |
+
+### Lean 4.35.0's actual declaration/semantic cut
+
+Study, convert and compare at **pinned commit**
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`:
+
+1. `src/Init/Data/Float/Model/Float.lean`: `Float.Model` is a
+   subtype-like structure with `toBits : UInt64` and
+   `valid : Float.Model.Format.binary64.Valid toBits.toBitVec`.
+   `pack/unpack`, `nan`, `inf`, `ofBits`, arithmetic and comparisons
+   are defined over the checked unpacked model, NOT over unconstrained UInt64.
+2. `src/Init/Data/Float/Float.lean`: logical `structure Float`
+   has exactly one field `toModel : Float.Model`; native
+   `Float.ofModel`/`toModel` have optimized extern representations.
+   `Float.ofBits` delegates to the model's canonicalization,
+   `Float.toBits` delegates to model bits, and `Float.beq` uses
+   model/IEEE Boolean equality. `Float.toString` is opaque in Core:
+   do not fabricate a logical computation proof for its runtime rendering.
+3. `src/Init/Data/Float/Model/Float32.lean` and
+   `src/Init/Data/Float/Float32.lean`: the separate **binary32** model
+   has a `UInt32` bit carrier and binary32 validity. Each arithmetic
+   operation and conversion must perform the binary32 model's rounding,
+   not binary64 arithmetic with final narrowing.
+4. `src/Init/Data/OfScientific/Basic.lean`: the class accepts an exact
+   `Nat` mantissa, `Bool` exponent sign and `Nat` decimal exponent.
+   `src/Init/Data/OfScientific.lean` implements the checked fast path
+   and fallback. Lexing must preserve this triple before elaboration.
+5. Differential references:
+   `tests/elab/floatEquality.lean`,
+   `tests/elab/floatBits.lean`, `tests/elab/floatModelDefeq.lean`
+   and `tests/pkg/ofScientific`, all at the same commit.
+
+**Selection policy:** The selected F0 declaration cut must be closed over every
+logical dependency (including the exact `Float.Model.Format.*` predicates and
+unpacked operations). Preserve original Lean signatures, real proof bodies,
+inductive constructor/recursor metadata and declared assumptions.
+Use the existing deterministic native exporter and official kernel replay;
+a cutoff that turns native definitions into convenient new axioms is forbidden.
+Only the already authorized `propext` and `Quot.sound` foundation
+assumptions are allowed; separately report the full F0 assumption manifest.
+
+**Transport policy:** Keep logical `Float` separate from runtime
+`PsVerifiedIrPrimitiveType.float`. Erasure may map the checked wrapper to a
+typed scalar only after proving the selected logical representation and
+one-to-one canonical bit transport meet all existing IR checks.
+The same rule applies to Float32. Do not add implicit Float↔UInt coercions or
+reinterpretation of proof/structure fields.
+
+**First executable F0 gate:** Export only the pinned, closed logical
+families and constructor/projection/bit contracts. Audit the exact membership,
+assumptions, snapshot FNV/SHA, kernel-generated metadata and all-admission
+receipt. Validate negative refusal before enabling any float arithmetic,
+literal syntax or emitter path. F1–F4 follow only after the F0 gate is green.
+
 ## Pinned upstream implementation (primary reference)
 
 Commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, Lean 4.35.0:

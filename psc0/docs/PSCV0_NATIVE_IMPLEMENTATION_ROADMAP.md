@@ -1,5 +1,25 @@
 # PSCV0 v7 native implementation roadmap
 
+## 15 October — append fully qualified; shared copySlice candidate
+
+Commit `13595a906abec60b39dccf54567d83d53e730fa0` passed all
+[27 Linux CI 38620235817](https://github.com/dwijayuda/pskernel/actions/runs/38620235817)
+steps, qualifying the native checked `ByteArray.append` model, the
+general Lean 4.35.0 model proofs, JS/TypeScript/Rust/Wasm GC, Wasmtime and
+resource gates. This is the last **fully accepted executable checkpoint**
+until newer independent CI evidence.
+
+**Next candidate (not qualified):** implement `ByteArray.copySlice` as
+a pure checked List/Array sequence of prefix, clipped source middle and
+remaining destination suffix; refactor `ByteArray.extract` to reuse
+`copySlice` as in pinned Lean 4.35.0. Preserve default
+`exact : Bool := true` as real `optParam Bool true` and do not pretend
+the capacity hint changes logical bytes or that packed runtime performance
+is implemented. Add all-input native Lean proof that exact true/false
+produces the same logical result, plus bounded source/oracle/runtime cases.
+Keep the unchanged strict registry guard until independent CI measures both
+new fingerprints. No new axiom, pskernel-core, self-hosting or C5.
+
 ## 15 October — list conversion/extract fully qualified; append candidate
 
 Commit `070d7d4d2c72b52cecc39f576128119ed2261b19` passed

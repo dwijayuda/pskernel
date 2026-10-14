@@ -1,5 +1,32 @@
 # PSC0 Phase A — Lean 4.35.0 ByteArray logical baseline
 
+## 15 October — checked copySlice implementation candidate
+
+The preceding `ByteArray.append` and native universal representation
+proofs passed all 27 [CI 38620235817](https://github.com/dwijayuda/pskernel/actions/runs/38620235817)
+steps at `13595a906abec60b39dccf54567d83d53e730fa0`.
+
+Pinned Lean 4.35.0 `Init/Data/ByteArray/Basic.lean` defines
+`copySlice (src) srcOff dest destOff len (exact := true)` as a
+three-extract concatenation. The checked portable formulation uses:
+`take destOff dest.data`, then
+`take len (drop srcOff src.data)`, then
+`drop (destOff + copied.length) dest.data`.
+It agrees with the native clipped source count
+`min len (src.size - srcOff)`. `exact : Bool := true` is represented
+as the actual Lean `optParam Bool true`; allocation capacity is not
+observable in the logical model. `ByteArray.extract` calls the same
+checked copy operation into `ByteArray.empty`, following upstream.
+
+Independent native oracle cases include default/exact=false,
+out-of-range source, and head/middle/tail preservation. All-input
+native theorems preserve the exact-hint independence and extract's
+defining equation; these are not global target-preservation theorems.
+
+**Unqualified until** official kernel replay, signature/reducibility
+audit, independently measured FNV/SHA, source/IR erasure and all
+JS/TS/Rust/Wasm/Wasmtime/performance steps pass.
+
 ## 15 October — qualified slicing, append candidate
 
 The exact native `List.toByteArray` and half-open `ByteArray.extract`

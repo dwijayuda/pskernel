@@ -211,19 +211,55 @@ def psStandardByteArraySliceDeclarations : List PsDeclaration :=
   let list := psSelfHostListOf uint8
   let xs : PsExpr := .fvar 0
   let a : PsExpr := .fvar 0
-  let start : PsExpr := .fvar 1
-  let stop : PsExpr := .fvar 2
+  let srcOff : PsExpr := .fvar 1
+  let dest : PsExpr := .fvar 2
+  let destOff : PsExpr := .fvar 3
+  let len : PsExpr := .fvar 4
+  let endOff : PsExpr := .fvar 2
   let arrayOfList := fun xs => psOrderCall "List.toArray" [uint8, xs]
-  let byteList := psOrderCall "Array.toList"
-    [uint8, psStandardByteArrayData a]
-  let count := psOrderCall "Nat.sub" [stop, start]
-  let slice := psStandardListCall "take"
-    [uint8, count, psStandardListCall "drop" [uint8, start, byteList]]
+  let byteList := fun xs => psOrderCall "Array.toList"
+    [uint8, psStandardByteArrayData xs]
+  -- Lean's exact := true is optParam Bool true, and the concrete packed
+  -- implementation uses it only as a capacity hint. Keep its source type.
+  let bool : PsExpr := .constE psBoolName []
+  let trueValue : PsExpr := .constE psBoolTrueName []
+  let exactType := psLogicApply (.constE psOptParamName [.succ .zero])
+    [bool, trueValue]
+  let srcPart := psStandardListCall "take"
+    [uint8, len, psStandardListCall "drop" [uint8, srcOff, byteList a]]
+  let destHead := psStandardListCall "take"
+    [uint8, destOff, byteList dest]
+  let readCount := psStandardListCall "length" [uint8, srcPart]
+  let suffixOffset := psOrderCall "Nat.add" [destOff, readCount]
+  let destTail := psStandardListCall "drop"
+    [uint8, suffixOffset, byteList dest]
+  let copied := psStandardListCall "append"
+    [uint8, destHead,
+      psStandardListCall "append" [uint8, srcPart, destTail]]
   let toBytes : PsDeclaration := .definitionDecl
     (psDecisionName "List.toByteArray") []
     (psLogicPi 0 "bytes" list bytes)
     (psLogicLam 0 "bytes" list
       (psStandardByteArrayMk (arrayOfList xs)))
+  -- Upstream Init/Data/ByteArray/Basic.lean uses three Array.extract calls.
+  -- Their concatenation equals this clipped List.take/drop construction,
+  -- including src/dest offsets beyond size and a zero-length copy.
+  let copySlice : PsDeclaration := .definitionDecl
+    (psNameAppendStr psStandardByteArrayName "copySlice") []
+    (psLogicPi 0 "src" bytes
+      (psLogicPi 1 "srcOff" psOrderNat
+        (psLogicPi 2 "dest" bytes
+          (psLogicPi 3 "destOff" psOrderNat
+            (psLogicPi 4 "len" psOrderNat
+              (psLogicPi 5 "exact" exactType bytes))))))
+    (psLogicLam 0 "src" bytes
+      (psLogicLam 1 "srcOff" psOrderNat
+        (psLogicLam 2 "dest" bytes
+          (psLogicLam 3 "destOff" psOrderNat
+            (psLogicLam 4 "len" psOrderNat
+              (psLogicLam 5 "exact" exactType
+                (psStandardByteArrayMk (arrayOfList copied)))))))
+  -- Preserve Lean's defining equation: extract is a copy into empty.
   let extract : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "extract") []
     (psLogicPi 0 "bytes" bytes
@@ -232,8 +268,10 @@ def psStandardByteArraySliceDeclarations : List PsDeclaration :=
     (psLogicLam 0 "bytes" bytes
       (psLogicLam 1 "start" psOrderNat
         (psLogicLam 2 "stop" psOrderNat
-          (psStandardByteArrayMk (arrayOfList slice)))))
-  [toBytes, extract]
+          (psOrderCall "ByteArray.copySlice" [a, srcOff,
+            psOrderCall "ByteArray.empty" [], .lit (.natural 0),
+            psOrderCall "Nat.sub" [endOff, srcOff], trueValue]))))
+  [toBytes, copySlice, extract]
 
 -- Pinned Lean 4.35.0 Init/Data/ByteArray/Bootstrap.lean:
 --   protected def append a b := ⟨⟨a.data.toList ++ b.data.toList⟩⟩

@@ -46,6 +46,12 @@ def psKernelC0VerifiedProviderPreflight
   if let some resource := psKernelResourcePreflight session.resources then
     throw (.resourceExhausted resource
       "resource policy declined operation before entry")
+  let checkedContext :=
+    session.verified.sealed.audited.trusted.certified.raw.checker.context
+  if checkedContext.maxRecDepth != session.resources.maxRecDepth ||
+      checkedContext.maxNatSize != session.resources.maxNatSize then
+    throw (.declinedUnsupported
+      "verified resource limits do not match source checked-session genesis")
 
 /-- Map only explicitly implemented kernel declaration families. No guessed
     mutual-definition transaction can bypass its dedicated checked semantics. -/

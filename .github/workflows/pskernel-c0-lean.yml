@@ -38,6 +38,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0RecursiveCheckedInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0RecursiveQualifiedLetRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0RecursiveQualifiedProjectionRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0QualifiedContextualWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -177,6 +178,9 @@ jobs:
       - name: C0 source-proved recursive metadata full checking and atomic publication
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedMetadataInferenceRegression.lean
+      - name: C0 source-proved contextual WHNF of lambda and rigid locals
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0QualifiedContextualWhnfRegression.lean
       - name: C0 independently refined checked projection major types
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0RecursiveQualifiedProjectionRegression.lean

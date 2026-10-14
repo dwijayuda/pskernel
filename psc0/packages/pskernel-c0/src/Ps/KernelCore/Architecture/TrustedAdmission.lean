@@ -1,4 +1,5 @@
 import Ps.KernelCore.Architecture.QualifiedRecursiveProjectionInference
+import Ps.KernelCore.Architecture.QualifiedContextualWhnf
 
 /-!
 Phase E: proof-carrying SOURCE admission provenance.
@@ -153,7 +154,7 @@ def psKernelC0TrustedSourceWhnf
     (work : PsKernelC0TrustedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) := do
-  let receipt ← psKernelC0CertifiedWorkWhnfCanonicalFastOwned
+  let receipt ← psKernelC0CertifiedWorkWhnfContextualOwned
     fuel work.certified expr
   let (value, checked) := receipt.val
   return (value,

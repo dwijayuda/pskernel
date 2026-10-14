@@ -29,6 +29,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.QualifiedRecursiveInference,
     `Ps.KernelCore.Architecture.QualifiedRecursiveLetInference,
     `Ps.KernelCore.Architecture.QualifiedRecursiveProjectionInference,
+    `Ps.KernelCore.Architecture.QualifiedContextualWhnf,
     `Ps.KernelCore.Architecture.TrustedAdmission,
     `Ps.KernelCore.Architecture.SealedState,
     `Ps.KernelCore.Architecture.SealedAuditedState,

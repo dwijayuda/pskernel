@@ -90,6 +90,20 @@ def main : IO Unit := do
       accepted.verified.sealed.audited.trusted.certified.raw.checker.context.environment != 1 then
     throw (IO.userError "resource failure mutated immutable checked state")
 
+  -- The provider record is constructible; it may not claim a runtime
+  -- policy with different recursion/numeral limits than the checker used.
+  let modifiedRecursion : PsKernelResourcePolicy :=
+    { resources with maxRecDepth := resources.maxRecDepth + 1 }
+  match psKernelC0VerifiedProviderCheck
+      { first with resources := modifiedRecursion } (.sort .zero) with
+  | .error (.declinedUnsupported _) => pure ()
+  | _ => throw (IO.userError "provider resource mismatch reached accepting checker")
+  let modifiedNumerals : PsKernelResourcePolicy :=
+    { resources with maxNatSize := resources.maxNatSize + 1 }
+  match psKernelC0VerifiedProviderAdmit
+      { first with resources := modifiedNumerals } (.unsupported "not available") with
+  | .error (.declinedUnsupported _) => pure ()
+  | _ => throw (IO.userError "modified numeral policy bypassed checked genesis")
   let cancelled : PsKernelResourcePolicy := { resources with cancelled := true }
   match psKernelC0VerifiedProviderBegin cancelled provider with
   | .error (.resourceExhausted .cancelled _) => pure ()

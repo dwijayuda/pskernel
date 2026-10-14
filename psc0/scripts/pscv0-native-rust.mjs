@@ -14,7 +14,8 @@ const names = new Map(manifest.symbols.map(s => [s.semantic, s.output]));
 const value = (v, type = 'nat') => typeof v === 'string'
   ? quotedSourceString(v) + '.to_owned()'
   : typeof v === 'bigint'
-  ? (type === 'int' ? 'int("' : 'nat("') + String(v) + '")' : String(v);
+  ? (type === 'int64' ? String(v) + 'i64' :
+    (type === 'int' ? 'int("' : 'nat("') + String(v) + '")') : String(v);
 const assertions = observations.map(({name, type, argTypes, args, expected}) => {
   assert(names.has(name), 'missing source export: ' + name);
   return '    assert_eq!(application::' + names.get(name) +

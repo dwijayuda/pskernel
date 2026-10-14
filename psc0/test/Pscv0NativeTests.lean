@@ -431,6 +431,12 @@ private def unitEmptyCallCases : IO Unit := do
 private def wordFixture : String :=
   "function wordOperations8(a: Nat, b: Nat): String := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y), UInt8.toNat(x - y), UInt8.toNat(x * y), UInt8.toNat(x / y), UInt8.toNat(x % y), UInt8.toNat(-x), UInt8.toNat(UInt8.complement(x)), UInt8.toNat(UInt8.land(x, y)), UInt8.toNat(UInt8.lor(x, y)), UInt8.toNat(UInt8.xor(x, y)), UInt8.toNat(UInt8.shiftLeft(x, y)), UInt8.toNat(UInt8.shiftRight(x, y))])) }\nfunction wordOperations16(a: Nat, b: Nat): String := { let x: UInt16 := UInt16.ofNat(a)\n let y: UInt16 := UInt16.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt16.toNat(x + y), UInt16.toNat(x - y), UInt16.toNat(x * y), UInt16.toNat(x / y), UInt16.toNat(x % y), UInt16.toNat(-x), UInt16.toNat(UInt16.complement(x)), UInt16.toNat(UInt16.land(x, y)), UInt16.toNat(UInt16.lor(x, y)), UInt16.toNat(UInt16.xor(x, y)), UInt16.toNat(UInt16.shiftLeft(x, y)), UInt16.toNat(UInt16.shiftRight(x, y))])) }\nfunction wordOperations32(a: Nat, b: Nat): String := { let x: UInt32 := UInt32.ofNat(a)\n let y: UInt32 := UInt32.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt32.toNat(x + y), UInt32.toNat(x - y), UInt32.toNat(x * y), UInt32.toNat(x / y), UInt32.toNat(x % y), UInt32.toNat(-x), UInt32.toNat(UInt32.complement(x)), UInt32.toNat(UInt32.land(x, y)), UInt32.toNat(UInt32.lor(x, y)), UInt32.toNat(UInt32.xor(x, y)), UInt32.toNat(UInt32.shiftLeft(x, y)), UInt32.toNat(UInt32.shiftRight(x, y))])) }\nfunction wordOperations64(a: Nat, b: Nat): String := { let x: UInt64 := UInt64.ofNat(a)\n let y: UInt64 := UInt64.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt64.toNat(x + y), UInt64.toNat(x - y), UInt64.toNat(x * y), UInt64.toNat(x / y), UInt64.toNat(x % y), UInt64.toNat(-x), UInt64.toNat(UInt64.complement(x)), UInt64.toNat(UInt64.land(x, y)), UInt64.toNat(UInt64.lor(x, y)), UInt64.toNat(UInt64.xor(x, y)), UInt64.toNat(UInt64.shiftLeft(x, y)), UInt64.toNat(UInt64.shiftRight(x, y))])) }\nfunction wordApply(operation: UInt64 -> UInt64 -> UInt64, left: UInt64, right: UInt64): Nat := UInt64.toNat(operation(left)(right))\nconst wordHigherOrder: Nat := wordApply(UInt64.shiftLeft, (3 : UInt64), (65 : UInt64))\nfunction wordGeneric{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\nconst wordGenericWrap: Nat := UInt8.toNat(wordGeneric((255 : UInt8), (2 : UInt8)))\ntheorem wordModel: UInt8.toNat(UInt8.add((255 : UInt8), (2 : UInt8))) = 1 := by { rfl }\n"
 
+-- Shared signed source family: every operation enters ordinary source
+-- elaboration, official kernel checking and typed target-neutral erasure.
+-- The native independent oracle below checks real pinned Lean 4.35.0 values.
+private def signedFixture : String :=
+  "function signed8Add(a: Nat, b: Nat): Int8 := Int8.add(Int8.ofNat(a), Int8.ofNat(b))\nfunction signed8Div(a: Nat, b: Nat): Int8 := Int8.div(Int8.ofNat(a), Int8.ofNat(b))\nfunction signed8Mod(a: Nat, b: Nat): Int8 := Int8.mod(Int8.ofNat(a), Int8.ofNat(b))\nfunction signed8Neg(a: Nat): Int8 := Int8.neg(Int8.ofNat(a))\nfunction signed8Complement(a: Nat): Int8 := Int8.complement(Int8.ofNat(a))\nfunction signed8Mul(a: Nat, b: Nat): Int8 := Int8.mul(Int8.ofNat(a), Int8.ofNat(b))\nfunction signed16Sub(a: Nat, b: Nat): Int16 := Int16.sub(Int16.ofNat(a), Int16.ofNat(b))\nfunction signed16Mul(a: Nat, b: Nat): Int16 := Int16.mul(Int16.ofNat(a), Int16.ofNat(b))\nfunction signed16Add(a: Nat, b: Nat): Int16 := Int16.add(Int16.ofNat(a), Int16.ofNat(b))\nfunction signed32Div(a: Nat, b: Nat): Int32 := Int32.div(Int32.ofNat(a), Int32.ofNat(b))\nfunction signed32Mod(a: Nat, b: Nat): Int32 := Int32.mod(Int32.ofNat(a), Int32.ofNat(b))\nfunction signed32Xor(a: Nat, b: Nat): Int32 := Int32.xor(Int32.ofNat(a), Int32.ofNat(b))\nfunction signed64Add(a: Nat, b: Nat): Int64 := Int64.add(Int64.ofNat(a), Int64.ofNat(b))\nfunction signed64Div(a: Nat, b: Nat): Int64 := Int64.div(Int64.ofNat(a), Int64.ofNat(b))\nfunction signed64Mod(a: Nat, b: Nat): Int64 := Int64.mod(Int64.ofNat(a), Int64.ofNat(b))\nfunction signed64Complement(a: Nat): Int64 := Int64.complement(Int64.ofNat(a))\nfunction signed64Mul(a: Nat, b: Nat): Int64 := Int64.mul(Int64.ofNat(a), Int64.ofNat(b))\n"
+
 private def unsignedFixture : String :=
   "function unsigned8(value: Nat): Nat := UInt8.toNat(UInt8.ofNat(value))\nfunction unsigned16(value: Nat): Nat := UInt16.toNat(UInt16.ofNat(value))\nfunction unsigned32(value: Nat): Nat := UInt32.toNat(UInt32.ofNat(value))\nfunction unsigned64(value: Nat): Nat := UInt64.toNat(UInt64.ofNat(value))\nconst unsignedLiteral: Nat := UInt64.toNat((18446744073709551619 : UInt64))\nfunction unsignedIdentity{A: Type}(value: A): A := value\nfunction unsignedGeneric(value: Nat): Nat := UInt64.toNat(unsignedIdentity(UInt64.ofNat(value)))\nfunction unsignedViaBits(value: Nat): Nat := BitVec.toNat(UInt32.toBitVec(UInt32.ofNat(value)))\nfunction unsignedViaFin(value: Nat): Nat := Fin.val(UInt16.toFin(UInt16.ofNat(value)))\nfunction unsignedRebuild(value: Nat): Nat := UInt8.toNat(UInt8.ofBitVec(UInt8.toBitVec(UInt8.ofNat(value))))\nfunction unsignedMatch(value: Nat): Nat := match UInt64.ofNat(value) with { | UInt64.ofBitVec bits => BitVec.toNat(bits) }\nfunction unsignedUse(convert: Nat -> UInt64, value: Nat): Nat := UInt64.toNat(convert(value))\nfunction unsignedHigher(value: Nat): Nat := unsignedUse(UInt64.ofNat, value)\nfunction bitvecConvert(width: Nat, value: Nat): Nat := BitVec.toNat(BitVec.ofNat(width, value))\nfunction naturalPower(base: Nat, exponent: Nat): Nat := Nat.pow(base, exponent)\ntheorem unsignedBound(value: UInt64): Nat.lt(UInt64.toNat(value), UInt64.size) := Fin.isLt(UInt64.toFin(value))\n"
 
@@ -453,7 +459,7 @@ private def derivingEqualityFixture : String :=
   "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nfunction derivedExplicitDecision(a: Nat, b: Nat): Bool := Decidable.decide(self := decEq(a, b))\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
 
 private def application : String :=
-  productUniverseFixture ++ hashFixture ++ wordFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -2495,6 +2501,57 @@ private def transparencyBoundaries : IO Unit := do
     throw (IO.userError "reducibility missing from frozen semantic payload")
   IO.println "PSCV0_TRANSPARENCY: PASS source/imported abbreviations, local evidence, rigid refusal and metadata drift"
 
+-- The expected results are fixed by the pinned official Lean 4.35.0
+-- SInt/Basic logical implementations, NOT inferred from generated targets.
+-- Compare exactly the same input vectors as JS/TS/Rust observations.
+private def signedNativeOracle : IO Unit := do
+  let checks : List (String × Int × Int) := [
+    ("signed8Add(127,1)", Int8.toInt (Int8.add (Int8.ofNat 127) (Int8.ofNat 1)), -128),
+    ("signed8Add(255,2)", Int8.toInt (Int8.add (Int8.ofNat 255) (Int8.ofNat 2)), 1),
+    ("signed8Div(128,255)", Int8.toInt (Int8.div (Int8.ofNat 128) (Int8.ofNat 255)), -128),
+    ("signed8Div(128,0)", Int8.toInt (Int8.div (Int8.ofNat 128) (Int8.ofNat 0)), 0),
+    ("signed8Mod(128,255)", Int8.toInt (Int8.mod (Int8.ofNat 128) (Int8.ofNat 255)), 0),
+    ("signed8Mod(128,0)", Int8.toInt (Int8.mod (Int8.ofNat 128) (Int8.ofNat 0)), -128),
+    ("signed8Mod(251,2)", Int8.toInt (Int8.mod (Int8.ofNat 251) (Int8.ofNat 2)), -1),
+    ("signed8Neg(128)", Int8.toInt (Int8.neg (Int8.ofNat 128)), -128),
+    ("signed8Complement(0)", Int8.toInt (Int8.complement (Int8.ofNat 0)), -1),
+    ("signed8Mul(127,127)", Int8.toInt (Int8.mul (Int8.ofNat 127) (Int8.ofNat 127)), 1),
+    ("signed16Sub(32768,1)", Int16.toInt (Int16.sub (Int16.ofNat 32768) (Int16.ofNat 1)), 32767),
+    ("signed16Mul(32767,2)", Int16.toInt (Int16.mul (Int16.ofNat 32767) (Int16.ofNat 2)), -2),
+    ("signed16Add(65535,2)", Int16.toInt (Int16.add (Int16.ofNat 65535) (Int16.ofNat 2)), 1),
+    ("signed32Div(2147483648,4294967295)", Int32.toInt (Int32.div (Int32.ofNat 2147483648) (Int32.ofNat 4294967295)), -2147483648),
+    ("signed32Div(2147483648,0)", Int32.toInt (Int32.div (Int32.ofNat 2147483648) (Int32.ofNat 0)), 0),
+    ("signed32Mod(2147483648,0)", Int32.toInt (Int32.mod (Int32.ofNat 2147483648) (Int32.ofNat 0)), -2147483648),
+    ("signed32Xor(2147483648,4294967295)", Int32.toInt (Int32.xor (Int32.ofNat 2147483648) (Int32.ofNat 4294967295)), 2147483647),
+    ("signed64Add(9223372036854775807,1)", Int64.toInt (Int64.add (Int64.ofNat 9223372036854775807) (Int64.ofNat 1)), -9223372036854775808),
+    ("signed64Div(9223372036854775808,18446744073709551615)", Int64.toInt (Int64.div (Int64.ofNat 9223372036854775808) (Int64.ofNat 18446744073709551615)), -9223372036854775808),
+    ("signed64Mod(9223372036854775808,0)", Int64.toInt (Int64.mod (Int64.ofNat 9223372036854775808) (Int64.ofNat 0)), -9223372036854775808),
+    ("signed64Complement(0)", Int64.toInt (Int64.complement (Int64.ofNat 0)), -1),
+    ("signed64Mul(9223372036854775807,2)", Int64.toInt (Int64.mul (Int64.ofNat 9223372036854775807) (Int64.ofNat 2)), -2)]
+  for (name, observed, expected) in checks do
+    unless observed == expected do
+      throw (IO.userError ("PSCV0-SIGNED-ORACLE: " ++ name ++
+        ": expected " ++ toString expected ++ ", actual " ++ toString observed))
+  -- Negative IR cases must refuse unqualified widths, family confusion and
+  -- noncanonical signed literals before any backend is invoked.
+  match psIrCheckIntrinsicSignature (.signedOfNat .int8) [] with
+  | .ok _ => pure ()
+  | .error _ => throw (IO.userError "PSCV0-SIGNED-IR: qualified Int8 refused")
+  match psIrCheckIntrinsicSignature (.signedOfNat .uint8) [] with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: unsigned signedOfNat accepted")
+  match psIrCheckIntrinsicSignature (.machineIntBinary .isize .add) [] with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: target-sized word accepted without profile")
+  match psIrCheckLiteralType (.machineInteger .int8 (-129)) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: out-of-range negative literal accepted")
+  match psIrCheckLiteralType (.machineInteger .int8 128) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: out-of-range positive literal accepted")
+  IO.println ("PSCV0_SIGNED_NATIVE_ORACLE: PASS " ++ toString checks.length ++
+    " pinned SInt values and five strict typed IR checks")
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
@@ -2503,6 +2560,7 @@ def main : IO Unit := do
   highUniverseHashableCases
   stringJoinIntercalateCases
   unsignedOperatorSourceCases
+  signedNativeOracle
   hAddPolymorphicCases
   unitEmptyCallCases
   semanticCases

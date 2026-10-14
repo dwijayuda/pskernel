@@ -591,3 +591,17 @@ backend parity or a completed M2+A exit; Linux integration and differential
 native-oracle checks remain mandatory. Primary pinned sources:
 `Init/Data/SInt/Basic.lean`, `Init/Data/BitVec/Basic.lean`,
 `src/include/lean/lean.h`, `tests/elab/test_extern_int.lean`.
+
+## Signed native oracle and cross-target regression slice
+
+The selected checked Int8/Int16/Int32/Int64 BitVec operations are exercised
+by one source fixture that is independently compiled to JS, strict TS and
+Rust. Twenty-two signed value observations cover wrapping overflow, unsigned
+source bit input, signed /0 and %0, min/-1, negative remainder, negation of
+minValue, complement and bitwise operations. A native Lean 4.35.0 oracle
+runs these same numerical cases using the original pinned Int8/16/32/64
+methods and checks exact expected signed results. Separate IR negative
+gates refuse an unsigned `signedOfNat`, platform-width operations without
+a profile, and signed literals outside the canonical range. This is
+regression qualification, not a theorem of compiler-wide semantic preservation;
+Wasm GC and component transport need their own execution evidence.

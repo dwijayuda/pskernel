@@ -157,8 +157,8 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          .lake/build/bin/pscv0_native --export-float-tobits-candidate ../dist/pscv0-native/StandardFloatToBitsCandidate.lean | tee ../dist/pscv0-native/float-tobits-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
-      - name: Kernel-review four-width signed operation closure
+          .lake/build/bin/pscv0_native --export-float-tobits-candidate ../dist/pscv0-native/StandardFloatToBitsCandidate.lean | tee ../dist/pscv0-native/float-tobits-candidate.log
+      - name: Kernel-review pure signed BitVec arithmetic closure
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail

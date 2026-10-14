@@ -630,10 +630,15 @@ def exportFloatToBitsCandidate (output : System.FilePath) : IO Unit := do
 -- Lean's kernel checked their original logical Core definitions.
 def exportSignedOperationsCandidate (output : System.FilePath) : IO Unit := do
   let owners := ["Int8", "Int16", "Int32", "Int64"]
-  let methods := ["ofNat", "ofInt", "toInt", "toBitVec", "ofBitVec",
+  -- Faithful logical dependency cut: native Int.toInt/ofInt and signed
+  -- shifts/comparisons reach Int lemma proofs whose source representations
+  -- differ from the currently checked PSCV0 Int arithmetic model. These
+  -- cannot be replayed by mere signature matching. Select whole pure BitVec
+  -- operation families first; re-enable the other roots after aligning the
+  -- underlying Int and proof dependencies, not via axiom substitution.
+  let methods := ["ofNat", "toBitVec", "ofBitVec",
                   "add", "sub", "mul", "div", "mod", "neg", "complement",
-                  "land", "lor", "xor", "shiftLeft", "shiftRight",
-                  "lt", "le", "instOfNat"]
+                  "land", "lor", "xor"]
   let roots := owners.flatMap fun owner =>
     methods.map (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method)
   let existing := psSelfHostProdPreludeEnvironment.declarations

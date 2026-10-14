@@ -95,7 +95,21 @@ private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
     -- within the IO admission scope, rather than being floated outside it.
     let start ← IO.getNumHeartbeats
     let heartbeatDeadline : USize := (start + 2000000).toUSize
-    return check prelude admissions heartbeatDeadline
+    -- Pattern matching on the pure result forces the kernel C++ call BEFORE
+    -- sampling the heartbeat counter. No source is accepted by this audit.
+    match check prelude admissions heartbeatDeadline with
+    | .ok value =>
+      let finish ← IO.getNumHeartbeats
+      IO.println ("PSCV0_KERNEL_BUDGET: accepted before=" ++ toString start ++
+        " after=" ++ toString finish ++ " deadline=" ++
+        toString heartbeatDeadline.toNat)
+      return .ok value
+    | .error message =>
+      let finish ← IO.getNumHeartbeats
+      IO.println ("PSCV0_KERNEL_BUDGET: rejected before=" ++ toString start ++
+        " after=" ++ toString finish ++ " deadline=" ++
+        toString heartbeatDeadline.toNat)
+      return .error message
   finally
     IO.setNumHeartbeats previous
 

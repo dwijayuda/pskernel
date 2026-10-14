@@ -67,9 +67,7 @@ def psKernelC0VerifiedProviderRequest
   | .ordinaryInductive info => .ok (.ordinaryInductive info)
   | .mutualInductive info => .ok (.mutualInductive info)
   | .nestedInductive info => .ok (.nestedInductive info)
-  | .mutualDefinitions _ =>
-      .error (.declinedUnsupported
-        "verified provider mutual definitions require exact atomic admission lineage")
+  | .mutualDefinitions values => .ok (.mutualDefinitions values)
   | .unsupported feature => .error (.declinedUnsupported feature)
 
 /-- Source checking, signed foundation permission and complete-state lineage

@@ -4,6 +4,14 @@
 **Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
 **Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
 
+## Latest qualified E.4W milestone — independent short checked-application children
+
+Exact-commit executable [621d5d7f](https://github.com/dwijayuda/pskernel/commit/621d5d7f5a9c6a6c00c49ccf00e14f2fc4a31ba5) passed the **full** pinned Lean 4.35 [native CI 38568180752](https://github.com/dwijayuda/pskernel/actions/runs/38568180752): 48 successful steps, zero failures, including the new Lean source-refinement proof, native regression, all mandatory fixtures and independent original-C0 comparison.
+
+The new QualifiedIndependentCheckedApp.lean checks *both* subterms of a short (<16-argument) checked application using existing independently qualified scalar/local/constant/metadata inference, never invoking the historical recursive inference worker on that successful branch. It accepts the optimized path only for a syntactic Pi function type and an exactly equal argument/domain type. The native theorem certifies the exact complete source result and checker state for arbitrary source contexts, state, fuel and callbacks, including the special short-root checker path; all unqualified cases fall back to original authoritative checking and diagnostics. It is selected in the real trusted/audited checked provider and exercised by mandatory C0IndependentCheckedAppRegression.lean, including provider checked publication and malformed/resource denials.
+
+This is **not a C/D/E phase exit** or full recursive independence. General higher-order inference, independent WHNF/DefEq and declaration admission, full Init/Std/Mathlib (record 86,383 gap), full-workload performance, and soundness/consistency remain OPEN. Continue C → D → E → B → F → G. Prioritize a single compositional fuel-/state-/context-accounted checker over proliferating source-sharing head wrappers. Never promote candidate evaluations or unaudited caches, and never waive resource, native/official negative or original-C0 differential gates.
+
 ## Decision and bounded evidence freeze
 
 Phase B's **exhaustive compatibility exit gate is deferred, not waived**. Preserve all official identical-byte accepted/rejected fixtures, real Init export digest, strict unsupported/rejected/resource distinctions and the independently verified accepted 79,416-record prefix. Preserve the known false rejection at record 86,383 (`Std.PRange.UpwardEnumerable.succMany?_add`) as an open regression. The native [CI 38395502669](https://github.com/dwijayuda/pskernel/actions/runs/38395502669) and real [CI 38395528602](https://github.com/dwijayuda/pskernel/actions/runs/38395528602) both passed on their explicit bounded gates, **not full Init acceptance**.

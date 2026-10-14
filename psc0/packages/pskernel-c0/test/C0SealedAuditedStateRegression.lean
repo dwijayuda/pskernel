@@ -57,6 +57,20 @@ def main : IO Unit := do
   | .ok _ =>
       throw (IO.userError "sealed audited publication accepted loose bound root")
 
+  -- Publication must be atomic even when an earlier selected root
+  -- checks successfully and a later staged root is malformed.
+  let some firstMixed := psKernelC0SealedAuditedStage genesis sort0
+    | throw (IO.userError "sealed mixed-publication first stage failed")
+  let some mixed := psKernelC0SealedAuditedStage firstMixed (.bvar 0)
+    | throw (IO.userError "sealed mixed-publication second stage failed")
+  match psKernelC0SealedAuditedCommitChecked 4096 mixed with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "sealed audited publication partially accepted roots")
+  if psKernelEnvironmentSize
+      genesis.audited.trusted.certified.raw.checker.context.environment != 0 then
+    throw (IO.userError "failed mixed publication mutated checked genesis")
+
   -- Approving a signature only permits source admission; it never
   -- substitutes for the original checker or an exact lineage step.
   let signedName : PsKernelName := .str .anonymous "ExplicitSealedAxiom"

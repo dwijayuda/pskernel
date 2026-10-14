@@ -445,6 +445,41 @@ def main : IO Unit := do
   | .ok _ =>
       throw (IO.userError "certified direct WHNF bypassed zero-fuel rejection")
 
+  -- The unified accepting WHNF route uses the source-free path for
+  -- irreducible heads, even at zero candidate quota, and carries the
+  -- *exact* source reduction equation for every successful result.
+  for head in irreducibleHeads do
+    if !psKernelC0WhnfIrreducibleHead head then
+      throw (IO.userError "direct WHNF form was not recognized")
+    let owned ← match psKernelC0CertifiedWorkWhnfQualified
+        4096 0 defeqWork head with
+      | .ok receipt => pure receipt
+      | .error e =>
+          throw (IO.userError ("qualified direct WHNF failed: " ++ e))
+    let _sourceEquality :
+        psKernelC0CertifiedWorkWhnf 4096 defeqWork head = .ok owned.val :=
+      owned.property
+    if !psKernelExprEqual owned.val.fst head then
+      throw (IO.userError "qualified direct WHNF altered source expression")
+  if psKernelC0WhnfIrreducibleHead betaExpr then
+    throw (IO.userError "context-dependent β application was wrongly direct")
+  let qualifiedBeta ← match psKernelC0CertifiedWorkWhnfQualified
+      4096 0 defeqWork betaExpr with
+    | .ok receipt => pure receipt
+    | .error e =>
+        throw (IO.userError ("qualified β source fallback failed: " ++ e))
+  let _betaSourceEquality :
+      psKernelC0CertifiedWorkWhnf 4096 defeqWork betaExpr =
+        .ok qualifiedBeta.val :=
+    qualifiedBeta.property
+  if !psKernelExprEqual qualifiedBeta.val.fst (.sort .zero) then
+    throw (IO.userError "qualified β fallback did not preserve source WHNF")
+  match psKernelC0CertifiedWorkWhnfQualified
+      0 32768 defeqWork (.sort .zero) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "qualified direct WHNF ignored source zero fuel")
+
   -- Admit only a source-checked definition. Admission must refresh the
   -- checker state while retaining the proof about the unchanged syntax.
   let defName := c0CertificateName "CertifiedDefinition"

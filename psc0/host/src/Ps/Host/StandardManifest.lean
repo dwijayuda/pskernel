@@ -146,6 +146,10 @@ def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
 def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
 
+-- Independently observed after all 27 Linux checks at 078ec135 (38653018583).
+def standardSurfaceManifestExpectedSHA256 : String :=
+  "sha256:0bc4bfaa0f9afb9e0c1c58d652c51db8732530cd1b50b9e8772cca90f5bac0cf"
+
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
   Lean.Json.mkObj [
@@ -188,6 +192,10 @@ def standardSurfaceManifestAudit (env : PsEnvironment) :
     throw "PSCV0-MANIFEST: deriving handler registry drift"
   if selectedSourceEffects.isEmpty || selectedElabEffects.isEmpty then
     throw "PSCV0-MANIFEST: empty selected effect policy"
+  let observed := standardSurfaceManifestSHA256 env
+  if observed != standardSurfaceManifestExpectedSHA256 then
+    throw ("PSCV0-MANIFEST: surface registry drift; expected " ++
+      standardSurfaceManifestExpectedSHA256 ++ " got " ++ observed)
 
 private def notationJson (entry : ManifestNotation) : Lean.Json :=
   Lean.Json.mkObj [

@@ -1,5 +1,41 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — signed < / ≤ / LT/LE and native deciders (qualification pending)
+
+Pinned Lean 4.35.0 `SInt/Basic.lean` defines each fixed-width
+`IntN.lt/le` using `BitVec.slt/sle`. `BitVec.slt/sle` compare the
+two's-complement mathematical values. The native portable
+`StandardSignedOrder.lean` implements their exact finite-width ordering
+using sign-biased canonical Nat carriers and existing kernel-checked
+`Nat.lt/le/decLt/decLe`. It adds per-width checked `lt/le` propositions,
+`decLt/decLe` decisions and ordinary `LT/LE` dictionaries, with
+explicit class and Decidable registration. No new axiom, runtime
+primitive, parser-specific dispatch, pskernel-core, self-hosting or C5.
+The 16 differential native Lean and shared-target observations cover
+minimum/maximum, equal, negative/positive and reversed-order boundaries.
+
+**Candidate only.** Confirm the exact checked native signatures, strict
+independently observed Standard fingerprints, source/IR erasure and
+full JS/TS/Rust/Wasm GC/Wasmtime CI before promoting this scope.
+Native class relations and actual source operation semantics remain
+subject to qualification; backend preservation remains bounded evidence.
+F1–F4 Float, portable size, general Phase A manifest, other M2 work
+remain incomplete.
+
+## 14 October — signed abs stage qualified
+
+Commit `f6d70dfbb256c1ca19a402eb75c8d28b9d568a74` passed
+[Linux CI 38578021600](https://github.com/dwijayuda/pskernel/actions/runs/38578021600).
+Qualified Standard: 1,703 declarations, 23 classes, 189 instances;
+519 shared runtime observations in JS/strict TS/Rust, native 70 SInt
+values plus seven typed IR refusals, Wasm GC and Wasmtime component,
+all ordinary Linux steps. Measured FNV
+`fnv1a64:8243444543599524808`, SHA-256
+`sha256:bcd5911445946ad2960d1ac35861dbb009e577985e51679db83ec82c940361b3`.
+The four checked `IntN.abs` definitions preserve minimum signed
+wraparound; this is bounded, not whole-compiler proof evidence.
+
+
 ## 14 October — checked signed fixed-width abs candidate (qualification pending)
 
 Pinned Lean 4.35.0 `BitVec.abs` is sign-conditional fixed-width

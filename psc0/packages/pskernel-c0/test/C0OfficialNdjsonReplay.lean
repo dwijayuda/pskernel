@@ -1005,7 +1005,14 @@ def c0ExportVerdictFromFileTrace
                         IO.println ("C0_REAL_EXPORT_INTERNAL_REASON=" ++ message)
                     | .ok _ => pure ()
           return (verdict, consumed)
-      | .ok next => state := next
+      | .ok next =>
+          state := next
+          -- Diagnostic-only streaming progress. The complete source
+          -- environment and every checking decision remain unchanged.
+          -- Report a bounded cadence even if a multi-million-record
+          -- real corpus later times out or exhausts host resources.
+          if consumed % 50000 == 0 then
+            IO.println s!"C0_REAL_EXPORT_PROGRESS consumed_records={consumed} checked_declarations={state.checkedCount}"
   return (c0ExportFinish state, consumed)
 
 def c0ExportVerdictFromFile

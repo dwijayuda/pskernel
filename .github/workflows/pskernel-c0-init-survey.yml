@@ -5,6 +5,7 @@ on:
       - perf/pskernel-c0-v7-rust-20261012
     paths:
       - '.github/workflows/pskernel-c0-init-survey.yml'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/**'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Inference/**'
   workflow_dispatch:
@@ -383,16 +384,36 @@ jobs:
           ) | tee "$RUNNER_TEMP/next-c0.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=150000 fuel=4096" "$RUNNER_TEMP/next-c0.txt"
           echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=150000"
-      - name: Probe full official Init with compiled C0 checked replay
+      - name: Expand exact real Init acceptance to 300000 source records
         shell: bash
         run: |
           set -euo pipefail
-          if (cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" && timeout 900s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-4.35.0.ndjson" 4096) > "$RUNNER_TEMP/c0-full-init-native.txt" 2>&1; then
+          head -n 300000 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-next-300000.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/Init-next-300000.ndjson")" -eq 300000
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/Init-next-300000.ndjson") > "$RUNNER_TEMP/next-300000-official.txt" 2>&1
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/next-300000-official.txt"
+          echo "C0_NEXT_INIT_OFFICIAL verdict=accepted records=300000"
+          (
+            cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+            timeout 300s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-next-300000.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/next-300000-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=300000 fuel=4096" "$RUNNER_TEMP/next-300000-c0.txt"
+          echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=300000"
+      - name: Probe full official Init with bounded compiled C0 progress
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This is a diagnostic probe, not a corpus acceptance gate.
+          # Preserve streamed record/declaration counts if the entire
+          # 6.45M-record corpus exceeds this host's budget.
+          if (cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" &&
+                timeout 420s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-4.35.0.ndjson" 4096) > "$RUNNER_TEMP/c0-full-init-native.txt" 2>&1; then
             cat "$RUNNER_TEMP/c0-full-init-native.txt"
             grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/c0-full-init-native.txt"
           else
             echo "C0_REAL_INIT_FULL_NATIVE verdict=inconclusive_host_or_timeout"
-            tail -n 40 "$RUNNER_TEMP/c0-full-init-native.txt" || true
+            tail -n 80 "$RUNNER_TEMP/c0-full-init-native.txt" || true
           fi
       - uses: actions/upload-artifact@v4
         if: always()
@@ -414,6 +435,9 @@ jobs:
             ${{ runner.temp }}/Init-next-boundary.ndjson
             ${{ runner.temp }}/next-official.txt
             ${{ runner.temp }}/next-c0.txt
+            ${{ runner.temp }}/Init-next-300000.ndjson
+            ${{ runner.temp }}/next-300000-official.txt
+            ${{ runner.temp }}/next-300000-c0.txt
             ${{ runner.temp }}/c0-full-init-native.txt
           if-no-files-found: warn
           retention-days: 14

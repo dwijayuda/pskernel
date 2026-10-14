@@ -503,6 +503,53 @@ theorem psKernelC0WhnfReceipt_sourceCheck
   rw [psKernelC0WhnfReceiptValue_source receipt]
   exact receipt.sourceCheck
 
+/-- A checked nontrivial WHNF candidate is permitted to return only a
+    result carrying the source evaluator's exact successful equation.
+    Source errors and candidate declines remain separate conditions. -/
+def psKernelC0CertifiedWorkWhnfRefinedOwned
+    (fuel quota : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0SourceExactWhnfOutput fuel work expr) := do
+  let receipt ← psKernelC0CertifiedWorkRefineWhnf fuel quota work expr
+  return ⟨(psKernelC0WhnfReceiptValue receipt, receipt.sourceWork),
+    psKernelC0WhnfReceipt_sourceCheck receipt⟩
+
+/-- Direct immutable WHNF forms can be independently decided. All other
+    forms stay on the source-first, exact-refinement observation path.
+    In both cases the *return type* forbids a successful result without
+    an exact source-WHNF proof for this environment and this fuel.
+    This is a qualified work API, NOT a complete independent type checker. -/
+def psKernelC0WhnfIrreducibleHead (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | .bvar _ => true
+  | .sort _ => true
+  | .mvar _ => true
+  | .forallE _ _ _ _ => true
+  | .lit _ => true
+  | _ => false
+
+def psKernelC0CertifiedWorkWhnfQualified
+    (fuel quota : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0SourceExactWhnfOutput fuel work expr) :=
+  if psKernelC0WhnfIrreducibleHead expr then
+    psKernelC0CertifiedWorkWhnfCanonicalFastOwned fuel work expr
+  else
+    psKernelC0CertifiedWorkWhnfRefinedOwned fuel quota work expr
+
+/-- A drop-in, fully source-equivalent checked WHNF result. Unlike the
+    historical source-only entry, its five direct heads avoid the source
+    evaluator; other heads remain explicitly source qualified. -/
+def psKernelC0CertifiedWorkWhnfQualifiedValue
+    (fuel quota : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0CertifiedWork) := do
+  let receipt ← psKernelC0CertifiedWorkWhnfQualified fuel quota work expr
+  return receipt.val
+
 /-- Opt-in checked work entry. Only the exact-proved candidate value can
     replace source WHNF; a declined or mismatched candidate never rejects,
     authorizes a proof, or mutates the source-checked environment. -/

@@ -142,3 +142,127 @@ def psKernelC0VerifiedProviderDefEq
     | .ok result => pure result
     | .error reason => throw (psKernelErrorFromMessage reason)
   return (same, { second with verified := next })
+
+
+/-!
+Phase E.4F: complete the provider-facing verified operation family.
+
+Source-compatible full inference is an observation, not proof admission.
+Syntax staging never confers checked status. Only the final atomically
+source-checked publication has a dependent proof of the exact source
+decision, tied to the actual staged session and full trust manifest.
+-/\
+
+/-- Provider-level source type synthesis. The returned type is NOT a
+    validated proof or a declaration-admission certificate; callers must
+    use full Check or checked publication to establish term validity. -/
+def psKernelC0VerifiedProviderInfer
+    (session : PsKernelC0VerifiedProviderSession)
+    (expr : PsKernelExpr) :
+    Except PsKernelError (PsKernelExpr × PsKernelC0VerifiedProviderSession) := do
+  psKernelC0VerifiedProviderPreflight session
+  let (inferred, next) ← match psKernelC0VerifiedInfer
+      session.resources.fuel session.verified expr with
+    | .ok value => pure value
+    | .error message => throw (psKernelErrorFromMessage message)
+  return (inferred, { session with verified := next })
+
+/-- Explicit foundation policy changes are independently rechecked against
+    the ENTIRE source-admitted history; they never insert an assumption or
+    alter checker caches. Failed narrowing/widening has no successor. -/
+def psKernelC0VerifiedProviderChangePolicy
+    (session : PsKernelC0VerifiedProviderSession)
+    (axioms : List PsKernelAxiomInfo)
+    (capabilities : List PsKernelC0TrustCapability) :
+    Except PsKernelError PsKernelC0VerifiedProviderSession := do
+  psKernelC0VerifiedProviderPreflight session
+  let some next :=
+      psKernelC0VerifiedChangePolicy session.verified axioms capabilities
+    | throw (.declinedUnsupported
+        "foundation policy does not authorize the full checked source history")
+  return { session with verified := next }
+
+/-- Syntax-only staging, preserving actual genesis/state-lineage evidence.
+    It deliberately permits an ill-typed input at this point: checked root
+    publication will reject the entire batch if ANY staged root is invalid.
+    No root is emitted by this operation. -/
+def psKernelC0VerifiedProviderStage
+    (session : PsKernelC0VerifiedProviderSession)
+    (expr : PsKernelExpr) :
+    Except PsKernelError PsKernelC0VerifiedProviderSession := do
+  psKernelC0VerifiedProviderPreflight session
+  let some next := psKernelC0VerifiedStage session.verified expr
+    | throw (.internalError "certified syntax staging failed")
+  return { session with verified := next }
+
+/-- Stage one complete root selection in the immutable checked work.
+    A staging failure abandons the local successor; the original session
+    remains unchanged. Partial staging never constitutes publication. -/
+def psKernelC0VerifiedProviderStageRoots
+    (session : PsKernelC0VerifiedProviderSession)
+    (roots : List PsKernelExpr) :
+    Except PsKernelError PsKernelC0VerifiedProviderSession := do
+  let mut current := session
+  for root in roots do
+    current ← psKernelC0VerifiedProviderStage current root
+  return current
+
+/-- The kernel's existing all-or-nothing closed-root checking must accept
+    every staged root. The resulting dependent-typed receipt refers to the
+    EXACT source-checked operation on this session and fuel. -/
+def psKernelC0VerifiedProviderCommitChecked
+    (session : PsKernelC0VerifiedProviderSession) :
+    Except PsKernelError
+      (PsKernelC0SealedAuditedPublication
+        session.resources.fuel session.verified.sealed) := do
+  psKernelC0VerifiedProviderPreflight session
+  match psKernelC0VerifiedCommitChecked
+      session.resources.fuel session.verified with
+  | .ok publication => return publication
+  | .error message => throw (psKernelErrorFromMessage message)
+
+/-- One provider-publication receipt records BOTH exact selected-root
+    staging and exact source checking. A canonical syntax store, assumption
+    permission or WHNF observation alone cannot construct this result. -/
+structure PsKernelC0VerifiedProviderPublication
+    (before : PsKernelC0VerifiedProviderSession)
+    (roots : List PsKernelExpr) where
+  staged : PsKernelC0VerifiedProviderSession
+  exactStaging :
+    psKernelC0VerifiedProviderStageRoots before roots = .ok staged
+  checked : PsKernelC0SealedAuditedPublication
+    staged.resources.fuel staged.verified.sealed
+
+/-- Atomic provider publishing: no output at all if staging fails, any
+    selected root is open or ill typed, or resources/policy do not qualify.
+    The caller's immutable original work is never replaced on failure. -/
+def psKernelC0VerifiedProviderPublishRoots
+    (session : PsKernelC0VerifiedProviderSession)
+    (roots : List PsKernelExpr) :
+    Except PsKernelError (PsKernelC0VerifiedProviderPublication session roots) :=
+  match h : psKernelC0VerifiedProviderStageRoots session roots with
+  | .error reason => .error reason
+  | .ok staged =>
+      match psKernelC0VerifiedProviderCommitChecked staged with
+      | .error reason => .error reason
+      | .ok checked =>
+          .ok ⟨staged, h, checked⟩
+
+/-- Exact staged-root source provenance is part of the successful result. -/
+theorem psKernelC0VerifiedProviderPublicationStagingExact
+    {session : PsKernelC0VerifiedProviderSession}
+    {roots : List PsKernelExpr}
+    (result : PsKernelC0VerifiedProviderPublication session roots) :
+    psKernelC0VerifiedProviderStageRoots session roots = .ok result.staged :=
+  result.exactStaging
+
+/-- Exact source-checked publication is also part of the result, with
+    source closure, typing and universe validation enforced on EVERY root. -/
+theorem psKernelC0VerifiedProviderPublicationCheckExact
+    {session : PsKernelC0VerifiedProviderSession}
+    {roots : List PsKernelExpr}
+    (result : PsKernelC0VerifiedProviderPublication session roots) :
+    psKernelC0AuditedSourceCommitChecked
+      result.staged.resources.fuel result.staged.verified.sealed.audited =
+        .ok (result.checked.store, result.checked.roots) :=
+  psKernelC0SealedAuditedPublicationExact result.checked

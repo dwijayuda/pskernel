@@ -5,9 +5,12 @@ Matched native Lean benchmark: approved-source queries with exact
 environment-equality proof transport vs identical source queries followed
 by explicit whole-history permission re-audit.
 
-Both lanes use the same source WHNF operation, declaration history, input
-and policy. The timings are informational, not acceptance thresholds or a
-claim of full-kernel competitive performance.
+Both lanes use the same source-equivalent, Lean-proved direct-head WHNF
+selection, identical immutable checked declaration history, input and policy.
+The first lane carries proofs incrementally; the second explicitly re-audits
+the whole history after each query. Both still return the exact source WHNF
+judgment. Timings are informational, not acceptance thresholds, an isolated
+optimization speedup, or competitive whole-kernel benchmark evidence.
 -/
 
 def c0AuditPerfName (i : Nat) : PsKernelName :=

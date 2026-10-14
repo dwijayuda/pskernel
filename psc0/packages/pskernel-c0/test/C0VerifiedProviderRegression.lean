@@ -23,7 +23,11 @@ def main : IO Unit := do
 
   let name : PsKernelName := .str .anonymous "VerifiedProviderAxiom"
   let axiom : PsKernelAxiomInfo := {
-    base := { name := name, levelParams := [], type := .sort .zero }
+    base := {
+      name := name
+      levelParams := []
+      type := .sort .zero
+    }
     isUnsafe := false
   }
   match psKernelC0VerifiedProviderAdmit first (.axiomDecl axiom) with

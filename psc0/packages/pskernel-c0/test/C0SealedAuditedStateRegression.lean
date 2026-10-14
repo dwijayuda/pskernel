@@ -38,6 +38,25 @@ def main : IO Unit := do
     | throw (IO.userError "audited lineage staging failed")
   let _stageProof := psKernelC0SealedAuditedHasLineage staged
 
+  -- Only an exact, whole-source-check success can publish staged
+  -- syntax as a checked root. The proof binds the complete audited work.
+  let publication ← match psKernelC0SealedAuditedCommitChecked 4096 staged with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("sealed checked publication failed: " ++ e))
+  let _sourceReceipt := psKernelC0SealedAuditedPublicationExact publication
+  match publication.roots with
+  | [receipt] =>
+      let _rootProof := psKernelC0SourceCheckedRootExact receipt
+      if !psKernelExprEqual receipt.checkedType (.sort (.succ .zero)) then
+        throw (IO.userError "audited checked publication changed closed root type")
+  | _ => throw (IO.userError "sealed audited publication lost selected root")
+  let some invalidStaged := psKernelC0SealedAuditedStage genesis (.bvar 0)
+    | throw (IO.userError "negative untyped staging failed unexpectedly")
+  match psKernelC0SealedAuditedCommitChecked 4096 invalidStaged with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "sealed audited publication accepted loose bound root")
+
   -- Approving a signature only permits source admission; it never
   -- substitutes for the original checker or an exact lineage step.
   let signedName : PsKernelName := .str .anonymous "ExplicitSealedAxiom"

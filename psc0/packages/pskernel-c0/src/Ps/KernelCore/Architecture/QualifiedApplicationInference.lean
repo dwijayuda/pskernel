@@ -136,10 +136,23 @@ theorem psKernelC0AppCheckedRoot_source
       context state fn arg =
     psKernelCheckWithFuel fuel whnf defeq
       context state (.app fn arg) := by
-  unfold psKernelC0AppCheckedRootWithFuel psKernelCheckWithFuel
-  split
-  · rfl
-  · exact psKernelC0AppFull_source fuel none
+  change
+    (if psKernelExprGetAppNumArgs (.app fn arg) >= 16 then
+      psKernelC0CheckAppRecursiveResummarized fuel whnf defeq
+        context state (.app fn arg)
+    else
+      psKernelC0AppFullWithFuel fuel none
+        whnf defeq context state fn arg) =
+    (if psKernelExprGetAppNumArgs (.app fn arg) >= 16 then
+      psKernelC0CheckAppRecursiveResummarized fuel whnf defeq
+        context state (.app fn arg)
+    else
+      psKernelInferCoreWithFuel fuel whnf defeq
+        context state (.app fn arg) false)
+  by_cases h : psKernelExprGetAppNumArgs (.app fn arg) >= 16
+  · simp only [if_pos h]
+  · simp only [if_neg h]
+    exact psKernelC0AppFull_source fuel none
       whnf defeq context state fn arg
 
 /-- Exact source checking equation: successful short and long root

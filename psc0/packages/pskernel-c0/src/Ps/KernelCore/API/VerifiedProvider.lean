@@ -151,7 +151,7 @@ Source-compatible full inference is an observation, not proof admission.
 Syntax staging never confers checked status. Only the final atomically
 source-checked publication has a dependent proof of the exact source
 decision, tied to the actual staged session and full trust manifest.
--/\
+-/
 
 /-- Provider-level source type synthesis. The returned type is NOT a
     validated proof or a declaration-admission certificate; callers must

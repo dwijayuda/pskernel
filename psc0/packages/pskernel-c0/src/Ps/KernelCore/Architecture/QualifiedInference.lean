@@ -41,9 +41,14 @@ def psKernelC0ScalarInferWithFuel
           | none =>
               match psKernelCheckerContextEnterRecDepth context with
               | .error _ => none
-              | .ok _ =>
-                  let ty : PsKernelExpr := .sort (.succ level)
-                  some (ty, psKernelCacheInferResult state inferOnly expr ty)
+              | .ok nextContext =>
+                  if !inferOnly &&
+                      (psKernelFindUndefLevelParam
+                        level nextContext.levelParams).isSome then none
+                  else
+                    let ty : PsKernelExpr := .sort (.succ level)
+                    some (ty, psKernelCacheInferResult
+                      state inferOnly expr ty)
       | .lit literal =>
           match psKernelCheckerContextEnterRecDepth context with
           | .error _ => none
@@ -120,26 +125,35 @@ theorem psKernelC0ScalarInfer_source
                   simp only [psKernelC0ScalarInferWithFuel, depth] at h
                   split at h <;> cases h
               | ok nextContext =>
-                  let ty : PsKernelExpr := .sort (.succ level)
-                  have hresult :
-                      result = (ty, psKernelCacheInferResult state inferOnly
-                        expr ty) := by
-                    have hx : some (ty,
-                        psKernelCacheInferResult state inferOnly expr ty) =
-                          some result := by
-                      simpa [psKernelC0ScalarInferWithFuel, cached, depth,
-                        cache, expr, ty] using h
-                    exact (Option.some.inj hx).symm
-                  rw [hresult]
-                  have hcache :
-                      psKernelExprMapGetWithKnownHash
-                        (if inferOnly then state.inferOnly else state.checkedInfer)
-                        (.sort level) none = none := by
-                    change psKernelExprMapGet cache expr = none
-                    exact cached
-                  simpa [psKernelInferCoreWithFuelUsing,
-                    psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, hcache, depth, ty, expr]
+                  cases invalid :
+                      (!inferOnly &&
+                        (psKernelFindUndefLevelParam
+                          level nextContext.levelParams).isSome) with
+                  | true =>
+                      simp [psKernelC0ScalarInferWithFuel,
+                        depth, invalid] at h
+                  | false =>
+                      let ty : PsKernelExpr := .sort (.succ level)
+                      have hresult :
+                          result = (ty, psKernelCacheInferResult
+                            state inferOnly expr ty) := by
+                        have hx : some (ty,
+                            psKernelCacheInferResult state inferOnly expr ty) =
+                              some result := by
+                          simpa [psKernelC0ScalarInferWithFuel, cached, depth,
+                            invalid, cache, expr, ty] using h
+                        exact (Option.some.inj hx).symm
+                      rw [hresult]
+                      have hcache :
+                          psKernelExprMapGetWithKnownHash
+                            (if inferOnly then state.inferOnly else state.checkedInfer)
+                            (.sort level) none = none := by
+                        change psKernelExprMapGet cache expr = none
+                        exact cached
+                      simpa [psKernelInferCoreWithFuelUsing,
+                        psKernelInferCoreWithFuelUsingSourceFrames,
+                        psKernelInferCacheEligible, hcache, depth, invalid,
+                        ty, expr]
       | lit literal =>
           cases depth : psKernelCheckerContextEnterRecDepth context with
           | error reason =>

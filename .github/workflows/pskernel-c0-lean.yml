@@ -20,6 +20,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0VerifiedProviderRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0VerifiedProviderPublicationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ReflexiveDefEqRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SortDefEqRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkPerfMicrobench.lean'
@@ -134,6 +135,9 @@ jobs:
       - name: C0 independently source-proved reflexive DefEq and provider typing
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ReflexiveDefEqRegression.lean
+      - name: C0 independently proved complete Sort universe DefEq and cache semantics
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0SortDefEqRegression.lean
       - name: C0 typed K/eta on source-admitted inductive declarations
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0TypedEliminationRegression.lean

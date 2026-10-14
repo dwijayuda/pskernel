@@ -188,7 +188,7 @@ def psKernelC0TrustedSourceDefEq
     (work : PsKernelC0TrustedSourceWork)
     (left right : PsKernelExpr) :
     Except String (Bool × PsKernelC0TrustedSourceWork) :=
-  match psKernelC0CertifiedWorkDefEqCanonicalFastOwned
+  match psKernelC0CertifiedWorkDefEqQualifiedOwned
       fuel work.certified left right with
   | .error reason => .error reason
   | .ok receipt =>

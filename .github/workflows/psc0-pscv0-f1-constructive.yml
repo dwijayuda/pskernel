@@ -64,7 +64,7 @@ jobs:
           set -euo pipefail
           lake build pscv0_native
           mkdir -p ../dist/pscv0-f1-constructive
-          .lake/build/bin/pscv0_native --export-float-constructive-pow-candidate ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          lake env .lake/build/bin/pscv0_native --export-float-constructive-pow-candidate ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
           sha256sum ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/source.sha256
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()

@@ -80,6 +80,14 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
         PsKernelLean.kernelExceptionContext error)
   pure ()
 
+-- Concrete IO/Except error types isolate the pure kernel admission from the
+-- surrounding ExceptT diagnostic transformer. The heartbeat reset must occur
+-- inside this real IO boundary, not in a lazy pure declaration term.
+private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
+    (admissions : String) : IO (Except String Unit) :=
+  PsKernelLean.withFreshKernelHeartbeatScope (ε := String) (α := Unit)
+    (fun _ => check prelude admissions)
+
 private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do
   let t0 ← IO.monoMsNow
@@ -116,8 +124,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
   -- heartbeat counter. The independently checked source must not inherit
   -- the unlimited, proof-heavy Standard replay's cumulative count.
   -- Maintain the SAME 2m heartbeat / 20k recursion limit in `check`.
-  let checked ← PsKernelLean.withFreshKernelHeartbeatScope (fun _ =>
-    check prelude output.admissions)
+  let checked ← checkWithScopedHeartbeats prelude output.admissions
   let _ ← fromResult "kernel" checked
   let t4 ← IO.monoMsNow
   let timings : Timings := if project.isSome then {

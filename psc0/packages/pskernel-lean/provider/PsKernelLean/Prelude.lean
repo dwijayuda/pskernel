@@ -35,6 +35,39 @@ def kernelExceptionContext : Lean.Kernel.Exception → String
   | .declTypeMismatch _ _ type => "\ngiven type: " ++ type.dbgToString
   | _ => ""
 
+-- Lean 4.35.0 src/Lean/Environment.lean:getMaxHeight and
+-- src/Lean/Declaration.lean:ReducibilityHints:
+-- Regular definitions are assigned height = 1 + the greatest regular height
+-- among the constants referenced by their *body*. Kernel lazy delta
+-- reduction uses these heights to choose which side to unfold first.
+--
+-- The standalone provider has a synchronous Kernel.Environment (not the
+-- elaborator's asynchronous environment) and no structural recursion height
+-- overrides; this is the pinned getMaxHeight rule for this closure.
+-- Abbrev/opaque hints, when explicitly present, remain untouched. These hints
+-- affect checking performance, NEVER validity or proof admission.
+def psKernelDefinitionHeight
+    (env : Lean.Kernel.Environment) (value : Lean.Expr) : UInt32 :=
+  let maximum := value.foldConsts (0 : UInt32) fun name greatest =>
+    match env.find? name with
+    | some (.defnInfo info) =>
+      match info.hints with
+      | .regular height => if height > greatest then height else greatest
+      | _ => greatest
+    | _ => greatest
+  maximum + 1
+
+def psKernelWithDefinitionHeight
+    (env : Lean.Kernel.Environment) (declaration : Lean.Declaration) :
+    Lean.Declaration :=
+  match declaration with
+  | .defnDecl info =>
+    match info.hints with
+    | .regular _ =>
+      .defnDecl { info with hints := .regular (psKernelDefinitionHeight env info.value) }
+    | _ => declaration
+  | _ => declaration
+
 def findConstructorInfo : List PsDeclaration -> PsName -> Option PsConstructorInfo
   | [], _ => none
   | declaration :: rest, name =>
@@ -182,6 +215,7 @@ def tryPreludeDeclaration
         if ← quotientGroupPresent env then
           validateQuotientDescriptor env declaration
           return .admitted env
+      let converted := psKernelWithDefinitionHeight env converted
       match env.addDeclCore maxHeartbeats maxRecDepth converted none with
       | .ok next =>
           validateQuotientDescriptor next declaration

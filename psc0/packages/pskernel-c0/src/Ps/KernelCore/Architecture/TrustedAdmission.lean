@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.CertifiedWork
+import Ps.KernelCore.Architecture.QualifiedInference
 
 /-!
 Phase E: proof-carrying SOURCE admission provenance.
@@ -166,8 +166,13 @@ def psKernelC0TrustedSourceInfer
     (work : PsKernelC0TrustedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
-  psKernelC0TrustedSourceRun work
-    (fun context state => psKernelCheckerInfer fuel context state expr)
+  match psKernelC0CertifiedWorkInferQualifiedOwned
+      fuel work.certified expr with
+  | .error reason => .error reason
+  | .ok receipt =>
+      let (ty, certified) := receipt.val
+      .ok (ty, psKernelC0TrustedSourceWithState
+        work certified.raw.checker.state)
 
 /-- Only the original FULL source checker may approve a term. Neither
     metadata, candidate reduction nor provenance alone authorizes it. -/
@@ -176,8 +181,13 @@ def psKernelC0TrustedSourceCheck
     (work : PsKernelC0TrustedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
-  psKernelC0TrustedSourceRun work
-    (fun context state => psKernelCheckerCheck fuel context state expr)
+  match psKernelC0CertifiedWorkCheckQualifiedOwned
+      fuel work.certified expr with
+  | .error reason => .error reason
+  | .ok receipt =>
+      let (ty, certified) := receipt.val
+      .ok (ty, psKernelC0TrustedSourceWithState
+        work certified.raw.checker.state)
 
 /-- The source-proved structurally reflexive DefEq fragment now runs
     independently on valid fuel/context, with exact original cache updates.

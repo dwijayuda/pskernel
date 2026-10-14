@@ -1,4 +1,5 @@
 import Ps.KernelCore.API.VerifiedProvider
+import Ps.KernelCore.API.Kernel
 
 def main : IO Unit := do
   let resources : PsKernelResourcePolicy := {
@@ -77,6 +78,75 @@ def main : IO Unit := do
   if !(psKernelC0HistoryAxiomSignatures
       cleanSession.verified.sealed.audited.trusted.history).isEmpty then
     throw (IO.userError "negative cache test introduced a trusted axiom")
+
+  -- Match one complete, safe declaration workload against the independent
+  -- existing KernelContract-v1 provider. This is full admission, full term
+  -- checking, WHNF and DefEq, not a syntax-only indexed observation.
+  let safeName : PsKernelName :=
+    .str .anonymous "VerifiedProviderSafeDefinition"
+  let safeInfo : PsKernelDefinitionInfo := {
+    base := {
+      name := safeName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := .sort .zero
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let safeRequest : PsKernelDeclarationRequest := .definitionDecl safeInfo
+  let safeVerified ← match psKernelC0VerifiedProviderAdmit first safeRequest with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "verified provider rejected safe definition")
+  let legacyBegin ← match psKernelKernelSessionEmpty resources provider with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "legacy provider empty genesis failed")
+  let legacyAdmitted ← match psKernelV1AdmitDeclaration legacyBegin safeRequest with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "legacy provider rejected same safe definition")
+  let safeCount := psKernelEnvironmentSize
+    safeVerified.verified.sealed.audited.trusted.certified.raw.checker.context.environment
+  if safeCount != psKernelEnvironmentSize legacyAdmitted.session.environment ||
+      safeCount != 1 then
+    throw (IO.userError "matched verified/legacy safe admission environment size diverged")
+  let safeConst : PsKernelExpr := .const safeName []
+  let (safeType, _) ← match psKernelC0VerifiedProviderCheck safeVerified safeConst with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "verified provider failed admitted definition type")
+  let legacyChecked ← match psKernelV1CheckExpression legacyAdmitted.session
+      [] .safe safeConst with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "legacy provider failed admitted definition type")
+  if !psKernelExprEqual safeType legacyChecked.type then
+    throw (IO.userError "verified/legacy safe definition type mismatch")
+  let (safeUnfolded, _) ← match psKernelC0VerifiedProviderWhnf safeVerified safeConst with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "verified admitted definition WHNF failed")
+  let legacyUnfolded ← match psKernelV1Whnf legacyAdmitted.session
+      [] .safe safeConst with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "legacy admitted definition WHNF failed")
+  if !psKernelExprEqual safeUnfolded legacyUnfolded ||
+      !psKernelExprEqual safeUnfolded (.sort .zero) then
+    throw (IO.userError "verified/legacy source delta results diverged")
+  let (safeDefEq, _) ← match psKernelC0VerifiedProviderDefEq
+      safeVerified safeConst (.sort .zero) with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "verified safe constant DefEq failed")
+  let legacyDefEq ← match psKernelV1IsDefEq legacyAdmitted.session
+      [] .safe safeConst (.sort .zero) with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "legacy safe constant DefEq failed")
+  if !safeDefEq || !legacyDefEq then
+    throw (IO.userError "verified/legacy source checked delta equivalence diverged")
+  if !(psKernelC0HistoryAxiomSignatures
+      safeVerified.verified.sealed.audited.trusted.history).isEmpty ||
+      !(psKernelC0HistoryTrustCapabilities
+        safeVerified.verified.sealed.audited.trusted.history).isEmpty then
+    throw (IO.userError "safe source definition widened verified trust foundation")
+  match psKernelC0VerifiedProviderAdmit safeVerified safeRequest with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "duplicate safe definition bypassed admission")
 
   let name : PsKernelName := .str .anonymous "VerifiedProviderAxiom"
   let signedAxiom : PsKernelAxiomInfo := {

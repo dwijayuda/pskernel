@@ -901,6 +901,40 @@ theorem psKernelC0RecursiveCheckedApp_checkerCheck
   simp only [if_neg hshort]
   exact source
 
+/-- The whole verified checker uses the callback-free route at short
+    root applications, and the checked-hook route for ALL other root
+    constructors. The recursive independent engine refines the correct
+    complete public checker in BOTH cases, including source cache states. -/
+theorem psKernelC0RecursiveCheckedTerm_checkerCheck
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr)
+    (result : PsKernelExpr × PsKernelCheckerState)
+    (h : psKernelC0RecursiveCheckedAppWithFuel fuel
+      context state expr = some result) :
+    psKernelCheckerCheck fuel context state expr = .ok result := by
+  have source := psKernelC0RecursiveCheckedApp_source fuel
+    (some psKernelC0CheckAppRecursiveResummarized)
+    (psKernelWhnfWithRecursorFuel fuel (psKernelIsDefEqWithFuel fuel))
+    (psKernelIsDefEqWithFuel fuel)
+    context state expr result h
+  cases expr with
+  | app fn arg =>
+      exact psKernelC0RecursiveCheckedApp_checkerCheck
+        fuel context state fn arg result h
+  | bvar _ => exact source
+  | fvar _ => exact source
+  | mvar _ => exact source
+  | sort _ => exact source
+  | const _ _ => exact source
+  | lam _ _ _ _ => exact source
+  | forallE _ _ _ _ => exact source
+  | letE _ _ _ _ _ => exact source
+  | lit _ => exact source
+  | mdata _ _ => exact source
+  | proj _ _ _ => exact source
+
 /-- Public-source-equivalent checked-work operation. On an independently
     qualified success, the dependent receipt proves the full original
     checker equation. For every other term and every decline, run the
@@ -912,22 +946,19 @@ def psKernelC0CertifiedWorkCheckIndependentAppOwned
     Except String
       { result : PsKernelExpr × PsKernelC0CertifiedWork //
         psKernelC0CertifiedWorkCheck fuel work expr = .ok result } :=
-  match expr with
-  | .app fn arg =>
-      match h : psKernelC0RecursiveCheckedAppWithFuel fuel
-          work.raw.checker.context work.raw.checker.state (.app fn arg) with
-      | none =>
-          psKernelC0CertifiedWorkCheckProjectionOwned fuel work (.app fn arg)
-      | some (ty, checkedState) =>
-          .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned
-            work checkedState).val), by
-              have source : psKernelCheckerCheck fuel
-                  work.raw.checker.context work.raw.checker.state
-                  (.app fn arg) = .ok (ty, checkedState) :=
-                psKernelC0RecursiveCheckedApp_checkerCheck fuel
-                  work.raw.checker.context work.raw.checker.state fn arg
-                  (ty, checkedState) h
-              unfold psKernelC0CertifiedWorkCheck psKernelSessionCheck
-              simp only [source]
-              rfl⟩
-  | other => psKernelC0CertifiedWorkCheckProjectionOwned fuel work other
+  match h : psKernelC0RecursiveCheckedAppWithFuel fuel
+      work.raw.checker.context work.raw.checker.state expr with
+  | none =>
+      psKernelC0CertifiedWorkCheckProjectionOwned fuel work expr
+  | some (ty, checkedState) =>
+      .ok ⟨(ty, (psKernelC0CertifiedWorkWithStateOwned
+        work checkedState).val), by
+          have source : psKernelCheckerCheck fuel
+              work.raw.checker.context work.raw.checker.state expr =
+                .ok (ty, checkedState) :=
+            psKernelC0RecursiveCheckedTerm_checkerCheck fuel
+              work.raw.checker.context work.raw.checker.state expr
+              (ty, checkedState) h
+          unfold psKernelC0CertifiedWorkCheck psKernelSessionCheck
+          simp only [source]
+          rfl⟩

@@ -969,6 +969,10 @@ def c0ExportVerdictFromFileTrace
   let handle ← IO.FS.Handle.mk path .read
   let mut state : C0ExportOnlineState := {}
   let mut consumed := 0
+  -- Benchmark observations are never included in trusted kernel state.
+  -- Read the source runtime's monotonic clock only once per 50k records.
+  let started ← IO.monoMsNow
+  let mut previousProgress := started
   let mut reading := true
   while reading do
     let line ← handle.getLine
@@ -1012,7 +1016,9 @@ def c0ExportVerdictFromFileTrace
           -- Report a bounded cadence even if a multi-million-record
           -- real corpus later times out or exhausts host resources.
           if consumed % 50000 == 0 then
-            IO.println s!"C0_REAL_EXPORT_PROGRESS consumed_records={consumed} checked_declarations={state.checkedCount}"
+            let now ← IO.monoMsNow
+            IO.println s!"C0_REAL_EXPORT_PROGRESS consumed_records={consumed} checked_declarations={state.checkedCount} elapsed_ms={now - started} interval_ms={now - previousProgress}"
+            previousProgress := now
   return (c0ExportFinish state, consumed)
 
 def c0ExportVerdictFromFile

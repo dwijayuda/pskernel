@@ -4,7 +4,15 @@
 **Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
 **Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
 
-## Latest native-qualified E.4AI — recursive source-proved β/ζ/δ WHNF
+## Latest native-qualified E.4AJ — recursive source-proved metadata DefEq
+
+[Executable 6710e0f](https://github.com/dwijayuda/pskernel/commit/6710e0f9081a8bf50f8c1487325e5190ef517193), [full pinned Lean 4.35 CI 38633622220](https://github.com/dwijayuda/pskernel/actions/runs/38633622220) **SUCCESS: 56 successful steps, zero failures, four optional skipped**; see [AI_WORK_STATE.md](AI_WORK_STATE.md) for exact source-result/state proof and regression evidence.
+
+One strong fuel-induction engine now recursively evaluates metadata-body DefEq and source-proved Sort, Nat/String literal and reflexive terminals. Complete conversion Boolean and every positive-cache insertion are proved equal to the original full source DefEq worker for all successful independent cases. The actual trusted/audited DefEq service uses the new proof-bearing selector; declines keep original source semantics. This is not general Lean 4.35 algorithmic conversion and does not prove kernel soundness.
+
+**Continue C→D→E→B→F→G:** integrate independently proven WHNF into DefEq reflection/lazy δ, recursive binder/eta/proof irrelevance, full checked inference/admission and all source forms; resume real Init/Std/Mathlib acceptance (6.45M-record Init exporter survey, first false rejection 86,383), end-to-end performance and independent mathematical consistency. The verified provider must still fully check all source terms and published roots.
+
+## Historical native-qualified E.4AI — recursive source-proved β/ζ/δ WHNF
 
 Executable [81dbc803](https://github.com/dwijayuda/pskernel/commit/81dbc8034ef7e9a95fd0d976b0770d85c55d8476) passed pinned Lean 4.35 [native CI 38619929963](https://github.com/dwijayuda/pskernel/actions/runs/38619929963): **55 successes, zero failures, four optional skipped**. [AI_WORK_STATE.md](AI_WORK_STATE.md) provides full exact-source mathematical proof and negative/resource/performance evidence.
 

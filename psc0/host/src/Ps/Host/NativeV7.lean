@@ -65,7 +65,10 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
   let declarations ← (PsKernelLean.decodeCanonicalAdmissions admissions).mapError
     (fun error => error.kind.code ++ ": " ++ error.message)
   let mut environment := prelude
-  for declaration in declarations do
+  for original in declarations do
+    -- Source definitions use the same Lean kernel lazy-delta strategy as the
+    -- checked Standard, but keep finite 2m/20k admission budgets and fail closed.
+    let declaration := PsKernelLean.psKernelWithDefinitionHeight environment original
     match environment.addDeclCore 2000000 20000 declaration none with
     | .ok next => environment := next
     | .error error =>

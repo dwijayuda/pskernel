@@ -208,6 +208,13 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited. Both hashes
 -- were independently observed after genuine strict drift refusal at
 -- a4fdce40, Linux Actions 38556955048; no new assumptions.
+-- Independently observed and reviewed ByteArray.copySlice source/typed
+-- signature and default optParam; extract now delegates to the same checked
+-- slicing mechanism. Pinned Lean 4.35.0 references: Init/Data/ByteArray/
+-- Basic.lean. Linux 38621774797 compiled native Lean, regenerated checked
+-- assets, audited selected signature/status and refused both old digests.
+-- No axiom/primitive/class/instance addition. Pinned values alone do not
+-- qualify source elaboration, typed erasure or executable backends.
 -- One checked ByteArray.append logical declaration, matching exactly the
 -- pinned Lean 4.35.0 Bootstrap.lean list-concatenation expression. Native
 -- Linux 38619901079 independently rebuilt source and audited admitted
@@ -239,7 +246,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- statuses. These precise FNV/SHA are from independent strict drift
 -- refusal in Linux 38563557310 at 09965258; never infer expected hashes.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:14396132309407814309"
+  "fnv1a64:7412877166083346047"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -401,7 +408,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:bd030068664f88b6b07932947128cfc53f70ab02d585dfab83b9b36f3532bd9a"
+  "sha256:b31a41db725e0e5fb58e934388ecf7a7a3cb10936d1f0d8c3fb66aa82df82e55"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

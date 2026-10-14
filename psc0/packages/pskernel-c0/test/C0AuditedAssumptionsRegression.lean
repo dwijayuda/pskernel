@@ -37,6 +37,29 @@ def main : IO Unit := do
     pure ()
   else
     throw (IO.userError "empty audited genesis changed capability allowance")
+  -- Source-free nested metadata WHNF carries both zero-foundation
+  -- proofs without introducing an assumption or accepting an unchecked term.
+  let metadataRoot : PsKernelExpr :=
+    .mdata 20 (.mdata 21 (.sort .zero))
+  let (metadataValue, metadataAudit) ← match psKernelC0AuditedSourceWhnf
+      3 genesis metadataRoot with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("audited metadata normalization failed: " ++ e))
+  if !psKernelExprEqual metadataValue (.sort .zero) then
+    throw (IO.userError "audited metadata WHNF changed irreducible head")
+  let _metadataAxiomProof :=
+    psKernelC0AuditedSourceAxiomsApproved metadataAudit
+  let _metadataCapabilityProof :=
+    psKernelC0AuditedSourceCapabilitiesApproved metadataAudit
+  if !(psKernelC0HistoryAxiomSignatures metadataAudit.trusted.history).isEmpty ||
+      !(psKernelC0HistoryTrustCapabilities metadataAudit.trusted.history).isEmpty then
+    throw (IO.userError "metadata WHNF introduced a trusted foundation event")
+  match psKernelC0AuditedSourceWhnf 2 genesis metadataRoot with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "audited nested metadata bypassed source fuel")
+
   let firstName := c0AuditedName "ReviewedAxiom"
   let secondName := c0AuditedName "UnapprovedAxiom"
   let firstRequest : PsKernelC0ArchitectureDeclaration :=

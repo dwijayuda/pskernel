@@ -936,6 +936,142 @@ def psKernelC0CertifiedWorkDefEqSortOwned
         rfl⟩
 
 
+/-!
+Phase E.4I: independently source-equivalent literal definitional equality.
+
+Lean 4.35's quick_is_def_eq compares kernel literal values directly. This
+matches C0's source psKernelLiteralEq for Nat and String values, preserving
+the same source fuel/recursion checks, structural fast path, raw-cache-hit
+behavior, positive cache update, and exact source-checked session state.
+Literal conversion is not a proof that Nat/String is declared or well typed.
+-/
+
+def psKernelC0LiteralDefEqWithFuel
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (leftLiteral rightLiteral : PsKernelLiteral) :
+    Option (Bool × PsKernelCheckerState) :=
+  match fuel with
+  | 0 => none
+  | Nat.succ _ =>
+      match psKernelCheckerContextEnterRecDepth context with
+      | .error _ => none
+      | .ok _ =>
+          let left : PsKernelExpr := .lit leftLiteral
+          let right : PsKernelExpr := .lit rightLiteral
+          if psKernelExprEq left right then
+            some (psKernelDefEqFinish state left right true)
+          else if psKernelExprPairSetContains state.success left right then
+            some (true, state)
+          else
+            some (psKernelDefEqFinish state left right
+              (psKernelLiteralEq leftLiteral rightLiteral))
+
+/-- For ANY input source cache/context and Literal universe levels, a
+    successful direct-head result equals the full source DefEq judgment
+    AND the complete source checker state. This includes source's
+    successful-pair memo semantics and is not a general consistency proof. -/
+theorem psKernelC0LiteralDefEq_source
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (leftLiteral rightLiteral : PsKernelLiteral)
+    (result : Bool × PsKernelCheckerState)
+    (h : psKernelC0LiteralDefEqWithFuel fuel context state
+      leftLiteral rightLiteral = some result) :
+    psKernelIsDefEq fuel context state
+      (.lit leftLiteral) (.lit rightLiteral) = .ok result := by
+  cases fuel with
+  | zero =>
+      simp [psKernelC0LiteralDefEqWithFuel] at h
+  | succ remaining =>
+      cases depth : psKernelCheckerContextEnterRecDepth context with
+      | error reason =>
+          simp [psKernelC0LiteralDefEqWithFuel, depth] at h
+      | ok entered =>
+          by_cases same :
+              psKernelExprEq (.lit leftLiteral) (.lit rightLiteral) = true
+          · have hresult :
+                result = psKernelDefEqFinish state
+                  (.lit leftLiteral) (.lit rightLiteral) true := by
+              have hsome : some (psKernelDefEqFinish state
+                  (.lit leftLiteral) (.lit rightLiteral) true) = some result := by
+                simpa [psKernelC0LiteralDefEqWithFuel, depth, same] using h
+              exact (Option.some.inj hsome).symm
+            rw [hresult]
+            change psKernelIsDefEqWithFuel (Nat.succ remaining)
+              context state (.lit leftLiteral) (.lit rightLiteral) =
+                .ok (psKernelDefEqFinish state
+                  (.lit leftLiteral) (.lit rightLiteral) true)
+            simp [psKernelIsDefEqWithFuel, depth, same]
+          · by_cases cached :
+                psKernelExprPairSetContains state.success
+                  (.lit leftLiteral) (.lit rightLiteral) = true
+            · have hresult : result = (true, state) := by
+                have hsome : some (true, state) = some result := by
+                  simpa [psKernelC0LiteralDefEqWithFuel, depth, same, cached]
+                    using h
+                exact (Option.some.inj hsome).symm
+              rw [hresult]
+              change psKernelIsDefEqWithFuel (Nat.succ remaining)
+                context state (.lit leftLiteral) (.lit rightLiteral) =
+                  .ok (true, state)
+              simp [psKernelIsDefEqWithFuel, depth, same, cached]
+            · have hresult :
+                  result = psKernelDefEqFinish state
+                    (.lit leftLiteral) (.lit rightLiteral)
+                    (psKernelLiteralEq leftLiteral rightLiteral) := by
+                have hsome : some (psKernelDefEqFinish state
+                    (.lit leftLiteral) (.lit rightLiteral)
+                    (psKernelLiteralEq leftLiteral rightLiteral)) =
+                      some result := by
+                  simpa [psKernelC0LiteralDefEqWithFuel, depth, same, cached]
+                    using h
+                exact (Option.some.inj hsome).symm
+              rw [hresult]
+              change psKernelIsDefEqWithFuel (Nat.succ remaining)
+                context state (.lit leftLiteral) (.lit rightLiteral) =
+                  .ok (psKernelDefEqFinish state
+                    (.lit leftLiteral) (.lit rightLiteral)
+                    (psKernelLiteralEq leftLiteral rightLiteral))
+              simp [psKernelIsDefEqWithFuel, depth, same, cached,
+                psKernelDefEqQuickAfterCommon]
+
+/-- A source-equation-carrying Literal comparison. Every successful direct
+    result is independently source-proved. Other cases use the already
+    qualified reflexive/source fallback and preserve resource/error paths. -/
+def psKernelC0CertifiedWorkDefEqLiteralOwned
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (leftLiteral rightLiteral : PsKernelLiteral) :
+    Except String
+      { result : Bool × PsKernelC0CertifiedWork //
+        psKernelC0CertifiedWorkDefEq fuel work
+          (.lit leftLiteral) (.lit rightLiteral) = .ok result } :=
+  match h : psKernelC0LiteralDefEqWithFuel fuel
+      work.raw.checker.context work.raw.checker.state
+      leftLiteral rightLiteral with
+  | none =>
+      psKernelC0CertifiedWorkDefEqCanonicalFastOwned fuel work
+        (.lit leftLiteral) (.lit rightLiteral)
+  | some (same, checkedState) =>
+      .ok ⟨(same,
+        psKernelC0CertifiedWorkWithSession work
+          { work.raw.checker with state := checkedState }), by
+        have source :
+            psKernelIsDefEq fuel work.raw.checker.context
+              work.raw.checker.state
+              (.lit leftLiteral) (.lit rightLiteral) =
+                .ok (same, checkedState) :=
+          psKernelC0LiteralDefEq_source fuel work.raw.checker.context
+            work.raw.checker.state leftLiteral rightLiteral
+            (same, checkedState) h
+        unfold psKernelC0CertifiedWorkDefEq psKernelSessionIsDefEq
+        simp only [source]
+        rfl⟩
+
+
 /-- One checked DefEq receipt interface. Sorts take the independently
     proved level comparison, structurally reflexive other terms use the
     independently proved quick rule, and all remaining source expressions
@@ -951,6 +1087,9 @@ def psKernelC0CertifiedWorkDefEqQualifiedOwned
   | .sort leftLevel, .sort rightLevel =>
       psKernelC0CertifiedWorkDefEqSortOwned
         fuel work leftLevel rightLevel
+  | .lit leftLiteral, .lit rightLiteral =>
+      psKernelC0CertifiedWorkDefEqLiteralOwned
+        fuel work leftLiteral rightLiteral
   | remainingLeft, remainingRight =>
       psKernelC0CertifiedWorkDefEqCanonicalFastOwned
         fuel work remainingLeft remainingRight

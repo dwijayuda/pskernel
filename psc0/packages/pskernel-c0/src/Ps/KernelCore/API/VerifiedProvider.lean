@@ -78,6 +78,18 @@ def psKernelC0VerifiedProviderAdmit
     Except PsKernelError PsKernelC0VerifiedProviderSession := do
   psKernelC0VerifiedProviderPreflight session
   let checkedRequest ← psKernelC0VerifiedProviderRequest request
+  -- Policy denials are deliberate unsupported/unauthorized requests, not
+  -- internal checker faults. The audited admission separately rechecks both
+  -- permissions and source validity before it extends any trusted history.
+  let audited := session.verified.sealed.audited
+  if !psKernelC0OrdinaryAxiomRequestApproved
+      checkedRequest audited.allowedAxioms then
+    throw (.declinedUnsupported
+      "ordinary axiom was not explicitly approved for this source history")
+  if !psKernelC0RequestCapabilitiesApproved
+      checkedRequest audited.allowedCapabilities then
+    throw (.declinedUnsupported
+      "trust-bearing declaration capability requires explicit approval")
   let next ← match psKernelC0VerifiedAdmit session.resources.fuel
       session.verified checkedRequest with
     | .ok result => pure result

@@ -100,8 +100,8 @@ def main : IO Unit := do
   | _ => throw (IO.userError "provider resource mismatch reached accepting checker")
   let modifiedNumerals : PsKernelResourcePolicy :=
     { resources with maxNatSize := resources.maxNatSize + 1 }
-  match psKernelC0VerifiedProviderAdmit
-      { first with resources := modifiedNumerals } (.unsupported "not available") with
+  match psKernelC0VerifiedProviderCheck
+      { first with resources := modifiedNumerals } (.sort .zero) with
   | .error (.declinedUnsupported _) => pure ()
   | _ => throw (IO.userError "modified numeral policy bypassed checked genesis")
   let cancelled : PsKernelResourcePolicy := { resources with cancelled := true }

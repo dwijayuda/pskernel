@@ -7,6 +7,10 @@ import path from 'node:path';
 const directory = path.resolve(process.argv[2]);
 const source = await readFile(path.join(directory, 'application.ps'), 'utf8');
 const sourceLiteral = value => typeof value === 'string' ? quotedSourceString(value) : String(value);
+const signedWidths = {
+  int8: ['Int8', 'UInt8', 8], int16: ['Int16', 'UInt16', 16],
+  int32: ['Int32', 'UInt32', 32], int64: ['Int64', 'UInt64', 64]
+};
 const wrappers = observations.map(({name, type, args, expected}, i) => {
   const call = name + (args === null ? '' : '(' + args.map(sourceLiteral).join(', ') + ')');
   // Check Int through its already modeled, canonical decimal representation.
@@ -19,7 +23,14 @@ const wrappers = observations.map(({name, type, args, expected}, i) => {
     : type === 'int'
       ? 'if (Int.repr(' + call + ') = ' + sourceLiteral(String(expected)) +
         ') { true } else { false }'
-      : 'Nat.beq(' + call + ', ' + String(expected) + ')';
+      : signedWidths[type]
+        ? (() => {
+            const [signed, unsigned, bits] = signedWidths[type];
+            const expectedBits = BigInt.asUintN(bits, BigInt(expected));
+            return 'Nat.beq(' + unsigned + '.toNat(' + signed + '.toUInt' +
+              bits + '(' + call + ')), ' + expectedBits + ')';
+          })()
+        : 'Nat.beq(' + call + ', ' + String(expected) + ')';
   return 'const wasmCheck' + i + ': Bool := ' + compare;
 });
 await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' +

@@ -426,6 +426,18 @@ def psIrSignedType (type : PsVerifiedIrMachineIntegerType) :
   | .int64 => .ok (.primitive .int64)
   | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "signed-width")
 
+-- A signed wrapper stores the exact two's-complement bits of its unsigned
+-- carrier. This is an explicit checked reinterpretation, not a numeric cast
+-- or a change to signed comparison semantics.
+def psIrSignedUnsignedType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  match type with
+  | .int8 => .ok (.primitive .uint8)
+  | .int16 => .ok (.primitive .uint16)
+  | .int32 => .ok (.primitive .uint32)
+  | .int64 => .ok (.primitive .uint64)
+  | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "signed-carrier")
+
 def psIrMachineType (type : PsVerifiedIrMachineIntegerType) :
     Except PsIrCheckIssue PsVerifiedIrType :=
   if psIrMachineIntegerIsSigned type then psIrSignedType type
@@ -521,6 +533,10 @@ def psIrCheckIntrinsicSignature
       psIrCheckSignatureNoTypes typeArguments [nat] (← psIrUnsignedType type)
   | .signedOfNat type => do
       psIrCheckSignatureNoTypes typeArguments [nat] (← psIrSignedType type)
+  | .signedToUnsigned type => do
+      let signed ← psIrSignedType type
+      let unsigned ← psIrSignedUnsignedType type
+      psIrCheckSignatureNoTypes typeArguments [signed] unsigned
   | .unsignedToNat type => do
       psIrCheckSignatureNoTypes typeArguments [← psIrUnsignedType type] nat
   | .machineIntBinary type _ => do

@@ -123,4 +123,25 @@ def main : IO Unit := do
         if e.phase != "ir/emit" then throw (IO.userError ("unexpected refusal phase: " ++ e.phase))
         if i == 3 && (e.message.splitOn "PSCV0-WIT-INVARIANT").length <= 1 then
           throw (IO.userError ("missing foreign invariant refusal: " ++ e.message))
-  IO.println "Wasm: scalar native pipeline, three refusals, typed GC/component fixture emitted."
+  -- Coherent four-width signed scalar source/ABI fixture. Every declaration
+  -- enters source elaboration, native kernel admission, typed erasure and
+  -- Wasm GC + Canonical ABI through one production emitter.
+  let signedSource : String := "function signedEightAdd(a: Int8, b: Int8): Int8 := Int8.add(a, b)\nfunction signedEightDiv(a: Int8, b: Int8): Int8 := Int8.div(a, b)\nfunction signedEightMod(a: Int8, b: Int8): Int8 := Int8.mod(a, b)\nfunction signedSixteenSub(a: Int16, b: Int16): Int16 := Int16.sub(a, b)\nfunction signedSixteenMul(a: Int16, b: Int16): Int16 := Int16.mul(a, b)\nfunction signedThirtyTwoDiv(a: Int32, b: Int32): Int32 := Int32.div(a, b)\nfunction signedThirtyTwoMod(a: Int32, b: Int32): Int32 := Int32.mod(a, b)\nfunction signedSixtyFourAdd(a: Int64, b: Int64): Int64 := Int64.add(a, b)\nfunction signedSixtyFourDiv(a: Int64, b: Int64): Int64 := Int64.div(a, b)\n"
+  let signedBatch ← match ← PsV7Native.runBatch #[{
+    source := signedSource, targets := [.wasmComponent], outputStem := "signed",
+    exports := .selected ["signedEightAdd","signedEightDiv","signedEightMod","signedSixteenSub","signedSixteenMul","signedThirtyTwoDiv","signedThirtyTwoMod","signedSixtyFourAdd","signedSixtyFourDiv"] }] with
+    | .ok result => pure result
+    | .error problem => throw (IO.userError ("signed Wasm prelude: " ++ problem.message))
+  let some signedResult := signedBatch.results[0]? |
+    throw (IO.userError "missing signed Wasm compilation")
+  let signedArtifacts ← match signedResult with
+    | .ok result => pure result.artifacts
+    | .error problem => throw (IO.userError ("signed Wasm " ++ problem.phase ++
+        ": " ++ problem.message))
+  for artifact in signedArtifacts do
+    for file in artifact.files do
+      let path := directory ++ "/" ++ file.path
+      match file.payload with
+      | .text text => IO.FS.writeFile path text
+      | .binary bytes => IO.FS.writeBinFile path bytes
+  IO.println "Wasm: scalar, signed four-width, three refusals and GC/component fixture emitted."

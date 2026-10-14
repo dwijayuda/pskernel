@@ -2540,6 +2540,12 @@ private def signedNativeOracle : IO Unit := do
   match psIrCheckIntrinsicSignature (.signedOfNat .uint8) [] with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: unsigned signedOfNat accepted")
+  match psIrCheckIntrinsicSignature (.signedToUnsigned .int8) [] with
+  | .ok _ => pure ()
+  | .error _ => throw (IO.userError "PSCV0-SIGNED-IR: signed carrier reinterpretation refused")
+  match psIrCheckIntrinsicSignature (.signedToUnsigned .uint8) [] with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: unsigned carrier reinterpretation accepted")
   match psIrCheckIntrinsicSignature (.machineIntBinary .isize .add) [] with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: target-sized word accepted without profile")
@@ -2550,7 +2556,7 @@ private def signedNativeOracle : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "PSCV0-SIGNED-IR: out-of-range positive literal accepted")
   IO.println ("PSCV0_SIGNED_NATIVE_ORACLE: PASS " ++ toString checks.length ++
-    " pinned SInt values and five strict typed IR checks")
+    " pinned SInt values and seven strict typed IR checks")
 
 def main : IO Unit := do
   emissionBoundary

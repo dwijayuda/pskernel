@@ -180,6 +180,15 @@ def psRustEmitIntrinsicFromPrinted
         if suffix.isEmpty then .error .intrinsicArity else
           .ok ("((" ++ value ++ ").to_u64_digits().first().copied().unwrap_or(0) as " ++ suffix ++ ")")
       | _ => .error .intrinsicArity
+  | .signedToUnsigned type =>
+      match arguments with
+      | [value] =>
+        let suffix := match type with
+          | .int8 => "u8" | .int16 => "u16" | .int32 => "u32" | .int64 => "u64"
+          | _ => ""
+        if suffix.isEmpty then .error .intrinsicArity
+        else .ok ("((" ++ value ++ ") as " ++ suffix ++ ")")
+      | _ => .error .intrinsicArity
   | .signedOfNat type =>
       match arguments with
       | [value] =>

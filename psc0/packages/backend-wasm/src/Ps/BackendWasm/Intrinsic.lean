@@ -39,7 +39,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .arraySet => pure "array_set" | .arraySetIfInBounds => pure "array_set_if_in_bounds"
     | .arrayMap => pure "array_map" | .arrayFoldl => pure "array_fold"
     | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe
-    | .unsignedOfNat _ | .signedOfNat _ | .unsignedToNat _
+    | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
     | .machineIntBinary .. | .machineIntCompare .. => pure ""
     | _ => throw "PSCV0-WASM-CAPABILITY: scalar intrinsic outside the checked runtime profile"
   let instructions := if runtime.isEmpty then match op with
@@ -49,6 +49,12 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .signedOfNat type =>
       [.call (match type with | .int64 => "__ps_nat_wrap_u64" | _ => "__ps_nat_wrap_u32")] ++
         psWasmNormalizeMachineInteger type
+    | .signedToUnsigned type =>
+      match type with
+      | .int8 => psWasmNormalizeMachineInteger .uint8
+      | .int16 => psWasmNormalizeMachineInteger .uint16
+      | .int32 | .int64 => []
+      | _ => []
     | .unsignedToNat type =>
       [.call (match type with | .uint64 => "__ps_nat_from_u64" | _ => "__ps_nat_from_u32")]
     | .machineIntBinary type op => psWasmLowerMachineIntegerBinary ⟨.wasm32⟩ type op

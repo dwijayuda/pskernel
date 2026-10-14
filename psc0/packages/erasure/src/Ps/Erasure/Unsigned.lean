@@ -17,6 +17,12 @@ def psErasureSignedWidth (owner : PsName) : Option PsVerifiedIrMachineIntegerTyp
   | "Int32" => some .int32 | "Int64" => some .int64
   | _ => none
 
+def psErasureSignedUnsignedWidth :
+    PsVerifiedIrMachineIntegerType → Option PsVerifiedIrMachineIntegerType
+  | .int8 => some .uint8 | .int16 => some .uint16
+  | .int32 => some .uint32 | .int64 => some .uint64
+  | _ => none
+
 def psErasureSignedBinary : String → Option PsVerifiedIrIntegerBinaryOp
   | "add" => some .add | "sub" => some .sub | "mul" => some .mul
   | "div" => some .div | "mod" => some .mod
@@ -43,7 +49,8 @@ def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
       | _ => none
     else if (psErasureSignedWidth owner).isSome then
       match method with
-      | "ofNat" | "ofBitVec" => some 1
+      | "ofNat" | "ofBitVec" | "toBitVec" => some 1
+      | "toUInt8" | "toUInt16" | "toUInt32" | "toUInt64" => some 1
       | "neg" | "complement" => some 1
       | "add" | "sub" | "mul" | "div" | "mod"
       | "land" | "lor" | "xor" => some 2
@@ -112,6 +119,15 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
       return some (← psEraseBoundedWrap scope (.intrinsic (.unsignedToNat width) [] [← erase value]) false)
     | _, _ => return none
   else if let some width := psErasureSignedWidth owner then
+    let some unsignedWidth := psErasureSignedUnsignedWidth width
+      | throw .unsupportedRuntimeTerm
+    let unsignedProjection := match width with
+      | .int8 => "toUInt8" | .int16 => "toUInt16"
+      | .int32 => "toUInt32" | .int64 => "toUInt64"
+      | _ => ""
+    if method == unsignedProjection then
+      let [value] := view.args | throw .unsupportedApplication
+      return some (.intrinsic (.signedToUnsigned width) [] [← erase value])
     if let some operation := psErasureSignedBinary method then
       let [left, right] := view.args | throw .unsupportedApplication
       return some (.intrinsic (.machineIntBinary width operation) []
@@ -119,6 +135,9 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
     match method, view.args with
     | "ofNat", [value] =>
       return some (.intrinsic (.signedOfNat width) [] [← erase value])
+    | "toBitVec", [value] =>
+      let unsigned := PsVerifiedIrExpr.intrinsic (.signedToUnsigned width) [] [← erase value]
+      return some (← psEraseUnsignedProjection scope unsignedWidth unsigned)
     | "ofBitVec", [value] =>
       return some (.intrinsic (.signedOfNat width) []
         [← psEraseBitVecNatural scope (← erase value)])

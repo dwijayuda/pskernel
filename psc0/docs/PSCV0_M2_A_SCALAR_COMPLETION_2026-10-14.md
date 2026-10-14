@@ -605,3 +605,32 @@ gates refuse an unsigned `signedOfNat`, platform-width operations without
 a profile, and signed literals outside the canonical range. This is
 regression qualification, not a theorem of compiler-wide semantic preservation;
 Wasm GC and component transport need their own execution evidence.
+
+## Dedicated signed Wasm GC and Canonical ABI conformance
+
+One compiled nine-function signed source fixture now exercises direct GC
+Wasm and generated signed WIT component exports for i8/i16/i32/i64.
+Eleven edge vectors cover min/-1, divide/modulo by zero, signed
+remainder, wrapping addition/subtraction/multiplication, and i64
+limits, with direct binary↔WAT roundtrips and signed WAVE values.
+The signed scalar ABI is checked against Wasmtime as well as V8 GC.
+The underlying checked Standard remains strictly hashed; no
+floating arithmetic or platform-width scalar is enabled by this test.
+
+## Signed core-to-canonical-bits conversion and Wasm observation repair
+
+The 22 native-oracle-observed signed results revealed a genuine missing IR
+edge: the generated Wasm Bool comparison wrappers had treated every numeric
+result as Nat, incorrectly applying Nat.beq to signed Int8/16/32/64 output.
+Instead of skipping observations, the typed IR now exposes
+`signedToUnsigned` only for the four pinned fixed widths; its checked
+signature maps signed iN to the corresponding unsigned uN bit carrier.
+The signed constructor projection and `toBitVec` use this same explicit
+representation operation. JS uses exact `BigInt.asUintN` on source values,
+Rust uses the same-width unsigned bitcast, and Wasm masks narrow signed
+words on its unboxed i32/i64 stack. The Wasm observation source checks
+`UIntN.toNat(IntN.toUIntN(result))` against the native oracle's exact
+low N bits, retaining every signed case. Unsized ISize and arbitrary
+floating operations remain refused. An independent nine-function Wasm
+GC/component fixture also exercises signed s8/s16/s32/s64 with negative
+edges and direct binary/WAT round trips.

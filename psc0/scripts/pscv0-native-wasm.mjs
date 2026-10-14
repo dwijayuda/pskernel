@@ -14,14 +14,14 @@ function run(tool, args) {
 // descriptive check-* names. C4b uses an embedding harness for arbitrary names
 // and repeated-call/post-return lifecycle checks.
 function componentCall(name, args = []) {
-  return name + '(' + args.map(x => JSON.stringify(x)).join(', ') + ')';
+  return name + '(' + args.map(x => typeof x === 'bigint' ? x.toString() : JSON.stringify(x)).join(', ') + ')';
 }
 function exportsOf(wit) {
   return [...wit.matchAll(/export\s+%?([\w-]+):\s*func\(([^)]*)\)(?:\s*->\s*(\w+))?;/g)]
     .map(m => [m[1], m[2].replaceAll('%', '').replace(/\s/g, ''), m[3] ?? ''])
     .sort((a, b) => a[0].localeCompare(b[0]));
 }
-for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
+for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations', 'signed']) {
   const stem = path.join(directory, name);
   const declared = run('wasm-tools', ['component', 'wit', stem + '.wit']);
   const extracted = run('wasm-tools', ['component', 'wit', stem + '.wasm']);
@@ -76,6 +76,32 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
           assert.equal(run('wasmtime', ['run', '--invoke', componentCall(foreign), stem + suffix]), 'true', foreign);
       }
     }
+  } else if (name === 'signed') {
+    // Signed i8/i16/i32/i64 use the same source-level definitions and
+    // canonical WIT s8/s16/s32/s64 types. Assert both V8 GC core and
+    // Wasmtime component values, including min/-1 and division-by-zero.
+    const cases = [
+    {core:"signedEightAdd", foreign:"signed-eight-add", args:[127,1], expected:-128},
+    {core:"signedEightDiv", foreign:"signed-eight-div", args:[-128,-1], expected:-128},
+    {core:"signedEightDiv", foreign:"signed-eight-div", args:[-128,0], expected:0},
+    {core:"signedEightMod", foreign:"signed-eight-mod", args:[-5,2], expected:-1},
+    {core:"signedEightMod", foreign:"signed-eight-mod", args:[-128,0], expected:-128},
+    {core:"signedSixteenSub", foreign:"signed-sixteen-sub", args:[-32768,1], expected:32767},
+    {core:"signedSixteenMul", foreign:"signed-sixteen-mul", args:[32767,2], expected:-2},
+    {core:"signedThirtyTwoDiv", foreign:"signed-thirty-two-div", args:[-2147483648,-1], expected:-2147483648},
+    {core:"signedThirtyTwoMod", foreign:"signed-thirty-two-mod", args:[-2147483648,0], expected:-2147483648},
+    {core:"signedSixtyFourAdd", foreign:"signed-sixty-four-add", args:[9223372036854775807n,1n], expected:-9223372036854775808n},
+    {core:"signedSixtyFourDiv", foreign:"signed-sixty-four-div", args:[-9223372036854775808n,-1n], expected:-9223372036854775808n},
+    ];
+    for (const test of cases) {
+      assert.equal(instance.exports[test.core](...test.args), test.expected,
+        test.core + ' V8 signed GC result');
+      for (const suffix of ['.wasm', '.roundtrip.wasm']) {
+        assert.equal(run('wasmtime', ['run', '--invoke',
+          componentCall(test.foreign, test.args), stem + suffix]),
+          String(test.expected), test.foreign + ' canonical signed result');
+      }
+    }
   } else {
     for (const a of [0, 1]) {
       assert.equal(instance.exports.invert(a), 1 - a);
@@ -91,4 +117,4 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
 }
 console.log(JSON.stringify({profile:'pscv0-wasm-c4-gc/1', node:process.version, v8:process.versions.v8,
   wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
-  gcInsideComponent:true, scalarWorlds:4, sharedObservations:observations.length, naturalLimbChecks:10, coreBinaryWatEqual:true}));
+  gcInsideComponent:true, scalarWorlds:5, sharedObservations:observations.length, naturalLimbChecks:10, coreBinaryWatEqual:true}));

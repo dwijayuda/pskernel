@@ -212,7 +212,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- statuses. These precise FNV/SHA are from independent strict drift
 -- refusal in Linux 38563557310 at 09965258; never infer expected hashes.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:18408272372580449619"
+  "fnv1a64:1158455147189393063"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -374,7 +374,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:52a6343fe02345259225f17386182d73cf452bb6df5b44987e79b80468aee543"
+  "sha256:5b989d2a0bb0c2f8d35bb850dc0d7e0bb99172d72abaf1b20e4e66316e59fed9"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

@@ -314,6 +314,24 @@ jobs:
           if line_num != target:
               raise RuntimeError("did not reach record 86383")
           PY
+      - name: Qualify official acceptance of the complete first-false-theorem prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix="$RUNNER_TEMP/Init-first-mismatch.ndjson"
+          test -s "$prefix"
+          test "$(wc -l < "$prefix")" -eq 86383
+          # The same bytes/IDs are retained for independent examination;
+          # a rejected C0 result can NEVER stand in for official rejection.
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env leanchecker --from-export "$prefix") \
+              > "$RUNNER_TEMP/first-mismatch-official.txt" 2>&1 || {
+            cat "$RUNNER_TEMP/first-mismatch-official.txt"
+            exit 1
+          }
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/first-mismatch-official.txt"
+          echo "C0_REAL_INIT_FIRST_FALSE_OFFICIAL verdict=accepted records=86383"
+          sha256sum "$prefix" | tee "$RUNNER_TEMP/first-mismatch-prefix-sha256.txt"
       - name: Dissect first false Eq application arguments at post-nested theorem
         shell: bash
         run: |
@@ -340,6 +358,8 @@ jobs:
             ${{ runner.temp }}/Init-first-inductive.ndjson
             ${{ runner.temp }}/Init-first-nested.ndjson
             ${{ runner.temp }}/Init-first-mismatch.ndjson
+            ${{ runner.temp }}/first-mismatch-official.txt
+            ${{ runner.temp }}/first-mismatch-prefix-sha256.txt
             ${{ runner.temp }}/first-inductive-official.txt
             ${{ runner.temp }}/leanchecker-result.txt
             ${{ runner.temp }}/c0-real-init-435-result.txt

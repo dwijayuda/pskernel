@@ -4,7 +4,15 @@
 **Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
 **Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
 
-## Latest native-qualified E.4AJ — recursive source-proved metadata DefEq
+## Latest native-qualified E.4AK — independent recursive WHNF inside DefEq
+
+[Executable d363b19e](https://github.com/dwijayuda/pskernel/commit/d363b19edd1326fb84a1086043b672d7bac2479c), [full Lean 4.35 native CI 38635485644](https://github.com/dwijayuda/pskernel/actions/runs/38635485644) **SUCCESS: 57 successful steps, zero failures, four optional skipped**. Full proof/source, checked-provider, regression and trust evidence in [AI_WORK_STATE.md](AI_WORK_STATE.md).
+
+The single recursive β/ζ/δ source-exact WHNF evaluator now supplies proof-backed results to a bounded independent Bool.true **algorithmic DefEq reflection** route. The independent result/state includes intermediate source caches and the exact final positive conversion-pair cache. Both real trusted and audited DefEq paths route through the checked-work receipt; unsupported and invalid/full-checking requirements are never waived. This is NOT full algorithmic DefEq or an independent accepting kernel.
+
+**Resume real Phase B immediately:** actual official Lean 4.35 Init export has a known first C0 false rejection at record 86,383, theorem `Std.PRange.UpwardEnumerable.succMany?_add` (type handle 75406, proof handle 75658). Survey workflow now retains the complete source prefix to support precise root-cause analysis. Do not confuse a permitted C0 "unsupported" case or a fuel failure with valid kernel rejection. Whole Init/Std/Mathlib, complete kernel, same-workload performance and metatheoretic soundness/consistency remain open.
+
+## Historical native-qualified E.4AJ — recursive source-proved metadata DefEq
 
 [Executable 6710e0f](https://github.com/dwijayuda/pskernel/commit/6710e0f9081a8bf50f8c1487325e5190ef517193), [full pinned Lean 4.35 CI 38633622220](https://github.com/dwijayuda/pskernel/actions/runs/38633622220) **SUCCESS: 56 successful steps, zero failures, four optional skipped**; see [AI_WORK_STATE.md](AI_WORK_STATE.md) for exact source-result/state proof and regression evidence.
 

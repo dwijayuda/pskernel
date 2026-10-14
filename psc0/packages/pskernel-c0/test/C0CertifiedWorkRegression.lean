@@ -505,6 +505,22 @@ def main : IO Unit := do
     | .error e => throw (IO.userError ("certified admitted WHNF failed: " ++ e))
   if !psKernelExprEqual unfolded (.sort .zero) then
     throw (IO.userError "certified admission reused stale environment WHNF")
+  -- A context-dependent constant is not an irreducible direct head:
+  -- it must still be unfolded under the exact source admission environment.
+  let _contextualExact :
+      psKernelC0CertifiedWorkWhnfCanonicalFast 4096 admitted
+          (.const defName []) =
+        psKernelC0CertifiedWorkWhnf 4096 admitted (.const defName []) :=
+    psKernelC0CertifiedWorkWhnfCanonicalFast_exact
+      4096 admitted (.const defName [])
+  let (contextual, _) ← match psKernelC0CertifiedWorkWhnfCanonicalFast
+      4096 admitted (.const defName []) with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("contextual WHNF source fallback failed: " ++ e))
+  if !psKernelExprEqual contextual (.sort .zero) then
+    throw (IO.userError "irreducible fast path incorrectly kept delta head")
+
   match psKernelC0CertifiedWorkAdmit 4096 admitted (.definition declaration) with
   | .error _ => pure ()
   | .ok _ =>

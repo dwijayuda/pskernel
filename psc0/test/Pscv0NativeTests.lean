@@ -234,6 +234,33 @@ private def unsignedDisplayFixture : String :=
 -- Native official-kernel acceptance is mandatory; no unknown reference,
 -- implicit model fallback or silent dictionary replacement is permitted.
 private def unsignedOperatorSourceCases : IO Unit := do
+  -- Identify the earliest kernel boundary without weakening any acceptance:
+  -- type declarations, pure Nat functions, UInt identities, constructors,
+  -- conversions and lets all use their ordinary checked source pipeline.
+  let baselines : Array (String × String) := #[
+    ("natural identity", "function operation(a: Nat): Nat := a\n"),
+    ("natural let", "function operation(a: Nat): Nat := { let value: Nat := a\n value }\n"),
+    ("word identity", "function operation(value: UInt8): UInt8 := value\n"),
+    ("word constructor", "function operation(value: Nat): UInt8 := UInt8.ofNat(value)\n"),
+    ("word conversion", "function operation(value: UInt8): Nat := UInt8.toNat(value)\n"),
+    ("word let", "function operation(n: Nat): UInt8 := { let value: UInt8 := UInt8.ofNat(n)\n value }\n"),
+    ("word constant", "const operation: UInt8 := UInt8.ofNat(7)\n")]
+  let baselineRequests : Array PsV7Native.Request :=
+    baselines.map fun (_, source) => { source }
+  let baselineResult ← PsV7Native.runBatch baselineRequests
+  let baseline ← match baselineResult with
+    | .error error => throw (IO.userError ("unsigned baseline batch: " ++ error.message))
+    | .ok batch => pure batch
+  let mut baselineFailures : Nat := 0
+  for i in [:baselines.size] do
+    let some (label, _) := baselines[i]? | throw (IO.userError "missing baseline label")
+    let some answer := baseline.results[i]? | throw (IO.userError "missing baseline result")
+    match answer with
+    | .ok _ => IO.println ("PSCV0_UNSIGNED_BASELINE: PASS " ++ label)
+    | .error problem =>
+      baselineFailures := baselineFailures + 1
+      IO.println ("PSCV0_UNSIGNED_BASELINE: " ++ label ++
+        " refused at " ++ problem.phase ++ ": " ++ problem.message)
   let samples : Array (String × String × String) := #[
     -- Differentially isolate ordinary projection/conversion, direct checked
     -- method call, typeclass projection, and composed result transport.
@@ -275,9 +302,10 @@ private def unsignedOperatorSourceCases : IO Unit := do
         " refused at " ++ problem.phase ++ ": " ++ problem.message
       IO.println message
       failures := message :: failures
-  unless failures.isEmpty do
+  unless failures.isEmpty && baselineFailures == 0 do
     throw (IO.userError ("PSCV0_UNSIGNED_SOURCE: " ++
-      toString failures.length ++ " checked operation cases failed"))
+      toString failures.length ++ " checked operation cases and " ++
+      toString baselineFailures ++ " baseline cases failed"))
 
 private def wordFixture : String :=
   "function wordOperations8(a: Nat, b: Nat): String := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y), UInt8.toNat(x - y), UInt8.toNat(x * y), UInt8.toNat(x / y), UInt8.toNat(x % y), UInt8.toNat(-x), UInt8.toNat(UInt8.complement(x)), UInt8.toNat(UInt8.land(x, y)), UInt8.toNat(UInt8.lor(x, y)), UInt8.toNat(UInt8.xor(x, y)), UInt8.toNat(UInt8.shiftLeft(x, y)), UInt8.toNat(UInt8.shiftRight(x, y))])) }\nfunction wordOperations16(a: Nat, b: Nat): String := { let x: UInt16 := UInt16.ofNat(a)\n let y: UInt16 := UInt16.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt16.toNat(x + y), UInt16.toNat(x - y), UInt16.toNat(x * y), UInt16.toNat(x / y), UInt16.toNat(x % y), UInt16.toNat(-x), UInt16.toNat(UInt16.complement(x)), UInt16.toNat(UInt16.land(x, y)), UInt16.toNat(UInt16.lor(x, y)), UInt16.toNat(UInt16.xor(x, y)), UInt16.toNat(UInt16.shiftLeft(x, y)), UInt16.toNat(UInt16.shiftRight(x, y))])) }\nfunction wordOperations32(a: Nat, b: Nat): String := { let x: UInt32 := UInt32.ofNat(a)\n let y: UInt32 := UInt32.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt32.toNat(x + y), UInt32.toNat(x - y), UInt32.toNat(x * y), UInt32.toNat(x / y), UInt32.toNat(x % y), UInt32.toNat(-x), UInt32.toNat(UInt32.complement(x)), UInt32.toNat(UInt32.land(x, y)), UInt32.toNat(UInt32.lor(x, y)), UInt32.toNat(UInt32.xor(x, y)), UInt32.toNat(UInt32.shiftLeft(x, y)), UInt32.toNat(UInt32.shiftRight(x, y))])) }\nfunction wordOperations64(a: Nat, b: Nat): String := { let x: UInt64 := UInt64.ofNat(a)\n let y: UInt64 := UInt64.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt64.toNat(x + y), UInt64.toNat(x - y), UInt64.toNat(x * y), UInt64.toNat(x / y), UInt64.toNat(x % y), UInt64.toNat(-x), UInt64.toNat(UInt64.complement(x)), UInt64.toNat(UInt64.land(x, y)), UInt64.toNat(UInt64.lor(x, y)), UInt64.toNat(UInt64.xor(x, y)), UInt64.toNat(UInt64.shiftLeft(x, y)), UInt64.toNat(UInt64.shiftRight(x, y))])) }\nfunction wordApply(operation: UInt64 -> UInt64 -> UInt64, left: UInt64, right: UInt64): Nat := UInt64.toNat(operation(left)(right))\nconst wordHigherOrder: Nat := wordApply(UInt64.shiftLeft, (3 : UInt64), (65 : UInt64))\nfunction wordGeneric{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\nconst wordGenericWrap: Nat := UInt8.toNat(wordGeneric((255 : UInt8), (2 : UInt8)))\ntheorem wordModel: UInt8.toNat(UInt8.add((255 : UInt8), (2 : UInt8))) = 1 := by { rfl }\n"

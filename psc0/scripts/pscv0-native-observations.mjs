@@ -657,5 +657,5 @@ export const panicObservations = [
   { name: "listBangPanic", wasm: "wasmListBangTrap" },
   { name: "finBangPanic", wasm: "wasmFinBangTrap" },
   { name: "arrayBangPanic", wasm: "wasmArrayBangTrap" },
-  { name: "byteGetOutside", wasm: "wasmByteBangTrap" }
+  { name: "byteGetOutside", wasm: "wasmByteBangTrap", type: "uint8" }
 ];

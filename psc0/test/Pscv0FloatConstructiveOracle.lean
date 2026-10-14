@@ -50,3 +50,74 @@ run_cmd do
 #guard !((Float32.ofBits 2143289344) == (Float32.ofBits 4290772992))
 #guard decide ((Float32.ofBits 0) ≠ (Float32.ofBits 2147483648))
 #guard decide ((Float32.ofBits 2143289344) = (Float32.ofBits 4290772992))
+
+-- Native, kernel-checked constructive replacement for the very small
+-- Format.Valid proof boundary, *not* an export of the whole Float.ofBits
+-- dependency graph. The proof works at any valid Float.Model.Format width.
+namespace Pscv0FloatCanonicalModel
+
+open Float.Model
+
+def canonicalPacked (spec : Format) (bits : BitVec spec.numBits) :
+    BitVec spec.numBits :=
+  if UnpackedFloat.unpackExponent (spec := spec) bits = (-1#_) then
+    if UnpackedFloat.unpackMantissa (spec := spec) bits = (0#_) then bits
+    else UnpackedFloat.packedNaN spec
+  else bits
+
+-- No Classical.choice, sorryAx, unchecked proof or opaque validity cast:
+-- this is the *actual* pinned Format.Valid predicate, discharged for every
+-- possible packed bitvector by cases on the exponent and mantissa.
+theorem canonicalPacked_valid (spec : Format) (bits : BitVec spec.numBits) :
+    Format.Valid spec (canonicalPacked spec bits) := by
+  unfold canonicalPacked
+  by_cases he : UnpackedFloat.unpackExponent (spec := spec) bits = (-1#_)
+  · simp only [if_pos he]
+    by_cases hm : UnpackedFloat.unpackMantissa (spec := spec) bits = (0#_)
+    · simp only [if_pos hm]
+      exact ⟨fun _ hNonzero => False.elim (hNonzero hm)⟩
+    · simp only [if_neg hm]
+      exact ⟨fun _ _ => rfl⟩
+  · simp only [if_neg he]
+    exact ⟨fun h _ => False.elim (he h)⟩
+
+-- Genuine logical Float values constructed with verified Format.Valid
+-- evidence. Host-only at this stage: source-level Float.ofBits and the
+-- cross-target floating ABI are deliberately NOT activated by these.
+def fromBits64 (bits : UInt64) : Float :=
+  Float.ofModel {
+    toBits := UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec)
+    valid := canonicalPacked_valid Format.binary64 bits.toBitVec
+  }
+
+def fromBits32 (bits : UInt32) : Float32 :=
+  Float32.ofModel {
+    toBits := UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec)
+    valid := canonicalPacked_valid Format.binary32 bits.toBitVec
+  }
+
+end Pscv0FloatCanonicalModel
+
+-- Independent pinned native executable observations. Full all-input
+-- equivalence to the upstream Float.ofBits still requires its own theorem;
+-- examples alone neither certify that equivalence nor target preservation.
+#guard (Pscv0FloatCanonicalModel.fromBits64 18444492273895866368).toBits ==
+  (9221120237041090560 : UInt64)
+#guard (Pscv0FloatCanonicalModel.fromBits64 9223372036854775808).toBits ==
+  (9223372036854775808 : UInt64)
+#guard (Pscv0FloatCanonicalModel.fromBits64 1).toBits == (1 : UInt64)
+#guard (Pscv0FloatCanonicalModel.fromBits32 4290772992).toBits ==
+  (2143289344 : UInt32)
+#guard (Pscv0FloatCanonicalModel.fromBits32 2147483648).toBits ==
+  (2147483648 : UInt32)
+#guard (Pscv0FloatCanonicalModel.fromBits32 1).toBits == (1 : UInt32)
+
+run_cmd do
+  for name in [``Pscv0FloatCanonicalModel.canonicalPacked_valid,
+      ``Pscv0FloatCanonicalModel.fromBits64,
+      ``Pscv0FloatCanonicalModel.fromBits32] do
+    let dependencies ← Lean.collectAxioms name
+    if dependencies.contains ``Classical.choice then
+      throwError "PSCV0-FLOAT-F1: constructive Valid proof imports Classical.choice"
+    if dependencies.contains ``sorryAx then
+      throwError "PSCV0-FLOAT-F1: constructive Valid proof imports sorryAx"

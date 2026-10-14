@@ -1,5 +1,31 @@
 # PSCV0 v7 native implementation roadmap
 
+## 15 October — F2 bit equalities green; constructive Format.Valid candidate
+
+The checked Float32/Float64 *bit-level* two-equality models passed all
+[27 Linux CI 38647823991](https://github.com/dwijayuda/pskernel/actions/runs/38647823991)
+steps at `ecdff92f3b59981f78aaadbf2c6022178d8ce8d3`.
+IEEE Bool equality (NaN unequal, signed zeros equal) is kept distinct
+from canonical logical bit identity (all NaN payloads normalized,
+signed zeros distinct). Sixteen native-reference/cross-target observations
+passed, without declaring source Float instances or additional axioms.
+
+**Research-only next candidate:** direct constructive Lean 4.35.0 proof
+for `Format.Valid spec (canonicalPacked spec bits)` for *all*
+bitvectors in any permitted Float.Model.Format. The definition branches
+on the original pinned `unpackExponent`/`unpackMantissa`, preserving
+non-NaN bits and mapping NaNs to `packedNaN spec`. This avoids the
+previous 1,038-declaration original Float.ofBits import and its
+independently refused List/Int proof-model mismatch. The native oracle
+also constructs actual Float and Float32 values with proof-bearing
+model fields and checks a handful of reference bit patterns.
+
+This does **not** publish Float.ofBits into the selected Standard, prove
+all-input equivalence to the full original upstream ofBits, or qualify
+JS/TS/Rust/Wasm floating runtime/ABI behavior. Strict transitive
+assumption auditing forbids Classical.choice/sorryAx; kernel/erasure and
+all native CI still apply. No pskernel-core, self-hosting or C5.
+
 ## 15 October — Float32/64 bit classification fully qualified; two equalities candidate
 
 Commit `5bb8c9c9f3c731263d910cfed8eda394b1d75ac6` passed all

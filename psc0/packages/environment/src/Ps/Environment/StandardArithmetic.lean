@@ -44,6 +44,14 @@ def psStandardBinaryClass (spec : PsStandardBinarySpec) : List PsDeclaration :=
   let resultSort := PsExpr.sortE (.succ (.max (.param u) (.max (.param v) (.param w))))
   let family := psLogicApply (.constE name levels) [alpha, beta, gamma]
   let methodType := psLogicPi 4 "a" alpha (psLogicPi 5 "b" beta gamma)
+  -- Pinned Init/Prelude.lean: HAdd, HSub, HMul, HDiv, HMod, HAppend
+  -- declare their type parameters with ordinary EXPLICIT parentheses.
+  -- Their constructor and method projections retain the usual implicit
+  -- uniform structure parameters. These are distinct kernel signatures:
+  -- HAdd(A,A,A) must be a legal source type, while HAdd.hAdd infers α,β,γ.
+  let bindClassParams := fun body =>
+    psLogicPi 0 "α" uType (psLogicPi 1 "β" vType
+      (psLogicPi 2 "γ" outputType body))
   let bindParams := fun body =>
     psLogicPi 0 "α" uType (psLogicPi 1 "β" vType
       (psLogicPi 2 "γ" outputType body .implicit) .implicit) .implicit
@@ -54,7 +62,7 @@ def psStandardBinaryClass (spec : PsStandardBinarySpec) : List PsDeclaration :=
   let projectionType := bindParams (psLogicPi 3 "self" family methodType .instanceImplicit)
   let projectionValue := bindParamLams
     (psLogicLam 3 "self" family (.proj name 0 self) .instanceImplicit)
-  [ .inductiveDecl (.mk name [u, v, w] (bindParams resultSort)
+  [ .inductiveDecl (.mk name [u, v, w] (bindClassParams resultSort)
       3 0 [ctor] true),
     .constructorDecl (.mk ctor [u, v, w] ctorType name 0 3 1 []),
     .definitionDecl field [u, v, w] projectionType projectionValue ]

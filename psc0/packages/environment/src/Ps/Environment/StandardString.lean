@@ -111,48 +111,33 @@ def psStandardStringJoin : PsDeclaration :=
   psOrderDecl "String.join" (psLogicPi 0 "parts" list str)
     (psLogicLam 0 "parts" list body)
 
--- The private accumulator worker matches Lean's intercalate.go:
---   go acc sep [] = acc
---   go acc sep (item :: rest) = go (acc ++ sep ++ item) sep rest
--- List.rec returns the accumulator transformation (String -> String);
--- its structural recursive hypothesis is checked and remains total.
-def psStandardStringIntercalateWorkerName : PsName :=
-  psNameAppendStr (psRootName "$psc0Standard") "stringIntercalateWorker"
-
-def psStandardStringIntercalateWorker : PsDeclaration :=
-  let str := PsExpr.constE psStringName []
-  let list := psSelfHostListOf str .zero
-  let arrow := psLogicPi 7 "acc" str str
-  let motive := psLogicLam 6 "_" list arrow
-  let initial := psLogicLam 7 "acc" str (.fvar 7)
-  let append := fun a b => psLogicApply (.constE psStringAppendName []) [a, b]
-  let next := append (append (.fvar 7) (.fvar 1)) (.fvar 3)
-  let step := psLogicLam 3 "piece" str
-    (psLogicLam 4 "rest" list
-      (psLogicLam 5 "ih" arrow
-        (psLogicLam 7 "acc" str (.app (.fvar 5) next))))
-  let run := psLogicApply (psStandardListRecursor .zero (.succ .zero))
-    [str, motive, initial, step, .fvar 2]
-  let body := .app run (.fvar 0)
-  .definitionDecl psStandardStringIntercalateWorkerName []
-    (psLogicPi 0 "acc" str
-      (psLogicPi 1 "separator" str
-        (psLogicPi 2 "parts" list str)))
-    (psLogicLam 0 "acc" str
-      (psLogicLam 1 "separator" str
-        (psLogicLam 2 "parts" list body)))
-
+-- Lean 4.35.0 Init/Data/String/Defs.lean: intercalate.go uses a
+-- left-to-right accumulator and appends the separator only between elements.
+-- Encode the same one-pass state machine using the *existing checked* List.foldl
+-- and Option.rec APIs. None means "no item seen"; Some acc means "nonempty".
+-- This avoids a second recursive-worker erasure path and keeps the accumulator
+-- data flow explicit for all the backends. The equations match pinned Lean:
+-- [] -> ""; [a] -> a; [a,b] -> a ++ sep ++ b, retaining empty elements.
 def psStandardStringIntercalate : PsDeclaration :=
   let str := PsExpr.constE psStringName []
   let list := psSelfHostListOf str .zero
-  let motive := psLogicLam 6 "_" list str
-  let first := psLogicLam 2 "head" str
-    (psLogicLam 3 "tail" list
-      (psLogicLam 4 "ih" str
-        (psLogicApply (.constE psStandardStringIntercalateWorkerName [])
-          [.fvar 2, .fvar 0, .fvar 3])))
-  let result := psLogicApply (psStandardListRecursor .zero (.succ .zero))
-    [str, motive, .lit (.string ""), first, .fvar 1]
+  let option := psSelfHostOptionOf str .zero
+  let append := fun a b => psLogicApply (.constE psStringAppendName []) [a, b]
+  let some := fun value => psSelfHostOptionSomeOf str value .zero
+  let none := psSelfHostOptionNoneOf str .zero
+  let optionMotive := psLogicLam 8 "_" option option
+  let afterSome := psLogicLam 4 "acc" str
+    (some (append (append (.fvar 4) (.fvar 0)) (.fvar 3)))
+  let stepBody := psLogicApply (psStandardOptionRecursor (.succ .zero) .zero)
+    [str, optionMotive, some (.fvar 3), afterSome, .fvar 2]
+  let step := psLogicLam 2 "state" option
+    (psLogicLam 3 "piece" str stepBody)
+  let folded := psStandardListCall "foldl"
+    [option, str, step, none, .fvar 1] [.zero, .zero]
+  let toStringMotive := psLogicLam 8 "_" option str
+  let result := psLogicApply (psStandardOptionRecursor (.succ .zero) .zero)
+    [str, toStringMotive, .lit (.string ""),
+     psLogicLam 5 "joined" str (.fvar 5), folded]
   psOrderDecl "String.intercalate"
     (psLogicPi 0 "separator" str
       (psLogicPi 1 "parts" list str))
@@ -164,8 +149,7 @@ def psStandardStringDeclarations : List PsDeclaration :=
    psOrderDecl "Char.repr" (psLogicPi 0 "c" (.constE psCharName []) (.constE psStringName []))
      (.constE (psDecisionName "Char.quote") []),
    psStandardStringQuoteWorker, psStandardStringQuote,
-   psStandardStringJoin, psStandardStringIntercalateWorker,
-   psStandardStringIntercalate]
+   psStandardStringJoin, psStandardStringIntercalate]
 
 def psStandardStringExtend (environment : PsEnvironment) : PsEnvironment :=
   psStandardStringDeclarations.foldl psPreludeAdd environment

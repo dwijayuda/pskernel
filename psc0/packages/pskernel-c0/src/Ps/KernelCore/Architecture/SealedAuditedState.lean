@@ -194,3 +194,37 @@ theorem psKernelC0SealedAuditedCapabilitiesApproved
     psKernelC0HistoryCapabilitiesApproved
       work.audited.trusted.history work.audited.allowedCapabilities :=
   work.audited.capabilitiesApproved
+
+/-- A published checked-root bundle is admitted ONLY by the existing
+    source-checked, closed-root, all-or-nothing publication operation on
+    an audited work value whose entire checker-state lineage is retained.
+    The equality binds the exact fuel, complete policy and staged work. -/
+structure PsKernelC0SealedAuditedPublication
+    (fuel : Nat)
+    (before : PsKernelC0SealedAuditedSourceWork) where
+  store : PsKernelC0CertifiedStore
+  roots : List PsKernelC0SourceCheckedRoot
+  checkedPublication :
+    psKernelC0AuditedSourceCommitChecked fuel before.audited =
+      .ok (store, roots)
+
+/-- Syntax-only staging or approved axioms cannot bypass full source root
+    checking. A single invalid root causes an error and no publication. -/
+def psKernelC0SealedAuditedCommitChecked
+    (fuel : Nat)
+    (before : PsKernelC0SealedAuditedSourceWork) :
+    Except String (PsKernelC0SealedAuditedPublication fuel before) :=
+  match h : psKernelC0AuditedSourceCommitChecked fuel before.audited with
+  | .error reason => .error reason
+  | .ok (store, roots) =>
+      .ok ⟨store, roots, h⟩
+
+/-- A successfully published bundle witnesses the exact unchanged source
+    checker decision, not an independent candidate typing judgment. -/
+theorem psKernelC0SealedAuditedPublicationExact
+    {fuel : Nat}
+    {before : PsKernelC0SealedAuditedSourceWork}
+    (result : PsKernelC0SealedAuditedPublication fuel before) :
+    psKernelC0AuditedSourceCommitChecked fuel before.audited =
+      .ok (result.store, result.roots) :=
+  result.checkedPublication

@@ -186,16 +186,6 @@ def psKernelC0SealedSourceCommitChecked
   | .ok (store, roots) =>
       .ok ⟨store, roots, h⟩
 
-/-- Every published root retains the source checker equality witness;
-    neither syntax certification nor state lineage substitutes for it. -/
-def psKernelC0SealedPublicationRootExact
-    {fuel : Nat}
-    {before : PsKernelC0SealedSourceWork}
-    (publication : PsKernelC0SealedPublication fuel before)
-    (root : PsKernelC0SourceCheckedRoot) :
-    root.sourceCheck =
-      root.sourceCheck := rfl
-
 /-- The publication receipt remains tied to the exact original operation
     and cannot record the result of a different checked session. -/
 theorem psKernelC0SealedPublicationExact

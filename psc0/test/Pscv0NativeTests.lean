@@ -7,6 +7,24 @@ import Pscv0GetElemOracle
 import Pscv0FloatConstructiveOracle
 import Init.Data.ByteArray.Lemmas
 
+-- Native boundary cases from Lean 4.35.0 System.Platform.numBits_eq,
+-- UInt/ISize two's-complement model; target width is explicitly selected.
+#guard (psIrMachineIntegerWidthWithTarget none .usize).isNone
+#guard (psIrMachineIntegerWidthWithTarget (some .bits32) .usize) == some 32
+#guard (psIrMachineIntegerWidthWithTarget (some .bits64) .isize) == some 64
+#guard psIrMachineIntegerLiteralInRangeWithTarget (some .bits32) .usize 4294967295
+#guard !psIrMachineIntegerLiteralInRangeWithTarget (some .bits32) .usize 4294967296
+#guard psIrMachineIntegerLiteralInRangeWithTarget (some .bits32) .isize (-2147483648)
+#guard !psIrMachineIntegerLiteralInRangeWithTarget (some .bits32) .isize (-2147483649)
+#guard !psIrMachineIntegerLiteralInRangeWithTarget (some .bits32) .isize 2147483648
+#guard psIrMachineIntegerLiteralInRangeWithTarget (some .bits64) .usize 18446744073709551615
+#guard !psIrMachineIntegerLiteralInRangeWithTarget (some .bits64) .usize 18446744073709551616
+#guard psIrMachineIntegerLiteralInRangeWithTarget (some .bits64) .isize (-9223372036854775808)
+#guard !psIrMachineIntegerLiteralInRangeWithTarget (some .bits64) .isize 9223372036854775808
+#guard !psIrMachineIntegerLiteralInRangeWithTarget none .usize 0
+#guard psIrMachineIntegerLiteralInRangeWithTarget none .uint8 255
+#guard !psIrMachineIntegerLiteralInRangeWithTarget none .uint8 256
+
 -- General Lean 4.35.0 kernel proofs for the canonical selected ByteArray
 -- representation; they are independent of the bounded runtime observations.
 private theorem pscv0ByteArrayFromListModelExact (xs : List UInt8) :

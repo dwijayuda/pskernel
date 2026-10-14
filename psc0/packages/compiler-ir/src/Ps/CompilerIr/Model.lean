@@ -52,6 +52,42 @@ def psIrMachineIntegerIsSigned : PsVerifiedIrMachineIntegerType → Bool
   | .int8 | .int16 | .int32 | .int64 | .isize => true
   | _ => false
 
+-- Lean 4.35.0 Init/System/Platform.lean proves that the native
+-- platform word width is either 32 or 64 bits. The compiler must select
+-- its *target* width explicitly; never infer the build host's width.
+inductive PsVerifiedIrWordSize where
+  | bits32
+  | bits64
+
+def psIrWordSizeBits : PsVerifiedIrWordSize → Nat
+  | .bits32 => 32
+  | .bits64 => 64
+
+-- A target-sized integer has NO canonical width when the target is
+-- absent. Fixed-width integers remain target-independent.
+def psIrMachineIntegerWidthWithTarget
+    (wordSize : Option PsVerifiedIrWordSize)
+    (type : PsVerifiedIrMachineIntegerType) : Option Nat :=
+  match type with
+  | .usize | .isize => wordSize.map psIrWordSizeBits
+  | _ => psIrMachineIntegerFixedWidth type
+
+-- One exact range predicate, shared by the checked IR and backend lowering.
+-- The representation uses canonical signed values, not wrapped source Nat
+-- literals or a silently inferred 64-bit platform.
+def psIrMachineIntegerLiteralInRangeWithTarget
+    (wordSize : Option PsVerifiedIrWordSize)
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) : Bool :=
+  match psIrMachineIntegerWidthWithTarget wordSize type with
+  | none => false
+  | some bits =>
+      if psIrMachineIntegerIsSigned type then
+        let bound : Int := Int.ofNat (2 ^ (bits - 1))
+        decide (-bound ≤ value ∧ value < bound)
+      else
+        decide (0 ≤ value ∧ value < Int.ofNat (2 ^ bits))
+
 -- Division truncates toward zero; /0 = 0 and %0 = the dividend.
 -- Shifts reduce their second operand modulo the value width.
 inductive PsVerifiedIrIntegerBinaryOp where

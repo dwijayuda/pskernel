@@ -364,42 +364,17 @@ def psJsMachineIntegerLiteralCanonicalForProfile
     (profile : Option PsJsTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)
     (value : Int) : Bool :=
-  let parts : Bool × Nat :=
-    psVerifiedIrIntNegativeMagnitude value;
-  let negative : Bool := Prod.fst parts;
-  let magnitude : Nat := Prod.snd parts;
   match type with
-  | PsVerifiedIrMachineIntegerType.usize =>
-      if negative then
-        false
-      else
-        match profile with
-        | Option.none => false
-        | Option.some target =>
-            match target.wordSize with
-            | PsJsWordSize.bits32 =>
-                Nat.ble magnitude 4294967295
-            | PsJsWordSize.bits64 =>
-                Nat.ble magnitude 18446744073709551615
-  | PsVerifiedIrMachineIntegerType.isize =>
-      match profile with
-      | Option.none => false
-      | Option.some target =>
-          match target.wordSize with
-          | PsJsWordSize.bits32 =>
-              if negative then
-                Nat.ble magnitude 2147483648
-              else
-                Nat.ble magnitude 2147483647
-          | PsJsWordSize.bits64 =>
-              if negative then
-                Nat.ble magnitude 9223372036854775808
-              else
-                Nat.ble magnitude 9223372036854775807
+  | .usize | .isize =>
+      -- Target-sized signed/unsigned literal bounds are owned by the
+      -- canonical typed IR semantic policy, not duplicated in JS.
+      let targetWord : Option PsVerifiedIrWordSize := profile.map fun target =>
+        match target.wordSize with
+        | .bits32 => .bits32
+        | .bits64 => .bits64
+      psIrMachineIntegerLiteralInRangeWithTarget targetWord type value
   | _ =>
-      psVerifiedIrMachineIntegerLiteralCanonical
-        type
-        value
+      psVerifiedIrMachineIntegerLiteralCanonical type value
 
 
 def psJsLowerIntegerBinaryOp

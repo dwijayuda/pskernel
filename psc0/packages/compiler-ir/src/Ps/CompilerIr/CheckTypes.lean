@@ -453,14 +453,14 @@ def psIrCheckLiteralType
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int)
   | .machineInteger type value => do
       let result ← psIrMachineType type
-      let some bits := psIrMachineIntegerFixedWidth type
+      -- The unprofiled public IR still refuses USize/ISize. Any future
+      -- target-profile admission must validate the backend for that width.
+      let some _ := psIrMachineIntegerWidthWithTarget none type
         | throw (psIrCheckIssue "scalar-capability-unqualified" "platform-width")
-      if psIrMachineIntegerIsSigned type then
-        let bound := Int.ofNat (2 ^ (bits - 1))
-        if value < -bound || value ≥ bound then
-          throw (psIrCheckIssue "machine-integer-literal-range" "signed-canonical")
-      else if value < 0 || value ≥ Int.ofNat (2 ^ bits) then
-        throw (psIrCheckIssue "machine-integer-literal-range" "unsigned-canonical")
+      if !psIrMachineIntegerLiteralInRangeWithTarget none type value then
+        throw (psIrCheckIssue "machine-integer-literal-range"
+          (if psIrMachineIntegerIsSigned type then "signed-canonical"
+           else "unsigned-canonical"))
       return result
   | .string _ =>
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string)

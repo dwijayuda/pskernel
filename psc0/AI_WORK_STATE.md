@@ -1,5 +1,30 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — target-word semantic ownership and fast-gate policy
+
+**Last qualified executable:** `f5f9c7f87b77d9700bc52ca02882ae1f1dbab73e`,
+[27-gate Linux CI 38654008436](https://github.com/dwijayuda/pskernel/actions/runs/38654008436);
+[canonical Float kernel replay 38654008396](https://github.com/dwijayuda/pskernel/actions/runs/38654008396) also passed.
+
+**New candidate:** `Ps.CompilerIr.Model` owns the *only* typed-IR
+USize/ISize width selector (`bits32`/`bits64`) and exact canonical signed/
+unsigned literal range. `CheckTypes` delegates fixed-width validation to
+the same policy while still refusing unprofiled target-sized IR. The JS
+profile-specific literal path reuses the shared selector rather than
+duplicating 32/64-bit numeric limits. A short native boundary suite checks
+signed minima/maxima, unsigned limits, fixed width and absent-profile
+rejection against pinned `Init/System/Platform.lean` and `Init/Data/SInt/Basic.lean`.
+No platform word capability is newly admitted and no backend semantic
+promise is inferred. The original upstream F1 import's **known negative**
+research-only workflow remains dispatchable by hand but no longer runs and
+fails on each ordinary source change; the successful small canonical-model
+replay and main CI are unchanged.
+
+**Remaining:** carry this explicit target profile through compiler IR
+admission and each JS/TS/Rust/Wasm execution/ABI lane; implement Float F1-F4,
+scientific, the remaining selected P0 APIs and complete assurance/manifest.
+Do not claim M2+A finished. No pskernel-core, self-hosting or C5.
+
 ## 15 October — surface digest frozen and per-project source graph candidate
 
 The selected source-surface SHA-256 from complete CI 38653018583

@@ -1,15 +1,10 @@
 name: PSCV0 F1 constructive authoring (research only)
 
+# The original full-upstream F1 closure is a documented expected refusal.
+# Run this negative research experiment explicitly, not on every compiler
+# commit; the positive canonical-model replay and full native CI stay active.
 on:
   workflow_dispatch:
-  push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
-    paths:
-      - 'psc0/host/src/Ps/Host/FloatConstructive.lean'
-      - 'psc0/host/src/Ps/Host/StandardExport.lean'
-      - 'psc0/scripts/Pscv0Native.lean'
-      - 'psc0/v7-native/lakefile.lean'
-      - '.github/workflows/psc0-pscv0-f1-constructive.yml'
 permissions:
   contents: read
 concurrency:

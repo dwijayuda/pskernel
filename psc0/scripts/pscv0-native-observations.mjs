@@ -5,6 +5,10 @@ export const observations = [
   {name:"signedToInt8",args:[0n],type:"int",expected:0n},
   {name:"sumLeftScore",args:null,type:"nat",expected:17n},
   {name:"sumRightScore",args:null,type:"nat",expected:123n},
+  {name:"byteEmptyLength",args:null,type:"nat",expected:0n},
+  {name:"byteRoundtrip",argTypes:["uint8"],args:[255],type:"uint8",expected:255},
+  {name:"byteTwoLength",argTypes:["uint8","uint8"],args:[1,255],type:"nat",expected:2n},
+
 
   {name:"unsignedClamp8",argTypes:["nat"],args:[0n],type:"uint8",expected:0},
   {name:"unsignedClamp8",argTypes:["nat"],args:[255n],type:"uint8",expected:255},

@@ -1,5 +1,41 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — native ByteArray structure and basic APIs (candidate)
+
+Pinned `Init/Prelude.lean` and `Init/Data/ByteArray/Basic.lean` in
+Lean 4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
+define ByteArray as a separate one-field structure holding
+`Array UInt8`, with an externally optimized packed byte buffer.
+The new native portable `StandardByteArray.lean` models its real
+inductive constructor/recursor, `data` projection, checked
+`emptyWithCapacity`, `empty`, `push` and `size`. It reuses
+the existing selected Array logic, including capacity being only an
+allocation hint, rather than adding a second array primitive.
+No axiom, unchecked cast, self-hosting or pskernel-core code.
+
+Three source/target observations and a native three-case oracle
+cover empty size, two pushes and retrieved byte; see
+`docs/PSCV0_A_BYTEARRAY_2026-10-14.md`. **Not yet qualified.**
+Keep native signature/reducibility, constructor/recursor metadata,
+strict FNV/SHA, source erasure, JS/TS/Rust/Wasm GC/Wasmtime and
+performance gates unchanged. Packed-byte backend optimization is
+a separate runtime fidelity/performance qualification, not assumed.
+
+## 14 October — Lean Sum two-constructor baseline qualified
+
+Commit `e055b2e5340eab08d4acc569355e2e022b023e9e` passed
+[Linux CI 38594035519](https://github.com/dwijayuda/pskernel/actions/runs/38594035519).
+Selected Standard: **1,795 declarations / 25 classes / 221 instances**;
+626 shared JS/TypeScript/Rust observations and 2 independent
+native Sum constructor/match oracle cases. Wasm GC, Wasmtime
+component/host and all mandatory native kernel and syntax checks
+passed. Lean-compatible `Sum` preserves its independent `u/v`
+and recursor `w` universes. FNV
+`fnv1a64:14927995082305765806`, SHA
+`sha256:f77eb6d54d68a9f3036d0d69213f5f45f5d0e1f688e93f347c97466f9226ae53`.
+This is bounded evidence, not full M2+A/Phase A completion.
+
+
 ## 14 October — native Lean 4.35 Sum type/recursor candidate (not yet qualified)
 
 Official Lean 4.35.0 `Init/Core.lean`, pinned

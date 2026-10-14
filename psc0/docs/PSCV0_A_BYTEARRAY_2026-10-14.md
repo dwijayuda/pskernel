@@ -1,0 +1,46 @@
+# PSC0 Phase A — Lean 4.35.0 ByteArray logical baseline
+
+## Official reference
+
+Pinned `leanprover/lean4` release `v4.35.0`, source commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Study `src/Init/Prelude.lean` (ByteArray structure, empty, push, size)
+and `src/Init/Data/ByteArray/Basic.lean` (array API and typed bounds).
+Original Microsoft/Lean contributor Apache-2.0 notices remain in
+`psc0/THIRD_PARTY_NOTICES.md`.
+
+## Selected architecture and invariant
+
+Lean's **logical** `ByteArray` is a distinct one-field structure:
+`data : Array UInt8`. Native Lean provides an optimized packed-byte
+representation via extern functions. Those externs do not create a
+different type theory, but they are an implementation optimization
+whose correspondence to the logical model must be validated.
+
+PSC0 adds the checked type, constructor, dependent recursor and field
+projection in native portable `.lean`. Selected `emptyWithCapacity`,
+`empty`, `push` and `size` are ordinary checked definitions using
+the existing generic Array operations. The capacity argument is an
+allocation hint only; logical contents and size are independent of it.
+Preserve the pinned `implicit_reducible` statuses for the four
+programming methods. Never add axioms or special-case parsing.
+
+Initially erase ByteArray as its actual one-field logical structure,
+not as an unchecked cast of Array UInt8. Backend-specific packed-buffer
+optimizations are a separate future choice and are **not** claimed by
+this milestone. The existing type/structure lowering must work in
+JavaScript, TypeScript, Rust and Wasm GC without a new runtime opcode.
+
+## Minimal qualification
+
+Test empty length, two pushes and one retrieved byte against independent
+pinned native Lean and common-source executable JS/TS/Rust/Wasm.
+Require regenerated constructor/recursor/iota checks by the official
+kernel, strict Standard FNV/SHA, typed ABI validation and all Linux CI.
+Failures must keep the last fully green executable as the qualified
+baseline.
+
+This is a **candidate**, not a completed release capability, until
+those gates pass. More extensive ByteArray APIs, alternative packed
+representation and performance remain separate M2+A/Phase A work.
+No `pskernel-core`, self-hosting or C5 development.

@@ -31,6 +31,35 @@ abbrev PsKernelC0BinderSmaller :=
     PsKernelCheckerContext → PsKernelCheckerState → PsKernelExpr →
     Bool → Except String (PsKernelExpr × PsKernelCheckerState)
 
+/-- Match source's exact checked binder-spine range lookup. An absent
+    checked-app hook always disables the range acceleration; infer-only
+    operations never change binder opening semantics. This pure helper is
+    shared by source inference and the qualified binder checker. -/
+def psKernelInferCurrentBinderRanges {α : Type}
+    (expr : PsKernelExpr)
+    (onCheckedApp : Option α)
+    (binderRanges : List Nat) : List Nat :=
+  match expr, onCheckedApp with
+  | .lam _ _ _ _, some _ =>
+      match binderRanges with
+      | [] =>
+          if psKernelC0HasBinderPrefix 12 true expr then
+            match psKernelC0BinderBodyRangesWithFuel 1024 expr with
+            | some (_, ranges) => ranges
+            | none => []
+          else []
+      | _ => binderRanges
+  | .forallE _ _ _ _, some _ =>
+      match binderRanges with
+      | [] =>
+          if psKernelC0HasBinderPrefix 12 false expr then
+            match psKernelC0BinderBodyRangesWithFuel 1024 expr with
+            | some (_, ranges) => ranges
+            | none => []
+          else []
+      | _ => binderRanges
+  | _, _ => []
+
 /-- The original checked lambda rule; its recursive worker and all
     environment-local state transitions are passed explicitly. -/
 def psKernelInferLambdaHead

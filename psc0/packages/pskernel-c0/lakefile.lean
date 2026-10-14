@@ -16,6 +16,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.Budget,
     `Ps.KernelCore.Architecture.Typed,
     `Ps.KernelCore.Architecture.CertifiedWork,
+    `Ps.KernelCore.Architecture.QualifiedInference,
     `Ps.KernelCore.Architecture.TrustedAdmission,
     `Ps.KernelCore.Architecture.SealedState,
     `Ps.KernelCore.Architecture.SealedAuditedState,

@@ -341,6 +341,42 @@ private def checkAutoParamSignature (native : Lean.Environment)
       throw (IO.userError (toString info.name ++
         ": autoParam in a declaration body requires independent value-equivalence proof"))
 
+
+-- A dedicated negative conformance gate: the boundary is definitional
+-- equivalence, NOT a textual rewrite license. If Lean changes the generated
+-- constructor's annotations, this probe refuses silently altered semantics.
+private def checkFloatAnnotationPolicy (native : Lean.Environment) : IO Unit := do
+  let some constructor := native.find? `Float.Model.Format.mk
+    | throw (IO.userError "pinned Float format constructor is missing")
+  let before := constructor.type
+  let after := standardEraseAutoParam before
+  unless after != before do
+    throw (IO.userError "expected pinned Format.mk autoParam signature change is absent")
+  if after.getUsedConstants.contains `autoParam ||
+      after.getUsedConstants.contains `Lean.Syntax then
+    throw (IO.userError "elaboration-only annotation escaped F0 normalization")
+  let syntax := Lean.Expr.const `Lean.Syntax []
+  unless standardEraseAutoParam syntax == syntax do
+    throw (IO.userError "ordinary Lean.Syntax dependency was silently excluded")
+  let partial := Lean.Expr.app (.const `autoParam [.zero]) (.const `Nat [])
+  unless standardEraseAutoParam partial == partial do
+    throw (IO.userError "partially applied autoParam was unsoundly normalized")
+  let optional := Lean.Expr.app
+    (Lean.Expr.app (.const `optParam [.zero]) (.const `Nat [])) (.lit (.natVal 0))
+  unless standardEraseAutoParam optional == optional do
+    throw (IO.userError "optParam semantics were silently changed")
+  let bogus : Lean.Declaration := .defnDecl {
+    name := `_pscv0FloatFormatForgedSignature
+    levelParams := constructor.levelParams
+    type := .const `Nat []
+    value := .const constructor.name (constructor.levelParams.map Lean.Level.param)
+    hints := .opaque
+    safety := .safe
+  }
+  if (native.checked.get.addDeclCore 2000000 20000 bogus none).isOk then
+    throw (IO.userError "official Lean kernel accepted a forged Format.mk signature")
+  IO.println "PSCV0_FLOAT_ANNOTATION_POLICY: PASS true annotation removal, ordinary Syntax and optParam preservation, partial-application preservation, and official kernel forged-type refusal"
+
 -- One conversion, admission and source-rendering pipeline for reviewed library
 -- slices. Profiles choose roots and a boundary; they cannot bypass checking.
 private def exportStandardCore (spec : StandardExportSpec)
@@ -349,6 +385,7 @@ private def exportStandardCore (spec : StandardExportSpec)
   let native ← Lean.importModules #[{ module := `Init }] {}
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "Standard export requires the pinned Lean 4.35.0 commit")
+  if spec.eraseAutoParams then checkFloatAnnotationPolicy native
   let originalBoundary := spec.boundary.foldl
     (fun (names : Lean.NameSet) name => names.insert (PsKernelLean.toLeanName name)) {}
   let originalBase := spec.baseDeclarations.filter

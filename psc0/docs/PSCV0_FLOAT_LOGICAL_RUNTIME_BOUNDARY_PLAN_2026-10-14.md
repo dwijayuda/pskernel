@@ -152,3 +152,7 @@ This section describes the **candidate implementation contract**, not a
 successful F0 kernel qualification. Any CI failure leaves the last fully
 green `/61` executable at `64a79a738d279e973839c624468fbec222212eb5`
 unchanged for release claims.
+
+## Positive and negative kernel qualification of annotation-erasure exporter
+
+The standalone candidate passed all 24 Linux gates at `9b5f04ed5b87707410dd859a247e0d724f326cc8`, run `38531327231`. It contained 51 entries / 8 compared iota rules with no new axioms and no changed selected /61 Standard. The next opt-in authoring negative fixture exercises: (1) genuine upstream `Format.mk` full `autoParam` removal; (2) preservation of real `Lean.Syntax` reference; (3) preservation of partially applied `autoParam`; (4) preservation of `optParam`; and (5) an independently forged `Format.mk` signature that the pinned kernel must refuse. All negatives and full Linux regression must pass before the candidate can be frozen. Runtime Float remains unavailable.

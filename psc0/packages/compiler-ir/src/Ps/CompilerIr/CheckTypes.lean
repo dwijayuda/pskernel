@@ -40,7 +40,8 @@ def psIrCheckPrimitive (type : PsVerifiedIrPrimitiveType) :
   match type with
   | .nat => Except.ok Unit.unit
   | .int => Except.ok Unit.unit
-  | .uint8 | .uint16 | .uint32 | .uint64 => Except.ok Unit.unit
+  | .uint8 | .uint16 | .uint32 | .uint64
+  | .int8 | .int16 | .int32 | .int64 => Except.ok Unit.unit
   | .bool => Except.ok Unit.unit
   | .char => Except.ok Unit.unit
   | .string => Except.ok Unit.unit
@@ -413,6 +414,23 @@ def psIrUnsignedType (type : PsVerifiedIrMachineIntegerType) :
   | .uint64 => .ok (.primitive .uint64)
   | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "unsigned-width")
 
+-- The signed and unsigned fixed-width carriers have distinct checked
+-- canonical ranges; platform-size carriers remain unqualified until their
+-- explicit target-width contract is available at the IR boundary.
+def psIrSignedType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  match type with
+  | .int8 => .ok (.primitive .int8)
+  | .int16 => .ok (.primitive .int16)
+  | .int32 => .ok (.primitive .int32)
+  | .int64 => .ok (.primitive .int64)
+  | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "signed-width")
+
+def psIrMachineType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  if psIrMachineIntegerIsSigned type then psIrSignedType type
+  else psIrUnsignedType type
+
 def psIrCheckLiteralType
     (literal : PsVerifiedIrLiteral) :
     Except PsIrCheckIssue PsVerifiedIrType :=
@@ -422,10 +440,14 @@ def psIrCheckLiteralType
   | .integer _ =>
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int)
   | .machineInteger type value => do
-      let result ← psIrUnsignedType type
-      let bits := match type with
-        | .uint8 => 8 | .uint16 => 16 | .uint32 => 32 | .uint64 => 64 | _ => 0
-      if value < 0 || value ≥ Int.ofNat (2 ^ bits) then
+      let result ← psIrMachineType type
+      let some bits := psIrMachineIntegerFixedWidth type
+        | throw (psIrCheckIssue "scalar-capability-unqualified" "platform-width")
+      if psIrMachineIntegerIsSigned type then
+        let bound := Int.ofNat (2 ^ (bits - 1))
+        if value < -bound || value ≥ bound then
+          throw (psIrCheckIssue "machine-integer-literal-range" "signed-canonical")
+      else if value < 0 || value ≥ Int.ofNat (2 ^ bits) then
         throw (psIrCheckIssue "machine-integer-literal-range" "unsigned-canonical")
       return result
   | .string _ =>
@@ -497,13 +519,15 @@ def psIrCheckIntrinsicSignature
   | .stringHash => psIrCheckSignatureNoTypes typeArguments [string] (.primitive .uint64)
   | .unsignedOfNat type => do
       psIrCheckSignatureNoTypes typeArguments [nat] (← psIrUnsignedType type)
+  | .signedOfNat type => do
+      psIrCheckSignatureNoTypes typeArguments [nat] (← psIrSignedType type)
   | .unsignedToNat type => do
       psIrCheckSignatureNoTypes typeArguments [← psIrUnsignedType type] nat
   | .machineIntBinary type _ => do
-      let value ← psIrUnsignedType type
+      let value ← psIrMachineType type
       psIrCheckSignatureNoTypes typeArguments [value, value] value
   | .machineIntCompare type _ => do
-      let value ← psIrUnsignedType type
+      let value ← psIrMachineType type
       psIrCheckSignatureNoTypes typeArguments [value, value] bool
   | .floatBinary _ _ =>
       Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")

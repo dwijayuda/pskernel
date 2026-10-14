@@ -573,3 +573,21 @@ all existing negative conformance; neither automatically enables runtime IR.
 CI [38547078451](https://github.com/dwijayuda/pskernel/actions/runs/38547078451) at `189b89b94d9d2f9bf705c6a7eda6ed30aca96d90` independently accepted six `Float.toBits`/`Float32.toBits` Core declarations, zero new axioms, but **refused** the larger signed root selection. The error is real: native `Int.add_zero`, `Int.neg_neg`, `Int.natCast_*` and similar proof bodies exhibit application/declaration type mismatches against PSCV0's selected Int model, leaving other recursive arithmetic dependencies blocked. It is not a reason to turn Int lemmas into axioms or to disable kernel validation.
 
 The next isolated candidate selects the pure BitVec-backed signed width operations (`ofNat`, `toBitVec`, `ofBitVec`, add/sub/mul/div/mod, neg/complement and bitwise Boolean operators) for Int8/16/32/64. Int-valued conversion, signed shifts, comparisons and general `OfNat` registrations remain unselected until their exact native logical and checked-Int dependencies can be reconciled. A green candidate alone does not grant runtime execution. F1 read-only Float projections are captured as an independently reproducible native asset.
+
+## M2+A signed fixed-width runtime implementation — qualification pending
+
+After the 62-declaration checked signed BitVec operation stage, the common typed
+IR now admits portable signed `Int8/16/32/64`, still **refusing** target-sized
+`ISize/USize` and floating primitives. The same machine arithmetic intrinsic
+and width plan serve unsigned and signed values; a new `signedOfNat` intrinsic
+is explicitly typed, uses two's-complement low bits, and has target-specific
+ECMAScript BigInt.asIntN, Rust wrapping casts and Wasm GC natural-limb
+low-word lowering. Signed literal ranges are independently checked; a signed
+complement constant uses canonical -1, not an illegal unsigned all-ones
+literal. Canonical ABI planning, WIT primitive codes and signed narrow loads
+share one signed scalar descriptor, extending i8/i16 from linear ABI memory
+via sign extension. This is an **implementation checkpoint**, not qualified
+backend parity or a completed M2+A exit; Linux integration and differential
+native-oracle checks remain mandatory. Primary pinned sources:
+`Init/Data/SInt/Basic.lean`, `Init/Data/BitVec/Basic.lean`,
+`src/include/lean/lean.h`, `tests/elab/test_extern_int.lean`.

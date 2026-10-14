@@ -35,8 +35,9 @@ def representation : PsVerifiedIrType → Except String PsWasmValueType
   | .primitive .int => pure integerType
   | .primitive .string => pure stringType
   | .primitive .bool | .primitive .char | .primitive .unit
-  | .primitive .uint8 | .primitive .uint16 | .primitive .uint32 => pure .i32
-  | .primitive .uint64 => pure .i64
+  | .primitive .uint8 | .primitive .uint16 | .primitive .uint32
+  | .primitive .int8 | .primitive .int16 | .primitive .int32 => pure .i32
+  | .primitive .uint64 | .primitive .int64 => pure .i64
   | .named "Array" [_] => pure arrayType
   | .named name _ => pure (.refT name)
   | .function .. => pure closureType

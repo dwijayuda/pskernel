@@ -106,6 +106,7 @@ inductive PsVerifiedIrIntrinsic where
   | hashMix
   | stringHash
   | unsignedOfNat (type : PsVerifiedIrMachineIntegerType)
+  | signedOfNat (type : PsVerifiedIrMachineIntegerType)
   | unsignedToNat (type : PsVerifiedIrMachineIntegerType)
   | machineIntBinary
       (type : PsVerifiedIrMachineIntegerType)

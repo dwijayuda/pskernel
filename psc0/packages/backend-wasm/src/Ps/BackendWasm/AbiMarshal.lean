@@ -16,6 +16,14 @@ private def load (pointer : R) := o (.memory .load32) [pointer]
 private def store (pointer value : R) := o (.memory .store32) [pointer, value]
 private def trap : R := o .unreachable []
 
+-- Canonical ABI loads for signed narrow scalars must sign-extend the packed
+-- memory representation; zero-extension would silently change negative values.
+private def abiScalarRead (scalar : WitScalar) (value : R) : R :=
+  match scalar with
+  | .s8 => o .i32Extend8S [value]
+  | .s16 => o .i32Extend16S [value]
+  | _ => value
+
 def abiHelper (direction : String) (node : AbiNode) := "__ps_abi_" ++ direction ++ "_" ++ psCodegenBaseName node.name
 
 def abiRepresentation (node : AbiNode) : Except String PsWasmValueType :=
@@ -77,7 +85,8 @@ def abiMarshalNode (plan : AbiPlan) (node : AbiNode) : Except String (List Runti
         | .bool => c "__ps_abi_check_bool" [value]
         | .char => c "__ps_abi_check_char" [value]
         | _ => value
-      pure (validate (o (.memory memoryOp) [pointer]), o (.memory storeOp) [pointer, validate value])
+      pure (validate (abiScalarRead scalar (o (.memory memoryOp) [pointer])),
+        o (.memory storeOp) [pointer, validate value])
     | .string => do
       loadLocals := [("buffer", bytesType), ("count", .i32), ("data", .i32)]
       storeLocals := [("buffer", bytesType), ("data", .i32)]
@@ -231,7 +240,8 @@ def abiSingleResult (plan : AbiPlan) : Nat → Nat → R → Except String R
     let node ← abiNode plan id
     if node.flat.length != 1 then throw "PSCV0-ABI-PLAN: result must have one flat slot"
     match node.shape with
-    | .scalar scalar => return o (.memory scalar.loadOp) [pointer]
+    | .scalar scalar =>
+      return abiScalarRead scalar (o (.memory scalar.loadOp) [pointer])
     | .variant _ _ _ tagSize =>
       return o (.memory (if tagSize == 1 then .load8 else if tagSize == 2 then .load16 else .load32)) [pointer]
     | .record _ fields | .payload fields =>

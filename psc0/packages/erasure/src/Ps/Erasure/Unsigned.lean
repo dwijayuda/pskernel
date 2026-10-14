@@ -8,6 +8,21 @@ def psErasureUnsignedWidth (owner : PsName) : Option PsVerifiedIrMachineIntegerT
   | "UInt32" => some .uint32 | "UInt64" => some .uint64
   | _ => none
 
+-- Native SInt/Basic.lean models a signed word as the same-width two's
+-- complement UInt carrier. This selects only the separately kernel-checked
+-- four portable widths, never target-sized ISize.
+def psErasureSignedWidth (owner : PsName) : Option PsVerifiedIrMachineIntegerType :=
+  match psNameToString owner with
+  | "Int8" => some .int8 | "Int16" => some .int16
+  | "Int32" => some .int32 | "Int64" => some .int64
+  | _ => none
+
+def psErasureSignedBinary : String → Option PsVerifiedIrIntegerBinaryOp
+  | "add" => some .add | "sub" => some .sub | "mul" => some .mul
+  | "div" => some .div | "mod" => some .mod
+  | "land" => some .bitAnd | "lor" => some .bitOr | "xor" => some .bitXor
+  | _ => none
+
 def psErasureUnsignedBinary : String → Option PsVerifiedIrIntegerBinaryOp
   | "add" => some .add | "sub" => some .sub | "mul" => some .mul
   | "div" => some .div | "mod" => some .mod
@@ -25,6 +40,13 @@ def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
       | "neg" | "complement" => some 1
       | "add" | "sub" | "mul" | "div" | "mod" | "land" | "lor" | "xor"
       | "shiftLeft" | "shiftRight" => some 2
+      | _ => none
+    else if (psErasureSignedWidth owner).isSome then
+      match method with
+      | "ofNat" | "ofBitVec" => some 1
+      | "neg" | "complement" => some 1
+      | "add" | "sub" | "mul" | "div" | "mod"
+      | "land" | "lor" | "xor" => some 2
       | _ => none
     else if psNameToString owner == "BitVec" then
       match method with
@@ -88,6 +110,24 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
       return some (← psEraseUnsignedProjection scope width (← erase value))
     | "toFin", [value] =>
       return some (← psEraseBoundedWrap scope (.intrinsic (.unsignedToNat width) [] [← erase value]) false)
+    | _, _ => return none
+  else if let some width := psErasureSignedWidth owner then
+    if let some operation := psErasureSignedBinary method then
+      let [left, right] := view.args | throw .unsupportedApplication
+      return some (.intrinsic (.machineIntBinary width operation) []
+        [← erase left, ← erase right])
+    match method, view.args with
+    | "ofNat", [value] =>
+      return some (.intrinsic (.signedOfNat width) [] [← erase value])
+    | "ofBitVec", [value] =>
+      return some (.intrinsic (.signedOfNat width) []
+        [← psEraseBitVecNatural scope (← erase value)])
+    | "neg", [value] =>
+      return some (.intrinsic (.machineIntBinary width .sub) []
+        [.literal (.machineInteger width 0), ← erase value])
+    | "complement", [value] =>
+      return some (.intrinsic (.machineIntBinary width .bitXor) []
+        [← erase value, .literal (.machineInteger width (-1))])
     | _, _ => return none
   else if psNameToString owner == "BitVec" then
     match method, view.args with

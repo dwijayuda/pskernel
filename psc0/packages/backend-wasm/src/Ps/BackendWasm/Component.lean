@@ -4,23 +4,33 @@ import Ps.Codegen.Api
 namespace PsWasm
 
 inductive WitScalar where
-  | bool | u8 | u16 | u32 | u64 | char
+  | bool | s8 | u8 | s16 | u16 | s32 | u32 | s64 | u64 | char
   deriving BEq
 
 def WitScalar.name : WitScalar → String
-  | .bool => "bool" | .u8 => "u8" | .u16 => "u16" | .u32 => "u32" | .u64 => "u64" | .char => "char"
+  | .bool => "bool" | .s8 => "s8" | .u8 => "u8"
+  | .s16 => "s16" | .u16 => "u16" | .s32 => "s32" | .u32 => "u32"
+  | .s64 => "s64" | .u64 => "u64" | .char => "char"
 
 def WitScalar.byte : WitScalar → UInt8
-  | .bool => 0x7f | .u8 => 0x7d | .u16 => 0x7b | .u32 => 0x79 | .u64 => 0x77 | .char => 0x74
+  | .bool => 0x7f | .s8 => 0x7e | .u8 => 0x7d
+  | .s16 => 0x7c | .u16 => 0x7b | .s32 => 0x7a | .u32 => 0x79
+  | .s64 => 0x78 | .u64 => 0x77 | .char => 0x74
 
 def WitScalar.coreType : WitScalar → PsWasmValueType
-  | .u64 => .i64 | _ => .i32
+  | .u64 | .s64 => .i64 | _ => .i32
 
 def WitScalar.loadOp : WitScalar → PsWasmMemoryOp
-  | .bool | .u8 => .load8 | .u16 => .load16 | .u64 => .load64 | _ => .load32
+  | .bool | .u8 | .s8 => .load8
+  | .u16 | .s16 => .load16
+  | .u64 | .s64 => .load64
+  | _ => .load32
 
 def WitScalar.storeOp : WitScalar → PsWasmMemoryOp
-  | .bool | .u8 => .store8 | .u16 => .store16 | .u64 => .store64 | _ => .store32
+  | .bool | .u8 | .s8 => .store8
+  | .u16 | .s16 => .store16
+  | .u64 | .s64 => .store64
+  | _ => .store32
 
 structure ScalarExport where
   sourceName : String
@@ -55,6 +65,8 @@ def scalarApi (api : PsPublicApi) (core : PsWasmModule) (locals : LocalNames) :
       | .primitive .char => .ok WitScalar.char
       | .primitive .uint8 => .ok WitScalar.u8 | .primitive .uint16 => .ok WitScalar.u16
       | .primitive .uint32 => .ok WitScalar.u32 | .primitive .uint64 => .ok WitScalar.u64
+      | .primitive .int8 => .ok WitScalar.s8 | .primitive .int16 => .ok WitScalar.s16
+      | .primitive .int32 => .ok WitScalar.s32 | .primitive .int64 => .ok WitScalar.s64
       | _ => .error ("PSCV0-WIT-SCALAR-PLAN: scalar interface required: " ++ d.name)
     let parameters ← d.parameters.mapM fun p => do return (witName p.name, ← type p.type)
     if (parameters.map (·.1)).eraseDups.length != parameters.length then

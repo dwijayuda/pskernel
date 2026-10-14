@@ -67,6 +67,13 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
       | _ => throw "PSCV0-ECMA: unsupported unsigned width"
     let wrapped := call "BigInt.asUintN" [num width, value]
     pure (match type with | .uint64 => wrapped | _ => call "Number" [wrapped])
+  | .signedOfNat type, [value] => do
+    let some width := psIrMachineIntegerFixedWidth type
+      | throw "PSCV0-ECMA: signed platform width is not qualified"
+    unless psIrMachineIntegerIsSigned type do
+      throw "PSCV0-ECMA: signedOfNat requires a signed width"
+    let wrapped := call "BigInt.asIntN" [num width, value]
+    pure (if width == 64 then wrapped else call "Number" [wrapped])
   | .unsignedToNat _, [value] => pure (call "BigInt" [value])
   | .machineIntBinary type op, [a,b] => machineBinary type op a b
   | .machineIntCompare _ op, [a,b] => pure (bin (compareOp op) a b)

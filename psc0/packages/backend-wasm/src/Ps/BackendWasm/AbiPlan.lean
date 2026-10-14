@@ -145,6 +145,10 @@ def planAbiType (ir : PsVerifiedIrModule) :
     | .primitive .uint16 => make (.scalar .u16) 2 2 [.i32]
     | .primitive .uint32 => make (.scalar .u32) 4 4 [.i32]
     | .primitive .uint64 => make (.scalar .u64) 8 8 [.i64]
+    | .primitive .int8 => make (.scalar .s8) 1 1 [.i32]
+    | .primitive .int16 => make (.scalar .s16) 2 2 [.i32]
+    | .primitive .int32 => make (.scalar .s32) 4 4 [.i32]
+    | .primitive .int64 => make (.scalar .s64) 8 8 [.i64]
     | .primitive .string => make .string 8 4 [.i32, .i32]
     | .primitive .nat =>
       let limbs ← addAbiNode {

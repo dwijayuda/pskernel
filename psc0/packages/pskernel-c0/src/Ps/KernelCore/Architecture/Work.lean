@@ -251,6 +251,7 @@ def psKernelC0ArchitectureAbort
 inductive PsKernelC0ArchitectureDeclaration where
   | axiomDecl (info : PsKernelAxiomInfo)
   | definition (info : PsKernelDefinitionInfo)
+  | mutualDefinitions (values : List PsKernelDefinitionInfo)
   | theoremDecl (info : PsKernelTheoremInfo)
   | opaqueDecl (info : PsKernelOpaqueInfo)
   | quotient
@@ -277,6 +278,8 @@ def psKernelC0ArchitectureAdmit
         psKernelAddAxiom fuel environment info prior.maxRecDepth prior.maxNatSize
     | .definition info =>
         psKernelAddDefinition fuel environment info prior.maxRecDepth prior.maxNatSize
+    | .mutualDefinitions values =>
+        psKernelAddMutualDefinitions fuel environment values prior.maxRecDepth prior.maxNatSize
     | .theoremDecl info =>
         psKernelAddTheorem fuel environment info prior.maxRecDepth prior.maxNatSize
     | .opaqueDecl info =>

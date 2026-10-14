@@ -42,6 +42,8 @@ def admitCanonicalAdmissions
       let preludeResult ← buildLeanPreludeEnvironment
       match preludeResult with
       | .error error => pure (.error error)
-      | .ok env => pure (admitDeclarations env declarations)
+      | .ok env =>
+           withFreshKernelHeartbeatScope fun _ =>
+             admitDeclarations env declarations
 
 end PsKernelLean

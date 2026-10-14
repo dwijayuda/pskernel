@@ -27,6 +27,7 @@ def psErasureSignedBinary : String → Option PsVerifiedIrIntegerBinaryOp
   | "add" => some .add | "sub" => some .sub | "mul" => some .mul
   | "div" => some .div | "mod" => some .mod
   | "land" => some .bitAnd | "lor" => some .bitOr | "xor" => some .bitXor
+  | "shiftLeft" => some .shiftLeft | "shiftRight" => some .shiftRight
   | _ => none
 
 def psErasureUnsignedBinary : String → Option PsVerifiedIrIntegerBinaryOp
@@ -53,7 +54,7 @@ def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
       | "toUInt8" | "toUInt16" | "toUInt32" | "toUInt64" => some 1
       | "neg" | "complement" => some 1
       | "add" | "sub" | "mul" | "div" | "mod"
-      | "land" | "lor" | "xor" => some 2
+      | "land" | "lor" | "xor" | "shiftLeft" | "shiftRight" => some 2
       | _ => none
     else if psNameToString owner == "BitVec" then
       match method with

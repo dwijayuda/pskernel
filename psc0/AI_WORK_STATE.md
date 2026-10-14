@@ -1,5 +1,11 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — signed shift candidate; ofInt now qualified
+
+The four wrapping `Int8/16/32/64.ofInt` declarations are **fully green** at commit `75b8787584339f3ea54d5b673aa3211f37589329`, [Linux 38567308280](https://github.com/dwijayuda/pskernel/actions/runs/38567308280). Selected Standard 1,687 declarations, 23 classes, 189 instances; independently measured FNV `fnv1a64:18408272372580449619` and SHA-256 `sha256:52a6343fe02345259225f17386182d73cf452bb6df5b44987e79b80468aee543`; 479 JS/TS/Rust shared observations, Wasm GC and Wasmtime component host qualified. Pinned native Lean signed oracle 30 values, seven typed-IR negative checks.
+
+**New candidate, NOT yet qualified:** Int8/16/32/64.shiftLeft/shiftRight via constructive fixed-width Nat arithmetic that implements the pinned signed shift count `b.toBitVec.smod width` using bit-pattern modulo (width divides 2^width), modulo-width left shift, and arithmetic right shift with high-bit sign fill. Generic typed signed machine shifts already exist in JS/Rust/Wasm and are enabled in signed erasure; 16 official native Lean reference cases and 16 source/executable all-target vectors were added. Any snapshot drift must be independently observed, the root causes of any failures resolved, and full CI green before claiming support. No new axioms, extra TCB, host-width assumption, pskernel-core, self-hosting or C5.
+
 ## 14 October — M2+A signed ofInt candidate (qualification pending)
 
 Last fully green branch HEAD is `b4f52e25973d1c9e5623ed8f247757b739a9939d`, [Linux 38564371025](https://github.com/dwijayuda/pskernel/actions/runs/38564371025): strict selected Standard 1,683 declarations / 23 classes / 189 instances, independently checked FNV `fnv1a64:12853239104520417295` and SHA-256 `sha256:7b6a29baea2279dc88dd94de1635937a23befd79830330874daeb5fdad778c43`; 467 common-source runtime observations through JS/TS/Rust, Wasm GC and Wasmtime qualification passed. The preceding signed `toInt` semantic drift and source-newline failures have been resolved without relaxing any guard.

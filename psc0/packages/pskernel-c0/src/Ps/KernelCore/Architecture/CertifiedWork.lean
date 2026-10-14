@@ -329,3 +329,117 @@ def psKernelC0CertifiedWorkCommitChecked
       checkedWork nextSession
     typed := receipt :: typed
   return (owner, typed.reverse, checkedWork)
+
+
+/-!
+Phase E: proof-carrying, source-exact candidate-to-accepting WHNF bridge.
+
+A candidate can be selected as the returned WHNF expression ONLY when Lean's
+propositional equality proves that it is exactly the value of the successful
+source WHNF operation. Source checking runs first and provides the only state
+transition. Candidate decline or disagreement is never a kernel rejection.
+This conservatively establishes an accepting integration seam, not an
+independent or faster kernel; eliminating the source check will require a
+general source-refinement theorem for the selected optimized evaluator.
+-/
+
+/-- An observation whose successful branch has a *propositional* source-
+    expression equality witness. Boolean equality or matching hashes are
+    deliberately insufficient. Declines and mismatches are not verdicts. -/
+inductive PsKernelC0WhnfCrossCheck (source : PsKernelExpr) where
+  | agreed (candidate : { value : PsKernelExpr // value = source })
+  | mismatch (candidate : PsKernelExpr)
+  | declined (reason : String)
+
+/-- The exact result of the source-owned, certified WHNF operation, paired
+    with independent candidate evidence. Constructing this receipt without
+    a source-result proof is impossible in Lean's ordinary safe fragment. -/
+structure PsKernelC0WhnfRefinementReceipt
+    (fuel : Nat)
+    (before : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) where
+  sourceValue : PsKernelExpr
+  sourceWork : PsKernelC0CertifiedWork
+  sourceCheck :
+    psKernelC0CertifiedWorkWhnf fuel before expr =
+      .ok (sourceValue, sourceWork)
+  candidate : PsKernelC0WhnfCrossCheck sourceValue
+
+/-- Run source WHNF *once*, then independently evaluate the bounded
+    closure/demand implementation under the same starting context.
+    The candidate must have exactly the same source expression, including
+    binder names, annotations and metadata. A mismatch or budget decline
+    does not change the source checker session or its error classification. -/
+def psKernelC0CertifiedWorkRefineWhnf
+    (fuel quota : Nat)
+    (before : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0WhnfRefinementReceipt fuel before expr) :=
+  match h : psKernelC0CertifiedWorkWhnf fuel before expr with
+  | .error reason => .error reason
+  | .ok (sourceValue, sourceWork) =>
+      let crossCheck : PsKernelC0WhnfCrossCheck sourceValue :=
+        match psKernelC0ArchitectureCandidateDemandMetered
+            fuel quota before.raw.checker.context expr with
+        | .error reason => .declined reason
+        | .ok (candidate, _, _) =>
+            if eq : candidate = sourceValue then
+              .agreed ⟨candidate, eq⟩
+            else
+              .mismatch candidate
+      .ok {
+        sourceValue := sourceValue
+        sourceWork := sourceWork
+        sourceCheck := h
+        candidate := crossCheck
+      }
+
+/-- Selecting a candidate changes the returned expression only when an
+    exact source-equality proof accompanies it. Otherwise return the source
+    expression directly, with the already source-checked session. -/
+def psKernelC0WhnfReceiptValue
+    {fuel : Nat}
+    {before : PsKernelC0CertifiedWork}
+    {expr : PsKernelExpr}
+    (receipt : PsKernelC0WhnfRefinementReceipt fuel before expr) :
+    PsKernelExpr :=
+  match receipt.candidate with
+  | .agreed proof => proof.val
+  | .mismatch _ => receipt.sourceValue
+  | .declined _ => receipt.sourceValue
+
+/-- The candidate-selected WHNF is definitionally no more powerful than
+    source WHNF: Lean equality (not an external candidate bit) is required. -/
+theorem psKernelC0WhnfReceiptValue_source
+    {fuel : Nat}
+    {before : PsKernelC0CertifiedWork}
+    {expr : PsKernelExpr}
+    (receipt : PsKernelC0WhnfRefinementReceipt fuel before expr) :
+    psKernelC0WhnfReceiptValue receipt = receipt.sourceValue := by
+  cases receipt.candidate with
+  | agreed proof => exact proof.property
+  | mismatch _ => rfl
+  | declined _ => rfl
+
+/-- Exact successful source WHNF and its checker state are preserved by
+    the candidate selection; the receipt is *not* a theorem/proof verdict. -/
+theorem psKernelC0WhnfReceipt_sourceCheck
+    {fuel : Nat}
+    {before : PsKernelC0CertifiedWork}
+    {expr : PsKernelExpr}
+    (receipt : PsKernelC0WhnfRefinementReceipt fuel before expr) :
+    psKernelC0CertifiedWorkWhnf fuel before expr =
+      .ok (psKernelC0WhnfReceiptValue receipt, receipt.sourceWork) := by
+  rw [psKernelC0WhnfReceiptValue_source receipt]
+  exact receipt.sourceCheck
+
+/-- Opt-in checked work entry. Only the exact-proved candidate value can
+    replace source WHNF; a declined or mismatched candidate never rejects,
+    authorizes a proof, or mutates the source-checked environment. -/
+def psKernelC0CertifiedWorkWhnfRefined
+    (fuel quota : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0CertifiedWork) := do
+  let receipt ← psKernelC0CertifiedWorkRefineWhnf fuel quota work expr
+  return (psKernelC0WhnfReceiptValue receipt, receipt.sourceWork)

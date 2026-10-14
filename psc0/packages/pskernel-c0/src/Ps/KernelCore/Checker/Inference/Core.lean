@@ -1,4 +1,4 @@
-import Ps.KernelCore.Checker.Inference.Let
+import Ps.KernelCore.Checker.Inference.Projection
 
 /-
 Syntax-directed core inference.
@@ -239,40 +239,8 @@ def psKernelInferCoreWithFuelUsingSourceFrames
                       nextContext state name type value body nondep
                       inferOnly currentFrames currentHash
                 | PsKernelExpr.proj typeName index structValue =>
-                    let inferType :=
-                      fun
-                        (projectionContext : PsKernelCheckerContext)
-                        (projectionState : PsKernelCheckerState)
-                        (projectionExpr : PsKernelExpr) =>
-                        smaller [] []
-                          whnf
-                          defeq
-                          projectionContext
-                          projectionState
-                          projectionExpr
-                          inferOnly;
-                    match
-                        psKernelInferProjectionWith
-                          whnf
-                          inferType
-                          nextContext
-                          state
-                          typeName
-                          index
-                          structValue with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok projectionResult =>
-                        let result :=
-                          Prod.fst projectionResult;
-                        Except.ok
-                          (Prod.mk
-                            result
-                            (psKernelCacheInferResult
-                              (Prod.snd projectionResult)
-                              inferOnly
-                              expr
-                              result))
+                    psKernelInferProjectionHead smaller whnf defeq
+                      nextContext state typeName index structValue inferOnly
 
 
 /-- The same recursive typing rules, with optional operation-local exact

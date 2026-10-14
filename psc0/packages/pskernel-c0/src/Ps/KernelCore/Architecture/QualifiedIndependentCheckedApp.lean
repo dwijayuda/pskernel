@@ -247,6 +247,41 @@ def psKernelC0RecursiveCheckedAppWithFuel :
                                   (.app fn arg) codomain)
                             else none
                     | _ => none
+      | .lam name domain body binderInfo =>
+          let term : PsKernelExpr := .lam name domain body binderInfo
+          -- The original checked-app hook may precompute immutable
+          -- summaries of long binder spines. Keep that source route
+          -- authoritative, including its exact state/resource effects.
+          if psKernelC0HasBinderPrefix 12 true term then none
+          else
+            match psKernelCheckerContextEnterRecDepth context with
+            | .error _ => none
+            | .ok entered =>
+                match psKernelC0RecursiveCheckedAppWithFuel
+                    remaining entered state domain with
+                | some (.sort _, domainState) =>
+                    let freshResult := psKernelCheckerStateFreshName
+                      domainState name
+                    let fresh := freshResult.fst
+                    let state1 := freshResult.snd
+                    let childLocal := psKernelLocalContextAddLocal
+                      entered.localContext fresh name domain binderInfo
+                    let child := psKernelCheckerContextWithLocalContext
+                      entered childLocal
+                    let openedBody := psKernelExprInstantiate1 body
+                      (.fvar fresh)
+                    match psKernelC0RecursiveCheckedAppWithFuel
+                        remaining child state1 openedBody with
+                    | some (bodyType, bodyState) =>
+                        let reducedBody := psKernelExprCheapBetaReduce bodyType
+                        let closedBody := psKernelExprAbstractFVars
+                          reducedBody [fresh]
+                        let ty : PsKernelExpr :=
+                          .forallE name domain closedBody binderInfo
+                        some (ty, psKernelCacheInferResult bodyState false
+                          term ty)
+                    | none => none
+                | _ => none
       | .forallE name domain body binderInfo =>
           let term : PsKernelExpr := .forallE name domain body binderInfo
           -- Pinned C0 source optimizes binder spines of length >=12
@@ -443,6 +478,137 @@ theorem psKernelC0RecursiveCheckedApp_source
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.const name levels) false result
             (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+      | lam name domain body binderInfo =>
+          let term : PsKernelExpr := .lam name domain body binderInfo
+          by_cases hlong : psKernelC0HasBinderPrefix 12 true term = true
+          · simp [psKernelC0RecursiveCheckedAppWithFuel,
+              hlong, term] at h
+          · cases depth : psKernelCheckerContextEnterRecDepth context with
+            | error reason =>
+                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                  hlong, depth, term] at h
+            | ok entered =>
+                cases hd : psKernelC0RecursiveCheckedAppWithFuel
+                    remaining entered state domain with
+                | none =>
+                    simp [psKernelC0RecursiveCheckedAppWithFuel,
+                      hlong, depth, hd, term] at h
+                | some domainResult =>
+                    cases domainResult with
+                    | mk domainType domainState =>
+                        cases domainType with
+                        | sort domainLevel =>
+                            let freshResult :=
+                              psKernelCheckerStateFreshName domainState name
+                            let fresh := freshResult.fst
+                            let state1 := freshResult.snd
+                            let childLocal := psKernelLocalContextAddLocal
+                              entered.localContext fresh name domain binderInfo
+                            let child := psKernelCheckerContextWithLocalContext
+                              entered childLocal
+                            let openedBody := psKernelExprInstantiate1 body
+                              (.fvar fresh)
+                            cases hb : psKernelC0RecursiveCheckedAppWithFuel
+                                remaining child state1 openedBody with
+                            | none =>
+                                simp [psKernelC0RecursiveCheckedAppWithFuel,
+                                  hlong, depth, hd, hb, term, child,
+                                  openedBody, freshResult, fresh, state1,
+                                  childLocal] at h
+                            | some bodyResult =>
+                                cases bodyResult with
+                                | mk bodyType bodyState =>
+                                    let reducedBody :=
+                                      psKernelExprCheapBetaReduce bodyType
+                                    let closedBody :=
+                                      psKernelExprAbstractFVars reducedBody [fresh]
+                                    let ty : PsKernelExpr :=
+                                      .forallE name domain closedBody binderInfo
+                                    let nextState :=
+                                      psKernelCacheInferResult
+                                        bodyState false term ty
+                                    have hr : result = (ty, nextState) := by
+                                      have hx : some (ty, nextState) =
+                                          some result := by
+                                        simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                                          hlong, depth, hd, hb, term, child,
+                                          openedBody, freshResult, fresh,
+                                          state1, childLocal, reducedBody,
+                                          closedBody, ty, nextState] using h
+                                      exact (Option.some.inj hx).symm
+                                    have sourceDomain :
+                                        psKernelInferCoreWithFuelUsingSourceFrames
+                                          remaining onCheckedApp [] []
+                                          whnf defeq entered state domain false =
+                                          .ok (.sort domainLevel, domainState) := by
+                                      change psKernelInferCoreWithFuelUsing
+                                        remaining onCheckedApp whnf defeq
+                                        entered state domain false =
+                                          .ok (.sort domainLevel, domainState)
+                                      exact ih entered state domain
+                                        (.sort domainLevel, domainState) hd
+                                    have sourceBody :
+                                        psKernelInferCoreWithFuelUsingSourceFrames
+                                          remaining onCheckedApp [] []
+                                          whnf defeq child state1 openedBody false =
+                                          .ok (bodyType, bodyState) := by
+                                      change psKernelInferCoreWithFuelUsing
+                                        remaining onCheckedApp whnf defeq
+                                        child state1 openedBody false =
+                                          .ok (bodyType, bodyState)
+                                      exact ih child state1 openedBody
+                                        (bodyType, bodyState) hb
+                                    rw [hr]
+                                    change
+                                      psKernelInferCoreWithFuelUsingSourceFrames
+                                        (Nat.succ remaining) onCheckedApp [] []
+                                        whnf defeq context state term false =
+                                          .ok (ty, nextState)
+                                    cases onCheckedApp with
+                                    | none =>
+                                        simpa [psKernelInferCoreWithFuelUsingSourceFrames,
+                                          psKernelInferCacheEligible,
+                                          psKernelInferCurrentBinderRanges,
+                                          psKernelInferLambdaHead,
+                                          psKernelEnsureSortWith,
+                                          hlong, depth, sourceDomain,
+                                          sourceBody, term, child,
+                                          openedBody, freshResult, fresh,
+                                          state1, childLocal, reducedBody,
+                                          closedBody, ty, nextState]
+                                    | some hook =>
+                                        simpa [psKernelInferCoreWithFuelUsingSourceFrames,
+                                          psKernelInferCacheEligible,
+                                          psKernelInferCurrentBinderRanges,
+                                          psKernelInferLambdaHead,
+                                          psKernelEnsureSortWith,
+                                          hlong, depth, sourceDomain,
+                                          sourceBody, term, child,
+                                          openedBody, freshResult, fresh,
+                                          state1, childLocal, reducedBody,
+                                          closedBody, ty, nextState]
+                        | bvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | fvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | mvar _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | const _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | app _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | lam _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | forallE _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | letE _ _ _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | lit _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | mdata _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
+                        | proj _ _ _ => simp [psKernelC0RecursiveCheckedAppWithFuel,
+                            hlong, depth, hd, term] at h
       | forallE name domain body binderInfo =>
           let term : PsKernelExpr := .forallE name domain body binderInfo
           by_cases hlong : psKernelC0HasBinderPrefix 12 false term = true
@@ -686,11 +852,6 @@ theorem psKernelC0RecursiveCheckedApp_source
       | mvar name =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.mvar name) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
-      | lam name dom body info =>
-          exact psKernelC0MetadataInfer_source (Nat.succ remaining)
-            onCheckedApp whnf defeq context state
-            (.lam name dom body info) false result
             (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
       | letE name ty value body nondep =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)

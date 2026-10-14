@@ -160,6 +160,7 @@ theorem psKernelC0ConstPostDeltaSome_source
       | .ok result =>
           psKernelWhnfFinish original result.fst result.snd := by
   simp [psKernelWhnfAfterCore, psKernelReduceNatWith, hdelta]
+  rfl
 
 /-- Full source-refinement of the NEW compositional public WHNF
     controller. All successful direct and nested delta/beta/zeta paths

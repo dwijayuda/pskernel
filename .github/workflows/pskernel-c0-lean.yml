@@ -18,6 +18,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0SealedAuditedStateRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0VerifiedSessionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0VerifiedProviderRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0VerifiedProviderPublicationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkPerfMicrobench.lean'
@@ -126,6 +127,9 @@ jobs:
       - name: C0 provider-compatible verified admission and resource policy
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0VerifiedProviderRegression.lean
+      - name: C0 provider public atomic checked-root publication and foundation policy
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0VerifiedProviderPublicationRegression.lean
       - name: C0 typed K/eta on source-admitted inductive declarations
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0TypedEliminationRegression.lean

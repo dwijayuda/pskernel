@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.QualifiedLocalInference
+import Ps.KernelCore.Architecture.QualifiedConstantInference
 
 /-!
 Phase E: proof-carrying SOURCE admission provenance.
@@ -166,7 +166,7 @@ def psKernelC0TrustedSourceInfer
     (work : PsKernelC0TrustedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
-  match psKernelC0CertifiedWorkInferWithLocalsOwned
+  match psKernelC0CertifiedWorkInferWithConstantsOwned
       fuel work.certified expr with
   | .error reason => .error reason
   | .ok receipt =>
@@ -181,7 +181,7 @@ def psKernelC0TrustedSourceCheck
     (work : PsKernelC0TrustedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0TrustedSourceWork) :=
-  match psKernelC0CertifiedWorkCheckWithLocalsOwned
+  match psKernelC0CertifiedWorkCheckWithConstantsOwned
       fuel work.certified expr with
   | .error reason => .error reason
   | .ok receipt =>

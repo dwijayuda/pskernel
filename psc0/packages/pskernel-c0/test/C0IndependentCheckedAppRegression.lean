@@ -54,6 +54,12 @@ def main : IO Unit := do
     .mdata 101 (.mdata 102 nestedFn)
   let metadataArgument : PsKernelExpr :=
     .app (.const identity []) nestedMetadata
+  let piSimple : PsKernelExpr :=
+    .forallE binder sort1 sort1 .default
+  let piDependent : PsKernelExpr :=
+    .forallE binder sort1
+      (.forallE binder (.bvar 0) (.bvar 1) .default) .default
+  let piWrapped : PsKernelExpr := .mdata 201 piDependent
   for expr in [application, wrapped] do
     let (.app fn arg) := expr
       | throw (IO.userError "independent checked app malformed test")
@@ -155,6 +161,36 @@ def main : IO Unit := do
         source.context source.state expr).isSome then
       throw (IO.userError "metadata app bypassed fuel")
 
+  -- Checked Pi formation is recursively qualified without historical
+  -- inference for either the domain or opened body, including a dependent
+  -- domain/body under two successive fresh local contexts.
+  for expr in [piSimple, piDependent, piWrapped] do
+    let some (qualifiedType, _) := psKernelC0RecursiveCheckedAppWithFuel
+        4096 source.context source.state expr
+      | throw (IO.userError "independent recursive Pi formation declined")
+    let (sourceType, _) ← match psKernelCheckerCheck
+        4096 source.context source.state expr with
+      | .ok result => pure result
+      | .error e => throw (IO.userError ("source Pi check failed: " ++ e))
+    if !psKernelExprEqual qualifiedType sourceType then
+      throw (IO.userError "independent dependent Pi type changed")
+    let some raw := psKernelC0ArchitectureBegin source
+      | throw (IO.userError "dependent Pi source genesis failed")
+    let some work := psKernelC0ArchitectureCertifyWork raw
+      | throw (IO.userError "dependent Pi certified work unavailable")
+    let checked ← match psKernelC0CertifiedWorkCheckIndependentAppOwned
+        4096 work expr with
+      | .ok receipt => pure receipt
+      | .error e => throw (IO.userError ("dependent Pi check failed: " ++ e))
+    let _sourceEquation :
+        psKernelC0CertifiedWorkCheck 4096 work expr = .ok checked.val :=
+      checked.property
+    if !psKernelExprEqual checked.val.fst sourceType then
+      throw (IO.userError "dependent Pi exact source receipt changed type")
+    if (psKernelC0RecursiveCheckedAppWithFuel 1
+        source.context source.state expr).isSome then
+      throw (IO.userError "dependent Pi bypassed recursive fuel")
+
   let mismatch : PsKernelExpr :=
     .app (.const identity []) sort1
   let unknown : PsKernelExpr :=
@@ -206,12 +242,12 @@ def main : IO Unit := do
   | _ => throw (IO.userError "provider accepted mismatched app")
   let publication ← match psKernelC0VerifiedProviderPublishRoots
       admittedCurry [application, wrapped, nestedFn, nestedArg,
-        nestedMetadata, metadataArgument] with
+        nestedMetadata, metadataArgument, piSimple, piDependent, piWrapped] with
     | .ok result => pure result
     | .error _ => throw (IO.userError "independent app root publication failed")
   let _exactPublication :=
     psKernelC0VerifiedProviderPublicationCheckExact publication
-  if publication.checked.roots.length != 6 ||
+  if publication.checked.roots.length != 9 ||
       !(psKernelC0HistoryAxiomSignatures
         publication.staged.verified.sealed.audited.trusted.history).isEmpty then
     throw (IO.userError "independent app weakened atomic audited roots")
@@ -219,5 +255,6 @@ def main : IO Unit := do
   IO.println "C0_INDEPENDENT_CHECKED_APP two_independent_child_judgments=pass"
   IO.println "C0_RECURSIVE_CHECKED_APP function_argument_trees_source_proved=pass"
   IO.println "C0_RECURSIVE_CHECKED_METADATA wrapped_application_trees_source_proved=pass"
+  IO.println "C0_RECURSIVE_CHECKED_PI dependent_binders_and_source_states=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP exact_source_errors_states_fuel=pass"
   IO.println "C0_INDEPENDENT_CHECKED_APP audited_publication=pass"

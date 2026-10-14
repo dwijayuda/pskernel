@@ -41,6 +41,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0QualifiedContextualWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedZetaWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedBetaWhnfRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0QualifiedRecursiveWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -180,6 +181,9 @@ jobs:
       - name: C0 source-proved recursive metadata full checking and atomic publication
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedMetadataInferenceRegression.lean
+      - name: C0 full source-proved recursive beta zeta WHNF
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0QualifiedRecursiveWhnfRegression.lean
       - name: C0 exact independently reduced one-step beta Sort WHNF
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedBetaWhnfRegression.lean

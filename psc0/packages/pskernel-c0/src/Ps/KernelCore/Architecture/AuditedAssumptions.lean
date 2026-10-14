@@ -429,7 +429,7 @@ def psKernelC0AuditedSourceWhnf
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) := do
-  let receipt ← psKernelC0CertifiedWorkWhnfBetaOwned
+  let receipt ← psKernelC0CertifiedWorkWhnfRecursiveOwned
     fuel work.trusted.certified expr
   let (value, checked) := receipt.val
   return (value,

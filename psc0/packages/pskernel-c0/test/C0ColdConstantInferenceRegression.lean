@@ -169,7 +169,11 @@ def main : IO Unit := do
   -- reclassify a denied input as an accepted checked term.
   let unsafeName : PsKernelName := .str .anonymous "ColdUnsafeDefinition"
   let unsafeInfo : PsKernelDefinitionInfo := {
-    base := { name := unsafeName; levelParams := []; type := sort1 }
+    base := {
+      name := unsafeName
+      levelParams := []
+      type := sort1
+    }
     value := sort0
     hints := .abbrevHint
     safety := .unsafeDef

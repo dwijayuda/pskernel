@@ -172,13 +172,18 @@ theorem psKernelC0RecursiveMetadataDefEq_source
                         depth, same, cached, child,
                         leftTerm, rightTerm, finalized] using h
                     exact (Option.some.inj hx).symm
-                  have sourceChild :=
+                  have sourceChild :
+                      psKernelIsDefEqWithFuel remaining entered state
+                        leftBody rightBody = .ok (equal, nextState) :=
                     ih entered state leftBody rightBody
                       (equal, nextState) child
                   rw [hr]
                   change psKernelIsDefEqWithFuel (Nat.succ remaining)
                     context state leftTerm rightTerm = .ok finalized
-                  simp [psKernelIsDefEqWithFuel, depth, same, cached,
+                  -- Expand the outer DefEq rule once, NOT its
+                  -- recursively proved metadata child.
+                  rw [psKernelIsDefEqWithFuel]
+                  simp [depth, same, cached,
                     psKernelDefEqQuickAfterCommon, sourceChild,
                     finalized, leftTerm, rightTerm]
 
@@ -218,18 +223,14 @@ def psKernelC0CertifiedWorkDefEqRecursiveMetadataOwned
     Except String
       { result : Bool × PsKernelC0CertifiedWork //
         psKernelC0CertifiedWorkDefEq fuel work left right = .ok result } :=
-  match left, right with
-  | .mdata _ _, .mdata _ _ =>
-      match h : psKernelC0RecursiveMetadataDefEqWithFuel fuel
-          work.raw.checker.context work.raw.checker.state
-          left right with
-      | none =>
-          psKernelC0CertifiedWorkDefEqQualifiedOwned fuel work left right
-      | some result =>
-          .ok ⟨(result.fst,
-            (psKernelC0CertifiedWorkWithStateOwned
-              work result.snd).val),
-            psKernelC0RecursiveMetadataDefEq_certified
-              fuel work left right result h⟩
-  | _, _ =>
+  match h : psKernelC0RecursiveMetadataDefEqWithFuel fuel
+      work.raw.checker.context work.raw.checker.state
+      left right with
+  | none =>
       psKernelC0CertifiedWorkDefEqQualifiedOwned fuel work left right
+  | some result =>
+      .ok ⟨(result.fst,
+        (psKernelC0CertifiedWorkWithStateOwned
+          work result.snd).val),
+        psKernelC0RecursiveMetadataDefEq_certified
+          fuel work left right result h⟩

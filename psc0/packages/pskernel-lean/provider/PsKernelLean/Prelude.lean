@@ -83,7 +83,12 @@ def withFreshKernelHeartbeatScope {ε α : Type}
   try
     match action () with
     | .ok result => return .ok result
-    | .error error => return .error error
+    | .error error =>
+      -- This is diagnostic only. A checked failure is still refused.
+      let consumed ← IO.getNumHeartbeats
+      IO.println ("PSCV0_KERNEL_HEARTBEAT_AUDIT: fresh-scope consumed=" ++
+        toString consumed ++ " restored-baseline=" ++ toString original)
+      return .error error
   finally
     IO.setNumHeartbeats original
 

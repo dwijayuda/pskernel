@@ -1,4 +1,4 @@
-import Ps.KernelCore.Checker.Inference.Binder
+import Ps.KernelCore.Checker.Inference.App
 
 /-
 Syntax-directed core inference.
@@ -13,14 +13,6 @@ is cached separately.
     fuel and context and may only replace a checked application judgment.
     The default absent hook is the independent historical recursive worker.
     Infer-only judgments never call this hook. -/
-abbrev PsKernelC0CheckedAppHook :=
-  Nat ->
-  (PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
-    Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
-  (PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
-    PsKernelExpr -> Except String (Prod Bool PsKernelCheckerState)) ->
-  PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
-  Except String (Prod PsKernelExpr PsKernelCheckerState)
 
 def psKernelInferCoreWithFuelUsingSourceFrames
     (fuel : Nat)
@@ -242,151 +234,8 @@ def psKernelInferCoreWithFuelUsingSourceFrames
                               expr
                               (Prod.fst result)))
                 | PsKernelExpr.app fn arg =>
-                    if inferOnly then
-                      -- Collect the canonical head and ordered arguments in
-                      -- one spine traversal; the length is used by both the
-                      -- budget and the infer-only exposure worker.
-                      let spine :=
-                        psKernelExprGetAppFnArgs expr;
-                      let args := spine.snd;
-                      let argCount := psKernelExprListLength args;
-                      match
-                          smaller [] []
-                            whnf
-                            defeq
-                            nextContext
-                            state
-                            spine.fst
-                            true with
-                      | Except.error error =>
-                          Except.error error
-                      | Except.ok fnResult =>
-                          match
-                              psKernelInferAppOnlyLoopWithFuelCount
-                                (Nat.succ argCount)
-                                argCount
-                                whnf
-                                nextContext
-                                (Prod.snd fnResult)
-                                args
-                                0
-                                0
-                                (Prod.fst fnResult) with
-                          | Except.error error =>
-                              Except.error error
-                          | Except.ok appResult =>
-                              Except.ok
-                                (Prod.mk
-                                  (Prod.fst appResult)
-                                  (psKernelCacheInferResult
-                                    (Prod.snd appResult)
-                                    true
-                                    expr
-                                    (Prod.fst appResult)))
-                    else
-                      -- Preserve the original checked branch as a suspended
-                      -- pure computation; never evaluate it before invoking
-                      -- the optimized route. This is the independent fallback
-                      -- for shorter checked applications and hook-free calls.
-                      let originalChecked : Unit -> Except String
-                          (Prod PsKernelExpr PsKernelCheckerState) :=
-                        fun _ =>
-                          match
-                              smaller [] []
-                                whnf
-                                defeq
-                                nextContext
-                                state
-                                fn
-                                false with
-                          | Except.error error =>
-                              Except.error error
-                          | Except.ok fnResult =>
-                              match
-                                  psKernelEnsureForallWith
-                                    whnf
-                                    nextContext
-                                    (Prod.snd fnResult)
-                                    (Prod.fst fnResult) with
-                              | Except.error error =>
-                                  Except.error error
-                              | Except.ok forallResult =>
-                                  let view :=
-                                    Prod.fst forallResult;
-                                  let state2 :=
-                                    Prod.snd forallResult;
-                                  match
-                                      smaller [] []
-                                        whnf
-                                        defeq
-                                        nextContext
-                                        state2
-                                        arg
-                                        false with
-                                  | Except.error error =>
-                                      Except.error error
-                                  | Except.ok argResult =>
-                                      let argType :=
-                                        Prod.fst argResult;
-                                      if
-                                          psKernelExprEq
-                                            argType
-                                            view.domain then
-                                        let result :=
-                                          psKernelExprInstantiate1
-                                            view.body
-                                            arg;
-                                        Except.ok
-                                          (Prod.mk
-                                            result
-                                            (psKernelCacheInferResult
-                                              (Prod.snd argResult)
-                                              false
-                                              expr
-                                              result))
-                                      else
-                                        let eqContext :=
-                                          if
-                                              psKernelExprIsEagerReduce
-                                                arg then
-                                            psKernelCheckerContextWithEagerReduce
-                                              nextContext
-                                              true
-                                          else
-                                            nextContext;
-                                        match
-                                            defeq
-                                              eqContext
-                                              (Prod.snd argResult)
-                                              argType
-                                              view.domain with
-                                        | Except.error error =>
-                                            Except.error error
-                                        | Except.ok eqResult =>
-                                            if Prod.fst eqResult then
-                                              let result :=
-                                                psKernelExprInstantiate1
-                                                  view.body
-                                                  arg;
-                                              Except.ok
-                                                (Prod.mk
-                                                  result
-                                                  (psKernelCacheInferResult
-                                                    (Prod.snd eqResult)
-                                                    false
-                                                    expr
-                                                    result))
-                                            else
-                                              Except.error
-                                                "application type mismatch"
-                      match onCheckedApp with
-                      | none => originalChecked ()
-                      | some checkedApp =>
-                          if psKernelExprGetAppNumArgs expr >= 16 then
-                            checkedApp (Nat.succ remaining)
-                              whnf defeq context state expr
-                          else
-                            originalChecked ()
+                    psKernelInferAppHead smaller onCheckedApp remaining
+                      whnf defeq context nextContext state fn arg inferOnly
                 | PsKernelExpr.lam name domain body binderInfo =>
                     psKernelInferLambdaHead smaller whnf defeq
                       nextContext state name domain body binderInfo

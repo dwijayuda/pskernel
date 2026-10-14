@@ -34,6 +34,57 @@ def psKernelInferCurrentLetFrames {α : Type}
       | _ => letFrames
   | _, _ => []
 
+/-!
+Every non-let term has definitionally empty immutable let frames. These
+source equations preserve the original cache-hash key and allow the
+preexisting scalar, local, constant and metadata refinement proofs to
+normalize after extraction, without changing evaluation behavior.
+-/
+
+@[simp] theorem psKernelInferCurrentLetFrames_sort {α : Type}
+    (u : PsKernelLevel) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.sort u) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_lit {α : Type}
+    (literal : PsKernelLiteral) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.lit literal) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_fvar {α : Type}
+    (name : PsKernelName) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.fvar name) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_const {α : Type}
+    (name : PsKernelName) (levels : List PsKernelLevel) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.const name levels) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_app {α : Type}
+    (fn arg : PsKernelExpr) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.app fn arg) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_lam {α : Type}
+    (name : PsKernelName) (domain body : PsKernelExpr) (info : PsKernelBinderInfo) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.lam name domain body info) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_pi {α : Type}
+    (name : PsKernelName) (domain body : PsKernelExpr) (info : PsKernelBinderInfo) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.forallE name domain body info) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_mdata {α : Type}
+    (tag : Nat) (body : PsKernelExpr) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.mdata tag body) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_bvar {α : Type}
+    (idx : Nat) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.bvar idx) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_mvar {α : Type}
+    (name : PsKernelName) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.mvar name) hook frames = [] := rfl
+
+@[simp] theorem psKernelInferCurrentLetFrames_proj {α : Type}
+    (name : PsKernelName) (index : Nat) (expr : PsKernelExpr) (hook : Option α) (frames : List (Nat × Nat)) :
+    psKernelInferCurrentLetFrames (.proj name index expr) hook frames = [] := rfl
+
 /-- Original source let-type and value checking with exact error precedence,
     local context ownership, opened-body inference, and result hash cache. -/
 def psKernelInferLetHead

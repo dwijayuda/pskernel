@@ -1,5 +1,30 @@
 # M2+A Float F1 constructive dependency closure — research candidate
 
+## 15 October — checked F1 bit canonicalization fully qualified; finite/inf candidate
+
+Commit `832764c6ec47b34e330e25441c258c4f4cbcfe05` passed all 27
+[Linux CI 38644795298](https://github.com/dwijayuda/pskernel/actions/runs/38644795298)
+gates, including independent native official Lean 4.35.0 bit reference cases,
+strict FNV/SHA review, kernel admissions, JS/TypeScript/Rust/Wasm GC/Wasmtime
+and resource qualification. The four selected `PsStandard.isNaN*` and
+`canonical*` UInt32/UInt64 bit definitions are executable and checked; no
+`Float.ofBits` or floating arithmetic is published.
+
+**New pending candidate:** extend the same generic native checked bit helper
+family with four `isInf*` and `isFinite*` definitions. Their exact IEEE
+predicates come from pinned Lean 4.35.0 `Float.Model.UnpackedFloat.unpack`:
+all exponent bits set with a zero fraction is ±infinity; any exponent other
+than all ones is finite (including signed zero/subnormals). The selected
+`Float.Model.isFinite`/`isInf` delegates to this unpacked model. A
+small independent pinned native oracle and 16 cross-target observations cover
+±infinity, both NaNs, positive/negative zero and subnormals.
+
+No Float constructors, proof fabrication, unchecked runtime cast, platform
+word-size assumption, pskernel-core, self-hosting or C5 are involved.
+**Do not qualify** until CI independently measures the new strict FNV/SHA
+and the entire runtime/Wasmtime/performance gate passes. Full F1–F4 and
+remaining M2+A are still open.
+
 ## 15 October — native checked Float32/64 bit canonicalization candidate
 
 The upstream F1 export at

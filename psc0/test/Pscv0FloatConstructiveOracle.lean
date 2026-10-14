@@ -27,3 +27,19 @@ run_cmd do
 #guard !((Float.ofBits 9221120237041090560) == (Float.ofBits 9221120237041090560))
 #guard decide ((Float.ofBits 0) ≠ (Float.ofBits 9223372036854775808))
 #guard decide ((Float.ofBits 9221120237041090560) = (Float.ofBits 18444492273895866368))
+
+-- Native independent Lean 4.35.0 classification oracle, matching the
+-- exact bit-level masks selected for the source UInt32/UInt64 helpers.
+-- Here the upstream Float operations are the *reference*, not PSC0's
+-- unimplemented checked Float constructors or runtime intrinsics.
+#guard (Float.ofBits 9218868437227405312).isInf
+#guard !(Float.ofBits 9218868437227405312).isFinite
+#guard !(Float.ofBits 9221120237041090560).isInf
+#guard (Float.ofBits 0).isFinite
+#guard (Float.ofBits 9223372036854775808).isFinite
+#guard (Float.ofBits 1).isFinite
+#guard (Float32.ofBits 2139095040).isInf
+#guard !(Float32.ofBits 2143289344).isInf
+#guard !(Float32.ofBits 2143289344).isFinite
+#guard (Float32.ofBits 2147483648).isFinite
+#guard (Float32.ofBits 1).isFinite

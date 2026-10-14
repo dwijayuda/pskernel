@@ -5,7 +5,7 @@ Native portable F1 bit helpers, not Float/Float32 source constructors.
 Lean 4.35.0 at eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
   Init/Data/Float/Model/Unpacked/Pack/Basic.lean: pack/unpack/packedNaN
   tests/elab/floatBits.lean: canonical positive quiet NaN, signed zero
-These four pure checked UInt32/UInt64 functions are small semantic units
+These eight pure checked UInt32/UInt64 functions are small semantic units
 reusable by a future checked Float source/IR layer. They never assert that a
 UInt word is itself a Float, fabricate model.Valid evidence, perform a host
 cast, or enable floating arithmetic. Both f32/f64 operations use the same
@@ -37,13 +37,20 @@ def psStandardFloatCanonicalPair (owner floatName : String)
   let yes : PsExpr := .constE psBoolTrueName []
   let no : PsExpr := .constE psBoolFalseName []
   let nanFlag := select bool no (select bool yes no emptyFraction) allExponent
+  -- Pinned Lean Float.Model.UnpackedFloat classification:
+  -- exp = all-ones + fraction = zero is ±inf, and exp != all-ones
+  -- is finite, including both signed zeros and all subnormal numbers.
+  -- NaN is exp = all-ones + fraction != zero; the sign is ignored.
+  let infFlag := select bool no emptyFraction allExponent
+  let finiteFlag := select bool yes no allExponent
   let normalized := select word bits
     (select word (wordOf canonicalNaN) bits emptyFraction) allExponent
   let declare := fun name result body =>
     PsDeclaration.definitionDecl (psDecisionName ("PsStandard." ++ name ++ floatName ++ "Bits")) []
       (psLogicPi 0 "bits" word result)
       (psLogicLam 0 "bits" word body)
-  [declare "isNaN" bool nanFlag, declare "canonical" word normalized]
+  [declare "isNaN" bool nanFlag, declare "isInf" bool infFlag,
+   declare "isFinite" bool finiteFlag, declare "canonical" word normalized]
 
 def psStandardFloatCanonicalDeclarations : List PsDeclaration :=
   psStandardFloatCanonicalPair "UInt64" "Float64"

@@ -1,4 +1,5 @@
 import Ps.Host.NativeV7
+import Ps.Host.StandardManifest
 import Ps.Compiler.Pscv0Modules
 import Ps.Environment.StandardSnapshot
 import Pscv0M1Harness
@@ -2912,7 +2913,21 @@ private def byteArrayNativeOracle : IO Unit := do
     throw (IO.userError "PSCV0_BYTE_ARRAY_ORACLE: stored byte mismatch")
   IO.println "PSCV0_BYTE_ARRAY_ORACLE: PASS empty/push/size/data"
 
+private def selectedStandardManifestCases : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  match PsV7Native.standardSurfaceManifestAudit environment with
+  | .error message => throw (IO.userError message)
+  | .ok () => pure ()
+  let manifest := PsV7Native.standardSurfaceManifestJson environment
+  let repr := manifest.compress
+  unless repr.contains "selectedStandardSHA256" &&
+      repr.contains "selectedNotation" &&
+      repr.contains "registeredAxioms" do
+    throw (IO.userError "PSCV0-MANIFEST: missing selected boundary")
+  IO.println s!"PSCV0_STANDARD_MANIFEST: PASS selected notation, deriving, tactics, effects, module boundaries and {environment.declarations.length} strict declarations"
+
 def main : IO Unit := do
+  selectedStandardManifestCases
   emissionBoundary
   metavariableBoundary
   parserCases

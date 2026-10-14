@@ -1,5 +1,24 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — checked ByteArray copySlice fully qualified
+
+Commit `e871e4024d7ca9e3e3b85adc2b028ea7f9c33173` passed
+[Linux CI 38634048433](https://github.com/dwijayuda/pskernel/actions/runs/38634048433)
+with all 27 steps. Source, exact optional `copySlice` argument, checked
+`extract` delegation, independently frozen FNV/SHA, official kernel
+replay, negative conformance, JS/TS/Rust, Wasm GC/Wasmtime and performance
+gates all passed. This is the latest fully qualified executable checkpoint.
+
+**Next manifest candidate:** native `Ps.Host.StandardManifest` validates
+the existing strict Standard roster *and* the selected infix operator
+spelling/precedence table against the live parser, records deriving and
+proof tactics, bounded effects and module boundaries, and inventories actual
+registered axioms separately from the approved source-proof assumptions.
+It must pass its own CI. This is an auditable **selected** manifest, not
+full Lean 4.35.0 or all M2+A: Float F1–F4/scientific, USize/ISize width
+profiles, remaining deriving/search and complete imported notation/effects
+still require implementation. No pskernel-core, self-hosting or C5.
+
 ## 15 October — append fully qualified; shared copySlice candidate
 
 Commit `13595a906abec60b39dccf54567d83d53e730fa0` passed all

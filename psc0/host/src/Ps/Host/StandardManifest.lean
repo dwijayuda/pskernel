@@ -1,0 +1,173 @@
+import Ps.Host.NativeV7
+import Ps.Environment.StandardSnapshot
+import Ps.Syntax.Pscv0.Operators
+
+/-!
+Native M2+A Standard surface manifest. The already strict, independently
+measured declaration/instance/alias/reducibility roster is the authority for
+those sections. This separately inventories *selected* surface notations,
+deriving handlers, tactics and typed effects, with explicit unsupported
+boundaries; it is not a claim of Lean-wide parity.
+
+References pinned at Lean 4.35.0 (eb6cafb7290e8bd5f2937522d8d804f58f02bafc):
+Init/Notation.lean, Lean/Parser/Term.lean, Lean/Meta/SynthInstance.lean,
+Lean/Elab/Deriving/Basic.lean, Init/Data/Float/* and Init/System/Platform.lean.
+-/
+
+namespace PsV7Native
+
+structure ManifestNotation where
+  token : String
+  kind : String
+  precedence : Nat
+  rightPrecedence : Nat
+  nonAssociative : Bool
+  deriving Repr
+
+-- Paired with the *real* closed parser registry psPscv0InfixInfo.
+-- This ledger is explicitly checked for status and precedence drift.
+def selectedNotations : List ManifestNotation := [
+  { token := "=", kind := "Eq", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "==", kind := "BEq.beq", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "!=", kind := "booleanNotEqual", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "∧", kind := "And", precedence := 35,
+    rightPrecedence := 35, nonAssociative := false },
+  { token := "/\\", kind := "And", precedence := 35,
+    rightPrecedence := 35, nonAssociative := false },
+  { token := "∨", kind := "Or", precedence := 30,
+    rightPrecedence := 30, nonAssociative := false },
+  { token := "\\/", kind := "Or", precedence := 30,
+    rightPrecedence := 30, nonAssociative := false },
+  { token := "&&", kind := "booleanAnd", precedence := 35,
+    rightPrecedence := 36, nonAssociative := false },
+  { token := "||", kind := "booleanOr", precedence := 30,
+    rightPrecedence := 31, nonAssociative := false },
+  { token := "↔", kind := "Iff", precedence := 20,
+    rightPrecedence := 21, nonAssociative := true },
+  { token := "<->", kind := "Iff", precedence := 20,
+    rightPrecedence := 21, nonAssociative := true },
+  { token := "×", kind := "Prod", precedence := 35,
+    rightPrecedence := 35, nonAssociative := false },
+  { token := "::", kind := "List.cons", precedence := 67,
+    rightPrecedence := 67, nonAssociative := false },
+  { token := "+", kind := "HAdd.hAdd", precedence := 65,
+    rightPrecedence := 66, nonAssociative := false },
+  { token := "++", kind := "HAppend.hAppend", precedence := 65,
+    rightPrecedence := 66, nonAssociative := false },
+  { token := "-", kind := "HSub.hSub", precedence := 65,
+    rightPrecedence := 66, nonAssociative := false },
+  { token := "*", kind := "HMul.hMul", precedence := 70,
+    rightPrecedence := 71, nonAssociative := false },
+  { token := "/", kind := "HDiv.hDiv", precedence := 70,
+    rightPrecedence := 71, nonAssociative := false },
+  { token := "%", kind := "HMod.hMod", precedence := 70,
+    rightPrecedence := 71, nonAssociative := false },
+  { token := "→", kind := "arrow", precedence := 25,
+    rightPrecedence := 25, nonAssociative := false },
+  { token := "->", kind := "arrow", precedence := 25,
+    rightPrecedence := 25, nonAssociative := false },
+  { token := "matches", kind := "matches", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true }
+]
+
+def notationKind : PsPscv0InfixKind → String
+  | .constant name => name
+  | .arrow => "arrow"
+  | .booleanAnd => "booleanAnd"
+  | .booleanOr => "booleanOr"
+  | .booleanNotEqual => "booleanNotEqual"
+  | .matches => "matches"
+
+-- This is a ledger of selected public handlers, not an automatic registration
+-- mechanism and not authorization to accept arbitrary deriving names.
+def selectedDeriving : List String :=
+  ["Inhabited", "BEq", "DecidableEq", "Repr", "Hashable"]
+
+-- Real surface spelling in Ps.Syntax.Pscv0.ProofRead; each elaborated proof
+-- term is still checked by the pinned official Lean kernel.
+def selectedTactics : List String :=
+  ["exact", "refine", "apply", "cases", "induction", "case", "next",
+   "have", "let", "change", "show", "intro", "assumption", "rfl",
+   "constructor", "·", "focus", "all_goals", "any_goals"]
+
+-- Source do-block rewrite currently admits explicit Except-typed results.
+-- The broader elaborator separately supports bounded Id/Option/Except cases;
+-- no general State/IO/FFI coverage is claimed by these entries.
+def selectedSourceEffects : List String := ["Except"]
+def selectedElabEffects : List String := ["Id", "Option", "Except"]
+def selectedModuleBehaviors : List String :=
+  ["named-import-closure", "ordered-interfaces", "private-export-hygiene",
+   "kernel-checked-project-linking"]
+
+def unqualifiedM2AFeatures : List String :=
+  ["Float/Float32 F1-F4 executable and scientific",
+   "USize/ISize explicit target word profiles",
+   "remaining deriving and class-search semantic boundaries",
+   "full Lean module/notation/tactic/effect closure",
+   "backend-wide semantic preservation proof"]
+
+-- Every selected operator from this audited catalog MUST resolve to exactly
+-- the documented live parser precedence/target. A new source spelling is not
+-- silently admitted to this frozen manifest.
+def selectedNotationAudit : Except String Unit := do
+  if (selectedNotations.map (·.token)).eraseDups.length !=
+      selectedNotations.length then
+    throw "PSCV0-MANIFEST: duplicate selected notation"
+  for entry in selectedNotations do
+    let some live := psPscv0InfixInfo entry.token
+      | throw ("PSCV0-MANIFEST: notation missing: " ++ entry.token)
+    if notationKind live.kind != entry.kind ||
+        live.precedence != entry.precedence ||
+        live.rightPrecedence != entry.rightPrecedence ||
+        live.nonAssociative != entry.nonAssociative then
+      throw ("PSCV0-MANIFEST: notation drift: " ++ entry.token)
+  if (psPscv0InfixInfo "?").isSome then
+    throw "PSCV0-MANIFEST: unregistered notation unexpectedly admitted"
+
+def standardSurfaceManifestAudit (env : PsEnvironment) :
+    Except String Unit := do
+  -- Reuse, do not replace, the independently pinned dual registry hashes.
+  psStandardSnapshotValidate env psStandardSnapshotExpected
+  selectedNotationAudit
+  if env.declarations.isEmpty || env.classes.isEmpty ||
+      env.instances.entries.isEmpty then
+    throw "PSCV0-MANIFEST: empty selected declaration/class/instance roster"
+  if selectedDeriving.eraseDups.length != selectedDeriving.length ||
+      selectedTactics.eraseDups.length != selectedTactics.length then
+    throw "PSCV0-MANIFEST: duplicate surface registration"
+
+private def notationJson (entry : ManifestNotation) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("token", Lean.toJson entry.token),
+    ("target", Lean.toJson entry.kind),
+    ("precedence", Lean.toJson entry.precedence),
+    ("rightPrecedence", Lean.toJson entry.rightPrecedence),
+    ("nonAssociative", Lean.toJson entry.nonAssociative)]
+
+def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
+  let knownAxioms : List String := env.declarations.filterMap fun declaration =>
+    match declaration with
+    | .axiomDecl name _ _ => some (psNameToString name)
+    | _ => none
+  Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-selected-standard-surface/1" : String)),
+    ("leanVersion", Lean.toJson leanVersion),
+    ("leanCommit", Lean.toJson leanCommit),
+    ("selectedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint env)),
+    ("selectedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint env)),
+    ("declarations", Lean.toJson env.declarations.length),
+    ("classes", Lean.toJson (env.classes.map psNameToString)),
+    ("orderedInstances", Lean.toJson env.instances.entries.length),
+    ("registeredAxioms", Lean.toJson knownAxioms),
+    ("selectedNotation", Lean.Json.arr (selectedNotations.map notationJson).toArray),
+    ("selectedDeriving", Lean.toJson selectedDeriving),
+    ("selectedTactics", Lean.toJson selectedTactics),
+    ("sourceEffects", Lean.toJson selectedSourceEffects),
+    ("boundedElaborationEffects", Lean.toJson selectedElabEffects),
+    ("moduleBehaviors", Lean.toJson selectedModuleBehaviors),
+    ("notYetQualified", Lean.toJson unqualifiedM2AFeatures)]
+
+end PsV7Native

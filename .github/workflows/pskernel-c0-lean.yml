@@ -44,6 +44,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0QualifiedRecursiveWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedRecursiveDeltaWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedRecursiveMetadataDefEqRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0QualifiedReflectedDefEqRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0UniverseParameterRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
@@ -183,6 +184,9 @@ jobs:
       - name: C0 source-proved recursive metadata full checking and atomic publication
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedMetadataInferenceRegression.lean
+      - name: C0 WHNF-to-DefEq source-proved Bool.true reflection
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0QualifiedReflectedDefEqRegression.lean
       - name: C0 source-proved recursive metadata DefEq and terminal cases
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedRecursiveMetadataDefEqRegression.lean

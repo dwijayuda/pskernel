@@ -1,5 +1,5 @@
 import Ps.KernelCore.Architecture.QualifiedRecursiveProjectionInference
-import Ps.KernelCore.Architecture.QualifiedRecursiveMetadataDefEq
+import Ps.KernelCore.Architecture.QualifiedReflectedDefEq
 
 /-!
 Phase E: proof-carrying SOURCE admission provenance.
@@ -199,7 +199,7 @@ def psKernelC0TrustedSourceDefEq
     (work : PsKernelC0TrustedSourceWork)
     (left right : PsKernelExpr) :
     Except String (Bool × PsKernelC0TrustedSourceWork) :=
-  match psKernelC0CertifiedWorkDefEqRecursiveMetadataOwned
+  match psKernelC0CertifiedWorkDefEqReflectedOwned
       fuel work.certified left right with
   | .error reason => .error reason
   | .ok receipt =>

@@ -1,5 +1,27 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — canonical Float model replay qualified; full selected-surface digest candidate
+
+The native Float canonical proof model produced 24 officially checked
+portable declarations and **no new axioms** at
+[research CI 38652410627](https://github.com/dwijayuda/pskernel/actions/runs/38652410627),
+commit `42eb74a26121be7f355ca273a959d475c166a3a1`.
+This does not enable runtime Float or resolve the original full F1
+List/Int incompatibility. The normal 27-gate executable CI runs separately.
+
+**New native Phase A manifest candidate:** record a canonical length-delimited
+digest over the selected operator/notation table, the actual deriving
+handler roster, selected tactics, source/elaboration effect policies,
+module policies, and ordered checked instances with class/priority/universes.
+The human-readable JSON reports the new surface SHA-256 and underlying strict
+Standard SHA-256 independently. `--audit-standard-surface` and native CI
+publish this artifact; its deriving registry is checked against the *actual*
+elaborator-owned handler list. This is still a **selected** manifest, not
+a claim of complete transitive Lean module imports, all available effects,
+or a full compiled-language semantics proof. The per-project import graph
+remains validated separately. No trust/instance/class extension and no
+pskernel-core, self-hosting or C5.
+
 ## 15 October — reusable constructive Float proof-model candidate
 
 The last green executable checkpoint is `1fd22ead9f5c32e57e189251be94db7c1245a542`,

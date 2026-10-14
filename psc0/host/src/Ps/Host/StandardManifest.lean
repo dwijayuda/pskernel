@@ -1,6 +1,7 @@
 import Ps.Host.NativeV7
 import Ps.Environment.StandardSnapshot
 import Ps.Syntax.Pscv0.Operators
+import Ps.Elab.Deriving
 
 /-!
 Native M2+A Standard surface manifest. The already strict, independently
@@ -109,6 +110,51 @@ def unqualifiedM2AFeatures : List String :=
    "full Lean module/notation/tactic/effect closure",
    "backend-wide semantic preservation proof"]
 
+-- Canonical length-delimited human-surface snapshot. This digest is
+-- independent of the existing kernel declaration and metadata snapshot:
+-- notation/deriving/selected tactics and effect policy are included here.
+-- A per-project resolved import graph is *not* part of this global manifest.
+private def manifestInstanceKey (entry : PsInstanceEntry) : String :=
+  match entry.value with
+  | .constE name _ => psNameToString name
+  | other => psStandardSnapshotExpr other
+
+private def manifestInstancePayload (entry : PsInstanceEntry) : String :=
+  psStandardSnapshotNode "registeredInstance" [
+    manifestInstanceKey entry,
+    toString entry.priority,
+    (entry.className.map psNameToString).getD "",
+    psStandardSnapshotList psStandardSnapshotName entry.levelParams]
+
+private def manifestNotationPayload (entry : ManifestNotation) : String :=
+  psStandardSnapshotNode "notation" [
+    entry.token, entry.kind, toString entry.precedence,
+    toString entry.rightPrecedence, psStandardSnapshotBool entry.nonAssociative]
+
+def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
+  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v1" [
+    leanVersion, leanCommit,
+    psStandardSnapshotSHA256Fingerprint env,
+    psStandardSnapshotList manifestNotationPayload selectedNotations,
+    psStandardSnapshotList id selectedDeriving,
+    psStandardSnapshotList id selectedTactics,
+    psStandardSnapshotList id selectedSourceEffects,
+    psStandardSnapshotList id selectedElabEffects,
+    psStandardSnapshotList id selectedModuleBehaviors,
+    psStandardSnapshotList manifestInstancePayload env.instances.entries]
+
+def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
+  "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
+
+private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
+    Lean.Json :=
+  Lean.Json.mkObj [
+    ("rank", Lean.toJson rank),
+    ("identity", Lean.toJson (manifestInstanceKey entry)),
+    ("class", Lean.toJson ((entry.className.map psNameToString).getD "")),
+    ("priority", Lean.toJson entry.priority),
+    ("universes", Lean.toJson (entry.levelParams.map psNameToString))]
+
 -- Every selected operator from this audited catalog MUST resolve to exactly
 -- the documented live parser precedence/target. A new source spelling is not
 -- silently admitted to this frozen manifest.
@@ -138,6 +184,10 @@ def standardSurfaceManifestAudit (env : PsEnvironment) :
   if selectedDeriving.eraseDups.length != selectedDeriving.length ||
       selectedTactics.eraseDups.length != selectedTactics.length then
     throw "PSCV0-MANIFEST: duplicate surface registration"
+  if selectedDeriving != psElabSelectedDerivingHandlers then
+    throw "PSCV0-MANIFEST: deriving handler registry drift"
+  if selectedSourceEffects.isEmpty || selectedElabEffects.isEmpty then
+    throw "PSCV0-MANIFEST: empty selected effect policy"
 
 private def notationJson (entry : ManifestNotation) : Lean.Json :=
   Lean.Json.mkObj [
@@ -158,9 +208,15 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
     ("leanCommit", Lean.toJson leanCommit),
     ("selectedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint env)),
     ("selectedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint env)),
+    ("selectedSurfaceSHA256", Lean.toJson (standardSurfaceManifestSHA256 env)),
+    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v1" : String)),
+    ("projectImportGraph", Lean.toJson ("validated-per-project-not-global" : String)),
     ("declarations", Lean.toJson env.declarations.length),
     ("classes", Lean.toJson (env.classes.map psNameToString)),
     ("orderedInstances", Lean.toJson env.instances.entries.length),
+    ("instanceRegistrations", Lean.Json.arr
+      ((env.instances.entries.zipIdx.map fun (entry, rank) =>
+        manifestInstanceJson entry rank).toArray)),
     ("registeredAxioms", Lean.toJson knownAxioms),
     ("selectedNotation", Lean.Json.arr (selectedNotations.map notationJson).toArray),
     ("selectedDeriving", Lean.toJson selectedDeriving),

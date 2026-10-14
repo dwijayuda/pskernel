@@ -2932,6 +2932,8 @@ private def selectedStandardManifestCases : IO Unit := do
   let manifest := PsV7Native.standardSurfaceManifestJson environment
   let repr := manifest.compress
   unless (repr.splitOn "selectedStandardSHA256").length > 1 &&
+      (repr.splitOn "selectedSurfaceSHA256").length > 1 &&
+      (repr.splitOn "instanceRegistrations").length > 1 &&
       (repr.splitOn "selectedNotation").length > 1 &&
       (repr.splitOn "registeredAxioms").length > 1 do
     throw (IO.userError "PSCV0-MANIFEST: missing selected boundary")

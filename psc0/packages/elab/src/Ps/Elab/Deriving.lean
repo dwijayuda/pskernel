@@ -4,6 +4,11 @@ import Ps.Elab.DerivingBEq
 import Ps.Elab.DerivingRepr
 import Ps.Elab.DerivingDecEq
 
+-- The selected deriving registry is also consumed by the native Standard
+-- surface audit. Keep this order stable; new handlers require explicit review.
+def psElabSelectedDerivingHandlers : List String :=
+  ["Inhabited", "BEq", "DecidableEq", "Repr", "Hashable"]
+
 -- Handlers return ordinary Core definitions. The source command owns instance
 -- registration and origin bookkeeping; official Lean still checks admission.
 def psElabDeriveHandler (environment : PsEnvironment)

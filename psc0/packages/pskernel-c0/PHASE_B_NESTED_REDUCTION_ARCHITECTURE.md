@@ -1,5 +1,12 @@
 # PSKernel-C0 — Phase B nested-inductive reduction architecture
 
+## 2026-10-15 — General app/right-lambda eta defect and requalification
+
+**Native-fixed at [6a1f7898](https://github.com/dwijayuda/pskernel/commit/6a1f7898811aaa60b7d3189eb8b56e05ef5ae390)**, [full native CI 38641430078](https://github.com/dwijayuda/pskernel/actions/runs/38641430078) success with 58 passes, zero failures. Actual pinned [Init diagnostic 38639778343](https://github.com/dwijayuda/pskernel/actions/runs/38639778343) confirms official Lean accepts 86,383 records; C0 at the earlier source differed only on Eq's two app/function vs λ η-expanded arguments, NOT the Pi type or Eq head. `Checker/DefEq/FullShape.lean` was missing a source algorithmic η-right dispatch on left applications. The new general rule follows official Lean 4.35 after application congruence; regression checks local-function η, reverse comparison, unrelated functions and verified source checking. No theorem special case, unchecked equality or new trusted assumption.
+
+**The current exact 86,383-record C0 acceptance survey is a distinct, mandatory gate, not yet claimed here.** [8d38b00d](https://github.com/dwijayuda/pskernel/commit/8d38b00d3a4568de93b08cf3b58420b9a5084631) requires a *positive* C0 verdict on the same official 4.35 source bytes with 4096 fuel, independent of the optional full-file diagnostic. Do not increase the source acceptance count until that gate passes; incomplete/unsupported/resource outcomes never count as rejection or acceptance. Later actual Init/Std/Mathlib, whole-library performance and independent metatheory remain open.
+
+
 ## Verified superseding checkpoint — 2026-10-13
 
 The nested performance bottleneck described below **has been resolved in the current source**. [Native CI 38383818618](https://github.com/dwijayuda/pskernel/actions/runs/38383818618) and [real Init CI 38383848731](https://github.com/dwijayuda/pskernel/actions/runs/38383848731) passed on the precise pinned 4.35.0 exporter and checker. C0 accepted the **79,416-record** real `Init` prefix including `Lean.Syntax` using default 4,096 fuel. The general correction recognizes a checked irreducible inductive head after at most one valid delta step; it keeps target-bearing, unknown and longer reducible chains on the full original checking route. Exported recursors remain subject to independently generated exact metadata checks, never trusted as axioms.

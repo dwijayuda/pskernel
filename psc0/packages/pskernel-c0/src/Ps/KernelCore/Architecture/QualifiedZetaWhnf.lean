@@ -143,19 +143,59 @@ theorem psKernelC0ZetaSortWhnf_source
                                               normalized, nextState] using h
                                           exact (Option.some.inj hx).symm
                                         rw [hr]
+                                        -- Qualify each source stage in isolation.
+                                        -- Expanding public/core/Nat/delta at
+                                        -- once creates exponential simplifier
+                                        -- work and obscures fuel/cache effects.
+                                        let whnfChild :=
+                                          fun (ctx : PsKernelCheckerContext)
+                                            (st : PsKernelCheckerState)
+                                            (ex : PsKernelExpr) =>
+                                              psKernelWhnfWithFuel
+                                                (Nat.succ (Nat.succ remaining))
+                                                reduceRecursor ctx st ex
+                                        let coreState := psKernelCheckerStateWithWhnfCore
+                                          state (psKernelExprMapInsert
+                                            state.whnfCore term normalized)
+                                        have bodyCore :
+                                            psKernelWhnfCoreWithFuelRanges
+                                              (Nat.succ remaining) []
+                                              whnfChild reduceRecursor
+                                              entered state normalized false false =
+                                                .ok (normalized, state) := by
+                                          simpa [psKernelWhnfCoreWithFuelRanges,
+                                            childDepth, normalized, whnfChild]
+                                        have letCore :
+                                            psKernelWhnfCoreWithFuel
+                                              (Nat.succ (Nat.succ remaining))
+                                              whnfChild reduceRecursor context state
+                                              term false false =
+                                                .ok (normalized, coreState) := by
+                                          simpa [psKernelWhnfCoreWithFuel,
+                                            psKernelWhnfCoreWithFuelRanges,
+                                            psKernelWhnfCoreFinishWithKnownHash,
+                                            hlong, depth, coreCache, opened,
+                                            bodyCore, term, normalized, coreState]
+                                        have natSort :
+                                            psKernelReduceNatWith whnfChild
+                                              context coreState normalized =
+                                                .ok (none, coreState) := by
+                                          rfl
+                                        have noDelta :
+                                            psKernelUnfoldDefinition
+                                              context normalized = none := by
+                                          rfl
+                                        have afterCore :
+                                            psKernelWhnfAfterCore whnfChild
+                                              context coreState term normalized =
+                                                .ok (normalized, nextState) := by
+                                          simpa [psKernelWhnfAfterCore,
+                                            natSort, noDelta, psKernelWhnfFinish,
+                                            psKernelC0ColdOneStepWhnfState,
+                                            nextState, normalized, coreState]
                                         simpa [psKernelWhnfWithFuel,
-                                          psKernelWhnfCoreWithFuel,
-                                          psKernelWhnfCoreWithFuelRanges,
-                                          psKernelWhnfCoreFinishWithKnownHash,
-                                          psKernelWhnfAfterCore,
-                                          psKernelReduceNatWith,
-                                          psKernelUnfoldDefinition,
-                                          psKernelExprGetAppFn,
-                                          psKernelWhnfFinish,
-                                          psKernelC0ColdOneStepWhnfState,
-                                          hlong, publicCache, depth, coreCache,
-                                          childDepth, opened, term,
-                                          normalized, nextState]
+                                          publicCache, letCore, afterCore,
+                                          whnfChild]
                                     | bvar _ => simp [psKernelC0ZetaSortWhnfWithFuel,
                                         hlong, publicCache, depth, coreCache,
                                         childDepth, opened, term] at h

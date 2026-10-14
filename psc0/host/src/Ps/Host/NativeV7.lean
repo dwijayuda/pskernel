@@ -112,7 +112,13 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
           psCompilerPscv0Error)
       | none => throw { phase := "prepare", message := "missing prepared source" }
   let t3 ← IO.monoMsNow
-  let _ ← fromResult "kernel" (check prelude output.admissions)
+  -- The C++ kernel's maximum heartbeat does not reset its thread-local
+  -- heartbeat counter. The independently checked source must not inherit
+  -- the unlimited, proof-heavy Standard replay's cumulative count.
+  -- Maintain the SAME 2m heartbeat / 20k recursion limit in `check`.
+  let checked ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    check prelude output.admissions
+  let _ ← fromResult "kernel" checked
   let t4 ← IO.monoMsNow
   let timings : Timings := if project.isSome then {
     -- The graph planner owns parsing and each module's elaboration/preparation.

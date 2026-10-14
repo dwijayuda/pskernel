@@ -343,38 +343,143 @@ behavior. Constants, local free variables, lambdas and projections are
 *excluded*: their reduction and cache effects are context-dependent.
 -/
 
-/-- A real, source-checker-free shortcut for five irreducible WHNF heads.
-    Fuel zero is delegated unchanged; only positive-fuel direct forms
-    bypass the source reducer. There is no speculative candidate result. -/
+/-- A fuel-accounted, context-free WHNF fragment: erase arbitrary nested
+    metadata and stop ONLY at source-irreducible heads. Each wrapper and the
+    terminal head consume one source WHNF recursive step. All other heads
+    decline, including names requiring delta, locals, lambdas, applications,
+    recursors, projections and lets. No source callback or checker cache is
+    read or modified by this operation. -/
+def psKernelC0IrreducibleWhnfWithFuel : Nat → PsKernelExpr → Option PsKernelExpr
+  | 0, _ => none
+  | Nat.succ remaining, expr =>
+      match expr with
+      | .mdata _ body => psKernelC0IrreducibleWhnfWithFuel remaining body
+      | .bvar _ => some expr
+      | .sort _ => some expr
+      | .mvar _ => some expr
+      | .forallE _ _ _ _ => some expr
+      | .lit _ => some expr
+      | _ => none
+
+/-- The complete *public source WHNF algorithm* agrees with the pure
+    metadata/head fragment under ANY context, checker state and recursor
+    callback. This avoids relying on a bounded set of source differential
+    examples: the evaluator never touches environment-sensitive rules. -/
+theorem psKernelC0IrreducibleWhnf_source
+    (fuel : Nat)
+    (reduceRecursor :
+      PsKernelCheckerContext → PsKernelCheckerState → PsKernelExpr →
+        Bool → Bool →
+        Except String (Option PsKernelExpr × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr result : PsKernelExpr)
+    (h : psKernelC0IrreducibleWhnfWithFuel fuel expr = some result) :
+    psKernelWhnfWithFuel fuel reduceRecursor context state expr =
+      .ok (result, state) := by
+  induction fuel generalizing expr result with
+  | zero =>
+      simp [psKernelC0IrreducibleWhnfWithFuel] at h
+  | succ remaining ih =>
+      cases expr with
+      | mdata data body =>
+          have hbody :
+              psKernelC0IrreducibleWhnfWithFuel remaining body =
+                some result := by
+            simpa only [psKernelC0IrreducibleWhnfWithFuel] using h
+          change psKernelWhnfWithFuel remaining reduceRecursor
+            context state body = .ok (result, state)
+          exact ih body result hbody
+      | bvar index =>
+          have heq : PsKernelExpr.bvar index = result :=
+            Option.some.inj
+              (by simpa only [psKernelC0IrreducibleWhnfWithFuel] using h)
+          subst result
+          rfl
+      | sort level =>
+          have heq : PsKernelExpr.sort level = result :=
+            Option.some.inj
+              (by simpa only [psKernelC0IrreducibleWhnfWithFuel] using h)
+          subst result
+          rfl
+      | mvar name =>
+          have heq : PsKernelExpr.mvar name = result :=
+            Option.some.inj
+              (by simpa only [psKernelC0IrreducibleWhnfWithFuel] using h)
+          subst result
+          rfl
+      | forallE name ty body binder =>
+          have heq : PsKernelExpr.forallE name ty body binder = result :=
+            Option.some.inj
+              (by simpa only [psKernelC0IrreducibleWhnfWithFuel] using h)
+          subst result
+          rfl
+      | lit literal =>
+          have heq : PsKernelExpr.lit literal = result :=
+            Option.some.inj
+              (by simpa only [psKernelC0IrreducibleWhnfWithFuel] using h)
+          subst result
+          rfl
+      | fvar _ => simp [psKernelC0IrreducibleWhnfWithFuel] at h
+      | const _ _ => simp [psKernelC0IrreducibleWhnfWithFuel] at h
+      | app _ _ => simp [psKernelC0IrreducibleWhnfWithFuel] at h
+      | lam _ _ _ _ => simp [psKernelC0IrreducibleWhnfWithFuel] at h
+      | letE _ _ _ _ _ => simp [psKernelC0IrreducibleWhnfWithFuel] at h
+      | proj _ _ _ => simp [psKernelC0IrreducibleWhnfWithFuel] at h
+
+/-- A successful pure fragment reduction is exactly the original checked
+    session WHNF, including its full source state. In particular, eliminating
+    metadata here does not create a source-cache entry or proof judgment. -/
+theorem psKernelC0IrreducibleWhnf_certified
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr result : PsKernelExpr)
+    (h : psKernelC0IrreducibleWhnfWithFuel fuel expr = some result) :
+    psKernelC0CertifiedWorkWhnf fuel work expr = .ok (result, work) := by
+  have hsource :
+      psKernelCheckerWhnf fuel work.raw.checker.context
+        work.raw.checker.state expr =
+          .ok (result, work.raw.checker.state) := by
+    change psKernelWhnfWithFuel fuel
+      (psKernelReduceRecursorBoundedWithFuel fuel
+        (psKernelIsDefEqWithFuel fuel))
+      work.raw.checker.context work.raw.checker.state expr =
+        .ok (result, work.raw.checker.state)
+    exact psKernelC0IrreducibleWhnf_source fuel
+      (psKernelReduceRecursorBoundedWithFuel fuel
+        (psKernelIsDefEqWithFuel fuel))
+      work.raw.checker.context work.raw.checker.state expr result h
+  unfold psKernelC0CertifiedWorkWhnf psKernelSessionWhnf
+  simp only [hsource]
+  rfl
+
+/-- The accepting fast path chooses independently evaluated nested-metadata
+    and irreducible heads ONLY under an all-context source-refinement theorem.
+    All context-sensitive forms and insufficient source fuel are delegated
+    unchanged to the source checker, including its error classification. -/
 def psKernelC0CertifiedWorkWhnfCanonicalFast
     (fuel : Nat)
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0CertifiedWork) :=
-  match fuel with
-  | 0 => psKernelC0CertifiedWorkWhnf fuel work expr
-  | Nat.succ _ =>
-      match expr with
-      | .bvar _ => .ok (expr, work)
-      | .sort _ => .ok (expr, work)
-      | .mvar _ => .ok (expr, work)
-      | .forallE _ _ _ _ => .ok (expr, work)
-      | .lit _ => .ok (expr, work)
-      | _ => psKernelC0CertifiedWorkWhnf fuel work expr
+  match psKernelC0IrreducibleWhnfWithFuel fuel expr with
+  | some value => .ok (value, work)
+  | none => psKernelC0CertifiedWorkWhnf fuel work expr
 
-/-- This proves an all-contexts source implementation equivalence of the
-    optimized accepting fast path, including its exact source state,
-    not just agreement on a collection of example terms. -/
+/-- Exact successful and failed source behavior for every input fuel,
+    environment, expression, and checker/cache state. -/
 theorem psKernelC0CertifiedWorkWhnfCanonicalFast_exact
     (fuel : Nat)
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr) :
     psKernelC0CertifiedWorkWhnfCanonicalFast fuel work expr =
       psKernelC0CertifiedWorkWhnf fuel work expr := by
-  cases fuel with
-  | zero => rfl
-  | succ remaining =>
-      cases expr <;> rfl
+  unfold psKernelC0CertifiedWorkWhnfCanonicalFast
+  cases h : psKernelC0IrreducibleWhnfWithFuel fuel expr with
+  | none => rfl
+  | some value =>
+      exact (psKernelC0IrreducibleWhnf_certified
+        fuel work expr value h).symm
 
 /-- A successful WHNF output with its exact source-evaluation equality.
     Unlike an observational candidate, this can be carried through checked
@@ -536,10 +641,9 @@ def psKernelC0CertifiedWorkWhnfQualified
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelC0SourceExactWhnfOutput fuel work expr) :=
-  if psKernelC0WhnfIrreducibleHead expr then
-    psKernelC0CertifiedWorkWhnfCanonicalFastOwned fuel work expr
-  else
-    psKernelC0CertifiedWorkWhnfRefinedOwned fuel quota work expr
+  match psKernelC0IrreducibleWhnfWithFuel fuel expr with
+  | some _ => psKernelC0CertifiedWorkWhnfCanonicalFastOwned fuel work expr
+  | none => psKernelC0CertifiedWorkWhnfRefinedOwned fuel quota work expr
 
 /-- A drop-in, fully source-equivalent checked WHNF result. Unlike the
     historical source-only entry, its five direct heads avoid the source

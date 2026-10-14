@@ -109,6 +109,81 @@ def psStandardByteArrayBeqModelDeclaration : PsDeclaration :=
     (psLogicLam 0 "left" bytes
       (psLogicLam 1 "right" bytes guarded))
 
+-- A proof-carrying logical getter/setter, shared by every executable
+-- backend after typed erasure. The two bounds are definitionally equal:
+-- i < bytes.size = i < bytes.data.size.
+-- Official Lean 4.35.0: Init/Data/ByteArray/Basic.lean.
+def psStandardByteArrayCheckedIndexDeclarations : List PsDeclaration :=
+  let bytes := psStandardByteArrayType
+  let uint8 := psStandardByteArrayElement
+  let a : PsExpr := .fvar 0
+  let i : PsExpr := .fvar 1
+  let value : PsExpr := .fvar 2
+  let proof : PsExpr := .fvar 3
+  let bound := psOrderCall "Nat.lt"
+    [i, psOrderCall "ByteArray.size" [a]]
+  let data := psStandardByteArrayData a
+  let get : PsDeclaration := .definitionDecl
+    (psNameAppendStr psStandardByteArrayName "get") []
+    (psLogicPi 0 "bytes" bytes
+      (psLogicPi 1 "index" psOrderNat
+        (psLogicPi 3 "h" bound uint8)))
+    (psLogicLam 0 "bytes" bytes
+      (psLogicLam 1 "index" psOrderNat
+        (psLogicLam 3 "h" bound
+          (psOrderCall "Array.getInternal" [uint8, data, i, proof]))))
+  let set : PsDeclaration := .definitionDecl
+    (psNameAppendStr psStandardByteArrayName "set") []
+    (psLogicPi 0 "bytes" bytes
+      (psLogicPi 1 "index" psOrderNat
+        (psLogicPi 2 "value" uint8
+          (psLogicPi 3 "h" bound bytes))))
+    (psLogicLam 0 "bytes" bytes
+      (psLogicLam 1 "index" psOrderNat
+        (psLogicLam 2 "value" uint8
+          (psLogicLam 3 "h" bound
+            (psStandardByteArrayMk
+              (psOrderCall "Array.set" [uint8, data, i, value, proof]))))))
+  [get, set]
+
+-- Genuine dependent GetElem, GetElem? and LawfulGetElem instances for
+-- (ByteArray, Nat, UInt8, fun xs i => i < xs.size). Reuse the already
+-- checked optional-indexing and lawfulness constructors: no Bool-to-Prop
+-- shortcut and no second collection runtime.
+def psStandardByteArrayIndexInstances : List PsDeclaration :=
+  let bytes := psStandardByteArrayType
+  let uint8 := psStandardByteArrayElement
+  let xs : PsExpr := .fvar 0
+  let i : PsExpr := .fvar 1
+  let h : PsExpr := .fvar 2
+  let bound := psOrderCall "Nat.lt"
+    [i, psOrderCall "ByteArray.size" [xs]]
+  let valid := psLogicLam 0 "bytes" bytes
+    (psLogicLam 1 "index" psOrderNat bound)
+  let args := psStandardGetElemArgs bytes psOrderNat uint8 valid
+  let family := fun name more => psLogicApply
+    (.constE (psDecisionName name) [.zero, .zero, .zero]) (args ++ more)
+  let checkedName := psDecisionName "PsStandard.instGetElemByteArray"
+  let checked : PsExpr := .constE checkedName []
+  let method := psLogicLam 0 "bytes" bytes
+    (psLogicLam 1 "index" psOrderNat
+      (psLogicLam 2 "h" bound
+        (psOrderCall "ByteArray.get" [xs, i, h])))
+  let decision := psLogicLam 0 "bytes" bytes
+    (psLogicLam 1 "index" psOrderNat
+      (psOrderCall "Nat.decLt"
+        [i, psOrderCall "ByteArray.size" [xs]]))
+  let optional := family "PsStandard.instGetElemOptionalDefault"
+    [checked, decision]
+  [ .definitionDecl checkedName [] (family "GetElem" [])
+      (family "GetElem.mk" [method]),
+    .definitionDecl (psDecisionName "PsStandard.instGetElemOptionalByteArray") []
+      (family "GetElem?" []) optional,
+    .definitionDecl (psDecisionName "PsStandard.instLawfulGetElemByteArray") []
+      (family "LawfulGetElem" [optional])
+      (family "PsStandard.instLawfulGetElemOptionalDefault"
+        [checked, decision]) ]
+
 -- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=
   let bytes := psStandardByteArrayType
@@ -126,16 +201,36 @@ def psStandardByteArrayCollectionDeclarations : List PsDeclaration :=
     [psStandardByteArrayBeqWorkerDeclaration,
      psStandardByteArrayBeqModelDeclaration,
      psStandardByteArrayBeqDeclaration,
-     psStandardByteArrayInhabitedDeclaration]
+     psStandardByteArrayInhabitedDeclaration] ++
+    psStandardByteArrayCheckedIndexDeclarations ++
+    psStandardByteArrayIndexInstances
 
 def psStandardByteArrayCollectionExtend
     (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardByteArrayCollectionDeclarations.foldl
     psEnvironmentInsert environment
+  -- Pinned Lean marks get implicit_reducible; set is ordinary semireducible.
+  let environment := psEnvironmentSetReducibility environment
+    (psNameAppendStr psStandardByteArrayName "get") .implicitReducible
   let environment := psStandardRegisterInstances environment "BEq"
     [psStandardByteArrayBeqDeclaration]
-  psStandardRegisterInstances environment "Inhabited"
+  let environment := psStandardRegisterInstances environment "Inhabited"
     [psStandardByteArrayInhabitedDeclaration]
+  let instances := psStandardByteArrayIndexInstances.foldl
+    (fun index declaration =>
+      let name := psDeclarationName declaration
+      let className :=
+        if psNameEq name (psDecisionName "PsStandard.instGetElemByteArray") then
+          psStandardGetElemName
+        else if psNameEq name
+            (psDecisionName "PsStandard.instGetElemOptionalByteArray") then
+          psStandardGetElemOptionalName
+        else psStandardLawfulGetElemName
+      psInstanceIndexAdd index {
+        value := .constE name []
+        type := psDeclarationType declaration
+        className := some className }) environment.instances
+  { environment with instances := instances }
 
 def psStandardByteArrayCollectionRuntimeDeclarations : List PsDeclaration :=
   psStandardByteArrayCollectionDeclarations

@@ -1,5 +1,28 @@
 # PSC0 Phase A — Lean 4.35.0 ByteArray logical baseline
 
+## 15 October 2026 — checked indexed ByteArray candidate
+
+The **fully qualified** existing logical collection baseline is commit
+`4ae7631c18ef9062f8a552015624b6af2d2a341d`,
+[Linux 38606086921](https://github.com/dwijayuda/pskernel/actions/runs/38606086921).
+
+The next candidate adds the pinned native `ByteArray.get` and
+`ByteArray.set` checked signatures. Their `i < bytes.size` proof
+is passed to the same checked underlying Array getter/setter, with
+definitional equality to `i < bytes.data.size`. The proof is
+kernel-admitted and disappears only through typed erasure. The true
+`GetElem ByteArray Nat UInt8 (...)` dictionary, selected `GetElem?`
+and `LawfulGetElem` dictionaries use the same generic class and
+decision-law implementation as Array and List. Instance registration,
+reducibility metadata and panic semantics are explicit.
+
+Qualification requires source/kernel replay, exact pinned signatures,
+strict independently observed FNV/SHA fingerprints, successful and
+out-of-range optional indexing, proof-directed access and update,
+JS/TS/Rust runtime observations, Wasm GC/components/Wasmtime and
+the ordinary resource gates. This is a **candidate**, not a claim
+of acceptance until all gates pass.
+
 ## Official reference
 
 Pinned `leanprover/lean4` release `v4.35.0`, source commit

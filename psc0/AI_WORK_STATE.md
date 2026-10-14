@@ -1,5 +1,25 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — ByteArray cross-target green and indexed API next
+
+**Last fully qualified executable:** `4ae7631c18ef9062f8a552015624b6af2d2a341d`;
+[Linux CI 38606086921](https://github.com/dwijayuda/pskernel/actions/runs/38606086921)
+passed all 27 steps, including official Lean 4.35.0 checking, both strict
+Standard fingerprints, native ByteArray oracles, source and negative
+conformance, JS/TS/Rust runtime, Wasm GC/components/Wasmtime and
+resource measurements. The earlier Standard drift and JS top-level
+initialization ordering were corrected without bypassing checks; the
+shared Wasm trap oracle now preserves the checked UInt8 result type.
+
+**New pending candidate:** native proof-indexed `ByteArray.get` and
+`ByteArray.set` plus real checked `GetElem`, `GetElem?` and
+`LawfulGetElem` instances and minimal independent source/runtime cases.
+The existing checked Array and index-lawfulness machinery are reused.
+This new slice is **not qualified** until its *own* strict registry
+and full cross-target CI run succeed; new fingerprints must be measured,
+not inferred from the previous green. Continue other M2+A tasks only
+while retaining the green baseline and strict assumptions boundary.
+
 ## 14 October — ByteArray checked read/write, equality and defaults candidate
 
 Pinned Lean 4.35.0 `Init/Data/ByteArray/Basic.lean` declares

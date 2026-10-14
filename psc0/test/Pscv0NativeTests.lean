@@ -496,7 +496,7 @@ private def standardByteArrayFixture : String :=
 
 -- Pinned Lean 4.35.0 ByteArray read/write, BEq and defaults.
 private def byteArrayCollectionFixture : String :=
-  "function byteReadSaved(value: UInt8): UInt8 := ByteArray.get!(ByteArray.push(ByteArray.empty, value), 0)\nfunction byteReplaceSaved(value: UInt8): UInt8 := ByteArray.get!(ByteArray.set!(ByteArray.push(ByteArray.empty, (3 : UInt8)), 0, value), 0)\nfunction byteReplaceOutside(value: UInt8): UInt8 := ByteArray.get!(ByteArray.set!(ByteArray.push(ByteArray.empty, value), 19, (0 : UInt8)), 0)\nconst byteEmptyIsEmpty: Bool := ByteArray.isEmpty(ByteArray.empty)\nconst byteNonEmptyIsEmpty: Bool := ByteArray.isEmpty(ByteArray.push(ByteArray.empty, (3 : UInt8)))\nconst byteDefaultLength: Nat := ByteArray.size((Inhabited.default : ByteArray))\nconst byteEqualSame: Bool := ByteArray.beq(ByteArray.push(ByteArray.empty, (3 : UInt8)), ByteArray.push(ByteArray.empty, (3 : UInt8)))\nconst byteEqualDifferent: Bool := ByteArray.beq(ByteArray.push(ByteArray.empty, (3 : UInt8)), ByteArray.push(ByteArray.empty, (4 : UInt8)))\nfunction byteGetOutside(index: Nat): UInt8 := ByteArray.get!(ByteArray.empty, index)\n"
+  "function byteReadSaved(value: UInt8): UInt8 := ByteArray.get!(ByteArray.push(ByteArray.empty, value), 0)\nfunction byteReplaceSaved(value: UInt8): UInt8 := ByteArray.get!(ByteArray.set!(ByteArray.push(ByteArray.empty, (3 : UInt8)), 0, value), 0)\nfunction byteReplaceOutside(value: UInt8): UInt8 := ByteArray.get!(ByteArray.set!(ByteArray.push(ByteArray.empty, value), 19, (0 : UInt8)), 0)\nconst byteEmptyIsEmpty: Bool := ByteArray.isEmpty(ByteArray.empty)\nconst byteNonEmptyIsEmpty: Bool := ByteArray.isEmpty(ByteArray.push(ByteArray.empty, (3 : UInt8)))\nconst byteDefaultLength: Nat := ByteArray.size((Inhabited.default : ByteArray))\nconst byteEqualSame: Bool := ByteArray.beq(ByteArray.push(ByteArray.empty, (3 : UInt8)), ByteArray.push(ByteArray.empty, (3 : UInt8)))\nconst byteEqualDifferent: Bool := ByteArray.beq(ByteArray.push(ByteArray.empty, (3 : UInt8)), ByteArray.push(ByteArray.empty, (4 : UInt8)))\nfunction byteCheckedRead(value: UInt8): UInt8 := ByteArray.get(ByteArray.push(ByteArray.empty, value), 0, PsStandard.natBleReflects(1, 1))\nfunction byteCheckedWrite(value: UInt8): UInt8 := ByteArray.get!(ByteArray.set(ByteArray.push(ByteArray.empty, (3 : UInt8)), 0, value, PsStandard.natBleReflects(1, 1)), 0)\nconst byteOptionalSome: UInt8 := Option.getD((ByteArray.push(ByteArray.empty, (6 : UInt8)))[0]?, (0 : UInt8))\nconst byteOptionalNone: Bool := Option.isNone((ByteArray.empty)[0]?)\nfunction byteGetOutside(index: Nat): UInt8 := ByteArray.get!(ByteArray.empty, index)\n"
 
 private def unsignedFixture : String :=
   "function unsigned8(value: Nat): Nat := UInt8.toNat(UInt8.ofNat(value))\nfunction unsigned16(value: Nat): Nat := UInt16.toNat(UInt16.ofNat(value))\nfunction unsigned32(value: Nat): Nat := UInt32.toNat(UInt32.ofNat(value))\nfunction unsigned64(value: Nat): Nat := UInt64.toNat(UInt64.ofNat(value))\nconst unsignedLiteral: Nat := UInt64.toNat((18446744073709551619 : UInt64))\nfunction unsignedIdentity{A: Type}(value: A): A := value\nfunction unsignedGeneric(value: Nat): Nat := UInt64.toNat(unsignedIdentity(UInt64.ofNat(value)))\nfunction unsignedViaBits(value: Nat): Nat := BitVec.toNat(UInt32.toBitVec(UInt32.ofNat(value)))\nfunction unsignedViaFin(value: Nat): Nat := Fin.val(UInt16.toFin(UInt16.ofNat(value)))\nfunction unsignedRebuild(value: Nat): Nat := UInt8.toNat(UInt8.ofBitVec(UInt8.toBitVec(UInt8.ofNat(value))))\nfunction unsignedMatch(value: Nat): Nat := match UInt64.ofNat(value) with { | UInt64.ofBitVec bits => BitVec.toNat(bits) }\nfunction unsignedUse(convert: Nat -> UInt64, value: Nat): Nat := UInt64.toNat(convert(value))\nfunction unsignedHigher(value: Nat): Nat := unsignedUse(UInt64.ofNat, value)\nfunction bitvecConvert(width: Nat, value: Nat): Nat := BitVec.toNat(BitVec.ofNat(width, value))\nfunction naturalPower(base: Nat, exponent: Nat): Nat := Nat.pow(base, exponent)\ntheorem unsignedBound(value: UInt64): Nat.lt(UInt64.toNat(value), UInt64.size) := Fin.isLt(UInt64.toFin(value))\n"
@@ -2836,7 +2836,19 @@ private def byteArrayCollectionNativeOracle : IO Unit := do
     throw (IO.userError "PSCV0_BYTE_COLLECTION: distinct bytes compared equal")
   unless (default : ByteArray).size == 0 do
     throw (IO.userError "PSCV0_BYTE_COLLECTION: default constructor mismatch")
-  IO.println "PSCV0_BYTE_COLLECTION_ORACLE: PASS seven independent native ByteArray cases"
+  unless (ByteArray.push ByteArray.empty (3 : UInt8))[0]? ==
+      some (3 : UInt8) do
+    throw (IO.userError "PSCV0_BYTE_COLLECTION: optional valid lookup")
+  unless (ByteArray.empty)[0]? == (none : Option UInt8) do
+    throw (IO.userError "PSCV0_BYTE_COLLECTION: optional empty lookup")
+  unless ByteArray.get (ByteArray.push ByteArray.empty (3 : UInt8))
+      0 (by decide) == (3 : UInt8) do
+    throw (IO.userError "PSCV0_BYTE_COLLECTION: proof-carrying getter")
+  let replaced := ByteArray.set (ByteArray.push ByteArray.empty (3 : UInt8))
+    0 (7 : UInt8) (by decide)
+  unless replaced[0]? == some (7 : UInt8) do
+    throw (IO.userError "PSCV0_BYTE_COLLECTION: proof-carrying setter")
+  IO.println "PSCV0_BYTE_COLLECTION_ORACLE: PASS eleven independent native ByteArray cases"
 
 private def byteArrayNativeOracle : IO Unit := do
   let empty := ByteArray.empty

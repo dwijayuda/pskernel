@@ -14,7 +14,6 @@ No proof or checking authority is supplied by merely constructing a Pi/lam.
 def main : IO Unit := do
   let binder : PsKernelName := .str .anonymous "binderParam"
   let sort0 : PsKernelExpr := .sort .zero
-  let sort1 : PsKernelExpr := .sort (.succ .zero)
   let piExpr : PsKernelExpr :=
     .forallE binder sort0 sort0 .default
   let depPi : PsKernelExpr :=
@@ -82,8 +81,14 @@ def main : IO Unit := do
   match psKernelSessionCheck 0 source piExpr with
   | .error "kernel inference budget exhausted" => pure ()
   | _ => throw (IO.userError "Pi binder ignored zero source fuel")
-  let restricted := psKernelMkCheckerSession
-    psKernelEnvironmentEmpty [] .safe 0 psKernelLeanNatMaxSizeDefault
+  let restricted : PsKernelCheckerSession := {
+    source with
+    context := {
+      source.context with
+      maxRecDepth := 1
+      recDepth := 1000000
+    }
+  }
   match psKernelSessionCheck 4096 restricted identity with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "lambda bypassed source recursion-depth policy")

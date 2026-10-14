@@ -3,6 +3,18 @@
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
   {name:"signedToInt8",args:[0n],type:"int",expected:0n},
+  {name:"signedAbs8",argTypes:["int8"],args:[-128],type:"int8",expected:-128},
+  {name:"signedAbs8",argTypes:["int8"],args:[-3],type:"int8",expected:3},
+  {name:"signedAbs8",argTypes:["int8"],args:[127],type:"int8",expected:127},
+  {name:"signedAbs16",argTypes:["int16"],args:[-32768],type:"int16",expected:-32768},
+  {name:"signedAbs16",argTypes:["int16"],args:[-3],type:"int16",expected:3},
+  {name:"signedAbs16",argTypes:["int16"],args:[32767],type:"int16",expected:32767},
+  {name:"signedAbs32",argTypes:["int32"],args:[-2147483648],type:"int32",expected:-2147483648},
+  {name:"signedAbs32",argTypes:["int32"],args:[-3],type:"int32",expected:3},
+  {name:"signedAbs32",argTypes:["int32"],args:[2147483647],type:"int32",expected:2147483647},
+  {name:"signedAbs64",argTypes:["int64"],args:[-9223372036854775808n],type:"int64",expected:-9223372036854775808n},
+  {name:"signedAbs64",argTypes:["int64"],args:[-3n],type:"int64",expected:3n},
+  {name:"signedAbs64",argTypes:["int64"],args:[9223372036854775807n],type:"int64",expected:9223372036854775807n},
   {name:"signedClamp8",argTypes:["int8"],args:[-128],type:"nat",expected:0n},
   {name:"signedClamp8",argTypes:["int8"],args:[127],type:"nat",expected:127n},
   {name:"signedClamp8",argTypes:["int8"],args:[-1],type:"nat",expected:0n},

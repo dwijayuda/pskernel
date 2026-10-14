@@ -454,6 +454,10 @@ private def signedShiftFixture : String :=
 private def signedClampFixture : String :=
   "function signedClamp8(value: Int8): Nat := Int8.toNatClampNeg(value)\nfunction signedClamp16(value: Int16): Nat := Int16.toNatClampNeg(value)\nfunction signedClamp32(value: Int32): Nat := Int32.toNatClampNeg(value)\nfunction signedClamp64(value: Int64): Nat := Int64.toNatClampNeg(value)\n"
 
+-- Checked signed absolute values use the pinned bit-pattern sign model.
+private def signedAbsFixture : String :=
+  "function signedAbs8(value: Int8): Int8 := Int8.abs(value)\nfunction signedAbs16(value: Int16): Int16 := Int16.abs(value)\nfunction signedAbs32(value: Int32): Int32 := Int32.abs(value)\nfunction signedAbs64(value: Int64): Int64 := Int64.abs(value)\n"
+
 private def unsignedFixture : String :=
   "function unsigned8(value: Nat): Nat := UInt8.toNat(UInt8.ofNat(value))\nfunction unsigned16(value: Nat): Nat := UInt16.toNat(UInt16.ofNat(value))\nfunction unsigned32(value: Nat): Nat := UInt32.toNat(UInt32.ofNat(value))\nfunction unsigned64(value: Nat): Nat := UInt64.toNat(UInt64.ofNat(value))\nconst unsignedLiteral: Nat := UInt64.toNat((18446744073709551619 : UInt64))\nfunction unsignedIdentity{A: Type}(value: A): A := value\nfunction unsignedGeneric(value: Nat): Nat := UInt64.toNat(unsignedIdentity(UInt64.ofNat(value)))\nfunction unsignedViaBits(value: Nat): Nat := BitVec.toNat(UInt32.toBitVec(UInt32.ofNat(value)))\nfunction unsignedViaFin(value: Nat): Nat := Fin.val(UInt16.toFin(UInt16.ofNat(value)))\nfunction unsignedRebuild(value: Nat): Nat := UInt8.toNat(UInt8.ofBitVec(UInt8.toBitVec(UInt8.ofNat(value))))\nfunction unsignedMatch(value: Nat): Nat := match UInt64.ofNat(value) with { | UInt64.ofBitVec bits => BitVec.toNat(bits) }\nfunction unsignedUse(convert: Nat -> UInt64, value: Nat): Nat := UInt64.toNat(convert(value))\nfunction unsignedHigher(value: Nat): Nat := unsignedUse(UInt64.ofNat, value)\nfunction bitvecConvert(width: Nat, value: Nat): Nat := BitVec.toNat(BitVec.ofNat(width, value))\nfunction naturalPower(base: Nat, exponent: Nat): Nat := Nat.pow(base, exponent)\ntheorem unsignedBound(value: UInt64): Nat.lt(UInt64.toNat(value), UInt64.size) := Fin.isLt(UInt64.toFin(value))\n"
 
@@ -476,7 +480,7 @@ private def derivingEqualityFixture : String :=
   "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nfunction derivedExplicitDecision(a: Nat, b: Nat): Bool := Decidable.decide(self := decEq(a, b))\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
 
 private def application : String :=
-  productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -2558,6 +2562,18 @@ private theorem signedToInt64_model (x : Int64) :
 -- Compare exactly the same input vectors as JS/TS/Rust observations.
 private def signedNativeOracle : IO Unit := do
   let checks : List (String × Int × Int) := [
+    ("signedAbs8(-128)", Int8.toInt (Int8.abs (Int8.ofInt (-128))), -128),
+    ("signedAbs8(-3)", Int8.toInt (Int8.abs (Int8.ofInt (-3))), 3),
+    ("signedAbs8(127)", Int8.toInt (Int8.abs (Int8.ofInt 127)), 127),
+    ("signedAbs16(-32768)", Int16.toInt (Int16.abs (Int16.ofInt (-32768))), -32768),
+    ("signedAbs16(-3)", Int16.toInt (Int16.abs (Int16.ofInt (-3))), 3),
+    ("signedAbs16(32767)", Int16.toInt (Int16.abs (Int16.ofInt 32767)), 32767),
+    ("signedAbs32(-2147483648)", Int32.toInt (Int32.abs (Int32.ofInt (-2147483648))), -2147483648),
+    ("signedAbs32(-3)", Int32.toInt (Int32.abs (Int32.ofInt (-3))), 3),
+    ("signedAbs32(2147483647)", Int32.toInt (Int32.abs (Int32.ofInt 2147483647)), 2147483647),
+    ("signedAbs64(-9223372036854775808)", Int64.toInt (Int64.abs (Int64.ofInt (-9223372036854775808))), -9223372036854775808),
+    ("signedAbs64(-3)", Int64.toInt (Int64.abs (Int64.ofInt (-3))), 3),
+    ("signedAbs64(9223372036854775807)", Int64.toInt (Int64.abs (Int64.ofInt 9223372036854775807)), 9223372036854775807),
     ("signedClamp8(-128)", Int.ofNat (Int8.toNatClampNeg (Int8.ofInt (-128))), 0),
     ("signedClamp8(127)", Int.ofNat (Int8.toNatClampNeg (Int8.ofInt 127)), 127),
     ("signedClamp8(-1)", Int.ofNat (Int8.toNatClampNeg (Int8.ofInt (-1))), 0),

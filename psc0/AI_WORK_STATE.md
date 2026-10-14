@@ -1,5 +1,36 @@
 # PSCV0 v7 — AI work state
 
+## 14 October — checked signed fixed-width abs candidate (qualification pending)
+
+Pinned Lean 4.35.0 `BitVec.abs` is sign-conditional fixed-width
+negation; `Int8/16/32/64.abs` preserve the minimum signed value.
+The new native portable `.lean` module composes the existing checked
+unsigned carriers, `Nat.lt`/`Nat.decLt`, `ite` and `IntN.neg`
+and registers four ordinary definitions in the selected Standard and
+runtime support. No new target primitive, axiom, `pskernel-core`,
+self-hosting or C5 code. Twelve signed-extrema, -3, positive-boundary
+values are checked against the independent pinned native Lean oracle
+and by common-source JS/TypeScript/Rust/Wasm observations.
+
+**Not yet qualified:** Require actual compiled drift values for the FNV/SHA
+registry guards and complete green Linux CI before claiming this stage
+as implemented and released. Native signed comparison classes and
+deciders, Float F1-F4, platform size and the Phase A manifest remain open.
+
+## 14 October — signed Nat clamps qualified
+
+Commit `e0a86361b53b0b2688e26ab6aeae20f4a1a7c560`
+passed [Linux CI 38576409867](https://github.com/dwijayuda/pskernel/actions/runs/38576409867):
+1,699 declarations / 23 classes / 189 instances, 507 JS/direct-JS/TS/Rust
+shared observations, native oracle 58 signed values plus seven strict
+IR refusals, qualified Wasm GC/Wasmtime component and host. The independently
+measured strict registry values were FNV
+`fnv1a64:9945284948184117163` and SHA-256
+`sha256:fb98de4265c1206139fd2859f317de035156391bc926c0ee3f8f3b01147b9056`.
+This evidence qualifies the four signed `toNatClampNeg` methods within
+the declared executable scope, not M2+A or full v7.
+
+
 ## 14 October — four checked signed Nat clamping methods (qualification pending)
 
 An M2+A native portable `.lean` stage implements Lean 4.35.0

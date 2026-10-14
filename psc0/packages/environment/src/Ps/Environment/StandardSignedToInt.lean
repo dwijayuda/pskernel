@@ -33,7 +33,12 @@ def psStandardSignedToIntDeclarations : List PsDeclaration :=
       (psLogicLam 0 "value" signedType result)
 
 def psStandardSignedToIntExtend (environment : PsEnvironment) : PsEnvironment :=
-  psStandardSignedToIntDeclarations.foldl psEnvironmentInsert environment
+  let environment := psStandardSignedToIntDeclarations.foldl psEnvironmentInsert environment
+  -- Lean 4.35.0 annotates all four conversions [implicit_reducible].
+  -- The official native audit rejects a declaration with any other status.
+  psStandardSignedToIntDeclarations.foldl (fun env declaration =>
+    psEnvironmentSetReducibility env (psDeclarationName declaration)
+      .implicitReducible) environment
 
 def psStandardSignedToIntRuntimeDeclarations : List PsDeclaration :=
   psStandardSignedToIntDeclarations

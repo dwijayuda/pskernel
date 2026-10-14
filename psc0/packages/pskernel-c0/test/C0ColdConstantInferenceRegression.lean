@@ -115,7 +115,7 @@ def main : IO Unit := do
   let u : PsKernelName := .str .anonymous "sourceUniverse"
   let v : PsKernelName := .str .anonymous "foreignUniverse"
   let axiomName : PsKernelName := .str .anonymous "ColdUniverseAxiom"
-  let axiom : PsKernelAxiomInfo := {
+  let axiomInfo : PsKernelAxiomInfo := {
     base := {
       name := axiomName
       levelParams := [u]
@@ -123,7 +123,7 @@ def main : IO Unit := do
     }
     isUnsafe := false
   }
-  let polymorphicEnv ← match psKernelAddAxiom 4096 env axiom
+  let polymorphicEnv ← match psKernelAddAxiom 4096 env axiomInfo
       4096 psKernelLeanNatMaxSizeDefault with
     | .ok result => pure result
     | .error e => throw (IO.userError ("poly axiom source admission failed: " ++ e))

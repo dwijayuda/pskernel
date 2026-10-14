@@ -192,8 +192,12 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- all assets and reproduced source byte-for-byte, then independently reported
 -- both strict digests using the previous Nat-based checksum implementation.
 -- The native-word implementation below must reproduce those exact digests.
+-- F0 selected logical Float/Float32 identity; independently observed at
+-- bdfdb6b CI 38534047864 before the old digest correctly refused drift.
+-- The 51 checked candidate declarations replace 2 historical type axioms;
+-- no new assumptions, classes or instances.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:6333670853941549394"
+  "fnv1a64:4585335486592655667"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -355,7 +359,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:ebf02f5f8dfecf3769cbaeaa52e39dac3ba9c8dc034ea5284655da324bc75d60"
+  "sha256:3bed7c1104a6209f6af124e932ce7c7ae6401f0f9483896e6730c51ffd35d0ca"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

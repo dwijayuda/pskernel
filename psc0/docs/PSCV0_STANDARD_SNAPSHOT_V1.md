@@ -1,5 +1,11 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
+## F0 selected Standard digest — independently observed (14 October 2026)
+
+Linux [run #38534047864](https://github.com/dwijayuda/pskernel/actions/runs/38534047864) at `bdfdb6b6402618908c1d52aa6494f37df7483713` compiled the newly selected 51-entry Float/Float32 Core model, independently regenerated its 254,044-byte source **byte-for-byte**, passed the F0 annotation and native-kernel negative probes, and correctly refused the previous /61 Standard digest. The run's independent candidate for the new selected Standard fingerprint was **FNV `fnv1a64:4585335486592655667`** and **SHA-256 `sha256:3bed7c1104a6209f6af124e932ce7c7ae6401f0f9483896e6730c51ffd35d0ca`**. These are now pinned in `StandardSnapshot.lean` without weakening either validation guard. The new selected environment is **pending full official kernel, source, runtime and CI qualification**; the last fully green regression remains `bb2dbbcc` on the unchanged /61 environment. F1–F4 executable Float, M2+A and later milestones remain open.
+
+
+
 ## Qualified /61 checkpoint — 14 October 2026
 
 Executable `34ff236b6fe9f936d7d44b8ace1c70612c7cc66e` passed all established Linux gates in [run 38515443060](https://github.com/dwijayuda/pskernel/actions/runs/38515443060).

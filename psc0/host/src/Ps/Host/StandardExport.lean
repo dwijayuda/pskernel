@@ -355,11 +355,11 @@ private def checkFloatAnnotationPolicy (native : Lean.Environment) : IO Unit := 
   if after.getUsedConstants.contains `autoParam ||
       after.getUsedConstants.contains `Lean.Syntax then
     throw (IO.userError "elaboration-only annotation escaped F0 normalization")
-  let syntax := Lean.Expr.const `Lean.Syntax []
-  unless standardEraseAutoParam syntax == syntax do
+  let syntaxExpr := Lean.Expr.const `Lean.Syntax []
+  unless standardEraseAutoParam syntaxExpr == syntaxExpr do
     throw (IO.userError "ordinary Lean.Syntax dependency was silently excluded")
-  let partial := Lean.Expr.app (.const `autoParam [.zero]) (.const `Nat [])
-  unless standardEraseAutoParam partial == partial do
+  let partialAnnotation := Lean.Expr.app (.const `autoParam [.zero]) (.const `Nat [])
+  unless standardEraseAutoParam partialAnnotation == partialAnnotation do
     throw (IO.userError "partially applied autoParam was unsoundly normalized")
   let optional := Lean.Expr.app
     (Lean.Expr.app (.const `optParam [.zero]) (.const `Nat [])) (.lit (.natVal 0))

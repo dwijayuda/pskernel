@@ -68,6 +68,25 @@ def psKernelWithDefinitionHeight
     | _ => declaration
   | _ => declaration
 
+-- Pinned Lean 4.35.0 runtime/interrupt.cpp: g_heartbeat is thread-local
+-- and is NOT reset by scope_max_heartbeat. The C++ lean_add_decl entrypoint
+-- installs only the maximum; after replaying a large Standard with maximum
+-- zero, an independent bounded source declaration would inherit that huge
+-- count and immediately time out. Reset and restore the counter ONLY across
+-- an independent kernel-admission boundary, exactly as Lean scopes isolated
+-- work. The maximum itself (2m, 20k depth) and every kernel check are
+-- unchanged. Match the result inside the scope so no lazy pure check escapes.
+def withFreshKernelHeartbeatScope {ε α : Type}
+    (action : Unit → Except ε α) : IO (Except ε α) := do
+  let original ← IO.getNumHeartbeats
+  IO.setNumHeartbeats 0
+  try
+    match action () with
+    | .ok result => return .ok result
+    | .error error => return .error error
+  finally
+    IO.setNumHeartbeats original
+
 def findConstructorInfo : List PsDeclaration -> PsName -> Option PsConstructorInfo
   | [], _ => none
   | declaration :: rest, name =>

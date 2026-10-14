@@ -230,7 +230,20 @@ def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
       -- identity in this 4.35.0 host. The error kind still identifies the boundary.
       return .error { phase := "prelude", message := error.kind.code ++ ": " ++ error.message }
   | .ok prelude =>
-      let results ← requests.mapM (fun request => (compile prelude request).run)
+      -- A batch request is the actual IO isolation unit. In pinned Lean's
+      -- C++ runtime, lean_add_decl scopes only the heartbeat MAXIMUM, not the
+      -- thread-local counter. Create a fresh counter BEFORE invoking the
+      -- IO compilation action; don't wrap a pre-evaluated pure Except value.
+      -- Restore the caller count even for refused or interrupted requests.
+      -- The official source checker still retains 2m heartbeat / 20k depth.
+      let results ← requests.mapM fun request => do
+        let previous ← IO.getNumHeartbeats
+        IO.setNumHeartbeats 0
+        try
+          let result ← (compile prelude request).run
+          return result
+        finally
+          IO.setNumHeartbeats previous
       return .ok { preludeMs := t1 - t0, results }
 
 def timingsJson (t : Timings) : Lean.Json :=

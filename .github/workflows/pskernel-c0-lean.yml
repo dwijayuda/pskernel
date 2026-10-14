@@ -14,6 +14,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0IndexedScratchRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0TrustedAdmissionRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SealedStateRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedAssumptionsRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0AuditedHistoryPerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkPerfMicrobench.lean'
@@ -110,6 +111,9 @@ jobs:
       - name: C0 source admission history from checked empty genesis
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0TrustedAdmissionRegression.lean
+      - name: C0 exact checked state lineage and fail-closed session transitions
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0SealedStateRegression.lean
       - name: C0 typed K/eta on source-admitted inductive declarations
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0TypedEliminationRegression.lean

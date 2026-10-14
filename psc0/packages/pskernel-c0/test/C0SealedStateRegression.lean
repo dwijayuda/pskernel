@@ -40,6 +40,22 @@ def main : IO Unit := do
   let some staged := psKernelC0SealedSourceStage afterDefEq sort0
     | throw (IO.userError "sealed syntax staging failed")
   let _stageHistory := psKernelC0SealedSourceHasLineage staged
+  -- Publication must be tied to this exact checked state and preserve the
+  -- source proof and immutable input even when root syntax is staged.
+  let published ← match psKernelC0SealedSourceCommitChecked 4096 staged with
+    | .ok receipt => pure receipt
+    | .error e => throw (IO.userError ("sealed checked publication failed: " ++ e))
+  let _publicationExact :=
+    psKernelC0SealedPublicationExact published
+  match published.roots with
+  | [root] =>
+      let _sourceProof := psKernelC0SourceCheckedRootExact root
+      if !psKernelExprEqual root.expression sort0 then
+        throw (IO.userError "sealed publication changed exact root syntax")
+  | _ => throw (IO.userError "sealed publication omitted checked root")
+  if psKernelEnvironmentSize
+      staged.trusted.certified.raw.checker.context.environment != 0 then
+    throw (IO.userError "sealed publication changed original environment")
   let declName : PsKernelName := .str .anonymous "SealedCheckedDefinition"
   let info : PsKernelDefinitionInfo := {
     base := {

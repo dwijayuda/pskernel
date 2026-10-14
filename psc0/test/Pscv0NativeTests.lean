@@ -445,7 +445,7 @@ private def signedDictionaryFixture : String :=
 -- Four checked, kernel-certificated two's-complement conversions from
 -- the same pinned Nat-bit carriers as the native mathematical model.
 private def signedConversionFixture : String :=
-  "function signedToInt8(value: Nat): Int := Int8.toInt(Int8.ofNat(value))\nfunction signedToInt16(value: Nat): Int := Int16.toInt(Int16.ofNat(value))\nfunction signedToInt32(value: Nat): Int := Int32.toInt(Int32.ofNat(value))\nfunction signedToInt64(value: Nat): Int := Int64.toInt(Int64.ofNat(value))\n"
+  "function signedToInt8(value: Nat): Int := Int8.toInt(Int8.ofNat(value))\nfunction signedToInt16(value: Nat): Int := Int16.toInt(Int16.ofNat(value))\nfunction signedToInt32(value: Nat): Int := Int32.toInt(Int32.ofNat(value))\nfunction signedToInt64(value: Nat): Int := Int64.toInt(Int64.ofNat(value))\nfunction signedFromInt8(value: Int): Int8 := Int8.ofInt(value)\nfunction signedFromInt16(value: Int): Int16 := Int16.ofInt(value)\nfunction signedFromInt32(value: Int): Int32 := Int32.ofInt(value)\nfunction signedFromInt64(value: Int): Int64 := Int64.ofInt(value)\n"
 
 private def unsignedFixture : String :=
   "function unsigned8(value: Nat): Nat := UInt8.toNat(UInt8.ofNat(value))\nfunction unsigned16(value: Nat): Nat := UInt16.toNat(UInt16.ofNat(value))\nfunction unsigned32(value: Nat): Nat := UInt32.toNat(UInt32.ofNat(value))\nfunction unsigned64(value: Nat): Nat := UInt64.toNat(UInt64.ofNat(value))\nconst unsignedLiteral: Nat := UInt64.toNat((18446744073709551619 : UInt64))\nfunction unsignedIdentity{A: Type}(value: A): A := value\nfunction unsignedGeneric(value: Nat): Nat := UInt64.toNat(unsignedIdentity(UInt64.ofNat(value)))\nfunction unsignedViaBits(value: Nat): Nat := BitVec.toNat(UInt32.toBitVec(UInt32.ofNat(value)))\nfunction unsignedViaFin(value: Nat): Nat := Fin.val(UInt16.toFin(UInt16.ofNat(value)))\nfunction unsignedRebuild(value: Nat): Nat := UInt8.toNat(UInt8.ofBitVec(UInt8.toBitVec(UInt8.ofNat(value))))\nfunction unsignedMatch(value: Nat): Nat := match UInt64.ofNat(value) with { | UInt64.ofBitVec bits => BitVec.toNat(bits) }\nfunction unsignedUse(convert: Nat -> UInt64, value: Nat): Nat := UInt64.toNat(convert(value))\nfunction unsignedHigher(value: Nat): Nat := unsignedUse(UInt64.ofNat, value)\nfunction bitvecConvert(width: Nat, value: Nat): Nat := BitVec.toNat(BitVec.ofNat(width, value))\nfunction naturalPower(base: Nat, exponent: Nat): Nat := Nat.pow(base, exponent)\ntheorem unsignedBound(value: UInt64): Nat.lt(UInt64.toNat(value), UInt64.size) := Fin.isLt(UInt64.toFin(value))\n"
@@ -2551,6 +2551,14 @@ private theorem signedToInt64_model (x : Int64) :
 -- Compare exactly the same input vectors as JS/TS/Rust observations.
 private def signedNativeOracle : IO Unit := do
   let checks : List (String × Int × Int) := [
+    ("signedFromInt8(-129)", Int8.toInt (Int8.ofInt (-129)), 127),
+    ("signedFromInt8(128)", Int8.toInt (Int8.ofInt (128)), -128),
+    ("signedFromInt16(-32769)", Int16.toInt (Int16.ofInt (-32769)), 32767),
+    ("signedFromInt16(32768)", Int16.toInt (Int16.ofInt (32768)), -32768),
+    ("signedFromInt32(-2147483649)", Int32.toInt (Int32.ofInt (-2147483649)), 2147483647),
+    ("signedFromInt32(2147483648)", Int32.toInt (Int32.ofInt (2147483648)), -2147483648),
+    ("signedFromInt64(-9223372036854775809)", Int64.toInt (Int64.ofInt (-9223372036854775809)), 9223372036854775807),
+    ("signedFromInt64(9223372036854775808)", Int64.toInt (Int64.ofInt (9223372036854775808)), -9223372036854775808),
     ("signed8Add(127,1)", Int8.toInt (Int8.add (Int8.ofNat 127) (Int8.ofNat 1)), -128),
     ("signed8Add(255,2)", Int8.toInt (Int8.add (Int8.ofNat 255) (Int8.ofNat 2)), 1),
     ("signed8Div(128,255)", Int8.toInt (Int8.div (Int8.ofNat 128) (Int8.ofNat 255)), -128),

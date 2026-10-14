@@ -4,7 +4,15 @@
 **Scope:** `dwijayuda/pskernel`, branch `perf/pskernel-c0-v7-rust-20261012`, `psc0/packages/pskernel-c0/`; native Lean 4.35.0 only.  
 **Non-goals:** no changes to original `pskernel-core`, PSC0 compiler, generated Rust, Wasm/self-host or metatheory during C–E construction.
 
-## Latest native-qualified E.4AH — recursive source-proved β/ζ WHNF core
+## Latest native-qualified E.4AI — recursive source-proved β/ζ/δ WHNF
+
+Executable [81dbc803](https://github.com/dwijayuda/pskernel/commit/81dbc8034ef7e9a95fd0d976b0770d85c55d8476) passed pinned Lean 4.35 [native CI 38619929963](https://github.com/dwijayuda/pskernel/actions/runs/38619929963): **55 successes, zero failures, four optional skipped**. [AI_WORK_STATE.md](AI_WORK_STATE.md) provides full exact-source mathematical proof and negative/resource/performance evidence.
+
+One existing recursive β/ζ core is now composed with a recursive public δ controller, source-admitted multi-definition chains, public/core cache and full-state source-equivalence proofs. Normal trusted/audited WHNF uses certified successful results, with exact fallback for unsupported source syntax/resources. This is the first qualified independent **β/ζ/δ WHNF subset**, NOT general WHNF, DefEq, independent declaration admission, consistency or performance supremacy.
+
+**Next:** independent recursively compositional DefEq, full Lean Init/Std/Mathlib conformance at the known record-86,383 false rejection, then C/D/E complete accepting checker, Phase F matched whole workload and G metatheory. No shortcut, extra trusted axiom, incomplete test substitution or compiler/backends/selfhost work.
+
+## Historical native-qualified E.4AH — recursive source-proved β/ζ WHNF core
 
 **Exact qualified source:** [04687393](https://github.com/dwijayuda/pskernel/commit/04687393a36db001e42b1e3140626b66913f6ef2) and [Lean 4.35 native CI 38605943276](https://github.com/dwijayuda/pskernel/actions/runs/38605943276) **SUCCESS (54 passed, zero failures)**. Full qualification details and mathematical proof scope: [AI_WORK_STATE.md](AI_WORK_STATE.md).
 

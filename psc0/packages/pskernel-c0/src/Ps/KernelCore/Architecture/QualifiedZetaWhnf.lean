@@ -175,7 +175,8 @@ theorem psKernelC0ZetaSortWhnf_source
                                             psKernelWhnfCoreWithFuelRanges,
                                             psKernelWhnfCoreFinishWithKnownHash,
                                             hlong, depth, coreCache, opened,
-                                            bodyCore, term, normalized, coreState]
+                                            childDepth, bodyCore, term,
+                                            normalized, coreState]
                                         have natSort :
                                             psKernelReduceNatWith whnfChild
                                               context coreState normalized =
@@ -193,9 +194,31 @@ theorem psKernelC0ZetaSortWhnf_source
                                             natSort, noDelta, psKernelWhnfFinish,
                                             psKernelC0ColdOneStepWhnfState,
                                             nextState, normalized, coreState]
-                                        simpa [psKernelWhnfWithFuel,
-                                          publicCache, letCore, afterCore,
-                                          whnfChild]
+                                        -- Expose ONLY the outer public
+                                        -- WHNF match. Rewriting the recursive
+                                        -- definition as a simp rule would
+                                        -- eagerly unfold whnfChild and make
+                                        -- the already proved core equation
+                                        -- syntactically unreachable.
+                                        change
+                                          (match psKernelExprMapGet
+                                              state.whnf term with
+                                          | some cached =>
+                                              .ok (cached, state)
+                                          | none =>
+                                              match psKernelWhnfCoreWithFuel
+                                                  (Nat.succ (Nat.succ remaining))
+                                                  whnfChild reduceRecursor
+                                                  context state term false false with
+                                              | .error reason => .error reason
+                                              | .ok coreResult =>
+                                                  psKernelWhnfAfterCore
+                                                    whnfChild context
+                                                    coreResult.snd term
+                                                    coreResult.fst) =
+                                            .ok (normalized, nextState)
+                                        simp only [publicCache, letCore,
+                                          afterCore]
                                     | bvar _ => simp [psKernelC0ZetaSortWhnfWithFuel,
                                         hlong, publicCache, depth, coreCache,
                                         childDepth, opened, term] at h

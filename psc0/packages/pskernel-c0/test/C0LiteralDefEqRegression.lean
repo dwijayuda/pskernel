@@ -115,8 +115,10 @@ def main : IO Unit := do
       exhaustedChecker.state (.nat 3) (.nat 3)).isSome then
     throw (IO.userError "literal equality bypassed source recursion limit")
 
-  -- Empty verified genesis intentionally lacks the source Nat/String
-  -- declarations: conversion of raw literal syntax is NOT a type proof.
+  -- Conversion of raw literal syntax is never sufficient to establish
+  -- checked status. Nat/String built-in typing must agree with the actual
+  -- source checker, and a malformed application containing literals must
+  -- fail full provider checking even when its two inputs are identical.
   let resources : PsKernelResourcePolicy := {
     fuel := 4096
     maxRecDepth := 4096
@@ -128,14 +130,24 @@ def main : IO Unit := do
       resources psKernelProviderDefault with
     | .ok result => pure result
     | .error _ => throw (IO.userError "literal verified provider genesis failed")
-  match psKernelC0VerifiedProviderDefEq verified three three with
+  for literal in [three, hello] do
+    let sourceChecked := psKernelSessionCheck resources.fuel
+      (psKernelMkCheckerSession psKernelEnvironmentEmpty [] .safe
+        resources.maxRecDepth resources.maxNatSize) literal
+    let providerChecked := psKernelC0VerifiedProviderCheck verified literal
+    match sourceChecked, providerChecked with
+    | .ok (sourceType, _), .ok (providerType, _) =>
+        if !psKernelExprEqual sourceType providerType then
+          throw (IO.userError "source/provider checked literal type mismatch")
+    | .error _, .error _ => pure ()
+    | _, _ =>
+        throw (IO.userError "verified literal full checking diverged from source")
+  let malformedLiteralApp : PsKernelExpr := .app three three
+  match psKernelC0VerifiedProviderDefEq verified
+      malformedLiteralApp malformedLiteralApp with
   | .error _ => pure ()
   | .ok _ =>
-      throw (IO.userError "untyped Nat literal was admitted without checked Nat")
-  match psKernelC0VerifiedProviderDefEq verified hello hello with
-  | .error _ => pure ()
-  | .ok _ =>
-      throw (IO.userError "untyped String literal was admitted without checked String")
+      throw (IO.userError "reflexive literal application bypassed full checking")
 
   IO.println "C0_LITERAL_DEFEQ full_nat_string_unicode_comparison_matrix=pass"
   IO.println "C0_LITERAL_DEFEQ source_equation_positive_cache_and_limits=pass"

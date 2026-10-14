@@ -60,8 +60,8 @@ def main : IO Unit := do
   | .ok _ => throw (IO.userError "verified provider admitted unsigned signedAxiom")
 
   match psKernelC0VerifiedProviderAdmit first (.mutualDefinitions []) with
-  | .error (.declinedUnsupported _) => pure ()
-  | _ => throw (IO.userError "verified provider invented mutual-definition admission")
+  | .error (.rejectedInvalid _) => pure ()
+  | _ => throw (IO.userError "verified provider admitted an invalid empty mutual family")
   let some policySession := psKernelC0VerifiedChangePolicy first.verified [signedAxiom] []
     | throw (IO.userError "verified policy expansion failed")
   let withPolicy : PsKernelC0VerifiedProviderSession :=
@@ -89,6 +89,68 @@ def main : IO Unit := do
   if psKernelEnvironmentSize
       accepted.verified.sealed.audited.trusted.certified.raw.checker.context.environment != 1 then
     throw (IO.userError "resource failure mutated immutable checked state")
+
+  -- Atomic mutual families require one approval for EVERY unsafe member.
+  let mutualResources : PsKernelResourcePolicy :=
+    { resources with maxDeclarations := 2 }
+  let mutualGenesis ← match psKernelC0VerifiedProviderBegin
+      mutualResources provider with
+    | .ok session => pure session
+    | .error _ => throw (IO.userError "verified mutual genesis failed")
+  let mutualOne : PsKernelName := .str .anonymous "VerifiedMutualOne"
+  let mutualTwo : PsKernelName := .str .anonymous "VerifiedMutualTwo"
+  let mutualType : PsKernelExpr := .sort (.succ .zero)
+  let mutualFirst : PsKernelDefinitionInfo := {
+    base := {
+      name := mutualOne
+      levelParams := []
+      type := mutualType
+    }
+    value := .sort .zero
+    hints := .abbrevHint
+    safety := .unsafeDef
+  }
+  let mutualSecond : PsKernelDefinitionInfo := {
+    base := {
+      name := mutualTwo
+      levelParams := []
+      type := mutualType
+    }
+    value := .sort .zero
+    hints := .abbrevHint
+    safety := .unsafeDef
+  }
+  let mutualRequest : PsKernelDeclarationRequest :=
+    .mutualDefinitions [mutualFirst, mutualSecond]
+  match psKernelC0VerifiedProviderAdmit mutualGenesis mutualRequest with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "unapproved mutual family entered trusted environment")
+  let some halfPolicy := psKernelC0VerifiedChangePolicy
+      mutualGenesis.verified [] [.unsafeDefinition mutualOne]
+    | throw (IO.userError "one-member policy review failed")
+  let halfSession : PsKernelC0VerifiedProviderSession :=
+    { mutualGenesis with verified := halfPolicy }
+  match psKernelC0VerifiedProviderAdmit halfSession mutualRequest with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "one permission authorized entire unsafe mutual family")
+  let some bothPolicy := psKernelC0VerifiedChangePolicy
+      mutualGenesis.verified []
+        [.unsafeDefinition mutualOne, .unsafeDefinition mutualTwo]
+    | throw (IO.userError "full mutual policy review failed")
+  let bothSession : PsKernelC0VerifiedProviderSession :=
+    { mutualGenesis with verified := bothPolicy }
+  let mutualAccepted ← match psKernelC0VerifiedProviderAdmit bothSession
+      mutualRequest with
+    | .ok result => pure result
+    | .error _ => throw (IO.userError "fully approved source mutual family rejected")
+  if psKernelEnvironmentSize
+      mutualAccepted.verified.sealed.audited.trusted.certified.raw.checker.context.environment != 2 then
+    throw (IO.userError "atomic mutual admission lost a checked member")
+  if (psKernelC0HistoryTrustCapabilities
+      mutualAccepted.verified.sealed.audited.trusted.history).length != 2 then
+    throw (IO.userError "mutual family did not record both trust capabilities")
+  if (psKernelC0VerifiedChangePolicy mutualAccepted.verified [] []).isSome then
+    throw (IO.userError "mutual trust ledger could be silently downgraded")
 
   -- The provider record is constructible; it may not claim a runtime
   -- policy with different recursion/numeral limits than the checker used.

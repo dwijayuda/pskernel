@@ -247,6 +247,23 @@ def psKernelC0RecursiveCheckedAppWithFuel :
                                   (.app fn arg) codomain)
                             else none
                     | _ => none
+      | .mdata md body =>
+          let term : PsKernelExpr := .mdata md body
+          match psKernelExprMapGet state.checkedInfer term with
+          | some ty =>
+              match psKernelCheckerContextEnterRecDepth context with
+              | .error _ => none
+              | .ok _ => some (ty, state)
+          | none =>
+              match psKernelCheckerContextEnterRecDepth context with
+              | .error _ => none
+              | .ok entered =>
+                  match psKernelC0RecursiveCheckedAppWithFuel
+                      remaining entered state body with
+                  | none => none
+                  | some (ty, checkedState) =>
+                      some (ty, psKernelCacheInferResult checkedState false
+                        term ty)
       | other =>
           psKernelC0MetadataInferWithFuel
             (Nat.succ remaining) context state other false
@@ -395,9 +412,69 @@ theorem psKernelC0RecursiveCheckedApp_source
             onCheckedApp whnf defeq context state (.const name levels) false result
             (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
       | mdata md body =>
-          exact psKernelC0MetadataInfer_source (Nat.succ remaining)
-            onCheckedApp whnf defeq context state (.mdata md body) false result
-            (by simpa only [psKernelC0RecursiveCheckedAppWithFuel] using h)
+          let term : PsKernelExpr := .mdata md body
+          cases cached : psKernelExprMapGet state.checkedInfer term with
+          | some ty =>
+              cases depth : psKernelCheckerContextEnterRecDepth context with
+              | error reason =>
+                  simp [psKernelC0RecursiveCheckedAppWithFuel,
+                    cached, depth, term] at h
+              | ok entered =>
+                  have hr : result = (ty, state) := by
+                    have hx : some (ty, state) = some result := by
+                      simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                        cached, depth, term] using h
+                    exact (Option.some.inj hx).symm
+                  rw [hr]
+                  have hcache :
+                      psKernelExprMapGetWithKnownHash state.checkedInfer
+                        (.mdata md body) none = some ty := by
+                    change psKernelExprMapGet state.checkedInfer term = some ty
+                    exact cached
+                  simpa [psKernelInferCoreWithFuelUsing,
+                    psKernelInferCoreWithFuelUsingSourceFrames,
+                    psKernelInferCacheEligible, hcache, depth]
+          | none =>
+              cases depth : psKernelCheckerContextEnterRecDepth context with
+              | error reason =>
+                  simp [psKernelC0RecursiveCheckedAppWithFuel,
+                    cached, depth, term] at h
+              | ok entered =>
+                  cases nested : psKernelC0RecursiveCheckedAppWithFuel
+                      remaining entered state body with
+                  | none =>
+                      simp [psKernelC0RecursiveCheckedAppWithFuel,
+                        cached, depth, nested, term] at h
+                  | some nestedResult =>
+                      cases nestedResult with
+                      | mk ty checkedState =>
+                          have hr : result =
+                              (ty, psKernelCacheInferResult
+                                checkedState false term ty) := by
+                            have hx : some (ty, psKernelCacheInferResult
+                                checkedState false term ty) = some result := by
+                              simpa [psKernelC0RecursiveCheckedAppWithFuel,
+                                cached, depth, nested, term] using h
+                            exact (Option.some.inj hx).symm
+                          rw [hr]
+                          have sourceChild :
+                              psKernelInferCoreWithFuelUsingSourceFrames
+                                remaining onCheckedApp [] [] whnf defeq
+                                entered state body false =
+                                .ok (ty, checkedState) := by
+                            change psKernelInferCoreWithFuelUsing remaining
+                              onCheckedApp whnf defeq
+                              entered state body false = .ok (ty, checkedState)
+                            exact ih entered state body (ty, checkedState) nested
+                          have hcache :
+                              psKernelExprMapGetWithKnownHash state.checkedInfer
+                                (.mdata md body) none = none := by
+                            change psKernelExprMapGet state.checkedInfer term = none
+                            exact cached
+                          simpa [psKernelInferCoreWithFuelUsing,
+                            psKernelInferCoreWithFuelUsingSourceFrames,
+                            psKernelInferCacheEligible, hcache, depth,
+                            sourceChild, term]
       | bvar n =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)
             onCheckedApp whnf defeq context state (.bvar n) false result

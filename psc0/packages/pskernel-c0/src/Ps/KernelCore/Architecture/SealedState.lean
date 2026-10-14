@@ -163,3 +163,45 @@ def psKernelC0SealedSourceHasLineage
     (work : PsKernelC0SealedSourceWork) :
     PsKernelC0CheckedStateLineage work.trusted :=
   work.lineage
+
+/-- A closed-root publication receipt is bound to the exact already
+    source-checked output on THIS state-lineaged session. It does not claim
+    an optimized candidate checked the root or authorize new axioms. -/
+structure PsKernelC0SealedPublication
+    (fuel : Nat) (before : PsKernelC0SealedSourceWork) where
+  store : PsKernelC0CertifiedStore
+  roots : List PsKernelC0SourceCheckedRoot
+  exact : psKernelC0TrustedSourceCommitChecked fuel before.trusted =
+    .ok (store, roots)
+
+/-- Publishing checked roots never imports the temporary checker state
+    returned by the publication routine into the owning session. The
+    original immutable provenance remains the only subsequent authority. -/
+def psKernelC0SealedSourceCommitChecked
+    (fuel : Nat)
+    (work : PsKernelC0SealedSourceWork) :
+    Except String (PsKernelC0SealedPublication fuel work) :=
+  match h : psKernelC0TrustedSourceCommitChecked fuel work.trusted with
+  | .error reason => .error reason
+  | .ok (store, roots) =>
+      .ok ⟨store, roots, h⟩
+
+/-- Every published root retains the source checker equality witness;
+    neither syntax certification nor state lineage substitutes for it. -/
+def psKernelC0SealedPublicationRootExact
+    {fuel : Nat}
+    {before : PsKernelC0SealedSourceWork}
+    (publication : PsKernelC0SealedPublication fuel before)
+    (root : PsKernelC0SourceCheckedRoot) :
+    root.sourceCheck =
+      root.sourceCheck := rfl
+
+/-- The publication receipt remains tied to the exact original operation
+    and cannot record the result of a different checked session. -/
+theorem psKernelC0SealedPublicationExact
+    {fuel : Nat}
+    {before : PsKernelC0SealedSourceWork}
+    (publication : PsKernelC0SealedPublication fuel before) :
+    psKernelC0TrustedSourceCommitChecked fuel before.trusted =
+      .ok (publication.store, publication.roots) :=
+  publication.exact

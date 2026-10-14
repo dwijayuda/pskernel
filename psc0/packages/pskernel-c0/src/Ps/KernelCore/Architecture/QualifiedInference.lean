@@ -139,7 +139,7 @@ theorem psKernelC0ScalarInfer_source
                     exact cached
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, hcache, depth]
+                    psKernelInferCacheEligible, hcache, depth, ty, expr]
       | lit literal =>
           cases depth : psKernelCheckerContextEnterRecDepth context with
           | error reason =>

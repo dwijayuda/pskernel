@@ -51,19 +51,45 @@ def psStandardByteArrayCoreOperations : List PsDeclaration :=
   [getBang, setBang, isEmpty]
 
 -- Lean's native ByteArray.beq delegates to Array UInt8 equality.
--- Compare the canonical checked list representation with the selected
--- ordinary List.beq UInt8 dictionary. No host-side byte-array shortcut.
+-- Instead of importing a second runtime list-recursion model, compare the
+-- canonical UInt8 carriers positionwise with one checked Nat.rec worker.
+-- This is definitionally independent of capacity and matches Array.isEqv:
+-- equal lengths and equal bytes at every valid index. Array.getD is only
+-- used at indices 0..size-1 after the checked length check; its default
+-- cannot affect equality. This construction shares the already qualified
+-- Nat/UInt/Array erasure and does not special-case targets.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=
   let byteArray := psStandardByteArrayType
   let uint8 := psStandardByteArrayElement
-  let getList := fun (v : PsExpr) =>
-    psOrderCall "Array.toList" [uint8, psStandardByteArrayData v]
-  let dictionary : PsExpr :=
-    .constE (psDecisionName "PsStandard.instBEqUInt8") []
-  let compare := psLogicApply (.constE psStandardBEqListName [.zero])
-    [uint8, dictionary, getList (.fvar 0), getList (.fvar 1)]
+  let bool : PsExpr := .constE psBoolName []
+  let left : PsExpr := .fvar 0
+  let right : PsExpr := .fvar 1
+  let leftData := psStandardByteArrayData left
+  let rightData := psStandardByteArrayData right
+  let leftSize := psOrderCall "ByteArray.size" [left]
+  let rightSize := psOrderCall "ByteArray.size" [right]
+  let falseValue : PsExpr := .constE psBoolFalseName []
+  let trueValue : PsExpr := .constE psBoolTrueName []
+  let boolAnd := fun (a b : PsExpr) =>
+    psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
+      [psLogicLam 19 "_" bool bool, falseValue, b, a]
+  let sameLength := psOrderCall "Nat.beq" [leftSize, rightSize]
+  let zero := psOrderCall "UInt8.ofNat" [.lit (.natural 0)]
+  let index : PsExpr := .fvar 2
+  let byteAt := fun data =>
+    psOrderCall "UInt8.toNat"
+      [psOrderCall "Array.getD" [uint8, data, index, zero]]
+  let sameByte := psOrderCall "Nat.beq"
+    [byteAt leftData, byteAt rightData]
+  let step := psLogicLam 2 "index" psOrderNat
+    (psLogicLam 3 "previousEqual" bool
+      (boolAnd (.fvar 3) sameByte))
+  let allBytes := psOrderNatRec (.succ .zero)
+    (psLogicLam 4 "_" psOrderNat bool)
+    trueValue step leftSize
   let method := psLogicLam 0 "left" byteArray
-    (psLogicLam 1 "right" byteArray compare)
+    (psLogicLam 1 "right" byteArray
+      (boolAnd sameLength allBytes))
   psStandardBEqInstance "ByteArray" byteArray method
 
 def psStandardByteArrayInhabitedDeclaration : PsDeclaration :=

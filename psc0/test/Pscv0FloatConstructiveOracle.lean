@@ -54,5 +54,4 @@ run_cmd do
     throwError "PSCV0-FLOAT-F1: constructive powEqZero unexpectedly imports Classical.choice"
   if used.contains ``sorryAx then
     throwError "PSCV0-FLOAT-F1: constructive powEqZero depends on sorryAx"
-  logInfo s!"PSCV0_FLOAT_CONSTRUCTIVE: Nat.pow_eq_zero alternative is free of Classical.choice; axioms={used.toList}"
 

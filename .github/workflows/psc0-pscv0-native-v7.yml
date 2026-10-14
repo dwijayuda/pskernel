@@ -142,11 +142,13 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_native --export-float-identity-candidate ../dist/pscv0-native/StandardFloatIdentityCandidate.lean | tee ../dist/pscv0-native/float-identity-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
           cmp ../packages/environment/src/Ps/Environment/StandardFloatIdentityData.lean ../dist/pscv0-native/StandardFloatIdentityCandidate.lean
-      - name: Export and kernel-review F1 float bit contracts
+      # The native F1 float-bit exporter still refuses unapproved Classical.choice.
+      # Preserve that refusal; it is not part of the selected Standard yet.
+      - name: Review kernel-checked signed logical identities
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          .lake/build/bin/pscv0_native --export-float-bits-candidate ../dist/pscv0-native/StandardFloatBitsCandidate.lean | tee ../dist/pscv0-native/float-bits-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          .lake/build/bin/pscv0_native --export-signed-identity-candidate ../dist/pscv0-native/StandardSignedIdentityCandidate.lean | tee ../dist/pscv0-native/signed-identity-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

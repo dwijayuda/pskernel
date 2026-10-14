@@ -590,4 +590,21 @@ def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Float logical bits and classification at Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nExperimental kernel-checked F1 candidate, not yet selected or runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- Pinned Lean 4.35.0 SInt/Basic: each signed type is a checked
+-- wrapper around an unsigned two's-complement carrier. This is a
+-- native-only authoring candidate, NOT executable signed arithmetic.
+def exportSignedIdentityCandidate (output : System.FilePath) : IO Unit := do
+  let existing := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`Int8, `Int16, `Int32, `Int64, `ISize]
+    boundary := existing.map psDeclarationName
+    baseDeclarations := existing
+    allowedAssumptions := [`propext, `Quot.sound]
+    replaceInductiveAxioms := [`Int8, `Int16, `Int32, `Int64, `ISize]
+    shareSource := true
+    publicPrefix := "psStandardSignedIdentity"
+    privatePrefix := "signedIdentityDecl"
+    provenance := "/-\nCopyright (c) 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned src/Init/Data/SInt/Basic.lean (Henrik Böving), Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nExperimental checked signed wrappers, not runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

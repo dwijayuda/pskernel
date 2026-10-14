@@ -337,6 +337,23 @@ jobs:
       # This stage is diagnostic and MUST NOT alter C0's accepting verdict.
       # The updated replay helper separates the failed Eq application into
       # independently checked type, function and argument conversions.
+      - name: Require C0 acceptance of the original real Init eta mismatch prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix="$RUNNER_TEMP/Init-first-mismatch.ndjson"
+          test -s "$prefix"
+          test "$(wc -l < "$prefix")" -eq 86383
+          # Official Lean has already accepted these exact bytes and
+          # the original export is pinned to Lean 4.35.0. C0 must
+          # independently report POSITIVE acceptance, not a resource
+          # limit, unsupported input, or a provisional diagnostic.
+          (
+            cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+            timeout 300s lake env lean --run test/C0OfficialNdjsonReplay.lean "$prefix" 4096
+          ) | tee "$RUNNER_TEMP/c0-first-86383-result.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=86383 fuel=4096"             "$RUNNER_TEMP/c0-first-86383-result.txt"
+          echo "C0_REAL_INIT_ETA_PREFIX parity=accepted records=86383"
       - name: Dissect first false Eq application arguments at post-nested theorem
         shell: bash
         run: |
@@ -370,5 +387,6 @@ jobs:
             ${{ runner.temp }}/c0-real-init-435-result.txt
             ${{ runner.temp }}/c0-first-12244-result.txt
             ${{ runner.temp }}/c0-first-nested-result.txt
+            ${{ runner.temp }}/c0-first-86383-result.txt
           if-no-files-found: warn
           retention-days: 14

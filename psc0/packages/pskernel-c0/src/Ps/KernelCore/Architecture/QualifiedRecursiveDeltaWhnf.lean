@@ -256,7 +256,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                             expr core = psKernelWhnfFinish expr core coreState :=
                         psKernelC0StableWhnfTerminal_post
                           callback context coreState expr core stable
-                      rw [hr]
+                      rw [hr, sourceOuter]
                       simp only [cache, psKernelWhnfCoreWithFuel,
                         sourceCore, sourcePost]
                       rfl
@@ -281,9 +281,9 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                 psKernelC0ConstPostDelta_source
                                   callback context coreState expr name levels
                                   none unfolding
-                              rw [hr]
+                              rw [hr, sourceOuter]
                               simp only [cache, psKernelWhnfCoreWithFuel,
-                        sourceCore, sourcePost]
+                                sourceCore, sourcePost]
                               rfl
                           | some opened =>
                               cases child : psKernelC0RecursiveDeltaWhnfWithFuel
@@ -313,7 +313,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                     psKernelC0ConstPostDelta_source
                                       callback context coreState expr
                                       name levels (some opened) unfolding
-                                  rw [hr]
+                                  rw [hr, sourceOuter]
                                   simp only [cache, psKernelWhnfCoreWithFuel,
                                     sourceCore, sourcePost, sourceChild]
                                   rfl

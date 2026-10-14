@@ -795,3 +795,142 @@ def psKernelC0CertifiedWorkDefEqCanonicalFastOwned
         rw [← psKernelC0CertifiedWorkDefEqCanonicalFast_exact
           fuel work left right]
         exact h⟩
+
+
+/-!
+Phase E.4H: independent closed-form Sort/universe DefEq.
+
+The original Lean 4.35 kernel's quick_is_def_eq handles Sort levels
+without full normalization. Preserve C0's exact source algorithm:
+fuel and recursion guards, early syntactic equality, already-successful
+cache lookup (even for arbitrary raw source state), source level
+equivalence, and positive-only cache publication.
+-/
+
+/-- Fully independent Sort-head source evaluation for a qualified context.
+    It never invokes the source DefEq worker. On declined resources the
+    source operation must be used for the exact original error. -/
+def psKernelC0SortDefEqWithFuel
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (leftLevel rightLevel : PsKernelLevel) :
+    Option (Bool × PsKernelCheckerState) :=
+  match fuel with
+  | 0 => none
+  | Nat.succ _ =>
+      match psKernelCheckerContextEnterRecDepth context with
+      | .error _ => none
+      | .ok _ =>
+          let left : PsKernelExpr := .sort leftLevel
+          let right : PsKernelExpr := .sort rightLevel
+          if psKernelExprEq left right then
+            some (psKernelDefEqFinish state left right true)
+          else if psKernelExprPairSetContains state.success left right then
+            some (true, state)
+          else
+            some (psKernelDefEqFinish state left right
+              (psKernelLevelEquivalent leftLevel rightLevel))
+
+/-- For ANY input source cache/context and Sort universe levels, a
+    successful direct-head result equals the full source DefEq judgment
+    AND the complete source checker state. This includes source's
+    successful-pair memo semantics and is not a general consistency proof. -/
+theorem psKernelC0SortDefEq_source
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (leftLevel rightLevel : PsKernelLevel)
+    (result : Bool × PsKernelCheckerState)
+    (h : psKernelC0SortDefEqWithFuel fuel context state
+      leftLevel rightLevel = some result) :
+    psKernelIsDefEq fuel context state
+      (.sort leftLevel) (.sort rightLevel) = .ok result := by
+  cases fuel with
+  | zero =>
+      simp [psKernelC0SortDefEqWithFuel] at h
+  | succ remaining =>
+      cases depth : psKernelCheckerContextEnterRecDepth context with
+      | error reason =>
+          simp [psKernelC0SortDefEqWithFuel, depth] at h
+      | ok entered =>
+          by_cases same :
+              psKernelExprEq (.sort leftLevel) (.sort rightLevel) = true
+          · have hresult :
+                result = psKernelDefEqFinish state
+                  (.sort leftLevel) (.sort rightLevel) true := by
+              have hsome : some (psKernelDefEqFinish state
+                  (.sort leftLevel) (.sort rightLevel) true) = some result := by
+                simpa [psKernelC0SortDefEqWithFuel, depth, same] using h
+              exact (Option.some.inj hsome).symm
+            rw [hresult]
+            change psKernelIsDefEqWithFuel (Nat.succ remaining)
+              context state (.sort leftLevel) (.sort rightLevel) =
+                .ok (psKernelDefEqFinish state
+                  (.sort leftLevel) (.sort rightLevel) true)
+            simp [psKernelIsDefEqWithFuel, depth, same]
+          · by_cases cached :
+                psKernelExprPairSetContains state.success
+                  (.sort leftLevel) (.sort rightLevel) = true
+            · have hresult : result = (true, state) := by
+                have hsome : some (true, state) = some result := by
+                  simpa [psKernelC0SortDefEqWithFuel, depth, same, cached]
+                    using h
+                exact (Option.some.inj hsome).symm
+              rw [hresult]
+              change psKernelIsDefEqWithFuel (Nat.succ remaining)
+                context state (.sort leftLevel) (.sort rightLevel) =
+                  .ok (true, state)
+              simp [psKernelIsDefEqWithFuel, depth, same, cached]
+            · have hresult :
+                  result = psKernelDefEqFinish state
+                    (.sort leftLevel) (.sort rightLevel)
+                    (psKernelLevelEquivalent leftLevel rightLevel) := by
+                have hsome : some (psKernelDefEqFinish state
+                    (.sort leftLevel) (.sort rightLevel)
+                    (psKernelLevelEquivalent leftLevel rightLevel)) =
+                      some result := by
+                  simpa [psKernelC0SortDefEqWithFuel, depth, same, cached]
+                    using h
+                exact (Option.some.inj hsome).symm
+              rw [hresult]
+              change psKernelIsDefEqWithFuel (Nat.succ remaining)
+                context state (.sort leftLevel) (.sort rightLevel) =
+                  .ok (psKernelDefEqFinish state
+                    (.sort leftLevel) (.sort rightLevel)
+                    (psKernelLevelEquivalent leftLevel rightLevel))
+              simp [psKernelIsDefEqWithFuel, depth, same, cached,
+                psKernelDefEqQuickAfterCommon]
+
+/-- A source-equation-carrying Sort comparison. Every successful direct
+    result is independently source-proved. Other cases use the already
+    qualified reflexive/source fallback and preserve resource/error paths. -/
+def psKernelC0CertifiedWorkDefEqSortOwned
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (leftLevel rightLevel : PsKernelLevel) :
+    Except String
+      { result : Bool × PsKernelC0CertifiedWork //
+        psKernelC0CertifiedWorkDefEq fuel work
+          (.sort leftLevel) (.sort rightLevel) = .ok result } :=
+  match h : psKernelC0SortDefEqWithFuel fuel
+      work.raw.checker.context work.raw.checker.state
+      leftLevel rightLevel with
+  | none =>
+      psKernelC0CertifiedWorkDefEqCanonicalFastOwned fuel work
+        (.sort leftLevel) (.sort rightLevel)
+  | some (same, checkedState) =>
+      .ok ⟨(same,
+        psKernelC0CertifiedWorkWithSession work
+          { work.raw.checker with state := checkedState }), by
+        have source :
+            psKernelIsDefEq fuel work.raw.checker.context
+              work.raw.checker.state
+              (.sort leftLevel) (.sort rightLevel) =
+                .ok (same, checkedState) :=
+          psKernelC0SortDefEq_source fuel work.raw.checker.context
+            work.raw.checker.state leftLevel rightLevel
+            (same, checkedState) h
+        unfold psKernelC0CertifiedWorkDefEq psKernelSessionIsDefEq
+        simp only [source]
+        rfl⟩

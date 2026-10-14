@@ -50,7 +50,7 @@ def main : IO Unit := do
   match published.roots with
   | [root] =>
       let _sourceProof := psKernelC0SourceCheckedRootExact root
-      if !psKernelExprEqual root.expression sort0 then
+      if !psKernelExprEqual root.root.expression sort0 then
         throw (IO.userError "sealed publication changed exact root syntax")
   | _ => throw (IO.userError "sealed publication omitted checked root")
   if psKernelEnvironmentSize

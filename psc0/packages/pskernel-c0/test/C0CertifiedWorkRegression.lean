@@ -461,6 +461,15 @@ def main : IO Unit := do
       owned.property
     if !psKernelExprEqual owned.val.fst head then
       throw (IO.userError "qualified direct WHNF altered source expression")
+  -- An irreducible WHNF observation is NOT a proof of well-typedness:
+  -- unbound de Bruijn variables and metavariables still fail full checking.
+  for malformed in [PsKernelExpr.bvar 0,
+      PsKernelExpr.mvar (c0CertificateName "unknown")] do
+    match psKernelC0CertifiedWorkCheck 4096 defeqWork malformed with
+    | .error _ => pure ()
+    | .ok _ =>
+        throw (IO.userError "qualified WHNF was mistaken for full checked term")
+
   if psKernelC0WhnfIrreducibleHead betaExpr then
     throw (IO.userError "context-dependent β application was wrongly direct")
   let qualifiedBeta ← match psKernelC0CertifiedWorkWhnfQualified

@@ -175,6 +175,9 @@ def main (args : List String) : IO UInt32 := do
     | ["--export-float-constructive-pow-candidate", output] =>
         exportFloatConstructivePowCandidate (System.FilePath.mk output)
         return 0
+    | ["--export-float-bits-constructive-candidate", output] =>
+        exportFloatBitsConstructiveCandidate (System.FilePath.mk output)
+        return 0
     | ["--export-float-bits-candidate", output] =>
         exportFloatBitsCandidate (System.FilePath.mk output)
         return 0
@@ -255,7 +258,7 @@ def main (args : List String) : IO UInt32 := do
     | ["--emit-both", input, stem] =>
         run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
+        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

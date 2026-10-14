@@ -409,6 +409,17 @@ private def exportStandardCore (spec : StandardExportSpec)
       | .axiomDecl .., some (.inductInfo _) => spec.replaceInductiveAxioms.contains name
       | _, _ => false
     if replace then names else names.insert name) {}
+  -- A replacement theorem closes the dependency graph *at the original
+  -- theorem name* while the independently checked constructive proof enters
+  -- as a separately listed root. Without this cut the collector would still
+  -- descend into the upstream proof body and reintroduce Classical.choice.
+  -- This cannot hide a selected Standard declaration or another root.
+  let cutNames := spec.checkedTheoremRenames.map (·.snd)
+  if cutNames.any (fun name => originalBoundary.contains name ||
+      spec.roots.contains name) then
+    throw (IO.userError "theorem-only cut collides with selected Standard or root")
+  let boundary := cutNames.foldl (fun (names : Lean.NameSet) name =>
+    names.insert name) boundary
   let mut seen : Lean.NameSet := {}
   let mut entries : Array Lean.ConstantInfo := #[]
   for root in spec.roots do
@@ -645,6 +656,30 @@ def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
     publicPrefix := "psStandardFloatBits"
     privatePrefix := "floatBitsDecl"
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Float logical bits and classification at Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nExperimental kernel-checked F1 candidate, not yet selected or runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+-- Second-stage F1 research: close only the original pinned
+-- Nat.pow_eq_zero *theorem* using the already-kernel-checked constructive
+-- alternative, then attempt the entire checked ofBits/toBits/classification
+-- dependency closure. This is not selected Standard or executable Float.
+-- Never change the allowed assumption list to make a candidate pass.
+def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit := do
+  let existing := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`Float.ofBits, `Float.toBits, `Float.isNaN, `Float.isFinite,
+              `Float32.ofBits, `Float32.toBits, `Float32.isNaN, `Float32.isFinite,
+              `PsV7Native.FloatConstructive.powEqZero]
+    boundary := existing.map psDeclarationName
+    baseDeclarations := existing
+    allowedAssumptions := [`propext, `Quot.sound]
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames :=
+      [(`PsV7Native.FloatConstructive.powEqZero, `Nat.pow_eq_zero)]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardFloatBitsConstructive"
+    privatePrefix := "floatBitsConstructiveDecl"
+    provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 Float model and verified constructive Nat.pow_eq_zero proof cut.\nKernel replay and approved propext/Quot.sound assumptions only.\nF1 research-only; not selected Standard or executable Float.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
 -- Pinned Lean 4.35.0 SInt/Basic: each signed type is a checked

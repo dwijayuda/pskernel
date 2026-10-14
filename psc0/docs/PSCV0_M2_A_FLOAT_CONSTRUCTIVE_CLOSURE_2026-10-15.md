@@ -37,6 +37,24 @@ retains a strict theorem-only whitelist, then independently replays
 the proof in the portable kernel. No trust expansion or Float runtime
 admission. Independent research CI is separate from the main native gate.
 
+## 15 October — full F1 transitive proof-cut experiment
+
+The original theorem-only cut passed all native type, imported-assumption,
+and portable kernel replay gates at
+[CI 38641629995](https://github.com/dwijayuda/pskernel/actions/runs/38641629995),
+with exactly two new checked declarations and no imported
+`Classical.choice`.
+
+The full F1 research exporter now adds the original Float/Float32
+`ofBits`, `toBits`, `isNaN` and `isFinite` roots alongside the
+constructive theorem source. The *original* `Nat.pow_eq_zero` name is
+a checked theorem-only dependency cut: the exporter never imports its
+historical nonconstructive proof body into this candidate. It instead
+replays a fresh theorem of exactly the same proposition at the same name.
+Every other dependency remains subject to the ordinary official kernel
+and strict assumption guard. No claim of executable Float follows from
+this research and further unsupported dependencies must fail closed.
+
 ## Required next gates before F1 authorization
 
 1. Qualify this proof/axiom audit in the full unchanged native CI matrix.

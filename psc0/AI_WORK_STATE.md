@@ -1,5 +1,26 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — checked constructive theorem cut green; full F1 closure research
+
+The isolated theorem-only authoring/export candidate passed
+[Linux research CI 38641629995](https://github.com/dwijayuda/pskernel/actions/runs/38641629995)
+at `4d1a4a5896471ea92c8a8fdce25b05de6e333bff`.
+It generated two independently portable-kernel-checked declarations with no
+new axioms; the official Lean 4.35.0 kernel checked the theorem type at the
+original `Nat.pow_eq_zero` signature. `propext` and `Quot.sound` remain
+the only permitted imported assumptions. This proves the authoring
+replacement mechanism works, not yet that Float F1 is usable.
+
+**Next experimental research candidate:** extend the same *theorem-only*
+cut to `Float.ofBits/toBits/isNaN/isFinite` and Float32 counterparts.
+The upstream `Nat.pow_eq_zero` dependency is closed at its original
+theorem name and replaced with a separately checked constructive proof.
+All further upstream definitions and proof dependencies must still be
+replayed by the official native/portable kernels. Refuse unknown axioms,
+unsupported dependencies and any target runtime emission; record independent
+CI evidence before promotion. Float F1–F4, platform sizes and complete
+M2+A/Phase A remain incomplete.
+
 ## 15 October — constructive Float F1 theorem green; proof-only exporter research
 
 Commit `2677ba11f240f950c96be95e3ad5e9bf35b19393` passed all

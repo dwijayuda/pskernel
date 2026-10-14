@@ -72,6 +72,10 @@ jobs:
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
           lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-constructive-pow-candidate ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
           sha256sum ../dist/pscv0-f1-constructive/FloatConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/source.sha256
+          # This separate full F1 closure must still fail closed on every
+          # additional unapproved axiom, unsupported inductive, or erased type.
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-bits-constructive-candidate ../dist/pscv0-f1-constructive/FloatBitsConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/full-f1-authoring.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          sha256sum ../dist/pscv0-f1-constructive/FloatBitsConstructiveCandidate.lean | tee ../dist/pscv0-f1-constructive/full-f1-source.sha256
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

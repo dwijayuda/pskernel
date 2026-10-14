@@ -81,7 +81,10 @@ def withFreshKernelHeartbeatScope {ε α : Type}
   let original ← IO.getNumHeartbeats
   IO.setNumHeartbeats 0
   try
-    match action () with
+    -- Lean 4.35.0 Init/System/IO.lean: IO.lazyPure performs the pure
+    -- action when IO executes, not speculatively before reset.
+    let result ← IO.lazyPure action
+    match result with
     | .ok result => return .ok result
     | .error error =>
       -- This is diagnostic only. A checked failure is still refused.

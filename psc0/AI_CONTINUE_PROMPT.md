@@ -1,5 +1,48 @@
 # PSCV0 v7 — Continue M2+A from the 14 October 2026 checkpoint
 
+## New qualified /61 checkpoint — 14 October 2026
+
+Executable commit `34ff236b6fe9f936d7d44b8ace1c70612c7cc66e` passed the full Linux workflow
+[38515443060](https://github.com/dwijayuda/pskernel/actions/runs/38515443060).
+Profile `pscv0-v7-native-bounded/61` is **green for its declared selected scope**; this
+does NOT mean M2+A, all v7, C5, full compiler metatheory, or formal backend preservation
+are complete. Standard selected 1516 declarations / 23 classes / 153 instances, FNV
+`fnv1a64:6333670853941549394`; SHA candidate
+`sha256:ebf02f5f8dfecf3769cbaeaa52e39dac3ba9c8dc034ea5284655da324bc75d60`.
+426 shared cross-target runtime observations passed for TypeScript, JS and Rust;
+Wasm GC/Wasmtime component, linked projects, parser/negative conformance, official kernel,
+asset regeneration and performance gates passed. These are bounded runtime observations,
+not a proof that every possible backend program preserves Lean semantics.
+
+Resolution: the official Lean 4.35.0 `Init/Prelude.lean` defines
+`Unit : Type := PUnit` and `Unit.unit := PUnit.unit`, but PSC0's APP-03
+empty-call path rejected a fresh *universe metavariable* in the
+`PUnit` argument domain before checked unification. The source check
+now distinguishes unresolved term types (still refused) from the known
+Unit/PUnit family, solves the universe using ordinary checked unification,
+then rechecks definitional equality and inserts an ordinary typed Unit inhabitant.
+All positive APP-03 cases (including `PUnit`) and the existing negatives passed.
+No new axiom, untrusted cast, permissive fallback or relaxation of source/kernel
+acceptance. Previous historical /61 failures and /60 baseline below remain for
+audit but are superseded by this independently qualified executable checkpoint.
+
+Further upstream sources studied for preceding /61 root fixes:
+`src/runtime/interrupt.cpp` (thread-local heartbeats),
+`src/kernel/environment.cpp` (checked `lean_add_decl`),
+`src/Lean/Environment.lean` (`Kernel.Environment` checked replay),
+`src/Lean/Declaration.lean` (kernel reducibility hints),
+`src/Init/Data/UInt/Basic.lean`, `src/Init/Data/Hashable.lean`,
+and `src/Init/Data/String/Defs.lean`.
+Use pinned commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Upstream licensing is acknowledged in the adapted source and
+`psc0/THIRD_PARTY_NOTICES.md`.
+
+Next: make `/61` the qualified baseline, update the latest frozen snapshot and
+milestone status documentation consistently, audit hot-path performance/resource
+telemetry, and continue the remaining M2+A language/standard exit criteria
+without starting C5 or self-hosting.
+
+
 Continue autonomously, but **update AI_WORK_STATE.md and this continuation prompt
 after every milestone slice** before starting the next. The previous chat had
 about 4% usage remaining. Read the work state and linked canonical specification,

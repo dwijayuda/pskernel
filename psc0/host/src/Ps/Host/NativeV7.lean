@@ -83,7 +83,7 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String)
 -- Concrete IO/Except error types isolate the pure kernel admission from the
 -- surrounding ExceptT diagnostic transformer. The heartbeat reset must occur
 -- inside this real IO boundary, not in a lazy pure declaration term.
-private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
+private def checkWithScopedHeartbeatsOnWorker (prelude : Lean.Kernel.Environment)
     (admissions : String) : IO (Except String Unit) := do
   let previous ← IO.getNumHeartbeats
   IO.setNumHeartbeats 0
@@ -114,6 +114,17 @@ private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
       return .error message
   finally
     IO.setNumHeartbeats previous
+
+-- The C++ kernel checks a self-contained immutable environment on the task
+-- executing the admission. Pinned Lean 4.35.0 Init/System/IO.lean:IO.asTask
+-- ensures that the scoped heartbeat origin and the checked addDeclCore calls
+-- run in the SAME runtime thread. Await the result before proceeding to IR.
+-- This never publishes an unchecked token, and no kernel error is ignored.
+private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
+    (admissions : String) : IO (Except String Unit) := do
+  let task ← IO.asTask (prio := .dedicated) do
+    checkWithScopedHeartbeatsOnWorker prelude admissions
+  return ← IO.ofExcept task.get
 
 private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do

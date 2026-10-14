@@ -159,7 +159,8 @@ theorem psKernelC0QualifiedLetHead_source
         | succ remaining =>
             simp only [psKernelC0QualifiedLetHeadWithFuel,
               psKernelC0LetHeadWithFuel,
-              psKernelC0RefinedCheckedSmaller_source])]
+              psKernelC0RefinedCheckedSmaller_source]
+            rfl)]
   exact psKernelC0LetHead_source fuel onCheckedApp
     whnf defeq context state name type value body nondep inferOnly
 

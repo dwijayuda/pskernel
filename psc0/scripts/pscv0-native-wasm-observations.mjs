@@ -20,6 +20,18 @@ const unsignedWidths = {
   uint8: ['UInt8', 8], uint16: ['UInt16', 16],
   uint32: ['UInt32', 32], uint64: ['UInt64', 64]
 };
+// Panic observations still type-check their entire call before expecting the
+// runtime trap. Respect each checked return type instead of treating all
+// non-returning calls as Nat. The conversion is never evaluated after a trap.
+const scalarAsNat = (type, expression) => {
+  if (type === 'nat') return expression;
+  if (unsignedWidths[type]) return unsignedWidths[type][0] + '.toNat(' + expression + ')';
+  if (signedWidths[type]) {
+    const [signed, unsigned, bits] = signedWidths[type];
+    return unsigned + '.toNat(' + signed + '.toUInt' + bits + '(' + expression + '))';
+  }
+  throw new Error('Unsupported Wasm panic observation scalar type: ' + type);
+};
 const wrappers = observations.map(({name, type, args, expected}, i) => {
   const call = name + (args === null ? '' : '(' + args.map(sourceLiteral).join(', ') + ')');
   // Check Int through its already modeled, canonical decimal representation.
@@ -51,8 +63,8 @@ const wrappers = observations.map(({name, type, args, expected}, i) => {
 });
 await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' +
   wrappers.join('\n') + '\n' +
-  panicObservations.map(({name, wasm}) =>
-    'const ' + wasm + ': Bool := Nat.beq(' + name + '(0), 0)\n').join(''));
+  panicObservations.map(({name, wasm, type = 'nat'}) =>
+    'const ' + wasm + ': Bool := Nat.beq(' + scalarAsNat(type, name + '(0)') + ', 0)\n').join(''));
 await writeFile(path.join(directory, 'wasm/observations.exports.json'),
   JSON.stringify([...observations.map((_, i) => 'wasmCheck' + i), ...panicObservations.map(({wasm}) => wasm)]));
 

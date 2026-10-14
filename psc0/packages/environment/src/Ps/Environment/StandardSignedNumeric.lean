@@ -49,7 +49,14 @@ def psStandardSignedNumericDeclarations : List PsDeclaration :=
     [size, minimum, maximum, pow]
 
 def psStandardSignedNumericExtend (environment : PsEnvironment) : PsEnvironment :=
-  psStandardSignedNumericDeclarations.foldl psEnvironmentInsert environment
+  let environment := psStandardSignedNumericDeclarations.foldl
+    psEnvironmentInsert environment
+  -- Upstream IntN.size/minValue/maxValue are abbrevs (reducible).
+  -- IntN.pow remains an ordinary semireducible definition.
+  psStandardSignedNumericWidths.foldl (fun env (owner, _) =>
+    ["size", "minValue", "maxValue"].foldl (fun env method =>
+      psEnvironmentSetReducibility env
+        (psNameAppendStr (psRootName owner) method) .reducible) env) environment
 
 def psStandardSignedNumericRuntimeDeclarations : List PsDeclaration :=
   psStandardSignedNumericDeclarations

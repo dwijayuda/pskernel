@@ -1,5 +1,27 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — native checked Float32/64 bit canonicalization candidate
+
+The upstream F1 export at
+[research CI 38643459231](https://github.com/dwijayuda/pskernel/actions/runs/38643459231)
+reached 1,038 original Lean declarations but *correctly refused* their
+portable replay: the current selected List.get universe signature and
+multiple Int addition/ordering theorem bodies differ from the upstream
+kernel dependencies. This is a real architecture/semantic boundary, not
+an opportunity to weaken checking or mark the full F1 import complete.
+
+**New coherent F1 bit-layer candidate:** native
+`StandardFloatCanonical.lean` contains four ordinary checked UInt32/64
+helper definitions, shared by the entire runtime prelude. IEEE exponent
+and mantissa masks normalize any NaN sign/payload to the positive quiet
+NaN while preserving all non-NaN bits (including signed zero/infinity).
+Their exact observable cases are checked against independent pinned
+Lean 4.35.0 Float/Float32 native oracles and twelve common-source
+JS/TS/Rust/Wasm observations. Neither a Float constructor, unchecked
+Validity witness nor an executable float arithmetic operation is added.
+The new Standard fingerprints require an independent CI observation,
+then a full green native/backends/Wasmtime/performance run. Candidate only.
+
 ## 15 October — full Float proof-cut root collision corrected (candidate)
 
 [Linux research 38642547802](https://github.com/dwijayuda/pskernel/actions/runs/38642547802)

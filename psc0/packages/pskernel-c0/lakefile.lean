@@ -22,6 +22,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.AuditedAssumptions,
     `Ps.KernelCore.Core.CertifiedStore,
     `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.API.VerifiedSession,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,
     `Ps.KernelCore.API.Provider,

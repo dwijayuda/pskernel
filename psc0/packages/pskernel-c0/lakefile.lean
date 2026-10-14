@@ -20,6 +20,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.QualifiedLocalInference,
     `Ps.KernelCore.Architecture.QualifiedConstantInference,
     `Ps.KernelCore.Architecture.QualifiedInferenceDispatch,
+    `Ps.KernelCore.Architecture.QualifiedMetadataInference,
     `Ps.KernelCore.Architecture.TrustedAdmission,
     `Ps.KernelCore.Architecture.SealedState,
     `Ps.KernelCore.Architecture.SealedAuditedState,

@@ -12,6 +12,7 @@ on:
       # semantics; changes must qualify on real pinned Init, not native alone.
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Context.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
   workflow_dispatch:
 permissions:
   contents: read

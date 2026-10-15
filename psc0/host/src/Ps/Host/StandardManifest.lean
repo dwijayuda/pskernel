@@ -1,4 +1,4 @@
-// Array universe-family digests independently measured by strict CI38734094047.
+-- Array universe-family digests independently measured by strict CI38734094047.
 import Ps.Host.NativeV7
 import Ps.Environment.StandardSnapshot
 import Ps.Syntax.Pscv0.Operators

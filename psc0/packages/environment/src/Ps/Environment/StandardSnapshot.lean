@@ -1,4 +1,4 @@
-// Array universe-family digests independently measured by strict CI38734094047.
+-- Array universe-family digests independently measured by strict CI38734094047.
 import Ps.Environment.SelfHostProd
 
 -- A portable, length-delimited canonical serialization of the checked

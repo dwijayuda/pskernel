@@ -299,7 +299,8 @@ def psCompilerVerifiedIrFromPrepared
       Except.error error
   | Except.ok environment =>
       let runtimePrelude := psSelfHostRuntimePreludeDeclarationsWithProd ++
-        (if targetWordSize.isSome then psStandardPlatformRuntimeDeclarations else []);
+        (if targetWordSize.isSome then psStandardPlatformRuntimeDeclarations ++
+          psStandardOperatorProtocolRuntimeDeclarations environment true else []);
       match
           psEraseCoreModuleWithRuntimePrelude
             environment

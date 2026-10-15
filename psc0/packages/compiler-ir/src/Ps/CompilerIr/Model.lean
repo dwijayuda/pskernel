@@ -177,6 +177,9 @@ inductive PsVerifiedIrIntrinsic where
   | natAdd
   | natSub
   | natMul
+  | natShiftLeft
+  | natShiftRight
+  | intPow
   | natPow
   | natLog2
   | natDiv

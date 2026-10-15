@@ -215,3 +215,13 @@ def psPrintDoItems (proofScript : Bool)
         return "if let " ++ (← psPrintPattern pattern) ++ " := " ++ (← printTerm value) ++
           (if proofScript then "" else " then") ++ block yes ++ noText
     return psPrintJoin "\n" lines
+
+-- Parenthesized reconstruction retains the source operator protocol. Printing
+-- a class-projection call instead would lose coercion-tree semantics.
+def psPrintSyntaxOperator (kind : PsSyntaxOperatorKind) (spelling : String)
+    (arguments : List String) : Except PsSourcePrintError String :=
+  match kind, arguments with
+  | .unary, [value] => .ok ("(" ++ spelling ++ "(" ++ value ++ "))")
+  | .unary, _ => .error (.unsupportedSourceForm "unary operator arity")
+  | _, [left, right] => .ok ("(" ++ left ++ " " ++ spelling ++ " " ++ right ++ ")")
+  | _, _ => .error (.unsupportedSourceForm "binary operator arity")

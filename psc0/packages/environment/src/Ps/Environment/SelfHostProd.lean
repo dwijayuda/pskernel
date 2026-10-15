@@ -1,6 +1,7 @@
 import Ps.Environment.StandardPlatformWords
 import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardLogicInstances
+import Ps.Environment.StandardOperatorProtocol
 import Ps.Environment.StandardUtf8
 import Ps.Environment.StandardFloatDisplay
 import Ps.Environment.StandardScientific
@@ -134,7 +135,7 @@ def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
   psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psStandardLogicExtend <| PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
+  psStandardOperatorProtocolExtend <| psStandardLogicExtend <| PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
     psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
@@ -156,7 +157,8 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
     psStandardArrayRuntimeDeclarations
 
-  psStandardLogicRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+  psStandardOperatorProtocolRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    psStandardLogicRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     PsStandardUtf8.runtimeDeclarations ++ psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
     psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     prior.filter (fun declaration =>

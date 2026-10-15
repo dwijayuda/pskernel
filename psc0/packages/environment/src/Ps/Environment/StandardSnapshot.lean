@@ -479,6 +479,7 @@ def psStandardSnapshotValidate (environment : PsEnvironment)
   psStandardFloatDisplayAudit environment
   psStandardPlatformAudit environment
   psStandardLogicAudit environment
+  psStandardOperatorProtocolAudit environment
   psStandardScientificAudit environment
   let payload := psStandardSnapshotPayload environment
   let observedFNV := "fnv1a64:" ++ toString (psStandardSnapshotFNV64 payload)

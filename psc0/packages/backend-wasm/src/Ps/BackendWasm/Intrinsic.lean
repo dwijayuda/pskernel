@@ -30,6 +30,8 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
         (match op with | .isNaN => "_is_nan" | .isInf => "_is_inf" | .isFinite => "_is_finite"))
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
     | .hashMix => pure "hash_mix" | .stringHash => pure "string_hash"
+    | .natShiftLeft => pure "nat_shift_left" | .natShiftRight => pure "nat_shift_right"
+    | .intPow => pure "int_pow"
     | .natPow => pure "nat_pow"
     | .natLog2 => pure "nat_log2"
     | .natDiv => pure "nat_div" | .natMod => pure "nat_mod"

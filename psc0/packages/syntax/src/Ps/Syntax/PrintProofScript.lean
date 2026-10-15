@@ -152,6 +152,8 @@ def psPrintProofScriptTermWithFuel
           let value ← smaller value
           let type ← smaller type
           return "(" ++ value ++ " : " ++ type ++ ")"
+      | .operatorE kind _ spelling arguments _ => do
+          psPrintSyntaxOperator kind spelling (← arguments.mapM smaller)
       | .call fn args _ => do
           let head ← smaller fn
           let arguments ← args.mapM fun (label, value) => do

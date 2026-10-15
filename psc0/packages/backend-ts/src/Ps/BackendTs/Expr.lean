@@ -167,7 +167,9 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["((__ps_a: bigint, __ps_b: bigint) => ", "(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(", left, ", ", right, ")"]);
       psTsPrinted2 emit arguments
-  | .natPow => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " ** " ++ b ++ ")")) arguments
+  | .natShiftLeft => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " << " ++ b ++ ")")) arguments
+  | .natShiftRight => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " >> " ++ b ++ ")")) arguments
+  | .natPow | .intPow => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " ** " ++ b ++ ")")) arguments
   | .natMul =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>

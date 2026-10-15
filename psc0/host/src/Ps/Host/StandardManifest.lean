@@ -29,25 +29,25 @@ structure ManifestNotation where
 -- Paired with the *real* closed parser registry psPscv0InfixInfo.
 -- This ledger is explicitly checked for status and precedence drift.
 def selectedNotations : List ManifestNotation := [
-  { token := "=", kind := "Eq", precedence := 50,
+  { token := "=", kind := "relation:Eq", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "==", kind := "BEq.beq", precedence := 50,
+  { token := "==", kind := "booleanRelation:BEq.beq", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
   { token := "!=", kind := "booleanNotEqual", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "<", kind := "LT.lt", precedence := 50,
+  { token := "<", kind := "relation:LT.lt", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "<=", kind := "LE.le", precedence := 50,
+  { token := "<=", kind := "relation:LE.le", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "≤", kind := "LE.le", precedence := 50,
+  { token := "≤", kind := "relation:LE.le", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := ">", kind := "GT.gt", precedence := 50,
+  { token := ">", kind := "relation:GT.gt", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := ">=", kind := "GE.ge", precedence := 50,
+  { token := ">=", kind := "relation:GE.ge", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "≥", kind := "GE.ge", precedence := 50,
+  { token := "≥", kind := "relation:GE.ge", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "≠", kind := "Ne", precedence := 50,
+  { token := "≠", kind := "relation:Ne", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
   { token := "∧", kind := "And", precedence := 35,
     rightPrecedence := 35, nonAssociative := false },
@@ -69,28 +69,38 @@ def selectedNotations : List ManifestNotation := [
     rightPrecedence := 35, nonAssociative := false },
   { token := "::", kind := "List.cons", precedence := 67,
     rightPrecedence := 67, nonAssociative := false },
-  { token := "+", kind := "HAdd.hAdd", precedence := 65,
+  { token := "+", kind := "binary:HAdd.hAdd", precedence := 65,
     rightPrecedence := 66, nonAssociative := false },
-  { token := "++", kind := "HAppend.hAppend", precedence := 65,
+  { token := "++", kind := "binary:HAppend.hAppend", precedence := 65,
     rightPrecedence := 66, nonAssociative := false },
-  { token := "-", kind := "HSub.hSub", precedence := 65,
+  { token := "-", kind := "binary:HSub.hSub", precedence := 65,
     rightPrecedence := 66, nonAssociative := false },
-  { token := "*", kind := "HMul.hMul", precedence := 70,
+  { token := "*", kind := "binary:HMul.hMul", precedence := 70,
     rightPrecedence := 71, nonAssociative := false },
-  { token := "/", kind := "HDiv.hDiv", precedence := 70,
+  { token := "/", kind := "binary:HDiv.hDiv", precedence := 70,
     rightPrecedence := 71, nonAssociative := false },
-  { token := "%", kind := "HMod.hMod", precedence := 70,
+  { token := "%", kind := "binary:HMod.hMod", precedence := 70,
     rightPrecedence := 71, nonAssociative := false },
   { token := "→", kind := "arrow", precedence := 25,
     rightPrecedence := 25, nonAssociative := false },
   { token := "->", kind := "arrow", precedence := 25,
     rightPrecedence := 25, nonAssociative := false },
+  { token := "<<<", kind := "HShiftLeft.hShiftLeft", precedence := 75,
+    rightPrecedence := 76, nonAssociative := false },
+  { token := ">>>", kind := "HShiftRight.hShiftRight", precedence := 75,
+    rightPrecedence := 76, nonAssociative := false },
+  { token := "^", kind := "rightAction:HPow.hPow", precedence := 80,
+    rightPrecedence := 80, nonAssociative := false },
   { token := "matches", kind := "matches", precedence := 50,
     rightPrecedence := 51, nonAssociative := true }
 ]
 
 def notationKind : PsPscv0InfixKind → String
   | .constant name => name
+  | .operator kind name =>
+    (match kind with
+      | .unary => "unary" | .binary => "binary" | .rightAction => "rightAction"
+      | .relation => "relation" | .booleanRelation => "booleanRelation") ++ ":" ++ name
   | .arrow => "arrow"
   | .booleanAnd => "booleanAnd"
   | .booleanOr => "booleanOr"
@@ -109,10 +119,9 @@ def selectedTactics : List String :=
    "have", "let", "change", "show", "intro", "assumption", "rfl",
    "constructor", "·", "focus", "all_goals", "any_goals"]
 
--- Source do-block rewrite currently admits explicit Except-typed results.
--- The broader elaborator separately supports bounded Id/Option/Except cases;
--- no general State/IO/FFI coverage is claimed by these entries.
-def selectedSourceEffects : List String := ["Except"]
+-- The source parser delegates typed do to the shared effect selector.
+-- Ordinary result types use the identity path; no State/IO/FFI is implied.
+def selectedSourceEffects : List String := ["Id", "Option", "Except"]
 def selectedElabEffects : List String := ["Id", "Option", "Except"]
 def selectedModuleBehaviors : List String :=
   ["named-import-closure", "ordered-interfaces", "private-export-hygiene",
@@ -243,8 +252,15 @@ def standardSurfaceManifestAudit (env : PsEnvironment) :
     throw "PSCV0-MANIFEST: duplicate surface registration"
   if selectedDeriving != psElabSelectedDerivingHandlers then
     throw "PSCV0-MANIFEST: deriving handler registry drift"
-  if selectedSourceEffects.isEmpty || selectedElabEffects.isEmpty then
-    throw "PSCV0-MANIFEST: empty selected effect policy"
+  if selectedDeriving != psPscv0SelectedDerivingNames then
+    throw "PSCV0-MANIFEST: deriving parser registry drift"
+  if selectedTactics != psPscv0TacticRegistry.map Prod.fst ||
+      !(psPscv0TacticRegistry.all fun entry =>
+        entry.1 == psPscv0TacticParserName entry.2) then
+    throw "PSCV0-MANIFEST: tactic dispatch registry drift"
+  let effects := psElabDoRegistry.map (fun entry => psNameToString entry.1)
+  if selectedSourceEffects != effects || selectedElabEffects != effects then
+    throw "PSCV0-MANIFEST: typed effect registry drift"
   let observed := standardSurfaceManifestSHA256 env
   if observed != standardSurfaceManifestExpectedSHA256 then
     throw ("PSCV0-MANIFEST: surface registry drift; expected " ++

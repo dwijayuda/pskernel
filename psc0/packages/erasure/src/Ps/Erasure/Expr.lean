@@ -730,6 +730,12 @@ def psErasePrimitiveApplication
         binary PsVerifiedIrIntrinsic.natSub
       else if psStringEq text "Nat.mul" then
         binary PsVerifiedIrIntrinsic.natMul
+      else if psStringEq text "Nat.shiftLeft" then
+        binary PsVerifiedIrIntrinsic.natShiftLeft
+      else if psStringEq text "Nat.shiftRight" then
+        binary PsVerifiedIrIntrinsic.natShiftRight
+      else if psStringEq text "Int.pow" then
+        binary PsVerifiedIrIntrinsic.intPow
       else if psStringEq text "Nat.pow" then
         binary PsVerifiedIrIntrinsic.natPow
       else if psStringEq text "Nat.div" then
@@ -1852,7 +1858,7 @@ def psErasureSpecialEntry
     Option.some (PsErasureSpecialEntry.mk 1 true)
   else if psListAny named
       ["mixHash", "Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
-        "Nat.pow", "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
+        "Nat.shiftLeft", "Nat.shiftRight", "Int.pow", "Nat.pow", "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
         "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
         "String.Internal.get", "String.Internal.atEnd", "Array.emptyWithCapacity",
         "Array.size", "Array.mk", "Array.toList"] then
@@ -1870,7 +1876,7 @@ def psErasureSpecialEntry
   else if named "Decidable.intro" then
     Option.some (PsErasureSpecialEntry.mk 3 true)
   else if psListAny named ["Decidable.isTrue", "Decidable.isFalse", "Decidable.decide",
-      "Bool.decEq", "Bool.beq", "Nat.decEq", "String.decEq", "Int.decLt", "Int.decLe"] then
+      "Bool.decEq", "Bool.beq", "Nat.decEq", "String.decEq", "Int.decEq", "Int.decLt", "Int.decLe"] then
     Option.some (PsErasureSpecialEntry.mk 2 true)
   else if psNameEq name psIteName || named "dite" then
     Option.some (PsErasureSpecialEntry.mk 5 false)
@@ -2080,6 +2086,8 @@ def psEraseDecisionApplication
     return some (.intrinsic .stringEq [] [← erase left, ← erase right])
   | "Bool.decEq", [left, right] | "Bool.beq", [left, right] =>
     return some (.intrinsic .boolEq [] [← erase left, ← erase right])
+  | "Int.decEq", [left, right] =>
+    return some (.intrinsic .intEq [] [← erase left, ← erase right])
   | "Int.decLt", [left, right] =>
     return some (.intrinsic .intLt [] [← erase left, ← erase right])
   | "Int.decLe", [left, right] =>

@@ -126,3 +126,19 @@ def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
     throw .unresolvedMetavariable
   return psElabResultWithMeta { result with context := solved.context }
     solved.context.metaContext result.type
+
+-- Lean Extra.toTree uses light synthesis before comparing operand types.
+-- Source continuations retain their scopes and wait for the ordinary drain:
+-- resuming them with postponing=false here could prematurely apply defaults.
+def psElabProgressPending (elaborate : PsElaborator) (context : PsElabContext)
+    (limit : Nat := 32768) : Except PsElabError PsElabContext := do
+  let attempt := fun current work =>
+    match work with
+    | .sourceTerm .. => none
+    | _ => (psElabResumeWork elaborate current work).toOption
+  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
+    psElabPendingPriorities psElabResumeDefault
+    { context with pending := [] } context.pending.reverse false limit
+  if solved.resourceExceeded then throw .fuelExhausted
+  return { solved.context with pending := solved.pending.reverse,
+    postponing := context.postponing }

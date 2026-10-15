@@ -127,7 +127,9 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
     pure (match type with | .float => value | .float32 => call "Math.fround" [value])
   | .floatCompare _ op, [a,b] => pure (bin (floatCompareOp op) a b)
   | .natAdd, [a,b] | .intAdd, [a,b] | .stringPush, [a,b] | .stringAppend, [a,b] => pure (bin "+" a b)
-  | .natPow, [a,b] => pure (bin "**" a b)
+  | .natPow, [a,b] | .intPow, [a,b] => pure (bin "**" a b)
+  | .natShiftLeft, [a,b] => pure (bin "<<" a b)
+  | .natShiftRight, [a,b] => pure (bin ">>" a b)
   | .natMul, [a,b] | .intMul, [a,b] => pure (bin "*" a b)
   | .intSub, [a,b] => pure (bin "-" a b)
   | .natSub, [a,b] => pure (bigPair a b (.conditional

@@ -318,6 +318,15 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .natShiftLeft | .natShiftRight | .intPow =>
+      match arguments with
+      | [a, b] =>
+        let fn := match operation with
+          | .natShiftLeft => "__ps_nat_shift_left"
+          | .natShiftRight => "__ps_nat_shift_right"
+          | _ => "__ps_int_pow"
+        .ok (fn ++ "(&(" ++ a ++ "), &(" ++ b ++ "))")
+      | _ => .error .intrinsicArity
   | .natPow =>
       match arguments with
       | [a, b] => .ok ("__ps_nat_pow(&(" ++ a ++ "), &(" ++ b ++ "))")

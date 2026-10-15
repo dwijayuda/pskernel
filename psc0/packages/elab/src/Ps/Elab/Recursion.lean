@@ -312,6 +312,10 @@ def psElabRecursionWalkWithFuel
             let type ← smaller context type
             return PsElabRecursionWalkResult.mk
               (.ascription value.term type.term span) (value.changedIds ++ type.changedIds)
+        | PsSyntaxTerm.operatorE kind name spelling arguments span => do
+            let args ← psElabRecursionWalkTerms smaller arguments context
+            return PsElabRecursionWalkResult.mk
+              (.operatorE kind name spelling args.fst span) args.snd
         | PsSyntaxTerm.call fn arguments span => do
             if arguments.all (fun arg => arg.fst.isNone) && !arguments.isEmpty then
               smaller context (.app fn (arguments.map Prod.snd) span)

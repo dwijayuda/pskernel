@@ -43,6 +43,10 @@ def integerRuntime : Except String (List RuntimeDefinition) := do
               (make (sign a) (c "__ps_nat_sub" [magnitude a, magnitude b])))))),
     ← emit "sub" [("left", integerType), ("right", integerType)] integerType []
       (c "__ps_int_add" [a, c "__ps_int_neg" [b]]),
+    ← emit "pow" [("left", integerType), ("right", naturalType)] integerType []
+      (make (choice (some .i32)
+        (o .i32And [o .i32LtS [sign a, k 0], o .i32And [c "__ps_nat_wrap_u32" [b], k 1]])
+        (k (-1)) (k 1)) (c "__ps_nat_pow" [magnitude a, b])),
     ← emit "mul" [("left", integerType), ("right", integerType)] integerType []
       (make (o .i32Mul [sign a, sign b]) (c "__ps_nat_mul" [magnitude a, magnitude b]))]
   for (suffix, instruction) in [

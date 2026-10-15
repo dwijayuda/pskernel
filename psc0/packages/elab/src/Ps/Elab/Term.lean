@@ -1,4 +1,5 @@
 import Ps.Elab.Postponed
+import Ps.Elab.Operator
 import Ps.Elab.Record
 import Ps.Elab.Universe
 import Ps.Elab.Proof
@@ -165,6 +166,7 @@ def psElabTermWithFuel
                   else psElabReference ctx name target
               | _ => smaller ctx source target
             psElabWithPostponement (fun _ => match term with
+            | .operatorE .. => psElabOperator smaller context term expected
             | .doE items _ => psElabDo smaller context items expected
             | .byE tactics scope _ => psElabProof smaller context tactics scope expected
             | .hole _ => Except.ok (psElabHole context expected)

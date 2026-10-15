@@ -583,6 +583,8 @@ def psIrCheckIntrinsicSignature
   | .natSub => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMul => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natLog2 => psIrCheckSignatureNoTypes typeArguments [nat] nat
+  | .natShiftLeft | .natShiftRight => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
+  | .intPow => psIrCheckSignatureNoTypes typeArguments [int, nat] int
   | .natPow => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natDiv => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMod => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat

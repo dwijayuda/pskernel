@@ -219,6 +219,54 @@ def naturalRuntime : Except String (List RuntimeDefinition) := do
       choice (some naturalType) (eq size (k 0)) (c "__ps_nat_zero" [])
         (c "__ps_nat_from_u32" [sub (o (.word .i32Shl) [size, k 5])
           (add (o (.word .i32Clz) [limb a (sub size (k 1))]) (k 1))])])]
+
+  -- Whole-limb displacement plus one carry pass: work is proportional to the
+  -- result's limb count. Published inputs are never mutated.
+  functions := functions ++ [← emit "shift_left_loop"
+    [("a", limbsType), ("output", limbsType), ("index", .i32), ("offset", .i32),
+     ("bits", .i64), ("carry", .i64)] naturalType [("total", .i64)]
+    (choice (some naturalType) (eq index (len a))
+      (seq [write output (add index (g "offset")) (low carry),
+        c "__ps_nat_trim" [output, len output]])
+      (seq [put "total" (o .i64Or [
+          o (.word .i64Shl) [wide (limb a index), g "bits"], carry]),
+        write output (add index (g "offset")) (low total),
+        c "__ps_nat_shift_left_loop" [a, output, add index (k 1), g "offset",
+          g "bits", high total]]))]
+  functions := functions ++ [← emit "shift_left"
+    [("left", naturalType), ("right", naturalType)] naturalType
+    [("count", .i32), ("offset", .i32), ("size", .i32)]
+    (choice (some naturalType) (c "__ps_nat_is_zero" [g "left"]) (g "left")
+      (seq [put "count" (c "__ps_nat_to_u32" [g "right"]),
+        put "offset" (o .i32ShrU [g "count", k 5]),
+        put "size" (c "__ps_nat_checked_size" [
+          c "__ps_nat_checked_size" [len (limbs (g "left")), g "offset"], k 1]),
+        c "__ps_nat_shift_left_loop" [limbs (g "left"), allocate size, k 0, g "offset",
+          wide (o .i32And [g "count", k 31]), .i64 0]]))]
+  functions := functions ++ [← emit "shift_right_loop"
+    [("a", limbsType), ("output", limbsType), ("index", .i32), ("offset", .i32),
+     ("bits", .i64)] naturalType [("total", .i64)]
+    (choice (some naturalType) (eq index (len output))
+      (c "__ps_nat_trim" [output, len output])
+      (seq [put "total" (o .i64Or [
+          wide (limb a (add index (g "offset"))),
+          o (.word .i64Shl) [wide (c "__ps_nat_at" [a, add (add index (g "offset")) (k 1)]), .i64 32]]),
+        write output index (low (o (.word .i64ShrU) [total, g "bits"])),
+        c "__ps_nat_shift_right_loop" [a, output, add index (k 1), g "offset", g "bits"]]))]
+  functions := functions ++ [← emit "shift_right"
+    [("left", naturalType), ("right", naturalType)] naturalType
+    [("count", .i32), ("offset", .i32), ("size", .i32)]
+    (seq [put "size" (len (limbs (g "left"))),
+      -- Existing checked_size bounds bit positions. Compare arbitrary Nat
+      -- counts before narrowing, including counts far beyond u32.
+      choice (some naturalType) (c "__ps_nat_le" [
+          c "__ps_nat_from_u32" [o (.word .i32Shl) [c "__ps_nat_checked_size" [size, k 0], k 5]],
+          g "right"]) (c "__ps_nat_zero" [])
+        (seq [put "count" (c "__ps_nat_to_u32" [g "right"]),
+          put "offset" (o .i32ShrU [g "count", k 5]),
+          c "__ps_nat_shift_right_loop" [limbs (g "left"),
+            allocate (sub size (g "offset")), k 0, g "offset",
+            wide (o .i32And [g "count", k 31])]])])]
   return functions
 
 -- Literal work is proportional to limb count, including huge source literals.

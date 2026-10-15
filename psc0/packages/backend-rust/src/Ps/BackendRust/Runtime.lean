@@ -61,6 +61,22 @@ pub(super) fn __ps_nat_lit(text: &str) -> PsNat {
 pub(super) fn __ps_int_lit(text: &str) -> PsInt {
     PsInt::from_str(text).expect("valid generated Int literal")
 }
+
+// Counts remain arbitrary-precision. Oversized right shifts return zero before
+// machine conversion; an unallocatable left result is a resource failure.
+pub(super) fn __ps_nat_shift_left(a: &PsNat, b: &PsNat) -> PsNat {
+    if a.is_zero() { return PsNat::zero(); }
+    a << b.to_usize().expect("Nat left-shift result exceeds addressable memory")
+}
+pub(super) fn __ps_nat_shift_right(a: &PsNat, b: &PsNat) -> PsNat {
+    if b >= &PsNat::from(a.bits()) { return PsNat::zero(); }
+    a >> b.to_usize().expect("bounded Nat shift count")
+}
+pub(super) fn __ps_int_pow(a: &PsInt, b: &PsNat) -> PsInt {
+    let magnitude = PsInt::from(__ps_nat_pow(a.magnitude(), b));
+    if a.sign() == num_bigint::Sign::Minus && b.bit(0) { -magnitude } else { magnitude }
+}
+
 pub(super) fn __ps_nat_add(a: &PsNat, b: &PsNat) -> PsNat { a + b }
 pub(super) fn __ps_nat_sub(a: &PsNat, b: &PsNat) -> PsNat {
     if a >= b { a - b } else { PsNat::zero() }

@@ -3,17 +3,17 @@ import Ps.Environment.StandardFin
 -- The proof-taking and optional workers share the same structural spine.
 -- Neither performs a length pass at runtime. Bounds exist only in the checked
 -- Core types; the optional worker stops at the requested cell or the list end.
-def psListIndexLength (alpha xs : PsExpr) : PsExpr :=
-  psStandardListCall "length" [alpha, xs]
+def psListIndexLength (alpha xs : PsExpr) (level : PsLevel := .zero) : PsExpr :=
+  psStandardListCall "length" [alpha, xs] [level]
 
-def psListIndexBound (alpha xs i : PsExpr) : PsExpr :=
-  psOrderCall "Nat.lt" [i, psListIndexLength alpha xs]
+def psListIndexBound (alpha xs i : PsExpr) (level : PsLevel := .zero) : PsExpr :=
+  psOrderCall "Nat.lt" [i, psListIndexLength alpha xs level]
 
 def psListIndexProofName : PsName :=
   psDecisionName "$psc0Standard.listGetProofWorker"
 
-def psListIndexProofGet (alpha xs i h : PsExpr) : PsExpr :=
-  psLogicApply (.constE psListIndexProofName []) [alpha, xs, i, h]
+def psListIndexProofGet (alpha xs i h : PsExpr) (level : PsLevel := .zero) : PsExpr :=
+  psLogicApply (.constE psListIndexProofName [level]) [alpha, xs, i, h]
 
 def psListIndexOptionalGet (alpha xs i : PsExpr) : PsExpr :=
   psStandardListCall "get?" [alpha, xs, i]
@@ -22,6 +22,7 @@ def psListIndexFalseElim (level : PsLevel) (type proof : PsExpr) : PsExpr :=
   psLogicApply (.constE (psDecisionName "False.elim") [level]) [type, proof]
 
 def psStandardListProofGetDeclaration : PsDeclaration :=
+  let u : PsLevel := .param (psRootName "u")
   let alpha := PsExpr.fvar 0
   let xs := PsExpr.fvar 1
   let i := PsExpr.fvar 2
@@ -30,34 +31,34 @@ def psStandardListProofGetDeclaration : PsDeclaration :=
   let tail := PsExpr.fvar 5
   let ih := PsExpr.fvar 6
   let previous := PsExpr.fvar 7
-  let list := psSelfHostListOf alpha
-  let nilValue := psSelfHostListNilOf alpha
-  let consValue := psSelfHostListConsOf alpha head tail
+  let list := psSelfHostListOf alpha u
+  let nilValue := psSelfHostListNilOf alpha u
+  let consValue := psSelfHostListConsOf alpha head tail u
   let result := fun xs => psLogicPi 2 "i" psOrderNat
-    (psLogicPi 3 "h" (psListIndexBound alpha xs i) alpha)
+    (psLogicPi 3 "h" (psListIndexBound alpha xs i u) alpha)
   let nilCase := psLogicLam 2 "i" psOrderNat
-    (psLogicLam 3 "h" (psListIndexBound alpha nilValue i)
-      (psListIndexFalseElim (.succ .zero) alpha (psOrderCall "Nat.not_lt_zero" [i, h])))
-  let atIndex := fun i => psLogicPi 3 "h" (psListIndexBound alpha consValue i) alpha
-  let zeroCase := psLogicLam 3 "h" (psListIndexBound alpha consValue (.lit (.natural 0))) head
+    (psLogicLam 3 "h" (psListIndexBound alpha nilValue i u)
+      (psListIndexFalseElim (.succ u) alpha (psOrderCall "Nat.not_lt_zero" [i, h])))
+  let atIndex := fun i => psLogicPi 3 "h" (psListIndexBound alpha consValue i u) alpha
+  let zeroCase := psLogicLam 3 "h" (psListIndexBound alpha consValue (.lit (.natural 0)) u) head
   let succCase := psLogicLam 7 "previous" psOrderNat
     (psLogicLam 8 "_" (atIndex previous)
-      (psLogicLam 3 "h" (psListIndexBound alpha consValue (psOrderSucc previous))
+      (psLogicLam 3 "h" (psListIndexBound alpha consValue (psOrderSucc previous) u)
         (psLogicApply ih [previous, psOrderCall "Nat.lt_of_succ_lt_succ"
-          [previous, psListIndexLength alpha tail, h]])))
+          [previous, psListIndexLength alpha tail u, h]])))
   let consCase := psLogicLam 4 "head" alpha
     (psLogicLam 5 "tail" list
       (psLogicLam 6 "ih" (result tail)
         (psLogicLam 2 "i" psOrderNat
-          (psOrderNatRec (.succ .zero)
+          (psOrderNatRec (.succ u)
             (psLogicLam 2 "i" psOrderNat (atIndex i)) zeroCase succCase i))))
   -- The List-recursive result owns its changing index/proof arguments,
   -- just like listGetWorker.
-  let body := psLogicApply (psStandardListRecursor .zero)
+  let body := psLogicApply (psStandardListRecursor u (.succ u))
     [alpha, psLogicLam 1 "xs" list (result xs), nilCase, consCase, xs]
-  .definitionDecl psListIndexProofName []
-    (psLogicPi 0 "α" psPreludeTypeType (psLogicPi 1 "xs" list (result xs)) .implicit)
-    (psLogicLam 0 "α" psPreludeTypeType (psLogicLam 1 "xs" list body) .implicit)
+  .definitionDecl psListIndexProofName [psRootName "u"]
+    (psLogicPi 0 "α" (.sortE (.succ u)) (psLogicPi 1 "xs" list (result xs)) .implicit)
+    (psLogicLam 0 "α" (.sortE (.succ u)) (psLogicLam 1 "xs" list body) .implicit)
 
 -- Positive and negative branch theorems validate the optimized optional
 -- algorithm independently of any chosen Decidable dictionary.
@@ -176,15 +177,19 @@ def psStandardListIndexPublicDeclarations : List PsDeclaration :=
   let i := PsExpr.fvar 2
   let inhabited := PsExpr.fvar 3
   let list := psSelfHostListOf alpha
-  let length := psListIndexLength alpha xs
-  let fin := psStandardFinOf length
   let params := fun body => psLogicPi 0 "α" psPreludeTypeType body .implicit
   let lams := fun body => psLogicLam 0 "α" psPreludeTypeType body .implicit
-  let get := .definitionDecl (psDecisionName "List.get") []
-    (params (psLogicPi 1 "xs" list (psLogicPi 2 "i" fin alpha)))
-    (lams (psLogicLam 1 "xs" list (psLogicLam 2 "i" fin
-      (psListIndexProofGet alpha xs (psStandardFinVal length i)
-        (psOrderCall "Fin.isLt" [length, i])))))
+  let u : PsLevel := .param (psRootName "u")
+  let listU := psSelfHostListOf alpha u
+  let lengthU := psListIndexLength alpha xs u
+  let finU := psStandardFinOf lengthU
+  let get := .definitionDecl (psDecisionName "List.get") [psRootName "u"]
+    (psLogicPi 0 "α" (.sortE (.succ u))
+      (psLogicPi 1 "xs" listU (psLogicPi 2 "i" finU alpha)) .implicit)
+    (psLogicLam 0 "α" (.sortE (.succ u))
+      (psLogicLam 1 "xs" listU (psLogicLam 2 "i" finU
+        (psListIndexProofGet alpha xs (psStandardFinVal lengthU i)
+          (psOrderCall "Fin.isLt" [lengthU, i]) u)) .implicit))
   let bangType := params (psLogicPi 3 "inhabited" (psStandardInhabitedType alpha)
     (psLogicPi 1 "xs" list (psLogicPi 2 "i" psOrderNat alpha)) .instanceImplicit)
   let bangValue := lams (psLogicLam 3 "inhabited" (psStandardInhabitedType alpha)

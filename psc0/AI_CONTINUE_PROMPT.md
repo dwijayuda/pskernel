@@ -15,13 +15,15 @@ The active work is on research branch psc0/pscv0-v7-platform-words-research, not
 
 Read psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md and the M2 design notes named in the work state. Finish the coherent qualification before adding unrelated work. Interleave M2+A -> M3+B -> M4+C/D -> M5/E. If GitHub connector/write access is unavailable in this regular chat, report the actual access blocker rather than claiming edits or using forbidden local fallbacks.
 
-The full durable work state follows for copy/paste portability.
+The latest native run is now known to have failed at equalityFalse; see the resumed checkpoint below. Continue the new qualification after the isolated default-program correction.
+
+The full durable work state follows for portability.
 
 ---
 
 # PSCV0 v7 — AI work state / regular-chat handoff
 
-Updated 16 October 2026, 05:30 Jakarta (15 October 22:30 UTC). User requested immediate handoff at 1% usage; implementation stopped for that request.
+Updated 16 October 2026, 05:30 Jakarta (15 October 22:30 UTC). User subsequently resumed autonomous work; continue from the latest checkpoint below.
 
 ## Working contract
 
@@ -31,7 +33,13 @@ Repository dwijayuda/pskernel. Use GitHub connector and cloud Linux CI exclusive
 Development psc0/pscv0-v7-native-lean-v1; draft PR109 targets psc0/pscv0-v7-m1-parser-ownership-v1. Keep draft, never merge. Research psc0/pscv0-v7-platform-words-research. Preserve both histories and newer development docs when integrating. Update both handoff files and roadmap/status every milestone. Interleave M2+A -> M3+B -> M4+C/D -> M5/E; current user asks to complete M2+A.
 
 
-## Read this first: exact current state
+## Resumed checkpoint: isolate global operator defaults completely
+
+User resumed work after the low-usage handoff. Native [38817100562](https://github.com/dwijayuda/pskernel/actions/runs/38817100562) at `990fba97e4a196736147460aceb780242644a244` passed compilation (including the independent pinned Lean oracle), parser/strict selected profile and all frozen assets, then stopped at source `equalityFalse`. The original arithmetic case progressed. The same high-priority global operator default still redirects two unknown operands inside relations, which intentionally do not inherit the Boolean expected type. A custom operand type alone cannot isolate a global default.
+
+The shared backend application now contains ordinary heterogeneous multiplication with an explicitly typed scalar, retaining its value-22 runtime observation as `operatorHeterogeneousScale`. Unknown-literal default selection moved to an independent source program with an official-kernel-checked `rfl` theorem proving the selected value is22. The isolated negative default-interference check and independent native Lean oracle remain. This changes qualification ownership, not compiler semantics, supported language, gates or budgets. Full qualification remains pending; M2+A remains open.
+
+## Prior handoff state (superseded by the checkpoint above)
 
 - Repository: https://github.com/dwijayuda/pskernel
 - Active research branch: `psc0/pscv0-v7-platform-words-research`.

@@ -69,7 +69,7 @@ export const observations = [
   { name: "operatorSignedShift", type: "int", args: null, expected: -3n },
   { name: "operatorWordPower", args: null, expected: 217n },
   { name: "operatorHeterogeneous", args: null, expected: 12n },
-  { name: "operatorHeterogeneousDefault", args: null, expected: 22n },
+  { name: "operatorHeterogeneousScale", args: null, expected: 22n },
   { name: "logicIntEquality", argTypes: ["int", "int"], args: [-4n, -4n], expected: true },
   { name: "logicIntEquality", argTypes: ["int", "int"], args: [-4n, 4n], expected: false },
   { name: "logicIntEquality", argTypes: ["int", "int"], args: [4n, 5n], expected: false },

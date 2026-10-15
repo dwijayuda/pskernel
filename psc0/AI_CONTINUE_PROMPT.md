@@ -1,5 +1,11 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — Int arithmetic asset reproduced; strict hashes measured
+
+Integration `5cffe9280f2f2bed07eb1f1a230eb1e924160bdd` compiled and regenerated the 28-declaration Int asset **byte-for-byte** in [native CI 38705958851](https://github.com/dwijayuda/pskernel/actions/runs/38705958851). The existing strict registry guard correctly refused the previous snapshot and independently measured **fnv1a64:17912930455396537674** and **sha256:a0f90d4ba911bd9be249bd72f8f0443e582eea41f21a56d192f27efb6b24ff44**. Both values are now pinned unchanged; no check is relaxed. The separate compact Float kernel replay [38705958724](https://github.com/dwijayuda/pskernel/actions/runs/38705958724) passed at that same integration SHA.
+
+This snapshot update still requires complete native/backend and independent Float qualification at its own commit. The expanded mask bridge is isolated on `psc0/research-float-mask-int-model-v1`, commit `cee61377f12fe465238ca5b474422e43575a3761`, [CI 38706081222](https://github.com/dwijayuda/pskernel/actions/runs/38706081222), pending at this checkpoint. No executable Float, new assumption or M2+A completion is claimed.
+
 ## 15 October — coherent Int logical arithmetic integration candidate
 
 Baseline: `bc613bc47f63e1fd3a9f1cb714317da46d78f12f`, following qualified `7742b4cd9599af315da4a1af1ba5c8f97a6ac290` (native [38701305472](https://github.com/dwijayuda/pskernel/actions/runs/38701305472), Float replay [38701305530](https://github.com/dwijayuda/pskernel/actions/runs/38701305530)). Actual baseline Standard: **1,832 declarations /25 classes /226 instances**, FNV `fnv1a64:8516648619442707737`, SHA-256 `sha256:606ab4df1a8517d7e3323d49ee4050cadc62612e433c541fd322f44e0b626f05`. The earlier 1bc8... SHA below was a documentation error; the source and successful exact-commit CI agree on 606ab4.... Existing 699 JS/TS/Rust observations and Wasm/Wasmtime passed.

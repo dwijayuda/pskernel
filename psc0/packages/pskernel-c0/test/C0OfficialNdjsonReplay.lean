@@ -1139,6 +1139,51 @@ def c0ExportDescribeWhnfProbe
   | .error error => "error=" ++ error
   | .ok (reduced, _) => "ok=" ++ c0ExportMismatchTerm 6 reduced
 
+/-- First nontrivial application argument in two full-WHNF expressions.
+    This is a discarded, source-owned diagnostic: compare the shared head,
+    then check arguments left-to-right in the same order as Lean 4.35's
+    type_checker::is_def_eq_app, threading only the genuine source state. -/
+def c0ExportProbeFirstAppMismatchAux
+    (defeq :
+      PsKernelCheckerContext -> PsKernelCheckerState ->
+      PsKernelExpr -> PsKernelExpr ->
+      Except String (Bool × PsKernelCheckerState))
+    (ctx : PsKernelCheckerContext)
+    (st : PsKernelCheckerState) :
+    Nat -> List PsKernelExpr -> List PsKernelExpr -> String
+  | _, [], [] => "all_arguments_equal"
+  | i, lhs :: leftRest, rhs :: rightRest =>
+      if psKernelExprEq lhs rhs then
+        c0ExportProbeFirstAppMismatchAux defeq ctx st (i+1) leftRest rightRest
+      else
+        let prefix := "argument[" ++ toString i ++
+          "] lhs=" ++ c0ExportMismatchTerm 8 lhs ++
+          " rhs=" ++ c0ExportMismatchTerm 8 rhs
+        match defeq ctx st lhs rhs with
+        | .ok (true, updated) =>
+            prefix ++ " result=true | " ++
+              c0ExportProbeFirstAppMismatchAux defeq ctx updated
+                (i+1) leftRest rightRest
+        | .ok (false, _) => prefix ++ " result=false"
+        | .error error => prefix ++ " error=" ++ error
+  | _, _, _ => "different_argument_counts"
+
+def c0ExportProbeFirstAppMismatch
+    (fuel : Nat)
+    (ctx : PsKernelCheckerContext)
+    (st : PsKernelCheckerState)
+    (lhs rhs : PsKernelExpr) : String :=
+  let defeq := psKernelIsDefEqWithFuel fuel
+  let leftSpine := psKernelExprGetAppFnArgs lhs
+  let rightSpine := psKernelExprGetAppFnArgs rhs
+  match defeq ctx st leftSpine.fst rightSpine.fst with
+  | .error error => "head_error=" ++ error
+  | .ok (false, _) => "heads_not_definitionally_equal"
+  | .ok (true, updated) =>
+      "head_equal | " ++
+        c0ExportProbeFirstAppMismatchAux defeq ctx updated 0
+          leftSpine.snd rightSpine.snd
+
 def c0ExportDiagnoseDefEqWhnfSides
     (fuel : Nat)
     (ctx : PsKernelCheckerContext)
@@ -1168,7 +1213,9 @@ def c0ExportDiagnoseDefEqWhnfSides
                 toString equal
           | .error error =>
               "full_whnf_structural_equal=false normalized_defeq_error=" ++
-                error
+                error ++ " | first_app_argument=" ++
+                c0ExportProbeFirstAppMismatch fuel ctx st
+                  leftNormal rightNormal
     | _, _ => "full_whnf_structural_equal=unavailable"
   " lhs_cheap=" ++ lCheap ++ " rhs_cheap=" ++ rCheap ++
   " lhs_core=" ++ lCore ++ " rhs_core=" ++ rCore ++

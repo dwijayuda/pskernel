@@ -473,17 +473,25 @@ def c0ExportParseRecord
     let idx ← value.getNat?
     if idx != st.names.size then throw "NDJSON name IDs not sequential"
     let newName ← c0ExportDecodeName st j
-    return { st with names := st.names.push newName }
+    -- Consume the table fields before pushing: no stale owner of the
+    -- growing array is needed after its referenced name was decoded.
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header⟩ := st
+    return ⟨names.push newName, levels, exprs, declarations,
+      quotientParts, quotientPending, header⟩
   if let .ok value := c0JsonObj j "il" then
     let idx ← value.getNat?
     if idx != st.levels.size then throw "NDJSON level IDs not sequential"
     let newLevel ← c0ExportDecodeLevel st j
-    return { st with levels := st.levels.push newLevel }
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header⟩ := st
+    return ⟨names, levels.push newLevel, exprs, declarations,
+      quotientParts, quotientPending, header⟩
   if let .ok value := c0JsonObj j "ie" then
     let idx ← value.getNat?
     if idx != st.exprs.size then throw "NDJSON expression IDs not sequential"
     let newExpr ← c0ExportDecodeExpr st j
-    return { st with exprs := st.exprs.push newExpr }
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header⟩ := st
+    return ⟨names, levels, exprs.push newExpr, declarations,
+      quotientParts, quotientPending, header⟩
   if let .ok payload := c0JsonObj j "def" then
     c0ExportOnlyKeys j ["def"]
     c0ExportOnlyKeys payload
@@ -768,30 +776,55 @@ structure C0ExportOnlineState where
   environment : PsKernelEnvironment := psKernelEnvironmentEmpty
   checkedCount : Nat := 0
 
-/-- Parse exactly one record and apply at most one checked declaration
-    transaction. Unsupported records fail before any further admission. -/
-def c0ExportStep
+/-- An error retains only its actual reason and, for a checker error,
+    the exact environment and declaration at the failed admission. Successful
+    records need not keep an old copy of the huge NDJSON expression table merely
+    to support a future diagnostic. This is not part of trusted kernel state. -/
+inductive C0ExportStepFailure where
+  | malformedJson (message : String)
+  | invalidInput (message : String)
+  | checked (environment : PsKernelEnvironment)
+      (declaration : C0ExportDeclaration) (error : PsKernelError)
+
+def c0ExportStepFailureVerdict : C0ExportStepFailure → C0ExportVerdict
+  | .malformedJson _ => .malformed
+  | .invalidInput message => c0ExportClassifyInputError message
+  | .checked _ _ error => c0ExportFromKernelError error
+
+/-- Parse one record with exclusive ownership of the growing tables.
+    Source checking and admission are unchanged; failure carries diagnostics
+    so callers never retain a second table owner on the successful hot path. -/
+def c0ExportStepDetailed
     (state : C0ExportOnlineState) (raw : String) (fuel : Nat) :
-    Except C0ExportVerdict C0ExportOnlineState := do
+    Except C0ExportStepFailure C0ExportOnlineState := do
+  let ⟨tables, initialEnv, initialChecked⟩ := state
   let record ← match Lean.Json.parse raw with
     | .ok value => pure value
-    | .error _ => throw .malformed
-  let parsed ← match c0ExportParseRecord state.tables record with
+    | .error message => throw (.malformedJson message)
+  let parsed ← match c0ExportParseRecord tables record with
     | .ok next => pure next
-    | .error message => throw (c0ExportClassifyInputError message)
-  let mut env := state.environment
-  let mut checked := state.checkedCount
+    | .error message => throw (.invalidInput message)
+  let mut env := initialEnv
+  let mut checked := initialChecked
   for declaration in parsed.declarations do
     match c0ExportCheckOne env declaration fuel with
     | .ok next =>
         env := next
         checked := checked + 1
-    | .error error => throw (c0ExportFromKernelError error)
+    | .error error => throw (.checked env declaration error)
   return {
     tables := { parsed with declarations := [] }
     environment := env
     checkedCount := checked
   }
+
+/-- Preserve the original public pure verdict and transition API. -/
+def c0ExportStep
+    (state : C0ExportOnlineState) (raw : String) (fuel : Nat) :
+    Except C0ExportVerdict C0ExportOnlineState :=
+  match c0ExportStepDetailed state raw fuel with
+  | .ok next => .ok next
+  | .error failure => .error (c0ExportStepFailureVerdict failure)
 
 def c0ExportFinish (state : C0ExportOnlineState) : C0ExportVerdict :=
   if !state.tables.header || state.checkedCount == 0 then .malformed
@@ -998,7 +1031,7 @@ def c0ExportVerdictFromFileTrace
         else if line.startsWith "{\"quot\":" then "quot"
         else ""
       let began ← if declKind.isEmpty then pure 0 else IO.monoMsNow
-      let outcome := c0ExportStep state line fuel
+      let outcome := c0ExportStepDetailed state line fuel
       if !declKind.isEmpty then
         let elapsed := (← IO.monoMsNow) - began
         intervalDeclMs := intervalDeclMs + elapsed
@@ -1010,33 +1043,30 @@ def c0ExportVerdictFromFileTrace
         if elapsed >= 3000 then
           IO.println s!"C0_REAL_EXPORT_SLOW_DECL record={consumed} kind={declKind} elapsed_ms={elapsed}"
       match outcome with
-      | .error verdict =>
-          -- Diagnostics are computed *after* the authoritative failure.
-          -- Keep malformed/unsupported/resource reasons separate from a
-          -- checked invalid declaration; no subsequent record is admitted.
-          match Lean.Json.parse line with
-          | .error message =>
+      | .error failure =>
+          -- The first failure already carries the original parser reason or
+          -- exact pre-admission checker environment. Do NOT retain 'state'
+          -- across successful table pushes just for this diagnostic branch.
+          let verdict := c0ExportStepFailureVerdict failure
+          match failure with
+          | .malformedJson message =>
               IO.println ("C0_REAL_EXPORT_PARSE_ERROR=" ++ message)
-          | .ok record =>
-              match c0ExportParseRecord state.tables record with
-              | .error message =>
-                  IO.println ("C0_REAL_EXPORT_INPUT_REASON=" ++ message)
-              | .ok parsed =>
-                  for declaration in parsed.declarations do
-                    match c0ExportCheckOne state.environment declaration fuel with
-                    | .error (.rejectedInvalid message) =>
-                        IO.println ("C0_REAL_EXPORT_REJECT_MESSAGE=" ++ message)
-                        match declaration with
-                        | .theoremDecl info =>
-                            c0ExportDiagnosticTheoremMismatch state.environment info fuel
-                        | _ => pure ()
-                    | .error (.declinedUnsupported message) =>
-                        IO.println ("C0_REAL_EXPORT_DECLINED_REASON=" ++ message)
-                    | .error (.resourceExhausted _ message) =>
-                        IO.println ("C0_REAL_EXPORT_RESOURCE_REASON=" ++ message)
-                    | .error (.internalError message) =>
-                        IO.println ("C0_REAL_EXPORT_INTERNAL_REASON=" ++ message)
-                    | .ok _ => pure ()
+          | .invalidInput message =>
+              IO.println ("C0_REAL_EXPORT_INPUT_REASON=" ++ message)
+          | .checked env declaration error =>
+              match error with
+              | .rejectedInvalid message =>
+                  IO.println ("C0_REAL_EXPORT_REJECT_MESSAGE=" ++ message)
+                  match declaration with
+                  | .theoremDecl info =>
+                      c0ExportDiagnosticTheoremMismatch env info fuel
+                  | _ => pure ()
+              | .declinedUnsupported message =>
+                  IO.println ("C0_REAL_EXPORT_DECLINED_REASON=" ++ message)
+              | .resourceExhausted _ message =>
+                  IO.println ("C0_REAL_EXPORT_RESOURCE_REASON=" ++ message)
+              | .internalError message =>
+                  IO.println ("C0_REAL_EXPORT_INTERNAL_REASON=" ++ message)
           return (verdict, consumed)
       | .ok next =>
           state := next

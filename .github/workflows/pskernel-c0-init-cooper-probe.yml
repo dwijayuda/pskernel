@@ -1,0 +1,83 @@
+name: PSKernel-C0 isolated Init Cooper theorem
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-init-cooper-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-cooper-dependency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build exact 4.35 exporter and native C0 replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          (cd psc0/packages/pskernel-c0 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Export complete Cooper dependency closure and check officially
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET=Int.Internal.Linear.cooper_dvd_right
+          echo "C0_INIT_STALL_TARGET=$TARGET full_init_record=5068573"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- "$TARGET" > "$RUNNER_TEMP/C0-cooper-dependencies.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/C0-cooper-dependencies.ndjson" > "$RUNNER_TEMP/C0-cooper-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/C0-cooper-official.txt"
+          echo "C0_INIT_STALL_CLOSURE_OFFICIAL=accepted"
+          wc -lc "$RUNNER_TEMP/C0-cooper-dependencies.ndjson"
+          sha256sum "$RUNNER_TEMP/C0-cooper-dependencies.ndjson"
+      - name: Replay identical closure in independent C0, bounded diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/C0-cooper-resources.txt" \
+              timeout 480s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              "$RUNNER_TEMP/C0-cooper-dependencies.ndjson" 4096
+          ) > "$RUNNER_TEMP/C0-cooper-native.txt" 2>&1
+          status=$?
+          set -e
+          tail -n 100 "$RUNNER_TEMP/C0-cooper-native.txt"
+          echo "C0_INIT_STALL_CLOSURE_PROCESS_EXIT=$status"
+          if test "$status" -eq 124; then
+            echo "C0_INIT_STALL_CLOSURE_RESULT=host_timeout_not_kernel_verdict"
+          elif test "$status" -ne 0; then
+            echo "C0_INIT_STALL_CLOSURE_RESULT=process_error_not_kernel_verdict"
+          elif grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/C0-cooper-native.txt"; then
+            echo "C0_INIT_STALL_CLOSURE_RESULT=accepted_closure_only_not_full_Init"
+          else
+            echo "C0_INIT_STALL_CLOSURE_RESULT=nonacceptance_inspect_exact_verdict"
+          fi
+          cat "$RUNNER_TEMP/C0-cooper-resources.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-init-cooper-closure
+          path: |
+            ${{ runner.temp }}/C0-cooper-dependencies.ndjson
+            ${{ runner.temp }}/C0-cooper-official.txt
+            ${{ runner.temp }}/C0-cooper-native.txt
+            ${{ runner.temp }}/C0-cooper-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

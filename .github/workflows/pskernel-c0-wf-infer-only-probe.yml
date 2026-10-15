@@ -1,0 +1,97 @@
+name: PSKernel-C0 exact WF infer-only diagnostic
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-infer-only-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  infer-only-first:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build pinned source plus official Lean 4.35 WF acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+             test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/wf-infer.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-infer.ndjson" > "$RUNNER_TEMP/wf-infer-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-infer-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/wf-infer.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-infer.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-infer.ndjson" | sha256sum -c -
+      - name: Build disposable theorem stage probe with non-accepting infer-only observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/C0TraceTheoremStages.py \
+            psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean --record 15758
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean")
+          s=path.read_text()
+          needle='  let some checkedProof ← c0ExportTraceStage "proof_check"'
+          assert s.count(needle)==1, "Unknown trace shape"
+          before='''  -- Exploratory infer-only mode is never used for proof acceptance.
+          -- This observation must not replace the mandatory checked mode.
+          let _ ← c0ExportTraceStage "infer_only_untrusted_diagnostic"
+              (fun _ => psKernelSessionInfer fuel propResult.snd theoremInfo.value)
+          '''
+          s=s.replace(needle,before.rstrip()+"\n"+needle)
+          path.write_text(s)
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          echo "C0_WF_INFER_PROBE_BUILD=disposable_untrusted_diagnostic_only"
+      - name: Observe infer-only versus checked inference in exact real theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-infer-resources.txt" \
+              timeout 150s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-infer.ndjson" 4096) > "$RUNNER_TEMP/wf-infer-native.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_WF_INFER_PROBE_EXIT=$rc"
+          grep 'C0_INIT_STAGE_' "$RUNNER_TEMP/wf-infer-native.txt" | tail -n 30 || true
+          grep 'C0_REAL_EXPORT replay_outcome' "$RUNNER_TEMP/wf-infer-native.txt" | tail -n 2 || true
+          if test "$rc" -eq 124; then
+            echo "C0_WF_INFER_PROBE_RESULT=timeout_before_checked_verdict"
+          elif test "$rc" -eq 0 &&
+               grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' \
+                 "$RUNNER_TEMP/wf-infer-native.txt"; then
+            echo "C0_WF_INFER_PROBE_RESULT=source_checked_accepted"
+          else
+            echo "C0_WF_INFER_PROBE_RESULT=nonaccepting_or_process_failure"
+          fi
+          cat "$RUNNER_TEMP/wf-infer-resources.txt"
+          echo "C0_WF_INFER_PROBE_SCOPE=diagnostic_not_a_kernel_judgment"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-wf-infer-only-diagnostic
+          path: |
+            ${{ runner.temp }}/wf-infer-official.txt
+            ${{ runner.temp }}/wf-infer-native.txt
+            ${{ runner.temp }}/wf-infer-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

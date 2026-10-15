@@ -1249,6 +1249,30 @@ def c0ExportProbeFirstAppMismatch
         c0ExportProbeFirstAppMismatchAux defeq ctx updated 0
           leftSpine.snd rightSpine.snd
 
+/-- Diagnostic-only finite expansion of active let FVars. -/
+def c0ExportExpandLocalLets (fuel : Nat)
+    (ctx : PsKernelCheckerContext) : PsKernelExpr → PsKernelExpr :=
+  match fuel with
+  | 0 => fun e => e
+  | remaining + 1 =>
+      let go := c0ExportExpandLocalLets remaining ctx
+      fun e =>
+        match e with
+        | .fvar n =>
+            match psKernelLocalContextFind ctx.localContext n with
+            | .some d =>
+                match psKernelLocalDeclValue d with
+                | .some v => go v
+                | .none => e
+            | .none => e
+        | .app f a => .app (go f) (go a)
+        | .lam n t b i => .lam n (go t) (go b) i
+        | .forallE n t b i => .forallE n (go t) (go b) i
+        | .letE n t v b d => .letE n (go t) (go v) (go b) d
+        | .mdata m b => .mdata m (go b)
+        | .proj n i b => .proj n i (go b)
+        | _ => e
+
 def c0ExportDiagnoseDefEqWhnfSides
     (fuel : Nat)
     (ctx : PsKernelCheckerContext)
@@ -1268,6 +1292,13 @@ def c0ExportDiagnoseDefEqWhnfSides
   let normalizedConversion :=
     match leftPublic, rightPublic with
     | .ok (leftNormal, _), .ok (rightNormal, _) =>
+        let zetaLeft := c0ExportExpandLocalLets 192 ctx leftNormal
+        let zetaRight := c0ExportExpandLocalLets 192 ctx rightNormal
+        let zetaSame := psKernelExprEq zetaLeft zetaRight
+        let zetaText :=
+          " | zeta_equal=" ++ toString zetaSame ++
+          " | zeta_path=" ++
+            c0ExportFirstSyntacticDifference 48 ctx zetaLeft zetaRight
         let same := psKernelExprEq leftNormal rightNormal
         if same then
           "full_whnf_structural_equal=true"
@@ -1278,7 +1309,7 @@ def c0ExportDiagnoseDefEqWhnfSides
                 toString equal
           | .error error =>
               "full_whnf_structural_equal=false normalized_defeq_error=" ++
-                error ++ " | first_app_argument=" ++
+                error ++ zetaText ++ " | first_app_argument=" ++
                 c0ExportProbeFirstAppMismatch fuel ctx st
                   leftNormal rightNormal
     | _, _ => "full_whnf_structural_equal=unavailable"

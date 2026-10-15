@@ -267,8 +267,13 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- Four checked IntN.toInt conversions, exact native implicit_reducible
 -- statuses. These precise FNV/SHA are from independent strict drift
 -- refusal in Linux 38563557310 at 09965258; never infer expected hashes.
+-- Research-only Lean 4.35.0 List.get universe-polymorphism repair.
+-- Native compilation of the exact checked getter/worker and the 534-module
+-- build passed, then the unchanged selected-registry guard independently
+-- reported the following FNV/SHA-256 values at Linux run 38679310229.
+-- This pin is NOT acceptance; unchanged native/backends/Wasmtime CI must pass.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:15322921429207463536"
+  "fnv1a64:8516648619442707737"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -430,7 +435,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:824f30eb624810924735f514ae6e5843859bcba3249b1a2aca6c69b64bbca4ce"
+  "sha256:606ab4df1a8517d7e3323d49ee4050cadc62612e433c541fd322f44e0b626f05"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

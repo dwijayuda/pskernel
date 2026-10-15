@@ -5,6 +5,17 @@ on:
   push:
     branches: [psc0/pscv0-v7-native-lean-v1]
     paths:
+      # The independently checked F1 proof model depends on the selected
+      # Standard and checker, not just its host-only proof source. A Standard
+      # universe/signature update must re-run the same kernel replay.
+      - 'psc0/packages/**/src/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/host/src/Ps/Host/StandardManifest.lean'
+      - 'psc0/host/src/Ps/Host/StandardClosure.lean'
+      - 'psc0/host/src/Ps/Host/StandardSource.lean'
+      - 'psc0/host/src/Ps/Host/StandardSnapshot.lean'
+      - 'psc0/lakefile.lean'
+      - 'psc0/lean-toolchain'
       - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
       - 'psc0/host/src/Ps/Host/FloatCanonicalContracts.lean'
       - 'psc0/host/src/Ps/Host/StandardExport.lean'

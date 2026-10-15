@@ -1,5 +1,35 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — M2+A polymorphic checked List.get integration candidate
+
+The pinned Lean 4.35.0 `List.get` proof-taking worker and its
+`List.get` declaration now quantify over the **original universe `u`**,
+instead of hardcoding the monomorphic `Type` level. Checked type formation,
+the dependent list recursor, the nonempty-index proof and recursion all
+use the same exact `u` and `u+1` levels. The optional indexing worker
+remains independent and unchanged. This is a real selected Standard
+semantic repair, **not** an unchecked native elaborator fallback.
+
+The isolated List-universe branch completed
+[27/27 native CI steps 38680040011](https://github.com/dwijayuda/pskernel/actions/runs/38680040011);
+its independently measured selected Standard integrity values were
+`fnv1a64:8516648619442707737` and
+`sha256:a1bc8d8587566b98c3c8bdfc3eacfdb7ea28372093b23365f0469f708b14cbfa`.
+The combination with the 26-root / 100-declaration Float F1 proof
+candidate also passed independent
+[portable replay 38700154737](https://github.com/dwijayuda/pskernel/actions/runs/38700154737);
+the matching comprehensive research native gate is under qualification.
+The F1 replay workflow is expanded to run when the selected Standard,
+compiler dependencies, or kernel bridge change, rather than only on
+host-side F1 proof edits.
+
+**This main-branch integration is NOT qualified until its own exact-commit
+native and independent portable workflows pass**. No Float runtime,
+selected source Float constructor, FFI, backend semantic waiver,
+unapproved axiom, pskernel-core, self-hosting or C5 is enabled.
+M2+A/Phase A F1–F4 remain open. Do not equate a selected Standard
+digest change with automatic coverage of the whole language.
+
 ## 15 October — F1 constructive 26-root / 100-declaration integration candidate
 
 An expanded **strict independent portable kernel** research replay passed

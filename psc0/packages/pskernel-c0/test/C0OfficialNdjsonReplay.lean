@@ -1909,11 +1909,10 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
     if verdict == .accepted || verdict == .rejected then
       throw (IO.userError s!"forged inductive metadata was treated as kernel verdict {label}: {repr verdict}")
 
-/-- The real-export command accepts an *explicit* larger fuel profile
-    without changing ordinary source acceptance, reference fixture budgets,
-    or any kernel rule. The emitted outcome remains separate from host failure. -/
 /-- Only a positively accepted replay is a successful strict command.
-    The ordinary diagnostic command keeps all original non-accepting outcomes. -/
+    The ordinary diagnostic command keeps all original non-accepting outcomes.
+    Fuel remains explicit and unchanged; host errors remain distinct from
+    a kernel rejection or resource-exhausted verdict. -/
 def c0ExportRequireAccepted (outcome : C0ExportVerdict) : Except String Unit :=
   if outcome == .accepted then .ok ()
   else .error s!"C0_REAL_EXPORT_STRICT_FAILURE verdict={repr outcome}"

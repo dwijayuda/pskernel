@@ -173,7 +173,7 @@ This is a **constrained Lean 4 parser/elaborator overlay**, not an independent E
 | `psNonExplicitBinder` / `psGivenBinder` / `psLambdaBinder` | `psNonExplicitBinder` is the selected native implicit, strict-implicit and instance declaration binder. `psGivenBinder` follows the 4.35.0 logical-contract binder selection. `psLambdaBinder` delegates to the **selected native** `Lean.Parser.Term.funBinder` family (ordinary names, typed/implicit/strict/instance binders as admitted in this profile); it is not the declaration-only comma `psExplicitGroup` grammar. |
 | `psCallHead` / `psCallArgs` | Completed callable expression and adjacent positional-then-named argument list; zero written arguments follow `PSCV0-APP-03`. These belong to *term expressions*, not patterns or declaration binders. |
 | `psDeclVal` / `psConstVal` / `psWhere` / `psLocalDeclaration` | `psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?` for selected `def`/`function`; `psConstVal ::= ":=" psDeclTerm psWhere?`; `psDeclTerm ::= term \| "{" term "}"` denotes exactly one term. `psRecursionSuffix` is valid only for selected functions and eligible local definitions, after the body and before any `where`. `psConstVal` never accepts a recursion suffix. `psWhere` contains local selected `def` declarations, optionally followed by one eligible contract proof tail. |
-| `psDefDecl` / `psFunctionDecl` / `psConstDecl` / `psDefOrFunction` | Modifier-free cores: `psDefDecl ::= "def" declId psBinderSeq (":" term)? psContractSeq? psDeclVal`; `psFunctionDecl ::= "function" declId psFunctionBinders (":" term)? psContractSeq? psDeclVal`; `psConstDecl ::= "const" declId (":" term)? psConstVal`; `psDefOrFunction ::= psDefDecl \| psFunctionDecl`. Contract admissibility follows `PSCV0-CONTRACT-SCOPE-01`. Only `function` admits terminal source-nullary `()`. Selected heads remain authoritative even if Lean provides a broader declaration parser. |
+| `psDefDecl` / `psFunctionDecl` / `psConstDecl` / `psDefOrFunction` | Modifier-free cores: `psDefDecl ::= "def" declId psBinderSeq (":" term)? psContractSeq psDeclVal`; `psFunctionDecl ::= "function" declId psFunctionBinders (":" term)? psContractSeq psDeclVal`; `psConstDecl ::= "const" declId (":" term)? psConstVal`; `psDefOrFunction ::= psDefDecl \| psFunctionDecl`. Contract admissibility follows `PSCV0-CONTRACT-SCOPE-01`. Only `function` admits terminal source-nullary `()`. Selected heads remain authoritative even if Lean provides a broader declaration parser. |
 | `psRecursiveDecl` / `psRecursionSuffix` | `psRecursionSuffix ::= psTermination \| "partial_fixpoint"` appears immediately after the body, before any `where`. Selected total recursion uses `psTermination`; `partial_fixpoint` uses checked fixed-point construction with no competing suffix. `partial` and restricted `unsafe` prefixes use their corresponding executable-only strategy, with no termination/fixpoint suffix. The full modifier/recursion combination matrix in §5 and pinned Lean mutual-clique checks govern acceptance. |
 | `selectedPsDeclaration` / `psModifiers` | `selectedPsDeclaration ::= selectedLeanDeclaration \| psDefDecl \| psFunctionDecl \| psConstDecl`. An owned head's restrictions take precedence over unrestricted Lean alternatives. `psModifiers` is the common selected prefix (attributes and optional `private`, in upstream order); the optional feature modifier is **exactly one** of `noncomputable`, `partial`, or `unsafe` and applies only to selected `def`/`function` heads. Combinations and duplicates are rejected by `PSCV0-REC-STRATEGY-01`; `partial_fixpoint` is a post-body suffix rather than a prefix. `noncomputable` remains proof/spec-only. The selected source has no user `axiom` or additional `const` modifiers. |
 | `psContractSeq` / `psGivenClause` / `psRequiresClause` / `psEnsuresClause` | The pinned `given? requires? ensures?` sequence (in order, at most once) is available on eligible selected `def`/`function` heads under `PSCV0-CONTRACT-SCOPE-01`. Native `Std.WP` theorem generation is not itself evidence for the actual runtime body of an opaque `partial` or `unsafe` definition. Verified use requires separately established executable semantics/refinement, plus every mandatory contract/effect assumption; unresolved evidence prevents emission. |
@@ -187,6 +187,8 @@ This is a **constrained Lean 4 parser/elaborator overlay**, not an independent E
 | `psAttributes` | The selected declaration-attribute category in §6 (`simp`, `instance`, `default_instance`), not unrestricted Lean attribute handlers and not trailing `deriving`. |
 
 **`PSCV0-DECL-01` / `PSCV0-DO-SELECT-01` (v7.1).** The registry owns declaration heads, one legal feature-modifier alternative, one correctly positioned recursion suffix, and any eligible `where`/contract. `noncomputable` retains its proof/spec role. Partial functions remain logically opaque; fixed points require checked equations and approved axiom dependencies; unsafe runtime implementations never create proof authority. Three distinct loops are selected: ordinary typed `while`, verified-total `while`, and staged trace-verified potentially divergent `while`. A verified request without required evidence fails closed.
+
+**Nullable grammar categories (v7.1).** `psModifiers` already accepts an empty common prefix, and `psContractSeq` already consists of up to three optional ordered clauses. Neither is wrapped in a second independent optional alternative. The actual parser chooses the clause-bearing contract branch only when a corresponding clause begins; ordinary definitions still require no contract. This eliminates duplicate empty grammar paths without reducing any source capability.
 
 **Normative error taxonomy:** LEX (invalid source/trivia), PARSE (wrong context or token/adjacency), ELAB (typing, typeclass, default or `Unit` completion), **ELAB/VC-PROOF** (generated verification-condition proof construction fails or leaves unsolved goals), ENV (unregistered module/deriving/tactic/effect facility), KERNEL (an actually submitted checked proof/term is invalid), and ASSURANCE (artifact closure, assumptions or erasure policy). A negative fixture passes only when its intended stage and rule are exercised; an earlier unrelated lexer failure does not count as an adjacency or proof-closure pass.
 
@@ -325,7 +327,7 @@ end
 <thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
 <tbody><tr><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId declSig? declVal
 declSig ::= binder* (&quot;:&quot; term)?
-declVal ::= &quot;:=&quot; term termination? whereDecls? | equations</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psContractSeq? psDeclVal
+declVal ::= &quot;:=&quot; term termination? whereDecls? | equations</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psContractSeq psDeclVal
 psDeclVal ::= &quot;:=&quot; psDeclTerm psRecursionSuffix? psWhere?
 psDeclTerm ::= term | &quot;{&quot; term &quot;}&quot;
 // suffix strategy restricted by PSCV0-REC-STRATEGY-01
@@ -374,7 +376,7 @@ const inc: Nat -&gt; Nat := { fun n =&gt; n + 1 }</code></pre></td></tr></tbody>
 <table>
 <thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
 <tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId binder* (&quot;:&quot; term)? declVal</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;function&quot; declId psFunctionBinders
-            (&quot;:&quot; term)? psContractSeq? psDeclVal
+            (&quot;:&quot; term)? psContractSeq psDeclVal
 // Non-nullary: psNonemptyBinderSeq; nullary: psNonExplicitBinder* psNullaryFunctionGroup
 // `psContractSeq` is ordered and non-repeating (§7)
 // Modification: &#x27;function&#x27; =&gt; Lean &#x27;def&#x27;; comma binder group</code></pre></td></tr></tbody></table>
@@ -650,7 +652,7 @@ opaque secret: Nat := 42</code></pre></td></tr></tbody></table>
 <tbody><tr><td valign="top"><pre><code>modifiers ::= docComment? attributes? visibility? ...
 visibility ::= &quot;private&quot; | &quot;public&quot;</code></pre></td><td valign="top"><pre><code>psModifiers ::= psAttributes? &quot;private&quot;?
 psFeatureModifier ::= &quot;noncomputable&quot; | &quot;partial&quot; | &quot;unsafe&quot;
-command ::= psModifiers? psFeatureModifier? selectedPsDeclaration
+command ::= psModifiers psFeatureModifier? selectedPsDeclaration
 // exactly one such modifier, and only for selected def/function
 // no feature modifier on const; see the matrix in §5</code></pre></td></tr></tbody></table>
 
@@ -1467,7 +1469,7 @@ decreasing_by by {
 ```text
 psModifiers ::= psAttributes? "private"?
 psFeatureModifier ::= "noncomputable" | "partial" | "unsafe"
-psSelectedFunction ::= psModifiers? psFeatureModifier?
+psSelectedFunction ::= psModifiers psFeatureModifier?
                       (psDefDecl | psFunctionDecl)
 psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?
 psRecursionSuffix ::= psTermination | "partial_fixpoint"

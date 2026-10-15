@@ -1,0 +1,108 @@
+name: PSCV0 F2 logical operations
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f2-operations-research]
+    paths:
+      # Independent replay of the selected logical operations and proof closure.
+      - 'psc0/packages/**/src/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/host/src/Ps/Host/StandardManifest.lean'
+      - 'psc0/host/src/Ps/Host/StandardClosure.lean'
+      - 'psc0/host/src/Ps/Host/StandardSource.lean'
+      - 'psc0/host/src/Ps/Host/StandardSnapshot.lean'
+      - 'psc0/lakefile.lean'
+      - 'psc0/lean-toolchain'
+      - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
+      - 'psc0/host/src/Ps/Host/FloatCanonicalContracts.lean'
+      - 'psc0/host/src/Ps/Host/StandardExport.lean'
+      - 'psc0/test/Pscv0FloatConstructiveOracle.lean'
+      - 'psc0/scripts/Pscv0Native.lean'
+      - 'psc0/v7-native/lakefile.lean'
+      - '.github/workflows/psc0-pscv0-f2-operations.yml'
+      - '.github/workflows/psc0-pscv0-native-v7.yml'
+permissions:
+  contents: read
+concurrency:
+  group: pscv0-f2-operations-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/v7-native/
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/test/
+            /psc0/scripts/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-f2-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-f2-${{ runner.os }}-${{ runner.arch }}-
+            pscv0-f1-${{ runner.os }}-${{ runner.arch }}-
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-
+      - name: Check pinned logical Float operations and proof dependencies
+        run: |
+          set -euo pipefail
+          lake build pscv0_native PsV7FloatConstructiveOracle
+          mkdir -p ../dist/pscv0-f2-operations
+          test -f .lake/build/lib/lean/Ps/Host/FloatConstructive.olean
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-operations-candidate ../dist/pscv0-f2-operations/FloatOperationsCandidate.lean | tee ../dist/pscv0-f2-operations/operations.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatOperationsData.lean ../dist/pscv0-f2-operations/FloatOperationsCandidate.lean
+          sha256sum ../dist/pscv0-f2-operations/FloatOperationsCandidate.lean | tee ../dist/pscv0-f2-operations/operations.sha256
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: always()
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-f2-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-f2-operations-${{ github.sha }}
+          path: psc0/dist/pscv0-f2-operations/
+          if-no-files-found: warn
+          retention-days: 30

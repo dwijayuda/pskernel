@@ -1,5 +1,18 @@
 # PSCV0 v7 native implementation roadmap
 
+## F2 executable family: research qualified, main integration — 15 October 2026
+
+[Native38734252078](https://github.com/dwijayuda/pskernel/actions/runs/38734252078) passed completely at `9ffdd799a05ee256368266831bbaec74bee18ed2`: **843 shared runtime observations** across readable JS/TS/Rust and GC Wasm/core/component, native oracles, official-kernel source admission, exact asset regeneration, ABI/WIT/WAT checks, multi-module programs, repeated Wasmtime calls and unchanged performance gates. Independent [F1 replay38733051176](https://github.com/dwijayuda/pskernel/actions/runs/38733051176) and [F2 replay38733051136](https://github.com/dwijayuda/pskernel/actions/runs/38733051136) pass at `c3081a0e0c102ba8f8fad16940301af893dcfe5b`; the descendant only corrects six constant observations to the established `args: null` schema and updates handoffs. No expected values changed.
+
+This integration selects Float/Float32 add/sub/mul/div, neg/abs, IEEE equality/order, NaN/infinity classification and checked logical equality decisions, including generic, partial and Model calls. The original Lean logical family contains 1,229 declarations /24 recursor rules /91,024 shared nodes /11,179,796 UTF-8 bytes, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. Only approved propext/Quot.sound are assumed; no new axioms or proof replacements. Proof dependencies stay out of runtime support.
+
+The typed IR adds float unary/test operations; ECMA enforces binary32 rounding per operation, Rust uses safe scalar operations, and Wasm uses native arithmetic plus memory-free classification helpers. Canonical NaN observation and signed-zero behavior follow F1. The shared constant/application erasure path now handles nullary primitives and preserves partial application. Its design follows pinned Lean `Lean/Compiler/LCNF/ToLCNF.lean` (visitCore/visitAppCore/etaIfUnderApplied). The instance registry now validates each key against the reduced result class, following `Lean/Meta/Instances.lean`; DecidableEq registers under Decidable.
+
+Reviewed selected Standard: **3,122 declarations /25 classes /250 instances**; FNV `11971833863653521941`, declaration SHA-256 `8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e`, surface SHA-256 `ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3`. All guards remain strict. Native prelude initialization measured 7.608s separately; performance gates passing does not establish optimal performance or a backend preservation theorem.
+
+**Exact-main qualification is pending on this integration commit.** F1 remains previously main-qualified at `262c5819c499256fcd2093746deae4ef3aa2012b`. Do not call all M2+A complete. Next: finish exact-main F2 checks; qualify/integrate the universe-polymorphic Array prerequisite from `psc0/pscv0-v7-f3-conversions-research`; then scientific literals, shared priority-ordered default instances and numeric conversions (F3), display (F4), and remaining M2+A exits. The F3 logical candidate already passes [38734094036](https://github.com/dwijayuda/pskernel/actions/runs/38734094036) but remains unselected. No pskernel-core, self-hosting, compiler-source translation or C5 work.
+
+
 ## F1 executable MAIN QUALIFIED — 15 October 2026
 
 **Main implementation qualified:** `262c5819c499256fcd2093746deae4ef3aa2012b`.

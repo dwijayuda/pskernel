@@ -120,6 +120,15 @@ inductive PsVerifiedIrFloatBinaryOp where
   | mul
   | div
 
+inductive PsVerifiedIrFloatUnaryOp where
+  | neg
+  | abs
+
+inductive PsVerifiedIrFloatTestOp where
+  | isNaN
+  | isInf
+  | isFinite
+
 inductive PsVerifiedIrFloatCompareOp where
   | eq
   | ne
@@ -153,6 +162,8 @@ inductive PsVerifiedIrIntrinsic where
       (operation : PsVerifiedIrIntegerCompareOp)
   | floatOfBits (type : PsVerifiedIrFloatingType)
   | floatToBits (type : PsVerifiedIrFloatingType)
+  | floatUnary (type : PsVerifiedIrFloatingType) (operation : PsVerifiedIrFloatUnaryOp)
+  | floatTest (type : PsVerifiedIrFloatingType) (operation : PsVerifiedIrFloatTestOp)
   | floatBinary
       (type : PsVerifiedIrFloatingType)
       (operation : PsVerifiedIrFloatBinaryOp)

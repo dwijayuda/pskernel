@@ -23,6 +23,23 @@ def floatRuntime : Except String (List RuntimeDefinition) := do
       ← runtimeDefinition (helperName ++ "_canonical") [("value", value)] [value] []
         (.ite (some value) (.op ne [.get "value", .get "value"])
           (.op (.word fromBits) [canonical]) (.get "value"))]
+  for (suffix, value, absOp, toBits, eq, lt, infinity) in
+      [("32", PsWasmValueType.f32, PsWasmWordOp.f32Abs,
+        PsWasmWordOp.i32ReinterpretF32, PsWasmInstruction.i32Eq,
+        PsWasmInstruction.i32LtU, RuntimeCode.i32 2139095040),
+       ("64", .f64, .f64Abs, .i64ReinterpretF64, .i64Eq, .i64LtU,
+        RuntimeCode.i64 9218868437227405312)] do
+    let magnitude := RuntimeCode.op (.word toBits)
+      [.op (.word absOp) [.get "value"]]
+    let nan := RuntimeCode.op (if suffix == "32" then .f32Ne else .f64Ne)
+      [.get "value", .get "value"]
+    -- Classification is independent of NaN payload/sign. No memory is used.
+    definitions := definitions ++ [
+      ← runtimeDefinition ("__ps_float" ++ suffix ++ "_is_nan") [("value", value)] [.i32] [] nan,
+      ← runtimeDefinition ("__ps_float" ++ suffix ++ "_is_inf") [("value", value)] [.i32] []
+        (.op eq [magnitude, infinity]),
+      ← runtimeDefinition ("__ps_float" ++ suffix ++ "_is_finite") [("value", value)] [.i32] []
+        (.op lt [magnitude, infinity])]
   return definitions
 
 end PsWasm

@@ -88,6 +88,13 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
       (match type with | .float => "__ps$float64OfBits" | .float32 => "__ps$float32OfBits") [value])
   | .floatToBits type, [value] => pure (call
       (match type with | .float => "__ps$float64ToBits" | .float32 => "__ps$float32ToBits") [value])
+  | .floatUnary _ op, [value] =>
+    pure (match op with | .neg => unary "-" value | .abs => call "Math.abs" [value])
+  | .floatTest _ op, [value] =>
+    pure (match op with
+      | .isNaN => call "Number.isNaN" [value]
+      | .isFinite => call "Number.isFinite" [value]
+      | .isInf => bin "===" (call "Math.abs" [value]) (id "Infinity"))
   | .floatBinary type op, [a,b] =>
     let value := bin (match op with | .add => "+" | .sub => "-" | .mul => "*" | .div => "/") a b
     pure (match type with | .float => value | .float32 => call "Math.fround" [value])

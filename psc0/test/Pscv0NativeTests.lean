@@ -570,11 +570,14 @@ private def postponedFixture : String :=
 private def derivingEqualityFixture : String :=
   "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nfunction derivedExplicitDecision(a: Nat, b: Nat): Bool := Decidable.decide(self := decEq(a, b))\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
 
+private def executableFloatOperationsFixture : String :=
+  "function f2GenericAdd{A: Type}[HAdd A A A](a: A, b: A): A := a + b\nfunction f2Add64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits((Float.ofBits(UInt64.ofNat(a)) + Float.ofBits(UInt64.ofNat(b)))))\nfunction f2Sub64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits((Float.ofBits(UInt64.ofNat(a)) - Float.ofBits(UInt64.ofNat(b)))))\nfunction f2Mul64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits((Float.ofBits(UInt64.ofNat(a)) * Float.ofBits(UInt64.ofNat(b)))))\nfunction f2Div64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits((Float.ofBits(UInt64.ofNat(a)) / Float.ofBits(UInt64.ofNat(b)))))\nfunction f2Neg64(a: Nat): Nat := UInt64.toNat(Float.toBits((-Float.ofBits(UInt64.ofNat(a)))))\nfunction f2Abs64(a: Nat): Nat := UInt64.toNat(Float.toBits(Float.abs(Float.ofBits(UInt64.ofNat(a)))))\nfunction f2BEq64(a: Nat, b: Nat): Bool := Float.ofBits(UInt64.ofNat(a)) == Float.ofBits(UInt64.ofNat(b))\nfunction f2Eq64(a: Nat, b: Nat): Bool := if (Float.ofBits(UInt64.ofNat(a)) = Float.ofBits(UInt64.ofNat(b))) { true } else { false }\nfunction f2LT64(a: Nat, b: Nat): Bool := Decidable.decide(self := Float.decLt(Float.ofBits(UInt64.ofNat(a)), Float.ofBits(UInt64.ofNat(b))))\nfunction f2LE64(a: Nat, b: Nat): Bool := Decidable.decide(self := Float.decLe(Float.ofBits(UInt64.ofNat(a)), Float.ofBits(UInt64.ofNat(b))))\nfunction f2NaN64(a: Nat): Bool := Float.isNaN(Float.ofBits(UInt64.ofNat(a)))\nfunction f2Inf64(a: Nat): Bool := Float.isInf(Float.ofBits(UInt64.ofNat(a)))\nfunction f2Finite64(a: Nat): Bool := Float.isFinite(Float.ofBits(UInt64.ofNat(a)))\nfunction f2Apply64(fn: Float -> Float -> Float, a: Float, b: Float): Float := fn(a, b)\nfunction f2Partial64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits(f2Apply64(Float.add, Float.ofBits(UInt64.ofNat(a)), Float.ofBits(UInt64.ofNat(b)))))\nfunction f2Generic64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits(f2GenericAdd(Float.ofBits(UInt64.ofNat(a)), Float.ofBits(UInt64.ofNat(b)))))\nfunction f2Model64(a: Nat, b: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.add(Float.toModel(Float.ofBits(UInt64.ofNat(a))), Float.toModel(Float.ofBits(UInt64.ofNat(b)))))))\nconst f2Default64: Nat := UInt64.toNat(Float.toBits((Inhabited.default : Float)))\nconst f2Nan64: Nat := UInt64.toNat(Float.toBits(Float.nan))\nconst f2Infinity64: Nat := UInt64.toNat(Float.toBits(Float.inf))\nfunction f2Add32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits((Float32.ofBits(UInt32.ofNat(a)) + Float32.ofBits(UInt32.ofNat(b)))))\nfunction f2Sub32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits((Float32.ofBits(UInt32.ofNat(a)) - Float32.ofBits(UInt32.ofNat(b)))))\nfunction f2Mul32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits((Float32.ofBits(UInt32.ofNat(a)) * Float32.ofBits(UInt32.ofNat(b)))))\nfunction f2Div32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits((Float32.ofBits(UInt32.ofNat(a)) / Float32.ofBits(UInt32.ofNat(b)))))\nfunction f2Neg32(a: Nat): Nat := UInt32.toNat(Float32.toBits((-Float32.ofBits(UInt32.ofNat(a)))))\nfunction f2Abs32(a: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.abs(Float32.ofBits(UInt32.ofNat(a)))))\nfunction f2BEq32(a: Nat, b: Nat): Bool := Float32.ofBits(UInt32.ofNat(a)) == Float32.ofBits(UInt32.ofNat(b))\nfunction f2Eq32(a: Nat, b: Nat): Bool := if (Float32.ofBits(UInt32.ofNat(a)) = Float32.ofBits(UInt32.ofNat(b))) { true } else { false }\nfunction f2LT32(a: Nat, b: Nat): Bool := Decidable.decide(self := Float32.decLt(Float32.ofBits(UInt32.ofNat(a)), Float32.ofBits(UInt32.ofNat(b))))\nfunction f2LE32(a: Nat, b: Nat): Bool := Decidable.decide(self := Float32.decLe(Float32.ofBits(UInt32.ofNat(a)), Float32.ofBits(UInt32.ofNat(b))))\nfunction f2NaN32(a: Nat): Bool := Float32.isNaN(Float32.ofBits(UInt32.ofNat(a)))\nfunction f2Inf32(a: Nat): Bool := Float32.isInf(Float32.ofBits(UInt32.ofNat(a)))\nfunction f2Finite32(a: Nat): Bool := Float32.isFinite(Float32.ofBits(UInt32.ofNat(a)))\nfunction f2Apply32(fn: Float32 -> Float32 -> Float32, a: Float32, b: Float32): Float32 := fn(a, b)\nfunction f2Partial32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits(f2Apply32(Float32.add, Float32.ofBits(UInt32.ofNat(a)), Float32.ofBits(UInt32.ofNat(b)))))\nfunction f2Generic32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits(f2GenericAdd(Float32.ofBits(UInt32.ofNat(a)), Float32.ofBits(UInt32.ofNat(b)))))\nfunction f2Model32(a: Nat, b: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.add(Float32.toModel(Float32.ofBits(UInt32.ofNat(a))), Float32.toModel(Float32.ofBits(UInt32.ofNat(b)))))))\nconst f2Default32: Nat := UInt32.toNat(Float32.toBits((Inhabited.default : Float32)))\nconst f2Nan32: Nat := UInt32.toNat(Float32.toBits(Float32.nan))\nconst f2Infinity32: Nat := UInt32.toNat(Float32.toBits(Float32.inf))\n"
+
 private def executableFloatFixture : String :=
   "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := match Float.toModel(Float.ofBits(UInt64.ofNat(bits))) with { | Float.Model.mk raw valid => UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.mk(raw, valid)))) }\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := match Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))) with { | Float32.Model.mk raw valid => UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.mk(raw, valid)))) }\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
 
 private def application : String :=
-  executableFloatFixture ++ productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -3080,14 +3083,116 @@ private def floatConstructorBoundaries : IO Unit := do
     | .error message => unless message.startsWith "PSCV0-IR-CHECK:" do
         throw (IO.userError message)
     | .ok _ => throw (IO.userError "wrong-width floating intrinsic reached emission")
-  -- The same typed gate continues to refuse F2 arithmetic.
-  match psIrCheckIntrinsicSignature (.floatBinary .float .add) [] with
-  | .error e => unless e.code == "scalar-capability-unqualified" do
-      throw (IO.userError "unexpected Float arithmetic refusal")
-  | .ok _ => throw (IO.userError "unqualified Float arithmetic admitted")
-  IO.println "PSCV0_FLOAT_F1: PASS source bit/model/generic/closure paths and type/arithmetic refusal"
+  let mixed : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [
+    { name := "mixedFloatWidths", typeParameters := [],
+      parameters := [{ name := "left", type := .primitive .float32 },
+        { name := "right", type := .primitive .float }],
+      resultType := .primitive .float32,
+      body := .intrinsic (.floatBinary .float32 .add) [] [.var "left", .var "right"] }] }
+  match psWithCheckedIr psIrCheckDefaultOptions mixed (fun _ => .ok ()) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "mixed-width floating arithmetic reached emission")
+  IO.println "PSCV0_FLOAT_F1: PASS source bit/model/generic/closure paths and width refusal"
+
+-- IEEE boundaries are checked against pinned native Lean independently of
+-- PSC0 erasure and target lowering. The same cases execute in shared targets.
+private def floatOperationsNativeOracle : IO Unit := do
+  let checks : List (String × Nat × Nat) := [
+    ("f2Add64", (Float.add (Float.ofBits 4607182418800017408) (Float.ofBits 4611686018427387904)).toBits.toNat, 4613937818241073152),
+    ("f2Add64", (Float.add (Float.ofBits 9218868437227405311) (Float.ofBits 9218868437227405311)).toBits.toNat, 9218868437227405312),
+    ("f2Add64", (Float.add (Float.ofBits 1) (Float.ofBits 1)).toBits.toNat, 2),
+    ("f2Add64", (Float.add (Float.ofBits 4607182418800017408) (Float.ofBits 4368491638549381120)).toBits.toNat, 4607182418800017408),
+    ("f2Add64", (Float.add (Float.ofBits 4607182418800017409) (Float.ofBits 4368491638549381120)).toBits.toNat, 4607182418800017410),
+    ("f2Sub64", (Float.sub (Float.ofBits 4607182418800017408) (Float.ofBits 4607182418800017408)).toBits.toNat, 0),
+    ("f2Sub64", (Float.sub (Float.ofBits 9223372036854775808) (Float.ofBits 0)).toBits.toNat, 9223372036854775808),
+    ("f2Mul64", (Float.mul (Float.ofBits 0) (Float.ofBits 9218868437227405312)).toBits.toNat, 9221120237041090560),
+    ("f2Mul64", (Float.mul (Float.ofBits 1) (Float.ofBits 4602678819172646912)).toBits.toNat, 0),
+    ("f2Mul64", (Float.mul (Float.ofBits 3) (Float.ofBits 4602678819172646912)).toBits.toNat, 2),
+    ("f2Div64", (Float.div (Float.ofBits 4607182418800017408) (Float.ofBits 0)).toBits.toNat, 9218868437227405312),
+    ("f2Div64", (Float.div (Float.ofBits 13830554455654793216) (Float.ofBits 0)).toBits.toNat, 18442240474082181120),
+    ("f2Div64", (Float.div (Float.ofBits 0) (Float.ofBits 0)).toBits.toNat, 9221120237041090560),
+    ("f2Div64", (Float.div (Float.ofBits 4607182418800017408) (Float.ofBits 4613937818241073152)).toBits.toNat, 4599676419421066581),
+    ("f2Div64", (Float.div (Float.ofBits 4503599627370496) (Float.ofBits 4611686018427387904)).toBits.toNat, 2251799813685248),
+    ("f2Neg64", (Float.neg (Float.ofBits 0)).toBits.toNat, 9223372036854775808),
+    ("f2Neg64", (Float.neg (Float.ofBits 9223372036854775808)).toBits.toNat, 0),
+    ("f2Neg64", (Float.neg (Float.ofBits 18442240474082181121)).toBits.toNat, 9221120237041090560),
+    ("f2Abs64", (Float.abs (Float.ofBits 18442240474082181120)).toBits.toNat, 9218868437227405312),
+    ("f2Abs64", (Float.abs (Float.ofBits 13830554455654793216)).toBits.toNat, 4607182418800017408),
+    ("f2BEq64", (if Float.beq (Float.ofBits 0) (Float.ofBits 9223372036854775808) then 1 else 0), 1),
+    ("f2BEq64", (if Float.beq (Float.ofBits 9221120237041090560) (Float.ofBits 9221120237041090560) then 1 else 0), 0),
+    ("f2BEq64", (if Float.beq (Float.ofBits 9218868437227405312) (Float.ofBits 9218868437227405312) then 1 else 0), 1),
+    ("f2Eq64", (if (Float.ofBits 0) = (Float.ofBits 9223372036854775808) then 1 else 0), 0),
+    ("f2Eq64", (if (Float.ofBits 9221120237041090560) = (Float.ofBits 18442240474082181121) then 1 else 0), 1),
+    ("f2Eq64", (if (Float.ofBits 9218868437227405312) = (Float.ofBits 9218868437227405312) then 1 else 0), 1),
+    ("f2LT64", (if Float.lt (Float.ofBits 18442240474082181120) (Float.ofBits 0) then 1 else 0), 1),
+    ("f2LT64", (if Float.lt (Float.ofBits 9221120237041090560) (Float.ofBits 0) then 1 else 0), 0),
+    ("f2LE64", (if Float.le (Float.ofBits 0) (Float.ofBits 9223372036854775808) then 1 else 0), 1),
+    ("f2LE64", (if Float.le (Float.ofBits 9221120237041090560) (Float.ofBits 9221120237041090560) then 1 else 0), 0),
+    ("f2NaN64", (if Float.isNaN (Float.ofBits 18442240474082181121) then 1 else 0), 1),
+    ("f2NaN64", (if Float.isNaN (Float.ofBits 9218868437227405312) then 1 else 0), 0),
+    ("f2Inf64", (if Float.isInf (Float.ofBits 18442240474082181120) then 1 else 0), 1),
+    ("f2Inf64", (if Float.isInf (Float.ofBits 9221120237041090560) then 1 else 0), 0),
+    ("f2Finite64", (if Float.isFinite (Float.ofBits 4503599627370496) then 1 else 0), 1),
+    ("f2Finite64", (if Float.isFinite (Float.ofBits 1) then 1 else 0), 1),
+    ("f2Finite64", (if Float.isFinite (Float.ofBits 9223372036854775808) then 1 else 0), 1),
+    ("f2Finite64", (if Float.isFinite (Float.ofBits 9221120237041090560) then 1 else 0), 0),
+    ("f2Partial64", (Float.add (Float.ofBits 4607182418800017408) (Float.ofBits 4611686018427387904)).toBits.toNat, 4613937818241073152),
+    ("f2Generic64", (Float.add (Float.ofBits 4607182418800017408) (Float.ofBits 4611686018427387904)).toBits.toNat, 4613937818241073152),
+    ("f2Model64", (Float.add (Float.ofBits 4607182418800017408) (Float.ofBits 4611686018427387904)).toBits.toNat, 4613937818241073152),
+    ("f2Default64", (default : Float).toBits.toNat, 0),
+    ("f2Nan64", Float.nan.toBits.toNat, 9221120237041090560),
+    ("f2Infinity64", Float.inf.toBits.toNat, 9218868437227405312),
+    ("f2Add32", (Float32.add (Float32.ofBits 1065353216) (Float32.ofBits 1073741824)).toBits.toNat, 1077936128),
+    ("f2Add32", (Float32.add (Float32.ofBits 2139095039) (Float32.ofBits 2139095039)).toBits.toNat, 2139095040),
+    ("f2Add32", (Float32.add (Float32.ofBits 1) (Float32.ofBits 1)).toBits.toNat, 2),
+    ("f2Add32", (Float32.add (Float32.ofBits 1065353216) (Float32.ofBits 864026624)).toBits.toNat, 1065353216),
+    ("f2Add32", (Float32.add (Float32.ofBits 1065353217) (Float32.ofBits 864026624)).toBits.toNat, 1065353218),
+    ("f2Sub32", (Float32.sub (Float32.ofBits 1065353216) (Float32.ofBits 1065353216)).toBits.toNat, 0),
+    ("f2Sub32", (Float32.sub (Float32.ofBits 2147483648) (Float32.ofBits 0)).toBits.toNat, 2147483648),
+    ("f2Mul32", (Float32.mul (Float32.ofBits 0) (Float32.ofBits 2139095040)).toBits.toNat, 2143289344),
+    ("f2Mul32", (Float32.mul (Float32.ofBits 1) (Float32.ofBits 1056964608)).toBits.toNat, 0),
+    ("f2Mul32", (Float32.mul (Float32.ofBits 3) (Float32.ofBits 1056964608)).toBits.toNat, 2),
+    ("f2Div32", (Float32.div (Float32.ofBits 1065353216) (Float32.ofBits 0)).toBits.toNat, 2139095040),
+    ("f2Div32", (Float32.div (Float32.ofBits 3212836864) (Float32.ofBits 0)).toBits.toNat, 4286578688),
+    ("f2Div32", (Float32.div (Float32.ofBits 0) (Float32.ofBits 0)).toBits.toNat, 2143289344),
+    ("f2Div32", (Float32.div (Float32.ofBits 1065353216) (Float32.ofBits 1077936128)).toBits.toNat, 1051372203),
+    ("f2Div32", (Float32.div (Float32.ofBits 8388608) (Float32.ofBits 1073741824)).toBits.toNat, 4194304),
+    ("f2Neg32", (Float32.neg (Float32.ofBits 0)).toBits.toNat, 2147483648),
+    ("f2Neg32", (Float32.neg (Float32.ofBits 2147483648)).toBits.toNat, 0),
+    ("f2Neg32", (Float32.neg (Float32.ofBits 4286578689)).toBits.toNat, 2143289344),
+    ("f2Abs32", (Float32.abs (Float32.ofBits 4286578688)).toBits.toNat, 2139095040),
+    ("f2Abs32", (Float32.abs (Float32.ofBits 3212836864)).toBits.toNat, 1065353216),
+    ("f2BEq32", (if Float32.beq (Float32.ofBits 0) (Float32.ofBits 2147483648) then 1 else 0), 1),
+    ("f2BEq32", (if Float32.beq (Float32.ofBits 2143289344) (Float32.ofBits 2143289344) then 1 else 0), 0),
+    ("f2BEq32", (if Float32.beq (Float32.ofBits 2139095040) (Float32.ofBits 2139095040) then 1 else 0), 1),
+    ("f2Eq32", (if (Float32.ofBits 0) = (Float32.ofBits 2147483648) then 1 else 0), 0),
+    ("f2Eq32", (if (Float32.ofBits 2143289344) = (Float32.ofBits 4286578689) then 1 else 0), 1),
+    ("f2Eq32", (if (Float32.ofBits 2139095040) = (Float32.ofBits 2139095040) then 1 else 0), 1),
+    ("f2LT32", (if Float32.lt (Float32.ofBits 4286578688) (Float32.ofBits 0) then 1 else 0), 1),
+    ("f2LT32", (if Float32.lt (Float32.ofBits 2143289344) (Float32.ofBits 0) then 1 else 0), 0),
+    ("f2LE32", (if Float32.le (Float32.ofBits 0) (Float32.ofBits 2147483648) then 1 else 0), 1),
+    ("f2LE32", (if Float32.le (Float32.ofBits 2143289344) (Float32.ofBits 2143289344) then 1 else 0), 0),
+    ("f2NaN32", (if Float32.isNaN (Float32.ofBits 4286578689) then 1 else 0), 1),
+    ("f2NaN32", (if Float32.isNaN (Float32.ofBits 2139095040) then 1 else 0), 0),
+    ("f2Inf32", (if Float32.isInf (Float32.ofBits 4286578688) then 1 else 0), 1),
+    ("f2Inf32", (if Float32.isInf (Float32.ofBits 2143289344) then 1 else 0), 0),
+    ("f2Finite32", (if Float32.isFinite (Float32.ofBits 8388608) then 1 else 0), 1),
+    ("f2Finite32", (if Float32.isFinite (Float32.ofBits 1) then 1 else 0), 1),
+    ("f2Finite32", (if Float32.isFinite (Float32.ofBits 2147483648) then 1 else 0), 1),
+    ("f2Finite32", (if Float32.isFinite (Float32.ofBits 2143289344) then 1 else 0), 0),
+    ("f2Partial32", (Float32.add (Float32.ofBits 1065353216) (Float32.ofBits 1073741824)).toBits.toNat, 1077936128),
+    ("f2Generic32", (Float32.add (Float32.ofBits 1065353216) (Float32.ofBits 1073741824)).toBits.toNat, 1077936128),
+    ("f2Model32", (Float32.add (Float32.ofBits 1065353216) (Float32.ofBits 1073741824)).toBits.toNat, 1077936128),
+    ("f2Default32", (default : Float32).toBits.toNat, 0),
+    ("f2Nan32", Float32.nan.toBits.toNat, 2143289344),
+    ("f2Infinity32", Float32.inf.toBits.toNat, 2139095040)]
+  for (name, observed, expected) in checks do
+    unless observed == expected do
+      throw (IO.userError ("PSCV0_FLOAT_F2_ORACLE: " ++ name ++ " expected " ++ toString expected ++ " got " ++ toString observed))
+  IO.println "PSCV0_FLOAT_F2_ORACLE: PASS 88 pinned native arithmetic, rounding, IEEE and logical equality observations"
 
 def main : IO Unit := do
+  floatOperationsNativeOracle
   kernelHeartbeatIsolationCases
   selectedStandardManifestCases
   floatConstructorBoundaries

@@ -557,10 +557,18 @@ def psIrCheckIntrinsicSignature
         | .float => (.primitive .uint64, .primitive .float)
         | .float32 => (.primitive .uint32, .primitive .float32)
       psIrCheckSignatureNoTypes typeArguments [value] bits
-  | .floatBinary _ _ =>
-      Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")
-  | .floatCompare _ _ =>
-      Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")
+  | .floatUnary type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] value
+  | .floatTest type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] bool
+  | .floatBinary type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value, value] value
+  | .floatCompare type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value, value] bool
   | .natAdd => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natSub => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMul => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat

@@ -87,6 +87,28 @@ theorem canonicalPacked_finiteExponent (spec : Format) (bits : BitVec spec.numBi
     canonicalPacked spec bits = bits := by
   simp [canonicalPacked, he]
 
+-- Experimental field reconstruction, using kernel-reflected bit-blasting
+-- for the two pinned IEEE formats. No production Float capability is enabled.
+theorem reconstructPackedFields64 (bits : BitVec 64) :
+    UnpackedFloat.packComponents Format.binary64
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary64) bits))
+      (UnpackedFloat.unpackExponent (spec := Format.binary64) bits)
+      (UnpackedFloat.unpackMantissa (spec := Format.binary64) bits) = bits := by
+  simp [UnpackedFloat.packComponents, UnpackedFloat.unpackSign,
+    UnpackedFloat.unpackExponent, UnpackedFloat.unpackMantissa,
+    UnpackedFloat.Sign.ofBitVec, UnpackedFloat.Sign.toBitVec] <;> bv_decide
+
+theorem reconstructPackedFields32 (bits : BitVec 32) :
+    UnpackedFloat.packComponents Format.binary32
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary32) bits))
+      (UnpackedFloat.unpackExponent (spec := Format.binary32) bits)
+      (UnpackedFloat.unpackMantissa (spec := Format.binary32) bits) = bits := by
+  simp [UnpackedFloat.packComponents, UnpackedFloat.unpackSign,
+    UnpackedFloat.unpackExponent, UnpackedFloat.unpackMantissa,
+    UnpackedFloat.Sign.ofBitVec, UnpackedFloat.Sign.toBitVec] <;> bv_decide
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream

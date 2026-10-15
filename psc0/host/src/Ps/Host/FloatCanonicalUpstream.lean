@@ -28,7 +28,15 @@ theorem fromBits64_eq_upstream_nan (bits : UInt64)
     UInt64.ofBitVec
       (UnpackedFloat.pack Format.binary64
         (UnpackedFloat.unpack Format.binary64 bits.toBitVec))
-  simp [canonicalPacked, UnpackedFloat.unpack, UnpackedFloat.pack, he, hm]
+  have hcanonical : canonicalPacked Format.binary64 bits.toBitVec =
+      UnpackedFloat.packedNaN Format.binary64 := by
+    unfold canonicalPacked
+    simp only [if_pos he, if_neg hm]
+  have hunpacked : UnpackedFloat.unpack Format.binary64 bits.toBitVec =
+      .notANumber := by
+    simp [UnpackedFloat.unpack, he, hm]
+  rw [hcanonical, hunpacked]
+  rfl
 
 theorem fromBits32_eq_upstream_nan (bits : UInt32)
     (he : UnpackedFloat.unpackExponent
@@ -41,7 +49,15 @@ theorem fromBits32_eq_upstream_nan (bits : UInt32)
     UInt32.ofBitVec
       (UnpackedFloat.pack Format.binary32
         (UnpackedFloat.unpack Format.binary32 bits.toBitVec))
-  simp [canonicalPacked, UnpackedFloat.unpack, UnpackedFloat.pack, he, hm]
+  have hcanonical : canonicalPacked Format.binary32 bits.toBitVec =
+      UnpackedFloat.packedNaN Format.binary32 := by
+    unfold canonicalPacked
+    simp only [if_pos he, if_neg hm]
+  have hunpacked : UnpackedFloat.unpack Format.binary32 bits.toBitVec =
+      .notANumber := by
+    simp [UnpackedFloat.unpack, he, hm]
+  rw [hcanonical, hunpacked]
+  rfl
 
 -- Separate host research policy: the portable exporter must never
 -- inherit previously refused upstream assumptions through these roots.

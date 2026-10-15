@@ -93,6 +93,7 @@ structure PsPscv0ModuleInterface where
   classes : List PsName := []
   classParameters : List (PsName × PsClassParameters) := []
   instances : List PsInstanceEntry := []
+  defaults : List PsInstanceEntry := []
   reducibility : List (PsName × PsReducibility) := []
 
 def psPscv0ImportedDeclaration (exposed : List PsName) : PsDeclaration → PsDeclaration
@@ -100,6 +101,15 @@ def psPscv0ImportedDeclaration (exposed : List PsName) : PsDeclaration → PsDec
     if exposed.any (psNameEq name) then .definitionDecl name levels type value
     else .opaqueDecl name levels type value
   | declaration => declaration
+
+def psPscv0SameInstanceIdentity (left right : PsInstanceEntry) : Bool :=
+  match left.value, right.value with
+  | .constE a _, .constE b _ => psNameEq a b
+  | _, _ => false
+
+def psPscv0MergeInstanceEntries (left right : List PsInstanceEntry) : List PsInstanceEntry :=
+  right.foldl (fun acc item =>
+    if acc.any (psPscv0SameInstanceIdentity item) then acc else acc ++ [item]) left
 
 def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
     PsPscv0ModuleInterface :=
@@ -111,15 +121,12 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
   let classParameters := right.classParameters.foldl (fun acc item =>
     if acc.any (fun entry => psNameEq entry.fst item.fst) then acc else acc ++ [item])
     left.classParameters
-  let instances := right.instances.foldl (fun acc item =>
-    if acc.any (fun entry => match entry.value, item.value with
-      | .constE left _, .constE right _ => psNameEq left right
-      | _, _ => false) then acc else acc ++ [item])
-    left.instances
+  let instances := psPscv0MergeInstanceEntries left.instances right.instances
+  let defaults := psPscv0MergeInstanceEntries left.defaults right.defaults
   let reducibility := right.reducibility.foldl (fun acc item =>
     if acc.any (fun prior => psNameEq prior.fst item.fst) then acc else acc ++ [item])
     left.reducibility
-  { declarations, classes, classParameters, instances, reducibility }
+  { declarations, classes, classParameters, instances, defaults, reducibility }
 
 -- Public identity is selected from source-command ownership, rather than from
 -- the final runtime IR (which also contains private and generated workers).
@@ -132,18 +139,15 @@ def psPscv0OwnInterface (environment : PsEnvironment)
   let owned := fun name => names.any (psNameEq name)
   let classes := environment.classes.filter owned
   let classParameters := environment.classParameters.filter (fun item => owned item.fst)
-  let instances := environment.instances.entries.filter fun item =>
+  let visible := fun (item : PsInstanceEntry) =>
     match item.value with
     | .constE name _ => owned name
     | _ => false
+  let instances := environment.instances.entries.filter visible
+  let defaults := environment.instances.defaults.filter visible
   { declarations := publicDecls.map (psPscv0ImportedDeclaration exposed),
-    classes, classParameters, instances,
+    classes, classParameters, instances, defaults,
     reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name)) }
-
-def psPscv0SameInstanceIdentity (left right : PsInstanceEntry) : Bool :=
-  match left.value, right.value with
-  | .constE a _, .constE b _ => psNameEq a b
-  | _, _ => false
 
 -- The same instance may reach a client through two public-import paths.
 -- Register it exactly once, without changing the relative instance priorities.
@@ -162,9 +166,14 @@ def psPscv0InstallInterface (environment : PsEnvironment)
   let classParameters := view.classParameters.foldl (fun acc item =>
     if acc.any (fun existing => psNameEq existing.fst item.fst) then acc
     else item :: acc) environment.classParameters
-  let instances := view.instances.foldl (fun index entry =>
+  -- Exported lists are already newest-first at each priority. Reverse replay
+  -- preserves their tie order, including public-import diamonds.
+  let instances := view.instances.reverse.foldl (fun index entry =>
     if index.entries.any (psPscv0SameInstanceIdentity entry) then index
     else psInstanceIndexAdd index entry) environment.instances
+  let instances := view.defaults.reverse.foldl (fun index entry =>
+    if index.defaults.any (psPscv0SameInstanceIdentity entry) then index
+    else psInstanceIndexAddDefault index entry) instances
   let environment := view.reducibility.foldl (fun env (name, status) =>
     psEnvironmentSetReducibility env name status) environment
   return { environment with classes, classParameters, instances }

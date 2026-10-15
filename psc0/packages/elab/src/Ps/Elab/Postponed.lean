@@ -96,13 +96,30 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
         id result.term | throw .typeMismatch
     return psElabLeaveScope context (psElabContextWithMeta result.context metaContext)
 
+def psElabPendingPriorities : PsElabPendingWork → List Nat
+  | .core scope constraint => psSyntheticConstraintPriorities scope.instances constraint
+  | .sourceTerm _ _ _ true => [0]
+  | _ => []
+
+def psElabResumeDefault (elaborate : PsElaborator) (context : PsElabContext)
+    (work : PsElabPendingWork) (priority : Nat) : Except Unit (Option PsElabContext) :=
+  match work with
+  | .core scope constraint =>
+    (psSyntheticAttemptDefault scope.environment scope.instances
+      context.metaContext constraint priority).map
+        (fun result => result.map (psElabContextWithMeta context))
+  | .sourceTerm _ _ _ true =>
+    .ok (if priority == 0 then (psElabResumeWork elaborate context work).toOption else none)
+  | _ => .ok none
+
 def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
     (limit : Nat := 32768) : Except PsElabError PsElabTermResult := do
   let context := { result.context with pending := [], postponing := false }
   let attempt := fun current work =>
     (psElabResumeWork elaborate current work).toOption
-  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault context
-    result.context.pending.reverse true limit
+  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
+    psElabPendingPriorities (psElabResumeDefault elaborate)
+    context result.context.pending.reverse true limit
   if solved.resourceExceeded then throw .fuelExhausted
   -- Re-run just the first blocked item for its owning diagnostic. The queue
   -- attempt has already rolled back every unsuccessful speculative change.

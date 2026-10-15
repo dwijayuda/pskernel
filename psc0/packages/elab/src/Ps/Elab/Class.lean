@@ -146,8 +146,8 @@ def psElabCheckInstanceOrder (telescope : PsElabOpenTelescope) : Except PsElabEr
   if !(psExprFVarIds telescope.body).all known.contains then
     throw (.data "instance does not determine its output parameters")
 
-def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priority : Nat) :
-    Except PsElabError PsEnvironment := do
+def psElabInstanceEntry (environment : PsEnvironment) (name : PsName) (priority : Nat)
+    (checkOrder : Bool) : Except PsElabError PsInstanceEntry := do
   let some declaration := psEnvironmentFind environment name
     | throw (.data "instance declaration missing")
   let telescope ← psElabOpenCoreTelescope 4096 (psElabContextEmpty environment)
@@ -157,13 +157,25 @@ def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priori
   let .constE className _ := head | throw (.data "instance result must be a registered class")
   if !environment.classes.any (psNameEq className) then
     throw (.data "instance result must be a registered class")
-  psElabCheckInstanceOrder telescope
-  let entry : PsInstanceEntry := {
+  if checkOrder then psElabCheckInstanceOrder telescope
+  return {
     value := .constE name ((psDeclarationLevelParams declaration).map PsLevel.param)
     levelParams := psDeclarationLevelParams declaration
     type := psDeclarationType declaration
     priority
     className := some className }
+
+def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priority : Nat) :
+    Except PsElabError PsEnvironment := do
+  let entry ← psElabInstanceEntry environment name priority true
   return psEnvironmentSetReducibility
     { environment with instances := psInstanceIndexAdd environment.instances entry }
     name .instanceReducible
+
+-- Lean's default_instance registry validates the reduced class result, but
+-- does not require ordinary search's input-determined synthesis order.
+def psElabRegisterDefaultInstance (environment : PsEnvironment)
+    (name : PsName) (priority : Nat) : Except PsElabError PsEnvironment := do
+  let entry ← psElabInstanceEntry environment name priority false
+  return { environment with
+    instances := psInstanceIndexAddDefault environment.instances entry }

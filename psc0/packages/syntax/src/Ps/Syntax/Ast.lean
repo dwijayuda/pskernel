@@ -275,6 +275,7 @@ inductive PsSyntaxRegistration where
   | abbrevDecl
   | opaqueDecl
   | instanceDecl (priority : Nat)
+  | defaultInstanceDecl (priority : Nat) (ordinaryPriority : Option Nat)
 
 inductive PsSyntaxCommand where
   | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)

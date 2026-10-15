@@ -133,7 +133,7 @@ private def manifestNotationPayload (entry : ManifestNotation) : String :=
     toString entry.rightPrecedence, psStandardSnapshotBool entry.nonAssociative]
 
 def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v1" [
+  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v2" [
     leanVersion, leanCommit,
     psStandardSnapshotSHA256Fingerprint env,
     psStandardSnapshotList manifestNotationPayload selectedNotations,
@@ -142,15 +142,19 @@ def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
     psStandardSnapshotList id selectedSourceEffects,
     psStandardSnapshotList id selectedElabEffects,
     psStandardSnapshotList id selectedModuleBehaviors,
-    psStandardSnapshotList manifestInstancePayload env.instances.entries]
+    psStandardSnapshotList manifestInstancePayload env.instances.entries,
+    psStandardSnapshotList manifestInstancePayload env.instances.defaults,
+    psStandardSnapshotList id psPscv0SelectedAttributes]
 
 def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
 
 -- Independently measured together with both declaration pins by the strict
 -- registry refusal at 49a38a11 / native CI38730889997 (F2).
+-- Surface v2 records selected default_instance syntax and default registry.
+-- Independently measured by strict CI38742459724 refusal; no roster expansion.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:579f461576427a5daf711943613979e4517803475779e40b0200f359450744fa"
+  "sha256:babd8330a9143aad468400ffdf5ae27fe8b5b389e0dbe087ad83cbb4056f1388"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
@@ -184,7 +188,7 @@ def selectedNotationAudit : Except String Unit := do
 -- Static Standard builders supply keys explicitly; audit the same invariant
 -- once here so a reducible alias cannot silently hide a valid instance.
 def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
-  for entry in env.instances.entries do
+  for entry in env.instances.entries ++ env.instances.defaults do
     let identity := manifestInstanceKey entry
     let some key := entry.className
       | throw ("PSCV0-MANIFEST: unclassified Standard instance " ++ identity)
@@ -244,10 +248,15 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
     ("selectedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint env)),
     ("selectedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint env)),
     ("selectedSurfaceSHA256", Lean.toJson (standardSurfaceManifestSHA256 env)),
-    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v1" : String)),
+    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v2" : String)),
     ("projectImportGraph", Lean.toJson ("validated-per-project-not-global" : String)),
     ("declarations", Lean.toJson env.declarations.length),
     ("classes", Lean.toJson (env.classes.map psNameToString)),
+    ("selectedAttributes", Lean.toJson psPscv0SelectedAttributes),
+    ("orderedDefaultInstances", Lean.toJson env.instances.defaults.length),
+    ("defaultInstanceRegistrations", Lean.Json.arr
+      ((env.instances.defaults.zipIdx.map fun (entry, rank) =>
+        manifestInstanceJson entry rank).toArray)),
     ("orderedInstances", Lean.toJson env.instances.entries.length),
     ("instanceRegistrations", Lean.Json.arr
       ((env.instances.entries.zipIdx.map fun (entry, rank) =>

@@ -153,13 +153,14 @@ def psStandardSnapshotAlias (value : PsName × PsName) : String :=
     psStandardSnapshotName value.fst, psStandardSnapshotName value.snd]
 
 def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v2" [
+  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v3" [
     "Lean-4.35.0@eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
     psStandardSnapshotList psStandardSnapshotDeclaration environment.declarations,
     psStandardSnapshotList psStandardSnapshotName environment.classes,
     psStandardSnapshotList psStandardSnapshotClassParameters
       environment.classParameters,
     psStandardSnapshotList psStandardSnapshotInstance environment.instances.entries,
+    psStandardSnapshotList psStandardSnapshotInstance environment.instances.defaults,
     psStandardSnapshotList psStandardSnapshotAlias environment.exportedAliases,
     psStandardSnapshotList (fun declaration =>
       let name := psDeclarationName declaration
@@ -282,8 +283,10 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- Independently measured by strict drift refusal in native CI38712915969:
 -- 21 checked constructor/validity declarations and two public typed wrappers.
 -- No new assumptions, classes, instances or executable Float capability.
+-- Metadata v3 includes the separate default registry; the selected declaration
+-- roster is unchanged. Independently measured by strict CI38742459724 refusal.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:14544844717468498892"
+  "fnv1a64:7059557959118648847"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -448,7 +451,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- independently measured by strict refusal in native CI38730889997.
 -- Candidate replay CI38729006492 confirms the byte-exact checked asset.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:373b27a0b77083baa58810055d68b6639ec00c2038da7641d3dd5c042e8f4e0d"
+  "sha256:2b0475103206285b3107cd646ea04a365bf682aef2c4c0c8bf16d21e67c65995"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

@@ -132,7 +132,7 @@ The official [Lean 4.35.0 notes](https://lean-lang.org/doc/reference/latest/rele
 | **Lean encoding** | Lean example expresses the semantic equivalent but may not share PSCV0 syntax |
 | **Illustrative** | Code shapes used to describe the design; no claim of compilation or proof closure |
 
-**Source-link policy (v7.1).** For normative facts use the pinned Lean 4.35.0 SHA and exact source. Public documentation chapter links may point to `/latest/` when the historical deep URL is inaccessible; those are explanatory references, not permission to adopt a newer feature. Compiler conformance must use the pinned source/tests and declared environment.
+**Source-link policy (v7.2, inherited from v7.1).** For normative facts use the pinned Lean 4.35.0 SHA and exact source. Public documentation chapter links may point to `/latest/` when the historical deep URL is inaccessible; those are explanatory references, not permission to adopt a newer feature. Compiler conformance must use the pinned source/tests and declared environment.
 
 **Sources of rule content:** the uploaded release candidate’s language chapters and selected PSCV verification proposals, plus the directly inspected pinned Lean 4.35.0 parser families and published Lean reference. `pscv0` additions are marked as surface deltas or proposed proof-language encodings rather than silently attributed to Lean. The authoritative Lean pin is the Git commit above; relevant exact Lean source links appear in the source concordance near the end. The public Lean language reference can explain parser behavior, but its `/latest/` pages are not a normative version pin.
 
@@ -192,7 +192,7 @@ This is a **constrained Lean 4 parser/elaborator overlay**, not an independent E
 
 **Normative error taxonomy:** LEX (invalid source/trivia), PARSE (wrong context or token/adjacency), ELAB (typing, typeclass, default or `Unit` completion), **ELAB/VC-PROOF** (generated verification-condition proof construction fails or leaves unsolved goals), ENV (unregistered module/deriving/tactic/effect facility), KERNEL (an actually submitted checked proof/term is invalid), and ASSURANCE (artifact closure, assumptions or erasure policy). A negative fixture passes only when its intended stage and rule are exercised; an earlier unrelated lexer failure does not count as an adjacency or proof-closure pass.
 
-**Versioned profile state:** These are normative **v7.1 design targets** over the stable Lean 4.35.0 source commit, not a measured PSC0 conformance claim. The stable source SHA alone is not a frozen PSCV0 Standard environment identity. Imports, notation, instances, tactic/deriving handlers, partial-fixpoint construction dependencies, runtime/unsafe boundaries, toolchain artifacts, and their reproducible manifest digest remain independent release gates (§14).
+**Versioned profile state:** These are normative **v7.2 design targets** over the stable Lean 4.35.0 source commit, not a measured PSC0 conformance claim. The stable source SHA alone is not a frozen PSCV0 Standard environment identity. Imports, notation, instances, tactic/deriving handlers, partial-fixpoint construction dependencies, runtime/unsafe boundaries, toolchain artifacts, and their reproducible manifest digest remain independent release gates (§14).
 
 ## 1. Files, lexical structure, and name scope
 
@@ -2039,7 +2039,7 @@ Only selected `def`/`function` heads accept exactly **one** of the three leading
 
 **Operational precedence:** Parser admission ⟶ elaboration/type check ⟶ kernel and approved proof environment ⟶ effect/assumption/erasure dependency closure ⟶ verification-condition and partial/total/trace checks ⟶ executable-implementation/refinement evidence ⟶ each target's backend admission ⟶ *only then* artifact emission. Failure at any mandatory stage produces **no artifact** for the requested identity. Source grammar admission is never equivalent to verification acceptance.
 
-**Compatibility and implementation status:** This is a v7.1 normative change; neither original v7's `N-PARTIAL` rejection nor a former blanket `unsafe` ban may be applied unconditionally. PSC0's actual implementation still needs P0/P1/P2 work and test/CI evidence; the document is not an assertion of current feature completion.
+**Compatibility and implementation status:** These rules were introduced in v7.1 and are **retained in v7.2**; neither original v7's `N-PARTIAL` rejection nor a former blanket `unsafe` ban may be applied unconditionally. PSC0's actual implementation still needs P0/P1/P2 work and test/CI evidence; the document is not an assertion of current feature completion.
 
 ## 6. Proof language, tactics, and attributes
 
@@ -2536,7 +2536,7 @@ Every constructor and update must supply an appropriate checked proof term. The 
 
 **Decision — `PSCV0-CONTRACT-04`:** discard the extra `verify target := by { ... }` command. For an 4.35.0 intrinsic `def`/`function` carrying `given`/`requires`/`ensures`, the pinned macro emits the ordinary definition **and** the `@[spec]` theorem `f.spec`; it runs `vcgen` and default proof steps, and—when the obligations remain—consumes **the `spec` subsection of the same definition's `where finally` tail**. A separate later theorem does **not** retroactively discharge the generated `f.spec` obligations. PSCV0 therefore admits one **contract-specific** braced tail, translating its selected tactic sequence directly into native 4.35.0 `where finally | spec => ...` (not into an extra `by` term or a new checker).
 
-**`PSCV0-CONTRACT-SCOPE-01` (retained in v7.2) — contract evidence is conditional on declaration strategy.** Lean's native contract elaborator produces `f.spec` through the selected `Std.WP` program logic; ProofScript's `function` alias lowers to `def`. For safe total definitions, checked `f.spec` proves the selected logical/effect specification under audited assumptions. For `partial_fixpoint`, logical unfolding equations do not automatically establish executable adequacy or promised termination. For opaque `partial`, a separate checked safe operational model and body/refinement proof are required for certified behavior. For registered `unsafe` implementations, no generated theorem simply mentioning the unsafe function is admitted as trusted proof of its behavior; require a separately checked safe model and implementation refinement. If a source contract is unsupported or has unresolved obligations, the requested artifact is rejected, including a contract-bearing ordinary build; an ordinary contract-free executable can still be type-checked with its explicitly nonverified identity.
+**`PSCV0-CONTRACT-SCOPE-01` (retained in v7.2) — contract evidence is conditional on declaration strategy.** Lean's native contract elaborator produces `f.spec` through the selected `Std.WP` program logic; ProofScript's `function` alias lowers to `def`. For safe total definitions, checked `f.spec` proves the selected logical/effect specification under audited assumptions. For `partial_fixpoint`, logical unfolding equations do not automatically establish executable adequacy or promised termination. For opaque `partial`, a separate checked safe operational model and body/refinement proof are required for certified behavior. For registered `unsafe` implementations, no generated theorem simply mentioning the unsafe function is admitted as trusted proof of its behavior; require a separately checked safe model and implementation refinement. If a source contract is unsupported or has unresolved obligations, the requested artifact is rejected, including a contract-bearing ordinary build; an ordinary contract-free executable can still be type-checked with its explicitly nonverified identity. An imported `.lean` contract theorem does not waive the transitive runtime/dependency and target-adequacy audit.
 
 **Lean 4.35.0 proof-attachment shape (schematic; requires `import Std.WP`):**
 
@@ -4036,7 +4036,7 @@ All test programs must be formed under stable Lean 4.35.0 and an exact source/en
 
 **Implementation sequencing:** P0 vocabulary/source gates/ordinary recursion; P1 stable `partial_fixpoint` construction and proof availability; P1 partial/total/trace VC dependency tracking; P2 restricted unsafe and runtime/backend refinement. All remain pending until measured by CI and independent review.
 
-### v7.1 interaction-regression tests (new normative cases; not executed)
+### v7.1-origin interaction-regression tests (retained in v7.2; not executed)
 
 These cases combine declaration grammar, elaboration, proof/effect closure and executable outcome policy. Supply legitimate types, imports and syntax wrappers for schematic fragments. An earlier unrelated parse failure is not a passing negative test.
 

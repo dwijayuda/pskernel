@@ -1,5 +1,11 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## Default-instance metadata pins reviewed — 15 October 2026
+
+At `b8e4ba33cdbafe7c1ed35e73537a83f095688f8a`, [native38742459724](https://github.com/dwijayuda/pskernel/actions/runs/38742459724) compiled the complete compiler and independent Lean default-instance oracles, passed the primitive/index audit and regenerated existing proof assets, then refused the intentional snapshot-format change. Both independent strict boundaries reported FNV `7059557959118648847`, declaration SHA-256 `2b0475103206285b3107cd646ea04a365bf682aef2c4c0c8bf16d21e67c65995`, surface SHA-256 `babd8330a9143aad468400ffdf5ae27fe8b5b389e0dbe087ad83cbb4056f1388`.
+
+These reviewed values are now pinned. The selected Standard roster is unchanged (3,122 declarations /25 classes /250 ordinary instances /zero Standard default entries). Changes are explicit metadata format v3 and surface format v2, including the selected default_instance attribute and separate registry. No acceptance, assumptions or budgets changed. Full source/backend qualification of this default-instance slice is still required; do not claim it from the native oracle or the pin update. The development branch Array milestone remains fully qualified; F3 conversions remain unselected.
+
 ## Default-instance semantic boundary reviewed — 15 October 2026
 
 [Native38741377803](https://github.com/dwijayuda/pskernel/actions/runs/38741377803) compiled all compiler sources but the independent Lean oracle rejected four proposed expectations. The cause was a semantic distinction, not runtime lowering: Lean's `trySynthInstance` returns success, definite failure, or stuck. A default-only declaration cannot rescue a definite ordinary failure (including a class with no ordinary candidates); defaults apply to stuck top-level goals. Within a selected default candidate, Lean catches failed dependency synthesis and tries nested defaults transactionally.

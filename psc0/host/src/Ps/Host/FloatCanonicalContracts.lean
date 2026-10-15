@@ -286,11 +286,21 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
   have hBias :
       (((exponent.toNat : Int) - (1023 + 52) + 1023 + 52).toNat) =
         exponent.toNat := by omega
+  have hUnpack : UnpackedFloat.unpack Format.binary64 bits =
+      .finite
+        (UnpackedFloat.Sign.ofBitVec
+          (UnpackedFloat.unpackSign (spec := Format.binary64) bits))
+        joined.toNat
+        ((exponent.toNat : Int) - (1023 + 52))
+        (Nat.pos_of_ne_zero hPositive) := by
+    simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
+    rfl
   have hRec := reconstructPackedFields64 bits
   rw [canonicalPacked_finiteExponent Format.binary64 bits heTop]
-  simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
-  simp only [UnpackedFloat.pack, hBias, hNoOverflow, hLog, hMask, hExp,
-    if_false, if_true]
+  rw [hUnpack]
+  unfold UnpackedFloat.pack
+  dsimp only
+  simp only [hBias, if_neg hNoOverflow, hLog, hMask, hExp]
   simpa [Format.binary64, Format.exponentBias, Format.mantissaBits,
     joined, exponent, mantissa] using hRec
 
@@ -341,11 +351,21 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
   have hBias :
       (((exponent.toNat : Int) - (127 + 23) + 127 + 23).toNat) =
         exponent.toNat := by omega
+  have hUnpack : UnpackedFloat.unpack Format.binary32 bits =
+      .finite
+        (UnpackedFloat.Sign.ofBitVec
+          (UnpackedFloat.unpackSign (spec := Format.binary32) bits))
+        joined.toNat
+        ((exponent.toNat : Int) - (127 + 23))
+        (Nat.pos_of_ne_zero hPositive) := by
+    simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
+    rfl
   have hRec := reconstructPackedFields32 bits
   rw [canonicalPacked_finiteExponent Format.binary32 bits heTop]
-  simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
-  simp only [UnpackedFloat.pack, hBias, hNoOverflow, hLog, hMask, hExp,
-    if_false, if_true]
+  rw [hUnpack]
+  unfold UnpackedFloat.pack
+  dsimp only
+  simp only [hBias, if_neg hNoOverflow, hLog, hMask, hExp]
   simpa [Format.binary32, Format.exponentBias, Format.mantissaBits,
     joined, exponent, mantissa] using hRec
 

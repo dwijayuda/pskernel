@@ -100,6 +100,29 @@ jobs:
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=114487 fuel=4096" "$RUNNER_TEMP/Init-cooper-c0.txt"
           echo "C0_DEPENDENCY_COOPER_PINNED_QUALIFIED same_bytes=114487 official=accepted c0=accepted fuel=4096"
           echo "C0_DEPENDENCY_COOPER_SCOPE=dependency_closure_only_not_full_Init"
+      - name: Mandate exact BitVec theorem after qualified 5.068M Init prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This is the isolated next real Init theorem (record 5068793).
+          # Do not promote its dependency-only conformance to full Init.
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake env .lake/build/bin/lean4export Init -- 'BitVec.lt_of_isSome_getElem?' > "$RUNNER_TEMP/Init-bitvec-435.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/Init-bitvec-435.ndjson" > "$RUNNER_TEMP/Init-bitvec-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/Init-bitvec-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/Init-bitvec-435.ndjson")" -eq 21407
+          test "$(stat -c%s "$RUNNER_TEMP/Init-bitvec-435.ndjson")" -eq 1176296
+          echo "ee71d2fcc99e0ff1b5a7f37c7a9b609999e8e027f24635e784095db9cab3f1c3  $RUNNER_TEMP/Init-bitvec-435.ndjson" | sha256sum -c -
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 180s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/Init-bitvec-435.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/Init-bitvec-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=21407 fuel=4096" "$RUNNER_TEMP/Init-bitvec-c0.txt"
+          echo "C0_DEPENDENCY_BITVEC_PINNED_QUALIFIED same_bytes=21407 official=accepted c0=accepted fuel=4096"
+          echo "C0_DEPENDENCY_BITVEC_SCOPE=dependency_closure_only_not_full_Init"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -111,5 +134,8 @@ jobs:
             ${{ runner.temp }}/Init-cooper-435.ndjson
             ${{ runner.temp }}/Init-cooper-official.txt
             ${{ runner.temp }}/Init-cooper-c0.txt
+            ${{ runner.temp }}/Init-bitvec-435.ndjson
+            ${{ runner.temp }}/Init-bitvec-official.txt
+            ${{ runner.temp }}/Init-bitvec-c0.txt
           if-no-files-found: warn
           retention-days: 14

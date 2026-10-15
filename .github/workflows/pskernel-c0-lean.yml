@@ -9,6 +9,7 @@ on:
       - 'psc0/packages/pskernel-c0/lean-toolchain'
       - '.github/workflows/pskernel-c0-lean.yml'
       - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ProofCongruenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0Lean435MigrationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedScratchRegression.lean'
@@ -258,6 +259,9 @@ jobs:
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean
+      - name: Checked proof congruence and malformed-proof negatives
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ProofCongruenceRegression.lean
       - name: Lean 4.35 semantics and obsolete-native rejection (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0Lean435MigrationRegression.lean

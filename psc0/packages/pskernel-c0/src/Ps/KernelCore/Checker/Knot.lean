@@ -339,6 +339,141 @@ def psKernelDefEqExpandLocalLetsWithFuel
         | .proj typeName index body => .proj typeName index (go body)
         | _ => expr
 
+/-- A proof-irrelevance witness for TWO fully checked theorem applications.
+    Lean 4.35 type_checker.cpp::is_def_eq_proof_irrel accepts proof
+    irrelevance only after checking the left proof's type is a proposition
+    and that both proof types are definitionally equal. This conservative
+    path requires exact equality of the checked proposition types and uses
+    only source full checking and source Prop classification.
+
+    The result is a checked state only; malformed, unsupported, resource
+    exhausted and mismatched propositions all decline without publishing a
+    conversion or extending the environment. -/
+def psKernelDefEqCheckedTheoremProofPairWith
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → PsKernelExpr →
+      Except String (Bool × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : Option PsKernelCheckerState :=
+  match psKernelExprGetAppFn left, psKernelExprGetAppFn right with
+  | .const leftName _, .const rightName _ =>
+      match psKernelEnvironmentFind context.environment leftName,
+            psKernelEnvironmentFind context.environment rightName with
+      | .some (.thmInfo _), .some (.thmInfo _) =>
+          let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+          let inferType := psKernelInferWithRecursorFuel fuel defeq
+          match psKernelCheckWithFuel fuel whnf defeq
+              context state left with
+          | .error _ => none
+          | .ok (leftType, state1) =>
+              match psKernelCheckWithFuel fuel whnf defeq
+                  context state1 right with
+              | .error _ => none
+              | .ok (rightType, state2) =>
+                  if psKernelExprEq leftType rightType then
+                    match psKernelDefEqIsPropWith inferType whnf
+                        context state2 leftType with
+                    | .ok (true, state3) => some state3
+                    | _ => none
+                  else none
+      | _, _ => none
+  | _, _ => none
+
+/-- Open a common binder with a single fresh checked local. Validate its
+    shared domain in the original checker before recursively comparing
+    bodies. No free variables from a failed candidate escape into an
+    accepting cache. -/
+def psKernelDefEqProofCongruenceOpenBinderWith
+    (descend :
+      PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → PsKernelExpr →
+      Option PsKernelCheckerState)
+    (fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → PsKernelExpr →
+      Except String (Bool × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (domain leftBody rightBody : PsKernelExpr)
+    (binderInfo : PsKernelBinderInfo) : Option PsKernelCheckerState :=
+  let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+  match psKernelCheckWithFuel fuel whnf defeq context state domain with
+  | .error _ => none
+  | .ok (domainType, state1) =>
+      match psKernelEnsureSortWith whnf context state1 domainType with
+      | .error _ => none
+      | .ok (_, state2) =>
+          let fresh := psKernelCheckerStateFreshName state2 name
+          let locals := psKernelLocalContextAddLocal context.localContext
+            fresh.1 name domain binderInfo
+          let child := psKernelCheckerContextWithLocalContext context locals
+          descend child fresh.2
+            (psKernelExprInstantiate1 leftBody (.fvar fresh.1))
+            (psKernelExprInstantiate1 rightBody (.fvar fresh.1))
+
+/-- Bounded congruence using only equal source syntax and independently
+    checked proof-irrelevance leaves. The checker never assumes that terms
+    with similar WHNF summaries are equal. This positive-only traversal
+    follows congruence through applications and checked lambda/Pi binders;
+    all other unequal shapes conservatively decline. -/
+def psKernelDefEqCheckedProofCongruenceWithFuel
+    (depth fuel : Nat)
+    (defeq :
+      PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → PsKernelExpr →
+      Except String (Bool × PsKernelCheckerState)) :
+    PsKernelCheckerContext → PsKernelCheckerState →
+    PsKernelExpr → PsKernelExpr → Option PsKernelCheckerState :=
+  match depth with
+  | 0 => fun _ _ _ _ => none
+  | remaining + 1 =>
+      let smaller :=
+        psKernelDefEqCheckedProofCongruenceWithFuel remaining fuel defeq
+      fun context state left right =>
+        if psKernelExprEq left right then some state
+        else
+          match psKernelCheckerContextEnterRecDepth context with
+          | .error _ => none
+          | .ok nextContext =>
+              match left, right with
+              | .app leftFn leftArg, .app rightFn rightArg =>
+                  match psKernelDefEqCheckedTheoremProofPairWith
+                      fuel defeq nextContext state left right with
+                  | .some proven => some proven
+                  | .none =>
+                      match smaller nextContext state leftFn rightFn with
+                      | .none => none
+                      | .some state1 =>
+                          smaller nextContext state1 leftArg rightArg
+              | .lam name domain leftBody info,
+                .lam _ otherDomain rightBody _ =>
+                  if psKernelExprEq domain otherDomain then
+                    psKernelDefEqProofCongruenceOpenBinderWith
+                      smaller fuel defeq nextContext state name domain
+                      leftBody rightBody info
+                  else none
+              | .forallE name domain leftBody info,
+                .forallE _ otherDomain rightBody _ =>
+                  if psKernelExprEq domain otherDomain then
+                    psKernelDefEqProofCongruenceOpenBinderWith
+                      smaller fuel defeq nextContext state name domain
+                      leftBody rightBody info
+                  else none
+              | .mdata _ leftBody, .mdata _ rightBody =>
+                  smaller nextContext state leftBody rightBody
+              | .proj leftType leftIndex leftBody,
+                .proj rightType rightIndex rightBody =>
+                  if psKernelNameEq leftType rightType &&
+                      leftIndex == rightIndex then
+                    smaller nextContext state leftBody rightBody
+                  else none
+              | _, _ => none
+
 /-- Exact structural equality of finite local-ζ expansions after independent
     *source* WHNF on both sides. This never concludes inequality, never grants
     admission from an untyped term, and preserves the source resource error
@@ -368,7 +503,10 @@ def psKernelDefEqTryLocalZetaRecovery
               budget context leftNormal
             let rhs := psKernelDefEqExpandLocalLetsWithFuel
               budget context rightNormal
-            if psKernelExprEq lhs rhs then some state2 else none
+            if psKernelExprEq lhs rhs then some state2
+            else
+              psKernelDefEqCheckedProofCongruenceWithFuel
+                (Nat.min fuel 192) fuel sourceDefEq context state2 lhs rhs
 
 /-- One non-recursive source-exact Lean 4.35 DefEq decision step. Its
     recursive continuation is supplied by the fuel-decreasing PUBLIC checker,

@@ -697,10 +697,24 @@ def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit :=
 def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := do
   let selected := psSelfHostProdPreludeEnvironment.declarations
   exportStandardCore {
-    roots := FloatCanonical.contractRoots
+    roots := FloatCanonical.contractRoots ++
+      [``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
+       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary32FractionMask_iff,
+       ``PsV7Native.FloatCanonical.canonicalMask64,
+       ``PsV7Native.FloatCanonical.canonicalMask32,
+       ``PsV7Native.FloatCanonical.packedNaN64_eq_constant,
+       ``PsV7Native.FloatCanonical.packedNaN32_eq_constant,
+       ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
+       ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact,
+       ``PsV7Native.FloatConstructive.powEqZero]
     boundary := selected.map psDeclarationName
     baseDeclarations := selected
-    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts }]
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts },
+      { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames :=
+      [(``PsV7Native.FloatConstructive.powEqZero, ``Nat.pow_eq_zero)]
     allowedAssumptions := [`propext, `Quot.sound]
     shareSource := true
     publicPrefix := "psStandardFloatCanonicalModel"

@@ -239,6 +239,97 @@ theorem upstreamPackUnpack_subnormal32 (bits : BitVec 32)
     Format.binary32, Format.exponentBias, Format.mantissaBits,
     he, hm, mantissa, hsmall] using hsub
 
+
+-- Raw normal reconstruction: the implicit leading one fixes log2 of the
+-- unpacked significand, and excluding the all-ones exponent prevents overflow.
+theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
+    (heZero : UnpackedFloat.unpackExponent (spec := Format.binary64) bits ≠ (0#_))
+    (heTop : UnpackedFloat.unpackExponent (spec := Format.binary64) bits ≠ (-1#_)) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary64) bits
+  let exponent := UnpackedFloat.unpackExponent (spec := Format.binary64) bits
+  let joined : BitVec 53 := (1#1) ++ mantissa
+  have hjoin : joined.toNat = 2 ^ 52 + mantissa.toNat := by
+    simp [joined, BitVec.toNat_append_eq_mul_add]
+  have hlow : 2 ^ 52 ≤ joined.toNat := by omega
+  have hhigh : joined.toNat < 2 ^ (52 + 1) := by
+    have hdouble : 2 ^ (52 + 1) = 2 ^ 52 + 2 ^ 52 := by
+      simp [Nat.pow_succ]
+      omega
+    rw [hdouble]
+    have hbound := mantissa.isLt
+    omega
+  have hpositive : joined.toNat ≠ 0 := by
+    have hpow : 0 < 2 ^ 52 := by decide
+    omega
+  have hlog : joined.toNat.log2 = 52 :=
+    (Nat.log2_eq_iff hpositive).2 ⟨hlow, hhigh⟩
+  have hmask : BitVec.ofNat 52 joined.toNat = mantissa := by
+    apply (BitVec.toNat_inj).mp
+    simp [BitVec.toNat_ofNat, hjoin, Nat.add_mod,
+      Nat.mod_eq_of_lt mantissa.isLt]
+  have hnotMax : exponent.toNat ≠ 2047 := by
+    intro h
+    have ht : exponent = (-1#11) := by
+      apply (BitVec.toNat_inj).mp
+      simpa using h
+    exact heTop (by simpa [exponent] using ht)
+  have hnoOverflow : ¬ (2 ^ 11 ≤ exponent.toNat + 1) := by
+    have hbound := exponent.isLt
+    norm_num
+    omega
+  have hrec := reconstructPackedFields64 bits
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
+    Format.binary64, Format.exponentBias, Format.mantissaBits,
+    heZero, heTop, exponent, mantissa, joined,
+    hlog, hmask, hnoOverflow] using hrec
+
+-- Raw normal reconstruction: the implicit leading one fixes log2 of the
+-- unpacked significand, and excluding the all-ones exponent prevents overflow.
+theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
+    (heZero : UnpackedFloat.unpackExponent (spec := Format.binary32) bits ≠ (0#_))
+    (heTop : UnpackedFloat.unpackExponent (spec := Format.binary32) bits ≠ (-1#_)) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary32) bits
+  let exponent := UnpackedFloat.unpackExponent (spec := Format.binary32) bits
+  let joined : BitVec 24 := (1#1) ++ mantissa
+  have hjoin : joined.toNat = 2 ^ 23 + mantissa.toNat := by
+    simp [joined, BitVec.toNat_append_eq_mul_add]
+  have hlow : 2 ^ 23 ≤ joined.toNat := by omega
+  have hhigh : joined.toNat < 2 ^ (23 + 1) := by
+    have hdouble : 2 ^ (23 + 1) = 2 ^ 23 + 2 ^ 23 := by
+      simp [Nat.pow_succ]
+      omega
+    rw [hdouble]
+    have hbound := mantissa.isLt
+    omega
+  have hpositive : joined.toNat ≠ 0 := by
+    have hpow : 0 < 2 ^ 23 := by decide
+    omega
+  have hlog : joined.toNat.log2 = 23 :=
+    (Nat.log2_eq_iff hpositive).2 ⟨hlow, hhigh⟩
+  have hmask : BitVec.ofNat 23 joined.toNat = mantissa := by
+    apply (BitVec.toNat_inj).mp
+    simp [BitVec.toNat_ofNat, hjoin, Nat.add_mod,
+      Nat.mod_eq_of_lt mantissa.isLt]
+  have hnotMax : exponent.toNat ≠ 255 := by
+    intro h
+    have ht : exponent = (-1#8) := by
+      apply (BitVec.toNat_inj).mp
+      simpa using h
+    exact heTop (by simpa [exponent] using ht)
+  have hnoOverflow : ¬ (2 ^ 8 ≤ exponent.toNat + 1) := by
+    have hbound := exponent.isLt
+    norm_num
+    omega
+  have hrec := reconstructPackedFields32 bits
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
+    Format.binary32, Format.exponentBias, Format.mantissaBits,
+    heZero, heTop, exponent, mantissa, joined,
+    hlog, hmask, hnoOverflow] using hrec
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream

@@ -1645,10 +1645,41 @@ const short: Outcome String Nat := .ok(42)
 
 **`PSCV0-DERIVE-01` (P0, normative selection):** admit Lean's native **trailing** `deriving` clause after `structure ... where { ... }` and `inductive ... where { ... }`, limited to the pinned allowlist. Do **not** admit an arbitrary deriving-handler registration, an `@[deriving]` attribute, a TypeScript decorator, or the standalone `deriving instance ... for ...` command in the initial Standard profile. This syntax is a selected *declaration suffix*, **not** a user declaration attribute. It does not add universal structural equality or a new `@derive` alias.
 
-| Lean 4.35.0 | `pscv0` |
-|---|---|
-| <pre>structure User where&#10;  id : Nat&#10;  name : String&#10;  deriving Repr, BEq</pre> | <pre>structure User where {&#10;  id: Nat&#10;  name: String&#10;} deriving Repr, BEq</pre> |
-| <pre>inductive Status where&#10;  &#124; ok (n : Nat)&#10;  &#124; error (s : String)&#10;  deriving Repr, BEq</pre> | <pre>inductive Status where {&#10;  &#124; ok(n: Nat)&#10;  &#124; error(message: String)&#10;} deriving Repr, BEq</pre> |
+**Lean 4.35.0 — example 1**
+
+```lean
+structure User where
+  id : Nat
+  name : String
+  deriving Repr, BEq
+```
+
+**`pscv0` — example 1**
+
+```proofscript
+structure User where {
+  id: Nat
+  name: String
+} deriving Repr, BEq
+```
+
+**Lean 4.35.0 — example 2**
+
+```lean
+inductive Status where
+  | ok (n : Nat)
+  | error (s : String)
+  deriving Repr, BEq
+```
+
+**`pscv0` — example 2**
+
+```proofscript
+inductive Status where {
+  | ok(n: Nat)
+  | error(message: String)
+} deriving Repr, BEq
+```
 
 **Grammar (schematic):** Lean supplies `derivingClause ::= ('deriving' derivingClass (',' derivingClass)*)?` in the supported declaration families. The selected `pscv0` production is `psDerivingClause ::= 'deriving' allowedClass (',' allowedClass)*`, appearing **optionally** after the closing structural braces; an actual clause requires at least one handler. `allowedClass` is resolved against the **exact named, versioned registered handler list**, not simply any imported class name. The parser's declaration ownership and generated-instance results are pinned to 4.35.0.
 
@@ -1731,10 +1762,45 @@ A scrutinee's family determines which constructors and patterns are admissible. 
 
 **Decision:** the new `pscv0` baseline admits Lean's **multiple match discriminants, named discriminants, and explicit dependent generalization** in the selected term grammar, instead of the previous single-discriminant subset. This is essential for dependent algorithms and theorem proving, not merely syntax comfort. `pscv0` retains the one **braced** body form and source-order alternatives; it does not add a separate runtime matching model.
 
-| Lean 4.35.0 | `pscv0` modified punctuation |
-|---|---|
-| <pre>def choose (x : Option Nat) (fallback : Nat) : Nat :=&#10;  match x with&#10;  &#124; none => fallback&#10;  &#124; some n => n</pre> | <pre>function choose(x: Option Nat, fallback: Nat): Nat := {&#10;  match x with {&#10;    &#124; .none => fallback&#10;    &#124; .some n => n&#10;  }&#10;}</pre> |
-| <pre>def both (x y : Option Nat) : Bool :=&#10;  match x, y with&#10;  &#124; some _, some _ => true&#10;  &#124; _, _ => false</pre> | <pre>function both(x: Option Nat, y: Option Nat): Bool := {&#10;  match x, y with {&#10;    &#124; .some _, .some _ => true&#10;    &#124; _, _ => false&#10;  }&#10;}</pre> |
+**Lean 4.35.0 — example 1**
+
+```lean
+def choose (x : Option Nat) (fallback : Nat) : Nat :=
+  match x with
+  | none => fallback
+  | some n => n
+```
+
+**`pscv0` modified punctuation — example 1**
+
+```proofscript
+function choose(x: Option Nat, fallback: Nat): Nat := {
+  match x with {
+    | .none => fallback
+    | .some n => n
+  }
+}
+```
+
+**Lean 4.35.0 — example 2**
+
+```lean
+def both (x y : Option Nat) : Bool :=
+  match x, y with
+  | some _, some _ => true
+  | _, _ => false
+```
+
+**`pscv0` modified punctuation — example 2**
+
+```proofscript
+function both(x: Option Nat, y: Option Nat): Bool := {
+  match x, y with {
+    | .some _, .some _ => true
+    | _, _ => false
+  }
+}
+```
 
 **Dependent match forms (schematic):** `match (generalizing := true) discriminants with { alternatives }` and `match h : discriminant with { alternatives }` select Lean's actual dependent elaboration and optional equality-hypothesis behavior. The `(generalizing := true)` after the `match` keyword belongs to Lean's **match syntax category**, not to a function call; it does not violate `PSCV0-APP-02`. The exact motive/generalization rules and accepted syntactic placement must be checked against the pinned parser.
 
@@ -1981,9 +2047,24 @@ Only selected `def`/`function` heads accept exactly **one** of the three leading
 
 **Lean family:** `theorem`, `example`, `by` tactic sequences, Lean proof terms. **`pscv0` modification:** comma-separated explicit declaration binders and **mandatory `by { ... }`** for a multi-tactic proof. We adopt Lean's actual tactic **middle-dot** bullet `·` (U+00B7). The ASCII period `.` is field notation or punctuation, **not a Lean goal bullet**.
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>theorem andProof (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by&#10;  constructor&#10;  · exact hp&#10;  · exact hq</pre> | <pre>theorem andProof(P: Prop, Q: Prop, hp: P, hq: Q): P ∧ Q := by {&#10;  constructor&#10;  · exact hp&#10;  · exact hq&#10;}</pre> |
+**Lean 4.35.0**
+
+```lean
+theorem andProof (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by
+  constructor
+  · exact hp
+  · exact hq
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+theorem andProof(P: Prop, Q: Prop, hp: P, hq: Q): P ∧ Q := by {
+  constructor
+  · exact hp
+  · exact hq
+}
+```
 
 **Why subgoal bullets matter:** `constructor` on `P ∧ Q` introduces two proof goals. `· exact hp` focuses the first and requires it to close; `· exact hq` handles the second. Unfocused sequential `exact hp` then `exact hq` can happen to work, but provides weaker local proof structure. Native `case` and `next` are alternative **Lean** ways to focus goals when identifying constructor/case names is clearer. They are not new ProofScript keywords.
 
@@ -2008,9 +2089,24 @@ The *source* tactic set is fixed/versioned rather than extended by arbitrary ins
 
 ### Proof terms, `have`, `show`, `suffices`, `calc`
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>theorem trans (a b c : Nat) (h1 : a = b) (h2 : b = c) : a = c := by&#10;  calc&#10;    a = b := h1&#10;    _ = c := h2</pre> | <pre>theorem trans(a: Nat, b: Nat, c: Nat, h1: a = b, h2: b = c): a = c := by {&#10;  calc&#10;    a = b := h1&#10;    _ = c := h2&#10;}</pre> |
+**Lean 4.35.0**
+
+```lean
+theorem trans (a b c : Nat) (h1 : a = b) (h2 : b = c) : a = c := by
+  calc
+    a = b := h1
+    _ = c := h2
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+theorem trans(a: Nat, b: Nat, c: Nat, h1: a = b, h2: b = c): a = c := by {
+  calc
+    a = b := h1
+    _ = c := h2
+}
+```
 
 Adopt Lean `have`, `show`, `suffices`, and `calc` with their native checked meanings. `calc` need not be restricted to equality-only if a fixed, pinned Lean relation/transitivity instance is present; arbitrary custom notation/attributes remain outside the closed source grammar. Do not create alternative ProofScript spellings for these facilities.
 
@@ -2307,9 +2403,27 @@ function next(n: Nat): Id Nat := do {
 
 **Lean family:** native `for`/`break`/`continue` `do` statements. **`pscv0` surface modification:** replace the outer Lean `do` loop-body delimiter with braced grouping, not another iterator or termination model. A verified effectful loop must have a checked invariant/iterator specification appropriate to the **actual Lean 4.35.0 loop semantics**; no new bare `invariant term` syntax is introduced merely because the earlier RC3 ProofScript draft proposed one.
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>def count (xs : List Nat) : Id Nat := do&#10;  let mut total := 0&#10;  for x in xs do&#10;    total := total + x&#10;  return total</pre> | <pre>function count(xs: List Nat): Id Nat := do {&#10;  let mut total := 0&#10;  for x in xs {&#10;    total := total + x&#10;  }&#10;  return total&#10;}</pre> |
+**Lean 4.35.0**
+
+```lean
+def count (xs : List Nat) : Id Nat := do
+  let mut total := 0
+  for x in xs do
+    total := total + x
+  return total
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function count(xs: List Nat): Id Nat := do {
+  let mut total := 0
+  for x in xs {
+    total := total + x
+  }
+  return total
+}
+```
 
 The plain loops above demonstrate **syntax only**. For a verified executable result, a proof-capable iterator semantics, invariants or verified iterator lemmas, and all relevant termination obligations are still required. If an upstream selected Lean `for` invariant annotation is used, its binder/shape must follow the **pinned Lean 4.35.0 parser**, not the old invented `invariant total = prefixSum` spelling. `break`/`continue` retain Lean control-flow meaning and their verified proof obligations.
 
@@ -2356,9 +2470,22 @@ function countDown(n: Nat): Id Nat
 
 Lean 4.35.0 adds experimental `erased x := e`, `erased mut x := e`, and `erased x ← action` inside `do`. **`pscv0` adopts `erased` unchanged; `ghost` is not a keyword, not an accepted synonym, and not needed.**
 
-| Lean 4.35.0 source family | `pscv0` braced source |
-|---|---|
-| <pre>def f (n : Nat) : Id Nat := do&#10;  erased mut visited : Nat := 0&#10;  return n</pre> | <pre>function f(n: Nat): Id Nat := do {&#10;  erased mut visited : Nat := 0&#10;  return n&#10;}</pre> |
+**Lean 4.35.0 source family**
+
+```lean
+def f (n : Nat) : Id Nat := do
+  erased mut visited : Nat := 0
+  return n
+```
+
+**`pscv0` braced source**
+
+```proofscript
+function f(n: Nat): Id Nat := do {
+  erased mut visited : Nat := 0
+  return n
+}
+```
 
 **Lean grammar (schematic):** `doSeqItem ::= ... | 'erased' ident ':=' term | 'erased' 'mut' ident ':=' term | 'erased' ident '←' term`. ProofScript changes only the **outer `do { ... }` grouping**, and keeps the same Lean item grammar. Assignment/invariant/proof rules ensure that erased information cannot affect runtime return values, branches, or effects. These snippets illustrate syntax; the experimental Lean verification context must be enabled for actual acceptance. Source: [4.35.0 release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/).
 
@@ -2366,9 +2493,19 @@ Lean 4.35.0 adds experimental `erased x := e`, `erased mut x := e`, and `erased 
 
 A Lean `Subtype` is exactly a value accompanied by evidence of its property. It already has a readable and established source notation: `{x : A // P x}`. There is **no** `pscv0` `refine type` syntax.
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>abbrev Positive := {n : Nat // n > 0}&#10;def onePositive : Positive := ⟨1, by decide⟩</pre> | <pre>abbrev Positive := {n : Nat // n > 0}&#10;const onePositive: Positive := ⟨1, by { decide }⟩</pre> |
+**Lean 4.35.0**
+
+```lean
+abbrev Positive := {n : Nat // n > 0}
+def onePositive : Positive := ⟨1, by decide⟩
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+abbrev Positive := {n : Nat // n > 0}
+const onePositive: Positive := ⟨1, by { decide }⟩
+```
 
 **Lean grammar (schematic):** `term ::= ... | '{' ident ':' term '//' term '}' | 'Subtype' term`. **ProofScript delta:** none for these terms, apart from the enclosing `const` alias and optional proof grouping. This avoids another syntax family and preserves Lean's existing proof erasure / coercion story. This `Subtype` brace form must be recognized **before** general record/body brace parsing in its type-expression context.
 
@@ -2376,9 +2513,22 @@ A Lean `Subtype` is exactly a value accompanied by evidence of its property. It 
 
 A proof-valued field is enough to express an invariant, so `invariant self => ...` after a `structure` declaration is **not** a `pscv0` language form.
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>structure Account where&#10;  balance : Int&#10;  nonnegative : balance >= 0</pre> | <pre>structure Account where {&#10;  balance: Int&#10;  nonnegative: balance >= 0&#10;}</pre> |
+**Lean 4.35.0**
+
+```lean
+structure Account where
+  balance : Int
+  nonnegative : balance >= 0
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+structure Account where {
+  balance: Int
+  nonnegative: balance >= 0
+}
+```
 
 Every constructor and update must supply an appropriate checked proof term. The `nonnegative` field lives in `Prop` and can be erased as Lean permits. No hidden constructor or unchecked proof obligation is introduced by alternative source syntax.
 
@@ -2901,9 +3051,19 @@ function atMost {n: Nat}(i: Fin n): Nat := i.val
 
 **Lean grammar (schematic)** already includes `Subtype`, `{x : A // P x}`, and constructor notation `⟨value, proof⟩`. **`pscv0` adopts these same constructs without the unnecessary `refine type` alternate spelling.**
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>abbrev Positive := {n : Nat // n > 0}&#10;def p : Positive := ⟨1, by decide⟩</pre> | <pre>abbrev Positive := {n : Nat // n > 0}&#10;const p: Positive := ⟨1, by { decide }⟩</pre> |
+**Lean 4.35.0**
+
+```lean
+abbrev Positive := {n : Nat // n > 0}
+def p : Positive := ⟨1, by decide⟩
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+abbrev Positive := {n : Nat // n > 0}
+const p: Positive := ⟨1, by { decide }⟩
+```
 
 The base value needs a proof that it satisfies the predicate; the proof is computationally irrelevant according to native Lean `Subtype` semantics. No special ProofScript proof field, runtime check, or extra cast is introduced.
 
@@ -3160,9 +3320,27 @@ The grammar is valid only in the sense of a language *design* until executable c
 
 **Lean grammar (schematic):** `command ::= import | namespace | section | open | variable | declaration | #check | #print | #reduce | #eval | ...`. `pscv0` retains the selected Lean module and scope families; declaration header imports remain before non-import commands; ordinary dependencies do not register new parser grammars. `.ps` source remains UTF-8.
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>import Std&#10;namespace Math&#10;def one : Nat := 1&#10;end Math&#10;#check Nat.succ&#10;#print axioms Nat.add_comm</pre> | <pre>import Std&#10;namespace Math&#10;const one: Nat := 1&#10;end Math&#10;#check Nat.succ&#10;#print axioms Nat.add_comm</pre> |
+**Lean 4.35.0**
+
+```lean
+import Std
+namespace Math
+def one : Nat := 1
+end Math
+#check Nat.succ
+#print axioms Nat.add_comm
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+import Std
+namespace Math
+const one: Nat := 1
+end Math
+#check Nat.succ
+#print axioms Nat.add_comm
+```
 
 `#eval` is admitted only for a pure/total executable expression supported by the pinned closed evaluation surface. Diagnostic evaluation does **not** prove contract obligations or contribute logical authority.
 
@@ -3197,9 +3375,19 @@ psParam ::= ident ':' term (':=' term)?
 
 These schematics describe surface shape, not complete parser precedence or all Lean modifiers. `function` and `const` lower to Lean `def`. A final nullary group **only on `function`** lowers to one hidden required `Unit` binder; it may follow nonexplicit binders, and no ordinary `psExplicitGroup` is empty. `def f()`, constructors and methods with `()` reject as initially unsupported. Nonexplicit binders may separate explicit groups without reordering, while **adjacent explicit groups fail parsing**: they must be written as one comma group in the source, not silently normalized after parsing. Non-explicit implicit/strict-implicit/instance binders remain selected Lean-native notation. `theorem` and `example` produce ordinary checked proof terms, not JS declarations.
 
-| Lean 4.35.0 | ProofScript `pscv0` |
-|---|---|
-| <pre>def add (a b : Nat) : Nat := a + b&#10;def limit : Nat := 10</pre> | <pre>function add(a: Nat, b: Nat): Nat := a + b&#10;const limit: Nat := 10</pre> |
+**Lean 4.35.0**
+
+```lean
+def add (a b : Nat) : Nat := a + b
+def limit : Nat := 10
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function add(a: Nat, b: Nat): Nat := a + b
+const limit: Nat := 10
+```
 
 ### 11.4 Application — precise Lean grammar overlay and restrictions
 
@@ -3262,9 +3450,21 @@ This rule blocks invisible changes in argument count on whitespace edits while r
 
 **`pscv0` decisions:** accept native mathematics and `Subtype` notation unchanged. `exist` (singular) and a new `refine type` declaration are **not** accepted. Keep Lean's `Prod`, `Fin`, `Option`, `Except`, `List`, `Array`, structure constructors/projections, and user-annotated `Prop` terms with the selected pinned library profile. Record values (`{ field := value, ... }`) preserve Lean's nominal-structure meaning. A declaration body wrapper `:= { oneTerm }` does not introduce arbitrary JavaScript statements.
 
-| Lean | `pscv0` |
-|---|---|
-| <pre>abbrev Positive := {n : Nat // n > 0}&#10;example : ∃ x : Nat, x = 0 := ⟨0, rfl⟩</pre> | <pre>abbrev Positive := {n : Nat // n > 0}&#10;example : exists x : Nat, x = 0 := by {&#10;  exact ⟨0, rfl⟩&#10;}</pre> |
+**Lean**
+
+```lean
+abbrev Positive := {n : Nat // n > 0}
+example : ∃ x : Nat, x = 0 := ⟨0, rfl⟩
+```
+
+**`pscv0`**
+
+```proofscript
+abbrev Positive := {n : Nat // n > 0}
+example : exists x : Nat, x = 0 := by {
+  exact ⟨0, rfl⟩
+}
+```
 
 ### 11.6 Conditionals, multi-discriminant matching, structures, inductives, and deriving
 
@@ -3309,10 +3509,43 @@ The **new selected Lean matching surface** includes more than one discriminant, 
 
 The `deriving` clause follows `PSCV0-DERIVE-01`: it is a trailing `structure`/`inductive` suffix (not an attribute or standalone Standard command), reusing native Lean class names and registered handler semantics; the initial allowlist is `Repr`, `BEq`, `DecidableEq`, `Inhabited`, `Hashable`. It does **not** grant arbitrary user handler registration, nor turn a typeclass declaration into a proven law without evidence. A derivation can fail if the required type or members do not support it.
 
-| Lean 4.35.0 | ProofScript `pscv0` (illustrative) |
-|---|---|
-| <pre>def both (x y : Option Nat) : Bool :=&#10;  match x, y with&#10;  &#124; some _, some _ => true&#10;  &#124; _, _ => false</pre> | <pre>function both(x: Option Nat, y: Option Nat): Bool := {&#10;  match x, y with {&#10;    &#124; .some _, .some _ => true&#10;    &#124; _, _ => false&#10;  }&#10;}</pre> |
-| <pre>structure Point where&#10;  x : Nat&#10;  y : Nat&#10;  deriving Repr, BEq</pre> | <pre>structure Point where {&#10;  x: Nat&#10;  y: Nat&#10;} deriving Repr, BEq</pre> |
+**Lean 4.35.0 — example 1**
+
+```lean
+def both (x y : Option Nat) : Bool :=
+  match x, y with
+  | some _, some _ => true
+  | _, _ => false
+```
+
+**ProofScript `pscv0` (illustrative) — example 1**
+
+```proofscript
+function both(x: Option Nat, y: Option Nat): Bool := {
+  match x, y with {
+    | .some _, .some _ => true
+    | _, _ => false
+  }
+}
+```
+
+**Lean 4.35.0 — example 2**
+
+```lean
+structure Point where
+  x : Nat
+  y : Nat
+  deriving Repr, BEq
+```
+
+**ProofScript `pscv0` (illustrative) — example 2**
+
+```proofscript
+structure Point where {
+  x: Nat
+  y: Nat
+} deriving Repr, BEq
+```
 
 Record *values* use commas; structure/class *field declarations* retain Lean-style newline sequencing. The brackets are **grammar-specific grouping**, not JavaScript object scopes. The corresponding unbraced native layout is used in `.lean`, not as a second `.ps` control-body form.
 
@@ -3358,9 +3591,24 @@ tactic ::= ... | 'constructor' | 'exact' term | '·' tacticSeq
 
 **`pscv0` modification (schematic):** `term ::= ... | 'by' '{' psTacticSeq '}'`. Source tactic text uses the native Lean tokens and syntax, with a fixed selected (not arbitrary import-extensible) tactic surface. The goal bullet **`·`** is U+00B7 middle dot; `.` remains field notation and is **not** a bullet.
 
-| Lean (native) | ProofScript (same goal behavior) |
-|---|---|
-| <pre>theorem andProof (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by&#10;  constructor&#10;  · exact hp&#10;  · exact hq</pre> | <pre>theorem andProof(P: Prop, Q: Prop, hp: P, hq: Q): P ∧ Q := by {&#10;  constructor&#10;  · exact hp&#10;  · exact hq&#10;}</pre> |
+**Lean (native)**
+
+```lean
+theorem andProof (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by
+  constructor
+  · exact hp
+  · exact hq
+```
+
+**ProofScript (same goal behavior)**
+
+```proofscript
+theorem andProof(P: Prop, Q: Prop, hp: P, hq: Q): P ∧ Q := by {
+  constructor
+  · exact hp
+  · exact hq
+}
+```
 
 `case`, `next`, `all_goals`, and `<;>` are supported only where the selected pinned Lean tactic parser and proof-producing semantics recognize them. A tactic `;` does not become a general statement separator. No ASCII-dot bullet alias is introduced.
 

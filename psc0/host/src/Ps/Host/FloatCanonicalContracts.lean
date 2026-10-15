@@ -417,25 +417,29 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
 theorem binary64ExponentMask_iff (bits : BitVec 64) :
     (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
       UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#11) := by
-  unfold UnpackedFloat.unpackExponent
+  change (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
+    bits.extractLsb' 52 11 = (-1#11)
   bv_decide
 
 theorem binary64FractionMask_iff (bits : BitVec 64) :
     (bits &&& 4503599627370495#64 = 0#64) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
-  unfold UnpackedFloat.unpackMantissa
+  change (bits &&& 4503599627370495#64 = 0#64) ↔
+    bits.extractLsb' 0 52 = (0#52)
   bv_decide
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
     (bits &&& 2139095040#32 = 2139095040#32) ↔
       UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#8) := by
-  unfold UnpackedFloat.unpackExponent
+  change (bits &&& 2139095040#32 = 2139095040#32) ↔
+    bits.extractLsb' 23 8 = (-1#8)
   bv_decide
 
 theorem binary32FractionMask_iff (bits : BitVec 32) :
     (bits &&& 8388607#32 = 0#32) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
-  unfold UnpackedFloat.unpackMantissa
+  change (bits &&& 8388607#32 = 0#32) ↔
+    bits.extractLsb' 0 23 = (0#23)
   bv_decide
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).

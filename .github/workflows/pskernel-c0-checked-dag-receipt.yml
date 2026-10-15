@@ -31,7 +31,12 @@ jobs:
           set -euo pipefail
           test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
-          lake build Ps.KernelCore.Architecture.CertifiedCheckedDAGMemo
+          # The executable regression imports Session as well as the receipt
+          # module. Build the complete native root closure so lake env lean
+          # can load every imported .olean, not just the receipt target.
+          lake build PsKernelC0
+          test -s .lake/build/lib/lean/Ps/KernelCore/Checker/Session.olean
+          test -s .lake/build/lib/lean/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.olean
           lake env lean --run test/C0CertifiedCheckedDAGMemoRegression.lean
           echo "C0_CHECKED_DAG_SOURCE_PROOF certified_root=pass source_equation=pass invalid=declined"
       - name: Preserve independent native checker positives and negatives

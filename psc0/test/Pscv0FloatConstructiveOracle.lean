@@ -86,7 +86,7 @@ run_cmd do
        ``BitVec.getLsbD_allOnes, ``BitVec.getLsbD_and,
        ``BitVec.getElem_allOnes, ``BitVec.getElem_and,
        ``BitVec.eq_of_toNat_eq,
-       ``PsV7Native.FloatCanonical.andAllOnes_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes8_constructive, ``PsV7Native.FloatCanonical.andAllOnes11_constructive, ``PsV7Native.FloatCanonical.andAllOnes23_constructive, ``PsV7Native.FloatCanonical.andAllOnes52_constructive,
        ``BitVec.and_append, ``BitVec.append_left_inj,
        ``BitVec.append_right_inj, ``BitVec.and_zero,
        ``BitVec.and_allOnes,

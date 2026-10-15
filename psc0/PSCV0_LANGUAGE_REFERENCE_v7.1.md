@@ -1908,9 +1908,11 @@ The older PSCV design proposed `reads`, `modifies`, contract-only `old(...)`, an
 <thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
 <tbody><tr><td valign="top"><pre><code>term ::= &quot;do&quot; doSeq
 // Lean library effect families include StateM / ReaderT / Except</code></pre></td><td valign="top"><pre><code>term ::= &quot;do&quot; &quot;{&quot; psDoSeq &quot;}&quot;
-psDoItem ::= psBaseDoItem | psVerifiedDoItemP0 | psStagedDoItemP1
-// Source selection §0B / §11.7: P1 arm needs explicit registration
-// P0 verified arms retain their 4.35.0 typed and proof-effect prerequisites
+psDoItem ::= psBaseDoItem | psVerifiedDoItemP0
+           | psStagedDoItemP1 | psDivergentDoItemP2
+// Source selection §0B / §11.7: unannotated while is ordinary checked
+// P0 total loops require VCs; P1 handlers require environment registration
+// P2 trace-verified partial loops need a sound separately registered model
 // Original Lean effect types; checked WP law evidence required</code></pre></td></tr></tbody></table>
 
 **Side-by-side examples.**

@@ -562,22 +562,23 @@ callArg ::= term | ident &quot;:=&quot; term
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>declVal ::= &quot;:=&quot; term termination? whereDecls?
-whereDecls ::= &quot;where&quot; localDeclaration+
-// Lean supports indentation and certain semicolon variants</code></pre></td><td valign="top"><pre><code>psDeclVal ::= &quot;:=&quot; term psTermination? psWhere?
-          | &quot;:=&quot; &quot;{&quot; term &quot;}&quot; psTermination? psWhere?
-psWhere ::= &quot;where&quot; &quot;{&quot; psLocalDeclaration+ &quot;}&quot;
-         | &quot;where&quot; &quot;{&quot; psLocalDeclaration* psSpecProofTail &quot;}&quot;
-psLocalDeclaration ::= &quot;def&quot; ident psBinderSeq (&quot;:&quot; term)? psLocalDeclVal
-psLocalDeclVal ::= &quot;:=&quot; term psTermination?
-                 | &quot;:=&quot; &quot;{&quot; term &quot;}&quot; psTermination?
-// Local `def` heads are PSCV0-only sugar, NOT native Lean `where` tokens.
-psSpecProofTail ::= &quot;finally&quot; &quot;{&quot; &quot;|&quot; &quot;spec&quot; &quot;=&gt;&quot;
-                  &quot;{&quot; psTacticSeq &quot;}&quot; &quot;}&quot;
-// Second branch only on a def/function with 4.35.0 intrinsic contract clauses; exactly one spec
-// Braces group local declarations/tactics; lower to Lean `where ... finally | spec => ...`</code></pre></td></tr></tbody></table>
+**Lean source-fidelity:** the pinned [`Command.declValSimple`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean#L188-L205) accepts a body, followed by a termination/fixpoint suffix, followed by optional `where` declarations. This order is preserved.
+
+```text
+psDeclTerm      ::= term | "{" term "}" -- one term, not statements
+psDeclVal       ::= ":=" psDeclTerm psRecursionSuffix? psWhere?
+psConstVal      ::= ":=" psDeclTerm psWhere? -- no recursion suffix
+psRecursionSuffix ::= psTermination | "partial_fixpoint"
+psWhere         ::= "where" "{" psLocalDeclaration+ "}"
+                  | "where" "{" psLocalDeclaration* psSpecProofTail "}"
+psLocalDeclaration ::= "def" ident psBinderSeq (":" term)? psLocalDeclVal
+psLocalDeclVal  ::= ":=" psDeclTerm psRecursionSuffix?
+psSpecProofTail ::= "finally" "{" "|" "spec" "=>" "{" psTacticSeq "}" "}"
+```
+
+A recursion suffix is reserved for selected `def`/`function` declarations and eligible local `where` definitions. It is not inherited by `const`, `theorem` or `opaque`. Local `partial_fixpoint` follows Lean's `Term.letRecDecl` recursion and mutual-clique checks; local `partial`/`unsafe` modifiers are not introduced by this rule. The `spec` section requires an eligible contract and cannot be used as a standalone local theorem.
+
+
 
 **Side-by-side examples.**
 

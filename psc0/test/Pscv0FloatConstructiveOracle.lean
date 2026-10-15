@@ -76,6 +76,11 @@ run_cmd do
   for name in
       [``BitVec.extractLsb'_append_extractLsb',
        ``BitVec.extractLsb'_append_extractLsb'_eq_extractLsb',
+       ``Nat.and_two_pow_sub_one_eq_mod,
+       ``BitVec.toNat_and, ``BitVec.toNat_allOnes,
+       ``BitVec.getElem_allOnes, ``BitVec.getElem_and,
+       ``BitVec.eq_of_toNat_eq,
+       ``PsV7Native.FloatCanonical.andAllOnes_constructive,
        ``BitVec.and_append, ``BitVec.append_left_inj,
        ``BitVec.append_right_inj, ``BitVec.and_zero,
        ``BitVec.and_allOnes,

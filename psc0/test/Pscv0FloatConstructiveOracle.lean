@@ -90,7 +90,11 @@ run_cmd do
        ``Float.Model.ofBits, ``Float32.Model.ofBits,
        ``PsV7Native.FloatCanonical.upstreamPackUnpack_nan,
        ``PsV7Native.FloatCanonical.fromBits64_eq_upstream_ofBits_nan,
-       ``PsV7Native.FloatCanonical.fromBits32_eq_upstream_ofBits_nan] do
+       ``PsV7Native.FloatCanonical.fromBits32_eq_upstream_ofBits_nan,
+       ``PsV7Native.FloatCanonical.upstreamPackUnpack_all64,
+       ``PsV7Native.FloatCanonical.upstreamPackUnpack_all32,
+       ``PsV7Native.FloatCanonical.fromBits64_eq_upstream_ofBits_all,
+       ``PsV7Native.FloatCanonical.fromBits32_eq_upstream_ofBits_all] do
     let dependencies ← Lean.collectAxioms name
     for assumption in dependencies do
       Lean.logInfo m!"PSCV0-FLOAT-UPSTREAM-RESEARCH {name}: {assumption}"

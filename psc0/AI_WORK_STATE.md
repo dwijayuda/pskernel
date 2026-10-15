@@ -1,5 +1,15 @@
 # PSCV0 v7 — AI work state
 
+## F2 registry review; full runtime qualification pending — 15 October 2026
+
+Research `6043e3e1891a326c2cd618925d5b5cfc8ec6c9e2` built the complete native compiler. Independent F1 replay [38729006486](https://github.com/dwijayuda/pskernel/actions/runs/38729006486) and byte-exact F2 replay [38729006492](https://github.com/dwijayuda/pskernel/actions/runs/38729006492) passed. F2 remains exactly 1,229 exported declarations /24 recursor rules /91,024 shared nodes, 11,179,796 source bytes, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. No new axioms or computational replacements.
+
+[Native run38729006660](https://github.com/dwijayuda/pskernel/actions/runs/38729006660) passed the expanded primitive/reducibility audit and all 88 pinned native Float reference observations, then correctly refused the intentional selected-registry expansion. The independently observed exact pins are now reviewed: FNV `fnv1a64:2505184579072579125`, declaration SHA `sha256:387824db2d09a897d682b9e4f3d9695f4b31b30f2eca169d999e243dcfa38f66`, surface SHA `sha256:a90cd3d4ac970e2247329b79a748c5dc7d93b5c9f7d48c94cd0a565c8ec324c7`. Strict checks remain enabled.
+
+The complete F2 code is on `psc0/pscv0-v7-f2-operations-research`; main remains qualified F1 at `262c5819c499256fcd2093746deae4ef3aa2012b`. Next run must qualify source elaboration/erasure, all 843 shared observations, GC Wasm/component execution, WIT/WAT and performance before integration. Do not call F2 or M2+A complete yet. Native .lean only; no pskernel-core, self-hosting/bootstrap or C5.
+
+## Earlier checkpoints (historical; current status above)
+
 ## F2 coherent implementation staged; qualification pending — 15 October 2026
 
 The expanded native logical family passed at research `7393a31700c8aefe8843c4eb92476342786f45be`, [run38724434988](https://github.com/dwijayuda/pskernel/actions/runs/38724434988): **1,229 declarations /24 recursor rules /91,024 shared nodes /11,179,796 source bytes**, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. This includes native Float.decLt/decLe and DecidableEq at both widths. Only the two existing theorem cuts and approved propext/Quot.sound are used. Original upstream correspondence proofs still retain their recorded native-only assumption boundary.

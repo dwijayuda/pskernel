@@ -147,9 +147,9 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
 
 -- Independently measured together with both declaration pins by the strict
--- registry refusal at dd532710 / native CI38712915969.
+-- registry refusal at 6043e3e1 / native CI38729006660 (F2).
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:240050e325b7c7d06827c36bffe7ed017ef18680b61ccf4fa7701807a62874b4"
+  "sha256:a90cd3d4ac970e2247329b79a748c5dc7d93b5c9f7d48c94cd0a565c8ec324c7"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

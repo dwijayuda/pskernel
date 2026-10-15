@@ -81,6 +81,7 @@ jobs:
           set -euo pipefail
           lake env lean --run test/C0OfficialNdjsonReplay.lean
           lake env lean --run test/C0ProofCongruenceRegression.lean
+          lake build Ps.KernelCore.Core.IndexedStoreValidation
           lake env lean --run test/C0IndexedStoreValidationRegression.lean
           lake env lean --run test/C0RecursiveCheckedInferenceRegression.lean
           echo "C0_HASH_ABLATION_NATIVE_REGRESSIONS=passed"

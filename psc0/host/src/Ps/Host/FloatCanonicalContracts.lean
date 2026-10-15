@@ -414,33 +414,74 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
 -- symbolically for EVERY bit pattern; spot observations are not sufficient.
 -- This is native proof research until source Float erasure and each target
 -- representation are independently qualified.
+-- Constructive BitVec field-mask lemmas adapted from the pinned upstream
+-- String/Decode.lean splitting method. No tactic-based SAT oracle or
+-- unchecked theorem is needed; the kernel checks ordinary equality rewrites.
+private theorem maskedHigh_iff {upper lower : Nat}
+    (bits : BitVec (upper + lower)) (mask target : BitVec upper) :
+    bits &&& (mask ++ 0#lower) = target ++ 0#lower ↔
+      bits.extractLsb' lower upper &&& mask = target := by
+  have split : bits = bits.extractLsb' lower upper ++ bits.extractLsb' 0 lower := by
+    rw [BitVec.extractLsb'_append_extractLsb']
+  conv => lhs; rw [split]
+  rw [BitVec.and_append, BitVec.and_zero, BitVec.append_left_inj]
+
+private theorem maskedLow_iff {upper lower : Nat}
+    (bits : BitVec (upper + lower)) (mask target : BitVec lower) :
+    bits &&& (0#upper ++ mask) = 0#upper ++ target ↔
+      bits.extractLsb' 0 lower &&& mask = target := by
+  have split : bits = bits.extractLsb' lower upper ++ bits.extractLsb' 0 lower := by
+    rw [BitVec.extractLsb'_append_extractLsb']
+  conv => lhs; rw [split]
+  rw [BitVec.and_append, BitVec.zero_and, BitVec.append_right_inj]
+
 theorem binary64ExponentMask_iff (bits : BitVec 64) :
     (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
       UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#11) := by
-  change (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
-    bits.extractLsb' 52 11 = (-1#11)
-  grind
+  change
+    (bits &&& ((0#1 ++ BitVec.allOnes 11) ++ 0#52) =
+      ((0#1 ++ BitVec.allOnes 11) ++ 0#52)) ↔
+        bits.extractLsb' 52 11 = BitVec.allOnes 11
+  rw [maskedHigh_iff]
+  have split : bits.extractLsb' 52 12 =
+      bits.extractLsb' 63 1 ++ bits.extractLsb' 52 11 := by
+    simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
+      (x := bits) (start₂ := 63) (start₁ := 52)
+      (len₂ := 1) (len₁ := 11) (by decide)).symm
+  rw [split, BitVec.and_append, BitVec.zero_and,
+      BitVec.and_allOnes, BitVec.append_right_inj]
 
 theorem binary64FractionMask_iff (bits : BitVec 64) :
     (bits &&& 4503599627370495#64 = 0#64) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
-  change (bits &&& 4503599627370495#64 = 0#64) ↔
-    bits.extractLsb' 0 52 = (0#52)
-  grind
+  change (bits &&& (0#12 ++ BitVec.allOnes 52) = 0#12 ++ 0#52) ↔
+    bits.extractLsb' 0 52 = 0#52
+  rw [maskedLow_iff]
+  simp
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
     (bits &&& 2139095040#32 = 2139095040#32) ↔
       UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#8) := by
-  change (bits &&& 2139095040#32 = 2139095040#32) ↔
-    bits.extractLsb' 23 8 = (-1#8)
-  grind
+  change
+    (bits &&& ((0#1 ++ BitVec.allOnes 8) ++ 0#23) =
+      ((0#1 ++ BitVec.allOnes 8) ++ 0#23)) ↔
+        bits.extractLsb' 23 8 = BitVec.allOnes 8
+  rw [maskedHigh_iff]
+  have split : bits.extractLsb' 23 9 =
+      bits.extractLsb' 31 1 ++ bits.extractLsb' 23 8 := by
+    simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
+      (x := bits) (start₂ := 31) (start₁ := 23)
+      (len₂ := 1) (len₁ := 8) (by decide)).symm
+  rw [split, BitVec.and_append, BitVec.zero_and,
+      BitVec.and_allOnes, BitVec.append_right_inj]
 
 theorem binary32FractionMask_iff (bits : BitVec 32) :
     (bits &&& 8388607#32 = 0#32) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
-  change (bits &&& 8388607#32 = 0#32) ↔
-    bits.extractLsb' 0 23 = (0#23)
-  grind
+  change (bits &&& (0#9 ++ BitVec.allOnes 23) = 0#9 ++ 0#23) ↔
+    bits.extractLsb' 0 23 = 0#23
+  rw [maskedLow_iff]
+  simp
 
 -- Exactly the mask/branch behavior of the selected
 -- PsStandard.canonicalFloat64Bits function, expressed on its bit carrier.

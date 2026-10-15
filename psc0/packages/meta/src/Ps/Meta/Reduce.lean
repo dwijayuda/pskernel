@@ -129,7 +129,11 @@ def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
               | .instances | .«implicit» => true
               | .reducible => allowed
               | _ => false
-            if !projectionMode || !psEnvironmentCanUnfold environment .«default» name then
+            let classField := match name with
+              | .str owner _ => environment.classes.any (psNameEq owner)
+              | _ => false
+            if !classField || !projectionMode ||
+                !psEnvironmentCanUnfold environment .«default» name then
               fallback ()
             else
               let beta := psWhnfCore metaContext localContext (psReduceApply value view.args)

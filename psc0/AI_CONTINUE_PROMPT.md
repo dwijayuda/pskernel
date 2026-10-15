@@ -1,4 +1,6 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
+Class-projection review refinement: only names directly owned by registered classes enter speculative projection beta reduction; ordinary constants keep their fast path. The focused oracle uses explicit empty contexts and a well-scoped local dictionary. Qualification pending.
+
 ## Shared class-projection reduction prerequisite — 15 October 2026
 
 Native38751673594 reached the older `Numeric.generic` regression and exposed a general reduction gap: instance transparency could not reduce a checked class field such as `OfNat.ofNat Nat 857 instOfNatNat` inside a dependent instance index. Restoring raw Nat literal shortcuts would hide the defect and break local dictionaries. Pinned Lean `src/Lean/Meta/WHNF.lean` (`isProjInst`, `unfoldProjInst?`, `unfoldProjInstWhenInstances?`, `unfoldDefault`) provides the correct rule; `GetUnfoldableConst.lean`, `tests/elab/instanceReducibility.lean` and `tests/elab/isDefEqProjInstWithMVar.lean` were studied.

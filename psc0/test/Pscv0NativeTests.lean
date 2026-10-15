@@ -2808,18 +2808,20 @@ private def transparencyBoundaries : IO Unit := do
   let explicit := project (psExprApplyMany
     (.constE (psDecisionName "OfNat.mk") [.zero]) [nat, n, .lit (.natural 42)])
   for mode in [PsTransparency.instances, .«implicit»] do
-    unless psExprAlphaEq (psWhnfWithTransparency mode original {} {} concrete) n do
+    unless psExprAlphaEq (psWhnfWithTransparency mode original psMetaEmpty psLocalEmpty concrete) n do
       throw (IO.userError "class projection failed at instance transparency")
-    unless psExprAlphaEq (psWhnfWithTransparency mode original {} {} explicit) (.lit (.natural 42)) do
+    unless psExprAlphaEq (psWhnfWithTransparency mode original psMetaEmpty psLocalEmpty explicit) (.lit (.natural 42)) do
       throw (IO.userError "class projection discarded explicit dictionary evidence")
-  unless psExprAlphaEq (psWhnfWithTransparency .reducible original {} {} concrete) concrete do
+  unless psExprAlphaEq (psWhnfWithTransparency .reducible original psMetaEmpty psLocalEmpty concrete) concrete do
     throw (IO.userError "class field unfolded at reducible transparency")
   let blocked := psEnvironmentSetReducibility original
     (psDecisionName "PsStandard.instOfNatNat") .irreducible
-  unless psExprAlphaEq (psWhnfWithTransparency .instances blocked {} {} concrete) concrete do
+  unless psExprAlphaEq (psWhnfWithTransparency .instances blocked psMetaEmpty psLocalEmpty concrete) concrete do
     throw (IO.userError "irreducible dictionary unfolded at instance transparency")
-  let stuck := project (.fvar 0)
-  unless psExprAlphaEq (psWhnfWithTransparency .instances original {} {} stuck) stuck do
+  let family := psExprApplyMany (.constE (psRootName "OfNat") [.zero]) [nat, n]
+  let local := psLocalPushBinding psLocalEmpty (psRootName "dictionary") family .instanceImplicit
+  let stuck := project (.fvar local.id)
+  unless psExprAlphaEq (psWhnfWithTransparency .instances original psMetaEmpty local.context stuck) stuck do
     throw (IO.userError "stuck class projection lost its canonical application")
   IO.println "PSCV0_TRANSPARENCY: PASS abbreviations, native class projections, stuck/irreducible evidence, rigid refusal and metadata drift"
 

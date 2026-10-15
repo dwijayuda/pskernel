@@ -250,15 +250,18 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
   let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary64) bits
   let exponent := UnpackedFloat.unpackExponent (spec := Format.binary64) bits
   let joined : BitVec 53 := (1#1) ++ mantissa
+  have hMantBound : mantissa.toNat < 2 ^ 52 := by
+    simpa [Format.binary64] using mantissa.isLt
   have hjoin : joined.toNat = 2 ^ 52 + mantissa.toNat := by
-    simp [joined, BitVec.toNat_append_eq_mul_add]
+    change ((1#1) ++ mantissa).toNat = 2 ^ 52 + mantissa.toNat
+    rw [BitVec.toNat_append]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt hMantBound]
+    simp [Nat.shiftLeft_eq, Format.binary64]
   have hlow : 2 ^ 52 ≤ joined.toNat := by omega
   have hhigh : joined.toNat < 2 ^ (52 + 1) := by
     have hdouble : 2 ^ (52 + 1) = 2 ^ 52 + 2 ^ 52 := by
       simp [Nat.pow_succ]
-      omega
     rw [hdouble]
-    have hbound := mantissa.isLt
     omega
   have hpositive : joined.toNat ≠ 0 := by
     have hpow : 0 < 2 ^ 52 := by decide
@@ -268,7 +271,7 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
   have hmask : BitVec.ofNat 52 joined.toNat = mantissa := by
     apply (BitVec.toNat_inj).mp
     simp [BitVec.toNat_ofNat, hjoin, Nat.add_mod,
-      Nat.mod_eq_of_lt mantissa.isLt]
+      Nat.mod_eq_of_lt hMantBound]
   have hnotMax : exponent.toNat ≠ 2047 := by
     intro h
     have ht : exponent = (-1#11) := by
@@ -276,8 +279,9 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
       simpa using h
     exact heTop (by simpa [exponent] using ht)
   have hnoOverflow : ¬ (2 ^ 11 ≤ exponent.toNat + 1) := by
-    have hbound := exponent.isLt
-    norm_num
+    have hExpBound : exponent.toNat < 2 ^ 11 := by
+      simpa [Format.binary64] using exponent.isLt
+    have hPow : (2 : Nat) ^ 11 = 2048 := by decide
     omega
   have hrec := reconstructPackedFields64 bits
   simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
@@ -295,15 +299,18 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
   let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary32) bits
   let exponent := UnpackedFloat.unpackExponent (spec := Format.binary32) bits
   let joined : BitVec 24 := (1#1) ++ mantissa
+  have hMantBound : mantissa.toNat < 2 ^ 23 := by
+    simpa [Format.binary32] using mantissa.isLt
   have hjoin : joined.toNat = 2 ^ 23 + mantissa.toNat := by
-    simp [joined, BitVec.toNat_append_eq_mul_add]
+    change ((1#1) ++ mantissa).toNat = 2 ^ 23 + mantissa.toNat
+    rw [BitVec.toNat_append]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt hMantBound]
+    simp [Nat.shiftLeft_eq, Format.binary32]
   have hlow : 2 ^ 23 ≤ joined.toNat := by omega
   have hhigh : joined.toNat < 2 ^ (23 + 1) := by
     have hdouble : 2 ^ (23 + 1) = 2 ^ 23 + 2 ^ 23 := by
       simp [Nat.pow_succ]
-      omega
     rw [hdouble]
-    have hbound := mantissa.isLt
     omega
   have hpositive : joined.toNat ≠ 0 := by
     have hpow : 0 < 2 ^ 23 := by decide
@@ -313,7 +320,7 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
   have hmask : BitVec.ofNat 23 joined.toNat = mantissa := by
     apply (BitVec.toNat_inj).mp
     simp [BitVec.toNat_ofNat, hjoin, Nat.add_mod,
-      Nat.mod_eq_of_lt mantissa.isLt]
+      Nat.mod_eq_of_lt hMantBound]
   have hnotMax : exponent.toNat ≠ 255 := by
     intro h
     have ht : exponent = (-1#8) := by
@@ -321,8 +328,9 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
       simpa using h
     exact heTop (by simpa [exponent] using ht)
   have hnoOverflow : ¬ (2 ^ 8 ≤ exponent.toNat + 1) := by
-    have hbound := exponent.isLt
-    norm_num
+    have hExpBound : exponent.toNat < 2 ^ 8 := by
+      simpa [Format.binary32] using exponent.isLt
+    have hPow : (2 : Nat) ^ 8 = 256 := by decide
     omega
   have hrec := reconstructPackedFields32 bits
   simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,

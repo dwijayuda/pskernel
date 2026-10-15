@@ -44,14 +44,14 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 6452982
           echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
           echo "C0_INIT_STALL_SOURCE exact_pinned_bytes=6452982 digest=verified"
-      - name: Resolve names around first unresolved full-Init stall
+      - name: Resolve declaration names after verified 5068793 prefix
         shell: bash
         run: |
           set -euo pipefail
           python3 -m py_compile psc0/packages/pskernel-c0/test/C0InitStallWindow.py
           python3 psc0/packages/pskernel-c0/test/C0InitStallWindow.py \
             "$RUNNER_TEMP/Init-4.35.0.ndjson" \
-            --start 5060000 --end 5070000 --after 5064933 \
+            --start 5068794 --end 5120000 --after 5068793 \
             --output "$RUNNER_TEMP/C0-init-stall-window.json"
           echo "C0_INIT_STALL_REPORT diagnostic_only=no_kernel_verdict"
       - uses: actions/upload-artifact@v4

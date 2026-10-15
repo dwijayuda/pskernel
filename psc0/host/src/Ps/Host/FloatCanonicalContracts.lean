@@ -419,28 +419,28 @@ theorem binary64ExponentMask_iff (bits : BitVec 64) :
       UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#11) := by
   change (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
     bits.extractLsb' 52 11 = (-1#11)
-  bv_decide
+  grind
 
 theorem binary64FractionMask_iff (bits : BitVec 64) :
     (bits &&& 4503599627370495#64 = 0#64) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
   change (bits &&& 4503599627370495#64 = 0#64) ↔
     bits.extractLsb' 0 52 = (0#52)
-  bv_decide
+  grind
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
     (bits &&& 2139095040#32 = 2139095040#32) ↔
       UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#8) := by
   change (bits &&& 2139095040#32 = 2139095040#32) ↔
     bits.extractLsb' 23 8 = (-1#8)
-  bv_decide
+  grind
 
 theorem binary32FractionMask_iff (bits : BitVec 32) :
     (bits &&& 8388607#32 = 0#32) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
   change (bits &&& 8388607#32 = 0#32) ↔
     bits.extractLsb' 0 23 = (0#23)
-  bv_decide
+  grind
 
 -- Exactly the mask/branch behavior of the selected
 -- PsStandard.canonicalFloat64Bits function, expressed on its bit carrier.

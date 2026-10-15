@@ -48,30 +48,30 @@ jobs:
           start=s.index("def psKernelExprHasLooseAt\n")
           end=s.index("\ndef psKernelExprHasLooseBVar\n",start)
           replacement="""/-- Diagnostic source-exact direct recursion, short-circuits before
-    constructing subtree functions. Never substitutes a checking judgment. -/
-def psKernelC0HasLooseAtDirect (expr : PsKernelExpr) (offset : Nat) : Bool :=
-  match expr with
-  | .bvar index => Nat.ble offset index
-  | .app fn arg =>
-      psKernelC0HasLooseAtDirect fn offset ||
-        psKernelC0HasLooseAtDirect arg offset
-  | .lam _ type body _ =>
-      psKernelC0HasLooseAtDirect type offset ||
-        psKernelC0HasLooseAtDirect body (offset + 1)
-  | .forallE _ type body _ =>
-      psKernelC0HasLooseAtDirect type offset ||
-        psKernelC0HasLooseAtDirect body (offset + 1)
-  | .letE _ type value body _ =>
-      psKernelC0HasLooseAtDirect type offset ||
-        psKernelC0HasLooseAtDirect value offset ||
-        psKernelC0HasLooseAtDirect body (offset + 1)
-  | .mdata _ body => psKernelC0HasLooseAtDirect body offset
-  | .proj _ _ body => psKernelC0HasLooseAtDirect body offset
-  | _ => false
-
-def psKernelExprHasLooseAt (expr : PsKernelExpr) : Nat → Bool :=
-  fun offset => psKernelC0HasLooseAtDirect expr offset
-"""
+              constructing subtree functions. Never substitutes a checking judgment. -/
+          def psKernelC0HasLooseAtDirect (expr : PsKernelExpr) (offset : Nat) : Bool :=
+            match expr with
+            | .bvar index => Nat.ble offset index
+            | .app fn arg =>
+                psKernelC0HasLooseAtDirect fn offset ||
+                  psKernelC0HasLooseAtDirect arg offset
+            | .lam _ type body _ =>
+                psKernelC0HasLooseAtDirect type offset ||
+                  psKernelC0HasLooseAtDirect body (offset + 1)
+            | .forallE _ type body _ =>
+                psKernelC0HasLooseAtDirect type offset ||
+                  psKernelC0HasLooseAtDirect body (offset + 1)
+            | .letE _ type value body _ =>
+                psKernelC0HasLooseAtDirect type offset ||
+                  psKernelC0HasLooseAtDirect value offset ||
+                  psKernelC0HasLooseAtDirect body (offset + 1)
+            | .mdata _ body => psKernelC0HasLooseAtDirect body offset
+            | .proj _ _ body => psKernelC0HasLooseAtDirect body offset
+            | _ => false
+          
+          def psKernelExprHasLooseAt (expr : PsKernelExpr) : Nat → Bool :=
+            fun offset => psKernelC0HasLooseAtDirect expr offset
+          """
           assert "psKernelExprHasLooseAt" in s[start:end]
           path.write_text(s[:start]+replacement+s[end:])
           print("C0_DIRECT_LOOSE_BVAR_ABLATION source_equivalent=true diagnostic_only=true")

@@ -6,7 +6,9 @@ on:
     branches: [psc0/pscv0-v7-native-lean-v1]
     paths:
       - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
+      - 'psc0/host/src/Ps/Host/FloatCanonicalContracts.lean'
       - 'psc0/host/src/Ps/Host/StandardExport.lean'
+      - 'psc0/test/Pscv0FloatConstructiveOracle.lean'
       - 'psc0/scripts/Pscv0Native.lean'
       - 'psc0/v7-native/lakefile.lean'
       - '.github/workflows/psc0-pscv0-f1-canonical-model.yml'
@@ -50,6 +52,7 @@ jobs:
             /psc0/packages/backend-wasm/src/
             /psc0/packages/pskernel-lean/provider/
             /psc0/host/src/
+            /psc0/test/
             /psc0/scripts/
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
@@ -71,7 +74,7 @@ jobs:
       - name: Replay verified native canonical Float model in portable kernel
         run: |
           set -euo pipefail
-          lake build pscv0_native
+          lake build pscv0_native PsV7FloatConstructiveOracle
           mkdir -p ../dist/pscv0-f1-constructive
           test -f .lake/build/lib/lean/Ps/Host/FloatCanonical.olean
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"

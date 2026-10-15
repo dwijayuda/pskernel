@@ -1,5 +1,34 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — F1 representation-contract integration candidate (not qualified)
+
+**Last confirmed green executable:** `ffa1460341bc6e3ec24b8ede5c586743fb9f4abf`,
+[Linux CI 38656809748](https://github.com/dwijayuda/pskernel/actions/runs/38656809748).
+PR #109 and the branch HEAD were verified before authoring; no newer branch history was overwritten.
+
+**Submitted source candidate:** preserve `Ps.Host.FloatCanonical` unchanged; add
+nine native Lean proof scripts in `Ps.Host.FloatCanonicalContracts` for canonical
+validity/fixed points, constructor bit representations, logical Float/Float32
+reconstruction and equality through canonical bits. A single fourteen-root
+roster now drives both the existing portable exporter and the native
+transitive axiom audit. The existing positive research replay workflow builds
+the oracle and checks out test sources. Existing selected Standard and runtime
+capability refusals remain unchanged; the full upstream Float export remains
+manual-only, with its previous List/Int incompatibility explicitly unresolved.
+
+**Unqualified at this checkpoint:** this is an implementation candidate under
+the existing CI gate, not nine proven theorems. No new Lean compilation,
+portable replay, runtime correspondence, performance receipt or M2+A acceptance
+has been verified for these changes yet. A compact model replay, if green,
+would still not prove equality to upstream `Float.ofBits` for all raw bits.
+
+**Next gates:** check the native proof scripts and entire roster with exact
+Lean 4.35.0, reject every axiom outside `propext` and `Quot.sound`, replay
+the compact closure through the existing portable kernel, then prove the
+separate upstream all-input constructor correspondence. Subsequently close
+Float F1–F4, target-explicit USize/ISize profiles and selected Phase A.
+No pskernel-core, self-hosting, bootstrap, C5 or later milestones.
+
 ## 15 October — target-word semantic ownership and fast-gate policy
 
 **Last qualified executable:** `f5f9c7f87b77d9700bc52ca02882ae1f1dbab73e`,

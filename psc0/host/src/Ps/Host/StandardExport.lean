@@ -9,7 +9,7 @@ import Ps.Host.StandardClosure
 import Ps.Meta.Reduce
 import Ps.Host.StandardSource
 import Ps.Host.FloatConstructive
-import Ps.Host.FloatCanonical
+import Ps.Host.FloatCanonicalContracts
 
 namespace PsV7Native
 
@@ -697,12 +697,10 @@ def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit :=
 def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := do
   let selected := psSelfHostProdPreludeEnvironment.declarations
   exportStandardCore {
-    roots := [`PsV7Native.FloatCanonical.fromBits64,
-              `PsV7Native.FloatCanonical.fromBits32,
-              `PsV7Native.FloatCanonical.canonicalPacked_idempotent]
+    roots := FloatCanonical.contractRoots
     boundary := selected.map psDeclarationName
     baseDeclarations := selected
-    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonical }]
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts }]
     allowedAssumptions := [`propext, `Quot.sound]
     shareSource := true
     publicPrefix := "psStandardFloatCanonicalModel"

@@ -1,6 +1,6 @@
 import Lean
 import Ps.Host.FloatConstructive
-import Ps.Host.FloatCanonical
+import Ps.Host.FloatCanonicalContracts
 import Lean.Util.CollectAxioms
 
 /-! Independent native Lean 4.35.0 verification. Not selected Standard. -/
@@ -71,12 +71,10 @@ run_cmd do
 #guard (PsV7Native.FloatCanonical.fromBits32 1).toBits == (1 : UInt32)
 
 run_cmd do
-  for name in [``PsV7Native.FloatCanonical.canonicalPacked_valid,
-      ``PsV7Native.FloatCanonical.canonicalPacked_idempotent,
-      ``PsV7Native.FloatCanonical.fromBits64,
-      ``PsV7Native.FloatCanonical.fromBits32] do
+  -- Audit exactly the same roots that the independent exporter replays.
+  -- Reject every unapproved axiom, not just two familiar forbidden names.
+  for name in PsV7Native.FloatCanonical.contractRoots do
     let dependencies ← Lean.collectAxioms name
-    if dependencies.contains ``Classical.choice then
-      throwError "PSCV0-FLOAT-F1: constructive Valid proof imports Classical.choice"
-    if dependencies.contains ``sorryAx then
-      throwError "PSCV0-FLOAT-F1: constructive Valid proof imports sorryAx"
+    for assumption in dependencies do
+      unless [``propext, ``Quot.sound].contains assumption do
+        throwError "PSCV0-FLOAT-F1: {name} imports unapproved axiom {assumption}"

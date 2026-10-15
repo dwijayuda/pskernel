@@ -1,0 +1,98 @@
+name: PSKernel-C0 checked Pi suffix reanalysis ablation
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-pi-range-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pi-range:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce original Lean and exact 15758-record hard theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+             test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/ranges-wf.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/ranges-wf.ndjson" > "$RUNNER_TEMP/ranges-wf-official.txt" 2>&1)
+          test "$(stat -c%s "$RUNNER_TEMP/ranges-wf.ndjson")" -eq 777157
+          test "$(wc -l < "$RUNNER_TEMP/ranges-wf.ndjson")" -eq 15758
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/ranges-wf.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/ranges-wf-official.txt"
+      - name: Disable only eager checked-application Pi suffix rebuilding in disposable C0
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Inference.lean")
+          s=path.read_text()
+          start=s.index("def psKernelC0CheckAppRecursiveResummarized\n")
+          end=s.index("\ndef psKernelCheckWithFuel\n",start)
+          before=s[start:end]
+          original="(Nat.min 1024 fuel) true whnf defeq context state expr"
+          assert before.count(original)==1, "Unrecognized source; refusing ablation"
+          replacement=before.replace(original,"(Nat.min 1024 fuel) false whnf defeq context state expr")
+          path.write_text(s[:start]+replacement+s[end:])
+          print("C0_PI_RANGE_ABLATION production=false only_source_exact_old_mode=true")
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Keep negative source and checked theorem regression semantics
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+      - name: Measure exact pinned WF source replay with old Pi-range mode
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/ranges-wf-resources.txt" \
+              timeout 180s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/ranges-wf.ndjson" 4096) \
+              > "$RUNNER_TEMP/ranges-wf-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_PI_RANGE_ABLATION_EXIT=$rc"
+          grep "C0_REAL_EXPORT replay_outcome" "$RUNNER_TEMP/ranges-wf-c0.txt" | tail -n 2 || true
+          grep "C0_REAL_EXPORT_SLOW_DECL" "$RUNNER_TEMP/ranges-wf-c0.txt" | tail -n 3 || true
+          if test "$rc" -eq 0 &&
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096" "$RUNNER_TEMP/ranges-wf-c0.txt"; then
+            echo "C0_PI_RANGE_ABLATION_RESULT=accepted_dependency_candidate_only"
+          else
+            echo "C0_PI_RANGE_ABLATION_RESULT=timeout_or_nonacceptance"
+          fi
+          cat "$RUNNER_TEMP/ranges-wf-resources.txt"
+          echo "C0_PI_RANGE_ABLATION_SCOPE=untrusted_diagnostic_only"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pi-range-ablation
+          path: |
+            ${{ runner.temp }}/ranges-wf-official.txt
+            ${{ runner.temp }}/ranges-wf-c0.txt
+            ${{ runner.temp }}/ranges-wf-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

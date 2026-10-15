@@ -10,6 +10,10 @@ Repository dwijayuda/pskernel. Use GitHub connector and cloud Linux CI exclusive
 Development psc0/pscv0-v7-native-lean-v1; draft PR109 targets psc0/pscv0-v7-m1-parser-ownership-v1. Keep draft, never merge. Research psc0/pscv0-v7-platform-words-research. Preserve both histories and newer development docs when integrating. Update both handoff files and roadmap/status every milestone. Interleave M2+A -> M3+B -> M4+C/D -> M5/E; current user asks to complete M2+A.
 
 
+## Qualification harness typing checkpoint
+
+Native [38818184051](https://github.com/dwijayuda/pskernel/actions/runs/38818184051) at `eece105251afef55109fba859222130fd8e1c078` stopped in compilation of the new independent checked-program harness: nested Option/Except anonymous-constructor patterns lacked the inferred inner expected type. The result is now unpacked through the same ordered batch/optional-result/Except pattern used throughout the existing native suite. No portable compiler changes or relaxed assertions. Await fresh native qualification.
+
 ## Resumed checkpoint: isolate global operator defaults completely
 
 User resumed work after the low-usage handoff. Native [38817100562](https://github.com/dwijayuda/pskernel/actions/runs/38817100562) at `990fba97e4a196736147460aceb780242644a244` passed compilation (including the independent pinned Lean oracle), parser/strict selected profile and all frozen assets, then stopped at source `equalityFalse`. The original arithmetic case progressed. The same high-priority global operator default still redirects two unknown operands inside relations, which intentionally do not inherit the Boolean expected type. A custom operand type alone cannot isolate a global default.

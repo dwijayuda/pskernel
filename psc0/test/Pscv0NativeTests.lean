@@ -2978,14 +2978,15 @@ private def defaultInstanceBoundaries : IO Unit := do
     "const selected: Nat := Bag.value(2 * Bag.mk(11))\n" ++
     "theorem selectedValue: selected = 22 := by { rfl }\n"
   let checked ← PsV7Native.runBatch #[{ source := defaultSource }]
-  match checked with
-  | .error problem => throw (IO.userError ("operator default kernel batch: " ++ problem.message))
-  | .ok batch =>
-    match batch.results[0]? with
-    | some (.ok _) => pure ()
-    | some (.error problem) =>
-      throw (IO.userError ("operator default checked value: " ++ problem.message))
-    | none => throw (IO.userError "operator default kernel result missing")
+  let batch ← match checked with
+    | .error problem => throw (IO.userError ("operator default kernel batch: " ++ problem.message))
+    | .ok batch => pure batch
+  let some response := batch.results[0]?
+    | throw (IO.userError "operator default kernel result missing")
+  match response with
+  | .ok _ => pure ()
+  | .error problem =>
+    throw (IO.userError ("operator default checked value: " ++ problem.message))
   -- Same intentionally interfering default as the independent native oracle.
   -- Keep this isolated from the shared runtime application's global registry.
   let interference :=

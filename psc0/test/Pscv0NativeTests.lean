@@ -39,6 +39,31 @@ example (a : Int) (n : Nat) : a ^ n = Int.pow a n := rfl
 #guard (18446744073709551617 : Nat) >>> 1000000000000000000000 == 0
 #guard (0 : Nat) <<< 1000000000000000000000 == 0
 
+-- A globally selected heterogeneous default can intentionally redirect an
+-- unknown operand. A namespace does not make that default local. Preserve
+-- the Lean refusal as a differential boundary; keep the runtime fixture's
+-- numeric domain distinct so it cannot alter unrelated Nat arithmetic.
+namespace OperatorDefaultIsolationOracle
+structure Bag where
+  value : Nat
+section
+@[default_instance 1100] local instance : HMul Nat Bag Bag where
+  hMul a b := ⟨a * b.value⟩
+example : True := by
+  fail_if_success
+    have : Nat := 17 % 5 * 2 + 3
+  trivial
+end
+structure Scale where
+  value : Nat
+local instance {n : Nat} : OfNat Scale n where ofNat := ⟨n⟩
+local instance : Mul Bag where mul a b := ⟨a.value * b.value⟩
+@[default_instance 1100] local instance : HMul Scale Bag Bag where
+  hMul a b := ⟨a.value * b.value⟩
+#guard (2 * Bag.mk 11).value == 22
+#guard (17 % 5 * 2 + 3 : Nat) == 7
+end OperatorDefaultIsolationOracle
+
 -- Independent pinned native WHNF oracle for class projection transparency.
 run_meta do
   let n := Lean.mkRawNatLit 857
@@ -794,7 +819,7 @@ private def arrayFilterFixture : String :=
   "namespace FilterCases\nuniverse u\nfunction keep{A: Type u}(predicate: A -> Bool, values: Array A): Array A := Array.filter(predicate, values)\nfunction greater(limit: Nat): Nat -> Bool := fun value => if (limit < value) { true } else { false }\nfunction rendered(start: Nat, stop: Nat): String := reprStr(Array.toList(Array.filter(greater(2), #[1, 2, 5, 2, 7, 7], start := start, stop := stop)))\nstructure High: Type 1 where { value: Nat }\nconst high: Array High := keep(fun value => if (2 < value.value) { true } else { false }, #[High.mk(1), High.mk(5)])\nconst partial: (Nat -> Bool) -> Array Nat -> Nat -> Nat -> Array Nat := Array.filter(α := Nat)\nend FilterCases\nconst arrayFilterDefault: String := reprStr(Array.toList(Array.filter(FilterCases.greater(2), #[1, 2, 5, 2, 7, 7])))\nconst arrayFilterStart: String := reprStr(Array.toList(Array.filter(fun _ => true, #[1, 2, 5, 2, 7, 7], start := 3)))\nconst arrayFilterStop: String := reprStr(Array.toList(Array.filter(fun _ => true, #[1, 2, 5, 2, 7, 7], stop := 3)))\nconst arrayFilterNone: String := reprStr(Array.toList(Array.filter(fun _ => false, #[1, 2, 5])))\nconst arrayFilterEmpty: String := reprStr(Array.toList(Array.filter(fun _ => true, (#[] : Array Nat))))\nconst arrayFilterPartial: String := reprStr(Array.toList(FilterCases.partial(FilterCases.greater(2), #[1, 2, 5, 2, 7, 7], 0, 100)))\nconst arrayFilterHigh: Nat := (Array.getD(FilterCases.high, 0, FilterCases.High.mk(0))).value\nconst arrayFilterPersistent: String := { let source := #[1, 2, 5]\n let filtered := Array.filter(fun value => if (1 < value) { true } else { false }, source)\n reprStr(Array.toList(source)) ++ \"/\" ++ reprStr(Array.toList(Array.push(filtered, 9))) }\nfunction arrayFilterBounds(start: Nat, stop: Nat): String := FilterCases.rendered(start, stop)\ntheorem arrayFilterModel: Array.toList(Array.filter(fun _ => true, #[1, 2], start := 0, stop := 2)) = [1, 2] := by { rfl }\n"
 
 private def operatorTreeFixture : String :=
-  "namespace OperatorTree\nstructure Bag where { value: Nat }\ninstance plus: Add Bag where { add := fun a => fun b => Bag.mk(a.value + b.value) }\ninstance times: Mul Bag where { mul := fun a => fun b => Bag.mk(a.value * b.value) }\n@[default_instance 1100]\ninstance scale: HMul(Nat, Bag, Bag) where { hMul := fun a => fun b => Bag.mk(a * b.value) }\nstructure Tag where { value: Nat }\ninstance combine: HAdd(Bag, Tag, Nat) where { hAdd := fun a => fun b => a.value + b.value }\nend OperatorTree\nfunction operatorTreePromote(n: Nat, i: Int): Int := (n + 0) + i\nfunction operatorTreeReverse(n: Nat, i: Int): Int := i + (0 + n)\nfunction operatorExpected(n: Nat): Int := n + 1\nfunction operatorTreeNeg(n: Nat, i: Int): Int := -n + i\nfunction operatorRelation(n: Nat, i: Int): Bool := if (n < i) { true } else { false }\nfunction operatorBooleanRelation(n: Nat): Bool := (n < 2) == (n ≤ 1)\nfunction operatorPropBool(n: Nat): Bool := n < 2\nfunction operatorPowerNat(a: Nat, b: Nat, c: Nat): Nat := a ^ b ^ c\nfunction operatorPowerInt(a: Int, n: Nat): Int := a ^ n\nfunction operatorShiftLeft(a: Nat, n: Nat): Nat := a <<< n\nfunction operatorShiftRight(a: Nat, n: Nat): Nat := a >>> n\nconst operatorWordShift: Nat := UInt8.toNat((129 : UInt8) <<< 1)\nconst operatorSignedShift: Int := Int64.toInt((-9 : Int64) >>> 2)\nconst operatorWordPower: Nat := UInt8.toNat((3 : UInt8) ^ 6)\nconst operatorHeterogeneous: Nat := OperatorTree.Bag.mk(5) + OperatorTree.Tag.mk(7)\nconst operatorHeterogeneousDefault: Nat := OperatorTree.Bag.value(2 * OperatorTree.Bag.mk(11))\ntheorem operatorLeafCoercions(n: Nat, i: Int): (n + 0) + i = Int.add(Int.add(Int.ofNat(n), 0), i) := by { rfl }\ntheorem operatorRightAction(a: Int, n: Nat): a ^ n = Int.pow(a, n) := by { rfl }\n"
+  "namespace OperatorTree\nstructure Bag where { value: Nat }\ninstance plus: Add Bag where { add := fun a => fun b => Bag.mk(a.value + b.value) }\ninstance times: Mul Bag where { mul := fun a => fun b => Bag.mk(a.value * b.value) }\nstructure Scale where { value: Nat }\ninstance scaleLiteral{n: Nat}: OfNat(Scale, n) where { ofNat := Scale.mk(n) }\n@[default_instance 1100]\ninstance scale: HMul(Scale, Bag, Bag) where { hMul := fun a => fun b => Bag.mk(a.value * b.value) }\nstructure Tag where { value: Nat }\ninstance combine: HAdd(Bag, Tag, Nat) where { hAdd := fun a => fun b => a.value + b.value }\nend OperatorTree\nfunction operatorTreePromote(n: Nat, i: Int): Int := (n + 0) + i\nfunction operatorTreeReverse(n: Nat, i: Int): Int := i + (0 + n)\nfunction operatorExpected(n: Nat): Int := n + 1\nfunction operatorTreeNeg(n: Nat, i: Int): Int := -n + i\nfunction operatorRelation(n: Nat, i: Int): Bool := if (n < i) { true } else { false }\nfunction operatorBooleanRelation(n: Nat): Bool := (n < 2) == (n ≤ 1)\nfunction operatorPropBool(n: Nat): Bool := n < 2\nfunction operatorPowerNat(a: Nat, b: Nat, c: Nat): Nat := a ^ b ^ c\nfunction operatorPowerInt(a: Int, n: Nat): Int := a ^ n\nfunction operatorShiftLeft(a: Nat, n: Nat): Nat := a <<< n\nfunction operatorShiftRight(a: Nat, n: Nat): Nat := a >>> n\nconst operatorWordShift: Nat := UInt8.toNat((129 : UInt8) <<< 1)\nconst operatorSignedShift: Int := Int64.toInt((-9 : Int64) >>> 2)\nconst operatorWordPower: Nat := UInt8.toNat((3 : UInt8) ^ 6)\nconst operatorHeterogeneous: Nat := OperatorTree.Bag.mk(5) + OperatorTree.Tag.mk(7)\nconst operatorHeterogeneousDefault: Nat := OperatorTree.Bag.value(2 * OperatorTree.Bag.mk(11))\ntheorem operatorLeafCoercions(n: Nat, i: Int): (n + 0) + i = Int.add(Int.add(Int.ofNat(n), 0), i) := by { rfl }\ntheorem operatorRightAction(a: Int, n: Nat): a ^ n = Int.pow(a, n) := by { rfl }\n"
 
 private def logicDecisionFixture : String :=
   "function logicIntEquality(a: Int, b: Int): Bool := if (a = b) { true } else { false }\nfunction logicAnd(a: Nat, b: Nat): Bool := if ((a < b) ∧ (a ≤ b)) { true } else { false }\nfunction logicOr(a: Nat, b: Nat): Bool := if ((a < b) ∨ (a = b)) { true } else { false }\nfunction logicNot(a: Nat, b: Nat): Bool := if (a ≠ b) { true } else { false }\nfunction logicImplies(a: Nat, b: Nat): Bool := if ((a < b) -> (a ≤ b)) { true } else { false }\nfunction logicIff(a: Nat, b: Nat): Bool := if ((a < b) ↔ (a ≤ b)) { true } else { false }\nfunction logicTrue(a: Nat, b: Nat): Bool := if (True) { true } else { false }\nfunction logicFalse(a: Nat, b: Nat): Bool := if (False) { true } else { false }\nfunction logicDecisions(a: Nat, b: Nat): String := reprStr([logicAnd(a, b), logicOr(a, b), logicNot(a, b), logicImplies(a, b), logicIff(a, b), logicTrue(a, b), logicFalse(a, b)])\nfunction intComparison(a: Int, b: Int): String := reprStr([if (a < b) { true } else { false }, if (a ≤ b) { true } else { false }, if (a > b) { true } else { false }, if (a ≥ b) { true } else { false }])\n"
@@ -2922,6 +2947,19 @@ private def defaultInstanceBoundaries : IO Unit := do
     let parsed ← get "default failure parse" (psCompilerParsePscv0 source)
     if (psElabProgram environment parsed).isOk then
       throw (IO.userError "definite ordinary failure incorrectly reached defaulting")
+  -- Same intentionally interfering default as the independent native oracle.
+  -- Keep this isolated from the shared runtime application's global registry.
+  let interference :=
+    "structure Bag where { value: Nat }\n" ++
+    "@[default_instance 1100]\n" ++
+    "instance scale: HMul(Nat, Bag, Bag) where { hMul := fun a => fun b => Bag.mk(a * b.value) }\n" ++
+    "const rejected: Nat := 17 % 5 * 2 + 3\n"
+  let parsed ← get "operator default interference parse" (psCompilerParsePscv0 interference)
+  match psElabProgram environment parsed with
+  | .error (.atDeclaration _ .implicitApplicationUnsupported) => pure ()
+  | .error error => throw (IO.userError ("operator default interference phase: " ++
+      psCompilerPscv0ElabError error))
+  | .ok _ => throw (IO.userError "operator default interference disagreed with pinned Lean")
   IO.println "PSCV0_DEFAULT_INSTANCES: PASS priority, transactional dependencies, ordinary quiescence, universes, module visibility and budgets"
 
 private def postponedBoundaries : IO Unit := do

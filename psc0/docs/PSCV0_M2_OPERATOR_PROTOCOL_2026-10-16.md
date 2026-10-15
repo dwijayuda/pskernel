@@ -38,3 +38,10 @@ Twenty shared observations extend the current JS/TS/Rust/GC Wasm/Wasmtime pipeli
 Strict declaration and surface hashes must be selected only after independent agreement at both CI boundaries. Tests do not establish a global semantics-preservation theorem. General coercion closure, Float transcendental power and C5 source reconstruction are not silently added by this slice.
 
 Int equality additionally selects the pinned Int.instDecidableEq/Int.decEq definitions, exact-signature intEq lowering and three true/false signed observations. Strict dependency presence, checked closure and both registry hashes must be verified before this capability is qualified. Prior research native38810569497 passed source/solver gates but stopped at this missing decision before platform backend emission; independent replay38810569357 passed.
+
+## Operator-default isolation checkpoint
+
+At `515894a39e6c272dd472f64f6cef5f247cfd705f`, native [38815020011](https://github.com/dwijayuda/pskernel/actions/runs/38815020011) passed compilation, the strict selected surface and declaration audits, and every frozen logical asset replay. Independent logical [38815020141](https://github.com/dwijayuda/pskernel/actions/runs/38815020141) passed. Full source qualification stopped at `arithmeticModulo`; backend steps were skipped.
+
+Source study of pinned Lean `Extra.lean` (`hasHeterogeneousDefaultInstances` and `applyCoe`) identified fixture interference: the new global priority-1100 `HMul Nat Bag Bag` protects an unknown right operand and may select Bag before its OfNat obligation can fail. Namespace membership does not scope instances. The shared runtime fixture now uses a dedicated checked `Scale` numeral type for its left operand; it still tests unknown-literal heterogeneous default selection. The original Nat/Bag interaction remains an explicit isolated refusal paired with an independent native Lean oracle. Unrelated arithmetic remains unchanged; compiler semantics, gates and budgets are unchanged. This correction awaits cloud confirmation.
+

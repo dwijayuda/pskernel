@@ -1,5 +1,12 @@
 # PSCV0 v7 native implementation roadmap
 
+## Operator-default isolation checkpoint
+
+At `515894a39e6c272dd472f64f6cef5f247cfd705f`, native [38815020011](https://github.com/dwijayuda/pskernel/actions/runs/38815020011) passed compilation, the strict selected surface and declaration audits, and every frozen logical asset replay. Independent logical [38815020141](https://github.com/dwijayuda/pskernel/actions/runs/38815020141) passed. Full source qualification stopped at `arithmeticModulo`; backend steps were skipped.
+
+Source study of pinned Lean `Extra.lean` (`hasHeterogeneousDefaultInstances` and `applyCoe`) identified fixture interference: the new global priority-1100 `HMul Nat Bag Bag` protects an unknown right operand and may select Bag before its OfNat obligation can fail. Namespace membership does not scope instances. The shared runtime fixture now uses a dedicated checked `Scale` numeral type for its left operand; it still tests unknown-literal heterogeneous default selection. The original Nat/Bag interaction remains an explicit isolated refusal paired with an independent native Lean oracle. Unrelated arithmetic remains unchanged; compiler semantics, gates and budgets are unchanged. This correction awaits cloud confirmation.
+
+
 ## Profile provenance checkpoint (profile72; qualification pending)
 
 At0165db7943aa06b34dea678d213bd426d3e0fe7b, native38813764645 compiled the complete operator/source-info changes, passed exact signature/reducibility and checked dependency audits, and regenerated all frozen assets. Both strict registry entry points independently reported FNV10704736494700616048 and SHA256a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f; surface v2 e0c9433e59a95261df499a1891df82210c18ad99ffef888659a2808ec387c285. Selected exactly these observed pins. The audit confirms Int.decEq/Int.instDecidableEq and selected native operator dependencies are already present; no new exported asset or assumption is required. Independent replay38813764520 passed. Full source and backend execution was blocked by the deliberate old-pin refusal.

@@ -68,32 +68,29 @@ def psKernelWithDefinitionHeight
     | _ => declaration
   | _ => declaration
 
--- Pinned Lean 4.35.0 runtime/interrupt.cpp: g_heartbeat is thread-local
--- and is NOT reset by scope_max_heartbeat. The C++ lean_add_decl entrypoint
--- installs only the maximum; after replaying a large Standard with maximum
--- zero, an independent bounded source declaration would inherit that huge
--- count and immediately time out. Reset and restore the counter ONLY across
--- an independent kernel-admission boundary, exactly as Lean scopes isolated
--- work. The maximum itself (2m, 20k depth) and every kernel check are
--- unchanged. Match the result inside the scope so no lazy pure check escapes.
+-- Pinned Lean 4.35.0 has TWO thread-local counters: runtime/alloc.cpp owns
+-- IO.getNumHeartbeats; runtime/interrupt.cpp owns the C++ kernel counter.
+-- Resetting the former cannot reset the latter. runtime/object.cpp:run_task
+-- resets the kernel counter before every task, including reused pool workers.
+-- Use that native task boundary, as Lean/AddDecl.lean does for kernel work.
+-- Await completion before using the checked environment; errors stay errors.
+-- Default pool priority avoids one OS thread per declaration. The caller's
+-- counters are untouched, and the caller still chooses the same finite limits.
 def withFreshKernelHeartbeatScope {ε α : Type}
     (action : Unit → Except ε α) : IO (Except ε α) := do
-  let original ← IO.getNumHeartbeats
-  IO.setNumHeartbeats 0
-  try
-    -- Lean 4.35.0 Init/System/IO.lean: IO.lazyPure performs the pure
-    -- action when IO executes, not speculatively before reset.
+  let task ← BaseIO.asTask do
+    let before ← IO.getNumHeartbeats
     let result ← IO.lazyPure action
-    match result with
-    | .ok result => return .ok result
-    | .error error =>
-      -- This is diagnostic only. A checked failure is still refused.
-      let consumed ← IO.getNumHeartbeats
-      IO.println ("PSCV0_KERNEL_HEARTBEAT_AUDIT: fresh-scope consumed=" ++
-        toString consumed ++ " restored-baseline=" ++ toString original)
-      return .error error
-  finally
-    IO.setNumHeartbeats original
+    let after ← IO.getNumHeartbeats
+    return (result, after - before)
+  let (result, allocations) ← IO.wait task
+  match result with
+  | .ok value => return .ok value
+  | .error error =>
+    -- Allocation telemetry is NOT the C++ kernel heartbeat counter.
+    IO.println ("PSCV0_KERNEL_HEARTBEAT_AUDIT: task allocations=" ++
+      toString allocations)
+    return .error error
 
 def findConstructorInfo : List PsDeclaration -> PsName -> Option PsConstructorInfo
   | [], _ => none

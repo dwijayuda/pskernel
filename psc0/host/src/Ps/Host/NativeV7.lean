@@ -80,51 +80,17 @@ private def check (prelude : Lean.Kernel.Environment) (admissions : String)
         PsKernelLean.kernelExceptionContext error)
   pure ()
 
--- Concrete IO/Except error types isolate the pure kernel admission from the
--- surrounding ExceptT diagnostic transformer. The heartbeat reset must occur
--- inside this real IO boundary, not in a lazy pure declaration term.
-private def checkWithScopedHeartbeatsOnWorker (prelude : Lean.Kernel.Environment)
-    (admissions : String) : IO (Except String Unit) := do
-  let previous ← IO.getNumHeartbeats
-  IO.setNumHeartbeats 0
-  try
-    -- Lean CoreM combines the *current* heartbeat origin and a relative
-    -- budget; lean_add_decl itself accepts an absolute thread-local deadline.
-    -- Derive the deadline from IO AFTER resetting it. This dependency also
-    -- forces the pure, externally checked addDeclCore operation to execute
-    -- within the IO admission scope, rather than being floated outside it.
-    let start ← IO.getNumHeartbeats
-    let heartbeatDeadline : USize := (start + 2000000).toUSize
-    -- Pattern matching on the pure result forces the kernel C++ call BEFORE
-    -- sampling the heartbeat counter. No source is accepted by this audit.
-    let result ← IO.lazyPure (fun _ =>
-      check prelude admissions heartbeatDeadline)
-    match result with
-    | .ok value =>
-      let finish ← IO.getNumHeartbeats
-      IO.println ("PSCV0_KERNEL_BUDGET: accepted before=" ++ toString start ++
-        " after=" ++ toString finish ++ " deadline=" ++
-        toString heartbeatDeadline.toNat)
-      return .ok value
-    | .error message =>
-      let finish ← IO.getNumHeartbeats
-      IO.println ("PSCV0_KERNEL_BUDGET: rejected before=" ++ toString start ++
-        " after=" ++ toString finish ++ " deadline=" ++
-        toString heartbeatDeadline.toNat)
-      return .error message
-  finally
-    IO.setNumHeartbeats previous
-
--- The C++ kernel checks a self-contained immutable environment on the task
--- executing the admission. Pinned Lean 4.35.0 Init/System/IO.lean:IO.asTask
--- ensures that the scoped heartbeat origin and the checked addDeclCore calls
--- run in the SAME runtime thread. Await the result before proceeding to IR.
--- This never publishes an unchecked token, and no kernel error is ignored.
+-- Source requests and authoring admissions share the native task boundary.
+-- One source request retains its existing cumulative 2m/20k kernel budget.
+-- Allocation telemetry is distinct from the C++ kernel's heartbeat counter.
 private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
     (admissions : String) : IO (Except String Unit) := do
-  let task ← IO.asTask (prio := .dedicated) do
-    checkWithScopedHeartbeatsOnWorker prelude admissions
-  return ← IO.ofExcept task.get
+  let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    check prelude admissions 2000000
+  IO.println ("PSCV0_KERNEL_BUDGET: " ++
+    (if result.isOk then "accepted" else "rejected") ++
+    " kernel-heartbeat-limit=2000000 recursion-limit=20000")
+  return result
 
 private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do
@@ -269,11 +235,9 @@ def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
       return .error { phase := "prelude", message := error.kind.code ++ ": " ++ error.message }
   | .ok prelude =>
       -- A batch request is the actual IO isolation unit. In pinned Lean's
-      -- C++ runtime, lean_add_decl scopes only the heartbeat MAXIMUM, not the
-      -- thread-local counter. Create a fresh counter BEFORE invoking the
-      -- IO compilation action; don't wrap a pre-evaluated pure Except value.
-      -- Restore the caller count even for refused or interrupted requests.
-      -- The official source checker still retains 2m heartbeat / 20k depth.
+      -- Scope allocation accounting for portable elaboration separately.
+      -- This IO counter is NOT the C++ kernel counter: checked source admission
+      -- owns a native task boundary and keeps its 2m/20k limits.
       let results ← requests.mapM fun request => do
         let previous ← IO.getNumHeartbeats
         IO.setNumHeartbeats 0

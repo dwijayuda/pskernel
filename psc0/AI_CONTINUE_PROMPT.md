@@ -1,5 +1,17 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — root correction: two heartbeat counters, one native task boundary
+
+Expanded replay [38708373149](https://github.com/dwijayuda/pskernel/actions/runs/38708373149) eliminated the List universe mismatch but still reported kernel timeouts after only small allocation deltas. Pinned runtime/alloc.cpp and runtime/io.cpp show that IO.setNumHeartbeats changes the **allocation** counter; runtime/interrupt.cpp has a separate C++ kernel counter. The former helper's comment was wrong. A simple allocation-only probe was insufficient.
+
+Pinned runtime/object.cpp:run_task resets the kernel counter before each task; Lean/AddDecl.lean schedules kernel checks on tasks, and Compiler/LCNF/EmitC.lean initializes the task manager for native executables. The shared provider scope now submits and awaits a default-pool BaseIO task. No dedicated OS thread per declaration; no retry, new extern, unchecked admission or increased limit. NativeV7 now uses this same mechanism instead of its redundant dedicated-thread/allocation reset code; its existing cumulative 2m/20k source-request limit is preserved. Allocation counters remain separately scoped for portable elaboration.
+
+The single boundary check now deliberately consumes actual C++ kernel work, confirms a small unscoped budget times out, then confirms the same scoped budget accepts a valid declaration and still rejects invalid types. Upstream taskState.lean and kernel_maxheartbeats.lean informed the boundary; task_test_io.lean is disabled upstream and is not validation evidence. Full research qualification and original compact Float replay remain pending.
+
+## 15 October — research List family compiled; strict fingerprints measured
+
+Research `3b5c5c1b754352589946513c8bda6c4760826238`, [native 38708373315](https://github.com/dwijayuda/pskernel/actions/runs/38708373315), compiled both changed portable/native modules and independent native oracles. The compact heartbeat boundary passed dirty-caller isolation, invalid-type refusal and baseline restoration. The existing strict guard intentionally refused the old pins and reported all three actual values together: `fnv1a64:14729641192328177589`, `sha256:8b956d8f7b7f5bbebaf6480454e528380cd53f513772460a5a8f60648ad8bc2b`, surface `sha256:58d4afa2cb069f078ab68f358b4e1718edd10cbc9f316f90357faeca381cb77d`. This commit pins exactly those independent values; full source/runtime qualification remains required. Expanded mask replay [38708373149](https://github.com/dwijayuda/pskernel/actions/runs/38708373149) is a separate research result, not assumed green.
+
 ## 15 October — List indexing / authoring scope coherent research candidate
 
 Research only: `psc0/research-list-index-scope-v1`, based on qualified Int family plus the latest docs. Complete List indexing universe propagation covers the bang/public/internal getters, positive/negative law helpers, all three selected dictionaries and freshened instance levels. Existing proof/optional workers and array callers retain their algorithms. Pinned Lean 4.35.0 Init/GetElem.lean and Init/Data/List/Basic.lean provide semantics; tests/elab/getElemV.lean and tests/elab_fail/getElem.lean distinguish checked/optional/bang/lawful behavior (their Classical alternatives are not imported).

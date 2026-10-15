@@ -2971,8 +2971,25 @@ private def kernelHeartbeatIsolationCases : IO Unit := do
   let original ← IO.getNumHeartbeats
   try
     IO.setNumHeartbeats 2000001
+    -- Exercise the actual C++ counter, not just allocation accounting.
+    -- Each distinct tiny definition forces kernel work on this caller thread.
+    for i in [:128] do
+      let seed : Lean.Declaration := .defnDecl {
+        name := .num `_pscv0HeartbeatSeed i
+        levelParams := []
+        type := .sort (.succ (.succ .zero))
+        value := .sort (.succ .zero)
+        hints := .opaque
+        safety := .safe }
+      let seeded ← IO.lazyPure fun _ => empty.addDeclCore 0 20000 seed none
+      unless seeded.isOk do
+        throw (IO.userError "kernel heartbeat seed was ill-typed")
+    let stale ← IO.lazyPure fun _ => empty.addDeclCore 64 20000 witness none
+    match stale with
+    | .error .deterministicTimeout => pure ()
+    | _ => throw (IO.userError "kernel counter isolation probe did not exhaust its caller")
     let admitted ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
-      empty.addDeclCore 2000000 20000 witness none
+      empty.addDeclCore 64 20000 witness none
     unless admitted.isOk do
       throw (IO.userError "independent kernel admission inherited caller heartbeats")
     let restored ← IO.getNumHeartbeats
@@ -2994,7 +3011,7 @@ private def kernelHeartbeatIsolationCases : IO Unit := do
       throw (IO.userError "failed kernel admission lost caller heartbeat baseline")
   finally
     IO.setNumHeartbeats original
-  IO.println "PSCV0_KERNEL_SCOPE: PASS dirty-caller isolation, type refusal and baseline restoration"
+  IO.println "PSCV0_KERNEL_SCOPE: PASS actual kernel-counter isolation, allocation baseline preservation and type refusal"
 
 def main : IO Unit := do
   kernelHeartbeatIsolationCases

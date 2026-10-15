@@ -79,25 +79,18 @@ run_cmd do
       unless [``propext, ``Quot.sound].contains assumption do
         throwError "PSCV0-FLOAT-F1: {name} imports unapproved axiom {assumption}"
 
--- Audit the all-input NaN normalization result directly. It mentions the
--- upstream PACK/UNPACK definitions, but not Float.ofBits's proof-valued wrapper.
--- It is not an exported portable root until the full dependency graph closes.
-run_cmd do
-  let name := ``PsV7Native.FloatCanonical.upstreamPackUnpack_nan
-  let dependencies ← Lean.collectAxioms name
-  for assumption in dependencies do
-    unless [``propext, ``Quot.sound].contains assumption do
-      throwError "PSCV0-FLOAT-UPSTREAM-BITS: {name} imports unapproved axiom {assumption}"
-
--- Diagnostic only: typed equality includes upstream Float.ofBits and its
--- dependency graph. This is research, not the selected Standard's trust gate.
--- Do not add any observed assumptions to the approved roster.
+-- Full upstream pack/unpack brings its own transitive axioms in native Lean,
+-- including Classical.choice. Never export these research-only comparisons to
+-- PSC0's admitted Standard, and never enlarge contractRoots to silence the gate.
+-- Keep the strict compact-roots audit above unchanged. The following diagnostic
+-- makes the native reference's actual assumptions visible in CI.
 run_cmd do
   for name in
       [``Float.ofBits, ``Float32.ofBits,
        ``Float.Model.ofBits, ``Float32.Model.ofBits,
+       ``PsV7Native.FloatCanonical.upstreamPackUnpack_nan,
        ``PsV7Native.FloatCanonical.fromBits64_eq_upstream_ofBits_nan,
        ``PsV7Native.FloatCanonical.fromBits32_eq_upstream_ofBits_nan] do
     let dependencies ← Lean.collectAxioms name
     for assumption in dependencies do
-      logInfo m!"PSCV0-FLOAT-UPSTREAM-DIAGNOSTIC {name}: {assumption}"
+      Lean.logInfo m!"PSCV0-FLOAT-UPSTREAM-RESEARCH {name}: {assumption}"

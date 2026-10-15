@@ -67,6 +67,26 @@ theorem eq_of_toBits_eq32 {a b : Float32}
           cases h
           rfl
 
+-- Constructive classification of canonical bit representation. Unlike the
+-- upstream pack/unpack functions, these roots retain the compact admitted
+-- dependency closure and may be independently replayed in PSC0.
+theorem canonicalPacked_nan (spec : Format) (bits : BitVec spec.numBits)
+    (he : UnpackedFloat.unpackExponent (spec := spec) bits = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := spec) bits ≠ (0#_)) :
+    canonicalPacked spec bits = UnpackedFloat.packedNaN spec := by
+  simp [canonicalPacked, he, hm]
+
+theorem canonicalPacked_infinityBits (spec : Format) (bits : BitVec spec.numBits)
+    (he : UnpackedFloat.unpackExponent (spec := spec) bits = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := spec) bits = (0#_)) :
+    canonicalPacked spec bits = bits := by
+  simp [canonicalPacked, he, hm]
+
+theorem canonicalPacked_finiteExponent (spec : Format) (bits : BitVec spec.numBits)
+    (he : UnpackedFloat.unpackExponent (spec := spec) bits ≠ (-1#_)) :
+    canonicalPacked spec bits = bits := by
+  simp [canonicalPacked, he]
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream
@@ -147,6 +167,8 @@ def contractRoots : List Lean.Name :=
   [``fromBits64, ``fromBits32,
    ``canonicalPacked_valid, ``canonicalPacked_of_valid,
    ``canonicalPacked_idempotent, ``canonicalPacked_fixed_iff_valid,
+   ``canonicalPacked_nan, ``canonicalPacked_infinityBits,
+   ``canonicalPacked_finiteExponent,
    ``toBits_fromBits64, ``toBits_fromBits32,
    ``eq_of_toBits_eq64, ``eq_of_toBits_eq32,
    ``fromBits64_toBits, ``fromBits32_toBits,

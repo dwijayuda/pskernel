@@ -8,7 +8,9 @@ Never use stage replay as an admission certificate.
 from pathlib import Path
 import argparse
 
-MARKER = "def c0ExportVerdictFromFileTrace\n"
+MARKER = ("/-- Result and one-based physical NDJSON record count, including a\n"
+          "    failed record. This is a diagnostic, never a proof receipt. -/\n"
+          "def c0ExportVerdictFromFileTrace\n")
 SITE = "      let outcome := c0ExportStepDetailed state line fuel"
 
 HELPER = r'''

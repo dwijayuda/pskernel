@@ -78,3 +78,15 @@ run_cmd do
     for assumption in dependencies do
       unless [``propext, ``Quot.sound].contains assumption do
         throwError "PSCV0-FLOAT-F1: {name} imports unapproved axiom {assumption}"
+
+-- Upstream bridge theorems are NOT added to the portable exporter roster:
+-- replay still blocks the larger pinned Lean Float/List/Int dependency graph.
+-- Native oracle nevertheless kernel-audits their assumptions separately.
+run_cmd do
+  for name in
+      [``PsV7Native.FloatCanonical.fromBits64_eq_upstream_ofBits_nan,
+       ``PsV7Native.FloatCanonical.fromBits32_eq_upstream_ofBits_nan] do
+    let dependencies ← Lean.collectAxioms name
+    for assumption in dependencies do
+      unless [``propext, ``Quot.sound].contains assumption do
+        throwError "PSCV0-FLOAT-UPSTREAM: {name} imports unapproved axiom {assumption}"

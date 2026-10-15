@@ -26,7 +26,7 @@ def entry (name : PsName) : Option (PsVerifiedIrMachineIntegerType × Operation)
     let text := psNameToString owner
     if text == "USize" || text == "ISize" then
       let word : PsVerifiedIrMachineIntegerType := if text == "USize" then .usize else .isize
-      let operation ← match method with
+      let operation : Operation ← match method with
         | "size" => some Operation.size
         | "pow" => some .power
         | "minValue" => if text == "ISize" then some .minimum else none
@@ -40,14 +40,14 @@ def entry (name : PsName) : Option (PsVerifiedIrMachineIntegerType × Operation)
         | "decEq" => some (.compare .eq)
         | "decLt" => some (.compare .lt)
         | "decLe" => some (.compare .le)
-        | _ => do
-          if !method.startsWith "to" then none else do
-          let targetName := psRootName (method.drop 2).toString
-          let target ← if text == "USize" then
-              (psErasureUnsignedWidth targetName).orElse
-                (fun _ => if method == "toISize" then some .isize else none)
-            else psErasureSignedWidth targetName
-          return .convert word target
+        | _ =>
+          if !method.startsWith "to" then none else
+            let targetName := psRootName (method.drop 2).toString
+            let target := if text == "USize" then
+                (psErasureUnsignedWidth targetName).orElse
+                  (fun _ => if method == "toISize" then some .isize else none)
+              else psErasureSignedWidth targetName
+            target.map (Operation.convert word)
       return (word, operation)
     else if method == "toUSize" then
       return (.usize, .convert (← psErasureUnsignedWidth owner) .usize)

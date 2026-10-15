@@ -51,7 +51,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
     | .machineIntBinary .. | .machineIntCompare ..
     | .floatBinary .. | .floatCompare .. | .floatUnary .. => pure ""
-    | _ => throw "PSCV0-WASM-CAPABILITY: scalar intrinsic outside the checked runtime profile"
   let instructions := if runtime.isEmpty then match op with
     | .unsignedOfNat type =>
       [.call (match type with | .uint64 => "__ps_nat_wrap_u64" | _ => "__ps_nat_wrap_u32")] ++

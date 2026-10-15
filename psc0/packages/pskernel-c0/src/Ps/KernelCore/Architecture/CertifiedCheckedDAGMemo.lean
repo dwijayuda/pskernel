@@ -248,15 +248,19 @@ theorem psKernelC0ScopedCheckedDAGSameRoot
   have hExpr : left.expression = right.expression := by
     injection hRead
   have hCheck :
-      Except.ok (left.inferredType, left.finalState) =
-        Except.ok (right.inferredType, right.finalState) := by
+      (Except.ok (left.inferredType, left.finalState) :
+        Except String (PsKernelExpr × PsKernelCheckerState)) =
+      (Except.ok (right.inferredType, right.finalState) :
+        Except String (PsKernelExpr × PsKernelCheckerState)) := by
     calc
-      Except.ok (left.inferredType, left.finalState) =
+      (Except.ok (left.inferredType, left.finalState) :
+          Except String (PsKernelExpr × PsKernelCheckerState)) =
           psKernelCheckerCheck fuel context initialState left.expression :=
         left.source.symm
       _ = psKernelCheckerCheck fuel context initialState right.expression := by
         rw [hExpr]
-      _ = Except.ok (right.inferredType, right.finalState) :=
+      _ = (Except.ok (right.inferredType, right.finalState) :
+          Except String (PsKernelExpr × PsKernelCheckerState)) :=
         right.source
   have hPair :
       (left.inferredType, left.finalState) =

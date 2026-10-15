@@ -3,10 +3,11 @@ name: PSCV0 F1 canonical-model replay (research only)
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
+    branches: [psc0/pscv0-v7-native-lean-v1, research/psc0-m2a-f1-upstream-20261015]
     paths:
       - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
       - 'psc0/host/src/Ps/Host/FloatCanonicalContracts.lean'
+      - 'psc0/host/src/Ps/Host/FloatCanonicalUpstream.lean'
       - 'psc0/host/src/Ps/Host/StandardExport.lean'
       - 'psc0/test/Pscv0FloatConstructiveOracle.lean'
       - 'psc0/scripts/Pscv0Native.lean'

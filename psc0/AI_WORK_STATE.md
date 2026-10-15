@@ -1,5 +1,18 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — F1 candidate CI identified missing Lake module root
+
+At `28de17ebfc75f3071088543004c72c81c1b6c3d7`,
+[Linux CI 38662428954](https://github.com/dwijayuda/pskernel/actions/runs/38662428954)
+failed in the native compilation step because the new
+`Ps.Host.FloatCanonicalContracts` module was imported but not listed
+among the explicit `PsV7Host` Lake library roots. The error was a missing
+`.olean` file, not yet a reported theorem/type error.
+This follow-up adds the root to the existing host library without changing
+the proof scripts, the frozen Standard or any trust policy.
+The candidate remains unqualified pending exact-commit native compilation
+and positive portable kernel replay; Float F1–F4 and M2+A remain incomplete.
+
 ## 15 October — F1 representation-contract integration candidate (not qualified)
 
 **Last confirmed green executable:** `ffa1460341bc6e3ec24b8ede5c586743fb9f4abf`,

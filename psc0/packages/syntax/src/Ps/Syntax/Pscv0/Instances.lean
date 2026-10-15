@@ -1,5 +1,19 @@
 import Ps.Syntax.Pscv0.Commands
 
+def psPscv0PriorityValue (text : String) (cursor : PsTokenCursor) :
+    Except PsParseError Nat := do
+  match text with
+  | "low" => pure 100
+  | "mid" => pure 500
+  | "default" => pure 1000
+  | "high" => pure 10000
+  | text =>
+    if text.isEmpty || !text.toList.all Char.isDigit then
+      throw (psProofScriptExpectedError "decimal or named instance priority" cursor)
+    match text.toNat? with
+    | some value => pure value
+    | none => throw (psProofScriptExpectedError "natural instance priority" cursor)
+
 def psPscv0InstancePriority (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult Nat) := do
   let named := match psTokenCursorAdvance cursor with
@@ -11,17 +25,7 @@ def psPscv0InstancePriority (cursor : PsTokenCursor) :
   let assign ← psTokenCursorExpectText keyword.cursor ":="
   let some atom := psTokenCursorAdvance assign.cursor
     | throw (.unexpectedEnd "instance priority")
-  let priority ← match atom.token.text with
-    | "low" => pure 100
-    | "mid" => pure 500
-    | "default" => pure 1000
-    | "high" => pure 10000
-    | text =>
-      if text.isEmpty || !text.toList.all Char.isDigit then
-        throw (psProofScriptExpectedError "decimal or named instance priority" assign.cursor)
-      match text.toNat? with
-      | some value => pure value
-      | none => throw (psProofScriptExpectedError "natural instance priority" assign.cursor)
+  let priority ← psPscv0PriorityValue atom.token.text assign.cursor
   let close ← psTokenCursorExpectText atom.cursor ")"
   return { value := priority, cursor := close.cursor }
 

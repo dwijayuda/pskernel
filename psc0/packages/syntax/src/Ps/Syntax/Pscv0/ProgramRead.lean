@@ -33,7 +33,7 @@ def psPscv0DerivingHandlers (fuel : Nat) (cursor : PsTokenCursor)
       psPscv0DerivingHandlers fuel comma.cursor accumulated
     else return { value := accumulated.reverse, cursor := name.cursor }
 
-def psPscv0ReadCommand (cursor : PsTokenCursor) :
+def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxCommand) := do
   let some first := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
   let isPrivate := first.text == "private"
@@ -121,6 +121,39 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
     (psProofScriptDeclarationStop declaration.value) declaration.cursor).mapError psPscv0ParseError
   return { value := if isPrivate then .privateDeclaration declaration.value
                     else .declaration declaration.value, cursor := next }
+
+def psPscv0SelectedAttributes : List String := ["default_instance"]
+
+-- Selected declaration attribute only; unsupported attributes are refused.
+-- The default priority is independent of an instance declaration's priority.
+def psPscv0ReadCommand (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxCommand) := do
+  if !psTokenCursorAtText cursor "@" then psPscv0ReadUnattributedCommand cursor
+  else
+    let at ← psPscv0Expect cursor "@"
+    let opening ← psPscv0Expect at.cursor "["
+    let attribute ← psPscv0Expect opening.cursor "default_instance"
+    let priority ←
+      if psTokenCursorAtText attribute.cursor "]" then
+        pure (PsParseResult.mk 1000 attribute.cursor)
+      else do
+        let some atom := psTokenCursorAdvance attribute.cursor
+          | throw "PSCV0-DEFAULT-INSTANCE-PRIORITY"
+        let value ← (psPscv0PriorityValue atom.token.text attribute.cursor).mapError psPscv0ParseError
+        pure (PsParseResult.mk value atom.cursor)
+    let close ← psPscv0Expect priority.cursor "]"
+    let parsed ← psPscv0ReadUnattributedCommand close.cursor
+    let command ← match parsed.value with
+      | .declaration source => pure (.registeredDeclaration source
+          (.defaultInstanceDecl priority.value none))
+      | .privateDeclaration source => pure (.privateRegisteredDeclaration source
+          (.defaultInstanceDecl priority.value none))
+      | .registeredDeclaration source (.instanceDecl ordinary) =>
+        pure (.registeredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
+      | .privateRegisteredDeclaration source (.instanceDecl ordinary) =>
+        pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
+      | _ => throw "PSCV0-DEFAULT-INSTANCE-DECLARATION"
+    return { parsed with value := command }
 
 def psPscv0ReadCommands (fuel : Nat) (cursor : PsTokenCursor)
     (acc : List PsSyntaxCommand) : Except String (List PsSyntaxCommand) := do

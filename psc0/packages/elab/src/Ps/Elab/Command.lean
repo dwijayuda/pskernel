@@ -160,7 +160,12 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     | some .abbrevDecl => pure (psEnvironmentSetReducibility environment name .reducible)
     | some .opaqueDecl => pure environment
     | some .classDecl => psElabRegisterClass environment name
-    | some (.instanceDecl priority) => psElabRegisterInstance environment name priority).mapError
+    | some (.instanceDecl priority) => psElabRegisterInstance environment name priority
+    | some (.defaultInstanceDecl priority ordinaryPriority) => do
+      let environment ← match ordinaryPriority with
+        | some ordinary => psElabRegisterInstance environment name ordinary
+        | none => pure environment
+      psElabRegisterDefaultInstance environment name priority).mapError
       (.atDeclaration name)
   let namespaces := batch.declarations.foldl (fun acc decl =>
     -- A declaration registers its parent namespaces. Constructors and

@@ -10,6 +10,8 @@ structure PsInstanceEntry where
 
 structure PsInstanceIndex where
   entries : List PsInstanceEntry
+  -- Default candidates are considered only after ordinary synthesis is stuck.
+  defaults : List PsInstanceEntry := []
 
 def psInstanceIndexEmpty : PsInstanceIndex :=
   { entries := [] }
@@ -35,7 +37,7 @@ def psInstanceInsert (entry : PsInstanceEntry) (entries : List PsInstanceEntry) 
 def psInstanceIndexAdd
     (index : PsInstanceIndex)
     (entry : PsInstanceEntry) : PsInstanceIndex :=
-  { entries := psInstanceInsert entry index.entries }
+  { index with entries := psInstanceInsert entry index.entries }
 
 def psLocalInstanceEntriesFromList
     (declarations : List PsLocalDecl) : List PsInstanceEntry :=
@@ -64,3 +66,8 @@ def psAllInstanceEntries
   psInstanceListAppend
     (psLocalInstanceEntries context)
     index.entries
+
+-- Keep the same priority/tie ordering, but a separate semantic registry.
+def psInstanceIndexAddDefault (index : PsInstanceIndex)
+    (entry : PsInstanceEntry) : PsInstanceIndex :=
+  { index with defaults := psInstanceInsert entry index.defaults }

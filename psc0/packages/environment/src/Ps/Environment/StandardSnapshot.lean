@@ -153,13 +153,14 @@ def psStandardSnapshotAlias (value : PsName × PsName) : String :=
     psStandardSnapshotName value.fst, psStandardSnapshotName value.snd]
 
 def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v2" [
+  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v3" [
     "Lean-4.35.0@eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
     psStandardSnapshotList psStandardSnapshotDeclaration environment.declarations,
     psStandardSnapshotList psStandardSnapshotName environment.classes,
     psStandardSnapshotList psStandardSnapshotClassParameters
       environment.classParameters,
     psStandardSnapshotList psStandardSnapshotInstance environment.instances.entries,
+    psStandardSnapshotList psStandardSnapshotInstance environment.instances.defaults,
     psStandardSnapshotList psStandardSnapshotAlias environment.exportedAliases,
     psStandardSnapshotList (fun declaration =>
       let name := psDeclarationName declaration

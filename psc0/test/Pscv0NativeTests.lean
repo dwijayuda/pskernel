@@ -45,6 +45,52 @@ private theorem pscv0ByteArrayExtractCopyLogical (bytes : ByteArray)
     bytes.extract start stop =
       bytes.copySlice start ByteArray.empty 0 (stop - start) := rfl
 
+-- Pinned Lean 4.35.0 default-instance priority, rollback and nested search.
+-- Independent source oracle; the PSC0 fixture below uses the same cases.
+namespace DefaultInstanceOracle
+class Choice (A : Type) where
+  pick : Nat
+class Missing (A : Type) where
+  marker : Nat
+instance ordinaryBool : Choice Bool where
+  pick := 37
+@[default_instance 600] instance fallbackNat : Choice Nat where
+  pick := 31
+@[default_instance 700] def unavailable [Missing Bool] : Choice Bool := ⟨47⟩
+class Preference (A : Type) where
+  pick : Nat
+@[default_instance 1000] def preferBool : Preference Bool := ⟨99⟩
+class Outer (A : Type) where
+  pick : Nat
+@[default_instance 800] def outer {A : Type} [Choice A] : Outer A :=
+  ⟨Choice.pick (A := A)⟩
+class Tie (A : Type) where
+  pick : Nat
+@[default_instance 200] instance tieNat : Tie Nat where
+  pick := 1
+@[default_instance 200] instance tieBool : Tie Bool where
+  pick := 2
+def choose {A : Type} [Choice A] (_ : Unit) : Nat := Choice.pick (A := A)
+def competing {A : Type} [Choice A] [Preference A] (_ : Unit) : Nat := Choice.pick (A := A)
+def nested {A : Type} [Outer A] (_ : Unit) : Nat := Outer.pick (A := A)
+def tie {A : Type} [Tie A] (_ : Unit) : Nat := Tie.pick (A := A)
+def anchored {A : Type} [Choice A] (_ : A) : Nat := Choice.pick (A := A)
+#guard choose () == 31
+#guard competing () == 37
+#guard nested () == 31
+#guard tie () == 2
+#guard anchored true == 37
+#guard Preference.pick (A := Bool) == 99
+universe u
+class Poly (A : Type u) where
+  pick : Nat
+@[default_instance] def poly {A : Type u} [Inhabited A] : Poly A := ⟨91⟩
+structure High : Type 1 where
+  value : Nat
+  deriving Inhabited
+#guard Poly.pick (A := High) == 91
+end DefaultInstanceOracle
+
 open Lean (toJson)
 
 private def get {α : Type} (label : String) (result : Except String α) : IO α :=
@@ -264,6 +310,9 @@ private def highUniverseHashableCases : IO Unit := do
         label ++ " refused at " ++ problem.phase ++ ": " ++ problem.message))
 
 -- One cross-universe family exercises the shared logical and runtime boundary.
+private def defaultInstanceFixture : String :=
+  "namespace DefaultChoice\nclass Choice(A: Type) where { pick: Nat }\nclass Missing(A: Type) where { marker: Nat }\ninstance ordinaryBool: Choice Bool where { pick := 37 }\n@[default_instance 600]\ninstance fallbackNat: Choice Nat where { pick := 31 }\n@[default_instance 700]\ndef unavailable[missing: Missing Bool]: Choice Bool := { pick := 47 }\nclass Preference(A: Type) where { pick: Nat }\n@[default_instance 1000]\ndef preferBool: Preference Bool := { pick := 99 }\nclass Outer(A: Type) where { pick: Nat }\n@[default_instance 800]\ndef outer{A: Type}[choice: Choice A]: Outer A := { pick := Choice.pick(A := A) }\nclass Tie(A: Type) where { pick: Nat }\n@[default_instance 200]\ninstance tieNat: Tie Nat where { pick := 1 }\n@[default_instance 200]\ninstance tieBool: Tie Bool where { pick := 2 }\nfunction choose{A: Type}[choice: Choice A](): Nat := Choice.pick(A := A)\nfunction competing{A: Type}[choice: Choice A][preference: Preference A](): Nat := Choice.pick(A := A)\nfunction nested{A: Type}[outer: Outer A](): Nat := Outer.pick(A := A)\nfunction tie{A: Type}[value: Tie A](): Nat := Tie.pick(A := A)\nfunction anchored{A: Type}[choice: Choice A](value: A): Nat := Choice.pick(A := A)\nuniverse u\nclass Poly(A: Type u) where { pick: Nat }\n@[default_instance]\ndef poly{A: Type u}[inhabited: Inhabited A]: Poly A := { pick := 91 }\nend DefaultChoice\nconst defaultRollback: Nat := DefaultChoice.choose()\nconst defaultPriority: Nat := DefaultChoice.competing()\nconst defaultNested: Nat := DefaultChoice.nested()\nconst defaultTie: Nat := DefaultChoice.tie()\nconst defaultAnchor: Nat := DefaultChoice.anchored(true)\nconst defaultOnlyKnown: Nat := DefaultChoice.Preference.pick(A := Bool)\nconst defaultUniverse: Nat := DefaultChoice.Poly.pick(A := ProductLevels.High)\n"
+
 private def arrayUniverseFixture : String :=
   "namespace ArrayLevels\nuniverse u v\nfunction mapAcross{A: Type u}{B: Type v}(f: A -> B, xs: Array A): Array B := Array.map(f, xs)\nfunction foldAcross{A: Type u}{B: Type v}(f: B -> A -> B, init: B, xs: Array A): B := Array.foldl(f, init, xs, 0, Array.size(xs))\ntheorem sizeModel{A: Type u}(xs: List A): Array.size(Array.mk(xs)) = List.length(xs) := by { rfl }\ntheorem listModel{A: Type u}(xs: List A): Array.toList(Array.mk(xs)) = xs := by { rfl }\nend ArrayLevels\nconst arrayHighValues: Array(ProductLevels.High) := Array.mk([ProductLevels.High.mk(5), ProductLevels.High.mk(7)])\nconst arrayHighMapDown: Nat := (ArrayLevels.mapAcross(ProductLevels.High.value, arrayHighValues))[1]!\nconst arrayHighMapUp: Nat := (ArrayLevels.mapAcross(ProductLevels.High.mk, #[11]))[0]!.value\nconst arrayHighFoldDown: Nat := ArrayLevels.foldAcross(fun acc => fun value => acc + value.value, 0, arrayHighValues)\nconst arrayHighFoldUp: Nat := (ArrayLevels.foldAcross(fun (acc: ProductLevels.High) => fun (value: Nat) => ProductLevels.High.mk(acc.value + value), ProductLevels.High.mk(0), #[13, 17])).value\nconst arrayHighDefault: Nat := Array.size((Inhabited.default : Array(ProductLevels.High)))\nconst arrayHighRepr: String := reprStr(arrayHighValues)\nconst arrayHighFormat: String := Std.Format.pretty(Std.format(arrayHighValues))\nconst arrayHighHash: Bool := hash(arrayHighValues) == mixHash(mixHash(UInt64.ofNat(7), hash(ProductLevels.High.mk(5))), hash(ProductLevels.High.mk(7)))\n"
 
@@ -581,7 +630,7 @@ private def executableFloatFixture : String :=
   "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := match Float.toModel(Float.ofBits(UInt64.ofNat(bits))) with { | Float.Model.mk raw valid => UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.mk(raw, valid)))) }\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := match Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))) with { | Float32.Model.mk raw valid => UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.mk(raw, valid)))) }\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
 
 private def application : String :=
-  executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -2568,6 +2617,57 @@ private def syntheticBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError "unresolved root/default conflict was accepted")
   IO.println "PSCV0_NATIVE_SYNTHETIC: PASS scoped templates, independent replay, mandatory defaults, quiescence and rollback"
 
+private def defaultInstanceBoundaries : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let program ← get "default-instance source" (psCompilerParsePscv0
+    (productUniverseFixture ++ defaultInstanceFixture))
+  let elaborated ← get "default-instance elaboration"
+    ((psElabProgram environment program).mapError psCompilerPscv0ElabError)
+  let selected := elaborated.environment
+  unless selected.instances.defaults.length == 7 do
+    throw (IO.userError "default registry lost a declaration")
+  let type := psMetaFresh psMetaEmpty psLocalEmpty (.sortE (.succ .zero)) .natural
+  let goal := PsExpr.app (.constE (psDecisionName "DefaultChoice.Choice") []) type.expr
+  let dictionary := psMetaFresh type.context psLocalEmpty goal .synthetic
+  let .mvar id := dictionary.expr | throw (IO.userError "default goal ID")
+  let pending := [PsSyntheticConstraint.instanceGoal id]
+  let ordinary := psSyntheticSolve selected selected.instances dictionary.context pending false
+  unless !ordinary.pending.isEmpty && ordinary.context.assignments.isEmpty do
+    throw (IO.userError "ordinary synthesis guessed a default input")
+  let solved := psSyntheticSolve selected selected.instances dictionary.context pending
+  unless solved.pending.isEmpty && !solved.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate solved.context type.expr) (.constE psNatName []) &&
+      solved.context.declarations.length == dictionary.context.declarations.length do
+    throw (IO.userError "default rollback leaked a rejected candidate or chose the wrong type")
+  let exhausted := psSyntheticSolve selected selected.instances dictionary.context pending true 1
+  unless exhausted.resourceExceeded && exhausted.context.assignments.isEmpty do
+    throw (IO.userError "default queue resource refusal leaked assignments")
+  -- Exported tie order and diamond deduplication apply to both registries.
+  let view := psPscv0OwnInterface selected elaborated.declarations [] []
+  let diamond := psPscv0InterfaceMerge view view
+  unless diamond.defaults.length == 7 && diamond.instances.length == view.instances.length do
+    throw (IO.userError "default/public-import diamond duplicated evidence")
+  let imported ← get "default interface" (psPscv0InstallInterface environment diamond)
+  unless (imported.instances.defaults.map psStandardSnapshotInstance) ==
+      (selected.instances.defaults.map psStandardSnapshotInstance) do
+    throw (IO.userError "import changed default priority or tie order")
+  let source :=
+    "class PrivateDefault(A: Type) where { pick: Nat }\n" ++
+    "@[default_instance] private def hiddenDefault: PrivateDefault Nat := { pick := 5 }\n"
+  let parsed ← get "private default parse" (psCompilerParsePscv0 source)
+  let privateResult ← get "private default elaboration"
+    ((psElabProgramWithOrigins environment parsed "Defaults").mapError psCompilerPscv0ElabError)
+  let privateView := psPscv0OwnInterface privateResult.result.environment
+    privateResult.result.declarations privateResult.privateNames []
+  unless privateResult.result.environment.instances.defaults.length == 1 &&
+      privateView.defaults.isEmpty do
+    throw (IO.userError "private default escaped its module")
+  let bad ← get "nonclass default parse"
+    (psCompilerParsePscv0 "@[default_instance] const bad: Nat := 0\n")
+  if (psElabProgram environment bad).isOk then
+    throw (IO.userError "default attribute accepted a nonclass result")
+  IO.println "PSCV0_DEFAULT_INSTANCES: PASS priority, transactional dependencies, ordinary quiescence, universes, module visibility and budgets"
+
 private def postponedBoundaries : IO Unit := do
   let requests : Array PsV7Native.Request := #[
     { source := coercionFixture ++ "structure Outer where { box: Coercion.Box }\ninstance chain: Coe(Outer, Coercion.Box) where { coe := Outer.box }\nconst bad: Nat := Outer.mk(Coercion.Box.mk(0))\n" },
@@ -3219,6 +3319,7 @@ def main : IO Unit := do
   projectBoundaries
   derivingBoundaries
   syntheticBoundaries
+  defaultInstanceBoundaries
   postponedBoundaries
   transparencyBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

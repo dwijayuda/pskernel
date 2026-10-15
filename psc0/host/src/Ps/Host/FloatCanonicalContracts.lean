@@ -291,13 +291,19 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
       simpa [Format.binary64] using exponent.isLt
     have hPow : (2 : Nat) ^ 11 = 2048 := by decide
     omega
+  have hWidth : BitVec.setWidth 52
+      ((1#1) ++ UnpackedFloat.unpackMantissa (spec := Format.binary64) bits) =
+        UnpackedFloat.unpackMantissa (spec := Format.binary64) bits := by
+    change BitVec.ofNat 52
+      ((1#1 ++ UnpackedFloat.unpackMantissa (spec := Format.binary64) bits).toNat) =
+        UnpackedFloat.unpackMantissa (spec := Format.binary64) bits
+    exact hmask
   have hrec := reconstructPackedFields64 bits
   rw [canonicalPacked_finiteExponent Format.binary64 bits heTop]
   dsimp [joined, exponent, mantissa] at hBiased hlog hmask hnoOverflow hnoOverflow'
   simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
-  simp [UnpackedFloat.pack, hBiased, hlog, hmask, hnoOverflow,
-    hnoOverflow', Format.binary64, Format.exponentBias, Format.mantissaBits,
-    BitVec.setWidth] at *
+  simp only [UnpackedFloat.pack, hBiased, hnoOverflow, hnoOverflow', hlog, hWidth,
+    BitVec.ofNat_toNat, ite_false, ite_true]
   exact hrec
 
 -- Raw normal reconstruction: the implicit leading one fixes log2 of the
@@ -351,13 +357,19 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
       simpa [Format.binary32] using exponent.isLt
     have hPow : (2 : Nat) ^ 8 = 256 := by decide
     omega
+  have hWidth : BitVec.setWidth 23
+      ((1#1) ++ UnpackedFloat.unpackMantissa (spec := Format.binary32) bits) =
+        UnpackedFloat.unpackMantissa (spec := Format.binary32) bits := by
+    change BitVec.ofNat 23
+      ((1#1 ++ UnpackedFloat.unpackMantissa (spec := Format.binary32) bits).toNat) =
+        UnpackedFloat.unpackMantissa (spec := Format.binary32) bits
+    exact hmask
   have hrec := reconstructPackedFields32 bits
   rw [canonicalPacked_finiteExponent Format.binary32 bits heTop]
   dsimp [joined, exponent, mantissa] at hBiased hlog hmask hnoOverflow hnoOverflow'
   simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
-  simp [UnpackedFloat.pack, hBiased, hlog, hmask, hnoOverflow,
-    hnoOverflow', Format.binary32, Format.exponentBias, Format.mantissaBits,
-    BitVec.setWidth] at *
+  simp only [UnpackedFloat.pack, hBiased, hnoOverflow, hnoOverflow', hlog, hWidth,
+    BitVec.ofNat_toNat, ite_false, ite_true]
   exact hrec
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).

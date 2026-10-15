@@ -91,7 +91,26 @@ jobs:
           test -f .lake/build/lib/lean/Ps/Host/FloatConstructive.olean
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
           lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-conversions-candidate ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean | tee ../dist/pscv0-f3-conversions/conversions.log | grep -v '^PSCV0_STANDARD_SOURCE '
-          cmp ../packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean
+          # Expose reviewed candidate metadata on a strict mismatch without
+          # dumping proof bodies or accepting any changed source.
+          if ! cmp ../packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean; then
+            python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          old = Path('../packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean').read_text()
+          new = Path('../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean').read_text()
+          marker = 'def psStandardFloatConversionsBoundary : List PsName :='
+          def split(source):
+              before, rest = source.split(marker, 1)
+              boundary, after = rest.split('\n\n', 1)
+              return before, boundary, after
+          a, b = split(old), split(new)
+          print('PSCV0_F3_ASSET_DIFF ' + json.dumps({'onlyBoundaryChanged': a[0] == b[0] and a[2] == b[2], 'bytes': len(new.encode()), 'sha256': hashlib.sha256(new.encode()).hexdigest()}))
+          if a[0] == b[0] and a[2] == b[2]:
+              print('PSCV0_F3_BOUNDARY_CANDIDATE ' + json.dumps(b[1]))
+          PY
+            exit 1
+          fi
           sha256sum ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean | tee ../dist/pscv0-f3-conversions/conversions.sha256
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()

@@ -53,7 +53,7 @@ jobs:
           body=original[original.index("  match expr with\n"):]
           body=body.replace("psKernelExprHash", "psKernelExprHashBounded remaining")
           bounded=(
-              "def psKernelExprHashBounded : Nat → PsKernelExpr → Nat :=\n"
+              "def psKernelExprHashBounded : Nat → PsKernelExpr → Nat\n"
               "  | 0, _ => 37\n"
               "  | Nat.succ remaining, expr =>\n"
               + "\n".join("    "+v for v in body.rstrip().splitlines())+"\n\n"

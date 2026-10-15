@@ -70,6 +70,35 @@ run_cmd do
   (2147483648 : UInt32)
 #guard (PsV7Native.FloatCanonical.fromBits32 1).toBits == (1 : UInt32)
 
+-- Research-only transitive source-axiom trace, preceding the strict refusal.
+-- Never use this diagnostic to authorize or conceal any assumption.
+run_cmd do
+  for name in
+      [``Nat.testBit_two_pow_sub_one,
+       ``Nat.testBit_two_pow_sub_succ,
+       ``BitVec.eq_of_getLsbD_eq,
+       ``BitVec.toNat_allOnes,
+       ``Nat.testBit_and,
+       ``BitVec.extractLsb'_append_extractLsb',
+       ``BitVec.extractLsb'_append_extractLsb'_eq_extractLsb',
+       ``Nat.and_two_pow_sub_one_eq_mod,
+       ``BitVec.toNat_and, ``BitVec.toNat_allOnes,
+       ``BitVec.getLsbD_allOnes, ``BitVec.getLsbD_and,
+       ``BitVec.getElem_allOnes, ``BitVec.getElem_and,
+       ``BitVec.eq_of_toNat_eq,
+       ``PsV7Native.FloatCanonical.andAllOnes8_constructive, ``PsV7Native.FloatCanonical.andAllOnes11_constructive, ``PsV7Native.FloatCanonical.andAllOnes23_constructive, ``PsV7Native.FloatCanonical.andAllOnes52_constructive,
+       ``BitVec.and_append, ``BitVec.append_left_inj,
+       ``BitVec.append_right_inj, ``BitVec.and_zero,
+       ``BitVec.and_allOnes,
+       ``PsV7Native.FloatCanonical.maskedHigh_iff,
+       ``PsV7Native.FloatCanonical.maskedLow_iff,
+       ``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
+       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary32FractionMask_iff] do
+    for assumption in ← Lean.collectAxioms name do
+      Lean.logInfo m!"PSCV0-FLOAT-AXIOM-PATH {name}: {assumption}"
+
 run_cmd do
   -- Audit exactly the same roots that the independent exporter replays.
   -- Reject every unapproved axiom, not just two familiar forbidden names.
@@ -78,50 +107,6 @@ run_cmd do
     for assumption in dependencies do
       unless [``propext, ``Quot.sound].contains assumption do
         throwError "PSCV0-FLOAT-F1: {name} imports unapproved axiom {assumption}"
-
--- Exact mask-model constructive proof audit. Portable export roots are
--- unchanged until the independent kernel can replay every dependency.
-run_cmd do
-  for name in
-      [``PsV7Native.FloatCanonical.andAllOnes8_constructive,
-       ``PsV7Native.FloatCanonical.andAllOnes11_constructive,
-       ``PsV7Native.FloatCanonical.andAllOnes23_constructive,
-       ``PsV7Native.FloatCanonical.andAllOnes52_constructive,
-       ``PsV7Native.FloatCanonical.maskedHigh_iff,
-       ``PsV7Native.FloatCanonical.maskedLow_iff,
-       ``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
-       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
-       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
-       ``PsV7Native.FloatCanonical.binary32FractionMask_iff,
-       ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
-       ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact] do
-    for assumption in ← Lean.collectAxioms name do
-      unless [``propext, ``Quot.sound].contains assumption do
-        throwError "PSCV0-FLOAT-MASK-CONSTRUCTIVE: {name} imports unapproved axiom {assumption}"
-
--- Native-only F1 exact UInt helper correspondence. The original checked
--- source helpers are defined by UInt.and/UInt.toNat/Nat.beq/Bool.rec and
--- remain separately qualified by the cross-target runtime tests.
--- These are source-reference theorems, not portable admission proofs:
--- bit-blasting transitively imports Classical.choice under pinned Lean.
--- Explicitly log this boundary; refuse any incomplete (sorryAx) proof.
-run_cmd do
-  for name in
-      [``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
-       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
-       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
-       ``PsV7Native.FloatCanonical.binary32FractionMask_iff,
-       ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
-       ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact,
-       ``PsV7Native.FloatCanonical.canonicalUIntMask64_eq_logical,
-       ``PsV7Native.FloatCanonical.canonicalUIntMask32_eq_logical,
-       ``PsV7Native.FloatCanonical.canonicalUIntMask64_eq_upstream_toBits,
-       ``PsV7Native.FloatCanonical.canonicalUIntMask32_eq_upstream_toBits] do
-    let dependencies ← Lean.collectAxioms name
-    if dependencies.contains ``sorryAx then
-      throwError "PSCV0-FLOAT-MASK-NATIVE: {name} depends on sorryAx"
-    for assumption in dependencies do
-      Lean.logInfo m!"PSCV0-FLOAT-MASK-NATIVE {name}: {assumption}"
 
 -- Full upstream pack/unpack brings its own transitive axioms in native Lean,
 -- including Classical.choice. Never export these research-only comparisons to

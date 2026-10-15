@@ -600,82 +600,6 @@ theorem canonicalMask32_eq_compact (bits : BitVec 32) :
       mt (binary32ExponentMask_iff bits).mpr he
     simp only [if_neg he, if_neg he']
 
--- Direct native model of the selected PsStandard.canonicalFloat64Bits
--- source helper (UInt.land -> UInt.toNat -> Nat.beq -> Bool.rec).
--- This is not a new runtime intrinsic.
-def canonicalUIntMask64 (bits : UInt64) : UInt64 :=
-  if (bits &&& (9218868437227405312 : UInt64)).toNat = 9218868437227405312 then
-    if (bits &&& (4503599627370495 : UInt64)).toNat = 0 then bits
-    else (9221120237041090560 : UInt64)
-  else bits
-
-theorem canonicalUIntMask64_eq_logical (bits : UInt64) :
-    canonicalUIntMask64 bits = UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) := by
-  have hExpNat : (9218868437227405312 : UInt64).toNat = 9218868437227405312 := by decide
-  have hFracNat : (4503599627370495 : UInt64).toNat = 4503599627370495 := by decide
-  have hExp : (bits &&& (9218868437227405312 : UInt64)).toNat = 9218868437227405312 ↔
-      bits.toBitVec &&& 9218868437227405312#64 = 9218868437227405312#64 := by
-    rw [← hExpNat, UInt64.toNat_inj, ← UInt64.toBitVec_inj]
-    simp [UInt64.toBitVec_and, UInt64.toBitVec_ofNat']
-  have hFrac : (bits &&& (4503599627370495 : UInt64)).toNat = 0 ↔
-      bits.toBitVec &&& 4503599627370495#64 = 0#64 := by
-    change (bits &&& (4503599627370495 : UInt64)).toNat = (0 : UInt64).toNat ↔
-      bits.toBitVec &&& 4503599627370495#64 = 0#64
-    rw [UInt64.toNat_inj, ← UInt64.toBitVec_inj]
-    simp [UInt64.toBitVec_and, UInt64.toBitVec_ofNat']
-  apply UInt64.eq_of_toBitVec_eq
-  rw [UInt64.toBitVec_ofBitVec, ← canonicalMask64_eq_compact]
-  unfold canonicalUIntMask64 canonicalMask64
-  by_cases he : (bits &&& (9218868437227405312 : UInt64)).toNat = 9218868437227405312
-  · have he' := hExp.mp he
-    by_cases hm : (bits &&& (4503599627370495 : UInt64)).toNat = 0
-    · have hm' := hFrac.mp hm
-      simp only [if_pos he, if_pos he', if_pos hm, if_pos hm']
-    · have hm' := mt hFrac.mpr hm
-      simp only [if_pos he, if_pos he']
-      rw [if_neg hm, if_neg hm']
-      rfl
-  · have he' := mt hExp.mpr he
-    simp only [if_neg he, if_neg he']
-
--- Direct native model of the selected PsStandard.canonicalFloat32Bits
--- source helper (UInt.land -> UInt.toNat -> Nat.beq -> Bool.rec).
--- This is not a new runtime intrinsic.
-def canonicalUIntMask32 (bits : UInt32) : UInt32 :=
-  if (bits &&& (2139095040 : UInt32)).toNat = 2139095040 then
-    if (bits &&& (8388607 : UInt32)).toNat = 0 then bits
-    else (2143289344 : UInt32)
-  else bits
-
-theorem canonicalUIntMask32_eq_logical (bits : UInt32) :
-    canonicalUIntMask32 bits = UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) := by
-  have hExpNat : (2139095040 : UInt32).toNat = 2139095040 := by decide
-  have hFracNat : (8388607 : UInt32).toNat = 8388607 := by decide
-  have hExp : (bits &&& (2139095040 : UInt32)).toNat = 2139095040 ↔
-      bits.toBitVec &&& 2139095040#32 = 2139095040#32 := by
-    rw [← hExpNat, UInt32.toNat_inj, ← UInt32.toBitVec_inj]
-    simp [UInt32.toBitVec_and, UInt32.toBitVec_ofNat']
-  have hFrac : (bits &&& (8388607 : UInt32)).toNat = 0 ↔
-      bits.toBitVec &&& 8388607#32 = 0#32 := by
-    change (bits &&& (8388607 : UInt32)).toNat = (0 : UInt32).toNat ↔
-      bits.toBitVec &&& 8388607#32 = 0#32
-    rw [UInt32.toNat_inj, ← UInt32.toBitVec_inj]
-    simp [UInt32.toBitVec_and, UInt32.toBitVec_ofNat']
-  apply UInt32.eq_of_toBitVec_eq
-  rw [UInt32.toBitVec_ofBitVec, ← canonicalMask32_eq_compact]
-  unfold canonicalUIntMask32 canonicalMask32
-  by_cases he : (bits &&& (2139095040 : UInt32)).toNat = 2139095040
-  · have he' := hExp.mp he
-    by_cases hm : (bits &&& (8388607 : UInt32)).toNat = 0
-    · have hm' := hFrac.mp hm
-      simp only [if_pos he, if_pos he', if_pos hm, if_pos hm']
-    · have hm' := mt hFrac.mpr hm
-      simp only [if_pos he, if_pos he']
-      rw [if_neg hm, if_neg hm']
-      rfl
-  · have he' := mt hExp.mpr he
-    simp only [if_neg he, if_neg he']
-
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream
@@ -760,29 +684,6 @@ theorem fromBits32_eq_upstream_ofBits_all (bits : UInt32) :
   exact congrArg UInt32.ofBitVec
     ((upstreamPackUnpack_all32 bits.toBitVec).symm)
 
--- Whole-word correspondence with pinned upstream constructor/projection.
--- These results are checked by the native Lean kernel but NOT a portable
--- admission proof: the original upstream operations import Classical.choice.
-theorem canonicalUIntMask64_eq_upstream_toBits (bits : UInt64) :
-    canonicalUIntMask64 bits = (Float.ofBits bits).toBits := by
-  calc
-    canonicalUIntMask64 bits =
-        UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) :=
-      canonicalUIntMask64_eq_logical bits
-    _ = (fromBits64 bits).toBits := (toBits_fromBits64 bits).symm
-    _ = (Float.ofBits bits).toBits :=
-      congrArg Float.toBits (fromBits64_eq_upstream_ofBits_all bits)
-
-theorem canonicalUIntMask32_eq_upstream_toBits (bits : UInt32) :
-    canonicalUIntMask32 bits = (Float32.ofBits bits).toBits := by
-  calc
-    canonicalUIntMask32 bits =
-        UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) :=
-      canonicalUIntMask32_eq_logical bits
-    _ = (fromBits32 bits).toBits := (toBits_fromBits32 bits).symm
-    _ = (Float32.ofBits bits).toBits :=
-      congrArg Float32.toBits (fromBits32_eq_upstream_ofBits_all bits)
-
 -- A left inverse on ALL existing native logical Float values. This is a
 -- representation contract for future erasure/ABI work, not an executable
 -- backend preservation theorem or a raw upstream-ofBits equivalence.
@@ -831,6 +732,11 @@ def contractRoots : List Lean.Name :=
    ``canonicalPacked_idempotent, ``canonicalPacked_fixed_iff_valid,
    ``canonicalPacked_nan, ``canonicalPacked_infinityBits,
    ``canonicalPacked_finiteExponent,
+   ``binary64ExponentMask_iff, ``binary64FractionMask_iff,
+   ``binary32ExponentMask_iff, ``binary32FractionMask_iff,
+   ``canonicalMask64, ``canonicalMask32,
+   ``packedNaN64_eq_constant, ``packedNaN32_eq_constant,
+   ``canonicalMask64_eq_compact, ``canonicalMask32_eq_compact,
    ``toBits_fromBits64, ``toBits_fromBits32,
    ``eq_of_toBits_eq64, ``eq_of_toBits_eq32,
    ``fromBits64_toBits, ``fromBits32_toBits,

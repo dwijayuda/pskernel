@@ -1,5 +1,19 @@
 # PSCV0 v7 — AI work state
 
+## F3 logical dependency gate prepared — 15 October 2026
+
+Research branch `psc0/pscv0-v7-f3-conversions-research` starts from F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.
+
+Pinned Lean 4.35.0 sources studied: Init/Data/OfScientific{,/Basic}; Float/{Float,Float32}, Model/{Float,Float32}, Model/Unpacked/Operations/{OfNat,ToNat,OfScientific}; SInt/Float{,32}; Lean/Parser/Basic.decimalNumberFn and Lean/Elab/BuiltinTerm.elabScientificLit. Relevant tests: elab/float_conversions.lean, elab_fail/scientific.lean, pkg/ofScientific/{Main.lean,test-data/README.md,doubleround.txt}. Existing scalar-completion design remains the roadmap.
+
+The coherent logical candidate has 42 roots: both widths' ofScientific/ofNat/ofInt and conversions to eight fixed signed/unsigned word types, and conversions from those words plus Nat/Int into both floats. It uses the current selected F2 declarations as its dependency cut, original native definitions/proofs, shared source serialization and official kernel replay. Platform words and opaque Float/Float32 cross-width conversions remain separate contracts. No new assumptions, theorem replacements, computational axioms or budgets.
+
+Semantic design: scientific lexing retains an exact mantissa, signed decimal exponent and source span; expected type and the shared OfScientific synthetic constraint determine interpretation. Float's default priority is 501. Native fast paths require exactly representable operands; model fallback bounds extreme exponents before powers of ten and rounds once to the selected width. Numeric integer-to-float conversion uses nearest-even; float-to-fixed-integer truncates toward zero, clamps at bounds and maps NaN to zero. Never convert an arbitrary UInt64/Int64 to binary64 before rounding to binary32: that can double-round. Reuse the shared typed conversion boundary across backends, canonical NaN observation and existing ABI plan.
+
+Next: inspect this gate's proof/closure result, assess any dependency-family mismatches, finish F2 exact main qualification, then implement F3 coherently. No F3 acceptance/runtime claim. Keep both handoffs current.
+
+## Prior checkpoint (F2 runtime still pending)
+
 ## F2 registry review; full runtime qualification pending — 15 October 2026
 
 Research `6043e3e1891a326c2cd618925d5b5cfc8ec6c9e2` built the complete native compiler. Independent F1 replay [38729006486](https://github.com/dwijayuda/pskernel/actions/runs/38729006486) and byte-exact F2 replay [38729006492](https://github.com/dwijayuda/pskernel/actions/runs/38729006492) passed. F2 remains exactly 1,229 exported declarations /24 recursor rules /91,024 shared nodes, 11,179,796 source bytes, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. No new axioms or computational replacements.

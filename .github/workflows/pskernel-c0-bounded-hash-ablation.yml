@@ -66,16 +66,9 @@ jobs:
           begin=s.index("def psKernelC0LetCacheFramesWithFuel")
           end=s.index("\n/-\nPSKernel-C0 radix-16",begin)
           region=s[begin:end]
-          original_hash="""            let h :=
-              psKernelCacheMix
-                (psKernelCacheMix
-                  (psKernelCacheMix
-                    (psKernelCacheMix 29 (psKernelExprHash ty))
-                    (psKernelExprHash value))
-                  bodyHash)
-                (if nondep then 1 else 0)"""
-          assert region.count(original_hash)==1, "Unknown precomputed hash shape"
-          region=region.replace(original_hash,"            let h := psKernelExprHash expr")
+          hash_start=region.index("            let h :=")
+          hash_end=region.index("            pure (",hash_start)
+          region=region[:hash_start]+"            let h := psKernelExprHash expr\n"+region[hash_end:]
           s=s[:begin]+region+s[end:]
           path.write_text(s)
           print("C0_HASH_ABLATION root_depth=8 consistent_let_keys=true full_source_untouched=true")

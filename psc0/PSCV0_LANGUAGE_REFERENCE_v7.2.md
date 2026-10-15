@@ -2327,7 +2327,7 @@ doSeqItem ::= "assert" term | ...
 **ProofScript `pscv0` modification (same Lean grammar family)**
 
 ```text
-psDoItem ::= "assert" term | selectedLeanDoItem
+psVerifiedDoItemP0 ::= ... | "assert" term
 // Requires Prop; generates proof obligation; no JS runtime assert
 ```
 

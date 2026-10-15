@@ -7,6 +7,27 @@ import Pscv0GetElemOracle
 import Pscv0FloatConstructiveOracle
 import Init.Data.ByteArray.Lemmas
 
+-- Independent pinned native WHNF oracle for class projection transparency.
+run_meta do
+  let n := Lean.mkRawNatLit 857
+  let nat := Lean.mkConst ``Nat
+  let project := fun dictionary =>
+    Lean.mkApp3 (Lean.mkConst ``OfNat.ofNat [Lean.Level.zero]) nat n dictionary
+  let concrete := project (Lean.mkApp (Lean.mkConst ``instOfNatNat) n)
+  let explicit := project (Lean.mkApp3 (Lean.mkConst ``OfNat.mk [Lean.Level.zero])
+    nat n (Lean.mkRawNatLit 42))
+  for mode in [Lean.Meta.TransparencyMode.instances, .implicit] do
+    let reduced ← Lean.Meta.withTransparency mode (Lean.Meta.whnf concrete)
+    unless reduced == n do
+      throwError ("native class projection did not expose the indexed numeral: " ++
+        toString mode ++ "; value=" ++ reduced.dbgToString ++
+        "; input=" ++ concrete.dbgToString ++
+        "; dictionary status=" ++ toString (← Lean.getReducibilityStatus ``instOfNatNat).toAttrString)
+    unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf explicit)) == Lean.mkRawNatLit 42 do
+      throwError "native class projection ignored explicit dictionary evidence"
+  unless (← Lean.Meta.withTransparency .reducible (Lean.Meta.whnf concrete)) == concrete do
+    throwError "native semireducible class field unfolded at reducible transparency"
+
 -- Native boundary cases from Lean 4.35.0 System.Platform.numBits_eq,
 -- UInt/ISize two's-complement model; target width is explicitly selected.
 #guard (psIrMachineIntegerWidthWithTarget none .usize).isNone
@@ -47,6 +68,40 @@ private theorem pscv0ByteArrayExtractCopyLogical (bytes : ByteArray)
 
 -- Pinned Lean 4.35.0 default-instance priority, rollback and nested search.
 -- Independent source oracle; the PSC0 fixture below uses the same cases.
+namespace LiteralConstraintOracle
+structure Ticket where
+  value : Nat
+instance {n : Nat} : OfNat Ticket n where ofNat := ⟨n⟩
+instance : Add Ticket where add a b := ⟨a.value + b.value + 1⟩
+structure High : Type 1 where
+  value : Nat
+instance : Add High where add a b := ⟨a.value + b.value⟩
+instance : HMul Nat Bool Nat where hMul a b := if b then a else 0
+def add {A : Type u} [Add A] (a b : A) : A := a + b
+def sub {A : Type u} [Sub A] (a b : A) : A := a - b
+def mul {A : Type u} [Mul A] (a b : A) : A := a * b
+def div {A : Type u} [Div A] (a b : A) : A := a / b
+def mod {A : Type u} [Mod A] (a b : A) : A := a % b
+def append {A : Type u} [Append A] (a b : A) : A := a ++ b
+def withZero [zero : OfNat Nat 0] (_ : Unit) : Nat := 0
+def inferredNatural : String := let value := 17; toString value
+def inferredNegative : String := let value := -7; toString value
+#guard (2 + Ticket.mk 5).value == 8
+#guard (Ticket.mk 5 + 2).value == 8
+#guard add (6 : Nat) 5 == 11
+#guard sub (9 : Nat) 2 == 7
+#guard mul (3 : Nat) 6 == 18
+#guard div (10 : Nat) 3 == 3
+#guard mod (11 : Nat) 3 == 2
+#guard append "a" "b" == "ab"
+#guard withZero (zero := ⟨42⟩) () == 42
+#guard inferredNatural == "17"
+#guard inferredNegative == "-7"
+#guard (add (High.mk 5) (High.mk 7)).value == 12
+#guard (add (Float.ofBits 4607182418800017408) (Float.ofBits 4611686018427387904)).toBits.toNat == 4613937818241073152
+#guard ((9 : Nat) * true) == 9
+end LiteralConstraintOracle
+
 namespace DefaultInstanceOracle
 class Choice (A : Type) where
   pick : Nat
@@ -322,6 +377,9 @@ private def highUniverseHashableCases : IO Unit := do
         label ++ " refused at " ++ problem.phase ++ ": " ++ problem.message))
 
 -- One cross-universe family exercises the shared logical and runtime boundary.
+private def literalConstraintFixture : String :=
+  "namespace LiteralConstraints\nuniverse u\nstructure Ticket where { value: Nat }\ninstance ticket{n: Nat}: OfNat(Ticket, n) where { ofNat := Ticket.mk(n) }\ninstance ticketAdd: Add Ticket where { add := fun (a: Ticket) (b: Ticket) => Ticket.mk(a.value + b.value + 1) }\nstructure High: Type 1 where { value: Nat }\ninstance highAdd: Add High where { add := fun (a: High) (b: High) => High.mk(a.value + b.value) }\ninstance hetero: HMul(Nat, Bool, Nat) where { hMul := fun (a: Nat) (b: Bool) => if (b) { a } else { 0 } }\nfunction add{A: Type u}[Add A](a: A, b: A): A := a + b\nfunction sub{A: Type u}[Sub A](a: A, b: A): A := a - b\nfunction mul{A: Type u}[Mul A](a: A, b: A): A := a * b\nfunction div{A: Type u}[Div A](a: A, b: A): A := a / b\nfunction mod{A: Type u}[Mod A](a: A, b: A): A := a % b\nfunction append{A: Type u}[Append A](a: A, b: A): A := a ++ b\nfunction withZero[zero: OfNat Nat 0](): Nat := 0\nfunction inferredNatural(unit: Unit): String := { let value := 17\n toString(value) }\nfunction inferredNegative(unit: Unit): String := { let value := -7\n toString(value) }\nend LiteralConstraints\nconst literalLeft: Nat := LiteralConstraints.Ticket.value(2 + LiteralConstraints.Ticket.mk(5))\nconst literalRight: Nat := LiteralConstraints.Ticket.value(LiteralConstraints.Ticket.mk(5) + 2)\nconst homogeneousAdd: Nat := LiteralConstraints.add(6, 5)\nconst homogeneousSub: Nat := LiteralConstraints.sub(9, 2)\nconst homogeneousMul: Nat := LiteralConstraints.mul(3, 6)\nconst homogeneousDiv: Nat := LiteralConstraints.div(10, 3)\nconst homogeneousMod: Nat := LiteralConstraints.mod(11, 3)\nconst homogeneousAppend: String := LiteralConstraints.append(\"a\", \"b\")\nconst literalLocalNat: Nat := LiteralConstraints.withZero((), zero := { ofNat := 42 })\nconst literalNatural: String := LiteralConstraints.inferredNatural()\nconst literalNegative: String := LiteralConstraints.inferredNegative()\nconst homogeneousHigh: Nat := LiteralConstraints.High.value(LiteralConstraints.add(LiteralConstraints.High.mk(5), LiteralConstraints.High.mk(7)))\nconst homogeneousFloat: Nat := UInt64.toNat(Float.toBits(LiteralConstraints.add(Float.ofBits(UInt64.ofNat(4607182418800017408)), Float.ofBits(UInt64.ofNat(4611686018427387904)))))\nconst heterogeneousMul: Nat := 9 * true\n"
+
 private def defaultInstanceFixture : String :=
   "namespace DefaultChoice\nclass Choice(A: Type) where { pick: Nat }\nclass Missing(A: Type) where { marker: Nat }\ninstance ordinaryBool: Choice Bool where { pick := 37 }\n@[default_instance 600]\ninstance fallbackNat: Choice Nat where { pick := 31 }\n@[default_instance 700]\ndef unavailable[missing: Missing Bool]: Choice Bool := { pick := 47 }\nclass Preference(A: Type) where { pick: Nat }\ninstance ordinaryPreference: Preference Nat where { pick := 23 }\n@[default_instance 1000]\ndef preferBool: Preference Bool := { pick := 99 }\nclass Outer(A: Type) where { pick: Nat }\n@[default_instance 800]\ninstance outer{A: Type}[choice: Choice A]: Outer A where { pick := Choice.pick(A := A) }\nclass Tie(A: Type) where { pick: Nat }\n@[default_instance 200]\ninstance tieNat: Tie Nat where { pick := 1 }\n@[default_instance 200]\ninstance tieBool: Tie Bool where { pick := 2 }\nfunction choose{A: Type}[choice: Choice A](): Nat := Choice.pick(A := A)\nfunction competing{A: Type}[choice: Choice A][preference: Preference A](): Nat := Choice.pick(A := A)\nfunction nested{A: Type}[outer: Outer A](): Nat := Outer.pick(A := A)\nfunction tie{A: Type}[value: Tie A](): Nat := Tie.pick(A := A)\nfunction anchored{A: Type}[choice: Choice A](value: A): Nat := Choice.pick(A := A)\nfunction preference{A: Type}[preference: Preference A](): Nat := Preference.pick(A := A)\nuniverse u\nclass Poly(A: Type u) where { pick: Nat }\n@[default_instance]\ninstance poly{A: Type u}[inhabited: Inhabited A]: Poly A where { pick := 91 }\nend DefaultChoice\nconst defaultRollback: Nat := DefaultChoice.choose()\nconst defaultPriority: Nat := DefaultChoice.competing()\nconst defaultNested: Nat := DefaultChoice.nested()\nconst defaultTie: Nat := DefaultChoice.tie()\nconst defaultAnchor: Nat := DefaultChoice.anchored(true)\nconst defaultOnlyInferred: Nat := DefaultChoice.preference()\nconst defaultUniverse: Nat := DefaultChoice.Poly.pick(A := ProductLevels.High)\n"
 
@@ -642,7 +700,7 @@ private def executableFloatFixture : String :=
   "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := match Float.toModel(Float.ofBits(UInt64.ofNat(bits))) with { | Float.Model.mk raw valid => UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.mk(raw, valid)))) }\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := match Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))) with { | Float32.Model.mk raw valid => UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.mk(raw, valid)))) }\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
 
 private def application : String :=
-  executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -2636,7 +2694,7 @@ private def defaultInstanceBoundaries : IO Unit := do
   let elaborated ← get "default-instance elaboration"
     ((psElabProgram environment program).mapError psCompilerPscv0ElabError)
   let selected := elaborated.environment
-  unless selected.instances.defaults.length == 7 do
+  unless selected.instances.defaults.length == environment.instances.defaults.length + 7 do
     throw (IO.userError "default registry lost a declaration")
   let type := psMetaFresh psMetaEmpty psLocalEmpty (.sortE (.succ .zero)) .natural
   let goal := PsExpr.app (.constE (psDecisionName "DefaultChoice.Choice") []) type.expr
@@ -2671,7 +2729,7 @@ private def defaultInstanceBoundaries : IO Unit := do
     ((psElabProgramWithOrigins environment parsed "Defaults").mapError psCompilerPscv0ElabError)
   let privateView := psPscv0OwnInterface privateResult.result.environment
     privateResult.result.declarations privateResult.privateNames []
-  unless privateResult.result.environment.instances.defaults.length == 1 &&
+  unless privateResult.result.environment.instances.defaults.length == environment.instances.defaults.length + 1 &&
       privateView.defaults.isEmpty do
     throw (IO.userError "private default escaped its module")
   let bad ← get "nonclass default parse"
@@ -2743,7 +2801,33 @@ private def transparencyBoundaries : IO Unit := do
   let changed := psEnvironmentSetReducibility original psOptParamName .semireducible
   unless psStandardSnapshotPayload original != psStandardSnapshotPayload changed do
     throw (IO.userError "reducibility missing from frozen semantic payload")
-  IO.println "PSCV0_TRANSPARENCY: PASS source/imported abbreviations, local evidence, rigid refusal and metadata drift"
+  -- Same observations as the pinned native WHNF oracle above, plus stuck
+  -- evidence and an irreducible dictionary. No raw-Nat special case is used.
+  let n := PsExpr.lit (.natural 857)
+  let nat := PsExpr.constE psNatName []
+  let project := fun dictionary => psExprApplyMany
+    (.constE (psDecisionName "OfNat.ofNat") [.zero]) [nat, n, dictionary]
+  let dictionary := PsExpr.app (.constE (psDecisionName "PsStandard.instOfNatNat") []) n
+  let concrete := project dictionary
+  let explicit := project (psExprApplyMany
+    (.constE (psDecisionName "OfNat.mk") [.zero]) [nat, n, .lit (.natural 42)])
+  for mode in [PsTransparency.instances, .«implicit»] do
+    unless psExprAlphaEq (psWhnfWithTransparency mode original psMetaEmpty psLocalEmpty concrete) n do
+      throw (IO.userError "class projection failed at instance transparency")
+    unless psExprAlphaEq (psWhnfWithTransparency mode original psMetaEmpty psLocalEmpty explicit) (.lit (.natural 42)) do
+      throw (IO.userError "class projection discarded explicit dictionary evidence")
+  unless psExprAlphaEq (psWhnfWithTransparency .reducible original psMetaEmpty psLocalEmpty concrete) concrete do
+    throw (IO.userError "class field unfolded at reducible transparency")
+  let blocked := psEnvironmentSetReducibility original
+    (psDecisionName "PsStandard.instOfNatNat") .irreducible
+  unless psExprAlphaEq (psWhnfWithTransparency .instances blocked psMetaEmpty psLocalEmpty concrete) concrete do
+    throw (IO.userError "irreducible dictionary unfolded at instance transparency")
+  let family := psExprApplyMany (.constE (psRootName "OfNat") [.zero]) [nat, n]
+  let pushed := psLocalPushBinding psLocalEmpty (psRootName "dictionary") family .instanceImplicit
+  let stuck := project (.fvar pushed.id)
+  unless psExprAlphaEq (psWhnfWithTransparency .instances original psMetaEmpty pushed.context stuck) stuck do
+    throw (IO.userError "stuck class projection lost its canonical application")
+  IO.println "PSCV0_TRANSPARENCY: PASS abbreviations, native class projections, stuck/irreducible evidence, rigid refusal and metadata drift"
 
 -- Pinned Lean 4.35.0 BitVec.toInt gives this exact two's-complement
 -- decomposition; these are definitional kernel certificates, not runtime

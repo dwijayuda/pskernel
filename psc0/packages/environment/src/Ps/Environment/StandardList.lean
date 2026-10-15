@@ -438,11 +438,9 @@ def psStandardRegistryAudit (environment : PsEnvironment) : Except String Unit :
     if !environment.classes.any (psNameEq className) ||
         !environment.classParameters.any (fun entry => psNameEq entry.fst className) then
       throw ("PSCV0-STANDARD: missing class registration " ++ psNameToString className)
-  let binaryInstances := psStandardBinarySpecs.flatMap fun spec =>
-    spec.natMethod.toList.map (psStandardBinaryInstance spec psNatName) ++
-    spec.intMethod.toList.map (psStandardBinaryInstance spec psIntName) ++
-    spec.stringMethod.toList.map (psStandardBinaryInstance spec psStringName)
-  let instances := binaryInstances ++ psStandardBEqInstances ++
+  -- Homogeneous operator registrations are audited at their final selected
+  -- stage, after the immutable native proof assets have been installed.
+  let instances := psStandardBEqInstances ++
     [psStandardBEqListInstance] ++ psStandardToStringInstances
   let instanceNames := instances.map psDeclarationName ++
     [psNameAppendStr (psRootName "PsStandard") "instNegInt"]

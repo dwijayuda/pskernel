@@ -245,30 +245,6 @@ def psElabApplyArgs (elaborate : PsElaborator) (current : PsElabTermResult)
   psElabApplyOrdered elaborate 4096 current arguments [] pending
     (!arguments.isEmpty || expected.isSome) expected
 
-def psElabSolveSynthetic (current : PsElabTermResult)
-    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabTermResult := do
-  let solved := psSyntheticSolve current.context.environment current.context.instances
-    current.context.metaContext pending (!current.context.postponing)
-  if solved.resourceExceeded then throw .fuelExhausted
-  if current.context.postponing then
-    for constraint in solved.pending do
-      if !psSyntheticMayRetry solved.context constraint then
-        match constraint with
-        | .instanceGoal _ => throw .implicitApplicationUnsupported
-        | _ => throw .typeMismatch
-    let result := psElabResultWithMeta current solved.context current.type
-    let scope := psElabSaveScope result.context
-    return { result with context := { result.context with
-      pending := solved.pending.reverse.map (PsElabPendingWork.core scope) ++
-        result.context.pending } }
-  -- Preserve the reason for failure at the elaborator boundary; a blocked
-  -- expected/default equality is a type mismatch, not a missing dictionary.
-  match solved.pending.head? with
-  | some (.expectedType _ _ _) | some (.defaultValue _ _) => throw .typeMismatch
-  | some (.instanceGoal _) => throw .implicitApplicationUnsupported
-  | none => pure ()
-  return psElabResultWithMeta current solved.context current.type
-
 def psElabFinishApplication (application : PsElabApplicationResult)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
   do

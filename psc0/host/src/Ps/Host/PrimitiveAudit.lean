@@ -62,7 +62,8 @@ def primitiveAudit : IO Lean.Json := do
       (psNameToString name)
     let checkedArray := ["Array", "Array.map", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)
-    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray then
+    let checkedOperator := psStandardHomogeneousNativeNames.any (psNameEq name)
+    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedOperator then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -88,7 +89,7 @@ def primitiveAudit : IO Lean.Json := do
         ("bodyTrust", Lean.toJson (if logicalAssumption then "approved-pinned-Lean-logical-assumption"
           else if kernelQuotient then "kernel-generated-quotient-primitive"
           else if assumption then "assumption/runtime-primitive"
-          else if checkedFoundation then "checked-native-signature-foundation"
+          else if checkedFoundation || checkedOperator then "checked-native-signature-foundation"
           else if opaquePrimitive then "checked-opaque-inhabitant/runtime-primitive"
           else "checked-logical-model/runtime-override"))] :: entries
   -- Newly exposed representation conversions and proof-taking operations have

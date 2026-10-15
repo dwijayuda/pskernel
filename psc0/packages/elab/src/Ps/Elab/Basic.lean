@@ -592,34 +592,60 @@ def psElabReference
       | List.cons _ _ =>
           psElabNamedReference context sourceName expected
 
+-- Applications and literal notation use the same scoped constraint owner.
+def psElabSolveSynthetic (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabTermResult := do
+  let solved := psSyntheticSolve current.context.environment current.context.instances
+    current.context.metaContext pending (!current.context.postponing)
+  if solved.resourceExceeded then throw .fuelExhausted
+  if current.context.postponing then
+    for constraint in solved.pending do
+      if !psSyntheticMayRetry solved.context constraint then
+        match constraint with
+        | .instanceGoal _ => throw .implicitApplicationUnsupported
+        | _ => throw .typeMismatch
+    let result := psElabResultWithMeta current solved.context current.type
+    let scope := psElabSaveScope result.context
+    return { result with context := { result.context with
+      pending := solved.pending.reverse.map (PsElabPendingWork.core scope) ++
+        result.context.pending } }
+  -- Preserve the reason for failure at the elaborator boundary; a blocked
+  -- expected/default equality is a type mismatch, not a missing dictionary.
+  match solved.pending.head? with
+  | some (.expectedType _ _ _) | some (.defaultValue _ _) => throw .typeMismatch
+  | some (.instanceGoal _) => throw .implicitApplicationUnsupported
+  | none => pure ()
+  return psElabResultWithMeta current solved.context current.type
+
+-- Lean 4.35.0 Lean/Elab/BuiltinTerm.elabNumLit: fresh Type-valued target,
+-- expected-type constraints, raw Nat parameter, and a synthetic OfNat goal.
+-- Copyright Microsoft Corporation, Apache-2.0, Leonardo de Moura.
+-- A numeral never guesses Nat before ordinary constraints reach quiescence.
 def psElabNatural
     (context : PsElabContext) (text : String) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult := do
   let some value := psParseNaturalText text | throw (.invalidNatural text)
   let natural := PsExpr.lit (.natural value)
-  let some expectedType := expected | psElabResolvedTerm context natural none
-  let reduced := psWhnfWithTransparency .instances context.environment context.metaContext
-    context.localContext expectedType
-  -- An unconstrained numeral defaults only at the scheduler's default phase.
-  -- Nat literals keep their kernel representation; all other types use OfNat.
-  match reduced with
-  | .mvar _ => psElabResolvedTerm context natural expected
-  | .constE name _ =>
-    if psNameEq name psNatName then psElabResolvedTerm context natural expected
-    else elabOfNat natural expectedType
-  | _ => elabOfNat natural expectedType
-where
-  elabOfNat (natural expectedType : PsExpr) : Except PsElabError PsElabTermResult := do
-    let fresh := psMetaFreshLevel context.metaContext
-    let goal ← psElabApplyCore (psElabContextWithMeta context fresh.context)
-      (.constE (psRootName "OfNat") [fresh.level]) [expectedType, natural]
-    let synthesized := psSynthInstance context.environment context.localContext
-      context.instances goal.context.metaContext goal.term
-    let some dictionary := synthesized.value | throw .typeMismatch
-    let term := psExprApplyMany
-      (.constE (psNameAppendStr (psRootName "OfNat") "ofNat") [fresh.level])
-      [expectedType, natural, dictionary]
-    psElabResolvedTerm (psElabContextWithMeta context synthesized.context) term expected
+  let level := psMetaFreshLevel context.metaContext
+  let target := psMetaFresh level.context context.localContext (.sortE (.succ level.level)) .natural
+  let context := psElabContextWithMeta context target.context
+  let context ← match expected with
+    | none => pure context
+    | some type =>
+      let unified := psUnify context.environment context.localContext context.metaContext target.expr type
+      if !unified.success then throw .typeMismatch
+      pure (psElabContextWithMeta context unified.context)
+  let goal ← psElabApplyCore context
+    (.constE (psRootName "OfNat") [level.level]) [target.expr, natural]
+  let dictionary := psMetaFresh goal.context.metaContext goal.context.localContext goal.term .synthetic
+  let .mvar id := dictionary.expr | throw .implicitApplicationUnsupported
+  let result : PsElabTermResult := {
+    context := psElabContextWithMeta goal.context dictionary.context
+    term := psExprApplyMany (.constE (psNameAppendStr (psRootName "OfNat") "ofNat") [level.level])
+      [target.expr, natural, dictionary.expr]
+    type := target.expr }
+  let result ← psElabSolveSynthetic result [.instanceGoal id]
+  psElabFinalizeExpected result expected
 
 def psElabString
     (context : PsElabContext)

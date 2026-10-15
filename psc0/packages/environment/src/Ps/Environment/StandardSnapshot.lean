@@ -285,8 +285,10 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- No new assumptions, classes, instances or executable Float capability.
 -- Metadata v3 includes the separate default registry; the selected declaration
 -- roster is unchanged. Independently measured by strict CI38742459724 refusal.
+-- Instance metadata measured independently by strict native38754937813.
+-- Both boundaries agreed after native projection/signature checks; full gates pending.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:7059557959118648847"
+  "fnv1a64:4909868320704722088"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -451,7 +453,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- independently measured by strict refusal in native CI38730889997.
 -- Candidate replay CI38729006492 confirms the byte-exact checked asset.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:2b0475103206285b3107cd646ea04a365bf682aef2c4c0c8bf16d21e67c65995"
+  "sha256:990f59c079198da859bbe7b98e11dc96ca6668851825f48df5fadeb24524148f"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
@@ -466,6 +468,7 @@ def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
 def psStandardSnapshotValidate (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
   psStandardExceptAudit environment
+  psStandardOperatorDefaultsAudit environment
   let payload := psStandardSnapshotPayload environment
   let observedFNV := "fnv1a64:" ++ toString (psStandardSnapshotFNV64 payload)
   let observedSHA := "sha256:" ++ psStandardSnapshotSHA256 payload

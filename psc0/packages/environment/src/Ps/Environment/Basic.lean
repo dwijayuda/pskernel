@@ -173,9 +173,13 @@ structure PsEnvironment where
   exportedAliases : List (PsName × PsName) := []
   reducibility : PsBucketIndex (PsName × PsReducibility) := .empty
 
-def psEnvironmentReducibility (environment : PsEnvironment) (name : PsName) : PsReducibility :=
+def psEnvironmentReducibility? (environment : PsEnvironment) (name : PsName) :
+    Option PsReducibility :=
   ((psBucketFind 16 environment.reducibility (psEnvironmentNameHash name)).find?
-    (fun entry => psNameEq entry.fst name)).map (·.snd) |>.getD .semireducible
+    (fun entry => psNameEq entry.fst name)).map (·.snd)
+
+def psEnvironmentReducibility (environment : PsEnvironment) (name : PsName) : PsReducibility :=
+  (psEnvironmentReducibility? environment name).getD .semireducible
 
 def psEnvironmentCanUnfold (environment : PsEnvironment) (mode : PsTransparency)
     (name : PsName) : Bool :=

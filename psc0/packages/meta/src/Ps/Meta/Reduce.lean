@@ -60,6 +60,30 @@ def psDefEqReadOnly
 -- alone first would unfold its logical model and lose the native fast path.
 -- This follows pinned Lean Meta/WHNF.lean's whnfCore -> reduceNat? -> delta
 -- ordering, using the existing portable spine and iota mechanisms.
+-- Lean 4.35.0 Meta/WHNF.unfoldProjInst? keeps class fields semireducible
+-- but reduces an actual instance projection at instances/implicit transparency.
+-- Recognize the checked generated field from its class constructor telescope;
+-- arbitrary same-shaped helper definitions do not gain projection privileges.
+-- Apache-2.0, Microsoft Corporation, Leonardo de Moura.
+def psReduceConstructorFieldName : Nat → PsExpr → Option PsName
+  | 0, .forallE name _ _ _ => some name
+  | count + 1, .forallE _ _ body _ => psReduceConstructorFieldName count body
+  | _, _ => none
+
+def psReduceClassProjectionView (environment : PsEnvironment)
+    (name : PsName) (value : PsExpr) : Option (PsName × Nat × PsExpr × List PsExpr) := do
+  let view := psReduceAppView value []
+  let .proj owner index major := view.head | none
+  if !environment.classes.any (psNameEq owner) then none else do
+  let info ← psEnvironmentFindInductive environment owner
+  if !info.isStructure then none else do
+  let [constructor] := info.constructors | none
+  let constructor ← psEnvironmentFindConstructor environment constructor
+  if index >= constructor.numFields then none else do
+  let field ← psReduceConstructorFieldName (constructor.numParams + index) constructor.type
+  if !psNameEq name (psNameAppendStr owner (psNameLastComponent field)) then none
+  else some (owner, index, major, view.args)
+
 def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
     (environment : PsEnvironment) (metaContext : PsMetaContext)
     (localContext : PsLocalContext) (fuel : Nat) :
@@ -92,14 +116,37 @@ def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
         match psEnvironmentFind environment name with
         | none => applied
         | some declaration =>
-          match if psEnvironmentCanUnfold environment transparency name
-              then psDeclarationValue declaration else none with
+          match psDeclarationValue declaration with
           | none => applied
-          | some value =>
+          | some body =>
             let parameters := psDeclarationLevelParams declaration
-            if parameters.length == levels.length then
-              step (psExprInstantiateLevelParams parameters levels value) view.args
-            else applied
+            if parameters.length != levels.length then applied else
+            let allowed := psEnvironmentCanUnfold environment transparency name
+            let projectionMode := match transparency with
+              | .instances | .«implicit» => true
+              | .reducible => allowed
+              | _ => false
+            let classField := projectionMode && (match name with
+              | .str owner _ => environment.classes.any (psNameEq owner)
+              | _ => false)
+            let eligible := classField && psEnvironmentCanUnfold environment .«default» name
+            -- Never instantiate the body of an ordinary opaque-to-search
+            -- constant merely to discover that it is not a class projection.
+            if !allowed && !eligible then applied else
+            let value := psExprInstantiateLevelParams parameters levels body
+            let fallback := fun (_ : Unit) =>
+              if allowed then step value view.args else applied
+            if !eligible then fallback () else
+              let beta := psWhnfCore metaContext localContext (psReduceApply value view.args)
+              match psReduceClassProjectionView environment name beta with
+              | none => fallback ()
+              | some (owner, index, major, args) =>
+                let major := psWhnfSpineWithTransparencyFuel .instances environment
+                  metaContext localContext remaining major []
+                match psReduceProjectionIota (fun value => value) environment owner index major with
+                | some field => step field args
+                -- A stuck instance preserves the original projection application.
+                | none => fallback ()
       | .proj typeName index major =>
         let major := reduce major
         match psReduceProjectionIota (fun value => value) environment typeName index major with

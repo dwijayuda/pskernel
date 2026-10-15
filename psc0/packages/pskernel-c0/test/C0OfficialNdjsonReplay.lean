@@ -1156,16 +1156,16 @@ def c0ExportProbeFirstAppMismatchAux
       if psKernelExprEq lhs rhs then
         c0ExportProbeFirstAppMismatchAux defeq ctx st (i+1) leftRest rightRest
       else
-        let prefix := "argument[" ++ toString i ++
+        let detailLabel := "argument[" ++ toString i ++
           "] lhs=" ++ c0ExportMismatchTerm 8 lhs ++
           " rhs=" ++ c0ExportMismatchTerm 8 rhs
         match defeq ctx st lhs rhs with
         | .ok (true, updated) =>
-            prefix ++ " result=true | " ++
+            detailLabel ++ " result=true | " ++
               c0ExportProbeFirstAppMismatchAux defeq ctx updated
                 (i+1) leftRest rightRest
-        | .ok (false, _) => prefix ++ " result=false"
-        | .error error => prefix ++ " error=" ++ error
+        | .ok (false, _) => detailLabel ++ " result=false"
+        | .error error => detailLabel ++ " error=" ++ error
   | _, _, _ => "different_argument_counts"
 
 def c0ExportProbeFirstAppMismatch

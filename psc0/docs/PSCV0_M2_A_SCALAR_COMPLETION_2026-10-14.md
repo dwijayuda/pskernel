@@ -1,5 +1,16 @@
 # M2+A scalar completion design — Lean 4.35.0
 
+## Array universe prerequisite: logical gate qualified, strict pins reviewed — 15 October 2026
+
+At `ae8f17d4d264cdd9be02cbd466f9ffd94ed07b73`, [F3 logical replay38734094036](https://github.com/dwijayuda/pskernel/actions/runs/38734094036) passes: 42 roots, 134 declarations, one recursor rule, 3,286 shared nodes and 617,019 UTF-8 bytes; SHA-256 `45e6c8b81fbd971c891d173acef36c2ce6f6c59b674a06ffc9bfbe2e8cff6391`. No new assumptions, replaced definitions or quotient primitives. The candidate remains unselected. Independent [F1 replay38734094050](https://github.com/dwijayuda/pskernel/actions/runs/38734094050) and [F2 replay38734094025](https://github.com/dwijayuda/pskernel/actions/runs/38734094025) also pass.
+
+[Native38734094047](https://github.com/dwijayuda/pskernel/actions/runs/38734094047) compiled the complete Array family and oracles, passed the strengthened signature audit, and regenerated the prior assets. Both strict checks independently refused the intentional registry change with FNV `14544844717468498892`, declaration SHA-256 `373b27a0b77083baa58810055d68b6639ec00c2038da7641d3dd5c042e8f4e0d`, and surface SHA-256 `579f461576427a5daf711943613979e4517803475779e40b0200f359450744fa`. These reviewed values are now pinned; no guard is relaxed. Full Array source/runtime qualification remains pending.
+
+F2 [native38734252078](https://github.com/dwijayuda/pskernel/actions/runs/38734252078) is green at `9ffdd799a05ee256368266831bbaec74bee18ed2`, including 843 shared observations across JS, TS, Rust and GC Wasm/component. Incorporate its six constant-observation metadata corrections (`args: null`) while preserving the eight new Array observations. Finish F2 exact-main qualification separately.
+
+Next F3 work: shared priority-ordered default instances and exact scientific syntax, followed by checked conversion selection and typed backend conversion lowering. Pinned Lean `Lean/Meta/Instances.lean` and `Lean/Elab/SyntheticMVars.lean` establish descending priorities, transactional candidate attempts, and return to ordinary synthesis after one successful default. Float's OfScientific priority 501 must precede Neg Int's 500; surrounding expected types take precedence. Do not hardcode a Float literal fallback. M2+A remains open.
+
+
 ## F3 logical dependency gate prepared — 15 October 2026
 
 Research branch `psc0/pscv0-v7-f3-conversions-research` starts from F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.

@@ -1,3 +1,4 @@
+// Array universe-family digests independently measured by strict CI38734094047.
 import Ps.Host.NativeV7
 import Ps.Environment.StandardSnapshot
 import Ps.Syntax.Pscv0.Operators
@@ -149,7 +150,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Independently measured together with both declaration pins by the strict
 -- registry refusal at 49a38a11 / native CI38730889997 (F2).
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3"
+  "sha256:579f461576427a5daf711943613979e4517803475779e40b0200f359450744fa"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

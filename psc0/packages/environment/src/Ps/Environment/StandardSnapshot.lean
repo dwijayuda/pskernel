@@ -1,3 +1,4 @@
+// Array universe-family digests independently measured by strict CI38734094047.
 import Ps.Environment.SelfHostProd
 
 -- A portable, length-delimited canonical serialization of the checked
@@ -282,7 +283,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- 21 checked constructor/validity declarations and two public typed wrappers.
 -- No new assumptions, classes, instances or executable Float capability.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:11971833863653521941"
+  "fnv1a64:14544844717468498892"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -447,7 +448,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- independently measured by strict refusal in native CI38730889997.
 -- Candidate replay CI38729006492 confirms the byte-exact checked asset.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e"
+  "sha256:373b27a0b77083baa58810055d68b6639ec00c2038da7641d3dd5c042e8f4e0d"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

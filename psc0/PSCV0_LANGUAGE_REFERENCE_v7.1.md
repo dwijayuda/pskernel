@@ -1755,28 +1755,26 @@ function take(xs: List Nat): Id Nat
 
 The plain loops above demonstrate **syntax only**. For a verified executable result, a proof-capable iterator semantics, invariants or verified iterator lemmas, and all relevant termination obligations are still required. If an upstream selected Lean `for` invariant annotation is used, its binder/shape must follow the **pinned Lean 4.35.0 parser**, not the old invented `invariant total = prefixSum` spelling. `break`/`continue` retain Lean control-flow meaning and their verified proof obligations.
 
-### `while` loops — total and explicitly potentially divergent verification (v7.1)
+### `while` loops — ordinary, total and trace-verified behavior (v7.1)
 
-**Lean family:** stable Lean 4.35.0's selected intrinsic `invariant` and `decreasing` verification syntax. The native total-correctness example retains its pinned exit-state invariant semantics; PSCV0 keeps braced bodies.
-
-For a **total** verified loop, the existing native-inspired source shape remains:
+**`PSCV0-LOOP-01`: source grammar and proof contracts.** Stable Lean 4.35.0 permits ordinary loops, and its experimental intrinsic verification framework additionally supports `invariant` and `decreasing` clauses. The three PSCV0 source categories below are disjoint: a bare loop is an ordinary runtime form; annotated total loops require a decreasing proof; trace-verified partial loops are a separately staged, explicitly selected model.
 
 ```text
+psWhileOrdinary ::= "while" term "{" psDoSeq "}"
 psWhileTotal ::= "while" term
-  "invariant" binder "=>" term
-  "decreasing" term
-  "{" psDoSeq "}"
-```
-
-For a **partial/ongoing** loop, v7.1 specifies a separately **staged and environment-gated** source form:
-
-```text
+                 "invariant" binder "=>" term
+                 "decreasing" term
+                 "{" psDoSeq "}"
 psWhilePartial ::= "while" term
-  "invariant" binder "=>" term
-  "{" psDoSeq "}"
+                   "invariant" binder "=>" term
+                   "{" psDoSeq "}"
 ```
 
-The second form is **not** a claim that Lean's intrinsic total-correctness `vcgen` will accept a missing decreasing clause. PSCV0 must use a separately justified, Lean-grounded small-step / trace proof rule for this form, including initialization, preservation, every `break`/`continue`/exceptional path, and effect/state invariants. A totality claim still requires a well-founded descent proof; liveness/fairness claims require their own proofs and explicit runtime scheduling assumptions. Without the selected trace-effect model, a verified request fails at **ENV/VC-PROOF**, not by silently deleting the verification annotations. Plain ordinary loops keep their admitted runtime behavior and explicit unverified identity.
+**Ordinary checked `while`.** Admit `psWhileOrdinary` under the selected ordinary `do` parser and applicable typed runtime-effect rules, without fabricating any invariant or termination claim. This syntactic form may also appear in a verified program **only** when an independent, sound proof rule supplies all behavior required by its declared contract; otherwise verified emission is rejected. Explicit selection of ordinary output is not a verified fallback.
+
+**Total verified `while`.** `psWhileTotal` uses the pinned Lean 4.35.0 invariant over the exit flag and loop state, with the specified `decreasing` expression and checked loop VCs. It requires initialization, preservation, break/continue/exit paths, justified descent, and the selected effect model.
+
+**Potentially divergent verified `while` (P2, staged).** `psWhilePartial` belongs **only** to `psDivergentDoItemP2`, not the P0 `vcgen` total-loop route. Until PSCV0 has a Lean-grounded operational trace model, proof rules for every normal/exceptional/cancellation step, and approved source-to-backend correspondence, a verified build using this feature is rejected at ENV/VC-PROOF. When enabled, every finite execution prefix must preserve required safety properties, and any promised progress/fairness/liveness additionally requires an appropriate proof and explicit scheduling assumptions. A mere postcondition on normal return is not a safety proof of an endlessly running service.
 
 **Total-correctness example (schematic `.ps`):**
 
@@ -1794,7 +1792,7 @@ function countDown(n: Nat): Id Nat
 }
 ```
 
-**`PSCV0-LOOP-01`:** Proof-before-emission is **not** synonymous with proving termination for every loop. It requires proving every contract-mandated property under the chosen total/partial/trace interpretation. For a nonterminating service an empty postcondition is not a useful safety certificate: finite-prefix safety, termination-sensitive errors, external effects and any required progress properties must be covered. This is a future verified feature until operational semantics, VC rules and target correspondence have evidence.
+**Assurance distinction.** Proof-before-emission is not synonymous with universal termination. An ordinary typed loop is executable without a behavioral certificate only under an **explicit ordinary** identity; a verified-total loop has a checked measure; a trace-verified partial loop is not available until its staged semantics and proof obligations are implemented and independently checked. Neither a missing decreasing clause nor a vacuous postcondition automatically proves safety.
 
 ### Verification-only `erased` state — use Lean's word
 

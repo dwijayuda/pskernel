@@ -7,6 +7,7 @@ import Ps.Environment.StandardSignedIdentity
 import Ps.Environment.StandardSignedOperations
 import Ps.Environment.StandardFloatToBits
 import Ps.Environment.StandardFloatCanonical
+import Ps.Environment.StandardFloatConstructors
 import Ps.Environment.StandardSignedScalar
 import Ps.Environment.StandardSignedToInt
 import Ps.Environment.StandardSignedOfInt
@@ -101,8 +102,12 @@ def psSelfHostProdPreIntArithmeticPreludeEnvironment : PsEnvironment :=
     psStandardSignedClampExtend <|
     psStandardSignedShiftExtend psSelfHostProdPreSignedShiftPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen input for the small logical Float constructor asset.
+def psSelfHostProdPreFloatConstructorsPreludeEnvironment : PsEnvironment :=
   psStandardIntArithmeticExtend psSelfHostProdPreIntArithmeticPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardFloatConstructorsExtend psSelfHostProdPreFloatConstructorsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

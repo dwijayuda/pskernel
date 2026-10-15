@@ -759,13 +759,13 @@ def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := d
 
 -- F1 constructors need their validity proof, not every representation theorem.
 -- The larger contract roster remains independently checked by the audit entry.
--- Keep this candidate out of selected Standard until source/IR integration.
+-- Regenerate against the frozen pre-constructor stage, never its own exports.
 def exportFloatConstructorsCandidate (output : System.FilePath) : IO Unit := do
-  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let selected := psSelfHostProdPreFloatConstructorsPreludeEnvironment.declarations
   exportStandardCore {
     roots := [`PsV7Native.FloatCanonical.fromBits64,
       `PsV7Native.FloatCanonical.fromBits32]
-    boundary := selected.map psDeclarationName
+    boundary := psStandardFloatConstructorsBoundary
     baseDeclarations := selected
     nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonical }]
     allowedAssumptions := [`propext, `Quot.sound]

@@ -1,12 +1,18 @@
 # PSCV0 v7 — AI work state
 
-## 15 October — F1 minimal constructor closure research
+## 15 October — minimal logical Float constructor integration candidate
 
-The complete 30-root mask audit passed as a 922-declaration, 11 MB proof artifact. That evidence does not imply every proof dependency belongs in selected Standard. Pinned Float/Float32.lean separates logical model/Format.Valid from optimized runtime representation; PSC0 follows the same boundary.
+Qualified baseline: main e5d1bdd6 (native 38711192827; full mask proof audit 38711192777). The independently checked 21-declaration /2-root constructor asset from research 412697cf, CI38711557857, is now integrated on this research branch, with a frozen pre-constructor boundary and mandatory byte-for-byte regeneration. Public Float.ofBits/Float32.ofBits wrappers retain ordinary typed lambda entries and actual Format.Valid evidence. No proof substitution, new assumption or runtime override.
 
-Research `psc0/research-float-constructor-slice-v1` adds a two-root constructor exporter using the existing checked dependency-closure pipeline and only FloatCanonical (not the larger contracts module). It must independently replay the transitive validity proof and actual native constructor signatures, with no theorem substitutions or extra assumptions. The existing complete representation audit still runs first. Measure the resulting asset before selecting it. Runtime representation, public source aliases, typed erasure, IR and all backend/ABI paths remain pending; no constructor has yet been added to selected Standard.
+The 922-declaration representation proof remains an authoring audit, not selected Standard. A compact source batch checks both logical constructors/projections, refuses a wrong-width argument, and requires unsupported Float execution to fail at the shared IR capability gate. Existing full runtime observations are reused unchanged. Snapshot pins remain the old reviewed values until independently measured; source/runtime integration qualification is pending. M2+A and executable F1-F4 remain incomplete.
 
-This is F1 within M2+A, not a new roadmap milestone. Main e5d1bdd6 integration qualification is separate. No pskernel-core, self-hosting or C5.
+## 15 October — List/kernel scope MAIN QUALIFIED; F1 constructor closure minimized
+
+**Qualified main code `e5d1bdd6d667057bfd5376e8b39f3069f1dfc93c`** passed [native 38711192827](https://github.com/dwijayuda/pskernel/actions/runs/38711192827) and [portable mask proof audit 38711192777](https://github.com/dwijayuda/pskernel/actions/runs/38711192777). All native/backend gates passed at the same SHA. Complete List indexing is universe-polymorphic; actual C++ kernel counters are isolated by one shared awaited pooled-task mechanism. Standard stays 1,856 declarations /25 classes /226 instances, with the measured List pins recorded below. No test or kernel limit was weakened.
+
+The next architectural cut has independent evidence: research `412697cf6811e32a37cf79ef955ed0c6c5a14b8c`, [38711557857](https://github.com/dwijayuda/pskernel/actions/runs/38711557857), passed both the full 30-root /922-declaration representation audit and the **two-root /21-declaration constructor closure**. The latter has 1,702 shared nodes, **307,290 UTF-8 bytes**, SHA-256 `3042b3db951a1c68f8df24c5161889841082f9f4ee03783e1e5b4da918b3f9a7`, only approved propext/Quot.sound, no axioms/replaced axioms and no theorem substitutions. Keep the 11 MB representation proof audit out of the selected constructor dependency closure.
+
+Next: integrate only that small logical constructor/Format.Valid asset behind a frozen regeneration boundary, expose checked Float.ofBits/Float32.ofBits aliases, and validate logical source admission while runtime Float remains refused. Then complete F1 typed representation/erasure/IR and JS/TS/Rust/Wasm/ABI together, followed by F2-F4 and remaining M2+A. No runtime Float or M2+A completion claim. No pskernel-core, self-hosting or C5.
 
 ## 15 October — complete List indexing and actual kernel-scope integration
 

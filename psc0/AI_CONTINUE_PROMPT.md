@@ -1,36 +1,24 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
-## 15 October — F1 minimal constructor closure research
+## 15 October — minimal logical Float constructor integration candidate
 
-The complete 30-root mask audit passed as a 922-declaration, 11 MB proof artifact. That evidence does not imply every proof dependency belongs in selected Standard. Pinned Float/Float32.lean separates logical model/Format.Valid from optimized runtime representation; PSC0 follows the same boundary.
+Qualified baseline: main e5d1bdd6 (native 38711192827; full mask proof audit 38711192777). The independently checked 21-declaration /2-root constructor asset from research 412697cf, CI38711557857, is now integrated on this research branch, with a frozen pre-constructor boundary and mandatory byte-for-byte regeneration. Public Float.ofBits/Float32.ofBits wrappers retain ordinary typed lambda entries and actual Format.Valid evidence. No proof substitution, new assumption or runtime override.
 
-Research `psc0/research-float-constructor-slice-v1` adds a two-root constructor exporter using the existing checked dependency-closure pipeline and only FloatCanonical (not the larger contracts module). It must independently replay the transitive validity proof and actual native constructor signatures, with no theorem substitutions or extra assumptions. The existing complete representation audit still runs first. Measure the resulting asset before selecting it. Runtime representation, public source aliases, typed erasure, IR and all backend/ABI paths remain pending; no constructor has yet been added to selected Standard.
+The 922-declaration representation proof remains an authoring audit, not selected Standard. A compact source batch checks both logical constructors/projections, refuses a wrong-width argument, and requires unsupported Float execution to fail at the shared IR capability gate. Existing full runtime observations are reused unchanged. Snapshot pins remain the old reviewed values until independently measured; source/runtime integration qualification is pending. M2+A and executable F1-F4 remain incomplete.
 
-This is F1 within M2+A, not a new roadmap milestone. Main e5d1bdd6 integration qualification is separate. No pskernel-core, self-hosting or C5.
+## 15 October — List/kernel scope MAIN QUALIFIED; F1 constructor closure minimized
 
-## 15 October — complete List indexing and actual kernel-scope integration
+**Qualified main code `e5d1bdd6d667057bfd5376e8b39f3069f1dfc93c`** passed [native 38711192827](https://github.com/dwijayuda/pskernel/actions/runs/38711192827) and [portable mask proof audit 38711192777](https://github.com/dwijayuda/pskernel/actions/runs/38711192777). All native/backend gates passed at the same SHA. Complete List indexing is universe-polymorphic; actual C++ kernel counters are isolated by one shared awaited pooled-task mechanism. Standard stays 1,856 declarations /25 classes /226 instances, with the measured List pins recorded below. No test or kernel limit was weakened.
 
-Research `556904b96a9d70306a92278cebaaa358095c3749` passed [full native CI 38710034211](https://github.com/dwijayuda/pskernel/actions/runs/38710034211) and [expanded portable Float replay 38710034341](https://github.com/dwijayuda/pskernel/actions/runs/38710034341). All 28 native steps passed: higher-universe List indexing/lawful inference, the actual kernel-counter boundary, exact existing asset regeneration, 699 observations each on JS/TS/Rust, GC Wasm/components and repeated Wasmtime calls.
+The next architectural cut has independent evidence: research `412697cf6811e32a37cf79ef955ed0c6c5a14b8c`, [38711557857](https://github.com/dwijayuda/pskernel/actions/runs/38711557857), passed both the full 30-root /922-declaration representation audit and the **two-root /21-declaration constructor closure**. The latter has 1,702 shared nodes, **307,290 UTF-8 bytes**, SHA-256 `3042b3db951a1c68f8df24c5161889841082f9f4ee03783e1e5b4da918b3f9a7`, only approved propext/Quot.sound, no axioms/replaced axioms and no theorem substitutions. Keep the 11 MB representation proof audit out of the selected constructor dependency closure.
 
-Integrated changes:
-- All selected List index workers/public/internal bang aliases, positive/negative proofs, GetElem/GetElem?/LawfulGetElem dictionaries and instance registrations consistently carry universe u. No extra length pass or algorithm change.
-- One awaited pooled native IO task owns each independent authoring admission. Source requests use the same helper and retain their existing cumulative 2,000,000-heartbeat /20,000-depth budget. No dedicated OS thread per declaration, unchecked admission, retry or limit increase.
-- Lean has separate allocation and C++ kernel counters. IO.setNumHeartbeats only changes the former; runtime/object.cpp:run_task resets the latter. NativeV7's redundant dedicated-thread wrapper is removed; allocation telemetry is no longer mislabeled as kernel heartbeats.
-- The four compact Float mask-equivalence bridges join the authoritative contractRoots roster used by native assumption auditing and portable replay. Duplicate mask audit lists are removed. Native upstream pack/unpack correspondence remains separately labelled and unselected.
-
-Selected Standard remains **1,856 declarations /25 classes /226 instances**. Independently measured strict pins: `fnv1a64:14729641192328177589`, declaration `sha256:8b956d8f7b7f5bbebaf6480454e528380cd53f513772460a5a8f60648ad8bc2b`, surface `sha256:58d4afa2cb069f078ab68f358b4e1718edd10cbc9f316f90357faeca381cb77d`.
-
-The expanded candidate checked **30 roots /922 declarations /11 recursor rules**, with only propext/Quot.sound, no new axioms or replaced-definition axioms. Research artifact: **11,097,675 bytes /83,125 shared nodes**, SHA-256 `564b48590fde9074679ec5e8d72f746fda4069f382b7cbcdd6101ba0c7bda622`. This candidate is **not** added wholesale to selected Standard or executable Float. Assess its proof dependency cost and integrate the minimal coherent F1 source/IR representation boundary next.
-
-**This main integration still requires exact-commit native/backend and expanded Float CI.** The qualified research result is not substituted for that check. M2+A/F1-F4 remain incomplete. No pskernel-core, self-hosting, C5 or trust expansion.
-
-Primary pinned Lean references studied: Init/GetElem.lean, Init/Data/List/Basic.lean; runtime/alloc.cpp, runtime/io.cpp, runtime/interrupt.cpp, runtime/object.cpp; Lean/AddDecl.lean and Compiler/LCNF/EmitC.lean. Relevant tests: elab/getElemV.lean, elab_fail/getElem.lean, elab/kernel_maxheartbeats.lean, elab/taskState.lean. task_test_io.lean exits early upstream and is not qualification evidence. The allocation-only first probe was insufficient; the final probe consumes actual C++ kernel work, observes unscoped timeout, checks fresh scoped acceptance and invalid-type rejection.
+Next: integrate only that small logical constructor/Format.Valid asset behind a frozen regeneration boundary, expose checked Float.ofBits/Float32.ofBits aliases, and validate logical source admission while runtime Float remains refused. Then complete F1 typed representation/erasure/IR and JS/TS/Rust/Wasm/ABI together, followed by F2-F4 and remaining M2+A. No runtime Float or M2+A completion claim. No pskernel-core, self-hosting or C5.
 
 ## Working contract
 
 GitHub canonical: dwijayuda/pskernel, branch psc0/pscv0-v7-native-lean-v1,
 draft PR109. Inspect actual HEAD and exact-commit CI before writes; preserve
-history using non-force expected-HEAD updates. The entry above records qualified research and its main integration candidate, not M2+A completion. Historical audit details remain in
+history using non-force expected-HEAD updates. The entry above records qualified main code and constructor research, not M2+A completion. Historical audit details remain in
 AI_WORK_STATE.md; use its newest entries and live evidence.
 
 Native portable .lean, pinned Lean 4.35.0 at
@@ -43,14 +31,14 @@ Classical.choice-dependent native research is not portable proof evidence.
 
 ## Next critical path
 
-1. Qualify this main integration at its exact SHA in native/backend and expanded
-   Float CI. The research already passed; investigate any genuine integration
-   difference, without weakening checks. Record exact results in both handoffs.
-2. The 30-root /922-declaration compact Float mask proof closure now replays.
-   Do not repeat monomorphic List or cumulative-kernel-counter repairs. Native
-   upstream-ofBits correspondence still includes Classical.choice and remains
-   unselected. Keep proof audit roots centralized; inspect candidate size before
-   selecting the F1 logical/constructor asset and runtime representation.
+1. Main List/kernel scope integration is qualified. Preserve that baseline.
+   Integrate the independently checked 21-declaration constructor/validity asset
+   using a frozen pre-constructor export boundary. Preserve byte-for-byte
+   regeneration and inspect source aliases; keep runtime Float refused.
+2. Keep the 30-root /922-declaration representation proof audit separate from
+   the selected constructor closure. Its all-input mask bridges already replay;
+   native upstream-ofBits correspondence still imports Classical.choice and is
+   not a selected assumption or portable admission theorem.
 3. Complete F1 selected Float32/64 source constructors, proof-carrying validity,
    shared typed erasure/IR and canonical bits; then F2 arithmetic/equality,
    F3 literals/conversions/rounding, F4 all-target ABI. Keep logical equality

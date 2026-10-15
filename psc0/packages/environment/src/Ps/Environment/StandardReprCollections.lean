@@ -3,7 +3,7 @@ Collection display follows Lean 4.35.0 Init/Data/Repr.lean,
 Init/Data/Format/Instances.lean and Init/Data/Array/Basic.lean.
 Copyright (c) Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: checked Core builders; Array retains the selected Type-0 model.
+Modified: checked Core builders with each collection's element universe.
 -/
 import Ps.Environment.StandardRepr
 import Ps.Environment.StandardArray
@@ -98,28 +98,30 @@ def psToFormatProductInstance : PsDeclaration :=
     (psFormatClassType "Std.ToFormat" prod level) (psFormatClassValue "Std.ToFormat" prod method level)
 
 def psDisplayArrayDeclarations : List PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
   let alpha := PsExpr.fvar 0
-  let array := psPreludeArrayOf alpha
-  let list := psStandardArrayToList alpha (.fvar 2)
+  let array := psPreludeArrayOf alpha level
+  let list := psStandardArrayToList alpha (.fvar 2) level
   let asFormat := psFormatClassValue "Std.ToFormat" alpha
-    (psLogicLam 4 "value" alpha (psReprPrec alpha (.fvar 1) (.fvar 4) (psFormatNat 0)))
-  let joined := psLogicApply (.constE (psDecisionName "Std.Format.joinSep") [.zero])
+    (psLogicLam 4 "value" alpha (psReprPrec alpha (.fvar 1) (.fvar 4) (psFormatNat 0) level)) level
+  let joined := psLogicApply (.constE (psDecisionName "Std.Format.joinSep") [level])
     [alpha, asFormat, list, psFormatCall "append" [psReprText ",", psFormatCall "line"]]
   let body := psFormatIf psFormatType
-    (psOrderCall "Nat.beq" [psStandardArraySize alpha (.fvar 2), psFormatNat 0])
+    (psOrderCall "Nat.beq" [psStandardArraySize alpha (.fvar 2) level, psFormatNat 0])
     (psReprText "#[]")
     (psFormatCall "bracketFill" [.lit (.string "#["), joined, .lit (.string "]")])
   let reprMethod := psLogicLam 2 "value" array body
   let reprDecl := psFormatContainerMethodDeclaration "Array.repr" "Repr"
-    (psLogicPi 2 "value" array psFormatType) reprMethod .zero []
+    (psLogicPi 2 "value" array psFormatType) reprMethod level [u]
   let repr := psFormatContainerDeclaration "PsStandard.instReprArray" "Repr" array
     (psLogicLam 2 "value" array (psLogicLam 3 "prec" psOrderNat
-      (psOrderCall "Array.repr" [alpha, .fvar 1, .fvar 2]))) .zero []
+      (psStandardArrayCall "repr" [alpha, .fvar 1, .fvar 2] [level]))) level [u]
   let formatMethod := psLogicLam 2 "value" array
     (psFormatCall "append" [psReprText "#",
-      psLogicApply (.constE (psDecisionName "List.format") [.zero]) [alpha, .fvar 1, list]])
+      psLogicApply (.constE (psDecisionName "List.format") [level]) [alpha, .fvar 1, list]])
   let format := psFormatContainerDeclaration "PsStandard.instToFormatArray" "Std.ToFormat"
-    array formatMethod .zero []
+    array formatMethod level [u]
   [reprDecl, repr, format]
 
 def psReprFinInstance : PsDeclaration :=

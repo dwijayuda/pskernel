@@ -1,5 +1,16 @@
 # PSCV0 v7 — AI work state
 
+## Array universe family prepared; F3 remains unselected — 15 October 2026
+
+F3 [38731735348](https://github.com/dwijayuda/pskernel/actions/runs/38731735348) found 134 candidate declarations, no new assumptions, and one general dependency mismatch: PSC0's monomorphic Array versus Lean's universe-polymorphic Array. The native `ofScientific` fast-path tables and their proofs require the native family. The repair preserves the checked list-backed logical model and existing runtime layouts.
+
+Studied pinned Lean 4.35.0 `Init/Prelude.lean` (Array, mk/toList, size, getInternal, push), `Init/Data/Array/Basic.lean` (map/foldl), and tests `compile/{array,arrayMk}.lean`, `elab/{arrayGetU,array_map_module}.lean`. Element universe u is propagated through Array and its complete selected operation family; recursor motive and map/fold result universes are independent. GetElem/GetElem?/LawfulGetElem, Inhabited, Hashable, Repr and ToFormat dictionaries carry the same universe parameters. ByteArray specializes to universe zero. Seven obsolete Type-0 signature exceptions are replaced by exact normalized native signature checks; the explicit fold-bound default policy remains separately recorded.
+
+One shared fixture adds eight cross-universe runtime observations (map both ways, fold both ways, default, formatting, repr, hash), plus generic checked list/size identities. Existing Array, ByteArray, proof assets and all-backend suites remain required. Strict manifest pins are intentionally unchanged until the independent CI measurement is reviewed. No limits, logical assumptions, runtime layout, self-hosting or C5 changes.
+
+This research branch also incorporates F2 shared constant/application erasure from `c3081a0e0c102ba8f8fad16940301af893dcfe5b`. Its independent [F1 replay38733051176](https://github.com/dwijayuda/pskernel/actions/runs/38733051176) and [F2 replay38733051136](https://github.com/dwijayuda/pskernel/actions/runs/38733051136) pass; [full native38733051228](https://github.com/dwijayuda/pskernel/actions/runs/38733051228) is still in progress. Finish F2 exact-main qualification before integrating this Array/F3 work. Current Array changes are prepared, not yet qualified; F3 scalar declarations and source syntax remain unselected.
+
+
 ## F3 logical dependency gate prepared — 15 October 2026
 
 Research branch `psc0/pscv0-v7-f3-conversions-research` was based on F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` and now incorporates its class-key audit and corrected metadata pins through `cbdb554fa9209361cd72217432fb8435d1a15022` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.

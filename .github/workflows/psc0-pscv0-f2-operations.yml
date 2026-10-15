@@ -3,7 +3,7 @@ name: PSCV0 F2 logical operations (research only)
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-f2-operations-research]
+    branches: [psc0/pscv0-v7-f3-conversions-research]
     paths:
       # Native authoring only; no selected Standard or runtime enablement.
       - 'psc0/packages/**/src/**'

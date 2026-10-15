@@ -140,7 +140,8 @@ theorem psKernelC0RecursiveMetadataDefEq_source
             change psKernelIsDefEqWithFuel (Nat.succ remaining)
               context state leftTerm rightTerm =
                 .ok (psKernelDefEqFinish state leftTerm rightTerm true)
-            simp [psKernelIsDefEqWithFuel, depth, same,
+            simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
+              depth, same,
               leftTerm, rightTerm]
           · by_cases cached :
                 psKernelExprPairSetContains state.success
@@ -153,7 +154,8 @@ theorem psKernelC0RecursiveMetadataDefEq_source
               rw [hr]
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state leftTerm rightTerm = .ok (true, state)
-              simp [psKernelIsDefEqWithFuel, depth, same, cached,
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
+              depth, same, cached,
                 leftTerm, rightTerm]
             · cases child :
                   psKernelC0RecursiveMetadataDefEqWithFuel
@@ -183,7 +185,8 @@ theorem psKernelC0RecursiveMetadataDefEq_source
                   -- Expand the outer DefEq rule once, NOT its
                   -- recursively proved metadata child.
                   rw [psKernelIsDefEqWithFuel]
-                  simp [depth, same, cached,
+                  simp [psKernelDefEqSourceStepWithFuel,
+                    depth, same, cached,
                     psKernelDefEqQuickAfterCommon, sourceChild,
                     finalized, leftTerm, rightTerm]
 

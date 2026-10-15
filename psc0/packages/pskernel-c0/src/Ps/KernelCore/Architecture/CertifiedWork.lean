@@ -732,7 +732,7 @@ theorem psKernelC0DefEqReflexive_source
             change psKernelIsDefEqWithFuel (Nat.succ remaining)
               context state left right =
                 .ok (psKernelDefEqFinish state left right true)
-            simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same]
+            simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same]
           · simp [psKernelC0DefEqReflexiveWithFuel, depth, same] at h
 
 /-- Qualified accepting DefEq execution for reflexive inputs; no candidate
@@ -868,7 +868,7 @@ theorem psKernelC0SortDefEq_source
               context state (.sort leftLevel) (.sort rightLevel) =
                 .ok (psKernelDefEqFinish state
                   (.sort leftLevel) (.sort rightLevel) true)
-            simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same]
+            simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same]
           · by_cases cached :
                 psKernelExprPairSetContains state.success
                   (.sort leftLevel) (.sort rightLevel) = true
@@ -881,7 +881,7 @@ theorem psKernelC0SortDefEq_source
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state (.sort leftLevel) (.sort rightLevel) =
                   .ok (true, state)
-              simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same, cached]
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same, cached]
             · have hresult :
                   result = psKernelDefEqFinish state
                     (.sort leftLevel) (.sort rightLevel)
@@ -899,7 +899,7 @@ theorem psKernelC0SortDefEq_source
                   .ok (psKernelDefEqFinish state
                     (.sort leftLevel) (.sort rightLevel)
                     (psKernelLevelEquivalent leftLevel rightLevel))
-              simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same, cached,
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same, cached,
                 psKernelDefEqQuickAfterCommon]
 
 /-- A source-equation-carrying Sort comparison. Every successful direct
@@ -1004,7 +1004,7 @@ theorem psKernelC0LiteralDefEq_source
               context state (.lit leftLiteral) (.lit rightLiteral) =
                 .ok (psKernelDefEqFinish state
                   (.lit leftLiteral) (.lit rightLiteral) true)
-            simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same]
+            simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same]
           · by_cases cached :
                 psKernelExprPairSetContains state.success
                   (.lit leftLiteral) (.lit rightLiteral) = true
@@ -1017,7 +1017,7 @@ theorem psKernelC0LiteralDefEq_source
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state (.lit leftLiteral) (.lit rightLiteral) =
                   .ok (true, state)
-              simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same, cached]
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same, cached]
             · have hresult :
                   result = psKernelDefEqFinish state
                     (.lit leftLiteral) (.lit rightLiteral)
@@ -1035,7 +1035,7 @@ theorem psKernelC0LiteralDefEq_source
                   .ok (psKernelDefEqFinish state
                     (.lit leftLiteral) (.lit rightLiteral)
                     (psKernelLiteralEq leftLiteral rightLiteral))
-              simp [psKernelIsDefEqWithFuel, psKernelIsDefEqSourceWithFuel, depth, same, cached,
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same, cached,
                 psKernelDefEqQuickAfterCommon]
 
 /-- A source-equation-carrying Literal comparison. Every successful direct

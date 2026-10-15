@@ -1151,11 +1151,29 @@ def c0ExportDiagnoseDefEqWhnfSides
   let rCheap := c0ExportDescribeWhnfProbe (core ctx st rhs false true)
   let lCore := c0ExportDescribeWhnfProbe (core ctx st lhs false false)
   let rCore := c0ExportDescribeWhnfProbe (core ctx st rhs false false)
-  let lPublic := c0ExportDescribeWhnfProbe (full ctx st lhs)
-  let rPublic := c0ExportDescribeWhnfProbe (full ctx st rhs)
+  let leftPublic := full ctx st lhs
+  let rightPublic := full ctx st rhs
+  let lPublic := c0ExportDescribeWhnfProbe leftPublic
+  let rPublic := c0ExportDescribeWhnfProbe rightPublic
+  let normalizedConversion :=
+    match leftPublic, rightPublic with
+    | .ok (leftNormal, _), .ok (rightNormal, _) =>
+        let same := psKernelExprEq leftNormal rightNormal
+        if same then
+          "full_whnf_structural_equal=true"
+        else
+          match defeq ctx st leftNormal rightNormal with
+          | .ok (equal, _) =>
+              "full_whnf_structural_equal=false normalized_defeq=" ++
+                toString equal
+          | .error error =>
+              "full_whnf_structural_equal=false normalized_defeq_error=" ++
+                error
+    | _, _ => "full_whnf_structural_equal=unavailable"
   " lhs_cheap=" ++ lCheap ++ " rhs_cheap=" ++ rCheap ++
   " lhs_core=" ++ lCore ++ " rhs_core=" ++ rCore ++
-  " lhs_public=" ++ lPublic ++ " rhs_public=" ++ rPublic
+  " lhs_public=" ++ lPublic ++ " rhs_public=" ++ rPublic ++
+  " | normalized=" ++ normalizedConversion
 
 /-- Trace the *outermost failing source callback*, not an accepting
     alternate checker. WHNF and DefEq remain the original source functions.

@@ -610,8 +610,9 @@ def psElabProjectionReference
           let base ← psElabResolvedTerm context baseTerm none
           let projected ← psElabProjectionChain context base selected.snd
           psElabFinalizeExpected projected expected
-      return { result with context := psElabRecordInfo result.context
-        (.reference sourceName selected.fst selected.snd result.term result.type) }
+      return { result with
+        context := psElabRecordInfo result.context
+          (.reference sourceName selected.fst selected.snd result.term result.type) }
 
 def psElabNamedReference
     (context : PsElabContext)

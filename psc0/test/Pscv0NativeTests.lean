@@ -263,6 +263,27 @@ private def highUniverseHashableCases : IO Unit := do
     | .error problem => throw (IO.userError ("PSCV0_HASHABLE_UNIVERSE: " ++
         label ++ " refused at " ++ problem.phase ++ ": " ++ problem.message))
 
+-- Pinned Lean 4.35.0 Init/Prelude.lean List.get {α : Type u}.
+-- Exercise the actual checked source with α : Type 1 (not merely Nat/Bool).
+-- This acceptance case catches a monomorphic List.get or proof worker and
+-- confirms that a dependent Fin index reduces to the intended list cell.
+private def highUniverseListGetCases : IO Unit := do
+  let source :=
+    "namespace HighIndexed\n" ++
+    "structure High: Type 1 where { value: Nat }\n" ++
+    "function getHigh(xs: List High, i: Fin(List.length(xs))): High := List.get(xs, i)\n" ++
+    "theorem getHighSecond: (getHigh([High.mk(11), High.mk(13)], Fin.mk(1, PsStandard.natBleReflects(2, 2)))).value = 13 := by { rfl }\n" ++
+    "end HighIndexed\n"
+  let batch ← PsV7Native.runBatch #[{ source }]
+  let answer ← match batch with
+    | .error err => throw (IO.userError ("HIGH_LIST_GET: " ++ err.message))
+    | .ok result => pure result
+  match answer.results[0]? with
+  | some (.ok _) => IO.println "PSCV0_HIGH_LIST_GET: PASS checked Type 1 List.get and Fin proof"
+  | some (.error err) =>
+      throw (IO.userError ("PSCV0_HIGH_LIST_GET: " ++ err.phase ++ ": " ++ err.message))
+  | none => throw (IO.userError "PSCV0_HIGH_LIST_GET: missing source result")
+
 private def hashFixture : String :=
   "namespace Hashing\nuniverse u\nstructure Box(A: Type u): Type u where { value: A } deriving Hashable\nstructure Checked where { value: Nat\n witness: value = value } deriving Hashable\ninductive Choice where { | none | value(payload: Nat) } deriving Hashable\ninductive Hidden where { | value{secret: Nat}(payload: Nat) } deriving Hashable\ninductive Void where { } deriving Hashable\nfunction generic{A: Type u}[inst: Hashable(A)](value: A): UInt64 := hash(value)\nfunction ignoreSort{A: Sort u}(value: A, answer: Nat): Nat := answer\nend Hashing\nfunction hashText(value: String): Nat := UInt64.toNat(hash(value))\nfunction hashNatural(value: Nat): Nat := UInt64.toNat(hash(value))\nfunction hashInteger(value: Int): Nat := UInt64.toNat(hash(value))\nfunction hashPair(first: Nat, second: Nat): Nat := UInt64.toNat(mixHash(UInt64.ofNat(first), UInt64.ofNat(second)))\nconst hashRecord: Nat := UInt64.toNat(hash(Hashing.Box.mk((23 : Nat))))\nconst hashProof: Nat := UInt64.toNat(hash(Hashing.Checked.mk(19, by { rfl })))\nconst hashCtor: Nat := UInt64.toNat(hash(Hashing.Choice.value(29)))\nconst hashNullary: Nat := UInt64.toNat(hash(Hashing.Choice.none))\nconst hashImplicit: Nat := UInt64.toNat(hash(Hashing.Hidden.value(secret := 31, payload := 37)))\nconst hashOption: Nat := UInt64.toNat(hash(Option.some((41 : Nat))))\nconst hashNone: Nat := UInt64.toNat(hash((Option.none : Option Nat)))\nconst hashList: Nat := UInt64.toNat(hash([1, 2, 3]))\nconst hashArray: Nat := UInt64.toNat(hash(Array.mk([1, 2, 3])))\nconst hashTuple: Nat := UInt64.toNat(hash(Prod.mk((43 : Nat), true)))\nconst hashProposition: Nat := UInt64.toNat(hash(True.intro))\nconst sortPropositionEntry: Nat := Hashing.ignoreSort(True.intro, 61)\nconst sortPropositionPartial: Nat := (Hashing.ignoreSort(True.intro))(67)\nfunction integerCases(value: Int): Nat := match Int.neg(value) with { | Int.ofNat n => Nat.add(n, 71) | Int.negSucc n => Nat.add(n, 73) }\nconst hashFin: Nat := UInt64.toNat(hash(Fin.mk(n := 4, val := 3, isLt := Nat.lt_succ_self(3))))\nconst hashPoly: Nat := UInt64.toNat(Hashing.generic((47 : Nat)))\nconst hashScalar: Nat := UInt64.toNat(hash((18446744073709551615 : UInt64)))\nconst hashNarrow: Nat := UInt64.toNat(hash((255 : UInt8)))\nconst hashChar: Nat := UInt64.toNat(hash(Char.ofNat(128512)))\nconst hashUnit: Nat := UInt64.toNat(hash(()))\nconst hash64Value: Nat := UInt64.toNat(hash64((53 : UInt64)))\n"
 
@@ -2965,6 +2986,7 @@ def main : IO Unit := do
   parserCases
   getElemFoundationCases
   highUniverseHashableCases
+  highUniverseListGetCases
   stringJoinIntercalateCases
   unsignedOperatorSourceCases
   signedNativeOracle

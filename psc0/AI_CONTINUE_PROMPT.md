@@ -1,11 +1,10 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
-## F1 executable integration — 15 October 2026
+## F1 executable MAIN QUALIFIED — 15 October 2026
 
-**Research implementation qualified:** `bcd102cdac80b19367b461c204d6663e8526e2f7`.
-[Full native/backend run 38720893666](https://github.com/dwijayuda/pskernel/actions/runs/38720893666) and
-[independent Float proof replay 38720893532](https://github.com/dwijayuda/pskernel/actions/runs/38720893532) both passed at that exact SHA.
-This integration commit still requires both main-branch workflows before claiming main qualification.
+**Main implementation qualified:** `262c5819c499256fcd2093746deae4ef3aa2012b`.
+[Full native/backend run 38721711653](https://github.com/dwijayuda/pskernel/actions/runs/38721711653) and
+[independent Float proof replay 38721711679](https://github.com/dwijayuda/pskernel/actions/runs/38721711679) both passed at that exact SHA; all 29 native steps passed. Research `bcd102cdac80b19367b461c204d6663e8526e2f7` passed native38720893666 and Float38720893532 before integration. This receipt changes documentation only.
 
 F1 implements checked `UInt64 ↔ Float` / `UInt32 ↔ Float32` bit transport, model construction/projection/elimination and partial applications. Logical Model records retain real validity proofs in checked Core and ordinary record layout after proof erasure. JS and TS share readable DataView helpers; Rust uses safe f32/f64 bit APIs; Wasm uses native scalars and GC boxes only at generic crossings. Every NaN denotes the unique logical NaN; bit/model/explicit ABI observations canonicalize it. Other patterns, including signed zero, are preserved.
 
@@ -20,24 +19,6 @@ Selected Standard and its exact hashes are unchanged: **1,879 declarations /25 c
 Native .lean only; no pskernel-core, self-hosting/bootstrap or C5. PR109 stays draft on its original base. Update BOTH handoff files each slice, preserve expected-HEAD history, and report exact completed/pending evidence.
 
 
-## Previous qualified checkpoint — 15 October 2026
-
-**Qualified implementation: `38dbbfb9826490d02a44e6ab5b518a9946849345`.** [Native compiler/backend CI 38715710210](https://github.com/dwijayuda/pskernel/actions/runs/38715710210) and [independent portable Float replay 38715710273](https://github.com/dwijayuda/pskernel/actions/runs/38715710273) both passed at this exact commit. The subsequent handoff update changes documentation only.
-
-Completed this continuation:
-- **Checked Int arithmetic:** 28 native declarations/laws replace exactly four historical computational axioms; existing runtime intrinsics remain independently audited. Main `e322eff798a96db14b5deed24824ccf3c2fcc783` passed native38706796031 and Float38706795768.
-- **Complete universe-polymorphic List indexing and actual kernel-counter isolation:** main `e5d1bdd6d667057bfd5376e8b39f3069f1dfc93c` passed native38711192827 and Float38711192777. One shared awaited pooled-task mechanism owns independent admission; source requests keep the cumulative 2,000,000-heartbeat /20,000-depth budget. IO allocation telemetry is a separate counter.
-- **Logical Float constructors:** only 21 checked validity/constructor declarations plus Float.ofBits/Float32.ofBits typed wrappers are selected. The 307,290-byte source asset regenerates exactly (SHA-256 `3042b3db951a1c68f8df24c5161889841082f9f4ee03783e1e5b4da918b3f9a7`). Checked source accepts both widths and bit projections; wrong-width arguments and unsupported executable Float are refused.
-- **Independent proof closure:** 30 roots /922 declarations /11 recursor rules, including the four mask-equivalence bridges, replay successfully with only propext/Quot.sound. The 11,097,675-byte audit asset (SHA-256 `564b48590fde9074679ec5e8d72f746fda4069f382b7cbcdd6101ba0c7bda622`) stays outside selected Standard.
-
-The native workflow passed all 29 steps, including **699 existing observations each for JS, TypeScript and Rust**, GC Wasm/core and component validation, repeated native Wasmtime calls, asset byte comparison, source refusals and performance checks. These observations are scoped evidence, not backend metatheory or full v7 conformance.
-
-Selected Standard: **1,879 declarations /25 classes /226 instances**. FNV `fnv1a64:9256054256618924345`; declaration SHA-256 `0f62a5df0a7273a183e10700bf8eb49563afd0ff8d03b7be3935d4d310a12f04`; surface SHA-256 `240050e325b7c7d06827c36bffe7ed017ef18680b61ccf4fa7701807a62874b4`.
-
-**M2 + Phase A is NOT complete.** Next required work is F1 executable model erasure, typed IR, GC boxing, all backends and explicit ABI, followed by F2 arithmetic/equality, F3 scientific/conversions, F4 qualification, target-sized words and remaining authoritative language/Standard exits. The existing scalar-completion design records the studied Lean runtime representation and Canonical ABI dependencies. C5, self-hosting/bootstrap, compiler-source .ps translation and pskernel-core remain excluded.
-
-No new trusted assumptions or proof placeholders. Native upstream Float correspondence still transitively imports Classical.choice and remains unselected. PR109 stays draft on its original base. Read live HEAD before further writes.
-
 ## Working contract
 
 GitHub canonical: dwijayuda/pskernel, branch psc0/pscv0-v7-native-lean-v1, draft PR109; keep its current base and do not merge. Inspect live HEAD and exact-commit CI before edits. Preserve history with expected-HEAD, non-force pushes. Use GitHub integration/cloud Linux CI; no Desktop Commander or local checkout/build.
@@ -48,10 +29,10 @@ Read AI_WORK_STATE.md's newest checkpoint, PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.m
 
 ## Immediate continuation
 
-1. Verify live main HEAD and preserve any later work. The exact implementation 38dbbfb9826490d02a44e6ab5b518a9946849345 passed both main workflows above; no rerun of that unchanged completed slice is needed.
-2. Proceed directly to F1 executable semantics. Preserve the small selected constructor asset; do not import the entire 11 MB proof audit into the portable compiler.
-3. Implement two shared typed bit-conversion intrinsics, checked Float/model erasure and partial applications, ECMA/Rust/Wasm scalar lowering, GC boxing, and the existing explicit Canonical ABI together. Account for signed zero, canonical NaN observation, generic data/closures, float variant joins and typed post-return aliases. CheckTypes currently refuses Float/Float32; keep that guard until the coherent feature is qualified.
-4. Continue F2 arithmetic/equality, F3 scientific/conversions, F4 target/ABI evidence, explicit USize/ISize profiles and other authoritative M2+A obligations. Update BOTH handoff files at each slice.
+1. Verify live main HEAD and preserve later work. F1 code 262c5819c499256fcd2093746deae4ef3aa2012b passed both workflows above. Do not redo the completed F1 implementation or unchanged qualification.
+2. Continue F2 arithmetic, IEEE equality/comparison and classification. Study pinned Float/Float32, Model/Unpacked Operations, Round and tests/elab/floatModelDefeq.lean. First export and kernel-replay the genuine logical dependency closure; only the already checked theorem-only cuts for Nat.pow_eq_zero and BitVec.getLsbD_of_ge may be reused. Any additional proof adaptation needs its own checked type and proof evidence.
+3. Keep the small selected F1 constructor asset. The independent 11 MB canonical proof audit remains outside selected Standard. F2 typed arithmetic/comparison IR is still refused pending logical admission and coherent backend qualification.
+4. Then finish F3 scientific/conversions, F4 full Float evidence, explicit USize/ISize target-profile propagation and the remaining authoritative Standard/manifest obligations. Update BOTH handoffs at each slice.
 
 Minimal meaningful tests should validate the design; reuse the existing native oracle and full backend suite at architectural milestones. Keep proof admission, runtime observations and formal preservation claims separate. Do not add assumptions, unchecked casts, fallback admission or increased limits to bypass a failure.
 

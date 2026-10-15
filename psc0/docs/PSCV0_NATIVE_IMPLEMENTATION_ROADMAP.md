@@ -1,11 +1,10 @@
 # PSCV0 v7 native implementation roadmap
 
-## F1 executable integration — 15 October 2026
+## F1 executable MAIN QUALIFIED — 15 October 2026
 
-**Research implementation qualified:** `bcd102cdac80b19367b461c204d6663e8526e2f7`.
-[Full native/backend run 38720893666](https://github.com/dwijayuda/pskernel/actions/runs/38720893666) and
-[independent Float proof replay 38720893532](https://github.com/dwijayuda/pskernel/actions/runs/38720893532) both passed at that exact SHA.
-This integration commit still requires both main-branch workflows before claiming main qualification.
+**Main implementation qualified:** `262c5819c499256fcd2093746deae4ef3aa2012b`.
+[Full native/backend run 38721711653](https://github.com/dwijayuda/pskernel/actions/runs/38721711653) and
+[independent Float proof replay 38721711679](https://github.com/dwijayuda/pskernel/actions/runs/38721711679) both passed at that exact SHA; all 29 native steps passed. Research `bcd102cdac80b19367b461c204d6663e8526e2f7` passed native38720893666 and Float38720893532 before integration. This receipt changes documentation only.
 
 F1 implements checked `UInt64 ↔ Float` / `UInt32 ↔ Float32` bit transport, model construction/projection/elimination and partial applications. Logical Model records retain real validity proofs in checked Core and ordinary record layout after proof erasure. JS and TS share readable DataView helpers; Rust uses safe f32/f64 bit APIs; Wasm uses native scalars and GC boxes only at generic crossings. Every NaN denotes the unique logical NaN; bit/model/explicit ABI observations canonicalize it. Other patterns, including signed zero, are preserved.
 
@@ -1114,7 +1113,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 
 | Phase | Focus | Status and completion evidence |
 |---|---|---|
-| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** M1 and the current M2 search/constraint/selected deriving slices are qualified. Standard: 1,879 declarations /25 classes /226 instances; 755 shared observations each on JS/TS/Rust, plus Wasm/Wasmtime gates. Executable Float F1 bit/model transport is research-qualified and integrated pending main qualification; Float arithmetic/scientific, target-sized words and remaining authoritative Standard/manifest exits remain open. |
+| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** M1 and the current M2 search/constraint/selected deriving slices are qualified. Standard: 1,879 declarations /25 classes /226 instances; 755 shared observations each on JS/TS/Rust, plus Wasm/Wasmtime gates. Executable Float F1 bit/model transport is qualified on the main development branch; Float arithmetic/scientific, target-sized words and remaining authoritative Standard/manifest exits remain open. |
 | **B** | Dependent and mutual data, elimination, strict positivity and total recursive programming | **Planned.** Complete heterogeneous index reasoning, dependent motives, nested/mutual inductives, recursive pattern matrices and well-founded/structural termination; refuse invalid/partial constructs |
 | **C** | General class-driven typed do, state, effectful control and explicit IO/FFI boundaries | **Planned.** Complete Monad/Except/State/Reader and selected transformers, mutable/erased state, loops/early returns, try/catch/finally, effect/capability evidence and all-target preservation |
 | **D** | Kernel-checked tactics, intrinsic specifications, VC generation and assurance ledger | **Planned.** Complete selected rewrite/simp/automation, RC4 given/requires/ensures/assert/invariant/decreasing, WP/VC proof attachment, and verified-emission block on *any* unresolved mandatory obligation |

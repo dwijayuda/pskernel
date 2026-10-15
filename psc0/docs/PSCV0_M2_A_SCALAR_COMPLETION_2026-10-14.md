@@ -1,11 +1,10 @@
 # M2+A scalar completion design — Lean 4.35.0
 
-## F1 executable integration — 15 October 2026
+## F1 executable MAIN QUALIFIED — 15 October 2026
 
-**Research implementation qualified:** `bcd102cdac80b19367b461c204d6663e8526e2f7`.
-[Full native/backend run 38720893666](https://github.com/dwijayuda/pskernel/actions/runs/38720893666) and
-[independent Float proof replay 38720893532](https://github.com/dwijayuda/pskernel/actions/runs/38720893532) both passed at that exact SHA.
-This integration commit still requires both main-branch workflows before claiming main qualification.
+**Main implementation qualified:** `262c5819c499256fcd2093746deae4ef3aa2012b`.
+[Full native/backend run 38721711653](https://github.com/dwijayuda/pskernel/actions/runs/38721711653) and
+[independent Float proof replay 38721711679](https://github.com/dwijayuda/pskernel/actions/runs/38721711679) both passed at that exact SHA; all 29 native steps passed. Research `bcd102cdac80b19367b461c204d6663e8526e2f7` passed native38720893666 and Float38720893532 before integration. This receipt changes documentation only.
 
 F1 implements checked `UInt64 ↔ Float` / `UInt32 ↔ Float32` bit transport, model construction/projection/elimination and partial applications. Logical Model records retain real validity proofs in checked Core and ordinary record layout after proof erasure. JS and TS share readable DataView helpers; Rust uses safe f32/f64 bit APIs; Wasm uses native scalars and GC boxes only at generic crossings. Every NaN denotes the unique logical NaN; bit/model/explicit ABI observations canonicalize it. Other patterns, including signed zero, are preserved.
 

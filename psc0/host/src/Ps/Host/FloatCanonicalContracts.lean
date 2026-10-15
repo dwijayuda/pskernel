@@ -87,17 +87,32 @@ theorem canonicalPacked_finiteExponent (spec : Format) (bits : BitVec spec.numBi
     canonicalPacked spec bits = bits := by
   simp [canonicalPacked, he]
 
--- Experimental field reconstruction, using kernel-reflected bit-blasting
--- for the two pinned IEEE formats. No production Float capability is enabled.
+-- Exact sign-bit roundtrip. Restrict bit-blasting to a one-bit value;
+-- whole-word bit-blasting is needlessly expensive for field reassembly.
+theorem signBitRoundTrip (sign : BitVec 1) :
+    (UnpackedFloat.Sign.ofBitVec sign).toBitVec = sign := by
+  simp [UnpackedFloat.Sign.ofBitVec, UnpackedFloat.Sign.toBitVec] <;> bv_decide
+
+-- Reassemble each pinned IEEE word using upstream BitVec extraction and
+-- concatenation lemmas, without a 64/32-bit SAT computation.
 theorem reconstructPackedFields64 (bits : BitVec 64) :
     UnpackedFloat.packComponents Format.binary64
       (UnpackedFloat.Sign.ofBitVec
         (UnpackedFloat.unpackSign (spec := Format.binary64) bits))
       (UnpackedFloat.unpackExponent (spec := Format.binary64) bits)
       (UnpackedFloat.unpackMantissa (spec := Format.binary64) bits) = bits := by
-  simp [UnpackedFloat.packComponents, UnpackedFloat.unpackSign,
-    UnpackedFloat.unpackExponent, UnpackedFloat.unpackMantissa,
-    UnpackedFloat.Sign.ofBitVec, UnpackedFloat.Sign.toBitVec] <;> bv_decide
+  change
+    ((UnpackedFloat.Sign.ofBitVec (bits.extractLsb' 63 1)).toBitVec ++
+      bits.extractLsb' 52 11) ++ bits.extractLsb' 0 52 = bits
+  rw [signBitRoundTrip]
+  have hi : bits.extractLsb' 63 1 ++ bits.extractLsb' 52 11 =
+      bits.extractLsb' 52 12 := by
+    simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
+      (x := bits) (start₂ := 63) (start₁ := 52) (len₂ := 1) (len₁ := 11)
+      (by decide))
+  rw [hi]
+  simpa using (BitVec.extractLsb'_append_extractLsb'
+    (x := bits) (w := 12) (len := 52))
 
 theorem reconstructPackedFields32 (bits : BitVec 32) :
     UnpackedFloat.packComponents Format.binary32
@@ -105,9 +120,18 @@ theorem reconstructPackedFields32 (bits : BitVec 32) :
         (UnpackedFloat.unpackSign (spec := Format.binary32) bits))
       (UnpackedFloat.unpackExponent (spec := Format.binary32) bits)
       (UnpackedFloat.unpackMantissa (spec := Format.binary32) bits) = bits := by
-  simp [UnpackedFloat.packComponents, UnpackedFloat.unpackSign,
-    UnpackedFloat.unpackExponent, UnpackedFloat.unpackMantissa,
-    UnpackedFloat.Sign.ofBitVec, UnpackedFloat.Sign.toBitVec] <;> bv_decide
+  change
+    ((UnpackedFloat.Sign.ofBitVec (bits.extractLsb' 31 1)).toBitVec ++
+      bits.extractLsb' 23 8) ++ bits.extractLsb' 0 23 = bits
+  rw [signBitRoundTrip]
+  have hi : bits.extractLsb' 31 1 ++ bits.extractLsb' 23 8 =
+      bits.extractLsb' 23 9 := by
+    simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
+      (x := bits) (start₂ := 31) (start₁ := 23) (len₂ := 1) (len₁ := 8)
+      (by decide))
+  rw [hi]
+  simpa using (BitVec.extractLsb'_append_extractLsb'
+    (x := bits) (w := 9) (len := 23))
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.

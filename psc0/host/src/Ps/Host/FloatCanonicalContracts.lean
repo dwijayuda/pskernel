@@ -450,7 +450,7 @@ theorem binary64ExponentMask_iff (bits : BitVec 64) :
     simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
       (x := bits) (start₂ := 63) (start₁ := 52)
       (len₂ := 1) (len₁ := 11) (by decide)).symm
-  rw [split, BitVec.and_append, BitVec.zero_and,
+  rw [split, BitVec.and_append, BitVec.and_zero,
       BitVec.and_allOnes, BitVec.append_right_inj]
 
 theorem binary64FractionMask_iff (bits : BitVec 64) :
@@ -458,7 +458,7 @@ theorem binary64FractionMask_iff (bits : BitVec 64) :
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
   change (bits &&& (0#12 ++ BitVec.allOnes 52) = 0#12 ++ 0#52) ↔
     bits.extractLsb' 0 52 = 0#52
-  simpa using (maskedLow_iff (upper := 12) (lower := 52)
+  simpa only [BitVec.and_allOnes] using (maskedLow_iff (upper := 12) (lower := 52)
     (bits := bits) (mask := BitVec.allOnes 52) (target := 0#52))
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
@@ -476,7 +476,7 @@ theorem binary32ExponentMask_iff (bits : BitVec 32) :
     simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
       (x := bits) (start₂ := 31) (start₁ := 23)
       (len₂ := 1) (len₁ := 8) (by decide)).symm
-  rw [split, BitVec.and_append, BitVec.zero_and,
+  rw [split, BitVec.and_append, BitVec.and_zero,
       BitVec.and_allOnes, BitVec.append_right_inj]
 
 theorem binary32FractionMask_iff (bits : BitVec 32) :
@@ -484,7 +484,7 @@ theorem binary32FractionMask_iff (bits : BitVec 32) :
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
   change (bits &&& (0#9 ++ BitVec.allOnes 23) = 0#9 ++ 0#23) ↔
     bits.extractLsb' 0 23 = 0#23
-  simpa using (maskedLow_iff (upper := 9) (lower := 23)
+  simpa only [BitVec.and_allOnes] using (maskedLow_iff (upper := 9) (lower := 23)
     (bits := bits) (mask := BitVec.allOnes 23) (target := 0#23))
 
 -- Exactly the mask/branch behavior of the selected

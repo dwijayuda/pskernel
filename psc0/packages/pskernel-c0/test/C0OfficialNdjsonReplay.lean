@@ -1279,9 +1279,9 @@ def c0ExportScopedProofDifference
           | .lam name lt lb bi, .lam _ rt rb _ =>
               if psKernelExprEq lt rt then
                 let fresh := psKernelCheckerStateFreshName st name
-                let local := psKernelLocalContextAddLocal
+                let openedLocal := psKernelLocalContextAddLocal
                   ctx.localContext fresh.1 name lt bi
-                let child := psKernelCheckerContextWithLocalContext ctx local
+                let child := psKernelCheckerContextWithLocalContext ctx openedLocal
                 "lambda.body/" ++ descend child fresh.2
                   (psKernelExprInstantiate1 lb (.fvar fresh.1))
                   (psKernelExprInstantiate1 rb (.fvar fresh.1))
@@ -1289,9 +1289,9 @@ def c0ExportScopedProofDifference
           | .forallE name lt lb bi, .forallE _ rt rb _ =>
               if psKernelExprEq lt rt then
                 let fresh := psKernelCheckerStateFreshName st name
-                let local := psKernelLocalContextAddLocal
+                let openedLocal := psKernelLocalContextAddLocal
                   ctx.localContext fresh.1 name lt bi
-                let child := psKernelCheckerContextWithLocalContext ctx local
+                let child := psKernelCheckerContextWithLocalContext ctx openedLocal
                 "forall.body/" ++ descend child fresh.2
                   (psKernelExprInstantiate1 lb (.fvar fresh.1))
                   (psKernelExprInstantiate1 rb (.fvar fresh.1))

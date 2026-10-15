@@ -135,6 +135,8 @@ private def sourceStatus (native : Lean.Environment) (name : Lean.Name) : String
 private def checkCandidate (declarations candidates : List PsDeclaration) : IO Unit := do
   let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   -- Authoring diagnostics collect independent root failures in one pass.
+  -- Each independent admission owns the unchanged kernel budget, as source
+  -- admission does. Previous declarations must not consume this one's fuel.
   -- A rejected declaration is never inserted; its dependents stay blocked.
   -- This temporary environment is discarded on any error and cannot publish.
   let mut checked := empty
@@ -145,7 +147,9 @@ private def checkCandidate (declarations candidates : List PsDeclaration) : IO U
     progress := false
     let mut deferred := []
     for declaration in pending do
-      match PsKernelLean.tryPreludeDeclaration declarations checked declaration with
+      let attempt ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+        PsKernelLean.tryPreludeDeclaration declarations checked declaration
+      match attempt with
       | .ok (.admitted next) => checked := next; progress := true
       | .ok .deferred => deferred := declaration :: deferred
       | .error error => failures := error.message :: failures; progress := true
@@ -276,19 +280,29 @@ def checkQuotientFoundation : IO Unit := do
       (candidates ++ candidates.reverse) checked
     | throw (IO.userError "repeated quotient descriptor validation failed")
   let wrong := PsDeclaration.quotientDecl (psDecisionName "Quot.lift") [] nat .lift
-  if (PsKernelLean.tryPreludeDeclaration declarations registered wrong).isOk then
+  let existingSignature ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.tryPreludeDeclaration declarations registered wrong
+  if existingSignature.isOk then
     throw (IO.userError "forged existing quotient signature accepted")
-  if (PsKernelLean.tryPreludeDeclaration declarations checked wrong).isOk then
+  let newSignature ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.tryPreludeDeclaration declarations checked wrong
+  if newSignature.isOk then
     throw (IO.userError "forged quotient signature accepted")
   -- Mirror pinned kernelQuotNameCollision in an isolated discarded environment.
-  let .ok collision := checked.addDeclCore 2000000 20000
+  let collisionResult ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    checked.addDeclCore 2000000 20000
       (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none
+  let .ok collision := collisionResult
     | throw (IO.userError "cannot construct isolated quotient collision probe")
   let some candidate := candidates.head?
     | throw (IO.userError "quotient candidate group is empty")
-  if (PsKernelLean.tryPreludeDeclaration declarations collision candidate).isOk then
+  let collisionCandidate ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.tryPreludeDeclaration declarations collision candidate
+  if collisionCandidate.isOk then
     throw (IO.userError "provider accepted a quotient name collision")
-  if (collision.addDeclCore 2000000 20000 .quotDecl none).isOk then
+  let registration ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    collision.addDeclCore 2000000 20000 .quotDecl none
+  if registration.isOk then
     throw (IO.userError "kernel quotient registration overwrote an existing name")
   IO.println "PSCV0_QUOTIENT_FOUNDATION: PASS kernel regeneration, lift/ind computation, signature/collision refusal; no added assumptions"
 
@@ -335,7 +349,9 @@ private def checkAutoParamSignature (native : Lean.Environment)
       hints := .opaque
       safety := .safe
     }
-    match native.checked.get.addDeclCore 2000000 20000 witness none with
+    let attempt ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+      native.checked.get.addDeclCore 2000000 20000 witness none
+    match attempt with
     | .ok _ => pure ()
     | .error error =>
       throw (IO.userError (toString info.name ++
@@ -380,7 +396,9 @@ private def checkFloatAnnotationPolicy (native : Lean.Environment) : IO Unit := 
     hints := .opaque
     safety := .safe
   }
-  if (native.checked.get.addDeclCore 2000000 20000 bogus none).isOk then
+  let attempt ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    native.checked.get.addDeclCore 2000000 20000 bogus none
+  if attempt.isOk then
     throw (IO.userError "official Lean kernel accepted a forged Format.mk signature")
   IO.println "PSCV0_FLOAT_ANNOTATION_POLICY: PASS true annotation removal, ordinary Syntax and optParam preservation, partial-application preservation, and official kernel forged-type refusal"
 
@@ -475,7 +493,9 @@ private def exportStandardCore (spec : StandardExportSpec)
         value := .const info.name (info.levelParams.map Lean.Level.param)
         hints := .opaque
         safety := .safe }
-      match native.checked.get.addDeclCore 2000000 20000 witness none with
+      let attempt ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+        native.checked.get.addDeclCore 2000000 20000 witness none
+      match attempt with
       | .error error =>
         throw (IO.userError ("official kernel refused proof-cut type: " ++
           PsKernelLean.kernelExceptionSummary error))
@@ -723,7 +743,11 @@ def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := d
   let selected := psSelfHostProdPreludeEnvironment.declarations
   exportStandardCore {
     roots := FloatCanonical.contractRoots ++
-      [`PsV7Native.FloatConstructive.getLsbDOfGe]
+      [`PsV7Native.FloatConstructive.getLsbDOfGe,
+       `PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
+       `PsV7Native.FloatCanonical.canonicalMask32_eq_compact,
+       `PsV7Native.FloatCanonical.canonicalUIntMask64_eq_logical,
+       `PsV7Native.FloatCanonical.canonicalUIntMask32_eq_logical]
     boundary := selected.map psDeclarationName
     baseDeclarations := selected
     nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts },

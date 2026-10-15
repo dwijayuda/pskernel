@@ -1,5 +1,13 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — List indexing / authoring scope coherent research candidate
+
+Research only: `psc0/research-list-index-scope-v1`, based on qualified Int family plus the latest docs. Complete List indexing universe propagation covers the bang/public/internal getters, positive/negative law helpers, all three selected dictionaries and freshened instance levels. Existing proof/optional workers and array callers retain their algorithms. Pinned Lean 4.35.0 Init/GetElem.lean and Init/Data/List/Basic.lean provide semantics; tests/elab/getElemV.lean and tests/elab_fail/getElem.lean distinguish checked/optional/bang/lawful behavior (their Classical alternatives are not imported).
+
+Host StandardExport and StandardClosure reuse the existing withFreshKernelHeartbeatScope for every independent kernel submission. Source: pinned src/runtime/interrupt.cpp, src/Lean/Util/Heartbeats.lean and tests/elab/kernel_maxheartbeats.lean. The unchanged kernel limits are 2,000,000 heartbeats and depth 20,000. Failures remain refused. One boundary check exercises dirty caller budget, invalid-type refusal and caller restoration; an existing source batch adds generic List indexing/lawful inference plus a Type-valued index, with an independent native oracle.
+
+The expanded four Float mask bridge roots remain research-only. Full native CI first independently measures strict manifest drift; only measured values may be pinned before complete qualification. No new runtime/Float claim, axiom, theorem replacement, pskernel-core or self-hosting. Main remains qualified at e322eff; M2+A incomplete.
+
 ## 15 October — checked Int arithmetic family QUALIFIED
 
 Exact qualified source: `e322eff798a96db14b5deed24824ccf3c2fcc783`. [Native Linux CI 38706796031](https://github.com/dwijayuda/pskernel/actions/runs/38706796031) and [independent portable Float replay 38706795768](https://github.com/dwijayuda/pskernel/actions/runs/38706795768) both **passed** at this SHA. All 28 native job steps passed, including exact regeneration, 699 shared observations on each JS/TS/Rust target, GC Wasm/component execution and repeated Wasmtime calls.

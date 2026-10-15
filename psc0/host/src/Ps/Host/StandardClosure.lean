@@ -170,7 +170,9 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
           provided.contains name || (environment.find? name).isSome
         if !ready then deferred := deferred.push info else
           progress := true
-          match environment.addDeclCore 2000000 20000 declaration none with
+          let attempt ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+            environment.addDeclCore 2000000 20000 declaration none
+          match attempt with
           | .ok next =>
             environment := next
             admitted := admitted.push (toString info.name)

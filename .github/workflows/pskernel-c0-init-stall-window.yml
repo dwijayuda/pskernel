@@ -1,0 +1,63 @@
+name: PSKernel-C0 pinned Init stalled-declaration locator
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-init-stall-window.yml'
+      - 'psc0/packages/pskernel-c0/test/C0InitStallWindow.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinpoint-real-init:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Restore exact official Init source
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/Init-4.35.0.ndjson
+          key: c0-init-v435-lean4export-5a9a355-c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179
+      - name: Regenerate pinned source if cache is unavailable
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          if test ! -s "$RUNNER_TEMP/Init-4.35.0.ndjson"; then
+            git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+            git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+            test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+            (cd "$RUNNER_TEMP/lean4export" && lake build lean4export &&
+              lake env .lake/build/bin/lean4export Init > "$RUNNER_TEMP/Init-4.35.0.ndjson")
+          fi
+          test "$(stat -c%s "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 345690182
+          test "$(wc -l < "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 6452982
+          echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
+          echo "C0_INIT_STALL_SOURCE exact_pinned_bytes=6452982 digest=verified"
+      - name: Resolve names around first unresolved full-Init stall
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0InitStallWindow.py
+          python3 psc0/packages/pskernel-c0/test/C0InitStallWindow.py \
+            "$RUNNER_TEMP/Init-4.35.0.ndjson" \
+            --start 5060000 --end 5070000 --after 5064933 \
+            --output "$RUNNER_TEMP/C0-init-stall-window.json"
+          echo "C0_INIT_STALL_REPORT diagnostic_only=no_kernel_verdict"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pinned-init-stall-window
+          path: ${{ runner.temp }}/C0-init-stall-window.json
+          if-no-files-found: warn
+          retention-days: 14

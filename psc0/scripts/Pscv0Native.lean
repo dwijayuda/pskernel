@@ -227,6 +227,9 @@ def main (args : List String) : IO UInt32 := do
     | ["--export-float-operations-candidate", output] =>
         exportFloatOperationsCandidate (System.FilePath.mk output)
         return 0
+    | ["--export-platform-words-candidate", output] =>
+        exportPlatformWordsCandidate (System.FilePath.mk output)
+        return 0
     | ["--export-float-display-candidate", output] =>
         exportFloatDisplayCandidate (System.FilePath.mk output)
         return 0

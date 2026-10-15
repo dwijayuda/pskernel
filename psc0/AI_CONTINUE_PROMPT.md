@@ -1,5 +1,11 @@
 # Continue PSC0 / PSCV0 v7 — after qualified F3, M2 + Phase A
 
+## Target-word dependency research — 16 October 2026
+
+The F4 runtime candidate remains separately qualifying on psc0/pscv0-v7-f3-conversions-research at ac3887d173347d6f39356f93b646976941212b3f (native38791473363). Its pinned oracle, source/kernel checks and byte-exact assets passed at c61e277; the shared observation table's five missing constant args fields were corrected. F4 backend qualification is not yet complete.
+
+This branch, psc0/pscv0-v7-platform-words-research, starts from that F4 candidate and reviews 92 native abstract-width roots against a frozen pre-platform stage. No platform word is selected or enabled yet; the selected Standard and strict F4 fingerprints are unchanged. Read [target-word design](docs/PSCV0_M2_A_TARGET_WORDS_2026-10-16.md) before implementation. Continue all remaining M2+A; do not stop merely at F4. GitHub/cloud-only, native .lean, official pinned Lean4.35.0, no pskernel-core/self-host/C5, no new assumptions/budget increases, draft PR109 unchanged.
+
 ## F4 implementation checkpoint — qualification pending
 
 Native qualification at c61e2771539d4801177b5a32b654ce0ea4fee554 ([38790035567](https://github.com/dwijayuda/pskernel/actions/runs/38790035567)) passed the pinned F4 oracle, all source/kernel/elaboration checks, all checked asset replays and module integration. The Wasm observation generator then rejected five malformed constant table entries (missing required `args: null`) before target execution. Their table schema is corrected; no observation, expected value, compiler behavior or acceptance criterion is removed. Full backend qualification remains pending. Both strict guards selected independently agreed F4 values from native38789249978: FNV 16506634277351925976, declaration SHA-256 bd9a79a2f258c46e383565a94662a188db0cd92ba0359750858ce7fec1251426, surface SHA-256 0018690e17bb2f61ee2444de07fb7b4435aaa146470bd87fb6cab907741097ee. The live manifest confirms 3,331 declarations; source closure is 260 portable /274 native modules.

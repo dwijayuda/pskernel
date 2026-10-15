@@ -125,8 +125,12 @@ def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
   psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen logical boundary for explicit target-word profile authoring.
+def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
   psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

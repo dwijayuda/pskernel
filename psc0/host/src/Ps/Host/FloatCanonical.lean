@@ -54,8 +54,8 @@ theorem canonicalPacked_idempotent (spec : Format)
     (canonicalPacked_valid spec bits)
 
 -- Genuine logical Float values constructed with verified Format.Valid
--- evidence. Host-only at this stage: source-level Float.ofBits and the
--- cross-target floating ABI are deliberately NOT activated by these.
+-- evidence. The selected portable asset replays these logical constructors.
+-- Executable Float erasure, typed IR and the cross-target ABI remain gated.
 def fromBits64 (bits : UInt64) : Float :=
   Float.ofModel {
     toBits := UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec)

@@ -23,6 +23,7 @@ on:
       - 'psc0/scripts/Pscv0Native.lean'
       - 'psc0/v7-native/lakefile.lean'
       - '.github/workflows/psc0-pscv0-f1-canonical-model.yml'
+      - '.github/workflows/psc0-pscv0-native-v7.yml'
 permissions:
   contents: read
 concurrency:
@@ -91,6 +92,12 @@ jobs:
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
           lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-canonical-model-candidate ../dist/pscv0-f1-constructive/FloatCanonicalModelCandidate.lean | tee ../dist/pscv0-f1-constructive/canonical-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
           sha256sum ../dist/pscv0-f1-constructive/FloatCanonicalModelCandidate.lean | tee ../dist/pscv0-f1-constructive/canonical-model.sha256
+      - name: Independently replay the minimal constructor and validity closure
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-constructors-candidate ../dist/pscv0-f1-constructive/FloatConstructorsCandidate.lean | tee ../dist/pscv0-f1-constructive/constructors.log
+          sha256sum ../dist/pscv0-f1-constructive/FloatConstructorsCandidate.lean | tee ../dist/pscv0-f1-constructive/constructors.sha256
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()
         with:

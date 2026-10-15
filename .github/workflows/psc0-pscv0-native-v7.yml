@@ -174,6 +174,15 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_native --export-int-arithmetic-model-candidate ../dist/pscv0-native/StandardIntArithmeticData.lean | tee ../dist/pscv0-native/int-arithmetic-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
           cmp ../packages/environment/src/Ps/Environment/StandardIntArithmeticData.lean ../dist/pscv0-native/StandardIntArithmeticData.lean
+      - name: Regenerate minimal checked Float constructors
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          # Lean resolves a namespace at its first root; local Ps.Host must
+          # precede the parent workspace's separate Ps namespace.
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-constructors-candidate ../dist/pscv0-native/StandardFloatConstructorsData.lean | tee ../dist/pscv0-native/float-constructors.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../dist/pscv0-native/StandardFloatConstructorsData.lean ../packages/environment/src/Ps/Environment/StandardFloatConstructorsData.lean
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

@@ -1,5 +1,17 @@
 # PSCV0 v7 native implementation roadmap
 
+## 15 October — minimal logical Float constructors integrated; main qualification pending
+
+Research `41a4474b7cbbb04c9e83b4a7fae111631be58e7a` passed both [full native integration 38715004637](https://github.com/dwijayuda/pskernel/actions/runs/38715004637) and [independent full proof replay 38715004629](https://github.com/dwijayuda/pskernel/actions/runs/38715004629). All 29 native steps passed, including exact asset regeneration, source/type/runtime boundaries, 699 observations each on JS/TS/Rust, GC Wasm/component validation, repeated Wasmtime calls and performance checks. This main integration still requires the same exact-commit pair before main qualification is claimed.
+
+The selected constructor layer adds **21 checked declarations plus two public typed wrappers**, retaining actual Format.Valid evidence. Asset: **307,290 UTF-8 bytes /1,702 shared nodes**, SHA-256 `3042b3db951a1c68f8df24c5161889841082f9f4ee03783e1e5b4da918b3f9a7`. Regeneration uses its frozen pre-constructor declaration boundary and mandatory byte comparison. The independent **30-root /922-declaration /11 MB** representation audit remains separate from selected Standard. No new assumptions, axioms or runtime overrides.
+
+Standard now has **1,879 declarations /25 classes /226 instances**. Strict independently measured pins: `fnv1a64:9256054256618924345`; declaration `sha256:0f62a5df0a7273a183e10700bf8eb49563afd0ff8d03b7be3935d4d310a12f04`; surface `sha256:240050e325b7c7d06827c36bffe7ed017ef18680b61ccf4fa7701807a62874b4`. Logical Float.ofBits/Float32.ofBits and toBits source admission is checked, a wrong-width argument is refused, and executable Float remains refused at the shared IR gate.
+
+The full audit's pre-constructor boundary prevents selected roots from cutting their own replay. Host authoring uses the local Ps namespace first: Lean/Util/Path.lean resolves the first root directory, so plain lake env alone is insufficient when both parent and native packages use Ps. This ordering matches the independently qualified proof workflow.
+
+M2+A remains incomplete. Next: coherent F1 model erasure, typed IR, all backends and explicit ABI; then F2-F4, target-sized words and remaining selected language/Standard obligations. Continue M2+A -> M3+B -> M4+C/D. No pskernel-core, self-hosting, C5 or trust expansion.
+
 ## 15 October — complete List indexing and actual kernel-scope integration
 
 Research `556904b96a9d70306a92278cebaaa358095c3749` passed [full native CI 38710034211](https://github.com/dwijayuda/pskernel/actions/runs/38710034211) and [expanded portable Float replay 38710034341](https://github.com/dwijayuda/pskernel/actions/runs/38710034341). All 28 native steps passed: higher-universe List indexing/lawful inference, the actual kernel-counter boundary, exact existing asset regeneration, 699 observations each on JS/TS/Rust, GC Wasm/components and repeated Wasmtime calls.

@@ -3013,9 +3013,35 @@ private def kernelHeartbeatIsolationCases : IO Unit := do
     IO.setNumHeartbeats original
   IO.println "PSCV0_KERNEL_SCOPE: PASS actual kernel-counter isolation, allocation baseline preservation and type refusal"
 
+-- Logical F1 admission is separate from the still-unqualified runtime profile.
+private def floatConstructorBoundaries : IO Unit := do
+  let source := "function make64(bits: UInt64): Float := Float.ofBits(bits)\n" ++
+    "function make32(bits: UInt32): Float32 := Float32.ofBits(bits)\n" ++
+    "function bits64(bits: UInt64): UInt64 := Float.toBits(make64(bits))\n" ++
+    "function bits32(bits: UInt32): UInt32 := Float32.toBits(make32(bits))\n"
+  let requests : Array PsV7Native.Request := #[
+    { source, targets := [] },
+    { source := "function bad(bits: UInt32): Float := Float.ofBits(bits)\n", targets := [] },
+    { source := "function identity(value: Float): Float := value\n", targets := [.javascript] }]
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok value => pure value
+    | .error error => throw (IO.userError ("Float constructor prelude: " ++ error.message))
+  match batch.results.toList with
+  | [.ok accepted, .error badType, .error unqualified] =>
+    unless accepted.declarationCount == 4 && accepted.artifacts.isEmpty do
+      throw (IO.userError "logical Float constructor admission produced unexpected artifacts")
+    unless badType.phase == "elaborate" do
+      throw (IO.userError ("Float constructor argument escaped elaboration: " ++ badType.message))
+    unless unqualified.phase == "ir/emit" &&
+        (unqualified.message.splitOn "scalar-capability-unqualified").length > 1 do
+      throw (IO.userError ("Float runtime refusal escaped the shared IR gate: " ++ unqualified.message))
+  | _ => throw (IO.userError "logical Float admission or runtime refusal mismatch")
+  IO.println "PSCV0_FLOAT_CONSTRUCTORS: PASS checked logical constructors/projections, argument refusal and shared runtime gate"
+
 def main : IO Unit := do
   kernelHeartbeatIsolationCases
   selectedStandardManifestCases
+  floatConstructorBoundaries
   IO.println "PSCV0_FLOAT_CONSTRUCTIVE_ORACLE: PASS independent pinned Nat.pow_eq_zero statement and axiom audit"
   emissionBoundary
   metavariableBoundary

@@ -421,8 +421,10 @@ theorem andAllOnes_constructive {w : Nat} (x : BitVec w) :
     x &&& BitVec.allOnes w = x := by
   apply BitVec.eq_of_getLsbD_eq
   intro i hi
-  simp only [BitVec.getLsbD_and, BitVec.getLsbD_allOnes, decide_eq_true hi,
-    Bool.and_true]
+  have hbit : (BitVec.allOnes w).getLsbD i = true := by
+    change Nat.testBit (2 ^ w - 1) i = true
+    simp [Nat.testBit_two_pow_sub_one, hi]
+  simp only [BitVec.getLsbD_and, hbit, Bool.and_true]
 
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream
 -- String/Decode.lean splitting method. No tactic-based SAT oracle or

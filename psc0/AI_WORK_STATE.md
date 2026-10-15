@@ -1,5 +1,32 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — F1 constructive 26-root / 100-declaration integration candidate
+
+An expanded **strict independent portable kernel** research replay passed
+at `800dc1ba3780bf44a3f6c0a63e60212a0e09f4ac`, [CI 38699328933](https://github.com/dwijayuda/pskernel/actions/runs/38699328933).
+The bounded F1 proof candidate now combines the previous 21 roots,
+four exact fixed-width constructive all-ones proofs, and a
+`BitVec.getLsbD_of_ge` **theorem-only** constructive replacement.
+The actual official Lean 4.35.0 kernel verifies the replacement has the
+same pinned native theorem type; PSC0 independently replays the proof,
+not an axiom. Receipt: **100 declarations / 26 roots**,
+`kernelChecked: true`, `axioms: []`,
+`replacedDefinitionAxioms: []`,
+`importedAssumptions: ["propext","Quot.sound"]`.
+
+**This main-branch integration is unqualified pending full Linux/native
+and portable Float replay at the exact new commit.** No selected Standard
+declarations, intrinsic registry, language syntax, typed erasure, executable
+Float runtime, JS/TS/Rust/Wasm/Wasmtime floating ABI, or trust policy were
+changed. The theorem-only proof cut exists in the **candidate exporter**;
+it is not silently enabled in production. Its exact origin and independent
+check must remain auditable.
+
+This proof progress does not discharge other large upstream
+`Lean.Omega → List.get / Int` proof-closure incompatibilities. Finish
+selected source F1 constructors and safe erasure separately, then F2–F4
+and the remaining M2+A/Phase A obligations. Do not assert completion.
+
 ## 15 October — Float F1 21-root compact candidate QUALIFIED at 7af2c508
 
 **Exactly qualified executable source:** `7af2c5080c9d21192d1ccc8a91d2de2013223f9f`. Both

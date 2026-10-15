@@ -1,5 +1,26 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — F1 constructive mask proof integration candidate
+
+The exact prior checkpoint `49a5853c7f6ced932b429b35c29a42af0ad8e9e0` passed [full native CI 38675622445](https://github.com/dwijayuda/pskernel/actions/runs/38675622445)
+and [compact-model replay 38675622572](https://github.com/dwijayuda/pskernel/actions/runs/38675622572).
+This new integration requires its own exact-commit CI before qualification.
+
+The exact Float32/Float64 mask/extracted-field equivalence proofs now
+use constructive BitVec splitting and finite kernel-checked proofs for widths
+8, 11, 23 and 52; no `bv_decide` or choice-bearing all-ones theorem is
+used in these roots. Research [native CI 38677653563](https://github.com/dwijayuda/pskernel/actions/runs/38677653563)
+passed the expanded root axiom audit without `Classical.choice`.
+The main native oracle now independently enforces the same rule.
+
+Expanded [portable CI 38677739506](https://github.com/dwijayuda/pskernel/actions/runs/38677739506)
+correctly refused the 924-declaration transitive import due to unresolved
+`List.get` universe and `Int` theorem incompatibility, not new axioms.
+Therefore the portable root roster stays at its original 17 roots (42
+declarations replayed), selected Standard is unchanged, and source Float,
+verified IR erasure, runtime/ABI and all backend Float are still disabled.
+No soundness policy is weakened. F1-F4 and M2+A are not complete.
+
 ## 15 October — F1 selected UInt mask semantics qualified at 9f0ffbaa
 
 **Exact-commit qualification:** `9f0ffbaa5e88eb78265f0350a0dfca0b600a1c57`,

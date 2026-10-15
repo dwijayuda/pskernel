@@ -79,6 +79,26 @@ run_cmd do
       unless [``propext, ``Quot.sound].contains assumption do
         throwError "PSCV0-FLOAT-F1: {name} imports unapproved axiom {assumption}"
 
+-- Exact mask-model constructive proof audit. Portable export roots are
+-- unchanged until the independent kernel can replay every dependency.
+run_cmd do
+  for name in
+      [``PsV7Native.FloatCanonical.andAllOnes8_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes11_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes23_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes52_constructive,
+       ``PsV7Native.FloatCanonical.maskedHigh_iff,
+       ``PsV7Native.FloatCanonical.maskedLow_iff,
+       ``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
+       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary32FractionMask_iff,
+       ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
+       ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact] do
+    for assumption in ← Lean.collectAxioms name do
+      unless [``propext, ``Quot.sound].contains assumption do
+        throwError "PSCV0-FLOAT-MASK-CONSTRUCTIVE: {name} imports unapproved axiom {assumption}"
+
 -- Native-only F1 exact UInt helper correspondence. The original checked
 -- source helpers are defined by UInt.and/UInt.toNat/Nat.beq/Bool.rec and
 -- remain separately qualified by the cross-target runtime tests.

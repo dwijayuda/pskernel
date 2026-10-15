@@ -41,4 +41,13 @@ theorem getLsbDOfGe {w : Nat} (x : BitVec w) (i : Nat)
   change x.toNat.testBit i = false
   exact Nat.testBit_lt_two_pow hbound
 
+-- Isolated constructive proof research for the pinned Int theorem bodies.
+-- Exact upstream signatures; no changes to computational Int definitions.
+theorem intAddZero (a : Int) : a + 0 = a := by
+  cases a with
+  | ofNat n => rfl
+  | negSucc n => rfl
+
+theorem intAddNegEqSub {a b : Int} : a + -b = a - b := rfl
+
 end PsV7Native.FloatConstructive

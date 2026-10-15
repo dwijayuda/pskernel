@@ -17,6 +17,22 @@ run_cmd do
     unless [``propext, ``Quot.sound].contains assumption do
       throwError "PSCV0-BITVEC-CUT: unapproved axiom {assumption}"
 
+-- The rejected portable Float closure touches these actual pinned Int
+-- theorem bodies. Any replacement must have identical upstream types and a
+-- strict allowed-assumption closure before independent portable replay.
+example (a : Int) : a + 0 = a :=
+  PsV7Native.FloatConstructive.intAddZero a
+example (a b : Int) : a + -b = a - b :=
+  PsV7Native.FloatConstructive.intAddNegEqSub
+
+run_cmd do
+  for name in
+      [``PsV7Native.FloatConstructive.intAddZero,
+       ``PsV7Native.FloatConstructive.intAddNegEqSub] do
+    for assumption in ← Lean.collectAxioms name do
+      unless [``propext, ``Quot.sound].contains assumption do
+        throwError "PSCV0-INT-CUT: unapproved axiom {name}: {assumption}"
+
 /-! Independent native Lean 4.35.0 verification. Not selected Standard. -/
 example {a n : Nat} : a ^ n = 0 ↔ a = 0 ∧ n ≠ 0 :=
   PsV7Native.FloatConstructive.powEqZero

@@ -86,17 +86,20 @@ def platformWordCases : IO Unit := do
     { source := "const width: Nat := System.Platform.numBits\n", targets := [.javascript] },
     { source := "theorem bad: System.Platform.numBits = 64 := by { rfl }\n",
       targetWordSize := some .bits64 }]
-  let .ok batch ← PsV7Native.runBatch requests
-    | throw (IO.userError "platform refusal batch initialization failed")
-  unless batch.results.size == 4 && batch.results[0]!.isOk do
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError ("platform batch: " ++ error.message))
+  let [transportResult, missingTransport, missingWidth, proofResult] := batch.results.toList
+    | throw (IO.userError "platform batch must return exactly four outcomes")
+  unless transportResult.isOk do
     throw (IO.userError "abstract platform transport must check without an execution profile")
-  for i in [1,2] do
-    match batch.results[i]! with
+  for outcome in [missingTransport, missingWidth] do
+    match outcome with
     | .error error =>
       unless error.phase == "erase" && error.message.startsWith "PSCV0-ERASURE: explicit target word size" do
         throw (IO.userError ("platform refusal phase: " ++ error.message))
     | .ok _ => throw (IO.userError "unprofiled platform execution accepted")
-  match batch.results[3]! with
+  match proofResult with
   | .error error =>
     unless error.phase == "elaborate" || error.phase == "kernel" do
       throw (IO.userError ("unexpected platform proof refusal phase: " ++ error.phase))

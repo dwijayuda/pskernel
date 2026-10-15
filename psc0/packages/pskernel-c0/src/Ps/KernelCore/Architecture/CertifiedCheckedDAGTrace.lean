@@ -126,8 +126,12 @@ theorem psKernelC0CheckedDAGTrace_sourceFold
       have hRead :
           psKernelC0DecodeExpr owner.store id =
             some checked.val.expression := by
-        rw [← checked.property]
-        exact checked.val.readback
+        calc
+          psKernelC0DecodeExpr owner.store id =
+              psKernelC0DecodeExpr owner.store checked.val.rootId :=
+            (congrArg (psKernelC0DecodeExpr owner.store)
+              checked.property).symm
+          _ = some checked.val.expression := checked.val.readback
       simpa [psKernelC0CheckedDAGTraceIds,
         psKernelC0IndexedDAGReferenceFold, hValid,
         hRead, checked.val.source] using ih

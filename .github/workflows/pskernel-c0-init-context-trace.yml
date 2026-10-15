@@ -43,10 +43,13 @@ jobs:
           echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
           head -n 5068573 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/C0-init-context-prefix.ndjson"
           test "$(wc -l < "$RUNNER_TEMP/C0-init-context-prefix.ndjson")" -eq 5068573
-          (cd "$RUNNER_TEMP/lean4export" 2>/dev/null || (git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export" &&
-             git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe &&
-             cd "$RUNNER_TEMP/lean4export");
-            lake build lean4export
+          if test ! -d "$RUNNER_TEMP/lean4export/.git"; then
+            git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+            git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          fi
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
             lake env leanchecker --from-export "$RUNNER_TEMP/C0-init-context-prefix.ndjson" > "$RUNNER_TEMP/C0-init-context-official.txt" 2>&1)
           grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/C0-init-context-official.txt"
           echo "C0_INIT_CONTEXT_OFFICIAL=accepted exact_original_prefix=5068573"
@@ -60,10 +63,11 @@ jobs:
           code=path.read_text()
           needle='      let outcome := c0ExportStepDetailed state line fuel'
           assert code.count(needle)==1, 'Unrecognized source; refusing instrumentation'
-          before='''      if consumed >= 5064000 && !declKind.isEmpty then
-                IO.println s!"C0_INIT_TRACE_START record={consumed} kind={declKind}"
-          '''
-          code=code.replace(needle,before+needle)
+          trace_lines=[
+              '      if consumed >= 5064000 && !declKind.isEmpty then',
+              '        IO.println s!"C0_INIT_TRACE_START record={consumed} kind={declKind}"',
+          ]
+          code=code.replace(needle,'\n'.join(trace_lines)+'\n'+needle)
           path.write_text(code)
           PY
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)

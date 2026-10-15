@@ -1,3 +1,4 @@
+import Ps.Environment.StandardUnsignedOperations
 import Ps.Environment.StandardFloatOperations
 import Ps.Environment.StandardSignedScalar
 
@@ -55,10 +56,10 @@ def psStandardOperatorDefaultRegistrations : List (String × String × Nat) :=
 def psStandardOperatorDefaultsExtend (environment : PsEnvironment) : PsEnvironment :=
   let oldNames := psStandardHomogeneousReplacedNames
   let instances := { environment.instances with entries :=
-    environment.instances.entries.filter fun entry =>
+    environment.instances.entries.filter (fun entry =>
       match entry.value with
       | .constE name _ => !oldNames.any (psNameEq name)
-      | _ => true }
+      | _ => true) }
   let environment := { environment with instances }
   let environment := psStandardHomogeneousSpecs.foldl
     (fun env (name, _, _) => psStandardRegisterClass env name) environment

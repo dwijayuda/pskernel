@@ -10,7 +10,9 @@ Primary references: pinned `Init/Prelude.lean`, `Init/Data/Int/Basic.lean`, `Lea
 
 One paired native/source fixture adds 14 shared observations (intended total **872**): all six bridges, custom numeric operands on either side, local OfNat Nat override, Nat/negative defaulting, a higher universe, executable Float generic addition and heterogeneous multiplication. Existing refusal checks and full backend/integration/performance gates remain mandatory. Strict registry/surface pins intentionally retain the previous qualified values until independent cloud measurement is reviewed. **This slice is prepared, not qualified.**
 
-Default-instance integration is at `5e07de1006ab3539888f68015b3470bdfd921cf8`; [native38745398231](https://github.com/dwijayuda/pskernel/actions/runs/38745398231) is the exact-development gate. Independent F1 38745397954, F2 38745398267 and F3 logical 38745398095 are green. Record native completion before claiming the integration fully qualified.
+Default-instance integration is fully qualified at `5e07de1006ab3539888f68015b3470bdfd921cf8`: [native38745398231](https://github.com/dwijayuda/pskernel/actions/runs/38745398231) passed all 30 steps and 858 shared observations; independent F1 38745397954, F2 38745398267 and F3 logical 38745398095 are green at the same commit. Main docs receipt: `899f3e295e544955ace2b58c6c24d28cda3f22b5`.
+
+Literal qualification correction: native38747708333 refused the missing portable Lake root; that root is registered. Native38747984746 then reported one missing explicit import and a record-update lambda layout error in the new module; both are corrected together. No semantic test, pin or budget has been weakened. Full qualification remains pending.
 
 F1/F2 and the Array prerequisite are already qualified. F3 scientific syntax and executable conversion IR remain pending; its 134-declaration logical candidate is still unselected. Next: finish this literal-family qualification, then exact scientific syntax/OfScientific and cross-target conversions, F4 display and remaining M2+A exits. No new assumptions, budgets, pskernel-core, self-hosting or C5.
 

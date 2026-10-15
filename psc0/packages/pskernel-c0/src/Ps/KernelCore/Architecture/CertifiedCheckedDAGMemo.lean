@@ -263,3 +263,68 @@ theorem psKernelC0ScopedCheckedDAGSameRoot
         (right.inferredType, right.finalState) := by
     injection hCheck
   exact ⟨hExpr, congrArg Prod.fst hPair, congrArg Prod.snd hPair⟩
+
+/-- An exact requested-ID receipt from an immutable checked batch. The
+caller cannot replace the requested ID with an unrelated store-local ID,
+or publish an unchecked result in the returned list. -/
+structure PsKernelC0ScopedCheckedDAGBatchEntry
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState) where
+  requestedId : Nat
+  receipt : PsKernelC0ScopedCheckedDAGReceipt
+    owner fuel context initialState
+  exactId : receipt.rootId = requestedId
+
+/-- Sequentially qualify requested roots, reusing only proof-carrying
+results from the exact same scoped memo. Failure of any root rejects the
+entire batch: this pure API publishes no partial list or updated cache.
+All checked source judgments are at the SAME initial checker state; it
+does not pretend that this is state-threaded dependent proof checking. -/
+def psKernelC0ScopedCheckedDAGCheckBatch
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState) :
+    List Nat →
+    PsKernelC0ScopedCheckedDAGMemo
+      owner fuel context initialState →
+    Except String
+      (List (PsKernelC0ScopedCheckedDAGBatchEntry
+        owner fuel context initialState) ×
+        PsKernelC0ScopedCheckedDAGMemo
+          owner fuel context initialState)
+  | [], memo => .ok ([], memo)
+  | id :: rest, memo => do
+      let (checked, nextMemo) ← psKernelC0ScopedCheckedDAGCheck
+        owner fuel context initialState memo id
+      let (remaining, finalMemo) ← psKernelC0ScopedCheckedDAGCheckBatch
+        owner fuel context initialState rest nextMemo
+      return ({
+        requestedId := id
+        receipt := checked.val
+        exactId := checked.property
+      } :: remaining, finalMemo)
+
+/-- Each published batch item is linked to its exact original node and
+full source checked judgment, with no hash or raw-ID admission shortcut. -/
+theorem psKernelC0ScopedCheckedDAGBatchEntry_source
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    (entry : PsKernelC0ScopedCheckedDAGBatchEntry
+      owner fuel context initialState) :
+    psKernelCheckerCheck fuel context initialState
+        entry.receipt.expression =
+      .ok (entry.receipt.inferredType, entry.receipt.finalState) ∧
+    psKernelC0DecodeExpr owner.store entry.requestedId =
+      some entry.receipt.expression := by
+  constructor
+  · exact entry.receipt.source
+  · calc
+      psKernelC0DecodeExpr owner.store entry.requestedId =
+          psKernelC0DecodeExpr owner.store entry.receipt.rootId := by
+            rw [entry.exactId]
+      _ = some entry.receipt.expression := entry.receipt.readback

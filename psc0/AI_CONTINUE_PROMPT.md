@@ -1,4 +1,10 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
+## Shared class-projection reduction prerequisite — 15 October 2026
+
+Native38751673594 reached the older `Numeric.generic` regression and exposed a general reduction gap: instance transparency could not reduce a checked class field such as `OfNat.ofNat Nat 857 instOfNatNat` inside a dependent instance index. Restoring raw Nat literal shortcuts would hide the defect and break local dictionaries. Pinned Lean `src/Lean/Meta/WHNF.lean` (`isProjInst`, `unfoldProjInst?`, `unfoldProjInstWhenInstances?`, `unfoldDefault`) provides the correct rule; `GetUnfoldableConst.lean`, `tests/elab/instanceReducibility.lean` and `tests/elab/isDefEqProjInstWithMVar.lean` were studied.
+
+Portable WHNF now recognizes checked generated class fields through their class constructor telescope, delta-beta reduces only that field, and reduces its actual dictionary at instance transparency. Stuck class projections retain their original application; irreducible fields/dictionaries stay blocked. Ordinary definitions do not gain extra transparency. A small independent native WHNF oracle and the existing transparency suite validate reducible/instances/implicit behavior, custom evidence, stuck evidence and irreducibility; the full existing generic-numeral/backend suite remains mandatory. No Standard declaration, pin, assumption or resource budget changed. Qualification remains pending. Scientific syntax work is prepared in memory only and has not been published or selected.
+
 ## Literal fixture invocation alignment — 15 October 2026
 
 Native38750864793 passed parsing, all prior gates, and integrated custom literal/operator declarations, then correctly refused `literalLocalNat`: its PSCV0 function has an explicit Unit parameter but its named-dictionary call omitted that argument. The fixture now supplies `()` and its independent native Lean oracle has the same Unit telescope. The shared application rule is unchanged: only a written empty invocation inserts Unit; a nonempty named call does not silently discard a required parameter. Expected value 42 and all other observations remain unchanged. Full backend qualification is pending.

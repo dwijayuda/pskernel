@@ -1,4 +1,10 @@
 # M2+A scalar completion design — Lean 4.35.0
+## Shared class-projection reduction prerequisite — 15 October 2026
+
+Native38751673594 reached the older `Numeric.generic` regression and exposed a general reduction gap: instance transparency could not reduce a checked class field such as `OfNat.ofNat Nat 857 instOfNatNat` inside a dependent instance index. Restoring raw Nat literal shortcuts would hide the defect and break local dictionaries. Pinned Lean `src/Lean/Meta/WHNF.lean` (`isProjInst`, `unfoldProjInst?`, `unfoldProjInstWhenInstances?`, `unfoldDefault`) provides the correct rule; `GetUnfoldableConst.lean`, `tests/elab/instanceReducibility.lean` and `tests/elab/isDefEqProjInstWithMVar.lean` were studied.
+
+Portable WHNF now recognizes checked generated class fields through their class constructor telescope, delta-beta reduces only that field, and reduces its actual dictionary at instance transparency. Stuck class projections retain their original application; irreducible fields/dictionaries stay blocked. Ordinary definitions do not gain extra transparency. A small independent native WHNF oracle and the existing transparency suite validate reducible/instances/implicit behavior, custom evidence, stuck evidence and irreducibility; the full existing generic-numeral/backend suite remains mandatory. No Standard declaration, pin, assumption or resource budget changed. Qualification remains pending. Scientific syntax work is prepared in memory only and has not been published or selected.
+
 
 ## Literal/operator metadata review — 15 October 2026
 

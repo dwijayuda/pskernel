@@ -7,6 +7,23 @@ import Pscv0GetElemOracle
 import Pscv0FloatConstructiveOracle
 import Init.Data.ByteArray.Lemmas
 
+-- Independent pinned native WHNF oracle for class projection transparency.
+run_meta do
+  let n := Lean.mkNatLit 857
+  let nat := Lean.mkConst ``Nat
+  let project := fun dictionary =>
+    Lean.mkApp3 (Lean.mkConst ``OfNat.ofNat [Lean.Level.zero]) nat n dictionary
+  let concrete := project (Lean.mkApp (Lean.mkConst ``instOfNatNat) n)
+  let explicit := project (Lean.mkApp3 (Lean.mkConst ``OfNat.mk [Lean.Level.zero])
+    nat n (Lean.mkNatLit 42))
+  for mode in [Lean.Meta.TransparencyMode.instances, .implicit] do
+    unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf concrete)) == n do
+      throwError "native class projection did not expose the indexed numeral"
+    unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf explicit)) == Lean.mkNatLit 42 do
+      throwError "native class projection ignored explicit dictionary evidence"
+  unless (← Lean.Meta.withTransparency .reducible (Lean.Meta.whnf concrete)) == concrete do
+    throwError "native semireducible class field unfolded at reducible transparency"
+
 -- Native boundary cases from Lean 4.35.0 System.Platform.numBits_eq,
 -- UInt/ISize two's-complement model; target width is explicitly selected.
 #guard (psIrMachineIntegerWidthWithTarget none .usize).isNone
@@ -2780,7 +2797,31 @@ private def transparencyBoundaries : IO Unit := do
   let changed := psEnvironmentSetReducibility original psOptParamName .semireducible
   unless psStandardSnapshotPayload original != psStandardSnapshotPayload changed do
     throw (IO.userError "reducibility missing from frozen semantic payload")
-  IO.println "PSCV0_TRANSPARENCY: PASS source/imported abbreviations, local evidence, rigid refusal and metadata drift"
+  -- Same observations as the pinned native WHNF oracle above, plus stuck
+  -- evidence and an irreducible dictionary. No raw-Nat special case is used.
+  let n := PsExpr.lit (.natural 857)
+  let nat := PsExpr.constE psNatName []
+  let project := fun dictionary => psExprApplyMany
+    (.constE (psDecisionName "OfNat.ofNat") [.zero]) [nat, n, dictionary]
+  let dictionary := PsExpr.app (.constE (psDecisionName "PsStandard.instOfNatNat") []) n
+  let concrete := project dictionary
+  let explicit := project (psExprApplyMany
+    (.constE (psDecisionName "OfNat.mk") [.zero]) [nat, n, .lit (.natural 42)])
+  for mode in [PsTransparency.instances, .«implicit»] do
+    unless psExprAlphaEq (psWhnfWithTransparency mode original {} {} concrete) n do
+      throw (IO.userError "class projection failed at instance transparency")
+    unless psExprAlphaEq (psWhnfWithTransparency mode original {} {} explicit) (.lit (.natural 42)) do
+      throw (IO.userError "class projection discarded explicit dictionary evidence")
+  unless psExprAlphaEq (psWhnfWithTransparency .reducible original {} {} concrete) concrete do
+    throw (IO.userError "class field unfolded at reducible transparency")
+  let blocked := psEnvironmentSetReducibility original
+    (psDecisionName "PsStandard.instOfNatNat") .irreducible
+  unless psExprAlphaEq (psWhnfWithTransparency .instances blocked {} {} concrete) concrete do
+    throw (IO.userError "irreducible dictionary unfolded at instance transparency")
+  let stuck := project (.fvar 0)
+  unless psExprAlphaEq (psWhnfWithTransparency .instances original {} {} stuck) stuck do
+    throw (IO.userError "stuck class projection lost its canonical application")
+  IO.println "PSCV0_TRANSPARENCY: PASS abbreviations, native class projections, stuck/irreducible evidence, rigid refusal and metadata drift"
 
 -- Pinned Lean 4.35.0 BitVec.toInt gives this exact two's-complement
 -- decomposition; these are definitional kernel certificates, not runtime

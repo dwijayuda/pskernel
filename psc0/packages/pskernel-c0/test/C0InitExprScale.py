@@ -32,8 +32,10 @@ def main():
     expr_idx = -1
     sort_zero = None
     for record in rows:
-        if record.startswith('{"ie":'):
-            obj = json.loads(record)
+        # Export objects do not promise that "ie" is their first key.
+        # Inspect the actual record key rather than a serialized prefix.
+        obj = json.loads(record)
+        if "ie" in obj:
             if obj["ie"] != expr_idx + 1:
                 raise ValueError("nonsequential expression index")
             expr_idx += 1

@@ -1,34 +1,44 @@
 # PSCV0 v7 — AI work state
 
-## 15 October — M2+A polymorphic checked List.get integration candidate
+## 15 October — M2+A checked universe-polymorphic List.get QUALIFIED at 7742b4cd
 
-The pinned Lean 4.35.0 `List.get` proof-taking worker and its
-`List.get` declaration now quantify over the **original universe `u`**,
-instead of hardcoding the monomorphic `Type` level. Checked type formation,
-the dependent list recursor, the nonempty-index proof and recursion all
-use the same exact `u` and `u+1` levels. The optional indexing worker
-remains independent and unchanged. This is a real selected Standard
-semantic repair, **not** an unchecked native elaborator fallback.
+**Exact qualified selected Standard and executable:** `7742b4cd9599af315da4a1af1ba5c8f97a6ac290`.
+[Full native Linux CI 38701305472](https://github.com/dwijayuda/pskernel/actions/runs/38701305472)
+and [independent portable Float replay 38701305530](https://github.com/dwijayuda/pskernel/actions/runs/38701305530)
+both **passed on this same SHA**; the 27-step native job and nine-step
+independent replay job each completed without failure. The separate
+[combined research CI 38700154739](https://github.com/dwijayuda/pskernel/actions/runs/38700154739)
+and [portable research replay 38700154737](https://github.com/dwijayuda/pskernel/actions/runs/38700154737)
+also passed before main integration.
 
-The isolated List-universe branch completed
-[27/27 native CI steps 38680040011](https://github.com/dwijayuda/pskernel/actions/runs/38680040011);
-its independently measured selected Standard integrity values were
+The pinned Lean 4.35.0 `List.get` proof worker, dependent index,
+reconstructor and checked signature are now consistently polymorphic
+over universe `u`, rather than constrained to monomorphic `Type`.
+This repairs genuine selected Standard semantics; the independent
+optional list-index worker and existing checked runtime behavior are
+preserved. The independently measured and qualified Standard digests are
 `fnv1a64:8516648619442707737` and
 `sha256:a1bc8d8587566b98c3c8bdfc3eacfdb7ea28372093b23365f0469f708b14cbfa`.
-The combination with the 26-root / 100-declaration Float F1 proof
-candidate also passed independent
-[portable replay 38700154737](https://github.com/dwijayuda/pskernel/actions/runs/38700154737);
-the matching comprehensive research native gate is under qualification.
-The F1 replay workflow is expanded to run when the selected Standard,
-compiler dependencies, or kernel bridge change, rather than only on
-host-side F1 proof edits.
+The full 26-root / 100-declaration compact F1 candidate still returns
+`kernelChecked: true`, `axioms: []`,
+`replacedDefinitionAxioms: []`,
+`importedAssumptions: ["propext","Quot.sound"]`.
+The Float replay workflow now also watches changes in the selected
+Standard, portable packages and manifest/checker dependencies.
 
-**This main-branch integration is NOT qualified until its own exact-commit
-native and independent portable workflows pass**. No Float runtime,
-selected source Float constructor, FFI, backend semantic waiver,
-unapproved axiom, pskernel-core, self-hosting or C5 is enabled.
-M2+A/Phase A F1–F4 remain open. Do not equate a selected Standard
-digest change with automatic coverage of the whole language.
+**Further research explicitly not selected:** native constructive
+`Int.add_zero` and `Int.add_neg_eq_sub` proofs passed their native
+oracle, but the strict [portable candidate replay 38700736202](https://github.com/dwijayuda/pskernel/actions/runs/38700736202)
+refused their proof types against the legacy selected Int arithmetic
+model. This is a real model/definitional-equality incompatibility,
+not a reason to admit an axiom, bypass kernel checks or change native
+semantic requirements. An isolated research branch is evaluating
+the *logical Int.add definition itself* before any further migration.
+
+Source-level Float constructors, verified erasure, numeric F2/F3,
+runtime/ABI F4, target-sized portable profiles and the full selected
+Phase A manifest remain open. Neither M2+A nor PSCV0 v7 is complete.
+No pskernel-core, self-hosting or C5.
 
 ## 15 October — F1 constructive 26-root / 100-declaration integration candidate
 

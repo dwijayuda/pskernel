@@ -67,6 +67,40 @@ theorem eq_of_toBits_eq32 {a b : Float32}
           cases h
           rfl
 
+-- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
+-- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
+-- Keep it OUT of the portable contractRoots until the independent full-upstream
+-- dependency closure is compatible with the selected PSC0 environment.
+private theorem upstreamPackUnpack_nan (spec : Format)
+    (bits : BitVec spec.numBits)
+    (he : UnpackedFloat.unpackExponent bits = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa bits ≠ (0#_)) :
+    UnpackedFloat.pack spec (UnpackedFloat.unpack spec bits) =
+      canonicalPacked spec bits := by
+  simp [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm]
+
+theorem fromBits64_eq_upstream_ofBits_nan (bits : UInt64)
+    (he : UnpackedFloat.unpackExponent bits.toBitVec = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa bits.toBitVec ≠ (0#_)) :
+    fromBits64 bits = Float.ofBits bits := by
+  apply eq_of_toBits_eq64
+  change UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) =
+    UInt64.ofBitVec
+      (UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits.toBitVec))
+  exact congrArg UInt64.ofBitVec
+    ((upstreamPackUnpack_nan Format.binary64 bits.toBitVec he hm).symm)
+
+theorem fromBits32_eq_upstream_ofBits_nan (bits : UInt32)
+    (he : UnpackedFloat.unpackExponent bits.toBitVec = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa bits.toBitVec ≠ (0#_)) :
+    fromBits32 bits = Float32.ofBits bits := by
+  apply eq_of_toBits_eq32
+  change UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) =
+    UInt32.ofBitVec
+      (UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits.toBitVec))
+  exact congrArg UInt32.ofBitVec
+    ((upstreamPackUnpack_nan Format.binary32 bits.toBitVec he hm).symm)
+
 -- A left inverse on ALL existing native logical Float values. This is a
 -- representation contract for future erasure/ABI work, not an executable
 -- backend preservation theorem or a raw upstream-ofBits equivalence.

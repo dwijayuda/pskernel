@@ -1,5 +1,43 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — F1 compact representation contracts qualified at 2f89b567
+
+**Exact qualified executable:** `2f89b567586b8a21787df64609396e9ff742d32a`.
+All steps of [native Linux CI 38662608990](https://github.com/dwijayuda/pskernel/actions/runs/38662608990)
+and [F1 canonical-model research CI 38662609097](https://github.com/dwijayuda/pskernel/actions/runs/38662609097)
+succeeded at this SHA. The qualification fixes the initially missing
+`PsV7Host` Lake root; the earlier failed run 38662428954 was a missing
+module build product, not a proof rejection.
+
+The pinned Lean 4.35.0 oracle compiled the nine new representation theorems,
+then the unchanged native/portable authoring policy independently replayed
+**39 declarations** from the fourteen-root compact Float proof model.
+The exporter reported `kernelChecked: true`, `axioms: []`,
+`importedAssumptions: ["propext","Quot.sound"]`, with no quotient
+primitives or replacement axioms. Exported candidate SHA-256:
+`85add6c8006e4107db248f65537149b3596a3a0be965357783ea7ed019d02b9e`.
+The full native workflow also passed its existing source, checked Standard,
+JS/TypeScript/Rust/Wasm/Wasmtime, component and resource gates.
+This qualifies the narrow *proof/representation candidate only*.
+Neither Float construction in selected source nor Float arithmetic,
+scientific conversion, ABI or cross-target floating execution is enabled.
+
+**Independent unresolved requirement:** prove for every raw UInt64/UInt32
+that the compact constructors exactly match the *upstream*
+`Float.ofBits`/`Float32.ofBits` unpack/repack semantics. The checked
+round trips only reconstruct already-valid Float values, not this
+all-input equivalence. Do not bypass the previous full-upstream
+List/Int dependency incompatibility, expand assumptions or publish
+Float based on the 39-declaration compact closure alone.
+
+**Next implementation critical path:** prove exact all-input upstream
+correspondence; integrate checked F1 source construction and safe erasure;
+then F2 arithmetic/equality, F3 scientific and numeric conversions, F4
+JS/TS/Rust/Wasm/Wasmtime/ABI, explicit target-size USize/ISize through
+the shared IR and all backends, and the remaining selected Phase A
+environment/deriving/instance/import obligations. No completion claim;
+no pskernel-core, bootstrap, self-hosting or C5.
+
 ## 15 October — F1 candidate CI identified missing Lake module root
 
 At `28de17ebfc75f3071088543004c72c81c1b6c3d7`,

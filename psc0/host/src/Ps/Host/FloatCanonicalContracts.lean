@@ -198,7 +198,7 @@ theorem upstreamPackUnpack_subnormal64 (bits : BitVec 64)
   have hpos : mantissa.toNat ≠ 0 := by
     intro h
     apply hm
-    apply BitVec.toNat_inj
+    apply (BitVec.toNat_inj).mp
     simpa [mantissa] using h
   have hlog : mantissa.toNat.log2 < 52 :=
     (Nat.log2_lt hpos).2 mantissa.isLt
@@ -224,7 +224,7 @@ theorem upstreamPackUnpack_subnormal32 (bits : BitVec 32)
   have hpos : mantissa.toNat ≠ 0 := by
     intro h
     apply hm
-    apply BitVec.toNat_inj
+    apply (BitVec.toNat_inj).mp
     simpa [mantissa] using h
   have hlog : mantissa.toNat.log2 < 23 :=
     (Nat.log2_lt hpos).2 mantissa.isLt

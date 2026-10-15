@@ -24,10 +24,13 @@ run_cmd do
     for assumption in used do
       unless [``propext, ``Quot.sound].contains assumption do
         throwError "constructive Float model has an unapproved assumption: {assumption}"
+    Lean.logInfo m!"PSCV0-FLOAT-CORRESPONDENCE constructive {name}: {used}"
   -- Exact correspondence must not introduce assumptions beyond those already
   -- in the pinned upstream reference and the two approved Lean foundations.
   let reference64 ← Lean.collectAxioms ``Float.ofBits
   let reference32 ← Lean.collectAxioms ``Float32.ofBits
+  Lean.logInfo m!"PSCV0-FLOAT-CORRESPONDENCE pinned Float.ofBits: {reference64}"
+  Lean.logInfo m!"PSCV0-FLOAT-CORRESPONDENCE pinned Float32.ofBits: {reference32}"
   let reference := reference64 ++ reference32 ++ #[``propext, ``Quot.sound]
   for name in [``PsV7Native.FloatCorrespondence.pack_unpack,
       ``PsV7Native.FloatCorrespondence.fromBits64_eq_ofBits,
@@ -36,4 +39,4 @@ run_cmd do
     for assumption in used do
       if assumption == ``sorryAx || !reference.contains assumption then
         throwError "Float correspondence introduced an unexpected assumption: {assumption}"
-    logInfo "PSCV0-FLOAT-CORRESPONDENCE reference-only {name}: {used}"
+    Lean.logInfo m!"PSCV0-FLOAT-CORRESPONDENCE reference-only {name}: {used}"

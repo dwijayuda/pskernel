@@ -282,7 +282,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- 21 checked constructor/validity declarations and two public typed wrappers.
 -- No new assumptions, classes, instances or executable Float capability.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:2505184579072579125"
+  "fnv1a64:11971833863653521941"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -444,10 +444,10 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 -- F2 exact logical operation/decision closure plus scalar dictionaries:
--- independently measured by strict refusal in native CI38729006660.
+-- independently measured by strict refusal in native CI38730889997.
 -- Candidate replay CI38729006492 confirms the byte-exact checked asset.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:387824db2d09a897d682b9e4f3d9695f4b31b30f2eca169d999e243dcfa38f66"
+  "sha256:8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

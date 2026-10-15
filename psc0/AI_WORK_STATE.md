@@ -1,5 +1,14 @@
 # PSCV0 v7 — AI work state
 
+## F2 instance-index invariant reviewed — 15 October 2026
+
+Research `49a38a118b6ed2b0fa5955bac4b8d9399c4b6466` fixes the Float equality registration: DecidableEq is a reducible Pi alias, so its result-class key is Decidable. Pinned Lean Meta/Instances.{mkInstanceKey,checkNonClassInstance} and SynthInstance were studied. A shared Standard manifest audit now reduces every registered instance telescope and checks its explicit key against the actual registered result class, preventing this entire metadata failure family. The unchanged native logical asset still passes independent F2 replay [38730889909](https://github.com/dwijayuda/pskernel/actions/runs/38730889909), and F1 replay [38730889978](https://github.com/dwijayuda/pskernel/actions/runs/38730889978) passes.
+
+[Native38730889997](https://github.com/dwijayuda/pskernel/actions/runs/38730889997) built successfully, passed the new class-key audit and all 88 native Float oracle observations, then independently reported the metadata-only digest change. Reviewed current pins: `fnv1a64:11971833863653521941`; declaration `sha256:8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e`; surface `sha256:ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3`. Standard remains 3,122 declarations. The older pin checkpoint below is superseded. Full runtime/backend qualification is still required.
+
+F3 dependency research proceeds separately at `cafabfdadf0453cb9e8e7355bb8a952bc39a644a`, [38730356496](https://github.com/dwijayuda/pskernel/actions/runs/38730356496), with 42 scientific/fixed-word conversion roots and no F3 selection. Its gate is based on F2's declaration roster; after F2 qualification synchronize metadata before F3 integration. Main F1 remains unchanged and qualified. No new assumptions, pskernel-core, self-hosting or C5.
+
+
 ## F2 registry review; full runtime qualification pending — 15 October 2026
 
 Research `6043e3e1891a326c2cd618925d5b5cfc8ec6c9e2` built the complete native compiler. Independent F1 replay [38729006486](https://github.com/dwijayuda/pskernel/actions/runs/38729006486) and byte-exact F2 replay [38729006492](https://github.com/dwijayuda/pskernel/actions/runs/38729006492) passed. F2 remains exactly 1,229 exported declarations /24 recursor rules /91,024 shared nodes, 11,179,796 source bytes, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. No new axioms or computational replacements.

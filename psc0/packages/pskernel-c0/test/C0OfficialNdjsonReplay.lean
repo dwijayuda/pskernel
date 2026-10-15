@@ -1386,6 +1386,74 @@ def c0ExportExpandLocalLets (fuel : Nat)
         | .proj n i b => .proj n i (go b)
         | _ => e
 
+/-- Non-accepting proof argument comparison: require two fully checked
+    applications of admitted theorems with one exact, verified Prop type. -/
+def c0ExportCheckedProofPair (fuel : Nat)
+    (ctx : PsKernelCheckerContext) (st : PsKernelCheckerState)
+    (lhs rhs : PsKernelExpr) : Bool :=
+  match psKernelExprGetAppFn lhs, psKernelExprGetAppFn rhs with
+  | .const ln _, .const rn _ =>
+      match psKernelEnvironmentFind ctx.environment ln,
+          psKernelEnvironmentFind ctx.environment rn with
+      | .some (.thmInfo _), .some (.thmInfo _) =>
+          let session := PsKernelCheckerSession.mk ctx st
+          match psKernelSessionCheck fuel session lhs with
+          | .error _ => false
+          | .ok (lt, next) =>
+              match psKernelSessionCheck fuel next rhs with
+              | .error _ => false
+              | .ok (rt, last) =>
+                  if psKernelExprEq lt rt then
+                    match psKernelSessionIsProp fuel last lt with
+                    | .ok (isProp, _) => isProp
+                    | .error _ => false
+                  else false
+      | _, _ => false
+  | _, _ => false
+
+/-- Bounded candidate only; never used for admission or DefEq caching.
+    Common binders open hygienically before comparing proof applications. -/
+def c0ExportProofCongruenceCandidate (depth fuel : Nat) :
+    PsKernelCheckerContext → PsKernelCheckerState →
+    PsKernelExpr → PsKernelExpr → Bool :=
+  match depth with
+  | 0 => fun _ _ _ _ => false
+  | n + 1 =>
+      let go := c0ExportProofCongruenceCandidate n fuel
+      fun ctx st lhs rhs =>
+        if psKernelExprEq lhs rhs then true
+        else
+          match lhs, rhs with
+          | .app lf la, .app rf ra =>
+              if c0ExportCheckedProofPair fuel ctx st lhs rhs then true
+              else if go ctx st lf rf then go ctx st la ra
+              else false
+          | .lam name lt lb bi, .lam _ rt rb _ =>
+              if psKernelExprEq lt rt then
+                let fresh := psKernelCheckerStateFreshName st name
+                let lc := psKernelLocalContextAddLocal
+                  ctx.localContext fresh.1 name lt bi
+                let child := psKernelCheckerContextWithLocalContext ctx lc
+                go child fresh.2
+                  (psKernelExprInstantiate1 lb (.fvar fresh.1))
+                  (psKernelExprInstantiate1 rb (.fvar fresh.1))
+              else false
+          | .forallE name lt lb bi, .forallE _ rt rb _ =>
+              if psKernelExprEq lt rt then
+                let fresh := psKernelCheckerStateFreshName st name
+                let lc := psKernelLocalContextAddLocal
+                  ctx.localContext fresh.1 name lt bi
+                let child := psKernelCheckerContextWithLocalContext ctx lc
+                go child fresh.2
+                  (psKernelExprInstantiate1 lb (.fvar fresh.1))
+                  (psKernelExprInstantiate1 rb (.fvar fresh.1))
+              else false
+          | .mdata _ lb, .mdata _ rb => go ctx st lb rb
+          | .proj ln li lb, .proj rn ri rb =>
+              if psKernelNameEq ln rn && li == ri then go ctx st lb rb
+              else false
+          | _, _ => false
+
 def c0ExportDiagnoseDefEqWhnfSides
     (fuel : Nat)
     (ctx : PsKernelCheckerContext)
@@ -1411,7 +1479,10 @@ def c0ExportDiagnoseDefEqWhnfSides
         let zetaText :=
           " | zeta_equal=" ++ toString zetaSame ++
           " | zeta_path=" ++
-            c0ExportFirstSyntacticDifference 48 ctx zetaLeft zetaRight
+            c0ExportFirstSyntacticDifference 48 ctx zetaLeft zetaRight ++
+          " | proof_congruence_candidate=" ++
+            toString (c0ExportProofCongruenceCandidate
+              96 fuel ctx st zetaLeft zetaRight)
         let same := psKernelExprEq leftNormal rightNormal
         if same then
           "full_whnf_structural_equal=true"

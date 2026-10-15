@@ -81,3 +81,143 @@ theorem psKernelC0CertifiedCheckedDAGRoot_exactRead
     psKernelC0DecodeExpr cert.root.owner.store cert.root.root =
       some cert.root.expression :=
   cert.root.readback
+
+/-!
+A scoped checked-result memo, with an explicit store ownership and source
+equation at each entry. These are immutable results of genuine checked
+inference, not guessed types or unchecked AST annotations.
+
+The input owner, source fuel, checker context and initial state appear in
+the ENTRY TYPE. A caller changing any of them cannot pass the old memo to
+this interface without proving the necessary exact contextual equalities.
+In particular, this is not yet an incremental-state DAG checker: checked
+state transport needs its own future refinement proof.
+-/
+
+/-- A checked source judgment for a specific node of one immutable,
+canonical, fully certified indexed syntax store. -/
+structure PsKernelC0ScopedCheckedDAGReceipt
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState) where
+  rootId : Nat
+  inBounds : psKernelC0StoreValid owner.store rootId = true
+  expression : PsKernelExpr
+  readback : psKernelC0DecodeExpr owner.store rootId = some expression
+  inferredType : PsKernelExpr
+  finalState : PsKernelCheckerState
+  source :
+    psKernelCheckerCheck fuel context initialState expression =
+      Except.ok (inferredType, finalState)
+
+/-- Return checked information only after evaluating the authoritative
+source judgment. The returned root-ID equality is a real Lean proof,
+not a fingerprint comparison or a claim made by a caller. -/
+def psKernelC0ScopedCheckedDAGCapture
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState)
+    (id : Nat) :
+    Except String
+      { receipt : PsKernelC0ScopedCheckedDAGReceipt
+            owner fuel context initialState // receipt.rootId = id } :=
+  if hv : psKernelC0StoreValid owner.store id = true then
+    match hr : psKernelC0DecodeExpr owner.store id with
+    | none =>
+        .error "certified DAG root could not be read from its owning store"
+    | some expression =>
+        match hc : psKernelCheckerCheck fuel context initialState expression with
+        | .error reason => .error reason
+        | .ok (ty, nextState) =>
+            .ok ⟨{
+              rootId := id
+              inBounds := hv
+              expression := expression
+              readback := hr
+              inferredType := ty
+              finalState := nextState
+              source := hc
+            }, rfl⟩
+  else
+    .error "certified DAG root is not in bounds"
+
+/-- No memo lookup can forget which immutable owner, fuel, checker context,
+and source-initial state qualified a prior result. -/
+abbrev PsKernelC0ScopedCheckedDAGMemo
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState) :=
+  List (PsKernelC0ScopedCheckedDAGReceipt owner fuel context initialState)
+
+/-- Check precise root IDs (not hash or runtime pointer identity). The
+dependent result proves the returned receipt is for the requested ID. -/
+def psKernelC0ScopedCheckedDAGLookup
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    (id : Nat) :
+    PsKernelC0ScopedCheckedDAGMemo owner fuel context initialState →
+      Option
+        { receipt : PsKernelC0ScopedCheckedDAGReceipt
+              owner fuel context initialState // receipt.rootId = id }
+  | [] => none
+  | entry :: rest =>
+      if h : entry.rootId = id then
+        some ⟨entry, h⟩
+      else
+        psKernelC0ScopedCheckedDAGLookup id rest
+
+/-- A memo miss performs the complete checked source judgment; a hit
+returns the prior exact source proof under the SAME typed parameters.
+No status, type, state or assumption from a distinct checking session is
+introduced, and no memo entry can be built from an unverified raw node. -/
+def psKernelC0ScopedCheckedDAGCheck
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState)
+    (memo : PsKernelC0ScopedCheckedDAGMemo
+      owner fuel context initialState)
+    (id : Nat) :
+    Except String
+      ({ receipt : PsKernelC0ScopedCheckedDAGReceipt
+          owner fuel context initialState // receipt.rootId = id } ×
+        PsKernelC0ScopedCheckedDAGMemo
+          owner fuel context initialState) :=
+  match psKernelC0ScopedCheckedDAGLookup id memo with
+  | some checked => .ok (checked, memo)
+  | none =>
+      match psKernelC0ScopedCheckedDAGCapture
+          owner fuel context initialState id with
+      | .error reason => .error reason
+      | .ok checked => .ok (checked, checked.val :: memo)
+
+/-- Cached and newly checked receipts both prove the exact source checked
+judgment; the memo has no alternative admission rule. -/
+theorem psKernelC0ScopedCheckedDAGReceipt_source
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    (receipt : PsKernelC0ScopedCheckedDAGReceipt
+      owner fuel context initialState) :
+    psKernelCheckerCheck fuel context initialState receipt.expression =
+      .ok (receipt.inferredType, receipt.finalState) :=
+  receipt.source
+
+/-- A checked indexed result carries the exact successful readback of its
+root in the immutable, replay-validated owner store. -/
+theorem psKernelC0ScopedCheckedDAGReceipt_readback
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    (receipt : PsKernelC0ScopedCheckedDAGReceipt
+      owner fuel context initialState) :
+    psKernelC0DecodeExpr owner.store receipt.rootId =
+      some receipt.expression :=
+  receipt.readback

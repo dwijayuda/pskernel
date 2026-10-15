@@ -215,7 +215,8 @@ def psElabApplyOrderedWith {α : Type}
             (psElabContextWithMeta current.context fresh.context)
             (.insertedArgument current.context.sourceSpan
               (if psBinderIsInstanceImplicit binder then .instanceImplicit
-               else if psBinderIsStrictImplicit binder then .strictImplicit else .implicit)
+               else if psBinderIsStrictImplicit binder then .strictImplicit
+               else if explicit then .inferredExplicit else .implicit)
               name current.term fresh.expr domain)
           term := .app current.term fresh.expr
           type := psExprInstantiate1 body fresh.expr }

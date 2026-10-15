@@ -15,7 +15,7 @@ Lean's complete interactive tree, widgets and diagnostic traces are unnecessary 
 
 - Binder elaboration records each source group once, after its shared annotation is elaborated and its ordered fresh local identities are introduced.
 - Reference elaboration records the selected global/local identity and projection path at the source occurrence, before scopes are discarded.
-- The existing application owner records omitted defaults and implicit/strict-implicit/instance arguments. Numeric/condition/coercion owners record their synthetic dictionary selections.
+- The existing application owner records omitted defaults, implicit/strict-implicit/instance arguments and explicitly declared parameters inferred by a named call. Numeric/condition/coercion owners record their synthetic dictionary selections.
 - Events carry persistent local contexts. A declaration/constructor receipt carries the final metavariable context; consumers instantiate against that context rather than guessing names or closing against a later telescope. Declaration universe generalization remains the existing `psElabGeneralizeExpr` operation.
 - Immutable elaborator contexts provide rollback. Saved lexical continuations retain the source span but never snapshot the event stream or assignments. Leaving a scope preserves successful events while restoring lexical authority.
 - Constructor receipts use independent meta contexts/owners. The preliminary structure-universe scan suppresses events; the actual checked constructor pass owns field events. Normalized workers/public wrappers retain distinct receipts and existing batch-parent provenance.

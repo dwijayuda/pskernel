@@ -6,6 +6,14 @@ Repository dwijayuda/pskernel. Use GitHub connector and cloud Linux CI exclusive
 
 Development psc0/pscv0-v7-native-lean-v1; draft PR109 targets psc0/pscv0-v7-m1-parser-ownership-v1. Keep draft, never merge. Research psc0/pscv0-v7-platform-words-research. Preserve both histories and newer development docs when integrating. Update both handoff files and roadmap/status every milestone. Interleave M2+A -> M3+B -> M4+C/D -> M5/E; current user asks to complete M2+A.
 
+## Strict profile selection and runtime-boundary review (profile73)
+
+Native38814381644 ata7d6e4fd compiled the expanded profile and regenerated all logical assets. The strict surface audit independently measured v3 SHA256117f2692ea15046020e113cd0454c5befa73479ec43e9923cafcbfc1e2031ed8; selected that actual value for subsequent independent validation. Declaration pins remain FNV10704736494700616048 / SHA256a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f. Independent replay38814381629 passed.
+
+The source qualification reached platform refusal checks and exposed an ownership error in the runtime catalogue: Int.decEq was included as an executable native body even though it is already an exact-signature intEq primitive boundary. Its dictionary stays executable; its logical native match/proof closure stays checked in Standard. Removed the redundant native-body runtime root, consistently with Int.decLt/decLe; no checked logical definition changes. Source-info insertion kinds now distinguish inferred explicit parameters in named calls. The existing manifest check runs before application checks, so a profile refusal is diagnosed before runtime work. Acceptance cases/budgets remain unchanged.
+
+Development advanced concurrently to268aeeb2e99f4f8a021538fc13ba684b7c7a1d73 via five documentation-only commits: new v7.1 proposed reference, README linkage and consistency audit. Preserve all three files and both histories at integration. The proposed later partial/fixpoint/unsafe policies are unimplemented; they do not expand this selected M2 compiler or its foundation. Continue current M2+A qualification; not complete.
+
 ## Profile provenance checkpoint (profile72; qualification pending)
 
 At0165db7943aa06b34dea678d213bd426d3e0fe7b, native38813764645 compiled the complete operator/source-info changes, passed exact signature/reducibility and checked dependency audits, and regenerated all frozen assets. Both strict registry entry points independently reported FNV10704736494700616048 and SHA256a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f; surface v2 e0c9433e59a95261df499a1891df82210c18ad99ffef888659a2808ec387c285. Selected exactly these observed pins. The audit confirms Int.decEq/Int.instDecidableEq and selected native operator dependencies are already present; no new exported asset or assumption is required. Independent replay38813764520 passed. Full source and backend execution was blocked by the deliberate old-pin refusal.

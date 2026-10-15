@@ -2697,6 +2697,8 @@ private def sourceInfoBoundaries : IO Unit := do
   let source :=
     "function infoGroups{A B: Type}(x: A, y: B, fallback: B := y): B := fallback\n" ++
     "const infoUse: Nat := infoGroups(true, 7)\n" ++
+    "function infoExplicit(A: Type, x: A): A := x\n" ++
+    "const infoInferred: Nat := infoExplicit(x := 8)\n" ++
     "structure InfoRecord where {\n left: Nat\n right: Nat\n}\n" ++
     "function infoApply{A B: Type}(f: A -> B, x: A): B := f(x)\n" ++
     "const infoProjection: Nat := infoApply(fun v => v.left, InfoRecord.mk(8, 9))\n"
@@ -2719,6 +2721,10 @@ private def sourceInfoBoundaries : IO Unit := do
         | .insertedArgument _ .implicit _ _ _ _ => true
         | _ => false) do
     throw (IO.userError "implicit/default insertion information missing")
+  unless entries.any (fun entry => match entry.info with
+      | .insertedArgument _ .inferredExplicit name _ _ _ => psNameEq name (psRootName "A")
+      | _ => false) do
+    throw (IO.userError "named-call inference lost explicit binder kind")
   unless entries.any (fun entry => match entry.info with
       | .reference _ (.global name) [] _ _ => psNameEq name (psRootName "infoGroups")
       | _ => false) do
@@ -3734,6 +3740,7 @@ private def utf8NativeOracle : IO Unit := do
   IO.println "PSCV0_UTF8_ORACLE: PASS strict validation, encoding, scalar boundaries and BOM preservation"
 
 def main : IO Unit := do
+  selectedStandardManifestCases
   utf8NativeOracle
   arrayFilterNativeOracle
   platformWordCases
@@ -3741,7 +3748,6 @@ def main : IO Unit := do
   floatConversionsNativeOracle
   floatOperationsNativeOracle
   kernelHeartbeatIsolationCases
-  selectedStandardManifestCases
   floatConstructorBoundaries
   IO.println "PSCV0_FLOAT_CONSTRUCTIVE_ORACLE: PASS independent pinned Nat.pow_eq_zero statement and axiom audit"
   emissionBoundary

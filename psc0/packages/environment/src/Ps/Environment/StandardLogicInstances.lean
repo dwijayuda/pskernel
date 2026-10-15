@@ -28,7 +28,9 @@ def psStandardLogicExtend (environment : PsEnvironment) : PsEnvironment :=
 def psStandardLogicRuntimeDeclarations (environment : PsEnvironment) : List PsDeclaration :=
   -- The frozen native Iff body uses the generic BEq-from-DecidableEq bridge
   -- applied to instDecidableEqBool, rather than a ground BEq dictionary.
-  (["instBEqOfDecidableEq", "instDecidableEqBool", "Int.decEq"] ++
+  -- Int.decEq/decLt/decLe are audited typed primitive boundaries. Keep their
+  -- dictionaries executable, but do not recursively emit native proof/match helpers.
+  (["instBEqOfDecidableEq", "instDecidableEqBool"] ++
     (psStandardLogicRegistrations.map Prod.fst).filter
       (fun name => name != "Int.decLt" && name != "Int.decLe")).filterMap
       (fun name => psEnvironmentFind environment (psDecisionName name))

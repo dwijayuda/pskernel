@@ -9,7 +9,7 @@ Wojciech Nawrocki, Leonardo de Moura and Sebastian Ullrich. PSCV0 keeps a
 compact ordered stream, without editor widgets, macro expansion or IO state.
 -/
 inductive PsElabInsertedArgumentKind where
-  | implicit | strictImplicit | instanceImplicit | defaultValue
+  | implicit | strictImplicit | instanceImplicit | defaultValue | inferredExplicit
   deriving BEq
 
 inductive PsElabInfo where

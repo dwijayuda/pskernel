@@ -79,3 +79,55 @@ theorem psKernelC0CheckedDAGTraceStep_source
     psKernelCheckerCheck fuel context initialState checked.val.expression =
       .ok (checked.val.inferredType, checked.val.finalState) :=
   checked.val.source
+
+/-- Independent reference fold: sequentially inspect the exact certified
+source ID, run the original full checker, and thread its returned state.
+It has no memo table, receipt, synthetic proof or accelerated admission. -/
+def psKernelC0IndexedDAGReferenceFold
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext) :
+    List Nat → PsKernelCheckerState → Except String PsKernelCheckerState
+  | [], state => .ok state
+  | id :: rest, state =>
+      if psKernelC0StoreValid owner.store id then
+        match psKernelC0DecodeExpr owner.store id with
+        | none =>
+            .error "certified DAG root could not be read from its owning store"
+        | some expression =>
+            match psKernelCheckerCheck fuel context state expression with
+            | .error reason => .error reason
+            | .ok (_, nextState) =>
+                psKernelC0IndexedDAGReferenceFold
+                  owner fuel context rest nextState
+      else
+        .error "certified DAG root is not in bounds"
+
+/-- Strong all-step operational refinement: any constructed dependent trace
+of source checked judgments is exactly the successful original checker
+sequence, in order, from the same starting state, with no intermediate
+state transport assumptions and without an untrusted memo hit. -/
+theorem psKernelC0CheckedDAGTrace_sourceFold
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState finalState : PsKernelCheckerState}
+    (trace : PsKernelC0CheckedDAGTrace
+      owner fuel context initialState finalState) :
+    psKernelC0IndexedDAGReferenceFold owner fuel context
+        (psKernelC0CheckedDAGTraceIds trace) initialState =
+      .ok finalState := by
+  induction trace with
+  | done state => rfl
+  | @step before after id checked rest ih =>
+      have hValid : psKernelC0StoreValid owner.store id = true := by
+        rw [← checked.property]
+        exact checked.val.inBounds
+      have hRead :
+          psKernelC0DecodeExpr owner.store id =
+            some checked.val.expression := by
+        rw [← checked.property]
+        exact checked.val.readback
+      simpa [psKernelC0CheckedDAGTraceIds,
+        psKernelC0IndexedDAGReferenceFold, hValid,
+        hRead, checked.val.source] using ih

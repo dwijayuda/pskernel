@@ -80,8 +80,8 @@ private theorem upstreamPackUnpack_nan (spec : Format)
   simp [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm]
 
 theorem fromBits64_eq_upstream_ofBits_nan (bits : UInt64)
-    (he : UnpackedFloat.unpackExponent bits.toBitVec = (-1#_))
-    (hm : UnpackedFloat.unpackMantissa bits.toBitVec ≠ (0#_)) :
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary64) bits.toBitVec = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits.toBitVec ≠ (0#_)) :
     fromBits64 bits = Float.ofBits bits := by
   apply eq_of_toBits_eq64
   change UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) =
@@ -91,8 +91,8 @@ theorem fromBits64_eq_upstream_ofBits_nan (bits : UInt64)
     ((upstreamPackUnpack_nan Format.binary64 bits.toBitVec he hm).symm)
 
 theorem fromBits32_eq_upstream_ofBits_nan (bits : UInt32)
-    (he : UnpackedFloat.unpackExponent bits.toBitVec = (-1#_))
-    (hm : UnpackedFloat.unpackMantissa bits.toBitVec ≠ (0#_)) :
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary64) bits.toBitVec = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits.toBitVec ≠ (0#_)) :
     fromBits32 bits = Float32.ofBits bits := by
   apply eq_of_toBits_eq32
   change UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) =

@@ -237,7 +237,8 @@ def psElabDeclarationParts
   let declaration := if isTheorem then
     PsDeclaration.theoremDecl name levels closed.snd closed.fst
     else PsDeclaration.definitionDecl name levels closed.snd closed.fst
-  return { declaration, metaContext := constraints,
+  return {
+    declaration, metaContext := constraints
     sourceInfo := psElabFinishSourceInfo value.context name }
 
 def psElabPartialDeclaration (environment : PsEnvironment)
@@ -263,7 +264,9 @@ def psElabPartialDeclaration (environment : PsEnvironment)
     (psMetaInstantiate metaContext value.term) (psMetaInstantiate metaContext openType)
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
     throw .unresolvedMetavariable
-  return { declaration := .partialDecl name [] closed.snd closed.fst, metaContext,
+  return {
+    declaration := .partialDecl name [] closed.snd closed.fst
+    metaContext
     sourceInfo := psElabFinishSourceInfo value.context name }
 
 def psElabDeclaration
@@ -362,7 +365,8 @@ def psElabNormalizedDefinitionWithPhase
                     let publicDeclaration : PsDeclaration := PsDeclaration.definitionDecl
                       normalized.publicName levelParams (Prod.snd closed) (Prod.fst closed);
                     Except.ok
-                      { worker, publicDeclaration,
+                      {
+                        worker, publicDeclaration
                         sourceInfo := [
                           { workerResult.sourceInfo with owner := normalized.workerName },
                           psElabFinishSourceInfo checked.context normalized.publicName] }

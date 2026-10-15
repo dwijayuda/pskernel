@@ -16,6 +16,8 @@ Native38812863861 and replay38812863915 atffa1cab3 stopped in compilation: the n
 
 Native38813384394/replay38813384395 at518f52d8 stopped at the new reference-event structure-update layout. The same multi-line expression layout is corrected at both reference and binder owners. No semantic qualification yet.
 
+Native38813567007/replay38813567093 atc7b5d476 found the same layout family in the new data-batch initializer. Audited all new receipt initializers and normalized data, ordinary/partial declaration and normalized worker receipts together. Compilation and semantic qualification remain pending.
+
 ## Source retention checkpoint (profile71; qualification pending)
 
 Native38813171316/replay38813171392 at583ea213 stopped in compilation because Operator referenced psExprAppView outside its owning later layer. It now uses the equivalent existing psInferAppView in the inference layer, preserving the acyclic dependency graph.

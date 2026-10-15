@@ -283,7 +283,8 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
   let withConstructors ← psAddDeclarationList withInductive declarations
   let recursor ← psBuildInductiveRecursor
     { result.context with environment := withConstructors } parameters.bindersRev info declarations
-  return { declarations := declaration :: (declarations ++ [recursor]),
+  return {
+    declarations := declaration :: (declarations ++ [recursor])
     sourceInfo := psElabFinishSourceInfo result.context name :: sourceInfoRev.reverse }
 
 def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxName)

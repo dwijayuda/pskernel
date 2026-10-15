@@ -383,25 +383,25 @@ jobs:
           ) | tee "$RUNNER_TEMP/next-c0.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=150000 fuel=4096" "$RUNNER_TEMP/next-c0.txt"
           echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=150000"
-      - name: Expand exact real Init acceptance to 1000000 source records
+      - name: Expand exact real Init acceptance to 2000000 source records
         shell: bash
         run: |
           set -euo pipefail
-          head -n 1000000 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-next-1000000.ndjson"
-          test "$(wc -l < "$RUNNER_TEMP/Init-next-1000000.ndjson")" -eq 1000000
+          head -n 2000000 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-next-2000000.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/Init-next-2000000.ndjson")" -eq 2000000
           (cd "$RUNNER_TEMP/lean4export" &&
-            lake env leanchecker --from-export "$RUNNER_TEMP/Init-next-1000000.ndjson") > "$RUNNER_TEMP/next-1000000-official.txt" 2>&1
-          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/next-1000000-official.txt"
-          echo "C0_NEXT_INIT_OFFICIAL verdict=accepted records=1000000"
+            lake env leanchecker --from-export "$RUNNER_TEMP/Init-next-2000000.ndjson") > "$RUNNER_TEMP/next-2000000-official.txt" 2>&1
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/next-2000000-official.txt"
+          echo "C0_NEXT_INIT_OFFICIAL verdict=accepted records=2000000"
           (
             cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
-            /usr/bin/time -v -o "$RUNNER_TEMP/next-1000000-c0-resources.txt" \
-               timeout 900s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-next-1000000.ndjson" 4096
-          ) | tee "$RUNNER_TEMP/next-1000000-c0.txt"
-          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=1000000 fuel=4096" "$RUNNER_TEMP/next-1000000-c0.txt"
-          echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=1000000"
-          echo "C0_REAL_INIT_RESOURCE_PROFILE records=1000000"
-          cat "$RUNNER_TEMP/next-1000000-c0-resources.txt"
+            /usr/bin/time -v -o "$RUNNER_TEMP/next-2000000-c0-resources.txt" \
+               timeout 1200s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-next-2000000.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/next-2000000-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=2000000 fuel=4096" "$RUNNER_TEMP/next-2000000-c0.txt"
+          echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=2000000"
+          echo "C0_REAL_INIT_RESOURCE_PROFILE records=2000000"
+          cat "$RUNNER_TEMP/next-2000000-c0-resources.txt"
       # Not an acceptance gate: the full-corpus diagnostic is expensive,
       # and repeating an inconclusive probe on every source change
       # delays validated-library and semantic progress. Its explicit
@@ -442,10 +442,10 @@ jobs:
             ${{ runner.temp }}/Init-next-boundary.ndjson
             ${{ runner.temp }}/next-official.txt
             ${{ runner.temp }}/next-c0.txt
-            ${{ runner.temp }}/Init-next-1000000.ndjson
-            ${{ runner.temp }}/next-1000000-official.txt
-            ${{ runner.temp }}/next-1000000-c0.txt
-            ${{ runner.temp }}/next-1000000-c0-resources.txt
+            ${{ runner.temp }}/Init-next-2000000.ndjson
+            ${{ runner.temp }}/next-2000000-official.txt
+            ${{ runner.temp }}/next-2000000-c0.txt
+            ${{ runner.temp }}/next-2000000-c0-resources.txt
             ${{ runner.temp }}/c0-full-init-native.txt
           if-no-files-found: warn
           retention-days: 14

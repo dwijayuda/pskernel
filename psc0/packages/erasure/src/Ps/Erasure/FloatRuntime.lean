@@ -172,7 +172,7 @@ def scientificBody (scope : PsErasureScope) (width : PsVerifiedIrFloatingType) :
     bind "power" .nat (op .natPow [n 10, e]) ratio
 
 def declarations (scope : PsErasureScope) : Except PsErasureError (List PsVerifiedIrDeclaration) := do
-  let mut result := []
+  let mut result : List PsVerifiedIrDeclaration := []
   for width in [PsVerifiedIrFloatingType.float, .float32] do
     let natural ← call scope width "ratio" [v "value", n 1]
     let natural := choice (lt (v "value") (n (2 ^ 64)))
@@ -184,12 +184,13 @@ def declarations (scope : PsErasureScope) : Except PsErasureError (List PsVerifi
     let modelScientific ← call scope width "scientific"
       [v "mantissa", ilt (v "exponent") (z 0),
        asNat (choice (ilt (v "exponent") (z 0)) (neg (v "exponent")) (v "exponent"))]
-    for (suffix, parameters, body) in [
+    let specifications : List (String × List (String × PsVerifiedIrPrimitiveType) × PsVerifiedIrExpr) := [
         ("ratio", [("numerator", .nat), ("denominator", .nat)], ratioBody width),
         ("scientific", [("mantissa", .nat), ("negativeExponent", .bool), ("exponent", .nat)], ← scientificBody scope width),
         ("natural", [("value", .nat)], natural),
         ("integer", [("value", .int)], integer),
-        ("model_scientific", [("mantissa", .nat), ("exponent", .int)], modelScientific)] do
+        ("model_scientific", [("mantissa", .nat), ("exponent", .int)], modelScientific)]
+    for (suffix, parameters, body) in specifications do
       result := result ++ [{
         name := ← name scope width suffix
         typeParameters := []

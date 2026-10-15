@@ -69,7 +69,7 @@ def psErasureFloatEntry (name : PsName) :
       | "Float" => some (.float, false) | "Float32" => some (.float32, false)
       | "Float.Model" => some (.float, true) | "Float32.Model" => some (.float32, true)
       | _ => none
-    let operation ← match method with
+    let operation : PsErasureFloatOperation ← match method with
       | "add" => some (.binary .add) | "sub" => some (.binary .sub)
       | "mul" => some (.binary .mul) | "div" => some (.binary .div)
       | "neg" => some (.unary .neg) | "abs" => some (.unary .abs)

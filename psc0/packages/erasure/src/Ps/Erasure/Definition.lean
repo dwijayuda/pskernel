@@ -558,7 +558,7 @@ def psEraseCoreModuleWithRuntimePrelude
                     let support ← PsFloatRuntime.declarations preparedInductives.scope
                     -- Follow support dependencies to a fixed point, then emit only
                     -- reachable helpers. Their names were reserved before locals.
-                    let used := (List.range support.length).foldl (fun needed _ =>
+                    let used := (List.range support.length).foldl (fun (needed : List PsVerifiedIrDeclaration) _ =>
                       needed ++ support.filter (fun helper =>
                         !needed.any (fun d => d.name == helper.name) &&
                         (lowered ++ needed).any (fun d =>

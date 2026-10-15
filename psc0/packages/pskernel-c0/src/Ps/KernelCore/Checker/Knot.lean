@@ -472,6 +472,12 @@ def psKernelDefEqCheckedProofCongruenceWithFuel
                       leftIndex == rightIndex then
                     smaller nextContext state leftBody rightBody
                   else none
+              | .const _ _, .const _ _ =>
+                  -- A theorem proof may itself be a closed constant, not
+                  -- an application. In either shape, require both ORIGINAL
+                  -- checked types to be the very same proposition.
+                  psKernelDefEqCheckedTheoremProofPairWith
+                    fuel defeq nextContext state left right
               | _, _ => none
 
 /-- Exact structural equality of finite local-ζ expansions after independent

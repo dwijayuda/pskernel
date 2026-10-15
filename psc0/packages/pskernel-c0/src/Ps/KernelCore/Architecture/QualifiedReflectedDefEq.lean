@@ -160,7 +160,8 @@ theorem psKernelC0ReflectedAppBoolTrue_source
                                     (Nat.succ remaining) context state
                                     left right = .ok finalized
                                   rw [psKernelIsDefEqWithFuel]
-                                  simp [depth, psKernelExprEq, cached,
+                                  simp [psKernelDefEqSourceStepWithFuel,
+                                    depth, psKernelExprEq, cached,
                                     sourceQuick, sourceReflection,
                                     finalized, left, right]
                                 · simp [psKernelC0ReflectedAppBoolTrueWithFuel,

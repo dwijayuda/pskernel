@@ -1,5 +1,10 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## F2 emission passed; observation metadata corrected — 15 October 2026
+
+At `c3081a0e0c102ba8f8fad16940301af893dcfe5b`, [native38733051228](https://github.com/dwijayuda/pskernel/actions/runs/38733051228) passed checked semantics, all exact proof regenerations, shared constant/application erasure and full application emission (1,291 declarations), and the three-module application. Standard measured 3,122 declarations / 25 classes / 250 instances at the unchanged reviewed pins. The subsequent Wasm wrapper elaboration exposed six constants (`f2Default/Nan/Infinity{32,64}`) incorrectly recorded with `args: []` (function-call syntax) instead of the table's existing `args: null` constant discriminator. Correct those six metadata entries; retain every expected bit pattern and all 843 observations. This changes no compiler semantics or acceptance criteria. Full runtime qualification remains pending.
+
+
 ## F2 shared constant/application lowering — 15 October 2026
 
 Research `cbdb554fa9209361cd72217432fb8435d1a15022` passed all checked native source tests, the strict 3,122-declaration manifest and shared instance-key invariant. Independent [F1 replay 38731576332](https://github.com/dwijayuda/pskernel/actions/runs/38731576332) and [F2 replay 38731576255](https://github.com/dwijayuda/pskernel/actions/runs/38731576255) passed. [Native 38731576337](https://github.com/dwijayuda/pskernel/actions/runs/38731576337) then found bare `Float.nan` bypassed primitive erasure.

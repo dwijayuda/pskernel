@@ -78,14 +78,17 @@ INJECTION = r'''      if consumed == 5068793 then
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
+    parser.add_argument("--record", type=int, default=5068793)
     args = parser.parse_args()
+    if args.record < 1:
+        raise ValueError("record must be positive")
     code = args.source.read_text(encoding="utf8")
     if code.count(MARKER) != 1 or code.count(SITE) != 1:
         raise ValueError("unrecognized source: refusing diagnostic instrumentation")
     if "C0_INIT_STAGE_BEGIN" in code:
         raise ValueError("already instrumented: refusing duplicate")
-    code = code.replace(MARKER, HELPER + "\n" + MARKER)
-    code = code.replace(SITE, INJECTION + SITE)
+    code = code.replace(MARKER, HELPER.replace("5068793", str(args.record)) + "\n" + MARKER)
+    code = code.replace(SITE, INJECTION.replace("5068793", str(args.record)) + SITE)
     args.source.write_text(code, encoding="utf8")
     print("C0_INIT_STAGE_INSTRUMENTED disposable_test_only=true")
 

@@ -46,27 +46,40 @@ example (a : Int) (n : Nat) : a ^ n = Int.pow a n := rfl
 namespace OperatorDefaultIsolationOracle
 structure Bag where
   value : Nat
-section
-@[local default_instance 1100] local instance : HMul Nat Bag Bag where
+local instance redirectNat : HMul Nat Bag Bag where
   hMul a b := ⟨a * b.value⟩
-run_meta do
-  let rejected ← Lean.Elab.Term.withoutErrToSorry do
-    try
-      let _ ← Lean.Elab.Term.elabTermAndSynthesize
-        (← `(17 % 5 * 2 + 3)) (some (Lean.mkConst ``Nat))
-      pure false
-    catch _ => pure true
-  unless rejected do
-    throwError "heterogeneous default interference unexpectedly accepted"
-end
 structure Scale where
   value : Nat
 local instance {n : Nat} : OfNat Scale n where ofNat := ⟨n⟩
 local instance : Mul Bag where mul a b := ⟨a.value * b.value⟩
-@[local default_instance 1100] local instance : HMul Scale Bag Bag where
+local instance redirectScale : HMul Scale Bag Bag where
   hMul a b := ⟨a.value * b.value⟩
-#guard (2 * Bag.mk 11).value == 22
-#guard (17 % 5 * 2 + 3 : Nat) == 7
+-- Lean's default-instance extension is global-only. Each oracle temporarily
+-- registers one default and restores the environment, as a separate module
+-- would. run_elab supplies TermElabM; run_meta supplies only MetaM.
+/-- OfNat Bag 2 -/
+#guard_msgs (substring := true) in
+run_elab do
+  let environment ← Lean.getEnv
+  try
+    Lean.Meta.addDefaultInstance ``redirectNat 1100
+    discard <| Lean.Elab.Term.withoutErrToSorry <|
+      Lean.Elab.Term.elabTermAndSynthesize (← `(17 % 5 * 2 + 3))
+        (some (Lean.mkConst ``Nat))
+  finally
+    Lean.setEnv environment
+run_elab do
+  let environment ← Lean.getEnv
+  try
+    Lean.Meta.addDefaultInstance ``redirectScale 1100
+    for (source, expected) in
+        [(← `((2 * Bag.mk 11).value), 22), (← `((17 % 5 * 2 + 3 : Nat)), 7)] do
+      let value ← Lean.Elab.Term.withoutErrToSorry <|
+        Lean.Elab.Term.elabTermAndSynthesize source (some (Lean.mkConst ``Nat))
+      unless (← Lean.Meta.isDefEq value (Lean.mkNatLit expected)) do
+        throwError "isolated heterogeneous default oracle value disagreed"
+  finally
+    Lean.setEnv environment
 end OperatorDefaultIsolationOracle
 
 -- Independent pinned native WHNF oracle for class projection transparency.

@@ -9,9 +9,9 @@ Repository dwijayuda/pskernel. Use GitHub connector and cloud Linux CI exclusive
 
 Development psc0/pscv0-v7-native-lean-v1; draft PR109 targets psc0/pscv0-v7-m1-parser-ownership-v1. Keep draft, never merge. Research psc0/pscv0-v7-platform-words-research. Preserve both histories and newer development docs when integrating. Update both handoff files and roadmap/status every milestone. Interleave M2+A -> M3+B -> M4+C/D -> M5/E; current user asks to complete M2+A.
 
-## Native oracle follow-up
+## Native oracle scope correction
 
-The independent native build at `dcae2c825a4d73be3fa204e095ff1f54dc461ec9` ([38816403714](https://github.com/dwijayuda/pskernel/actions/runs/38816403714)) reproduced the predicted `OfNat Bag 2` and `HAdd Bag Nat Nat` failures. Its rejection harness needed two Lean-specific corrections: disable error-to-sorry recovery around full term synthesis, and mark the default attribute itself local (a local instance alone does not scope an independently global default attribute). Corrected the native harness; portable compiler logic and acceptance are unchanged. New cloud qualification remains required.
+Native `38816403714` at `dcae2c8` reproduced the predicted `OfNat Bag 2` and `HAdd Bag Nat Nat` failures, confirming the fixture interference. The follow-up harness at `46ecff661362f91f6350cb9929e5d8df19bdffc7` ([38816737192](https://github.com/dwijayuda/pskernel/actions/runs/38816737192)) did not compile: pinned Lean requires `default_instance` to be global and `run_meta` cannot execute term elaboration. Studied `Lean/Meta/Instances.lean`, `Lean/Elab/BuiltinEvalCommand.lean`, `Lean/Elab/GuardMsgs.lean` and upstream default-instance tests. The final harness uses `run_elab`, a temporarily extended environment restored in finally, no-recovery full synthesis and a checked expected diagnostic. Positive default selection and ordinary arithmetic use independent temporary environments. Portable compiler logic/acceptance and all budgets remain unchanged. New cloud qualification is required.
 
 ## Operator-default isolation checkpoint
 

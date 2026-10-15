@@ -221,6 +221,9 @@ def main (args : List String) : IO UInt32 := do
     | ["--export-float-constructive-pow-candidate", output] =>
         exportFloatConstructivePowCandidate (System.FilePath.mk output)
         return 0
+    | ["--export-bitvec-getlsbd-bound-candidate", output] =>
+        exportBitVecBoundCutCandidate (System.FilePath.mk output)
+        return 0
     | ["--export-float-canonical-model-candidate", output] =>
         exportFloatCanonicalModelCandidate (System.FilePath.mk output)
         return 0

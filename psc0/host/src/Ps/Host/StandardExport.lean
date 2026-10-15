@@ -621,6 +621,30 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nModified: selected Core conversion, closure/cut and independent kernel audit.\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- Research-only, theorem-only replacement of the pinned proof that a
+-- BitVec has no set bit above its width. The original proof imports Omega
+-- internals that are incompatible with PSC0's selected List/Int Standard.
+-- This replacement is checked for EXACT native type equality and independently
+-- kernel-replayed; no definitions, axioms or source/runtime Float are admitted.
+def exportBitVecBoundCutCandidate (output : System.FilePath) : IO Unit := do
+  let base := psSelfHostProdPreludeEnvironment.declarations
+  if base.any (fun d =>
+      psNameToString (psDeclarationName d) == "BitVec.getLsbD_of_ge") then
+    throw (IO.userError "BitVec theorem cut collides with frozen Standard")
+  exportStandardCore {
+    roots := [`PsV7Native.FloatConstructive.getLsbDOfGe]
+    boundary := base.map psDeclarationName
+    baseDeclarations := base
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames :=
+      [(`PsV7Native.FloatConstructive.getLsbDOfGe, `BitVec.getLsbD_of_ge)]
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardBitVecBoundCut"
+    privatePrefix := "bitVecBoundCutDecl"
+    provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nResearch-only constructive BitVec bound theorem, pinned Lean 4.35.0.\nNo executable Float or widened trust boundaries.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 -- Research-only constructive theorem authoring cut. This never changes
 -- the selected Standard, its strict fingerprints, or the Float runtime.
 def exportFloatConstructivePowCandidate (output : System.FilePath) : IO Unit := do

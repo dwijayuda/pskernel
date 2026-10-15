@@ -1,16 +1,10 @@
 # PSCV0 v7 — AI work state
 
-## F2 logical dependency gate — 15 October 2026
+## F2 logical family checked; runtime pending — 15 October 2026
 
-F1 is complete and qualified at 262c5819c499256fcd2093746deae4ef3aa2012b. Current F2 research is isolated on `psc0/pscv0-v7-f2-operations-research`; no arithmetic runtime enablement or selected Standard change is claimed.
+Research commit `d4528f27e45917b5d63edd84b0feb15d5e812bf6` on `psc0/pscv0-v7-f2-operations-research` passed [logical closure replay 38722766782](https://github.com/dwijayuda/pskernel/actions/runs/38722766782). All 28 Float/Float32 arithmetic/comparison/classification roots plus the two existing constructive theorem roots passed: **1,169 new declarations, 24 recursor rules, 89,183 shared source nodes, 10,941,261 source bytes**. SHA-256 `711ef5ecd08df8442c986b6df2cc9135ea79b9842ec0100cf517b289488b9acf`. No new axioms, quotient primitives or definition replacements; only the approved propext/Quot.sound foundation.
 
-Before implementation, studied pinned Lean 4.35.0 [Model/Float.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Float/Model/Float.lean), Float32 counterpart, Unpacked/Operations/{Add,Sub,Mul,Div,Compare,Sign,Status}.lean, [Round.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Float/Model/Unpacked/Round.lean) and [floatModelDefeq.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/tests/elab/floatModelDefeq.lean).
-
-The implementation reference is unpack/operate/round/pack, not mathematical real arithmetic. Add/sub align signed integer mantissas; mul preserves the exact product; div retains quotient/remainder accuracy; round tracks round/sticky bits with ties to even and carry renormalization. IEEE beq is non-reflexive at NaN and identifies both zero signs; propositional equality uses the canonical model and is a separate capability. Classification observes unpacked constructors.
-
-The first coherent gate exports 14 methods for each width: add/sub/mul/div/neg/abs/beq/lt/le/isNaN/isInf/isFinite/nan/inf. It reuses StandardExport's dependency closure, exact native theorem-type witnesses, portable official-kernel replay, recursor comparison and Apache-2.0 attribution. Only existing checked constructive proofs of Nat.pow_eq_zero and BitVec.getLsbD_of_ge may replace theorem bodies, when outside the selected cut. No computation replacement, increased budgets, Classical.choice admission or proof placeholder is permitted.
-
-The research workflow checks the complete logical family before selecting assets or enabling F2 IR. Dependency or replay failures are evidence about the shared logical boundary, not permission to patch operations or weaken checking. Once the closure is accepted, freeze its pre-admission boundary, minimize runtime support independently, implement the shared typed operations and all active backends together, then qualify against pinned native bit observations. F3/scientific, F4, target-word propagation and the remaining Standard/manifest exits stay in M2+A.
+This candidate is not selected Standard and F2 runtime operations remain refused. Next: freeze the pre-F2 boundary, select the checked logical family and source class metadata, keep proof dependencies out of runtime support, implement shared typed arithmetic/unary/classification/equality lowering across all active backends, then qualify one compact native differential corpus. F1 remains main-qualified at 262c5819c499256fcd2093746deae4ef3aa2012b (native38721711653, Float38721711679, 755 shared observations). M2+A is incomplete.
 
 ## F1 executable MAIN QUALIFIED — 15 October 2026
 

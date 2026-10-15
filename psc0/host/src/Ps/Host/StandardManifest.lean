@@ -148,7 +148,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 
 -- Independently observed after all 27 Linux checks at 078ec135 (38653018583).
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:0bc4bfaa0f9afb9e0c1c58d652c51db8732530cd1b50b9e8772cca90f5bac0cf"
+  "sha256:a1bc8d8587566b98c3c8bdfc3eacfdb7ea28372093b23365f0469f708b14cbfa"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

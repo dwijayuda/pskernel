@@ -1128,6 +1128,45 @@ def c0ExportDiagnoseDefinitionStages
   else
     throw "body/defeq=false"
 
+/-- Trace the *outermost failing source callback*, not an accepting
+    alternate checker. WHNF and DefEq remain the original source functions.
+    The wrapper only annotates their existing errors with bounded expressions;
+    it is invoked after the original declaration has already been declined. -/
+def c0ExportDiagnoseDefinitionReduction
+    (env : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo)
+    (fuel : Nat) : String :=
+  let session := psKernelMkCheckerSession env value.base.levelParams
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  match psKernelCheckConstantBaseWithSession fuel session value.base with
+  | .error reason => "header: " ++ reason
+  | .ok header =>
+      let originalDefEq := psKernelIsDefEqWithFuel fuel
+      let tracedDefEq := fun
+          (ctx : PsKernelCheckerContext)
+          (st : PsKernelCheckerState)
+          (lhs rhs : PsKernelExpr) =>
+        match originalDefEq ctx st lhs rhs with
+        | .error reason =>
+            .error ("defeq left=" ++ c0ExportMismatchTerm 7 lhs ++
+              " right=" ++ c0ExportMismatchTerm 7 rhs ++
+              " | " ++ reason)
+        | result => result
+      let originalWhnf := psKernelWhnfWithRecursorFuel fuel tracedDefEq
+      let tracedWhnf := fun
+          (ctx : PsKernelCheckerContext)
+          (st : PsKernelCheckerState)
+          (expr : PsKernelExpr) =>
+        match originalWhnf ctx st expr with
+        | .error reason =>
+            .error ("whnf input=" ++ c0ExportMismatchTerm 7 expr ++
+              " | " ++ reason)
+        | result => result
+      match psKernelCheckWithFuel fuel tracedWhnf tracedDefEq
+          header.context header.state value.value with
+      | .ok _ => "annotated source callback completed"
+      | .error reason => reason
+
 def c0ExportDiagnosticDefinitionResource
     (env : PsKernelEnvironment)
     (value : PsKernelDefinitionInfo)
@@ -1139,6 +1178,8 @@ def c0ExportDiagnosticDefinitionResource
       IO.println ("C0_REAL_RESOURCE_DEF_STAGE=" ++ result)
   | .error stage =>
       IO.println ("C0_REAL_RESOURCE_DEF_STAGE=" ++ stage)
+      IO.println ("C0_REAL_RESOURCE_DEF_CONVERSION=" ++
+        c0ExportDiagnoseDefinitionReduction env value fuel)
   -- Diagnostic only. The original 4096-fuel verdict has already been
   -- returned; increasing a *probe* budget neither admits nor authorizes a
   -- declaration and must not be counted toward positive acceptance.

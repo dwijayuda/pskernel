@@ -1016,6 +1016,84 @@ def c0ExportStage {α : Type} (stage : String) :
   | .ok result => .ok result
   | .error reason => .error (stage ++ ": " ++ reason)
 
+/-- A pure diagnostic probe of the first false conversion in the
+    original checked source path; invoked only for a rejected constructor
+    type, never in the admitted kernel computation. -/
+def c0ExportDiagnoseCtorFirstFalse
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (expr : PsKernelExpr) : String :=
+  let defeq := psKernelIsDefEqWithFuel fuel
+  let witnessDefEq := fun
+      (ctx : PsKernelCheckerContext)
+      (st : PsKernelCheckerState)
+      (left right : PsKernelExpr) =>
+    match defeq ctx st left right with
+    | .ok (false, _) =>
+        .error ("first-false lhs=" ++ c0ExportMismatchTerm 7 left ++
+          " rhs=" ++ c0ExportMismatchTerm 7 right ++
+          " | components=" ++
+          c0ExportMismatchDefEqComponents defeq ctx st left right)
+    | result => result
+  let witnessWhnf := psKernelWhnfWithRecursorFuel fuel witnessDefEq
+  match psKernelInferCoreWithFuel fuel witnessWhnf witnessDefEq
+      session.context session.state expr false with
+  | .error reason => reason
+  | .ok _ => "no first-false in independent source callback recheck"
+
+/-- Drill into the same checked constructor sequence using singleton source
+    transactions. The full bundle is already rejected before this function
+    runs: no result is published, and all original error strings stay intact.
+    A staged failure specifies the constructor and suboperation, not an
+    alternative validity judgment. -/
+def c0ExportDiagnoseConstructorSequence
+    (fuel : Nat)
+    (decl : PsKernelSimpleInductiveDecl)
+    (safety : PsKernelDefinitionSafety)
+    (resultLevel : PsKernelLevel)
+    (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder)
+    (numIndices : Nat)
+    (headerSession : PsKernelCheckerSession)
+    (work : PsKernelEnvironment)
+    (index : Nat) :
+    List PsKernelSimpleConstructorDecl → Except String String
+  | [] => .ok "all constructor singleton stages succeeded"
+  | ctor :: rest => do
+      match psKernelAddSimpleConstructorsWithFuel (fuel + 1)
+          decl safety resultLevel levels params numIndices
+          headerSession work index [ctor] with
+      | .ok result =>
+          c0ExportDiagnoseConstructorSequence fuel decl safety
+            resultLevel levels params numIndices headerSession
+            result.environment (index + 1) rest
+      | .error original =>
+          let label := "constructor[" ++ toString index ++ "]"
+          let closedSession := psKernelMkCheckerSession work
+            decl.levelParams safety 4096 psKernelLeanNatMaxSizeDefault
+          let checked ←
+            match psKernelSessionCheck fuel closedSession ctor.type with
+            | .ok result => pure result
+            | .error reason =>
+                throw (label ++ "/full_type: " ++ reason ++
+                  " | " ++ c0ExportDiagnoseCtorFirstFalse
+                    fuel closedSession ctor.type)
+          let _ ← c0ExportStage (label ++ "/type_sort")
+            (psKernelSessionEnsureSort fuel checked.2 checked.1)
+          let opened ← c0ExportStage (label ++ "/open_params")
+            (psKernelOpenSimpleConstructorParams
+              fuel (psKernelSessionWithEnvironment headerSession work)
+              params ctor.type)
+          let fields ← c0ExportStage (label ++ "/open_fields")
+            (psKernelOpenSimpleConstructorFields
+              fuel opened.session decl.name levels params numIndices
+              resultLevel opened.result)
+          let _ ← c0ExportStage (label ++ "/result_indices")
+            (psKernelValidateSimpleConstructorResult
+              decl.name levels params numIndices fields.result)
+          return label ++ ": source singleton rejected (" ++ original ++
+            ") but diagnostic substeps completed"
+
 def c0ExportDiagnoseOrdinaryInductiveStages
     (env : PsKernelEnvironment)
     (decl : PsKernelSimpleInductiveDecl)
@@ -1050,10 +1128,22 @@ def c0ExportDiagnoseOrdinaryInductiveStages
           isReflexive := false
           isUnsafe := decl.isUnsafe }
       let work0 := psKernelEnvironmentAddUnchecked env (.inductInfo initialInfo)
-      let constructors ← c0ExportStage "checked constructors"
-        (psKernelAddSimpleConstructorsWithFuel (fuel + 1)
-          decl safety resultLevel levels params.binders numIndices
-          params.session work0 0 decl.ctors)
+      let constructors ←
+        match psKernelAddSimpleConstructorsWithFuel (fuel + 1)
+            decl safety resultLevel levels params.binders numIndices
+            params.session work0 0 decl.ctors with
+        | .ok result => .ok result
+        | .error reason =>
+            let detail := c0ExportDiagnoseConstructorSequence
+              fuel decl safety resultLevel levels params.binders
+              numIndices params.session work0 0 decl.ctors
+            match detail with
+            | .ok summary =>
+                .error ("checked constructors: " ++ reason ++
+                  " | " ++ summary)
+            | .error stage =>
+                .error ("checked constructors: " ++ reason ++
+                  " | " ++ stage)
       let shapes := constructors.shapes
       let finalInfo : PsKernelInductiveInfo :=
         { initialInfo with

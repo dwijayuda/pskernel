@@ -149,14 +149,14 @@ theorem pack_unpack (spec : Format) (b : BitVec spec.numBits) :
   · by_cases hm : unpackMantissa (spec := spec) b = 0#_
     · simp only [canonicalPacked, ite_eq_left he, ite_eq_left hm,
         UnpackedFloat.unpack, UnpackedFloat.pack, packedInfinity]
-      simpa only [he, hm] using components_roundtrip spec b
+      simpa [he, hm] using components_roundtrip spec b
     · simp only [canonicalPacked, ite_eq_left he, ite_eq_right hm,
         UnpackedFloat.unpack, UnpackedFloat.pack]
   · by_cases he0 : unpackExponent (spec := spec) b = 0#_
     · by_cases hm : unpackMantissa (spec := spec) b = 0#_
       · simp only [canonicalPacked, ite_eq_right he, UnpackedFloat.unpack,
           ite_eq_left he0, dite_eq_left hm, UnpackedFloat.pack, packedZero]
-        simpa only [he0, hm] using components_roundtrip spec b
+        simpa [he0, hm] using components_roundtrip spec b
       · simp only [canonicalPacked, ite_eq_right he, UnpackedFloat.unpack,
           ite_eq_left he0, dite_eq_right hm]
         rw [pack_subnormal spec _ _ _ he0 hm]

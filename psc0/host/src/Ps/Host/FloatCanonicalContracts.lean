@@ -10,9 +10,13 @@ The relevant pinned definitions are Float/Float32.ofModel and toBits, the
 proof-bearing Model structures, and Format.Valid. The original compact
 constructors, validity proof and normalization policy are left unchanged.
 
-This module does not claim equality with upstream Float.ofBits on arbitrary
-raw inputs, publish any selected Standard declaration, or enable runtime
-Float. Its root roster is authoring metadata and is not itself exported.
+This module has native-only proofs that its canonical constructor equals
+upstream Float.ofBits / Float32.ofBits for EVERY raw bit pattern. Those
+upstream-dependent theorems transitively import Classical.choice and are
+NOT in portable contractRoots. Only the independent compact constructive
+model is replayed against the strict selected assumptions propext and
+Quot.sound; neither source Float constructors nor runtime Float are enabled.
+The explicit root roster is authoring metadata, not automatic publication.
 -/
 
 namespace PsV7Native.FloatCanonical

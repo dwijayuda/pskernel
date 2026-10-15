@@ -1104,6 +1104,54 @@ def c0ExportDiagnoseFieldSequence
             pure ("all " ++ toString fieldIndex ++
               " constructor field opening stages succeeded")
 
+/-- A failure-only diagnostic of the original safe definition stages.
+    A failed record is never admitted; this repeats the source checks on an
+    immutable, disposable environment to locate the first resource boundary. -/
+def c0ExportDiagnoseDefinitionStages
+    (env : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo)
+    (fuel : Nat) : Except String String := do
+  let session := psKernelMkCheckerSession env value.base.levelParams
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let header ← c0ExportStage "header/full_check"
+    (psKernelCheckConstantBaseWithSession fuel session value.base)
+  let _ ← c0ExportStage "body/closure"
+    (psKernelCheckNoMVarNoFVar value.value)
+  let _ ← c0ExportStage "body/universes"
+    (psKernelCheckLevelParams value.value value.base.levelParams)
+  let inferred ← c0ExportStage "body/full_check"
+    (psKernelSessionCheck fuel header value.value)
+  let eq ← c0ExportStage "body/defeq"
+    (psKernelSessionIsDefEq fuel inferred.2 inferred.1 value.base.type)
+  if eq.1 then
+    return "staged source checking accepted unexpectedly"
+  else
+    throw "body/defeq=false"
+
+def c0ExportDiagnosticDefinitionResource
+    (env : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo)
+    (fuel : Nat) : IO Unit := do
+  IO.println ("C0_REAL_RESOURCE_DEF_NAME=" ++
+    c0ExportMismatchTerm 2 (.const value.base.name []))
+  match c0ExportDiagnoseDefinitionStages env value fuel with
+  | .ok result =>
+      IO.println ("C0_REAL_RESOURCE_DEF_STAGE=" ++ result)
+  | .error stage =>
+      IO.println ("C0_REAL_RESOURCE_DEF_STAGE=" ++ stage)
+  -- Diagnostic only. The original 4096-fuel verdict has already been
+  -- returned; increasing a *probe* budget neither admits nor authorizes a
+  -- declaration and must not be counted toward positive acceptance.
+  let started ← IO.monoMsNow
+  let probeFuel := fuel * 2
+  match c0ExportCheckOne env (.definition value) probeFuel with
+  | .ok _ =>
+      IO.println s!"C0_REAL_RESOURCE_DEF_PROBE fuel={probeFuel} result=accepted_diagnostic_only"
+  | .error error =>
+      IO.println s!"C0_REAL_RESOURCE_DEF_PROBE fuel={probeFuel} result={repr (c0ExportFromKernelError error)}"
+  let finished ← IO.monoMsNow
+  IO.println s!"C0_REAL_RESOURCE_DEF_PROBE_ELAPSED_MS={finished - started}"
+
 /-- Drill into the same checked constructor sequence using singleton source
     transactions. The full bundle is already rejected before this function
     runs: no result is published, and all original error strings stay intact.
@@ -1324,6 +1372,10 @@ def c0ExportVerdictFromFileTrace
                   IO.println ("C0_REAL_EXPORT_DECLINED_REASON=" ++ message)
               | .resourceExhausted _ message =>
                   IO.println ("C0_REAL_EXPORT_RESOURCE_REASON=" ++ message)
+                  match declaration with
+                  | .definition info =>
+                      c0ExportDiagnosticDefinitionResource env info fuel
+                  | _ => pure ()
               | .internalError message =>
                   IO.println ("C0_REAL_EXPORT_INTERNAL_REASON=" ++ message)
           return (verdict, consumed)

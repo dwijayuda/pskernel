@@ -1,0 +1,122 @@
+name: PSKernel-C0 exact BitVec theorem source-stage audit
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-bitvec-stage-audit.yml'
+      - 'psc0/packages/pskernel-c0/test/C0TraceTheoremStages.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-native-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Restore exact original Lean Init export
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/Init-4.35.0.ndjson
+          key: c0-init-v435-lean4export-5a9a355-c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179
+      - name: Check source identities and rebuild pinned exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0TraceTheoremStages.py
+      - name: Validate staged checker trace on small BitVec closure before expensive replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- 'BitVec.lt_of_isSome_getElem?' \
+              > "$RUNNER_TEMP/BitVec-stage-closure.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/BitVec-stage-closure.ndjson" \
+              > "$RUNNER_TEMP/BitVec-stage-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/BitVec-stage-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/BitVec-stage-closure.ndjson")" -eq 21407
+          test "$(stat -c%s "$RUNNER_TEMP/BitVec-stage-closure.ndjson")" -eq 1176296
+          echo "ee71d2fcc99e0ff1b5a7f37c7a9b609999e8e027f24635e784095db9cab3f1c3  $RUNNER_TEMP/BitVec-stage-closure.ndjson" | sha256sum -c -
+          c0=psc0/packages/pskernel-c0
+          cp "$c0/test/C0OfficialNdjsonReplay.lean" "$RUNNER_TEMP/C0OriginalNdjsonReplay.lean"
+          python3 "$c0/test/C0TraceTheoremStages.py" "$c0/test/C0OfficialNdjsonReplay.lean" --record 21407
+          (cd "$c0" && lake build c0OfficialReplay &&
+            timeout 120s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/BitVec-stage-closure.ndjson" 4096) \
+            > "$RUNNER_TEMP/BitVec-stage-small.txt" 2>&1
+          grep -Fq "C0_INIT_STAGE_FINISHED is_defeq=true diagnostic_only=true" "$RUNNER_TEMP/BitVec-stage-small.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=21407 fuel=4096" "$RUNNER_TEMP/BitVec-stage-small.txt"
+          echo "C0_BITVEC_STAGE_SMALL_QUALIFIED exact_source=yes all_stages=success no_admission_from_trace=yes"
+          cp "$RUNNER_TEMP/C0OriginalNdjsonReplay.lean" "$c0/test/C0OfficialNdjsonReplay.lean"
+          python3 "$c0/test/C0TraceTheoremStages.py" "$c0/test/C0OfficialNdjsonReplay.lean" --record 5068793
+          (cd "$c0" && lake build c0OfficialReplay)
+          echo "C0_BITVEC_STAGE_FULL_BUILD=disposable_source_only"
+      - name: Verify official same-byte original full-context prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          if test ! -s "$RUNNER_TEMP/Init-4.35.0.ndjson"; then
+            (cd "$RUNNER_TEMP/lean4export" &&
+              lake env .lake/build/bin/lean4export Init > "$RUNNER_TEMP/Init-4.35.0.ndjson")
+          fi
+          test "$(stat -c%s "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 345690182
+          test "$(wc -l < "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 6452982
+          echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
+          head -n 5068793 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/BitVec-exact-full-context.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/BitVec-exact-full-context.ndjson")" -eq 5068793
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/BitVec-exact-full-context.ndjson" > "$RUNNER_TEMP/BitVec-full-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/BitVec-full-official.txt"
+          echo "C0_BITVEC_STAGE_OFFICIAL_FULL_CONTEXT=accepted records=5068793"
+      - name: Bound exact original full-context C0 stage trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/BitVec-full-resources.txt" \
+              timeout 2480s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/BitVec-exact-full-context.ndjson" 4096
+          ) > "$RUNNER_TEMP/BitVec-full-c0.txt" 2>&1
+          result=$?
+          set -e
+          echo "C0_BITVEC_STAGE_FULL_PROCESS_EXIT=$result"
+          grep "C0_INIT_STAGE" "$RUNNER_TEMP/BitVec-full-c0.txt" | tail -n 32 || true
+          grep 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/BitVec-full-c0.txt" | tail -n 5 || true
+          grep 'C0_REAL_EXPORT replay_outcome' "$RUNNER_TEMP/BitVec-full-c0.txt" | tail -n 3 || true
+          if test "$result" -eq 0 &&
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=5068793 fuel=4096" "$RUNNER_TEMP/BitVec-full-c0.txt"; then
+            echo "C0_BITVEC_FULL_CONTEXT_VERIFIED=5068793"
+          else
+            echo "C0_BITVEC_FULL_CONTEXT_NOT_QUALIFIED=inspect_stage_or_timeout"
+          fi
+          cat "$RUNNER_TEMP/BitVec-full-resources.txt"
+          echo "C0_BITVEC_STAGE_AUDIT=diagnostic_only_no_extra_kernel_authority"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-exact-bitvec-stages
+          path: |
+            ${{ runner.temp }}/BitVec-stage-small.txt
+            ${{ runner.temp }}/BitVec-stage-official.txt
+            ${{ runner.temp }}/BitVec-full-official.txt
+            ${{ runner.temp }}/BitVec-full-c0.txt
+            ${{ runner.temp }}/BitVec-full-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

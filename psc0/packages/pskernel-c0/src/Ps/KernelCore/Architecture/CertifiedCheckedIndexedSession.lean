@@ -29,17 +29,19 @@ def psKernelC0IndexedSessionCheckCertifiedTrace
     (fuel : Nat)
     (session : PsKernelC0IndexedCheckerSession)
     (requested : List Nat) :
-    Except String (PsKernelC0CertifiedIndexedSourceRun fuel session) := do
-  let some owner ← pure (psKernelC0CertifyStoreOwned session.store)
-    | .error "indexed checker session store is not canonically certified"
-  let ⟨finalState, checkedTrace⟩ ← psKernelC0CheckIndexedDAGTrace
-    owner.val fuel session.checker.context session.checker.state requested
-  .ok {
-    owner := owner.val
-    ownerExact := owner.property
-    finalState := finalState
-    checkedTrace := checkedTrace
-  }
+    Except String (PsKernelC0CertifiedIndexedSourceRun fuel session) :=
+  match psKernelC0CertifyStoreOwned session.store with
+  | none =>
+      .error "indexed checker session store is not canonically certified"
+  | some owner => do
+      let ⟨finalState, checkedTrace⟩ ← psKernelC0CheckIndexedDAGTrace
+        owner.val fuel session.checker.context session.checker.state requested
+      pure {
+        owner := owner.val
+        ownerExact := owner.property
+        finalState := finalState
+        checkedTrace := checkedTrace
+      }
 
 /-- An indexed session run is a real successful sequence of fully checked
 C0 source judgments in the exact original context and state. -/

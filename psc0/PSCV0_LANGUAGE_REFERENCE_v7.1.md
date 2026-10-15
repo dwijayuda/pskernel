@@ -323,9 +323,10 @@ end
 <thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
 <tbody><tr><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId declSig? declVal
 declSig ::= binder* (&quot;:&quot; term)?
-declVal ::= &quot;:=&quot; term termination? whereDecls? | equations</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psContractSeq psDeclVal
-psDeclVal ::= &quot;:=&quot; term psTermination? psWhere?
-          | &quot;:=&quot; &quot;{&quot; term &quot;}&quot; psTermination? psWhere?
+declVal ::= &quot;:=&quot; term termination? whereDecls? | equations</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psContractSeq? psDeclVal
+psDeclVal ::= &quot;:=&quot; psDeclTerm psRecursionSuffix? psWhere?
+psDeclTerm ::= term | &quot;{&quot; term &quot;}&quot;
+// suffix strategy restricted by PSCV0-REC-STRATEGY-01
 // Modification: comma explicit binders; optional one-term braces</code></pre></td></tr></tbody></table>
 
 **Side-by-side examples.**
@@ -348,7 +349,7 @@ psDeclVal ::= &quot;:=&quot; term psTermination? psWhere?
 
 <table>
 <thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId (&quot;:&quot; term)? &quot;:=&quot; term</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;const&quot; declId (&quot;:&quot; term)? psDeclVal
+<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId (&quot;:&quot; term)? &quot;:=&quot; term</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;const&quot; declId (&quot;:&quot; term)? psConstVal
 // Lowers to parameterless Lean def; not JS/TS const</code></pre></td></tr></tbody></table>
 
 **Side-by-side examples.**
@@ -371,7 +372,7 @@ const inc: Nat -&gt; Nat := { fun n =&gt; n + 1 }</code></pre></td></tr></tbody>
 <table>
 <thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
 <tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId binder* (&quot;:&quot; term)? declVal</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;function&quot; declId psFunctionBinders
-            (&quot;:&quot; term)? psContractSeq psDeclVal
+            (&quot;:&quot; term)? psContractSeq? psDeclVal
 // Non-nullary: psNonemptyBinderSeq; nullary: psNonExplicitBinder* psNullaryFunctionGroup
 // `psContractSeq` is ordered and non-repeating (§7)
 // Modification: &#x27;function&#x27; =&gt; Lean &#x27;def&#x27;; comma binder group</code></pre></td></tr></tbody></table>
@@ -633,7 +634,7 @@ where {
 opaque secret : Nat := 42</code></pre></td><td valign="top"><pre><code>abbrev UserId := Nat
 opaque secret: Nat := 42</code></pre></td></tr></tbody></table>
 
-**Source language distinction.** `abbrev` remains definitionally reducible in the permitted Lean transparency contexts, whereas `opaque` does not unfold under ordinary source conversion. The initial `.ps` profile admits **only body-present** `opaque name: T := value`, not native Lean's separately supported bodyless `opaque name : T`. This choice excludes an unnecessary unimplemented assumption-like declaration form. In PSCV, a public executable `opaque` declaration still needs approved specification coverage and proof evidence; the source form is not an exemption from validity. Public bodies are not automatically exposed to downstream module elaboration (§1).
+**Source language distinction.** `abbrev` remains definitionally reducible in the permitted Lean transparency contexts, whereas `opaque` does not unfold under ordinary source conversion. Their existing selected v7 `psDeclVal` grammar is preserved; a recursion suffix on either is admitted only to the extent that **pinned Lean 4.35.0** actually elaborates that declaration/head/strategy combination, with unchanged PSCV0 proof and executable dependency gates. It is **not** a path for leading `partial` or `unsafe` modifiers, nor a promise that all `partial_fixpoint` suffixes elaborate on `abbrev` or `opaque`. The initial `.ps` profile admits **only body-present** `opaque name: T := value`, not native Lean's separately supported bodyless `opaque name : T`. This choice excludes an unnecessary unimplemented assumption-like declaration form. In PSCV, a public executable `opaque` declaration still needs approved specification coverage and proof evidence; the source form is not an exemption from validity. Public bodies are not automatically exposed to downstream module elaboration (§1).
 
 ### Visibility: `private` and declarations exported through modules
 
@@ -1484,6 +1485,7 @@ psConstVal ::= ":=" psDeclTerm psWhere?
 | `unsafe def` / `unsafe function` | No recursion suffix | Registered runtime implementation only; a safe modeled specification and independently justified correspondence are required for any verified claim |
 | `noncomputable def` / `noncomputable function` | No recursion suffix in this profile | Proof/specification-only; no executable computational body dependency |
 | `const` | No recursion suffix or feature modifier | Nonrecursive source value with selected `psConstVal` |
+| Selected `abbrev` / body-present `opaque` | Existing §2 v7 head and `psDeclVal` grammar only; source cannot acquire `partial` or `unsafe` leading modifiers | Any recursion hint must pass the **actual pinned Lean elaborator** and the same proof/effect/assurance gates; the new fixed-point suffix does not imply automatic acceptance for these heads |
 
 Only selected `def`/`function` heads accept exactly **one** of the three leading feature modifiers. Repeated modifiers; `unsafe partial`, `partial unsafe`, `partial partial`, `unsafe unsafe`; `partial` or `unsafe` with `partial_fixpoint`; and `noncomputable` combined with executable recursion are all rejected at the source-profile/elaboration boundary. `partial_fixpoint` and `termination_by` are mutually exclusive. Even when Lean parses an alternative modifier combination, PSCV0 does not silently accept a logically different recursion strategy. Apply native mutual-recursion-clique checks and audit the effective opacity of **every** member before making any verified assertion.
 

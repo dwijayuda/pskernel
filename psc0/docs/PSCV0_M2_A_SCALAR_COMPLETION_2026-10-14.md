@@ -1,5 +1,11 @@
 # M2+A scalar completion design — Lean 4.35.0
 
+## Literal/operator metadata review — 15 October 2026
+
+At `195a077f9f4747ce1731a382ba471b40974ab43e`, [native38748876958](https://github.com/dwijayuda/pskernel/actions/runs/38748876958) built the compiler and independent Lean literal/operator oracles, passed the strengthened native signature/reducibility audit, and regenerated the prior checked assets. Both strict boundaries independently refused the intentional selected registry expansion and reported the same values: FNV `2999019441064509306`, declaration SHA-256 `6d8074129e70b3bd01c9d18ab92701edadf5932061e13988a491fa00c0efef10`, surface SHA-256 `0386344f5ade3df16048d155d650a7f1a197117c72971fb55002de9172a88069`. Those reviewed values are now pinned. No check, assumption or budget is relaxed.
+
+The source closure now explicitly registers the new portable Lake root; its explicit imports and record-update layout are complete. The architecture and 14 paired observations are unchanged. Full source/backend qualification remains pending; passing the native oracles and asset gates alone does not qualify the slice. Exact-development default-instance qualification remains complete at `5e07de1006ab3539888f68015b3470bdfd921cf8` (native38745398231, 858 observations, F1/F2/F3 replay green). F3 scientific/conversion runtime selection remains pending.
+
 ## Literal constraints and homogeneous operators prepared — 15 October 2026
 
 This F3 prerequisite now reuses the six native checked homogeneous classes and H* bridges already present in the selected logical assets. The selected final instance catalogue replaces redundant ground H* search entries with homogeneous ground dictionaries built from the same checked operation values. No class or bridge body is copied or replaced. Six native bridges are ordinary/default instances at priority 1000; OfNat Nat defaults at 100 and Neg Int at 500. Earlier logical asset boundaries remain immutable, and the final runtime catalogue emits the selected dictionaries and native bridges.

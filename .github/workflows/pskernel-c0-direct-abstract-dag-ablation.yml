@@ -1,0 +1,111 @@
+name: PSKernel-C0 direct FVar abstraction DAG ablation
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-direct-abstract-dag-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  loose-bvar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce Lean 4.35 real pinned WF theorem and official acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/abstract-wf.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/abstract-wf.ndjson" > "$RUNNER_TEMP/abstract-wf-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/abstract-wf.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/abstract-wf.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/abstract-wf.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/abstract-wf-official.txt"
+      - name: Bypass source AST-size prepass using direct structural FVar abstraction in disposable C0
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Substitution/Abstract.lean")
+          s=path.read_text()
+          start=s.index("def psKernelExprAbstractFVarsAtChangedWithFuel\n")
+          begin=s.index("        match expr with\n",start)
+          end=s.index("\ndef psKernelExprAbstractFVarsAtChanged\n",begin)
+          body=s[begin:end].rstrip()
+          assert body.count("smaller")==11, "Unrecognized original abstraction worker"
+          body="\n".join(v[6:] if v.startswith("      ") else v
+                         for v in body.splitlines())
+          body=body.replace("smaller","psKernelC0ExprAbstractFVarsDirect")
+          func=("\n/-- Disposable direct structural version; original worker remains oracle. -/\n"
+                "def psKernelC0ExprAbstractFVarsDirect\n"
+                "    (expr : PsKernelExpr)\n"
+                "    (fvars : List PsKernelName)\n"
+                "    (offset : Nat) : Prod PsKernelExpr Bool :=\n"
+                + body + "\n")
+          old=("  psKernelExprAbstractFVarsAtChangedWithFuel\n"
+               "    (Nat.succ (psKernelExprNodeCount expr))\n"
+               "    expr\n    fvars\n    offset")
+          assert s.count(old)==1, "Unrecognized existing source abstraction"
+          s=s[:end]+func+s[end:]
+          s=s.replace(old,"  psKernelC0ExprAbstractFVarsDirect expr fvars offset")
+          path.write_text(s)
+          print("C0_ABSTRACT_DAG_ABLATION source_size_prepass=eliminated source_oracle=retained")
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Keep native official and negative proof regressions unchanged
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_ABSTRACT_DAG_ABLATION_REGRESSIONS=pass"
+      - name: Measure original hard WF source with direct FVar abstraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/abstract-wf-resources.txt" \
+              timeout 165s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/abstract-wf.ndjson" 4096) \
+                > "$RUNNER_TEMP/abstract-wf-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_ABSTRACT_DAG_ABLATION_EXIT=$rc"
+          grep 'C0_REAL_EXPORT replay_outcome' "$RUNNER_TEMP/abstract-wf-c0.txt" | tail -n 2 || true
+          if test "$rc" -eq 0 &&
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096" "$RUNNER_TEMP/abstract-wf-c0.txt"; then
+            echo "C0_ABSTRACT_DAG_ABLATION_RESULT=accepted_candidate_only"
+          else
+            echo "C0_ABSTRACT_DAG_ABLATION_RESULT=not_qualified"
+          fi
+          cat "$RUNNER_TEMP/abstract-wf-resources.txt"
+          echo "C0_ABSTRACT_DAG_ABLATION_SCOPE=disposable_only_not_trusted_kernel"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-direct-instantiate-ablation
+          path: |
+            ${{ runner.temp }}/abstract-wf-official.txt
+            ${{ runner.temp }}/abstract-wf-c0.txt
+            ${{ runner.temp }}/abstract-wf-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

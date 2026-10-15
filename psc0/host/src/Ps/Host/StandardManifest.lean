@@ -154,7 +154,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Surface v2 records selected default_instance syntax and default registry.
 -- Independently measured by strict CI38742459724 refusal; no roster expansion.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:0386344f5ade3df16048d155d650a7f1a197117c72971fb55002de9172a88069"
+  "sha256:e188d6f21d7ac7604ebbd41d34f48b626b1385789da98c0f288bbc1162fe2098"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

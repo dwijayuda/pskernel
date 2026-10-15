@@ -121,10 +121,7 @@ def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
           | some body =>
             let parameters := psDeclarationLevelParams declaration
             if parameters.length != levels.length then applied else
-            let value := psExprInstantiateLevelParams parameters levels body
             let allowed := psEnvironmentCanUnfold environment transparency name
-            let fallback := fun (_ : Unit) =>
-              if allowed then step value view.args else applied
             let projectionMode := match transparency with
               | .instances | .«implicit» => true
               | .reducible => allowed
@@ -132,10 +129,14 @@ def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
             let classField := projectionMode && (match name with
               | .str owner _ => environment.classes.any (psNameEq owner)
               | _ => false)
-            if !classField ||
-                !psEnvironmentCanUnfold environment .«default» name then
-              fallback ()
-            else
+            let eligible := classField && psEnvironmentCanUnfold environment .«default» name
+            -- Never instantiate the body of an ordinary opaque-to-search
+            -- constant merely to discover that it is not a class projection.
+            if !allowed && !eligible then applied else
+            let value := psExprInstantiateLevelParams parameters levels body
+            let fallback := fun (_ : Unit) =>
+              if allowed then step value view.args else applied
+            if !eligible then fallback () else
               let beta := psWhnfCore metaContext localContext (psReduceApply value view.args)
               match psReduceClassProjectionView environment name beta with
               | none => fallback ()

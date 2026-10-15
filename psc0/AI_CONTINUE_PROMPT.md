@@ -1,4 +1,10 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
+
+## Literal/operator metadata independently measured — 15 October 2026
+
+Native run [38754937813](https://github.com/dwijayuda/pskernel/actions/runs/38754937813) at `a829bb49b26ec133c00113674c4d5a40599202e1` compiled all native targets, including the corrected raw-numeral projection oracle, and passed the pinned native signature/reducibility audit. Both strict qualification boundaries independently reported FNV `4909868320704722088`, declaration SHA-256 `990f59c079198da859bbe7b98e11dc96ca6668851825f48df5fadeb24524148f`, and surface SHA-256 `e188d6f21d7ac7604ebbd41d34f48b626b1385789da98c0f288bbc1162fe2098`. These reviewed metadata values are now pinned; declarations and counts are unchanged. Independent F1 38754937765, F2 38754937822 and F3 logical 38754937715 replays passed at the same commit.
+
+The reducer now checks unfoldability and class-projection eligibility before instantiating declaration universes, preserving the cheap ordinary opaque-constant path. Semantics, fuel, foundation and acceptance gates are unchanged. Full source/backend qualification of the literal/operator slice is still pending; previous failures are retained as diagnostic history. Main development remains qualified at the default-instance milestone (858 observations). Scientific literal frontend work is staged separately and F3 runtime conversion/scientific execution remains unselected.
 ## Native projection oracle resolved; instance metadata aligned — 15 October 2026
 
 The diagnostic from native38754279462 confirmed the native result was raw `857`; the oracle itself had accidentally built its expected value with `Lean.mkNatLit`, which constructs overloaded `OfNat` syntax. It now uses `Lean.mkRawNatLit`, exactly as pinned `BuiltinTerm.elabNumLit` does. Assertions are unchanged. Portable source literals already use raw Core parameters.

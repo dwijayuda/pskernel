@@ -721,10 +721,14 @@ def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit :=
 def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := do
   let selected := psSelfHostProdPreludeEnvironment.declarations
   exportStandardCore {
-    roots := FloatCanonical.contractRoots
+    roots := FloatCanonical.contractRoots ++
+      [`PsV7Native.FloatConstructive.getLsbDOfGe]
     boundary := selected.map psDeclarationName
     baseDeclarations := selected
-    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts }]
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts },
+      { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames :=
+      [(`PsV7Native.FloatConstructive.getLsbDOfGe, `BitVec.getLsbD_of_ge)]
     allowedAssumptions := [`propext, `Quot.sound]
     shareSource := true
     publicPrefix := "psStandardFloatCanonicalModel"

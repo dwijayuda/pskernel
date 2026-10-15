@@ -3,7 +3,7 @@ name: PSCV0 F1 canonical-model replay (research only)
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1, psc0/research-bitvec-getlsbd-cut-v1]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/research-float-allones-proofcut-v1]
     paths:
       - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
       - 'psc0/host/src/Ps/Host/FloatCanonicalContracts.lean'
@@ -71,14 +71,14 @@ jobs:
           restore-keys: |
             pscv0-f1-${{ runner.os }}-${{ runner.arch }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-
-      - name: Strict portable theorem-only BitVec bound proof replay
+      - name: Strict portable replay of four IEEE all-ones roots with bound theorem cut
         run: |
           set -euo pipefail
           lake build pscv0_native PsV7FloatConstructiveOracle
           mkdir -p ../dist/pscv0-f1-constructive
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
-          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-bitvec-getlsbd-bound-candidate ../dist/pscv0-f1-constructive/BitVecBoundCutCandidate.lean | tee ../dist/pscv0-f1-constructive/bitvec-bound.log | grep -v '^PSCV0_STANDARD_SOURCE '
-          sha256sum ../dist/pscv0-f1-constructive/BitVecBoundCutCandidate.lean
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-canonical-model-candidate ../dist/pscv0-f1-constructive/FloatCanonicalModelCandidate.lean | tee ../dist/pscv0-f1-constructive/canonical-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          sha256sum ../dist/pscv0-f1-constructive/FloatCanonicalModelCandidate.lean
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()
         with:

@@ -2664,18 +2664,23 @@ Record *values* use commas; structure/class *field declarations* retain Lean-sty
 
 ```text
 term ::= ... | 'do' '{' psDoSeq '}'
-psDoItem ::= psBaseDoItem | psVerifiedDoItemP0 | psStagedDoItemP1
+psDoItem ::= psBaseDoItem | psVerifiedDoItemP0
+           | psStagedDoItemP1 | psDivergentDoItemP2
 psBaseDoItem ::= selectedLeanBinding | selectedLeanReturn
                | selectedLeanTermStatement | psDoIf | psDoIfLet
+               | psWhileOrdinary
 psVerifiedDoItemP0 ::= selectedLeanMutOrAssignment
-                     | selectedLeanForOrSpecifiedWhile
+                     | selectedLeanFor | psWhileTotal
                      | selectedLeanErasedOrAssert
 psStagedDoItemP1 ::= selectedLeanThrowOrTryCatchFinally
-// P0 verified arms require effect/verification prerequisites (§7)
-// P1 arm requires explicit registration and pinned catch/monad behavior (§7B)
+psDivergentDoItemP2 ::= psWhilePartial
+// Bare ordinary while has no automatic behavioral certificate.
+// Total while requires invariant and decreasing evidence.
+// P2 partial while requires a registered finite-trace verification rule.
+// P1/P2 are gated by their named parser/effect environments.
 ```
 
-**Selection rule `PSCV0-DO-SELECT-01`:** §0B defines the exact three-arm ownership. Basic forms are part of Standard source; P0 verified items are conditional on their pinned proof/effect requirements; P1 exception handlers are **not** implicitly available from any ordinary import or generic `doSeqItem` placeholder. The category names above are schematic references to the selected forms already described in §§3, 7 and 7B, not an independent additional grammar or a blanket adoption of 4.35.0 `do` handlers.
+**Selection rule `PSCV0-DO-SELECT-01`:** §0B defines four distinct arms. Base forms include typed ordinary `while` and do not provide an invariant/termination theorem. P0 total-loop and state forms require the corresponding Lean verification/effect obligations. P1 typed exception handlers and P2 finite-trace partial loops are admitted only under explicitly registered versioned environments. In a verified request, an ordinary loop must have independently established semantic proof obligations or the build fails; it cannot inherit an ordinary status by fallback. This is a selection of Lean-grounded `do` constructs, not a blanket import of native `doSeqItem` alternatives.
 
 The **outer braces and newline sequencing** are the `pscv0` overlay; `do`-level `if`/`if let` follow `PSCV0-DO-IF-01` with do-sequence arms and an optional `else`, distinct from term-level `if`. A declaration bearing a contract may carry `psContractSeq` in exact `given? requires? ensures?` order and a single contract-owned `where { finally { | spec => { ... } } }` proof tail (§7); there is no arbitrary `psContract*` grammar. **The typed monadic meaning must match the pinned Lean elaborator.** `catch`/`finally` are only admitted when the corresponding `MonadExcept`/`MonadFinally` class requirements and exact parser forms are available. The grammar line is schematic, not an assertion that the illustrative `{}` catch bodies below are already parsed by 4.35.0. A `Monad` instance alone never certifies the effect as verified.
 

@@ -29,4 +29,16 @@ theorem powEqZero {a : Nat} : ∀ {n : Nat}, a ^ n = 0 ↔ a = 0 ∧ n ≠ 0
         cases h.1
         rfl
 
+-- Exact pinned theorem type of BitVec.getLsbD_of_ge, proved without
+-- upstream Omega/List/Int proof machinery. This is a theorem replacement
+-- candidate ONLY; the portable checker still re-admits the proof term.
+theorem getLsbDOfGe {w : Nat} (x : BitVec w) (i : Nat)
+    (ge : w ≤ i) : x.getLsbD i = false := by
+  have hp : (2 : Nat) ^ w ≤ 2 ^ i :=
+    Nat.pow_le_pow_right (by decide) ge
+  have hbound : x.toNat < 2 ^ i :=
+    Nat.lt_of_lt_of_le x.isLt hp
+  change x.toNat.testBit i = false
+  exact Nat.testBit_lt_two_pow hbound
+
 end PsV7Native.FloatConstructive

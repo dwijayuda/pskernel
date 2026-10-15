@@ -3,6 +3,20 @@ import Ps.Host.FloatConstructive
 import Ps.Host.FloatCanonicalContracts
 import Lean.Util.CollectAxioms
 
+
+-- Strict admission audit for the replacement proof. No new kernel axiom,
+-- Classical.choice, sorryAx, or unsupported theorem substitution.
+example {w : Nat} (x : BitVec w) (i : Nat) (h : w ≤ i) :
+    x.getLsbD i = false := by
+  exact PsV7Native.FloatConstructive.getLsbDOfGe x i h
+
+run_cmd do
+  let used ← Lean.collectAxioms
+    ``PsV7Native.FloatConstructive.getLsbDOfGe
+  for assumption in used do
+    unless [``propext, ``Quot.sound].contains assumption do
+      throwError "PSCV0-BITVEC-CUT: unapproved axiom {assumption}"
+
 /-! Independent native Lean 4.35.0 verification. Not selected Standard. -/
 example {a n : Nat} : a ^ n = 0 ↔ a = 0 ∧ n ≠ 0 :=
   PsV7Native.FloatConstructive.powEqZero

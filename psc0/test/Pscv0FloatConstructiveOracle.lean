@@ -79,6 +79,28 @@ run_cmd do
       unless [``propext, ``Quot.sound].contains assumption do
         throwError "PSCV0-FLOAT-F1: {name} imports unapproved axiom {assumption}"
 
+-- Native-only F1 exact UInt helper correspondence. The original checked
+-- source helpers are defined by UInt.and/UInt.toNat/Nat.beq/Bool.rec and
+-- remain separately qualified by the cross-target runtime tests.
+-- These are source-reference theorems, not portable admission proofs:
+-- bit-blasting transitively imports Classical.choice under pinned Lean.
+-- Explicitly log this boundary; refuse any incomplete (sorryAx) proof.
+run_cmd do
+  for name in
+      [``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
+       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary32FractionMask_iff,
+       ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
+       ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact,
+       ``PsV7Native.FloatCanonical.canonicalUIntMask64_eq_logical,
+       ``PsV7Native.FloatCanonical.canonicalUIntMask32_eq_logical] do
+    let dependencies ← Lean.collectAxioms name
+    if dependencies.contains ``sorryAx then
+      throwError "PSCV0-FLOAT-MASK-NATIVE: {name} depends on sorryAx"
+    for assumption in dependencies do
+      Lean.logInfo m!"PSCV0-FLOAT-MASK-NATIVE {name}: {assumption}"
+
 -- Full upstream pack/unpack brings its own transitive axioms in native Lean,
 -- including Classical.choice. Never export these research-only comparisons to
 -- PSC0's admitted Standard, and never enlarge contractRoots to silence the gate.

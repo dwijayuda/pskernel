@@ -1,5 +1,32 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — F1 all-input selected UInt mask model (native candidate)
+
+Research [Lean CI 38674696877](https://github.com/dwijayuda/pskernel/actions/runs/38674696877)
+passed at `9ca35f7ef2acbd56cbaa7839c66926c79e7afd1a`.
+This integration is **unqualified until exact-commit main CI completes**.
+
+New native symbolic proofs establish that the checked
+`PsStandard.canonicalFloat64Bits` / `canonicalFloat32Bits` mask-and-branch
+algorithm has the same canonical packed bits as the pinned Lean Float model for
+**every UInt64/UInt32 input**, including NaNs of every sign/payload, both
+signed zeros, infinities, subnormals and normal values. The correspondence
+includes explicit bit-mask/extracted-field lemmas and UInt.toNat predicates.
+
+**Non-negotiable trust boundary:** the generated native `bv_decide` proof
+closure reaches `Classical.choice`, correctly rejected in experimental
+portable [CI 38674185003](https://github.com/dwijayuda/pskernel/actions/runs/38674185003).
+These native reference lemmas are deliberately NOT added to portable
+`contractRoots`, selected Standard, or the executable Float API. The
+approved `propext` and `Quot.sound` list is unchanged; strict research
+assumption logs and `sorryAx` refusals are retained. The native proof
+supports F1 bit-helper semantic correspondence, **not** backend preservation
+or emission of source-level Float constructors.
+
+Next: complete fail-closed selected source Float constructor, safe erasure
+and independent cross-target runtime/ABI qualifications without expanding
+assumptions. F1-F4 and M2+A remain incomplete.
+
 ## 15 October — Native all-input Float correspondence QUALIFIED at d7d267bf
 
 **Exactly qualified native executable:** `d7d267bf55b99ffc2a692075573b1bb96ae4f52c`.

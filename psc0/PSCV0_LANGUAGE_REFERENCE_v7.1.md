@@ -1336,7 +1336,7 @@ A scrutinee's family determines which constructors and patterns are admissible. 
 
 Lean supports convenient equation-style declarations. Adopt the **selected native Lean equation compiler family** in `pscv0` as a P1 proof/programming enhancement once its exact grammar and restrictions are mapped to `pscv0` declaration binders and canonical body braces. This family has **no new `function` equation keyword** beyond the established alias; direct syntax acceptance remains *pending* until complete positive/negative parser, termination, and elaboration cases are added. Multi-discriminant `match` is P0 and must not wait for P1 equation-style syntax.
 
-**Source:** [Lean 4.35 pattern matching](https://lean-lang.org/doc/reference/latest/Terms/Pattern-Matching/) and [recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/).
+**Source:** [Lean pattern matching (current explanatory reference)](https://lean-lang.org/doc/reference/latest/Terms/Pattern-Matching/) and [recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/).
 
 ## 5. Recursion and computability
 
@@ -2081,7 +2081,7 @@ The `catch` handler here is typed via `Except String`, not inferred from JS runt
 
 **One language, distinguishable assurance identities.** Ordinary output is an explicit, non-behavioral-guarantee choice; closed verified output requires complete self-contained assurance under the approved foundation; boundary-qualified verification always identifies exactly which external contracts are assumed. All proof terms are Lean-grounded and kernel checked, and all runtime/backend promises require additional independent evidence. The current document is a specification, not evidence that the corresponding PSC0 checker/backend gates are implemented.
 
-**Research basis:** [stable Lean recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [stable Lean modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [Lean 4.35.0 intrinsic verification](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/).
+**Research basis:** [current explanatory recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [stable Lean modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [Lean 4.35.0 intrinsic verification](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/).
 
 ## 8. Operators, basis types, and language subset
 
@@ -3366,7 +3366,7 @@ The v6 re-audit identified three local documentation defects, now corrected in t
 
 **Evidence boundary:** This is a normative-document update with source-based design justification. It is **not** evidence of Lean kernel, PSC0 parser, custom frontend, target compiler or CI execution. Every added positive/negative fixture must run under stable Lean 4.35.0 and an exact frozen profile before conformance can be claimed.
 
-**Selected upstream references:** [stable recursive definitions / partial-fixpoint theory](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [stable source modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [stable release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/), [pinned predefinition elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/Main.lean), [pinned fixed-point elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean).
+**Selected upstream references:** [current explanatory recursive definitions / partial-fixpoint theory](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [stable source modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [stable release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/), [pinned predefinition elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/Main.lean), [pinned fixed-point elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean).
 
 ## 15. Exact stable Lean 4.35.0 source concordance and research provenance
 
@@ -3389,7 +3389,7 @@ The v6 re-audit identified three local documentation defects, now corrected in t
 | Partial fixpoint construction | [`src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean) | monotonicity, fixed-point elaboration, equations, and checking |
 | Recursive and partial-fixpoint syntax | [`src/Lean/Parser/Term.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term.lean) and [`src/Lean/Parser/Command.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean) | native `partial` modifier and `partial_fixpoint` post-body clause, not a second kernel |
 | Chain-complete orders and monotonicity | [`Init/Internal/Order`](https://github.com/leanprover/lean4/tree/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Internal/Order) | checked monotonicity/fixpoint lemmas; exact imported environment provenance required |
-| Recursive functions explanatory reference | [Lean 4.35.0 recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/) | distinguishes total recursion, opaque partial functions, and fixed-point equations |
+| Recursive functions explanatory reference | [current explanatory recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/) | distinguishes total recursion, opaque partial functions, and fixed-point equations |
 | Lean primitive kernel foundations | [`src/kernel`](https://github.com/leanprover/lean4/tree/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/kernel) | selected core theory, definitional equality, inductives, judgment checks |
 
 **Official explanatory research (moving pages; pinned code above is normative for this proposal):** The Lean 4.35.0 index and certain top-level chapters are accessible, but multiple deep versioned chapter URLs are unavailable from the current published reference. Their links below use the current `/latest/` explanatory pages only when the versioned deep path was unavailable in review; **no `/latest/` content overrides the exact stable 4.35.0 Git commit** for normative syntax, elaboration or semantics.

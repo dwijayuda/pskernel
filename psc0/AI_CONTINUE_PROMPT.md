@@ -1,5 +1,13 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — F1 minimal constructor closure research
+
+The complete 30-root mask audit passed as a 922-declaration, 11 MB proof artifact. That evidence does not imply every proof dependency belongs in selected Standard. Pinned Float/Float32.lean separates logical model/Format.Valid from optimized runtime representation; PSC0 follows the same boundary.
+
+Research `psc0/research-float-constructor-slice-v1` adds a two-root constructor exporter using the existing checked dependency-closure pipeline and only FloatCanonical (not the larger contracts module). It must independently replay the transitive validity proof and actual native constructor signatures, with no theorem substitutions or extra assumptions. The existing complete representation audit still runs first. Measure the resulting asset before selecting it. Runtime representation, public source aliases, typed erasure, IR and all backend/ABI paths remain pending; no constructor has yet been added to selected Standard.
+
+This is F1 within M2+A, not a new roadmap milestone. Main e5d1bdd6 integration qualification is separate. No pskernel-core, self-hosting or C5.
+
 ## 15 October — complete List indexing and actual kernel-scope integration
 
 Research `556904b96a9d70306a92278cebaaa358095c3749` passed [full native CI 38710034211](https://github.com/dwijayuda/pskernel/actions/runs/38710034211) and [expanded portable Float replay 38710034341](https://github.com/dwijayuda/pskernel/actions/runs/38710034341). All 28 native steps passed: higher-universe List indexing/lawful inference, the actual kernel-counter boundary, exact existing asset regeneration, 699 observations each on JS/TS/Rust, GC Wasm/components and repeated Wasmtime calls.

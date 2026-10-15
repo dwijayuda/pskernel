@@ -757,6 +757,24 @@ def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := d
     provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nNative kernel-checked Float canonical-model research, not executable Float.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- F1 constructors need their validity proof, not every representation theorem.
+-- The larger contract roster remains independently checked by the audit entry.
+-- Keep this candidate out of selected Standard until source/IR integration.
+def exportFloatConstructorsCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`PsV7Native.FloatCanonical.fromBits64,
+      `PsV7Native.FloatCanonical.fromBits32]
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonical }]
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardFloatConstructors"
+    privatePrefix := "floatConstructorsDecl"
+    provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 compact Float constructors with checked Format.Valid evidence.\nIndependent constructor candidate; runtime enablement is separate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 -- Pinned Lean 4.35.0 SInt/Basic: each signed type is a checked
 -- wrapper around an unsigned two's-complement carrier. This is a
 -- native-only authoring candidate, NOT executable signed arithmetic.

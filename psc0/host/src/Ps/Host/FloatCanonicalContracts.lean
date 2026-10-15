@@ -414,6 +414,15 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
 -- symbolically for EVERY bit pattern; spot observations are not sufficient.
 -- This is native proof research until source Float erasure and each target
 -- representation are independently qualified.
+-- The pinned generic BitVec.and_allOnes lemma imports Classical.choice
+-- transitively despite expressing a constructive bit identity. Use the
+-- lower-level natural bitwise identity instead; keep the trust audit strict.
+theorem andAllOnes_constructive {w : Nat} (x : BitVec w) :
+    x &&& BitVec.allOnes w = x := by
+  apply BitVec.eq_of_toNat_eq
+  rw [BitVec.toNat_and, BitVec.toNat_allOnes,
+      Nat.and_two_pow_sub_one_eq_mod, Nat.mod_eq_of_lt x.isLt]
+
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream
 -- String/Decode.lean splitting method. No tactic-based SAT oracle or
 -- unchecked theorem is needed; the kernel checks ordinary equality rewrites.
@@ -451,14 +460,14 @@ theorem binary64ExponentMask_iff (bits : BitVec 64) :
       (x := bits) (start₂ := 63) (start₁ := 52)
       (len₂ := 1) (len₁ := 11) (by decide)).symm
   rw [split, BitVec.and_append, BitVec.and_zero,
-      BitVec.and_allOnes, BitVec.append_right_inj]
+      andAllOnes_constructive, BitVec.append_right_inj]
 
 theorem binary64FractionMask_iff (bits : BitVec 64) :
     (bits &&& 4503599627370495#64 = 0#64) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
   change (bits &&& (0#12 ++ BitVec.allOnes 52) = 0#12 ++ 0#52) ↔
     bits.extractLsb' 0 52 = 0#52
-  simpa only [BitVec.and_allOnes] using (maskedLow_iff (upper := 12) (lower := 52)
+  simpa only [andAllOnes_constructive] using (maskedLow_iff (upper := 12) (lower := 52)
     (bits := bits) (mask := BitVec.allOnes 52) (target := 0#52))
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
@@ -477,14 +486,14 @@ theorem binary32ExponentMask_iff (bits : BitVec 32) :
       (x := bits) (start₂ := 31) (start₁ := 23)
       (len₂ := 1) (len₁ := 8) (by decide)).symm
   rw [split, BitVec.and_append, BitVec.and_zero,
-      BitVec.and_allOnes, BitVec.append_right_inj]
+      andAllOnes_constructive, BitVec.append_right_inj]
 
 theorem binary32FractionMask_iff (bits : BitVec 32) :
     (bits &&& 8388607#32 = 0#32) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
   change (bits &&& (0#9 ++ BitVec.allOnes 23) = 0#9 ++ 0#23) ↔
     bits.extractLsb' 0 23 = 0#23
-  simpa only [BitVec.and_allOnes] using (maskedLow_iff (upper := 9) (lower := 23)
+  simpa only [andAllOnes_constructive] using (maskedLow_iff (upper := 9) (lower := 23)
     (bits := bits) (mask := BitVec.allOnes 23) (target := 0#23))
 
 -- Exactly the mask/branch behavior of the selected

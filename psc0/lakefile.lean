@@ -75,6 +75,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardArithmetic,
     `Ps.Environment.StandardIntArithmeticData, `Ps.Environment.StandardIntArithmetic,
     `Ps.Environment.StandardFloatOperationsData, `Ps.Environment.StandardFloatOperations,
+    `Ps.Environment.StandardOperatorDefaults,
     `Ps.Environment.StandardFloatConstructorsData, `Ps.Environment.StandardFloatConstructors,
     `Ps.Environment.StandardEquality,
     `Ps.Environment.StandardCollectionEquality,

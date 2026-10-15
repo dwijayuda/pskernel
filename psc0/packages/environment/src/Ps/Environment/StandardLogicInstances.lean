@@ -24,10 +24,11 @@ def psStandardLogicExtend (environment : PsEnvironment) : PsEnvironment :=
     | some declaration => psStandardRegisterInstances env className [declaration]) environment
 
 def psStandardLogicRuntimeDeclarations (environment : PsEnvironment) : List PsDeclaration :=
-  -- Int decisions use the existing typed Int comparison operations. Iff's
-  -- native computation refers to the existing checked Bool BEq dictionary.
-  ("instBEqBool" :: (psStandardLogicRegistrations.map Prod.fst).filter
-    (fun name => name != "Int.decLt" && name != "Int.decLe")).filterMap
+  -- The frozen native Iff body uses the generic BEq-from-DecidableEq bridge
+  -- applied to instDecidableEqBool, rather than a ground BEq dictionary.
+  (["instBEqOfDecidableEq", "instDecidableEqBool"] ++
+    (psStandardLogicRegistrations.map Prod.fst).filter
+      (fun name => name != "Int.decLt" && name != "Int.decLe")).filterMap
       (fun name => psEnvironmentFind environment (psDecisionName name))
 
 def psStandardLogicAudit (environment : PsEnvironment) : Except String Unit := do
@@ -40,5 +41,6 @@ def psStandardLogicAudit (environment : PsEnvironment) : Except String Unit := d
     if !environment.classes.any (psNameEq (psRootName className)) then
       throw ("PSCV0-STANDARD: missing selected logic class " ++ className)
     psStandardAuditInstance environment declaration
-  if (psEnvironmentFind environment (psDecisionName "instBEqBool")).isNone then
-    throw "PSCV0-STANDARD: missing checked Bool BEq runtime dependency"
+  for name in ["instBEqOfDecidableEq", "instDecidableEqBool"] do
+    let some (.definitionDecl ..) := psEnvironmentFind environment (psDecisionName name)
+      | throw ("PSCV0-STANDARD: missing checked decision runtime dependency " ++ name)

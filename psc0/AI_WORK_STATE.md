@@ -1,5 +1,8 @@
 # PSCV0 v7 — AI work state
 
+Native38806446169 compiled the logic layer and all six pinned decision observations, then its strict audit refused a mistaken runtime dependency name. Direct inspection of the frozen native Core DAG confirms that instDecidableIff uses instBEqOfDecidableEq applied to instDecidableEqBool, not a ground instBEqBool. The runtime catalogue and strict dependency audit now select those exact checked dependencies; no logical body, acceptance criterion or registration changed. Digest selection and complete source/runtime qualification remain pending.
+
+
 ## Basic order and constructive decisions — qualification pending
 
 At176f18025642ee7a8c056aa05d0eb667df5d76da, native38804150832 passed compiler, registry, frozen assets and platform kernel boundaries, then refused comparisonNotation because the checked Nat LT/LE dictionaries were not registered. Independent F3/F4/platform replay38804150877 passed. The source/runtime slice is not green.

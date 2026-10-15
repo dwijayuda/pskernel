@@ -14,10 +14,13 @@ Native38804150832 compiled the previous slice and passed its strict registry and
 
 StandardLogicInstances explicitly selects thirteen existing checked definitions: Nat/Int LT/LE, Int.decLt/decLe and seven constructive proposition decisions. Dependency inclusion never means implicit instance registration. The strict audit verifies every name, definition kind, class and registration. The frozen exporter boundaries remain unchanged, with no new declarations or assumptions.
 
-The ordinary synthetic-constraint scheduler and structural table keys resolve these dictionaries. Runtime selection includes the checked Bool BEq dependency for Iff, and the selected constructive definitions. Int decisions lower to the existing typed Int comparison operations, and Bool.beq to boolEq, using the same arity/partial-application boundary as other primitives. PrimitiveAudit verifies their exact pinned native signatures; differential execution and kernel checking remain separate evidence.
+The ordinary synthetic-constraint scheduler and structural table keys resolve these dictionaries. Runtime selection includes the native instBEqOfDecidableEq and instDecidableEqBool dependencies for Iff, and the selected constructive definitions. Int decisions lower to the existing typed Int comparison operations, and Bool.beq to boolEq, using the same arity/partial-application boundary as other primitives. PrimitiveAudit verifies their exact pinned native signatures; differential execution and kernel checking remain separate evidence.
 
 ## Qualification
 
 Six compact native Lean observations are mirrored in the existing shared JS/TS/Rust runtime ledger: three compound Nat propositions (And, Or, Not, implication, Iff, True, False) and three negative/equal/positive Int order cases. The existing three comparison-alias observations remain. No new test runner, new backend IR operation, resource relaxation or trusted axiom.
 
 Implementation is pending cloud qualification. Keep the previous registry digests until strict independent entry points report agreeing new values. Full source/kernel/IR/module, all backend, GC/ABI, and existing solver/performance gates are required before calling this slice qualified.
+
+Native38806446169 compiled the logic layer and all six pinned decision observations, then its strict audit refused a mistaken runtime dependency name. Direct inspection of the frozen native Core DAG confirms that instDecidableIff uses instBEqOfDecidableEq applied to instDecidableEqBool, not a ground instBEqBool. The runtime catalogue and strict dependency audit now select those exact checked dependencies; no logical body, acceptance criterion or registration changed. Digest selection and complete source/runtime qualification remain pending.
+

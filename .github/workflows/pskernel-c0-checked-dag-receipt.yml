@@ -7,6 +7,8 @@ on:
       - '.github/workflows/pskernel-c0-checked-dag-receipt.yml'
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGTrace.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGTraceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGMemoRegression.lean'
   workflow_dispatch:
 permissions:
@@ -38,6 +40,8 @@ jobs:
           test -s .lake/build/lib/lean/Ps/KernelCore/Checker/Session.olean
           test -s .lake/build/lib/lean/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.olean
           lake env lean --run test/C0CertifiedCheckedDAGMemoRegression.lean
+          lake env lean --run test/C0CertifiedCheckedDAGTraceRegression.lean
+          echo "C0_CHECKED_DAG_TRACE source_state_threading=qualified" 
           echo "C0_CHECKED_DAG_SOURCE_PROOF certified_root=pass source_equation=pass invalid=declined"
       - name: Preserve independent native checker positives and negatives
         working-directory: psc0/packages/pskernel-c0

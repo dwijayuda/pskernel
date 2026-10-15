@@ -283,11 +283,16 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
       simpa [Format.binary64] using exponent.isLt
     have hPow : (2 : Nat) ^ 11 = 2048 := by decide
     omega
+  have hBiased :
+      (((exponent.toNat : Int) - (1023 + 52) + 1023 + 52).toNat) =
+        exponent.toNat := by omega
   have hrec := reconstructPackedFields64 bits
-  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
-    Format.binary64, Format.exponentBias, Format.mantissaBits,
-    heZero, heTop, exponent, mantissa, joined,
-    hlog, hmask, hnoOverflow] using hrec
+  rw [canonicalPacked_finiteExponent Format.binary64 bits heTop]
+  simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero,
+    UnpackedFloat.pack, hBiased, hlog, hnoOverflow,
+    if_false, if_true, hmask]
+  simpa [Format.binary64, Format.exponentBias, Format.mantissaBits,
+    joined, exponent, mantissa] using hrec
 
 -- Raw normal reconstruction: the implicit leading one fixes log2 of the
 -- unpacked significand, and excluding the all-ones exponent prevents overflow.
@@ -332,11 +337,16 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
       simpa [Format.binary32] using exponent.isLt
     have hPow : (2 : Nat) ^ 8 = 256 := by decide
     omega
+  have hBiased :
+      (((exponent.toNat : Int) - (127 + 23) + 127 + 23).toNat) =
+        exponent.toNat := by omega
   have hrec := reconstructPackedFields32 bits
-  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
-    Format.binary32, Format.exponentBias, Format.mantissaBits,
-    heZero, heTop, exponent, mantissa, joined,
-    hlog, hmask, hnoOverflow] using hrec
+  rw [canonicalPacked_finiteExponent Format.binary32 bits heTop]
+  simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero,
+    UnpackedFloat.pack, hBiased, hlog, hnoOverflow,
+    if_false, if_true, hmask]
+  simpa [Format.binary32, Format.exponentBias, Format.mantissaBits,
+    joined, exponent, mantissa] using hrec
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.

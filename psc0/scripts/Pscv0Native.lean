@@ -154,9 +154,10 @@ private def auditProjectSourceGraph (manifestPath : String) : IO UInt32 := do
   let modulePayload := fun (item : PsPscv0ParsedModule) =>
     psStandardSnapshotNode "module" [
       item.name, item.sourceName, psStandardSnapshotSHA256 item.source,
-      psStandardSnapshotList id (item.program.imports.map psPscv0ImportKey),
+      psStandardSnapshotList (fun imp => psStandardSnapshotNode "import"
+        [psPscv0ImportKey imp, psStandardSnapshotBool imp.isPublic]) item.program.imports,
       psStandardSnapshotBool (reachable.contains item.name)]
-  let payload := psStandardSnapshotNode "PSCV0-PROJECT-SOURCE-GRAPH-v1" [
+  let payload := psStandardSnapshotNode "PSCV0-PROJECT-SOURCE-GRAPH-v2" [
     leanCommit, standardSurfaceManifestSHA256 env, entry,
     psStandardSnapshotList modulePayload ordered]
   let digest := "sha256:" ++ psStandardSnapshotSHA256 payload
@@ -164,11 +165,12 @@ private def auditProjectSourceGraph (manifestPath : String) : IO UInt32 := do
     ("module", toJson item.name),
     ("sourcePath", toJson item.sourceName),
     ("sourceSHA256", toJson ("sha256:" ++ psStandardSnapshotSHA256 item.source)),
-    ("imports", toJson (item.program.imports.map psPscv0ImportKey)),
+    ("imports", Lean.Json.arr (item.program.imports.map fun imp => Lean.Json.mkObj [
+      ("module", toJson (psPscv0ImportKey imp)), ("public", toJson imp.isPublic)]).toArray),
     ("buildOrder", toJson rank),
     ("reachableFromEntry", toJson (reachable.contains item.name))]).toArray
   IO.println (Lean.Json.mkObj [
-    ("schema", toJson ("pscv0-project-source-graph/1" : String)),
+    ("schema", toJson ("pscv0-project-source-graph/2" : String)),
     ("status", toJson ("source-graph-only; kernel/runtime evidence is separate" : String)),
     ("leanCommit", toJson leanCommit),
     ("entry", toJson entry),
@@ -205,6 +207,7 @@ private def runProject (targetWordSize : Option PsVerifiedIrWordSize) (manifest 
     match outcome with
     | .error _ => return 1
     | .ok value =>
+      IO.println (compiledProjectManifestJson value).compress
       let files ← outputs.mapM fun (target, output) => do
         let some artifact := value.artifacts.find? (fun artifact => artifact.target == target)
           | throw (IO.userError "PSCV0-PROJECT: missing target artifact")

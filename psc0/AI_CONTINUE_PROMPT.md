@@ -8,6 +8,12 @@ Repository dwijayuda/pskernel. Use GitHub connector and cloud Linux CI exclusive
 
 Development psc0/pscv0-v7-native-lean-v1; draft PR109 targets psc0/pscv0-v7-m1-parser-ownership-v1. Keep draft, never merge. Research psc0/pscv0-v7-platform-words-research. Preserve both histories and newer development docs when integrating. Update both handoff files and roadmap/status every milestone. Interleave M2+A -> M3+B -> M4+C/D -> M5/E; current user asks to complete M2+A.
 
+## Profile provenance checkpoint (profile72; qualification pending)
+
+At0165db7943aa06b34dea678d213bd426d3e0fe7b, native38813764645 compiled the complete operator/source-info changes, passed exact signature/reducibility and checked dependency audits, and regenerated all frozen assets. Both strict registry entry points independently reported FNV10704736494700616048 and SHA256a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f; surface v2 e0c9433e59a95261df499a1891df82210c18ad99ffef888659a2808ec387c285. Selected exactly these observed pins. The audit confirms Int.decEq/Int.instDecidableEq and selected native operator dependencies are already present; no new exported asset or assumption is required. Independent replay38813764520 passed. Full source and backend execution was blocked by the deliberate old-pin refusal.
+
+This checkpoint retains actual elaborated module interfaces/import visibility in portable project output, publishes successful checked-project-profile receipts without a second elaboration, upgrades the existing source-graph digest to include public/private edges, and adds source surface v3 policies/proof prerequisites/assumption provenance with an explicit whole-selected-environment proof-hole scan. See docs/PSCV0_M2_PROFILE_PROVENANCE_2026-10-16.md. Declaration pins remain measured; surface v3 intentionally awaits a new independently reproduced value (v2 expected is still selected). Finish complete qualification, then integrate both research/development histories and requalify. M2+A is not complete.
+
 ## Confirmed baseline and research boundary
 
 Development HEAD 4fedd6cab8236c5f0f0a16dcffe8f7e10402972e is a receipt for executable f1bb4bb810b2397a42ee5d04e4cc2af7dfc4c9d3: native all32 run38793307283; exact F1/F2/F3-F4 runs38793307234/38793307180/38793307143 passed. 978 JS/TS/Rust observations, GC Wasm core/components, Wasmtime/postreturn, source/kernel/modules/assets/performance. This is scoped qualification, not full v7 or global semantics preservation.
@@ -30,7 +36,7 @@ This checkpoint adds immutable source info receipts at shared elaboration owners
 
 Research includes explicit32/64 target words with opaque logical platform width; Array.filter; structural alpha-normalized instance keys; strict UTF8 and shared GC boundary validation; constructive logic/order; conditional and Prop-to-Bool decisions on the shared synthetic queue. This checkpoint adds Lean Extra.lean-style typed operator trees, read-only maximal-type/coercion analysis, heterogeneous guards, Pow/shift protocols and Nat/Int runtime primitives across readable JS/TS/Rust/GC Wasm. It also makes deriving/tactic/effect surface audits consume actual dispatch tables.
 
-Int equality selects Int.instDecidableEq and Int.decEq with exact primitive signature audit and three differential observations. Their native asset presence is not yet confirmed: the strict complete-dependency audit must reject any missing roots; if absent, extend the existing official-native export mechanism and replay its complete checked closure. Do not assume presence or create a logical axiom.
+Int equality selects the existing checked Int.instDecidableEq and Int.decEq. Their presence and exact primitive signature have now passed strict audits at0165db79; runtime observations remain pending.
 
 Twenty operator observations plus three Int equality observations extend the planned shared count from1046 to1069. All compilation/source/runtime evidence for this checkpoint is pending. Strict previous pins remain intentionally selected until BOTH independent audit boundaries agree on new measurements:
 FNV16326442589260407706; declaration SHA256ba31eac8de32f952e1e217ae65ab78402df3785df35617fb8dd442ddff52a25c; surface SHA256e45f0214b2532da66f5863f91a9a7aaadfb3dbe9af128d0e19c77f210f16f393.
@@ -41,7 +47,7 @@ Designs: docs/PSCV0_M2_OPERATOR_PROTOCOL_2026-10-16.md, PSCV0_M2_LIVE_SURFACE_20
 
 1. Complete dependency/source/kernel/backend qualification of the coherent research changes; fix underlying capabilities without weakening fixtures, budgets or audits. Native asset export must use pinned Lean and strict admission.
 2. Qualify the committed source info receipts and final-assignment/scope/rollback invariants, with the existing performance budget. No C5 execution.
-3. Finish comprehensive selected manifest and project provenance. Existing --audit-project-graph/project-source-graph.json already owns module/import evidence; inspect/reuse it. Audit proof extension/effect/assumption closure, state later-phase unavailable capabilities honestly.
+3. Qualify the committed selected surface v3 and actual project-interface receipts, including unavailable proof/effect capabilities. Select surface pins only from reproduced native measurements.
 4. Compare actual M2+A exit criteria with exact evidence; integrate research into development preserving both parents, rerun exact integration CI, update roadmap and PR109. Do not declare completion before these gates.
 
 General dependent/recursive deriving, full proof automation/effects, global backend preservation and source reconstruction belong to later roadmap phases unless the canonical exit criteria require their selected subset here.

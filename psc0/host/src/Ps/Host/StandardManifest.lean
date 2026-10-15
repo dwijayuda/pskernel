@@ -133,6 +133,45 @@ def unqualifiedM2AFeatures : List String :=
    "full Lean module/notation/tactic/effect closure",
    "backend-wide semantic preservation proof"]
 
+-- Selected proof/effect prerequisites are explicit, even when unavailable.
+-- Presence is measured from the same checked Standard, not inferred from a
+-- native package import used only by the authoring tool.
+def selectedProofPrerequisites : List String :=
+  ["Std.WP.Triple", "Gadget.assertGadget"]
+
+def selectedFoundationAssumptions : List String := ["propext", "Quot.sound"]
+
+def selectedProfilePolicies : List String := [
+  "source-public-names-by-default",
+  "ordinary-import-private; public-import-reexports",
+  "definition-bodies-opaque-across-modules; abbrev-bodies-exposed",
+  "proof-holes-and-user-axioms-forbidden-in-all-emitted-output",
+  "pure-typed-ir; external-effects-unselected",
+  "wasm-gc-interior; linear-memory-explicit-canonical-abi-only",
+  "platform-width-abstract-logically; executable-width-explicit32-or64",
+  "metadata-outside-core-identity",
+  "source-reconstruction-not-qualified"]
+
+private def selectedPrerequisitePayload (env : PsEnvironment) (name : String) : String :=
+  psStandardSnapshotNode "proofPrerequisite" [
+    name, psStandardSnapshotBool (psEnvironmentContains env (psDecisionName name))]
+
+-- The complete selected environment is visited, including opaque inhabitants.
+-- Together with kernel dependency closure and the exact declaration digest,
+-- this excludes transitively imported holes without a second proof checker.
+def selectedProofClosureAudit (env : PsEnvironment) : Except String Unit := do
+  for declaration in env.declarations do
+    let name := psDeclarationName declaration
+    let body := match declaration with
+      | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value |
+        .opaqueDecl _ _ _ value => [value]
+      | _ => []
+    if let .partialDecl .. := declaration then
+      throw ("PSCV0-MANIFEST: partial Standard declaration " ++ psNameToString name)
+    let constants := name :: ((psDeclarationType declaration :: body).flatMap psPscv0ExprConstants)
+    if constants.any (fun name => psNameToString name == "sorryAx") then
+      throw "PSCV0-MANIFEST: proof-hole dependency in selected Standard"
+
 -- Canonical length-delimited human-surface snapshot. This digest is
 -- independent of the existing kernel declaration and metadata snapshot:
 -- notation/deriving/selected tactics and effect policy are included here.
@@ -155,7 +194,7 @@ private def manifestNotationPayload (entry : ManifestNotation) : String :=
     toString entry.rightPrecedence, psStandardSnapshotBool entry.nonAssociative]
 
 def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v2" [
+  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v3" [
     leanVersion, leanCommit,
     psStandardSnapshotSHA256Fingerprint env,
     psStandardSnapshotList manifestNotationPayload selectedNotations,
@@ -166,7 +205,11 @@ def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
     psStandardSnapshotList id selectedModuleBehaviors,
     psStandardSnapshotList manifestInstancePayload env.instances.entries,
     psStandardSnapshotList manifestInstancePayload env.instances.defaults,
-    psStandardSnapshotList id psPscv0SelectedAttributes]
+    psStandardSnapshotList id psPscv0SelectedAttributes,
+    psStandardSnapshotList id selectedProfilePolicies,
+    psStandardSnapshotList id selectedFoundationAssumptions,
+    psStandardSnapshotList (selectedPrerequisitePayload env) selectedProofPrerequisites,
+    psStandardSnapshotNode "authoringOrigin" ["Lean.Init", leanCommit]]
 
 def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
@@ -179,7 +222,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Independently measured at both strict boundaries in native38781449363.
 -- F4 display registrations independently measured at native38789249978.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:e45f0214b2532da66f5863f91a9a7aaadfb3dbe9af128d0e19c77f210f16f393"
+  "sha256:e0c9433e59a95261df499a1891df82210c18ad99ffef888659a2808ec387c285"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
@@ -234,6 +277,7 @@ def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
 
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
+  selectedProofClosureAudit env
   standardInstanceIndexAudit env
   -- Reuse, do not replace, the independently pinned dual registry hashes.
   match psStandardSnapshotValidate env psStandardSnapshotExpected with
@@ -280,13 +324,13 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
     | .axiomDecl name _ _ => some (psNameToString name)
     | _ => none
   Lean.Json.mkObj [
-    ("schema", Lean.toJson ("pscv0-selected-standard-surface/1" : String)),
+    ("schema", Lean.toJson ("pscv0-selected-standard-surface/2" : String)),
     ("leanVersion", Lean.toJson leanVersion),
     ("leanCommit", Lean.toJson leanCommit),
     ("selectedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint env)),
     ("selectedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint env)),
     ("selectedSurfaceSHA256", Lean.toJson (standardSurfaceManifestSHA256 env)),
-    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v2" : String)),
+    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v3" : String)),
     ("projectImportGraph", Lean.toJson ("validated-per-project-not-global" : String)),
     ("declarations", Lean.toJson env.declarations.length),
     ("classes", Lean.toJson (env.classes.map psNameToString)),
@@ -300,6 +344,15 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
       ((env.instances.entries.zipIdx.map fun (entry, rank) =>
         manifestInstanceJson entry rank).toArray)),
     ("registeredAxioms", Lean.toJson knownAxioms),
+    ("approvedLogicalAssumptions", Lean.toJson selectedFoundationAssumptions),
+    ("profilePolicies", Lean.toJson selectedProfilePolicies),
+    ("authoringOrigin", Lean.toJson ("Lean.Init@" ++ leanCommit)),
+    ("proofPrerequisites", Lean.Json.arr (selectedProofPrerequisites.map fun name =>
+      Lean.Json.mkObj [("name", Lean.toJson name),
+        ("available", Lean.toJson (psEnvironmentContains env (psDecisionName name)))]).toArray),
+    ("derivingOwner", Lean.toJson ("Ps.Elab.Deriving" : String)),
+    ("tacticOwner", Lean.toJson ("Ps.Syntax.Pscv0.ProofRead/Ps.Elab.Proof" : String)),
+    ("effectOwner", Lean.toJson ("Ps.Elab.Do" : String)),
     ("selectedNotation", Lean.Json.arr (selectedNotations.map notationJson).toArray),
     ("selectedDeriving", Lean.toJson selectedDeriving),
     ("selectedTactics", Lean.toJson selectedTactics),
@@ -307,5 +360,72 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
     ("boundedElaborationEffects", Lean.toJson selectedElabEffects),
     ("moduleBehaviors", Lean.toJson selectedModuleBehaviors),
     ("notYetQualified", Lean.toJson unqualifiedM2AFeatures)]
+
+-- Canonical receipts use the actual interface retained by the portable module
+-- builder, not a second parse/elaboration or a guessed list of public names.
+private def moduleInterfacePayload (view : PsPscv0ModuleInterface) : String :=
+  psStandardSnapshotNode "moduleInterface" [
+    psStandardSnapshotList psStandardSnapshotDeclaration view.declarations,
+    psStandardSnapshotList psStandardSnapshotName view.classes,
+    psStandardSnapshotList psStandardSnapshotClassParameters view.classParameters,
+    psStandardSnapshotList psStandardSnapshotInstance view.instances,
+    psStandardSnapshotList psStandardSnapshotInstance view.defaults,
+    psStandardSnapshotList (fun (name, status) =>
+      psStandardSnapshotNode "reducibility" [psStandardSnapshotName name,
+        psReducibilityName status]) view.reducibility]
+
+private def projectModulePayload (item : PsPscv0ModuleProfile) : String :=
+  psStandardSnapshotNode "module" [
+    item.name, item.sourceName, psStandardSnapshotSHA256 item.source,
+    psStandardSnapshotList (fun (name, isPublic) =>
+      psStandardSnapshotNode "import" [name, psStandardSnapshotBool isPublic]) item.imports,
+    psStandardSnapshotList psStandardSnapshotName item.ownNames,
+    psStandardSnapshotList psStandardSnapshotName item.privateNames,
+    psStandardSnapshotList psStandardSnapshotName item.exposedNames,
+    moduleInterfacePayload item.interface]
+
+private def projectModuleJson (item : PsPscv0ModuleProfile) : Lean.Json :=
+  let api := item.interface.declarations.map fun declaration =>
+    Lean.Json.mkObj [
+      ("name", Lean.toJson (psNameToString (psDeclarationName declaration))),
+      ("signatureSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256
+        (psStandardSnapshotNode "signature" [
+          psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams declaration),
+          psStandardSnapshotExpr (psDeclarationType declaration)]))),
+      ("bodyExposed", Lean.toJson (match declaration with
+        | .definitionDecl .. => true | _ => false))]
+  Lean.Json.mkObj [
+    ("module", Lean.toJson item.name), ("sourcePath", Lean.toJson item.sourceName),
+    ("sourceSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256 item.source)),
+    ("imports", Lean.Json.arr (item.imports.map fun (name, isPublic) =>
+      Lean.Json.mkObj [("module", Lean.toJson name), ("public", Lean.toJson isPublic)]).toArray),
+    ("ownDeclarations", Lean.toJson (item.ownNames.map psNameToString)),
+    ("privateDeclarations", Lean.toJson (item.privateNames.map psNameToString)),
+    ("exposedOwnBodies", Lean.toJson (item.exposedNames.map psNameToString)),
+    ("publicAPI", Lean.Json.arr api.toArray),
+    ("classes", Lean.toJson (item.interface.classes.map psNameToString)),
+    ("instances", Lean.Json.arr (item.interface.instances.zipIdx.map fun (entry, rank) =>
+      manifestInstanceJson entry rank).toArray),
+    ("defaults", Lean.Json.arr (item.interface.defaults.zipIdx.map fun (entry, rank) =>
+      manifestInstanceJson entry rank).toArray),
+    ("interfaceSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256
+      (moduleInterfacePayload item.interface)))]
+
+-- Only the successful native compilation path publishes this receipt. It
+-- describes kernel-checked interfaces, not verification of foreign runtimes.
+def compiledProjectManifestJson (result : Result) : Lean.Json :=
+  let surface := standardSurfaceManifestSHA256 psSelfHostProdPreludeEnvironment
+  let payload := psStandardSnapshotNode "PSCV0-CHECKED-PROJECT-PROFILE-v1" [
+    leanCommit, surface,
+    (result.targetWordSize.map (fun width => toString (psIrWordSizeBits width))).getD "unspecified",
+    psStandardSnapshotList projectModulePayload result.moduleProfiles]
+  Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-checked-project-profile/1" : String)),
+    ("status", Lean.toJson ("kernel-checked-interfaces; runtime qualification is separate" : String)),
+    ("leanCommit", Lean.toJson leanCommit),
+    ("selectedSurfaceSHA256", Lean.toJson surface),
+    ("profileSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256 payload)),
+    ("targetWordSize", Lean.toJson (result.targetWordSize.map psIrWordSizeBits)),
+    ("modules", Lean.Json.arr (result.moduleProfiles.map projectModuleJson).toArray)]
 
 end PsV7Native

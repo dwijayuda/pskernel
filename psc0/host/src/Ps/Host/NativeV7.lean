@@ -13,7 +13,7 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/71"
+def profile : String := "pscv0-v7-native-bounded/72"
 
 def leanVersion : String := "4.35.0"
 def leanCommit : String := "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
@@ -44,6 +44,7 @@ structure Timings where
   emitMs : Nat := 0
 
 structure Result where
+  moduleProfiles : List PsPscv0ModuleProfile := []
   declarationCount : Nat
   artifacts : List PsEmissionArtifact
   timings : Timings
@@ -101,7 +102,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     pure none
   else
     (fromResult "module" (psCompilerPreparePscv0Project request.moduleName
-      (request.modules ++ [{ name := request.moduleName, source := request.source }]))).map some
+      (request.modules ++ [{ name := request.moduleName, source := request.source, sourceName := request.sourceName }]))).map some
   let parsed ← match project with
     | some _ => pure none
     | none => (fromResult "parse" (psCompilerParsePscv0 request.source)).map some
@@ -142,6 +143,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     prepareMs := t3 - t2, kernelMs := t4 - t3 }
   if request.targets.isEmpty then
     return {
+      moduleProfiles := (project.map (·.moduleProfiles)).getD []
       declarationCount := output.prepared.declarations.length
       artifacts := []
       targetWordSize := request.targetWordSize
@@ -211,6 +213,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
           PsWasm.emit checked context (target == .wasmComponent) request.exports)
   let t6 ← IO.monoMsNow
   return {
+    moduleProfiles := (project.map (·.moduleProfiles)).getD []
     declarationCount := output.prepared.declarations.length
     artifacts := artifacts.map (fun artifact => { artifact with targetWordSize := request.targetWordSize })
     targetWordSize := request.targetWordSize

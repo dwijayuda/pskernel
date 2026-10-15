@@ -1944,7 +1944,8 @@ def psEraseCompleteSpecialWithFuel
                               | List.cons capturedValue _ =>
                                   let pushed :=
                                     psLocalPushLet captured.scope.localContext name domain argument;
-                                  let nextScope := { captured.scope with localContext := pushed.context,
+                                  let nextScope := { captured.scope with
+                                    localContext := pushed.context
                                     runtimeExpressions := (List.cons (Prod.mk pushed.id capturedValue)
                                       captured.scope.runtimeExpressions) };
                                   let openedArgument := PsExpr.fvar pushed.id;
@@ -1987,7 +1988,8 @@ def psEraseCompleteSpecialWithFuel
                           if psErasureLocalNameUsed state.scope parameterName then
                             Except.error PsErasureError.fuelExhausted
                           else
-                            let nextScope := { state.scope with localContext := pushed.context,
+                            let nextScope := { state.scope with
+                              localContext := pushed.context
                               runtimeLocals := (List.cons (Prod.mk pushed.id parameterName) state.scope.runtimeLocals) };
                             let openedArgument := PsExpr.fvar pushed.id;
                             psEraseCompleteSpecialWithFuel eraseAt environment

@@ -199,9 +199,10 @@ def psEraseOpenDefinitionWithFuel
                               (List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev)
                               current.runtimeParameters);
                     let nextScope : PsErasureScope :=
-                      { scope with localContext := pushed.context,
-                        typeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals),
-                        erasedLocals := (List.cons pushed.id scope.erasedLocals),
+                      { scope with
+                        localContext := pushed.context
+                        typeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals)
+                        erasedLocals := (List.cons pushed.id scope.erasedLocals)
                         currentDefinition := nextCurrentDefinition };
                     smaller
                       nextScope
@@ -243,8 +244,9 @@ def psEraseOpenDefinitionWithFuel
                                   current.typeArgumentsRev
                                   (psErasureAppendRuntimeParameter current.runtimeParameters parameterName));
                         let nextScope : PsErasureScope :=
-                          { scope with localContext := pushed.context,
-                            runtimeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals),
+                          { scope with
+                            localContext := pushed.context
+                            runtimeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals)
                             currentDefinition := nextCurrentDefinition };
                         smaller
                           nextScope

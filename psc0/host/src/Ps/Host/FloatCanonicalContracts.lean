@@ -535,13 +535,12 @@ theorem canonicalUIntMask64_eq_logical (bits : UInt64) :
     by_cases hm : (bits &&& (4503599627370495 : UInt64)).toNat = 0
     · have hm' := hFrac.mp hm
       simp only [if_pos he, if_pos he', if_pos hm, if_pos hm']
-      rfl
     · have hm' := mt hFrac.mpr hm
-      simp only [if_pos he, if_pos he', if_pos hm, if_pos hm']
+      simp only [if_pos he, if_pos he']
+      rw [if_neg hm, if_neg hm']
       rfl
   · have he' := mt hExp.mpr he
     simp only [if_neg he, if_neg he']
-    rfl
 
 -- Direct native model of the selected PsStandard.canonicalFloat32Bits
 -- source helper (UInt.land -> UInt.toNat -> Nat.beq -> Bool.rec).
@@ -574,13 +573,12 @@ theorem canonicalUIntMask32_eq_logical (bits : UInt32) :
     by_cases hm : (bits &&& (8388607 : UInt32)).toNat = 0
     · have hm' := hFrac.mp hm
       simp only [if_pos he, if_pos he', if_pos hm, if_pos hm']
-      rfl
     · have hm' := mt hFrac.mpr hm
-      simp only [if_pos he, if_pos he', if_pos hm, if_pos hm']
+      simp only [if_pos he, if_pos he']
+      rw [if_neg hm, if_neg hm']
       rfl
   · have he' := mt hExp.mpr he
     simp only [if_neg he, if_neg he']
-    rfl
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.

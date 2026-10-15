@@ -402,6 +402,16 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: A[]): B[] => ", "__ps_a.map((__ps_x) => __ps_f(__ps_x)))(", fn, ", ", array, ")"]);
       psTsPrinted2 emit arguments
+  | .arrayFilter =>
+      match arguments with
+      | [fn, array, start, stop] =>
+        .ok (psTsJoin "" [
+          "(<A>(predicate: (value: A) => boolean, array: A[], start: bigint, stop: bigint): A[] => { ",
+          "const result: A[] = []; const size = BigInt(array.length); const end = stop < size ? stop : size; ",
+          "for (let index = start; index < end; index += 1n) { const value = array[Number(index)]!; ",
+          "if (predicate(value)) result.push(value); } return result; })(",
+          fn, ", ", array, ", ", start, ", ", stop, ")"])
+      | _ => .error PsTsEmitError.intrinsicArity
   | .arrayFoldl =>
       let emit : String -> String -> String -> String -> String -> Except PsTsEmitError String :=
         fun (fn : String) (init : String) (array : String) (start : String) (stop : String) =>

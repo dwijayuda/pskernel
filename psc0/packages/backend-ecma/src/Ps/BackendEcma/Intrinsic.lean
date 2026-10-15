@@ -213,6 +213,23 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
         ret (id "__ps_result")]
         [{ name := "__ps_fn", type := "(value: " ++ a ++ ") => " ++ b },
           { name := "__ps_array", type := a ++ "[]" }] [fn,array] ("__ps$Computation<" ++ b ++ "[]>"))
+  | .arrayFilter, [fn,array,start,stop] =>
+      let [a] ← types.mapM irType | throw "PSCV0-ECMA: arrayFilter type arguments"
+      pure (delegate [
+        const "__ps_size" (call "BigInt" [field (id "__ps_array") "length"]),
+        const "__ps_end" (.conditional (bin "<=" (id "__ps_stop") (id "__ps_size")) (id "__ps_stop") (id "__ps_size")),
+        .binding false "__ps_result" (a ++ "[]") (some (.array [])),
+        letE "__ps_index" (id "__ps_start"),
+        .whileE (bin "<" (id "__ps_index") (id "__ps_end")) [
+          const "__ps_element" arrayAt,
+          .ifE (unary "yield* " (call "__ps$invoke" [id "__ps_fn", id "__ps_element"]))
+            [.expression (method (id "__ps_result") "push" [id "__ps_element"])] [],
+          inc "__ps_index" (id "1n")],
+        ret (id "__ps_result")]
+        [{ name := "__ps_fn", type := "(value: " ++ a ++ ") => boolean" },
+          { name := "__ps_array", type := a ++ "[]" },
+          { name := "__ps_start", type := "bigint" }, { name := "__ps_stop", type := "bigint" }]
+        [fn,array,start,stop] ("__ps$Computation<" ++ a ++ "[]>"))
   | .arrayFoldl, [fn,initial,array,start,stop] =>
       let [a,b] ← types.mapM irType | throw "PSCV0-ECMA: arrayFoldl type arguments"
       pure (delegate [

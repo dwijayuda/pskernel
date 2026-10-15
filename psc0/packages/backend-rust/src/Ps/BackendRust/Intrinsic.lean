@@ -801,6 +801,11 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 array "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .arrayFilter =>
+      match arguments with
+      | [fn, array, start, stop] =>
+        .ok ("__ps_array_filter(" ++ fn ++ ", &(" ++ array ++ "), &(" ++ start ++ "), &(" ++ stop ++ "))")
+      | _ => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.arrayFoldl =>
       match psRustExactFiveArguments arguments with
       | Option.some quintuple =>
@@ -836,5 +841,5 @@ def psRustIntrinsicConsumes (op : PsVerifiedIrIntrinsic) (index : Nat) : Bool :=
   | .arrayBuild => index != 0
   | .arrayPush => true
   | .arraySet | .arraySetIfInBounds => index == 0 || index == 2
-  | .arrayMap | .arrayFoldl | .stringPush | .stringAppend => index == 0
+  | .arrayMap | .arrayFilter | .arrayFoldl | .stringPush | .stringAppend => index == 0
   | _ => false

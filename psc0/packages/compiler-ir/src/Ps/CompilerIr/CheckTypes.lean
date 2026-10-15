@@ -668,6 +668,11 @@ def psIrCheckIntrinsicSignature
             [PsVerifiedIrType.function [element] result, psIrCheckArrayType element]
             (psIrCheckArrayType result);
       psIrCheckSignatureTwoTypes typeArguments build
+  | .arrayFilter =>
+      psIrCheckSignatureOneType typeArguments fun element =>
+        PsIrCheckSignature.mk
+          [PsVerifiedIrType.function [element] bool, psIrCheckArrayType element, nat, nat]
+          (psIrCheckArrayType element)
   | .arrayFoldl =>
       let build : PsVerifiedIrType -> PsVerifiedIrType -> PsIrCheckSignature :=
         fun (element : PsVerifiedIrType) (accumulator : PsVerifiedIrType) =>

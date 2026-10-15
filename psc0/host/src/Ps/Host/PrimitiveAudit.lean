@@ -61,7 +61,7 @@ def primitiveAudit : IO Lean.Json := do
     let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd",
       "List.foldl", "List.reverse", "List.reverseAux"].contains
       (psNameToString name)
-    let checkedArray := ["Array", "Array.map", "Array.setIfInBounds", "Array.getD",
+    let checkedArray := ["Array", "Array.map", "Array.filter", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)
     let checkedOperator := (psStandardHomogeneousNativeNames ++ psStandardScientificNames).any (psNameEq name)
     if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedOperator then

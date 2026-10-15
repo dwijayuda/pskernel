@@ -375,7 +375,7 @@ def psTsTailPureWithFuel (aliases : List PsTsTailAlias) (fuel : Nat) : PsVerifie
             | Option.some _ => false
         | PsVerifiedIrExpr.intrinsic operation _ arguments =>
             match operation with
-            | PsVerifiedIrIntrinsic.arrayMap => false
+            | PsVerifiedIrIntrinsic.arrayMap | PsVerifiedIrIntrinsic.arrayFilter => false
             | PsVerifiedIrIntrinsic.arrayFoldl => false
             | _ => if psListAny impure arguments then false else true
         | PsVerifiedIrExpr.record _ _ fields => if psListAny impureField fields then false else true

@@ -14,35 +14,45 @@ structure PsPscv0Infix where
   rightPrecedence : Nat
   nonAssociative : Bool := false
 
--- Closed source registry; extending notation does not change call or binder
--- grammar. Precedence comes from the pinned RC4 parser/notation declarations.
-def psPscv0InfixInfo : String → Option PsPscv0Infix
-  | "=" => some { kind := .constant "Eq", precedence := 50, rightPrecedence := 51, nonAssociative := true }
-  | "==" => some { kind := .constant "BEq.beq", precedence := 50, rightPrecedence := 51, nonAssociative := true }
-  | "!=" => some { kind := .booleanNotEqual, precedence := 50, rightPrecedence := 51, nonAssociative := true }
-  | "∧" | "/\\" => some { kind := .constant "And", precedence := 35, rightPrecedence := 35 }
-  | "∨" | "\\/" => some { kind := .constant "Or", precedence := 30, rightPrecedence := 30 }
-  -- Pinned RC4 Init/Notation.lean: infixl:35 "&&", infixl:30 "||".
-  -- Encode selected lazy Bool operations through the existing typed if.
-  | "&&" => some { kind := .booleanAnd, precedence := 35, rightPrecedence := 36 }
-  | "||" => some { kind := .booleanOr, precedence := 30, rightPrecedence := 31 }
-  | "↔" | "<->" => some { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }
-  -- Pinned Lean RC4 Init/Notation.lean: infixr:35 " × " => Prod.
-  | "×" => some { kind := .constant "Prod", precedence := 35, rightPrecedence := 35 }
-  -- Pinned RC4 Init/Notation.lean: infixr:67 "::" => List.cons.
-  | "::" => some { kind := .constant "List.cons", precedence := 67, rightPrecedence := 67 }
-  -- Pinned Lean RC4 Init/Notation.lean: infixl:65 "+" => HAdd.hAdd.
-  | "+" => some { kind := .constant "HAdd.hAdd", precedence := 65, rightPrecedence := 66 }
-  -- Lean RC4 Init/Notation.lean infixl:65 "++" => HAppend.hAppend.
-  | "++" => some { kind := .constant "HAppend.hAppend", precedence := 65, rightPrecedence := 66 }
-  | "-" => some { kind := .constant "HSub.hSub", precedence := 65, rightPrecedence := 66 }
-  -- Lean 4.35.0-rc4 Init/Notation: infixl:70 for *, / and %.
-  | "*" => some { kind := .constant "HMul.hMul", precedence := 70, rightPrecedence := 71 }
-  | "/" => some { kind := .constant "HDiv.hDiv", precedence := 70, rightPrecedence := 71 }
-  | "%" => some { kind := .constant "HMod.hMod", precedence := 70, rightPrecedence := 71 }
-  | "→" | "->" => some { kind := .arrow, precedence := 25, rightPrecedence := 25 }
-  | "matches" => some { kind := .matches, precedence := 50, rightPrecedence := 51, nonAssociative := true }
-  | _ => none
+-- Enumerated closed source registry. Parser lookup and exhaustive native
+-- manifest auditing consume this single list; the independently pinned ledger
+-- still rejects unreviewed additions. Lean 4.35.0 Init/Notation.lean supplies
+-- precedence/targets; GT/GE are the reducible reversed LT/LE in Init/Prelude.
+-- Source comparisons stay non-associative; adjacent-call rules are unchanged.
+def psPscv0InfixRegistry : List (String × PsPscv0Infix) := [
+  ("=", { kind := .constant "Eq", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("==", { kind := .constant "BEq.beq", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("!=", { kind := .booleanNotEqual, precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("<", { kind := .constant "LT.lt", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("<=", { kind := .constant "LE.le", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("≤", { kind := .constant "LE.le", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  (">", { kind := .constant "GT.gt", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  (">=", { kind := .constant "GE.ge", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("≥", { kind := .constant "GE.ge", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("≠", { kind := .constant "Ne", precedence := 50, rightPrecedence := 51, nonAssociative := true }),
+  ("∧", { kind := .constant "And", precedence := 35, rightPrecedence := 35 }),
+  ("/\\", { kind := .constant "And", precedence := 35, rightPrecedence := 35 }),
+  ("∨", { kind := .constant "Or", precedence := 30, rightPrecedence := 30 }),
+  ("\\/", { kind := .constant "Or", precedence := 30, rightPrecedence := 30 }),
+  ("&&", { kind := .booleanAnd, precedence := 35, rightPrecedence := 36 }),
+  ("||", { kind := .booleanOr, precedence := 30, rightPrecedence := 31 }),
+  ("↔", { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }),
+  ("<->", { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }),
+  ("×", { kind := .constant "Prod", precedence := 35, rightPrecedence := 35 }),
+  ("::", { kind := .constant "List.cons", precedence := 67, rightPrecedence := 67 }),
+  ("+", { kind := .constant "HAdd.hAdd", precedence := 65, rightPrecedence := 66 }),
+  ("++", { kind := .constant "HAppend.hAppend", precedence := 65, rightPrecedence := 66 }),
+  ("-", { kind := .constant "HSub.hSub", precedence := 65, rightPrecedence := 66 }),
+  ("*", { kind := .constant "HMul.hMul", precedence := 70, rightPrecedence := 71 }),
+  ("/", { kind := .constant "HDiv.hDiv", precedence := 70, rightPrecedence := 71 }),
+  ("%", { kind := .constant "HMod.hMod", precedence := 70, rightPrecedence := 71 }),
+  ("→", { kind := .arrow, precedence := 25, rightPrecedence := 25 }),
+  ("->", { kind := .arrow, precedence := 25, rightPrecedence := 25 }),
+  ("matches", { kind := .matches, precedence := 50, rightPrecedence := 51, nonAssociative := true })
+]
+
+def psPscv0InfixInfo (token : String) : Option PsPscv0Infix :=
+  (psPscv0InfixRegistry.find? fun entry => entry.1 == token).map Prod.snd
 
 -- The common lexer already splits the multi-symbol ASCII aliases. Join only
 -- adjacent registered spellings; whitespace can never manufacture an operator.

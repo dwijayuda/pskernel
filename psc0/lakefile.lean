@@ -101,7 +101,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
     `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
-    `Ps.Environment.StandardArray, `Ps.Environment.StandardListIndex,
+    `Ps.Environment.StandardArray, `Ps.Environment.StandardArrayFilter, `Ps.Environment.StandardListIndex,
     `Ps.Environment.StandardData,
     `Ps.Environment.StandardFormatData,
     `Ps.Environment.StandardFormatBasic,
@@ -241,7 +241,7 @@ lean_lib PsMeta where
     `Ps.Meta.Unify,
     `Ps.Meta.InstanceTarget,
     `Ps.Meta.InstanceCandidate,
-    `Ps.Meta.InstanceSearch,
+    `Ps.Meta.InstanceKey, `Ps.Meta.InstanceSearch,
     `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView

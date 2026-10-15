@@ -197,6 +197,22 @@ pub(super) fn __ps_array_map<A: Clone, B>(
 ) -> PsArray<B> {
     Rc::new(array.iter().cloned().map(|value| f(value)).collect())
 }
+pub(super) fn __ps_array_filter<A: Clone>(
+    predicate: Rc<dyn Fn(A) -> bool>, array: &PsArray<A>,
+    start: &PsNat, stop: &PsNat,
+) -> PsArray<A> {
+    let size = PsNat::from(array.len());
+    let begin = start.min(&size).to_usize().expect("bounded Array start fits usize");
+    let end = stop.min(&size).to_usize().expect("bounded Array stop fits usize");
+    let mut result = Vec::with_capacity(end.saturating_sub(begin));
+    for index in begin..end {
+        let value = array[index].clone();
+        if predicate(value.clone()) {
+            result.push(value);
+        }
+    }
+    Rc::new(result)
+}
 pub(super) fn __ps_array_foldl<A: Clone, B: Clone>(
     f: Rc<dyn Fn(B, A) -> B>, init: &B, array: &PsArray<A>,
     start: &PsNat, stop: &PsNat,

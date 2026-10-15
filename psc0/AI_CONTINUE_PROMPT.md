@@ -1,5 +1,16 @@
 # Continue PSC0 / PSCV0 v7 — complete remaining M2+A
 
+## M2 collection, table-key and notation qualification checkpoint
+
+Platform native run38799414716 at6323d81de1231c89034f0cbefd6492b7afe549e7 admitted3556 declarations/32classes/302instances; source, kernel, modules, generalized answers, defaults, scopes, rollback and resource gates passed. Runtime qualification then stopped before emission at source '<': checked order classes exist, but the parser registry omitted comparison notation. Independent asset replay38799414892 passed. No runtime success is claimed.
+
+The current research slice completes coherent implementations before qualification: Array.filter with Lean's predicate-first universe-aware dependent-default telescope and linear builders on JS/TS/Rust/GC Wasm; complete comparison spelling family plus exhaustive live operator inventory; full structural instance-table keys retaining checked answer replay and local-context isolation. The old same-class workload measured528 comparisons for32goals. The strengthened existing gate now also bounds same-class distinct-input comparisons. The checked environment adds one Array.filter definition and no assumptions/instances; strict pins intentionally remain at the last independently measured values until CI reports the new ones.
+
+Design/source references and pending evidence: docs/PSCV0_M2_A_ARRAY_FILTER_2026-10-16.md, PSCV0_M2_INSTANCE_KEYS_2026-10-16.md, PSCV0_M2_COMPARISON_NOTATION_2026-10-16.md. Native profile/65. These changes are not yet qualified. No budgets, refusals or acceptance criteria were weakened.
+
+Next: inspect CI compiler/pin/runtime evidence, select only independently measured pins, and finish cross-target qualification. Then integrate into development with both parent histories and the newer F4 receipt. UTF8, remaining canonical operator/coercion behavior, comprehensive live manifest/provenance and M2 retention audit remain open. Do not declare M2+A complete.
+
+
 ## Platform registry checkpoint — runtime qualification pending, 16 October 2026
 
 Active request: complete remaining M2+A in native .lean. Stop after M2+A; the established later sequence is M3+B -> M4+C/D -> M5/E. Earlier stop-after-F3 instructions are superseded.
@@ -21,8 +32,8 @@ Lean4.35.0 pinned eb6cafb7290e8bd5f2937522d8d804f58f02bafc is the primary refere
 ## Next coherent work and exit boundaries
 
 1. Finish platform-word qualification from the fresh research head. Inspect complete failures before changing code. Strict pins are now measured; never auto-accept a subsequent drift. Full development integration requires its own exact-commit CI receipt.
-2. Complete selected P0 Array.filter and String UTF8 encoding/decoding. Array.filter is currently only an in-memory implementation draft, not committed: checked fold model with dependent defaults, one typed intrinsic, shared ECMA generator, safe Rust Vec builder, linear GC Wasm temporary-buffer/compact-copy, eleven shared observations. Reconstruct from source/design if that draft is unavailable; do not claim it exists remotely.
-3. Finish M2 solver/retention audit and live selected environment manifest. Lean's SynthInstance table keys are structural; current PSC0's same-class definitional-equality scan has a quadratic comparison workload. A key-index draft is not committed or qualified. Avoid executing large type-index computations merely to hash them. Preserve existing priority, cycle/diamond, local context, generalized answer, rollback and budget checks.
+2. Qualify the committed Array.filter implementation described above, then complete selected P0 String UTF8 encoding/decoding.
+3. Finish M2 solver/retention audit and live selected environment manifest. Lean's SynthInstance table keys are structural; current PSC0's same-class definitional-equality scan has a quadratic comparison workload. The structural key implementation above is now committed but not yet qualified. Avoid executing large type-index computations merely to hash them. Preserve existing priority, cycle/diamond, local context, generalized answer, rollback and budget checks.
 4. Read canonical PSCV0_LANGUAGE_REFERENCE.md §8A plus existing architecture/readable-output audit. Selected five deriving handlers already exist; dependent/indexed/recursive extensions keep their M3+B dependency. Higher-rank runtime dictionary values remain an explicit current IR boundary; do not silently call them supported.
 5. Comprehensive live parser/handler/effect/import/axiom provenance and M2 ordered binder/default/implicit/occurrence retention must be audited before claiming M2+A complete. Full proof automation/effects and global backend preservation remain later phase gates, not evidence supplied by these runtime observations.
 

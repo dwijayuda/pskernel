@@ -1,4 +1,5 @@
 import Ps.Environment.StandardPlatformWords
+import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardFloatDisplay
 import Ps.Environment.StandardScientific
 import Ps.Environment.StandardOperatorDefaults
@@ -131,7 +132,8 @@ def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
   psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
+  psStandardArrayFilterExtend <|
+    psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

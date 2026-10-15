@@ -759,8 +759,14 @@ private def executableFloatOperationsFixture : String :=
 private def executableFloatFixture : String :=
   "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := match Float.toModel(Float.ofBits(UInt64.ofNat(bits))) with { | Float.Model.mk raw valid => UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.mk(raw, valid)))) }\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := match Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))) with { | Float32.Model.mk raw valid => UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.mk(raw, valid)))) }\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
 
+private def arrayFilterFixture : String :=
+  "namespace FilterCases\nuniverse u\nfunction keep{A: Type u}(predicate: A -> Bool, values: Array A): Array A := Array.filter(predicate, values)\nfunction greater(limit: Nat): Nat -> Bool := fun value => if (limit < value) { true } else { false }\nfunction rendered(start: Nat, stop: Nat): String := reprStr(Array.toList(Array.filter(greater(2), #[1, 2, 5, 2, 7, 7], start := start, stop := stop)))\nstructure High: Type 1 where { value: Nat }\nconst high: Array High := keep(fun value => if (2 < value.value) { true } else { false }, #[High.mk(1), High.mk(5)])\nconst partial: (Nat -> Bool) -> Array Nat -> Nat -> Nat -> Array Nat := @Array.filter(Nat)\nend FilterCases\nconst arrayFilterDefault: String := reprStr(Array.toList(Array.filter(FilterCases.greater(2), #[1, 2, 5, 2, 7, 7])))\nconst arrayFilterStart: String := reprStr(Array.toList(Array.filter(fun _ => true, #[1, 2, 5, 2, 7, 7], start := 3)))\nconst arrayFilterStop: String := reprStr(Array.toList(Array.filter(fun _ => true, #[1, 2, 5, 2, 7, 7], stop := 3)))\nconst arrayFilterNone: String := reprStr(Array.toList(Array.filter(fun _ => false, #[1, 2, 5])))\nconst arrayFilterEmpty: String := reprStr(Array.toList(Array.filter(fun _ => true, (#[] : Array Nat))))\nconst arrayFilterPartial: String := reprStr(Array.toList(FilterCases.partial(FilterCases.greater(2), #[1, 2, 5, 2, 7, 7], 0, 100)))\nconst arrayFilterHigh: Nat := (Array.getD(FilterCases.high, 0, FilterCases.High.mk(0))).value\nconst arrayFilterPersistent: String := { let source := #[1, 2, 5]\n let filtered := Array.filter(fun value => if (1 < value) { true } else { false }, source)\n reprStr(Array.toList(source)) ++ \"/\" ++ reprStr(Array.toList(Array.push(filtered, 9))) }\nfunction arrayFilterBounds(start: Nat, stop: Nat): String := FilterCases.rendered(start, stop)\ntheorem arrayFilterModel: Array.toList(Array.filter(fun _ => true, #[1, 2], start := 0, stop := 2)) = [1, 2] := by { rfl }\n"
+
+private def comparisonNotationFixture : String :=
+  "function comparisonNotation(a: Nat, b: Nat): String := reprStr([if (a < b) { true } else { false }, if (a <= b) { true } else { false }, if (a ≤ b) { true } else { false }, if (a > b) { true } else { false }, if (a >= b) { true } else { false }, if (a ≥ b) { true } else { false }, if (a ≠ b) { true } else { false }])\ntheorem comparisonNotationScope(a: Nat, b: Nat)(h: a < b): LT.lt(a, b) := by { exact h }\n"
+
 private def application : String :=
-  floatDisplayFixture ++ floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  comparisonNotationFixture ++ arrayFilterFixture ++ floatDisplayFixture ++ floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -1778,6 +1784,8 @@ private def emissionBoundary : IO Unit := do
 
 private def doBoundaries : IO Unit := do
   let cases : Array (String × String) := #[
+    ("const bad: Bool := if (1 < 2 < 3) { true } else { false }\n", "parse"),
+    ("const bad: Bool := if (1 < = 2) { true } else { false }\n", "parse"),
     ("universe u v\nfunction bad{A: Type u}{B: Type v}(xs: Option A, f: A -> B): Option B := do {\n  let x: A ← xs\n  return f(x)\n}\n", "elaborate"),
     ("const bad: Except String Nat := do { return 1; return 2 }\n", "parse"),
     ("const bad: Option Nat := do {\n  let n: Nat ← Except.ok(1)\n  return n\n}\n", "elaborate"),
@@ -1798,7 +1806,7 @@ private def doBoundaries : IO Unit := do
       unless error.phase == cases[i]!.snd do
         throw (IO.userError s!"do boundary {i}: {error.phase}: {error.message}")
     | .ok _ => throw (IO.userError s!"do boundary {i}: invalid source accepted")
-  IO.println "PSCV0_NATIVE_DO: PASS 8 do refusals and 1 opaque definitional-opacity refusal"
+  IO.println "PSCV0_NATIVE_DO: PASS 8 do refusals, 2 comparison syntax refusals and 1 opaque definitional-opacity refusal"
 
 -- Reuse the production graph planner and checked environment, rather than
 -- introducing a separate project interpreter or a large fixture suite.
@@ -1888,8 +1896,8 @@ private def projectBoundaries : IO Unit := do
         (actual.zip expected).all (fun (a, b) =>
           a.priority == b.priority && psExprAlphaEq a.value b.value) do
       throw (IO.userError "class-index lookup changed global instance order")
-  -- Distinct rigid heads partition safely. Same-head, different arguments
-  -- remain an explicit comparison workload; no unsafe structural-key shortcut.
+  -- Full structural keys partition both distinct heads and distinct rigid
+  -- arguments. Hash hits still require equality and checked answer replay.
   for width in [1, 8, 32] do
     for partitioned in [true, false] do
       let mut measuredEnv := environment
@@ -1908,12 +1916,24 @@ private def projectBoundaries : IO Unit := do
       let measured := psSynthInstanceWithTable measuredEnv measuredLocals
         psInstanceIndexEmpty psMetaEmpty 64 resultGoal
       unless measured.result.value.isSome && measured.table.visits == width + 1 &&
-          (!partitioned || measured.table.goalComparisons <= width) do
-        throw (IO.userError "instance head partitioning changed checked graph results")
+          measured.table.goalComparisons <= width do
+        throw (IO.userError "instance structural indexing changed results or repeated same-head comparisons")
       IO.println ("PSCV0_INSTANCE_LOOKUP_GROWTH: goals=" ++ toString width ++
         " partitioned=" ++ toString partitioned ++
         " comparisons=" ++ toString measured.table.goalComparisons ++
         " candidates=" ++ toString measured.table.candidateChecks)
+  -- Key construction must not execute a large primitive power merely to
+  -- organize goals. Candidate unification remains responsible for conversion.
+  let indexedPower := psLogicApply (.constE (psDecisionName "Nat.pow") [])
+    [.lit (.natural 2), .lit (.natural 1000000000)]
+  let canonicalPower := psInstanceCanonicalKey environment psLocalEmpty psMetaEmpty
+    256 indexedPower
+  unless psExprAlphaEq canonicalPower indexedPower do
+    throw (IO.userError "instance key construction executed primitive arithmetic")
+  let alphaLeft := PsExpr.lam (psRootName "x") (.constE psNatName []) (.bvar 0) .explicit
+  let alphaRight := PsExpr.lam (psRootName "y") (.constE psNatName []) (.bvar 0) .explicit
+  unless psInstanceExprHash alphaLeft == psInstanceExprHash alphaRight do
+    throw (IO.userError "alpha-equal instance keys have different hashes")
   let hiddenAlias := psStandardInhabitedType
     (.app (.constE (psRootName "Id") [.zero]) (.constE psNatName []))
   let hiddenSearch := psSynthInstanceWithTable environment (add psLocalEmpty "seed" a)
@@ -3577,7 +3597,24 @@ private def floatDisplayNativeOracle : IO Unit := do
       throw (IO.userError ("PSCV0_FLOAT_CAST_ORACLE: expected " ++ toString expected ++ " got " ++ toString observed))
   IO.println "PSCV0_FLOAT_F4_ORACLE: PASS fixed-six decimal display, Repr and cross-width contracts"
 
+private def arrayFilterNativeOracle : IO Unit := do
+  let values : Array Nat := #[1, 2, 5, 2, 7, 7]
+  let greater := fun (value : Nat) => decide (2 < value)
+  let pairs : List (List Nat × List Nat) := [
+    ((values.filter greater).toList, [5, 7, 7]),
+    ((values.filter (fun _ => true) (start := 3)).toList, [2, 7, 7]),
+    ((values.filter (fun _ => true) (stop := 3)).toList, [1, 2, 5]),
+    ((values.filter (fun _ => false)).toList, []),
+    (((#[] : Array Nat).filter greater).toList, []),
+    ((values.filter greater (start := 1) (stop := 5)).toList, [5, 7]),
+    ((values.filter greater (start := 5) (stop := 2)).toList, []),
+    ((values.filter greater (start := 1000000000000000000000) (stop := 1000000000000000000001)).toList, [])]
+  unless pairs.all (fun (actual, expected) => actual == expected) do
+    throw (IO.userError "PSCV0_ARRAY_FILTER_ORACLE: pinned slice/order mismatch")
+  IO.println "PSCV0_ARRAY_FILTER_ORACLE: PASS pinned bounded stable filtering"
+
 def main : IO Unit := do
+  arrayFilterNativeOracle
   platformWordCases
   floatDisplayNativeOracle
   floatConversionsNativeOracle

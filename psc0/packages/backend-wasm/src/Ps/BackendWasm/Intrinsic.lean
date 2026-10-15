@@ -47,7 +47,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .arrayEmptyWithCapacity => pure "array_empty" | .arraySize => pure "array_size"
     | .arrayPush => pure "array_push" | .arrayGet => pure "array_get" | .arrayGetD => pure "array_get_default"
     | .arraySet => pure "array_set" | .arraySetIfInBounds => pure "array_set_if_in_bounds"
-    | .arrayMap => pure "array_map" | .arrayFoldl => pure "array_fold"
+    | .arrayMap => pure "array_map" | .arrayFilter => pure "array_filter" | .arrayFoldl => pure "array_fold"
     | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe
     | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
     | .machineIntBinary .. | .machineIntCompare ..

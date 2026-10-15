@@ -78,6 +78,29 @@ def arrayRuntime : Except String (List RuntimeDefinition) := do
           c "__ps_array_map_loop" [fn, a, output, add index (k 1)]])),
     ← emit "map" [("fn", closureType), ("a", arrayType)] arrayType []
       (c "__ps_array_map_loop" [fn, values a, allocate (len (values a)), k 0]),
+    -- One predicate pass, then one exact-size copy. Only unpublished GC
+    -- buffers are mutated; retained source arrays and element order survive.
+    ← emit "filter_finish" [("a", valuesType), ("size", .i32)] arrayType [("output", valuesType)]
+      (seq [put "output" (allocate size),
+        o (.arrayCopy valuesName valuesName) [output, k 0, a, k 0, size], array output]),
+    ← emit "filter_loop" [("fn", closureType), ("a", valuesType), ("output", valuesType),
+        ("index", .i32), ("size", .i32), ("count", .i32)] arrayType [("element", valueType)]
+      (choice (some arrayType) (o .i32GeU [index, size])
+        (c "__ps_array_filter_finish" [output, g "count"])
+        (seq [put "element" (read a index),
+          choice none
+            (o (.structGet scalarBoxName 0)
+              [o (.refCast scalarBoxName) [invokeClosure fn [g "element"]]])
+            (seq [write output (g "count") (g "element"),
+              put "count" (add (g "count") (k 1))]) (seq []),
+          c "__ps_array_filter_loop" [fn, a, output, add index (k 1), size, g "count"]])),
+    ← emit "filter" [("fn", closureType), ("a", arrayType),
+        ("start", naturalType), ("stop", naturalType)] arrayType [("index", .i32), ("size", .i32)]
+      (seq [put "index" (c "__ps_array_clamp" [g "start", len (values a)]),
+        put "size" (c "__ps_array_clamp" [g "stop", len (values a)]),
+        choice (some arrayType) (o .i32GeU [index, size])
+          (array (o (.arrayNewFixed valuesName 0) []))
+          (c "__ps_array_filter_loop" [fn, values a, allocate (o .i32Sub [size, index]), index, size, k 0])]),
     ← emit "fold_loop" [("fn", closureType), ("value", valueType), ("a", valuesType),
         ("index", .i32), ("size", .i32)] valueType []
       (choice (some valueType) (o .i32GeU [index, size]) (g "value")

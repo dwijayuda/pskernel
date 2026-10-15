@@ -223,6 +223,7 @@ inductive PsVerifiedIrIntrinsic where
   | arraySet
   | arraySetIfInBounds
   | arrayMap
+  | arrayFilter
   | arrayFoldl
 
 structure PsVerifiedIrParameter where

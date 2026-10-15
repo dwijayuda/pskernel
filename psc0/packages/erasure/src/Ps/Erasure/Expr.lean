@@ -920,6 +920,11 @@ def psErasePrimitiveApplication
               view.args [0, 1] [2, 3] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (Option.some result)
+      else if psErasureBoolAnd (psStringEq text "Array.filter") (Nat.beq (psListLength view.args) 5) then
+        match psEraseTypedIntrinsic environment scope erase
+            PsVerifiedIrIntrinsic.arrayFilter view.args [0] [1, 2, 3, 4] with
+        | Except.error error => Except.error error
+        | Except.ok result => Except.ok (Option.some result)
       else if psErasureBoolAnd (psStringEq text "Array.foldl") (Nat.beq (psListLength view.args) 7) then
         match
             psEraseArrayFoldl environment scope erase view.args with
@@ -1851,7 +1856,7 @@ def psErasureSpecialEntry
   else if psListAny named
       ["Array.getInternal", "Array.getD", "Array.setIfInBounds", "Array.map"] then
     Option.some (PsErasureSpecialEntry.mk 4 true)
-  else if named "Array.set" then
+  else if named "Array.set" || named "Array.filter" then
     Option.some (PsErasureSpecialEntry.mk 5 true)
   else if named "Array.foldl" then
     Option.some (PsErasureSpecialEntry.mk 7 true)

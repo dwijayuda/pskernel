@@ -35,6 +35,20 @@ def selectedNotations : List ManifestNotation := [
     rightPrecedence := 51, nonAssociative := true },
   { token := "!=", kind := "booleanNotEqual", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
+  { token := "<", kind := "LT.lt", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "<=", kind := "LE.le", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "≤", kind := "LE.le", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := ">", kind := "GT.gt", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := ">=", kind := "GE.ge", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "≥", kind := "GE.ge", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "≠", kind := "Ne", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
   { token := "∧", kind := "And", precedence := 35,
     rightPrecedence := 35, nonAssociative := false },
   { token := "/\\", kind := "And", precedence := 35,
@@ -174,6 +188,12 @@ def selectedNotationAudit : Except String Unit := do
   if (selectedNotations.map (·.token)).eraseDups.length !=
       selectedNotations.length then
     throw "PSCV0-MANIFEST: duplicate selected notation"
+  let liveTokens := psPscv0InfixRegistry.map Prod.fst
+  let selectedTokens := selectedNotations.map (·.token)
+  if liveTokens.eraseDups.length != liveTokens.length ||
+      liveTokens.length != selectedTokens.length ||
+      !liveTokens.all selectedTokens.contains then
+    throw "PSCV0-MANIFEST: live notation registry is not exhaustively inventoried"
   for entry in selectedNotations do
     let some live := psPscv0InfixInfo entry.token
       | throw ("PSCV0-MANIFEST: notation missing: " ++ entry.token)

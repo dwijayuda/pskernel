@@ -2,6 +2,20 @@
 // The signed vectors are also computed independently by pinned native Lean
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
+  { name: "comparisonNotation", args: [1n, 2n], expected: "[true, true, true, false, false, false, true]" },
+  { name: "comparisonNotation", args: [2n, 2n], expected: "[false, true, true, false, true, true, false]" },
+  { name: "comparisonNotation", args: [3n, 2n], expected: "[false, false, false, true, true, true, true]" },
+  { name: "arrayFilterDefault", args: null, expected: "[5, 7, 7]" },
+  { name: "arrayFilterStart", args: null, expected: "[2, 7, 7]" },
+  { name: "arrayFilterStop", args: null, expected: "[1, 2, 5]" },
+  { name: "arrayFilterNone", args: null, expected: "[]" },
+  { name: "arrayFilterEmpty", args: null, expected: "[]" },
+  { name: "arrayFilterPartial", args: null, expected: "[5, 7, 7]" },
+  { name: "arrayFilterHigh", args: null, expected: 5n },
+  { name: "arrayFilterPersistent", args: null, expected: "[1, 2, 5]/[2, 5, 9]" },
+  { name: "arrayFilterBounds", args: [1n, 5n], expected: "[5, 7]" },
+  { name: "arrayFilterBounds", args: [5n, 2n], expected: "[]" },
+  { name: "arrayFilterBounds", args: [1000000000000000000000n, 1000000000000000000001n], expected: "[]" },
   { name: "f4Display64", args: [0n], expected: "0.000000" },
   { name: "f4Display64", args: [9223372036854775808n], expected: "-0.000000" },
   { name: "f4Display64", args: [4609434218613702656n], expected: "1.500000" },

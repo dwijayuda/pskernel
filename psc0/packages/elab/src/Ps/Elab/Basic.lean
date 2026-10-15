@@ -224,7 +224,9 @@ def psElabCoerce (result : PsElabTermResult) (classText : String)
     context.instances goal.context.metaContext 64 {} goal.term
   if search.table.resourceExceeded then throw .fuelExhausted
   let some dictionary := search.result.value | throw .typeMismatch
-  psElabApplyCore (psElabContextWithMeta context search.result.context)
+  let context := psElabRecordInfo (psElabContextWithMeta context search.result.context)
+    (.instanceSelection context.sourceSpan goal.term dictionary)
+  psElabApplyCore context
     (.constE (psNameAppendStr className "coe") [u, v.level])
     [result.type, output, dictionary, result.term]
 
@@ -261,7 +263,8 @@ def psElabSynthesizeInstance (context : PsElabContext) (target : PsExpr) :
   let fresh := psMetaFresh context.metaContext context.localContext target .synthetic
   let .mvar id := fresh.expr | throw .unresolvedMetavariable
   psElabSolveSynthetic {
-    context := psElabContextWithMeta context fresh.context,
+    context := psElabRecordInfo (psElabContextWithMeta context fresh.context)
+      (.instanceSelection context.sourceSpan target fresh.expr),
     term := fresh.expr, type := target } [.instanceGoal id]
 
 def psElabDecideProposition (result : PsElabTermResult) :
@@ -602,11 +605,13 @@ def psElabProjectionReference
             (PsElabError.unknownName (psNameAppendStr PsName.anonymous first))
   | Option.some selected => do
       let (context, baseTerm) ← psElabResolvedReference context selected.fst
-      if selected.snd.isEmpty then psElabResolvedTerm context baseTerm expected
-      else
-        let base ← psElabResolvedTerm context baseTerm none
-        let projected ← psElabProjectionChain context base selected.snd
-        psElabFinalizeExpected projected expected
+      let result ← if selected.snd.isEmpty then psElabResolvedTerm context baseTerm expected
+        else do
+          let base ← psElabResolvedTerm context baseTerm none
+          let projected ← psElabProjectionChain context base selected.snd
+          psElabFinalizeExpected projected expected
+      return { result with context := psElabRecordInfo result.context
+        (.reference sourceName selected.fst selected.snd result.term result.type) }
 
 def psElabNamedReference
     (context : PsElabContext)
@@ -662,7 +667,8 @@ def psElabNumericLiteral (context : PsElabContext) (family method : String)
   let dictionary := psMetaFresh goal.context.metaContext goal.context.localContext goal.term .synthetic
   let .mvar id := dictionary.expr | throw .implicitApplicationUnsupported
   let result : PsElabTermResult := {
-    context := psElabContextWithMeta goal.context dictionary.context
+    context := psElabRecordInfo (psElabContextWithMeta goal.context dictionary.context)
+      (.instanceSelection context.sourceSpan goal.term dictionary.expr)
     term := psExprApplyMany (.constE (psNameAppendStr (psRootName family) method) [level.level])
       (target.expr :: (indices ++ [dictionary.expr] ++ arguments))
     type := target.expr }

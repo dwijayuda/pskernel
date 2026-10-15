@@ -126,14 +126,14 @@ def psElabOperatorHasHeterogeneousDefault (context : PsElabContext)
   match psElabOperatorClass name with
   | none => false
   | some classSyntax =>
-    match psSyntaxNameToName classSyntax, (psExprAppView maximum).head with
+    match psSyntaxNameToName classSyntax, (psInferAppView maximum).head with
     | some className, .constE typeName _ =>
       let defaults := context.instances.defaults.filter fun entry =>
         entry.className.any (psNameEq className)
       defaults.length > 1 && defaults.any fun entry =>
-        let arguments := (psExprAppView (psElabOperatorPiBody entry.type)).args
+        let arguments := (psInferAppView (psElabOperatorPiBody entry.type)).args
         match arguments[if left then 1 else 0]? with
-        | some other => match (psExprAppView other).head with
+        | some other => match (psInferAppView other).head with
           | .constE otherName _ => psNameEq typeName otherName
           | _ => false
         | none => false

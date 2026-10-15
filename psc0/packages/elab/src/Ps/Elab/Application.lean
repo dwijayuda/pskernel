@@ -195,7 +195,10 @@ def psElabApplyOrderedWith {α : Type}
               domain .syntheticOpaque
             let .mvar id := fresh.expr | throw .implicitApplicationUnsupported
             let argument : PsElabTermResult := {
-              context := psElabContextWithMeta current.context fresh.context
+              context := psElabRecordInfo
+                (psElabContextWithMeta current.context fresh.context)
+                (.insertedArgument current.context.sourceSpan .defaultValue name
+                  current.term fresh.expr domain)
               term := fresh.expr, type := domain }
             return ← psElabApplyOrderedWith elaborate fuel
               (psElabApplyValue current argument body) positions names
@@ -208,7 +211,12 @@ def psElabApplyOrderedWith {α : Type}
           PsMetaVarKind.synthetic else PsMetaVarKind.natural
         let fresh := psMetaFresh current.context.metaContext current.context.localContext domain kind
         let next : PsElabTermResult := {
-          context := psElabContextWithMeta current.context fresh.context
+          context := psElabRecordInfo
+            (psElabContextWithMeta current.context fresh.context)
+            (.insertedArgument current.context.sourceSpan
+              (if psBinderIsInstanceImplicit binder then .instanceImplicit
+               else if psBinderIsStrictImplicit binder then .strictImplicit else .implicit)
+              name current.term fresh.expr domain)
           term := .app current.term fresh.expr
           type := psExprInstantiate1 body fresh.expr }
         let pending := if psBinderIsInstanceImplicit binder then

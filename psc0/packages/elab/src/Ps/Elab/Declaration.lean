@@ -6,6 +6,7 @@ import Ps.Elab.Data
 structure PsElabDeclarationResult where
   declaration : PsDeclaration
   metaContext : PsMetaContext
+  sourceInfo : PsElabSourceInfo
 
 structure PsElabModuleResult where
   environment : PsEnvironment
@@ -41,6 +42,7 @@ structure PsElabBatchOrigin where
   span : PsSourceSpan
   members : List PsElabMemberOrigin
   normalization : Option PsElabNormalizationOrigin
+  sourceInfo : List PsElabSourceInfo := []
 
 structure PsElabOriginError where
   error : PsElabError
@@ -69,6 +71,7 @@ structure PsElabOriginPhaseError where
 structure PsElabNormalizedDefinitionResult where
   worker : PsDeclaration
   publicDeclaration : PsDeclaration
+  sourceInfo : List PsElabSourceInfo
 
 def psElabOriginSource
     (source : PsSyntaxDeclaration) : Prod PsSyntaxName PsSourceSpan :=
@@ -91,8 +94,8 @@ def psElabBatchOriginAt
     (members : List PsElabMemberOrigin)
     (normalization : Option PsElabNormalizationOrigin) : PsElabBatchOrigin :=
   let sourceOrigin : Prod PsSyntaxName PsSourceSpan := psElabOriginSource source;
-  PsElabBatchOrigin.mk sourceIndex
-    (Prod.fst sourceOrigin) (Prod.snd sourceOrigin) members normalization
+  { sourceIndex, sourceName := sourceOrigin.fst, span := sourceOrigin.snd,
+    members, normalization }
 
 def psElabStableMemberRole (declaration : PsDeclaration) : PsElabOriginRole :=
   match declaration with
@@ -234,7 +237,8 @@ def psElabDeclarationParts
   let declaration := if isTheorem then
     PsDeclaration.theoremDecl name levels closed.snd closed.fst
     else PsDeclaration.definitionDecl name levels closed.snd closed.fst
-  return { declaration, metaContext := constraints }
+  return { declaration, metaContext := constraints,
+    sourceInfo := psElabFinishSourceInfo value.context name }
 
 def psElabPartialDeclaration (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
@@ -259,7 +263,8 @@ def psElabPartialDeclaration (environment : PsEnvironment)
     (psMetaInstantiate metaContext value.term) (psMetaInstantiate metaContext openType)
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
     throw .unresolvedMetavariable
-  return { declaration := .partialDecl name [] closed.snd closed.fst, metaContext }
+  return { declaration := .partialDecl name [] closed.snd closed.fst, metaContext,
+    sourceInfo := psElabFinishSourceInfo value.context name }
 
 def psElabDeclaration
     (environment : PsEnvironment)
@@ -357,7 +362,10 @@ def psElabNormalizedDefinitionWithPhase
                     let publicDeclaration : PsDeclaration := PsDeclaration.definitionDecl
                       normalized.publicName levelParams (Prod.snd closed) (Prod.fst closed);
                     Except.ok
-                      (PsElabNormalizedDefinitionResult.mk worker publicDeclaration)
+                      { worker, publicDeclaration,
+                        sourceInfo := [
+                          { workerResult.sourceInfo with owner := normalized.workerName },
+                          psElabFinishSourceInfo checked.context normalized.publicName] }
       | _ =>
           Except.error
             (PsElabOriginPhaseError.mk PsElabError.structuralRecursionInternal
@@ -365,8 +373,7 @@ def psElabNormalizedDefinitionWithPhase
 
 def psElabNormalizedDefinitionBatch
     (result : PsElabNormalizedDefinitionResult) : PsElabDeclarationBatchResult :=
-  PsElabDeclarationBatchResult.mk
-    (List.cons result.worker (List.cons result.publicDeclaration List.nil))
+  { declarations := [result.worker, result.publicDeclaration], sourceInfo := result.sourceInfo }
 
 def psElabNormalizedDefinition
     (environment : PsEnvironment) (sourceName : PsSyntaxName)
@@ -402,8 +409,7 @@ def psElabDeclarationBatchStable
       | Except.error error => Except.error error
       | Except.ok result =>
           Except.ok
-            (PsElabDeclarationBatchResult.mk
-              (List.cons result.declaration List.nil))
+            { declarations := [result.declaration], sourceInfo := [result.sourceInfo] }
 
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
@@ -418,7 +424,8 @@ def psElabDeclarationBatchWithOrigins
         psElabStableMemberOrigins result.declarations 0;
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
-          (psElabBatchOriginAt sourceIndex source members Option.none))
+          { (psElabBatchOriginAt sourceIndex source members Option.none) with
+            sourceInfo := result.sourceInfo })
   | Except.error error =>
       match error with
       | PsElabError.structuralRecursionInvariantArgument
@@ -457,8 +464,8 @@ def psElabDeclarationBatchWithOrigins
                           Except.ok
                             (PsElabDeclarationBatchWithOriginsResult.mk
                               (psElabNormalizedDefinitionBatch result)
-                              (psElabBatchOriginAt sourceIndex source members
-                                (Option.some normalized.origin)))
+                              { (psElabBatchOriginAt sourceIndex source members
+                                (Option.some normalized.origin)) with sourceInfo := result.sourceInfo })
           | _ =>
               Except.error
                 (psElabOriginErrorAt sourceIndex source

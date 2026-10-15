@@ -16,6 +16,12 @@ Research parent58b1f0c8767926512ce0de7b9e416707e7db7793: native [38810569497](ht
 
 Native38812863861 and replay38812863915 atffa1cab3 stopped in compilation: the new scanner used Lean's reserved `prefix` keyword as a parameter and the light-synthesis structure update had invalid layout. Corrected both native source syntax issues; semantic qualification is still pending.
 
+## Source retention checkpoint (profile71; qualification pending)
+
+Native38813171316/replay38813171392 at583ea213 stopped in compilation because Operator referenced psExprAppView outside its owning later layer. It now uses the equivalent existing psInferAppView in the inference layer, preserving the acyclic dependency graph.
+
+This checkpoint adds immutable source info receipts at shared elaboration owners: ordered binder groups, resolved references/projections, implicit/default insertions and dictionary selections. Local contexts and the final assignment context remain attached; immutable rollback and resumed-scope ownership are preserved. Declaration/constructor and batch/project origins retain them outside Core identity/admissions. No C5 emission. One compact fixture checks grouped binders, omitted defaults, resolved globals, constructor fields and a single scoped postponed projection. See docs/PSCV0_M2_SOURCE_INFO_2026-10-16.md. Compiler and complete source/kernel/runtime/performance evidence is pending.
+
 ## Current coherent implementation checkpoint (profile70; qualification pending)
 
 Research includes explicit32/64 target words with opaque logical platform width; Array.filter; structural alpha-normalized instance keys; strict UTF8 and shared GC boundary validation; constructive logic/order; conditional and Prop-to-Bool decisions on the shared synthetic queue. This checkpoint adds Lean Extra.lean-style typed operator trees, read-only maximal-type/coercion analysis, heterogeneous guards, Pow/shift protocols and Nat/Int runtime primitives across readable JS/TS/Rust/GC Wasm. It also makes deriving/tactic/effect surface audits consume actual dispatch tables.
@@ -30,7 +36,7 @@ Designs: docs/PSCV0_M2_OPERATOR_PROTOCOL_2026-10-16.md, PSCV0_M2_LIVE_SURFACE_20
 ## Remaining M2+A exit work
 
 1. Complete dependency/source/kernel/backend qualification of the coherent research changes; fix underlying capabilities without weakening fixtures, budgets or audits. Native asset export must use pinned Lean and strict admission.
-2. Retain ordered binder groups, resolved references, implicit/default/instance decisions and occurrence provenance in immutable source info receipts at their elaboration owners. A design/draft based on Lean InfoTree exists in the current chat, not yet committed; no C5 execution. Preserve final metavariable context and scope, rollback on failed branches, Core identity unchanged.
+2. Qualify the committed source info receipts and final-assignment/scope/rollback invariants, with the existing performance budget. No C5 execution.
 3. Finish comprehensive selected manifest and project provenance. Existing --audit-project-graph/project-source-graph.json already owns module/import evidence; inspect/reuse it. Audit proof extension/effect/assumption closure, state later-phase unavailable capabilities honestly.
 4. Compare actual M2+A exit criteria with exact evidence; integrate research into development preserving both parents, rerun exact integration CI, update roadmap and PR109. Do not declare completion before these gates.
 

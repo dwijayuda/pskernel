@@ -251,7 +251,7 @@ lean_lib PsMeta where
 lean_lib PsElab where
   srcDir := "packages/elab/src"
   roots := #[
-    `Ps.Elab.Context,
+    `Ps.Elab.Info, `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
     `Ps.Elab.Postponed,

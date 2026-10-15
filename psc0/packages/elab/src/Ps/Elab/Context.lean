@@ -3,6 +3,7 @@ import Ps.Environment.Instances
 import Ps.Environment.LocalContext
 import Ps.Meta.Synthetic
 import Ps.Syntax.Ast
+import Ps.Elab.Info
 
 structure PsElabStructuralRecursion where
   functionName : PsName
@@ -35,6 +36,7 @@ structure PsElabSavedScope where
   instances : PsInstanceIndex
   structuralRecursion : Option PsElabStructuralRecursion
   levelNames : List PsName
+  sourceSpan : Option PsSourceSpan := none
 
 inductive PsElabPendingWork where
   | core (scope : PsElabSavedScope) (constraint : PsSyntheticConstraint)
@@ -50,6 +52,9 @@ structure PsElabContext where
   levelNames : List PsName := []
   pending : List PsElabPendingWork := []
   postponing : Bool := false
+  sourceSpan : Option PsSourceSpan := none
+  collectInfo : Bool := true
+  infoRev : List PsElabInfoEntry := []
 
 def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
@@ -76,7 +81,7 @@ def psElabContextWithStructuralRecursion (context : PsElabContext)
 def psElabSaveScope (context : PsElabContext) : PsElabSavedScope :=
   { environment := context.environment, localContext := context.localContext,
     instances := context.instances, structuralRecursion := context.structuralRecursion,
-    levelNames := context.levelNames }
+    levelNames := context.levelNames, sourceSpan := context.sourceSpan }
 
 def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : PsElabContext :=
   { context with
@@ -85,7 +90,7 @@ def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : Ps
       nextId := max scope.localContext.nextId context.localContext.nextId }
     instances := scope.instances
     structuralRecursion := scope.structuralRecursion
-    levelNames := scope.levelNames }
+    levelNames := scope.levelNames, sourceSpan := scope.sourceSpan }
 
 -- Root fields keep their established call map in every nested body. Only the
 -- whole declaration match may create that map; a nested fold has another IH.
@@ -104,8 +109,19 @@ def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
       nextId := max outer.localContext.nextId inner.localContext.nextId
       declarations := outer.localContext.declarations }
     metaContext := inner.metaContext
-    pending := inner.pending }
+    pending := inner.pending
+    infoRev := inner.infoRev }
 
 def psElabContextWithEnvironment (context : PsElabContext)
     (environment : PsEnvironment) : PsElabContext :=
   { context with environment }
+
+-- Immutable context ownership gives failed speculation automatic rollback.
+-- Saved lexical scopes intentionally exclude the event stream and assignments.
+def psElabRecordInfo (context : PsElabContext) (info : PsElabInfo) : PsElabContext :=
+  if context.collectInfo then
+    { context with infoRev := { localContext := context.localContext, info } :: context.infoRev }
+  else context
+
+def psElabFinishSourceInfo (context : PsElabContext) (owner : PsName) : PsElabSourceInfo :=
+  { owner, metaContext := context.metaContext, entries := context.infoRev.reverse }

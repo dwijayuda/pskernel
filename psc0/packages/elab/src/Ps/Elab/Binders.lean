@@ -68,7 +68,11 @@ def psElabBindersWithExpected (elaborate : PsElaborator)
       | _ => do
         let annotation ← psElabType elaborate state.context sourceType
         pure (some annotation.type, { state with context := annotation.context })
+    let previous := state.bindersRev.length
     let state ← (psSyntaxBinderNames head).foldlM (psElabBinderName type head.kind) state
+    let ids := (state.bindersRev.take (state.bindersRev.length - previous)).reverse.map (·.id)
+    let state := { state with context := psElabRecordInfo state.context
+      (.binderGroup head sourceType ids) }
     psElabBindersWithExpected elaborate rest state
 
 def psElabTypedBindersAcc (elaborate : PsElaborator)

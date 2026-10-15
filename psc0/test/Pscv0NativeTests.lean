@@ -2693,6 +2693,56 @@ private def derivingBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
   IO.println "PSCV0_DERIVING_BOUNDARIES: PASS dictionaries, dependent runtime fields, recursion, indices, ill-typed defaults and missing required fields"
 
+private def sourceInfoBoundaries : IO Unit := do
+  let source :=
+    "function infoGroups{A B: Type}(x: A, y: B, fallback: B := y): B := fallback\n" ++
+    "const infoUse: Nat := infoGroups(true, 7)\n" ++
+    "structure InfoRecord where {\n left: Nat\n right: Nat\n}\n" ++
+    "function infoApply{A B: Type}(f: A -> B, x: A): B := f(x)\n" ++
+    "const infoProjection: Nat := infoApply(fun v => v.left, InfoRecord.mk(8, 9))\n"
+  let parsed ← get "source info parse" (psCompilerParsePscv0 source)
+  let elaborated ← get "source info elaboration"
+    ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed).mapError
+      psCompilerPscv0ElabError)
+  let receipts := elaborated.origins.flatMap (·.sourceInfo)
+  let entries := receipts.flatMap (·.entries)
+  unless entries.any (fun entry => match entry.info with
+      | .binderGroup head _ ids =>
+        (psSyntaxBinderNames head).map (·.segments) == [["A"], ["B"]] &&
+        ids.length == 2 && ids.eraseDups.length == 2
+      | _ => false) do
+    throw (IO.userError "ordered multi-name binder information missing")
+  unless entries.any (fun entry => match entry.info with
+      | .insertedArgument _ .defaultValue name _ _ _ => psNameEq name (psRootName "fallback")
+      | _ => false) &&
+      entries.any (fun entry => match entry.info with
+        | .insertedArgument _ .implicit _ _ _ _ => true
+        | _ => false) do
+    throw (IO.userError "implicit/default insertion information missing")
+  unless entries.any (fun entry => match entry.info with
+      | .reference _ (.global name) [] _ _ => psNameEq name (psRootName "infoGroups")
+      | _ => false) do
+    throw (IO.userError "resolved source reference missing")
+  let some constructor := receipts.find? (fun receipt =>
+      psNameToString receipt.owner == "InfoRecord.mk")
+    | throw (IO.userError "constructor information owner missing")
+  unless constructor.entries.any (fun entry => match entry.info with
+      | .binderGroup head _ ids => head.name.segments == ["left"] && ids.length == 1
+      | _ => false) do
+    throw (IO.userError "actual constructor field information missing")
+  let projections := entries.filter fun entry => match entry.info with
+    | .reference source _ ["left"] _ _ => source.segments == ["v", "left"]
+    | _ => false
+  unless projections.length == 1 do
+    throw (IO.userError "postponed projection occurrence missing or duplicated")
+  for receipt in receipts do
+    for entry in receipt.entries do
+      let finalInfo := psElabInfoInstantiate receipt.metaContext entry.info
+      unless (psElabInfoExpressions finalInfo).all
+          (psExprFVarsInContext entry.localContext) do
+        throw (IO.userError "source information escaped its saved local scope")
+  IO.println "PSCV0_M2_SOURCE_INFO: ordered binders, references, insertions, scoped resumption PASS"
+
 private def syntheticBoundaries : IO Unit := do
   let environment := psSelfHostProdPreludeEnvironment
   let nat := PsExpr.constE psNatName []
@@ -3711,6 +3761,7 @@ def main : IO Unit := do
   doBoundaries
   projectBoundaries
   derivingBoundaries
+  sourceInfoBoundaries
   syntheticBoundaries
   defaultInstanceBoundaries
   postponedBoundaries

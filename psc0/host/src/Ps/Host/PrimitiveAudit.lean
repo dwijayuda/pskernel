@@ -105,8 +105,10 @@ def primitiveAudit : IO Lean.Json := do
     ["ofNat", "ofNatLT", "ofBitVec", "toNat", "toBitVec", "toFin",
       "add", "sub", "mul", "div", "mod", "neg", "complement", "land", "lor", "xor", "shiftLeft", "shiftRight"].map (fun method => owner ++ "." ++ method)
   let floatModels := ["Float", "Float32"].flatMap fun owner =>
-    ["ofBits", "toBits", "ofModel", "toModel"].map (fun method => owner ++ "." ++ method)
-  let modelNames := floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
+    ["ofBits", "toBits", "ofModel", "toModel", "add", "sub", "mul", "div",
+      "neg", "abs", "beq", "lt", "le", "decLt", "decLe", "nan", "inf",
+      "isNaN", "isInf", "isFinite"].map (fun method => owner ++ "." ++ method)
+  let modelNames := ["instDecidableEqFloat", "instDecidableEqFloat32"] ++ floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
     "Nat.ble", "outOfBounds"]
   let mut models := []
   for name in modelNames do

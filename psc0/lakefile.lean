@@ -74,6 +74,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.StandardArithmetic,
     `Ps.Environment.StandardIntArithmeticData, `Ps.Environment.StandardIntArithmetic,
+    `Ps.Environment.StandardFloatOperationsData, `Ps.Environment.StandardFloatOperations,
     `Ps.Environment.StandardFloatConstructorsData, `Ps.Environment.StandardFloatConstructors,
     `Ps.Environment.StandardEquality,
     `Ps.Environment.StandardCollectionEquality,
@@ -201,7 +202,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
     `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Intrinsic,
-    `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.Word, `Ps.BackendWasm.Float, `Ps.BackendWasm.Type,
+    `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.LowerFloat, `Ps.BackendWasm.Word, `Ps.BackendWasm.Float, `Ps.BackendWasm.Type,
     `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,
     `Ps.BackendWasm.AbiMarshal, `Ps.BackendWasm.AbiComponent]

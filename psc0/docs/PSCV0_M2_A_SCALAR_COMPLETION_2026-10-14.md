@@ -1,5 +1,15 @@
 # M2+A scalar completion design — Lean 4.35.0
 
+## F2 coherent implementation staged; qualification pending — 15 October 2026
+
+The expanded native logical family passed at research `7393a31700c8aefe8843c4eb92476342786f45be`, [run38724434988](https://github.com/dwijayuda/pskernel/actions/runs/38724434988): **1,229 declarations /24 recursor rules /91,024 shared nodes /11,179,796 source bytes**, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. This includes native Float.decLt/decLe and DecidableEq at both widths. Only the two existing theorem cuts and approved propext/Quot.sound are used. Original upstream correspondence proofs still retain their recorded native-only assumption boundary.
+
+The staged source selects that exact checked logical asset behind a frozen pre-F2 environment, registers arithmetic/Neg/BEq/Inhabited and native order/Eq decisions through the existing class index, and keeps the proof closure out of runtime support. Shared typed IR owns unary/classification signatures alongside arithmetic/comparison. Canonical-bit equality reuses existing bit conversions and integer equality; IEEE equality remains a distinct operation. Model-level operations use the same typed boundary and ordinary proof-erased record representation.
+
+Readable JS/TS retain binary64 operations and explicit binary32 rounding. Rust uses safe native floating operations. Wasm emits native arithmetic/comparison and shared scalar descriptors for abs/neg; classification remains memory-free. F1 GC boxing and explicit ABI ownership are unchanged. **88 additional native-reference observations** cover rounding ties, subnormals, infinities, NaNs, signed zero, comparison/equality, partial/generic and Model calls. The full target corpus is intended to reach 843 observations, pending CI.
+
+Strict declaration/surface pins remain at the prior qualified values until the intentional expansion is independently measured and reviewed. Do not weaken those checks. Run full native/backend CI, byte-exact F2 regeneration and independent F1 proof replay before claiming runtime qualification. No pskernel-core, self-hosting/bootstrap or C5. Main F1 remains qualified at 262c5819c499256fcd2093746deae4ef3aa2012b. Update both handoffs at the next slice.
+
 ## F2 logical family checked; runtime pending — 15 October 2026
 
 Research commit `d4528f27e45917b5d63edd84b0feb15d5e812bf6` on `psc0/pscv0-v7-f2-operations-research` passed [logical closure replay 38722766782](https://github.com/dwijayuda/pskernel/actions/runs/38722766782). All 28 Float/Float32 arithmetic/comparison/classification roots plus the two existing constructive theorem roots passed: **1,169 new declarations, 24 recursor rules, 89,183 shared source nodes, 10,941,261 source bytes**. SHA-256 `711ef5ecd08df8442c986b6df2cc9135ea79b9842ec0100cf517b289488b9acf`. No new axioms, quotient primitives or definition replacements; only the approved propext/Quot.sound foundation.

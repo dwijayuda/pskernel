@@ -163,6 +163,17 @@ def psRustEmitIntrinsicFromPrinted
     (arguments : List String) :
     Except PsRustEmitError String :=
   match operation with
+  | .floatUnary _ op =>
+      match arguments with
+      | [value] => .ok (match op with
+          | .neg => "(-(" ++ value ++ "))"
+          | .abs => "(" ++ value ++ ").abs()")
+      | _ => .error .intrinsicArity
+  | .floatTest _ op =>
+      match arguments with
+      | [value] => .ok ("(" ++ value ++ ")." ++ (match op with
+          | .isNaN => "is_nan()" | .isInf => "is_infinite()" | .isFinite => "is_finite()"))
+      | _ => .error .intrinsicArity
   | .floatOfBits type =>
       match arguments with
       | [value] => .ok ((match type with | .float => "__ps_float64_of_bits" | .float32 => "__ps_float32_of_bits") ++ "(" ++ value ++ ")")

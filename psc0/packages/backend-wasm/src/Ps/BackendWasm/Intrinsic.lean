@@ -1,3 +1,4 @@
+import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.Array
 import Ps.BackendWasm.Word
 import Ps.BackendWasm.Float
@@ -23,6 +24,9 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .floatOfBits .float32 => pure "float32_of_bits"
     | .floatToBits .float => pure "float64_to_bits"
     | .floatToBits .float32 => pure "float32_to_bits"
+    | .floatTest type op =>
+      pure ((match type with | .float => "float64" | .float32 => "float32") ++
+        (match op with | .isNaN => "_is_nan" | .isInf => "_is_inf" | .isFinite => "_is_finite"))
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
     | .hashMix => pure "hash_mix" | .stringHash => pure "string_hash"
     | .natPow => pure "nat_pow"
@@ -45,7 +49,8 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .arrayMap => pure "array_map" | .arrayFoldl => pure "array_fold"
     | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe
     | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
-    | .machineIntBinary .. | .machineIntCompare .. => pure ""
+    | .machineIntBinary .. | .machineIntCompare ..
+    | .floatBinary .. | .floatCompare .. | .floatUnary .. => pure ""
     | _ => throw "PSCV0-WASM-CAPABILITY: scalar intrinsic outside the checked runtime profile"
   let instructions := if runtime.isEmpty then match op with
     | .unsignedOfNat type =>
@@ -62,6 +67,11 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
       | _ => []
     | .unsignedToNat type =>
       [.call (match type with | .uint64 => "__ps_nat_from_u64" | _ => "__ps_nat_from_u32")]
+    | .floatBinary type op => psWasmLowerFloatBinary type op
+    | .floatCompare type op => psWasmLowerFloatCompare type op
+    | .floatUnary type op => [.word (match type, op with
+        | .float, .neg => .f64Neg | .float, .abs => .f64Abs
+        | .float32, .neg => .f32Neg | .float32, .abs => .f32Abs)]
     | .machineIntBinary type op => psWasmLowerMachineIntegerBinary ⟨.wasm32⟩ type op
     | .machineIntCompare type op => psWasmLowerMachineIntegerCompare ⟨.wasm32⟩ type op
     | .boolNot => [.i32Const 0, .i32Eq]

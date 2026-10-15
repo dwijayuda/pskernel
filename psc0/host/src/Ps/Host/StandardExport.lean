@@ -780,7 +780,7 @@ def exportFloatConstructorsCandidate (output : System.FilePath) : IO Unit := do
 -- already checked constructive theorem proofs, and only outside the selected
 -- cut. A new assumption or incompatible proof dependency remains a hard error.
 def exportFloatOperationsCandidate (output : System.FilePath) : IO Unit := do
-  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let selected := psSelfHostProdPreFloatOperationsPreludeEnvironment.declarations
   let names := selected.map (fun d => PsKernelLean.toLeanName (psDeclarationName d))
   let owners := ["Float", "Float32"]
   let methods := ["add", "sub", "mul", "div", "neg", "abs", "beq", "lt", "le",
@@ -793,7 +793,7 @@ def exportFloatOperationsCandidate (output : System.FilePath) : IO Unit := do
   exportStandardCore {
     roots := operations ++ [`Float.decLt, `Float.decLe, `instDecidableEqFloat,
       `Float32.decLt, `Float32.decLe, `instDecidableEqFloat32] ++ cuts.map (·.fst)
-    boundary := selected.map psDeclarationName
+    boundary := psStandardFloatOperationsBoundary
     baseDeclarations := selected
     nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]
     checkedTheoremRenames := cuts

@@ -1,7 +1,7 @@
 name: PSC0 v7 native Lean development (Linux)
 on:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
+    branches: [psc0/pscv0-v7-f2-operations-research]
     paths:
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
@@ -183,6 +183,14 @@ jobs:
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
           lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-constructors-candidate ../dist/pscv0-native/StandardFloatConstructorsData.lean | tee ../dist/pscv0-native/float-constructors.log | grep -v '^PSCV0_STANDARD_SOURCE '
           cmp ../dist/pscv0-native/StandardFloatConstructorsData.lean ../packages/environment/src/Ps/Environment/StandardFloatConstructorsData.lean
+      - name: Regenerate checked Float operations and decisions
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-operations-candidate ../dist/pscv0-native/FloatOperationsCandidate.lean > ../dist/pscv0-native/float-operations.log
+          grep -v '^PSCV0_STANDARD_SOURCE ' ../dist/pscv0-native/float-operations.log
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatOperationsData.lean ../dist/pscv0-native/FloatOperationsCandidate.lean
+          sha256sum ../dist/pscv0-native/FloatOperationsCandidate.lean
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

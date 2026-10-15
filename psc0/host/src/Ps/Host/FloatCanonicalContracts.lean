@@ -831,6 +831,8 @@ def contractRoots : List Lean.Name :=
    ``canonicalPacked_idempotent, ``canonicalPacked_fixed_iff_valid,
    ``canonicalPacked_nan, ``canonicalPacked_infinityBits,
    ``canonicalPacked_finiteExponent,
+   ``canonicalMask64, ``canonicalMask32,
+   ``packedNaN64_eq_constant, ``packedNaN32_eq_constant,
    ``toBits_fromBits64, ``toBits_fromBits32,
    ``eq_of_toBits_eq64, ``eq_of_toBits_eq32,
    ``fromBits64_toBits, ``fromBits32_toBits,

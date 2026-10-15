@@ -3,7 +3,7 @@ name: PSCV0 F1 canonical-model replay (research only)
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/research-float-canonical-carriers-v1]
     paths:
       - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
       - 'psc0/host/src/Ps/Host/FloatCanonicalContracts.lean'

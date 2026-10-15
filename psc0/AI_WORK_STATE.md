@@ -1,5 +1,13 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — checked Int arithmetic family QUALIFIED
+
+Exact qualified source: `e322eff798a96db14b5deed24824ccf3c2fcc783`. [Native Linux CI 38706796031](https://github.com/dwijayuda/pskernel/actions/runs/38706796031) and [independent portable Float replay 38706795768](https://github.com/dwijayuda/pskernel/actions/runs/38706795768) both **passed** at this SHA. All 28 native job steps passed, including exact regeneration, 699 shared observations on each JS/TS/Rust target, GC Wasm/component execution and repeated Wasmtime calls.
+
+Selected Standard: **1,856 declarations /25 classes /226 instances**; FNV `fnv1a64:17912930455396537674`, declaration SHA `sha256:a0f90d4ba911bd9be249bd72f8f0443e582eea41f21a56d192f27efb6b24ff44`, surface SHA `sha256:6c4c0803cb69b893926325dccd19ca9930425c2a051e8fdd1770bbc3c2d71b6c`. The exact 28-declaration /9-root asset provides native checked Int.add/neg/sub/mul definitions and original symbolic laws, replacing four computational axioms with no new assumptions or theorem substitutions. Fast runtime overrides are unchanged and explicitly audited.
+
+**Next causal blockers, isolated research only:** expanded four Float mask bridges at `cee61377f12fe465238ca5b474422e43575a3761`, [38706081222](https://github.com/dwijayuda/pskernel/actions/runs/38706081222), were refused. The first genuine mismatch is monomorphic selected `List.get!Internal` versus native universe-polymorphic use. Later timeout cascades require per-independent-admission heartbeat isolation already used by source admission. Investigate and strengthen the whole List indexing family and host audit scope; keep 2,000,000/20,000 limits, official kernel admission, and failed dependencies blocked. Do not select the 922-declaration expanded Float candidate or claim executable Float/M2+A completion. Update both handoffs at the next slice.
+
 ## 15 October — measured surface pin, complete qualification pending
 
 Native [38706356401](https://github.com/dwijayuda/pskernel/actions/runs/38706356401) at `8d50fdab04fea2825064220bf9842820ab03554e` passed the reviewed declaration FNV/SHA pins and byte-for-byte arithmetic regeneration, then correctly refused the separate surface manifest pin. Its independently reported new value is **sha256:6c4c0803cb69b893926325dccd19ca9930425c2a051e8fdd1770bbc3c2d71b6c**, now pinned exactly. Independent Float replay [38706356864](https://github.com/dwijayuda/pskernel/actions/runs/38706356864) passed.

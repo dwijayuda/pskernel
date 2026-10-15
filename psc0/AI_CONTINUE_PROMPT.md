@@ -1,34 +1,18 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
-## 15 October — measured surface pin, complete qualification pending
+## 15 October — checked Int arithmetic family QUALIFIED
 
-Native [38706356401](https://github.com/dwijayuda/pskernel/actions/runs/38706356401) at `8d50fdab04fea2825064220bf9842820ab03554e` passed the reviewed declaration FNV/SHA pins and byte-for-byte arithmetic regeneration, then correctly refused the separate surface manifest pin. Its independently reported new value is **sha256:6c4c0803cb69b893926325dccd19ca9930425c2a051e8fdd1770bbc3c2d71b6c**, now pinned exactly. Independent Float replay [38706356864](https://github.com/dwijayuda/pskernel/actions/runs/38706356864) passed.
+Exact qualified source: `e322eff798a96db14b5deed24824ccf3c2fcc783`. [Native Linux CI 38706796031](https://github.com/dwijayuda/pskernel/actions/runs/38706796031) and [independent portable Float replay 38706795768](https://github.com/dwijayuda/pskernel/actions/runs/38706795768) both **passed** at this SHA. All 28 native job steps passed, including exact regeneration, 699 shared observations on each JS/TS/Rust target, GC Wasm/component execution and repeated Wasmtime calls.
 
-The older a1bc8... value was the **surface manifest** digest, not the declaration SHA-256. Future drift failures now report all three candidate fingerprints in the first refused audit, avoiding sequential authoring runs; acceptance still fails and no emission is authorized. This is diagnostic reporting only, not automatic repinning or relaxed validation. Complete native/backend qualification of this commit remains required. M2+A remains incomplete.
+Selected Standard: **1,856 declarations /25 classes /226 instances**; FNV `fnv1a64:17912930455396537674`, declaration SHA `sha256:a0f90d4ba911bd9be249bd72f8f0443e582eea41f21a56d192f27efb6b24ff44`, surface SHA `sha256:6c4c0803cb69b893926325dccd19ca9930425c2a051e8fdd1770bbc3c2d71b6c`. The exact 28-declaration /9-root asset provides native checked Int.add/neg/sub/mul definitions and original symbolic laws, replacing four computational axioms with no new assumptions or theorem substitutions. Fast runtime overrides are unchanged and explicitly audited.
 
-## 15 October — Int arithmetic asset reproduced; strict hashes measured
-
-Integration `5cffe9280f2f2bed07eb1f1a230eb1e924160bdd` compiled and regenerated the 28-declaration Int asset **byte-for-byte** in [native CI 38705958851](https://github.com/dwijayuda/pskernel/actions/runs/38705958851). The existing strict registry guard correctly refused the previous snapshot and independently measured **fnv1a64:17912930455396537674** and **sha256:a0f90d4ba911bd9be249bd72f8f0443e582eea41f21a56d192f27efb6b24ff44**. Both values are now pinned unchanged; no check is relaxed. The separate compact Float kernel replay [38705958724](https://github.com/dwijayuda/pskernel/actions/runs/38705958724) passed at that same integration SHA.
-
-This snapshot update still requires complete native/backend and independent Float qualification at its own commit. The expanded mask bridge is isolated on `psc0/research-float-mask-int-model-v1`, commit `cee61377f12fe465238ca5b474422e43575a3761`, [CI 38706081222](https://github.com/dwijayuda/pskernel/actions/runs/38706081222), pending at this checkpoint. No executable Float, new assumption or M2+A completion is claimed.
-
-## 15 October — coherent Int logical arithmetic integration candidate
-
-Baseline: `bc613bc47f63e1fd3a9f1cb714317da46d78f12f`, following qualified `7742b4cd9599af315da4a1af1ba5c8f97a6ac290` (native [38701305472](https://github.com/dwijayuda/pskernel/actions/runs/38701305472), Float replay [38701305530](https://github.com/dwijayuda/pskernel/actions/runs/38701305530)). Actual baseline Standard: **1,832 declarations /25 classes /226 instances**, FNV `fnv1a64:8516648619442707737`, SHA-256 `sha256:606ab4df1a8517d7e3323d49ee4050cadc62612e433c541fd322f44e0b626f05`. The earlier 1bc8... SHA below was a documentation error; the source and successful exact-commit CI agree on 606ab4.... Existing 699 JS/TS/Rust observations and Wasm/Wasmtime passed.
-
-Research `ab031712d4cf75c4860bb53ae76ca753d7b61b67`, [38705122100](https://github.com/dwijayuda/pskernel/actions/runs/38705122100), independently checked **28 declarations /9 roots /1 recursor rule**, replacing exactly Int.add/neg/sub/mul computational axioms. The actual native add_zero, neg_neg, add_neg_eq_sub, natCast_add and natCast_mul proofs replay without theorem cuts or new axioms; assumptions remain exactly propext/Quot.sound. This fixes the missing logical definitions behind the earlier Int proof refusal. Native Float constructors and all Float runtime features remain separate.
-
-Integrated candidate: exact checked asset, frozen pre-arithmetic export boundary, recorded native reducibility, required byte-for-byte regeneration, and explicit checked-runtime-model audit entries. Fast Int intrinsics remain the executable implementation; proof dependencies are not runtime support. The strict old FNV/SHA pins are intentionally retained until independent candidate measurements; do not infer new fingerprints. **Main integration is pending complete native/backend and independent Float qualification at the same SHA.**
-
-Pinned Lean sources studied: Init/Data/Int/Basic.lean and Lemmas.lean; tests/elab/intNegSucc.lean and test_extern_int.lean. Source references/design are in the existing scalar completion document. No pskernel-core, self-hosting, C5, unchecked proofs or trust expansion. M2+A remains incomplete.
-
+**Next causal blockers, isolated research only:** expanded four Float mask bridges at `cee61377f12fe465238ca5b474422e43575a3761`, [38706081222](https://github.com/dwijayuda/pskernel/actions/runs/38706081222), were refused. The first genuine mismatch is monomorphic selected `List.get!Internal` versus native universe-polymorphic use. Later timeout cascades require per-independent-admission heartbeat isolation already used by source admission. Investigate and strengthen the whole List indexing family and host audit scope; keep 2,000,000/20,000 limits, official kernel admission, and failed dependencies blocked. Do not select the 922-declaration expanded Float candidate or claim executable Float/M2+A completion. Update both handoffs at the next slice.
 
 ## Working contract
 
 GitHub canonical: dwijayuda/pskernel, branch psc0/pscv0-v7-native-lean-v1,
 draft PR109. Inspect actual HEAD and exact-commit CI before writes; preserve
-history using non-force expected-HEAD updates. The entry above describes an
-integration candidate, not acceptance. Historical audit details remain in
+history using non-force expected-HEAD updates. The entry above records a qualified Int slice, not M2+A completion. Historical audit details remain in
 AI_WORK_STATE.md; use its newest entries and live evidence.
 
 Native portable .lean, pinned Lean 4.35.0 at
@@ -41,11 +25,9 @@ Classical.choice-dependent native research is not portable proof evidence.
 
 ## Next critical path
 
-1. Qualify the current Int arithmetic integration. Inspect native and Float
-   replay results. Pin only independently measured strict Standard hashes;
-   require byte-for-byte asset regeneration, original kernel admission,
-   existing 699 runtime observations per JS/TS/Rust and Wasm/Wasmtime gates.
-   Fix general causes, never weaken acceptance or substitute axioms.
+1. Complete universe-polymorphic List indexing and fresh heartbeat scope for
+   independent host audit admissions. Study pinned Lean sources/tests, inspect
+   the affected family, validate complete changes; keep kernel limits unchanged.
 2. Re-evaluate expanded compact Float mask/field proof closure with the actual
    checked Int definitions. The existing 26-root /100-declaration Float
    candidate already passed and is integrated; do not repeat its implementation.

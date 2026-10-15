@@ -154,8 +154,9 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Independently measured by strict CI38742459724 refusal; no roster expansion.
 -- F3: OfScientific class, two scientific/two numeral dictionaries, default501.
 -- Independently measured at both strict boundaries in native38781449363.
+-- F4 display registrations independently measured at native38789249978.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:ade666bf0e47f4f4c93079ad3876ccf298e0f95bab3732ee24d33c66778f621a"
+  "sha256:0018690e17bb2f61ee2444de07fb7b4435aaa146470bd87fb6cab907741097ee"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

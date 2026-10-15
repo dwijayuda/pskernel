@@ -364,6 +364,20 @@ def psKernelCheckerContextFreshName
     base
     context.localContext.nextIndex
 
+/-- The two fresh-variable producers use different terminal name
+    constructors: a session-local FVar is `.num`, whereas a checker-internal
+    binder FVar is `.str`. Thus equality of the user-provided binder names or
+    independent counters cannot alias local typing/cached inference entries.
+    This is an exact syntactic non-alias theorem, not a DefEq assumption. -/
+theorem psKernelCheckerFreshNamespacesDisjoint
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (localBase checkerBase : PsKernelName) :
+    psKernelCheckerContextFreshName context localBase ≠
+      (psKernelCheckerStateFreshName state checkerBase).fst := by
+  intro h
+  cases h
+
 def psKernelCheckerContextWithLocal
     (context : PsKernelCheckerContext)
     (userName : PsKernelName)

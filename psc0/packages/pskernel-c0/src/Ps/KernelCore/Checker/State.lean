@@ -132,10 +132,16 @@ def psKernelCheckerStateFreshName
     (state : PsKernelCheckerState)
     (base : PsKernelName) :
     Prod PsKernelName PsKernelCheckerState :=
+  -- Checked inference opens temporary binders from the checker state's
+  -- independent counter. They must NEVER alias session/local-context FVars,
+  -- whose names end in the `.num` constructor. A separate terminal `.str`
+  -- namespace is structurally disjoint for every source binder name/counter.
+  -- Caches compare exact FVar names, so this identity separation is essential
+  -- for sound dependent application checking across nested binder sessions.
   let name :=
-    PsKernelName.num
-      base
-      state.nextFresh;
+    PsKernelName.str
+      (PsKernelName.num base state.nextFresh)
+      "_c0_checked_binder";
   Prod.mk
     name
     {

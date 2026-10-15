@@ -1006,6 +1006,86 @@ def c0ExportDiagnosticTheoremMismatch
                   | .error reason =>
                       IO.println ("C0_REAL_THEOREM_FIRST_FALSE=" ++ reason)
 
+/-- Label source checker substeps *after* a rejected inductive bundle.
+    This uses the existing authoritative checking helpers, on a disposable
+    diagnostic environment, without admitting any proof or influencing the
+    original declaration outcome. In particular, an exported recursor is
+    never imported as an axiom to explain a rejection. -/
+def c0ExportStage {α : Type} (stage : String) :
+    Except String α → Except String α
+  | .ok result => .ok result
+  | .error reason => .error (stage ++ ": " ++ reason)
+
+def c0ExportDiagnoseOrdinaryInductiveStages
+    (env : PsKernelEnvironment)
+    (decl : PsKernelSimpleInductiveDecl)
+    (fuel : Nat) : Except String String := do
+  let safety := if decl.isUnsafe then
+    PsKernelDefinitionSafety.unsafeDef
+  else
+    PsKernelDefinitionSafety.safe
+  let initial := psKernelMkCheckerSession env
+    decl.levelParams safety 4096 psKernelLeanNatMaxSizeDefault
+  let header ← c0ExportStage "header type"
+    (psKernelSessionCheck fuel initial decl.type)
+  let headerSort ← c0ExportStage "header sort"
+    (psKernelSessionEnsureSort fuel header.2 header.1)
+  let params ← c0ExportStage "open uniform parameters"
+    (psKernelOpenSimpleHeaderParams fuel headerSort.2 decl.type decl.numParams)
+  let indices ← c0ExportStage "open indices"
+    (psKernelOpenSimpleHeaderIndices fuel params.session params.result)
+  match indices.result with
+  | .sort resultLevel =>
+      let levels := psKernelLevelParamsToLevels decl.levelParams
+      let numIndices := psKernelOpenBinderListLength indices.binders
+      let initialInfo : PsKernelInductiveInfo :=
+        { base := { name := decl.name, levelParams := decl.levelParams,
+                     type := decl.type }
+          numParams := decl.numParams
+          numIndices := numIndices
+          all := [decl.name]
+          ctors := psKernelSimpleCtorNames decl.ctors
+          numNested := 0
+          isRec := false
+          isReflexive := false
+          isUnsafe := decl.isUnsafe }
+      let work0 := psKernelEnvironmentAddUnchecked env (.inductInfo initialInfo)
+      let constructors ← c0ExportStage "checked constructors"
+        (psKernelAddSimpleConstructorsWithFuel (fuel + 1)
+          decl safety resultLevel levels params.binders numIndices
+          params.session work0 0 decl.ctors)
+      let shapes := constructors.shapes
+      let finalInfo : PsKernelInductiveInfo :=
+        { initialInfo with
+          isRec := psKernelSimpleHasRecursiveFields shapes
+          isReflexive := psKernelSimpleHasReflexiveFields shapes }
+      let work1 := psKernelEnvironmentReplaceUnchecked
+        constructors.environment (.inductInfo finalInfo)
+      let elimSession := psKernelSessionWithEnvironment params.session work1
+      let _ ← c0ExportStage "checked elimination level"
+        (psKernelSimpleElimOnlyAtZero
+          fuel elimSession params.binders resultLevel decl.ctors)
+      return "header, constructors and elimination accepted; error in generated recursor/rules"
+  | _ => throw "header opened to a nonsort result"
+
+/-- Unlike the normal source admission, this only runs after an authoritative
+    rejecting verdict. It cannot turn that verdict into acceptance. -/
+def c0ExportDiagnosticInductiveMismatch
+    (env : PsKernelEnvironment)
+    (group : C0ExportInductiveGroup)
+    (fuel : Nat) : IO Unit := do
+  match group.source with
+  | .ordinary decl =>
+      match c0ExportDiagnoseOrdinaryInductiveStages env decl fuel with
+      | .ok stage =>
+          IO.println ("C0_REAL_INDUCTIVE_STAGE= " ++ stage)
+      | .error stage =>
+          IO.println ("C0_REAL_INDUCTIVE_STAGE_FAILURE= " ++ stage)
+  | .mutual _ =>
+      IO.println "C0_REAL_INDUCTIVE_STAGE=mutual; requires mutual diagnostic"
+  | .nested _ =>
+      IO.println "C0_REAL_INDUCTIVE_STAGE=nested; requires nested diagnostic"
+
 /-- Result and one-based physical NDJSON record count, including a
     failed record. This is a diagnostic, never a proof receipt. -/
 def c0ExportVerdictFromFileTrace
@@ -1072,6 +1152,8 @@ def c0ExportVerdictFromFileTrace
                   match declaration with
                   | .theoremDecl info =>
                       c0ExportDiagnosticTheoremMismatch env info fuel
+                  | .inductiveGroup group =>
+                      c0ExportDiagnosticInductiveMismatch env group fuel
                   | _ => pure ()
               | .declinedUnsupported message =>
                   IO.println ("C0_REAL_EXPORT_DECLINED_REASON=" ++ message)

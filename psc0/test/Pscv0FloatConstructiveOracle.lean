@@ -70,6 +70,24 @@ run_cmd do
   (2147483648 : UInt32)
 #guard (PsV7Native.FloatCanonical.fromBits32 1).toBits == (1 : UInt32)
 
+-- Research-only transitive source-axiom trace, preceding the strict refusal.
+-- Never use this diagnostic to authorize or conceal any assumption.
+run_cmd do
+  for name in
+      [``BitVec.extractLsb'_append_extractLsb',
+       ``BitVec.extractLsb'_append_extractLsb'_eq_extractLsb',
+       ``BitVec.and_append, ``BitVec.append_left_inj,
+       ``BitVec.append_right_inj, ``BitVec.and_zero,
+       ``BitVec.and_allOnes,
+       ``PsV7Native.FloatCanonical.maskedHigh_iff,
+       ``PsV7Native.FloatCanonical.maskedLow_iff,
+       ``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
+       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary32FractionMask_iff] do
+    for assumption in ← Lean.collectAxioms name do
+      Lean.logInfo m!"PSCV0-FLOAT-AXIOM-PATH {name}: {assumption}"
+
 run_cmd do
   -- Audit exactly the same roots that the independent exporter replays.
   -- Reject every unapproved axiom, not just two familiar forbidden names.

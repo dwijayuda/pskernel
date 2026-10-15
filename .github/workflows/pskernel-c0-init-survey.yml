@@ -19,7 +19,7 @@ permissions:
 jobs:
   init-export-survey:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 105
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
@@ -400,45 +400,29 @@ jobs:
           ) | tee "$RUNNER_TEMP/next-c0.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=150000 fuel=4096" "$RUNNER_TEMP/next-c0.txt"
           echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=150000"
-      - name: Expand exact real Init acceptance to 4000000 source records
+      # The full 4M real-prefix gate passed at 21ab746 (CI 38734916071):
+      # 4,000,000 records / 32,019 declarations, fuel 4096. Do not
+      # requalify this same costly prefix instead of advancing to full Init.
+      # The prior step freshly checked ALL pinned 6,452,982 source records
+      # with Lean's official kernel, after exact byte count and SHA checks.
+      - name: Require complete exact-byte Lean Init acceptance by C0
         shell: bash
         run: |
           set -euo pipefail
-          head -n 4000000 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-next-4000000.ndjson"
-          test "$(wc -l < "$RUNNER_TEMP/Init-next-4000000.ndjson")" -eq 4000000
-          (cd "$RUNNER_TEMP/lean4export" &&
-            lake env leanchecker --from-export "$RUNNER_TEMP/Init-next-4000000.ndjson") > "$RUNNER_TEMP/next-4000000-official.txt" 2>&1
-          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/next-4000000-official.txt"
-          echo "C0_NEXT_INIT_OFFICIAL verdict=accepted records=4000000"
+          test "$(stat -c%s "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 345690182
+          test "$(wc -l < "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 6452982
+          echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
+          # An actual full-corpus source-checker verdict is mandatory.
+          # A timeout/resourceExhausted/unsupported/invalid rejection is
+          # NOT a success, and must leave the first failing record in logs.
           (
             cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
-            /usr/bin/time -v -o "$RUNNER_TEMP/next-4000000-c0-resources.txt" \
-               timeout 1800s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-next-4000000.ndjson" 4096
-          ) | tee "$RUNNER_TEMP/next-4000000-c0.txt"
-          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=4000000 fuel=4096" "$RUNNER_TEMP/next-4000000-c0.txt"
-          echo "C0_REAL_INIT_PREFIX_VERIFIED accepted_records=4000000"
-          echo "C0_REAL_INIT_RESOURCE_PROFILE records=4000000"
-          cat "$RUNNER_TEMP/next-4000000-c0-resources.txt"
-      # Not an acceptance gate: the full-corpus diagnostic is expensive,
-      # and repeating an inconclusive probe on every source change
-      # delays validated-library and semantic progress. Its explicit
-      # workflow_dispatch path remains available for deeper profiling.
-      - name: Probe full official Init with bounded compiled C0 progress
-        if: github.event_name == 'workflow_dispatch'
-        shell: bash
-        run: |
-          set -euo pipefail
-          # This is a diagnostic probe, not a corpus acceptance gate.
-          # Preserve streamed record/declaration counts if the entire
-          # 6.45M-record corpus exceeds this host's budget.
-          if (cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" &&
-                timeout 900s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-4.35.0.ndjson" 4096) > "$RUNNER_TEMP/c0-full-init-native.txt" 2>&1; then
-            cat "$RUNNER_TEMP/c0-full-init-native.txt"
-            grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/c0-full-init-native.txt"
-          else
-            echo "C0_REAL_INIT_FULL_NATIVE verdict=inconclusive_host_or_timeout"
-            tail -n 80 "$RUNNER_TEMP/c0-full-init-native.txt" || true
-          fi
+            /usr/bin/time -v -o "$RUNNER_TEMP/c0-full-init-resources.txt" \
+              timeout 5400s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/Init-4.35.0.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/c0-full-init-native.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=6452982 fuel=4096" "$RUNNER_TEMP/c0-full-init-native.txt"
+          echo "C0_REAL_INIT_FULL_VERIFIED accepted_records=6452982 fuel=4096"
+          cat "$RUNNER_TEMP/c0-full-init-resources.txt"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -459,10 +443,7 @@ jobs:
             ${{ runner.temp }}/Init-next-boundary.ndjson
             ${{ runner.temp }}/next-official.txt
             ${{ runner.temp }}/next-c0.txt
-            ${{ runner.temp }}/Init-next-4000000.ndjson
-            ${{ runner.temp }}/next-4000000-official.txt
-            ${{ runner.temp }}/next-4000000-c0.txt
-            ${{ runner.temp }}/next-4000000-c0-resources.txt
+            ${{ runner.temp }}/c0-full-init-resources.txt
             ${{ runner.temp }}/c0-full-init-native.txt
           if-no-files-found: warn
           retention-days: 14

@@ -221,3 +221,47 @@ theorem psKernelC0ScopedCheckedDAGReceipt_readback
     psKernelC0DecodeExpr owner.store receipt.rootId =
       some receipt.expression :=
   receipt.readback
+
+/-- Under the same certified owner, fuel, context and initial state, equal
+node IDs MUST yield the same expression, checked type and final checker
+state. This prevents conflicting cache entries from silently changing an
+already source-checked result, even if a caller supplies multiple entries.
+The proof does not rely on hashes, pointer equality or cache policies. -/
+theorem psKernelC0ScopedCheckedDAGSameRoot
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    (left right : PsKernelC0ScopedCheckedDAGReceipt
+      owner fuel context initialState)
+    (hId : left.rootId = right.rootId) :
+    left.expression = right.expression ∧
+      left.inferredType = right.inferredType ∧
+        left.finalState = right.finalState := by
+  have hRead : some left.expression = some right.expression := by
+    calc
+      some left.expression =
+          psKernelC0DecodeExpr owner.store left.rootId :=
+        left.readback.symm
+      _ = psKernelC0DecodeExpr owner.store right.rootId := by rw [hId]
+      _ = some right.expression := right.readback
+  have hExpr : left.expression = right.expression := by
+    injection hRead with he
+    exact he
+  have hCheck :
+      Except.ok (left.inferredType, left.finalState) =
+        Except.ok (right.inferredType, right.finalState) := by
+    calc
+      Except.ok (left.inferredType, left.finalState) =
+          psKernelCheckerCheck fuel context initialState left.expression :=
+        left.source.symm
+      _ = psKernelCheckerCheck fuel context initialState right.expression := by
+        rw [hExpr]
+      _ = Except.ok (right.inferredType, right.finalState) :=
+        right.source
+  have hPair :
+      (left.inferredType, left.finalState) =
+        (right.inferredType, right.finalState) := by
+    injection hCheck with hp
+    exact hp
+  exact ⟨hExpr, congrArg Prod.fst hPair, congrArg Prod.snd hPair⟩

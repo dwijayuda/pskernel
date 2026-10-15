@@ -3070,6 +3070,16 @@ private def floatConstructorBoundaries : IO Unit := do
   | results => throw (IO.userError ("executable Float boundary mismatch: " ++
       String.intercalate "; " (results.map fun r => match r with
         | .ok _ => "accepted" | .error e => e.phase ++ ": " ++ e.message)))
+  for (operation, input, output) in [
+      (PsVerifiedIrIntrinsic.floatOfBits .float, PsVerifiedIrType.primitive .uint32, PsVerifiedIrType.primitive .float),
+      (.floatToBits .float, .primitive .float32, .primitive .uint64)] do
+    let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [
+      { name := "wrongWidth", typeParameters := [], parameters := [{ name := "value", type := input }],
+        resultType := output, body := .intrinsic operation [] [.var "value"] }] }
+    match psWithCheckedIr psIrCheckDefaultOptions invalid (fun _ => .ok ()) with
+    | .error message => unless message.startsWith "PSCV0-IR-CHECK:" do
+        throw (IO.userError message)
+    | .ok _ => throw (IO.userError "wrong-width floating intrinsic reached emission")
   -- The same typed gate continues to refuse F2 arithmetic.
   match psIrCheckIntrinsicSignature (.floatBinary .float .add) [] with
   | .error e => unless e.code == "scalar-capability-unqualified" do

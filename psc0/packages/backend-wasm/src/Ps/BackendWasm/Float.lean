@@ -9,9 +9,9 @@ def floatRuntime : Except String (List RuntimeDefinition) := do
   for (suffix, bits, value, fromBits, toBits, ne, canonical) in
       [("32", PsWasmValueType.i32, PsWasmValueType.f32,
         PsWasmWordOp.f32ReinterpretI32, PsWasmWordOp.i32ReinterpretF32,
-        PsWasmInstruction.f32Ne, R.i32 2143289344),
+        PsWasmInstruction.f32Ne, RuntimeCode.i32 2143289344),
        ("64", .i64, .f64, .f64ReinterpretI64, .i64ReinterpretF64,
-        .f64Ne, R.i64 9221120237041090560)] do
+        .f64Ne, RuntimeCode.i64 9221120237041090560)] do
     let helperName := "__ps_float" ++ suffix
     definitions := definitions ++ [
       ← runtimeDefinition (helperName ++ "_to_bits") [("value", value)] [bits] []

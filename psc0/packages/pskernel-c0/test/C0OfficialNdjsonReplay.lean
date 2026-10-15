@@ -1201,6 +1201,119 @@ def c0ExportFirstSyntacticDifference
               "leaf lhs=" ++ c0ExportMismatchTerm 6 lhs ++
                 " rhs=" ++ c0ExportMismatchTerm 6 rhs
 
+/-- Inspect two candidate proof applications under an *opened and scoped*
+    binder context. This is a discarded first-failure diagnostic: even a
+    positive type/proposition observation does not admit or cache a term. -/
+def c0ExportProofArgumentWitness
+    (fuel : Nat)
+    (ctx : PsKernelCheckerContext)
+    (st : PsKernelCheckerState)
+    (lhs rhs : PsKernelExpr) : String :=
+  let session := PsKernelCheckerSession.mk ctx st
+  match psKernelSessionCheck fuel session lhs with
+  | .error reason =>
+      "left_check_error=" ++ reason
+  | .ok (leftType, afterLeft) =>
+      match psKernelSessionCheck fuel afterLeft rhs with
+      | .error reason => "right_check_error=" ++ reason
+      | .ok (rightType, afterRight) =>
+          let equalTypes := psKernelExprEq leftType rightType
+          let leftProp :=
+            match psKernelSessionIsProp fuel afterRight leftType with
+            | .ok (yes, _) => toString yes
+            | .error err => "error:" ++ err
+          let rightProp :=
+            match psKernelSessionIsProp fuel afterRight rightType with
+            | .ok (yes, _) => toString yes
+            | .error err => "error:" ++ err
+          let typeCompare :=
+            if equalTypes then "identical"
+            else
+              match psKernelSessionIsDefEq fuel afterRight
+                  leftType rightType with
+              | .ok (yes, _) => toString yes
+              | .error err => "error:" ++ err
+          "left_type=" ++ c0ExportMismatchTerm 7 leftType ++
+            " right_type=" ++ c0ExportMismatchTerm 7 rightType ++
+            " equal_types=" ++ toString equalTypes ++
+            " left_is_prop=" ++ leftProp ++
+            " right_is_prop=" ++ rightProp ++
+            " type_defeq=" ++ typeCompare
+
+/-- Follow the first *open-binder-safe* syntactic divergence. Source binders
+    are instantiated with a shared fresh checker local before examining their
+    bodies: type inference on a raw de Bruijn body would be ill scoped.
+    At two distinct constant-headed applications, report independently
+    checked types and whether the proof-irrelevance premise holds. -/
+def c0ExportScopedProofDifference
+    (depth : Nat)
+    (fuel : Nat) :
+    PsKernelCheckerContext -> PsKernelCheckerState ->
+    PsKernelExpr -> PsKernelExpr -> String :=
+  match depth with
+  | 0 =>
+      fun _ _ _ _ => "scoped_diagnostic_depth_exhausted"
+  | remaining + 1 =>
+      let descend := c0ExportScopedProofDifference remaining fuel
+      fun ctx st lhs rhs =>
+        if psKernelExprEq lhs rhs then "same"
+        else
+          match lhs, rhs with
+          | .app lf la, .app rf ra =>
+              if psKernelExprEq lf rf then
+                "app.arg/" ++ descend ctx st la ra
+              else
+                match psKernelExprGetAppFn lhs,
+                      psKernelExprGetAppFn rhs with
+                | .const leftName _, .const rightName _ =>
+                    if psKernelNameEq leftName rightName then
+                      "app.fn/" ++ descend ctx st lf rf
+                    else
+                      "proof_head_left=" ++ c0ExportMismatchTerm 3
+                        (psKernelExprGetAppFn lhs) ++
+                      " proof_head_right=" ++ c0ExportMismatchTerm 3
+                        (psKernelExprGetAppFn rhs) ++
+                      " | " ++
+                      c0ExportProofArgumentWitness fuel ctx st lhs rhs
+                | _, _ => "app.fn/" ++ descend ctx st lf rf
+          | .lam name lt lb bi, .lam _ rt rb _ =>
+              if psKernelExprEq lt rt then
+                let fresh := psKernelCheckerStateFreshName st name
+                let local := psKernelLocalContextAddLocal
+                  ctx.localContext fresh.1 name lt bi
+                let child := psKernelCheckerContextWithLocalContext ctx local
+                "lambda.body/" ++ descend child fresh.2
+                  (psKernelExprInstantiate1 lb (.fvar fresh.1))
+                  (psKernelExprInstantiate1 rb (.fvar fresh.1))
+              else "lambda.domain/" ++ descend ctx st lt rt
+          | .forallE name lt lb bi, .forallE _ rt rb _ =>
+              if psKernelExprEq lt rt then
+                let fresh := psKernelCheckerStateFreshName st name
+                let local := psKernelLocalContextAddLocal
+                  ctx.localContext fresh.1 name lt bi
+                let child := psKernelCheckerContextWithLocalContext ctx local
+                "forall.body/" ++ descend child fresh.2
+                  (psKernelExprInstantiate1 lb (.fvar fresh.1))
+                  (psKernelExprInstantiate1 rb (.fvar fresh.1))
+              else "forall.domain/" ++ descend ctx st lt rt
+          | .letE name lt lv lb _, .letE _ rt rv rb _ =>
+              if psKernelExprEq lt rt && psKernelExprEq lv rv then
+                let opened := psKernelCheckerContextWithLet
+                  ctx name lt lv
+                "let.body/" ++ descend opened.2 st
+                  (psKernelExprInstantiate1 lb (.fvar opened.1))
+                  (psKernelExprInstantiate1 rb (.fvar opened.1))
+              else if psKernelExprEq lt rt then
+                "let.value/" ++ descend ctx st lv rv
+              else "let.type/" ++ descend ctx st lt rt
+          | .mdata _ le, .mdata _ re =>
+              "mdata.body/" ++ descend ctx st le re
+          | .proj _ _ le, .proj _ _ re =>
+              "proj.body/" ++ descend ctx st le re
+          | _, _ =>
+              "different_shapes left=" ++ c0ExportMismatchTerm 5 lhs ++
+              " right=" ++ c0ExportMismatchTerm 5 rhs
+
 /-- First nontrivial application argument in two full-WHNF expressions.
     This is a discarded, source-owned diagnostic: compare the shared head,
     then check arguments left-to-right in the same order as Lean 4.35's
@@ -1309,7 +1422,10 @@ def c0ExportDiagnoseDefEqWhnfSides
                 toString equal
           | .error error =>
               "full_whnf_structural_equal=false normalized_defeq_error=" ++
-                error ++ zetaText ++ " | first_app_argument=" ++
+                error ++ zetaText ++ " | scoped_proof=" ++
+                c0ExportScopedProofDifference 64 fuel ctx st
+                  zetaLeft zetaRight ++
+                " | first_app_argument=" ++
                 c0ExportProbeFirstAppMismatch fuel ctx st
                   leftNormal rightNormal
     | _, _ => "full_whnf_structural_equal=unavailable"

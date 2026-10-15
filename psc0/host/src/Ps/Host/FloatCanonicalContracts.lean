@@ -439,6 +439,56 @@ theorem fromBits32_eq_upstream_ofBits_nan (bits : UInt32)
   exact congrArg UInt32.ofBitVec
     ((upstreamPackUnpack_nan Format.binary32 bits.toBitVec he hm).symm)
 
+-- Complete upstream compact-bit correspondence for every 64-bit pattern:
+-- NaN, infinity, both zeros, subnormal and normal. This remains native-only
+-- because upstream Float pack/unpack imports Classical.choice transitively.
+theorem upstreamPackUnpack_all64 (bits : BitVec 64) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  by_cases hTop : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#_)
+  · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#_)
+    · exact upstreamPackUnpack_infinity64 bits hTop hMant
+    · exact upstreamPackUnpack_nan Format.binary64 bits hTop hMant
+  · by_cases hZero : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (0#_)
+    · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#_)
+      · exact upstreamPackUnpack_zero64 bits hZero hMant
+      · exact upstreamPackUnpack_subnormal64 bits hZero hMant
+    · exact upstreamPackUnpack_normal64 bits hZero hTop
+
+theorem fromBits64_eq_upstream_ofBits_all (bits : UInt64) :
+    fromBits64 bits = Float.ofBits bits := by
+  apply eq_of_toBits_eq64
+  change UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) =
+    UInt64.ofBitVec
+      (UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits.toBitVec))
+  exact congrArg UInt64.ofBitVec
+    ((upstreamPackUnpack_all64 bits.toBitVec).symm)
+
+-- Complete upstream compact-bit correspondence for every 32-bit pattern:
+-- NaN, infinity, both zeros, subnormal and normal. This remains native-only
+-- because upstream Float pack/unpack imports Classical.choice transitively.
+theorem upstreamPackUnpack_all32 (bits : BitVec 32) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  by_cases hTop : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#_)
+  · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#_)
+    · exact upstreamPackUnpack_infinity32 bits hTop hMant
+    · exact upstreamPackUnpack_nan Format.binary32 bits hTop hMant
+  · by_cases hZero : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (0#_)
+    · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#_)
+      · exact upstreamPackUnpack_zero32 bits hZero hMant
+      · exact upstreamPackUnpack_subnormal32 bits hZero hMant
+    · exact upstreamPackUnpack_normal32 bits hZero hTop
+
+theorem fromBits32_eq_upstream_ofBits_all (bits : UInt32) :
+    fromBits32 bits = Float32.ofBits bits := by
+  apply eq_of_toBits_eq32
+  change UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) =
+    UInt32.ofBitVec
+      (UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits.toBitVec))
+  exact congrArg UInt32.ofBitVec
+    ((upstreamPackUnpack_all32 bits.toBitVec).symm)
+
 -- A left inverse on ALL existing native logical Float values. This is a
 -- representation contract for future erasure/ABI work, not an executable
 -- backend preservation theorem or a raw upstream-ofBits equivalence.

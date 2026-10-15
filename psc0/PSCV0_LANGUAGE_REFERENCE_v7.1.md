@@ -3092,7 +3092,7 @@ The design criterion was **maximum Lean semantic/syntactic reuse with only high-
 
 | Question | Decision | Support / remaining risk |
 |---|---|---|
-| Lean baseline | pin **`v4.35.0`**, SHA `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` | GitHub 4.35.0 release/tag and official release notes; prerelease |
+| Lean baseline | pin **`v4.35.0`**, SHA `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` | GitHub 4.35.0 release/tag and official release notes; stable release (2026-10-12) |
 | Language identity | keep `const`, `function`, `def`; names lower to Lean declarations | distinctive but logically conservative |
 | `f ()` vs `f()` | **reject `f ()` in `.ps` application positions** | avoids visually indistinguishable Unit application / empty call; preserve binder parentheses |
 | `f (x,y)` vs `f(x,y)` | **reject `f (x,y)` in `.ps`** | prevents changing argument arity by a whitespace edit |

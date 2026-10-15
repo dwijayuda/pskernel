@@ -109,7 +109,7 @@ def psSyntheticDefaultSearch (fuel : Nat) (environment : PsEnvironment)
         if arg.isInstance then
           match arg.expr with | .mvar id => some id | _ => none
         else none
-      let solved := psSyntheticDefaultGoals fuel environment index checked.context pending remaining
+      let solved := psSyntheticDefaultGoals fuel environment index checked.context pending.reverse remaining
       remaining := solved.remaining
       if solved.exhausted then return { context, remaining, exhausted := true }
       if !solved.success then continue
@@ -140,8 +140,10 @@ def psSyntheticDefaultGoals (fuel : Nat) (environment : PsEnvironment)
     unresolved := unresolved.reverse
     if unresolved.length < pending.length then
       return psSyntheticDefaultGoals fuel environment index current unresolved remaining
-    for priority in psSyntheticDefaultPriorities index do
-      for id in unresolved do
+    -- Nested dependencies follow Lean: reverse telescope order, then each
+    -- goal's priorities. Only the outer scheduler orders priorities globally.
+    for id in unresolved do
+      for priority in psSyntheticDefaultPriorities index do
         let tried := psSyntheticDefaultSearch fuel environment index current id priority remaining
         remaining := tried.remaining
         if tried.exhausted then return { context, remaining, exhausted := true }
@@ -149,6 +151,31 @@ def psSyntheticDefaultGoals (fuel : Nat) (environment : PsEnvironment)
           return psSyntheticDefaultGoals fuel environment index tried.context unresolved remaining
     return { context, remaining }
 end
+
+-- Lean's trySynthInstance distinguishes a stuck input from definite failure:
+-- an empty ordinary candidate set never reaches defaulting. Probe candidate
+-- result types transactionally, with outputs masked by the shared target
+-- preparation. This does not select evidence or assign caller metavariables.
+def psSyntheticDefaultEligibility (environment : PsEnvironment) (index : PsInstanceIndex)
+    (context : PsMetaContext) (id remaining : Nat) : Except Unit (Bool × Nat) := do
+  let some declaration := psMetaFindDecl context id | return (false, remaining)
+  if psInstanceGoalReady environment declaration.localContext context declaration.type then
+    return (false, remaining)
+  let some target := psPrepareInstanceTarget environment declaration.localContext context
+      declaration.type false | return (false, remaining)
+  let .constE name _ := (psInferAppView target.type).head | return (false, remaining)
+  let entries := psLocalInstanceEntries declaration.localContext ++
+    psInstanceRegistryEntries (psInstanceRegistry index) name
+  let mut remaining := remaining
+  for entry in entries do
+    if remaining == 0 then throw ()
+    remaining := remaining - 1
+    let candidate := psPrepareInstance environment declaration.localContext target.context entry
+    if !candidate.success then continue
+    let checked := psUnifyWithTransparency .instances environment declaration.localContext
+      candidate.context candidate.resultType target.type
+    if checked.success then return (true, remaining)
+  return (false, remaining)
 
 def psSyntheticAttemptDefault (environment : PsEnvironment) (index : PsInstanceIndex)
     (context : PsMetaContext) (constraint : PsSyntheticConstraint) (priority : Nat) :
@@ -159,9 +186,11 @@ def psSyntheticAttemptDefault (environment : PsEnvironment) (index : PsInstanceI
   | .instanceGoal id =>
     if (psMetaFindAssignment context id).isSome then
       .ok (psSyntheticAttempt environment index context constraint)
-    else
-      let result := psSyntheticDefaultSearch 64 environment index context id priority
+    else do
+      let (eligible, remaining) ← psSyntheticDefaultEligibility environment index context id
         psInstanceMaxCandidateChecks
+      if !eligible then return none
+      let result := psSyntheticDefaultSearch 64 environment index context id priority remaining
       if result.exhausted then .error ()
       else .ok (if result.success then some result.context else none)
   | _ => .ok none
@@ -171,15 +200,6 @@ def psSyntheticConstraintPriorities (index : PsInstanceIndex) :
   | .defaultValue _ _ => [0]
   | .instanceGoal _ => psSyntheticDefaultPriorities index
   | _ => []
-
-def psSyntheticHasDefault (environment : PsEnvironment) (index : PsInstanceIndex)
-    (context : PsMetaContext) : PsSyntheticConstraint → Bool
-  | .instanceGoal id =>
-    match psSyntheticInstanceClass environment context id with
-    | none => false
-    | some name => index.defaults.any (fun entry => entry.className.any (psNameEq name))
-  | .defaultValue _ _ => true
-  | _ => false
 
 -- A rigid failure cannot be repaired by running unrelated work. Refuse it at
 -- its owning boundary, before an ill-typed intermediate term is constructed.

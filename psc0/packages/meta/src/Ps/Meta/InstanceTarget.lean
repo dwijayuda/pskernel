@@ -8,12 +8,13 @@ structure PsInstanceTarget where
 
 def psInstanceTargetArguments (fuel : Nat) (environment : PsEnvironment)
     (locals : PsLocalContext) (outputs : List Nat) (position : Nat)
-    (context : PsMetaContext) (type target key : PsExpr) (arguments : List PsExpr) :
+    (context : PsMetaContext) (type target key : PsExpr) (arguments : List PsExpr)
+    (requireReady : Bool := true) :
     Option PsInstanceTarget := do
   match fuel, arguments with
   | _, [] =>
     let key := psMetaInstantiate context key
-    if psExprHasUnresolvedMeta key then none
+    if requireReady && psExprHasUnresolvedMeta key then none
     else some { context, type := target, key }
   | 0, _ => none
   | fuel + 1, argument :: arguments =>
@@ -24,13 +25,14 @@ def psInstanceTargetArguments (fuel : Nat) (environment : PsEnvironment)
         (fresh.context, fresh.expr, PsExpr.bvar position)
       else (context, argument, argument)
     psInstanceTargetArguments fuel environment locals outputs (position + 1) context
-      (psExprInstantiate1 body value) (.app target value) (.app key keyValue) arguments
+      (psExprInstantiate1 body value) (.app target value) (.app key keyValue) arguments requireReady
 
 -- Output arguments and output-only universes are fresh during search, even
 -- when the caller supplied them. Reconciliation happens after a solution is
 -- selected, so output preferences cannot silently select a lower-priority instance.
 def psPrepareInstanceTarget (environment : PsEnvironment) (locals : PsLocalContext)
-    (context : PsMetaContext) (target : PsExpr) : Option PsInstanceTarget := do
+    (context : PsMetaContext) (target : PsExpr) (requireReady : Bool := true) :
+    Option PsInstanceTarget := do
   let target := psMetaInstantiate context target
   let view := psInferAppView (psWhnfWithTransparency .instances environment context locals target)
   let .constE name levels := view.head | none
@@ -47,4 +49,4 @@ def psPrepareInstanceTarget (environment : PsEnvironment) (locals : PsLocalConte
   let type := psExprInstantiateLevelParams (psDeclarationLevelParams declaration) levels
     (psDeclarationType declaration)
   psInstanceTargetArguments 4096 environment locals parameters.outputs 0 context type
-    (.constE name levels) (.constE name keysRev.reverse) view.args
+    (.constE name levels) (.constE name keysRev.reverse) view.args requireReady

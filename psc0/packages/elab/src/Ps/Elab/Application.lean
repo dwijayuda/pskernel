@@ -252,9 +252,7 @@ def psElabSolveSynthetic (current : PsElabTermResult)
   if solved.resourceExceeded then throw .fuelExhausted
   if current.context.postponing then
     for constraint in solved.pending do
-      if !psSyntheticMayRetry solved.context constraint &&
-          !psSyntheticHasDefault current.context.environment current.context.instances
-            solved.context constraint then
+      if !psSyntheticMayRetry solved.context constraint then
         match constraint with
         | .instanceGoal _ => throw .implicitApplicationUnsupported
         | _ => throw .typeMismatch

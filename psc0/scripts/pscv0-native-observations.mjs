@@ -7,7 +7,7 @@ export const observations = [
   { name: "defaultNested", args: null, expected: 31n },
   { name: "defaultTie", args: null, expected: 2n },
   { name: "defaultAnchor", args: null, expected: 37n },
-  { name: "defaultOnlyKnown", args: null, expected: 99n },
+  { name: "defaultOnlyInferred", args: null, expected: 99n },
   { name: "defaultUniverse", args: null, expected: 91n },
   { name: "arrayHighMapDown", args: null, expected: 7n },
   { name: "arrayHighMapUp", args: null, expected: 11n },

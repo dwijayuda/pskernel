@@ -1,5 +1,21 @@
 # PSCV0 v7 — AI work state
 
+## Default-instance semantic boundary reviewed — 15 October 2026
+
+[Native38741377803](https://github.com/dwijayuda/pskernel/actions/runs/38741377803) compiled all compiler sources but the independent Lean oracle rejected four proposed expectations. The cause was a semantic distinction, not runtime lowering: Lean's `trySynthInstance` returns success, definite failure, or stuck. A default-only declaration cannot rescue a definite ordinary failure (including a class with no ordinary candidates); defaults apply to stuck top-level goals. Within a selected default candidate, Lean catches failed dependency synthesis and tries nested defaults transactionally.
+
+Additional primary references: pinned `Lean/Meta/SynthInstance.lean` (`getInstances`, `mkGeneratorNode?`, `trySynthInstance`) and `Lean/Elab/Term/TermElabM.lean` (`synthesizeInstMVarCore`). PSC0 now requires an unresolved ordinary input and a compatible ordinary candidate before top-level defaulting. The compatibility probe reuses candidate preparation, instance transparency and shared output masking, discards all speculative assignments, and consumes the existing candidate budget. Rigid failure is restored at application boundaries. Nested defaults now use Lean's reverse-telescope, goal-first order; top-level defaults retain global priority order.
+
+The corrected differential fixture keeps all seven observations and expected numbers. It distinguishes an inferred default-only choice (with an ordinary alternative) from fixed-goal rejection; two paired negative checks enforce both definite-failure cases. Nested/universe fixtures now declare ordinary instances where Lean requires them. No failed check was bypassed or unsupported success retained. Strict metadata pins remain intentionally unchanged pending cloud measurement. Qualification is pending.
+
+## Array prerequisite qualified on development branch — 15 October 2026
+
+Exact integration `e3902f3d91556af40b85f65566ff6787620346ee` passed [native38739411239](https://github.com/dwijayuda/pskernel/actions/runs/38739411239): all 30 steps and **851 shared runtime observations** across readable JavaScript/TypeScript/Rust, GC Wasm/core/component paths, checked source and IR boundaries, module integration, repeated Wasmtime calls, byte-exact assets and unchanged performance gates. Independent [F1 replay38739411057](https://github.com/dwijayuda/pskernel/actions/runs/38739411057), [F2 replay38739411179](https://github.com/dwijayuda/pskernel/actions/runs/38739411179), and [F3 logical replay38739411210](https://github.com/dwijayuda/pskernel/actions/runs/38739411210) passed at the same commit.
+
+The universe-polymorphic Array family and exact native-signature audit are selected. Registry counts remain 3,122 declarations /25 classes /250 ordinary instances. Pins remain FNV `14544844717468498892`, declaration SHA-256 `373b27a0b77083baa58810055d68b6639ec00c2038da7641d3dd5c042e8f4e0d`, surface SHA-256 `579f461576427a5daf711943613979e4517803475779e40b0200f359450744fa`. Native prelude initialization measured 7.677s; cross-runtime timings are observations, not performance equivalence.
+
+Next on research `psc0/pscv0-v7-f3-conversions-research`: shared priority-ordered default instances, then scientific syntax/OfNat/OfScientific integration and F3 numeric conversions. The default implementation at `7ba03254ba3c1abccf5c75e0b67a679fa6ad7feb` is qualifying after correcting Lean syntax errors; no semantic acceptance or budgets were weakened. The checked 134-declaration F3 conversion candidate is still unselected. F4 display, target-sized profiles and remaining M2+A obligations remain open. Native Lean 4.35.0, official kernel, only the two approved assumptions; no pskernel-core or self-hosting.
+
 ## Default-instance qualification correction — 15 October 2026
 
 [Native38739652823](https://github.com/dwijayuda/pskernel/actions/runs/38739652823) refused before qualification: a mutable-variable shadow, a structure-update layout error, and reserved identifier names in the new Lean sources. These syntax issues are corrected together. Semantic oracles, acceptance criteria, budgets and strict snapshot pins are unchanged. The implementation remains unqualified until the full gates pass; scientific literals and conversion runtime selection remain pending.

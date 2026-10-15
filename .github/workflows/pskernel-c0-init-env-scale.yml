@@ -85,6 +85,35 @@ jobs:
             cat "$RUNNER_TEMP/cooper-env-${extra}-resources.txt"
           done
           echo "C0_ENV_SCALE_SCOPE=synthetic_checked_definitions_not_original_Init_qualification"
+      - name: Compare full-context BitVec candidate against synthetic checked environment count
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- 'BitVec.lt_of_isSome_getElem?' > "$RUNNER_TEMP/bitvec-source.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/bitvec-source.ndjson" > "$RUNNER_TEMP/bitvec-source-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/bitvec-source-official.txt"
+          test "$(stat -c%s "$RUNNER_TEMP/bitvec-source.ndjson")" -eq 1176296
+          test "$(wc -l < "$RUNNER_TEMP/bitvec-source.ndjson")" -eq 21407
+          echo "ee71d2fcc99e0ff1b5a7f37c7a9b609999e8e027f24635e784095db9cab3f1c3  $RUNNER_TEMP/bitvec-source.ndjson" | sha256sum -c -
+          python3 psc0/packages/pskernel-c0/test/C0InitEnvScale.py \
+            "$RUNNER_TEMP/bitvec-source.ndjson" "$RUNNER_TEMP/bitvec-env-40000.ndjson" \
+            --case bitvec --definitions 40000
+          (cd "$RUNNER_TEMP/lean4export" &&
+            timeout 240s lake env leanchecker --from-export "$RUNNER_TEMP/bitvec-env-40000.ndjson") \
+            > "$RUNNER_TEMP/bitvec-env-40000-official.txt" 2>&1
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/bitvec-env-40000-official.txt"
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/bitvec-env-40000-resources.txt" \
+              timeout 400s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/bitvec-env-40000.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/bitvec-env-40000-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=101407 fuel=4096" \
+            "$RUNNER_TEMP/bitvec-env-40000-c0.txt"
+          echo "C0_BITVEC_ENV_SCALE_VERIFIED original=21407 synthetic_safe_extra=40000 official=accepted c0=accepted fuel=4096"
+          echo "C0_BITVEC_ENV_SCALE_SCOPE=diagnostic_only_not_real_Init"
+          cat "$RUNNER_TEMP/bitvec-env-40000-resources.txt"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -93,5 +122,8 @@ jobs:
             ${{ runner.temp }}/cooper-env-*-official.txt
             ${{ runner.temp }}/cooper-env-*-c0.txt
             ${{ runner.temp }}/cooper-env-*-resources.txt
+            ${{ runner.temp }}/bitvec-env-40000-official.txt
+            ${{ runner.temp }}/bitvec-env-40000-c0.txt
+            ${{ runner.temp }}/bitvec-env-40000-resources.txt
           if-no-files-found: warn
           retention-days: 14

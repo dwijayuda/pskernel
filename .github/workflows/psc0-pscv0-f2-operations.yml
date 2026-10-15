@@ -89,7 +89,7 @@ jobs:
           mkdir -p ../dist/pscv0-f2-operations
           test -f .lake/build/lib/lean/Ps/Host/FloatConstructive.olean
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
-          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-operations-candidate ../dist/pscv0-f2-operations/FloatOperationsCandidate.lean | tee ../dist/pscv0-f2-operations/operations.log
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-operations-candidate ../dist/pscv0-f2-operations/FloatOperationsCandidate.lean | tee ../dist/pscv0-f2-operations/operations.log | grep -v '^PSCV0_STANDARD_SOURCE '
           sha256sum ../dist/pscv0-f2-operations/FloatOperationsCandidate.lean | tee ../dist/pscv0-f2-operations/operations.sha256
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()

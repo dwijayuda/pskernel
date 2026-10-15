@@ -791,7 +791,8 @@ def exportFloatOperationsCandidate (output : System.FilePath) : IO Unit := do
     (`PsV7Native.FloatConstructive.getLsbDOfGe, `BitVec.getLsbD_of_ge)]
   let cuts := cuts.filter (fun pair => !names.contains pair.snd)
   exportStandardCore {
-    roots := operations ++ cuts.map (·.fst)
+    roots := operations ++ [`Float.decLt, `Float.decLe, `instDecidableEqFloat,
+      `Float32.decLt, `Float32.decLe, `instDecidableEqFloat32] ++ cuts.map (·.fst)
     boundary := selected.map psDeclarationName
     baseDeclarations := selected
     nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]

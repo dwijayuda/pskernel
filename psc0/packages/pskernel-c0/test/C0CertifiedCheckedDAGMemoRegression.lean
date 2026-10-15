@@ -81,6 +81,18 @@ def main : IO Unit := do
           again.val.expression =
         .ok (again.val.inferredType, again.val.finalState) :=
     psKernelC0ScopedCheckedDAGReceipt_source again.val
+  let sameId : fresh.val.rootId = again.val.rootId := by
+    calc
+      fresh.val.rootId = id := fresh.property
+      _ = again.val.rootId := again.property.symm
+  let sourceUnique := psKernelC0ScopedCheckedDAGSameRoot
+    fresh.val again.val sameId
+  let _uniqueExpr : fresh.val.expression = again.val.expression :=
+    sourceUnique.1
+  let _uniqueType : fresh.val.inferredType = again.val.inferredType :=
+    sourceUnique.2.1
+  let _uniqueState : fresh.val.finalState = again.val.finalState :=
+    sourceUnique.2.2
   if originalMemo.length != 1 then
     throw (IO.userError "scoped checked DAG: cache hit changed immutable entries")
   if !psKernelExprEqual fresh.val.inferredType again.val.inferredType then

@@ -27,6 +27,16 @@ def main : IO Unit := do
     | .error error =>
         throw (IO.userError ("checked DAG trace: valid sequence failed: " ++ error))
   let ⟨finalState, trace⟩ := result
+  let _wholeSourceProof :
+      psKernelC0IndexedDAGReferenceFold owner 4096 session.context
+          (psKernelC0CheckedDAGTraceIds trace) session.state =
+        .ok finalState :=
+    psKernelC0CheckedDAGTrace_sourceFold trace
+  match psKernelC0IndexedDAGReferenceFold owner 4096 session.context
+      [goodId, badId] session.state with
+  | .ok _ =>
+      throw (IO.userError "checked DAG trace: independent source accepted invalid tail")
+  | .error _ => pure ()
   if psKernelC0CheckedDAGTraceIds trace != [goodId, goodId] then
     throw (IO.userError "checked DAG trace: incorrect source root ID sequence")
   -- Validate a separate exact source run through the two successive states.

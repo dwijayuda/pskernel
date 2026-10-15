@@ -1063,7 +1063,15 @@ const left: Nat := Prod.fst(pair)
 |---|---|
 | `theorem same (n : Nat) : n = n := by rfl` | `theorem same(n: Nat): n = n := by { rfl }` |
 | `example : ∃ n : Nat, n = 0 := ⟨0, rfl⟩` | `example : exists n : Nat, n = 0 := by { exact ⟨0, rfl⟩ }` |
-| `example : ∀ n : Nat, n = n := by intro n; rfl` | <code>example : forall n : Nat, n = n := by { intro n&#10;  rfl&#10;}</code> (illustrative layout) |
+| `example : ∀ n : Nat, n = n := by intro n; rfl` | See `P-QUANTIFIER-LAYOUT` source below (illustrative) |
+
+**P-QUANTIFIER-LAYOUT — illustrative source:**
+
+```proofscript
+example : forall n : Nat, n = n := by { intro n
+  rfl
+}
+```
 
 #### Native mathematical symbol and text pairs
 
@@ -3680,7 +3688,14 @@ The paired source is illustrative; exact acceptance depends on admitted static m
 | `verify f := by { omega }` | no extra declaration head; use Lean theorem/checkable VC |
 | `exist x : Nat, x = x` | singular `exist` is not a Lean quantifier; use `exists` or `∃` |
 | `if b then 1 else 2` | native Lean layout is not `.ps` conditional; write `if (b) {1} else {2}` |
-| <code>by&#10;  rfl</code> | `.ps` uses braced `by { rfl }`; native `.lean` remains unaffected |
+| See the `N-UNBRACED-PROOF` source below | `.ps` uses braced `by { rfl }`; native `.lean` remains unaffected |
+
+**N-UNBRACED-PROOF — invalid unbraced ProofScript proof:**
+
+```text
+by
+  rfl
+```
 
 No statement here proves actual compiler implementation or complete Lean parser compatibility. The reference is a **closed design overlay**, not a claim that arbitrary upstream Lean notation, macros, tactic parsers, or library definitions have become part of `pscv0`.
 
@@ -3722,9 +3737,17 @@ The separator policy follows Lean syntax **within** each selected construct but 
 | `{ n : Nat // n > 0 }` | native subtype term | refined Lean type, not an expression block |
 | `if (b) { a } else { c }` | conditional branches | one term per branch |
 | `do { ... }` | selected Lean monadic sequencing | multiple `doSeqItem`s, no generic JS statements |
-| <code>by { constructor&#10;  · exact hp&#10;  · exact hq }</code> | Lean tactic sequencing with focused goals | proof term construction, not ordinary runtime block |
+| See the `P-FOCUSED-PROOF` source below | Lean tactic sequencing with focused goals | proof term construction, not ordinary runtime block |
 | `structure S where { x: Nat }` | structure field sequence | Lean-dependent/nominal fields |
 | `match x with { \| .some y => y \| .none => 0 }` | match alternatives | exhaustive selected Lean pattern checking |
+
+**P-FOCUSED-PROOF — illustrative source:**
+
+```proofscript
+by { constructor
+  · exact hp
+  · exact hq }
+```
 
 ### 12.3 Delimiter and Unicode hygiene
 
@@ -4275,7 +4298,7 @@ The v6 re-audit identified three local documentation defects, now corrected in t
 
 **Current authority.** This complete v7.2 reference is the active source-design edition. The RC3/RC4, v3–v7 and v7.1 audit discussions above are historical records, not competing source grammar rules. The authoritative selected .ps syntax, recursion strategies, proof/effect/assumption policies and assurance identities remain the active §§0A–0B, 2, 5, 7/7B and 11–13. The pinned Lean implementation is **stable 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 
-**Document representation.** The former 80 HTML side-by-side tables and 14 additional paired code-example Markdown tables have been converted into labelled Lean/ProofScript or schematic grammar Markdown code blocks. The last two inline `<pre>` fixture cells are provided as independently copyable Markdown code fences. HTML entity decoding preserves the original contents of the comparisons. The underlying source examples remain **illustrative unless executed** against the pinned toolchain.
+**Document representation.** The former 80 HTML side-by-side tables and 14 additional paired code-example Markdown tables have been converted into labelled Lean/ProofScript or schematic grammar Markdown code blocks. The last two inline HTML-preformatted fixture cells are provided as independently copyable Markdown code fences. HTML entity decoding preserves the original contents of the comparisons. The underlying source examples remain **illustrative unless executed** against the pinned toolchain.
 
 **Specific consistency correction.** The historical v3 C04/C05 account now accurately distinguishes its original total-only `psTermination?` normalization from the active v7.2 function `psRecursionSuffix` (total or `partial_fixpoint`) and preserved total-only `psConstVal`. This is a historical/source-rule clarification; no accepted language feature, trust boundary or proof requirement has been weakened or removed.
 

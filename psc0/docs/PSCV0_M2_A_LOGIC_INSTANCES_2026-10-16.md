@@ -1,0 +1,23 @@
+# M2+A: explicit basic order and constructive decisions
+
+## Design and pinned reference
+
+Lean 4.35.0, eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
+- [Init/Prelude.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Prelude.lean): Nat LT/LE, reversed GT/GE, Decidable's Boolean payload, constructive And/Or/Not.
+- [Init/Core.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Core.lean): constructive True/False, implication and Iff decisions.
+- [Init/Data/Int/Basic.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Int/Basic.lean): Int order dictionaries and decLe/decLt.
+Upstream attribution: Microsoft Corporation / Lean FRO, LLC, Apache-2.0; see THIRD_PARTY_NOTICES.md.
+
+Native38804150832 compiled the previous slice and passed its strict registry and checked asset gates, then refused comparisonNotation: the checked native LT/LE declarations were logical dependencies, but were never selected as instances. Source notation exposed that missing selection layer. This is not evidence of an invalid checked declaration or a need to special-case conditionals.
+
+## Architecture
+
+StandardLogicInstances explicitly selects thirteen existing checked definitions: Nat/Int LT/LE, Int.decLt/decLe and seven constructive proposition decisions. Dependency inclusion never means implicit instance registration. The strict audit verifies every name, definition kind, class and registration. The frozen exporter boundaries remain unchanged, with no new declarations or assumptions.
+
+The ordinary synthetic-constraint scheduler and structural table keys resolve these dictionaries. Runtime selection includes the checked Bool BEq dependency for Iff, and the selected constructive definitions. Int decisions lower to the existing typed Int comparison operations, and Bool.beq to boolEq, using the same arity/partial-application boundary as other primitives. PrimitiveAudit verifies their exact pinned native signatures; differential execution and kernel checking remain separate evidence.
+
+## Qualification
+
+Six compact native Lean observations are mirrored in the existing shared JS/TS/Rust runtime ledger: three compound Nat propositions (And, Or, Not, implication, Iff, True, False) and three negative/equal/positive Int order cases. The existing three comparison-alias observations remain. No new test runner, new backend IR operation, resource relaxation or trusted axiom.
+
+Implementation is pending cloud qualification. Keep the previous registry digests until strict independent entry points report agreeing new values. Full source/kernel/IR/module, all backend, GC/ABI, and existing solver/performance gates are required before calling this slice qualified.

@@ -1,5 +1,12 @@
 # PSCV0 v7 — AI work state
 
+## Basic order and constructive decisions — qualification pending
+
+At176f18025642ee7a8c056aa05d0eb667df5d76da, native38804150832 passed compiler, registry, frozen assets and platform kernel boundaries, then refused comparisonNotation because the checked Nat LT/LE dictionaries were not registered. Independent F3/F4/platform replay38804150877 passed. The source/runtime slice is not green.
+
+This checkpoint selects thirteen already checked native basic order/proposition-decision definitions through one audited Standard layer. Existing typed Int comparisons and Bool equality lower their runtime dependencies. Six native/shared differential observations complement the three comparison aliases. See docs/PSCV0_M2_A_LOGIC_INSTANCES_2026-10-16.md. Profile/67. Keep the old strict pins until new independently agreeing measurements; then qualify the complete slice. No new assumptions, pskernel-core, self-hosting or C5 execution.
+
+
 Strict native38803665074 at322541747fed53a09f8a003594e7fd4db976bf3a compiled the UTF8/backend implementation and passed the independent native UTF8/array/platform oracles and frozen checked asset replays. Both strict registry entry points refused the old pins with identical observed FNV12192271966327546278 and SHA256d73d9dbee2bdd03461e59d356cc083064b226097e0752415f7bc103cc96e169c; surface SHA2564815fda89dcd006fad2490abe79b2589caba28c08030800e32998600fda051ba. This checkpoint selects exactly those measured pins. Independent F3/F4/platform replay38803665120 passed. Full source/kernel/IR/runtime qualification remains pending; do not report this refusal run as green.
 
 ## Selected UTF-8 implementation — qualification pending

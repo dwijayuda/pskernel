@@ -1870,7 +1870,7 @@ def psErasureSpecialEntry
   else if named "Decidable.intro" then
     Option.some (PsErasureSpecialEntry.mk 3 true)
   else if psListAny named ["Decidable.isTrue", "Decidable.isFalse", "Decidable.decide",
-      "Bool.decEq", "Nat.decEq", "String.decEq"] then
+      "Bool.decEq", "Bool.beq", "Nat.decEq", "String.decEq", "Int.decLt", "Int.decLe"] then
     Option.some (PsErasureSpecialEntry.mk 2 true)
   else if psNameEq name psIteName || named "dite" then
     Option.some (PsErasureSpecialEntry.mk 5 false)
@@ -2060,7 +2060,7 @@ def psEraseProofMinorFields
     let scope := { scope with localContext := pushed.context, erasedLocals := pushed.id :: scope.erasedLocals }
     psEraseProofMinorFields eraseAt environment count scope application applied
 
--- Decidable has a single Boolean payload in RC4. The reflection proof never
+-- Decidable has a single Boolean payload in Lean 4.35.0. The reflection proof never
 -- becomes runtime data. Conditions use the actual dictionary, not its Prop syntax.
 def psEraseDecisionApplication
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
@@ -2078,10 +2078,12 @@ def psEraseDecisionApplication
     return some (.intrinsic .natEq [] [← erase left, ← erase right])
   | "String.decEq", [left, right] =>
     return some (.intrinsic .stringEq [] [← erase left, ← erase right])
-  | "Bool.decEq", [left, right] =>
-    let left ← erase left
-    let right ← erase right
-    return some (.ifE left right (.intrinsic .boolNot [] [right]))
+  | "Bool.decEq", [left, right] | "Bool.beq", [left, right] =>
+    return some (.intrinsic .boolEq [] [← erase left, ← erase right])
+  | "Int.decLt", [left, right] =>
+    return some (.intrinsic .intLt [] [← erase left, ← erase right])
+  | "Int.decLe", [left, right] =>
+    return some (.intrinsic .intLe [] [← erase left, ← erase right])
   | "ite", [_, _, decision, yes, no] =>
     return some (.ifE (← erase decision) (← erase yes) (← erase no))
   | "dite", [_, _, decision, yes, no] =>

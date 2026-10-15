@@ -110,7 +110,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatWork,
     `Ps.Environment.StandardFormatRender,
     `Ps.Environment.StandardFormat,
-    `Ps.Environment.StandardClass, `Ps.Environment.StandardFormatClass,
+    `Ps.Environment.StandardClass, `Ps.Environment.StandardLogicInstances, `Ps.Environment.StandardFormatClass,
     `Ps.Environment.StandardToFormat,
     `Ps.Environment.StandardRepr,
     `Ps.Environment.StandardFormatString,

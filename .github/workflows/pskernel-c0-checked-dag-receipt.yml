@@ -1,0 +1,43 @@
+name: PSKernel-C0 certified checked DAG source receipts
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-checked-dag-receipt.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGMemoRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certified-dag-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Prove receipt against pinned native source checker
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build Ps.KernelCore.Architecture.CertifiedCheckedDAGMemo
+          lake env lean --run test/C0CertifiedCheckedDAGMemoRegression.lean
+          echo "C0_CHECKED_DAG_SOURCE_PROOF certified_root=pass source_equation=pass invalid=declined"
+      - name: Preserve independent native checker positives and negatives
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_CHECKED_DAG_QUALIFICATION native_reference_negative=pass"

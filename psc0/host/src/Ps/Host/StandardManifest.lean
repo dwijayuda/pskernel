@@ -178,8 +178,27 @@ def selectedNotationAudit : Except String Unit := do
   if (psPscv0InfixInfo "?").isSome then
     throw "PSCV0-MANIFEST: unregistered notation unexpectedly admitted"
 
+-- Lean 4.35.0 Meta/Instances.mkInstanceKey and checkNonClassInstance
+-- reduce the entire Pi telescope before computing the result-class key.
+-- Static Standard builders supply keys explicitly; audit the same invariant
+-- once here so a reducible alias cannot silently hide a valid instance.
+def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
+  for entry in env.instances.entries do
+    let identity := manifestInstanceKey entry
+    let some key := entry.className
+      | throw ("PSCV0-MANIFEST: unclassified Standard instance " ++ identity)
+    let prepared := psPrepareInstance env psLocalEmpty psMetaEmpty entry
+    if !prepared.success then
+      throw ("PSCV0-MANIFEST: instance telescope incomplete " ++ identity)
+    let .constE resultClass _ := (psInferAppView prepared.resultType).head
+      | throw ("PSCV0-MANIFEST: instance result is not a class " ++ identity)
+    if !env.classes.any (psNameEq resultClass) || !psNameEq key resultClass then
+      throw ("PSCV0-MANIFEST: instance class key mismatch " ++ identity ++
+        "; registered " ++ psNameToString key ++ "; reduced " ++ psNameToString resultClass)
+
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
+  standardInstanceIndexAudit env
   -- Reuse, do not replace, the independently pinned dual registry hashes.
   match psStandardSnapshotValidate env psStandardSnapshotExpected with
   | .ok () => pure ()

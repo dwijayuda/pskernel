@@ -1128,6 +1128,35 @@ def c0ExportDiagnoseDefinitionStages
   else
     throw "body/defeq=false"
 
+/-- Failure-only comparison of the two disputed terms under the *same*
+    original checker context, state and source resource policy. Distinguishes
+    cheap-projection core WHNF, full core WHNF, and public WHNF without
+    inserting any equality or reduction into the accepting checker. -/
+def c0ExportDescribeWhnfProbe
+    (result : Except String (PsKernelExpr × PsKernelCheckerState)) :
+    String :=
+  match result with
+  | .error error => "error=" ++ error
+  | .ok (reduced, _) => "ok=" ++ c0ExportMismatchTerm 6 reduced
+
+def c0ExportDiagnoseDefEqWhnfSides
+    (fuel : Nat)
+    (ctx : PsKernelCheckerContext)
+    (st : PsKernelCheckerState)
+    (lhs rhs : PsKernelExpr) : String :=
+  let defeq := psKernelIsDefEqWithFuel fuel
+  let core := psKernelWhnfCoreWithRecursorFuel fuel defeq
+  let full := psKernelWhnfWithRecursorFuel fuel defeq
+  let lCheap := c0ExportDescribeWhnfProbe (core ctx st lhs false true)
+  let rCheap := c0ExportDescribeWhnfProbe (core ctx st rhs false true)
+  let lCore := c0ExportDescribeWhnfProbe (core ctx st lhs false false)
+  let rCore := c0ExportDescribeWhnfProbe (core ctx st rhs false false)
+  let lPublic := c0ExportDescribeWhnfProbe (full ctx st lhs)
+  let rPublic := c0ExportDescribeWhnfProbe (full ctx st rhs)
+  " lhs_cheap=" ++ lCheap ++ " rhs_cheap=" ++ rCheap ++
+  " lhs_core=" ++ lCore ++ " rhs_core=" ++ rCore ++
+  " lhs_public=" ++ lPublic ++ " rhs_public=" ++ rPublic
+
 /-- Trace the *outermost failing source callback*, not an accepting
     alternate checker. WHNF and DefEq remain the original source functions.
     The wrapper only annotates their existing errors with bounded expressions;
@@ -1148,9 +1177,14 @@ def c0ExportDiagnoseDefinitionReduction
           (lhs rhs : PsKernelExpr) =>
         match originalDefEq ctx st lhs rhs with
         | .error reason =>
+            let whnfTrace :=
+              if reason == "kernel reduction budget exhausted" then
+                " | whnf_sides=" ++
+                  c0ExportDiagnoseDefEqWhnfSides fuel ctx st lhs rhs
+              else ""
             .error ("defeq left=" ++ c0ExportMismatchTerm 7 lhs ++
               " right=" ++ c0ExportMismatchTerm 7 rhs ++
-              " | " ++ reason)
+              " | " ++ reason ++ whnfTrace)
         | result => result
       let originalWhnf := psKernelWhnfWithRecursorFuel fuel tracedDefEq
       let tracedWhnf := fun

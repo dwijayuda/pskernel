@@ -5,6 +5,7 @@ on:
       - perf/pskernel-c0-v7-rust-20261012
     paths:
       - '.github/workflows/pskernel-c0-dependency-probe.yml'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
   workflow_dispatch:
     inputs:
       declaration:

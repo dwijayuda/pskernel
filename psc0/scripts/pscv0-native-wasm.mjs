@@ -103,6 +103,14 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations', 'sign
       }
     }
   } else {
+    for (const bits of [0n, 0x8000000000000000n, 1n, 0x7ff0000000000000n, 0xfff0000000000001n]) {
+      const expected = bits === 0xfff0000000000001n ? 0x7ff8000000000000n : bits;
+      assert.equal(BigInt.asUintN(64, instance.exports.scalarBits64(instance.exports.scalarMake64(bits))), expected);
+    }
+    for (const bits of [0, 0x80000000, 1, 0x7f800000, 0xff800001]) {
+      const expected = bits === 0xff800001 ? 0x7fc00000 : bits;
+      assert.equal(instance.exports.scalarBits32(instance.exports.scalarMake32(bits)) >>> 0, expected);
+    }
     for (const a of [0, 1]) {
       assert.equal(instance.exports.invert(a), 1 - a);
       for (const b of [0, 1]) {

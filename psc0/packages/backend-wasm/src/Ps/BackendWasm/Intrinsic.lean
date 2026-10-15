@@ -1,5 +1,6 @@
 import Ps.BackendWasm.Array
 import Ps.BackendWasm.Word
+import Ps.BackendWasm.Float
 import Ps.BackendWasm.Hash
 
 namespace PsWasm
@@ -18,6 +19,10 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   let signature ← (psIrCheckIntrinsicSignature op generics).mapError
     (fun e => "PSCV0-WASM-INTRINSIC: " ++ e.detail)
   let runtime : String ← match op with
+    | .floatOfBits .float => pure "float64_of_bits"
+    | .floatOfBits .float32 => pure "float32_of_bits"
+    | .floatToBits .float => pure "float64_to_bits"
+    | .floatToBits .float32 => pure "float32_to_bits"
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
     | .hashMix => pure "hash_mix" | .stringHash => pure "string_hash"
     | .natPow => pure "nat_pow"
@@ -66,6 +71,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   return { parameters := signature.parameters, result := signature.resultType, instructions }
 
 def runtimeDefinitions : Except String (List RuntimeDefinition) := do
-  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime)
+  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime)
 
 end PsWasm

@@ -4,29 +4,34 @@ import Ps.Codegen.Api
 namespace PsWasm
 
 inductive WitScalar where
-  | bool | s8 | u8 | s16 | u16 | s32 | u32 | s64 | u64 | char
+  | bool | s8 | u8 | s16 | u16 | s32 | u32 | s64 | u64 | f32 | f64 | char
   deriving BEq
 
 def WitScalar.name : WitScalar → String
   | .bool => "bool" | .s8 => "s8" | .u8 => "u8"
   | .s16 => "s16" | .u16 => "u16" | .s32 => "s32" | .u32 => "u32"
+  | .f32 => "f32" | .f64 => "f64"
   | .s64 => "s64" | .u64 => "u64" | .char => "char"
 
 def WitScalar.byte : WitScalar → UInt8
   | .bool => 0x7f | .s8 => 0x7e | .u8 => 0x7d
   | .s16 => 0x7c | .u16 => 0x7b | .s32 => 0x7a | .u32 => 0x79
+  | .f32 => 0x76 | .f64 => 0x75
   | .s64 => 0x78 | .u64 => 0x77 | .char => 0x74
 
 def WitScalar.coreType : WitScalar → PsWasmValueType
+  | .f32 => .f32 | .f64 => .f64
   | .u64 | .s64 => .i64 | _ => .i32
 
 def WitScalar.loadOp : WitScalar → PsWasmMemoryOp
+  | .f32 => .loadF32 | .f64 => .loadF64
   | .bool | .u8 | .s8 => .load8
   | .u16 | .s16 => .load16
   | .u64 | .s64 => .load64
   | _ => .load32
 
 def WitScalar.storeOp : WitScalar → PsWasmMemoryOp
+  | .f32 => .storeF32 | .f64 => .storeF64
   | .bool | .u8 | .s8 => .store8
   | .u16 | .s16 => .store16
   | .u64 | .s64 => .store64
@@ -61,6 +66,8 @@ def scalarApi (api : PsPublicApi) (core : PsWasmModule) (locals : LocalNames) :
   for d in api.exports do
     if !d.typeParameters.isEmpty then throw ("PSCV0-WIT-CAPABILITY: concrete export required: " ++ d.name)
     let type := fun (t : PsVerifiedIrType) => match t with
+      | .primitive .float => .ok WitScalar.f64
+      | .primitive .float32 => .ok WitScalar.f32
       | .primitive .bool => .ok WitScalar.bool
       | .primitive .char => .ok WitScalar.char
       | .primitive .uint8 => .ok WitScalar.u8 | .primitive .uint16 => .ok WitScalar.u16

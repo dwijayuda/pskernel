@@ -64,28 +64,18 @@ def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
     else none
   | _ => none
 
--- Reuse prepared fields and target identities. The callers own the checked
--- bound invariant; this is never an automatic foreign construction adapter.
-def psErasureBoundedField (scope : PsErasureScope) (owner : String) :
-    Except PsErasureError (PsRuntimeStructureInfo × PsRuntimeStructureField) := do
-  let some info := psErasureLookupStructure scope.runtimeStructures (psRootName owner)
-    | throw .unsupportedRuntimeTerm
-  let [field] := info.fields | throw .unsupportedRuntimeTerm
-  if info.unboxed || !info.typeParameters.isEmpty then throw .unsupportedRuntimeTerm
-  return (info, field)
-
 def psEraseBoundedWrap (scope : PsErasureScope) (value : PsVerifiedIrExpr) (bitvec : Bool) :
     Except PsErasureError PsVerifiedIrExpr := do
-  let (fin, val) ← psErasureBoundedField scope "Fin"
+  let (fin, val) ← psErasureSingleRuntimeField scope (psRootName "Fin")
   let value := PsVerifiedIrExpr.record fin.name [] [(val.name, value)]
   if !bitvec then return value
-  let (bits, toFin) ← psErasureBoundedField scope "BitVec"
+  let (bits, toFin) ← psErasureSingleRuntimeField scope (psRootName "BitVec")
   return .record bits.name [] [(toFin.name, value)]
 
 def psEraseBitVecNatural (scope : PsErasureScope) (value : PsVerifiedIrExpr) :
     Except PsErasureError PsVerifiedIrExpr := do
-  let (bits, toFin) ← psErasureBoundedField scope "BitVec"
-  let (fin, val) ← psErasureBoundedField scope "Fin"
+  let (bits, toFin) ← psErasureSingleRuntimeField scope (psRootName "BitVec")
+  let (fin, val) ← psErasureSingleRuntimeField scope (psRootName "Fin")
   return .projection fin.name [] (.projection bits.name [] value toFin.name) val.name
 
 def psEraseUnsignedProjection (scope : PsErasureScope) (width : PsVerifiedIrMachineIntegerType)
@@ -157,7 +147,7 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
     | "ofNatLT", [_, value, _] => return some (← psEraseBoundedWrap scope (← erase value) true)
     | "toNat", [_, value] => return some (← psEraseBitVecNatural scope (← erase value))
     | "toFin", [_, value] =>
-      let (bits, field) ← psErasureBoundedField scope "BitVec"
+      let (bits, field) ← psErasureSingleRuntimeField scope (psRootName "BitVec")
       return some (.projection bits.name [] (← erase value) field.name)
     | _, _ => return none
   else return none

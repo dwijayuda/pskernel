@@ -34,7 +34,8 @@ def psIrCheckPrimitiveName (type : PsVerifiedIrPrimitiveType) : String :=
   | .string => "string"
   | .unit => "unit"
 
--- Target-sized and signed/floating capabilities need separate qualification.
+-- Target-sized words require an explicit source width. Operation families
+-- retain their own qualification gates independently of scalar transport.
 def psIrCheckPrimitive (type : PsVerifiedIrPrimitiveType) :
     Except PsIrCheckIssue Unit :=
   match type with
@@ -42,6 +43,7 @@ def psIrCheckPrimitive (type : PsVerifiedIrPrimitiveType) :
   | .int => Except.ok Unit.unit
   | .uint8 | .uint16 | .uint32 | .uint64
   | .int8 | .int16 | .int32 | .int64 => Except.ok Unit.unit
+  | .float | .float32 => Except.ok Unit.unit
   | .bool => Except.ok Unit.unit
   | .char => Except.ok Unit.unit
   | .string => Except.ok Unit.unit
@@ -545,6 +547,16 @@ def psIrCheckIntrinsicSignature
   | .machineIntCompare type _ => do
       let value ← psIrMachineType type
       psIrCheckSignatureNoTypes typeArguments [value, value] bool
+  | .floatOfBits type =>
+      let (bits, value) : PsVerifiedIrType × PsVerifiedIrType := match type with
+        | .float => (.primitive .uint64, .primitive .float)
+        | .float32 => (.primitive .uint32, .primitive .float32)
+      psIrCheckSignatureNoTypes typeArguments [bits] value
+  | .floatToBits type =>
+      let (bits, value) : PsVerifiedIrType × PsVerifiedIrType := match type with
+        | .float => (.primitive .uint64, .primitive .float)
+        | .float32 => (.primitive .uint32, .primitive .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] bits
   | .floatBinary _ _ =>
       Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")
   | .floatCompare _ _ =>

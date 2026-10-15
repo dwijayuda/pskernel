@@ -15,6 +15,7 @@ inductive PsWasmValueType where
   | refT (name : String)
   | funcRef
   | noValue
+  deriving BEq
 
 inductive PsWasmStorageType where
   | value (type : PsWasmValueType)
@@ -28,6 +29,10 @@ structure PsWasmLoweredType where
 -- Word operations needed by the limb runtime. A single descriptor supplies
 -- their mnemonic, binary opcode and stack signature to all target consumers.
 inductive PsWasmWordOp where
+  | i32ReinterpretF32
+  | i64ReinterpretF64
+  | f32ReinterpretI32
+  | f64ReinterpretI64
   | i32Clz
   | i32DivS
   | i32DivU
@@ -52,6 +57,10 @@ structure PsWasmWordInstruction where
   result : PsWasmValueType
 
 def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
+  | .i32ReinterpretF32 => { mnemonic := "i32.reinterpret_f32", opcode := 188, parameters := [.f32], result := .i32 }
+  | .i64ReinterpretF64 => { mnemonic := "i64.reinterpret_f64", opcode := 189, parameters := [.f64], result := .i64 }
+  | .f32ReinterpretI32 => { mnemonic := "f32.reinterpret_i32", opcode := 190, parameters := [.i32], result := .f32 }
+  | .f64ReinterpretI64 => { mnemonic := "f64.reinterpret_i64", opcode := 191, parameters := [.i64], result := .f64 }
   | .i64ShrS => { mnemonic := "i64.shr_s", opcode := 135, parameters := [.i64, .i64], result := .i64 }
   | .i64RemS => { mnemonic := "i64.rem_s", opcode := 129, parameters := [.i64, .i64], result := .i64 }
   | .i64DivS => { mnemonic := "i64.div_s", opcode := 127, parameters := [.i64, .i64], result := .i64 }
@@ -71,6 +80,10 @@ def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
 
 -- Memory operations are admitted only in explicitly marked ABI modules.
 inductive PsWasmMemoryOp where
+  | loadF32
+  | loadF64
+  | storeF32
+  | storeF64
   | load32
   | load64
   | load8
@@ -90,6 +103,10 @@ structure PsWasmMemoryInstruction where
   results : List PsWasmValueType
 
 def psWasmMemoryInstruction : PsWasmMemoryOp → PsWasmMemoryInstruction
+  | .loadF32 => { mnemonic := "f32.load", bytes := [42, 2, 0], parameters := [.i32], results := [.f32] }
+  | .loadF64 => { mnemonic := "f64.load", bytes := [43, 3, 0], parameters := [.i32], results := [.f64] }
+  | .storeF32 => { mnemonic := "f32.store", bytes := [56, 2, 0], parameters := [.i32, .f32], results := [] }
+  | .storeF64 => { mnemonic := "f64.store", bytes := [57, 3, 0], parameters := [.i32, .f64], results := [] }
   | .load64 => { mnemonic := "i64.load", bytes := [41, 3, 0], parameters := [.i32], results := [.i64] }
   | .load32 => { mnemonic := "i32.load", bytes := [40, 2, 0], parameters := [.i32], results := [.i32] }
   | .load8 => { mnemonic := "i32.load8_u", bytes := [45, 0, 0], parameters := [.i32], results := [.i32] }

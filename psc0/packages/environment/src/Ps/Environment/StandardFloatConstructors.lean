@@ -5,7 +5,8 @@ import Ps.Environment.StandardFloatCanonical
 F1 logical constructors with actual pinned Format.Valid proof evidence.
 Only the 21-declaration constructor closure is selected here. The independent
 30-root mask/representation audit is deliberately not part of this environment.
-No Float runtime intrinsic, arithmetic, literal or foreign ABI is enabled.
+This layer owns logical construction only. Executable F1 bit/model transport
+is provided by the typed erasure/IR boundary; arithmetic/literals remain gated.
 -/
 
 def psStandardFloatConstructorsPublicDeclarations : List PsDeclaration :=

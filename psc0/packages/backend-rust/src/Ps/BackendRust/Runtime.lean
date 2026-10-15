@@ -7,6 +7,22 @@ use num_traits::{ToPrimitive, Zero};
 use std::rc::Rc;
 use std::str::FromStr;
 
+pub(super) fn __ps_float32_of_bits(bits: u32) -> f32 {
+    let value = f32::from_bits(bits);
+    if value.is_nan() { f32::from_bits(0x7fc00000) } else { value }
+}
+pub(super) fn __ps_float32_to_bits(value: f32) -> u32 {
+    if value.is_nan() { 0x7fc00000 } else { value.to_bits() }
+}
+
+pub(super) fn __ps_float64_of_bits(bits: u64) -> f64 {
+    let value = f64::from_bits(bits);
+    if value.is_nan() { f64::from_bits(0x7ff8000000000000) } else { value }
+}
+pub(super) fn __ps_float64_to_bits(value: f64) -> u64 {
+    if value.is_nan() { 0x7ff8000000000000 } else { value.to_bits() }
+}
+
 // Adapted from Lean 4.35.0 runtime/hash.h and hash.cpp (Microsoft, Apache-2.0).
 // Canonical little-endian MurmurHash2 bytes; pair mixing uses Lean's XOR step.
 const HASH_MULTIPLIER: u64 = 0xc6a4a7935bd1e995;

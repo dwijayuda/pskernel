@@ -1,5 +1,73 @@
 # PSCV0 v7 native implementation roadmap
 
+## Literal constraints and homogeneous operators prepared — 15 October 2026
+
+This F3 prerequisite now reuses the six native checked homogeneous classes and H* bridges already present in the selected logical assets. The selected final instance catalogue replaces redundant ground H* search entries with homogeneous ground dictionaries built from the same checked operation values. No class or bridge body is copied or replaced. Six native bridges are ordinary/default instances at priority 1000; OfNat Nat defaults at 100 and Neg Int at 500. Earlier logical asset boundaries remain immutable, and the final runtime catalogue emits the selected dictionaries and native bridges.
+
+Numerals now follow pinned Lean `Lean/Elab/BuiltinTerm.elabNumLit`: a fresh Type-valued target, expected-type constraint, raw Nat parameter and shared synthetic OfNat goal. Applications and literals share one constraint-completion operation. The special source-level Nat fallback and its unused defaulting flag are removed. This preserves local OfNat dictionaries, enables adjacent-operand inference and allows generic Add/Sub/Mul/Div/Mod/Append code.
+
+Primary references: pinned `Init/Prelude.lean`, `Init/Data/Int/Basic.lean`, `Lean/Elab/BuiltinTerm.lean`; tests `elab/{hmulDefaultInstance,dotNotationAndDefaultInstance,ofNat_class}.lean` and the previously qualified default-instance tests. The native signature audit now checks all 24 selected class/constructor/projection/bridge identities. The registry audit checks the replacement rules and exact default priorities.
+
+One paired native/source fixture adds 14 shared observations (intended total **872**): all six bridges, custom numeric operands on either side, local OfNat Nat override, Nat/negative defaulting, a higher universe, executable Float generic addition and heterogeneous multiplication. Existing refusal checks and full backend/integration/performance gates remain mandatory. Strict registry/surface pins intentionally retain the previous qualified values until independent cloud measurement is reviewed. **This slice is prepared, not qualified.**
+
+Default-instance integration is at `5e07de1006ab3539888f68015b3470bdfd921cf8`; [native38745398231](https://github.com/dwijayuda/pskernel/actions/runs/38745398231) is the exact-development gate. Independent F1 38745397954, F2 38745398267 and F3 logical 38745398095 are green. Record native completion before claiming the integration fully qualified.
+
+F1/F2 and the Array prerequisite are already qualified. F3 scientific syntax and executable conversion IR remain pending; its 134-declaration logical candidate is still unselected. Next: finish this literal-family qualification, then exact scientific syntax/OfScientific and cross-target conversions, F4 display and remaining M2+A exits. No new assumptions, budgets, pskernel-core, self-hosting or C5.
+
+## Shared default instances: research qualified, integration checkpoint — 15 October 2026
+
+Research commit `144da8fb916c63eb7057e6f2d5b6b43d465d9d87` passed [native38743248005](https://github.com/dwijayuda/pskernel/actions/runs/38743248005): **858 shared runtime observations** on TypeScript, direct JavaScript and Rust, GC Wasm/core/component execution, repeated Wasmtime calls, source/kernel/IR checks, module integration, exact assets and unchanged performance gates. Independent [F1 replay38743110807](https://github.com/dwijayuda/pskernel/actions/runs/38743110807), [F2 replay38743111243](https://github.com/dwijayuda/pskernel/actions/runs/38743111243) and [F3 logical replay38743111380](https://github.com/dwijayuda/pskernel/actions/runs/38743111380) passed at parent `9823ce526bad037e1de7da40c2485e91e7a9825b`; the sole descendant changes two fixture declarations to normative `where` syntax. Exact-development integration qualification is pending.
+
+Implemented together: separate ordered ordinary/default registries; `@[default_instance priority]`; checked class-result registration; scoped, transactional dependency solving; ordinary quiescence before one default commitment; universe instantiation; public/private imports, newest-first ties and diamond deduplication. Search exhaustion rolls back rather than choosing a lower-priority fallback. Lean distinguishes success, definite failure and stuck synthesis: top-level defaults apply only to stuck goals with compatible ordinary candidates. Nested default dependencies follow Lean's reverse-telescope, goal-first policy. Native differential oracles and compact negative/budget/module checks enforce these boundaries.
+
+Primary reference: pinned Lean 4.35.0 `Lean/Meta/{Instances,SynthInstance}.lean`, `Lean/Elab/SyntheticMVars.lean`, `Lean/Elab/Term/TermElabM.lean`; tests `elab/{defaultInstanceWithPrio,defaultInstBacktrackIssue}.lean`, `elab_fail/defaultInstance.lean`. Adaptation attribution is recorded in Synthetic.lean. PSC0 retains its immutable portable contexts and bounded tabled search.
+
+Reviewed selected pins: FNV `7059557959118648847`; declaration SHA-256 `2b0475103206285b3107cd646ea04a365bf682aef2c4c0c8bf16d21e67c65995`; surface SHA-256 `babd8330a9143aad468400ffdf5ae27fe8b5b389e0dbe087ad83cbb4056f1388`. Snapshot v3 / surface v2 explicitly record the default registry and attribute. Roster remains **3,122 declarations /25 classes /250 ordinary instances /zero Standard defaults**. The strict pins were independently measured at both existing boundaries, not relaxed.
+
+Array prerequisite is already exact-development qualified at `e3902f3d91556af40b85f65566ff6787620346ee` ([native38739411239](https://github.com/dwijayuda/pskernel/actions/runs/38739411239), 851 observations, F1/F2/F3 replays green). F1 and F2 executable families are complete. F3's 134-declaration logical candidate remains **unselected**; scientific syntax, literal constraints, numeric conversions, F4 display, target-sized profiles and remaining M2+A exits remain open.
+
+Next coherent F3 work: replace eager Nat fallback with shared OfNat constraints; implement pinned homogeneous operator/default bridges (Add/Sub/Mul/Div/Mod/Append -> heterogeneous operations) so surrounding operands constrain literals; retain exact scientific mantissa/exponent until OfScientific is chosen. Inspect existing logical declarations before adding any class. Then implement shared typed conversion IR across all backends, with direct target-width rounding. Do not implement Float32 by a potentially double-rounded binary64 intermediate. No new assumptions, budgets, pskernel-core, self-hosting or C5.
+
+## Historical checkpoints (superseded where the current checkpoint differs)
+
+## Polymorphic Array prerequisite: research qualified, main integration — 15 October 2026
+
+[Native38737651266](https://github.com/dwijayuda/pskernel/actions/runs/38737651266) passed all 30 steps at `3642e8835f36f238c88e4097914df55b199fd58e`: **851 shared runtime observations**, checked source, exact assets, readable JS/TS/Rust, GC Wasm/component and repeated Wasmtime calls, module integration and unchanged performance gates. Independent [F1 replay38736528638](https://github.com/dwijayuda/pskernel/actions/runs/38736528638), [F2 replay38736528346](https://github.com/dwijayuda/pskernel/actions/runs/38736528346), and [F3 logical replay38736528477](https://github.com/dwijayuda/pskernel/actions/runs/38736528477) passed at parent `80205a9bd25bdaa5eb6c08c75cdf7b34eba2000a`; the sole descendant change parenthesizes a type-ascribed fixture argument. No expected result was relaxed.
+
+Pinned Lean 4.35.0 `Init/Prelude.lean`, `Init/Data/Array/{Basic,BasicAux}.lean`, and tests `compile/{array,arrayMk}.lean`, `elab/{arrayGetU,array_map_module}.lean` govern this repair. Array, mk/toList, recursor, selected operations and dictionaries now carry element universe u; map/fold result and recursor motive universes are independent. ByteArray explicitly specializes to zero. Existing list-backed logical semantics and runtime layouts are preserved. Seven obsolete Type-0 audit exceptions are replaced by exact normalized signature checks. Eight observations cover both map/fold directions, default, Repr, ToFormat and Hashable; generic list/size identities are kernel checked.
+
+Strict reviewed pins: FNV `14544844717468498892`; declaration SHA-256 `373b27a0b77083baa58810055d68b6639ec00c2038da7641d3dd5c042e8f4e0d`; surface SHA-256 `579f461576427a5daf711943613979e4517803475779e40b0200f359450744fa`. Registry counts and approved assumptions are unchanged from F2. Independent native prelude measurement was 6.524s; this is an observation, not a performance-equivalence claim.
+
+This fixes the general native dependency mismatch that prevented F3's scientific fast-path tables and proofs from replaying. The **unselected** F3 logical candidate now passes: 42 roots /134 declarations /one recursor /3,286 shared nodes /617,019 UTF-8 bytes, SHA-256 `45e6c8b81fbd971c891d173acef36c2ce6f6c59b674a06ffc9bfbe2e8cff6391`. No new axioms, quotient primitives or replaced definitions.
+
+**Exact-main Array qualification is pending on this integration commit.** F2 remains main-qualified at `ef5c5e342015bfabcb58ae1f3291f0fe544cec5a`. Next coherent slice is scoped, transactional, priority-ordered default instances, followed by exact scientific syntax and typed scalar conversions. It is prepared on the F3 research branch; no claim of F3 or M2+A completion. Both handoffs track the live frontier.
+
+
+## F2 executable MAIN QUALIFIED — 15 October 2026
+
+**Qualified development commit:** `ef5c5e342015bfabcb58ae1f3291f0fe544cec5a`.
+[Native/backend38736277605](https://github.com/dwijayuda/pskernel/actions/runs/38736277605),
+[independent F1 replay38736277937](https://github.com/dwijayuda/pskernel/actions/runs/38736277937), and
+[independent F2 replay38736278026](https://github.com/dwijayuda/pskernel/actions/runs/38736278026) all pass at this exact SHA. All 30 native job steps succeeded, including 843 shared runtime observations, checked source and Standard, exact proof assets, readable target artifacts, GC core/component ABI execution, repeated Wasmtime calls, module integration and existing performance gates. The approved assumption boundary and resource limits are unchanged.
+
+F2 scope and hashes are those recorded below. This closes executable Float arithmetic/comparison/classification F2 after the already qualified F1 bit/model transport. It does **not** close F3 scientific literals/numeric conversions, F4 display, platform-word profiles, remaining M2+A, C5 or whole-backend correctness proofs.
+
+Active prerequisite work is on `psc0/pscv0-v7-f3-conversions-research`: polymorphic Array has passed signature audit, existing asset regeneration and independent F1/F2/F3 logical replay. Its full runtime qualification continues after fixing the new fixture's required parentheses around an ascribed argument. The F3 candidate remains unselected. Shared default-instance support is being designed/implemented against pinned Lean `Meta/Instances`, `Elab/SyntheticMVars` and the default-instance priority/backtracking tests. Finish the Array milestone before integrating that next coherent change. Keep both handoffs updated; native Lean/cloud CI only, no pskernel-core or self-hosting.
+
+
+## F2 executable family: research qualified, main integration — 15 October 2026
+
+[Native38734252078](https://github.com/dwijayuda/pskernel/actions/runs/38734252078) passed completely at `9ffdd799a05ee256368266831bbaec74bee18ed2`: **843 shared runtime observations** across readable JS/TS/Rust and GC Wasm/core/component, native oracles, official-kernel source admission, exact asset regeneration, ABI/WIT/WAT checks, multi-module programs, repeated Wasmtime calls and unchanged performance gates. Independent [F1 replay38733051176](https://github.com/dwijayuda/pskernel/actions/runs/38733051176) and [F2 replay38733051136](https://github.com/dwijayuda/pskernel/actions/runs/38733051136) pass at `c3081a0e0c102ba8f8fad16940301af893dcfe5b`; the descendant only corrects six constant observations to the established `args: null` schema and updates handoffs. No expected values changed.
+
+This integration selects Float/Float32 add/sub/mul/div, neg/abs, IEEE equality/order, NaN/infinity classification and checked logical equality decisions, including generic, partial and Model calls. The original Lean logical family contains 1,229 declarations /24 recursor rules /91,024 shared nodes /11,179,796 UTF-8 bytes, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. Only approved propext/Quot.sound are assumed; no new axioms or proof replacements. Proof dependencies stay out of runtime support.
+
+The typed IR adds float unary/test operations; ECMA enforces binary32 rounding per operation, Rust uses safe scalar operations, and Wasm uses native arithmetic plus memory-free classification helpers. Canonical NaN observation and signed-zero behavior follow F1. The shared constant/application erasure path now handles nullary primitives and preserves partial application. Its design follows pinned Lean `Lean/Compiler/LCNF/ToLCNF.lean` (visitCore/visitAppCore/etaIfUnderApplied). The instance registry now validates each key against the reduced result class, following `Lean/Meta/Instances.lean`; DecidableEq registers under Decidable.
+
+Reviewed selected Standard: **3,122 declarations /25 classes /250 instances**; FNV `11971833863653521941`, declaration SHA-256 `8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e`, surface SHA-256 `ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3`. All guards remain strict. Native prelude initialization measured 7.608s separately; performance gates passing does not establish optimal performance or a backend preservation theorem.
+
+**Exact-main qualification subsequently passed; see the current receipt above.** F1 remains previously main-qualified at `262c5819c499256fcd2093746deae4ef3aa2012b`. Do not call all M2+A complete. Next: finish exact-main F2 checks; qualify/integrate the universe-polymorphic Array prerequisite from `psc0/pscv0-v7-f3-conversions-research`; then scientific literals, shared priority-ordered default instances and numeric conversions (F3), display (F4), and remaining M2+A exits. The F3 logical candidate already passes [38734094036](https://github.com/dwijayuda/pskernel/actions/runs/38734094036) but remains unselected. No pskernel-core, self-hosting, compiler-source translation or C5 work.
+
+
 ## F1 executable MAIN QUALIFIED — 15 October 2026
 
 **Main implementation qualified:** `262c5819c499256fcd2093746deae4ef3aa2012b`.

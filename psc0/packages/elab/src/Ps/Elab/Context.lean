@@ -40,7 +40,6 @@ inductive PsElabPendingWork where
   | core (scope : PsElabSavedScope) (constraint : PsSyntheticConstraint)
   | expectedTerm (scope : PsElabSavedScope) (id : Nat) (value type : PsExpr)
   | sourceTerm (scope : PsElabSavedScope) (id : Nat) (source : PsSyntaxTerm)
-      (defaulting : Bool)
 
 structure PsElabContext where
   environment : PsEnvironment

@@ -2,6 +2,20 @@
 // The signed vectors are also computed independently by pinned native Lean
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
+  { name: "literalLeft", args: null, expected: 8n },
+  { name: "literalRight", args: null, expected: 8n },
+  { name: "homogeneousAdd", args: null, expected: 11n },
+  { name: "homogeneousSub", args: null, expected: 7n },
+  { name: "homogeneousMul", args: null, expected: 18n },
+  { name: "homogeneousDiv", args: null, expected: 3n },
+  { name: "homogeneousMod", args: null, expected: 2n },
+  { name: "homogeneousAppend", args: null, expected: "ab" },
+  { name: "literalLocalNat", args: null, expected: 42n },
+  { name: "literalNatural", args: null, expected: "17" },
+  { name: "literalNegative", args: null, expected: "-7" },
+  { name: "homogeneousHigh", args: null, expected: 12n },
+  { name: "homogeneousFloat", args: null, expected: 4613937818241073152n },
+  { name: "heterogeneousMul", args: null, expected: 9n },
   { name: "defaultRollback", args: null, expected: 31n },
   { name: "defaultPriority", args: null, expected: 37n },
   { name: "defaultNested", args: null, expected: 31n },

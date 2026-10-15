@@ -1,3 +1,4 @@
+import Ps.Environment.StandardOperatorDefaults
 import Ps.Environment.StandardIntArithmetic
 import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardUnsigned
@@ -111,8 +112,11 @@ def psSelfHostProdPreFloatConstructorsPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreFloatOperationsPreludeEnvironment : PsEnvironment :=
   psStandardFloatConstructorsExtend psSelfHostProdPreFloatConstructorsPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+def psSelfHostProdPreLiteralPreludeEnvironment : PsEnvironment :=
   psStandardFloatOperationsExtend psSelfHostProdPreFloatOperationsPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardOperatorDefaultsExtend psSelfHostProdPreLiteralPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
@@ -121,7 +125,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
   -- The checked ByteArray.empty value must initialize before the checked
   -- Inhabited ByteArray dictionary captures it in the shared executable IR.
   -- This order is shared by JS, TypeScript, Rust and Wasm, not a JS workaround.
-  psStandardFloatOperationsRuntimeDeclarations ++ psStandardFloatModelRuntimeDeclarations ++ psStandardFloatModelProjectionRuntimeDeclarations ++ psStandardFloatCanonicalRuntimeDeclarations ++ psStandardByteArrayRuntimeDeclarations ++ psStandardByteArrayCollectionRuntimeDeclarations ++ psStandardSumRuntimeDeclarations ++ psStandardUnsignedClampRuntimeDeclarations ++ psStandardUnsignedOfIntRuntimeDeclarations ++ psStandardUnsignedPowerRuntimeDeclarations ++ psStandardUnsignedOrderRuntimeDeclarations ++ psStandardBoolWordRuntimeDeclarations ++ psStandardSignedNumericRuntimeDeclarations ++ psStandardSignedOrderRuntimeDeclarations ++ psStandardSignedAbsRuntimeDeclarations ++ psStandardSignedClampRuntimeDeclarations ++ psStandardSignedShiftRuntimeDeclarations ++ psStandardSignedOfIntRuntimeDeclarations ++ psStandardSignedToIntRuntimeDeclarations ++ psStandardSignedScalarRuntimeDeclarations ++ psStandardUnsignedOperationsRuntimeDeclarations ++ psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  let prior := psStandardFloatOperationsRuntimeDeclarations ++ psStandardFloatModelRuntimeDeclarations ++ psStandardFloatModelProjectionRuntimeDeclarations ++ psStandardFloatCanonicalRuntimeDeclarations ++ psStandardByteArrayRuntimeDeclarations ++ psStandardByteArrayCollectionRuntimeDeclarations ++ psStandardSumRuntimeDeclarations ++ psStandardUnsignedClampRuntimeDeclarations ++ psStandardUnsignedOfIntRuntimeDeclarations ++ psStandardUnsignedPowerRuntimeDeclarations ++ psStandardUnsignedOrderRuntimeDeclarations ++ psStandardBoolWordRuntimeDeclarations ++ psStandardSignedNumericRuntimeDeclarations ++ psStandardSignedOrderRuntimeDeclarations ++ psStandardSignedAbsRuntimeDeclarations ++ psStandardSignedClampRuntimeDeclarations ++ psStandardSignedShiftRuntimeDeclarations ++ psStandardSignedOfIntRuntimeDeclarations ++ psStandardSignedToIntRuntimeDeclarations ++ psStandardSignedScalarRuntimeDeclarations ++ psStandardUnsignedOperationsRuntimeDeclarations ++ psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure
@@ -132,3 +136,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardGetElemOptionalDefaultDeclarations ++ psStandardNatOrderDeclarations ++
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
     psStandardArrayRuntimeDeclarations
+
+  psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    prior.filter (fun declaration =>
+      !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration)))

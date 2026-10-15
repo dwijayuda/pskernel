@@ -16,7 +16,7 @@ def psElabHasPendingInput (context : PsElabContext) (expected : Option PsExpr) :
       unresolved (psLocalDeclType localDecl))
 
 def psElabSuspend (context : PsElabContext) (source : PsSyntaxTerm)
-    (expected : Option PsExpr) (defaulting : Bool := false) : PsElabTermResult :=
+    (expected : Option PsExpr) : PsElabTermResult :=
   let target := match expected with
     | some type => PsElabTypeResult.mk context type
     | none => psElabFreshType context
@@ -25,29 +25,30 @@ def psElabSuspend (context : PsElabContext) (source : PsSyntaxTerm)
   let context := psElabContextWithMeta target.context fresh.context
   let pending := match fresh.expr with
     | .mvar id => PsElabPendingWork.sourceTerm (psElabSaveScope context)
-        id source defaulting :: context.pending
+        id source :: context.pending
     | _ => context.pending
   { context := { context with pending }, term := fresh.expr, type := target.type }
 
--- A numeral can use later type information before the pinned Nat fallback.
--- Tactics must not turn an unresolved expected proposition into a guessed one.
+-- Syntax continuations wait for structural information. Numerals now own
+-- ordinary OfNat constraints and share the same default-instance scheduling.
 def psElabDelayBefore (context : PsElabContext) (source : PsSyntaxTerm)
-    (expected : Option PsExpr) : Option Bool := do
-  if !context.postponing then none else
-  let type ← expected
-  let type := psWhnf context.environment context.metaContext context.localContext type
-  match source with
-  | .natural _ _ => match type with | .mvar _ => some true | _ => none
-  | .record _ _ => match type with | .mvar _ => some false | _ => none
-  | .byE _ _ _ => if psExprHasTermMeta type then some false else none
-  | _ => none
+    (expected : Option PsExpr) : Bool :=
+  if !context.postponing then false else
+  match expected with
+  | none => false
+  | some type =>
+    let type := psWhnf context.environment context.metaContext context.localContext type
+    match source with
+    | .record _ _ => match type with | .mvar _ => true | _ => false
+    | .byE _ _ _ => psExprHasTermMeta type
+    | _ => false
 
 def psElabWithPostponement (attempt : Unit → Except PsElabError PsElabTermResult)
     (context : PsElabContext) (source : PsSyntaxTerm) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match psElabDelayBefore context source expected with
-  | some defaulting => .ok (psElabSuspend context source expected defaulting)
-  | none => match attempt () with
+  if psElabDelayBefore context source expected then
+    .ok (psElabSuspend context source expected)
+  else match attempt () with
     | .ok result => .ok result
     | .error error =>
       if context.postponing && psElabErrorMayPostpone error &&
@@ -58,7 +59,7 @@ def psElabWithPostponement (attempt : Unit → Except PsElabError PsElabTermResu
 def psElabPendingIsDefault : PsElabPendingWork → Bool
   | .core _ constraint => psSyntheticIsDefault constraint
   | .expectedTerm _ _ _ _ => false
-  | .sourceTerm _ _ _ defaulting => defaulting
+  | .sourceTerm _ _ _ => false
 
 def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
     (work : PsElabPendingWork) : Except PsElabError PsElabContext := do
@@ -80,7 +81,7 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
     let some metaContext := psSyntheticAssign saved.environment result.context.metaContext
         id result.term | throw .typeMismatch
     return psElabLeaveScope context (psElabContextWithMeta result.context metaContext)
-  | .sourceTerm scope id source _ =>
+  | .sourceTerm scope id source =>
     let saved := psElabRestoreScope { context with postponing := false } scope
     let some declaration := psMetaFindDecl saved.metaContext id
       | throw .unresolvedMetavariable
@@ -98,18 +99,15 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
 
 def psElabPendingPriorities : PsElabPendingWork → List Nat
   | .core scope constraint => psSyntheticConstraintPriorities scope.instances constraint
-  | .sourceTerm _ _ _ true => [0]
   | _ => []
 
-def psElabResumeDefault (elaborate : PsElaborator) (context : PsElabContext)
+def psElabResumeDefault (context : PsElabContext)
     (work : PsElabPendingWork) (priority : Nat) : Except Unit (Option PsElabContext) :=
   match work with
   | .core scope constraint =>
     (psSyntheticAttemptDefault scope.environment scope.instances
       context.metaContext constraint priority).map
         (fun result => result.map (psElabContextWithMeta context))
-  | .sourceTerm _ _ _ true =>
-    .ok (if priority == 0 then (psElabResumeWork elaborate context work).toOption else none)
   | _ => .ok none
 
 def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
@@ -118,7 +116,7 @@ def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
   let attempt := fun current work =>
     (psElabResumeWork elaborate current work).toOption
   let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
-    psElabPendingPriorities (psElabResumeDefault elaborate)
+    psElabPendingPriorities psElabResumeDefault
     context result.context.pending.reverse true limit
   if solved.resourceExceeded then throw .fuelExhausted
   -- Re-run just the first blocked item for its owning diagnostic. The queue

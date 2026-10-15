@@ -466,6 +466,7 @@ def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
 def psStandardSnapshotValidate (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
   psStandardExceptAudit environment
+  psStandardOperatorDefaultsAudit environment
   let payload := psStandardSnapshotPayload environment
   let observedFNV := "fnv1a64:" ++ toString (psStandardSnapshotFNV64 payload)
   let observedSHA := "sha256:" ++ psStandardSnapshotSHA256 payload

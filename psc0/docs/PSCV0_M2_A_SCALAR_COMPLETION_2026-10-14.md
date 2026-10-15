@@ -1,5 +1,17 @@
 # M2+A scalar completion design — Lean 4.35.0
 
+## F2 executable MAIN QUALIFIED — 15 October 2026
+
+**Qualified development commit:** `ef5c5e342015bfabcb58ae1f3291f0fe544cec5a`.
+[Native/backend38736277605](https://github.com/dwijayuda/pskernel/actions/runs/38736277605),
+[independent F1 replay38736277937](https://github.com/dwijayuda/pskernel/actions/runs/38736277937), and
+[independent F2 replay38736278026](https://github.com/dwijayuda/pskernel/actions/runs/38736278026) all pass at this exact SHA. All 30 native job steps succeeded, including 843 shared runtime observations, checked source and Standard, exact proof assets, readable target artifacts, GC core/component ABI execution, repeated Wasmtime calls, module integration and existing performance gates. The approved assumption boundary and resource limits are unchanged.
+
+F2 scope and hashes are those recorded below. This closes executable Float arithmetic/comparison/classification F2 after the already qualified F1 bit/model transport. It does **not** close F3 scientific literals/numeric conversions, F4 display, platform-word profiles, remaining M2+A, C5 or whole-backend correctness proofs.
+
+Active prerequisite work is on `psc0/pscv0-v7-f3-conversions-research`: polymorphic Array has passed signature audit, existing asset regeneration and independent F1/F2/F3 logical replay. Its full runtime qualification continues after fixing the new fixture's required parentheses around an ascribed argument. The F3 candidate remains unselected. Shared default-instance support is being designed/implemented against pinned Lean `Meta/Instances`, `Elab/SyntheticMVars` and the default-instance priority/backtracking tests. Finish the Array milestone before integrating that next coherent change. Keep both handoffs updated; native Lean/cloud CI only, no pskernel-core or self-hosting.
+
+
 ## F2 executable family: research qualified, main integration — 15 October 2026
 
 [Native38734252078](https://github.com/dwijayuda/pskernel/actions/runs/38734252078) passed completely at `9ffdd799a05ee256368266831bbaec74bee18ed2`: **843 shared runtime observations** across readable JS/TS/Rust and GC Wasm/core/component, native oracles, official-kernel source admission, exact asset regeneration, ABI/WIT/WAT checks, multi-module programs, repeated Wasmtime calls and unchanged performance gates. Independent [F1 replay38733051176](https://github.com/dwijayuda/pskernel/actions/runs/38733051176) and [F2 replay38733051136](https://github.com/dwijayuda/pskernel/actions/runs/38733051136) pass at `c3081a0e0c102ba8f8fad16940301af893dcfe5b`; the descendant only corrects six constant observations to the established `args: null` schema and updates handoffs. No expected values changed.
@@ -10,7 +22,7 @@ The typed IR adds float unary/test operations; ECMA enforces binary32 rounding p
 
 Reviewed selected Standard: **3,122 declarations /25 classes /250 instances**; FNV `11971833863653521941`, declaration SHA-256 `8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e`, surface SHA-256 `ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3`. All guards remain strict. Native prelude initialization measured 7.608s separately; performance gates passing does not establish optimal performance or a backend preservation theorem.
 
-**Exact-main qualification is pending on this integration commit.** F1 remains previously main-qualified at `262c5819c499256fcd2093746deae4ef3aa2012b`. Do not call all M2+A complete. Next: finish exact-main F2 checks; qualify/integrate the universe-polymorphic Array prerequisite from `psc0/pscv0-v7-f3-conversions-research`; then scientific literals, shared priority-ordered default instances and numeric conversions (F3), display (F4), and remaining M2+A exits. The F3 logical candidate already passes [38734094036](https://github.com/dwijayuda/pskernel/actions/runs/38734094036) but remains unselected. No pskernel-core, self-hosting, compiler-source translation or C5 work.
+**Exact-main qualification subsequently passed; see the current receipt above.** F1 remains previously main-qualified at `262c5819c499256fcd2093746deae4ef3aa2012b`. Do not call all M2+A complete. Next: finish exact-main F2 checks; qualify/integrate the universe-polymorphic Array prerequisite from `psc0/pscv0-v7-f3-conversions-research`; then scientific literals, shared priority-ordered default instances and numeric conversions (F3), display (F4), and remaining M2+A exits. The F3 logical candidate already passes [38734094036](https://github.com/dwijayuda/pskernel/actions/runs/38734094036) but remains unselected. No pskernel-core, self-hosting, compiler-source translation or C5 work.
 
 
 ## F2 coherent implementation staged; qualification pending — 15 October 2026

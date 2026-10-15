@@ -1,0 +1,131 @@
+name: PSKernel-C0 bounded-hash checked-app memoization ablation
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-checked-app-cache-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-cache-hash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Export exact pinned well-founded theorem and verify with official Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/hash-wf.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/hash-wf.ndjson" > "$RUNNER_TEMP/hash-wf-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/hash-wf.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/hash-wf.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/hash-wf.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/hash-wf-official.txt"
+          echo "C0_CHECKED_APP_ABLATION_PINNED_SOURCE=official_accepted"
+      - name: Bound structural hash and memoize checked app syntax only in disposable C0
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean")
+          s=path.read_text()
+          start=s.index("def psKernelExprHash\n")
+          end=s.index("\n/-- Exact immutable structural hashes",start)
+          original=s[start:end]
+          assert original.count("psKernelExprHash") == 12, "Unknown source hash shape; refuse modification"
+          body=original[original.index("  match expr with\n"):]
+          body=body.replace("psKernelExprHash", "psKernelExprHashBounded remaining")
+          bounded=(
+              "def psKernelExprHashBounded : Nat → PsKernelExpr → Nat\n"
+              "  | 0, _ => 37\n"
+              "  | Nat.succ remaining, expr =>\n"
+              + "\n".join("    "+v for v in body.rstrip().splitlines())+"\n\n"
+              "def psKernelExprHash (expr : PsKernelExpr) : Nat :=\n"
+              "  psKernelExprHashBounded 8 expr\n"
+          )
+          s=s[:start]+bounded+s[end:]
+          # Let-frame precomputed hashes must equal the same bounded hash
+          # as ordinary insertion, or cache lookup would miss exact entries.
+          begin=s.index("def psKernelC0LetCacheFramesWithFuel")
+          end=s.index("\n/-\nPSKernel-C0 radix-16",begin)
+          region=s[begin:end]
+          hash_start=region.index("            let h :=")
+          hash_end=region.index("            pure (",hash_start)
+          region=region[:hash_start]+"            let h := psKernelExprHash expr\n"+region[hash_end:]
+          s=s[:begin]+region+s[end:]
+          path.write_text(s)
+          print("C0_HASH_ABLATION root_depth=8 consistent_let_keys=true full_source_untouched=true")
+          PY
+          python3 - <<'PY'
+          from pathlib import Path
+          path=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean")
+          source=path.read_text()
+          old='  | PsKernelExpr.app _ _ =>\n      inferOnly'
+          assert source.count(old)==1, "unknown checked application eligibility"
+          path.write_text(source.replace(old,'  | PsKernelExpr.app _ _ =>\n      true'))
+          print("C0_CHECKED_APP_ABLATION checked_app_memo_only=true source_fuel=unchanged")
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Check negative, source hash and exact verifier conformance
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          lake build Ps.KernelCore.Core.IndexedStoreValidation
+          lake env lean --run test/C0IndexedStoreValidationRegression.lean
+          lake build Ps.KernelCore.API.VerifiedProvider Ps.KernelCore.Architecture.QualifiedRecursiveInference
+          lake env lean --run test/C0RecursiveCheckedInferenceRegression.lean
+          echo "C0_CHECKED_APP_ABLATION_NATIVE_REGRESSIONS=passed"
+      - name: Measure real pinned WF theorem at unchanged fuel and strict verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/hash-wf-resources.txt" \
+              timeout 175s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/hash-wf.ndjson" 4096
+          ) > "$RUNNER_TEMP/hash-wf-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_CHECKED_APP_ABLATION_PROCESS_EXIT=$rc"
+          grep "C0_REAL_EXPORT replay_outcome" "$RUNNER_TEMP/hash-wf-c0.txt" | tail -n 2 || true
+          if test "$rc" -eq 0 &&
+               grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096" "$RUNNER_TEMP/hash-wf-c0.txt"; then
+            echo "C0_CHECKED_APP_ABLATION_RESULT=accepted_closure_candidate_only"
+          else
+            echo "C0_CHECKED_APP_ABLATION_RESULT=not_qualified_timeout_or_error"
+            tail -n 15 "$RUNNER_TEMP/hash-wf-c0.txt"
+          fi
+          cat "$RUNNER_TEMP/hash-wf-resources.txt"
+          echo "C0_CHECKED_APP_ABLATION_SCOPE=disposable_untrusted_no_kernel_production_change"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-checked-app-cache-ablation
+          path: |
+            ${{ runner.temp }}/hash-wf-official.txt
+            ${{ runner.temp }}/hash-wf-c0.txt
+            ${{ runner.temp }}/hash-wf-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

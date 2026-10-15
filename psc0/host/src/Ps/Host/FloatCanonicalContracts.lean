@@ -186,6 +186,59 @@ theorem upstreamPackUnpack_zero32 (bits : BitVec 32)
     simpa [UnpackedFloat.packedZero, he, hm] using hrec
   simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm] using hZero
 
+
+-- Raw subnormal reconstruction: a nonzero mantissa with a zero exponent
+-- retains every mantissa and sign bit through upstream unpack/repack.
+theorem upstreamPackUnpack_subnormal64 (bits : BitVec 64)
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (0#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits ≠ (0#_)) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary64) bits
+  have hpos : mantissa.toNat ≠ 0 := by
+    intro h
+    apply hm
+    apply BitVec.toNat_inj
+    simpa [mantissa] using h
+  have hlog : mantissa.toNat.log2 < 52 :=
+    (Nat.log2_lt hpos).2 mantissa.isLt
+  have hsmall : mantissa.toNat.log2 + 1 ≠ 53 := by omega
+  have hrec := reconstructPackedFields64 bits
+  have hsub : UnpackedFloat.packComponents Format.binary64
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary64) bits))
+      (0#_) mantissa = bits := by
+    simpa [mantissa, he] using hrec
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
+    Format.binary64, Format.exponentBias, Format.mantissaBits,
+    he, hm, mantissa, hsmall] using hsub
+
+-- Raw subnormal reconstruction: a nonzero mantissa with a zero exponent
+-- retains every mantissa and sign bit through upstream unpack/repack.
+theorem upstreamPackUnpack_subnormal32 (bits : BitVec 32)
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (0#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits ≠ (0#_)) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary32) bits
+  have hpos : mantissa.toNat ≠ 0 := by
+    intro h
+    apply hm
+    apply BitVec.toNat_inj
+    simpa [mantissa] using h
+  have hlog : mantissa.toNat.log2 < 23 :=
+    (Nat.log2_lt hpos).2 mantissa.isLt
+  have hsmall : mantissa.toNat.log2 + 1 ≠ 24 := by omega
+  have hrec := reconstructPackedFields32 bits
+  have hsub : UnpackedFloat.packComponents Format.binary32
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary32) bits))
+      (0#_) mantissa = bits := by
+    simpa [mantissa, he] using hrec
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked,
+    Format.binary32, Format.exponentBias, Format.mantissaBits,
+    he, hm, mantissa, hsmall] using hsub
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream

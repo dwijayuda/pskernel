@@ -47,18 +47,23 @@ namespace OperatorDefaultIsolationOracle
 structure Bag where
   value : Nat
 section
-@[default_instance 1100] local instance : HMul Nat Bag Bag where
+@[local default_instance 1100] local instance : HMul Nat Bag Bag where
   hMul a b := ⟨a * b.value⟩
-example : True := by
-  fail_if_success
-    have : Nat := 17 % 5 * 2 + 3
-  trivial
+run_meta do
+  let rejected ← Lean.Elab.Term.withoutErrToSorry do
+    try
+      let _ ← Lean.Elab.Term.elabTermAndSynthesize
+        (← `(17 % 5 * 2 + 3)) (some (Lean.mkConst ``Nat))
+      pure false
+    catch _ => pure true
+  unless rejected do
+    throwError "heterogeneous default interference unexpectedly accepted"
 end
 structure Scale where
   value : Nat
 local instance {n : Nat} : OfNat Scale n where ofNat := ⟨n⟩
 local instance : Mul Bag where mul a b := ⟨a.value * b.value⟩
-@[default_instance 1100] local instance : HMul Scale Bag Bag where
+@[local default_instance 1100] local instance : HMul Scale Bag Bag where
   hMul a b := ⟨a.value * b.value⟩
 #guard (2 * Bag.mk 11).value == 22
 #guard (17 % 5 * 2 + 3 : Nat) == 7

@@ -9,6 +9,10 @@ Repository dwijayuda/pskernel. Use GitHub connector and cloud Linux CI exclusive
 
 Development psc0/pscv0-v7-native-lean-v1; draft PR109 targets psc0/pscv0-v7-m1-parser-ownership-v1. Keep draft, never merge. Research psc0/pscv0-v7-platform-words-research. Preserve both histories and newer development docs when integrating. Update both handoff files and roadmap/status every milestone. Interleave M2+A -> M3+B -> M4+C/D -> M5/E; current user asks to complete M2+A.
 
+## Native oracle follow-up
+
+The independent native build at `dcae2c825a4d73be3fa204e095ff1f54dc461ec9` ([38816403714](https://github.com/dwijayuda/pskernel/actions/runs/38816403714)) reproduced the predicted `OfNat Bag 2` and `HAdd Bag Nat Nat` failures. Its rejection harness needed two Lean-specific corrections: disable error-to-sorry recovery around full term synthesis, and mark the default attribute itself local (a local instance alone does not scope an independently global default attribute). Corrected the native harness; portable compiler logic and acceptance are unchanged. New cloud qualification remains required.
+
 ## Operator-default isolation checkpoint
 
 At `515894a39e6c272dd472f64f6cef5f247cfd705f`, native [38815020011](https://github.com/dwijayuda/pskernel/actions/runs/38815020011) passed compilation, the strict selected surface and declaration audits, and every frozen logical asset replay. Independent logical [38815020141](https://github.com/dwijayuda/pskernel/actions/runs/38815020141) passed. Full source qualification stopped at `arithmeticModulo`; backend steps were skipped.

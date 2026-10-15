@@ -45,3 +45,8 @@ At `515894a39e6c272dd472f64f6cef5f247cfd705f`, native [38815020011](https://gith
 
 Source study of pinned Lean `Extra.lean` (`hasHeterogeneousDefaultInstances` and `applyCoe`) identified fixture interference: the new global priority-1100 `HMul Nat Bag Bag` protects an unknown right operand and may select Bag before its OfNat obligation can fail. Namespace membership does not scope instances. The shared runtime fixture now uses a dedicated checked `Scale` numeral type for its left operand; it still tests unknown-literal heterogeneous default selection. The original Nat/Bag interaction remains an explicit isolated refusal paired with an independent native Lean oracle. Unrelated arithmetic remains unchanged; compiler semantics, gates and budgets are unchanged. This correction awaits cloud confirmation.
 
+
+## Native oracle follow-up
+
+The independent native build at `dcae2c825a4d73be3fa204e095ff1f54dc461ec9` ([38816403714](https://github.com/dwijayuda/pskernel/actions/runs/38816403714)) reproduced the predicted `OfNat Bag 2` and `HAdd Bag Nat Nat` failures. Its rejection harness needed two Lean-specific corrections: disable error-to-sorry recovery around full term synthesis, and mark the default attribute itself local (a local instance alone does not scope an independently global default attribute). Corrected the native harness; portable compiler logic and acceptance are unchanged. New cloud qualification remains required.
+

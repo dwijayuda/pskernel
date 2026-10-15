@@ -133,6 +133,59 @@ theorem reconstructPackedFields32 (bits : BitVec 32) :
   simpa using (BitVec.extractLsb'_append_extractLsb'
     (x := bits) (w := 9) (len := 23))
 
+
+-- Upstream representation reconstruction for every infinity and signed-zero
+-- encoding at this width; both sign bits are covered symbolically.
+theorem upstreamPackUnpack_infinity64 (bits : BitVec 64)
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#_)) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  have hrec := reconstructPackedFields64 bits
+  have hInf : UnpackedFloat.packedInfinity Format.binary64
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary64) bits)) = bits := by
+    simpa [UnpackedFloat.packedInfinity, he, hm] using hrec
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm] using hInf
+
+theorem upstreamPackUnpack_zero64 (bits : BitVec 64)
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (0#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#_)) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  have hrec := reconstructPackedFields64 bits
+  have hZero : UnpackedFloat.packedZero Format.binary64
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary64) bits)) = bits := by
+    simpa [UnpackedFloat.packedZero, he, hm] using hrec
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm] using hZero
+
+-- Upstream representation reconstruction for every infinity and signed-zero
+-- encoding at this width; both sign bits are covered symbolically.
+theorem upstreamPackUnpack_infinity32 (bits : BitVec 32)
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#_)) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  have hrec := reconstructPackedFields32 bits
+  have hInf : UnpackedFloat.packedInfinity Format.binary32
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary32) bits)) = bits := by
+    simpa [UnpackedFloat.packedInfinity, he, hm] using hrec
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm] using hInf
+
+theorem upstreamPackUnpack_zero32 (bits : BitVec 32)
+    (he : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (0#_))
+    (hm : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#_)) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  have hrec := reconstructPackedFields32 bits
+  have hZero : UnpackedFloat.packedZero Format.binary32
+      (UnpackedFloat.Sign.ofBitVec
+        (UnpackedFloat.unpackSign (spec := Format.binary32) bits)) = bits := by
+    simpa [UnpackedFloat.packedZero, he, hm] using hrec
+  simpa [UnpackedFloat.unpack, UnpackedFloat.pack, canonicalPacked, he, hm] using hZero
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream

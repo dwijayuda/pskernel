@@ -2,7 +2,7 @@
 
 ## F3 logical dependency gate prepared — 15 October 2026
 
-Research branch `psc0/pscv0-v7-f3-conversions-research` starts from F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.
+Research branch `psc0/pscv0-v7-f3-conversions-research` was based on F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` and now incorporates its class-key audit and corrected metadata pins through `cbdb554fa9209361cd72217432fb8435d1a15022` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.
 
 Pinned Lean 4.35.0 sources studied: Init/Data/OfScientific{,/Basic}; Float/{Float,Float32}, Model/{Float,Float32}, Model/Unpacked/Operations/{OfNat,ToNat,OfScientific}; SInt/Float{,32}; Lean/Parser/Basic.decimalNumberFn and Lean/Elab/BuiltinTerm.elabScientificLit. Relevant tests: elab/float_conversions.lean, elab_fail/scientific.lean, pkg/ofScientific/{Main.lean,test-data/README.md,doubleround.txt}. Existing scalar-completion design remains the roadmap.
 
@@ -12,7 +12,17 @@ Semantic design: scientific lexing retains an exact mantissa, signed decimal exp
 
 Next: inspect this gate's proof/closure result, assess any dependency-family mismatches, finish F2 exact main qualification, then implement F3 coherently. No F3 acceptance/runtime claim. Keep both handoffs current.
 
-## Prior checkpoint (F2 runtime still pending)
+F3 first run38730356496 built the exporter but stopped on a missing CLI success return in the adjacent F2 branch. This return is restored; no logical candidate result was produced by that run.
+
+
+## F2 instance-index invariant reviewed — 15 October 2026
+
+Research `49a38a118b6ed2b0fa5955bac4b8d9399c4b6466` fixes the Float equality registration: DecidableEq is a reducible Pi alias, so its result-class key is Decidable. Pinned Lean Meta/Instances.{mkInstanceKey,checkNonClassInstance} and SynthInstance were studied. A shared Standard manifest audit now reduces every registered instance telescope and checks its explicit key against the actual registered result class, preventing this entire metadata failure family. The unchanged native logical asset still passes independent F2 replay [38730889909](https://github.com/dwijayuda/pskernel/actions/runs/38730889909), and F1 replay [38730889978](https://github.com/dwijayuda/pskernel/actions/runs/38730889978) passes.
+
+[Native38730889997](https://github.com/dwijayuda/pskernel/actions/runs/38730889997) built successfully, passed the new class-key audit and all 88 native Float oracle observations, then independently reported the metadata-only digest change. Reviewed current pins: `fnv1a64:11971833863653521941`; declaration `sha256:8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e`; surface `sha256:ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3`. Standard remains 3,122 declarations. The older pin checkpoint below is superseded. Full runtime/backend qualification is still required.
+
+F3 dependency research proceeds separately at `cafabfdadf0453cb9e8e7355bb8a952bc39a644a`, [38730356496](https://github.com/dwijayuda/pskernel/actions/runs/38730356496), with 42 scientific/fixed-word conversion roots and no F3 selection. Its gate is based on F2's declaration roster; after F2 qualification synchronize metadata before F3 integration. Main F1 remains unchanged and qualified. No new assumptions, pskernel-core, self-hosting or C5.
+
 
 ## F2 registry review; full runtime qualification pending — 15 October 2026
 

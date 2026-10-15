@@ -2,7 +2,7 @@
 
 ## F3 logical dependency gate prepared — 15 October 2026
 
-Research branch `psc0/pscv0-v7-f3-conversions-research` starts from F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.
+Research branch `psc0/pscv0-v7-f3-conversions-research` was based on F2 candidate `d70fe6c562d7643f9b42a13d72f718ae146b1d7c` and now incorporates its class-key audit and corrected metadata pins through `cbdb554fa9209361cd72217432fb8435d1a15022` while F2 full runtime qualification continues independently. This branch adds only native authoring/export and a read-only cloud replay workflow; it does not select any F3 declaration or enable new syntax/runtime operations.
 
 Pinned Lean 4.35.0 sources studied: Init/Data/OfScientific{,/Basic}; Float/{Float,Float32}, Model/{Float,Float32}, Model/Unpacked/Operations/{OfNat,ToNat,OfScientific}; SInt/Float{,32}; Lean/Parser/Basic.decimalNumberFn and Lean/Elab/BuiltinTerm.elabScientificLit. Relevant tests: elab/float_conversions.lean, elab_fail/scientific.lean, pkg/ofScientific/{Main.lean,test-data/README.md,doubleround.txt}. Existing scalar-completion design remains the roadmap.
 
@@ -12,15 +12,17 @@ Semantic design: scientific lexing retains an exact mantissa, signed decimal exp
 
 Next: inspect this gate's proof/closure result, assess any dependency-family mismatches, finish F2 exact main qualification, then implement F3 coherently. No F3 acceptance/runtime claim. Keep both handoffs current.
 
-## Prior checkpoint (F2 runtime still pending)
+F3 first run38730356496 built the exporter but stopped on a missing CLI success return in the adjacent F2 branch. This return is restored; no logical candidate result was produced by that run.
 
-## F2 registry review; full runtime qualification pending — 15 October 2026
 
-Research `6043e3e1891a326c2cd618925d5b5cfc8ec6c9e2` built the complete native compiler. Independent F1 replay [38729006486](https://github.com/dwijayuda/pskernel/actions/runs/38729006486) and byte-exact F2 replay [38729006492](https://github.com/dwijayuda/pskernel/actions/runs/38729006492) passed. F2 remains exactly 1,229 exported declarations /24 recursor rules /91,024 shared nodes, 11,179,796 source bytes, SHA-256 `ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df`. No new axioms or computational replacements.
+## F2 instance-index invariant reviewed — 15 October 2026
 
-[Native run38729006660](https://github.com/dwijayuda/pskernel/actions/runs/38729006660) passed the expanded primitive/reducibility audit and all 88 pinned native Float reference observations, then correctly refused the intentional selected-registry expansion. The independently observed exact pins are now reviewed: FNV `fnv1a64:2505184579072579125`, declaration SHA `sha256:387824db2d09a897d682b9e4f3d9695f4b31b30f2eca169d999e243dcfa38f66`, surface SHA `sha256:a90cd3d4ac970e2247329b79a748c5dc7d93b5c9f7d48c94cd0a565c8ec324c7`. Strict checks remain enabled.
+Research `49a38a118b6ed2b0fa5955bac4b8d9399c4b6466` fixes the Float equality registration: DecidableEq is a reducible Pi alias, so its result-class key is Decidable. Pinned Lean Meta/Instances.{mkInstanceKey,checkNonClassInstance} and SynthInstance were studied. A shared Standard manifest audit now reduces every registered instance telescope and checks its explicit key against the actual registered result class, preventing this entire metadata failure family. The unchanged native logical asset still passes independent F2 replay [38730889909](https://github.com/dwijayuda/pskernel/actions/runs/38730889909), and F1 replay [38730889978](https://github.com/dwijayuda/pskernel/actions/runs/38730889978) passes.
 
-The complete F2 code is on `psc0/pscv0-v7-f2-operations-research`; main remains qualified F1 at `262c5819c499256fcd2093746deae4ef3aa2012b`. Next run must qualify source elaboration/erasure, all 843 shared observations, GC Wasm/component execution, WIT/WAT and performance before integration. Do not call F2 or M2+A complete yet. Native .lean only; no pskernel-core, self-hosting/bootstrap or C5.
+[Native38730889997](https://github.com/dwijayuda/pskernel/actions/runs/38730889997) built successfully, passed the new class-key audit and all 88 native Float oracle observations, then independently reported the metadata-only digest change. Reviewed current pins: `fnv1a64:11971833863653521941`; declaration `sha256:8a3fbf1e59845739e6926b7e52add0059a33054cf74625f64923d4f360c43c7e`; surface `sha256:ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3`. Standard remains 3,122 declarations. The older pin checkpoint below is superseded. Full runtime/backend qualification is still required.
+
+F3 dependency research proceeds separately at `cafabfdadf0453cb9e8e7355bb8a952bc39a644a`, [38730356496](https://github.com/dwijayuda/pskernel/actions/runs/38730356496), with 42 scientific/fixed-word conversion roots and no F3 selection. Its gate is based on F2's declaration roster; after F2 qualification synchronize metadata before F3 integration. Main F1 remains unchanged and qualified. No new assumptions, pskernel-core, self-hosting or C5.
+
 
 ## Working contract
 
@@ -35,7 +37,7 @@ Read the latest AI_WORK_STATE.md checkpoint, docs/PSCV0_NATIVE_IMPLEMENTATION_RO
 1. Inspect live research HEAD and current native/F1/F2 workflow results. The former Wasm fallback became redundant after exhaustive F2 dispatch; it was removed. The primitive audit now includes Model methods and Eq decision helpers. Do not redo qualified F1.
 2. Finish coherent F2 qualification after the exact registry pins above. Fix root causes without weakening checks. Integrate the reviewed tree to fresh main only after all required lanes pass, restore workflow main-branch triggers, then qualify the exact main commit. Update BOTH handoff files, roadmap and PR evidence.
 3. Continue F3 scientific syntax/defaults and scalar conversions, F4 complete Float qualification, USize/ISize explicit target profiles and remaining authoritative selected Standard/manifest obligations. Study the whole affected subsystem first.
-4. F3 source study already covers pinned Parser/Basic.decimalNumberFn, Elab/BuiltinTerm.elabScientificLit, Init/Data/OfScientific{,/Basic}, Float/Model/Unpacked/Operations/OfScientific and tests/pkg/ofScientific (including doubleround.txt). Keep exact Nat mantissa, exponent sign and Nat exponent until the expected type/OfScientific instance is selected. Default Float priority is 501. Reuse exact rounding and exponent bounds; do not parse via binary64 before choosing Float32. No F3 implementation is staged yet.
+4. F3 research at cafabfdadf0453cb9e8e7355bb8a952bc39a644a (run38730356496) covers pinned Parser/Basic.decimalNumberFn, Elab/BuiltinTerm.elabScientificLit, Init/Data/OfScientific{,/Basic}, Float/Model/Unpacked/Operations/OfScientific and tests/pkg/ofScientific (including doubleround.txt). Keep exact Nat mantissa, exponent sign and Nat exponent until the expected type/OfScientific instance is selected. Default Float priority is 501. Reuse exact rounding and exponent bounds; do not parse via binary64 before choosing Float32. Only the isolated F3 logical exporter gate is staged; syntax/runtime remain pending.
 
 ## Verification and invariants
 

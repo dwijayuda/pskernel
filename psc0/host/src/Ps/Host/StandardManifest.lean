@@ -147,9 +147,9 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
 
 -- Independently measured together with both declaration pins by the strict
--- registry refusal at 6043e3e1 / native CI38729006660 (F2).
+-- registry refusal at 49a38a11 / native CI38730889997 (F2).
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:a90cd3d4ac970e2247329b79a748c5dc7d93b5c9f7d48c94cd0a565c8ec324c7"
+  "sha256:ff2b3e2ed6e043cb11a332d5175ff1116f8e4c1a4c13a91baca71bb53a917fc3"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
@@ -178,8 +178,27 @@ def selectedNotationAudit : Except String Unit := do
   if (psPscv0InfixInfo "?").isSome then
     throw "PSCV0-MANIFEST: unregistered notation unexpectedly admitted"
 
+-- Lean 4.35.0 Meta/Instances.mkInstanceKey and checkNonClassInstance
+-- reduce the entire Pi telescope before computing the result-class key.
+-- Static Standard builders supply keys explicitly; audit the same invariant
+-- once here so a reducible alias cannot silently hide a valid instance.
+def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
+  for entry in env.instances.entries do
+    let identity := manifestInstanceKey entry
+    let some key := entry.className
+      | throw ("PSCV0-MANIFEST: unclassified Standard instance " ++ identity)
+    let prepared := psPrepareInstance env psLocalEmpty psMetaEmpty entry
+    if !prepared.success then
+      throw ("PSCV0-MANIFEST: instance telescope incomplete " ++ identity)
+    let .constE resultClass _ := (psInferAppView prepared.resultType).head
+      | throw ("PSCV0-MANIFEST: instance result is not a class " ++ identity)
+    if !env.classes.any (psNameEq resultClass) || !psNameEq key resultClass then
+      throw ("PSCV0-MANIFEST: instance class key mismatch " ++ identity ++
+        "; registered " ++ psNameToString key ++ "; reduced " ++ psNameToString resultClass)
+
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
+  standardInstanceIndexAudit env
   -- Reuse, do not replace, the independently pinned dual registry hashes.
   match psStandardSnapshotValidate env psStandardSnapshotExpected with
   | .ok () => pure ()

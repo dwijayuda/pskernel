@@ -41,7 +41,8 @@ def psStandardFloatNativeInstances : List (String × PsDeclaration) :=
     let className :=
       if ["instLTFloat", "instLTFloat32"].contains name then some "LT"
       else if ["instLEFloat", "instLEFloat32"].contains name then some "LE"
-      else if ["instDecidableEqFloat", "instDecidableEqFloat32"].contains name then some "DecidableEq"
+      -- DecidableEq is a reducible Pi alias, not a class. Its result is Decidable.
+      else if ["instDecidableEqFloat", "instDecidableEqFloat32"].contains name then some "Decidable"
       else if ["Float.decLt", "Float.decLe", "Float32.decLt", "Float32.decLe"].contains name then some "Decidable"
       else none
     className.map (fun className => (className, declaration))

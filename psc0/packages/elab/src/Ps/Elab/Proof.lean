@@ -1,13 +1,31 @@
 import Ps.Elab.Elimination
 import Ps.Elab.Application
 import Ps.Elab.Equality
+import Ps.Elab.Postponed
+
+-- Adapted from Lean 4.35.0 Lean/Elab/Tactic/ElabTerm.lean
+-- (eb6cafb7290e8bd5f2937522d8d804f58f02bafc), runTermElab and
+-- closeMainGoalUsing; upstream is Apache-2.0, Microsoft/Leonardo de Moura.
+-- Complete a tactic-owned term before inspecting its holes or introducing
+-- a local fact. Outer pending work retains its original owner and schedule.
+-- Natural proof holes are not synthesized here: exact/local/refine retain
+-- their existing separate refusal or goal-collection policies.
+def psProofWithTermSynthesis (elaborate : PsElaborator)
+    (context : PsElabContext)
+    (action : PsElabContext → Except PsElabError PsElabTermResult) :
+    Except PsElabError PsElabTermResult := do
+  let value ← action { context with pending := [], postponing := true }
+  let value ← psElabDrainPending elaborate value
+  return { value with context := { value.context with
+    pending := context.pending, postponing := context.postponing } }
 
 def psProofExact (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (state : PsProofState) (source : PsSyntaxTerm) (refine : Bool) :
     Except PsElabError PsProofState := do
   let (goal, context, target) ← psProofMain state
   let source ← psProofSource scope context source
-  let value ← elaborate context source (some target)
+  let value ← psProofWithTermSynthesis elaborate context
+    (fun current => elaborate current source (some target))
   if !refine && psExprHasTermMeta (psMetaInstantiate value.context.metaContext value.term) then
     throw (.proof "exact left unresolved holes")
   let pending := psProofFreshGoals context.metaContext.nextId value.context
@@ -105,7 +123,8 @@ def psProofLocalValue (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let annotation ← annotation.mapM (psProofSource scope context)
   let source ← psProofSource scope context source
-  let value ← psElabLocalValue elaborate context annotation source
+  let value ← psProofWithTermSynthesis elaborate context
+    (fun current => psElabLocalValue elaborate current annotation source)
   psProofLocal state name value reducible
 
 def psProofChange (elaborate : PsElaborator) (scope : PsSyntaxProofScope)

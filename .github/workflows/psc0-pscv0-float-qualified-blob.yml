@@ -1,0 +1,57 @@
+name: PSC0 preserve qualified Float model artifact
+
+# Staging-only artifact transport: no branch/ref update and no code execution
+# from the artifact. Both the independently measured content SHA-256 and Git
+# blob identity are pinned. Integration still requires separate checked CI.
+on:
+  push:
+    branches: [psc0/pscv0-m2a-float-equivalence-v1]
+    paths: ['.github/workflows/psc0-pscv0-float-qualified-blob.yml']
+permissions:
+  contents: read
+jobs:
+  preserve:
+    if: github.repository == 'dwijayuda/pskernel' && github.ref == 'refs/heads/psc0/pscv0-m2a-float-equivalence-v1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Retrieve previously qualified artifact without rerunning research
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/dwijayuda/pskernel/actions/artifacts/11935161444/zip > qualified.zip
+          python3 - <<'PY'
+          import base64, hashlib, json, zipfile
+          with zipfile.ZipFile('qualified.zip') as archive:
+              data = archive.read('FloatCanonicalModelCandidate.lean')
+          expected = 'f661625b40b57438405c4d604ed8884266cf5e262aa2b170ff784428c094d927'
+          assert hashlib.sha256(data).hexdigest() == expected, 'qualified source SHA-256 mismatch'
+          identity = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          assert identity == '388dfc695613cdc610428878a0b4b4b09a21d1c9', 'Git content identity mismatch'
+          with open('blob-request.json', 'w') as out:
+              json.dump({'content': base64.b64encode(data).decode(), 'encoding': 'base64'}, out)
+          with open('source-identity.json', 'w') as out:
+              json.dump({'qualified_run': 38652410627, 'qualified_artifact': 11935161444,
+                         'source_sha256': expected, 'git_blob_sha': identity,
+                         'bytes': len(data), 'selected_standard_changed': False}, out)
+          PY
+          gh api --method POST repos/dwijayuda/pskernel/git/blobs --input blob-request.json > blob-result.json
+          python3 - <<'PY'
+          import json
+          source = json.load(open('source-identity.json'))
+          result = json.load(open('blob-result.json'))
+          assert result['sha'] == source['git_blob_sha'], 'published blob mismatch'
+          print('PSCV0-QUALIFIED-FLOAT-BLOB ' + json.dumps(source, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-qualified-float-blob-${{ github.sha }}
+          path: |
+            source-identity.json
+            blob-result.json
+          if-no-files-found: error
+          retention-days: 30

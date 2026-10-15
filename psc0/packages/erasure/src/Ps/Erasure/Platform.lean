@@ -120,7 +120,15 @@ def erase (scope : PsErasureScope)
   let result ← match operation, args with
     | .bits, [] => pure (natural bits)
     | .getBits, [unit] => do
-      let (subtype, field) ← psErasureSingleRuntimeField scope (psRootName "Subtype")
+      -- getNumBits returns Subtype Nat, not a monomorphic scalar wrapper.
+      -- Reuse its prepared generic layout; the predicate/proof are erased.
+      -- Keep psErasureSingleRuntimeField strict for Fin/BitVec/model adapters.
+      let some subtype := psErasureLookupStructure scope.runtimeStructures (psRootName "Subtype")
+        | throw .unsupportedRuntimeTerm
+      let [parameter] := subtype.typeParameters | throw .unsupportedRuntimeTerm
+      let [field] := subtype.fields | throw .unsupportedRuntimeTerm
+      let .typeParameter fieldType := field.type | throw .unsupportedRuntimeTerm
+      if subtype.unboxed || fieldType != parameter.name then throw .unsupportedRuntimeTerm
       pure (bind scope (.primitive .unit) unit fun _ =>
         .record subtype.name [.primitive .nat] [(field.name, natural bits)])
     | .size, [] => pure (natural (2 ^ bits))

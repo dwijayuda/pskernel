@@ -706,6 +706,15 @@ def psRustEmitIntrinsicFromPrinted
                 "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .stringToUtf8 | .utf8Valid | .utf8Decode =>
+      match psRustExactOneArgument arguments with
+      | some value =>
+        let helper := match operation with
+          | .stringToUtf8 => "__ps_string_to_utf8"
+          | .utf8Valid => "__ps_utf8_valid"
+          | _ => "__ps_utf8_decode"
+        .ok (helper ++ "(&(" ++ value ++ "))")
+      | none => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.stringEq =>
       match psRustExactTwoArguments arguments with
       | Option.some pair =>

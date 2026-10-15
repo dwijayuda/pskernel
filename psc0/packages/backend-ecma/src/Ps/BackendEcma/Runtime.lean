@@ -1,4 +1,5 @@
 import Ps.BackendEcma.Hash
+import Ps.BackendEcma.Utf8
 
 namespace PsEcma
 
@@ -151,6 +152,6 @@ def runtimeDoc (dialect : Dialect) : Except String PsDoc := do
     txt "type __ps$Computation<R> = Generator<__ps$Request, R, unknown>;",
     txt "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };"
   ] else []
-  let bodies ← (stackRuntime ++ utf8Runtime ++ hashRuntime ++ floatRuntime ++ floatConversionRuntime).mapM (stmtDoc dialect 4096)
+  let bodies ← (stackRuntime ++ utf8Runtime ++ utf8CodecRuntime ++ hashRuntime ++ floatRuntime ++ floatConversionRuntime).mapM (stmtDoc dialect 4096)
   return psDocJoin (cat [.hardline, .hardline]) (types ++ bodies)
 end PsEcma

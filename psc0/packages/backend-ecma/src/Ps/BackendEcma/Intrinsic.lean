@@ -165,6 +165,9 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
       [{ name := "__ps_text", type := "string" }, { name := "__ps_position", type := "bigint" }]
       "boolean" [ret (bin ">=" (id "__ps_position") (field (call "__ps$utf8" [id "__ps_text"]) "size"))] [a,b])
   | .stringExtract, [a,b,c] => pure (call "__ps$stringExtract" [a,b,c])
+  | .stringToUtf8, [a] => pure (call "__ps$stringToUtf8" [a])
+  | .utf8Valid, [a] => pure (call "__ps$utf8Valid" [a])
+  | .utf8Decode, [a] => pure (call "__ps$utf8Decode" [a])
   | .stringEq, [a,b] => pure (equal "string" "===" a b)
   | .arrayBuild, [count,seed,head,tail] =>
       let [a,s] ← types.mapM irType | throw "PSCV0-ECMA: arrayBuild type arguments"

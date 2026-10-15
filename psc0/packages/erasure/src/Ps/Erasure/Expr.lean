@@ -2,6 +2,7 @@ import Ps.Erasure.Recursion
 import Ps.Erasure.Array
 import Ps.Erasure.Float
 import Ps.Erasure.Platform
+import Ps.Erasure.Utf8
 import Ps.CompilerIr.CheckTypes
 import Ps.Meta.TypeView
 
@@ -636,6 +637,10 @@ def psErasePrimitiveApplication
                 | Except.ok result => Except.ok (Option.some result)
           else Except.error PsErasureError.unsupportedApplication;
       match psEraseFloatApplication scope erase view with
+      | .error error => .error error
+      | .ok (some value) => .ok (some value)
+      | .ok none =>
+      match PsUtf8Runtime.erase scope erase view with
       | .error error => .error error
       | .ok (some value) => .ok (some value)
       | .ok none =>
@@ -1830,6 +1835,8 @@ def psErasureSpecialEntry
   let text := psNameToString name;
   let named : String -> Bool := fun (candidate : String) => psStringEq text candidate;
   if let some arity := psErasureFloatEntryArity name then
+    some (PsErasureSpecialEntry.mk arity true)
+  else if let some arity := PsUtf8Runtime.arity name then
     some (PsErasureSpecialEntry.mk arity true)
   else if let some arity := PsPlatformRuntime.arity name then
     some (PsErasureSpecialEntry.mk arity true)

@@ -1,5 +1,6 @@
 import Ps.BackendTs.Expr
 import Ps.Codegen.Names
+import Ps.BackendEcma.Utf8
 
 def psTsEmitStructure
     (brands : List (String × String))
@@ -366,8 +367,12 @@ def psTsEmitNamedModule
       | Except.ok inductives =>
           match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
           | Except.error error => Except.error error
-          | Except.ok declarations =>
-              let header : List String := ["// generated from ProofScript runtime IR; kernel provenance belongs to the caller", psTsRuntimeSupport];
+          | Except.ok declarations => do
+              let docs ← (PsEcma.utf8CodecRuntime.mapM (PsEcma.stmtDoc .typescript 4096)).mapError
+                (fun _ => PsTsEmitError.intrinsicArity)
+              let codec ← (psRenderDoc (psDocJoin .hardline docs)).mapError
+                (fun _ => PsTsEmitError.intrinsicArity)
+              let header : List String := ["// generated from ProofScript runtime IR; kernel provenance belongs to the caller", psTsRuntimeSupport, codec.text];
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
 

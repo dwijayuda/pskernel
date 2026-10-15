@@ -143,6 +143,15 @@ pub(super) fn __ps_string_extract(value: &String, begin: &PsNat, end: &PsNat) ->
     }
     out
 }
+pub(super) fn __ps_string_to_utf8(value: &String) -> PsArray<u8> {
+    Rc::new(value.as_bytes().to_vec())
+}
+pub(super) fn __ps_utf8_valid(value: &PsArray<u8>) -> bool {
+    std::str::from_utf8(value.as_slice()).is_ok()
+}
+pub(super) fn __ps_utf8_decode(value: &PsArray<u8>) -> String {
+    std::str::from_utf8(value.as_slice()).unwrap_or("").to_owned()
+}
 pub(super) fn __ps_string_eq(left: &String, right: &String) -> bool { left == right }
 pub(super) fn __ps_array_empty_with_capacity<T>(capacity: &PsNat) -> PsArray<T> {
     Rc::new(Vec::with_capacity(capacity.to_usize().unwrap_or(0)))

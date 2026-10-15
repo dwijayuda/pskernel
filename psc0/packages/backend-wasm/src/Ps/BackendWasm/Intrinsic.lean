@@ -1,5 +1,6 @@
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.Array
+import Ps.BackendWasm.Utf8
 import Ps.BackendWasm.Word
 import Ps.BackendWasm.Float
 import Ps.BackendWasm.Hash
@@ -43,6 +44,9 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .stringUtf8ByteSize => pure "string_byte_size" | .stringNext => pure "string_next"
     | .stringGet => pure "string_get" | .stringAtEnd => pure "string_at_end"
     | .stringExtract => pure "string_extract" | .stringEq => pure "string_eq"
+    | .stringToUtf8 => pure "string_to_utf8"
+    | .utf8Valid => pure "utf8_valid"
+    | .utf8Decode => pure "utf8_decode"
     | .arrayBuild => pure "array_build"
     | .arrayEmptyWithCapacity => pure "array_empty" | .arraySize => pure "array_size"
     | .arrayPush => pure "array_push" | .arrayGet => pure "array_get" | .arrayGetD => pure "array_get_default"
@@ -92,6 +96,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   return { parameters := signature.parameters, result := signature.resultType, instructions }
 
 def runtimeDefinitions : Except String (List RuntimeDefinition) := do
-  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime) ++ (← floatWordRuntime)
+  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← utf8Runtime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime) ++ (← floatWordRuntime)
 
 end PsWasm

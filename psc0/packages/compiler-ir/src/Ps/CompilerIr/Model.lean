@@ -212,6 +212,9 @@ inductive PsVerifiedIrIntrinsic where
   | stringGet
   | stringAtEnd
   | stringExtract
+  | stringToUtf8
+  | utf8Valid
+  | utf8Decode
   | stringEq
   -- Sized pure sequence builder; mutable storage never escapes before completion.
   | arrayBuild

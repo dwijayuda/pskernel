@@ -63,8 +63,10 @@ def primitiveAudit : IO Lean.Json := do
       (psNameToString name)
     let checkedArray := ["Array", "Array.map", "Array.filter", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)
+    let checkedUtf8 := ["String.toUTF8", "String.fromUTF8?", "ByteArray.validateUTF8"].contains
+      (psNameToString name)
     let checkedOperator := (psStandardHomogeneousNativeNames ++ psStandardScientificNames).any (psNameEq name)
-    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedOperator then
+    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedUtf8 || checkedOperator then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value

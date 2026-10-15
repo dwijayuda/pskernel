@@ -101,7 +101,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
     `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
-    `Ps.Environment.StandardArray, `Ps.Environment.StandardArrayFilter, `Ps.Environment.StandardListIndex,
+    `Ps.Environment.StandardArray, `Ps.Environment.StandardArrayFilter, `Ps.Environment.StandardUtf8, `Ps.Environment.StandardListIndex,
     `Ps.Environment.StandardData,
     `Ps.Environment.StandardFormatData,
     `Ps.Environment.StandardFormatBasic,
@@ -148,7 +148,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
-    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Platform, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
+    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Platform, `Ps.Erasure.Utf8, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]
@@ -184,7 +184,7 @@ lean_lib PsBackendTs where
 
 lean_lib PsBackendEcma where
   srcDir := "packages/backend-ecma/src"
-  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime,
+  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime, `Ps.BackendEcma.Utf8,
     `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
 
 lean_lib PsBackendRust where
@@ -205,7 +205,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
-    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Intrinsic,
+    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Utf8, `Ps.BackendWasm.Intrinsic,
     `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.LowerFloat, `Ps.BackendWasm.Word, `Ps.BackendWasm.Float, `Ps.BackendWasm.Type,
     `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,

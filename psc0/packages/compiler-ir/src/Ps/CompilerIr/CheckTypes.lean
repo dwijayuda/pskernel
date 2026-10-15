@@ -617,6 +617,12 @@ def psIrCheckIntrinsicSignature
   | .stringGet => psIrCheckSignatureNoTypes typeArguments [string, nat] char
   | .stringAtEnd => psIrCheckSignatureNoTypes typeArguments [string, nat] bool
   | .stringExtract => psIrCheckSignatureNoTypes typeArguments [string, nat, nat] string
+  | .stringToUtf8 => psIrCheckSignatureNoTypes typeArguments [string]
+      (psIrCheckArrayType (.primitive .uint8))
+  | .utf8Valid => psIrCheckSignatureNoTypes typeArguments
+      [psIrCheckArrayType (.primitive .uint8)] bool
+  | .utf8Decode => psIrCheckSignatureNoTypes typeArguments
+      [psIrCheckArrayType (.primitive .uint8)] string
   | .stringEq => psIrCheckSignatureNoTypes typeArguments [string, string] bool
   | .arrayBuild =>
       psIrCheckSignatureTwoTypes typeArguments (fun element state =>

@@ -30,7 +30,6 @@ def abiMemoryRuntime : Except String (List RuntimeDefinition) := do
   let a := g "a"
   let bytes := g "bytes"
   let length := g "length"
-  let code := g "code"
   let postReturns ← abiPostReturns.mapM fun (name, parameters) =>
     runtimeDefinition name (parameters.zipIdx.map fun (type, i) => ("result" ++ toString i, type)) [] []
       (seq [choice none (eq active (k 0)) trap (seq []),
@@ -83,22 +82,10 @@ def abiMemoryRuntime : Except String (List RuntimeDefinition) := do
       (choice none (eq index (o .arrayLen [bytes])) (seq [])
         (seq [o (.memory .store8) [add pointer index, o (.arrayGetU bytesName) [bytes, index]],
           c "__ps_abi_write_bytes" [pointer, bytes, add index (k 1)]])),
-    ← emit "utf8_tail" [("bytes", bytesType), ("index", .i32), ("remaining", .i32)] [] []
-      (choice none (eq (g "remaining") (k 0)) (seq [])
-        (seq [choice none (o .i32Ne [o .i32And [o (.arrayGetU bytesName) [bytes, index], k 192], k 128])
-            trap (seq []),
-          c "__ps_abi_utf8_tail" [bytes, add index (k 1), sub (g "remaining") (k 1)]])),
     ← emit "utf8_count" [("bytes", bytesType), ("index", .i32), ("length", .i32)] [.i32]
-      [("width", .i32), ("code", .i32), ("lead", .i32)]
-      (choice (some .i32) (eq index (o .arrayLen [bytes])) length
-        (seq [put "lead" (o (.arrayGetU bytesName) [bytes, index]),
-          choice none (o .i32Or [
-              o .i32And [o .i32GeU [g "lead", k 128], lt (g "lead") (k 194)],
-              o .i32GeU [g "lead", k 245]]) trap (seq []),
-          put "width" (c "__ps_string_lead_width" [g "lead"]),
-          choice none (o .i32GtU [g "width", sub (o .arrayLen [bytes]) index]) trap (seq []),
-          c "__ps_abi_utf8_tail" [bytes, add index (k 1), sub (g "width") (k 1)],
-          put "code" (c "__ps_abi_check_char" [c "__ps_string_decode" [bytes, index]]),
-          choice none (o .i32Ne [c "__ps_string_width" [code], g "width"]) trap (seq []),
-          c "__ps_abi_utf8_count" [bytes, add index (g "width"), add length (k 1)]]))]
+      [("count", .i64)]
+      (seq [put "count" (c "__ps_utf8_count"
+          [bytes,index,o (.word .i64ExtendI32U) [length]]),
+        choice (some .i32) (o .i64LtS [g "count",.i64 0]) trap
+          (o (.word .i32WrapI64) [g "count"])])]
 end PsWasm

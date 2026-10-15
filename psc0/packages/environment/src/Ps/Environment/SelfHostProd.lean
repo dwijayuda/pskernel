@@ -1,5 +1,6 @@
 import Ps.Environment.StandardPlatformWords
 import Ps.Environment.StandardArrayFilter
+import Ps.Environment.StandardUtf8
 import Ps.Environment.StandardFloatDisplay
 import Ps.Environment.StandardScientific
 import Ps.Environment.StandardOperatorDefaults
@@ -132,7 +133,7 @@ def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
   psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psStandardArrayFilterExtend <|
+  PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
     psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
@@ -154,7 +155,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
     psStandardArrayRuntimeDeclarations
 
-  psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
+  PsStandardUtf8.runtimeDeclarations ++ psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
     psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     prior.filter (fun declaration =>
       !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration)))

@@ -1,5 +1,9 @@
 # Continue PSC0 / PSCV0 v7 — complete remaining M2+A
 
+## Current continuation — shared constructive decision constraints
+
+Research parent7fde856b; native [38809845902](https://github.com/dwijayuda/pskernel/actions/runs/38809845902) passed implication, then refused `FilterCases.high`: the conditional used eager Decidable search before the later array fixed a polymorphic callback's domain. Conditions and Prop-to-Bool now reuse the ordinary scoped synthetic queue, with original rigid missing-instance diagnostics. Profile69; strict registry pins unchanged. Await full qualification. Operator protocol/power/shifts remain a separate draft; C5 metadata retention design/draft is also in progress, no reconstruction or self-hosting. M2+A is not complete. Both handoffs updated.
+
 ## Current continuation — implication proposition classification
 
 Research parent a08346dc; native run [38808961871](https://github.com/dwijayuda/pskernel/actions/runs/38808961871) failed at `logicImplies` before backend execution. Root cause: conditional classification used syntactic `Sort 0` rather than level equivalence; implication yields `imax 0 0`. Apply existing read-only conversion to Prop, following pinned Lean `Meta/InferType.isProp`; no unknown sort assignment or acceptance weakening. Native profile 68. Registry pins unchanged (logicPins). Re-run combined qualification; platform/filter/UTF8/key/logic slice remains unqualified and not integrated into PR109. Both handoffs updated. Continue M2+A after qualification, including pending operator protocol and source retention work. Do not claim completion.

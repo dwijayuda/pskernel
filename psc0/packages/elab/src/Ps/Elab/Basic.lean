@@ -228,6 +228,50 @@ def psElabCoerce (result : PsElabTermResult) (classText : String)
     (.constE (psNameAppendStr className "coe") [u, v.level])
     [result.type, output, dictionary, result.term]
 
+-- Applications and literal notation use the same scoped constraint owner.
+def psElabSolveSynthetic (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabTermResult := do
+  let solved := psSyntheticSolve current.context.environment current.context.instances
+    current.context.metaContext pending (!current.context.postponing)
+  if solved.resourceExceeded then throw .fuelExhausted
+  if current.context.postponing then
+    for constraint in solved.pending do
+      if !psSyntheticMayRetry solved.context constraint then
+        match constraint with
+        | .instanceGoal _ => throw .implicitApplicationUnsupported
+        | _ => throw .typeMismatch
+    let result := psElabResultWithMeta current solved.context current.type
+    let scope := psElabSaveScope result.context
+    return { result with context := { result.context with
+      pending := solved.pending.reverse.map (PsElabPendingWork.core scope) ++
+        result.context.pending } }
+  -- Preserve the reason for failure at the elaborator boundary; a blocked
+  -- expected/default equality is a type mismatch, not a missing dictionary.
+  match solved.pending.head? with
+  | some (.expectedType _ _ _) | some (.defaultValue _ _) => throw .typeMismatch
+  | some (.instanceGoal _) => throw .implicitApplicationUnsupported
+  | none => pure ()
+  return psElabResultWithMeta current solved.context current.type
+
+-- All syntax-owned dictionaries share the same synthetic queue, including
+-- proposition conditions and Prop-to-Bool conversions. Evidence remains an
+-- ordinary checked term; unresolved decisions never become runtime guesses.
+def psElabSynthesizeInstance (context : PsElabContext) (target : PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let fresh := psMetaFresh context.metaContext context.localContext target .synthetic
+  let .mvar id := fresh.expr | throw .unresolvedMetavariable
+  psElabSolveSynthetic {
+    context := psElabContextWithMeta context fresh.context,
+    term := fresh.expr, type := target } [.instanceGoal id]
+
+def psElabDecideProposition (result : PsElabTermResult) :
+    Except PsElabError PsElabTermResult := do
+  let target := PsExpr.app (.constE psDecidableName []) result.term
+  let dictionary ← psElabSynthesizeInstance result.context target
+  psElabApplyCore dictionary.context
+    (.constE (psNameAppendStr psDecidableName "decide") [])
+    [result.term, dictionary.term]
+
 def psElabFinalizeExpected (result : PsElabTermResult) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult := do
   match psElabUnifyExpected result expected with
@@ -249,7 +293,12 @@ def psElabFinalizeExpected (result : PsElabTermResult) (expected : Option PsExpr
                term := fresh.expr, type := target }
     -- The failed conversion is speculative. Synthesis starts from the original
     -- context, and the final strict check cannot insert a second coercion.
-    let converted ← (psElabCoerce result "Coe" (some target)).mapError fun failure =>
+    let isProp := psDefEqReadOnlyWithEnv context.environment context.metaContext
+      context.localContext result.type (.sortE .zero)
+    let isBool := psDefEqReadOnlyWithEnv context.environment context.metaContext
+      context.localContext target (.constE psBoolName [])
+    let converted ← (if isProp && isBool then psElabDecideProposition result
+        else psElabCoerce result "Coe" (some target)).mapError fun failure =>
       match failure with | .fuelExhausted => failure | _ => error
     psElabUnifyExpected converted expected
 
@@ -591,31 +640,6 @@ def psElabReference
             psElabNamedReference context sourceName expected
       | List.cons _ _ =>
           psElabNamedReference context sourceName expected
-
--- Applications and literal notation use the same scoped constraint owner.
-def psElabSolveSynthetic (current : PsElabTermResult)
-    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabTermResult := do
-  let solved := psSyntheticSolve current.context.environment current.context.instances
-    current.context.metaContext pending (!current.context.postponing)
-  if solved.resourceExceeded then throw .fuelExhausted
-  if current.context.postponing then
-    for constraint in solved.pending do
-      if !psSyntheticMayRetry solved.context constraint then
-        match constraint with
-        | .instanceGoal _ => throw .implicitApplicationUnsupported
-        | _ => throw .typeMismatch
-    let result := psElabResultWithMeta current solved.context current.type
-    let scope := psElabSaveScope result.context
-    return { result with context := { result.context with
-      pending := solved.pending.reverse.map (PsElabPendingWork.core scope) ++
-        result.context.pending } }
-  -- Preserve the reason for failure at the elaborator boundary; a blocked
-  -- expected/default equality is a type mismatch, not a missing dictionary.
-  match solved.pending.head? with
-  | some (.expectedType _ _ _) | some (.defaultValue _ _) => throw .typeMismatch
-  | some (.instanceGoal _) => throw .implicitApplicationUnsupported
-  | none => pure ()
-  return psElabResultWithMeta current solved.context current.type
 
 -- Pinned Lean BuiltinTerm.elabNumLit/elabScientificLit share a fresh Type,
 -- expected-type unification and one synthetic class goal. Raw parameters must

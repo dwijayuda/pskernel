@@ -30,6 +30,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
     | .hashMix => pure "hash_mix" | .stringHash => pure "string_hash"
     | .natPow => pure "nat_pow"
+    | .natLog2 => pure "nat_log2"
     | .natDiv => pure "nat_div" | .natMod => pure "nat_mod"
     | .natEq => pure "nat_eq" | .natNe => pure "nat_ne" | .natLt => pure "nat_lt" | .natLe => pure "nat_le"
     | .intToNat => pure "int_to_nat"
@@ -50,7 +51,8 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe
     | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
     | .machineIntBinary .. | .machineIntCompare ..
-    | .floatBinary .. | .floatCompare .. | .floatUnary .. => pure ""
+    | .floatBinary .. | .floatCompare .. | .floatUnary ..
+    | .floatOfWord .. | .floatToWord .. => pure ""
   let instructions := if runtime.isEmpty then match op with
     | .unsignedOfNat type =>
       [.call (match type with | .uint64 => "__ps_nat_wrap_u64" | _ => "__ps_nat_wrap_u32")] ++
@@ -66,6 +68,11 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
       | _ => []
     | .unsignedToNat type =>
       [.call (match type with | .uint64 => "__ps_nat_from_u64" | _ => "__ps_nat_from_u32")]
+    | .floatOfWord type word => [.word (floatWordConversion type word false)]
+    | .floatToWord type word =>
+      if ((psIrMachineIntegerFixedWidth word).getD 0) < 32 then
+        [.call (floatWordRuntimeName type word)]
+      else [.word (floatWordConversion type word true)]
     | .floatBinary type op => psWasmLowerFloatBinary type op
     | .floatCompare type op => psWasmLowerFloatCompare type op
     | .floatUnary type op => [.word (match type, op with
@@ -80,6 +87,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   return { parameters := signature.parameters, result := signature.resultType, instructions }
 
 def runtimeDefinitions : Except String (List RuntimeDefinition) := do
-  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime)
+  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime) ++ (← floatWordRuntime)
 
 end PsWasm

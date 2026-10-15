@@ -76,6 +76,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardIntArithmeticData, `Ps.Environment.StandardIntArithmetic,
     `Ps.Environment.StandardFloatOperationsData, `Ps.Environment.StandardFloatOperations,
     `Ps.Environment.StandardOperatorDefaults,
+    `Ps.Environment.StandardFloatConversionsData, `Ps.Environment.StandardScientific,
     `Ps.Environment.StandardFloatConstructorsData, `Ps.Environment.StandardFloatConstructors,
     `Ps.Environment.StandardEquality,
     `Ps.Environment.StandardCollectionEquality,
@@ -145,7 +146,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
-    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Float,
+    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]

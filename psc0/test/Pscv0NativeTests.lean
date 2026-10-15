@@ -68,6 +68,36 @@ private theorem pscv0ByteArrayExtractCopyLogical (bytes : ByteArray)
 
 -- Pinned Lean 4.35.0 default-instance priority, rollback and nested search.
 -- Independent source oracle; the PSC0 fixture below uses the same cases.
+namespace ScientificLiteralOracle
+structure Decimal where
+  mantissa : Nat
+  negative : Bool
+  exponent : Nat
+instance : OfScientific Decimal where ofScientific m s e := ⟨m, s, e⟩
+structure High : Type 1 where
+  value : Decimal
+instance : OfScientific High where ofScientific m s e := ⟨⟨m, s, e⟩⟩
+def describe (value : Decimal) : String :=
+  toString value.mantissa ++ ":" ++ (if value.negative then "-" else "+") ++ toString value.exponent
+def generic {A : Type u} [OfScientific A] (_ : Unit) : A := 9.87
+def raw [zero : OfNat Nat 0] (_ : Unit) : Decimal := 0.0
+#guard describe 1.23 == "123:-2"
+#guard describe 1.2e3 == "12:+2"
+#guard describe 1.2E-3 == "12:-4"
+#guard describe 1_2.3__4e+0_2 == "1234:+0"
+#guard describe 1. == "1:-0"
+#guard describe 1e0 == "1:+0"
+#guard describe (raw (zero := ⟨42⟩) ()) == "0:-1"
+#guard describe (generic ()) == "987:-2"
+#guard describe (High.value (generic ())) == "987:-2"
+end ScientificLiteralOracle
+
+run_meta do
+  let environment ← Lean.getEnv
+  for source in ["1e","1e+","1.2e-","1_.0","1.0_","1._0","1.foo","1.«x»"] do
+    if (Lean.Parser.runParserCategory environment `term source).isOk then
+      throwError ("native scientific parser unexpectedly accepted " ++ source)
+
 namespace LiteralConstraintOracle
 structure Ticket where
   value : Nat
@@ -166,6 +196,26 @@ private def get {α : Type} (label : String) (result : Except String α) : IO α
   | .error error => throw (IO.userError (label ++ ": " ++ error))
 
 private def parserCases : IO Unit := do
+  -- Exact scientific decoding and malformed-token refusal are paired with
+  -- pinned native syntax, independently of any floating runtime implementation.
+  for source in ["1.23","1.2e3","1.2E-3","1_2.3__4e+0_2","1.","1e0","123.E+3","1e-0","0.0","9007199254740993123456789e-400"] do
+    unless psParseScientificText source == Lean.Syntax.decodeScientificLitVal? source do
+      throw (IO.userError ("scientific decoder mismatch: " ++ source))
+    let tokens ← match psLexProofScript source with
+      | .ok tokens => pure tokens
+      | .error _ => throw (IO.userError ("scientific lexer refused " ++ source))
+    let some token := tokens.head? | throw (IO.userError "missing scientific token")
+    unless psTokenKindEq token.kind .scientific && token.text == source &&
+        token.span.start.byteOffset == 0 && token.span.stop.byteOffset == source.utf8ByteSize do
+      throw (IO.userError ("scientific token/span drift: " ++ source))
+  for source in ["1e","1e+","1.2e-","1_.0","1.0_","1._0","1.foo","1.«x»"] do
+    if (psLexProofScript source).isOk then
+      throw (IO.userError ("malformed scientific token accepted: " ++ source))
+  let .ok rangeTokens := psLexProofScript "1..2"
+    | throw (IO.userError "range tokenization refused")
+  unless rangeTokens.head?.any (fun token =>
+      psTokenKindEq token.kind .natural && token.text == "1") do
+    throw (IO.userError "decimal lexer consumed the first range dot")
   -- Exact source ownership for all four Lean RC4 index spellings.
   -- These are parser cases, not a claim that List/Array GetElem instances or
   -- automatic arithmetic proof discharge are already installed.
@@ -377,6 +427,12 @@ private def highUniverseHashableCases : IO Unit := do
         label ++ " refused at " ++ problem.phase ++ ": " ++ problem.message))
 
 -- One cross-universe family exercises the shared logical and runtime boundary.
+private def floatConversionsFixture : String :=
+  "function f3Scientific64(m: Nat, s: Bool, e: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofScientific(m, s, e)))\nfunction f3ModelScientific64(m: Nat, s: Bool, e: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.ofScientific(m, if (s) { -Int.ofNat(e) } else { Int.ofNat(e) }))))\nfunction f3Natural64(n: Nat): Nat := UInt64.toNat(Float.toBits(Nat.toFloat(n)))\nfunction f3Integer64(n: Int): Nat := UInt64.toNat(Float.toBits(Int.toFloat(n)))\nfunction f3Scientific32(m: Nat, s: Bool, e: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofScientific(m, s, e)))\nfunction f3ModelScientific32(m: Nat, s: Bool, e: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.ofScientific(m, if (s) { -Int.ofNat(e) } else { Int.ofNat(e) }))))\nfunction f3Natural32(n: Nat): Nat := UInt32.toNat(Float32.toBits(Nat.toFloat32(n)))\nfunction f3Integer32(n: Int): Nat := UInt32.toNat(Float32.toBits(Int.toFloat32(n)))\nconst f3FloatUInt8: Bool := (Float.toUInt8(Float.nan) == UInt8.ofNat(0)) && (Float.toUInt8(Float.inf) == UInt8.ofNat(255)) && (Float.toUInt8(-Float.inf) == UInt8.ofNat(0)) && (Float.toUInt8(-7.9) == UInt8.ofNat(0)) && (UInt8.toFloat(UInt8.ofNat(247)) == 247.0)\nconst f3FloatUInt16: Bool := (Float.toUInt16(Float.nan) == UInt16.ofNat(0)) && (Float.toUInt16(Float.inf) == UInt16.ofNat(65535)) && (Float.toUInt16(-Float.inf) == UInt16.ofNat(0)) && (Float.toUInt16(-7.9) == UInt16.ofNat(0)) && (UInt16.toFloat(UInt16.ofNat(247)) == 247.0)\nconst f3FloatUInt32: Bool := (Float.toUInt32(Float.nan) == UInt32.ofNat(0)) && (Float.toUInt32(Float.inf) == UInt32.ofNat(4294967295)) && (Float.toUInt32(-Float.inf) == UInt32.ofNat(0)) && (Float.toUInt32(-7.9) == UInt32.ofNat(0)) && (UInt32.toFloat(UInt32.ofNat(247)) == 247.0)\nconst f3FloatUInt64: Bool := (Float.toUInt64(Float.nan) == UInt64.ofNat(0)) && (Float.toUInt64(Float.inf) == UInt64.ofNat(18446744073709551615)) && (Float.toUInt64(-Float.inf) == UInt64.ofNat(0)) && (Float.toUInt64(-7.9) == UInt64.ofNat(0)) && (UInt64.toFloat(UInt64.ofNat(247)) == 247.0)\nconst f3FloatInt8: Bool := (Float.toInt8(Float.nan) == Int8.ofInt(0)) && (Float.toInt8(Float.inf) == Int8.ofInt(127)) && (Float.toInt8(-Float.inf) == Int8.ofInt(-128)) && (Float.toInt8(-7.9) == Int8.ofInt(-7)) && (Int8.toFloat(Int8.ofInt(-7)) == -7.0)\nconst f3FloatInt16: Bool := (Float.toInt16(Float.nan) == Int16.ofInt(0)) && (Float.toInt16(Float.inf) == Int16.ofInt(32767)) && (Float.toInt16(-Float.inf) == Int16.ofInt(-32768)) && (Float.toInt16(-7.9) == Int16.ofInt(-7)) && (Int16.toFloat(Int16.ofInt(-7)) == -7.0)\nconst f3FloatInt32: Bool := (Float.toInt32(Float.nan) == Int32.ofInt(0)) && (Float.toInt32(Float.inf) == Int32.ofInt(2147483647)) && (Float.toInt32(-Float.inf) == Int32.ofInt(-2147483648)) && (Float.toInt32(-7.9) == Int32.ofInt(-7)) && (Int32.toFloat(Int32.ofInt(-7)) == -7.0)\nconst f3FloatInt64: Bool := (Float.toInt64(Float.nan) == Int64.ofInt(0)) && (Float.toInt64(Float.inf) == Int64.ofInt(9223372036854775807)) && (Float.toInt64(-Float.inf) == Int64.ofInt(-9223372036854775808)) && (Float.toInt64(-7.9) == Int64.ofInt(-7)) && (Int64.toFloat(Int64.ofInt(-7)) == -7.0)\nconst f3Float32UInt8: Bool := (Float32.toUInt8(Float32.nan) == UInt8.ofNat(0)) && (Float32.toUInt8(Float32.inf) == UInt8.ofNat(255)) && (Float32.toUInt8(-Float32.inf) == UInt8.ofNat(0)) && (Float32.toUInt8(-7.9) == UInt8.ofNat(0)) && (UInt8.toFloat32(UInt8.ofNat(247)) == 247.0)\nconst f3Float32UInt16: Bool := (Float32.toUInt16(Float32.nan) == UInt16.ofNat(0)) && (Float32.toUInt16(Float32.inf) == UInt16.ofNat(65535)) && (Float32.toUInt16(-Float32.inf) == UInt16.ofNat(0)) && (Float32.toUInt16(-7.9) == UInt16.ofNat(0)) && (UInt16.toFloat32(UInt16.ofNat(247)) == 247.0)\nconst f3Float32UInt32: Bool := (Float32.toUInt32(Float32.nan) == UInt32.ofNat(0)) && (Float32.toUInt32(Float32.inf) == UInt32.ofNat(4294967295)) && (Float32.toUInt32(-Float32.inf) == UInt32.ofNat(0)) && (Float32.toUInt32(-7.9) == UInt32.ofNat(0)) && (UInt32.toFloat32(UInt32.ofNat(247)) == 247.0)\nconst f3Float32UInt64: Bool := (Float32.toUInt64(Float32.nan) == UInt64.ofNat(0)) && (Float32.toUInt64(Float32.inf) == UInt64.ofNat(18446744073709551615)) && (Float32.toUInt64(-Float32.inf) == UInt64.ofNat(0)) && (Float32.toUInt64(-7.9) == UInt64.ofNat(0)) && (UInt64.toFloat32(UInt64.ofNat(247)) == 247.0)\nconst f3Float32Int8: Bool := (Float32.toInt8(Float32.nan) == Int8.ofInt(0)) && (Float32.toInt8(Float32.inf) == Int8.ofInt(127)) && (Float32.toInt8(-Float32.inf) == Int8.ofInt(-128)) && (Float32.toInt8(-7.9) == Int8.ofInt(-7)) && (Int8.toFloat32(Int8.ofInt(-7)) == -7.0)\nconst f3Float32Int16: Bool := (Float32.toInt16(Float32.nan) == Int16.ofInt(0)) && (Float32.toInt16(Float32.inf) == Int16.ofInt(32767)) && (Float32.toInt16(-Float32.inf) == Int16.ofInt(-32768)) && (Float32.toInt16(-7.9) == Int16.ofInt(-7)) && (Int16.toFloat32(Int16.ofInt(-7)) == -7.0)\nconst f3Float32Int32: Bool := (Float32.toInt32(Float32.nan) == Int32.ofInt(0)) && (Float32.toInt32(Float32.inf) == Int32.ofInt(2147483647)) && (Float32.toInt32(-Float32.inf) == Int32.ofInt(-2147483648)) && (Float32.toInt32(-7.9) == Int32.ofInt(-7)) && (Int32.toFloat32(Int32.ofInt(-7)) == -7.0)\nconst f3Float32Int64: Bool := (Float32.toInt64(Float32.nan) == Int64.ofInt(0)) && (Float32.toInt64(Float32.inf) == Int64.ofInt(9223372036854775807)) && (Float32.toInt64(-Float32.inf) == Int64.ofInt(-9223372036854775808)) && (Float32.toInt64(-7.9) == Int64.ofInt(-7)) && (Int64.toFloat32(Int64.ofInt(-7)) == -7.0)\nfunction f3DefaultScientific(unit: Unit): Nat := { let value := -42.0\n UInt64.toNat(Float.toBits(value)) }\nconst f3DefaultScientificBits: Nat := f3DefaultScientific()\nconst f3LiteralMixed64: Nat := UInt64.toNat(Float.toBits(1.0 + 2))\nconst f3LiteralMixed32: Nat := UInt32.toNat(Float32.toBits(1.0 + 2))\nfunction f3Generic{A: Type}[OfScientific A](m: Nat, s: Bool, e: Nat): A := OfScientific.ofScientific(m, s, e)\nfunction f3Apply(fn: Nat -> Bool -> Nat -> Float): Float := fn(1, true, 1)\nconst f3Partial: Nat := UInt64.toNat(Float.toBits(f3Apply(Float.ofScientific)))\nconst f3Generic32: Nat := UInt32.toNat(Float32.toBits(f3Generic(1, true, 1)))\nconst f3WordDoubleRounding32: Nat := UInt32.toNat(Float32.toBits(UInt64.toFloat32(UInt64.ofNat(18014399583223809))))\nconst f3SignedDoubleRounding32: Nat := UInt32.toNat(Float32.toBits(Int64.toFloat32(Int64.ofInt(-18014399583223809))))\n"
+
+private def scientificLiteralFixture : String :=
+  "namespace ScientificLiterals\nuniverse u\nstructure Decimal where { mantissa: Nat\n negative: Bool\n exponent: Nat }\ninstance decimal: OfScientific Decimal where { ofScientific := fun (m: Nat) (s: Bool) (e: Nat) => Decimal.mk(m, s, e) }\nstructure High: Type 1 where { value: Decimal }\ninstance high: OfScientific High where { ofScientific := fun (m: Nat) (s: Bool) (e: Nat) => High.mk(Decimal.mk(m, s, e)) }\nfunction describe(value: Decimal): String := toString(value.mantissa) ++ \":\" ++ (if (value.negative) { \"-\" } else { \"+\" }) ++ toString(value.exponent)\nfunction generic{A: Type u}[OfScientific A](): A := 9.87\nfunction raw[zero: OfNat Nat 0](): Decimal := 0.0\nend ScientificLiterals\nconst scientificFraction: String := ScientificLiterals.describe(1.23)\nconst scientificExponent: String := ScientificLiterals.describe(1.2e3)\nconst scientificNegativeExponent: String := ScientificLiterals.describe(1.2E-3)\nconst scientificGrouped: String := ScientificLiterals.describe(1_2.3__4e+0_2)\nconst scientificBareDot: String := ScientificLiterals.describe(1.)\nconst scientificZeroExponent: String := ScientificLiterals.describe(1e0)\nconst scientificRawParameters: String := ScientificLiterals.describe(ScientificLiterals.raw((), zero := { ofNat := 42 }))\nconst scientificGeneric: String := ScientificLiterals.describe(ScientificLiterals.generic())\nconst scientificHigh: String := ScientificLiterals.describe(ScientificLiterals.High.value(ScientificLiterals.generic()))\n"
+
 private def literalConstraintFixture : String :=
   "namespace LiteralConstraints\nuniverse u\nstructure Ticket where { value: Nat }\ninstance ticket{n: Nat}: OfNat(Ticket, n) where { ofNat := Ticket.mk(n) }\ninstance ticketAdd: Add Ticket where { add := fun (a: Ticket) (b: Ticket) => Ticket.mk(a.value + b.value + 1) }\nstructure High: Type 1 where { value: Nat }\ninstance highAdd: Add High where { add := fun (a: High) (b: High) => High.mk(a.value + b.value) }\ninstance hetero: HMul(Nat, Bool, Nat) where { hMul := fun (a: Nat) (b: Bool) => if (b) { a } else { 0 } }\nfunction add{A: Type u}[Add A](a: A, b: A): A := a + b\nfunction sub{A: Type u}[Sub A](a: A, b: A): A := a - b\nfunction mul{A: Type u}[Mul A](a: A, b: A): A := a * b\nfunction div{A: Type u}[Div A](a: A, b: A): A := a / b\nfunction mod{A: Type u}[Mod A](a: A, b: A): A := a % b\nfunction append{A: Type u}[Append A](a: A, b: A): A := a ++ b\nfunction withZero[zero: OfNat Nat 0](): Nat := 0\nfunction inferredNatural(unit: Unit): String := { let value := 17\n toString(value) }\nfunction inferredNegative(unit: Unit): String := { let value := -7\n toString(value) }\nend LiteralConstraints\nconst literalLeft: Nat := LiteralConstraints.Ticket.value(2 + LiteralConstraints.Ticket.mk(5))\nconst literalRight: Nat := LiteralConstraints.Ticket.value(LiteralConstraints.Ticket.mk(5) + 2)\nconst homogeneousAdd: Nat := LiteralConstraints.add(6, 5)\nconst homogeneousSub: Nat := LiteralConstraints.sub(9, 2)\nconst homogeneousMul: Nat := LiteralConstraints.mul(3, 6)\nconst homogeneousDiv: Nat := LiteralConstraints.div(10, 3)\nconst homogeneousMod: Nat := LiteralConstraints.mod(11, 3)\nconst homogeneousAppend: String := LiteralConstraints.append(\"a\", \"b\")\nconst literalLocalNat: Nat := LiteralConstraints.withZero((), zero := { ofNat := 42 })\nconst literalNatural: String := LiteralConstraints.inferredNatural()\nconst literalNegative: String := LiteralConstraints.inferredNegative()\nconst homogeneousHigh: Nat := LiteralConstraints.High.value(LiteralConstraints.add(LiteralConstraints.High.mk(5), LiteralConstraints.High.mk(7)))\nconst homogeneousFloat: Nat := UInt64.toNat(Float.toBits(LiteralConstraints.add(Float.ofBits(UInt64.ofNat(4607182418800017408)), Float.ofBits(UInt64.ofNat(4611686018427387904)))))\nconst heterogeneousMul: Nat := 9 * true\n"
 
@@ -700,7 +756,7 @@ private def executableFloatFixture : String :=
   "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := match Float.toModel(Float.ofBits(UInt64.ofNat(bits))) with { | Float.Model.mk raw valid => UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.mk(raw, valid)))) }\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := match Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))) with { | Float32.Model.mk raw valid => UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.mk(raw, valid)))) }\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
 
 private def application : String :=
-  executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -3401,7 +3457,68 @@ private def floatOperationsNativeOracle : IO Unit := do
       throw (IO.userError ("PSCV0_FLOAT_F2_ORACLE: " ++ name ++ " expected " ++ toString expected ++ " got " ++ toString observed))
   IO.println "PSCV0_FLOAT_F2_ORACLE: PASS 88 pinned native arithmetic, rounding, IEEE and logical equality observations"
 
+#guard (Float.toUInt8 Float.nan == (UInt8.ofNat (0))) && (Float.toUInt8 Float.inf == (UInt8.ofNat (255))) && (Float.toUInt8 (-Float.inf) == (UInt8.ofNat (0))) && (Float.toUInt8 (-7.9) == (UInt8.ofNat (0))) && (UInt8.toFloat (UInt8.ofNat (247)) == 247.0)
+#guard (Float.toUInt16 Float.nan == (UInt16.ofNat (0))) && (Float.toUInt16 Float.inf == (UInt16.ofNat (65535))) && (Float.toUInt16 (-Float.inf) == (UInt16.ofNat (0))) && (Float.toUInt16 (-7.9) == (UInt16.ofNat (0))) && (UInt16.toFloat (UInt16.ofNat (247)) == 247.0)
+#guard (Float.toUInt32 Float.nan == (UInt32.ofNat (0))) && (Float.toUInt32 Float.inf == (UInt32.ofNat (4294967295))) && (Float.toUInt32 (-Float.inf) == (UInt32.ofNat (0))) && (Float.toUInt32 (-7.9) == (UInt32.ofNat (0))) && (UInt32.toFloat (UInt32.ofNat (247)) == 247.0)
+#guard (Float.toUInt64 Float.nan == (UInt64.ofNat (0))) && (Float.toUInt64 Float.inf == (UInt64.ofNat (18446744073709551615))) && (Float.toUInt64 (-Float.inf) == (UInt64.ofNat (0))) && (Float.toUInt64 (-7.9) == (UInt64.ofNat (0))) && (UInt64.toFloat (UInt64.ofNat (247)) == 247.0)
+#guard (Float.toInt8 Float.nan == (Int8.ofInt (0))) && (Float.toInt8 Float.inf == (Int8.ofInt (127))) && (Float.toInt8 (-Float.inf) == (Int8.ofInt (-128))) && (Float.toInt8 (-7.9) == (Int8.ofInt (-7))) && (Int8.toFloat (Int8.ofInt (-7)) == (-7.0))
+#guard (Float.toInt16 Float.nan == (Int16.ofInt (0))) && (Float.toInt16 Float.inf == (Int16.ofInt (32767))) && (Float.toInt16 (-Float.inf) == (Int16.ofInt (-32768))) && (Float.toInt16 (-7.9) == (Int16.ofInt (-7))) && (Int16.toFloat (Int16.ofInt (-7)) == (-7.0))
+#guard (Float.toInt32 Float.nan == (Int32.ofInt (0))) && (Float.toInt32 Float.inf == (Int32.ofInt (2147483647))) && (Float.toInt32 (-Float.inf) == (Int32.ofInt (-2147483648))) && (Float.toInt32 (-7.9) == (Int32.ofInt (-7))) && (Int32.toFloat (Int32.ofInt (-7)) == (-7.0))
+#guard (Float.toInt64 Float.nan == (Int64.ofInt (0))) && (Float.toInt64 Float.inf == (Int64.ofInt (9223372036854775807))) && (Float.toInt64 (-Float.inf) == (Int64.ofInt (-9223372036854775808))) && (Float.toInt64 (-7.9) == (Int64.ofInt (-7))) && (Int64.toFloat (Int64.ofInt (-7)) == (-7.0))
+#guard (Float32.toUInt8 Float32.nan == (UInt8.ofNat (0))) && (Float32.toUInt8 Float32.inf == (UInt8.ofNat (255))) && (Float32.toUInt8 (-Float32.inf) == (UInt8.ofNat (0))) && (Float32.toUInt8 (-7.9) == (UInt8.ofNat (0))) && (UInt8.toFloat32 (UInt8.ofNat (247)) == 247.0)
+#guard (Float32.toUInt16 Float32.nan == (UInt16.ofNat (0))) && (Float32.toUInt16 Float32.inf == (UInt16.ofNat (65535))) && (Float32.toUInt16 (-Float32.inf) == (UInt16.ofNat (0))) && (Float32.toUInt16 (-7.9) == (UInt16.ofNat (0))) && (UInt16.toFloat32 (UInt16.ofNat (247)) == 247.0)
+#guard (Float32.toUInt32 Float32.nan == (UInt32.ofNat (0))) && (Float32.toUInt32 Float32.inf == (UInt32.ofNat (4294967295))) && (Float32.toUInt32 (-Float32.inf) == (UInt32.ofNat (0))) && (Float32.toUInt32 (-7.9) == (UInt32.ofNat (0))) && (UInt32.toFloat32 (UInt32.ofNat (247)) == 247.0)
+#guard (Float32.toUInt64 Float32.nan == (UInt64.ofNat (0))) && (Float32.toUInt64 Float32.inf == (UInt64.ofNat (18446744073709551615))) && (Float32.toUInt64 (-Float32.inf) == (UInt64.ofNat (0))) && (Float32.toUInt64 (-7.9) == (UInt64.ofNat (0))) && (UInt64.toFloat32 (UInt64.ofNat (247)) == 247.0)
+#guard (Float32.toInt8 Float32.nan == (Int8.ofInt (0))) && (Float32.toInt8 Float32.inf == (Int8.ofInt (127))) && (Float32.toInt8 (-Float32.inf) == (Int8.ofInt (-128))) && (Float32.toInt8 (-7.9) == (Int8.ofInt (-7))) && (Int8.toFloat32 (Int8.ofInt (-7)) == (-7.0))
+#guard (Float32.toInt16 Float32.nan == (Int16.ofInt (0))) && (Float32.toInt16 Float32.inf == (Int16.ofInt (32767))) && (Float32.toInt16 (-Float32.inf) == (Int16.ofInt (-32768))) && (Float32.toInt16 (-7.9) == (Int16.ofInt (-7))) && (Int16.toFloat32 (Int16.ofInt (-7)) == (-7.0))
+#guard (Float32.toInt32 Float32.nan == (Int32.ofInt (0))) && (Float32.toInt32 Float32.inf == (Int32.ofInt (2147483647))) && (Float32.toInt32 (-Float32.inf) == (Int32.ofInt (-2147483648))) && (Float32.toInt32 (-7.9) == (Int32.ofInt (-7))) && (Int32.toFloat32 (Int32.ofInt (-7)) == (-7.0))
+#guard (Float32.toInt64 Float32.nan == (Int64.ofInt (0))) && (Float32.toInt64 Float32.inf == (Int64.ofInt (9223372036854775807))) && (Float32.toInt64 (-Float32.inf) == (Int64.ofInt (-9223372036854775808))) && (Float32.toInt64 (-7.9) == (Int64.ofInt (-7))) && (Int64.toFloat32 (Int64.ofInt (-7)) == (-7.0))
+
+private def floatConversionsNativeOracle : IO Unit := do
+  let checks : List (String × Nat × Nat) := [
+    ("f3Scientific64", (Float.ofScientific 1 true 1).toBits.toNat, 4591870180066957722),
+    ("f3Scientific64", (Float.ofScientific 0 false 999999).toBits.toNat, 0),
+    ("f3Scientific64", (Float.ofScientific 1 false 999999).toBits.toNat, 9218868437227405312),
+    ("f3Scientific64", (Float.ofScientific 1 true 999999).toBits.toNat, 0),
+    ("f3Scientific64", (Float.ofScientific 5 true 324).toBits.toNat, 1),
+    ("f3Scientific64", (Float.ofScientific 22250738585072014 true 324).toBits.toNat, 4503599627370496),
+    ("f3Scientific64", (Float.ofScientific 17976931348623157 false 292).toBits.toNat, 9218868437227405311),
+    ("f3Scientific64", (Float.ofScientific 100000000000000011102230246251565404236316680908203125 true 53).toBits.toNat, 4607182418800017408),
+    ("f3Scientific64", (Float.ofScientific 100000000000000011102230246251565404236316680908203126 true 53).toBits.toNat, 4607182418800017409),
+    ("f3Scientific64", (Float.ofScientific 9689081178615771 true 325).toBits.toNat, 196109186302929),
+    ("f3ModelScientific64", (Float.ofModel (Float.Model.ofScientific 9689081178615771 (-325))).toBits.toNat, 196109186302929),
+    ("f3Scientific32", (Float32.ofScientific 1 true 1).toBits.toNat, 1036831949),
+    ("f3Scientific32", (Float32.ofScientific 0 false 999999).toBits.toNat, 0),
+    ("f3Scientific32", (Float32.ofScientific 1 false 999999).toBits.toNat, 2139095040),
+    ("f3Scientific32", (Float32.ofScientific 1 true 999999).toBits.toNat, 0),
+    ("f3Scientific32", (Float32.ofScientific 7 true 46).toBits.toNat, 0),
+    ("f3Scientific32", (Float32.ofScientific 8 true 46).toBits.toNat, 1),
+    ("f3Scientific32", (Float32.ofScientific 11754943508222875 true 54).toBits.toNat, 8388608),
+    ("f3Scientific32", (Float32.ofScientific 34028234663852886 false 22).toBits.toNat, 2139095039),
+    ("f3Scientific32", (Float32.ofScientific 1000000059604644775390625 true 24).toBits.toNat, 1065353216),
+    ("f3Scientific32", (Float32.ofScientific 1000000059604644775390625000001 true 30).toBits.toNat, 1065353217),
+    ("f3ModelScientific32", (Float32.ofModel (Float32.Model.ofScientific 1000000059604644775390625000001 (-30))).toBits.toNat, 1065353217),
+    ("f3Natural64", (Float.ofNat 9007199254740993).toBits.toNat, 4845873199050653696),
+    ("f3Natural64", (Float.ofNat 9007199254740995).toBits.toNat, 4845873199050653698),
+    ("f3Natural64", (Float.ofNat 179769313486231590772930519078902473361797697894230657273430081157732675805500963132708477322407536021120113879871393357658789768814416622492847430639474124377767893424865485276302219601246094119453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216).toBits.toNat, 9218868437227405312),
+    ("f3Natural32", (Float32.ofNat 18014399583223809).toBits.toNat, 1518338049),
+    ("f3Natural32", (Float32.ofNat 340282366920938463463374607431768211456).toBits.toNat, 2139095040),
+    ("f3Integer64", (Float.ofInt (-9007199254740995)).toBits.toNat, 14069245235905429506),
+    ("f3Integer32", (Float32.ofInt (-18014399583223809)).toBits.toNat, 3665821697),
+    ("f3DefaultScientificBits", (let value := -42.0; value.toBits.toNat), 13854479828675198976),
+    ("f3LiteralMixed64", ((1.0 + 2 : Float).toBits.toNat), 4613937818241073152),
+    ("f3LiteralMixed32", ((1.0 + 2 : Float32).toBits.toNat), 1077936128),
+    ("f3Partial", (Float.ofScientific 1 true 1).toBits.toNat, 4591870180066957722),
+    ("f3Generic32", (Float32.ofScientific 1 true 1).toBits.toNat, 1036831949),
+    ("f3WordDoubleRounding32", (UInt64.toFloat32 (UInt64.ofNat 18014399583223809)).toBits.toNat, 1518338049),
+    ("f3SignedDoubleRounding32", (Int64.toFloat32 (Int64.ofInt (-18014399583223809))).toBits.toNat, 3665821697)]
+  for (name, observed, expected) in checks do
+    unless observed == expected do
+      throw (IO.userError ("PSCV0_FLOAT_F3_ORACLE: " ++ name ++ " expected " ++ toString expected ++ " got " ++ toString observed))
+  IO.println "PSCV0_FLOAT_F3_ORACLE: PASS exact scientific rounding and fixed-width conversion family"
+
 def main : IO Unit := do
+  floatConversionsNativeOracle
   floatOperationsNativeOracle
   kernelHeartbeatIsolationCases
   selectedStandardManifestCases

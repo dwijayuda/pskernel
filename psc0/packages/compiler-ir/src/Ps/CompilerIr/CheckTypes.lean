@@ -547,6 +547,12 @@ def psIrCheckIntrinsicSignature
   | .machineIntCompare type _ => do
       let value ← psIrMachineType type
       psIrCheckSignatureNoTypes typeArguments [value, value] bool
+  | .floatOfWord type word => do
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [← psIrMachineType word] value
+  | .floatToWord type word => do
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] (← psIrMachineType word)
   | .floatOfBits type =>
       let (bits, value) : PsVerifiedIrType × PsVerifiedIrType := match type with
         | .float => (.primitive .uint64, .primitive .float)
@@ -572,6 +578,7 @@ def psIrCheckIntrinsicSignature
   | .natAdd => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natSub => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMul => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
+  | .natLog2 => psIrCheckSignatureNoTypes typeArguments [nat] nat
   | .natPow => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natDiv => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMod => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat

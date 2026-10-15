@@ -3,6 +3,7 @@ import Ps.Foundation.Source
 inductive PsTokenKind where
   | identifier
   | natural
+  | scientific
   | string
   | character
   | symbol
@@ -19,6 +20,10 @@ def psTokenKindEq
   | PsTokenKind.natural =>
       match right with
       | PsTokenKind.natural => true
+      | _ => false
+  | PsTokenKind.scientific =>
+      match right with
+      | PsTokenKind.scientific => true
       | _ => false
   | PsTokenKind.string =>
       match right with

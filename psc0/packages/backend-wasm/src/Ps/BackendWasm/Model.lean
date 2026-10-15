@@ -29,6 +29,22 @@ structure PsWasmLoweredType where
 -- Word operations needed by the limb runtime. A single descriptor supplies
 -- their mnemonic, binary opcode and stack signature to all target consumers.
 inductive PsWasmWordOp where
+  | f32ConvertI32S
+  | f32ConvertI32U
+  | f32ConvertI64S
+  | f32ConvertI64U
+  | f64ConvertI32S
+  | f64ConvertI32U
+  | f64ConvertI64S
+  | f64ConvertI64U
+  | i32TruncSatF32S
+  | i32TruncSatF32U
+  | i32TruncSatF64S
+  | i32TruncSatF64U
+  | i64TruncSatF32S
+  | i64TruncSatF32U
+  | i64TruncSatF64S
+  | i64TruncSatF64U
   | f32Abs
   | f32Neg
   | f64Abs
@@ -56,35 +72,51 @@ inductive PsWasmWordOp where
 
 structure PsWasmWordInstruction where
   mnemonic : String
-  opcode : UInt8
+  bytes : List UInt8
   parameters : List PsWasmValueType
   result : PsWasmValueType
 
 def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
-  | .f32Abs => { mnemonic := "f32.abs", opcode := 139, parameters := [.f32], result := .f32 }
-  | .f32Neg => { mnemonic := "f32.neg", opcode := 140, parameters := [.f32], result := .f32 }
-  | .f64Abs => { mnemonic := "f64.abs", opcode := 153, parameters := [.f64], result := .f64 }
-  | .f64Neg => { mnemonic := "f64.neg", opcode := 154, parameters := [.f64], result := .f64 }
-  | .i32ReinterpretF32 => { mnemonic := "i32.reinterpret_f32", opcode := 188, parameters := [.f32], result := .i32 }
-  | .i64ReinterpretF64 => { mnemonic := "i64.reinterpret_f64", opcode := 189, parameters := [.f64], result := .i64 }
-  | .f32ReinterpretI32 => { mnemonic := "f32.reinterpret_i32", opcode := 190, parameters := [.i32], result := .f32 }
-  | .f64ReinterpretI64 => { mnemonic := "f64.reinterpret_i64", opcode := 191, parameters := [.i64], result := .f64 }
-  | .i64ShrS => { mnemonic := "i64.shr_s", opcode := 135, parameters := [.i64, .i64], result := .i64 }
-  | .i64RemS => { mnemonic := "i64.rem_s", opcode := 129, parameters := [.i64, .i64], result := .i64 }
-  | .i64DivS => { mnemonic := "i64.div_s", opcode := 127, parameters := [.i64, .i64], result := .i64 }
-  | .i32ShrS => { mnemonic := "i32.shr_s", opcode := 117, parameters := [.i32, .i32], result := .i32 }
-  | .i32RemS => { mnemonic := "i32.rem_s", opcode := 111, parameters := [.i32, .i32], result := .i32 }
-  | .i32DivS => { mnemonic := "i32.div_s", opcode := 109, parameters := [.i32, .i32], result := .i32 }
-  | .i32Clz => { mnemonic := "i32.clz", opcode := 103, parameters := [.i32], result := .i32 }
-  | .i32DivU => { mnemonic := "i32.div_u", opcode := 110, parameters := [.i32, .i32], result := .i32 }
-  | .i32RemU => { mnemonic := "i32.rem_u", opcode := 112, parameters := [.i32, .i32], result := .i32 }
-  | .i32Shl => { mnemonic := "i32.shl", opcode := 116, parameters := [.i32, .i32], result := .i32 }
-  | .i64DivU => { mnemonic := "i64.div_u", opcode := 128, parameters := [.i64, .i64], result := .i64 }
-  | .i64RemU => { mnemonic := "i64.rem_u", opcode := 130, parameters := [.i64, .i64], result := .i64 }
-  | .i64Shl => { mnemonic := "i64.shl", opcode := 134, parameters := [.i64, .i64], result := .i64 }
-  | .i64ShrU => { mnemonic := "i64.shr_u", opcode := 136, parameters := [.i64, .i64], result := .i64 }
-  | .i32WrapI64 => { mnemonic := "i32.wrap_i64", opcode := 167, parameters := [.i64], result := .i32 }
-  | .i64ExtendI32U => { mnemonic := "i64.extend_i32_u", opcode := 173, parameters := [.i32], result := .i64 }
+  | .f32ConvertI32S => { mnemonic := "f32.convert_i32_s", bytes := [178], parameters := [.i32], result := .f32 }
+  | .f32ConvertI32U => { mnemonic := "f32.convert_i32_u", bytes := [179], parameters := [.i32], result := .f32 }
+  | .f32ConvertI64S => { mnemonic := "f32.convert_i64_s", bytes := [180], parameters := [.i64], result := .f32 }
+  | .f32ConvertI64U => { mnemonic := "f32.convert_i64_u", bytes := [181], parameters := [.i64], result := .f32 }
+  | .f64ConvertI32S => { mnemonic := "f64.convert_i32_s", bytes := [183], parameters := [.i32], result := .f64 }
+  | .f64ConvertI32U => { mnemonic := "f64.convert_i32_u", bytes := [184], parameters := [.i32], result := .f64 }
+  | .f64ConvertI64S => { mnemonic := "f64.convert_i64_s", bytes := [185], parameters := [.i64], result := .f64 }
+  | .f64ConvertI64U => { mnemonic := "f64.convert_i64_u", bytes := [186], parameters := [.i64], result := .f64 }
+  | .i32TruncSatF32S => { mnemonic := "i32.trunc_sat_f32_s", bytes := [252, 0], parameters := [.f32], result := .i32 }
+  | .i32TruncSatF32U => { mnemonic := "i32.trunc_sat_f32_u", bytes := [252, 1], parameters := [.f32], result := .i32 }
+  | .i32TruncSatF64S => { mnemonic := "i32.trunc_sat_f64_s", bytes := [252, 2], parameters := [.f64], result := .i32 }
+  | .i32TruncSatF64U => { mnemonic := "i32.trunc_sat_f64_u", bytes := [252, 3], parameters := [.f64], result := .i32 }
+  | .i64TruncSatF32S => { mnemonic := "i64.trunc_sat_f32_s", bytes := [252, 4], parameters := [.f32], result := .i64 }
+  | .i64TruncSatF32U => { mnemonic := "i64.trunc_sat_f32_u", bytes := [252, 5], parameters := [.f32], result := .i64 }
+  | .i64TruncSatF64S => { mnemonic := "i64.trunc_sat_f64_s", bytes := [252, 6], parameters := [.f64], result := .i64 }
+  | .i64TruncSatF64U => { mnemonic := "i64.trunc_sat_f64_u", bytes := [252, 7], parameters := [.f64], result := .i64 }
+  | .f32Abs => { mnemonic := "f32.abs", bytes := [139], parameters := [.f32], result := .f32 }
+  | .f32Neg => { mnemonic := "f32.neg", bytes := [140], parameters := [.f32], result := .f32 }
+  | .f64Abs => { mnemonic := "f64.abs", bytes := [153], parameters := [.f64], result := .f64 }
+  | .f64Neg => { mnemonic := "f64.neg", bytes := [154], parameters := [.f64], result := .f64 }
+  | .i32ReinterpretF32 => { mnemonic := "i32.reinterpret_f32", bytes := [188], parameters := [.f32], result := .i32 }
+  | .i64ReinterpretF64 => { mnemonic := "i64.reinterpret_f64", bytes := [189], parameters := [.f64], result := .i64 }
+  | .f32ReinterpretI32 => { mnemonic := "f32.reinterpret_i32", bytes := [190], parameters := [.i32], result := .f32 }
+  | .f64ReinterpretI64 => { mnemonic := "f64.reinterpret_i64", bytes := [191], parameters := [.i64], result := .f64 }
+  | .i64ShrS => { mnemonic := "i64.shr_s", bytes := [135], parameters := [.i64, .i64], result := .i64 }
+  | .i64RemS => { mnemonic := "i64.rem_s", bytes := [129], parameters := [.i64, .i64], result := .i64 }
+  | .i64DivS => { mnemonic := "i64.div_s", bytes := [127], parameters := [.i64, .i64], result := .i64 }
+  | .i32ShrS => { mnemonic := "i32.shr_s", bytes := [117], parameters := [.i32, .i32], result := .i32 }
+  | .i32RemS => { mnemonic := "i32.rem_s", bytes := [111], parameters := [.i32, .i32], result := .i32 }
+  | .i32DivS => { mnemonic := "i32.div_s", bytes := [109], parameters := [.i32, .i32], result := .i32 }
+  | .i32Clz => { mnemonic := "i32.clz", bytes := [103], parameters := [.i32], result := .i32 }
+  | .i32DivU => { mnemonic := "i32.div_u", bytes := [110], parameters := [.i32, .i32], result := .i32 }
+  | .i32RemU => { mnemonic := "i32.rem_u", bytes := [112], parameters := [.i32, .i32], result := .i32 }
+  | .i32Shl => { mnemonic := "i32.shl", bytes := [116], parameters := [.i32, .i32], result := .i32 }
+  | .i64DivU => { mnemonic := "i64.div_u", bytes := [128], parameters := [.i64, .i64], result := .i64 }
+  | .i64RemU => { mnemonic := "i64.rem_u", bytes := [130], parameters := [.i64, .i64], result := .i64 }
+  | .i64Shl => { mnemonic := "i64.shl", bytes := [134], parameters := [.i64, .i64], result := .i64 }
+  | .i64ShrU => { mnemonic := "i64.shr_u", bytes := [136], parameters := [.i64, .i64], result := .i64 }
+  | .i32WrapI64 => { mnemonic := "i32.wrap_i64", bytes := [167], parameters := [.i64], result := .i32 }
+  | .i64ExtendI32U => { mnemonic := "i64.extend_i32_u", bytes := [173], parameters := [.i32], result := .i64 }
 
 -- Memory operations are admitted only in explicitly marked ABI modules.
 inductive PsWasmMemoryOp where

@@ -36,6 +36,7 @@ def psPscv0CanStartNativeArgument
       else if psTokenCursorAtText cursor "{" then annotation
       else if psTokenKindEq token.kind PsTokenKind.identifier then true
       else if psTokenKindEq token.kind PsTokenKind.natural then true
+      else if psTokenKindEq token.kind PsTokenKind.scientific then true
       else if psTokenKindEq token.kind PsTokenKind.string then true
       else psTokenKindEq token.kind PsTokenKind.character
 

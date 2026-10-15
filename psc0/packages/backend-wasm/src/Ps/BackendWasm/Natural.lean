@@ -213,6 +213,12 @@ def naturalRuntime : Except String (List RuntimeDefinition) := do
           (c "__ps_nat_pow_loop" [c "__ps_nat_mul" [g "base", g "base"], g "next", g "product"])]))]
   functions := functions ++ [← emit "pow" [("base", naturalType), ("exponent", naturalType)] naturalType []
     (c "__ps_nat_pow_loop" [g "base", g "exponent", c "__ps_nat_from_u32" [k 1]])]
+  functions := functions ++ [← emit "log2" [("value", naturalType)] naturalType
+    [("a", limbsType), ("size", .i32)]
+    (seq [put "a" (limbs (g "value")), put "size" (len a),
+      choice (some naturalType) (eq size (k 0)) (c "__ps_nat_zero" [])
+        (c "__ps_nat_from_u32" [sub (o (.word .i32Shl) [size, k 5])
+          (add (o (.word .i32Clz) [limb a (sub size (k 1))]) (k 1))])])]
   return functions
 
 -- Literal work is proportional to limb count, including huge source literals.

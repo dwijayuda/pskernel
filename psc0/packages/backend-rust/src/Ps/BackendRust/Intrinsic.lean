@@ -163,6 +163,24 @@ def psRustEmitIntrinsicFromPrinted
     (arguments : List String) :
     Except PsRustEmitError String :=
   match operation with
+  | .floatOfWord type _ =>
+      match arguments with
+      | [value] => .ok ("((" ++ value ++ ") as " ++
+          (match type with | .float => "f64" | .float32 => "f32") ++ ")")
+      | _ => .error .intrinsicArity
+  | .floatToWord _ word =>
+      let target := match word with
+        | .uint8 => "u8" | .uint16 => "u16" | .uint32 => "u32" | .uint64 => "u64"
+        | .int8 => "i8" | .int16 => "i16" | .int32 => "i32" | .int64 => "i64"
+        | .usize | .isize => ""
+      match arguments with
+      | [value] => if target.isEmpty then .error .intrinsicArity
+          else .ok ("((" ++ value ++ ") as " ++ target ++ ")")
+      | _ => .error .intrinsicArity
+  | .natLog2 =>
+      match arguments with
+      | [value] => .ok ("PsNat::from((" ++ value ++ ").bits().saturating_sub(1))")
+      | _ => .error .intrinsicArity
   | .floatUnary _ op =>
       match arguments with
       | [value] => .ok (match op with

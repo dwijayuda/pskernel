@@ -126,12 +126,31 @@ def floatRuntime : List Stmt :=
       .expression (method (id "__ps$floatBits") ("setFloat" ++ width) [num 0, id "value", id "true"]),
       ret (method (id "__ps$floatBits") ("get" ++ word) [num 0, id "true"])]])
 
+-- Round the integer directly to 24 significant bits before Number conversion.
+-- Number(bigint) followed by fround would round twice at binary32 midpoints.
+def floatConversionRuntime : List Stmt := [
+  .functionD false false "__ps$word64ToFloat32" "" [{ name := "value", type := "bigint" }] "number" [
+    const "negative" (bin "<" (id "value") (id "0n")),
+    const "magnitude" (.conditional (id "negative") (unary "-" (id "value")) (id "value")),
+    const "shift" (bin "-" (field (method (id "magnitude") "toString" [num 2]) "length") (num 24)),
+    .ifE (bin "<=" (id "shift") (num 0)) [ret (call "Number" [id "value"])] [],
+    const "unit" (bin "<<" (id "1n") (call "BigInt" [id "shift"])),
+    letE "quotient" (bin "/" (id "magnitude") (id "unit")),
+    const "twiceRemainder" (bin "*" (id "2n") (bin "%" (id "magnitude") (id "unit"))),
+    .ifE (bin "||" (bin ">" (id "twiceRemainder") (id "unit"))
+      (bin "&&" (bin "===" (id "twiceRemainder") (id "unit"))
+        (bin "===" (bin "&" (id "quotient") (id "1n")) (id "1n"))))
+      [inc "quotient" (id "1n")] [],
+    const "rounded" (bin "*" (call "Number" [id "quotient"]) (bin "**" (num 2) (id "shift"))),
+    ret (.conditional (id "negative") (unary "-" (id "rounded")) (id "rounded"))
+  ]]
+
 def runtimeDoc (dialect : Dialect) : Except String PsDoc := do
   let types := if dialect == .typescript then [
     txt "type __ps$Request = { readonly fn: Function; readonly args: unknown[] };",
     txt "type __ps$Computation<R> = Generator<__ps$Request, R, unknown>;",
     txt "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };"
   ] else []
-  let bodies ← (stackRuntime ++ utf8Runtime ++ hashRuntime ++ floatRuntime).mapM (stmtDoc dialect 4096)
+  let bodies ← (stackRuntime ++ utf8Runtime ++ hashRuntime ++ floatRuntime ++ floatConversionRuntime).mapM (stmtDoc dialect 4096)
   return psDocJoin (cat [.hardline, .hardline]) (types ++ bodies)
 end PsEcma

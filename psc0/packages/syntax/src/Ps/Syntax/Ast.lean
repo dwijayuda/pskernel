@@ -89,6 +89,7 @@ inductive PsSyntaxTerm where
   | call (fn : PsSyntaxTerm)
       (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm)) (span : PsSourceSpan)
   | natural (text : String) (span : PsSourceSpan)
+  | scientific (text : String) (span : PsSourceSpan)
   | string (text : String) (span : PsSourceSpan)
   | character (text : String) (span : PsSourceSpan)
   | bool (value : Bool) (span : PsSourceSpan)
@@ -198,6 +199,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .call _ _ span => span
   | .reference name => name.span
   | .natural _ span => span
+  | .scientific _ span => span
   | .string _ span => span
   | .character _ span => span
   | .bool _ span => span

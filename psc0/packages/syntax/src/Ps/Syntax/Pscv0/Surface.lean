@@ -105,6 +105,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .reference _ => []
   | .sortE _ _ _ => []
   | .natural _ _ => []
+  | .scientific _ _ => []
   | .string _ _ => []
   | .character _ _ => []
   | .bool _ _ => []

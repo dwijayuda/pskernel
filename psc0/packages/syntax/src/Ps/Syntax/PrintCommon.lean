@@ -99,6 +99,7 @@ def psPrintPattern (pattern : PsSyntaxPattern) : Except PsSourcePrintError Strin
 def psSyntaxTermSimpleForApplication : PsSyntaxTerm -> Bool
   | .reference _ => true
   | .natural _ _ => true
+  | .scientific _ _ => true
   | .string _ _ => true
   | .character _ _ => true
   | .bool _ _ => true

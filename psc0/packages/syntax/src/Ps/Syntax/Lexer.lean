@@ -780,6 +780,57 @@ def psLexTokenFromRead
     span := psLexSpan start read.cursor.position
   }
 
+-- Lean 4.35.0 Lean/Parser/Basic.decimalNumberFn. Decimal tokens retain
+-- their exact spelling; neither lexing nor parsing rounds a floating value.
+-- Apache-2.0, Microsoft Corporation, Leonardo de Moura.
+def psLexNumericToken (first : Char) (remaining : List Char) (start : PsSourcePos) :
+    Except PsLexError (PsToken × PsLexCursor) := do
+  let integer := psLexReadNumeral first remaining start
+  let finish := fun kind read => (psLexTokenFromRead kind start read, read.cursor)
+  let radix := psLexCharEq first '0' &&
+    (remaining.head?.bind psLexRadixBase).isSome
+  if radix then return finish .natural integer
+  match integer.cursor.remaining with
+  | '.' :: '.' :: _ => return finish .natural integer
+  | '.' :: _ | 'e' :: _ | 'E' :: _ => pure ()
+  | _ => return finish .natural integer
+  let checked : PsLexRead → Except PsLexError PsLexRead := fun read => do
+    if read.charsRev.head? == some '_' then
+      throw (.invalidSource "trailing separator in scientific literal"
+        (psLexSpan start read.cursor.position))
+    pure read
+  let integer ← checked integer
+  let (fraction, bareDot) := match integer.cursor.remaining with
+    | '.' :: rest =>
+      let position := psLexAdvanceChar integer.cursor.position '.'
+      let charsRev := '.' :: integer.charsRev
+      if rest.head?.any psLexDigit then
+        (psLexReadNatural rest position charsRev, false)
+      else ({ cursor := { remaining := rest, position }, charsRev }, true)
+    | _ => (integer, false)
+  let fraction ← checked fraction
+  match fraction.cursor.remaining with
+  | marker :: rest =>
+    if marker == 'e' || marker == 'E' then
+      let position := psLexAdvanceChar fraction.cursor.position marker
+      let charsRev := marker :: fraction.charsRev
+      let (rest, position, charsRev) := match rest with
+        | sign :: tail =>
+          if sign == '+' || sign == '-' then
+            (tail, psLexAdvanceChar position sign, sign :: charsRev)
+          else (rest, position, charsRev)
+        | [] => (rest, position, charsRev)
+      if !rest.head?.any psLexDigit then
+        throw (.invalidSource "missing exponent digits in scientific literal"
+          (psLexSpan start position))
+      let exponent ← checked (psLexReadNatural rest position charsRev)
+      return finish .scientific exponent
+    else if bareDot && (psLexIdentifierStart marker || marker == '«') then
+      throw (.invalidSource "identifier after decimal point; parenthesize the number"
+        (psLexSpan start fraction.cursor.position))
+    else return finish .scientific fraction
+  | [] => return finish .scientific fraction
+
 def psLexReadToken
     (cursor : PsLexCursor) :
     Except PsLexError (Prod PsToken PsLexCursor) :=
@@ -859,15 +910,7 @@ def psLexReadToken
                     read)
                   read.cursor)
             else if psLexDigit first then
-              let read :=
-                psLexReadNumeral first List.nil start;
-              Except.ok
-                (Prod.mk
-                  (psLexTokenFromRead
-                    PsTokenKind.natural
-                    start
-                    read)
-                  read.cursor)
+              psLexNumericToken first List.nil start
             else
               let stop := psLexAdvanceChar start first;
               let read : PsLexRead := {
@@ -899,15 +942,7 @@ def psLexReadToken
                     read)
                   read.cursor)
             else if psLexDigit first then
-              let read :=
-                psLexReadNumeral first (List.cons second tail) start;
-              Except.ok
-                (Prod.mk
-                  (psLexTokenFromRead
-                    PsTokenKind.natural
-                    start
-                    read)
-                  read.cursor)
+              psLexNumericToken first (List.cons second tail) start
             else if psLexIsTwoCharSymbol first second then
               let stop := psLexAdvanceTwo start first second;
               let read : PsLexRead := {

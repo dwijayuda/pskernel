@@ -401,7 +401,7 @@ def psWasmEncodeInstruction
   | .memory operation => pure (psWasmMemoryInstruction operation).bytes
   | .globalGet index => pure ([0x23] ++ psWasmEncodeUleb index)
   | .globalSet index => pure ([0x24] ++ psWasmEncodeUleb index)
-  | .word operation => pure [(psWasmWordInstruction operation).opcode]
+  | .word operation => pure (psWasmWordInstruction operation).bytes
   | .localGet index =>
       Except.ok
         (List.cons

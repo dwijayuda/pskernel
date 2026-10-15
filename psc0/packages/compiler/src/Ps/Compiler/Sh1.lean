@@ -355,6 +355,10 @@ def psSh1SyntaxTermStep
               "do semantics are outside the enabled source profile"
               moduleName owner (Option.some origin))
       | Option.none => Except.ok state
+  | PsSyntaxTerm.scientific _ span =>
+      Except.error (psSh1SourceFailure "source-scientific-unsupported"
+        "scientific literals are outside the frozen SH1 source profile"
+        moduleName owner (some span))
   | PsSyntaxTerm.natural _ _ => Except.ok state
   | PsSyntaxTerm.string _ _ => Except.ok state
   | PsSyntaxTerm.character _ _ => Except.ok state

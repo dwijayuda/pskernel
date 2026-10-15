@@ -172,6 +172,8 @@ def psPrintProofScriptTermWithFuel
       | .sortE isType level _ => .ok (psPrintSyntaxSort isType level)
       | .reference name =>
           psPrintSyntaxName name
+      | .scientific text _ =>
+          Except.ok text
       | .natural text _ =>
           Except.ok text
       | .string text _ =>

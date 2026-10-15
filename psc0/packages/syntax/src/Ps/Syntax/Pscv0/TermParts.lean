@@ -103,6 +103,9 @@ def psPscv0ReadListLiteral (read : PsPscv0TermReader)
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   if let some token := psTokenCursorPeek cursor then
+    if psTokenKindEq token.kind .scientific then
+      let literal ← psTokenCursorExpectKind cursor .scientific
+      return { value := .scientific literal.token.text literal.token.span, cursor := literal.cursor }
     if psTokenKindEq token.kind .string && token.text.startsWith "s!\"" then
       return ← psPscv0Interpolate read cursor
   if psTokenCursorAtText cursor "#" then return ← psPscv0ReadArrayLiteral read cursor

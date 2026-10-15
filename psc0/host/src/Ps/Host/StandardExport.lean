@@ -809,7 +809,7 @@ def exportFloatOperationsCandidate (output : System.FilePath) : IO Unit := do
 -- conversions are one logical family. Platform words and opaque cross-float
 -- conversions have separate contracts and are deliberately not roots here.
 def exportFloatConversionsCandidate (output : System.FilePath) : IO Unit := do
-  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let selected := psSelfHostProdPreFloatConversionsPreludeEnvironment.declarations
   let owners := ["Float", "Float32"]
   let words := ["UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64"]
   let sourceMethods := owners.flatMap fun owner =>

@@ -1,3 +1,4 @@
+import Ps.Environment.StandardScientific
 import Ps.Environment.StandardOperatorDefaults
 import Ps.Environment.StandardIntArithmetic
 import Ps.Environment.StandardScalarArithmetic
@@ -115,8 +116,12 @@ def psSelfHostProdPreFloatOperationsPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreLiteralPreludeEnvironment : PsEnvironment :=
   psStandardFloatOperationsExtend psSelfHostProdPreFloatOperationsPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Immutable F3 authoring boundary, preceding OfScientific source selection.
+def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
   psStandardOperatorDefaultsExtend psSelfHostProdPreLiteralPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
@@ -137,6 +142,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
     psStandardArrayRuntimeDeclarations
 
-  psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+  psStandardScientificRuntimeDeclarations ++
+    psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     prior.filter (fun declaration =>
       !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration)))

@@ -160,6 +160,9 @@ inductive PsVerifiedIrIntrinsic where
   | machineIntCompare
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerCompareOp)
+  -- Fixed-width IEEE conversion; nearest-even to floats, saturating/truncating to words.
+  | floatOfWord (type : PsVerifiedIrFloatingType) (word : PsVerifiedIrMachineIntegerType)
+  | floatToWord (type : PsVerifiedIrFloatingType) (word : PsVerifiedIrMachineIntegerType)
   | floatOfBits (type : PsVerifiedIrFloatingType)
   | floatToBits (type : PsVerifiedIrFloatingType)
   | floatUnary (type : PsVerifiedIrFloatingType) (operation : PsVerifiedIrFloatUnaryOp)
@@ -174,6 +177,7 @@ inductive PsVerifiedIrIntrinsic where
   | natSub
   | natMul
   | natPow
+  | natLog2
   | natDiv
   | natMod
   | natEq

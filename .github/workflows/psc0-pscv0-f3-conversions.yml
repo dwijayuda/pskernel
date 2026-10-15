@@ -1,11 +1,11 @@
-name: PSCV0 F3 logical conversions (research only)
+name: PSCV0 F3 checked logical conversions
 
 on:
   workflow_dispatch:
   push:
     branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research]
     paths:
-      # Native authoring only; no selected Standard or runtime enablement.
+      # Byte-exact logical replay; runtime qualification is an independent gate.
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
       - 'psc0/host/src/Ps/Host/StandardManifest.lean'
@@ -91,6 +91,7 @@ jobs:
           test -f .lake/build/lib/lean/Ps/Host/FloatConstructive.olean
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
           lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-conversions-candidate ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean | tee ../dist/pscv0-f3-conversions/conversions.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean
           sha256sum ../dist/pscv0-f3-conversions/FloatConversionsCandidate.lean | tee ../dist/pscv0-f3-conversions/conversions.sha256
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()

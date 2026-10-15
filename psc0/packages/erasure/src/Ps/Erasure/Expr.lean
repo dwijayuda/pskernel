@@ -105,7 +105,7 @@ def psErasureCaptureTypedApplicationValue
         (psErasureIndexInsert Bool state.scope.declarationNames.byOutput
           (PsName.str PsName.anonymous localName) true)
         (Nat.succ state.scope.declarationNames.count)
-        state.scope.declarationNames.entries;
+        state.scope.declarationNames.entries state.scope.declarationNames.supportNames;
     let nextScope :=
       PsErasureScope.mk
         state.scope.localContext state.scope.runtimeLocals state.scope.typeLocals
@@ -1626,7 +1626,7 @@ def psEraseRuntimeRecursorApplication
                                       (psErasureIndexInsert Bool scope.declarationNames.byOutput
                                         (PsName.str PsName.anonymous localName) true)
                                       (Nat.succ scope.declarationNames.count)
-                                      scope.declarationNames.entries;
+                                      scope.declarationNames.entries scope.declarationNames.supportNames;
                                   PsErasureScope.mk
                                     scope.localContext scope.runtimeLocals scope.typeLocals
                                     scope.erasedLocals reservedNames scope.runtimeConstructors

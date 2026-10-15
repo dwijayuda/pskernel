@@ -145,6 +145,7 @@ def psProofScriptTermWithSpan
   | .call fn args _ => .call fn args span
   | .reference name =>
       PsSyntaxTerm.reference { segments := name.segments, span := span }
+  | .scientific value _ => PsSyntaxTerm.scientific value span
   | .natural value _ => PsSyntaxTerm.natural value span
   | .sortE isType level _ => PsSyntaxTerm.sortE isType level span
   | .string value _ => PsSyntaxTerm.string value span

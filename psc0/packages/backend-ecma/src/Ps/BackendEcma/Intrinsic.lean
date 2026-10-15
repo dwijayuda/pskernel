@@ -84,6 +84,31 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
   | .unsignedToNat _, [value] => pure (call "BigInt" [value])
   | .machineIntBinary type op, [a,b] => machineBinary type op a b
   | .machineIntCompare _ op, [a,b] => pure (bin (compareOp op) a b)
+  | .natLog2, [value] =>
+      pure (invoke [{ name := "__ps_n", type := "bigint" }] "bigint"
+        [ret (.conditional (bin "===" (id "__ps_n") (id "0n")) (id "0n")
+          (call "BigInt" [bin "-" (field (method (id "__ps_n") "toString" [num 2]) "length") (num 1)]))] [value])
+  | .floatOfWord type word, [value] =>
+      match type with
+      | .float => pure (call "Number" [value])
+      | .float32 =>
+        if psIrMachineIntegerFixedWidth word == some 64 then
+          pure (call "__ps$word64ToFloat32" [value])
+        else pure (call "Math.fround" [value])
+  | .floatToWord _ word, [value] => do
+      let some width := psIrMachineIntegerFixedWidth word
+        | throw "PSCV0-ECMA: float conversion requires fixed word width"
+      let signed := psIrMachineIntegerIsSigned word
+      let upper : Nat := 2 ^ (if signed then width - 1 else width)
+      let lower : Int := if signed then -(Int.ofNat upper) else 0
+      let v := id "__ps_value"
+      let integer := fun n => if width == 64 then id (toString n ++ "n") else id (toString n)
+      pure (invoke [{ name := "__ps_value", type := "number" }]
+        (if width == 64 then "bigint" else "number") [
+        ret (.conditional (call "Number.isNaN" [v]) (integer (0 : Int))
+          (.conditional (bin "<=" v (id (toString lower))) (integer lower)
+            (.conditional (bin ">=" v (id (toString upper))) (integer (Int.ofNat upper - 1))
+              (if width == 64 then call "BigInt" [call "Math.trunc" [v]] else call "Math.trunc" [v]))))] [value])
   | .floatOfBits type, [value] => pure (call
       (match type with | .float => "__ps$float64OfBits" | .float32 => "__ps$float32OfBits") [value])
   | .floatToBits type, [value] => pure (call

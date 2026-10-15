@@ -1,5 +1,18 @@
 # PSCV0 v7 native implementation roadmap
 
+## F3 scientific literals and conversions — implementation checkpoint, 16 October 2026
+
+The current user authorized completing F3 across all executable backends, then stopping at the next milestone. This commit implements the coherent family; **qualification is pending**. The previous qualified executable remains `9caedc25b4ba373186935a8cf363907ffa8cb6f7` (native38759692425, 872 observations). Do not report F3 or M2+A complete from this checkpoint.
+
+Design: exact scientific tokens feed the shared universe-aware numeric literal/synthetic-constraint path. Select the independently checked 134-declaration F3 logical asset against the frozen pre-F3 environment, explicitly register OfScientific Float/Float32, two checked OfNat dictionaries, and Float's pinned default priority 501. No new assumptions. Exact rational rounding is authored once as typed IR helpers; reserve private support names before local erasure and emit reachable helpers. Rust and Wasm use native fixed-width conversions; JavaScript rounds 64-bit integers directly to binary32 before Number conversion. Wasm uses GC Nat/Int support; no new linear memory.
+
+Pinned references: Lean 4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, `src/Init/Data/OfScientific.lean`, `src/Init/Data/OfScientific/Basic.lean`, `src/Init/Meta/Defs.lean`, `src/Lean/Parser/Basic.lean`, `src/Lean/Elab/BuiltinTerm.lean`, `src/Init/Data/Float/Model/Unpacked/{Round,Operations/OfScientific,Operations/Div,Operations/OfNat,Operations/ToNat}.lean`, `src/Init/Data/SInt/Float{,32}.lean`, `src/include/lean/lean.h`, `tests/elab/float_conversions.lean`, and `tests/pkg/ofScientific`. Apache-2.0 attribution is retained. Wasm numeric conversions and Rust numeric casts were checked against their official specifications.
+
+Validation plan: build the complete native compiler; preserve strict old declaration/surface digest pins for independent measurement and review before updating them. Replay F1/F2/F3 assets byte-for-byte. Run the existing full native/integration suite with one compact F3 fixture (52 observations), nine custom scientific literal observations, independent pinned Lean oracles, and all shared runtime backends. Expected shared total: 933, not yet qualified. Keep current time/resource ceilings.
+
+Remaining after this slice: F4 display, opaque cross-width float contracts, target USize/ISize profiles, broader M2+A boundaries. Preserve the interleaved M2+A → M3+B → M4+C/D roadmap. No pskernel-core, self-hosting, C5, local execution, new trust assumptions, or claim of compiler semantic preservation.
+
+
 ## Literal/operator slice qualified on development branch — 15 October 2026
 
 Development commit `9caedc25b4ba373186935a8cf363907ffa8cb6f7` passed all 30 job steps in [native38759692425](https://github.com/dwijayuda/pskernel/actions/runs/38759692425): **872 shared runtime observations** on TypeScript, direct JavaScript and Rust, GC Wasm/core/component checks using the shared observation table, repeated native Wasmtime calls, source/kernel/typed-IR checks, module integration, byte-exact checked assets and existing performance checks. Independent [F1 replay38759692456](https://github.com/dwijayuda/pskernel/actions/runs/38759692456), [F2 replay38759692430](https://github.com/dwijayuda/pskernel/actions/runs/38759692430), and [F3 logical replay38759692551](https://github.com/dwijayuda/pskernel/actions/runs/38759692551) also passed at this exact commit. The final receipt commit changes documentation only; compiler source and workflow configuration remain identical to this qualified commit.

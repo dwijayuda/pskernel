@@ -62,7 +62,7 @@ def primitiveAudit : IO Lean.Json := do
       (psNameToString name)
     let checkedArray := ["Array", "Array.map", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)
-    let checkedOperator := psStandardHomogeneousNativeNames.any (psNameEq name)
+    let checkedOperator := (psStandardHomogeneousNativeNames ++ psStandardScientificNames).any (psNameEq name)
     if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedOperator then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
@@ -108,7 +108,12 @@ def primitiveAudit : IO Lean.Json := do
     operations.map (fun method => owner ++ ".Model." ++ method) ++
     [owner ++ ".instDecidableEqModel", owner ++ ".instDecidableEqModel.decEq",
       "instDecidableEq" ++ owner, "instDecidableEq" ++ owner ++ ".decEq"]
-  let modelNames := floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
+  let floatConversions := ["Float", "Float32"].flatMap fun owner =>
+    ["ofScientific", "ofNat", "ofInt"].map (fun method => owner ++ "." ++ method) ++
+    ["UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64"].flatMap (fun word =>
+      [owner ++ ".to" ++ word, owner ++ ".Model.to" ++ word, owner ++ ".Model.of" ++ word,
+       word ++ ".to" ++ owner]) ++ [owner ++ ".Model.ofScientific"]
+  let modelNames := floatConversions ++ ["Nat.toFloat", "Nat.toFloat32", "Int.toFloat", "Int.toFloat32"] ++ floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
     "Nat.ble", "outOfBounds"]
   let mut models := []
   for name in modelNames do

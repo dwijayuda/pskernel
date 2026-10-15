@@ -194,6 +194,8 @@ def psElabTermWithFuel
                       | Except.ok application =>
                           psElabFinishApplication application expected
             | .sortE isType level _ => psElabSort context isType level expected
+            | .scientific text _ =>
+                psElabScientific context text expected
             | .natural text _ =>
                 psElabNatural context text expected
             | .string text _ =>

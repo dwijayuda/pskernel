@@ -105,7 +105,7 @@ def selectedModuleBehaviors : List String :=
    "kernel-checked-project-linking"]
 
 def unqualifiedM2AFeatures : List String :=
-  ["Float/Float32 F3 scientific/conversions and F4 complete qualification",
+  ["Float/Float32 F4 display qualification and opaque cross-width conversions",
    "USize/ISize explicit target word profiles",
    "remaining deriving and class-search semantic boundaries",
    "full Lean module/notation/tactic/effect closure",

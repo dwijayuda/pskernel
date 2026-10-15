@@ -617,15 +617,13 @@ def psElabSolveSynthetic (current : PsElabTermResult)
   | none => pure ()
   return psElabResultWithMeta current solved.context current.type
 
--- Lean 4.35.0 Lean/Elab/BuiltinTerm.elabNumLit: fresh Type-valued target,
--- expected-type constraints, raw Nat parameter, and a synthetic OfNat goal.
--- Copyright Microsoft Corporation, Apache-2.0, Leonardo de Moura.
--- A numeral never guesses Nat before ordinary constraints reach quiescence.
-def psElabNatural
-    (context : PsElabContext) (text : String) (expected : Option PsExpr) :
+-- Pinned Lean BuiltinTerm.elabNumLit/elabScientificLit share a fresh Type,
+-- expected-type unification and one synthetic class goal. Raw parameters must
+-- never be elaborated as source numerals (a local OfNat may change them).
+-- Apache-2.0, Microsoft Corporation, Leonardo de Moura.
+def psElabNumericLiteral (context : PsElabContext) (family method : String)
+    (indices arguments : List PsExpr) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult := do
-  let some value := psParseNaturalText text | throw (.invalidNatural text)
-  let natural := PsExpr.lit (.natural value)
   let level := psMetaFreshLevel context.metaContext
   let target := psMetaFresh level.context context.localContext (.sortE (.succ level.level)) .natural
   let context := psElabContextWithMeta context target.context
@@ -636,16 +634,30 @@ def psElabNatural
       if !unified.success then throw .typeMismatch
       pure (psElabContextWithMeta context unified.context)
   let goal ← psElabApplyCore context
-    (.constE (psRootName "OfNat") [level.level]) [target.expr, natural]
+    (.constE (psRootName family) [level.level]) (target.expr :: indices)
   let dictionary := psMetaFresh goal.context.metaContext goal.context.localContext goal.term .synthetic
   let .mvar id := dictionary.expr | throw .implicitApplicationUnsupported
   let result : PsElabTermResult := {
     context := psElabContextWithMeta goal.context dictionary.context
-    term := psExprApplyMany (.constE (psNameAppendStr (psRootName "OfNat") "ofNat") [level.level])
-      [target.expr, natural, dictionary.expr]
+    term := psExprApplyMany (.constE (psNameAppendStr (psRootName family) method) [level.level])
+      (target.expr :: (indices ++ [dictionary.expr] ++ arguments))
     type := target.expr }
   let result ← psElabSolveSynthetic result [.instanceGoal id]
   psElabFinalizeExpected result expected
+
+def psElabNatural (context : PsElabContext) (text : String) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let some value := psParseNaturalText text | throw (.invalidNatural text)
+  psElabNumericLiteral context "OfNat" "ofNat" [.lit (.natural value)] [] expected
+
+def psElabScientific (context : PsElabContext) (text : String) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let some (mantissa, negative, exponent) := psParseScientificText text
+    | throw (.invalidArgument ("invalid scientific literal: " ++ text))
+  let sign := PsExpr.constE (psNameAppendStr (psRootName "Bool")
+    (if negative then "true" else "false")) []
+  psElabNumericLiteral context "OfScientific" "ofScientific" []
+    [.lit (.natural mantissa), sign, .lit (.natural exponent)] expected
 
 def psElabString
     (context : PsElabContext)

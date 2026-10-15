@@ -94,6 +94,8 @@ structure PsErasureDeclarationNames where
   byOutput : PsErasureNameIndex Bool
   count : Nat
   entries : PsErasureNameIndex PsErasureEntryInfo
+  -- IR-only support identities are reserved separately from checked Core names.
+  supportNames : List (String × String) := []
 
 def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
   match entries with
@@ -515,7 +517,7 @@ def psErasurePrepareDeclarationEntries
   | Except.ok entries =>
       let names := PsErasureDeclarationNames.mk
         scope.declarationNames.byCore scope.declarationNames.byOutput
-        scope.declarationNames.count entries;
+        scope.declarationNames.count entries scope.declarationNames.supportNames;
       Except.ok
         (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
           scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
@@ -564,7 +566,7 @@ def psErasureReserveOutputName (scope : PsErasureScope) (name : String) :
     (psErasureIndexInsert Bool scope.declarationNames.byOutput
       (PsName.str PsName.anonymous name) true)
     (Nat.succ scope.declarationNames.count)
-    scope.declarationNames.entries;
+    scope.declarationNames.entries scope.declarationNames.supportNames;
   PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
     scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
     scope.runtimeStructures scope.runtimeStructureConstructors

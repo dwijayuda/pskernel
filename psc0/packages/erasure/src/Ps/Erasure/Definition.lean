@@ -345,7 +345,7 @@ def psErasureEnsureDefinitionEntry
       | Except.ok entries =>
           let names := PsErasureDeclarationNames.mk
             scope.declarationNames.byCore scope.declarationNames.byOutput
-            scope.declarationNames.count entries;
+            scope.declarationNames.count entries scope.declarationNames.supportNames;
           Except.ok
             (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
               scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
@@ -524,55 +524,66 @@ def psEraseCoreModuleWithRuntimePrelude
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
-  let baseScope := psErasureScopeEmpty names;
-  match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with
+  let baseScopeResult := PsFloatRuntime.reserve (psErasureScopeEmpty names)
+  match baseScopeResult with
   | Except.error error => Except.error error
-  | Except.ok entryScope =>
-      match
-          psPrepareRuntimeStructures
-            environment
-            runtimeDeclarations
-            runtimeDeclarations
-            entryScope
-            [] with
-      | Except.error error => Except.error error
-      | Except.ok preparedStructures =>
-          match
-              psPrepareRuntimeInductives
-                environment
-                runtimeDeclarations
-                runtimeDeclarations
-                preparedStructures.scope
-                [] with
-          | Except.error error => Except.error error
-          | Except.ok preparedInductives =>
-              match
-                  psEraseDefinitionsLoop
-                    environment
-                    preparedInductives.scope
-                    runtimeDeclarations
-                    [] with
-              | Except.error error => Except.error error
-              | Except.ok lowered =>
-                  Except.ok {
-                    foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
-                    -- The canonical Standard declaration roster includes
-                    -- proof-valued class methods. They have no executable
-                    -- representation and therefore no IR export identity.
-                    -- Keep only names with actual checked runtime output;
-                    -- never weaken the downstream internal-name validator.
-                    internalNames := (internalRuntimeNames.filterMap
-                      (psErasureLookupName preparedInductives.scope.declarationNames)).filter
-                      (fun name =>
-                        lowered.any (fun entry => entry.name == name) ||
-                        preparedStructures.ir.any (fun entry => entry.name == name) ||
-                        preparedInductives.ir.any (fun entry => entry.name == name))
-                    imports := []
-                    structures := preparedStructures.ir
-                    inductives := preparedInductives.ir
-                    declarations := lowered
-                  }
-
+  | Except.ok baseScope =>
+    match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with
+    | Except.error error => Except.error error
+    | Except.ok entryScope =>
+        match
+            psPrepareRuntimeStructures
+              environment
+              runtimeDeclarations
+              runtimeDeclarations
+              entryScope
+              [] with
+        | Except.error error => Except.error error
+        | Except.ok preparedStructures =>
+            match
+                psPrepareRuntimeInductives
+                  environment
+                  runtimeDeclarations
+                  runtimeDeclarations
+                  preparedStructures.scope
+                  [] with
+            | Except.error error => Except.error error
+            | Except.ok preparedInductives =>
+                match
+                    psEraseDefinitionsLoop
+                      environment
+                      preparedInductives.scope
+                      runtimeDeclarations
+                      [] with
+                | Except.error error => Except.error error
+                | Except.ok lowered => do
+                    let support ← PsFloatRuntime.declarations preparedInductives.scope
+                    -- Follow support dependencies to a fixed point, then emit only
+                    -- reachable helpers. Their names were reserved before locals.
+                    let used := (List.range support.length).foldl (fun needed _ =>
+                      needed ++ support.filter (fun helper =>
+                        !needed.any (fun d => d.name == helper.name) &&
+                        (lowered ++ needed).any (fun d =>
+                          psErasureIrUsesNameWithFuel 4096 d.body helper.name))) []
+                    Except.ok {
+                      foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
+                      -- The canonical Standard declaration roster includes
+                      -- proof-valued class methods. They have no executable
+                      -- representation and therefore no IR export identity.
+                      -- Keep only names with actual checked runtime output;
+                      -- never weaken the downstream internal-name validator.
+                      internalNames := used.map (·.name) ++ (internalRuntimeNames.filterMap
+                        (psErasureLookupName preparedInductives.scope.declarationNames)).filter
+                        (fun name =>
+                          lowered.any (fun entry => entry.name == name) ||
+                          preparedStructures.ir.any (fun entry => entry.name == name) ||
+                          preparedInductives.ir.any (fun entry => entry.name == name))
+                      imports := []
+                      structures := preparedStructures.ir
+                      inductives := preparedInductives.ir
+                      declarations := used ++ lowered
+                    }
+  
 def psEraseCoreModule
     (environment : PsEnvironment)
     (declarations : List PsDeclaration) :

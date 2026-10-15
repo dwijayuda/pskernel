@@ -1168,9 +1168,9 @@ doSeqItem ::= "let" ident ":=" term | "let" ident "←" term
 
 ```text
 term ::= "do" "{" psDoSeq "}"
-psDoItem ::= "let" ident ":=" term
-           | "let" ident "←" term | term | "return" term
-           | psDoIf | psDoIfLet
+psBaseDoItem ::= "let" ident ":=" term
+               | "let" ident "←" term | term | "return" term
+               | psDoIf | psDoIfLet
 psDoCondition ::= Lean.Parser.Term.binderIdent ":" term | term
 psDoIf ::= "if" "(" psDoCondition ")" "{" psDoSeq "}"
            ("else" "{" psDoSeq "}")?
@@ -2371,8 +2371,8 @@ doSeqItem ::= "let" "mut" ident ":=" term
 **ProofScript `pscv0` modification (same Lean grammar family)**
 
 ```text
-psDoItem ::= "let" "mut" ident (":" term)? ":=" term
-           | ident ":=" term | "return" term | ...
+psVerifiedDoItemP0 ::= "let" "mut" ident (":" term)? ":=" term
+                       | ident ":=" term | ...
 // Retain Lean local-mutation translation; no unmodeled aliasing
 ```
 
@@ -3165,7 +3165,7 @@ term ::= ... | "assert!" term ...    // runtime assertion
 **ProofScript `pscv0` modification (same Lean grammar family)**
 
 ```text
-psDoItem ::= ... | "assert" term
+psVerifiedDoItemP0 ::= ... | "assert" term
 // Lean proof obligation required; `assert!` not substituted
 ```
 

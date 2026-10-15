@@ -433,7 +433,7 @@ private theorem maskedLow_iff {upper lower : Nat}
   have split : bits = bits.extractLsb' lower upper ++ bits.extractLsb' 0 lower := by
     rw [BitVec.extractLsb'_append_extractLsb']
   conv => lhs; rw [split]
-  rw [BitVec.and_append, BitVec.zero_and, BitVec.append_right_inj]
+  rw [BitVec.and_append, BitVec.and_zero, BitVec.append_right_inj]
 
 theorem binary64ExponentMask_iff (bits : BitVec 64) :
     (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
@@ -442,7 +442,9 @@ theorem binary64ExponentMask_iff (bits : BitVec 64) :
     (bits &&& ((0#1 ++ BitVec.allOnes 11) ++ 0#52) =
       ((0#1 ++ BitVec.allOnes 11) ++ 0#52)) ↔
         bits.extractLsb' 52 11 = BitVec.allOnes 11
-  rw [maskedHigh_iff]
+  rw [maskedHigh_iff (upper := 12) (lower := 52)
+    (bits := bits) (mask := (0#1 ++ BitVec.allOnes 11))
+    (target := (0#1 ++ BitVec.allOnes 11))]
   have split : bits.extractLsb' 52 12 =
       bits.extractLsb' 63 1 ++ bits.extractLsb' 52 11 := by
     simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
@@ -456,8 +458,8 @@ theorem binary64FractionMask_iff (bits : BitVec 64) :
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
   change (bits &&& (0#12 ++ BitVec.allOnes 52) = 0#12 ++ 0#52) ↔
     bits.extractLsb' 0 52 = 0#52
-  rw [maskedLow_iff]
-  simp
+  simpa using (maskedLow_iff (upper := 12) (lower := 52)
+    (bits := bits) (mask := BitVec.allOnes 52) (target := 0#52))
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
     (bits &&& 2139095040#32 = 2139095040#32) ↔
@@ -466,7 +468,9 @@ theorem binary32ExponentMask_iff (bits : BitVec 32) :
     (bits &&& ((0#1 ++ BitVec.allOnes 8) ++ 0#23) =
       ((0#1 ++ BitVec.allOnes 8) ++ 0#23)) ↔
         bits.extractLsb' 23 8 = BitVec.allOnes 8
-  rw [maskedHigh_iff]
+  rw [maskedHigh_iff (upper := 9) (lower := 23)
+    (bits := bits) (mask := (0#1 ++ BitVec.allOnes 8))
+    (target := (0#1 ++ BitVec.allOnes 8))]
   have split : bits.extractLsb' 23 9 =
       bits.extractLsb' 31 1 ++ bits.extractLsb' 23 8 := by
     simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
@@ -480,8 +484,8 @@ theorem binary32FractionMask_iff (bits : BitVec 32) :
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
   change (bits &&& (0#9 ++ BitVec.allOnes 23) = 0#9 ++ 0#23) ↔
     bits.extractLsb' 0 23 = 0#23
-  rw [maskedLow_iff]
-  simp
+  simpa using (maskedLow_iff (upper := 9) (lower := 23)
+    (bits := bits) (mask := BitVec.allOnes 23) (target := 0#23))
 
 -- Exactly the mask/branch behavior of the selected
 -- PsStandard.canonicalFloat64Bits function, expressed on its bit carrier.

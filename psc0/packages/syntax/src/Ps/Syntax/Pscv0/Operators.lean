@@ -67,14 +67,14 @@ structure PsPscv0ParsedInfix where
 -- Longest registered adjacent spelling wins. Bound the scan by the longest
 -- spelling in the actual registry; spaces can never create an operator.
 private def psPscv0InfixScan (fuel : Nat) (cursor : PsTokenCursor)
-    (prefix : String) (span : PsSourceSpan)
+    (spellingSoFar : String) (span : PsSourceSpan)
     (best : Option PsPscv0ParsedInfix) : Option PsPscv0ParsedInfix :=
   match fuel, cursor.remaining with
   | 0, _ | _, [] => best
   | fuel + 1, token :: rest =>
-    if !prefix.isEmpty && span.stop.byteOffset != token.span.start.byteOffset then best else
-    let spelling := prefix ++ token.text
-    let span := if prefix.isEmpty then token.span else psSyntaxSpanJoin span token.span
+    if !spellingSoFar.isEmpty && span.stop.byteOffset != token.span.start.byteOffset then best else
+    let spelling := spellingSoFar ++ token.text
+    let span := if spellingSoFar.isEmpty then token.span else psSyntaxSpanJoin span token.span
     let cursor : PsTokenCursor := { remaining := rest }
     let best := match psPscv0InfixInfo spelling with
       | none => best

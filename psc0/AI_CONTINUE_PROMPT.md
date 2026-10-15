@@ -14,6 +14,8 @@ Development HEAD 4fedd6cab8236c5f0f0a16dcffe8f7e10402972e is a receipt for execu
 
 Research parent58b1f0c8767926512ce0de7b9e416707e7db7793: native [38810569497](https://github.com/dwijayuda/pskernel/actions/runs/38810569497) passed compiler, frozen assets, strict3568 declarations/32classes/315instances, source/kernel (4 programs,92 refusals), module emission, deriving and shared synthetic/instance/default/rollback/scaling checks. Platform runtime fixture then refused before emission: missing Decidable (Int equality) in checkSignedShift. No all-backend qualification for research yet. Independent F3/F4/platform logical replay [38810569357](https://github.com/dwijayuda/pskernel/actions/runs/38810569357) passed.
 
+Native38812863861 and replay38812863915 atffa1cab3 stopped in compilation: the new scanner used Lean's reserved `prefix` keyword as a parameter and the light-synthesis structure update had invalid layout. Corrected both native source syntax issues; semantic qualification is still pending.
+
 ## Current coherent implementation checkpoint (profile70; qualification pending)
 
 Research includes explicit32/64 target words with opaque logical platform width; Array.filter; structural alpha-normalized instance keys; strict UTF8 and shared GC boundary validation; constructive logic/order; conditional and Prop-to-Bool decisions on the shared synthetic queue. This checkpoint adds Lean Extra.lean-style typed operator trees, read-only maximal-type/coercion analysis, heterogeneous guards, Pow/shift protocols and Nat/Int runtime primitives across readable JS/TS/Rust/GC Wasm. It also makes deriving/tactic/effect surface audits consume actual dispatch tables.

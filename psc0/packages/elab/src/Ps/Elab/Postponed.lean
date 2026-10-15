@@ -140,5 +140,6 @@ def psElabProgressPending (elaborate : PsElaborator) (context : PsElabContext)
     psElabPendingPriorities psElabResumeDefault
     { context with pending := [] } context.pending.reverse false limit
   if solved.resourceExceeded then throw .fuelExhausted
-  return { solved.context with pending := solved.pending.reverse,
+  return { solved.context with
+    pending := solved.pending.reverse
     postponing := context.postponing }

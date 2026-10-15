@@ -1,0 +1,81 @@
+name: PSKernel-C0 pinned Init BitVec boundary probe
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-init-bitvec-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bitvec-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build exact Lean 4.35.0 exporter and independent C0
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc &&
+            lake build c0OfficialReplay)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Export and check next real Init theorem's complete dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET='BitVec.lt_of_isSome_getElem?'
+          echo "C0_NEXT_BOUNDARY target=$TARGET original_full_Init_record=5068793"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- "$TARGET" > "$RUNNER_TEMP/C0-bitvec-435.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/C0-bitvec-435.ndjson" > "$RUNNER_TEMP/C0-bitvec-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/C0-bitvec-official.txt"
+          wc -lc "$RUNNER_TEMP/C0-bitvec-435.ndjson"
+          sha256sum "$RUNNER_TEMP/C0-bitvec-435.ndjson"
+          echo "C0_NEXT_BOUNDARY_OFFICIAL=accepted"
+      - name: Check exact closure in independent C0 at unchanged fuel 4096
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/C0-bitvec-resources.txt" \
+              timeout 300s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/C0-bitvec-435.ndjson" 4096) \
+              > "$RUNNER_TEMP/C0-bitvec-native.txt" 2>&1
+          status=$?
+          set -e
+          echo "C0_NEXT_BOUNDARY_EXIT=$status"
+          grep 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/C0-bitvec-native.txt" | tail -n 5 || true
+          tail -n 20 "$RUNNER_TEMP/C0-bitvec-native.txt"
+          cat "$RUNNER_TEMP/C0-bitvec-resources.txt"
+          if test "$status" -eq 0; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/C0-bitvec-native.txt"
+            echo "C0_NEXT_BOUNDARY_RESULT=accepted_dependency_closure_only"
+          else
+            echo "C0_NEXT_BOUNDARY_RESULT=not_accepted_or_timeout_inspect_precise_verdict"
+          fi
+          echo "C0_NEXT_BOUNDARY_SCOPE=diagnostic_only_not_full_Init"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pinned-bitvec-boundary
+          path: |
+            ${{ runner.temp }}/C0-bitvec-official.txt
+            ${{ runner.temp }}/C0-bitvec-435.ndjson
+            ${{ runner.temp }}/C0-bitvec-native.txt
+            ${{ runner.temp }}/C0-bitvec-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

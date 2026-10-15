@@ -909,6 +909,8 @@ def exportFloatDisplayCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Data/Float/Float{,32}.lean, Init/Data/Repr.lean and runtime/object.cpp.\nNative checked opaque inhabitants and display dictionaries; runtime parity is a separate gate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- ISize/ofUSize/rec are already selected by StandardSignedIdentityData and
+-- stay at the frozen boundary; do not duplicate their checked native family.
 -- Target-word dependency review. Logical width stays abstract, including the
 -- native opaque getNumBits inhabitant; selecting an executable 32/64 profile
 -- is an erasure concern and must never change this checking environment.
@@ -953,7 +955,6 @@ def exportPlatformWordsCandidate (output : System.FilePath) : IO Unit := do
       `ISize.toBitVec,
       `ISize.ofBitVec,
       `ISize.toUSize,
-      `ISize.ofUSize,
       `ISize.size,
       `ISize.minValue,
       `ISize.maxValue,

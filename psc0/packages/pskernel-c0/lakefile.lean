@@ -19,6 +19,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.CertifiedCheckedDAGMemo,
     `Ps.KernelCore.Architecture.CertifiedCheckedDAGTrace,
     `Ps.KernelCore.Architecture.CertifiedCheckedIndexedSession,
+    `Ps.KernelCore.Architecture.QualifiedCheckedDAGInference,
     `Ps.KernelCore.Architecture.QualifiedInference,
     `Ps.KernelCore.Architecture.QualifiedLocalInference,
     `Ps.KernelCore.Architecture.QualifiedConstantInference,

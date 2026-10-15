@@ -1,5 +1,9 @@
 # Continue PSC0 / PSCV0 v7 — complete remaining M2+A
 
+## Current continuation — implication proposition classification
+
+Research parent a08346dc; native run [38808961871](https://github.com/dwijayuda/pskernel/actions/runs/38808961871) failed at `logicImplies` before backend execution. Root cause: conditional classification used syntactic `Sort 0` rather than level equivalence; implication yields `imax 0 0`. Apply existing read-only conversion to Prop, following pinned Lean `Meta/InferType.isProp`; no unknown sort assignment or acceptance weakening. Native profile 68. Registry pins unchanged (logicPins). Re-run combined qualification; platform/filter/UTF8/key/logic slice remains unqualified and not integrated into PR109. Both handoffs updated. Continue M2+A after qualification, including pending operator protocol and source retention work. Do not claim completion.
+
 Native38807935990 at3aeeca27c67c49f6ddadd048942872fd63da5434 passed the strict3568-declaration manifest, native source/kernel and existing scope/unsigned/generic boundaries. Full application case0 then refused PSCV0-TYPE-MISMATCH in logicDecisions. The compound fixture now names each of its seven predicates separately, retaining exactly the same six shared observations and acceptance criteria, so source diagnostics identify the failing logical form. No backend qualification claimed; operator inference/power/shift work is in progress separately.
 
 

@@ -24,3 +24,7 @@ Implementation is pending cloud qualification. Keep the previous registry digest
 
 Native38806446169 compiled the logic layer and all six pinned decision observations, then its strict audit refused a mistaken runtime dependency name. Direct inspection of the frozen native Core DAG confirms that instDecidableIff uses instBEqOfDecidableEq applied to instDecidableEqBool, not a ground instBEqBool. The runtime catalogue and strict dependency audit now select those exact checked dependencies; no logical body, acceptance criterion or registration changed. Digest selection and complete source/runtime qualification remain pending.
 
+
+## Conditional proposition classification
+
+Cloud run 38808961871 at a08346dc isolated the compound source failure to `logicImplies`. The conditional owner matched only literal `Sort 0`, while the forall elaborator correctly retained `Sort (imax 0 0)`. Lean 4.35.0 `src/Lean/Meta/InferType.lean` (`isAlwaysZero`, `isProp`) recognizes all levels equivalent to zero. PSC0 now uses its existing read-only definitional equality against Prop, which handles instantiated equivalent levels without assigning an unknown type to Prop. No new unifier or logical definition is introduced. The existing seven named logical forms and six shared runtime vectors remain unchanged; the implication vector is the regression. Upstream conditional coverage reviewed: `tests/elab/ifThenElseIssue.lean`, `ifThenElseIssue2.lean`. Validation pending.

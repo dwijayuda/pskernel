@@ -8,10 +8,12 @@ structure PsElabCondition where
 def psElabCondition (elaborate : PsElaborator) (context : PsElabContext)
     (source : PsSyntaxTerm) : Except PsElabError PsElabCondition := do
   let value ← elaborate context source none
-  let type := psWhnf value.context.environment value.context.metaContext
-    value.context.localContext value.type
-  match type with
-  | .sortE .zero =>
+  -- Lean 4.35.0 Meta/InferType.isProp recognizes levels equivalent to zero,
+  -- including imax u 0 from implication/dependent products. A syntactic
+  -- Sort.zero match misclassifies those propositions as Bool conditions.
+  -- Read-only conversion must never solve an unknown sort to Prop.
+  if psDefEqReadOnlyWithEnv value.context.environment value.context.metaContext
+      value.context.localContext value.type (.sortE .zero) then
     let target := PsExpr.app (.constE psDecidableName []) value.term
     let decision := psSynthInstance value.context.environment value.context.localContext
       value.context.instances value.context.metaContext target
@@ -21,7 +23,7 @@ def psElabCondition (elaborate : PsElaborator) (context : PsElabContext)
       context := psElabContextWithMeta value.context decision.context
       proposition := psMetaInstantiate decision.context value.term
       decision := term }
-  | _ =>
+  else
     let value ← psElabFinalizeExpected value (some (.constE psBoolName []))
     let boolean := PsExpr.constE psBoolName []
     let truth := PsExpr.constE psBoolTrueName []

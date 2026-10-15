@@ -1,4 +1,8 @@
 # PSCV0 v7 — AI work state
+## Literal fixture invocation alignment — 15 October 2026
+
+Native38750864793 passed parsing, all prior gates, and integrated custom literal/operator declarations, then correctly refused `literalLocalNat`: its PSCV0 function has an explicit Unit parameter but its named-dictionary call omitted that argument. The fixture now supplies `()` and its independent native Lean oracle has the same Unit telescope. The shared application rule is unchanged: only a written empty invocation inserts Unit; a nonempty named call does not silently discard a required parameter. Expected value 42 and all other observations remain unchanged. Full backend qualification is pending.
+
 ## Literal qualification syntax correction — 15 October 2026
 
 Native run 38749641509 accepted all 3179 selected declarations and passed the strengthened registry audit, native literal/operator oracles, previous scalar assets and source checks. The integrated fixture was refused during parsing because its heterogeneous-operation example used Lean-style `if b` instead of the canonical PSCV0 `if (b)`. Only that fixture spelling is corrected. Expectations, compiler behavior, foundation and budgets are unchanged; full source/backend qualification is still pending. Independent F1/F2/F3 replays at 39a1718a1ff47dbbd7dea91967a145bb7438c176 passed.

@@ -3,6 +3,20 @@ import Ps.Host.FloatConstructive
 import Ps.Host.FloatCanonicalContracts
 import Lean.Util.CollectAxioms
 
+-- Host-only audited replacement candidate for original pinned
+-- BitVec.getLsbD_of_ge. Do not publish it until independent theorem-only
+-- portable replay verifies exact type equivalence and source dependencies.
+example {w : Nat} (x : BitVec w) (i : Nat) (h : w ≤ i) :
+    x.getLsbD i = false :=
+  PsV7Native.FloatConstructive.getLsbDOfGe x i h
+
+run_cmd do
+  let used ← Lean.collectAxioms
+    ``PsV7Native.FloatConstructive.getLsbDOfGe
+  for assumption in used do
+    unless [``propext, ``Quot.sound].contains assumption do
+      throwError "PSCV0-BITVEC-CUT: unapproved axiom {assumption}"
+
 /-! Independent native Lean 4.35.0 verification. Not selected Standard. -/
 example {a n : Nat} : a ^ n = 0 ↔ a = 0 ∧ n ≠ 0 :=
   PsV7Native.FloatConstructive.powEqZero

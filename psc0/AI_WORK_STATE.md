@@ -1,5 +1,22 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — Constructive BitVec bound proof candidate
+
+Native-only research commit `8647b0e4ce1ad32b030dc7ebadd1958813942014`
+passed [pinned Lean CI 38680234876](https://github.com/dwijayuda/pskernel/actions/runs/38680234876).
+A new constructive proof of the **exact pinned**
+`BitVec.getLsbD_of_ge` proposition uses the BitVec unsigned bound,
+`Nat.pow_le_pow_right`, and `Nat.testBit_lt_two_pow` instead of the
+original `omega` proof body. The native oracle refuses every imported
+assumption except `propext` and `Quot.sound`.
+
+**This integration is unqualified pending its own exact-commit CI.** The
+separate theorem-only portable proof-cut experiment is under review. The
+checker, frozen selected Standard, previously qualified 17-root Float
+candidate, source compiler and executable Float capabilities are not
+modified. Neither a replacement proof nor any new runtime functionality
+is admitted by merging a host-only theorem. F1–F4/M2+A remain incomplete.
+
 ## 15 October — Constructive IEEE mask proof milestone QUALIFIED
 
 **Exactly qualified source and executable:** `7f2b68304d8aea26df08e3a75e7641cb12313d66`.

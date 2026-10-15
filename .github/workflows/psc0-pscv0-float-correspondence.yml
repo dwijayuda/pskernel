@@ -1,0 +1,53 @@
+name: PSC0 native Float all-input correspondence
+on:
+  push:
+    branches: [psc0/pscv0-m2a-float-equivalence-v1, psc0/pscv0-v7-native-lean-v1]
+    paths:
+      - 'psc0/host/src/Ps/Host/FloatCanonical.lean'
+      - 'psc0/host/src/Ps/Host/FloatCorrespondence.lean'
+      - 'psc0/test/Pscv0FloatCorrespondenceOracle.lean'
+      - 'psc0/v7-native/lakefile.lean'
+      - 'psc0/v7-native/lean-toolchain'
+      - 'psc0/lean-toolchain'
+      - '.github/workflows/psc0-pscv0-float-correspondence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pscv0-float-correspondence-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  correspondence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: psc0
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Check pinned kernel and universal Float correspondence
+        run: |
+          set -euo pipefail
+          lean --version | tee toolchain-correspondence.txt
+          grep -F '4.35.0' toolchain-correspondence.txt
+          grep -F 'eb6cafb' toolchain-correspondence.txt
+          lake build PsV7FloatConstructiveOracle PsV7FloatCorrespondenceOracle 2>&1 | tee float-correspondence.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-float-correspondence-${{ github.sha }}
+          path: |
+            psc0/v7-native/toolchain-correspondence.txt
+            psc0/v7-native/float-correspondence.log

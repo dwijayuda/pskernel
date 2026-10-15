@@ -16,7 +16,7 @@ lean_lib PsKernelLean where
 
 lean_lib PsV7Host where
   srcDir := "../host/src"
-  roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit, `Ps.Host.StandardClosure, `Ps.Host.StandardSource, `Ps.Host.StandardExport, `Ps.Host.StandardManifest, `Ps.Host.FloatConstructive, `Ps.Host.FloatCanonical]
+  roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit, `Ps.Host.StandardClosure, `Ps.Host.StandardSource, `Ps.Host.StandardExport, `Ps.Host.StandardManifest, `Ps.Host.FloatConstructive, `Ps.Host.FloatCanonical, `Ps.Host.FloatCorrespondence]
 
 lean_lib PsV7ParserChecks where
   srcDir := "../scripts"
@@ -33,6 +33,12 @@ lean_lib PsV7GetElemOracle where
 lean_lib PsV7FloatConstructiveOracle where
   srcDir := "../test"
   roots := #[`Pscv0FloatConstructiveOracle]
+
+-- Universal reference equivalence is checked separately from constructive
+-- portable admission; neither one alone enables an executable Float lane.
+lean_lib PsV7FloatCorrespondenceOracle where
+  srcDir := "../test"
+  roots := #[`Pscv0FloatCorrespondenceOracle]
 
 @[default_target]
 lean_exe pscv0_native where

@@ -576,7 +576,7 @@ psLocalDeclVal  ::= ":=" psDeclTerm psRecursionSuffix?
 psSpecProofTail ::= "finally" "{" "|" "spec" "=>" "{" psTacticSeq "}" "}"
 ```
 
-A recursion suffix is reserved for selected `def`/`function` declarations and eligible local `where` definitions. It is not inherited by `const`, `theorem` or `opaque`. Local `partial_fixpoint` follows Lean's `Term.letRecDecl` recursion and mutual-clique checks; local `partial`/`unsafe` modifiers are not introduced by this rule. The `spec` section requires an eligible contract and cannot be used as a standalone local theorem.
+A recursion suffix on `def`/`function` or a local `where` definition is governed by §5. `const` receives no suffix; selected `abbrev` and body-present `opaque` use their existing v7 declaration grammar, but any recursive suffix on those heads must follow exact Lean 4.35.0 elaboration and independent acceptance gates (§2), never automatic admission from the `def`/`function` feature-modifier matrix. Theorem proof terms never gain partial/unsafe recursion permission. Local `partial_fixpoint` follows Lean's `Term.letRecDecl` recursion and mutual-clique checks; local `partial`/`unsafe` modifiers are not introduced by this rule. The `spec` section requires an eligible contract and cannot be used as a standalone local theorem.
 
 
 
@@ -1828,6 +1828,8 @@ Every constructor and update must supply an appropriate checked proof term. The 
 
 **Decision — `PSCV0-CONTRACT-04`:** discard the extra `verify target := by { ... }` command. For an 4.35.0 intrinsic `def`/`function` carrying `given`/`requires`/`ensures`, the pinned macro emits the ordinary definition **and** the `@[spec]` theorem `f.spec`; it runs `vcgen` and default proof steps, and—when the obligations remain—consumes **the `spec` subsection of the same definition's `where finally` tail**. A separate later theorem does **not** retroactively discharge the generated `f.spec` obligations. PSCV0 therefore admits one **contract-specific** braced tail, translating its selected tactic sequence directly into native 4.35.0 `where finally | spec => ...` (not into an extra `by` term or a new checker).
 
+**`PSCV0-CONTRACT-SCOPE-01` (v7.1) — contract evidence is conditional on declaration strategy.** The native Lean contract elaborator applies to `def` and produces `f.spec` through the selected `Std.WP` program logic. PSCV0's `function` alias may use it after lowering. For a safe total function, a successfully checked `f.spec` is evidence about the selected logical/effect semantics under its approved assumptions. For a valid `partial_fixpoint`, the generated equations permit logical reasoning, but verified executable behavior still requires the declared partial/total/trace obligations and a sound adequacy/refinement relationship. For an opaque `partial`, a contract cannot establish body correctness from the opaque constant alone: require a separately checked safe operational model and a proof connecting the exact implementation to the model. For a registered `unsafe` function, native `f.spec` generation **may not** be used as a proof about the unsafe body: only a separately checked safe model and implementation-refinement obligation may justify verified behavior. If the required contract-model registration, supported lowering or proof evidence is unavailable, reject that contracted program at ENV/VC-PROOF/ASSURANCE, **including an ordinary build requesting that contract**, rather than silently discarding a source obligation. This condition does not prohibit ordinary, contract-free typed `partial` or restricted `unsafe` runtime functions. An imported `.lean` contract theorem does not exempt the executable correspondence audit.
+
 **Lean 4.35.0 proof-attachment shape (schematic; requires `import Std.WP`):**
 
 ```lean
@@ -2521,7 +2523,8 @@ binder  ::= ... | '(' ident ':' term ')' | '{' ident ':' term '}'
 
 ```text
 command ::= selectedLeanDeclaration
-          | psConstDecl | psFunctionDecl  -- both defined in §0B
+          | psDefDecl | psConstDecl | psFunctionDecl -- see §0B
+-- Native def routes never bypass the selected head/binder grammar.
 -- Authoritative binder selection: §2, PSCV0-BIND-02.
 psBinderSeq ::= psNonExplicitBinder*
                 (psExplicitGroup psNonExplicitBinder+)* psExplicitGroup?

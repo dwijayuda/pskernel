@@ -10,22 +10,33 @@ import hashlib
 import json
 from pathlib import Path
 
-COOPER_RECORDS = 114487
-COOPER_SHA = "2e57b983242e47f7dd1c95679ee0697b21aae688bfd38b6039d95c23b49100c1"
+PINNED_CASES = {
+    "cooper": (
+        114487,
+        "2e57b983242e47f7dd1c95679ee0697b21aae688bfd38b6039d95c23b49100c1",
+        "Int.Internal.Linear.cooper_dvd_right",
+    ),
+    "bitvec": (
+        21407,
+        "ee71d2fcc99e0ff1b5a7f37c7a9b609999e8e027f24635e784095db9cab3f1c3",
+        "BitVec.lt_of_isSome_getElem?",
+    ),
+}
 
 
 def line(obj):
     return json.dumps(obj, separators=(",", ":"), ensure_ascii=False) + "\n"
 
 
-def enlarge(source: Path, destination: Path, count: int):
+def enlarge(source: Path, destination: Path, count: int, case: str = "cooper"):
     if not 0 <= count <= 40000:
         raise ValueError("unbounded diagnostic declaration count")
+    expected_records, expected_sha, target_name = PINNED_CASES[case]
     raw = source.read_bytes()
-    if hashlib.sha256(raw).hexdigest() != COOPER_SHA:
+    if hashlib.sha256(raw).hexdigest() != expected_sha:
         raise ValueError("pinned official dependency closure SHA-256 mismatch")
     records = raw.decode("utf-8").splitlines()
-    if len(records) != COOPER_RECORDS:
+    if len(records) != expected_records:
         raise ValueError(f"source records mismatch: {len(records)}")
     latest_name = 0
     latest_level = 0
@@ -63,7 +74,7 @@ def enlarge(source: Path, destination: Path, count: int):
             elif first_succ0 is not None and obj.get("sort") == first_succ0:
                 has_sort1 = expridx
     target = json.loads(records[-1])
-    if list(target) != ["thm"] or names[target["thm"]["name"]] != "Int.Internal.Linear.cooper_dvd_right":
+    if list(target) != ["thm"] or names[target["thm"]["name"]] != target_name:
         raise ValueError("last declaration is not the pinned Cooper theorem")
     added = []
     if has_sort0 is None:
@@ -100,9 +111,9 @@ def enlarge(source: Path, destination: Path, count: int):
     return {
         "diagnostic_only": True,
         "synthetic_safe_definitions": count,
-        "records": COOPER_RECORDS + len(added) + 2 * count,
-        "target": "Int.Internal.Linear.cooper_dvd_right",
-        "source_sha256": COOPER_SHA,
+        "records": expected_records + len(added) + 2 * count,
+        "target": target_name,
+        "source_sha256": expected_sha,
     }
 
 
@@ -111,8 +122,9 @@ def main():
     parser.add_argument("source", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--definitions", type=int, required=True)
+    parser.add_argument("--case", choices=PINNED_CASES, default="cooper")
     args = parser.parse_args()
-    print(json.dumps(enlarge(args.source, args.output, args.definitions), sort_keys=True))
+    print(json.dumps(enlarge(args.source, args.output, args.definitions, args.case), sort_keys=True))
 
 
 if __name__ == "__main__":

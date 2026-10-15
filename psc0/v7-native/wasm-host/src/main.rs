@@ -43,6 +43,17 @@ fn main() -> Result<()> {
         for i in 0..count {
             invoke(&mut store, instance, &format!("wasm-check{i}"), &[], Val::Bool(true))?;
         }
+        let component = Component::from_file(&engine, directory.join(format!("scalar{suffix}")))?;
+        let mut store = Store::new(&engine, ());
+        let instance = Linker::new(&engine).instantiate(&mut store, &component)?;
+        for (value, bits) in [(-0.0, 0x8000000000000000), (f64::INFINITY, 0x7ff0000000000000),
+                              (f64::from_bits(0xfff0000000000001), 0x7ff8000000000000)] {
+            invoke(&mut store, instance, "scalar-bits64", &[Val::Float64(value)], Val::U64(bits))?;
+        }
+        for (value, bits) in [(-0.0, 0x80000000), (f32::INFINITY, 0x7f800000),
+                              (f32::from_bits(0xff800001), 0x7fc00000)] {
+            invoke(&mut store, instance, "scalar-bits32", &[Val::Float32(value)], Val::U32(bits))?;
+        }
         let component = Component::from_file(&engine, directory.join(format!("aggregate{suffix}")))?;
         let mut store = Store::new(&engine, ());
         let instance = Linker::new(&engine).instantiate(&mut store, &component)?;
@@ -72,6 +83,25 @@ fn main() -> Result<()> {
         for (case, value) in [("narrow", Val::U8(255)), ("wide", Val::U64(u64::MAX))] {
             let choice = Val::Variant(case.into(), Some(Box::new(Val::Record(vec![("value".into(), value)]))));
             invoke(&mut store, instance, "echo-unsigned-choice", &[choice.clone()], choice)?;
+        }
+        for (case, value) in [("word", Val::U32(u32::MAX)), ("single", Val::Float32(-1.25))] {
+            let choice = Val::Variant(case.into(), Some(Box::new(Val::Record(vec![("value".into(), value)]))));
+            invoke(&mut store, instance, "echo-float-narrow-choice", &[choice.clone()], choice)?;
+        }
+        for (case, value) in [("word", Val::U64(u64::MAX)), ("single", Val::Float32(-1.25)), ("double", Val::Float64(f64::MIN_POSITIVE))] {
+            let choice = Val::Variant(case.into(), Some(Box::new(Val::Record(vec![("value".into(), value)]))));
+            invoke(&mut store, instance, "echo-float-wide-choice", &[choice.clone()], choice)?;
+        }
+        let pair = Val::Record(vec![("narrow".into(), Val::Float32(-1.25)), ("wide".into(), Val::Float64(f64::MIN_POSITIVE))]);
+        invoke(&mut store, instance, "echo-float-pair", &[pair.clone()], pair)?;
+        let boxed = Val::Record(vec![("value".into(), Val::Float64(-1.25))]);
+        invoke(&mut store, instance, "echo-float-box", &[boxed.clone()], boxed)?;
+        let floats = Val::List(vec![Val::Float32(-1.25), Val::Float32(f32::MIN_POSITIVE)]);
+        invoke(&mut store, instance, "echo-float-array", &[floats.clone()], floats)?;
+        invoke(&mut store, instance, "many-floats", &vec![Val::Float32(-1.25); 17], Val::Float32(-1.25))?;
+        for _ in 0..64 {
+            invoke(&mut store, instance, "echo-float32", &[Val::Float32(-1.25)], Val::Float32(-1.25))?;
+            invoke(&mut store, instance, "echo-float64", &[Val::Float64(f64::MIN_POSITIVE)], Val::Float64(f64::MIN_POSITIVE))?;
         }
         let consume = lookup(&mut store, instance, "consume");
         consume.call(&mut store, &[Val::String("discarded".into())], &mut [])?;

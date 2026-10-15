@@ -1,6 +1,15 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
-## Current qualified checkpoint — 15 October 2026
+## F1 executable candidate — 15 October 2026 (qualification pending)
+
+Research branch `psc0/pscv0-v7-f1-executable-research` starts at `9f60e292593edcd4120c6ee31552406532f6302c`. It implements the coherent F1 runtime boundary in native Lean: width-checked bit intrinsics, explicit Float/model erasure, shared readable JS/TS DataView helpers, safe native Rust conversions, native Wasm f32/f64 with GC boxes at generic crossings, and typed float Canonical ABI planning/marshalling/post-return aliases. No F2 arithmetic gate is enabled, no new foundation assumption, and no logical Standard asset/pin change.
+
+Qualification is pending: run the existing full native workflow and independent Float proof replay on the exact candidate SHA. The shared suite adds 56 IEEE/model/partial/generic/record/array/closure observations (755 total); native Lean checks the fixed bit corpus. Scalar and aggregate ABI tests cover signed zero/NaN, mixed i32/f32 and i64/f32/f64 variants, generic boxes/lists, indirect parameters and repeated post-return. These are acceptance work, not passing evidence yet. Preserve the last qualified implementation below until both runs pass, then integrate with a fresh expected-HEAD check and qualify the integration SHA.
+
+M2+A remains incomplete after F1: follow existing F2 arithmetic/equality, F3 scientific/conversions, F4 qualification, target-sized words and remaining authoritative exits. No pskernel-core, self-hosting/bootstrap or C5. Read the current scalar-completion design and exact CI logs before continuing. Update both handoffs at each slice.
+
+
+## Previous qualified checkpoint — 15 October 2026
 
 **Qualified implementation: `38dbbfb9826490d02a44e6ab5b518a9946849345`.** [Native compiler/backend CI 38715710210](https://github.com/dwijayuda/pskernel/actions/runs/38715710210) and [independent portable Float replay 38715710273](https://github.com/dwijayuda/pskernel/actions/runs/38715710273) both passed at this exact commit. The subsequent handoff update changes documentation only.
 

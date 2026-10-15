@@ -31,7 +31,11 @@ def abiMemoryRuntime : Except String (List RuntimeDefinition) := do
   let bytes := g "bytes"
   let length := g "length"
   let code := g "code"
-  return [
+  let postReturns ← abiPostReturns.mapM fun (name, parameters) =>
+    runtimeDefinition name (parameters.zipIdx.map fun (type, i) => ("result" ++ toString i, type)) [] []
+      (seq [choice none (eq active (k 0)) trap (seq []),
+        o (.globalSet 0) [k 16], o (.globalSet 1) [k 0]])
+  return postReturns ++ [
     ← emit "checked_product" [("a", .i32), ("b", .i32)] [.i32] [("product", .i64)]
       (seq [put "product" (o .i64Mul [
           o (.word .i64ExtendI32U) [a], o (.word .i64ExtendI32U) [g "b"]]),
@@ -65,13 +69,6 @@ def abiMemoryRuntime : Except String (List RuntimeDefinition) := do
           o (.globalSet 0) [g "end"], pointer])),
     ← emit "enter" [] [] []
       (seq [choice none (o .i32Ne [active, k 0]) trap (seq []), o (.globalSet 1) [k 1]]),
-    ← emit "post_return" [("result", .i32)] [] []
-      (seq [choice none (eq active (k 0)) trap (seq []),
-        o (.globalSet 0) [k 16], o (.globalSet 1) [k 0]]),
-    ← emit "post_return_i64" [("result", .i64)] [] []
-      (c "__ps_abi_post_return" [k 0]),
-    ← emit "post_return_void" [] [] []
-      (c "__ps_abi_post_return" [k 0]),
     ← emit "usage" [] [.i32] [] cursor,
     ← emit "check_bool" [("value", .i32)] [.i32] []
       (choice (some .i32) (o .i32LeU [g "value", k 1]) (g "value") trap),

@@ -8,3 +8,8 @@ def psStandardFloatToBitsExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardFloatToBitsDeclarations.foldl psEnvironmentInsert environment
   psStandardFloatToBitsReducibility.foldl (fun env (name, status) =>
     psEnvironmentSetReducibility env name status) environment
+
+def psStandardFloatModelProjectionRuntimeDeclarations : List PsDeclaration :=
+  psStandardFloatToBitsDeclarations.filter fun d =>
+    ["Float.Model.toBits", "Float32.Model.toBits"].contains
+      (psNameToString (psDeclarationName d))

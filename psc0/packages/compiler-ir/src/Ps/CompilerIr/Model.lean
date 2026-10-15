@@ -151,6 +151,8 @@ inductive PsVerifiedIrIntrinsic where
   | machineIntCompare
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerCompareOp)
+  | floatOfBits (type : PsVerifiedIrFloatingType)
+  | floatToBits (type : PsVerifiedIrFloatingType)
   | floatBinary
       (type : PsVerifiedIrFloatingType)
       (operation : PsVerifiedIrFloatBinaryOp)

@@ -5,14 +5,14 @@ namespace PsWasm
 
 abbrev AbiScalar := WitScalar
 
--- The active integer scalar profile joins differing variant payload slots to
--- i64, as required by Canonical ABI flatten_variant/join. Width is retained
--- throughout planning; a scalar count alone cannot describe this signature.
+-- Canonical ABI flatten_variant/join retains equal slot types, joins i32/f32
+-- to i32, and all other differing scalar slots to i64. This is bit transport.
 def abiJoinFlat : List PsWasmValueType → List PsWasmValueType → List PsWasmValueType
   | [], ys => ys
   | xs, [] => xs
   | x :: xs, y :: ys =>
-    (match x, y with | .i32, .i32 => .i32 | _, _ => .i64) :: abiJoinFlat xs ys
+    (if x == y then x else match x, y with
+      | .i32, .f32 | .f32, .i32 => .i32 | _, _ => .i64) :: abiJoinFlat xs ys
 
 structure AbiField where
   name : String
@@ -139,6 +139,8 @@ def planAbiType (ir : PsVerifiedIrModule) :
     let make := fun shape size alignment flat =>
       addAbiNode { key, name, type, shape, size, alignment, flat }
     match type with
+    | .primitive .float => make (.scalar .f64) 8 8 [.f64]
+    | .primitive .float32 => make (.scalar .f32) 4 4 [.f32]
     | .primitive .bool => make (.scalar .bool) 1 1 [.i32]
     | .primitive .char => make (.scalar .char) 4 4 [.i32]
     | .primitive .uint8 => make (.scalar .u8) 1 1 [.i32]
@@ -235,11 +237,22 @@ def abiExportResultTypes (plan : AbiPlan) (e : AbiExport) : Except String (List 
   | none => pure []
   | some id => if e.indirectResult then pure [.i32] else (abiNode plan id).map (·.flat)
 
-def abiPostReturnIndex (plan : AbiPlan) (e : AbiExport) : Except String Nat := do
-  match ← abiExportResultTypes plan e with
-  | [] => pure 2
-  | [.i32] => pure 1
-  | [.i64] => pure 3
-  | _ => throw "PSCV0-ABI-PLAN: unsupported post-return signature"
+-- One typed roster drives runtime exports, component alias indices and WAT.
+-- Realloc is the first core function alias; memory has its own index space.
+def abiPostReturns : List (String × List PsWasmValueType) := [
+  ("__ps_abi_post_return", [.i32]), ("__ps_abi_post_return_void", []),
+  ("__ps_abi_post_return_i64", [.i64]), ("__ps_abi_post_return_f32", [.f32]),
+  ("__ps_abi_post_return_f64", [.f64])]
+
+def abiCoreAliases : List String := "__ps_abi_realloc" :: abiPostReturns.map Prod.fst
+
+def abiPostReturn (plan : AbiPlan) (e : AbiExport) : Except String (String × Nat) := do
+  let signature ← abiExportResultTypes plan e
+  let some ((name, _), index) := abiPostReturns.zipIdx.find? (fun p => p.1.2 == signature)
+    | throw "PSCV0-ABI-PLAN: unsupported post-return signature"
+  return (name, index + 1)
+
+def abiPostReturnIndex (plan : AbiPlan) (e : AbiExport) : Except String Nat :=
+  (abiPostReturn plan e).map Prod.snd
 
 end PsWasm

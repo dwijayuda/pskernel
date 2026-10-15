@@ -20,6 +20,8 @@ private def trap : R := o .unreachable []
 -- memory representation; zero-extension would silently change negative values.
 private def abiScalarRead (scalar : WitScalar) (value : R) : R :=
   match scalar with
+  | .f32 => c "__ps_float32_canonical" [value]
+  | .f64 => c "__ps_float64_canonical" [value]
   | .s8 => o .i32Extend8S [value]
   | .s16 => o .i32Extend16S [value]
   | _ => value
@@ -86,7 +88,7 @@ def abiMarshalNode (plan : AbiPlan) (node : AbiNode) : Except String (List Runti
         | .char => c "__ps_abi_check_char" [value]
         | _ => value
       pure (validate (abiScalarRead scalar (o (.memory memoryOp) [pointer])),
-        o (.memory storeOp) [pointer, validate value])
+        o (.memory storeOp) [pointer, validate (abiScalarRead scalar value)])
     | .string => do
       loadLocals := [("buffer", bytesType), ("count", .i32), ("data", .i32)]
       storeLocals := [("buffer", bytesType), ("data", .i32)]
@@ -204,7 +206,7 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
         | .bool => c "__ps_abi_check_bool" [value]
         | .char => c "__ps_abi_check_char" [value]
         | _ => value
-      return o (.memory scalar.storeOp) [pointer, value]
+      return o (.memory scalar.storeOp) [pointer, abiScalarRead scalar value]
     | .string | .list _ | .limbs =>
       return seq [store pointer (← slot 0), store (offset pointer 4) (← slot 1)]
     | .natural limbs => abiStoreFlat plan fuel limbs pointer values
@@ -226,7 +228,10 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
             let converted ← payload.mapM fun ((value, joined), actual) =>
               match joined, actual with
               | .i64, .i32 => pure (o (.word .i32WrapI64) [value])
-              | .i32, .i32 | .i64, .i64 => pure value
+              | .i32, .f32 => pure (o (.word .f32ReinterpretI32) [value])
+              | .i64, .f32 => pure (o (.word .f32ReinterpretI32) [o (.word .i32WrapI64) [value]])
+              | .i64, .f64 => pure (o (.word .f64ReinterpretI64) [value])
+              | .i32, .i32 | .i64, .i64 | .f32, .f32 | .f64, .f64 => pure value
               | _, _ => throw "PSCV0-ABI-PLAN: unsupported flat scalar conversion"
             abiStoreFlat plan fuel id (offset pointer payloadOffset) converted
         return (alternative.tag, body)
@@ -289,12 +294,7 @@ def addCanonicalAdapters (core : PsWasmModule) (names : LocalNames) (plan : AbiP
   let marshals ← plan.nodes.mapM (abiMarshalNode plan)
   let exports ← plan.exports.mapM (abiExportWrapper plan)
   let definitions := runtime ++ marshals.flatten ++ exports
-  let abiExports := [
-    ("__ps_abi_realloc", "__ps_abi_realloc"),
-    ("__ps_abi_post_return", "__ps_abi_post_return"),
-    ("__ps_abi_post_return_void", "__ps_abi_post_return_void"),
-    ("__ps_abi_post_return_i64", "__ps_abi_post_return_i64"),
-    ("__ps_abi_usage", "__ps_abi_usage")]
+  let abiExports := (abiCoreAliases ++ ["__ps_abi_usage"]).map fun name => (name, name)
   let core : PsWasmModule := {
     core with
     abiMemory := true, abiGlobals := [("abi_cursor", 16), ("abi_active", 0)]

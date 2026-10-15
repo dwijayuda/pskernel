@@ -27,13 +27,12 @@ def aggregateComponentBinary (plan : AggregateComponent) : Except String ByteArr
   let typeCount := dataTypes.length
   let functionTypes ← plan.abi.exports.mapM (abiFunctionTypeBytes plan.abi)
   bytes := bytes ++ sect 7 (vector (dataTypes ++ functionTypes))
-  let aliases := [("__ps_abi_realloc", 0), ("__ps_abi_post_return", 0),
-      ("__ps_abi_post_return_void", 0), ("__ps_abi_post_return_i64", 0), ("memory", 2)] ++
+  let aliases := (abiCoreAliases.map fun name => (name, 0)) ++ [("memory", 2)] ++
     plan.abi.exports.map fun e => (e.semanticName, 0)
   bytes := bytes ++ sect 6 (vector (aliases.map fun (name, kind) =>
     [0, UInt8.ofNat kind, 1, 0] ++ str name))
   let lifts ← plan.abi.exports.zipIdx.mapM fun (e, index) => do
-    return [0, 0] ++ u (4 + index) ++ [4, 0, 3, 0, 4, 0, 5] ++
+    return [0, 0] ++ u (abiCoreAliases.length + index) ++ [4, 0, 3, 0, 4, 0, 5] ++
       u (← abiPostReturnIndex plan.abi e) ++ u (typeCount + index)
   bytes := bytes ++ sect 8 (vector lifts)
   let typeExports := (abiNamedNodes plan.abi).zipIdx.map fun ((node, _), index) =>
@@ -59,21 +58,17 @@ def aggregateComponentWat (plan : AggregateComponent) : Except String PsDoc := d
       | some id => (abiComponentValueText plan.abi id).map (fun type => " (result " ++ type ++ ")")
     declarations := declarations ++ [.text ("(type $__ps_signature" ++ toString index ++ " (func" ++
       String.join parameters ++ result ++ "))")]
-  declarations := declarations ++ [
-    .text "(alias core export $instance \"__ps_abi_realloc\" (core func $reallocate))",
-    .text "(alias core export $instance \"__ps_abi_post_return\" (core func $post_return))",
-    .text "(alias core export $instance \"__ps_abi_post_return_void\" (core func $post_return_void))",
-    .text "(alias core export $instance \"__ps_abi_post_return_i64\" (core func $post_return_i64))",
+  declarations := declarations ++ (abiCoreAliases.map fun name =>
+    .text ("(alias core export $instance " ++ watQuote name ++ " (core func " ++ watId name ++ "))")) ++ [
     .text "(alias core export $instance \"memory\" (core memory $abi_memory))"]
   for (e, index) in plan.abi.exports.zipIdx do
     declarations := declarations ++ [.text ("(alias core export $instance " ++ watQuote e.semanticName ++
       " (core func $lift" ++ toString index ++ "))")]
   for (e, index) in plan.abi.exports.zipIdx do
-    let post ← abiPostReturnIndex plan.abi e
+    let (post, _) ← abiPostReturn plan.abi e
     declarations := declarations ++ [.text ("(func " ++ watId e.foreignName ++ " (type $__ps_signature" ++ toString index ++
       ") (canon lift (core func $lift" ++ toString index ++ ") string-encoding=utf8 (memory $abi_memory)" ++
-      " (realloc $reallocate) (post-return " ++
-      (if post == 3 then "$post_return_i64" else if post == 1 then "$post_return" else "$post_return_void") ++ ")))")]
+      " (realloc " ++ watId "__ps_abi_realloc" ++ ") (post-return " ++ watId post ++ ")))")]
   let typeExports := (abiNamedNodes plan.abi).map fun (node, _) =>
     PsDoc.text ("(export " ++ watQuote node.name ++ " (type " ++ watId node.name ++ "))")
   let functionExports := plan.abi.exports.map fun e =>

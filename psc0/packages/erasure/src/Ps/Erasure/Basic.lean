@@ -1004,3 +1004,13 @@ def psEraseRuntimeType
     (type : PsExpr) :
     Except PsErasureError PsVerifiedIrType :=
   psEraseRuntimeTypeWithFuel environment scope 4096 type
+
+// Prepared single-field layouts are shared by explicit scalar/model adapters.
+// Proof and index erasure have already determined the physical field identity.
+def psErasureSingleRuntimeField (scope : PsErasureScope) (owner : PsName) :
+    Except PsErasureError (PsRuntimeStructureInfo × PsRuntimeStructureField) := do
+  let some info := psErasureLookupStructure scope.runtimeStructures owner
+    | throw .unsupportedRuntimeTerm
+  let [field] := info.fields | throw .unsupportedRuntimeTerm
+  if info.unboxed || !info.typeParameters.isEmpty then throw .unsupportedRuntimeTerm
+  return (info, field)

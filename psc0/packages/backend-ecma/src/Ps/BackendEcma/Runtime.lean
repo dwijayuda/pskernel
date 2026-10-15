@@ -107,12 +107,31 @@ def utf8Runtime : List Stmt := [
   ]
 ]
 
+-- A private synchronous scratch view; no user callbacks run between writes
+-- and reads. BigInt retains all 64 bits, and explicit endianness is portable.
+def floatRuntime : List Stmt :=
+  [const "__ps$floatBits" (.newE "DataView" "" [.newE "ArrayBuffer" "" [num 8]])] ++
+  (["32", "64"].flatMap fun width =>
+    let narrow := width == "32"
+    let bitsType := if narrow then "number" else "bigint"
+    let word := if narrow then "Uint32" else "BigUint64"
+    let canonical := id (if narrow then "0x7fc00000" else "0x7ff8000000000000n")
+    let prefix := "__ps$float" ++ width
+    [.functionD false false (prefix ++ "OfBits") "" [{ name := "bits", type := bitsType }] "number" [
+      .expression (method (id "__ps$floatBits") ("set" ++ word) [num 0, id "bits", id "true"]),
+      const "value" (method (id "__ps$floatBits") ("getFloat" ++ width) [num 0, id "true"]),
+      ret (.conditional (call "Number.isNaN" [id "value"]) (id "NaN") (id "value"))],
+     .functionD false false (prefix ++ "ToBits") "" [{ name := "value", type := "number" }] bitsType [
+      .ifE (call "Number.isNaN" [id "value"]) [ret canonical] [],
+      .expression (method (id "__ps$floatBits") ("setFloat" ++ width) [num 0, id "value", id "true"]),
+      ret (method (id "__ps$floatBits") ("get" ++ word) [num 0, id "true"])]])
+
 def runtimeDoc (dialect : Dialect) : Except String PsDoc := do
   let types := if dialect == .typescript then [
     txt "type __ps$Request = { readonly fn: Function; readonly args: unknown[] };",
     txt "type __ps$Computation<R> = Generator<__ps$Request, R, unknown>;",
     txt "type __ps$Utf8View = { readonly text: string; readonly size: bigint; readonly positions: Uint32Array };"
   ] else []
-  let bodies ← (stackRuntime ++ utf8Runtime ++ hashRuntime).mapM (stmtDoc dialect 4096)
+  let bodies ← (stackRuntime ++ utf8Runtime ++ hashRuntime ++ floatRuntime).mapM (stmtDoc dialect 4096)
   return psDocJoin (cat [.hardline, .hardline]) (types ++ bodies)
 end PsEcma

@@ -84,6 +84,10 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
   | .unsignedToNat _, [value] => pure (call "BigInt" [value])
   | .machineIntBinary type op, [a,b] => machineBinary type op a b
   | .machineIntCompare _ op, [a,b] => pure (bin (compareOp op) a b)
+  | .floatOfBits type, [value] => pure (call
+      (match type with | .float => "__ps$float64OfBits" | .float32 => "__ps$float32OfBits") [value])
+  | .floatToBits type, [value] => pure (call
+      (match type with | .float => "__ps$float64ToBits" | .float32 => "__ps$float32ToBits") [value])
   | .floatBinary type op, [a,b] =>
     let value := bin (match op with | .add => "+" | .sub => "-" | .mul => "*" | .div => "/") a b
     pure (match type with | .float => value | .float32 => call "Math.fround" [value])

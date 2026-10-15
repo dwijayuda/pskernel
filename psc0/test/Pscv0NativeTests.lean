@@ -570,8 +570,11 @@ private def postponedFixture : String :=
 private def derivingEqualityFixture : String :=
   "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nfunction derivedExplicitDecision(a: Nat, b: Nat): Bool := Decidable.decide(self := decEq(a, b))\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
 
+private def executableFloatFixture : String :=
+  "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofModel(Float.toModel(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
+
 private def application : String :=
-  productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  executableFloatFixture ++ productUniverseFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -3013,30 +3016,66 @@ private def kernelHeartbeatIsolationCases : IO Unit := do
     IO.setNumHeartbeats original
   IO.println "PSCV0_KERNEL_SCOPE: PASS actual kernel-counter isolation, allocation baseline preservation and type refusal"
 
--- Logical F1 admission is separate from the still-unqualified runtime profile.
+-- One compact source boundary check; the shared backend observations execute
+-- the IEEE corpus, model elimination and generic/closure paths below.
 private def floatConstructorBoundaries : IO Unit := do
-  let source := "function make64(bits: UInt64): Float := Float.ofBits(bits)\n" ++
-    "function make32(bits: UInt32): Float32 := Float32.ofBits(bits)\n" ++
-    "function bits64(bits: UInt64): UInt64 := Float.toBits(make64(bits))\n" ++
-    "function bits32(bits: UInt32): UInt32 := Float32.toBits(make32(bits))\n"
+  let cases64 : List (UInt64 × UInt64) := [
+    (0, 0),
+    (9223372036854775808, 9223372036854775808),
+    (1, 1),
+    (4503599627370495, 4503599627370495),
+    (4503599627370496, 4503599627370496),
+    (4607182418800017408, 4607182418800017408),
+    (9218868437227405311, 9218868437227405311),
+    (18442240474082181119, 18442240474082181119),
+    (9218868437227405312, 9218868437227405312),
+    (18442240474082181120, 18442240474082181120),
+    (9218868437227405313, 9221120237041090560),
+    (18442240474082181121, 9221120237041090560),
+    (9221120237041090560, 9221120237041090560),
+    (18446744073709551615, 9221120237041090560)]
+  for (bits, expected) in cases64 do
+    unless (Float.ofBits bits).toBits == expected do
+      throw (IO.userError "pinned native Float64 oracle differs from IEEE corpus")
+  let cases32 : List (UInt32 × UInt32) := [
+    (0, 0),
+    (2147483648, 2147483648),
+    (1, 1),
+    (8388607, 8388607),
+    (8388608, 8388608),
+    (1065353216, 1065353216),
+    (2139095039, 2139095039),
+    (4286578687, 4286578687),
+    (2139095040, 2139095040),
+    (4286578688, 4286578688),
+    (2139095041, 2143289344),
+    (4286578689, 2143289344),
+    (2143289344, 2143289344),
+    (4294967295, 2143289344)]
+  for (bits, expected) in cases32 do
+    unless (Float32.ofBits bits).toBits == expected do
+      throw (IO.userError "pinned native Float32 oracle differs from IEEE corpus")
   let requests : Array PsV7Native.Request := #[
-    { source, targets := [] },
-    { source := "function bad(bits: UInt32): Float := Float.ofBits(bits)\n", targets := [] },
-    { source := "function identity(value: Float): Float := value\n", targets := [.javascript] }]
+    { source := executableFloatFixture, targets := [.javascript, .typescript, .rust] },
+    { source := "function bad(bits: UInt32): Float := Float.ofBits(bits)\n", targets := [] }]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
     | .error error => throw (IO.userError ("Float constructor prelude: " ++ error.message))
   match batch.results.toList with
-  | [.ok accepted, .error badType, .error unqualified] =>
-    unless accepted.declarationCount == 4 && accepted.artifacts.isEmpty do
-      throw (IO.userError "logical Float constructor admission produced unexpected artifacts")
+  | [.ok accepted, .error badType] =>
+    unless accepted.artifacts.length == 3 do
+      throw (IO.userError "executable Float fixture did not emit all three source targets")
     unless badType.phase == "elaborate" do
       throw (IO.userError ("Float constructor argument escaped elaboration: " ++ badType.message))
-    unless unqualified.phase == "ir/emit" &&
-        (unqualified.message.splitOn "scalar-capability-unqualified").length > 1 do
-      throw (IO.userError ("Float runtime refusal escaped the shared IR gate: " ++ unqualified.message))
-  | _ => throw (IO.userError "logical Float admission or runtime refusal mismatch")
-  IO.println "PSCV0_FLOAT_CONSTRUCTORS: PASS checked logical constructors/projections, argument refusal and shared runtime gate"
+  | results => throw (IO.userError ("executable Float boundary mismatch: " ++
+      String.intercalate "; " (results.map fun r => match r with
+        | .ok _ => "accepted" | .error e => e.phase ++ ": " ++ e.message)))
+  -- The same typed gate continues to refuse F2 arithmetic.
+  match psIrCheckIntrinsicSignature (.floatBinary .float .add) [] with
+  | .error e => unless e.code == "scalar-capability-unqualified" do
+      throw (IO.userError "unexpected Float arithmetic refusal")
+  | .ok _ => throw (IO.userError "unqualified Float arithmetic admitted")
+  IO.println "PSCV0_FLOAT_F1: PASS source bit/model/generic/closure paths and type/arithmetic refusal"
 
 def main : IO Unit := do
   kernelHeartbeatIsolationCases

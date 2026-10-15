@@ -32,12 +32,20 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
       | .error _ => pure none
     if scalar.isSome then
       for d in api.exports do
-        if let .primitive .unit := d.resultType then
-          let name := "__ps_abi_unit_" ++ nameOf d.name
+        let normalize := fun type => match type with
+          | PsVerifiedIrType.primitive .float => [.call "__ps_float64_canonical"]
+          | .primitive .float32 => [.call "__ps_float32_canonical"]
+          | _ => []
+        let omitResult := match d.resultType with | .primitive .unit => true | _ => false
+        if omitResult || !(normalize d.resultType).isEmpty ||
+            d.parameters.any (fun p => !(normalize p.type).isEmpty) then
+          let name := "__ps_abi_scalar_" ++ nameOf d.name
           let parameters ← d.parameters.mapM (fun p => representation p.type)
+          let results ← if omitResult then pure [] else (representation d.resultType).map (fun t => [t])
           let wrapper : PsWasmFunction := {
-            name, typeName := none, parameters, results := [], locals := []
-            body := (parameters.zipIdx.map fun (_, i) => .localGet i) ++ [.call (nameOf d.name), .drop] }
+            name, typeName := none, parameters, results, locals := []
+            body := (d.parameters.zipIdx.flatMap fun (p, i) => [.localGet i] ++ normalize p.type) ++
+              [.call (nameOf d.name)] ++ (if omitResult then [.drop] else normalize d.resultType) }
           core := { core with
             functions := core.functions ++ [wrapper],
             exports := core.exports.map fun (exportedName, target) => (exportedName, if exportedName == d.name then name else target) }

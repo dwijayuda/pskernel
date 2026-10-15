@@ -143,7 +143,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
-    `Ps.Erasure.Array, `Ps.Erasure.Unsigned,
+    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Float,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]
@@ -201,7 +201,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
     `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Intrinsic,
-    `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.Word, `Ps.BackendWasm.Type,
+    `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.Word, `Ps.BackendWasm.Float, `Ps.BackendWasm.Type,
     `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,
     `Ps.BackendWasm.AbiMarshal, `Ps.BackendWasm.AbiComponent]

@@ -53,6 +53,57 @@ for (const [tag, value] of [[0,255n],[1,wide]]) {
 assert.equal(BigInt.asUintN(64,api.wideResult(0,0)),wide);
 api.__ps_abi_post_return_i64(wide);
 assert.equal(api.__ps_abi_usage(),16);
+// Float ABI slots preserve signed zero and canonicalize NaNs. Mixed variants
+// exercise i32/f32 and i64/f32/f64 joins as bit transport, never numeric casts.
+for (const [name, post] of [["echoFloat32","__ps_abi_post_return_f32"],
+                            ["echoFloat64","__ps_abi_post_return_f64"],
+                            ["echoFloatBox","__ps_abi_post_return_f64"]]) {
+  for (const value of [-0, 1.25, Infinity, -Infinity, NaN]) {
+    assert(Object.is(api[name](value), value), name);
+    api[post](value);
+  }
+}
+let pointer = api.echoFloatPair(-0, NaN);
+let view = new DataView(api.memory.buffer);
+assert.equal(view.getUint32(pointer, true), 0x80000000);
+assert.equal(view.getBigUint64(pointer+8, true), 0x7ff8000000000000n);
+api.__ps_abi_post_return(pointer);
+for (const [tag, bits] of [[0, 0xffffffff], [1, 0x80000000], [1, 0xff800001]]) {
+  pointer = api.echoFloatNarrowChoice(tag, bits);
+  view = new DataView(api.memory.buffer);
+  assert.equal(view.getUint8(pointer), tag);
+  assert.equal(view.getUint32(pointer+4,true), tag === 1 && bits === 0xff800001 ? 0x7fc00000 : bits);
+  api.__ps_abi_post_return(pointer);
+}
+for (const [tag, bits, expected] of [
+  [0, 0xffffffffffffffffn, 0xffffffffffffffffn],
+  [1, 0x80000000n, 0x80000000n], [1, 0xff800001n, 0x7fc00000n],
+  [2, 0x8000000000000000n, 0x8000000000000000n],
+  [2, 0xfff0000000000001n, 0x7ff8000000000000n]]) {
+  pointer = api.echoFloatWideChoice(tag, bits);
+  view = new DataView(api.memory.buffer);
+  assert.equal(view.getUint8(pointer), tag);
+  assert.equal(tag === 1 ? BigInt(view.getUint32(pointer+8,true)) : view.getBigUint64(pointer+8,true), expected);
+  api.__ps_abi_post_return(pointer);
+}
+pointer = api.__ps_abi_realloc(0,0,4,68);
+view = new DataView(api.memory.buffer);
+for (let i=0;i<17;i++) view.setFloat32(pointer+4*i, i === 16 ? -0 : i, true);
+assert(Object.is(api.manyFloats(pointer), -0));
+api.__ps_abi_post_return_f32(-0);
+pointer = api.__ps_abi_realloc(0,0,4,8);
+view = new DataView(api.memory.buffer);
+view.setUint32(pointer, 0x80000000, true);
+view.setUint32(pointer+4, 0xff800001, true);
+const arrayResult = api.echoFloatArray(pointer,2);
+view = new DataView(api.memory.buffer);
+const arrayData = view.getUint32(arrayResult,true);
+assert.equal(view.getUint32(arrayResult+4,true),2);
+assert.equal(view.getUint32(arrayData,true),0x80000000);
+assert.equal(view.getUint32(arrayData+4,true),0x7fc00000);
+api.__ps_abi_post_return(arrayResult);
+assert.equal(api.__ps_abi_usage(),16);
+
 const encoder = new TextEncoder(), decoder = new TextDecoder('utf8', {fatal:true});
 const text = 'é🙂'.repeat(16384), encoded = encoder.encode(text);
 let stablePages;

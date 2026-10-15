@@ -1,5 +1,6 @@
 import Ps.Erasure.Recursion
 import Ps.Erasure.Array
+import Ps.Erasure.Float
 import Ps.Erasure.Unsigned
 import Ps.CompilerIr.CheckTypes
 import Ps.Meta.TypeView
@@ -641,6 +642,10 @@ def psErasePrimitiveApplication
                 | Except.error error => Except.error error
                 | Except.ok result => Except.ok (Option.some result)
           else Except.error PsErasureError.unsupportedApplication;
+      match psEraseFloatApplication scope erase view with
+      | .error error => .error error
+      | .ok (some value) => .ok (some value)
+      | .ok none =>
       match psEraseUnsignedApplication scope erase view with
       | .error error => .error error
       | .ok (some value) => .ok (some value)
@@ -1832,7 +1837,9 @@ def psErasureSpecialEntry
     (scope : PsErasureScope) (name : PsName) : Option PsErasureSpecialEntry :=
   let text := psNameToString name;
   let named : String -> Bool := fun (candidate : String) => psStringEq text candidate;
-  if let some arity := psErasureUnsignedEntryArity name then
+  if let some arity := psErasureFloatEntryArity name then
+    some (PsErasureSpecialEntry.mk arity true)
+  else if let some arity := psErasureUnsignedEntryArity name then
     some (PsErasureSpecialEntry.mk arity true)
   else if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
   else if named "False.elim" || named "False.rec" then some (PsErasureSpecialEntry.mk 2 false)
@@ -2580,6 +2587,9 @@ def psEraseRuntimeExprWithFuelWorker
             if psNameEq typeName psDecidableName then
               if index == 0 then smaller scope target
               else Except.error PsErasureError.unsupportedRuntimeTerm
+            else if let some width := psErasureFloatWidth typeName then do
+              if index != 0 then throw .unsupportedRuntimeTerm
+              psEraseFloatProjection scope width (← smaller scope target)
             else if let some width := psErasureUnsignedWidth typeName then do
               if index != 0 then throw .unsupportedRuntimeTerm
               psEraseUnsignedProjection scope width (← smaller scope target)

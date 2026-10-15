@@ -67,7 +67,7 @@
 | Tuple argument | `f (x, y)` | `f((x, y))` | one tuple-argument spelling in `.ps` |
 | Nullary declaration | `def f (_ : Unit) : R := t` | `function f(): R := t` | required Unit lowering, no second runtime arity |
 | Conditional | native `if p then a else b` (and separate `bif` notation) | `if (p) { a } else { b }` lowers to native Lean `if` for `Prop` or coercible `Bool` | no implicit `bif`/`cond` transformation |
-| `match`, `do`, proof, declarations | Lean layout-sensitive bodies; braced alternatives may be available \| choose precisely defined **braced bodies**, including distinct `do`-statement branches \| no duplicate indentation-only form for those bodies |
+| `match`, `do`, proof, declarations | Lean layout-sensitive bodies; braced alternatives may be available | choose precisely defined **braced bodies**, including distinct `do`-statement branches | no duplicate indentation-only form for those bodies |
 | Proof branches | `· exact hp`, `case ... => ...`, `next ... => ...` | **same native Lean syntax inside `by { ... }`** | no ASCII `.` bullet alias |
 | Proof relevance | Lean `erased`, `erased mut`, `erased x ← action` | **exactly `erased`**, not `ghost` | native Lean 4.35.0 vocabulary |
 | Refined values | Lean `Subtype`, `{x : A // P x}` | **same `Subtype` and `{x : A // P x}`** | no `refine type` declaration |
@@ -445,16 +445,16 @@ The Lean kernel has only unary application and dependent/Pi-function types; a so
 
 | Source | `pscv0` acceptance | Desugaring / explanation |
 |---|---|---|
-| `function clock(): Nat := 42` | yes \| Lean `def clock (_u : Unit) : Nat := 42` |
-| `clock()` | yes \| Lean `clock ()` through zero-source-argument completion |
-| `clock(())` | yes when a `Unit` argument is required \| an explicit one-argument application; may have the same Lean core term as `clock()` |
-| `clock ()` | **no** \| forbidden gap-parenthesized application in `.ps` |
-| `function useUnit(u: Unit): Nat := 1` | yes \| regular explicit parameter |
-| `useUnit(())` | yes \| explicitly pass `Unit` |
-| `useUnit()` | yes under **exactly-one-Unit** completion rule \| inserts `()` for its sole required explicit `Unit` binder; same core application as `useUnit(())` |
-| `function greet(name: String := "world"): String := name` / `greet()` | yes \| inserts declared default |
-| `greet ()` | **no** \| parse error, regardless of expected type |
-| `function add(x: Nat, y: Nat): Nat := x + y` / `add()` | **no** \| unresolved required arguments |
+| `function clock(): Nat := 42` | yes | Lean `def clock (_u : Unit) : Nat := 42` |
+| `clock()` | yes | Lean `clock ()` through zero-source-argument completion |
+| `clock(())` | yes when a `Unit` argument is required | an explicit one-argument application; may have the same Lean core term as `clock()` |
+| `clock ()` | **no** | forbidden gap-parenthesized application in `.ps` |
+| `function useUnit(u: Unit): Nat := 1` | yes | regular explicit parameter |
+| `useUnit(())` | yes | explicitly pass `Unit` |
+| `useUnit()` | yes under **exactly-one-Unit** completion rule | inserts `()` for its sole required explicit `Unit` binder; same core application as `useUnit(())` |
+| `function greet(name: String := "world"): String := name` / `greet()` | yes | inserts declared default |
+| `greet ()` | **no** | parse error, regardless of expected type |
+| `function add(x: Nat, y: Nat): Nat := x + y` / `add()` | **no** | unresolved required arguments |
 
 **Empty-source-argument rule (proposed):** First establish that the head is callable by a Lean Pi/function type (possibly via an **admitted** `CoeFun` instance), then resolve its implicit/instance binders and the explicitly declared default/automatic parameters under the pinned Lean elaborator. `f()` is admitted only when (a) that completion leaves **no** required explicit binders, or (b) it leaves **exactly one** required explicit binder whose instantiated type is *definitionally equal* to `Unit`, allowing the insertion of `()`. If that type remains an unsolved metavariable, do not guess `Unit`. All other required values reject; neither `Inhabited` values nor missing `Nat`/other values are synthesized. A bare non-callable value, e.g. `answer : Nat`, does not become callable through `answer()`.
 
@@ -466,26 +466,26 @@ This is an **elaboration rule**, not a proof or runtime arity model; the semanti
 
 | Expression | Lean meaning or comparison | `pscv0` acceptance |
 |---|---|---|
-| `f x y` | two Lean unary applications \| **accept** |
-| `f(x)` | one ProofScript call argument \| **accept**; lowers to Lean `f x` |
-| `f(x, y)` | two ProofScript call arguments \| **accept**; lowers to Lean `f x y` |
-| `f (x)` | one grouped argument in `.lean` \| **reject**; use `f(x)` |
-| `f (x, y)` | **one tuple** in `.lean`, not two arguments \| **reject**; use `f((x, y))` |
-| `f((x, y))` | one tuple argument \| **accept**; lowers to Lean `f (x, y)` |
-| `f()` | zero source arguments, type-directed completion \| **accept only if** `PSCV0-APP-03` closes every required explicit argument |
-| `f ()` | one explicit Unit value in Lean \| **reject**; use `f(())` |
-| `f(())` | one explicitly supplied `Unit` value \| **accept** where parameter type is `Unit` |
-| `h (g x)` | application to one grouped argument in `.lean` \| **reject**; use `h(g x)` or `h(g(x))` |
-| `(h) (x)` | grouped function applied to grouped argument in `.lean` \| **reject**; use `(h)(x)` or `h(x)` |
-| `f/- gap -/(x)` | a valid Lean block comment separates head and `(` \| **reject with `PSCV0-APP-02`**, not a generic lexer failure |
-| `f /- gap -/ (x)` | spaces plus a valid Lean block comment \| **reject with `PSCV0-APP-02`** |
-| `f(/- comment -/ x)` | comment *inside* adjacent call delimiters \| **accept** where `f x` is well-typed; no head-to-`(` gap |
-| `x + (y * z)` | `(` begins an operand after infix `+`, not an application head \| **accept** |
-| `(f x)` | grouped *standalone term* \| **accept** |
-| `#check (f x)` | `(` starts the command's term \| **accept** |
-| `exact (hp)` | `(` starts a tactic argument term \| **accept** |
-| `variable (n: Nat)` | `(` starts a typed command binder \| **accept** |
-| `fun (n: Nat) => n` | `(` starts a typed lambda binder \| **accept** |
+| `f x y` | two Lean unary applications | **accept** |
+| `f(x)` | one ProofScript call argument | **accept**; lowers to Lean `f x` |
+| `f(x, y)` | two ProofScript call arguments | **accept**; lowers to Lean `f x y` |
+| `f (x)` | one grouped argument in `.lean` | **reject**; use `f(x)` |
+| `f (x, y)` | **one tuple** in `.lean`, not two arguments | **reject**; use `f((x, y))` |
+| `f((x, y))` | one tuple argument | **accept**; lowers to Lean `f (x, y)` |
+| `f()` | zero source arguments, type-directed completion | **accept only if** `PSCV0-APP-03` closes every required explicit argument |
+| `f ()` | one explicit Unit value in Lean | **reject**; use `f(())` |
+| `f(())` | one explicitly supplied `Unit` value | **accept** where parameter type is `Unit` |
+| `h (g x)` | application to one grouped argument in `.lean` | **reject**; use `h(g x)` or `h(g(x))` |
+| `(h) (x)` | grouped function applied to grouped argument in `.lean` | **reject**; use `(h)(x)` or `h(x)` |
+| `f/- gap -/(x)` | a valid Lean block comment separates head and `(` | **reject with `PSCV0-APP-02`**, not a generic lexer failure |
+| `f /- gap -/ (x)` | spaces plus a valid Lean block comment | **reject with `PSCV0-APP-02`** |
+| `f(/- comment -/ x)` | comment *inside* adjacent call delimiters | **accept** where `f x` is well-typed; no head-to-`(` gap |
+| `x + (y * z)` | `(` begins an operand after infix `+`, not an application head | **accept** |
+| `(f x)` | grouped *standalone term* | **accept** |
+| `#check (f x)` | `(` starts the command's term | **accept** |
+| `exact (hp)` | `(` starts a tactic argument term | **accept** |
+| `variable (n: Nat)` | `(` starts a typed command binder | **accept** |
+| `fun (n: Nat) => n` | `(` starts a typed lambda binder | **accept** |
 
 **`PSCV0-APP-02` — source-position and grammar-category test.** A parser should first determine whether it is parsing a **binder**, an **initial/grouped term**, or a **continuation of an already-completed expression**. Only in the last category is a parenthesis after a nonempty trivia gap banned as an application operand. The rule is not the text-level regex `identifier + space + '('`: such a rule would incorrectly reject `variable (n: Nat)`, theorem and `def` binders, `#check (term)`, `exact (proof)`, and infix grouping.
 
@@ -776,12 +776,12 @@ Interpolation requires the pinned `ToString` behavior and parses `{expr}` with t
 
 | Notation | Meaning in `pscv0` | Verification consequence |
 |---|---|---|
-| `xs[i]` | Lean `GetElem`; requires `valid xs i` proof \| proof side-condition must be discharged (or type-checking fails) |
-| `xs[i]'h` | Lean lookup with explicit proof `h : valid xs i` \| checked evidence supplied explicitly |
-| `xs[i]?` | optional `Option α` lookup \| no required in-bounds proof; handle `none` |
-| `xs[i]!` | panic/default `GetElem?` path \| **not** bounds-safe proof; may panic at runtime |
-| `#[a, b]` | `Array` literal \| retains Lean array semantics |
-| `[a, b]` | `List` literal under admitted expected type/notation \| retains inductive list meaning |
+| `xs[i]` | Lean `GetElem`; requires `valid xs i` proof | proof side-condition must be discharged (or type-checking fails) |
+| `xs[i]'h` | Lean lookup with explicit proof `h : valid xs i` | checked evidence supplied explicitly |
+| `xs[i]?` | optional `Option α` lookup | no required in-bounds proof; handle `none` |
+| `xs[i]!` | panic/default `GetElem?` path | **not** bounds-safe proof; may panic at runtime |
+| `#[a, b]` | `Array` literal | retains Lean array semantics |
+| `[a, b]` | `List` literal under admitted expected type/notation | retains inductive list meaning |
 
 ```proofscript
 function lookup(xs: Array Nat, i: Nat): Option Nat := xs[i]?
@@ -832,22 +832,22 @@ const left: Nat := Prod.fst(pair)</code></pre></td></tr></tbody></table>
 
 | Mathematical spelling | Lean-native textual / term equivalent | `pscv0` acceptance | Semantics / caution |
 |---|---|---|---|
-| `∀ x : A, P x` | `forall x : A, P x` \| **both** \| dependent Pi / universal quantifier |
-| `∃ x : A, P x` | `exists x : A, P x` \| **both** \| `Exists`; the keyword is **`exists`**, not `exist` |
-| `∃! x : A, P x` | `ExistsUnique(fun x : A => P x)` \| when available in pinned Standard environment \| unique existence; do not invent an `existUnique` keyword |
-| `λ x => body` | `fun x => body` \| **both** \| ordinary lambda |
-| `A → B` | `A -> B` \| **both** \| (non)dependent Pi arrow |
-| `P ∧ Q` | `And P Q` \| **both** \| logical and, not Boolean `&&` |
-| `P ∨ Q` | `Or P Q` \| **both** \| logical or, not Boolean `\|\|` |
-| `¬ P` | `Not P` \| **both** \| logical negation, not Boolean `!` |
-| `P ↔ Q` | `Iff P Q` \| **both** \| logical equivalence |
-| `a ≠ b` | `a = b → False` \| standard not-equal notation \| proposition; **different from** Boolean `!=` |
-| `a ≤ b` | `a <= b` \| **both** where a typeclass instance exists \| proposition-valued comparison |
-| `a ≥ b` | `a >= b` \| **both** where a typeclass instance exists \| proposition-valued comparison |
-| `A × B` | `Prod A B` \| **both** \| ordinary product type |
-| `Σ x : A, B x` | `Sigma(fun x : A => B x)` \| both only when admitted library/profile provides `Sigma` \| dependent data pair |
-| `⟨a, h⟩` | type-directed constructor term \| admit Lean constructor notation \| useful for `Subtype`, `Exists`, structures |
-| `x ∈ s`, `x ∉ s` | Lean membership/not-membership notation \| admit **only if** required library/instances are present \| do not globally invent set syntax |
+| `∀ x : A, P x` | `forall x : A, P x` | **both** | dependent Pi / universal quantifier |
+| `∃ x : A, P x` | `exists x : A, P x` | **both** | `Exists`; the keyword is **`exists`**, not `exist` |
+| `∃! x : A, P x` | `ExistsUnique(fun x : A => P x)` | when available in pinned Standard environment | unique existence; do not invent an `existUnique` keyword |
+| `λ x => body` | `fun x => body` | **both** | ordinary lambda |
+| `A → B` | `A -> B` | **both** | (non)dependent Pi arrow |
+| `P ∧ Q` | `And P Q` | **both** | logical and, not Boolean `&&` |
+| `P ∨ Q` | `Or P Q` | **both** | logical or, not Boolean `\|\|` |
+| `¬ P` | `Not P` | **both** | logical negation, not Boolean `!` |
+| `P ↔ Q` | `Iff P Q` | **both** | logical equivalence |
+| `a ≠ b` | `a = b → False` | standard not-equal notation | proposition; **different from** Boolean `!=` |
+| `a ≤ b` | `a <= b` | **both** where a typeclass instance exists | proposition-valued comparison |
+| `a ≥ b` | `a >= b` | **both** where a typeclass instance exists | proposition-valued comparison |
+| `A × B` | `Prod A B` | **both** | ordinary product type |
+| `Σ x : A, B x` | `Sigma(fun x : A => B x)` | both only when admitted library/profile provides `Sigma` | dependent data pair |
+| `⟨a, h⟩` | type-directed constructor term | admit Lean constructor notation | useful for `Subtype`, `Exists`, structures |
+| `x ∈ s`, `x ∉ s` | Lean membership/not-membership notation | admit **only if** required library/instances are present | do not globally invent set syntax |
 
 **Application-spelling note:** The textual `ExistsUnique(fun ...)` and `Sigma(fun ...)` entries above are *PSCV0-safe adaptations* of native Lean `ExistsUnique (fun ...)` / `Sigma (fun ...)`; they preserve the same Lean application while respecting `PSCV0-APP-02`. No Lean-only gap-parenthesized application spelling is implicitly admitted into `.ps` through a comparison table.
 
@@ -1480,10 +1480,10 @@ psConstVal ::= ":=" psDeclTerm psWhere?
 |---|---|---|
 | Plain `def` / `function` | No suffix (termination inferred), or selected `termination_by` with optional proof | Selected Lean-grounded total function and contract rules |
 | Plain `def` / `function` using `partial_fixpoint` | Exactly that suffix; no `termination_by` or `decreasing_by` | Check fixed-point and monotonicity evidence, generated equation dependencies, declared behavior, and executable adequacy |
-| `partial def` / `partial function` | No recursion suffix \| Opaque in the logic; verify behavioral claims only through a checked operational model and source/backend refinement |
-| `unsafe def` / `unsafe function` | No recursion suffix \| Registered runtime implementation only; a safe modeled specification and independently justified correspondence are required for any verified claim |
-| `noncomputable def` / `noncomputable function` | No recursion suffix in this profile \| Proof/specification-only; no executable computational body dependency |
-| `const` | No recursion suffix or feature modifier \| Nonrecursive source value with selected `psConstVal` |
+| `partial def` / `partial function` | No recursion suffix | Opaque in the logic; verify behavioral claims only through a checked operational model and source/backend refinement |
+| `unsafe def` / `unsafe function` | No recursion suffix | Registered runtime implementation only; a safe modeled specification and independently justified correspondence are required for any verified claim |
+| `noncomputable def` / `noncomputable function` | No recursion suffix in this profile | Proof/specification-only; no executable computational body dependency |
+| `const` | No recursion suffix or feature modifier | Nonrecursive source value with selected `psConstVal` |
 
 Only selected `def`/`function` heads accept exactly **one** of the three leading feature modifiers. Repeated modifiers; `unsafe partial`, `partial unsafe`, `partial partial`, `unsafe unsafe`; `partial` or `unsafe` with `partial_fixpoint`; and `noncomputable` combined with executable recursion are all rejected at the source-profile/elaboration boundary. `partial_fixpoint` and `termination_by` are mutually exclusive. Even when Lean parses an alternative modifier combination, PSCV0 does not silently accept a logically different recursion strategy. Apply native mutual-recursion-clique checks and audit the effective opacity of **every** member before making any verified assertion.
 
@@ -1503,9 +1503,9 @@ Only selected `def`/`function` heads accept exactly **one** of the three leading
 | Construct | Explicit ordinary checked executable | Closed verified executable | Boundary-qualified verified executable |
 |---|---|---|---|
 | Total `def`/`function` | Type/kernel/environment checks | Mandatory behavior/effect/backend evidence | Same, with any allowed boundary assumptions disclosed |
-| `partial def` / `partial function` | Allowed with inhabited type and executable backend support \| Only with checked body/model refinement **and** required partial/total/trace obligations \| Only with same internal proofs and any boundary assumptions permitted by policy |
-| `partial_fixpoint` | Only after valid fixed-point construction and executable backend support \| Checked fixpoint equations, application-specific correctness and required runtime refinement; totality only if promised \| Same internal proof; disclosed approved runtime assumptions |
-| `unsafe def` / `unsafe function` | Only registered typed boundary/capability \| **Reject** unless unsafe implementation correspondence is formally established for the promised closed claim \| Allowed only by an explicit approved, named boundary-assumption policy |
+| `partial def` / `partial function` | Allowed with inhabited type and executable backend support | Only with checked body/model refinement **and** required partial/total/trace obligations | Only with same internal proofs and any boundary assumptions permitted by policy |
+| `partial_fixpoint` | Only after valid fixed-point construction and executable backend support | Checked fixpoint equations, application-specific correctness and required runtime refinement; totality only if promised | Same internal proof; disclosed approved runtime assumptions |
+| `unsafe def` / `unsafe function` | Only registered typed boundary/capability | **Reject** unless unsafe implementation correspondence is formally established for the promised closed claim | Allowed only by an explicit approved, named boundary-assumption policy |
 | User `axiom`, `sorry`/`sorryAx` proof holes | Reject emitted artifact | Reject | Reject |
 | Proof-only `noncomputable` | Allowed in logical proof closure; no computational executable dependency | Same, under stricter assumption policy | Same |
 
@@ -1937,14 +1937,14 @@ function checkedDiv(n: Nat, d: Nat): Except String Nat := {
 
 | Lean native command | `pscv0` accepted form | Meaning / gate |
 |---|---|---|
-| `#check term` | **yes** \| elaborate a term and report its type; may report unresolved metavariables in a development diagnostic |
-| `#print ident` | **yes** \| inspect declaration/signature and selected definition information |
-| `#print axioms ident` | **yes** \| inspect the transitive axiom/dependency set of a named proposition/declaration; not a replacement for the release assurance audit |
-| `#reduce term` | **yes** \| kernel-style definitional reduction/normalization for inspection, subject to resource limits |
-| `#eval term` | **yes, restricted** \| evaluate a pure, total executable term for feedback; printing is not proof |
-| `#eval!`, unrestricted `#eval` of `IO` | **no** in closed `pscv0` \| no bypass around effect/axiom/partial policy |
-| `#check_failure`, `#synth`, `#guard`, `#eval_msgs`, `#print commands` | **not in minimum closed grammar** \| may be added only after a separately versioned source-feature decision |
-| `set_option` (source-affecting) | **not in minimum closed grammar** \| configure a tool session separately; formatter/diagnostic output controls are not proof authority |
+| `#check term` | **yes** | elaborate a term and report its type; may report unresolved metavariables in a development diagnostic |
+| `#print ident` | **yes** | inspect declaration/signature and selected definition information |
+| `#print axioms ident` | **yes** | inspect the transitive axiom/dependency set of a named proposition/declaration; not a replacement for the release assurance audit |
+| `#reduce term` | **yes** | kernel-style definitional reduction/normalization for inspection, subject to resource limits |
+| `#eval term` | **yes, restricted** | evaluate a pure, total executable term for feedback; printing is not proof |
+| `#eval!`, unrestricted `#eval` of `IO` | **no** in closed `pscv0` | no bypass around effect/axiom/partial policy |
+| `#check_failure`, `#synth`, `#guard`, `#eval_msgs`, `#print commands` | **not in minimum closed grammar** | may be added only after a separately versioned source-feature decision |
+| `set_option` (source-affecting) | **not in minimum closed grammar** | configure a tool session separately; formatter/diagnostic output controls are not proof authority |
 
 **Lean grammar (schematic):**
 
@@ -2053,14 +2053,14 @@ The `catch` handler here is typed via `Except String`, not inferred from JS runt
 | Source/action | Explicit ordinary type-checked program | Closed verified executable | Boundary-qualified verified executable |
 |---|---|---|---|
 | Total pure `def`/`function` | Accept after ordinary typing/environment checks | Accept only with mandatory accepted specification/proofs and required backend evidence | Same, with explicitly disclosed approved boundary assumptions |
-| `partial def` / `partial function` | Accept only after inhabited result, type checks, valid runtime lowering \| **No** proof from its opaque body; accept only when an independent checked operational/refinement proof establishes the requested correctness and trace/divergence properties \| Same internal proofs, plus any explicitly allowed runtime assumptions |
-| `partial_fixpoint` | Admit only if pinned fixpoint/monotonicity construction succeeds \| Check generated equations, application-specific contracts and required executable/backend refinement; termination must be proven when promised \| Same internal proof; audited runtime assumptions disclosed |
+| `partial def` / `partial function` | Accept only after inhabited result, type checks, valid runtime lowering | **No** proof from its opaque body; accept only when an independent checked operational/refinement proof establishes the requested correctness and trace/divergence properties | Same internal proofs, plus any explicitly allowed runtime assumptions |
+| `partial_fixpoint` | Admit only if pinned fixpoint/monotonicity construction succeeds | Check generated equations, application-specific contracts and required executable/backend refinement; termination must be proven when promised | Same internal proof; audited runtime assumptions disclosed |
 | Restricted `unsafe def` / `unsafe function` | Admitted only for registered typed target capability, with ordinary unverified identity | Reject unless exact implementation correspondence and applicable safety/effect/refinement obligations are **formally established** | Only with explicit separately approved named assumptions, and **never** described as closed verification |
-| `while` with invariant and decreasing | Allowed under admitted typed executable semantics \| Total-proof rule: init/preservation/exit/decrease and effects \| Same, assumptions explicitly qualified |
+| `while` with invariant and decreasing | Allowed under admitted typed executable semantics | Total-proof rule: init/preservation/exit/decrease and effects | Same, assumptions explicitly qualified |
 | Potentially unbounded `while` (staged) | Ordinary typed loop where source profile enables it | Invariant/finite-trace proof and promised progress properties; **ENV/VC-PROOF reject** until sound staged model exists | Same checked internal trace obligations and documented approved boundary assumptions |
 | Typed `Except`/`State`/`Reader` | Typed available effects | Verify required weakest-precondition and effect laws | Checked model or disclosed approved external assumptions |
-| `IO`, clock, filesystem, network, FFI | Declared typed runtime capabilities; no automatic behavior proof \| Not closed without formal connection between implementation and required specification \| Possible only with explicit audited assumptions and non-closed identity |
-| `xs[i]!` possible panic | Typed runtime panic behavior \| No in-bounds proof from `!` notation alone; cover panic path in contract or use safe indexing \| Same |
+| `IO`, clock, filesystem, network, FFI | Declared typed runtime capabilities; no automatic behavior proof | Not closed without formal connection between implementation and required specification | Possible only with explicit audited assumptions and non-closed identity |
+| `xs[i]!` possible panic | Typed runtime panic behavior | No in-bounds proof from `!` notation alone; cover panic path in contract or use safe indexing | Same |
 | Proof-only `noncomputable` | Permitted for proofs/specification, no runtime computational dependency | Same and tighter assumption closure | Same |
 | User `axiom`, `sorry`/`sorryAx`, unresolved metavariables | **Never** emit | **Never** emit | **Never** emit |
 | Imported audited axioms | Disclose exact permitted logical assumptions | Permit only approved closed axiom set | Permit only approved named assumptions, not proof holes |
@@ -2083,23 +2083,23 @@ The table below reproduces ProofScript Standard's exact **source operator notati
 
 | Source | Kind | Prec. | Semantic target |
 |---|---:|---:|---|
-| `->`, `→` | R \| 25 \| Pi/non-dependent arrow |
-| `∨`, `\/` | R \| 30 \| `Or` |
-| `\|\|` | L \| 30 \| Boolean `or` |
-| `∧`, `/\\` | R \| 35 \| `And` |
-| `&&` | L \| 35 \| Boolean `and` |
-| `×` | R \| 35 \| `Prod` |
-| `<`, `<=`, `≤`, `>`, `>=`, `≥` | N \| 50 \| `LT`/`LE`/`GT`/`GE` |
-| `=` | N \| 50 \| `Eq` propositional equality |
-| `≠` | N \| 50 \| `Not (Eq ...)` |
-| `==` | N \| 50 \| `BEq.beq` Boolean equality |
-| `!=` | N \| 50 \| pinned `bne`, definitionally `!(a == b)` |
-| `+`, binary `-`, `++` | L \| 65 \| add/sub/append |
-| `::` | R \| 67 \| `List.cons` |
-| `*`, `/`, `%` | L \| 70 \| mul/div/mod |
+| `->`, `→` | R | 25 | Pi/non-dependent arrow |
+| `∨`, `\/` | R | 30 | `Or` |
+| `\|\|` | L | 30 | Boolean `or` |
+| `∧`, `/\\` | R | 35 | `And` |
+| `&&` | L | 35 | Boolean `and` |
+| `×` | R | 35 | `Prod` |
+| `<`, `<=`, `≤`, `>`, `>=`, `≥` | N | 50 | `LT`/`LE`/`GT`/`GE` |
+| `=` | N | 50 | `Eq` propositional equality |
+| `≠` | N | 50 | `Not (Eq ...)` |
+| `==` | N | 50 | `BEq.beq` Boolean equality |
+| `!=` | N | 50 | pinned `bne`, definitionally `!(a == b)` |
+| `+`, binary `-`, `++` | L | 65 | add/sub/append |
+| `::` | R | 67 | `List.cons` |
+| `*`, `/`, `%` | L | 70 | mul/div/mod |
 | prefix `-` | prefix | 75 | negation |
-| `<<<`, `>>>` | L \| 75 \| shifts |
-| `^` | R \| 80 \| power |
+| `<<<`, `>>>` | L | 75 | shifts |
+| `^` | R | 80 | power |
 | prefix `¬` | prefix | operand 40 | `Not` |
 | prefix `!` | prefix | operand 40 | Boolean `not` |
 
@@ -2123,29 +2123,29 @@ This section makes a **closed intended `pscv0` baseline** explicit rather than r
 
 | Family | `pscv0` status | Description / distinction |
 |---|---|---|
-| `Prop`, `Sort u`, `Type u` | **required — Lean core** \| propositions and universes; `Type u = Sort (u+1)` |
+| `Prop`, `Sort u`, `Type u` | **required — Lean core** | propositions and universes; `Type u = Sort (u+1)` |
 | dependent Pi `(x : A) → B x`, `A → B` | **required — Lean core** | dependent and ordinary function types, not a JS arity system |
-| `Eq` / `=`, `HEq` where explicitly imported | `Eq` **required**; `HEq` library-gated \| propositional proof families, not Boolean `==` |
-| `True`, `False`, `And`, `Or`, `Not`, `Exists` | **required — Lean prelude** \| propositions; their proofs are computationally irrelevant where the Lean theory permits |
-| `Quot` logical foundation | **required semantic support, restricted source use** \| Lean kernel-provided quotient machinery, no new PSCV0 quotient axiom |
-| `Subtype p` | **required — dependent data** \| value plus proof; `{x : A // p x}` is selected Lean notation |
+| `Eq` / `=`, `HEq` where explicitly imported | `Eq` **required**; `HEq` library-gated | propositional proof families, not Boolean `==` |
+| `True`, `False`, `And`, `Or`, `Not`, `Exists` | **required — Lean prelude** | propositions; their proofs are computationally irrelevant where the Lean theory permits |
+| `Quot` logical foundation | **required semantic support, restricted source use** | Lean kernel-provided quotient machinery, no new PSCV0 quotient axiom |
+| `Subtype p` | **required — dependent data** | value plus proof; `{x : A // p x}` is selected Lean notation |
 
 #### B. Required scalar/basic executable families
 
 | Type | Kind | `pscv0` guarantee / example | Special care |
 |---|---|---|---|
-| `Unit` | inductive single-value type \| `()` \| a value, not a JS zero-arity call marker |
-| `Bool` | inductive data \| `true`, `false` \| separate from `Prop`; `== : Bool` when `BEq` is available |
-| `Nat` | exact naturals \| `(42 : Nat)` \| unbounded; subtraction saturates at 0 |
-| `Int` | exact signed integers \| `(-42 : Int)` \| unbounded; never silently JS `number` |
-| `UInt8`, `UInt16`, `UInt32`, `UInt64` | fixed unsigned \| `(255 : UInt8)` \| modulo-width literal/arithmetic semantics per Lean |
-| `USize` | target-word unsigned \| `(1 : USize)` \| target word size is a defined platform assumption |
-| `Int8`, `Int16`, `Int32`, `Int64` | fixed signed \| `(-1 : Int8)` \| two's-complement Lean model |
-| `ISize` | target-word signed \| `(1 : ISize)` \| platform-specific word-width model |
-| `Float`, `Float32` | floating-point \| `(1.25 : Float)` \| Lean pinned IEEE-related semantics, not mathematical reals |
-| `Char` | Unicode character type \| `'a'` \| character validity follows Lean, not JS UTF-16 units |
-| `String` | Lean string abstraction \| `"Ada"` \| source string operations must preserve Lean semantics |
-| `ByteArray` | packed byte array \| `(ByteArray.empty : ByteArray)` \| distinct from `Array UInt8` in operational representation and API |
+| `Unit` | inductive single-value type | `()` | a value, not a JS zero-arity call marker |
+| `Bool` | inductive data | `true`, `false` | separate from `Prop`; `== : Bool` when `BEq` is available |
+| `Nat` | exact naturals | `(42 : Nat)` | unbounded; subtraction saturates at 0 |
+| `Int` | exact signed integers | `(-42 : Int)` | unbounded; never silently JS `number` |
+| `UInt8`, `UInt16`, `UInt32`, `UInt64` | fixed unsigned | `(255 : UInt8)` | modulo-width literal/arithmetic semantics per Lean |
+| `USize` | target-word unsigned | `(1 : USize)` | target word size is a defined platform assumption |
+| `Int8`, `Int16`, `Int32`, `Int64` | fixed signed | `(-1 : Int8)` | two's-complement Lean model |
+| `ISize` | target-word signed | `(1 : ISize)` | platform-specific word-width model |
+| `Float`, `Float32` | floating-point | `(1.25 : Float)` | Lean pinned IEEE-related semantics, not mathematical reals |
+| `Char` | Unicode character type | `'a'` | character validity follows Lean, not JS UTF-16 units |
+| `String` | Lean string abstraction | `"Ada"` | source string operations must preserve Lean semantics |
+| `ByteArray` | packed byte array | `(ByteArray.empty : ByteArray)` | distinct from `Array UInt8` in operational representation and API |
 
 Do **not** call every row a **kernel primitive**. For example, `Bool`, signed fixed-width numbers, and strings have Lean declarations and implementations; some have compiler/runtime optimizations, and only a smaller core subset has special kernel treatment. The exact **closed initial instances/operators** must be frozen in a `pscv0` environment manifest before a toolchain can claim complete conformance.
 
@@ -2153,16 +2153,16 @@ Do **not** call every row a **kernel primitive**. For example, `Bool`, signed fi
 
 | Type/family | Kind | Canonical Lean / `pscv0` syntax | Notes |
 |---|---|---|---|
-| `Empty` | empty inductive \| `Empty` \| **newly adopted** first-party type; differs from `False : Prop` |
-| `Prod α β` | binary product \| `(a, b)` \| right-nested tuples where applicable; one tuple is one argument |
-| `Sum α β` | tagged sum \| `Sum.inl a`, `Sum.inr b` \| not TS union type |
-| `Option α` | option \| `.some(x)`, `.none` in PSCV0 calls \| no ambient JS null/undefined |
-| `Except ε α` | typed result/error \| `.ok(x)`, `.error(e)` \| not JS thrown exception |
-| `List α` | persistent inductive list \| `[1, 2, 3]` \| Lean notation, not automatically an `Array` |
-| `Array α` | array abstraction \| `#[1, 2, 3]` \| Lean array syntax and API |
-| `Fin n` | bounded natural \| `Fin n` \| carries proof of range bound |
-| `BitVec n` | fixed-width bitvector \| `BitVec 8` \| **newly adopted required curated Lean library family** for bit-precise verification; not a kernel primitive |
-| `Subtype p` | proof-carrying subset \| `{x : Nat // x > 0}` \| compile-time proof requirement |
+| `Empty` | empty inductive | `Empty` | **newly adopted** first-party type; differs from `False : Prop` |
+| `Prod α β` | binary product | `(a, b)` | right-nested tuples where applicable; one tuple is one argument |
+| `Sum α β` | tagged sum | `Sum.inl a`, `Sum.inr b` | not TS union type |
+| `Option α` | option | `.some(x)`, `.none` in PSCV0 calls | no ambient JS null/undefined |
+| `Except ε α` | typed result/error | `.ok(x)`, `.error(e)` | not JS thrown exception |
+| `List α` | persistent inductive list | `[1, 2, 3]` | Lean notation, not automatically an `Array` |
+| `Array α` | array abstraction | `#[1, 2, 3]` | Lean array syntax and API |
+| `Fin n` | bounded natural | `Fin n` | carries proof of range bound |
+| `BitVec n` | fixed-width bitvector | `BitVec 8` | **newly adopted required curated Lean library family** for bit-precise verification; not a kernel primitive |
+| `Subtype p` | proof-carrying subset | `{x : Nat // x > 0}` | compile-time proof requirement |
 
 `Empty` and `BitVec n` are **explicit `pscv0` design additions** relative to the uploaded RC-v2's Section 26 guaranteed basis. Their Lean semantics and source syntax are adopted, not reinvented. Actual distribution of their declarations, coercions, theorem sets, and reducibility must be verified against the frozen 4.35.0 environment.
 
@@ -2199,13 +2199,13 @@ Primary sources: [Lean Basic Types](https://lean-lang.org/doc/reference/4.35.0/B
 
 | Feature | Native Lean 4.35.0 | `pscv0` decision |
 |---|---|---|
-| `def`, `abbrev`, `opaque`, `theorem`, `example` | ordinary Lean declarations \| retain selected native meaning; `.ps` binder groups are comma-separated |
-| `function`, `const` | not Lean declaration heads \| **keep** as identity-bearing programming sugar for `def` |
-| `Prop`, `Type`, `Sort`, Pi, equality, inductives | native type foundation \| adopt without alternative type system |
+| `def`, `abbrev`, `opaque`, `theorem`, `example` | ordinary Lean declarations | retain selected native meaning; `.ps` binder groups are comma-separated |
+| `function`, `const` | not Lean declaration heads | **keep** as identity-bearing programming sugar for `def` |
+| `Prop`, `Type`, `Sort`, Pi, equality, inductives | native type foundation | adopt without alternative type system |
 | Scalar and container families | Lean prelude/Std declarations | require explicit roster in §8; preserve exact semantics |
-| `if let`, `nomatch`, multi-discriminant `match` | native Lean eliminator/pattern grammar \| selected **P0** source families, braced `.ps` clauses |
+| `if let`, `nomatch`, multi-discriminant `match` | native Lean eliminator/pattern grammar | selected **P0** source families, braced `.ps` clauses |
 | Native `deriving` | pinned deriving handlers | **P0** allowlist for structures/inductives, checked generated instances |
-| `GetElem` notation | native `xs[i]`, `xs[i]?`, `xs[i]!`, `xs[i]'h` \| **P0**; proof/Option/panic distinctions maintained |
+| `GetElem` notation | native `xs[i]`, `xs[i]?`, `xs[i]!`, `xs[i]'h` | **P0**; proof/Option/panic distinctions maintained |
 | Strings | native `s!` interpolation, raw literals | **P0**, including `.ps`-checked embedded terms |
 | Monadic `try`/`catch`/`finally` | Lean `do` exception/`MonadFinally` semantics | **P1 staged**; exact braced parser tests pending |
 | Maps, sets, JSON, HTTP, tasks | Std/runtime API families | **P1 library or explicit boundary**, not new grammar |
@@ -2215,16 +2215,16 @@ Primary sources: [Lean Basic Types](https://lean-lang.org/doc/reference/4.35.0/B
 | Native application `f x y` | Lean curried application | keep; type/proof terms remain Lean-like |
 | Adjacent `f(x, y)` | new ProofScript surface call | retain two-argument call lowering |
 | Gap parenthesized argument `f (x)`, `f (x, y)`, `f ()` | meaningful Lean application forms | **reject in `.ps`**; use unambiguous `f(x)`, `f((x, y))`, `f(())` |
-| `f()` | source-empty call sugar \| allowed only for defaults/automatics or exactly one required Unit |
-| `if`, `match`, `do`, `by`, `where` bodies | native Lean layout syntax \| **one braced `.ps` form** per family; `.lean` unchanged |
+| `f()` | source-empty call sugar | allowed only for defaults/automatics or exactly one required Unit |
+| `if`, `match`, `do`, `by`, `where` bodies | native Lean layout syntax | **one braced `.ps` form** per family; `.lean` unchanged |
 | Proof `·`, `case`, `next` | native Lean tactic goal control | **admit** selected pinned forms, not ASCII dot alias |
 | Subtype/proof fields | native `Subtype`, `{x // P x}`, structure proofs | **retain native Lean**, remove `refine type` / invariant suffix |
 | Verification-only state | 4.35.0 native experimental `erased` | use `erased`, `erased mut`, erased bind (not `ghost`) |
 | Intrinsic contracts | 4.35.0 `given`, `requires`, `ensures`, `assert`, `invariant`, `decreasing` | retain selected native spellings under strict proof policy |
 | Verification proof | Lean `theorem` / `by` / `vcgen` | no redundant `verify` keyword |
 | Frame/error sugar | no confirmed direct equivalent in 4.35.0 language grammar | **deferred**, use Lean predicates/effect models for now |
-| `#check`, `#print`, `#reduce`, bounded `#eval` | native diagnostics \| accept as non-authoritative inspection commands |
-| `partial`, `partial_fixpoint`, restricted `unsafe` | Lean supports these distinct forms \| v7.1 source admission gated by `PSCV0-TERM-02`, `PSCV0-FIXPOINT-01`, `PSCV0-UNSAFE-01`; verified emission requires actual proof/runtime evidence (§5, §7B) |
+| `#check`, `#print`, `#reduce`, bounded `#eval` | native diagnostics | accept as non-authoritative inspection commands |
+| `partial`, `partial_fixpoint`, restricted `unsafe` | Lean supports these distinct forms | v7.1 source admission gated by `PSCV0-TERM-02`, `PSCV0-FIXPOINT-01`, `PSCV0-UNSAFE-01`; verified emission requires actual proof/runtime evidence (§5, §7B) |
 | user `axiom`, proof holes | Lean permits explicit assumptions and `sorry` development holes | reject user axioms in **all** `.ps` source; reject `sorryAx` in all emitted outputs; audit permitted imported assumptions separately |
 | Raw `IO`, `extern`, aliased/concurrent mutable state | Lean runtime/FFI constructs | permitted only through typed, declared boundary capability where selected; never silently closed verified |
 | User `syntax`, macros, custom elaborators | Lean source extensibility | not part of closed `.ps`; separate named extensible profile only |
@@ -2263,14 +2263,14 @@ The Lean alternatives are nominal structures and inductives with explicit adapte
 
 | Design tradeoff | Final `pscv0` choice | Why |
 |---|---|---|
-| `function` / `const` versus `def` | keep all three but give distinct **roles**: functional programming, parameterless values, general Lean definitions \| user-facing identity; all lower to Lean declarations |
+| `function` / `const` versus `def` | keep all three but give distinct **roles**: functional programming, parameterless values, general Lean definitions | user-facing identity; all lower to Lean declarations |
 | Unicode vs text `∀`/`forall`, `∃`/`exists` | keep both native Lean notations | existing Lean syntax, common mathematical workflow |
-| `ghost` vs `erased` | **erased only** \| Lean 4.35.0 already supplies meaning and token |
-| `refine type` vs `Subtype` | **Subtype only** \| Lean already provides concise `{x : A // P x}` |
-| `verify target` vs theorem/proof | **theorem / checked proof only** \| one proof language is easier to audit |
+| `ghost` vs `erased` | **erased only** | Lean 4.35.0 already supplies meaning and token |
+| `refine type` vs `Subtype` | **Subtype only** | Lean already provides concise `{x : A // P x}` |
+| `verify target` vs theorem/proof | **theorem / checked proof only** | one proof language is easier to audit |
 | Structure-invariant suffix vs proof field | **proof fields only** | avoids hidden semantic fields and extra grammar |
-| `f ()` vs `f()` vs `f(())` | reject `f ()`, use `f()` for source-empty and `f(())` for explicit Unit \| fewer confused calls |
-| `f (x, y)` vs `f(x, y)` | reject first **in `.ps`**, use `f((x, y))` for tuple \| no whitespace-caused arity changes |
+| `f ()` vs `f()` vs `f(())` | reject `f ()`, use `f()` for source-empty and `f(())` for explicit Unit | fewer confused calls |
+| `f (x, y)` vs `f(x, y)` | reject first **in `.ps`**, use `f((x, y))` for tuple | no whitespace-caused arity changes |
 | Lean native layout vs `.ps` braced layout | one braced `.ps` form | fewer representations of the same construct |
 | Tactic bullets | native middle dot **`·`** | does not collide with field selection `.` |
 | Frames/typed error contracts | lean on predicates now, reevaluate new sugar later | avoid extra keywords without proven benefit |
@@ -2432,10 +2432,10 @@ The objective is **not source-level JavaScript compatibility**. A general-purpos
 
 | TypeScript programming need | `pscv0` alternative | Is language syntax missing? |
 |---|---|---|
-| `function` / top-level `const` | existing `function`, `const` (both Lean `def` meanings) \| no |
-| `interface` / structural object types | `structure`; typeclass for generic behavior, explicit adapters for related structures \| **no**, intentional nominal typing |
-| `type A = ...` | native Lean `abbrev`/`def` for appropriate type aliases \| no new `type` alias keyword |
-| `enum`, tagged union, discriminated union | `inductive` constructors + exhaustive multi-discriminant `match`, `if let` \| no duplicate union syntax |
+| `function` / top-level `const` | existing `function`, `const` (both Lean `def` meanings) | no |
+| `interface` / structural object types | `structure`; typeclass for generic behavior, explicit adapters for related structures | **no**, intentional nominal typing |
+| `type A = ...` | native Lean `abbrev`/`def` for appropriate type aliases | no new `type` alias keyword |
+| `enum`, tagged union, discriminated union | `inductive` constructors + exhaustive multi-discriminant `match`, `if let` | no duplicate union syntax |
 | Optional fields / nullish data | `Option α`, `.some`, `.none`, `getD`, checked matching | no `null`/`undefined` truthiness |
 | Errors and `Result<T,E>` | `Except ε α`, `throw`, typed `try`/`catch` under admitted monad | **need selected Lean `do` error syntax**, not JS exceptions |
 | Generic functions/interfaces | `{α : Type}`, `[C α]`, dependent Pi, typeclasses | no, but IDE explanation needed |
@@ -2443,10 +2443,10 @@ The objective is **not source-level JavaScript compatibility**. A general-purpos
 | Arrays / lists / iterators | `Array`, `List`, `do` loops, `ForIn` and standard collections | library/pinned instance completeness needed |
 | Map / Set / dictionaries | `Std.HashMap`, `Std.HashSet`, explicit typed lookup | P1 library guarantee, not syntax |
 | Template strings | Lean `s!"...{expr}..."`; raw strings `r#"..."#` | now native syntax guarantee |
-| `as`, `any`, unchecked coercion | checked type ascription `(x : T)`, explicit adapter/decoders, `Subtype`, proof obligations \| intentionally no unsafe alias |
-| `readonly`, ordinary mutable variables | immutable `let`/`def`, `let mut` and scoped assignment in `do`, verified effects \| no copied JS reference semantics |
-| `switch` / narrow-by-tag | selected Lean `match`, `if let`, `matches`, proof-level case analysis \| now richer native feature coverage |
-| `Promise` / `async` / event handling | typed task/effect libraries and IO boundaries \| async *capability* P1, syntax P2 pending evidence |
+| `as`, `any`, unchecked coercion | checked type ascription `(x : T)`, explicit adapter/decoders, `Subtype`, proof obligations | intentionally no unsafe alias |
+| `readonly`, ordinary mutable variables | immutable `let`/`def`, `let mut` and scoped assignment in `do`, verified effects | no copied JS reference semantics |
+| `switch` / narrow-by-tag | selected Lean `match`, `if let`, `matches`, proof-level case analysis | now richer native feature coverage |
+| `Promise` / `async` / event handling | typed task/effect libraries and IO boundaries | async *capability* P1, syntax P2 pending evidence |
 | JSON response/request handling | typed JSON AST and validated decoders returning typed `Except` | P1 library/tooling, no `unknown` import as proof |
 | Classes / method-call syntax | structures and typeclasses; type-directed `x.method(y)` notation | OO inheritance/prototype semantics intentionally absent |
 | Importing npm/FFI libraries | explicit typed adapter and validation/boundary evidence | P1 package/runtime tooling, no magical TS semantic admission |
@@ -2805,16 +2805,16 @@ The separator policy follows Lean syntax **within** each selected construct but 
 | Explicit Unit | `f ()` | `f(())` | no gap-parenthesized call permitted |
 | Source-empty call | not a separate native core arity | `f()` | callable head; declared defaults/automatics or exactly-one-Unit completion only; non-callable values reject |
 | Values | `{ x := a, y := b }` | same | comma-separated nominal record fields |
-| `Subtype` | `{x : T // P x}` \| same \| native double slash, not a record value |
+| `Subtype` | `{x : T // P x}` | same | native double slash, not a record value |
 | Structure/class declarations | Lean `where` layout | `where { ... }` | newline/layout fields, **not commas** |
 | Instance fields | Lean `where` layout | `where { ... }` | native field declarations, no general comma/semicolon list |
 | Match cases | `match x with \| ...` | `match x with { \| ... }` | Lean `\|` alternatives |
 | Inductive constructors | `where \| ctor ...` | `where { \| ctor... }` | Lean `\|` alternatives |
 | Braced declaration body | `:= term` | `:= { oneTerm }` or `:= term` | one term only, not a JS statement block |
-| `if` | `if p then a else b` \| `if (p) { a } else { b }` \| exactly one term in each branch |
-| `do` | `do` layout/brackets \| `do { ... }` \| native selected `doSeqItem` newline layout |
-| `by` | `by` layout/brackets \| `by { ... }` \| selected native tactic grammar; `·` and `case` for subgoals |
-| `where` locals | Lean layout \| `where { ... }` \| local declaration grammar |
+| `if` | `if p then a else b` | `if (p) { a } else { b }` | exactly one term in each branch |
+| `do` | `do` layout/brackets | `do { ... }` | native selected `doSeqItem` newline layout |
+| `by` | `by` layout/brackets | `by { ... }` | selected native tactic grammar; `·` and `case` for subgoals |
+| `where` locals | Lean layout | `where { ... }` | local declaration grammar |
 | Mathematical symbols | `∀`, `∃`, `∧`, `↔`, `λ`, `→` | same | their native Lean counterpart spellings coexist |
 
 ### 12.1 No space before a parenthesized argument
@@ -2825,15 +2825,15 @@ The separator policy follows Lean syntax **within** each selected construct but 
 
 | Source | Selected grammar family | Precise meaning |
 |---|---|---|
-| `:= { x + 1 }` | definition body expression wrapper \| exactly one term |
-| `:= { id := 1, name := "Ada" }` | structure instance term \| nominal expected structure, not a JS object |
-| `:= {{ id := 1 }}` | body wrapper around a record value \| still one structure value, not nested objects |
-| `{ n : Nat // n > 0 }` | native subtype term \| refined Lean type, not an expression block |
-| `if (b) { a } else { c }` | conditional branches \| one term per branch |
-| `do { ... }` | selected Lean monadic sequencing \| multiple `doSeqItem`s, no generic JS statements |
+| `:= { x + 1 }` | definition body expression wrapper | exactly one term |
+| `:= { id := 1, name := "Ada" }` | structure instance term | nominal expected structure, not a JS object |
+| `:= {{ id := 1 }}` | body wrapper around a record value | still one structure value, not nested objects |
+| `{ n : Nat // n > 0 }` | native subtype term | refined Lean type, not an expression block |
+| `if (b) { a } else { c }` | conditional branches | one term per branch |
+| `do { ... }` | selected Lean monadic sequencing | multiple `doSeqItem`s, no generic JS statements |
 | <code>by { constructor&#10;  · exact hp&#10;  · exact hq }</code> | Lean tactic sequencing with focused goals | proof term construction, not ordinary runtime block |
-| `structure S where { x: Nat }` | structure field sequence \| Lean-dependent/nominal fields |
-| `match x with { \| .some y => y \| .none => 0 }` | match alternatives \| exhaustive selected Lean pattern checking |
+| `structure S where { x: Nat }` | structure field sequence | Lean-dependent/nominal fields |
+| `match x with { \| .some y => y \| .none => 0 }` | match alternatives | exhaustive selected Lean pattern checking |
 
 ### 12.3 Delimiter and Unicode hygiene
 
@@ -3133,26 +3133,26 @@ The design criterion was **maximum Lean semantic/syntactic reuse with only high-
 |---|---|---|
 | Lean baseline | pin **`v4.35.0`**, SHA `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` | GitHub 4.35.0 release/tag and official release notes; stable release (2026-10-12) |
 | Language identity | keep `const`, `function`, `def`; names lower to Lean declarations | distinctive but logically conservative |
-| `f ()` vs `f()` | **reject `f ()` in `.ps` application positions** \| avoids visually indistinguishable Unit application / empty call; preserve binder parentheses |
-| `f (x,y)` vs `f(x,y)` | **reject `f (x,y)` in `.ps`** \| prevents changing argument arity by a whitespace edit |
-| `f(())` | valid explicit `Unit` argument \| maps to ordinary Lean `f ()` |
+| `f ()` vs `f()` | **reject `f ()` in `.ps` application positions** | avoids visually indistinguishable Unit application / empty call; preserve binder parentheses |
+| `f (x,y)` vs `f(x,y)` | **reject `f (x,y)` in `.ps`** | prevents changing argument arity by a whitespace edit |
+| `f(())` | valid explicit `Unit` argument | maps to ordinary Lean `f ()` |
 | Native `f x y` | retain | useful for mathematical applications; unambiguous without parenthesized operand |
 | Proof branch `. exact` | **reject ASCII `.`**; use native `· exact` | confirmed Lean tactic-language bullet is U+00B7 |
 | Goal control | native `·`, `case`, `next`, selected `all_goals`, `<;>` | use upstream fixed tactic parser, never a new bullet language |
-| `ghost` | **drop**; use 4.35.0 `erased` \| upstream syntax present, albeit experimental |
-| `refine type` | **drop**; use `Subtype` and `{x : A // P x}` \| native Lean type and notation |
+| `ghost` | **drop**; use 4.35.0 `erased` | upstream syntax present, albeit experimental |
+| `refine type` | **drop**; use `Subtype` and `{x : A // P x}` | native Lean type and notation |
 | Structure `invariant self` | **drop**; use proof field | avoids hidden semantic changes and redundant grammar |
-| `verify target` | **drop**; use theorem / `by` / VC proof \| one proof language, checked evidence |
-| `∀`/`forall`, `∃`/`exists` | **both admitted** as native Lean notation \| text forms are real Lean syntax; singular `exist` excluded |
+| `verify target` | **drop**; use theorem / `by` / VC proof | one proof language, checked evidence |
+| `∀`/`forall`, `∃`/`exists` | **both admitted** as native Lean notation | text forms are real Lean syntax; singular `exist` excluded |
 | Braced vs Lean indentation body | one `.ps` braced spelling | user-facing consistency; Lean `.lean` remains native |
-| `requires`, `ensures`, `given`, `invariant`, `decreasing` | retain selected Lean 4.35.0 intrinsic verification vocabulary \| upstream experimental; require pinned proof semantics |
-| `old` / `reads` / `modifies` / `errors` | defer as distinct language keywords \| no confirmed native 4.35.0 equivalents; can start with Lean propositions/WP effects |
+| `requires`, `ensures`, `given`, `invariant`, `decreasing` | retain selected Lean 4.35.0 intrinsic verification vocabulary | upstream experimental; require pinned proof semantics |
+| `old` / `reads` / `modifies` / `errors` | defer as distinct language keywords | no confirmed native 4.35.0 equivalents; can start with Lean propositions/WP effects |
 | Types / literals | preserve named Lean scalar, container, dependent and proof-indexed families | catalog §8; freeze exact Std environment for conformance |
-| `Nat` successor matching | accept both `\| k + 1 => ...` and `\| .succ k => ...`; prefer arithmetic form in examples \| pinned Lean built-in match-pattern expansion; **not** general arithmetic pattern solving |
-| `variable (n : Nat)` | retain Lean section-parameter generalization under `PSCV0-BIND-01` \| command binder is a different grammar category from term application; theorem statement generalization rules apply |
+| `Nat` successor matching | accept both `\| k + 1 => ...` and `\| .succ k => ...`; prefer arithmetic form in examples | pinned Lean built-in match-pattern expansion; **not** general arithmetic pattern solving |
+| `variable (n : Nat)` | retain Lean section-parameter generalization under `PSCV0-BIND-01` | command binder is a different grammar category from term application; theorem statement generalization rules apply |
 | Lean-style `#check` / proof editing | already accepted; specify full useful editor feedback and source spans | future VS Code/LSP InfoView target, **not** proof or unrestricted Lean feature parity |
 | Multi-discriminant/dependent `match` | **adopt selected Lean 4.35.0 features** | preserves mathematical elaboration, proof terms and exhaustiveness; complete parser tests still pending |
-| `if let`, `nomatch`, `matches`, let-patterns | **adopt selected Lean native terms**, with `.ps` braces where relevant \| do not substitute TS union narrowing or unchecked cast semantics |
+| `if let`, `nomatch`, `matches`, let-patterns | **adopt selected Lean native terms**, with `.ps` braces where relevant | do not substitute TS union narrowing or unchecked cast semantics |
 | Native `deriving` | **P0** trailing handler allowlist (`Repr`, `BEq`, `DecidableEq`, `Inhabited`, `Hashable`) | frozen handler provenance; no arbitrary dependency-based handlers |
 | Strings and indexing | **P0** `s!`/raw strings, `GetElem`, `xs[i]`, `xs[i]?`, `xs[i]!`, array/list literals | pin lexer/parser and instance availability; `!` may panic |
 | Monadic exceptions | **P1** admit selected `try`/`catch`/`finally` and `throw` under typed effects | exact proposed `.ps` brace mapping needs conformance; no JS exception model |
@@ -3334,9 +3334,9 @@ The v6 re-audit identified three local documentation defects, now corrected in t
 | Declaration heads, `def`, structure, class, instance | [`src/Lean/Parser/Command.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean) | native headers; `const` and `function` are PSCV0 aliases |
 | Basic parser/identifiers/trivia | [`src/Lean/Parser/Basic.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Basic.lean) | select Lean lexing rather than reconstruct lexical regexes |
 | Binder terms and syntax | [`src/Lean/Parser/Term/Basic.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term/Basic.lean) | selected explicit, implicit, strict implicit, instance binder forms |
-| `do`, mutable/erased state, loops | [`src/Lean/Parser/Do.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Do.lean) \| PS selected `do` grammar and experimental verification parallels |
-| `#check` and `#eval` command parsing | [`src/Lean/Parser/Command.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean) \| same command spelling; PSCV0 restricts evaluation effects |
-| `#reduce` syntax | [`src/Init/Notation.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Notation.lean) \| reducibility diagnostic, not proof authority |
+| `do`, mutable/erased state, loops | [`src/Lean/Parser/Do.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Do.lean) | PS selected `do` grammar and experimental verification parallels |
+| `#check` and `#eval` command parsing | [`src/Lean/Parser/Command.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean) | same command spelling; PSCV0 restricts evaluation effects |
+| `#reduce` syntax | [`src/Init/Notation.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Notation.lean) | reducibility diagnostic, not proof authority |
 | Lean stable 4.35.0 modules and exposure | [`Source Files and Modules`](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/) | `module`, imports, visibility, public section and exposures; source `.ps` retains its selected module translation |
 | Intrinsic `where finally` grammar | [`src/Lean/Parser/Term.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term.lean) | `whereDecls` / `whereFinally` / `whereFinallySubsection` used by stable Lean 4.35.0 generated contract spec proof |
 | Lean intrinsic contract elaboration | [`src/Lean/Elab/Tactic/Do/Contract.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/Tactic/Do/Contract.lean) | experimental ordered `given`/`requires`/`ensures`, `Std.WP` prerequisite, generated `f.spec` and `where finally \| spec` proof attachment |

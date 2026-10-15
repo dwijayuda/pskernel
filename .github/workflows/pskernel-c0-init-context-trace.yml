@@ -41,8 +41,8 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 6452982
           test "$(stat -c%s "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 345690182
           echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
-          head -n 5068793 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/C0-init-context-prefix.ndjson"
-          test "$(wc -l < "$RUNNER_TEMP/C0-init-context-prefix.ndjson")" -eq 5068793
+          head -n 5120000 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/C0-init-context-prefix.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/C0-init-context-prefix.ndjson")" -eq 5120000
           if test ! -d "$RUNNER_TEMP/lean4export/.git"; then
             git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
             git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
@@ -52,7 +52,7 @@ jobs:
             lake build lean4export &&
             lake env leanchecker --from-export "$RUNNER_TEMP/C0-init-context-prefix.ndjson" > "$RUNNER_TEMP/C0-init-context-official.txt" 2>&1)
           grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/C0-init-context-official.txt"
-          echo "C0_INIT_CONTEXT_OFFICIAL=accepted exact_original_prefix=5068793"
+          echo "C0_INIT_CONTEXT_OFFICIAL=accepted exact_original_prefix=5120000"
       - name: Insert diagnostic-only declaration entry prints into disposable test executable
         shell: bash
         run: |
@@ -64,7 +64,7 @@ jobs:
           needle='      let outcome := c0ExportStepDetailed state line fuel'
           assert code.count(needle)==1, 'Unrecognized source; refusing instrumentation'
           trace_lines=[
-              '      if consumed >= 5068000 && !declKind.isEmpty then',
+              '      if consumed >= 5068794 && !declKind.isEmpty then',
               '        IO.println s!"C0_INIT_TRACE_START record={consumed} kind={declKind}"',
           ]
           code=code.replace(needle,'\n'.join(trace_lines)+'\n'+needle)
@@ -72,8 +72,9 @@ jobs:
           PY
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           echo "C0_INIT_TRACE_BUILD=diagnostic_only_not_acceptance_authority"
-      # New upper boundary includes the very next distinct theorem after the
-      # validated 5,068,573-record prefix; this is NOT a repeated 5.068M gate.
+      # Previously qualified exact 5,068,793 prefix succeeded. Scan forward
+      # through 5.12M, printing declaration starts after the proven boundary.
+      # Do NOT promote a timeout to an acceptance receipt.
       - name: Bound source-equivalent instrumented prefix replay
         shell: bash
         run: |
@@ -82,7 +83,7 @@ jobs:
           (
             cd psc0/packages/pskernel-c0
             /usr/bin/time -v -o "$RUNNER_TEMP/C0-init-context-resources.txt" \
-              timeout 2650s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              timeout 2620s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
               "$RUNNER_TEMP/C0-init-context-prefix.ndjson" 4096
           ) > "$RUNNER_TEMP/C0-init-context-native.txt" 2>&1
           status=$?

@@ -17,13 +17,15 @@ The constructive constructors and their strict portable replay are unchanged.
 
 namespace PsV7Native.FloatCorrespondence
 
-open Float.Model Float.Model.UnpackedFloat
+open Float.Model (Format UnpackedFloat)
+open Float.Model.UnpackedFloat
 open PsV7Native.FloatCanonical
 
 private theorem sign_roundtrip (b : BitVec 1) :
     Sign.toBitVec (Sign.ofBitVec b) = b := by
   by_cases hz : b = 0#1
-  · simp only [Sign.ofBitVec, if_pos hz, Sign.toBitVec, hz]
+  · subst b
+    rfl
   · have hn : b.toNat ≠ 0 := by
       intro h
       apply hz
@@ -31,7 +33,7 @@ private theorem sign_roundtrip (b : BitVec 1) :
     have hb : b.toNat = 1 := by
       have bound : b.toNat < 2 := b.toFin.isLt
       omega
-    simp only [Sign.ofBitVec, if_neg hz, Sign.toBitVec]
+    simp only [Sign.ofBitVec, ite_eq_right hz, Sign.toBitVec]
     apply BitVec.eq_of_toNat_eq
     exact hb.symm
 
@@ -45,10 +47,16 @@ private theorem components_roundtrip (spec : Format) (b : BitVec spec.numBits) :
   simp (discharger := omega) [unpackSign, unpackExponent, unpackMantissa,
     BitVec.extractLsb'_append_extractLsb'_eq_extractLsb']
 
+-- Pinned Bootstrap.toNat_append is expressed with shift/or, not the newer
+-- toNat_append_eq_mul_add API. Disjoint low bits justify addition exactly.
 private theorem normal_mantissa_toNat {w : Nat} (m : BitVec w) :
     (1#1 ++ m).toNat = 2 ^ w + m.toNat := by
-  rw [BitVec.toNat_append_eq_mul_add]
-  simp
+  have bound : m.toNat < 2 ^ w := m.toFin.isLt
+  calc
+    (1#1 ++ m).toNat = 2 ^ w ||| m.toNat := by
+      simp [BitVec.toNat_append, Nat.shiftLeft_eq]
+    _ = 2 ^ w + m.toNat := by
+      simpa only [Nat.mul_one] using (Nat.two_pow_add_eq_or_of_lt bound 1).symm
 
 private theorem normal_mantissa_log2 {w : Nat} (m : BitVec w) :
     (1#1 ++ m).toNat.log2 = w := by
@@ -56,7 +64,8 @@ private theorem normal_mantissa_log2 {w : Nat} (m : BitVec w) :
     rw [normal_mantissa_toNat]
     omega
   have upper : (1#1 ++ m).toNat < 2 ^ (w + 1) := by
-    simpa only [Nat.add_comm 1 w] using (1#1 ++ m).toFin.isLt
+    have bound : (1#1 ++ m).toNat < 2 ^ (1 + w) := (1#1 ++ m).toFin.isLt
+    simpa only [Nat.add_comm 1 w] using bound
   have nonzero : (1#1 ++ m).toNat ≠ 0 := by
     have positive := Nat.two_pow_pos w
     omega
@@ -66,14 +75,18 @@ private theorem normal_mantissa_truncate {w : Nat} (m : BitVec w) :
     BitVec.ofNat w (1#1 ++ m).toNat = m := by
   apply BitVec.eq_of_toNat_eq
   rw [BitVec.toNat_ofNat, normal_mantissa_toNat]
-  simp [Nat.add_mod, Nat.mod_eq_of_lt m.toFin.isLt]
+  simp
 
 private theorem exponent_capacity (spec : Format) : 2 < 2 ^ spec.exponentBits := by
   have width : spec.exponentBits = (spec.exponentBits - 2) + 2 := by
     have bound := spec.he
     omega
   have power : 2 ^ spec.exponentBits = 2 ^ (spec.exponentBits - 2) * 4 := by
-    conv_lhs => rw [width, Nat.pow_add]
+    calc
+      2 ^ spec.exponentBits = 2 ^ ((spec.exponentBits - 2) + 2) :=
+        congrArg (fun n : Nat => 2 ^ n) width
+      _ = 2 ^ (spec.exponentBits - 2) * 4 := by
+        rw [Nat.pow_add]
   rw [power]
   have positive := Nat.two_pow_pos (spec.exponentBits - 2)
   omega
@@ -81,7 +94,7 @@ private theorem exponent_capacity (spec : Format) : 2 < 2 ^ spec.exponentBits :=
 private theorem pack_normal (spec : Format) (s : Sign)
     (e : BitVec spec.exponentBits) (m : BitVec spec.mantissaBitsWithoutImplicit)
     (he : e ≠ -1#_) {hp : 0 < (1#1 ++ m).toNat} :
-    pack spec (.finite s (1#1 ++ m).toNat
+    UnpackedFloat.pack spec (.finite s (1#1 ++ m).toNat
       ((e.toNat : Int) - (spec.exponentBias + spec.mantissaBitsWithoutImplicit)) hp) =
       packComponents spec s e m := by
   have biased : (((e.toNat : Int) -
@@ -99,13 +112,14 @@ private theorem pack_normal (spec : Format) (s : Sign)
   have full : (1#1 ++ m).toNat.log2 + 1 = spec.mantissaBits := by
     rw [normal_mantissa_log2]
     simp only [Format.mantissaBits, Nat.add_comm]
-  simp only [pack, biased, if_neg noOverflow, if_pos full,
-    BitVec.ofNat_toNat, normal_mantissa_truncate]
+  simp only [UnpackedFloat.pack, biased, ite_eq_right noOverflow, ite_eq_left full]
+  rw [normal_mantissa_truncate]
+  simp
 
 private theorem pack_subnormal (spec : Format) (s : Sign)
     (e : BitVec spec.exponentBits) (m : BitVec spec.mantissaBitsWithoutImplicit)
     (he : e = 0#_) (hm : m ≠ 0#_) {hp : 0 < m.toNat} :
-    pack spec (.finite s m.toNat
+    UnpackedFloat.pack spec (.finite s m.toNat
       (((e.toNat : Int) - (spec.exponentBias + spec.mantissaBitsWithoutImplicit)) + 1) hp) =
       packComponents spec s e m := by
   subst e
@@ -125,26 +139,29 @@ private theorem pack_subnormal (spec : Format) (s : Sign)
   have noOverflow : ¬ 2 ^ spec.exponentBits ≤ 1 + 1 := by
     have capacity := exponent_capacity spec
     omega
-  simp only [pack, biased, if_neg noOverflow, if_neg notFull, BitVec.ofNat_toNat]
+  simp only [UnpackedFloat.pack, biased, ite_eq_right noOverflow, ite_eq_right notFull]
+  simp
 
 /-- Upstream unpack/repack is exactly direct NaN canonicalization for every bit pattern. -/
 theorem pack_unpack (spec : Format) (b : BitVec spec.numBits) :
-    pack spec (unpack spec b) = canonicalPacked spec b := by
+    UnpackedFloat.pack spec (UnpackedFloat.unpack spec b) = canonicalPacked spec b := by
   by_cases he : unpackExponent (spec := spec) b = -1#_
   · by_cases hm : unpackMantissa (spec := spec) b = 0#_
-    · simp only [canonicalPacked, if_pos he, if_pos hm,
-        unpack, pack, packedInfinity]
+    · simp only [canonicalPacked, ite_eq_left he, ite_eq_left hm,
+        UnpackedFloat.unpack, UnpackedFloat.pack, packedInfinity]
       simpa only [he, hm] using components_roundtrip spec b
-    · simp only [canonicalPacked, if_pos he, if_neg hm, unpack, pack]
+    · simp only [canonicalPacked, ite_eq_left he, ite_eq_right hm,
+        UnpackedFloat.unpack, UnpackedFloat.pack]
   · by_cases he0 : unpackExponent (spec := spec) b = 0#_
     · by_cases hm : unpackMantissa (spec := spec) b = 0#_
-      · simp only [canonicalPacked, if_neg he, unpack, if_pos he0,
-          dif_pos hm, pack, packedZero]
+      · simp only [canonicalPacked, ite_eq_right he, UnpackedFloat.unpack,
+          ite_eq_left he0, dite_eq_left hm, UnpackedFloat.pack, packedZero]
         simpa only [he0, hm] using components_roundtrip spec b
-      · simp only [canonicalPacked, if_neg he, unpack, if_pos he0, dif_neg hm]
+      · simp only [canonicalPacked, ite_eq_right he, UnpackedFloat.unpack,
+          ite_eq_left he0, dite_eq_right hm]
         rw [pack_subnormal spec _ _ _ he0 hm]
         exact components_roundtrip spec b
-    · simp only [canonicalPacked, if_neg he, unpack, if_neg he0]
+    · simp only [canonicalPacked, ite_eq_right he, UnpackedFloat.unpack, ite_eq_right he0]
       rw [pack_normal spec _ _ _ he]
       exact components_roundtrip spec b
 

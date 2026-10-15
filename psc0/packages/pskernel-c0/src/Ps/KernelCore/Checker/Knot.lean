@@ -304,7 +304,73 @@ def psKernelDefEqProjectionShortcut
       Except.ok
         (Prod.mk Option.none state)
 
-def psKernelIsDefEqWithFuel
+/-- Expand *only* values of active local let declarations. Every inserted
+    value must be locally closed (no loose de Bruijn variables); otherwise
+    inserting it beneath a binder could capture indices. A finite structural
+    budget leaves every unexpanded subterm unchanged. This helper is used
+    only to establish *positive exact syntactic equality* after a source
+    DefEq resource failure, never to guess equality of different terms. -/
+def psKernelDefEqExpandLocalLetsWithFuel
+    (fuel : Nat)
+    (context : PsKernelCheckerContext) :
+    PsKernelExpr → PsKernelExpr :=
+  match fuel with
+  | 0 => fun expr => expr
+  | remaining + 1 =>
+      let go := psKernelDefEqExpandLocalLetsWithFuel remaining context
+      fun expr =>
+        match expr with
+        | .fvar name =>
+            match psKernelLocalContextFind context.localContext name with
+            | .some decl =>
+                match psKernelLocalDeclValue decl with
+                | .some value =>
+                    if psKernelExprHasLooseBVar value then expr
+                    else go value
+                | .none => expr
+            | .none => expr
+        | .app fn arg => .app (go fn) (go arg)
+        | .lam name type body bi => .lam name (go type) (go body) bi
+        | .forallE name type body bi =>
+            .forallE name (go type) (go body) bi
+        | .letE name type value body nondep =>
+            .letE name (go type) (go value) (go body) nondep
+        | .mdata metadata body => .mdata metadata (go body)
+        | .proj typeName index body => .proj typeName index (go body)
+        | _ => expr
+
+/-- Exact structural equality of finite local-ζ expansions after independent
+    *source* WHNF on both sides. This never concludes inequality, never grants
+    admission from an untyped term, and preserves the source resource error
+    when reduction, validation or equality does not succeed. Returned cache
+    state is sourced only from successful source WHNF operations. -/
+def psKernelDefEqTryLocalZetaRecovery
+    (fuel : Nat)
+    (sourceDefEq :
+      PsKernelCheckerContext → PsKernelCheckerState →
+      PsKernelExpr → PsKernelExpr →
+      Except String (Bool × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) :
+    Option PsKernelCheckerState :=
+  if context.localContext.declCount == 0 || fuel == 0 then none
+  else
+    let whnf := psKernelWhnfWithRecursorFuel fuel sourceDefEq
+    match whnf context state left with
+    | .error _ => none
+    | .ok (leftNormal, state1) =>
+        match whnf context state1 right with
+        | .error _ => none
+        | .ok (rightNormal, state2) =>
+            let budget := Nat.min fuel 192
+            let lhs := psKernelDefEqExpandLocalLetsWithFuel
+              budget context leftNormal
+            let rhs := psKernelDefEqExpandLocalLetsWithFuel
+              budget context rightNormal
+            if psKernelExprEq lhs rhs then some state2 else none
+
+def psKernelIsDefEqSourceWithFuel
     (fuel : Nat) :
     PsKernelCheckerContext ->
     PsKernelCheckerState ->
@@ -329,7 +395,7 @@ def psKernelIsDefEqWithFuel
           PsKernelExpr ->
           Except String
             (Prod Bool PsKernelCheckerState) :=
-        psKernelIsDefEqWithFuel remaining;
+        psKernelIsDefEqSourceWithFuel remaining;
       fun
         (context : PsKernelCheckerContext)
         (state : PsKernelCheckerState)
@@ -619,6 +685,31 @@ def psKernelIsDefEqWithFuel
                                                                                             right
                                                                                             leftFull
                                                                                             rightFull
+
+
+/-- Source-judgment-preserving local-ζ conversion recovery. Only a genuine
+    source reduction-budget exhaustion can request a retry. A positive result
+    requires successful WHNF of BOTH original terms and exact syntactic
+    identity after only locally closed let substitutions, which is a valid
+    definitional ζ-conversion. Other errors and negative outcomes are
+    returned byte-for-byte, without raising the configured resource budget. -/
+def psKernelIsDefEqWithFuel
+    (fuel : Nat) :
+    PsKernelCheckerContext → PsKernelCheckerState →
+    PsKernelExpr → PsKernelExpr →
+    Except String (Bool × PsKernelCheckerState) :=
+  fun context state left right =>
+    match psKernelIsDefEqSourceWithFuel fuel context state left right with
+    | .ok result => .ok result
+    | .error reason =>
+        if reason == "kernel reduction budget exhausted" then
+          match psKernelDefEqTryLocalZetaRecovery fuel
+              (psKernelIsDefEqSourceWithFuel fuel)
+              context state left right with
+          | .some recovered =>
+              .ok (psKernelDefEqFinish recovered left right true)
+          | .none => .error reason
+        else .error reason
 
 def psKernelIsDefEq
     (fuel : Nat)

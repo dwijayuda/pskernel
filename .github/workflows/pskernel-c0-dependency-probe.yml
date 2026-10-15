@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/pskernel-c0-dependency-probe.yml'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
   workflow_dispatch:
     inputs:
       declaration:

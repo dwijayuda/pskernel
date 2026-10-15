@@ -417,14 +417,49 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
 -- The pinned generic BitVec.and_allOnes lemma imports Classical.choice
 -- transitively despite expressing a constructive bit identity. Use the
 -- lower-level natural bitwise identity instead; keep the trust audit strict.
-theorem andAllOnes_constructive {w : Nat} (x : BitVec w) :
-    x &&& BitVec.allOnes w = x := by
+-- Fixed IEEE field width 8: constructive finite bit-index check.
+-- This never imports the pinned generic choice-bearing allOnes bit theorem.
+theorem andAllOnes8_constructive (x : BitVec 8) :
+    x &&& BitVec.allOnes 8 = x := by
   apply BitVec.eq_of_getLsbD_eq
   intro i hi
-  have hbit : (BitVec.allOnes w).getLsbD i = true := by
-    change Nat.testBit (2 ^ w - 1) i = true
-    simp [Nat.testBit_two_pow_sub_one, hi]
-  simp only [BitVec.getLsbD_and, hbit, Bool.and_true]
+  have bit : (BitVec.allOnes 8).getLsbD i = true := by
+    change Nat.testBit (2 ^ 8 - 1) i = true
+    interval_cases i <;> decide
+  simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
+
+-- Fixed IEEE field width 11: constructive finite bit-index check.
+-- This never imports the pinned generic choice-bearing allOnes bit theorem.
+theorem andAllOnes11_constructive (x : BitVec 11) :
+    x &&& BitVec.allOnes 11 = x := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  have bit : (BitVec.allOnes 11).getLsbD i = true := by
+    change Nat.testBit (2 ^ 11 - 1) i = true
+    interval_cases i <;> decide
+  simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
+
+-- Fixed IEEE field width 23: constructive finite bit-index check.
+-- This never imports the pinned generic choice-bearing allOnes bit theorem.
+theorem andAllOnes23_constructive (x : BitVec 23) :
+    x &&& BitVec.allOnes 23 = x := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  have bit : (BitVec.allOnes 23).getLsbD i = true := by
+    change Nat.testBit (2 ^ 23 - 1) i = true
+    interval_cases i <;> decide
+  simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
+
+-- Fixed IEEE field width 52: constructive finite bit-index check.
+-- This never imports the pinned generic choice-bearing allOnes bit theorem.
+theorem andAllOnes52_constructive (x : BitVec 52) :
+    x &&& BitVec.allOnes 52 = x := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  have bit : (BitVec.allOnes 52).getLsbD i = true := by
+    change Nat.testBit (2 ^ 52 - 1) i = true
+    interval_cases i <;> decide
+  simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
 
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream
 -- String/Decode.lean splitting method. No tactic-based SAT oracle or
@@ -463,14 +498,14 @@ theorem binary64ExponentMask_iff (bits : BitVec 64) :
       (x := bits) (start₂ := 63) (start₁ := 52)
       (len₂ := 1) (len₁ := 11) (by decide)).symm
   rw [split, BitVec.and_append, BitVec.and_zero,
-      andAllOnes_constructive, BitVec.append_right_inj]
+      andAllOnes11_constructive, BitVec.append_right_inj]
 
 theorem binary64FractionMask_iff (bits : BitVec 64) :
     (bits &&& 4503599627370495#64 = 0#64) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
   change (bits &&& (0#12 ++ BitVec.allOnes 52) = 0#12 ++ 0#52) ↔
     bits.extractLsb' 0 52 = 0#52
-  simpa only [andAllOnes_constructive] using (maskedLow_iff (upper := 12) (lower := 52)
+  simpa only [andAllOnes52_constructive] using (maskedLow_iff (upper := 12) (lower := 52)
     (bits := bits) (mask := BitVec.allOnes 52) (target := 0#52))
 
 theorem binary32ExponentMask_iff (bits : BitVec 32) :
@@ -489,14 +524,14 @@ theorem binary32ExponentMask_iff (bits : BitVec 32) :
       (x := bits) (start₂ := 31) (start₁ := 23)
       (len₂ := 1) (len₁ := 8) (by decide)).symm
   rw [split, BitVec.and_append, BitVec.and_zero,
-      andAllOnes_constructive, BitVec.append_right_inj]
+      andAllOnes8_constructive, BitVec.append_right_inj]
 
 theorem binary32FractionMask_iff (bits : BitVec 32) :
     (bits &&& 8388607#32 = 0#32) ↔
       UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
   change (bits &&& (0#9 ++ BitVec.allOnes 23) = 0#9 ++ 0#23) ↔
     bits.extractLsb' 0 23 = 0#23
-  simpa only [andAllOnes_constructive] using (maskedLow_iff (upper := 9) (lower := 23)
+  simpa only [andAllOnes23_constructive] using (maskedLow_iff (upper := 9) (lower := 23)
     (bits := bits) (mask := BitVec.allOnes 23) (target := 0#23))
 
 -- Exactly the mask/branch behavior of the selected

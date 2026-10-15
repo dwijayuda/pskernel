@@ -246,8 +246,7 @@ theorem psKernelC0ScopedCheckedDAGSameRoot
       _ = psKernelC0DecodeExpr owner.store right.rootId := by rw [hId]
       _ = some right.expression := right.readback
   have hExpr : left.expression = right.expression := by
-    injection hRead with he
-    exact he
+    injection hRead
   have hCheck :
       Except.ok (left.inferredType, left.finalState) =
         Except.ok (right.inferredType, right.finalState) := by
@@ -262,6 +261,5 @@ theorem psKernelC0ScopedCheckedDAGSameRoot
   have hPair :
       (left.inferredType, left.finalState) =
         (right.inferredType, right.finalState) := by
-    injection hCheck with hp
-    exact hp
+    injection hCheck
   exact ⟨hExpr, congrArg Prod.fst hPair, congrArg Prod.snd hPair⟩

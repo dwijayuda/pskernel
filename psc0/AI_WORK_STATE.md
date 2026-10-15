@@ -1,5 +1,33 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — Full raw-bit upstream Float correspondence, native candidate
+
+**Research qualification:** `343d1ef8074ab573fa38441a7bb2e8ad4d327b52`,
+[focused pinned Lean 4.35.0 CI 38672309292](https://github.com/dwijayuda/pskernel/actions/runs/38672309292) **passed**.
+This main-branch integration is a **candidate pending its own exact-commit full CI**.
+
+The native host proves symbolic equality, for **all 2^64 / 2^32 raw bit
+patterns**, between the pinned upstream `UnpackedFloat.pack (unpack bits)`
+and PSC0's `canonicalPacked`. Cases include every NaN payload, infinity,
+both signed zeros, subnormals and normal floats; explicit normal-case proofs
+use the pinned `Nat.log2` and `BitVec` field reconstruction lemmas.
+Native `fromBits64_eq_upstream_ofBits_all` and
+`fromBits32_eq_upstream_ofBits_all` lift the result to typed upstream
+`Float.ofBits` / `Float32.ofBits`.
+
+**Trust boundary remains CLOSED:** upstream `Float.ofBits` dependencies
+transitively use `Classical.choice`, as independently diagnosed in native
+`Pscv0FloatConstructiveOracle`; these native upstream proof roots are
+NOT included in portable `contractRoots`, the approved portable axiom
+roster remains `propext` / `Quot.sound`, and source Float construction,
+arithmetic, scientific conversion, erasure/ABI and all-target runtime
+admission remain disabled. Do not claim Float F1-F4 or M2+A complete.
+
+**Next:** verify full Linux CI at the exact new main branch HEAD, then
+reconcile the upstream dependency boundary without widening assumptions,
+qualify checked F1 source construction plus sound erasure and progress F2-F4.
+Do not enable unsupported runtime capabilities or weaken acceptance gates.
+
 ## 15 October — F1 compact representation contracts qualified at 2f89b567
 
 **Exact qualified executable:** `2f89b567586b8a21787df64609396e9ff742d32a`.

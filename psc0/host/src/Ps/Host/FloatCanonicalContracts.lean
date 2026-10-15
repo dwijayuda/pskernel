@@ -239,6 +239,172 @@ theorem upstreamPackUnpack_subnormal32 (bits : BitVec 32)
     Format.binary32, Format.exponentBias, Format.mantissaBits,
     he, hm, mantissa, hsmall] using hsub
 
+-- Pinned upstream normal representation proof (native research only).
+theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
+    (heZero : UnpackedFloat.unpackExponent (spec := Format.binary64) bits ≠ (0#_))
+    (heTop : UnpackedFloat.unpackExponent (spec := Format.binary64) bits ≠ (-1#_)) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary64) bits
+  let exponent := UnpackedFloat.unpackExponent (spec := Format.binary64) bits
+  let joined : BitVec 53 := (1#1) ++ mantissa
+  have hMantBound : mantissa.toNat < 2 ^ 52 := by
+    simpa [Format.binary64] using mantissa.isLt
+  have hExpBound : exponent.toNat < 2 ^ 11 := by
+    simpa [Format.binary64] using exponent.isLt
+  have hJoin : joined.toNat = 2 ^ 52 + mantissa.toNat := by
+    change ((1#1) ++ mantissa).toNat = 2 ^ 52 + mantissa.toNat
+    rw [BitVec.toNat_append]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt hMantBound]
+    simp [Nat.shiftLeft_eq, Format.binary64]
+  have hLow : 2 ^ 52 ≤ joined.toNat := by omega
+  have hHigh : joined.toNat < 2 ^ (52 + 1) := by
+    have hd : 2 ^ (52 + 1) = 2 ^ 52 + 2 ^ 52 := by
+      simp [Nat.pow_succ]
+    rw [hd]
+    omega
+  have hPositive : joined.toNat ≠ 0 := by
+    have hp : 0 < 2 ^ 52 := by decide
+    omega
+  have hLog : joined.toNat.log2 = 52 :=
+    (Nat.log2_eq_iff hPositive).2 ⟨hLow, hHigh⟩
+  have hMask : BitVec.ofNat 52 joined.toNat = mantissa := by
+    apply (BitVec.toNat_inj).mp
+    simp [BitVec.toNat_ofNat, hJoin, Nat.mod_eq_of_lt hMantBound]
+  have hExp : BitVec.ofNat 11 exponent.toNat = exponent := by
+    apply (BitVec.toNat_inj).mp
+    simp [BitVec.toNat_ofNat, Nat.mod_eq_of_lt hExpBound]
+  have hNotMax : exponent.toNat ≠ 2047 := by
+    intro h
+    have ht : exponent = (-1#11) := by
+      apply (BitVec.toNat_inj).mp
+      simpa using h
+    exact heTop (by simpa [exponent] using ht)
+  have hNoOverflow : ¬ (2 ^ 11 ≤ exponent.toNat + 1) := by
+    have hp : (2 : Nat) ^ 11 = 2048 := by decide
+    omega
+  have hBias :
+      (((exponent.toNat : Int) - (1023 + 52) + 1023 + 52).toNat) =
+        exponent.toNat := by omega
+  have hUnpack : UnpackedFloat.unpack Format.binary64 bits =
+      .finite
+        (UnpackedFloat.Sign.ofBitVec
+          (UnpackedFloat.unpackSign (spec := Format.binary64) bits))
+        joined.toNat
+        ((exponent.toNat : Int) - (1023 + 52))
+        (Nat.pos_of_ne_zero hPositive) := by
+    simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
+    rfl
+  have hRawBias :
+      (((exponent.toNat : Int) - (1023 + 52) +
+        (Format.binary64.exponentBias : Nat) + ((52 : Nat) : Int)).toNat) =
+        exponent.toNat := by
+    exact hBias
+  have hRawNoOverflow :
+      ¬ (2 ^ 11 ≤ (((exponent.toNat : Int) - (1023 + 52) +
+        (Format.binary64.exponentBias : Nat) + ((52 : Nat) : Int)).toNat) + 1) := by
+    rw [hRawBias]
+    exact hNoOverflow
+  have hRawExponent : BitVec.ofNat 11
+      (((exponent.toNat : Int) - (1023 + 52) +
+        (Format.binary64.exponentBias : Nat) + ((52 : Nat) : Int)).toNat) = exponent := by
+    rw [hRawBias]
+    exact hExp
+  have hIsNormal : joined.toNat.log2 + 1 = Format.binary64.mantissaBits := by
+    simp [hLog, Format.binary64, Format.mantissaBits]
+  have hRec := reconstructPackedFields64 bits
+  rw [canonicalPacked_finiteExponent Format.binary64 bits heTop]
+  rw [hUnpack]
+  unfold UnpackedFloat.pack
+  dsimp only
+  rw [if_neg hRawNoOverflow]
+  rw [if_pos hIsNormal]
+  rw [hRawExponent, hMask]
+  exact hRec
+
+-- Pinned upstream normal representation proof (native research only).
+theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
+    (heZero : UnpackedFloat.unpackExponent (spec := Format.binary32) bits ≠ (0#_))
+    (heTop : UnpackedFloat.unpackExponent (spec := Format.binary32) bits ≠ (-1#_)) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  let mantissa := UnpackedFloat.unpackMantissa (spec := Format.binary32) bits
+  let exponent := UnpackedFloat.unpackExponent (spec := Format.binary32) bits
+  let joined : BitVec 24 := (1#1) ++ mantissa
+  have hMantBound : mantissa.toNat < 2 ^ 23 := by
+    simpa [Format.binary32] using mantissa.isLt
+  have hExpBound : exponent.toNat < 2 ^ 8 := by
+    simpa [Format.binary32] using exponent.isLt
+  have hJoin : joined.toNat = 2 ^ 23 + mantissa.toNat := by
+    change ((1#1) ++ mantissa).toNat = 2 ^ 23 + mantissa.toNat
+    rw [BitVec.toNat_append]
+    rw [← Nat.shiftLeft_add_eq_or_of_lt hMantBound]
+    simp [Nat.shiftLeft_eq, Format.binary32]
+  have hLow : 2 ^ 23 ≤ joined.toNat := by omega
+  have hHigh : joined.toNat < 2 ^ (23 + 1) := by
+    have hd : 2 ^ (23 + 1) = 2 ^ 23 + 2 ^ 23 := by
+      simp [Nat.pow_succ]
+    rw [hd]
+    omega
+  have hPositive : joined.toNat ≠ 0 := by
+    have hp : 0 < 2 ^ 23 := by decide
+    omega
+  have hLog : joined.toNat.log2 = 23 :=
+    (Nat.log2_eq_iff hPositive).2 ⟨hLow, hHigh⟩
+  have hMask : BitVec.ofNat 23 joined.toNat = mantissa := by
+    apply (BitVec.toNat_inj).mp
+    simp [BitVec.toNat_ofNat, hJoin, Nat.mod_eq_of_lt hMantBound]
+  have hExp : BitVec.ofNat 8 exponent.toNat = exponent := by
+    apply (BitVec.toNat_inj).mp
+    simp [BitVec.toNat_ofNat, Nat.mod_eq_of_lt hExpBound]
+  have hNotMax : exponent.toNat ≠ 255 := by
+    intro h
+    have ht : exponent = (-1#8) := by
+      apply (BitVec.toNat_inj).mp
+      simpa using h
+    exact heTop (by simpa [exponent] using ht)
+  have hNoOverflow : ¬ (2 ^ 8 ≤ exponent.toNat + 1) := by
+    have hp : (2 : Nat) ^ 8 = 256 := by decide
+    omega
+  have hBias :
+      (((exponent.toNat : Int) - (127 + 23) + 127 + 23).toNat) =
+        exponent.toNat := by omega
+  have hUnpack : UnpackedFloat.unpack Format.binary32 bits =
+      .finite
+        (UnpackedFloat.Sign.ofBitVec
+          (UnpackedFloat.unpackSign (spec := Format.binary32) bits))
+        joined.toNat
+        ((exponent.toNat : Int) - (127 + 23))
+        (Nat.pos_of_ne_zero hPositive) := by
+    simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
+    rfl
+  have hRawBias :
+      (((exponent.toNat : Int) - (127 + 23) +
+        (Format.binary32.exponentBias : Nat) + ((23 : Nat) : Int)).toNat) =
+        exponent.toNat := by
+    exact hBias
+  have hRawNoOverflow :
+      ¬ (2 ^ 8 ≤ (((exponent.toNat : Int) - (127 + 23) +
+        (Format.binary32.exponentBias : Nat) + ((23 : Nat) : Int)).toNat) + 1) := by
+    rw [hRawBias]
+    exact hNoOverflow
+  have hRawExponent : BitVec.ofNat 8
+      (((exponent.toNat : Int) - (127 + 23) +
+        (Format.binary32.exponentBias : Nat) + ((23 : Nat) : Int)).toNat) = exponent := by
+    rw [hRawBias]
+    exact hExp
+  have hIsNormal : joined.toNat.log2 + 1 = Format.binary32.mantissaBits := by
+    simp [hLog, Format.binary32, Format.mantissaBits]
+  have hRec := reconstructPackedFields32 bits
+  rw [canonicalPacked_finiteExponent Format.binary32 bits heTop]
+  rw [hUnpack]
+  unfold UnpackedFloat.pack
+  dsimp only
+  rw [if_neg hRawNoOverflow]
+  rw [if_pos hIsNormal]
+  rw [hRawExponent, hMask]
+  exact hRec
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream
@@ -272,6 +438,56 @@ theorem fromBits32_eq_upstream_ofBits_nan (bits : UInt32)
       (UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits.toBitVec))
   exact congrArg UInt32.ofBitVec
     ((upstreamPackUnpack_nan Format.binary32 bits.toBitVec he hm).symm)
+
+-- Complete upstream compact-bit correspondence for every 64-bit pattern:
+-- NaN, infinity, both zeros, subnormal and normal. This remains native-only
+-- because upstream Float pack/unpack imports Classical.choice transitively.
+theorem upstreamPackUnpack_all64 (bits : BitVec 64) :
+    UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits) =
+      canonicalPacked Format.binary64 bits := by
+  by_cases hTop : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#_)
+  · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#_)
+    · exact upstreamPackUnpack_infinity64 bits hTop hMant
+    · exact upstreamPackUnpack_nan Format.binary64 bits hTop hMant
+  · by_cases hZero : UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (0#_)
+    · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#_)
+      · exact upstreamPackUnpack_zero64 bits hZero hMant
+      · exact upstreamPackUnpack_subnormal64 bits hZero hMant
+    · exact upstreamPackUnpack_normal64 bits hZero hTop
+
+theorem fromBits64_eq_upstream_ofBits_all (bits : UInt64) :
+    fromBits64 bits = Float.ofBits bits := by
+  apply eq_of_toBits_eq64
+  change UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) =
+    UInt64.ofBitVec
+      (UnpackedFloat.pack Format.binary64 (UnpackedFloat.unpack Format.binary64 bits.toBitVec))
+  exact congrArg UInt64.ofBitVec
+    ((upstreamPackUnpack_all64 bits.toBitVec).symm)
+
+-- Complete upstream compact-bit correspondence for every 32-bit pattern:
+-- NaN, infinity, both zeros, subnormal and normal. This remains native-only
+-- because upstream Float pack/unpack imports Classical.choice transitively.
+theorem upstreamPackUnpack_all32 (bits : BitVec 32) :
+    UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits) =
+      canonicalPacked Format.binary32 bits := by
+  by_cases hTop : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#_)
+  · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#_)
+    · exact upstreamPackUnpack_infinity32 bits hTop hMant
+    · exact upstreamPackUnpack_nan Format.binary32 bits hTop hMant
+  · by_cases hZero : UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (0#_)
+    · by_cases hMant : UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#_)
+      · exact upstreamPackUnpack_zero32 bits hZero hMant
+      · exact upstreamPackUnpack_subnormal32 bits hZero hMant
+    · exact upstreamPackUnpack_normal32 bits hZero hTop
+
+theorem fromBits32_eq_upstream_ofBits_all (bits : UInt32) :
+    fromBits32 bits = Float32.ofBits bits := by
+  apply eq_of_toBits_eq32
+  change UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) =
+    UInt32.ofBitVec
+      (UnpackedFloat.pack Format.binary32 (UnpackedFloat.unpack Format.binary32 bits.toBitVec))
+  exact congrArg UInt32.ofBitVec
+    ((upstreamPackUnpack_all32 bits.toBitVec).symm)
 
 -- A left inverse on ALL existing native logical Float values. This is a
 -- representation contract for future erasure/ABI work, not an executable

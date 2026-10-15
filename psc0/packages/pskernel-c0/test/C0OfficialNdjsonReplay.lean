@@ -1143,6 +1143,52 @@ def c0ExportDescribeWhnfProbe
     This is a discarded, source-owned diagnostic: compare the shared head,
     then check arguments left-to-right in the same order as Lean 4.35's
     type_checker::is_def_eq_app, threading only the genuine source state. -/
+/-- Locate the first exact syntactic disagreement through common app and
+    binder spines. This is a bounded *diagnostic only*, never a DefEq rule:
+    binder names are ignored by the existing exact kernel Expr equality. -/
+def c0ExportFirstSyntacticDifference
+    (depth : Nat) :
+    PsKernelExpr -> PsKernelExpr -> String :=
+  match depth with
+  | 0 =>
+      fun lhs rhs => "depth_limit lhs=" ++ c0ExportMismatchTerm 5 lhs ++
+        " rhs=" ++ c0ExportMismatchTerm 5 rhs
+  | remaining + 1 =>
+      let smaller := c0ExportFirstSyntacticDifference remaining
+      fun lhs rhs =>
+        if psKernelExprEq lhs rhs then "same"
+        else
+          match lhs, rhs with
+          | .app lf la, .app rf ra =>
+              if psKernelExprEq lf rf then
+                "app.arg/" ++ smaller la ra
+              else
+                "app.fn/" ++ smaller lf rf
+          | .lam _ lt lb _, .lam _ rt rb _ =>
+              if psKernelExprEq lt rt then
+                "lambda.body/" ++ smaller lb rb
+              else
+                "lambda.domain/" ++ smaller lt rt
+          | .forallE _ lt lb _, .forallE _ rt rb _ =>
+              if psKernelExprEq lt rt then
+                "forall.body/" ++ smaller lb rb
+              else
+                "forall.domain/" ++ smaller lt rt
+          | .letE _ lt lv lb _, .letE _ rt rv rb _ =>
+              if !psKernelExprEq lt rt then
+                "let.type/" ++ smaller lt rt
+              else if !psKernelExprEq lv rv then
+                "let.value/" ++ smaller lv rv
+              else
+                "let.body/" ++ smaller lb rb
+          | .mdata _ le, .mdata _ re =>
+              "mdata.body/" ++ smaller le re
+          | .proj _ _ le, .proj _ _ re =>
+              "proj.body/" ++ smaller le re
+          | _, _ =>
+              "leaf lhs=" ++ c0ExportMismatchTerm 6 lhs ++
+                " rhs=" ++ c0ExportMismatchTerm 6 rhs
+
 def c0ExportProbeFirstAppMismatchAux
     (defeq :
       PsKernelCheckerContext -> PsKernelCheckerState ->
@@ -1165,7 +1211,10 @@ def c0ExportProbeFirstAppMismatchAux
               c0ExportProbeFirstAppMismatchAux defeq ctx updated
                 (i+1) leftRest rightRest
         | .ok (false, _) => detailLabel ++ " result=false"
-        | .error error => detailLabel ++ " error=" ++ error
+        | .error error =>
+            detailLabel ++ " error=" ++ error ++
+              " | first_syntax_path=" ++
+                c0ExportFirstSyntacticDifference 48 lhs rhs
   | _, _, _ => "different_argument_counts"
 
 def c0ExportProbeFirstAppMismatch

@@ -37,12 +37,24 @@ jobs:
           git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
           test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
           (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
-      - name: Export and independently verify real Init
+      - name: Restore digest-pinned official Init source bytes
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/Init-4.35.0.ndjson
+          key: c0-init-v435-lean4export-5a9a355-c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179
+          save-always: true
+      - name: Export or validate pinned Init and independently verify with Lean
         shell: bash
         run: |
           set -euo pipefail
-          (cd "$RUNNER_TEMP/lean4export" && lake env .lake/build/bin/lean4export Init > "$RUNNER_TEMP/Init-4.35.0.ndjson")
-          test -s "$RUNNER_TEMP/Init-4.35.0.ndjson"
+          if test ! -s "$RUNNER_TEMP/Init-4.35.0.ndjson"; then
+            (cd "$RUNNER_TEMP/lean4export" && lake env .lake/build/bin/lean4export Init > "$RUNNER_TEMP/Init-4.35.0.ndjson")
+          fi
+          test "$(stat -c%s "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 345690182
+          test "$(wc -l < "$RUNNER_TEMP/Init-4.35.0.ndjson")" -eq 6452982
+          echo "c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179  $RUNNER_TEMP/Init-4.35.0.ndjson" | sha256sum -c -
+          # Even cached *identical bytes* need fresh official acceptance:
+          # cache identity is never a checked admission or proof receipt.
           (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$RUNNER_TEMP/Init-4.35.0.ndjson") > "$RUNNER_TEMP/leanchecker-result.txt" 2>&1 || {
             cat "$RUNNER_TEMP/leanchecker-result.txt"
             exit 1

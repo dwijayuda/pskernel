@@ -425,7 +425,8 @@ theorem andAllOnes8_constructive (x : BitVec 8) :
   intro i hi
   have bit : (BitVec.allOnes 8).getLsbD i = true := by
     change Nat.testBit (2 ^ 8 - 1) i = true
-    interval_cases i <;> decide
+    have hAll : ∀ j : Fin 8, Nat.testBit (2 ^ 8 - 1) j.val = true := by decide
+    exact hAll ⟨i, hi⟩
   simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
 
 -- Fixed IEEE field width 11: constructive finite bit-index check.
@@ -436,7 +437,8 @@ theorem andAllOnes11_constructive (x : BitVec 11) :
   intro i hi
   have bit : (BitVec.allOnes 11).getLsbD i = true := by
     change Nat.testBit (2 ^ 11 - 1) i = true
-    interval_cases i <;> decide
+    have hAll : ∀ j : Fin 11, Nat.testBit (2 ^ 11 - 1) j.val = true := by decide
+    exact hAll ⟨i, hi⟩
   simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
 
 -- Fixed IEEE field width 23: constructive finite bit-index check.
@@ -447,7 +449,8 @@ theorem andAllOnes23_constructive (x : BitVec 23) :
   intro i hi
   have bit : (BitVec.allOnes 23).getLsbD i = true := by
     change Nat.testBit (2 ^ 23 - 1) i = true
-    interval_cases i <;> decide
+    have hAll : ∀ j : Fin 23, Nat.testBit (2 ^ 23 - 1) j.val = true := by decide
+    exact hAll ⟨i, hi⟩
   simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
 
 -- Fixed IEEE field width 52: constructive finite bit-index check.
@@ -458,7 +461,8 @@ theorem andAllOnes52_constructive (x : BitVec 52) :
   intro i hi
   have bit : (BitVec.allOnes 52).getLsbD i = true := by
     change Nat.testBit (2 ^ 52 - 1) i = true
-    interval_cases i <;> decide
+    have hAll : ∀ j : Fin 52, Nat.testBit (2 ^ 52 - 1) j.val = true := by decide
+    exact hAll ⟨i, hi⟩
   simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
 
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream

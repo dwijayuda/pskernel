@@ -3949,7 +3949,7 @@ Expected: translation to one Lean 4.35.0 definition plus its kernel-checkable ge
 | N-BINDER-ADJACENT | `function f(x: Nat)(y: Nat): Nat := x + y` | PARSE reject `PSCV0-BIND-02`; use one `(x: Nat, y: Nat)` group |
 | P-LAMBDA-BINDER | `fun (x: Nat) => x` | Admit the native 4.35.0 typed lambda binder; independent of named declaration comma groups |
 | N-LAMBDA-COMMA-GROUP | `fun (x: Nat, y: Nat) => x + y` | No PSCV0 declaration-style comma-group expansion inside `fun`; excluded from selected lambda grammar |
-| P-WHERE-LOCAL | <pre>function plusOne(n: Nat): Nat := helper(n)&#10;where {&#10;  def helper(x: Nat): Nat := x + 1&#10;}</pre> | PARSE accept as local `def` sugar; lower to native `where` without the local `def` keyword |
+| P-WHERE-LOCAL | See fenced `P-WHERE-LOCAL` fixture immediately below the table | PARSE accept as local `def` sugar; lower to native `where` without the local `def` keyword |
 | N-WHERE-LOCAL-FUNCTION | `where { function helper(x: Nat): Nat := x }` as a local `where` form | PARSE reject; only selected local `def` form admitted initially |
 | N-BINDER-CTOR-NULLARY | `inductive T where { \| nil() }` | PARSE: constructor empty binder group excluded |
 | N-APP-MIXED-GAP | Given an earlier separate-line `function inc(x: Nat): Nat := x`, check `const bad: Nat := inc (1)` as the next declaration | PARSE: `PSCV0-APP-02`, not a generic lexer error or an invalid semicolon-separated declaration |
@@ -3965,7 +3965,7 @@ Expected: translation to one Lean 4.35.0 definition plus its kernel-checkable ge
 | N-DECL-HEAD-MUTUAL-NULLARY | `mutual` containing `def bad()` | PARSE reject: `psDefDecl` does not acquire `function`'s hidden-`Unit` binder |
 | P-NONCOMP-SPEC | selected `noncomputable def` used only in a proof/spec declaration, with a well-typed body and permitted dependencies | Source/ELAB eligible as proof/spec; **no** executable dependency claim |
 | N-NONCOMP-EXEC | ordinary or verified emitted executable transitively depends computationally on a selected `noncomputable` definition | ASSURANCE reject both executable identities; not necessarily a parser error in the proof-only definition |
-| P-DO-BASE | <pre>do {&#10;  let x ← pure(1)&#10;  return x&#10;}</pre> as a source do-sequence in a suitable `Id` context | Selected `psBaseDoItem`; statements are LF-separated in a proper fixture |
+| P-DO-BASE | See fenced `P-DO-BASE` fixture immediately below the table as a source do-sequence in a suitable `Id` context | Selected `psBaseDoItem`; statements are LF-separated in a proper fixture |
 | P-DO-ERASED-VERIFIED | `erased mut steps: Nat := 0` inside a properly admitted 4.35.0 verified `do` context | Selected `psVerifiedDoItemP0`; subject to environment/proof-effect prerequisites |
 | N-DO-P1-STANDARD | a typed `try`/`catch` `do` statement in initial Standard without the selected P1 environment | ENV/profile reject: P1 is staged, not implicitly admitted |
 | P-DO-P1-SELECTED | the selected typed `try`/`catch` shape after explicit P1 environment activation, with required instances | Source admission conditional on frozen P1 grammar/handler selection; **not** an executed success |
@@ -3973,6 +3973,26 @@ Expected: translation to one Lean 4.35.0 definition plus its kernel-checkable ge
 | N-HOLE-ORDINARY | `theorem bad: False := by { sorry }` then ordinary artifact emission | ASSURANCE: `sorryAx` cannot be emitted even without verified label |
 | N-HOLE-SUBTYPE | construction of a `Subtype` witness using `by { sorry }` | ASSURANCE: incomplete proof blocks both emitted identities |
 | N-HOLE-INDEX | attempted proof of array bound with `by { sorry }` | ASSURANCE: proof hole blocks both identities |
+
+**Copyable source sketches for the two multiline acceptance cases:**
+
+**P-WHERE-LOCAL**
+
+```proofscript
+function plusOne(n: Nat): Nat := helper(n)
+where {
+  def helper(x: Nat): Nat := x + 1
+}
+```
+
+**P-DO-BASE** (requires an appropriate `Id` context)
+
+```proofscript
+do {
+  let x ← pure(1)
+  return x
+}
+```
 
 These additional fixtures must be translated into harness-specific independent files with explicit active environment identities before being counted as executed test cases. The text intentionally does not assert a successful compiler run.
 

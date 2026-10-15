@@ -1,0 +1,94 @@
+name: PSKernel-C0 isolated WF theorem checker-stage audit
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-stage-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-wf-theorem-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build pinned original Lean checker and independent C0 replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0TraceTheoremStages.py
+      - name: Reproduce byte-pinned small WF theorem and official acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' \
+              > "$RUNNER_TEMP/wf-small.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-small.ndjson" \
+              > "$RUNNER_TEMP/wf-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/wf-small.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-small.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-small.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-official.txt"
+          echo "C0_WF_STAGE_OFFICIAL=accepted exact_records=15758"
+      - name: Build disposable source-stage probe, never used for admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          path=psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean
+          python3 psc0/packages/pskernel-c0/test/C0TraceTheoremStages.py "$path" --record 15758
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          echo "C0_WF_STAGE_PROBE_BUILD=disposable_test_executable"
+      - name: Bound actual C0 theorem-checking stages and preserve timeout evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-stage-resources.txt" \
+              timeout 150s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-small.ndjson" 4096) \
+              > "$RUNNER_TEMP/wf-stage-native.txt" 2>&1
+          status=$?
+          set -e
+          echo "C0_WF_STAGE_PROCESS_EXIT=$status"
+          grep -E "C0_INIT_STAGE_|C0_REAL_EXPORT replay_outcome|C0_REAL_EXPORT_RESOURCE_REASON|C0_REAL_EXPORT_REJECT_MESSAGE" \
+            "$RUNNER_TEMP/wf-stage-native.txt" | tail -n 40 || true
+          if test "$status" -eq 124; then
+            echo "C0_WF_STAGE_CLASS=host_timeout_before_checker_verdict"
+          elif test "$status" -ne 0; then
+            echo "C0_WF_STAGE_CLASS=process_failure_not_acceptance"
+          elif grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' \
+              "$RUNNER_TEMP/wf-stage-native.txt"; then
+            echo "C0_WF_STAGE_CLASS=full_dependency_closure_accepted"
+          else
+            echo "C0_WF_STAGE_CLASS=nonaccepting_kernel_verdict"
+          fi
+          cat "$RUNNER_TEMP/wf-stage-resources.txt"
+          echo "C0_WF_STAGE_SCOPE=diagnostic_only_no_proof_receipt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-wf-theorem-stage-probe
+          path: |
+            ${{ runner.temp }}/wf-official.txt
+            ${{ runner.temp }}/wf-stage-native.txt
+            ${{ runner.temp }}/wf-stage-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

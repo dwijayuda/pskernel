@@ -1041,6 +1041,69 @@ def c0ExportDiagnoseCtorFirstFalse
   | .error reason => reason
   | .ok _ => "no first-false in independent source callback recheck"
 
+/-- Identify the *field index* and original checked suboperation that
+    produced a constructor rejection, without changing the authoritative
+    admission result. Mirrors the source field-opening sequence on a discarded
+    session; none of its intermediate environments are ever published. -/
+def c0ExportDiagnoseFieldSequence
+    (fuel : Nat) :
+    PsKernelCheckerSession ->
+    PsKernelName ->
+    List PsKernelLevel ->
+    List PsKernelOpenBinder ->
+    Nat ->
+    PsKernelLevel ->
+    PsKernelExpr ->
+    Nat ->
+    Except String String :=
+  match fuel with
+  | 0 =>
+      fun _ _ _ _ _ _ _ _ =>
+        .error "diagnostic field-opening budget exhausted"
+  | remaining + 1 =>
+      fun session target levels params numIndices resultLevel ty fieldIndex => do
+        let reduced ← c0ExportStage
+          ("field[" ++ toString fieldIndex ++ "]/whnf")
+          (psKernelSessionWhnf remaining session ty)
+        match reduced.1 with
+        | .forallE userName domain body binderInfo =>
+            let domainType ←
+              match psKernelSessionCheck remaining reduced.2 domain with
+              | .ok result => pure result
+              | .error original =>
+                  throw ("field[" ++ toString fieldIndex ++
+                    "]/full_domain: " ++ original ++
+                    " | domain=" ++ c0ExportMismatchTerm 9 domain ++
+                    " | first-false=" ++
+                    c0ExportDiagnoseCtorFirstFalse remaining reduced.2 domain)
+            let fieldSort ← c0ExportStage
+              ("field[" ++ toString fieldIndex ++ "]/sort")
+              (psKernelSessionEnsureSort remaining domainType.2 domainType.1)
+            if !(psKernelLevelLe fieldSort.1 resultLevel ||
+                psKernelLevelNormalizesToZero resultLevel) then
+              throw ("field[" ++ toString fieldIndex ++
+                "]/universe: constructor field universe is too large")
+            let opened := psKernelSessionWithLocal fieldSort.2 userName
+              (psKernelExprConsumeTypeAnnotations domain) binderInfo
+            let analysis ← c0ExportStage
+              ("field[" ++ toString fieldIndex ++ "]/positivity")
+              (psKernelAnalyzeSimpleRecursiveArgument remaining opened.2
+                target levels params numIndices domain)
+            let nextLocals := psKernelLocalContextWithNextIndex
+              opened.2.context.localContext
+              analysis.session.context.localContext.nextIndex
+            let child := PsKernelCheckerSession.mk
+              (psKernelCheckerContextWithLocalContext
+                opened.2.context nextLocals)
+              analysis.session.state
+            c0ExportDiagnoseFieldSequence remaining child target levels
+              params numIndices resultLevel
+              (psKernelExprInstantiate1 body (.fvar opened.1))
+              (fieldIndex + 1)
+        | _ =>
+            pure ("all " ++ toString fieldIndex ++
+              " constructor field opening stages succeeded")
+
 /-- Drill into the same checked constructor sequence using singleton source
     transactions. The full bundle is already rejected before this function
     runs: no result is published, and all original error strings stay intact.
@@ -1084,10 +1147,22 @@ def c0ExportDiagnoseConstructorSequence
             (psKernelOpenSimpleConstructorParams
               fuel (psKernelSessionWithEnvironment headerSession work)
               params ctor.type)
-          let fields ← c0ExportStage (label ++ "/open_fields")
-            (psKernelOpenSimpleConstructorFields
-              fuel opened.session decl.name levels params numIndices
-              resultLevel opened.result)
+          let fields ←
+            match psKernelOpenSimpleConstructorFields
+                fuel opened.session decl.name levels params numIndices
+                resultLevel opened.result with
+            | .ok result => pure result
+            | .error original =>
+                let detail := c0ExportDiagnoseFieldSequence (fuel + 1)
+                  opened.session decl.name levels params numIndices
+                  resultLevel opened.result 0
+                match detail with
+                | .error reason =>
+                    throw (label ++ "/open_fields: " ++ original ++
+                      " | " ++ reason)
+                | .ok summary =>
+                    throw (label ++ "/open_fields: " ++ original ++
+                      " | " ++ summary)
           let _ ← c0ExportStage (label ++ "/result_indices")
             (psKernelValidateSimpleConstructorResult
               decl.name levels params numIndices fields.result)

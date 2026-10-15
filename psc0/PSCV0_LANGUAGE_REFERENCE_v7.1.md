@@ -172,7 +172,7 @@ This is a **constrained Lean 4 parser/elaborator overlay**, not an independent E
 | `psFunctionBinders` / `psNullaryFunctionGroup` | Non-nullary function: `psNonemptyBinderSeq` conforming to `PSCV0-BIND-02`. Nullary form: zero or more nonexplicit binders followed by one **final** `()`; only that terminal form inserts a required Lean `Unit` binder. Bare empty groups and adjacent explicit binder groups are excluded in all other declaration kinds. |
 | `psNonExplicitBinder` / `psGivenBinder` / `psLambdaBinder` | `psNonExplicitBinder` is the selected native implicit, strict-implicit and instance declaration binder. `psGivenBinder` follows the 4.35.0 logical-contract binder selection. `psLambdaBinder` delegates to the **selected native** `Lean.Parser.Term.funBinder` family (ordinary names, typed/implicit/strict/instance binders as admitted in this profile); it is not the declaration-only comma `psExplicitGroup` grammar. |
 | `psCallHead` / `psCallArgs` | Completed callable expression and adjacent positional-then-named argument list; zero written arguments follow `PSCV0-APP-03`. These belong to *term expressions*, not patterns or declaration binders. |
-| `psDeclVal` / `psConstVal` / `psWhere` / `psLocalDeclaration` | `psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?` for selected `def`/`function`; `psConstVal ::= ":=" psDeclTerm psWhere?`; `psDeclTerm ::= term \| "{" term "}"` denotes exactly one term. `psRecursionSuffix` is valid only for selected functions and eligible local definitions, after the body and before any `where`. `psConstVal` never accepts a recursion suffix. `psWhere` contains local selected `def` declarations, optionally followed by one eligible contract proof tail. |
+| `psDeclVal` / `psConstVal` / `psWhere` / `psLocalDeclaration` | `psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?` for selected `def`/`function`; `psConstVal ::= ":=" psDeclTerm psTermination? psWhere?`; `psDeclTerm ::= term \| "{" term "}"` denotes exactly one term. `psRecursionSuffix` is valid only for selected functions and eligible local definitions, after the body and before any `where`. `psConstVal` accepts only the selected **total** `psTermination` suffix, preserving v7; it does not inherit `partial_fixpoint` or special prefixes. `psWhere` contains local selected `def` declarations, optionally followed by one eligible contract proof tail. |
 | `psDefDecl` / `psFunctionDecl` / `psConstDecl` / `psDefOrFunction` | Modifier-free cores: `psDefDecl ::= "def" declId psBinderSeq (":" term)? psContractSeq psDeclVal`; `psFunctionDecl ::= "function" declId psFunctionBinders (":" term)? psContractSeq psDeclVal`; `psConstDecl ::= "const" declId (":" term)? psConstVal`; `psDefOrFunction ::= psDefDecl \| psFunctionDecl`. Contract admissibility follows `PSCV0-CONTRACT-SCOPE-01`. Only `function` admits terminal source-nullary `()`. Selected heads remain authoritative even if Lean provides a broader declaration parser. |
 | `psRecursiveDecl` / `psRecursionSuffix` | `psRecursionSuffix ::= psTermination \| "partial_fixpoint"` appears immediately after the body, before any `where`. Selected total recursion uses `psTermination`; `partial_fixpoint` uses checked fixed-point construction with no competing suffix. `partial` and restricted `unsafe` prefixes use their corresponding executable-only strategy, with no termination/fixpoint suffix. The full modifier/recursion combination matrix in §5 and pinned Lean mutual-clique checks govern acceptance. |
 | `selectedPsDeclaration` / `psModifiers` | `selectedPsDeclaration ::= selectedLeanDeclaration \| psDefDecl \| psFunctionDecl \| psConstDecl`. An owned head's restrictions take precedence over unrestricted Lean alternatives. `psModifiers` is the common selected prefix (attributes and optional `private`, in upstream order); the optional feature modifier is **exactly one** of `noncomputable`, `partial`, or `unsafe` and applies only to selected `def`/`function` heads. Combinations and duplicates are rejected by `PSCV0-REC-STRATEGY-01`; `partial_fixpoint` is a post-body suffix rather than a prefix. `noncomputable` remains proof/spec-only. The selected source has no user `axiom` or additional `const` modifiers. |
@@ -588,7 +588,7 @@ callArg ::= term | ident &quot;:=&quot; term
 ```text
 psDeclTerm      ::= term | "{" term "}" -- one term, not statements
 psDeclVal       ::= ":=" psDeclTerm psRecursionSuffix? psWhere?
-psConstVal      ::= ":=" psDeclTerm psWhere? -- no recursion suffix
+psConstVal      ::= ":=" psDeclTerm psTermination? psWhere? -- v7 total suffix retained
 psRecursionSuffix ::= psTermination | "partial_fixpoint"
 psWhere         ::= "where" "{" psLocalDeclaration+ "}"
                   | "where" "{" psLocalDeclaration* psSpecProofTail "}"
@@ -597,7 +597,7 @@ psLocalDeclVal  ::= ":=" psDeclTerm psRecursionSuffix?
 psSpecProofTail ::= "finally" "{" "|" "spec" "=>" "{" psTacticSeq "}" "}"
 ```
 
-A recursion suffix on `def`/`function` or a local `where` definition is governed by §5. `const` receives no suffix; selected `abbrev` and body-present `opaque` use their existing v7 declaration grammar, but any recursive suffix on those heads must follow exact Lean 4.35.0 elaboration and independent acceptance gates (§2), never automatic admission from the `def`/`function` feature-modifier matrix. Theorem proof terms never gain partial/unsafe recursion permission. Local `partial_fixpoint` follows Lean's `Term.letRecDecl` recursion and mutual-clique checks; local `partial`/`unsafe` modifiers are not introduced by this rule. The `spec` section requires an eligible contract and cannot be used as a standalone local theorem.
+A recursion suffix on `def`/`function` or a local `where` definition is governed by §5. `const` retains the v7 selected total `psTermination` suffix if pinned Lean accepts and checks its recursion; selected `abbrev` and body-present `opaque` use their existing v7 declaration grammar, but any recursive suffix on those heads must follow exact Lean 4.35.0 elaboration and independent acceptance gates (§2), never automatic admission from the `def`/`function` feature-modifier matrix. Theorem proof terms never gain partial/unsafe recursion permission. Local `partial_fixpoint` follows Lean's `Term.letRecDecl` recursion and mutual-clique checks; local `partial`/`unsafe` modifiers are not introduced by this rule. The `spec` section requires an eligible contract and cannot be used as a standalone local theorem.
 
 
 
@@ -1474,7 +1474,7 @@ psSelectedFunction ::= psModifiers psFeatureModifier?
 psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?
 psRecursionSuffix ::= psTermination | "partial_fixpoint"
 psConstDecl ::= "const" declId (":" term)? psConstVal
-psConstVal ::= ":=" psDeclTerm psWhere?
+psConstVal ::= ":=" psDeclTerm psTermination? psWhere?
 -- The suffix belongs after the body, before where.
 -- The modifier and suffix must satisfy PSCV0-REC-STRATEGY-01.
 ```
@@ -1488,7 +1488,7 @@ psConstVal ::= ":=" psDeclTerm psWhere?
 | `partial def` / `partial function` | No recursion suffix | Opaque in the logic; verify behavioral claims only through a checked operational model and source/backend refinement |
 | `unsafe def` / `unsafe function` | No recursion suffix | Registered runtime implementation only; a safe modeled specification and independently justified correspondence are required for any verified claim |
 | `noncomputable def` / `noncomputable function` | No recursion suffix in this profile | Proof/specification-only; no executable computational body dependency |
-| `const` | No recursion suffix or feature modifier | Nonrecursive source value with selected `psConstVal` |
+| `const` | Existing selected total `psTermination` suffix is retained on function-valued constants; no `partial_fixpoint` or feature modifier | Parameterless Lean `def` alias; recursive use requires actual pinned Lean termination elaboration and kernel evidence |
 | Selected `abbrev` / body-present `opaque` | Existing §2 v7 head and `psDeclVal` grammar only; source cannot acquire `partial` or `unsafe` leading modifiers | Any recursion hint must pass the **actual pinned Lean elaborator** and the same proof/effect/assurance gates; the new fixed-point suffix does not imply automatic acceptance for these heads |
 
 Only selected `def`/`function` heads accept exactly **one** of the three leading feature modifiers. Repeated modifiers; `unsafe partial`, `partial unsafe`, `partial partial`, `unsafe unsafe`; `partial` or `unsafe` with `partial_fixpoint`; and `noncomputable` combined with executable recursion are all rejected at the source-profile/elaboration boundary. `partial_fixpoint` and `termination_by` are mutually exclusive. Even when Lean parses an alternative modifier combination, PSCV0 does not silently accept a logically different recursion strategy. Apply native mutual-recursion-clique checks and audit the effective opacity of **every** member before making any verified assertion.
@@ -3140,6 +3140,8 @@ These cases combine declaration grammar, elaboration, proof/effect closure and e
 | Test ID | Scenario | Expected gate/result |
 |---|---|---|
 | P-V71-MOD-PARTIAL | Type-correct `partial function` with inhabited result under explicit ordinary mode | Accepted when backend supports it; no verified behavior claim |
+| P-V71-CONST-TOTAL | Function-valued `const` with a selected `termination_by` (and proof when needed) | Retains v7 source grammar; accept only if pinned Lean total recursion elaborates successfully |
+| N-V71-CONST-PARTIAL-FIX | `const` with `partial_fixpoint` or a `partial`/`unsafe` feature prefix | Reject; those new function-head strategies are not implicitly added to `const` |
 | N-V71-MOD-DOUBLE | `partial partial def` or `unsafe unsafe def` | Profile rejects duplicate special modifiers |
 | N-V71-MOD-MIX | `unsafe partial def` or `partial unsafe def` | Profile rejects combined strategies |
 | N-V71-UNSAFE-FIX | `unsafe def` with `partial_fixpoint` suffix | Reject conflicting recursion strategy |

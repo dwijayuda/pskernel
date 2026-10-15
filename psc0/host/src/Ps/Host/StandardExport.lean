@@ -775,6 +775,35 @@ def exportFloatConstructorsCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 compact Float constructors with checked Format.Valid evidence.\nIndependent constructor candidate; runtime enablement is separate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- F2 dependency gate: genuine pinned arithmetic, IEEE comparisons and
+-- classification, before enabling runtime operators. Reuse only the two
+-- already checked constructive theorem proofs, and only outside the selected
+-- cut. A new assumption or incompatible proof dependency remains a hard error.
+def exportFloatOperationsCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let names := selected.map (fun d => PsKernelLean.toLeanName (psDeclarationName d))
+  let owners := ["Float", "Float32"]
+  let methods := ["add", "sub", "mul", "div", "neg", "abs", "beq", "lt", "le",
+    "isNaN", "isInf", "isFinite", "nan", "inf"]
+  let operations := owners.flatMap fun owner =>
+    methods.map (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method)
+  let cuts := [(`PsV7Native.FloatConstructive.powEqZero, `Nat.pow_eq_zero),
+    (`PsV7Native.FloatConstructive.getLsbDOfGe, `BitVec.getLsbD_of_ge)]
+  let cuts := cuts.filter (fun pair => !names.contains pair.snd)
+  exportStandardCore {
+    roots := operations ++ cuts.map (·.fst)
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames := cuts
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardFloatOperations"
+    privatePrefix := "floatOperationsDecl"
+    provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2026 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Data/Float/Model/Unpacked Operations and Round; authors include Julia M. Himmel.\nClosed Core conversion and existing checked constructive theorem cuts.\nF2 research candidate only: not selected Standard or executable arithmetic.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 -- Pinned Lean 4.35.0 SInt/Basic: each signed type is a checked
 -- wrapper around an unsigned two's-complement carrier. This is a
 -- native-only authoring candidate, NOT executable signed arithmetic.

@@ -663,3 +663,13 @@ private def wordApply (operation : UInt64 → UInt64 → UInt64) (left right : U
 #guard wordApply UInt64.shiftLeft 3 65 == 6
 private def wordGeneric {A : Type} [HAdd A A A] (left right : A) : A := left + right
 #guard (wordGeneric (255 : UInt8) 2).toNat == 1
+
+-- Universe-polymorphic indexing: one logical family, checked independently.
+namespace Pscv0ListIndexUniverseOracle
+universe u
+def proof {A : Type u} (xs : List A) (i : Nat) (h : i < xs.length) : A := xs[i]'h
+def optional {A : Type u} (xs : List A) (i : Nat) : Option A := xs[i]?
+def bang {A : Type u} [Inhabited A] (xs : List A) (i : Nat) : A := xs[i]!
+example {A : Type u} : LawfulGetElem (List A) Nat A (fun xs i => i < xs.length) := inferInstance
+example : optional [Nat] 0 = some Nat := rfl
+end Pscv0ListIndexUniverseOracle

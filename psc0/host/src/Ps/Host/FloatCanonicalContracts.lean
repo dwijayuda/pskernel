@@ -838,6 +838,8 @@ def contractRoots : List Lean.Name :=
    ``toBits_fromBits64, ``toBits_fromBits32,
    ``eq_of_toBits_eq64, ``eq_of_toBits_eq32,
    ``fromBits64_toBits, ``fromBits32_toBits,
-   ``fromBits64_eq_iff, ``fromBits32_eq_iff]
+   ``fromBits64_eq_iff, ``fromBits32_eq_iff,
+   ``canonicalMask64_eq_compact, ``canonicalMask32_eq_compact,
+   ``canonicalUIntMask64_eq_logical, ``canonicalUIntMask32_eq_logical]
 
 end PsV7Native.FloatCanonical

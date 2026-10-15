@@ -276,8 +276,10 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- Both digests independently observed by strict refusal in Linux 38705958851
 -- at 5cffe928 after native compilation; all assets regenerate byte-for-byte.
 -- These pins alone do not qualify source execution or backend preservation.
+-- Linux 38708373315 independently measured the complete polymorphic List
+-- indexing family and instance level metadata; no declaration/assumption added.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:17912930455396537674"
+  "fnv1a64:14729641192328177589"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -439,7 +441,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:a0f90d4ba911bd9be249bd72f8f0443e582eea41f21a56d192f27efb6b24ff44"
+  "sha256:8b956d8f7b7f5bbebaf6480454e528380cd53f513772460a5a8f60648ad8bc2b"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

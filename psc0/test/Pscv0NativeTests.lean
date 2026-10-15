@@ -2414,7 +2414,7 @@ private def derivingBoundaries : IO Unit := do
   -- Type-valued fields exercise kernel projection inference only; their runtime
   -- representation is outside the selected backend subset.
   let projection : PsV7Native.Request := {
-    source := "universe u\nstructure TypeField: Type (u + 1) where { value: Type u }\nconst record: TypeField := TypeField.mk(Nat)\nconst projected: Type := record.value\ntheorem correct: projected = Nat := by { rfl }\nfunction emptyList{A: Type u}(unit: Unit): List A := Inhabited.default\nfunction equalLists{A: Type u}[BEq A](xs: List A, ys: List A): Bool := List.beq(xs, ys)\ntheorem emptyTypes: emptyList(A := Type, unit := Unit.unit) = List.nil := by { rfl }\n" }
+    source := "universe u\nstructure TypeField: Type (u + 1) where { value: Type u }\nconst record: TypeField := TypeField.mk(Nat)\nconst projected: Type := record.value\ntheorem correct: projected = Nat := by { rfl }\nfunction emptyList{A: Type u}(unit: Unit): List A := Inhabited.default\nfunction equalLists{A: Type u}[BEq A](xs: List A, ys: List A): Bool := List.beq(xs, ys)\ntheorem emptyTypes: emptyList(A := Type, unit := Unit.unit) = List.nil := by { rfl }\nfunction listProof{A: Type u}(xs: List A, i: Nat, h: Nat.lt(i, List.length(xs))): A := xs[i]'h\nfunction listOptional{A: Type u}(xs: List A, i: Nat): Option A := xs[i]?\nfunction listBang{A: Type u}[Inhabited A](xs: List A, i: Nat): A := xs[i]!\nfunction listPublicBang{A: Type u}[Inhabited A](xs: List A, i: Nat): A := List.get!(xs, i)\nfunction requireListLaw{A: Type u}[LawfulGetElem(List A, Nat, A, fun xs => fun i => Nat.lt(i, List.length(xs)))](xs: List A): Nat := List.length(xs)\nfunction listLaw{A: Type u}(xs: List A): Nat := requireListLaw(xs)\ntheorem typeIndex: listOptional([Nat], 0) = Option.some(Nat) := by { rfl }\n" }
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
     { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
@@ -2957,7 +2957,64 @@ private def selectedStandardManifestCases : IO Unit := do
     throw (IO.userError "PSCV0-MANIFEST: missing selected boundary")
   IO.println s!"PSCV0_STANDARD_MANIFEST: PASS selected notation, deriving, tactics, effects, module boundaries and {environment.declarations.length} strict declarations"
 
+-- Dirty caller heartbeats must not consume an independent admission's budget.
+-- The same scope still refuses an ill-typed declaration and restores its caller.
+private def kernelHeartbeatIsolationCases : IO Unit := do
+  let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
+  let witness : Lean.Declaration := .defnDecl {
+    name := `_pscv0HeartbeatScopeWitness
+    levelParams := []
+    type := .sort (.succ (.succ .zero))
+    value := .sort (.succ .zero)
+    hints := .opaque
+    safety := .safe }
+  let original ← IO.getNumHeartbeats
+  try
+    IO.setNumHeartbeats 2000001
+    -- Exercise the actual C++ counter, not just allocation accounting.
+    -- Each distinct tiny definition forces kernel work on this caller thread.
+    for i in [:128] do
+      let seed : Lean.Declaration := .defnDecl {
+        name := .num `_pscv0HeartbeatSeed i
+        levelParams := []
+        type := .sort (.succ (.succ .zero))
+        value := .sort (.succ .zero)
+        hints := .opaque
+        safety := .safe }
+      let seeded ← IO.lazyPure fun _ => empty.addDeclCore 0 20000 seed none
+      unless seeded.isOk do
+        throw (IO.userError "kernel heartbeat seed was ill-typed")
+    let stale ← IO.lazyPure fun _ => empty.addDeclCore 64 20000 witness none
+    match stale with
+    | .error .deterministicTimeout => pure ()
+    | _ => throw (IO.userError "kernel counter isolation probe did not exhaust its caller")
+    let admitted ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+      empty.addDeclCore 64 20000 witness none
+    unless admitted.isOk do
+      throw (IO.userError "independent kernel admission inherited caller heartbeats")
+    let restored ← IO.getNumHeartbeats
+    unless restored ≥ 2000001 do
+      throw (IO.userError "kernel admission lost caller heartbeat baseline")
+    let invalid : Lean.Declaration := .defnDecl {
+      name := `_pscv0HeartbeatScopeInvalid
+      levelParams := []
+      type := .sort .zero
+      value := .sort .zero
+      hints := .opaque
+      safety := .safe }
+    let refused ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+      empty.addDeclCore 2000000 20000 invalid none
+    if refused.isOk then
+      throw (IO.userError "fresh heartbeat scope accepted an ill-typed declaration")
+    let restoredFailure ← IO.getNumHeartbeats
+    unless restoredFailure ≥ restored do
+      throw (IO.userError "failed kernel admission lost caller heartbeat baseline")
+  finally
+    IO.setNumHeartbeats original
+  IO.println "PSCV0_KERNEL_SCOPE: PASS actual kernel-counter isolation, allocation baseline preservation and type refusal"
+
 def main : IO Unit := do
+  kernelHeartbeatIsolationCases
   selectedStandardManifestCases
   IO.println "PSCV0_FLOAT_CONSTRUCTIVE_ORACLE: PASS independent pinned Nat.pow_eq_zero statement and axiom audit"
   emissionBoundary

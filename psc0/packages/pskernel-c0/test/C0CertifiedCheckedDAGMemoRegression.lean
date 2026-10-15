@@ -1,4 +1,5 @@
 import Ps.KernelCore.Architecture.CertifiedCheckedDAGMemo
+import Ps.KernelCore.Checker.Session
 
 /-!
 Exact checked DAG receipt regression. This is NOT a proof-checker shortcut:

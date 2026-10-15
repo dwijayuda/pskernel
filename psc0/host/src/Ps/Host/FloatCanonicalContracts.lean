@@ -664,6 +664,29 @@ theorem fromBits32_eq_upstream_ofBits_all (bits : UInt32) :
   exact congrArg UInt32.ofBitVec
     ((upstreamPackUnpack_all32 bits.toBitVec).symm)
 
+-- Full all-input correspondence of the checked UInt mask algorithm with
+-- official pinned Lean Float.ofBits/toBits. Native only: the upstream
+-- dependency graph imports Classical.choice and is NOT a portable root.
+theorem canonicalUIntMask64_eq_upstream_toBits (bits : UInt64) :
+    canonicalUIntMask64 bits = (Float.ofBits bits).toBits := by
+  calc
+    canonicalUIntMask64 bits =
+        UInt64.ofBitVec (canonicalPacked Format.binary64 bits.toBitVec) :=
+      canonicalUIntMask64_eq_logical bits
+    _ = (fromBits64 bits).toBits := (toBits_fromBits64 bits).symm
+    _ = (Float.ofBits bits).toBits :=
+      congrArg Float.toBits (fromBits64_eq_upstream_ofBits_all bits)
+
+theorem canonicalUIntMask32_eq_upstream_toBits (bits : UInt32) :
+    canonicalUIntMask32 bits = (Float32.ofBits bits).toBits := by
+  calc
+    canonicalUIntMask32 bits =
+        UInt32.ofBitVec (canonicalPacked Format.binary32 bits.toBitVec) :=
+      canonicalUIntMask32_eq_logical bits
+    _ = (fromBits32 bits).toBits := (toBits_fromBits32 bits).symm
+    _ = (Float32.ofBits bits).toBits :=
+      congrArg Float32.toBits (fromBits32_eq_upstream_ofBits_all bits)
+
 -- A left inverse on ALL existing native logical Float values. This is a
 -- representation contract for future erasure/ABI work, not an executable
 -- backend preservation theorem or a raw upstream-ofBits equivalence.

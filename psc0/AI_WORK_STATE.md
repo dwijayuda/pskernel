@@ -1,5 +1,25 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — Four additional portable F1 canonical-carrier roots (candidate)
+
+A focused, independent proof replay at `0c07511549b5cadea5d4584ea59aab824aaad067`,
+[research CI 38680047555](https://github.com/dwijayuda/pskernel/actions/runs/38680047555),
+**passed**. The frozen selected Standard and unmodified portable kernel
+independently checked **46 declarations / 21 roots** including the two
+pure IEEE32/IEEE64 mask-based canonical carrier definitions and two exact
+canonical-NaN constant theorems. Receipt:
+`kernelChecked: true`, `axioms: []`, and
+`importedAssumptions: ["propext","Quot.sound"]`.
+
+This branch integration is **a candidate pending its own exact-commit
+full native and portable CI**. It changes only which native-authoring roots
+the existing portable F1 candidate replays, not the selected Standard,
+checker, allowed assumptions or executable runtime. The full equality
+between mask algorithms and upstream Float.ofBits is still **native-only**
+because its proof dependency closure reaches incompatible pinned List/Int
+models. Do not admit source Float, typed erasure, ABI or F2–F4 operations
+without their independent acceptance gates. M2+A is not complete.
+
 ## 15 October — Constructive BitVec bound proof candidate
 
 Native-only research commit `8647b0e4ce1ad32b030dc7ebadd1958813942014`

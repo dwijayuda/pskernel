@@ -409,6 +409,35 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
   rw [hRawExponent, hMask]
   exact hRec
 
+-- F1 mask/field bridge: these are the exact masks used by the checked
+-- PsStandard.canonicalFloat32/64Bits UInt helpers. Prove each condition
+-- symbolically for EVERY bit pattern; spot observations are not sufficient.
+-- This is native proof research until source Float erasure and each target
+-- representation are independently qualified.
+theorem binary64ExponentMask_iff (bits : BitVec 64) :
+    (bits &&& 9218868437227405312#64 = 9218868437227405312#64) ↔
+      UnpackedFloat.unpackExponent (spec := Format.binary64) bits = (-1#11) := by
+  unfold UnpackedFloat.unpackExponent
+  bv_decide
+
+theorem binary64FractionMask_iff (bits : BitVec 64) :
+    (bits &&& 4503599627370495#64 = 0#64) ↔
+      UnpackedFloat.unpackMantissa (spec := Format.binary64) bits = (0#52) := by
+  unfold UnpackedFloat.unpackMantissa
+  bv_decide
+
+theorem binary32ExponentMask_iff (bits : BitVec 32) :
+    (bits &&& 2139095040#32 = 2139095040#32) ↔
+      UnpackedFloat.unpackExponent (spec := Format.binary32) bits = (-1#8) := by
+  unfold UnpackedFloat.unpackExponent
+  bv_decide
+
+theorem binary32FractionMask_iff (bits : BitVec 32) :
+    (bits &&& 8388607#32 = 0#32) ↔
+      UnpackedFloat.unpackMantissa (spec := Format.binary32) bits = (0#23) := by
+  unfold UnpackedFloat.unpackMantissa
+  bv_decide
+
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream

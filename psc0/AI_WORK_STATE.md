@@ -1,5 +1,7 @@
 # PSCV0 v7 — AI work state
 
+Strict native38803665074 at322541747fed53a09f8a003594e7fd4db976bf3a compiled the UTF8/backend implementation and passed the independent native UTF8/array/platform oracles and frozen checked asset replays. Both strict registry entry points refused the old pins with identical observed FNV12192271966327546278 and SHA256d73d9dbee2bdd03461e59d356cc083064b226097e0752415f7bc103cc96e169c; surface SHA2564815fda89dcd006fad2490abe79b2589caba28c08030800e32998600fda051ba. This checkpoint selects exactly those measured pins. Independent F3/F4/platform replay38803665120 passed. Full source/kernel/IR/runtime qualification remains pending; do not report this refusal run as green.
+
 ## Selected UTF-8 implementation — qualification pending
 
 Native38802922250 at c855be7227b8a8ae6964d62fa8f776d5d4d7acc3 passed compiler/registry/assets, then rejected the Array.filter fixture's Lean-only @ application. That fixture now uses the supported named type argument while retaining the same partial-application assertion. No parser acceptance rule changed. The collection/table-key/platform/comparison slice is still awaiting complete source/runtime qualification.

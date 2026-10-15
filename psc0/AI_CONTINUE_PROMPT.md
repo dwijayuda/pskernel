@@ -1,5 +1,11 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — measured surface pin, complete qualification pending
+
+Native [38706356401](https://github.com/dwijayuda/pskernel/actions/runs/38706356401) at `8d50fdab04fea2825064220bf9842820ab03554e` passed the reviewed declaration FNV/SHA pins and byte-for-byte arithmetic regeneration, then correctly refused the separate surface manifest pin. Its independently reported new value is **sha256:6c4c0803cb69b893926325dccd19ca9930425c2a051e8fdd1770bbc3c2d71b6c**, now pinned exactly. Independent Float replay [38706356864](https://github.com/dwijayuda/pskernel/actions/runs/38706356864) passed.
+
+The older a1bc8... value was the **surface manifest** digest, not the declaration SHA-256. Future drift failures now report all three candidate fingerprints in the first refused audit, avoiding sequential authoring runs; acceptance still fails and no emission is authorized. This is diagnostic reporting only, not automatic repinning or relaxed validation. Complete native/backend qualification of this commit remains required. M2+A remains incomplete.
+
 ## 15 October — Int arithmetic asset reproduced; strict hashes measured
 
 Integration `5cffe9280f2f2bed07eb1f1a230eb1e924160bdd` compiled and regenerated the 28-declaration Int asset **byte-for-byte** in [native CI 38705958851](https://github.com/dwijayuda/pskernel/actions/runs/38705958851). The existing strict registry guard correctly refused the previous snapshot and independently measured **fnv1a64:17912930455396537674** and **sha256:a0f90d4ba911bd9be249bd72f8f0443e582eea41f21a56d192f27efb6b24ff44**. Both values are now pinned unchanged; no check is relaxed. The separate compact Float kernel replay [38705958724](https://github.com/dwijayuda/pskernel/actions/runs/38705958724) passed at that same integration SHA.

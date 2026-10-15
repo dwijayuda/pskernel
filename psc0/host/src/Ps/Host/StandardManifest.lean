@@ -146,9 +146,10 @@ def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
 def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
 
--- Independently observed after all 27 Linux checks at 078ec135 (38653018583).
+-- Independently observed by strict surface refusal in native CI 38706356401
+-- at 8d50fdab after the checked Int arithmetic registry passed its dual pins.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:a1bc8d8587566b98c3c8bdfc3eacfdb7ea28372093b23365f0469f708b14cbfa"
+  "sha256:6c4c0803cb69b893926325dccd19ca9930425c2a051e8fdd1770bbc3c2d71b6c"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
@@ -180,7 +181,13 @@ def selectedNotationAudit : Except String Unit := do
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
   -- Reuse, do not replace, the independently pinned dual registry hashes.
-  psStandardSnapshotValidate env psStandardSnapshotExpected
+  match psStandardSnapshotValidate env psStandardSnapshotExpected with
+  | .ok () => pure ()
+  | .error message =>
+      -- Authoring diagnostics report every dependent pin in the first refused
+      -- run. This remains a hard error; no candidate is admitted or emitted.
+      throw (message ++ "; surface SHA-256 candidate " ++
+        standardSurfaceManifestSHA256 env)
   selectedNotationAudit
   if env.declarations.isEmpty || env.classes.isEmpty ||
       env.instances.entries.isEmpty then

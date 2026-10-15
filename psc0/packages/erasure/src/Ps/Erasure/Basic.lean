@@ -99,15 +99,14 @@ structure PsErasureDeclarationNames where
 
 def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
   match entries with
-  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0 PsErasureNameIndex.empty
+  | List.nil => { byCore := .empty, byOutput := .empty, count := 0, entries := .empty }
   | List.cons entry rest =>
       let tail := psErasureDeclarationNameIndex rest;
       match entry with
-      | Prod.mk name value => PsErasureDeclarationNames.mk
-          (psErasureIndexInsert String tail.byCore name value)
-          (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)
-          (Nat.succ tail.count)
-          tail.entries
+      | Prod.mk name value => { tail with
+          byCore := psErasureIndexInsert String tail.byCore name value
+          byOutput := psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true
+          count := tail.count + 1 }
 
 inductive PsErasureError where
   | fuelExhausted
@@ -515,9 +514,7 @@ def psErasurePrepareDeclarationEntries
   match psErasureDeclarationEntryIndex environment declarations with
   | Except.error error => Except.error error
   | Except.ok entries =>
-      let names := PsErasureDeclarationNames.mk
-        scope.declarationNames.byCore scope.declarationNames.byOutput
-        scope.declarationNames.count entries scope.declarationNames.supportNames;
+      let names := { scope.declarationNames with entries := entries };
       Except.ok
         (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
           scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
@@ -561,12 +558,10 @@ def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Na
 
 def psErasureReserveOutputName (scope : PsErasureScope) (name : String) :
     PsErasureScope :=
-  let names := PsErasureDeclarationNames.mk
-    scope.declarationNames.byCore
-    (psErasureIndexInsert Bool scope.declarationNames.byOutput
-      (PsName.str PsName.anonymous name) true)
-    (Nat.succ scope.declarationNames.count)
-    scope.declarationNames.entries scope.declarationNames.supportNames;
+  let names := { scope.declarationNames with
+    byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
+      (PsName.str PsName.anonymous name) true
+    count := scope.declarationNames.count + 1 };
   PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
     scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
     scope.runtimeStructures scope.runtimeStructureConstructors

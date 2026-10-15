@@ -343,9 +343,7 @@ def psErasureEnsureDefinitionEntry
           scope.declarationNames.entries with
       | Except.error error => Except.error error
       | Except.ok entries =>
-          let names := PsErasureDeclarationNames.mk
-            scope.declarationNames.byCore scope.declarationNames.byOutput
-            scope.declarationNames.count entries scope.declarationNames.supportNames;
+          let names := { scope.declarationNames with entries := entries };
           Except.ok
             (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
               scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors

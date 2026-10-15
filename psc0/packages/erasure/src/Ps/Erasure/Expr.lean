@@ -100,12 +100,10 @@ def psErasureCaptureTypedApplicationValue
     -- The completed scope includes every new eta parameter. Reserve
     -- each capture here without adding or changing a Core local.
     let reservedNames : PsErasureDeclarationNames :=
-      PsErasureDeclarationNames.mk
-        state.scope.declarationNames.byCore
-        (psErasureIndexInsert Bool state.scope.declarationNames.byOutput
-          (PsName.str PsName.anonymous localName) true)
-        (Nat.succ state.scope.declarationNames.count)
-        state.scope.declarationNames.entries state.scope.declarationNames.supportNames;
+      { state.scope.declarationNames with
+        byOutput := psErasureIndexInsert Bool state.scope.declarationNames.byOutput
+          (PsName.str PsName.anonymous localName) true
+        count := state.scope.declarationNames.count + 1 };
     let nextScope :=
       PsErasureScope.mk
         state.scope.localContext state.scope.runtimeLocals state.scope.typeLocals
@@ -1621,12 +1619,10 @@ def psEraseRuntimeRecursorApplication
                               | Option.none => scope
                               | Option.some localName =>
                                   let reservedNames : PsErasureDeclarationNames :=
-                                    PsErasureDeclarationNames.mk
-                                      scope.declarationNames.byCore
-                                      (psErasureIndexInsert Bool scope.declarationNames.byOutput
-                                        (PsName.str PsName.anonymous localName) true)
-                                      (Nat.succ scope.declarationNames.count)
-                                      scope.declarationNames.entries scope.declarationNames.supportNames;
+                                    { scope.declarationNames with
+                                      byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
+                                        (PsName.str PsName.anonymous localName) true
+                                      count := scope.declarationNames.count + 1 };
                                   PsErasureScope.mk
                                     scope.localContext scope.runtimeLocals scope.typeLocals
                                     scope.erasedLocals reservedNames scope.runtimeConstructors

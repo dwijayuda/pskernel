@@ -1912,10 +1912,21 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
 /-- The real-export command accepts an *explicit* larger fuel profile
     without changing ordinary source acceptance, reference fixture budgets,
     or any kernel rule. The emitted outcome remains separate from host failure. -/
+/-- Only a positively accepted replay is a successful strict command.
+    The ordinary diagnostic command keeps all original non-accepting outcomes. -/
+def c0ExportRequireAccepted (outcome : C0ExportVerdict) : Except String Unit :=
+  if outcome == .accepted then .ok ()
+  else .error s!"C0_REAL_EXPORT_STRICT_FAILURE verdict={repr outcome}"
+
+/-- Opt-in strict admission CLI; unchanged source checking and trace. -/
 def c0ExportPrintFileOutcome
-    (path : String) (fuel : Nat) : IO Unit := do
+    (path : String) (fuel : Nat) (strict : Bool := false) : IO Unit := do
   let (outcome, lines) ← c0ExportVerdictFromFileTrace path fuel
   IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome} consumed_records={lines} fuel={fuel}"
+  if strict then
+    match c0ExportRequireAccepted outcome with
+    | .ok () => pure ()
+    | .error reason => throw (IO.userError reason)
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -1927,8 +1938,23 @@ def main (args : List String) : IO Unit := do
         | throw (IO.userError "expected decimal fuel budget")
       c0ExportPrintFileOutcome path fuel
       return ()
+  | [flag, path, fuelText] =>
+      if flag != "--require-accepted" then
+        throw (IO.userError "unknown NDJSON replay mode")
+      let some fuel := fuelText.toNat?
+        | throw (IO.userError "expected decimal fuel budget")
+      c0ExportPrintFileOutcome path fuel true
+      return ()
   | [] => pure ()
-  | _ => throw (IO.userError "expected zero arguments or NDJSON path [fuel]")
+  | _ => throw (IO.userError "expected zero arguments, NDJSON path [fuel], or --require-accepted path fuel")
+  -- Negatives, unsupported input and resource exhaustion can never be
+  -- promoted to a process-success acceptance contract.
+  for verdict in [C0ExportVerdict.rejected, .unsupported, .malformed,
+      .resourceExhausted, .inconclusive] do
+    if (c0ExportRequireAccepted verdict).isOk then
+      throw (IO.userError "strict NDJSON replay admitted a non-accepting verdict")
+  if !(c0ExportRequireAccepted .accepted).isOk then
+    throw (IO.userError "strict NDJSON replay declined accepted input")
   c0ExportRejectLossyImports
   c0ExportRejectForgedInductiveMetadata
   c0ExportOnlineOutcomes

@@ -284,8 +284,8 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
     have hPow : (2 : Nat) ^ 11 = 2048 := by decide
     omega
   have hBiased :
-      (((exponent.toNat : Int) - ((Format.binary64.exponentBias : Nat) : Int) -
-          (52 : Int) + ((Format.binary64.exponentBias : Nat) : Int) + (52 : Int)).toNat) =
+      (((exponent.toNat : Int) - (((Format.binary64.exponentBias : Nat) : Int) +
+          (52 : Int)) + ((Format.binary64.exponentBias : Nat) : Int) + (52 : Int)).toNat) =
         exponent.toNat := by omega
   have hMantBits : 52 + 1 = Format.binary64.mantissaBits := by decide
   have hnoOverflow' : ¬ (2047 ≤ exponent.toNat) := by
@@ -354,8 +354,8 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
     have hPow : (2 : Nat) ^ 8 = 256 := by decide
     omega
   have hBiased :
-      (((exponent.toNat : Int) - ((Format.binary32.exponentBias : Nat) : Int) -
-          (23 : Int) + ((Format.binary32.exponentBias : Nat) : Int) + (23 : Int)).toNat) =
+      (((exponent.toNat : Int) - (((Format.binary32.exponentBias : Nat) : Int) +
+          (23 : Int)) + ((Format.binary32.exponentBias : Nat) : Int) + (23 : Int)).toNat) =
         exponent.toNat := by omega
   have hMantBits : 23 + 1 = Format.binary32.mantissaBits := by decide
   have hnoOverflow' : ¬ (255 ≤ exponent.toNat) := by

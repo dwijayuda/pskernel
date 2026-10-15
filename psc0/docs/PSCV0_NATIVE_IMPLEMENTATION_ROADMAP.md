@@ -1,5 +1,18 @@
 # PSCV0 v7 native implementation roadmap
 
+## F4 Float display and cross-width conversion — qualified research milestone, 16 October 2026
+
+The active request is to complete remaining M2+A, then continue the interleaved roadmap M3+B -> M4+C/D -> M5/E. Earlier stop-after-F3 directions below are historical and superseded.
+
+F4 research `ac3887d173347d6f39356f93b646976941212b3f` passed all 32 native qualification steps in [run 38791473363](https://github.com/dwijayuda/pskernel/actions/runs/38791473363). All **978 shared observations** pass in readable JavaScript, TypeScript and Rust; the shared GC Wasm core/component suite, repeated native Wasmtime calls and post-return, native/kernel/IR checks, module integration and unchanged performance checks pass. Independent [F1](https://github.com/dwijayuda/pskernel/actions/runs/38790035529), [F2](https://github.com/dwijayuda/pskernel/actions/runs/38790035602) and [F3/F4 asset replay](https://github.com/dwijayuda/pskernel/actions/runs/38790035550) passed at compiler-source-identical parent `c61e2771539d4801177b5a32b654ce0ea4fee554`; the final change supplies required `args: null` metadata to five constant observations. No observation or acceptance criterion was removed. Development integration now requires its own exact-commit CI receipt.
+
+One shared typed-IR formatter implements native Lean 4.35.0 fixed-six decimal display by extracting IEEE bits, exact Nat scaling and nearest-even rounding. It preserves signed zero and canonical special values, and shares quotient rounding with scientific conversions. Six checked ToString/Repr/ReprAtom dictionaries support generic, partial, interpolation, list, ToFormat and precedence paths. Typed cross-width conversions share the backend-independent contract with explicit Wasm promote/demote descriptors. No host-default decimal formatting, new trust assumption or extra memory boundary.
+
+The pinned native asset has 16 declarations, 234 shared nodes and 238,111 bytes, SHA-256 `b3e9a6fa198001b28d5d43383834dee40c56c159c734d8e60da5312ff2fffcfe`; opaque inhabitants remain unchanged. Strict publication and host guards independently agreed before selecting FNV `16506634277351925976`, declaration SHA-256 `bd9a79a2f258c46e383565a94662a188db0cd92ba0359750858ce7fec1251426`, surface SHA-256 `0018690e17bb2f61ee2444de07fb7b4435aaa146470bd87fb6cab907741097ee`. The selected environment has 3,331 declarations; native source closure is 260 portable /274 native modules. Research measured 82 ms median indexed-128 elaboration and 5,781 ms prelude initialization; these measurements are not guarantees or formal semantic preservation proofs.
+
+**M2+A remains open:** explicit 32/64-bit target-word ownership; selected P0 API closure (including Array.filter and String encoding); comprehensive live environment/registry closure and M2 solver/retention exit audit. Platform-word dependency review is isolated on `psc0/pscv0-v7-platform-words-research` at `118ac259172c81386c464448e8d31826fc3fe06c`; neither runtime profile is enabled. Study pinned Lean first, implement coherent mechanisms, then qualify. Keep native .lean, GitHub/cloud Linux CI only, official Lean kernel, minimal focused tests; no pskernel-core, bootstrap, self-hosting or C5 execution. Update both handoffs every milestone. PR109 remains draft.
+
+
 ## F3 scientific literals and conversions — qualified milestone, 16 October 2026
 
 **F3 scientific syntax and fixed-width numeric conversions are complete and qualified across the existing executable backends. M2 + Phase A remains open. Stop before F4 at this user-requested milestone.** The active order remains M2+A -> M3+B -> M4+C/D -> M5/E.

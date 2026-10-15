@@ -1,5 +1,8 @@
 # Continue PSC0 / PSCV0 v7 — complete remaining M2+A
 
+Native38807935990 at3aeeca27c67c49f6ddadd048942872fd63da5434 passed the strict3568-declaration manifest, native source/kernel and existing scope/unsigned/generic boundaries. Full application case0 then refused PSCV0-TYPE-MISMATCH in logicDecisions. The compound fixture now names each of its seven predicates separately, retaining exactly the same six shared observations and acceptance criteria, so source diagnostics identify the failing logical form. No backend qualification claimed; operator inference/power/shift work is in progress separately.
+
+
 Native38807241380 atb293ecd683904cd5acdb978cd4c4b33509c15f1b compiled and passed the explicit logic dependency audit. Both strict entry points independently observed FNV16326442589260407706, SHA256ba31eac8de32f952e1e217ae65ab78402df3785df35617fb8dd442ddff52a25c; surface SHA256e45f0214b2532da66f5863f91a9a7aaadfb3dbe9af128d0e19c77f210f16f393. This commit selects exactly those measurements. Full source, typed IR, all backend, GC/ABI and solver/performance qualification is still pending; the refused registry run is not green.
 
 

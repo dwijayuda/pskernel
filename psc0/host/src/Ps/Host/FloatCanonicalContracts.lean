@@ -419,9 +419,10 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
 -- lower-level natural bitwise identity instead; keep the trust audit strict.
 theorem andAllOnes_constructive {w : Nat} (x : BitVec w) :
     x &&& BitVec.allOnes w = x := by
-  apply BitVec.eq_of_toNat_eq
-  rw [BitVec.toNat_and, BitVec.toNat_allOnes,
-      Nat.and_two_pow_sub_one_eq_mod, Nat.mod_eq_of_lt x.isLt]
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  simp only [BitVec.getLsbD_and, BitVec.getLsbD_allOnes, decide_eq_true hi,
+    Bool.and_true]
 
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream
 -- String/Decode.lean splitting method. No tactic-based SAT oracle or

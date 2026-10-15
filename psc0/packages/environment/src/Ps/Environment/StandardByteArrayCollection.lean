@@ -31,7 +31,7 @@ def psStandardByteArrayCoreOperations : List PsDeclaration :=
       (psLogicPi 1 "index" nat uint8))
     (psLogicLam 0 "bytes" byteArray
       (psLogicLam 1 "index" nat
-        (psOrderCall "Array.get!Internal" [uint8, inhabited, data, i])))
+        (psStandardArrayCall "get!Internal" [uint8, inhabited, data, i])))
   let setBang : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "set!") []
     (psLogicPi 0 "bytes" byteArray
@@ -41,7 +41,7 @@ def psStandardByteArrayCoreOperations : List PsDeclaration :=
       (psLogicLam 1 "index" nat
         (psLogicLam 2 "byte" uint8
           (psStandardByteArrayMk
-            (psOrderCall "Array.setIfInBounds" [uint8, data, i, b])))))
+            (psStandardArrayCall "setIfInBounds" [uint8, data, i, b])))))
   let isEmpty : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "isEmpty") []
     (psLogicPi 0 "bytes" byteArray (.constE psBoolName []))
@@ -75,7 +75,7 @@ def psStandardByteArrayBeqWorkerDeclaration : PsDeclaration :=
   let zero := psOrderCall "UInt8.ofNat" [.lit (.natural 0)]
   let byteAt := fun data =>
     psOrderCall "UInt8.toNat"
-      [psOrderCall "Array.getD" [uint8, data, index, zero]]
+      [psStandardArrayCall "getD" [uint8, data, index, zero]]
   let equalByte := psOrderCall "Nat.beq"
     [byteAt leftData, byteAt rightData]
   let step := psLogicLam 3 "index" psOrderNat
@@ -131,7 +131,7 @@ def psStandardByteArrayCheckedIndexDeclarations : List PsDeclaration :=
     (psLogicLam 0 "bytes" bytes
       (psLogicLam 1 "index" psOrderNat
         (psLogicLam 3 "h" bound
-          (psOrderCall "Array.getInternal" [uint8, data, i, proof]))))
+          (psStandardArrayCall "getInternal" [uint8, data, i, proof]))))
   let set : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "set") []
     (psLogicPi 0 "bytes" bytes
@@ -143,7 +143,7 @@ def psStandardByteArrayCheckedIndexDeclarations : List PsDeclaration :=
         (psLogicLam 2 "value" uint8
           (psLogicLam 3 "h" bound
             (psStandardByteArrayMk
-              (psOrderCall "Array.set" [uint8, data, i, value, proof]))))))
+              (psStandardArrayCall "set" [uint8, data, i, value, proof]))))))
   [get, set]
 
 -- Genuine dependent GetElem, GetElem? and LawfulGetElem instances for
@@ -196,7 +196,7 @@ def psStandardByteArrayToListDeclaration : PsDeclaration :=
     (psLogicPi 0 "bytes" bytes
       (psSelfHostListOf psStandardByteArrayElement))
     (psLogicLam 0 "bytes" bytes
-      (psOrderCall "Array.toList"
+      (psStandardArrayCall "toList"
         [psStandardByteArrayElement, psStandardByteArrayData a]))
 
 
@@ -216,8 +216,8 @@ def psStandardByteArraySliceDeclarations : List PsDeclaration :=
   let destOff : PsExpr := .fvar 3
   let len : PsExpr := .fvar 4
   let endOff : PsExpr := .fvar 2
-  let arrayOfList := fun xs => psOrderCall "List.toArray" [uint8, xs]
-  let byteList := fun xs => psOrderCall "Array.toList"
+  let arrayOfList := fun xs => psStandardListCall "toArray" [uint8, xs]
+  let byteList := fun xs => psStandardArrayCall "toList"
     [uint8, psStandardByteArrayData xs]
   -- Lean's exact := true is optParam Bool true, and the concrete packed
   -- implementation uses it only as a capacity hint. Keep its source type.
@@ -282,14 +282,14 @@ def psStandardByteArrayAppendDeclaration : PsDeclaration :=
   let uint8 := psStandardByteArrayElement
   let a : PsExpr := .fvar 0
   let b : PsExpr := .fvar 1
-  let list := fun x => psOrderCall "Array.toList"
+  let list := fun x => psStandardArrayCall "toList"
     [uint8, psStandardByteArrayData x]
   let appended := psStandardListCall "append" [uint8, list a, list b]
   .definitionDecl (psNameAppendStr psStandardByteArrayName "append") []
     (psLogicPi 0 "left" bytes (psLogicPi 1 "right" bytes bytes))
     (psLogicLam 0 "left" bytes (psLogicLam 1 "right" bytes
       (psStandardByteArrayMk
-        (psOrderCall "List.toArray" [uint8, appended]))))
+        (psStandardListCall "toArray" [uint8, appended]))))
 
 -- Ordinary dictionary forwarding to the checked native-named ByteArray.beq.
 def psStandardByteArrayBeqDeclaration : PsDeclaration :=

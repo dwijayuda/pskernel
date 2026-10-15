@@ -2,7 +2,7 @@
 Hash instances adapted from Lean 4.35.0 Init/Data/Hashable.lean.
 Copyright (c) 2016 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: portable checked Core builders and selected Type-0 Array.
+Modified: portable checked Core builders with universe-polymorphic containers.
 -/
 import Ps.Environment.StandardHashFoundationData
 import Ps.Environment.StandardClass
@@ -89,15 +89,15 @@ def psHashContainerInstances : List PsDeclaration :=
     (psHashMix (.fvar 3) (psHashMethod alpha (.fvar 1) (.fvar 4) (.succ level))))
   let listMethod := psLogicLam 2 "values" list
     (psStandardListCall "foldl" [psHashUInt64, alpha, step, psHashSeed 7, .fvar 2] [.zero, level])
-  let array := psPreludeArrayOf alpha
+  let array := psPreludeArrayOf alpha level
   let arrayStep := psLogicLam 3 "acc" psHashUInt64 (psLogicLam 4 "value" alpha
-    (psHashMix (.fvar 3) (psHashMethod alpha (.fvar 1) (.fvar 4))))
+    (psHashMix (.fvar 3) (psHashMethod alpha (.fvar 1) (.fvar 4) (.succ level))))
   let arrayMethod := psLogicLam 2 "values" array
-    (psOrderCall "Array.foldl" [alpha, psHashUInt64, arrayStep, psHashSeed 7, .fvar 2,
-      .lit (.natural 0), psStandardArraySize alpha (.fvar 2)])
+    (psStandardArrayCall "foldl" [alpha, psHashUInt64, arrayStep, psHashSeed 7, .fvar 2,
+      .lit (.natural 0), psStandardArraySize alpha (.fvar 2) level] [level, .zero])
   [ psHashContainer "Option" option optionMethod level [u],
     psHashContainer "List" list listMethod level [u],
-    psHashContainer "Array" array arrayMethod .zero [] ]
+    psHashContainer "Array" array arrayMethod level [u] ]
 
 def psHashProductInstance : PsDeclaration :=
   psStandardProductInstance "Prod" "Hashable"

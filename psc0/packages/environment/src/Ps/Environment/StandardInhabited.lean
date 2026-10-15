@@ -50,7 +50,7 @@ def psStandardInhabitedGround (suffix : String) (type value : PsExpr) :
       (psStandardInhabitedType type) (psStandardInhabitedValue type value)
 
 -- One constructor for empty-container dictionaries at their actual universe.
--- Array retains its selected Type-0 model; List/Option carry their element level.
+-- Array, List and Option carry their element universe.
 def psStandardInhabitedContainer (suffix : String) (parameters : List PsName)
     (level : PsLevel) (type value : PsExpr) : PsDeclaration :=
   .definitionDecl (psDecisionName ("PsStandard.instInhabited" ++ suffix)) parameters
@@ -71,6 +71,13 @@ def psStandardInhabitedList : PsDeclaration :=
   psStandardInhabitedContainer "List" [u] level
     (psSelfHostListOf (.fvar 0) level) (psSelfHostListNilOf (.fvar 0) level)
 
+def psStandardInhabitedArray : PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
+  psStandardInhabitedContainer "Array" [u] level (psPreludeArrayOf (.fvar 0) level)
+    (psLogicApply (.constE psArrayEmptyWithCapacityName [level])
+      [.fvar 0, .lit (.natural 0)])
+
 -- All entries are ordinary checked data or existing audited runtime primitives.
 -- Crucially the collection defaults do not require Inhabited α.
 def psStandardInhabitedInstances : List PsDeclaration :=
@@ -90,9 +97,7 @@ def psStandardInhabitedInstances : List PsDeclaration :=
     psStandardInhabitedGround "Unit" unit (.constE psUnitUnitName []),
     psStandardInhabitedOption,
     psStandardInhabitedList,
-    psStandardInhabitedContainer "Array" [] .zero (psPreludeArrayOf (.fvar 0))
-      (psLogicApply (.constE psArrayEmptyWithCapacityName [])
-        [.fvar 0, .lit (.natural 0)]) ]
+    psStandardInhabitedArray ]
 
 def psStandardInhabitedDeclarations : List PsDeclaration :=
   psStandardInhabitedClass ++ psStandardInhabitedInstances

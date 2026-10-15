@@ -1,5 +1,18 @@
 # M2+A scalar completion design — Lean 4.35.0
 
+## Polymorphic Array prerequisite: research qualified, main integration — 15 October 2026
+
+[Native38737651266](https://github.com/dwijayuda/pskernel/actions/runs/38737651266) passed all 30 steps at `3642e8835f36f238c88e4097914df55b199fd58e`: **851 shared runtime observations**, checked source, exact assets, readable JS/TS/Rust, GC Wasm/component and repeated Wasmtime calls, module integration and unchanged performance gates. Independent [F1 replay38736528638](https://github.com/dwijayuda/pskernel/actions/runs/38736528638), [F2 replay38736528346](https://github.com/dwijayuda/pskernel/actions/runs/38736528346), and [F3 logical replay38736528477](https://github.com/dwijayuda/pskernel/actions/runs/38736528477) passed at parent `80205a9bd25bdaa5eb6c08c75cdf7b34eba2000a`; the sole descendant change parenthesizes a type-ascribed fixture argument. No expected result was relaxed.
+
+Pinned Lean 4.35.0 `Init/Prelude.lean`, `Init/Data/Array/{Basic,BasicAux}.lean`, and tests `compile/{array,arrayMk}.lean`, `elab/{arrayGetU,array_map_module}.lean` govern this repair. Array, mk/toList, recursor, selected operations and dictionaries now carry element universe u; map/fold result and recursor motive universes are independent. ByteArray explicitly specializes to zero. Existing list-backed logical semantics and runtime layouts are preserved. Seven obsolete Type-0 audit exceptions are replaced by exact normalized signature checks. Eight observations cover both map/fold directions, default, Repr, ToFormat and Hashable; generic list/size identities are kernel checked.
+
+Strict reviewed pins: FNV `14544844717468498892`; declaration SHA-256 `373b27a0b77083baa58810055d68b6639ec00c2038da7641d3dd5c042e8f4e0d`; surface SHA-256 `579f461576427a5daf711943613979e4517803475779e40b0200f359450744fa`. Registry counts and approved assumptions are unchanged from F2. Independent native prelude measurement was 6.524s; this is an observation, not a performance-equivalence claim.
+
+This fixes the general native dependency mismatch that prevented F3's scientific fast-path tables and proofs from replaying. The **unselected** F3 logical candidate now passes: 42 roots /134 declarations /one recursor /3,286 shared nodes /617,019 UTF-8 bytes, SHA-256 `45e6c8b81fbd971c891d173acef36c2ce6f6c59b674a06ffc9bfbe2e8cff6391`. No new axioms, quotient primitives or replaced definitions.
+
+**Exact-main Array qualification is pending on this integration commit.** F2 remains main-qualified at `ef5c5e342015bfabcb58ae1f3291f0fe544cec5a`. Next coherent slice is scoped, transactional, priority-ordered default instances, followed by exact scientific syntax and typed scalar conversions. It is prepared on the F3 research branch; no claim of F3 or M2+A completion. Both handoffs track the live frontier.
+
+
 ## F2 executable MAIN QUALIFIED — 15 October 2026
 
 **Qualified development commit:** `ef5c5e342015bfabcb58ae1f3291f0fe544cec5a`.

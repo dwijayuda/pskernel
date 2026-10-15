@@ -805,6 +805,31 @@ def exportFloatOperationsCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2026 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Data/Float/Model/Unpacked Operations and Round; authors include Julia M. Himmel.\nClosed Core conversion and existing checked constructive theorem cuts.\nF2 research candidate only: not selected Standard or executable arithmetic.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- F3 dependency gate: native scientific literals and fixed-width numeric
+-- conversions are one logical family. Platform words and opaque cross-float
+-- conversions have separate contracts and are deliberately not roots here.
+def exportFloatConversionsCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let owners := ["Float", "Float32"]
+  let words := ["UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64"]
+  let sourceMethods := owners.flatMap fun owner =>
+    (["ofScientific", "ofNat", "ofInt"] ++ words.map ("to" ++ ·)).map
+      (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method)
+  let destinationMethods := (words ++ ["Nat", "Int"]).flatMap fun owner =>
+    ["toFloat", "toFloat32"].map
+      (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method)
+  exportStandardCore {
+    roots := sourceMethods ++ destinationMethods
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardFloatConversions"
+    privatePrefix := "floatConversionsDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Data/OfScientific, Float/Model/Unpacked/Operations/{OfNat,ToNat,OfScientific}, SInt/Float{,32}.\nAuthors include Julia M. Himmel and Henrik Boeving.\nF3 logical dependency candidate; runtime and source enablement remain separate gates.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 -- Pinned Lean 4.35.0 SInt/Basic: each signed type is a checked
 -- wrapper around an unsigned two's-complement carrier. This is a
 -- native-only authoring candidate, NOT executable signed arithmetic.

@@ -65,7 +65,7 @@ def psStandardByteArrayOperationDeclarations : List PsDeclaration :=
   let byteArray := psStandardByteArrayType
   let uint8 := psStandardByteArrayElement
   let nat := psOrderNat
-  let emptyStorage := psOrderCall "Array.emptyWithCapacity"
+  let emptyStorage := psStandardArrayCall "emptyWithCapacity"
     [uint8, .lit (.natural 0)]
   let emptyWithCapacity : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "emptyWithCapacity") []
@@ -83,13 +83,13 @@ def psStandardByteArrayOperationDeclarations : List PsDeclaration :=
     (psLogicLam 0 "bytes" byteArray
       (psLogicLam 1 "byte" uint8
         (psStandardByteArrayMk
-          (psOrderCall "Array.push"
+          (psStandardArrayCall "push"
             [uint8, psStandardByteArrayData (.fvar 0), .fvar 1]))))
   let size : PsDeclaration := .definitionDecl
     (psNameAppendStr psStandardByteArrayName "size") []
     (psLogicPi 0 "bytes" byteArray nat)
     (psLogicLam 0 "bytes" byteArray
-      (psOrderCall "Array.size"
+      (psStandardArrayCall "size"
         [uint8, psStandardByteArrayData (.fvar 0)]))
   [emptyWithCapacity, empty, push, size]
 

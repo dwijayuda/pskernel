@@ -3,9 +3,9 @@ name: PSCV0 F2 logical operations
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f2-operations-research]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research]
     paths:
-      # Independent replay of the selected logical operations and proof closure.
+      # Independent replay of the selected logical operation closure.
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
       - 'psc0/host/src/Ps/Host/StandardManifest.lean'

@@ -33,17 +33,10 @@ private def normalizeType (parameters : List Lean.Name) : Lean.Expr → Lean.Exp
   | value => value
 
 -- Exact reviewed signatures at the pinned native toolchain. These exceptions
--- encode existing universe restriction / position representation policies.
+-- encode the explicit fold bounds / position representation policies.
 -- New mismatches fail qualification instead of expanding trust implicitly.
 private def modeledSignatures : List (String × String × String) := [
-  ("Array.foldl", "forall {α : Type} {b : Type}, (b -> α -> b) -> b -> (Array α) -> Nat -> Nat -> b", "forall {α : Type.{u}} {β : Type.{v}}, (β -> α -> β) -> β -> (forall (as : Array.{u} α), (optParam.{1} Nat (OfNat.ofNat.{0} Nat 0 (instOfNatNat 0))) -> (optParam.{1} Nat (Array.size.{u} α as)) -> β)"),
-  ("Array.map", "forall {α : Type} {b : Type}, (α -> b) -> (Array α) -> (Array b)", "forall {α : Type.{u}} {β : Type.{v}}, (α -> β) -> (Array.{u} α) -> (Array.{v} β)"),
-  ("Array.setIfInBounds", "forall {α : Type}, (Array α) -> Nat -> α -> (Array α)", "forall {α : Type.{u_1}}, (Array.{u_1} α) -> Nat -> α -> (Array.{u_1} α)"),
-  ("Array.getD", "forall {α : Type}, (Array α) -> Nat -> α -> α", "forall {α : Type.{u_1}}, (Array.{u_1} α) -> Nat -> α -> α"),
-  ("Array.push", "forall {α : Type}, (Array α) -> α -> (Array α)", "forall {α : Type.{u}}, (Array.{u} α) -> α -> (Array.{u} α)"),
-  ("Array.size", "forall {α : Type}, (Array α) -> Nat", "forall {α : Type.{u}}, ([mdata borrowed:1 Array.{u} α]) -> Nat"),
-  ("Array.emptyWithCapacity", "forall {α : Type}, Nat -> (Array α)", "forall {α : Type.{u}}, ([mdata borrowed:1 Nat]) -> (Array.{u} α)"),
-  ("Array", "Type -> Type", "Type.{u} -> Type.{u}"),
+  ("Array.foldl", "forall {α : Type.{u}} {b : Type.{v}}, (b -> α -> b) -> b -> (Array.{u} α) -> Nat -> Nat -> b", "forall {α : Type.{u}} {β : Type.{v}}, (β -> α -> β) -> β -> (forall (as : Array.{u} α), (optParam.{1} Nat (OfNat.ofNat.{0} Nat 0 (instOfNatNat 0))) -> (optParam.{1} Nat (Array.size.{u} α as)) -> β)"),
   ("String.Pos.Raw.byteIdx", "Nat -> Nat", "String.Pos.Raw -> Nat"),
   ("String.Pos.Raw.mk", "Nat -> Nat", "Nat -> String.Pos.Raw"),
   ("String.Internal.extract", "String -> Nat -> Nat -> String", "([mdata borrowed:1 String]) -> ([mdata borrowed:1 String.Pos.Raw]) -> ([mdata borrowed:1 String.Pos.Raw]) -> String"),
@@ -67,7 +60,9 @@ def primitiveAudit : IO Lean.Json := do
     let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd",
       "List.foldl", "List.reverse", "List.reverseAux"].contains
       (psNameToString name)
-    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation then
+    let checkedArray := ["Array", "Array.map", "Array.setIfInBounds", "Array.getD",
+      "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)
+    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -98,7 +93,7 @@ def primitiveAudit : IO Lean.Json := do
           else "checked-logical-model/runtime-override"))] :: entries
   -- Newly exposed representation conversions and proof-taking operations have
   -- checked portable models. Record both signatures without claiming alpha
-  -- equality: RC4 uses universe-polymorphic collections, LT and optParam.
+  -- equality: selected proof-taking operations use explicit bounds instead of native LT/optParam.
   -- The exact portable bodies remain protected by the Standard snapshot and
   -- separately admitted by the kernel; the source oracle checks observations.
   let unsignedModels := ["UInt8", "UInt16", "UInt32", "UInt64"].flatMap fun owner =>

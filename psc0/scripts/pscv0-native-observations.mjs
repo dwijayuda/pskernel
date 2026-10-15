@@ -2,6 +2,15 @@
 // The signed vectors are also computed independently by pinned native Lean
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
+  { name: "arrayHighMapDown", args: null, expected: 7n },
+  { name: "arrayHighMapUp", args: null, expected: 11n },
+  { name: "arrayHighFoldDown", args: null, expected: 12n },
+  { name: "arrayHighFoldUp", args: null, expected: 30n },
+  { name: "arrayHighDefault", args: null, expected: 0n },
+  { name: "arrayHighRepr", args: null, expected: "#[{ value := 5 }, { value := 7 }]" },
+  { name: "arrayHighFormat", args: null, expected: "#[hi, hi]" },
+  { name: "arrayHighHash", args: null, expected: true },
+
   {name:"f2Add64",args:[4607182418800017408n,4611686018427387904n],type:"nat",expected:4613937818241073152n},
   {name:"f2Add64",args:[9218868437227405311n,9218868437227405311n],type:"nat",expected:9218868437227405312n},
   {name:"f2Add64",args:[1n,1n],type:"nat",expected:2n},

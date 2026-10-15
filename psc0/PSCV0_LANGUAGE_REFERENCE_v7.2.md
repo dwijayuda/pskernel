@@ -203,26 +203,42 @@ This is a **constrained Lean 4 parser/elaborator overlay**, not an independent E
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>sourceFile ::= module? importHeader command* EOF
+**Lean 4 grammar (schematic)**
+
+```text
+sourceFile ::= module? importHeader command* EOF
 identifier ::= Lean.ident
 literal ::= Lean.numeral | Lean.string | Lean.char | ...
-comment ::= &quot;--&quot; lineText | &quot;/-&quot; nestedComment &quot;-/&quot;</code></pre></td><td valign="top"><pre><code>psSourceFile ::= psImportHeader selectedPsCommand* EOF
+comment ::= "--" lineText | "/-" nestedComment "-/"
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psSourceFile ::= psImportHeader selectedPsCommand* EOF
 identifier ::= Lean.ident
 literal ::= Lean.literalRestricted
 comment ::= Lean.comment
-// Modification: UTF-8; ASCII-space/LF layout profile; no ASI</code></pre></td></tr></tbody></table>
+// Modification: UTF-8; ASCII-space/LF layout profile; no ASI
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>-- UTF-8 source; line comments
+**Lean 4.35.0**
+
+```lean
+-- UTF-8 source; line comments
 /- nested /- block -/ comments -/
-def answer : Nat := 42</code></pre></td><td valign="top"><pre><code>-- UTF-8 .ps source; line comments
+def answer : Nat := 42
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+-- UTF-8 .ps source; line comments
 /- nested /- block -/ comments -/
-const answer: Nat := 42</code></pre></td></tr></tbody></table>
+const answer: Nat := 42
+```
 
 **Source language distinction.** Standard ProofScript requires UTF-8, permits one leading BOM, normalizes CRLF to LF, rejects lone CR and horizontal tabs outside literals/comments, and uses only ASCII SPACE/LF as structural whitespace. Lean’s scanner is less restricted; neither language imports JavaScript automatic semicolon insertion.
 
@@ -235,26 +251,42 @@ const answer: Nat := 42</code></pre></td></tr></tbody></table>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>header ::= &quot;module&quot;? importCommand*
-importCommand ::= &quot;import&quot; moduleName
-                | &quot;public&quot; &quot;import&quot; moduleName (module mode only)
-command ::= Lean.command</code></pre></td><td valign="top"><pre><code>psImportHeader ::= psImport*
-psImport ::= &quot;import&quot; moduleName | &quot;public&quot; &quot;import&quot; moduleName
+**Lean 4 grammar (schematic)**
+
+```text
+header ::= "module"? importCommand*
+importCommand ::= "import" moduleName
+                | "public" "import" moduleName (module mode only)
+command ::= Lean.command
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psImportHeader ::= psImport*
+psImport ::= "import" moduleName | "public" "import" moduleName
 selectedPsCommand ::= selectedLeanCommand | selectedPsDeclaration
-// .ps implicitly lowers to a Lean `module` header; no written `module` keyword required</code></pre></td></tr></tbody></table>
+// .ps implicitly lowers to a Lean `module` header; no written `module` keyword required
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>module
+**Lean 4.35.0**
+
+```lean
+module
 public import Std
 
-public def value : Nat := 1</code></pre></td><td valign="top"><pre><code>public import Std
+public def value : Nat := 1
+```
 
-const value: Nat := 1</code></pre></td></tr></tbody></table>
+**ProofScript `pscv0`**
+
+```proofscript
+public import Std
+
+const value: Nat := 1
+```
 
 **Source language distinction — `PSCV0-MODULE-01` and `PSCV0-MODULE-02`.** Each `.ps` source file **implicitly targets a Lean 4.35.0 `module`**; the `.ps` source does not repeat the literal `module` header, but the lowering must emit it before imported modules. Both `import M` (private to this module) and `public import M` (re-export the imported module's public scope) use **module-style** 4.35.0 import meaning; importing a non-module or unavailable module rejects at ENV. All imports remain top-level and precede commands; `meta import`, `import all`, and legacy transitive-import semantics are outside the initial `.ps` selection. The Lean column therefore writes its `module` header explicitly, unlike the `.ps` column. All examples that omit imports/headers elsewhere are **fragments**, not self-contained module fixtures.
 
@@ -267,22 +299,31 @@ const value: Nat := 1</code></pre></td></tr></tbody></table>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;namespace&quot; ident | &quot;section&quot; ident?
-          | &quot;end&quot; ident? | &quot;open&quot; ident+
-          | &quot;variable&quot; binder+ | &quot;include&quot; ident+
-          | &quot;omit&quot; ident+ | &quot;universe&quot; ident+</code></pre></td><td valign="top"><pre><code>command ::= &quot;namespace&quot; ident | &quot;section&quot; ident?
-          | &quot;end&quot; ident? | &quot;open&quot; ident+
-          | &quot;variable&quot; selectedLeanBinder+ | &quot;include&quot; ident+
-          | &quot;omit&quot; ident+ | &quot;universe&quot; ident+
-// Modification: selected Lean commands; same scoping model</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "namespace" ident | "section" ident?
+          | "end" ident? | "open" ident+
+          | "variable" binder+ | "include" ident+
+          | "omit" ident+ | "universe" ident+
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "namespace" ident | "section" ident?
+          | "end" ident? | "open" ident+
+          | "variable" selectedLeanBinder+ | "include" ident+
+          | "omit" ident+ | "universe" ident+
+// Modification: selected Lean commands; same scoping model
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>namespace MathOps
+**Lean 4.35.0**
+
+```lean
+namespace MathOps
   def twice (n : Nat) : Nat := n + n
 end MathOps
 
@@ -294,7 +335,13 @@ section
 end
 
 #check result
-#eval result 7  -- 14</code></pre></td><td valign="top"><pre><code>namespace MathOps
+#eval result 7  -- 14
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+namespace MathOps
   function twice(n: Nat): Nat := n + n
 end MathOps
 
@@ -306,7 +353,8 @@ section
 end
 
 #check result
-#eval result(7) -- 14</code></pre></td></tr></tbody></table>
+#eval result(7) -- 14
+```
 
 **Source language distinction.** Namespace prefixes affect declaration names; sections do not. ProofScript's unqualified-name lookup has deterministic local/current/enclosing/opened/imported tiers; ambiguities reject. `#check` is an **admitted diagnostic command** in `pscv0` Standard, not an unknown command; detailed restrictions appear in §7A.
 
@@ -323,24 +371,40 @@ end
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId declSig? declVal
-declSig ::= binder* (&quot;:&quot; term)?
-declVal ::= &quot;:=&quot; term termination? whereDecls? | equations</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psContractSeq psDeclVal
-psDeclVal ::= &quot;:=&quot; psDeclTerm psRecursionSuffix? psWhere?
-psDeclTerm ::= term | &quot;{&quot; term &quot;}&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= modifiers? "def" declId declSig? declVal
+declSig ::= binder* (":" term)?
+declVal ::= ":=" term termination? whereDecls? | equations
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= modifiers? "def" declId psBinderSeq (":" term)? psContractSeq psDeclVal
+psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?
+psDeclTerm ::= term | "{" term "}"
 // suffix strategy restricted by PSCV0-REC-STRATEGY-01
-// Modification: comma explicit binders; optional one-term braces</code></pre></td></tr></tbody></table>
+// Modification: comma explicit binders; optional one-term braces
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def double (n : Nat) : Nat :=
-  n + n</code></pre></td><td valign="top"><pre><code>def double(n: Nat): Nat := {
+**Lean 4.35.0**
+
+```lean
+def double (n : Nat) : Nat :=
   n + n
-}</code></pre></td></tr></tbody></table>
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+def double(n: Nat): Nat := {
+  n + n
+}
+```
 
 **Source language distinction.** Consecutive explicit parameters are comma-separated inside one group; `:= { term }` is a **single-term wrapper**, not a multi-statement block. Plain `:= term` is also valid. Braced record literals are separately parsed as terms. In declarations, `(n: Nat)` is parsed as an **explicit binder group**, not a call: `def double (n: Nat): Nat := n + n` is admitted by the selected declaration grammar, although the canonical formatter writes `def double(n: Nat): Nat := n + n`. For `function`, the canonical spelling is `function double(n: Nat)`. This allowance has no `f ()` consequence because a call after an expression head uses the separate term grammar.
 
@@ -351,18 +415,34 @@ psDeclTerm ::= term | &quot;{&quot; term &quot;}&quot;
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId (&quot;:&quot; term)? &quot;:=&quot; term</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;const&quot; declId (&quot;:&quot; term)? psConstVal
-// Lowers to parameterless Lean def; not JS/TS const</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "def" declId (":" term)? ":=" term
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= modifiers? "const" declId (":" term)? psConstVal
+// Lowers to parameterless Lean def; not JS/TS const
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def answer : Nat := 42
-def inc : Nat → Nat := fun n =&gt; n + 1</code></pre></td><td valign="top"><pre><code>const answer: Nat := 42
-const inc: Nat -&gt; Nat := { fun n =&gt; n + 1 }</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+def answer : Nat := 42
+def inc : Nat → Nat := fun n => n + 1
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const answer: Nat := 42
+const inc: Nat -> Nat := { fun n => n + 1 }
+```
 
 **Source language distinction.** `const` is a top-level/namespace **parameterless definition alias**—not TypeScript `const` and not a distinct Lean kernel constructor. In the provided design RC it is retained even though other ProofScript design discussions may have considered removing it.
 
@@ -373,22 +453,38 @@ const inc: Nat -&gt; Nat := { fun n =&gt; n + 1 }</code></pre></td></tr></tbody>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId binder* (&quot;:&quot; term)? declVal</code></pre></td><td valign="top"><pre><code>command ::= modifiers? &quot;function&quot; declId psFunctionBinders
-            (&quot;:&quot; term)? psContractSeq psDeclVal
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "def" declId binder* (":" term)? declVal
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= modifiers? "function" declId psFunctionBinders
+            (":" term)? psContractSeq psDeclVal
 // Non-nullary: psNonemptyBinderSeq; nullary: psNonExplicitBinder* psNullaryFunctionGroup
 // `psContractSeq` is ordered and non-repeating (§7)
-// Modification: &#x27;function&#x27; =&gt; Lean &#x27;def&#x27;; comma binder group</code></pre></td></tr></tbody></table>
+// Modification: 'function' => Lean 'def'; comma binder group
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def add (x : Nat) (y : Nat) : Nat :=
-  x + y</code></pre></td><td valign="top"><pre><code>function add(x: Nat, y: Nat): Nat := {
+**Lean 4.35.0**
+
+```lean
+def add (x : Nat) (y : Nat) : Nat :=
   x + y
-}</code></pre></td></tr></tbody></table>
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function add(x: Nat, y: Nat): Nat := {
+  x + y
+}
+```
 
 **Source language distinction.** Lean application remains curried at the core level; ProofScript's comma-grouped source parameters and calls do not make a new noncurried type theory. `function name()` is a dedicated, terminal **nullary-function group** (with an inserted required Lean `Unit` binder); `function name(args)` and interleaved binders use `psNonemptyBinderSeq` under `PSCV0-BIND-02`. No other declaration or method gains hidden-`Unit` behavior simply by reusing the generic binder grammar.
 
@@ -399,33 +495,49 @@ const inc: Nat -&gt; Nat := { fun n =&gt; n + 1 }</code></pre></td></tr></tbody>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>binder ::= &quot;(&quot; ident+ &quot;:&quot; term &quot;)&quot; | &quot;{&quot; ident+ &quot;:&quot; term &quot;}&quot;
-         | &quot;⦃&quot; ident+ &quot;:&quot; term &quot;⦄&quot; | &quot;[&quot; term &quot;]&quot;
-// ASCII {{x : T}} is also a strict-implicit Lean spelling</code></pre></td><td valign="top"><pre><code>psBinderSeq ::= psNonExplicitBinder*
+**Lean 4 grammar (schematic)**
+
+```text
+binder ::= "(" ident+ ":" term ")" | "{" ident+ ":" term "}"
+         | "⦃" ident+ ":" term "⦄" | "[" term "]"
+// ASCII {{x : T}} is also a strict-implicit Lean spelling
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psBinderSeq ::= psNonExplicitBinder*
               (psExplicitGroup psNonExplicitBinder+)* psExplicitGroup?
 psNonemptyBinderSeq ::= psBinderSeq  // only if at least one binder is present
 psFunctionBinders ::= psNonemptyBinderSeq
                     | psNonExplicitBinder* psNullaryFunctionGroup
-psExplicitGroup ::= &quot;(&quot; psParam (&quot;,&quot; psParam)* &quot;,&quot;? &quot;)&quot;   // nonempty
-psNullaryFunctionGroup ::= &quot;()&quot;  // function only, terminal
-psParam ::= ident &quot;:&quot; term (&quot;:=&quot; term)?
+psExplicitGroup ::= "(" psParam ("," psParam)* ","? ")"   // nonempty
+psNullaryFunctionGroup ::= "()"  // function only, terminal
+psParam ::= ident ":" term (":=" term)?
 psNonExplicitBinder ::= selectedLeanImplicitBinder
                     | selectedLeanStrictImplicitBinder | selectedLeanInstBinder
-// Adjacent explicit groups are rejected by grammar (BIND-02), never silently merged</code></pre></td></tr></tbody></table>
+// Adjacent explicit groups are rejected by grammar (BIND-02), never silently merged
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def same {α : Type} [BEq α] (x : α) (y : α) : Bool :=
+**Lean 4.35.0**
+
+```lean
+def same {α : Type} [BEq α] (x : α) (y : α) : Bool :=
   x == y
 
-def retain {{α : Type}} (x : α) : α := x</code></pre></td><td valign="top"><pre><code>function same {α: Type}[BEq α](x: α, y: α): Bool := {
+def retain {{α : Type}} (x : α) : α := x
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function same {α: Type}[BEq α](x: α, y: α): Bool := {
   x == y
 }
-function retain {{α: Type}}(x: α): α := x</code></pre></td></tr></tbody></table>
+function retain {{α: Type}}(x: α): α := x
+```
 
 **Source language distinction — `PSCV0-BIND-02`.** ProofScript preserves the **ordered Lean binder telescope**. A comma group contains one or more successive explicit binders; implicit (`{...}`), strict-implicit (`{{...}}` / `⦃...⦄`), and instance (`[...]`) binders may occur **before, between, or after** explicit groups. Two adjacent explicit groups without an intervening nonexplicit binder are **excluded by `psBinderSeq`** and rejected at the PARSE stage under `PSCV0-BIND-02`; a programmer must write one comma group, never rely on silent group merging. The `()` group is **not** a generic empty binder group: only a final `function` nullary group gets the required-`Unit` lowering. `def f()`, `abbrev T()`, `structure S()`, `inductive E()`, `| nil()`, and instance-field `field()` are rejected by the initial source grammar. `{{α: Type}}` remains the strict-implicit ASCII form. Closed PSCV0 restricts instance synthesis to a pinned deterministic registry.
 
@@ -559,20 +671,36 @@ This reference intentionally retains a small amount of harmless duplicate notati
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= term &quot;.&quot; ident | term argument+ | ...
-// Lean generalized field notation uses type-directed elaboration</code></pre></td><td valign="top"><pre><code>term ::= term &quot;.&quot; ident | psCallHead &quot;(&quot; psCallArgs? &quot;)&quot;
-psCallArgs ::= callArg (&quot;,&quot; callArg)* &quot;,&quot;?
-callArg ::= term | ident &quot;:=&quot; term
-// Unchanged field lookup; new comma-call postfix only</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= term "." ident | term argument+ | ...
+// Lean generalized field notation uses type-directed elaboration
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= term "." ident | psCallHead "(" psCallArgs? ")"
+psCallArgs ::= callArg ("," callArg)* ","?
+callArg ::= term | ident ":=" term
+// Unchanged field lookup; new comma-call postfix only
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def stringLength (s : String) : Nat := s.length</code></pre></td><td valign="top"><pre><code>function stringLength(s: String): Nat := s.length
--- If mapped method exists: users.map(toName)</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+def stringLength (s : String) : Nat := s.length
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function stringLength(s: String): Nat := s.length
+-- If mapped method exists: users.map(toName)
+```
 
 **Source language distinction.** Both use *static, type-directed* field/method resolution, not JS prototype lookup. The `users.map(toName)` example presumes a visible admitted mapping and is illustrative, not a promise about every Standard library API.
 
@@ -603,15 +731,23 @@ A recursion suffix on `def`/`function` or a local `where` definition is governed
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def plusOne (n : Nat) : Nat := helper n
+**Lean 4.35.0**
+
+```lean
+def plusOne (n : Nat) : Nat := helper n
 where
-  helper (x : Nat) : Nat := x + 1</code></pre></td><td valign="top"><pre><code>-- PSCV0: explicit local where with braced local definitions
+  helper (x : Nat) : Nat := x + 1
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+-- PSCV0: explicit local where with braced local definitions
 function plusOne(n: Nat): Nat := helper(n)
 where {
   def helper(x: Nat): Nat := x + 1
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — `PSCV0-D-WHERE-01`.** The original source omitted `where` from its grammar; this edition retains Lean's introducer and selects `where { ... }`. The `def` keyword in `where { def helper(...) ... }` is an **owned ProofScript local-declaration introducer**, not a token retained in the generated Lean `where`. Lower `def helper(x: A, y: B): R := e` to native Lean `where helper (x : A) (y : B) : R := e'`, where `e'` is the recursively lowered term; remove the outer grouping braces, and preserve ordered binders, defaults, name resolution, recursion dependencies, and the selected `psTermination` suffix. Ordinary `where` holds newline-separated selected **local** definitions, not namespace/top-level `def` declarations. The initial profile does **not** admit local `function`/`const`, local theorem/instance/attribute/command forms, nested `where` in a local declaration, or `mutual` as independent local syntax. Recursive local definitions are accepted only when their selected 4.35.0 lowering and totality obligations can be discharged; no new local-recursion semantics is defined. **Exception: `PSCV0-CONTRACT-04`** permits one contract-owned terminal `finally { | spec => { psTacticSeq } }` in the same `where` block, possibly after local definitions. It is *not* a new standalone theorem, ordinary local declaration, or general `where finally` hook. If no intrinsic contract is present, a `spec` section is rejected. The compiler lowers this one section to 4.35.0 `where finally | spec => ...`, the mechanism by which the generated `f.spec` proof receives tactics (§7).
 
@@ -622,21 +758,37 @@ where {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;abbrev&quot; declId declSig? declVal
-          | &quot;opaque&quot; declId declSig declVal?</code></pre></td><td valign="top"><pre><code>command ::= &quot;abbrev&quot; declId psBinderSeq (&quot;:&quot; term)? psDeclVal
-          | &quot;opaque&quot; declId psBinderSeq &quot;:&quot; term psDeclVal
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "abbrev" declId declSig? declVal
+          | "opaque" declId declSig declVal?
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "abbrev" declId psBinderSeq (":" term)? psDeclVal
+          | "opaque" declId psBinderSeq ":" term psDeclVal
 // Intentional PSCV0 selection: an `opaque` must have an explicit right-hand-side body;
-// native Lean's bodyless opaque alternative is excluded from initial .ps</code></pre></td></tr></tbody></table>
+// native Lean's bodyless opaque alternative is excluded from initial .ps
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>abbrev UserId := Nat
-opaque secret : Nat := 42</code></pre></td><td valign="top"><pre><code>abbrev UserId := Nat
-opaque secret: Nat := 42</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+abbrev UserId := Nat
+opaque secret : Nat := 42
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+abbrev UserId := Nat
+opaque secret: Nat := 42
+```
 
 **Source language distinction.** `abbrev` remains definitionally reducible in the permitted Lean transparency contexts, whereas `opaque` does not unfold under ordinary source conversion. Their existing selected v7 `psDeclVal` grammar is preserved; a recursion suffix on either is admitted only to the extent that **pinned Lean 4.35.0** actually elaborates that declaration/head/strategy combination, with unchanged PSCV0 proof and executable dependency gates. It is **not** a path for leading `partial` or `unsafe` modifiers, nor a promise that all `partial_fixpoint` suffixes elaborate on `abbrev` or `opaque`. The initial `.ps` profile admits **only body-present** `opaque name: T := value`, not native Lean's separately supported bodyless `opaque name : T`. This choice excludes an unnecessary unimplemented assumption-like declaration form. In PSCV, a public executable `opaque` declaration still needs approved specification coverage and proof evidence; the source form is not an exemption from validity. Public bodies are not automatically exposed to downstream module elaboration (§1).
 
@@ -647,22 +799,38 @@ opaque secret: Nat := 42</code></pre></td></tr></tbody></table>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>modifiers ::= docComment? attributes? visibility? ...
-visibility ::= &quot;private&quot; | &quot;public&quot;</code></pre></td><td valign="top"><pre><code>psModifiers ::= psAttributes? &quot;private&quot;?
-psFeatureModifier ::= &quot;noncomputable&quot; | &quot;partial&quot; | &quot;unsafe&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+modifiers ::= docComment? attributes? visibility? ...
+visibility ::= "private" | "public"
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psModifiers ::= psAttributes? "private"?
+psFeatureModifier ::= "noncomputable" | "partial" | "unsafe"
 command ::= psModifiers psFeatureModifier? selectedPsDeclaration
 // exactly one such modifier, and only for selected def/function
-// no feature modifier on const; see the matrix in §5</code></pre></td></tr></tbody></table>
+// no feature modifier on const; see the matrix in §5
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>private def secret : Nat := 7
-def publicValue : Nat := 3</code></pre></td><td valign="top"><pre><code>private const secret: Nat := 7
-const publicValue: Nat := 3</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+private def secret : Nat := 7
+def publicValue : Nat := 3
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+private const secret: Nat := 7
+const publicValue: Nat := 3
+```
 
 **Source language distinction.** ProofScript ordinary top-level declarations are public unless `private`; a `.ps` module lowers to 4.35.0 module mode with an implicit `public section` (or equivalent per-declaration public modifiers), while normal module imports remain private to the importing module and `public import` re-exports their public scope. **Only name visibility is public by default; definitional unfolding of public bodies across modules is not.** A client must use exported checked theorems or a future reviewed exposure facility. No TypeScript declaration merging or selective-export syntax is provided. See `PSCV0-MODULE-01/02` (§1).
 
@@ -675,24 +843,40 @@ const publicValue: Nat := 3</code></pre></td></tr></tbody></table>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= &quot;Prop&quot; | &quot;Type&quot; level? | &quot;Sort&quot; level
-     | &quot;(&quot; ident &quot;:&quot; term &quot;)&quot; &quot;→&quot; term
-     | term &quot;→&quot; term</code></pre></td><td valign="top"><pre><code>term ::= &quot;Prop&quot; | &quot;Type&quot; level? | &quot;Sort&quot; level
-     | &quot;(&quot; ident &quot;:&quot; term &quot;)&quot; (&quot;→&quot; | &quot;-&gt;&quot;) term
-     | term (&quot;→&quot; | &quot;-&gt;&quot;) term
-// No new universe or Pi forms</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= "Prop" | "Type" level? | "Sort" level
+     | "(" ident ":" term ")" "→" term
+     | term "→" term
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= "Prop" | "Type" level? | "Sort" level
+     | "(" ident ":" term ")" ("→" | "->") term
+     | term ("→" | "->") term
+// No new universe or Pi forms
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>universe u
+**Lean 4.35.0**
+
+```lean
+universe u
 def id {α : Type u} (x : α) : α := x
--- Dependent result type: (n : Nat) → Fin n → Nat</code></pre></td><td valign="top"><pre><code>universe u
+-- Dependent result type: (n : Nat) → Fin n → Nat
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+universe u
 function id {α: Type u}(x: α): α := x
--- Dependent result type: (n: Nat) -&gt; Fin n -&gt; Nat</code></pre></td></tr></tbody></table>
+-- Dependent result type: (n: Nat) -> Fin n -> Nat
+```
 
 **Source language distinction.** `Prop = Sort 0`, `Type u = Sort (u+1)`. Function arrows denote dependent Pi. The result type may reference prior arguments. The source grammar for universe-level terms is delegated to a pinned Lean parser category (not fully expanded in the uploaded text).
 
@@ -703,32 +887,48 @@ function id {α: Type u}(x: α): α := x
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= &quot;fun&quot; binder+ &quot;=&gt;&quot; term
-     | &quot;(&quot; term &quot;:&quot; term &quot;)&quot;
-     | &quot;let&quot; ident (&quot;:&quot; term)? &quot;:=&quot; term separator term</code></pre></td><td valign="top"><pre><code>term ::= &quot;fun&quot; psLambdaBinder+ &quot;=&gt;&quot; term
-     | &quot;(&quot; term &quot;:&quot; term &quot;)&quot;
-     | &quot;let&quot; ident (&quot;:&quot; term)? &quot;:=&quot; term separator term
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= "fun" binder+ "=>" term
+     | "(" term ":" term ")"
+     | "let" ident (":" term)? ":=" term separator term
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= "fun" psLambdaBinder+ "=>" term
+     | "(" term ":" term ")"
+     | "let" ident (":" term)? ":=" term separator term
 psLambdaBinder ::= selectedLeanFunBinder
 // selectedLeanFunBinder = the admitted 4.35.0 Lean.Parser.Term.funBinder cases;
 // Native name, typed binder, and selected implicit/strict/instance forms;
-// NOT declaration comma `psExplicitGroup` or JS arrow-lambda grammar</code></pre></td></tr></tbody></table>
+// NOT declaration comma `psExplicitGroup` or JS arrow-lambda grammar
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def increment : Nat → Nat := fun n =&gt; n + 1
+**Lean 4.35.0**
+
+```lean
+def increment : Nat → Nat := fun n => n + 1
 
 def two : Nat :=
   let x := 1
-  x + 1</code></pre></td><td valign="top"><pre><code>const increment: Nat -&gt; Nat := fun n =&gt; n + 1
+  x + 1
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const increment: Nat -> Nat := fun n => n + 1
 
 function two(): Nat := {
   let x := 1
   x + 1
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — lambda binder ownership.** Lambdas retain the native Lean `fun ... => ...` spelling rather than TypeScript's bare `x => ...`. The `psLambdaBinder` name above selects Lean 4.35.0's `Lean.Parser.Term.funBinder` in the admitted term/binder profile; it is **not** a hidden alias for the comma-grouped **declaration** production `psExplicitGroup`. Thus `fun x => x` and `fun (x: Nat) => x` retain native binder meaning; a new declaration-style `fun (x: Nat, y: Nat) => ...` comma-binder syntax is **not** introduced by this document. The source-empty `function f()`/required-Unit rule applies only to named functions and does not reinterpret lambdas. `let` has immutable logical meaning. In ProofScript a `let ...` followed by its body is **one term**, not a general statement list. The `TermBodySep` is a completed-value newline.
 
@@ -739,28 +939,44 @@ function two(): Nat := {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= Lean.numeral | Lean.scientific | Lean.string
-     | Lean.char | &quot;true&quot; | &quot;false&quot; | &quot;()&quot;</code></pre></td><td valign="top"><pre><code>term ::= Lean.numeral | Lean.scientific | Lean.string
-     | Lean.char | &quot;true&quot; | &quot;false&quot; | &quot;()&quot;
-// Lexical classes and overloaded numeral semantics inherited</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= Lean.numeral | Lean.scientific | Lean.string
+     | Lean.char | "true" | "false" | "()"
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= Lean.numeral | Lean.scientific | Lean.string
+     | Lean.char | "true" | "false" | "()"
+// Lexical classes and overloaded numeral semantics inherited
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def count : Nat := 42
+**Lean 4.35.0**
+
+```lean
+def count : Nat := 42
 def fraction : Float := 1.25
-def text : String := &quot;Ada&quot;
+def text : String := "Ada"
 def enabled : Bool := true
-def letter : Char := &#x27;A&#x27;
-def empty : Unit := ()</code></pre></td><td valign="top"><pre><code>const count: Nat := 42
+def letter : Char := 'A'
+def empty : Unit := ()
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const count: Nat := 42
 const fraction: Float := 1.25
-const text: String := &quot;Ada&quot;
+const text: String := "Ada"
 const enabled: Bool := true
-const letter: Char := &#x27;A&#x27;
-const empty: Unit := ()</code></pre></td></tr></tbody></table>
+const letter: Char := 'A'
+const empty: Unit := ()
+```
 
 **Source language distinction.** Token scanners are pinned Lean families. Numeric meaning is type-directed by instances; defaulting can select `Nat`, `Float` or an applicable signed type under the ProofScript Standard environment. The uploaded reference says its Lean-4.35-rc3 manifest/digest is still pending; no finalized registry is implied.
 
@@ -808,18 +1024,34 @@ function readChecked(xs: Array Nat, i: Nat, h: i < xs.size): Nat := {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= &quot;(&quot; term &quot;)&quot; | &quot;(&quot; term &quot;,&quot; term (&quot;,&quot; term)* &quot;)&quot;</code></pre></td><td valign="top"><pre><code>term ::= &quot;(&quot; term &quot;)&quot; | &quot;(&quot; term &quot;,&quot; term (&quot;,&quot; term)* &quot;,&quot;? &quot;)&quot;
-// Tuple is one term; f((x,y)) passes one tuple in comma-call</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= "(" term ")" | "(" term "," term ("," term)* ")"
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= "(" term ")" | "(" term "," term ("," term)* ","? ")"
+// Tuple is one term; f((x,y)) passes one tuple in comma-call
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def pair : Nat × Bool := (4, true)
-def left : Nat := pair.1</code></pre></td><td valign="top"><pre><code>const pair: Nat × Bool := (4, true,)
-const left: Nat := Prod.fst(pair)</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+def pair : Nat × Bool := (4, true)
+def left : Nat := pair.1
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const pair: Nat × Bool := (4, true,)
+const left: Nat := Prod.fst(pair)
+```
 
 **Source language distinction.** ProofScript tuple terms require **at least two elements**, mandatory commas between elements, and allow one trailing comma. Type-level products are still `Prod`/`×`, not TypeScript tuples. Direct `.1` numeric projection syntax is Lean; ProofScript’s `FieldSuffix` grammar requires an **Identifier** and does not explicitly promise numeric projections—use `Prod.fst(pair)` in ProofScript if available, or named structures.
 
@@ -924,31 +1156,47 @@ There is no new `as`, `typeof`, structural-union narrowing, or unsafe cast synta
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= &quot;do&quot; doSeq
-doSeqItem ::= &quot;let&quot; ident &quot;:=&quot; term | &quot;let&quot; ident &quot;←&quot; term
-            | term | &quot;return&quot; term | ...</code></pre></td><td valign="top"><pre><code>term ::= &quot;do&quot; &quot;{&quot; psDoSeq &quot;}&quot;
-psDoItem ::= &quot;let&quot; ident &quot;:=&quot; term
-           | &quot;let&quot; ident &quot;←&quot; term | term | &quot;return&quot; term
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= "do" doSeq
+doSeqItem ::= "let" ident ":=" term | "let" ident "←" term
+            | term | "return" term | ...
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= "do" "{" psDoSeq "}"
+psDoItem ::= "let" ident ":=" term
+           | "let" ident "←" term | term | "return" term
            | psDoIf | psDoIfLet
-psDoCondition ::= Lean.Parser.Term.binderIdent &quot;:&quot; term | term
-psDoIf ::= &quot;if&quot; &quot;(&quot; psDoCondition &quot;)&quot; &quot;{&quot; psDoSeq &quot;}&quot;
-           (&quot;else&quot; &quot;{&quot; psDoSeq &quot;}&quot;)?
-psDoIfLet ::= &quot;if let&quot; selectedLeanPattern &quot;:=&quot; term
-              &quot;{&quot; psDoSeq &quot;}&quot; (&quot;else&quot; &quot;{&quot; psDoSeq &quot;}&quot;)?
-// Distinct from one-term conditional; preserves Lean `doIf`/`doSeq` elaboration</code></pre></td></tr></tbody></table>
+psDoCondition ::= Lean.Parser.Term.binderIdent ":" term | term
+psDoIf ::= "if" "(" psDoCondition ")" "{" psDoSeq "}"
+           ("else" "{" psDoSeq "}")?
+psDoIfLet ::= "if let" selectedLeanPattern ":=" term
+              "{" psDoSeq "}" ("else" "{" psDoSeq "}")?
+// Distinct from one-term conditional; preserves Lean `doIf`/`doSeq` elaboration
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def compute : Id Nat := do
+**Lean 4.35.0**
+
+```lean
+def compute : Id Nat := do
   let x ← pure 1
-  pure (x + 1)</code></pre></td><td valign="top"><pre><code>function compute(): Id Nat := do {
+  pure (x + 1)
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function compute(): Id Nat := do {
   let x ← pure 1
   pure(x + 1)
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — `PSCV0-DO-IF-01`.** This is **base ProofScript** (`PSCV0`) syntax, distinct from richer verified `do`. Besides term statements, immutable `let`, monadic bind and `pure`/`return`, the initial source selection admits native-Lean-grounded **`do` statement conditionals** with braced `psDoSeq` branches: `if (c) { action1; action2 }` in *schematic* notation (actual `.ps` statements are separated by **newlines**, never literal `;`), and `if let .some x := v { ... }`. `else` is optional for do-level control where Lean's typing and monadic sequencing permit it; it is mandatory for the one-term expression `if` of §3. An `if` in a `do` statement position selects `psDoIf`/`psDoIfLet`; one inside a term expected to return a value selects the term grammar. **`psDoCondition` is either a named proof binder plus proposition written `h : P`, or an ordinary selected condition term (`Bool` or decidable `Prop` as allowed by Lean). The named-binder alternative takes precedence when the next nontrivia token after a `binderIdent` is `:` (ordinary spaces are allowed); otherwise the ordinary term alternative is used, as in the pinned `doIfProp` parser.** Hence `if (h : i < xs.size) { ... }` is an admitted `do` condition and `h` has the corresponding Lean proof scope in its branches; this is **not** an extra term-call parameter group. This is the selected braced translation of 4.35.0 `doIfProp`, not a new verification axiom. The distinct `if let` form initially admits `:=` (pattern binding in the success branch); 4.35.0's `if let p ← action` remains outside this initial selection until specified separately. Nested `do` and pattern binding still use the pinned elaborator; no JS mutable-scoping rules are added. Standard source uses LF-separated `doSeqItem`s rather than general semicolons.
 
@@ -987,27 +1235,43 @@ The `h` binder is part of the condition, not a function argument. The exact `Get
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;instance&quot; declSig declVal
-term ::= term | ...  // coercions are type-directed, not term syntax</code></pre></td><td valign="top"><pre><code>command ::= &quot;instance&quot; psPriority? psInstanceHeader
-            &quot;where&quot; &quot;{&quot; psInstanceFields &quot;}&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "instance" declSig declVal
+term ::= term | ...  // coercions are type-directed, not term syntax
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "instance" psPriority? psInstanceHeader
+            "where" "{" psInstanceFields "}"
 term ::= selectedLeanTerm  // no extra cast syntax
-// Coercions limited by selected Lean instance environment</code></pre></td></tr></tbody></table>
+// Coercions limited by selected Lean instance environment
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>structure Wrapped where
+**Lean 4.35.0**
+
+```lean
+structure Wrapped where
   value : Nat
 instance : Coe Wrapped Nat where
-  coe x := x.value</code></pre></td><td valign="top"><pre><code>structure Wrapped where {
+  coe x := x.value
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+structure Wrapped where {
   value: Nat
 }
 instance : Coe Wrapped Nat where {
   coe(x: Wrapped): Nat := x.value
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** Coercions are **compile-time/type-directed** insertion, not runtime casts or JS coercion. ProofScript Standard may try one direct ordinary coercion, `CoeFun` to function, or `CoeSort` to sort; it excludes arbitrary chains and implicit auto-lifting. The actual instance declarations must belong to the visible bounded Standard registry.
 
@@ -1020,26 +1284,42 @@ instance : Coe Wrapped Nat where {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;structure&quot; declId declSig? (&quot;where&quot; structFields)?
-structFields ::= structField*  // indentation-sensitive</code></pre></td><td valign="top"><pre><code>command ::= &quot;structure&quot; declId psBinderSeq &quot;where&quot; &quot;{&quot; structFields &quot;}&quot; psDerivingClause?
-// Reuse Lean&#x27;s structField, structFields, dependent field checking
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "structure" declId declSig? ("where" structFields)?
+structFields ::= structField*  // indentation-sensitive
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "structure" declId psBinderSeq "where" "{" structFields "}" psDerivingClause?
+// Reuse Lean's structField, structFields, dependent field checking
 // Modification: braces delimit fields; optional allowlisted trailing deriving
-// `psDerivingClause` is defined by PSCV0-DERIVE-01 below</code></pre></td></tr></tbody></table>
+// `psDerivingClause` is defined by PSCV0-DERIVE-01 below
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>structure User where
+**Lean 4.35.0**
+
+```lean
+structure User where
   id : Nat
   name : String
-  active : Bool</code></pre></td><td valign="top"><pre><code>structure User where {
+  active : Bool
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+structure User where {
   id: Nat
   name: String
   active: Bool
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** Both have nominal structure types and Lean-grounded fields. Structure **declaration fields are not comma-separated** in ProofScript; braces only group the Lean-like layout fields. Commas belong in structure **values**, not declarations.
 
@@ -1050,28 +1330,44 @@ structFields ::= structField*  // indentation-sensitive</code></pre></td><td val
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= &quot;{&quot; structInstField (&quot;,&quot; structInstField)* &quot;}&quot;
-     | &quot;{&quot; term &quot;with&quot; structInstField (&quot;,&quot; structInstField)* &quot;}&quot;
-// Lean also supports inferred shorthand, omitted fields and type annotation</code></pre></td><td valign="top"><pre><code>term ::= &quot;{&quot; psRecordField (&quot;,&quot; psRecordField)* &quot;,&quot;? &quot;}&quot;
-     | &quot;{&quot; term &quot;with&quot; psRecordField (&quot;,&quot; psRecordField)* &quot;,&quot;? &quot;}&quot;
-psRecordField ::= ident &quot;:=&quot; term
-// Same nominal Lean structure, stricter field syntax</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= "{" structInstField ("," structInstField)* "}"
+     | "{" term "with" structInstField ("," structInstField)* "}"
+// Lean also supports inferred shorthand, omitted fields and type annotation
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= "{" psRecordField ("," psRecordField)* ","? "}"
+     | "{" term "with" psRecordField ("," psRecordField)* ","? "}"
+psRecordField ::= ident ":=" term
+// Same nominal Lean structure, stricter field syntax
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def alice : User := { id := 1, name := &quot;Alice&quot;, active := false }
-def activate (u : User) : User := { u with active := true }</code></pre></td><td valign="top"><pre><code>const alice: User := {
+**Lean 4.35.0**
+
+```lean
+def alice : User := { id := 1, name := "Alice", active := false }
+def activate (u : User) : User := { u with active := true }
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const alice: User := {
   id := 1,
-  name := &quot;Alice&quot;,
+  name := "Alice",
   active := false,
 }
 function activate(u: User): User := {
   { u with active := true }
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** Record **values** and updates require commas between fields and allow a final comma. ProofScript requires an expected structure type to elaborate a record construction and permits defaults only if declared; it does not guess a shape or fill missing fields through `Inhabited`. Dependent updates must type-check after reconstruction.
 
@@ -1082,18 +1378,34 @@ function activate(u: User): User := {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= term &quot;.&quot; ident | ...
-// Lean generalized field notation; same structure projections</code></pre></td><td valign="top"><pre><code>term ::= term &quot;.&quot; ident
-     | term &quot;.&quot; ident &quot;(&quot; psCallArgs? &quot;)&quot;
-// Call postfix is PSCV0 sugar; resolution stays static</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= term "." ident | ...
+// Lean generalized field notation; same structure projections
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= term "." ident
+     | term "." ident "(" psCallArgs? ")"
+// Call postfix is PSCV0 sugar; resolution stays static
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def nameOf (u : User) : String := u.name</code></pre></td><td valign="top"><pre><code>function nameOf(u: User): String := u.name</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+def nameOf (u : User) : String := u.name
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function nameOf(u: User): String := u.name
+```
 
 **Source language distinction.** Both resolve a declared structure field statically. ProofScript's static generalized field search is deterministic, and method-call parentheses remain adjacency-sensitive.
 
@@ -1104,32 +1416,48 @@ function activate(u: User): User := {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;class&quot; declId declSig? &quot;where&quot; structFields
-          | &quot;instance&quot; declSig &quot;where&quot; structInstFields</code></pre></td><td valign="top"><pre><code>command ::= &quot;class&quot; declId psBinderSeq &quot;where&quot; &quot;{&quot; structFields &quot;}&quot;
-          | &quot;instance&quot; psPriority? psInstanceHeader
-            &quot;where&quot; &quot;{&quot; psInstanceFields &quot;}&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "class" declId declSig? "where" structFields
+          | "instance" declSig "where" structInstFields
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "class" declId psBinderSeq "where" "{" structFields "}"
+          | "instance" psPriority? psInstanceHeader
+            "where" "{" psInstanceFields "}"
 psInstanceFields ::= (psInstanceField on separate source lines)*
-psInstanceField ::= ident psBinderSeq? (&quot;:&quot; term)? &quot;:=&quot; term
+psInstanceField ::= ident psBinderSeq? (":" term)? ":=" term
 // Field headers lower to Lean structure-instance declaration fields, not postfix calls
-// Native value-form `instance ... := term` is outside initial PSCV0 Standard</code></pre></td></tr></tbody></table>
+// Native value-form `instance ... := term` is outside initial PSCV0 Standard
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>class Sized (α : Type) where
+**Lean 4.35.0**
+
+```lean
+class Sized (α : Type) where
   size : α → Nat
 
 instance : Sized String where
-  size s := s.length</code></pre></td><td valign="top"><pre><code>class Sized(α: Type) where {
-  size: α -&gt; Nat
+  size s := s.length
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+class Sized(α: Type) where {
+  size: α -> Nat
 }
 
 instance : Sized String where {
   size(s: String): Nat := s.length
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — `PSCV0-INSTANCE-01`.** Classes are Lean typeclasses, **not** OO classes. Class fields retain Lean layout, while instance fields are **newline-only declaration fields** (no commas/semicolons) with ordered binders, optional dependent result type and one term body. Thus `size(s: String): Nat := ...` is a *field-declaration header*, not a call expression; it lowers to Lean `size (s : String) : Nat := ...`. Named/anonymous instance headers both use `psInstanceHeader ::= declId? psBinderSeq ":" term` (defined once in §4 below): the optional name precedes the binders, and the colon plus class/type term is mandatory. This is a **declaration header**, not a call; it never receives the `function f()` hidden-`Unit` rule. Initial Standard deliberately **excludes** the native value-form `instance ... := term` and supports only `instance ... where { ... }`; this must be reflected in grammar-negative tests. Lean additionally has forms outside this closed selection.
 
@@ -1140,29 +1468,45 @@ instance : Sized String where {
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>binder ::= &quot;[&quot; term &quot;]&quot;
-command ::= &quot;instance&quot; Lean.Command.optNamedPrio
-            declSig &quot;where&quot; structInstFields
-// Lean.namedPrio delegates its value to Lean.priorityParser</code></pre></td><td valign="top"><pre><code>binder ::= Lean.instBinder
-command ::= &quot;instance&quot; psPriority? psInstanceHeader
-            &quot;where&quot; &quot;{&quot; psInstanceFields &quot;}&quot;
-psInstanceHeader ::= declId? psBinderSeq &quot;:&quot; term
-psPriority ::= &quot;(&quot; &quot;priority&quot; &quot;:=&quot; psPriorityAtom &quot;)&quot;
-psPriorityAtom ::= decimalNat | &quot;low&quot; | &quot;mid&quot; | &quot;default&quot; | &quot;high&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+binder ::= "[" term "]"
+command ::= "instance" Lean.Command.optNamedPrio
+            declSig "where" structInstFields
+// Lean.namedPrio delegates its value to Lean.priorityParser
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+binder ::= Lean.instBinder
+command ::= "instance" psPriority? psInstanceHeader
+            "where" "{" psInstanceFields "}"
+psInstanceHeader ::= declId? psBinderSeq ":" term
+psPriority ::= "(" "priority" ":=" psPriorityAtom ")"
+psPriorityAtom ::= decimalNat | "low" | "mid" | "default" | "high"
 // The optional instance name precedes its binder telescope.
 // A command modifier, never a call or ordinary binder;
-// arithmetic/prio macros remain outside this initial PSCV0 subset</code></pre></td></tr></tbody></table>
+// arithmetic/prio macros remain outside this initial PSCV0 subset
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def sizeOf {α : Type} [Sized α] (x : α) : Nat :=
-  Sized.size x</code></pre></td><td valign="top"><pre><code>function sizeOf {α: Type}[Sized α](x: α): Nat := {
+**Lean 4.35.0**
+
+```lean
+def sizeOf {α : Type} [Sized α] (x : α) : Nat :=
+  Sized.size x
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function sizeOf {α: Type}[Sized α](x: α): Nat := {
   Sized.size(x)
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — `PSCV0-INSTANCE-PRIO-01` / `PSCV0-INSTANCE-HDR-01`.** Instance-implicit Pi binders work in both. Under `PSCV0-INSTANCE-HDR-01`, `instance : C T where { ... }` is anonymous, whereas `instance chosen : C T where { ... }` names the declaration; `instance (priority := high) chosen : C T where { ... }` also admits the selected priority modifier. `declId` can carry an admissible Lean universe suffix, while an omitted colon/type or a `()` binder is rejected at PARSE. Names, binder order, and type inference follow the selected Lean declaration semantics, with no special nullary lowering. 4.35.0's native `instance (priority := value)` modifier is a **command-head category**, not an application or parameter. The initial `.ps` selection admits a nonnegative decimal natural literal, `low`, `mid`, `default`, and `high` with pinned values `100`, `500`, `1000`, `10000`; absence of a modifier uses native `default = 1000`. Literal numbers outside those four named bands are admitted and preserve their numeric priority. 4.35.0 also parses priority arithmetic such as `high + 1`, but Standard `.ps` **deliberately excludes** it initially; do not imply full `Lean.priorityParser` admission from the Lean pin. ProofScript freezes candidate order (lexical locals before prioritized visible globals) and uses this same numeric ordering for admitted global priorities. The spacing in `instance (priority := high)` is native **modifier syntax** and is exempt from `PSCV0-APP-02`. This is a source-observable constraint, not a new `class` syntax. [Pinned 4.35.0 priority parser](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean) and [named values](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Notation.lean).
 
@@ -1173,23 +1517,39 @@ psPriorityAtom ::= decimalNat | &quot;low&quot; | &quot;mid&quot; | &quot;defaul
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;class&quot; declId declSig? &quot;where&quot; structFields
-structField ::= ident &quot;:&quot; term | ...</code></pre></td><td valign="top"><pre><code>command ::= &quot;class&quot; declId psBinderSeq &quot;where&quot; &quot;{&quot; structFields &quot;}&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "class" declId declSig? "where" structFields
+structField ::= ident ":" term | ...
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "class" declId psBinderSeq "where" "{" structFields "}"
 structField ::= Lean.structField
-// Law: any field with a Prop-typed result, checked by Lean</code></pre></td></tr></tbody></table>
+// Law: any field with a Prop-typed result, checked by Lean
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>class IdentityCodec (α : Type) where
+**Lean 4.35.0**
+
+```lean
+class IdentityCodec (α : Type) where
   encode : α → α
-  roundTrip : ∀ x : α, encode x = x</code></pre></td><td valign="top"><pre><code>class IdentityCodec(α: Type) where {
-  encode: α -&gt; α
+  roundTrip : ∀ x : α, encode x = x
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+class IdentityCodec(α: Type) where {
+  encode: α -> α
   roundTrip: forall x : α, encode(x) = x
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** A law is an ordinary field of a proposition type. An instance must supply proof evidence for it just as it supplies executable operations; this adds no novel kernel primitive.
 
@@ -1200,27 +1560,43 @@ structField ::= Lean.structField
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;inductive&quot; declId declSig? &quot;where&quot; ctor*
-ctor ::= &quot;|&quot; ident binder* (&quot;:&quot; term)?</code></pre></td><td valign="top"><pre><code>command ::= &quot;inductive&quot; declId psBinderSeq (&quot;:&quot; term)?
-            &quot;where&quot; &quot;{&quot; psCtor* &quot;}&quot; psDerivingClause?
-psCtor ::= &quot;|&quot; ident psBinderSeq (&quot;:&quot; term)?
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "inductive" declId declSig? "where" ctor*
+ctor ::= "|" ident binder* (":" term)?
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "inductive" declId psBinderSeq (":" term)?
+            "where" "{" psCtor* "}" psDerivingClause?
+psCtor ::= "|" ident psBinderSeq (":" term)?
 // Use the closed, ordered PSCV0 declaration-binder selection; no unrestricted Lean.binder.
 // The optional constructor result type supports both ordinary and indexed inductives.
 // Constructors checked by Lean inductive type checker
-// Optional trailing clause follows PSCV0-DERIVE-01</code></pre></td></tr></tbody></table>
+// Optional trailing clause follows PSCV0-DERIVE-01
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>inductive Outcome (ε : Type) (α : Type) where
+**Lean 4.35.0**
+
+```lean
+inductive Outcome (ε : Type) (α : Type) where
   | ok (value : α)
-  | error (error : ε)</code></pre></td><td valign="top"><pre><code>inductive Outcome(ε: Type, α: Type) where {
+  | error (error : ε)
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+inductive Outcome(ε: Type, α: Type) where {
   | ok(value: α)
   | error(error: ε)
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** ProofScript uses a comma-grouped parameter telescope and *canonically* braces the `|` alternatives. The `.ps` grammar requires the selected braced form; ordinary `.lean` syntax retains native Lean layout. Constructor fields reuse unified explicit parameter groups. Strict positivity, parameters/indices, and recursors remain Lean-grounded; this is still not Lean’s unrestricted equation compiler.
 
@@ -1231,21 +1607,37 @@ psCtor ::= &quot;|&quot; ident psBinderSeq (&quot;:&quot; term)?
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= ident argument* | &quot;.&quot; ident argument* | ...
-// Elaborator resolves anonymous-namespace constructor notation</code></pre></td><td valign="top"><pre><code>term ::= ident &quot;(&quot; psCallArgs? &quot;)&quot;
-     | &quot;.&quot; ident &quot;(&quot; psCallArgs? &quot;)&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= ident argument* | "." ident argument* | ...
+// Elaborator resolves anonymous-namespace constructor notation
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= ident "(" psCallArgs? ")"
+     | "." ident "(" psCallArgs? ")"
      | selectedLeanConstructorTerm
-// Both lower to ordinary Lean constructor applications</code></pre></td></tr></tbody></table>
+// Both lower to ordinary Lean constructor applications
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def ok : Outcome String Nat := Outcome.ok 42
-def short : Outcome String Nat := .ok 42</code></pre></td><td valign="top"><pre><code>const ok: Outcome String Nat := Outcome.ok(42)
-const short: Outcome String Nat := .ok(42)</code></pre></td></tr></tbody></table>
+**Lean 4.35.0**
+
+```lean
+def ok : Outcome String Nat := Outcome.ok 42
+def short : Outcome String Nat := .ok 42
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const ok: Outcome String Nat := Outcome.ok(42)
+const short: Outcome String Nat := .ok(42)
+```
 
 **Source language distinction.** Shorthand requires a known expected inductive type and a uniquely determined constructor. Neither language thereby uses dynamic enum-string dispatch.
 
@@ -1271,26 +1663,42 @@ const short: Outcome String Nat := .ok(42)</code></pre></td></tr></tbody></table
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;inductive&quot; declId binder* &quot;:&quot; term &quot;where&quot; ctor*
-ctor ::= &quot;|&quot; ident binder* &quot;:&quot; term</code></pre></td><td valign="top"><pre><code>command ::= &quot;inductive&quot; declId psBinderSeq &quot;:&quot; term
-            &quot;where&quot; &quot;{&quot; psCtor* &quot;}&quot; psDerivingClause?
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "inductive" declId binder* ":" term "where" ctor*
+ctor ::= "|" ident binder* ":" term
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "inductive" declId psBinderSeq ":" term
+            "where" "{" psCtor* "}" psDerivingClause?
 // Refer to the single `psCtor` production above; do not redefine it.
 // Indexed constructors use its explicit result-type alternative to state indices.
 // Preserve Lean parameters/indices and dependent result types
-// Same selected trailing deriving clause as other inductives</code></pre></td></tr></tbody></table>
+// Same selected trailing deriving clause as other inductives
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>inductive Vec (α : Type) : Nat → Type where
+**Lean 4.35.0**
+
+```lean
+inductive Vec (α : Type) : Nat → Type where
   | nil : Vec α 0
-  | cons (n : Nat) (value : α) (tail : Vec α n) : Vec α (n + 1)</code></pre></td><td valign="top"><pre><code>inductive Vec(α: Type): Nat -&gt; Type where {
+  | cons (n : Nat) (value : α) (tail : Vec α n) : Vec α (n + 1)
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+inductive Vec(α: Type): Nat -> Type where {
   | nil : Vec(α, 0)
   | cons(n: Nat, value: α, tail: Vec(α, n)): Vec(α, n + 1)
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** Indices may occur in constructor result types. The native Lean column legitimately uses `Vec α (n + 1)`; the `.ps` column instead uses `Vec(α, n + 1)` and `Vec(α, n)` because `Vec α (n + 1)` would violate `PSCV0-APP-02` in an **application continuation**. Do **not** "fix" this by writing `Vec α(n + 1)`, which attaches a call to `α` and is not a faithful two-argument application. The **new** `pscv0` selection explicitly admits Lean's named/generalizing discriminants for selected dependent matches (§4), but still does not promise that every unrestricted Lean equation-compiler/motive inference variant is supported. Each admitted dependent elimination must elaborate to checked Lean terms.
 
@@ -1347,27 +1755,43 @@ Lean supports convenient equation-style declarations. Adopt the **selected nativ
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId declSig? declVal
-// Recursive definitions may be accepted using recursor/termination proof</code></pre></td><td valign="top"><pre><code>command ::= &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psDeclVal
-          | &quot;function&quot; declId psFunctionBinders (&quot;:&quot; term)? psDeclVal
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "def" declId declSig? declVal
+// Recursive definitions may be accepted using recursor/termination proof
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "def" declId psBinderSeq (":" term)? psDeclVal
+          | "function" declId psFunctionBinders (":" term)? psDeclVal
 // Head-specific binders also apply to recursive declarations: only `function` has `()`.
-// Recursive calls require an admitted Lean-checkable termination proof</code></pre></td></tr></tbody></table>
+// Recursive calls require an admitted Lean-checkable termination proof
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def length {α : Type} (xs : List α) : Nat :=
+**Lean 4.35.0**
+
+```lean
+def length {α : Type} (xs : List α) : Nat :=
   match xs with
-  | [] =&gt; 0
-  | _ :: tail =&gt; 1 + length tail</code></pre></td><td valign="top"><pre><code>function length {α: Type}(xs: List α): Nat := {
+  | [] => 0
+  | _ :: tail => 1 + length tail
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function length {α: Type}(xs: List α): Nat := {
   match xs with {
-    | .nil =&gt; 0
-    | .cons _ tail =&gt; 1 + length(tail)
+    | .nil => 0
+    | .cons _ tail => 1 + length(tail)
   }
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** The inherited base reference allowed only structural recursion; this `pscv0` revision also retains the already proposed bounded `termination_by` well-founded path. In the structural case, recursive calls must pass a designated strict constructor subterm. An arithmetic expression such as `n - 1` is not accepted as *structural-subterm evidence*. Lean offers more termination elaboration routes.
 
@@ -1378,39 +1802,55 @@ Lean supports convenient equation-style declarations. Adopt the **selected nativ
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;mutual&quot; declaration+ &quot;end&quot;
-// Lean mutual groups are declaration groups</code></pre></td><td valign="top"><pre><code>command ::= &quot;mutual&quot; (psDefDecl | psFunctionDecl)+ &quot;end&quot;
-// Members lower to Lean mutual declarations</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "mutual" declaration+ "end"
+// Lean mutual groups are declaration groups
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "mutual" (psDefDecl | psFunctionDecl)+ "end"
+// Members lower to Lean mutual declarations
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>mutual
+**Lean 4.35.0**
+
+```lean
+mutual
   def even (n : Nat) : Bool :=
     match n with
-    | 0 =&gt; true
-    | k + 1 =&gt; odd k
+    | 0 => true
+    | k + 1 => odd k
   def odd (n : Nat) : Bool :=
     match n with
-    | 0 =&gt; false
-    | k + 1 =&gt; even k
-end</code></pre></td><td valign="top"><pre><code>mutual
+    | 0 => false
+    | k + 1 => even k
+end
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+mutual
   function even(n: Nat): Bool := {
     match n with {
-      | 0 =&gt; true
-      | k + 1 =&gt; odd(k)
+      | 0 => true
+      | k + 1 => odd(k)
     }
   }
   function odd(n: Nat): Bool := {
     match n with {
-      | 0 =&gt; false
-      | k + 1 =&gt; even(k)
+      | 0 => false
+      | k + 1 => even(k)
     }
   }
-end</code></pre></td></tr></tbody></table>
+end
+```
 
 **Source language distinction.** ProofScript demands one designated structural argument for each member of the recursive strongly connected component, strictly decreasing across every recursive edge. Both `| .succ k => ...` and `| k + 1 => ...` are permitted on `Nat`: Lean elaborates the second to an equivalent successor-constructor pattern, so the call on `k` is a call on a strict subterm. **This is not permission to recursively call on `n - 1` without separate termination evidence.** The two spellings belong to the same native Lean semantics; arithmetic-oriented examples prefer `k + 1`. See the [Lean recursive-definition reference](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/).
 
@@ -1421,30 +1861,46 @@ end</code></pre></td></tr></tbody></table>
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>declVal ::= &quot;:=&quot; term terminationSuffix? whereDecls?
-terminationSuffix ::= &quot;termination_by&quot; term
-                    (&quot;decreasing_by&quot; tacticSeq)?</code></pre></td><td valign="top"><pre><code>// Reuse the two `psDeclVal` alternatives from §2 (plain term OR {one term}).
+**Lean 4 grammar (schematic)**
+
+```text
+declVal ::= ":=" term terminationSuffix? whereDecls?
+terminationSuffix ::= "termination_by" term
+                    ("decreasing_by" tacticSeq)?
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+// Reuse the two `psDeclVal` alternatives from §2 (plain term OR {one term}).
 // Both body forms admit the same optional selected termination suffix.
-psTermination ::= &quot;termination_by&quot; term
-                  (&quot;decreasing_by&quot; &quot;by&quot; &quot;{&quot; psTacticSeq &quot;}&quot;)?
-// Use Lean&#x27;s decreasing proof kernel checks</code></pre></td></tr></tbody></table>
+psTermination ::= "termination_by" term
+                  ("decreasing_by" "by" "{" psTacticSeq "}")?
+// Use Lean's decreasing proof kernel checks
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def down (n : Nat) : Nat :=
+**Lean 4.35.0**
+
+```lean
+def down (n : Nat) : Nat :=
   if n == 0 then 0 else down (n - 1)
 termination_by n
-decreasing_by omega</code></pre></td><td valign="top"><pre><code>function down(n: Nat): Nat := {
+decreasing_by omega
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function down(n: Nat): Nat := {
   if (n == 0) { 0 } else { down(n - 1) }
 }
 termination_by n
 decreasing_by by {
   omega
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — `PSCV0-TERM-01`.** PSCV0 extends the base structural-only profile with explicit well-founded/measure recursion. Each call must produce an accepted decrease proof. The selected **PSCV0** suffix is `termination_by measure` optionally followed by `decreasing_by by { psTacticSeq }`. This second spelling **is an owned ProofScript proof-body transformation**, not literal native Lean source: discard the `.ps` grouping `by {` and `}`, and emit Lean's `decreasing_by` followed by the corresponding native tactic sequence (e.g., `.ps` `decreasing_by by { omega }` lowers to `.lean` `decreasing_by omega`). Do not emit a term-level `by` into a native tactic position. Preserve Lean's goal focus and proof-term checking, and require the `pscv0` application grammar in embedded tactic arguments. Unlike Lean's richer termination suffix grammar (which also has variants such as `termination_by structural` and allows some independent suffix arrangements), initial PSCV0 intentionally selects the measure-first form above. The source example is a design illustration and has not been execution-tested.
 
@@ -1616,22 +2072,38 @@ Lean research: [custom tactics](https://lean-lang.org/doc/reference/latest/Tacti
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>attributes ::= &quot;@[&quot; attr (&quot;,&quot; attr)* &quot;]&quot;
-command ::= attributes? declaration</code></pre></td><td valign="top"><pre><code>psAttributes ::= &quot;@[&quot; (&quot;simp&quot; | &quot;instance&quot; | &quot;default_instance&quot;)
-                  (&quot;,&quot; (&quot;simp&quot; | &quot;instance&quot; | &quot;default_instance&quot;))* &quot;]&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+attributes ::= "@[" attr ("," attr)* "]"
+command ::= attributes? declaration
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psAttributes ::= "@[" ("simp" | "instance" | "default_instance")
+                  ("," ("simp" | "instance" | "default_instance"))* "]"
 command ::= psAttributes? selectedPsDeclaration
-// Select Lean attribute semantics, not arbitrary plugin handlers</code></pre></td></tr></tbody></table>
+// Select Lean attribute semantics, not arbitrary plugin handlers
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>@[simp] theorem add_zero_right (n : Nat) : n + 0 = n := by
-  simp</code></pre></td><td valign="top"><pre><code>@[simp] theorem addZeroRight(n: Nat): n + 0 = n := by {
+**Lean 4.35.0**
+
+```lean
+@[simp] theorem add_zero_right (n : Nat) : n + 0 = n := by
   simp
-}</code></pre></td></tr></tbody></table>
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+@[simp] theorem addZeroRight(n: Nat): n + 0 = n := by {
+  simp
+}
+```
 
 **Source language distinction.** Only `simp`, `instance`, and `default_instance` are exposed as **user attributes** by the ProofScript Standard grammar. Imported source may add admitted instance and simp entries but not arbitrary syntax or proof authority. `set_option`, `syntax`, `macro`, arbitrary deriving-handler registration, standalone `deriving instance ... for ...`, and custom attribute handlers are outside the **initial Standard source**. The **trailing allowlisted `deriving` clause** after `structure`/`inductive` is **inside** Standard source under `PSCV0-DERIVE-01`; it is a *declaration suffix*, not an `@[...]` attribute. This distinction overrides the older blanket exclusion of the word `deriving` in this paragraph.
 
@@ -1644,34 +2116,50 @@ command ::= psAttributes? selectedPsDeclaration
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId declSig
-            &quot;given&quot;? &quot;requires&quot;? &quot;ensures&quot;? declVal
-// Lean 4.35.0 experimental intrinsic contracts</code></pre></td><td valign="top"><pre><code>command ::= &quot;def&quot; declId psBinderSeq (&quot;:&quot; term)? psContractSeq psDeclVal
-          | &quot;function&quot; declId psFunctionBinders (&quot;:&quot; term)? psContractSeq psDeclVal
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "def" declId declSig
+            "given"? "requires"? "ensures"? declVal
+// Lean 4.35.0 experimental intrinsic contracts
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "def" declId psBinderSeq (":" term)? psContractSeq psDeclVal
+          | "function" declId psFunctionBinders (":" term)? psContractSeq psDeclVal
 // Contract eligibility does not remove the source-nullary `function f()` form.
 psContractSeq ::= psGivenClause? psRequiresClause? psEnsuresClause?   // fixed order
-psGivenClause ::= &quot;given&quot; psGivenBinder+  // binderIdent or bracketedBinder
-psRequiresClause ::= &quot;requires&quot; term | &quot;requires&quot; selectedLeanBasicFun
-psEnsuresClause ::= &quot;ensures&quot; selectedLeanBasicFun  // mandatory result binder
-// At most once each; native 4.35.0 contractDeclVal order, never arbitrary psContract*</code></pre></td></tr></tbody></table>
+psGivenClause ::= "given" psGivenBinder+  // binderIdent or bracketedBinder
+psRequiresClause ::= "requires" term | "requires" selectedLeanBasicFun
+psEnsuresClause ::= "ensures" selectedLeanBasicFun  // mandatory result binder
+// At most once each; native 4.35.0 contractDeclVal order, never arbitrary psContract*
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>-- Lean intrinsic verification, version-sensitive example
+**Lean 4.35.0**
+
+```lean
+-- Lean intrinsic verification, version-sensitive example
 -- requires import Std.WP and its registered proof environment
 def increment (n : Nat) : Id Nat
-    requires n &lt; 100
-    ensures r =&gt; r = n + 1 := do
-  return n + 1</code></pre></td><td valign="top"><pre><code>-- PSCV0: requires a selected pinned Std.WP import/prelude
-function increment(n: Nat): Id Nat
-  requires n &lt; 100
-  ensures r =&gt; r = n + 1 := do {
+    requires n < 100
+    ensures r => r = n + 1 := do
   return n + 1
-}</code></pre></td></tr></tbody></table>
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+-- PSCV0: requires a selected pinned Std.WP import/prelude
+function increment(n: Nat): Id Nat
+  requires n < 100
+  ensures r => r = n + 1 := do {
+  return n + 1
+}
+```
 
 **Source language distinction — `PSCV0-CONTRACT-01/02`.** Clauses may occur only in the 4.35.0 sequence **`given? requires? ensures?`**, at most once each, after a selected `def` or `function` signature and before its value. `requires` accepts the pinned term or predicate-binder form; `ensures` requires a Lean `basicFun` result binder (e.g. `ensures r => ...`). Repetitions, missing `ensures` binder, and reordered clauses are **PARSE rejects**. These are genuine 4.35.0 intrinsic contracts, not harmless metadata. The generated `f.spec` proof obligations must be closed under the selected WP/effect model, with missing proofs blocking verified emission.
 
@@ -1684,29 +2172,45 @@ function increment(n: Nat): Id Nat
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId declSig &quot;given&quot; binder+ ...
-// Pinned Lean&#x27;s experimental givenClause</code></pre></td><td valign="top"><pre><code>psGivenClause ::= &quot;given&quot; psGivenBinder+
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "def" declId declSig "given" binder+ ...
+// Pinned Lean's experimental givenClause
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psGivenClause ::= "given" psGivenBinder+
 psGivenBinder ::= Lean.binderIdent | selectedLeanBracketedBinder
-// A typed binder is `(target: Nat)`, never bare `target: Nat`; logical only</code></pre></td></tr></tbody></table>
+// A typed binder is `(target: Nat)`, never bare `target: Nat`; logical only
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>-- Requires import Std.WP; schematic (not tested)
+**Lean 4.35.0**
+
+```lean
+-- Requires import Std.WP; schematic (not tested)
 def take (xs : List Nat) : Id Nat
     given (target : Nat)
     requires target = xs.length
-    ensures r =&gt; r = target := do
-  return xs.length</code></pre></td><td valign="top"><pre><code>-- Requires the selected Std.WP verification environment; schematic
+    ensures r => r = target := do
+  return xs.length
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+-- Requires the selected Std.WP verification environment; schematic
 function take(xs: List Nat): Id Nat
   given (target: Nat)
   requires target = xs.length
-  ensures r =&gt; r = target := do {
+  ensures r => r = target := do {
   return xs.length
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction — `PSCV0-GIVEN-01`.** `given` introduces specification-only logical variables, never runtime arguments, with exactly Lean's binder grammar: untyped identifier or selected parenthesized/bracketed binder. In particular write `given (target: Nat)`, not `given target: Nat`. PSCV0 retains 4.35.0 `given` → `requires` → `ensures` order; the older non-native `reads`/`modifies`/`errors` clauses are **deferred**. Both snippets are **illustrative** and depend on `Std.WP`; they are not claimed to parse, elaborate or prove in a test run.
 
@@ -1717,24 +2221,40 @@ function take(xs: List Nat): Id Nat
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>doSeqItem ::= &quot;assert&quot; term | ...
-// Pinned Lean 4.35 experimental intrinsic verification</code></pre></td><td valign="top"><pre><code>psDoItem ::= &quot;assert&quot; term | selectedLeanDoItem
-// Requires Prop; generates proof obligation; no JS runtime assert</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+doSeqItem ::= "assert" term | ...
+// Pinned Lean 4.35 experimental intrinsic verification
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psDoItem ::= "assert" term | selectedLeanDoItem
+// Requires Prop; generates proof obligation; no JS runtime assert
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>-- Lean 4.35 verification context; illustrative
+**Lean 4.35.0**
+
+```lean
+-- Lean 4.35 verification context; illustrative
 -- def check (n : Nat) : Id Nat := do
 --   assert 0 ≤ n
---   return n</code></pre></td><td valign="top"><pre><code>-- PSCV0 verification context; illustrative
--- function check(n: Nat): Id Nat := do {
---   assert 0 &lt;= n
 --   return n
--- }</code></pre></td></tr></tbody></table>
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+-- PSCV0 verification context; illustrative
+-- function check(n: Nat): Id Nat := do {
+--   assert 0 <= n
+--   return n
+-- }
+```
 
 **Source language distinction.** `assert P` has `P : Prop`; it creates proof obligations and contributes proved facts to later verification, with **no required runtime check**. It is not JavaScript's throwing `assert`. Lean 4.35.0 requires the `Std.WP` assertion gadget/registered elaboration; a bare `assert` without that environment or a compatible verified effect model fails instead of silently becoming a runtime assertion. Verified status additionally requires successful proof closure.
 
@@ -1745,25 +2265,41 @@ function take(xs: List Nat): Id Nat
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>doSeqItem ::= &quot;let&quot; &quot;mut&quot; ident &quot;:=&quot; term
-            | ident &quot;:=&quot; term | &quot;return&quot; term | ...</code></pre></td><td valign="top"><pre><code>psDoItem ::= &quot;let&quot; &quot;mut&quot; ident (&quot;:&quot; term)? &quot;:=&quot; term
-           | ident &quot;:=&quot; term | &quot;return&quot; term | ...
-// Retain Lean local-mutation translation; no unmodeled aliasing</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+doSeqItem ::= "let" "mut" ident ":=" term
+            | ident ":=" term | "return" term | ...
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psDoItem ::= "let" "mut" ident (":" term)? ":=" term
+           | ident ":=" term | "return" term | ...
+// Retain Lean local-mutation translation; no unmodeled aliasing
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def next (n : Nat) : Id Nat := do
-  let mut x := n
-  x := x + 1
-  return x</code></pre></td><td valign="top"><pre><code>function next(n: Nat): Id Nat := do {
+**Lean 4.35.0**
+
+```lean
+def next (n : Nat) : Id Nat := do
   let mut x := n
   x := x + 1
   return x
-}</code></pre></td></tr></tbody></table>
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function next(n: Nat): Id Nat := do {
+  let mut x := n
+  x := x + 1
+  return x
+}
+```
 
 **Source language distinction.** Local mutability is translated into a total stateful `do` computation. PSCV0 does **not** thereby admit mutable aliases/shared heap references. Early return must satisfy all applicable postconditions. `do` sequencing is line-based in ProofScript, not semicolon-separated.
 
@@ -1906,33 +2442,49 @@ The older PSCV design proposed `reads`, `modifies`, contract-only `old(...)`, an
 
 **Lean 4 grammar family → ProofScript surface selection (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= &quot;do&quot; doSeq
-// Lean library effect families include StateM / ReaderT / Except</code></pre></td><td valign="top"><pre><code>term ::= &quot;do&quot; &quot;{&quot; psDoSeq &quot;}&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= "do" doSeq
+// Lean library effect families include StateM / ReaderT / Except
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= "do" "{" psDoSeq "}"
 psDoItem ::= psBaseDoItem | psVerifiedDoItemP0
            | psStagedDoItemP1 | psDivergentDoItemP2
 // Source selection §0B / §11.7: unannotated while is ordinary checked
 // P0 total loops require VCs; P1 handlers require environment registration
 // P2 trace-verified partial loops need a sound separately registered model
-// Original Lean effect types; checked WP law evidence required</code></pre></td></tr></tbody></table>
+// Original Lean effect types; checked WP law evidence required
+```
 
 **Side-by-side examples.**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def pureAdd (a b : Nat) : Id Nat := do
+**Lean 4.35.0**
+
+```lean
+def pureAdd (a b : Nat) : Id Nat := do
   return a + b
 
 def checkedDiv (n d : Nat) : Except String Nat :=
-  if d == 0 then .error &quot;zero&quot; else .ok (n / d)</code></pre></td><td valign="top"><pre><code>function pureAdd(a: Nat, b: Nat): Id Nat := do {
+  if d == 0 then .error "zero" else .ok (n / d)
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function pureAdd(a: Nat, b: Nat): Id Nat := do {
   return a + b
 }
 
 function checkedDiv(n: Nat, d: Nat): Except String Nat := {
-  if (d == 0) { .error(&quot;zero&quot;) }
+  if (d == 0) { .error("zero") }
   else { .ok(n / d) }
-}</code></pre></td></tr></tbody></table>
+}
+```
 
 **Source language distinction.** PSCV0 requires proof-capable semantics for at least identity/pure, state, reader, and typed error effects. The existence of a `Monad`/`StateM` class instance alone does not verify effects. Raw `IO` and external world operations remain outside closed verified computation without an accepted model. This is a **language/effect-profile** distinction, not backend design.
 
@@ -2113,13 +2665,21 @@ The table below reproduces ProofScript Standard's exact **source operator notati
 
 **Spelling examples (side by side):**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def arith (a b : Nat) : Nat := a + b * 2
+**Lean 4.35.0**
+
+```lean
+def arith (a b : Nat) : Nat := a + b * 2
 def equal (a b : Nat) : Prop := a = b
-def sameBool (a b : Nat) : Bool := a == b</code></pre></td><td valign="top"><pre><code>function arith(a: Nat, b: Nat): Nat := a + b * 2
+def sameBool (a b : Nat) : Bool := a == b
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function arith(a: Nat, b: Nat): Nat := a + b * 2
 function equal(a: Nat, b: Nat): Prop := a = b
-function sameBool(a: Nat, b: Nat): Bool := a == b</code></pre></td></tr></tbody></table>
+function sameBool(a: Nat, b: Nat): Bool := a == b
+```
 
 ProofScript forbids user-defined Standard notation and rejects unparenthesized chaining of nonassociative precedence-50 comparisons (`a < b < c`, `a = b = c`). Its `&&` and `||` are Boolean operations, while `∧`, `∨`, `¬` are propositional connectives. `≠` is `Not (Eq ...)`, `!=` is Boolean inequality; `Nat`/`Int` arithmetic retains exact Lean-grounded meaning.
 
@@ -2306,19 +2866,34 @@ Keep `erased`, `Subtype`, `Fin`, constructors, typeclass notation, theorems, tac
 
 **Lean 4 grammar family → ProofScript overlay (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>command ::= &quot;def&quot; declId binder* (&quot;:&quot; term)? declVal
-term ::= ... | &quot;Fin&quot; term | term &quot;.&quot; ident</code></pre></td><td valign="top"><pre><code>command ::= &quot;function&quot; declId psFunctionBinders (&quot;:&quot; term)? psDeclVal
-term ::= ... | &quot;Fin&quot; term | term &quot;.&quot; ident
-// Same dependent type and bounds proof as Lean</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+command ::= "def" declId binder* (":" term)? declVal
+term ::= ... | "Fin" term | term "." ident
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+command ::= "function" declId psFunctionBinders (":" term)? psDeclVal
+term ::= ... | "Fin" term | term "." ident
+// Same dependent type and bounds proof as Lean
+```
 
 **Side-by-side example**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def atMost {n : Nat} (i : Fin n) : Nat := i.val</code></pre></td><td valign="top"><pre><code>function atMost {n: Nat}(i: Fin n): Nat := i.val</code></pre></td></tr></tbody>
-</table>
+**Lean 4.35.0**
+
+```lean
+def atMost {n : Nat} (i : Fin n) : Nat := i.val
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function atMost {n: Nat}(i: Fin n): Nat := i.val
+```
 
 **Meaning and boundary.** `Fin n` is Lean's dependent index/bounded-natural family. ProofScript inherits the same type; the syntax change is only the explicit binder group. The index proof is not a new runtime type or unchecked numeric cast.
 
@@ -2339,21 +2914,36 @@ The base value needs a proof that it satisfies the predicate; the proof is compu
 
 **Lean 4 grammar family → ProofScript overlay (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= ... | term argument+
-argument ::= term | &quot;(&quot; ident &quot;:=&quot; term &quot;)&quot;</code></pre></td><td valign="top"><pre><code>term ::= ... | term argument+
-            | psCallHead &quot;(&quot; psCallArgs? &quot;)&quot;
-// Both elaborate to nested Lean unary applications</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= ... | term argument+
+argument ::= term | "(" ident ":=" term ")"
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= ... | term argument+
+            | psCallHead "(" psCallArgs? ")"
+// Both elaborate to nested Lean unary applications
+```
 
 **Side-by-side example**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def add (x y : Nat) : Nat := x + y
-def plusOne : Nat → Nat := add 1</code></pre></td><td valign="top"><pre><code>function add(x: Nat, y: Nat): Nat := x + y
-const plusOne: Nat -&gt; Nat := add(1)</code></pre></td></tr></tbody>
-</table>
+**Lean 4.35.0**
+
+```lean
+def add (x y : Nat) : Nat := x + y
+def plusOne : Nat → Nat := add 1
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function add(x: Nat, y: Nat): Nat := x + y
+const plusOne: Nat -> Nat := add(1)
+```
 
 **Meaning and boundary.** `f(x)` can return a function when more explicit binders remain, exactly as Lean's `f x`. An *empty* `f()` asks for bounded empty-invocation completion: defaults/automatics or exactly one required explicit `Unit`. In `.ps`, `f ()` is always rejected; the only explicit Unit call is `f(())`.
 
@@ -2364,22 +2954,37 @@ const plusOne: Nat -&gt; Nat := add(1)</code></pre></td></tr></tbody>
 
 **Lean 4 grammar family → ProofScript overlay (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= ... | &quot;bif&quot; term &quot;then&quot; term &quot;else&quot; term
-            | &quot;if&quot; term &quot;then&quot; term &quot;else&quot; term</code></pre></td><td valign="top"><pre><code>term ::= ... | &quot;if&quot; &quot;(&quot; term &quot;)&quot; &quot;{&quot; term &quot;}&quot;
-            &quot;else&quot; &quot;{&quot; term &quot;}&quot;
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= ... | "bif" term "then" term "else" term
+            | "if" term "then" term "else" term
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= ... | "if" "(" term ")" "{" term "}"
+            "else" "{" term "}"
 // For both admissible condition types: lower to Lean `if condition then a else b`
-// Lean native `bif`/`cond` is a distinct construct, not selected by ordinary PSCV0 `if`</code></pre></td></tr></tbody></table>
+// Lean native `bif`/`cond` is a distinct construct, not selected by ordinary PSCV0 `if`
+```
 
 **Side-by-side example**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def boolChoice (b : Bool) : Nat := if b then 1 else 0
-def propChoice (n : Nat) : Nat := if n = 0 then 1 else 0</code></pre></td><td valign="top"><pre><code>function boolChoice(b: Bool): Nat := if (b) { 1 } else { 0 }
-function propChoice(n: Nat): Nat := if (n = 0) { 1 } else { 0 }</code></pre></td></tr></tbody>
-</table>
+**Lean 4.35.0**
+
+```lean
+def boolChoice (b : Bool) : Nat := if b then 1 else 0
+def propChoice (n : Nat) : Nat := if n = 0 then 1 else 0
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function boolChoice(b: Bool): Nat := if (b) { 1 } else { 0 }
+function propChoice(n: Nat): Nat := if (n = 0) { 1 } else { 0 }
+```
 
 **Meaning and boundary — `PSCV0-IF-01`.** For both accepted `Bool` and `Prop` conditions, `if (c) { t } else { e }` lowers to the native Lean expression `if c then t else e` under 4.35.0's existing elaboration/coercion rules; **it does not silently lower a Bool condition to Lean's separate `bif ... then ... else ...` / `cond` family**. A proposition condition needs an admitted `Decidable` instance; Boolean values are handled only by Lean's actual native `if` mechanism, never JavaScript truthiness. Each *term-level* branch contains exactly one term. The distinct `do`-statement branch grammar (§3/§7) has do-sequences and may omit `else`.
 
@@ -2390,22 +2995,37 @@ function propChoice(n: Nat): Nat := if (n = 0) { 1 } else { 0 }</code></pre></td
 
 **Lean 4 grammar family → ProofScript overlay (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= ... | &quot;assert!&quot; term ...    // runtime assertion
-// &#x27;assert&#x27; is available only in pinned intrinsic verification</code></pre></td><td valign="top"><pre><code>psDoItem ::= ... | &quot;assert&quot; term
-// Lean proof obligation required; `assert!` not substituted</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= ... | "assert!" term ...    // runtime assertion
+// 'assert' is available only in pinned intrinsic verification
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+psDoItem ::= ... | "assert" term
+// Lean proof obligation required; `assert!` not substituted
+```
 
 **Side-by-side example**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>-- Native Lean term-level runtime assertion (not formal proof):
--- assert! (n &gt; 0); n</code></pre></td><td valign="top"><pre><code>function checked(n: Nat): Id Nat := do {
+**Lean 4.35.0**
+
+```lean
+-- Native Lean term-level runtime assertion (not formal proof):
+-- assert! (n > 0); n
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+function checked(n: Nat): Id Nat := do {
   assert n = n
   return n
-}</code></pre></td></tr></tbody>
-</table>
+}
+```
 
 **Meaning and boundary.** `assert` requires a provable proposition and contributes proof/VC semantics; Lean's `assert!` is a runtime checking mechanism. Neither proves a specification merely by running. The PSCV0 example still requires an admitted verification context and discharged obligation.
 
@@ -2416,21 +3036,36 @@ function propChoice(n: Nat): Nat := if (n = 0) { 1 } else { 0 }</code></pre></td
 
 **Lean 4 grammar family → ProofScript overlay (schematic).**
 
-<table>
-<thead><tr><th width="50%">Lean 4 grammar (schematic)</th><th width="50%">ProofScript `pscv0` modification (same Lean grammar family)</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>term ::= ... | ident argument+ | ident &quot;.&quot; ident
-// `List`/`Array` are Lean data families, not grammar additions</code></pre></td><td valign="top"><pre><code>term ::= ... | ident argument+
-            | psCallHead &quot;(&quot; psCallArgs? &quot;)&quot;
-// Reuse Lean List / Array types and constructors</code></pre></td></tr></tbody></table>
+**Lean 4 grammar (schematic)**
+
+```text
+term ::= ... | ident argument+ | ident "." ident
+// `List`/`Array` are Lean data families, not grammar additions
+```
+
+**ProofScript `pscv0` modification (same Lean grammar family)**
+
+```text
+term ::= ... | ident argument+
+            | psCallHead "(" psCallArgs? ")"
+// Reuse Lean List / Array types and constructors
+```
 
 **Side-by-side example**
 
-<table>
-<thead><tr><th width="50%">Lean 4.35.0</th><th width="50%">ProofScript `pscv0`</th></tr></thead>
-<tbody><tr><td valign="top"><pre><code>def single : List Nat := List.cons 1 List.nil
-def emptyArray : Array Nat := Array.empty</code></pre></td><td valign="top"><pre><code>const single: List Nat := List.cons(1, List.nil)
-const emptyArray: Array Nat := Array.empty</code></pre></td></tr></tbody>
-</table>
+**Lean 4.35.0**
+
+```lean
+def single : List Nat := List.cons 1 List.nil
+def emptyArray : Array Nat := Array.empty
+```
+
+**ProofScript `pscv0`**
+
+```proofscript
+const single: List Nat := List.cons(1, List.nil)
+const emptyArray: Array Nat := Array.empty
+```
 
 **Meaning and boundary.** The *historical source* guaranteed the basis types without a complete API/literal catalog. **This revised `pscv0` design explicitly admits native Lean list literals `[a, b]`, array literals `#[a, b]`, and indexed `GetElem` syntax** (see §3), while requiring the actual constructors, instances and convenience APIs to be frozen in the 4.35.0 environment. No JavaScript array behavior is imported. A complete application-library API is a separate, explicit requirement in §8A.
 

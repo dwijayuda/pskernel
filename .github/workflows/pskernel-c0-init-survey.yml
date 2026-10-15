@@ -8,6 +8,10 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/**'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Inference/**'
+      # Fresh-name identity and environment-local context are trusted
+      # semantics; changes must qualify on real pinned Init, not native alone.
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Context.lean'
   workflow_dispatch:
 permissions:
   contents: read

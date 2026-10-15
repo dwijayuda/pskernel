@@ -1,0 +1,65 @@
+name: PSKernel-C0 source proof DAG size diagnostics
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-proof-dag-metrics.yml'
+      - 'psc0/packages/pskernel-c0/test/C0InitProofDagMetrics.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-real-proof-dag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Require exact Lean 4.35.0 and reconstruct exporter identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0InitProofDagMetrics.py
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Independently check exact real proof closures and count shared DAG nodes
+        shell: bash
+        run: |
+          set -euo pipefail
+          names=(
+            'WellFounded.partialExtrinsicFix₃'
+            'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix'
+            'BitVec.msb_add'
+          )
+          for n in ${!names[@]}; do
+            name="${names[$n]}"
+            idx="$((n+1))"
+            echo "C0_DAG_PROOF_TARGET=$name"
+            (cd "$RUNNER_TEMP/lean4export" &&
+              lake env .lake/build/bin/lean4export Init -- "$name" > "$RUNNER_TEMP/dag-$idx.ndjson" &&
+              lake env leanchecker --from-export "$RUNNER_TEMP/dag-$idx.ndjson" > "$RUNNER_TEMP/dag-$idx-official.txt" 2>&1)
+            grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/dag-$idx-official.txt"
+            python3 psc0/packages/pskernel-c0/test/C0InitProofDagMetrics.py \
+              "$RUNNER_TEMP/dag-$idx.ndjson" "$name" | tee "$RUNNER_TEMP/dag-$idx-summary.json"
+          done
+          echo "C0_DAG_PROOF_SCOPE=syntactic_metric_only_not_kernel_acceptance"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pinned-proof-DAG-metrics
+          path: |
+            ${{ runner.temp }}/dag-*-summary.json
+            ${{ runner.temp }}/dag-*-official.txt
+          if-no-files-found: warn
+          retention-days: 14

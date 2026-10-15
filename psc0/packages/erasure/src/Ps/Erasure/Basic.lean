@@ -116,6 +116,7 @@ inductive PsErasureError where
   | unknownLocal (id : Nat)
   | erasedLocalUsed (id : Nat)
   | unsupportedRuntimeTerm
+  | missingTargetWordSize
   | inDeclaration (name : PsName) (cause : PsErasureError)
   | unsupportedApplication
   | unknownConstant (name : PsName)
@@ -185,6 +186,35 @@ structure PsErasureScope where
   runtimeStructureConstructors : PsErasureNameIndex PsRuntimeStructureInfo
   runtimeExpressions : List (Nat × PsVerifiedIrExpr)
   currentDefinition : Option PsErasureCurrentDefinition
+  -- Immutable execution profile, separate from the abstract logical environment.
+  targetWordSize : Option PsVerifiedIrWordSize := none
+
+-- Resolve target-dependent representations once, before strict IR validation.
+-- This never changes a Core type, opaque value, or kernel reduction rule.
+def psErasureTargetWordSize (scope : PsErasureScope) :
+    Except PsErasureError PsVerifiedIrWordSize :=
+  match scope.targetWordSize with
+  | some size => .ok size
+  | none => .error .missingTargetWordSize
+
+def psErasureResolveWord (scope : PsErasureScope)
+    (word : PsVerifiedIrMachineIntegerType) :
+    Except PsErasureError PsVerifiedIrMachineIntegerType := do
+  match word with
+  | .usize => return match ← psErasureTargetWordSize scope with
+      | .bits32 => .uint32 | .bits64 => .uint64
+  | .isize => return match ← psErasureTargetWordSize scope with
+      | .bits32 => .int32 | .bits64 => .int64
+  | _ => return word
+
+def psErasureResolvePrimitive (scope : PsErasureScope)
+    (type : PsVerifiedIrType) : Except PsErasureError PsVerifiedIrType := do
+  match type with
+  | .primitive .usize => return .primitive (match ← psErasureTargetWordSize scope with
+      | .bits32 => .uint32 | .bits64 => .uint64)
+  | .primitive .isize => return .primitive (match ← psErasureTargetWordSize scope with
+      | .bits32 => .int32 | .bits64 => .int64)
+  | _ => return type
 
 def psErasureNatRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Nat" psNatName psNatRecName 0 List.nil
@@ -516,10 +546,7 @@ def psErasurePrepareDeclarationEntries
   | Except.ok entries =>
       let names := { scope.declarationNames with entries := entries };
       Except.ok
-        (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
-          scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
-          scope.runtimeStructures scope.runtimeStructureConstructors
-          scope.runtimeExpressions scope.currentDefinition)
+        ({ scope with declarationNames := names })
 
 -- Semantic identifiers retain their original spelling. Code generation owns
 -- target keywords, Unicode policy and collision-safe output names.
@@ -562,10 +589,7 @@ def psErasureReserveOutputName (scope : PsErasureScope) (name : String) :
     byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
       (PsName.str PsName.anonymous name) true
     count := scope.declarationNames.count + 1 };
-  PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
-    scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
-    scope.runtimeStructures scope.runtimeStructureConstructors
-    scope.runtimeExpressions scope.currentDefinition
+  { scope with declarationNames := names }
 
 -- Proof data is erased, but computational functions retain an ignored Unit
 -- slot at each proof binder. Dropping the slot could force a proof-guarded body
@@ -871,7 +895,7 @@ def psEraseRuntimeTypeWithFuelWorker
                   Except.ok PsVerifiedIrType.unknown
           | .constE name _ =>
               match psErasurePrimitiveType name with
-              | Option.some primitive => Except.ok primitive
+              | Option.some primitive => psErasureResolvePrimitive scope primitive
               | Option.none =>
                   let outputName : String :=
                     match psErasureLookupName
@@ -936,7 +960,7 @@ def psEraseRuntimeTypeWithFuelWorker
                     psErasureSafeIdentifier
                       (psNameToString name)
                       "_arg";
-                  let nextScope : PsErasureScope := {
+                  let nextScope : PsErasureScope := { scope with
                     localContext := pushed.context
                     runtimeLocals :=
                       List.cons (Prod.mk pushed.id runtimeName) scope.runtimeLocals

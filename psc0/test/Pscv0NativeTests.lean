@@ -1,3 +1,4 @@
+import Pscv0PlatformTests
 import Ps.Host.NativeV7
 import Ps.Host.StandardManifest
 import Ps.Compiler.Pscv0Modules
@@ -3577,6 +3578,7 @@ private def floatDisplayNativeOracle : IO Unit := do
   IO.println "PSCV0_FLOAT_F4_ORACLE: PASS fixed-six decimal display, Repr and cross-width contracts"
 
 def main : IO Unit := do
+  platformWordCases
   floatDisplayNativeOracle
   floatConversionsNativeOracle
   floatOperationsNativeOracle

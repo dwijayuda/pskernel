@@ -1,6 +1,18 @@
 # M2+A explicit target-word profiles
 
-Status: dependency research; no platform-word executable capability is selected or qualified.
+Status: complete implementation submitted for qualification; no executable platform-word qualification claim yet.
+
+## Platform implementation checkpoint — qualification pending
+
+The native dependency candidate at f534fe6711cb07d33d440f8596c02ff17ca46c26 passed [official replay 38793757444](https://github.com/dwijayuda/pskernel/actions/runs/38793757444): 196 declarations, 4,775 shared nodes, 773,868 UTF-8 bytes, two compared recursor rules, zero new axioms; SHA-256 54fd05f822dd6e30b11a38ee06f16054eb2edbae9e759c82196c2e4229f3a89e. ISize/ofUSize/rec reuse the existing native identity stage. USize's legacy axiom is replaced by its actual BitVec structure.
+
+The coherent implementation carries optional targetWordSize through portable API, immutable erasure scopes, native Request, CLI --word-size 32|64 and result/artifact metadata. Before strict IR checking, it resolves platform types and operations to fixed widths; no backend chooses a host width. Native logical definitions remain abstract and getNumBits opaque. Shared typed-IR conversions handle wrapping, clamping, sign extension, bounds and IEEE casts; 28 ordinary scalar dictionaries plus eight native instance registrations are explicit. Native Nat.brecOn power retains its public logical body and uses a private officially checked Nat.rec adapter built by the existing power-equation owner.
+
+One paired fixture has 35 common probes per width plus typed unsigned/signed exports, with an independent native64/fixed32 oracle, missing-profile refusals and an opaque-width proof refusal. Existing 978-observation suite and all budgets remain. The first qualification is expected to refuse unchanged old registry pins; review both independently observed boundaries before selecting replacement hashes. Do not treat compilation, the native asset replay, or one runtime as complete platform qualification.
+
+F4 is integrated at development f1bb4bb810b2397a42ee5d04e4cc2af7dfc4c9d3. Exact-commit independent F1/F2/F3-F4 replays passed; native run38793307283 is pending. Research F4 ac3887d passed all32 native steps and 978 shared observations. Keep PR109 draft. Continue remaining M2+A after platform qualification; no pskernel-core/self-hosting/C5 execution.
+
+
 
 Lean pin: 4.35.0, eb6cafb7290e8bd5f2937522d8d804f58f02bafc. This continues the existing M2+A scalar completion, not a new roadmap milestone.
 

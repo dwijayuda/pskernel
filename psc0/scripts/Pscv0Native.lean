@@ -17,6 +17,7 @@ private def artifactFiles (output : String) (artifact : PsEmissionArtifact) :
   let manifest := (Lean.Json.mkObj [
     ("schema", toJson ("pscv0-origins/2" : String)),
     ("target", toJson (psEmissionTargetName artifact.target)),
+    ("targetWordSize", toJson (artifact.targetWordSize.map psIrWordSizeBits)),
     ("kernel", toJson ("official-lean4-cpp" : String)),
     ("irValidation", toJson ("accepted-complete" : String)),
     ("leanCommit", toJson Lean.githash), ("profile", toJson profile),
@@ -59,7 +60,7 @@ private def writeFiles (files : List (System.FilePath × PsArtifactPayload)) : I
     | .text value => IO.FS.writeFile path value
     | .binary value => IO.FS.writeBinFile path value
 
-private def run (paths : List String) (outputs : List (PsEmissionTarget × String)) (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
+private def run (targetWordSize : Option PsVerifiedIrWordSize) (paths : List String) (outputs : List (PsEmissionTarget × String)) (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
   let requests ← paths.toArray.mapM fun (path : String) => do
     if !path.endsWith ".ps" then
       throw (IO.userError "PSCV0-NATIVE-INPUT: expected .ps application input")
@@ -71,6 +72,7 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
       sourceName := (System.FilePath.mk path).fileName.getD path
       outputStem := outputStem
       targets := outputs.map (·.1)
+      targetWordSize
       exports := exposure : Request }
   match ← runBatch requests with
   | .error error =>
@@ -175,7 +177,7 @@ private def auditProjectSourceGraph (manifestPath : String) : IO UInt32 := do
     ("modules", Lean.Json.arr rows)]).compress
   return 0
 
-private def runProject (manifest : String)
+private def runProject (targetWordSize : Option PsVerifiedIrWordSize) (manifest : String)
     (outputs : List (PsEmissionTarget × String))
     (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
   let (entry, selected, dependencies) ← readProjectManifest manifest
@@ -189,6 +191,7 @@ private def runProject (manifest : String)
     modules := dependencies
     outputStem
     targets := outputs.map (·.1)
+    targetWordSize
     exports := exposure }
   match ← runBatch #[request] with
   | .error error =>
@@ -211,6 +214,12 @@ private def runProject (manifest : String)
 
 def main (args : List String) : IO UInt32 := do
   try
+    let (targetWordSize, args) : Option PsVerifiedIrWordSize × List String ←
+      match args with
+      | "--word-size" :: "32" :: rest => pure (some .bits32, rest)
+      | "--word-size" :: "64" :: rest => pure (some .bits64, rest)
+      | "--word-size" :: _ => throw (IO.userError "PSCV0-TARGET-WORD-SIZE: expected 32 or 64")
+      | _ => pure (none, args)
     match args with
     | ["--check-quotient-foundation"] =>
         checkQuotientFoundation
@@ -290,18 +299,18 @@ def main (args : List String) : IO UInt32 := do
     | ["--audit-project-graph", manifest] =>
         auditProjectSourceGraph manifest
     | ["--check-project", manifest] =>
-        runProject manifest []
+        runProject targetWordSize manifest []
     | ["--emit-project", manifest, output] =>
         let target ← if output.endsWith ".ts" then pure PsEmissionTarget.typescript
           else if output.endsWith ".rs" then pure PsEmissionTarget.rust
           else if output.endsWith ".js" then pure PsEmissionTarget.javascript
           else throw (IO.userError "PSCV0-PROJECT-OUTPUT: expected .ts, .js or .rs")
-        runProject manifest [(target, output)]
+        runProject targetWordSize manifest [(target, output)]
     | ["--emit-project-all", manifest, stem] =>
-        runProject manifest [(.typescript, stem ++ ".ts"),
+        runProject targetWordSize manifest [(.typescript, stem ++ ".ts"),
           (.rust, stem ++ ".rs"), (.javascript, stem ++ ".js")]
     | ["--emit-project-wasm-core", manifest, stem] =>
-        runProject manifest [(.wasmCore, stem ++ ".wasm")]
+        runProject targetWordSize manifest [(.wasmCore, stem ++ ".wasm")]
     | ["--emit-project-wasm", manifest, stem, exportManifest] =>
         let json ← match Lean.Json.parse (← IO.FS.readFile exportManifest) with
           | .ok value => pure value
@@ -310,16 +319,16 @@ def main (args : List String) : IO UInt32 := do
           | .ok (names : List String) => pure names
           | .error message => throw (IO.userError ("PSCV0-EXPORT-MANIFEST: " ++ message))
         if names.isEmpty then throw (IO.userError "PSCV0-EXPORT-MANIFEST: empty selection")
-        runProject manifest [(.wasmComponent, stem ++ ".wasm")] (.selected names)
-    | "--check" :: first :: rest => run (first :: rest) []
+        runProject targetWordSize manifest [(.wasmComponent, stem ++ ".wasm")] (.selected names)
+    | "--check" :: first :: rest => run targetWordSize (first :: rest) []
     | ["--emit", input, output] =>
         let target ← if output.endsWith ".ts" then pure PsEmissionTarget.typescript
           else if output.endsWith ".rs" then pure PsEmissionTarget.rust
           else if output.endsWith ".js" then pure PsEmissionTarget.javascript
           else throw (IO.userError "PSCV0-NATIVE-OUTPUT: expected .ts, .js or .rs output")
-        run [input] [(target, output)]
+        run targetWordSize [input] [(target, output)]
     | ["--emit-wasm-core", input, stem] =>
-        run [input] [(.wasmCore, stem ++ ".wasm")]
+        run targetWordSize [input] [(.wasmCore, stem ++ ".wasm")]
     | ["--emit-wasm", input, stem, manifest] =>
         let json ← match Lean.Json.parse (← IO.FS.readFile manifest) with
           | .ok value => pure value
@@ -328,13 +337,13 @@ def main (args : List String) : IO UInt32 := do
           | .ok (names : List String) => pure names
           | .error message => throw (IO.userError ("PSCV0-EXPORT-MANIFEST: " ++ message))
         if names.isEmpty then throw (IO.userError "PSCV0-EXPORT-MANIFEST: empty selection")
-        run [input] [(.wasmComponent, stem ++ ".wasm")] (.selected names)
+        run targetWordSize [input] [(.wasmComponent, stem ++ ".wasm")] (.selected names)
     | ["--emit-all", input, stem] =>
-        run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs"), (.javascript, stem ++ ".js")]
+        run targetWordSize [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs"), (.javascript, stem ++ ".js")]
     | ["--emit-both", input, stem] =>
-        run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
+        run targetWordSize [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --audit-project-graph <manifest.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --audit-standard-surface | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-constructors-candidate <output.lean> | --export-float-canonical-model-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
+        IO.eprintln "usage: pscv0_native [--word-size 32|64] --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --audit-project-graph <manifest.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --audit-standard-surface | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-constructors-candidate <output.lean> | --export-float-canonical-model-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

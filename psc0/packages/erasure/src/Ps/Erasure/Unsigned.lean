@@ -1,20 +1,22 @@
 import Ps.Erasure.Basic
 
 -- Lean 4.35.0 keeps UInt's checked BitVec/Fin model and assigns a primitive
--- runtime representation. Only these four target-independent widths are enabled.
+-- runtime representation. Platform descriptors resolve through the request profile.
 def psErasureUnsignedWidth (owner : PsName) : Option PsVerifiedIrMachineIntegerType :=
   match psNameToString owner with
   | "UInt8" => some .uint8 | "UInt16" => some .uint16
   | "UInt32" => some .uint32 | "UInt64" => some .uint64
+  | "USize" => some .usize
   | _ => none
 
 -- Native SInt/Basic.lean models a signed word as the same-width two's
 -- complement UInt carrier. This selects only the separately kernel-checked
--- four portable widths, never target-sized ISize.
+-- four portable widths and explicitly profiled ISize.
 def psErasureSignedWidth (owner : PsName) : Option PsVerifiedIrMachineIntegerType :=
   match psNameToString owner with
   | "Int8" => some .int8 | "Int16" => some .int16
   | "Int32" => some .int32 | "Int64" => some .int64
+  | "ISize" => some .isize
   | _ => none
 
 def psErasureSignedUnsignedWidth :
@@ -51,7 +53,7 @@ def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
     else if (psErasureSignedWidth owner).isSome then
       match method with
       | "ofNat" | "ofBitVec" | "toBitVec" => some 1
-      | "toUInt8" | "toUInt16" | "toUInt32" | "toUInt64" => some 1
+      | "toUInt8" | "toUInt16" | "toUInt32" | "toUInt64" | "toUSize" | "ofUSize" => some 1
       | "neg" | "complement" => some 1
       | "add" | "sub" | "mul" | "div" | "mod"
       | "land" | "lor" | "xor" | "shiftLeft" | "shiftRight" => some 2
@@ -87,6 +89,7 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
     Except PsErasureError (Option PsVerifiedIrExpr) := do
   let .constE (.str owner method) _ := view.head | return none
   if let some width := psErasureUnsignedWidth owner then
+    let width ← psErasureResolveWord scope width
     if let some operation := psErasureUnsignedBinary method then
       let [left, right] := view.args | throw .unsupportedApplication
       return some (.intrinsic (.machineIntBinary width operation) [] [← erase left, ← erase right])
@@ -110,13 +113,14 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
       return some (← psEraseBoundedWrap scope (.intrinsic (.unsignedToNat width) [] [← erase value]) false)
     | _, _ => return none
   else if let some width := psErasureSignedWidth owner then
+    let width ← psErasureResolveWord scope width
     let some unsignedWidth := psErasureSignedUnsignedWidth width
       | throw .unsupportedRuntimeTerm
     let unsignedProjection := match width with
       | .int8 => "toUInt8" | .int16 => "toUInt16"
       | .int32 => "toUInt32" | .int64 => "toUInt64"
       | _ => ""
-    if method == unsignedProjection then
+    if method == unsignedProjection || (psNameToString owner == "ISize" && method == "toUSize") then
       let [value] := view.args | throw .unsupportedApplication
       return some (.intrinsic (.signedToUnsigned width) [] [← erase value])
     if let some operation := psErasureSignedBinary method then
@@ -126,6 +130,9 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
     match method, view.args with
     | "ofNat", [value] =>
       return some (.intrinsic (.signedOfNat width) [] [← erase value])
+    | "ofUSize", [value] =>
+      return some (.intrinsic (.signedOfNat width) []
+        [.intrinsic (.unsignedToNat unsignedWidth) [] [← erase value]])
     | "toBitVec", [value] =>
       let unsigned := PsVerifiedIrExpr.intrinsic (.signedToUnsigned width) [] [← erase value]
       return some (← psEraseUnsignedProjection scope unsignedWidth unsigned)

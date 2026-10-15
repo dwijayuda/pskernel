@@ -69,6 +69,7 @@ jobs:
             /psc0/host/src/
             /psc0/scripts/
             /psc0/test/Pscv0NativeTests.lean
+            /psc0/test/Pscv0PlatformTests.lean
             /psc0/test/Pscv0GetElemOracle.lean
             /psc0/test/Pscv0FloatConstructiveOracle.lean
             /psc0/test/Pscv0M1Performance.lean

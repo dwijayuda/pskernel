@@ -1,0 +1,97 @@
+name: PSKernel-C0 synthetic checked environment scaling
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-init-env-scale.yml'
+      - 'psc0/packages/pskernel-c0/test/C0InitEnvScale.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  env-size-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce exact Lean 4.35 checker and exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc &&
+            lake build c0OfficialReplay)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0InitEnvScale.py
+      - name: Export and verify exact real Cooper source closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- Int.Internal.Linear.cooper_dvd_right > "$RUNNER_TEMP/cooper-reference.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/cooper-reference.ndjson" > "$RUNNER_TEMP/cooper-reference-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/cooper-reference-official.txt"
+          test "$(stat -c%s "$RUNNER_TEMP/cooper-reference.ndjson")" -eq 5847444
+          test "$(wc -l < "$RUNNER_TEMP/cooper-reference.ndjson")" -eq 114487
+          echo "2e57b983242e47f7dd1c95679ee0697b21aae688bfd38b6039d95c23b49100c1  $RUNNER_TEMP/cooper-reference.ndjson" | sha256sum -c -
+      - name: Compare official and C0 on controlled extra checked definitions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for extra in 5000 30000; do
+            candidate="$RUNNER_TEMP/cooper-env-${extra}.ndjson"
+            python3 psc0/packages/pskernel-c0/test/C0InitEnvScale.py \
+              "$RUNNER_TEMP/cooper-reference.ndjson" "$candidate" \
+              --definitions "$extra"
+            echo "C0_ENV_SCALE_STAGE definitions=$extra synthetic_source=yes"
+            set +e
+            (cd "$RUNNER_TEMP/lean4export" &&
+              timeout 240s lake env leanchecker --from-export "$candidate") > "$RUNNER_TEMP/cooper-env-${extra}-official.txt" 2>&1
+            official=$?
+            set -e
+            echo "C0_ENV_SCALE_OFFICIAL_EXIT definitions=$extra status=$official"
+            if test "$official" -ne 0; then
+              tail -n 35 "$RUNNER_TEMP/cooper-env-${extra}-official.txt"
+              echo "C0_ENV_SCALE_DIAGNOSTIC=official_reject_or_timeout_unqualified_fixture"
+              break
+            fi
+            grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/cooper-env-${extra}-official.txt"
+            set +e
+            (cd psc0/packages/pskernel-c0 &&
+              /usr/bin/time -v -o "$RUNNER_TEMP/cooper-env-${extra}-resources.txt" \
+              timeout 600s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$candidate" 4096) \
+                > "$RUNNER_TEMP/cooper-env-${extra}-c0.txt" 2>&1
+            c0=$?
+            set -e
+            echo "C0_ENV_SCALE_C0_EXIT definitions=$extra status=$c0"
+            grep 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/cooper-env-${extra}-c0.txt" | tail -n 4 || true
+            tail -n 20 "$RUNNER_TEMP/cooper-env-${extra}-c0.txt"
+            if test "$c0" -ne 0; then
+              echo "C0_ENV_SCALE_DIAGNOSTIC=C0_nonacceptance_or_resource_inspect_failure"
+              break
+            fi
+            echo "C0_ENV_SCALE_DIAGNOSTIC=both_kernels_accepted_synthetic_checked_definitions extra=$extra"
+            cat "$RUNNER_TEMP/cooper-env-${extra}-resources.txt"
+          done
+          echo "C0_ENV_SCALE_SCOPE=synthetic_checked_definitions_not_original_Init_qualification"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-synthetic-env-scale-results
+          path: |
+            ${{ runner.temp }}/cooper-env-*-official.txt
+            ${{ runner.temp }}/cooper-env-*-c0.txt
+            ${{ runner.temp }}/cooper-env-*-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

@@ -37,10 +37,19 @@ inductive C0ExportDeclaration where
   | inductiveGroup (value : C0ExportInductiveGroup)
   | quotientGroup (parts : List PsKernelQuotInfo)
 
+-- Pinned Lean 4.35's 32-way PersistentArray bounds copying on shared
+-- exporter snapshots; no kernel expression or checker semantics change.
+-- These defaults are reachable only through a proven in-range lookup.
+private instance : Inhabited PsKernelName := ⟨.anonymous⟩
+private instance : Inhabited PsKernelLevel := ⟨.zero⟩
+private instance : Inhabited PsKernelExpr := ⟨.bvar 0⟩
+
 structure C0ExportTables where
-  names : Array PsKernelName := #[.anonymous]
-  levels : Array PsKernelLevel := #[.zero]
-  exprs : Array PsKernelExpr := #[]
+  names : Lean.PersistentArray PsKernelName :=
+    (Lean.PersistentArray.empty.push .anonymous)
+  levels : Lean.PersistentArray PsKernelLevel :=
+    (Lean.PersistentArray.empty.push .zero)
+  exprs : Lean.PersistentArray PsKernelExpr := Lean.PersistentArray.empty
   declarations : List C0ExportDeclaration := []
   quotientParts : Nat := 0
   quotientPending : List PsKernelQuotInfo := []
@@ -74,23 +83,26 @@ def c0JsonNatList (j : Lean.Json) : Except String (List Nat) := do
 def c0ExportName
     (tables : C0ExportTables) (idx : Nat) :
     Except String PsKernelName :=
-  match tables.names[idx]? with
-  | some value => .ok value
-  | none => .error s!"unknown NDJSON name handle {idx}"
+  if h : idx < tables.names.size then
+    .ok tables.names[idx]
+  else
+    .error s!"unknown NDJSON name handle {idx}"
 
 def c0ExportLevel
     (tables : C0ExportTables) (idx : Nat) :
     Except String PsKernelLevel :=
-  match tables.levels[idx]? with
-  | some value => .ok value
-  | none => .error s!"unknown NDJSON level handle {idx}"
+  if h : idx < tables.levels.size then
+    .ok tables.levels[idx]
+  else
+    .error s!"unknown NDJSON level handle {idx}"
 
 def c0ExportExpr
     (tables : C0ExportTables) (idx : Nat) :
     Except String PsKernelExpr :=
-  match tables.exprs[idx]? with
-  | some value => .ok value
-  | none => .error s!"unknown NDJSON expression handle {idx}"
+  if h : idx < tables.exprs.size then
+    .ok tables.exprs[idx]
+  else
+    .error s!"unknown NDJSON expression handle {idx}"
 
 def c0ExportNames
     (tables : C0ExportTables) (j : Lean.Json) :

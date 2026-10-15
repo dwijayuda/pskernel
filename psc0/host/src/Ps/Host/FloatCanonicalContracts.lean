@@ -417,7 +417,7 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream
 -- String/Decode.lean splitting method. No tactic-based SAT oracle or
 -- unchecked theorem is needed; the kernel checks ordinary equality rewrites.
-private theorem maskedHigh_iff {upper lower : Nat}
+theorem maskedHigh_iff {upper lower : Nat}
     (bits : BitVec (upper + lower)) (mask target : BitVec upper) :
     bits &&& (mask ++ 0#lower) = target ++ 0#lower ↔
       bits.extractLsb' lower upper &&& mask = target := by
@@ -426,7 +426,7 @@ private theorem maskedHigh_iff {upper lower : Nat}
   conv => lhs; rw [split]
   rw [BitVec.and_append, BitVec.and_zero, BitVec.append_left_inj]
 
-private theorem maskedLow_iff {upper lower : Nat}
+theorem maskedLow_iff {upper lower : Nat}
     (bits : BitVec (upper + lower)) (mask target : BitVec lower) :
     bits &&& (0#upper ++ mask) = 0#upper ++ target ↔
       bits.extractLsb' 0 lower &&& mask = target := by

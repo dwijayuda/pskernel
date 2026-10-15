@@ -1,5 +1,14 @@
 # Continue PSC0 / PSCV0 v7 — after qualified F3, M2 + Phase A
 
+## Active continuation — remaining M2+A, 16 October 2026
+
+The latest user request supersedes the previous stop-after-F3 instruction: continue until remaining M2+A is completed. F3 remains qualified at development bc69717469bbe72249d0d18022b1a51fa5cdd817; receipt 391d1083bc8e1b096690e52603b777af2c5974e1. Current research reviews F4 display and opaque Float/Float32 cross-width contracts before selecting them. Nothing beyond F3 is yet qualified.
+
+Studied pinned Lean 4.35.0 Float/Float32.toString, repr and instances, native runtime/object.cpp, include/lean/lean.h, tests/compile/float.lean and its expected output, tests/elab/float32.lean. Runtime display uses fixed six decimal places with nearest-even rounding, canonical NaN and signed zero; host default string conversion is not sufficient. Planned implementation reuses shared typed-IR exact binary rounding and ordinary checked Format/Repr. Native opaque bodies/instances are exported with full official-kernel replay; no new axiom or unfolding rule. Cross-width conversions use native IEEE promote/demote through shared typed IR.
+
+Continue F4, target-word profile ownership and selected API/registry/M2 exit audit in the existing M2+A -> M3+B -> M4+C/D -> M5/E roadmap. Keep native .lean, GitHub/cloud CI only, no pskernel-core/self-hosting/C5; update both handoffs each qualified milestone. Preserve all acceptance and resource ceilings.
+
+
 ## Current task boundary
 
 The user requested F3 scientific literals and conversions across all backends, updated handoffs, and stopping at the next milestone. F3 is complete and qualified on the development branch. This request is finished; stop before F4. A subsequent explicit continuation may resume remaining M2+A from the next coherent work below.

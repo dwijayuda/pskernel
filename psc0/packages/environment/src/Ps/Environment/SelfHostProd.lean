@@ -120,8 +120,12 @@ def psSelfHostProdPreLiteralPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
   psStandardOperatorDefaultsExtend psSelfHostProdPreLiteralPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen F4 input, prior to native display and opaque cross-width selection.
+def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
   psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPreFloatDisplayPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

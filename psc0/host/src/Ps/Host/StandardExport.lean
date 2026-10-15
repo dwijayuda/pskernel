@@ -892,4 +892,21 @@ def exportSignedOperationsCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned src/Init/Data/SInt/Basic.lean, Henrik Böving, Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative-only checked signed operation candidate, not runtime-qualified.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- F4: native opaque signatures/inhabitants, display dictionaries and exact
+-- cross-width contracts. Runtime implementations are qualified separately.
+def exportFloatDisplayCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPreFloatDisplayPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`Float.toString, `Float32.toString, `Float.repr, `Float32.repr,
+      `instToStringFloat, `instToStringFloat32, `instReprFloat, `instReprFloat32,
+      `instReprAtomFloat, `instReprAtomFloat32, `Float.toFloat32, `Float32.toFloat]
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardFloatDisplay"
+    privatePrefix := "floatDisplayDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Data/Float/Float{,32}.lean, Init/Data/Repr.lean and runtime/object.cpp.\nNative checked opaque inhabitants and display dictionaries; runtime parity is a separate gate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

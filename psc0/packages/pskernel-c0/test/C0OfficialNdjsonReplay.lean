@@ -1139,10 +1139,6 @@ def c0ExportDescribeWhnfProbe
   | .error error => "error=" ++ error
   | .ok (reduced, _) => "ok=" ++ c0ExportMismatchTerm 6 reduced
 
-/-- First nontrivial application argument in two full-WHNF expressions.
-    This is a discarded, source-owned diagnostic: compare the shared head,
-    then check arguments left-to-right in the same order as Lean 4.35's
-    type_checker::is_def_eq_app, threading only the genuine source state. -/
 /-- Locate the first exact syntactic disagreement through common app and
     binder spines. This is a bounded *diagnostic only*, never a DefEq rule:
     binder names are ignored by the existing exact kernel Expr equality. -/
@@ -1189,6 +1185,10 @@ def c0ExportFirstSyntacticDifference
               "leaf lhs=" ++ c0ExportMismatchTerm 6 lhs ++
                 " rhs=" ++ c0ExportMismatchTerm 6 rhs
 
+/-- First nontrivial application argument in two full-WHNF expressions.
+    This is a discarded, source-owned diagnostic: compare the shared head,
+    then check arguments left-to-right in the same order as Lean 4.35's
+    type_checker::is_def_eq_app, threading only the genuine source state. -/
 def c0ExportProbeFirstAppMismatchAux
     (defeq :
       PsKernelCheckerContext -> PsKernelCheckerState ->

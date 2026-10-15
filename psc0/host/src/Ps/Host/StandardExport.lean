@@ -621,6 +621,34 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nModified: selected Core conversion, closure/cut and independent kernel audit.\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- Research-only family of native Int theorem replacement candidates.
+-- These are proof-only, checked against original Lean theorem types before
+-- independent PSC0 portable kernel replay, never computational definitions.
+-- The signatures may differ in the selected portable Standard; this exporter
+-- MUST fail closed rather than silently replacing incompatible operations.
+def exportIntConstructiveCutCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPreludeEnvironment.declarations
+  for target in [`Int.add_zero, `Int.add_neg_eq_sub] do
+    if selected.any (fun d => PsKernelLean.toLeanName (psDeclarationName d) == target) then
+      throw (IO.userError ("Int proof-cut target already in selected Standard: " ++
+        toString target))
+  exportStandardCore {
+    roots :=
+      [`PsV7Native.FloatConstructive.intAddZero,
+       `PsV7Native.FloatConstructive.intAddNegEqSub]
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatConstructive }]
+    checkedTheoremRenames :=
+      [(`PsV7Native.FloatConstructive.intAddZero, `Int.add_zero),
+       (`PsV7Native.FloatConstructive.intAddNegEqSub, `Int.add_neg_eq_sub)]
+    allowedAssumptions := [`propext, `Quot.sound]
+    shareSource := true
+    publicPrefix := "psStandardIntConstructiveCut"
+    privatePrefix := "intConstructiveCutDecl"
+    provenance := "/-\nCopyright (c) 2026 Lean FRO, LLC and contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nResearch-only pinned Int proof-equivalence candidate, no executable Float.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 -- Research-only constructive theorem authoring cut. This never changes
 -- the selected Standard, its strict fingerprints, or the Float runtime.
 def exportFloatConstructivePowCandidate (output : System.FilePath) : IO Unit := do

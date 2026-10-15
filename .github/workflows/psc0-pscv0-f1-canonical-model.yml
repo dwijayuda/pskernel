@@ -71,10 +71,14 @@ jobs:
           restore-keys: |
             pscv0-f1-${{ runner.os }}-${{ runner.arch }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-
-      - name: Native Lean proof and axiom check of pinned Int theorem cuts (research)
+      - name: Independent kernel replay of checked pinned Int theorem-only cuts
         run: |
           set -euo pipefail
-          lake build PsV7FloatConstructiveOracle
+          lake build pscv0_native PsV7FloatConstructiveOracle
+          mkdir -p ../dist/pscv0-f1-constructive
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-int-constructive-cut-candidate ../dist/pscv0-f1-constructive/IntConstructiveCutCandidate.lean | tee ../dist/pscv0-f1-constructive/int-constructive-cut.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          sha256sum ../dist/pscv0-f1-constructive/IntConstructiveCutCandidate.lean
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()
         with:

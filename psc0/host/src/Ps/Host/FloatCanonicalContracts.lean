@@ -295,14 +295,27 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
         (Nat.pos_of_ne_zero hPositive) := by
     simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
     rfl
+  have hRawNoOverflow :
+      ¬ (2 ^ 11 ≤ (((exponent.toNat : Int) - (1023 + 52) +
+        1023 + 52).toNat) + 1) := by
+    rw [hBias]
+    exact hNoOverflow
+  have hRawExponent : BitVec.ofNat 11
+      (((exponent.toNat : Int) - (1023 + 52) +
+        1023 + 52).toNat) = exponent := by
+    rw [hBias]
+    exact hExp
+  have hIsNormal : joined.toNat.log2 + 1 = Format.binary64.mantissaBits := by
+    simp [hLog, Format.binary64, Format.mantissaBits]
   have hRec := reconstructPackedFields64 bits
   rw [canonicalPacked_finiteExponent Format.binary64 bits heTop]
   rw [hUnpack]
   unfold UnpackedFloat.pack
   dsimp only
-  simp only [hBias, if_neg hNoOverflow, hLog, hMask, hExp]
-  simpa [Format.binary64, Format.exponentBias, Format.mantissaBits,
-    joined, exponent, mantissa] using hRec
+  rw [if_neg hRawNoOverflow]
+  rw [if_pos hIsNormal]
+  rw [hRawExponent, hMask]
+  exact hRec
 
 -- Pinned upstream normal representation proof (native research only).
 theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
@@ -360,14 +373,27 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
         (Nat.pos_of_ne_zero hPositive) := by
     simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
     rfl
+  have hRawNoOverflow :
+      ¬ (2 ^ 8 ≤ (((exponent.toNat : Int) - (127 + 23) +
+        127 + 23).toNat) + 1) := by
+    rw [hBias]
+    exact hNoOverflow
+  have hRawExponent : BitVec.ofNat 8
+      (((exponent.toNat : Int) - (127 + 23) +
+        127 + 23).toNat) = exponent := by
+    rw [hBias]
+    exact hExp
+  have hIsNormal : joined.toNat.log2 + 1 = Format.binary32.mantissaBits := by
+    simp [hLog, Format.binary32, Format.mantissaBits]
   have hRec := reconstructPackedFields32 bits
   rw [canonicalPacked_finiteExponent Format.binary32 bits heTop]
   rw [hUnpack]
   unfold UnpackedFloat.pack
   dsimp only
-  simp only [hBias, if_neg hNoOverflow, hLog, hMask, hExp]
-  simpa [Format.binary32, Format.exponentBias, Format.mantissaBits,
-    joined, exponent, mantissa] using hRec
+  rw [if_neg hRawNoOverflow]
+  rw [if_pos hIsNormal]
+  rw [hRawExponent, hMask]
+  exact hRec
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.

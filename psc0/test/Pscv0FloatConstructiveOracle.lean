@@ -78,6 +78,7 @@ run_cmd do
        ``BitVec.extractLsb'_append_extractLsb'_eq_extractLsb',
        ``Nat.and_two_pow_sub_one_eq_mod,
        ``BitVec.toNat_and, ``BitVec.toNat_allOnes,
+       ``BitVec.getLsbD_allOnes, ``BitVec.getLsbD_and,
        ``BitVec.getElem_allOnes, ``BitVec.getElem_and,
        ``BitVec.eq_of_toNat_eq,
        ``PsV7Native.FloatCanonical.andAllOnes_constructive,

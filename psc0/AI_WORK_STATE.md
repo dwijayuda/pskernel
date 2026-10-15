@@ -1,4 +1,8 @@
 # PSCV0 v7 — AI work state
+## Literal qualification syntax correction — 15 October 2026
+
+Native run 38749641509 accepted all 3179 selected declarations and passed the strengthened registry audit, native literal/operator oracles, previous scalar assets and source checks. The integrated fixture was refused during parsing because its heterogeneous-operation example used Lean-style `if b` instead of the canonical PSCV0 `if (b)`. Only that fixture spelling is corrected. Expectations, compiler behavior, foundation and budgets are unchanged; full source/backend qualification is still pending. Independent F1/F2/F3 replays at 39a1718a1ff47dbbd7dea91967a145bb7438c176 passed.
+
 
 ## Literal/operator metadata review — 15 October 2026
 

@@ -2225,7 +2225,14 @@ def psEraseGeneralApplication
       | Except.error error => Except.error error
       | Except.ok resolved =>
           match resolved with
-          | Option.none => psEraseCanonicalApplication erase environment scope view
+          | Option.none =>
+              -- End the zero-argument path here: asking canonical erasure to
+              -- erase this same unresolved head would recurse without progress.
+              if view.args.isEmpty then
+                match psErasureLookupName scope.declarationNames name with
+                | some known => .ok (.var known)
+                | none => .error (.unknownConstant name)
+              else psEraseCanonicalApplication erase environment scope view
           | Option.some entry =>
               match psErasureLookupName scope.declarationNames name with
               | Option.none => Except.error (PsErasureError.unknownConstant name)
@@ -2305,60 +2312,9 @@ def psEraseRuntimeExprWithFuelWorker
                       Except.error (PsErasureError.erasedLocalUsed id)
                     else
                       Except.error (PsErasureError.unknownLocal id)
-        | .constE name _ =>
-            match psEraseSpecialBoundary smaller environment scope
-                (PsErasureAppView.mk expr List.nil) with
-            | Except.error error => Except.error error
-            | Except.ok special =>
-                match special with
-                | Option.some result => Except.ok result
-                | Option.none =>
-                    match psErasureResolveEntry environment scope name with
-                    | Except.error error => Except.error error
-                    | Except.ok resolved =>
-                        match resolved with
-                        | Option.some entry =>
-                            match psErasureLookupName scope.declarationNames name with
-                            | Option.none => Except.error (PsErasureError.unknownConstant name)
-                            | Option.some known =>
-                                match psInferType environment psMetaEmpty scope.localContext expr with
-                                | Except.error _ => Except.error PsErasureError.unsupportedApplication
-                                | Except.ok headType =>
-                                    psEraseKnownEntryApplication (smaller scope) environment scope
-                                      (PsVerifiedIrExpr.var known) entry headType List.nil
-                        | Option.none =>
-                            match
-                                psErasureLookupConstructor
-                                  scope.runtimeConstructors
-                                  name with
-                            | Option.some ctorInfo =>
-                                if
-                                    psErasureBoolAnd
-                                      (Nat.beq ctorInfo.numParams 0)
-                                      (Nat.beq ctorInfo.numFields 0) then
-                                  Except.ok
-                                    (PsVerifiedIrExpr.constructor
-                                      ctorInfo.inductiveName
-                                      ctorInfo.name
-                                      []
-                                      [])
-                                else
-                                  Except.error PsErasureError.unsupportedApplication
-                            | Option.none =>
-                                -- A zero-field, non-generic structure value is a bare constructor.
-                                -- Reuse the same arity/field lowering as applied structure constructors.
-                                match psEraseRuntimeStructureApplication environment scope (smaller scope)
-                                    (PsErasureAppView.mk expr List.nil) with
-                                | Except.error error => Except.error error
-                                | Except.ok structureValue =>
-                                    match structureValue with
-                                    | Option.some value => Except.ok value
-                                    | Option.none =>
-                                        match psErasureLookupName scope.declarationNames name with
-                                        | Option.some known => Except.ok (PsVerifiedIrExpr.var known)
-                                        | Option.none =>
-                                            Except.error (PsErasureError.unknownConstant name)
-        | .app _ _ =>
+        -- Lean 4.35 ToLCNF.visitCore treats constants as applications with no
+        -- arguments. One dispatch also handles nullary intrinsics and constructors.
+        | .constE _ _ | .app _ _ =>
             let view := psErasureAppView expr;
             let erase :=
               smaller scope;

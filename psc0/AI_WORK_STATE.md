@@ -1,5 +1,14 @@
 # PSCV0 v7 — AI work state
 
+## F2 shared constant/application lowering — 15 October 2026
+
+Research `cbdb554fa9209361cd72217432fb8435d1a15022` passed all checked native source tests, the strict 3,122-declaration manifest and shared instance-key invariant. Independent [F1 replay 38731576332](https://github.com/dwijayuda/pskernel/actions/runs/38731576332) and [F2 replay 38731576255](https://github.com/dwijayuda/pskernel/actions/runs/38731576255) passed. [Native 38731576337](https://github.com/dwijayuda/pskernel/actions/runs/38731576337) then found bare `Float.nan` bypassed primitive erasure.
+
+Pinned Lean 4.35.0 `src/Lean/Compiler/LCNF/ToLCNF.lean` (`visitCore`, `visitAppCore`, `etaIfUnderApplied`) routes constants and applications through the same lowering. PSC0 now follows that invariant: zero-argument constants use the same special/decision/primitive/structure/constructor dispatch as applications; the general unresolved-head case terminates directly instead of recursively erasing the same constant. Duplicate constructor/entry handling is removed. Existing NaN/infinity and ordinary constant/constructor fixtures validate the design; full backend qualification is pending. No logical assets, strict pins, assumptions or budgets changed.
+
+F3 gate [38731735348](https://github.com/dwijayuda/pskernel/actions/runs/38731735348) examined 134 additional declarations and found the next general dependency: selected Array is monomorphic but pinned Lean scientific fast-path arrays and indexing proofs are universe-polymorphic. Complete the Array family coherently before selecting F3; never drop native universe arguments or replace scientific semantics to bypass admission. F3 remains unselected on `psc0/pscv0-v7-f3-conversions-research` at `f1d2c51104aca2b25c77f1771c226af1772eb99d`.
+
+
 ## F2 instance-index invariant reviewed — 15 October 2026
 
 Research `49a38a118b6ed2b0fa5955bac4b8d9399c4b6466` fixes the Float equality registration: DecidableEq is a reducible Pi alias, so its result-class key is Decidable. Pinned Lean Meta/Instances.{mkInstanceKey,checkNonClassInstance} and SynthInstance were studied. A shared Standard manifest audit now reduces every registered instance telescope and checks its explicit key against the actual registered result class, preventing this entire metadata failure family. The unchanged native logical asset still passes independent F2 replay [38730889909](https://github.com/dwijayuda/pskernel/actions/runs/38730889909), and F1 replay [38730889978](https://github.com/dwijayuda/pskernel/actions/runs/38730889978) passes.

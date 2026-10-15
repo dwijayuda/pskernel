@@ -129,10 +129,10 @@ def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
               | .instances | .«implicit» => true
               | .reducible => allowed
               | _ => false
-            let classField := match name with
+            let classField := projectionMode && (match name with
               | .str owner _ => environment.classes.any (psNameEq owner)
-              | _ => false
-            if !classField || !projectionMode ||
+              | _ => false)
+            if !classField ||
                 !psEnvironmentCanUnfold environment .«default» name then
               fallback ()
             else

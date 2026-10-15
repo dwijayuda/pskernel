@@ -1,4 +1,8 @@
 # PSCV0 v7 — AI work state
+## Projection oracle diagnosis — 15 October 2026
+
+Native38753531404 compiled the portable reducer but its independent native WHNF oracle refused the assumed reduced shape before source qualification. The oracle now reports the exact mode, expression and native dictionary status so the native invariant can be reconstructed without weakening its assertion. The Lean-reserved local variable name in the portable test is corrected, and ordinary/default/all transparency now short-circuits projection metadata lookup. No selected source or expected runtime observation changed. Full qualification remains pending; do not integrate this research checkpoint as green.
+
 Class-projection review refinement: only names directly owned by registered classes enter speculative projection beta reduction; ordinary constants keep their fast path. The focused oracle uses explicit empty contexts and a well-scoped local dictionary. Qualification pending.
 
 ## Shared class-projection reduction prerequisite — 15 October 2026

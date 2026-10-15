@@ -17,8 +17,12 @@ run_meta do
   let explicit := project (Lean.mkApp3 (Lean.mkConst ``OfNat.mk [Lean.Level.zero])
     nat n (Lean.mkNatLit 42))
   for mode in [Lean.Meta.TransparencyMode.instances, .implicit] do
-    unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf concrete)) == n do
-      throwError "native class projection did not expose the indexed numeral"
+    let reduced ← Lean.Meta.withTransparency mode (Lean.Meta.whnf concrete)
+    unless reduced == n do
+      throwError ("native class projection did not expose the indexed numeral: " ++
+        toString mode ++ "; value=" ++ reduced.dbgToString ++
+        "; input=" ++ concrete.dbgToString ++
+        "; dictionary status=" ++ toString (← Lean.getReducibilityStatus ``instOfNatNat).toAttrString)
     unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf explicit)) == Lean.mkNatLit 42 do
       throwError "native class projection ignored explicit dictionary evidence"
   unless (← Lean.Meta.withTransparency .reducible (Lean.Meta.whnf concrete)) == concrete do
@@ -2819,9 +2823,9 @@ private def transparencyBoundaries : IO Unit := do
   unless psExprAlphaEq (psWhnfWithTransparency .instances blocked psMetaEmpty psLocalEmpty concrete) concrete do
     throw (IO.userError "irreducible dictionary unfolded at instance transparency")
   let family := psExprApplyMany (.constE (psRootName "OfNat") [.zero]) [nat, n]
-  let local := psLocalPushBinding psLocalEmpty (psRootName "dictionary") family .instanceImplicit
-  let stuck := project (.fvar local.id)
-  unless psExprAlphaEq (psWhnfWithTransparency .instances original psMetaEmpty local.context stuck) stuck do
+  let pushed := psLocalPushBinding psLocalEmpty (psRootName "dictionary") family .instanceImplicit
+  let stuck := project (.fvar pushed.id)
+  unless psExprAlphaEq (psWhnfWithTransparency .instances original psMetaEmpty pushed.context stuck) stuck do
     throw (IO.userError "stuck class projection lost its canonical application")
   IO.println "PSCV0_TRANSPARENCY: PASS abbreviations, native class projections, stuck/irreducible evidence, rigid refusal and metadata drift"
 

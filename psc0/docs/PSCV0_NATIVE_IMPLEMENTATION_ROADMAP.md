@@ -1,4 +1,10 @@
 # PSCV0 v7 native implementation roadmap
+## Native projection oracle resolved; instance metadata aligned — 15 October 2026
+
+The diagnostic from native38754279462 confirmed the native result was raw `857`; the oracle itself had accidentally built its expected value with `Lean.mkNatLit`, which constructs overloaded `OfNat` syntax. It now uses `Lean.mkRawNatLit`, exactly as pinned `BuiltinTerm.elabNumLit` does. Assertions are unchanged. Portable source literals already use raw Core parameters.
+
+The whole affected instance family was reviewed: newly constructed Standard dictionaries registered after the early prelude had no explicit reducibility status, preventing their class projections from reducing at instance transparency. The shared Standard instance factory now applies the native instance-command default `instanceReducible` only when no status was supplied; explicitly imported or overridden statuses are preserved. Environment metadata now exposes an optional lookup so absence is distinct from an explicit semireducible choice. This applies to the family once rather than patching numerical operations separately. Existing exact native status audit and strict selected snapshot will independently check and measure the delta; pins intentionally remain at the previous reviewed values until that measurement. No Core declaration bodies, assumptions, source expectations or budgets are weakened. Qualification pending.
+
 ## Shared class-projection reduction prerequisite — 15 October 2026
 
 Native38751673594 reached the older `Numeric.generic` regression and exposed a general reduction gap: instance transparency could not reduce a checked class field such as `OfNat.ofNat Nat 857 instOfNatNat` inside a dependent instance index. Restoring raw Nat literal shortcuts would hide the defect and break local dictionaries. Pinned Lean `src/Lean/Meta/WHNF.lean` (`isProjInst`, `unfoldProjInst?`, `unfoldProjInstWhenInstances?`, `unfoldDefault`) provides the correct rule; `GetUnfoldableConst.lean`, `tests/elab/instanceReducibility.lean` and `tests/elab/isDefEqProjInstWithMVar.lean` were studied.

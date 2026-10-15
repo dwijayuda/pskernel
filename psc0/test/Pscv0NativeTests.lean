@@ -9,13 +9,13 @@ import Init.Data.ByteArray.Lemmas
 
 -- Independent pinned native WHNF oracle for class projection transparency.
 run_meta do
-  let n := Lean.mkNatLit 857
+  let n := Lean.mkRawNatLit 857
   let nat := Lean.mkConst ``Nat
   let project := fun dictionary =>
     Lean.mkApp3 (Lean.mkConst ``OfNat.ofNat [Lean.Level.zero]) nat n dictionary
   let concrete := project (Lean.mkApp (Lean.mkConst ``instOfNatNat) n)
   let explicit := project (Lean.mkApp3 (Lean.mkConst ``OfNat.mk [Lean.Level.zero])
-    nat n (Lean.mkNatLit 42))
+    nat n (Lean.mkRawNatLit 42))
   for mode in [Lean.Meta.TransparencyMode.instances, .implicit] do
     let reduced ← Lean.Meta.withTransparency mode (Lean.Meta.whnf concrete)
     unless reduced == n do
@@ -23,7 +23,7 @@ run_meta do
         toString mode ++ "; value=" ++ reduced.dbgToString ++
         "; input=" ++ concrete.dbgToString ++
         "; dictionary status=" ++ toString (← Lean.getReducibilityStatus ``instOfNatNat).toAttrString)
-    unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf explicit)) == Lean.mkNatLit 42 do
+    unless (← Lean.Meta.withTransparency mode (Lean.Meta.whnf explicit)) == Lean.mkRawNatLit 42 do
       throwError "native class projection ignored explicit dictionary evidence"
   unless (← Lean.Meta.withTransparency .reducible (Lean.Meta.whnf concrete)) == concrete do
     throwError "native semireducible class field unfolded at reducible transparency"

@@ -1,4 +1,10 @@
 # PSCV0 v7 — AI work state
+## Native projection oracle resolved; instance metadata aligned — 15 October 2026
+
+The diagnostic from native38754279462 confirmed the native result was raw `857`; the oracle itself had accidentally built its expected value with `Lean.mkNatLit`, which constructs overloaded `OfNat` syntax. It now uses `Lean.mkRawNatLit`, exactly as pinned `BuiltinTerm.elabNumLit` does. Assertions are unchanged. Portable source literals already use raw Core parameters.
+
+The whole affected instance family was reviewed: newly constructed Standard dictionaries registered after the early prelude had no explicit reducibility status, preventing their class projections from reducing at instance transparency. The shared Standard instance factory now applies the native instance-command default `instanceReducible` only when no status was supplied; explicitly imported or overridden statuses are preserved. Environment metadata now exposes an optional lookup so absence is distinct from an explicit semireducible choice. This applies to the family once rather than patching numerical operations separately. Existing exact native status audit and strict selected snapshot will independently check and measure the delta; pins intentionally remain at the previous reviewed values until that measurement. No Core declaration bodies, assumptions, source expectations or budgets are weakened. Qualification pending.
+
 ## Projection oracle diagnosis — 15 October 2026
 
 Native38753531404 compiled the portable reducer but its independent native WHNF oracle refused the assumed reduced shape before source qualification. The oracle now reports the exact mode, expression and native dictionary status so the native invariant can be reconstructed without weakening its assertion. The Lean-reserved local variable name in the portable test is corrected, and ordinary/default/all transparency now short-circuits projection metadata lookup. No selected source or expected runtime observation changed. Full qualification remains pending; do not integrate this research checkpoint as green.

@@ -113,7 +113,7 @@ def primitiveAudit : IO Lean.Json := do
     ["UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64"].flatMap (fun word =>
       [owner ++ ".to" ++ word, owner ++ ".Model.to" ++ word, owner ++ ".Model.of" ++ word,
        word ++ ".to" ++ owner]) ++ [owner ++ ".Model.ofScientific"]
-  let modelNames := floatConversions ++ ["Nat.toFloat", "Nat.toFloat32", "Int.toFloat", "Int.toFloat32"] ++ floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
+  let modelNames := floatConversions ++ ["Nat.toFloat", "Nat.toFloat32", "Int.toFloat", "Int.toFloat32"] ++ floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.log2", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
     "Nat.ble", "outOfBounds"]
   let mut models := []
   for name in modelNames do

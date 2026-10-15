@@ -287,8 +287,11 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- roster is unchanged. Independently measured by strict CI38742459724 refusal.
 -- Instance metadata measured independently by strict native38754937813.
 -- Both boundaries agreed after native projection/signature checks; full gates pending.
+-- F3: 134 checked native declarations and two checked OfNat dictionaries.
+-- Independent strict command/check boundaries agreed at native38781449363;
+-- primitive signatures/status and native conversion oracle passed first.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:4909868320704722088"
+  "fnv1a64:12963509668132181128"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -453,7 +456,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- independently measured by strict refusal in native CI38730889997.
 -- Candidate replay CI38729006492 confirms the byte-exact checked asset.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:990f59c079198da859bbe7b98e11dc96ca6668851825f48df5fadeb24524148f"
+  "sha256:bc08da1b91289aecc447678b691874558330e4816dbed426e6fbfb29ed8c7790"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

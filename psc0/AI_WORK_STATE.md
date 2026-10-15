@@ -1,41 +1,46 @@
 # PSCV0 v7 — AI work state
 
-## 15 October — Four additional portable F1 canonical-carrier roots (candidate)
+## 15 October — Float F1 21-root compact candidate QUALIFIED at 7af2c508
 
-A focused, independent proof replay at `0c07511549b5cadea5d4584ea59aab824aaad067`,
-[research CI 38680047555](https://github.com/dwijayuda/pskernel/actions/runs/38680047555),
-**passed**. The frozen selected Standard and unmodified portable kernel
-independently checked **46 declarations / 21 roots** including the two
-pure IEEE32/IEEE64 mask-based canonical carrier definitions and two exact
-canonical-NaN constant theorems. Receipt:
-`kernelChecked: true`, `axioms: []`, and
-`importedAssumptions: ["propext","Quot.sound"]`.
+**Exactly qualified executable source:** `7af2c5080c9d21192d1ccc8a91d2de2013223f9f`. Both
+[full native Linux CI 38680587949](https://github.com/dwijayuda/pskernel/actions/runs/38680587949)
+and independent
+[portable F1 replay 38680587932](https://github.com/dwijayuda/pskernel/actions/runs/38680587932)
+succeeded on the **same commit**.
 
-This branch integration is **a candidate pending its own exact-commit
-full native and portable CI**. It changes only which native-authoring roots
-the existing portable F1 candidate replays, not the selected Standard,
-checker, allowed assumptions or executable runtime. The full equality
-between mask algorithms and upstream Float.ofBits is still **native-only**
-because its proof dependency closure reaches incompatible pinned List/Int
-models. Do not admit source Float, typed erasure, ABI or F2–F4 operations
-without their independent acceptance gates. M2+A is not complete.
+The checked compact candidate now contains **21 roots / 46 declarations**:
+the previous 17-root Float construction and representation closure, plus
+`canonicalMask64`, `canonicalMask32`,
+`packedNaN64_eq_constant`, and `packedNaN32_eq_constant`.
+These are ordinary, checked canonical-bit carrier definitions and fixed
+canonical NaN proofs; they do **not** admit source-level Float execution.
+The unchanged exporter reports `kernelChecked: true`, `axioms: []`,
+`replacedDefinitionAxioms: []` and imported assumptions exactly
+`["propext","Quot.sound"]`. Target JS/TS/Rust/Wasm and native Wasmtime
+CI gates remain green at this checkpoint.
 
-## 15 October — Constructive BitVec bound proof candidate
+**Separate constructive theorem-cut research:** the host-only proof
+`PsV7Native.FloatConstructive.getLsbDOfGe`, already committed in this
+working tree, passed native Lean CI 38680234876 and an **independent
+theorem-only type-and-kernel replay** at
+[CI 38680361737](https://github.com/dwijayuda/pskernel/actions/runs/38680361737).
+Its exact pinned `BitVec.getLsbD_of_ge` statement was checked with a
+replacement proof that avoids `Lean.Omega` and imports no new axioms.
+Receipt: `kernelChecked: true`, one replayed declaration,
+`axioms: []`, and only `propext` / `Quot.sound`. The replacement is
+**not published into the selected Standard**. A separate isolated
+research branch tests whether that checked proof cut can support wider
+IEEE field theorems.
 
-Native-only research commit `8647b0e4ce1ad32b030dc7ebadd1958813942014`
-passed [pinned Lean CI 38680234876](https://github.com/dwijayuda/pskernel/actions/runs/38680234876).
-A new constructive proof of the **exact pinned**
-`BitVec.getLsbD_of_ge` proposition uses the BitVec unsigned bound,
-`Nat.pow_le_pow_right`, and `Nat.testBit_lt_two_pow` instead of the
-original `omega` proof body. The native oracle refuses every imported
-assumption except `propext` and `Quot.sound`.
-
-**This integration is unqualified pending its own exact-commit CI.** The
-separate theorem-only portable proof-cut experiment is under review. The
-checker, frozen selected Standard, previously qualified 17-root Float
-candidate, source compiler and executable Float capabilities are not
-modified. Neither a replacement proof nor any new runtime functionality
-is admitted by merging a host-only theorem. F1–F4/M2+A remain incomplete.
+**Remaining blocker:** upstream BitVec splitting/injectivity proofs
+transitively import incompatible `Lean.Omega → List.get / Int` proof
+dependencies. Extended proof roots that fail independent kernel replay
+must stay out of the published candidate. No trust expansion, unsound
+casting or artificial proof evidence is permitted. Selected source Float
+constructors, erased typed Float IR, runtime/ABI and F2–F4 are still
+disabled/unqualified; M2+A is incomplete. Continue F1 selected source,
+proof erasure and separate backend evidence only when fail-closed gates
+are satisfied. No pskernel-core, self-hosting or C5.
 
 ## 15 October — Constructive IEEE mask proof milestone QUALIFIED
 

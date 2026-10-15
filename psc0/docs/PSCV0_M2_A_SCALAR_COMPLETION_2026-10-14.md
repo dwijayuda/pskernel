@@ -1,5 +1,32 @@
 # M2+A scalar completion design — Lean 4.35.0
 
+## 15 October — replace opaque Int arithmetic with pinned logical definitions
+
+Pinned upstream [Int/Basic.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Int/Basic.lean)
+uses Int.ofNat/negSucc, negOfNat/subNatNat, four sign cases for add/mul,
+and sub defined as add with negation. These logical definitions coexist with
+fast extern runtime implementations. [Int/Lemmas.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Int/Lemmas.lean)
+proves add_zero/neg_neg/cast equations by definitional reduction. PSC0's
+remaining Int arithmetic axioms prevented that reduction, explaining a whole
+family of imported proof refusals. Matching signatures cannot solve it.
+
+Decision: reuse the existing native-to-portable checked asset pipeline for the
+entire add/neg/sub/mul family and five symbolic laws. The strict research gate
+[38705122100](https://github.com/dwijayuda/pskernel/actions/runs/38705122100)
+accepted 28 declarations, replacing precisely four axioms and comparing one
+recursor rule. No theorem-only replacement, new assumption, or new source
+syntax. Tests inspected: pinned tests/elab/intNegSucc.lean and
+test_extern_int.lean (logical/native representation boundary).
+
+The final selected stage has a separate frozen pre-arithmetic environment.
+CI regenerates the exact asset including the recorded dependency cut and native
+reducibility. Existing primitive audit retains the four operations as explicit
+checked-logical-model/runtime-override entries. Existing typed Int erasure and
+all backend intrinsics are unchanged; proof terms do not enter runtime support.
+This keeps proof compatibility independent of runtime performance. Apache-2.0
+attribution stays in the asset. Full integration qualification and independently
+observed registry digests remain mandatory. Float F1-F4/M2+A are still open.
+
 ### New qualified /61 integration receipt
 
 ## New qualified /61 checkpoint — 14 October 2026

@@ -1,5 +1,15 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — coherent Int logical arithmetic integration candidate
+
+Baseline: `bc613bc47f63e1fd3a9f1cb714317da46d78f12f`, following qualified `7742b4cd9599af315da4a1af1ba5c8f97a6ac290` (native [38701305472](https://github.com/dwijayuda/pskernel/actions/runs/38701305472), Float replay [38701305530](https://github.com/dwijayuda/pskernel/actions/runs/38701305530)). Actual baseline Standard: **1,832 declarations /25 classes /226 instances**, FNV `fnv1a64:8516648619442707737`, SHA-256 `sha256:606ab4df1a8517d7e3323d49ee4050cadc62612e433c541fd322f44e0b626f05`. The earlier 1bc8... SHA below was a documentation error; the source and successful exact-commit CI agree on 606ab4.... Existing 699 JS/TS/Rust observations and Wasm/Wasmtime passed.
+
+Research `ab031712d4cf75c4860bb53ae76ca753d7b61b67`, [38705122100](https://github.com/dwijayuda/pskernel/actions/runs/38705122100), independently checked **28 declarations /9 roots /1 recursor rule**, replacing exactly Int.add/neg/sub/mul computational axioms. The actual native add_zero, neg_neg, add_neg_eq_sub, natCast_add and natCast_mul proofs replay without theorem cuts or new axioms; assumptions remain exactly propext/Quot.sound. This fixes the missing logical definitions behind the earlier Int proof refusal. Native Float constructors and all Float runtime features remain separate.
+
+Integrated candidate: exact checked asset, frozen pre-arithmetic export boundary, recorded native reducibility, required byte-for-byte regeneration, and explicit checked-runtime-model audit entries. Fast Int intrinsics remain the executable implementation; proof dependencies are not runtime support. The strict old FNV/SHA pins are intentionally retained until independent candidate measurements; do not infer new fingerprints. **Main integration is pending complete native/backend and independent Float qualification at the same SHA.**
+
+Pinned Lean sources studied: Init/Data/Int/Basic.lean and Lemmas.lean; tests/elab/intNegSucc.lean and test_extern_int.lean. Source references/design are in the existing scalar completion document. No pskernel-core, self-hosting, C5, unchecked proofs or trust expansion. M2+A remains incomplete.
+
 ## 15 October — M2+A checked universe-polymorphic List.get QUALIFIED at 7742b4cd
 
 **Exact qualified selected Standard and executable:** `7742b4cd9599af315da4a1af1ba5c8f97a6ac290`.

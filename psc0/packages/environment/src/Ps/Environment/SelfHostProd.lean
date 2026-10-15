@@ -1,3 +1,4 @@
+import Ps.Environment.StandardIntArithmetic
 import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardUnsigned
 import Ps.Environment.StandardUnsignedOperations
@@ -83,7 +84,8 @@ def psSelfHostProdPreSignedOfIntPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreSignedShiftPreludeEnvironment : PsEnvironment :=
   psStandardSignedOfIntExtend psSelfHostProdPreSignedOfIntPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen input for exact Int arithmetic asset regeneration.
+def psSelfHostProdPreIntArithmeticPreludeEnvironment : PsEnvironment :=
   psStandardFloatCanonicalExtend <|
   psStandardByteArrayCollectionExtend <|
     psStandardByteArrayExtend <|
@@ -98,6 +100,9 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
     psStandardSignedAbsExtend <|
     psStandardSignedClampExtend <|
     psStandardSignedShiftExtend psSelfHostProdPreSignedShiftPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardIntArithmeticExtend psSelfHostProdPreIntArithmeticPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

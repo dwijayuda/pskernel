@@ -168,6 +168,12 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_native --export-signed-operations-candidate ../dist/pscv0-native/StandardSignedOperationsCandidate.lean | tee ../dist/pscv0-native/signed-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
           cmp ../packages/environment/src/Ps/Environment/StandardSignedOperationsData.lean ../dist/pscv0-native/StandardSignedOperationsCandidate.lean
+      - name: Regenerate checked Int arithmetic definitions and symbolic laws
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-int-arithmetic-model-candidate ../dist/pscv0-native/StandardIntArithmeticData.lean | tee ../dist/pscv0-native/int-arithmetic-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardIntArithmeticData.lean ../dist/pscv0-native/StandardIntArithmeticData.lean
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

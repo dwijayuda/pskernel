@@ -74,7 +74,12 @@ run_cmd do
 -- Never use this diagnostic to authorize or conceal any assumption.
 run_cmd do
   for name in
-      [``BitVec.extractLsb'_append_extractLsb',
+      [``Nat.testBit_two_pow_sub_one,
+       ``Nat.testBit_two_pow_sub_succ,
+       ``BitVec.eq_of_getLsbD_eq,
+       ``BitVec.toNat_allOnes,
+       ``Nat.testBit_and,
+       ``BitVec.extractLsb'_append_extractLsb',
        ``BitVec.extractLsb'_append_extractLsb'_eq_extractLsb',
        ``Nat.and_two_pow_sub_one_eq_mod,
        ``BitVec.toNat_and, ``BitVec.toNat_allOnes,

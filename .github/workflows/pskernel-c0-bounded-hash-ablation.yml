@@ -83,6 +83,7 @@ jobs:
           lake env lean --run test/C0ProofCongruenceRegression.lean
           lake build Ps.KernelCore.Core.IndexedStoreValidation
           lake env lean --run test/C0IndexedStoreValidationRegression.lean
+          lake build Ps.KernelCore.API.VerifiedProvider Ps.KernelCore.Architecture.QualifiedRecursiveInference
           lake env lean --run test/C0RecursiveCheckedInferenceRegression.lean
           echo "C0_HASH_ABLATION_NATIVE_REGRESSIONS=passed"
       - name: Measure real pinned WF theorem at unchanged fuel and strict verdict

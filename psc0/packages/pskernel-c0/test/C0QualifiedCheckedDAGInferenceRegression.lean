@@ -62,9 +62,9 @@ def main : IO Unit := do
   let _exactStore : run.owner.store = withBad.store := run.ownerExact
   let _exactFold :
       psKernelC0IndexedDAGReferenceFold run.owner 4096
-        source.context
+        withBad.checker.context
         (psKernelC0CheckedDAGTraceIds run.checkedTrace)
-        source.state = .ok run.finalState :=
+        withBad.checker.state = .ok run.finalState :=
     psKernelC0CertifiedIndexedSourceRun_source run
   if psKernelC0CheckedDAGTraceIds run.checkedTrace != [appId, appId] then
     throw (IO.userError "qualified DAG: returned wrong source handle trace")

@@ -126,6 +126,35 @@ jobs:
           done
           lake env lean --run test/C0OfficialReferenceRegression.lean
           lake env lean --run test/C0OfficialNdjsonReplay.lean
+      - name: Fail-closed official replay CLI process exit codes and exact verdicts
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build c0OfficialReplay
+          .lake/build/bin/c0OfficialReplay --require-accepted \
+            test/C0OfficialAccept.ndjson 4096 > "$RUNNER_TEMP/c0-strict-good.txt" 2>&1
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=6 fuel=4096" \
+            "$RUNNER_TEMP/c0-strict-good.txt"
+          if .lake/build/bin/c0OfficialReplay --require-accepted \
+              test/C0OfficialChainReject.ndjson 4096 > "$RUNNER_TEMP/c0-strict-invalid.txt" 2>&1; then
+            echo "strict C0 replay exited success for invalid checked declaration" >&2
+            exit 1
+          fi
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" \
+            "$RUNNER_TEMP/c0-strict-invalid.txt"
+          grep -Fq "C0_REAL_EXPORT_STRICT_FAILURE verdict=C0ExportVerdict.rejected" \
+            "$RUNNER_TEMP/c0-strict-invalid.txt"
+          if .lake/build/bin/c0OfficialReplay --require-accepted \
+              test/C0OfficialAccept.ndjson 0 > "$RUNNER_TEMP/c0-strict-fuel.txt" 2>&1; then
+            echo "strict C0 replay exited success for exhausted checking fuel" >&2
+            exit 1
+          fi
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted" \
+            "$RUNNER_TEMP/c0-strict-fuel.txt"
+          grep -Fq "C0_REAL_EXPORT_STRICT_FAILURE verdict=C0ExportVerdict.resourceExhausted" \
+            "$RUNNER_TEMP/c0-strict-fuel.txt"
+          echo "C0_STRICT_CLI_RESULT positive=exit_zero invalid=exit_nonzero fuel_exhausted=exit_nonzero"
       - name: C0 architecture-first lazy execution versus source WHNF (non-accepting)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureExecutionRegression.lean

@@ -690,7 +690,7 @@ def exportFloatConstructivePowCandidate (output : System.FilePath) : IO Unit := 
 -- NEVER an occasion to add Classical.choice or to turn proofs into axioms.
 -- Existing /F0 Standard is the immutable input cut and is not mutated.
 def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
-  let existing := psSelfHostProdPreludeEnvironment.declarations
+  let existing := psSelfHostProdPreFloatConstructorsPreludeEnvironment.declarations
   exportStandardCore {
     roots := [`Float.ofBits, `Float.toBits, `Float.isNaN, `Float.isFinite,
               `Float32.ofBits, `Float32.toBits, `Float32.isNaN, `Float32.isFinite]
@@ -710,7 +710,7 @@ def exportFloatBitsCandidate (output : System.FilePath) : IO Unit := do
 -- dependency closure. This is not selected Standard or executable Float.
 -- Never change the allowed assumption list to make a candidate pass.
 def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit := do
-  let existing := psSelfHostProdPreludeEnvironment.declarations
+  let existing := psSelfHostProdPreFloatConstructorsPreludeEnvironment.declarations
   -- These two checked F1a projection declarations are already in the exact
   -- frozen Standard. Require their presence; do not duplicate source roots
   -- or pretend the candidate separately requalifies their definitions.
@@ -736,11 +736,11 @@ def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit :=
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 Float model and verified constructive Nat.pow_eq_zero proof cut.\nKernel replay and approved propext/Quot.sound assumptions only.\nF1 research-only; not selected Standard or executable Float.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
--- Small native constructive F1 authoring closure. Replay all reached
--- declarations in the portable kernel against the frozen Standard;
+-- Full constructive F1 representation audit. Replay all reached declarations
+-- against the frozen pre-constructor Standard, independent of selected exports;
 -- refuse any incompatible dependencies, unapproved axioms or opaque casts.
 def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := do
-  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let selected := psSelfHostProdPreFloatConstructorsPreludeEnvironment.declarations
   exportStandardCore {
     roots := FloatCanonical.contractRoots ++
       [`PsV7Native.FloatConstructive.getLsbDOfGe]

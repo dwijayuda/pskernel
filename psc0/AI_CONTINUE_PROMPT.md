@@ -1,5 +1,11 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — constructor pins measured; independent audit boundary fixed
+
+Research dd532710 compiled the complete candidate. Native CI38712915969 refused the deliberate old pins and independently reported FNV fnv1a64:9256054256618924345, declaration SHA-256 0f62a5df0a7273a183e10700bf8eb49563afd0ff8d03b7be3935d4d310a12f04, surface SHA-256 240050e325b7c7d06827c36bffe7ed017ef18680b61ccf4fa7701807a62874b4. Pins now record exactly these values.
+
+The separate full proof audit correctly refused a root already present in the newly selected constructor layer. All Float constructor authoring exports now use the frozen pre-constructor stage, so selected output cannot cut its own proof replay. No acceptance guard was relaxed. Full qualification of this revised candidate remains pending; the last qualified main code is e5d1bdd6. M2+A and executable Float remain incomplete.
+
 ## 15 October — minimal logical Float constructor integration candidate
 
 Qualified baseline: main e5d1bdd6 (native 38711192827; full mask proof audit 38711192777). The independently checked 21-declaration /2-root constructor asset from research 412697cf, CI38711557857, is now integrated on this research branch, with a frozen pre-constructor boundary and mandatory byte-for-byte regeneration. Public Float.ofBits/Float32.ofBits wrappers retain ordinary typed lambda entries and actual Format.Valid evidence. No proof substitution, new assumption or runtime override.

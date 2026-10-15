@@ -1143,14 +1143,15 @@ def c0ExportDescribeWhnfProbe
     binder spines. This is a bounded *diagnostic only*, never a DefEq rule:
     binder names are ignored by the existing exact kernel Expr equality. -/
 def c0ExportFirstSyntacticDifference
-    (depth : Nat) :
+    (depth : Nat)
+    (context : PsKernelCheckerContext) :
     PsKernelExpr -> PsKernelExpr -> String :=
   match depth with
   | 0 =>
       fun lhs rhs => "depth_limit lhs=" ++ c0ExportMismatchTerm 5 lhs ++
         " rhs=" ++ c0ExportMismatchTerm 5 rhs
   | remaining + 1 =>
-      let smaller := c0ExportFirstSyntacticDifference remaining
+      let smaller := c0ExportFirstSyntacticDifference remaining context
       fun lhs rhs =>
         if psKernelExprEq lhs rhs then "same"
         else
@@ -1181,6 +1182,21 @@ def c0ExportFirstSyntacticDifference
               "mdata.body/" ++ smaller le re
           | .proj _ _ le, .proj _ _ re =>
               "proj.body/" ++ smaller le re
+          | _, .fvar name =>
+              let bindingInfo :=
+                match psKernelLocalContextFind context.localContext name with
+                | .none => "binding=missing"
+                | .some declaration =>
+                    match psKernelLocalDeclValue declaration with
+                    | .none => "binding=ordinary"
+                    | .some value =>
+                        "binding=let value=" ++
+                          c0ExportMismatchTerm 7 value ++
+                          " lhs_matches_value=" ++
+                          toString (psKernelExprEq lhs value)
+              "leaf lhs=" ++ c0ExportMismatchTerm 6 lhs ++
+                " rhs=" ++ c0ExportMismatchTerm 6 rhs ++
+                " | " ++ bindingInfo
           | _, _ =>
               "leaf lhs=" ++ c0ExportMismatchTerm 6 lhs ++
                 " rhs=" ++ c0ExportMismatchTerm 6 rhs
@@ -1214,7 +1230,7 @@ def c0ExportProbeFirstAppMismatchAux
         | .error error =>
             detailLabel ++ " error=" ++ error ++
               " | first_syntax_path=" ++
-                c0ExportFirstSyntacticDifference 48 lhs rhs
+                c0ExportFirstSyntacticDifference 48 ctx lhs rhs
   | _, _, _ => "different_argument_counts"
 
 def c0ExportProbeFirstAppMismatch

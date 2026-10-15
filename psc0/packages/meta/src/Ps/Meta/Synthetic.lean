@@ -137,7 +137,7 @@ def psSyntheticDefaultGoals (fuel : Nat) (environment : PsEnvironment)
       if attempted.table.resourceExceeded then return { context, remaining, exhausted := true }
       if attempted.result.value.isSome then current := attempted.result.context
       else unresolved := id :: unresolved
-    let unresolved := unresolved.reverse
+    unresolved := unresolved.reverse
     if unresolved.length < pending.length then
       return psSyntheticDefaultGoals fuel environment index current unresolved remaining
     for priority in psSyntheticDefaultPriorities index do
@@ -241,7 +241,9 @@ def psSyntheticQueueDefault {σ α : Type}
       | .error () => return { state with attempts, resourceExceeded := true }
       | .ok none => pure ()
       | .ok (some context) =>
-        return { state with context, attempts,
+        return { state with
+          context := context
+          attempts := attempts
           pending := state.pending.take position ++ state.pending.drop (position + 1) }
   return { state with attempts }
 

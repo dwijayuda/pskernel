@@ -1,5 +1,9 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## Default-instance qualification correction — 15 October 2026
+
+[Native38739652823](https://github.com/dwijayuda/pskernel/actions/runs/38739652823) refused before qualification: a mutable-variable shadow, a structure-update layout error, and reserved identifier names in the new Lean sources. These syntax issues are corrected together. Semantic oracles, acceptance criteria, budgets and strict snapshot pins are unchanged. The implementation remains unqualified until the full gates pass; scientific literals and conversion runtime selection remain pending.
+
 ## Shared default instances prepared for qualification — 15 October 2026
 
 The Array prerequisite passed [native38737651266](https://github.com/dwijayuda/pskernel/actions/runs/38737651266) at `3642e8835f36f238c88e4097914df55b199fd58e`: 851 shared observations and all required gates. It is integrated to main `e3902f3d91556af40b85f65566ff6787620346ee`, pending exact-main qualification. F2 is already exact-main qualified at `ef5c5e342015bfabcb58ae1f3291f0fe544cec5a` (native38736277605, F138736277937, F238736278026).

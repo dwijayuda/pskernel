@@ -124,22 +124,22 @@ def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor) :
 
 def psPscv0SelectedAttributes : List String := ["default_instance"]
 
--- Selected declaration attribute only; unsupported attributes are refused.
+-- Selected declaration attributeName only; unsupported attributes are refused.
 -- The default priority is independent of an instance declaration's priority.
 def psPscv0ReadCommand (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxCommand) := do
   if !psTokenCursorAtText cursor "@" then psPscv0ReadUnattributedCommand cursor
   else
-    let at ← psPscv0Expect cursor "@"
-    let opening ← psPscv0Expect at.cursor "["
-    let attribute ← psPscv0Expect opening.cursor "default_instance"
+    let marker ← psPscv0Expect cursor "@"
+    let opening ← psPscv0Expect marker.cursor "["
+    let attributeName ← psPscv0Expect opening.cursor "default_instance"
     let priority ←
-      if psTokenCursorAtText attribute.cursor "]" then
-        pure (PsParseResult.mk 1000 attribute.cursor)
+      if psTokenCursorAtText attributeName.cursor "]" then
+        pure (PsParseResult.mk 1000 attributeName.cursor)
       else do
-        let some atom := psTokenCursorAdvance attribute.cursor
+        let some atom := psTokenCursorAdvance attributeName.cursor
           | throw "PSCV0-DEFAULT-INSTANCE-PRIORITY"
-        let value ← (psPscv0PriorityValue atom.token.text attribute.cursor).mapError psPscv0ParseError
+        let value ← (psPscv0PriorityValue atom.token.text attributeName.cursor).mapError psPscv0ParseError
         pure (PsParseResult.mk value atom.cursor)
     let close ← psPscv0Expect priority.cursor "]"
     let parsed ← psPscv0ReadUnattributedCommand close.cursor

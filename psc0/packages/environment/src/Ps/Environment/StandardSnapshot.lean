@@ -293,7 +293,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- F4 six display dictionaries and preserved native opaque contracts.
 -- Both strict entry points independently measured these at native38789249978.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:12192271966327546278"
+  "fnv1a64:16326442589260407706"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -460,7 +460,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- Platform-word roster: strict publication and host boundaries independently
 -- agreed in native run 38798802729; checked 196-entry asset replay also passed.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:d73d9dbee2bdd03461e59d356cc083064b226097e0752415f7bc103cc96e169c"
+  "sha256:ba31eac8de32f952e1e217ae65ab78402df3785df35617fb8dd442ddff52a25c"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

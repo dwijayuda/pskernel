@@ -1,5 +1,8 @@
 # Continue PSC0 / PSCV0 v7 — complete remaining M2+A
 
+Native38807241380 atb293ecd683904cd5acdb978cd4c4b33509c15f1b compiled and passed the explicit logic dependency audit. Both strict entry points independently observed FNV16326442589260407706, SHA256ba31eac8de32f952e1e217ae65ab78402df3785df35617fb8dd442ddff52a25c; surface SHA256e45f0214b2532da66f5863f91a9a7aaadfb3dbe9af128d0e19c77f210f16f393. This commit selects exactly those measurements. Full source, typed IR, all backend, GC/ABI and solver/performance qualification is still pending; the refused registry run is not green.
+
+
 Native38806446169 compiled the logic layer and all six pinned decision observations, then its strict audit refused a mistaken runtime dependency name. Direct inspection of the frozen native Core DAG confirms that instDecidableIff uses instBEqOfDecidableEq applied to instDecidableEqBool, not a ground instBEqBool. The runtime catalogue and strict dependency audit now select those exact checked dependencies; no logical body, acceptance criterion or registration changed. Digest selection and complete source/runtime qualification remain pending.
 
 

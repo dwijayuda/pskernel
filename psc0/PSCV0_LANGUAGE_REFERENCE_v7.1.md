@@ -3129,6 +3129,40 @@ All test programs must be formed under stable Lean 4.35.0 and an exact source/en
 
 **Implementation sequencing:** P0 vocabulary/source gates/ordinary recursion; P1 stable `partial_fixpoint` construction and proof availability; P1 partial/total/trace VC dependency tracking; P2 restricted unsafe and runtime/backend refinement. All remain pending until measured by CI and independent review.
 
+### v7.1 interaction-regression tests (new normative cases; not executed)
+
+These cases combine declaration grammar, elaboration, proof/effect closure and executable outcome policy. Supply legitimate types, imports and syntax wrappers for schematic fragments. An earlier unrelated parse failure is not a passing negative test.
+
+| Test ID | Scenario | Expected gate/result |
+|---|---|---|
+| P-V71-MOD-PARTIAL | Type-correct `partial function` with inhabited result under explicit ordinary mode | Accepted when backend supports it; no verified behavior claim |
+| N-V71-MOD-DOUBLE | `partial partial def` or `unsafe unsafe def` | Profile rejects duplicate special modifiers |
+| N-V71-MOD-MIX | `unsafe partial def` or `partial unsafe def` | Profile rejects combined strategies |
+| N-V71-UNSAFE-FIX | `unsafe def` with `partial_fixpoint` suffix | Reject conflicting recursion strategy |
+| N-V71-PARTIAL-FIX | `partial def` with `partial_fixpoint` suffix | Reject conflicting recursion strategy |
+| N-V71-FIX-DECREASE | `partial_fixpoint` combined with `termination_by` or `decreasing_by` | Reject incompatible suffixes |
+| P-V71-FIX-WHERE | Valid function body, `partial_fixpoint`, then eligible `where` declarations | Source/fixpoint acceptance only with pinned Lean proof; verified adequacy checked separately |
+| N-V71-FIX-WHERE-ORDER | Outer `partial_fixpoint` incorrectly placed after the `where` block | Reject wrong suffix ownership |
+| P-V71-LOCAL-FIX | Local `where` definition with valid `partial_fixpoint` | Accept only if pinned native local-recursion checks succeed |
+| N-V71-LOCAL-UNSAFE | Selected local `where` declaration with unsupported `unsafe` prefix | Reject local modifier grammar |
+| N-V71-PARTIAL-CONTRACT | Opaque `partial` contract without a separately proved executable model | Contract/verified emission rejected; type-checked contract-free ordinary code remains possible |
+| N-V71-UNSAFE-CONTRACT | `unsafe` declaration with intrinsic contract but no checked safe model and implementation relation | Reject contract evidence; no automatic trusted `f.spec` |
+| N-V71-FIX-SPEC-GAP | Fixed-point equations checked but required postcondition or runtime adequacy is missing | Verified artifact rejected |
+| P-V71-WHILE-ORD | Unannotated `while` in explicitly ordinary selected `do` | Type/runtime admission, never an implicit verification certificate |
+| N-V71-WHILE-ORD-VER | Unannotated `while` in a verified build without separately checked invariant/behavior proof | No verified emission and no ordinary fallback |
+| P-V71-WHILE-TOTAL | Annotated loop with invariant, decreasing measure, valid VCs and effect model | Verified admission when target evidence also closes |
+| N-V71-WHILE-TRACE-ENV | Invariant-only partial loop with no registered finite-trace verifier | ENV/VC-PROOF rejects verified request |
+| N-V71-WHILE-VACUOUS | Never-returning service with postcondition only and no finite-prefix safety proof | Reject claimed service safety |
+| N-V71-IMPL-TRAP | Backend trap or stack overflow equated with logical divergence/normal return without a proof | Reject target correspondence |
+| N-V71-FIX-ASSUMPTION | Fixed-point generated proof depends on classical principle outside approved axiom manifest | Reject assumption closure, distinguish from proof holes |
+| P-V71-QUALIFIED-BOUNDARY | Completed internal proofs plus specifically approved disclosed foreign assumptions | Only distinct boundary-qualified identity when policy permits |
+| N-V71-STRICT-BOUNDARY | External assumptions used despite policy requiring closed proofs | Reject verified output |
+| N-V71-IMPORT-CLOSURE | Imported Lean/runtime implementation introduces unapproved axiom or unverified replacement | Reject requested assurance while leaving `.lean` grammar unrestricted |
+| N-V71-ERASURE-EFFECT | Erased/proof state changes observable result, branch, failure or effect | Reject noninterference proof |
+| N-V71-OUTPUT-DOWNGRADE | Verified build with open proof emits an ordinary executable as fallback | Reject the entire requested emission |
+
+**Execution requirement:** Run this matrix through PSC0 `.ps` parsing/lowering and pinned Lean 4.35.0 elaboration/kernel, then validate dependency, assumption, erasure and target correspondence gates. Every case must report the intended acceptance or rejection stage; no passing tests are claimed here.
+
 ## 14. Research outcome, decisions, and remaining conformance work
 
 The design criterion was **maximum Lean semantic/syntactic reuse with only high-value ProofScript surface differences**. The following are user-requested design decisions; they are *not* claims that the compiler currently implements every feature.

@@ -3,7 +3,7 @@ name: PSCV0 F1 canonical-model replay (research only)
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/research-int-add-model-v1]
     paths:
       # The independently checked F1 proof model depends on the selected
       # Standard and checker, not just its host-only proof source. A Standard
@@ -82,15 +82,14 @@ jobs:
           restore-keys: |
             pscv0-f1-${{ runner.os }}-${{ runner.arch }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-
-      - name: Replay verified native canonical Float model in portable kernel
+      - name: Strict independent pinned Int.add logical-model candidate
         run: |
           set -euo pipefail
-          lake build pscv0_native PsV7FloatConstructiveOracle
+          lake build pscv0_native
           mkdir -p ../dist/pscv0-f1-constructive
-          test -f .lake/build/lib/lean/Ps/Host/FloatCanonical.olean
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
-          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-canonical-model-candidate ../dist/pscv0-f1-constructive/FloatCanonicalModelCandidate.lean | tee ../dist/pscv0-f1-constructive/canonical-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
-          sha256sum ../dist/pscv0-f1-constructive/FloatCanonicalModelCandidate.lean | tee ../dist/pscv0-f1-constructive/canonical-model.sha256
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-int-add-model-candidate ../dist/pscv0-f1-constructive/IntAddModelCandidate.lean | tee ../dist/pscv0-f1-constructive/int-add-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          sha256sum ../dist/pscv0-f1-constructive/IntAddModelCandidate.lean
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()
         with:

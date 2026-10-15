@@ -1,5 +1,22 @@
 # Continue PSC0 / PSCV0 v7 M2 + Phase A
 
+## 15 October — bounded Float mask bridge replay after Int-model repair
+
+Research only, based on integration candidate `5cffe9280f2f2bed07eb1f1a230eb1e924160bdd`.
+Replay the existing compact 26-root Float closure plus the four native
+canonicalMask32/64_eq_compact and canonicalUIntMask32/64_eq_logical
+bridges against the new checked Int add/neg/sub/mul definitions. These are
+all-input correspondence statements needed by source Float erasure;
+no new Float source/runtime feature is enabled. Keep the previously checked
+BitVec.getLsbD_of_ge theorem cut, original kernel replay and exact
+propext/Quot.sound policy. A refusal is evidence of remaining dependency
+incompatibility, never permission to add assumptions or omit proofs.
+
+Main arithmetic integration remains pending full exact-commit qualification.
+Do not merge this research branch wholesale. On success review closure size,
+proof dependencies and exact native/runtime boundary before selecting roots.
+M2+A remains incomplete. No pskernel-core, self-hosting or C5.
+
 ## 15 October — coherent Int logical arithmetic integration candidate
 
 Baseline: `bc613bc47f63e1fd3a9f1cb714317da46d78f12f`, following qualified `7742b4cd9599af315da4a1af1ba5c8f97a6ac290` (native [38701305472](https://github.com/dwijayuda/pskernel/actions/runs/38701305472), Float replay [38701305530](https://github.com/dwijayuda/pskernel/actions/runs/38701305530)). Actual baseline Standard: **1,832 declarations /25 classes /226 instances**, FNV `fnv1a64:8516648619442707737`, SHA-256 `sha256:606ab4df1a8517d7e3323d49ee4050cadc62612e433c541fd322f44e0b626f05`. The earlier 1bc8... SHA below was a documentation error; the source and successful exact-commit CI agree on 606ab4.... Existing 699 JS/TS/Rust observations and Wasm/Wasmtime passed.

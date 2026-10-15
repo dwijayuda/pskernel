@@ -723,7 +723,11 @@ def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := d
   let selected := psSelfHostProdPreludeEnvironment.declarations
   exportStandardCore {
     roots := FloatCanonical.contractRoots ++
-      [`PsV7Native.FloatConstructive.getLsbDOfGe]
+      [`PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
+       `PsV7Native.FloatCanonical.canonicalMask32_eq_compact,
+       `PsV7Native.FloatCanonical.canonicalUIntMask64_eq_logical,
+       `PsV7Native.FloatCanonical.canonicalUIntMask32_eq_logical,
+       `PsV7Native.FloatConstructive.getLsbDOfGe]
     boundary := selected.map psDeclarationName
     baseDeclarations := selected
     nativeModules := #[{ module := `Init }, { module := `Ps.Host.FloatCanonicalContracts },

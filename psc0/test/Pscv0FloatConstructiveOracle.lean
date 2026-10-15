@@ -94,7 +94,9 @@ run_cmd do
        ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
        ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact,
        ``PsV7Native.FloatCanonical.canonicalUIntMask64_eq_logical,
-       ``PsV7Native.FloatCanonical.canonicalUIntMask32_eq_logical] do
+       ``PsV7Native.FloatCanonical.canonicalUIntMask32_eq_logical,
+       ``PsV7Native.FloatCanonical.canonicalUIntMask64_eq_upstream_toBits,
+       ``PsV7Native.FloatCanonical.canonicalUIntMask32_eq_upstream_toBits] do
     let dependencies ← Lean.collectAxioms name
     if dependencies.contains ``sorryAx then
       throwError "PSCV0-FLOAT-MASK-NATIVE: {name} depends on sorryAx"

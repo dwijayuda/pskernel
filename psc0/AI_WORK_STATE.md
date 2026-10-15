@@ -1,31 +1,37 @@
 # PSCV0 v7 — AI work state
 
-## 15 October — F1 all-input selected UInt mask model (native candidate)
+## 15 October — F1 selected UInt mask semantics qualified at 9f0ffbaa
 
-Research [Lean CI 38674696877](https://github.com/dwijayuda/pskernel/actions/runs/38674696877)
-passed at `9ca35f7ef2acbd56cbaa7839c66926c79e7afd1a`.
-This integration is **unqualified until exact-commit main CI completes**.
+**Exact-commit qualification:** `9f0ffbaa5e88eb78265f0350a0dfca0b600a1c57`,
+full [native Linux CI 38674864244](https://github.com/dwijayuda/pskernel/actions/runs/38674864244)
+**passed**; independent [compact Float CI 38674864220](https://github.com/dwijayuda/pskernel/actions/runs/38674864220)
+**passed**. The native model's `canonicalUIntMask64_eq_logical` and
+`canonicalUIntMask32_eq_logical` prove that the selected UInt-land/Nat-beq
+algorithm produces the same canonical bits as the Lean logical Float model
+**for every UInt64/UInt32 input**. These are symbolic all-input proofs,
+not finite test-only evidence.
 
-New native symbolic proofs establish that the checked
-`PsStandard.canonicalFloat64Bits` / `canonicalFloat32Bits` mask-and-branch
-algorithm has the same canonical packed bits as the pinned Lean Float model for
-**every UInt64/UInt32 input**, including NaNs of every sign/payload, both
-signed zeros, infinities, subnormals and normal values. The correspondence
-includes explicit bit-mask/extracted-field lemmas and UInt.toNat predicates.
+**Newest native research improvement:** two short theorems connecting that
+algorithm all the way to pinned upstream
+`(Float.ofBits bits).toBits` and `(Float32.ofBits bits).toBits`
+passed focused [Lean CI 38675504040](https://github.com/dwijayuda/pskernel/actions/runs/38675504040)
+at `b6d67b913db6358116b0b3b905ea470ecd51d8c3`.
+This new PR integration is **not itself qualified until its exact-commit
+native/full CI succeeds**.
 
-**Non-negotiable trust boundary:** the generated native `bv_decide` proof
-closure reaches `Classical.choice`, correctly rejected in experimental
-portable [CI 38674185003](https://github.com/dwijayuda/pskernel/actions/runs/38674185003).
-These native reference lemmas are deliberately NOT added to portable
-`contractRoots`, selected Standard, or the executable Float API. The
-approved `propext` and `Quot.sound` list is unchanged; strict research
-assumption logs and `sorryAx` refusals are retained. The native proof
-supports F1 bit-helper semantic correspondence, **not** backend preservation
-or emission of source-level Float constructors.
+**Trust boundary unchanged:** The upstream and `bv_decide` native proof
+closures transitively import `Classical.choice`; expanded portable roots
+were correctly refused by [research replay 38674185003](https://github.com/dwijayuda/pskernel/actions/runs/38674185003).
+Only the original 42-declaration compact model, with approved
+`propext` and `Quot.sound`, is portably replayed. Native mask/upstream
+theorems are NOT published selected Standard roots. Source-level Float
+construction, typed erasure/IR, ABI and JS/TS/Rust/Wasm execution remain
+unqualified and disabled. No F1–F4/M2+A completion claim.
 
-Next: complete fail-closed selected source Float constructor, safe erasure
-and independent cross-target runtime/ABI qualifications without expanding
-assumptions. F1-F4 and M2+A remain incomplete.
+**Next:** resolve F1 source constructors with a kernel-replayable portable
+proof term and explicit erasure, without widening assumptions. Validate
+target semantics and the remaining F2/F3/F4 obligations; keep kernel
+replacement, bootstrap, self-hosting and C5 out of scope.
 
 ## 15 October — Native all-input Float correspondence QUALIFIED at d7d267bf
 

@@ -1,7 +1,7 @@
 name: PSC0 v7 native Lean development (Linux)
 on:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/research-list-get-universe-v1]
     paths:
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'

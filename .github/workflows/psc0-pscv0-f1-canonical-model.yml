@@ -75,6 +75,7 @@ jobs:
         run: |
           set -euo pipefail
           lake build pscv0_native pscv0_native_checks
+          .lake/build/bin/pscv0_native_checks
 
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()

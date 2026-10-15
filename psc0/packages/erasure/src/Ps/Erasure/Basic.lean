@@ -1005,8 +1005,8 @@ def psEraseRuntimeType
     Except PsErasureError PsVerifiedIrType :=
   psEraseRuntimeTypeWithFuel environment scope 4096 type
 
-// Prepared single-field layouts are shared by explicit scalar/model adapters.
-// Proof and index erasure have already determined the physical field identity.
+-- Prepared single-field layouts are shared by explicit scalar/model adapters.
+-- Proof and index erasure have already determined the physical field identity.
 def psErasureSingleRuntimeField (scope : PsErasureScope) (owner : PsName) :
     Except PsErasureError (PsRuntimeStructureInfo × PsRuntimeStructureField) := do
   let some info := psErasureLookupStructure scope.runtimeStructures owner

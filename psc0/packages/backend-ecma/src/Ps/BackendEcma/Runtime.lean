@@ -116,12 +116,12 @@ def floatRuntime : List Stmt :=
     let bitsType := if narrow then "number" else "bigint"
     let word := if narrow then "Uint32" else "BigUint64"
     let canonical := id (if narrow then "0x7fc00000" else "0x7ff8000000000000n")
-    let prefix := "__ps$float" ++ width
-    [.functionD false false (prefix ++ "OfBits") "" [{ name := "bits", type := bitsType }] "number" [
+    let helperName := "__ps$float" ++ width
+    [.functionD false false (helperName ++ "OfBits") "" [{ name := "bits", type := bitsType }] "number" [
       .expression (method (id "__ps$floatBits") ("set" ++ word) [num 0, id "bits", id "true"]),
       const "value" (method (id "__ps$floatBits") ("getFloat" ++ width) [num 0, id "true"]),
       ret (.conditional (call "Number.isNaN" [id "value"]) (id "NaN") (id "value"))],
-     .functionD false false (prefix ++ "ToBits") "" [{ name := "value", type := "number" }] bitsType [
+     .functionD false false (helperName ++ "ToBits") "" [{ name := "value", type := "number" }] bitsType [
       .ifE (call "Number.isNaN" [id "value"]) [ret canonical] [],
       .expression (method (id "__ps$floatBits") ("setFloat" ++ width) [num 0, id "value", id "true"]),
       ret (method (id "__ps$floatBits") ("get" ++ word) [num 0, id "true"])]])

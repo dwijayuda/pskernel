@@ -12,15 +12,15 @@ def floatRuntime : Except String (List RuntimeDefinition) := do
         PsWasmInstruction.f32Ne, R.i32 2143289344),
        ("64", .i64, .f64, .f64ReinterpretI64, .i64ReinterpretF64,
         .f64Ne, R.i64 9221120237041090560)] do
-    let prefix := "__ps_float" ++ suffix
+    let helperName := "__ps_float" ++ suffix
     definitions := definitions ++ [
-      ← runtimeDefinition (prefix ++ "_to_bits") [("value", value)] [bits] []
+      ← runtimeDefinition (helperName ++ "_to_bits") [("value", value)] [bits] []
         (.ite (some bits) (.op ne [.get "value", .get "value"]) canonical
           (.op (.word toBits) [.get "value"])),
-      ← runtimeDefinition (prefix ++ "_of_bits") [("bits", bits)] [value] []
-        (.call (prefix ++ "_canonical")
+      ← runtimeDefinition (helperName ++ "_of_bits") [("bits", bits)] [value] []
+        (.call (helperName ++ "_canonical")
           [.op (.word fromBits) [.get "bits"]]),
-      ← runtimeDefinition (prefix ++ "_canonical") [("value", value)] [value] []
+      ← runtimeDefinition (helperName ++ "_canonical") [("value", value)] [value] []
         (.ite (some value) (.op ne [.get "value", .get "value"])
           (.op (.word fromBits) [canonical]) (.get "value"))]
   return definitions

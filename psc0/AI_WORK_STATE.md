@@ -6,6 +6,9 @@ Research branch `psc0/pscv0-v7-f1-executable-research` starts at `9f60e292593edc
 
 Qualification is pending: run the existing full native workflow and independent Float proof replay on the exact candidate SHA. The shared suite adds 56 IEEE/model/partial/generic/record/array/closure observations (755 total); native Lean checks the fixed bit corpus. Scalar and aggregate ABI tests cover signed zero/NaN, mixed i32/f32 and i64/f32/f64 variants, generic boxes/lists, indirect parameters and repeated post-return. These are acceptance work, not passing evidence yet. Preserve the last qualified implementation below until both runs pass, then integrate with a fresh expected-HEAD check and qualify the integration SHA.
 
+
+The first research build (`73b5d068`, native38720012770) refused a comment delimiter and two uses of Lean's reserved `prefix` keyword. Corrected before runtime qualification; no acceptance guard changed. The primitive audit now also lists both Float widths' bit/model runtime overrides. Full exact-commit qualification remains pending.
+
 M2+A remains incomplete after F1: follow existing F2 arithmetic/equality, F3 scientific/conversions, F4 qualification, target-sized words and remaining authoritative exits. No pskernel-core, self-hosting/bootstrap or C5. Read the current scalar-completion design and exact CI logs before continuing. Update both handoffs at each slice.
 
 

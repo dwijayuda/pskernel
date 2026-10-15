@@ -1442,18 +1442,33 @@ decreasing_by by {
 
 **`PSCV0-DECL-01` — `noncomputable` unchanged.** `noncomputable` remains available on selected proof/spec `def`/`function` declarations with Lean-compatible typing and approved logical dependencies. An executable's **computational** dependency closure may not rely on noncomputable-only implementations; this does not prohibit propositions/proof terms that are fully erased with certified noninterference.
 
-**Selected schematic source grammar** (declaration cores are precisely the `psDefDecl`/`psFunctionDecl` registry entries in §0B; actual upstream parser is authoritative):
+**Canonical modifier/recursion source grammar (v7.1).** This is an owned ProofScript selection of the stable Lean 4.35.0 modifier ordering and termination-suffix parser, not a second proof calculus.
 
 ```text
-psFunctionLike ::= psDefDecl | psFunctionDecl
-psPartialDecl  ::= selectedModifiers "partial" psFunctionLike
-psUnsafeDecl   ::= selectedModifiers "unsafe" psFunctionLike
-psFixpointDecl ::= selectedModifiers psFunctionLike "partial_fixpoint"
-psTotalDecl    ::= selectedModifiers psFunctionLike psTermination?
--- "partial_fixpoint" is a post-body recursion suffix, never a leading prefix.
--- No source "axiom"; no "partial const"; no combined termination_by/fixpoint.
--- "unsafe partial" or unselected modifier combinations are not automatically admitted.
+psModifiers ::= psAttributes? "private"?
+psFeatureModifier ::= "noncomputable" | "partial" | "unsafe"
+psSelectedFunction ::= psModifiers? psFeatureModifier?
+                      (psDefDecl | psFunctionDecl)
+psDeclVal ::= ":=" psDeclTerm psRecursionSuffix? psWhere?
+psRecursionSuffix ::= psTermination | "partial_fixpoint"
+psConstDecl ::= "const" declId (":" term)? psConstVal
+psConstVal ::= ":=" psDeclTerm psWhere?
+-- The suffix belongs after the body, before where.
+-- The modifier and suffix must satisfy PSCV0-REC-STRATEGY-01.
 ```
+
+**`PSCV0-REC-STRATEGY-01` — admitted combinations (normative):**
+
+| Declared function strategy | Allowed suffix | Assurance and contract constraints |
+|---|---|---|
+| Plain `def` / `function` | No suffix (termination inferred), or selected `termination_by` with optional proof | Selected Lean-grounded total function and contract rules |
+| Plain `def` / `function` using `partial_fixpoint` | Exactly that suffix; no `termination_by` or `decreasing_by` | Check fixed-point and monotonicity evidence, generated equation dependencies, declared behavior, and executable adequacy |
+| `partial def` / `partial function` | No recursion suffix | Opaque in the logic; verify behavioral claims only through a checked operational model and source/backend refinement |
+| `unsafe def` / `unsafe function` | No recursion suffix | Registered runtime implementation only; a safe modeled specification and independently justified correspondence are required for any verified claim |
+| `noncomputable def` / `noncomputable function` | No recursion suffix in this profile | Proof/specification-only; no executable computational body dependency |
+| `const` | No recursion suffix or feature modifier | Nonrecursive source value with selected `psConstVal` |
+
+Only selected `def`/`function` heads accept exactly **one** of the three leading feature modifiers. Repeated modifiers; `unsafe partial`, `partial unsafe`, `partial partial`, `unsafe unsafe`; `partial` or `unsafe` with `partial_fixpoint`; and `noncomputable` combined with executable recursion are all rejected at the source-profile/elaboration boundary. `partial_fixpoint` and `termination_by` are mutually exclusive. Even when Lean parses an alternative modifier combination, PSCV0 does not silently accept a logically different recursion strategy. Apply native mutual-recursion-clique checks and audit the effective opacity of **every** member before making any verified assertion.
 
 **Lean 4.35.0 / PSCV0 surface comparison** (illustrative, not independently compiled fixtures):
 

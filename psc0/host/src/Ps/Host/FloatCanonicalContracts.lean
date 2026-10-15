@@ -465,6 +465,42 @@ theorem andAllOnes52_constructive (x : BitVec 52) :
     exact hAll ⟨i, hi⟩
   simpa only [BitVec.getLsbD_and, bit, Bool.and_true]
 
+-- The generic upstream BitVec split lemmas use Omega proof terms,
+-- pulling in List.get/Int dependencies that conflict with PSC0's selected
+-- Standard. This replacement uses only direct getLsbD reconstruction,
+-- bounded Nat subtraction and the pinned BitVec projection rules.
+theorem splitBitsNoOmega {upper lower : Nat}
+    (bits : BitVec (upper + lower)) :
+    bits = bits.extractLsb' lower upper ++ bits.extractLsb' 0 lower := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  rw [BitVec.getLsbD_append]
+  by_cases hlo : i < lower
+  · simp [hlo, BitVec.getLsbD_extractLsb']
+  · have hge : lower ≤ i := Nat.le_of_not_gt hlo
+    have hbound : i < lower + upper := by simpa only [Nat.add_comm] using hi
+    have hup : i - lower < upper := Nat.sub_lt_left_of_lt_add hge hbound
+    have hidx : lower + (i - lower) = i := Nat.add_sub_of_le hge
+    simp [hlo, hup, hidx, BitVec.getLsbD_extractLsb']
+
+-- Adjacent field concatenation without the upstream Omega-based theorem.
+theorem concatFieldsNoOmega {w start lenLow lenHigh : Nat}
+    (bits : BitVec w) :
+    bits.extractLsb' (start + lenLow) lenHigh ++
+        bits.extractLsb' start lenLow =
+      bits.extractLsb' start (lenHigh + lenLow) := by
+  apply BitVec.eq_of_getLsbD_eq
+  intro i hi
+  rw [BitVec.getLsbD_append]
+  by_cases hlo : i < lenLow
+  · simp [hlo, hi, BitVec.getLsbD_extractLsb']
+  · have hge : lenLow ≤ i := Nat.le_of_not_gt hlo
+    have hb : i < lenLow + lenHigh := by simpa only [Nat.add_comm] using hi
+    have hh : i - lenLow < lenHigh := Nat.sub_lt_left_of_lt_add hge hb
+    have hidx : (start + lenLow) + (i - lenLow) = start + i := by
+      rw [Nat.add_assoc, Nat.add_sub_of_le hge]
+    simp [hlo, hi, hh, hidx, BitVec.getLsbD_extractLsb']
+
 -- Constructive BitVec field-mask lemmas adapted from the pinned upstream
 -- String/Decode.lean splitting method. No tactic-based SAT oracle or
 -- unchecked theorem is needed; the kernel checks ordinary equality rewrites.
@@ -472,8 +508,7 @@ theorem maskedHigh_iff {upper lower : Nat}
     (bits : BitVec (upper + lower)) (mask target : BitVec upper) :
     bits &&& (mask ++ 0#lower) = target ++ 0#lower ↔
       bits.extractLsb' lower upper &&& mask = target := by
-  have split : bits = bits.extractLsb' lower upper ++ bits.extractLsb' 0 lower := by
-    rw [BitVec.extractLsb'_append_extractLsb']
+  have split := splitBitsNoOmega bits
   conv => lhs; rw [split]
   rw [BitVec.and_append, BitVec.and_zero, BitVec.append_left_inj]
 
@@ -481,8 +516,7 @@ theorem maskedLow_iff {upper lower : Nat}
     (bits : BitVec (upper + lower)) (mask target : BitVec lower) :
     bits &&& (0#upper ++ mask) = 0#upper ++ target ↔
       bits.extractLsb' 0 lower &&& mask = target := by
-  have split : bits = bits.extractLsb' lower upper ++ bits.extractLsb' 0 lower := by
-    rw [BitVec.extractLsb'_append_extractLsb']
+  have split := splitBitsNoOmega bits
   conv => lhs; rw [split]
   rw [BitVec.and_append, BitVec.and_zero, BitVec.append_right_inj]
 
@@ -498,9 +532,8 @@ theorem binary64ExponentMask_iff (bits : BitVec 64) :
     (target := (0#1 ++ BitVec.allOnes 11))]
   have split : bits.extractLsb' 52 12 =
       bits.extractLsb' 63 1 ++ bits.extractLsb' 52 11 := by
-    simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
-      (x := bits) (start₂ := 63) (start₁ := 52)
-      (len₂ := 1) (len₁ := 11) (by decide)).symm
+    exact (concatFieldsNoOmega (bits := bits) (start := 52)
+      (lenLow := 11) (lenHigh := 1)).symm
   rw [split, BitVec.and_append, BitVec.and_zero,
       andAllOnes11_constructive, BitVec.append_right_inj]
 
@@ -524,9 +557,8 @@ theorem binary32ExponentMask_iff (bits : BitVec 32) :
     (target := (0#1 ++ BitVec.allOnes 8))]
   have split : bits.extractLsb' 23 9 =
       bits.extractLsb' 31 1 ++ bits.extractLsb' 23 8 := by
-    simpa using (BitVec.extractLsb'_append_extractLsb'_eq_extractLsb'
-      (x := bits) (start₂ := 31) (start₁ := 23)
-      (len₂ := 1) (len₁ := 8) (by decide)).symm
+    exact (concatFieldsNoOmega (bits := bits) (start := 23)
+      (lenLow := 8) (lenHigh := 1)).symm
   rw [split, BitVec.and_append, BitVec.and_zero,
       andAllOnes8_constructive, BitVec.append_right_inj]
 

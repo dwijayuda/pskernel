@@ -78,12 +78,12 @@ def psKernelWithDefinitionHeight
 -- counters are untouched, and the caller still chooses the same finite limits.
 def withFreshKernelHeartbeatScope {ε α : Type}
     (action : Unit → Except ε α) : IO (Except ε α) := do
-  let task ← BaseIO.asTask do
+  let task ← IO.asTask do
     let before ← IO.getNumHeartbeats
     let result ← IO.lazyPure action
     let after ← IO.getNumHeartbeats
     return (result, after - before)
-  let (result, allocations) ← IO.wait task
+  let (result, allocations) ← IO.ofExcept (← IO.wait task)
   match result with
   | .ok value => return .ok value
   | .error error =>

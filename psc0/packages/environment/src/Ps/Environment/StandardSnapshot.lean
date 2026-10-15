@@ -276,8 +276,8 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- Both digests independently observed by strict refusal in Linux 38705958851
 -- at 5cffe928 after native compilation; all assets regenerate byte-for-byte.
 -- These pins alone do not qualify source execution or backend preservation.
-// Linux 38708373315 independently measured the complete polymorphic List
-// indexing family and instance level metadata; no declaration/assumption added.
+-- Linux 38708373315 independently measured the complete polymorphic List
+-- indexing family and instance level metadata; no declaration/assumption added.
 def psStandardSnapshotExpected : String :=
   "fnv1a64:14729641192328177589"
 

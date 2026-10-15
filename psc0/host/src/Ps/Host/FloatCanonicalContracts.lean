@@ -295,15 +295,20 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
         (Nat.pos_of_ne_zero hPositive) := by
     simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
     rfl
+  have hRawBias :
+      (((exponent.toNat : Int) - (1023 + 52) +
+        (Format.binary64.exponentBias : Nat) + 52).toNat) =
+        exponent.toNat := by
+    exact hBias
   have hRawNoOverflow :
       ¬ (2 ^ 11 ≤ (((exponent.toNat : Int) - (1023 + 52) +
-        1023 + 52).toNat) + 1) := by
-    rw [hBias]
+        (Format.binary64.exponentBias : Nat) + 52).toNat) + 1) := by
+    rw [hRawBias]
     exact hNoOverflow
   have hRawExponent : BitVec.ofNat 11
       (((exponent.toNat : Int) - (1023 + 52) +
-        1023 + 52).toNat) = exponent := by
-    rw [hBias]
+        (Format.binary64.exponentBias : Nat) + 52).toNat) = exponent := by
+    rw [hRawBias]
     exact hExp
   have hIsNormal : joined.toNat.log2 + 1 = Format.binary64.mantissaBits := by
     simp [hLog, Format.binary64, Format.mantissaBits]
@@ -373,15 +378,20 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
         (Nat.pos_of_ne_zero hPositive) := by
     simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
     rfl
+  have hRawBias :
+      (((exponent.toNat : Int) - (127 + 23) +
+        (Format.binary32.exponentBias : Nat) + 23).toNat) =
+        exponent.toNat := by
+    exact hBias
   have hRawNoOverflow :
       ¬ (2 ^ 8 ≤ (((exponent.toNat : Int) - (127 + 23) +
-        127 + 23).toNat) + 1) := by
-    rw [hBias]
+        (Format.binary32.exponentBias : Nat) + 23).toNat) + 1) := by
+    rw [hRawBias]
     exact hNoOverflow
   have hRawExponent : BitVec.ofNat 8
       (((exponent.toNat : Int) - (127 + 23) +
-        127 + 23).toNat) = exponent := by
-    rw [hBias]
+        (Format.binary32.exponentBias : Nat) + 23).toNat) = exponent := by
+    rw [hRawBias]
     exact hExp
   have hIsNormal : joined.toNat.log2 + 1 = Format.binary32.mantissaBits := by
     simp [hLog, Format.binary32, Format.mantissaBits]

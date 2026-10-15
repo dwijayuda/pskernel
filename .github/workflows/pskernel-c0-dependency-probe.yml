@@ -6,7 +6,7 @@ on:
     paths:
       - '.github/workflows/pskernel-c0-dependency-probe.yml'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
-      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
   workflow_dispatch:
     inputs:
       declaration:
@@ -74,6 +74,32 @@ jobs:
             echo "C0_DEPENDENCY_PINNED_QUALIFIED same_bytes=499130 official=accepted c0=accepted fuel=4096"
           fi
           echo "C0_DEPENDENCY_RESULT=dependency_closure_only_not_full_Init_qualification"
+      - name: Mandate pinned Cooper theorem closure and strict C0 verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This second independent corpus case is the pinned theorem near
+          # full Init record 5068573. It passed the isolated 114487-record
+          # differential check, not the full retained-context Init gate.
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake env .lake/build/bin/lean4export Init -- Int.Internal.Linear.cooper_dvd_right \
+              > "$RUNNER_TEMP/Init-cooper-435.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/Init-cooper-435.ndjson" \
+              > "$RUNNER_TEMP/Init-cooper-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/Init-cooper-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/Init-cooper-435.ndjson")" -eq 114487
+          test "$(stat -c%s "$RUNNER_TEMP/Init-cooper-435.ndjson")" -eq 5847444
+          echo "2e57b983242e47f7dd1c95679ee0697b21aae688bfd38b6039d95c23b49100c1  $RUNNER_TEMP/Init-cooper-435.ndjson" | sha256sum -c -
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 180s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/Init-cooper-435.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/Init-cooper-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=114487 fuel=4096" "$RUNNER_TEMP/Init-cooper-c0.txt"
+          echo "C0_DEPENDENCY_COOPER_PINNED_QUALIFIED same_bytes=114487 official=accepted c0=accepted fuel=4096"
+          echo "C0_DEPENDENCY_COOPER_SCOPE=dependency_closure_only_not_full_Init"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -82,5 +108,8 @@ jobs:
             ${{ runner.temp }}/Init-dependency-435.ndjson
             ${{ runner.temp }}/Init-dependency-official.txt
             ${{ runner.temp }}/Init-dependency-c0.txt
+            ${{ runner.temp }}/Init-cooper-435.ndjson
+            ${{ runner.temp }}/Init-cooper-official.txt
+            ${{ runner.temp }}/Init-cooper-c0.txt
           if-no-files-found: warn
           retention-days: 14

@@ -1,5 +1,9 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — constructor source and full proof audit passed; regeneration environment corrected
+
+At research 1e45a3dd, full proof replay 38713950619 passed; native 38713950473 passed source checks, all three exact pins (1,879 declarations /25 classes /226 instances), and constructor argument/runtime refusals. The new byte-regeneration step could not locate the host Ps module because it lacked Lake's search path. It now invokes the native exporter through lake env, matching the successful independent authoring workflow. No compiler semantics or acceptance checks changed. Full runtime qualification is pending on this revision; main remains qualified at e5d1bdd6.
+
 ## 15 October — constructor pins measured; independent audit boundary fixed
 
 Research dd532710 compiled the complete candidate. Native CI38712915969 refused the deliberate old pins and independently reported FNV fnv1a64:9256054256618924345, declaration SHA-256 0f62a5df0a7273a183e10700bf8eb49563afd0ff8d03b7be3935d4d310a12f04, surface SHA-256 240050e325b7c7d06827c36bffe7ed017ef18680b61ccf4fa7701807a62874b4. Pins now record exactly these values.

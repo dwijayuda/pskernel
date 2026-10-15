@@ -284,8 +284,10 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
     have hPow : (2 : Nat) ^ 11 = 2048 := by decide
     omega
   have hBiased :
-      (((exponent.toNat : Int) - (1023 + 52) + 1023 + 52).toNat) =
+      (((exponent.toNat : Int) - ((Format.binary64.exponentBias : Nat) : Int) -
+          (52 : Int) + ((Format.binary64.exponentBias : Nat) : Int) + (52 : Int)).toNat) =
         exponent.toNat := by omega
+  have hMantBits : 52 + 1 = Format.binary64.mantissaBits := by decide
   have hnoOverflow' : ¬ (2047 ≤ exponent.toNat) := by
     have hExpBound : exponent.toNat < 2 ^ 11 := by
       simpa [Format.binary64] using exponent.isLt
@@ -303,11 +305,10 @@ theorem upstreamPackUnpack_normal64 (bits : BitVec 64)
   dsimp [joined, exponent, mantissa] at hBiased hlog hmask hnoOverflow hnoOverflow'
   simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
   simp only [UnpackedFloat.pack]
-  simp only [Format.binary64, Format.exponentBias, Format.mantissaBits]
   rw [hBiased]
-  simpa only [hnoOverflow, hnoOverflow', hlog, hWidth,
-    BitVec.ofNat_toNat, ite_false, ite_true, Nat.reduceAdd, Nat.reducePow,
-    Nat.reduceLE] using hrec
+  simp only [hnoOverflow, ite_false, hlog, hMantBits, ite_true,
+    hWidth, BitVec.ofNat_toNat]
+  exact hrec
 
 -- Raw normal reconstruction: the implicit leading one fixes log2 of the
 -- unpacked significand, and excluding the all-ones exponent prevents overflow.
@@ -353,8 +354,10 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
     have hPow : (2 : Nat) ^ 8 = 256 := by decide
     omega
   have hBiased :
-      (((exponent.toNat : Int) - (127 + 23) + 127 + 23).toNat) =
+      (((exponent.toNat : Int) - ((Format.binary32.exponentBias : Nat) : Int) -
+          (23 : Int) + ((Format.binary32.exponentBias : Nat) : Int) + (23 : Int)).toNat) =
         exponent.toNat := by omega
+  have hMantBits : 23 + 1 = Format.binary32.mantissaBits := by decide
   have hnoOverflow' : ¬ (255 ≤ exponent.toNat) := by
     have hExpBound : exponent.toNat < 2 ^ 8 := by
       simpa [Format.binary32] using exponent.isLt
@@ -372,11 +375,10 @@ theorem upstreamPackUnpack_normal32 (bits : BitVec 32)
   dsimp [joined, exponent, mantissa] at hBiased hlog hmask hnoOverflow hnoOverflow'
   simp only [UnpackedFloat.unpack, if_neg heTop, if_neg heZero]
   simp only [UnpackedFloat.pack]
-  simp only [Format.binary32, Format.exponentBias, Format.mantissaBits]
   rw [hBiased]
-  simpa only [hnoOverflow, hnoOverflow', hlog, hWidth,
-    BitVec.ofNat_toNat, ite_false, ite_true, Nat.reduceAdd, Nat.reducePow,
-    Nat.reduceLE] using hrec
+  simp only [hnoOverflow, ite_false, hlog, hMantBits, ite_true,
+    hWidth, BitVec.ofNat_toNat]
+  exact hrec
 
 -- Native upstream bridge, limited to ALL NaN payloads (not a finite sample).
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.

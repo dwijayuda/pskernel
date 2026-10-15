@@ -71,7 +71,7 @@ theorem eq_of_toBits_eq32 {a b : Float32}
 -- This uses upstream UnpackedFloat.pack/unpack, not a replacement Float model.
 -- Keep it OUT of the portable contractRoots until the independent full-upstream
 -- dependency closure is compatible with the selected PSC0 environment.
-private theorem upstreamPackUnpack_nan (spec : Format)
+theorem upstreamPackUnpack_nan (spec : Format)
     (bits : BitVec spec.numBits)
     (he : UnpackedFloat.unpackExponent bits = (-1#_))
     (hm : UnpackedFloat.unpackMantissa bits ≠ (0#_)) :

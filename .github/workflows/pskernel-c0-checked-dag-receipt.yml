@@ -8,6 +8,8 @@ on:
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGTrace.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedIndexedSession.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedIndexedSessionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGTraceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGMemoRegression.lean'
   workflow_dispatch:
@@ -41,6 +43,8 @@ jobs:
           test -s .lake/build/lib/lean/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.olean
           lake env lean --run test/C0CertifiedCheckedDAGMemoRegression.lean
           lake env lean --run test/C0CertifiedCheckedDAGTraceRegression.lean
+          lake env lean --run test/C0CertifiedCheckedIndexedSessionRegression.lean
+          echo "C0_INDEXED_CHECKED_SOURCE_SESSION exact_owner=pass source_sequence=pass negatives=pass"
           echo "C0_CHECKED_DAG_TRACE source_state_threading=qualified" 
           echo "C0_CHECKED_DAG_SOURCE_PROOF certified_root=pass source_equation=pass invalid=declined"
       - name: Preserve independent native checker positives and negatives

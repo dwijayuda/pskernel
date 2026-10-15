@@ -199,6 +199,13 @@ jobs:
           grep -v '^PSCV0_STANDARD_SOURCE ' ../dist/pscv0-native/float-conversions.log
           cmp ../packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean ../dist/pscv0-native/FloatConversionsCandidate.lean
           sha256sum ../dist/pscv0-native/FloatConversionsCandidate.lean
+      - name: Regenerate checked Float display and cross-width contracts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-display-candidate ../dist/pscv0-native/FloatDisplayCandidate.lean | tee ../dist/pscv0-native/float-display.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatDisplayData.lean ../dist/pscv0-native/FloatDisplayCandidate.lean
       - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

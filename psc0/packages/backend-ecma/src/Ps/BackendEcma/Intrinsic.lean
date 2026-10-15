@@ -88,6 +88,8 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
       pure (invoke [{ name := "__ps_n", type := "bigint" }] "bigint"
         [ret (.conditional (bin "===" (id "__ps_n") (id "0n")) (id "0n")
           (call "BigInt" [bin "-" (field (method (id "__ps_n") "toString" [num 2]) "length") (num 1)]))] [value])
+  | .floatConvert _ target, [value] =>
+      pure (match target with | .float => value | .float32 => call "Math.fround" [value])
   | .floatOfWord type word, [value] =>
       match type with
       | .float => pure (call "Number" [value])

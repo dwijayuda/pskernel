@@ -34,8 +34,8 @@ private def isub (a b : PsVerifiedIrExpr) := op .intSub [a,b]
 private def ilt (a b : PsVerifiedIrExpr) := op .intLt [a,b]
 
 def roles : List String :=
-  ["float64_ratio", "float64_scientific", "float64_natural", "float64_integer", "float64_model_scientific",
-   "float32_ratio", "float32_scientific", "float32_natural", "float32_integer", "float32_model_scientific"]
+  ["float64_ratio", "float64_scientific", "float64_natural", "float64_integer", "float64_model_scientific", "float64_display",
+   "float32_ratio", "float32_scientific", "float32_natural", "float32_integer", "float32_model_scientific", "float32_display"]
 
 def role (width : PsVerifiedIrFloatingType) (suffix : String) : String :=
   (match width with | .float => "float64_" | .float32 => "float32_") ++ suffix
@@ -80,6 +80,18 @@ private def constant (width : PsVerifiedIrFloatingType) (bits : Nat) :=
 private def infinity : PsVerifiedIrFloatingType → Nat
   | .float => 9218868437227405312 | .float32 => 2139095040
 
+-- Positive exact rational -> nearest integer, ties to even. Shared by
+-- binary floating conversion and the pinned fixed-six-decimal display.
+private def roundRatio (numerator denominator : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  bind "roundNumerator" .nat numerator <|
+  bind "roundDenominator" .nat denominator <|
+  bind "quotient" .nat (div (v "roundNumerator") (v "roundDenominator")) <|
+  bind "twiceRemainder" .nat (mul (n 2) (op .natMod [v "roundNumerator", v "roundDenominator"])) <|
+  choice (op .boolOr [lt (v "roundDenominator") (v "twiceRemainder"),
+    op .boolAnd [eq (v "twiceRemainder") (v "roundDenominator"),
+      eq (op .natMod [v "quotient", n 2]) (n 1)]])
+    (add (v "quotient") (n 1)) (v "quotient")
+
 -- n/d is positive and d is nonzero. Determine its binade exactly; round once
 -- at max(binade - fractionBits, minimumSubnormalExponent). A quotient carry
 -- advances the exponent before packing, including the overflow boundary.
@@ -91,8 +103,6 @@ def ratioBody (width : PsVerifiedIrFloatingType) : PsVerifiedIrExpr :=
   let denominator := v "denominator"
   let raw := v "rawExponent"
   let unit := v "unitExponent"
-  let q := v "quotient"
-  let twice := v "twiceRemainder"
   let rounded := v "rounded"
   let carry := v "carry"
   let finalUnit := v "finalUnit"
@@ -115,12 +125,7 @@ def ratioBody (width : PsVerifiedIrFloatingType) : PsVerifiedIrExpr :=
     (choice (ilt unit (z 0)) (mul numerator (pow2 (asNat (neg unit)))) numerator) <|
   bind "scaledDenominator" .nat
     (choice (ilt unit (z 0)) denominator (mul denominator (pow2 (asNat unit)))) <|
-  bind "quotient" .nat (div (v "scaledNumerator") (v "scaledDenominator")) <|
-  bind "twiceRemainder" .nat (mul (n 2) (op .natMod [v "scaledNumerator", v "scaledDenominator"])) <|
-  bind "rounded" .nat
-    (choice (op .boolOr [lt (v "scaledDenominator") twice,
-      op .boolAnd [eq twice (v "scaledDenominator"), eq (op .natMod [q, n 2]) (n 1)]])
-      (add q (n 1)) q) <|
+  bind "rounded" .nat (roundRatio (v "scaledNumerator") (v "scaledDenominator")) <|
   bind "carry" .bool (eq rounded (n (2 * hidden))) <|
   bind "finalUnit" .int (iadd unit (choice carry (z 1) (z 0))) <|
   bind "significand" .nat (choice carry (div rounded (n 2)) rounded) <|
@@ -171,6 +176,39 @@ def scientificBody (scope : PsErasureScope) (width : PsVerifiedIrFloatingType) :
       (choice negative (constant width 0) (constant width (infinity width))) <|
     bind "power" .nat (op .natPow [n 10, e]) ratio
 
+-- Lean 4.35.0 runtime/object.cpp uses std::to_string (%f, six decimals)
+-- and canonical "NaN". Compute exact binary value * 10^6 and round once;
+-- no backend formatter, intermediate float multiplication or locale dependence.
+-- The sign comes from bits, retaining -0 and negative values rounded to zero.
+private def displayBody (width : PsVerifiedIrFloatingType) : PsVerifiedIrExpr :=
+  let (fraction, exponentBits, bias, minimumUnit, totalBits) : Nat × Nat × Nat × Int × Nat :=
+    match width with
+    | .float => (52, 11, 1023, -1074, 64)
+    | .float32 => (23, 8, 127, -149, 32)
+  let text := fun value => PsVerifiedIrExpr.literal (.string value)
+  let append := fun a b => op .stringAppend [a, b]
+  let decimal := fun value => op .intRepr [asInt value]
+  let signed := fun body => append (choice (v "negative") (text "-") (text "")) body
+  bind "bits" .nat (op (.unsignedToNat (wordType width))
+    [op (.floatToBits width) [v "value"]]) <|
+  bind "negative" .bool (op .natLe [n (2 ^ (totalBits - 1)), v "bits"]) <|
+  bind "exponent" .nat (op .natMod [div (v "bits") (n (2 ^ fraction)), n (2 ^ exponentBits)]) <|
+  bind "fraction" .nat (op .natMod [v "bits", n (2 ^ fraction)]) <|
+  choice (eq (v "exponent") (n (2 ^ exponentBits - 1)))
+    (choice (eq (v "fraction") (n 0)) (signed (text "inf")) (text "NaN")) <|
+  bind "significand" .nat (add (v "fraction")
+    (choice (eq (v "exponent") (n 0)) (n 0) (n (2 ^ fraction)))) <|
+  bind "unit" .int (choice (eq (v "exponent") (n 0)) (z minimumUnit)
+    (isub (asInt (v "exponent")) (z (Int.ofNat (bias + fraction))))) <|
+  bind "scaled" .nat (mul (v "significand") (n 1000000)) <|
+  bind "decimalUnits" .nat
+    (choice (ilt (v "unit") (z 0))
+      (roundRatio (v "scaled") (pow2 (asNat (neg (v "unit")))))
+      (mul (v "scaled") (pow2 (asNat (v "unit"))))) <|
+  signed (append (decimal (div (v "decimalUnits") (n 1000000)))
+    (append (text ".") (op .stringExtract [
+      decimal (add (n 1000000) (op .natMod [v "decimalUnits", n 1000000])), n 1, n 7])))
+
 def declarations (scope : PsErasureScope) : Except PsErasureError (List PsVerifiedIrDeclaration) := do
   let mut result : List PsVerifiedIrDeclaration := []
   for width in [PsVerifiedIrFloatingType.float, .float32] do
@@ -197,6 +235,12 @@ def declarations (scope : PsErasureScope) : Except PsErasureError (List PsVerifi
         parameters := parameters.map fun (name, type) => ⟨name, .primitive type⟩
         resultType := valueType width
         body := body }]
+    result := result ++ [{
+      name := ← name scope width "display"
+      typeParameters := []
+      parameters := [⟨"value", valueType width⟩]
+      resultType := .primitive .string
+      body := displayBody width }]
   return result
 
 end PsFloatRuntime

@@ -547,6 +547,10 @@ def psIrCheckIntrinsicSignature
   | .machineIntCompare type _ => do
       let value ← psIrMachineType type
       psIrCheckSignatureNoTypes typeArguments [value, value] bool
+  | .floatConvert source target =>
+      let valueType := fun (type : PsVerifiedIrFloatingType) => PsVerifiedIrType.primitive
+        (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [valueType source] (valueType target)
   | .floatOfWord type word => do
       let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
       psIrCheckSignatureNoTypes typeArguments [← psIrMachineType word] value

@@ -52,7 +52,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
     | .machineIntBinary .. | .machineIntCompare ..
     | .floatBinary .. | .floatCompare .. | .floatUnary ..
-    | .floatOfWord .. | .floatToWord .. => pure ""
+    | .floatOfWord .. | .floatToWord .. | .floatConvert .. => pure ""
   let instructions := if runtime.isEmpty then match op with
     | .unsignedOfNat type =>
       [.call (match type with | .uint64 => "__ps_nat_wrap_u64" | _ => "__ps_nat_wrap_u32")] ++
@@ -68,6 +68,11 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
       | _ => []
     | .unsignedToNat type =>
       [.call (match type with | .uint64 => "__ps_nat_from_u64" | _ => "__ps_nat_from_u32")]
+    | .floatConvert source target =>
+      match source, target with
+      | .float, .float32 => [.word .f32DemoteF64]
+      | .float32, .float => [.word .f64PromoteF32]
+      | _, _ => []
     | .floatOfWord type word => [.word (floatWordConversion type word false)]
     | .floatToWord type word =>
       if ((psIrMachineIntegerFixedWidth word).getD 0) < 32 then

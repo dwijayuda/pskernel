@@ -29,6 +29,8 @@ structure PsWasmLoweredType where
 -- Word operations needed by the limb runtime. A single descriptor supplies
 -- their mnemonic, binary opcode and stack signature to all target consumers.
 inductive PsWasmWordOp where
+  | f32DemoteF64
+  | f64PromoteF32
   | f32ConvertI32S
   | f32ConvertI32U
   | f32ConvertI64S
@@ -77,6 +79,8 @@ structure PsWasmWordInstruction where
   result : PsWasmValueType
 
 def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
+  | .f32DemoteF64 => { mnemonic := "f32.demote_f64", bytes := [182], parameters := [.f64], result := .f32 }
+  | .f64PromoteF32 => { mnemonic := "f64.promote_f32", bytes := [187], parameters := [.f32], result := .f64 }
   | .f32ConvertI32S => { mnemonic := "f32.convert_i32_s", bytes := [178], parameters := [.i32], result := .f32 }
   | .f32ConvertI32U => { mnemonic := "f32.convert_i32_u", bytes := [179], parameters := [.i32], result := .f32 }
   | .f32ConvertI64S => { mnemonic := "f32.convert_i64_s", bytes := [180], parameters := [.i64], result := .f32 }

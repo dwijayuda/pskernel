@@ -116,7 +116,8 @@ jobs:
         run: |
           set -euo pipefail
           BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
-          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-display-candidate ../dist/pscv0-f3-conversions/FloatDisplayCandidate.lean | tee ../dist/pscv0-f3-conversions/display.log
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-display-candidate ../dist/pscv0-f3-conversions/FloatDisplayCandidate.lean | tee ../dist/pscv0-f3-conversions/display.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatDisplayData.lean ../dist/pscv0-f3-conversions/FloatDisplayCandidate.lean
           sha256sum ../dist/pscv0-f3-conversions/FloatDisplayCandidate.lean
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always()

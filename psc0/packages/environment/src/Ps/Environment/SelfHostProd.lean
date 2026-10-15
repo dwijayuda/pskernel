@@ -1,3 +1,4 @@
+import Ps.Environment.StandardFloatDisplay
 import Ps.Environment.StandardScientific
 import Ps.Environment.StandardOperatorDefaults
 import Ps.Environment.StandardIntArithmetic
@@ -125,7 +126,7 @@ def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
   psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psSelfHostProdPreFloatDisplayPreludeEnvironment
+  psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
@@ -146,7 +147,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
     psStandardArrayRuntimeDeclarations
 
-  psStandardScientificRuntimeDeclarations ++
+  psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
     psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     prior.filter (fun declaration =>
       !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration)))

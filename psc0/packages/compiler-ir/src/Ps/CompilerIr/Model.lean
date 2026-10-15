@@ -161,6 +161,7 @@ inductive PsVerifiedIrIntrinsic where
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerCompareOp)
   -- Fixed-width IEEE conversion; nearest-even to floats, saturating/truncating to words.
+  | floatConvert (source target : PsVerifiedIrFloatingType)
   | floatOfWord (type : PsVerifiedIrFloatingType) (word : PsVerifiedIrMachineIntegerType)
   | floatToWord (type : PsVerifiedIrFloatingType) (word : PsVerifiedIrMachineIntegerType)
   | floatOfBits (type : PsVerifiedIrFloatingType)

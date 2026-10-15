@@ -1,5 +1,14 @@
 # Continue PSC0 / PSCV0 v7 — after qualified F3, M2 + Phase A
 
+## F4 implementation checkpoint — qualification pending
+
+Native candidate replay [38788560853](https://github.com/dwijayuda/pskernel/actions/runs/38788560853) at eb3f65ee4e17b2f053b77e67696291b2d1393ab5 checked 16 declarations /234 shared nodes /238,111 UTF-8 bytes, zero new axioms and zero recursors. Asset SHA-256: b3e9a6fa198001b28d5d43383834dee40c56c159c734d8e60da5312ff2fffcfe. Native opaque inhabitants are preserved unchanged; register only the six intended ToString/Repr/ReprAtom dictionaries, not proof-closure Inhabited dependencies.
+
+The coherent implementation selects the asset after a frozen pre-F4 boundary. One shared typed-IR fixed-six formatter extracts the exact IEEE significand/exponent, multiplies in Nat, rounds once nearest-even, retains signed zero and emits canonical special strings. F3 rational conversion and F4 formatting share one quotient-rounding builder. Cross-width conversions have one typed IR contract, safe native JS/Rust operations and Wasm promote/demote descriptors shared by WAT/binary/validation. No additional memory boundary or trust assumption.
+
+One compact family fixture adds 45 independent native/shared observations (planned total 978), including generic/partial display, ToFormat/Repr/list formatting, ties, subnormal/overflow/max finite values, signed zero and both cross-width paths. Full qualification and independently reviewed new strict pins remain pending; the previous F3 executable remains the qualified reference. Continue remaining M2+A after this slice.
+
+
 ## Active continuation — remaining M2+A, 16 October 2026
 
 The latest user request supersedes the previous stop-after-F3 instruction: continue until remaining M2+A is completed. F3 remains qualified at development bc69717469bbe72249d0d18022b1a51fa5cdd817; receipt 391d1083bc8e1b096690e52603b777af2c5974e1. Current research reviews F4 display and opaque Float/Float32 cross-width contracts before selecting them. Nothing beyond F3 is yet qualified.

@@ -27,7 +27,8 @@ inductive PsErasureFloatOperation where
   | unary (op : PsVerifiedIrFloatUnaryOp)
   | test (op : PsVerifiedIrFloatTestOp)
   | compare (op : PsVerifiedIrFloatCompareOp)
-  | logicalEq | nan | inf | ofNat | ofInt | scientific
+  | logicalEq | nan | inf | ofNat | ofInt | scientific | display
+  | convert (target : PsVerifiedIrFloatingType)
   | ofWord (word : PsVerifiedIrMachineIntegerType)
   | toWord (word : PsVerifiedIrMachineIntegerType)
 
@@ -38,8 +39,7 @@ def psErasureFloatWord : String → Option PsVerifiedIrMachineIntegerType
   | "Int32" => some .int32 | "Int64" => some .int64 | _ => none
 
 -- Exact native identities only; neither suffixes nor arbitrary user definitions
--- gain a primitive contract. USize/ISize and opaque cross-width Float conversions
--- are deliberately outside this fixed-width logical family.
+-- gain a primitive contract. USize/ISize remain separately target-profiled.
 def psErasureFloatEntry (name : PsName) :
     Option (PsVerifiedIrFloatingType × Bool × PsErasureFloatOperation) := do
   let text := psNameToString name
@@ -61,6 +61,8 @@ def psErasureFloatEntry (name : PsName) :
   else if method == "toFloat" || method == "toFloat32" then
     let width := if method == "toFloat" then PsVerifiedIrFloatingType.float else .float32
     match ownerText with
+    | "Float" => if method == "toFloat32" then return (.float, false, .convert .float32) else none
+    | "Float32" => if method == "toFloat" then return (.float32, false, .convert .float) else none
     | "Nat" => return (width, false, .ofNat)
     | "Int" => return (width, false, .ofInt)
     | _ => return (width, false, .ofWord (← psErasureFloatWord ownerText))
@@ -79,6 +81,7 @@ def psErasureFloatEntry (name : PsName) :
       | "ofNat" => if model then none else some .ofNat
       | "ofInt" => if model then none else some .ofInt
       | "ofScientific" => some .scientific
+      | "toString" => if model then none else some .display
       | "ofBits" => if model then none else some .ofBits
       | "toBits" => if model then none else some .toBits
       | "ofModel" => if model then none else some .ofModel
@@ -122,6 +125,8 @@ def psEraseFloatApplication (scope : PsErasureScope)
     | .compare op, [a,b] => pure (.intrinsic (.floatCompare width op) [] [a,b], false)
     | .ofWord word, [value] => pure (.intrinsic (.floatOfWord width word) [] [value], true)
     | .toWord word, [value] => pure (.intrinsic (.floatToWord width word) [] [value], false)
+    | .display, [value] => pure (← PsFloatRuntime.call scope width "display" [value], false)
+    | .convert target, [value] => pure (.intrinsic (.floatConvert width target) [] [value], true)
     | .ofNat, [value] => pure (← PsFloatRuntime.call scope width "natural" [value], true)
     | .ofInt, [value] => pure (← PsFloatRuntime.call scope width "integer" [value], true)
     | .scientific, _ =>

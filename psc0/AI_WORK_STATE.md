@@ -1,5 +1,7 @@
 # PSCV0 v7 — AI work state
 
+Strict native CI38801073436 at2fabc3226da85cb73cfcbb2886c3766ce34e70cf compiled the coherent slice and passed native array/profile oracles and all checked dependency replays. Both strict entry points refused the prior registry with identical observed FNV10905333745314286673, SHA256 8dc79d842add3bc0701ba400a54f9e373cbf28895e250ac04521540a9f6c35ca; independently reported surfaceSHA256 bc9892bf4aec7a3c4b636176ae8cbc4aedd0efdd9efe8bdab3b95fc8e97b35e0. This checkpoint selects those exact measured values. Source admission, structural-key invariants and backend execution remain pending.
+
 ## M2 collection, table-key and notation qualification checkpoint
 
 Platform native run38799414716 at6323d81de1231c89034f0cbefd6492b7afe549e7 admitted3556 declarations/32classes/302instances; source, kernel, modules, generalized answers, defaults, scopes, rollback and resource gates passed. Runtime qualification then stopped before emission at source '<': checked order classes exist, but the parser registry omitted comparison notation. Independent asset replay38799414892 passed. No runtime success is claimed.

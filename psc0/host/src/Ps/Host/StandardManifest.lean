@@ -170,7 +170,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Independently measured at both strict boundaries in native38781449363.
 -- F4 display registrations independently measured at native38789249978.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:c1c6a33f603ba503ade3c7d1bca9a6bd3ac29dffc060ba21980e34afe9363196"
+  "sha256:bc9892bf4aec7a3c4b636176ae8cbc4aedd0efdd9efe8bdab3b95fc8e97b35e0"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

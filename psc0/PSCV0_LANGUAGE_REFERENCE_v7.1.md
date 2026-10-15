@@ -96,7 +96,7 @@
 
 ### 4.35.0 upstream delta relevant to `pscv0`
 
-The official [Lean 4.35.0 notes](https://lean-lang.org/doc/reference/4.35.0/releases/v4.35.0/) document experimental erased state in `do` (`erased`, `erased mut`, erased monadic binds), `given` logical contract variables, and new/adjusted VC and loop tooling. They also describe improved kernel reductions for several `Array`/`Vector` operations and array equality. **Impact:** target the 4.35.0 parser and proof/verification library exactly; do not copy RC3's assumed built-in registry or claim stable intrinsic-verification syntax. All such constructs still require independently checked final proof terms.
+The official [Lean 4.35.0 notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/) document experimental erased state in `do` (`erased`, `erased mut`, erased monadic binds), `given` logical contract variables, and new/adjusted VC and loop tooling. They also describe improved kernel reductions for several `Array`/`Vector` operations and array equality. **Impact:** target the 4.35.0 parser and proof/verification library exactly; do not copy RC3's assumed built-in registry or claim stable intrinsic-verification syntax. All such constructs still require independently checked final proof terms.
 
 ### 4.35.0 pin and unified `pscv0` decisions
 
@@ -131,6 +131,8 @@ The official [Lean 4.35.0 notes](https://lean-lang.org/doc/reference/4.35.0/rele
 | **Restricted** | Lean can express more; `pscv0` deliberately recognizes a closed subset |
 | **Lean encoding** | Lean example expresses the semantic equivalent but may not share PSCV0 syntax |
 | **Illustrative** | Code shapes used to describe the design; no claim of compilation or proof closure |
+
+**Source-link policy (v7.1).** For normative facts use the pinned Lean 4.35.0 SHA and exact source. Public documentation chapter links may point to `/latest/` when the historical deep URL is inaccessible; those are explanatory references, not permission to adopt a newer feature. Compiler conformance must use the pinned source/tests and declared environment.
 
 **Sources of rule content:** the uploaded release candidate’s language chapters and selected PSCV verification proposals, plus the directly inspected pinned Lean 4.35.0 parser families and published Lean reference. `pscv0` additions are marked as surface deltas or proposed proof-language encodings rather than silently attributed to Lean. The authoritative Lean pin is the Git commit above; relevant exact Lean source links appear in the source concordance near the end. The public Lean language reference can explain parser behavior, but its `/latest/` pages are not a normative version pin.
 
@@ -769,7 +771,7 @@ const empty: Unit := ()</code></pre></td></tr></tbody></table>
 | `def greeting (name : String) : String := s!"Hello, {name}!"` | `function greeting(name: String): String := s!"Hello, {name}!"` |
 | `def path : String := r#"C:\tmp\"quoted"#` | `const path: String := r#"C:\tmp\"quoted"#` |
 
-Interpolation requires the pinned `ToString` behavior and parses `{expr}` with the same `.ps` expression grammar, including `f (x)` rejection. Raw-string contents are **not** parsed as terms. String conversion is typeclass-directed, not unrestricted JavaScript coercion. The exact 4.35.0 lexer/parser and initial `ToString` instances must be part of the environment conformance suite. [Lean strings](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/Strings/).
+Interpolation requires the pinned `ToString` behavior and parses `{expr}` with the same `.ps` expression grammar, including `f (x)` rejection. Raw-string contents are **not** parsed as terms. String conversion is typeclass-directed, not unrestricted JavaScript coercion. The exact 4.35.0 lexer/parser and initial `ToString` instances must be part of the environment conformance suite. [Lean strings](https://lean-lang.org/doc/reference/latest/Basic-Types/Strings/).
 
 ### Native collection literals and bounds-aware indexing
 
@@ -795,7 +797,7 @@ function readChecked(xs: Array Nat, i: Nat, h: i < xs.size): Nat := {
 #eval lookup(#[10, 20], 1)  -- some 20
 ```
 
-`GetElem` class instances, `get_elem_tactic` behavior, and any source-derived proof discharge paths must be pinned and are **not** replaced by unchecked JavaScript indexing. A verified closure must reject unresolved index validity proofs; the `!` operator's panic/default path is a behavior to model explicitly if admitted, not a proof of bounds. [Lean basic classes / GetElem](https://lean-lang.org/doc/reference/4.35.0/Type-Classes/Basic-Classes/), [arrays](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/Arrays/).
+`GetElem` class instances, `get_elem_tactic` behavior, and any source-derived proof discharge paths must be pinned and are **not** replaced by unchecked JavaScript indexing. A verified closure must reject unresolved index validity proofs; the `!` operator's panic/default path is a behavior to model explicitly if admitted, not a proof of bounds. [Lean basic classes / GetElem](https://lean-lang.org/doc/reference/latest/Type-Classes/Basic-Classes/), [arrays](https://lean-lang.org/doc/reference/latest/Basic-Types/Arrays/).
 
 ### Tuples/products and explicit grouping
 
@@ -854,7 +856,7 @@ const left: Nat := Prod.fst(pair)</code></pre></td></tr></tbody></table>
 
 **Token policy:** Unicode notation and existing Lean ASCII forms are **native aliases**, not unnecessary ProofScript sugar. Textual constant applications such as `And P Q` are Lean expressions, not extra infix keywords `and`/`or`. The singular `exist` is not an accepted quantifier. `=` is propositional equality, while `==` is Boolean equality through `BEq`; `≠` and `!=` are not interchangeable. Native input shortcuts (`\forall`, `\exists`, `\l`, `\to`, etc.) are editor conveniences, not source-token alternates.
 
-**Relevant Lean docs:** [Quantifiers](https://lean-lang.org/doc/reference/4.35.0/Basic-Propositions/Quantifiers/), [Subtype](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/Subtypes/), [The Tactic Language](https://lean-lang.org/doc/reference/4.35.0/Tactic-Proofs/The-Tactic-Language/).
+**Relevant Lean docs:** [Quantifiers](https://lean-lang.org/doc/reference/latest/Basic-Propositions/Quantifiers/), [Subtype](https://lean-lang.org/doc/reference/latest/Basic-Types/Subtypes/), [The Tactic Language](https://lean-lang.org/doc/reference/latest/Tactic-Proofs/The-Tactic-Language/).
 
 ### Boolean/propositional `if`, dependent `if`, and `if let`
 
@@ -899,7 +901,7 @@ function fromOption(x: Option Nat): Nat := {
 }
 ```
 
-**Important:** `if p then a else b` continues to be **invalid `.ps` conditional syntax**; it is not silently re-enabled by the new Lean-first feature selection. A parsed `if` in a proof tactic (as opposed to a term) remains a distinct *tactic* grammar category subject to the pinned tactic environment. [Lean conditionals](https://lean-lang.org/doc/reference/4.35.0/Terms/Conditionals/).
+**Important:** `if p then a else b` continues to be **invalid `.ps` conditional syntax**; it is not silently re-enabled by the new Lean-first feature selection. A parsed `if` in a proof tactic (as opposed to a term) remains a distinct *tactic* grammar category subject to the pinned tactic environment. [Lean conditionals](https://lean-lang.org/doc/reference/latest/Terms/Conditionals/).
 
 ### `nomatch`, `matches`, and term-level pattern bindings
 
@@ -911,7 +913,7 @@ Lean's `nomatch e` constructs a value from an impossible case only when exhausti
 | `def isSome (x : Option Nat) : Bool := x matches some _` | `function isSome(x: Option Nat): Bool := x matches .some _` |
 | native pattern `let` in a supported term or `do` context | same selected Lean binding grammar inside canonical `.ps` braces |
 
-There is no new `as`, `typeof`, structural-union narrowing, or unsafe cast syntax. The pattern's constructor families are checked against the scrutinee's admitted Lean type, and impossible matches must truly be empty. [Lean pattern matching](https://lean-lang.org/doc/reference/4.35.0/Terms/Pattern-Matching/).
+There is no new `as`, `typeof`, structural-union narrowing, or unsafe cast syntax. The pattern's constructor families are checked against the scrutinee's admitted Lean type, and impossible matches must truly be empty. [Lean pattern matching](https://lean-lang.org/doc/reference/latest/Terms/Pattern-Matching/).
 
 ### Base `do`: monadic bind, simple `let`, `pure`, `return`
 
@@ -1258,7 +1260,7 @@ const short: Outcome String Nat := .ok(42)</code></pre></td></tr></tbody></table
 
 **Initial allowlist:** `Repr`, `BEq`, `DecidableEq`, `Inhabited`, `Hashable`, subject to each handler's actual applicability and typeclass instance prerequisites. Additional built-ins (e.g. `LawfulBEq`, `Ord`, `SizeOf`) can be added via an explicitly revised environment snapshot after semantic review. The fact that Lean supports deriving a class does **not** mean all classes can always be derived for all user types.
 
-**Safety and negative-case ownership:** the deriving handler is elaboration machinery. All emitted declarations and proof terms must satisfy normal Lean-grounded checking, and registration affects the deterministic environment. Generated executable methods are *not* proofs of unspecified algebraic laws. For `structure S where { ... } deriving SomeUnregisteredClass`, the trailing clause is **grammatically valid** but the handler/environment gate rejects it; a standalone `deriving instance ... for ...` rejects at the **closed-profile command grammar**. These must be independent tests. The standalone form may be admitted in a later explicit environment revision. [Lean deriving instances](https://lean-lang.org/doc/reference/4.35.0/Type-Classes/Deriving-Instances/).
+**Safety and negative-case ownership:** the deriving handler is elaboration machinery. All emitted declarations and proof terms must satisfy normal Lean-grounded checking, and registration affects the deterministic environment. Generated executable methods are *not* proofs of unspecified algebraic laws. For `structure S where { ... } deriving SomeUnregisteredClass`, the trailing clause is **grammatically valid** but the handler/environment gate rejects it; a standalone `deriving instance ... for ...` rejects at the **closed-profile command grammar**. These must be independent tests. The standalone form may be admitted in a later explicit environment revision. [Lean deriving instances](https://lean-lang.org/doc/reference/latest/Type-Classes/Deriving-Instances/).
 
 ### Indexed/dependent inductive families
 
@@ -1332,7 +1334,7 @@ A scrutinee's family determines which constructors and patterns are admissible. 
 
 Lean supports convenient equation-style declarations. Adopt the **selected native Lean equation compiler family** in `pscv0` as a P1 proof/programming enhancement once its exact grammar and restrictions are mapped to `pscv0` declaration binders and canonical body braces. This family has **no new `function` equation keyword** beyond the established alias; direct syntax acceptance remains *pending* until complete positive/negative parser, termination, and elaboration cases are added. Multi-discriminant `match` is P0 and must not wait for P1 equation-style syntax.
 
-**Source:** [Lean 4.35 pattern matching](https://lean-lang.org/doc/reference/4.35.0/Terms/Pattern-Matching/) and [recursive definitions](https://lean-lang.org/doc/reference/4.35.0/Definitions/Recursive-Definitions/).
+**Source:** [Lean 4.35 pattern matching](https://lean-lang.org/doc/reference/latest/Terms/Pattern-Matching/) and [recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/).
 
 ## 5. Recursion and computability
 
@@ -1408,7 +1410,7 @@ end</code></pre></td><td valign="top"><pre><code>mutual
   }
 end</code></pre></td></tr></tbody></table>
 
-**Source language distinction.** ProofScript demands one designated structural argument for each member of the recursive strongly connected component, strictly decreasing across every recursive edge. Both `| .succ k => ...` and `| k + 1 => ...` are permitted on `Nat`: Lean elaborates the second to an equivalent successor-constructor pattern, so the call on `k` is a call on a strict subterm. **This is not permission to recursively call on `n - 1` without separate termination evidence.** The two spellings belong to the same native Lean semantics; arithmetic-oriented examples prefer `k + 1`. See the [Lean recursive-definition reference](https://lean-lang.org/doc/reference/4.35.0/Definitions/Recursive-Definitions/).
+**Source language distinction.** ProofScript demands one designated structural argument for each member of the recursive strongly connected component, strictly decreasing across every recursive edge. Both `| .succ k => ...` and `| k + 1 => ...` are permitted on `Nat`: Lean elaborates the second to an equivalent successor-constructor pattern, so the call on `k` is a call on a strict subterm. **This is not permission to recursively call on `n - 1` without separate termination evidence.** The two spellings belong to the same native Lean semantics; arithmetic-oriented examples prefer `k + 1`. See the [Lean recursive-definition reference](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/).
 
 ### Well-founded recursion, `termination_by`, and `decreasing_by`
 
@@ -1446,7 +1448,7 @@ decreasing_by by {
 
 ### `partial`, `partial_fixpoint`, `unsafe`, `axiom` and `noncomputable` — v7.1
 
-**Feature / profile:** revised selective admission; **source status is distinct from checked proof evidence and artifact admission**. The preceding `PSCV0-TERM-01` still governs ordinary total/structural/well-founded recursion. Stable Lean 4.35.0 is the source of parser/elaborator/kernel semantics: [Recursive Definitions](https://lean-lang.org/doc/reference/4.35.0/Definitions/Recursive-Definitions/), [Lean parser declaration modifiers](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean).
+**Feature / profile:** revised selective admission; **source status is distinct from checked proof evidence and artifact admission**. The preceding `PSCV0-TERM-01` still governs ordinary total/structural/well-founded recursion. Stable Lean 4.35.0 is the source of parser/elaborator/kernel semantics: [Recursive Definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [Lean parser declaration modifiers](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean).
 
 **`PSCV0-TERM-02` — selected `partial` declarations (P0 source, separately gated verified behavior).** A source `partial def` or `partial function` lowers to Lean's `partial def` with the same type/arguments and body semantics. Only genuine function definitions are admitted; `partial const` and arbitrary application of `partial` to theorem, axiom, inductive or other declaration heads are forbidden. Follow stable Lean's admissibility rule: the function result type must be inhabited (by a suitable `Nonempty` or `Inhabited` witness); an arbitrary `A → Empty` cannot be introduced by unguarded partial recursion. Mutual recursion must follow Lean's corresponding group rules. The type checker checks the predefinition, but the resulting constant is logically opaque: its executable body is not a proof equation.
 
@@ -1603,7 +1605,7 @@ theorem orLaw(P: Prop, Q: Prop, hp: P): P ∨ Q := by {
 
 **Term grammar remains uniform.** An extension that accepts a term inside a tactic argument or quoted source must either parse that term using the same `pscv0` application rule or be explicitly isolated under a different, auditable syntax category; it must not silently turn `f (x)` back into a legal ordinary `.ps` application. String interpolation and editor quick fixes are covered by the same policy.
 
-Lean research: [custom tactics](https://lean-lang.org/doc/reference/4.35.0/Tactic-Proofs/Custom-Tactics/), [tactic proof states](https://lean-lang.org/doc/reference/4.35.0/Tactic-Proofs/), [validating proofs and axioms](https://lean-lang.org/doc/reference/4.35.0/ValidatingProofs/).
+Lean research: [custom tactics](https://lean-lang.org/doc/reference/latest/Tactic-Proofs/Custom-Tactics/), [tactic proof states](https://lean-lang.org/doc/reference/4.35.0/Tactic-Proofs/), [validating proofs and axioms](https://lean-lang.org/doc/reference/4.35.0/ValidatingProofs/).
 
 ### Source attributes and instance/default-instance registrations
 
@@ -1820,7 +1822,7 @@ Lean 4.35.0 adds experimental `erased x := e`, `erased mut x := e`, and `erased 
 |---|---|
 | <pre>def f (n : Nat) : Id Nat := do&#10;  erased mut visited : Nat := 0&#10;  return n</pre> | <pre>function f(n: Nat): Id Nat := do {&#10;  erased mut visited : Nat := 0&#10;  return n&#10;}</pre> |
 
-**Lean grammar (schematic):** `doSeqItem ::= ... | 'erased' ident ':=' term | 'erased' 'mut' ident ':=' term | 'erased' ident '←' term`. ProofScript changes only the **outer `do { ... }` grouping**, and keeps the same Lean item grammar. Assignment/invariant/proof rules ensure that erased information cannot affect runtime return values, branches, or effects. These snippets illustrate syntax; the experimental Lean verification context must be enabled for actual acceptance. Source: [4.35.0 release notes](https://lean-lang.org/doc/reference/4.35.0/releases/v4.35.0/).
+**Lean grammar (schematic):** `doSeqItem ::= ... | 'erased' ident ':=' term | 'erased' 'mut' ident ':=' term | 'erased' ident '←' term`. ProofScript changes only the **outer `do { ... }` grouping**, and keeps the same Lean item grammar. Assignment/invariant/proof rules ensure that erased information cannot affect runtime return values, branches, or effects. These snippets illustrate syntax; the experimental Lean verification context must be enabled for actual acceptance. Source: [4.35.0 release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/).
 
 ### Refined data — native Lean `Subtype`, no new `refine type` declaration
 
@@ -2075,7 +2077,7 @@ The `catch` handler here is typed via `Except String`, not inferred from JS runt
 
 **One language, distinguishable assurance identities.** Ordinary output is an explicit, non-behavioral-guarantee choice; closed verified output requires complete self-contained assurance under the approved foundation; boundary-qualified verification always identifies exactly which external contracts are assumed. All proof terms are Lean-grounded and kernel checked, and all runtime/backend promises require additional independent evidence. The current document is a specification, not evidence that the corresponding PSC0 checker/backend gates are implemented.
 
-**Research basis:** [stable Lean recursive definitions](https://lean-lang.org/doc/reference/4.35.0/Definitions/Recursive-Definitions/), [stable Lean modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [Lean 4.35.0 intrinsic verification](https://lean-lang.org/doc/reference/4.35.0/releases/v4.35.0/).
+**Research basis:** [stable Lean recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [stable Lean modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [Lean 4.35.0 intrinsic verification](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/).
 
 ## 8. Operators, basis types, and language subset
 
@@ -2195,7 +2197,7 @@ A library import may provide declarations, functions, theorems, instances, and a
 
 **Literal caveat:** natural/scientific tokens are elaborated using selected `OfNat` / `OfScientific` instances; a float token without an expected type requires a pinned default. `Nat`/`Int` are exact, fixed-width integers wrap as Lean specifies, and floats preserve pinned floating semantics. `= : Prop` and `== : Bool` remain separate. `[x,y]` and `#[x,y]` are **not interchangeable**. `BitVec n` numeral syntax and `ByteArray` APIs need source/instance verification, not speculative compiler intrinsics.
 
-Primary sources: [Lean Basic Types](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/), [Fixed-Precision Integers](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/Fixed-Precision-Integers/), [Function Application](https://lean-lang.org/doc/reference/4.35.0/Terms/Function-Application/), and the uploaded original RC-v2 Chapter 26.
+Primary sources: [Lean Basic Types](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/), [Fixed-Precision Integers](https://lean-lang.org/doc/reference/latest/Basic-Types/Fixed-Precision-Integers/), [Function Application](https://lean-lang.org/doc/reference/latest/Terms/Function-Application/), and the uploaded original RC-v2 Chapter 26.
 
 ### Feature admission: selected Lean syntax, PSCV0 overlay, and exclusions
 
@@ -3215,7 +3217,7 @@ This revision's answer to “more or fewer features?” is **richer native Lean 
 
 The highest remaining language-design risks are: (1) keeping `f()`/defaults/`Unit` completion unambiguous in all contexts; (2) faithfully mapping multi-scrutinee and dependent match syntax, plus `if let`, to the 4.35.0 elaborator; (3) giving braces one clear grammar owner alongside record literals/`Subtype`/implicit binders; (4) ensuring `deriving` and tactics cannot alter accepted source meaning without a new environment identity; (5) exact `try`/`catch`/`finally` syntax and registered `MonadFinally` availability; and (6) preventing ordinary IO/boundary behavior from being mislabeled formally verified.
 
-Native Lean features confirmed in current official reference: [Pattern Matching](https://lean-lang.org/doc/reference/4.35.0/Terms/Pattern-Matching/), [Conditionals](https://lean-lang.org/doc/reference/4.35.0/Terms/Conditionals/), [Deriving Instances](https://lean-lang.org/doc/reference/4.35.0/Type-Classes/Deriving-Instances/), [GetElem](https://lean-lang.org/doc/reference/4.35.0/Type-Classes/Basic-Classes/), [Strings](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/Strings/), [Do Notation](https://lean-lang.org/doc/reference/4.35.0/Functors___-Monads-and--do--Notation/Syntax/), [Monadic Exceptions](https://lean-lang.org/doc/reference/4.35.0/Functors___-Monads-and--do--Notation/Varieties-of-Monads/), [Custom Tactics](https://lean-lang.org/doc/reference/4.35.0/Tactic-Proofs/Custom-Tactics/), and the [4.35 4.35.0 notes](https://lean-lang.org/doc/reference/4.35.0/releases/v4.35.0/). The immutable git commit, not a moving documentation URL, remains the specified semantic-source pin.
+Native Lean features confirmed in current official reference: [Pattern Matching](https://lean-lang.org/doc/reference/latest/Terms/Pattern-Matching/), [Conditionals](https://lean-lang.org/doc/reference/latest/Terms/Conditionals/), [Deriving Instances](https://lean-lang.org/doc/reference/latest/Type-Classes/Deriving-Instances/), [GetElem](https://lean-lang.org/doc/reference/latest/Type-Classes/Basic-Classes/), [Strings](https://lean-lang.org/doc/reference/latest/Basic-Types/Strings/), [Do Notation](https://lean-lang.org/doc/reference/latest/Functors___-Monads-and--do--Notation/Syntax/), [Monadic Exceptions](https://lean-lang.org/doc/reference/latest/Functors___-Monads-and--do--Notation/Varieties-of-Monads/), [Custom Tactics](https://lean-lang.org/doc/reference/latest/Tactic-Proofs/Custom-Tactics/), and the [4.35 4.35.0 notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/). The immutable git commit, not a moving documentation URL, remains the specified semantic-source pin.
 
 ### 14.3A Third-pass consistency corrections and evidence boundary (C01–C05, R01)
 
@@ -3324,7 +3326,7 @@ The v6 re-audit identified three local documentation defects, now corrected in t
 
 **Evidence boundary:** This is a normative-document update with source-based design justification. It is **not** evidence of Lean kernel, PSC0 parser, custom frontend, target compiler or CI execution. Every added positive/negative fixture must run under stable Lean 4.35.0 and an exact frozen profile before conformance can be claimed.
 
-**Selected upstream references:** [stable recursive definitions / partial-fixpoint theory](https://lean-lang.org/doc/reference/4.35.0/Definitions/Recursive-Definitions/), [stable source modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [stable release notes](https://lean-lang.org/doc/reference/4.35.0/releases/v4.35.0/), [pinned predefinition elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/Main.lean), [pinned fixed-point elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean).
+**Selected upstream references:** [stable recursive definitions / partial-fixpoint theory](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/), [stable source modules](https://lean-lang.org/doc/reference/4.35.0/Source-Files-and-Modules/), [stable release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/), [pinned predefinition elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/Main.lean), [pinned fixed-point elaboration](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean).
 
 ## 15. Exact stable Lean 4.35.0 source concordance and research provenance
 
@@ -3347,20 +3349,20 @@ The v6 re-audit identified three local documentation defects, now corrected in t
 | Partial fixpoint construction | [`src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/PartialFixpoint/Main.lean) | monotonicity, fixed-point elaboration, equations, and checking |
 | Recursive and partial-fixpoint syntax | [`src/Lean/Parser/Term.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term.lean) and [`src/Lean/Parser/Command.lean`](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Command.lean) | native `partial` modifier and `partial_fixpoint` post-body clause, not a second kernel |
 | Chain-complete orders and monotonicity | [`Init/Internal/Order`](https://github.com/leanprover/lean4/tree/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Internal/Order) | checked monotonicity/fixpoint lemmas; exact imported environment provenance required |
-| Recursive functions explanatory reference | [Lean 4.35.0 recursive definitions](https://lean-lang.org/doc/reference/4.35.0/Definitions/Recursive-Definitions/) | distinguishes total recursion, opaque partial functions, and fixed-point equations |
+| Recursive functions explanatory reference | [Lean 4.35.0 recursive definitions](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/) | distinguishes total recursion, opaque partial functions, and fixed-point equations |
 | Lean primitive kernel foundations | [`src/kernel`](https://github.com/leanprover/lean4/tree/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/kernel) | selected core theory, definitional equality, inductives, judgment checks |
 
-**Official explanatory research (moving pages; pinned code above is normative for this proposal):**
+**Official explanatory research (moving pages; pinned code above is normative for this proposal):** The Lean 4.35.0 index and certain top-level chapters are accessible, but multiple deep versioned chapter URLs are unavailable from the current published reference. Their links below use the current `/latest/` explanatory pages only when the versioned deep path was unavailable in review; **no `/latest/` content overrides the exact stable 4.35.0 Git commit** for normative syntax, elaboration or semantics.
 
-- [Lean 4.35.0 release notes](https://lean-lang.org/doc/reference/4.35.0/releases/v4.35.0/): especially erased state, `given`, VC/loop updates and upstream experimental warnings.
-- [Function Application](https://lean-lang.org/doc/reference/4.35.0/Terms/Function-Application/): juxtaposition/curried core, named/implicit/optional arguments.
-- [Lean pattern matching](https://lean-lang.org/doc/reference/4.35.0/Terms/Pattern-Matching/): `match_pattern` reduction and `Nat` syntax `k + 1` versus the invalid reversed form `1 + k`.
+- [Lean 4.35.0 release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/): especially erased state, `given`, VC/loop updates and upstream experimental warnings.
+- [Function Application](https://lean-lang.org/doc/reference/latest/Terms/Function-Application/): juxtaposition/curried core, named/implicit/optional arguments.
+- [Lean pattern matching](https://lean-lang.org/doc/reference/latest/Terms/Pattern-Matching/): `match_pattern` reduction and `Nat` syntax `k + 1` versus the invalid reversed form `1 + k`.
 - [Lean 4.35.0 Namespaces and Sections](https://lean-lang.org/doc/reference/4.35.0/Namespaces-and-Sections/): generalization of explicit/implicit/instance section variables, theorem-header dependency rules, fixed section variables in recursive functions.
 - [Lean tactic proofs](https://lean-lang.org/doc/reference/4.35.0/Tactic-Proofs/): goal states, bullets, `case`, `next`, and tactic proof terms.
 - [Lean Infoview](https://github.com/leanprover/vscode-lean4/tree/master/lean4-infoview): practical proof-state inspection and language-server integration.
-- [Headers and Signatures](https://lean-lang.org/doc/reference/4.35.0/Definitions/Headers-and-Signatures/): `declSig`, binder scopes, optional and automatic parameters.
+- [Headers and Signatures](https://lean-lang.org/doc/reference/latest/Definitions/Headers-and-Signatures/): `declSig`, binder scopes, optional and automatic parameters.
 - [Interacting with Lean](https://lean-lang.org/doc/reference/4.35.0/Interacting-with-Lean/): distinction among `#check`, `#print`, `#reduce`, `#eval` and limits of execution as proof.
-- [Basic Types](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/) and [Fixed-Precision Integers](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/Fixed-Precision-Integers/): data families, 8/16/32/64/word signed/unsigned types, wrapping behavior.
+- [Basic Types](https://lean-lang.org/doc/reference/4.35.0/Basic-Types/) and [Fixed-Precision Integers](https://lean-lang.org/doc/reference/latest/Basic-Types/Fixed-Precision-Integers/): data families, 8/16/32/64/word signed/unsigned types, wrapping behavior.
 - [Terms](https://lean-lang.org/doc/reference/4.35.0/Terms/), [Definitions](https://lean-lang.org/doc/reference/4.35.0/Definitions/), [Monads and do-notation](https://lean-lang.org/doc/reference/4.35.0/Functors___-Monads-and--do--Notation/): selected source syntax and elaboration context.
 
 **Historical document attribution:** The initial ProofScript PSCV normative RC-v2 and v7 used Lean 4.35 release candidates for historical research. **v7.1** supersedes the active toolchain pin with stable Lean 4.35.0 and selectively admits partial recursion, proof-friendly fixpoints and tightly governed unsafe boundaries without expanding proof authority. Its source/assurance decisions are **new** requirements, not claims about v7 or confirmed PSC0 implementation. Prior errata remain available for provenance.

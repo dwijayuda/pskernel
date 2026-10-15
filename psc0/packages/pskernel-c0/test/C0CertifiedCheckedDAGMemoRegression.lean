@@ -117,5 +117,30 @@ def main : IO Unit := do
   | .ok _ =>
       throw (IO.userError "scoped checked DAG: foreign/out-of-bounds ID accepted")
   | .error _ => pure ()
+  let (batched, batchMemo) ← match psKernelC0ScopedCheckedDAGCheckBatch
+      owner 4096 session.context session.state [id, id, id] [] with
+    | .ok pair => pure pair
+    | .error e =>
+        throw (IO.userError ("scoped checked DAG: repeated batch failed: " ++ e))
+  if batched.length != 3 || batchMemo.length != 1 then
+    throw (IO.userError
+      "scoped checked DAG: identical three-root batch failed to reuse one receipt")
+  for entry in batched do
+    let _batchSource := psKernelC0ScopedCheckedDAGBatchEntry_source entry
+    if entry.requestedId != id then
+      throw (IO.userError "scoped checked DAG: batch returned unrelated ID")
+  let some (mixedStore, mixedBadId) :=
+      psKernelC0EncodeExpr store (.bvar 0)
+    | throw (IO.userError "scoped checked DAG: mixed store encode failed")
+  let some mixedOwner := psKernelC0CertifyStore mixedStore
+    | throw (IO.userError "scoped checked DAG: mixed store certification failed")
+  -- An invalid tail must reject the entire batch even after a valid head
+  -- was successfully checked in this pure local evaluation.
+  match psKernelC0ScopedCheckedDAGCheckBatch
+      mixedOwner 4096 session.context session.state [id, mixedBadId] [] with
+  | .ok _ =>
+      throw (IO.userError "scoped checked DAG: partially invalid batch accepted")
+  | .error _ => pure ()
+  IO.println "C0_SCOPED_CHECKED_DAG_BATCH repeated=3 memo_entries=1 invalid_tail=atomic_rejection"
   IO.println "C0_SCOPED_CHECKED_DAG exact_id=pass memo_hit=pass source=pass invalid=declined zero_fuel=declined out_of_bounds=declined"
   IO.println "C0_CERTIFIED_CHECKED_DAG owned_root=pass exact_source=pass invalid=declined"

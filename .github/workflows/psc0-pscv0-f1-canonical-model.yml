@@ -23,6 +23,7 @@ on:
       - 'psc0/scripts/Pscv0Native.lean'
       - 'psc0/v7-native/lakefile.lean'
       - '.github/workflows/psc0-pscv0-f1-canonical-model.yml'
+      - '.github/workflows/psc0-pscv0-native-v7.yml'
 permissions:
   contents: read
 concurrency:

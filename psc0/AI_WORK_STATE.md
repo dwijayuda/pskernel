@@ -1,5 +1,9 @@
 # PSCV0 v7 — AI work state
 
+## 15 October — authoring namespace precedence
+
+Lean 4.35.0 Lean/Util/Path.lean SearchPath.findWithExt resolves the FIRST matching root namespace directory, not the first full module filename. Plain lake env puts the parent Ps namespace before local Ps.Host, so it is insufficient for dynamic authoring imports. The native constructor regeneration now uses the exact already-qualified full-proof invocation, explicitly placing local .lake/build/lib/lean first. This is host authoring configuration only. The full proof workflow also tracks the native qualification workflow so changes to its invocation receive exact-commit independent replay. All strict pins, cmp and runtime guards remain unchanged.
+
 ## 15 October — constructor source and full proof audit passed; regeneration environment corrected
 
 At research 1e45a3dd, full proof replay 38713950619 passed; native 38713950473 passed source checks, all three exact pins (1,879 declarations /25 classes /226 instances), and constructor argument/runtime refusals. The new byte-regeneration step could not locate the host Ps module because it lacked Lake's search path. It now invokes the native exporter through lake env, matching the successful independent authoring workflow. No compiler semantics or acceptance checks changed. Full runtime qualification is pending on this revision; main remains qualified at e5d1bdd6.

@@ -621,6 +621,30 @@ def exportFloatIdentityCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) 2016 Microsoft Corporation and 2024 Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nUpstream Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nModified: selected Core conversion, closure/cut and independent kernel audit.\nEXPERIMENTAL F0 LOGICAL CANDIDATE, NOT RUNTIME FLOAT SUPPORT.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- Isolated model migration candidate. The pinned Lean 4.35.0 Int.add
+-- definition (and ONLY its required checked closure) must replace the
+-- selected Standard's legacy Int.add *axiom* through the reviewable
+-- native-to-portable kernel pipeline. No runtime primitive changes here.
+def exportIntArithmeticModelCandidate (output : System.FilePath) : IO Unit := do
+  let base := psSelfHostProdPreludeEnvironment.declarations
+  if !base.any (fun d =>
+      psNameToString (psDeclarationName d) == "Int.add") then
+    throw (IO.userError "pinned Int.add is absent from selected Standard boundary")
+  exportStandardCore {
+    roots := [`Int.add, `Int.neg, `Int.sub, `Int.mul,
+      `Int.add_zero, `Int.neg_neg, `Int.add_neg_eq_sub,
+      `Int.natCast_add, `Int.natCast_mul]
+    boundary := base.map psDeclarationName
+    baseDeclarations := base
+    allowedAssumptions := [`propext, `Quot.sound]
+    replaceDefinitionAxioms := true
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardIntArithmeticModel"
+    privatePrefix := "intArithmeticModelDecl"
+    provenance := "/-\nCopyright (c) 2016 Jeremy Avigad and Lean FRO, LLC contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 Init/Data/Int/Basic.lean: native checked Int arithmetic definitions and laws research only.\nNOT SELECTED, NOT EXECUTABLE.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 -- Research-only constructive theorem authoring cut. This never changes
 -- the selected Standard, its strict fingerprints, or the Float runtime.
 def exportFloatConstructivePowCandidate (output : System.FilePath) : IO Unit := do

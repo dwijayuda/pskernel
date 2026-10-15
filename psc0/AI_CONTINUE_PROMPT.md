@@ -1,4 +1,15 @@
-# PSCV0 v7 — Continue M2+A from the 14 October 2026 checkpoint
+# PSCV0 v7 — Continue M2+A from 15 October 2026
+
+## 15 October — coherent Int logical arithmetic research (pending)
+
+Baseline main HEAD: `bc613bc47f63e1fd3a9f1cb714317da46d78f12f`; qualified implementation `7742b4cd9599af315da4a1af1ba5c8f97a6ac290` passed native CI 38701305472 and independent Float CI 38701305530. The handoff's pending 26-root experiment passed and is already integrated; do not repeat it.
+
+Independent Int.add research `8b2bb624637c9a5b035ccb6da1002403dc107657`, [CI 38701907649](https://github.com/dwijayuda/pskernel/actions/runs/38701907649), checked five declarations, replacing only the legacy Int.add computational axiom, with no new axioms. This establishes the root cause of the previous Int.add_zero refusal: an opaque primitive boundary prevents required definitional reduction.
+
+This isolated branch now qualifies the coherent pinned Int.add/neg/sub/mul logical definitions together with native add_zero, neg_neg, add_neg_eq_sub, natCast_add and natCast_mul proof bodies. Sources studied: pinned Init/Data/Int/Basic.lean and Lemmas.lean, tests/elab/intNegSucc.lean and test_extern_int.lean at eb6cafb7290e8bd5f2937522d8d804f58f02bafc. No computational definition or theorem is replaced by an axiom. The existing exporter checks converted Core in a fresh official kernel and retains Apache-2.0 attribution.
+
+Research is NOT selected Standard or executable qualification. On success freeze a reproducible pre-arithmetic boundary, integrate the checked asset with native reducibility metadata, independently measure strict hashes, then run full native/backend and Float replay on the same commit. Keep logical definitions separate from the existing fast Int runtime intrinsics. M2+A and executable Float F1-F4 remain incomplete; no pskernel-core, self-hosting or C5.
+
 
 ## 14 October — signed shift candidate; ofInt now qualified
 

@@ -696,6 +696,41 @@ def exportFloatBitsConstructiveCandidate (output : System.FilePath) : IO Unit :=
 -- refuse any incompatible dependencies, unapproved axioms or opaque casts.
 def exportFloatCanonicalModelCandidate (output : System.FilePath) : IO Unit := do
   let selected := psSelfHostProdPreludeEnvironment.declarations
+  -- Research-only import map: identify which ordinary native proof roots
+  -- drag incompatible List.get/Int models into the independent kernel.
+  -- This is diagnostic: no admission rule, boundary or trust policy changes.
+  Lean.initSearchPath (← Lean.findSysroot)
+  let native ← Lean.importModules #[{ module := `Init },
+    { module := `Ps.Host.FloatCanonicalContracts }] {}
+  let boundary : Lean.NameSet := selected.foldl
+    (fun names declaration =>
+      names.insert (PsKernelLean.toLeanName (psDeclarationName declaration))) {}
+  for name in
+      [``PsV7Native.FloatCanonical.splitBitsNoOmega,
+       ``PsV7Native.FloatCanonical.concatFieldsNoOmega,
+       ``BitVec.getLsbD_append,
+       ``BitVec.getLsbD_extractLsb',
+       ``PsV7Native.FloatCanonical.andAllOnes8_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes11_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes23_constructive,
+       ``PsV7Native.FloatCanonical.andAllOnes52_constructive,
+       ``PsV7Native.FloatCanonical.maskedHigh_iff,
+       ``PsV7Native.FloatCanonical.maskedLow_iff,
+       ``PsV7Native.FloatCanonical.binary64ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary64FractionMask_iff,
+       ``PsV7Native.FloatCanonical.binary32ExponentMask_iff,
+       ``PsV7Native.FloatCanonical.binary32FractionMask_iff,
+       ``PsV7Native.FloatCanonical.canonicalMask64_eq_compact,
+       ``PsV7Native.FloatCanonical.canonicalMask32_eq_compact] do
+    let closure ← standardDependencyClosure native name boundary
+    let listPath := standardDependencyPath native [name] `List.get boundary
+    let intPath := standardDependencyPath native [name] `Int.add_zero boundary
+    IO.println (Lean.Json.mkObj [
+      ("schema", Lean.toJson ("pscv0-f1-root-closure-research/1" : String)),
+      ("root", Lean.toJson (toString name)),
+      ("size", Lean.toJson closure.size),
+      ("listGetPath", Lean.toJson (listPath.map toString)),
+      ("intAddZeroPath", Lean.toJson (intPath.map toString))]).compress
   exportStandardCore {
     roots := FloatCanonical.contractRoots
     boundary := selected.map psDeclarationName

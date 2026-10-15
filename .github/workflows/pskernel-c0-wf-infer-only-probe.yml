@@ -50,12 +50,13 @@ jobs:
           s=path.read_text()
           needle='  let some checkedProof ← c0ExportTraceStage "proof_check"'
           assert s.count(needle)==1, "Unknown trace shape"
-          before='''  -- Exploratory infer-only mode is never used for proof acceptance.
-          -- This observation must not replace the mandatory checked mode.
-          let _ ← c0ExportTraceStage "infer_only_untrusted_diagnostic"
-              (fun _ => psKernelSessionInfer fuel propResult.snd theoremInfo.value)
-          '''
-          s=s.replace(needle,before.rstrip()+"\n"+needle)
+          before="\n".join([
+              '  -- Exploratory infer-only mode is never used for proof acceptance.',
+              '  -- This must not replace the mandatory checked mode.',
+              '  let _ ← c0ExportTraceStage "infer_only_untrusted_diagnostic"',
+              '      (fun _ => psKernelSessionInfer fuel propResult.snd theoremInfo.value)',
+          ])
+          s=s.replace(needle,before+"\n"+needle)
           path.write_text(s)
           PY
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)

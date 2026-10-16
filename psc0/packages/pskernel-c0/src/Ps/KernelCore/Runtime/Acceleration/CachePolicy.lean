@@ -1,4 +1,4 @@
-import Ps.KernelCore.Runtime.Acceleration.Cache
+import Ps.KernelCore.Runtime.Acceleration.CertifiedNodeCountMemo
 
 /-
 Non-semantic checker cache policy.

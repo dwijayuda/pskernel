@@ -5,6 +5,7 @@ on:
       - perf/pskernel-c0-v7-rust-20261012
     paths:
       - '.github/workflows/pskernel-c0-fast-app-eq.yml'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/FastExactAppEq.lean'
       - 'psc0/packages/pskernel-c0/test/C0FastExactAppEqRegression.lean'
   workflow_dispatch:

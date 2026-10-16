@@ -1,18 +1,32 @@
+/-
+Reference: Lean 4.35.0 Lean/Elab/Deriving/DecEq.lean at eb6cafb.
+Copyright (c) 2020 Microsoft Corporation. Author: Leonardo de Moura.
+Apache-2.0; see THIRD_PARTY_NOTICES.md.
+Adaptation: checked direct induction, ordinary equality transport and
+constructor discrimination. No assumed recursive instance or BEq axiom.
+-/
 import Ps.Elab.DerivingContext
 import Ps.Elab.Equality
 import Ps.Environment.Decision
 
+inductive PsElabDeriveDecEqDecision where
+  | erased
+  | independent (method : PsExpr)
+  | recursive
+
 structure PsElabDeriveDecEqConstructor where
   fields : PsElabDeriveFields
-  decisions : List (Option PsExpr)
+  decisions : List PsElabDeriveDecEqDecision
 
 def psElabDeriveDecEqPlan (plan : PsElabDeriveContext) (name : PsName) :
     Except PsElabError PsElabDeriveDecEqConstructor := do
-  let fields ← psElabDeriveFields plan name
-  let decisions ← (fields.fields.zip fields.proofs).mapM fun (field, proof) => do
-    if proof then return none
+  let fields ← psElabDeriveFieldsWithRecursion plan name true
+  let decisions ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
+    if proof then return PsElabDeriveDecEqDecision.erased
+    if fields.constructor.recursiveFields.contains index then
+      return PsElabDeriveDecEqDecision.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "DecidableEq") field.type
-    return some (← psElabDeriveInstance plan.context target)
+    return PsElabDeriveDecEqDecision.independent (← psElabDeriveInstance plan.context target)
   return { fields, decisions }
 
 structure PsElabDeriveDecEqField where
@@ -81,7 +95,8 @@ def psElabDeriveDecEqChoose (context : PsElabContext) (familyLevel : PsLevel)
 
 def psElabDeriveDecEqSame (plan : PsElabDeriveContext)
     (entry : PsElabDeriveDecEqConstructor) (context : PsElabContext)
-    (leftFields rightFields : List PsElabTypedBinder) (left right : PsExpr) :
+    (leftFields rightFields : List PsElabTypedBinder)
+    (hypotheses : List (Nat × PsExpr)) (left right : PsExpr) :
     Except PsElabError PsExpr := do
   if leftFields.length != entry.decisions.length || rightFields.length != entry.decisions.length then
     throw (.data "DecidableEq deriving field alignment mismatch")
@@ -89,10 +104,19 @@ def psElabDeriveDecEqSame (plan : PsElabDeriveContext)
   let target := psLogicEq familyLevel plan.family left right
   let fields ← ((entry.decisions.zip leftFields).zip rightFields).zipIdx.filterMapM
     fun (((method, lhs), rhs), index) => do
-      let some method := method | return none
-      let level ← psElabExpressionSort context lhs.type
       let leftValue := PsExpr.fvar lhs.id
       let rightValue := PsExpr.fvar rhs.id
+      let decision ← match method with
+        | .erased => pure none
+        | .independent method => pure (some (psExprApplyMany method [leftValue, rightValue]))
+        | .recursive => do
+          let some (_, method) := hypotheses.find? (fun entry => entry.fst == lhs.id)
+            | throw (.data "DecidableEq deriving recursive field has no checked induction hypothesis")
+          -- The shared minor checker establishes forall right, Decidable (lhs = right).
+          -- This is actual recursor evidence, not a self-instance assumption.
+          pure (some (PsExpr.app method rightValue))
+      let some decision := decision | return none
+      let level ← psElabExpressionSort context lhs.type
       let projection ← if plan.info.isStructure then do
           let major := context.localContext.nextId
           pure (psLogicLam major "value" plan.family (.proj plan.info.name index (.fvar major)))
@@ -101,7 +125,7 @@ def psElabDeriveDecEqSame (plan : PsElabDeriveContext)
             lhs.type leftValue leftValue
       return some ({
         level, type := lhs.type, left := leftValue, right := rightValue,
-        decision := psExprApplyMany method [leftValue, rightValue], projection } : PsElabDeriveDecEqField)
+        decision, projection } : PsElabDeriveDecEqField)
   let proof ← (psElabDeriveDecEqProof context fields rightFields target).mapError
     (.atDeclaration (psNameAppendStr entry.fields.constructor.name "fieldEquality"))
   psElabDeriveDecEqChoose context familyLevel plan.family left right target proof [] fields
@@ -131,14 +155,14 @@ def psElabDeriveDecEq (environment : PsEnvironment)
   let level ← psElabExpressionSort plan.context plan.family
   let target := fun left right => psDecisionType (psLogicEq level plan.family left right)
   let rightId := plan.context.localContext.nextId + 1
-  let method ← psElabDeriveEliminate plan plan.context
+  let method ← psElabDeriveEliminateWithRecursion plan plan.context true
     (fun left => psLogicPi rightId "right" plan.family (target left (.fvar rightId)))
-    (fun leftContext leftCtor leftFields left =>
-      psElabDeriveEliminate plan leftContext (target left)
-        (fun context rightCtor rightFields right => do
+    (fun leftContext leftCtor leftFields hypotheses left =>
+      psElabDeriveEliminateWithRecursion plan leftContext true (target left)
+        (fun context rightCtor rightFields _ right => do
           if !psNameEq leftCtor.name rightCtor.name then
             return ← psElabDeriveDecEqDifferent plan context leftCtor left right
           let some entry := constructors.find? (fun c => psNameEq c.fields.constructor.name leftCtor.name)
             | throw (.data "DecidableEq deriving constructor plan missing")
-          psElabDeriveDecEqSame plan entry context leftFields rightFields left right))
+          psElabDeriveDecEqSame plan entry context leftFields rightFields hypotheses left right))
   psElabDeriveFinish plan "instDecidableEq" type method

@@ -6,14 +6,21 @@ universe u
 inductive M3HashTree (A : Type u) where
   | leaf : A → M3HashTree A
   | fork : M3HashTree A → M3HashTree A → M3HashTree A
-  deriving Hashable, Repr, BEq
+  deriving Hashable, Repr, BEq, DecidableEq
 
 -- BEq is not required to be reflexive. Recursive deriving must use the actual
 -- field dictionary, not pointer identity or an assumed LawfulBEq instance.
 inductive M3EqAtom where
   | atom : Bool → M3EqAtom
+  deriving DecidableEq
 instance : BEq M3EqAtom where
   beq _ _ := false
+
+-- The certificate depends on a recursive child but has no runtime payload.
+inductive M3EqProofChain where
+  | stop
+  | link (value : Nat) (next : M3EqProofChain) (certificate : next = next)
+  deriving DecidableEq
 
 namespace M3RecursiveHashOracle
 
@@ -61,6 +68,36 @@ def atomEq (flag : Bool) : UInt64 :=
   let x := M3HashTree.fork (M3HashTree.leaf (M3EqAtom.atom flag))
     (M3HashTree.leaf (M3EqAtom.atom (!flag)))
   if x == x then 0 else 1
+
+def natDecision (flag : Bool) : UInt64 :=
+  let n : Nat := if flag then 71 else 13
+  let x := natTree flag
+  let y := M3HashTree.fork (M3HashTree.leaf n)
+    (M3HashTree.fork (M3HashTree.leaf (n + 1))
+      (M3HashTree.leaf (if flag then n + 2 else n + 3)))
+  let z := M3HashTree.fork (M3HashTree.leaf (n + 1))
+    (M3HashTree.fork (M3HashTree.leaf (n + 1)) (M3HashTree.leaf (n + 2)))
+  eqBits (decide (x = x)) (decide (x = y)) (decide (y = x))
+    (decide (x = M3HashTree.leaf n)) (decide (M3HashTree.leaf n = x)) (decide (x = z))
+
+def boolDecision (flag : Bool) : UInt64 :=
+  let x := boolTree flag
+  let y := M3HashTree.fork (M3HashTree.leaf flag) (M3HashTree.leaf true)
+  let z := M3HashTree.fork (M3HashTree.leaf (!flag)) (M3HashTree.leaf (!flag))
+  eqBits (decide (x = x)) (decide (x = y)) (decide (y = x))
+    (decide (x = M3HashTree.leaf flag)) (decide (M3HashTree.leaf flag = x)) (decide (x = z))
+
+def atomDecision (flag : Bool) : UInt64 :=
+  let x := M3HashTree.fork (M3HashTree.leaf (M3EqAtom.atom flag))
+    (M3HashTree.leaf (M3EqAtom.atom (!flag)))
+  if decide (x = x) then 1 else 0
+
+def proofDecision (flag : Bool) : UInt64 :=
+  let leftTail := M3EqProofChain.link 4 .stop rfl
+  let rightTail := M3EqProofChain.link (if flag then 4 else 5) .stop rfl
+  let left := M3EqProofChain.link 3 leftTail rfl
+  let right := M3EqProofChain.link 3 rightTail rfl
+  if decide (left = right) then 1 else 0
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -70,7 +107,7 @@ private def source : String :=
   "inductive M3HashTree(A: Type u): Type u where {\n" ++
   " | leaf(value: A)\n" ++
   " | fork(left: M3HashTree A, right: M3HashTree A)\n" ++
-  "} deriving Hashable, Repr, BEq\n" ++
+  "} deriving Hashable, Repr, BEq, DecidableEq\n" ++
   "function m3hashnat(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
   " Hashable.hash(M3HashTree.fork(M3HashTree.leaf(n), M3HashTree.fork(M3HashTree.leaf(n + 1), M3HashTree.leaf(n + 2))))\n" ++
@@ -109,13 +146,45 @@ private def source : String :=
   " let z: M3HashTree Bool := M3HashTree.fork(M3HashTree.leaf(Bool.not(flag)), M3HashTree.leaf(Bool.not(flag)))\n" ++
   " m3eqbits(x == x, x == y, y == x, x == M3HashTree.leaf(flag), M3HashTree.leaf(flag) == x, x == z)\n" ++
   "}\n" ++
-  "inductive M3EqAtom where { | atom(value: Bool) }\n" ++
+  "inductive M3EqAtom where { | atom(value: Bool) } deriving DecidableEq\n" ++
   "instance m3atomBEq: BEq M3EqAtom where { beq(left: M3EqAtom, right: M3EqAtom): Bool := false }\n" ++
   "function m3eqatom(flag: Bool): UInt64 := {\n" ++
   " let x: M3HashTree M3EqAtom := M3HashTree.fork(M3HashTree.leaf(M3EqAtom.atom(flag)), M3HashTree.leaf(M3EqAtom.atom(Bool.not(flag))))\n" ++
   " if (x == x) { UInt64.ofNat(0) } else { UInt64.ofNat(1) }\n" ++
   "}\n" ++
-  "theorem m3beqlaw(n: Nat, m: Nat, k: Nat, l: Nat): (M3HashTree.fork(M3HashTree.leaf(n), M3HashTree.leaf(m)) == M3HashTree.fork(M3HashTree.leaf(k), M3HashTree.leaf(l))) = Bool.and(n == k, m == l) := by { rfl }\n"
+  "theorem m3beqlaw(n: Nat, m: Nat, k: Nat, l: Nat): (M3HashTree.fork(M3HashTree.leaf(n), M3HashTree.leaf(m)) == M3HashTree.fork(M3HashTree.leaf(k), M3HashTree.leaf(l))) = Bool.and(n == k, m == l) := by { rfl }\n" ++
+  "function m3decidenat(flag: Bool): UInt64 := {\n" ++
+  " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
+  " let last: Nat := if (flag) { n + 2 } else { n + 3 }\n" ++
+  " let x: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(n), M3HashTree.fork(M3HashTree.leaf(n + 1), M3HashTree.leaf(n + 2)))\n" ++
+  " let y: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(n), M3HashTree.fork(M3HashTree.leaf(n + 1), M3HashTree.leaf(last)))\n" ++
+  " let z: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(n + 1), M3HashTree.fork(M3HashTree.leaf(n + 1), M3HashTree.leaf(n + 2)))\n" ++
+  " m3eqbits(Decidable.decide(self := decEq(x, x)), Decidable.decide(self := decEq(x, y)), Decidable.decide(self := decEq(y, x)), Decidable.decide(self := decEq(x, M3HashTree.leaf(n))), Decidable.decide(self := decEq(M3HashTree.leaf(n), x)), Decidable.decide(self := decEq(x, z)))\n" ++
+  "}\n" ++
+  "function m3decidebool(flag: Bool): UInt64 := {\n" ++
+  " let x: M3HashTree Bool := M3HashTree.fork(M3HashTree.leaf(flag), M3HashTree.leaf(Bool.not(flag)))\n" ++
+  " let y: M3HashTree Bool := M3HashTree.fork(M3HashTree.leaf(flag), M3HashTree.leaf(true))\n" ++
+  " let z: M3HashTree Bool := M3HashTree.fork(M3HashTree.leaf(Bool.not(flag)), M3HashTree.leaf(Bool.not(flag)))\n" ++
+  " m3eqbits(Decidable.decide(self := decEq(x, x)), Decidable.decide(self := decEq(x, y)), Decidable.decide(self := decEq(y, x)), Decidable.decide(self := decEq(x, M3HashTree.leaf(flag))), Decidable.decide(self := decEq(M3HashTree.leaf(flag), x)), Decidable.decide(self := decEq(x, z)))\n" ++
+  "}\n" ++
+  "function m3decideatom(flag: Bool): UInt64 := {\n" ++
+  " let x: M3HashTree M3EqAtom := M3HashTree.fork(M3HashTree.leaf(M3EqAtom.atom(flag)), M3HashTree.leaf(M3EqAtom.atom(Bool.not(flag))))\n" ++
+  " if (Decidable.decide(self := decEq(x, x))) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
+  "}\n" ++
+  "inductive M3EqProofChain where { | stop | link(value: Nat, next: M3EqProofChain, certificate: next = next) } deriving DecidableEq\n" ++
+  "function m3decideproof(flag: Bool): UInt64 := {\n" ++
+  " let n: Nat := if (flag) { 4 } else { 5 }\n" ++
+  " let empty: M3EqProofChain := M3EqProofChain.stop\n" ++
+  " let leftTail: M3EqProofChain := M3EqProofChain.link(4, empty, by { rfl })\n" ++
+  " let rightTail: M3EqProofChain := M3EqProofChain.link(n, empty, by { rfl })\n" ++
+  " let left: M3EqProofChain := M3EqProofChain.link(3, leftTail, by { rfl })\n" ++
+  " let right: M3EqProofChain := M3EqProofChain.link(3, rightTail, by { rfl })\n" ++
+  " if (Decidable.decide(self := decEq(left, right))) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
+  "}\n" ++
+  "const m3decisionLeft: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(1), M3HashTree.leaf(2))\n" ++
+  "const m3decisionRight: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(1), M3HashTree.leaf(3))\n" ++
+  "theorem m3decisionEqual: Decidable.decide(self := decEq(m3decisionLeft, m3decisionLeft)) = true := by { rfl }\n" ++
+  "theorem m3decisionDifferent: Decidable.decide(self := decEq(m3decisionLeft, m3decisionRight)) = false := by { rfl }\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -135,6 +204,12 @@ private def refusals : List (String × String × String) := [
   ("beq-indexed", "inductive IndexedBEq: Nat -> Type where { | intro(n: Nat): IndexedBEq n } deriving BEq\n",
     "deriving indexed families is not yet implemented"),
   ("beq-missing-field-dictionary", "inductive FunctionBEq where { | leaf(value: Nat -> Nat) | node(next: FunctionBEq) } deriving BEq\n",
+    "deriving field has no checked instance"),
+  ("deceq-nested", "inductive NestedDecEq where { | node(children: List NestedDecEq) } deriving DecidableEq\n",
+    "recursive deriving requires the M3 data machinery"),
+  ("deceq-indexed", "inductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\n",
+    "deriving indexed families is not yet implemented"),
+  ("deceq-missing-field-dictionary", "inductive FunctionDecEq where { | leaf(value: Nat -> Nat) | node(next: FunctionDecEq) } deriving DecidableEq\n",
     "deriving field has no checked instance")]
 
 def main (args : List String) : IO Unit := do
@@ -146,7 +221,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -180,9 +255,14 @@ def main (args : List String) : IO Unit := do
     ("m3eqnat", Lean.toJson (toString ((M3RecursiveHashOracle.natEq flag).toNat))),
     ("m3eqbool", Lean.toJson (toString ((M3RecursiveHashOracle.boolEq flag).toNat))),
     ("m3eqatom", Lean.toJson (toString ((M3RecursiveHashOracle.atomEq flag).toNat))),
+    ("m3decidenat", Lean.toJson (toString ((M3RecursiveHashOracle.natDecision flag).toNat))),
+    ("m3decidebool", Lean.toJson (toString ((M3RecursiveHashOracle.boolDecision flag).toNat))),
+    ("m3decideatom", Lean.toJson (toString ((M3RecursiveHashOracle.atomDecision flag).toNat))),
+    ("m3decideproof", Lean.toJson (toString ((M3RecursiveHashOracle.proofDecision flag).toNat))),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_RECURSIVE_HASH: PASS generic direct-recursive derivation, checked defining law, five-target emission and three phase-correct Hashable refusals; runtime checks follow"
   IO.println "PSCV0_M3_RECURSIVE_REPR: PASS generic Nat/Bool, two root precedences, exact native-oracle text at width 40, three phase-correct Repr refusals; runtime checks follow"
   IO.println "PSCV0_M3_RECURSIVE_BEQ: PASS Nat/Bool comparison masks, independent non-reflexive field dictionary, checked recursive defining law, three phase-correct BEq refusals; runtime checks follow"
+  IO.println "PSCV0_M3_RECURSIVE_DECEQ: PASS native decision masks, BEq-independent equality, dependent proof field, checked equal/different equations and three phase-correct refusals; runtime checks follow"

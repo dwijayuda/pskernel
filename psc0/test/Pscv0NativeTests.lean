@@ -2713,7 +2713,7 @@ private def derivingBoundaries : IO Unit := do
     { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: List(Chain A)) } deriving BEq\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving DecidableEq\n" },
     { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\n" },
-    { source := "inductive Bad where { | nil | cons(next: Bad) } deriving DecidableEq\n" },
+    { source := "inductive Bad where { | nil | cons(next: List Bad) } deriving DecidableEq\n" },
     { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\n" },
     { source := "structure Bad where { value: Nat := true } deriving Inhabited\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving Repr\n" },

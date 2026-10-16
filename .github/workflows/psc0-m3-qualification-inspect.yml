@@ -10,40 +10,82 @@ permissions:
 jobs:
   inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: 7998bdc7b654dccf46ddfc0b09d16cf8143b33d0
           persist-credentials: false
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
-            .github/workflows
-            psc0/scripts
-            psc0/test
-      - name: Inspect exact source and original failed job without changing either
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/test/
+            /psc0/scripts/
+            /psc0/v7-native/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: m3-source-inspection-${{ github.sha }}
+          restore-keys: |
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+            pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Recover the original source and expose its exact compiler diagnostic
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = 7998bdc7b654dccf46ddfc0b09d16cf8143b33d0
+          test ! -d ../packages/pskernel-core
           mkdir -p "$RUNNER_TEMP/m3-source-inspection"
-          git grep -n -E 'Chain|recursive deriving requires|expect_error' -- psc0/test psc0/scripts .github/workflows | tee "$RUNNER_TEMP/m3-source-inspection/owners.txt" || test "$?" = 1
           gh api repos/dwijayuda/pskernel/actions/runs/38886292555 --jq '{id,head_sha,status,conclusion,path}' | tee "$RUNNER_TEMP/m3-source-inspection/run.json"
-          gh api --allow-escape-sequences repos/dwijayuda/pskernel/actions/jobs/116924732052/logs > "$RUNNER_TEMP/m3-source-inspection/native.log"
-          python3 - <<'PY'
-          import os, pathlib
-          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'm3-source-inspection'
-          text = (root/'native.log').read_text()
-          lines = text.splitlines()
-          for i, line in enumerate(lines):
-              if any(key in line for key in ['Traceback', 'AssertionError', 'uncaught exception', 'unexpectedly accepted', 'pscv0-native-source.py', 'PSCV0-DERIVING', 'case 84']):
-                  print('\n'.join(lines[max(0,i-3):min(len(lines),i+8)]))
-          print('=== EXACT SOURCE-GATE COMMANDS ===')
-          workflow = pathlib.Path('.github/workflows/psc0-pscv0-native-v7.yml').read_text().splitlines()
-          for i, line in enumerate(workflow):
-              if 'Qualify checked source and admitted Standard' in line:
-                  print('\n'.join(workflow[i:i+12]))
-          PY
+          gh run download 38886292555 --repo dwijayuda/pskernel --name pscv0-v7-native-7998bdc7b654dccf46ddfc0b09d16cf8143b33d0 --dir "$RUNNER_TEMP/m3-source-inspection/original"
+          mapfile -t sources < <(find "$RUNNER_TEMP/m3-source-inspection/original" -name application.ps -type f)
+          test "${#sources[@]}" = 1
+          sha256sum "${sources[0]}" | tee "$RUNNER_TEMP/m3-source-inspection/source-digest.txt"
+          lake build pscv0_native
+          set +e
+          .lake/build/bin/pscv0_native --check "${sources[0]}" 2>&1 | tee "$RUNNER_TEMP/m3-source-inspection/application-check.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          printf 'ORIGINAL_APPLICATION_RECHECK_EXIT=%s\n' "$status"
+          # This is diagnostic evidence, never a replacement qualification gate.
+          test "$status" = 1
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

@@ -8,6 +8,7 @@ on:
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedInstantiateMemoRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0AdaptiveInstantiationRegression.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,6 +34,7 @@ jobs:
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
           lake build Ps.KernelCore.Architecture.CertifiedInstantiateMemo
           lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          lake env lean --run test/C0AdaptiveInstantiationRegression.lean
           echo "C0_CERTIFIED_INSTANTIATE_SOURCE_PROOF exact_changed_flag=Lean exact_offsets=Lean"
       - name: Preserve independent source admission and negative resource behavior
         working-directory: psc0/packages/pskernel-c0

@@ -1,0 +1,45 @@
+name: PSKernel-C0 proof-checked instantiation csimp
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-instantiation-csimp.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+      - 'psc0/packages/pskernel-c0/test/C0InstantiateCSimpProbe.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certified-native-codegen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Compile and execute source-exact substitution with csimp
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0InstantiateCSimpProbe
+          timeout 25s .lake/build/bin/c0InstantiateCSimpProbe
+          lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          echo "C0_INSTANTIATE_CSIMP_SOURCE exact_public_equivalence=Lean_proved native_codegen=pass"
+      - name: Preserve original native source and negative proof checks
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          lake build c0OfficialReplay
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_INSTANTIATE_CSIMP_NEGATIVES=pass"

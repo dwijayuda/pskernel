@@ -421,3 +421,58 @@ def psKernelC0VerifiedIndexedHashLet
     readback := hRead
     valueCorrect := hParent
   }
+
+/-- The exact historical symmetric DefEq pair-cache bucket, computed from
+two certified O(1) indexed hash fields. Never a proof of definitional
+equality; a bucket candidate must pass full pair syntax comparison. -/
+def psKernelC0VerifiedIndexedPairHash
+    {owner : PsKernelC0CertifiedStore}
+    {leftId rightId : Nat}
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) : Nat :=
+  (psKernelC0VerifiedIndexedHashRead left +
+    psKernelC0VerifiedIndexedHashRead right) % psKernelCacheHashModulus
+
+theorem psKernelC0VerifiedIndexedPairHash_source
+    {owner : PsKernelC0CertifiedStore}
+    {leftId rightId : Nat}
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) :
+    psKernelC0VerifiedIndexedPairHash left right =
+      psKernelExprPairHash left.expr right.expr := by
+  simp only [psKernelC0VerifiedIndexedPairHash,
+    psKernelC0VerifiedIndexedHashRead_source,
+    psKernelExprPairHash]
+
+/-- Full source semantics of success/failure DefEq cache lookup remain
+unchanged. The certified pair hash is only a trie bucket selector;
+psKernelExprPairSetContainsIn STILL compares the exact pair syntax. -/
+def psKernelC0VerifiedIndexedPairContains
+    {owner : PsKernelC0CertifiedStore}
+    {leftId rightId : Nat}
+    (set : PsKernelExprPairSet)
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) : Bool :=
+  match set.index with
+  | none =>
+      psKernelExprPairSetContainsIn left.expr right.expr set.small
+  | some index =>
+      psKernelExprPairSetContainsIn left.expr right.expr
+        (psKernelExprPairSetIndexBucket
+          psKernelC0IndexDepth index
+          (psKernelC0VerifiedIndexedPairHash left right))
+
+theorem psKernelC0VerifiedIndexedPairContains_source
+    {owner : PsKernelC0CertifiedStore}
+    {leftId rightId : Nat}
+    (set : PsKernelExprPairSet)
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) :
+    psKernelC0VerifiedIndexedPairContains set left right =
+      psKernelExprPairSetContains set left.expr right.expr := by
+  unfold psKernelC0VerifiedIndexedPairContains
+    psKernelExprPairSetContains
+  cases h : set.index with
+  | none => rfl
+  | some index =>
+      simp only [psKernelC0VerifiedIndexedPairHash_source]

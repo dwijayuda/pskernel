@@ -542,6 +542,7 @@ def psKernelDefEqSourceStepWithFuel
             right
             true)
       else if
+          psKernelSemanticPairCacheEligible left right &&
           psKernelExprPairSetContains
             state.success
             left

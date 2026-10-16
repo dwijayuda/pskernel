@@ -150,7 +150,8 @@ def psKernelDefEqQuick
   if psKernelExprEq left right then
     Except.ok
       (Prod.mk (Option.some true) state)
-  else if psKernelExprPairSetContains state.success left right then
+  else if psKernelSemanticPairCacheEligible left right &&
+      psKernelExprPairSetContains state.success left right then
     Except.ok
       (Prod.mk (Option.some true) state)
   else

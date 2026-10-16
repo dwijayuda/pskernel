@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.KernelReductions
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Core weak-head reduction.
@@ -77,9 +78,8 @@ def psKernelWhnfCoreFinishWithKnownHash
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if cheapProj then
-    Except.ok
-      (Prod.mk result state)
+  if cheapProj || !psKernelSemanticCacheEligible original then
+    Except.ok (Prod.mk result state)
   else
     let nextCache :=
       psKernelExprMapInsertWithKnownHash
@@ -109,17 +109,12 @@ def psKernelWhnfFinish
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  let nextCache :=
-    psKernelExprMapInsert
-      state.whnf
-      original
-      result;
-  Except.ok
-    (Prod.mk
-      result
-      (psKernelCheckerStateWithWhnf
-        state
-        nextCache))
+  if psKernelSemanticCacheEligible original then
+    let nextCache := psKernelExprMapInsert state.whnf original result
+    Except.ok (Prod.mk result
+      (psKernelCheckerStateWithWhnf state nextCache))
+  else
+    Except.ok (Prod.mk result state)
 
 def psKernelWhnfCoreWithFuelRanges
     (fuel : Nat)
@@ -264,11 +259,13 @@ def psKernelWhnfCoreWithFuelRanges
                       | _ => letFrames
                   | _ => []
                 let cached :=
-                  match currentFrames with
-                  | (_, hash) :: _ =>
-                      psKernelExprMapGetWithKnownHash state.whnfCore expr
-                        (some hash)
-                  | [] => psKernelExprMapGet state.whnfCore expr
+                  if psKernelSemanticCacheEligible expr then
+                    match currentFrames with
+                    | (_, hash) :: _ =>
+                        psKernelExprMapGetWithKnownHash state.whnfCore expr
+                          (some hash)
+                    | [] => psKernelExprMapGet state.whnfCore expr
+                  else Option.none
                 match cached with
                 | Option.some cached =>
                     Except.ok

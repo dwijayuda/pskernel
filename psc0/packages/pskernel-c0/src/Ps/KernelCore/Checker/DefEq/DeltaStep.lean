@@ -76,9 +76,9 @@ def psKernelDefEqUnfold
     (expr : PsKernelExpr) :
     Prod (Option PsKernelExpr) PsKernelCheckerState :=
   match
-      psKernelExprMapGet
-        state.unfold
-        expr with
+      (if psKernelSemanticCacheEligible expr then
+        psKernelExprMapGet state.unfold expr
+       else Option.none) with
   | Option.some cached =>
       Prod.mk
         (Option.some cached)
@@ -91,16 +91,12 @@ def psKernelDefEqUnfold
       | Option.none =>
           Prod.mk Option.none state
       | Option.some value =>
-          let cache :=
-            psKernelExprMapInsert
-              state.unfold
-              expr
-              value;
-          Prod.mk
-            (Option.some value)
-            (psKernelCheckerStateWithUnfold
-              state
-              cache)
+          if psKernelSemanticCacheEligible expr then
+            let cache := psKernelExprMapInsert state.unfold expr value
+            Prod.mk (Option.some value)
+              (psKernelCheckerStateWithUnfold state cache)
+          else
+            Prod.mk (Option.some value) state
 
 def psKernelDefEqDeltaOnce
     (coreWhnf :
@@ -432,7 +428,7 @@ def psKernelDefEqLazyStepBoth
         Except String
           (Prod Bool PsKernelCheckerState) :=
       if sameShortcut then
-        if
+        if psKernelSemanticPairCacheEligible left right &&
             psKernelExprPairSetContains
               state.failure
               left
@@ -466,7 +462,8 @@ def psKernelDefEqLazyStepBoth
           let comparedState :=
             Prod.snd compared;
           let afterFailure :=
-            if sameShortcut then
+            if sameShortcut &&
+                psKernelSemanticPairCacheEligible left right then
               psKernelCheckerStateWithFailure
                 comparedState
                 (psKernelExprPairSetInsert

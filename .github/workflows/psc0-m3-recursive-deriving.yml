@@ -91,10 +91,9 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native
+          lake build pscv0_native pscv0_m3_recursive_deriving
           mkdir -p ../dist/m3-recursive-deriving
-          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
-          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" lean --run ../test/Pscv0M3RecursiveDeriving.lean ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
+          .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         with:

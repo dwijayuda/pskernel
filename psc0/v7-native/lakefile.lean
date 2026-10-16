@@ -56,3 +56,9 @@ lean_exe pscv0_wasm_checks where
 lean_exe pscv0_m1_performance where
   srcDir := "../test"
   root := `Pscv0M1Performance
+
+-- The host and portable libraries share Ps.*. Let Lake supply exact module
+-- dependencies instead of an ad hoc LEAN_PATH namespace overlay.
+lean_exe pscv0_m3_recursive_deriving where
+  srcDir := "../test"
+  root := `Pscv0M3RecursiveDeriving

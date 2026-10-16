@@ -59,6 +59,17 @@ def main : IO Unit := do
       !psKernelC0AdaptiveHasFVar positiveHead then
     throw (IO.userError "memo skipped a certified positive function child")
 
+  -- A positive domain or let value must bypass the huge later child,
+  -- preserving the source predicate's left-to-right short circuit.
+  let shortLambda : PsKernelExpr := .lam name fvarTerm huge .default
+  let shortPi : PsKernelExpr := .forallE name fvarTerm huge .default
+  let shortLetType : PsKernelExpr := .letE name fvarTerm closed huge false
+  let shortLetValue : PsKernelExpr := .letE name closed fvarTerm huge false
+  for short in [shortLambda, shortPi, shortLetType, shortLetValue] do
+    if !psKernelC0MemoizedHasFVar short ||
+        !psKernelC0AdaptiveHasFVar short then
+      throw (IO.userError "memo lost source early-positive binder/let result")
+
   -- Hash buckets are hints only: binder names and info are not semantic
   -- cache keys. The proof-producing equality check must still discriminate
   -- different expressions regardless of their shallow shape.

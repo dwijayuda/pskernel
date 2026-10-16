@@ -1,17 +1,20 @@
 import Ps.Host.NativeV7
 import Ps.Core.InductiveGroup
 import Ps.Meta.Recursor
+import PsKernelLean.Admission
 
 -- Independent ordinary Lean declarations. The native group API below parses
 -- the member ASTs separately and admits its own Core group into a fresh checked
 -- prelude. v7.2's .ps mutual syntax remains definition/function-only.
+-- Pinned Lean syntax requires matching parameter spellings; these ordinary
+-- declarations use A/a while the native member AST inputs exercise B/b aliases.
 universe u
 mutual
   inductive M3GroupLeft (A : Type u) : Type u where
     | nil
     | link (value : A) (next : M3GroupRight A)
-  inductive M3GroupRight (B : Type u) : Type u where
-    | join (previous : M3GroupLeft B)
+  inductive M3GroupRight (A : Type u) : Type u where
+    | join (previous : M3GroupLeft A)
 end
 
 def m3GroupOracle : M3GroupLeft Nat → Nat :=
@@ -24,8 +27,8 @@ mutual
   inductive M3IndexedLeft (A : Type) : Nat → Type where
     | zero : M3IndexedLeft A 0
     | step (n : Nat) (next : M3IndexedRight A n) : M3IndexedLeft A (Nat.succ n)
-  inductive M3IndexedRight (B : Type) : Nat → Type where
-    | wrap (n : Nat) (previous : M3IndexedLeft B n) : M3IndexedRight B n
+  inductive M3IndexedRight (A : Type) : Nat → Type where
+    | wrap (n : Nat) (previous : M3IndexedLeft A n) : M3IndexedRight A n
 end
 
 mutual
@@ -35,14 +38,14 @@ mutual
     | intro
 end
 
--- Parameters are dependent and alpha-renamed; index counts differ between
--- members. This checks alias rebinding and each family's own motive telescope.
+-- Parameters are dependent and index counts differ between members. The
+-- native AST variant below also checks alias rebinding of these parameters.
 mutual
   inductive M3DependentLeft (A : Type) (a : A) : Type where
     | stop
     | next (right : M3DependentRight A a 0)
-  inductive M3DependentRight (B : Type) (b : B) : Nat → Type where
-    | wrap (n : Nat) (left : M3DependentLeft B b) : M3DependentRight B b n
+  inductive M3DependentRight (A : Type) (a : A) : Nat → Type where
+    | wrap (n : Nat) (left : M3DependentLeft A a) : M3DependentRight A a n
 end
 
 def m3DependentOracle : M3DependentRight Nat 7 5 → Nat :=
@@ -195,7 +198,7 @@ private def reductionWitness (name : String) (probe : PsExpr) (result : Nat) : P
   let nat := PsExpr.constE psNatName []
   let expected := PsExpr.lit (.natural result)
   let proposition := call psEqName [.succ .zero] [nat, probe, expected]
-  let proof := call psEqReflName [.succ .zero] [nat, expected]
+  let proof := call (psNameAppendStr psEqName "refl") [.succ .zero] [nat, expected]
   .theoremDecl (psRootName name) [] proposition proof
 
 private def portableEnvironment (declarations : List PsDeclaration) : IO PsEnvironment :=

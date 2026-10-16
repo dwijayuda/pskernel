@@ -1,0 +1,78 @@
+name: PSKernel-C0 exact heavy theorem stage diagnostic
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-theorem-stage-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  theorem-stage-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce pinned official-positive exact dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake env .lake/build/bin/lean4export Init -- String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep > "$RUNNER_TEMP/c0-stage-dependency.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-stage-dependency.ndjson" > "$RUNNER_TEMP/c0-stage-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/c0-stage-official.txt"
+          test "$(stat -c%s "$RUNNER_TEMP/c0-stage-dependency.ndjson")" -eq 25031309
+          test "$(wc -l < "$RUNNER_TEMP/c0-stage-dependency.ndjson")" -eq 499130
+          echo "7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/c0-stage-dependency.ndjson" | sha256sum -c -
+          echo "C0_STAGE_PROFILE_REFERENCE exact_bytes=verified official=accepted"
+      - name: Identify source theorem admission stage without issuing any acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          target='_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec'
+          echo "C0_STAGE_PROFILE_TARGET=$target"
+          status=0
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 900s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --diagnose-theorem "$target" "$RUNNER_TEMP/c0-stage-dependency.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/c0-theorem-stage.txt" || status=$?
+          if [ "$status" -ne 0 ] && [ "$status" -ne 124 ]; then
+            echo "C0_STAGE_PROFILE unexpected diagnostic process exit=$status" >&2
+            exit "$status"
+          fi
+          grep -Fq 'C0_THEOREM_PROBE target=' "$RUNNER_TEMP/c0-theorem-stage.txt" || {
+            echo "C0_STAGE_PROFILE did not reach exact theorem" >&2
+            exit 1
+          }
+          if grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/c0-theorem-stage.txt"; then
+            echo "C0_STAGE_PROFILE diagnostic falsely issued acceptance" >&2
+            exit 1
+          fi
+          grep '^C0_THEOREM_PROBE ' "$RUNNER_TEMP/c0-theorem-stage.txt" | tail -n 25
+          echo "C0_STAGE_PROFILE_COMPLETED diagnostic_only=true native_exit=$status official_source=accepted c0_acceptance=not_claimed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-theorem-stage-diagnostic
+          path: |
+            ${{ runner.temp }}/c0-stage-official.txt
+            ${{ runner.temp }}/c0-theorem-stage.txt
+          if-no-files-found: warn
+          retention-days: 14

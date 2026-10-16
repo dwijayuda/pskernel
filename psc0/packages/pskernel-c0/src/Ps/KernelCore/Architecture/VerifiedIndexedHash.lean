@@ -163,3 +163,47 @@ def psKernelC0VerifiedIndexedHashAppTry
           else none
         else none
       else none
+
+/-- Reuse the proven O(1) checker-hash field for source cache lookup. Exact
+source expression equality STILL decides every hash-bucket collision. -/
+def psKernelC0VerifiedIndexedCacheGet
+    {owner : PsKernelC0CertifiedStore} {id : Nat}
+    (proof : PsKernelC0VerifiedIndexedHash owner id)
+    (cache : PsKernelExprMap) : Option PsKernelExpr :=
+  psKernelExprMapGetWithKnownHash cache proof.expr
+    (some (psKernelC0VerifiedIndexedHashRead proof))
+
+/-- Complete cache-lookup refinement, including indexed/short caches and
+every colliding-hash case, without trusting a hash as expression equality. -/
+theorem psKernelC0VerifiedIndexedCacheGet_source
+    {owner : PsKernelC0CertifiedStore} {id : Nat}
+    (proof : PsKernelC0VerifiedIndexedHash owner id)
+    (cache : PsKernelExprMap) :
+    psKernelC0VerifiedIndexedCacheGet proof cache =
+      psKernelExprMapGet cache proof.expr := by
+  unfold psKernelC0VerifiedIndexedCacheGet psKernelExprMapGet
+  rw [psKernelC0VerifiedIndexedHashRead_source proof]
+  simp [psKernelExprMapGetWithKnownHash]
+
+/-- Store the same source expression/type pair under its already certified
+indexed hash. The canonical source map remains the semantic reference. -/
+def psKernelC0VerifiedIndexedCacheInsert
+    {owner : PsKernelC0CertifiedStore} {id : Nat}
+    (proof : PsKernelC0VerifiedIndexedHash owner id)
+    (cache : PsKernelExprMap)
+    (ty : PsKernelExpr) : PsKernelExprMap :=
+  psKernelExprMapInsertWithKnownHash cache proof.expr ty
+    (some (psKernelC0VerifiedIndexedHashRead proof))
+
+/-- Complete cache-update refinement: no equality, typing, failure or
+resource decision changes when a cached indexed hash is provided. -/
+theorem psKernelC0VerifiedIndexedCacheInsert_source
+    {owner : PsKernelC0CertifiedStore} {id : Nat}
+    (proof : PsKernelC0VerifiedIndexedHash owner id)
+    (cache : PsKernelExprMap)
+    (ty : PsKernelExpr) :
+    psKernelC0VerifiedIndexedCacheInsert proof cache ty =
+      psKernelExprMapInsert cache proof.expr ty := by
+  unfold psKernelC0VerifiedIndexedCacheInsert psKernelExprMapInsert
+  rw [psKernelC0VerifiedIndexedHashRead_source proof]
+  simp [psKernelExprMapInsertWithKnownHash]

@@ -1,5 +1,6 @@
-# Requalify pinned 15,758-record WF on Lean 4.35 after the Nat binary
-# head guard, left-first operand correction and independent Arena validation.
+# Replay exact pinned 15,758-record WF after certified native cache-selector
+# short-circuit (checked app/lambda/Pi skip mandatory-false FVar scanning).
+# Keep the original checker source and semantic policy definition unmodified.
 # A timeout is explicitly unqualified, never a kernel acceptance receipt.
 name: PSKernel-C0 native source-integrated hard WF replay
 on:

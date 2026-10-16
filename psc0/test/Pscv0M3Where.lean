@@ -49,7 +49,7 @@ section
 variable (ignored : Nat)
 
 -- Original main modifiers are checked before the dependency graph is split.
-/-- error: cannot mix partial and non-partial definitions -/
+/-- error: invalid mutually recursive definitions, cannot mix partial and non-partial definitions -/
 #guard_msgs (error, drop warning, substring := true) in
 mutual
   partial def invalidPartial (n : Nat) : Nat := invalidPartial n

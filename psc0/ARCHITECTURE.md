@@ -1,4 +1,4 @@
-## M3+B current architecture checkpoint — original-main compatibility repair
+## M3+B current architecture checkpoint — native oracle qualification repair
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
@@ -13,6 +13,38 @@ M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
 55–75% engineering uncertainty). All six weights remain data 30, source 15,
 total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
 are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Native oracle qualification correction
+
+At compiler/test `cfe86ea64da3d34683974e09bf4cda76861f2e54`, F1
+38982453387, F2 38982453388 and F3/F4 38982453392 passed.
+Focused 38982453396 (job 117246201593) failed while building two native
+oracles. Production modules compiled, including the current recursion
+and deriving owners; focused source and target execution had not started.
+
+The Where rejection must include Lean's full diagnostic prefix:
+"invalid mutually recursive definitions, cannot mix partial and non-partial
+definitions". The isolated correction changes only that native guard text.
+
+The PreDefinitions cyclic Nat / Type-u component was incorrectly described
+as a native positive. Pinned PreDefinition.Main partitions SCCs first
+(lines 296–324), then Basic.checkCodomainsLevel (309–322) rejects differing
+actual result universes in a recursive total component. The fixture now
+asserts that actual native refusal and removes the two impossible native
+rfl witnesses. Its disconnected same-signature functions remain the positive
+control. The entire portable namespace is unchanged, including the existing
+PSCV0-MUTUAL-TOTAL-SORT refusal and all requests, values and atomicity checks.
+No source-wide universe gate or production change is introduced by this repair.
+
+Native Linux 38982453386 (job 117246201628) finished SUCCESS with all
+34 reported steps, including checked source/Standard, real three-module
+emission, GC/components, strict compiled TypeScript, locked Rust, repeated
+Wasmtime embedding and the original measurement step. The tip therefore
+has four successful gates and one failed focused gate; it is not accepted.
+Its native artifact 12082645231 is 6,796,096 bytes, SHA256
+`d88c29d724d209ba5faa608009599e11cda4675112b7ec89780e1b7b4be27727`.
+All five gates must pass at one exact compiler/test SHA after these fixture
+corrections.
 
 ### Qualification repair: original main modifiers and real deriving refusals
 

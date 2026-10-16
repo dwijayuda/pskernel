@@ -43,12 +43,14 @@ example : countList.{0, 0} Nat 11 5 [2, 4] = 2 := rfl
 example : flag.{0, 0} Nat 11 5 true = 7 := rfl
 example : pick.{0, 0} Nat 11 5 4 = 11 := rfl
 
--- General native mutual construction handles unequal result universes. The
--- current direct packed-motive owner deliberately refuses this actual cycle;
--- a disconnected pair with the same signatures is covered positively above.
+-- Pinned PreDefinition.Main partitions SCCs before Basic.checkCodomainsLevel.
+-- The actual cyclic component must have compatible result universes; the
+-- disconnected same-signature functions above are the positive control.
 def retainA (A : Type u) (a : A) (_ : Nat) : A := a
 def retainNat (A : Type u) (_ : A) (n : Nat) : Nat := n
 
+/-- error: invalid mutual definition, result types must be in the same universe level -/
+#guard_msgs (error, drop warning, substring := true) in
 mutual
   def mixedNat (A : Type u) (a : A) (n : Nat) : Nat :=
     match n with
@@ -59,9 +61,6 @@ mutual
     | 0 => a
     | k + 1 => retainA A a (mixedNat A a k)
 end
-
-example : mixedNat Nat 11 3 = 1 := rfl
-example : mixedValue Nat 11 3 = 11 := rfl
 
 end M3PreDefinitionOracle
 

@@ -29,7 +29,8 @@ def psReduceNatPrimitive (reduce : PsExpr → PsExpr) (expr : PsExpr) : Option P
     -- Pinned Lean 4.35.0 Init.Prelude defines Nat.add by recursion on
     -- its SECOND operand: Nat.add a 0 reduces to a even when a is open.
     -- Do not introduce the propositionally true but non-definitional
-    -- reverse rule Nat.add 0 a = a.
+    -- reverse rule Nat.add 0 a = a. Infix HAdd projections are not
+    -- assumed to reduce unless their checked instance unfolds.
     if psNameEq name psNatAddName &&
         psExprAlphaEq rightReduced (.lit (.natural 0)) then
       return left

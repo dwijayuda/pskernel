@@ -222,7 +222,9 @@ private def refusals : List (String × String × String) := [
   ("deceq-indexed", "inductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\n",
     "deriving indexed families is not yet implemented"),
   ("deceq-missing-field-dictionary", "inductive FunctionDecEq where { | leaf(value: Nat -> Nat) | node(next: FunctionDecEq) } deriving DecidableEq\n",
-    "deriving field has no checked instance")]
+    "deriving field has no checked instance"),
+  ("nondecreasing-major", "function badMajor(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => badMajor(Nat.succ(k)) }\n",
+    "recursive major must be a direct recursive field")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")

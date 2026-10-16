@@ -59,3 +59,12 @@ Previous infix k + 0 tests still fail in the selected PSC0 elaboration path;
 do not claim full infix definitional-equivalence parity from this case.
 The proof and target observations remain unchanged. Native and focused
 qualification on this commit are required for acceptance.
+
+### Fixed structural-child qualification and refusal
+Focused run 38922907562 passed on f560a1df, including native oracle and
+JavaScript, TypeScript, Rust, GC and Wasmtime for the explicit Nat.add(k, 0)
+case. Full same-commit integration replays were not triggered by that fixture-
+only child. This new candidate adds the intended-phase refusal for a
+nondecreasing successor argument and documents that infix HAdd projections
+require separately checked instance unfolding. Exact native/F1/F2/F3-F4
+and focused runs on this commit are pending before formal slice acceptance.

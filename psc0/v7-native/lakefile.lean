@@ -33,6 +33,11 @@ lean_lib PsV7PlatformChecks where
   srcDir := "../test"
   roots := #[`Pscv0PlatformTests]
 
+-- Shared typed-predefinition evidence invoked by the structural fixture.
+lean_lib PsV7M3PreDefinitionChecks where
+  srcDir := "../test"
+  roots := #[`Pscv0M3PreDefinitions]
+
 -- Independently checked native Float F1 constructive dependency oracle.
 -- This remains outside the selected Standard and executable compiler.
 lean_lib PsV7FloatConstructiveOracle where

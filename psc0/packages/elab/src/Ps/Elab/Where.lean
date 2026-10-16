@@ -364,6 +364,7 @@ def psElabPreparePreDefinitionsWithSource (environment : PsEnvironment) (levelNa
     (capturedSyntax : List PsScopeBinder) (members : List PsScopedPreDefinition)
     (span : PsSourceSpan) : Except PsElabError PsElabWherePrepared := do
   if members.isEmpty then throw (psElabWhereError "EMPTY" "a typed source block must contain a declaration")
+  psElabPreDefinitionCheckMainModifiers (members.map (fun member => .declaration member.source))
   let captured ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) capturedSyntax
   let ambient := captured.bindersRev.reverse.map fun binder =>
     ({ origin := { owner := none, id := binder.id }, binder } : PsElabWhereCapture)
@@ -374,8 +375,8 @@ def psElabPreparePreDefinitionsWithSource (environment : PsEnvironment) (levelNa
     (captured.context, ([] : List PsElabWhereHeader))
   let (peerContext, headers) ← psElabWherePeers headersContext headers
   let mainPeers := peerContext.localContext.declarations.take headers.length
-  -- Pinned MutualDef.getModifiersForLetRecs inherits from all original main
-  -- sources before SCC partition, including disconnected partial members.
+  -- All original main modifiers agree. Pinned getModifiersForLetRecs now
+  -- supplies their shared operational intent to plain local helper headers.
   let mainSources := headers.map (·.source)
   let (bodyContext, bodies) ← (headers.zip members).foldlM
     (fun (state : PsElabContext × List PsElabWhereBody) (header, member) => do

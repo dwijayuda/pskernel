@@ -2392,7 +2392,7 @@ private def projectBoundaries : IO Unit := do
     "const otherCtor: Bool := CellLabel.count(3) == CellLabel.enabled(true)\n" ++
     "theorem otherCtorProof: otherCtor = false := by { rfl }\n"
   let derivingRecursiveBEqRefusal :=
-    "inductive RecursiveCell where { | nil | cons(next: List RecursiveCell) } deriving BEq\n"
+    "inductive RecursiveCell where { | nil | cons(unsupported: Nat -> Nat, next: List RecursiveCell) } deriving BEq\n"
   let optionEqualitySource :=
     "const a: Option Nat := Option.some(3)\n" ++
     "const equalSome: Bool := a == Option.some(3)\n" ++
@@ -2659,7 +2659,7 @@ private def projectBoundaries : IO Unit := do
           error.phase ++ ": " ++ error.message))
     | 34, .error error =>
         unless error.phase == "elaborate" do
-          throw (IO.userError "recursive payload BEq did not fail during elaboration")
+          throw (IO.userError "missing recursive payload BEq dictionary did not fail during elaboration")
     | 35, .ok value =>
         unless value.artifacts.length == 3 do
           throw (IO.userError "polymorphic Option BEq missing target artifacts")
@@ -2710,14 +2710,14 @@ private def derivingBoundaries : IO Unit := do
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
     { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
-    { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: List(Chain A)) } deriving BEq\n" },
+    { source := "universe u\ninductive Chain(A: Type u): Nat -> Type u where { | nil: Chain(A, 0) | cons(head: A, tail: List(Chain(A, 0))): Chain(A, Nat.succ(0)) } deriving BEq\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving DecidableEq\n" },
     { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\n" },
     { source := "inductive Bad where { | nil | cons(next: List Bad) } deriving DecidableEq\n" },
     { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\n" },
     { source := "structure Bad where { value: Nat := true } deriving Inhabited\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving Repr\n" },
-    { source := "inductive Bad where { | loop(tails: List Bad) } deriving Repr\n" },
+    { source := "inductive Bad where { | loop(n: Nat, value: Fin n, tails: List Bad) } deriving Repr\n" },
     { source := "structure Required where { value: Nat }\nconst bad: Required := {}\n" }
   ]
   let batch ← match ← PsV7Native.runBatch (#[projection] ++ requests) with
@@ -2734,7 +2734,7 @@ private def derivingBoundaries : IO Unit := do
       unless error.phase == "elaborate" do
         throw (IO.userError ("deriving refusal escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
     | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
-  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS dictionaries, dependent runtime fields, recursion, indices, ill-typed defaults and missing required fields"
+  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS missing dictionaries, dependent runtime fields, indexed BEq, nested/indexed DecidableEq, ill-typed defaults and missing required fields"
 
 private def sourceInfoBoundaries : IO Unit := do
   let source :=

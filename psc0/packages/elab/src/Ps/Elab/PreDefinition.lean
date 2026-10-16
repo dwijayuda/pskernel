@@ -97,6 +97,7 @@ def psElabPreDefinitionValidate (environment : PsEnvironment)
     (block : PsElabPreDefinitionBlock) : Except PsElabError PsElabContext := do
   if block.members.isEmpty then
     throw (psElabPreDefinitionError "OWNERSHIP" "empty checked block")
+  psElabPreDefinitionCheckMainModifiers (block.members.map (·.source))
   for name in block.levelNames do
     if (block.levelNames.filter (psNameEq name)).length != 1 then
       throw (psElabPreDefinitionError "UNIVERSES" "block universe layout repeats a parameter")
@@ -474,8 +475,9 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
     let some consumer := wellFounded
       | throw (psElabPreDefinitionError "WF" "checked local well-founded bodies require the separate measure-and-proof consumer; this SCC is not structural evidence")
     return ← psElabPreDefinitionWellFounded environment levels member consumer
-  -- Pinned Main chooses the operational partial strategy for the whole
-  -- recursive clique if any member requests it. Every resulting member gets
+  -- Original main modifiers have already passed the native whole-block
+  -- compatibility gate. Pinned Main then chooses partial for this recursive
+  -- component, including inherited local helpers. Every resulting member has
   -- its own independently inhabited logical identity and actual body marker.
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .partial) then
     return ← psElabPartialMutualFromChecked environment levels members

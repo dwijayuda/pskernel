@@ -1,4 +1,103 @@
-## M3+B current checkpoint — mutual proof/default deriving and WF foundation authoring
+## M3+B current checkpoint — source compatibility and qualification repair
+
+Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
+All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
+F1 38976284003, F2 38976283981, F3/F4 38976283973 and focused 38976283967
+(15/15). The receipt is
+`docs/PSCV0_M3_NESTED_ELIMINATION_TYPED_RECURSION_QUALIFICATION_2026-10-16.md`.
+It qualifies the accumulated typed-WF/direct-mutual-structural changes and
+complete selected nested elimination/Hashable, including all existing outputs
+on all five targets. The original native workloads and measurement step pass.
+
+M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
+55–75% engineering uncertainty). All six weights remain data 30, source 15,
+total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
+are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Qualification repair: original main modifiers and real deriving refusals
+
+The combined source/deriving/authoring tip
+`ef8e3bb697861b65cfcc172d8372dfd9d2c3896b` is not accepted:
+
+| Gate | Run | Result |
+| --- | --- | --- |
+| Native Linux | 38981566559 | FAILURE in checked source/module qualification |
+| F1 | 38981566602 | SUCCESS |
+| F2 | 38981566562 | SUCCESS |
+| F3/F4 | 38981566550 | SUCCESS |
+| Focused | 38981566596 | FAILURE while building source fixtures |
+
+The native compiler, all new deriving production modules, and the new
+nested/proof deriving fixtures compiled. Focused job 117243385545 stopped
+before executing its source checks: pinned Lean rejected mixed partial and
+non-partial original main declarations in the Where and MutualPartial
+oracles. It also found an unregistered imported PreDefinitions fixture and
+an untyped optionalType pattern. No five-target candidate qualification was
+reached by that job.
+
+Pinned MutualDef.checkModifiers/check (75–111) compares original main
+headers before body elaboration or SCC partition. Main's later anyPartial
+dispatch and getModifiersForLetRecs do not permit incompatible source main
+modifiers, even when those mains are disconnected. v7.2
+PSCV0-TERM-02/PSCV0-REC-STRATEGY-01 require the native group rule.
+
+One shared original-main modifier predicate now guards both the source
+preparation owner and retained typed-block validation. Local helpers are
+excluded from that main-header check. A valid all-partial block still gives
+plain recursive helpers its operational strategy; nonrecursive inherited
+helpers remain ordinary, and unused hints add no captured header argument.
+Explicit source partial opacity remains the v7.2 P0 policy, including when
+native Main takes its nonrecursive-first path for its own declaration.
+
+The independent Where evidence now uses a compatible two-main partial block
+and a separate ordinary WF/P1 block. Exact native and portable mixed-main
+refusals cover disconnected headers. The mutual fixture covers connected,
+disconnected and body-error precedence, then reuses the same names in an
+all-partial recovery with exact logical/body/provenance checks. A retained
+source-kind/strategy corruption must fail at the shared whole-block gate.
+The original seven Where requests, six exports/values and sixteen local
+origins, and sixteen MutualPartial requests/five outputs, remain unchanged.
+The existing PreDefinitions checks are now registered as a Lake library and
+still execute inside the structural fixture. The owned default-binder pattern
+has an explicit syntax type.
+
+Native job 117243385381 reached module request 34 and rejected its stale
+expected refusal: recursive List BEq is now supported. A complete NativeTests
+audit found exactly three obsolete negative slots. Their counts and expected
+elaboration phase are preserved with genuine missing-field-dictionary,
+indexed-BEq and dependent-runtime-field refusals. The former capabilities
+already have stronger independent positive coverage in the nested deriving
+fixture, including generic groups, complete native strings/dictionaries and
+all five required target lanes. Existing successful source/workload values,
+request counts, checksums and budgets are unchanged.
+
+### Checked WF authoring evidence retained
+
+The same native job successfully exported the actual missing WF relation
+closure before the unrelated source-test failure. It selected 34 new
+declarations from 12 missing roots, with zero candidate axioms, 3 actual
+recursor-rule comparisons and 2,329 shared source nodes. Official-kernel
+replay passed against the unchanged frozen pre-WF environment.
+
+The generated 466,947-byte candidate was reconstructed from its 228 emitted
+JSON source chunks and matched CI SHA256
+`b6bd56c4ab6378905d1d3ac2f0155eb5bc4742be3e19e684d64ac1a3007716f3`.
+Native artifact 12081064126 is 3,696,804 bytes with archive SHA256
+`0e1a9600ea9122d33556a7f711795a6f70c5acec6153429aecc6d6e526bfc034`.
+That file is reviewed candidate data, not an active new Standard or a generic
+WF execution claim. Its later selection must preserve actual dictionary
+priorities, typed runtime layouts and independently measured snapshot identity.
+
+All accumulated compiler/test changes still require five successful gates
+at the next exact tip. The accepted compiler remains fbbc5271; this repair
+does not raise the progress estimate. PR #109 remains draft/open/unmerged
+on its original base. Native portable Lean, the exact 4.35.0 and v7.2 pins,
+propext/Quot.sound, all original workloads and cloud-only validation remain
+fixed. P1 remains fail-closed on the audited Classical.choice dependency.
+
+---
+
+## M3+B earlier checkpoint — mutual proof/default deriving and WF foundation authoring
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),

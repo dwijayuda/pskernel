@@ -37,9 +37,24 @@ def psElabPreDefinitionSourceExplicitPartial : PsElabPreDefinitionSource → Boo
   | .declaration source => psElabPreDefinitionDeclarationExplicitPartial source
   | .localDefinition .. => false
 
--- Pinned MutualDef.getModifiersForLetRecs derives this intent from every
--- original main header, before SCC partition. A disconnected partial main
--- therefore also governs a recursive helper belonging to a plain main.
+-- Pinned MutualDef.checkModifiers/check (75-111, invoked by elabHeaders at
+-- 290) requires equal partial modifiers on every original main header,
+-- before body elaboration or SCC partition. Local helpers are not main
+-- headers; their inherited strategy is considered only after this gate.
+def psElabPreDefinitionCheckMainModifiers
+    (sources : List PsElabPreDefinitionSource) : Except PsElabError Unit := do
+  let mainModifiers := sources.filterMap fun source =>
+    match source with
+    | .declaration declaration =>
+      some (psElabPreDefinitionDeclarationExplicitPartial declaration)
+    | .localDefinition .. => none
+  let first :: remaining := mainModifiers | return ()
+  if remaining.any (fun modifier => modifier != first) then
+    throw (.data "PSCV0-MUTUAL-STRATEGY: cannot mix partial and non-partial original main definitions")
+
+-- After the original-main compatibility check, pinned
+-- MutualDef.getModifiersForLetRecs derives helper intent from the complete
+-- main block. It does not authorize mixed original main modifiers.
 def psElabPreDefinitionHasPartialMain (sources : List PsElabPreDefinitionSource) : Bool :=
   sources.any psElabPreDefinitionSourceExplicitPartial
 

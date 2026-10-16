@@ -48,10 +48,18 @@ where
 section
 variable (ignored : Nat)
 
+-- Original main modifiers are checked before the dependency graph is split.
+/-- error: cannot mix partial and non-partial definitions -/
+#guard_msgs (error, drop warning, substring := true) in
+mutual
+  partial def invalidPartial (n : Nat) : Nat := invalidPartial n
+  def invalidPlain (n : Nat) : Nat := n
+end
+
 mutual
   partial def disconnectedPartial (n : Nat) : Nat :=
     if n == 0 then 0 else disconnectedPartial (n - 1) + 1
-  def disconnected (n : Nat) : Nat :=
+  partial def disconnected (n : Nat) : Nat :=
     let _witness : True := proof n
     loop n + bump n
   where
@@ -70,6 +78,9 @@ mutual
       if k == 0 then 0 else fixedLoop (k - 1)
     partial_fixpoint
     proof (k : Nat) := True.intro
+end
+
+mutual
   def redundantWF (n : Nat) : Nat := n
   termination_by n + ignored
   def redundantP1 (n : Nat) : Nat := n
@@ -222,7 +233,7 @@ private def partialSource : String :=
 private def disconnectedSource : String :=
   "section\nvariable (ignored: Nat)\nmutual\n" ++
   "partial function wdisconnectedPartial(n: Nat): Nat := if (n == 0) { 0 } else { wdisconnectedPartial(n - 1) + 1 }\n" ++
-  "function wdisconnected(n: Nat): Nat := {\n" ++
+  "partial function wdisconnected(n: Nat): Nat := {\n" ++
   "  let witness: True := proof(n)\n" ++
   "  loop(n) + bump(n)\n}\n" ++
   "where {\n" ++
@@ -237,7 +248,7 @@ private def disconnectedSource : String :=
   "  def fixedLoop(k: Nat): Nat := if (k == 0) { 0 } else { fixedLoop(k - 1) }\n" ++
   "  partial_fixpoint\n" ++
   "  def proof(k: Nat) := True.intro\n" ++
-  "}\n" ++
+  "}\nend\nmutual\n" ++
   "function wredundantWF(n: Nat): Nat := n\ntermination_by n + ignored\n" ++
   "function wredundantP1(n: Nat): Nat := n\npartial_fixpoint\n" ++
   "end\nend\n"
@@ -314,7 +325,8 @@ private def checkSource : IO Unit := do
   ensure (first.type.isNone && second.type.isSome && first.binders.length == 1 &&
     second.binders.length == 2 && first.span.stop.byteOffset < second.span.start.byteOffset)
     "where erased omitted result annotations, default binders or local spans"
-  match second.binders[1]? with
+  let defaultBinder : Option (PsSyntaxBinderHead × PsSyntaxTerm) := second.binders[1]?
+  match defaultBinder with
   | some (_, .optionalType _ (.reference name) _) =>
     ensure (name.segments == ["bias"]) "local default lost its enclosing parameter reference"
   | _ => throw (IO.userError "local default was not retained as an owned typed default")
@@ -347,14 +359,14 @@ private def checkSource : IO Unit := do
     | _ => throw (IO.userError "local total strategy was discarded")
   | _ => throw (IO.userError "local suffix lost following declaration ownership")
   let unusedProgram ← fromExcept (psPscv0ParseProgram disconnectedSource)
-  let groupMembers := unusedProgram.commands.findSome? fun command =>
+  let groupMembers := unusedProgram.commands.filterMap fun command =>
     match command with
     | .mutualDeclarations members _ => some members
     | _ => none
-  let some members := groupMembers
-    | throw (IO.userError "unused hints lost their original mutual source owner")
-  let [_, main, wf, fixedpoint] := members
-    | throw (IO.userError "unused hints lost their original mutual source owners")
+  let [[_, main], [wf, fixedpoint]] := groupMembers
+    | throw (IO.userError "unused hints lost their compatible original mutual source owners")
+  let .whereDeclaration (.partialDefinition ..) _ _ := main.declaration
+    | throw (IO.userError "the inherited helper block lost its explicit partial main")
   let .whereDeclaration _ [loop, bump, measured, fixedLoop, proof] _ := main.declaration
     | throw (IO.userError "inherited helpers lost their local source order")
   for localDefinition in [loop, measured] do
@@ -445,7 +457,16 @@ private def checkConstruction : IO Unit := do
     | _, _ => throw (IO.userError "a retained local hint overrode block-wide inherited partial opacity")
     ensure ((psEnvironmentFind environment (psNameAppendStr name "eq_def")).isNone)
       "an inherited-partial helper acquired an equation from its unused hint"
-  for name in [disconnected, psNameAppendStr disconnected "bump",
+  -- v7.2 preserves opacity for an explicit source partial main even when
+  -- native Main's nonrecursive-first route makes its own main transparent.
+  match psEnvironmentFind environment disconnected,
+      psEnvironmentFind environment (PsName.num disconnected 0) with
+  | some (.opaqueDecl _ levels type _), some (.partialDecl ..) =>
+    ensure (levels.isEmpty && binderNames type == ["n"] &&
+      (psEnvironmentFind environment (psNameAppendStr disconnected "eq_def")).isNone)
+      "explicit-source partial opacity or ignored-hint header ownership changed"
+  | _, _ => throw (IO.userError "the explicit partial main lost its logical/body identities")
+  for name in [psNameAppendStr disconnected "bump",
       psNameAppendStr disconnected "measured", psRootName "wredundantWF", psRootName "wredundantP1"] do
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (psNameAppendStr name "eq_def") with
@@ -484,6 +505,15 @@ private def checkConstruction : IO Unit := do
       ensure (missingHintName name error)
         ("active hint-only local refused at the wrong owner: " ++ psCompilerPscv0ElabError error)
     | .ok _ => throw (IO.userError "an active hint silently added a section capture")
+  let incompatible ← fromExcept (psPscv0ParseProgram (
+    "mutual\npartial function invalidPartial(n: Nat): Nat := invalidPartial(n)\n" ++
+    "function invalidPlain(n: Nat): Nat := n\nend\n"))
+  match psElabProgram psSelfHostProdPreludeEnvironment incompatible with
+  | .error error =>
+    ensure (((psCompilerPscv0ElabError error).splitOn
+      "PSCV0-MUTUAL-STRATEGY: cannot mix partial and non-partial original main definitions").length > 1)
+      "disconnected mixed original mains did not refuse at the pinned modifier owner"
+  | .ok _ => throw (IO.userError "SCC splitting admitted incompatible original main modifiers")
   let localCount := compiled.origins.foldl (fun count origin => count + origin.localDefinitions.length) 0
   ensure (localCount == 16) "source origins discarded local helper membership"
   for origin in compiled.origins do

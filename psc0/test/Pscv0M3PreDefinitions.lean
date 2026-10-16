@@ -309,16 +309,35 @@ private def checkInheritedStrategy : IO Unit := do
   for (suffix, incorrect) in variants do
     let prepared ← prepare
       ("mutual\npartial function pdPartialMain(n: Nat): Nat := pdPartialMain(n)\n" ++
-        "function pdPlainMain(n: Nat): Nat := loop(n)\n" ++
+        "partial function pdLocalMain(n: Nat): Nat := loop(n)\n" ++
         "where { def loop(k: Nat): Nat := loop(k)" ++ suffix ++ "\n}\nend\n")
-    let helperName := psNameAppendStr (psRootName "pdPlainMain") "loop"
+    let helperName := psNameAppendStr (psRootName "pdLocalMain") "loop"
     let some helper := prepared.block.members.find? (fun member => psNameEq member.name helperName)
-      | throw (IO.userError "inherited strategy fixture lost the plain main's local helper")
+      | throw (IO.userError "inherited strategy fixture lost the compatible main's plain local helper")
     ensure (psElabPreDefinitionStrategyEq helper.strategy .partial)
-      "a local helper did not inherit the disconnected original main's partial intent"
+      "a local helper did not inherit the compatible original main block's partial intent"
     let corrupted := prepared.block.members.map fun member =>
       if psNameEq member.name helperName then { member with strategy := incorrect } else member
     expectRefused prepared { prepared.block with members := corrupted } "STRATEGY"
+    if suffix.isEmpty then
+      let _ ← fromExcept ((psElabPreDefinitionValidate prepared.environment prepared.block).mapError
+        psCompilerPscv0ElabError)
+      let first :: rest := prepared.block.members
+        | throw (IO.userError "main-modifier corruption lost the first actual source member")
+      let .declaration (.partialDefinition name binders type value span) := first.source
+        | throw (IO.userError "main-modifier corruption lost the original partial source head")
+      -- Core header/value/peer ownership stays identical, and the individual
+      -- source strategy is changed consistently. Only the original-main
+      -- compatibility invariant distinguishes this retained-provenance input.
+      let first := { first with
+        source := .declaration (.definition name binders type value span)
+        strategy := .total }
+      match psElabPreDefinitionBatch prepared.environment
+          { prepared.block with members := first :: rest } with
+      | .ok _ => throw (IO.userError "typed batch accepted corrupted mixed-main source provenance")
+      | .error error =>
+        ensure (refusal error == "PSCV0-MUTUAL-STRATEGY: cannot mix partial and non-partial original main definitions")
+          ("corrupted main modifiers refused at the wrong owner: " ++ refusal error)
 
 private def checkAtomicity : IO (List PsDeclaration) := do
   let sourcePrefix := "mutual\nfunction pdAtomicReady(flag: Bool): Nat := if (flag) { 3 } else { 7 }\n"
@@ -348,7 +367,7 @@ def check : IO (List PsDeclaration) := do
   checkWellFoundedIdentity
   checkInheritedStrategy
   let repaired ← checkAtomicity
-  IO.println "PSCV0_M3_PREDEFINITIONS: PASS native disconnected-family/result signatures, actual typed SCC dependency order, whole-block captures and body universes, source equations, full-peer/capture and inherited-strategy corruption, WF body identity and late-component atomicity"
+  IO.println "PSCV0_M3_PREDEFINITIONS: PASS native disconnected-family/result signatures, actual typed SCC dependency order, whole-block captures and body universes, source equations, full-peer/capture, original-main modifier and inherited-helper strategy corruption, WF body identity and late-component atomicity"
   return compiled.result.declarations ++ witnesses ++ repaired
 
 end M3PreDefinitions

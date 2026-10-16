@@ -2,7 +2,7 @@
 Repr deriving adapted from Lean 4.35.0 Lean/Elab/Deriving/Repr.lean.
 Copyright (c) 2020 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: direct checked Core construction for independent nonrecursive families.
+Modified: checked Core construction for independent and direct-recursive families.
 -/
 import Ps.Elab.DerivingContext
 import Ps.Environment.StandardRepr
@@ -11,13 +11,16 @@ structure PsElabDeriveReprConstructor where
   fields : PsElabDeriveFields
   printers : List (Option PsExpr)
 
--- Plan in the parameter telescope, once per field type. A field whose value is
--- a type or proof prints "_"; it must not request an impossible Repr dictionary.
+-- Plan independent dictionaries once in the parameter telescope. A direct
+-- recursive field obtains its printer from the checked recursor minor, never
+-- from an assumed self instance. Types/proofs and hidden inductive fields
+-- retain the existing underscore/omission behavior.
 def psElabDeriveReprPlan (plan : PsElabDeriveContext) (name : PsName) :
     Except PsElabError PsElabDeriveReprConstructor := do
-  let fields ← psElabDeriveFields plan name
-  let printers ← (fields.fields.zip fields.proofs).mapM fun (field, proof) => do
+  let fields ← psElabDeriveFieldsWithRecursion plan name (!plan.info.isStructure)
+  let printers ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof || (!plan.info.isStructure && !psBinderInfoEq field.binder .explicit) then return none
+    if fields.constructor.recursiveFields.contains index then return none
     match psWhnf plan.context.environment plan.context.metaContext
         plan.context.localContext field.type with
     | .sortE _ => return none
@@ -55,19 +58,24 @@ def psElabDeriveReprStructure (plan : PsElabDeriveContext)
 
 def psElabDeriveReprInductive (plan : PsElabDeriveContext)
     (constructors : List PsElabDeriveReprConstructor) : Except PsElabError PsExpr :=
-  psElabDeriveEliminate plan plan.context
+  psElabDeriveEliminateWithRecursion plan plan.context true
     (fun _ => psLogicPi plan.context.localContext.nextId "prec" psOrderNat psFormatType)
-    (fun context constructor fields _ => do
+    (fun context constructor fields hypotheses _ => do
       let some entry := constructors.find? (fun c => psNameEq c.fields.constructor.name constructor.name)
         | throw (.data "Repr deriving constructor plan missing")
       if entry.printers.length != fields.length then
         throw (.data "Repr deriving field alignment mismatch")
       let id := context.localContext.nextId
       let append := fun a b => psFormatCall "append" [a, b]
-      let body := (fields.zip entry.printers).foldl (fun acc (field, printer) =>
-        if !psBinderInfoEq field.binder .explicit then acc
-        else append (append acc (psFormatCall "line"))
-          (psElabDeriveReprField printer (.fvar field.id) 1024)) (psReprText (psNameToString constructor.name))
+      let body ← (fields.zip entry.printers).zipIdx.foldlM (fun acc ((field, printer), index) => do
+        if !psBinderInfoEq field.binder .explicit then return acc
+        let rendered ← if constructor.recursiveFields.contains index then
+            match hypotheses.find? (fun entry => entry.fst == field.id) with
+            | some (_, childPrinter) => pure (PsExpr.app childPrinter (psFormatNat 1024))
+            | none => throw (.data "Repr deriving recursive field has no checked induction printer")
+          else pure (psElabDeriveReprField printer (.fvar field.id) 1024)
+        return append (append acc (psFormatCall "line")) rendered)
+        (psReprText (psNameToString constructor.name))
       let indent := psFormatIf psOrderNat
         (psOrderCall "Nat.ble" [psFormatNat 1024, .fvar id]) (psFormatNat 1) (psFormatNat 2)
       let document := psFormatCall "group"

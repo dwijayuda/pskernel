@@ -1,4 +1,4 @@
-// Focused execution checks for the separately kernel-checked M3 Hashable fixture.
+// Focused execution checks for the separately kernel-checked M3 deriving fixture.
 // Compiler implementation remains native Lean; this file only drives target VMs.
 import assert from 'node:assert/strict';
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
@@ -10,7 +10,7 @@ const [mode, directoryArg, moduleArg] = process.argv.slice(2);
 assert(directoryArg, 'expected mode and fixture directory');
 const directory = path.resolve(directoryArg);
 const expected = JSON.parse(await readFile(path.join(directory, 'expected.json'), 'utf8'));
-const names = ['m3hashnat', 'm3hashbool'];
+const names = ['m3hashnat', 'm3hashbool', 'm3reprnat', 'm3reprbool'];
 assert.deepEqual(expected.map(row => row.flag), [false, true]);
 const run = (command, args) => {
   const result = spawnSync(command, args, {encoding:'utf8', timeout:120000, maxBuffer:4*1024*1024});

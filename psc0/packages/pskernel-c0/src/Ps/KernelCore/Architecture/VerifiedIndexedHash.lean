@@ -1,5 +1,9 @@
 import Ps.KernelCore.Core.CertifiedStore
 
+-- Exact propositional node-shape check for certificate construction.
+-- This never replaces source typing or DefEq.
+deriving instance DecidableEq for PsKernelC0Node
+
 /-!
 Verified source-hash readout for a certified immutable indexed expression.
 

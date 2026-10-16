@@ -1,0 +1,108 @@
+name: PSKernel-C0 recursive exact app Eq real WF A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-fast-app-eq-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-equal-pointer-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce exact officially accepted pinned Lean 4.35 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/wf-fast-app-eq.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-fast-app-eq.ndjson" > "$RUNNER_TEMP/wf-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/wf-fast-app-eq.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-fast-app-eq.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-fast-app-eq.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-official.txt"
+          echo "C0_FAST_APP_EQ_WF_OFFICIAL=accepted pinned_records=15758"
+      - name: Route only exact hash/instantiate memo bucket lookups through proof-constrained recursive Eq
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root=Path('psc0/packages/pskernel-c0/src/Ps/KernelCore')
+          cache=root/'Runtime/Acceleration/Cache.lean'
+          inst=root/'Architecture/CertifiedInstantiateMemo.lean'
+          s=cache.read_text()
+          i=inst.read_text()
+          old='match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with'
+          assert s.count(old)==1 and i.count(old)==1, 'unexpected memo equality shape'
+          s=s.replace('import Ps.KernelCore.Core.ExprDecidableEq\n',
+              'import Ps.KernelCore.Core.FastExactAppEq\n',1)
+          cache.write_text(s.replace(old,
+              'match psKernelC0FastAppDecEq expr entry.expr with'))
+          inst.write_text(i.replace(old,
+              'match psKernelC0FastAppDecEq expr entry.expr with'))
+          print("C0_FAST_APP_EQ_ABLATION proof_typed_lookups=2 source_cache_semantics_unchanged=yes")
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build PsKernelC0 c0OfficialReplay)
+      - name: Require source proof and native rejection/regression invariants
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 30s lake env lean --run test/C0FastExactAppEqRegression.lean
+          lake env lean --run test/C0CertifiedHashMemoRegression.lean
+          lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_FAST_APP_EQ_ABLATION_SOURCE=Lean_proved full_pointer_nonadmission=yes negative_replay=pass"
+      - name: Check exact original WF proof at unchanged C0 fuel 4096
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-fast-eq-resources.txt" \
+              timeout 330s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-fast-app-eq.ndjson" 4096
+          ) > "$RUNNER_TEMP/wf-fast-eq-c0.txt" 2>&1
+          status=$?
+          set -e
+          echo "C0_FAST_APP_EQ_WF_PROCESS_EXIT=$status"
+          grep "C0_REAL_EXPORT replay_outcome" "$RUNNER_TEMP/wf-fast-eq-c0.txt" | tail -n 3 || true
+          if test "$status" -eq 0 &&
+             grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' \
+               "$RUNNER_TEMP/wf-fast-eq-c0.txt"; then
+            echo "C0_FAST_APP_EQ_WF_RESULT=ACCEPTED_original_exact_Lean435"
+          else
+            echo "C0_FAST_APP_EQ_WF_RESULT=UNQUALIFIED_timeout_or_nonacceptance"
+          fi
+          tail -n 16 "$RUNNER_TEMP/wf-fast-eq-c0.txt"
+          cat "$RUNNER_TEMP/wf-fast-eq-resources.txt"
+          echo "C0_FAST_APP_EQ_SCOPE=disposable_only_not_production_kernel"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-fast-exact-app-eq-wf
+          path: |
+            ${{ runner.temp }}/wf-official.txt
+            ${{ runner.temp }}/wf-fast-eq-c0.txt
+            ${{ runner.temp }}/wf-fast-eq-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

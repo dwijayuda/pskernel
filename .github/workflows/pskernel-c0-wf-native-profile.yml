@@ -1,0 +1,73 @@
+name: PSKernel-C0 pinned WF native hot-stack sampling
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-native-profile.yml'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofSampler.c'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-hot-stacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Pin Lean 4.35 and compile unchanged C0 executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc &&
+            lake build c0OfficialReplay)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py
+          cc -O2 -fPIC -shared -o "$RUNNER_TEMP/c0-native-sampler.so" \
+            psc0/packages/pskernel-c0/test/C0NativeProofSampler.c
+          test -s "$RUNNER_TEMP/c0-native-sampler.so"
+      - name: Reproduce exact original WF dependency and official kernel acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/wf-profile.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-profile.ndjson" > "$RUNNER_TEMP/wf-profile-official.txt" 2>&1)
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-profile-official.txt"
+          test "$(stat -c%s "$RUNNER_TEMP/wf-profile.ndjson")" -eq 777157
+          test "$(wc -l < "$RUNNER_TEMP/wf-profile.ndjson")" -eq 15758
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-profile.ndjson" | sha256sum -c -
+          echo "C0_WF_PROFILE_SOURCE original_sha256=verified official=accepted records=15758"
+      - name: Sample original native C0 stacks under untouched checked semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$RUNNER_TEMP/wf-profile.ndjson" "$RUNNER_TEMP/c0-native-sampler.so" \
+            "$RUNNER_TEMP/wf-native-stacks.txt" "$RUNNER_TEMP/wf-native-summary.json" \
+            --samples 14 --interval 4
+          test -s "$RUNNER_TEMP/wf-native-summary.json"
+          echo "C0_WF_PROFILE_SAMPLING=diagnostic_only_native_source_unchanged"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pinned-wf-hot-stacks
+          path: |
+            ${{ runner.temp }}/wf-native-summary.json
+            ${{ runner.temp }}/wf-native-stacks.txt
+            ${{ runner.temp }}/wf-profile-official.txt
+          if-no-files-found: warn
+          retention-days: 14

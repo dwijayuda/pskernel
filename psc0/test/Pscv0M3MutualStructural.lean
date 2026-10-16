@@ -133,7 +133,7 @@ private def source : String :=
   "end\n" ++
   "section\nvariable {A: Type u} [dictionary: Inhabited A] (fallback: A) (h: True)\n" ++
   "mutual\n" ++
-  "  function msPick(n: Nat): A := match n with { | 0 => Inhabited.default | k + 1 => { let witness: True := h\n msPickOther(k) } }\n" ++
+  "  function msPick(n: Nat): A := match n with { | 0 => Inhabited.default | k + 1 => let witness: True := h\n msPickOther(k) }\n" ++
   "  function msPickOther(n: Nat): A := match n with { | 0 => fallback | k + 1 => msPick(k) }\n" ++
   "end\nend\n"
 

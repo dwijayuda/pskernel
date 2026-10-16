@@ -22,16 +22,23 @@ All six exits remain in the denominator. Unqualified code adds no points.
 
 The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`;
 total mutual structural construction is `293a6f797d8135e10c407779a8dc429afa8345f6`.
-The combined candidate passed F1 `38969444791`, F2 `38969444690` and F3/F4
-`38969444693`, but focused run `38969444761` failed while compiling the new
-mutual-structural fixture. Its late-member refusal branch had a Lean layout
-error: the assertion message was parsed outside the `ensure` application.
-This commit repairs only that layout and preserves every assertion and
-expected result. The production recursion modules and well-founded fixture
-compiled in that run; focused runtime steps were not reached. Native run
-`38969444762` is historical evidence for the previous candidate, not a pass
-for this repair. Qualify the repaired compiler/test tip on all five gates.
-Neither new recursion feature is fully accepted yet.
+The combined candidate passed F1/F2/F3-F4, but focused `38969444761` found
+a Lean assertion-layout error in the new structural fixture. Repair
+`2b809e8d24c726c32ccca354231e9d638d729ba0` compiled all Lean targets and passed
+F1 `38970094104`, F2 `38970094096` and F3/F4 `38970094526`. Its focused run
+`38970094187` then found `PSCV0-PARSE: with at 41:3; got }` in the new
+well-founded dependent-result source fixture, before runtime execution.
+
+The match arm incorrectly used a declaration-only brace wrapper around its
+single let expression. This commit removes those arm braces in that fixture
+and the equivalent proof-capture arm in the new structural fixture, retaining
+the actual let bindings, native oracles, assertions and expected outputs.
+The focused source-check step now runs all nine existing independent required
+fixtures and retains every failure before failing the step if any check
+fails. Commands, inputs, counts, source-SHA stamps, timeouts and tool pins are
+unchanged. Subsequent runtime steps still require complete source success.
+Require all five gates on the repaired compiler/test tip. Prior-run native
+results cannot qualify it; neither new recursion feature is fully accepted.
 
 ### Typed well-founded recursion candidate
 

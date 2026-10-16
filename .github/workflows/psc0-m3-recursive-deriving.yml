@@ -106,15 +106,26 @@ jobs:
           set -euo pipefail
           lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural
           mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural
-          .lake/build/bin/pscv0_m3_inductive_groups | tee ../dist/m3-recursive-deriving/inductive-groups.log
-          lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean | tee ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log
-          .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
-          .lake/build/bin/pscv0_m3_inductive_runtime ../dist/m3-inductive-runtime | tee ../dist/m3-inductive-runtime/check.log
-          .lake/build/bin/pscv0_m3_well_founded ../dist/m3-well-founded | tee ../dist/m3-well-founded/check.log
-          .lake/build/bin/pscv0_m3_inductive_match ../dist/m3-inductive-match | tee ../dist/m3-inductive-match/check.log
-          .lake/build/bin/pscv0_m3_mutual_partial ../dist/m3-mutual-partial | tee ../dist/m3-mutual-partial/check.log
-          .lake/build/bin/pscv0_m3_inductive_deriving ../dist/m3-inductive-deriving | tee ../dist/m3-inductive-deriving/check.log
-          .lake/build/bin/pscv0_m3_mutual_structural ../dist/m3-mutual-structural | tee ../dist/m3-mutual-structural/check.log
+          # Collect every independent source-check failure; all fixtures remain required.
+          m3_fixture_status=0
+          m3_check_fixture() {
+            local m3_fixture_log="$1"
+            shift
+            if "$@" 2>&1 | tee "$m3_fixture_log"; then
+              return 0
+            else
+              m3_fixture_status=1
+            fi
+          }
+          m3_check_fixture ../dist/m3-recursive-deriving/inductive-groups.log .lake/build/bin/pscv0_m3_inductive_groups
+          m3_check_fixture ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean
+          m3_check_fixture ../dist/m3-recursive-deriving/check.log .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving
+          m3_check_fixture ../dist/m3-inductive-runtime/check.log .lake/build/bin/pscv0_m3_inductive_runtime ../dist/m3-inductive-runtime
+          m3_check_fixture ../dist/m3-well-founded/check.log .lake/build/bin/pscv0_m3_well_founded ../dist/m3-well-founded
+          m3_check_fixture ../dist/m3-inductive-match/check.log .lake/build/bin/pscv0_m3_inductive_match ../dist/m3-inductive-match
+          m3_check_fixture ../dist/m3-mutual-partial/check.log .lake/build/bin/pscv0_m3_mutual_partial ../dist/m3-mutual-partial
+          m3_check_fixture ../dist/m3-inductive-deriving/check.log .lake/build/bin/pscv0_m3_inductive_deriving ../dist/m3-inductive-deriving
+          m3_check_fixture ../dist/m3-mutual-structural/check.log .lake/build/bin/pscv0_m3_mutual_structural ../dist/m3-mutual-structural
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-runtime/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-well-founded/source-sha.txt
@@ -122,6 +133,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-partial/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-structural/source-sha.txt
+          test "$m3_fixture_status" -eq 0
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         with:
           path: |

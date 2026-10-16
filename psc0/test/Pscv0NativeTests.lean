@@ -2392,7 +2392,7 @@ private def projectBoundaries : IO Unit := do
     "const otherCtor: Bool := CellLabel.count(3) == CellLabel.enabled(true)\n" ++
     "theorem otherCtorProof: otherCtor = false := by { rfl }\n"
   let derivingRecursiveBEqRefusal :=
-    "inductive RecursiveCell where { | nil | cons(next: RecursiveCell) } deriving BEq\n"
+    "inductive RecursiveCell where { | nil | cons(next: List RecursiveCell) } deriving BEq\n"
   let optionEqualitySource :=
     "const a: Option Nat := Option.some(3)\n" ++
     "const equalSome: Bool := a == Option.some(3)\n" ++
@@ -2710,7 +2710,7 @@ private def derivingBoundaries : IO Unit := do
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
     { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
-    { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: Chain A) } deriving BEq\n" },
+    { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: List(Chain A)) } deriving BEq\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving DecidableEq\n" },
     { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\n" },
     { source := "inductive Bad where { | nil | cons(next: Bad) } deriving DecidableEq\n" },

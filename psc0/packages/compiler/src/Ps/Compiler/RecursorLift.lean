@@ -100,10 +100,19 @@ def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
       return { state, term := expr }
     match expr with
     | .lam name domain body binder =>
+      -- Entry arity is the aligned RAW forall/lambda prefix, exactly as in
+      -- psErasureEntryInfoWithFuel and psEraseOpenDefinitionWithFuel. A
+      -- function exposed only by reducing a result alias (e.g. DecidableEq A)
+      -- is a returned closure, not another flat declaration argument. Its
+      -- recursive major therefore needs the ordinary checked helper lifting.
+      let entryRoot := match type with
+        | .forallE .. => root
+        | _ => false
       let .forallE _ _ typeBody _ := psWhnf state.environment psMetaEmpty locals type
         | throw "lambda preparation requires a function type"
       let pushed := psLocalPushBinding locals name domain binder
-      let result ← psRecursorLiftVisit fuel root (if root then pushed.id :: entryIds else entryIds)
+      let result ← psRecursorLiftVisit fuel entryRoot
+        (if entryRoot then pushed.id :: entryIds else entryIds)
         state pushed.context (psExprInstantiate1 body (.fvar pushed.id))
         (psExprInstantiate1 typeBody (.fvar pushed.id))
       return { result with term := .lam name domain (psExprAbstractFVar pushed.id result.term) binder }

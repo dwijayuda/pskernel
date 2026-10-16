@@ -27,3 +27,17 @@ v7.2blob694115223777599ba28ee175e14bb642b7b6aa4b/SHA256c65487eccbd2829d1d9e5e1be
 ## Contract
 
 GitHub/cloud Linux ONLY; no local files/checkouts/shell/build/tests/Desktop Commander. Native portable .lean; official4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc; onlypropext/Quot.sound. No pskernel-core/self-hosting/compiler-source migration/C5/sorry/unchecked admission/weaker gates/larger budgets. GC internally; linear memory explicit ABI. Fresh expected-HEAD/non-force writes, preserve concurrent history, BOTH handoffs each slice. PR109 draft/open/originalbase psc0/pscv0-v7-m1-parser-ownership-v1, never merge. Continue M3+B -> M4+C/D -> M5+E; no fabricated qualification or percentages.
+
+
+## Candidate: definitionally equal strict-child recursion — qualification pending
+
+A first-position recursive argument may now be inferred and compared by read-only
+definitional equality to an existing, checked strict constructor child and IH.
+The term is elaborated only once and checked against the dependent child telescope
+and invariant arguments; arbitrary arithmetic decreases and computed non-first
+majors remain unavailable. The independent pinned Lean oracle and one new
+Bool-to-UInt64 observation in each existing target lane await same-commit
+native/F1/F2/F3-F4/focused qualification. This does not close M3+B.
+The unrelated fixed-discriminant cloud preparation commit 9f15ef1 failed
+invariant validation. Its code and logs are preserved as an unqualified
+experiment. No erasure gates, assumptions or performance budgets changed.

@@ -98,6 +98,14 @@ def proofDecision (flag : Bool) : UInt64 :=
   let left := M3EqProofChain.link 3 leftTail rfl
   let right := M3EqProofChain.link 3 rightTail rfl
   if decide (left = right) then 1 else 0
+-- This independent native definition requires the actual strict-child proof.
+def normalizedChild (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | k + 1 => normalizedChild (k + 0) + 1
+termination_by structural n
+
+example (n : Nat) : normalizedChild (Nat.succ n) = normalizedChild n + 1 := by rfl
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -184,7 +192,11 @@ private def source : String :=
   "const m3decisionLeft: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(1), M3HashTree.leaf(2))\n" ++
   "const m3decisionRight: M3HashTree Nat := M3HashTree.fork(M3HashTree.leaf(1), M3HashTree.leaf(3))\n" ++
   "theorem m3decisionEqual: Decidable.decide(self := decEq(m3decisionLeft, m3decisionLeft)) = true := by { rfl }\n" ++
-  "theorem m3decisionDifferent: Decidable.decide(self := decEq(m3decisionLeft, m3decisionRight)) = false := by { rfl }\n"
+  "theorem m3decisionDifferent: Decidable.decide(self := decEq(m3decisionLeft, m3decisionRight)) = false := by { rfl }\n" ++
+  -- The recursive argument is definitionally, not syntactically, the child.
+  "function m3normalizedChild(n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3normalizedChild(k + 0) + 1 }\n" ++
+  "theorem m3normalizedStep(n: Nat): m3normalizedChild(Nat.succ(n)) = m3normalizedChild(n) + 1 := by { rfl }\n" ++
+  "function m3normoutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedChild(if (flag) { 17 } else { 9 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -221,7 +233,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -259,6 +271,8 @@ def main (args : List String) : IO Unit := do
     ("m3decidebool", Lean.toJson (toString ((M3RecursiveHashOracle.boolDecision flag).toNat))),
     ("m3decideatom", Lean.toJson (toString ((M3RecursiveHashOracle.atomDecision flag).toNat))),
     ("m3decideproof", Lean.toJson (toString ((M3RecursiveHashOracle.proofDecision flag).toNat))),
+    ("m3normoutput", Lean.toJson (toString ((UInt64.ofNat
+      (M3RecursiveHashOracle.normalizedChild (if flag then 17 else 9))).toNat))),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

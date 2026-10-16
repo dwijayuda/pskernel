@@ -11,3 +11,17 @@ Next implement broader shared data/elimination/recursion: inspect existing neste
 Preserve BEq058fb67f, Repr/Hashable4501164e/docsad47, and M2 originalprofile73integration2a707206/docs280e receipts. v7.2blob694115223777599ba28ee175e14bb642b7b6aa4b/SHA256c65487eccbd2829d1d9e5e1be3bc7f4cb37849b841ab3257ea0dd47665b8a30e. Runtime133af061/paired38840337837 evidence9.25–10.11xfromList; deep-list/reversal remain unresolved. No new speed claim.
 
 GitHub/cloud Linux ONLY; no local files/checkouts/shell/build/tests/Desktop Commander. Native portable .lean, official4.35.0eb6cafb7290e8bd5f2937522d8d804f58f02bafc; onlypropext/Quot.sound. No pskernel-core/self-hosting/compiler-source migration/C5/sorry/unchecked admission/weaker tests/larger budgets. GC internally/explicitABI. Fresh expected-HEAD/non-force writes, preserve concurrent histories, BOTH handoffs and exact receipts per slice. PR109 draft/open/originalbase, never merge. Continue M3+B -> M4+C/D -> M5+E without fabricated completion.
+
+
+## Candidate: definitionally equal strict-child recursion — qualification pending
+
+A first-position recursive argument may now be inferred and compared by read-only
+definitional equality to an existing, checked strict constructor child and IH.
+The term is elaborated only once and checked against the dependent child telescope
+and invariant arguments; arbitrary arithmetic decreases and computed non-first
+majors remain unavailable. The independent pinned Lean oracle and one new
+Bool-to-UInt64 observation in each existing target lane await same-commit
+native/F1/F2/F3-F4/focused qualification. This does not close M3+B.
+The unrelated fixed-discriminant cloud preparation commit 9f15ef1 failed
+invariant validation. Its code and logs are preserved as an unqualified
+experiment. No erasure gates, assumptions or performance budgets changed.

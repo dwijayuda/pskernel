@@ -98,3 +98,7 @@ lean_exe pscv0_m3_nested_inductive where
 lean_exe pscv0_m3_where where
   srcDir := "../test"
   root := `Pscv0M3Where
+
+lean_exe pscv0_m3_nested_deriving where
+  srcDir := "../test"
+  root := `Pscv0M3NestedDeriving

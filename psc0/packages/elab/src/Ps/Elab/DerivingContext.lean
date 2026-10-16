@@ -291,18 +291,20 @@ structure PsElabDeriveHypothesis where
 -- registered group. A result callback receives the actual member type at its
 -- own indices. Branches receive only real, checked recursor hypotheses keyed
 -- by field ID; no recursive dictionary or partial definition is introduced.
-def psElabDeriveEliminateSlots (plan : PsElabDeriveContext)
-    (context : PsElabContext) (allowDirectRecursion : Bool)
+def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
+    (context : PsElabContext) (selectedIndex : Nat) (family : PsExpr)
+    (allowDirectRecursion : Bool)
     (result : Nat → PsInductiveEliminationSlot → PsExpr → PsExpr → PsExpr)
     (branch : PsElabContext → Nat → PsInductiveEliminationSlot →
       PsInductiveEliminationConstructor → List PsElabTypedBinder →
       List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr) :
     Except PsElabError PsExpr := do
-  let some (selectedIndex, selected) := psInductiveEliminationSlotFor plan.elimination
-      (psNameAppendStr plan.info.name "rec") | throw (.data "deriving selected slot is absent")
-  let major := psLocalPushBinding context.localContext (psRootName "value") plan.family .explicit
+  let some selected := plan.elimination.slots[selectedIndex]?
+    | throw (.data "deriving selected slot is absent")
+  let indices ← psElabDeriveSlotIndices plan context selected family
+  let major := psLocalPushBinding context.localContext (psRootName "value") family .explicit
   let inner := psElabContextWithLocal context major.context
-  let resultType := result selectedIndex selected plan.family (.fvar major.id)
+  let resultType := result selectedIndex selected family (.fvar major.id)
   let level ← psElabExpressionSort inner resultType
   let parameters := psElabBinderArguments plan.parametersRev
   let recursor ← psElabEliminationRecursorPlanFor context plan.info
@@ -374,13 +376,28 @@ def psElabDeriveEliminateSlots (plan : PsElabDeriveContext)
         context := psElabLeaveScope current opened.context
         term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
     motives.context motives.cursor
-  let term := psLogicLam major.id "value" plan.family
-    (psExprApplyMany (.constE recursor.recursor.name recursor.levels)
+  let term := psLogicLam major.id "value" family
+    (psExprApplyMany (.constE selected.recursorName recursor.levels)
       (parameters ++ motives.arguments ++ minors.arguments ++
-        psElabBinderArguments plan.indicesRev ++ [.fvar major.id]))
+        indices ++ [.fvar major.id]))
   let checked ← psElabResolvedTerm (psElabLeaveScope context minors.context) term
-    (some (psLogicPi major.id "value" plan.family resultType))
+    (some (psLogicPi major.id "value" family resultType))
   return checked.term
+
+-- Public handlers retain their selected family and index telescope. Binary
+-- handlers can use the same owner to inspect an actual auxiliary slot on the
+-- right; its rec_N and specialization are validated above, without replacing
+-- the public header with a base-container declaration.
+def psElabDeriveEliminateSlots (plan : PsElabDeriveContext)
+    (context : PsElabContext) (allowDirectRecursion : Bool)
+    (result : Nat → PsInductiveEliminationSlot → PsExpr → PsExpr → PsExpr)
+    (branch : PsElabContext → Nat → PsInductiveEliminationSlot →
+      PsInductiveEliminationConstructor → List PsElabTypedBinder →
+      List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr) :
+    Except PsElabError PsExpr := do
+  let some (selectedIndex, _) := psInductiveEliminationSlotFor plan.elimination
+      (psNameAppendStr plan.info.name "rec") | throw (.data "deriving selected slot is absent")
+  psElabDeriveEliminateSlotAt plan context selectedIndex plan.family allowDirectRecursion result branch
 
 -- Direct deriving consumers keep their existing callback and refusal contract.
 -- The implementation is the same complete slot owner used by nested Hashable.

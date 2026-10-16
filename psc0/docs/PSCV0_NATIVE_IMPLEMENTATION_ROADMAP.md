@@ -1,4 +1,114 @@
-## M3+B current roadmap checkpoint — local definitions and typed component candidate
+## M3+B current roadmap checkpoint — source components and nested deriving candidate
+
+Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
+All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
+F1 38976284003, F2 38976283981, F3/F4 38976283973 and focused 38976283967
+(15/15). The receipt is
+`docs/PSCV0_M3_NESTED_ELIMINATION_TYPED_RECURSION_QUALIFICATION_2026-10-16.md`.
+It qualifies the accumulated typed-WF/direct-mutual-structural changes and
+complete selected nested elimination/Hashable, including all existing outputs
+on all five targets. The original native workloads and measurement step pass.
+
+M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
+55–75% engineering uncertainty). All six weights remain data 30, source 15,
+total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
+are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Current candidate: complete selected nested Repr and BEq
+
+The preceding source checkpoint is `c55a7caf857959e07c0e86b8496b422289c8b82b`.
+Its flat where ownership, typed SCC strategy selection, original-block capture/
+universe closure, local provenance and checked WF source-equation transport are
+included unchanged. That checkpoint and this deriving change are unqualified
+until all five gates pass at one combined compiler/test tip.
+
+Repr and BEq now consume the existing complete visible/nested elimination plan.
+The shared DerivingContext cursor can select an actual auxiliary slot while
+retaining all group motives and minors. It validates the actual specialized
+family, its own indices, full recursor prefix and real child-hypothesis types.
+Right-hand binary cases retain their real telescopes while ignoring all right
+IHs; they do not invent a new recursive dictionary or worker group.
+
+Repr uses a Nat-to-Format motive for visible families, Option and Array, a List
+of already rendered documents for List slots, and a right-tuple accumulator for
+Prod slots. Actual ReprAtom evidence selects native List bracketFill; ordinary
+List uses bracket and Array always uses bracketFill. The actual ReprTuple
+dictionary handles an independent right product field, while real Prod-slot
+hypotheses flatten recursive right tuples in native order. Public constructor
+formatting preserves explicit fields, max precedence, group/nest and application
+parentheses. Proof/type placeholders and existing structure formatting remain.
+
+BEq uses actual field dictionaries and real selected child IHs. Ordinary List
+comparison visits the head first. Array checks equal lengths before demanding
+any field comparison, then visits the final element first as pinned Array.isEqv
+does. Reverse mode propagates only through the same specialized List tail;
+List-valued elements retain ordinary forward comparison. Option and Prod preserve
+their native shape and field order. No reflexivity optimization may bypass a
+user-supplied nonreflexive BEq dictionary.
+
+### Independent evidence and required cloud qualification
+
+Pscv0M3NestedDeriving independently declares the native mutual and indexed types,
+then separately constructs the portable declarations/instances. It checks a
+nine-slot dependent-parameter group and a two-slot indexed group, eleven full
+signature witnesses, five generated instances, exact selected-slot refusal and
+a source singleton deriving positive.
+
+The Repr exports compare complete portable rendered strings against complete
+independently rendered native strings, including newlines/spacing/parentheses,
+at widths 23/120 and precedences 0/1024. Coverage includes marked/unmarked List,
+Array, Option, recursively flattened right tuples, independent Prod Nat Nat and
+indexed public Repr. Numeric result bits encode full String equality; no text
+hash substitutes for the comparison.
+
+The BEq fixture compares native masks, an actual nonreflexive element dictionary,
+ordinary list order, reverse array order and unequal lengths. Open generated-method
+WHNF probes establish which unresolved Boolean is demanded first; two general
+comparison equations join fresh official-kernel admission. The right-case path
+must not introduce additional worker groups.
+
+The focused workflow now requires all twelve source checks and adds these six
+outputs to the existing JS, strict compiled TS, locked Rust, V8 GC and Wasmtime
+runner: m3nestedrepr, m3nestedtuplerepr, m3nestedindexedrepr, m3nestedbeq,
+m3nestedarraybeq and m3nestedatombeq. Each Rust generation remains immediately
+paired with its execution. All earlier workloads, request counts, outputs,
+checksums, dependency pins and resource budgets remain unchanged.
+
+The two now-supported recursive Repr/BEq capability negatives become real
+function-valued nested-field refusals, preserving their precise phase and the
+existing fixture's counts. The prior nested fixture retains its raw-key oracle,
+all seven outputs and its remaining Inhabited/DecidableEq refusal coverage.
+
+Both production handlers and the selected-slot cursor have independent static
+review. No local Lean/Lake/build/test execution is claimed. Only exact-tip GitHub
+Linux CI can qualify this source/kernel/IR/backend candidate. Record failed gates
+and their actual causes; do not weaken expected values, assertions or budgets.
+When four gates pass, let the full native run finish before another feature push.
+
+### Remaining selected limits
+
+Indexed BEq, indexed/group DecidableEq and broader Inhabited remain outside this
+candidate. Pinned Lean's DecEq handler itself declines nested inductives; preserve
+that explicit native boundary. Arbitrary containers, function-valued nested
+fields and constructor-local specialization parameters retain their refusals.
+
+The next proof/default deriving work targets direct nonindexed mutual DecidableEq
+and native constructor-ordered nonindexed group/nested Inhabited. Actual broader
+WF relations and typed argument packing, optional main-result inference, further
+structural/dependent elimination and the rest of the selected matrix remain open.
+The source checkpoint's eager unused-hint name-resolution and registration limits
+remain explicit. P1 is still blocked by Classical.choice in the actual pinned
+fixedpoint/equation closure. An unused nonrecursive suffix is not P1 support.
+
+Native portable .lean, official Lean 4.35.0 and its pinned commit, the exact v7.2
+reference blob, approved propext/Quot.sound, the original official checking
+boundary and PR draft/open/original base remain fixed. M4/M5 completion, kernel
+replacement, self-hosting, compiler-source migration, LLVM, resets and merging
+remain outside this work.
+
+---
+
+## M3+B earlier roadmap checkpoint — local definitions and typed component candidate
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),

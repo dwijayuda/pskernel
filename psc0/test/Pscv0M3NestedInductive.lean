@@ -512,7 +512,9 @@ private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarati
   expectSourceRefused environment "default nested induction"
     "theorem bad(x: M3NestedShape(Nat, 0)): x = x := by { induction x }\n"
     "nested induction requires an explicit eliminator"
-  for handler in ["Repr", "BEq", "DecidableEq", "Inhabited"] do
+  -- Repr and nonindexed BEq have independent checked/native positives in
+  -- Pscv0M3NestedDeriving. The other handler boundaries remain unchanged.
+  for handler in ["DecidableEq", "Inhabited"] do
     match psElabDeriveHandler environment origin { segments := [handler], span := origin.span } with
     | .error error =>
       ensure (refusal error == "recursive deriving requires the M3 data machinery")

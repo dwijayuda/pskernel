@@ -41,6 +41,13 @@ def psProofEliminate (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
   let .fvar _ := value.term | throw (.proof "elimination currently requires a local hypothesis")
   let read := fun current _ expected => psElabResolvedTerm current value.term expected
   let result ← psElabMatchWith read (fun current info => do
+    if induction then
+      let some group := psInductiveGroupPlanFor
+          (psEnvironmentFindInductive current.environment)
+          (psEnvironmentFindRecursor current.environment) info
+        | throw .matchRecursorUnsupported
+      if group.members.length != 1 then
+        throw (.proof "group induction requires a complete motive family")
     info.constructors.mapM fun name => do
       let some ctor := psEnvironmentFindConstructor current.environment name
         | throw (.matchConstructorUnknown name)
@@ -105,3 +112,4 @@ def psProofSelectCase (state : PsProofState) (tag : Option PsSyntaxName)
       | _ => throw (.proof "ambiguous case tag")
   let state ← psProofRenameCase state selected names
   return ({ state with goals := [selected] }, state.goals.filter fun goal => goal.id != selected.id)
+

@@ -75,3 +75,7 @@ lean_exe pscv0_m3_inductive_runtime where
   srcDir := "../test"
   root := `Pscv0M3InductiveRuntime
 
+lean_exe pscv0_m3_inductive_match where
+  srcDir := "../test"
+  root := `Pscv0M3InductiveMatch
+

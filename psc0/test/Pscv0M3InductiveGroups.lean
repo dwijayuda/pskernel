@@ -225,9 +225,9 @@ private def expectCodecRefusal (declarations : List PsDeclaration) : IO Unit := 
   | .error .unsupportedDeclaration => pure ()
   | _ => throw (IO.userError "malformed group was dropped or serialized")
 
-private def matchRefused : PsElabError → Bool
-  | .matchRecursorUnsupported => true
-  | .atDeclaration _ error => matchRefused error
+private def inductionRefused : PsElabError → Bool
+  | .proof message => message == "group induction requires a complete motive family"
+  | .atDeclaration _ error => inductionRefused error
   | _ => false
 
 end M3InductiveGroups
@@ -330,8 +330,8 @@ def main : IO Unit := do
   expectIotaRefusal group.declarations (psReduceApply probeView.head (probeView.args.take 6 ++ [wrongMajor]))
 
   -- The same closed Core expressions have checked kernel equations above.
-  -- Portable conversion agrees. Source matching and the legacy singleton
-  -- runtime view still refuse groups; companion-worker tests own group runtime.
+  -- Portable conversion agrees. The legacy singleton runtime view continues
+  -- to refuse groups; the group view and companion tests own that consumer.
   let environment ← portableEnvironment group.declarations
   portableReduction environment groupProbe 2
   let dependentEnvironment ← portableEnvironment dependent.declarations
@@ -342,8 +342,17 @@ def main : IO Unit := do
     "single-family runtime view accepted an indexed mutual recursor"
   let program ← fromExcept (psPscv0ParseProgram
     "function m3GroupMatch(x: M3GroupLeft(Nat)): Nat := match x with { | M3GroupLeft.nil => 0 | M3GroupLeft.link value next => 1 }\n")
-  match psElabProgramWithOrigins environment program with
-  | .error error => ensure (matchRefused error) ("wrong group match refusal: " ++ elabMessage error)
-  | .ok _ => throw (IO.userError "source group match silently enabled")
-  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures and portable group reduction against independent checked equations; malformed groups, source Match and legacy singleton runtime view refused"
+  let matched ← fromExcept ((psElabProgramWithOrigins environment program).mapError elabMessage)
+  let matchProbe := PsExpr.app (.constE (psRootName "m3GroupMatch") [])
+    (psExprApplyMany (.constE (psNameAppendStr (psRootName "M3GroupLeft") "nil") [.zero])
+      [.constE psNatName []])
+  let _ ← check checked
+    (matched.result.declarations ++ [reductionWitness "M3SourceMatchWitness" matchProbe 0])
+  portableReduction matched.result.environment matchProbe 0
+  let induction ← fromExcept (psPscv0ParseProgram
+    "theorem m3GroupInduction(x: M3GroupLeft(Nat)): x = x := by { induction x }\n")
+  match psElabProgramWithOrigins environment induction with
+  | .error error => ensure (inductionRefused error) ("wrong group induction refusal: " ++ elabMessage error)
+  | .ok _ => throw (IO.userError "group induction silently acquired a motive family")
+  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures, portable group reduction and checked source Match; malformed groups, unfinished group induction and legacy singleton runtime view refused"
 

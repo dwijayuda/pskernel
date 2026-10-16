@@ -1,4 +1,24 @@
-## M3+B current candidate: typed group execution and Nat-measure recursion
+## M3+B source group cases candidate
+
+Source matching now specializes the actual complete group recursor through
+`Ps.Elab.GroupElimination`: one inferred/unified argument cursor, selected
+family motive, checked PUnit companion motives/minors, and the real ordered
+constructor telescope. Dependent indices, major/context refinement, and
+case-only runtime suffixes reuse their existing owners. Group IHs are hidden
+from source case branches; full group induction and cross-family structural
+calls remain explicitly unavailable. No new group syntax or trust authority
+is introduced. The source fixture compares fresh kernel equations and scalar
+observations across five targets; this candidate still requires all five
+gates on one exact SHA.
+
+The underlying group-runtime and one-Nat well-founded fixtures passed all
+focused targets at `5c8bc97280098ad768b6de5ab9283624f97e5149`, run
+`38961009875`. Production/F-gate evidence on its predecessor is mixed-SHA;
+the latest fully accepted compiler remains `a7c6dade`. Both handoffs retain
+exact lineage. Deriving, broader nested traversal, broader total/mutual
+strategies and P1's Classical.choice policy blocker remain open.
+
+## M3+B earlier candidate: typed group execution and Nat-measure recursion
 
 The current compiler candidate adds exact checked companion workers for
 complete direct-recursive inductive groups and a selected Nat-measure
@@ -122,7 +142,7 @@ The earlier PSC2 self-host bootstrap plan formerly stored at this path is retain
 
 **Current proven-by-CI boundary:** selected source and modules are accepted by official Lean; typed erasure and IR validation reject unsupported forms; published JS/TS/Rust/Wasm scalar and bounded recursive programs have differential oracles. This **does not prove** the elaborator's interpretation of every `.ps` source, the semantics of all primitives, general backend preservation, or complete v7.2 conformance. Never call a diagnostic receipt, serialized check result, or raw `PsVerifiedIrModule` a user-mintable verification capability.
 
-**Selected already implemented:** scopes/public-private module interfaces, dependency ordering, scoped tabled typeclass solver with answer replay, selected dependent/indexed data and match matrices, checked direct-recursive deriving, structural recursion and checked Core definitional equality, explicit runtime type/proof/index erasure, IR validation, multi-target emission and measured runtime baselines. Current candidates add explicit ordinary P0 body/assurance identity, native atomic inductive-group formation/reduction, typed group companion workers, and checked Nat-measure recursion; acceptance requires each candidate's own five gates. **Not fully implemented:** nested/group match and deriving consumers, full well-founded/strategy matrix, general P0 closure coverage, P1 fixedpoints, M4 effects/contracts/verified evidence, complete incremental tooling/optimization.
+**Selected already implemented:** scopes/public-private module interfaces, dependency ordering, scoped tabled typeclass solver with answer replay, selected dependent/indexed data and match matrices, checked direct-recursive deriving, structural recursion and checked Core definitional equality, explicit runtime type/proof/index erasure, IR validation, multi-target emission and measured runtime baselines. Current candidates add explicit ordinary P0 body/assurance identity, native atomic inductive-group formation/reduction, typed group companion workers, source group cases and checked Nat-measure recursion; acceptance requires each candidate's own five gates. **Not fully implemented:** broader nested matching, group induction and deriving consumers, full well-founded/strategy matrix, general P0 closure coverage, P1 fixedpoints, M4 effects/contracts/verified evidence, complete incremental tooling/optimization.
 
 ## 3. Target shared semantic architecture — no alternative proof kernel
 
@@ -146,6 +166,8 @@ Official comparison: pinned `Lean/Elab/MutualInductive.lean` stages group header
 Represent total structural, total well-founded, ordinary `partial`, fixedpoint and restricted `unsafe` as **distinct source strategies**, keeping declaration and suffix ownership separate from executable admission. The parser and scope retain a valid `partial_fixpoint` suffix as `fixedpointDefinition`; the elaborator refuses it at the exact assumption boundary. Pinned `Lean.Order.fix` uses `CCPO.csup`, which uses `Classical.choice`, including for existing Unit/Option CCPO instances; `fix_eq` and actual generated equations carry that dependency. The independent oracle records this blocker outside the admitted compiler Standard.
 
 Source `partial` creates (a) a public logically opaque, independently inhabited declaration and (b) a private typed actual-body marker. After official checking of the original graph, the native host's explicit ordinary path pairs their matching types/universes and selects the actual body for runtime erasure. It retains the original logical graph and admits no defining equation for the opaque function. Generic library erasure still rejects markers. Single-source and project CLI requests carry assurance, and published origins take the returned assurance. These selected P0 candidates require exact integration qualification; general closure behavior remains open. Verified partial behavior still requires a checked operational model and source/body/target refinement.
+
+`Ps.Elab.GroupElimination` owns the typed complete recursor-argument cursor shared by singleton and group source matching. The selected family keeps its complete dependent motive; companion families use actual checked PUnit at that result universe. All real minor binders close in retained order, while case-only group branches hide IHs. The existing dependent-context/equality and typed runtime suffix owners remain authoritative. Full induction requires a complete family of substantive motives and is still refused.
 
 `Ps.Syntax` retains total `termination_by` and optional `decreasing_by by { ... }` as a `wellFoundedDefinition`, including scope and spans. `Ps.Elab.WellFounded` currently constructs the selected one-explicit-Nat-argument/Nat-result case using the checked Standard's `WellFounded.Nat.fix`. Each recursive call has a scoped synthetic-opaque decrease goal; one tactic sequence runs over their creation order. Definition and checked `fix_eq`-derived `.eq_def` theorem form one source-owned declaration batch. `Ps.Erasure.WellFounded` recognizes the actual typed root construction and lowers the proof-restricted callback through the existing curried proof-slot ABI. It uses no partial marker, assumed equation, arbitrary fuel, extra axiom or strategy-name shortcut. Broader telescopes, relations, mutual cliques and general open-match equation normalization remain explicit work.
 

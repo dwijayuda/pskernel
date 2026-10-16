@@ -1,4 +1,50 @@
-## M3+B candidate — group runtime and checked Nat-measure recursion
+## M3+B candidate — source cases over complete inductive groups
+
+`Ps.Elab.GroupElimination` now consumes the actual checked recursor argument
+telescope in complete family/minor order. Source `match`, pattern matrices,
+and `cases` specialize the selected family's motive and use checked
+`PUnit.{u}` / `PUnit.unit.{u}` for companion families, following pinned Lean's
+`cases_on.cpp`. Every supplied argument is inferred and unified against the
+real Pi domain. Singleton matching uses this same argument owner.
+
+Per-family indices, major-dependent results, and reverted dependent context
+remain in the selected motive. Group case branches retain the actual minor
+binders internally but expose no fabricated induction hypotheses or new map
+of decreasing recursive calls. Existing enclosing singleton recursion keeps
+its actual hypothesis map. Full group induction, cross-family source
+structural recursion, and unsupported fixed-index heterogeneous transport
+retain explicit refusals. The def/function-only source `mutual` grammar is
+not widened into mutual inductive syntax.
+
+The new source fixture covers alpha-renamed dependent parameters, the second
+indexed family, dependent copy/context suffixes, Prop proofs, higher result
+universes, impossible fixed-index branches, and nested cases under Nat
+recursion. It checks fresh official-kernel equations, portable reduction,
+complete metadata/PUnit refusals, and emits all five targets. Runtime exports
+are `m3matchleft`, `m3matchright`, `m3matchnested`, and `m3matchzero`, with the
+independent native oracle fixing every expected result.
+
+Underlying group-fold and one-Nat-measure fixtures passed focused
+`38961009875` on test-only `5c8bc97280098ad768b6de5ab9283624f97e5149`:
+all 15 reported steps, JS, strict compiled TS, locked Rust, V8 GC and Wasmtime
+components. The real Nat.fix and fix_eq assumption audit stays inside the
+approved policy. Production `59fddc28ec01726e7a42258d7cc5f3020ed8969b` has
+F1 `38960668822`, F2 `38960668820`, F3/F4 `38960668821`, and native
+`38960669014` green; native completed all 33 reported steps, including the
+unchanged performance checks. This is mixed-SHA evidence, not a replacement
+for all five gates on this new exact compiler/test checkpoint.
+
+Latest fully accepted compiler remains
+`a7c6dade87a9d8df74d5248e8276623e7870078c`. Approximately 40% was fully
+qualified before these candidates (30–50% engineering uncertainty); reassess
+against all six exits only after exact integration acceptance. P1 remains
+unavailable because pinned Lean.Order.fix/CCPO.csup requires
+`Classical.choice`; approved assumptions remain only `propext` and
+`Quot.sound`. Group deriving, broader nested traversal, multi-argument total
+recursion and mutual source strategies remain active work. M3+B remains OPEN,
+and PR #109 stays draft/open/unmerged on its original base.
+
+## M3+B earlier candidate — group runtime and checked Nat-measure recursion
 
 This checkpoint combines the retained atomic inductive-group implementation
 with typed companion-worker execution and selected total well-founded

@@ -1,4 +1,24 @@
-## Current M3+B candidate — typed group execution and checked Nat measures
+## M3+B source group cases candidate
+
+Source matching now specializes the actual complete group recursor through
+`Ps.Elab.GroupElimination`: one inferred/unified argument cursor, selected
+family motive, checked PUnit companion motives/minors, and the real ordered
+constructor telescope. Dependent indices, major/context refinement, and
+case-only runtime suffixes reuse their existing owners. Group IHs are hidden
+from source case branches; full group induction and cross-family structural
+calls remain explicitly unavailable. No new group syntax or trust authority
+is introduced. The source fixture compares fresh kernel equations and scalar
+observations across five targets; this candidate still requires all five
+gates on one exact SHA.
+
+The underlying group-runtime and one-Nat well-founded fixtures passed all
+focused targets at `5c8bc97280098ad768b6de5ab9283624f97e5149`, run
+`38961009875`. Production/F-gate evidence on its predecessor is mixed-SHA;
+the latest fully accepted compiler remains `a7c6dade`. Both handoffs retain
+exact lineage. Deriving, broader nested traversal, broader total/mutual
+strategies and P1's Classical.choice policy blocker remain open.
+
+## Earlier M3+B candidate — typed group execution and checked Nat measures
 
 Exit 1 now has candidate companion-worker execution on the retained complete
 inductive-group plan, with shared captures and distinct per-family indices

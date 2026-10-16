@@ -1,5 +1,6 @@
 import Ps.Elab.Equality
 import Ps.Elab.Application
+import Ps.Elab.GroupElimination
 
 -- Branch consumers receive typed elimination metadata; patterns and tactics
 -- share refinement without reconstructing fields or induction hypotheses.
@@ -245,14 +246,13 @@ def psElabMatchAnonymousFields (context : PsElabContext) (type : PsExpr) (count 
     context := psElabContextWithLocal opened.context { opened.context.localContext with declarations }
     bindersRev := opened.bindersRev.map (fun binder => { binder with name := name binder.id }) }
 
-structure PsElabMatchMinorResult where
-  context : PsElabContext
-  term : PsExpr
+abbrev PsElabMatchMinorResult := PsElabRecursorArgument
 
 def psElabMatchMinor (context : PsElabContext)
     (info : PsInductiveInfo) (levels : List PsLevel) (parameters : List PsExpr)
     (plan : PsElabMatchPlan) (ctorName : PsName) (alternative : Option PsElabMatchAlternative)
-    (minorType : PsExpr) : Except PsElabError PsElabMatchMinorResult := do
+    (minorType : PsExpr) (retainHypotheses : Bool := true) :
+    Except PsElabError PsElabMatchMinorResult := do
   let some ctor := psEnvironmentFindConstructor context.environment ctorName
     | throw (.matchConstructorUnknown ctorName)
   let names := alternative.map (·.fieldNames)
@@ -286,11 +286,19 @@ def psElabMatchMinor (context : PsElabContext)
     let clearedIds := majorIds ++ plan.generalized.map (·.binder.id) ++
       aliases.sourcesRev.filterMap (fun (original, alias) =>
         if majorIds.contains original then some alias else none)
+    -- A cases specialization cannot expose a companion motive's dummy result
+    -- as an induction hypothesis. Keep the real binders for the recursor term,
+    -- but remove them from source name resolution and new proof-goal contexts.
+    let hidden := if retainHypotheses then [] else hypotheses.bindersRev.map (·.id)
+    let branchContext := psElabContextWithLocal generalized.context {
+      generalized.context.localContext with
+      declarations := generalized.context.localContext.declarations.filter
+        (fun declaration => !hidden.contains (psLocalDeclId declaration)) }
     let body ← alternative.elaborate {
-      context := psElabContextAfterStructuralFields generalized.context
+      context := psElabContextAfterStructuralFields branchContext
       target := generalized.body
       fields := fields.bindersRev.reverse
-      hypotheses := hypotheses.bindersRev.reverse
+      hypotheses := if retainHypotheses then hypotheses.bindersRev.reverse else []
       clearedIds }
     psElabCloseDependents context generalized body target
   let flexible := fields.bindersRev.map (fun binder => binder.id) ++ plan.constraintVariables
@@ -302,25 +310,31 @@ def psElabMatchMinor (context : PsElabContext)
     body.term minorType
   return { context := closed.context, term := closed.term }
 
-structure PsElabMatchMinorsResult where
-  context : PsElabContext
-  minors : List PsExpr
+-- Pinned Lean's cases_on.cpp specializes unused motives to PUnit at exactly
+-- the eliminator's universe. Both constants come from the ordinary checked
+-- Standard; an absent or incompatible signature is an elaboration failure.
+def psElabMatchUnit (context : PsElabContext) (level : PsLevel) :
+    Except PsElabError (PsExpr × PsExpr) := do
+  let name := psRootName "PUnit"
+  let unit := PsExpr.constE name [level]
+  let value := PsExpr.constE (psNameAppendStr name "unit") [level]
+  let unitType ← (psInferType context.environment context.metaContext
+    context.localContext unit).mapError PsElabError.infer
+  let valueType ← (psInferType context.environment context.metaContext
+    context.localContext value).mapError PsElabError.infer
+  if !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext
+      unitType (.sortE level) ||
+      !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext
+        valueType unit then
+    throw .matchRecursorUnsupported
+  return (unit, value)
 
-def psElabMatchMinors (info : PsInductiveInfo)
-    (levels : List PsLevel) (parameters : List PsExpr) (plan : PsElabMatchPlan)
-    (alternatives : List PsElabMatchAlternative) (constructors : List PsName)
-    (context : PsElabContext) (cursor : PsExpr) :
-    Except PsElabError PsElabMatchMinorsResult := do
-  match constructors with
-  | [] => return { context, minors := [] }
-  | name :: rest =>
-    let alternative := psElabMatchAlternativeFind name alternatives
-    let pi ← (psInferEnsureForall context.environment context.metaContext
-      context.localContext cursor).mapError PsElabError.infer
-    let minor ← psElabMatchMinor context info levels parameters plan name alternative pi.domain
-    let tail ← psElabMatchMinors info levels parameters plan alternatives rest
-      minor.context (psExprInstantiate1 pi.body minor.term)
-    return { context := tail.context, minors := minor.term :: tail.minors }
+def psElabMatchConstantArgument (context : PsElabContext)
+    (type : PsExpr) (count : Nat) (value : PsExpr) :
+    Except PsElabError PsElabRecursorArgument := do
+  let opened ← psElabOpenCoreTelescope 4096 context type (some count)
+  let term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev value
+  return { context := psElabLeaveScope context opened.context, term }
 
 def psElabStructuralMatchContext (context : PsElabContext)
     (scrutinee expected : PsExpr) (plan : PsElabMatchPlan) (numIndices : Nat) : PsElabContext :=
@@ -364,25 +378,42 @@ def psElabMatchWith (elaborate : PsElaborator)
   if typeView.args.length != info.numParams + info.numIndices then throw .matchParameterArity
   let parameters := typeView.args.take info.numParams
   let indices := typeView.args.drop info.numParams
-  let alternatives ← prepare context info
-  let recursorName := psNameAppendStr name "rec"
-  let some recursor := psEnvironmentFindRecursor context.environment recursorName
-    | throw .matchRecursorUnsupported
-  if recursor.numParams != info.numParams || recursor.numIndices != info.numIndices ||
-      recursor.numMotives != 1 || recursor.numMinors != info.constructors.length then
-    throw .matchRecursorUnsupported
   let expectedType := psMetaInstantiate context.metaContext expectedType
   let plan ← psElabMatchMotive context info levels parameters indices scrutinee.term expectedType
   -- Reverted dependent parameters can raise the motive's universe above that
   -- of the original expected result. Infer the completed motive, not a proxy.
   let level ← psElabMatchMotiveLevel context plan.motive
-  let recursorLevels ← psElabRecursorLevels info recursor levels level
-  let minorContext := psElabStructuralMatchContext context scrutinee.term expectedType plan info.numIndices
-  let recursorType := psExprInstantiateLevelParams recursor.levelParams recursorLevels recursor.type
-  let cursor ← psElabMatchApplyParameters context (parameters ++ [plan.motive]) recursorType
-  let minors ← psElabMatchMinors info levels parameters plan alternatives info.constructors
-    minorContext cursor
-  let term := psExprApplyMany (.constE recursorName recursorLevels)
-    (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term] ++ plan.arguments)
+  let recursor ← psElabGroupRecursorPlanFor context info levels parameters level
+  let alternatives ← prepare recursor.context info
+  let constructors ← psElabGroupConstructors recursor.context recursor.group
+  let singleton := recursor.group.members.length == 1
+  let unit ← if singleton then pure none else
+    pure (some (← psElabMatchUnit recursor.context level))
+  let motives ← psElabRecursorArguments recursor.group.members
+    (fun current family type => do
+      if psNameEq family.name info.name then return { context := current, term := plan.motive }
+      let some unit := unit | throw .matchRecursorUnsupported
+      psElabMatchConstantArgument current type (family.numIndices + 1) unit.fst)
+    recursor.context recursor.cursor
+  -- Ordinary group matching is a cases specialization. It supplies no map
+  -- from fields to recursive source calls: such calls need a complete motive
+  -- family, while an unrelated enclosing singleton recursion retains its map.
+  let minorContext := if singleton then
+      psElabStructuralMatchContext motives.context scrutinee.term expectedType plan info.numIndices
+    else psElabContextAfterStructuralFields motives.context
+  let minors ← psElabRecursorArguments constructors
+    (fun current (family, constructor) type => do
+      if psNameEq family.name info.name then
+        psElabMatchMinor current info levels parameters plan constructor.name
+          (psElabMatchAlternativeFind constructor.name alternatives) type singleton
+      else
+        let some unit := unit | throw .matchRecursorUnsupported
+        psElabMatchConstantArgument current type
+          (constructor.numFields + constructor.recursiveFields.length) unit.snd)
+    minorContext motives.cursor
+  let term := psExprApplyMany (.constE recursor.recursor.name recursor.levels)
+    (parameters ++ motives.arguments ++ minors.arguments ++ indices ++
+      [scrutinee.term] ++ plan.arguments)
   psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
+
 

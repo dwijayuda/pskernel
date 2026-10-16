@@ -269,6 +269,7 @@ lean_lib PsElab where
     `Ps.Elab.Application, `Ps.Elab.Operator,
     `Ps.Elab.Record,
     `Ps.Elab.Refinement,
+    `Ps.Elab.GroupElimination,
     `Ps.Elab.Equality,
     `Ps.Elab.Match,
     `Ps.Elab.PatternMatrix,

@@ -290,6 +290,12 @@ def psKernelEnvironmentIndexInsert
         PsKernelEnvironmentIndex.small next
       else
         psKernelEnvironmentIndexBuild next
+  | PsKernelEnvironmentIndex.bucket constants =>
+      -- Public root buckets are readable but not traversable as a branch
+      -- by the positive-fuel worker; rebuild before inserting a new name.
+      psKernelEnvironmentIndexBuild
+        (List.cons info
+          (psKernelEnvironmentIndexRemoveName name constants))
   | PsKernelEnvironmentIndex.radix tree =>
       let hash := psKernelEnvironmentNameHash name
       let bucket := psKernelC0TrieBucket psKernelC0IndexDepth tree hash

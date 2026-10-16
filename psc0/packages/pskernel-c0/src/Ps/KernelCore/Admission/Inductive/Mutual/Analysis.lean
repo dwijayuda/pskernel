@@ -496,7 +496,7 @@ def psKernelMutualRecursiveDomainHeadKind
   | _ => "other"
 
 def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     List PsKernelName ->
     List PsKernelSimpleMutualTypeShape ->
@@ -524,7 +524,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
   | Nat.succ remaining =>
       let smaller :=
         psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
-          remaining;
+          remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (targets : List PsKernelName)
@@ -559,7 +559,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
               else
                 match psKernelMutualNeutralAfterOneDelta session targets domain with
                 | some expanded => Except.ok (Prod.mk expanded session)
-                | none => psKernelSessionWhnf remaining session domain
+                | none => psKernelSessionWhnf checkerFuel session domain
             match whnfResult with
             | Except.error error =>
                 -- Pure diagnostic distinction: an occurrence-free constructor
@@ -658,6 +658,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                           Option.none)
 
 def psKernelAnalyzeSimpleMutualRecursiveArgument
+    (checkerFuel : Nat)
     (session : PsKernelCheckerSession)
     (targets : List PsKernelName)
     (shapes : List PsKernelSimpleMutualTypeShape)
@@ -668,6 +669,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgument
     Except String PsKernelMutualRecursiveArgumentResult :=
   psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
     (Nat.succ (psKernelExprNodeCount domain))
+    checkerFuel
     session
     targets
     shapes
@@ -718,15 +720,9 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
         (type : PsKernelExpr)
         (revFields : List PsKernelOpenBinder)
         (revRecursive : List PsKernelSimpleMutualRecursiveField) =>
-        match
-            psKernelSessionWhnf
-              remaining
-              session
-              type with
-        | Except.error error =>
-            Except.error (psKernelMutualBudgetAt "field-whnf" error)
-        | Except.ok reduced =>
-            match Prod.fst reduced with
+        -- Preserve raw constructor Pi spine; domains may be checked
+        -- and reduced, but an outer non-Pi must not become a binder.
+        match type with
             | PsKernelExpr.forallE
                 userName
                 domain
@@ -735,7 +731,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                 match
                     psKernelSessionCheck
                       remaining
-                      (Prod.snd reduced)
+                      session
                       domain with
                 | Except.error error =>
                     Except.error (psKernelMutualBudgetAt "field-domain-check" error)
@@ -778,6 +774,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                               binderInfo;
                           match
                               psKernelAnalyzeSimpleMutualRecursiveArgument
+                                remaining
                                 child
                                 targets
                                 shapes
@@ -788,20 +785,9 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                           | Except.error error =>
                               Except.error (psKernelMutualBudgetAt "field-recursive-analysis" error)
                           | Except.ok recursiveResult =>
-                              let child0 :=
-                                child;
-                              let analysisLocal :=
-                                recursiveResult.session.context.localContext;
-                              let continuationLocal :=
-                                psKernelLocalContextWithNextIndex
-                                  child0.context.localContext
-                                  analysisLocal.nextIndex;
                               let continuation :=
-                                PsKernelCheckerSession.mk
-                                  (psKernelCheckerContextWithLocalContext
-                                    child0.context
-                                    continuationLocal)
-                                  recursiveResult.session.state;
+                                psKernelSessionRestoreLocalScope
+                                  child recursiveResult.session;
                               let nextRecursive :
                                   List PsKernelSimpleMutualRecursiveField :=
                                 match
@@ -830,11 +816,11 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
             | _ =>
                 Except.ok
                   (PsKernelMutualOpenFieldsResult.mk
-                    (Prod.snd reduced)
+                    session
                     (psKernelReverseOpenBinders revFields)
                     (psKernelReverseMutualRecursiveFields
                       revRecursive)
-                    (Prod.fst reduced))
+                    type)
 
 def psKernelOpenSimpleMutualConstructorFields
     (fuel : Nat)

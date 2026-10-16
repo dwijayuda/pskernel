@@ -119,39 +119,24 @@ def psKernelOpenSimpleConstructorParamsWithFuel
                 session
                 type)
         | List.cons param rest =>
-            match
-                psKernelSessionWhnf
-                  remaining
-                  session
-                  type with
-            | Except.error error =>
-                Except.error error
-            | Except.ok reduced =>
-                match Prod.fst reduced with
-                | PsKernelExpr.forallE _ domain body _ =>
-                    match
-                        psKernelSessionIsDefEq
-                          remaining
-                          (Prod.snd reduced)
-                          domain
-                          param.type with
-                    | Except.error error =>
-                        Except.error error
-                    | Except.ok equal =>
-                        if Prod.fst equal then
-                          smaller
-                            (Prod.snd equal)
-                            rest
-                            (psKernelExprInstantiate1
-                              body
-                              (PsKernelExpr.fvar
-                                param.internalName))
-                        else
-                          Except.error
-                            "simple inductive constructor parameter does not match the datatype parameter"
-                | _ =>
-                    Except.error
-                      "simple inductive constructor has fewer parameters than the datatype"
+            -- The outer constructor parameter must be a RAW syntactic Pi.
+            -- WHNF must not manufacture a binder from an alias or metadata.
+            match type with
+            | PsKernelExpr.forallE _ domain body _ =>
+                match psKernelSessionIsDefEq remaining session
+                    domain param.type with
+                | Except.error error => Except.error error
+                | Except.ok equal =>
+                    if equal.fst then
+                      smaller equal.snd rest
+                        (psKernelExprInstantiate1 body
+                          (PsKernelExpr.fvar param.internalName))
+                    else
+                      Except.error
+                        "simple inductive constructor parameter does not match the datatype parameter"
+            | _ =>
+                Except.error
+                  "simple inductive constructor has fewer parameters than the datatype"
 
 def psKernelOpenSimpleConstructorParams
     (fuel : Nat)
@@ -448,20 +433,14 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
         (type : PsKernelExpr)
         (revFields : List PsKernelOpenBinder)
         (revRecursive : List PsKernelSimpleRecursiveField) =>
-        match
-            psKernelSessionWhnf
-              remaining
-              session
-              type with
-        | Except.error error =>
-            Except.error error
-        | Except.ok reducedResult =>
-            match Prod.fst reducedResult with
+        -- Only RAW Pi syntax introduces constructor fields; never WHNF
+        -- the outer spine to manufacture implicit/hidden binders.
+        match type with
             | PsKernelExpr.forallE userName domain body binderInfo =>
                 match
                     psKernelSessionCheck
                       remaining
-                      (Prod.snd reducedResult)
+                      session
                       domain with
                 | Except.error error =>
                     Except.error error
@@ -512,20 +491,9 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                           | Except.error error =>
                               Except.error error
                           | Except.ok analysis =>
-                              let child0 :=
-                                Prod.snd localResult;
-                              let analysisLocal :=
-                                analysis.session.context.localContext;
-                              let continuationLocal :=
-                                psKernelLocalContextWithNextIndex
-                                  child0.context.localContext
-                                  analysisLocal.nextIndex;
                               let child :=
-                                PsKernelCheckerSession.mk
-                                  (psKernelCheckerContextWithLocalContext
-                                    child0.context
-                                    continuationLocal)
-                                  analysis.session.state;
+                                psKernelSessionRestoreLocalScope
+                                  (Prod.snd localResult) analysis.session;
                               let nextRecursive :
                                   List PsKernelSimpleRecursiveField :=
                                 match analysis.recursiveInfo with
@@ -556,10 +524,10 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
             | _ =>
                 Except.ok
                   (PsKernelOpenFieldsResult.mk
-                    (Prod.snd reducedResult)
+                    session
                     (psKernelReverseOpenBinders revFields)
                     (psKernelReverseRecursiveFields revRecursive)
-                    (Prod.fst reducedResult))
+                    type)
 
 def psKernelOpenSimpleConstructorFields
     (fuel : Nat)

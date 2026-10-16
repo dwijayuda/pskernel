@@ -20,6 +20,18 @@ def psKernelSessionWithLocal
     (Prod.fst opened)
     nextSession
 
+/-- Leaving temporary constructor analysis retains the parent's semantic caches
+and lookup scope. Child allocation ordinals/freshness remain monotone, but
+temporary analysis judgments are never transferred to a parent scope. -/
+def psKernelSessionRestoreLocalScope
+    (parent child : PsKernelCheckerSession) : PsKernelCheckerSession :=
+  let continuationLocal := psKernelLocalContextWithNextIndex
+    parent.context.localContext child.context.localContext.nextIndex
+  PsKernelCheckerSession.mk
+    (psKernelCheckerContextWithLocalContext
+      parent.context continuationLocal)
+    (psKernelCheckerStateExitLocalScope parent.state child.state)
+
 def psKernelReverseOpenBindersWorker
     (values : List PsKernelOpenBinder) :
     List PsKernelOpenBinder -> List PsKernelOpenBinder :=

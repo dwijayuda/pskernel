@@ -169,6 +169,18 @@ def nestedRoseTag : M3NestedRose → Nat
 example (xs : List M3NestedRose) :
     nestedRoseTag (.node xs) = 1 := rfl
 
+-- Pinned Lean models Array α as a List α-backed structure.
+inductive M3NestedArrayRose where
+  | leaf
+  | node : Array M3NestedArrayRose → M3NestedArrayRose
+
+def nestedArrayRoseTag : M3NestedArrayRose → Nat
+  | .leaf => 0
+  | .node _ => 1
+
+example (xs : Array M3NestedArrayRose) :
+    nestedArrayRoseTag (.node xs) = 1 := rfl
+
 def nestedRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedRoseTag
     (if flag then M3NestedRose.leaf else M3NestedRose.node []))
@@ -340,7 +352,12 @@ def main (args : List String) : IO Unit := do
       "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
       "function m3nestedtag(r: M3NestedRose): Nat := match r with { | M3NestedRose.leaf => 0 | M3NestedRose.node children => 1 }\n"
     sourceName := "m3-nested-rose.ps" }
-  let requests := #[request, nestedRequest] ++ (refusals.map fun (_, text, _) =>
+  let nestedArrayRequest : PsV7Native.Request := {
+    source :=
+      "inductive M3NestedArrayRose where { | leaf | node(children: Array M3NestedArrayRose) }\n" ++
+      "function m3nestedarraytag(r: M3NestedArrayRose): Nat := match r with { | M3NestedArrayRose.leaf => 0 | M3NestedArrayRose.node children => 1 }\n"
+    sourceName := "m3-nested-array-rose.ps" }
+  let requests := #[request, nestedRequest, nestedArrayRequest] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
@@ -365,8 +382,15 @@ def main (args : List String) : IO Unit := do
   | .ok nested =>
     if !nested.artifacts.isEmpty || nested.declarationCount < 4 then
       throw (IO.userError "nested check-only failed declaration/artifact boundary")
+  let some arrayOutcome := batch.results[2]? | throw (IO.userError "missing nested Array admission")
+  match arrayOutcome with
+  | .error error =>
+    throw (IO.userError ("nested Array check-only: " ++ error.phase ++ ": " ++ error.message))
+  | .ok nested =>
+    if !nested.artifacts.isEmpty || nested.declarationCount < 4 then
+      throw (IO.userError "nested Array check-only failed declaration/artifact boundary")
   for ((label, _, expected), i) in refusals.zipIdx do
-    let some outcome := batch.results[i + 2]? | throw (IO.userError "missing deriving refusal")
+    let some outcome := batch.results[i + 3]? | throw (IO.userError "missing deriving refusal")
     match outcome with
     | .ok _ => throw (IO.userError ("deriving unexpectedly accepted " ++ label))
     | .error error =>

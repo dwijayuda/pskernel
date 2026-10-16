@@ -784,11 +784,18 @@ def psCheckedNestedContainerFields (type : PsExpr) : Except PsCheckedAdmissionCo
   match type with
   | PsExpr.app fn arg =>
       match fn with
-      | PsExpr.constE name _ =>
+      | PsExpr.constE name levels =>
           if psNameEq name (psCheckedNestedName "List") then
             Except.ok (List.cons List.nil (List.cons (List.cons arg (List.cons type List.nil)) List.nil))
           else if psNameEq name (psCheckedNestedName "Option") then
             Except.ok (List.cons List.nil (List.cons (List.cons arg List.nil) List.nil))
+          else if psNameEq name (psCheckedNestedName "Array") then
+            -- Pinned Lean 4.35.0 Init/Prelude: Array α is a structure with
+            -- one field, toList : List α. Its nested motive must therefore
+            -- also account for the List α occurrence. No new checked
+            -- recursor, source assumption or executable representation.
+            let list := PsExpr.app (PsExpr.constE (psCheckedNestedName "List") levels) arg
+            Except.ok (List.cons (List.cons list List.nil) List.nil)
           else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
       | PsExpr.app head left =>
           match head with

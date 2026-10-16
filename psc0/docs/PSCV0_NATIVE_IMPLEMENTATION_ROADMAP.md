@@ -1,3 +1,23 @@
+## M3 nested parameter validation — qualified; Array bridge candidate pending
+
+Compiler `e3c3f8b6b9b2231b4bf69f4ae37bd2aa234b1cf9`: five exact same-SHA runs SUCCESS — native
+`38941232123` (33/33 steps), F1 `38941232184`, F2 `38941232130`,
+F3/F4 `38941232155`, focused `38941232165`. Receipt:
+`psc0/docs/PSCV0_M3_NESTED_UNIFORM_QUALIFICATION_2026-10-17.md`.
+Every nested family occurrence now checks the same Core uniform parameters
+as a direct occurrence; nonuniform `BadNested(A)` under `List` refuses
+at elaboration. Separate check-only `bde3dccd` and runtime `eb227eb6`
+focused runs passed for one zero-parameter `List Rose` shallow
+elimination case. This is NOT nested recursive traversal or deriving.
+
+Current new candidate extends the checked nested recursor bridge for
+`Array α` using Lean 4.35's exact `List α` backing field, with an
+independent check-only `Array Rose` source/oracle. No assumption,
+kernel-admission bypass, erasure shortcut or runtime speed claim.
+**Candidate requires its own native/F1/F2/F3-F4/focused qualification.**
+Current M3+B remains OPEN; continue canonical `psc0/ARCHITECTURE.md`,
+v7.2-only .ps, native .lean, minimal tests, no pskernel-core/selfhost.
+
 ## Active PSC0 v7.2 architecture authority
 
 See [PSC0 native current/target/later architecture](../ARCHITECTURE.md) for one current set of semantic owners, supported features, Lean 4.35 comparison, future pass boundaries and milestone allocation. The previous PSC2 bootstrap architecture was archived verbatim at [history/PSC2_MINIMAL_SELFHOST_ARCHITECTURE_SNAPSHOT.md](history/PSC2_MINIMAL_SELFHOST_ARCHITECTURE_SNAPSHOT.md). Historical kernel/npm/self-host docs are **not** current M3+B instructions. M2+A unchanged; M3+B still OPEN.

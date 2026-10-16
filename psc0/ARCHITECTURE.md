@@ -1,3 +1,24 @@
+## M3 nested parameter validation — qualified; Array bridge candidate pending
+
+Compiler `e3c3f8b6b9b2231b4bf69f4ae37bd2aa234b1cf9`: five exact same-SHA runs SUCCESS — native
+`38941232123` (33/33 steps), F1 `38941232184`, F2 `38941232130`,
+F3/F4 `38941232155`, focused `38941232165`. Receipt:
+`psc0/docs/PSCV0_M3_NESTED_UNIFORM_QUALIFICATION_2026-10-17.md`.
+Every nested family occurrence now checks the same Core uniform parameters
+as a direct occurrence; nonuniform `BadNested(A)` under `List` refuses
+at elaboration. Separate check-only `bde3dccd` and runtime `eb227eb6`
+focused runs passed for one zero-parameter `List Rose` shallow
+elimination case. This is NOT nested recursive traversal or deriving.
+
+Current new candidate extends the checked nested recursor bridge for
+`Array α` using Lean 4.35's exact `List α` backing field, with an
+independent check-only `Array Rose` source/oracle. No assumption,
+kernel-admission bypass, erasure shortcut or runtime speed claim.
+**Candidate requires its own native/F1/F2/F3-F4/focused qualification.**
+Current M3+B remains OPEN; continue canonical `psc0/ARCHITECTURE.md`,
+v7.2-only .ps, native .lean, minimal tests, no pskernel-core/selfhost.
+
+
 # PSC0 native v7.2 — current, target, and later architecture
 
 **Status:** Active architecture authority for the native PSC0/PSCV0 compiler on branch `psc0/pscv0-v7-native-lean-v1`. **This is a design and implementation contract, not a completed-language or verified-backend claim.** Updated 17 October 2026.

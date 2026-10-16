@@ -1,4 +1,3 @@
-import Ps.KernelCore.Core.CertifiedStore
 import Ps.KernelCore.Runtime.Acceleration.CertifiedHashMemo
 import Ps.KernelCore.Core.Substitution.Instantiate
 

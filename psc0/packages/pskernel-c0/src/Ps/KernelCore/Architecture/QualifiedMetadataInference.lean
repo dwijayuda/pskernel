@@ -29,7 +29,8 @@ def psKernelC0MetadataInferWithFuel :
       | .mdata _ body =>
           let cache := if inferOnly then state.inferOnly
             else state.checkedInfer
-          match psKernelExprMapGet cache expr with
+          match (if psKernelInferCacheEligible inferOnly expr then
+            psKernelExprMapGet cache expr else Option.none) with
           | some ty =>
               match psKernelCheckerContextEnterRecDepth context with
               | .ok _ => some (ty, state)
@@ -78,7 +79,9 @@ theorem psKernelC0MetadataInfer_source
           let term : PsKernelExpr := .mdata md body
           let cache := if inferOnly then state.inferOnly
             else state.checkedInfer
-          cases cached : psKernelExprMapGet cache term with
+          cases cached :
+              (if psKernelInferCacheEligible inferOnly term then
+                psKernelExprMapGet cache term else Option.none) with
           | some ty =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
@@ -92,11 +95,12 @@ theorem psKernelC0MetadataInfer_source
                     exact (Option.some.inj hx).symm
                   rw [hresult]
                   have hcache :
-                      psKernelExprMapGetWithKnownHash
-                        (if inferOnly then state.inferOnly else state.checkedInfer)
-                        (.mdata md body) none = some ty := by
-                    change psKernelExprMapGet cache term = some ty
-                    exact cached
+                      (if psKernelInferCacheEligible inferOnly term then
+                        psKernelExprMapGetWithKnownHash
+                          (if inferOnly then state.inferOnly else state.checkedInfer)
+                          (.mdata md body) none
+                       else Option.none) = some ty := by
+                    simpa [psKernelExprMapGet, cache, term] using cached
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
                     psKernelInferCacheEligible, hcache, depth]
@@ -133,12 +137,13 @@ theorem psKernelC0MetadataInfer_source
                             apply ih
                             exact nested
                           have hcache :
-                              psKernelExprMapGetWithKnownHash
-                                (if inferOnly then state.inferOnly
-                                  else state.checkedInfer)
-                                (.mdata md body) none = none := by
-                            change psKernelExprMapGet cache term = none
-                            exact cached
+                              (if psKernelInferCacheEligible inferOnly term then
+                                psKernelExprMapGetWithKnownHash
+                                  (if inferOnly then state.inferOnly
+                                   else state.checkedInfer)
+                                  (.mdata md body) none
+                               else Option.none) = none := by
+                            simpa [psKernelExprMapGet, cache, term] using cached
                           change psKernelInferCoreWithFuelUsingSourceFrames
                             remaining onCheckedApp [] [] whnf defeq
                             entered state body inferOnly =

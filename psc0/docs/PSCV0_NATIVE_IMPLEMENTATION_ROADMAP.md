@@ -1,3 +1,19 @@
+## Accepted Array nested constructor adaptation — current checkpoint
+
+**Compiler `8f217a80a6010b5db83affb5f608d494521b44bf`**: native
+`38943289653` (33/33), F1 `38943289504`, F2 `38943289694`,
+F3/F4 `38943289454`, focused `38943289601` all **SUCCESS**.
+The subsequent test-only source SHA `59fa293d587e83c3c5fe6d9572debb82a385a30a`
+passed focused `38943635308` including pinned native Lean oracle,
+JS, compiled TS, Rust, V8 GC and Wasmtime for shallow `Array Rose`.
+Read `psc0/docs/PSCV0_M3_ARRAY_NESTED_QUALIFICATION_2026-10-17.md`.
+This is **not** nested recursion traversal, all-family deriving, P0/P1,
+or full M3+B; old candidate-pending paragraphs are historical.
+Next architecture priority: one common positive-container shape owner
+across `Ps.Elab.Data` and `Ps.Bridge.CheckedAdmissions`, preserving
+the exact pinned checked constructor fields and fail-closed boundaries.
+M3+B remains OPEN; native portable .lean, no pskernel-core or self-hosting.
+
 ## M3 nested parameter validation — qualified; Array bridge candidate pending
 
 Compiler `e3c3f8b6b9b2231b4bf69f4ae37bd2aa234b1cf9`: five exact same-SHA runs SUCCESS — native

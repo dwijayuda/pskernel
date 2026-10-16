@@ -39,11 +39,13 @@ def main : IO Unit := do
       if !psKernelExprEqual tyInfer expected ||
           !psKernelExprEqual tyCheck expected then
         throw (IO.userError "independent local lookup returned wrong type")
-      if (psKernelExprMapGet inferState.inferOnly expression).isNone ||
+      -- FVars are scoped; neither infer-only nor checked judgments may
+      -- populate semantic caches with a name that can be shadowed.
+      if (psKernelExprMapGet inferState.inferOnly expression).isSome ||
           (psKernelExprMapGet inferState.checkedInfer expression).isSome ||
-          (psKernelExprMapGet checkState.checkedInfer expression).isNone ||
+          (psKernelExprMapGet checkState.checkedInfer expression).isSome ||
           (psKernelExprMapGet checkState.inferOnly expression).isSome then
-        throw (IO.userError "local inference mixed source checked/infer caches")
+        throw (IO.userError "local inference cached a scoped free variable")
   | _, _ =>
       throw (IO.userError "qualified local path declined a bound variable")
 
@@ -121,18 +123,29 @@ def main : IO Unit := do
       contextual.state name false).isSome then
     throw (IO.userError "local inference ignored source recursion budget")
 
-  -- Constructible raw caches are deliberately NOT public proof authority.
-  -- Source equivalence records them, but the verified provider starts
-  -- only from independently qualified empty checked genesis.
+  -- Constructible raw cache entries must never authorize a local that is
+  -- absent from the current context or override one with the same name.
+  -- Compare the independent selector against the source checked operation.
   let forged : PsKernelExpr := .sort (.succ (.succ .zero))
   let poisoned := psKernelCheckerStateWithCheckedInfer source.state
     (psKernelExprMapInsert source.state.checkedInfer expression forged)
+  if (psKernelC0FVarInferWithFuel 4096
+      source.context poisoned name false).isSome then
+    throw (IO.userError "poisoned cache admitted an unknown local")
+  match psKernelCheckerCheck 4096 source.context poisoned expression with
+  | .error "unknown free variable" => pure ()
+  | _ => throw (IO.userError "source checker trusted poisoned local cache")
   match psKernelC0FVarInferWithFuel 4096
-      source.context poisoned name false with
-  | some (cached, _) =>
-      if !psKernelExprEqual cached forged then
-        throw (IO.userError "raw cache source behavior was not matched")
-  | none => throw (IO.userError "raw cache compatibility path was not reached")
+      contextual.context poisoned name false with
+  | some (actual, _) =>
+      if !psKernelExprEqual actual expected then
+        throw (IO.userError "poisoned cache shadowed scoped local type")
+  | none => throw (IO.userError "valid local declined with poisoned cache")
+  match psKernelCheckerCheck 4096 contextual.context poisoned expression with
+  | .ok (actual, _) =>
+      if !psKernelExprEqual actual expected then
+        throw (IO.userError "source checker returned poisoned local type")
+  | .error _ => throw (IO.userError "source checker declined valid local")
 
   let resources : PsKernelResourcePolicy := {
     fuel := 4096
@@ -154,4 +167,4 @@ def main : IO Unit := do
 
   IO.println "C0_LOCAL_INFER source_exact_fvar_infer_and_check=pass"
   IO.println "C0_LOCAL_INFER shadowing_deep_context_and_resource_boundaries=pass"
-  IO.println "C0_LOCAL_INFER raw_cache_isolation_and_verified_provider=pass"
+  IO.println "C0_LOCAL_INFER poisoned_cache_ignored_and_verified_provider=pass"

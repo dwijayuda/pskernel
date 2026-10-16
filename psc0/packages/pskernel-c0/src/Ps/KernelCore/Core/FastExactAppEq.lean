@@ -36,7 +36,7 @@ def psKernelC0FastAppDecEq :
             else
               .isFalse (by intro heq; cases heq; exact hfn rfl)
         | _ =>
-            (inferInstance : Decidable ((.app fn arg) = right)))
+            .isFalse (by intro heq; cases heq))
   | left, right =>
       withPtrEqDecEq left right (fun _ => inferInstance)
 

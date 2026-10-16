@@ -113,6 +113,64 @@ jobs:
             fi
             echo "C0_ARENA_NATIVE name=$name expected=$expected official=matched c0=matched fuel=4096"
           done
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          base = pathlib.Path(os.environ["RUNNER_TEMP"])
+          names = {
+              "natAddLit": "accept",
+              "natSubLit": "accept",
+              "natBleLit": "accept",
+              "natAddLitBad": "reject",
+              "badFalse": "reject",
+              "badProjNonStructure": "reject",
+          }
+          entries = []
+          for name, expected in names.items():
+              source = base / f"arena435-{name}.ndjson"
+              official = (base / f"arena435-{name}-official.txt").read_text()
+              native = (base / f"arena435-{name}-c0.txt").read_text()
+              records = source.read_bytes().splitlines()
+              meta = json.loads(records[0])["meta"]
+              assert meta["lean"] == {
+                  "version": "4.35.0",
+                  "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              }
+              assert (
+                  "Lean default kernel accepts the solution" in official
+                  if expected == "accept" else
+                  "Lean default kernel rejects the solution" in official
+              )
+              matches = re.findall(
+                  r"C0_REAL_EXPORT replay_outcome=C0ExportVerdict\.([A-Za-z]+) consumed_records=(\d+) fuel=(\d+)",
+                  native,
+              )
+              assert len(matches) == 1 and matches[0][0] == (
+                  "accepted" if expected == "accept" else "rejected"
+              )
+              assert int(matches[0][2]) == 4096
+              entries.append({
+                  "test": name, "expect": expected,
+                  "official_lean435": "accepted" if expected == "accept" else "rejected",
+                  "pskernel_c0": matches[0][0],
+                  "records": len(records),
+                  "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                  "arena_source_revision": "5d7ca987618f1136aaa296057b50a2c10c4ce77a",
+              })
+          summary = {
+              "format": "pskernel-c0-arena435-evidence-v1",
+              "native_lean": "4.35.0",
+              "original_archive_2026_09_results": "not_represented",
+              "total": len(entries),
+              "actual_accepts": sum(x["expect"] == "accept" for x in entries),
+              "actual_rejects": sum(x["expect"] == "reject" for x in entries),
+              "all_identical_bytes_checked": True,
+              "all_verdicts_exact": True,
+              "cases": entries,
+          }
+          out = base / "pskernel-c0-arena-native435-evidence.json"
+          out.write_text(json.dumps(summary, indent=2) + "\n")
+          print(f"C0_ARENA_NATIVE_EVIDENCE valid={summary['actual_accepts']} invalid={summary['actual_rejects']} exact_sha256=yes")
+          PY
           echo "C0_ARENA_NATIVE_RESULT cases=6 all_correct=true source_origin=arena_2026_09 native_lean=4.35.0"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -122,5 +180,6 @@ jobs:
             ${{ runner.temp }}/arena435-*.ndjson
             ${{ runner.temp }}/arena435-*-official.txt
             ${{ runner.temp }}/arena435-*-c0.txt
+            ${{ runner.temp }}/pskernel-c0-arena-native435-evidence.json
           if-no-files-found: warn
           retention-days: 21

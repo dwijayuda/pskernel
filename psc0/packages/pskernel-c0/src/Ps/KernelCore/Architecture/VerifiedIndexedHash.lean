@@ -207,3 +207,217 @@ theorem psKernelC0VerifiedIndexedCacheInsert_source
   unfold psKernelC0VerifiedIndexedCacheInsert psKernelExprMapInsert
   rw [psKernelC0VerifiedIndexedHashRead_source proof]
   simp [psKernelExprMapInsertWithKnownHash]
+
+/-- An exact child-hash equality derived from its certified owning source
+node, never an assumption about matching hashes across stores. -/
+theorem psKernelC0VerifiedIndexedChildHash
+    {owner : PsKernelC0CertifiedStore} {id : Nat}
+    (proof : PsKernelC0VerifiedIndexedHash owner id) :
+    psKernelC0ChildCheckerHash owner.store id =
+      psKernelExprHash proof.expr := by
+  simp only [psKernelC0ChildCheckerHash, proof.lookup]
+  exact proof.valueCorrect
+
+/-- Source hash of a certified metadata node, assembled in O(1)
+from the child's checker-hash proof and canonical metadata. -/
+def psKernelC0VerifiedIndexedHashMetadata
+    (owner : PsKernelC0CertifiedStore)
+    (id childId : Nat)
+    (metadata : Nat)
+    (entry : PsKernelC0StoredNode)
+    (hGet : psKernelC0StoreGet owner.store id = some entry)
+    (hNode : entry.node = .mdata metadata childId)
+    (hDerived :
+      entry.checkerHash =
+        (psKernelC0NodeHashes owner.store entry.node).snd)
+    (child : PsKernelC0VerifiedIndexedHash owner childId)
+    (hRead :
+      psKernelC0DecodeExpr owner.store id =
+        some (.mdata metadata child.expr)) :
+    PsKernelC0VerifiedIndexedHash owner id := by
+  have hChild := psKernelC0VerifiedIndexedChildHash child
+  have hParent : entry.checkerHash =
+      psKernelExprHash (.mdata metadata child.expr) := by
+    calc
+      entry.checkerHash =
+          (psKernelC0NodeHashes owner.store entry.node).snd := hDerived
+      _ = psKernelCacheMix (psKernelCacheMix 31 metadata) (psKernelC0ChildCheckerHash owner.store childId) := by
+            rw [hNode]
+            rfl
+      _ = psKernelExprHash (.mdata metadata child.expr) := by
+            simp only [psKernelExprHash, hChild]
+  exact {
+    entry := entry
+    expr := .mdata metadata child.expr
+    lookup := hGet
+    readback := hRead
+    valueCorrect := hParent
+  }
+
+/-- Source hash of a certified projection node, assembled in O(1)
+from the child's checker-hash proof and canonical metadata. -/
+def psKernelC0VerifiedIndexedHashProjection
+    (owner : PsKernelC0CertifiedStore)
+    (id childId : Nat)
+    (name : PsKernelName) (index : Nat)
+    (entry : PsKernelC0StoredNode)
+    (hGet : psKernelC0StoreGet owner.store id = some entry)
+    (hNode : entry.node = .proj name index childId)
+    (hDerived :
+      entry.checkerHash =
+        (psKernelC0NodeHashes owner.store entry.node).snd)
+    (child : PsKernelC0VerifiedIndexedHash owner childId)
+    (hRead :
+      psKernelC0DecodeExpr owner.store id =
+        some (.proj name index child.expr)) :
+    PsKernelC0VerifiedIndexedHash owner id := by
+  have hChild := psKernelC0VerifiedIndexedChildHash child
+  have hParent : entry.checkerHash =
+      psKernelExprHash (.proj name index child.expr) := by
+    calc
+      entry.checkerHash =
+          (psKernelC0NodeHashes owner.store entry.node).snd := hDerived
+      _ = psKernelCacheMix (psKernelCacheMix (psKernelCacheMix 32 (psKernelCacheNameHash name)) index) (psKernelC0ChildCheckerHash owner.store childId) := by
+            rw [hNode]
+            rfl
+      _ = psKernelExprHash (.proj name index child.expr) := by
+            simp only [psKernelExprHash, hChild]
+  exact {
+    entry := entry
+    expr := .proj name index child.expr
+    lookup := hGet
+    readback := hRead
+    valueCorrect := hParent
+  }
+
+/-- Exact source checker hash of a certified lambda binder.
+The historical hash intentionally omits user binder name and info, but
+the certified app node and exact readback still retain those fields. -/
+def psKernelC0VerifiedIndexedHashLambda
+    (owner : PsKernelC0CertifiedStore)
+    (id typeId bodyId : Nat)
+    (name : PsKernelName) (info : PsKernelBinderInfo)
+    (entry : PsKernelC0StoredNode)
+    (hGet : psKernelC0StoreGet owner.store id = some entry)
+    (hNode : entry.node = .lam name typeId bodyId info)
+    (hDerived :
+      entry.checkerHash =
+        (psKernelC0NodeHashes owner.store entry.node).snd)
+    (type : PsKernelC0VerifiedIndexedHash owner typeId)
+    (body : PsKernelC0VerifiedIndexedHash owner bodyId)
+    (hRead :
+      psKernelC0DecodeExpr owner.store id =
+        some (.lam name type.expr body.expr info)) :
+    PsKernelC0VerifiedIndexedHash owner id := by
+  have hType := psKernelC0VerifiedIndexedChildHash type
+  have hBody := psKernelC0VerifiedIndexedChildHash body
+  have hParent : entry.checkerHash =
+      psKernelExprHash (.lam name type.expr body.expr info) := by
+    calc
+      entry.checkerHash =
+          (psKernelC0NodeHashes owner.store entry.node).snd := hDerived
+      _ = psKernelCacheMix
+          (psKernelCacheMix 27
+            (psKernelC0ChildCheckerHash owner.store typeId))
+          (psKernelC0ChildCheckerHash owner.store bodyId) := by
+            rw [hNode]
+            rfl
+      _ = psKernelExprHash (.lam name type.expr body.expr info) := by
+            simp only [psKernelExprHash, hType, hBody]
+  exact {
+    entry := entry
+    expr := .lam name type.expr body.expr info
+    lookup := hGet
+    readback := hRead
+    valueCorrect := hParent
+  }
+
+/-- Exact source checker hash of a certified forall binder.
+The historical hash intentionally omits user binder name and info, but
+the certified app node and exact readback still retain those fields. -/
+def psKernelC0VerifiedIndexedHashForall
+    (owner : PsKernelC0CertifiedStore)
+    (id typeId bodyId : Nat)
+    (name : PsKernelName) (info : PsKernelBinderInfo)
+    (entry : PsKernelC0StoredNode)
+    (hGet : psKernelC0StoreGet owner.store id = some entry)
+    (hNode : entry.node = .forallE name typeId bodyId info)
+    (hDerived :
+      entry.checkerHash =
+        (psKernelC0NodeHashes owner.store entry.node).snd)
+    (type : PsKernelC0VerifiedIndexedHash owner typeId)
+    (body : PsKernelC0VerifiedIndexedHash owner bodyId)
+    (hRead :
+      psKernelC0DecodeExpr owner.store id =
+        some (.forallE name type.expr body.expr info)) :
+    PsKernelC0VerifiedIndexedHash owner id := by
+  have hType := psKernelC0VerifiedIndexedChildHash type
+  have hBody := psKernelC0VerifiedIndexedChildHash body
+  have hParent : entry.checkerHash =
+      psKernelExprHash (.forallE name type.expr body.expr info) := by
+    calc
+      entry.checkerHash =
+          (psKernelC0NodeHashes owner.store entry.node).snd := hDerived
+      _ = psKernelCacheMix
+          (psKernelCacheMix 28
+            (psKernelC0ChildCheckerHash owner.store typeId))
+          (psKernelC0ChildCheckerHash owner.store bodyId) := by
+            rw [hNode]
+            rfl
+      _ = psKernelExprHash (.forallE name type.expr body.expr info) := by
+            simp only [psKernelExprHash, hType, hBody]
+  exact {
+    entry := entry
+    expr := .forallE name type.expr body.expr info
+    lookup := hGet
+    readback := hRead
+    valueCorrect := hParent
+  }
+
+/-- Exact cached checker hash of a certified let node, including its
+source nondependence bit, with all three children separately verified. -/
+def psKernelC0VerifiedIndexedHashLet
+    (owner : PsKernelC0CertifiedStore)
+    (id typeId valueId bodyId : Nat)
+    (name : PsKernelName) (nondep : Bool)
+    (entry : PsKernelC0StoredNode)
+    (hGet : psKernelC0StoreGet owner.store id = some entry)
+    (hNode : entry.node = .letE name typeId valueId bodyId nondep)
+    (hDerived :
+      entry.checkerHash =
+        (psKernelC0NodeHashes owner.store entry.node).snd)
+    (type : PsKernelC0VerifiedIndexedHash owner typeId)
+    (value : PsKernelC0VerifiedIndexedHash owner valueId)
+    (body : PsKernelC0VerifiedIndexedHash owner bodyId)
+    (hRead :
+      psKernelC0DecodeExpr owner.store id =
+        some (.letE name type.expr value.expr body.expr nondep)) :
+    PsKernelC0VerifiedIndexedHash owner id := by
+  have hType := psKernelC0VerifiedIndexedChildHash type
+  have hValue := psKernelC0VerifiedIndexedChildHash value
+  have hBody := psKernelC0VerifiedIndexedChildHash body
+  have hParent : entry.checkerHash =
+      psKernelExprHash (.letE name type.expr value.expr body.expr nondep) := by
+    calc
+      entry.checkerHash =
+          (psKernelC0NodeHashes owner.store entry.node).snd := hDerived
+      _ = psKernelCacheMix
+          (psKernelCacheMix
+            (psKernelCacheMix
+              (psKernelCacheMix 29
+                (psKernelC0ChildCheckerHash owner.store typeId))
+              (psKernelC0ChildCheckerHash owner.store valueId))
+            (psKernelC0ChildCheckerHash owner.store bodyId))
+          (if nondep then 1 else 0) := by
+            rw [hNode]
+            rfl
+      _ = psKernelExprHash
+          (.letE name type.expr value.expr body.expr nondep) := by
+            simp only [psKernelExprHash, hType, hValue, hBody]
+  exact {
+    entry := entry
+    expr := .letE name type.expr value.expr body.expr nondep
+    lookup := hGet
+    readback := hRead
+    valueCorrect := hParent
+  }

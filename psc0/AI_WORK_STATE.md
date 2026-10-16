@@ -1,4 +1,4 @@
-## M3+B candidate — atomic inductive groups and shared recursor construction (17 October 2026)
+## M3+B candidate — atomic groups, portable reduction and ordinary closures (17 October 2026)
 
 The native `psElabInductiveGroup` entry point now stages all family headers,
 checks compatible common parameters and result universes, elaborates every
@@ -13,15 +13,23 @@ This is a **new compiler candidate, not an acceptance receipt**. The focused
 workflow includes independent Lean declarations, canonical group admission,
 whole retained recursor-signature witnesses, cross-family reduction, indexed
 and Prop elimination checks, and explicit unsupported-consumer refusals.
-Multi-motive portable reduction, source match/deriving/runtime consumers and
-nested auxiliary groups remain the next shared implementation work. The v7.2
+Portable iota selects the target family's global minor segment and each
+recursive field's actual family recursor with its own indices. Independent
+native and canonical kernel equations are compared with portable reduction;
+malformed group metadata, ordinals and major families remain stuck. Source
+match/deriving/runtime consumers and nested auxiliaries remain unfinished. The v7.2
 `.ps` mutual grammar still selects def/function groups; it is not expanded to
 mutual inductive syntax by this native API change.
 
 The preceding P0 assurance and P1 source-strategy candidate is included.
+A finite P0 fixture passes a recursive closure with changing captured state
+through a higher-order function for comparison on every target lane.
 Its parser indentation failure was corrected in
 `ef47dee3de4de6298de276322a30b2bac3af0a73`; qualification must be read from
-actual runs, never inferred from its successful compiler build. P1 remains
+actual runs, never inferred from its successful compiler build. Its focused,
+F1, F2 and F3/F4 gates passed; its native run was superseded/cancelled. The
+first group builds found missing portable Lake registration and a Data record
+indentation error; both are corrected without weakening checks. P1 remains
 unavailable because pinned `Lean.Order.fix` and its equations transitively
 require unapproved `Classical.choice`. Only `propext` and `Quot.sound` remain
 approved; the isolated oracle observes that blocker without changing policy.

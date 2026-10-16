@@ -4,9 +4,9 @@ Native group formation now has one `Ps.Core.InductiveGroup` plan, staged
 `Ps.Elab.Data` construction, and atomic canonical admission. The candidate
 covers common dependent/alpha-renamed parameters, per-family indices, all
 motives/minors, Prop elimination restrictions and unique retained descriptors.
-It requires its own five-gate qualification. Source group matching, portable
-multi-motive reduction, runtime/deriving consumers and nested auxiliaries
-remain unfinished; `.ps` mutual inductive grammar is not newly selected.
+It requires its own five-gate qualification. Portable group reduction now uses the shared plan and
+is compared with independent checked kernel equations. Source group matching,
+runtime/deriving consumers and nested auxiliaries remain unfinished; `.ps` mutual inductive grammar is not newly selected.
 
 The included P0 candidate exposes ordinary/verified assurance selections,
 selects the separately checked actual partial body only for ordinary host

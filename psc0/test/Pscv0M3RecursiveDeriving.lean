@@ -226,11 +226,23 @@ partial def partialCount (n : Nat) : Nat :=
   | 0 => 0
   | k + 1 => partialCount k + 1
 
+def applyPartialCapture (step : Nat → Nat) (n : Nat) : Nat := step n
+
+-- The recursive call crosses a higher-order argument and captures changing
+-- prefix state. This tests ordinary body identity through closure lowering.
+partial def partialCapture (bias n : Nat) : Nat :=
+  match n with
+  | 0 => bias
+  | k + 1 => applyPartialCapture (fun rest => partialCapture (bias + 1) rest) k
+
 def partialOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (partialIncrement (if flag then 17 else 9))
 
 def partialCountOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (partialCount (if flag then 7 else 3))
+
+def partialCaptureOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (partialCapture (if flag then 7 else 11) (if flag then 3 else 5))
 
 def nestedRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedRoseTag
@@ -356,7 +368,10 @@ private def source : String :=
   "partial function m3partial(n: Nat): Nat := n + 5\n" ++
   "function m3partialoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partial(if (flag) { 17 } else { 9 }))\n" ++
   "partial function m3partialCount(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3partialCount(k) + 1 }\n" ++
-  "function m3partialcountoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCount(if (flag) { 7 } else { 3 }))\n"
+  "function m3partialcountoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCount(if (flag) { 7 } else { 3 }))\n" ++
+  "function m3applyPartialCapture(step: Nat -> Nat, n: Nat): Nat := step(n)\n" ++
+  "partial function m3partialCapture(bias: Nat, n: Nat): Nat := match n with { | 0 => bias | k + 1 => m3applyPartialCapture((fun (rest: Nat) => m3partialCapture(bias + 1, rest)), k) }\n" ++
+  "function m3partialcaptureoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCapture(if (flag) { 7 } else { 11 }, if (flag) { 3 } else { 5 }))\n"
 
 -- Parser/source identity is tested independently from the P1 elaboration gate.
 -- A valid suffix must not disappear, become a prefix, or use P0 opacity.
@@ -471,7 +486,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput", "m3partialcountoutput", "m3nestedoptionoutput", "m3nestedprodoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput", "m3partialcountoutput", "m3nestedoptionoutput", "m3nestedprodoutput", "m3partialcaptureoutput"] }
   let nestedRequest : PsV7Native.Request := {
     source :=
       "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
@@ -587,6 +602,8 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.partialOutput flag).toNat)),
     ("m3partialcountoutput", Lean.toJson (toString
       (M3RecursiveHashOracle.partialCountOutput flag).toNat)),
+    ("m3partialcaptureoutput", Lean.toJson (toString
+      (M3RecursiveHashOracle.partialCaptureOutput flag).toNat)),
     ("m3nestedoptionoutput", Lean.toJson (toString
       (M3RecursiveHashOracle.nestedOptionRoseOutput flag).toNat)),
     ("m3nestedprodoutput", Lean.toJson (toString

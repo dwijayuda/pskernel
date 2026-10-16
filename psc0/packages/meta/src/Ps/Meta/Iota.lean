@@ -1,5 +1,6 @@
 import Ps.Environment.Basic
 import Ps.Core.Builtin
+import Ps.Core.InductiveGroup
 import Ps.Core.Subst
 import Ps.Core.LevelSubst
 
@@ -50,49 +51,61 @@ def psReduceApplyType (reduce : PsExpr -> PsExpr) (type : PsExpr)
     psReduceApplyType reduce (psExprInstantiate1 body value) rest
 
 -- Lean kernel/inductive.cpp mk_rec_rules: a recursive field may be a
--- dependent function returning the family. Its induction hypothesis abstracts
--- the same telescope and recurses at the field applied to those arguments.
+-- dependent function returning any member of the group. Its induction
+-- hypothesis abstracts the same telescope and calls that member's recursor
+-- with its own indices and the shared parameters, motives and minors.
 -- Bound variables are lifted when entering each lambda; no fresh free variable
 -- can escape the caller's checked context.
 def psReduceRecursorHypothesis (reduce : PsExpr → PsExpr) (fuel : Nat)
-    (family : PsName) (numParams numIndices : Nat)
-    (head : PsExpr) (fixedArgs : List PsExpr) (domain field : PsExpr) : Option PsExpr := do
+    (plan : PsInductiveGroupPlan) (levels : List PsLevel)
+    (fixedArgs : List PsExpr) (domain field : PsExpr) : Option PsExpr := do
   match fuel with
   | 0 => none
   | fuel + 1 =>
     match reduce domain with
     | .forallE name parameter body binder =>
       let lift := psExprLiftBVars 1 0
-      let hypothesis ← psReduceRecursorHypothesis reduce fuel family numParams numIndices
-        (lift head) (fixedArgs.map lift) body (.app (lift field) (.bvar 0))
+      let hypothesis ← psReduceRecursorHypothesis reduce fuel plan levels
+        (fixedArgs.map lift) body (.app (lift field) (.bvar 0))
       return .lam name parameter hypothesis binder
     | result =>
       let fieldType := psReduceAppView result
-      let .constE owner _ := fieldType.head | none
-      if !psNameEq owner family || fieldType.args.length != numParams + numIndices then none
+      let .constE owner fieldLevels := fieldType.head | none
+      let family ← psInductiveGroupFind plan owner
+      if fieldLevels.length != family.levelParams.length ||
+          fieldType.args.length != family.numParams + family.numIndices then none
       else
-        return psReduceApply head
-          (fixedArgs ++ fieldType.args.drop numParams ++ [field])
+        return psReduceApply (.constE (psNameAppendStr family.name "rec") levels)
+          (fixedArgs ++ fieldType.args.drop family.numParams ++ [field])
 
--- Metadata-driven iota for one family, including function-valued recursive
--- fields. Unsupported nested/mutual recursors remain stuck; never guess.
+-- Metadata-driven iota for a complete registered group, including singleton
+-- and function-valued recursive fields. This is checked Core conversion;
+-- multi-motive source match/runtime lowering require their own consumers.
 def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
     (expr : PsExpr) : Option PsExpr := do
   let view := psReduceAppView expr
   let .constE name levels := view.head | none
   let recursor ← psEnvironmentFindRecursor environment name
-  if recursor.numMotives != 1 || recursor.inductiveNames.length != 1 then none else do
-    let majorPosition := recursor.numParams + 1 + recursor.numMinors + recursor.numIndices
+  let owner ← recursor.inductiveNames.find?
+    (fun family => psNameEq name (psNameAppendStr family "rec"))
+  let family ← psEnvironmentFindInductive environment owner
+  let plan ← psInductiveGroupPlanFor
+    (psEnvironmentFindInductive environment) (psEnvironmentFindRecursor environment) family
+  if !psInductiveGroupRecursorShapeValid plan family recursor ||
+      levels.length != recursor.levelParams.length then none else do
+    let prefixSize := recursor.numParams + recursor.numMotives + recursor.numMinors
+    let majorPosition := prefixSize + family.numIndices
     let major ← view.args[majorPosition]?
     let constructor := psReduceConstructorView (reduce major)
     let .constE ctorName ctorLevels := constructor.head | none
     let ctor ← psEnvironmentFindConstructor environment ctorName
-    if !(recursor.inductiveNames.any (psNameEq ctor.inductiveName)) ||
+    let orderedName ← family.constructors[ctor.constructorIndex]?
+    if !psNameEq ctor.inductiveName family.name || !psNameEq orderedName ctorName ||
         ctor.numParams != recursor.numParams ||
         constructor.args.length != ctor.numParams + ctor.numFields ||
-        levels.length != recursor.levelParams.length ||
         ctorLevels.length != ctor.levelParams.length then none else do
-      let minor ← view.args[recursor.numParams + 1 + ctor.constructorIndex]?
+      let offset ← psInductiveGroupMinorOffset plan family.name
+      let minor ← view.args[recursor.numParams + recursor.numMotives + offset + ctor.constructorIndex]?
       let fields := constructor.args.drop ctor.numParams
       let hypotheses ← ctor.recursiveFields.mapM fun index => do
         let field ← fields[index]?
@@ -100,9 +113,8 @@ def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
           (psExprInstantiateLevelParams ctor.levelParams ctorLevels ctor.type)
           (constructor.args.take (ctor.numParams + index))
         let .forallE _ domain _ _ := reduce fieldCursor | none
-        psReduceRecursorHypothesis reduce 4096 ctor.inductiveName
-          recursor.numParams recursor.numIndices view.head
-          (view.args.take (recursor.numParams + 1 + recursor.numMinors)) domain field
+        psReduceRecursorHypothesis reduce 4096 plan levels
+          (view.args.take prefixSize) domain field
       return psReduceApply minor (fields ++ hypotheses ++ view.args.drop (majorPosition + 1))
 
 
@@ -123,3 +135,4 @@ def psReduceQuotientIota (reduce : PsExpr → PsExpr) (environment : PsEnvironme
       let field ← constructor.args[2]?
       let minor ← view.args[3]?
       return psReduceApply (.app minor field) (view.args.drop (majorPosition + 1))
+

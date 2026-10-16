@@ -117,7 +117,7 @@ The earlier PSC2 self-host bootstrap plan formerly stored at this path is retain
 
 ### 3.1 A single, group-aware inductive and recursion owner (M3+B)
 
-`Ps.Core.InductiveGroup` now owns an ordered group plan: family order determines motive order, and each family's constructor order determines its segment of the common minor telescope. Existing retained recursor metadata owns explicit group membership. `Ps.Elab.Data.psElabInductiveGroup` stages common headers and constructors, builds all motives before all minors, and reuses the same path for singleton declarations. `Ps.Bridge.CheckedAdmissions` checks unique related records and serializes one atomic official inductive batch. This candidate is qualified separately from future consumers. Constructor-only singleton compatibility retains no claim of explicit mutual membership.
+`Ps.Core.InductiveGroup` now owns an ordered group plan: family order determines motive order, and each family's constructor order determines its segment of the common minor telescope. Existing retained recursor metadata owns explicit group membership. `Ps.Elab.Data.psElabInductiveGroup` stages common headers and constructors, builds all motives before all minors, and reuses the same path for singleton declarations. `Ps.Bridge.CheckedAdmissions` checks unique related records and serializes one atomic official inductive batch. `Ps.Meta.Iota` consumes the same ordered plan for global minor offsets and cross-family recursive hypotheses, preserving common arguments and each family's own indices. Independent kernel equations and portable reduction comparisons qualify this candidate separately from source and runtime consumers. Constructor-only singleton compatibility retains no claim of explicit mutual membership.
 
 The shared owner and its remaining consumer obligations are:
 
@@ -153,7 +153,7 @@ Project source imports and public/private interfaces are implemented for bounded
 | Area | Lean 4.35 architectural fact | PSC0 current / target judgment |
 | --- | --- | --- |
 | Meta/elaboration | Rich dependent metavariable solver, tabled typeclass resolution, incremental command processing | Native solver and scopes exist; selected subset is intentional, but broad completeness/tooling is behind Lean |
-| Inductives/termination | Group-aware inductive elaboration, recursors, structural/WF/partial/fixpoint strategies | Shared native group formation and atomic admission candidate; group reduction/match/deriving/runtime consumers and total WF recursion remain critical |
+| Inductives/termination | Group-aware inductive elaboration, recursors, structural/WF/partial/fixpoint strategies | Shared native group formation, atomic admission and portable reduction candidate; group match/deriving/runtime consumers and total WF recursion remain critical |
 | Kernel | Small mature checking kernel | Correct choice: **reuse official Lean**, never replace or bypass it in active PSC0 |
 | Compiler optimizer | LCNF, pure/monomorphic/impure stages, pass validation and mature runtime | Checked expression IR + specialization are real, but not yet equivalent in pass structure or performance |
 | Backend/ABI | Native-oriented runtime/foreign interfaces | PSC0's direct JS/TS/Rust/GC/components are a real specialized portability advantage on supported cases |

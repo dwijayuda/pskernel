@@ -45,6 +45,12 @@ mutual
     | wrap (n : Nat) (left : M3DependentLeft B b) : M3DependentRight B b n
 end
 
+def m3DependentOracle : M3DependentRight Nat 7 5 → Nat :=
+  @M3DependentRight.rec Nat 7 (fun _ => Nat) (fun _ _ => Nat)
+    0 (fun _ ih => Nat.succ ih) (fun n _ ih => Nat.add n ih) 5
+
+example : m3DependentOracle (.wrap 5 (.next (.wrap 0 .stop))) = 6 := rfl
+
 namespace M3InductiveGroups
 
 private def ensure (condition : Bool) (message : String) : IO Unit :=
@@ -157,12 +163,52 @@ private def groupProbe : PsExpr :=
   call (psNameAppendStr left "rec") [.succ .zero, .zero]
     [nat, motiveLeft, motiveRight, .lit (.natural 0), minorLeft, minorRight, value]
 
-private def reductionWitness : PsDeclaration :=
+-- Start from the second family, whose minor segment is not at zero. Recursion
+-- crosses from one index to no indices and back while retaining both shared
+-- dependent parameters. The two nontrivial minors have different equations.
+private def dependentProbe : PsExpr :=
   let nat := PsExpr.constE psNatName []
-  let two := PsExpr.lit (.natural 2)
-  let proposition := call psEqName [.succ .zero] [nat, groupProbe, two]
-  let proof := call psEqReflName [.succ .zero] [nat, two]
-  .theoremDecl (psRootName "M3GroupReductionWitness") [] proposition proof
+  let seven := PsExpr.lit (.natural 7)
+  let zero := PsExpr.lit (.natural 0)
+  let five := PsExpr.lit (.natural 5)
+  let left := psRootName "M3DependentLeft"
+  let right := psRootName "M3DependentRight"
+  let leftType := call left [] [nat, seven]
+  let rightType := fun n => call right [] [nat, seven, n]
+  let motiveLeft := PsExpr.lam (psRootName "x") leftType nat .explicit
+  let motiveRight := PsExpr.lam (psRootName "n") nat
+    (.lam (psRootName "x") (rightType (.bvar 0)) nat .explicit) .explicit
+  let minorLeft := PsExpr.lam (psRootName "right") (rightType zero)
+    (.lam (psRootName "ih") nat (call psNatSuccName [] [.bvar 0]) .explicit) .explicit
+  let minorRight := PsExpr.lam (psRootName "n") nat
+    (.lam (psRootName "left") leftType
+      (.lam (psRootName "ih") nat (call psNatAddName [] [.bvar 2, .bvar 0]) .explicit)
+      .explicit) .explicit
+  let empty := call (psNameAppendStr left "stop") [] [nat, seven]
+  let inner := call (psNameAppendStr right "wrap") [] [nat, seven, zero, empty]
+  let middle := call (psNameAppendStr left "next") [] [nat, seven, inner]
+  let value := call (psNameAppendStr right "wrap") [] [nat, seven, five, middle]
+  call (psNameAppendStr right "rec") [.succ .zero]
+    [nat, seven, motiveLeft, motiveRight, zero, minorLeft, minorRight, five, value]
+
+private def reductionWitness (name : String) (probe : PsExpr) (result : Nat) : PsDeclaration :=
+  let nat := PsExpr.constE psNatName []
+  let expected := PsExpr.lit (.natural result)
+  let proposition := call psEqName [.succ .zero] [nat, probe, expected]
+  let proof := call psEqReflName [.succ .zero] [nat, expected]
+  .theoremDecl (psRootName name) [] proposition proof
+
+private def portableEnvironment (declarations : List PsDeclaration) : IO PsEnvironment :=
+  fromExcept ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations).mapError elabMessage)
+
+private def portableReduction (environment : PsEnvironment) (probe : PsExpr) (result : Nat) : IO Unit :=
+  ensure (psExprAlphaEq (psWhnf environment psMetaEmpty psLocalEmpty probe) (.lit (.natural result)))
+    "portable group reduction differs from the independent checked Lean equation"
+
+private def expectIotaRefusal (declarations : List PsDeclaration) (probe : PsExpr) : IO Unit := do
+  let environment ← portableEnvironment declarations
+  ensure (psReduceIota (fun value => value) environment probe).isNone
+    "malformed group metadata or a wrong-family major acquired an iota rule"
 
 private def expectDataRefusal (text expected : String) : IO Unit := do
   match elaborate text with
@@ -196,7 +242,8 @@ def main : IO Unit := do
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
   let checked ← check prelude
-    (group.declarations ++ signatureWitnesses group.declarations ++ [reductionWitness])
+    (group.declarations ++ signatureWitnesses group.declarations ++
+      [reductionWitness "M3GroupReductionWitness" groupProbe 2])
   kernelShape checked (psNameAppendStr (psRootName "M3GroupLeft") "rec") 2 3 0
   kernelShape checked (psNameAppendStr (psRootName "M3GroupRight") "rec") 2 3 0
   let checkedIndexed ← check prelude (indexed.declarations ++ signatureWitnesses indexed.declarations)
@@ -207,7 +254,9 @@ def main : IO Unit := do
   for declaration in prop.declarations do
     if let .recursorDecl info := declaration then
       ensure info.levelParams.isEmpty "mutual Prop incorrectly acquired large elimination"
-  let checkedDependent ← check prelude (dependent.declarations ++ signatureWitnesses dependent.declarations)
+  let checkedDependent ← check prelude
+    (dependent.declarations ++ signatureWitnesses dependent.declarations ++
+      [reductionWitness "M3DependentReductionWitness" dependentProbe 6])
   kernelShape checkedDependent (psNameAppendStr (psRootName "M3DependentLeft") "rec") 2 3 0
   kernelShape checkedDependent (psNameAppendStr (psRootName "M3DependentRight") "rec") 2 3 1
 
@@ -250,17 +299,46 @@ def main : IO Unit := do
     | _ => true
   expectCodecRefusal missing
 
-  -- Official Lean reduction above is accepted. Portable multi-motive iota,
-  -- source matching, and runtime consumers remain explicit unsupported work.
-  let environment ← fromExcept ((psAddDeclarationList psSelfHostProdPreludeEnvironment group.declarations).mapError elabMessage)
-  ensure (psReduceIota (fun value => value) environment groupProbe).isNone
-    "portable group iota was enabled without its checked recursive-call plan"
+  let wrongLevels := group.declarations.map fun declaration =>
+    match declaration with
+    | .recursorDecl info =>
+      if psNameEq info.name (psNameAppendStr (psRootName "M3GroupRight") "rec") then
+        .recursorDecl { info with levelParams := info.levelParams.reverse }
+      else declaration
+    | _ => declaration
+  expectCodecRefusal wrongLevels
+  expectIotaRefusal conflicting groupProbe
+  expectIotaRefusal missing groupProbe
+  expectIotaRefusal wrongLevels groupProbe
+  let wrongOrdinal := group.declarations.map fun declaration =>
+    match declaration with
+    | .constructorDecl info =>
+      if psNameEq info.name (psNameAppendStr (psRootName "M3GroupLeft") "link") then
+        .constructorDecl { info with constructorIndex := 0 }
+      else declaration
+    | _ => declaration
+  expectIotaRefusal wrongOrdinal groupProbe
+  let nat := PsExpr.constE psNatName []
+  let nil := call (psNameAppendStr (psRootName "M3GroupLeft") "nil") [.zero] [nat]
+  let wrongMajor := call (psNameAppendStr (psRootName "M3GroupRight") "join") [.zero] [nat, nil]
+  let probeView := psReduceAppView groupProbe
+  expectIotaRefusal group.declarations (psReduceApply probeView.head (probeView.args.take 6 ++ [wrongMajor]))
+
+  -- The same closed Core expressions have checked kernel equations above.
+  -- Portable conversion now agrees; source matching and runtime remain gated
+  -- on their still-single-family consumers.
+  let environment ← portableEnvironment group.declarations
+  portableReduction environment groupProbe 2
+  let dependentEnvironment ← portableEnvironment dependent.declarations
+  portableReduction dependentEnvironment dependentProbe 6
   ensure (psRecursorApplication environment groupProbe).isNone
     "single-family runtime view accepted a mutual recursor"
+  ensure (psRecursorApplication dependentEnvironment dependentProbe).isNone
+    "single-family runtime view accepted an indexed mutual recursor"
   let program ← fromExcept (psPscv0ParseProgram
     "function m3GroupMatch(x: M3GroupLeft(Nat)): Nat := match x with { | M3GroupLeft.nil => 0 | M3GroupLeft.link value next => 1 }\n")
   match psElabProgramWithOrigins environment program with
   | .error error => ensure (matchRefused error) ("wrong group match refusal: " ++ elabMessage error)
   | .ok _ => throw (IO.userError "source group match silently enabled")
-  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures and independent recursive equation; malformed groups and unfinished consumers refused"
+  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures and portable group reduction against independent checked equations; malformed groups and unfinished Match/runtime consumers refused"
 

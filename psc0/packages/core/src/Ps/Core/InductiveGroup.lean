@@ -1,7 +1,7 @@
 import Ps.Core.Declaration
 
--- Ordered declaration-group shape, shared by elaboration and canonical
--- admission. This is a plan, not kernel acceptance or a proof capability.
+-- Ordered declaration-group shape, shared by elaboration, canonical admission
+-- and reduction. This is a plan, not kernel acceptance or a proof capability.
 -- Family order owns motive order; constructor order within each family owns
 -- its segment of the common minor telescope (Lean kernel/inductive.cpp).
 structure PsInductiveGroupPlan where
@@ -18,6 +18,15 @@ def psInductiveGroupFind (plan : PsInductiveGroupPlan) (name : PsName) : Option 
 
 def psInductiveGroupNumMinors (plan : PsInductiveGroupPlan) : Nat :=
   plan.members.foldl (fun count info => count + info.constructors.length) 0
+
+def psInductiveGroupMinorOffsetFrom : List PsInductiveInfo → PsName → Nat → Option Nat
+  | [], _, _ => none
+  | member :: rest, name, offset =>
+    if psNameEq member.name name then some offset
+    else psInductiveGroupMinorOffsetFrom rest name (offset + member.constructors.length)
+
+def psInductiveGroupMinorOffset (plan : PsInductiveGroupPlan) (name : PsName) : Option Nat :=
+  psInductiveGroupMinorOffsetFrom plan.members name 0
 
 def psInductiveGroupHeaderShapeValid (plan : PsInductiveGroupPlan) : Bool :=
   match plan.members with
@@ -56,6 +65,12 @@ def psInductiveGroupPlanFor
         | some recursor =>
           if !psInductiveGroupRecursorShapeValid plan member recursor then none
           else pure ()
+          -- Every recursive call reuses the caller's universe arguments.
+          -- Pinned mk_rec_rules uses one ordered recursor level layout for
+          -- the entire group; a differing retained layout must stay stuck.
+          if let some anchor := ownRecursor then
+            if !psInductiveGroupNamesEqual recursor.levelParams anchor.levelParams then none
+            else pure ()
         | none =>
           -- Constructor-only singleton declarations are used by the checked
           -- nested bridge's private unit family. A group always has recursors.

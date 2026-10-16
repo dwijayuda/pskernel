@@ -319,8 +319,9 @@ def psElabInductiveGroupContext (first header : PsElabInductiveHeader)
     match bindersRev.find? (fun binder => binder.id == psLocalDeclId declaration), declaration with
     | some binder, .binding id _ type kind => .binding id binder.name type kind
     | _, _ => declaration
-  { bindersRev, context := { first.context with environment, infoRev := []
-      localContext := { first.context.localContext with declarations } } }
+  let localContext := { first.context.localContext with declarations := declarations }
+  let context := { first.context with environment := environment, infoRev := [], localContext := localContext }
+  { bindersRev := bindersRev, context := context }
 
 -- Native group entry point. The existing .ps singleton/structure entry point
 -- below uses this same pipeline. This does not expand v7.2's source mutual

@@ -106,7 +106,6 @@ def psKernelC0InstOneMemoGo
                     (.app fn arg) replacement offset := by
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← f.source, ← a.source]
-                rfl
               psKernelC0InstOneMemoStore m2 ⟨result, equality⟩
           | .lam name ty body info =>
               let (t, m1) := psKernelC0InstOneMemoGo replacement ty offset memo
@@ -120,7 +119,6 @@ def psKernelC0InstOneMemoGo
                     (.lam name ty body info) replacement offset := by
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← t.source, ← b.source]
-                rfl
               psKernelC0InstOneMemoStore m2 ⟨result, equality⟩
           | .forallE name ty body info =>
               let (t, m1) := psKernelC0InstOneMemoGo replacement ty offset memo
@@ -134,7 +132,6 @@ def psKernelC0InstOneMemoGo
                     (.forallE name ty body info) replacement offset := by
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← t.source, ← b.source]
-                rfl
               psKernelC0InstOneMemoStore m2 ⟨result, equality⟩
           | .letE name ty value body nondep =>
               let (t, m1) := psKernelC0InstOneMemoGo replacement ty offset memo
@@ -150,7 +147,6 @@ def psKernelC0InstOneMemoGo
                     (.letE name ty value body nondep) replacement offset := by
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← t.source, ← v.source, ← b.source]
-                rfl
               psKernelC0InstOneMemoStore m3 ⟨result, equality⟩
           | .mdata md body =>
               let (b, m1) := psKernelC0InstOneMemoGo replacement body offset memo
@@ -161,7 +157,6 @@ def psKernelC0InstOneMemoGo
                     (.mdata md body) replacement offset := by
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← b.source]
-                rfl
               psKernelC0InstOneMemoStore m1 ⟨result, equality⟩
           | .proj name i body =>
               let (b, m1) := psKernelC0InstOneMemoGo replacement body offset memo
@@ -172,7 +167,6 @@ def psKernelC0InstOneMemoGo
                     (.proj name i body) replacement offset := by
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← b.source]
-                rfl
               psKernelC0InstOneMemoStore m1 ⟨result, equality⟩
           | other =>
               let value := psKernelC0ExprInstantiateOneChanged other replacement offset

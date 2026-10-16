@@ -1,0 +1,126 @@
+name: PSKernel-C0 source-proved DefEq pair hash integration A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-pair-hash-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-pair-bucket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    strategy:
+      fail-fast: false
+      matrix:
+        pair_mode: [adaptive, shared]
+    env:
+      C0_PAIR_MODE: ${{ matrix.pair_mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Official Lean 4.35 confirms pinned exact WF proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/wf-pair-hash.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-pair-hash.ndjson" > "$RUNNER_TEMP/wf-pair-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/wf-pair-hash.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-pair-hash.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-pair-hash.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-pair-official.txt"
+          echo "C0_PAIR_HASH_PINNED official=accepted exact_records=15758"
+      - name: Test only proof-equivalent native pair hash compiler replacement in disposable checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          pkg=Path("psc0/packages/pskernel-c0")
+          mode=os.environ["C0_PAIR_MODE"]
+          assert mode in ("adaptive","shared")
+          cache=pkg/"src/Ps/KernelCore/Runtime/Acceleration/Cache.lean"
+          extra=pkg/"src/Ps/KernelCore/Architecture/CertifiedDefEqPairHash.lean"
+          source=cache.read_text()
+          other=extra.read_text()
+          beginning="import Ps.KernelCore.Runtime.Acceleration.Cache\n"
+          assert other.startswith(beginning)
+          assert source.count("\nabbrev PsKernelExprPairSetIndex :=")==1
+          assert "psKernelC0AdaptivePairHash_source" in other
+          target=("psKernelC0AdaptivePairHash" if mode=="adaptive"
+                  else "psKernelC0MemoizedPairHash")
+          proof=target+"_source"
+          comp=("\n/-- Proof-checked compiler replacement in disposable checkout only. -/\n"
+                "@[csimp] theorem psKernelExprPairHash_nativeCSimp :\n"
+                "    @psKernelExprPairHash = @"+target+" := by\n"
+                "  funext left right\n"
+                "  exact ("+proof+" left right).symm\n")
+          source=source.replace("\nabbrev PsKernelExprPairSetIndex :=",
+            "\n"+other[len(beginning):]+"\n"+comp+"\nabbrev PsKernelExprPairSetIndex :=")
+          cache.write_text(source)
+          extra.write_text(beginning+
+            "\n/-! The original source proof and verified pair hash are\n"
+            "temporarily hosted by Cache in this disposable A/B build. -/\n")
+          print("C0_PAIR_HASH_ABLATION mode="+mode+" exact_source_csimp=Lean_checked")
+          PY
+          (cd psc0/packages/pskernel-c0 &&
+            lake build c0OfficialReplay)
+      - name: Preserve full source hash theorem and negative kernel fixtures
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0CertifiedDefEqPairHashRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_PAIR_HASH_NEGATIVES=passed source_proofs=Lean_verified"
+      - name: Require pinned WF acceptance or report timeout with no invented verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-pair-resources.txt" \
+              timeout 300s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-pair-hash.ndjson" 4096) \
+              > "$RUNNER_TEMP/wf-pair-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_PAIR_HASH_EXIT=$rc mode=$C0_PAIR_MODE"
+          grep 'C0_REAL_EXPORT replay_outcome' "$RUNNER_TEMP/wf-pair-c0.txt" | tail -n 2 || true
+          if test "$rc" -eq 0 &&
+              grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' \
+                 "$RUNNER_TEMP/wf-pair-c0.txt"; then
+            echo "C0_PAIR_HASH_RESULT=accepted_exact_WF_proof_candidate"
+          else
+            echo "C0_PAIR_HASH_RESULT=unqualified_timeout_or_other_nonacceptance"
+            tail -n 18 "$RUNNER_TEMP/wf-pair-c0.txt"
+          fi
+          cat "$RUNNER_TEMP/wf-pair-resources.txt" | grep -E 'Elapsed \(wall clock\)|Maximum resident set size|Exit status' || true
+          echo "C0_PAIR_HASH_SCOPE=disposable_source_unmodified_production"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pair-hash-${{ matrix.pair_mode }}
+          path: |
+            ${{ runner.temp }}/wf-pair-official.txt
+            ${{ runner.temp }}/wf-pair-c0.txt
+            ${{ runner.temp }}/wf-pair-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

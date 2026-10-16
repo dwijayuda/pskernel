@@ -98,7 +98,7 @@ jobs:
               badK=copy.deepcopy(rec)
               badK["inductive"]["recs"][0]["k"]=not badK["inductive"]["recs"][0]["k"]
               for label, forged in (("duplicateRecName",duplicate),("forgedRecK",badK)):
-                  mutated=b"".join(original[:i])+(json.dumps(forged,ensure_ascii=False,separators=(",",":"))+"\\n").encode()
+                  mutated=b"".join(original[:i])+(json.dumps(forged,ensure_ascii=False,separators=(",",":"))+"\n").encode()
                   (temp/f"arena435-{label}.ndjson").write_bytes(mutated)
               print(f"C0_ARENA_MUTUAL_PREFIX records={i+1} exported_recursor_order=reversed native_versions=unchanged")
               found=True

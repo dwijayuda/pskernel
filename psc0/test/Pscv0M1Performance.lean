@@ -3,6 +3,53 @@ import Ps.BackendEcma.Lower
 
 open Lean (toJson)
 
+-- This is source-strategy qualification, not partial runtime or proof admission.
+private def checkV72PartialGrammar : IO Unit := do
+  for (source, privateExpected) in [
+      ("partial def spin(n: Nat): Nat := spin(n)\n", false),
+      ("partial function spin(n: Nat): Nat := spin(n)\n", false),
+      ("partial function spin(): Nat := spin()\n", false),
+      ("private partial function spin(n: Nat): Nat := spin(n)\n", true)] do
+    let program ← match psPscv0ParseProgram source with
+      | .ok value => pure value
+      | .error message => throw (IO.userError ("v7.2 partial source: " ++ message))
+    let declaration ← match program.commands with
+      | [.declaration value] =>
+        if privateExpected then throw (IO.userError "partial privacy lost") else pure value
+      | [.privateDeclaration value] =>
+        if privateExpected then pure value else throw (IO.userError "unexpected private partial")
+      | _ => throw (IO.userError "partial command shape changed")
+    match declaration with
+    | .partialDefinition name _ _ _ span =>
+      if name.segments != ["spin"] || span.start.byteOffset != (if privateExpected then 8 else 0) then
+        throw (IO.userError "partial name/modifier source span was not retained")
+    | _ => throw (IO.userError "partial strategy was erased to a total definition")
+  for (source, expected) in [
+      ("partial const x: Nat := 0\n", "PSCV0-TERM-02-HEAD"),
+      ("partial theorem x: True := True.intro\n", "PSCV0-TERM-02-HEAD"),
+      ("partial partial def x: Nat := 0\n", "PSCV0-REC-STRATEGY-01"),
+      ("partial unsafe def x: Nat := 0\n", "PSCV0-REC-STRATEGY-01"),
+      ("unsafe partial def x: Nat := 0\n", "PSCV0-REC-STRATEGY-01"),
+      ("partial noncomputable def x: Nat := 0\n", "PSCV0-REC-STRATEGY-01"),
+      ("partial def spin(n: Nat): Nat := spin(n)\npartial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      ("partial def spin(n: Nat): Nat := spin(n)\ntermination_by n\n", "PSCV0-REC-STRATEGY-01"),
+      ("partial_fixpoint def spin(n: Nat): Nat := spin(n)\n", "PSCV0-FIXPOINT-01")] do
+    match psPscv0ParseProgram source with
+    | .ok _ => throw (IO.userError ("v7.2 invalid strategy accepted: " ++ source))
+    | .error message =>
+      if !message.startsWith expected then
+        throw (IO.userError ("v7.2 strategy rejected for wrong rule: " ++ message))
+  let surface ← match psPscv0ParseSource true "partial def spin(n: Nat): Nat := spin(n)\n" with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  let lowered ← match psPscv0LowerModule surface with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  match lowered.declarations with
+  | [.partialDefinition ..] => pure ()
+  | _ => throw (IO.userError "source translation discarded partial strategy")
+  IO.println "PSCV0_V72_PARTIAL_SOURCE: PASS def/function/nullary/private ownership, modifier conflicts and retained strategy; runtime admission remains pending"
+
 -- Focused M3 emitter boundary checks; existing measurement workloads below are
 -- unchanged. These are recognizer checks, not a compiler-preservation proof.
 private def checkEcmaLowering : IO Unit := do
@@ -104,6 +151,7 @@ private def timingJson (t : PsV7Native.Timings) : Lean.Json :=
     ("eraseMs", toJson t.eraseMs), ("emitMs", toJson t.emitMs)]
 
 def main (args : List String) : IO Unit := do
+  checkV72PartialGrammar
   checkEcmaLowering
   let directory := System.FilePath.mk (args.headD "../dist/pscv0-native/m1-performance")
   IO.FS.createDirAll directory
@@ -121,6 +169,12 @@ def main (args : List String) : IO Unit := do
   requests := requests.push {
     source := runtimeSource, sourceName := "runtime.ps",
     outputStem := "runtime", targets := [.javascript] }
+  -- Share the existing prepared Standard batch, after measured requests. A
+  -- parsed partial body must not reach any executable target before admission.
+  requests := requests.push {
+    source := "partial function spin(n: Nat): Nat := spin(n)\n"
+    sourceName := "v72-partial-pending.ps", outputStem := "v72-partial-pending"
+    targets := [.javascript, .typescript, .rust] }
   IO.FS.writeFile (directory / "runtime.ps") runtimeSource
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
@@ -128,19 +182,27 @@ def main (args : List String) : IO Unit := do
   let mut compilerRows := #[]
   for i in [:batch.results.size] do
     let some outcome := batch.results[i]? | throw (IO.userError "M1 benchmark result missing")
-    let result ← match outcome with
-      | .ok value => pure value
-      | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
-    if let some (count, indexed) := labels[i]? then
-      compilerRows := compilerRows.push (Lean.Json.mkObj [
-        ("count", toJson count), ("indexed", toJson indexed),
-        ("trial", toJson (i % 4)), ("timings", timingJson result.timings)])
+    if i == labels.size + 1 then
+      match outcome with
+      | .ok _ => throw (IO.userError "partial executable admitted before logical/runtime separation")
+      | .error error =>
+        if error.phase != "elaborate" || !error.message.startsWith "PSCV0-UNSUPPORTED-SOURCE-TERM" then
+          throw (IO.userError ("partial rejected at wrong staged boundary: " ++ error.phase ++ ": " ++ error.message))
+        IO.println "PSCV0_V72_PARTIAL_ADMISSION: PASS explicit staged elaboration refusal; no executable result"
     else
-      for artifact in result.artifacts do
-        for file in artifact.files do
-          match file.payload with
-          | .text value => IO.FS.writeFile (directory / file.path) value
-          | .binary value => IO.FS.writeBinFile (directory / file.path) value
+      let result ← match outcome with
+        | .ok value => pure value
+        | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
+      if let some (count, indexed) := labels[i]? then
+        compilerRows := compilerRows.push (Lean.Json.mkObj [
+          ("count", toJson count), ("indexed", toJson indexed),
+          ("trial", toJson (i % 4)), ("timings", timingJson result.timings)])
+      else
+        for artifact in result.artifacts do
+          for file in artifact.files do
+            match file.payload with
+            | .text value => IO.FS.writeFile (directory / file.path) value
+            | .binary value => IO.FS.writeBinFile (directory / file.path) value
   let report := Lean.Json.mkObj [
     ("schema", toJson ("pscv0-m1-performance/1" : String)),
     ("leanCommit", toJson Lean.githash), ("leanVersion", toJson Lean.versionString),

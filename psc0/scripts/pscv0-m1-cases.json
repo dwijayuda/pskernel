@@ -186,9 +186,9 @@
       "error": "PSCV0-PARSE"
     },
     {
-      "name": "retired grammar",
-      "source": "partial def sample: Nat := 0\n",
-      "error": "PSCV0-PARTIAL-EXCLUDED"
+      "name": "v7.2 partial const head is forbidden",
+      "source": "partial const sample: Nat := 0\n",
+      "error": "PSCV0-TERM-02-HEAD"
     }
   ]
 }

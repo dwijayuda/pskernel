@@ -90,7 +90,13 @@ def psPscv0AttachDeclaration (proofScript : Bool) (tokens : List PsToken)
   | Except.error error => Except.error error
   | Except.ok _ =>
       match declaration with
-      | .partialDefinition _ _ _ _ _ => Except.error "PSCV0-PARTIAL-EXCLUDED"
+      | .partialDefinition _ _ _ value span =>
+          -- Preserve source strategy. The flat translator does not silently
+          -- route partial typed-do through its older Except-only adapter.
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: partial do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
       | .definition _ binders type value span =>
           let keyword := psPscv0TokenTextAt tokens span.start.byteOffset;
           let block := psPscv0BodyBlock blocks value;
@@ -188,9 +194,8 @@ def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
     | .declaration declaration | .registeredDeclaration declaration _
     | .privateDeclaration declaration | .privateRegisteredDeclaration declaration _
     | .derivingDeclaration declaration _ _ =>
-      match declaration with
-      | .partialDefinition .. => throw "PSCV0-PARTIAL-EXCLUDED"
-      | _ => pure ()
+      -- Partial strategy is retained by the AST; executable admission belongs
+      -- to elaboration/model preparation, not a historical blanket parse ban.
       for term in psPscv0DeclarationTerms declaration do
         psPscv0ValidateTermWithFuel input.tokens 4096 term
     | .variableCmd binders _ =>
@@ -212,12 +217,12 @@ def psPscv0PrintBinders (proofScript : Bool)
     | Except.error _ => Except.error "PSCV0-BINDER-PRINT-UNSUPPORTED"
     | Except.ok text => Except.ok text
   else
-    match psListMapExcept psPscv0PrintLeanBinder binders with
+    match psListMapExcept psPrintLeanBinder binders with
     | Except.error _ => Except.error "PSCV0-BINDER-PRINT-UNSUPPORTED"
     | Except.ok texts => Except.ok (psPrintLeanSpaceJoinedSuffix texts)
 
 def psPscv0PrintResultType (proofScript : Bool) (type : PsSyntaxTerm) : Except String String :=
-  if proofScript then psPscv0PrintTerm true type
+  if proofScript then psPscv0PrintTerm proofScript type
   else
     match psPscv0PrintLeanType type with
     | Except.error _ => Except.error "PSCV0-RESULT-TYPE-PRINT-UNSUPPORTED"

@@ -45,7 +45,7 @@ def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor) :
   else pure cursor
   let some token := psTokenCursorPeek cursor | throw "PSCV0-PRIVATE-DECLARATION-MISSING"
   if isPrivate && !["instance", "abbrev", "opaque", "class", "def", "const",
-      "function", "theorem", "structure", "inductive"].contains token.text then
+      "function", "theorem", "structure", "inductive", "partial", "unsafe", "noncomputable"].contains token.text then
     throw "PSCV0-PRIVATE-DECLARATION-EXPECTED"
   if token.text == "instance" then
     let parsed ← (psPscv0ReadInstance cursor).mapError psPscv0ParseError

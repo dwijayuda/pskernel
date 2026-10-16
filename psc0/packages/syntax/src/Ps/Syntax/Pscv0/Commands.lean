@@ -53,10 +53,40 @@ def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
   (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
 
+-- v7.2 head ownership is separate from execution admission. The body stays in
+-- partialDefinition; it is never relabeled as a total logical definition.
+-- Lean 4.35.0 Command.declModifiers and PreDefinition.addAndCompilePartial
+-- separate these same syntactic/semantic responsibilities. PSCV0's selected
+-- modifier matrix is deliberately narrower than unrestricted native Lean.
+def psPscv0ReadSpecialDeclaration (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxDeclaration) := do
+  let some marker := psTokenCursorAdvance cursor | throw "PSCV0-DECLARATION-MISSING"
+  let some head := psTokenCursorPeek marker.cursor | throw "PSCV0-REC-STRATEGY-01: missing declaration head"
+  if ["partial", "unsafe", "noncomputable"].contains head.text then
+    throw "PSCV0-REC-STRATEGY-01: duplicate or combined special modifiers"
+  if !["def", "function"].contains head.text then
+    throw "PSCV0-TERM-02-HEAD: special modifier requires def or function"
+  if marker.token.text != "partial" then
+    throw ("PSCV0-FEATURE-UNAVAILABLE: " ++ marker.token.text ++ " requires selected semantic admission")
+  let parsed ← psPscv0ReadValueDeclaration marker.cursor
+  let .definition name binders type value span := parsed.value
+    | throw "PSCV0-TERM-02-HEAD: expected function-like declaration"
+  if ["partial_fixpoint", "termination_by", "decreasing_by"].any
+      (psTokenCursorAtText parsed.cursor) then
+    throw "PSCV0-REC-STRATEGY-01: partial modifier cannot own a total or fixedpoint suffix"
+  -- Local where construction is a separate pending source family; do not
+  -- swallow it or lose its ownership while introducing the partial prefix.
+  if psTokenCursorAtText parsed.cursor "where" then
+    throw "PSCV0-FEATURE-UNAVAILABLE: partial where declarations"
+  return { parsed with value := .partialDefinition name binders type value
+    { start := marker.token.span.start, stop := span.stop } }
+
 def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
-  if psTokenCursorAtText cursor "partial" then Except.error "PSCV0-PARTIAL-EXCLUDED"
-  else if psTokenCursorAtText cursor "unsafe" then Except.error "PSCV0-UNSAFE-EXCLUDED"
+  if ["partial", "unsafe", "noncomputable"].any (psTokenCursorAtText cursor) then
+    psPscv0ReadSpecialDeclaration cursor
+  else if psTokenCursorAtText cursor "partial_fixpoint" then
+    Except.error "PSCV0-FIXPOINT-01: partial_fixpoint is a post-body suffix, not a declaration head"
   else if psTokenCursorAtText cursor "axiom" then Except.error "PSCV0-SOURCE-AXIOM-EXCLUDED"
   else if psTokenCursorAtText cursor "verify" then Except.error "PSCV0-VERIFY-REMOVED"
   else if psTokenCursorAtText cursor "ghost" then Except.error "PSCV0-GHOST-REMOVED"
@@ -66,7 +96,7 @@ def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
   else if psTokenCursorAtText cursor "structure" then psPscv0ReadSelectedDeclaration cursor
   else if psTokenCursorAtText cursor "inductive" then psPscv0ReadSelectedDeclaration cursor
   else if psTokenCursorAtText cursor "theorem" then psPscv0ReadValueDeclaration cursor
-  else Except.error "PSCV0-V7-COMMAND-NOT-YET-SUPPORTED"
+  else Except.error "PSCV0-COMMAND-NOT-YET-SUPPORTED"
 
 def psPscv0ReadDeclarations (fuel : Nat) (cursor : PsTokenCursor)
     (declarationsRev : List PsSyntaxDeclaration) : Except String (List PsSyntaxDeclaration) :=

@@ -1,0 +1,41 @@
+name: PSKernel-C0 metatheory semantic repair parity
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-metatheory-parity.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/**'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/EnvironmentIndex.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Inductive/**'
+      - 'psc0/packages/pskernel-c0/test/C0MetatheoryScopeRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0MetatheoryAdmissionRegression.lean'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  semantic-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Validate pinned C0 semantic source without optional architecture proof roots
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build Ps.KernelCore.Admission.Inductive.Mutual.Analysis
+          lake env lean --run test/C0MetatheoryScopeRegression.lean
+          lake env lean --run test/C0MetatheoryAdmissionRegression.lean
+          echo "C0_METATHEORY_PARITY native_source=pass cache_scope=pass raw_pi=pass root_bucket=pass"

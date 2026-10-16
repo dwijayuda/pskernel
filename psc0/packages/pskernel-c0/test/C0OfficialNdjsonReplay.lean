@@ -238,6 +238,22 @@ def c0ExportSameNames (xs ys : List PsKernelName) : Bool :=
   xs.length == ys.length &&
     (xs.zip ys).all (fun (x, y) => psKernelNameEq x y)
 
+/-- Recursor declarations in the exporter may appear in a different order
+    from their source mutual-inductive types (Lean 4.35 exports them in
+    dependency order). Require the SAME exact multiset of names, including
+    multiplicities: never drop or synthesize a generated recursor. Post-
+    admission metadata checks still compare every generated recursor's
+    name, universes, exact type, K flag, arity and reduction rules. -/
+def c0ExportSameRecursorNameFamily
+    (actual expected : List PsKernelName) : Bool :=
+  actual.length == expected.length &&
+    actual.all (fun name =>
+      (actual.filter (fun x => psKernelNameEq x name)).length ==
+      (expected.filter (fun y => psKernelNameEq y name)).length) &&
+    expected.all (fun name =>
+      (actual.filter (fun x => psKernelNameEq x name)).length ==
+      (expected.filter (fun y => psKernelNameEq y name)).length)
+
 def c0ExportSameBase (a b : PsKernelConstantBase) : Bool :=
   psKernelNameEq a.name b.name &&
   c0ExportSameNames a.levelParams b.levelParams &&
@@ -413,7 +429,8 @@ def c0ExportReadInductiveGroup
   -- auxiliary names: do not guess their spelling here. Instead, every
   -- exported recursor is checked *after* independent native generation,
   -- including its type, motive/indices, constructor rules and safety.
-  if !hasNested && !c0ExportSameNames recNames generatedNames then
+  if !hasNested &&
+      !c0ExportSameRecursorNameFamily recNames generatedNames then
     throw "unsupported NDJSON recursor family is not canonical"
   let toCtor (c : PsKernelConstructorInfo) :
       PsKernelSimpleConstructorDecl :=
@@ -2046,6 +2063,21 @@ def c0ExportRequireAccepted (outcome : C0ExportVerdict) : Except String Unit :=
   if outcome == .accepted then .ok ()
   else .error s!"C0_REAL_EXPORT_STRICT_FAILURE verdict={repr outcome}"
 
+/-- Adversarial multiset sanity: accept a genuine reordered mutual
+    recursor export, never accept missing or duplicated recursor names. -/
+def c0ExportRecursorNameFamilyRegression : IO Unit := do
+  let a : PsKernelName := .str .anonymous "RecA.rec"
+  let b : PsKernelName := .str .anonymous "RecB.rec"
+  let c : PsKernelName := .str .anonymous "RecC.rec"
+  if !c0ExportSameRecursorNameFamily [b, a] [a, b] ||
+      !c0ExportSameRecursorNameFamily [a, b] [a, b] ||
+      c0ExportSameRecursorNameFamily [a, a] [a, b] ||
+      c0ExportSameRecursorNameFamily [a] [a, b] ||
+      c0ExportSameRecursorNameFamily [a, b] [a, c] ||
+      c0ExportSameRecursorNameFamily [a, b, b] [a, b, c] then
+    throw (IO.userError "mutual recursor exact name multiset regression")
+  IO.println "C0_RECURSOR_NAME_MANIFEST order_independent=pass multiplicity=exact forged_names=denied"
+
 /-- Opt-in strict admission CLI; unchanged source checking and trace. -/
 def c0ExportPrintFileOutcome
     (path : String) (fuel : Nat) (strict : Bool := false)
@@ -2092,6 +2124,7 @@ def main (args : List String) : IO Unit := do
       return ()
   | [] => pure ()
   | _ => throw (IO.userError "expected NDJSON path [fuel], --require-accepted [--trace-declarations] path fuel, or --diagnose-theorem name path fuel")
+  c0ExportRecursorNameFamilyRegression
   -- Negatives, unsupported input and resource exhaustion can never be
   -- promoted to a process-success acceptance contract.
   for verdict in [C0ExportVerdict.rejected, .unsupported, .malformed,

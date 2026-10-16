@@ -89,6 +89,17 @@ jobs:
               recursors=[names[x["name"]] for x in group["recs"]]
               assert recursors==["ImaxProp.rec","ImaxPropDummy.rec"], recursors
               (temp/"arena435-imaxMutualPrefix.ndjson").write_bytes(b"".join(original[:i+1]))
+              # These are explicitly synthetic negative variants of the
+              # independently checked positive export. Never count them
+              # as original Arena-authored soundness test cases.
+              import copy
+              duplicate=copy.deepcopy(rec)
+              duplicate["inductive"]["recs"][1]["name"]=duplicate["inductive"]["recs"][0]["name"]
+              badK=copy.deepcopy(rec)
+              badK["inductive"]["recs"][0]["k"]=not badK["inductive"]["recs"][0]["k"]
+              for label, forged in (("duplicateRecName",duplicate),("forgedRecK",badK)):
+                  mutated=b"".join(original[:i])+(json.dumps(forged,ensure_ascii=False,separators=(",",":"))+"\\n").encode()
+                  (temp/f"arena435-{label}.ndjson").write_bytes(mutated)
               print(f"C0_ARENA_MUTUAL_PREFIX records={i+1} exported_recursor_order=reversed native_versions=unchanged")
               found=True
               break
@@ -108,6 +119,18 @@ jobs:
           )
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/arena435-imaxMutualPrefix-c0.txt"
           echo "C0_ARENA_MUTUAL_RECURSOR_FIDELITY genuine_positive=accepted generated_metadata=exact no_parser_header_rewrite=true"
+      - name: Fail closed on forged mutual recursor multiplicity and K metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          for label in duplicateRecName forgedRecK; do
+            (
+              cd psc0/packages/pskernel-c0
+              timeout 35s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/arena435-$label.ndjson" 4096
+            ) > "$RUNNER_TEMP/arena435-$label-c0.txt" 2>&1
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.unsupported" "$RUNNER_TEMP/arena435-$label-c0.txt"
+            echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=unsupported no_admission=true"
+          done
       - name: Require real official rejection and classify native C0 without false acceptance
         shell: bash
         run: |

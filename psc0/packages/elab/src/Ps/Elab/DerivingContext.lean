@@ -160,6 +160,10 @@ def psElabDeriveEliminateWithRecursion (plan : PsElabDeriveContext)
     (plan.info.levelParams.map PsLevel.param) level
   let parameters := psElabBinderArguments plan.parametersRev
   let motive := psLogicLam major.id "value" plan.family (result (.fvar major.id))
+  -- Apply this already-abstracted motive in branch scopes. Reinvoking result
+  -- after fresh fields exist can capture a field whose ID equals a synthetic
+  -- binder chosen by the callback (e.g. DecidableEq's right-hand argument).
+  let resultAt := fun value => PsExpr.app motive value
   let recType := psExprInstantiateLevelParams recursor.levelParams levels recursor.type
   let some cursor := psReduceApplyType
     (psWhnf context.environment context.metaContext context.localContext)
@@ -186,13 +190,13 @@ def psElabDeriveEliminateWithRecursion (plan : PsElabDeriveContext)
           if !psDefEqReadOnlyWithEnv context.environment context.metaContext
               opened.context.localContext field.type plan.family ||
               !psDefEqReadOnlyWithEnv context.environment context.metaContext
-                opened.context.localContext hypothesis.type (result (.fvar field.id)) then
+                opened.context.localContext hypothesis.type (resultAt (.fvar field.id)) then
             throw (.data "deriving induction hypothesis type mismatch")
           pure (field.id, PsExpr.fvar hypothesis.id))
       let value := psExprApplyMany (.constE name (plan.info.levelParams.map PsLevel.param))
         (parameters ++ fields.map (fun field => .fvar field.id))
       if !psDefEqReadOnlyWithEnv context.environment context.metaContext
-          opened.context.localContext opened.body (result value) then
+          opened.context.localContext opened.body (resultAt value) then
         throw (.data "deriving recursor minor conclusion mismatch")
       let body ← (branch opened.context ctor fields hypotheses value).mapError (.atDeclaration name)
       let body := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body

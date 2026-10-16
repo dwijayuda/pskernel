@@ -267,8 +267,8 @@ def main (args : List String) : IO Unit := do
       | none, .ok result =>
         if !result.artifacts.isEmpty then
           throw (IO.userError ("check-only partial produced artifacts: " ++ check.label))
-      | some (phase, prefix), .error error =>
-        if error.phase != phase || !error.message.startsWith prefix then
+      | some (phase, diagnosticPrefix), .error error =>
+        if error.phase != phase || !error.message.startsWith diagnosticPrefix then
           throw (IO.userError ("partial wrong rejection for " ++ check.label ++ ": " ++ error.phase ++ ": " ++ error.message))
       | none, .error error =>
         throw (IO.userError ("partial expected acceptance for " ++ check.label ++ ": " ++ error.phase ++ ": " ++ error.message))

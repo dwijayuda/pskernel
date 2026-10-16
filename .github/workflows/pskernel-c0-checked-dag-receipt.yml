@@ -8,6 +8,7 @@ on:
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/VerifiedIndexedCheckedReceipt.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/VerifiedIndexedCheckedSession.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedDAGTrace.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedCheckedIndexedSession.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/QualifiedCheckedDAGInference.lean'
@@ -16,6 +17,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGTraceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedCheckedDAGMemoRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0VerifiedIndexedCheckedReceiptRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0VerifiedIndexedCheckedSessionRegression.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -47,6 +49,7 @@ jobs:
           test -s .lake/build/lib/lean/Ps/KernelCore/Architecture/CertifiedCheckedDAGMemo.olean
           lake env lean --run test/C0CertifiedCheckedDAGMemoRegression.lean
           lake env lean --run test/C0VerifiedIndexedCheckedReceiptRegression.lean
+          lake env lean --run test/C0VerifiedIndexedCheckedSessionRegression.lean
           lake env lean --run test/C0CertifiedCheckedDAGTraceRegression.lean
           lake env lean --run test/C0CertifiedCheckedIndexedSessionRegression.lean
           lake env lean --run test/C0QualifiedCheckedDAGInferenceRegression.lean

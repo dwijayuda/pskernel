@@ -821,7 +821,7 @@ theorem psKernelC0RecursiveChecked_source
                      simpa [psKernelExprMapGet, term] using cached
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, hcache, depth]
+                    hcache, depth]
           | none =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
@@ -861,7 +861,7 @@ theorem psKernelC0RecursiveChecked_source
                              simpa [psKernelExprMapGet, term] using cached
                           simpa [psKernelInferCoreWithFuelUsing,
                             psKernelInferCoreWithFuelUsingSourceFrames,
-                            psKernelInferCacheEligible, hcache, depth,
+                            hcache, depth,
                             sourceChild, term]
       | bvar n =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)

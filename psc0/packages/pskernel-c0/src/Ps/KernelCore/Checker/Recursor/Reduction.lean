@@ -46,9 +46,9 @@ def psKernelReduceInductiveRecWith
       (Prod
         (Option PsKernelExpr)
         PsKernelCheckerState) :=
-  let recSpine :=
-    psKernelExprGetAppFnArgs expr;
-  match Prod.fst recSpine with
+  -- Match Lean 4.35 inductive_reduce_rec: reject non-recursor heads
+  -- without materializing the whole application-argument list.
+  match psKernelExprGetAppFn expr with
   | PsKernelExpr.const recName recLevels =>
       match
           psKernelEnvironmentFind
@@ -57,8 +57,10 @@ def psKernelReduceInductiveRecWith
       | Option.some info =>
           match info with
           | PsKernelConstantInfo.recInfo recursor =>
+              -- The source-proved application-spine decomposition ensures
+              -- this is exactly the original head-to-right arguments list.
               let recArgs :=
-                Prod.snd recSpine;
+                psKernelExprGetAppArgs expr;
               let majorIndex :=
                 Nat.add
                   recursor.numParams

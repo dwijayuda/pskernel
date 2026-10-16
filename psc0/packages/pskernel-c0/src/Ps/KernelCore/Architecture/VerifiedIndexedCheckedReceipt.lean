@@ -198,18 +198,11 @@ theorem psKernelC0IndexedCheckedReceiptTableCheck_error_source
   | some checked =>
       simp [psKernelC0IndexedCheckedReceiptTableCheck, hLookup] at hError
   | none =>
-      cases hSource :
-          psKernelCheckerCheck fuel context initialState hash.expr with
-      | error originalReason =>
-          have hReason : originalReason = reason := by
-            simpa [psKernelC0IndexedCheckedReceiptTableCheck,
-              hLookup, psKernelC0CaptureCheckedIndexedHash,
-              valid, hSource] using hError
-          simpa [hSource, hReason]
-      | ok result =>
-          simp [psKernelC0IndexedCheckedReceiptTableCheck,
-            hLookup, psKernelC0CaptureCheckedIndexedHash,
-            valid, hSource] at hError
+      unfold psKernelC0IndexedCheckedReceiptTableCheck at hError
+      simp only [hLookup] at hError
+      unfold psKernelC0CaptureCheckedIndexedHash at hError
+      simp only [valid, if_true] at hError
+      split at hError <;> simp_all
 
 /-- Erase only the indexing implementation detail; retain the checker
 result and its EXACT final state, or its original error. This is the

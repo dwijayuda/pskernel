@@ -51,6 +51,14 @@ def main : IO Unit := do
       psKernelC0AdaptiveHasFVar huge then
     throw (IO.userError "memo misclassified a deeply shared closed DAG")
 
+  -- Short-circuit parity with the source predicate: the left child
+  -- already contains an FVar and a huge, shared right child is irrelevant.
+  -- A full traversal of that right child would do unnecessary work.
+  let positiveHead : PsKernelExpr := .app fvarTerm huge
+  if !psKernelC0MemoizedHasFVar positiveHead ||
+      !psKernelC0AdaptiveHasFVar positiveHead then
+    throw (IO.userError "memo skipped a certified positive function child")
+
   -- Hash buckets are hints only: binder names and info are not semantic
   -- cache keys. The proof-producing equality check must still discriminate
   -- different expressions regardless of their shallow shape.

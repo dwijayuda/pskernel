@@ -1670,6 +1670,7 @@ def psProofScriptDeclarationStop
   match declaration with
   | .definition _ _ _ _ span => span.stop
   | .partialDefinition _ _ _ _ span => span.stop
+  | .fixedpointDefinition _ _ _ _ span => span.stop
   | .theoremDecl _ _ _ _ span => span.stop
   | .inductiveDecl _ _ _ _ span => span.stop
   | .structureDecl _ _ _ _ span => span.stop
@@ -1801,3 +1802,4 @@ def psParseProofScriptSource
       | Except.error error =>
           Except.error (PsProofScriptFrontendError.parse error)
       | Except.ok module => Except.ok module
+

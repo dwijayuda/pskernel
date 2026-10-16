@@ -24,9 +24,11 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   match source with
   | .definition _ binders type value span
   | .partialDefinition _ binders type value span
+  | .fixedpointDefinition _ binders type value span
   | .theoremDecl _ binders type value span =>
     let isTheorem := match source with | .theoremDecl _ _ _ _ _ => true | _ => false
     let isPartial := match source with | .partialDefinition _ _ _ _ _ => true | _ => false
+    let isFixedpoint := match source with | .fixedpointDefinition _ _ _ _ _ => true | _ => false
     let binders ← psScopeBinders visit [] binders
     let type ← visit binders.bound type
     let value ← visit binders.bound value
@@ -48,6 +50,8 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
       else psScopeTerm 4096 { resolver with selfArguments } binders.bound value.term
     if isPartial then
       return .partialDefinition name (captured ++ binders.binders) type.term value.term span
+    if isFixedpoint then
+      return .fixedpointDefinition name (captured ++ binders.binders) type.term value.term span
     return .definition name (captured ++ binders.binders) type.term value.term span
   | .structureDecl _ params result fields span =>
     let params ← psScopeBinders visit [] params
@@ -380,3 +384,4 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
 def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
     Except PsElabError PsElabModuleResult :=
   (psElabProgramWithOrigins environment program).map (·.result)
+

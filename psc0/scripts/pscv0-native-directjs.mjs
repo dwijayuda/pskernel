@@ -59,6 +59,7 @@ const js = await read('application.js'), ts = await read('application.ts');
 const declaration = await read('application.d.ts');
 const map = JSON.parse(await read('application.js.map'));
 const manifest = JSON.parse(await read('application.js.origins.json'));
+assert.equal(manifest.assurance, 'ordinary-checked', 'saved single-file artifact assurance');
 assert.equal(map.file, 'application.js');
 assert.equal(map.sourcesContent[0], await read('application.ps'));
 assert(js.endsWith('//# sourceMappingURL=application.js.map\n'));

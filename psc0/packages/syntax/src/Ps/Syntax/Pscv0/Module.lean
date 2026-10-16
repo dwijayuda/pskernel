@@ -66,6 +66,7 @@ def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxT
   match declaration with
   | .definition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .partialDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .fixedpointDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .theoremDecl _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .structureDecl _ params result fields _ =>
       result.toList ++ psListMap psPscv0BinderType (psListAppend params fields)
@@ -95,6 +96,11 @@ def psPscv0AttachDeclaration (proofScript : Bool) (tokens : List PsToken)
           -- route partial typed-do through its older Except-only adapter.
           if (psPscv0BodyBlock blocks value).isSome then
             Except.error "PSCV0-FEATURE-UNAVAILABLE: partial do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
+      | .fixedpointDefinition _ _ _ value span =>
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: fixedpoint do source translation"
           else Except.ok (PsPscv0SurfaceDeclaration.mk
             (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
       | .definition _ binders type value span =>
@@ -291,3 +297,4 @@ def psPscv0TranslateReadable (sourceIsPs targetIsPs : Bool) (source : String) : 
   | Except.ok surface => psPscv0PrintSurfaceModule targetIsPs surface
 
 def psPscv0ReplayOriginal (surface : PsPscv0SurfaceModule) : String := surface.originalSource
+

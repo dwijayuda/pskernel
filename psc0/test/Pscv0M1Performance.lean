@@ -3,6 +3,42 @@ import Ps.BackendEcma.Lower
 
 open Lean (toJson)
 
+-- Exercise the actual native CLI parser without another prelude replay.
+-- Verified grades are also routed through this parser in the batch below.
+private def checkV72AssuranceOptions : IO Unit := do
+  let command := ["--emit", "input.ps", "output.js"]
+  let accepted : List (List String × String × Option Nat) := [
+    (command, "ordinary-checked", none),
+    (["--assurance", "ordinary-checked"] ++ command, "ordinary-checked", none),
+    (["--assurance", "closed-verified"] ++ command, "closed-verified", none),
+    (["--assurance", "boundary-qualified-verified"] ++ command, "boundary-qualified-verified", none),
+    (["--word-size", "32", "--assurance", "closed-verified"] ++ command, "closed-verified", some 32),
+    (["--assurance", "boundary-qualified-verified", "--word-size", "64"] ++ command,
+      "boundary-qualified-verified", some 64)]
+  for (arguments, expected, wordSize) in accepted do
+    let options ← match PsV7Native.parseCliOptions arguments with
+      | .ok value => pure value
+      | .error message => throw (IO.userError message)
+    if PsV7Native.assuranceLabel options.assurance != expected ||
+        options.targetWordSize.map psIrWordSizeBits != wordSize || options.arguments != command then
+      throw (IO.userError "native CLI lost an assurance grade, word size or command argument")
+  for (arguments, expected) in [
+      (["--assurance"], "PSCV0-ASSURANCE-OPTION:"),
+      (["--assurance", "verified"] ++ command, "PSCV0-ASSURANCE-OPTION:"),
+      (["--assurance", "ordinary-checked", "--assurance", "closed-verified"] ++ command,
+        "PSCV0-ASSURANCE-OPTION:"),
+      (["--assurance", "closed-verified", "--word-size", "32", "--assurance", "ordinary-checked"] ++ command,
+        "PSCV0-ASSURANCE-OPTION:"),
+      (command ++ ["--assurance", "ordinary-checked"], "PSCV0-ASSURANCE-OPTION:"),
+      (["--word-size", "16"] ++ command, "PSCV0-TARGET-WORD-SIZE:"),
+      (["--word-size", "32", "--word-size", "64"] ++ command, "PSCV0-TARGET-WORD-SIZE:")] do
+    match PsV7Native.parseCliOptions arguments with
+    | .ok _ => throw (IO.userError "native CLI accepted invalid or duplicate options")
+    | .error message =>
+      if !message.startsWith expected then
+        throw (IO.userError ("native CLI option failed at the wrong boundary: " ++ message))
+  IO.println "PSCV0_ASSURANCE_OPTIONS: PASS explicit grades, word-size ordering, invalid/duplicate refusals and ordinary default"
+
 -- Source-strategy qualification remains distinct from partial runtime admission.
 private def checkV72PartialGrammar : IO Unit := do
   for (source, privateExpected) in [
@@ -48,7 +84,7 @@ private def checkV72PartialGrammar : IO Unit := do
   match lowered.declarations with
   | [.partialDefinition ..] => pure ()
   | _ => throw (IO.userError "source translation discarded partial strategy")
-  IO.println "PSCV0_V72_PARTIAL_SOURCE: PASS def/function/nullary/private ownership, modifier conflicts and retained strategy; runtime admission remains pending"
+  IO.println "PSCV0_V72_PARTIAL_SOURCE: PASS def/function/nullary/private ownership, modifier conflicts and retained strategy"
 
 -- Inspect the actual retained graph, not a separately invented safety flag.
 -- The end-to-end requests below independently send both bodies to the kernel.
@@ -78,9 +114,26 @@ private def checkV72PartialOwnership : IO Unit := do
       if !psNameEq retained implementation || !psNameEq checked implementation ||
           !psExprAlphaEq checkedBody body then
         throw (IO.userError "partial checking view changed body identity")
-    | _, _ => throw (IO.userError "partial preparation lost the runtime refusal marker")
+    | _, _ => throw (IO.userError "partial preparation lost the retained implementation marker")
+    let runtime ← match psCompilerOrdinaryPartialRuntimeDeclarations prepared.prepared.declarations with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (psCompilerPscv0Error error))
+    match runtime with
+    | [.definitionDecl runtimeName _ runtimeType runtimeBody] =>
+      if !psNameEq runtimeName name || !psExprAlphaEq runtimeType type ||
+          !psExprAlphaEq runtimeBody body || psExprAlphaEq runtimeBody witness then
+        throw (IO.userError "ordinary runtime view did not retain the actual typed partial body")
+    | _ => throw (IO.userError "ordinary runtime view lost its unique public implementation")
+    -- Pure library preparation cannot authorize execution of retained partial
+    -- bodies. Only the native ordinary host checks and consumes their mapping.
+    match psCompilerVerifiedIrFromPrepared prepared.prepared with
+    | .error (.normalization message) =>
+      if !message.startsWith "PSCV0-PARTIAL-RUNTIME-PENDING:" then
+        throw (IO.userError ("generic partial refusal changed: " ++ message))
+    | .error error => throw (IO.userError (psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError "generic preparation admitted a partial executable")
   | _ => throw (IO.userError "partial declaration must own separate logical/body members")
-  IO.println "PSCV0_V72_PARTIAL_OWNERSHIP: PASS separate inhabitant/body, private numeric identity, local witnesses and retained runtime marker"
+  IO.println "PSCV0_V72_PARTIAL_OWNERSHIP: PASS separate inhabitant/body, private numeric identity, local witnesses, actual runtime body and generic fail-closed boundary"
 
 private structure PartialCheck where
   label : String
@@ -93,7 +146,7 @@ private def partialChecks : Array PartialCheck :=
     name := "Lib", sourceName := "Lib.ps"
     source := "namespace Lib\n" ++ spin ++ "end Lib\n" }
   let client := "import Lib\nfunction main(n: Nat): Nat := Lib.spin(n)\n"
-  let runtimeFailure := some ("erase", "PSCV0-PREPARATION: PSCV0-PARTIAL-RUNTIME-PENDING:")
+  let verifiedFailure := some ("assurance", "PSCV0-ASSURANCE-DOWNGRADE:")
   #[
     { label := "recursive-body-and-reflexivity", request := {
         source := spin ++ "theorem identity(n: Nat): spin(n) = spin(n) := by { rfl }\n" } },
@@ -118,14 +171,26 @@ private def partialChecks : Array PartialCheck :=
     { label := "function-only", request := {
         source := "partial def value: Nat := 0\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-TERM-02-FUNCTION:") },
-    { label := "all-targets-refused", request := {
-        source := spin, targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] }
-      failure := runtimeFailure },
+    -- A divergent body may be emitted in the ordinary profile. This checks
+    -- artifact admission; it deliberately does not execute this `spin` input.
+    { label := "ordinary-all-targets", request := {
+        source := spin, assurance := .ordinaryChecked
+        targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } },
     { label := "imported-logical-interface", request := {
         source := client, modules := [library] } },
-    { label := "imported-runtime-refused", request := {
-        source := client, modules := [library], targets := [.javascript, .typescript, .rust] }
-      failure := runtimeFailure } ]
+    { label := "ordinary-imported-runtime", request := {
+        source := client, modules := [library], assurance := .ordinaryChecked
+        targets := [.javascript, .typescript, .rust] } },
+    { label := "closed-verified-refused", request := {
+        source := spin, assurance := .closedVerified, targets := [.javascript] }
+      failure := verifiedFailure },
+    { label := "boundary-qualified-verified-refused", request := {
+        source := spin, assurance := .boundaryQualifiedVerified, targets := [.javascript] }
+      failure := verifiedFailure },
+    { label := "imported-verified-refused", request := {
+        source := client, modules := [library], assurance := .closedVerified
+        targets := [.javascript, .typescript, .rust] }
+      failure := verifiedFailure } ]
 
 -- Focused M3 emitter boundary checks; existing measurement workloads below are
 -- unchanged. These are recognizer checks, not a compiler-preservation proof.
@@ -228,6 +293,7 @@ private def timingJson (t : PsV7Native.Timings) : Lean.Json :=
     ("eraseMs", toJson t.eraseMs), ("emitMs", toJson t.emitMs)]
 
 def main (args : List String) : IO Unit := do
+  checkV72AssuranceOptions
   checkV72PartialGrammar
   checkV72PartialOwnership
   checkEcmaLowering
@@ -248,10 +314,15 @@ def main (args : List String) : IO Unit := do
     source := runtimeSource, sourceName := "runtime.ps",
     outputStem := "runtime", targets := [.javascript] }
   -- Preserve original measured requests, then reuse their immutable prelude
-  -- for phase-specific logical/body and executable-refusal qualification.
+  -- for phase-specific logical/body, ordinary execution and verified refusal.
   let checks := partialChecks
   for check in checks do
+    let options ← match PsV7Native.parseCliOptions
+        ["--assurance", PsV7Native.assuranceLabel check.request.assurance, "--check"] with
+      | .ok value => pure value
+      | .error message => throw (IO.userError message)
     requests := requests.push { check.request with
+      assurance := options.assurance
       sourceName := "v72-partial-" ++ check.label ++ ".ps" }
   IO.FS.writeFile (directory / "runtime.ps") runtimeSource
   let batch ← match ← PsV7Native.runBatch requests with
@@ -265,8 +336,11 @@ def main (args : List String) : IO Unit := do
         | throw (IO.userError "partial qualification result index mismatch")
       match check.failure, outcome with
       | none, .ok result =>
-        if !result.artifacts.isEmpty then
-          throw (IO.userError ("check-only partial produced artifacts: " ++ check.label))
+        if PsV7Native.assuranceLabel result.assurance != "ordinary-checked" then
+          throw (IO.userError ("partial returned the wrong assurance identity: " ++ check.label))
+        if result.artifacts.map (·.target) != check.request.targets ||
+            result.artifacts.any (fun artifact => artifact.files.isEmpty) then
+          throw (IO.userError ("partial artifact targets/bundles mismatch: " ++ check.label))
       | some (phase, diagnosticPrefix), .error error =>
         if error.phase != phase || !error.message.startsWith diagnosticPrefix then
           throw (IO.userError ("partial wrong rejection for " ++ check.label ++ ": " ++ error.phase ++ ": " ++ error.message))

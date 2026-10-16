@@ -1,3 +1,38 @@
+## M3+B candidate — P0 assurance identities and retained P1 source strategy (17 October 2026)
+
+This commit is a **new, unqualified compiler checkpoint** on top of live source
+`9cf5a9a90e736ab1172bdf7b3107169cedf78ec1`. The latest fully accepted compiler
+remains `a7c6dade87a9d8df74d5248e8276623e7870078c` and its five-gate nested
+shared-model receipt. The newer P0 candidate's full native run
+`38948302333` failed only at the stale expectation that all partial runtime
+targets refuse; its focused/F1/F2/F3-F4 gates passed. Do not accept that
+candidate from focused evidence alone.
+
+The integration boundary now requires explicit ordinary partial artifacts,
+exact targets and nonempty bundles, actual typed body identity, logical
+opacity, generic-library refusal, and both verified-grade refusals including
+imported dependencies. The native CLI propagates `--assurance` through both
+single-source and project requests; saved origins use the returned assurance
+identity. Original performance workloads, iteration counts and checksums are
+unchanged.
+
+A valid `partial_fixpoint` suffix is retained as its own source declaration
+through source lowering and scope resolution. It is no longer misdiagnosed
+as a declaration prefix. P1 elaboration remains unavailable under the
+unchanged approved assumptions: the required pinned `Lean.Order.fix`
+construction uses `CCPO.csup` and `Classical.choice`. An isolated official
+Lean oracle inspects actual Unit/Option fixpoints and generated-equation
+axiom closures; it is outside the compiler's admitted Standard environment.
+No P1 executable, new logical assumption, equation, or verified fallback
+is enabled.
+
+Require this checkpoint's **own** native, F1, F2, F3/F4 and focused workflows.
+M3+B remains OPEN; approximately 40% qualified (30–50% engineering
+uncertainty), not a measured language-conformance percentage. Group-aware
+data/elimination, broader total/WF recursion, P0 closure coverage and the
+P1 assumption incompatibility remain. PR #109 stays draft/open/unmerged.
+
+
 ## M3+B current candidate: selected P0 ordinary partial body execution (NOT qualified)
 
 A new explicit `PsV7Native.Assurance` request/response distinguishes
@@ -528,3 +563,4 @@ continues its own native qualification; focused recursive P0
 requires its own focused qualification and does not inherit the
 earlier full native result. No new compiler semantic implementation,
 kernel, assumptions, backend special cases or performance budget.
+

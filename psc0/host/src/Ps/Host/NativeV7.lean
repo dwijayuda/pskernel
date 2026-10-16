@@ -35,6 +35,49 @@ def assuranceLabel : Assurance → String
   | .closedVerified => "closed-verified"
   | .boundaryQualifiedVerified => "boundary-qualified-verified"
 
+def parseAssuranceLabel : String → Except String Assurance
+  | "ordinary-checked" => .ok .ordinaryChecked
+  | "closed-verified" => .ok .closedVerified
+  | "boundary-qualified-verified" => .ok .boundaryQualifiedVerified
+  | _ => .error "PSCV0-ASSURANCE-OPTION: expected ordinary-checked, closed-verified or boundary-qualified-verified"
+
+-- Parse host options before reading input files or requesting any artifacts.
+-- The existing ordinary development default is explicit here; a supplied
+-- verified grade is retained unchanged and must reach the assurance gate.
+structure CliOptions where
+  assurance : Assurance := .ordinaryChecked
+  targetWordSize : Option PsVerifiedIrWordSize := none
+  arguments : List String
+
+private def parseCliOptionsAux : List String → Option Assurance →
+    Option PsVerifiedIrWordSize → Except String CliOptions
+  | "--assurance" :: value :: rest, assurance, targetWordSize => do
+    if assurance.isSome then
+      throw "PSCV0-ASSURANCE-OPTION: duplicate --assurance"
+    let selected ← parseAssuranceLabel value
+    parseCliOptionsAux rest (some selected) targetWordSize
+  | ["--assurance"], _, _ =>
+    .error "PSCV0-ASSURANCE-OPTION: missing assurance value"
+  | "--word-size" :: value :: rest, assurance, targetWordSize => do
+    if targetWordSize.isSome then
+      throw "PSCV0-TARGET-WORD-SIZE: duplicate --word-size"
+    let selected ← match value with
+      | "32" => pure PsVerifiedIrWordSize.bits32
+      | "64" => pure PsVerifiedIrWordSize.bits64
+      | _ => throw "PSCV0-TARGET-WORD-SIZE: expected 32 or 64"
+    parseCliOptionsAux rest assurance (some selected)
+  | ["--word-size"], _, _ =>
+    .error "PSCV0-TARGET-WORD-SIZE: expected 32 or 64"
+  | arguments, assurance, targetWordSize => do
+    if arguments.contains "--assurance" then
+      throw "PSCV0-ASSURANCE-OPTION: --assurance must precede the command"
+    if arguments.contains "--word-size" then
+      throw "PSCV0-TARGET-WORD-SIZE: --word-size must precede the command"
+    return { assurance := assurance.getD .ordinaryChecked, targetWordSize, arguments }
+
+def parseCliOptions (arguments : List String) : Except String CliOptions :=
+  parseCliOptionsAux arguments none none
+
 structure Request where
   source : String
   assurance : Assurance := .ordinaryChecked

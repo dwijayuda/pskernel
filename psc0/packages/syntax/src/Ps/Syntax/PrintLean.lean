@@ -480,7 +480,11 @@ def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
-  | .definition name binders type value _ =>
+  | .definition name binders type value _
+  | .fixedpointDefinition name binders type value _ =>
+      let suffix := match declaration with
+        | .fixedpointDefinition .. => "\npartial_fixpoint"
+        | _ => "";
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
@@ -505,7 +509,7 @@ def psPrintLeanDeclaration
                           binderSuffix
                           " : "
                           printedType
-                          (psPrintLeanConcat2 " := " printedValue))
+                          (psPrintLeanConcat2 " := " printedValue) ++ suffix)
   | .partialDefinition name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -682,3 +686,4 @@ def psPrintLeanModule
   match module with
   | PsSyntaxModule.mk sourceImports sourceDeclarations =>
       psPrintLeanModuleParts sourceImports sourceDeclarations
+

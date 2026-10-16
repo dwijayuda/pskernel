@@ -358,7 +358,67 @@ private def source : String :=
   "partial function m3partialCount(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3partialCount(k) + 1 }\n" ++
   "function m3partialcountoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCount(if (flag) { 7 } else { 3 }))\n"
 
+-- Parser/source identity is tested independently from the P1 elaboration gate.
+-- A valid suffix must not disappear, become a prefix, or use P0 opacity.
+private def checkFixedpointSource : IO Unit := do
+  for (text, isPrivate) in [
+      ("def fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\n", false),
+      ("function fixed(n: Nat): Nat := fixed(n) partial_fixpoint\n", false),
+      ("function fixed(n: Nat): Nat := fixed(n)\n  partial_fixpoint\n", false),
+      ("function fixed(n: Nat): Nat := { fixed(n) }\npartial_fixpoint\n", false),
+      ("function fixed(): Nat := fixed()\npartial_fixpoint\n", false),
+      ("private function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\n", true)] do
+    let program ← match psPscv0ParseProgram (text ++ "const following: Nat := 1\n") with
+      | .ok value => pure value
+      | .error message => throw (IO.userError ("fixedpoint parse: " ++ message))
+    let declaration ← match program.commands with
+      | [.declaration value, .declaration (.definition ..)] =>
+        if isPrivate then throw (IO.userError "fixedpoint privacy lost") else pure value
+      | [.privateDeclaration value, .declaration (.definition ..)] =>
+        if isPrivate then pure value else throw (IO.userError "unexpected fixedpoint privacy")
+      | _ => throw (IO.userError "fixedpoint suffix consumed the following declaration")
+    match declaration with
+    | .fixedpointDefinition name _ _ _ span =>
+      if name.segments != ["fixed"] ||
+          span.start.byteOffset != (if isPrivate then 8 else 0) ||
+          span.stop.byteOffset != text.utf8ByteSize - 1 then
+        throw (IO.userError "fixedpoint strategy/source span was not retained")
+    | _ => throw (IO.userError "fixedpoint strategy was relabeled as total or partial")
+  let body := "function fixed(n: Nat): Nat := fixed(n)\n"
+  for (text, expected) in [
+      ("partial_fixpoint " ++ body, "PSCV0-FIXPOINT-01"),
+      ("const fixed: Nat := 0\npartial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      ("theorem fixed: True := True.intro\npartial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      ("abbrev fixed: Nat := 0\npartial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      ("opaque fixed: Nat := 0\npartial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      ("partial " ++ body ++ "partial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      (body ++ "partial_fixpoint\ntermination_by n\n", "PSCV0-REC-STRATEGY-01"),
+      (body ++ "partial_fixpoint\ndecreasing_by by { rfl }\n", "PSCV0-REC-STRATEGY-01"),
+      (body ++ "partial_fixpoint\npartial_fixpoint\n", "PSCV0-REC-STRATEGY-01"),
+      (body ++ "partial_fixpoint monotonicity by { rfl }\n", "PSCV0-FIXPOINT-01")] do
+    match psPscv0ParseProgram text with
+    | .ok _ => throw (IO.userError ("invalid fixedpoint strategy accepted: " ++ text))
+    | .error message =>
+      if !message.startsWith expected then
+        throw (IO.userError ("fixedpoint wrong source refusal: " ++ message))
+  let surface ← match psPscv0ParseSource true (body ++ "partial_fixpoint\n") with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  let lowered ← match psPscv0LowerModule surface with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  match lowered.declarations with
+  | [.fixedpointDefinition ..] => pure ()
+  | _ => throw (IO.userError "flat source lowering discarded fixedpoint strategy")
+  IO.println "PSCV0_M3_FIXEDPOINT_SOURCE: PASS retained suffix, nullary/private/span ownership and incompatible strategy refusals; assumption admission checked separately"
+
 private def refusals : List (String × String × String) := [
+  ("fixedpoint-choice",
+    "function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\n",
+    "PSCV0-FIXPOINT-ASSUMPTION"),
+  ("fixedpoint-private-choice",
+    "namespace Fix\nprivate function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\nend Fix\n",
+    "PSCV0-FIXPOINT-ASSUMPTION"),
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
     "recursive deriving requires the M3 data machinery"),
   ("nested-nonuniform-parameter",
@@ -403,6 +463,7 @@ private def refusals : List (String × String × String) := [
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
+  checkFixedpointSource
   let directory := System.FilePath.mk directory
   IO.FS.createDirAll directory
   -- Preserve the actual submitted source even when qualification fails.
@@ -537,3 +598,4 @@ def main (args : List String) : IO Unit := do
   IO.println "PSCV0_M3_RECURSIVE_REPR: PASS generic Nat/Bool, two root precedences, exact native-oracle text at width 40, three phase-correct Repr refusals; runtime checks follow"
   IO.println "PSCV0_M3_RECURSIVE_BEQ: PASS Nat/Bool comparison masks, independent non-reflexive field dictionary, checked recursive defining law, three phase-correct BEq refusals; runtime checks follow"
   IO.println "PSCV0_M3_RECURSIVE_DECEQ: PASS native decision masks, BEq-independent equality, dependent proof field, checked equal/different equations and three phase-correct refusals; runtime checks follow"
+

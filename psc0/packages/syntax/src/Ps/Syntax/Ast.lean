@@ -254,6 +254,15 @@ inductive PsSyntaxDeclaration where
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
+  -- Retain the requested P1 strategy through parsing and scope resolution.
+  -- Its eventual fixed-point construction has a separate assumption gate;
+  -- this node is neither a total definition nor an opaque P0 implementation.
+  | fixedpointDefinition
+      (name : PsSyntaxName)
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+      (type : PsSyntaxTerm)
+      (value : PsSyntaxTerm)
+      (span : PsSourceSpan)
   | theoremDecl
       (name : PsSyntaxName)
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
@@ -310,3 +319,4 @@ inductive PsSyntaxCommand where
 structure PsSyntaxProgram where
   imports : List PsSyntaxImport
   commands : List PsSyntaxCommand
+

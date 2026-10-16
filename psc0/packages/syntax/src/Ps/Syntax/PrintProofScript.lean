@@ -534,7 +534,11 @@ def psPrintProofScriptDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
-  | .definition name binders type value _ =>
+  | .definition name binders type value _
+  | .fixedpointDefinition name binders type value _ =>
+      let suffix := match declaration with
+        | .fixedpointDefinition .. => "\npartial_fixpoint"
+        | _ => "";
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
@@ -557,7 +561,7 @@ def psPrintProofScriptDeclaration
                           printedBinders
                           " : "
                           printedType
-                          (psPrintProofScriptConcat2 " := " printedValue))
+                          (psPrintProofScriptConcat2 " := " printedValue) ++ suffix)
   | .partialDefinition name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -732,3 +736,4 @@ def psPrintProofScriptModule
   match module with
   | PsSyntaxModule.mk sourceImports sourceDeclarations =>
       psPrintProofScriptModuleParts sourceImports sourceDeclarations
+

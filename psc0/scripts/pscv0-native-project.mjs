@@ -11,6 +11,7 @@ const executable = path.resolve(process.argv[3] ?? stem + ".js");
 const manifest = JSON.parse(await readFile(stem + ".js.origins.json", "utf8"));
 const mapping = JSON.parse(await readFile(stem + ".js.map", "utf8"));
 assert.equal(manifest.target, "javascript");
+assert.equal(manifest.assurance, "ordinary-checked", "saved project JavaScript artifact assurance");
 assert.deepEqual(manifest.exports.map(e => e.semantic), ["App.compute"],
   "only entry-module public declarations are executable exports");
 const exported = new Map(manifest.symbols.map(s => [s.semantic, s.output]));
@@ -28,6 +29,7 @@ assert.equal(typeof output[functionName], "function", "missing linked exported i
 assert.equal(output[functionName](7n), 18n, "cross-module private-helper calculation");
 if (!process.argv[3]) {
   const rust = JSON.parse(await readFile(stem + ".rs.origins.json", "utf8"));
+  assert.equal(rust.assurance, "ordinary-checked", "saved project Rust artifact assurance");
   const rustFn = rust.symbols.find(s => s.semantic === "App.compute")?.output;
   assert(rustFn, "missing Rust entry symbol");
   await writeFile(path.join(path.dirname(stem), "project-checks.rs"),

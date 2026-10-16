@@ -5,7 +5,10 @@ abbrev PsPscv0TermReader :=
 
 def psPscv0ReservedArgument (text : String) : Bool :=
   psProofScriptReservedArgument text ||
-    ["by", "have", "show", "suffices", "exists", "∃", "from", "return", "do", "←", "<-"].contains text
+    -- Total suffixes are already reserved by the shared reader. Keep the P1
+    -- suffix out of ordinary application arguments as well, regardless of
+    -- its line or indentation, so the declaration reader retains ownership.
+    ["partial_fixpoint", "by", "have", "show", "suffices", "exists", "∃", "from", "return", "do", "←", "<-"].contains text
 
 -- All binder contexts use the caller's v7 annotation reader. Grammar policy
 -- stays here: declarations own comma groups/defaults; terms own native binders.
@@ -188,3 +191,4 @@ def psPscv0DependentBinder (read : PsPscv0TermReader) (fuel : Nat)
   match group.value with
   | [binder] => return { value := binder, cursor := group.cursor }
   | _ => throw (psProofScriptExpectedError "one dependent binder" cursor)
+

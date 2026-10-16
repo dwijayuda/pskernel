@@ -78,6 +78,7 @@ def psElabOriginSource
   match source with
   | PsSyntaxDeclaration.definition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.partialDefinition name _ _ _ span => Prod.mk name span
+  | PsSyntaxDeclaration.fixedpointDefinition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.structureDecl name _ _ _ span => Prod.mk name span
@@ -289,6 +290,11 @@ def psElabDeclaration
         binders
         type
         value
+  | .fixedpointDefinition _ _ _ _ _ =>
+      -- This is the audited dependency of the mandated pinned construction,
+      -- not a parser error or an assertion about every constructive fixpoint.
+      -- Do not relabel P1 as P0 or an ordinary total definition to evade it.
+      Except.error (.data "PSCV0-FIXPOINT-ASSUMPTION: selected Lean.Order.fix construction requires unapproved Classical.choice through CCPO.csup; partial_fixpoint admission is unavailable")
   | .theoremDecl name binders type value _ =>
       psElabDeclarationParts
         environment
@@ -569,3 +575,4 @@ def psElabModule
   match psElabModuleWithOrigins environment module with
   | Except.error failure => Except.error failure.error
   | Except.ok result => Except.ok result.result
+

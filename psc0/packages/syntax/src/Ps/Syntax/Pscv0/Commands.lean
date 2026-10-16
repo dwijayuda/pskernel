@@ -3,7 +3,7 @@ import Ps.Syntax.Pscv0.Data
 
 -- The annotation parser owns nested terms; the declaration consumes only its
 -- own assignment token. No scan to the first top-level := is involved.
-def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
+def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
   match psTokenCursorAdvance cursor with
   | none => Except.error "PSCV0-DECLARATION-MISSING"
@@ -49,6 +49,30 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
                                 Except.ok (PsParseResult.mk declaration body.cursor)
               else Except.error "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED"
 
+-- Lean 4.35 Parser.Termination.suffix and elabTerminationHints retain the
+-- strategy after the body. The source parser owns that syntax; elaboration
+-- owns the construction's dependency/assumption gate. In particular, never
+-- reinterpret a valid P1 suffix as the head of the following declaration.
+def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxDeclaration) := do
+  let parsed ← psPscv0ReadValueDeclarationBody cursor
+  if !psTokenCursorAtText parsed.cursor "partial_fixpoint" then return parsed
+  let some head := psTokenCursorPeek cursor | throw "PSCV0-DECLARATION-MISSING"
+  if !["def", "function"].contains head.text then
+    throw "PSCV0-REC-STRATEGY-01: partial_fixpoint requires an ordinary def or function"
+  let suffix ← psPscv0Expect parsed.cursor "partial_fixpoint"
+  if ["partial_fixpoint", "termination_by", "decreasing_by"].any
+      (psTokenCursorAtText suffix.cursor) then
+    throw "PSCV0-REC-STRATEGY-01: fixedpoint cannot combine with another recursion suffix"
+  if psTokenCursorAtText suffix.cursor "monotonicity" then
+    throw "PSCV0-FIXPOINT-01: explicit monotonicity syntax is not selected by v7.2"
+  if psTokenCursorAtText suffix.cursor "where" then
+    throw "PSCV0-FEATURE-UNAVAILABLE: fixedpoint where declarations"
+  let .definition name binders type value span := parsed.value
+    | throw "PSCV0-REC-STRATEGY-01: fixedpoint requires a function-like declaration"
+  return { value := .fixedpointDefinition name binders type value
+    { span with stop := suffix.token.span.stop }, cursor := suffix.cursor }
+
 def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
   (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
@@ -68,7 +92,7 @@ def psPscv0ReadSpecialDeclaration (cursor : PsTokenCursor) :
     throw "PSCV0-TERM-02-HEAD: special modifier requires def or function"
   if marker.token.text != "partial" then
     throw ("PSCV0-FEATURE-UNAVAILABLE: " ++ marker.token.text ++ " requires selected semantic admission")
-  let parsed ← psPscv0ReadValueDeclaration marker.cursor
+  let parsed ← psPscv0ReadValueDeclarationBody marker.cursor
   let .definition name binders type value span := parsed.value
     | throw "PSCV0-TERM-02-HEAD: expected function-like declaration"
   if ["partial_fixpoint", "termination_by", "decreasing_by"].any
@@ -121,3 +145,4 @@ def psPscv0ParseTokens (tokens : List PsToken) : Except String PsSyntaxModule :=
       match psPscv0ReadDeclarations 4096 imports.cursor [] with
       | Except.error error => Except.error error
       | Except.ok declarations => Except.ok (PsSyntaxModule.mk imports.value declarations)
+

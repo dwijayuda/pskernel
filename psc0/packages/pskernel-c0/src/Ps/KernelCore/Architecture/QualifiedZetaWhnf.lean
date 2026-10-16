@@ -40,7 +40,10 @@ def psKernelC0ZetaStableWhnfWithFuel
   | Nat.succ (Nat.succ (Nat.succ _)) =>
       match expr with
       | .letE _ _ value body _ =>
-          if psKernelC0HasLetPrefix 12 expr then none
+          -- Decline scoped syntax; the original source checker then owns
+          -- all cache/environment effects for local FVar occurrences.
+          if !psKernelSemanticCacheEligible expr then none
+          else if psKernelC0HasLetPrefix 12 expr then none
           else
             match psKernelExprMapGet state.whnf expr with
             | some _ => none
@@ -92,31 +95,36 @@ theorem psKernelC0ZetaStableWhnf_source
               cases expr with
               | letE name ty value body nondep =>
                   let term : PsKernelExpr := .letE name ty value body nondep
+                  have eligible : psKernelSemanticCacheEligible term = true := by
+                    by_cases he : psKernelSemanticCacheEligible term = true
+                    · exact he
+                    · simp [psKernelC0ZetaStableWhnfWithFuel,
+                        he, term] at h
                   by_cases hlong : psKernelC0HasLetPrefix 12 term = true
                   · simp [psKernelC0ZetaStableWhnfWithFuel,
-                      hlong, term] at h
+                      eligible, hlong, term] at h
                   · cases publicCache : psKernelExprMapGet state.whnf term with
                     | some cached =>
                         simp [psKernelC0ZetaStableWhnfWithFuel,
-                          hlong, publicCache, term] at h
+                          eligible, hlong, publicCache, term] at h
                     | none =>
                         cases depth :
                             psKernelCheckerContextEnterRecDepth context with
                         | error reason =>
                             simp [psKernelC0ZetaStableWhnfWithFuel,
-                              hlong, publicCache, depth, term] at h
+                              eligible, hlong, publicCache, depth, term] at h
                         | ok entered =>
                             cases coreCache :
                                 psKernelExprMapGet state.whnfCore term with
                             | some cached =>
                                 simp [psKernelC0ZetaStableWhnfWithFuel,
-                                  hlong, publicCache, depth, coreCache, term] at h
+                                  eligible, eligible, hlong, publicCache, depth, coreCache, term] at h
                             | none =>
                                 cases childDepth :
                                     psKernelCheckerContextEnterRecDepth entered with
                                 | error reason =>
                                     simp [psKernelC0ZetaStableWhnfWithFuel,
-                                      hlong, publicCache, depth, coreCache,
+                                      eligible, hlong, publicCache, depth, coreCache,
                                       childDepth, term] at h
                                 | ok child =>
                                     let normalized : PsKernelExpr :=
@@ -130,7 +138,7 @@ theorem psKernelC0ZetaStableWhnf_source
                                         have hx : some (normalized, nextState) =
                                             some result := by
                                           simpa [psKernelC0ZetaStableWhnfWithFuel,
-                                            hlong, publicCache, depth, coreCache,
+                                            eligible, hlong, publicCache, depth, coreCache,
                                             childDepth, stable, normalized,
                                             term, nextState] using h
                                         exact (Option.some.inj hx).symm
@@ -168,7 +176,7 @@ theorem psKernelC0ZetaStableWhnf_source
                                             .ok (normalized, coreState)
                                         rw [psKernelWhnfCoreWithFuelRanges]
                                         simp [depth, hlong, coreCache,
-                                          bodyCore, psKernelWhnfCoreFinishWithKnownHash,
+                                          bodyCore, psKernelWhnfCoreFinishWithKnownHash, eligible,
                                           psKernelExprMapInsert, term,
                                           coreState, normalized]
                                       have afterCore :
@@ -178,9 +186,14 @@ theorem psKernelC0ZetaStableWhnf_source
                                         rw [psKernelC0StableWhnfTerminal_post
                                           whnfChild context coreState term
                                           normalized stable]
-                                        rfl
+                                        simp [psKernelWhnfFinish,
+                                          eligible, nextState,
+                                          psKernelC0ColdOneStepWhnfState,
+                                          coreState]
                                       change
-                                        (match psKernelExprMapGet state.whnf term with
+                                        (match (if psKernelSemanticCacheEligible term then
+                                            psKernelExprMapGet state.whnf term
+                                          else Option.none) with
                                         | some cached => Except.ok (cached, state)
                                         | none =>
                                             match psKernelWhnfCoreWithFuel
@@ -194,9 +207,10 @@ theorem psKernelC0ZetaStableWhnf_source
                                                   coreResult.snd term
                                                   coreResult.fst) =
                                           Except.ok (normalized, nextState)
-                                      simp only [publicCache, letCore, afterCore]
+                                      simp only [eligible, ite_true,
+                                        publicCache, letCore, afterCore]
                                     · simp [psKernelC0ZetaStableWhnfWithFuel,
-                                        hlong, publicCache, depth, coreCache,
+                                        eligible, hlong, publicCache, depth, coreCache,
                                         childDepth, stable, normalized, term] at h
               | bvar _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h
               | fvar _ => simp [psKernelC0ZetaStableWhnfWithFuel] at h

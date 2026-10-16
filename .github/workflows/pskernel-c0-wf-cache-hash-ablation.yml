@@ -1,0 +1,116 @@
+name: PSKernel-C0 real WF proof exact-hash csimp integration A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-cache-hash-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-proved-runtime-hash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce byte-exact officially accepted Lean 4.35 WF proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' \
+              > "$RUNNER_TEMP/wf-memo-native.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-memo-native.ndjson" \
+              > "$RUNNER_TEMP/wf-memo-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/wf-memo-native.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-memo-native.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-memo-native.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-memo-official.txt"
+          echo "C0_WF_MEMO_PINNED official_Lean435=accepted real_records=15758"
+      - name: Test proof-checked source-hash compiler rewrite inside native cache only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          pkg=Path("psc0/packages/pskernel-c0")
+          cache=pkg/"src/Ps/KernelCore/Runtime/Acceleration/Cache.lean"
+          memo=pkg/"src/Ps/KernelCore/Runtime/Acceleration/CertifiedHashMemo.lean"
+          left=cache.read_text()
+          right=memo.read_text()
+          import_line="import Ps.KernelCore.Runtime.Acceleration.Cache\n"
+          assert right.startswith(import_line)
+          assert right.count("psKernelExprHash_compiler_eq_exactMemo")==1
+          assert right.count("deriving instance DecidableEq for PsKernelExpr")==1
+          marker="\nabbrev PsKernelExprMapIndex :="
+          assert left.count(marker)==1, "unexpected source cache layout"
+          body=right[len(import_line):]
+          cache.write_text(left.replace(marker,"\n"+body+"\n"+marker))
+          memo.write_text(import_line+
+              "\n/-! Compatibility import for the source-equivalent exact hash\n"
+              "memo whose proofs and compiler rewrite now live beside the\n"
+              "source cache's native read/write definitions. -/\n")
+          print("C0_WF_MEMO_SOURCE_ABLATION=cache_local_proven_csimp no_new_untrusted_code=true")
+          PY
+          (cd psc0/packages/pskernel-c0 &&
+            lake build PsKernelC0 c0OfficialReplay c0HashCSimpProbe)
+      - name: Require Lean checked source equality and original negative regressions
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 25s .lake/build/bin/c0HashCSimpProbe
+          lake env lean --run test/C0CertifiedHashMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_WF_MEMO_SOURCE_PROOF csimp=Lean_proved exact_original_hash=yes negative=pass"
+      - name: Require original WF acceptance or preserve explicit bounded nonacceptance evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-memo-resources.txt" \
+              timeout 300s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-memo-native.ndjson" 4096
+          ) > "$RUNNER_TEMP/wf-memo-c0.txt" 2>&1
+          status=$?
+          set -e
+          echo "C0_WF_MEMO_PROCESS_EXIT=$status"
+          grep "C0_REAL_EXPORT replay_outcome" "$RUNNER_TEMP/wf-memo-c0.txt" | tail -n 3 || true
+          grep "C0_REAL_EXPORT_SLOW_DECL" "$RUNNER_TEMP/wf-memo-c0.txt" | tail -n 4 || true
+          if test "$status" -eq 0 &&
+              grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' \
+                "$RUNNER_TEMP/wf-memo-c0.txt"; then
+            echo "C0_WF_MEMO_RESULT=ACCEPTED_exact_real_Lean435_closure_unchanged_fuel"
+          else
+            echo "C0_WF_MEMO_RESULT=NOT_QUALIFIED_host_timeout_or_checker_error"
+            tail -n 35 "$RUNNER_TEMP/wf-memo-c0.txt"
+          fi
+          cat "$RUNNER_TEMP/wf-memo-resources.txt"
+          echo "C0_WF_MEMO_SCOPE=disposable_checkout_only_production_branch_unchanged"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pinned-wf-memo-ablation
+          path: |
+            ${{ runner.temp }}/wf-memo-official.txt
+            ${{ runner.temp }}/wf-memo-c0.txt
+            ${{ runner.temp }}/wf-memo-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

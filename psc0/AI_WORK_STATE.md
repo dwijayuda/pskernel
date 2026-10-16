@@ -271,3 +271,19 @@ backend semantics. The existing infix `k+0` positive and nondecreasing
 `k+1` refusal demand their intended phases in the focused suite.
 Five exact same-commit native/F1/F2/F3-F4/focused replays are required.
 Full M3+B remains open; old Nat.sub all-five receipt is unaffected.
+
+## In-flight HAdd infix conversion candidate: progress only admitted constraints
+
+Candidate `bdd9cde559a2b9bc457b752c4d0685c9a172615c` built
+native Lean, but focused `38933591612` still rejected `m3infixChild(k + 0)`
+at the strict recursive child rule after adding a common checked-IH type
+hint. The operator elaborator can leave ordinary instance/metavariable
+constraints queued under postponement. This correction invokes the
+existing `psElabProgressPending` **non-default** queue solver after
+elaborating a computed major, then compares its Core term only with
+actual strict constructor fields and their checked IHs. It does **not**
+run final default-instance selection, force suspended source resolution,
+replace the read-only definitional equality criterion, or expand the
+logical foundation. The pinned oracle, equation, `k+1` negative and
+runtime targets are unchanged. Both full native and focused same-commit
+replays are required; this is NOT yet accepted or full M3+B.

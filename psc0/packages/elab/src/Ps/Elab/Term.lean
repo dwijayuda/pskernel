@@ -146,6 +146,12 @@ def psElabValidateStructuralCall (elaborate : PsElaborator)
         throw .structuralRecursionInvariantArgument
       let expected := psElabStructuralCommonChildType context recursion.calls
       let checked ← elaborate context source expected
+      -- The operator's class dictionary may be a deferred ordinary
+      -- synthetic constraint. Resolve available non-default evidence before
+      -- comparing with existing induction hypotheses; never force default
+      -- instances or resume a suspended source in the wrong lexical scope.
+      let progressed ← psElabProgressPending elaborate checked.context
+      let checked := { checked with context := progressed }
       let some (childId, hypothesisId) :=
         psElabStructuralDefEqChild checked.context checked.term recursion.calls
         | throw .structuralRecursionNotDecreasing

@@ -62,4 +62,20 @@ def main : IO Unit := do
   if !psKernelC0MemoizedHasFVar a || !psKernelC0MemoizedHasFVar b then
     throw (IO.userError "shape hash affected source FVar result")
 
+  -- Two distinct subexpressions can have the identical bounded shape
+  -- fingerprint yet opposite correct FVar answers. They occur together
+  -- within ONE memo query to exercise the collision bucket lookup.
+  let mut noLocal : PsKernelExpr := closed
+  let mut yesLocal : PsKernelExpr := fvarTerm
+  for _ in [:6] do
+    noLocal := .app noLocal closed
+    yesLocal := .app yesLocal closed
+  if psKernelC0MemoShapeHash 4 noLocal !=
+       psKernelC0MemoShapeHash 4 yesLocal then
+    throw (IO.userError "expected equal bounded-shape hashes")
+  if psKernelC0MemoizedHasFVar noLocal ||
+      !psKernelC0MemoizedHasFVar yesLocal ||
+      !psKernelC0MemoizedHasFVar (.app noLocal yesLocal) then
+    throw (IO.userError "FVar memo reused a hash-colliding false result")
+
   IO.println "C0_FVAR_MEMO source_equivalence=Lean constructors=pass shared_DAG=pass shape_collision=pass"

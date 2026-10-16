@@ -176,4 +176,52 @@ def main : IO Unit := do
   | .error "simple inductive constructor admission budget exhausted" => pure ()
   | _ => throw (IO.userError "zero constructor traversal fuel was not enforced")
 
-  IO.println "C0_CONSTRUCTOR_FIELD_FUEL ordinary=separate mutual=separate params=separate indices=separate elimination=separate constructors=separate alias_pi=checked zero_checker=declined exhausted_walk=declined"
+  -- Positive admission: TWO distinct valid constructors must each get
+  -- the original checker allowance, even under a short list-walk bound.
+  -- A later dependent constructor exercises genuine Pi-field checking.
+  let family : PsKernelName := .str .anonymous "FuelTwoCtor"
+  let first : PsKernelName := .str .anonymous "FuelCtorA"
+  let second : PsKernelName := .str .anonymous "FuelCtorB"
+  let familyType : PsKernelExpr := .sort (.succ .zero)
+  let familyResult : PsKernelExpr := .const family []
+  let firstCtor : PsKernelSimpleConstructorDecl := {
+    name := first
+    type := familyResult
+  }
+  let secondCtor : PsKernelSimpleConstructorDecl := {
+    name := second
+    type := .forallE name sort0 familyResult .default
+  }
+  let realDecl : PsKernelSimpleInductiveDecl := {
+    levelParams := []
+    name := family
+    type := familyType
+    ctors := [firstCtor, secondCtor]
+    isUnsafe := false
+    numParams := 0
+  }
+  let provisional : PsKernelInductiveInfo := PsKernelInductiveInfo.mk
+    (PsKernelConstantBase.mk family [] familyType)
+    0 0 [family] [first, second] 0 false false false
+  let staged := psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
+    (.inductInfo provisional)
+  let both ← match psKernelAddSimpleConstructorsWithFuel
+      3 16 realDecl .safe (.succ .zero) [] [] 0 source
+      staged 0 realDecl.ctors with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("valid two-constructor checked walk failed: " ++ e))
+  if both.shapes.length != 2 ||
+      !psKernelEnvironmentContains both.environment first ||
+      !psKernelEnvironmentContains both.environment second then
+    throw (IO.userError "valid two-constructor sequence lost checked metadata")
+  let accepted ← match psKernelAddSimpleInductive
+      16 psKernelEnvironmentEmpty realDecl
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error e => throw (IO.userError ("full valid two-constructor admission failed: " ++ e))
+  if !psKernelEnvironmentContains accepted family ||
+      !psKernelEnvironmentContains accepted first ||
+      !psKernelEnvironmentContains accepted second then
+    throw (IO.userError "valid two-constructor declaration was not published")
+
+  IO.println "C0_CONSTRUCTOR_FIELD_FUEL ordinary=separate mutual=separate params=separate indices=separate elimination=separate constructors=separate two_ctor=accepted alias_pi=checked zero_checker=declined exhausted_walk=declined"

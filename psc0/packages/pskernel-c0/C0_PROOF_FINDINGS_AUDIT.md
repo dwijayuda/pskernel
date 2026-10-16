@@ -1,5 +1,13 @@
 # PSKernel-C0: proof-discovered defect audit (2026-10-12)
 
+## Current correction addendum — 17 October 2026 (historical text below retained)
+
+This document's 2026-10-12 body is a historical audit, **not** a statement of the current Lean pin or checker implementation. C0 now pins stable Lean **4.35.0**. The then-reported absence of `psKernelCheckerStateExitLocalScope` has been corrected in `Checker/State.lean`, and `Runtime/Acceleration/CachePolicy.lean` forbids expression-only semantic cache lookup/insertion for any syntax containing local FVars; binder-local semantic caches are restored upon scope exit. The corresponding full-source-refinement proof families and metatheory scope regression are compiled in [native CI 38951397701](https://github.com/dwijayuda/pskernel/actions/runs/38951397701) (**SUCCESS** on `008a51c7`).
+
+Further proof-guided inspections identified and corrected implicit coupling of decreasing syntax/constructor-list traversal fuel with actual semantic checker fuel across ordinary/mutual fields, recursive-argument Pi-spines, constructor parameters, indices and elimination checks. The ordinary constructor-list loop now preserves its independently supplied checker fuel while retaining a finite list traversal. Explicit native regressions enforce semantic rejection vs resource exhaustion, resource zero-fuel failures and raw constructor Pi-spine behavior. A delta-expanded verified alias also has finite analysis traversal based on both original syntax nodes and checker budget.
+
+**Still unresolved, not to be described as bugs without a reproduction:** complete semantic annotation-coherence theorem, checked lambda codomain proof-guided divergence, corpus-wide Lean equivalence, whole-kernel consistency/soundness proof, and real Init/Std/Mathlib acceptance. The broader formal relation's proof-irrelevance premises are defective in the historical metatheory branch but do **not** establish an executable false acceptance in C0. The current native scope regression and full workflow establish tested corrections, not a universal soundness theorem.
+
 ## Sources examined
 
 - Historical dedicated proof branch `pscv/prove-pskernel-core-v1` at `85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62`, `psc15selfhost/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/Judgments.lean`.

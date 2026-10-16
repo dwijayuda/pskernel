@@ -82,7 +82,8 @@ def psKernelC0RecursiveMetadataDefEqWithFuel :
           | .ok entered =>
               if psKernelExprEq left right then
                 some (psKernelDefEqFinish state left right true)
-              else if psKernelExprPairSetContains state.success left right then
+              else if psKernelSemanticPairCacheEligible left right &&
+                  psKernelExprPairSetContains state.success left right then
                 some (true, state)
               else
                 match psKernelC0RecursiveMetadataDefEqWithFuel
@@ -144,8 +145,9 @@ theorem psKernelC0RecursiveMetadataDefEq_source
               depth, same,
               leftTerm, rightTerm]
           · by_cases cached :
-                psKernelExprPairSetContains state.success
-                  leftTerm rightTerm = true
+                (psKernelSemanticPairCacheEligible leftTerm rightTerm &&
+                  psKernelExprPairSetContains state.success
+                    leftTerm rightTerm) = true
             · have hr : result = (true, state) := by
                 have hx : some (true, state) = some result := by
                   simpa [psKernelC0RecursiveMetadataDefEqWithFuel,

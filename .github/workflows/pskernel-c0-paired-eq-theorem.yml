@@ -1,0 +1,33 @@
+name: PSKernel-C0 paired expression equality source theorem
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-paired-eq-theorem.yml'
+      - 'psc0/packages/pskernel-c0/test/C0PairedEqualitySourceTheorem.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Prove historical paired equality equivalence on all source terms
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build Ps.KernelCore.Core.Expr
+          lake env lean --run test/C0PairedEqualitySourceTheorem.lean
+          echo "C0_PAIRED_EQ_SOURCE_THM complete_source=verified"

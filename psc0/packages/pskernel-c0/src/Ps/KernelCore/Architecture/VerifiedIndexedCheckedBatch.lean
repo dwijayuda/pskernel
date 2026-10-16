@@ -70,8 +70,9 @@ theorem psKernelC0IndexedCheckedBatchFold_congr
             (fun outcome : Except String
                 (List PsKernelExpr × PsKernelCheckerState) =>
               match outcome with
-              | .error reason => .error reason
-              | .ok (types, finalState) => .ok (ty :: types, finalState))
+              | Except.error reason => Except.error reason
+              | Except.ok (types, finalState) =>
+                  Except.ok (ty :: types, finalState))
             (ih nextState)
 
 /-- Independent original-C0 reference: every root goes through the

@@ -1,0 +1,20 @@
+{
+  "schema": "pskernel-con-leche-upstream/1",
+  "repository": "https://github.com/leanprover/con-leche",
+  "revision": "b47ea19d6864a1fd09db6144528f91baa5c550dd",
+  "tree": "cbf5e57ba1ad8b1d051cf4780ae9935d31de150d",
+  "upstreamCommitDate": "2026-10-15T20:24:13Z",
+  "license": "Apache-2.0",
+  "toolchain": "leanprover/lean4:v4.35.0",
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "checkerMode": "verified",
+  "inputDialect": "lean4export-ndjson/3",
+  "inputAxiomPolicy": ["propext", "Quot.sound"],
+  "upstreamProofAxioms": ["propext", "Classical.choice", "Quot.sound"],
+  "psc0BaseBranch": "psc0/pscv0-v7-native-lean-v1",
+  "psc0BaseCommit": "77f5fe75ad2731c2d7e8445d7aa953c8d41827bb",
+  "defaultCompilerIntegration": false,
+  "canonicalAdmissionsV2Adapter": false,
+  "sourcePreservationProved": false,
+  "backendPreservationProved": false
+}

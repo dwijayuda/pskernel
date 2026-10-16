@@ -1,0 +1,29 @@
+{
+  "name": "@proofscript/pskernel-con-leche",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Experimental native Lean con-leche alternative checker for PSC0 research",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "lake build",
+    "test": "lake exe pskernel-con-leche-tests",
+    "verify": "lake build PsKernelConLecheProofs"
+  },
+  "exports": {
+    "./metadata": "./UPSTREAM_PIN.json",
+    "./package.json": "./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc0/packages/pskernel-con-leche"
+  },
+  "proofscript": {
+    "implementation": "native-lean",
+    "experimental": true,
+    "kernelAuthority": false,
+    "inputDialect": "lean4export-ndjson/3",
+    "checkerMode": "verified",
+    "publishingRequiresQualification": true
+  }
+}

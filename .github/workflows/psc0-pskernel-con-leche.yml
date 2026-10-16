@@ -1,0 +1,102 @@
+name: PSC0 PSKernel Con Leche
+
+on:
+  push:
+    branches: [feature/psc0-pskernel-con-leche-v1]
+    paths:
+      - 'psc0/packages/pskernel-con-leche/**'
+      - '.github/workflows/psc0-pskernel-con-leche.yml'
+  pull_request:
+    paths:
+      - 'psc0/packages/pskernel-con-leche/**'
+      - '.github/workflows/psc0-pskernel-con-leche.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pskernel-con-leche-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: psc0/packages/pskernel-con-leche
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore pinned native build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.elan
+            psc0/packages/pskernel-con-leche/.lake
+          key: pskernel-con-leche-${{ runner.os }}-${{ hashFiles('psc0/packages/pskernel-con-leche/UPSTREAM_PIN.json', 'psc0/packages/pskernel-con-leche/lakefile.toml') }}
+      - name: Install pinned Lean toolchain
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --no-modify-path --default-toolchain none
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.35.0
+      - name: Resolve and audit exact upstream identity
+        run: |
+          set -euo pipefail
+          echo "PSC0_SOURCE_SHA=$GITHUB_SHA"
+          lean --version
+          lake update
+          test "$(git -C .lake/packages/con-leche rev-parse HEAD)" = b47ea19d6864a1fd09db6144528f91baa5c550dd
+          test "$(cat .lake/packages/con-leche/lean-toolchain)" = "$(cat lean-toolchain)"
+      - name: Build native checker and focused tests
+        run: |
+          set -euo pipefail
+          lake build pskernel-con-leche pskernel-con-leche-tests
+      - name: Run focused checker tests
+        run: |
+          set -euo pipefail
+          timeout 300 .lake/build/bin/pskernel-con-leche-tests
+      - name: Check explicit CLI protocol and no trusted fallback
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pskernel-con-leche --identity > identity.json
+          python3 - <<'PY'
+          import json
+          x = json.load(open('identity.json'))
+          assert x['protocol'] == 'pskernel-con-leche/1'
+          assert x['upstreamCommit'] == 'b47ea19d6864a1fd09db6144528f91baa5c550dd'
+          assert x['mode'] == 'verified'
+          assert x['status'] == 'identity'
+          assert x['canAuthorizePublication'] is False
+          PY
+          set +e
+          .lake/build/bin/pskernel-con-leche --trusted > refused.json
+          status=$?
+          set -e
+          test "$status" -eq 3
+          python3 - <<'PY'
+          import json
+          x = json.load(open('refused.json'))
+          assert x['status'] == 'error' and x['phase'] == 'request'
+          assert x['canAuthorizePublication'] is False
+          PY
+      - name: Build wrapper refinement and model theorem
+        run: |
+          set -euo pipefail
+          lake build PsKernelConLecheProofs 2>&1 | tee proof-build.log
+      - name: Retain package evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-con-leche-${{ github.sha }}
+          if-no-files-found: warn
+          path: |
+            psc0/packages/pskernel-con-leche/UPSTREAM_PIN.json
+            psc0/packages/pskernel-con-leche/lake-manifest.json
+            psc0/packages/pskernel-con-leche/identity.json
+            psc0/packages/pskernel-con-leche/refused.json
+            psc0/packages/pskernel-con-leche/proof-build.log

@@ -1,0 +1,26 @@
+name = "pskernel-con-leche"
+version = "0.1.0"
+defaultTargets = ["PsKernelConLeche", "pskernel-con-leche"]
+
+# Deliberately independent of psc0's default Lake build. The checker and its
+# proofs are one immutable upstream dependency, not a renamed PSKernel fork.
+[[require]]
+name = "con-leche"
+git = "https://github.com/leanprover/con-leche.git"
+rev = "b47ea19d6864a1fd09db6144528f91baa5c550dd"
+
+[[lean_lib]]
+name = "PsKernelConLeche"
+
+# Explicitly built by the proof gate, not required by the runtime executable.
+[[lean_lib]]
+name = "PsKernelConLecheProofs"
+srcDir = "proofs"
+
+[[lean_exe]]
+name = "pskernel-con-leche"
+root = "Main"
+
+[[lean_exe]]
+name = "pskernel-con-leche-tests"
+root = "Tests"

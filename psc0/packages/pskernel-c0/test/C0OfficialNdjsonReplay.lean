@@ -1752,11 +1752,80 @@ def c0ExportTraceDeclarationName
               | .error _ => s!"<unknown-name-{idx}>"
               | .ok name => c0ExportTraceName name
 
+/-- Disposable stage timings for ONE exact, source-checked theorem.
+    Never returns a kernel environment or an accepting checked receipt.
+    Every worker is the original pinned C0 checker operation: if a stage
+    times out the last BEGIN marker identifies the real hot suboperation. -/
+def c0ExportProbeTheoremStages
+    (env : PsKernelEnvironment)
+    (info : PsKernelTheoremInfo)
+    (fuel : Nat) : IO Unit := do
+  let session := psKernelMkCheckerSession env
+    info.base.levelParams .safe 4096 psKernelLeanNatMaxSizeDefault
+  IO.println "C0_THEOREM_PROBE non_admitting=true stage=header status=begin"
+  let began ← IO.monoMsNow
+  match psKernelCheckConstantBaseWithSession fuel session info.base with
+  | .error reason =>
+      let elapsed := (← IO.monoMsNow) - began
+      IO.println s!"C0_THEOREM_PROBE stage=header status=error elapsed_ms={elapsed} reason={reason}"
+  | .ok header =>
+      let elapsed := (← IO.monoMsNow) - began
+      IO.println s!"C0_THEOREM_PROBE stage=header status=ok elapsed_ms={elapsed}"
+      IO.println "C0_THEOREM_PROBE non_admitting=true stage=proposition status=begin"
+      let startProp ← IO.monoMsNow
+      match psKernelSessionIsProp fuel header info.base.type with
+      | .error reason =>
+          let elapsed := (← IO.monoMsNow) - startProp
+          IO.println s!"C0_THEOREM_PROBE stage=proposition status=error elapsed_ms={elapsed} reason={reason}"
+      | .ok (isProp, afterProp) =>
+          let elapsed := (← IO.monoMsNow) - startProp
+          IO.println s!"C0_THEOREM_PROBE stage=proposition status=ok elapsed_ms={elapsed} is_prop={isProp}"
+          if isProp then
+            IO.println "C0_THEOREM_PROBE non_admitting=true stage=closure status=begin"
+            let startClosure ← IO.monoMsNow
+            match psKernelCheckNoMVarNoFVar info.value with
+            | .error reason =>
+                let elapsed := (← IO.monoMsNow) - startClosure
+                IO.println s!"C0_THEOREM_PROBE stage=closure status=error elapsed_ms={elapsed} reason={reason}"
+            | .ok _ =>
+                let elapsed := (← IO.monoMsNow) - startClosure
+                IO.println s!"C0_THEOREM_PROBE stage=closure status=ok elapsed_ms={elapsed}"
+                IO.println "C0_THEOREM_PROBE non_admitting=true stage=universe status=begin"
+                let startLevels ← IO.monoMsNow
+                match psKernelCheckLevelParams info.value info.base.levelParams with
+                | .error reason =>
+                    let elapsed := (← IO.monoMsNow) - startLevels
+                    IO.println s!"C0_THEOREM_PROBE stage=universe status=error elapsed_ms={elapsed} reason={reason}"
+                | .ok _ =>
+                    let elapsed := (← IO.monoMsNow) - startLevels
+                    IO.println s!"C0_THEOREM_PROBE stage=universe status=ok elapsed_ms={elapsed}"
+                    IO.println "C0_THEOREM_PROBE non_admitting=true stage=proof_full_check status=begin"
+                    let startBody ← IO.monoMsNow
+                    match psKernelSessionCheck fuel afterProp info.value with
+                    | .error reason =>
+                        let elapsed := (← IO.monoMsNow) - startBody
+                        IO.println s!"C0_THEOREM_PROBE stage=proof_full_check status=error elapsed_ms={elapsed} reason={reason}"
+                    | .ok (inferred, afterBody) =>
+                        let elapsed := (← IO.monoMsNow) - startBody
+                        IO.println s!"C0_THEOREM_PROBE stage=proof_full_check status=ok elapsed_ms={elapsed}"
+                        IO.println "C0_THEOREM_PROBE non_admitting=true stage=conclusion_defeq status=begin"
+                        let startEq ← IO.monoMsNow
+                        match psKernelSessionIsDefEq fuel afterBody
+                            inferred info.base.type with
+                        | .error reason =>
+                            let elapsed := (← IO.monoMsNow) - startEq
+                            IO.println s!"C0_THEOREM_PROBE stage=conclusion_defeq status=error elapsed_ms={elapsed} reason={reason}"
+                        | .ok (equal, _) =>
+                            let elapsed := (← IO.monoMsNow) - startEq
+                            IO.println s!"C0_THEOREM_PROBE stage=conclusion_defeq status=done elapsed_ms={elapsed} equal={equal}"
+  IO.println "C0_THEOREM_PROBE verdict=inconclusive diagnostic_only=true"
+
 /-- Result and one-based physical NDJSON record count, including a
     failed record. This is a diagnostic, never a proof receipt. -/
 def c0ExportVerdictFromFileTrace
     (path : System.FilePath) (fuel : Nat := 4096)
-    (traceDeclarations : Bool := false) :
+    (traceDeclarations : Bool := false)
+    (diagnosticTheorem : Option String := none) :
     IO (C0ExportVerdict × Nat) := do
   let handle ← IO.FS.Handle.mk path .read
   let mut state : C0ExportOnlineState := {}
@@ -1789,6 +1858,27 @@ def c0ExportVerdictFromFileTrace
         else if line.startsWith "{\"opaque\":" then "opaque"
         else if line.startsWith "{\"quot\":" then "quot"
         else ""
+      -- A requested theorem probe runs the ORIGINAL source subjudgments
+      -- on a disposable snapshot and terminates INCONCLUSIVE. No checked
+      -- value, cache or environment from this mode can be published.
+      if let some target := diagnosticTheorem then
+        if declKind == "thm" &&
+            c0ExportTraceDeclarationName state.tables line declKind == target then
+          IO.println s!"C0_THEOREM_PROBE target={target} record={consumed} fuel={fuel}"
+          match Lean.Json.parse line with
+          | .error reason =>
+              IO.println ("C0_THEOREM_PROBE parse_error=" ++ reason)
+          | .ok json =>
+              match c0ExportParseRecord state.tables json with
+              | .error reason =>
+                  IO.println ("C0_THEOREM_PROBE input_error=" ++ reason)
+              | .ok parsed =>
+                  match parsed.declarations with
+                  | [.theoremDecl info] =>
+                      c0ExportProbeTheoremStages state.environment info fuel
+                  | _ =>
+                      IO.println "C0_THEOREM_PROBE expected_single_theorem=false"
+          return (.inconclusive, consumed)
       -- Emit the active declaration BEFORE checker execution. A timeout
       -- therefore identifies the precise still-running declaration.
       -- The diagnostic is outside the measured source checker duration.
@@ -1854,6 +1944,9 @@ def c0ExportVerdictFromFileTrace
             slowestDeclMs := 0
             slowestDeclRecord := 0
             slowestDeclKind := "none"
+  if diagnosticTheorem.isSome then
+    IO.println "C0_THEOREM_PROBE target_not_found=true"
+    return (.inconclusive, consumed)
   return (c0ExportFinish state, consumed)
 
 def c0ExportVerdictFromFile
@@ -1956,9 +2049,10 @@ def c0ExportRequireAccepted (outcome : C0ExportVerdict) : Except String Unit :=
 /-- Opt-in strict admission CLI; unchanged source checking and trace. -/
 def c0ExportPrintFileOutcome
     (path : String) (fuel : Nat) (strict : Bool := false)
-    (traceDeclarations : Bool := false) : IO Unit := do
+    (traceDeclarations : Bool := false)
+    (diagnosticTheorem : Option String := none) : IO Unit := do
   let (outcome, lines) ← c0ExportVerdictFromFileTrace
-    path fuel traceDeclarations
+    path fuel traceDeclarations diagnosticTheorem
   IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome} consumed_records={lines} fuel={fuel}"
   if strict then
     match c0ExportRequireAccepted outcome with
@@ -1986,15 +2080,18 @@ def main (args : List String) : IO Unit := do
         throw (IO.userError "unknown NDJSON replay mode")
       return ()
   | [first, second, path, fuelText] =>
-      if first != "--require-accepted" ||
-          second != "--trace-declarations" then
-        throw (IO.userError "unknown NDJSON replay mode")
       let some fuel := fuelText.toNat?
         | throw (IO.userError "expected decimal fuel budget")
-      c0ExportPrintFileOutcome path fuel true true
+      if first == "--diagnose-theorem" then
+        c0ExportPrintFileOutcome path fuel false false (some second)
+      else if first == "--require-accepted" &&
+          second == "--trace-declarations" then
+        c0ExportPrintFileOutcome path fuel true true
+      else
+        throw (IO.userError "unknown NDJSON replay mode")
       return ()
   | [] => pure ()
-  | _ => throw (IO.userError "expected NDJSON path [fuel] with optional --require-accepted and/or --trace-declarations")
+  | _ => throw (IO.userError "expected NDJSON path [fuel], --require-accepted [--trace-declarations] path fuel, or --diagnose-theorem name path fuel")
   -- Negatives, unsupported input and resource exhaustion can never be
   -- promoted to a process-success acceptance contract.
   for verdict in [C0ExportVerdict.rejected, .unsupported, .malformed,

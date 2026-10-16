@@ -143,7 +143,7 @@ def psPrepareConstructorFieldsWithFuel
           localContext := pushed.context
           runtimeLocals := (pushed.id, fieldName) :: scope.runtimeLocals }
         psPrepareConstructorFieldsWithFuel environment fuel scope cursor count (index + 1)
-          erasedTypeFields (⟨index, fieldName, fieldType, false⟩ :: fieldsRev)
+          erasedTypeFields (⟨index, fieldName, fieldType, false, none⟩ :: fieldsRev)
       | kind =>
         let scope := { scope with
           localContext := pushed.context

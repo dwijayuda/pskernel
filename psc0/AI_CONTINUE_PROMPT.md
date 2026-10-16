@@ -13,12 +13,17 @@ passes, not five-gate acceptance. The latest accepted compiler remains 01d762eb.
 
 The shared nested elimination and Hashable candidate
 `7ce2388184f2c29cc49a2b1a367c05191828265a` failed all five gates at Core
-compilation. Focused `38974214074` and F1 `38974214021` identify multiline
-constructor/application layout in InductiveGroup.lean; runtime checks did not run.
-This isolated repair uses explicit sequential Option binds for the same rebased
-constructors and an explicit instantiation block. Four related consumer/fixture
-files receive equivalent continuation layout corrections. Actual arguments,
-traversal order, guards, diagnostics, equations and expected outputs are unchanged.
+compilation. Its multiline constructor/application layout was repaired in
+`78f5f2e09b4a4497ddc179648f3ed3a291544f02`. Focused `38974978039`
+then compiled Core and the elaborator, but found one remaining constructor-arity
+error in Erasure.Inductive; all five gates failed before source/runtime checks.
+
+The new optional recursive-target field was already supplied in explicit
+constructor calls, but one existing positional literal in generic constructor
+field preparation still supplied four fields. This commit initializes that
+legacy field's recursive target to none, as in the other direct constructor
+paths. Checked nested specialization later sets the actual target as before.
+No fixture, expected output, equation, guard, dependency pin or budget changes.
 
 This repaired compiler/test candidate requires its own exact-SHA native, F1, F2,
 F3/F4 and focused success. Let its full native gate finish before publishing the

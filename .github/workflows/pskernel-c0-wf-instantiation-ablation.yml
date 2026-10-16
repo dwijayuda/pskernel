@@ -5,6 +5,7 @@ on:
       - perf/pskernel-c0-v7-rust-20261012
     paths:
       - '.github/workflows/pskernel-c0-wf-instantiation-ablation.yml'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
   workflow_dispatch:
 permissions:
   contents: read

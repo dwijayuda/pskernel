@@ -78,8 +78,8 @@ def psPscv0ReadSpecialDeclaration (cursor : PsTokenCursor) :
   -- swallow it or lose its ownership while introducing the partial prefix.
   if psTokenCursorAtText parsed.cursor "where" then
     throw "PSCV0-FEATURE-UNAVAILABLE: partial where declarations"
-  return { parsed with value := .partialDefinition name binders type value
-    { start := marker.token.span.start, stop := span.stop } }
+  let sourceSpan := PsSourceSpan.mk marker.token.span.start span.stop
+  return { parsed with value := .partialDefinition name binders type value sourceSpan }
 
 def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=

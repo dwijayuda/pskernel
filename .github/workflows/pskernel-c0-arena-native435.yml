@@ -45,22 +45,32 @@ jobs:
             "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/other/nat-lit-arith.lean"
           curl -fL --retry 3 -o "$RUNNER_TEMP/lean4export/ArenaNatBad.lean" \
             "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/other/nat-lit-add-bad.lean"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/lean4export/ArenaProjBad.lean" \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/other/proj-of-prop.lean"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/lean4export/ArenaProjNonStructure.lean" \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/bugs/proj-non-structure.lean"
           (
             cd "$RUNNER_TEMP/lean4export"
             mkdir -p .lake/build/lib/lean
             lake env lean -o .lake/build/lib/lean/ArenaNatGood.olean ArenaNatGood.lean
             lake env lean -o .lake/build/lib/lean/ArenaNatBad.olean ArenaNatBad.lean
+            lake env lean -o .lake/build/lib/lean/ArenaProjBad.olean ArenaProjBad.lean
+            lake env lean -o .lake/build/lib/lean/ArenaProjNonStructure.olean ArenaProjNonStructure.lean
             for decl in natAddLit natSubLit natBleLit; do
               lake env .lake/build/bin/lean4export ArenaNatGood -- "$decl" \
                 > "$RUNNER_TEMP/arena435-$decl.ndjson"
             done
             lake env .lake/build/bin/lean4export ArenaNatBad -- natAddLitBad \
               > "$RUNNER_TEMP/arena435-natAddLitBad.ndjson"
+            lake env .lake/build/bin/lean4export ArenaProjBad -- badFalse \
+              > "$RUNNER_TEMP/arena435-badFalse.ndjson"
+            lake env .lake/build/bin/lean4export ArenaProjNonStructure -- bad \
+              > "$RUNNER_TEMP/arena435-badProjNonStructure.ndjson"
           )
           python3 - <<'PY'
           import os, json, pathlib
           base = pathlib.Path(os.environ["RUNNER_TEMP"])
-          for name in ["natAddLit", "natSubLit", "natBleLit", "natAddLitBad"]:
+          for name in ["natAddLit", "natSubLit", "natBleLit", "natAddLitBad", "badFalse", "badProjNonStructure"]:
               path = base / f"arena435-{name}.ndjson"
               records = path.read_bytes().splitlines()
               hdr = json.loads(records[0])["meta"]
@@ -73,10 +83,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in natAddLit natSubLit natBleLit natAddLitBad; do
+          for name in natAddLit natSubLit natBleLit natAddLitBad badFalse badProjNonStructure; do
             input="$RUNNER_TEMP/arena435-$name.ndjson"
             expected=accept
-            if [ "$name" = natAddLitBad ]; then expected=reject; fi
+            case "$name" in natAddLitBad|badFalse|badProjNonStructure) expected=reject;; esac
             official_status=0
             (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$input") \
               > "$RUNNER_TEMP/arena435-$name-official.txt" 2>&1 || official_status=$?
@@ -102,7 +112,7 @@ jobs:
             fi
             echo "C0_ARENA_NATIVE name=$name expected=$expected official=matched c0=matched fuel=4096"
           done
-          echo "C0_ARENA_NATIVE_RESULT cases=4 all_correct=true source_origin=arena_2026_09 native_lean=4.35.0"
+          echo "C0_ARENA_NATIVE_RESULT cases=6 all_correct=true source_origin=arena_2026_09 native_lean=4.35.0"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

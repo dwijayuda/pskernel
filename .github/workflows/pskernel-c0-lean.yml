@@ -106,6 +106,7 @@ jobs:
           timeout 25s .lake/build/bin/c0InstantiateCSimpProbe
           lake env lean --run test/C0CertifiedHashMemoRegression.lean
           lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          lake env lean --run test/C0AdaptiveInstantiationRegression.lean
           echo "C0_SOURCE_CERTIFIED_MEMO original_hash=equivalent original_substitution=equivalent native_csimp=pass"
 
       - name: Official Lean 4.35 export replay versus C0 checked declaration fixtures

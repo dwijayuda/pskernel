@@ -4,6 +4,14 @@ Status: native Lean engineering and qualification inventory — 17 October 2026.
 Scope: dwijayuda/pskernel, branch perf/pskernel-c0-v7-rust-20261012.
 **No Rust experiment and no compiler/self-host implementation in this phase.**
 
+## 17 October 2026 qualified native 4.35 conformance delta
+
+- The original immutable September 2026 **193** exported test files still all **decline** under the strictly pinned native 4.35 importer. There is **no** claim of 193 official-positive/negative parity.
+- Independently re-exported Arena-authored adversarial `imaxPropBadFalse` and `largeElimBoom` both **truly reject** in official Lean 4.35 and C0 on identical bytes: [strict workflow 38981862523](https://github.com/dwijayuda/pskernel/actions/runs/38981862523). The latter now uses a generic, narrowly witnessed prohibition against an extra motive universe on a multi-constructor Prop recursor, after independent native generation; other unsupported generated metadata still declines.
+- A separate **non-Arena** official Lean 4.35 source control, the valid two-constructor-Prop `Or.rec` small eliminator, was **accepted** by both kernel checkers on identical bytes, alongside the two true adversarial rejections in [workflow 38982095691](https://github.com/dwijayuda/pskernel/actions/runs/38982095691). The genuine two-type mutual prefix and six Arena-authored native source adaptations retain their separately qualified counts; do not add these to the frozen 193 archive denominator.
+- Pinned Lean 4.35 `type_checker.cpp::reduce_nat` and `reduce_bin_nat_op` exposed a distinct C0 compatibility defect: old C0 normalized operands of *any* binary constant and normalized both operands of a Nat primitive even when the first was stuck. Source corrections now dispatch only the recognized 14 Nat operators, with an all-input no-callback theorem and a stuck-left exact-state theorem. [Full 67-step native CI 38982191557](https://github.com/dwijayuda/pskernel/actions/runs/38982191557) passed the new source proofs, negative regressions, and original-C0 comparison. The semantic guard is ordinary pure case analysis, compatible in principle with a future portable implementation.
+- **Still open:** frozen archived Arena source migration/re-exports, broad negative soundness coverage, large real proof throughput, strict acceptance of the pinned **15,758 WF** and **499,130 dependency**, full **6,452,982 Init**, Std and Mathlib, and a verified PSC0 v7.2 feature closure. No benchmark or acceptance result can be inferred from native proof/test compilation alone.
+
 ## Boundary and pinned versions
 
 The admitting PSKernel-C0 checker is native Lean 4.35.0 at commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Only the original native checking and declaration-admission APIs authorize checked declarations. Cached syntax, hash identities, external test labels, build artifacts and archived verdict tables are untrusted inputs; they never authorize theorem acceptance.

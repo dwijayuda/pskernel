@@ -140,6 +140,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Environment.Semantic,
     `Ps.KernelCore.Runtime.Acceleration.Cache,
     `Ps.KernelCore.Runtime.Acceleration.CertifiedHashMemo,
+    `Ps.KernelCore.Runtime.Acceleration.CertifiedNodeCountMemo,
     `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
     `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
     `Ps.KernelCore.SelfHost

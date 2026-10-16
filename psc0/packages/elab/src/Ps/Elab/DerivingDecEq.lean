@@ -44,6 +44,8 @@ def psElabDeriveDecEqProposition (field : PsElabDeriveDecEqField) : PsExpr :=
 -- Once all field equalities are available, the existing substitution engine
 -- reverts dependent proof fields, transports them, and closes by reflexivity.
 -- There is no BEq-to-equality axiom, proof hole or trusted noConfusion shortcut.
+-- Proof fields may depend on earlier data fields; inductive formation still
+-- owns positivity and nested-parameter validity, before deriving is attempted.
 def psElabDeriveDecEqProof (context : PsElabContext)
     (fields : List PsElabDeriveDecEqField) (right : List PsElabTypedBinder)
     (target : PsExpr) : Except PsElabError PsExpr := do

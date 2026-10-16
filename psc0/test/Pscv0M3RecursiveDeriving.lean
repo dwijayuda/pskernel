@@ -16,10 +16,10 @@ inductive M3EqAtom where
 instance : BEq M3EqAtom where
   beq _ _ := false
 
--- The certificate depends on a recursive child but has no runtime payload.
+-- The certificate depends on the scalar field but has no runtime payload.
 inductive M3EqProofChain where
   | stop
-  | link (value : Nat) (next : M3EqProofChain) (certificate : next = next)
+  | link (value : Nat) (next : M3EqProofChain) (certificate : value = value)
   deriving DecidableEq
 
 namespace M3RecursiveHashOracle
@@ -171,7 +171,7 @@ private def source : String :=
   " let x: M3HashTree M3EqAtom := M3HashTree.fork(M3HashTree.leaf(M3EqAtom.atom(flag)), M3HashTree.leaf(M3EqAtom.atom(Bool.not(flag))))\n" ++
   " if (Decidable.decide(self := decEq(x, x))) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
   "}\n" ++
-  "inductive M3EqProofChain where { | stop | link(value: Nat, next: M3EqProofChain, certificate: next = next) } deriving DecidableEq\n" ++
+  "inductive M3EqProofChain where { | stop | link(value: Nat, next: M3EqProofChain, certificate: value = value) } deriving DecidableEq\n" ++
   "function m3decideproof(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 4 } else { 5 }\n" ++
   " let empty: M3EqProofChain := M3EqProofChain.stop\n" ++

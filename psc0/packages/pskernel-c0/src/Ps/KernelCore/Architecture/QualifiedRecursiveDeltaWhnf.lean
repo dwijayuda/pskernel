@@ -246,7 +246,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                             context coreResult.snd expr coreResult.fst := by
                 cases expr <;>
                   simp [psKernelC0DeltaCoreEligible] at eligible <;>
-                  simp [psKernelWhnfWithFuel, cacheEligible]
+                  simp [psKernelWhnfWithFuel, cacheEligible] <;> rfl
             cases cache : psKernelExprMapGet state.whnf expr with
             | some cached =>
                 simp [psKernelC0RecursiveDeltaWhnfWithFuel,
@@ -363,7 +363,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                               rw [hr, sourceAtCore, sourcePost]
                               simp [psKernelWhnfFinish,
                                 psKernelC0RecursiveDeltaWhnfFinish,
-                                cacheEligible, afterState]
+                                cacheEligible, afterState, constTerm] <;> rfl
                           | some opened =>
                               cases child : psKernelC0RecursiveDeltaWhnfWithFuel
                                   remaining context coreState opened with

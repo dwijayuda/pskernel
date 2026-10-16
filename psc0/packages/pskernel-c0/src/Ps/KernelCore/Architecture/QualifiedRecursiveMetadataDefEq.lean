@@ -157,7 +157,7 @@ theorem psKernelC0RecursiveMetadataDefEq_source
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state leftTerm rightTerm = .ok (true, state)
               simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
-              depth, same, cached,
+              depth, same, Bool.and_eq_true, cached,
                 leftTerm, rightTerm]
             · cases child :
                   psKernelC0RecursiveMetadataDefEqWithFuel
@@ -188,7 +188,7 @@ theorem psKernelC0RecursiveMetadataDefEq_source
                   -- recursively proved metadata child.
                   rw [psKernelIsDefEqWithFuel]
                   simp [psKernelDefEqSourceStepWithFuel,
-                    depth, same, cached,
+                    depth, same, Bool.and_eq_true, cached,
                     psKernelDefEqQuickAfterCommon, sourceChild,
                     finalized, leftTerm, rightTerm]
 

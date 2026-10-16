@@ -1595,6 +1595,7 @@ def c0ExportDiagnoseConstructorSequence
   | [] => .ok "all constructor singleton stages succeeded"
   | ctor :: rest => do
       match psKernelAddSimpleConstructorsWithFuel (fuel + 1)
+            fuel
           decl safety resultLevel levels params numIndices
           headerSession work index [ctor] with
       | .ok result =>
@@ -1676,6 +1677,7 @@ def c0ExportDiagnoseOrdinaryInductiveStages
       let work0 := psKernelEnvironmentAddUnchecked env (.inductInfo initialInfo)
       let constructors ←
         match psKernelAddSimpleConstructorsWithFuel (fuel + 1)
+            fuel
             decl safety resultLevel levels params.binders numIndices
             params.session work0 0 decl.ctors with
         | .ok result => .ok result

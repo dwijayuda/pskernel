@@ -147,9 +147,8 @@ def main : IO Unit := do
   IO.println "C0_LEAN435 non_nat_binary_avoids_eager_operand_whnf=pass"
 
   -- Cache policy is Boolean work selection, not theorem admission.
-  -- In checked mode the memo FVar traversal must never be needed for
-  -- a growing application, lambda, Pi or literal; infer-only mode keeps
-  -- the exact original FVar eligibility guard.
+  -- The native candidate bypasses FVar traversal on checked applications,
+  -- lambdas, Pi and literals, but equals the unchanged source Boolean.
   let closedApp : PsKernelExpr :=
     .app (.const psKernelNatAddName []) two
   let localFVarName : PsKernelName :=
@@ -169,13 +168,13 @@ def main : IO Unit := do
   for expr in policyFixtures do
     for inferOnly in [false, true] do
       if psKernelInferCacheEligible inferOnly expr !=
-          psKernelInferCacheEligibleSource inferOnly expr then
+          psKernelC0FastInferCacheEligible inferOnly expr then
         throw (IO.userError "Source-exact inference-cache selector drift")
   for expr in [closedApp, scopedApp, lambda, forallType, two] do
-    if psKernelInferCacheEligible false expr then
+    if psKernelC0FastInferCacheEligible false expr then
       throw (IO.userError "Checked non-cacheable source unexpectedly eligible")
-  if !psKernelInferCacheEligible true closedApp ||
-      psKernelInferCacheEligible true scopedApp then
+  if !psKernelC0FastInferCacheEligible true closedApp ||
+      psKernelC0FastInferCacheEligible true scopedApp then
     throw (IO.userError "Infer-only cache FVar scope guard was altered")
   IO.println "C0_LEAN435 lazy_infer_cache_selector_source_equivalence=pass"
 

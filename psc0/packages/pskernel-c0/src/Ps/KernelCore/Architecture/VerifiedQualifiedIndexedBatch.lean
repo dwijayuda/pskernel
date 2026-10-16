@@ -163,3 +163,4 @@ theorem psKernelC0IndexedSessionCheckMemoQualifiedBatch_source
   unfold psKernelC0IndexedSessionCheckMemoQualifiedBatch
     psKernelC0IndexedSessionCheckSourceBatch
   rw [psKernelC0IndexedMemoQualifiedBatch_source]
+  rfl

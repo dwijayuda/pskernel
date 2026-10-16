@@ -43,7 +43,7 @@ run_cmd do
     let axioms ← Lean.collectAxioms name
     unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
       throwError "WF oracle uses an unapproved assumption: {name}: {axioms}"
-    logInfo m!"PSCV0_M3_WF_ASSUMPTIONS: {name}: {axioms}"
+    Lean.logInfo m!"PSCV0_M3_WF_ASSUMPTIONS: {name}: {axioms}"
 
 end M3WellFoundedOracle
 
@@ -89,14 +89,14 @@ private def source : String :=
 private def checkSource : IO Unit := do
   let plain := "termination_by n\n"
   let proved := plain ++ "decreasing_by by { exact Nat.lt_succ_self(n) }\n"
-  for (prefix, suffix, privacy, registration) in [
+  for (sourcePrefix, suffix, privacy, registration) in [
       ("def fixed(n: Nat): Nat := fixed(n)\n", plain, false, ""),
       ("function fixed(n: Nat): Nat := fixed(n) ", proved, false, ""),
       ("function fixed(n: Nat): Nat := fixed(n)\n  ", proved, false, ""),
       ("private function fixed(n: Nat): Nat := fixed(n)\n", proved, true, ""),
       ("abbrev fixed(n: Nat): Nat := fixed(n)\n", plain, false, "abbrev"),
       ("opaque fixed(n: Nat): Nat := fixed(n)\n", plain, false, "opaque")] do
-    let text := prefix ++ suffix
+    let text := sourcePrefix ++ suffix
     let program ← match psPscv0ParseProgram (text ++ "const following: Nat := 1\n") with
       | .ok value => pure value
       | .error message => throw (IO.userError ("WF source: " ++ message))
@@ -117,7 +117,7 @@ private def checkSource : IO Unit := do
     if name.segments != ["fixed"] || measure.segments != ["n"] ||
         span.start.byteOffset != (if privacy then 8 else 0) ||
         span.stop.byteOffset != text.utf8ByteSize - 1 ||
-        termination.span.start.byteOffset != prefix.utf8ByteSize ||
+        termination.span.start.byteOffset != sourcePrefix.utf8ByteSize ||
         termination.span.stop.byteOffset != span.stop.byteOffset ||
         (psSyntaxTermSpan body).stop.byteOffset > termination.span.start.byteOffset then
       throw (IO.userError "WF body/measure/suffix source spans were not retained")

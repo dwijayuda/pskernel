@@ -26,6 +26,15 @@ repair normalizes all three new split current-definition updates, their nested
 scope records, and the analogous fixture companion-plan records. No semantic
 expectation changes; qualification must resume on the repaired exact SHA.
 
+Production compilation succeeds at `59fddc28ec01726e7a42258d7cc5f3020ed8969b`.
+F1 `38960668822`, F2 `38960668820`, and F3/F4 `38960668821` pass; native
+`38960669014` is still running. Focused `38960668913` stops only while
+compiling the new fixtures: `prefix` is a reserved Lean identifier, and the
+well-founded oracle needs the qualified `Lean.logInfo` API. The fixture-only
+repair renames those locals and qualifies the call, preserving all assertions.
+The repaired focused run and continuing production runs span SHAs; they cannot
+serve as five-gate same-commit acceptance.
+
 The group runtime path constructs one ordinary checked definition per family
 from the actual complete recursor application. All workers retain the same
 capture telescope, levels, parameters, motives and minor arguments; only the

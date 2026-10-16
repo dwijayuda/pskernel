@@ -108,11 +108,11 @@ private def foldDeclarations : List PsDeclaration :=
   let index := PsExpr.fvar 2
   let left := PsExpr.fvar 2
   let right := PsExpr.fvar 3
-  let prefix := [(0, "A", PsExpr.sortE (.succ .zero)), (1, "seed", nat)]
-  [definition "m3foldleft" (prefix ++ [(2, "tree", leftType type)]) nat
+  let parameters := [(0, "A", PsExpr.sortE (.succ .zero)), (1, "seed", nat)]
+  [definition "m3foldleft" (parameters ++ [(2, "tree", leftType type)]) nat
     (psExprApplyMany (.constE (psNameAppendStr leftName "rec") [.succ .zero])
       (fixedArguments type seed ++ [left])),
-   definition "m3foldright" (prefix ++ [(2, "n", nat), (3, "tree", rightType type index)]) boolean
+   definition "m3foldright" (parameters ++ [(2, "n", nat), (3, "tree", rightType type index)]) boolean
     (psExprApplyMany (.constE (psNameAppendStr rightName "rec") [.succ .zero])
       (fixedArguments type seed ++ [index, right]))]
 

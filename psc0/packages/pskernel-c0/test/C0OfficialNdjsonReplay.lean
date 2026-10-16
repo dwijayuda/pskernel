@@ -1728,12 +1728,12 @@ def c0ExportDiagnosticInductiveMismatch
 def c0ExportTraceName : PsKernelName → String
   | .anonymous => ""
   | .str parent value =>
-      let prefix := c0ExportTraceName parent
-      if prefix.isEmpty then value else prefix ++ "." ++ value
+      let parentName := c0ExportTraceName parent
+      if parentName.isEmpty then value else parentName ++ "." ++ value
   | .num parent value =>
-      let prefix := c0ExportTraceName parent
-      if prefix.isEmpty then toString value
-      else prefix ++ "." ++ toString value
+      let parentName := c0ExportTraceName parent
+      if parentName.isEmpty then toString value
+      else parentName ++ "." ++ toString value
 
 /-- Lazily resolve the exact exported declaration name for a stalled
     or completed slow declaration. This never determines an admission result. -/

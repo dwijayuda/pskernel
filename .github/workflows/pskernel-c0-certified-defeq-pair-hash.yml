@@ -30,7 +30,9 @@ jobs:
         run: |
           set -euo pipefail
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
-          lake build PsKernelC0
+          # Qualify the pair-hash proof's own import closure separately from
+          # experimental modules that are not dependencies of source DefEq.
+          lake build Ps.KernelCore.Architecture.CertifiedDefEqPairHash c0OfficialReplay
           lake env lean --run test/C0CertifiedDefEqPairHashRegression.lean
           echo "C0_PAIR_HASH_SOURCE exact_result=Lean proved_symmetry=yes"
       - name: Preserve negative source kernel judgments

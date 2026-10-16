@@ -43,10 +43,17 @@ def main : IO Unit := do
 
   let depth := 26
   let expanded := c0InstMemoShared (.bvar 0) depth
-  let expected := c0InstMemoShared replacement depth
   let begin ← IO.monoNanosNow
   let computed := psKernelC0InstOneMemoizedChanged expanded replacement 0
   let elapsed ← IO.monoNanosNow
-  if !computed.2 || !psKernelExprEqual computed.1 expected then
-    throw (IO.userError "shared 134-million-node DAG substitution differs from exact result")
+  -- Full structural equality here would itself exponentially expand
+  -- the physical DAG; the source-equality theorem below is stronger.
+  let _source :
+      psKernelC0InstOneMemoizedChanged expanded replacement 0 =
+        psKernelC0ExprInstantiateOneChanged expanded replacement 0 :=
+    psKernelC0InstOneMemoizedChanged_source expanded replacement 0
+  if !computed.2 ||
+      psKernelExprGetAppNumArgs computed.1 != depth ||
+      !psKernelExprEqual (psKernelExprGetAppFn computed.1) replacement then
+    throw (IO.userError "shared DAG substitution has wrong binder or spine result")
   IO.println s!"C0_CERTIFIED_INSTANTIATE_MEMO source=Lean_proved all_offsets=pass shared_depth={depth} elapsed_ms={(elapsed - begin)/1000000}"

@@ -5,6 +5,8 @@ on:
       - perf/pskernel-c0-v7-rust-20261012
     paths:
       - '.github/workflows/pskernel-c0-arena-adversarial435.yml'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -63,6 +65,49 @@ jobs:
               assert len(lines)>2
               print(f"C0_ARENA_EXPLOIT_EXPORT case={name} records={len(lines)} bytes={path.stat().st_size}")
           PY
+      - name: Qualify original reordered mutual recursor prefix without rewriting exports
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,pathlib
+          temp=pathlib.Path(os.environ["RUNNER_TEMP"])
+          original=(temp/"arena435-imaxPropBadFalse.ndjson").read_bytes().splitlines(keepends=True)
+          names={0:""}
+          found=False
+          for i,raw in enumerate(original):
+              rec=json.loads(raw)
+              if "in" in rec:
+                  part=rec.get("str",rec.get("num"))
+                  parent=names.get(part["pre"],"") if part else ""
+                  segment=str(part.get("str",part.get("i"))) if part else ""
+                  names[rec["in"]]=parent+"."+segment if parent else segment
+              if "inductive" not in rec: continue
+              group=rec["inductive"]
+              family=[names[x["name"]] for x in group["types"]]
+              if family!=["ImaxPropDummy","ImaxProp"]: continue
+              recursors=[names[x["name"]] for x in group["recs"]]
+              assert recursors==["ImaxProp.rec","ImaxPropDummy.rec"], recursors
+              (temp/"arena435-imaxMutualPrefix.ndjson").write_bytes(b"".join(original[:i+1]))
+              print(f"C0_ARENA_MUTUAL_PREFIX records={i+1} exported_recursor_order=reversed native_versions=unchanged")
+              found=True
+              break
+          assert found, "missing genuine two-type Arena mutual declaration"
+          PY
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake env leanchecker --from-export "$RUNNER_TEMP/arena435-imaxMutualPrefix.ndjson" \
+              > "$RUNNER_TEMP/arena435-imaxMutualPrefix-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/arena435-imaxMutualPrefix-official.txt"
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 150s .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/arena435-imaxMutualPrefix.ndjson" 4096 \
+              > "$RUNNER_TEMP/arena435-imaxMutualPrefix-c0.txt" 2>&1
+          )
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/arena435-imaxMutualPrefix-c0.txt"
+          echo "C0_ARENA_MUTUAL_RECURSOR_FIDELITY genuine_positive=accepted generated_metadata=exact no_parser_header_rewrite=true"
       - name: Require real official rejection and classify native C0 without false acceptance
         shell: bash
         run: |

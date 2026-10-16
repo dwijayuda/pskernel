@@ -159,7 +159,7 @@ theorem psKernelC0RecursiveMetadataDefEq_source
               have cacheBoth :
                   psKernelSemanticPairCacheEligible leftTerm rightTerm = true ∧
                   psKernelExprPairSetContains state.success leftTerm rightTerm = true :=
-                Bool.and_eq_true.mp cached
+                by simpa only [Bool.and_eq_true] using cached
               simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
                 depth, same, cacheBoth.1, cacheBoth.2,
                 leftTerm, rightTerm]

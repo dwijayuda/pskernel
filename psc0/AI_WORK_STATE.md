@@ -19,6 +19,13 @@ owners and found two detached `.mapError` continuations in
 with two analogous fixture continuations identified before that fixture could
 compile. This is a Lean syntax repair; runtime results remain unqualified.
 
+The repaired `0e2d628d6f4f4c7c7ed6f4e9f9a157374515012c` compiled the
+well-founded runtime and expression owners, then all five builds stopped at a
+split record-field value in `Ps.Erasure.Definition`. The next syntax-only
+repair normalizes all three new split current-definition updates, their nested
+scope records, and the analogous fixture companion-plan records. No semantic
+expectation changes; qualification must resume on the repaired exact SHA.
+
 The group runtime path constructs one ordinary checked definition per family
 from the actual complete recursor application. All workers retain the same
 capture telescope, levels, parameters, motives and minor arguments; only the

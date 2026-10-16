@@ -188,12 +188,15 @@ private def checkRefusals (prelude : Lean.Kernel.Environment)
     | throw (IO.userError "runtime fixture produced no companion workers")
   let firstWorker :: _ := first.workers | throw (IO.userError "runtime fixture has an empty worker group")
   expectRefused { prepared with recursorWorkerGroups := [] } "missing companion plan"
-  expectRefused { prepared with recursorWorkerGroups :=
-    { first with workers := first.workers.take 1 } :: rest } "incomplete companion plan"
-  expectRefused { prepared with recursorWorkerGroups :=
-    { first with workers := first.workers.reverse } :: rest } "reordered companion plan"
-  expectRefused { prepared with recursorWorkerGroups :=
-    { first with captureCount := first.captureCount + 1 } :: rest } "stale capture telescope"
+  expectRefused { prepared with
+    recursorWorkerGroups :=
+      { first with workers := first.workers.take 1 } :: rest } "incomplete companion plan"
+  expectRefused { prepared with
+    recursorWorkerGroups :=
+      { first with workers := first.workers.reverse } :: rest } "reordered companion plan"
+  expectRefused { prepared with
+    recursorWorkerGroups :=
+      { first with captureCount := first.captureCount + 1 } :: rest } "stale capture telescope"
   let altered := changedWorker prepared.declarations firstWorker.name
   let _ ← checked prelude altered
   expectRefused { prepared with declarations := altered } "kernel-accepted stale companion minor"

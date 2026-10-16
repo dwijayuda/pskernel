@@ -172,8 +172,9 @@ def psEraseOpenDefinitionWithFuel
                     domain
                     binder;
                 let openedVariable := PsExpr.fvar pushed.id;
-                let scope := { scope with currentDefinition := scope.currentDefinition.map fun current =>
-                  { current with coreParametersRev := openedVariable :: current.coreParametersRev } };
+                let scope := { scope with
+                  currentDefinition := scope.currentDefinition.map fun current =>
+                    { current with coreParametersRev := openedVariable :: current.coreParametersRev } };
                 let nextType :=
                   psExprInstantiate1 typeBody openedVariable;
                 let nextValue :=
@@ -196,8 +197,9 @@ def psEraseOpenDefinitionWithFuel
                       | Option.none => Option.none
                       | Option.some current =>
                           Option.some
-                            { current with typeArgumentsRev :=
-                              List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev };
+                            { current with
+                              typeArgumentsRev :=
+                                List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev };
                     let nextScope : PsErasureScope :=
                       { scope with
                         localContext := pushed.context
@@ -217,8 +219,9 @@ def psEraseOpenDefinitionWithFuel
                     let (parameter, proofScope) :=
                       psErasureOpenProofSlot scope pushed.context pushed.id
                     let current := proofScope.currentDefinition.map fun current =>
-                      { current with runtimeParameters :=
-                        psErasureAppendRuntimeParameter current.runtimeParameters parameter.name }
+                      { current with
+                        runtimeParameters :=
+                          psErasureAppendRuntimeParameter current.runtimeParameters parameter.name }
                     smaller { proofScope with currentDefinition := current }
                       nextType nextValue typeIndex typeParametersRev
                       (parameter :: parametersRev)
@@ -239,8 +242,9 @@ def psEraseOpenDefinitionWithFuel
                           | Option.none => Option.none
                           | Option.some current =>
                               Option.some
-                                { current with runtimeParameters :=
-                                  psErasureAppendRuntimeParameter current.runtimeParameters parameterName };
+                                { current with
+                                  runtimeParameters :=
+                                    psErasureAppendRuntimeParameter current.runtimeParameters parameterName };
                         let nextScope : PsErasureScope :=
                           { scope with
                             localContext := pushed.context
@@ -354,9 +358,10 @@ def psEraseDefinition
     | Except.error error => Except.error error
     | Except.ok entryScope =>
         let definitionScope : PsErasureScope :=
-          { entryScope with currentDefinition := (Option.some
-              { name := outputName, typeArgumentsRev := [], runtimeParameters := []
-                coreName := some name }) };
+          { entryScope with
+            currentDefinition := (Option.some {
+              name := outputName, typeArgumentsRev := [], runtimeParameters := []
+              coreName := some name }) };
         match psLowerStructureRecursors environment value with
         | Except.error error => Except.error error
         | Except.ok normalizedValue =>

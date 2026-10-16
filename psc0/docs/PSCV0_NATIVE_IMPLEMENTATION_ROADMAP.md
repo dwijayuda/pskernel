@@ -1,3 +1,23 @@
+## M3+B exact qualification: open Nat.sub strict-child slice accepted (16 October 2026)
+
+**Accepted compiler/test:** `721b97038926db5f34e2da1cf7157c68c18234ff`. All five exact same-commit
+runs SUCCESS: native `38931145719` (33/33 steps), F1 `38931145674`,
+F2 `38931145639`, F3/F4 `38931145711`, focused `38931145641`.
+See `psc0/docs/PSCV0_M3_NAT_SUB_QUALIFICATION_2026-10-16.md`.
+The pinned `Nat.sub a 0 ≡ a` conversion is checked for open terms,
+with native oracle, source `rfl` equation, two scalar runtime inputs in
+JS/TS/Rust/GC/Wasmtime and a phase-correct non-child subtraction refusal.
+The previous **candidate pending-native** text remains historical.
+
+**Next in-flight test-only candidate:** `3a2fbdfa` checks ordinary HAdd infix
+`k + 0` and refuses `k + 1`; it must pass its own focused workflow
+`38933071884` and does not by itself produce a new compiler qualification.
+Entire M3+B **remains OPEN** for indexed/nested/mutual data, broad
+elimination/well-founded total recursion and selected P0/P1.
+No extra logical assumptions, unverified execution, benchmark relaxation or
+performance speedup. Continue v7.2 only for .ps, native portable .lean,
+GitHub/cloud CI, both handoffs and PR draft/open.
+
 # PSCV0 native implementation roadmap — v7.2 sole target
 
 Updated 16 October 2026. **The sole forward `.ps` target is [v7.2](../PSCV0_LANGUAGE_REFERENCE_v7.2.md).** No v7/v7.1 compatibility mode, legacy grammar fallback or architectural restart. Apply the user's [stage directive](PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md) before every new slice. The [migration matrix](PSCV0_V7_TO_V72_MIGRATION_IMPACT_2026-10-16.md) separates actual semantic changes from formatting and specified behavior from implemented/qualified capability.

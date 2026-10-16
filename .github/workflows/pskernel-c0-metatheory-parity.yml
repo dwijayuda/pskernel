@@ -11,6 +11,7 @@ on:
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Inductive/**'
       - 'psc0/packages/pskernel-c0/test/C0MetatheoryScopeRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0MetatheoryAdmissionRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ConstructorFieldFuelSeparationRegression.lean'
       - 'psc0/packages/pskernel-c0/lakefile.lean'
   workflow_dispatch:
 permissions:
@@ -38,4 +39,5 @@ jobs:
           lake build Ps.KernelCore.Admission.Inductive.Mutual.Analysis
           lake env lean --run test/C0MetatheoryScopeRegression.lean
           lake env lean --run test/C0MetatheoryAdmissionRegression.lean
+          lake env lean --run test/C0ConstructorFieldFuelSeparationRegression.lean
           echo "C0_METATHEORY_PARITY native_source=pass cache_scope=pass raw_pi=pass root_bucket=pass"

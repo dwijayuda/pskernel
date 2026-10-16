@@ -216,3 +216,20 @@ major rule. Existing strict-child, fixed/evolving-prefix, direct-recursive
 deriving, benchmark, module, proof, erasure and runtime cases are preserved.
 Five exact-commit native/F1/F2/F3-F4/focused workflows are REQUIRED before
 admission. No new speedup or entire M3+B closure is claimed.
+
+## Experimental M3 HAdd-infix computed-child conformance (focused qualification pending)
+
+Prior Nat.sub compiler/test `721b97038926db5f34e2da1cf7157c68c18234ff`
+still awaits exact native run `38931145719`; the four independent
+gate results are green. This **fixture-only** candidate does not modify
+compiler code. It tests `k + 0` through checked HAdd Nat instance
+resolution against an existing strict-child IH, and a separate `k + 1`
+negative that must reject at the structural elaboration rule.
+The native Lean 4.35 oracle checks the equation by rfl; one additional
+Bool-to-UInt64 source observation is compared on the existing
+JS/strict TS/Rust/V8 GC/Wasmtime lanes.
+
+The focused workflow must pass before claiming source infix conformance.
+This is not automatic arithmetic termination, general well-founded
+recursion, executable partial P0, P1 fixedpoints or full M3+B.
+No new axiom, weakened original test or performance claim.

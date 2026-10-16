@@ -156,8 +156,12 @@ theorem psKernelC0RecursiveMetadataDefEq_source
               rw [hr]
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state leftTerm rightTerm = .ok (true, state)
+              have cacheBoth :
+                  psKernelSemanticPairCacheEligible leftTerm rightTerm = true ∧
+                  psKernelExprPairSetContains state.success leftTerm rightTerm = true :=
+                Bool.and_eq_true.mp cached
               simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
-              depth, same, Bool.and_eq_true, cached,
+                depth, same, cacheBoth.1, cacheBoth.2,
                 leftTerm, rightTerm]
             · cases child :
                   psKernelC0RecursiveMetadataDefEqWithFuel

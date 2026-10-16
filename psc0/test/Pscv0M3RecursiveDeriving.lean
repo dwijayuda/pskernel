@@ -117,6 +117,17 @@ termination_by structural n
 example (flag : Bool) (n : Nat) :
     laterChild flag (Nat.succ n) =
       laterChild flag n + (if flag then 2 else 1) := by rfl
+
+-- A changing prefix can be a checked accumulator/state parameter.
+-- Unlike a fixed prefix, its update is handled by worker normalization.
+def flipPrefix (flag : Bool) (n : Nat) : Nat :=
+  match n with
+  | 0 => if flag then 1 else 0
+  | k + 1 => flipPrefix (!flag) (Nat.add k 0)
+termination_by structural n
+
+example (flag : Bool) (n : Nat) :
+    flipPrefix flag (Nat.succ n) = flipPrefix (!flag) n := by rfl
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -210,7 +221,10 @@ private def source : String :=
   "function m3normoutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedChild(if (flag) { 17 } else { 9 }))\n" ++
   "function m3laterChild(flag: Bool, n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3laterChild(flag, Nat.add(k, 0)) + (if (flag) { 2 } else { 1 }) }\n" ++
   "theorem m3laterStep(flag: Bool, n: Nat): m3laterChild(flag, Nat.succ(n)) = m3laterChild(flag, n) + (if (flag) { 2 } else { 1 }) := by { rfl }\n" ++
-  "function m3lateroutput(flag: Bool): UInt64 := UInt64.ofNat(m3laterChild(flag, if (flag) { 17 } else { 9 }))\n"
+  "function m3lateroutput(flag: Bool): UInt64 := UInt64.ofNat(m3laterChild(flag, if (flag) { 17 } else { 9 }))\n" ++
+  "function m3flipPrefix(flag: Bool, n: Nat): Nat := match n with { | 0 => if (flag) { 1 } else { 0 } | k+1 => m3flipPrefix(Bool.not(flag), Nat.add(k, 0)) }\n" ++
+  "theorem m3flipStep(flag: Bool, n: Nat): m3flipPrefix(flag, Nat.succ(n)) = m3flipPrefix(Bool.not(flag), n) := by { rfl }\n" ++
+  "function m3flipoutput(flag: Bool): UInt64 := UInt64.ofNat(m3flipPrefix(flag, if (flag) { 17 } else { 9 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -252,7 +266,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -294,6 +308,8 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.normalizedChild (if flag then 17 else 9))).toNat))),
     ("m3lateroutput", Lean.toJson (toString ((UInt64.ofNat
       (M3RecursiveHashOracle.laterChild flag (if flag then 17 else 9))).toNat))),
+    ("m3flipoutput", Lean.toJson (toString ((UInt64.ofNat
+      (M3RecursiveHashOracle.flipPrefix flag (if flag then 17 else 9))).toNat))),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

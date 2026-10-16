@@ -118,6 +118,8 @@ def psElabValidateStructuralCall (elaborate : PsElaborator)
       -- Earlier arguments must be unchanged, direct binder references.
       -- Prechecking the computed major cannot reorder any actual computation;
       -- the normal telescope still elaborates these references in order.
+      -- Other changing-prefix calls may instead use the separately checked
+      -- state-parameter worker normalization, never a synthetic IH.
       let fixedPrefix := recursion.explicitParameterIds.take recursion.recursiveParameterIndex
       let sourcePrefix := arguments.take recursion.recursiveParameterIndex
       if fixedPrefix.length != sourcePrefix.length ||

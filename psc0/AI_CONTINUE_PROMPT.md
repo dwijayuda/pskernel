@@ -103,3 +103,15 @@ The same focused suite instead checks `badLaterMajor(flag, Nat.succ(k))`
 with an unchanged prefix but a nondecreasing recursive major at a later
 argument position; that must reject by the same strict-child rule. Actual
 typed-elaboration and proof gates remain intact. Qualification pending.
+
+### Candidate positive evidence — evolving prefix state
+The prior `badPrefix` refusal was invalid: recursion may change a prefix
+state parameter while strictly decreasing a later major through the
+existing checked worker-normalization. Focused 38927983884 successfully
+qualified the corrected nondecreasing-later-major refusal at 6fe169bf.
+This candidate adds `m3flipPrefix(flag,n)`, an independent pinned-Lean
+structural proof, one exact Bool→UInt64 observation for each flag across
+existing JS/TS/Rust/GC/Wasmtime lanes, and a checked source equation.
+It preserves the conservative once-only computed-major prefix path as
+a distinct supported case and leaves unsupported dependent/nested/mutual
+recursion unchanged. The full five-gate exact-commit acceptance is pending.

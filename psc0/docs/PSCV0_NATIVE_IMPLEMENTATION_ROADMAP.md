@@ -88,3 +88,8 @@ The [BEq qualification receipt](PSCV0_M3_RECURSIVE_BEQ_QUALIFICATION_2026-10-16.
 Selected uniform nonindexed direct-recursive BEq now uses checked left-child comparison hypotheses, right constructor case analysis, independent field dictionaries and no reflexivity/pointer shortcut. Native-oracle comparison masks, a non-reflexive field dictionary, checked defining law and all selected target lanes passed. Two obsolete direct-recursive negatives became unsupported nested cases without changing their rejection assertions or phases. This entry supersedes the historical Repr entry's pending BEq status, not its accepted evidence or the unchanged full M3 exit.
 
 The next [recursive DecidableEq candidate](PSCV0_M3_RECURSIVE_DECEQ_2026-10-16.md) extends the same induction mechanism with actual child decision proofs and existing equality transport. Its native-oracle fixture includes proof-bearing recursion and equality independent of custom BEq. **That new compiler remains unqualified until its own five same-commit workflows pass.** BEq success is not DecidableEq or full M3 acceptance. Broader data/elimination/total recursion/P0/P1 remain open; no new performance improvement is claimed.
+
+
+## Selected definitional strict-child recursion — accepted 16 October 2026
+
+The [qualification receipt](PSCV0_M3_STRUCTURAL_CHILD_QUALIFICATION_2026-10-16.md) accepts `8e7f18885a3e917fbdf000d7d108842b2cc1f067` after all five same-commit workflows passed. No general source `k + 0` projection inference, arbitrary arithmetic decrease, non-first computed major, broader inductives, partial execution or fixedpoint is implied. M3+B remains OPEN. Its older pending deriving text above is historical; exact recursive DecidableEq is already accepted separately.

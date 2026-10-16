@@ -1,4 +1,21 @@
-# Continue v7.2 M3+B — accepted recursive DecidableEq baseline
+# Continue v7.2 M3+B — accepted structural child baseline
+
+## Accepted M3+B structural strict-child slice — 16 October 2026
+
+Selected compiler/test `8e7f18885a3e917fbdf000d7d108842b2cc1f067` passed all five exact same-commit gates:
+native 38923349115 (33/33 steps), F1 38923349086, F2 38923349001,
+F3/F4/platform 38923349042, focused 38923349138 (JS, compiled TS, Rust, V8 GC, Wasmtime).
+See [structural child qualification](docs/PSCV0_M3_STRUCTURAL_CHILD_QUALIFICATION_2026-10-16.md).
+It admits first-position computed children only by checked definitional equality
+to an existing strict IH field. `Nat.add k 0` canonical conversion succeeds;
+infix `k + 0`, non-first computed majors and general arithmetic decreases are
+not yet qualified. The nondecreasing-successor negative rejects as intended.
+Older pending-candidate notes below are **historical**, not live qualification blockers.
+M3+B **remains OPEN** for nested/indexed/mutual data and deriving, more
+elimination/motives, broader total recursion, source strategy matrix,
+selected P0/P1 obligations, and cross-stage acceptance. Continue v7.2 only,
+native portable .lean, pinned 4.35.0, no pskernel-core/self-hosting, no
+weakened gates, same prior accepted M2+A and other evidence.
 
 Reapply the attached user stage prompt and docs/PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md before each coherent slice. Fresh HEAD/CI/both handoffs, relevant v7.2 clauses and pinned Lean source/tests. v7.2 only for .ps; no legacy modes or native .lean restrictions. M3+B remains OPEN.
 

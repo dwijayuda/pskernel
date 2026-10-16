@@ -32,6 +32,28 @@ def main : IO Unit := do
     psKernelC0VerifiedIndexedHashRead_source combined
   if psKernelC0VerifiedIndexedHashRead combined != psKernelExprHash rootExpr then
     throw (IO.userError "indexed-hash: source application hash mismatch")
+  -- Force the source cache past its small-entry threshold into the
+  -- persistent radix index, where precomputed hash lookup matters.
+  let cache := (List.range 14).foldl
+    (fun state (n : Nat) =>
+      psKernelExprMapInsert state (.lit (.nat n)) (.sort .zero))
+    psKernelExprMapEmpty
+  let resultType : PsKernelExpr := .sort (.succ .zero)
+  let sourceCache := psKernelExprMapInsert cache combined.expr resultType
+  let acceleratedCache :=
+    psKernelC0VerifiedIndexedCacheInsert combined cache resultType
+  let _exactInsertion :
+      acceleratedCache = sourceCache :=
+    psKernelC0VerifiedIndexedCacheInsert_source combined cache resultType
+  let _exactLookup :
+      psKernelC0VerifiedIndexedCacheGet combined acceleratedCache =
+        psKernelExprMapGet acceleratedCache combined.expr :=
+    psKernelC0VerifiedIndexedCacheGet_source combined acceleratedCache
+  if psKernelC0VerifiedIndexedCacheGet combined acceleratedCache !=
+      psKernelExprMapGet sourceCache combined.expr then
+    throw (IO.userError "indexed-hash: checked indexed cache lookup differs from source")
+  if !(psKernelC0VerifiedIndexedCacheGet combined cache).isNone then
+    throw (IO.userError "indexed-hash: incorrect hit before inserting source term")
   if (psKernelC0VerifiedIndexedHashAppTry
       owner rootId argId fnId arg fn).isSome then
     throw (IO.userError "indexed-hash: swapped source children forged an app certificate")

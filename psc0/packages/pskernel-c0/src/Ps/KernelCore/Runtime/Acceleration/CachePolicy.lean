@@ -25,19 +25,44 @@ def psKernelSemanticPairCacheEligible
   psKernelSemanticCacheEligible left &&
     psKernelSemanticCacheEligible right
 
-def psKernelInferCacheEligible
+/-- Historical cache selector; retained as a mathematical source oracle.
+The original order scanned every expression for FVars before noticing that
+checked applications and checked binders are never cache candidates. -/
+def psKernelInferCacheEligibleSource
     (inferOnly : Bool)
-    (expr : PsKernelExpr) :
-    Bool :=
+    (expr : PsKernelExpr) : Bool :=
   if psKernelSemanticCacheEligible expr then
     match expr with
-    | PsKernelExpr.lit _ => false
-    | PsKernelExpr.app _ _ => inferOnly
-    | PsKernelExpr.lam _ _ _ _ => inferOnly
-    | PsKernelExpr.forallE _ _ _ _ => inferOnly
+    | .lit _ => false
+    | .app _ _ => inferOnly
+    | .lam _ _ _ _ => inferOnly
+    | .forallE _ _ _ _ => inferOnly
     | _ => true
-  else
-    false
+  else false
+
+/-- Source-exact selector; test the cheap shape/mode before recursively
+querying local-variable containment. Checked application/lambda/Pi and any
+literal cannot enter either infer cache, so do not traverse their DAG just
+to discover that the historical result is already false. Infer-only terms
+still obey the exact original FVar scope guard. -/
+def psKernelInferCacheEligible
+    (inferOnly : Bool)
+    (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | .lit _ => false
+  | .app _ _ | .lam _ _ _ _ | .forallE _ _ _ _ =>
+      inferOnly && psKernelSemanticCacheEligible expr
+  | _ => psKernelSemanticCacheEligible expr
+
+/-- All-input identity of the *actual Boolean cache policy*, including
+local FVar handling, binder forms and infer-only versus checked mode.
+This is not a new semantic cache and cannot authorize any cached typing. -/
+theorem psKernelInferCacheEligible_source
+    (inferOnly : Bool) (expr : PsKernelExpr) :
+    psKernelInferCacheEligible inferOnly expr =
+      psKernelInferCacheEligibleSource inferOnly expr := by
+  cases expr <;> cases inferOnly <;>
+    simp [psKernelInferCacheEligible, psKernelInferCacheEligibleSource]
 
 
 /-!

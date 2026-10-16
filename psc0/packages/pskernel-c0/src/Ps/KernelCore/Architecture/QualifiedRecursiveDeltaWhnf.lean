@@ -38,12 +38,14 @@ def psKernelC0DeltaIsMetadata : PsKernelExpr → Bool
 /-- Forms for which the existing E.4AH core is independently qualified.
     A delta-expanded application headed by an unknown constant is NOT
     accepted: recursor/Quot/Nat callbacks can affect its source state. -/
-def psKernelC0DeltaCoreEligible : PsKernelExpr → Bool
-  | .const _ _ => true
-  | .lam _ _ _ _ => true
-  | .app _ _ => true
-  | .letE _ _ _ _ _ => true
-  | _ => false
+def psKernelC0DeltaCoreEligible (expr : PsKernelExpr) : Bool :=
+  psKernelSemanticCacheEligible expr &&
+    (match expr with
+    | .const _ _ => true
+    | .lam _ _ _ _ => true
+    | .app _ _ => true
+    | .letE _ _ _ _ _ => true
+    | _ => false)
 
 /-- The same whole checker state as original public WHNF completion.
     An unfolded child may have inserted intermediate core and public
@@ -219,7 +221,12 @@ theorem psKernelC0RecursiveDeltaWhnf_source
           | lit _ => simp [psKernelC0DeltaIsMetadata] at metadata
           | proj _ _ _ => simp [psKernelC0DeltaIsMetadata] at metadata
         · by_cases eligible : psKernelC0DeltaCoreEligible expr = true
-          · have sourceOuter :
+          · have cacheEligible :
+                psKernelSemanticCacheEligible expr = true := by
+                by_cases he : psKernelSemanticCacheEligible expr = true
+                · exact he
+                · simp [psKernelC0DeltaCoreEligible, he] at eligible
+            have sourceOuter :
                 psKernelWhnfWithFuel (Nat.succ remaining)
                   reduceRecursor context state expr =
                   match psKernelExprMapGet state.whnf expr with
@@ -239,7 +246,7 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                             context coreResult.snd expr coreResult.fst := by
                 cases expr <;>
                   simp [psKernelC0DeltaCoreEligible] at eligible <;>
-                  rfl
+                  simp [psKernelWhnfWithFuel, cacheEligible]
             cases cache : psKernelExprMapGet state.whnf expr with
             | some cached =>
                 simp [psKernelC0RecursiveDeltaWhnfWithFuel,
@@ -329,7 +336,9 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                         psKernelC0StableWhnfTerminal_post
                           callback context coreState expr core stable
                       rw [hr, sourceAtCore, sourcePost]
-                      rfl
+                      simp [psKernelWhnfFinish,
+                        psKernelC0RecursiveDeltaWhnfFinish,
+                        cacheEligible, afterState]
                     · cases core with
                       | const name levels =>
                           let constTerm : PsKernelExpr := .const name levels
@@ -352,7 +361,9 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                   callback context coreState expr name levels
                                   none unfolding
                               rw [hr, sourceAtCore, sourcePost]
-                              rfl
+                              simp [psKernelWhnfFinish,
+                                psKernelC0RecursiveDeltaWhnfFinish,
+                                cacheEligible, afterState]
                           | some opened =>
                               cases child : psKernelC0RecursiveDeltaWhnfWithFuel
                                   remaining context coreState opened with
@@ -392,7 +403,9 @@ theorem psKernelC0RecursiveDeltaWhnf_source
                                           childResult.fst childResult.snd) =
                                       Except.ok (value, afterState)
                                   rw [sourceChild]
-                                  rfl
+                                  simp [psKernelWhnfFinish,
+                                    psKernelC0RecursiveDeltaWhnfFinish,
+                                    cacheEligible, afterState]
                       | bvar _ =>
                           simp [psKernelC0RecursiveDeltaWhnfWithFuel,
                             direct, metadata, eligible, cache,

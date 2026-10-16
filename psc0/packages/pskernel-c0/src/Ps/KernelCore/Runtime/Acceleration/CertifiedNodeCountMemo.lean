@@ -155,18 +155,21 @@ theorem psKernelC0MemoizedExprNodeCount_source (expr : PsKernelExpr) :
 /-- Independent direct algorithm, not a call back into the compiler-replaced
 source name. Plain linear trees avoid memo allocation on this path. -/
 def psKernelC0DirectExprNodeCount : PsKernelExpr → Nat
-  | .app f a => 1 + psKernelC0DirectExprNodeCount f +
-      psKernelC0DirectExprNodeCount a
-  | .lam _ ty body _ => 1 + psKernelC0DirectExprNodeCount ty +
-      psKernelC0DirectExprNodeCount body
-  | .forallE _ ty body _ => 1 + psKernelC0DirectExprNodeCount ty +
-      psKernelC0DirectExprNodeCount body
-  | .letE _ ty val body _ =>
-      1 + psKernelC0DirectExprNodeCount ty +
-        (psKernelC0DirectExprNodeCount val +
-          psKernelC0DirectExprNodeCount body)
-  | .mdata _ body => 1 + psKernelC0DirectExprNodeCount body
-  | .proj _ _ body => 1 + psKernelC0DirectExprNodeCount body
+  | .app f a => Nat.succ (Nat.add
+      (psKernelC0DirectExprNodeCount f)
+      (psKernelC0DirectExprNodeCount a))
+  | .lam _ ty body _ => Nat.succ (Nat.add
+      (psKernelC0DirectExprNodeCount ty)
+      (psKernelC0DirectExprNodeCount body))
+  | .forallE _ ty body _ => Nat.succ (Nat.add
+      (psKernelC0DirectExprNodeCount ty)
+      (psKernelC0DirectExprNodeCount body))
+  | .letE _ ty val body _ => Nat.succ (Nat.add
+      (psKernelC0DirectExprNodeCount ty)
+      (Nat.add (psKernelC0DirectExprNodeCount val)
+        (psKernelC0DirectExprNodeCount body)))
+  | .mdata _ body => Nat.succ (psKernelC0DirectExprNodeCount body)
+  | .proj _ _ body => Nat.succ (psKernelC0DirectExprNodeCount body)
   | _ => 1
 
 theorem psKernelC0DirectExprNodeCount_source (expr : PsKernelExpr) :

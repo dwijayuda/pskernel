@@ -34,6 +34,30 @@ jobs:
           test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
           (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      # Real pinned Lean 4.35 control, not an Arena-authored exploit.
+      # Or is a two-constructor Prop: legal small elimination must still work.
+      - name: Check legitimate two-constructor Prop recursor against official Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake env .lake/build/bin/lean4export Init -- Or.rec \
+              > "$RUNNER_TEMP/lean435-prop-Or-rec.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/lean435-prop-Or-rec.ndjson" \
+              > "$RUNNER_TEMP/lean435-prop-Or-rec-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" \
+            "$RUNNER_TEMP/lean435-prop-Or-rec-official.txt"
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 120s .lake/build/bin/c0OfficialReplay --require-accepted \
+              "$RUNNER_TEMP/lean435-prop-Or-rec.ndjson" 4096 \
+              > "$RUNNER_TEMP/lean435-prop-Or-rec-c0.txt" 2>&1
+          )
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" \
+            "$RUNNER_TEMP/lean435-prop-Or-rec-c0.txt"
+          echo "C0_LEAN435_PROP_SMALL_ELIM case=Or.rec official=accepted c0=accepted"
       - name: Rebuild frozen Arena exploit sources without inventing declarations
         shell: bash
         run: |
@@ -177,6 +201,7 @@ jobs:
           name: pskernel-c0-arena-adversarial435
           path: |
             ${{ runner.temp }}/arena435-*.ndjson
+            ${{ runner.temp }}/lean435-prop-Or-rec*
             ${{ runner.temp }}/arena435-*-official.txt
             ${{ runner.temp }}/arena435-*-c0.txt
           if-no-files-found: warn

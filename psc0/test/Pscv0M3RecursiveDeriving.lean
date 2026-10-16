@@ -207,6 +207,12 @@ def nestedArrayRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedArrayRoseTag
     (if flag then M3NestedArrayRose.leaf else M3NestedArrayRose.node #[]))
 
+-- Lean's partial executable body is distinct from its logical opaque value.
+partial def partialIncrement (n : Nat) : Nat := n + 5
+
+def partialOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (partialIncrement (if flag then 17 else 9))
+
 def nestedRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedRoseTag
     (if flag then M3NestedRose.leaf else M3NestedRose.node []))
@@ -321,7 +327,9 @@ private def source : String :=
   "function m3nestedoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedtag(if (flag) { M3NestedRose.leaf } else { M3NestedRose.node(List.nil) }))\n" ++
   "inductive M3NestedArrayRose where { | leaf | node(children: Array M3NestedArrayRose) }\n" ++
   "function m3nestedarraytag(r: M3NestedArrayRose): Nat := match r with { | M3NestedArrayRose.leaf => 0 | M3NestedArrayRose.node children => 1 }\n" ++
-  "function m3nestedarrayoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedarraytag(if (flag) { M3NestedArrayRose.leaf } else { M3NestedArrayRose.node(#[]) }))\n"
+  "function m3nestedarrayoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedarraytag(if (flag) { M3NestedArrayRose.leaf } else { M3NestedArrayRose.node(#[]) }))\n" ++
+  "partial function m3partial(n: Nat): Nat := n + 5\n" ++
+  "function m3partialoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partial(if (flag) { 17 } else { 9 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -375,7 +383,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput"] }
   let nestedRequest : PsV7Native.Request := {
     source :=
       "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
@@ -396,9 +404,13 @@ def main (args : List String) : IO Unit := do
       "inductive M3NestedProdRose where { | leaf | node(children: Prod M3NestedProdRose M3NestedProdRose) }\n" ++
       "function m3nestedprodtag(r: M3NestedProdRose): Nat := match r with { | M3NestedProdRose.leaf => 0 | M3NestedProdRose.node children => 1 }\n"
     sourceName := "m3-nested-prod-rose.ps" }
+  let verifiedRequest : PsV7Native.Request := {
+    source, sourceName := "m3-verified-request.ps"
+    assurance := .closedVerified
+    targets := [.javascript] }
   let requests := #[request, nestedRequest, nestedArrayRequest, nestedOptionRequest,
     nestedProdRequest] ++ (refusals.map fun (_, text, _) =>
-    ({ source := text } : PsV7Native.Request)).toArray
+    ({ source := text } : PsV7Native.Request)).toArray ++ #[verifiedRequest]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
@@ -446,6 +458,15 @@ def main (args : List String) : IO Unit := do
     | .error error =>
       if error.phase != "elaborate" || (error.message.splitOn expected).length < 2 then
         throw (IO.userError (label ++ " failed at wrong phase/rule: " ++ error.phase ++ ": " ++ error.message))
+  let some verified := batch.results[requests.size - 1]? |
+    throw (IO.userError "missing explicit verified refusal")
+  match verified with
+  | .ok _ => throw (IO.userError "verified request incorrectly downgraded to ordinary output")
+  | .error error =>
+    if error.phase != "assurance" ||
+        (error.message.splitOn "PSCV0-ASSURANCE-DOWNGRADE").length < 2 then
+      throw (IO.userError ("verified request wrong phase/rule: " ++
+        error.phase ++ ": " ++ error.message))
   let rows := [false, true].map fun flag => Lean.Json.mkObj [
     ("flag", Lean.toJson flag),
     ("m3hashnat", Lean.toJson (toString ((M3RecursiveHashOracle.natHash flag).toNat))),
@@ -474,6 +495,8 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.nestedRoseOutput flag).toNat)),
     ("m3nestedarrayoutput", Lean.toJson (toString
       (M3RecursiveHashOracle.nestedArrayRoseOutput flag).toNat)),
+    ("m3partialoutput", Lean.toJson (toString
+      (M3RecursiveHashOracle.partialOutput flag).toNat)),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

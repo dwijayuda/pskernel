@@ -23,8 +23,21 @@ structure Diagnostic where
   message : String
   deriving Repr
 
+-- Ordinary vs verified must be an explicit host-owned request, never
+-- inferred from whether a partial body happened to typecheck.
+inductive Assurance where
+  | ordinaryChecked
+  | closedVerified
+  | boundaryQualifiedVerified
+
+def assuranceLabel : Assurance → String
+  | .ordinaryChecked => "ordinary-checked"
+  | .closedVerified => "closed-verified"
+  | .boundaryQualifiedVerified => "boundary-qualified-verified"
+
 structure Request where
   source : String
+  assurance : Assurance := .ordinaryChecked
   sourceName : String := "application.ps"
   outputStem : String := "module"
   targets : List PsEmissionTarget := []
@@ -44,6 +57,7 @@ structure Timings where
   emitMs : Nat := 0
 
 structure Result where
+  assurance : Assurance := .ordinaryChecked
   moduleProfiles : List PsPscv0ModuleProfile := []
   declarationCount : Nat
   artifacts : List PsEmissionArtifact
@@ -97,6 +111,11 @@ private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
 
 private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do
+  match request.assurance with
+  | .ordinaryChecked => pure ()
+  | .closedVerified | .boundaryQualifiedVerified =>
+      throw { phase := "assurance", message :=
+        "PSCV0-ASSURANCE-DOWNGRADE: verified emission requires unavailable model/refinement and target proofs; no ordinary fallback" }
   let t0 ← IO.monoMsNow
   let project ← if request.modules.isEmpty then
     pure none
@@ -147,11 +166,20 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
       declarationCount := output.prepared.declarations.length
       artifacts := []
       targetWordSize := request.targetWordSize
+      assurance := request.assurance
       timings := timings }
-  -- Keep the same immutable prepared graph alive through checking and emission.
-  -- Existing erasure validation is retained until profiling justifies changing it.
+  -- The original prepared logical graph was checked with the official kernel
+  -- above. Only explicit ordinary requests may lower the separately checked
+  -- private partial body to the public runtime name. Never make that runtime
+  -- view available to proof elaboration or verified artifact admission.
+  let partialBody := output.prepared.declarations.any fun decl =>
+    match decl with | .partialDecl .. => true | _ => false
   let ir ← fromResult "erase"
-    ((psCompilerVerifiedIrFromPrepared output.prepared request.targetWordSize).mapError psCompilerPscv0Error)
+    ((if partialBody then
+        psCompilerOrdinaryPartialIrFromCheckedPrepared output.prepared request.targetWordSize
+      else
+        psCompilerVerifiedIrFromPrepared output.prepared request.targetWordSize
+      ).mapError psCompilerPscv0Error)
   let ir := match project with
     | none => ir
     | some value =>
@@ -217,6 +245,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     declarationCount := output.prepared.declarations.length
     artifacts := artifacts.map (fun artifact => { artifact with targetWordSize := request.targetWordSize })
     targetWordSize := request.targetWordSize
+    assurance := request.assurance
     timings := { timings with eraseMs := t5 - t4, emitMs := t6 - t5 } }
 
 -- A batch shares only the immutable checked prelude. Inputs remain independent:
@@ -271,7 +300,8 @@ def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.
       ("accepted", toJson false), ("phase", toJson error.phase),
       ("message", toJson error.message)])
   | .ok value => Lean.Json.mkObj (identity ++ [
-      ("accepted", toJson true), ("declarations", toJson value.declarationCount),
+      ("accepted", toJson true), ("assurance", toJson (assuranceLabel value.assurance)),
+      ("declarations", toJson value.declarationCount),
       ("targetWordSize", toJson (value.targetWordSize.map psIrWordSizeBits)),
       ("timings", timingsJson value.timings)])
 

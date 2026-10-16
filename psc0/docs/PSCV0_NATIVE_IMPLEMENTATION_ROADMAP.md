@@ -1,3 +1,23 @@
+## M3+B current candidate: selected P0 ordinary partial body execution (NOT qualified)
+
+A new explicit `PsV7Native.Assurance` request/response distinguishes
+`ordinary-checked` from unimplemented verified grades; verified
+requests must fail without ordinary downgrade. After the **original**
+canonical `partial` logical/core body is kernel-checked, the native
+host's selected ordinary path alone pairs opaque public `f` with the
+unique separately checked private `f.0` body (matching universes/type)
+for runtime erasure, retaining the original logical graph untouched.
+Generic library erasure still rejects partial markers. The focused
+suite adds an independent pinned-Lean nonrecursive `partial` body
+oracle, scalar two-input JS/TS/Rust/GC/Wasmtime runtime observations,
+and explicit verified refusal. Detailed candidate contract:
+`psc0/docs/PSCV0_M3_PARTIAL_P0_RUNTIME_CANDIDATE_2026-10-17.md`.
+
+**Unqualified until own five exact same-commit gates.** Not general
+partial recursion, model/body/target correctness, P1, effects, M4
+verified assurance or full M3+B. Pinned v7.2/Lean 4.35.0,
+no new assumptions, pskernel-core or selfhosting.
+
 ## Accepted common nested container ownership — 17 October 2026
 
 Exact implementation `a7c6dade87a9d8df74d5248e8276623e7870078c` passed all five same-commit workflows:

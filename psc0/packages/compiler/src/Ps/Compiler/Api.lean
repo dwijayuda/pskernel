@@ -301,37 +301,89 @@ def psCompilerEnvironmentFromPrepared
       | Except.ok environment =>
           Except.ok environment
 
+-- The official checker sees the public independently inhabited opaque
+-- declaration, and the private actual source body through a separately
+-- checked opaque implementation marker. For *ordinary execution only*,
+-- connect that actual body to the public runtime name. This transformation
+-- is not a new proof equation and must never replace the canonical checked
+-- Core graph or be called to authorize verified emission.
+def psCompilerOrdinaryPartialRuntimeDeclarations
+    (declarations : List PsDeclaration) :
+    Except PsCompilerError (List PsDeclaration) := do
+  let implementations := declarations.filter fun declaration =>
+    match declaration with | .partialDecl .. => true | _ => false
+  for implementation in implementations do
+    let .partialDecl privateName levels type _ := implementation
+      | throw (.normalization "PSCV0-PARTIAL: malformed implementation marker")
+    let owners := declarations.filter fun declaration =>
+      match declaration with
+      | .opaqueDecl name .. => psNameEq (PsName.num name 0) privateName
+      | _ => false
+    match owners with
+    | [.opaqueDecl _ publicLevels publicType _] =>
+        if levels.length != publicLevels.length ||
+            !(levels.zip publicLevels).all (fun pair =>
+              psNameEq pair.fst pair.snd) ||
+            !psExprAlphaEq type publicType then
+          throw (.normalization "PSCV0-PARTIAL: private implementation/type mismatch")
+    | _ => throw (.normalization "PSCV0-PARTIAL: missing unique opaque logical owner")
+  return declarations.filterMap fun declaration =>
+    match declaration with
+    | .partialDecl .. => none
+    | .opaqueDecl name levels type _ =>
+        let candidate := implementations.find? fun implementation =>
+          match implementation with
+          | .partialDecl privateName .. =>
+              psNameEq (PsName.num name 0) privateName
+          | _ => false
+        match candidate with
+        | some (.partialDecl _ _ _ body) =>
+            some (.definitionDecl name levels type body)
+        | _ => some declaration
+    | _ => some declaration
+
+-- Host-owned execution may erase a runtime representation ONLY after it
+-- checked the ORIGINAL canonical logical admissions with Lean 4.35.0.
+-- Keep the source logical environment; change only the runtime declaration
+-- bodies/identities passed to erasure. The resulting IR still requires the
+-- full typed validator and backend capability checks.
+def psCompilerErasePreparedRuntimeView
+    (prepared : PsCompilerAdmissionReadyModule)
+    (runtimeDeclarations : List PsDeclaration)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
+    Except PsCompilerError PsVerifiedIrModule := do
+  let environment ← psCompilerEnvironmentFromPrepared prepared
+  let runtimePrelude := psSelfHostRuntimePreludeDeclarationsWithProd ++
+    (if targetWordSize.isSome then psStandardPlatformRuntimeDeclarations ++
+      psStandardOperatorProtocolRuntimeDeclarations environment true else [])
+  (psEraseCoreModuleWithRuntimePrelude
+    environment
+    runtimePrelude
+    runtimeDeclarations
+    (runtimePrelude.map psDeclarationName) targetWordSize).mapError
+      PsCompilerError.erasure
+
+-- Ordinary partial execution only. The native host must have already
+-- independently kernel-accepted psCompilerLogicalCheckingView on the exact
+-- original prepared graph. A caller cannot mint proof authority via this API.
+def psCompilerOrdinaryPartialIrFromCheckedPrepared
+    (prepared : PsCompilerAdmissionReadyModule)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
+    Except PsCompilerError PsVerifiedIrModule := do
+  let runtime ← psCompilerOrdinaryPartialRuntimeDeclarations prepared.declarations
+  psCompilerErasePreparedRuntimeView prepared runtime targetWordSize
+
 def psCompilerVerifiedIrFromPrepared
     (prepared : PsCompilerAdmissionReadyModule)
     (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule := do
-  -- All targets and linked modules share this boundary. In this logical-only
-  -- slice, even an unused partial body blocks emission conservatively. Never
-  -- erase its marker or substitute the public logical inhabitant at runtime.
+  -- The general source/library API must remain fail-closed for partial
+  -- implementations. Only the native host's explicitly ordinary runtime
+  -- path may lower the paired body, after real official kernel admission.
   if prepared.declarations.any (fun declaration =>
       match declaration with | .partialDecl .. => true | _ => false) then
     throw (.normalization "PSCV0-PARTIAL-RUNTIME-PENDING: partial logical checking does not admit executable output")
-  match psCompilerEnvironmentFromPrepared prepared with
-  | Except.error error =>
-      Except.error error
-  | Except.ok environment =>
-      let runtimePrelude := psSelfHostRuntimePreludeDeclarationsWithProd ++
-        (if targetWordSize.isSome then psStandardPlatformRuntimeDeclarations ++
-          psStandardOperatorProtocolRuntimeDeclarations environment true else []);
-      match
-          psEraseCoreModuleWithRuntimePrelude
-            environment
-            runtimePrelude
-            prepared.declarations
-            -- One authoritative runtime prelude also owns its non-exportable
-            -- symbol set. A new Standard class, method or instance must never
-            -- silently become a public user entry merely because a second
-            -- hand-maintained name list was not updated.
-            (runtimePrelude.map psDeclarationName) targetWordSize with
-      | Except.error error =>
-          Except.error (PsCompilerError.erasure error)
-      | Except.ok ir =>
-          Except.ok ir
+  psCompilerErasePreparedRuntimeView prepared prepared.declarations targetWordSize
 
 def psCompilerVerifiedIrFromElaborated
     (elaborated : PsElabModuleResult)

@@ -1,6 +1,44 @@
 import Ps.Host.NativeV7
+import Ps.BackendEcma.Lower
 
 open Lean (toJson)
+
+-- Focused M3 emitter boundary checks; existing measurement workloads below are
+-- unchanged. These are recognizer checks, not a compiler-preservation proof.
+private def checkEcmaLowering : IO Unit := do
+  let nat := PsVerifiedIrType.primitive .nat
+  let type := PsVerifiedIrType.typeParameter "T"
+  let mk : List PsVerifiedIrType → PsVerifiedIrDeclaration := fun types => {
+    name := "m3Tail", typeParameters := [{ name := "T" }]
+    parameters := [{ name := "n", type := nat }], resultType := nat
+    body := .ifE (.intrinsic .natEq [] [.var "n", .literal (.natural 0)])
+      (.literal (.natural 0))
+      (.call (.var "m3Tail") types [.intrinsic .natSub [] [.var "n", .literal (.natural 1)]]) }
+  for (label, types, expected) in [("uniform", [type], true), ("type-changing", [nat], false)] do
+    let emitted ← match PsEcma.declaration [] [] (mk types) with
+      | .ok value => pure value
+      | .error message => throw (IO.userError message)
+    let direct := match emitted with
+      | [.functionD _ false _ "<T>" _ _ body] => body.all (PsEcma.stmtSynchronous 4096)
+      | _ => false
+    if direct != expected then throw (IO.userError ("M3 tail boundary: " ++ label))
+  let alias := PsVerifiedIrExpr.lambda [{ name := "k", type := nat }] nat
+    (.call (.var "m3Tail") [type] [.var "k"])
+  if (PsEcma.tailAliasValue (mk [type]) "again" alias).isNone then
+    throw (IO.userError "M3 uniform generic alias was not recognized")
+  let callback ← match PsEcma.intrinsic .arrayBuild [nat, nat]
+      [PsEcma.id "count", PsEcma.id "seed", PsEcma.id "head", PsEcma.id "tail"] with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  if PsEcma.exprSynchronous 4096 callback || PsEcma.exprSynchronous 0 (PsEcma.id "x") then
+    throw (IO.userError "M3 suspension/exhaustion fallback was bypassed")
+  let simple ← match PsEcma.lower [] [] 4096
+      (.lambda [{ name := "x", type := nat }] nat (.var "x")) with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  if !PsEcma.exprSynchronous 4096 simple then
+    throw (IO.userError "M3 pure lambda unnecessarily suspended")
+  IO.println "PSCV0_M3_ECMA: PASS uniform tail/alias, type-changing fallback, callback suspension, budget fallback and direct lambda"
 
 -- This is a host-only measurement harness, never part of the portable closure.
 -- The reference operations are compiled by the pinned official Lean compiler.
@@ -50,7 +88,8 @@ private def runtimeSource : String :=
   "function m1ListAt(xs: List Nat, i: Nat): Nat := Option.getD(xs[i]?, 0)\n" ++
   "function m1ArrayAt(xs: Array Nat, i: Nat): Nat := Option.getD(xs[i]?, 0)\n" ++
   "function m1FromList(xs: List Nat): Nat := Array.size(List.toArray(xs))\n" ++
-  "function m1ToList(xs: Array Nat): Nat := List.length(Array.toList(xs))\n"
+  "function m1ToList(xs: Array Nat): Nat := List.length(Array.toList(xs))\n" ++
+  "function m3Keep(alpha: Type, n: Nat, x: alpha): alpha := match n with { | 0 => x | k + 1 => m3Keep(alpha, k, x) }\n"
 
 private def compilerSource (count : Nat) (indexed : Bool) : String :=
   String.join ((List.range count).map fun n =>
@@ -65,6 +104,7 @@ private def timingJson (t : PsV7Native.Timings) : Lean.Json :=
     ("eraseMs", toJson t.eraseMs), ("emitMs", toJson t.emitMs)]
 
 def main (args : List String) : IO Unit := do
+  checkEcmaLowering
   let directory := System.FilePath.mk (args.headD "../dist/pscv0-native/m1-performance")
   IO.FS.createDirAll directory
   let mut requests : Array PsV7Native.Request := #[]

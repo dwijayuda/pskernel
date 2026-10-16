@@ -1,4 +1,5 @@
 import Ps.BackendEcma.Intrinsic
+import Ps.BackendEcma.Sync
 import Ps.BackendTs.Analysis
 
 namespace PsEcma
@@ -20,8 +21,13 @@ def lower (brands tags : List (String × String)) : Nat → PsVerifiedIrExpr →
     | .var name => return id name
     | .intrinsic op types args => intrinsic op types (← args.mapM visit)
     | .lambda parameters result body =>
-        return call "__ps$wrap" [.functionE true "" (← irParameters parameters)
-          ("__ps$Computation<" ++ (← irType result) ++ ">") [ret (← visit body)]]
+        let body ← visit body
+        let parameters ← irParameters parameters
+        let result ← irType result
+        if exprSynchronous 4096 body then
+          return .functionE false "" parameters result [ret body]
+        return call "__ps$wrap" [.functionE true "" parameters
+          ("__ps$Computation<" ++ result ++ ">") [ret body]]
     | .call fn types args =>
         return unary "yield* " (call "__ps$invoke"
           (.generic (← visit fn) (← typeArguments types) :: (← args.mapM visit)))
@@ -29,8 +35,8 @@ def lower (brands tags : List (String × String)) : Nat → PsVerifiedIrExpr →
         -- A binder shadows only its body. A function parameter avoids JS's
         -- temporal dead zone when the initializer mentions an outer namesake.
         if psTsExprUsesNameWithFuel 4096 value name then
-          return delegate [ret (← visit body)] [{ name, type := ← irType type }] [← visit value]
-        return delegate [.binding false name (← irType type) (some (← visit value)), ret (← visit body)]
+          return scopeExpr [ret (← visit body)] [{ name, type := ← irType type }] [← visit value]
+        return scopeExpr [.binding false name (← irType type) (some (← visit value)), ret (← visit body)]
     | .ifE c a b => return .conditional (← visit c) (← visit a) (← visit b)
     | .record name _ fields =>
         let some brand := psTsLookup brands name | throw ("PSCV0-ECMA: unknown structure " ++ name)
@@ -52,7 +58,7 @@ def lower (brands tags : List (String × String)) : Nat → PsVerifiedIrExpr →
           let bindings ← bindings.mapM fun b => do
             return Stmt.binding false b.name (← irType b.type) (some (.member (id temp) b.field))
           return (str constructor, bindings ++ [ret (← visit body)])
-        return delegate [const temp (← visit value), .switchE (.index (id temp) (id tag)) cases,
+        return scopeExpr [const temp (← visit value), .switchE (.index (id temp) (id tag)) cases,
           fail "invalid ProofScript constructor tag"]
 
 def countCases (tag self : String)
@@ -80,15 +86,38 @@ def countLoop (tags : List (String × String)) (d : PsVerifiedIrDeclaration) : O
     return .functionD true false d.name (psTsGenericNames d.typeParameters)
       [{ name := p.name, type }] "bigint" (letE "__ps$cursor" (id p.name) :: cases)
 
+-- A typed loop retains one instantiation throughout its lifetime. Type-changing
+-- recursive applications must retain their original stack-safe calling path.
+def uniformTypeArguments (parameters : List PsVerifiedIrTypeParameter)
+    (arguments : List PsVerifiedIrType) : Bool :=
+  parameters.length == arguments.length && (parameters.zip arguments).all (fun (p, a) =>
+    match a with | .typeParameter name => name == p.name | _ => false)
+
+def tailAliasValue (d : PsVerifiedIrDeclaration) (name : String)
+    (value : PsVerifiedIrExpr) : Option PsTsTailAlias :=
+  match value with
+  | .lambda parameters result (.call fn types args) =>
+    if uniformTypeArguments d.typeParameters types then
+      psTsTailAliasValue d.name name (.lambda parameters result (.call fn [] args))
+    else psTsTailAliasValue d.name name value
+  | _ => psTsTailAliasValue d.name name value
+
 def tailBody (brands tags : List (String × String)) (d : PsVerifiedIrDeclaration) :
     Nat → List PsTsTailAlias → PsVerifiedIrExpr → Option (List Stmt)
   | 0, _, _ => none
   | fuel + 1, aliases, value => do
-    let pureExpr := fun e =>
-      if psTsTailPureWithFuel aliases 4096 e then (lower brands tags 4096 e).toOption else none
+    let pureExpr := fun e => do
+      if !psTsTailPureWithFuel aliases 4096 e then none else do
+        let result ← (lower brands tags 4096 e).toOption
+        if exprSynchronous 4096 result then some result else none
     let visit := tailBody brands tags d fuel
     match value with
-    | .call fn [] args =>
+    | .call fn types args =>
+      let _ ← if types.isEmpty then some () else
+        match fn with
+        | .var name =>
+          if name == d.name && uniformTypeArguments d.typeParameters types then some () else none
+        | _ => none
       let args ← psTsTailCallArguments d.name aliases fn args
       if args.length != d.parameters.length then none else do
         let values ← args.mapM pureExpr
@@ -96,7 +125,7 @@ def tailBody (brands tags : List (String × String)) (d : PsVerifiedIrDeclaratio
     | .letE name type value body =>
       if psTsExprUsesNameWithFuel 4096 value name ||
           !psTsTailBindingSafe d aliases name then none else do
-        match psTsTailAliasValue d.name name value with
+        match tailAliasValue d name value with
         | some alias =>
           if alias.captured.all (psTsTailPureWithFuel aliases 4096) then
             visit (alias :: aliases) body
@@ -142,20 +171,23 @@ def declaration (brands tags : List (String × String)) (d : PsVerifiedIrDeclara
   if let some loop := countLoop tags d then return [loop]
   let parameters ← irParameters d.parameters
   let result ← irType d.resultType
+  let types := psTsGenericNames d.typeParameters
   let body := psTsInlineEtaApplication d.body
-  if d.typeParameters.isEmpty && !parameters.isEmpty then
+  if !parameters.isEmpty && !(d.parameters.any (fun p => p.name == d.name)) then
     if let some tail := tailBody brands tags d 4096 [] body then
       let statements := if tail.any (tailHasContinue 4096) then [.whileE (id "true") tail]
         else match tail with | [.block body] => body | _ => tail
-      return [.functionD true false d.name "" parameters result statements]
+      return [.functionD true false d.name types parameters result statements]
   let body ← lower brands tags 4096 body
   let computation := "__ps$Computation<" ++ result ++ ">"
   if parameters.isEmpty then
     if !d.typeParameters.isEmpty then throw ("PSCV0-ECMA: generic value " ++ d.name)
     -- Export is applied to this binding by the module printer.
+    if exprSynchronous 4096 body then return [.binding false d.name result (some body)]
     return [.binding false d.name result (some (call "__ps$run" [
       .call (.functionE true "" [] computation [ret body]) "" []]))]
-  let types := psTsGenericNames d.typeParameters
+  if exprSynchronous 4096 body then
+    return [.functionD true false d.name types parameters result [ret body]]
   let implementation := "__ps$impl$" ++ d.name
   return [
     .functionD true false d.name types parameters result [

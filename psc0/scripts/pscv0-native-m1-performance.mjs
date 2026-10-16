@@ -5,6 +5,10 @@ import path from 'node:path';
 const directory = path.resolve(process.argv[2]);
 const native = JSON.parse(await readFile(path.join(directory, 'native.json'), 'utf8'));
 const generated = await import(pathToFileURL(path.join(directory, 'runtime.js')).href);
+// One generic source function, two runtime instantiations and deep total recursion.
+assert.equal(generated.m3Keep(100000n, 37n), 37n);
+assert.equal(generated.m3Keep(50000n, true), true);
+console.log('PSCV0_M3_GENERIC_RECURSION: PASS Nat/Bool payloads at 100000/50000 steps');
 const median = values => [...values].sort((a,b) => a-b)[Math.floor(values.length / 2)];
 const rows = [];
 for (const size of [256, 8192]) {

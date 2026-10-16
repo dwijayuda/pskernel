@@ -12,8 +12,8 @@ theorem c0PairedEntry_eq_historical
     psKernelExprEq left right =
       psKernelExprEqLegacy left right := by
   cases left <;> cases right <;> simp
-    [psKernelExprEq, psKernelExprEqLegacy, Bool.and_assoc,
-      Bool.beq_eq_decide_eq]
+    [psKernelExprEq, psKernelExprEqLegacy, Bool.and_assoc]
+  all_goals rfl
 
 def main : IO Unit := do
   let one : PsKernelName := .str .anonymous "one"

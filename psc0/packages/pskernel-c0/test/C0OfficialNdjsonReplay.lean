@@ -699,6 +699,35 @@ def c0ExportVerifyOrdinaryInductive
           a.nFields != b.nFields || !psKernelExprEq a.rhs b.rhs then
         throw "unsupported generated recursor reduction rule differs"
 
+/-- Narrow, independent rejection of a forged *large-elimination*
+recursor on an ordinary Prop with multiple constructors. Pinned Lean 4.35
+`src/kernel/inductive.cpp::elim_only_at_universe_zero` explicitly forbids
+elimination to Type for such a predicate. After native C0 has already
+generated the canonical recursor, an exported declaration that adds extra
+motive universe parameters cannot be a legal Lean 4.35 declaration.
+
+This is NOT a generic `generated metadata mismatch => rejection` rule.
+Unrecognized/nested/mutual cases and every other metadata divergence still
+decline rather than pretending to be independently kernel-rejected. -/
+def c0ExportForbiddenPropLargeElim
+    (checked : PsKernelEnvironment)
+    (group : C0ExportInductiveGroup) : Bool :=
+  match group.source with
+  | .ordinary decl =>
+      match decl.type with
+      | .sort .zero =>
+          if decl.ctors.length > 1 then
+            group.expectedRecs.any fun exported =>
+              match psKernelEnvironmentFind checked exported.base.name with
+              | some (.recInfo generated) =>
+                  generated.base.levelParams.length == decl.levelParams.length &&
+                  exported.base.levelParams.length >
+                    generated.base.levelParams.length
+              | _ => false
+          else false
+      | _ => false
+  | _ => false
+
 /-- One declaration check, preserving the kernel's typed error category.
     The source recursive checker is the *only* acceptance authority. -/
 def c0ExportCheckOne
@@ -734,7 +763,17 @@ def c0ExportCheckOne
       | .inductiveGroup group =>
           match c0ExportVerifyOrdinaryInductive next group with
           | .ok _ => .ok next
-          | .error message => .error (.declinedUnsupported message)
+          | .error message =>
+              -- Generated-source mismatch is ordinarily an unsupported
+              -- compatibility divergence. Only the independently forbidden
+              -- Prop/multiple-constructor large-elimination case is a
+              -- genuine Lean-kernel invalidity.
+              if message == "unsupported generated recursor name/universes/type mismatch" &&
+                  c0ExportForbiddenPropLargeElim next group then
+                .error (.rejectedInvalid
+                  "invalid Prop recursor: large elimination from multiple constructors")
+              else
+                .error (.declinedUnsupported message)
       | .quotientGroup group =>
           let metadataAgrees := group.length == 4 && group.all (fun expected =>
             match psKernelEnvironmentFind next expected.base.name with

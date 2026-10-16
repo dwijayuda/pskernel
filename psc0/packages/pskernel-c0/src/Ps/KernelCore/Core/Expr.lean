@@ -801,10 +801,9 @@ private theorem psKernelExprGetAppFnArgsWorker_components
     (expr : PsKernelExpr) (args : List PsKernelExpr) :
     psKernelExprGetAppFnArgsWorker expr args =
       (psKernelExprGetAppFn expr, psKernelExprGetAppArgsWorker expr args) := by
-  induction expr generalizing args with
-  | app fn arg fnIH argIH =>
-      exact fnIH (arg :: args)
-  all_goals rfl
+  induction expr generalizing args <;> try rfl
+  case app fn arg fnIH argIH =>
+    exact fnIH (arg :: args)
 
 theorem psKernelExprGetAppFnArgs_components
     (expr : PsKernelExpr) :

@@ -22,46 +22,47 @@ All six exits remain in the denominator. Unqualified code adds no points.
 
 The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`;
 total mutual structural construction is `293a6f797d8135e10c407779a8dc429afa8345f6`.
-Fixture layout/source spelling repairs are `2b809e8d` and `42e1874d`.
-The latter compiled every Lean target and passed F1 `38970664555`, F2
-`38970664345` and F3/F4 `38970664477`. Its aggregate focused run
-`38970664748` retained all nine required source-check results: existing
-group/deriving/P0 checks passed, while the new WF function-result construction
-and one structural refusal fixture failed. No new recursion acceptance follows.
+Layout/source-wrapper repairs `2b809e8d` and `42e1874d` retain the original
+bodies and outputs. The focused step now collects all nine required source
+checks before failing if any fails; target execution requires complete success.
 
-Source repair `02f50d5b6fd0fd302b205381c206cb6a6711c817` addresses the real WF
-type-shape loss. Closing argument lets could delay an already-known function
-result behind a synthetic type metavariable, so a chained application reported
-`expected a function`. An instantiated result type without term metavariables
-is now retained only after verifying its free variables and rechecking it in
-the original caller scope. All ordered value lets and delayed decrease goals
-remain. Result types that depend on argument locals still use the existing
-checked type-abstraction path. The complete 12-output WF fixture, including
-dependent Fin state/result, is unchanged.
+Source repair `02f50d5b6fd0fd302b205381c206cb6a6711c817` addresses real WF
+result-type shape loss. Closing argument lets could hide an already-known
+function type behind a delayed type metavariable. The result type is now
+retained after checking its free variables and rechecking it in the caller's
+scope; ordered value lets, delayed decrease goals and the existing dependent
+type-abstraction fallback remain. The twelve-output WF fixture is unchanged.
 
-That repair also replaces a function-field negative which previously stopped
-at unsupported source-data formation. It now uses the Standard's actual Acc
-constructor and real function-valued recursive field, still requiring exact
-`PSCV0-MUTUAL-TOTAL: DIRECT-FIELD:` refusal. The small portable relation
-definition is independently admitted by the fresh kernel. The structural
-construction/origin checks had already passed at `42e1874d`; all six original
-native structural fixture outputs remain unchanged.
+That repair also replaces a structural negative which stopped at unsupported
+source-data formation with the Standard's actual Acc constructor and real
+function-valued recursive field. It still requires exact
+`PSCV0-MUTUAL-TOTAL: DIRECT-FIELD:` refusal. The independent native oracle's
+initial automatic structural elaboration failed because Acc.brecOn only
+supports Prop motives. Repair `913129f2ac168cb0b852e6cf4e9b6c640f085309`
+uses the actual Acc.rec with an explicit Nat-valued motive and the real
+function-valued child hypothesis. Its native axiom audit permits only
+propext and Quot.sound; the portable relation is separately kernel-admitted.
 
-Focused run `38972039962` at `02f50d5b` failed during Lean compilation
-(job `117212476187`), before source checks or runtime execution. The independent
-native oracle incorrectly asked automatic structural elaboration to eliminate
-Acc into Nat; its Acc.brecOn motive is restricted to Prop. This commit uses the
-actual Acc.rec with an explicit Nat-valued motive and its real function-valued
-child hypothesis, matching the pinned Standard recursor telescope. A native
-axiom collection check restricts this oracle to propext and Quot.sound. This
-checks the real recursor shape, without claiming automatic structural inference.
-The portable DIRECT-FIELD refusal and all source/runtime expectations remain.
+At `913129f2`, F1 `38972836975`, F2 `38972836985` and F3/F4
+`38972837002` passed. Focused run `38972837016` (job `117215101121`)
+compiled all 627 Lean build jobs and executed all nine source commands.
+The structural construction, exact refusals, fresh-kernel equations and all
+five target emissions passed, as did every established source fixture.
+Runtime target steps did not run because WF elaboration stopped at
+`PSCV0-UNSUPPORTED-SOURCE-TERM (in m3wfbounded)`.
 
-The focused source step still runs all nine existing required fixtures and
-fails if any fails; target runtime steps require complete source success.
+This commit corrects that fixture's bound proof to the actual exported
+Nat.succ_le_succ. The selected Standard exports Fin.isLt and Nat.succ_le_succ
+but does not export the originally referenced Nat.succ_lt_succ. Since Nat.lt
+reduces to a successor inequality, applying succ_le_succ to the child's
+actual isLt proof proves the same required bound. The dependent Fin value,
+recursive call, independent native oracle, logical equation and all twelve
+expected WF observations remain unchanged. No Standard or production code
+change is needed for this correction.
+
 Qualify this repaired compiler/test tip on native, F1, F2, F3/F4 and focused.
-Prior-run native results cannot qualify it. Both recursion features remain
-candidates until all five exact-SHA gates succeed.
+A prior native result cannot qualify the changed fixture. Both recursion
+features remain candidates until all five exact-SHA gates succeed.
 
 ### Typed well-founded recursion candidate
 

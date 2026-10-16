@@ -181,7 +181,7 @@ private def typedSource : String :=
   "  | 0 => Fin.mk(0, Nat.zero_lt_succ(0))\n" ++
   "  | k + 1 =>\n" ++
   "    let child: Fin(k + 1) := m3wfbounded(k)\n" ++
-  "    Fin.mk(Fin.val(child) + 1, Nat.succ_lt_succ(Fin.isLt(child)))\n" ++
+  "    Fin.mk(Fin.val(child) + 1, Nat.succ_le_succ(Fin.isLt(child)))\n" ++
   "}\ntermination_by n\n" ++
   "decreasing_by by { exact Nat.lt_succ_self(k) }\n" ++
   "theorem m3wfboundedStep(k: Nat): Fin.val(m3wfbounded(Nat.succ(k))) = Fin.val(m3wfbounded(k)) + 1 := by { exact congrArg((fun (value: Fin(Nat.succ(k) + 1)) => Fin.val(value)), m3wfbounded.eq_def(Nat.succ(k))) }\n"

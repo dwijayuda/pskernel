@@ -1724,10 +1724,39 @@ def c0ExportDiagnosticInductiveMismatch
   | .nested _ =>
       IO.println "C0_REAL_INDUCTIVE_STAGE=nested; requires nested diagnostic"
 
+/-- Render names only for IO trace diagnostics, never for checker decisions. -/
+def c0ExportTraceName : PsKernelName → String
+  | .anonymous => ""
+  | .str parent value =>
+      let prefix := c0ExportTraceName parent
+      if prefix.isEmpty then value else prefix ++ "." ++ value
+  | .num parent value =>
+      let prefix := c0ExportTraceName parent
+      if prefix.isEmpty then toString value
+      else prefix ++ "." ++ toString value
+
+/-- Lazily resolve the exact exported declaration name for a stalled
+    or completed slow declaration. This never determines an admission result. -/
+def c0ExportTraceDeclarationName
+    (tables : C0ExportTables) (raw kind : String) : String :=
+  match Lean.Json.parse raw with
+  | .error _ => "<unparsed>"
+  | .ok record =>
+      match record.getObjVal? kind with
+      | .error _ => "<unknown-kind>"
+      | .ok payload =>
+          match c0JsonNat payload "name" with
+          | .error _ => "<unnamed>"
+          | .ok idx =>
+              match c0ExportName tables idx with
+              | .error _ => s!"<unknown-name-{idx}>"
+              | .ok name => c0ExportTraceName name
+
 /-- Result and one-based physical NDJSON record count, including a
     failed record. This is a diagnostic, never a proof receipt. -/
 def c0ExportVerdictFromFileTrace
-    (path : System.FilePath) (fuel : Nat := 4096) :
+    (path : System.FilePath) (fuel : Nat := 4096)
+    (traceDeclarations : Bool := false) :
     IO (C0ExportVerdict × Nat) := do
   let handle ← IO.FS.Handle.mk path .read
   let mut state : C0ExportOnlineState := {}
@@ -1760,6 +1789,11 @@ def c0ExportVerdictFromFileTrace
         else if line.startsWith "{\"opaque\":" then "opaque"
         else if line.startsWith "{\"quot\":" then "quot"
         else ""
+      -- Emit the active declaration BEFORE checker execution. A timeout
+      -- therefore identifies the precise still-running declaration.
+      -- The diagnostic is outside the measured source checker duration.
+      if traceDeclarations && !declKind.isEmpty then
+        IO.println s!"C0_REAL_EXPORT_DECL_BEGIN record={consumed} kind={declKind} name={c0ExportTraceDeclarationName state.tables line declKind}"
       let began ← if declKind.isEmpty then pure 0 else IO.monoMsNow
       let outcome := c0ExportStepDetailed state line fuel
       if !declKind.isEmpty then
@@ -1771,7 +1805,7 @@ def c0ExportVerdictFromFileTrace
           slowestDeclRecord := consumed
           slowestDeclKind := declKind
         if elapsed >= 3000 then
-          IO.println s!"C0_REAL_EXPORT_SLOW_DECL record={consumed} kind={declKind} elapsed_ms={elapsed}"
+          IO.println s!"C0_REAL_EXPORT_SLOW_DECL record={consumed} kind={declKind} elapsed_ms={elapsed} name={c0ExportTraceDeclarationName state.tables line declKind}"
       match outcome with
       | .error failure =>
           -- The first failure already carries the original parser reason or
@@ -1921,8 +1955,10 @@ def c0ExportRequireAccepted (outcome : C0ExportVerdict) : Except String Unit :=
 
 /-- Opt-in strict admission CLI; unchanged source checking and trace. -/
 def c0ExportPrintFileOutcome
-    (path : String) (fuel : Nat) (strict : Bool := false) : IO Unit := do
-  let (outcome, lines) ← c0ExportVerdictFromFileTrace path fuel
+    (path : String) (fuel : Nat) (strict : Bool := false)
+    (traceDeclarations : Bool := false) : IO Unit := do
+  let (outcome, lines) ← c0ExportVerdictFromFileTrace
+    path fuel traceDeclarations
   IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome} consumed_records={lines} fuel={fuel}"
   if strict then
     match c0ExportRequireAccepted outcome with
@@ -1940,14 +1976,25 @@ def main (args : List String) : IO Unit := do
       c0ExportPrintFileOutcome path fuel
       return ()
   | [flag, path, fuelText] =>
-      if flag != "--require-accepted" then
+      let some fuel := fuelText.toNat?
+        | throw (IO.userError "expected decimal fuel budget")
+      if flag == "--require-accepted" then
+        c0ExportPrintFileOutcome path fuel true
+      else if flag == "--trace-declarations" then
+        c0ExportPrintFileOutcome path fuel false true
+      else
+        throw (IO.userError "unknown NDJSON replay mode")
+      return ()
+  | [first, second, path, fuelText] =>
+      if first != "--require-accepted" ||
+          second != "--trace-declarations" then
         throw (IO.userError "unknown NDJSON replay mode")
       let some fuel := fuelText.toNat?
         | throw (IO.userError "expected decimal fuel budget")
-      c0ExportPrintFileOutcome path fuel true
+      c0ExportPrintFileOutcome path fuel true true
       return ()
   | [] => pure ()
-  | _ => throw (IO.userError "expected zero arguments, NDJSON path [fuel], or --require-accepted path fuel")
+  | _ => throw (IO.userError "expected NDJSON path [fuel] with optional --require-accepted and/or --trace-declarations")
   -- Negatives, unsupported input and resource exhaustion can never be
   -- promoted to a process-success acceptance contract.
   for verdict in [C0ExportVerdict.rejected, .unsupported, .malformed,

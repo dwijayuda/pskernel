@@ -187,3 +187,109 @@ theorem psKernelC0IndexedSessionCheckVerifiedBatch_source
   unfold psKernelC0IndexedSessionCheckVerifiedBatch
     psKernelC0IndexedSessionCheckSourceBatch
   rw [psKernelC0IndexedCheckedBatchVerified_source]
+
+
+/-- A REAL prechecked hit may serve the first node without re-running the
+original source checker. Later nodes receive only tables scoped at THEIR
+actual source-produced states; no unrelated cached judgment transports over
+a state transition. This supports compositional verified reuse from a
+previous same-state checked operation, not merely fresh empty tables. -/
+def psKernelC0IndexedCheckedBatchWithSeed
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState)
+    (seed : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel context initialState)
+    (tables : (state : PsKernelCheckerState) →
+      PsKernelC0IndexedCheckedReceiptTable owner fuel context state)
+    (requests : List (PsKernelC0IndexedCheckedBatchRequest owner)) :
+    Except String (List PsKernelExpr × PsKernelCheckerState) :=
+  match requests with
+  | [] => .ok ([], initialState)
+  | request :: rest =>
+      match psKernelC0IndexedCheckedReceiptTableOutcome
+          owner fuel context initialState seed request.hash with
+      | .error reason => .error reason
+      | .ok (ty, nextState) =>
+          match psKernelC0IndexedCheckedBatchVerified
+              owner fuel context tables rest nextState with
+          | .error reason => .error reason
+          | .ok (types, finalState) => .ok (ty :: types, finalState)
+
+/-- The seed is a full source-checked receipt, NOT a guessed cached type.
+The seeded-first-call followed by verified remaining steps returns the
+complete identical source sequence under all successes and errors. -/
+theorem psKernelC0IndexedCheckedBatchWithSeed_source
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState)
+    (seed : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel context initialState)
+    (tables : (state : PsKernelCheckerState) →
+      PsKernelC0IndexedCheckedReceiptTable owner fuel context state)
+    (requests : List (PsKernelC0IndexedCheckedBatchRequest owner)) :
+    psKernelC0IndexedCheckedBatchWithSeed owner fuel context
+        initialState seed tables requests =
+      psKernelC0IndexedCheckedBatchSource owner fuel context
+        requests initialState := by
+  cases requests with
+  | nil => rfl
+  | cons request rest =>
+      simp only [psKernelC0IndexedCheckedBatchWithSeed,
+        psKernelC0IndexedCheckedBatchSource,
+        psKernelC0IndexedCheckedBatchFold]
+      rw [psKernelC0IndexedCheckedReceiptTableOutcome_source
+        request.hash seed]
+      cases hCheck :
+          psKernelCheckerCheck fuel context initialState request.hash.expr with
+      | error reason => rfl
+      | ok result =>
+          rcases result with ⟨ty, nextState⟩
+          simp only [hCheck]
+          rw [psKernelC0IndexedCheckedBatchVerified_source]
+
+/-- Session-level seeded, atomic batch: the first node may reuse an actual
+previously checked result at precisely this original session state. -/
+def psKernelC0IndexedSessionCheckVerifiedBatchWithSeed
+    (fuel : Nat)
+    (session : PsKernelC0IndexedCheckerSession)
+    (owner : PsKernelC0CertifiedStore)
+    (_sameOwner : owner.store = session.store)
+    (requests : List (PsKernelC0IndexedCheckedBatchRequest owner))
+    (seed : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel session.checker.context session.checker.state)
+    (tables : (state : PsKernelCheckerState) →
+      PsKernelC0IndexedCheckedReceiptTable
+        owner fuel session.checker.context state) :
+    Except String (List PsKernelExpr × PsKernelC0IndexedCheckerSession) :=
+  match psKernelC0IndexedCheckedBatchWithSeed owner fuel
+      session.checker.context session.checker.state
+      seed tables requests with
+  | .error reason => .error reason
+  | .ok (types, finalState) =>
+      .ok (types, {session with
+        checker := {session.checker with state := finalState}})
+
+/-- The seeded checked-session API refines the exact original source
+sequence, including original context, full final session, fuel/errors,
+and all-or-nothing checked-root publication. -/
+theorem psKernelC0IndexedSessionCheckVerifiedBatchWithSeed_source
+    (fuel : Nat)
+    (session : PsKernelC0IndexedCheckerSession)
+    (owner : PsKernelC0CertifiedStore)
+    (sameOwner : owner.store = session.store)
+    (requests : List (PsKernelC0IndexedCheckedBatchRequest owner))
+    (seed : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel session.checker.context session.checker.state)
+    (tables : (state : PsKernelCheckerState) →
+      PsKernelC0IndexedCheckedReceiptTable
+        owner fuel session.checker.context state) :
+    psKernelC0IndexedSessionCheckVerifiedBatchWithSeed
+        fuel session owner sameOwner requests seed tables =
+      psKernelC0IndexedSessionCheckSourceBatch
+        fuel session owner requests := by
+  unfold psKernelC0IndexedSessionCheckVerifiedBatchWithSeed
+    psKernelC0IndexedSessionCheckSourceBatch
+  rw [psKernelC0IndexedCheckedBatchWithSeed_source]

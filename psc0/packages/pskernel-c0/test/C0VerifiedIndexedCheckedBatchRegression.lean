@@ -93,4 +93,34 @@ def main : IO Unit := do
   | .ok _ => throw (IO.userError "indexed batch: exhausted fuel admitted")
   | .error _ => pure ()
 
+  -- A prechecked SAME-STATE receipt provides a genuine indexed cache hit
+  -- for the first node; later nodes remain scoped to their returned states.
+  let emptySeed := psKernelC0IndexedCheckedReceiptTableEmpty
+    owner 4096 indexed.checker.context indexed.checker.state
+  let (_prior, seededTable) ← match psKernelC0IndexedCheckedReceiptTableCheck
+      owner 4096 indexed.checker.context indexed.checker.state
+      emptySeed goodHash with
+    | .error e =>
+        throw (IO.userError ("indexed batch: seed checking failed: " ++ e))
+    | .ok checkedResult => pure checkedResult
+  if !(psKernelC0IndexedCheckedReceiptTableLookup
+      seededTable goodId).isSome then
+    throw (IO.userError "indexed batch: checked seed table has no hit")
+  let _seededSource :
+      psKernelC0IndexedSessionCheckVerifiedBatchWithSeed
+          4096 indexed owner owned.property requests seededTable tables =
+        psKernelC0IndexedSessionCheckSourceBatch
+          4096 indexed owner requests :=
+    psKernelC0IndexedSessionCheckVerifiedBatchWithSeed_source
+      4096 indexed owner owned.property requests seededTable tables
+  let (seedTypes, _) ← match
+      psKernelC0IndexedSessionCheckVerifiedBatchWithSeed
+        4096 indexed owner owned.property requests seededTable tables with
+    | .error e =>
+        throw (IO.userError ("indexed batch: known source hit failed: " ++ e))
+    | .ok answer => pure answer
+  if seedTypes.length != requests.length then
+    throw (IO.userError "indexed batch: seeded source result type list changed")
+
+  IO.println "C0_VERIFIED_INDEXED_BATCH_SEEDED prechecked_first_hit=pass source_sequence=Lean context_state_scoped=pass"
   IO.println "C0_VERIFIED_INDEXED_BATCH state_thread=Lean exact_source=Lean complete_except=Lean repeated=3 malformed_tail=declined zero_fuel=declined publication=atomic"

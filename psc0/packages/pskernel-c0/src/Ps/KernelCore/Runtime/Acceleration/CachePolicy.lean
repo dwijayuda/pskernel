@@ -107,14 +107,28 @@ def psKernelC0FVarMemoGo :
           match expr with
           | .app fn arg =>
               let (f, m1) := psKernelC0FVarMemoGo fn memo
-              let (a, m2) := psKernelC0FVarMemoGo arg m1
-              let checked : PsKernelC0ExactFVar (.app fn arg) :=
-                ⟨if f.value then true else a.value, by
-                  change (if f.value then true else a.value) =
-                    (if psKernelExprHasFVar fn then true
-                     else psKernelExprHasFVar arg)
-                  rw [f.source, a.source]⟩
-              psKernelC0FVarMemoStore m2 checked
+              -- The source predicate short-circuits on the function side.
+              -- Do not traverse a potentially enormous argument DAG when
+              -- the left child already certifies the presence of an FVar.
+              if h : f.value = true then
+                let checked : PsKernelC0ExactFVar (.app fn arg) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasFVar fn then true
+                       else psKernelExprHasFVar arg)
+                    rw [← f.source]
+                    simp [h]⟩
+                psKernelC0FVarMemoStore m1 checked
+              else
+                let (a, m2) := psKernelC0FVarMemoGo arg m1
+                let checked : PsKernelC0ExactFVar (.app fn arg) :=
+                  ⟨a.value, by
+                    change a.value =
+                      (if psKernelExprHasFVar fn then true
+                       else psKernelExprHasFVar arg)
+                    rw [← f.source, ← a.source]
+                    simp [h]⟩
+                psKernelC0FVarMemoStore m2 checked
           | .lam name ty body info =>
               let (t, m1) := psKernelC0FVarMemoGo ty memo
               let (b, m2) := psKernelC0FVarMemoGo body m1

@@ -149,3 +149,9 @@ lean_exe c0OfficialReplay where
 lean_exe c0HashCSimpProbe where
   srcDir := "test"
   root := `C0HashCSimpProbe
+
+
+-- Compile-time-only differential proof of source-exact memo substitution.
+lean_exe c0InstantiateCSimpProbe where
+  srcDir := "test"
+  root := `C0InstantiateCSimpProbe

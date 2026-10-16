@@ -367,3 +367,21 @@ batch request and its indexing added. Native kernel rejects imply
 the bridge or recursor requires architectural work, never a gate bypass.
 Full M3+B remains open; nested indexed/mutual groups, runtime/deriving,
 P0/P1 and verified target behavior are not claimed.
+
+## M3 bounded nested family runtime probe — qualification pending
+
+The check-only `M3NestedRose` / `List M3NestedRose` source plus
+shallow constructor match passed the focused kernel replay on
+`bde3dccd` (run `38941701921`). This next fixture-only child
+adds the same strictly positive no-parameter family to the existing
+compiled multi-target source and exports `m3nestedoutput`, comparing
+`leaf` and `node(List.nil)` against the independent pinned Lean
+4.35.0 oracle for both Bool inputs. It tests Core admission, typed
+erasure, IR checks, JS/strict TS/Rust/V8-GC/Wasmtime without adding
+backend-specific recursion shortcuts. The bound is *one-level shallow
+elimination over a nested field*, NOT general nested recursive functions,
+nested deriving, indexed/mutual types, P0 or P1.
+Original negatives and other runtime observations are unchanged.
+If the existing erasure/runtime refuses, inspect the actual shared
+runtime representation and report the unsupported boundary instead of
+loosening an unrelated checker.

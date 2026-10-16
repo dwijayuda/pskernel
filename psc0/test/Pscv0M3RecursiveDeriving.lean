@@ -168,6 +168,10 @@ def nestedRoseTag : M3NestedRose → Nat
 
 example (xs : List M3NestedRose) :
     nestedRoseTag (.node xs) = 1 := rfl
+
+def nestedRoseOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (nestedRoseTag
+    (if flag then M3NestedRose.leaf else M3NestedRose.node []))
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -273,7 +277,10 @@ private def source : String :=
   "function m3infixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3infixChild(if (flag) { 17 } else { 9 }))\n" ++
   "function m3matrixSelect(flag: Bool, n: Nat): Nat := match flag, n with { | true, 0 => 3 | true, k+1 => k+20 | false, _ => 11 }\n" ++
   "theorem m3matrixStep(k: Nat): m3matrixSelect(true, Nat.succ(k)) = k+20 := by { rfl }\n" ++
-  "function m3matrixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3matrixSelect(flag, if (flag) { 5 } else { 0 }))\n"
+  "function m3matrixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3matrixSelect(flag, if (flag) { 5 } else { 0 }))\n" ++
+  "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
+  "function m3nestedtag(r: M3NestedRose): Nat := match r with { | M3NestedRose.leaf => 0 | M3NestedRose.node children => 1 }\n" ++
+  "function m3nestedoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedtag(if (flag) { M3NestedRose.leaf } else { M3NestedRose.node(List.nil) }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -327,7 +334,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput"] }
   let nestedRequest : PsV7Native.Request := {
     source :=
       "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
@@ -389,6 +396,8 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.infixChild (if flag then 17 else 9))).toNat))),
     ("m3matrixoutput", Lean.toJson (toString ((UInt64.ofNat
       (M3RecursiveHashOracle.matrixSelect flag (if flag then 5 else 0))).toNat))),
+    ("m3nestedoutput", Lean.toJson (toString
+      (M3RecursiveHashOracle.nestedRoseOutput flag).toNat)),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

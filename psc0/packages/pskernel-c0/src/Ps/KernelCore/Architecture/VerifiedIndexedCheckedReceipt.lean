@@ -173,40 +173,12 @@ theorem psKernelC0IndexedCheckedReceiptTableCheck_source
   psKernelC0IndexedCheckedReceiptHash_source hash checked
 
 
-/-- A failed indexed memo check is the ORIGINAL source checker error under
-the exact certified root-validity premise. A hash hit can only return a
-successful source-checked receipt; a miss delegates failure classification
-to the unchanged source checker. This includes exhausted fuel and malformed
-expressions, without replacing the reason with a synthetic cache status. -/
-theorem psKernelC0IndexedCheckedReceiptTableCheck_error_source
-    {owner : PsKernelC0CertifiedStore}
-    {fuel : Nat}
-    {context : PsKernelCheckerContext}
-    {initialState : PsKernelCheckerState}
-    {id : Nat}
-    (hash : PsKernelC0VerifiedIndexedHash owner id)
-    (table : PsKernelC0IndexedCheckedReceiptTable
-      owner fuel context initialState)
-    (reason : String)
-    (valid : psKernelC0StoreValid owner.store id = true)
-    (hError : psKernelC0IndexedCheckedReceiptTableCheck
-        owner fuel context initialState table hash = .error reason) :
-    psKernelCheckerCheck fuel context initialState hash.expr =
-      .error reason := by
-  cases hLookup :
-      psKernelC0IndexedCheckedReceiptTableLookup table id with
-  | some checked =>
-      simp [psKernelC0IndexedCheckedReceiptTableCheck, hLookup] at hError
-  | none =>
-      unfold psKernelC0IndexedCheckedReceiptTableCheck at hError
-      simp only [hLookup] at hError
-      unfold psKernelC0CaptureCheckedIndexedHash at hError
-      simp only [valid, if_true] at hError
-      split at hError <;> simp_all
-
-/-- Erase only the indexing implementation detail; retain the checker
-result and its EXACT final state, or its original error. This is the
-executable source-compatible operation callers can compose safely. -/
+/-- Execute the checked operation with a proof-carrying indexed cache HIT,
+or delegate a miss to the ORIGINAL full checker. Unlike a synthetic cache
+command, both branches are legitimate checker judgments and all original
+error/resource distinctions remain unchanged. This read-only operation does
+not retain a new receipt on a miss; TableCheck above is the separate
+proof-carrying memo-insertion path. -/
 def psKernelC0IndexedCheckedReceiptTableOutcome
     (owner : PsKernelC0CertifiedStore)
     (fuel : Nat)
@@ -217,16 +189,16 @@ def psKernelC0IndexedCheckedReceiptTableOutcome
     {id : Nat}
     (hash : PsKernelC0VerifiedIndexedHash owner id) :
     Except String (PsKernelExpr × PsKernelCheckerState) :=
-  match psKernelC0IndexedCheckedReceiptTableCheck
-      owner fuel context initialState table hash with
-  | .error reason => .error reason
-  | .ok (checked, _) =>
+  match psKernelC0IndexedCheckedReceiptTableLookup table id with
+  | some checked =>
       .ok (checked.val.inferredType, checked.val.finalState)
+  | none =>
+      psKernelCheckerCheck fuel context initialState hash.expr
 
-/-- COMPLETE source refinement for the opt-in checked operation: positive
-types, exact final states, all negative errors and checked resource outcomes
-are identical to the original kernel call, not merely to an insertion
-operation. A certified hash/ID is never a typing or DefEq oracle. -/
+/-- COMPLETE original checker refinement: verified memo hits recover the
+identical type and entire final state. Cache misses delegate the FULL source
+checker, preserving the exact original failure and resource classification,
+not just source-equivalence of a map operation. No raw hash/ID grants trust. -/
 theorem psKernelC0IndexedCheckedReceiptTableOutcome_source
     {owner : PsKernelC0CertifiedStore}
     {fuel : Nat}
@@ -235,21 +207,14 @@ theorem psKernelC0IndexedCheckedReceiptTableOutcome_source
     {id : Nat}
     (hash : PsKernelC0VerifiedIndexedHash owner id)
     (table : PsKernelC0IndexedCheckedReceiptTable
-      owner fuel context initialState)
-    (valid : psKernelC0StoreValid owner.store id = true) :
+      owner fuel context initialState) :
     psKernelC0IndexedCheckedReceiptTableOutcome
         owner fuel context initialState table hash =
       psKernelCheckerCheck fuel context initialState hash.expr := by
-  cases hResult : psKernelC0IndexedCheckedReceiptTableCheck
-      owner fuel context initialState table hash with
-  | error reason =>
-      have hSource :=
-        psKernelC0IndexedCheckedReceiptTableCheck_error_source
-          hash table reason valid hResult
-      simp [psKernelC0IndexedCheckedReceiptTableOutcome, hResult, hSource]
-  | ok result =>
-      rcases result with ⟨checked, nextTable⟩
-      have hSource :=
-        psKernelC0IndexedCheckedReceiptTableCheck_source
-          hash table nextTable checked hResult
-      simp [psKernelC0IndexedCheckedReceiptTableOutcome, hResult, hSource]
+  unfold psKernelC0IndexedCheckedReceiptTableOutcome
+  cases hLookup : psKernelC0IndexedCheckedReceiptTableLookup table id with
+  | none =>
+      simp only []
+  | some checked =>
+      simp only []
+      exact (psKernelC0IndexedCheckedReceiptHash_source hash checked).symm

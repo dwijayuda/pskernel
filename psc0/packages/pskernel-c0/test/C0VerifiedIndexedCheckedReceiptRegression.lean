@@ -56,14 +56,11 @@ def main : IO Unit := do
 
   -- Full return-value equivalence covers BOTH positive types/final states
   -- and original negative error/resource classification, not just a hit.
-  if hv : psKernelC0StoreValid owner.store id = true then
-    let _fullOutcome :
-        psKernelC0IndexedCheckedReceiptTableOutcome
-            owner 4096 source.context source.state table hash =
-          psKernelCheckerCheck 4096 source.context source.state hash.expr :=
-      psKernelC0IndexedCheckedReceiptTableOutcome_source hash table hv
-  else
-    throw (IO.userError "checked indexed memo: certified root is invalid")
+  let _fullOutcome :
+      psKernelC0IndexedCheckedReceiptTableOutcome
+          owner 4096 source.context source.state table hash =
+        psKernelCheckerCheck 4096 source.context source.state hash.expr :=
+    psKernelC0IndexedCheckedReceiptTableOutcome_source hash table
 
   -- Deliberate table-position corruption may not become a false checked hit.
   let misplaced : PsKernelC0IndexedCheckedReceiptTable

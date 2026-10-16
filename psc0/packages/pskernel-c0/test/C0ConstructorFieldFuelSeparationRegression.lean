@@ -36,7 +36,7 @@ def main : IO Unit := do
     | .ok result => pure result
     | .error e => throw (IO.userError ("mutual field checker lost independent fuel: " ++ e))
   if mutualFields.fields.length != 1 ||
-      !psKernelExprEq mutual.result sort0 then
+      !psKernelExprEq mutualFields.result sort0 then
     throw (IO.userError "mutual constructor field walk changed raw Pi shape")
 
   -- The checker's own exhausted budget still fails closed; walker exhaustion

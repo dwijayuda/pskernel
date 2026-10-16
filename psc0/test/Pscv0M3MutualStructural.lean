@@ -1,5 +1,6 @@
 import Ps.Host.NativeV7
 import PsKernelLean.Admission
+import Lean.Util.CollectAxioms
 
 -- Independent ordinary Lean source. These functions use Lean's structural
 -- mutual elaborator, not the portable implementation's recursor terms.
@@ -16,16 +17,19 @@ end
 
 namespace M3MutualStructuralOracle
 
--- Pinned Lean accepts structural descent through Acc's function-valued
--- recursive field. This logical oracle needs no executable inhabitant of
--- the always-True relation; the selected portable direct-field owner refuses
--- this larger structural capability on the already checked Standard datatype.
+-- The actual Acc.rec supports a Type-valued motive and a function-valued
+-- child hypothesis. Native structural inference uses Acc.brecOn, whose
+-- motive is restricted to Prop; this oracle checks the real recursor directly.
 def higherRelation (_ _ : Nat) : Prop := True
 
 noncomputable def higherField (n : Nat) (tree : Acc higherRelation n) : Nat :=
-  match tree with
-  | .intro _ below => higherField 0 (below 0 True.intro)
-termination_by structural tree
+  Acc.rec (motive := fun _ _ => Nat)
+    (fun _ _ children => children 0 True.intro) tree
+
+run_cmd do
+  let axioms ← Lean.collectAxioms ``higherField
+  unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
+    throwError "Acc function-field oracle uses an unapproved assumption: {axioms}"
 
 mutual
   def first (bias n : Nat) : Nat :=

@@ -23,30 +23,39 @@ All six exits remain in the denominator. Unqualified code adds no points.
 The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`;
 total mutual structural construction is `293a6f797d8135e10c407779a8dc429afa8345f6`.
 Fixture layout/source spelling repairs are `2b809e8d` and `42e1874d`.
-All Lean targets compile; the latter passed F1 `38970664555`, F2 `38970664345`
-and F3/F4 `38970664477`. Its aggregate focused run `38970664748` retained
-all nine required source-check results: existing group/deriving/P0 checks
-passed, while the new WF function-result construction and one structural
-refusal fixture failed. No new recursion acceptance follows from those runs.
+The latter compiled every Lean target and passed F1 `38970664555`, F2
+`38970664345` and F3/F4 `38970664477`. Its aggregate focused run
+`38970664748` retained all nine required source-check results: existing
+group/deriving/P0 checks passed, while the new WF function-result construction
+and one structural refusal fixture failed. No new recursion acceptance follows.
 
-This commit repairs the real WF type-shape loss. Closing argument lets could
-delay an already-known function result behind a synthetic type metavariable,
-so a chained application reported `expected a function`. An instantiated result
-type without term metavariables is now retained only after verifying its free
-variables and rechecking it in the original caller scope. All ordered value
-lets and delayed decrease goals remain. Result types that depend on argument
-locals still use the existing checked type-abstraction path. The complete
-12-output WF fixture, including dependent Fin state/result, is unchanged.
+Source repair `02f50d5b6fd0fd302b205381c206cb6a6711c817` addresses the real WF
+type-shape loss. Closing argument lets could delay an already-known function
+result behind a synthetic type metavariable, so a chained application reported
+`expected a function`. An instantiated result type without term metavariables
+is now retained only after verifying its free variables and rechecking it in
+the original caller scope. All ordered value lets and delayed decrease goals
+remain. Result types that depend on argument locals still use the existing
+checked type-abstraction path. The complete 12-output WF fixture, including
+dependent Fin state/result, is unchanged.
 
-The structural fixture's function-field negative previously hit unsupported
-source-data formation before its intended recursion owner. It now uses the
-Standard's actual Acc constructor and its real function-valued recursive
-field, still requiring exact `PSCV0-MUTUAL-TOTAL: DIRECT-FIELD:` refusal.
-An independent native structural oracle checks the same shape; the small
-portable relation definition is separately admitted by the fresh kernel.
-No metadata, hypothesis, logical equation or executable inhabitant is forged.
-The structural construction/origin checks had already passed at `42e1874d`;
-its six original native fixture outputs remain unchanged.
+That repair also replaces a function-field negative which previously stopped
+at unsupported source-data formation. It now uses the Standard's actual Acc
+constructor and real function-valued recursive field, still requiring exact
+`PSCV0-MUTUAL-TOTAL: DIRECT-FIELD:` refusal. The small portable relation
+definition is independently admitted by the fresh kernel. The structural
+construction/origin checks had already passed at `42e1874d`; all six original
+native structural fixture outputs remain unchanged.
+
+Focused run `38972039962` at `02f50d5b` failed during Lean compilation
+(job `117212476187`), before source checks or runtime execution. The independent
+native oracle incorrectly asked automatic structural elaboration to eliminate
+Acc into Nat; its Acc.brecOn motive is restricted to Prop. This commit uses the
+actual Acc.rec with an explicit Nat-valued motive and its real function-valued
+child hypothesis, matching the pinned Standard recursor telescope. A native
+axiom collection check restricts this oracle to propext and Quot.sound. This
+checks the real recursor shape, without claiming automatic structural inference.
+The portable DIRECT-FIELD refusal and all source/runtime expectations remain.
 
 The focused source step still runs all nine existing required fixtures and
 fails if any fails; target runtime steps require complete source success.

@@ -51,11 +51,11 @@ def psKernelC0PairHashMemoWorthwhile (left right : PsKernelExpr) : Bool :=
 non-qualified shapes. No hash alone ever validates DefEq. -/
 def psKernelC0AdaptivePairHash
     (left right : PsKernelExpr) : Nat :=
-  if psKernelC0PairHashMemoWorthwhile left right then
-    psKernelC0MemoizedPairHash left right
-  else
-    (psKernelExprHash left + psKernelExprHash right) %
-      psKernelCacheHashModulus
+  match psKernelC0PairHashMemoWorthwhile left right with
+  | true => psKernelC0MemoizedPairHash left right
+  | false =>
+      (psKernelExprHash left + psKernelExprHash right) %
+        psKernelCacheHashModulus
 
 theorem psKernelC0AdaptivePairHash_source
     (left right : PsKernelExpr) :
@@ -63,10 +63,9 @@ theorem psKernelC0AdaptivePairHash_source
       psKernelExprPairHash left right := by
   cases h : psKernelC0PairHashMemoWorthwhile left right with
   | false =>
-      simp only [psKernelC0AdaptivePairHash, h]
-      rfl
+      simp [psKernelC0AdaptivePairHash, h, psKernelExprPairHash]
   | true =>
-      simpa only [psKernelC0AdaptivePairHash, h] using
+      simpa [psKernelC0AdaptivePairHash, h] using
         psKernelC0MemoizedPairHash_source left right
 
 /-- Source pair hashing is commutative, even on memoized large DAGs;

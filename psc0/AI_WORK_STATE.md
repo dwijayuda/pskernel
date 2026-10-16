@@ -1,3 +1,23 @@
+## Accepted M3+B prefix recursion / normalized evolving state — 16 October 2026
+
+**Implementation/test commit `8f8aa47fc3b742488bd1ce4ad15024a63c0b6d4f`: all five same-commit gates
+SUCCESS**. Native 38928344482 (job 117065962490: 33/33 steps, none
+skipped); F1 38928344465; F2 38928344501; F3/F4/platform 38928344471;
+focused 38928344644, including pinned Lean oracle, JavaScript, strict TS,
+Rust, V8 GC, Wasmtime. Exact artifacts and digests:
+[qualification](docs/PSCV0_M3_PREFIX_RECURSION_QUALIFICATION_2026-10-16.md).
+The preceding pending-run and false-negative fixture notes are *history*
+superseded by this evidence, not current blockers. PR #109 remains draft/open.
+
+The admitted subset: a computed recursive major after pure unchanged
+binder references, justified by read-only Core definitional equality to an
+existing strict constructor field and IH; and separately qualified evolving
+prefix state using the already checked worker-normalization machinery.
+Defining equations, a changed-prefix state execution oracle, and a
+nondecreasing *later* major refusal passed. **No general computed
+discriminants, nested/mutual recursion, arbitrary decrease, P0 executable
+partial or P1 fixedpoint admission is implied. M3+B remains OPEN.**
+
 # PSCV0 — M3 structural strict-child accepted; M3+B continues
 
 ## Accepted M3+B structural strict-child slice — 16 October 2026

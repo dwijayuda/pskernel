@@ -121,3 +121,7 @@ existing JS/TS/Rust/GC/Wasmtime lanes, and a checked source equation.
 It preserves the conservative once-only computed-major prefix path as
 a distinct supported case and leaves unsupported dependent/nested/mutual
 recursion unchanged. The full five-gate exact-commit acceptance is pending.
+
+## Accepted M3+B fixed and evolving prefix recursion
+
+Compiler/test `8f8aa47fc3b742488bd1ce4ad15024a63c0b6d4f` passed native 38928344482 (33/33 steps), F1 38928344465, F2 38928344501, F3/F4/platform 38928344471 and focused 38928344644 (pinned Lean / JS / TS / Rust / V8 GC / Wasmtime). Read [exact qualification](PSCV0_M3_PREFIX_RECURSION_QUALIFICATION_2026-10-16.md). Both unchanged-prefix computed child and separately checked evolving-prefix worker normalization are qualified in the selected family. Prior candidate pending statuses are historical. M3+B overall OPEN; source strategy, nested/indexed/mutual data, larger elimination, total well-founded recursion, P0/P1 and full cross-stage exit remain pending.

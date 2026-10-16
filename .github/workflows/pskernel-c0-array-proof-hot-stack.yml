@@ -1,0 +1,84 @@
+name: PSKernel-C0 official Init shared-proof hot stacks
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-array-proof-hot-stack.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-source-profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build unchanged native source checker and diagnostic-only sample hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc &&
+            lake build c0OfficialReplay)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py
+          cc -O2 -fPIC -shared -o "$RUNNER_TEMP/c0-shared-proof-sampler.so" psc0/packages/pskernel-c0/test/C0NativeProofSampler.c
+      - name: Pin original official 499130-record shared proof closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep > "$RUNNER_TEMP/c0-shared-proof.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-shared-proof.ndjson" > "$RUNNER_TEMP/c0-shared-proof-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/c0-shared-proof-official.txt"
+          test "$(stat -c%s "$RUNNER_TEMP/c0-shared-proof.ndjson")" -eq 25031309
+          test "$(wc -l < "$RUNNER_TEMP/c0-shared-proof.ndjson")" -eq 499130
+          echo "7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/c0-shared-proof.ndjson" | sha256sum -c -
+          echo "C0_SHARED_PROOF_PROFILE source=official_verified original_bytes=499130"
+      - name: Sample original C0 inference stacks on authentic proof-body workload
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$RUNNER_TEMP/c0-shared-proof.ndjson" \
+            "$RUNNER_TEMP/c0-shared-proof-sampler.so" \
+            "$RUNNER_TEMP/c0-shared-proof-hot-stacks.txt" \
+            "$RUNNER_TEMP/c0-shared-proof-hot-summary.json" \
+            --samples 20 --interval 10
+          test -s "$RUNNER_TEMP/c0-shared-proof-hot-summary.json"
+          python3 - <<'PY'
+          import json, os, pathlib
+          p = pathlib.Path(os.environ["RUNNER_TEMP"]) / "c0-shared-proof-hot-summary.json"
+          j = json.loads(p.read_text())
+          assert j["diagnostic_only"] is True
+          assert j["no_trusted_code_modified"] is True
+          assert j["successful_source_acceptance"] is False
+          assert j["native_stack_samples"] > 0, "no native checker frames sampled"
+          print("C0_SHARED_PROOF_HOT_STACK sample_count=%d accepting_verdict=not_claimed" % j["native_stack_samples"])
+          for name, count in j["top_inclusive_functions"][:12]:
+              print("C0_SHARED_PROOF_HOT_FN n=%d symbol=%s" % (count, name))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-authentic-shared-proof-hot-stacks
+          path: |
+            ${{ runner.temp }}/c0-shared-proof-hot-summary.json
+            ${{ runner.temp }}/c0-shared-proof-hot-stacks.txt
+            ${{ runner.temp }}/c0-shared-proof-official.txt
+          if-no-files-found: warn
+          retention-days: 14

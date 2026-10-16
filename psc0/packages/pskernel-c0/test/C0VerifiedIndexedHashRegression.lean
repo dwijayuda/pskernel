@@ -54,6 +54,30 @@ def main : IO Unit := do
     throw (IO.userError "indexed-hash: checked indexed cache lookup differs from source")
   if !(psKernelC0VerifiedIndexedCacheGet combined cache).isNone then
     throw (IO.userError "indexed-hash: incorrect hit before inserting source term")
+  -- DefEq success/failure caches also use a symmetric expression-pair
+  -- hash. The proof must preserve complete lookup semantics, even after
+  -- trie promotion and for a nonmatching indexed pair.
+  let pairSet := (List.range 14).foldl
+    (fun state (n : Nat) =>
+      psKernelExprPairSetInsert state (.lit (.nat n)) fnExpr)
+    psKernelExprPairSetEmpty
+  let pairSet := psKernelExprPairSetInsert pairSet rootExpr fnExpr
+  let _pairBucket :
+      psKernelC0VerifiedIndexedPairHash combined fn =
+        psKernelExprPairHash combined.expr fn.expr :=
+    psKernelC0VerifiedIndexedPairHash_source combined fn
+  let _sourcePair :
+      psKernelC0VerifiedIndexedPairContains pairSet combined fn =
+        psKernelExprPairSetContains pairSet combined.expr fn.expr :=
+    psKernelC0VerifiedIndexedPairContains_source pairSet combined fn
+  if !psKernelC0VerifiedIndexedPairContains pairSet combined fn then
+    throw (IO.userError "indexed-hash: source DefEq pair hit lost")
+  let _sourceMiss :
+      psKernelC0VerifiedIndexedPairContains pairSet combined arg =
+        psKernelExprPairSetContains pairSet combined.expr arg.expr :=
+    psKernelC0VerifiedIndexedPairContains_source pairSet combined arg
+  if psKernelC0VerifiedIndexedPairContains pairSet combined arg then
+    throw (IO.userError "indexed-hash: invented DefEq pair hit")
   if (psKernelC0VerifiedIndexedHashAppTry
       owner rootId argId fnId arg fn).isSome then
     throw (IO.userError "indexed-hash: swapped source children forged an app certificate")

@@ -25,6 +25,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0SortDefEqRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0LiteralDefEqRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedInferenceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SourceCertifiedFVarMemoRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedLocalInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedConstantInferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedInferenceDispatchRegression.lean'
@@ -221,6 +222,9 @@ jobs:
       - name: C0 independently proved Nat String literal DefEq and cache semantics
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0LiteralDefEqRegression.lean
+      - name: Source-certified DAG-aware FVar eligibility and scoped cache safety
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0SourceCertifiedFVarMemoRegression.lean
       - name: C0 independent scalar source inference and full checked typing
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0QualifiedInferenceRegression.lean

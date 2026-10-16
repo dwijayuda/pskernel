@@ -76,8 +76,15 @@ def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
       pure (next, psExprApplyMany (.fvar (psLocalDeclId callback))
         ([argument, fresh.expr] ++ states))
   let resolved ← psElabResolvedTerm next term (some captured.resultType)
-  let closedType ← psElabAbstractType context resolved.context
-    captured.abstractions resolved.type
+  let resultType := psMetaInstantiate resolved.context.metaContext resolved.type
+  -- Independent result types already belong to the caller's scope. Delaying
+  -- them on unresolved dictionaries in argument let values would hide a real
+  -- function result behind an opaque type meta before a chained application.
+  -- Value closure still retains every original argument let in source order.
+  let closedType ← if !psExprHasTermMeta resultType &&
+      psExprFVarsInContext context.localContext resultType then
+    psElabResolvedTerm (psElabLeaveScope context resolved.context) resultType none
+  else psElabAbstractType context resolved.context captured.abstractions resultType
   let inner := psElabContextWithMeta resolved.context closedType.context.metaContext
   let closed ← psElabAbstract context inner captured.abstractions resolved.term closedType.term
   return some (← psElabFinalizeExpected closed expected)

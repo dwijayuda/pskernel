@@ -16,6 +16,17 @@ end
 
 namespace M3MutualStructuralOracle
 
+-- Pinned Lean accepts structural descent through Acc's function-valued
+-- recursive field. This logical oracle needs no executable inhabitant of
+-- the always-True relation; the selected portable direct-field owner refuses
+-- this larger structural capability on the already checked Standard datatype.
+def higherRelation (_ _ : Nat) : Prop := True
+
+noncomputable def higherField (n : Nat) (tree : Acc higherRelation n) : Nat :=
+  match tree with
+  | .intro _ below => higherField 0 (below 0 True.intro)
+termination_by structural tree
+
 mutual
   def first (bias n : Nat) : Nat :=
     match n with
@@ -253,7 +264,7 @@ private def expectRefused (environment : PsEnvironment) (label text rule : Strin
     ensure ((refusal error).startsWith ("PSCV0-MUTUAL-TOTAL: " ++ rule ++ ":"))
       (label ++ " refused at the wrong rule: " ++ refusal error)
 
-private def checkRefusals (environment : PsEnvironment) : IO Unit := do
+private def checkRefusals (environment : PsEnvironment) : IO (List PsDeclaration) := do
   expectRefused environment "unconstructed total recursion"
     "mutual\nfunction bad(n: Nat): Nat := bad(n)\nend\n" "ROOT"
   expectRefused environment "unchanged recursive major"
@@ -269,9 +280,10 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
     ("universe u\nsection\nvariable (A: Type u) (a: A)\nmutual\n" ++
       "function bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => 1 }\n" ++
       "function other(n: Nat): A := match n with { | 0 => a | k + 1 => a }\nend\nend\n") "SORT"
-  expectRefused environment "function-valued recursive field"
-    ("inductive M3Higher: Type where { | leaf | node(next: Nat -> M3Higher) }\n" ++
-      "mutual\nfunction bad(x: M3Higher): Nat := match x with { | .leaf => 0 | .node next => bad(next(0)) }\nend\n") "DIRECT-FIELD"
+  let higher ← elaborate environment "function m3HigherRelation(x: Nat, y: Nat): Prop := True\n"
+  expectRefused higher.result.environment "checked Acc function-valued recursive field"
+    "mutual\nfunction bad(n: Nat, tree: Acc(m3HigherRelation, n)): Nat := match tree with { | .intro x below => bad(0, below(0, True.intro)) }\nend\n"
+    "DIRECT-FIELD"
   expectRefused environment "different structural groups"
     ("mutual\nfunction bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => 1 }\n" ++
       "function other(x: Bool): Nat := match x with { | .false => 0 | .true => 1 }\nend\n") "GROUP"
@@ -292,6 +304,7 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   ensure (repaired.result.declarations.length == 4)
     "a failed mutual group prevented atomic reuse of its original names"
   IO.println "PSCV0_M3_MUTUAL_STRUCTURAL_REFUSALS: PASS root, strict child, complete peer arity, uniform fixed mapping, motive universe, direct-field/group and late-member atomicity boundaries"
+  return higher.result.declarations
 
 private def witness (name : String) (flag : Bool) (expected : UInt64) : PsDeclaration :=
   let uint64 := PsExpr.constE (psRootName "UInt64") []
@@ -332,7 +345,7 @@ def main (args : List String) : IO Unit := do
     ((psAddDeclarationList psSelfHostProdPreludeEnvironment group.declarations).mapError psCompilerPscv0ElabError)
   let compiled ← elaborate environment source
   checkConstruction compiled
-  checkRefusals environment
+  let refusalFoundation ← checkRefusals environment
   let equations ← elaborate compiled.result.environment equationSource
   let runtime ← elaborate compiled.result.environment wrappers
   let declarations := group.declarations ++ compiled.result.declarations ++ runtime.result.declarations
@@ -340,6 +353,7 @@ def main (args : List String) : IO Unit := do
     ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations).mapError psCompilerPscv0ElabError)
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  let _ ← checked prelude refusalFoundation
   let admitted ← checked prelude (declarations ++ equations.result.declarations)
   let closedEquations := [false, true].flatMap fun flag =>
     outputs.map fun (name, oracle) => witness name flag (oracle flag)

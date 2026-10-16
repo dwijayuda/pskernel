@@ -22,23 +22,37 @@ All six exits remain in the denominator. Unqualified code adds no points.
 
 The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`;
 total mutual structural construction is `293a6f797d8135e10c407779a8dc429afa8345f6`.
-The combined candidate passed F1/F2/F3-F4, but focused `38969444761` found
-a Lean assertion-layout error in the new structural fixture. Repair
-`2b809e8d24c726c32ccca354231e9d638d729ba0` compiled all Lean targets and passed
-F1 `38970094104`, F2 `38970094096` and F3/F4 `38970094526`. Its focused run
-`38970094187` then found `PSCV0-PARSE: with at 41:3; got }` in the new
-well-founded dependent-result source fixture, before runtime execution.
+Fixture layout/source spelling repairs are `2b809e8d` and `42e1874d`.
+All Lean targets compile; the latter passed F1 `38970664555`, F2 `38970664345`
+and F3/F4 `38970664477`. Its aggregate focused run `38970664748` retained
+all nine required source-check results: existing group/deriving/P0 checks
+passed, while the new WF function-result construction and one structural
+refusal fixture failed. No new recursion acceptance follows from those runs.
 
-The match arm incorrectly used a declaration-only brace wrapper around its
-single let expression. This commit removes those arm braces in that fixture
-and the equivalent proof-capture arm in the new structural fixture, retaining
-the actual let bindings, native oracles, assertions and expected outputs.
-The focused source-check step now runs all nine existing independent required
-fixtures and retains every failure before failing the step if any check
-fails. Commands, inputs, counts, source-SHA stamps, timeouts and tool pins are
-unchanged. Subsequent runtime steps still require complete source success.
-Require all five gates on the repaired compiler/test tip. Prior-run native
-results cannot qualify it; neither new recursion feature is fully accepted.
+This commit repairs the real WF type-shape loss. Closing argument lets could
+delay an already-known function result behind a synthetic type metavariable,
+so a chained application reported `expected a function`. An instantiated result
+type without term metavariables is now retained only after verifying its free
+variables and rechecking it in the original caller scope. All ordered value
+lets and delayed decrease goals remain. Result types that depend on argument
+locals still use the existing checked type-abstraction path. The complete
+12-output WF fixture, including dependent Fin state/result, is unchanged.
+
+The structural fixture's function-field negative previously hit unsupported
+source-data formation before its intended recursion owner. It now uses the
+Standard's actual Acc constructor and its real function-valued recursive
+field, still requiring exact `PSCV0-MUTUAL-TOTAL: DIRECT-FIELD:` refusal.
+An independent native structural oracle checks the same shape; the small
+portable relation definition is separately admitted by the fresh kernel.
+No metadata, hypothesis, logical equation or executable inhabitant is forged.
+The structural construction/origin checks had already passed at `42e1874d`;
+its six original native fixture outputs remain unchanged.
+
+The focused source step still runs all nine existing required fixtures and
+fails if any fails; target runtime steps require complete source success.
+Qualify this repaired compiler/test tip on native, F1, F2, F3/F4 and focused.
+Prior-run native results cannot qualify it. Both recursion features remain
+candidates until all five exact-SHA gates succeed.
 
 ### Typed well-founded recursion candidate
 

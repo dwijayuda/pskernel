@@ -61,10 +61,13 @@ theorem psKernelC0AdaptivePairHash_source
     (left right : PsKernelExpr) :
     psKernelC0AdaptivePairHash left right =
       psKernelExprPairHash left right := by
-  unfold psKernelC0AdaptivePairHash
-  split_ifs
-  · exact psKernelC0MemoizedPairHash_source left right
-  · rfl
+  cases h : psKernelC0PairHashMemoWorthwhile left right with
+  | false =>
+      simp only [psKernelC0AdaptivePairHash, h]
+      rfl
+  | true =>
+      simpa only [psKernelC0AdaptivePairHash, h] using
+        psKernelC0MemoizedPairHash_source left right
 
 /-- Source pair hashing is commutative, even on memoized large DAGs;
     this is essential for the historical symmetric success-pair cache. -/
@@ -74,5 +77,10 @@ theorem psKernelC0AdaptivePairHash_comm
       psKernelC0AdaptivePairHash right left := by
   rw [psKernelC0AdaptivePairHash_source,
       psKernelC0AdaptivePairHash_source]
-  unfold psKernelExprPairHash
-  rw [Nat.add_comm]
+  change
+    (psKernelExprHash left + psKernelExprHash right) %
+        psKernelCacheHashModulus =
+      (psKernelExprHash right + psKernelExprHash left) %
+        psKernelCacheHashModulus
+  exact congrArg (fun n : Nat => n % psKernelCacheHashModulus)
+    (Nat.add_comm (psKernelExprHash left) (psKernelExprHash right))

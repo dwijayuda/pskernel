@@ -97,9 +97,10 @@ def psKernelC0InstOneMemoGo
           | .app fn arg =>
               let (f, m1) := psKernelC0InstOneMemoGo replacement fn offset memo
               let (a, m2) := psKernelC0InstOneMemoGo replacement arg offset m1
-              let result := if f.value.2 || a.value.2 then
-                (.app f.value.1 a.value.1, true)
-              else (expr, false)
+              let result :=
+                if f.value.2 then (.app f.value.1 a.value.1, true)
+                else if a.value.2 then (.app f.value.1 a.value.1, true)
+                else (.app fn arg, false)
               let equality :
                   result = psKernelC0ExprInstantiateOneChanged
                     (.app fn arg) replacement offset := by
@@ -110,9 +111,10 @@ def psKernelC0InstOneMemoGo
           | .lam name ty body info =>
               let (t, m1) := psKernelC0InstOneMemoGo replacement ty offset memo
               let (b, m2) := psKernelC0InstOneMemoGo replacement body (offset + 1) m1
-              let result := if t.value.2 || b.value.2 then
-                (.lam name t.value.1 b.value.1 info, true)
-              else (expr, false)
+              let result :=
+                if t.value.2 then (.lam name t.value.1 b.value.1 info, true)
+                else if b.value.2 then (.lam name t.value.1 b.value.1 info, true)
+                else (.lam name ty body info, false)
               let equality :
                   result = psKernelC0ExprInstantiateOneChanged
                     (.lam name ty body info) replacement offset := by
@@ -123,9 +125,10 @@ def psKernelC0InstOneMemoGo
           | .forallE name ty body info =>
               let (t, m1) := psKernelC0InstOneMemoGo replacement ty offset memo
               let (b, m2) := psKernelC0InstOneMemoGo replacement body (offset + 1) m1
-              let result := if t.value.2 || b.value.2 then
-                (.forallE name t.value.1 b.value.1 info, true)
-              else (expr, false)
+              let result :=
+                if t.value.2 then (.forallE name t.value.1 b.value.1 info, true)
+                else if b.value.2 then (.forallE name t.value.1 b.value.1 info, true)
+                else (.forallE name ty body info, false)
               let equality :
                   result = psKernelC0ExprInstantiateOneChanged
                     (.forallE name ty body info) replacement offset := by
@@ -137,9 +140,11 @@ def psKernelC0InstOneMemoGo
               let (t, m1) := psKernelC0InstOneMemoGo replacement ty offset memo
               let (v, m2) := psKernelC0InstOneMemoGo replacement value offset m1
               let (b, m3) := psKernelC0InstOneMemoGo replacement body (offset + 1) m2
-              let result := if t.value.2 || v.value.2 || b.value.2 then
-                (.letE name t.value.1 v.value.1 b.value.1 nondep, true)
-              else (expr, false)
+              let result :=
+                if t.value.2 then (.letE name t.value.1 v.value.1 b.value.1 nondep, true)
+                else if v.value.2 then (.letE name t.value.1 v.value.1 b.value.1 nondep, true)
+                else if b.value.2 then (.letE name t.value.1 v.value.1 b.value.1 nondep, true)
+                else (.letE name ty value body nondep, false)
               let equality :
                   result = psKernelC0ExprInstantiateOneChanged
                     (.letE name ty value body nondep) replacement offset := by
@@ -150,7 +155,7 @@ def psKernelC0InstOneMemoGo
           | .mdata md body =>
               let (b, m1) := psKernelC0InstOneMemoGo replacement body offset memo
               let result := if b.value.2 then (.mdata md b.value.1, true)
-                            else (expr, false)
+                            else (.mdata md body, false)
               let equality :
                   result = psKernelC0ExprInstantiateOneChanged
                     (.mdata md body) replacement offset := by
@@ -161,7 +166,7 @@ def psKernelC0InstOneMemoGo
           | .proj name i body =>
               let (b, m1) := psKernelC0InstOneMemoGo replacement body offset memo
               let result := if b.value.2 then (.proj name i b.value.1, true)
-                            else (expr, false)
+                            else (.proj name i body, false)
               let equality :
                   result = psKernelC0ExprInstantiateOneChanged
                     (.proj name i body) replacement offset := by
@@ -169,10 +174,9 @@ def psKernelC0InstOneMemoGo
                 rw [← b.source]
                 rfl
               psKernelC0InstOneMemoStore m1 ⟨result, equality⟩
-          | _ =>
-              let value := psKernelC0ExprInstantiateOneChanged expr replacement offset
+          | other =>
+              let value := psKernelC0ExprInstantiateOneChanged other replacement offset
               psKernelC0InstOneMemoStore memo ⟨value, rfl⟩
-termination_by expr
 
 /-- Original source's *changed-flag* algorithm, memoized precisely. -/
 def psKernelC0InstOneMemoizedChanged

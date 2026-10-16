@@ -1,37 +1,60 @@
-## M3+B current checkpoint: accepted e03; expanded group deriving candidate
+## M3+B current checkpoint: accepted group deriving; recursion candidate
 
-Accepted compiler/test `e03a99d1f45f2127372ee556ffe866d304d103e3` has five green gates:
-native `38964433671` (33/33), F1 `38964433756`, F2 `38964433572`,
-F3/F4 `38964433857`, focused `38964433806` (15/15).
-See [the exact receipt](PSCV0_M3_GROUP_RECURSION_P0_QUALIFICATION_2026-10-17.md)
-for artifact digests, implemented scope, historical repairs and limitations.
+Accepted compiler/test `01d762eb02eab1d2f795e5338cb3586cd1d1ace0` has all five gates green:
+native `38967030820` (33/33), F1 `38967031191`, F2 `38967030836`,
+F3/F4 `38967030843`, focused `38967030789` (15/15).
+See [the exact receipt](PSCV0_M3_GROUP_DERIVING_QUALIFICATION_2026-10-17.md).
 
-The current deriving candidate advances Exit 1 through the existing shared
-group motive/minor cursor: direct indexed Hashable/Repr, nonindexed group
-BEq, actual child-family/indices checking and ordinary generated instances.
-The shared constructor-order predicate also protects elaboration, reduction,
-recursor inspection and canonical transport. Independent native oracles and
-fresh checked equations feed all five focused target lanes. This changed
-compiler still requires all five gates on its own exact SHA.
+Accepted progress is approximately 60% (50–70% engineering uncertainty),
+with all six exit weights retained: data 30%, source strategies 15%,
+total recursion 20%, P0 15%, P1 10%, integration 10%. Approximate accepted
+contributions are 17, 10, 10, 13, 1 and 7 points respectively. The following
+candidate adds no accepted points until all five gates pass on its SHA.
 
-Approximate accepted progress is 55%, with a broad 45–65% engineering
-uncertainty interval. The estimate retains all six weighted exits:
-data/elimination/deriving 30%, source strategies 15%, total recursion 20%,
-P0 15%, P1 10%, integration 10%. The new deriving candidate and unfinished
-working implementations do not add accepted percentage points.
+### Typed well-founded recursion candidate
 
-Next shared dependencies are actual typed measured-recursion telescopes,
-compatible total-mutual strict-child construction, complete visible/nested
-recursor specialization slots, and selected local where closure/strategy
-ownership. The local where gap includes capture closure and recursive
-component policy, not just removal of parser refusals. The selected default
-induction tactic continues to match pinned Lean's mutual/nested refusal;
-no unspecified using grammar is introduced.
+The well-founded owner now uses the full explicit typed source header. One
+changing measured parameter may have any checked domain depending only on
+fixed captures; the Nat-valued measure may depend on those captures. All
+remaining evolving arguments form the actual dependent state telescope, and
+the result may be any checked type supported by ordinary erasure.
 
-P1 remains unavailable at the actual Classical.choice dependency of pinned
-Lean.Order.fix/CCPO.csup and its equations. Only propext and Quot.sound remain
-approved. M3+B remains OPEN; no later stage, verified artifact policy,
-performance baseline, workload or dependency pin is changed.
+Typed call analysis closes dependencies before partitioning fixed, major and
+state arguments. The real Nat.fix motive returns that state function.
+Recursive arguments are checked and bound once in original order. The
+public f.eq_def uses actual fix_eq and inferred-level funext/congrArg/Eq.trans
+where state extensionality is required. No provisional global, recursive
+proof assumption, eta conversion rule or runtime ABI is added.
+
+Ps.Erasure.Entry owns validation of the actual definition, universe
+arguments and current entry telescope. It recomputes binder roles, checks
+local/order identities, and separates raw source-header arguments from
+applications of a returned function. Ps.Erasure.WellFounded consumes that
+validated entry and the real fixed-point term, then delegates typed
+recursive calls to ordinary erasure. Proof Unit slots, erased indices,
+polymorphic types and runtime parameters retain their existing conventions.
+
+The original eight well-founded outputs remain unchanged. Four new native
+oracles cover polymorphic List reversal with an ordered digest, a fixed
+function and returned closure, evolving dependent Fin state with erased
+family/proof captures, and a dependent Fin result. Fresh logical equations,
+universe closure, all-kind entry roles, a returned-function application and
+stale runtime argument-order refusal are checked in the same fixture.
+
+Selected limits remain explicit: no several-changing-input measure pack,
+no major domain depending on changing state, and no extension of ordinary
+erasure's higher-rank/type-changing-state limits. Body lambdas do not enter
+the source header or termination-measure scope.
+
+Remaining shared dependencies include nested specialization motives/traversal,
+expanded dependent deriving, flat local where capture/strategy ownership,
+compatible SCC dispatch and broader selected structural/WF construction.
+Default source mutual/nested induction retains the pinned default refusal;
+the .ps mutual grammar remains def/function-only. P1 is blocked by the exact
+Classical.choice closure of pinned Lean.Order.fix/CCPO.csup and its equations.
+Only propext and Quot.sound remain approved. M3+B stays OPEN.
+
+The following dated sections retain earlier implementation history.
 
 ## M3+B earlier candidate: source mutual P0 and typed measured-state recursion
 

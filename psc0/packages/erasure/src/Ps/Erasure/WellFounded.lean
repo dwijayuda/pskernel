@@ -1,4 +1,5 @@
 import Ps.Erasure.Recursion
+import Ps.Erasure.Entry
 
 /-
 Runtime equation for the checked Nat-measure fixpoint.
@@ -14,11 +15,6 @@ The ordinary typed eraser owns the callback's proof slot and function ABI.
 
 def psErasureWellFoundedFixName : PsName :=
   psNameAppendStr (psNameAppendStr (psRootName "WellFounded") "Nat") "fix"
-
-def psErasureWellFoundedIsNat (environment : PsEnvironment)
-    (scope : PsErasureScope) (type : PsExpr) : Bool :=
-  psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext
-    type (.constE psNatName [])
 
 -- Open only actual lambda binders, without unfolding the fixpoint itself.
 def psErasureWellFoundedOpenValue (arguments : List PsExpr) (value : PsExpr) :
@@ -38,14 +34,13 @@ structure PsErasureWellFoundedBinder where
   binder : PsBinderInfo
 
 def psErasureWellFoundedCallback (environment : PsEnvironment)
-    (scope : PsErasureScope) (name : PsName) (entryArguments : List PsExpr)
+    (scope : PsErasureScope) (name : PsName) (levels : List PsLevel)
+    (entryArguments : List PsExpr)
     (majorId : Nat) (stateIds : List Nat) (callbackType : PsExpr) :
     Except PsErasureError PsExpr := do
   let smaller ← (psInferEnsureForall environment psMetaEmpty
     scope.localContext callbackType).mapError (fun _ => PsErasureError.binderMismatch)
-  if !psBinderInfoEq smaller.binder .explicit ||
-      !psErasureWellFoundedIsNat environment scope smaller.domain then
-    throw .unsupportedRuntimeTerm
+  if !psBinderInfoEq smaller.binder .explicit then throw .unsupportedRuntimeTerm
   let argument := psLocalPushBinding scope.localContext smaller.name smaller.domain smaller.binder
   let proof ← (psInferEnsureForall environment psMetaEmpty argument.context
     (psExprInstantiate1 smaller.body (.fvar argument.id))).mapError
@@ -63,22 +58,16 @@ def psErasureWellFoundedCallback (environment : PsEnvironment)
   for id in stateIds do
     let state ← (psInferEnsureForall environment psMetaEmpty localContext resultType).mapError
       (fun _ => PsErasureError.binderMismatch)
-    let stateScope := { scope with localContext := localContext }
-    if !psBinderInfoEq state.binder .explicit ||
-        !psErasureWellFoundedIsNat environment stateScope state.domain then
-      throw .unsupportedRuntimeTerm
+    if !psBinderInfoEq state.binder .explicit then throw .unsupportedRuntimeTerm
     let pushed := psLocalPushBinding localContext state.name state.domain state.binder
     replacements := replacements ++ [(id, .fvar pushed.id)]
     bindersRev := .mk pushed.id state.name state.domain state.binder :: bindersRev
     localContext := pushed.context
     resultType := psExprInstantiate1 state.body (.fvar pushed.id)
-  let resultScope := { scope with localContext := localContext }
-  if !psErasureWellFoundedIsNat environment resultScope resultType then
-    throw .unsupportedRuntimeTerm
   let arguments ← entryArguments.mapM fun entry => do
     let .fvar id := entry | throw PsErasureError.unsupportedRuntimeTerm
     return ((replacements.find? (fun pair => pair.fst == id)).map Prod.snd).getD entry
-  let self := psExprApplyMany (.constE name []) arguments
+  let self := psExprApplyMany (.constE name levels) arguments
   let inferred ← (psInferType environment psMetaEmpty localContext self).mapError
     (fun _ => PsErasureError.unsupportedRuntimeTerm)
   if !psDefEqReadOnlyWithEnv environment psMetaEmpty localContext inferred resultType then
@@ -98,31 +87,24 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
     Except PsErasureError (Option PsVerifiedIrExpr) := do
   let .constE name levels := view.head | return none
   if !psNameEq name psErasureWellFoundedFixName then return none
-  let domain :: motive :: measure :: functional :: major :: stateArguments := view.args
+  let domain :: motive :: measure :: functional :: major :: arguments := view.args
     | throw .unsupportedApplication
-  let one := PsLevel.succ .zero
-  if levels.length != 2 || !(levels.all (psLevelEquivalent one)) then
+  if levels.length != 2 then throw .unsupportedRuntimeTerm
+  let entry ← psErasureValidateRootEntry environment scope
+  let applied := psExprApplyMany view.head view.args
+  if !psExprAlphaEq entry.value applied ||
+      arguments.length < entry.applicationArguments.length then
     throw .unsupportedRuntimeTerm
-  let some current := scope.currentDefinition | throw .unsupportedRuntimeTerm
-  let some coreName := current.coreName | throw .unsupportedRuntimeTerm
-  if !current.typeArgumentsRev.isEmpty then throw .unsupportedRuntimeTerm
-  let entryArguments := current.coreParametersRev.reverse
-  if entryArguments.isEmpty || current.runtimeParameters.length != entryArguments.length then
+  let stateCount := arguments.length - entry.applicationArguments.length
+  let stateArguments := arguments.take stateCount
+  let applicationArguments := arguments.drop stateCount
+  if !(applicationArguments.zip entry.applicationArguments).all
+      (fun pair => psExprAlphaEq pair.fst pair.snd) then
     throw .unsupportedRuntimeTerm
-  let entryIds ← entryArguments.mapM fun argument =>
+  let entryIds ← entry.headerArguments.mapM fun argument =>
     match argument with
     | .fvar id => pure id
     | _ => throw .unsupportedRuntimeTerm
-  if entryIds.eraseDups.length != entryIds.length ||
-      entryIds != scope.localContext.declarations.reverse.map psLocalDeclId then
-    throw .unsupportedRuntimeTerm
-  for ((id, runtimeName), declaration) in
-      (entryIds.zip current.runtimeParameters).zip scope.localContext.declarations.reverse do
-    let .binding actualId _ type .explicit := declaration
-      | throw .unsupportedRuntimeTerm
-    if actualId != id || psErasureLookupNat scope.runtimeLocals id != some runtimeName ||
-        !psErasureWellFoundedIsNat environment scope type then
-      throw .unsupportedRuntimeTerm
   let .fvar majorId := major | throw .unsupportedRuntimeTerm
   let stateIds ← stateArguments.mapM fun argument =>
     match argument with
@@ -132,36 +114,25 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
   if changingIds.eraseDups.length != changingIds.length ||
       !changingIds.all entryIds.contains then
     throw .unsupportedRuntimeTerm
-  let some (.definitionDecl actualName [] declaredType declaredValue) :=
-      psEnvironmentFind environment coreName | throw .unsupportedRuntimeTerm
-  if !psNameEq actualName coreName then throw .unsupportedRuntimeTerm
-  let inferredDeclaration ← (psInferType environment psMetaEmpty psLocalEmpty declaredValue).mapError
-    (fun _ => PsErasureError.unsupportedRuntimeTerm)
-  if !psDefEqReadOnlyWithEnv environment psMetaEmpty psLocalEmpty
-      inferredDeclaration declaredType then
-    throw .unsupportedRuntimeTerm
-  let some opened := psErasureWellFoundedOpenValue entryArguments declaredValue
-    | throw .unsupportedRuntimeTerm
-  let applied := psExprApplyMany view.head view.args
-  if !psExprAlphaEq opened applied then throw .unsupportedRuntimeTerm
-  if !psErasureWellFoundedIsNat environment scope domain then throw .unsupportedRuntimeTerm
-  -- A fixed captured local may not carry an indirect dependency on a changed
-  -- argument through its declared type. No source plan authorizes this check.
+  let fixedIds := entryIds.filter fun id => !changingIds.contains id
+  -- Fixed captures cannot indirectly depend on a changed argument through
+  -- their types. Extra result-application arguments are not fixed captures.
   for declaration in scope.localContext.declarations do
-    if !changingIds.contains (psLocalDeclId declaration) &&
+    if fixedIds.contains (psLocalDeclId declaration) &&
         (psExprFVarIds (psLocalDeclType declaration)).any changingIds.contains then
       throw .unsupportedRuntimeTerm
   if [domain, motive, measure, functional].any (fun term =>
-      (psExprFVarIds term).any changingIds.contains) then
+      !(psExprFVarIds term).all fixedIds.contains) then
     throw .unsupportedRuntimeTerm
   let resultType ← (psInferType environment psMetaEmpty scope.localContext applied).mapError
     (fun _ => PsErasureError.unsupportedRuntimeTerm)
-  if !psErasureWellFoundedIsNat environment scope resultType then throw .unsupportedRuntimeTerm
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext resultType entry.type then
+    throw .unsupportedRuntimeTerm
   let .lam callbackName callbackType body .explicit :=
       psWhnf environment psMetaEmpty scope.localContext (.app functional major)
     | throw .unsupportedRuntimeTerm
-  let recursiveCore ← psErasureWellFoundedCallback environment scope coreName
-    entryArguments majorId stateIds callbackType
+  let recursiveCore ← psErasureWellFoundedCallback environment scope entry.name
+    entry.levelArguments entry.headerArguments majorId stateIds callbackType
   let nestedScope := { scope with currentDefinition := none }
   let recursiveValue ← eraseAt nestedScope recursiveCore
   let callback := psLocalPushBinding scope.localContext callbackName callbackType .explicit
@@ -173,4 +144,9 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
   let some body := psErasureWellFoundedOpenValue stateArguments
       (psExprInstantiate1 body (.fvar callback.id))
     | throw .unsupportedRuntimeTerm
+  let body := psExprApplyMany body applicationArguments
+  let bodyType ← (psInferType environment psMetaEmpty bodyScope.localContext body).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty bodyScope.localContext bodyType entry.type then
+    throw .unsupportedRuntimeTerm
   return some (← eraseAt bodyScope body)

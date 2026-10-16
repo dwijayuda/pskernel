@@ -1,32 +1,59 @@
-## M3+B current checkpoint: accepted group/recursion/P0; expanded deriving candidate
+## M3+B current checkpoint: accepted group deriving; checked recursion expansion
 
-Exact compiler/test `e03a99d1f45f2127372ee556ffe866d304d103e3` passed all five gates,
-including every native step and every focused runtime target. The detailed
-[acceptance receipt](docs/PSCV0_M3_GROUP_RECURSION_P0_QUALIFICATION_2026-10-17.md)
-supersedes older pending and mixed-SHA status below.
+The accepted compiler/test is `01d762eb02eab1d2f795e5338cb3586cd1d1ace0`; all five gates passed.
+The [group-deriving receipt](docs/PSCV0_M3_GROUP_DERIVING_QUALIFICATION_2026-10-17.md)
+records exact runs, artifact digests and selected scope. The complete
+group motive/minor owner now serves direct indexed Hashable/Repr and
+nonindexed BEq. Actual child-family/index checking and the shared ordered
+recursive-field rule protect elaboration, reduction and canonical transport.
 
-The new deriving candidate extends `Ps.Elab.DerivingContext` through the
-existing typed `Ps.Elab.GroupElimination` cursor. It constructs every actual
-family motive and constructor minor, retains each family's indices, and
-checks each child hypothesis against the corresponding closed motive.
-Hashable/Repr support direct indexed groups; BEq supports nonindexed groups,
-with left induction and right case inspection. The native group handler
-checks complete ordered source ownership and constructs all ordinary
-instances against the original environment.
+The following recursion construction is implemented and requires its own
+exact-SHA five-gate qualification before acceptance.
 
-`psConstructorRecursiveFieldsOrdered` in `Ps.Core.InductiveGroup` owns
-strictly increasing, bounded recursive-field positions. Elaboration,
-deriving, reduction, recursor inspection and canonical encoding reuse it.
-A set-membership check cannot preserve the association of two equal-typed
-child hypotheses; their constructor order is semantically relevant.
+### Typed well-founded recursion candidate
 
-The six-output native/kernel/runtime fixture is integrated into every
-focused target lane. This candidate still needs its own five-gate acceptance.
-Nested specialization slots, dependent ordinary deriving fields, indexed
-BEq/DecidableEq, broader total and local where recursion remain explicit
-work. Default mutual/nested source induction remains refused as in pinned
-Lean without an explicit selected eliminator. No source grammar or logical
-assumption is expanded by this deriving change.
+The well-founded owner now uses the full explicit typed source header. One
+changing measured parameter may have any checked domain depending only on
+fixed captures; the Nat-valued measure may depend on those captures. All
+remaining evolving arguments form the actual dependent state telescope, and
+the result may be any checked type supported by ordinary erasure.
+
+Typed call analysis closes dependencies before partitioning fixed, major and
+state arguments. The real Nat.fix motive returns that state function.
+Recursive arguments are checked and bound once in original order. The
+public f.eq_def uses actual fix_eq and inferred-level funext/congrArg/Eq.trans
+where state extensionality is required. No provisional global, recursive
+proof assumption, eta conversion rule or runtime ABI is added.
+
+Ps.Erasure.Entry owns validation of the actual definition, universe
+arguments and current entry telescope. It recomputes binder roles, checks
+local/order identities, and separates raw source-header arguments from
+applications of a returned function. Ps.Erasure.WellFounded consumes that
+validated entry and the real fixed-point term, then delegates typed
+recursive calls to ordinary erasure. Proof Unit slots, erased indices,
+polymorphic types and runtime parameters retain their existing conventions.
+
+The original eight well-founded outputs remain unchanged. Four new native
+oracles cover polymorphic List reversal with an ordered digest, a fixed
+function and returned closure, evolving dependent Fin state with erased
+family/proof captures, and a dependent Fin result. Fresh logical equations,
+universe closure, all-kind entry roles, a returned-function application and
+stale runtime argument-order refusal are checked in the same fixture.
+
+Selected limits remain explicit: no several-changing-input measure pack,
+no major domain depending on changing state, and no extension of ordinary
+erasure's higher-rank/type-changing-state limits. Body lambdas do not enter
+the source header or termination-measure scope.
+
+Remaining shared dependencies include nested specialization motives/traversal,
+expanded dependent deriving, flat local where capture/strategy ownership,
+compatible SCC dispatch and broader selected structural/WF construction.
+Default source mutual/nested induction retains the pinned default refusal;
+the .ps mutual grammar remains def/function-only. P1 is blocked by the exact
+Classical.choice closure of pinned Lean.Order.fix/CCPO.csup and its equations.
+Only propext and Quot.sound remain approved. M3+B stays OPEN.
+
+The following dated sections retain earlier implementation history.
 
 ## M3+B earlier candidate: source mutual P0 and typed measured-state recursion
 

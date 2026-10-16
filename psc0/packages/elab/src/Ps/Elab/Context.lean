@@ -27,6 +27,7 @@ structure PsElabWellFoundedRecursion where
   stateIds : List Nat := []
   fixedIds : List Nat := []
   collectCalls : Bool := false
+  sourceType : Option PsExpr := none
 
 -- Typed call observations retain their actual branch scope. Invariant
 -- analysis must compare these arguments, not the spelling of source names.

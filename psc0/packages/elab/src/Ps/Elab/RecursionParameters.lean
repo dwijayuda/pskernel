@@ -53,12 +53,12 @@ def psElabRecursionNatParameterPlan (context : PsElabContext)
   let dependencies := psExprFVarIds measure
   let measuredVarying := ids.filter fun id => varying.contains id && dependencies.contains id
   if measuredVarying.length > 1 then
-    throw (.data "PSCV0-WF-MEASURE-STATE: the selected Nat motive requires at most one changing parameter in the measure; packing several measured arguments is unavailable")
+    throw (.data "PSCV0-WF-MEASURE-STATE: the selected Nat-valued measure may depend on at most one changing parameter; packing several measured arguments is unavailable")
   -- Constant/same-size candidates still create their genuine impossible
   -- decrease goals, preserving the established DECREASE diagnostic.
   let some majorId := measuredVarying.head? <|>
       (ids.find? varying.contains) <|> (ids.find? dependencies.contains) <|> ids.head?
-    | throw (.data "PSCV0-WF-TELESCOPE: the selected slice requires an explicit Nat parameter")
+    | throw (.data "PSCV0-WF-TELESCOPE: the selected slice requires an explicit header parameter")
   let changing := psElabRecursionParameterDependencies context (varying ++ [majorId])
   let stateIds := ids.filter fun id => id != majorId && changing.contains id
   if stateIds.any dependencies.contains then
@@ -80,21 +80,29 @@ structure PsElabRecursionArguments where
   context : PsElabContext
   values : List PsExpr
   abstractions : List PsMetaAbstraction
+  resultType : PsExpr
 
 -- A permutation must not reorder or repeat source argument computations.
 -- Keep one checked Core let for each original argument, in source order,
 -- including fixed arguments; only their bound references are rearranged.
 def psElabRecursionCaptureArguments (elaborate : PsElaborator)
-    (context : PsElabContext) (arguments : List PsSyntaxTerm) (type : PsExpr) :
+    (context : PsElabContext) (arguments : List PsSyntaxTerm) (sourceType : PsExpr) :
     Except PsElabError PsElabRecursionArguments := do
   let mut current := context
   let mut values := []
   let mut abstractions := []
+  let mut cursor := sourceType
   for source in arguments do
-    let argument ← elaborate current source (some type)
+    let parameter ← (psInferEnsureForall current.environment current.metaContext
+      current.localContext cursor).mapError PsElabError.infer
+    let .explicit := parameter.binder
+      | throw (.data "PSCV0-WF-TELESCOPE: recursive calls require the complete explicit header telescope")
+    let argument ← elaborate current source (some parameter.domain)
+    let type := psMetaInstantiate argument.context.metaContext parameter.domain
     let name := psNameAppendNum (psRootName "_psc0CallArgument") argument.context.localContext.nextId
     let captured := psLocalPushLet argument.context.localContext name type argument.term
     current := { argument.context with localContext := captured.context }
     values := values ++ [.fvar captured.id]
     abstractions := .letE captured.id name type argument.term :: abstractions
-  return { context := current, values, abstractions }
+    cursor := psExprInstantiate1 parameter.body (.fvar captured.id)
+  return { context := current, values, abstractions, resultType := cursor }

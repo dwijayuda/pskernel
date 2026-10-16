@@ -71,10 +71,59 @@ def fixedOnly (step n : Nat) : Nat :=
 termination_by n + step
 decreasing_by exact Nat.add_lt_add_right (Nat.lt_succ_of_le (Nat.sub_le _ _)) step
 
+universe u
+
+-- The domain, state and result live at their real universe levels. The
+-- reversal result is inspected in order, rather than merely by its length.
+def reverseList (A : Type u) (acc xs : List A) : List A :=
+  match xs with
+  | [] => acc
+  | head :: tail => reverseList A (head :: acc) tail
+termination_by xs.length
+decreasing_by exact Nat.lt_succ_self _
+
+def digest : List Nat → Nat
+  | [] => 0
+  | head :: tail => head + 10 * digest tail
+
+-- seed is a body lambda, not a declared termination-measure parameter.
+def iterate (step : Nat → Nat) (n : Nat) : Nat → Nat :=
+  fun seed => match n with
+    | 0 => step seed
+    | k + 1 => iterate step (k - 1) (step seed)
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+
+-- family is an erased index; p and h retain ordinary proof Unit slots.
+-- The changing Fin state must be specialized to the smaller n at each call.
+def dependentState (family : Nat → Type u) (p : Prop) (h : p)
+    (n : Nat) (acc : Fin (n + 1)) : Nat :=
+  match n with
+  | 0 => acc.val
+  | k + 1 => acc.val + dependentState family p h (k - 1)
+      ⟨k - 1, Nat.lt_succ_self (k - 1)⟩
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+
+def bounded (n : Nat) : Fin (n + 1) :=
+  match n with
+  | 0 => ⟨0, Nat.zero_lt_succ 0⟩
+  | k + 1 =>
+    let child := bounded k
+    ⟨child.val + 1, Nat.succ_lt_succ child.isLt⟩
+termination_by n
+decreasing_by exact Nat.lt_succ_self _
+
+theorem bounded_step (k : Nat) :
+    (bounded (Nat.succ k)).val = (bounded k).val + 1 :=
+  congrArg (fun (value : Fin (Nat.succ k + 1)) => value.val)
+    (bounded.eq_def (Nat.succ k))
+
 run_cmd do
   for name in #[``WellFounded.Nat.fix, ``WellFounded.Nat.fix_eq,
       ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease,
-      ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly] do
+      ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly,
+      ``reverseList, ``digest, ``iterate, ``dependentState, ``bounded, ``bounded_step] do
     let axioms ← Lean.collectAxioms name
     unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
       throwError "WF oracle uses an unapproved assumption: {name}: {axioms}"
@@ -115,6 +164,29 @@ private def parameterSource : String :=
   "termination_by n + step\n" ++
   "decreasing_by by { exact Nat.add_lt_add_right(Nat.lt_succ_of_le(Nat.sub_le(k, 1)), step) }\n"
 
+private def typedSource : String :=
+  "universe u v\n" ++
+  "function m3wfreverse(A: Type u, acc: List A, xs: List A): List A := match xs with { | .nil => acc | .cons head tail => m3wfreverse(A, List.cons(head, acc), tail) }\n" ++
+  "termination_by List.length(xs)\n" ++
+  "decreasing_by by { exact Nat.lt_succ_self(List.length(tail)) }\n" ++
+  "function m3wfdigest(xs: List Nat): Nat := match xs with { | .nil => 0 | .cons head tail => head + 10 * m3wfdigest(tail) }\n" ++
+  "function m3wfiterate(step: Nat -> Nat, n: Nat): Nat -> Nat := fun (seed: Nat) => match n with { | 0 => step(seed) | k + 1 => m3wfiterate(step, k - 1)(step(seed)) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
+  "theorem m3wfiterateStep(step: Nat -> Nat, k: Nat): m3wfiterate(step, Nat.succ(k)) = (fun (seed: Nat) => m3wfiterate(step, k - 1)(step(seed))) := by { exact m3wfiterate.eq_def(step, Nat.succ(k)) }\n" ++
+  "function m3wfdependent(family: Nat -> Type u, p: Prop, h: p, n: Nat, acc: Fin(n + 1)): Nat := match n with { | 0 => Fin.val(acc) | k + 1 => Fin.val(acc) + m3wfdependent(family, p, h, k - 1, Fin.mk(k - 1, Nat.lt_succ_self(k - 1))) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
+  "function m3wfbounded(n: Nat): Fin(n + 1) := match n with {\n" ++
+  "  | 0 => Fin.mk(0, Nat.zero_lt_succ(0))\n" ++
+  "  | k + 1 => {\n" ++
+  "    let child: Fin(k + 1) := m3wfbounded(k)\n" ++
+  "    Fin.mk(Fin.val(child) + 1, Nat.succ_lt_succ(Fin.isLt(child)))\n" ++
+  "  }\n" ++
+  "}\ntermination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_self(k) }\n" ++
+  "theorem m3wfboundedStep(k: Nat): Fin.val(m3wfbounded(Nat.succ(k))) = Fin.val(m3wfbounded(k)) + 1 := by { exact congrArg((fun (value: Fin(Nat.succ(k) + 1)) => Fin.val(value)), m3wfbounded.eq_def(Nat.succ(k))) }\n"
+
 private def source : String :=
   skipSource ++
   "theorem m3wfskipStep(k: Nat): m3wfskip(Nat.succ(k)) = m3wfskip(k - 1) + 1 := by { exact m3wfskip.eq_def(Nat.succ(k)) }\n" ++
@@ -128,7 +200,7 @@ private def source : String :=
   "decreasing_by by { exact Nat.succ_le_succ(Nat.succ_le_succ(Nat.sub_le(k, 1))) }\n" ++
   "function m3wfdefault(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3wfdefault(k) + 1 }\n" ++
   "termination_by n\n" ++
-  scopeSource ++ parameterSource ++
+  scopeSource ++ parameterSource ++ typedSource ++
   "function m3wfskipoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfskip(if (flag) { 17 } else { 10 }))\n" ++
   "function m3wfbranchesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfbranches(if (flag) { 9 } else { 6 }))\n" ++
   "function m3wfshiftoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfshift(if (flag) { 17 } else { 10 }))\n" ++
@@ -136,7 +208,17 @@ private def source : String :=
   "function m3wfaccoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfaccumulate(5, if (flag) { 17 } else { 10 }, 3))\n" ++
   "function m3wfoffsetoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfoffset(5, if (flag) { 17 } else { 10 }, 3))\n" ++
   "function m3wfstatesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfstates(3, if (flag) { 17 } else { 10 }, 5, 2))\n" ++
-  "function m3wffixedoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wffixed(if (flag) { 7 } else { 4 }, if (flag) { 17 } else { 10 }))\n"
+  "function m3wffixedoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wffixed(if (flag) { 7 } else { 4 }, if (flag) { 17 } else { 10 }))\n" ++
+  "function m3wflistoutput(flag: Bool): UInt64 := {\n" ++
+  "  let xs: List Nat := if (flag) { List.cons(2, List.cons(4, List.cons(7, List.nil))) } else { List.cons(1, List.cons(3, List.cons(8, List.nil))) }\n" ++
+  "  UInt64.ofNat(m3wfdigest(m3wfreverse(Nat, List.cons(9, List.nil), xs)))\n" ++
+  "}\n" ++
+  "function m3wffunctionoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfiterate((fun (value: Nat) => value + 3), if (flag) { 17 } else { 10 })(5))\n" ++
+  "function m3wfdependentstateoutput(flag: Bool): UInt64 := {\n" ++
+  "  let n: Nat := if (flag) { 17 } else { 10 }\n" ++
+  "  UInt64.ofNat(m3wfdependent((fun (index: Nat) => Nat), True, True.intro, n, Fin.mk(n, Nat.lt_succ_self(n))))\n" ++
+  "}\n" ++
+  "function m3wfdependentresultoutput(flag: Bool): UInt64 := UInt64.ofNat(Fin.val(m3wfbounded(if (flag) { 17 } else { 10 })))\n"
 
 -- Suffix ownership is checked before elaboration. Malformed selected syntax
 -- must fail here, while a well-formed strategy survives into its semantic owner.
@@ -238,13 +320,77 @@ private def checkSource : IO Unit := do
   | _ => throw (IO.userError "WF flat source lowering discarded its strategy")
   IO.println "PSCV0_M3_WF_SOURCE: PASS measure/proof/span and following-command ownership, selected heads, strategy refusals and both printers"
 
+-- Exercise a real function result already applied to a further typed entry
+-- argument. The validator must retain the actual two-lambda header and apply
+-- seed afterwards; reclassifying seed as recursive state changes this call.
+private def checkResultApplication (environment : PsEnvironment) : IO Unit := do
+  let name := psRootName "m3wfiterate"
+  let some declaration := psEnvironmentFind environment name
+    | throw (IO.userError "missing function-valued WF declaration")
+  let .definitionDecl _ _ declaredType declaredValue := declaration
+    | throw (IO.userError "function-valued WF declaration is not a definition")
+  let mut localContext := psLocalEmpty
+  let mut cursor := declaredType
+  let mut arguments : List PsExpr := []
+  let mut runtimeLocals : List (Nat × String) := []
+  let runtimeParameters := ["wfStep", "wfN", "wfSeed"]
+  for parameterName in runtimeParameters do
+    let parameter ← match psInferEnsureForall environment psMetaEmpty localContext cursor with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "function-valued WF entry lost a typed argument")
+    let pushed := psLocalPushBinding localContext parameter.name parameter.domain parameter.binder
+    localContext := pushed.context
+    arguments := arguments ++ [.fvar pushed.id]
+    runtimeLocals := (pushed.id, parameterName) :: runtimeLocals
+    cursor := psExprInstantiate1 parameter.body (.fvar pushed.id)
+  let base ← match psErasurePrepareDeclarationEntries environment [declaration]
+      (psErasureScopeEmpty [(name, "m3wfiterate")]) with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "failed to prepare actual WF entry metadata")
+  let current : PsErasureCurrentDefinition := {
+    name := "m3wfiterate"
+    typeArgumentsRev := []
+    runtimeParameters
+    coreName := some name
+    coreParametersRev := arguments.reverse }
+  let scope := { base with
+    localContext
+    runtimeLocals
+    currentDefinition := some current }
+  let entry ← match psErasureValidateRootEntry environment scope with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "typed WF result application was rejected")
+  let some opened := psErasureWellFoundedOpenValue (arguments.take 2) declaredValue
+    | throw (IO.userError "WF function result changed the raw declaration lambda prefix")
+  if entry.headerArguments.length != 2 || entry.applicationArguments.length != 1 ||
+      !psExprAlphaEq entry.value (psExprApplyMany opened (arguments.drop 2)) ||
+      !psExprAlphaEq entry.type cursor then
+    throw (IO.userError "WF result binder was promoted into the source header or beta/eta-assumed")
+  let swapped := { scope with
+    currentDefinition := some { current with runtimeParameters := runtimeParameters.reverse } }
+  match psErasureValidateRootEntry environment swapped with
+  | .ok _ => throw (IO.userError "WF accepted a stale runtime entry argument order")
+  | .error _ => pure ()
+
 -- Inspect the real typed construction separately from runtime observations.
 -- In particular an opaque P0 declaration, an axiom, or a self-referential
 -- definition cannot stand in for WellFounded.Nat.fix or its checked equation.
 private def checkConstruction : IO Unit := do
-  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource) with
+  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource) with
     | .ok value => pure value
     | .error error => throw (IO.userError error)
+  let some iterateCommand := parsed.commands.find? (fun command =>
+      match command with
+      | .declaration (.wellFoundedDefinition name ..) => name.segments == ["m3wfiterate"]
+      | _ => false)
+    | throw (IO.userError "missing source function-valued WF declaration")
+  let .declaration (.wellFoundedDefinition _ header _ (.lambda bodyBinders _ _) termination _) :=
+      iterateCommand
+    | throw (IO.userError "WF function result lost its body lambda")
+  let .reference measure := termination.measure
+    | throw (IO.userError "WF function result changed its source measure")
+  if header.length != 2 || bodyBinders.length != 1 || measure.segments != ["n"] then
+    throw (IO.userError "WF result lambda crossed the source header/measure boundary")
   let result ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
     | .ok value => pure value
     | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
@@ -273,7 +419,8 @@ private def checkConstruction : IO Unit := do
       throw (IO.userError "WF namespace/private proof or generated-equation ownership was lost")
   | _ => throw (IO.userError "WF private declaration batch changed shape")
   for (text, hasState) in [("m3wfaccumulate", true), ("m3wfoffset", true),
-      ("m3wfstates", true), ("m3wffixed", false)] do
+      ("m3wfstates", true), ("m3wffixed", false), ("m3wfreverse", true),
+      ("m3wfiterate", false), ("m3wfdependent", true), ("m3wfbounded", false)] do
     let name := psRootName text
     match psEnvironmentFind result.result.environment name with
     | some (.definitionDecl _ _ type value) =>
@@ -290,7 +437,24 @@ private def checkConstruction : IO Unit := do
           psNameAppendStr psEqName "trans"].all (fun constantName => psExprHasConst constantName value) then
         throw (IO.userError (text ++ " omitted the checked function-state equality transport"))
     | _ => throw (IO.userError (text ++ " has no checked equation"))
-  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real Nat.fix, resolved call proofs, public fix_eq equations with checked function-state transport, private scope, no recursive axiom or P0 marker"
+  let expectedEntries : List (String × List String × List PsErasedBinderKind × Nat × Nat) := [
+    ("m3wfreverse", ["u"], [.type, .runtime, .runtime], 2, 1),
+    ("m3wfiterate", [], [.runtime, .runtime], 2, 0),
+    ("m3wfdependent", ["u"], [.index, .proof, .proof, .runtime, .runtime], 4, 0),
+    ("m3wfbounded", [], [.runtime], 1, 0)]
+  for (text, expectedLevels, expectedKinds, runtimeArity, typeArity) in expectedEntries do
+    let name := psRootName text
+    let some (.definitionDecl _ levels type value) := psEnvironmentFind result.result.environment name
+      | throw (IO.userError ("missing typed WF declaration " ++ text))
+    let info ← match psErasureEntryInfoWithFuel result.result.environment 4096 psLocalEmpty type value with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError ("invalid typed WF entry " ++ text))
+    if levels.map psNameToString != expectedLevels || info.binders.length != expectedKinds.length ||
+        !(info.binders.zip expectedKinds).all (fun pair => psErasureEntryBinderKindEq pair.fst pair.snd) ||
+        info.runtimeArity != runtimeArity || info.typeArity != typeArity then
+      throw (IO.userError ("WF changed universe closure or typed entry roles for " ++ text))
+  checkResultApplication result.result.environment
+  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, no recursive axiom or P0 marker"
 
 private def refusals : List (String × String × String) := [
   ("same-size",
@@ -308,18 +472,27 @@ private def refusals : List (String × String × String) := [
   ("nonrecursive",
     "function bad(n: Nat): Nat := n\ntermination_by n\n",
     "PSCV0-WF-NOT-RECURSIVE"),
-  ("wrong-domain",
+  ("nondecreasing-Bool-domain",
     "function bad(n: Bool): Nat := bad(n)\ntermination_by 0\n",
-    "PSCV0-WF-DOMAIN"),
-  ("wrong-result",
+    "PSCV0-WF-DECREASE"),
+  ("nondecreasing-Bool-result",
     "function bad(n: Nat): Bool := bad(n)\ntermination_by n\n",
-    "PSCV0-WF-RESULT"),
+    "PSCV0-WF-DECREASE"),
   ("unchanged-parameters",
     "function bad(n: Nat, k: Nat): Nat := bad(n, k)\ntermination_by n\n",
     "PSCV0-WF-DECREASE"),
   ("two-changing-measure-dependencies",
     "function bad(n: Nat, acc: Nat): Nat := match n with { | 0 => acc | k + 1 => bad(k, acc + 1) }\ntermination_by n + acc\n",
     "PSCV0-WF-MEASURE-STATE"),
+  ("changing-major-domain",
+    "function bad(n: Nat, i: Fin(n + 1)): Nat := match n with { | 0 => 0 | k + 1 => bad(k, Fin.mk(0, Nat.zero_lt_succ(k))) }\ntermination_by i.val\n",
+    "PSCV0-WF-MAJOR-DOMAIN"),
+  ("incomplete-recursive-header",
+    "function bad(step: Nat, n: Nat): Nat := bad(n)\ntermination_by n\n",
+    "PSCV0-WF-ARITY"),
+  ("function-result-measure-scope",
+    "function bad(n: Nat): Nat -> Nat := fun (seed: Nat) => bad(n)(seed)\ntermination_by seed\n",
+    "unknown name seed"),
   ("body-lambda-is-not-a-header-parameter",
     "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by 0\n",
     "PSCV0-WF-TELESCOPE"),
@@ -342,7 +515,9 @@ def main (args : List String) : IO Unit := do
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
     exports := .selected ["m3wfskipoutput", "m3wfbranchesoutput",
       "m3wfshiftoutput", "m3wfdefaultoutput", "m3wfaccoutput",
-      "m3wfoffsetoutput", "m3wfstatesoutput", "m3wffixedoutput"] }
+      "m3wfoffsetoutput", "m3wfstatesoutput", "m3wffixedoutput",
+      "m3wflistoutput", "m3wffunctionoutput", "m3wfdependentstateoutput",
+      "m3wfdependentresultoutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -380,6 +555,12 @@ def main (args : List String) : IO Unit := do
       ("m3wfaccoutput", Lean.toJson (toString (M3WellFoundedOracle.accumulate 5 n 3))),
       ("m3wfoffsetoutput", Lean.toJson (toString (M3WellFoundedOracle.offset 5 n 3))),
       ("m3wfstatesoutput", Lean.toJson (toString (M3WellFoundedOracle.twoStates 3 n 5 2))),
-      ("m3wffixedoutput", Lean.toJson (toString (M3WellFoundedOracle.fixedOnly (if flag then 7 else 4) n)))]
+      ("m3wffixedoutput", Lean.toJson (toString (M3WellFoundedOracle.fixedOnly (if flag then 7 else 4) n))),
+      ("m3wflistoutput", Lean.toJson (toString (M3WellFoundedOracle.digest
+        (M3WellFoundedOracle.reverseList Nat [9] (if flag then [2, 4, 7] else [1, 3, 8]))))),
+      ("m3wffunctionoutput", Lean.toJson (toString (M3WellFoundedOracle.iterate (· + 3) n 5))),
+      ("m3wfdependentstateoutput", Lean.toJson (toString (M3WellFoundedOracle.dependentState
+        (fun _ => Nat) True True.intro n ⟨n, Nat.lt_succ_self n⟩))),
+      ("m3wfdependentresultoutput", Lean.toJson (toString (M3WellFoundedOracle.bounded n).val))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_WELL_FOUNDED: PASS checked decreases and ordered proof goals, nonprefix fixed/evolving arguments, typed beta-fixed measure, multiple states, successor equations, semantic refusals and five-target emission; runtime parity follows"
+  IO.println "PSCV0_M3_WELL_FOUNDED: PASS checked ordered decreases, typed fixed/evolving arguments, polymorphic domains, function results, dependent Fin state/result, all-kind entry slots, public equations, semantic refusals and five-target emission; runtime parity follows"

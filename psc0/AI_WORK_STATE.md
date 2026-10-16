@@ -1,84 +1,89 @@
-## Deriving fixture repair and exact-SHA workflow triggering
+## M3+B current checkpoint — accepted group deriving; typed well-founded candidate
 
-Compiler `0d17a6ca9dc5ceb5ceed4c40ffcc3ffabfd1be19` compiled every changed
-production owner, but focused `38966362759` stopped while compiling the new
-fixture. It needed the explicit PsKernelLean.Admission import, source spans
-on six native handler-name records, and the actual PsReduceAppView record
-for its real two-child recursor probe. The repair changes none of the
-fixture's assertions, source workloads, exports or expected values.
+Latest fully accepted compiler/test: `01d762eb02eab1d2f795e5338cb3586cd1d1ace0`.
+All five exact-SHA gates succeeded: native `38967030820` (33/33 reported
+steps), F1 `38967031191`, F2 `38967030836`, F3/F4 `38967030843`,
+focused `38967030789` (15/15). Full native source/Standard, modules,
+all runtime lanes, repeated component calls and the original measurement
+step passed. Receipt: `docs/PSCV0_M3_GROUP_DERIVING_QUALIFICATION_2026-10-17.md`.
 
-All five primary workflows now also watch `psc0/test/Pscv0M3*.lean` and
-`psc0/scripts/pscv0-m3-*.mjs`. This closes the trigger gap that previously
-left fixture-only repairs with focused evidence on a different SHA from the
-other gates. The jobs, checks, workloads, timeouts and dependency pins are
-unchanged. The repaired compiler/test commit must obtain all five results;
-the 0d17 candidate is not accepted.
+This accepts direct indexed Hashable/Repr and nonindexed group BEq through
+the complete checked motive/minor cursor, actual child-family/index
+hypotheses, ordinary checked captured instances/workers, and the shared
+strictly ordered recursive-field predicate. It also retains all previously
+qualified group elimination, measured-Nat recursion and ordinary P0 scope.
+Earlier candidate and mixed-SHA sections below are historical.
 
-Latest accepted compiler remains `e03a99d1f45f2127372ee556ffe866d304d103e3`,
-with the five-gate receipt below. M3+B remains OPEN at approximately 55%
-(45–65% engineering uncertainty); unfinished typed/mutual/nested work is
-excluded from that accepted estimate.
+M3+B remains OPEN at approximately 60% (50–70% engineering uncertainty).
+The weighted accepted contribution is approximately 58 points: data 17/30,
+source strategies 10/15, total recursion 10/20, P0 13/15, P1 1/10,
+integration 7/10. This is an engineering estimate, not a conformance rate.
+All six exits remain in the denominator. Unqualified code adds no points.
 
-## M3+B current checkpoint — accepted recursion/P0 baseline; group deriving candidate
+### Typed well-founded recursion candidate
 
-Latest fully accepted compiler/test: `e03a99d1f45f2127372ee556ffe866d304d103e3`.
-All five exact-SHA gates succeeded: native `38964433671` (33/33 reported
-steps), F1 `38964433756`, F2 `38964433572`, F3/F4 `38964433857`,
-focused `38964433806` (15/15). Native source/Standard, every runtime lane,
-repeated Wasmtime calls and the unchanged measurement step passed.
+The well-founded owner now uses the full explicit typed source header. One
+changing measured parameter may have any checked domain depending only on
+fixed captures; the Nat-valued measure may depend on those captures. All
+remaining evolving arguments form the actual dependent state telescope, and
+the result may be any checked type supported by ordinary erasure.
 
-Receipt: `docs/PSCV0_M3_GROUP_RECURSION_P0_QUALIFICATION_2026-10-17.md`.
-This accepts the retained direct group formation/admission/reduction,
-checked captured companion execution, dependent source group cases,
-multi-Nat measured state with exact fix_eq equations, and ordinary singleton
-and mutual P0 body execution. Earlier mixed-SHA results are historical;
-the old a7c6 baseline no longer describes current acceptance.
+Typed call analysis closes dependencies before partitioning fixed, major and
+state arguments. The real Nat.fix motive returns that state function.
+Recursive arguments are checked and bound once in original order. The
+public f.eq_def uses actual fix_eq and inferred-level funext/congrArg/Eq.trans
+where state extensionality is required. No provisional global, recursive
+proof assumption, eta conversion rule or runtime ABI is added.
 
-The current implementation candidate extends the shared deriving context to
-the complete checked group. Hashable and Repr consume actual per-family
-motives and indices; nonindexed BEq uses left induction and right cases.
-Every child IH is checked against its actual family's closed motive and
-indices. All generated group instances are ordinary definitions built
-against the original input environment, with no assumed sibling dictionary.
+Ps.Erasure.Entry owns validation of the actual definition, universe
+arguments and current entry telescope. It recomputes binder roles, checks
+local/order identities, and separates raw source-header arguments from
+applications of a returned function. Ps.Erasure.WellFounded consumes that
+validated entry and the real fixed-point term, then delegates typed
+recursive calls to ordinary erasure. Proof Unit slots, erased indices,
+polymorphic types and runtime parameters retain their existing conventions.
 
-One Core predicate requires retained recursive-field positions to be
-strictly increasing and bounded. Deriving, source recursor elaboration,
-portable iota reduction, runtime recursor inspection and canonical encoding
-consume this shared rule, preventing equal-typed child IHs from being
-silently reordered. Canonical encoding refuses invalid metadata before its
-constructor-only wire representation can discard those positions.
+The original eight well-founded outputs remain unchanged. Four new native
+oracles cover polymorphic List reversal with an ordered digest, a fixed
+function and returned closure, evolving dependent Fin state with erased
+family/proof captures, and a dependent Fin result. Fresh logical equations,
+universe closure, all-kind entry roles, a returned-function application and
+stale runtime argument-order refusal are checked in the same fixture.
 
-The new independent native fixture emits six outputs for group Hashable,
-Repr, BEq, a nonreflexive field dictionary, and indexed Hashable/Repr.
-It checks fresh official-kernel instances/workers, generic hash equations,
-closed equality equations, exact native pretty text at two precedences,
-ten two-worker groups with the real A/a/dictionary captures, and metadata
-reversal/omission refusals. mixHash is opaque in native Lean; numeric hash
-parity comes from executed native oracles, not fabricated rfl witnesses.
-The same fixture runs JS, strict compiled TS, locked Rust, V8 GC and Wasmtime.
+Selected limits remain explicit: no several-changing-input measure pack,
+no major domain depending on changing state, and no extension of ordinary
+erasure's higher-rank/type-changing-state limits. Body lambdas do not enter
+the source header or termination-measure scope.
 
-Indexed Hashable/Repr become positive selected cases. Only their two old
-indexed-refusal rows change to dependent ordinary Fin fields that still
-require a precise independent-runtime-field refusal; their new positive
-behavior is checked separately. Existing BEq/DecidableEq boundaries,
-original workloads, expected scalar results, iteration counts, budgets and
-dependency pins remain intact.
+### Qualification and continuation
 
-This deriving compiler/test candidate requires its own five gates before
-acceptance. Broader typed measured recursion and compatible total mutual
-structural construction are separate active implementations. Nested
-specialized recursor motives/traversal and selected local where closure are
-remaining shared dependencies. Default source mutual/nested induction stays
-refused, matching pinned Lean without an explicit selected eliminator.
+The current recursion implementation is a candidate. Require native, F1,
+F2, F3/F4 and focused SUCCESS on one exact compiler/test SHA before accepting
+it. M3 fixture/runner edits now trigger all five workflows; never combine
+passes from different SHAs. Inspect full focused/native logs and retained
+artifact metadata, and correct genuine failures without weakening checks.
 
-M3+B remains OPEN. Reassessed from accepted e03 evidence: approximately 55%
-complete (45–65% engineering uncertainty). Weights remain data 30%, source
-strategies 15%, total recursion 20%, P0 15%, P1 10%, integration 10%; all six
-exits remain in the denominator. P1 has no accepted construction because
-pinned Lean.Order.fix/CCPO.csup and its equations require Classical.choice.
-Approved assumptions remain only propext and Quot.sound. Continue the
-unaffected implementation; PR #109 stays draft/open/unmerged on its original
-base.
+Continue the shared nested specialization plan and flat local where typed
+capture/SCC owner. Compatible disconnected mutual components, broader
+structural/WF coverage and the final selected integration matrix remain
+open. Where needs actual per-member capture closure and recursive component
+dispatch; parser acceptance alone is insufficient. Default mutual/nested
+source induction retains pinned Lean's refusal without a selected
+eliminator. Source mutual remains def/function-only.
+
+P1 remains unavailable because pinned Lean.Order.fix/CCPO.csup and their
+equations require Classical.choice. Approved assumptions remain only
+propext and Quot.sound. Continue unaffected work without expanding that
+policy or inventing a fixed-point equation.
+
+Native portable .lean; official Lean 4.35.0 at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. The only forward .ps reference is
+PSCV0_LANGUAGE_REFERENCE_v7.2.md, blob 694115223777599ba28ee175e14bb642b7b6aa4b.
+Original workloads, counts, checksums, budgets, pins and benchmark semantics
+remain intact. Use connected GitHub/cloud CI, fresh expected-HEAD non-force
+updates, and preserve concurrent history. PR #109 stays draft/open/unmerged
+on psc0/pscv0-v7-m1-parser-ownership-v1; no new kernel, self-hosting, source
+migration, LLVM or later-milestone promotion.
 
 The following sections retain earlier checkpoint history.
 

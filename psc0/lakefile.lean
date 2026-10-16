@@ -151,6 +151,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
+    `Ps.Erasure.Entry,
     `Ps.Erasure.WellFounded,
     `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Platform, `Ps.Erasure.Utf8, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
     `Ps.Erasure.Expr,

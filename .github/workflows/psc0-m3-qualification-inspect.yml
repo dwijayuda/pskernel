@@ -27,9 +27,9 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = 7998bdc7b654dccf46ddfc0b09d16cf8143b33d0
           mkdir -p "$RUNNER_TEMP/m3-source-inspection"
+          git grep -n -E 'Chain|recursive deriving requires|expect_error' -- psc0/test psc0/scripts .github/workflows | tee "$RUNNER_TEMP/m3-source-inspection/owners.txt" || test "$?" = 1
           gh api repos/dwijayuda/pskernel/actions/runs/38886292555 --jq '{id,head_sha,status,conclusion,path}' | tee "$RUNNER_TEMP/m3-source-inspection/run.json"
-          gh api repos/dwijayuda/pskernel/actions/jobs/116924732052/logs > "$RUNNER_TEMP/m3-source-inspection/native.log"
-          git grep -n -E 'Chain|recursive deriving requires|expect_error' -- psc0/test psc0/scripts .github/workflows > "$RUNNER_TEMP/m3-source-inspection/owners.txt" || test "$?" = 1
+          gh api --allow-escape-sequences repos/dwijayuda/pskernel/actions/jobs/116924732052/logs > "$RUNNER_TEMP/m3-source-inspection/native.log"
           python3 - <<'PY'
           import os, pathlib
           root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'm3-source-inspection'
@@ -38,8 +38,6 @@ jobs:
           for i, line in enumerate(lines):
               if any(key in line for key in ['Traceback', 'AssertionError', 'uncaught exception', 'unexpectedly accepted', 'pscv0-native-source.py', 'PSCV0-DERIVING', 'case 84']):
                   print('\n'.join(lines[max(0,i-3):min(len(lines),i+8)]))
-          print('=== TRACKED TEST OWNERS ===')
-          print((root/'owners.txt').read_text())
           print('=== EXACT SOURCE-GATE COMMANDS ===')
           workflow = pathlib.Path('.github/workflows/psc0-pscv0-native-v7.yml').read_text().splitlines()
           for i, line in enumerate(workflow):

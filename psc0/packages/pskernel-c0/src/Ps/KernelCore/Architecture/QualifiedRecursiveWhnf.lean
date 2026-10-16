@@ -56,7 +56,8 @@ def psKernelC0RecursiveBetaZetaCoreWithFuel :
               psKernelC0RecursiveBetaZetaCoreWithFuel
                 remaining entered state body
           | .letE _ _ value body _ =>
-              if psKernelC0HasLetPrefix 12 expr then none
+              if !psKernelSemanticCacheEligible expr then none
+              else if psKernelC0HasLetPrefix 12 expr then none
               else
                 match psKernelExprMapGet state.whnfCore expr with
                 | some _ => none
@@ -69,7 +70,8 @@ def psKernelC0RecursiveBetaZetaCoreWithFuel :
                           psKernelC0RecursiveWhnfCoreFinish expr
                             reduced nextState)
           | .app _ _ =>
-              match psKernelExprMapGet state.whnfCore expr with
+              if !psKernelSemanticCacheEligible expr then none
+              else match psKernelExprMapGet state.whnfCore expr with
               | some _ => none
               | none =>
                   let fn0 := psKernelExprGetAppFn expr
@@ -190,20 +192,25 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                 (ih entered state body result hchild)
           | letE name ty value body nondep =>
               let term : PsKernelExpr := .letE name ty value body nondep
+              have eligible : psKernelSemanticCacheEligible term = true := by
+                by_cases he : psKernelSemanticCacheEligible term = true
+                · exact he
+                · simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
+                    depth, he, term] at h
               by_cases hlong : psKernelC0HasLetPrefix 12 term = true
               · simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                  depth, hlong, term] at h
+                  eligible, depth, hlong, term] at h
               · cases cache : psKernelExprMapGet state.whnfCore term with
                 | some old =>
                     simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                      depth, hlong, cache, term] at h
+                      eligible, depth, hlong, cache, term] at h
                 | none =>
                     let opened := psKernelExprInstantiate1 body value
                     cases childCheck : psKernelC0RecursiveBetaZetaCoreWithFuel
                         remaining entered state opened with
                     | none =>
                         simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                          depth, hlong, cache, opened, childCheck, term] at h
+                          eligible, depth, hlong, cache, opened, childCheck, term] at h
                     | some childResult =>
                         let nextState :=
                           psKernelC0RecursiveWhnfCoreFinish
@@ -212,30 +219,35 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                           have hx : some (childResult.fst, nextState) =
                               some result := by
                             simpa [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                              depth, hlong, cache, opened, childCheck,
+                              eligible, depth, hlong, cache, opened, childCheck,
                               nextState, term] using h
                           exact (Option.some.inj hx).symm
                         have sourceChild :=
                           ih entered state opened childResult childCheck
                         rw [hr]
                         rw [psKernelWhnfCoreWithFuelRanges]
-                        simp [depth, hlong, cache, sourceChild,
+                        simp [eligible, depth, hlong, cache, sourceChild,
                           psKernelWhnfCoreFinishWithKnownHash,
                           psKernelExprMapInsert, term, opened,
                           psKernelC0RecursiveWhnfCoreFinish, nextState]
           | app fn arg =>
               let term : PsKernelExpr := .app fn arg
+              have eligible : psKernelSemanticCacheEligible term = true := by
+                by_cases he : psKernelSemanticCacheEligible term = true
+                · exact he
+                · simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
+                    depth, he, term] at h
               cases cache : psKernelExprMapGet state.whnfCore term with
               | some old =>
                   simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                    depth, cache, term] at h
+                    eligible, depth, cache, term] at h
               | none =>
                   let fn0 := psKernelExprGetAppFn term
                   cases fnCheck : psKernelC0RecursiveBetaZetaCoreWithFuel
                       remaining entered state fn0 with
                   | none =>
                       simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                        depth, cache, fn0, fnCheck, term] at h
+                        eligible, depth, cache, fn0, fnCheck, term] at h
                   | some fnResult =>
                       cases fnResult with
                       | mk fnValue fnState =>
@@ -247,7 +259,7 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                                   psKernelC0BetaSpinePlan fnHead args with
                               | none =>
                                   simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                                    depth, cache, fn0, fnCheck,
+                                    eligible, depth, cache, fn0, fnCheck,
                                     plan, fnHead, args, term] at h
                               | some selection =>
                                   let opened := psKernelC0BetaSpineApply selection
@@ -256,7 +268,7 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                                         remaining entered fnState opened with
                                   | none =>
                                       simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                                        depth, cache, fn0, fnCheck,
+                                        eligible, depth, cache, fn0, fnCheck,
                                         plan, opened, childCheck,
                                         fnHead, args, term] at h
                                   | some childResult =>
@@ -269,7 +281,7 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                                             (childResult.fst, nextState) =
                                               some result := by
                                           simpa [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                                            depth, cache, fn0, fnCheck,
+                                            eligible, depth, cache, fn0, fnCheck,
                                             plan, opened, childCheck,
                                             fnHead, args, term, nextState] using h
                                         exact (Option.some.inj hx).symm
@@ -281,7 +293,7 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                                           childResult childCheck
                                       rw [hr]
                                       rw [psKernelWhnfCoreWithFuelRanges]
-                                      simp [depth, cache, sourceFn, plan,
+                                      simp [eligible, depth, cache, sourceFn, plan,
                                         sourceBody, fn0, fnHead, args,
                                         opened, term,
                                         psKernelWhnfCoreFinish,
@@ -290,7 +302,7 @@ theorem psKernelC0RecursiveBetaZetaCore_source
                                         psKernelC0RecursiveWhnfCoreFinish,
                                         nextState]
                           | bvar _ => simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
-                              depth, cache, fn0, fnCheck, term] at h
+                              eligible, depth, cache, fn0, fnCheck, term] at h
                           | fvar _ => simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
                               depth, cache, fn0, fnCheck, term] at h
                           | mvar _ => simp [psKernelC0RecursiveBetaZetaCoreWithFuel,
@@ -330,7 +342,8 @@ def psKernelC0RecursiveBetaZetaWhnfWithFuel
   | Nat.succ remaining =>
       match expr with
       | .app _ _ | .letE _ _ _ _ _ =>
-          match psKernelExprMapGet state.whnf expr with
+          if !psKernelSemanticCacheEligible expr then none
+          else match psKernelExprMapGet state.whnf expr with
           | some _ => none
           | none =>
               match psKernelC0RecursiveBetaZetaCoreWithFuel
@@ -366,16 +379,21 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
       cases expr with
       | app fn arg =>
           let term : PsKernelExpr := .app fn arg
+          have eligible : psKernelSemanticCacheEligible term = true := by
+            by_cases he : psKernelSemanticCacheEligible term = true
+            · exact he
+            · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
+                he, term] at h
           cases cache : psKernelExprMapGet state.whnf term with
           | some old =>
               simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                cache, term] at h
+                eligible, cache, term] at h
           | none =>
               cases coreCheck : psKernelC0RecursiveBetaZetaCoreWithFuel
                   remaining context state term with
               | none =>
                   simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                    cache, coreCheck, term] at h
+                    eligible, cache, coreCheck, term] at h
               | some coreResult =>
                   cases coreResult with
                   | mk value coreState =>
@@ -389,7 +407,7 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                                 (psKernelExprMapInsert coreState.whnf term value)) =
                                   some result := by
                             simpa [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                              cache, coreCheck, stable, term] using h
+                              eligible, cache, coreCheck, stable, term] using h
                           exact (Option.some.inj hx).symm
                         have sourceCore :=
                           psKernelC0RecursiveBetaZetaCore_source remaining
@@ -404,7 +422,9 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                             context coreState term value stable
                         rw [hr]
                         change
-                          (match psKernelExprMapGet state.whnf term with
+                          (match (if psKernelSemanticCacheEligible term then
+                                psKernelExprMapGet state.whnf term
+                              else Option.none) with
                           | some cached => Except.ok (cached, state)
                           | none =>
                               match psKernelWhnfCoreWithFuel remaining
@@ -424,23 +444,28 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                             Except.ok (value,
                               psKernelCheckerStateWithWhnf coreState
                                 (psKernelExprMapInsert coreState.whnf term value))
-                        simp only [cache, psKernelWhnfCoreWithFuel,
+                        simp only [eligible, ite_true, cache, psKernelWhnfCoreWithFuel,
                           sourceCore, sourcePost]
                         rfl
                       · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                          cache, coreCheck, stable, term] at h
+                          eligible, cache, coreCheck, stable, term] at h
       | letE name ty value body nondep =>
           let term : PsKernelExpr := .letE name ty value body nondep
+          have eligible : psKernelSemanticCacheEligible term = true := by
+            by_cases he : psKernelSemanticCacheEligible term = true
+            · exact he
+            · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
+                he, term] at h
           cases cache : psKernelExprMapGet state.whnf term with
           | some old =>
               simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                cache, term] at h
+                eligible, cache, term] at h
           | none =>
               cases coreCheck : psKernelC0RecursiveBetaZetaCoreWithFuel
                   remaining context state term with
               | none =>
                   simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                    cache, coreCheck, term] at h
+                    eligible, cache, coreCheck, term] at h
               | some coreResult =>
                   cases coreResult with
                   | mk reduced coreState =>
@@ -454,7 +479,7 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                                 (psKernelExprMapInsert coreState.whnf term reduced)) =
                                   some result := by
                             simpa [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                              cache, coreCheck, stable, term] using h
+                              eligible, cache, coreCheck, stable, term] using h
                           exact (Option.some.inj hx).symm
                         have sourceCore :=
                           psKernelC0RecursiveBetaZetaCore_source remaining
@@ -469,7 +494,9 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                             context coreState term reduced stable
                         rw [hr]
                         change
-                          (match psKernelExprMapGet state.whnf term with
+                          (match (if psKernelSemanticCacheEligible term then
+                                psKernelExprMapGet state.whnf term
+                              else Option.none) with
                           | some cached => Except.ok (cached, state)
                           | none =>
                               match psKernelWhnfCoreWithFuel remaining
@@ -489,11 +516,11 @@ theorem psKernelC0RecursiveBetaZetaWhnf_source
                             Except.ok (reduced,
                               psKernelCheckerStateWithWhnf coreState
                                 (psKernelExprMapInsert coreState.whnf term reduced))
-                        simp only [cache, psKernelWhnfCoreWithFuel,
+                        simp only [eligible, ite_true, cache, psKernelWhnfCoreWithFuel,
                           sourceCore, sourcePost]
                         rfl
                       · simp [psKernelC0RecursiveBetaZetaWhnfWithFuel,
-                          cache, coreCheck, stable, term] at h
+                          eligible, cache, coreCheck, stable, term] at h
       | bvar _ => simp [psKernelC0RecursiveBetaZetaWhnfWithFuel] at h
       | fvar _ => simp [psKernelC0RecursiveBetaZetaWhnfWithFuel] at h
       | mvar _ => simp [psKernelC0RecursiveBetaZetaWhnfWithFuel] at h

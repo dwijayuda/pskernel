@@ -477,3 +477,50 @@ theorem psKernelC0VerifiedIndexedPairContains_source
   | none => rfl
   | some index =>
       simp only [psKernelC0VerifiedIndexedPairHash_source]
+
+
+/-- Source-exact DefEq success/failure pair insertion from two SAME-store
+certified indexed hashes. The hash chooses the radix bucket only; source
+pair syntax remains the mandatory collision and duplicate comparison.
+For an unindexed/small set use the original source insertion verbatim. -/
+def psKernelC0VerifiedIndexedPairInsert
+    {owner : PsKernelC0CertifiedStore}
+    {leftId rightId : Nat}
+    (set : PsKernelExprPairSet)
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) :
+    PsKernelExprPairSet :=
+  match set.index with
+  | none =>
+      psKernelExprPairSetInsert set left.expr right.expr
+  | some index =>
+      let hash := psKernelC0VerifiedIndexedPairHash left right
+      let bucket := psKernelExprPairSetIndexBucket
+        psKernelC0IndexDepth index hash
+      if psKernelExprPairSetContainsIn left.expr right.expr bucket then
+        set
+      else
+        {
+          small := []
+          index := some (psKernelExprPairSetIndexSet
+            psKernelC0IndexDepth index hash
+            ((left.expr, right.expr) :: bucket))
+        }
+
+/-- Complete original DefEq cache-insertion equivalence for EVERY source
+set, including unpromoted arrays, promoted radix buckets, duplicates and
+hash collisions. A hash match never establishes proof equality or DefEq. -/
+theorem psKernelC0VerifiedIndexedPairInsert_source
+    {owner : PsKernelC0CertifiedStore}
+    {leftId rightId : Nat}
+    (set : PsKernelExprPairSet)
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) :
+    psKernelC0VerifiedIndexedPairInsert set left right =
+      psKernelExprPairSetInsert set left.expr right.expr := by
+  unfold psKernelC0VerifiedIndexedPairInsert
+    psKernelExprPairSetInsert
+  cases h : set.index with
+  | none => rfl
+  | some index =>
+      simp only [psKernelC0VerifiedIndexedPairHash_source]

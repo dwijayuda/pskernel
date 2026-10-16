@@ -131,3 +131,27 @@ existing JS/TS/Rust/GC/Wasmtime lanes, and a checked source equation.
 It preserves the conservative once-only computed-major prefix path as
 a distinct supported case and leaves unsupported dependent/nested/mutual
 recursion unchanged. The full five-gate exact-commit acceptance is pending.
+
+
+## Latest exact CI checkpoint for fixed/evolving-prefix recursion
+Compiler/test `8f8aa47fc3b742488bd1ce4ad15024a63c0b6d4f`: F1 **SUCCESS** run 38928344465,
+F2 **SUCCESS** run 38928344501, F3/F4/platform **SUCCESS**
+run 38928344471, focused **SUCCESS** run 38928344644
+(JS, strict TS, Rust, V8 GC, Wasmtime; artifact 12057652697;
+SHA256 6810c1bb993307f038cf0ad950e1eb77850a7b1df0d235efdea5d841f3c80c3f).
+**Native run 38928344482 was still in progress in Wasmtime embedding when
+this snapshot was written**. Recheck its conclusion; do not claim all five
+green before it finishes. The candidate is not yet formally accepted.
+
+An independently reviewed next native `Nat.sub a 0` reduction candidate
+is prepared as **unattached blobs only**, not source branch changes:
+`psc0/packages/meta/src/Ps/Meta/NatReduce.lean` = ce55c61324d6993f50c83c0e58e91108db9fac21,
+`psc0/test/Pscv0M3RecursiveDeriving.lean` = 0caefd5276d56f461fa6e39facc4a0477e93947b,
+`psc0/scripts/pscv0-m3-recursive-deriving.mjs` = 48e0b456c199dce2c0f6099c2800227a33c83188.
+The code is based on pinned Lean 4.35.0 `Init/Prelude.lean`,
+whose `Nat.sub a 0` equation is definitional. Do not advance this
+unqualified candidate to the main development branch until exact native
+qualification of the current recursion compiler has resolved. When
+admitting it, build a new tree on fresh HEAD using these blobs, validate
+a native oracle and negative `Nat.sub(k,1)` strict-child refusal, and
+rerun all five gates. No runtime speedup is claimed.

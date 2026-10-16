@@ -35,8 +35,17 @@ def psKernelC0FastAppDecEq :
                 .isFalse (by intro heq; cases heq; exact harg rfl)
             else
               .isFalse (by intro heq; cases heq; exact hfn rfl)
-        | _ =>
-            .isFalse (by intro heq; cases heq))
+        | .bvar _ => .isFalse (by intro h; cases h)
+        | .fvar _ => .isFalse (by intro h; cases h)
+        | .mvar _ => .isFalse (by intro h; cases h)
+        | .sort _ => .isFalse (by intro h; cases h)
+        | .const _ _ => .isFalse (by intro h; cases h)
+        | .lam _ _ _ _ => .isFalse (by intro h; cases h)
+        | .forallE _ _ _ _ => .isFalse (by intro h; cases h)
+        | .letE _ _ _ _ _ => .isFalse (by intro h; cases h)
+        | .lit _ => .isFalse (by intro h; cases h)
+        | .mdata _ _ => .isFalse (by intro h; cases h)
+        | .proj _ _ _ => .isFalse (by intro h; cases h))
   | left, right =>
       withPtrEqDecEq left right (fun _ => inferInstance)
 

@@ -122,4 +122,49 @@ def main : IO Unit := do
       throw (IO.userError "qualified indexed: zero fuel accepted")
   | .error _ => pure ()
 
+  -- Nontrivial independently checked dependent lambda/application:
+  -- verified memo/independent/source selection must preserve both type
+  -- and the entire checker state under repeated sequential checking.
+  let binder : PsKernelName := .str .anonymous "qualified-indexed-app"
+  let sortOne : PsKernelExpr := .sort (.succ .zero)
+  let identity : PsKernelExpr := .lam binder sortOne (.bvar 0) .default
+  let application : PsKernelExpr := .app identity good
+  if (psKernelC0RecursiveCheckedWithFuel 4096
+      indexed.checker.context indexed.checker.state application).isNone then
+    throw (IO.userError "qualified indexed: independent dependent app declined")
+  let some withApp := psKernelC0IndexedSessionRetain indexed application
+    | throw (IO.userError "qualified indexed: cannot retain dependent app")
+  let some appOwned := psKernelC0CertifyStoreOwned withApp.store
+    | throw (IO.userError "qualified indexed: dependent app store declined")
+  let appOwner := appOwned.val
+  let some (_, appId) := psKernelC0EncodeExpr withApp.store application
+    | throw (IO.userError "qualified indexed: missing dependent app ID")
+  let some appHash := psKernelC0VerifiedIndexedHashSourceOracle
+      appOwner appId
+    | throw (IO.userError "qualified indexed: missing dependent app hash")
+  let appRequest : PsKernelC0IndexedCheckedBatchRequest appOwner :=
+    { id := appId, hash := appHash }
+  let appTables : (state : PsKernelCheckerState) →
+      PsKernelC0IndexedCheckedReceiptTable
+        appOwner 4096 withApp.checker.context state :=
+    fun state => psKernelC0IndexedCheckedReceiptTableEmpty
+      appOwner 4096 withApp.checker.context state
+  let appRequests := [appRequest, appRequest]
+  let _appProof :
+      psKernelC0IndexedSessionCheckMemoQualifiedBatch
+          4096 withApp appOwner appOwned.property appRequests appTables =
+        psKernelC0IndexedSessionCheckSourceBatch
+          4096 withApp appOwner appRequests :=
+    psKernelC0IndexedSessionCheckMemoQualifiedBatch_source
+      4096 withApp appOwner appOwned.property appRequests appTables
+  let (appTypes, checkedAppSession) ← match
+      psKernelC0IndexedSessionCheckMemoQualifiedBatch
+        4096 withApp appOwner appOwned.property appRequests appTables with
+    | .error e => throw (IO.userError
+        ("qualified indexed: dependent app rejected: " ++ e))
+    | .ok result => pure result
+  if appTypes.length != 2 ||
+      checkedAppSession.store.nodes.size != withApp.store.nodes.size then
+    throw (IO.userError "qualified indexed: dependent app state changed")
+
   IO.println "C0_INDEXED_MEMO_QUALIFIED source_exact=Lean source_state=Lean independent_recursive=pass checked_memo_hit=pass invalid_tail=declined zero_fuel=declined"

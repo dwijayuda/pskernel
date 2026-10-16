@@ -498,3 +498,27 @@ Selected nested *shallow* checking is not nested recursive
 traversal, deriving, indexed/mutual group support, P0/P1 or M3 exit.
 Full native/F1/F2/F3-F4/focused same-commit gates are required
 before acceptance. Preserve older qualified receipts and PR #109.
+
+## Candidate: actual recursively calling partial runtime body — focused qualification pending
+
+Original selected P0 ordinary host candidate `e6a14c86b11ee50570554ae75d371628d3759e0b`
+passed focused/native Lean oracle/JS/strict TS/Rust/GC/Wasmtime
+`38948302365` and F1/F2/F3-F4 on the exact code SHA. Full
+native `38948302333` is still in progress; **not yet all-five accepted**.
+This *test-only* descendant keeps the same compiler implementation
+and adds pinned Lean `partialCount(n)` with a real recursive call on
+a strict Nat predecessor, and source `partial function
+m3partialCount(n)` plus two `Bool → UInt64` output observations.
+Unlike the earlier nonrecursive partial body, this directly exercises
+public source self-calls being bound to the actual executable body,
+not the independent logical inhabitant. The logical declaration
+remains opaque, no defining equation is admitted as proof, and the
+explicit verified request still fails without ordinary downgrade.
+
+Focus uses unchanged selected JS, TS, Rust, V8 GC and Wasmtime
+paths and all previous phase-specific failures/budgets. The new
+case validates only these bounded finite runs, not arbitrary
+termination, diverging behavior, trace safety, partial_fixpoint P1,
+model/body/target refinement, or full M3+B. Require its own focused
+qualification before counting it; do not relabel the older native
+run as belonging to this test-only descendant.

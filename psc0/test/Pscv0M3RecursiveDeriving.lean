@@ -210,8 +210,18 @@ def nestedArrayRoseOutput (flag : Bool) : UInt64 :=
 -- Lean's partial executable body is distinct from its logical opaque value.
 partial def partialIncrement (n : Nat) : Nat := n + 5
 
+-- The executable body has a real self reference, but its logical declaration
+-- is still opaque. Native Lean computes only selected finite executions.
+partial def partialCount (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | k + 1 => partialCount k + 1
+
 def partialOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (partialIncrement (if flag then 17 else 9))
+
+def partialCountOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (partialCount (if flag then 7 else 3))
 
 def nestedRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedRoseTag
@@ -329,7 +339,9 @@ private def source : String :=
   "function m3nestedarraytag(r: M3NestedArrayRose): Nat := match r with { | M3NestedArrayRose.leaf => 0 | M3NestedArrayRose.node children => 1 }\n" ++
   "function m3nestedarrayoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedarraytag(if (flag) { M3NestedArrayRose.leaf } else { M3NestedArrayRose.node(#[]) }))\n" ++
   "partial function m3partial(n: Nat): Nat := n + 5\n" ++
-  "function m3partialoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partial(if (flag) { 17 } else { 9 }))\n"
+  "function m3partialoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partial(if (flag) { 17 } else { 9 }))\n" ++
+  "partial function m3partialCount(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3partialCount(k) + 1 }\n" ++
+  "function m3partialcountoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCount(if (flag) { 7 } else { 3 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -383,7 +395,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput", "m3partialcountoutput"] }
   let nestedRequest : PsV7Native.Request := {
     source :=
       "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
@@ -497,6 +509,8 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.nestedArrayRoseOutput flag).toNat)),
     ("m3partialoutput", Lean.toJson (toString
       (M3RecursiveHashOracle.partialOutput flag).toNat)),
+    ("m3partialcountoutput", Lean.toJson (toString
+      (M3RecursiveHashOracle.partialCountOutput flag).toNat)),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

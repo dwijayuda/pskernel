@@ -60,7 +60,7 @@ jobs:
             "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
             "$RUNNER_TEMP/wf-profile.ndjson" "$RUNNER_TEMP/c0-native-sampler.so" \
             "$RUNNER_TEMP/wf-native-stacks.txt" "$RUNNER_TEMP/wf-native-summary.json" \
-            --samples 24 --interval 3
+            --samples 20 --interval 3
           test -s "$RUNNER_TEMP/wf-native-summary.json"
           echo "C0_WF_PROFILE_SAMPLING=diagnostic_only_native_source_unchanged"
       - uses: actions/upload-artifact@v4

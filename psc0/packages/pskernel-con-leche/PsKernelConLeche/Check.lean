@@ -68,8 +68,11 @@ def auditInputAxioms (decls : Array ConLeche.Declaration) : Except Diagnostic Un
     match decls[i]! with
     | .axiomDecl cv =>
       unless permittedInputAxiom cv.name do
-        throw { phase := .policy, position := i,
-          error := .notImplemented s!"PSC0 input axiom policy forbids {cv.name}" }
+        throw {
+          phase := .policy
+          error := .notImplemented s!"PSC0 input axiom policy forbids {cv.name}"
+          position := i
+        }
     | _ => pure ()
 
 structure PreparedInput where

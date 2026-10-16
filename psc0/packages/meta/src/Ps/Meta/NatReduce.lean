@@ -1,5 +1,6 @@
 import Ps.Core.Builtin
 import Ps.Core.Expr
+import Ps.Core.Equality
 
 def psReduceNatBinary (name : PsName) : Option (Nat → Nat → PsExpr) :=
   if psNameEq name psNatAddName then some (fun a b => .lit (.natural (a + b)))

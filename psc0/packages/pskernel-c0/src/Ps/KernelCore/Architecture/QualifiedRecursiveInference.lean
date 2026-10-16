@@ -289,8 +289,9 @@ def psKernelC0RecursiveCheckedWithFuel :
                           reducedBody [fresh]
                         let ty : PsKernelExpr :=
                           .forallE name domain closedBody binderInfo
-                        some (ty, psKernelCacheInferResult bodyState false
-                          term ty)
+                        some (ty, psKernelCacheInferResult
+                          (psKernelCheckerStateExitLocalScope state1 bodyState)
+                          false term ty)
                     | none => none
                 | _ => none
       | .forallE name domain body binderInfo =>
@@ -321,13 +322,15 @@ def psKernelC0RecursiveCheckedWithFuel :
                     | some (.sort bodyLevel, bodyState) =>
                         let ty : PsKernelExpr :=
                           .sort (psKernelLevelMkIMax domainLevel bodyLevel)
-                        some (ty, psKernelCacheInferResult bodyState false
-                          term ty)
+                        some (ty, psKernelCacheInferResult
+                          (psKernelCheckerStateExitLocalScope state1 bodyState)
+                          false term ty)
                     | _ => none
                 | _ => none
       | .mdata md body =>
           let term : PsKernelExpr := .mdata md body
-          match psKernelExprMapGet state.checkedInfer term with
+          match (if psKernelInferCacheEligible false term then
+             psKernelExprMapGet state.checkedInfer term else Option.none) with
           | some ty =>
               match psKernelCheckerContextEnterRecDepth context with
               | .error _ => none
@@ -537,7 +540,8 @@ theorem psKernelC0RecursiveChecked_source
                                       .forallE name domain closedBody binderInfo
                                     let nextState :=
                                       psKernelCacheInferResult
-                                        bodyState false term ty
+                                          (psKernelCheckerStateExitLocalScope
+                                            state1 bodyState) false term ty
                                     have hr : result = (ty, nextState) := by
                                       have hx : some (ty, nextState) =
                                           some result := by
@@ -667,7 +671,8 @@ theorem psKernelC0RecursiveChecked_source
                                             domainLevel bodyLevel)
                                         let nextState :=
                                           psKernelCacheInferResult
-                                            bodyState false term ty
+                                          (psKernelCheckerStateExitLocalScope
+                                            state1 bodyState) false term ty
                                         have hr : result = (ty, nextState) := by
                                           have hx : some (ty, nextState) =
                                               some result := by
@@ -794,7 +799,9 @@ theorem psKernelC0RecursiveChecked_source
                             hlong, depth, hd, term] at h
       | mdata md body =>
           let term : PsKernelExpr := .mdata md body
-          cases cached : psKernelExprMapGet state.checkedInfer term with
+          cases cached :
+               (if psKernelInferCacheEligible false term then
+                 psKernelExprMapGet state.checkedInfer term else Option.none) with
           | some ty =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
@@ -808,10 +815,10 @@ theorem psKernelC0RecursiveChecked_source
                     exact (Option.some.inj hx).symm
                   rw [hr]
                   have hcache :
-                      psKernelExprMapGetWithKnownHash state.checkedInfer
-                        (.mdata md body) none = some ty := by
-                    change psKernelExprMapGet state.checkedInfer term = some ty
-                    exact cached
+                       (if psKernelInferCacheEligible false term then
+                         psKernelExprMapGetWithKnownHash state.checkedInfer
+                           (.mdata md body) none else Option.none) = some ty := by
+                     simpa [psKernelExprMapGet, term] using cached
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
                     psKernelInferCacheEligible, hcache, depth]
@@ -848,10 +855,10 @@ theorem psKernelC0RecursiveChecked_source
                               entered state body false = .ok (ty, checkedState)
                             exact ih entered state body (ty, checkedState) nested
                           have hcache :
-                              psKernelExprMapGetWithKnownHash state.checkedInfer
-                                (.mdata md body) none = none := by
-                            change psKernelExprMapGet state.checkedInfer term = none
-                            exact cached
+                               (if psKernelInferCacheEligible false term then
+                                 psKernelExprMapGetWithKnownHash state.checkedInfer
+                                   (.mdata md body) none else Option.none) = none := by
+                             simpa [psKernelExprMapGet, term] using cached
                           simpa [psKernelInferCoreWithFuelUsing,
                             psKernelInferCoreWithFuelUsingSourceFrames,
                             psKernelInferCacheEligible, hcache, depth,

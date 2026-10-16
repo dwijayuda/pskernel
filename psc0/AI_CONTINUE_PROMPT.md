@@ -34,3 +34,12 @@ Official pinned Init/Prelude.lean defines Nat.add a 0 by reduction on the
 second operand. This child patch adds only that exact definitional rule,
 not zero-add, arbitrary arithmetic decreasing, a new IH or proof axiom.
 The candidate still requires its own exact-commit five-workflow replay.
+
+### Focused explicit-Nat conversion qualification pending
+The pinned kernel equation Nat.add a 0 reduces even with open a. The new
+computed-child fixture now spells this as Nat.add(k, 0), testing the direct
+canonical constant before generalized infix HAdd dictionary normalization.
+Previous infix k + 0 tests still fail in the selected PSC0 elaboration path;
+do not claim full infix definitional-equivalence parity from this case.
+The proof and target observations remain unchanged. Native and focused
+qualification on this commit are required for acceptance.

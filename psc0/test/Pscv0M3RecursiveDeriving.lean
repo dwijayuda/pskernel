@@ -102,7 +102,7 @@ def proofDecision (flag : Bool) : UInt64 :=
 def normalizedChild (n : Nat) : Nat :=
   match n with
   | 0 => 0
-  | k + 1 => normalizedChild (k + 0) + 1
+  | k + 1 => normalizedChild (Nat.add k 0) + 1
 termination_by structural n
 
 example (n : Nat) : normalizedChild (Nat.succ n) = normalizedChild n + 1 := by rfl
@@ -194,7 +194,7 @@ private def source : String :=
   "theorem m3decisionEqual: Decidable.decide(self := decEq(m3decisionLeft, m3decisionLeft)) = true := by { rfl }\n" ++
   "theorem m3decisionDifferent: Decidable.decide(self := decEq(m3decisionLeft, m3decisionRight)) = false := by { rfl }\n" ++
   -- The recursive argument is definitionally, not syntactically, the child.
-  "function m3normalizedChild(n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3normalizedChild(k + 0) + 1 }\n" ++
+  "function m3normalizedChild(n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3normalizedChild(Nat.add(k, 0)) + 1 }\n" ++
   "theorem m3normalizedStep(n: Nat): m3normalizedChild(Nat.succ(n)) = m3normalizedChild(n) + 1 := by { rfl }\n" ++
   "function m3normoutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedChild(if (flag) { 17 } else { 9 }))\n"
 

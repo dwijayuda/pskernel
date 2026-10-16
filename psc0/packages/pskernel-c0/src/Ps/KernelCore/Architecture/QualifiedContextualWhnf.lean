@@ -35,22 +35,24 @@ def psKernelC0ContextualHeadWhnfWithFuel :
               match psKernelLocalDeclValue declaration with
               | none => some (expr, state)
               | some _ =>
-                  match psKernelExprMapGet state.whnf expr with
-                  | some cached => some (cached, state)
-                  | none => none
+                  -- A reducible local variable depends on this exact
+                  -- scope. Never reuse its source-cache data by name.
+                  none
       | .lam _ _ _ _ =>
-          match psKernelExprMapGet state.whnf expr with
-          | some cached => some (cached, state)
-          | none =>
-              match remaining with
-              | 0 => none
-              | Nat.succ _ =>
-                  match psKernelCheckerContextEnterRecDepth context with
-                  | .error _ => none
-                  | .ok _ =>
-                      some (expr,
-                        psKernelCheckerStateWithWhnf state
-                          (psKernelExprMapInsert state.whnf expr expr))
+          if psKernelSemanticCacheEligible expr then
+            match psKernelExprMapGet state.whnf expr with
+            | some cached => some (cached, state)
+            | none =>
+                match remaining with
+                | 0 => none
+                | Nat.succ _ =>
+                    match psKernelCheckerContextEnterRecDepth context with
+                    | .error _ => none
+                    | .ok _ =>
+                        some (expr,
+                          psKernelCheckerStateWithWhnf state
+                            (psKernelExprMapInsert state.whnf expr expr))
+          else none
       | _ => none
 
 /-- Every independently computed success equals the WHOLE original
@@ -107,55 +109,49 @@ theorem psKernelC0ContextualHeadWhnf_source
                   rw [hr]
                   simp [psKernelWhnfWithFuel, lookup, localValue, term]
               | some value =>
-                  cases cache : psKernelExprMapGet state.whnf term with
-                  | none =>
-                      simp [psKernelC0ContextualHeadWhnfWithFuel,
-                        lookup, localValue, cache, term] at h
-                  | some cached =>
-                      have hr : result = (cached, state) := by
-                        have hx : some (cached, state) = some result := by
-                          simpa [psKernelC0ContextualHeadWhnfWithFuel,
-                            lookup, localValue, cache, term] using h
-                        exact (Option.some.inj hx).symm
-                      rw [hr]
-                      simp [psKernelWhnfWithFuel,
-                        lookup, localValue, cache, term]
+                  simp [psKernelC0ContextualHeadWhnfWithFuel,
+                    lookup, localValue, term] at h
       | lam name domain body binderInfo =>
           let term : PsKernelExpr := .lam name domain body binderInfo
-          cases cache : psKernelExprMapGet state.whnf term with
-          | some cached =>
-              have hr : result = (cached, state) := by
-                have hx : some (cached, state) = some result := by
-                  simpa [psKernelC0ContextualHeadWhnfWithFuel,
-                    cache, term] using h
-                exact (Option.some.inj hx).symm
-              rw [hr]
-              simp [psKernelWhnfWithFuel, cache, term]
-          | none =>
-              cases remaining with
-              | zero =>
-                  simp [psKernelC0ContextualHeadWhnfWithFuel,
-                    cache, term] at h
-              | succ previous =>
-                  cases depth : psKernelCheckerContextEnterRecDepth context with
-                  | error reason =>
-                      simp [psKernelC0ContextualHeadWhnfWithFuel,
-                        cache, depth, term] at h
-                  | ok entered =>
-                      let nextState := psKernelCheckerStateWithWhnf state
-                        (psKernelExprMapInsert state.whnf term term)
-                      have hr : result = (term, nextState) := by
-                        have hx : some (term, nextState) = some result := by
-                          simpa [psKernelC0ContextualHeadWhnfWithFuel,
-                            cache, depth, term, nextState] using h
-                        exact (Option.some.inj hx).symm
-                      rw [hr]
-                      simp [psKernelWhnfWithFuel,
-                        psKernelWhnfCoreWithFuel,
-                        psKernelWhnfCoreWithFuelRanges,
-                        psKernelWhnfAfterCore, psKernelReduceNatWith,
-                        psKernelUnfoldDefinition, psKernelExprGetAppFn,
-                        psKernelWhnfFinish, cache, depth, term, nextState]
+          cases eligible : psKernelSemanticCacheEligible term with
+          | false =>
+              simp [psKernelC0ContextualHeadWhnfWithFuel,
+                term, eligible] at h
+          | true =>
+            cases cache : psKernelExprMapGet state.whnf term with
+            | some cached =>
+                have hr : result = (cached, state) := by
+                  have hx : some (cached, state) = some result := by
+                    simpa [psKernelC0ContextualHeadWhnfWithFuel,
+                      cache, eligible, term] using h
+                  exact (Option.some.inj hx).symm
+                rw [hr]
+                simp [psKernelWhnfWithFuel, cache, eligible, term]
+            | none =>
+                cases remaining with
+                | zero =>
+                    simp [psKernelC0ContextualHeadWhnfWithFuel,
+                      cache, eligible, term] at h
+                | succ previous =>
+                    cases depth : psKernelCheckerContextEnterRecDepth context with
+                    | error reason =>
+                        simp [psKernelC0ContextualHeadWhnfWithFuel,
+                          cache, eligible, depth, term] at h
+                    | ok entered =>
+                        let nextState := psKernelCheckerStateWithWhnf state
+                          (psKernelExprMapInsert state.whnf term term)
+                        have hr : result = (term, nextState) := by
+                          have hx : some (term, nextState) = some result := by
+                            simpa [psKernelC0ContextualHeadWhnfWithFuel,
+                              cache, eligible, depth, term, nextState] using h
+                          exact (Option.some.inj hx).symm
+                        rw [hr]
+                        simp [psKernelWhnfWithFuel,
+                          psKernelWhnfCoreWithFuel,
+                          psKernelWhnfCoreWithFuelRanges,
+                          psKernelWhnfAfterCore, psKernelReduceNatWith,
+                          psKernelUnfoldDefinition, psKernelExprGetAppFn,
+                          psKernelWhnfFinish, cache, eligible, depth, term, nextState]
       | bvar _ => simp [psKernelC0ContextualHeadWhnfWithFuel] at h
       | sort _ => simp [psKernelC0ContextualHeadWhnfWithFuel] at h
       | mvar _ => simp [psKernelC0ContextualHeadWhnfWithFuel] at h

@@ -90,7 +90,8 @@ theorem psKernelC0ConstantCachedInfer_source
                 exact cached
               simpa [psKernelInferCoreWithFuelUsing,
                 psKernelInferCoreWithFuelUsingSourceFrames,
-                psKernelInferCacheEligible, hcache, depth]
+                psKernelInferCacheEligible, psKernelSemanticCacheEligible,
+                psKernelExprHasFVar, hcache, depth]
 
 theorem psKernelC0ConstantCachedInfer_checkerInfer
     (fuel : Nat)
@@ -292,7 +293,8 @@ theorem psKernelC0ConstantCompleteInfer_source
                 exact cached
               simpa [psKernelInferCoreWithFuelUsing,
                 psKernelInferCoreWithFuelUsingSourceFrames,
-                psKernelInferCacheEligible, hcache, depth]
+                psKernelInferCacheEligible, psKernelSemanticCacheEligible,
+                psKernelExprHasFVar, hcache, depth]
       | none =>
           cases depth : psKernelCheckerContextEnterRecDepth context with
           | error reason =>
@@ -319,4 +321,5 @@ theorem psKernelC0ConstantCompleteInfer_source
                     exact cached
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, hcache, depth, chosen]
+                    psKernelInferCacheEligible, psKernelSemanticCacheEligible,
+                psKernelExprHasFVar, hcache, depth, chosen]

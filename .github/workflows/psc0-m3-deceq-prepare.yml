@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Prepare reviewed nested-family negative without changing any ref
+      - name: Prepare reviewed fixtures using the qualified decision API without changing any ref
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -21,7 +21,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import base64, difflib, hashlib, json, os, urllib.request
+          import base64, difflib, hashlib, json, os, re, urllib.request
           repo = os.environ['REPOSITORY']
           assert repo == 'dwijayuda/pskernel'
           base = 'https://api.github.com/repos/' + repo
@@ -33,21 +33,42 @@ jobs:
                   return json.load(r)
           def git_sha(raw):
               return hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest()
-          original = '44338bb06e8f633d8b27c6413cbd3c9b5c684979'
-          raw = base64.b64decode(api('/git/blobs/' + original)['content'])
-          assert git_sha(raw) == original
-          text = raw.decode('utf-8')
-          for index, line in enumerate(text.splitlines(), 1):
-              if 'DecidableEq' in line and ('deriving' in line or 'recursion' in line):
-                  print('DECEQ_SOURCE', index, line)
+          def read_blob(sha):
+              raw = base64.b64decode(api('/git/blobs/' + sha)['content'])
+              assert git_sha(raw) == sha
+              return raw.decode('utf-8')
+          def publish(label, before, after):
+              print(''.join(difflib.unified_diff(before.splitlines(True), after.splitlines(True), fromfile=label, tofile=label)))
+              expected = git_sha(after.encode())
+              response = api('/git/blobs', {'content': after, 'encoding': 'utf-8'})
+              assert response['sha'] == expected
+              print('PREPARED_BLOB', label, expected, flush=True)
+          native = read_blob('44338bb06e8f633d8b27c6413cbd3c9b5c684979')
           old = 'inductive Bad where { | nil | cons(next: Bad) } deriving DecidableEq'
           new = 'inductive Bad where { | nil | cons(next: List Bad) } deriving DecidableEq'
-          assert text.count(old) == 1
-          updated = text.replace(old, new)
-          print(''.join(difflib.unified_diff(text.splitlines(True), updated.splitlines(True), fromfile='Pscv0NativeTests.lean', tofile='Pscv0NativeTests.lean')))
-          expected = git_sha(updated.encode())
-          response = api('/git/blobs', {'content': updated, 'encoding': 'utf-8'})
-          assert response['sha'] == expected
-          print('PREPARED_NATIVE_BLOB', expected)
+          assert native.count(old) == 1
+          publish('Pscv0NativeTests.lean', native, native.replace(old, new))
+          # Only explicit .ps calls change; the independently compiled native
+          # oracle retains its native `decide (x = y)` syntax and semantics.
+          fixture = read_blob('c65d563747cf62162aff2ec62e932e3fc2c22fdd')
+          replacements = [
+            ('x = x', 'x, x', 3), ('x = y', 'x, y', 2), ('y = x', 'y, x', 2),
+            ('x = M3HashTree.leaf(n)', 'x, M3HashTree.leaf(n)', 1),
+            ('M3HashTree.leaf(n) = x', 'M3HashTree.leaf(n), x', 1),
+            ('x = z', 'x, z', 2),
+            ('x = M3HashTree.leaf(flag)', 'x, M3HashTree.leaf(flag)', 1),
+            ('M3HashTree.leaf(flag) = x', 'M3HashTree.leaf(flag), x', 1),
+            ('left = right', 'left, right', 1),
+            ('m3decisionLeft = m3decisionLeft', 'm3decisionLeft, m3decisionLeft', 1),
+            ('m3decisionLeft = m3decisionRight', 'm3decisionLeft, m3decisionRight', 1)]
+          updated = fixture
+          for proposition, arguments, count in replacements:
+              old = 'decide(' + proposition + ')'
+              new = 'Decidable.decide(self := decEq(' + arguments + '))'
+              assert updated.count(old) == count, (old, updated.count(old), count)
+              updated = updated.replace(old, new)
+          assert not re.search(r'(?<![.\w])decide\(', updated)
+          assert updated.count('Decidable.decide(self := decEq(') == 16
+          publish('Pscv0M3RecursiveDeriving.lean', fixture, updated)
           print('Prepared only: no branch, commit, tracked file, PR or qualification result changed.')
           PY

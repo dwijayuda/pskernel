@@ -14,26 +14,45 @@ M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
 total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
 are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
 
-### Qualification repair: reserved local identifier
+### Qualification repair: local context and native hint scope
 
-The combined source/deriving compiler/test SHA
-`37ffb9a356e6ff04c5b607b2c6537469dc5ec32d` failed all five gates.
-Focused run 38978211015 (job 117232632319) stopped compiling Where.lean:
-Lean 4.35 reserves the word meta, used as a local/parameter name in three
-new declarations. The remaining reported Where errors follow those parse
-failures. No candidate source/kernel/runtime acceptance was reached.
+The combined source/deriving SHA
+`37ffb9a356e6ff04c5b607b2c6537469dc5ec32d` failed all five gates at
+Where.lean parsing (focused 38978211015, job 117232632319). The lexical
+repair `9c65ddca8fb814b31eab6b9f77c42ecabcc6debb` removed the reserved
+meta bindings. All five gates then failed at that SHA; focused 38978550909
+(job 117233725275) compiled the new Where, PreDefinition, Repr and BEq
+production modules but stopped at WhereWellFounded.lean:104–106.
 
-This isolated repair renames those bindings and their references to metaContext.
-A text audit of all newly introduced source paths found no other such reserved
-binding. Types, values, scopes, closure algorithms, assertions, original outputs,
-request counts, resource limits and dependency pins are unchanged. The repaired
-tip requires its own five successful gates; fbbc5271 remains the accepted SHA.
+The inner local-context expression was inferred as the enclosing
+PsElabWellFoundedResult. This repair explicitly binds PsLocalContext and
+uses pure for that inner record expression. The final adapter still returns
+the actual checked definition, equation, meta context and source information
+from the existing WF constructor. No source/kernel/runtime qualification
+was reached by either failed candidate; fbbc5271 remains accepted.
 
-A separate source review found that section dependencies used only by an
-actually recursive WF hint/proof must be retained before capture closure.
-That substantive repair is being developed through the shared typed component
-and WF preparation owners. Unused nonrecursive/inherited-P0 hints must still
-add no captures. It is not included in this lexical repair.
+A proposed automatic capture extension was discarded after exact-pin review.
+Lean MutualDef.collectUsed/withUsed closes definitions and lifted locals from
+their actual checked header/body/local types and values. PreDefinition.Main
+then clears the local context before TerminationMeasure reopens the already
+closed function header. A section or parent local mentioned only by an active
+termination hint is therefore unavailable unless a real checked dependency
+already retains it. v7.2 rule 10 and PSCV0-D-WHERE-01 require this native scope
+and local-recursion behavior. Adapting only the native oracle would not justify
+a different portable capture rule.
+
+The original body-based capture closure and typed component owner remain.
+Unused ordinary/inherited-P0 hints add no captures; active WF hints operate
+only in the genuinely retained header. The discarded all-ambient dependency
+preparation, strategy-term capture seeding and graph relocation are excluded
+from this repair. Two exact native rejections and matching portable checks
+characterize measure-only and proof-only missing locals. Unused ordinary/P0
+hints must retain their owned syntax while adding no hidden header capture.
+The existing seven requests, six exports and expected values, and sixteen
+local-origin records are preserved.
+
+All five gates must pass at the same repaired compiler/test tip before this
+source and nested Repr/BEq candidate is accepted.
 
 ### Current candidate: complete selected nested Repr and BEq
 

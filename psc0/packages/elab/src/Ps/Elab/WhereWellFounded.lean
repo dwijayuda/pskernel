@@ -93,7 +93,7 @@ def psElabWhereWellFounded (prepared : PsElabWherePrepared)
       let some name := psSyntaxNameToName source.name | throw .emptyName
       let visible := psLocalPushLet current.localContext name checked.type value
       return { current with localContext := visible.context }) bodyContext
-  let bodyLocalContext ← match input.header.source with
+  let bodyLocalContext : PsLocalContext ← match input.header.source with
     | .declaration _ => pure bodyContext.localContext
     | .localDefinition _ _ => do
       let ownIds := parametersRev.map (·.id)
@@ -101,7 +101,7 @@ def psElabWhereWellFounded (prepared : PsElabWherePrepared)
         if let .letDecl _ _ type value := declaration then
           if (psExprFVarIds type ++ psExprFVarIds value).any ownIds.contains then
             throw (psElabWhereError "WF-CAPTURE" "a sibling alias depends on this helper's own parameter instead of its actual enclosing captures")
-      return { bodyContext.localContext with
+      pure { bodyContext.localContext with
         declarations := bodyContext.localContext.declarations.filter (fun declaration => ownIds.contains (psLocalDeclId declaration)) ++
           bodyContext.localContext.declarations.filter (fun declaration => !ownIds.contains (psLocalDeclId declaration)) }
   let termination ← psElabWhereTermination input.header.source

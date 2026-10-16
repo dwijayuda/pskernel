@@ -45,6 +45,9 @@ where
   loop (k : Nat) : Nat :=
     if k == 0 then bump 1 else loop (k - 1) + 1
 
+section
+variable (ignored : Nat)
+
 mutual
   partial def disconnectedPartial (n : Nat) : Nat :=
     if n == 0 then 0 else disconnectedPartial (n - 1) + 1
@@ -56,20 +59,30 @@ mutual
       match k with
       | 0 => 0
       | j + 1 => loop j + 1
-    termination_by k
+    termination_by k + ignored
+    decreasing_by exact ignored
     bump (k : Nat) : Nat := k + 1
     partial_fixpoint
     measured (k : Nat) : Nat := k
-    termination_by k
+    termination_by k + ignored
+    decreasing_by exact ignored
     fixedLoop (k : Nat) : Nat :=
       if k == 0 then 0 else fixedLoop (k - 1)
     partial_fixpoint
     proof (k : Nat) := True.intro
   def redundantWF (n : Nat) : Nat := n
-  termination_by n
+  termination_by n + ignored
   def redundantP1 (n : Nat) : Nat := n
   partial_fixpoint
 end
+
+end
+
+-- Unused hints are retained source, but do not add section parameters.
+example : Nat → Nat := disconnected
+example : Nat → Nat := disconnected.loop
+example : Nat → Nat := disconnected.measured
+example : Nat → Nat := redundantWF
 
 def measured (bias n : Nat) : Nat := descend n + walk n
 where
@@ -84,6 +97,40 @@ where
     | j + 1 => finish (walk (j - 1))
   termination_by k
   decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le j 1)
+
+-- Pinned MutualDef closes checked type/body dependencies before hints are
+-- elaborated in PreDefinition.Main's empty local context. A hint alone
+-- cannot introduce an enclosing section parameter into the lifted helper.
+section
+variable (bias : Nat)
+
+/-- error: Unknown identifier `bias` -/
+#guard_msgs (error, drop warning, substring := true) in
+def measureOnly (n : Nat) : Nat := walk n
+where
+  walk (k : Nat) : Nat :=
+    match k with
+    | 0 => 0
+    | j + 1 => walk j + 1
+  termination_by k + bias
+
+end
+
+section
+variable (bound : ∀ k : Nat, k < Nat.succ k)
+
+/-- error: Unknown identifier `bound` -/
+#guard_msgs (error, drop warning, substring := true) in
+def proofOnly (n : Nat) : Nat := walk n
+where
+  walk (k : Nat) : Nat :=
+    match k with
+    | 0 => 0
+    | j + 1 => walk j + 1
+  termination_by k
+  decreasing_by exact bound _
+
+end
 
 def captureOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (capture (if flag then 7 else 13) (if flag then 3 else 4))
@@ -173,25 +220,27 @@ private def partialSource : String :=
   "}\n"
 
 private def disconnectedSource : String :=
-  "mutual\n" ++
+  "section\nvariable (ignored: Nat)\nmutual\n" ++
   "partial function wdisconnectedPartial(n: Nat): Nat := if (n == 0) { 0 } else { wdisconnectedPartial(n - 1) + 1 }\n" ++
   "function wdisconnected(n: Nat): Nat := {\n" ++
   "  let witness: True := proof(n)\n" ++
   "  loop(n) + bump(n)\n}\n" ++
   "where {\n" ++
   "  def loop(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => loop(j) + 1 }\n" ++
-  "  termination_by k\n" ++
+  "  termination_by k + ignored\n" ++
+  "  decreasing_by by { exact ignored }\n" ++
   "  def bump(k: Nat): Nat := k + 1\n" ++
   "  partial_fixpoint\n" ++
   "  def measured(k: Nat): Nat := k\n" ++
-  "  termination_by k\n" ++
+  "  termination_by k + ignored\n" ++
+  "  decreasing_by by { exact ignored }\n" ++
   "  def fixedLoop(k: Nat): Nat := if (k == 0) { 0 } else { fixedLoop(k - 1) }\n" ++
   "  partial_fixpoint\n" ++
   "  def proof(k: Nat) := True.intro\n" ++
   "}\n" ++
-  "function wredundantWF(n: Nat): Nat := n\ntermination_by n\n" ++
+  "function wredundantWF(n: Nat): Nat := n\ntermination_by n + ignored\n" ++
   "function wredundantP1(n: Nat): Nat := n\npartial_fixpoint\n" ++
-  "end\n"
+  "end\nend\n"
 
 private def measuredSource : String :=
   "function wmeasured(bias: Nat, n: Nat): Nat := descend(n) + walk(n)\n" ++
@@ -204,6 +253,24 @@ private def measuredSource : String :=
   "  termination_by k\n" ++
   "  decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(j, 1)) }\n" ++
   "}\n"
+
+private def hintScopeRefusals : List (String × String) := [
+  ("bias",
+    "section\nvariable (bias: Nat)\n" ++
+    "function measureOnly(n: Nat): Nat := walk(n)\nwhere {\n" ++
+    "  def walk(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => walk(j) + 1 }\n" ++
+    "  termination_by k + bias\n}\nend\n"),
+  ("bound",
+    "section\nvariable (bound: forall (k: Nat), k < Nat.succ(k))\n" ++
+    "function proofOnly(n: Nat): Nat := walk(n)\nwhere {\n" ++
+    "  def walk(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => walk(j) + 1 }\n" ++
+    "  termination_by k\n  decreasing_by by { exact bound(j) }\n}\nend\n")]
+
+private def missingHintName (expected : String) : PsElabError → Bool
+  | .unknownName name => psNameToString name == expected
+  | .scope message => message == ("unknown name " ++ expected)
+  | .atDeclaration _ error => missingHintName expected error
+  | _ => false
 
 private def equations : String :=
   "theorem captureEquation(bias: Nat, n: Nat): wcapture(bias, n) = wcapture.first(bias, n) := by { exact wcapture.eq_def(bias, n) }\n" ++
@@ -280,16 +347,23 @@ private def checkSource : IO Unit := do
     | _ => throw (IO.userError "local total strategy was discarded")
   | _ => throw (IO.userError "local suffix lost following declaration ownership")
   let unusedProgram ← fromExcept (psPscv0ParseProgram disconnectedSource)
-  let [.mutualDeclarations [_, main, wf, fixedpoint] _] := unusedProgram.commands
+  let groupMembers := unusedProgram.commands.findSome? fun command =>
+    match command with
+    | .mutualDeclarations members _ => some members
+    | _ => none
+  let some members := groupMembers
+    | throw (IO.userError "unused hints lost their original mutual source owner")
+  let [_, main, wf, fixedpoint] := members
     | throw (IO.userError "unused hints lost their original mutual source owners")
   let .whereDeclaration _ [loop, bump, measured, fixedLoop, proof] _ := main.declaration
     | throw (IO.userError "inherited helpers lost their local source order")
   for localDefinition in [loop, measured] do
     match localDefinition.recursion with
     | some (.total termination) =>
-      let .reference measure := termination.measure
+      let .operatorE .binary _ "+" [.reference measure, .reference ignored] _ := termination.measure
         | throw (IO.userError "an unused measure lost its source expression")
-      ensure (measure.segments == ["k"] &&
+      ensure (measure.segments == ["k"] && ignored.segments == ["ignored"] &&
+        termination.decreasing.isSome &&
         termination.span.stop.byteOffset == localDefinition.span.stop.byteOffset)
         "effective strategy erased an unused measure or its owned span"
     | _ => throw (IO.userError "an inherited unused total hint was discarded")
@@ -365,7 +439,9 @@ private def checkConstruction : IO Unit := do
     let name := psNameAppendStr disconnected shortName
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (PsName.num name 0) with
-    | some (.opaqueDecl ..), some (.partialDecl ..) => pure ()
+    | some (.opaqueDecl _ levels type _), some (.partialDecl ..) =>
+      ensure (levels.isEmpty && binderNames type == ["k"])
+        "an ignored hint added a section capture to a partial helper"
     | _, _ => throw (IO.userError "a retained local hint overrode block-wide inherited partial opacity")
     ensure ((psEnvironmentFind environment (psNameAppendStr name "eq_def")).isNone)
       "an inherited-partial helper acquired an equation from its unused hint"
@@ -373,8 +449,9 @@ private def checkConstruction : IO Unit := do
       psNameAppendStr disconnected "measured", psRootName "wredundantWF", psRootName "wredundantP1"] do
     match psEnvironmentFind environment name,
         psEnvironmentFind environment (psNameAppendStr name "eq_def") with
-    | some (.definitionDecl _ _ type value), some (.theoremDecl _ _ equationType proof) =>
-      ensure (!psExprHasConst psWellFoundedFixName value &&
+    | some (.definitionDecl _ levels type value), some (.theoremDecl _ _ equationType proof) =>
+      ensure (levels.isEmpty && (binderNames type).length == 1 &&
+        !psExprHasConst psWellFoundedFixName value &&
         !psExprHasUnresolvedMeta type && !psExprHasUnresolvedMeta value &&
         !psExprHasUnresolvedMeta equationType && !psExprHasUnresolvedMeta proof)
         "an unused hint changed an ordinary value into a WF construction or left unchecked terms"
@@ -397,6 +474,16 @@ private def checkConstruction : IO Unit := do
         psExprHasConst psWellFoundedFixEqName proof && !psExprHasConst measuredName value)
         "local WF construction lost its checked captures, real fix/fix_eq or closed callback"
     | _, _ => throw (IO.userError "local total suffix did not construct its checked definition and source equation")
+  -- Reuse the already checked prelude; these are source-scope checks, not
+  -- additional backend requests. The named failure must be the missing
+  -- hint-only local, after its ordinary typed body has elaborated.
+  for (name, text) in hintScopeRefusals do
+    let parsed ← fromExcept (psPscv0ParseProgram text)
+    match psElabProgram psSelfHostProdPreludeEnvironment parsed with
+    | .error error =>
+      ensure (missingHintName name error)
+        ("active hint-only local refused at the wrong owner: " ++ psCompilerPscv0ElabError error)
+    | .ok _ => throw (IO.userError "an active hint silently added a section capture")
   let localCount := compiled.origins.foldl (fun count origin => count + origin.localDefinitions.length) 0
   ensure (localCount == 16) "source origins discarded local helper membership"
   for origin in compiled.origins do
@@ -436,7 +523,7 @@ private def checkConstruction : IO Unit := do
             "serialized local origin changed its qualified name, exact span or emitted declaration membership"
   let equations ← fromExcept (psPscv0ParseProgram equations)
   let _ ← fromExcept ((psElabProgram environment equations).mapError psCompilerPscv0ElabError)
-  IO.println "PSCV0_M3_WHERE_CONSTRUCTION: PASS actual helper captures and equations, forward inference/defaults, sibling recursion, parent/helper clique, inferred theorem helpers, proof shadowing, private identities, original-block P0 inheritance, retained unused hints with effective ordinary/P0 kinds, checked local WF and exact local origins"
+  IO.println "PSCV0_M3_WHERE_CONSTRUCTION: PASS actual helper captures and equations, forward inference/defaults, sibling recursion, parent/helper clique, inferred theorem helpers, proof shadowing, private identities, original-block P0 inheritance, ignored hints without captures, active hint-only scope refusals, checked local WF and exact local origins"
 
 private def refusals : List (String × String × String) := [
   ("body-lambda-scope",

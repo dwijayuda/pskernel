@@ -86,27 +86,27 @@ jobs:
           elif variant == "spine":
             old='private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :='
             assert source.count(old)==1
-            source=source.replace(old,
-              """/-- Deterministic bucket hint, never an equality/admission test. -/
-def psKernelC0MemoSpineFingerprint (expr : PsKernelExpr) : Nat :=
-  let head := psKernelExprGetAppFn expr
-  let arity := psKernelExprGetAppNumArgs expr
-  let headHash :=
-    match head with
-    | .const name levels =>
-        psKernelCacheMix (psKernelCacheNameHash name)
-          (psKernelCacheLevelListHash levels)
-    | .fvar name => psKernelCacheMix 41 (psKernelCacheNameHash name)
-    | .mvar name => psKernelCacheMix 42 (psKernelCacheNameHash name)
-    | .sort level => psKernelCacheMix 43 (psKernelCacheLevelHash level)
-    | .lit value => psKernelCacheMix 44 (psKernelCacheLiteralHash value)
-    | .bvar idx => psKernelCacheMix 45 idx
-    | other => psKernelC0MemoShapeHash 3 other
-  psKernelCacheMix
-    (psKernelCacheMix (psKernelC0MemoShapeHash 3 expr) arity)
-    headHash
-
-"""+old)
+            lean_lines=[
+              "/-- Deterministic bucket hint, never an equality/admission test. -/",
+              "def psKernelC0MemoSpineFingerprint (expr : PsKernelExpr) : Nat :=",
+              "  let head := psKernelExprGetAppFn expr",
+              "  let arity := psKernelExprGetAppNumArgs expr",
+              "  let headHash :=",
+              "    match head with",
+              "    | .const name levels =>",
+              "        psKernelCacheMix (psKernelCacheNameHash name)",
+              "          (psKernelCacheLevelListHash levels)",
+              "    | .fvar name => psKernelCacheMix 41 (psKernelCacheNameHash name)",
+              "    | .mvar name => psKernelCacheMix 42 (psKernelCacheNameHash name)",
+              "    | .sort level => psKernelCacheMix 43 (psKernelCacheLevelHash level)",
+              "    | .lit value => psKernelCacheMix 44 (psKernelCacheLiteralHash value)",
+              "    | .bvar idx => psKernelCacheMix 45 idx",
+              "    | other => psKernelC0MemoShapeHash 3 other",
+              "  psKernelCacheMix",
+              "    (psKernelCacheMix (psKernelC0MemoShapeHash 3 expr) arity)",
+              "    headHash",
+            ]
+            source=source.replace(old,"\n".join(lean_lines)+"\n\n"+old)
             oldBase='  psKernelC0MemoShapeHash 4 expr'
             assert source.count(oldBase)==1
             source=source.replace(oldBase,

@@ -131,39 +131,84 @@ def psKernelC0FVarMemoGo :
                 psKernelC0FVarMemoStore m2 checked
           | .lam name ty body info =>
               let (t, m1) := psKernelC0FVarMemoGo ty memo
-              let (b, m2) := psKernelC0FVarMemoGo body m1
-              let checked : PsKernelC0ExactFVar (.lam name ty body info) :=
-                ⟨if t.value then true else b.value, by
-                  change (if t.value then true else b.value) =
-                    (if psKernelExprHasFVar ty then true
-                     else psKernelExprHasFVar body)
-                  rw [t.source, b.source]⟩
-              psKernelC0FVarMemoStore m2 checked
+              if ht : t.value = true then
+                let checked : PsKernelC0ExactFVar (.lam name ty body info) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasFVar ty then true
+                       else psKernelExprHasFVar body)
+                    rw [← t.source]
+                    simp [ht]⟩
+                psKernelC0FVarMemoStore m1 checked
+              else
+                let (b, m2) := psKernelC0FVarMemoGo body m1
+                let checked : PsKernelC0ExactFVar (.lam name ty body info) :=
+                  ⟨b.value, by
+                    change b.value =
+                      (if psKernelExprHasFVar ty then true
+                       else psKernelExprHasFVar body)
+                    rw [← t.source, ← b.source]
+                    simp [ht]⟩
+                psKernelC0FVarMemoStore m2 checked
           | .forallE name ty body info =>
               let (t, m1) := psKernelC0FVarMemoGo ty memo
-              let (b, m2) := psKernelC0FVarMemoGo body m1
-              let checked : PsKernelC0ExactFVar (.forallE name ty body info) :=
-                ⟨if t.value then true else b.value, by
-                  change (if t.value then true else b.value) =
-                    (if psKernelExprHasFVar ty then true
-                     else psKernelExprHasFVar body)
-                  rw [t.source, b.source]⟩
-              psKernelC0FVarMemoStore m2 checked
+              if ht : t.value = true then
+                let checked : PsKernelC0ExactFVar (.forallE name ty body info) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasFVar ty then true
+                       else psKernelExprHasFVar body)
+                    rw [← t.source]
+                    simp [ht]⟩
+                psKernelC0FVarMemoStore m1 checked
+              else
+                let (b, m2) := psKernelC0FVarMemoGo body m1
+                let checked : PsKernelC0ExactFVar (.forallE name ty body info) :=
+                  ⟨b.value, by
+                    change b.value =
+                      (if psKernelExprHasFVar ty then true
+                       else psKernelExprHasFVar body)
+                    rw [← t.source, ← b.source]
+                    simp [ht]⟩
+                psKernelC0FVarMemoStore m2 checked
           | .letE name ty val body nondep =>
               let (t, m1) := psKernelC0FVarMemoGo ty memo
-              let (v, m2) := psKernelC0FVarMemoGo val m1
-              let (b, m3) := psKernelC0FVarMemoGo body m2
-              let checked : PsKernelC0ExactFVar
-                  (.letE name ty val body nondep) :=
-                ⟨if t.value then true else if v.value then true
-                  else b.value, by
-                  change (if t.value then true else if v.value then true
-                    else b.value) =
-                    (if psKernelExprHasFVar ty then true
-                     else if psKernelExprHasFVar val then true
-                     else psKernelExprHasFVar body)
-                  rw [t.source, v.source, b.source]⟩
-              psKernelC0FVarMemoStore m3 checked
+              if ht : t.value = true then
+                let checked : PsKernelC0ExactFVar
+                    (.letE name ty val body nondep) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasFVar ty then true
+                       else if psKernelExprHasFVar val then true
+                       else psKernelExprHasFVar body)
+                    rw [← t.source]
+                    simp [ht]⟩
+                psKernelC0FVarMemoStore m1 checked
+              else
+                let (v, m2) := psKernelC0FVarMemoGo val m1
+                if hv : v.value = true then
+                  let checked : PsKernelC0ExactFVar
+                      (.letE name ty val body nondep) :=
+                    ⟨true, by
+                      change true =
+                        (if psKernelExprHasFVar ty then true
+                         else if psKernelExprHasFVar val then true
+                         else psKernelExprHasFVar body)
+                      rw [← t.source, ← v.source]
+                      simp [ht, hv]⟩
+                  psKernelC0FVarMemoStore m2 checked
+                else
+                  let (b, m3) := psKernelC0FVarMemoGo body m2
+                  let checked : PsKernelC0ExactFVar
+                      (.letE name ty val body nondep) :=
+                    ⟨b.value, by
+                      change b.value =
+                        (if psKernelExprHasFVar ty then true
+                         else if psKernelExprHasFVar val then true
+                         else psKernelExprHasFVar body)
+                      rw [← t.source, ← v.source, ← b.source]
+                      simp [ht, hv]⟩
+                  psKernelC0FVarMemoStore m3 checked
           | .mdata md body =>
               let (b, m1) := psKernelC0FVarMemoGo body memo
               let checked : PsKernelC0ExactFVar (.mdata md body) :=

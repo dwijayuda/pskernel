@@ -1,0 +1,45 @@
+name: PSKernel-C0 certified DAG instantiation memo
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-certified-instantiation-memo.yml'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedInstantiateMemoRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-exact-memo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Prove exact source and memo cache safety with Lean 4.35
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build Ps.KernelCore.Architecture.CertifiedInstantiateMemo
+          lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          echo "C0_CERTIFIED_INSTANTIATE_SOURCE_PROOF exact_changed_flag=Lean exact_offsets=Lean"
+      - name: Preserve independent source admission and negative resource behavior
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build c0OfficialReplay
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_CERTIFIED_INSTANTIATE_REGRESSIONS negative=pass source_replay=pass"

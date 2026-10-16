@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Acceleration.Cache
+import Ps.KernelCore.Core.ExprDecidableEq
 
 /-!
 Proof-carrying memoization of EXACT historical PsKernelExpr structural hashes.
@@ -14,11 +15,6 @@ term, DefEq fact, environment admission, or substitute for resource policy.
 The original source hash remains an independent oracle.
 -/
 
-deriving instance DecidableEq for PsKernelName
-deriving instance DecidableEq for PsKernelLevel
-deriving instance DecidableEq for PsKernelLiteral
-deriving instance DecidableEq for PsKernelBinderInfo
-deriving instance DecidableEq for PsKernelExpr
 
 /-- Depth-bounded bucket selector; *never* a certified hash result. It
 examines at most four constructor layers regardless of shared DAG expansion.

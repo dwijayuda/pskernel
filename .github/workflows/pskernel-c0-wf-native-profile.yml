@@ -1,3 +1,5 @@
+# Post-Lean-4.35 Nat-dispatch and stuck-left correction. Profile the
+# unchanged admitting source only; do not use the sampled run as a verdict.
 name: PSKernel-C0 pinned WF native hot-stack sampling
 on:
   push:
@@ -58,7 +60,7 @@ jobs:
             "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
             "$RUNNER_TEMP/wf-profile.ndjson" "$RUNNER_TEMP/c0-native-sampler.so" \
             "$RUNNER_TEMP/wf-native-stacks.txt" "$RUNNER_TEMP/wf-native-summary.json" \
-            --samples 14 --interval 4
+            --samples 24 --interval 3
           test -s "$RUNNER_TEMP/wf-native-summary.json"
           echo "C0_WF_PROFILE_SAMPLING=diagnostic_only_native_source_unchanged"
       - uses: actions/upload-artifact@v4

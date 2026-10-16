@@ -102,3 +102,7 @@ lean_exe pscv0_m3_where where
 lean_exe pscv0_m3_nested_deriving where
   srcDir := "../test"
   root := `Pscv0M3NestedDeriving
+
+lean_exe pscv0_m3_group_proof_deriving where
+  srcDir := "../test"
+  root := `Pscv0M3GroupProofDeriving

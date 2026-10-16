@@ -1,4 +1,118 @@
-## M3+B current architecture checkpoint — complete nested deriving over typed source components
+## M3+B current architecture checkpoint — proof/default deriving over complete groups
+
+Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
+All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
+F1 38976284003, F2 38976283981, F3/F4 38976283973 and focused 38976283967
+(15/15). The receipt is
+`docs/PSCV0_M3_NESTED_ELIMINATION_TYPED_RECURSION_QUALIFICATION_2026-10-16.md`.
+It qualifies the accumulated typed-WF/direct-mutual-structural changes and
+complete selected nested elimination/Hashable, including all existing outputs
+on all five targets. The original native workloads and measurement step pass.
+
+M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
+55–75% engineering uncertainty). All six weights remain data 30, source 15,
+total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
+are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Current candidate: mutual proof decisions and native ordered defaults
+
+This checkpoint retains the unqualified source component/where work from
+c55a7caf and complete selected nested Repr/BEq from 37ffb9a3, together with
+the local-context repair and native hint-scope correction at
+`a0c98a3fbc4d96c1d9e4438dca9a01f88925766a`. All accumulated
+source/compiler/test changes require five successful gates at one tip.
+
+Direct nonindexed mutual DecidableEq now uses the complete selected-slot
+elimination owner. Each left family has its actual dependent decision motive;
+recursive decisions come only from its real checked left-child hypotheses.
+Each right operand is a bound variable under its own actual left motive;
+no block-level synthetic local ID can collide with a later family's major.
+Right-side cases bind every actual minor/IH, leave right IHs unused, and use
+Decidable True for companion families. Existing equality transport and proof
+field substitution remain responsible for same-constructor decisions.
+Different-constructor and field failures use checked projections/discriminators.
+
+The existing psElabIndexFunction owner now handles complete direct groups.
+It checks the selected constructor's actual owner/ordinal, validates the
+provided fallback, builds every constant motive and real minor telescope,
+and checks the final projection or discriminator function. It does not
+manufacture an inhabitant, a recursive hypothesis or an injectivity axiom.
+
+Nonindexed group/nested Inhabited reuses the existing native constructor
+algorithm: try constructors in order without new assumptions, then with
+valid parameter requirements, pruning unused dictionaries. List.nil,
+Option.none and Array.empty require no child default; a product uses its
+actual component dictionaries. Group dispatch registers a genuinely generated
+earlier closed instance before constructing the next member. It performs
+no constructor-order search across families and introduces no forward/self
+default. Other recursive deriving handlers continue using their original
+input environment.
+
+### Independent evidence and target integration
+
+Pscv0M3GroupProofDeriving separately declares native mutual families and
+constructs the portable groups/instances. The direct decision fixture has
+cross-family recursion, two equal-typed same-family children, dependent proof
+fields and an unrelated always-false BEq instance. This checks actual
+DecidableEq evidence independently of Boolean equality.
+
+The fixture checks six generated instances and their exact requirements:
+one DecidableEq A for each direct member, no requirements for either nested
+empty default, and only Inhabited A for each required-default member.
+Later defaults must reference the actual earlier instance and never themselves.
+
+There are thirteen full recursor signature witnesses (2 direct, 8 nested
+default and 3 required default slots), four direct second-family projection/
+discriminator kernel equations, generic default equations and eight closed
+output equations. Runtime preparation must yield exactly two real left
+induction worker groups, each with two members and three captures; right
+cases, projections and defaults must not create a recursive worker group.
+
+The independently calculated output matrix is:
+
+| flag | m3groupdecide | m3groupdecideatom | m3groupdefault | m3grouprequired |
+| --- | ---: | ---: | ---: | ---: |
+| false | 1 | 3 | 31 | 55 |
+| true | 39 | 3 | 19 | 133 |
+
+The focused workflow requires all thirteen source checks and adds these four
+outputs to the established JS, strict compiled TypeScript, locked Rust,
+V8 GC and Wasmtime component lanes. Rust generation remains immediately
+paired with its execution. The original workloads, request counts, exported
+names, expected outputs, checksums, budgets and pins are preserved. Existing
+negative slots for newly supported capabilities retain genuine indexed or
+nested-DecEq refusals; they are not removed to obtain a pass.
+
+Both the shared equality/decision construction and the independent fixture
+have static peer review. Compilation, source execution, fresh-kernel checks,
+IR validation and target parity remain unqualified until exact-tip GitHub
+Linux results are recorded. No local Lean/Lake/build/test execution occurred.
+
+### Remaining selected boundaries and next work
+
+Pinned Lean's DecEq handler explicitly declines nested inductives. Indexed
+DecidableEq/Inhabited and indexed BEq remain outside this candidate, as do
+arbitrary nested containers, constructor-local specialization parameters and
+function-valued nested fields. The source mutual grammar remains def/function
+only. A hint alone does not extend a local function's captured header;
+v7.2 rule 10 and PSCV0-D-WHERE-01 preserve pinned native scope.
+
+Broader actual WF relation selection/typed argument packing, optional main
+result inference, additional dependent equality/elimination and the remaining
+selected matrix are still open. P1 remains blocked by Classical.choice in
+the actual pinned fixedpoint/equation dependency closure; unused suffixes
+are not P1 support.
+
+Native portable .lean, official Lean 4.35.0 at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, the exact v7.2 reference blob,
+approved propext/Quot.sound and the official checking boundary remain fixed.
+PR #109 stays draft/open/unmerged on its original base. No M4/M5 promotion,
+replacement kernel, self-hosting, source migration, LLVM, reset or merge is
+part of this checkpoint.
+
+---
+
+## M3+B earlier architecture checkpoint — complete nested deriving over typed source components
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),

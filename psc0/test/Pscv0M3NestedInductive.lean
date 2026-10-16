@@ -513,8 +513,9 @@ private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarati
     "theorem bad(x: M3NestedShape(Nat, 0)): x = x := by { induction x }\n"
     "nested induction requires an explicit eliminator"
   -- Repr and nonindexed BEq have independent checked/native positives in
-  -- Pscv0M3NestedDeriving. The other handler boundaries remain unchanged.
-  for handler in ["DecidableEq", "Inhabited"] do
+  -- Pscv0M3NestedDeriving; constructor-based nested Inhabited is checked in
+  -- Pscv0M3GroupProofDeriving. Pinned native nested DecidableEq still refuses.
+  for handler in ["DecidableEq"] do
     match psElabDeriveHandler environment origin { segments := [handler], span := origin.span } with
     | .error error =>
       ensure (refusal error == "recursive deriving requires the M3 data machinery")

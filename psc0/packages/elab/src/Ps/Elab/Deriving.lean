@@ -24,13 +24,15 @@ def psElabDeriveHandler (environment : PsEnvironment)
 
 -- Native group API. Provenance must name exactly the registered family group;
 -- the source command still selects singleton declarations under v7.2 grammar.
--- Every instance is built against the input environment, so another generated
--- group instance cannot become an assumed recursive field dictionary.
+-- Recursive handlers use the input environment, so another generated group
+-- instance cannot become assumed induction evidence. Inhabited follows native
+-- declaration order instead: only an already constructed, closed, registered
+-- earlier instance can supply a later constructor's field default.
 def psElabDeriveGroupHandler (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) (handler : PsSyntaxName) :
     Except PsElabError (List PsDeclaration) := do
   match handler.segments with
-  | ["Hashable"] | ["Repr"] | ["BEq"] => pure ()
+  | ["Hashable"] | ["Repr"] | ["BEq"] | ["DecidableEq"] | ["Inhabited"] => pure ()
   | _ => throw (.data "deriving handler does not provide a complete group motive family")
   let name ← psElabDeriveSourceFamily origin
   let some info := psEnvironmentFindInductive environment name
@@ -44,10 +46,23 @@ def psElabDeriveGroupHandler (environment : PsEnvironment)
     | _ => none
   if !psInductiveGroupNamesEqual names (psInductiveGroupNames group) then
     throw (.data "deriving origin does not retain the complete ordered group")
-  group.members.mapM fun member =>
+  let memberOrigin := fun (member : PsInductiveInfo) =>
     let selected := origin.members.filter fun entry =>
       match entry.role with
       | .inductiveType | .structureType => psNameEq entry.name member.name
       | _ => true
-    psElabDeriveHandler environment { origin with members := selected } handler
+    { origin with members := selected }
+  match handler.segments with
+  | ["Inhabited"] =>
+    let (_, declarations) ← group.members.foldlM
+      (fun (state : PsEnvironment × List PsDeclaration) member => do
+        let generated ← psElabDeriveHandler state.1 (memberOrigin member) handler
+        let name := psDeclarationName generated
+        let some added := psEnvironmentAdd state.1 generated
+          | throw (.duplicateDeclaration name)
+        let registered ← psElabRegisterInstance added name 1000
+        return (registered, state.2 ++ [generated])) (environment, [])
+    return declarations
+  | _ => group.members.mapM fun member =>
+    psElabDeriveHandler environment (memberOrigin member) handler
 

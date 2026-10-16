@@ -252,8 +252,9 @@ private def checkRefusals (environment : PsEnvironment)
     (psElabDeriveGroupHandler environment indexedOrigin
       { segments := ["BEq"], span := indexedOrigin.span })
   for handler in ["Inhabited", "DecidableEq"] do
-    expectRefused ("legacy singleton " ++ handler) "deriving handler requires a singleton family"
-      (psElabDeriveHandler environment origin { segments := [handler], span := origin.span })
+    expectRefused ("indexed group " ++ handler) "deriving indexed families is not yet implemented"
+      (psElabDeriveHandler environment indexedOrigin
+        { segments := [handler], span := indexedOrigin.span })
   expectRefused "reordered retained group origin"
     "deriving origin does not retain the complete ordered group"
     (psElabDeriveGroupHandler environment { origin with members := origin.members.reverse }
@@ -272,7 +273,7 @@ private def checkRefusals (environment : PsEnvironment)
     (.constructorDecl { constructor with recursiveFields := [1] })
   expectRefused "omitted direct child metadata" "deriving direct field is absent from recursive metadata"
     (psElabDeriveGroupHandler omitted origin { segments := ["Hashable"], span := origin.span })
-  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association, indexed BEq boundary and legacy singleton handlers"
+  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association and indexed BEq/DecidableEq/Inhabited boundaries"
 
 private def checkPlans (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do

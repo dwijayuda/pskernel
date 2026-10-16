@@ -1,4 +1,4 @@
-import Ps.Elab.Refinement
+import Ps.Elab.GroupElimination
 
 structure PsElabEquation where
   level : PsLevel
@@ -45,8 +45,10 @@ def psElabEquationCongr (context : PsElabContext) (equation : PsElabEquation)
     (psLogicRefl level resultType left)
   return { level, type := resultType, left, right, proof }
 
--- Build a discriminator or homogeneous projection using the family's own
--- recursor. Every minor is closed over its actual telescope, including IHs.
+-- Build a discriminator or homogeneous projection using the complete direct
+-- group. Every family has a constant motive at the actual result type; an
+-- existing fallback supplies the other branches. No inhabitant or recursive
+-- evidence is invented, and every minor retains its unused real IH binders.
 def psElabIndexFunction (context : PsElabContext) (value : PsExpr)
     (selected : PsName) (field : Option Nat) (resultType fallback chosen : PsExpr) :
     Except PsElabError PsExpr := do
@@ -56,35 +58,64 @@ def psElabIndexFunction (context : PsElabContext) (value : PsExpr)
   let some info := psEnvironmentFindInductive context.environment family
     | throw (.refinement "index constructor family unavailable")
   if info.numIndices != 0 then throw (.refinement "dependent index-constructor projections are pending")
-  let recName := psNameAppendStr family "rec"
-  let some recursor := psEnvironmentFindRecursor context.environment recName | throw .matchRecursorUnsupported
-  let level ← psElabExpressionSort context resultType
-  let recLevels ← psElabRecursorLevels info recursor levels level
-  let id := context.localContext.nextId
-  let motive := psLogicLam id "_index" type resultType
-  let recType := psExprInstantiateLevelParams recursor.levelParams recLevels recursor.type
-  let some cursor := psReduceApplyType
-    (psWhnf context.environment context.metaContext context.localContext) recType (view.args ++ [motive])
+  if view.args.length != info.numParams then throw .matchParameterArity
+  let some selectedConstructor := psEnvironmentFindConstructor context.environment selected
+    | throw (.matchConstructorUnknown selected)
+  let some selectedName := info.constructors[selectedConstructor.constructorIndex]?
     | throw .matchRecursorUnsupported
-  let state ← info.constructors.foldlM (fun (state : PsExpr × List PsExpr) ctorName => do
-    let pi ← (psInferEnsureForall context.environment context.metaContext context.localContext state.fst).mapError PsElabError.infer
-    let some ctor := psEnvironmentFindConstructor context.environment ctorName | throw .matchRecursorUnsupported
-    let opened ← psElabOpenCoreTelescope 4096 context pi.domain
-      (some (ctor.numFields + ctor.recursiveFields.length))
-    let body ← if psNameEq ctorName selected then
-      match field with
-      | none => pure chosen
-      | some index => do
-        let some binder := opened.bindersRev.reverse[index]? | throw .matchRecursorUnsupported
-        if !(psDefEqReadOnlyWithEnv context.environment context.metaContext
-            opened.context.localContext binder.type resultType) then
-          throw (.refinement "dependent index-constructor projections are pending")
-        pure (.fvar binder.id)
-      else pure fallback
-    let minor := psCloseElabLambdaBinders context.metaContext opened.bindersRev body
-    pure (psExprInstantiate1 pi.body minor, state.snd ++ [minor])) (cursor, [])
-  return psLogicLam id "_index" type
-    (psExprApplyMany (.constE recName recLevels) (view.args ++ [motive] ++ state.snd ++ [.fvar id]))
+  if !psNameEq selectedConstructor.inductiveName info.name || !psNameEq selectedName selected then
+    throw .matchRecursorUnsupported
+  let level ← psElabExpressionSort context resultType
+  let fallback ← psElabResolvedTerm context fallback (some resultType)
+  let context := fallback.context
+  let (context, chosen) ← match field with
+    | none => do
+      let checked ← psElabResolvedTerm context chosen (some resultType)
+      pure (checked.context, checked.term)
+    | some _ => pure (context, chosen)
+  let recursor ← psElabGroupRecursorPlanFor context info levels view.args level
+  if recursor.group.members.any (·.numIndices != 0) then
+    throw (.refinement "dependent index-constructor projections are pending")
+  let constructors ← psElabGroupConstructors recursor.context recursor.group
+  let motives ← psElabRecursorArguments recursor.group.members
+    (fun current member type => do
+      let opened ← psElabOpenCoreTelescope 4096 current type (some 1)
+      let [major] := opened.bindersRev | throw .matchRecursorUnsupported
+      let familyType := psExprApplyMany (.constE member.name levels) view.args
+      if !psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
+          opened.context.localContext major.type familyType then
+        throw .matchRecursorUnsupported
+      return {
+        context := psElabLeaveScope current opened.context
+        term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev resultType })
+    recursor.context recursor.cursor
+  let minors ← psElabRecursorArguments constructors
+    (fun current (_, constructor) type => do
+      let opened ← psElabOpenCoreTelescope 4096 current type
+        (some (constructor.numFields + constructor.recursiveFields.length))
+      let body ←
+        if psNameEq constructor.name selected then
+          match field with
+          | none => pure chosen
+          | some index => do
+            if index >= constructor.numFields then throw .matchRecursorUnsupported
+            let some binder := opened.bindersRev.reverse[index]? | throw .matchRecursorUnsupported
+            if !psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
+                opened.context.localContext binder.type resultType then
+              throw (.refinement "dependent index-constructor projections are pending")
+            pure (.fvar binder.id)
+        else pure fallback.term
+      return {
+        context := psElabLeaveScope current opened.context
+        term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
+    motives.context motives.cursor
+  let id := context.localContext.nextId
+  let term := psLogicLam id "_index" type
+    (psExprApplyMany (.constE recursor.recursor.name recursor.levels)
+      (view.args ++ motives.arguments ++ minors.arguments ++ [.fvar id]))
+  let checked ← psElabResolvedTerm (psElabLeaveScope context minors.context) term
+    (some (psLogicPi id "_index" type resultType))
+  return checked.term
 
 def psElabIndexConstructor (context : PsElabContext) (value : PsExpr) :
     Option (PsConstructorInfo × List PsExpr) := do
@@ -190,3 +221,4 @@ def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
       return { body with type := target, term := psExprApplyMany body.term (equations.map (fun entry => entry.proof)) }
     | _, _ => finish context target
 end
+

@@ -40,7 +40,10 @@ def psElabDeriveInhabitedValue (plan : PsElabDeriveContext) : Except PsElabError
 
 def psElabDeriveInhabited (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
-  let plan ← psElabDerivePrepare environment origin
+  -- Complete nested/group metadata is validated by the shared preparation.
+  -- Defaults themselves use only actual constructor terms and available
+  -- dictionaries; a recursive slot never creates a self/default assumption.
+  let plan ← psElabDerivePrepare environment origin { groups := true, nested := true }
   -- RC4 chooses across all constructors before adding assumptions: a later
   -- empty constructor must beat an earlier constructor requiring Inhabited α.
   let (plan, defaultValue) ← match psElabDeriveInhabitedValue plan with
@@ -53,3 +56,4 @@ def psElabDeriveInhabited (environment : PsEnvironment)
   psElabDeriveFinish plan "instInhabited"
     (psStandardInhabitedType plan.family level)
     (psStandardInhabitedValue plan.family defaultValue level) true
+

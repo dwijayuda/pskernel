@@ -2,8 +2,9 @@
 Reference: Lean 4.35.0 Lean/Elab/Deriving/DecEq.lean at eb6cafb.
 Copyright (c) 2020 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Adaptation: checked direct induction, ordinary equality transport and
-constructor discrimination. No assumed recursive instance or BEq axiom.
+Adaptation: checked induction over complete direct nonindexed groups, ordinary
+equality transport and constructor discrimination. Nested deriving retains the
+pinned handler's refusal. No assumed recursive instance or BEq axiom.
 -/
 import Ps.Elab.DerivingContext
 import Ps.Elab.Equality
@@ -148,23 +149,57 @@ def psElabDeriveDecEqDifferent (plan : PsElabDeriveContext)
   return psExprApplyMany (.constE (psDecisionName "Decidable.isFalse") [])
     [target, psLogicLam assumption.id "impossible" target contradiction]
 
+-- Inspect only the right constructor belonging to this left family. Other
+-- group members use the ordinary inhabited type Decidable True, so their
+-- motives never pretend that values from different families can be equal.
+-- All right-side IHs remain bound and unused; only the real left-child
+-- hypotheses provide recursive decisions.
+def psElabDeriveDecEqRightCases (plan : PsElabDeriveContext)
+    (constructors : List PsElabDeriveDecEqConstructor) (context : PsElabContext)
+    (slotIndex : Nat) (slot : PsInductiveEliminationSlot)
+    (constructor : PsInductiveEliminationConstructor) (leftFields : List PsElabTypedBinder)
+    (hypotheses : List PsElabDeriveHypothesis) (left : PsExpr) : Except PsElabError PsExpr := do
+  let member ← psElabDeriveAtMember plan slot.family
+  let level ← psElabExpressionSort context member.family
+  let target := fun right => psDecisionType (psLogicEq level member.family left right)
+  let truth := PsExpr.constE (psRootName "True") []
+  let trivial := psExprApplyMany (.constE (psDecisionName "Decidable.isTrue") [])
+    [truth, .constE (psDecisionName "True.intro") []]
+  psElabDeriveEliminateSlotAt plan context slotIndex member.family true
+    (fun rightIndex _ _ right =>
+      if rightIndex == slotIndex then target right else psDecisionType truth)
+    (fun rightContext rightIndex _ rightConstructor rightFields _ right => do
+      if rightIndex != slotIndex then return trivial
+      if !psNameEq constructor.info.name rightConstructor.info.name then
+        return ← psElabDeriveDecEqDifferent member rightContext constructor.info left right
+      let some entry := constructors.find? (fun candidate =>
+          psNameEq candidate.fields.constructor.name constructor.info.name)
+        | throw (.data "DecidableEq deriving constructor plan missing")
+      psElabDeriveDecEqSame member entry rightContext leftFields rightFields
+        (hypotheses.map (fun hypothesis => (hypothesis.fieldId, hypothesis.value))) left right)
+
 def psElabDeriveDecEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
-  let initial ← psElabDerivePrepare environment origin
+  let initial ← psElabDerivePrepare environment origin { groups := true }
   let plan := psElabDeriveRequirements initial (psRootName "DecidableEq")
   let type ← psElabDeriveClassType plan.context (psRootName "DecidableEq") plan.family
-  let constructors ← plan.info.constructors.mapM (psElabDeriveDecEqPlan plan)
+  let constructors ← (psElabDeriveConstructorNames plan).mapM (psElabDeriveDecEqPlan plan)
   let level ← psElabExpressionSort plan.context plan.family
-  let target := fun left right => psDecisionType (psLogicEq level plan.family left right)
-  let rightId := plan.context.localContext.nextId + 1
-  let method ← psElabDeriveEliminateWithRecursion plan plan.context true
-    (fun left => psLogicPi rightId "right" plan.family (target left (.fvar rightId)))
-    (fun leftContext leftCtor leftFields hypotheses left =>
-      psElabDeriveEliminateWithRecursion plan leftContext true (target left)
-        (fun context rightCtor rightFields _ right => do
-          if !psNameEq leftCtor.name rightCtor.name then
-            return ← psElabDeriveDecEqDifferent plan context leftCtor left right
-          let some entry := constructors.find? (fun c => psNameEq c.fields.constructor.name leftCtor.name)
-            | throw (.data "DecidableEq deriving constructor plan missing")
-          psElabDeriveDecEqSame plan entry context leftFields rightFields hypotheses left right))
+  -- The kernel requires a common result universe for direct mutual families.
+  -- Recheck it before the pure motive callback reuses that inferred level.
+  for info in plan.group.members do
+    let member ← psElabDeriveAtMember plan info
+    let memberLevel ← psElabExpressionSort plan.context member.family
+    if !psLevelEquivalent level memberLevel then
+      throw (.data "DecidableEq deriving group result universes differ")
+  let method ← psElabDeriveEliminateSlots plan plan.context true
+    -- Each motive is opened in a fresh scope. Bind right directly so a later
+    -- member's actual left major cannot collide with a captured local ID.
+    (fun _ _ family left => .forallE (psRootName "right") family
+      (psDecisionType (psLogicEq level (psExprLiftBVars 1 0 family)
+        (psExprLiftBVars 1 0 left) (.bvar 0))) .explicit)
+    (fun context slotIndex slot constructor fields hypotheses left =>
+      psElabDeriveDecEqRightCases plan constructors context slotIndex slot constructor
+        fields hypotheses left)
   psElabDeriveFinish plan "instDecidableEq" type method
+

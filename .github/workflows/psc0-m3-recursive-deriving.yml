@@ -104,8 +104,8 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving
-          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive ../dist/m3-where ../dist/m3-nested-deriving
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving pscv0_m3_group_proof_deriving
+          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive ../dist/m3-where ../dist/m3-nested-deriving ../dist/m3-group-proof-deriving
           # Collect every independent source-check failure; all fixtures remain required.
           m3_fixture_status=0
           m3_check_fixture() {
@@ -129,6 +129,7 @@ jobs:
           m3_check_fixture ../dist/m3-nested-inductive/check.log .lake/build/bin/pscv0_m3_nested_inductive ../dist/m3-nested-inductive
           m3_check_fixture ../dist/m3-where/check.log .lake/build/bin/pscv0_m3_where ../dist/m3-where
           m3_check_fixture ../dist/m3-nested-deriving/check.log .lake/build/bin/pscv0_m3_nested_deriving ../dist/m3-nested-deriving
+          m3_check_fixture ../dist/m3-group-proof-deriving/check.log .lake/build/bin/pscv0_m3_group_proof_deriving ../dist/m3-group-proof-deriving
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-runtime/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-well-founded/source-sha.txt
@@ -139,6 +140,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-nested-inductive/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-where/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-nested-deriving/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-group-proof-deriving/source-sha.txt
           test "$m3_fixture_status" -eq 0
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         with:
@@ -182,6 +184,9 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-nested-deriving/nestedderive.ts --outDir ../dist/m3-nested-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq | tee ../dist/m3-nested-deriving/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq ../dist/m3-nested-deriving/ts/nestedderive.js | tee ../dist/m3-nested-deriving/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-group-proof-deriving/groupproof.ts --outDir ../dist/m3-group-proof-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-group-proof-deriving groupproof m3groupdecide,m3groupdecideatom,m3groupdefault,m3grouprequired | tee ../dist/m3-group-proof-deriving/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-group-proof-deriving groupproof m3groupdecide,m3groupdecideatom,m3groupdefault,m3grouprequired ../dist/m3-group-proof-deriving/ts/groupproof.js | tee ../dist/m3-group-proof-deriving/ts.log
       - name: Execute Rust with the existing pinned dependency lock
         run: |
           set -euo pipefail
@@ -206,6 +211,8 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-where/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-nested-deriving/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-group-proof-deriving groupproof m3groupdecide,m3groupdecideatom,m3groupdefault,m3grouprequired
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-group-proof-deriving/rust.log
       - name: Execute GC core and components against the native oracle
         run: |
           set -euo pipefail
@@ -229,6 +236,7 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf | tee ../dist/m3-where/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq | tee ../dist/m3-nested-deriving/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-group-proof-deriving groupproof m3groupdecide,m3groupdecideatom,m3groupdefault,m3grouprequired | tee ../dist/m3-group-proof-deriving/wasm.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -244,6 +252,7 @@ jobs:
             psc0/dist/m3-nested-inductive/
             psc0/dist/m3-where/
             psc0/dist/m3-nested-deriving/
+            psc0/dist/m3-group-proof-deriving/
           if-no-files-found: warn
           retention-days: 30
 

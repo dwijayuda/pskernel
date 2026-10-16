@@ -13,6 +13,12 @@ The following repair supplies explicit singleton `none` arguments and uses
 ordinary Core name construction. No expected values or acceptance checks
 change; all five gates must run again on the repaired compiler SHA.
 
+The next build, `ec22f4437e9f0d346af0a0da6d7981788760f6fb`, compiled those
+owners and found two detached `.mapError` continuations in
+`Ps.Erasure.WellFounded`. They are joined to their parenthesized calls, along
+with two analogous fixture continuations identified before that fixture could
+compile. This is a Lean syntax repair; runtime results remain unqualified.
+
 The group runtime path constructs one ordinary checked definition per family
 from the actual complete recursor application. All workers retain the same
 capture telescope, levels, parameters, motives and minor arguments; only the

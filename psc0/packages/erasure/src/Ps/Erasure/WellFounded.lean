@@ -51,8 +51,8 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
       (psExprFVarIds term).contains majorId) then
     throw .unsupportedRuntimeTerm
   let applied := view.args.foldl PsExpr.app view.head
-  let resultType ← (psInferType environment psMetaEmpty scope.localContext applied)
-    .mapError (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  let resultType ← (psInferType environment psMetaEmpty scope.localContext applied).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
   if !psErasureWellFoundedIsNat environment scope resultType then
     throw .unsupportedRuntimeTerm
   let .lam callbackName callbackType body .explicit :=
@@ -67,8 +67,8 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
   let probe := psLocalPushBinding scope.localContext argument.name argument.domain argument.binder
   let probeScope := { scope with localContext := probe.context }
   let proof ← (psInferEnsureForall environment psMetaEmpty probe.context
-    (psExprInstantiate1 argument.body (.fvar probe.id)))
-    .mapError (fun _ => PsErasureError.binderMismatch)
+    (psExprInstantiate1 argument.body (.fvar probe.id))).mapError
+    (fun _ => PsErasureError.binderMismatch)
   let proofKind := psErasureClassifyBinder environment probe.context proof.domain
   let .proof := proofKind | throw .unsupportedRuntimeTerm
   if !psErasureWellFoundedIsNat environment probeScope proof.body then

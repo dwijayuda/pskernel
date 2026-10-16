@@ -225,10 +225,10 @@ def main (args : List String) : IO Unit := do
     "group runtime qualification requires the pinned Lean"
   let group ← fromExcept elaborateGroup
   let declarations := group.declarations ++ foldDeclarations ++ outputs
-  let environment ← fromExcept ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations)
-    .mapError elabMessage)
-  let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput { environment, declarations })
-    .mapError psCompilerPscv0Error)
+  let environment ← fromExcept
+    ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations).mapError elabMessage)
+  let prepared ← fromExcept
+    ((psCompilerPrepareElaboratedWithOutput { environment, declarations }).mapError psCompilerPscv0Error)
   ensure (prepared.prepared.recursorWorkerGroups.length == 2 &&
     prepared.prepared.recursorWorkerGroups.all (fun group =>
       group.workers.length == 2 && group.captureCount == 2))

@@ -1,0 +1,105 @@
+name: PSKernel-C0 external Arena adversarial kernel cases
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-adversarial435.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  arena-native-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build exact-version native Lean C0 and external exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Rebuild frozen Arena exploit sources without inventing declarations
+        shell: bash
+        run: |
+          set -euo pipefail
+          revision=5d7ca987618f1136aaa296057b50a2c10c4ce77a
+          cd "$RUNNER_TEMP/lean4export"
+          mkdir -p .lake/build/lib/lean
+          curl -fL --retry 3 -o ArenaImaxProp.lean \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/bugs/proj-of-imax-prop.lean"
+          curl -fL --retry 3 -o ArenaLargeElim.lean \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/bugs/large-elim-prop-bool.lean"
+          lake env lean -o .lake/build/lib/lean/ArenaImaxProp.olean ArenaImaxProp.lean
+          lake env lean -o .lake/build/lib/lean/ArenaLargeElim.olean ArenaLargeElim.lean
+          lake env .lake/build/bin/lean4export ArenaImaxProp -- badFalse \
+            > "$RUNNER_TEMP/arena435-imaxPropBadFalse.ndjson"
+          lake env .lake/build/bin/lean4export ArenaLargeElim -- boom \
+            > "$RUNNER_TEMP/arena435-largeElimBoom.ndjson"
+          python3 - <<'PY'
+          import json,os,pathlib
+          temp=pathlib.Path(os.environ["RUNNER_TEMP"])
+          for name in ("imaxPropBadFalse","largeElimBoom"):
+              path=temp/f"arena435-{name}.ndjson"
+              lines=path.read_bytes().splitlines()
+              header=json.loads(lines[0])["meta"]
+              assert header["lean"]=={
+                "version":"4.35.0",
+                "githash":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+              assert header["exporter"]["version"]=="3.1.0"
+              assert len(lines)>2
+              print(f"C0_ARENA_EXPLOIT_EXPORT case={name} records={len(lines)} bytes={path.stat().st_size}")
+          PY
+      - name: Require real official rejection and classify native C0 without false acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in imaxPropBadFalse largeElimBoom; do
+            path="$RUNNER_TEMP/arena435-$name.ndjson"
+            rc=0
+            (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$path") \
+              > "$RUNNER_TEMP/arena435-$name-official.txt" 2>&1 || rc=$?
+            test "$rc" -ne 0
+            grep -Fq "Lean default kernel rejects the solution" "$RUNNER_TEMP/arena435-$name-official.txt"
+            native_rc=0
+            (cd psc0/packages/pskernel-c0 && timeout 150s .lake/build/bin/c0OfficialReplay "$path" 4096) \
+              > "$RUNNER_TEMP/arena435-$name-c0.txt" 2>&1 || native_rc=$?
+            if [ "$native_rc" -ne 0 ]; then
+              echo "C0_ARENA_EXPLOIT case=$name classification=process_failure exit=$native_rc" >&2
+              exit 1
+            fi
+            case "$(grep '^C0_REAL_EXPORT replay_outcome=' "$RUNNER_TEMP/arena435-$name-c0.txt" | tail -1)" in
+              *C0ExportVerdict.rejected*)
+                echo "C0_ARENA_EXPLOIT case=$name classification=correct_reject source=arena_2026_09 native_lean=4.35.0";;
+              *C0ExportVerdict.unsupported*|*C0ExportVerdict.inconclusive*|*C0ExportVerdict.resourceExhausted*)
+                echo "C0_ARENA_EXPLOIT case=$name classification=unqualified_decline source=arena_2026_09 native_lean=4.35.0";;
+              *C0ExportVerdict.accepted*)
+                echo "C0_ARENA_EXPLOIT case=$name classification=FALSE_ACCEPT" >&2; exit 1;;
+              *)
+                echo "C0_ARENA_EXPLOIT case=$name classification=unrecognized_result" >&2; exit 1;;
+            esac
+          done
+          echo "C0_ARENA_EXPLOIT_GATES native_kernel=false_accept_forbidden historical_bytes_unchanged=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-adversarial435
+          path: |
+            ${{ runner.temp }}/arena435-*.ndjson
+            ${{ runner.temp }}/arena435-*-official.txt
+            ${{ runner.temp }}/arena435-*-c0.txt
+          if-no-files-found: warn
+          retention-days: 21

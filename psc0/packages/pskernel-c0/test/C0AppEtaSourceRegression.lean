@@ -38,9 +38,12 @@ def main : IO Unit := do
     | .ok pair => pure pair
     | .error reason =>
         throw (IO.userError ("eta conversion returned error: " ++ reason))
-  if !positive ||
-      !psKernelExprPairSetContains converted.success left right then
+  if !positive then
     throw (IO.userError "eta did not match the official Lean 4.35 rule")
+  -- Eta remains valid, but its local-FVar operands may not populate a
+  -- cross-scope reusable positive-conversion cache.
+  if psKernelExprPairSetContains converted.success left right then
+    throw (IO.userError "eta cached an expression containing a local FVar")
   let (reverse, _) ← match psKernelIsDefEq
       4096 checked.context checked.state right left with
     | .ok pair => pure pair

@@ -24,11 +24,14 @@ for (const bits of [32,64]) {
     const cli = path.resolve('.lake/build/bin/pscv0_native');
     run(cli, ['--word-size', String(bits), '--emit-all', stem + '.ps', stem]);
     run(cli, ['--word-size', String(bits), '--emit-wasm', stem + '.ps', stem, path.join(directory,'exports.json')]);
-    const wit = await readFile(stem + '.wit', 'utf8');
     const declared = exportsOf(run('wasm-tools', ['component','wit',stem + '.wit']));
     assert.deepEqual(exportsOf(run('wasm-tools', ['component','wit',stem + '.wasm'])), declared);
-    assert.match(wit, new RegExp('echo-unsigned: func\\(value: u' + bits + '\\) -> u' + bits));
-    assert.match(wit, new RegExp('echo-signed: func\\(value: s' + bits + '\\) -> s' + bits));
+    // WIT permits %escaped identifiers, including %value. Compare the exact
+    // parsed scalar signature, not a particular spelling of the parameter.
+    assert.deepEqual(declared.find(e => e[0] === 'echo-unsigned'),
+      ['echo-unsigned', 'value:u' + bits, 'u' + bits]);
+    assert.deepEqual(declared.find(e => e[0] === 'echo-signed'),
+      ['echo-signed', 'value:s' + bits, 's' + bits]);
     for (const kind of ['', '.core']) {
       run('wasm-tools',['validate',stem + kind + '.wasm']);
       run('wasm-tools',['parse',stem + kind + '.wat','-o',stem + kind + '.roundtrip.wasm']);

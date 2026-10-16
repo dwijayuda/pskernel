@@ -54,7 +54,9 @@ def psKernelC0AppInferOnlyWithFuel
   | 0 => .error "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let expr : PsKernelExpr := .app fn arg
-      match psKernelExprMapGetWithKnownHash state.inferOnly expr none with
+      match (if psKernelInferCacheEligible true expr then
+          psKernelExprMapGetWithKnownHash state.inferOnly expr none
+        else Option.none) with
       | some ty =>
           match psKernelCheckerContextEnterRecDepth context with
           | .error error => .error error
@@ -83,7 +85,13 @@ theorem psKernelC0AppFull_source
       context state fn arg =
     psKernelInferCoreWithFuelUsing fuel onCheckedApp whnf defeq
       context state (.app fn arg) false := by
-  cases fuel <;> rfl
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      simp [psKernelC0AppFullWithFuel,
+        psKernelInferCoreWithFuelUsing,
+        psKernelInferCoreWithFuelUsingSourceFrames,
+        psKernelInferCacheEligible] <;> rfl
 
 /-- Infer-only app operational refinement, including both source cache
     states, the app argument-spine budget, and all source failures. -/
@@ -98,7 +106,12 @@ theorem psKernelC0AppInferOnly_source
       context state fn arg =
     psKernelInferCoreWithFuelUsing fuel none whnf defeq
       context state (.app fn arg) true := by
-  cases fuel <;> rfl
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      simp [psKernelC0AppInferOnlyWithFuel,
+        psKernelInferCoreWithFuelUsing,
+        psKernelInferCoreWithFuelUsingSourceFrames] <;> rfl
 
 /-- A root checked application is NOT the same operation as a recursive
     checked subapplication: the original source checker selects the

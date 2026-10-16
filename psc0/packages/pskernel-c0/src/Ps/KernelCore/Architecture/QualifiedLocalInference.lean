@@ -25,31 +25,23 @@ def psKernelC0FVarInferWithFuel
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (name : PsKernelName)
-    (inferOnly : Bool) :
+    (_inferOnly : Bool) :
     Option (PsKernelExpr × PsKernelCheckerState) :=
   match fuel with
   | 0 => none
   | Nat.succ _ =>
-      let expr : PsKernelExpr := .fvar name
-      let cache := if inferOnly then state.inferOnly else state.checkedInfer
-      match psKernelExprMapGet cache expr with
-      | some ty =>
-          match psKernelCheckerContextEnterRecDepth context with
-          | .ok _ => some (ty, state)
-          | .error _ => none
-      | none =>
-          match psKernelCheckerContextEnterRecDepth context with
-          | .error _ => none
-          | .ok entered =>
-              match psKernelLocalContextFind entered.localContext name with
-              | none => none
-              | some decl =>
-                  let ty := psKernelLocalDeclType decl
-                  some (ty, psKernelCacheInferResult state inferOnly expr ty)
+      -- FVars are NEVER semantic-cache eligible. Check the actual local
+      -- context even when an external caller supplied a stale cache entry.
+      match psKernelCheckerContextEnterRecDepth context with
+      | .error _ => none
+      | .ok entered =>
+          match psKernelLocalContextFind entered.localContext name with
+          | none => none
+          | some decl => some (psKernelLocalDeclType decl, state)
 
-/-- A successful independent local-variable result is exactly the original
-    inference worker's complete result, for ANY source state, context,
-    cache, optional checked-application hook or WHNF/DefEq callbacks. -/
+/-- The independent FVar path performs context lookup, never an
+untrusted cross-scope cache hit. Full types and final checker state are
+identical to the corrected source algorithm for any initial cache state. -/
 theorem psKernelC0FVarInfer_source
     (fuel : Nat)
     (onCheckedApp : Option PsKernelC0CheckedAppHook)
@@ -68,69 +60,29 @@ theorem psKernelC0FVarInfer_source
     psKernelInferCoreWithFuelUsing fuel onCheckedApp
       whnf defeq context state (.fvar name) inferOnly = .ok result := by
   cases fuel with
-  | zero => simp [psKernelC0FVarInferWithFuel] at h
+  | zero =>
+      simp [psKernelC0FVarInferWithFuel] at h
   | succ remaining =>
-      let expr : PsKernelExpr := .fvar name
-      let cache := if inferOnly then state.inferOnly
-        else state.checkedInfer
-      cases cached : psKernelExprMapGet cache expr with
-      | some ty =>
-          cases depth : psKernelCheckerContextEnterRecDepth context with
-          | error reason =>
-              simp only [psKernelC0FVarInferWithFuel, depth] at h
-              split at h <;> cases h
-          | ok entered =>
-              have hresult : result = (ty, state) := by
-                have hx : some (ty, state) = some result := by
-                  simpa [psKernelC0FVarInferWithFuel, cached, depth,
-                    cache, expr] using h
-                exact (Option.some.inj hx).symm
+      cases depth : psKernelCheckerContextEnterRecDepth context with
+      | error reason =>
+          simp [psKernelC0FVarInferWithFuel, depth] at h
+      | ok entered =>
+          cases found : psKernelLocalContextFind entered.localContext name with
+          | none =>
+              simp [psKernelC0FVarInferWithFuel, depth, found] at h
+          | some decl =>
+              have hresult : result = (psKernelLocalDeclType decl, state) := by
+                have hs : some (psKernelLocalDeclType decl, state) =
+                    some result := by
+                  simpa [psKernelC0FVarInferWithFuel, depth, found] using h
+                exact (Option.some.inj hs).symm
               rw [hresult]
-              have hcache :
-                  psKernelExprMapGetWithKnownHash
-                    (if inferOnly then state.inferOnly else state.checkedInfer)
-                    (.fvar name) none = some ty := by
-                change psKernelExprMapGet cache expr = some ty
-                exact cached
-              simpa [psKernelInferCoreWithFuelUsing,
+              simp [psKernelInferCoreWithFuelUsing,
                 psKernelInferCoreWithFuelUsingSourceFrames,
-                psKernelInferCacheEligible, hcache, depth]
-      | none =>
-          cases depth : psKernelCheckerContextEnterRecDepth context with
-          | error reason =>
-              simp only [psKernelC0FVarInferWithFuel, depth] at h
-              split at h <;> cases h
-          | ok entered =>
-              cases found : psKernelLocalContextFind
-                  entered.localContext name with
-              | none =>
-                  simp only [psKernelC0FVarInferWithFuel,
-                    depth, found] at h
-                  rw [cached] at h
-                  cases h
-              | some decl =>
-                  let ty : PsKernelExpr := psKernelLocalDeclType decl
-                  have hresult :
-                      result = (ty, psKernelCacheInferResult
-                        state inferOnly expr ty) := by
-                    have hx : some (ty,
-                        psKernelCacheInferResult state inferOnly expr ty) =
-                          some result := by
-                      simpa [psKernelC0FVarInferWithFuel, cached,
-                        depth, found, cache, expr, ty] using h
-                    exact (Option.some.inj hx).symm
-                  rw [hresult]
-                  have hcache :
-                      psKernelExprMapGetWithKnownHash
-                        (if inferOnly then state.inferOnly
-                          else state.checkedInfer)
-                        (.fvar name) none = none := by
-                    change psKernelExprMapGet cache expr = none
-                    exact cached
-                  simpa [psKernelInferCoreWithFuelUsing,
-                    psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, hcache, depth, found,
-                    ty, expr]
+                psKernelInferCacheEligible, psKernelSemanticCacheEligible,
+                psKernelExprHasFVar,
+                psKernelCacheInferResult, psKernelCacheInferResultWithKnownHash,
+                depth, found]
 
 /-- Source infer-only FVar checking uses precisely the previously defined
     infer-only cache and local context. -/

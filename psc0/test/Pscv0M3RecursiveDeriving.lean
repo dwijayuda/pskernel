@@ -147,6 +147,15 @@ def infixChild (n : Nat) : Nat :=
 termination_by structural n
 
 example (n : Nat) : infixChild (Nat.succ n) = infixChild n + 1 := by rfl
+
+-- Two-column pattern elimination, no recursion fallback or unproved branch.
+def matrixSelect (flag : Bool) (n : Nat) : Nat :=
+  match flag, n with
+  | true, 0 => 3
+  | true, Nat.succ k => k + 20
+  | false, _ => 11
+
+example (k : Nat) : matrixSelect true (Nat.succ k) = k + 20 := by rfl
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -249,7 +258,10 @@ private def source : String :=
   "function m3suboutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedSub(if (flag) { 17 } else { 9 }))\n" ++
   "function m3infixChild(n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3infixChild(k + 0) + 1 }\n" ++
   "theorem m3infixStep(n: Nat): m3infixChild(Nat.succ(n)) = m3infixChild(n) + 1 := by { rfl }\n" ++
-  "function m3infixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3infixChild(if (flag) { 17 } else { 9 }))\n"
+  "function m3infixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3infixChild(if (flag) { 17 } else { 9 }))\n" ++
+  "function m3matrixSelect(flag: Bool, n: Nat): Nat := match flag, n with { | true, 0 => 3 | true, k+1 => k+20 | false, _ => 11 }\n" ++
+  "theorem m3matrixStep(k: Nat): m3matrixSelect(true, Nat.succ(k)) = k+20 := by { rfl }\n" ++
+  "function m3matrixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3matrixSelect(flag, if (flag) { 5 } else { 0 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -286,7 +298,10 @@ private def refusals : List (String × String × String) := [
     "recursive major must be a direct recursive field"),
   ("non-child-infix",
     "function badInfixMajor(n: Nat): Nat := match n with { | 0 => 0 | k+1 => badInfixMajor(k + 1) }\n",
-    "recursive major must be a direct recursive field")]
+    "recursive major must be a direct recursive field"),
+  ("matrix-nonexhaustive",
+    "function badMatrix(flag: Bool, n: Nat): Nat := match flag, n with { | true, 0 => 1 }\n",
+    "PSCV0-MATCH: missing feasible constructor branch")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
@@ -297,7 +312,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -345,6 +360,8 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.normalizedSubChild (if flag then 17 else 9))).toNat))),
     ("m3infixoutput", Lean.toJson (toString ((UInt64.ofNat
       (M3RecursiveHashOracle.infixChild (if flag then 17 else 9))).toNat))),
+    ("m3matrixoutput", Lean.toJson (toString ((UInt64.ofNat
+      (M3RecursiveHashOracle.matrixSelect flag (if flag then 5 else 0))).toNat))),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

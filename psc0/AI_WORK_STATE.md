@@ -306,3 +306,20 @@ empty; when work exists, it still uses the original non-default
 Previously accepted Nat.sub and prefix-recursion receipts are intact.
 Five exact-commit native/F1/F2/F3-F4/focused gates must all pass.
 Overall M3+B remains OPEN; no self-hosting or pskernel-core.
+
+## Next M3+B pattern-matrix qualification — two discriminants (focused only pending)
+
+The current checked HAdd computed-major compiler `33c569e0` has
+F1/F2/F3-F4 and focused green on its own SHA while its full native
+workflow `38934640403` is in progress. Preserve this qualification
+boundary. This **test-only descendant** adds one independent pinned
+Lean 4.35.0 `Bool × Nat` multi-discriminant match oracle, selected
+PSCV0 `m3matrixSelect` with native checked equation, and one
+Bool→UInt64 observation for each input across existing
+JS/TS/Rust/V8 GC/Wasmtime lanes. A deliberately nonexhaustive
+two-column function must be refused at `PSCV0-MATCH: missing feasible
+constructor branch` during elaboration. It reuses existing common
+`Ps.Elab.PatternMatrix`/typed eliminator; no compiler implementation
+is changed or positive result claimed before the focused run.
+If the probe fails, fix the actual typed motive/pattern owner without
+accepting erroneous branches or weakening refusal. M3+B remains OPEN.

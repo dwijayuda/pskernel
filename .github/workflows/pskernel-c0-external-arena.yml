@@ -1,0 +1,70 @@
+name: PSKernel-C0 external Lean Kernel Arena differential
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-external-arena.yml'
+      - 'psc0/packages/pskernel-c0/test/arena_conformance.py'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  external-arena-small:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Verify native C0 and frozen external Arena identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(cd psc0/packages/pskernel-c0 && lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          cd psc0/packages/pskernel-c0
+          python3 -m py_compile test/arena_conformance.py
+          lake build c0OfficialReplay
+      - name: Download immutable external Arena round and validate SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" "https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz"
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+          echo "C0_ARENA pinned_release=round-2026-09 sha256=verified native_lean=4.35.0"
+      - name: Run exact external Arena cases with safe native 4.35 controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/arena_conformance.py --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" --checker psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay --controls psc0/packages/pskernel-c0/test --out "$RUNNER_TEMP/pskernel-c0-arena-results.json" --fuel 4096 --timeout 20 | tee "$RUNNER_TEMP/pskernel-c0-arena-summary.txt"
+          python3 - <<'PY'
+          import json, os, pathlib
+          r = json.loads((pathlib.Path(os.environ["RUNNER_TEMP"]) /
+                          "pskernel-c0-arena-results.json").read_text())
+          assert r["counts"].get("false_accept", 0) == 0
+          assert r["counts"].get("false_reject", 0) == 0
+          assert r["counts"].get("error", 0) == 0
+          assert r["native_controls"].get("correct", 0) == len(r["controls"])
+          print("C0_ARENA_GATES no_false_accept=true no_false_reject=true controls=verified")
+          print("C0_ARENA_COVERAGE accepted=%d rejected=%d unqualified=%d" % (
+              r["verified_arena_accepts"], r["verified_arena_rejects"],
+              r["total"] - r["verified_arena_accepts"] - r["verified_arena_rejects"]))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-external-arena-verdicts
+          path: |
+            ${{ runner.temp }}/pskernel-c0-arena-results.json
+            ${{ runner.temp }}/pskernel-c0-arena-summary.txt
+          if-no-files-found: warn
+          retention-days: 30

@@ -34,12 +34,10 @@ inductive M3NestedIndexed (A : Type u) (a : A) : Nat → Type u where
       M3NestedIndexed A a (Nat.succ n)
   deriving Hashable
 
--- Pinned kernel discovery compares these two fixed container parameters
--- structurally. Definitional equality must not merge their auxiliary motives.
-inductive M3NestedKey (A : Type u) : Type u where
-  | leaf
-  | plain (children : List (M3NestedKey A))
-  | aliased (children : List (Id (M3NestedKey A)))
+-- The raw-vs-definitional key oracle below uses an independently constructed
+-- Lean.Declaration.inductDecl. The native source command for that example
+-- reaches maxRecDepth while also requesting automatic elaborator extras;
+-- this fixture claims only the actual kernel declaration/recursor boundary.
 
 namespace M3NestedInductiveOracle
 
@@ -385,6 +383,51 @@ private def kernelShapes (environment : Lean.Kernel.Environment)
         actual.all == expected.inductiveNames.map PsKernelLean.toLeanName)
         "official nested recursor telescope or visible-only group names differ"
 
+-- Build the family and all constructor types directly with the official Lean
+-- AST. No portable declaration, conversion, or generated telescope enters
+-- this oracle. Id is retained in the aliased List parameter before admission.
+private def independentKeyDeclaration : Lean.Declaration :=
+  let level := Lean.Level.param `u
+  let sort := Lean.Expr.sort (.succ level)
+  let family := Lean.Expr.const `M3NestedKey [level]
+  let atParameter := Lean.Expr.app family (.bvar 0)
+  let result := Lean.Expr.app family (.bvar 1)
+  let list := Lean.Expr.const `List [level]
+  let plain := Lean.Expr.app list atParameter
+  let aliased := Lean.Expr.app list (.app (.const `Id [level]) atParameter)
+  let parameter := fun (body : Lean.Expr) => Lean.Expr.forallE `A sort body .implicit
+  let constructors : List Lean.Constructor := [
+    { name := `M3NestedKey.leaf, type := parameter atParameter },
+    { name := `M3NestedKey.plain,
+      type := parameter (.forallE `children plain result .default) },
+    { name := `M3NestedKey.aliased,
+      type := parameter (.forallE `children aliased result .default) }]
+  .inductDecl [`u] 1 [{
+    name := `M3NestedKey
+    type := .forallE `A sort sort .default
+    ctors := constructors }] false
+
+private def checkKeyKernelOracle (environment : PsEnvironment)
+    (prelude : Lean.Kernel.Environment) (declarations : List PsDeclaration) : IO Unit := do
+  let encoded ← fromExcept (encode environment declarations)
+  let decoded ← fromExcept ((PsKernelLean.decodeCanonicalAdmissions encoded).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message))
+  match independentKeyDeclaration, decoded.toList with
+  | .inductDecl levels parameters [expected] false,
+      [.inductDecl actualLevels actualParameters [actual] false] =>
+    ensure (levels == actualLevels && parameters == actualParameters && actual == expected)
+      "portable raw-key family/constructor types differ from the independent Lean AST"
+  | _, _ => throw (IO.userError "raw-key oracle lost its one ordinary kernel declaration")
+  -- Keep the native default recursion depth, below the unchanged provider's
+  -- existing ceiling. An actual kernel refusal remains a fixture failure.
+  let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    prelude.addDeclCore 2000000 1000 independentKeyDeclaration none
+  let oracle ← fromExcept (result.mapError PsKernelLean.kernelExceptionSummary)
+  let witnesses := signatureWitnesses declarations
+  ensure (witnesses.length == 3) "raw-key oracle lost a public/auxiliary signature witness"
+  let oracle ← checked environment oracle witnesses
+  kernelShapes oracle declarations
+
 private def reductionWitness (name : String) (value : PsExpr) (expected : Nat) : PsDeclaration :=
   let nat := PsExpr.constE psNatName []
   let expected := PsExpr.lit (.natural expected)
@@ -645,6 +688,7 @@ def main (args : List String) : IO Unit := do
     { environment := runtime.result.environment, declarations }).mapError psCompilerPscv0Error)
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  checkKeyKernelOracle input prelude keyGroup.declarations
   let keyAdmitted ← checked input prelude
     (keyGroup.declarations ++ signatureWitnesses keyGroup.declarations)
   kernelShapes keyAdmitted keyGroup.declarations

@@ -12,18 +12,24 @@ including all twelve WF and six structural outputs. It therefore has four
 passes, not five-gate acceptance. The latest accepted compiler remains 01d762eb.
 
 The shared nested elimination and Hashable candidate
-`7ce2388184f2c29cc49a2b1a367c05191828265a` failed all five gates at Core
-compilation. Its multiline constructor/application layout was repaired in
-`78f5f2e09b4a4497ddc179648f3ed3a291544f02`. Focused `38974978039`
-then compiled Core and the elaborator, but found one remaining constructor-arity
-error in Erasure.Inductive; all five gates failed before source/runtime checks.
+`7ce2388184f2c29cc49a2b1a367c05191828265a` needed Lean continuation layout
+repair `78f5f2e09b4a4497ddc179648f3ed3a291544f02`, then one legacy
+constructor-target initialization in `90cc412e2a171fef95af181c62f9e8c3196049d1`.
+At 90cc412e all production modules compile, and F1 `38975380612`,
+F2 `38975380763` and F3/F4 `38975380793` pass. Focused `38975380963`
+failed compiling the independent native M3NestedKey source command at its
+default recursion-depth limit. Native `38975381664` was still in progress
+when that fixture blocker was inspected. No source/runtime pass is claimed.
 
-The new optional recursive-target field was already supplied in explicit
-constructor calls, but one existing positional literal in generic constructor
-field preparation still supplied four fields. This commit initializes that
-legacy field's recursive target to none, as in the other direct constructor
-paths. Checked nested specialization later sets the actual target as before.
-No fixture, expected output, equation, guard, dependency pin or budget changes.
+This commit isolates the raw structural/definitional key oracle at the actual
+official-kernel boundary. An independent Lean.Declaration.inductDecl constructs
+the same family and constructor types, retaining Id in the second List argument.
+Its types are compared with decoded canonical admission; the actual fresh kernel
+must admit it, and all three public/auxiliary recursor signature witnesses must
+pass. The existing canonical admission, three-slot distinction and one-declaration
+checks also remain. Native source-command postprocessing support is not claimed.
+The provider's options, existing heartbeat/depth ceilings, seven runtime outputs,
+all earlier assertions, dependency pins and workflow budgets remain unchanged.
 
 This repaired compiler/test candidate requires its own exact-SHA native, F1, F2,
 F3/F4 and focused success. Let its full native gate finish before publishing the

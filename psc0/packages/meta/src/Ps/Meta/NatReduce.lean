@@ -24,8 +24,16 @@ def psReduceNatPrimitive (reduce : PsExpr → PsExpr) (expr : PsExpr) : Option P
       let .lit (.natural n) := reduce value | none
       return .lit (.natural (n + 1))
   | .app (.app (.constE name []) left) right =>
+    let rightReduced := reduce right
+    -- Pinned Lean 4.35.0 Init.Prelude defines Nat.add by recursion on
+    -- its SECOND operand: Nat.add a 0 reduces to a even when a is open.
+    -- Do not introduce the propositionally true but non-definitional
+    -- reverse rule Nat.add 0 a = a.
+    if psNameEq name psNatAddName &&
+        psExprAlphaEq rightReduced (.lit (.natural 0)) then
+      return left
     let operation ← psReduceNatBinary name
     let .lit (.natural a) := reduce left | none
-    let .lit (.natural b) := reduce right | none
+    let .lit (.natural b) := rightReduced | none
     return operation a b
   | _ => none

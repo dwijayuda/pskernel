@@ -25,3 +25,12 @@ native/F1/F2/F3-F4/focused qualification. This does not close M3+B.
 The unrelated fixed-discriminant cloud preparation commit 9f15ef1 failed
 invariant validation. Its code and logs are preserved as an unqualified
 experiment. No erasure gates, assumptions or performance budgets changed.
+
+### M3 structural-child candidate correction — pending qualification
+Focused run 38921593998 at 80d0654 built native Lean and the oracle but
+rejected the new .ps example at recursive major selection. The shared
+NatReduce converter only recognized closed binary arithmetic literals.
+Official pinned Init/Prelude.lean defines Nat.add a 0 by reduction on the
+second operand. This child patch adds only that exact definitional rule,
+not zero-add, arbitrary arithmetic decreasing, a new IH or proof axiom.
+The candidate still requires its own exact-commit five-workflow replay.

@@ -14,17 +14,17 @@ def c0FastAppEqBool (a b : PsKernelExpr) : Bool :=
 
 def main : IO Unit := do
   let base : PsKernelExpr := .fvar (.str .anonymous "x")
-  let meta : PsKernelExpr := .mdata 8 (.sort .zero)
+  let metaExpr : PsKernelExpr := .mdata 8 (.sort .zero)
   let differing : PsKernelExpr := .mdata 9 (.sort .zero)
   let sample : List PsKernelExpr := [
     .bvar 0, .bvar 1, base,
     .app base (.lit (.nat 1)),
     .lam (.str .anonymous "a") (.sort .zero) (.bvar 0) .default,
-    .forallE (.str .anonymous "b") meta differing .implicit,
-    .letE (.str .anonymous "z") meta base (.app (.bvar 0) base) false,
-    .app (.app base base) meta,
-    .proj (.str .anonymous "S") 2 meta,
-    meta, differing
+    .forallE (.str .anonymous "b") metaExpr differing .implicit,
+    .letE (.str .anonymous "z") metaExpr base (.app (.bvar 0) base) false,
+    .app (.app base base) metaExpr,
+    .proj (.str .anonymous "S") 2 metaExpr,
+    metaExpr, differing
   ]
   for a in sample do
     for b in sample do

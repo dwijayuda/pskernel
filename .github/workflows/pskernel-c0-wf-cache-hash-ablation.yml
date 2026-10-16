@@ -59,6 +59,18 @@ jobs:
           marker="\nabbrev PsKernelExprMapIndex :="
           assert left.count(marker)==1, "unexpected source cache layout"
           body=right[len(import_line):]
+          # The old CertifiedStore module already derives the exact same
+          # DecidableEq instances. Moving the cached-hash algorithm earlier
+          # also moves their single owner to Cache: do not redeclare them.
+          certified=pkg/"src/Ps/KernelCore/Core/CertifiedStore.lean"
+          old_cert=certified.read_text()
+          names=["PsKernelName","PsKernelLevel","PsKernelBinderInfo",
+                 "PsKernelLiteral","PsKernelExpr"]
+          for name in names:
+              instance=f"deriving instance DecidableEq for {name}\n"
+              assert old_cert.count(instance)==1, name
+              old_cert=old_cert.replace(instance,"")
+          certified.write_text(old_cert)
           cache.write_text(left.replace(marker,"\n"+body+"\n"+marker))
           memo.write_text(import_line+
               "\n/-! Compatibility import for the source-equivalent exact hash\n"

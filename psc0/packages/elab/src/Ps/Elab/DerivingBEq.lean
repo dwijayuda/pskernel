@@ -2,7 +2,7 @@
 Reference: Lean 4.35.0 Lean/Elab/Deriving/BEq.lean at eb6cafb.
 Copyright (c) 2020 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Adaptation: checked Core induction for direct uniform nonindexed recursion.
+Adaptation: checked Core induction for complete direct uniform nonindexed groups.
 No partial fallback or assumed self dictionary. Nested/dependent families
 retain the shared field-admissibility boundary.
 -/
@@ -47,7 +47,7 @@ def psElabDeriveBEqCompare (comparisons : List PsElabDeriveBEqField)
       let .fvar id := lhs | throw (.data "BEq deriving recursive field is not a local")
       let some (_, compare) := hypotheses.find? (fun entry => entry.fst == id)
         | throw (.data "BEq deriving recursive field has no checked induction hypothesis")
-      -- The shared eliminator checked this hypothesis at family -> Bool.
+      -- The shared eliminator checked this hypothesis at its child family -> Bool.
       -- It already fixes the left child; only the matching right child remains.
       return some (PsExpr.app compare rhs)
   let bool := PsExpr.constE psBoolName []
@@ -78,11 +78,12 @@ def psElabDeriveBEqStructure (plan : PsElabDeriveContext)
 def psElabDeriveBEqInductive (plan : PsElabDeriveContext)
     (constructors : List PsElabDeriveBEqConstructor) : Except PsElabError PsExpr :=
   let bool := PsExpr.constE psBoolName []
-  psElabDeriveEliminateWithRecursion plan plan.context true
-    (fun _ => .forallE (psRootName "right") plan.family bool .explicit)
-    (fun leftContext leftCtor left hypotheses _ =>
-      psElabDeriveEliminateWithRecursion plan leftContext true (fun _ => bool)
-        (fun _ rightCtor right _ _ => do
+  psElabDeriveEliminateGroup plan plan.context true
+    (fun _ family _ => .forallE (psRootName "right") family bool .explicit)
+    (fun leftContext leftFamily leftCtor left hypotheses _ => do
+      let rightPlan ← psElabDeriveAtMember plan leftFamily
+      psElabDeriveEliminateGroup rightPlan leftContext true (fun _ _ _ => bool)
+        (fun _ _ rightCtor right _ _ => do
           if !psNameEq leftCtor.name rightCtor.name then return .constE psBoolFalseName []
           let some entry := constructors.find? (fun c => psNameEq c.fields.constructor.name leftCtor.name)
             | throw (.data "BEq deriving constructor plan missing")
@@ -92,12 +93,12 @@ def psElabDeriveBEqInductive (plan : PsElabDeriveContext)
 
 def psElabDeriveBEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
-  let plan ← psElabDerivePrepare environment origin
+  let plan ← psElabDerivePrepare environment origin { groups := true }
   let className := psRootName "BEq"
   let plan := psElabDeriveRequirements plan className
   let type ← psElabDeriveClassType plan.context className plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch
-  let constructors ← plan.info.constructors.mapM (psElabDeriveBEqPlanConstructor plan)
+  let constructors ← (psElabDeriveConstructorNames plan).mapM (psElabDeriveBEqPlanConstructor plan)
   let method ← if plan.info.isStructure then
       match constructors with
       | [constructor] => psElabDeriveBEqStructure plan constructor
@@ -105,3 +106,4 @@ def psElabDeriveBEq (environment : PsEnvironment)
     else psElabDeriveBEqInductive plan constructors
   let value := psExprApplyMany (.constE (psNameAppendStr className "mk") levels) [plan.family, method]
   psElabDeriveFinish plan "instBEq" type value
+

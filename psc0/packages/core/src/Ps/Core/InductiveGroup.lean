@@ -7,6 +7,16 @@ import Ps.Core.Declaration
 structure PsInductiveGroupPlan where
   members : List PsInductiveInfo
 
+-- Kernel minor hypotheses follow constructor-field order. The retained
+-- positions must be strictly increasing and bounded; uniqueness alone would
+-- allow equal-typed hypotheses to be silently associated with another child.
+def psConstructorRecursiveFieldsOrdered (constructor : PsConstructorInfo) : Bool :=
+  let checked := constructor.recursiveFields.foldl
+    (fun (state : Bool × Nat) position =>
+      (state.fst && state.snd <= position && position < constructor.numFields,
+        position + 1)) (true, 0)
+  checked.fst
+
 def psInductiveGroupNames (plan : PsInductiveGroupPlan) : List PsName :=
   plan.members.map (·.name)
 

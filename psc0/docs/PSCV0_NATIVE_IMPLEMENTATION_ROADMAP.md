@@ -1,4 +1,39 @@
-## M3+B candidate: source mutual P0 and typed measured-state recursion
+## M3+B current checkpoint: accepted e03; expanded group deriving candidate
+
+Accepted compiler/test `e03a99d1f45f2127372ee556ffe866d304d103e3` has five green gates:
+native `38964433671` (33/33), F1 `38964433756`, F2 `38964433572`,
+F3/F4 `38964433857`, focused `38964433806` (15/15).
+See [the exact receipt](PSCV0_M3_GROUP_RECURSION_P0_QUALIFICATION_2026-10-17.md)
+for artifact digests, implemented scope, historical repairs and limitations.
+
+The current deriving candidate advances Exit 1 through the existing shared
+group motive/minor cursor: direct indexed Hashable/Repr, nonindexed group
+BEq, actual child-family/indices checking and ordinary generated instances.
+The shared constructor-order predicate also protects elaboration, reduction,
+recursor inspection and canonical transport. Independent native oracles and
+fresh checked equations feed all five focused target lanes. This changed
+compiler still requires all five gates on its own exact SHA.
+
+Approximate accepted progress is 55%, with a broad 45–65% engineering
+uncertainty interval. The estimate retains all six weighted exits:
+data/elimination/deriving 30%, source strategies 15%, total recursion 20%,
+P0 15%, P1 10%, integration 10%. The new deriving candidate and unfinished
+working implementations do not add accepted percentage points.
+
+Next shared dependencies are actual typed measured-recursion telescopes,
+compatible total-mutual strict-child construction, complete visible/nested
+recursor specialization slots, and selected local where closure/strategy
+ownership. The local where gap includes capture closure and recursive
+component policy, not just removal of parser refusals. The selected default
+induction tactic continues to match pinned Lean's mutual/nested refusal;
+no unspecified using grammar is introduced.
+
+P1 remains unavailable at the actual Classical.choice dependency of pinned
+Lean.Order.fix/CCPO.csup and its equations. Only propext and Quot.sound remain
+approved. M3+B remains OPEN; no later stage, verified artifact policy,
+performance baseline, workload or dependency pin is changed.
+
+## M3+B earlier candidate: source mutual P0 and typed measured-state recursion
 
 The selected def/function mutual command has one ordered source owner.
 `Ps.Elab.Mutual` constructs independent real opaque headers before any P0

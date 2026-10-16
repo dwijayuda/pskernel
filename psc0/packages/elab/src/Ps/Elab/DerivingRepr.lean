@@ -2,7 +2,8 @@
 Repr deriving adapted from Lean 4.35.0 Lean/Elab/Deriving/Repr.lean.
 Copyright (c) 2020 Microsoft Corporation. All rights reserved.
 Author: Leonardo de Moura. Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: checked Core construction for independent and uniform direct-recursive families.
+Modified: checked Core construction for independent fields and complete uniform
+direct-recursive groups, including each member's own index telescope.
 -/
 import Ps.Elab.DerivingContext
 import Ps.Environment.StandardRepr
@@ -58,9 +59,9 @@ def psElabDeriveReprStructure (plan : PsElabDeriveContext)
 
 def psElabDeriveReprInductive (plan : PsElabDeriveContext)
     (constructors : List PsElabDeriveReprConstructor) : Except PsElabError PsExpr :=
-  psElabDeriveEliminateWithRecursion plan plan.context true
-    (fun _ => psLogicPi plan.context.localContext.nextId "prec" psOrderNat psFormatType)
-    (fun context constructor fields hypotheses _ => do
+  psElabDeriveEliminateGroup plan plan.context true
+    (fun _ _ _ => psLogicPi plan.context.localContext.nextId "prec" psOrderNat psFormatType)
+    (fun context _ constructor fields hypotheses _ => do
       let some entry := constructors.find? (fun c => psNameEq c.fields.constructor.name constructor.name)
         | throw (.data "Repr deriving constructor plan missing")
       if entry.printers.length != fields.length then
@@ -84,11 +85,11 @@ def psElabDeriveReprInductive (plan : PsElabDeriveContext)
 
 def psElabDeriveRepr (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
-  let plan ← psElabDerivePrepare environment origin
+  let plan ← psElabDerivePrepare environment origin { groups := true, indices := true }
   let plan := psElabDeriveRequirements plan (psRootName "Repr")
   let type ← psElabDeriveClassType plan.context (psRootName "Repr") plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch
-  let constructors ← plan.info.constructors.mapM (psElabDeriveReprPlan plan)
+  let constructors ← (psElabDeriveConstructorNames plan).mapM (psElabDeriveReprPlan plan)
   let method ← if plan.info.isStructure then
       match constructors with
       | [constructor] => psElabDeriveReprStructure plan constructor
@@ -96,3 +97,4 @@ def psElabDeriveRepr (environment : PsEnvironment)
     else psElabDeriveReprInductive plan constructors
   let value := psExprApplyMany (.constE (psDecisionName "Repr.mk") levels) [plan.family, method]
   psElabDeriveFinish plan "instRepr" type value
+

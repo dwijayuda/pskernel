@@ -102,6 +102,7 @@ def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
     let orderedName ← family.constructors[ctor.constructorIndex]?
     if !psNameEq ctor.inductiveName family.name || !psNameEq orderedName ctorName ||
         ctor.numParams != recursor.numParams ||
+        !psConstructorRecursiveFieldsOrdered ctor ||
         constructor.args.length != ctor.numParams + ctor.numFields ||
         ctorLevels.length != ctor.levelParams.length then none else do
       let offset ← psInductiveGroupMinorOffset plan family.name

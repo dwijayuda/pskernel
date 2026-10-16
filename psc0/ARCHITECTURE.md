@@ -1,4 +1,34 @@
-## M3+B candidate: source mutual P0 and typed measured-state recursion
+## M3+B current checkpoint: accepted group/recursion/P0; expanded deriving candidate
+
+Exact compiler/test `e03a99d1f45f2127372ee556ffe866d304d103e3` passed all five gates,
+including every native step and every focused runtime target. The detailed
+[acceptance receipt](docs/PSCV0_M3_GROUP_RECURSION_P0_QUALIFICATION_2026-10-17.md)
+supersedes older pending and mixed-SHA status below.
+
+The new deriving candidate extends `Ps.Elab.DerivingContext` through the
+existing typed `Ps.Elab.GroupElimination` cursor. It constructs every actual
+family motive and constructor minor, retains each family's indices, and
+checks each child hypothesis against the corresponding closed motive.
+Hashable/Repr support direct indexed groups; BEq supports nonindexed groups,
+with left induction and right case inspection. The native group handler
+checks complete ordered source ownership and constructs all ordinary
+instances against the original environment.
+
+`psConstructorRecursiveFieldsOrdered` in `Ps.Core.InductiveGroup` owns
+strictly increasing, bounded recursive-field positions. Elaboration,
+deriving, reduction, recursor inspection and canonical encoding reuse it.
+A set-membership check cannot preserve the association of two equal-typed
+child hypotheses; their constructor order is semantically relevant.
+
+The six-output native/kernel/runtime fixture is integrated into every
+focused target lane. This candidate still needs its own five-gate acceptance.
+Nested specialization slots, dependent ordinary deriving fields, indexed
+BEq/DecidableEq, broader total and local where recursion remain explicit
+work. Default mutual/nested source induction remains refused as in pinned
+Lean without an explicit selected eliminator. No source grammar or logical
+assumption is expanded by this deriving change.
+
+## M3+B earlier candidate: source mutual P0 and typed measured-state recursion
 
 The selected def/function mutual command has one ordered source owner.
 `Ps.Elab.Mutual` constructs independent real opaque headers before any P0

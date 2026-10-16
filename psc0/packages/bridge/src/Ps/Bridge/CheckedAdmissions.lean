@@ -329,7 +329,8 @@ def psEncodeCodecConstructor
       Except.error
         (PsCheckedAdmissionCodecError.missingConstructor constructorName)
   | some info =>
-      if psCheckedAdmissionBoolNot (psNameEq info.inductiveName inductiveName) then
+      if psCheckedAdmissionBoolNot (psNameEq info.inductiveName inductiveName) ||
+          psCheckedAdmissionBoolNot (psConstructorRecursiveFieldsOrdered info) then
         Except.error
           (PsCheckedAdmissionCodecError.mismatchedConstructor constructorName)
       else

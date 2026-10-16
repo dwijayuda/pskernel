@@ -25,8 +25,13 @@ def psGroupRecursorApplication (environment : PsEnvironment) (expr : PsExpr) :
   let family ← psEnvironmentFindInductive environment familyName
   let group ← psInductiveGroupPlanFor
     (psEnvironmentFindInductive environment) (psEnvironmentFindRecursor environment) family
+  let constructorsValid := group.members.all fun member =>
+    member.constructors.all fun name =>
+      match psEnvironmentFindConstructor environment name with
+      | some constructor => psConstructorRecursiveFieldsOrdered constructor
+      | none => false
   if !psInductiveGroupRecursorShapeValid group family info ||
-      levels.length != info.levelParams.length then none else do
+      levels.length != info.levelParams.length || !constructorsValid then none else do
     let prefixSize := info.numParams + info.numMotives + info.numMinors
     let major ← view.args[prefixSize + info.numIndices]?
     return {

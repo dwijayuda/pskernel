@@ -1,4 +1,67 @@
-## M3+B candidate — source mutual P0 and typed measured-state recursion
+## M3+B current checkpoint — accepted recursion/P0 baseline; group deriving candidate
+
+Latest fully accepted compiler/test: `e03a99d1f45f2127372ee556ffe866d304d103e3`.
+All five exact-SHA gates succeeded: native `38964433671` (33/33 reported
+steps), F1 `38964433756`, F2 `38964433572`, F3/F4 `38964433857`,
+focused `38964433806` (15/15). Native source/Standard, every runtime lane,
+repeated Wasmtime calls and the unchanged measurement step passed.
+
+Receipt: `docs/PSCV0_M3_GROUP_RECURSION_P0_QUALIFICATION_2026-10-17.md`.
+This accepts the retained direct group formation/admission/reduction,
+checked captured companion execution, dependent source group cases,
+multi-Nat measured state with exact fix_eq equations, and ordinary singleton
+and mutual P0 body execution. Earlier mixed-SHA results are historical;
+the old a7c6 baseline no longer describes current acceptance.
+
+The current implementation candidate extends the shared deriving context to
+the complete checked group. Hashable and Repr consume actual per-family
+motives and indices; nonindexed BEq uses left induction and right cases.
+Every child IH is checked against its actual family's closed motive and
+indices. All generated group instances are ordinary definitions built
+against the original input environment, with no assumed sibling dictionary.
+
+One Core predicate requires retained recursive-field positions to be
+strictly increasing and bounded. Deriving, source recursor elaboration,
+portable iota reduction, runtime recursor inspection and canonical encoding
+consume this shared rule, preventing equal-typed child IHs from being
+silently reordered. Canonical encoding refuses invalid metadata before its
+constructor-only wire representation can discard those positions.
+
+The new independent native fixture emits six outputs for group Hashable,
+Repr, BEq, a nonreflexive field dictionary, and indexed Hashable/Repr.
+It checks fresh official-kernel instances/workers, generic hash equations,
+closed equality equations, exact native pretty text at two precedences,
+ten two-worker groups with the real A/a/dictionary captures, and metadata
+reversal/omission refusals. mixHash is opaque in native Lean; numeric hash
+parity comes from executed native oracles, not fabricated rfl witnesses.
+The same fixture runs JS, strict compiled TS, locked Rust, V8 GC and Wasmtime.
+
+Indexed Hashable/Repr become positive selected cases. Only their two old
+indexed-refusal rows change to dependent ordinary Fin fields that still
+require a precise independent-runtime-field refusal; their new positive
+behavior is checked separately. Existing BEq/DecidableEq boundaries,
+original workloads, expected scalar results, iteration counts, budgets and
+dependency pins remain intact.
+
+This deriving compiler/test candidate requires its own five gates before
+acceptance. Broader typed measured recursion and compatible total mutual
+structural construction are separate active implementations. Nested
+specialized recursor motives/traversal and selected local where closure are
+remaining shared dependencies. Default source mutual/nested induction stays
+refused, matching pinned Lean without an explicit selected eliminator.
+
+M3+B remains OPEN. Reassessed from accepted e03 evidence: approximately 55%
+complete (45–65% engineering uncertainty). Weights remain data 30%, source
+strategies 15%, total recursion 20%, P0 15%, P1 10%, integration 10%; all six
+exits remain in the denominator. P1 has no accepted construction because
+pinned Lean.Order.fix/CCPO.csup and its equations require Classical.choice.
+Approved assumptions remain only propext and Quot.sound. Continue the
+unaffected implementation; PR #109 stays draft/open/unmerged on its original
+base.
+
+The following sections retain earlier checkpoint history.
+
+## M3+B earlier candidate — source mutual P0 and typed measured-state recursion
 
 The selected v7.2 def/function `mutual ... end` command now retains its
 ordered members, per-member modifiers/spans and whole-group span. Compatible

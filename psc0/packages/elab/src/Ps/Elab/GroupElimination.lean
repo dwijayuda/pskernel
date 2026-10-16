@@ -79,8 +79,7 @@ def psElabGroupConstructors (context : PsElabContext) (group : PsInductiveGroupP
           constructor.constructorIndex != index ||
           constructor.numParams != family.numParams ||
           !psInductiveGroupNamesEqual constructor.levelParams family.levelParams ||
-          constructor.recursiveFields.eraseDups.length != constructor.recursiveFields.length ||
-          constructor.recursiveFields.any (· >= constructor.numFields) then
+          !psConstructorRecursiveFieldsOrdered constructor then
         throw .matchRecursorUnsupported
       return (family, constructor)
   return families.flatten

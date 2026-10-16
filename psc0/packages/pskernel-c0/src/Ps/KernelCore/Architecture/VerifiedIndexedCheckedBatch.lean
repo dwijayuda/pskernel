@@ -249,6 +249,7 @@ theorem psKernelC0IndexedCheckedBatchWithSeed_source
           rcases result with ⟨ty, nextState⟩
           simp only [hCheck]
           rw [psKernelC0IndexedCheckedBatchVerified_source]
+          rfl
 
 /-- Session-level seeded, atomic batch: the first node may reuse an actual
 previously checked result at precisely this original session state. -/

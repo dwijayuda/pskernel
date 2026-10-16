@@ -172,7 +172,13 @@ jobs:
             "$RUNNER_TEMP/c0-strict-fuel.txt"
           grep -Fq "C0_REAL_EXPORT_STRICT_FAILURE verdict=C0ExportVerdict.resourceExhausted" \
             "$RUNNER_TEMP/c0-strict-fuel.txt"
-          echo "C0_STRICT_CLI_RESULT positive=exit_zero invalid=exit_nonzero fuel_exhausted=exit_nonzero"
+          # The opt-in profiler must not change the strict checked verdict.
+          .lake/build/bin/c0OfficialReplay --require-accepted --trace-declarations \
+            test/C0OfficialAccept.ndjson 4096 > "$RUNNER_TEMP/c0-strict-traced.txt" 2>&1
+          grep -Fq "C0_REAL_EXPORT_DECL_BEGIN record=" "$RUNNER_TEMP/c0-strict-traced.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=6 fuel=4096" \
+            "$RUNNER_TEMP/c0-strict-traced.txt"
+          echo "C0_STRICT_CLI_RESULT positive=exit_zero invalid=exit_nonzero fuel_exhausted=exit_nonzero trace_verdict=unchanged"
       - name: C0 architecture-first lazy execution versus source WHNF (non-accepting)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureExecutionRegression.lean

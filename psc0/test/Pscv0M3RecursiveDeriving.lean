@@ -156,6 +156,18 @@ def matrixSelect (flag : Bool) (n : Nat) : Nat :=
   | false, _ => 11
 
 example (k : Nat) : matrixSelect true (Nat.succ k) = k + 20 := by rfl
+-- Independent pinned Lean 4.35.0: a strictly positive nested family
+-- with a shallow nonrecursive elimination over its actual constructor cases.
+inductive M3NestedRose where
+  | leaf
+  | node : List M3NestedRose → M3NestedRose
+
+def nestedRoseTag : M3NestedRose → Nat
+  | .leaf => 0
+  | .node _ => 1
+
+example (xs : List M3NestedRose) :
+    nestedRoseTag (.node xs) = 1 := rfl
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -316,7 +328,12 @@ def main (args : List String) : IO Unit := do
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
     exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput"] }
-  let requests := #[request] ++ (refusals.map fun (_, text, _) =>
+  let nestedRequest : PsV7Native.Request := {
+    source :=
+      "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
+      "function m3nestedtag(r: M3NestedRose): Nat := match r with { | M3NestedRose.leaf => 0 | M3NestedRose.node children => 1 }\n"
+    sourceName := "m3-nested-rose.ps" }
+  let requests := #[request, nestedRequest] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
@@ -334,8 +351,15 @@ def main (args : List String) : IO Unit := do
       match file.payload with
       | .text value => IO.FS.writeFile (directory / file.path) value
       | .binary value => IO.FS.writeBinFile (directory / file.path) value
+  let some nestedOutcome := batch.results[1]? | throw (IO.userError "missing nested admission")
+  match nestedOutcome with
+  | .error error =>
+    throw (IO.userError ("nested check-only: " ++ error.phase ++ ": " ++ error.message))
+  | .ok nested =>
+    if !nested.artifacts.isEmpty || nested.declarationCount < 4 then
+      throw (IO.userError "nested check-only failed declaration/artifact boundary")
   for ((label, _, expected), i) in refusals.zipIdx do
-    let some outcome := batch.results[i + 1]? | throw (IO.userError "missing deriving refusal")
+    let some outcome := batch.results[i + 2]? | throw (IO.userError "missing deriving refusal")
     match outcome with
     | .ok _ => throw (IO.userError ("deriving unexpectedly accepted " ++ label))
     | .error error =>

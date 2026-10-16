@@ -332,3 +332,22 @@ deliberately nonuniform nested family must reject at the precise
 focused CI and all native/F1/F2/F3-F4 gates are required before accepting
 this bounded validation improvement. It is NOT complete general
 mutual/nested recursion, deriving, M3+B, P0 or P1.
+
+## Focused M3+B probe: check-only nested one-family elimination
+
+After the preceding native `.lean` nested uniform-parameter validator
+candidate, the inspected canonical admission bridge showed a bounded,
+zero-parameter/zero-index nested adapter (`psCheckedNestedWrapper`) for
+List/Option/Prod, distinct from the portable recursive deriving machinery.
+This test-only child asks the **existing official native host** to check a
+zero-parameter, strictly positive two-constructor `Rose` with a
+`List Rose` field and a shallow `match`; the independently checked
+pinned Lean oracle constructs an equivalent family and equation.
+No target artifacts are requested: passing establishes only logical
+inductive/recursor admission, not executable nested recursion/IR/ABI.
+The initial actual recursive deriving/target runtime fixture and every
+earlier exact-phase negative remain unchanged, with only a positive
+batch request and its indexing added. Native kernel rejects imply
+the bridge or recursor requires architectural work, never a gate bypass.
+Full M3+B remains open; nested indexed/mutual groups, runtime/deriving,
+P0/P1 and verified target behavior are not claimed.

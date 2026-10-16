@@ -80,7 +80,8 @@ jobs:
           print("C0_PAIR_HASH_ABLATION mode="+mode+" exact_source_csimp=Lean_checked")
           PY
           (cd psc0/packages/pskernel-c0 &&
-            lake build c0OfficialReplay)
+            # Compile native checker and the source-proof compatibility import.
+            lake build c0OfficialReplay Ps.KernelCore.Architecture.CertifiedDefEqPairHash)
       - name: Preserve full source hash theorem and negative kernel fixtures
         working-directory: psc0/packages/pskernel-c0
         shell: bash

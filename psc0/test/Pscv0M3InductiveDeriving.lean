@@ -1,4 +1,5 @@
 import Ps.Host.NativeV7
+import PsKernelLean.Admission
 
 -- Independent pinned Lean deriving. These ordinary native declarations are
 -- never substituted for the portable group AST or its generated instances.
@@ -208,7 +209,7 @@ private def add (environment : PsEnvironment) (declarations : List PsDeclaration
 private def derive (environment : PsEnvironment) (origin : PsElabBatchOrigin)
     (handlers : List String) : IO (List PsDeclaration) := do
   let declarations ← fromExcept ((handlers.mapM fun handler =>
-    psElabDeriveGroupHandler environment origin { segments := [handler] }).mapError
+    psElabDeriveGroupHandler environment origin { segments := [handler], span := origin.span }).mapError
       psCompilerPscv0ElabError)
   return declarations.flatten
 
@@ -248,14 +249,15 @@ private def checkRefusals (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do
   expectRefused "indexed member through an unindexed selected family"
     "deriving indexed families is not yet implemented"
-    (psElabDeriveGroupHandler environment indexedOrigin { segments := ["BEq"] })
+    (psElabDeriveGroupHandler environment indexedOrigin
+      { segments := ["BEq"], span := indexedOrigin.span })
   for handler in ["Inhabited", "DecidableEq"] do
     expectRefused ("legacy singleton " ++ handler) "deriving handler requires a singleton family"
-      (psElabDeriveHandler environment origin { segments := [handler] })
+      (psElabDeriveHandler environment origin { segments := [handler], span := origin.span })
   expectRefused "reordered retained group origin"
     "deriving origin does not retain the complete ordered group"
     (psElabDeriveGroupHandler environment { origin with members := origin.members.reverse }
-      { segments := ["Hashable"] })
+      { segments := ["Hashable"], span := origin.span })
   let name := psNameAppendStr (psRootName "M3DeriveForest") "cons"
   let some constructor := psEnvironmentFindConstructor environment name
     | throw (IO.userError "two-child deriving constructor is absent")
@@ -265,11 +267,11 @@ private def checkRefusals (environment : PsEnvironment)
   for handler in ["Hashable", "Repr"] do
     expectRefused ("reversed equal-result IHs for " ++ handler)
       "deriving recursive field metadata is invalid"
-      (psElabDeriveGroupHandler reversed origin { segments := [handler] })
+      (psElabDeriveGroupHandler reversed origin { segments := [handler], span := origin.span })
   let omitted := psEnvironmentInsert environment
     (.constructorDecl { constructor with recursiveFields := [1] })
   expectRefused "omitted direct child metadata" "deriving direct field is absent from recursive metadata"
-    (psElabDeriveGroupHandler omitted origin { segments := ["Hashable"] })
+    (psElabDeriveGroupHandler omitted origin { segments := ["Hashable"], span := origin.span })
   IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association, indexed BEq boundary and legacy singleton handlers"
 
 private def checkPlans (environment : PsEnvironment)
@@ -301,8 +303,8 @@ private def twoChildProbe (environment : PsEnvironment) (instances : List PsDecl
     | throw (IO.userError "generated Forest Hashable instance is absent")
   let some opened := psRecursorOpenWorker 4096 3 psLocalEmpty type value
     | throw (IO.userError "generated Hashable parameter/dictionary telescope is invalid")
-  let application := psExprAppView opened.value
-  let some (.lam _ _ body _) := application.args[1]?
+  let application : PsReduceAppView := psReduceAppView opened.value
+  let some (PsExpr.lam _ _ body _) := application.args[1]?
     | throw (IO.userError "generated Hashable method is not an explicit lambda")
   let some view := psGroupRecursorApplication environment body
     | throw (IO.userError "generated Hashable method lost its complete group recursor")

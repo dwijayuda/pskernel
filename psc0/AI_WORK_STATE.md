@@ -1,3 +1,24 @@
+## Deriving fixture repair and exact-SHA workflow triggering
+
+Compiler `0d17a6ca9dc5ceb5ceed4c40ffcc3ffabfd1be19` compiled every changed
+production owner, but focused `38966362759` stopped while compiling the new
+fixture. It needed the explicit PsKernelLean.Admission import, source spans
+on six native handler-name records, and the actual PsReduceAppView record
+for its real two-child recursor probe. The repair changes none of the
+fixture's assertions, source workloads, exports or expected values.
+
+All five primary workflows now also watch `psc0/test/Pscv0M3*.lean` and
+`psc0/scripts/pscv0-m3-*.mjs`. This closes the trigger gap that previously
+left fixture-only repairs with focused evidence on a different SHA from the
+other gates. The jobs, checks, workloads, timeouts and dependency pins are
+unchanged. The repaired compiler/test commit must obtain all five results;
+the 0d17 candidate is not accepted.
+
+Latest accepted compiler remains `e03a99d1f45f2127372ee556ffe866d304d103e3`,
+with the five-gate receipt below. M3+B remains OPEN at approximately 55%
+(45–65% engineering uncertainty); unfinished typed/mutual/nested work is
+excluded from that accepted estimate.
+
 ## M3+B current checkpoint — accepted recursion/P0 baseline; group deriving candidate
 
 Latest fully accepted compiler/test: `e03a99d1f45f2127372ee556ffe866d304d103e3`.

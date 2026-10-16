@@ -3,6 +3,9 @@ on:
   push:
     branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research, psc0/pscv0-v7-platform-words-research]
     paths:
+      # M3 acceptance uses one compiler/test SHA, including fixture-only repairs.
+      - 'psc0/test/Pscv0M3*.lean'
+      - 'psc0/scripts/pscv0-m3-*.mjs'
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
       - 'psc0/host/src/Ps/Host/*.lean'
@@ -322,3 +325,4 @@ jobs:
           path: psc0/dist/pscv0-native/
           if-no-files-found: warn
           retention-days: 30
+

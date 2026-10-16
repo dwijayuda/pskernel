@@ -6,6 +6,9 @@ on:
       - psc0/pscv0-v7-native-lean-v1
       - psc0/pscv0-v7-platform-words-research
     paths:
+      # M3 acceptance uses one compiler/test SHA, including fixture-only repairs.
+      - 'psc0/test/Pscv0M3*.lean'
+      - 'psc0/scripts/pscv0-m3-*.mjs'
       - 'psc0/lakefile.lean'
       - 'psc0/lean-toolchain'
       - 'psc0/packages/**'

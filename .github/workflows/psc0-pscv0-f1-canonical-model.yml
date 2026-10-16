@@ -5,6 +5,9 @@ on:
   push:
     branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research, psc0/pscv0-v7-platform-words-research]
     paths:
+      # M3 acceptance uses one compiler/test SHA, including fixture-only repairs.
+      - 'psc0/test/Pscv0M3*.lean'
+      - 'psc0/scripts/pscv0-m3-*.mjs'
       # The independently checked F1 proof model depends on the selected
       # Standard and checker, not just its host-only proof source. A Standard
       # universe/signature update must re-run the same kernel replay.

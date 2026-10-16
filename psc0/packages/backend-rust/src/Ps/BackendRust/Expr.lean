@@ -61,7 +61,7 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
         if ctx.locals.contains name then
           return .text (if preserve.contains name then psRustClonePrinted name else name)
         else psRustGlobalValue ctx name
-    | .intrinsic op _ args =>
+    | .intrinsic op resultType args =>
         -- Name complex operands once, in order. Borrowed variables avoid a
         -- needless BigInt/array clone; owned updates can retain uniqueness.
         let mut statements := []
@@ -86,8 +86,15 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
               statements := .append (.text ("let " ++ temporary ++ " = ")) (.append value (.text ";")) :: statements
               printed := temporary :: printed
         let value ← psRustResult (psRustEmitIntrinsicFromPrinted op printed.reverse)
-        if statements.isEmpty then return .text value
-        return psDocBlock "" (statements.reverse ++ [.text value])
+        -- Preserve the checked result type at every primitive boundary. A
+        -- nested empty collection has no element-bearing operand from which
+        -- Rust can recover its type. This also covers future polymorphic
+        -- primitives without special-casing a source fixture or operation.
+        let type ← psRustResult (psRustEmitType resultType)
+        let result := "__ps_result_" ++ toString fuel
+        return psDocBlock "" (statements.reverse ++ [
+          .text ("let " ++ result ++ ": " ++ type ++ " = " ++ value ++ ";"),
+          .text result])
     | .call fn types args =>
         let fnLive := preserve ++ psRustFreeMany ctx args
         let callee ← match fn with

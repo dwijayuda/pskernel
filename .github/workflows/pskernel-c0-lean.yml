@@ -322,7 +322,24 @@ jobs:
         run: lake env lean --run test/C0IndexedScratchRegression.lean
       - name: Native Lean C0 performance microbenchmarks (no self-host)
         working-directory: psc0/packages/pskernel-c0
-        run: lake env lean --run test/C0PerfMicrobench.lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0PerfMicrobench.lean | tee "$RUNNER_TEMP/c0-native-perf.txt"
+          # A source-exact memo previously slowed the established 512-arg
+          # single-substitution fixture ~20x without changing acceptance.
+          # Fail before deployment if the specialized call exceeds three
+          # times the matched generic call in this same runner and input.
+          line="$(grep -F 'C0_BENCH instantiate1 generic_ms=' "$RUNNER_TEMP/c0-native-perf.txt" | tail -n 1)"
+          test -n "$line"
+          generic="$(printf '%s\n' "$line" | sed -n 's/.*generic_ms=\([0-9][0-9]*\).*/\1/p')"
+          specialized="$(printf '%s\n' "$line" | sed -n 's/.*specialized_ms=\([0-9][0-9]*\).*/\1/p')"
+          test -n "$generic" && test -n "$specialized"
+          if (( generic == 0 || specialized > 3 * generic )); then
+            echo "C0_INST1_PERF_GUARD=FAIL generic_ms=$generic specialized_ms=$specialized" >&2
+            exit 1
+          fi
+          echo "C0_INST1_PERF_GUARD=PASS generic_ms=$generic specialized_ms=$specialized max_factor=3"
 
       - name: Matched original vs C0 native checker (no self-host)
         shell: bash

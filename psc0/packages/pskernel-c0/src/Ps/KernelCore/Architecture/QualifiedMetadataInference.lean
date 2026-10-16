@@ -95,12 +95,12 @@ theorem psKernelC0MetadataInfer_source
                     exact (Option.some.inj hx).symm
                   rw [hresult]
                   have hcache :
-                      (if psKernelInferCacheEligible inferOnly term then
+                      (if psKernelSemanticCacheEligible term then
                         psKernelExprMapGetWithKnownHash
                           (if inferOnly then state.inferOnly else state.checkedInfer)
                           (.mdata md body) none
                        else Option.none) = some ty := by
-                    simpa [psKernelExprMapGet, cache, term] using cached
+                    simpa [psKernelExprMapGet, psKernelInferCacheEligible, cache, term] using cached
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
                     psKernelInferCacheEligible, hcache, depth]
@@ -137,13 +137,13 @@ theorem psKernelC0MetadataInfer_source
                             apply ih
                             exact nested
                           have hcache :
-                              (if psKernelInferCacheEligible inferOnly term then
+                              (if psKernelSemanticCacheEligible term then
                                 psKernelExprMapGetWithKnownHash
                                   (if inferOnly then state.inferOnly
                                    else state.checkedInfer)
                                   (.mdata md body) none
                                else Option.none) = none := by
-                            simpa [psKernelExprMapGet, cache, term] using cached
+                            simpa [psKernelExprMapGet, psKernelInferCacheEligible, cache, term] using cached
                           change psKernelInferCoreWithFuelUsingSourceFrames
                             remaining onCheckedApp [] [] whnf defeq
                             entered state body inferOnly =

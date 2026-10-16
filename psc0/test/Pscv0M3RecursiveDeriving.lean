@@ -203,6 +203,15 @@ def nestedProdRoseTag : M3NestedProdRose → Nat
 example (xs : Prod M3NestedProdRose M3NestedProdRose) :
     nestedProdRoseTag (.node xs) = 1 := rfl
 
+def nestedOptionRoseOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (nestedOptionRoseTag
+    (if flag then M3NestedOptionRose.leaf else M3NestedOptionRose.node none))
+
+def nestedProdRoseOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (nestedProdRoseTag
+    (if flag then M3NestedProdRose.leaf else
+      M3NestedProdRose.node (M3NestedProdRose.leaf, M3NestedProdRose.leaf)))
+
 def nestedArrayRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedArrayRoseTag
     (if flag then M3NestedArrayRose.leaf else M3NestedArrayRose.node #[]))
@@ -338,6 +347,12 @@ private def source : String :=
   "inductive M3NestedArrayRose where { | leaf | node(children: Array M3NestedArrayRose) }\n" ++
   "function m3nestedarraytag(r: M3NestedArrayRose): Nat := match r with { | M3NestedArrayRose.leaf => 0 | M3NestedArrayRose.node children => 1 }\n" ++
   "function m3nestedarrayoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedarraytag(if (flag) { M3NestedArrayRose.leaf } else { M3NestedArrayRose.node(#[]) }))\n" ++
+  "inductive M3NestedOptionRose where { | leaf | node(child: Option M3NestedOptionRose) }\n" ++
+  "function m3nestedoptiontag(r: M3NestedOptionRose): Nat := match r with { | M3NestedOptionRose.leaf => 0 | M3NestedOptionRose.node child => 1 }\n" ++
+  "function m3nestedoptionoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedoptiontag(if (flag) { M3NestedOptionRose.leaf } else { M3NestedOptionRose.node(Option.none) }))\n" ++
+  "inductive M3NestedProdRose where { | leaf | node(children: Prod M3NestedProdRose M3NestedProdRose) }\n" ++
+  "function m3nestedprodtag(r: M3NestedProdRose): Nat := match r with { | M3NestedProdRose.leaf => 0 | M3NestedProdRose.node children => 1 }\n" ++
+  "function m3nestedprodoutput(flag: Bool): UInt64 := UInt64.ofNat(m3nestedprodtag(if (flag) { M3NestedProdRose.leaf } else { M3NestedProdRose.node(Prod.mk(M3NestedProdRose.leaf, M3NestedProdRose.leaf)) }))\n" ++
   "partial function m3partial(n: Nat): Nat := n + 5\n" ++
   "function m3partialoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partial(if (flag) { 17 } else { 9 }))\n" ++
   "partial function m3partialCount(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3partialCount(k) + 1 }\n" ++
@@ -395,7 +410,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput", "m3partialcountoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput", "m3matrixoutput", "m3nestedoutput", "m3nestedarrayoutput", "m3partialoutput", "m3partialcountoutput", "m3nestedoptionoutput", "m3nestedprodoutput"] }
   let nestedRequest : PsV7Native.Request := {
     source :=
       "inductive M3NestedRose where { | leaf | node(children: List M3NestedRose) }\n" ++
@@ -511,6 +526,10 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.partialOutput flag).toNat)),
     ("m3partialcountoutput", Lean.toJson (toString
       (M3RecursiveHashOracle.partialCountOutput flag).toNat)),
+    ("m3nestedoptionoutput", Lean.toJson (toString
+      (M3RecursiveHashOracle.nestedOptionRoseOutput flag).toNat)),
+    ("m3nestedprodoutput", Lean.toJson (toString
+      (M3RecursiveHashOracle.nestedProdRoseOutput flag).toNat)),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

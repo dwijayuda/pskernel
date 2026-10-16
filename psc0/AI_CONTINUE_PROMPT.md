@@ -506,3 +506,25 @@ termination, diverging behavior, trace safety, partial_fixpoint P1,
 model/body/target refinement, or full M3+B. Require its own focused
 qualification before counting it; do not relabel the older native
 run as belonging to this test-only descendant.
+
+## Test-only next M3 data slice: shallow Option/Prod target representation
+
+After accepted shared List/Option/Array/Prod `Ps.Core.Nested`
+shape ownership and successful check-only Option/Prod family fixtures,
+this child adds actual `Option.none` and `Prod.mk` nested
+constructor values under a monomorphic self-family, then a shallow
+checked match and two `Bool → UInt64` observations for each target.
+Both outputs are compared against independent pinned Lean 4.35
+`M3NestedOptionRose`/`M3NestedProdRose` oracles through existing
+JS/strict TS/Rust/V8 GC/Wasmtime checkers, retaining prior scalar
+observations, ABI and all phase-specific negatives.
+
+This is source/IR/runtime evidence for shallow constructors, NOT
+nested recursive traversal/deriving, parameterized indexed/mutual
+groups, general effect/partial trace/refinement semantics or full
+M3+B. The earlier P0 ordinary partial compiler `e6a14c86`
+continues its own native qualification; focused recursive P0
+`77f5fe75` passed independently. This test-only descendant
+requires its own focused qualification and does not inherit the
+earlier full native result. No new compiler semantic implementation,
+kernel, assumptions, backend special cases or performance budget.

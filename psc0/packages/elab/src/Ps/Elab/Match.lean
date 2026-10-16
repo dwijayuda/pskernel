@@ -421,8 +421,9 @@ def psElabMatchWith (elaborate : PsElaborator)
   let minors ← psElabRecursorArguments constructors
     (fun current (index, _, constructor) type => do
       if index == recursor.slotIndex then
-        let visible := if singleton then constructor.recursiveFields.filterMap
-          (fun (field, target) => if target == recursor.slotIndex then some field else none)
+        let visible := if singleton then
+            constructor.recursiveFields.filterMap
+              (fun (field, target) => if target == recursor.slotIndex then some field else none)
           else []
         psElabMatchMinorWithHypotheses current info levels parameters plan constructor.info.name
           (psElabMatchAlternativeFind constructor.info.name alternatives) type visible

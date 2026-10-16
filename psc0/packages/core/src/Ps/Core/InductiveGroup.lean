@@ -206,21 +206,26 @@ def psInductiveEliminationRebase (count removed : Nat) (expr : PsExpr)
     else if index < depth + removed || index >= depth + removed + count then none
     else return .bvar (index - removed)
   | .fvar _ | .mvar _ => none
-  | .app fn arg => return .app
-      (← psInductiveEliminationRebase count removed fn depth)
-      (← psInductiveEliminationRebase count removed arg depth)
-  | .lam name domain body binder => return .lam name
-      (← psInductiveEliminationRebase count removed domain depth)
-      (← psInductiveEliminationRebase count removed body (depth + 1)) binder
-  | .forallE name domain body binder => return .forallE name
-      (← psInductiveEliminationRebase count removed domain depth)
-      (← psInductiveEliminationRebase count removed body (depth + 1)) binder
-  | .letE name domain value body => return .letE name
-      (← psInductiveEliminationRebase count removed domain depth)
-      (← psInductiveEliminationRebase count removed value depth)
-      (← psInductiveEliminationRebase count removed body (depth + 1))
-  | .proj name index value => return .proj name index
-      (← psInductiveEliminationRebase count removed value depth)
+  | .app fn arg =>
+    let rebasedFn ← psInductiveEliminationRebase count removed fn depth
+    let rebasedArg ← psInductiveEliminationRebase count removed arg depth
+    return .app rebasedFn rebasedArg
+  | .lam name domain body binder =>
+    let rebasedDomain ← psInductiveEliminationRebase count removed domain depth
+    let rebasedBody ← psInductiveEliminationRebase count removed body (depth + 1)
+    return .lam name rebasedDomain rebasedBody binder
+  | .forallE name domain body binder =>
+    let rebasedDomain ← psInductiveEliminationRebase count removed domain depth
+    let rebasedBody ← psInductiveEliminationRebase count removed body (depth + 1)
+    return .forallE name rebasedDomain rebasedBody binder
+  | .letE name domain value body =>
+    let rebasedDomain ← psInductiveEliminationRebase count removed domain depth
+    let rebasedValue ← psInductiveEliminationRebase count removed value depth
+    let rebasedBody ← psInductiveEliminationRebase count removed body (depth + 1)
+    return .letE name rebasedDomain rebasedValue rebasedBody
+  | .proj name index value =>
+    let rebasedValue ← psInductiveEliminationRebase count removed value depth
+    return .proj name index rebasedValue
   | _ => return expr
 
 def psInductiveEliminationContains (names : List PsName) (expr : PsExpr) : Bool :=
@@ -291,8 +296,9 @@ def psInductiveEliminationInstantiate (plan : PsInductiveEliminationPlan)
     (levels : List PsLevel) (parameters : List PsExpr) (template : PsExpr) : Option PsExpr := do
   let first :: _ := plan.group.members | none
   if levels.length != first.levelParams.length || parameters.length != first.numParams then none
-  else psInductiveEliminationApplyTemplate
-    (psExprInstantiateLevelParams first.levelParams levels template) parameters
+  else do
+    let instantiated := psExprInstantiateLevelParams first.levelParams levels template
+    psInductiveEliminationApplyTemplate instantiated parameters
 
 -- With the target slot already fixed, compare its real parameter prefix and
 -- return only that slot's own indices. Never find a nested child by base name:

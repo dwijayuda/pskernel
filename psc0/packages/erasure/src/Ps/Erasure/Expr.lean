@@ -1583,7 +1583,8 @@ def psEraseEliminationStructureSlot (environment : PsEnvironment) (scope : PsEra
     let some field := fields[index]? | throw PsErasureError.binderMismatch
     let some target := application.plan.slots[targetIndex]? | throw PsErasureError.unsupportedRuntimeTerm
     match recursion with
-    | some recursion => psErasureGroupRecursiveCoreCall environment inner recursion
+    | some recursion =>
+      psErasureGroupRecursiveCoreCall environment inner recursion
         (.fvar field.id) target.recursorName
     | none =>
       -- An unused binder can be substituted with its real Core hypothesis.

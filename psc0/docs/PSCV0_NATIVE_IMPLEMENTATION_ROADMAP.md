@@ -5,14 +5,25 @@ Latest fully accepted compiler/test remains
 The repaired typed-WF and total-mutual candidate
 `62a43dcc1ac9069533e4a48bf54639121cb265fd` has passed F1 `38973463203`,
 F2 `38973463414`, F3/F4 `38973463241` and focused `38973463517` (15/15).
-The full native gate `38973463333` is still running. Its focused log confirms
+The full native gate `38973463333` was cancelled by the next compiler push
+under the existing cancel-in-progress workflow setting. Its focused log confirms
 all source checks, fresh-kernel equations and JS/TS/Rust/V8/Wasmtime execution,
-including all twelve WF and six structural outputs. This is not yet five-gate
-acceptance. Earlier failed candidate details below remain historical evidence.
+including all twelve WF and six structural outputs. It therefore has four
+passes, not five-gate acceptance. The latest accepted compiler remains 01d762eb.
 
-This commit adds shared nested elimination and Hashable as a new compiler/test
-candidate. It requires its own exact-SHA native, F1, F2, F3/F4 and focused success;
-neither earlier native results nor focused passes qualify a different tip.
+The shared nested elimination and Hashable candidate
+`7ce2388184f2c29cc49a2b1a367c05191828265a` failed all five gates at Core
+compilation. Focused `38974214074` and F1 `38974214021` identify multiline
+constructor/application layout in InductiveGroup.lean; runtime checks did not run.
+This isolated repair uses explicit sequential Option binds for the same rebased
+constructors and an explicit instantiation block. Four related consumer/fixture
+files receive equivalent continuation layout corrections. Actual arguments,
+traversal order, guards, diagnostics, equations and expected outputs are unchanged.
+
+This repaired compiler/test candidate requires its own exact-SHA native, F1, F2,
+F3/F4 and focused success. Let its full native gate finish before publishing the
+next feature when the other gates pass; implement follow-up work separately.
+Neither earlier native results nor focused passes qualify a different tip.
 
 M3+B remains OPEN at approximately 60% (50–70% engineering uncertainty).
 All six exit weights remain data 30, source 15, total recursion 20, P0 15,
@@ -23,10 +34,10 @@ and 7 points. Unqualified code adds no accepted points.
 | --- | --- | --- |
 | Data, elimination, deriving | Complete selected nested/mutual/indexed slot plan, full recursor signatures, Match, nested Hashable and runtime traversal | Qualify this exact tip; expand remaining nested deriving |
 | Source strategies | Existing selected heads/suffixes and compatible total mutual construction | Typed local where/capture/SCC owner and full source strategy matrix |
-| Total recursion | Typed dependent WF and exact direct mutual equations passed focused at 62a43dcc | Finish its native gate; checked local-match equation transport and broader selected relations/packing |
+| Total recursion | Typed dependent WF and exact direct mutual equations passed focused at 62a43dcc | Obtain all five gates on the repaired current compiler; checked local-match equation transport and broader selected relations/packing |
 | P0 ordinary execution | Accepted opaque logical/body identity and actual singleton/mutual runtime | Qualify new local/mixed SCC closure cases when implemented |
 | P1 | Exact assumption audit and fail-closed source behavior | Pinned construction requires forbidden Classical.choice |
-| Cross-stage integration | Existing baseline has five exact-SHA gates; 62a43dcc has four | Obtain native evidence and then all five gates for this nested candidate |
+| Cross-stage integration | Existing baseline has five exact-SHA gates; 62a43dcc has four and cancelled native | Repair nested compilation and obtain all five gates at one current SHA |
 
 ### One shared visible and nested elimination plan
 

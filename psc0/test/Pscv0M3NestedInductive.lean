@@ -471,7 +471,8 @@ private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarati
     "nested induction requires an explicit eliminator"
   for handler in ["Repr", "BEq", "DecidableEq", "Inhabited"] do
     match psElabDeriveHandler environment origin { segments := [handler], span := origin.span } with
-    | .error error => ensure (refusal error == "recursive deriving requires the M3 data machinery")
+    | .error error =>
+      ensure (refusal error == "recursive deriving requires the M3 data machinery")
         ("nested " ++ handler ++ " refused at wrong boundary: " ++ refusal error)
     | .ok _ => throw (IO.userError ("nested " ++ handler ++ " unexpectedly accepted"))
   let recName := psNameAppendStr (psRootName "M3NestedShape") "rec_5"
@@ -523,7 +524,8 @@ private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarati
     ensure (psNameEq name prodName) "canonical nested order refusal named the wrong constructor"
   | _ => throw (IO.userError "canonical nested admission lost reversed real constructor metadata")
   match psElabDeriveHandler reversed origin { segments := ["Hashable"], span := origin.span } with
-  | .error error => ensure (refusal error == "deriving recursive field metadata is invalid")
+  | .error error =>
+    ensure (refusal error == "deriving recursive field metadata is invalid")
       ("reversed nested IH refused at wrong deriving rule: " ++ refusal error)
   | .ok _ => throw (IO.userError "nested Hashable accepted reversed equal-typed child hypotheses")
   IO.println "PSCV0_M3_NESTED_REFUSALS: PASS exact signatures, specialization/order, actual container metadata, missing/duplicate auxiliaries and explicit source/deriving boundaries"

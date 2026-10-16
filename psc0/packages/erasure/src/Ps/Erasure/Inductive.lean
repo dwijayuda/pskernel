@@ -337,8 +337,9 @@ def psPrepareRuntimeEliminationSlot (environment : PsEnvironment)
     constructors
     group := if plan.group.members.length > 1 then some plan.group else none
     elimination := some (plan, index) }
-  return { scope with runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo
-    scope.runtimeRecursors slot.recursorName runtimeInfo }
+  let runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo
+    scope.runtimeRecursors slot.recursorName runtimeInfo
+  return { scope with runtimeRecursors }
 
 def psPrepareRuntimeEliminationRecursors (environment : PsEnvironment)
     (declarations : List PsDeclaration) (scope : PsErasureScope) :

@@ -1,174 +1,64 @@
 {
-  "schema": "psc0-language-reference-adoption/2",
-  "status": "v7-selected-normative-design-target-not-implemented-conformance",
-  "selectedOn": "2026-10-11",
+  "schema": "psc0-language-reference-adoption/3",
+  "status": "v7.2-sole-normative-target-not-full-conformance",
+  "selectedOn": "2026-10-16",
   "languageEdition": "pscv0",
   "reference": {
-    "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
-    "revision": "v7",
-    "repoPath": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
-    "uploadedFilename": "ProofScript_PSCV0_Lean435rc4_Language_Reference_Consistency_Revision_v7_2026-10-11(2).md",
-    "source": "user-uploaded v7 with user-authorized stable Lean pin amendment on 2026-10-14",
-    "bytes": 309429,
-    "physicalLines": 3203,
-    "sha256": "07e505a93806c47faab5bd215e8fe2c76c2998ca48654dda86f0bb5f161ca389",
-    "gitBlobSha1": "25e1ef788794db175a2183679e37ff8c8e9b6a2e",
-    "verbatimCopyCommittedInThisReview": false,
-    "sourceAvailabilityRequirement": "Verify complete amended reference SHA-256 and byte identity. Original upload identity is retained separately; no older grammar fallback."
+    "revision": "v7.2",
+    "repoPath": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
+    "bytes": 337963,
+    "physicalLines": 4347,
+    "sha256": "c65487eccbd2829d1d9e5e1be3bc7f4cb37849b841ab3257ea0dd47665b8a30e",
+    "gitBlobSha1": "694115223777599ba28ee175e14bb642b7b6aa4b",
+    "fnv1a64": "1159812798589705897"
   },
   "referenceLeanPin": {
     "tag": "v4.35.0",
-    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-    "amendedOn": "2026-10-14",
-    "authority": "explicit user request",
-    "migration": "psc0/docs/PSCV0_LEAN_435_PIN_2026-10-14.md"
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
   },
-  "futureSourceCompatibility": {
-    "oldProofScriptGrammarRequired": false,
-    "oldProfileIsFeatureCeiling": false,
-    "oldParserFallbackAllowedInNewEdition": false,
-    "nativeLeanSourceKindRetained": true,
-    "bootstrapArtifactsAndHistoricalReceiptsPreserved": true,
-    "v7RequiredForNewDevelopment": true
+  "sourcePolicy": {
+    "normativeExtensions": [".ps"],
+    "legacyCompatibilityModes": [],
+    "oldParserFallbackAllowed": false,
+    "nativeLeanSemanticsUnchanged": true,
+    "historicalReferencesPreserved": true
   },
-  "observedImplementation": {
-    "sourceCommit": "f7b92aa3479cd2c39ce959cab82d69dfb8d969a4",
-    "sourceAuthority": "handwritten-lean",
-    "psGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
-    "strictEntry": "psCompilerSh1TypeScriptSources",
-    "leanToolchain": "4.34.0",
-    "typescript": "7.0.2",
-    "compilerSourceFiles": 69,
-    "compilerBootstrapModules": 64,
-    "pscv0ConformanceEstablished": false
+  "conformance": {
+    "fullV72": false,
+    "partialOrdinary": "pending",
+    "partialFixpoint": "pending",
+    "restrictedUnsafe": "pending",
+    "threeAssuranceIdentities": "pending",
+    "traceVerification": "pending"
   },
-  "migrationPolicy": {
-    "compilerOnlyFirst": true,
-    "kernelSourceChangesAuthorizedByThisReview": false,
-    "languageRuntimeRelabelingAllowed": false,
-    "portableFeaturesImplementedInPortableCompiler": true,
-    "newGrammarFixtureAndReceiptIdentityRequired": true,
-    "changedSourceMayInheritExactOldSelfhostReceipt": false,
-    "routineFullFixedPointRequired": false,
-    "deliberateCompilerOnlyPromotionQualificationRequired": true,
-    "referenceAuthority": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
-    "v7IdentityGuardRequired": true,
-    "firstPsCompilerModuleStillCandidate": true,
-    "historicalBridgeEvidenceRetainsOldReferenceIdentity": true
-  },
-  "sourceErrataForReview": [
-    "V7 settles earlier E1-E4, F01-F22, C01-C05 and v4-v7 document-only category/grammar corrections; examples and fixtures are not executed compiler conformance.",
-    "Full pinned Standard environment manifest, exact module visibility and Std.WP contract/tactic/effect registration remain pending implementation evidence.",
-    "Prior 19-module bridge qualification is exact-source historical evidence under the older reference digest; never retag it as complete v7."
-  ],
-  "implementationPlan": "PSC0_PSCV0_SELFHOST_MIGRATION_REVIEW.md",
-  "compilerCodeChangedByThisReview": false,
-  "kernelCodeChangedByThisReview": false,
-  "newLanguageConformanceTestsExecuted": false,
-  "newSelfhostFixedPointExecuted": false,
-  "supersededReference": {
-    "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
-    "uploadedFilename": "Lean4_ProofScript_PSCV0_Lean435rc4_Expanded_Lean_First_Unified_Language_Reference(2).md",
-    "source": "user-uploaded original in the task conversation",
-    "bytes": 230234,
-    "physicalLines": 2888,
-    "sha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
-    "gitBlobSha1": "8cd3f5b9d2a47d10927ac40e32fe702d4642afb4",
-    "verbatimCopyCommittedInThisReview": false,
-    "sourceAvailabilityRequirement": "Retrieve the exact user upload and verify the digest before implementation; this manifest and review are not substitutes for its full text.",
-    "status": "historical previous language design and exact qualification identity"
-  },
-  "currentCandidate": {
-    "branch": "psc0/pscv0-readable-selfhost-v1",
-    "parentHead": "29c12e9eb8cf00966c03b4636ff9d6d243b010a3",
-    "module": "Ps.Syntax.Translate",
-    "source": "psc0/packages/syntax/src-ps/Ps/Syntax/Translate.ps",
-    "latestRun": 38112642444,
-    "nativeAndGeneratedMaterializationPassed": true,
-    "eightConcreteEquationsPassed": true,
-    "twoAxiomFreeAlgebraLemmasPassed": true,
-    "incompleteReason": "Earlier 900-second failure superseded at original source 8603f7; newer v7-only policy source still requires generated qualification.",
-    "fullV7Conformance": false,
-    "newSelfhostFixedPoint": false,
-    "latestQualifiedSource": "8603f7dcf6af6295335c4e11912a10aac86c85a4",
-    "latestQualifiedRun": 38120695522,
-    "newerV7OnlySourcePolicyCandidateGeneratedQualification": false
-  },
-  "firstAuthoredCompilerModuleQualification": {
-    "status": "bounded-first-ps-module-qualified-at-original-source",
-    "originalSourceCommit": "8603f7dcf6af6295335c4e11912a10aac86c85a4",
-    "run": 38120695522,
-    "overallConclusion": "success",
-    "languageDesign": "pscv0-v7",
-    "leanPin": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
-    "module": "Ps.Syntax.Translate",
-    "modulePsSha256": "938288af9c8476d592fc69c4e6f2c01ecb8e1f371fdd5bac1f789a3097710428",
-    "generatedBridgeModules": 20,
-    "sharedPrefixPreparedOnce": 13,
-    "generatedBridgeJsSha256": "fa5728347204ea683c6a22f900f2a2474d8f178ae0b093a01d141c2557605e27",
-    "fixtureCanonicalAdmissionsSha256": "6f14a42e22bf0e0fb41fbe4af07ada5bcbc82b21776d629ddb2",
-    "linux": {
-      "job": 114414631646,
-      "conclusion": "success",
-      "bridgeTests": 38,
-      "authoringAndArrowTests": 12,
-      "apiComparisons": 36
+  "qualificationBaselines": {
+    "m2A": {
+      "profile": "pscv0-v7-native-bounded/73",
+      "implementation": "2a7072064974cb0d051a1773a26caf15fc59838b",
+      "acceptance": "280e1e4e6b18e4f1ac17a1a6297602250ca27e2e",
+      "scope": "accepted historical selected M2+A, not v7.2 conformance",
+      "runs": [38832366451, 38832366381, 38832366374, 38832366314]
     },
-    "windows": {
-      "job": 114418588840,
-      "conclusion": "success",
-      "bridgeTests": 38,
-      "authoringAndArrowTests": 12,
-      "apiComparisons": 36
-    },
-    "leanReference": {
-      "job": 114418588824,
-      "conclusion": "success",
-      "generatedDoFixtureAxioms": [],
-      "concreteApiEquationCount": 8,
-      "concreteApiAxioms": [
-        "propext"
-      ],
-      "zeroAxiomAlgebraTheorems": 2
-    },
-    "artifacts": [
-      {
-        "role": "linux-generated",
-        "id": 11695282564,
-        "zipSha256": "e9aa3ac1089bed9465fd01e83bdf5a6facea673fe9de1d289840738003d49e57"
-      },
-      {
-        "role": "native-source",
-        "id": 11695122822,
-        "zipSha256": "6d223b0ac47382e99fe2e0d811ad8a41564bd64a6df1e87e25d6239a73ace564"
-      },
-      {
-        "role": "windows-generated",
-        "id": 11695114280,
-        "zipSha256": "6085c35c27418bdbf72425d16f5c915ebf6f1b34019815461cab6e0cd54813bb"
-      },
-      {
-        "role": "lean-rc4",
-        "id": 11695019450,
-        "zipSha256": "861a9f197df2f4f2ce5fae8a4eaa325e877c718a7516364e533339ecf940d46c"
-      }
-    ],
-    "fullCompilerAuthoritativePs": false,
-    "newC2C3CompilerFixedPoint": false,
-    "kernelRegenerated": false,
-    "fullV7Conformance": false
+    "m3Runtime": {
+      "implementation": "133af061d6aaff0eb6ed990abd341ca2a44d15e9",
+      "scope": "qualified suspension-aware generic ECMA lowering, not full M3+B",
+      "runs": [38838737641, 38838737640, 38838737549, 38838737558],
+      "pairedPerformanceRun": 38840337837
+    }
   },
-  "originalV7Upload": {
-    "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
-    "revision": "v7",
-    "repoPath": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
-    "uploadedFilename": "ProofScript_PSCV0_Lean435rc4_Language_Reference_Consistency_Revision_v7_2026-10-11(2).md",
-    "source": "byte-identical user upload in psc0",
-    "bytes": 308462,
-    "physicalLines": 3201,
-    "sha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
-    "gitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
-    "verbatimCopyCommittedInThisReview": true,
-    "sourceAvailabilityRequirement": "Verify complete repo source SHA-256 and byte identity; old parser or reference is not a v7 fallback."
+  "approvedLogicalAssumptions": ["propext", "Quot.sound"],
+  "requiredAssurancePolicy": {
+    "automaticVerifiedToOrdinaryDowngrade": false,
+    "unresolvedMandatoryEvidenceBlocksVerifiedEmission": true,
+    "ordinaryEmissionDoesNotClaimBehavioralVerification": true,
+    "adoptionDoesNotEnableStagedFeatures": true
+  },
+  "evidence": {
+    "referenceAuditRun": 38840967041,
+    "referenceAuditArtifact": 12021078540,
+    "referenceAuditDigest": "sha256:a96a305d43ffa13cf17daa2f68f0efb43e3f2e1633a266a4391fb699fdec5399",
+    "impactMatrix": "psc0/docs/PSCV0_V7_TO_V72_MIGRATION_IMPACT_2026-10-16.md",
+    "stageDirective": "psc0/docs/PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md",
+    "previousAdoptionRecord": "psc0/docs/PSCV0_REFERENCE_ADOPTION_V7_HISTORY_2026-10-16.json"
   }
 }

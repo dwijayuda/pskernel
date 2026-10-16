@@ -1,4 +1,4 @@
-name: PSC0 v7 native Lean development (Linux)
+name: PSC0 v7.2 native Lean development (Linux)
 on:
   push:
     branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research, psc0/pscv0-v7-platform-words-research]
@@ -8,7 +8,7 @@ on:
       - 'psc0/host/src/Ps/Host/*.lean'
       - 'psc0/v7-native/**'
       - 'psc0/lean-toolchain'
-      - 'psc0/PSCV0_LANGUAGE_REFERENCE.md'
+      - 'psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md'
       - 'psc0/docs/PSCV0_REFERENCE_ADOPTION.json'
       - 'psc0/scripts/pscv0-reference-identity.mjs'
       - 'psc0/lakefile.lean'
@@ -47,7 +47,7 @@ jobs:
             /psc0/lake-manifest.json
             /psc0/lean-toolchain
             /psc0/package.json
-            /psc0/PSCV0_LANGUAGE_REFERENCE.md
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
             /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
             /psc0/v7-native/
             /psc0/packages/foundation/src/

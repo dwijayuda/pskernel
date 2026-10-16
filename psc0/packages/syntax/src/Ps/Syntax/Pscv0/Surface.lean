@@ -26,8 +26,13 @@ structure PsPscv0SurfaceModule where
   discardName : PsSyntaxName
 
 def psPscv0LanguageEdition : String := "pscv0"
+-- Normative document identity is distinct from implemented/qualified features.
+-- Historical v7/v7.1 files are provenance, never alternate source modes.
+def psPscv0ReferenceRevision : String := "v7.2"
+def psPscv0ReferencePath : String := "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md"
 def psPscv0ReferenceSha256 : String :=
-  "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5"
+  "c65487eccbd2829d1d9e5e1be3bc7f4cb37849b841ab3257ea0dd47665b8a30e"
+def psPscv0ReferenceGitBlob : String := "694115223777599ba28ee175e14bb642b7b6aa4b"
 def psPscv0SurfaceCapability : String := "declaration-except-do/1"
 def psPscv0FullConformance : Bool := false
 

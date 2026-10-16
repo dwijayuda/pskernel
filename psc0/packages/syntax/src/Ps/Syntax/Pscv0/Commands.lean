@@ -70,9 +70,10 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
     throw "PSCV0-FEATURE-UNAVAILABLE: fixedpoint where declarations"
   let .definition name binders type value span := parsed.value
     | throw "PSCV0-REC-STRATEGY-01: fixedpoint requires a function-like declaration"
-  let sourceSpan := { span with stop := suffix.token.span.stop }
-  return { value := .fixedpointDefinition name binders type value sourceSpan,
-    cursor := suffix.cursor }
+  let sourceSpan := PsSourceSpan.mk span.start suffix.token.span.stop
+  let declaration := PsSyntaxDeclaration.fixedpointDefinition
+    name binders type value sourceSpan
+  return PsParseResult.mk declaration suffix.cursor
 
 def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=

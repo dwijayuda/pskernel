@@ -99,6 +99,8 @@ jobs:
           set -euo pipefail
           test -n "$TARGET"
           echo "C0_DEPENDENCY_TARGET=$TARGET"
+          echo "C0_DEPENDENCY_EXPERIMENT=certified_fvar_and_exact_expanded_node_count"
+          echo "C0_DEPENDENCY_POLICY=unchanged_fuel_4096_strict_same_bytes"
           (
             cd "$RUNNER_TEMP/lean4export"
             lake env .lake/build/bin/lean4export Init -- "$TARGET" > "$RUNNER_TEMP/Init-dependency-435.ndjson"

@@ -141,3 +141,10 @@ lean_lib PsKernelC0 where
 lean_exe c0OfficialReplay where
   srcDir := "test"
   root := `C0OfficialNdjsonReplay
+
+
+-- Diagnostic-only native executable. It checks Lean's proof-constrained
+-- compiler replacement of the *same* structural hash, never admits proofs.
+lean_exe c0HashCSimpProbe where
+  srcDir := "test"
+  root := `C0HashCSimpProbe

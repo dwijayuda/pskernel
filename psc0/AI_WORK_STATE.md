@@ -1,33 +1,38 @@
-# PSCV0 M2+A — exact integration qualification pending
+# PSCV0 M2+A — completed and accepted
 
-Updated 16 October 2026. **Selected implementation and research qualification complete; final M2+A acceptance OPEN until this integration passes.**
+Updated 16 October 2026. **Selected M2 + Phase A is COMPLETE for `pscv0-v7-native-bounded/73`.** All required exact integration workflows passed and the final artifact evidence is recorded. The authoritative receipt is [M2+A integration qualification](docs/PSCV0_M2_A_INTEGRATION_QUALIFICATION_2026-10-16.md); [exit review](docs/PSCV0_M2_A_EXIT_REVIEW_2026-10-16.md) reconciles every selected criterion. Do not restart M2 implementation or repeat integration based on stale pending snapshots.
 
 ## Working contract
 
-User-owned public compiler/formal-verification repository dwijayuda/pskernel. GitHub connector/cloud Linux CI ONLY; no local files/checkouts/shell/build/tests/Desktop Commander. Native portable `.lean`, official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Study pinned source before substantial changes. Only propext/Quot.sound; no sorry/admission, weaker gates, larger budgets, pskernel-core, self-hosting, compiler-source `.ps` migration or C5 execution. Wasm GC internally; linear memory only explicit ABI. App fixtures allowed.
+User-owned public compiler/formal-verification repository dwijayuda/pskernel. GitHub connector/cloud Linux CI ONLY; no local files/checkouts/shell/build/tests/Desktop Commander. Native portable `.lean`, official Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Study pinned source before substantial changes. Only `propext`/`Quot.sound`; no sorry/admission, weaker gates, larger budgets, pskernel-core, self-hosting, compiler-source `.ps` migration or C5 execution. Wasm GC internally; linear memory only explicit ABI. Application fixtures are allowed. Prefer shared clean mechanisms and focused validation, not test-fix hunting.
 
-Dev psc0/pscv0-v7-native-lean-v1; research psc0/pscv0-v7-platform-words-research. PR109 stays draft/open, base psc0/pscv0-v7-m1-parser-ownership-v1; NEVER merge. Fresh expected-HEAD/non-force writes and both histories; BOTH handoffs every slice. M2+A -> M3+B -> M4+C/D -> M5/E.
+Dev `psc0/pscv0-v7-native-lean-v1`; research `psc0/pscv0-v7-platform-words-research`. PR109 stays draft/open, base `psc0/pscv0-v7-m1-parser-ownership-v1`; NEVER merge. Fresh expected-HEAD/non-force writes, both histories and BOTH handoffs every completed slice. Established order: M2+A -> M3+B -> M4+C/D -> M5/E; this task closes M2+A only.
 
-## This integration candidate
+## Exact qualified integration and evidence
 
-Parents: development e6183db9ddeeb532cdad3c3aae8c3396c99574b9 and research8cd3b9fe4a29da36f8fde96f1771d0198f356cc9. Preserve both parent histories. Development's37 concurrent commits changed TEN docs. Six refs/README/audits and qualified F4 scalar receipt are copied by exact blob identity; both handoffs/current roadmap are reconciled, with both historical roadmap journals retained byteexact. No new partial/unsafe/fixpoint admission.
+Qualified executable/integration SHA: **`2a7072064974cb0d051a1773a26caf15fc59838b`**. Both parents preserved: development `e6183db9ddeeb532cdad3c3aae8c3396c99574b9` and research `8cd3b9fe4a29da36f8fde96f1771d0198f356cc9`. Concurrent reference/README/audit/scalar files and both historical roadmap journals are retained. The only additional `.lean` change relative to qualified research7148989 was descriptive later-phase StandardManifest wording, with no registry/hash/admission change; the exact integration independently passed.
 
-Executable/compiler behavior is the qualified7148989 below. Only additional `.lean` diff is StandardManifest's descriptive later-phase list, previously checked as7 additions/4 deletions; no hash payload, registry or admission change. Fetch this commit's live SHA and native/F1/F2/F3-F4 runs, then qualify ALL on the same exact integration SHA before final acceptance. These results are PENDING, not inherited from research.
+All SUCCESS at that same SHA:
 
-## Complete research evidence
+- Native [38832366451](https://github.com/dwijayuda/pskernel/actions/runs/38832366451), job116753779387, all33 reported steps including setup/cleanup; completed2026-10-16T01:16:49Z.
+- F1 [38832366381](https://github.com/dwijayuda/pskernel/actions/runs/38832366381), job116753778925.
+- F2 [38832366374](https://github.com/dwijayuda/pskernel/actions/runs/38832366374), job116753778916.
+- F3/F4/platform [38832366314](https://github.com/dwijayuda/pskernel/actions/runs/38832366314), job116753778799.
 
-Compiler71489890970049293e78f33f9f9dc3826a0074b2: full native38830077352/job116746591841 SUCCESS all33 reported steps including setup/cleanup; independent38830077384/job116746591874 SUCCESS. F1 38831491203/job116751050169 and F2 38831491147/job116751050177 SUCCESS on8fc8154 (same sources, docs/branch-trigger differences only).
+Read-only diagnostic38835057984/job116762208483 at research54575d2a extracted actual integration artifact **12018546813**, digest **sha256:6eb7d1fbe2bcb3ee8c95613406f24e4ec7d42d7c1314c9beacd43e8035b67dbe**. It is evidence extraction, not qualification. This acceptance revision changes only documentation: do not label a later receipt SHA as the tested compiler SHA. Fetch fresh HEAD before any further writes.
 
-Read-only diagnostic38832102110/job116752955444 extracted the actual native artifact12017362168, digest sha256:d56700d7e7164aa234bf561d5a07215f21e543f956a19319a41657475a90862f. See docs/PSCV0_M2_A_RESEARCH_QUALIFICATION_2026-10-16.md for full observed counters, pins, performance, source/kernel/GC/ABI/module receipts. Diagnostic success itself is not qualification.
+## Confirmed selected results
 
-Confirmed **1,069 observations each JS/TS/Rust**,35 probes per32/64 platform profile across JS/TS/Rust/V8/Wasmtime,3-module JS/TS/Rust and4-module GC application,1,239 declaration mappings/52 generated-parent origins, repeated native Wasmtime and post-return. Source4 checked/92 phase-specific refusals; structural-key growth2 generators/3 candidates at1/8/32 edges; generalized6 answers/1 generalized/1 freshened/6 generators.
+Integration observed **1,069 each JS/TS/Rust**, **35 probes per32/64 target profile** across JS/TS/Rust/V8/Wasmtime, three-module JS/TS/Rust and four-module GC execution, **1,239 declaration mappings/52 generated-parent origins**, repeated native Wasmtime/post-return, source4 checked/92 phase-specific refusals and separate typed-do/opaque boundary suites. Instance growth retained2 generators/3 candidates at1/8/32 edges, transitions7/21/69; generalized6 answers/1 generalized/1 freshened/6 generators. These are tested fixtures, not global preservation/complexity proofs.
 
-Manifest profile73:3,599 declarations/39 classes/355 instances/13 defaults; approved propext/Quot.sound. FNV10704736494700616048; declaration SHA256 a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f; surfacev3 SHA256117f2692ea15046020e113cd0454c5befa73479ec43e9923cafcbfc1e2031ed8.
+Manifest: **3,599 declarations/39 classes/355 instances/13 defaults**; approved propext/Quot.sound; selected deriving Inhabited/BEq/DecidableEq/Repr/Hashable. FNV10704736494700616048; declaration SHA256 `a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f`; surfacev3 SHA256 `117f2692ea15046020e113cd0454c5befa73479ec43e9923cafcbfc1e2031ed8`.
 
-Benchmark completed; prelude7,900ms, indexed128-definition elaboration125ms/kernel29ms/erase131ms/emit141ms. Reported generated-JS/native-Lean microbenchmark ratios364.33x–3412.48x remain an explicit performance limitation, NOT production speed/no-regression acceptance. Existing measurement/output equality gates were unchanged; later performance work remains. This benchmark does not measure Rust performance.
+Integration prelude5668ms; indexed128-definition elaboration88ms/kernel28ms/erase91ms/emit100ms. Integration generated-JS/native-Lean microbenchmark ratios **247.09x–3157.89x** remain a substantial performance limitation, NOT production speed, parity, optimization improvement or no-regression acceptance. The benchmark checks output equality and records timings, not a speed target or Rust runtime performance. Keep earlier research metrics labeled research; exact tables are in the separate final receipt.
 
-## Implementation corrections and next action
+## Research provenance, corrections and next boundary
 
-7148989 uses the existing instantiated IR intrinsic signature for explicit Rust result typing, preserving operands/ownership/helpers/tests; prior dc4a3c01 misread type arguments and failed compilation. fe702130 fixed WIT signature checking for valid %value identifiers without loosening types/widths.3405c32a generic Subtype Nat getNumBits lowering now executes both widths. Preserve tactic-owned synthesis and isolated default-selection theorem/native oracle.
+Research71489890970049293e78f33f9f9dc3826a0074b2 passed native38830077352 and independent38830077384; source-identical8fc8154 passed F1 38831491203/F2 38831491147. Research diagnostic38832102110/artifact12017362168 and its distinct performance measurements remain documented in [research qualification](docs/PSCV0_M2_A_RESEARCH_QUALIFICATION_2026-10-16.md).
 
-M2_A_EXIT_REVIEW reconciles all selected research criteria; only exact integration/metadata receipt remains. Native plus independent F1/F2/F3-F4 must pass this integration. Then extract final exact artifact metrics with the read-only compact diagnostic, update final acceptance/roadmap/both handoffs and draft PR109. Don’t start M3 or declare fullv7/C5/global preservation/self-host completion in place of finishing this gate. Research branch need not be reset or deleted.
+Preserve the qualified generic Subtype Nat getNumBits erasure3405c32a, exact WIT percent-identifier handlingfe702130, existing instantiated IR signature result typing7148989, tactic-owned synthesis and isolated default theorem/native oracle. No implementation or test changes were required during final closure.
+
+There are **no remaining selected M2+A acceptance blockers**. Broader data/termination/deriving belongs to M3+B; effects/specifications/proof automation to M4+C/D; incremental/tooling/validated optimization/performance/C5/global integration to M5/E. Those remain open and were not started by this closure. Fullv7, all Lean extensions, general backend preservation, release performance, pskernel-core and self-hosting are not claimed. PR109 is a continuing draft, not a release/merge action.

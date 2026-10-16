@@ -1,0 +1,46 @@
+name: PSKernel-C0 proof-checked native hash csimp A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-hash-csimp-probe.yml'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedHashMemo.lean'
+      - 'psc0/packages/pskernel-c0/test/C0HashCSimpProbe.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-source-equivalent-replacement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Compile checked csimp proof and separate native benchmark executable
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0HashCSimpProbe
+          timeout 20s .lake/build/bin/c0HashCSimpProbe
+          echo "C0_HASH_CSIMP_RESULT native_source_symbol=fast exact_source_proof=Lean"
+      - name: Keep independent original source and replay negative regression
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build PsKernelC0
+          lake env lean --run test/C0CertifiedHashMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_HASH_CSIMP_SOURCE_NEGATIVE original_hash=pass invalid_replay=pass"

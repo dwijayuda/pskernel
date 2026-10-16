@@ -371,3 +371,21 @@ def psKernelReduceNatWith
   | _ =>
       Except.ok
         (Prod.mk Option.none state)
+
+
+/-- An unknown binary head is stuck under the Lean 4.35 Nat reducer.
+This is an all-input source theorem: the operand callback is never invoked,
+no cache or context state is altered, and the outcome is exactly `none`.
+It addresses the accidental eager normalization of non-Nat heads. -/
+theorem psKernelReduceNatWith_nonNatBinary
+    (publicWhnf : PsKernelCheckerContext -> PsKernelCheckerState ->
+      PsKernelExpr -> Except String (PsKernelExpr × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (left right : PsKernelExpr)
+    (nonNat : psKernelNatBinaryPrimitiveName name = false) :
+    psKernelReduceNatWith publicWhnf context state
+      (.app (.app (.const name []) left) right) =
+      Except.ok (Prod.mk Option.none state) := by
+  simp [psKernelReduceNatWith, nonNat]

@@ -42,6 +42,16 @@ states using the original values, a no-state case, and successor equations.
 The existing one-batch fixture adds four exports without changing original
 workloads, expected results, iteration counts, budgets or dependency pins.
 
+Initial candidate `d0c6ee3dfea9b8a36ef5574cdbc50d3b526cbbdb` triggered all
+five gates. Its focused build compiled Mutual, RecursionParameters and both
+well-founded owners, then every gate stopped at the new Command local
+`scoped`, a reserved Lean keyword. The syntax-only repair renames it to
+`scopedMembers` and the analogous new fixture local `universe` to
+`universeBatch`. No semantic assertion or expected diagnostic changes.
+The repaired exact SHA must run all five gates; the failed candidate has no
+runtime acceptance. Runs: native `38963849148`, F1 `38963849068`,
+F2 `38963849997`, F3/F4 `38963849156`, focused `38963849930`.
+
 Previous source-case checkpoint `34f43e6bfdaf91cfa965b9449eca5bb30bf66597`
 passed F1 `38962445093`, F2 `38962445118`, F3/F4 `38962445161` and focused
 `38962445128`, including every group-match target. Native `38962445114`

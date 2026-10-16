@@ -262,20 +262,20 @@ def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualM
   let localAliases := (names.zipIdx).map fun entry =>
     (entry.fst, ["$psc0Mutual", psNatToString entry.snd])
   let resolver := { resolver with mutualNames := names, mutualAliases := localAliases }
-  let scoped ← (members.zip localAliases).mapM fun entry =>
+  let scopedMembers ← (members.zip localAliases).mapM fun entry =>
     psScopeMutualMember resolver entry.fst
       (PsSyntaxName.mk entry.snd.snd (psElabOriginSource entry.fst.declaration).snd)
   -- Pinned MutualDef.collectUsed/removeUnusedVars closes section variables
   -- over every main header/body before SCC partition, including disconnected
   -- members. Keep this explicit result instead of guessing from AST arities.
-  let used := scoped.foldl (fun used member => psScopeUnion used member.used) []
+  let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
   let captured := psScopeSelect state.scope used
   let result ← psElabPartialMutualBatch state.environment
-    (state.scope.levelNames.map psRootName) captured scoped
-  if result.members.length != scoped.length then
+    (state.scope.levelNames.map psRootName) captured scopedMembers
+  if result.members.length != scopedMembers.length then
     throw (.data "PSCV0-MUTUAL-INTERNAL: checked member provenance mismatch")
   let environment ← psAddDeclarationList state.environment result.batch.declarations
-  let origins := (scoped.zip result.members).zipIdx.map fun entry =>
+  let origins := (scopedMembers.zip result.members).zipIdx.map fun entry =>
     let origin := psElabBatchOriginAt (state.originsRev.length + entry.snd)
       entry.fst.fst.source (psElabStableMemberOrigins entry.fst.snd.declarations 0) none
     { origin with
@@ -283,9 +283,9 @@ def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualM
       mutualGroup := some {
         firstSourceIndex := state.originsRev.length
         memberIndex := entry.snd
-        memberCount := scoped.length
+        memberCount := scopedMembers.length
         span } }
-  let privateNames := (scoped.zip result.members).flatMap fun entry =>
+  let privateNames := (scopedMembers.zip result.members).flatMap fun entry =>
     if entry.fst.isPrivate then entry.snd.declarations.map psDeclarationName
     else entry.snd.declarations.filterMap fun declaration =>
       match declaration with | .partialDecl name .. => some name | _ => none

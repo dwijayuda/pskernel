@@ -252,9 +252,9 @@ private def checkConstruction : IO (List PsElabBatchOrigin) := do
     match type with
     | .forallE _ _ (.forallE _ _ _ .instanceImplicit) .implicit => pure ()
     | _ => throw (IO.userError "mutual capture changed implicit or instance binder kind")
-  let universe ← elaborate universeSource
+  let universeBatch ← elaborate universeSource
   for name in ["universeLeft", "universeRight"] do
-    let some (.opaqueDecl _ levels _ _) := psEnvironmentFind universe.result.environment (psRootName name)
+    let some (.opaqueDecl _ levels _ _) := psEnvironmentFind universeBatch.result.environment (psRootName name)
       | throw (IO.userError "missing body-universe mutual identity")
     ensure (psElabMutualLevelNamesEqual levels [psRootName "u"])
       "body-only universe did not enter every final mutual signature"

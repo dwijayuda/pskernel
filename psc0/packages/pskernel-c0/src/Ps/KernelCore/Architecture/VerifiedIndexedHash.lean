@@ -443,6 +443,7 @@ theorem psKernelC0VerifiedIndexedPairHash_source
   simp only [psKernelC0VerifiedIndexedPairHash,
     psKernelC0VerifiedIndexedHashRead_source,
     psKernelExprPairHash]
+  rfl
 
 /-- Full source semantics of success/failure DefEq cache lookup remain
 unchanged. The certified pair hash is only a trie bucket selector;

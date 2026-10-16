@@ -31,11 +31,11 @@ def main : IO Unit := do
       !psKernelExprEq ordinary.result sort0 then
     throw (IO.userError "ordinary constructor field walk changed raw Pi shape")
 
-  let mutual ← match psKernelOpenSimpleMutualConstructorFieldsWithFuel
+  let mutualFields ← match psKernelOpenSimpleMutualConstructorFieldsWithFuel
       2 16 source [] [] [] [] level constructorType [] [] with
     | .ok result => pure result
     | .error e => throw (IO.userError ("mutual field checker lost independent fuel: " ++ e))
-  if mutual.fields.length != 1 ||
+  if mutualFields.fields.length != 1 ||
       !psKernelExprEq mutual.result sort0 then
     throw (IO.userError "mutual constructor field walk changed raw Pi shape")
 

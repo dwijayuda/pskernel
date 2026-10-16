@@ -98,6 +98,7 @@ jobs:
               # the native re-export. An invalid export or converter error
               # cannot count as external soundness evidence.
               test "$official_status" -ne 0
+              grep -Fq "Lean default kernel rejects the solution" "$RUNNER_TEMP/arena435-$name-official.txt"
               if grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/arena435-$name-official.txt"; then
                 echo "official oracle unexpectedly accepted negative Arena case" >&2
                 exit 1

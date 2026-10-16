@@ -1,37 +1,29 @@
-# PSCV0 — M3+B runtime qualification and performance investigation
+# PSCV0 — v7.2 adoption, M3+B and measured runtime work
 
-Updated 16 October 2026. The user requests M3+B implementation and deep performance diagnosis/fixes. M2+A is COMPLETE; M3+B remains OPEN.
+Updated 16 October 2026. **The user now selects v7.2 as the sole forward `.ps` language target, with no v7/v7.1 compatibility requirement.** Apply the attached stage prompt before every new milestone slice/stage; durable working contract: [stage directive](docs/PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md). M2+A remains accepted for its original bounded profile; M3+B is OPEN.
 
 ## Working contract
 
-User-owned public repository `dwijayuda/pskernel`. GitHub connector and cloud Linux CI ONLY: no local filesystem, checkout, shell, builds, tests or Desktop Commander. Native portable `.lean`; official Lean 4.35.0 at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Study matching pinned sources before substantial changes. Approved assumptions are only `propext` and `Quot.sound`. No sorry, unchecked admission, weaker gates, larger budgets, pskernel-core, self-hosting, compiler-source `.ps` migration or C5 execution. Wasm GC internally; linear memory only at explicit ABI boundaries. Coherent shared mechanisms and focused validation.
+User-owned public repository dwijayuda/pskernel. GitHub connector/cloud Linux CI ONLY; no local filesystem, checkout, shell, builds, tests or Desktop Commander. Native portable `.lean`; official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Study corresponding pinned source/tests before substantial changes. Only propext/Quot.sound; no sorry, unchecked admission, weaker gates, larger budgets, pskernel-core, self-hosting, compiler-source `.ps` migration or immediate C5. Wasm GC internally, linear memory explicit ABI. `.lean` retains native Lean semantics. Focused validation and shared mechanisms.
 
-Development: `psc0/pscv0-v7-native-lean-v1`; old research is retained. Fresh expected-HEAD/non-force writes; preserve concurrent histories. Update BOTH handoffs after completed slices. PR109 remains draft/open on its original base `psc0/pscv0-v7-m1-parser-ownership-v1`; NEVER merge. Order M3+B -> M4+C/D -> M5/E, with the requested measured optimization alongside relevant dependencies.
+Development psc0/pscv0-v7-native-lean-v1; retain old research. Fresh expected-HEAD/non-force writes; preserve concurrent histories; BOTH handoffs every completed slice. PR109 draft/open, original base psc0/pscv0-v7-m1-parser-ownership-v1; NEVER merge. Continue M3+B -> M4+C/D -> M5/E with measured optimization alongside relevant dependencies.
 
-## Accepted baseline
+## Normative target and adoption status
 
-Integration `2a7072064974cb0d051a1773a26caf15fc59838b`, acceptance receipt `280e1e4e6b18e4f1ac17a1a6297602250ca27e2e`. Native 38832366451 (all 33 reported steps), F1 38832366381, F2 38832366374 and F3/F4/platform 38832366314 all passed that integration. Artifact 12018546813; digest `sha256:6eb7d1fbe2bcb3ee8c95613406f24e4ec7d42d7c1314c9beacd43e8035b67dbe`. The final M2+A receipt preserves full evidence. Do not repeat M2 integration.
+`psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`, inspected blob **694115223777599ba28ee175e14bb642b7b6aa4b**, is normative by explicit user instruction. Older references remain immutable historical sources, not executable modes. Full reference comparison/identity extraction is started by `psc0-v72-reference-audit.yml` against exact cb000664 sources. Its result is document evidence, not language conformance. Active manifest/identity-guard pointers and detailed migration matrix still need reconciliation after that audit; do not falsely label the old guard as already migrated.
 
-Baseline: 1,069 observations each JS/TS/Rust, 35 probes per 32/64 profile, and 3,599 declarations / 39 classes / 355 instances / 13 defaults. The historical 247x–3,158x ratios concern generated-JS collection microbenchmarks versus native Lean, not native compiler throughput or Rust execution.
+The attached prompt's required impact matrix separates true breaking semantics/new features/clarifications from HTML-to-Markdown formatting. Additional partial/fixpoint/unsafe/assurance/trace behavior is specified, not automatically implemented. Unsupported assurance must fail closed; never downgrade verified to ordinary or enlarge the logical foundation. Preserve historical M2 acceptance unchanged.
 
-## Current source and exact qualification
+## Accepted foundation and now-qualified runtime slice
 
-Implementation `77627e5c0e8a10a48a2631fdf426cfa2a1feb847`; roster correction/current compiler candidate **`133af061d6aaff0eb6ed990abd341ca2a44d15e9`**. Candidate tree `46d6d6e4c1b1bd01f90710efa32e609cd4d6996f`.
+M2 integration **2a7072064974cb0d051a1773a26caf15fc59838b**, acceptance **280e1e4e6b18e4f1ac17a1a6297602250ca27e2e**. Native38832366451/all33, F1 38832366381, F2 38832366374, F3/F4/platform38832366314 all passed. Artifact12018546813; digest sha256:6eb7d1fbe2bcb3ee8c95613406f24e4ec7d42d7c1314c9beacd43e8035b67dbe. Preserve final M2 receipt. Its1069 JS/TS/Rust observations,35 probes/profile and3599/39/355/13 environment counts are bounded evidence, not full v7.2.
 
-- Initial native 38838501700 / job 116772905192 stopped before compilation: the new `Ps.BackendEcma.Sync` was missing from the portable Lake roots. No guard was relaxed. The correction registers that module in the existing library.
-- Current native **38838737641 / job 116773647886**. Latest observation: compilation, parser/native cases, all preceding logical assets, source/Standard and module emission passed; GC/runtime/component qualification was running. Later TS/Rust/native-host/performance stages remain pending. Fetch fresh status; this is NOT a completed qualification claim.
-- This handoff commit is documentation only. Do not attribute the candidate's eventual qualification to a different compiler SHA.
+M3 runtime implementation77627e5c; corrected portable-root compiler **133af061d6aaff0eb6ed990abd341ca2a44d15e9**. Exact native **38838737641 / job116773647886 is now SUCCESS, all33 reported steps**, including source/Standard/modules/GC/TS/Rust/native Wasmtime/performance. Earlier38838501700 stopped at the missing portable Lake root; the guard was retained and the module registered. No runtime representation, logical assumption, ABI or registry change.
 
-## Implemented slice
+The runtime slice adds actual-AST suspension analysis, synchronous ECMA scopes/lambdas/generic definitions, and uniform generic tail/alias loops. Dynamic/non-tail/type-changing cases retain the stack-safe fallback. Focused recognizer checks and checked generic `.ps` recursion at100000/50000 steps are included in the successful native measurement stage; inspect exact logs before quoting their individual markers.
 
-`Ps.BackendEcma.Sync` checks the actual lowered AST for suspension and fails closed at the existing budget. `Lower` emits ordinary synchronous lambdas/scopes/declarations and supports uniform generic self-tail/alias loops. Type-changing and general dynamic/non-tail calls retain the stack-safe fallback. No primitive representation, logical assumption, ABI or registry change.
+## Performance evidence and immediate continuation
 
-The existing native performance harness includes focused uniform/type-changing/alias/callback/budget/direct-lambda recognizer checks, plus one officially checked generic `.ps` recursion fixture with Nat/Bool payloads at 100,000/50,000 steps. Original performance operations, counts, checksums and sample counts remain unchanged. These new runtime results are pending until the measurement stage runs.
+Baseline study38837301337/job116769178297 used accepted artifact12018546813 and found substantial generator/closure/scheduler/GC costs. Its hidden-file upload was skipped; do not claim an artifact existed. Publication has been corrected in cb000664, and paired study **38840337837 / job116778720109 is SUCCESS**. Extract exact paired measurements/artifact before claiming speedup; old ratios247x–3158x are not current compiler throughput or universal language-speed ratios.
 
-## Diagnosis and next work
-
-Baseline study 38837301337 / job 116769178297 at `c9279d8a` executed accepted artifact 12018546813. Longer checksummed batches still measured approximately 37.63 ms for listTail, 22.01 ms for fromList and 28.58 ms for toList at size 8,192. Generator/closure/scheduler/GC costs are observed. The hidden `.study` upload was skipped; the logs exist, but no study artifact was published. Repair publication before the paired run.
-
-Read `docs/PSCV0_M3_B_RUNTIME_SLICE_2026-10-16.md`, `PSCV0_M3_B_SOURCE_REVIEW_2026-10-16.md` and the initial execution/performance note. The source review compares the actual TypeScript 7.0.2 transform, pinned Lean mutual/recursor/deriving implementation and inspected PSC0 owners. It separates source findings, background references and planned implementation; it does not claim full M3 coverage.
-
-Next: finish exact native qualification, then run the same-runner baseline/candidate study using a successful native artifact and fix hidden-file publication. Record actual gains or regressions. Continue shared mutual/nested data, motives, total recursion and deriving; do not substitute a TypeScript rewrite or unchecked partial deriving for those mechanisms. No full M3 or production-performance completion is claimed.
+Read existing M3 execution/performance, runtime-slice and source-review documents. They preserve the pinned Lean/TypeScript analysis. Next: complete the whole-reference semantic audit, migrate active authority guards without changing historical files, record paired results, implement the highest-priority feasible v7.2 M3 strategy/data slice, and run focused plus mandatory qualification. Do not substitute a documentation-only adoption or parser acceptance for partial runtime semantics, checked fixpoints, completed verification or full M3.

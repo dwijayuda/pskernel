@@ -93,6 +93,21 @@ jobs:
       - name: Compile C0 Lean semantic closure (no self-host tests)
         working-directory: psc0/packages/pskernel-c0
         run: lake build PsKernelC0
+      - name: Source-certified native hash and substitution compiler routes
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          # These Lean theorems prove both native compiler replacements
+          # return exactly the pre-existing source functions. No alternate
+          # hash/substitution result or input-dependent proof admission.
+          lake build c0HashCSimpProbe c0InstantiateCSimpProbe
+          timeout 25s .lake/build/bin/c0HashCSimpProbe
+          timeout 25s .lake/build/bin/c0InstantiateCSimpProbe
+          lake env lean --run test/C0CertifiedHashMemoRegression.lean
+          lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          echo "C0_SOURCE_CERTIFIED_MEMO original_hash=equivalent original_substitution=equivalent native_csimp=pass"
+
       - name: Official Lean 4.35 export replay versus C0 checked declaration fixtures
         working-directory: psc0/packages/pskernel-c0
         shell: bash

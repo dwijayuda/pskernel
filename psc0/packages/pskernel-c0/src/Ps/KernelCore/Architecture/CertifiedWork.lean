@@ -881,7 +881,9 @@ theorem psKernelC0SortDefEq_source
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state (.sort leftLevel) (.sort rightLevel) =
                   .ok (true, state)
-              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same, cached]
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
+                psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
+                psKernelExprHasFVar, depth, same, cached]
             · have hresult :
                   result = psKernelDefEqFinish state
                     (.sort leftLevel) (.sort rightLevel)
@@ -1017,7 +1019,9 @@ theorem psKernelC0LiteralDefEq_source
               change psKernelIsDefEqWithFuel (Nat.succ remaining)
                 context state (.lit leftLiteral) (.lit rightLiteral) =
                   .ok (true, state)
-              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel, depth, same, cached]
+              simp [psKernelIsDefEqWithFuel, psKernelDefEqSourceStepWithFuel,
+                psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
+                psKernelExprHasFVar, depth, same, cached]
             · have hresult :
                   result = psKernelDefEqFinish state
                     (.lit leftLiteral) (.lit rightLiteral)

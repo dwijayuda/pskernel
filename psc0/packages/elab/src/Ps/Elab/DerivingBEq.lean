@@ -72,6 +72,9 @@ def psElabDeriveBEqStructure (plan : PsElabDeriveContext)
 -- Induct on the left; inspect only the right constructor. The inner recursor
 -- deliberately ignores its induction hypotheses. All recursion evidence used
 -- by comparisons comes from the checked left-child telescope.
+-- Keep right hypotheses absent from the generated branches: the existing
+-- psRecursorUsesHypotheses analysis then retains case-only right lowering.
+-- Introducing a right hypothesis would change traversal and stack behavior.
 def psElabDeriveBEqInductive (plan : PsElabDeriveContext)
     (constructors : List PsElabDeriveBEqConstructor) : Except PsElabError PsExpr :=
   let bool := PsExpr.constE psBoolName []

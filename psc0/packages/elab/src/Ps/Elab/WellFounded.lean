@@ -10,8 +10,10 @@ This module constructs their actual typed application; it introduces no
 recursive axiom, opacity marker, fuel bound, or unchecked equation.
 -/
 
-def psWellFoundedFixName : PsName := psDecisionName "WellFounded.Nat.fix"
-def psWellFoundedFixEqName : PsName := psDecisionName "WellFounded.Nat.fix_eq"
+def psWellFoundedFixName : PsName :=
+  psNameAppendStr (psNameAppendStr (psRootName "WellFounded") "Nat") "fix"
+def psWellFoundedFixEqName : PsName :=
+  psNameAppendStr (psNameAppendStr (psRootName "WellFounded") "Nat") "fix_eq"
 
 def psElabWellFoundedIsNat (context : PsElabContext) (type : PsExpr) : Bool :=
   psDefEqReadOnlyWithEnv context.environment context.metaContext
@@ -153,7 +155,7 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   let callbackName := psNameAppendNum (psRootName "_psc0WellFounded") localId
   let smallerMeasure := PsExpr.app measure (.fvar localId)
   let currentMeasure := PsExpr.app measure (.fvar major.id)
-  let relation := psExprApplyMany (.constE (psDecisionName "Nat.lt") [])
+  let relation := psExprApplyMany (.constE (psNameAppendStr psNatName "lt") [])
     [smallerMeasure, currentMeasure]
   let callbackType := psLogicPi localId "_smaller" nat
     (psLogicPi (localId + 1) "_decreases" relation nat)
@@ -199,7 +201,7 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   let x := PsExpr.fvar major.id
   let yId := solved.localContext.nextId
   let y := PsExpr.fvar yId
-  let decrease := psExprApplyMany (.constE (psDecisionName "Nat.lt") [])
+  let decrease := psExprApplyMany (.constE (psNameAppendStr psNatName "lt") [])
     [.app measure y, .app measure x]
   let self := PsExpr.constE name []
   let unfoldCallback := psLogicLam yId "_smaller" nat

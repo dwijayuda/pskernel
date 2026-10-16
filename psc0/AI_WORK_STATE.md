@@ -5,6 +5,14 @@ with typed companion-worker execution and selected total well-founded
 recursion. It is a **compiler candidate requiring all five gates on its own
 exact SHA**, not a full M3+B acceptance claim.
 
+Initial cloud compilation of `68a14501dc670142aa61c2bee4eae05fe7f68ac5`
+failed in all five gates before runtime qualification: the three built-in
+`PsRuntimeInductiveInfo.mk` calls omitted the new optional group argument,
+and `Ps.Elab.WellFounded` referenced a name helper outside its import closure.
+The following repair supplies explicit singleton `none` arguments and uses
+ordinary Core name construction. No expected values or acceptance checks
+change; all five gates must run again on the repaired compiler SHA.
+
 The group runtime path constructs one ordinary checked definition per family
 from the actual complete recursor application. All workers retain the same
 capture telescope, levels, parameters, motives and minor arguments; only the

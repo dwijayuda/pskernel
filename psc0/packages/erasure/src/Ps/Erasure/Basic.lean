@@ -239,12 +239,12 @@ def psErasureNatRecursor : PsRuntimeInductiveInfo :=
       (List.cons
         (PsRuntimeConstructorInfo.mk "Nat" "succ" psNatSuccName 0
           (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil) 1)
-        List.nil)) 0 []
+        List.nil)) 0 [] none
 
 def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Bool" psBoolName (psNameAppendStr psBoolName "rec") 0 []
     [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [] 0,
-     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0 []
+     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0 [] none
 
 -- Int has two Nat payloads, neither recursively contains an Int. Its runtime
 -- representation is primitive, so elimination uses a sign split rather than
@@ -254,7 +254,7 @@ def psErasureIntRecursor : PsRuntimeInductiveInfo :=
     [PsRuntimeConstructorInfo.mk "Int" "ofNat" psIntOfNatName 0
        [PsRuntimeConstructorField.mk 0 "magnitude" (.primitive .nat) false] 1,
      PsRuntimeConstructorInfo.mk "Int" "negSucc" psIntNegSuccName 0
-       [PsRuntimeConstructorField.mk 0 "predecessor" (.primitive .nat) false] 1] 0 []
+       [PsRuntimeConstructorField.mk 0 "predecessor" (.primitive .nat) false] 1] 0 [] none
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :

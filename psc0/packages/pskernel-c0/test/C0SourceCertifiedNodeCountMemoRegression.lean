@@ -12,7 +12,7 @@ def main : IO Unit := do
   let name : PsKernelName := .str .anonymous "countMemo"
   let leaf : PsKernelExpr := .sort .zero
   let localVar : PsKernelExpr := .fvar name
-  let cases : List PsKernelExpr := [
+  let samples : List PsKernelExpr := [
     leaf, localVar, .bvar 12, .mvar name,
     .const name [], .lit (.nat 25),
     .app leaf localVar,
@@ -22,7 +22,7 @@ def main : IO Unit := do
     .mdata 13 (.app leaf leaf),
     .proj name 0 (.app leaf leaf)
   ]
-  for expr in cases do
+  for expr in samples do
     let expected := psKernelExprNodeCount expr
     if psKernelC0MemoizedExprNodeCount expr != expected ||
         psKernelC0AdaptiveExprNodeCount expr != expected ||

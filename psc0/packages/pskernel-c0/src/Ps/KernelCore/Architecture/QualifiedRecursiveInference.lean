@@ -819,9 +819,14 @@ theorem psKernelC0RecursiveChecked_source
                          psKernelExprMapGetWithKnownHash state.checkedInfer
                            (.mdata md body) none else Option.none) = some ty := by
                      simpa [psKernelExprMapGet, term] using cached
+                  have hcacheExact :
+                      (if psKernelInferCacheEligible false (.mdata md body) then
+                        psKernelExprMapGetWithKnownHash state.checkedInfer
+                          (.mdata md body) none else Option.none) = some ty := by
+                    simpa only [term] using hcache
                   simpa [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    hcache, depth]
+                    hcacheExact, depth]
           | none =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>
@@ -859,9 +864,14 @@ theorem psKernelC0RecursiveChecked_source
                                  psKernelExprMapGetWithKnownHash state.checkedInfer
                                    (.mdata md body) none else Option.none) = none := by
                              simpa [psKernelExprMapGet, term] using cached
+                          have hcacheExact :
+                              (if psKernelInferCacheEligible false (.mdata md body) then
+                                psKernelExprMapGetWithKnownHash state.checkedInfer
+                                  (.mdata md body) none else Option.none) = none := by
+                            simpa only [term] using hcache
                           simpa [psKernelInferCoreWithFuelUsing,
                             psKernelInferCoreWithFuelUsingSourceFrames,
-                            hcache, depth,
+                            hcacheExact, depth,
                             sourceChild, term]
       | bvar n =>
           exact psKernelC0MetadataInfer_source (Nat.succ remaining)

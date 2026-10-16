@@ -3,7 +3,7 @@ import Ps.BackendEcma.Lower
 
 open Lean (toJson)
 
--- This is source-strategy qualification, not partial runtime or proof admission.
+-- Source-strategy qualification remains distinct from partial runtime admission.
 private def checkV72PartialGrammar : IO Unit := do
   for (source, privateExpected) in [
       ("partial def spin(n: Nat): Nat := spin(n)\n", false),
@@ -49,6 +49,83 @@ private def checkV72PartialGrammar : IO Unit := do
   | [.partialDefinition ..] => pure ()
   | _ => throw (IO.userError "source translation discarded partial strategy")
   IO.println "PSCV0_V72_PARTIAL_SOURCE: PASS def/function/nullary/private ownership, modifier conflicts and retained strategy; runtime admission remains pending"
+
+-- Inspect the actual retained graph, not a separately invented safety flag.
+-- The end-to-end requests below independently send both bodies to the kernel.
+private def checkV72PartialOwnership : IO Unit := do
+  let program ← match psPscv0ParseProgram "partial function spin(n: Nat): Nat := spin(n)\n" with
+    | .ok value => pure value
+    | .error message => throw (IO.userError message)
+  let elaborated ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment program with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
+  match elaborated.result.declarations with
+  | [.opaqueDecl name levels type witness, .partialDecl implementation bodyLevels bodyType body] =>
+    if !psNameEq implementation (.num name 0) || levels.length != bodyLevels.length ||
+        !psExprAlphaEq type bodyType || psExprAlphaEq witness body then
+      throw (IO.userError "partial logical identity and actual body were conflated")
+    if !elaborated.privateNames.any (psNameEq implementation) ||
+        elaborated.privateNames.any (psNameEq name) then
+      throw (IO.userError "partial implementation privacy is incorrect")
+    if elaborated.result.environment.instances.entries.length !=
+        psSelfHostProdPreludeEnvironment.instances.entries.length then
+      throw (IO.userError "partial witness instances escaped their local scope")
+    let prepared ← match psCompilerPrepareElaboratedWithOutput elaborated.result with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (psCompilerPscv0Error error))
+    match prepared.prepared.declarations, psCompilerLogicalCheckingView prepared.prepared.declarations with
+    | [_, .partialDecl retained ..], [_, .opaqueDecl checked _ _ checkedBody] =>
+      if !psNameEq retained implementation || !psNameEq checked implementation ||
+          !psExprAlphaEq checkedBody body then
+        throw (IO.userError "partial checking view changed body identity")
+    | _, _ => throw (IO.userError "partial preparation lost the runtime refusal marker")
+  | _ => throw (IO.userError "partial declaration must own separate logical/body members")
+  IO.println "PSCV0_V72_PARTIAL_OWNERSHIP: PASS separate inhabitant/body, private numeric identity, local witnesses and retained runtime marker"
+
+private structure PartialCheck where
+  label : String
+  request : PsV7Native.Request
+  failure : Option (String × String) := none
+
+private def partialChecks : Array PartialCheck :=
+  let spin := "partial function spin(n: Nat): Nat := spin(n)\n"
+  let library : PsPscv0ModuleSource := {
+    name := "Lib", sourceName := "Lib.ps"
+    source := "namespace Lib\n" ++ spin ++ "end Lib\n" }
+  let client := "import Lib\nfunction main(n: Nat): Nat := Lib.spin(n)\n"
+  let runtimeFailure := some ("erase", "PSCV0-PREPARATION: PSCV0-PARTIAL-RUNTIME-PENDING:")
+  #[
+    { label := "recursive-body-and-reflexivity", request := {
+        source := spin ++ "theorem identity(n: Nat): spin(n) = spin(n) := by { rfl }\n" } },
+    { label := "universe-parameter-inhabitant", request := {
+        source := "universe u\npartial function keep {alpha: Type u}(x: alpha): alpha := keep(x)\n" } },
+    { label := "private-nullary", request := {
+        source := "private partial function loop(): Nat := loop()\n" } },
+    { label := "captured-section-parameter", request := {
+        source := "universe u\nsection\nvariable (alpha: Type u)\npartial function keep(x: alpha): alpha := keep(x)\nend\n" } },
+    { label := "empty-result", request := {
+        source := "inductive EmptyResult where { }\npartial function bad(n: Nat): EmptyResult := bad(n)\n" }
+      failure := some ("elaborate", "PSCV0-DATA: PSCV0-TERM-02-INHABITED:") },
+    { label := "false-result", request := {
+        source := "partial function bad(n: Nat): False := bad(n)\n" }
+      failure := some ("elaborate", "PSCV0-DATA: PSCV0-TERM-02-INHABITED:") },
+    { label := "body-type", request := {
+        source := "partial function bad(n: Nat): Nat := true\n" }
+      failure := some ("elaborate", "PSCV0-TYPE-MISMATCH") },
+    { label := "no-defining-equation", request := {
+        source := spin ++ "theorem equation: spin(0) = 0 := by { rfl }\n" }
+      failure := some ("elaborate", "PSCV0-PROOF:") },
+    { label := "function-only", request := {
+        source := "partial def value: Nat := 0\n" }
+      failure := some ("elaborate", "PSCV0-DATA: PSCV0-TERM-02-FUNCTION:") },
+    { label := "all-targets-refused", request := {
+        source := spin, targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] }
+      failure := runtimeFailure },
+    { label := "imported-logical-interface", request := {
+        source := client, modules := [library] } },
+    { label := "imported-runtime-refused", request := {
+        source := client, modules := [library], targets := [.javascript, .typescript, .rust] }
+      failure := runtimeFailure } ]
 
 -- Focused M3 emitter boundary checks; existing measurement workloads below are
 -- unchanged. These are recognizer checks, not a compiler-preservation proof.
@@ -152,6 +229,7 @@ private def timingJson (t : PsV7Native.Timings) : Lean.Json :=
 
 def main (args : List String) : IO Unit := do
   checkV72PartialGrammar
+  checkV72PartialOwnership
   checkEcmaLowering
   let directory := System.FilePath.mk (args.headD "../dist/pscv0-native/m1-performance")
   IO.FS.createDirAll directory
@@ -169,12 +247,12 @@ def main (args : List String) : IO Unit := do
   requests := requests.push {
     source := runtimeSource, sourceName := "runtime.ps",
     outputStem := "runtime", targets := [.javascript] }
-  -- Share the existing prepared Standard batch, after measured requests. A
-  -- parsed partial body must not reach any executable target before admission.
-  requests := requests.push {
-    source := "partial function spin(n: Nat): Nat := spin(n)\n"
-    sourceName := "v72-partial-pending.ps", outputStem := "v72-partial-pending"
-    targets := [.javascript, .typescript, .rust] }
+  -- Preserve original measured requests, then reuse their immutable prelude
+  -- for phase-specific logical/body and executable-refusal qualification.
+  let checks := partialChecks
+  for check in checks do
+    requests := requests.push { check.request with
+      sourceName := "v72-partial-" ++ check.label ++ ".ps" }
   IO.FS.writeFile (directory / "runtime.ps") runtimeSource
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
@@ -182,13 +260,21 @@ def main (args : List String) : IO Unit := do
   let mut compilerRows := #[]
   for i in [:batch.results.size] do
     let some outcome := batch.results[i]? | throw (IO.userError "M1 benchmark result missing")
-    if i == labels.size + 1 then
-      match outcome with
-      | .ok _ => throw (IO.userError "partial executable admitted before logical/runtime separation")
-      | .error error =>
-        if error.phase != "elaborate" || !error.message.startsWith "PSCV0-UNSUPPORTED-SOURCE-TERM" then
-          throw (IO.userError ("partial rejected at wrong staged boundary: " ++ error.phase ++ ": " ++ error.message))
-        IO.println "PSCV0_V72_PARTIAL_ADMISSION: PASS explicit staged elaboration refusal; no executable result"
+    if i > labels.size then
+      let some check := checks[i - labels.size - 1]?
+        | throw (IO.userError "partial qualification result index mismatch")
+      match check.failure, outcome with
+      | none, .ok result =>
+        if !result.artifacts.isEmpty then
+          throw (IO.userError ("check-only partial produced artifacts: " ++ check.label))
+      | some (phase, prefix), .error error =>
+        if error.phase != phase || !error.message.startsWith prefix then
+          throw (IO.userError ("partial wrong rejection for " ++ check.label ++ ": " ++ error.phase ++ ": " ++ error.message))
+      | none, .error error =>
+        throw (IO.userError ("partial expected acceptance for " ++ check.label ++ ": " ++ error.phase ++ ": " ++ error.message))
+      | some _, .ok _ =>
+        throw (IO.userError ("partial expected refusal for " ++ check.label))
+      IO.println ("PSCV0_V72_PARTIAL_CHECK: PASS " ++ check.label)
     else
       let result ← match outcome with
         | .ok value => pure value

@@ -40,6 +40,17 @@ structure PsCompilerPreparationStepWithOriginsResult where
   state : PsCompilerPreparationState
   origins : List PsElabBatchOrigin
 
+-- Check the retained partial implementation as an ordinary opaque body,
+-- AFTER its separately inhabited public logical identity. This is a checking
+-- view only: retain the original strategy marker in the prepared graph.
+-- No body equation, runtime override, unchecked admission or new axiom is
+-- introduced. An invalid self-reference is still rejected by the kernel.
+def psCompilerLogicalCheckingView (declarations : List PsDeclaration) : List PsDeclaration :=
+  declarations.map fun declaration =>
+    match declaration with
+    | .partialDecl name levels type value => .opaqueDecl name levels type value
+    | _ => declaration
+
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
     (source : String) :
@@ -109,7 +120,7 @@ def psCompilerPrepareElaboratedWithOutput
   let elaborated := lifted.result
   match
       psEncodeCheckedAdmissionsCanonical
-        elaborated.declarations with
+        (psCompilerLogicalCheckingView elaborated.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
@@ -240,7 +251,7 @@ def psCompilerValidatePrepared
     Except PsCompilerError Unit :=
   match
       psEncodeCheckedAdmissionsCanonical
-        prepared.declarations with
+        (psCompilerLogicalCheckingView prepared.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok _ =>
@@ -249,7 +260,7 @@ def psCompilerValidatePrepared
 def psCompilerAdmissionsFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError String :=
-  match psEncodeCheckedAdmissionsCanonical prepared.declarations with
+  match psEncodeCheckedAdmissionsCanonical (psCompilerLogicalCheckingView prepared.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
@@ -293,7 +304,13 @@ def psCompilerEnvironmentFromPrepared
 def psCompilerVerifiedIrFromPrepared
     (prepared : PsCompilerAdmissionReadyModule)
     (targetWordSize : Option PsVerifiedIrWordSize := none) :
-    Except PsCompilerError PsVerifiedIrModule :=
+    Except PsCompilerError PsVerifiedIrModule := do
+  -- All targets and linked modules share this boundary. In this logical-only
+  -- slice, even an unused partial body blocks emission conservatively. Never
+  -- erase its marker or substitute the public logical inhabitant at runtime.
+  if prepared.declarations.any (fun declaration =>
+      match declaration with | .partialDecl .. => true | _ => false) then
+    throw (.normalization "PSCV0-PARTIAL-RUNTIME-PENDING: partial logical checking does not admit executable output")
   match psCompilerEnvironmentFromPrepared prepared with
   | Except.error error =>
       Except.error error

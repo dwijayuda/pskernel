@@ -23,8 +23,10 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   let visit := psScopeTerm 4096 resolver
   match source with
   | .definition _ binders type value span
+  | .partialDefinition _ binders type value span
   | .theoremDecl _ binders type value span =>
     let isTheorem := match source with | .theoremDecl _ _ _ _ _ => true | _ => false
+    let isPartial := match source with | .partialDefinition _ _ _ _ _ => true | _ => false
     let binders ← psScopeBinders visit [] binders
     let type ← visit binders.bound type
     let value ← visit binders.bound value
@@ -37,13 +39,15 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     if isTheorem then
       return .theoremDecl name (captured ++ binders.binders) type.term value.term span
     -- Recursive section parameters are fixed in the source scope. Add them at
-    -- the syntax boundary before the existing structural-recursion algorithm.
+    -- the syntax boundary before either recursion strategy is elaborated.
     let selfArguments := (captured.filter fun binder =>
       match binder.fst.kind with | .explicit => true | _ => false).flatMap
         (fun binder => (psSyntaxBinderNames binder.fst).map PsSyntaxTerm.reference)
     let value ←
       if selfArguments.isEmpty then pure value
       else psScopeTerm 4096 { resolver with selfArguments } binders.bound value.term
+    if isPartial then
+      return .partialDefinition name (captured ++ binders.binders) type.term value.term span
     return .definition name (captured ++ binders.binders) type.term value.term span
   | .structureDecl _ params result fields span =>
     let params ← psScopeBinders visit [] params
@@ -65,7 +69,6 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let captured := psScopeSelect resolver.scope used
     return .inductiveDecl name (captured ++ params.binders) (result.map (·.term))
       (constructors.map Prod.fst) span
-  | .partialDefinition _ _ _ _ _ => throw .unsupportedTerm
 
 def psScopeNamePrefixes (name : PsName) : List (List String) :=
   match name with
@@ -122,6 +125,88 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
     state.scope.included
   return { state with scope := { state.scope with included } }
 
+-- Constructive part of pinned Lean's PreDefinition/MkInhabitant: every
+-- parameter supplies an Inhabited value in this witness-only local scope.
+-- Search uses the existing shared constraint engine, not the recursive body.
+-- The Nonempty/Classical fallback is deliberately unavailable under the
+-- current approved assumption policy. No witness instance escapes this call.
+def psElabPartialInhabitant (environment : PsEnvironment)
+    (levels : List PsName) (type : PsExpr) : Except PsElabError PsExpr := do
+  let initial := psElabContextEmpty environment levels
+  match psWhnf environment initial.metaContext initial.localContext type with
+  | .forallE .. => pure ()
+  | _ => throw (.data "PSCV0-TERM-02-FUNCTION: partial requires a function type")
+  let opened ← psElabOpenCoreTelescope 4096 initial type none
+  let className := psRootName "Inhabited"
+  let context ← opened.bindersRev.reverse.foldlM
+    (fun (context : PsElabContext) binder => do
+      let sort ← (psInferType environment context.metaContext context.localContext
+        binder.type).mapError PsElabError.infer
+      let level ← (psInferEnsureSort environment context.metaContext context.localContext
+        sort).mapError PsElabError.infer
+      let dictionary ← psElabApplyCore context
+        (.constE (psNameAppendStr className "mk") [level])
+        [binder.type, .fvar binder.id]
+      return { dictionary.context with
+        instances := psInstanceIndexAdd dictionary.context.instances {
+          value := dictionary.term, type := dictionary.type, className := some className } })
+    opened.context
+  let sort ← (psInferType environment context.metaContext context.localContext
+    opened.body).mapError PsElabError.infer
+  let level ← (psInferEnsureSort environment context.metaContext context.localContext
+    sort).mapError PsElabError.infer
+  let target := PsExpr.app (.constE className [level]) opened.body
+  let dictionary ← (psElabSynthesizeInstance context target).mapError fun error =>
+    match error with
+    | .implicitApplicationUnsupported =>
+      .data "PSCV0-TERM-02-INHABITED: no constructive result inhabitant in the selected environment"
+    | _ => error
+  let value ← psElabApplyCore dictionary.context
+    (.constE (psNameAppendStr className "default") [level])
+    [opened.body, dictionary.term]
+  let witness := psCloseElabLambdaBinders value.context.metaContext opened.bindersRev
+    (psMetaInstantiate value.context.metaContext value.term)
+  if psExprHasUnresolvedMeta witness then throw .unresolvedMetavariable
+  let checked ← psElabResolvedTerm initial witness (some type)
+  return psMetaInstantiate checked.context.metaContext checked.term
+
+-- Like pinned Lean's addAndCompilePartial, logical identity and actual body
+-- are separate. The public opaque receives an independently constructed
+-- inhabitant; the body is checked against that opaque self, with no axiom
+-- stub and no equation between them. Its numeric identity cannot be spelled
+-- by source. A partialDecl marker is retained through preparation so current
+-- executable admission rejects it instead of executing the inhabitant.
+def psElabPartialCommandBatch (environment : PsEnvironment)
+    (nameSyntax : PsSyntaxName) (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (typeSyntax bodySyntax : PsSyntaxTerm) (levelNames : List PsName) :
+    Except PsElabError PsElabDeclarationBatchResult := do
+  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let binderResult ← psElabTypedBinders psElabTerm
+    (psElabContextEmpty environment levelNames) binders
+  let annotation ← psElabType psElabTerm binderResult.context typeSyntax
+  let openType := psMetaInstantiate annotation.context.metaContext annotation.type
+  let type := psCloseElabForallBinders annotation.context.metaContext
+    binderResult.bindersRev openType
+  -- This slice requires a resolved header before recursive body elaboration.
+  if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
+  let levels := psElabDeclarationLevels levelNames [type]
+  let witness ← psElabPartialInhabitant environment levels type
+  let logical := PsDeclaration.opaqueDecl name levels type witness
+  let some withSelf := psEnvironmentAdd environment logical
+    | throw (.duplicateDeclaration name)
+  let body ← psElabTerm (psElabContextWithEnvironment annotation.context withSelf)
+    bodySyntax (some openType)
+  let closed := psCloseElabTypedBinders body.context.metaContext binderResult.bindersRev
+    (psMetaInstantiate body.context.metaContext body.term)
+    (psMetaInstantiate body.context.metaContext openType)
+  if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
+    throw .unresolvedMetavariable
+  if !psExprAlphaEq closed.snd type then throw .typeMismatch
+  let implementationName := PsName.num name 0
+  return {
+    declarations := [logical, .partialDecl implementationName levels type closed.fst]
+    sourceInfo := [psElabFinishSourceInfo body.context implementationName] }
+
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
     (registration : Option PsSyntaxRegistration) (isPrivate : Bool := false) :
     Except PsElabError PsCommandState := do
@@ -137,9 +222,19 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     environment := state.environment, scope := state.scope,
     privateAliases := aliases } source
   let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
-  let originBatch ← (psElabDeclarationBatchWithOrigins state.environment
-    state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
-      (fun error => PsElabError.atDeclaration name error.error)
+  let originBatch ← match source with
+    | .partialDefinition sourceName binders type value _ => do
+      if registration.isSome then
+        throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
+      let result ← (psElabPartialCommandBatch state.environment sourceName binders type value
+        (state.scope.levelNames.map psRootName)).mapError (.atDeclaration name)
+      let origin := psElabBatchOriginAt state.originsRev.length source
+        (psElabStableMemberOrigins result.declarations 0) none
+      pure ({ result, origin := { origin with sourceInfo := result.sourceInfo } } :
+        PsElabDeclarationBatchWithOriginsResult)
+    | _ => (psElabDeclarationBatchWithOrigins state.environment
+        state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
+          (fun error => PsElabError.atDeclaration name error.error)
   let batch ← match registration with
     | some .opaqueDecl =>
       -- Preserve actual kernel opacity, rather than a display-only declaration tag.
@@ -171,6 +266,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     -- A declaration registers its parent namespaces. Constructors and
     -- projections also register their inductive/structure namespace.
     ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) state.namespaces
+  let implementationNames := batch.declarations.filterMap fun declaration =>
+    match declaration with | .partialDecl name .. => some name | _ => none
   return { state with
     environment := environment
     namespaces := namespaces
@@ -181,7 +278,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev
     privateNames := if isPrivate then
       batch.declarations.map psDeclarationName ++ state.privateNames
-    else state.privateNames
+    else implementationNames ++ state.privateNames
     exposedNames := if isAbbrev then
       batch.declarations.map psDeclarationName ++ state.exposedNames
     else state.exposedNames

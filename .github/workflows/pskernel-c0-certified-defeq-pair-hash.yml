@@ -1,0 +1,43 @@
+name: PSKernel-C0 certified DefEq pair hash
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-certified-defeq-pair-hash.yml'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedDefEqPairHash.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedDefEqPairHashRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-pair-hash:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Prove unchanged source pair hash, collision-safe memo and symmetry
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build PsKernelC0
+          lake env lean --run test/C0CertifiedDefEqPairHashRegression.lean
+          echo "C0_PAIR_HASH_SOURCE exact_result=Lean proved_symmetry=yes"
+      - name: Preserve negative source kernel judgments
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_PAIR_HASH_NEGATIVE_GATES=pass"

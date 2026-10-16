@@ -65,6 +65,61 @@ def main : IO Unit := do
         throw (IO.userError "C0 migration broke ordinary Nat.add")
   IO.println "C0_LEAN435 standard_nat_reduction=pass"
 
+  -- Official Lean 4.35 type_checker.cpp checks the binary Nat operator
+  -- *before* entering reduce_bin_nat_op/WHNF of either argument. A generic
+  -- two-argument constant must not trigger Nat operand reduction, since
+  -- that previously altered WHNF caches and could cause spurious fuel errors.
+  let notNatName : PsKernelName :=
+    .str .anonymous "C0.notNatBinary"
+  let notNat : PsKernelExpr :=
+    .app (.app (.const notNatName []) addition) addition
+  let guardContext := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let guardState : PsKernelCheckerState := {
+    psKernelCheckerStateEmpty with nextFresh := 17
+  }
+  let forbiddenWhnf :
+      PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+        Except String (PsKernelExpr × PsKernelCheckerState) :=
+    fun _ _ _ => .error "C0_NAT_FORBIDDEN_OPERAND_WHNF"
+  match psKernelReduceNatWith forbiddenWhnf guardContext guardState notNat with
+  | .ok (.none, nextState) =>
+      if nextState.nextFresh != 17 then
+        throw (IO.userError "Non-Nat primitive guard altered checker state")
+  | .ok (.some _, _) =>
+      throw (IO.userError "Non-Nat primitive guard invented a reduction")
+  | .error error =>
+      throw (IO.userError ("Non-Nat primitive evaluated an operand: " ++ error))
+  -- No weakening of known Nat operation semantics: the same callback is
+  -- still required for a recognized Nat.add.
+  match psKernelReduceNatWith forbiddenWhnf guardContext guardState addition with
+  | .error "C0_NAT_FORBIDDEN_OPERAND_WHNF" => pure ()
+  | _ => throw (IO.userError "Nat.add bypassed required operand WHNF")
+  -- Even a known Nat name with illegal universe arguments is not reduced.
+  let nonemptyLevels : PsKernelExpr :=
+    .app (.app (.const psKernelNatAddName [.zero]) two) three
+  match psKernelReduceNatWith forbiddenWhnf guardContext guardState
+      nonemptyLevels with
+  | .ok (.none, nextState) =>
+      if nextState.nextFresh != 17 then
+        throw (IO.userError "Nonempty Nat universe list altered state")
+  | _ => throw (IO.userError "Nonempty Nat universe list evaluated operands")
+  -- Guard covers every operation actually implemented in the primitive
+  -- reducer, including the bitwise and shift operations.
+  let knownNatBinaryNames : List PsKernelName := [
+    psKernelNatAddName, psKernelNatSubName, psKernelNatMulName,
+    psKernelNatPowName, psKernelNatGcdName, psKernelNatModName,
+    psKernelNatDivName, psKernelNatBeqName, psKernelNatBleName,
+    psKernelNatLandName, psKernelNatLorName, psKernelNatXorName,
+    psKernelNatShiftLeftName, psKernelNatShiftRightName
+  ]
+  for name in knownNatBinaryNames do
+    if !psKernelNatBinaryPrimitiveName name then
+      throw (IO.userError "Recognized Nat reducer is missing from dispatch")
+  if psKernelNatBinaryPrimitiveName notNatName ||
+      psKernelNatBinaryPrimitiveName psKernelStringName then
+    throw (IO.userError "Unrecognized reducer entered Nat binary dispatch")
+  IO.println "C0_LEAN435 non_nat_binary_avoids_eager_operand_whnf=pass"
+
   let candidate : PsKernelDefinitionInfo := {
     base := {
       name := target

@@ -8,9 +8,9 @@ def main : IO Unit := do
   let name : PsKernelName := .str .anonymous "scoped"
   let key : PsKernelExpr := .fvar name
   let typ : PsKernelExpr := .sort .zero
-  let local := psKernelLocalContextAddLocal
+  let scopeLocal := psKernelLocalContextAddLocal
     source.context.localContext name name typ .default
-  let ctx := psKernelCheckerContextWithLocalContext source.context local
+  let ctx := psKernelCheckerContextWithLocalContext source.context scopeLocal
   if psKernelSemanticCacheEligible key ||
       psKernelSemanticCacheEligible (.app typ key) ||
       psKernelSemanticPairCacheEligible typ key ||

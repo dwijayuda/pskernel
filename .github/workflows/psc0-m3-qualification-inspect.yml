@@ -1,0 +1,55 @@
+name: PSCV0 M3 qualification source inspection
+on:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1]
+    paths: [.github/workflows/psc0-m3-qualification-inspect.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 7998bdc7b654dccf46ddfc0b09d16cf8143b33d0
+          persist-credentials: false
+          sparse-checkout: |
+            .github/workflows
+            psc0/scripts
+            psc0/test
+      - name: Inspect exact source and original failed job without changing either
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = 7998bdc7b654dccf46ddfc0b09d16cf8143b33d0
+          mkdir -p "$RUNNER_TEMP/m3-source-inspection"
+          gh api repos/dwijayuda/pskernel/actions/runs/38886292555 --jq '{id,head_sha,status,conclusion,path}' | tee "$RUNNER_TEMP/m3-source-inspection/run.json"
+          gh api repos/dwijayuda/pskernel/actions/jobs/116924732052/logs > "$RUNNER_TEMP/m3-source-inspection/native.log"
+          git grep -n -E 'Chain|recursive deriving requires|expect_error' -- psc0/test psc0/scripts .github/workflows > "$RUNNER_TEMP/m3-source-inspection/owners.txt" || test "$?" = 1
+          python3 - <<'PY'
+          import os, pathlib
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'm3-source-inspection'
+          text = (root/'native.log').read_text()
+          lines = text.splitlines()
+          for i, line in enumerate(lines):
+              if any(key in line for key in ['Traceback', 'AssertionError', 'uncaught exception', 'unexpectedly accepted', 'pscv0-native-source.py', 'PSCV0-DERIVING', 'case 84']):
+                  print('\n'.join(lines[max(0,i-3):min(len(lines),i+8)]))
+          print('=== TRACKED TEST OWNERS ===')
+          print((root/'owners.txt').read_text())
+          print('=== EXACT SOURCE-GATE COMMANDS ===')
+          workflow = pathlib.Path('.github/workflows/psc0-pscv0-native-v7.yml').read_text().splitlines()
+          for i, line in enumerate(workflow):
+              if 'Qualify checked source and admitted Standard' in line:
+                  print('\n'.join(workflow[i:i+12]))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-m3-source-inspection-${{ github.sha }}
+          path: ${{ runner.temp }}/m3-source-inspection/
+          if-no-files-found: error
+          retention-days: 30

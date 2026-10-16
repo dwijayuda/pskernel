@@ -120,25 +120,77 @@ theorem psKernelC0VerifiedIndexedCacheTraceRun_source
         _ = psKernelC0VerifiedIndexedCacheTraceSource
               (cmd :: rest) initialState := rfl
 
-/-- A public cache-only session bridge: a certified owner must be exactly
-the input session's store. Commands update only the checker state; the
-environment/local context, retained roots, radix index and provenance
-remain in that same input session. -/
-def psKernelC0VerifiedIndexedCacheTraceSession
+/-!
+IMPORTANT CACHE-TRUST BOUNDARY:
+
+Source-equivalence of an INSERT to the original cache insertion function is
+NOT proof that the inserted type or DefEq pair has been validated. Trace
+commands intentionally carry arbitrary syntax and must never be able to
+publish a new live checked session. In particular, the source-equivalent
+write trace is a non-admitting *model* for subsequent verified integration.
+
+A production cache-writing operation must instead carry a source-checked
+typing or conversion receipt with the precise context/initial state/fuel
+and must prove full checked state transport. Until that proof exists,
+only read-only session observation is exported here.
+-/
+
+/-- Read-only indexed-cache observation from a SAME-owner session. A cache
+lookup remains only a source lookup, not a checked judgment or admission.
+No checker state, context, local environment or pending proof is mutated. -/
+def psKernelC0VerifiedIndexedCacheReadSession
     (session : PsKernelC0IndexedCheckerSession)
     (owner : PsKernelC0CertifiedStore)
     (_sameOwner : owner.store = session.store)
-    (commands : List (PsKernelC0VerifiedIndexedCacheCommand owner)) :
-    { updated : PsKernelC0IndexedCheckerSession //
-        updated.store = session.store ∧
-        updated.checker.context = session.checker.context ∧
-        updated.checker.state =
-          psKernelC0VerifiedIndexedCacheTraceSource
-            commands session.checker.state } :=
-  ⟨{ session with checker :=
-       PsKernelCheckerSession.mk session.checker.context
-         (psKernelC0VerifiedIndexedCacheTraceRun
-           commands session.checker.state) },
-    ⟨rfl, rfl,
-      psKernelC0VerifiedIndexedCacheTraceRun_source
-        commands session.checker.state⟩⟩
+    {id : Nat}
+    (route : PsKernelC0IndexedExprCacheRoute)
+    (proof : PsKernelC0VerifiedIndexedHash owner id) :
+    Option PsKernelExpr :=
+  psKernelC0VerifiedIndexedStateCacheGet
+    route session.checker.state proof
+
+theorem psKernelC0VerifiedIndexedCacheReadSession_source
+    (session : PsKernelC0IndexedCheckerSession)
+    (owner : PsKernelC0CertifiedStore)
+    (sameOwner : owner.store = session.store)
+    {id : Nat}
+    (route : PsKernelC0IndexedExprCacheRoute)
+    (proof : PsKernelC0VerifiedIndexedHash owner id) :
+    psKernelC0VerifiedIndexedCacheReadSession
+        session owner sameOwner route proof =
+      psKernelExprMapGet
+        (psKernelC0IndexedExprCacheSelect
+          route session.checker.state) proof.expr :=
+  psKernelC0VerifiedIndexedStateCacheGet_source
+    route session.checker.state proof
+
+/-- Read-only success/failure DefEq pair-cache observation. The full
+source pair-syntax comparison still decides any hash collision. Even a
+cache hit is NOT a new DefEq proof or independent acceptance result. -/
+def psKernelC0VerifiedIndexedPairReadSession
+    (session : PsKernelC0IndexedCheckerSession)
+    (owner : PsKernelC0CertifiedStore)
+    (_sameOwner : owner.store = session.store)
+    {leftId rightId : Nat}
+    (route : PsKernelC0IndexedPairCacheRoute)
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) : Bool :=
+  psKernelC0VerifiedIndexedStatePairContains
+    route session.checker.state left right
+
+theorem psKernelC0VerifiedIndexedPairReadSession_source
+    (session : PsKernelC0IndexedCheckerSession)
+    (owner : PsKernelC0CertifiedStore)
+    (sameOwner : owner.store = session.store)
+    {leftId rightId : Nat}
+    (route : PsKernelC0IndexedPairCacheRoute)
+    (left : PsKernelC0VerifiedIndexedHash owner leftId)
+    (right : PsKernelC0VerifiedIndexedHash owner rightId) :
+    psKernelC0VerifiedIndexedPairReadSession
+        session owner sameOwner route left right =
+      psKernelExprPairSetContains
+        (psKernelC0IndexedPairCacheSelect
+          route session.checker.state)
+        left.expr right.expr :=
+  psKernelC0VerifiedIndexedStatePairContains_source
+    route session.checker.state left right

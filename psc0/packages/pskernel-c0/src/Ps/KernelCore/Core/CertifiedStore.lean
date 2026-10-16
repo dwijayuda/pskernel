@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.IndexedScratch
+import Ps.KernelCore.Core.ExprDecidableEq
 
 /-!
 Phase C: proof-carrying replay validation for immutable indexed snapshots.
@@ -302,11 +303,6 @@ def psKernelC0CertifyPromotedRoots
    Unlike the project's two Boolean cache/equality helpers, this
    DecidableEq is generated directly from the constructors of Name, Level,
    Literal, BinderInfo and Expr, including all source binder metadata. -/
-deriving instance DecidableEq for PsKernelName
-deriving instance DecidableEq for PsKernelLevel
-deriving instance DecidableEq for PsKernelBinderInfo
-deriving instance DecidableEq for PsKernelLiteral
-deriving instance DecidableEq for PsKernelExpr
 
 /-- Two certified roots can belong to different immutable stores. This
     witness certifies their exact *propositional* source expression equality.

@@ -7,6 +7,8 @@ on:
       - '.github/workflows/pskernel-c0-indexed-hash-proof.yml'
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/VerifiedIndexedHash.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/VerifiedIndexedCacheState.lean'
+      - 'psc0/packages/pskernel-c0/test/C0VerifiedIndexedCacheStateRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0VerifiedIndexedHashRegression.lean'
   workflow_dispatch:
 permissions:
@@ -32,7 +34,10 @@ jobs:
           test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
           lake build Ps.KernelCore.Architecture.VerifiedIndexedHash
+          lake build Ps.KernelCore.Architecture.VerifiedIndexedCacheState
           lake env lean --run test/C0VerifiedIndexedHashRegression.lean
+          lake env lean --run test/C0VerifiedIndexedCacheStateRegression.lean
+          echo "C0_INDEXED_STATE_CACHE source_equations=Lean all_5_expr_slots=pass pair_success_failure=pass collision=declined"
           echo "C0_INDEXED_HASH_PROOF full_source_hash=Lean exact_owner=pass malformed=declined"
       - name: Preserve official and negative native checker fixture acceptance
         working-directory: psc0/packages/pskernel-c0

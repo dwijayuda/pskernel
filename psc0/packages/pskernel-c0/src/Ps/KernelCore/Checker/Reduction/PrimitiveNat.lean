@@ -183,6 +183,27 @@ def psKernelNatShiftLeft
     value
     (psKernelNatPow 2 count)
 
+/-- Exactly the binary Nat constants recognized by pinned Lean 4.35
+`type_checker::reduce_nat`. The caller must test the operator *before*
+normalizing either operand: arbitrary binary constants are not Nat
+reductions, and normalizing their operands can exhaust resources or change
+checker caches on an otherwise stuck head. -/
+def psKernelNatBinaryPrimitiveName (name : PsKernelName) : Bool :=
+  psKernelNameEq name psKernelNatAddName ||
+  psKernelNameEq name psKernelNatSubName ||
+  psKernelNameEq name psKernelNatMulName ||
+  psKernelNameEq name psKernelNatPowName ||
+  psKernelNameEq name psKernelNatGcdName ||
+  psKernelNameEq name psKernelNatModName ||
+  psKernelNameEq name psKernelNatDivName ||
+  psKernelNameEq name psKernelNatBeqName ||
+  psKernelNameEq name psKernelNatBleName ||
+  psKernelNameEq name psKernelNatLandName ||
+  psKernelNameEq name psKernelNatLorName ||
+  psKernelNameEq name psKernelNatXorName ||
+  psKernelNameEq name psKernelNatShiftLeftName ||
+  psKernelNameEq name psKernelNatShiftRightName
+
 def psKernelReduceNatBinary
     (maxNatSize : Nat)
     (op : PsKernelName)

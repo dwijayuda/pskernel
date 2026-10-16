@@ -11,15 +11,15 @@ is the authority; the tests cover executable traversal and performance.
 def main : IO Unit := do
   let name : PsKernelName := .str .anonymous "memoFVar"
   let closed : PsKernelExpr := .sort .zero
-  let local : PsKernelExpr := .fvar name
+  let fvarTerm : PsKernelExpr := .fvar name
   let raw : List PsKernelExpr := [
-    closed, local, .bvar 0, .mvar name, .const name [],
-    .lit (.nat 17), .app closed local, .app local closed,
-    .lam name closed (.app closed local) .default,
-    .forallE name (.app closed local) closed .default,
-    .letE name closed closed (.app closed local) false,
-    .mdata 17 (.app local closed),
-    .proj name 0 (.app closed local)
+    closed, fvarTerm, .bvar 0, .mvar name, .const name [],
+    .lit (.nat 17), .app closed fvarTerm, .app fvarTerm closed,
+    .lam name closed (.app closed fvarTerm) .default,
+    .forallE name (.app closed fvarTerm) closed .default,
+    .letE name closed closed (.app closed fvarTerm) false,
+    .mdata 17 (.app fvarTerm closed),
+    .proj name 0 (.app closed fvarTerm)
   ]
   for expr in raw do
     let original := psKernelExprHasFVar expr
@@ -38,11 +38,11 @@ def main : IO Unit := do
       psKernelC0AdaptiveHasFVar shared then
     throw (IO.userError "closed shared DAG gained a free variable")
 
-  let withLocal : PsKernelExpr := .app shared local
+  let withLocal : PsKernelExpr := .app shared fvarTerm
   if !psKernelExprHasFVar withLocal ||
       !psKernelC0MemoizedHasFVar withLocal ||
       !psKernelC0AdaptiveHasFVar withLocal then
-    throw (IO.userError "FVar memo missed a local on shared DAG")
+    throw (IO.userError "FVar memo missed a fvarTerm on shared DAG")
 
   let mut huge := closed
   for _ in [:22] do
@@ -55,8 +55,8 @@ def main : IO Unit := do
   -- cache keys. The proof-producing equality check must still discriminate
   -- different expressions regardless of their shallow shape.
   let another : PsKernelName := .str .anonymous "differentFVar"
-  let a : PsKernelExpr := .lam name closed local .default
-  let b : PsKernelExpr := .lam another closed local .default
+  let a : PsKernelExpr := .lam name closed fvarTerm .default
+  let b : PsKernelExpr := .lam another closed fvarTerm .default
   if psKernelC0MemoShapeHash 4 a != psKernelC0MemoShapeHash 4 b then
     throw (IO.userError "expected binder-name-insensitive shape collision")
   if !psKernelC0MemoizedHasFVar a || !psKernelC0MemoizedHasFVar b then

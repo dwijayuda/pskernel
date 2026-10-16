@@ -190,7 +190,7 @@ theorem psKernelC0InstOneMemoizedChanged_source
 /-- Exact public single-variable instantiation, retaining the existing
 binder-headed loose-variable fast path and every capture-avoidance decision.
 The only substituted computation is the source-proved changed-flag worker. -/
-def psKernelC0MemoizedInstantiate1
+def psKernelC0MemoizedInstantiate1All
     (expr replacement : PsKernelExpr) : PsKernelExpr :=
   match expr with
   | .lam _ _ _ _
@@ -204,14 +204,91 @@ def psKernelC0MemoizedInstantiate1
 
 /-- Full behavioral equivalence for the public beta/zeta instantiation API,
 including all original binder-headed shortcut decisions. -/
+theorem psKernelC0MemoizedInstantiate1All_source
+    (expr replacement : PsKernelExpr) :
+    psKernelC0MemoizedInstantiate1All expr replacement =
+      psKernelExprInstantiate1 expr replacement := by
+  cases expr <;>
+    simp only [psKernelC0MemoizedInstantiate1All,
+      psKernelExprInstantiate1,
+      psKernelC0InstOneMemoizedChanged_source]
+
+
+/-!
+The exact full DAG memo has a large per-node indexing cost on ordinary
+linear application spines, which the original source's one-pass worker
+already handles efficiently. Native performance A/B (CI 38895203082)
+found a 20× regression from choosing DAG memoization indiscriminately.
+
+This selector inspects only a bounded left application spine, or a finite
+binder prefix. A negative selection performs the ORIGINAL specialized
+single-binder algorithm, not a false rejection. Positive selection
+reuses the existing proof-certified DAG memo. This decision affects only
+runtime work, never the source semantic result.
+-/
+
+/-- Detect a complex argument on at most eight outer application nodes.
+A single linear spine with atomic arguments is deliberately cheap. -/
+def psKernelC0InstMemoComplexApp : Nat → PsKernelExpr → Bool
+  | 0, _ => false
+  | remaining + 1, .app fn arg =>
+      match arg with
+      | .app _ _ | .lam _ _ _ _ | .forallE _ _ _ _ | .letE _ _ _ _ _ =>
+          true
+      | _ => psKernelC0InstMemoComplexApp remaining fn
+  | _, _ => false
+
+/-- A long dependent binder chain is a useful candidate for per-subtree
+memoization; the check inspects at most twelve binder heads. -/
+def psKernelC0InstMemoBinderPrefix : Nat → PsKernelExpr → Bool
+  | 0, _ => true
+  | remaining + 1, .lam _ _ body _ =>
+      psKernelC0InstMemoBinderPrefix remaining body
+  | remaining + 1, .forallE _ _ body _ =>
+      psKernelC0InstMemoBinderPrefix remaining body
+  | _, _ => false
+
+/-- Read-only, bounded shape selector. It never establishes equality, typing,
+capture safety, or an admission outcome. -/
+def psKernelC0InstMemoWorthwhile (expr : PsKernelExpr) : Bool :=
+  psKernelC0InstMemoComplexApp 8 expr ||
+    psKernelC0InstMemoBinderPrefix 12 expr
+
+/-- Complete original specialized source algorithm, maintained as an
+independent executable oracle and the cheap path for ordinary terms. -/
+def psKernelC0DirectInstantiate1
+    (expr replacement : PsKernelExpr) : PsKernelExpr :=
+  match expr with
+  | .lam _ _ _ _ | .forallE _ _ _ _ | .letE _ _ _ _ _ =>
+      if psKernelExprHasLooseBVar expr then
+        (psKernelC0ExprInstantiateOneChanged expr replacement 0).1
+      else expr
+  | _ => (psKernelC0ExprInstantiateOneChanged expr replacement 0).1
+
+theorem psKernelC0DirectInstantiate1_source
+    (expr replacement : PsKernelExpr) :
+    psKernelC0DirectInstantiate1 expr replacement =
+      psKernelExprInstantiate1 expr replacement := by
+  rfl
+
+/-- Select DAG memo ONLY for suitable source shapes; ordinary linear spines
+keep the original source's one-pass behavior. Both branches have independent
+Lean proofs of FULL equality to psKernelExprInstantiate1. -/
+def psKernelC0MemoizedInstantiate1
+    (expr replacement : PsKernelExpr) : PsKernelExpr :=
+  if psKernelC0InstMemoWorthwhile expr then
+    psKernelC0MemoizedInstantiate1All expr replacement
+  else
+    psKernelC0DirectInstantiate1 expr replacement
+
 theorem psKernelC0MemoizedInstantiate1_source
     (expr replacement : PsKernelExpr) :
     psKernelC0MemoizedInstantiate1 expr replacement =
       psKernelExprInstantiate1 expr replacement := by
-  cases expr <;>
-    simp only [psKernelC0MemoizedInstantiate1,
-      psKernelExprInstantiate1,
-      psKernelC0InstOneMemoizedChanged_source]
+  unfold psKernelC0MemoizedInstantiate1
+  split
+  · exact psKernelC0MemoizedInstantiate1All_source expr replacement
+  · exact psKernelC0DirectInstantiate1_source expr replacement
 
 /-- Source-exact native compiler replacement. Lean checks the full
 function equality, so codegen may accelerate every consumer importing this

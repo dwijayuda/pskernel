@@ -1,30 +1,32 @@
-# PSCV0 M2+A — all exact integration workflows passed
+# PSCV0 M2+A — completed; final authority is on development
 
-Updated 16 October 2026. Development integration `2a7072064974cb0d051a1773a26caf15fc59838b` has passed all four required workflows. The remaining action is recording its final exact artifact evidence and acceptance on development, not another compiler implementation or integration cycle.
+Updated 16 October 2026. **Selected M2 + Phase A is COMPLETE for `pscv0-v7-native-bounded/73`.** Research implementation, qualification, history-preserving integration, all four exact integration gates and the final evidence/acceptance records are complete. Do not restart this milestone or repeat integration from older pending research paragraphs.
 
-## Exact successful integration
+## Final development checkpoint
 
-Development branch: `psc0/pscv0-v7-native-lean-v1`. Two preserved parents: `e6183db9ddeeb532cdad3c3aae8c3396c99574b9` and research `8cd3b9fe4a29da36f8fde96f1771d0198f356cc9`. All concurrent reference/README/audit/scalar files and both historical roadmap journals were preserved. PR109 remains draft/open with base `psc0/pscv0-v7-m1-parser-ownership-v1`; never merge.
+Development branch: `psc0/pscv0-v7-native-lean-v1`.
 
-Live GitHub check-runs confirmed SUCCESS on the same exact integration SHA:
+- Qualified integration: **`2a7072064974cb0d051a1773a26caf15fc59838b`**.
+- Documentation-only acceptance child: **`280e1e4e6b18e4f1ac17a1a6297602250ca27e2e`**.
+- [Final integration qualification](https://github.com/dwijayuda/pskernel/blob/280e1e4e6b18e4f1ac17a1a6297602250ca27e2e/psc0/docs/PSCV0_M2_A_INTEGRATION_QUALIFICATION_2026-10-16.md).
+- [Accepted exit review](https://github.com/dwijayuda/pskernel/blob/280e1e4e6b18e4f1ac17a1a6297602250ca27e2e/psc0/docs/PSCV0_M2_A_EXIT_REVIEW_2026-10-16.md).
 
-- Native [38832366451](https://github.com/dwijayuda/pskernel/actions/runs/38832366451), job116753779387; completed 2026-10-16T01:16:49Z, including repeated native Wasmtime, measurements, artifacts and cleanup.
-- F1 [38832366381](https://github.com/dwijayuda/pskernel/actions/runs/38832366381), job116753778925.
-- F2 [38832366374](https://github.com/dwijayuda/pskernel/actions/runs/38832366374), job116753778916.
-- F3/F4/platform [38832366314](https://github.com/dwijayuda/pskernel/actions/runs/38832366314), job116753778799.
+The acceptance diff was inspected: only five Markdown files, including roadmap and BOTH development handoffs; no compiler/proof/test/workflow/gate changes. PR109 body now records accepted selected M2+A and remains draft/open/unmerged on base `psc0/pscv0-v7-m1-parser-ownership-v1`. Both integration parents e6183db9 and8cd3b9fe, concurrent documentation and both historical roadmap journals are preserved.
 
-This slice changes only the two default run IDs in the existing read-only compact diagnostic and both research handoffs. It targets the now-completed integration run38832366451. No compiler, proof, fixture, qualification command, permission, timeout or budget changes. Diagnostic success is evidence extraction, not a replacement for qualification.
+## Exact integration receipts
 
-## Final closure action
+All SUCCESS on2a707206: native [38832366451](https://github.com/dwijayuda/pskernel/actions/runs/38832366451)/job116753779387; F1 [38832366381](https://github.com/dwijayuda/pskernel/actions/runs/38832366381)/job116753778925; F2 [38832366374](https://github.com/dwijayuda/pskernel/actions/runs/38832366374)/job116753778916; F3/F4/platform [38832366314](https://github.com/dwijayuda/pskernel/actions/runs/38832366314)/job116753778799. Native passed all33 reported steps including setup/cleanup, source/modules/GC/runtimes/native Wasmtime/post-return/measurements/artifacts. Completed2026-10-16T01:16:49Z.
 
-Read the diagnostic triggered by this workflow-only push, capture its exact native artifact ID/digest, manifest and performance measurements, then update development's M2+A acceptance/exit review/roadmap/BOTH handoffs and PR109 body. Point both research handoffs at the final development receipt. Read fresh refs and preserve concurrent changes. Do not substitute research performance numbers for this integration's measurements or rerun an already successful qualification merely to change pending prose.
+Research read-only diagnostic [38835057984](https://github.com/dwijayuda/pskernel/actions/runs/38835057984)/job116762208483 at54575d2a extracted actual integration artifact **12018546813**, digest **sha256:6eb7d1fbe2bcb3ee8c95613406f24e4ec7d42d7c1314c9beacd43e8035b67dbe**. It is evidence extraction, not a replacement qualification. The diagnostic default remains the completed integration run. No further diagnostic or qualification run is needed merely to update these pointers.
 
-## Existing research evidence and limits
+Integration:1069 each JS/TS/Rust;35 probes per32/64 profile across selected JS/TS/Rust/V8/Wasmtime lanes;3599 declarations/39 classes/355 instances/13 defaults;1239 declaration mappings/52 generated-parent origins; source4 checked/92 refusals plus boundary suites; three-module JS/TS/Rust/four-module GC execution and native repeated calls/post-return. Do not relabel1069 as identical Wasm exports.
 
-Research compiler71489890970049293e78f33f9f9dc3826a0074b2 passed native38830077352 and F3/F4/platform38830077384. Source-identical8fc8154 passed F1 38831491203 and F2 38831491147. Research diagnostic38832102110 extracted artifact12017362168, digest sha256:d56700d7e7164aa234bf561d5a07215f21e543f956a19319a41657475a90862f. Full research receipt and criterion reconciliation are in development `docs/PSCV0_M2_A_RESEARCH_QUALIFICATION_2026-10-16.md` and `docs/PSCV0_M2_A_EXIT_REVIEW_2026-10-16.md`.
+Integration prelude5668ms; indexed128 elab88ms/kernel28ms/erase91ms/emit100ms. JS/native-Lean microbenchmark ratios247.09x–3157.89x remain a substantial limitation, not production-speed/no-regression or Rust-performance acceptance. The unchanged benchmark checks outputs and records times. Older research artifact12017362168 and364x–3412x research ratios remain separately attributed in the research receipt; use development's final tables for integration.
 
-Research observed1069 each JS/TS/Rust,35 probes per32/64 profile across JS/TS/Rust/V8/Wasmtime,3599 declarations/39 classes/355 instances/13 defaults. Declaration SHA256 a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f; surfacev3 SHA256117f2692ea15046020e113cd0454c5befa73479ec43e9923cafcbfc1e2031ed8. Research generated-JS/native-Lean microbenchmark ratios364x–3412x are an explicit limitation, not a speed-target pass, production performance or a universal comparison. Integration metrics must be recorded separately.
+## Preserved research and working contract
 
-## Working contract
+Research retains compiler71489890970049293e78f33f9f9dc3826a0074b2, native38830077352/F3-F4-platform38830077384 successes, source-identical8fc8154 F1 38831491203/F2 38831491147 successes, and diagnostic38832102110. Older research exit/roadmap snapshots are historical; final status and subsequent dependency plan are on development. Do not reset or delete either branch or duplicate integration.
 
-User-owned public compiler/formal-verification repository dwijayuda/pskernel. GitHub connector/cloud Linux CI ONLY; no local files/checkouts/shell/build/tests/Desktop Commander. Native portable `.lean`, official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc; study pinned source before substantial compiler changes. Only propext/Quot.sound. No sorry/admission/weaker gates/larger budgets/pskernel-core/self-hosting/compiler-source `.ps` migration/C5 execution. Wasm GC internally, linear memory explicit ABI. Fresh expected-HEAD/non-force updates; both histories and BOTH handoffs every slice. Selected bounded73 qualification is not fullv7, all Lean extensions or global compiler preservation. M3+B -> M4+C/D -> M5/E remain later work; this task only closes M2+A.
+User-owned public compiler/formal-verification repository dwijayuda/pskernel. GitHub connector/cloud Linux CI ONLY; no local files/checkouts/shell/build/tests/Desktop Commander. Native portable `.lean`, official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc; study pinned source/tests before substantial compiler changes. Only propext/Quot.sound. No sorry/admission/weaker gates/larger budgets/pskernel-core/self-hosting/compiler-source `.ps` migration/C5 execution. Wasm GC internally, linear memory explicit ABI. Fresh expected-HEAD/non-force updates, both histories and BOTH handoffs per slice. PR109 stays draft; NEVER merge.
+
+There are no remaining selected M2+A acceptance blockers. M3+B -> M4+C/D -> M5/E remain later work and were not started by this closure. No fullv7, Lean-wide equivalence, global compiler preservation, release performance, C5 or self-hosting completion is claimed. Continue from development only when further implementation is requested.

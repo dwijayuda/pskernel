@@ -66,7 +66,13 @@ theorem psKernelC0IndexedCheckedBatchFold_congr
       | error reason => rfl
       | ok result =>
           rcases result with ⟨ty, nextState⟩
-          rw [ih nextState]
+          simpa using congrArg
+            (fun outcome : Except String
+                (List PsKernelExpr × PsKernelCheckerState) =>
+              match outcome with
+              | .error reason => .error reason
+              | .ok (types, finalState) => .ok (ty :: types, finalState))
+            (ih nextState)
 
 /-- Independent original-C0 reference: every root goes through the
 original full checker, with the exact source-returned state threaded onward.

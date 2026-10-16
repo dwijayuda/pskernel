@@ -134,9 +134,14 @@ def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
   psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen input for checked well-founded relation authoring. Later relation
+-- declarations must never become their own export or replay boundary.
+def psSelfHostProdPreWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardOperatorProtocolExtend <| psStandardLogicExtend <| PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
     psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPreWellFoundedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

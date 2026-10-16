@@ -1,4 +1,4 @@
-## M3+B current architecture checkpoint — proof/default deriving over complete groups
+## M3+B current architecture checkpoint — proof/default deriving over complete groups and WF foundation authoring
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
@@ -47,6 +47,41 @@ earlier closed instance before constructing the next member. It performs
 no constructor-order search across families and introduces no forward/self
 default. Other recursive deriving handlers continue using their original
 input environment.
+
+### Audited WF foundation authoring
+
+This authoring checkpoint follows the unqualified proof/default deriving
+commit `161b6e16652f3a597fe9d1d5b43988f9ee20a0b2` and includes all preceding
+source, scope and nested deriving candidates in its exact-tip qualification.
+
+A separate native-only export profile prepares the actual missing relation
+declarations required by the next WF slice. The prior final Standard expression
+is frozen unchanged as psSelfHostProdPreWellFoundedPreludeEnvironment; the
+current final environment is its alias, so this checkpoint changes no active
+logical declaration, class registry, runtime roster or snapshot identity.
+
+The profile requests WellFoundedRelation, generic fix/fix_eq, invImage,
+SizeOf and its actual Nat/default instances, sizeOfWFRel, the actual product
+lexicographic instance/constructors, emptyWf and the selected Nat decrease
+lemmas. It determines already-selected versus missing roots from the actual
+frozen environment instead of assuming absence from a partial asset inventory.
+
+Every missing root goes through the existing StandardExport closure,
+official-kernel replay, real recursor-rule comparison and deterministic source
+renderer at the pinned Lean commit. The approved assumption set remains
+propext/Quot.sound. No proof body, theorem, dictionary or trusted admission
+is fabricated or substituted by this profile.
+
+The new native CI step runs that existing exporter, retains its source chunks
+and exact generated-file SHA256, and uploads the candidate through the existing
+artifact step. All earlier commands, frozen replay boundaries and budgets are
+unchanged. The native workflow now has one additional required authoring step;
+all five primary gates still need to pass at the same compiler/test SHA.
+
+The resulting asset must be retrieved and reviewed before a later coherent
+commit selects its declarations, real instance priorities and typed runtime
+structure layout. Generic WF execution and relation-specific equations remain
+a separate future compiler/runtime qualification.
 
 ### Independent evidence and target integration
 

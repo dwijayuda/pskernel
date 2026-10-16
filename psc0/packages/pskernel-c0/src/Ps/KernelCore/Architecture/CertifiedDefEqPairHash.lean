@@ -54,7 +54,7 @@ def psKernelC0AdaptivePairHash
   match psKernelC0PairHashMemoWorthwhile left right with
   | true => psKernelC0MemoizedPairHash left right
   | false =>
-      (psKernelExprHash left + psKernelExprHash right) %
+      Nat.mod (Nat.add (psKernelExprHash left) (psKernelExprHash right))
         psKernelCacheHashModulus
 
 theorem psKernelC0AdaptivePairHash_source

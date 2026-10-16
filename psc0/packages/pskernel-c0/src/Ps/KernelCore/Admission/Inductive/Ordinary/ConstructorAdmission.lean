@@ -17,7 +17,7 @@ The top-level bundle transaction remains in `InductiveAdmission.lean`.
 -/
 
 def psKernelAddSimpleConstructorsWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelSimpleInductiveDecl ->
     PsKernelDefinitionSafety ->
     PsKernelLevel ->
@@ -46,7 +46,7 @@ def psKernelAddSimpleConstructorsWithFuel
           "simple inductive constructor admission budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelAddSimpleConstructorsWithFuel remaining;
+        psKernelAddSimpleConstructorsWithFuel remaining checkerFuel;
       fun
         (decl : PsKernelSimpleInductiveDecl)
         (safety : PsKernelDefinitionSafety)
@@ -85,7 +85,7 @@ def psKernelAddSimpleConstructorsWithFuel
                         headerSession.context.maxNatSize;
                     match
                         psKernelSessionCheck
-                          remaining
+                          checkerFuel
                           closedSession
                           ctor.type with
                     | Except.error error =>
@@ -93,7 +93,7 @@ def psKernelAddSimpleConstructorsWithFuel
                     | Except.ok ctorType =>
                         match
                             psKernelSessionEnsureSort
-                              remaining
+                              checkerFuel
                               (Prod.snd ctorType)
                               (Prod.fst ctorType) with
                         | Except.error error =>
@@ -105,7 +105,7 @@ def psKernelAddSimpleConstructorsWithFuel
                                 work;
                             match
                                 psKernelOpenSimpleConstructorParams
-                                  remaining
+                                  checkerFuel
                                   ctorSession
                                   params
                                   ctor.type with
@@ -114,7 +114,7 @@ def psKernelAddSimpleConstructorsWithFuel
                             | Except.ok afterParams =>
                                 match
                                     psKernelOpenSimpleConstructorFields
-                                      remaining
+                                      checkerFuel
                                       afterParams.session
                                       decl.name
                                       levels

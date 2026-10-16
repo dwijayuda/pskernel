@@ -141,4 +141,39 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "zero checker fuel traversed a checked alias")
 
-  IO.println "C0_CONSTRUCTOR_FIELD_FUEL ordinary=separate mutual=separate params=separate indices=separate elimination=separate alias_pi=checked zero_checker=declined exhausted_walk=declined"
+  -- A short constructor-list walk must not spend the checker budget.
+  -- This intentionally invalid type must reach semantic rejection rather
+  -- than prematurely reporting exhaustion at the first constructor.
+  let invalidCtor : PsKernelSimpleConstructorDecl := {
+    name := .str .anonymous "InvalidBudgetCtor"
+    type := sort0
+  }
+  let invalidDecl : PsKernelSimpleInductiveDecl := {
+    levelParams := []
+    name := target
+    type := sort0
+    ctors := [invalidCtor]
+    isUnsafe := false
+    numParams := 0
+  }
+  let invalidReason ← match psKernelAddSimpleConstructorsWithFuel
+      1 16 invalidDecl .safe level [] [] 0 source
+      psKernelEnvironmentEmpty 0 [invalidCtor] with
+    | .error e => pure e
+    | .ok _ => throw (IO.userError "invalid constructor was admitted")
+  if invalidReason == "kernel inference budget exhausted" ||
+      invalidReason == "kernel reduction budget exhausted" ||
+      invalidReason == "simple inductive constructor admission budget exhausted" then
+    throw (IO.userError "constructor list walker stole checker fuel")
+  match psKernelAddSimpleConstructorsWithFuel
+      1 0 invalidDecl .safe level [] [] 0 source
+      psKernelEnvironmentEmpty 0 [invalidCtor] with
+  | .error "kernel inference budget exhausted" => pure ()
+  | _ => throw (IO.userError "zero-fuel constructor checking was not enforced")
+  match psKernelAddSimpleConstructorsWithFuel
+      0 16 invalidDecl .safe level [] [] 0 source
+      psKernelEnvironmentEmpty 0 [invalidCtor] with
+  | .error "simple inductive constructor admission budget exhausted" => pure ()
+  | _ => throw (IO.userError "zero constructor traversal fuel was not enforced")
+
+  IO.println "C0_CONSTRUCTOR_FIELD_FUEL ordinary=separate mutual=separate params=separate indices=separate elimination=separate constructors=separate alias_pi=checked zero_checker=declined exhausted_walk=declined"

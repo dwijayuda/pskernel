@@ -171,6 +171,7 @@ def psKernelAddSimpleInductive
                                           match
                                               psKernelAddSimpleConstructorsWithFuel
                                                 (Nat.succ fuel)
+                                                fuel
                                                 decl
                                                 safety
                                                 resultLevel

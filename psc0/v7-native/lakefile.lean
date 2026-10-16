@@ -62,3 +62,8 @@ lean_exe pscv0_m1_performance where
 lean_exe pscv0_m3_recursive_deriving where
   srcDir := "../test"
   root := `Pscv0M3RecursiveDeriving
+
+lean_exe pscv0_m3_inductive_groups where
+  srcDir := "../test"
+  root := `Pscv0M3InductiveGroups
+

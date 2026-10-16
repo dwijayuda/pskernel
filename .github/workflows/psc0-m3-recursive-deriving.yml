@@ -6,6 +6,8 @@ on:
       - psc0/pscv0-v7-native-lean-v1
       - psc0/pscv0-v7-platform-words-research
     paths:
+      - 'psc0/lakefile.lean'
+      - 'psc0/lean-toolchain'
       - 'psc0/packages/**'
       - 'psc0/host/**'
       - 'psc0/v7-native/**'
@@ -93,9 +95,9 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups
           mkdir -p ../dist/m3-recursive-deriving
-          lake env lean --run ../test/Pscv0M3InductiveGroups.lean | tee ../dist/m3-recursive-deriving/inductive-groups.log
+          .lake/build/bin/pscv0_m3_inductive_groups | tee ../dist/m3-recursive-deriving/inductive-groups.log
           lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean | tee ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log
           .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt

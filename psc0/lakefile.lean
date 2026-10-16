@@ -55,6 +55,7 @@ lean_lib PsCore where
     `Ps.Core.Abstract,
     `Ps.Core.Builtin,
     `Ps.Core.Nested,
+    `Ps.Core.InductiveGroup,
     `Ps.Core.LevelSubst,
     `Ps.Core.Equality,
     `Ps.Core.Subst,
@@ -340,3 +341,4 @@ lean_exe psc2_selfhost_replay_audit where
 lean_exe psc1_sh1_compile where
   srcDir := "scripts"
   root := `StrictSourceCompile
+

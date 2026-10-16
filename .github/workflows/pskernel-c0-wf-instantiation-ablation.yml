@@ -1,0 +1,102 @@
+name: PSKernel-C0 real WF source-exact instantiate memo A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-instantiation-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-wf-with-certified-substitution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce byte-exact officially accepted Lean 4.35 WF proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' \
+              > "$RUNNER_TEMP/wf-inst-memo.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-inst-memo.ndjson" \
+              > "$RUNNER_TEMP/wf-inst-memo-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/wf-inst-memo.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-inst-memo.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-inst-memo.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-inst-memo-official.txt"
+          echo "C0_WF_INST_MEMO_PINNED official_Lean435=accepted original_records=15758"
+      - name: Import Lean-proved csimp in shared substitution consumers only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Substitution/Beta.lean")
+          s=p.read_text()
+          old="import Ps.KernelCore.Core.Substitution.Instantiate\n"
+          assert s.count(old)==1, "Unrecognized native substitution module import"
+          s=s.replace(old,old+"import Ps.KernelCore.Architecture.CertifiedInstantiateMemo\n")
+          p.write_text(s)
+          print("C0_WF_INST_MEMO_ABLATION=csimp_public_import_only pure_source_unchanged=true")
+          PY
+          (cd psc0/packages/pskernel-c0 &&
+            lake build PsKernelC0 c0OfficialReplay c0InstantiateCSimpProbe)
+      - name: Preserve exact source and native negative conformance
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          timeout 20s .lake/build/bin/c0InstantiateCSimpProbe
+          lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_WF_INST_MEMO_SOURCE_PROOF exact_public_source=Lean_proved negative=pass"
+      - name: Run original real WF proof with strict verdict and unchanged fuel 4096
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-inst-memo-resources.txt" \
+              timeout 300s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-inst-memo.ndjson" 4096) \
+              > "$RUNNER_TEMP/wf-inst-memo-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_WF_INST_MEMO_EXIT=$rc"
+          grep "C0_REAL_EXPORT replay_outcome" "$RUNNER_TEMP/wf-inst-memo-c0.txt" | tail -n 3 || true
+          if test "$rc" -eq 0 &&
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096" "$RUNNER_TEMP/wf-inst-memo-c0.txt"; then
+            echo "C0_WF_INST_MEMO_RESULT=ACCEPTED_pinned_real_theorem"
+          else
+            echo "C0_WF_INST_MEMO_RESULT=NOT_QUALIFIED_timeout_or_error"
+            tail -n 25 "$RUNNER_TEMP/wf-inst-memo-c0.txt"
+          fi
+          cat "$RUNNER_TEMP/wf-inst-memo-resources.txt"
+          echo "C0_WF_INST_MEMO_SCOPE=disposable_checkout_only_no_production_checker_change"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-exact-WF-instantiation-memo
+          path: |
+            ${{ runner.temp }}/wf-inst-memo-official.txt
+            ${{ runner.temp }}/wf-inst-memo-c0.txt
+            ${{ runner.temp }}/wf-inst-memo-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

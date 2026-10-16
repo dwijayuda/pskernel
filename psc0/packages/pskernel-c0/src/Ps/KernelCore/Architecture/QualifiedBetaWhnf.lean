@@ -32,7 +32,9 @@ def psKernelC0BetaStableWhnfWithFuel
   | Nat.succ (Nat.succ (Nat.succ _)) =>
       match expr with
       | .app (.lam _ _ body _) argument =>
-          match psKernelExprMapGet state.whnf expr with
+          -- Decline FVar-scoped syntax; all such caches are source-ineligible.
+          if !psKernelSemanticCacheEligible expr then none
+          else match psKernelExprMapGet state.whnf expr with
           | some _ => none
           | none =>
               match psKernelCheckerContextEnterRecDepth context with
@@ -86,29 +88,34 @@ theorem psKernelC0BetaStableWhnf_source
                   | lam name domain body binderInfo =>
                       let head : PsKernelExpr := .lam name domain body binderInfo
                       let term : PsKernelExpr := .app head argument
+                      have eligible : psKernelSemanticCacheEligible term = true := by
+                        by_cases he : psKernelSemanticCacheEligible term = true
+                        · exact he
+                        · simp [psKernelC0BetaStableWhnfWithFuel, he,
+                            term, head] at h
                       cases publicCache : psKernelExprMapGet state.whnf term with
                       | some cached =>
                           simp [psKernelC0BetaStableWhnfWithFuel,
-                            publicCache, head, term] at h
+                            eligible, publicCache, head, term] at h
                       | none =>
                           cases depth :
                               psKernelCheckerContextEnterRecDepth context with
                           | error reason =>
                               simp [psKernelC0BetaStableWhnfWithFuel,
-                                publicCache, depth, head, term] at h
+                                eligible, publicCache, depth, head, term] at h
                           | ok entered =>
                               cases coreCache :
                                   psKernelExprMapGet state.whnfCore term with
                               | some cached =>
                                   simp [psKernelC0BetaStableWhnfWithFuel,
-                                    publicCache, depth, coreCache,
+                                    eligible, publicCache, depth, coreCache,
                                     head, term] at h
                               | none =>
                                   cases childDepth :
                                       psKernelCheckerContextEnterRecDepth entered with
                                   | error reason =>
                                       simp [psKernelC0BetaStableWhnfWithFuel,
-                                        publicCache, depth, coreCache,
+                                        eligible, publicCache, depth, coreCache,
                                         childDepth, head, term] at h
                                   | ok child =>
                                       let normalized : PsKernelExpr :=
@@ -121,7 +128,7 @@ theorem psKernelC0BetaStableWhnf_source
                                           have hx : some (normalized, nextState) =
                                               some result := by
                                             simpa [psKernelC0BetaStableWhnfWithFuel,
-                                              publicCache, depth, coreCache,
+                                              eligible, publicCache, depth, coreCache,
                                               childDepth, stable, head,
                                               term, normalized, nextState] using h
                                           exact (Option.some.inj hx).symm
@@ -181,7 +188,7 @@ theorem psKernelC0BetaStableWhnf_source
                                             psKernelWhnfCoreFinish,
                                             psKernelWhnfCoreFinishWithKnownHash,
                                             psKernelExprMapInsert, depth,
-                                            coreCache, childDepth, headCore,
+                                            coreCache, childDepth, headCore, eligible,
                                             betaBody, bodyCore, head, term,
                                             coreState, normalized]
                                         have afterCore :
@@ -191,9 +198,14 @@ theorem psKernelC0BetaStableWhnf_source
                                           rw [psKernelC0StableWhnfTerminal_post
                                             whnfChild context coreState term
                                             normalized stable]
-                                          rfl
+                                          simp [psKernelWhnfFinish,
+                                            eligible, nextState,
+                                            psKernelC0ColdOneStepWhnfState,
+                                            coreState]
                                         change
-                                          (match psKernelExprMapGet state.whnf term with
+                                          (match (if psKernelSemanticCacheEligible term then
+                                              psKernelExprMapGet state.whnf term
+                                            else Option.none) with
                                           | some cached => Except.ok (cached, state)
                                           | none =>
                                               match psKernelWhnfCoreWithFuel
@@ -206,9 +218,9 @@ theorem psKernelC0BetaStableWhnf_source
                                                     whnfChild context
                                                     coreResult.snd term coreResult.fst) =
                                             Except.ok (normalized, nextState)
-                                        simp only [publicCache, appCore, afterCore]
+                                        simp only [eligible, ite_true, publicCache, appCore, afterCore]
                                       · simp [psKernelC0BetaStableWhnfWithFuel,
-                                          publicCache, depth, coreCache,
+                                          eligible, publicCache, depth, coreCache,
                                           childDepth, stable, head, term,
                                           normalized] at h
                   | bvar _ => simp [psKernelC0BetaStableWhnfWithFuel] at h

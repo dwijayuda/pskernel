@@ -94,6 +94,32 @@ def main : IO Unit := do
   match psKernelReduceNatWith forbiddenWhnf guardContext guardState addition with
   | .error "C0_NAT_FORBIDDEN_OPERAND_WHNF" => pure ()
   | _ => throw (IO.userError "Nat.add bypassed required operand WHNF")
+  -- For a recognized Nat operator, a nonnumeral first WHNF operand
+  -- must stop reduction *before* visiting the second operand, exactly
+  -- like type_checker.cpp::reduce_bin_nat_op. Retain first-stage cache/state
+  -- changes; never synthesize a value from the stuck term.
+  let stuckLeft : PsKernelExpr := .const notNatName []
+  let stuckAddition : PsKernelExpr :=
+    .app (.app (.const psKernelNatAddName []) stuckLeft) three
+  let checkFirstOnly :
+      PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+        Except String (PsKernelExpr × PsKernelCheckerState) :=
+    fun _ current input =>
+      if psKernelExprEqual input stuckLeft then
+        .ok (input, { current with nextFresh := current.nextFresh + 1 })
+      else
+        .error "C0_NAT_UNEXPECTED_SECOND_OPERAND"
+  match psKernelReduceNatWith checkFirstOnly guardContext guardState
+      stuckAddition with
+  | .ok (.none, nextState) =>
+      if nextState.nextFresh != 18 then
+        throw (IO.userError "Stuck Nat first operand lost checker state")
+  | .ok (.some _, _) =>
+      throw (IO.userError "Stuck Nat first operand invented a reduction")
+  | .error why =>
+      throw (IO.userError ("Stuck Nat binary visited right: " ++ why))
+  IO.println "C0_LEAN435 stuck_nat_left_preserves_state_skips_right=pass"
+
   -- Even a known Nat name with illegal universe arguments is not reduced.
   let nonemptyLevels : PsKernelExpr :=
     .app (.app (.const psKernelNatAddName [.zero]) two) three

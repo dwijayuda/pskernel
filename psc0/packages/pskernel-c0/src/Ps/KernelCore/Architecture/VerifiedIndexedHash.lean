@@ -110,3 +110,52 @@ theorem psKernelC0VerifiedIndexedHashApp_source
           hGet hNode hDerived fn arg hRead) =
       psKernelExprHash (.app fn.expr arg.expr) :=
   psKernelC0VerifiedIndexedHashRead_source _
+
+/-- Slow, strictly non-accepting reference witness builder for tests. It
+intentionally evaluates the old source hash and must NOT be used as the
+hot-path source of indexed certificates on large shared expressions.
+The app constructor above builds that equality instead from exact child
+certificates, without reevaluating the expanded expression hash. -/
+def psKernelC0VerifiedIndexedHashSourceOracle
+    (owner : PsKernelC0CertifiedStore)
+    (id : Nat) :
+    Option (PsKernelC0VerifiedIndexedHash owner id) :=
+  match hGet : psKernelC0StoreGet owner.store id with
+  | none => none
+  | some entry =>
+      match hRead : psKernelC0DecodeExpr owner.store id with
+      | none => none
+      | some expr =>
+          if hHash : entry.checkerHash = psKernelExprHash expr then
+            some {
+              entry := entry
+              expr := expr
+              lookup := hGet
+              readback := hRead
+              valueCorrect := hHash
+            }
+          else none
+
+/-- A compositional certificate can only be assembled after verifying that
+the parent's owning node is exactly the indicated application and the
+source readback is exactly its two certified children. This does not
+recompute the original hash of the combined expanded application. -/
+def psKernelC0VerifiedIndexedHashAppTry
+    (owner : PsKernelC0CertifiedStore)
+    (id fnId argId : Nat)
+    (fn : PsKernelC0VerifiedIndexedHash owner fnId)
+    (arg : PsKernelC0VerifiedIndexedHash owner argId) :
+    Option (PsKernelC0VerifiedIndexedHash owner id) :=
+  match hGet : psKernelC0StoreGet owner.store id with
+  | none => none
+  | some entry =>
+      if hNode : entry.node = .app fnId argId then
+        if hDerived : entry.checkerHash =
+            (psKernelC0NodeHashes owner.store entry.node).snd then
+          if hRead : psKernelC0DecodeExpr owner.store id =
+              some (.app fn.expr arg.expr) then
+            some (psKernelC0VerifiedIndexedHashApp owner id fnId argId
+              entry hGet hNode hDerived fn arg hRead)
+          else none
+        else none
+      else none

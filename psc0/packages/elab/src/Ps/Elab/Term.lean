@@ -70,6 +70,24 @@ def psElabStructuralDefEqChild (context : PsElabContext) (term : PsExpr) :
     else
       psElabStructuralDefEqChild context term rest
 
+-- An expected major type may guide implicit HAdd/instance elaboration,
+-- but it may only come from actual, already checked recursive fields.
+-- If the available field types vary by index, leave the argument inference
+-- unchanged and rely on its subsequent child equality and telescope checks.
+def psElabStructuralCommonChildType (context : PsElabContext)
+    (calls : List (Nat × Nat)) : Option PsExpr := do
+  let some first := calls.head? | none
+  let some declaration := psLocalFindById context.localContext first.fst | none
+  let result := psLocalDeclType declaration
+  if calls.all (fun entry =>
+      match psLocalFindById context.localContext entry.fst with
+      | none => false
+      | some child => psDefEqReadOnlyWithEnv
+          context.environment context.metaContext context.localContext
+          result (psLocalDeclType child)) then
+    some result
+  else none
+
 -- Validate actual Core arguments against the child telescope, rather than
 -- comparing source names. This admits computed indices while rejecting stale
 -- indices and changes to invariant parameters.
@@ -126,7 +144,8 @@ def psElabValidateStructuralCall (elaborate : PsElaborator)
           !(fixedPrefix.zip sourcePrefix).all (fun entry =>
             psElabSyntaxLocalId context entry.snd == some entry.fst) then
         throw .structuralRecursionInvariantArgument
-      let checked ← elaborate context source none
+      let expected := psElabStructuralCommonChildType context recursion.calls
+      let checked ← elaborate context source expected
       let some (childId, hypothesisId) :=
         psElabStructuralDefEqChild checked.context checked.term recursion.calls
         | throw .structuralRecursionNotDecreasing

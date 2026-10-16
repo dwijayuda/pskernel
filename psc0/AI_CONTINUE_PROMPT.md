@@ -237,3 +237,21 @@ The focused workflow must pass before claiming source infix conformance.
 This is not automatic arithmetic termination, general well-founded
 recursion, executable partial P0, P1 fixedpoints or full M3+B.
 No new axiom, weakened original test or performance claim.
+
+## M3+B candidate: child-typed computed operator majors (qualification pending)
+
+The fixture-only `3a2fbdfa3ec4c63e6134792892b6c1a26028c25e`
+failed focused run `38933071884`: `m3infixChild(k + 0)` rejected at
+`PSCV0-RECURSION: recursive major must be a direct recursive field`.
+Native Lean 4.35.0 accepts the same strict-child expression by definitional
+equality. This candidate adds a **shared expected-type hint** for computed
+recursive arguments: only when all actual constructor-recursive field types
+are read-only definitionally equal is that common checked child type supplied
+to the ordinary term elaborator. Varied indexed child types fall back to the
+previous inference route. It still chooses an *existing checked IH* only
+after exact Core definitional equality; no new termination heuristic or
+trust principle is introduced. No source-specific HAdd rewrite or changed
+backend semantics. The existing infix `k+0` positive and nondecreasing
+`k+1` refusal demand their intended phases in the focused suite.
+Five exact same-commit native/F1/F2/F3-F4/focused replays are required.
+Full M3+B remains open; old Nat.sub all-five receipt is unaffected.

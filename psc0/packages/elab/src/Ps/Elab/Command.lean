@@ -1,6 +1,7 @@
 import Ps.Elab.Scope
 import Ps.Elab.Deriving
 import Ps.Elab.Mutual
+import Ps.Elab.MutualStructural
 
 structure PsCommandState where
   environment : PsEnvironment
@@ -220,9 +221,9 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     else state.exposedNames
     privateAliases := aliases }
 
--- Only compatible, independently inhabited P0 members enter this selected
--- joint batch. Other strategies keep their own refusal instead of silently
--- inheriting an opaque/runtime interpretation from a neighboring declaration.
+-- A joint batch has one checked strategy. Ordinary members use the selected
+-- direct structural construction; independently inhabited P0 members retain
+-- their logical opaque/actual-body owner. Other strategies keep their refusal.
 def psElabMutualStrategy (members : List PsSyntaxMutualMember) : Except PsElabError Unit := do
   if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
   if members.any (fun member => match member.declaration with
@@ -233,7 +234,9 @@ def psElabMutualStrategy (members : List PsSyntaxMutualMember) : Except PsElabEr
     throw (.data "PSCV0-MUTUAL-WF: mutual well-founded recursion requires a checked group construction; admission is unavailable")
   if members.all (fun member => match member.declaration with
       | .definition .. => true | _ => false) then
-    throw (.data "PSCV0-MUTUAL-TOTAL: total mutual recursion requires a checked group construction; admission is unavailable")
+    if members.any (fun member => member.registration.isSome) then
+      throw (.data "PSCV0-MUTUAL-TOTAL: REGISTRATION: selected structural mutual members cannot register additional declaration kinds")
+    return ()
   if !members.all (fun member => match member.declaration with
       | .partialDefinition .. => true | _ => false) then
     throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
@@ -270,8 +273,13 @@ def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualM
   -- members. Keep this explicit result instead of guessing from AST arities.
   let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
   let captured := psScopeSelect state.scope used
-  let result ← psElabPartialMutualBatch state.environment
-    (state.scope.levelNames.map psRootName) captured scopedMembers
+  let result ← if members.all (fun member => match member.declaration with
+      | .definition .. => true | _ => false) then
+    psElabStructuralMutualBatch state.environment
+      (state.scope.levelNames.map psRootName) captured scopedMembers
+  else
+    psElabPartialMutualBatch state.environment
+      (state.scope.levelNames.map psRootName) captured scopedMembers
   if result.members.length != scopedMembers.length then
     throw (.data "PSCV0-MUTUAL-INTERNAL: checked member provenance mismatch")
   let environment ← psAddDeclarationList state.environment result.batch.declarations

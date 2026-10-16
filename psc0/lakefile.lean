@@ -290,6 +290,7 @@ lean_lib PsElab where
     `Ps.Elab.Deriving,
     `Ps.Elab.Scope,
     `Ps.Elab.Mutual,
+    `Ps.Elab.MutualStructural,
     `Ps.Elab.Command
   ]
 

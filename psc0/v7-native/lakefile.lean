@@ -87,3 +87,7 @@ lean_exe pscv0_m3_inductive_deriving where
   srcDir := "../test"
   root := `Pscv0M3InductiveDeriving
 
+lean_exe pscv0_m3_mutual_structural where
+  srcDir := "../test"
+  root := `Pscv0M3MutualStructural
+

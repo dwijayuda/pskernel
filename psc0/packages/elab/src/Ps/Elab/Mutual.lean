@@ -95,8 +95,12 @@ structure PsScopedMutualMember where
 def psScopeMutualMember (resolver : PsScopeResolver)
     (member : PsSyntaxMutualMember) (alias : PsSyntaxName) :
     Except PsElabError PsScopedMutualMember := do
-  let .partialDefinition sourceName binders type value span := member.declaration
-    | throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
+  let (sourceName, binders, type, value, span, isPartial) ← match member.declaration with
+    | .partialDefinition name binders type value span =>
+      pure (name, binders, type, value, span, true)
+    | .definition name binders type value span =>
+      pure (name, binders, type, value, span, false)
+    | _ => throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
   let qualified := psScopeQualified resolver.scope sourceName
   let name := { qualified with
     segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments }
@@ -107,7 +111,8 @@ def psScopeMutualMember (resolver : PsScopeResolver)
   let type ← psScopeTerm 4096 headerResolver binders.bound type
   let value ← psScopeTerm 4096 resolver binders.bound value
   return {
-    source := .partialDefinition name binders.binders type.term value.term span
+    source := if isPartial then .partialDefinition name binders.binders type.term value.term span
+      else .definition name binders.binders type.term value.term span
     alias
     used := psScopeUnion binders.used (psScopeUnion type.used value.used)
     isPrivate := member.isPrivate }
@@ -119,10 +124,12 @@ structure PsElabPartialHeader where
   openType : PsExpr
   type : PsExpr
 
-def psElabMutualPartialHeader (captured : PsElabTypedBindersResult)
-    (source : PsSyntaxDeclaration) : Except PsElabError PsElabPartialHeader := do
-  let .partialDefinition nameSyntax binders typeSyntax _ _ := source
-    | throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
+-- Scope and typed headers are shared by logical strategies. This function
+-- introduces only the real parameter telescope, never a declaration or a
+-- provisional global constant. The caller owns how a checked body is built.
+def psElabMutualTypedHeader (captured : PsElabTypedBindersResult)
+    (nameSyntax : PsSyntaxName) (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (typeSyntax : PsSyntaxTerm) : Except PsElabError PsElabPartialHeader := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let binders ← psElabTypedBindersAcc psElabTerm binders captured.context captured.bindersRev
   let annotation ← psElabType psElabTerm binders.context typeSyntax
@@ -130,6 +137,12 @@ def psElabMutualPartialHeader (captured : PsElabTypedBindersResult)
   let type := psCloseElabForallBinders annotation.context.metaContext binders.bindersRev openType
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   return { name, context := annotation.context, bindersRev := binders.bindersRev, openType, type }
+
+def psElabMutualPartialHeader (captured : PsElabTypedBindersResult)
+    (source : PsSyntaxDeclaration) : Except PsElabError PsElabPartialHeader := do
+  let .partialDefinition nameSyntax binders typeSyntax _ _ := source
+    | throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
+  psElabMutualTypedHeader captured nameSyntax binders typeSyntax
 
 def psElabMutualPartialLogical (environment : PsEnvironment) (levels : List PsName)
     (header : PsElabPartialHeader) : Except PsElabError PsDeclaration := do

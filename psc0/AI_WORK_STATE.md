@@ -1,4 +1,4 @@
-## M3+B current checkpoint — accepted group deriving; typed well-founded candidate
+## M3+B current checkpoint — accepted group deriving; typed and mutual recursion candidate
 
 Latest fully accepted compiler/test: `01d762eb02eab1d2f795e5338cb3586cd1d1ace0`.
 All five exact-SHA gates succeeded: native `38967030820` (33/33 reported
@@ -19,6 +19,10 @@ The weighted accepted contribution is approximately 58 points: data 17/30,
 source strategies 10/15, total recursion 10/20, P0 13/15, P1 1/10,
 integration 7/10. This is an engineering estimate, not a conformance rate.
 All six exits remain in the denominator. Unqualified code adds no points.
+
+The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`; this
+commit adds total mutual structural construction. Qualify the combined tip
+on all five gates. Neither recursion change is independently accepted yet.
 
 ### Typed well-founded recursion candidate
 
@@ -54,6 +58,42 @@ Selected limits remain explicit: no several-changing-input measure pack,
 no major domain depending on changing state, and no extension of ordinary
 erasure's higher-rank/type-changing-state limits. Body lambdas do not enter
 the source header or termination-measure scope.
+
+### Total mutual structural recursion candidate
+
+The shared scoped header preparation now feeds an actual typed structural
+batch. Each source member root-matches one explicit major. Every function
+owns exactly one ordered component of its actual family motive; families
+may own zero, one or several functions. PUnit, an unwrapped component, or
+right-associated Prod is constructed and checked at the actual motive
+universe. Equal result types never identify functions.
+
+The existing complete-group argument cursor builds motives and minors.
+Every recursive call must target a real strict direct constructor field,
+with the child's actual family/indices, invariant uniform parameters and
+the full original member header. Its source identity selects the exact
+component from that child's checked hypothesis; all other evolving
+arguments and returned-function applications are checked in source order.
+
+All completed ordinary definitions close without provisional peer locals
+or recursive globals. Only then are the exact original source equations
+proved against the actual public definitions using checked constructor
+cases, delta/iota reduction and product projections. Any late failure
+returns no batch. Existing ordinary compiler preparation constructs and
+revalidates companion workers before shared erasure.
+
+The new independent native fixture has six outputs. It exercises two
+equal-typed functions with distinct observations, differing argument
+arities/orders and evolving state, unequal family index telescopes, a
+zero-owned companion at Type u, shared implicit/instance/value/proof
+captures, exact public equation use and late-member atomicity. It runs
+through direct JS, strict TS, locked Rust, V8 GC and Wasmtime components.
+
+This slice requires a root match for every member, distinct header-local
+indices, the same actual direct group and uniform parameters, and
+equivalent successor motive universes. Nested/function-valued recursive
+fields, escaping/unsaturated peers and general mutual well-founded
+recursion retain precise refusals.
 
 ### Qualification and continuation
 

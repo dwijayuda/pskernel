@@ -93,24 +93,27 @@ def main : IO Unit := do
       4096 letSession.context letSession.state rigid).isSome then
     throw (IO.userError "uncached let-fvar was independently accepted")
 
-  -- Warm source-owned let-fvar WHNF cache is eligible without repeating
-  -- zeta evaluation. This is never an externally imported success cache.
+  -- A let-bound FVar is context-sensitive. Even after successful source
+  -- zeta, it must never enter a reusable expression-only WHNF cache.
   let (letValue, warmedLetState) ← match psKernelCheckerWhnf 4096
       letSession.context letSession.state rigid with
     | .ok result => pure result
     | .error e => throw (IO.userError ("source let-fvar failed: " ++ e))
-  if !psKernelExprEqual letValue sort0 then
-    throw (IO.userError "source let-fvar zeta result changed")
-  let some (cachedLet, identicalState) :=
-      psKernelC0ContextualHeadWhnfWithFuel 1
-        letSession.context warmedLetState rigid
-    | throw (IO.userError "warm let-fvar cache declined")
-  if !psKernelExprEqual cachedLet sort0 ||
-      (psKernelExprMapGet identicalState.whnf rigid).isNone then
-    throw (IO.userError "warm let-fvar cache lost source value")
+  if !psKernelExprEqual letValue sort0 ||
+      (psKernelExprMapGet warmedLetState.whnf rigid).isSome then
+    throw (IO.userError "source let-fvar zeta or scoped cache policy changed")
+  if (psKernelC0ContextualHeadWhnfWithFuel
+      1 letSession.context warmedLetState rigid).isSome then
+    throw (IO.userError "contextual WHNF reused scoped let-fvar cache")
+  let (again, _) ← match psKernelCheckerWhnf 4096
+      letSession.context warmedLetState rigid with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("repeated source let-fvar failed: " ++ e))
+  if !psKernelExprEqual again sort0 then
+    throw (IO.userError "repeated source let-fvar normalization changed")
   if (psKernelC0ContextualHeadWhnfWithFuel
       0 letSession.context warmedLetState rigid).isSome then
-    throw (IO.userError "warm let-fvar bypassed zero public fuel")
+    throw (IO.userError "let-fvar bypassed zero public fuel")
 
   let blocked : PsKernelCheckerSession := {
     source with

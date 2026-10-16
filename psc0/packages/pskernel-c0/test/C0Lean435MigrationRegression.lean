@@ -146,6 +146,39 @@ def main : IO Unit := do
     throw (IO.userError "Unrecognized reducer entered Nat binary dispatch")
   IO.println "C0_LEAN435 non_nat_binary_avoids_eager_operand_whnf=pass"
 
+  -- Cache policy is Boolean work selection, not theorem admission.
+  -- In checked mode the memo FVar traversal must never be needed for
+  -- a growing application, lambda, Pi or literal; infer-only mode keeps
+  -- the exact original FVar eligibility guard.
+  let closedApp : PsKernelExpr :=
+    .app (.const psKernelNatAddName []) two
+  let localFVarName : PsKernelName :=
+    .str .anonymous "C0.cacheScopeLocal"
+  let scopedApp : PsKernelExpr :=
+    .app closedApp (.fvar localFVarName)
+  let lambda : PsKernelExpr :=
+    .lam localFVarName (.sort .zero) closedApp .default
+  let forallType : PsKernelExpr :=
+    .forallE localFVarName (.sort .zero) scopedApp .default
+  let policyFixtures : List PsKernelExpr := [
+    two, closedApp, scopedApp, lambda, forallType,
+    .fvar localFVarName, .const psKernelNatAddName [],
+    .mdata 17 scopedApp,
+    .proj psKernelNatName 0 scopedApp
+  ]
+  for expr in policyFixtures do
+    for inferOnly in [false, true] do
+      if psKernelInferCacheEligible inferOnly expr !=
+          psKernelInferCacheEligibleSource inferOnly expr then
+        throw (IO.userError "Source-exact inference-cache selector drift")
+  for expr in [closedApp, scopedApp, lambda, forallType, two] do
+    if psKernelInferCacheEligible false expr then
+      throw (IO.userError "Checked non-cacheable source unexpectedly eligible")
+  if !psKernelInferCacheEligible true closedApp ||
+      psKernelInferCacheEligible true scopedApp then
+    throw (IO.userError "Infer-only cache FVar scope guard was altered")
+  IO.println "C0_LEAN435 lazy_infer_cache_selector_source_equivalence=pass"
+
   let candidate : PsKernelDefinitionInfo := {
     base := {
       name := target

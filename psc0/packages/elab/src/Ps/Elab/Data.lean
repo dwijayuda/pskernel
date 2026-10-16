@@ -1,6 +1,7 @@
 import Ps.Elab.Term
 import Ps.Meta.Inductive
 import Ps.Core.Nested
+import Ps.Core.InductiveGroup
 
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
@@ -59,7 +60,7 @@ def psElabDataIndices (context : PsElabContext) (info : PsInductiveInfo)
 -- selected List/Option/Array/Prod positive-container policy. Kernel admission
 -- is still the final positivity authority. No nested IH is manufactured.
 def psElabValidateNestedRecursiveFieldWithFuel
-    (fuel : Nat) (context : PsElabContext) (info : PsInductiveInfo)
+    (fuel : Nat) (context : PsElabContext) (plan : PsInductiveGroupPlan)
     (parameters : List PsExpr) (fieldType : PsExpr) :
     Except PsElabError Unit := do
   match fuel with
@@ -67,40 +68,41 @@ def psElabValidateNestedRecursiveFieldWithFuel
   | remaining + 1 =>
     let fieldType := psWhnf context.environment context.metaContext
       context.localContext fieldType
-    if !psExprHasConst info.name fieldType then return ()
+    if !plan.members.any (fun info => psExprHasConst info.name fieldType) then return ()
     let view := psExprAppView fieldType
     let .constE head _ := view.head
       | throw (.data "unsupported recursive field; expected a positive direct family occurrence")
-    if psNameEq head info.name then
+    if let some info := psInductiveGroupFind plan head then
       let _ ← psElabDataIndices context info parameters fieldType
       return ()
+    if plan.members.length != 1 || plan.members.any (fun info => info.numIndices != 0) then
+      throw (.data "nested recursive groups require the checked auxiliary motive plan")
     let some selected := psSelectedNestedContainer? fieldType
       | throw (.data "unsupported recursive field; expected a positive direct family occurrence")
     for element in psSelectedNestedContainerElements selected do
-      psElabValidateNestedRecursiveFieldWithFuel remaining context info
+      psElabValidateNestedRecursiveFieldWithFuel remaining context plan
         parameters element
 
-def psElabDataRecursiveFields (context : PsElabContext) (info : PsInductiveInfo)
+def psElabDataRecursiveFields (context : PsElabContext) (plan : PsInductiveGroupPlan)
     (parameters : List PsExpr) (fields : List PsElabTypedBinder) :
     Except PsElabError (List Nat) := do
   let (_, result) ← fields.foldlM (fun (state : Nat × List Nat) field => do
     let type := psWhnf context.environment context.metaContext context.localContext field.type
     let view := psExprAppView type
     let direct := match view.head with
-      | .constE name _ => psNameEq name info.name
-      | _ => false
-    if direct then
+      | .constE name _ => psInductiveGroupFind plan name
+      | _ => none
+    if let some info := direct then
       let _ ← psElabDataIndices context info parameters type
       return (state.fst + 1, state.fst :: state.snd)
-    if psExprHasConst info.name type then
-      if info.numIndices != 0 then
-        throw (.data "unsupported recursive field; expected a positive direct family occurrence")
-      psElabValidateNestedRecursiveFieldWithFuel 4096 context info parameters type
+    if plan.members.any (fun info => psExprHasConst info.name type) then
+      psElabValidateNestedRecursiveFieldWithFuel 4096 context plan parameters type
     return (state.fst + 1, state.snd)) (0, [])
   return result.reverse
 
 def psElabDataConstructor (context : PsElabContext)
-    (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
+    (parameterBindersRev : List PsElabTypedBinder) (plan : PsInductiveGroupPlan)
+    (info : PsInductiveInfo)
     (index : Nat) (source : PsSyntaxInductiveConstructor) :
     Except PsElabError (PsDeclaration × PsElabSourceInfo) := do
   let some name := psSyntaxConstructorCoreName info.name source.name | throw .emptyName
@@ -118,7 +120,7 @@ def psElabDataConstructor (context : PsElabContext)
   if !unified.success then throw (.data "constructor result must be its declared family")
   let result := { result with context := psElabContextWithMeta result.context unified.context }
   let _ ← psElabDataIndices result.context info parameters result.type
-  let recursiveFields ← psElabDataRecursiveFields result.context info parameters fields.bindersRev.reverse
+  let recursiveFields ← psElabDataRecursiveFields result.context plan parameters fields.bindersRev.reverse
   let type := psCloseElabImplicitBinders result.context.metaContext parameterBindersRev
     (psCloseElabForallBinders result.context.metaContext fields.bindersRev result.type)
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
@@ -134,124 +136,244 @@ def psElabDataMotiveAt (context : PsElabContext) (info : PsInductiveInfo)
   let indices ← psElabDataIndices context info parameters type
   return psExprApplyMany motive (indices ++ [value])
 
-def psElabDataMinor (context : PsElabContext) (info : PsInductiveInfo)
-    (parameters : List PsExpr) (motive : PsExpr) (constructor : PsConstructorInfo) :
-    Except PsElabError PsExpr := do
+-- All motives are installed before any minor is constructed. A recursive
+-- field selects its own family's motive; the result selects its constructor's
+-- family. No cross-family induction hypothesis is guessed from a field index.
+def psElabDataGroupMotiveAt (context : PsElabContext) (plan : PsInductiveGroupPlan)
+    (parameters : List PsExpr) (motives : List PsElabTypedBinder)
+    (value type : PsExpr) : Except PsElabError PsExpr := do
+  let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext type)
+  let .constE name _ := view.head | throw (.data "expected a group family occurrence")
+  let some pair := (plan.members.zip motives).find? (fun pair => psNameEq pair.fst.name name)
+    | throw (.data "recursive field does not belong to the inductive group")
+  psElabDataMotiveAt context pair.fst parameters (.fvar pair.snd.id) value type
+
+def psElabDataMinor (context : PsElabContext) (plan : PsInductiveGroupPlan)
+    (parameters : List PsExpr) (motives : List PsElabTypedBinder)
+    (constructor : PsConstructorInfo) : Except PsElabError PsExpr := do
+  let some info := psInductiveGroupFind plan constructor.inductiveName
+    | throw (.data "constructor does not belong to the inductive group")
   let cursor ← psElabMatchApplyParameters context parameters constructor.type
   let fields ← psElabOpenCoreTelescope 4096 context cursor (some constructor.numFields)
   let args := psElabBinderArguments fields.bindersRev
   let intro := psExprApplyMany (.constE constructor.name (info.levelParams.map PsLevel.param)) (parameters ++ args)
-  let conclusion ← psElabDataMotiveAt fields.context info parameters motive intro fields.body
+  let conclusion ← psElabDataGroupMotiveAt fields.context plan parameters motives intro fields.body
   let fieldsInOrder := fields.bindersRev.reverse
   let hypotheses ← constructor.recursiveFields.mapM fun index => do
     let some field := fieldsInOrder[index]? | throw (.data "invalid recursive field metadata")
-    psElabDataMotiveAt fields.context info parameters motive (.fvar field.id) field.type
+    psElabDataGroupMotiveAt fields.context plan parameters motives (.fvar field.id) field.type
   let body := (hypotheses.zip constructor.recursiveFields).foldr (fun entry body =>
     .forallE (psNameAppendNum (psRootName "_ih") entry.snd) entry.fst body .explicit) conclusion
   return psCloseElabForallBinders fields.context.metaContext fields.bindersRev body
 
-def psBuildInductiveRecursor (context : PsElabContext)
-    (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
-    (constructors : List PsDeclaration) : Except PsElabError PsDeclaration := do
-  let large ← (psInductiveLargeElimination context.environment info).mapError PsElabError.infer
-  let some motiveUniverse := (List.range (info.levelParams.length + 1)).map
+-- Pinned Lean uses one elimination universe, all family motives, and all
+-- constructor minors in every recursor. Mutually inductive predicates cannot
+-- use the singleton large-elimination exception (kernel/inductive.cpp).
+def psBuildInductiveGroupRecursors (context : PsElabContext)
+    (parameterBindersRev : List PsElabTypedBinder) (plan : PsInductiveGroupPlan)
+    (constructors : List PsDeclaration) : Except PsElabError (List PsDeclaration) := do
+  let first :: _ := plan.members | throw (.data "empty inductive group")
+  if !psInductiveGroupHeaderShapeValid plan then throw (.data "incompatible inductive group headers")
+  let large ← if plan.members.length == 1 then
+      (psInductiveLargeElimination context.environment first).mapError PsElabError.infer
+    else do
+      let level ← (psInductiveResultLevel context.environment first).mapError PsElabError.infer
+      pure (psLevelAlwaysPositive level)
+  let some motiveUniverse := (List.range (first.levelParams.length + 1)).map
       (psNameAppendNum (psRootName "_motiveUniverse")) |>.find?
-        (fun name => !(info.levelParams.any (psNameEq name)))
+        (fun name => !(first.levelParams.any (psNameEq name)))
     | throw (.data "cannot allocate motive universe")
   let motiveLevel := if large then PsLevel.param motiveUniverse else .zero
   let parameters := psElabBinderArguments parameterBindersRev
-  let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters
-  let indexType ← psElabMatchApplyParameters context parameters info.type
-  let indices ← psElabOpenCoreTelescope 4096 context indexType (some info.numIndices)
-  let indexedFamily := psExprApplyMany family (psElabBinderArguments indices.bindersRev)
-  let motiveType := psCloseElabForallBinders context.metaContext indices.bindersRev
-    (.forallE (psRootName "_major") indexedFamily (.sortE motiveLevel) .explicit)
-  -- Index locals are scoped inside the motive; keep their IDs fresh for minors.
-  let outer := psElabLeaveScope context indices.context
-  let motive := psLocalPushBinding outer.localContext (psRootName "_motive") motiveType .explicit
-  let motiveContext := psElabContextWithLocal outer motive.context
-  let (minorContext, minorsRev) ← constructors.foldlM
-    (fun (state : PsElabContext × List PsElabTypedBinder) declaration => do
-      let .constructorDecl constructor := declaration | throw (.data "expected constructor")
-      let type ← psElabDataMinor state.fst info parameters (.fvar motive.id) constructor
-      let name := psNameAppendNum (psRootName "_minor") constructor.constructorIndex
+  let (motiveContext, motivesRev) ← plan.members.foldlM
+    (fun (state : PsElabContext × List PsElabTypedBinder) info => do
+      let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters
+      let indexType ← psElabMatchApplyParameters state.fst parameters info.type
+      let indices ← psElabOpenCoreTelescope 4096 state.fst indexType (some info.numIndices)
+      let indexedFamily := psExprApplyMany family (psElabBinderArguments indices.bindersRev)
+      let motiveType := psCloseElabForallBinders state.fst.metaContext indices.bindersRev
+        (.forallE (psRootName "_major") indexedFamily (.sortE motiveLevel) .explicit)
+      let outer := psElabLeaveScope state.fst indices.context
+      let name := if plan.members.length == 1 then psRootName "_motive"
+        else psNameAppendNum (psRootName "_motive") state.snd.length
+      let pushed := psLocalPushBinding outer.localContext name motiveType .explicit
+      return (psElabContextWithLocal outer pushed.context,
+        PsElabTypedBinder.mk pushed.id name motiveType .explicit :: state.snd)) (context, [])
+  let motives := motivesRev.reverse
+  let orderedNames := plan.members.flatMap (·.constructors)
+  if constructors.length != orderedNames.length then throw (.data "inductive group constructor count mismatch")
+  let ordered ← orderedNames.mapM fun name => do
+    let some (.constructorDecl constructor) := constructors.find? (fun declaration =>
+        psNameEq (psDeclarationName declaration) name)
+      | throw (.data "missing inductive group constructor")
+    return constructor
+  let (minorContext, minorsRev) ← ordered.foldlM
+    (fun (state : PsElabContext × List PsElabTypedBinder) constructor => do
+      let type ← psElabDataMinor state.fst plan parameters motives constructor
+      let name := psNameAppendNum (psRootName "_minor") state.snd.length
       let pushed := psLocalPushBinding state.fst.localContext name type .explicit
       return (psElabContextWithLocal state.fst pushed.context,
-        PsElabTypedBinder.mk pushed.id name type .explicit :: state.snd))
-    (motiveContext, [])
-  let indices ← psElabOpenCoreTelescope 4096 minorContext indexType (some info.numIndices)
-  let indexArgs := psElabBinderArguments indices.bindersRev
-  let majorType := psExprApplyMany family indexArgs
-  let majorName := psRootName "_major"
-  let major := psLocalPushBinding indices.context.localContext majorName majorType .explicit
-  let body := psExprApplyMany (.fvar motive.id) (indexArgs ++ [.fvar major.id])
-  let type := psCloseElabImplicitBinders context.metaContext parameterBindersRev
-    (psCloseElabForallBinders context.metaContext
-      [PsElabTypedBinder.mk motive.id (psRootName "_motive") motiveType .explicit]
-      (psCloseElabForallBinders context.metaContext minorsRev
-        (psCloseElabImplicitBinders context.metaContext indices.bindersRev
-          (psCloseElabForallBinders context.metaContext
-            [PsElabTypedBinder.mk major.id majorName majorType .explicit] body))))
-  if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
-  return .recursorDecl {
-    name := psNameAppendStr info.name "rec"
-    levelParams := if large then motiveUniverse :: info.levelParams else info.levelParams
-    type
-    inductiveNames := [info.name], numParams := info.numParams, numIndices := info.numIndices
-    numMotives := 1, numMinors := constructors.length }
+        PsElabTypedBinder.mk pushed.id name type .explicit :: state.snd)) (motiveContext, [])
+  (plan.members.zip motives).mapM fun (info, motive) => do
+    let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters
+    let indexType ← psElabMatchApplyParameters minorContext parameters info.type
+    let indices ← psElabOpenCoreTelescope 4096 minorContext indexType (some info.numIndices)
+    let indexArgs := psElabBinderArguments indices.bindersRev
+    let majorType := psExprApplyMany family indexArgs
+    let majorName := psRootName "_major"
+    let major := psLocalPushBinding indices.context.localContext majorName majorType .explicit
+    let body := psExprApplyMany (.fvar motive.id) (indexArgs ++ [.fvar major.id])
+    let type := psCloseElabImplicitBinders context.metaContext parameterBindersRev
+      (psCloseElabForallBinders context.metaContext motivesRev
+        (psCloseElabForallBinders context.metaContext minorsRev
+          (psCloseElabImplicitBinders context.metaContext indices.bindersRev
+            (psCloseElabForallBinders context.metaContext
+              [PsElabTypedBinder.mk major.id majorName majorType .explicit] body))))
+    if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
+    return .recursorDecl {
+      name := psNameAppendStr info.name "rec"
+      levelParams := if large then motiveUniverse :: first.levelParams else first.levelParams
+      type, inductiveNames := psInductiveGroupNames plan
+      numParams := info.numParams, numIndices := info.numIndices
+      numMotives := plan.members.length, numMinors := ordered.length }
 
-def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
-    (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)
-    (constructors : List PsSyntaxInductiveConstructor) (isStructure : Bool)
-    (levelNames : List PsName := []) :
-    Except PsElabError PsElabDeclarationBatchResult := do
-  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
-  let parameters ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) params
-  let result ← match resultType with
+def psBuildInductiveRecursor (context : PsElabContext)
+    (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
+    (constructors : List PsDeclaration) : Except PsElabError PsDeclaration := do
+  let [recursor] ← psBuildInductiveGroupRecursors context parameterBindersRev { members := [info] } constructors
+    | throw (.data "expected singleton recursor plan")
+  return recursor
+
+structure PsElabInductiveSource where
+  name : PsSyntaxName
+  params : List (PsSyntaxBinderHead × PsSyntaxTerm)
+  resultType : Option PsSyntaxTerm
+  constructors : List PsSyntaxInductiveConstructor
+  isStructure : Bool := false
+
+structure PsElabInductiveHeader where
+  source : PsElabInductiveSource
+  info : PsInductiveInfo
+  context : PsElabContext
+  bindersRev : List PsElabTypedBinder
+
+-- Headers are elaborated in the pre-group environment. Only after their
+-- complete parameter/index telescopes agree do any family names enter the
+-- constructor environment; these entries remain unadmitted Core plans.
+def psElabInductiveHeader (environment : PsEnvironment) (source : PsElabInductiveSource)
+    (levelNames : List PsName) : Except PsElabError PsElabInductiveHeader := do
+  let some name := psSyntaxNameToName source.name | throw .emptyName
+  let parameters ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) source.params
+  let result ← match source.resultType with
     | none => do
       let mut context := parameters.context
       let mut level := PsLevel.succ .zero
-      if isStructure then
-        for constructor in constructors do
+      if source.isStructure then
+        for constructor in source.constructors do
           let fields ← psElabTypedBinders psElabTerm { context with collectInfo := false } constructor.fields
           for field in fields.bindersRev do
             let fieldLevel ← psElabExpressionSort fields.context field.type
             level := psLevelMax level fieldLevel
           context := psElabLeaveScope context fields.context
       pure (PsElabTypeResult.mk context (.sortE (psLevelNormalize level)))
-    | some source => psElabType psElabTerm parameters.context source
+    | some term => psElabType psElabTerm parameters.context term
   let indices ← psElabOpenCoreTelescope 4096 result.context result.type none
   match indices.body with
   | .sortE _ => pure ()
   | _ => throw (.data "data family must end in a sort")
-  if isStructure && !indices.bindersRev.isEmpty then
+  if source.isStructure && !indices.bindersRev.isEmpty then
     throw (.data "structure result must be a sort, not an indexed family")
   let type := psCloseElabForallBinders result.context.metaContext parameters.bindersRev result.type
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
-  let names ← constructors.mapM fun source =>
-    match psSyntaxConstructorCoreName name source.name with
+  let names ← source.constructors.mapM fun constructor =>
+    match psSyntaxConstructorCoreName name constructor.name with
     | some name => pure name
     | none => throw .emptyName
   if names.any (fun name => (names.filter (psNameEq name)).length > 1) then throw (.data "duplicate constructor")
   let info : PsInductiveInfo := {
     name, levelParams := psElabDeclarationLevels levelNames [type], type, numParams := parameters.bindersRev.length
-    numIndices := indices.bindersRev.length, constructors := names, isStructure }
-  let declaration := PsDeclaration.inductiveDecl info
-  let withInductive ← psAddDeclarationList environment [declaration]
-  let constructorContext := { result.context with environment := withInductive, infoRev := [] }
-  let (_, declarationsRev, sourceInfoRev) ← constructors.foldlM
-    (fun (state : Nat × List PsDeclaration × List PsElabSourceInfo) source => do
-      let (index, declarations, sourceInfo) := state
-      let (declaration, receipt) ←
-        psElabDataConstructor constructorContext parameters.bindersRev info index source
-      return (index + 1, declaration :: declarations, receipt :: sourceInfo)) (0, [], [])
-  let declarations := declarationsRev.reverse
-  let withConstructors ← psAddDeclarationList withInductive declarations
-  let recursor ← psBuildInductiveRecursor
-    { result.context with environment := withConstructors } parameters.bindersRev info declarations
-  return {
-    declarations := declaration :: (declarations ++ [recursor])
-    sourceInfo := psElabFinishSourceInfo result.context name :: sourceInfoRev.reverse }
+    numIndices := indices.bindersRev.length, constructors := names, isStructure := source.isStructure }
+  return { source, info, context := result.context, bindersRev := parameters.bindersRev }
+
+def psElabInductiveGroupParameters (context : PsElabContext) (parameters : List PsExpr)
+    (left right : PsExpr) : Except PsElabError Unit := do
+  match parameters with
+  | [] => return ()
+  | parameter :: rest =>
+    let left ← (psInferEnsureForall context.environment context.metaContext context.localContext left).mapError PsElabError.infer
+    let right ← (psInferEnsureForall context.environment context.metaContext context.localContext right).mapError PsElabError.infer
+    if !psBinderInfoEq left.binder right.binder ||
+        !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext left.domain right.domain then
+      throw (.data "inductive group parameters must have compatible binder types and kinds")
+    psElabInductiveGroupParameters context rest
+      (psExprInstantiate1 left.body parameter) (psExprInstantiate1 right.body parameter)
+
+-- Constructors use one common parameter identity. Each member retains its
+-- source binder names as aliases for that common context, so alpha-renamed
+-- compatible headers cannot introduce unrelated free-variable telescopes.
+def psElabInductiveGroupContext (first header : PsElabInductiveHeader)
+    (environment : PsEnvironment) : PsElabTypedBindersResult :=
+  let bindersRev := (first.bindersRev.zip header.bindersRev).map fun (common, source) =>
+    { common with name := source.name }
+  let declarations := first.context.localContext.declarations.map fun declaration =>
+    match bindersRev.find? (fun binder => binder.id == psLocalDeclId declaration), declaration with
+    | some binder, .binding id _ type kind => .binding id binder.name type kind
+    | _, _ => declaration
+  { bindersRev, context := { first.context with environment, infoRev := []
+      localContext := { first.context.localContext with declarations } } }
+
+-- Native group entry point. The existing .ps singleton/structure entry point
+-- below uses this same pipeline. This does not expand v7.2's source mutual
+-- grammar, which currently selects definition/function groups only.
+def psElabInductiveGroup (environment : PsEnvironment)
+    (sources : List PsElabInductiveSource) (levelNames : List PsName := []) :
+    Except PsElabError PsElabDeclarationBatchResult := do
+  if sources.length > 1 && sources.any (·.isStructure) then
+    throw (.data "mutual structures require the group projection plan")
+  let headers ← sources.mapM (psElabInductiveHeader environment · levelNames)
+  let groupLevels := psElabDeclarationLevels levelNames (headers.map (·.info.type))
+  let headers := headers.map fun header =>
+    { header with info := { header.info with levelParams := groupLevels } }
+  let first :: _ := headers | throw (.data "empty inductive group")
+  let plan : PsInductiveGroupPlan := { members := headers.map (·.info) }
+  if !psInductiveGroupHeaderShapeValid plan then throw (.data "incompatible inductive group headers")
+  let names := plan.members.flatMap fun info =>
+    info.name :: (psNameAppendStr info.name "rec" :: info.constructors)
+  if names.any (fun name => (names.filter (psNameEq name)).length != 1) then
+    throw (.data "duplicate inductive group member")
+  let parameters := psElabBinderArguments first.bindersRev
+  if headers.length > 1 then
+    let level ← (psInductiveResultLevel environment first.info).mapError PsElabError.infer
+    for header in headers.drop 1 do
+      psElabInductiveGroupParameters first.context parameters first.info.type header.info.type
+      let otherLevel ← (psInductiveResultLevel environment header.info).mapError PsElabError.infer
+      if !psLevelEquivalent level otherLevel then
+        throw (.data "inductive group members must have the same resulting universe")
+  let declarations := plan.members.map PsDeclaration.inductiveDecl
+  let withHeaders ← psAddDeclarationList environment declarations
+  let (constructors, sourceInfo) ← headers.foldlM
+    (fun (state : List PsDeclaration × List PsElabSourceInfo) header => do
+      let common := psElabInductiveGroupContext first header withHeaders
+      let (_, constructorsRev, receiptsRev) ← header.source.constructors.foldlM
+        (fun (state : Nat × List PsDeclaration × List PsElabSourceInfo) source => do
+          let (index, constructors, receipts) := state
+          let (declaration, receipt) ← psElabDataConstructor common.context common.bindersRev
+            plan header.info index source
+          return (index + 1, declaration :: constructors, receipt :: receipts)) (0, [], [])
+      return (state.fst ++ constructorsRev.reverse,
+        state.snd ++ (psElabFinishSourceInfo header.context header.info.name :: receiptsRev.reverse))) ([], [])
+  let withConstructors ← psAddDeclarationList withHeaders constructors
+  let recursors ← psBuildInductiveGroupRecursors
+    { first.context with environment := withConstructors } first.bindersRev plan constructors
+  return { declarations := declarations ++ constructors ++ recursors, sourceInfo }
+
+def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
+    (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)
+    (constructors : List PsSyntaxInductiveConstructor) (isStructure : Bool)
+    (levelNames : List PsName := []) :
+    Except PsElabError PsElabDeclarationBatchResult :=
+  psElabInductiveGroup environment
+    [{ name := nameSyntax, params, resultType, constructors, isStructure }] levelNames
 
 def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxName)
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)
@@ -260,3 +382,4 @@ def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxNam
     Except PsElabError PsElabDeclarationBatchResult :=
   psElabInductiveDeclaration environment name params resultType
     [{ name := PsSyntaxName.mk ["mk"] span, fields, span }] true levelNames
+

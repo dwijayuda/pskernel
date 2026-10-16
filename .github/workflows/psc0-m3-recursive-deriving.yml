@@ -10,6 +10,7 @@ on:
       - 'psc0/host/**'
       - 'psc0/v7-native/**'
       - 'psc0/test/Pscv0M3RecursiveDeriving.lean'
+      - 'psc0/test/Pscv0M3InductiveGroups.lean'
       - 'psc0/test/Pscv0M3PartialFixpointAssumptions.lean'
       - 'psc0/scripts/pscv0-m3-recursive-deriving.mjs'
       - '.github/workflows/psc0-m3-recursive-deriving.yml'
@@ -94,6 +95,7 @@ jobs:
           set -euo pipefail
           lake build pscv0_native pscv0_m3_recursive_deriving
           mkdir -p ../dist/m3-recursive-deriving
+          lake env lean --run ../test/Pscv0M3InductiveGroups.lean | tee ../dist/m3-recursive-deriving/inductive-groups.log
           lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean | tee ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log
           .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt

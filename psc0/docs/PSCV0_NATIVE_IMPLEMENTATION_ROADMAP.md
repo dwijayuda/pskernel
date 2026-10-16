@@ -1,3 +1,25 @@
+## Current M3+B shared-owner candidate — 17 October 2026
+
+Native group formation now has one `Ps.Core.InductiveGroup` plan, staged
+`Ps.Elab.Data` construction, and atomic canonical admission. The candidate
+covers common dependent/alpha-renamed parameters, per-family indices, all
+motives/minors, Prop elimination restrictions and unique retained descriptors.
+It requires its own five-gate qualification. Source group matching, portable
+multi-motive reduction, runtime/deriving consumers and nested auxiliaries
+remain unfinished; `.ps` mutual inductive grammar is not newly selected.
+
+The included P0 candidate exposes ordinary/verified assurance selections,
+selects the separately checked actual partial body only for ordinary host
+emission, and records returned assurance in artifact origins. Both verified
+grades refuse. The valid P1 suffix retains source identity but fails at the
+exact `Classical.choice` dependency of pinned `Lean.Order.fix`/`CCPO.csup` and
+generated equations; the approved assumption policy is unchanged.
+
+M3+B remains OPEN. The six exit criteria below retain their full denominator.
+Approximately 40% is qualified (30–50% engineering uncertainty), pending
+acceptance of these candidates. Read both handoffs and exact CI receipts;
+historical pending paragraphs do not supersede newer evidence.
+
 ## M3+B current candidate: selected P0 ordinary partial body execution (NOT qualified)
 
 A new explicit `PsV7Native.Assurance` request/response distinguishes
@@ -419,3 +441,4 @@ termination, diverging behavior, trace safety, partial_fixpoint P1,
 model/body/target refinement, or full M3+B. Require its own focused
 qualification before counting it; do not relabel the older native
 run as belonging to this test-only descendant.
+

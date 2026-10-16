@@ -111,13 +111,16 @@ The earlier PSC2 self-host bootstrap plan formerly stored at this path is retain
 
 **Current proven-by-CI boundary:** selected source and modules are accepted by official Lean; typed erasure and IR validation reject unsupported forms; published JS/TS/Rust/Wasm scalar and bounded recursive programs have differential oracles. This **does not prove** the elaborator's interpretation of every `.ps` source, the semantics of all primitives, general backend preservation, or complete v7.2 conformance. Never call a diagnostic receipt, serialized check result, or raw `PsVerifiedIrModule` a user-mintable verification capability.
 
-**Selected already implemented:** scopes/public-private module interfaces, dependency ordering, scoped tabled typeclass solver with answer replay, selected dependent/indexed data and match matrices, checked direct-recursive deriving, structural recursion and checked Core definitional equality, explicit runtime type/proof/index erasure, IR validation, multi-target emission and measured runtime baselines. **Not fully implemented:** mutual/nested/indexed family groups and deriving, full well-founded/strategy matrix, partial P0 ordinary execution, P1 fixedpoints, M4 effects/contracts/assurance grades, complete incremental tooling/optimization.
+**Selected already implemented:** scopes/public-private module interfaces, dependency ordering, scoped tabled typeclass solver with answer replay, selected dependent/indexed data and match matrices, checked direct-recursive deriving, structural recursion and checked Core definitional equality, explicit runtime type/proof/index erasure, IR validation, multi-target emission and measured runtime baselines. Current candidates add explicit ordinary P0 body/assurance identity and native atomic inductive-group formation; acceptance requires each candidate's own five gates. **Not fully implemented:** nested/group match and deriving consumers, full well-founded/strategy matrix, general P0 closure coverage, P1 fixedpoints, M4 effects/contracts/verified evidence, complete incremental tooling/optimization.
 
 ## 3. Target shared semantic architecture — no alternative proof kernel
 
 ### 3.1 A single, group-aware inductive and recursion owner (M3+B)
 
-The core future change is *one staged declaration group plan*, rather than independent ad-hoc paths for each derived class or pattern:
+`Ps.Core.InductiveGroup` now owns an ordered group plan: family order determines motive order, and each family's constructor order determines its segment of the common minor telescope. Existing retained recursor metadata owns explicit group membership. `Ps.Elab.Data.psElabInductiveGroup` stages common headers and constructors, builds all motives before all minors, and reuses the same path for singleton declarations. `Ps.Bridge.CheckedAdmissions` checks unique related records and serializes one atomic official inductive batch. This candidate is qualified separately from future consumers. Constructor-only singleton compatibility retains no claim of explicit mutual membership.
+
+The shared owner and its remaining consumer obligations are:
+
 - **Header plan:** collect every family's name, shared parameters, universe information and indices before checking any constructor. For mutually recursive groups use one consistent parameter context and a dependency graph, not sequential axioms falsely presented as checked declarations.
 - **Constructor plan:** elaborate in the group environment; validate type, universe, unchanged uniform parameters, indices and strict positivity for **every occurrence**, including nested containers and nonrecursive-looking dependent fields. Track provenance and fields in the actual source telescope.
 - **Recursor plan:** construct the full motive/minor telescope, actual recursive hypotheses and elimination universe rules for the group. Kernel-check the generated recursors and family declarations. Never create an unchecked IH, assume an impossible branch or use a fabricated equation.
@@ -127,7 +130,9 @@ Official comparison: pinned `Lean/Elab/MutualInductive.lean` stages group header
 
 ### 3.2 One explicit recursion-strategy/partial-body representation (M3 → M4)
 
-Represent total structural, total well-founded, ordinary `partial`, fixedpoint and restricted `unsafe` as **distinct source strategies**, keeping declaration and suffix ownership separate from any executable admission decision. Source `partial` currently creates (a) a public logically opaque, independently inhabited declaration and (b) a private typed actual-body marker; those are not interchangeable. No `partial` executable artifact is currently admitted. Ordinary partial runtime lowering requires actual body/dependency identity and backend operational support. Any verified partial behavior requires a separately checked operational model plus source/body/target refinement. `partial_fixpoint` must reuse the pinned Lean construction and transitive assumption audit; no unapproved `Classical.ofNonempty` fallback, proof escapes, or manufactured equation theorem.
+Represent total structural, total well-founded, ordinary `partial`, fixedpoint and restricted `unsafe` as **distinct source strategies**, keeping declaration and suffix ownership separate from executable admission. The parser and scope retain a valid `partial_fixpoint` suffix as `fixedpointDefinition`; the elaborator refuses it at the exact assumption boundary. Pinned `Lean.Order.fix` uses `CCPO.csup`, which uses `Classical.choice`, including for existing Unit/Option CCPO instances; `fix_eq` and actual generated equations carry that dependency. The independent oracle records this blocker outside the admitted compiler Standard.
+
+Source `partial` creates (a) a public logically opaque, independently inhabited declaration and (b) a private typed actual-body marker. After official checking of the original graph, the native host's explicit ordinary path pairs their matching types/universes and selects the actual body for runtime erasure. It retains the original logical graph and admits no defining equation for the opaque function. Generic library erasure still rejects markers. Single-source and project CLI requests carry assurance, and published origins take the returned assurance. These selected P0 candidates require exact integration qualification; general closure behavior remains open. Verified partial behavior still requires a checked operational model and source/body/target refinement.
 
 Exactly one approved logical basis (current policy `propext`, `Quot.sound`), with explicit primitive and foreign-runtime trust ledger; any additional permitted assumptions require an explicit future policy decision. Succeeding at type checking must not silently change an explicit verified request to ordinary output.
 
@@ -139,7 +144,7 @@ Current `Ps.CompilerIr.Model` is an expression IR; it is **not** yet Lean's matu
 
 ### 3.4 Assurance and incremental/module boundaries (M4–M5)
 
-Use three distinguishable outcomes under **one** source language: ordinary checked, closed verified and boundary-qualified verified. A verified artifact may be emitted only after all requested proof, specification, effect, assumption, runtime-model/target correspondence and erasure obligations are discharged; no automatic downgrade. `Return`, `Throw`, `Trap`, `Diverge` and trace/progress claims are distinct and need target-appropriate evidence. The present `PsV7Native.Request` does **not** yet expose these assurance selections, so this is target design rather than shipped support.
+Use three distinguishable outcomes under **one** source language: ordinary checked, closed verified and boundary-qualified verified. `PsV7Native.Request`, `Result` and native CLI now expose these identities; only ordinary checked emission is implemented. Both verified requests refuse without automatic downgrade. A future verified artifact requires all requested proof, specification, effect, assumption, runtime-model/target correspondence and erasure obligations to be discharged. `Return`, `Throw`, `Trap`, `Diverge` and trace/progress claims remain distinct and need target-appropriate evidence.
 
 Project source imports and public/private interfaces are implemented for bounded sources; Lean-style incremental elaboration, deterministic red/green invalidation, editor info trees and fine-grained source maps remain broader M5 goals. Treat past in-memory prefix caching as a bounded optimization, never as reusable kernel admission authority. Extensions may propose syntax/proofs/IR, but cannot mint host checker tokens, load untrusted guests inside the trusted process, or authorize a verified release.
 
@@ -148,7 +153,7 @@ Project source imports and public/private interfaces are implemented for bounded
 | Area | Lean 4.35 architectural fact | PSC0 current / target judgment |
 | --- | --- | --- |
 | Meta/elaboration | Rich dependent metavariable solver, tabled typeclass resolution, incremental command processing | Native solver and scopes exist; selected subset is intentional, but broad completeness/tooling is behind Lean |
-| Inductives/termination | Group-aware inductive elaboration, recursors, structural/WF/partial/fixpoint strategies | Selected single-family and direct recursion work; *general group/recursion owner is next critical path* |
+| Inductives/termination | Group-aware inductive elaboration, recursors, structural/WF/partial/fixpoint strategies | Shared native group formation and atomic admission candidate; group reduction/match/deriving/runtime consumers and total WF recursion remain critical |
 | Kernel | Small mature checking kernel | Correct choice: **reuse official Lean**, never replace or bypass it in active PSC0 |
 | Compiler optimizer | LCNF, pure/monomorphic/impure stages, pass validation and mature runtime | Checked expression IR + specialization are real, but not yet equivalent in pass structure or performance |
 | Backend/ABI | Native-oriented runtime/foreign interfaces | PSC0's direct JS/TS/Rust/GC/components are a real specialized portability advantage on supported cases |
@@ -193,3 +198,4 @@ Selected nested *shallow* checking is not nested recursive
 traversal, deriving, indexed/mutual group support, P0/P1 or M3 exit.
 Full native/F1/F2/F3-F4/focused same-commit gates are required
 before acceptance. Preserve older qualified receipts and PR #109.
+

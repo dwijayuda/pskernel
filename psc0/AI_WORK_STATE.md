@@ -1,3 +1,36 @@
+## M3+B candidate — atomic inductive groups and shared recursor construction (17 October 2026)
+
+The native `psElabInductiveGroup` entry point now stages all family headers,
+checks compatible common parameters and result universes, elaborates every
+constructor in the common environment, and constructs all group motives and
+constructor minors. Existing singleton source declarations use the same
+mechanism. `Ps.Core.InductiveGroup` owns ordered group shape;
+`Ps.Bridge.CheckedAdmissions` resolves unique retained records and emits one
+canonical official-Lean inductive batch. Duplicate/conflicting descriptors,
+incomplete retained group recursors and reordered membership refuse.
+
+This is a **new compiler candidate, not an acceptance receipt**. The focused
+workflow includes independent Lean declarations, canonical group admission,
+whole retained recursor-signature witnesses, cross-family reduction, indexed
+and Prop elimination checks, and explicit unsupported-consumer refusals.
+Multi-motive portable reduction, source match/deriving/runtime consumers and
+nested auxiliary groups remain the next shared implementation work. The v7.2
+`.ps` mutual grammar still selects def/function groups; it is not expanded to
+mutual inductive syntax by this native API change.
+
+The preceding P0 assurance and P1 source-strategy candidate is included.
+Its parser indentation failure was corrected in
+`ef47dee3de4de6298de276322a30b2bac3af0a73`; qualification must be read from
+actual runs, never inferred from its successful compiler build. P1 remains
+unavailable because pinned `Lean.Order.fix` and its equations transitively
+require unapproved `Classical.choice`. Only `propext` and `Quot.sound` remain
+approved; the isolated oracle observes that blocker without changing policy.
+
+Require all five gates on this new compiler SHA. Latest fully accepted
+baseline at preparation remains `a7c6dade87a9d8df74d5248e8276623e7870078c`.
+M3+B stays OPEN, approximately 40% qualified (30–50% engineering uncertainty).
+PR #109 remains draft/open/unmerged. Preserve the full history below.
+
 ## M3+B candidate — P0 assurance identities and retained P1 source strategy (17 October 2026)
 
 This commit is a **new, unqualified compiler checkpoint** on top of live source

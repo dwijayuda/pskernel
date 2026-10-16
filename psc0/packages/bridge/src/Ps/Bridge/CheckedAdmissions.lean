@@ -1,5 +1,6 @@
 import Ps.Bridge.Json
 import Ps.Core.Declaration
+import Ps.Core.InductiveGroup
 import Ps.Core.Nested
 import Ps.Core.Abstract
 import Ps.Core.Subst
@@ -368,32 +369,53 @@ def psEncodeCodecConstructors
           | Except.ok encodedTail =>
               Except.ok (List.cons encodedHead encodedTail)
 
-def psEncodeCodecInductive
-    (allDeclarations : List PsDeclaration)
-    (info : PsInductiveInfo) :
-    Except PsCheckedAdmissionCodecError String :=
-  match
-      psEncodeCodecConstructors
-        allDeclarations
-        info.name
-        info.constructors with
-  | Except.error error => Except.error error
-  | Except.ok encodedConstructors =>
-      match psEncodeCodecExpr info.type with
-      | Except.error error => Except.error error
-      | Except.ok encodedType =>
-          let encodedTypeEntry :=
-            psJsonObject [
-              psCheckedAdmissionJsonField "cs" (psJsonArray encodedConstructors),
-              psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
-              psCheckedAdmissionJsonField "t" (encodedType)
-            ];
-          Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList info.levelParams),
-              psCheckedAdmissionJsonField "np" (psCheckedAdmissionNatToString info.numParams),
-              psCheckedAdmissionJsonField "ts" (psJsonArray [encodedTypeEntry])
-            ])
+-- Core owns group identity and motive/minor order; transport only resolves
+-- the retained declarations and serializes a single official inductive batch.
+def psBridgeInductiveGroupPlan (all : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError PsInductiveGroupPlan := do
+  let findInductive := fun name => all.findSome? fun declaration =>
+    match declaration with
+    | .inductiveDecl member => if psNameEq member.name name then some member else none
+    | _ => none
+  let findRecursor := fun name => all.findSome? fun declaration =>
+    match declaration with
+    | .recursorDecl member => if psNameEq member.name name then some member else none
+    | _ => none
+  let some plan := psInductiveGroupPlanFor findInductive findRecursor info
+    | throw .unsupportedDeclaration
+  -- Emitting a group once must never turn a repeated/conflicting retained
+  -- descriptor into an ignored record. Resolve every owned name uniquely
+  -- before any member can be marked emitted; missing constructors retain
+  -- their existing precise codec error below.
+  for member in plan.members do
+    let names := member.name :: (psNameAppendStr member.name "rec" :: member.constructors)
+    for name in names do
+      if (all.filter (fun declaration => psNameEq (psDeclarationName declaration) name)).length > 1 then
+        throw .unsupportedDeclaration
+  return plan
+
+def psEncodeCodecInductiveType (all : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError String := do
+  let constructors ← psEncodeCodecConstructors all info.name info.constructors
+  let type ← psEncodeCodecExpr info.type
+  return psJsonObject [
+    psCheckedAdmissionJsonField "cs" (psJsonArray constructors),
+    psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
+    psCheckedAdmissionJsonField "t" type ]
+
+def psEncodeCodecInductiveGroup (all : List PsDeclaration) (plan : PsInductiveGroupPlan) :
+    Except PsCheckedAdmissionCodecError String := do
+  let first :: _ := plan.members | throw .unsupportedDeclaration
+  let entries ← plan.members.mapM (psEncodeCodecInductiveType all)
+  return psJsonObject [
+    psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList first.levelParams),
+    psCheckedAdmissionJsonField "np" (psCheckedAdmissionNatToString first.numParams),
+    psCheckedAdmissionJsonField "ts" (psJsonArray entries) ]
+
+def psEncodeCodecInductive (allDeclarations : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError String := do
+  let plan ← psBridgeInductiveGroupPlan allDeclarations info
+  psEncodeCodecInductiveGroup allDeclarations plan
 
 def psBridgeFindRegularHeightInBucket
     (entries : List (PsName × Nat)) :
@@ -575,6 +597,7 @@ def psEncodeInductiveAdmission (declaration : String) : String :=
 structure PsCheckedAdmissionEncodeState where
   heights : PsBridgeHeightIndex
   admissionsRev : List String
+  inductiveNames : List PsName := []
 
 def psEncodeCheckedAdmissionsLoop
     (allDeclarations : List PsDeclaration)
@@ -605,7 +628,7 @@ def psEncodeCheckedAdmissionsLoop
             | Except.error error =>
                 Except.error error
             | Except.ok encoded =>
-                smaller {
+                smaller { state with
                   heights := psBridgeHeightInsert state.heights name height
                   admissionsRev :=
                     List.cons
@@ -617,25 +640,24 @@ def psEncodeCheckedAdmissionsLoop
             | Except.error error =>
                 Except.error error
             | Except.ok encoded =>
-                smaller {
+                smaller { state with
                   heights := state.heights
                   admissionsRev :=
                     List.cons
                       (psEncodeConstantAdmission encoded)
                       state.admissionsRev
                 }
-        | .inductiveDecl info =>
-            match psEncodeCodecInductive allDeclarations info with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeInductiveAdmission encoded)
-                      state.admissionsRev
-                }
+        | .inductiveDecl info => do
+            if state.inductiveNames.any (psNameEq info.name) then smaller state
+            else do
+              let plan ← psBridgeInductiveGroupPlan allDeclarations info
+              let names := psInductiveGroupNames plan
+              if names.any (fun name => state.inductiveNames.any (psNameEq name)) then
+                throw .unsupportedDeclaration
+              let encoded ← psEncodeCodecInductiveGroup allDeclarations plan
+              smaller { state with
+                inductiveNames := names ++ state.inductiveNames
+                admissionsRev := psEncodeInductiveAdmission encoded :: state.admissionsRev }
         | .constructorDecl _ =>
             smaller state
         | .recursorDecl _ =>
@@ -1034,3 +1056,4 @@ def psEncodeCheckedAdmissionsText
   match psEncodeCheckedAdmissionsCanonical declarations with
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (String.Internal.append encoded "\n")
+

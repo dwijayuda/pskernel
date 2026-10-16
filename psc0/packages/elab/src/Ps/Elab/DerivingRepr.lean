@@ -1,8 +1,8 @@
 /-
 Repr deriving adapted from Lean 4.35.0 Lean/Elab/Deriving/Repr.lean.
-Copyright (c) 2020 Microsoft Corporation. Author: Leonardo de Moura.
-Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: checked Core construction for independent and direct-recursive families.
+Copyright (c) 2020 Microsoft Corporation. All rights reserved.
+Author: Leonardo de Moura. Apache-2.0; see THIRD_PARTY_NOTICES.md.
+Modified: checked Core construction for independent and uniform direct-recursive families.
 -/
 import Ps.Elab.DerivingContext
 import Ps.Environment.StandardRepr

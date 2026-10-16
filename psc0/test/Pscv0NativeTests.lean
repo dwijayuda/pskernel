@@ -2717,7 +2717,7 @@ private def derivingBoundaries : IO Unit := do
     { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\n" },
     { source := "structure Bad where { value: Nat := true } deriving Inhabited\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving Repr\n" },
-    { source := "inductive Bad where { | loop(tail: Bad) } deriving Repr\n" },
+    { source := "inductive Bad where { | loop(tails: List Bad) } deriving Repr\n" },
     { source := "structure Required where { value: Nat }\nconst bad: Required := {}\n" }
   ]
   let batch ← match ← PsV7Native.runBatch (#[projection] ++ requests) with

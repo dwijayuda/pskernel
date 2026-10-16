@@ -16,13 +16,25 @@ branch. Upstream pin is `b47ea19d6864a1fd09db6144528f91baa5c550dd` (Lean 4.35.0)
 - Focused positive, invalid, policy, malformed, chunking and budget tests.
 - Separate proof target composing wrapper acceptance with upstream model_exists.
 - Dedicated package-only cloud CI; active host, kernels, backend sources and
-  PR #109 are untouched.
+  PR #109 are untouched. CI includes five process-level protocol/verdict cases,
+  an actual theorem-axiom audit, and logs pinned to the source commit.
 
-## Qualification
+## Observed qualification and corrections
 
-At creation these are source candidates, NOT yet CI-qualified. The new workflow
-must build the native executable, run focused tests/CLI protocol checks, and
-build the proof target on the same commit before package acceptance is claimed.
+- Initial source `dccac0c438cfaedd375a5baf23ed02740f4168ee`, run `38949923855`:
+  toolchain/upstream pins passed; the imported upstream runtime closure built.
+  The wrapper's multiline policy diagnostic had a Lean layout error.
+- Correction `6c441087c7c38a05986d93465c86b5c4c3d2f294`, run `38950601637`:
+  the wrapper library AND native test executable built successfully. The CLI's
+  multiline usage-string application failed layout/type elaboration, so the
+  combined native-build step failed; runtime tests and proofs did NOT run.
+- This checkpoint fixes the CLI by naming the usage text separately. Qualification
+  of this correction, the runtime cases and the model proof is still pending.
+
+Do not call the package CI-qualified until the full required workflow succeeds.
+A saved incremental compiler cache is build acceleration, NEVER acceptance or
+proof evidence. CI checks the upstream revision and clean tracked sources before
+using it, and re-elaborates this wrapper's axiom report on every qualifying run.
 Full PSC0/Standard/source/target integration is intentionally NOT claimed, even
 if this package's focused gates pass. No self-host tests are required.
 

@@ -30,12 +30,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Restore pinned native build cache
-        uses: actions/cache@v4
+        id: cache
+        uses: actions/cache/restore@v4
         with:
           path: |
             ~/.elan
             psc0/packages/pskernel-con-leche/.lake
-          key: pskernel-con-leche-${{ runner.os }}-${{ hashFiles('psc0/packages/pskernel-con-leche/UPSTREAM_PIN.json', 'psc0/packages/pskernel-con-leche/lakefile.toml') }}
+          key: pskernel-con-leche-${{ runner.os }}-${{ hashFiles('psc0/packages/pskernel-con-leche/UPSTREAM_PIN.json', 'psc0/packages/pskernel-con-leche/lakefile.toml') }}-${{ github.sha }}
+          restore-keys: |
+            pskernel-con-leche-${{ runner.os }}-${{ hashFiles('psc0/packages/pskernel-con-leche/UPSTREAM_PIN.json', 'psc0/packages/pskernel-con-leche/lakefile.toml') }}-
       - name: Install pinned Lean toolchain
         run: |
           set -euo pipefail
@@ -45,6 +48,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           "$HOME/.elan/bin/elan" toolchain install leanprover/lean4:v4.35.0
       - name: Resolve and audit exact upstream identity
+        id: upstream
         run: |
           set -euo pipefail
           echo "PSC0_SOURCE_SHA=$GITHUB_SHA"
@@ -52,42 +56,89 @@ jobs:
           lake update
           test "$(git -C .lake/packages/con-leche rev-parse HEAD)" = b47ea19d6864a1fd09db6144528f91baa5c550dd
           test "$(cat .lake/packages/con-leche/lean-toolchain)" = "$(cat lean-toolchain)"
+          git -C .lake/packages/con-leche diff --exit-code HEAD -- .
       - name: Build native checker and focused tests
         run: |
           set -euo pipefail
-          lake build pskernel-con-leche pskernel-con-leche-tests
+          lake build pskernel-con-leche pskernel-con-leche-tests 2>&1 | tee native-build.log
       - name: Run focused checker tests
         run: |
           set -euo pipefail
-          timeout 300 .lake/build/bin/pskernel-con-leche-tests
-      - name: Check explicit CLI protocol and no trusted fallback
+          timeout 300 .lake/build/bin/pskernel-con-leche-tests 2>&1 | tee native-tests.log
+      - name: Check CLI verdicts, identity and no trusted fallback
         run: |
           set -euo pipefail
-          .lake/build/bin/pskernel-con-leche --identity > identity.json
           python3 - <<'PY'
-          import json
-          x = json.load(open('identity.json'))
-          assert x['protocol'] == 'pskernel-con-leche/1'
-          assert x['upstreamCommit'] == 'b47ea19d6864a1fd09db6144528f91baa5c550dd'
-          assert x['mode'] == 'verified'
-          assert x['status'] == 'identity'
-          assert x['canAuthorizePublication'] is False
-          PY
-          set +e
-          .lake/build/bin/pskernel-con-leche --trusted > refused.json
-          status=$?
-          set -e
-          test "$status" -eq 3
-          python3 - <<'PY'
-          import json
-          x = json.load(open('refused.json'))
-          assert x['status'] == 'error' and x['phase'] == 'request'
-          assert x['canAuthorizePublication'] is False
+          import json, pathlib, subprocess, tempfile
+          exe = str(pathlib.Path('.lake/build/bin/pskernel-con-leche').resolve())
+          results = []
+          def run(args, code, status, phase=None):
+              p = subprocess.run([exe, *args], capture_output=True, text=True, timeout=60)
+              assert p.returncode == code, (args, p.returncode, p.stdout, p.stderr)
+              x = json.loads(p.stdout)
+              assert x['protocol'] == 'pskernel-con-leche/1'
+              assert x['upstreamCommit'] == 'b47ea19d6864a1fd09db6144528f91baa5c550dd'
+              assert x['mode'] == 'verified' and x['canAuthorizePublication'] is False
+              assert x['status'] == status, x
+              if phase is not None:
+                  assert x['phase'] == phase, x
+              results.append({'exitCode': code, 'response': x})
+          run(['--identity'], 0, 'identity')
+          run(['--trusted'], 3, 'error', 'request')
+          with tempfile.TemporaryDirectory() as tmp:
+              root = pathlib.Path(tmp)
+              run(['--ndjson', str(root / 'missing.ndjson')], 3, 'error', 'io')
+              def fixture(type_name, kind):
+                  cv = {'all': [2], 'levelParams': [], 'name': 2, 'type': 0, 'value': 1}
+                  if kind == 'def':
+                      cv.update(hints={'regular': 1}, safety='safe')
+                  return [
+                      {'in': 1, 'str': {'pre': 0, 'str': type_name}},
+                      {'in': 2, 'str': {'pre': 0, 'str': 'probe'}},
+                      {'ie': 0, 'const': {'name': 1, 'us': []}},
+                      {'ie': 1, 'natVal': '42'},
+                      {kind: cv}]
+              for file, records, code, status, phase in [
+                  ('good.ndjson', fixture('Nat', 'def'), 0, 'accepted', None),
+                  ('bad.ndjson', fixture('False', 'thm'), 1, 'rejected', 'kernel')]:
+                  path = root / file
+                  path.write_text(''.join(json.dumps(r, separators=(',', ':')) + '\n' for r in records))
+                  run(['--ndjson', str(path)], code, status, phase)
+          pathlib.Path('cli-results.json').write_text(json.dumps(results, indent=2) + '\n')
+          print('PSKERNEL_CON_LECHE_CLI_PASS: 5 operations')
           PY
       - name: Build wrapper refinement and model theorem
         run: |
           set -euo pipefail
           lake build PsKernelConLecheProofs 2>&1 | tee proof-build.log
+      - name: Audit actual wrapper theorem axioms
+        run: |
+          set -euo pipefail
+          # Re-elaborate the wrapper even on a cache hit, so this commit emits
+          # its own #print axioms output rather than reusing an old log.
+          lake env lean proofs/PsKernelConLecheProofs.lean 2>&1 | tee axiom-audit.log
+          python3 - <<'PY'
+          import pathlib, re
+          text = pathlib.Path('axiom-audit.log').read_text()
+          allowed = {'propext', 'Classical.choice', 'Quot.sound'}
+          for name in ['accepted_by_upstream', 'checkedInput_model_exists']:
+              full = 'PsKernelConLeche.' + name
+              pattern = re.escape(full) + r"'\s+(?:does not depend on any axioms|depends on axioms:\s*\[([^\]]*)\])"
+              m = re.search(pattern, text)
+              assert m is not None, ('missing axiom evidence', full, text)
+              actual = {x.strip() for x in (m.group(1) or '').split(',') if x.strip()}
+              assert actual <= allowed, (full, actual)
+              print(full, sorted(actual))
+          print('PSKERNEL_CON_LECHE_AXIOMS_PASS')
+          PY
+      - name: Preserve partial native build cache
+        if: always() && steps.upstream.outcome == 'success' && steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.elan
+            psc0/packages/pskernel-con-leche/.lake
+          key: ${{ steps.cache.outputs.cache-primary-key }}
       - name: Retain package evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -97,6 +148,8 @@ jobs:
           path: |
             psc0/packages/pskernel-con-leche/UPSTREAM_PIN.json
             psc0/packages/pskernel-con-leche/lake-manifest.json
-            psc0/packages/pskernel-con-leche/identity.json
-            psc0/packages/pskernel-con-leche/refused.json
+            psc0/packages/pskernel-con-leche/native-build.log
+            psc0/packages/pskernel-con-leche/native-tests.log
+            psc0/packages/pskernel-con-leche/cli-results.json
             psc0/packages/pskernel-con-leche/proof-build.log
+            psc0/packages/pskernel-con-leche/axiom-audit.log

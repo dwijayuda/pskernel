@@ -5,6 +5,9 @@ import Std.Async.System
 open PsKernelConLeche
 open Lean (Json toJson)
 
+private def usage : String :=
+  "usage: pskernel-con-leche --identity | --ndjson FILE; no trusted mode or canonical-v2 adapter"
+
 private def identityFields : List (String × Json) := [
   ("protocol", toJson protocol),
   ("provider", toJson provider),
@@ -54,8 +57,7 @@ private def run (args : List String) : IO UInt32 := do
       emit [("status", toJson ("identity" : String))]
       pure 0
     | ["--ndjson", file] => runFile file
-    | _ => errorResult "request"
-      "usage: pskernel-con-leche --identity | --ndjson FILE; no trusted mode or canonical-v2 adapter"
+    | _ => errorResult "request" usage
   catch e =>
     -- A host/IO exception is never an invalid-declaration verdict (exit 1).
     try

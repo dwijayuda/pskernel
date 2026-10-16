@@ -180,6 +180,17 @@ jobs:
           grep -Fq "C0_REAL_EXPORT_DECL_BEGIN record=" "$RUNNER_TEMP/c0-strict-traced.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=6 fuel=4096" \
             "$RUNNER_TEMP/c0-strict-traced.txt"
+          # Timed theorem staging is NEVER a checking/admission receipt.
+          .lake/build/bin/c0OfficialReplay --diagnose-theorem C0Theorem \
+            test/C0OfficialTheoremAccept.ndjson 4096 > "$RUNNER_TEMP/c0-theorem-stage.txt" 2>&1
+          grep -Fq "C0_THEOREM_PROBE stage=proof_full_check status=ok" "$RUNNER_TEMP/c0-theorem-stage.txt"
+          grep -Fq "C0_THEOREM_PROBE stage=conclusion_defeq status=done" "$RUNNER_TEMP/c0-theorem-stage.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.inconclusive" "$RUNNER_TEMP/c0-theorem-stage.txt"
+          if grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/c0-theorem-stage.txt"; then
+            echo "non-admitting theorem stage probe falsely issued accepted verdict" >&2
+            exit 1
+          fi
+          echo "C0_THEOREM_STAGE_DIAGNOSTIC full_source_stages=pass verdict=inconclusive"
           echo "C0_STRICT_CLI_RESULT positive=exit_zero invalid=exit_nonzero fuel_exhausted=exit_nonzero trace_verdict=unchanged"
       - name: C0 architecture-first lazy execution versus source WHNF (non-accepting)
         working-directory: psc0/packages/pskernel-c0

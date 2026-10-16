@@ -106,6 +106,17 @@ def normalizedChild (n : Nat) : Nat :=
 termination_by structural n
 
 example (n : Nat) : normalizedChild (Nat.succ n) = normalizedChild n + 1 := by rfl
+
+-- Fixed prefix precedes the structural argument. It is an unchanged binder.
+def laterChild (flag : Bool) (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | k + 1 => laterChild flag (Nat.add k 0) + (if flag then 2 else 1)
+termination_by structural n
+
+example (flag : Bool) (n : Nat) :
+    laterChild flag (Nat.succ n) =
+      laterChild flag n + (if flag then 2 else 1) := by rfl
 end M3RecursiveHashOracle
 
 private def oracleLiteral (value : String) : String := (Lean.toJson value).compress
@@ -196,7 +207,10 @@ private def source : String :=
   -- The recursive argument is definitionally, not syntactically, the child.
   "function m3normalizedChild(n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3normalizedChild(Nat.add(k, 0)) + 1 }\n" ++
   "theorem m3normalizedStep(n: Nat): m3normalizedChild(Nat.succ(n)) = m3normalizedChild(n) + 1 := by { rfl }\n" ++
-  "function m3normoutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedChild(if (flag) { 17 } else { 9 }))\n"
+  "function m3normoutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedChild(if (flag) { 17 } else { 9 }))\n" ++
+  "function m3laterChild(flag: Bool, n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3laterChild(flag, Nat.add(k, 0)) + (if (flag) { 2 } else { 1 }) }\n" ++
+  "theorem m3laterStep(flag: Bool, n: Nat): m3laterChild(flag, Nat.succ(n)) = m3laterChild(flag, n) + (if (flag) { 2 } else { 1 }) := by { rfl }\n" ++
+  "function m3lateroutput(flag: Bool): UInt64 := UInt64.ofNat(m3laterChild(flag, if (flag) { 17 } else { 9 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -224,7 +238,10 @@ private def refusals : List (String × String × String) := [
   ("deceq-missing-field-dictionary", "inductive FunctionDecEq where { | leaf(value: Nat -> Nat) | node(next: FunctionDecEq) } deriving DecidableEq\n",
     "deriving field has no checked instance"),
   ("nondecreasing-major", "function badMajor(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => badMajor(Nat.succ(k)) }\n",
-    "recursive major must be a direct recursive field")]
+    "recursive major must be a direct recursive field"),
+  ("computed-major-changing-prefix",
+    "function badPrefix(flag: Bool, n: Nat): Nat := match n with { | 0 => 0 | k+1 => badPrefix(Bool.not(flag), Nat.add(k, 0)) }\n",
+    "argument must equal its child index or invariant value")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
@@ -235,7 +252,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -275,6 +292,8 @@ def main (args : List String) : IO Unit := do
     ("m3decideproof", Lean.toJson (toString ((M3RecursiveHashOracle.proofDecision flag).toNat))),
     ("m3normoutput", Lean.toJson (toString ((UInt64.ofNat
       (M3RecursiveHashOracle.normalizedChild (if flag then 17 else 9))).toNat))),
+    ("m3lateroutput", Lean.toJson (toString ((UInt64.ofNat
+      (M3RecursiveHashOracle.laterChild flag (if flag then 17 else 9))).toNat))),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty

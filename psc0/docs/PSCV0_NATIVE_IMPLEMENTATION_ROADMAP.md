@@ -93,3 +93,7 @@ The next [recursive DecidableEq candidate](PSCV0_M3_RECURSIVE_DECEQ_2026-10-16.m
 ## Selected definitional strict-child recursion — accepted 16 October 2026
 
 The [qualification receipt](PSCV0_M3_STRUCTURAL_CHILD_QUALIFICATION_2026-10-16.md) accepts `8e7f18885a3e917fbdf000d7d108842b2cc1f067` after all five same-commit workflows passed. No general source `k + 0` projection inference, arbitrary arithmetic decrease, non-first computed major, broader inductives, partial execution or fixedpoint is implied. M3+B remains OPEN. Its older pending deriving text above is historical; exact recursive DecidableEq is already accepted separately.
+
+### Current candidate: computed strict major after unchanged prefix
+
+The accepted strict-child receipt above remains immutable. Candidate extending first-position-only admission to later explicit parameter positions requires all earlier arguments be identical local binder references, retaining once-only elaboration and dependent telescope checks. A pinned-Lean oracle and exact-phase changing-prefix refusal are included in the existing focused suite; qualification pending. No other M3 exit item is claimed closed.

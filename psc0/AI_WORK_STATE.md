@@ -85,3 +85,25 @@ only child. This new candidate adds the intended-phase refusal for a
 nondecreasing successor argument and documents that infix HAdd projections
 require separately checked instance unfolding. Exact native/F1/F2/F3-F4
 and focused runs on this commit are pending before formal slice acceptance.
+
+## M3+B candidate — computed major after fixed invariant prefix (qualification pending)
+
+Against exact accepted strict-child baseline 8e7f1888 / documentation 1cf46bc5,
+shared native `Term.lean` now permits an elaborated computed recursive major
+at a non-first explicit parameter position only if **every preceding
+argument is the unchanged corresponding local binder reference**. This
+prevents reordering any evaluated prefix expression. The prechecked major
+is cached with its actual telescope position, reused only once and
+revalidated against the selected strict child and dependent invariants.
+No new arithmetic heuristic, IH, trust principle or erasure shortcut is added.
+
+One independent pinned-Lean `laterChild(flag, n)` oracle, selected .ps
+defining equation and one scalar Bool→UInt64 cross-backend observation are
+added to the existing focused suite. A changing prefix `Bool.not(flag)`
+must reject at the structural invariant rule in elaboration. Prior
+Pos/Neg cases and all original budgets remain intact.
+
+This is a candidate only. Require exact same-commit native, F1, F2,
+F3/F4/platform and focused JS/TS/Rust/V8-GC/Wasmtime qualification
+before acceptance. Nested/mutual data, dependent motives, well-founded
+recursion, P0 ordinary execution, P1 fixedpoints and entire M3+B remain open.

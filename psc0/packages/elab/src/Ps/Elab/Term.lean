@@ -76,7 +76,7 @@ def psElabStructuralDefEqChild (context : PsElabContext) (term : PsExpr) :
 def psElabValidateStructuralArguments (elaborate : PsElaborator)
     (substitutions : List (Nat × PsExpr)) (ids : List Nat)
     (arguments : List PsSyntaxTerm) (context : PsElabContext)
-    (precheckedFirst : Option PsElabTermResult) :
+    (prechecked : Option (Nat × PsElabTermResult)) :
     Except PsElabError PsElabContext := do
   match ids, arguments with
   | [], [] => return context
@@ -84,19 +84,22 @@ def psElabValidateStructuralArguments (elaborate : PsElaborator)
     let some declaration := psLocalFindById context.localContext id
       | throw .structuralRecursionInternal
     let expected := psElabSubstituteLocals substitutions (psLocalDeclType declaration)
-    let value ← match precheckedFirst with
-      | none => elaborate context source (some expected)
-      | some cached => do
-        -- The computed first argument was elaborated once in its source scope.
-        if !(psDefEqReadOnlyWithEnv cached.context.environment cached.context.metaContext
-            cached.context.localContext cached.type expected) then
+    let value ← match prechecked with
+      | some (0, cached) => do
+        -- Reuse exactly the previous Core term, but retain subsequent checked
+        -- assignments from preceding invariant reference arguments.
+        if !(psDefEqReadOnlyWithEnv context.environment context.metaContext
+            context.localContext cached.type expected) then
           throw .structuralRecursionInvariantArgument
-        pure cached
+        pure { cached with context := context }
+      | _ => elaborate context source (some expected)
     let required := psElabSubstituteLocals substitutions (.fvar id)
     if !(psDefEqReadOnlyWithEnv value.context.environment value.context.metaContext
         value.context.localContext value.term required) then
       throw .structuralRecursionInvariantArgument
-    psElabValidateStructuralArguments elaborate substitutions rest tail value.context none
+    let later := prechecked.bind fun entry =>
+      if entry.fst == 0 then none else some (entry.fst - 1, entry.snd)
+    psElabValidateStructuralArguments elaborate substitutions rest tail value.context later
   | _, _ => throw .structuralRecursionArity
 
 def psElabValidateStructuralCall (elaborate : PsElaborator)
@@ -105,22 +108,28 @@ def psElabValidateStructuralCall (elaborate : PsElaborator)
   let majorId ← psElabCheckStructuralTelescope context recursion
   let some source := arguments[recursion.recursiveParameterIndex]?
     | throw .structuralRecursionArity
-  let (childId, hypothesisId, context, precheckedFirst) ←
+  let (childId, hypothesisId, context, prechecked) ←
     match psElabSyntaxLocalId context source with
     | some childId => do
       let some hypothesisId := psElabStructuralRecursionFindCall recursion.calls childId
         | throw .structuralRecursionNotDecreasing
       pure (childId, hypothesisId, context, none)
     | none => do
-      -- Only precheck computed majors in the first argument position.
-      -- This avoids reordering evaluation of earlier telescope arguments.
-      if recursion.recursiveParameterIndex != 0 then
-        throw .structuralRecursionNotDecreasing
+      -- Earlier arguments must be unchanged, direct binder references.
+      -- Prechecking the computed major cannot reorder any actual computation;
+      -- the normal telescope still elaborates these references in order.
+      let fixedPrefix := recursion.explicitParameterIds.take recursion.recursiveParameterIndex
+      let sourcePrefix := arguments.take recursion.recursiveParameterIndex
+      if fixedPrefix.length != sourcePrefix.length ||
+          !(fixedPrefix.zip sourcePrefix).all (fun entry =>
+            psElabSyntaxLocalId context entry.snd == some entry.fst) then
+        throw .structuralRecursionInvariantArgument
       let checked ← elaborate context source none
       let some (childId, hypothesisId) :=
         psElabStructuralDefEqChild checked.context checked.term recursion.calls
         | throw .structuralRecursionNotDecreasing
-      pure (childId, hypothesisId, checked.context, some checked)
+      pure (childId, hypothesisId, checked.context,
+        some (recursion.recursiveParameterIndex, checked))
   let some child := psLocalFindById context.localContext childId
     | throw .structuralRecursionInternal
   let childType := psExprAppView (psWhnf context.environment context.metaContext
@@ -134,7 +143,7 @@ def psElabValidateStructuralCall (elaborate : PsElaborator)
     return (entry.fst, value)
   let context ← psElabValidateStructuralArguments elaborate
     (substitutions ++ [(majorId, .fvar childId)]) recursion.explicitParameterIds
-    arguments context precheckedFirst
+    arguments context prechecked
   return (context, hypothesisId)
 
 def psElabStructuralNameIsLocal (context : PsElabContext) (name : PsName) : Bool :=

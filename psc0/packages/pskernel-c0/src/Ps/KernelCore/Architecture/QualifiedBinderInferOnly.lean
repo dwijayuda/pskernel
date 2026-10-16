@@ -31,7 +31,9 @@ def psKernelC0LambdaInferOnlyWithFuel
   | 0 => .error "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let expr : PsKernelExpr := .lam name domain body binderInfo
-      match psKernelExprMapGetWithKnownHash state.inferOnly expr none with
+      match (if psKernelInferCacheEligible true expr then
+          psKernelExprMapGetWithKnownHash state.inferOnly expr none
+        else Option.none) with
       | some type =>
           match psKernelCheckerContextEnterRecDepth context with
           | .error error => .error error
@@ -62,7 +64,9 @@ def psKernelC0PiInferOnlyWithFuel
   | 0 => .error "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let expr : PsKernelExpr := .forallE name domain body binderInfo
-      match psKernelExprMapGetWithKnownHash state.inferOnly expr none with
+      match (if psKernelInferCacheEligible true expr then
+          psKernelExprMapGetWithKnownHash state.inferOnly expr none
+        else Option.none) with
       | some type =>
           match psKernelCheckerContextEnterRecDepth context with
           | .error error => .error error
@@ -92,7 +96,12 @@ theorem psKernelC0LambdaInferOnly_source
       context state name domain body binderInfo =
     psKernelInferCoreWithFuelUsing fuel none whnf defeq
       context state (.lam name domain body binderInfo) true := by
-  cases fuel <;> rfl
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      simp [psKernelC0LambdaInferOnlyWithFuel,
+        psKernelInferCoreWithFuelUsing,
+        psKernelInferCoreWithFuelUsingSourceFrames] <;> rfl
 
 /-- Exact source-result/state/cache equality for infer-only dependent Π. -/
 theorem psKernelC0PiInferOnly_source
@@ -108,7 +117,12 @@ theorem psKernelC0PiInferOnly_source
       context state name domain body binderInfo =
     psKernelInferCoreWithFuelUsing fuel none whnf defeq
       context state (.forallE name domain body binderInfo) true := by
-  cases fuel <;> rfl
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      simp [psKernelC0PiInferOnlyWithFuel,
+        psKernelInferCoreWithFuelUsing,
+        psKernelInferCoreWithFuelUsingSourceFrames] <;> rfl
 
 theorem psKernelC0LambdaInferOnly_checkerInfer
     (fuel : Nat)

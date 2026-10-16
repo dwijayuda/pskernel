@@ -39,44 +39,9 @@ jobs:
           test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
           (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
-      - name: Export declaration closure and compare original kernel
-        shell: bash
-        env:
-          TARGET: ${{ github.event.inputs.declaration || 'String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep' }}
-        run: |
-          set -euo pipefail
-          test -n "$TARGET"
-          echo "C0_DEPENDENCY_TARGET=$TARGET"
-          (
-            cd "$RUNNER_TEMP/lean4export"
-            lake env .lake/build/bin/lean4export Init -- "$TARGET" > "$RUNNER_TEMP/Init-dependency-435.ndjson"
-            lake env leanchecker --from-export "$RUNNER_TEMP/Init-dependency-435.ndjson" > "$RUNNER_TEMP/Init-dependency-official.txt" 2>&1
-          )
-          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/Init-dependency-official.txt"
-          echo "C0_DEPENDENCY_OFFICIAL=accepted"
-          sha256sum "$RUNNER_TEMP/Init-dependency-435.ndjson"
-          wc -lc "$RUNNER_TEMP/Init-dependency-435.ndjson"
-          # The default pinned witness is now a mandatory, exact-byte
-          # positive differential conformance test. Other workflow_dispatch
-          # declarations remain diagnostic (with official positive checking).
-          if [ "$TARGET" = "String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep" ]; then
-            test "$(stat -c%s "$RUNNER_TEMP/Init-dependency-435.ndjson")" -eq 25031309
-            test "$(wc -l < "$RUNNER_TEMP/Init-dependency-435.ndjson")" -eq 499130
-            echo "7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/Init-dependency-435.ndjson" | sha256sum -c -
-          fi
-          # Opt-in diagnostic prints the active declaration BEFORE checking;
-          # timeout artifacts can identify the stalled name without altering
-          # source acceptance, resource budgets, or export bytes.
-          (
-            cd psc0/packages/pskernel-c0
-            timeout 900s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay --trace-declarations "$RUNNER_TEMP/Init-dependency-435.ndjson" 4096
-          ) | tee "$RUNNER_TEMP/Init-dependency-c0.txt"
-          grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/Init-dependency-c0.txt"
-          if [ "$TARGET" = "String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep" ]; then
-            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=499130 fuel=4096" "$RUNNER_TEMP/Init-dependency-c0.txt"
-            echo "C0_DEPENDENCY_PINNED_QUALIFIED same_bytes=499130 official=accepted c0=accepted fuel=4096"
-          fi
-          echo "C0_DEPENDENCY_RESULT=dependency_closure_only_not_full_Init_qualification"
+      # Complete bounded official-positive cases before the expensive
+      # 499130-record timeout-prone dependency. Failed long-CI diagnostics
+      # must not suppress independent Cooper/BitVec conformance evidence.
       - name: Mandate pinned Cooper theorem closure and strict C0 verdict
         shell: bash
         run: |
@@ -126,6 +91,44 @@ jobs:
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=21407 fuel=4096" "$RUNNER_TEMP/Init-bitvec-c0.txt"
           echo "C0_DEPENDENCY_BITVEC_PINNED_QUALIFIED same_bytes=21407 official=accepted c0=accepted fuel=4096"
           echo "C0_DEPENDENCY_BITVEC_SCOPE=dependency_closure_only_not_full_Init"
+      - name: Export declaration closure and compare original kernel
+        shell: bash
+        env:
+          TARGET: ${{ github.event.inputs.declaration || 'String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep' }}
+        run: |
+          set -euo pipefail
+          test -n "$TARGET"
+          echo "C0_DEPENDENCY_TARGET=$TARGET"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake env .lake/build/bin/lean4export Init -- "$TARGET" > "$RUNNER_TEMP/Init-dependency-435.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/Init-dependency-435.ndjson" > "$RUNNER_TEMP/Init-dependency-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/Init-dependency-official.txt"
+          echo "C0_DEPENDENCY_OFFICIAL=accepted"
+          sha256sum "$RUNNER_TEMP/Init-dependency-435.ndjson"
+          wc -lc "$RUNNER_TEMP/Init-dependency-435.ndjson"
+          # The default pinned witness is now a mandatory, exact-byte
+          # positive differential conformance test. Other workflow_dispatch
+          # declarations remain diagnostic (with official positive checking).
+          if [ "$TARGET" = "String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep" ]; then
+            test "$(stat -c%s "$RUNNER_TEMP/Init-dependency-435.ndjson")" -eq 25031309
+            test "$(wc -l < "$RUNNER_TEMP/Init-dependency-435.ndjson")" -eq 499130
+            echo "7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/Init-dependency-435.ndjson" | sha256sum -c -
+          fi
+          # Opt-in diagnostic prints the active declaration BEFORE checking;
+          # timeout artifacts can identify the stalled name without altering
+          # source acceptance, resource budgets, or export bytes.
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 900s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay --trace-declarations "$RUNNER_TEMP/Init-dependency-435.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/Init-dependency-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/Init-dependency-c0.txt"
+          if [ "$TARGET" = "String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep" ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=499130 fuel=4096" "$RUNNER_TEMP/Init-dependency-c0.txt"
+            echo "C0_DEPENDENCY_PINNED_QUALIFIED same_bytes=499130 official=accepted c0=accepted fuel=4096"
+          fi
+          echo "C0_DEPENDENCY_RESULT=dependency_closure_only_not_full_Init_qualification"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

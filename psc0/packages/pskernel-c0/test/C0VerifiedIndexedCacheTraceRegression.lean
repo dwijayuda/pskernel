@@ -44,43 +44,63 @@ def main : IO Unit := do
     .pairInsert .failure checked arg,
     .pairInsert .success fn checked
   ]
-  let result := psKernelC0VerifiedIndexedCacheTraceSession
-    indexed owner owned.property commands
-  let updated := result.val
-  let _unchangedStore : updated.store = indexed.store := result.property.1
-  let _unchangedContext :
-      updated.checker.context = indexed.checker.context :=
-    result.property.2.1
+  -- These synthetic write commands are a non-admitting MODEL only.
+  -- Their results must never become an audited source-checker session:
+  -- source-equivalent insertion does not prove cached typing legitimacy.
+  let modelState := psKernelC0VerifiedIndexedCacheTraceRun
+    commands indexed.checker.state
   let _completeSourceState :
-      updated.checker.state =
+      modelState =
         psKernelC0VerifiedIndexedCacheTraceSource
           commands indexed.checker.state :=
-    result.property.2.2
+    psKernelC0VerifiedIndexedCacheTraceRun_source
+      commands indexed.checker.state
+
+  -- A real (unmodified) indexed session permits ONLY read-only hash hints.
+  let originalRead := psKernelC0VerifiedIndexedCacheReadSession
+    indexed owner owned.property .checkedInfer checked
+  let _readSource :
+      originalRead =
+        psKernelExprMapGet indexed.checker.state.checkedInfer checked.expr :=
+    psKernelC0VerifiedIndexedCacheReadSession_source
+      indexed owner owned.property .checkedInfer checked
+  if originalRead.isSome then
+    throw (IO.userError "indexed trace: observer invented checked type")
+  let originalPair := psKernelC0VerifiedIndexedPairReadSession
+    indexed owner owned.property .success checked fn
+  let _pairSource :
+      originalPair =
+        psKernelExprPairSetContains
+          indexed.checker.state.success checked.expr fn.expr :=
+    psKernelC0VerifiedIndexedPairReadSession_source
+      indexed owner owned.property .success checked fn
+  if originalPair then
+    throw (IO.userError "indexed trace: observer invented DefEq proof")
 
   let routeNames : List PsKernelC0IndexedExprCacheRoute :=
     [.checkedInfer, .inferOnly, .whnfCore, .whnf, .unfold]
   for route in routeNames do
     let hit := psKernelC0VerifiedIndexedStateCacheGet
-      route updated.checker.state checked
+      route modelState checked
     if !hit.isSome then
       throw (IO.userError "indexed trace: valid source expression cache miss")
     let _source :
         hit = psKernelExprMapGet
-          (psKernelC0IndexedExprCacheSelect route updated.checker.state)
+          (psKernelC0IndexedExprCacheSelect route modelState)
           checked.expr :=
       psKernelC0VerifiedIndexedStateCacheGet_source
-        route updated.checker.state checked
+        route modelState checked
 
   if !psKernelC0VerifiedIndexedStatePairContains
-      .success updated.checker.state checked fn ||
+      .success modelState checked fn ||
       !psKernelC0VerifiedIndexedStatePairContains
-        .success updated.checker.state fn checked then
+        .success modelState fn checked then
     throw (IO.userError "indexed trace: symmetric DefEq cache membership lost")
   if !psKernelC0VerifiedIndexedStatePairContains
-      .failure updated.checker.state checked arg then
+      .failure modelState checked arg then
     throw (IO.userError "indexed trace: failure-cache entry lost")
   if psKernelC0VerifiedIndexedStatePairContains
-      .failure updated.checker.state checked fn then
+      .failure modelState checked fn then
     throw (IO.userError "indexed trace: failure-cache member invented")
 
   let _rawProof :
@@ -94,4 +114,4 @@ def main : IO Unit := do
   if (psKernelC0VerifiedIndexedHashSourceOracle
       owner (rootId + 51)).isSome then
     throw (IO.userError "indexed trace: missing handle supplied source hash")
-  IO.println "C0_VERIFIED_INDEXED_CACHE_TRACE ordered_cache_updates=8 full_source_state=Lean all_slots=pass defeq_symmetry=pass forged_store=declined bad_id=declined"
+  IO.println "C0_VERIFIED_INDEXED_CACHE_TRACE model_updates=8 source_cache_transition=Lean read_only_session=pass no_unchecked_admission=yes all_slots=pass defeq_symmetry=pass forged_store=declined bad_id=declined"

@@ -8,7 +8,7 @@ on:
       run_id:
         description: Completed native qualification run to inspect
         required: true
-        default: '38823906652'
+        default: '38827509921'
 permissions:
   contents: read
   actions: read
@@ -17,14 +17,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Read failure context without replaying generated source dumps
+      - name: Read exact CI failures, qualification markers and small artifact receipts
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          RUN_ID: ${{ inputs.run_id || '38823906652' }}
+          RUN_ID: ${{ inputs.run_id || '38827509921' }}
         run: |
           python3 - <<'PY'
-          import json, os, re, urllib.request, urllib.error
+          import io, json, os, re, urllib.request, urllib.error, zipfile
           repo, run = os.environ['REPOSITORY'], os.environ['RUN_ID']
           if not run.isdecimal():
               raise ValueError('run_id must be numeric')
@@ -38,8 +38,8 @@ jobs:
           class NoRedirect(urllib.request.HTTPRedirectHandler):
               def redirect_request(self, req, fp, code, msg, hdrs, newurl):
                   return None
-          def read_log(job):
-              request = urllib.request.Request(root + '/actions/jobs/' + str(job) + '/logs', headers=headers)
+          def read_download(path):
+              request = urllib.request.Request(root + path, headers=headers)
               try:
                   response = urllib.request.build_opener(NoRedirect).open(request, timeout=30)
               except urllib.error.HTTPError as error:
@@ -47,24 +47,60 @@ jobs:
                       raise
                   location = error.headers['Location']
                   if not location.startswith('https://'):
-                      raise ValueError('expected HTTPS log redirect')
-                  # Do not forward the GitHub token to the signed log-storage URL.
+                      raise ValueError('expected HTTPS download redirect')
+                  # Do not forward the GitHub token to signed storage URLs.
                   response = urllib.request.urlopen(location, timeout=30)
               with response:
-                  return response.read().decode('utf-8', errors='replace').splitlines()
+                  return response.read()
           receipt = read_json('/actions/runs/' + run)
           print('RUN', run, 'HEAD', receipt['head_sha'], receipt['status'], receipt['conclusion'])
+          if receipt['status'] != 'completed':
+              raise RuntimeError('Qualification is still pending; retry this diagnostic only after completion')
           for job in read_json('/actions/runs/' + run + '/jobs?per_page=100')['jobs']:
               print('JOB', job['id'], job['name'], job['conclusion'])
               for step in job['steps']:
                   print('STEP', step['number'], step['name'], step['conclusion'])
-              if job['conclusion'] != 'failure':
+              lines = read_download('/actions/jobs/' + str(job['id']) + '/logs').decode('utf-8', errors='replace').splitlines()
+              markers = [line for line in lines if re.search(r'^\S+ PSCV0_[A-Z0-9_]+:', line)
+                         and re.search(r'PASS|observations|generators|freshened|portable', line)
+                         and not re.search(r'PSCV0_STANDARD_SOURCE|PSCV0_KERNEL_BUDGET', line)]
+              for line in markers[-90:]:
+                  print('QUALIFICATION', line[:1600])
+              if job['conclusion'] == 'failure':
+                  hits = [i for i, line in enumerate(lines) if re.search(r'AssertionError|TypeError|ReferenceError|error(?:\[[A-Z0-9]+\])?:|PSCV0-ERASURE|actual:|expected:|operator:|at file:', line, re.IGNORECASE)]
+                  selected = set()
+                  for i in hits[-18:]:
+                      selected.update(range(max(0, i-4), min(len(lines), i+14)))
+                  for i in sorted(selected):
+                      print('LOG', i+1, lines[i][:1200])
+          artifacts = read_json('/actions/runs/' + run + '/artifacts?per_page=100')['artifacts']
+          expected_name = 'pscv0-v7-native-' + receipt['head_sha']
+          for artifact in artifacts:
+              if artifact['name'] != expected_name or artifact['expired']:
                   continue
-              lines = read_log(job['id'])
-              hits = [i for i, line in enumerate(lines) if re.search(r'AssertionError|TypeError|ReferenceError|Error:|PSCV0_PLATFORM_|PSCV0-ERASURE|actual:|expected:|operator:|at file:', line)]
-              selected = set()
-              for i in hits[-18:]:
-                  selected.update(range(max(0, i-3), min(len(lines), i+8)))
-              for i in sorted(selected):
-                  print('LOG', i+1, lines[i][:1200])
+              print('ARTIFACT', artifact['id'], artifact['name'], artifact.get('digest'))
+              with zipfile.ZipFile(io.BytesIO(read_download('/actions/artifacts/' + str(artifact['id']) + '/zip'))) as archive:
+                  def small_json(suffix):
+                      matches = [name for name in archive.namelist() if name == suffix or name.endswith('/' + suffix)]
+                      if not matches:
+                          return None
+                      if len(matches) != 1 or archive.getinfo(matches[0]).file_size > 2*1024*1024:
+                          raise ValueError('ambiguous or oversized receipt: ' + suffix)
+                      return json.loads(archive.read(matches[0]))
+                  manifest = small_json('standard-surface.json')
+                  if manifest is not None:
+                      selected = {key: manifest.get(key) for key in
+                                  ['leanVersion', 'leanCommit', 'declarations', 'orderedInstances',
+                                   'orderedDefaultInstances', 'selectedStandardFNV', 'selectedStandardSHA256',
+                                   'selectedSurfaceSHA256', 'approvedLogicalAssumptions', 'selectedDeriving']}
+                      selected['classCount'] = len(manifest['classes'])
+                      print('MANIFEST', json.dumps(selected, sort_keys=True))
+                  performance = small_json('m1-performance/comparison.json')
+                  if performance is not None:
+                      selected = {key: performance.get(key) for key in
+                                  ['sourceSha', 'leanCommit', 'preludeMs', 'compiler']}
+                      selected['runtimeRatios'] = [{'name': item['name'], 'size': item['size'],
+                                                   'ratioToNativeLean': item['ratioToNativeLean']}
+                                                  for item in performance['runtime']]
+                      print('PERFORMANCE', json.dumps(selected, sort_keys=True))
           PY

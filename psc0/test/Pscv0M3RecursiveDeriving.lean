@@ -249,7 +249,7 @@ private def source : String :=
   "function m3suboutput(flag: Bool): UInt64 := UInt64.ofNat(m3normalizedSub(if (flag) { 17 } else { 9 }))\n" ++
   "function m3infixChild(n: Nat): Nat := match n with { | 0 => 0 | k+1 => m3infixChild(k + 0) + 1 }\n" ++
   "theorem m3infixStep(n: Nat): m3infixChild(Nat.succ(n)) = m3infixChild(n) + 1 := by { rfl }\n" ++
-  "function m3infixOutput(flag: Bool): UInt64 := UInt64.ofNat(m3infixChild(if (flag) { 17 } else { 9 }))\n"
+  "function m3infixoutput(flag: Bool): UInt64 := UInt64.ofNat(m3infixChild(if (flag) { 17 } else { 9 }))\n"
 
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
@@ -297,7 +297,7 @@ def main (args : List String) : IO Unit := do
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
-    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixOutput"] }
+    exports := .selected ["m3hashnat", "m3hashbool", "m3reprnat", "m3reprbool", "m3eqnat", "m3eqbool", "m3eqatom", "m3decidenat", "m3decidebool", "m3decideatom", "m3decideproof", "m3normoutput", "m3lateroutput", "m3flipoutput", "m3suboutput", "m3infixoutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -343,7 +343,7 @@ def main (args : List String) : IO Unit := do
       (M3RecursiveHashOracle.flipPrefix flag (if flag then 17 else 9))).toNat))),
     ("m3suboutput", Lean.toJson (toString ((UInt64.ofNat
       (M3RecursiveHashOracle.normalizedSubChild (if flag then 17 else 9))).toNat))),
-    ("m3infixOutput", Lean.toJson (toString ((UInt64.ofNat
+    ("m3infixoutput", Lean.toJson (toString ((UInt64.ofNat
       (M3RecursiveHashOracle.infixChild (if flag then 17 else 9))).toNat))),
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]

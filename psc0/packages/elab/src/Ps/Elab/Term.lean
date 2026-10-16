@@ -150,7 +150,10 @@ def psElabValidateStructuralCall (elaborate : PsElaborator)
       -- synthetic constraint. Resolve available non-default evidence before
       -- comparing with existing induction hypotheses; never force default
       -- instances or resume a suspended source in the wrong lexical scope.
-      let progressed ← psElabProgressPending elaborate checked.context
+      -- No pending work needs a scheduler pass. The ordinary queue solver
+      -- remains responsible for all non-default constraints when present.
+      let progressed ← if checked.context.pending.isEmpty then pure checked.context
+        else psElabProgressPending elaborate checked.context
       let checked := { checked with context := progressed }
       let some (childId, hypothesisId) :=
         psElabStructuralDefEqChild checked.context checked.term recursion.calls

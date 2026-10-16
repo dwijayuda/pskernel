@@ -10,7 +10,7 @@ const [mode, directoryArg, moduleArg] = process.argv.slice(2);
 assert(directoryArg, 'expected mode and fixture directory');
 const directory = path.resolve(directoryArg);
 const expected = JSON.parse(await readFile(path.join(directory, 'expected.json'), 'utf8'));
-const names = ['m3hashnat', 'm3hashbool', 'm3reprnat', 'm3reprbool', 'm3eqnat', 'm3eqbool', 'm3eqatom', 'm3decidenat', 'm3decidebool', 'm3decideatom', 'm3decideproof', 'm3normoutput', 'm3lateroutput', 'm3flipoutput', 'm3suboutput', 'm3infixOutput'];
+const names = ['m3hashnat', 'm3hashbool', 'm3reprnat', 'm3reprbool', 'm3eqnat', 'm3eqbool', 'm3eqatom', 'm3decidenat', 'm3decidebool', 'm3decideatom', 'm3decideproof', 'm3normoutput', 'm3lateroutput', 'm3flipoutput', 'm3suboutput', 'm3infixoutput'];
 assert.deepEqual(expected.map(row => row.flag), [false, true]);
 const run = (command, args) => {
   const result = spawnSync(command, args, {encoding:'utf8', timeout:120000, maxBuffer:4*1024*1024});

@@ -237,3 +237,22 @@ replace the read-only definitional equality criterion, or expand the
 logical foundation. The pinned oracle, equation, `k+1` negative and
 runtime targets are unchanged. Both full native and focused same-commit
 replays are required; this is NOT yet accepted or full M3+B.
+
+## HAdd infix strict-child candidate: WIT export identity correction (qualification pending)
+
+The prior `40b216a09fa20e737cfe2e02d78f28f5e86a4064`
+candidate focused run `38934185882` reached native checked source
+and passed direct JS, strict compiled TS and locked Rust execution.
+Its only focused failure was the new fixture's mixed-case export
+`m3infixOutput`: WIT correctly converted it to `m3infix-output`
+and the exact unchanged ABI assertion expected the camel-case name.
+The new export is now consistently **`m3infixoutput`** across native
+oracle JSON, selected PSC source, generated JS/TS/Rust and WIT/GC/
+Wasmtime comparison. This corrects fixture ownership, NOT compiler
+semantics, and does NOT relax or remove the ABI assertion.
+The computed-major synthetic-constraint queue is skipped when
+empty; when work exists, it still uses the original non-default
+`psElabProgressPending` solver before strict-child/IH validation.
+Previously accepted Nat.sub and prefix-recursion receipts are intact.
+Five exact-commit native/F1/F2/F3-F4/focused gates must all pass.
+Overall M3+B remains OPEN; no self-hosting or pskernel-core.

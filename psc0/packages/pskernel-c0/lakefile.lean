@@ -20,6 +20,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.VerifiedIndexedHash,
     `Ps.KernelCore.Architecture.VerifiedIndexedCheckedReceipt,
     `Ps.KernelCore.Architecture.VerifiedIndexedCheckedSession,
+    `Ps.KernelCore.Architecture.VerifiedIndexedCheckedBatch,
     `Ps.KernelCore.Architecture.VerifiedIndexedCacheState,
     `Ps.KernelCore.Architecture.VerifiedIndexedCacheTrace,
     `Ps.KernelCore.Architecture.CertifiedInstantiateMemo,

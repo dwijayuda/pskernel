@@ -19,34 +19,50 @@ private def bad : String := String.intercalate "\n" [
   "{\"thm\":{\"all\":[2],\"levelParams\":[],\"name\":2,\"type\":0,\"value\":1}}",
   ""]
 
+-- The axiom grammar differs from def/thm: it has no `all` field.
+-- Its type is intentionally irrelevant to this negative policy test: the
+-- forbidden structured name must be declined before kernel type validation.
 private def axiomInput : String := String.intercalate "\n" [
   "{\"in\":1,\"str\":{\"pre\":0,\"str\":\"Nat\"}}",
   "{\"in\":2,\"str\":{\"pre\":0,\"str\":\"Classical\"}}",
   "{\"in\":3,\"str\":{\"pre\":2,\"str\":\"choice\"}}",
   "{\"ie\":0,\"const\":{\"name\":1,\"us\":[]}}",
-  "{\"axiom\":{\"all\":[3],\"levelParams\":[],\"name\":3,\"type\":0,\"isUnsafe\":false}}",
+  "{\"axiom\":{\"levelParams\":[],\"name\":3,\"type\":0,\"isUnsafe\":false}}",
   ""]
+
+private def malformedAxiomInput : String :=
+  "{\"axiom\":{\"all\":[3],\"levelParams\":[],\"name\":3,\"type\":0,\"isUnsafe\":false}}\n"
 
 private def require (ok : Bool) (label : String) : IO Unit := do
   unless ok do throw (IO.userError label)
   IO.println s!"PASS {label}"
 
+private def expectSuccess (chunks : List ByteArray) (label : String) : IO Unit := do
+  match check chunks with
+  | .ok _ => IO.println s!"PASS {label}"
+  | .error d =>
+    throw (IO.userError s!"{label}: got {d.status}/{d.phase.label}/{d.exitCode} at {d.position}: {d.error}")
+
 private def expectFailure (text : String) (code : UInt32) (phase : Phase)
     (label : String) (limits : Limits := {}) : IO Unit := do
   match check [text.toUTF8] limits with
   | .ok _ => throw (IO.userError s!"{label}: unexpectedly accepted")
-  | .error d => require (d.exitCode == code && d.phase == phase) label
+  | .error d =>
+    unless d.exitCode == code && d.phase == phase do
+      throw (IO.userError s!"{label}: expected {phase.label}/{code}, got {d.status}/{d.phase.label}/{d.exitCode} at {d.position}: {d.error}")
+    IO.println s!"PASS {label}"
 
 def main : IO UInt32 := do
   try
     Std.Async.System.setEnvVar "LEAN_ABORT_ON_PANIC" "1"
     Std.Async.System.setEnvVar "LEAN_ABORT_ON_NONLINEAR" "1"
-    require (check [good.toUTF8]).isOk "valid Nat definition, including prelude replay"
+    expectSuccess [good.toUTF8] "valid Nat definition, including prelude replay"
     let b := good.toUTF8
-    require (check [b.extract 0 17, b.extract 17 b.size]).isOk "chunk boundary inside a record"
-    require (check [good.toUTF8]).isOk "fresh repeat, no shared admission authority"
+    expectSuccess [b.extract 0 17, b.extract 17 b.size] "chunk boundary inside a record"
+    expectSuccess [good.toUTF8] "fresh repeat, no shared admission authority"
     expectFailure bad 1 .kernel "False theorem rejected after installation"
     expectFailure axiomInput 2 .policy "Classical.choice forbidden by PSC0 policy"
+    expectFailure malformedAxiomInput 3 .parse "axiom with forbidden all field is malformed, not a policy verdict"
     expectFailure "not json\n" 3 .parse "malformed input is not logical rejection"
     expectFailure "{\"format\":\"proofscript-checked-admissions\",\"version\":2,\"admissions\":[]}" 3 .parse
       "canonical-v2 never misrepresented as supported"

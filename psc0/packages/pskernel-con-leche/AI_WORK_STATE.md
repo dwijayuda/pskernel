@@ -22,16 +22,28 @@ branch. Upstream pin is `b47ea19d6864a1fd09db6144528f91baa5c550dd` (Lean 4.35.0)
 ## Observed qualification and corrections
 
 - Initial source `dccac0c438cfaedd375a5baf23ed02740f4168ee`, run `38949923855`:
-  toolchain/upstream pins passed; the imported upstream runtime closure built.
+  toolchain/upstream pins passed; imported upstream runtime modules built.
   The wrapper's multiline policy diagnostic had a Lean layout error.
 - Correction `6c441087c7c38a05986d93465c86b5c4c3d2f294`, run `38950601637`:
-  the wrapper library AND native test executable built successfully. The CLI's
-  multiline usage-string application failed layout/type elaboration, so the
-  combined native-build step failed; runtime tests and proofs did NOT run.
-- This checkpoint fixes the CLI by naming the usage text separately. Qualification
-  of this correction, the runtime cases and the model proof is still pending.
+  wrapper library and native test executable built; the CLI usage string had
+  another layout error. Runtime tests and proofs did NOT run.
+- Correction `594aa87437d37371c7bab0cbfc368b436ae8f3c3`, run `38951418065`:
+  full native build SUCCEEDED (checker library, CLI and tests; 156 build jobs).
+  Valid Nat definition, chunk split, fresh repeat and invalid False theorem
+  tests PASSED. The fifth test returned the wrong phase/code; the combined
+  runtime test step failed, so CLI process cases and proof gates did NOT run.
+- Root cause verified in pinned `ConLeche/Frontend/Scan/Fast.lean`,
+  `scanAxiomDeclLoop`: an axiom record admits `isUnsafe`, `levelParams`, `name`
+  and `type`, NOT the `all` field allowed on definitions/theorems. The original
+  policy fixture was malformed and never reached the policy audit. This
+  checkpoint corrects the fixture, preserves a separate malformed-axiom test,
+  and reports actual phase/code/error on any future mismatch. No policy or
+  checker acceptance rule was changed to satisfy the test.
 
-Do not call the package CI-qualified until the full required workflow succeeds.
+The current corrected suite has 13 focused cases. Its full runtime result,
+the five CLI operations, proof target and actual axiom audit remain pending
+until the exact new source commit's CI passes.
+
 A saved incremental compiler cache is build acceleration, NEVER acceptance or
 proof evidence. CI checks the upstream revision and clean tracked sources before
 using it, and re-elaborates this wrapper's axiom report on every qualifying run.

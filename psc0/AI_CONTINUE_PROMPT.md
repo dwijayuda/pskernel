@@ -1,3 +1,28 @@
+## Latest M3+B candidate: open Nat.sub strict child (not yet fully accepted)
+
+Compiler/test `721b97038926db5f34e2da1cf7157c68c18234ff` implements exact pinned Lean 4.35.0
+`Nat.sub a 0 ≡ a` reduction in shared native `Ps.Meta.NatReduce`.
+The independent Lean oracle, checked .ps unfolding equation, 15 scalar
+exports × 2 inputs across JS/strict TS/Rust/V8 GC/Wasmtime, and a
+`Nat.sub(k,1)` non-child refusal now pass the **focused** workflow
+[38931145641](https://github.com/dwijayuda/pskernel/actions/runs/38931145641).
+Independent F1 [38931145674](https://github.com/dwijayuda/pskernel/actions/runs/38931145674),
+F2 [38931145639](https://github.com/dwijayuda/pskernel/actions/runs/38931145639),
+F3/F4/platform [38931145711](https://github.com/dwijayuda/pskernel/actions/runs/38931145711)
+all SUCCESS on this exact code commit. The full native workflow
+[38931145719](https://github.com/dwijayuda/pskernel/actions/runs/38931145719)
+was **still IN PROGRESS when this checkpoint was committed**. Re-read its
+final result before accepting. No old 4/5 green results establish
+full integrated 5/5 success.
+
+Fully accepted previous M3 prefix-recursion compiler `8f8aa47f`, with
+five same-commit green workflows and final receipt
+`psc0/docs/PSCV0_M3_PREFIX_RECURSION_QUALIFICATION_2026-10-16.md`,
+remains the acceptance baseline. M2+A remains complete for original
+bounded profile. v7.2 alone is future .ps; native .lean semantics unrestricted.
+No source axiom/sorry/new classical assumption, pskernel-core, self-hosting,
+unchecked totality, runtime performance-parity or completed M3 claim.
+
 ## Accepted M3+B prefix recursion / normalized evolving state — 16 October 2026
 
 **Implementation/test commit `8f8aa47fc3b742488bd1ce4ad15024a63c0b6d4f`: all five same-commit gates

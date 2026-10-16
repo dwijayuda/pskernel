@@ -46,6 +46,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.SealedState,
     `Ps.KernelCore.Architecture.SealedAuditedState,
     `Ps.KernelCore.Architecture.AuditedAssumptions,
+    `Ps.KernelCore.Core.ExprDecidableEq,
     `Ps.KernelCore.Core.CertifiedStore,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.VerifiedSession,

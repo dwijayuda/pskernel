@@ -14,7 +14,7 @@ def main : IO Unit := do
   let b : PsKernelName := .str .anonymous "b"
   let base : PsKernelExpr := .bvar 0
   let replacement : PsKernelExpr := .fvar a
-  let example : PsKernelExpr :=
+  let nestedTerm : PsKernelExpr :=
     .letE b (.sort .zero) (.app (.bvar 1) (.bvar 0))
       (.forallE b (.app (.fvar a) (.bvar 2))
         (.lam a (.sort .zero)
@@ -26,7 +26,7 @@ def main : IO Unit := do
     .mdata 5 (.app base (.bvar 2)),
     .lam b (.bvar 1) (.bvar 0) .default,
     .forallE a (.bvar 0) (.bvar 1) .implicit,
-    example, c0InstMemoShared (.app base example) 7
+    nestedTerm, c0InstMemoShared (.app base nestedTerm) 7
   ]
   for expr in samples do
     for offset in [0, 1, 2, 5] do

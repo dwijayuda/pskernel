@@ -6,10 +6,13 @@ SIGUSR1 handler. Collect only stack traces and analyze symbol addresses.
 No source checker, admission rule, resource budget or proof term is modified.
 """
 import argparse
+from bisect import bisect_right
 from collections import Counter
+import ctypes
 import json
 import os
 from pathlib import Path
+import platform
 import re
 import signal
 import subprocess
@@ -30,15 +33,41 @@ def sample(exe, source, preload, log, samples, interval):
             start_new_session=True,
         )
         attempts = 0
-        for _ in range(samples):
+        worker_attempts = 0
+        assert platform.machine() == "x86_64", "tgkill syscall pinned to x86_64 runner"
+        libc = ctypes.CDLL(None, use_errno=True)
+        SYS_tgkill = 234
+        for iteration in range(samples):
             time.sleep(interval)
             if proc.poll() is not None:
                 break
-            try:
-                os.kill(proc.pid, signal.SIGUSR1)
+            # Native Lean's main thread waits for run_with_thread_stack's
+            # checker worker. Sampling the PID only sees that idle main
+            # thread, not the executable checker. Inspect its LWP threads.
+            task_dir = Path(f"/proc/{proc.pid}/task")
+            status = []
+            for tid_path in task_dir.iterdir():
+                try:
+                    stat = (tid_path / "stat").read_text()
+                    state = stat.rsplit(") ", 1)[1].split()[0]
+                    tid = int(tid_path.name)
+                    status.append((tid, state))
+                except (OSError, ValueError, IndexError):
+                    continue
+            active = sorted(t for t, st in status
+                            if t != proc.pid and st == "R")
+            others = sorted(t for t, st in status if t != proc.pid)
+            if not others:
+                print(f"C0_WF_PROFILE_NO_WORKER sample={iteration} threads={status}")
+                continue
+            chosen = active[iteration % len(active)] if active else others[iteration % len(others)]
+            result = libc.syscall(SYS_tgkill, proc.pid, chosen, signal.SIGUSR1)
+            if result == 0:
                 attempts += 1
-            except ProcessLookupError:
-                break
+                worker_attempts += 1
+                print(f"C0_WF_PROFILE_WORKER sample={iteration} tid={chosen} state={dict(status).get(chosen)}")
+            else:
+                print(f"C0_WF_PROFILE_SIGNAL_FAILED sample={iteration} tid={chosen} errno={ctypes.get_errno()}")
         status = proc.poll()
         if status is None:
             try:
@@ -51,6 +80,7 @@ def sample(exe, source, preload, log, samples, interval):
                 os.killpg(proc.pid, signal.SIGKILL)
                 proc.wait(timeout=8)
         print(f"C0_WF_PROFILE_INTENT samples={samples} interval_seconds={interval} sampled={attempts}")
+        print(f"C0_WF_PROFILE_WORKER_SAMPLES={worker_attempts}")
         print(f"C0_WF_PROFILE_PROCESS status={status} diagnostic_stopped={status is None}")
     return attempts
 
@@ -60,41 +90,76 @@ def analyze(log: Path, binary: Path, summary: Path):
     chunks = source.split(PROFILE_BEGIN)[1:]
     stacks = [block.split(PROFILE_END)[0] for block in chunks if PROFILE_END in block]
     address_re = re.compile(r"\+0x([a-fA-F0-9]+)\)")
-    addresses = []
+    exe_lines = []
     for block in stacks:
-        addresses += address_re.findall(block)
+        exe_lines.extend(line for line in block.splitlines()
+                         if str(binary) in line)
+    addresses = [
+        match.group(1) for line in exe_lines
+        if (match := address_re.search(line)) is not None
+    ]
     unique = list(dict.fromkeys(addresses))
     resolved = {}
     if unique:
         for start in range(0, len(unique), 180):
-            portion = unique[start:start + 180]
+            portion = unique[start:start+180]
             result = subprocess.run(
                 ["addr2line", "-f", "-C", "-e", str(binary),
-                 *("0x" + a for a in portion)],
+                 *("0x"+a for a in portion)],
                 text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 timeout=35,
             )
             lines = result.stdout.splitlines()
             for i, addr in enumerate(portion):
                 resolved[addr] = {
-                    "function": lines[2*i] if 2*i < len(lines) else "<unknown>",
-                    "source": lines[2*i+1] if 2*i+1 < len(lines) else "<unknown>",
+                    "function": lines[2*i] if 2*i < len(lines) else "??",
+                    "source": lines[2*i+1] if 2*i+1 < len(lines) else "??",
                 }
+    symbols = []
+    try:
+        p = subprocess.run(
+            ["nm", "-n", "--defined-only", str(binary)],
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            timeout=65,
+        )
+        if p.returncode == 0:
+            for line in p.stdout.splitlines():
+                parts = line.split()
+                if len(parts) == 3 and re.fullmatch(r"[0-9a-fA-F]+", parts[0]):
+                    symbols.append((int(parts[0],16),parts[2]))
+    except (subprocess.TimeoutExpired, OSError):
+        pass
+    locations = [x[0] for x in symbols]
+    for addr in unique:
+        result = resolved[addr]
+        if result["function"] in ("??", "unknown"):
+            n = bisect_right(locations,int(addr,16))-1
+            if n>=0:
+                result["function"]=symbols[n][1]
+                result["source"]=f"nearest_native_symbol_plus_0x{int(addr,16)-locations[n]:x}"
+        if result["function"] in ("??","unknown"):
+            result["function"]="c0OfficialReplay+0x"+addr
     sampled_frames = []
     for b in stacks:
         sampled_frames.append([
             resolved.get(addr, {"function": "unknown", "source": "?"})
-            for addr in address_re.findall(b)
+            for line in b.splitlines()
+            if str(binary) in line
+            if (match := address_re.search(line)) is not None
+            for addr in [match.group(1)]
         ])
     inclusive = Counter(fr["function"] for stack in sampled_frames for fr in set_as_unique(stack))
     deepest = Counter(
-        next((f["function"] for f in stack[3:] if f["function"] not in ("??", "unknown")), "unknown")
+        next((f["function"] for f in stack
+              if f["function"] not in ("??", "unknown")), "unknown")
         for stack in sampled_frames
     )
     report = {
         "diagnostic_only": True,
         "source_file": source.name if hasattr(source, "name") else log.name,
         "native_stack_samples": len(stacks),
+        "native_symbol_count": len(symbols),
+        "checker_executable_addresses": len(unique),
         "successful_source_acceptance": "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" in source,
         "top_inclusive_functions": inclusive.most_common(35),
         "top_active_functions": deepest.most_common(20),

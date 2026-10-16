@@ -64,6 +64,27 @@ def main : IO Unit := do
         throw (IO.userError "semantic cache: shadowed inferred type poisoned")
   | .error e => throw (IO.userError ("shadowed infer-only FVar rejected: " ++ e))
 
+  -- A forged POSITIVE DefEq pair involving a local FVar must not turn
+  -- two unknown, distinct variables into an equality verdict. Both the raw
+  -- pair and an enclosing metadata pair exercise the source quick-cache
+  -- guard and the recursive metadata checker, respectively.
+  let foreignName : PsKernelName := .str .anonymous "foreignScoped"
+  let foreignKey : PsKernelExpr := .fvar foreignName
+  let poisonedSuccess := psKernelCheckerStateWithSuccess source.state
+    (psKernelExprPairSetInsert source.state.success key foreignKey)
+  match psKernelIsDefEq 4096 source.context poisonedSuccess key foreignKey with
+  | .ok (true, _) =>
+      throw (IO.userError "semantic cache: forged cross-scope DefEq accepted")
+  | _ => pure ()
+  let wrappedForeign : PsKernelExpr := .mdata 83 foreignKey
+  let poisonedNestedSuccess := psKernelCheckerStateWithSuccess source.state
+    (psKernelExprPairSetInsert source.state.success wrapped wrappedForeign)
+  match psKernelIsDefEq 4096 source.context
+      poisonedNestedSuccess wrapped wrappedForeign with
+  | .ok (true, _) =>
+      throw (IO.userError "semantic cache: wrapped forged DefEq accepted")
+  | _ => pure ()
+
   -- Exit scope must restore ALL five expression caches and both DefEq
   -- verdict sets, not merely the positive cache exercised by the original
   -- metatheory counterexample. Only nextFresh may advance monotonically.
@@ -86,4 +107,4 @@ def main : IO Unit := do
       psKernelExprPairSetContains restored.success key typ ||
       psKernelExprPairSetContains restored.failure key typ then
     throw (IO.userError "semantic cache: binder state leaked")
-  IO.println "C0_METATHEORY_SCOPE fvar_keys=blocked wrapped_foreign=error shadowed_types=correct all_seven_caches=restored monotone_fresh=pass"
+  IO.println "C0_METATHEORY_SCOPE fvar_keys=blocked wrapped_foreign=error shadowed_types=correct forged_defeq=blocked all_seven_caches=restored monotone_fresh=pass"

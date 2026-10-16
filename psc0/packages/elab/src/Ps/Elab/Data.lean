@@ -38,63 +38,6 @@ def psElabContainerRecursiveName (name : PsName) : Bool :=
   else
     psNameEq name psArrayName
 
-def psElabNestedRecursiveFieldTypeSupportedWithFuel
-    (fuel : Nat) : PsName -> PsExpr -> Bool :=
-  match fuel with
-  | Nat.zero =>
-      fun (_inductiveName : PsName) (_type : PsExpr) => false
-  | Nat.succ remaining =>
-      fun (inductiveName : PsName) (type : PsExpr) =>
-        let smaller : PsName -> PsExpr -> Bool :=
-          psElabNestedRecursiveFieldTypeSupportedWithFuel remaining;
-        if psExprHasConst inductiveName type then
-          let view := psExprAppView type;
-          match view.head with
-          | .constE name _ =>
-              if psNameEq name inductiveName then
-                true
-              else if psElabContainerRecursiveName name then
-                match view.args with
-                | List.nil =>
-                    false
-                | List.cons argument rest =>
-                    match rest with
-                    | List.nil =>
-                        smaller inductiveName argument
-                    | List.cons _ _ =>
-                        false
-              else if psNameEq name psProdName then
-                match view.args with
-                | List.nil =>
-                    false
-                | List.cons left rest =>
-                    match rest with
-                    | List.nil =>
-                        false
-                    | List.cons right tail =>
-                        match tail with
-                        | List.nil =>
-                            if smaller inductiveName left then
-                              smaller inductiveName right
-                            else
-                              false
-                        | List.cons _ _ =>
-                            false
-              else
-                false
-          | _ => false
-        else
-          true
-
-def psElabNestedRecursiveFieldTypeSupported
-    (inductiveName : PsName)
-    (type : PsExpr) : Bool :=
-  psElabNestedRecursiveFieldTypeSupportedWithFuel
-    4096
-    inductiveName
-    type
-
-
 -- Every occurrence must use the same uniform parameters. Indices are checked
 -- by ordinary application elaboration and may vary between constructors/fields.
 def psElabDataIndices (context : PsElabContext) (info : PsInductiveInfo)
@@ -114,6 +57,46 @@ def psElabDataIndices (context : PsElabContext) (info : PsInductiveInfo)
     throw (.data "constructor parameters must remain uniform")
   return view.args.drop info.numParams
 
+-- Nested occurrences must use the SAME checked uniform parameters as the
+-- family's constructors. Previously only direct fields checked this telescope,
+-- and the positive-container whitelist accepted e.g. List(Family Nat) under
+-- Family α. Neither positive nesting nor a missing runtime IH permits this.
+--
+-- Inspect every recursive occurrence, while retaining the intentionally
+-- selected List/Option/Array/Prod positive-container policy. Kernel admission
+-- is still the final positivity authority. No nested IH is manufactured.
+def psElabValidateNestedRecursiveFieldWithFuel
+    (fuel : Nat) (context : PsElabContext) (info : PsInductiveInfo)
+    (parameters : List PsExpr) (fieldType : PsExpr) :
+    Except PsElabError Unit := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | remaining + 1 =>
+    let fieldType := psWhnf context.environment context.metaContext
+      context.localContext fieldType
+    if !psExprHasConst info.name fieldType then return ()
+    let view := psExprAppView fieldType
+    let .constE head _ := view.head
+      | throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+    if psNameEq head info.name then
+      let _ ← psElabDataIndices context info parameters fieldType
+      return ()
+    if psElabContainerRecursiveName head then
+      match view.args with
+      | [argument] =>
+        psElabValidateNestedRecursiveFieldWithFuel remaining context info
+          parameters argument
+      | _ => throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+    else if psNameEq head psProdName then
+      match view.args with
+      | [left, right] => do
+        psElabValidateNestedRecursiveFieldWithFuel remaining context info
+          parameters left
+        psElabValidateNestedRecursiveFieldWithFuel remaining context info
+          parameters right
+      | _ => throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+    else throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+
 def psElabDataRecursiveFields (context : PsElabContext) (info : PsInductiveInfo)
     (parameters : List PsExpr) (fields : List PsElabTypedBinder) :
     Except PsElabError (List Nat) := do
@@ -127,9 +110,9 @@ def psElabDataRecursiveFields (context : PsElabContext) (info : PsInductiveInfo)
       let _ ← psElabDataIndices context info parameters type
       return (state.fst + 1, state.fst :: state.snd)
     if psExprHasConst info.name type then
-      if info.numIndices != 0 ||
-          !psElabNestedRecursiveFieldTypeSupported info.name type then
+      if info.numIndices != 0 then
         throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+      psElabValidateNestedRecursiveFieldWithFuel 4096 context info parameters type
     return (state.fst + 1, state.snd)) (0, [])
   return result.reverse
 

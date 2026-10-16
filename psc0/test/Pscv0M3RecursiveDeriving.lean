@@ -266,6 +266,9 @@ private def source : String :=
 private def refusals : List (String × String × String) := [
   ("nested", "inductive NestedHash where { | node(children: List NestedHash) } deriving Hashable\n",
     "recursive deriving requires the M3 data machinery"),
+  ("nested-nonuniform-parameter",
+    "inductive BadNested(A: Type) where { | branch(children: List(BadNested(Nat))) }\n",
+    "constructor parameters must remain uniform"),
   ("indexed", "inductive IndexedHash: Nat -> Type where { | intro(n: Nat): IndexedHash n } deriving Hashable\n",
     "deriving indexed families is not yet implemented"),
   ("missing-field-dictionary", "inductive FunctionHash where { | leaf(value: Nat -> Nat) | node(next: FunctionHash) } deriving Hashable\n",

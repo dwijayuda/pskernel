@@ -327,3 +327,24 @@ constructor branch` during elaboration. It reuses existing common
 is changed or positive result claimed before the focused run.
 If the probe fails, fix the actual typed motive/pattern owner without
 accepting erroneous branches or weakening refusal. M3+B remains OPEN.
+
+## Next M3+B code candidate — uniform parameters through positive nested containers
+
+At compiler HEAD, `Ps.Elab.Data` previously validated uniform parameters
+on direct recursive fields only; its nested List/Option/Array/Prod acceptance
+walker could encounter the same family with changed parameters without
+applying `psElabDataIndices`. This change replaces that permissive boolean
+walker with one bounded, common checked-occurrence validator. It reuses the
+same universe/family/parameter telescope check for **every nested recursive
+occurrence**, including both sides of `Prod`. Nonrecursive fields remain
+unchanged. Indexed nested cases and unsupported variance still reject;
+no nested IH, positivity axiom, new recursor, or new runtime capability is
+invented. Official Lean 4.35 kernel checking remains authoritative.
+
+The existing nested-family `deriving Hashable` refusal already traverses
+a positively nested family, and its phase/rule are unchanged; one additional
+deliberately nonuniform nested family must reject at the precise
+`constructor parameters must remain uniform` elaboration rule. Minimal
+focused CI and all native/F1/F2/F3-F4 gates are required before accepting
+this bounded validation improvement. It is NOT complete general
+mutual/nested recursion, deriving, M3+B, P0 or P1.

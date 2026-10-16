@@ -1,0 +1,115 @@
+name: PSKernel-C0 Arena-authored native Lean 4.35 cases
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-native435.yml'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  arena-authored-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Rebuild pinned Lean 4.35 external exporter and native C0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(cd psc0/packages/pskernel-c0 && lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Rebuild authentic Arena source scenarios under pinned native Lean 4.35
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Frozen Arena September source identity. No Rust, no original
+          # v4.29-export header spoofing, and no production parser changes.
+          revision=5d7ca987618f1136aaa296057b50a2c10c4ce77a
+          curl -fL --retry 3 -o "$RUNNER_TEMP/lean4export/ArenaNatGood.lean" \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/other/nat-lit-arith.lean"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/lean4export/ArenaNatBad.lean" \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/other/nat-lit-add-bad.lean"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            mkdir -p .lake/build/lib/lean
+            lake env lean -o .lake/build/lib/lean/ArenaNatGood.olean ArenaNatGood.lean
+            lake env lean -o .lake/build/lib/lean/ArenaNatBad.olean ArenaNatBad.lean
+            for decl in natAddLit natSubLit natBleLit; do
+              lake env .lake/build/bin/lean4export ArenaNatGood -- "$decl" \
+                > "$RUNNER_TEMP/arena435-$decl.ndjson"
+            done
+            lake env .lake/build/bin/lean4export ArenaNatBad -- natAddLitBad \
+              > "$RUNNER_TEMP/arena435-natAddLitBad.ndjson"
+          )
+          python3 - <<'PY'
+          import os, json, pathlib
+          base = pathlib.Path(os.environ["RUNNER_TEMP"])
+          for name in ["natAddLit", "natSubLit", "natBleLit", "natAddLitBad"]:
+              path = base / f"arena435-{name}.ndjson"
+              records = path.read_bytes().splitlines()
+              hdr = json.loads(records[0])["meta"]
+              assert hdr["lean"] == {"version": "4.35.0", "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+              assert hdr["exporter"]["version"] == "3.1.0"
+              assert len(records) > 2
+              print(f"C0_ARENA_NATIVE_EXPORT name={name} records={len(records)} bytes={path.stat().st_size}")
+          PY
+      - name: Compare official Lean 4.35 and authoritative C0 judgments
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in natAddLit natSubLit natBleLit natAddLitBad; do
+            input="$RUNNER_TEMP/arena435-$name.ndjson"
+            expected=accept
+            if [ "$name" = natAddLitBad ]; then expected=reject; fi
+            official_status=0
+            (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$input") \
+              > "$RUNNER_TEMP/arena435-$name-official.txt" 2>&1 || official_status=$?
+            if [ "$expected" = accept ]; then
+              test "$official_status" -eq 0
+              grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/arena435-$name-official.txt"
+            else
+              # Official checker must report an actual rejection on precisely
+              # the native re-export. An invalid export or converter error
+              # cannot count as external soundness evidence.
+              test "$official_status" -ne 0
+              if grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/arena435-$name-official.txt"; then
+                echo "official oracle unexpectedly accepted negative Arena case" >&2
+                exit 1
+              fi
+            fi
+            (cd psc0/packages/pskernel-c0 && timeout 150s .lake/build/bin/c0OfficialReplay "$input" 4096) \
+              > "$RUNNER_TEMP/arena435-$name-c0.txt" 2>&1
+            if [ "$expected" = accept ]; then
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/arena435-$name-c0.txt"
+            else
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" "$RUNNER_TEMP/arena435-$name-c0.txt"
+            fi
+            echo "C0_ARENA_NATIVE name=$name expected=$expected official=matched c0=matched fuel=4096"
+          done
+          echo "C0_ARENA_NATIVE_RESULT cases=4 all_correct=true source_origin=arena_2026_09 native_lean=4.35.0"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-native435
+          path: |
+            ${{ runner.temp }}/arena435-*.ndjson
+            ${{ runner.temp }}/arena435-*-official.txt
+            ${{ runner.temp }}/arena435-*-c0.txt
+          if-no-files-found: warn
+          retention-days: 21

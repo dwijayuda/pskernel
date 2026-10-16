@@ -98,7 +98,7 @@ theorem psKernelC0LambdaFull_source
       simp [psKernelC0LambdaFullWithFuel,
         psKernelInferCoreWithFuelUsing,
         psKernelInferCoreWithFuelUsingSourceFrames,
-        psKernelInferCacheEligible]
+        psKernelInferCacheEligible] <;> rfl
 
 /-- Source equality of the entire dependent Π checked operation for
     every starting source context/state, fuel, safety level and callback.
@@ -123,7 +123,7 @@ theorem psKernelC0PiFull_source
       simp [psKernelC0PiFullWithFuel,
         psKernelInferCoreWithFuelUsing,
         psKernelInferCoreWithFuelUsingSourceFrames,
-        psKernelInferCacheEligible]
+        psKernelInferCacheEligible] <;> rfl
 
 /-- Match the real source full-check specialization. It is essential
     that any recursively checked applications inside the binder continue

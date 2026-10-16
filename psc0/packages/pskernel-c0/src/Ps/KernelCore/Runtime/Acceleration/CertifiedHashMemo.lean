@@ -261,3 +261,13 @@ theorem psKernelC0ExactMemoizedExprHash_source
     (expr : PsKernelExpr) :
     psKernelC0ExactMemoizedExprHash expr = psKernelExprHash expr :=
   (psKernelC0ExactHashWithMemo expr .empty).1.source
+
+/-- Native compiler replacement with a FULL Lean proof: every expression
+returns precisely the historical C0 hash, including shape-hash collisions.
+This replacement cannot change checking semantics. Registered only for
+modules that explicitly import this experimental hash memo until the
+complete real-WF benchmark qualifies the source-cache integration. -/
+@[csimp] theorem psKernelExprHash_compiler_eq_exactMemo :
+    @psKernelExprHash = @psKernelC0ExactMemoizedExprHash := by
+  funext expr
+  exact (psKernelC0ExactMemoizedExprHash_source expr).symm

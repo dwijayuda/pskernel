@@ -171,3 +171,92 @@ theorem psKernelC0IndexedCheckedReceiptTableCheck_source
     psKernelCheckerCheck fuel context initialState hash.expr =
       .ok (checked.val.inferredType, checked.val.finalState) :=
   psKernelC0IndexedCheckedReceiptHash_source hash checked
+
+
+/-- A failed indexed memo check is the ORIGINAL source checker error under
+the exact certified root-validity premise. A hash hit can only return a
+successful source-checked receipt; a miss delegates failure classification
+to the unchanged source checker. This includes exhausted fuel and malformed
+expressions, without replacing the reason with a synthetic cache status. -/
+theorem psKernelC0IndexedCheckedReceiptTableCheck_error_source
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    {id : Nat}
+    (hash : PsKernelC0VerifiedIndexedHash owner id)
+    (table : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel context initialState)
+    (reason : String)
+    (valid : psKernelC0StoreValid owner.store id = true)
+    (hError : psKernelC0IndexedCheckedReceiptTableCheck
+        owner fuel context initialState table hash = .error reason) :
+    psKernelCheckerCheck fuel context initialState hash.expr =
+      .error reason := by
+  cases hLookup :
+      psKernelC0IndexedCheckedReceiptTableLookup table id with
+  | some checked =>
+      simp [psKernelC0IndexedCheckedReceiptTableCheck, hLookup] at hError
+  | none =>
+      cases hSource :
+          psKernelCheckerCheck fuel context initialState hash.expr with
+      | error originalReason =>
+          have hReason : originalReason = reason := by
+            simpa [psKernelC0IndexedCheckedReceiptTableCheck,
+              hLookup, psKernelC0CaptureCheckedIndexedHash,
+              valid, hSource] using hError
+          simpa [hSource, hReason]
+      | ok result =>
+          simp [psKernelC0IndexedCheckedReceiptTableCheck,
+            hLookup, psKernelC0CaptureCheckedIndexedHash,
+            valid, hSource] at hError
+
+/-- Erase only the indexing implementation detail; retain the checker
+result and its EXACT final state, or its original error. This is the
+executable source-compatible operation callers can compose safely. -/
+def psKernelC0IndexedCheckedReceiptTableOutcome
+    (owner : PsKernelC0CertifiedStore)
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (initialState : PsKernelCheckerState)
+    (table : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel context initialState)
+    {id : Nat}
+    (hash : PsKernelC0VerifiedIndexedHash owner id) :
+    Except String (PsKernelExpr × PsKernelCheckerState) :=
+  match psKernelC0IndexedCheckedReceiptTableCheck
+      owner fuel context initialState table hash with
+  | .error reason => .error reason
+  | .ok (checked, _) =>
+      .ok (checked.val.inferredType, checked.val.finalState)
+
+/-- COMPLETE source refinement for the opt-in checked operation: positive
+types, exact final states, all negative errors and checked resource outcomes
+are identical to the original kernel call, not merely to an insertion
+operation. A certified hash/ID is never a typing or DefEq oracle. -/
+theorem psKernelC0IndexedCheckedReceiptTableOutcome_source
+    {owner : PsKernelC0CertifiedStore}
+    {fuel : Nat}
+    {context : PsKernelCheckerContext}
+    {initialState : PsKernelCheckerState}
+    {id : Nat}
+    (hash : PsKernelC0VerifiedIndexedHash owner id)
+    (table : PsKernelC0IndexedCheckedReceiptTable
+      owner fuel context initialState)
+    (valid : psKernelC0StoreValid owner.store id = true) :
+    psKernelC0IndexedCheckedReceiptTableOutcome
+        owner fuel context initialState table hash =
+      psKernelCheckerCheck fuel context initialState hash.expr := by
+  cases hResult : psKernelC0IndexedCheckedReceiptTableCheck
+      owner fuel context initialState table hash with
+  | error reason =>
+      have hSource :=
+        psKernelC0IndexedCheckedReceiptTableCheck_error_source
+          hash table reason valid hResult
+      simp [psKernelC0IndexedCheckedReceiptTableOutcome, hResult, hSource]
+  | ok result =>
+      rcases result with ⟨checked, nextTable⟩
+      have hSource :=
+        psKernelC0IndexedCheckedReceiptTableCheck_source
+          hash table nextTable checked hResult
+      simp [psKernelC0IndexedCheckedReceiptTableOutcome, hResult, hSource]

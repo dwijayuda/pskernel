@@ -186,7 +186,7 @@ lean_lib PsBackendTs where
 lean_lib PsBackendEcma where
   srcDir := "packages/backend-ecma/src"
   roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime, `Ps.BackendEcma.Utf8,
-    `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
+    `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Sync, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
 
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"

@@ -29,11 +29,25 @@ structure ManifestNotation where
 -- Paired with the *real* closed parser registry psPscv0InfixInfo.
 -- This ledger is explicitly checked for status and precedence drift.
 def selectedNotations : List ManifestNotation := [
-  { token := "=", kind := "Eq", precedence := 50,
+  { token := "=", kind := "relation:Eq", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
-  { token := "==", kind := "BEq.beq", precedence := 50,
+  { token := "==", kind := "booleanRelation:BEq.beq", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
   { token := "!=", kind := "booleanNotEqual", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "<", kind := "relation:LT.lt", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "<=", kind := "relation:LE.le", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "≤", kind := "relation:LE.le", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := ">", kind := "relation:GT.gt", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := ">=", kind := "relation:GE.ge", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "≥", kind := "relation:GE.ge", precedence := 50,
+    rightPrecedence := 51, nonAssociative := true },
+  { token := "≠", kind := "relation:Ne", precedence := 50,
     rightPrecedence := 51, nonAssociative := true },
   { token := "∧", kind := "And", precedence := 35,
     rightPrecedence := 35, nonAssociative := false },
@@ -55,28 +69,38 @@ def selectedNotations : List ManifestNotation := [
     rightPrecedence := 35, nonAssociative := false },
   { token := "::", kind := "List.cons", precedence := 67,
     rightPrecedence := 67, nonAssociative := false },
-  { token := "+", kind := "HAdd.hAdd", precedence := 65,
+  { token := "+", kind := "binary:HAdd.hAdd", precedence := 65,
     rightPrecedence := 66, nonAssociative := false },
-  { token := "++", kind := "HAppend.hAppend", precedence := 65,
+  { token := "++", kind := "binary:HAppend.hAppend", precedence := 65,
     rightPrecedence := 66, nonAssociative := false },
-  { token := "-", kind := "HSub.hSub", precedence := 65,
+  { token := "-", kind := "binary:HSub.hSub", precedence := 65,
     rightPrecedence := 66, nonAssociative := false },
-  { token := "*", kind := "HMul.hMul", precedence := 70,
+  { token := "*", kind := "binary:HMul.hMul", precedence := 70,
     rightPrecedence := 71, nonAssociative := false },
-  { token := "/", kind := "HDiv.hDiv", precedence := 70,
+  { token := "/", kind := "binary:HDiv.hDiv", precedence := 70,
     rightPrecedence := 71, nonAssociative := false },
-  { token := "%", kind := "HMod.hMod", precedence := 70,
+  { token := "%", kind := "binary:HMod.hMod", precedence := 70,
     rightPrecedence := 71, nonAssociative := false },
   { token := "→", kind := "arrow", precedence := 25,
     rightPrecedence := 25, nonAssociative := false },
   { token := "->", kind := "arrow", precedence := 25,
     rightPrecedence := 25, nonAssociative := false },
+  { token := "<<<", kind := "HShiftLeft.hShiftLeft", precedence := 75,
+    rightPrecedence := 76, nonAssociative := false },
+  { token := ">>>", kind := "HShiftRight.hShiftRight", precedence := 75,
+    rightPrecedence := 76, nonAssociative := false },
+  { token := "^", kind := "rightAction:HPow.hPow", precedence := 80,
+    rightPrecedence := 80, nonAssociative := false },
   { token := "matches", kind := "matches", precedence := 50,
     rightPrecedence := 51, nonAssociative := true }
 ]
 
 def notationKind : PsPscv0InfixKind → String
   | .constant name => name
+  | .operator kind name =>
+    (match kind with
+      | .unary => "unary" | .binary => "binary" | .rightAction => "rightAction"
+      | .relation => "relation" | .booleanRelation => "booleanRelation") ++ ":" ++ name
   | .arrow => "arrow"
   | .booleanAnd => "booleanAnd"
   | .booleanOr => "booleanOr"
@@ -95,20 +119,61 @@ def selectedTactics : List String :=
    "have", "let", "change", "show", "intro", "assumption", "rfl",
    "constructor", "·", "focus", "all_goals", "any_goals"]
 
--- Source do-block rewrite currently admits explicit Except-typed results.
--- The broader elaborator separately supports bounded Id/Option/Except cases;
--- no general State/IO/FFI coverage is claimed by these entries.
-def selectedSourceEffects : List String := ["Except"]
+-- The source parser delegates typed do to the shared effect selector.
+-- Ordinary result types use the identity path; no State/IO/FFI is implied.
+def selectedSourceEffects : List String := ["Id", "Option", "Except"]
 def selectedElabEffects : List String := ["Id", "Option", "Except"]
 def selectedModuleBehaviors : List String :=
   ["named-import-closure", "ordered-interfaces", "private-export-hygiene",
    "kernel-checked-project-linking"]
 
+-- Descriptive later-phase boundaries, not a mutable semantic admission gate.
+-- Runtime qualification requires an external exact-commit CI receipt.
 def unqualifiedM2AFeatures : List String :=
-  ["USize/ISize explicit target word profiles",
-   "remaining deriving and class-search semantic boundaries",
-   "full Lean module/notation/tactic/effect closure",
-   "backend-wide semantic preservation proof"]
+  ["general recursive/indexed/dependent deriving (M3+B)",
+   "general effects and proof automation (M4+C/D)",
+   "full Lean elaborator and imported extension parity",
+   "backend-wide semantic preservation proof",
+   "C5 source reconstruction and final conformance integration (M5/E)"]
+
+-- Selected proof/effect prerequisites are explicit, even when unavailable.
+-- Presence is measured from the same checked Standard, not inferred from a
+-- native package import used only by the authoring tool.
+def selectedProofPrerequisites : List String :=
+  ["Std.WP.Triple", "Gadget.assertGadget"]
+
+def selectedFoundationAssumptions : List String := ["propext", "Quot.sound"]
+
+def selectedProfilePolicies : List String := [
+  "source-public-names-by-default",
+  "ordinary-import-private; public-import-reexports",
+  "definition-bodies-opaque-across-modules; abbrev-bodies-exposed",
+  "proof-holes-and-user-axioms-forbidden-in-all-emitted-output",
+  "pure-typed-ir; external-effects-unselected",
+  "wasm-gc-interior; linear-memory-explicit-canonical-abi-only",
+  "platform-width-abstract-logically; executable-width-explicit32-or64",
+  "metadata-outside-core-identity",
+  "source-reconstruction-not-qualified"]
+
+private def selectedPrerequisitePayload (env : PsEnvironment) (name : String) : String :=
+  psStandardSnapshotNode "proofPrerequisite" [
+    name, psStandardSnapshotBool (psEnvironmentContains env (psDecisionName name))]
+
+-- The complete selected environment is visited, including opaque inhabitants.
+-- Together with kernel dependency closure and the exact declaration digest,
+-- this excludes transitively imported holes without a second proof checker.
+def selectedProofClosureAudit (env : PsEnvironment) : Except String Unit := do
+  for declaration in env.declarations do
+    let name := psDeclarationName declaration
+    let body := match declaration with
+      | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value |
+        .opaqueDecl _ _ _ value => [value]
+      | _ => []
+    if let .partialDecl .. := declaration then
+      throw ("PSCV0-MANIFEST: partial Standard declaration " ++ psNameToString name)
+    let constants := name :: ((psDeclarationType declaration :: body).flatMap psPscv0ExprConstants)
+    if constants.any (fun name => psNameToString name == "sorryAx") then
+      throw "PSCV0-MANIFEST: proof-hole dependency in selected Standard"
 
 -- Canonical length-delimited human-surface snapshot. This digest is
 -- independent of the existing kernel declaration and metadata snapshot:
@@ -132,7 +197,7 @@ private def manifestNotationPayload (entry : ManifestNotation) : String :=
     toString entry.rightPrecedence, psStandardSnapshotBool entry.nonAssociative]
 
 def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v2" [
+  psStandardSnapshotNode "PSCV0-SELECTED-SOURCE-SURFACE-v3" [
     leanVersion, leanCommit,
     psStandardSnapshotSHA256Fingerprint env,
     psStandardSnapshotList manifestNotationPayload selectedNotations,
@@ -143,7 +208,11 @@ def standardSurfaceManifestPayload (env : PsEnvironment) : String :=
     psStandardSnapshotList id selectedModuleBehaviors,
     psStandardSnapshotList manifestInstancePayload env.instances.entries,
     psStandardSnapshotList manifestInstancePayload env.instances.defaults,
-    psStandardSnapshotList id psPscv0SelectedAttributes]
+    psStandardSnapshotList id psPscv0SelectedAttributes,
+    psStandardSnapshotList id selectedProfilePolicies,
+    psStandardSnapshotList id selectedFoundationAssumptions,
+    psStandardSnapshotList (selectedPrerequisitePayload env) selectedProofPrerequisites,
+    psStandardSnapshotNode "authoringOrigin" ["Lean.Init", leanCommit]]
 
 def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (standardSurfaceManifestPayload env)
@@ -156,7 +225,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Independently measured at both strict boundaries in native38781449363.
 -- F4 display registrations independently measured at native38789249978.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:0018690e17bb2f61ee2444de07fb7b4435aaa146470bd87fb6cab907741097ee"
+  "sha256:117f2692ea15046020e113cd0454c5befa73479ec43e9923cafcbfc1e2031ed8"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
@@ -174,6 +243,12 @@ def selectedNotationAudit : Except String Unit := do
   if (selectedNotations.map (·.token)).eraseDups.length !=
       selectedNotations.length then
     throw "PSCV0-MANIFEST: duplicate selected notation"
+  let liveTokens := psPscv0InfixRegistry.map Prod.fst
+  let selectedTokens := selectedNotations.map (·.token)
+  if liveTokens.eraseDups.length != liveTokens.length ||
+      liveTokens.length != selectedTokens.length ||
+      !liveTokens.all selectedTokens.contains then
+    throw "PSCV0-MANIFEST: live notation registry is not exhaustively inventoried"
   for entry in selectedNotations do
     let some live := psPscv0InfixInfo entry.token
       | throw ("PSCV0-MANIFEST: notation missing: " ++ entry.token)
@@ -205,6 +280,7 @@ def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
 
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
+  selectedProofClosureAudit env
   standardInstanceIndexAudit env
   -- Reuse, do not replace, the independently pinned dual registry hashes.
   match psStandardSnapshotValidate env psStandardSnapshotExpected with
@@ -223,8 +299,15 @@ def standardSurfaceManifestAudit (env : PsEnvironment) :
     throw "PSCV0-MANIFEST: duplicate surface registration"
   if selectedDeriving != psElabSelectedDerivingHandlers then
     throw "PSCV0-MANIFEST: deriving handler registry drift"
-  if selectedSourceEffects.isEmpty || selectedElabEffects.isEmpty then
-    throw "PSCV0-MANIFEST: empty selected effect policy"
+  if selectedDeriving != psPscv0SelectedDerivingNames then
+    throw "PSCV0-MANIFEST: deriving parser registry drift"
+  if selectedTactics != psPscv0TacticRegistry.map Prod.fst ||
+      !(psPscv0TacticRegistry.all fun entry =>
+        entry.1 == psPscv0TacticParserName entry.2) then
+    throw "PSCV0-MANIFEST: tactic dispatch registry drift"
+  let effects := psElabDoRegistry.map (fun entry => psNameToString entry.1)
+  if selectedSourceEffects != effects || selectedElabEffects != effects then
+    throw "PSCV0-MANIFEST: typed effect registry drift"
   let observed := standardSurfaceManifestSHA256 env
   if observed != standardSurfaceManifestExpectedSHA256 then
     throw ("PSCV0-MANIFEST: surface registry drift; expected " ++
@@ -244,13 +327,13 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
     | .axiomDecl name _ _ => some (psNameToString name)
     | _ => none
   Lean.Json.mkObj [
-    ("schema", Lean.toJson ("pscv0-selected-standard-surface/1" : String)),
+    ("schema", Lean.toJson ("pscv0-selected-standard-surface/2" : String)),
     ("leanVersion", Lean.toJson leanVersion),
     ("leanCommit", Lean.toJson leanCommit),
     ("selectedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint env)),
     ("selectedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint env)),
     ("selectedSurfaceSHA256", Lean.toJson (standardSurfaceManifestSHA256 env)),
-    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v2" : String)),
+    ("surfacePayloadFormat", Lean.toJson ("PSCV0-SELECTED-SOURCE-SURFACE-v3" : String)),
     ("projectImportGraph", Lean.toJson ("validated-per-project-not-global" : String)),
     ("declarations", Lean.toJson env.declarations.length),
     ("classes", Lean.toJson (env.classes.map psNameToString)),
@@ -264,6 +347,15 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
       ((env.instances.entries.zipIdx.map fun (entry, rank) =>
         manifestInstanceJson entry rank).toArray)),
     ("registeredAxioms", Lean.toJson knownAxioms),
+    ("approvedLogicalAssumptions", Lean.toJson selectedFoundationAssumptions),
+    ("profilePolicies", Lean.toJson selectedProfilePolicies),
+    ("authoringOrigin", Lean.toJson ("Lean.Init@" ++ leanCommit)),
+    ("proofPrerequisites", Lean.Json.arr (selectedProofPrerequisites.map fun name =>
+      Lean.Json.mkObj [("name", Lean.toJson name),
+        ("available", Lean.toJson (psEnvironmentContains env (psDecisionName name)))]).toArray),
+    ("derivingOwner", Lean.toJson ("Ps.Elab.Deriving" : String)),
+    ("tacticOwner", Lean.toJson ("Ps.Syntax.Pscv0.ProofRead/Ps.Elab.Proof" : String)),
+    ("effectOwner", Lean.toJson ("Ps.Elab.Do" : String)),
     ("selectedNotation", Lean.Json.arr (selectedNotations.map notationJson).toArray),
     ("selectedDeriving", Lean.toJson selectedDeriving),
     ("selectedTactics", Lean.toJson selectedTactics),
@@ -271,5 +363,72 @@ def standardSurfaceManifestJson (env : PsEnvironment) : Lean.Json :=
     ("boundedElaborationEffects", Lean.toJson selectedElabEffects),
     ("moduleBehaviors", Lean.toJson selectedModuleBehaviors),
     ("notYetQualified", Lean.toJson unqualifiedM2AFeatures)]
+
+-- Canonical receipts use the actual interface retained by the portable module
+-- builder, not a second parse/elaboration or a guessed list of public names.
+private def moduleInterfacePayload (view : PsPscv0ModuleInterface) : String :=
+  psStandardSnapshotNode "moduleInterface" [
+    psStandardSnapshotList psStandardSnapshotDeclaration view.declarations,
+    psStandardSnapshotList psStandardSnapshotName view.classes,
+    psStandardSnapshotList psStandardSnapshotClassParameters view.classParameters,
+    psStandardSnapshotList psStandardSnapshotInstance view.instances,
+    psStandardSnapshotList psStandardSnapshotInstance view.defaults,
+    psStandardSnapshotList (fun (name, status) =>
+      psStandardSnapshotNode "reducibility" [psStandardSnapshotName name,
+        psReducibilityName status]) view.reducibility]
+
+private def projectModulePayload (item : PsPscv0ModuleProfile) : String :=
+  psStandardSnapshotNode "module" [
+    item.name, item.sourceName, psStandardSnapshotSHA256 item.source,
+    psStandardSnapshotList (fun (name, isPublic) =>
+      psStandardSnapshotNode "import" [name, psStandardSnapshotBool isPublic]) item.imports,
+    psStandardSnapshotList psStandardSnapshotName item.ownNames,
+    psStandardSnapshotList psStandardSnapshotName item.privateNames,
+    psStandardSnapshotList psStandardSnapshotName item.exposedNames,
+    moduleInterfacePayload item.interface]
+
+private def projectModuleJson (item : PsPscv0ModuleProfile) : Lean.Json :=
+  let api := item.interface.declarations.map fun declaration =>
+    Lean.Json.mkObj [
+      ("name", Lean.toJson (psNameToString (psDeclarationName declaration))),
+      ("signatureSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256
+        (psStandardSnapshotNode "signature" [
+          psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams declaration),
+          psStandardSnapshotExpr (psDeclarationType declaration)]))),
+      ("bodyExposed", Lean.toJson (match declaration with
+        | .definitionDecl .. => true | _ => false))]
+  Lean.Json.mkObj [
+    ("module", Lean.toJson item.name), ("sourcePath", Lean.toJson item.sourceName),
+    ("sourceSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256 item.source)),
+    ("imports", Lean.Json.arr (item.imports.map fun (name, isPublic) =>
+      Lean.Json.mkObj [("module", Lean.toJson name), ("public", Lean.toJson isPublic)]).toArray),
+    ("ownDeclarations", Lean.toJson (item.ownNames.map psNameToString)),
+    ("privateDeclarations", Lean.toJson (item.privateNames.map psNameToString)),
+    ("exposedOwnBodies", Lean.toJson (item.exposedNames.map psNameToString)),
+    ("publicAPI", Lean.Json.arr api.toArray),
+    ("classes", Lean.toJson (item.interface.classes.map psNameToString)),
+    ("instances", Lean.Json.arr (item.interface.instances.zipIdx.map fun (entry, rank) =>
+      manifestInstanceJson entry rank).toArray),
+    ("defaults", Lean.Json.arr (item.interface.defaults.zipIdx.map fun (entry, rank) =>
+      manifestInstanceJson entry rank).toArray),
+    ("interfaceSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256
+      (moduleInterfacePayload item.interface)))]
+
+-- Only the successful native compilation path publishes this receipt. It
+-- describes kernel-checked interfaces, not verification of foreign runtimes.
+def compiledProjectManifestJson (result : Result) : Lean.Json :=
+  let surface := standardSurfaceManifestSHA256 psSelfHostProdPreludeEnvironment
+  let payload := psStandardSnapshotNode "PSCV0-CHECKED-PROJECT-PROFILE-v1" [
+    leanCommit, surface,
+    (result.targetWordSize.map (fun width => toString (psIrWordSizeBits width))).getD "unspecified",
+    psStandardSnapshotList projectModulePayload result.moduleProfiles]
+  Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-checked-project-profile/1" : String)),
+    ("status", Lean.toJson ("kernel-checked-interfaces; runtime qualification is separate" : String)),
+    ("leanCommit", Lean.toJson leanCommit),
+    ("selectedSurfaceSHA256", Lean.toJson surface),
+    ("profileSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256 payload)),
+    ("targetWordSize", Lean.toJson (result.targetWordSize.map psIrWordSizeBits)),
+    ("modules", Lean.Json.arr (result.moduleProfiles.map projectModuleJson).toArray)]
 
 end PsV7Native

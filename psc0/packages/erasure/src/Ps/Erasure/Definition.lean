@@ -199,18 +199,11 @@ def psEraseOpenDefinitionWithFuel
                               (List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev)
                               current.runtimeParameters);
                     let nextScope : PsErasureScope :=
-                      PsErasureScope.mk
-                        pushed.context
-                        scope.runtimeLocals
-                        (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals)
-                        (List.cons pushed.id scope.erasedLocals)
-                        scope.declarationNames
-                        scope.runtimeConstructors
-                        scope.runtimeRecursors
-                        scope.runtimeStructures
-                        scope.runtimeStructureConstructors
-                        scope.runtimeExpressions
-                        nextCurrentDefinition;
+                      { scope with
+                        localContext := pushed.context
+                        typeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals)
+                        erasedLocals := (List.cons pushed.id scope.erasedLocals)
+                        currentDefinition := nextCurrentDefinition };
                     smaller
                       nextScope
                       nextType
@@ -251,18 +244,10 @@ def psEraseOpenDefinitionWithFuel
                                   current.typeArgumentsRev
                                   (psErasureAppendRuntimeParameter current.runtimeParameters parameterName));
                         let nextScope : PsErasureScope :=
-                          PsErasureScope.mk
-                            pushed.context
-                            (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals)
-                            scope.typeLocals
-                            scope.erasedLocals
-                            scope.declarationNames
-                            scope.runtimeConstructors
-                            scope.runtimeRecursors
-                            scope.runtimeStructures
-                            scope.runtimeStructureConstructors
-                            scope.runtimeExpressions
-                            nextCurrentDefinition;
+                          { scope with
+                            localContext := pushed.context
+                            runtimeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals)
+                            currentDefinition := nextCurrentDefinition };
                         smaller
                           nextScope
                           nextType
@@ -345,10 +330,7 @@ def psErasureEnsureDefinitionEntry
       | Except.ok entries =>
           let names := { scope.declarationNames with entries := entries };
           Except.ok
-            (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
-              scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
-              scope.runtimeStructures scope.runtimeStructureConstructors
-              scope.runtimeExpressions scope.currentDefinition)
+            ({ scope with declarationNames := names })
 
 def psEraseDefinition
     (environment : PsEnvironment)
@@ -374,19 +356,8 @@ def psEraseDefinition
     | Except.error error => Except.error error
     | Except.ok entryScope =>
         let definitionScope : PsErasureScope :=
-          PsErasureScope.mk
-            entryScope.localContext
-            entryScope.runtimeLocals
-            entryScope.typeLocals
-            entryScope.erasedLocals
-            entryScope.declarationNames
-            entryScope.runtimeConstructors
-            entryScope.runtimeRecursors
-            entryScope.runtimeStructures
-            entryScope.runtimeStructureConstructors
-            entryScope.runtimeExpressions
-            (Option.some
-              (PsErasureCurrentDefinition.mk outputName List.nil List.nil));
+          { entryScope with currentDefinition := (Option.some
+              (PsErasureCurrentDefinition.mk outputName List.nil List.nil)) };
         match psLowerStructureRecursors environment value with
         | Except.error error => Except.error error
         | Except.ok normalizedValue =>
@@ -517,12 +488,13 @@ def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration)
-    (internalRuntimeNames : List PsName := []) :
+    (internalRuntimeNames : List PsName := [])
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsErasureError PsVerifiedIrModule :=
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
-  let baseScopeResult := PsFloatRuntime.reserve (psErasureScopeEmpty names)
+  let baseScopeResult := PsFloatRuntime.reserve { (psErasureScopeEmpty names) with targetWordSize }
   match baseScopeResult with
   | Except.error error => Except.error error
   | Except.ok baseScope =>

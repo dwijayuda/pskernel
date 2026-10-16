@@ -293,7 +293,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- F4 six display dictionaries and preserved native opaque contracts.
 -- Both strict entry points independently measured these at native38789249978.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:16506634277351925976"
+  "fnv1a64:10704736494700616048"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -457,8 +457,10 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- F2 exact logical operation/decision closure plus scalar dictionaries:
 -- independently measured by strict refusal in native CI38730889997.
 -- Candidate replay CI38729006492 confirms the byte-exact checked asset.
+-- Platform-word roster: strict publication and host boundaries independently
+-- agreed in native run 38798802729; checked 196-entry asset replay also passed.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:bd9a79a2f258c46e383565a94662a188db0cd92ba0359750858ce7fec1251426"
+  "sha256:a7a45451faa0d1724642590262bda91d12ff49b6f711abd2f6255f883a5a8b1f"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
@@ -475,6 +477,9 @@ def psStandardSnapshotValidate (environment : PsEnvironment)
   psStandardExceptAudit environment
   psStandardOperatorDefaultsAudit environment
   psStandardFloatDisplayAudit environment
+  psStandardPlatformAudit environment
+  psStandardLogicAudit environment
+  psStandardOperatorProtocolAudit environment
   psStandardScientificAudit environment
   let payload := psStandardSnapshotPayload environment
   let observedFNV := "fnv1a64:" ++ toString (psStandardSnapshotFNV64 payload)

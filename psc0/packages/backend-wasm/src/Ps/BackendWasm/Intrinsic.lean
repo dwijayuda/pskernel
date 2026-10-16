@@ -1,5 +1,6 @@
 import Ps.BackendWasm.LowerFloat
 import Ps.BackendWasm.Array
+import Ps.BackendWasm.Utf8
 import Ps.BackendWasm.Word
 import Ps.BackendWasm.Float
 import Ps.BackendWasm.Hash
@@ -29,6 +30,8 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
         (match op with | .isNaN => "_is_nan" | .isInf => "_is_inf" | .isFinite => "_is_finite"))
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
     | .hashMix => pure "hash_mix" | .stringHash => pure "string_hash"
+    | .natShiftLeft => pure "nat_shift_left" | .natShiftRight => pure "nat_shift_right"
+    | .intPow => pure "int_pow"
     | .natPow => pure "nat_pow"
     | .natLog2 => pure "nat_log2"
     | .natDiv => pure "nat_div" | .natMod => pure "nat_mod"
@@ -43,11 +46,14 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .stringUtf8ByteSize => pure "string_byte_size" | .stringNext => pure "string_next"
     | .stringGet => pure "string_get" | .stringAtEnd => pure "string_at_end"
     | .stringExtract => pure "string_extract" | .stringEq => pure "string_eq"
+    | .stringToUtf8 => pure "string_to_utf8"
+    | .utf8Valid => pure "utf8_valid"
+    | .utf8Decode => pure "utf8_decode"
     | .arrayBuild => pure "array_build"
     | .arrayEmptyWithCapacity => pure "array_empty" | .arraySize => pure "array_size"
     | .arrayPush => pure "array_push" | .arrayGet => pure "array_get" | .arrayGetD => pure "array_get_default"
     | .arraySet => pure "array_set" | .arraySetIfInBounds => pure "array_set_if_in_bounds"
-    | .arrayMap => pure "array_map" | .arrayFoldl => pure "array_fold"
+    | .arrayMap => pure "array_map" | .arrayFilter => pure "array_filter" | .arrayFoldl => pure "array_fold"
     | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe
     | .unsignedOfNat _ | .signedOfNat _ | .signedToUnsigned _ | .unsignedToNat _
     | .machineIntBinary .. | .machineIntCompare ..
@@ -92,6 +98,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   return { parameters := signature.parameters, result := signature.resultType, instructions }
 
 def runtimeDefinitions : Except String (List RuntimeDefinition) := do
-  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime) ++ (← floatWordRuntime)
+  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← utf8Runtime) ++ (← hashRuntime) ++ (← wordRuntime) ++ (← floatRuntime) ++ (← floatWordRuntime)
 
 end PsWasm

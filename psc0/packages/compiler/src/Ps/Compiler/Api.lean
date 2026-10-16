@@ -291,42 +291,48 @@ def psCompilerEnvironmentFromPrepared
           Except.ok environment
 
 def psCompilerVerifiedIrFromPrepared
-    (prepared : PsCompilerAdmissionReadyModule) :
+    (prepared : PsCompilerAdmissionReadyModule)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule :=
   match psCompilerEnvironmentFromPrepared prepared with
   | Except.error error =>
       Except.error error
   | Except.ok environment =>
+      let runtimePrelude := psSelfHostRuntimePreludeDeclarationsWithProd ++
+        (if targetWordSize.isSome then psStandardPlatformRuntimeDeclarations ++
+          psStandardOperatorProtocolRuntimeDeclarations environment true else []);
       match
           psEraseCoreModuleWithRuntimePrelude
             environment
-            psSelfHostRuntimePreludeDeclarationsWithProd
+            runtimePrelude
             prepared.declarations
             -- One authoritative runtime prelude also owns its non-exportable
             -- symbol set. A new Standard class, method or instance must never
             -- silently become a public user entry merely because a second
             -- hand-maintained name list was not updated.
-            (psSelfHostRuntimePreludeDeclarationsWithProd.map psDeclarationName) with
+            (runtimePrelude.map psDeclarationName) targetWordSize with
       | Except.error error =>
           Except.error (PsCompilerError.erasure error)
       | Except.ok ir =>
           Except.ok ir
 
 def psCompilerVerifiedIrFromElaborated
-    (elaborated : PsElabModuleResult) :
+    (elaborated : PsElabModuleResult)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule :=
   match psCompilerPrepareElaborated elaborated with
   | Except.error error =>
       Except.error error
   | Except.ok prepared =>
-      psCompilerVerifiedIrFromPrepared prepared
+      psCompilerVerifiedIrFromPrepared prepared targetWordSize
 
 def psCompilerVerifiedIrSource
     (sourceKind : PsCompilerSourceKind)
-    (source : String) :
+    (source : String)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule :=
   match psCompilerPrepareSource sourceKind source with
   | Except.error error =>
       Except.error error
   | Except.ok prepared =>
-      psCompilerVerifiedIrFromPrepared prepared
+      psCompilerVerifiedIrFromPrepared prepared targetWordSize

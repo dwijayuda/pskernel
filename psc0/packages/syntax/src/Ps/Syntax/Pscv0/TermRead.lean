@@ -200,7 +200,7 @@ def psPscv0ParseTermAtPrecedence
             let sign ← psTokenCursorExpectText cursor "-"
             let argument ← psPscv0ParseTermAtPrecedence annotation 75 remaining sign.cursor
             pure {
-              value := psPscv0NotationCall "Neg.neg" [argument.value]
+              value := psPscv0OperatorTerm .unary "Neg.neg" "-" [argument.value]
                 (psSyntaxSpanJoin sign.token.span (psSyntaxTermSpan argument.value))
               cursor := argument.cursor }
           else if psTokenCursorAtText cursor "by" then

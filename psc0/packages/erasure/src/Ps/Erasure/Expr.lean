@@ -1,7 +1,8 @@
 import Ps.Erasure.Recursion
 import Ps.Erasure.Array
 import Ps.Erasure.Float
-import Ps.Erasure.Unsigned
+import Ps.Erasure.Platform
+import Ps.Erasure.Utf8
 import Ps.CompilerIr.CheckTypes
 import Ps.Meta.TypeView
 
@@ -105,12 +106,7 @@ def psErasureCaptureTypedApplicationValue
           (PsName.str PsName.anonymous localName) true
         count := state.scope.declarationNames.count + 1 };
     let nextScope :=
-      PsErasureScope.mk
-        state.scope.localContext state.scope.runtimeLocals state.scope.typeLocals
-        state.scope.erasedLocals reservedNames state.scope.runtimeConstructors
-        state.scope.runtimeRecursors state.scope.runtimeStructures
-        state.scope.runtimeStructureConstructors state.scope.runtimeExpressions
-        state.scope.currentDefinition;
+      { state.scope with declarationNames := reservedNames };
     Except.ok
       (PsErasureApplicationCaptureState.mk nextScope
         (List.cons (PsVerifiedIrExpr.var localName) state.valuesRev)
@@ -386,7 +382,7 @@ def psEraseFinishEntryWithFuel
                       if psErasureLocalNameUsed scope parameterName then
                         Except.error PsErasureError.fuelExhausted
                       else
-                        let nextScope : PsErasureScope := {
+                        let nextScope : PsErasureScope := { scope with
                           localContext := pushed.context
                           runtimeLocals :=
                             List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals
@@ -644,6 +640,14 @@ def psErasePrimitiveApplication
       | .error error => .error error
       | .ok (some value) => .ok (some value)
       | .ok none =>
+      match PsUtf8Runtime.erase scope erase view with
+      | .error error => .error error
+      | .ok (some value) => .ok (some value)
+      | .ok none =>
+      match PsPlatformRuntime.erase scope erase view with
+      | .error error => .error error
+      | .ok (some value) => .ok (some value)
+      | .ok none =>
       match psEraseUnsignedApplication scope erase view with
       | .error error => .error error
       | .ok (some value) => .ok (some value)
@@ -726,6 +730,12 @@ def psErasePrimitiveApplication
         binary PsVerifiedIrIntrinsic.natSub
       else if psStringEq text "Nat.mul" then
         binary PsVerifiedIrIntrinsic.natMul
+      else if psStringEq text "Nat.shiftLeft" then
+        binary PsVerifiedIrIntrinsic.natShiftLeft
+      else if psStringEq text "Nat.shiftRight" then
+        binary PsVerifiedIrIntrinsic.natShiftRight
+      else if psStringEq text "Int.pow" then
+        binary PsVerifiedIrIntrinsic.intPow
       else if psStringEq text "Nat.pow" then
         binary PsVerifiedIrIntrinsic.natPow
       else if psStringEq text "Nat.div" then
@@ -919,6 +929,11 @@ def psErasePrimitiveApplication
               environment scope erase
               PsVerifiedIrIntrinsic.arrayMap
               view.args [0, 1] [2, 3] with
+        | Except.error error => Except.error error
+        | Except.ok result => Except.ok (Option.some result)
+      else if psErasureBoolAnd (psStringEq text "Array.filter") (Nat.beq (psListLength view.args) 5) then
+        match psEraseTypedIntrinsic environment scope erase
+            PsVerifiedIrIntrinsic.arrayFilter view.args [0] [1, 2, 3, 4] with
         | Except.error error => Except.error error
         | Except.ok result => Except.ok (Option.some result)
       else if psErasureBoolAnd (psStringEq text "Array.foldl") (Nat.beq (psListLength view.args) 7) then
@@ -1209,7 +1224,7 @@ def psOpenMatchMinorHypotheses
                     name
                     domain
                     binder;
-                let baseScope : PsErasureScope := {
+                let baseScope : PsErasureScope := { state.scope with
                   localContext := pushed.context
                   runtimeLocals := state.scope.runtimeLocals
                   typeLocals := state.scope.typeLocals
@@ -1235,10 +1250,7 @@ def psOpenMatchMinorHypotheses
                       match value with
                       | Option.none => baseScope.runtimeExpressions
                       | Option.some expression => List.cons (Prod.mk pushed.id expression) baseScope.runtimeExpressions;
-                    let nextScope := PsErasureScope.mk baseScope.localContext baseScope.runtimeLocals
-                      baseScope.typeLocals baseScope.erasedLocals baseScope.declarationNames
-                      baseScope.runtimeConstructors baseScope.runtimeRecursors baseScope.runtimeStructures
-                      baseScope.runtimeStructureConstructors expressions baseScope.currentDefinition;
+                    let nextScope := { baseScope with runtimeExpressions := expressions };
                     smaller (PsOpenMatchHypotheses.mk nextScope (psExprInstantiate1 body (PsExpr.fvar pushed.id)))
         | _ => Except.error PsErasureError.binderMismatch
 
@@ -1623,12 +1635,7 @@ def psEraseRuntimeRecursorApplication
                                       byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
                                         (PsName.str PsName.anonymous localName) true
                                       count := scope.declarationNames.count + 1 };
-                                  PsErasureScope.mk
-                                    scope.localContext scope.runtimeLocals scope.typeLocals
-                                    scope.erasedLocals reservedNames scope.runtimeConstructors
-                                    scope.runtimeRecursors scope.runtimeStructures
-                                    scope.runtimeStructureConstructors scope.runtimeExpressions
-                                    scope.currentDefinition;
+                                  { scope with declarationNames := reservedNames };
                             match
                                 psEraseMatchAlternatives
                                   environment
@@ -1835,6 +1842,10 @@ def psErasureSpecialEntry
   let named : String -> Bool := fun (candidate : String) => psStringEq text candidate;
   if let some arity := psErasureFloatEntryArity name then
     some (PsErasureSpecialEntry.mk arity true)
+  else if let some arity := PsUtf8Runtime.arity name then
+    some (PsErasureSpecialEntry.mk arity true)
+  else if let some arity := PsPlatformRuntime.arity name then
+    some (PsErasureSpecialEntry.mk arity true)
   else if let some arity := psErasureUnsignedEntryArity name then
     some (PsErasureSpecialEntry.mk arity true)
   else if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
@@ -1847,7 +1858,7 @@ def psErasureSpecialEntry
     Option.some (PsErasureSpecialEntry.mk 1 true)
   else if psListAny named
       ["mixHash", "Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
-        "Nat.pow", "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
+        "Nat.shiftLeft", "Nat.shiftRight", "Int.pow", "Nat.pow", "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
         "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
         "String.Internal.get", "String.Internal.atEnd", "Array.emptyWithCapacity",
         "Array.size", "Array.mk", "Array.toList"] then
@@ -1858,14 +1869,14 @@ def psErasureSpecialEntry
   else if psListAny named
       ["Array.getInternal", "Array.getD", "Array.setIfInBounds", "Array.map"] then
     Option.some (PsErasureSpecialEntry.mk 4 true)
-  else if named "Array.set" then
+  else if named "Array.set" || named "Array.filter" then
     Option.some (PsErasureSpecialEntry.mk 5 true)
   else if named "Array.foldl" then
     Option.some (PsErasureSpecialEntry.mk 7 true)
   else if named "Decidable.intro" then
     Option.some (PsErasureSpecialEntry.mk 3 true)
   else if psListAny named ["Decidable.isTrue", "Decidable.isFalse", "Decidable.decide",
-      "Bool.decEq", "Nat.decEq", "String.decEq"] then
+      "Bool.decEq", "Bool.beq", "Nat.decEq", "String.decEq", "Int.decEq", "Int.decLt", "Int.decLe"] then
     Option.some (PsErasureSpecialEntry.mk 2 true)
   else if psNameEq name psIteName || named "dite" then
     Option.some (PsErasureSpecialEntry.mk 5 false)
@@ -1951,15 +1962,10 @@ def psEraseCompleteSpecialWithFuel
                               | List.cons capturedValue _ =>
                                   let pushed :=
                                     psLocalPushLet captured.scope.localContext name domain argument;
-                                  let nextScope := PsErasureScope.mk
-                                    pushed.context captured.scope.runtimeLocals
-                                    captured.scope.typeLocals captured.scope.erasedLocals
-                                    captured.scope.declarationNames captured.scope.runtimeConstructors
-                                    captured.scope.runtimeRecursors captured.scope.runtimeStructures
-                                    captured.scope.runtimeStructureConstructors
-                                    (List.cons (Prod.mk pushed.id capturedValue)
-                                      captured.scope.runtimeExpressions)
-                                    captured.scope.currentDefinition;
+                                  let nextScope := { captured.scope with
+                                    localContext := pushed.context
+                                    runtimeExpressions := (List.cons (Prod.mk pushed.id capturedValue)
+                                      captured.scope.runtimeExpressions) };
                                   let openedArgument := PsExpr.fvar pushed.id;
                                   psEraseCompleteSpecialWithFuel eraseAt environment
                                     remaining restCount rest
@@ -2000,14 +2006,9 @@ def psEraseCompleteSpecialWithFuel
                           if psErasureLocalNameUsed state.scope parameterName then
                             Except.error PsErasureError.fuelExhausted
                           else
-                            let nextScope := PsErasureScope.mk
-                              pushed.context
-                              (List.cons (Prod.mk pushed.id parameterName) state.scope.runtimeLocals)
-                              state.scope.typeLocals state.scope.erasedLocals
-                              state.scope.declarationNames state.scope.runtimeConstructors
-                              state.scope.runtimeRecursors state.scope.runtimeStructures
-                              state.scope.runtimeStructureConstructors state.scope.runtimeExpressions
-                              state.scope.currentDefinition;
+                            let nextScope := { state.scope with
+                              localContext := pushed.context
+                              runtimeLocals := (List.cons (Prod.mk pushed.id parameterName) state.scope.runtimeLocals) };
                             let openedArgument := PsExpr.fvar pushed.id;
                             psEraseCompleteSpecialWithFuel eraseAt environment
                               remaining restCount List.nil
@@ -2065,7 +2066,7 @@ def psEraseProofMinorFields
     let scope := { scope with localContext := pushed.context, erasedLocals := pushed.id :: scope.erasedLocals }
     psEraseProofMinorFields eraseAt environment count scope application applied
 
--- Decidable has a single Boolean payload in RC4. The reflection proof never
+-- Decidable has a single Boolean payload in Lean 4.35.0. The reflection proof never
 -- becomes runtime data. Conditions use the actual dictionary, not its Prop syntax.
 def psEraseDecisionApplication
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
@@ -2083,10 +2084,14 @@ def psEraseDecisionApplication
     return some (.intrinsic .natEq [] [← erase left, ← erase right])
   | "String.decEq", [left, right] =>
     return some (.intrinsic .stringEq [] [← erase left, ← erase right])
-  | "Bool.decEq", [left, right] =>
-    let left ← erase left
-    let right ← erase right
-    return some (.ifE left right (.intrinsic .boolNot [] [right]))
+  | "Bool.decEq", [left, right] | "Bool.beq", [left, right] =>
+    return some (.intrinsic .boolEq [] [← erase left, ← erase right])
+  | "Int.decEq", [left, right] =>
+    return some (.intrinsic .intEq [] [← erase left, ← erase right])
+  | "Int.decLt", [left, right] =>
+    return some (.intrinsic .intLt [] [← erase left, ← erase right])
+  | "Int.decLe", [left, right] =>
+    return some (.intrinsic .intLe [] [← erase left, ← erase right])
   | "ite", [_, _, decision, yes, no] =>
     return some (.ifE (← erase decision) (← erase yes) (← erase no))
   | "dite", [_, _, decision, yes, no] =>
@@ -2257,10 +2262,7 @@ def psEraseGeneralApplication
 -- may establish its recursion equation. Child computations retain established
 -- IH replacements but cannot manufacture another equation for that declaration.
 def psErasureNestedRuntimeScope (scope : PsErasureScope) : PsErasureScope :=
-  PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
-    scope.erasedLocals scope.declarationNames scope.runtimeConstructors
-    scope.runtimeRecursors scope.runtimeStructures scope.runtimeStructureConstructors
-    scope.runtimeExpressions Option.none
+  { scope with currentDefinition := Option.none }
 
 def psEraseRuntimeExprWithFuelWorker
     (environment : PsEnvironment) (fuel : Nat) :
@@ -2405,7 +2407,7 @@ def psEraseRuntimeExprWithFuelWorker
                 match psEraseRuntimeType environment scope type with
                 | Except.error error => Except.error error
                 | Except.ok parameterType =>
-                    let nextScope : PsErasureScope := {
+                    let nextScope : PsErasureScope := { scope with
                       localContext := pushed.context
                       runtimeLocals :=
                         List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals
@@ -2446,7 +2448,7 @@ def psEraseRuntimeExprWithFuelWorker
                 smaller nextScope openedBody
             | .type =>
                 let typeName := String.Internal.append "T" (psNatToString pushed.id);
-                let nextScope : PsErasureScope := {
+                let nextScope : PsErasureScope := { scope with
                   localContext := pushed.context
                   runtimeLocals := scope.runtimeLocals
                   typeLocals :=
@@ -2495,7 +2497,7 @@ def psEraseRuntimeExprWithFuelWorker
                           psErasureLocalName scope
                             (psNameToString name)
                             "local" pushed.id;
-                        let nextScope : PsErasureScope := {
+                        let nextScope : PsErasureScope := { scope with
                           localContext := pushed.context
                           runtimeLocals :=
                             List.cons (Prod.mk pushed.id localName) scope.runtimeLocals
@@ -2544,7 +2546,11 @@ def psEraseRuntimeExprWithFuelWorker
               psEraseFloatProjection scope width (← smaller scope target)
             else if let some width := psErasureUnsignedWidth typeName then do
               if index != 0 then throw .unsupportedRuntimeTerm
-              psEraseUnsignedProjection scope width (← smaller scope target)
+              psEraseUnsignedProjection scope (← psErasureResolveWord scope width) (← smaller scope target)
+            else if let some width := psErasureSignedWidth typeName then do
+              if index != 0 then throw .unsupportedRuntimeTerm
+              return .intrinsic (.signedToUnsigned (← psErasureResolveWord scope width)) []
+                [← smaller scope target]
             else if psNameEq typeName psArrayName then do
               if index != 0 then throw .unsupportedRuntimeTerm
               let sourceType ← psErasureCheckedTypeView environment scope.localContext target

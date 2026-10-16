@@ -3,6 +3,7 @@ import Ps.Meta.Inductive
 
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
+  sourceInfo : List PsElabSourceInfo := []
 
 def psSyntaxConstructorCoreName (inductiveName : PsName)
     (sourceName : PsSyntaxName) : Option PsName :=
@@ -135,7 +136,7 @@ def psElabDataRecursiveFields (context : PsElabContext) (info : PsInductiveInfo)
 def psElabDataConstructor (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
     (index : Nat) (source : PsSyntaxInductiveConstructor) :
-    Except PsElabError PsDeclaration := do
+    Except PsElabError (PsDeclaration × PsElabSourceInfo) := do
   let some name := psSyntaxConstructorCoreName info.name source.name | throw .emptyName
   let fields ← psElabTypedBinders psElabTerm context source.fields
   let parameters := psElabBinderArguments parameterBindersRev
@@ -155,9 +156,10 @@ def psElabDataConstructor (context : PsElabContext)
   let type := psCloseElabImplicitBinders result.context.metaContext parameterBindersRev
     (psCloseElabForallBinders result.context.metaContext fields.bindersRev result.type)
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
-  return .constructorDecl {
+  let declaration := PsDeclaration.constructorDecl {
     name, levelParams := info.levelParams, type, inductiveName := info.name, constructorIndex := index
     numParams := info.numParams, numFields := fields.bindersRev.length, recursiveFields }
+  return (declaration, psElabFinishSourceInfo result.context name)
 
 -- Motives always receive all indices followed by the major. The same operation
 -- constructs constructor conclusions and recursive hypotheses.
@@ -245,7 +247,7 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
       let mut level := PsLevel.succ .zero
       if isStructure then
         for constructor in constructors do
-          let fields ← psElabTypedBinders psElabTerm context constructor.fields
+          let fields ← psElabTypedBinders psElabTerm { context with collectInfo := false } constructor.fields
           for field in fields.bindersRev do
             let fieldLevel ← psElabExpressionSort fields.context field.type
             level := psLevelMax level fieldLevel
@@ -270,16 +272,20 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
     numIndices := indices.bindersRev.length, constructors := names, isStructure }
   let declaration := PsDeclaration.inductiveDecl info
   let withInductive ← psAddDeclarationList environment [declaration]
-  let constructorContext := { result.context with environment := withInductive }
-  let (_, declarationsRev) ← constructors.foldlM
-    (fun (state : Nat × List PsDeclaration) source => do
-      let declaration ← psElabDataConstructor constructorContext parameters.bindersRev info state.fst source
-      return (state.fst + 1, declaration :: state.snd)) (0, [])
+  let constructorContext := { result.context with environment := withInductive, infoRev := [] }
+  let (_, declarationsRev, sourceInfoRev) ← constructors.foldlM
+    (fun (state : Nat × List PsDeclaration × List PsElabSourceInfo) source => do
+      let (index, declarations, sourceInfo) := state
+      let (declaration, receipt) ←
+        psElabDataConstructor constructorContext parameters.bindersRev info index source
+      return (index + 1, declaration :: declarations, receipt :: sourceInfo)) (0, [], [])
   let declarations := declarationsRev.reverse
   let withConstructors ← psAddDeclarationList withInductive declarations
   let recursor ← psBuildInductiveRecursor
     { result.context with environment := withConstructors } parameters.bindersRev info declarations
-  return { declarations := declaration :: (declarations ++ [recursor]) }
+  return {
+    declarations := declaration :: (declarations ++ [recursor])
+    sourceInfo := psElabFinishSourceInfo result.context name :: sourceInfoRev.reverse }
 
 def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxName)
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)

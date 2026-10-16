@@ -47,7 +47,7 @@ def psElabAddStructureProjections (environment : PsEnvironment) (isClass : Bool)
   let proofFamily ← (psInductiveIsProp environment info).mapError PsElabError.infer
   let projections ← psElabStructureProjections constructor.numFields context proofFamily info bindersRev
     (.fvar major.id) 0 cursor
-  return { declarations := batch.declarations ++ projections }
+  return { batch with declarations := batch.declarations ++ projections }
 
 structure PsClassParameterState where
   inputs : PsLocalContext := psLocalEmpty

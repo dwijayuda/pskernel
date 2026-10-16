@@ -583,6 +583,8 @@ def psIrCheckIntrinsicSignature
   | .natSub => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMul => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natLog2 => psIrCheckSignatureNoTypes typeArguments [nat] nat
+  | .natShiftLeft | .natShiftRight => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
+  | .intPow => psIrCheckSignatureNoTypes typeArguments [int, nat] int
   | .natPow => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natDiv => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMod => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
@@ -617,6 +619,12 @@ def psIrCheckIntrinsicSignature
   | .stringGet => psIrCheckSignatureNoTypes typeArguments [string, nat] char
   | .stringAtEnd => psIrCheckSignatureNoTypes typeArguments [string, nat] bool
   | .stringExtract => psIrCheckSignatureNoTypes typeArguments [string, nat, nat] string
+  | .stringToUtf8 => psIrCheckSignatureNoTypes typeArguments [string]
+      (psIrCheckArrayType (.primitive .uint8))
+  | .utf8Valid => psIrCheckSignatureNoTypes typeArguments
+      [psIrCheckArrayType (.primitive .uint8)] bool
+  | .utf8Decode => psIrCheckSignatureNoTypes typeArguments
+      [psIrCheckArrayType (.primitive .uint8)] string
   | .stringEq => psIrCheckSignatureNoTypes typeArguments [string, string] bool
   | .arrayBuild =>
       psIrCheckSignatureTwoTypes typeArguments (fun element state =>
@@ -668,6 +676,11 @@ def psIrCheckIntrinsicSignature
             [PsVerifiedIrType.function [element] result, psIrCheckArrayType element]
             (psIrCheckArrayType result);
       psIrCheckSignatureTwoTypes typeArguments build
+  | .arrayFilter =>
+      psIrCheckSignatureOneType typeArguments fun element =>
+        PsIrCheckSignature.mk
+          [PsVerifiedIrType.function [element] bool, psIrCheckArrayType element, nat, nat]
+          (psIrCheckArrayType element)
   | .arrayFoldl =>
       let build : PsVerifiedIrType -> PsVerifiedIrType -> PsIrCheckSignature :=
         fun (element : PsVerifiedIrType) (accumulator : PsVerifiedIrType) =>

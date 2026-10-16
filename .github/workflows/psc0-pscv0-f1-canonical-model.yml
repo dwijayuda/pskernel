@@ -3,7 +3,7 @@ name: PSCV0 F1 canonical-model replay
 on:
   workflow_dispatch:
   push:
-    branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research]
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research, psc0/pscv0-v7-platform-words-research]
     paths:
       # The independently checked F1 proof model depends on the selected
       # Standard and checker, not just its host-only proof source. A Standard

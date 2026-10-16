@@ -55,16 +55,19 @@ def primitiveAudit : IO Lean.Json := do
     let assumption := match declaration with | .axiomDecl .. => true | _ => false
     let reviewed := modeledSignatures.any (fun entry => entry.1 == psNameToString name)
     let opaquePrimitive := ["mixHash", "String.hash", "Float.toString", "Float32.toString",
-      "Float.toFloat32", "Float32.toFloat"].contains (psNameToString name)
+      "Float.toFloat32", "Float32.toFloat", "System.Platform.getNumBits"].contains (psNameToString name)
     let logicalAssumption := ["propext", "Quot.sound"].contains (psNameToString name)
     let kernelQuotient := match declaration with | .quotientDecl .. => true | _ => false
     let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd",
       "List.foldl", "List.reverse", "List.reverseAux"].contains
       (psNameToString name)
-    let checkedArray := ["Array", "Array.map", "Array.setIfInBounds", "Array.getD",
+    let checkedArray := ["Array", "Array.map", "Array.filter", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)
-    let checkedOperator := (psStandardHomogeneousNativeNames ++ psStandardScientificNames).any (psNameEq name)
-    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedOperator then
+    let checkedUtf8 := ["String.toUTF8", "String.fromUTF8?", "ByteArray.validateUTF8"].contains
+      (psNameToString name)
+    let checkedDecision := ["Int.decEq", "Int.decLt", "Int.decLe", "Bool.beq", "Nat.shiftLeft", "Nat.shiftRight", "Int.pow"].contains (psNameToString name)
+    let checkedOperator := (psStandardOperatorProtocolNativeNames.map psDecisionName ++ psStandardHomogeneousNativeNames ++ psStandardScientificNames).any (psNameEq name)
+    if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation || checkedArray || checkedUtf8 || checkedDecision || checkedOperator then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -114,7 +117,9 @@ def primitiveAudit : IO Lean.Json := do
     ["UInt8", "UInt16", "UInt32", "UInt64", "Int8", "Int16", "Int32", "Int64"].flatMap (fun word =>
       [owner ++ ".to" ++ word, owner ++ ".Model.to" ++ word, owner ++ ".Model.of" ++ word,
        word ++ ".to" ++ owner]) ++ [owner ++ ".Model.ofScientific"]
-  let modelNames := floatConversions ++ ["Nat.toFloat", "Nat.toFloat32", "Int.toFloat", "Int.toFloat32"] ++ floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.log2", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
+  let modelNames := (psStandardPlatformWordsDeclarations.filterMap (fun d =>
+    let n := psNameToString (psDeclarationName d)
+    if n.startsWith "USize." || n.startsWith "ISize." then some n else none)) ++ floatConversions ++ ["Nat.toFloat", "Nat.toFloat32", "Int.toFloat", "Int.toFloat32"] ++ floatModels ++ unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.log2", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Int.add", "Int.neg", "Int.sub", "Int.mul", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
     "Nat.ble", "outOfBounds"]
   let mut models := []
   for name in modelNames do

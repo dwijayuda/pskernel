@@ -1,3 +1,8 @@
+import Ps.Environment.StandardPlatformWords
+import Ps.Environment.StandardArrayFilter
+import Ps.Environment.StandardLogicInstances
+import Ps.Environment.StandardOperatorProtocol
+import Ps.Environment.StandardUtf8
 import Ps.Environment.StandardFloatDisplay
 import Ps.Environment.StandardScientific
 import Ps.Environment.StandardOperatorDefaults
@@ -125,8 +130,13 @@ def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
   psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen logical boundary for explicit target-word profile authoring.
+def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
   psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardOperatorProtocolExtend <| psStandardLogicExtend <| PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
+    psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
@@ -147,7 +157,9 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
     psStandardArrayRuntimeDeclarations
 
-  psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
+  psStandardOperatorProtocolRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    psStandardLogicRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    PsStandardUtf8.runtimeDeclarations ++ psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
     psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     prior.filter (fun declaration =>
       !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration)))

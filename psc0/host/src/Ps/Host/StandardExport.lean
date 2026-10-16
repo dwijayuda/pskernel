@@ -909,4 +909,114 @@ def exportFloatDisplayCandidate (output : System.FilePath) : IO Unit := do
     provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Data/Float/Float{,32}.lean, Init/Data/Repr.lean and runtime/object.cpp.\nNative checked opaque inhabitants and display dictionaries; runtime parity is a separate gate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- ISize/ofUSize/rec are already selected by StandardSignedIdentityData and
+-- stay at the frozen boundary; do not duplicate their checked native family.
+-- Target-word dependency review. Logical width stays abstract, including the
+-- native opaque getNumBits inhabitant; selecting an executable 32/64 profile
+-- is an erasure concern and must never change this checking environment.
+def exportPlatformWordsCandidate (output : System.FilePath) : IO Unit := do
+  let selected := psSelfHostProdPrePlatformWordsPreludeEnvironment.declarations
+  exportStandardCore {
+    roots := [`System.Platform.getNumBits,
+      `System.Platform.numBits,
+      `USize,
+      `USize.ofNat,
+      `USize.ofNatLT,
+      `USize.ofNatClamp,
+      `USize.ofInt,
+      `USize.toNat,
+      `USize.toFin,
+      `USize.toBitVec,
+      `USize.ofBitVec,
+      `USize.size,
+      `USize.decEq,
+      `USize.decLt,
+      `USize.decLe,
+      `USize.lt,
+      `USize.le,
+      `USize.add,
+      `USize.sub,
+      `USize.mul,
+      `USize.div,
+      `USize.mod,
+      `USize.pow,
+      `USize.neg,
+      `USize.complement,
+      `USize.land,
+      `USize.lor,
+      `USize.xor,
+      `USize.shiftLeft,
+      `USize.shiftRight,
+      `ISize.ofNat,
+      `ISize.ofInt,
+      `ISize.toInt,
+      `ISize.toNatClampNeg,
+      `ISize.ofIntClamp,
+      `ISize.toBitVec,
+      `ISize.ofBitVec,
+      `ISize.toUSize,
+      `ISize.size,
+      `ISize.minValue,
+      `ISize.maxValue,
+      `ISize.decEq,
+      `ISize.decLt,
+      `ISize.decLe,
+      `ISize.lt,
+      `ISize.le,
+      `ISize.add,
+      `ISize.sub,
+      `ISize.mul,
+      `ISize.div,
+      `ISize.mod,
+      `ISize.pow,
+      `ISize.neg,
+      `ISize.complement,
+      `ISize.abs,
+      `ISize.land,
+      `ISize.lor,
+      `ISize.xor,
+      `ISize.shiftLeft,
+      `ISize.shiftRight,
+      `USize.instOfNat,
+      `ISize.instOfNat,
+      `USize.ofFin,
+      `Nat.toUSize,
+      `Nat.toISize,
+      `Int.toISize,
+      `UInt8.toUSize,
+      `USize.toUInt8,
+      `UInt16.toUSize,
+      `USize.toUInt16,
+      `UInt32.toUSize,
+      `USize.toUInt32,
+      `UInt64.toUSize,
+      `USize.toUInt64,
+      `Int8.toISize,
+      `ISize.toInt8,
+      `Int16.toISize,
+      `ISize.toInt16,
+      `Int32.toISize,
+      `ISize.toInt32,
+      `Int64.toISize,
+      `ISize.toInt64,
+      `Float.toUSize,
+      `USize.toFloat,
+      `Float.toISize,
+      `ISize.toFloat,
+      `Float32.toUSize,
+      `USize.toFloat32,
+      `Float32.toISize,
+      `ISize.toFloat32,
+      `USize.toISize]
+    boundary := selected.map psDeclarationName
+    baseDeclarations := selected
+    replaceInductiveAxioms := [`USize]
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psStandardPlatformWords"
+    privatePrefix := "platformWordsDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nInit/Prelude, UInt/Basic{,Aux}, SInt/Basic and SInt/Float{,32}.\nNative abstract-width Core; runtime target profiles require separate qualification.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

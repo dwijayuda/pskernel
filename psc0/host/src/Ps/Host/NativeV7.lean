@@ -13,7 +13,7 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/63"
+def profile : String := "pscv0-v7-native-bounded/73"
 
 def leanVersion : String := "4.35.0"
 def leanCommit : String := "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
@@ -28,6 +28,7 @@ structure Request where
   sourceName : String := "application.ps"
   outputStem : String := "module"
   targets : List PsEmissionTarget := []
+  targetWordSize : Option PsVerifiedIrWordSize := none
   exports : PsApiExposure := .allRuntime
   -- Optional explicitly named source dependencies. Empty preserves the
   -- original isolated single-file entry point and its strict import refusal.
@@ -43,9 +44,11 @@ structure Timings where
   emitMs : Nat := 0
 
 structure Result where
+  moduleProfiles : List PsPscv0ModuleProfile := []
   declarationCount : Nat
   artifacts : List PsEmissionArtifact
   timings : Timings
+  targetWordSize : Option PsVerifiedIrWordSize := none
 
 structure Batch where
   preludeMs : Nat
@@ -99,7 +102,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     pure none
   else
     (fromResult "module" (psCompilerPreparePscv0Project request.moduleName
-      (request.modules ++ [{ name := request.moduleName, source := request.source }]))).map some
+      (request.modules ++ [{ name := request.moduleName, source := request.source, sourceName := request.sourceName }]))).map some
   let parsed ← match project with
     | some _ => pure none
     | none => (fromResult "parse" (psCompilerParsePscv0 request.source)).map some
@@ -140,13 +143,15 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     prepareMs := t3 - t2, kernelMs := t4 - t3 }
   if request.targets.isEmpty then
     return {
+      moduleProfiles := (project.map (·.moduleProfiles)).getD []
       declarationCount := output.prepared.declarations.length
       artifacts := []
+      targetWordSize := request.targetWordSize
       timings := timings }
   -- Keep the same immutable prepared graph alive through checking and emission.
   -- Existing erasure validation is retained until profiling justifies changing it.
   let ir ← fromResult "erase"
-    ((psCompilerVerifiedIrFromPrepared output.prepared).mapError psCompilerPscv0Error)
+    ((psCompilerVerifiedIrFromPrepared output.prepared request.targetWordSize).mapError psCompilerPscv0Error)
   let ir := match project with
     | none => ir
     | some value =>
@@ -208,8 +213,10 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
           PsWasm.emit checked context (target == .wasmComponent) request.exports)
   let t6 ← IO.monoMsNow
   return {
+    moduleProfiles := (project.map (·.moduleProfiles)).getD []
     declarationCount := output.prepared.declarations.length
-    artifacts := artifacts
+    artifacts := artifacts.map (fun artifact => { artifact with targetWordSize := request.targetWordSize })
+    targetWordSize := request.targetWordSize
     timings := { timings with eraseMs := t5 - t4, emitMs := t6 - t5 } }
 
 -- A batch shares only the immutable checked prelude. Inputs remain independent:
@@ -265,6 +272,7 @@ def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.
       ("message", toJson error.message)])
   | .ok value => Lean.Json.mkObj (identity ++ [
       ("accepted", toJson true), ("declarations", toJson value.declarationCount),
+      ("targetWordSize", toJson (value.targetWordSize.map psIrWordSizeBits)),
       ("timings", timingsJson value.timings)])
 
 end PsV7Native

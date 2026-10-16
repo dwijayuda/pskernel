@@ -8,20 +8,21 @@ structure PsElabCondition where
 def psElabCondition (elaborate : PsElaborator) (context : PsElabContext)
     (source : PsSyntaxTerm) : Except PsElabError PsElabCondition := do
   let value ← elaborate context source none
-  let type := psWhnf value.context.environment value.context.metaContext
-    value.context.localContext value.type
-  match type with
-  | .sortE .zero =>
+  -- A proposition may have an instantiated imax/max level equivalent to zero.
+  -- Use read-only conversion, as in pinned Lean Meta/InferType.isProp.
+  if psDefEqReadOnlyWithEnv value.context.environment value.context.metaContext
+      value.context.localContext value.type (.sortE .zero) then
     let target := PsExpr.app (.constE psDecidableName []) value.term
-    let decision := psSynthInstance value.context.environment value.context.localContext
-      value.context.instances value.context.metaContext target
-    let some term := decision.value
-      | throw (.invalidArgument "conditional proposition requires a Decidable instance")
+    let decision ← (psElabSynthesizeInstance value.context target).mapError fun error =>
+      match error with
+      | .implicitApplicationUnsupported =>
+        .invalidArgument "conditional proposition requires a Decidable instance"
+      | _ => error
     return {
-      context := psElabContextWithMeta value.context decision.context
-      proposition := psMetaInstantiate decision.context value.term
-      decision := term }
-  | _ =>
+      context := decision.context
+      proposition := psMetaInstantiate decision.context.metaContext value.term
+      decision := decision.term }
+  else
     let value ← psElabFinalizeExpected value (some (.constE psBoolName []))
     let boolean := PsExpr.constE psBoolName []
     let truth := PsExpr.constE psBoolTrueName []

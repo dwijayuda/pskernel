@@ -28,6 +28,7 @@ structure PsApiExport where
 
 structure PsEmissionArtifact where
   target : PsEmissionTarget
+  targetWordSize : Option PsVerifiedIrWordSize := none
   source : PsRenderedDoc
   symbols : List PsCodegenSymbol
   files : List PsArtifactFile := []

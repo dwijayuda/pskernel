@@ -167,7 +167,9 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["((__ps_a: bigint, __ps_b: bigint) => ", "(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(", left, ", ", right, ")"]);
       psTsPrinted2 emit arguments
-  | .natPow => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " ** " ++ b ++ ")")) arguments
+  | .natShiftLeft => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " << " ++ b ++ ")")) arguments
+  | .natShiftRight => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " >> " ++ b ++ ")")) arguments
+  | .natPow | .intPow => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " ** " ++ b ++ ")")) arguments
   | .natMul =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
@@ -346,6 +348,12 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["((__ps_s: string, __ps_b: bigint, __ps_e: bigint) => { ", "if (__ps_b >= __ps_e) return \"\"; let __ps_i = 0n; ", "let __ps_started = false; let __ps_out = \"\"; ", "for (const __ps_c of __ps_s) { ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; ", "else { __ps_i += __ps_w; continue; } } ", "if (__ps_i === __ps_e) return __ps_out; ", "__ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(", value, ", ", start, ", ", stop, ")"]);
       psTsPrinted3 emit arguments
+  | .stringToUtf8 | .utf8Valid | .utf8Decode =>
+      let helper := match operation with
+        | .stringToUtf8 => "__ps$stringToUtf8"
+        | .utf8Valid => "__ps$utf8Valid"
+        | _ => "__ps$utf8Decode"
+      psTsPrinted1 (fun value => .ok (helper ++ "(" ++ value ++ ")")) arguments
   | .stringEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
@@ -402,6 +410,16 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: A[]): B[] => ", "__ps_a.map((__ps_x) => __ps_f(__ps_x)))(", fn, ", ", array, ")"]);
       psTsPrinted2 emit arguments
+  | .arrayFilter =>
+      match arguments with
+      | [fn, array, start, stop] =>
+        .ok (psTsJoin "" [
+          "(<A>(predicate: (value: A) => boolean, array: A[], start: bigint, stop: bigint): A[] => { ",
+          "const result: A[] = []; const size = BigInt(array.length); const end = stop < size ? stop : size; ",
+          "for (let index = start; index < end; index += 1n) { const value = array[Number(index)]!; ",
+          "if (predicate(value)) result.push(value); } return result; })(",
+          fn, ", ", array, ", ", start, ", ", stop, ")"])
+      | _ => .error PsTsEmitError.intrinsicArity
   | .arrayFoldl =>
       let emit : String -> String -> String -> String -> String -> Except PsTsEmitError String :=
         fun (fn : String) (init : String) (array : String) (start : String) (stop : String) =>

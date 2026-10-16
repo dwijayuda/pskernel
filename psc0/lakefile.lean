@@ -78,6 +78,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardOperatorDefaults,
     `Ps.Environment.StandardFloatConversionsData, `Ps.Environment.StandardFloatDisplayData, `Ps.Environment.StandardFloatDisplay,
     `Ps.Environment.StandardScientific,
+    `Ps.Environment.StandardPlatformWordsData, `Ps.Environment.StandardPlatformWords,
     `Ps.Environment.StandardFloatConstructorsData, `Ps.Environment.StandardFloatConstructors,
     `Ps.Environment.StandardEquality,
     `Ps.Environment.StandardCollectionEquality,
@@ -100,7 +101,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
     `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
-    `Ps.Environment.StandardArray, `Ps.Environment.StandardListIndex,
+    `Ps.Environment.StandardArray, `Ps.Environment.StandardArrayFilter, `Ps.Environment.StandardUtf8, `Ps.Environment.StandardListIndex,
     `Ps.Environment.StandardData,
     `Ps.Environment.StandardFormatData,
     `Ps.Environment.StandardFormatBasic,
@@ -109,7 +110,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatWork,
     `Ps.Environment.StandardFormatRender,
     `Ps.Environment.StandardFormat,
-    `Ps.Environment.StandardClass, `Ps.Environment.StandardFormatClass,
+    `Ps.Environment.StandardClass, `Ps.Environment.StandardLogicInstances,
+    `Ps.Environment.StandardOperatorProtocol, `Ps.Environment.StandardFormatClass,
     `Ps.Environment.StandardToFormat,
     `Ps.Environment.StandardRepr,
     `Ps.Environment.StandardFormatString,
@@ -147,7 +149,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
-    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
+    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Platform, `Ps.Erasure.Utf8, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]
@@ -183,7 +185,7 @@ lean_lib PsBackendTs where
 
 lean_lib PsBackendEcma where
   srcDir := "packages/backend-ecma/src"
-  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime,
+  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime, `Ps.BackendEcma.Utf8,
     `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
 
 lean_lib PsBackendRust where
@@ -204,7 +206,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
-    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Intrinsic,
+    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Utf8, `Ps.BackendWasm.Intrinsic,
     `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.LowerFloat, `Ps.BackendWasm.Word, `Ps.BackendWasm.Float, `Ps.BackendWasm.Type,
     `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,
@@ -240,7 +242,7 @@ lean_lib PsMeta where
     `Ps.Meta.Unify,
     `Ps.Meta.InstanceTarget,
     `Ps.Meta.InstanceCandidate,
-    `Ps.Meta.InstanceSearch,
+    `Ps.Meta.InstanceKey, `Ps.Meta.InstanceSearch,
     `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView
@@ -249,7 +251,7 @@ lean_lib PsMeta where
 lean_lib PsElab where
   srcDir := "packages/elab/src"
   roots := #[
-    `Ps.Elab.Context,
+    `Ps.Elab.Info, `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
     `Ps.Elab.Postponed,
@@ -260,7 +262,7 @@ lean_lib PsElab where
     `Ps.Elab.GoalSource,
     `Ps.Elab.Elimination,
     `Ps.Elab.Proof,
-    `Ps.Elab.Application,
+    `Ps.Elab.Application, `Ps.Elab.Operator,
     `Ps.Elab.Record,
     `Ps.Elab.Refinement,
     `Ps.Elab.Equality,

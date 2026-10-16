@@ -1,3 +1,4 @@
+import Pscv0PlatformTests
 import Ps.Host.NativeV7
 import Ps.Host.StandardManifest
 import Ps.Compiler.Pscv0Modules
@@ -6,6 +7,80 @@ import Pscv0M1Harness
 import Pscv0GetElemOracle
 import Pscv0FloatConstructiveOracle
 import Init.Data.ByteArray.Lemmas
+
+
+-- Pinned native decisions, independent of the portable parser and registry.
+private def nativeLogicDecisions (a b : Nat) : List Bool :=
+  [decide (a < b ∧ a ≤ b), decide (a < b ∨ a = b), decide (a ≠ b),
+   decide (a < b → a ≤ b), decide (a < b ↔ a ≤ b), decide True, decide False]
+#guard nativeLogicDecisions 1 2 == [true, true, true, true, true, true, false]
+#guard nativeLogicDecisions 2 2 == [false, true, false, true, false, true, false]
+#guard nativeLogicDecisions 3 2 == [false, false, true, true, true, true, false]
+#guard decide ((-4 : Int) = -4)
+#guard !(decide ((-4 : Int) = 4))
+#guard !(decide ((4 : Int) = 5))
+private def nativeIntComparison (a b : Int) : List Bool :=
+  [decide (a < b), decide (a ≤ b), decide (a > b), decide (a ≥ b)]
+#guard nativeIntComparison (-3) 2 == [true, true, false, false]
+#guard nativeIntComparison (-2) (-2) == [false, true, false, true]
+#guard nativeIntComparison 3 (-2) == [false, false, true, true]
+
+-- Independent Lean 4.35.0 Extra/Notation references for the operator slice.
+example (n : Nat) (i : Int) : (n + 0) + i = Int.add (Int.add (Int.ofNat n) 0) i := rfl
+example (a : Int) (n : Nat) : a ^ n = Int.pow a n := rfl
+#guard (2 ^ 3 ^ 2 : Nat) == 512
+#guard ((-3 : Int) ^ 5) == -243
+#guard ((-3 : Int) ^ 6) == 729
+#guard ((129 : UInt8) <<< 1).toNat == 2
+#guard ((-9 : Int64) >>> 2).toInt == -3
+#guard ((3 : UInt8) ^ 6).toNat == 217
+#guard (18446744073709551617 : Nat) <<< 33 == 158456325028528675195677835264
+#guard (158456325028528675195677835264 : Nat) >>> 33 == 18446744073709551617
+#guard (18446744073709551617 : Nat) >>> 1000000000000000000000 == 0
+#guard (0 : Nat) <<< 1000000000000000000000 == 0
+
+-- A globally selected heterogeneous default can intentionally redirect an
+-- unknown operand. A namespace does not make that default local. Preserve
+-- the Lean refusal as a differential boundary; keep the runtime fixture's
+-- numeric domain distinct so it cannot alter unrelated Nat arithmetic.
+namespace OperatorDefaultIsolationOracle
+structure Bag where
+  value : Nat
+local instance redirectNat : HMul Nat Bag Bag where
+  hMul a b := ⟨a * b.value⟩
+structure Scale where
+  value : Nat
+local instance {n : Nat} : OfNat Scale n where ofNat := ⟨n⟩
+local instance : Mul Bag where mul a b := ⟨a.value * b.value⟩
+local instance redirectScale : HMul Scale Bag Bag where
+  hMul a b := ⟨a.value * b.value⟩
+-- Lean's default-instance extension is global-only. Each oracle temporarily
+-- registers one default and restores the environment, as a separate module
+-- would. run_elab supplies TermElabM; run_meta supplies only MetaM.
+/-- OfNat Bag 2 -/
+#guard_msgs (substring := true) in
+run_elab do
+  let environment ← Lean.getEnv
+  try
+    Lean.Meta.addDefaultInstance ``redirectNat 1100
+    discard <| Lean.Elab.Term.withoutErrToSorry <|
+      Lean.Elab.Term.elabTermAndSynthesize (← `(17 % 5 * 2 + 3))
+        (some (Lean.mkConst ``Nat))
+  finally
+    Lean.setEnv environment
+run_elab do
+  let environment ← Lean.getEnv
+  try
+    Lean.Meta.addDefaultInstance ``redirectScale 1100
+    for (source, expected) in
+        [(← `((2 * Bag.mk 11).value), 22), (← `((17 % 5 * 2 + 3 : Nat)), 7)] do
+      let value ← Lean.Elab.Term.withoutErrToSorry <|
+        Lean.Elab.Term.elabTermAndSynthesize source (some (Lean.mkConst ``Nat))
+      unless (← Lean.Meta.isDefEq value (Lean.mkNatLit expected)) do
+        throwError "isolated heterogeneous default oracle value disagreed"
+  finally
+    Lean.setEnv environment
+end OperatorDefaultIsolationOracle
 
 -- Independent pinned native WHNF oracle for class projection transparency.
 run_meta do
@@ -758,8 +833,23 @@ private def executableFloatOperationsFixture : String :=
 private def executableFloatFixture : String :=
   "structure F1Box(A: Type) where { value: A }\nfunction f1Identity{A: Type}(value: A): A := value\nfunction f1Round64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Float.ofBits(UInt64.ofNat(bits))))\nfunction f1Model64(bits: Nat): Nat := match Float.toModel(Float.ofBits(UInt64.ofNat(bits))) with { | Float.Model.mk raw valid => UInt64.toNat(Float.toBits(Float.ofModel(Float.Model.mk(raw, valid)))) }\nfunction f1Match64(bits: Nat): Nat := match Float.ofBits(UInt64.ofNat(bits)) with { | Float.ofModel model => UInt64.toNat(Float.Model.toBits(model)) }\nfunction f1Use64(make: UInt64 -> Float, read: Float -> UInt64, bits: Nat): Nat := UInt64.toNat(read(make(UInt64.ofNat(bits))))\nfunction f1Partial64(bits: Nat): Nat := f1Use64(Float.ofBits, Float.toBits, bits)\nfunction f1Generic64(bits: Nat): Nat := UInt64.toNat(Float.toBits(f1Identity(Float.ofBits(UInt64.ofNat(bits)))))\nfunction f1Record64(bits: Nat): Nat := UInt64.toNat(Float.toBits(F1Box.value(F1Box.mk(Float.ofBits(UInt64.ofNat(bits))))))\nfunction f1Array64(bits: Nat): Nat := UInt64.toNat(Float.toBits(Array.getD(#[Float.ofBits(UInt64.ofNat(bits))], 0, Float.ofBits(UInt64.ofNat(0)))))\nfunction f1Closure64(bits: Nat): Nat := {\n  let value: Float := Float.ofBits(UInt64.ofNat(bits))\n  let read: Unit -> Float := fun (_: Unit) => value\n  UInt64.toNat(Float.toBits(read(())))\n}\nfunction f1Round32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Float32.ofBits(UInt32.ofNat(bits))))\nfunction f1Model32(bits: Nat): Nat := match Float32.toModel(Float32.ofBits(UInt32.ofNat(bits))) with { | Float32.Model.mk raw valid => UInt32.toNat(Float32.toBits(Float32.ofModel(Float32.Model.mk(raw, valid)))) }\nfunction f1Match32(bits: Nat): Nat := match Float32.ofBits(UInt32.ofNat(bits)) with { | Float32.ofModel model => UInt32.toNat(Float32.Model.toBits(model)) }\nfunction f1Use32(make: UInt32 -> Float32, read: Float32 -> UInt32, bits: Nat): Nat := UInt32.toNat(read(make(UInt32.ofNat(bits))))\nfunction f1Partial32(bits: Nat): Nat := f1Use32(Float32.ofBits, Float32.toBits, bits)\nfunction f1Generic32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(f1Identity(Float32.ofBits(UInt32.ofNat(bits)))))\nfunction f1Record32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(F1Box.value(F1Box.mk(Float32.ofBits(UInt32.ofNat(bits))))))\nfunction f1Array32(bits: Nat): Nat := UInt32.toNat(Float32.toBits(Array.getD(#[Float32.ofBits(UInt32.ofNat(bits))], 0, Float32.ofBits(UInt32.ofNat(0)))))\nfunction f1Closure32(bits: Nat): Nat := {\n  let value: Float32 := Float32.ofBits(UInt32.ofNat(bits))\n  let read: Unit -> Float32 := fun (_: Unit) => value\n  UInt32.toNat(Float32.toBits(read(())))\n}\n"
 
+private def arrayFilterFixture : String :=
+  "namespace FilterCases\nuniverse u\nfunction keep{A: Type u}(predicate: A -> Bool, values: Array A): Array A := Array.filter(predicate, values)\nfunction greater(limit: Nat): Nat -> Bool := fun value => if (limit < value) { true } else { false }\nfunction rendered(start: Nat, stop: Nat): String := reprStr(Array.toList(Array.filter(greater(2), #[1, 2, 5, 2, 7, 7], start := start, stop := stop)))\nstructure High: Type 1 where { value: Nat }\nconst high: Array High := keep(fun value => if (2 < value.value) { true } else { false }, #[High.mk(1), High.mk(5)])\nconst partial: (Nat -> Bool) -> Array Nat -> Nat -> Nat -> Array Nat := Array.filter(α := Nat)\nend FilterCases\nconst arrayFilterDefault: String := reprStr(Array.toList(Array.filter(FilterCases.greater(2), #[1, 2, 5, 2, 7, 7])))\nconst arrayFilterStart: String := reprStr(Array.toList(Array.filter(fun _ => true, #[1, 2, 5, 2, 7, 7], start := 3)))\nconst arrayFilterStop: String := reprStr(Array.toList(Array.filter(fun _ => true, #[1, 2, 5, 2, 7, 7], stop := 3)))\nconst arrayFilterNone: String := reprStr(Array.toList(Array.filter(fun _ => false, #[1, 2, 5])))\nconst arrayFilterEmpty: String := reprStr(Array.toList(Array.filter(fun _ => true, (#[] : Array Nat))))\nconst arrayFilterPartial: String := reprStr(Array.toList(FilterCases.partial(FilterCases.greater(2), #[1, 2, 5, 2, 7, 7], 0, 100)))\nconst arrayFilterHigh: Nat := (Array.getD(FilterCases.high, 0, FilterCases.High.mk(0))).value\nconst arrayFilterPersistent: String := { let source := #[1, 2, 5]\n let filtered := Array.filter(fun value => if (1 < value) { true } else { false }, source)\n reprStr(Array.toList(source)) ++ \"/\" ++ reprStr(Array.toList(Array.push(filtered, 9))) }\nfunction arrayFilterBounds(start: Nat, stop: Nat): String := FilterCases.rendered(start, stop)\ntheorem arrayFilterModel: Array.toList(Array.filter(fun _ => true, #[1, 2], start := 0, stop := 2)) = [1, 2] := by { rfl }\n"
+
+private def operatorTreeFixture : String :=
+  "namespace OperatorTree\nstructure Bag where { value: Nat }\ninstance plus: Add Bag where { add := fun a => fun b => Bag.mk(a.value + b.value) }\ninstance times: Mul Bag where { mul := fun a => fun b => Bag.mk(a.value * b.value) }\nstructure Scale where { value: Nat }\ninstance scaleLiteral{n: Nat}: OfNat(Scale, n) where { ofNat := Scale.mk(n) }\ninstance scale: HMul(Scale, Bag, Bag) where { hMul := fun a => fun b => Bag.mk(a.value * b.value) }\nstructure Tag where { value: Nat }\ninstance combine: HAdd(Bag, Tag, Nat) where { hAdd := fun a => fun b => a.value + b.value }\nend OperatorTree\nfunction operatorTreePromote(n: Nat, i: Int): Int := (n + 0) + i\nfunction operatorTreeReverse(n: Nat, i: Int): Int := i + (0 + n)\nfunction operatorExpected(n: Nat): Int := n + 1\nfunction operatorTreeNeg(n: Nat, i: Int): Int := -n + i\nfunction operatorRelation(n: Nat, i: Int): Bool := if (n < i) { true } else { false }\nfunction operatorBooleanRelation(n: Nat): Bool := (n < 2) == (n ≤ 1)\nfunction operatorPropBool(n: Nat): Bool := n < 2\nfunction operatorPowerNat(a: Nat, b: Nat, c: Nat): Nat := a ^ b ^ c\nfunction operatorPowerInt(a: Int, n: Nat): Int := a ^ n\nfunction operatorShiftLeft(a: Nat, n: Nat): Nat := a <<< n\nfunction operatorShiftRight(a: Nat, n: Nat): Nat := a >>> n\nconst operatorWordShift: Nat := UInt8.toNat((129 : UInt8) <<< 1)\nconst operatorSignedShift: Int := Int64.toInt((-9 : Int64) >>> 2)\nconst operatorWordPower: Nat := UInt8.toNat((3 : UInt8) ^ 6)\nconst operatorHeterogeneous: Nat := OperatorTree.Bag.mk(5) + OperatorTree.Tag.mk(7)\nconst operatorHeterogeneousScale: Nat := OperatorTree.Bag.value((2 : OperatorTree.Scale) * OperatorTree.Bag.mk(11))\ntheorem operatorLeafCoercions(n: Nat, i: Int): (n + 0) + i = Int.add(Int.add(Int.ofNat(n), 0), i) := by { rfl }\ntheorem operatorRightAction(a: Int, n: Nat): a ^ n = Int.pow(a, n) := by { rfl }\n"
+
+private def logicDecisionFixture : String :=
+  "function logicIntEquality(a: Int, b: Int): Bool := if (a = b) { true } else { false }\nfunction logicAnd(a: Nat, b: Nat): Bool := if ((a < b) ∧ (a ≤ b)) { true } else { false }\nfunction logicOr(a: Nat, b: Nat): Bool := if ((a < b) ∨ (a = b)) { true } else { false }\nfunction logicNot(a: Nat, b: Nat): Bool := if (a ≠ b) { true } else { false }\nfunction logicImplies(a: Nat, b: Nat): Bool := if ((a < b) -> (a ≤ b)) { true } else { false }\nfunction logicIff(a: Nat, b: Nat): Bool := if ((a < b) ↔ (a ≤ b)) { true } else { false }\nfunction logicTrue(a: Nat, b: Nat): Bool := if (True) { true } else { false }\nfunction logicFalse(a: Nat, b: Nat): Bool := if (False) { true } else { false }\nfunction logicDecisions(a: Nat, b: Nat): String := reprStr([logicAnd(a, b), logicOr(a, b), logicNot(a, b), logicImplies(a, b), logicIff(a, b), logicTrue(a, b), logicFalse(a, b)])\nfunction intComparison(a: Int, b: Int): String := reprStr([if (a < b) { true } else { false }, if (a ≤ b) { true } else { false }, if (a > b) { true } else { false }, if (a ≥ b) { true } else { false }])\n"
+
+private def comparisonNotationFixture : String :=
+  "function comparisonNotation(a: Nat, b: Nat): String := reprStr([if (a < b) { true } else { false }, if (a <= b) { true } else { false }, if (a ≤ b) { true } else { false }, if (a > b) { true } else { false }, if (a >= b) { true } else { false }, if (a ≥ b) { true } else { false }, if (a ≠ b) { true } else { false }])\ntheorem comparisonNotationScope(a: Nat, b: Nat, h: a < b): LT.lt(a, b) := by { exact h }\n"
+
+private def utf8Fixture : String :=
+  "namespace Utf8Cases\nconst samples: Array ByteArray := #[List.toByteArray([]), List.toByteArray([0]), List.toByteArray([65, 0, 66]), List.toByteArray([127, 194, 128, 223, 191, 224, 160, 128, 239, 191, 191, 240, 144, 128, 128, 244, 143, 191, 191]), List.toByteArray([239, 187, 191, 65]), List.toByteArray([195, 169, 240, 159, 152, 128]), List.toByteArray([128]), List.toByteArray([192, 128]), List.toByteArray([193, 191]), List.toByteArray([194]), List.toByteArray([226, 130]), List.toByteArray([226, 65, 172]), List.toByteArray([224, 159, 191]), List.toByteArray([237, 160, 128]), List.toByteArray([240, 143, 191, 191]), List.toByteArray([244, 144, 128, 128]), List.toByteArray([245, 128, 128, 128]), List.toByteArray([255]), List.toByteArray([65, 195])]\nfunction sample(index: Nat): ByteArray := Array.getD(samples, index, ByteArray.empty)\nfunction read(decode: ByteArray -> Option String, bytes: ByteArray): String := match decode(bytes) with { | .none => \"#invalid\" | .some text => \"#\" ++ text }\nend Utf8Cases\nfunction utf8ValidateCase(index: Nat): Bool := ByteArray.validateUTF8(Utf8Cases.sample(index))\nfunction utf8DecodeCase(index: Nat): String := Utf8Cases.read(String.fromUTF8?, Utf8Cases.sample(index))\nfunction utf8RoundtripCase(index: Nat): String := match String.fromUTF8?(Utf8Cases.sample(index)) with { | .none => \"#invalid\" | .some text => reprStr(List.map(UInt8.toNat, ByteArray.toList(String.toUTF8(text)))) }\nfunction utf8Encode(text: String): String := reprStr(List.map(UInt8.toNat, ByteArray.toList(String.toUTF8(text))))\nconst utf8Persistent: Bool := {\n let before: ByteArray := Utf8Cases.sample(5)\n let decoded: Option String := String.fromUTF8?(before)\n let after: ByteArray := ByteArray.set!(before, 0, 65)\n ByteArray.beq(before, Utf8Cases.sample(5)) && ByteArray.validateUTF8(before) && !ByteArray.validateUTF8(after)\n}\n"
+
 private def application : String :=
-  floatDisplayFixture ++ floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  operatorTreeFixture ++ logicDecisionFixture ++ utf8Fixture ++ comparisonNotationFixture ++ arrayFilterFixture ++ floatDisplayFixture ++ floatConversionsFixture ++ executableFloatOperationsFixture ++ executableFloatFixture ++ productUniverseFixture ++ arrayUniverseFixture ++ defaultInstanceFixture ++ literalConstraintFixture ++ scientificLiteralFixture ++ hashFixture ++ wordFixture ++ signedFixture ++ signedDictionaryFixture ++ signedConversionFixture ++ signedShiftFixture ++ signedClampFixture ++ signedAbsFixture ++ signedOrderFixture ++ signedNumericFixture ++ boolWordFixture ++ unsignedOrderFixture ++ unsignedPowerFixture ++ unsignedOfIntFixture ++ unsignedClampFixture ++ standardSumFixture ++ standardFloatCanonicalFixture ++ standardFloatBitEqualityFixture ++ standardByteArrayFixture ++ byteArrayCollectionFixture ++ unsignedDisplayFixture ++ unsignedFixture ++ reprFixture ++ formatFixture ++ integerConversionFixture ++ quotingFixture ++ coercionFixture ++ numericFixture ++ postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -1777,6 +1867,8 @@ private def emissionBoundary : IO Unit := do
 
 private def doBoundaries : IO Unit := do
   let cases : Array (String × String) := #[
+    ("const bad: Bool := if (1 < 2 < 3) { true } else { false }\n", "parse"),
+    ("const bad: Bool := if (1 < = 2) { true } else { false }\n", "parse"),
     ("universe u v\nfunction bad{A: Type u}{B: Type v}(xs: Option A, f: A -> B): Option B := do {\n  let x: A ← xs\n  return f(x)\n}\n", "elaborate"),
     ("const bad: Except String Nat := do { return 1; return 2 }\n", "parse"),
     ("const bad: Option Nat := do {\n  let n: Nat ← Except.ok(1)\n  return n\n}\n", "elaborate"),
@@ -1797,7 +1889,7 @@ private def doBoundaries : IO Unit := do
       unless error.phase == cases[i]!.snd do
         throw (IO.userError s!"do boundary {i}: {error.phase}: {error.message}")
     | .ok _ => throw (IO.userError s!"do boundary {i}: invalid source accepted")
-  IO.println "PSCV0_NATIVE_DO: PASS 8 do refusals and 1 opaque definitional-opacity refusal"
+  IO.println "PSCV0_NATIVE_DO: PASS 8 do refusals, 2 comparison syntax refusals and 1 opaque definitional-opacity refusal"
 
 -- Reuse the production graph planner and checked environment, rather than
 -- introducing a separate project interpreter or a large fixture suite.
@@ -1887,8 +1979,8 @@ private def projectBoundaries : IO Unit := do
         (actual.zip expected).all (fun (a, b) =>
           a.priority == b.priority && psExprAlphaEq a.value b.value) do
       throw (IO.userError "class-index lookup changed global instance order")
-  -- Distinct rigid heads partition safely. Same-head, different arguments
-  -- remain an explicit comparison workload; no unsafe structural-key shortcut.
+  -- Full structural keys partition both distinct heads and distinct rigid
+  -- arguments. Hash hits still require equality and checked answer replay.
   for width in [1, 8, 32] do
     for partitioned in [true, false] do
       let mut measuredEnv := environment
@@ -1907,12 +1999,24 @@ private def projectBoundaries : IO Unit := do
       let measured := psSynthInstanceWithTable measuredEnv measuredLocals
         psInstanceIndexEmpty psMetaEmpty 64 resultGoal
       unless measured.result.value.isSome && measured.table.visits == width + 1 &&
-          (!partitioned || measured.table.goalComparisons <= width) do
-        throw (IO.userError "instance head partitioning changed checked graph results")
+          measured.table.goalComparisons <= width do
+        throw (IO.userError "instance structural indexing changed results or repeated same-head comparisons")
       IO.println ("PSCV0_INSTANCE_LOOKUP_GROWTH: goals=" ++ toString width ++
         " partitioned=" ++ toString partitioned ++
         " comparisons=" ++ toString measured.table.goalComparisons ++
         " candidates=" ++ toString measured.table.candidateChecks)
+  -- Key construction must not execute a large primitive power merely to
+  -- organize goals. Candidate unification remains responsible for conversion.
+  let indexedPower := psLogicApply (.constE (psDecisionName "Nat.pow") [])
+    [.lit (.natural 2), .lit (.natural 1000000000)]
+  let canonicalPower := psInstanceCanonicalKey environment psLocalEmpty psMetaEmpty
+    256 indexedPower
+  unless psExprAlphaEq canonicalPower indexedPower do
+    throw (IO.userError "instance key construction executed primitive arithmetic")
+  let alphaLeft := PsExpr.lam (psRootName "x") (.constE psNatName []) (.bvar 0) .explicit
+  let alphaRight := PsExpr.lam (psRootName "y") (.constE psNatName []) (.bvar 0) .explicit
+  unless psInstanceExprHash alphaLeft == psInstanceExprHash alphaRight do
+    throw (IO.userError "alpha-equal instance keys have different hashes")
   let hiddenAlias := psStandardInhabitedType
     (.app (.constE (psRootName "Id") [.zero]) (.constE psNatName []))
   let hiddenSearch := psSynthInstanceWithTable environment (add psLocalEmpty "seed" a)
@@ -2632,6 +2736,62 @@ private def derivingBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
   IO.println "PSCV0_DERIVING_BOUNDARIES: PASS dictionaries, dependent runtime fields, recursion, indices, ill-typed defaults and missing required fields"
 
+private def sourceInfoBoundaries : IO Unit := do
+  let source :=
+    "function infoGroups{A B: Type}(x: A, y: B, fallback: B := y): B := fallback\n" ++
+    "const infoUse: Nat := infoGroups(true, 7)\n" ++
+    "function infoExplicit(A: Type, x: A): A := x\n" ++
+    "const infoInferred: Nat := infoExplicit(x := 8)\n" ++
+    "structure InfoRecord where {\n left: Nat\n right: Nat\n}\n" ++
+    "function infoApply{A B: Type}(f: A -> B, x: A): B := f(x)\n" ++
+    "const infoProjection: Nat := infoApply(fun v => v.left, InfoRecord.mk(8, 9))\n"
+  let parsed ← get "source info parse" (psCompilerParsePscv0 source)
+  let elaborated ← get "source info elaboration"
+    ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed).mapError
+      psCompilerPscv0ElabError)
+  let receipts := elaborated.origins.flatMap (·.sourceInfo)
+  let entries := receipts.flatMap (·.entries)
+  unless entries.any (fun entry => match entry.info with
+      | .binderGroup head _ ids =>
+        (psSyntaxBinderNames head).map (·.segments) == [["A"], ["B"]] &&
+        ids.length == 2 && ids.eraseDups.length == 2
+      | _ => false) do
+    throw (IO.userError "ordered multi-name binder information missing")
+  unless entries.any (fun entry => match entry.info with
+      | .insertedArgument _ .defaultValue name _ _ _ => psNameEq name (psRootName "fallback")
+      | _ => false) &&
+      entries.any (fun entry => match entry.info with
+        | .insertedArgument _ .implicit _ _ _ _ => true
+        | _ => false) do
+    throw (IO.userError "implicit/default insertion information missing")
+  unless entries.any (fun entry => match entry.info with
+      | .insertedArgument _ .inferredExplicit name _ _ _ => psNameEq name (psRootName "A")
+      | _ => false) do
+    throw (IO.userError "named-call inference lost explicit binder kind")
+  unless entries.any (fun entry => match entry.info with
+      | .reference _ (.global name) [] _ _ => psNameEq name (psRootName "infoGroups")
+      | _ => false) do
+    throw (IO.userError "resolved source reference missing")
+  let some constructor := receipts.find? (fun receipt =>
+      psNameToString receipt.owner == "InfoRecord.mk")
+    | throw (IO.userError "constructor information owner missing")
+  unless constructor.entries.any (fun entry => match entry.info with
+      | .binderGroup head _ ids => head.name.segments == ["left"] && ids.length == 1
+      | _ => false) do
+    throw (IO.userError "actual constructor field information missing")
+  let projections := entries.filter fun entry => match entry.info with
+    | .reference source _ ["left"] _ _ => source.segments == ["v", "left"]
+    | _ => false
+  unless projections.length == 1 do
+    throw (IO.userError "postponed projection occurrence missing or duplicated")
+  for receipt in receipts do
+    for entry in receipt.entries do
+      let finalInfo := psElabInfoInstantiate receipt.metaContext entry.info
+      unless (psElabInfoExpressions finalInfo).all
+          (psExprFVarsInContext entry.localContext) do
+        throw (IO.userError "source information escaped its saved local scope")
+  IO.println "PSCV0_M2_SOURCE_INFO: ordered binders, references, insertions, scoped resumption PASS"
+
 private def syntheticBoundaries : IO Unit := do
   let environment := psSelfHostProdPreludeEnvironment
   let nat := PsExpr.constE psNatName []
@@ -2805,6 +2965,41 @@ private def defaultInstanceBoundaries : IO Unit := do
     let parsed ← get "default failure parse" (psCompilerParsePscv0 source)
     if (psElabProgram environment parsed).isOk then
       throw (IO.userError "definite ordinary failure incorrectly reached defaulting")
+  -- A global operator default belongs to an independent program. Keep its
+  -- positive inference and value theorem checked by the official kernel;
+  -- do not contaminate unrelated all-backend application observations.
+  let defaultSource :=
+    "structure Bag where { value: Nat }\n" ++
+    "instance times: Mul Bag where { mul := fun a => fun b => Bag.mk(a.value * b.value) }\n" ++
+    "structure Scale where { value: Nat }\n" ++
+    "instance literal{n: Nat}: OfNat(Scale, n) where { ofNat := Scale.mk(n) }\n" ++
+    "@[default_instance 1100]\n" ++
+    "instance scale: HMul(Scale, Bag, Bag) where { hMul := fun a => fun b => Bag.mk(a.value * b.value) }\n" ++
+    "const selected: Nat := Bag.value(2 * Bag.mk(11))\n" ++
+    "theorem selectedValue: selected = 22 := by { rfl }\n"
+  let checked ← PsV7Native.runBatch #[{ source := defaultSource }]
+  let batch ← match checked with
+    | .error problem => throw (IO.userError ("operator default kernel batch: " ++ problem.message))
+    | .ok batch => pure batch
+  let some response := batch.results[0]?
+    | throw (IO.userError "operator default kernel result missing")
+  match response with
+  | .ok _ => pure ()
+  | .error problem =>
+    throw (IO.userError ("operator default checked value: " ++ problem.message))
+  -- Same intentionally interfering default as the independent native oracle.
+  -- Keep this isolated from the shared runtime application's global registry.
+  let interference :=
+    "structure Bag where { value: Nat }\n" ++
+    "@[default_instance 1100]\n" ++
+    "instance scale: HMul(Nat, Bag, Bag) where { hMul := fun a => fun b => Bag.mk(a * b.value) }\n" ++
+    "const rejected: Nat := 17 % 5 * 2 + 3\n"
+  let parsed ← get "operator default interference parse" (psCompilerParsePscv0 interference)
+  match psElabProgram environment parsed with
+  | .error (.atDeclaration _ .implicitApplicationUnsupported) => pure ()
+  | .error error => throw (IO.userError ("operator default interference phase: " ++
+      psCompilerPscv0ElabError error))
+  | .ok _ => throw (IO.userError "operator default interference disagreed with pinned Lean")
   IO.println "PSCV0_DEFAULT_INSTANCES: PASS priority, transactional dependencies, ordinary quiescence, universes, module visibility and budgets"
 
 private def postponedBoundaries : IO Unit := do
@@ -3576,12 +3771,61 @@ private def floatDisplayNativeOracle : IO Unit := do
       throw (IO.userError ("PSCV0_FLOAT_CAST_ORACLE: expected " ++ toString expected ++ " got " ++ toString observed))
   IO.println "PSCV0_FLOAT_F4_ORACLE: PASS fixed-six decimal display, Repr and cross-width contracts"
 
+private def arrayFilterNativeOracle : IO Unit := do
+  let values : Array Nat := #[1, 2, 5, 2, 7, 7]
+  let greater := fun (value : Nat) => decide (2 < value)
+  let pairs : List (List Nat × List Nat) := [
+    ((values.filter greater).toList, [5, 7, 7]),
+    ((values.filter (fun _ => true) (start := 3)).toList, [2, 7, 7]),
+    ((values.filter (fun _ => true) (stop := 3)).toList, [1, 2, 5]),
+    ((values.filter (fun _ => false)).toList, []),
+    (((#[] : Array Nat).filter greater).toList, []),
+    ((values.filter greater (start := 1) (stop := 5)).toList, [5, 7]),
+    ((values.filter greater (start := 5) (stop := 2)).toList, []),
+    ((values.filter greater (start := 1000000000000000000000) (stop := 1000000000000000000001)).toList, [])]
+  unless pairs.all (fun (actual, expected) => actual == expected) do
+    throw (IO.userError "PSCV0_ARRAY_FILTER_ORACLE: pinned slice/order mismatch")
+  IO.println "PSCV0_ARRAY_FILTER_ORACLE: PASS pinned bounded stable filtering"
+
+private def utf8NativeOracle : IO Unit := do
+  let cases : List (List UInt8 × Option String) := [
+    ([], some ""),
+    ([0], some "\x00"),
+    ([65, 0, 66], some "A\x00B"),
+    ([127, 194, 128, 223, 191, 224, 160, 128, 239, 191, 191, 240, 144, 128, 128, 244, 143, 191, 191], some "߿ࠀ￿𐀀􏿿"),
+    ([239, 187, 191, 65], some "﻿A"),
+    ([195, 169, 240, 159, 152, 128], some "é😀"),
+    ([128], none),
+    ([192, 128], none),
+    ([193, 191], none),
+    ([194], none),
+    ([226, 130], none),
+    ([226, 65, 172], none),
+    ([224, 159, 191], none),
+    ([237, 160, 128], none),
+    ([240, 143, 191, 191], none),
+    ([244, 144, 128, 128], none),
+    ([245, 128, 128, 128], none),
+    ([255], none),
+    ([65, 195], none)]
+  for (input,expected) in cases do
+    let bytes := input.toByteArray
+    unless String.fromUTF8? bytes == expected && bytes.validateUTF8 == expected.isSome do
+      throw (IO.userError "PSCV0_UTF8_ORACLE: native strict decoding mismatch")
+    if let some text := expected then
+      unless text.toUTF8.toList == input do
+        throw (IO.userError "PSCV0_UTF8_ORACLE: native encoding mismatch")
+  IO.println "PSCV0_UTF8_ORACLE: PASS strict validation, encoding, scalar boundaries and BOM preservation"
+
 def main : IO Unit := do
+  selectedStandardManifestCases
+  utf8NativeOracle
+  arrayFilterNativeOracle
+  platformWordCases
   floatDisplayNativeOracle
   floatConversionsNativeOracle
   floatOperationsNativeOracle
   kernelHeartbeatIsolationCases
-  selectedStandardManifestCases
   floatConstructorBoundaries
   IO.println "PSCV0_FLOAT_CONSTRUCTIVE_ORACLE: PASS independent pinned Nat.pow_eq_zero statement and axiom audit"
   emissionBoundary
@@ -3601,6 +3845,7 @@ def main : IO Unit := do
   doBoundaries
   projectBoundaries
   derivingBoundaries
+  sourceInfoBoundaries
   syntheticBoundaries
   defaultInstanceBoundaries
   postponedBoundaries

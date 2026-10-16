@@ -1,4 +1,5 @@
 import Ps.Elab.Postponed
+import Ps.Elab.Operator
 import Ps.Elab.Record
 import Ps.Elab.Universe
 import Ps.Elab.Proof
@@ -151,6 +152,8 @@ def psElabTermWithFuel
       fun (context : PsElabContext) =>
         fun (term : PsSyntaxTerm) =>
           fun (expected : Option PsExpr) =>
+            let outerSpan := context.sourceSpan;
+            let context := { context with sourceSpan := some (psSyntaxTermSpan term) };
             let smaller :
                 PsElabContext ->
                 PsSyntaxTerm ->
@@ -164,7 +167,8 @@ def psElabTermWithFuel
                     Except.error PsElabError.structuralRecursionEscapingReference
                   else psElabReference ctx name target
               | _ => smaller ctx source target
-            psElabWithPostponement (fun _ => match term with
+            (psElabWithPostponement (fun _ => match term with
+            | .operatorE .. => psElabOperator smaller context term expected
             | .doE items _ => psElabDo smaller context items expected
             | .byE tactics scope _ => psElabProof smaller context tactics scope expected
             | .hole _ => Except.ok (psElabHole context expected)
@@ -282,7 +286,8 @@ def psElabTermWithFuel
                                     [] expected with
                                 | Except.error error => Except.error error
                                 | Except.ok application =>
-                                    psElabFinishApplication application expected) context term expected
+                                    psElabFinishApplication application expected) context term expected).map
+              (fun result => { result with context := { result.context with sourceSpan := outerSpan } })
 
 def psElabTerm
     (context : PsElabContext)

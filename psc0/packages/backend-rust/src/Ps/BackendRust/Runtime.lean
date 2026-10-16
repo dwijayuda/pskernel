@@ -61,6 +61,22 @@ pub(super) fn __ps_nat_lit(text: &str) -> PsNat {
 pub(super) fn __ps_int_lit(text: &str) -> PsInt {
     PsInt::from_str(text).expect("valid generated Int literal")
 }
+
+// Counts remain arbitrary-precision. Oversized right shifts return zero before
+// machine conversion; an unallocatable left result is a resource failure.
+pub(super) fn __ps_nat_shift_left(a: &PsNat, b: &PsNat) -> PsNat {
+    if a.is_zero() { return PsNat::zero(); }
+    a << b.to_usize().expect("Nat left-shift result exceeds addressable memory")
+}
+pub(super) fn __ps_nat_shift_right(a: &PsNat, b: &PsNat) -> PsNat {
+    if b >= &PsNat::from(a.bits()) { return PsNat::zero(); }
+    a >> b.to_usize().expect("bounded Nat shift count")
+}
+pub(super) fn __ps_int_pow(a: &PsInt, b: &PsNat) -> PsInt {
+    let magnitude = PsInt::from(__ps_nat_pow(a.magnitude(), b));
+    if a.sign() == num_bigint::Sign::Minus && b.bit(0) { -magnitude } else { magnitude }
+}
+
 pub(super) fn __ps_nat_add(a: &PsNat, b: &PsNat) -> PsNat { a + b }
 pub(super) fn __ps_nat_sub(a: &PsNat, b: &PsNat) -> PsNat {
     if a >= b { a - b } else { PsNat::zero() }
@@ -143,6 +159,15 @@ pub(super) fn __ps_string_extract(value: &String, begin: &PsNat, end: &PsNat) ->
     }
     out
 }
+pub(super) fn __ps_string_to_utf8(value: &String) -> PsArray<u8> {
+    Rc::new(value.as_bytes().to_vec())
+}
+pub(super) fn __ps_utf8_valid(value: &PsArray<u8>) -> bool {
+    std::str::from_utf8(value.as_slice()).is_ok()
+}
+pub(super) fn __ps_utf8_decode(value: &PsArray<u8>) -> String {
+    std::str::from_utf8(value.as_slice()).unwrap_or("").to_owned()
+}
 pub(super) fn __ps_string_eq(left: &String, right: &String) -> bool { left == right }
 pub(super) fn __ps_array_empty_with_capacity<T>(capacity: &PsNat) -> PsArray<T> {
     Rc::new(Vec::with_capacity(capacity.to_usize().unwrap_or(0)))
@@ -196,6 +221,22 @@ pub(super) fn __ps_array_map<A: Clone, B>(
     f: Rc<dyn Fn(A) -> B>, array: &PsArray<A>,
 ) -> PsArray<B> {
     Rc::new(array.iter().cloned().map(|value| f(value)).collect())
+}
+pub(super) fn __ps_array_filter<A: Clone>(
+    predicate: Rc<dyn Fn(A) -> bool>, array: &PsArray<A>,
+    start: &PsNat, stop: &PsNat,
+) -> PsArray<A> {
+    let size = PsNat::from(array.len());
+    let begin = start.min(&size).to_usize().expect("bounded Array start fits usize");
+    let end = stop.min(&size).to_usize().expect("bounded Array stop fits usize");
+    let mut result = Vec::with_capacity(end.saturating_sub(begin));
+    for index in begin..end {
+        let value = array[index].clone();
+        if predicate(value.clone()) {
+            result.push(value);
+        }
+    }
+    Rc::new(result)
 }
 pub(super) fn __ps_array_foldl<A: Clone, B: Clone>(
     f: Rc<dyn Fn(B, A) -> B>, init: &B, array: &PsArray<A>,

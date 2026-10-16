@@ -9,6 +9,17 @@ inductive PsElabDoOps where
   | option (level : PsLevel)
   | except (error : PsExpr)
 
+-- Effect selection and the surface manifest enumerate this same closed table.
+inductive PsElabDoFamily where
+  | identity | option | except
+
+def psElabDoRegistry : List (PsName × PsElabDoFamily) := [
+  (psRootName "Id", .identity), (psOptionName, .option),
+  (psRootName "Except", .except)]
+
+def psElabDoFamilyFor (name : PsName) : Option PsElabDoFamily :=
+  (psElabDoRegistry.find? fun entry => psNameEq entry.1 name).map Prod.snd
+
 -- Construct effect types through ordinary universe constraints. Lean's
 -- Monad Option fixes one element universe across a do block. The explicit
 -- Option.bind library function can change universes; monadic do cannot.
@@ -40,7 +51,7 @@ def psElabDoView (fuel : Nat) (context : PsElabContext) (type : PsExpr) : PsExpr
     let view := psExprAppView core
     match view.head with
     | .constE name levels =>
-      if [psRootName "Id", psRootName "Except", psOptionName].any (psNameEq name) then core
+      if (psElabDoFamilyFor name).isSome then core
       else match psEnvironmentFind context.environment name with
         | some declaration => match psDeclarationValue declaration with
           | some value =>
@@ -55,18 +66,17 @@ def psElabDoSelect (context : PsElabContext) (expected : Option PsExpr) :
   let some expected := expected | throw (.invalidArgument "do requires an expected result type")
   let type := psElabDoView 256 context expected
   let view := psExprAppView type
-  match view.head, view.args with
-  | .constE name _, [error, value] =>
-    if psNameEq name (psRootName "Except") then return (.except error, value)
-    return (.identity, type)
-  | .constE name levels, [value] =>
-    if psNameEq name (psRootName "Id") then return (.identity, value)
-    if psNameEq name psOptionName then
+  match view.head with
+  | .mvar _ => throw (.invalidArgument "do effect is not determined by its expected type")
+  | .constE name levels =>
+    match psElabDoFamilyFor name, view.args with
+    | some .except, [error, value] => return (.except error, value)
+    | some .identity, [value] => return (.identity, value)
+    | some .option, [value] =>
       let [level] := levels | throw (.invalidArgument "Option requires its element universe")
       return (.option level, value)
-    return (.identity, type)
-  | .mvar _, _ => throw (.invalidArgument "do effect is not determined by its expected type")
-  | _, _ => return (.identity, type)
+    | _, _ => return (.identity, type)
+  | _ => return (.identity, type)
 
 def psElabDoPure (ops : PsElabDoOps) (context : PsElabContext)
     (type value : PsExpr) : Except PsElabError PsElabTermResult := do

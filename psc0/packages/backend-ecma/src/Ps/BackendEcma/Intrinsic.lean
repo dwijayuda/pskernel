@@ -127,7 +127,9 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
     pure (match type with | .float => value | .float32 => call "Math.fround" [value])
   | .floatCompare _ op, [a,b] => pure (bin (floatCompareOp op) a b)
   | .natAdd, [a,b] | .intAdd, [a,b] | .stringPush, [a,b] | .stringAppend, [a,b] => pure (bin "+" a b)
-  | .natPow, [a,b] => pure (bin "**" a b)
+  | .natPow, [a,b] | .intPow, [a,b] => pure (bin "**" a b)
+  | .natShiftLeft, [a,b] => pure (bin "<<" a b)
+  | .natShiftRight, [a,b] => pure (bin ">>" a b)
   | .natMul, [a,b] | .intMul, [a,b] => pure (bin "*" a b)
   | .intSub, [a,b] => pure (bin "-" a b)
   | .natSub, [a,b] => pure (bigPair a b (.conditional
@@ -165,6 +167,9 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
       [{ name := "__ps_text", type := "string" }, { name := "__ps_position", type := "bigint" }]
       "boolean" [ret (bin ">=" (id "__ps_position") (field (call "__ps$utf8" [id "__ps_text"]) "size"))] [a,b])
   | .stringExtract, [a,b,c] => pure (call "__ps$stringExtract" [a,b,c])
+  | .stringToUtf8, [a] => pure (call "__ps$stringToUtf8" [a])
+  | .utf8Valid, [a] => pure (call "__ps$utf8Valid" [a])
+  | .utf8Decode, [a] => pure (call "__ps$utf8Decode" [a])
   | .stringEq, [a,b] => pure (equal "string" "===" a b)
   | .arrayBuild, [count,seed,head,tail] =>
       let [a,s] ← types.mapM irType | throw "PSCV0-ECMA: arrayBuild type arguments"
@@ -213,6 +218,23 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
         ret (id "__ps_result")]
         [{ name := "__ps_fn", type := "(value: " ++ a ++ ") => " ++ b },
           { name := "__ps_array", type := a ++ "[]" }] [fn,array] ("__ps$Computation<" ++ b ++ "[]>"))
+  | .arrayFilter, [fn,array,start,stop] =>
+      let [a] ← types.mapM irType | throw "PSCV0-ECMA: arrayFilter type arguments"
+      pure (delegate [
+        const "__ps_size" (call "BigInt" [field (id "__ps_array") "length"]),
+        const "__ps_end" (.conditional (bin "<=" (id "__ps_stop") (id "__ps_size")) (id "__ps_stop") (id "__ps_size")),
+        .binding false "__ps_result" (a ++ "[]") (some (.array [])),
+        letE "__ps_index" (id "__ps_start"),
+        .whileE (bin "<" (id "__ps_index") (id "__ps_end")) [
+          const "__ps_element" arrayAt,
+          .ifE (unary "yield* " (call "__ps$invoke" [id "__ps_fn", id "__ps_element"]))
+            [.expression (method (id "__ps_result") "push" [id "__ps_element"])] [],
+          inc "__ps_index" (id "1n")],
+        ret (id "__ps_result")]
+        [{ name := "__ps_fn", type := "(value: " ++ a ++ ") => boolean" },
+          { name := "__ps_array", type := a ++ "[]" },
+          { name := "__ps_start", type := "bigint" }, { name := "__ps_stop", type := "bigint" }]
+        [fn,array,start,stop] ("__ps$Computation<" ++ a ++ "[]>"))
   | .arrayFoldl, [fn,initial,array,start,stop] =>
       let [a,b] ← types.mapM irType | throw "PSCV0-ECMA: arrayFoldl type arguments"
       pure (delegate [

@@ -36,7 +36,8 @@ def psErasureFloatWord : String → Option PsVerifiedIrMachineIntegerType
   | "UInt8" => some .uint8 | "UInt16" => some .uint16
   | "UInt32" => some .uint32 | "UInt64" => some .uint64
   | "Int8" => some .int8 | "Int16" => some .int16
-  | "Int32" => some .int32 | "Int64" => some .int64 | _ => none
+  | "Int32" => some .int32 | "Int64" => some .int64
+  | "USize" => some .usize | "ISize" => some .isize | _ => none
 
 -- Exact native identities only; neither suffixes nor arbitrary user definitions
 -- gain a primitive contract. USize/ISize remain separately target-profiled.
@@ -123,8 +124,8 @@ def psEraseFloatApplication (scope : PsErasureScope)
     | .unary op, [value] => pure (.intrinsic (.floatUnary width op) [] [value], true)
     | .test op, [value] => pure (.intrinsic (.floatTest width op) [] [value], false)
     | .compare op, [a,b] => pure (.intrinsic (.floatCompare width op) [] [a,b], false)
-    | .ofWord word, [value] => pure (.intrinsic (.floatOfWord width word) [] [value], true)
-    | .toWord word, [value] => pure (.intrinsic (.floatToWord width word) [] [value], false)
+    | .ofWord word, [value] => pure (.intrinsic (.floatOfWord width (← psErasureResolveWord scope word)) [] [value], true)
+    | .toWord word, [value] => pure (.intrinsic (.floatToWord width (← psErasureResolveWord scope word)) [] [value], false)
     | .display, [value] => pure (← PsFloatRuntime.call scope width "display" [value], false)
     | .convert target, [value] => pure (.intrinsic (.floatConvert width target) [] [value], true)
     | .ofNat, [value] => pure (← PsFloatRuntime.call scope width "natural" [value], true)

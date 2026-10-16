@@ -75,6 +75,12 @@ structure PsSyntaxProofScope where
   -- serialized as public names or made visible to external importers.
   privateAliases : List (List String × List String) := []
 
+-- Operator intent survives parsing so elaboration can join operand types before
+-- inserting coercions. Ordinary named calls keep their ordinary semantics.
+inductive PsSyntaxOperatorKind where
+  | unary | binary | rightAction | relation | booleanRelation
+  deriving BEq
+
 mutual
 inductive PsSyntaxTerm where
   | doE (items : List PsSyntaxDoItem) (span : PsSourceSpan)
@@ -88,6 +94,8 @@ inductive PsSyntaxTerm where
   -- Adjacent calls retain labels and the empty-invocation request until elaboration.
   | call (fn : PsSyntaxTerm)
       (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm)) (span : PsSourceSpan)
+  | operatorE (kind : PsSyntaxOperatorKind) (name : PsSyntaxName)
+      (spelling : String) (arguments : List PsSyntaxTerm) (span : PsSourceSpan)
   | natural (text : String) (span : PsSourceSpan)
   | scientific (text : String) (span : PsSourceSpan)
   | string (text : String) (span : PsSourceSpan)
@@ -197,6 +205,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .optionalType _ _ span => span
   | .ascription _ _ span => span
   | .call _ _ span => span
+  | .operatorE _ _ _ _ span => span
   | .reference name => name.span
   | .natural _ span => span
   | .scientific _ span => span

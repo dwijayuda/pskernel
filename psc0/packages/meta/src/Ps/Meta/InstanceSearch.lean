@@ -1,4 +1,5 @@
 import Ps.Meta.InstanceCandidate
+import Ps.Meta.InstanceKey
 import Ps.Foundation.Index
 
 -- The table belongs to one environment, registry and synthesis invocation.
@@ -170,25 +171,21 @@ def psInstancePrepareGenerator (environment : PsEnvironment)
     let entries := psLocalInstanceEntries locals ++ psInstanceRegistryEntries registry name
     some {
       scope, locals, context := prepared.context,
-      target := prepared.type, key := some prepared.key, entries }
+      target := prepared.type,
+      key := some (psInstanceCanonicalKey environment locals prepared.context 256 prepared.key), entries }
   | none =>
     match psWhnfWithTransparency .instances environment context locals (psMetaInstantiate context target) with
     | .forallE _ _ _ _ =>
       some { scope, locals, context, target, key := none, entries := [] }
     | _ => none
 
--- A canonical class key masks outputs during selection, as in InstanceTarget.
--- Comparing keys never supplies proof evidence. Every replay below is checked
--- against the receiver's complete, original dependent target.
-def psInstanceGoalHash (goal : PsInstanceGenerator) : Option Nat := do
-  let key ← goal.key
-  let .constE name _ := (psInferAppView key).head | none
-  return (psEnvironmentNameHash name + 31 * goal.scope) % 65521
+-- Key hashing partitions by normalized structural expression and lexical
+-- scope. Collision buckets retain alpha equality and the closed local-signature
+-- check; answer replay still validates the receiver's full dependent target.
+def psInstanceGoalHash (goal : PsInstanceGenerator) : Option Nat :=
+  goal.key.map (psInstanceScopedKeyHash goal.scope)
 
--- Partition only by rigid class identity and lexical scope. Terms that are
--- definitionally equal may have different syntax, so term hashes cannot
--- safely exclude a candidate. Full checked comparison remains in the bucket.
-def psInstanceFindGenerator (environment : PsEnvironment)
+def psInstanceFindGenerator (_environment : PsEnvironment)
     (state : PsInstanceSearchState) (goal : PsInstanceGenerator) : Option Nat × Nat :=
   match goal.key, psInstanceGoalHash goal with
   | some key, some hash =>
@@ -203,8 +200,7 @@ def psInstanceFindGenerator (environment : PsEnvironment)
           match prior.key with
           | none => false
           | some priorKey =>
-            psExprAlphaEq priorKey key ||
-              psDefEqReadOnlyWithTransparency .instances environment goal.context goal.locals priorKey key
+            psExprAlphaEq priorKey key
         (if same then some id else none, comparisons + 1)) (none, 0)
   | _, _ => (none, 0)
 

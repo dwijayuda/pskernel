@@ -2,6 +2,7 @@ import Ps.BackendRust.Captures
 import Ps.BackendRust.Intrinsic
 import Ps.BackendRust.Layout
 import Ps.Codegen.Doc
+import Ps.CompilerIr.CheckTypes
 
 def psRustResult {α : Type} (value : Except PsRustEmitError α) : Except String α :=
   value.mapError (fun error => "PSCV0-RUST: " ++ reprStr error)
@@ -61,7 +62,7 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
         if ctx.locals.contains name then
           return .text (if preserve.contains name then psRustClonePrinted name else name)
         else psRustGlobalValue ctx name
-    | .intrinsic op _ args =>
+    | .intrinsic op typeArguments args =>
         -- Name complex operands once, in order. Borrowed variables avoid a
         -- needless BigInt/array clone; owned updates can retain uniqueness.
         let mut statements := []
@@ -86,8 +87,16 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
               statements := .append (.text ("let " ++ temporary ++ " = ")) (.append value (.text ";")) :: statements
               printed := temporary :: printed
         let value ← psRustResult (psRustEmitIntrinsicFromPrinted op printed.reverse)
-        if statements.isEmpty then return .text value
-        return psDocBlock "" (statements.reverse ++ [.text value])
+        -- Reuse the checked IR's instantiated signature, not a second typing
+        -- table. A nested empty collection has no element-bearing operand
+        -- from which Rust could recover its type arguments.
+        let signature ← (psIrCheckIntrinsicSignature op typeArguments).mapError
+          (fun issue => "PSCV0-RUST: " ++ issue.code ++ ": " ++ issue.detail)
+        let type ← psRustResult (psRustEmitType signature.resultType)
+        let result := "__ps_result_" ++ toString fuel
+        return psDocBlock "" (statements.reverse ++ [
+          .text ("let " ++ result ++ ": " ++ type ++ " = " ++ value ++ ";"),
+          .text result])
     | .call fn types args =>
         let fnLive := preserve ++ psRustFreeMany ctx args
         let callee ← match fn with

@@ -208,12 +208,25 @@ structure PsPscv0ProjectOrigin where
   batches : List PsElabBatchOrigin
   parents : List (PsName × PsName)
 
+-- Retain the actual import/export decision at its owner. This receipt is
+-- descriptive metadata; admission and runtime semantics remain separate.
+structure PsPscv0ModuleProfile where
+  name : String
+  sourceName : String
+  source : String
+  imports : List (String × Bool)
+  ownNames : List PsName
+  privateNames : List PsName
+  exposedNames : List PsName
+  interface : PsPscv0ModuleInterface
+
 structure PsPscv0ProjectOutput where
   prepared : PsCompilerAdmissionReadyModule
   admissions : String
   mainNames : List PsName
   libraryNames : List PsName
   origins : List PsPscv0ProjectOrigin
+  moduleProfiles : List PsPscv0ModuleProfile
   -- No imported source is promoted to proof authority. The external official
   -- Lean kernel still checks the complete canonical dependency closure.
 
@@ -234,6 +247,7 @@ def psCompilerPreparePscv0Project (entryName : String)
   let mut globalNames : List PsName := []
   let mut origins : List PsPscv0ProjectOrigin := []
   let mut mainNames : List PsName := []
+  let mut moduleProfiles : List PsPscv0ModuleProfile := []
   for item in order do
     let importEnvironment ← item.program.imports.foldlM (fun env imp => do
       let some linked := built.find? (fun module =>
@@ -275,6 +289,10 @@ def psCompilerPreparePscv0Project (entryName : String)
           module.name == psPscv0ImportKey imp)
           | throw "PSCV0-MODULE: missing public dependency"
         interface := psPscv0InterfaceMerge interface linked.interface
+    moduleProfiles := moduleProfiles ++ [{
+      name := item.name, sourceName := item.sourceName, source := item.source
+      imports := item.program.imports.map (fun imp => (psPscv0ImportKey imp, imp.isPublic))
+      ownNames, privateNames := hidden, exposedNames := elaborated.exposedNames, interface }]
     built := built ++ [{ name := item.name, interface, ownNames }]
     declarations := declarations ++ own
     origins := origins ++ [{
@@ -289,4 +307,4 @@ def psCompilerPreparePscv0Project (entryName : String)
   let libraryNames := globalNames.reverse.filter (fun name =>
     !mainNames.any (psNameEq name))
   let admissions ← (psCompilerAdmissionsFromPrepared prepared).mapError psCompilerPscv0Error
-  return { prepared, admissions, mainNames, libraryNames, origins }
+  return { prepared, admissions, mainNames, libraryNames, origins, moduleProfiles }

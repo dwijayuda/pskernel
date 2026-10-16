@@ -41,7 +41,7 @@ def psPrepareInductiveParametersWithFuel
                       binder;
                   let parameterName := String.Internal.append "T" (psNatToString index);
                   let value := PsExpr.fvar pushed.id;
-                  let nextScope : PsErasureScope := {
+                  let nextScope : PsErasureScope := { scope with
                     localContext := pushed.context
                     runtimeLocals := scope.runtimeLocals
                     typeLocals :=
@@ -301,7 +301,7 @@ def psPrepareRuntimeInductive
                 let makeEntry :=
                   fun (ctorInfo : PsRuntimeConstructorInfo) => Prod.mk ctorInfo.coreName ctorInfo;
                 let constructorEntries := psListMap makeEntry constructors;
-                let nextScope : PsErasureScope := {
+                let nextScope : PsErasureScope := { scope with
                   localContext := scope.localContext
                   runtimeLocals := scope.runtimeLocals
                   typeLocals := scope.typeLocals

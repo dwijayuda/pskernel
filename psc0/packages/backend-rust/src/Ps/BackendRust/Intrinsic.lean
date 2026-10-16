@@ -318,6 +318,15 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .natShiftLeft | .natShiftRight | .intPow =>
+      match arguments with
+      | [a, b] =>
+        let fn := match operation with
+          | .natShiftLeft => "__ps_nat_shift_left"
+          | .natShiftRight => "__ps_nat_shift_right"
+          | _ => "__ps_int_pow"
+        .ok (fn ++ "(&(" ++ a ++ "), &(" ++ b ++ "))")
+      | _ => .error .intrinsicArity
   | .natPow =>
       match arguments with
       | [a, b] => .ok ("__ps_nat_pow(&(" ++ a ++ "), &(" ++ b ++ "))")
@@ -706,6 +715,15 @@ def psRustEmitIntrinsicFromPrinted
                 "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .stringToUtf8 | .utf8Valid | .utf8Decode =>
+      match psRustExactOneArgument arguments with
+      | some value =>
+        let helper := match operation with
+          | .stringToUtf8 => "__ps_string_to_utf8"
+          | .utf8Valid => "__ps_utf8_valid"
+          | _ => "__ps_utf8_decode"
+        .ok (helper ++ "(&(" ++ value ++ "))")
+      | none => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.stringEq =>
       match psRustExactTwoArguments arguments with
       | Option.some pair =>
@@ -801,6 +819,11 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 array "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .arrayFilter =>
+      match arguments with
+      | [fn, array, start, stop] =>
+        .ok ("__ps_array_filter(" ++ fn ++ ", &(" ++ array ++ "), &(" ++ start ++ "), &(" ++ stop ++ "))")
+      | _ => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.arrayFoldl =>
       match psRustExactFiveArguments arguments with
       | Option.some quintuple =>
@@ -836,5 +859,5 @@ def psRustIntrinsicConsumes (op : PsVerifiedIrIntrinsic) (index : Nat) : Bool :=
   | .arrayBuild => index != 0
   | .arrayPush => true
   | .arraySet | .arraySetIfInBounds => index == 0 || index == 2
-  | .arrayMap | .arrayFoldl | .stringPush | .stringAppend => index == 0
+  | .arrayMap | .arrayFilter | .arrayFoldl | .stringPush | .stringAppend => index == 0
   | _ => false

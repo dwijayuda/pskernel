@@ -1,25 +1,66 @@
-# M3 direct-recursive Repr — focused qualification and full-suite reconciliation
+# M3 direct-recursive Repr — qualified 16 October 2026
 
-16 October 2026. **Focused cross-target qualification passed; exact reconciled full-suite qualification is pending. M3+B remains OPEN.** This note supplements the implementation design in PSCV0_M3_RECURSIVE_REPR_2026-10-16.md; it does not rewrite prior failed or pending evidence.
+## Acceptance and exact boundary
 
-## Focused evidence
+**The selected direct-recursive Repr slice is implemented and qualified. M3+B remains OPEN.** This receipt supersedes pending qualification language in the earlier Repr design and handoffs. It does not change the v7.2 specification or the milestone's remaining requirements.
 
-Compiler/test commit `f0d2237239303fd7fc82499efc0333f749c69a6c` passed run **38897206572**, job **116960429649**. Every reported step succeeded: checked source and five-target emission, direct JS, strict compiled TS, locked Rust, V8 GC core and Wasmtime components, and artifact publication. The existing generic tree fixture compares exact independently computed Lean strings for Nat and Bool, root precedences 0/1024 and width 40. It retains the checked Hashable defining law and three Hashable plus three Repr intended-rule refusals. Recursive values remain internal; exports use the existing Bool-to-UInt64 ABI.
+Qualified compiler and tests: **4501164e5f1c32e00c81ae98d171e7bf201d1907**, tree `b41b9db561108596a95cc0879ba8dcfa0d964f8d`, development `psc0/pscv0-v7-native-lean-v1`. The acceptance update is a documentation-only child; qualification belongs to this exact compiler commit.
 
-Artifact **12044600921**, name `pscv0-m3-recursive-hash-f0d2237239303fd7fc82499efc0333f749c69a6c`, size **225317 bytes**, digest `sha256:340abb082a14e68c5d262d01d6fcb8171683ea36e38af8a6acd368cd3f1b06be`. The artifact was present and unexpired when read. Hosting retention is not permanent availability.
+Official Lean: **4.35.0**, `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Forward `.ps` reference: v7.2 blob `694115223777599ba28ee175e14bb642b7b6aa4b`, SHA-256 `c65487eccbd2829d1d9e5e1be3bc7f4cb37849b841ab3257ea0dd47665b8a30e`. Approved assumptions remain `propext` and `Quot.sound`. No legacy mode, new axiom, partial helper, backend-specific printer, pskernel-core, self-hosting or C5 execution.
 
-The initial c942112d fixture failed because it used unavailable `String.beq` instead of the selected checked equality operator. f0d22372 changes those two source expressions to `==` without changing oracle strings, inputs, expected results or compiler logic. No compiler behavior changed between c942112d and f0d22372.
+## Same-commit qualification
 
-## Existing native test migration
+The following run identities and head SHAs were read from the exact commit's GitHub run/check metadata. Earlier intermediate summaries are not substitutes for these receipts.
 
-The existing `Pscv0NativeTests.lean` deriving boundary still expected `inductive Bad where { | loop(tail: Bad) } deriving Repr` to fail. Direct-recursive Repr is now an intended capability with independent positive coverage. The negative is therefore migrated to a nested-recursive field `tails: List Bad`, which remains unsupported. The rejection phase/assertion and every other native fixture remain unchanged.
+| Gate | Run | Final result |
+| --- | --- | --- |
+| Full native Linux pipeline | [38898123679](https://github.com/dwijayuda/pskernel/actions/runs/38898123679) | SUCCESS; all 33 reported steps, including setup/cleanup, none skipped |
+| Independent F1 canonical model | [38898123552](https://github.com/dwijayuda/pskernel/actions/runs/38898123552) | SUCCESS |
+| Independent F2 logical operations | [38898123501](https://github.com/dwijayuda/pskernel/actions/runs/38898123501) | SUCCESS |
+| Independent F3/F4/platform | [38898123787](https://github.com/dwijayuda/pskernel/actions/runs/38898123787) | SUCCESS |
+| Focused recursive deriving and target execution | [38898124015](https://github.com/dwijayuda/pskernel/actions/runs/38898124015) | SUCCESS; every reported step passed |
 
-Cloud preparation **38897511036/job116961438670** verified original blob `1496891ff3e665ff5e06fb367b4175c845552b35`, replaced exactly one matching line, printed the unified diff and created unreferenced blob `913c02e94f1688da595c6bad617eb8a7f8f9c83b` (326254 bytes). The returned SHA was checked against the independently computed Git blob hash. That job changed no tracked source, tree, commit, ref or PR. The connector now applies the inspected blob and removes the completed temporary preparation workflow. Preparation success is not compiler qualification.
+Native job **116963430156** completed at **2026-10-16T12:22:03Z / 19:22:03 Jakarta**. This includes compiler/parser checks, logical-asset regeneration, checked source and Standard, module emission, GC core/components, TypeScript and Rust application execution, repeated native Wasmtime embedding/post-return, unchanged measurement and artifact publication. The 33-step count includes setup/cleanup and is not 33 independent semantic suites.
 
-Earlier diagnostic 38897206612 successfully located the actual source owner, but its later redirected job-log download failed HTTP 401. It is not a green qualification. Inconsistent earlier log summaries naming absent scripts or a different Hidden declaration were not used to change compiler semantics.
+Focused job **116963431087** passed source checking and five-target generation, direct JS, strict compiled TS, locked Rust, V8 GC core and Wasmtime components. These are this exact commit's results, not inherited success from the parent.
 
-## Exact next gate and scope
+## Published artifacts
 
-The reconciliation changes one native-test line, the Repr attribution/scope comment, both handoffs, this receipt and removal of the temporary diagnostic workflow. No executable compiler code, logical assumption, budget or qualification command changes. The packages comment change also causes all applicable native, independent and focused workflows to run at one exact reconciliation commit. Their results must be read before full-slice acceptance; do not inherit the older focused success.
+The following identifiers/digests come from the corresponding run's artifact inventory, with the workflow head SHA checked against the qualified commit. Both were present and unexpired when inspected. Hosting retention does not guarantee permanent downloads.
 
-Shared recursor motive/type validation, nonrecursive formatting and proof/type/hidden-field behavior remain intact. This slice is direct uniform nonindexed Repr, not mutual/nested/indexed deriving, complete P0 execution, P1 fixedpoints, full M3+B or global compiler preservation. No performance result is claimed. Approved assumptions remain propext/Quot.sound; no pskernel-core, self-hosting or C5 execution.
+| Artifact | ID | Size in bytes | SHA-256 digest |
+| --- | --- | ---: | --- |
+| `pscv0-v7-native-4501164e5f1c32e00c81ae98d171e7bf201d1907` | 12044554729 | 6704386 | `a21b4955502b3a2237d233a57cecf531cd040a05466138aed502a8ebe44f7cfa` |
+| `pscv0-m3-recursive-hash-4501164e5f1c32e00c81ae98d171e7bf201d1907` | 12045001218 | 225316 | `5a3d5807763726e1ed1988a856aa62babc65f6a022e4dc90b6b880882f7081e4` |
+
+The focused workflow retains its historical Hashable name but now checks both Hashable and Repr. The artifact identity is preserved rather than renamed in this receipt.
+
+## Implemented semantics and focused evidence
+
+`Ps.Elab.DerivingRepr` consumes the existing checked direct-recursive eliminator. Independent field dictionaries are planned in the shared family telescope. A recursive child's printer is the actual induction hypothesis of type Nat -> Format, applied at precedence 1024. No self dictionary is assumed. The existing abstracted-motive application, minor type checks, parameter/universe handling, nonrecursive structure formatting, constructor names, source field order, hidden fields and proof/type placeholders remain intact.
+
+The existing generic binary-tree fixture now derives Hashable and Repr, rather than adding another test executable or target workflow. An independent pinned Lean derivation uses the same family name, so its exact rendered text can be compared without name normalization. Nat and Bool payloads cover two recursive children, nested tree values, root precedences 0 and 1024, and width 40. Expected strings are generated by the native oracle, stored in the fixture artifact, and embedded as literals in the separately compiled `.ps` program.
+
+Generated functions compare the actual rendered string to that native string directly and return UInt64 one only for equality. Every selected VM checks the result. This is an exact text comparison, not comparison of string hashes. The existing Bool-to-UInt64 foreign ABI is retained; recursive data remains internal to each runtime.
+
+The Hashable defining law and original three refusal cases remain. Three corresponding Repr cases reject nested families, indexed families and missing independent field dictionaries at the intended elaboration rule. These tests support the selected scope, not all possible inductives, general compiler preservation or an unrestricted formatting theorem.
+
+## Corrections and historical evidence
+
+Initial implementation `c942112d9ca0e2cb47598eb20f8b72d64be9ca4a` compiled but its new fixture used the unavailable `String.beq` spelling. `f0d2237239303fd7fc82499efc0333f749c69a6c` changed those two expressions to the selected checked `==` operator without changing compiler logic, expected text, inputs or comparison outcomes. Its focused run `38897206572` passed before final reconciliation.
+
+The existing native suite still expected `inductive Bad where { | loop(tail: Bad) } deriving Repr` to fail. Direct-recursive Repr is now positively qualified, so the negative was migrated to the unsupported nested case `tails: List Bad`. Rejection phase/assertions and all other native fixtures stayed unchanged. This is a supported-feature boundary migration, not accepting an arbitrary failure.
+
+Cloud preparation `38897511036/job116961438670` verified original native-test blob `1496891ff3e665ff5e06fb367b4175c845552b35`, replaced exactly one matching line, printed the diff and created SHA-checked unreferenced blob `913c02e94f1688da595c6bad617eb8a7f8f9c83b`. The connector applied that exact blob with a fresh non-force branch update. The completed temporary workflow was deleted at the qualified commit. No tracked source or branch was updated by the preparation job itself.
+
+Earlier diagnostic `38897206612` found the actual source owner but later redirected log retrieval failed HTTP 401. It is not counted as successful qualification. Prior failed runs remain in history; final success is demonstrated by the five same-commit results above.
+
+## Remaining M3 and performance boundaries
+
+Direct-recursive Hashable and Repr are now covered by the shared checked induction interface. Broader recursive BEq/DecidableEq, nested/indexed/mutual data and deriving, elimination, structural/well-founded recursion, P0 executable/assurance integration and selected P1 fixedpoints remain open. The current partial logical checking retains the actual private partial marker; shared executable admission still rejects it. Never execute an inhabitant as the program body or invent logical equations/totality.
+
+The next deriving investigation has read local DerivingBEq, pinned upstream Deriving/BEq, and the shared recursor/erasure APIs. Recursive comparison needs checked left-child comparison hypotheses plus right-constructor case analysis, without accidental extra recursive traversal. `psRecursorUsesHypotheses` is an existing reusable analysis, not by itself proof that a new lowering is correct. No recursive BEq implementation or qualification is claimed by this receipt.
+
+No new speedup is claimed. The original runtime133af061 and paired38840337837/artifact12021226623 remain the performance evidence: 9.25–10.11x List-to-Array improvement, smaller head/array gains, and unresolved deep-list lookup/reversal. Benchmark completion here is output/measurement qualification, not production speed, no-regression or native-Lean parity.
+
+PR109 remains draft/open on its original base and unmerged. Both handoffs and the roadmap are updated with this slice's accepted boundary; M2+A's original accepted profile and receipts remain unchanged.

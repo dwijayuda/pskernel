@@ -1,0 +1,55 @@
+name: PSCV0 M3 Repr source diagnostic
+on:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1]
+    paths: ['.github/workflows/psc0-m3-repr-diagnostic.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/test
+            psc0/scripts
+            psc0/packages/elab/src
+      - name: Extract exact source owners and failed-run excerpts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, re, urllib.request
+          print('CHECKOUT', os.environ['GITHUB_SHA'])
+          p = pathlib.Path('psc0/test/Pscv0NativeTests.lean')
+          lines = p.read_text().splitlines()
+          selected = set()
+          for i, line in enumerate(lines):
+              if re.search(r'derivingBoundaries|DerivingEquality|recursive.*Repr|recursive deriving|Hidden.*where', line):
+                  selected.update(range(max(0, i-5), min(len(lines), i+12)))
+          for i in sorted(selected): print(f'{p}:{i+1}: {lines[i]}')
+          print('NATIVE SCRIPTS', ', '.join(p.name for p in pathlib.Path('psc0/scripts').glob('*native*')))
+          base = 'https://api.github.com/repos/dwijayuda/pskernel'
+          headers = {'Authorization': 'Bearer '+os.environ['GH_TOKEN'], 'Accept':'application/vnd.github+json'}
+          for run in [38894962990, 38894963323]:
+              req = urllib.request.Request(f'{base}/actions/runs/{run}', headers=headers)
+              with urllib.request.urlopen(req, timeout=30) as r: meta = json.load(r)
+              assert meta['head_sha'] == 'c942112d9ca0e2cb47598eb20f8b72d64be9ca4a'
+              print('RUN', run, meta['head_sha'], meta['status'], meta['conclusion'])
+              req = urllib.request.Request(f'{base}/actions/runs/{run}/jobs', headers=headers)
+              with urllib.request.urlopen(req, timeout=30) as r: jobs = json.load(r)['jobs']
+              for job in jobs:
+                  print('JOB', job['id'], [(s['name'], s['conclusion']) for s in job['steps'] if s['conclusion'] == 'failure'])
+                  req = urllib.request.Request(f"{base}/actions/jobs/{job['id']}/logs", headers=headers)
+                  with urllib.request.urlopen(req, timeout=30) as r: log = r.read().decode('utf-8', errors='replace').splitlines()
+                  chosen = set()
+                  for i, line in enumerate(log):
+                      if re.search(r'uncaught exception|##\[error\]|unsupported runtime|v7 deriving|Error:|wrong phase|source case', line):
+                          chosen.update(range(max(0,i-2), min(len(log),i+4)))
+                  for i in sorted(chosen): print(log[i])
+          PY

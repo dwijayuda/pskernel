@@ -49,7 +49,7 @@ private def source : String :=
   " let expected: String := if (flag) { " ++ oracleLiteral (M3RecursiveHashOracle.natText true) ++
     " } else { " ++ oracleLiteral (M3RecursiveHashOracle.natText false) ++ " }\n" ++
   " let actual: String := Std.Format.pretty(Repr.reprPrec(tree, prec), 40, 0, 0)\n" ++
-  " if (String.beq(actual, expected)) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
+  " if (actual == expected) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
   "}\n" ++
   "function m3reprbool(flag: Bool): UInt64 := {\n" ++
   " let prec: Nat := if (flag) { 1024 } else { 0 }\n" ++
@@ -57,7 +57,7 @@ private def source : String :=
   " let expected: String := if (flag) { " ++ oracleLiteral (M3RecursiveHashOracle.boolText true) ++
     " } else { " ++ oracleLiteral (M3RecursiveHashOracle.boolText false) ++ " }\n" ++
   " let actual: String := Std.Format.pretty(Repr.reprPrec(tree, prec), 40, 0, 0)\n" ++
-  " if (String.beq(actual, expected)) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
+  " if (actual == expected) { UInt64.ofNat(1) } else { UInt64.ofNat(0) }\n" ++
   "}\n"
 
 private def refusals : List (String × String × String) := [
@@ -78,6 +78,8 @@ def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
   let directory := System.FilePath.mk directory
   IO.FS.createDirAll directory
+  -- Preserve the actual submitted source even when qualification fails.
+  IO.FS.writeFile (directory / "hashing.ps") source
   let request : PsV7Native.Request := {
     source, sourceName := "m3-recursive-hash.ps", outputStem := "hashing"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
@@ -115,6 +117,5 @@ def main (args : List String) : IO Unit := do
     ("reprNatText", Lean.toJson (M3RecursiveHashOracle.natText flag)),
     ("reprBoolText", Lean.toJson (M3RecursiveHashOracle.boolText flag))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.FS.writeFile (directory / "hashing.ps") source
   IO.println "PSCV0_M3_RECURSIVE_HASH: PASS generic direct-recursive derivation, checked defining law, five-target emission and three phase-correct Hashable refusals; runtime checks follow"
   IO.println "PSCV0_M3_RECURSIVE_REPR: PASS generic Nat/Bool, two root precedences, exact native-oracle text at width 40, three phase-correct Repr refusals; runtime checks follow"

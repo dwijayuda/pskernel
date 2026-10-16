@@ -218,7 +218,7 @@ def psKernelOpenSimpleHeaderParams
     List.nil
 
 def psKernelOpenSimpleHeaderIndicesWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelExpr ->
     List PsKernelOpenBinder ->
@@ -233,14 +233,14 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
           "simple inductive index budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelOpenSimpleHeaderIndicesWithFuel remaining;
+        psKernelOpenSimpleHeaderIndicesWithFuel remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (type : PsKernelExpr)
         (revIndices : List PsKernelOpenBinder) =>
         match
             psKernelSessionWhnf
-              remaining
+              checkerFuel
               session
               type with
         | Except.error error =>
@@ -252,7 +252,7 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
             | PsKernelExpr.forallE userName domain body binderInfo =>
                 match
                     psKernelSessionCheck
-                      remaining
+                      checkerFuel
                       (Prod.snd reduced)
                       domain with
                 | Except.error error =>
@@ -260,7 +260,7 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
                 | Except.ok domainType =>
                     match
                         psKernelSessionEnsureSort
-                          remaining
+                          checkerFuel
                           (Prod.snd domainType)
                           (Prod.fst domainType) with
                     | Except.error error =>
@@ -302,6 +302,7 @@ def psKernelOpenSimpleHeaderIndices
     Except String PsKernelOpenBindersResult :=
   psKernelOpenSimpleHeaderIndicesWithFuel
     (Nat.succ fuel)
+    fuel
     session
     type
     List.nil

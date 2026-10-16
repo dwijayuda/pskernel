@@ -92,7 +92,7 @@ def psKernelSimpleCtorTypes
         (psKernelSimpleCtorTypes rest)
 
 def psKernelOpenSimpleConstructorParamsWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     List PsKernelOpenBinder ->
     PsKernelExpr ->
@@ -107,7 +107,7 @@ def psKernelOpenSimpleConstructorParamsWithFuel
           "simple inductive constructor parameter budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelOpenSimpleConstructorParamsWithFuel remaining;
+        psKernelOpenSimpleConstructorParamsWithFuel remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (params : List PsKernelOpenBinder)
@@ -123,7 +123,7 @@ def psKernelOpenSimpleConstructorParamsWithFuel
             -- WHNF must not manufacture a binder from an alias or metadata.
             match type with
             | PsKernelExpr.forallE _ domain body _ =>
-                match psKernelSessionIsDefEq remaining session
+                match psKernelSessionIsDefEq checkerFuel session
                     domain param.type with
                 | Except.error error => Except.error error
                 | Except.ok equal =>
@@ -146,6 +146,7 @@ def psKernelOpenSimpleConstructorParams
     Except String PsKernelExprSessionResult :=
   psKernelOpenSimpleConstructorParamsWithFuel
     (Nat.succ fuel)
+    fuel
     session
     params
     type

@@ -40,7 +40,7 @@ def psKernelSimpleAllExprsMember
         false
 
 def psKernelSimpleCtorAllowsLargeElimWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelExpr ->
     List PsKernelExpr ->
@@ -55,14 +55,14 @@ def psKernelSimpleCtorAllowsLargeElimWithFuel
           "simple inductive elimination budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelSimpleCtorAllowsLargeElimWithFuel remaining;
+        psKernelSimpleCtorAllowsLargeElimWithFuel remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (type : PsKernelExpr)
         (revNonProp : List PsKernelExpr) =>
         match
             psKernelSessionWhnf
-              remaining
+              checkerFuel
               session
               type with
         | Except.error error =>
@@ -72,7 +72,7 @@ def psKernelSimpleCtorAllowsLargeElimWithFuel
             | PsKernelExpr.forallE userName domain body binderInfo =>
                 match
                     psKernelSessionCheck
-                      remaining
+                      checkerFuel
                       (Prod.snd reduced)
                       domain with
                 | Except.error error =>
@@ -80,7 +80,7 @@ def psKernelSimpleCtorAllowsLargeElimWithFuel
                 | Except.ok domainType =>
                     match
                         psKernelSessionEnsureSort
-                          remaining
+                          checkerFuel
                           (Prod.snd domainType)
                           (Prod.fst domainType) with
                     | Except.error error =>
@@ -138,6 +138,7 @@ def psKernelSimpleCtorAllowsLargeElim
   | Except.ok afterParams =>
       psKernelSimpleCtorAllowsLargeElimWithFuel
         (Nat.succ fuel)
+        fuel
         afterParams.session
         afterParams.result
         List.nil

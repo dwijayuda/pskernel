@@ -1,0 +1,70 @@
+name: PSC0 compact CI diagnostic
+on:
+  push:
+    branches: [psc0/pscv0-v7-platform-words-research]
+    paths: ['.github/workflows/psc0-ci-diagnostic.yml']
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Completed native qualification run to inspect
+        required: true
+        default: '38823906652'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read failure context without replaying generated source dumps
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ inputs.run_id || '38823906652' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request, urllib.error
+          repo, run = os.environ['REPOSITORY'], os.environ['RUN_ID']
+          if not run.isdecimal():
+              raise ValueError('run_id must be numeric')
+          root = 'https://api.github.com/repos/' + repo
+          headers = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                     'Accept': 'application/vnd.github+json',
+                     'X-GitHub-Api-Version': '2022-11-28'}
+          def read_json(path):
+              with urllib.request.urlopen(urllib.request.Request(root + path, headers=headers), timeout=30) as response:
+                  return json.load(response)
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+                  return None
+          def read_log(job):
+              request = urllib.request.Request(root + '/actions/jobs/' + str(job) + '/logs', headers=headers)
+              try:
+                  response = urllib.request.build_opener(NoRedirect).open(request, timeout=30)
+              except urllib.error.HTTPError as error:
+                  if error.code not in (301, 302, 303, 307, 308):
+                      raise
+                  location = error.headers['Location']
+                  if not location.startswith('https://'):
+                      raise ValueError('expected HTTPS log redirect')
+                  # Do not forward the GitHub token to the signed log-storage URL.
+                  response = urllib.request.urlopen(location, timeout=30)
+              with response:
+                  return response.read().decode('utf-8', errors='replace').splitlines()
+          receipt = read_json('/actions/runs/' + run)
+          print('RUN', run, 'HEAD', receipt['head_sha'], receipt['status'], receipt['conclusion'])
+          for job in read_json('/actions/runs/' + run + '/jobs?per_page=100')['jobs']:
+              print('JOB', job['id'], job['name'], job['conclusion'])
+              for step in job['steps']:
+                  print('STEP', step['number'], step['name'], step['conclusion'])
+              if job['conclusion'] != 'failure':
+                  continue
+              lines = read_log(job['id'])
+              hits = [i for i, line in enumerate(lines) if re.search(r'AssertionError|TypeError|ReferenceError|Error:|PSCV0_PLATFORM_|PSCV0-ERASURE|actual:|expected:|operator:|at file:', line)]
+              selected = set()
+              for i in hits[-18:]:
+                  selected.update(range(max(0, i-3), min(len(lines), i+8)))
+              for i in sorted(selected):
+                  print('LOG', i+1, lines[i][:1200])
+          PY

@@ -104,21 +104,31 @@ structure PsElabDeriveFields where
   fields : List PsElabTypedBinder
   proofs : List Bool
 
-def psElabDeriveFields (plan : PsElabDeriveContext) (name : PsName) :
-    Except PsElabError PsElabDeriveFields := do
+-- Recursion is an explicit handler capability, not permission to bypass the
+-- family/field checks. Direct recursive fields must agree with both metadata
+-- and the instantiated uniform family. Nested/indexed recursion is separate.
+def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
+    (allowDirectRecursion : Bool) : Except PsElabError PsElabDeriveFields := do
   let some constructor := psEnvironmentFindConstructor plan.context.environment name
     | throw (.data "deriving constructor missing")
-  if !constructor.recursiveFields.isEmpty then
+  if !allowDirectRecursion && !constructor.recursiveFields.isEmpty then
     throw (.data "recursive deriving requires the M3 data machinery")
+  if constructor.recursiveFields.eraseDups.length != constructor.recursiveFields.length ||
+      constructor.recursiveFields.any (· >= constructor.numFields) then
+    throw (.data "deriving recursive field metadata is invalid")
   let (_, cursor) ← psElabDeriveConstructor plan constructor
   let opened ← psElabOpenCoreTelescope 4096 plan.context cursor (some constructor.numFields)
   let fields := opened.bindersRev.reverse
-  let proofs ← fields.mapM fun field => do
+  let proofs ← fields.zipIdx.mapM fun (field, index) => do
+    let recursive := constructor.recursiveFields.contains index
+    if recursive && !psDefEqReadOnlyWithEnv plan.context.environment plan.context.metaContext
+        opened.context.localContext field.type plan.family then
+      throw (.data "deriving recursive field is not the uniform direct family")
     let level ← psElabExpressionSort opened.context field.type
     if psLevelEquivalent level .zero then return true
     if !psExprFVarsInContext plan.context.localContext field.type then
       throw (.data "deriving requires independent runtime field types")
-    if psExprHasConst plan.info.name field.type then
+    if psExprHasConst plan.info.name field.type && !(allowDirectRecursion && recursive) then
       throw (.data "recursive deriving requires the M3 data machinery")
     return false
   if !psDefEqReadOnlyWithEnv plan.context.environment plan.context.metaContext
@@ -126,13 +136,20 @@ def psElabDeriveFields (plan : PsElabDeriveContext) (name : PsName) :
     throw (.data "deriving constructor result mismatch")
   return { constructor, cursor, fields, proofs }
 
+def psElabDeriveFields (plan : PsElabDeriveContext) (name : PsName) :
+    Except PsElabError PsElabDeriveFields :=
+  psElabDeriveFieldsWithRecursion plan name false
+
 -- One eliminator builder owns motive universes and the actual minor telescope.
--- The callback receives fresh local fields and the reconstructed constructor.
--- Empty families work without a special inhabitant or fabricated branch.
-def psElabDeriveEliminate (plan : PsElabDeriveContext) (context : PsElabContext)
+-- An enabled handler receives induction hypotheses keyed by fresh field ID.
+-- These are ordinary recursor arguments, not recursive dictionary assumptions
+-- or partial definitions. The old nonrecursive entry point remains below.
+def psElabDeriveEliminateWithRecursion (plan : PsElabDeriveContext)
+    (context : PsElabContext) (allowDirectRecursion : Bool)
     (result : PsExpr → PsExpr)
     (branch : PsElabContext → PsConstructorInfo → List PsElabTypedBinder →
-      PsExpr → Except PsElabError PsExpr) : Except PsElabError PsExpr := do
+      List (Nat × PsExpr) → PsExpr → Except PsElabError PsExpr) :
+    Except PsElabError PsExpr := do
   let recName := psNameAppendStr plan.info.name "rec"
   let some recursor := psEnvironmentFindRecursor context.environment recName
     | throw (.data "deriving recursor missing")
@@ -151,17 +168,44 @@ def psElabDeriveEliminate (plan : PsElabDeriveContext) (context : PsElabContext)
     (fun (state : PsExpr × List PsExpr) name => do
       let some ctor := psEnvironmentFindConstructor context.environment name
         | throw (.data "deriving constructor missing")
-      if !ctor.recursiveFields.isEmpty then
+      if !allowDirectRecursion && !ctor.recursiveFields.isEmpty then
         throw (.data "recursive deriving requires the M3 data machinery")
+      if ctor.recursiveFields.eraseDups.length != ctor.recursiveFields.length ||
+          ctor.recursiveFields.any (· >= ctor.numFields) then
+        throw (.data "deriving recursive field metadata is invalid")
       let minor ← (psInferEnsureForall context.environment context.metaContext
         context.localContext state.fst).mapError PsElabError.infer
-      let opened ← psElabOpenCoreTelescope 4096 context minor.domain (some ctor.numFields)
-      let fields := opened.bindersRev.reverse
+      let opened ← psElabOpenCoreTelescope 4096 context minor.domain
+        (some (ctor.numFields + ctor.recursiveFields.length))
+      let binders := opened.bindersRev.reverse
+      let fields := binders.take ctor.numFields
+      let hypotheses ← (ctor.recursiveFields.zip (binders.drop ctor.numFields)).mapM
+        (fun (index, hypothesis) => do
+          let some field := fields[index]?
+            | throw (.data "deriving induction hypothesis has no field")
+          if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+              opened.context.localContext field.type plan.family ||
+              !psDefEqReadOnlyWithEnv context.environment context.metaContext
+                opened.context.localContext hypothesis.type (result (.fvar field.id)) then
+            throw (.data "deriving induction hypothesis type mismatch")
+          pure (field.id, PsExpr.fvar hypothesis.id))
       let value := psExprApplyMany (.constE name (plan.info.levelParams.map PsLevel.param))
         (parameters ++ fields.map (fun field => .fvar field.id))
-      let body ← (branch opened.context ctor fields value).mapError (.atDeclaration name)
-      let body := psCloseElabLambdaBinders context.metaContext opened.bindersRev body
+      if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+          opened.context.localContext opened.body (result value) then
+        throw (.data "deriving recursor minor conclusion mismatch")
+      let body ← (branch opened.context ctor fields hypotheses value).mapError (.atDeclaration name)
+      let body := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body
       pure (psExprInstantiate1 minor.body body, body :: state.snd)) (cursor, [])
   return psLogicLam major.id "value" plan.family
     (psExprApplyMany (.constE recName levels)
       (parameters ++ [motive] ++ branches.reverse ++ [.fvar major.id]))
+
+-- Handlers that do not yet consume recursive evidence still reject recursive
+-- families. Their callback contract and previously qualified behavior remain.
+def psElabDeriveEliminate (plan : PsElabDeriveContext) (context : PsElabContext)
+    (result : PsExpr → PsExpr)
+    (branch : PsElabContext → PsConstructorInfo → List PsElabTypedBinder →
+      PsExpr → Except PsElabError PsExpr) : Except PsElabError PsExpr :=
+  psElabDeriveEliminateWithRecursion plan context false result
+    (fun context constructor fields _ value => branch context constructor fields value)

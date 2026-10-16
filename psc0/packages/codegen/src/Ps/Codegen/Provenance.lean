@@ -8,10 +8,20 @@ structure PsSourceIdentity where
   declaration : String
   occurrence : List Nat := []
 
+-- The emission boundary retains source command ownership independently of
+-- target symbol spelling. Member spans stay on PsSourceOrigin itself.
+structure PsSourceMutualGroupOrigin where
+  firstSourceIndex : Nat
+  memberIndex : Nat
+  memberCount : Nat
+  span : PsSourceSpan
+
 structure PsSourceOrigin where
   identity : PsSourceIdentity
   span : PsSourceSpan
   generatedReason : Option String := none
+  sourceIndex : Option Nat := none
+  mutualGroup : Option PsSourceMutualGroupOrigin := none
 
 structure PsEmissionContext where
   sourceName : String := "application.ps"
@@ -56,3 +66,4 @@ def psSourceCoordinateAt (coordinates : Array PsSourceCoordinate) (offset : Nat)
   let some position := coordinates[result.fst]? | throw "PSCV0-SOURCE: offset outside input"
   if position.byteOffset != offset then throw "PSCV0-SOURCE: offset is not a scalar boundary"
   return position
+

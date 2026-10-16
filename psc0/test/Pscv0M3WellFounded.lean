@@ -37,9 +37,44 @@ def defaultDecrease (n : Nat) : Nat :=
   | k + 1 => defaultDecrease k + 1
 termination_by n
 
+-- Header order deliberately interleaves changing state, the measured
+-- argument, and fixed parameters. These use Lean's independent WF elaborator.
+def accumulate (acc n step : Nat) : Nat :=
+  match n with
+  | 0 => acc
+  | k + 1 => accumulate (acc + step) (k - 1) step
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+
+def offset (acc n step : Nat) : Nat :=
+  match n with
+  | 0 => acc
+  | k + 1 => offset (acc + step) (k - 1) ((fun (x : Nat) => x) step)
+termination_by n + step
+decreasing_by exact Nat.add_lt_add_right (Nat.lt_succ_of_le (Nat.sub_le _ _)) step
+
+theorem offset_step (acc k step : Nat) :
+    offset acc (Nat.succ k) step = offset (acc + step) (k - 1) step :=
+  offset.eq_def acc (Nat.succ k) step
+
+def twoStates (left n right step : Nat) : Nat :=
+  match n with
+  | 0 => left + right
+  | k + 1 => twoStates (left + step) (k - 1) (right + left) step
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+
+def fixedOnly (step n : Nat) : Nat :=
+  match n with
+  | 0 => step
+  | k + 1 => fixedOnly ((fun (x : Nat) => x) step) (k - 1)
+termination_by n + step
+decreasing_by exact Nat.add_lt_add_right (Nat.lt_succ_of_le (Nat.sub_le _ _)) step
+
 run_cmd do
   for name in #[``WellFounded.Nat.fix, ``WellFounded.Nat.fix_eq,
-      ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease] do
+      ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease,
+      ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly] do
     let axioms ← Lean.collectAxioms name
     unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
       throwError "WF oracle uses an unapproved assumption: {name}: {axioms}"
@@ -65,6 +100,21 @@ private def scopeSource : String :=
   "function use(n: Nat): Nat := loop(n)\n" ++
   "end M3WFScope\n"
 
+private def parameterSource : String :=
+  "function m3wfaccumulate(acc: Nat, n: Nat, step: Nat): Nat := match n with { | 0 => acc | k + 1 => m3wfaccumulate(acc + step, k - 1, step) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
+  "function m3wfoffset(acc: Nat, n: Nat, step: Nat): Nat := match n with { | 0 => acc | k + 1 => m3wfoffset(acc + step, k - 1, (fun (x: Nat) => x)(step)) }\n" ++
+  "termination_by n + step\n" ++
+  "decreasing_by by { exact Nat.add_lt_add_right(Nat.lt_succ_of_le(Nat.sub_le(k, 1)), step) }\n" ++
+  "theorem m3wfoffsetStep(acc: Nat, k: Nat, step: Nat): m3wfoffset(acc, Nat.succ(k), step) = m3wfoffset(acc + step, k - 1, step) := by { exact m3wfoffset.eq_def(acc, Nat.succ(k), step) }\n" ++
+  "function m3wfstates(left: Nat, n: Nat, right: Nat, step: Nat): Nat := match n with { | 0 => left + right | k + 1 => m3wfstates(left + step, k - 1, right + left, step) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n" ++
+  "function m3wffixed(step: Nat, n: Nat): Nat := match n with { | 0 => step | k + 1 => m3wffixed((fun (x: Nat) => x)(step), k - 1) }\n" ++
+  "termination_by n + step\n" ++
+  "decreasing_by by { exact Nat.add_lt_add_right(Nat.lt_succ_of_le(Nat.sub_le(k, 1)), step) }\n"
+
 private def source : String :=
   skipSource ++
   "theorem m3wfskipStep(k: Nat): m3wfskip(Nat.succ(k)) = m3wfskip(k - 1) + 1 := by { exact m3wfskip.eq_def(Nat.succ(k)) }\n" ++
@@ -78,11 +128,15 @@ private def source : String :=
   "decreasing_by by { exact Nat.succ_le_succ(Nat.succ_le_succ(Nat.sub_le(k, 1))) }\n" ++
   "function m3wfdefault(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3wfdefault(k) + 1 }\n" ++
   "termination_by n\n" ++
-  scopeSource ++
+  scopeSource ++ parameterSource ++
   "function m3wfskipoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfskip(if (flag) { 17 } else { 10 }))\n" ++
   "function m3wfbranchesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfbranches(if (flag) { 9 } else { 6 }))\n" ++
   "function m3wfshiftoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfshift(if (flag) { 17 } else { 10 }))\n" ++
-  "function m3wfdefaultoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfdefault(if (flag) { 17 } else { 10 }))\n"
+  "function m3wfdefaultoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfdefault(if (flag) { 17 } else { 10 }))\n" ++
+  "function m3wfaccoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfaccumulate(5, if (flag) { 17 } else { 10 }, 3))\n" ++
+  "function m3wfoffsetoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfoffset(5, if (flag) { 17 } else { 10 }, 3))\n" ++
+  "function m3wfstatesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfstates(3, if (flag) { 17 } else { 10 }, 5, 2))\n" ++
+  "function m3wffixedoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wffixed(if (flag) { 7 } else { 4 }, if (flag) { 17 } else { 10 }))\n"
 
 -- Suffix ownership is checked before elaboration. Malformed selected syntax
 -- must fail here, while a well-formed strategy survives into its semantic owner.
@@ -188,7 +242,7 @@ private def checkSource : IO Unit := do
 -- In particular an opaque P0 declaration, an axiom, or a self-referential
 -- definition cannot stand in for WellFounded.Nat.fix or its checked equation.
 private def checkConstruction : IO Unit := do
-  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource) with
+  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource) with
     | .ok value => pure value
     | .error error => throw (IO.userError error)
   let result ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
@@ -208,7 +262,7 @@ private def checkConstruction : IO Unit := do
         psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta value then
       throw (IO.userError "WF equation did not use the checked fix_eq theorem")
   | _ => throw (IO.userError "WF equation is missing or unproved")
-  match result.result.declarations with
+  match result.result.declarations.take 6 with
   | [_, _, .theoremDecl boundName .., .definitionDecl loopName _ _ loopBody,
       .theoremDecl loopEquation .., .definitionDecl publicName _ _ publicBody] =>
     if !psNameEq loopEquation (psNameAppendStr loopName "eq_def") ||
@@ -218,7 +272,25 @@ private def checkConstruction : IO Unit := do
         result.privateNames.any (psNameEq publicName) then
       throw (IO.userError "WF namespace/private proof or generated-equation ownership was lost")
   | _ => throw (IO.userError "WF private declaration batch changed shape")
-  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real Nat.fix, resolved call proofs, checked fix_eq equation, no recursive axiom or P0 marker"
+  for (text, hasState) in [("m3wfaccumulate", true), ("m3wfoffset", true),
+      ("m3wfstates", true), ("m3wffixed", false)] do
+    let name := psRootName text
+    match psEnvironmentFind result.result.environment name with
+    | some (.definitionDecl _ _ type value) =>
+      if !psExprHasConst psWellFoundedFixName value || psExprHasConst name value ||
+          psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta value then
+        throw (IO.userError (text ++ " lost its checked Nat.fix construction"))
+    | _ => throw (IO.userError (text ++ " is not a checked ordinary definition"))
+    match psEnvironmentFind result.result.environment (psNameAppendStr name "eq_def") with
+    | some (.theoremDecl _ _ type value) =>
+      if !psExprHasConst psWellFoundedFixEqName value || !psExprHasConst name type ||
+          psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta value then
+        throw (IO.userError (text ++ " lost its proved public unfolding equation"))
+      if hasState && ![psRootName "funext", psRootName "congrArg",
+          psNameAppendStr psEqName "trans"].all (fun constantName => psExprHasConst constantName value) then
+        throw (IO.userError (text ++ " omitted the checked function-state equality transport"))
+    | _ => throw (IO.userError (text ++ " has no checked equation"))
+  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real Nat.fix, resolved call proofs, public fix_eq equations with checked function-state transport, private scope, no recursive axiom or P0 marker"
 
 private def refusals : List (String × String × String) := [
   ("same-size",
@@ -242,9 +314,18 @@ private def refusals : List (String × String × String) := [
   ("wrong-result",
     "function bad(n: Nat): Bool := bad(n)\ntermination_by n\n",
     "PSCV0-WF-RESULT"),
-  ("extra-parameter",
+  ("unchanged-parameters",
     "function bad(n: Nat, k: Nat): Nat := bad(n, k)\ntermination_by n\n",
+    "PSCV0-WF-DECREASE"),
+  ("two-changing-measure-dependencies",
+    "function bad(n: Nat, acc: Nat): Nat := match n with { | 0 => acc | k + 1 => bad(k, acc + 1) }\ntermination_by n + acc\n",
+    "PSCV0-WF-MEASURE-STATE"),
+  ("body-lambda-is-not-a-header-parameter",
+    "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by 0\n",
     "PSCV0-WF-TELESCOPE"),
+  ("body-lambda-measure-scope",
+    "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by n\n",
+    "unknown name n"),
   ("escaping-self",
     "function bad(n: Nat): Nat := (fun (f: Nat -> Nat) => f(n))(bad)\ntermination_by n\n",
     "PSCV0-WF-ESCAPE")]
@@ -260,7 +341,8 @@ def main (args : List String) : IO Unit := do
     source, sourceName := "m3-well-founded.ps", outputStem := "wellfounded"
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent]
     exports := .selected ["m3wfskipoutput", "m3wfbranchesoutput",
-      "m3wfshiftoutput", "m3wfdefaultoutput"] }
+      "m3wfshiftoutput", "m3wfdefaultoutput", "m3wfaccoutput",
+      "m3wfoffsetoutput", "m3wfstatesoutput", "m3wffixedoutput"] }
   let requests := #[request] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -294,6 +376,10 @@ def main (args : List String) : IO Unit := do
       ("m3wfskipoutput", Lean.toJson (toString (M3WellFoundedOracle.skip n))),
       ("m3wfbranchesoutput", Lean.toJson (toString (M3WellFoundedOracle.branches branchN))),
       ("m3wfshiftoutput", Lean.toJson (toString (M3WellFoundedOracle.shiftedMeasure n))),
-      ("m3wfdefaultoutput", Lean.toJson (toString (M3WellFoundedOracle.defaultDecrease n)))]
+      ("m3wfdefaultoutput", Lean.toJson (toString (M3WellFoundedOracle.defaultDecrease n))),
+      ("m3wfaccoutput", Lean.toJson (toString (M3WellFoundedOracle.accumulate 5 n 3))),
+      ("m3wfoffsetoutput", Lean.toJson (toString (M3WellFoundedOracle.offset 5 n 3))),
+      ("m3wfstatesoutput", Lean.toJson (toString (M3WellFoundedOracle.twoStates 3 n 5 2))),
+      ("m3wffixedoutput", Lean.toJson (toString (M3WellFoundedOracle.fixedOnly (if flag then 7 else 4) n)))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_WELL_FOUNDED: PASS checked arithmetic decreases, ordered proof goals, nonidentity measure, default proof, successor equation, semantic refusals and five-target emission; runtime parity follows"
+  IO.println "PSCV0_M3_WELL_FOUNDED: PASS checked decreases and ordered proof goals, nonprefix fixed/evolving arguments, typed beta-fixed measure, multiple states, successor equations, semantic refusals and five-target emission; runtime parity follows"

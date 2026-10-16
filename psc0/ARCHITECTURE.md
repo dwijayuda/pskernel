@@ -1,4 +1,33 @@
-## M3+B source group cases candidate
+## M3+B candidate: source mutual P0 and typed measured-state recursion
+
+The selected def/function mutual command has one ordered source owner.
+`Ps.Elab.Mutual` constructs independent real opaque headers before any P0
+body, closes block-wide section/universe captures and uses typed local peer
+aliases for the complete captured telescope. Every private actual body is
+rechecked after alias substitution. Ordinary runtime selection reuses the
+existing checked opaque/body pairing. Per-member and whole-group provenance
+survive through all target artifacts and CLI origin JSON. The source grammar
+does not add mutual inductive declarations; total/mutual-WF construction and
+P1's assumption blocker retain explicit refusals.
+
+`Ps.Elab.RecursionParameters` owns typed fixed/evolving parameter analysis.
+The selected Nat-measure path now supports one changing measured Nat plus
+independent evolving Nat state and fixed Nat captures, in any header order.
+Its real Nat.fix motive returns the state function. Ordered checked Core
+lets preserve source argument evaluation; checked extensionality and
+congruence derive the public equation without extending conversion.
+`Ps.Erasure.WellFounded` revalidates the actual closed definition and entry
+arguments, then uses ordinary typed self-call erasure for its callback.
+
+New independent native/source fixtures exercise these constructions and the
+existing five runtime targets. Prior `34f43e6b` passed focused/F1/F2/F3-F4 but
+native source qualification found a refusal-diagnostic regression; it is not
+accepted. This compiler candidate needs all five gates on its own exact SHA.
+The accepted baseline remains `a7c6dade`; M3+B and all remaining boundaries
+in the six-exit roadmap stay open. See both handoffs for exact evidence.
+The dated candidate sections below are historical checkpoints.
+
+## M3+B earlier source group cases candidate
 
 Source matching now specializes the actual complete group recursor through
 `Ps.Elab.GroupElimination`: one inferred/unified argument cursor, selected
@@ -169,7 +198,9 @@ Source `partial` creates (a) a public logically opaque, independently inhabited 
 
 `Ps.Elab.GroupElimination` owns the typed complete recursor-argument cursor shared by singleton and group source matching. The selected family keeps its complete dependent motive; companion families use actual checked PUnit at that result universe. All real minor binders close in retained order, while case-only group branches hide IHs. The existing dependent-context/equality and typed runtime suffix owners remain authoritative. Full induction requires a complete family of substantive motives and is still refused.
 
-`Ps.Syntax` retains total `termination_by` and optional `decreasing_by by { ... }` as a `wellFoundedDefinition`, including scope and spans. `Ps.Elab.WellFounded` currently constructs the selected one-explicit-Nat-argument/Nat-result case using the checked Standard's `WellFounded.Nat.fix`. Each recursive call has a scoped synthetic-opaque decrease goal; one tactic sequence runs over their creation order. Definition and checked `fix_eq`-derived `.eq_def` theorem form one source-owned declaration batch. `Ps.Erasure.WellFounded` recognizes the actual typed root construction and lowers the proof-restricted callback through the existing curried proof-slot ABI. It uses no partial marker, assumed equation, arbitrary fuel, extra axiom or strategy-name shortcut. Broader telescopes, relations, mutual cliques and general open-match equation normalization remain explicit work.
+`Ps.Syntax` retains total `termination_by` and optional `decreasing_by by { ... }` as a `wellFoundedDefinition`, including scope and spans. `Ps.Elab.RecursionParameters` observes typed calls and closes parameter dependencies; fixed arguments must remain reducibly equal in each call's actual scope. The selected `Ps.Elab.WellFounded` construction has explicit Nat header parameters, one changing measure dependency, independent evolving Nat state and a Nat result. Its actual `WellFounded.Nat.fix` motive returns the state function. Checked Core lets preserve original argument evaluation order. Each recursive call has a scoped synthetic-opaque decrease goal; one tactic sequence runs over their creation order. The definition and `.eq_def` form one source-owned batch; real `fix_eq`, `funext` and congruence prove the equation with calls to public `f`, without extending conversion. `Ps.Erasure.WellFounded` revalidates the exact retained root definition and entry telescope, reconstructs a typed proof-restricted self-callback in original argument order, and delegates to the ordinary eraser. General dependent domains/results, several changing measured arguments, mutual cliques and general open-match equation normalization remain explicit work.
+
+`Ps.Syntax.Pscv0.ProgramRead` retains a def/function-only `mutual ... end` command with ordered source members. `Ps.Elab.Mutual` owns compatible P0 group construction: block-wide captured section variables and common universe closure, independently inhabited real opaque headers before any body, complete typed peer aliases, and final alias-free implementation checking. `Ps.Elab.Command` owns the atomic scope update, visibility and exact member/group provenance. The host carries that provenance to every target artifact and CLI origin JSON. Total mutual and mutual well-founded recursion require separate checked constructions; neither inherits the P0 runtime interpretation.
 
 Exactly one approved logical basis (current policy `propext`, `Quot.sound`), with explicit primitive and foreign-runtime trust ledger; any additional permitted assumptions require an explicit future policy decision. Succeeding at type checking must not silently change an explicit verified request to ordinary output.
 

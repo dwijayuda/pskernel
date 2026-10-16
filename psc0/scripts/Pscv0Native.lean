@@ -31,11 +31,7 @@ private def artifactFiles (assurance : Assurance) (output : String) (artifact : 
       ("externalImports", toJson capabilities.externalImports),
       ("sourceMaps", toJson capabilities.sourceMaps)]),
     ("sourceResolution", toJson ("owning-declaration-span" : String)),
-    ("origins", toJson (artifact.origins.map fun (name, origin) => Lean.Json.mkObj [
-      ("semantic", toJson name), ("file", toJson origin.identity.file),
-      ("sourceStartByte", toJson origin.span.start.byteOffset),
-      ("sourceEndByte", toJson origin.span.stop.byteOffset),
-      ("generatedReason", toJson origin.generatedReason)])),
+    ("origins", toJson (artifact.origins.map fun (name, origin) => sourceOriginJson name origin)),
     ("exports", toJson (artifact.exports.map fun entry => Lean.Json.mkObj [
       ("semantic", toJson entry.semanticName),
       ("typeParameters", toJson (entry.typeParameters.map (·.name))),

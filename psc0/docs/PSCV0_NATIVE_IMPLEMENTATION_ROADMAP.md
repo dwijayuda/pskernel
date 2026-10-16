@@ -1,4 +1,33 @@
-## M3+B source group cases candidate
+## M3+B candidate: source mutual P0 and typed measured-state recursion
+
+The selected def/function mutual command has one ordered source owner.
+`Ps.Elab.Mutual` constructs independent real opaque headers before any P0
+body, closes block-wide section/universe captures and uses typed local peer
+aliases for the complete captured telescope. Every private actual body is
+rechecked after alias substitution. Ordinary runtime selection reuses the
+existing checked opaque/body pairing. Per-member and whole-group provenance
+survive through all target artifacts and CLI origin JSON. The source grammar
+does not add mutual inductive declarations; total/mutual-WF construction and
+P1's assumption blocker retain explicit refusals.
+
+`Ps.Elab.RecursionParameters` owns typed fixed/evolving parameter analysis.
+The selected Nat-measure path now supports one changing measured Nat plus
+independent evolving Nat state and fixed Nat captures, in any header order.
+Its real Nat.fix motive returns the state function. Ordered checked Core
+lets preserve source argument evaluation; checked extensionality and
+congruence derive the public equation without extending conversion.
+`Ps.Erasure.WellFounded` revalidates the actual closed definition and entry
+arguments, then uses ordinary typed self-call erasure for its callback.
+
+New independent native/source fixtures exercise these constructions and the
+existing five runtime targets. Prior `34f43e6b` passed focused/F1/F2/F3-F4 but
+native source qualification found a refusal-diagnostic regression; it is not
+accepted. This compiler candidate needs all five gates on its own exact SHA.
+The accepted baseline remains `a7c6dade`; M3+B and all remaining boundaries
+in the six-exit roadmap stay open. See both handoffs for exact evidence.
+The dated candidate sections below are historical checkpoints.
+
+## M3+B earlier source group cases candidate
 
 Source matching now specializes the actual complete group recursor through
 `Ps.Elab.GroupElimination`: one inferred/unified argument cursor, selected

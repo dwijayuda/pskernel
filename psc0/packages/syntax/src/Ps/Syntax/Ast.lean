@@ -74,6 +74,9 @@ structure PsSyntaxProofScope where
   -- Module-owned private names are resolved within tactic terms, never
   -- serialized as public names or made visible to external importers.
   privateAliases : List (List String × List String) := []
+  -- Delayed proof terms resolve a mutual peer to its checked local alias,
+  -- which already supplies the common captured telescope with all binder kinds.
+  mutualAliases : List (List String × List String) := []
 
 -- Operator intent survives parsing so elaboration can join operand types before
 -- inserting coercions. Ordinary named calls keep their ordinary semantics.
@@ -312,6 +315,13 @@ inductive PsSyntaxRegistration where
   | instanceDecl (priority : Nat)
   | defaultInstanceDecl (priority : Nat) (ordinaryPriority : Option Nat)
 
+-- A source mutual block keeps ordered declaration and modifier ownership.
+-- It is not flattened into sequential commands or a mutual-inductive group.
+structure PsSyntaxMutualMember where
+  declaration : PsSyntaxDeclaration
+  isPrivate : Bool := false
+  registration : Option PsSyntaxRegistration := none
+
 inductive PsSyntaxCommand where
   | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
   | registeredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
@@ -323,6 +333,7 @@ inductive PsSyntaxCommand where
   -- command, not to a second unconstrained source macro or derived type AST.
   | derivingDeclaration (value : PsSyntaxDeclaration) (handlers : List PsSyntaxName)
       (isPrivate : Bool)
+  | mutualDeclarations (members : List PsSyntaxMutualMember) (span : PsSourceSpan)
   | namespaceCmd (name : PsSyntaxName) (span : PsSourceSpan)
   | sectionCmd (name : Option PsSyntaxName) (span : PsSourceSpan)
   | endCmd (name : Option PsSyntaxName) (span : PsSourceSpan)

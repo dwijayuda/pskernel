@@ -22,6 +22,18 @@ structure PsElabStructuralRecursion where
 structure PsElabWellFoundedRecursion where
   functionName : PsName
   callbackName : PsName
+  parameterIds : List Nat := []
+  majorId : Nat := 0
+  stateIds : List Nat := []
+  fixedIds : List Nat := []
+  collectCalls : Bool := false
+
+-- Typed call observations retain their actual branch scope. Invariant
+-- analysis must compare these arguments, not the spelling of source names.
+structure PsElabRecursionCall where
+  localContext : PsLocalContext
+  arguments : List PsExpr
+  span : PsSourceSpan
 
 def psElabStructuralRecursionFindCall
     (calls : List (Prod Nat Nat))
@@ -67,6 +79,7 @@ structure PsElabContext where
   -- Like infoRev, this is an event stream, not saved lexical authority.
   -- Each metavariable owns its original complete branch context.
   wellFoundedGoalsRev : List (Nat × PsSourceSpan) := []
+  wellFoundedCallsRev : List PsElabRecursionCall := []
 
 def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
@@ -125,7 +138,8 @@ def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
     metaContext := inner.metaContext
     pending := inner.pending
     infoRev := inner.infoRev
-    wellFoundedGoalsRev := inner.wellFoundedGoalsRev }
+    wellFoundedGoalsRev := inner.wellFoundedGoalsRev
+    wellFoundedCallsRev := inner.wellFoundedCallsRev }
 
 def psElabContextWithEnvironment (context : PsElabContext)
     (environment : PsEnvironment) : PsElabContext :=

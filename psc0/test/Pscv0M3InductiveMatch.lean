@@ -192,6 +192,7 @@ private def refusal : PsElabError → String
   | .structuralRecursionNotDecreasing => "structural"
   | .proof message => "proof:" ++ message
   | .refinement message => "refinement:" ++ message
+  | .infer .applicationTypeMismatch => "infer:application"
   | .infer (.unknownConstant name) => "missing:" ++ psNameToString name
   | error => psCompilerPscv0ElabError error
 
@@ -226,7 +227,10 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
     "constructor"
   expectRefused environment "Prop large elimination"
     "function bad(h: M3MatchPropLeft): Nat := match h with { | .fromRight right => 0 }\n"
-    "type"
+    "infer:application"
+  expectRefused environment "singleton Prop large elimination"
+    "function bad(h: Or True True): Nat := match h with { | .inl proof => 0 | .inr proof => 1 }\n"
+    "infer:application"
   expectRefused environment "group induction"
     "theorem bad(x: M3MatchLeft(Nat, 0)): x = x := by { induction x }\n"
     "proof:group induction requires a complete motive family"

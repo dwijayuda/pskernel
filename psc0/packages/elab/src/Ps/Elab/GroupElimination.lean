@@ -27,7 +27,10 @@ def psElabRecursorArguments {α : Type} (items : List α)
       argument.context.localContext argument.term).mapError PsElabError.infer
     let unified := psUnify argument.context.environment argument.context.localContext
       argument.context.metaContext pi.domain actual
-    if !unified.success then throw .typeMismatch
+    -- These are complete Core recursor arguments. Preserve the application
+    -- error that final Core inference reports, including forbidden Prop
+    -- elimination, while rejecting the incompatible domain at this cursor.
+    if !unified.success then throw (.infer .applicationTypeMismatch)
     let context := psElabContextWithMeta argument.context unified.context
     let term := psMetaInstantiate context.metaContext argument.term
     let tail ← psElabRecursorArguments rest make context

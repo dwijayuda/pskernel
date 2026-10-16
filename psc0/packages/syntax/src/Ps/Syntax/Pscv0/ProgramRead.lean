@@ -35,7 +35,8 @@ def psPscv0DerivingHandlers (fuel : Nat) (cursor : PsTokenCursor)
       psPscv0DerivingHandlers fuel comma.cursor accumulated
     else return { value := accumulated.reverse, cursor := name.cursor }
 
-def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor) :
+def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor)
+    (mutualMember : Bool := false) :
     Except String (PsParseResult PsSyntaxCommand) := do
   let some first := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
   let isPrivate := first.text == "private"
@@ -44,6 +45,8 @@ def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor) :
     pure marker.cursor
   else pure cursor
   let some token := psTokenCursorPeek cursor | throw "PSCV0-PRIVATE-DECLARATION-MISSING"
+  if mutualMember && !["def", "function", "partial", "unsafe", "noncomputable"].contains token.text then
+    throw "PSCV0-MUTUAL-HEAD: a source mutual member must use a selected def or function head"
   if isPrivate && !["instance", "abbrev", "opaque", "class", "def", "const",
       "function", "theorem", "structure", "inductive", "partial", "unsafe", "noncomputable"].contains token.text then
     throw "PSCV0-PRIVATE-DECLARATION-EXPECTED"
@@ -128,9 +131,10 @@ def psPscv0SelectedAttributes : List String := ["default_instance"]
 
 -- Selected declaration attributeName only; unsupported attributes are refused.
 -- The default priority is independent of an instance declaration's priority.
-def psPscv0ReadCommand (cursor : PsTokenCursor) :
+def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
+    (mutualMember : Bool := false) :
     Except String (PsParseResult PsSyntaxCommand) := do
-  if !psTokenCursorAtText cursor "@" then psPscv0ReadUnattributedCommand cursor
+  if !psTokenCursorAtText cursor "@" then psPscv0ReadUnattributedCommand cursor mutualMember
   else
     let marker ← psPscv0Expect cursor "@"
     let opening ← psPscv0Expect marker.cursor "["
@@ -144,7 +148,7 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
         let value ← (psPscv0PriorityValue atom.token.text attributeName.cursor).mapError psPscv0ParseError
         pure (PsParseResult.mk value atom.cursor)
     let close ← psPscv0Expect priority.cursor "]"
-    let parsed ← psPscv0ReadUnattributedCommand close.cursor
+    let parsed ← psPscv0ReadUnattributedCommand close.cursor mutualMember
     let command ← match parsed.value with
       | .declaration source => pure (.registeredDeclaration source
           (.defaultInstanceDecl priority.value none))
@@ -156,6 +160,42 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
         pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
       | _ => throw "PSCV0-DEFAULT-INSTANCE-DECLARATION"
     return { parsed with value := command }
+
+-- Pinned Lean Parser.Command.mutual owns the complete ordered block before
+-- elaboration partitions recursive cliques. The v7.2 source selection keeps
+-- def/function heads only; existing per-head binders and suffix rules remain
+-- authoritative. No provisional logical declarations are made by parsing.
+def psPscv0ReadMutualMembers (fuel : Nat) (cursor : PsTokenCursor)
+    (membersRev : List PsSyntaxMutualMember) :
+    Except String (PsParseResult (List PsSyntaxMutualMember × PsSourceSpan)) := do
+  match fuel with
+  | 0 => throw "PSCV0-MUTUAL-MEMBER-BUDGET"
+  | fuel + 1 =>
+    if psTokenCursorDone cursor then throw "PSCV0-MUTUAL-END: missing end for mutual block"
+    if psTokenCursorAtText cursor "end" then
+      if membersRev.isEmpty then throw "PSCV0-MUTUAL-EMPTY: mutual requires a def or function"
+      let closing ← psPscv0Expect cursor "end"
+      return PsParseResult.mk (membersRev.reverse, closing.token.span) closing.cursor
+    let parsed ← psPscv0ReadOrdinaryCommand cursor true
+    let member ← match parsed.value with
+      | .declaration declaration => pure (PsSyntaxMutualMember.mk declaration false none)
+      | .privateDeclaration declaration => pure (PsSyntaxMutualMember.mk declaration true none)
+      | .registeredDeclaration declaration registration =>
+        pure (PsSyntaxMutualMember.mk declaration false (some registration))
+      | .privateRegisteredDeclaration declaration registration =>
+        pure (PsSyntaxMutualMember.mk declaration true (some registration))
+      | _ => throw "PSCV0-MUTUAL-HEAD: only selected function-like declarations belong to mutual"
+    psPscv0ReadMutualMembers fuel parsed.cursor (member :: membersRev)
+
+def psPscv0ReadCommand (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxCommand) := do
+  if !psTokenCursorAtText cursor "mutual" then
+    return ← psPscv0ReadOrdinaryCommand cursor
+  let opening ← psPscv0Expect cursor "mutual"
+  let parsed ← psPscv0ReadMutualMembers 4096 opening.cursor []
+  let span := PsSourceSpan.mk opening.token.span.start parsed.value.2.stop
+  let next ← (psParseProofScriptCommandSeparator span.stop parsed.cursor).mapError psPscv0ParseError
+  return PsParseResult.mk (.mutualDeclarations parsed.value.1 span) next
 
 def psPscv0ReadCommands (fuel : Nat) (cursor : PsTokenCursor)
     (acc : List PsSyntaxCommand) : Except String (List PsSyntaxCommand) := do
@@ -171,3 +211,4 @@ def psPscv0ParseProgramTokens (tokens : List PsToken) : Except String PsSyntaxPr
     (psTokenCursorFromTokens tokens) []).mapError psPscv0ParseError
   let commands ← psPscv0ReadCommands 4096 imports.cursor []
   return { imports := imports.value, commands }
+

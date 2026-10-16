@@ -79,3 +79,7 @@ lean_exe pscv0_m3_inductive_match where
   srcDir := "../test"
   root := `Pscv0M3InductiveMatch
 
+lean_exe pscv0_m3_mutual_partial where
+  srcDir := "../test"
+  root := `Pscv0M3MutualPartial
+

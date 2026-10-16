@@ -214,6 +214,10 @@ def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
         psPscv0ValidateTermWithFuel input.tokens 4096 term
     | .variableCmd binders _ =>
       for (_, type) in binders do psPscv0ValidateTermWithFuel input.tokens 4096 type
+    | .mutualDeclarations members _ =>
+      for member in members do
+        for term in psPscv0DeclarationTerms member.declaration do
+          psPscv0ValidateTermWithFuel input.tokens 4096 term
     | _ => pure ()
   return parsed
 

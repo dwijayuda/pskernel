@@ -25,6 +25,10 @@ structure PsScopeResolver where
   deferProofNames : Bool := false
   -- Source-visible qualified private name to stable module-local kernel name.
   privateAliases : List (List String × List String) := []
+  -- Joint headers are scope identities, never temporary environment axioms.
+  mutualNames : List (List String) := []
+  -- A body sees typed local lets applying each real opaque to common captures.
+  mutualAliases : List (List String × List String) := []
 
 def psScopeKey (name : PsSyntaxName) : String := String.intercalate "." name.segments
 
@@ -48,14 +52,15 @@ def psScopePrefixes (namePrefix : List String) : List (List String) :=
 
 def psScopeHasGlobal (resolver : PsScopeResolver) (segments : List String) : Bool :=
   resolver.selfName == some segments ||
+    resolver.mutualNames.contains segments ||
+    resolver.mutualAliases.any (fun entry => entry.fst == segments) ||
     psEnvironmentContains resolver.environment (psSyntaxNameAppendSegments segments .anonymous)
 
 def psScopeExportedRewrite (resolver : PsScopeResolver)
     (segments : List String) : Option (List String) := do
   let requested := psSyntaxNameAppendSegments segments .anonymous
   -- A real declaration in the nearest namespace shadows an exported alias.
-  if psEnvironmentContains resolver.environment requested ||
-      resolver.selfName == some segments then none
+  if psScopeHasGlobal resolver segments then none
   else
     let alias ← resolver.environment.exportedAliases.find? (fun entry =>
       psNameEq entry.fst requested)
@@ -77,6 +82,15 @@ def psScopePrivateRewrite (resolver : PsScopeResolver)
   let alias ← resolver.privateAliases.find? (fun entry => entry.fst == matchPrefix)
   return alias.snd ++ segments.drop matchPrefix.length
 
+-- Keep these references local, including qualified peer projections. The
+-- aliases cannot be written by ordinary source and are checked local lets.
+def psScopeMutualRewrite (resolver : PsScopeResolver)
+    (segments : List String) : Option (List String) := do
+  let matchPrefix ← (psScopePrefixes segments).find? (fun candidate =>
+    resolver.mutualAliases.any (fun entry => entry.fst == candidate))
+  let alias ← resolver.mutualAliases.find? (fun entry => entry.fst == matchPrefix)
+  return alias.snd ++ segments.drop matchPrefix.length
+
 def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     (name : PsSyntaxName) : Except PsElabError (Prod PsSyntaxName (List String)) := do
   let segments := psSyntaxNameRootSegments name.segments
@@ -96,18 +110,20 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
   let canonical := fun key =>
     (psScopePrivateRewrite resolver key).getD
       ((psScopeExportedRewrite resolver key).getD key)
+  let reference := fun key =>
+    let resolved := canonical key
+    { name with
+      segments := (psScopeMutualRewrite resolver resolved).getD ("_root_" :: resolved) }
   match candidates.find? available with
   | some full =>
-    let resolved := canonical full
-    return ({ name with segments := "_root_" :: resolved }, [])
+    return (reference full, [])
   | none => pure ()
   if rooted then throw (.scope ("unknown global " ++ psScopeKey name))
   let opened := (resolver.scope.opened.map (· ++ segments)).filter available
   let unique := opened.foldl (fun acc item => if acc.contains item then acc else item :: acc) []
   match unique with
   | [full] =>
-    let resolved := canonical full
-    return ({ name with segments := "_root_" :: resolved }, [])
+    return (reference full, [])
   | [] => throw (.scope ("unknown name " ++ psScopeKey name))
   | _ => throw (.scope ("ambiguous open name " ++ psScopeKey name))
 
@@ -274,7 +290,8 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
         (psScopeTerm fuel { resolver with deferProofNames := true }) bound tactics
       return { term := .byE tactics {
         namePrefix := resolver.scope.namePrefix, opened := resolver.scope.opened,
-        privateAliases := resolver.privateAliases } span, used }
+        privateAliases := resolver.privateAliases
+        mutualAliases := resolver.mutualAliases } span, used }
     | .reference name =>
       let resolved ← psScopeResolve resolver bound name
       return { term := .reference resolved.fst, used := resolved.snd }
@@ -390,3 +407,4 @@ def psScopeSelect (scope : PsCommandScope) (used : List String) : List PsScopeBi
   scope.variables.filterMap fun entry =>
     (psSyntaxBinderSelectNames entry.binder.fst (fun name => selected.contains (psScopeKey name))).map
       (fun head => (head, entry.binder.snd))
+

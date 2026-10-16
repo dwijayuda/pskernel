@@ -266,6 +266,7 @@ lean_lib PsElab where
     `Ps.Elab.Elimination,
     `Ps.Elab.Proof,
     `Ps.Elab.WellFounded,
+    `Ps.Elab.RecursionParameters,
     `Ps.Elab.Application, `Ps.Elab.Operator,
     `Ps.Elab.Record,
     `Ps.Elab.Refinement,
@@ -287,6 +288,7 @@ lean_lib PsElab where
     `Ps.Elab.DerivingRepr,
     `Ps.Elab.Deriving,
     `Ps.Elab.Scope,
+    `Ps.Elab.Mutual,
     `Ps.Elab.Command
   ]
 

@@ -16,6 +16,7 @@ on:
       - 'psc0/test/Pscv0M3InductiveRuntime.lean'
       - 'psc0/test/Pscv0M3InductiveMatch.lean'
       - 'psc0/test/Pscv0M3WellFounded.lean'
+      - 'psc0/test/Pscv0M3MutualPartial.lean'
       - 'psc0/test/Pscv0M3PartialFixpointAssumptions.lean'
       - 'psc0/scripts/pscv0-m3-recursive-deriving.mjs'
       - 'psc0/scripts/pscv0-m3-runtime.mjs'
@@ -99,18 +100,20 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match
-          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial
+          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial
           .lake/build/bin/pscv0_m3_inductive_groups | tee ../dist/m3-recursive-deriving/inductive-groups.log
           lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean | tee ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log
           .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
           .lake/build/bin/pscv0_m3_inductive_runtime ../dist/m3-inductive-runtime | tee ../dist/m3-inductive-runtime/check.log
           .lake/build/bin/pscv0_m3_well_founded ../dist/m3-well-founded | tee ../dist/m3-well-founded/check.log
           .lake/build/bin/pscv0_m3_inductive_match ../dist/m3-inductive-match | tee ../dist/m3-inductive-match/check.log
+          .lake/build/bin/pscv0_m3_mutual_partial ../dist/m3-mutual-partial | tee ../dist/m3-mutual-partial/check.log
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-runtime/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-well-founded/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-match/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-partial/source-sha.txt
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         with:
           path: |
@@ -130,11 +133,14 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright | tee ../dist/m3-inductive-runtime/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright ../dist/m3-inductive-runtime/ts/groupfold.js | tee ../dist/m3-inductive-runtime/ts.log
           "$TSC" --ignoreConfig ../dist/m3-well-founded/wellfounded.ts --outDir ../dist/m3-well-founded/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput | tee ../dist/m3-well-founded/js.log
-          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput ../dist/m3-well-founded/ts/wellfounded.js | tee ../dist/m3-well-founded/ts.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput,m3wfaccoutput,m3wfoffsetoutput,m3wfstatesoutput,m3wffixedoutput | tee ../dist/m3-well-founded/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput,m3wfaccoutput,m3wfoffsetoutput,m3wfstatesoutput,m3wffixedoutput ../dist/m3-well-founded/ts/wellfounded.js | tee ../dist/m3-well-founded/ts.log
           "$TSC" --ignoreConfig ../dist/m3-inductive-match/groupmatch.ts --outDir ../dist/m3-inductive-match/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-match groupmatch m3matchleft,m3matchright,m3matchnested,m3matchzero | tee ../dist/m3-inductive-match/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-match groupmatch m3matchleft,m3matchright,m3matchnested,m3matchzero ../dist/m3-inductive-match/ts/groupmatch.js | tee ../dist/m3-inductive-match/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-mutual-partial/mutual.ts --outDir ../dist/m3-mutual-partial/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput | tee ../dist/m3-mutual-partial/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput ../dist/m3-mutual-partial/ts/mutual.js | tee ../dist/m3-mutual-partial/ts.log
       - name: Execute Rust with the existing pinned dependency lock
         run: |
           set -euo pipefail
@@ -143,10 +149,12 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-recursive-deriving/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-runtime/rust.log
-          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput,m3wfaccoutput,m3wfoffsetoutput,m3wfstatesoutput,m3wffixedoutput
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-well-founded/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-match groupmatch m3matchleft,m3matchright,m3matchnested,m3matchzero
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-match/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-partial/rust.log
       - name: Execute GC core and components against the native oracle
         run: |
           set -euo pipefail
@@ -162,8 +170,9 @@ jobs:
           cd "$GITHUB_WORKSPACE/psc0/v7-native"
           node ../scripts/pscv0-m3-recursive-deriving.mjs wasm ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright | tee ../dist/m3-inductive-runtime/wasm.log
-          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput | tee ../dist/m3-well-founded/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput,m3wfaccoutput,m3wfoffsetoutput,m3wfstatesoutput,m3wffixedoutput | tee ../dist/m3-well-founded/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-match groupmatch m3matchleft,m3matchright,m3matchnested,m3matchzero | tee ../dist/m3-inductive-match/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput | tee ../dist/m3-mutual-partial/wasm.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -173,6 +182,7 @@ jobs:
             psc0/dist/m3-inductive-runtime/
             psc0/dist/m3-well-founded/
             psc0/dist/m3-inductive-match/
+            psc0/dist/m3-mutual-partial/
           if-no-files-found: warn
           retention-days: 30
 

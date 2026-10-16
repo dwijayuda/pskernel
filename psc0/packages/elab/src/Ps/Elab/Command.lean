@@ -1,5 +1,6 @@
 import Ps.Elab.Scope
 import Ps.Elab.Deriving
+import Ps.Elab.Mutual
 
 structure PsCommandState where
   environment : PsEnvironment
@@ -140,87 +141,6 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
     state.scope.included
   return { state with scope := { state.scope with included } }
 
--- Constructive part of pinned Lean's PreDefinition/MkInhabitant: every
--- parameter supplies an Inhabited value in this witness-only local scope.
--- Search uses the existing shared constraint engine, not the recursive body.
--- The Nonempty/Classical fallback is deliberately unavailable under the
--- current approved assumption policy. No witness instance escapes this call.
-def psElabPartialInhabitant (environment : PsEnvironment)
-    (levels : List PsName) (type : PsExpr) : Except PsElabError PsExpr := do
-  let initial := psElabContextEmpty environment levels
-  match psWhnf environment initial.metaContext initial.localContext type with
-  | .forallE .. => pure ()
-  | _ => throw (.data "PSCV0-TERM-02-FUNCTION: partial requires a function type")
-  let opened ← psElabOpenCoreTelescope 4096 initial type none
-  let className := psRootName "Inhabited"
-  let context ← opened.bindersRev.reverse.foldlM
-    (fun (context : PsElabContext) binder => do
-      let sort ← (psInferType environment context.metaContext context.localContext
-        binder.type).mapError PsElabError.infer
-      let level ← (psInferEnsureSort environment context.metaContext context.localContext
-        sort).mapError PsElabError.infer
-      let dictionary ← psElabApplyCore context
-        (.constE (psNameAppendStr className "mk") [level])
-        [binder.type, .fvar binder.id]
-      return { dictionary.context with
-        instances := psInstanceIndexAdd dictionary.context.instances {
-          value := dictionary.term, type := dictionary.type, className := some className } })
-    opened.context
-  let sort ← (psInferType environment context.metaContext context.localContext
-    opened.body).mapError PsElabError.infer
-  let level ← (psInferEnsureSort environment context.metaContext context.localContext
-    sort).mapError PsElabError.infer
-  let target := PsExpr.app (.constE className [level]) opened.body
-  let dictionary ← (psElabSynthesizeInstance context target).mapError fun error =>
-    match error with
-    | .implicitApplicationUnsupported =>
-      .data "PSCV0-TERM-02-INHABITED: no constructive result inhabitant in the selected environment"
-    | _ => error
-  let value ← psElabApplyCore dictionary.context
-    (.constE (psNameAppendStr className "default") [level])
-    [opened.body, dictionary.term]
-  let witness := psCloseElabLambdaBinders value.context.metaContext opened.bindersRev
-    (psMetaInstantiate value.context.metaContext value.term)
-  if psExprHasUnresolvedMeta witness then throw .unresolvedMetavariable
-  let checked ← psElabResolvedTerm initial witness (some type)
-  return psMetaInstantiate checked.context.metaContext checked.term
-
--- Like pinned Lean's addAndCompilePartial, logical identity and actual body
--- are separate. The public opaque receives an independently constructed
--- inhabitant; the body is checked against that opaque self, with no axiom
--- stub and no equation between them. Its numeric identity cannot be spelled
--- by source. A partialDecl marker is retained through preparation so current
--- executable admission rejects it instead of executing the inhabitant.
-def psElabPartialCommandBatch (environment : PsEnvironment)
-    (nameSyntax : PsSyntaxName) (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax bodySyntax : PsSyntaxTerm) (levelNames : List PsName) :
-    Except PsElabError PsElabDeclarationBatchResult := do
-  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
-  let binderResult ← psElabTypedBinders psElabTerm
-    (psElabContextEmpty environment levelNames) binders
-  let annotation ← psElabType psElabTerm binderResult.context typeSyntax
-  let openType := psMetaInstantiate annotation.context.metaContext annotation.type
-  let type := psCloseElabForallBinders annotation.context.metaContext
-    binderResult.bindersRev openType
-  -- This slice requires a resolved header before recursive body elaboration.
-  if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
-  let levels := psElabDeclarationLevels levelNames [type]
-  let witness ← psElabPartialInhabitant environment levels type
-  let logical := PsDeclaration.opaqueDecl name levels type witness
-  let some withSelf := psEnvironmentAdd environment logical
-    | throw (.duplicateDeclaration name)
-  let body ← psElabTerm (psElabContextWithEnvironment annotation.context withSelf)
-    bodySyntax (some openType)
-  let closed := psCloseElabTypedBinders body.context.metaContext binderResult.bindersRev
-    (psMetaInstantiate body.context.metaContext body.term)
-    (psMetaInstantiate body.context.metaContext openType)
-  if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
-    throw .unresolvedMetavariable
-  if !psExprAlphaEq closed.snd type then throw .typeMismatch
-  let implementationName := PsName.num name 0
-  return {
-    declarations := [logical, .partialDecl implementationName levels type closed.fst]
-    sourceInfo := [psElabFinishSourceInfo body.context implementationName] }
 
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
     (registration : Option PsSyntaxRegistration) (isPrivate : Bool := false) :
@@ -300,6 +220,85 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     else state.exposedNames
     privateAliases := aliases }
 
+-- Only compatible, independently inhabited P0 members enter this selected
+-- joint batch. Other strategies keep their own refusal instead of silently
+-- inheriting an opaque/runtime interpretation from a neighboring declaration.
+def psElabMutualStrategy (members : List PsSyntaxMutualMember) : Except PsElabError Unit := do
+  if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
+  if members.any (fun member => match member.declaration with
+      | .fixedpointDefinition .. => true | _ => false) then
+    throw (.data "PSCV0-FIXPOINT-ASSUMPTION: selected Lean.Order.fix construction requires unapproved Classical.choice through CCPO.csup; partial_fixpoint admission is unavailable")
+  if members.any (fun member => match member.declaration with
+      | .wellFoundedDefinition .. => true | _ => false) then
+    throw (.data "PSCV0-MUTUAL-WF: mutual well-founded recursion requires a checked group construction; admission is unavailable")
+  if members.all (fun member => match member.declaration with
+      | .definition .. => true | _ => false) then
+    throw (.data "PSCV0-MUTUAL-TOTAL: total mutual recursion requires a checked group construction; admission is unavailable")
+  if !members.all (fun member => match member.declaration with
+      | .partialDefinition .. => true | _ => false) then
+    throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
+  if members.any (fun member => member.registration.isSome) then
+    throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
+
+def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualMember)
+    (span : PsSourceSpan) : Except PsElabError PsCommandState := do
+  psElabMutualStrategy members
+  let qualified := members.map fun member =>
+    psScopeQualified state.scope (psElabOriginSource member.declaration).fst
+  let names := qualified.map (·.segments)
+  for sourceName in qualified do
+    if (names.filter (· == sourceName.segments)).length != 1 then
+      let some name := psSyntaxNameToName sourceName | throw .emptyName
+      throw (.duplicateDeclaration name)
+  let aliases := (members.zip qualified).foldl (fun aliases entry =>
+    if entry.fst.isPrivate && !state.moduleIdentity.isEmpty then
+      (entry.snd.segments,
+        ["$psc0Private"] ++ state.moduleIdentity.splitOn "." ++ entry.snd.segments) :: aliases
+    else aliases) state.privateAliases
+  let resolver : PsScopeResolver := {
+    environment := state.environment, scope := state.scope, privateAliases := aliases }
+  let names := qualified.map fun sourceName =>
+    (psScopePrivateRewrite resolver sourceName.segments).getD sourceName.segments
+  let localAliases := (names.zipIdx).map fun entry =>
+    (entry.fst, ["$psc0Mutual", psNatToString entry.snd])
+  let resolver := { resolver with mutualNames := names, mutualAliases := localAliases }
+  let scoped ← (members.zip localAliases).mapM fun entry =>
+    psScopeMutualMember resolver entry.fst
+      (PsSyntaxName.mk entry.snd.snd (psElabOriginSource entry.fst.declaration).snd)
+  -- Pinned MutualDef.collectUsed/removeUnusedVars closes section variables
+  -- over every main header/body before SCC partition, including disconnected
+  -- members. Keep this explicit result instead of guessing from AST arities.
+  let used := scoped.foldl (fun used member => psScopeUnion used member.used) []
+  let captured := psScopeSelect state.scope used
+  let result ← psElabPartialMutualBatch state.environment
+    (state.scope.levelNames.map psRootName) captured scoped
+  if result.members.length != scoped.length then
+    throw (.data "PSCV0-MUTUAL-INTERNAL: checked member provenance mismatch")
+  let environment ← psAddDeclarationList state.environment result.batch.declarations
+  let origins := (scoped.zip result.members).zipIdx.map fun entry =>
+    let origin := psElabBatchOriginAt (state.originsRev.length + entry.snd)
+      entry.fst.fst.source (psElabStableMemberOrigins entry.fst.snd.declarations 0) none
+    { origin with
+      sourceInfo := entry.fst.snd.sourceInfo
+      mutualGroup := some {
+        firstSourceIndex := state.originsRev.length
+        memberIndex := entry.snd
+        memberCount := scoped.length
+        span } }
+  let privateNames := (scoped.zip result.members).flatMap fun entry =>
+    if entry.fst.isPrivate then entry.snd.declarations.map psDeclarationName
+    else entry.snd.declarations.filterMap fun declaration =>
+      match declaration with | .partialDecl name .. => some name | _ => none
+  let namespaces := result.batch.declarations.foldl (fun acc declaration =>
+    ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc)
+    state.namespaces
+  return { state with
+    environment, namespaces
+    originsRev := origins.reverse ++ state.originsRev
+    declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
+    privateNames := privateNames ++ state.privateNames
+    privateAliases := aliases }
+
 -- Deriving owns Core generation in a shared parameter/universe telescope.
 -- This command owns source order, registration and provenance for all handlers.
 def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration)
@@ -376,6 +375,7 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     psElabCommandDeclaration state source (some registration) true
   | .derivingDeclaration source handlers isPrivate =>
     psElabCommandDeriving state source handlers isPrivate
+  | .mutualDeclarations members span => psElabCommandMutual state members span
 
 def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram)
     (moduleIdentity : String := "") :

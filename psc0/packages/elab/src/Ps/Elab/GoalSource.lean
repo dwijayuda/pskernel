@@ -8,7 +8,8 @@ def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
   let resolved ← psScopeTerm 4096 {
     environment := context.environment
     scope := { namePrefix := scope.namePrefix, opened := scope.opened }
-    privateAliases := scope.privateAliases } bound source
+    privateAliases := scope.privateAliases
+    mutualAliases := scope.mutualAliases } bound source
   return resolved.term
 
 def psProofMain (state : PsProofState) :
@@ -18,4 +19,5 @@ def psProofMain (state : PsProofState) :
   let some declaration := psMetaFindDecl context.metaContext goal.id
     | throw (.proof "unknown goal")
   return (goal, context, psMetaInstantiate context.metaContext declaration.type)
+
 

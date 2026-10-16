@@ -111,6 +111,29 @@ structure Batch where
   preludeMs : Nat
   results : Array (Except Diagnostic Result)
 
+private def mutualGroupOriginJson (group : PsSourceMutualGroupOrigin) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("firstSourceIndex", toJson group.firstSourceIndex),
+    ("memberIndex", toJson group.memberIndex),
+    ("memberCount", toJson group.memberCount),
+    ("sourceStartByte", toJson group.span.start.byteOffset),
+    ("sourceEndByte", toJson group.span.stop.byteOffset)]
+
+-- Used by CLI publication and fixture inspection of the same emitted origins.
+-- Per-member source coordinates and complete mutual-command ownership survive
+-- all target backends; neither is reconstructed from generated symbols.
+def sourceOriginJson (name : String) (origin : PsSourceOrigin) : Lean.Json :=
+  let fields := [
+    ("semantic", toJson name), ("file", toJson origin.identity.file),
+    ("sourceStartByte", toJson origin.span.start.byteOffset),
+    ("sourceEndByte", toJson origin.span.stop.byteOffset),
+    ("generatedReason", toJson origin.generatedReason)]
+  Lean.Json.mkObj (fields ++ match origin.mutualGroup with
+    | none => []
+    | some group => [
+        ("sourceIndex", toJson origin.sourceIndex),
+        ("mutualGroup", mutualGroupOriginJson group)])
+
 private def fromResult {α : Type} (phase : String)
     (result : Except String α) : ExceptT Diagnostic IO α :=
   match result with
@@ -248,6 +271,12 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
       (psNameToString member.name, {
         identity := { file := fileName, declaration := psNameToString member.name }
         span := batch.span
+        sourceIndex := some batch.sourceIndex
+        mutualGroup := batch.mutualGroup.map fun group => {
+          firstSourceIndex := group.firstSourceIndex
+          memberIndex := group.memberIndex
+          memberCount := group.memberCount
+          span := group.span }
         generatedReason := match member.role with
           | .sourceDeclaration | .inductiveType | .structureType => none
           | _ => some "elaboration member of source declaration" : PsSourceOrigin })

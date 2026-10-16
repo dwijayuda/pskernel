@@ -1,4 +1,70 @@
-## M3+B candidate — source cases over complete inductive groups
+## M3+B candidate — source mutual P0 and typed measured-state recursion
+
+The selected v7.2 def/function `mutual ... end` command now retains its
+ordered members, per-member modifiers/spans and whole-group span. Compatible
+P0 groups close the section telescope and universe union over the complete
+source block, following pinned Lean before SCC partition. Every public
+opaque has an independently constructed inhabitant in the original
+environment; all real opaque headers are staged before any body. Typed local
+peer aliases apply the exact captured Core telescope, including implicit,
+instance and proof slots. They support bare peer values and shadowed names,
+and are removed before final body checking. Every source member owns its
+public opaque and private numeric implementation identity. The existing
+ordinary host path executes only the separately checked actual bodies.
+
+Mutual group provenance now survives elaboration, target artifact origins and
+the CLI serializer. Ordinary origin JSON keeps its existing fields; mutual
+origins also carry source index, ordered group member identity and complete
+group byte span. The new independent native/source fixture covers recursion,
+imports/privacy, common captures, disconnected members, nullary functions,
+bare higher-order peers, shadowing, implicit/instance binders, delayed proofs,
+body-only universe closure and exact strategy/assurance refusals. Divergent
+pairs are checked but never invoked. Total mutual and mutual well-founded
+strategies still require their own checked construction; P1 retains its exact
+Classical.choice policy refusal.
+
+Well-founded recursion now accepts multiple explicit Nat header parameters
+and Nat results. Typed call analysis separates fixed captures, one changing
+measured parameter and other evolving state. The actual Nat.fix motive
+returns the state function, preserving nonprefix argument order and fixed
+measure dependencies. Every source call argument becomes one checked Core
+let in its original order; final calls revalidate fixed arguments. No source
+body lambda is promoted into the termination clause's header scope.
+
+The public `f.eq_def` still follows from real `Nat.fix_eq`. State callbacks
+use checked `funext`, `congrArg` and `Eq.trans` to expose calls to actual
+public `f`; portable conversion is unchanged. Runtime lowering revalidates
+the retained root body and full entry telescope, reconstructs a typed
+proof-restricted public self-call in original argument order, and delegates
+to ordinary erasure. Independent oracles cover nonprefix state/major/fixed
+slots, beta-equivalent fixed arguments, a fixed offset measure, two evolving
+states using the original values, a no-state case, and successor equations.
+The existing one-batch fixture adds four exports without changing original
+workloads, expected results, iteration counts, budgets or dependency pins.
+
+Previous source-case checkpoint `34f43e6bfdaf91cfa965b9449eca5bb30bf66597`
+passed F1 `38962445093`, F2 `38962445118`, F3/F4 `38962445161` and focused
+`38962445128`, including every group-match target. Native `38962445114`
+compiled and regenerated the checked assets, then rejected source case 64
+with TYPE-MISMATCH instead of its expected diagnostic for forbidden
+Or True True elimination into Nat. The shared recursor cursor now preserves
+the existing Core application-type error while checking the incompatible
+motive earlier. Existing native expectations remain unchanged; the focused
+fixture asserts that exact error for both singleton and group Prop cases.
+The failed checkpoint is not accepted. The current compiler/test candidate
+requires all five gates on its own SHA.
+
+Latest fully accepted compiler remains
+`a7c6dade87a9d8df74d5248e8276623e7870078c`. Approximately 40% was fully
+qualified before these candidates (30–50% engineering uncertainty), with all
+six exits retained in the denominator. Full group deriving/induction,
+broader nested traversal, total mutual recursion, general dependent
+well-founded domains/results and integration remain open. P1 is unavailable
+under the unchanged approved assumptions `propext` and `Quot.sound`.
+Continue implementation after the exact cloud checkpoint; PR #109 remains
+draft/open/unmerged on its original base.
+
+## M3+B earlier candidate — source cases over complete inductive groups
 
 `Ps.Elab.GroupElimination` now consumes the actual checked recursor argument
 telescope in complete family/minor order. Source `match`, pattern matrices,

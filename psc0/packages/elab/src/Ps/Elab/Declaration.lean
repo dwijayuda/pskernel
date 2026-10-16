@@ -36,6 +36,15 @@ structure PsElabMemberOrigin where
   name : PsName
   role : PsElabOriginRole
 
+-- A mutual source command owns one complete ordered group while each source
+-- member keeps its own declaration span and source index. These coordinates
+-- are provenance only; they never participate in checked Core identity.
+structure PsElabMutualGroupOrigin where
+  firstSourceIndex : Nat
+  memberIndex : Nat
+  memberCount : Nat
+  span : PsSourceSpan
+
 structure PsElabBatchOrigin where
   sourceIndex : Nat
   sourceName : PsSyntaxName
@@ -43,6 +52,7 @@ structure PsElabBatchOrigin where
   members : List PsElabMemberOrigin
   normalization : Option PsElabNormalizationOrigin
   sourceInfo : List PsElabSourceInfo := []
+  mutualGroup : Option PsElabMutualGroupOrigin := none
 
 structure PsElabOriginError where
   error : PsElabError

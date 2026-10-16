@@ -1,3 +1,7 @@
+## Active PSC0 v7.2 architecture authority
+
+See [PSC0 native current/target/later architecture](../ARCHITECTURE.md) for one current set of semantic owners, supported features, Lean 4.35 comparison, future pass boundaries and milestone allocation. The previous PSC2 bootstrap architecture was archived verbatim at [history/PSC2_MINIMAL_SELFHOST_ARCHITECTURE_SNAPSHOT.md](history/PSC2_MINIMAL_SELFHOST_ARCHITECTURE_SNAPSHOT.md). Historical kernel/npm/self-host docs are **not** current M3+B instructions. M2+A unchanged; M3+B still OPEN.
+
 ## M3+B exact qualification: open Nat.sub strict-child slice accepted (16 October 2026)
 
 **Accepted compiler/test:** `721b97038926db5f34e2da1cf7157c68c18234ff`. All five exact same-commit

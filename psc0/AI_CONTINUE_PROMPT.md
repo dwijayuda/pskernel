@@ -1,3 +1,7 @@
+## Active architecture consolidation — 17 October 2026
+
+`psc0/ARCHITECTURE.md` is now the single active native v7.2 architecture document for current implementation, target mechanisms, later-track non-goals and Lean 4.35 comparison; historical PSC2 text is preserved exactly in `psc0/docs/history/PSC2_MINIMAL_SELFHOST_ARCHITECTURE_SNAPSHOT.md`. Continue the six unchanged M3+B exits from the roadmap, beginning with one group-aware data/recursion validation owner. Source/CI receipts above remain independent; this doc commit makes no implementation or new qualification claim.
+
 ## M3+B exact qualification: open Nat.sub strict-child slice accepted (16 October 2026)
 
 **Accepted compiler/test:** `721b97038926db5f34e2da1cf7157c68c18234ff`. All five exact same-commit

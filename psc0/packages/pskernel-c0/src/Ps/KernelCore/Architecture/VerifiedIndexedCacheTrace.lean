@@ -136,9 +136,9 @@ def psKernelC0VerifiedIndexedCacheTraceSession
           psKernelC0VerifiedIndexedCacheTraceSource
             commands session.checker.state } :=
   ⟨{ session with checker :=
-       { session.checker with state :=
-           psKernelC0VerifiedIndexedCacheTraceRun
-             commands session.checker.state } },
+       PsKernelCheckerSession.mk session.checker.context
+         (psKernelC0VerifiedIndexedCacheTraceRun
+           commands session.checker.state) },
     ⟨rfl, rfl,
       psKernelC0VerifiedIndexedCacheTraceRun_source
         commands session.checker.state⟩⟩

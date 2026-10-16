@@ -314,35 +314,23 @@ def psKernelReduceNatWith
                           Prod.fst leftResult;
                         let state1 :=
                           Prod.snd leftResult;
-                        match
-                            publicWhnf
-                              context
-                              state1
-                              right with
-                        | Except.error error =>
-                            Except.error error
-                        | Except.ok rightResult =>
-                            let rightReduced :=
-                              Prod.fst rightResult;
-                            let state2 :=
-                              Prod.snd rightResult;
-                            match
-                                psKernelExprNatLiteralValue
-                                  leftReduced with
-                            | Option.none =>
-                                Except.ok
-                                  (Prod.mk
-                                    Option.none
-                                    state2)
-                            | Option.some leftValue =>
-                                match
-                                    psKernelExprNatLiteralValue
-                                      rightReduced with
+                        -- Lean 4.35 reduce_bin_nat_op checks the first
+                        -- WHNF argument for Nat literal shape *before*
+                        -- evaluating the second. A stuck first operand must
+                        -- leave the second unvisited and preserve state1.
+                        match psKernelExprNatLiteralValue leftReduced with
+                        | Option.none =>
+                            Except.ok (Prod.mk Option.none state1)
+                        | Option.some leftValue =>
+                            match publicWhnf context state1 right with
+                            | Except.error error =>
+                                Except.error error
+                            | Except.ok rightResult =>
+                                let rightReduced := Prod.fst rightResult;
+                                let state2 := Prod.snd rightResult;
+                                match psKernelExprNatLiteralValue rightReduced with
                                 | Option.none =>
-                                    Except.ok
-                                      (Prod.mk
-                                        Option.none
-                                        state2)
+                                    Except.ok (Prod.mk Option.none state2)
                                 | Option.some rightValue =>
                                     match
                                         psKernelReduceNatBinary
@@ -353,10 +341,7 @@ def psKernelReduceNatWith
                                     | Except.error error =>
                                         Except.error error
                                     | Except.ok result =>
-                                        Except.ok
-                                          (Prod.mk
-                                            result
-                                            state2)
+                                        Except.ok (Prod.mk result state2)
                   else
                     Except.ok (Prod.mk Option.none state)
               | List.cons _ _ =>

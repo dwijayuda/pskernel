@@ -122,7 +122,7 @@ def psCompilerPrepareElaboratedWithOutput
     elaborated.declarations).mapError PsCompilerError.normalization
   let elaborated := lifted.result
   match
-      psEncodeCheckedAdmissionsCanonical
+      psEncodeCheckedAdmissionsCanonicalIn elaborated.environment
         (psCompilerLogicalCheckingView elaborated.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
@@ -253,7 +253,7 @@ def psCompilerValidatePrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError Unit :=
   match
-      psEncodeCheckedAdmissionsCanonical
+      psEncodeCheckedAdmissionsCanonicalIn psSelfHostProdPreludeEnvironment
         (psCompilerLogicalCheckingView prepared.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
@@ -263,7 +263,8 @@ def psCompilerValidatePrepared
 def psCompilerAdmissionsFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError String :=
-  match psEncodeCheckedAdmissionsCanonical (psCompilerLogicalCheckingView prepared.declarations) with
+  match psEncodeCheckedAdmissionsCanonicalIn psSelfHostProdPreludeEnvironment
+      (psCompilerLogicalCheckingView prepared.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>

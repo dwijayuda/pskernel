@@ -285,8 +285,8 @@ def main : IO Unit := do
     "inductive P where { | bad(next: Q -> Nat) }\ninductive Q where { | good }\n"
     "unsupported recursive field"
   expectDataRefusal
-    "inductive P where { | nested(next: List Q) }\ninductive Q where { | good }\n"
-    "checked auxiliary motive plan"
+    "inductive P where { | nested(next: List(Q -> Nat)) }\ninductive Q where { | good }\n"
+    "unsupported recursive field"
 
   let some first := group.declarations.head? | throw (IO.userError "missing group head")
   expectCodecRefusal (group.declarations ++ [first])

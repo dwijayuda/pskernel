@@ -70,6 +70,7 @@ structure PsErasureGroupRecursionPlan where
   workers : PsRecursorWorkerGroup
   captures : List PsExpr
   levels : List PsLevel
+  application : PsEliminationRecursorApplication
 
 inductive PsErasureRecursionDispatch where
   | singleton (plan : PsErasureRecursionPlan)
@@ -79,13 +80,14 @@ inductive PsErasureRecursionDispatch where
 -- A nested fold or changed capture cannot reuse a caller merely because its
 -- major happens to have the same family. The raw entry telescope is retained.
 def psErasurePlanGroupRecursion (environment : PsEnvironment) (scope : PsErasureScope)
-    (view : PsGroupRecursorApplication) : Option PsErasureGroupRecursionPlan := do
+    (view : PsEliminationRecursorApplication) : Option PsErasureGroupRecursionPlan := do
   let current ← scope.currentDefinition
   let name ← current.coreName
   let [workers] := scope.recursorWorkerGroups.filter
     (fun group => group.workers.any (fun worker => psNameEq worker.name name)) | none
   let worker ← workers.workers.find? (fun worker => psNameEq worker.name name)
-  if !psNameEq worker.family view.family.name || !view.suffix.isEmpty then none else do
+  if !psNameEq (psRecursorWorkerRecursorName worker) view.slot.recursorName ||
+      !psNameEq worker.family view.slot.family.name || !view.suffix.isEmpty then none else do
     let some (.definitionDecl _ levels _ value) := psEnvironmentFind environment name | none
     let arguments := current.coreParametersRev.reverse
     if arguments.length != workers.captureCount + view.info.numIndices + 1 then none else do
@@ -95,34 +97,51 @@ def psErasurePlanGroupRecursion (environment : PsEnvironment) (scope : PsErasure
       else return {
         workers, captures := arguments.take workers.captureCount
         levels := levels.map PsLevel.param
+        application := view
       }
 
-def psErasureGroupRecursiveCall (environment : PsEnvironment)
-    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
-    (scope : PsErasureScope) (plan : PsErasureGroupRecursionPlan) (childName : String) :
-    Except PsErasureError PsVerifiedIrExpr := do
-  let some child := scope.runtimeLocals.find? (fun entry => entry.2 == childName)
-    | throw .binderMismatch
-  let some declaration := psLocalFindById scope.localContext child.1 | throw .binderMismatch
-  let view := psReduceAppView (psWhnf environment psMetaEmpty scope.localContext
-    (psLocalDeclType declaration))
-  let .constE owner _ := view.head | throw .unsupportedRuntimeTerm
-  let some worker := plan.workers.workers.find? (fun worker => psNameEq worker.family owner)
+-- A constructor's canonical field edge chooses the worker. The child's actual
+-- instantiated type must then agree with that slot, including fixed container
+-- parameters; a base name such as List is never a sufficient dispatch key.
+def psErasureGroupRecursiveCoreCall (environment : PsEnvironment)
+    (scope : PsErasureScope) (plan : PsErasureGroupRecursionPlan)
+    (child : PsExpr) (target : PsName) : Except PsErasureError PsExpr := do
+  let some (_, slot) := psInductiveEliminationSlotFor plan.application.plan target
     | throw .unsupportedRuntimeTerm
-  let some family := psEnvironmentFindInductive environment owner | throw .unsupportedRuntimeTerm
-  if view.args.length != family.numParams + family.numIndices then throw .unsupportedRuntimeTerm
+  let some worker := plan.workers.workers.find?
+      (fun worker => psNameEq (psRecursorWorkerRecursorName worker) target)
+    | throw .unsupportedRuntimeTerm
+  let .constE _ recursorLevels := plan.application.head | throw .unsupportedRuntimeTerm
+  let some levels := psInductiveEliminationFamilyLevels plan.application.plan
+      plan.application.info recursorLevels | throw .unsupportedRuntimeTerm
+  let type ← (psInferType environment psMetaEmpty scope.localContext child).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  let reduce := psWhnf environment psMetaEmpty scope.localContext
+  let some indices := psInductiveEliminationIndicesAt (psReduceEliminationEqual reduce)
+      plan.application.plan slot levels
+      (plan.application.fixedArgs.take plan.application.info.numParams) (reduce type)
+    | throw .unsupportedRuntimeTerm
   -- Reuse ordinary checked declaration-call erasure for type arguments,
   -- erased indices, proof slots and the target worker's distinct return type.
   -- No runtime slot or cross-family call signature is guessed here.
-  let call := psReduceApply (.constE worker.name plan.levels)
-    (plan.captures ++ view.args.drop family.numParams ++ [.fvar child.1])
+  return psReduceApply (.constE worker.name plan.levels) (plan.captures ++ indices ++ [child])
+
+def psErasureGroupRecursiveCall (environment : PsEnvironment)
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (scope : PsErasureScope) (plan : PsErasureGroupRecursionPlan) (childName : String)
+    (target : Option PsName) : Except PsErasureError PsVerifiedIrExpr := do
+  let some child := scope.runtimeLocals.find? (fun entry => entry.2 == childName)
+    | throw .binderMismatch
+  let some target := target | throw .unsupportedRuntimeTerm
+  let call ← psErasureGroupRecursiveCoreCall environment scope plan (.fvar child.1) target
   eraseAt { scope with currentDefinition := none } call
 
 def psErasureDispatchRecursiveCall (environment : PsEnvironment)
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
-    (scope : PsErasureScope) (plan : PsErasureRecursionDispatch) (childName : String) :
+    (scope : PsErasureScope) (plan : PsErasureRecursionDispatch) (childName : String)
+    (target : Option PsName := none) :
     Except PsErasureError PsVerifiedIrExpr :=
   match plan with
   | .singleton plan => psErasureRecursiveCall environment eraseAt scope plan childName
-  | .group plan => psErasureGroupRecursiveCall environment eraseAt scope plan childName
+  | .group plan => psErasureGroupRecursiveCall environment eraseAt scope plan childName target
 

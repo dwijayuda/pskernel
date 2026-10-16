@@ -1243,7 +1243,7 @@ def psOpenMatchMinorHypotheses
                   match recursionPlan with
                   | none => Except.ok none
                   | some plan => (psErasureDispatchRecursiveCall environment eraseAt
-                      state.scope plan binding.name).map some;
+                      state.scope plan binding.name field.recursiveTarget).map some;
                 match replacement with
                 | Except.error error => Except.error error
                 | Except.ok value =>
@@ -1323,7 +1323,7 @@ def psErasureStructureRecursorFields
         | Except.ok tail =>
             Except.ok (List.cons
               (PsRuntimeConstructorField.mk field.sourceIndex field.name field.type
-                (psErasureNatInList recursiveFields field.projectionIndex))
+                (psErasureNatInList recursiveFields field.projectionIndex) none)
               tail)
 
 def psErasureStructureProjectionBindings
@@ -1544,6 +1544,67 @@ def psEraseIntRecursorAlternatives
         (.intrinsic .intToNat [] [scrutinee]) positiveBody))
   | _ => .error PsErasureError.binderMismatch
 
+structure PsErasureSlotProjection where
+  id : Nat
+  name : PsName
+  type : PsExpr
+  value : PsExpr
+
+-- Array and Prod auxiliary slots eliminate their actual structures. A typed
+-- Core projection let binds each field once. In particular Array.toList uses
+-- the existing checked conversion adapter and shares its allocated List
+-- between the field argument and that List slot's induction hypothesis.
+def psEraseEliminationStructureSlot (environment : PsEnvironment) (scope : PsErasureScope)
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (application : PsEliminationRecursorApplication)
+    (recursion : Option PsErasureGroupRecursionPlan) :
+    Except PsErasureError PsVerifiedIrExpr := do
+  let [constructor] := application.slot.constructors | throw .unsupportedRuntimeTerm
+  if !application.slot.family.isStructure || application.info.numIndices != 0 then
+    throw .unsupportedRuntimeTerm
+  let majorType ← (psInferType environment psMetaEmpty scope.localContext application.major).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  let majorName := psRootName "_nestedMajor"
+  let major := psLocalPushBinding scope.localContext majorName majorType .explicit
+  let initial := { scope with localContext := major.context }
+  let (inner, fields) ← (List.range constructor.info.numFields).foldlM
+    (fun (state : PsErasureScope × List PsErasureSlotProjection) index => do
+      let value := PsExpr.proj application.slot.family.name index (.fvar major.id)
+      let type ← (psInferType environment psMetaEmpty state.1.localContext value).mapError
+        (fun _ => PsErasureError.unsupportedRuntimeTerm)
+      let name := psNameAppendNum (psRootName "_nestedField") index
+      let pushed := psLocalPushBinding state.1.localContext name type .explicit
+      let field : PsErasureSlotProjection := { id := pushed.id, name, type, value }
+      return ({ state.1 with localContext := pushed.context }, state.2 ++ [field])) (initial, [])
+  let .constE _ recursorLevels := application.head | throw .unsupportedRuntimeTerm
+  let some familyLevels := psInductiveEliminationFamilyLevels application.plan
+      application.info recursorLevels | throw .unsupportedRuntimeTerm
+  let hypotheses ← constructor.recursiveFields.mapM fun (index, targetIndex) => do
+    let some field := fields[index]? | throw PsErasureError.binderMismatch
+    let some target := application.plan.slots[targetIndex]? | throw PsErasureError.unsupportedRuntimeTerm
+    match recursion with
+    | some recursion => psErasureGroupRecursiveCoreCall environment inner recursion
+        (.fvar field.id) target.recursorName
+    | none =>
+      -- An unused binder can be substituted with its real Core hypothesis.
+      -- Raw beta substitution drops it before erasure; no unit or fake IH is
+      -- introduced. A used hypothesis without workers is refused upstream.
+      let some hypothesis := psReduceEliminationHypothesis
+          (psWhnf environment psMetaEmpty inner.localContext) 4096 application.plan targetIndex
+          recursorLevels familyLevels application.fixedArgs field.type (.fvar field.id)
+        | throw PsErasureError.unsupportedRuntimeTerm
+      pure hypothesis
+  let some offset := psInductiveEliminationMinorOffset application.plan application.slotIndex
+    | throw .unsupportedRuntimeTerm
+  let some minor := application.fixedArgs[application.info.numParams +
+      application.info.numMotives + offset]? | throw .unsupportedApplication
+  let some body := psRecursorWorkerBetaApply minor
+      (fields.map (fun field => .fvar field.id) ++ hypotheses) | throw .binderMismatch
+  let body := fields.foldr (fun field body =>
+    PsExpr.letE field.name field.type field.value (psExprAbstractFVar field.id body)) body
+  let term := PsExpr.letE majorName majorType application.major (psExprAbstractFVar major.id body)
+  eraseAt { scope with currentDefinition := none } term
+
 def psEraseRuntimeRecursorApplication
     (environment : PsEnvironment) (scope : PsErasureScope)
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
@@ -1554,17 +1615,27 @@ def psEraseRuntimeRecursorApplication
   if view.args.length != psRuntimeRecursorArity inductiveInfo then throw .unsupportedApplication
   -- Builtin and singleton scopes keep their existing runtime layout. A group
   -- additionally requires its complete registered Core recursor equation.
-  let groupApplication ← match inductiveInfo.group with
+  let groupApplication ← match inductiveInfo.elimination with
     | none => pure none
-    | some group => do
-      let some application := psGroupRecursorApplication environment
+    | some (plan, index) => do
+      let some application := psEliminationRecursorApplication environment
           (psErasureApplyCoreArguments view.head view.args) | throw .unsupportedRuntimeTerm
-      if !psNameEq application.family.name inductiveInfo.coreName ||
-          !psInductiveGroupNamesEqual (psInductiveGroupNames application.group)
-            (psInductiveGroupNames group) then throw .unsupportedRuntimeTerm
+      if application.slotIndex != index || !psNameEq application.slot.family.name inductiveInfo.coreName ||
+          !psInductiveGroupNamesEqual (application.plan.slots.map (·.recursorName))
+            (plan.slots.map (·.recursorName)) then throw .unsupportedRuntimeTerm
       pure (some application)
+  let parameters ← match groupApplication with
+    | none => pure (view.args.take inductiveInfo.numParams)
+    | some application =>
+      let .constE _ levels := application.head | throw .unsupportedRuntimeTerm
+      let some levels := psInductiveEliminationFamilyLevels application.plan application.info levels
+        | throw .unsupportedRuntimeTerm
+      let some specializedPrefix := psInductiveEliminationInstantiate application.plan levels
+          (view.args.take inductiveInfo.numParams) application.slot.typeFormer
+        | throw .unsupportedRuntimeTerm
+      pure (psReduceAppView specializedPrefix).args
   let selected ← psErasureSelectSourceTypeArguments
-    (view.args.take inductiveInfo.numParams) inductiveInfo.sourceTypeIndices
+    parameters inductiveInfo.sourceTypeIndices
   let typeArguments ← selected.mapM (psEraseRuntimeType environment scope)
   if typeArguments.length != inductiveInfo.typeParameters.length then throw .unsupportedApplication
   let substitutions := (inductiveInfo.typeParameters.zip typeArguments).map
@@ -1583,8 +1654,14 @@ def psEraseRuntimeRecursorApplication
       (psErasurePlanRecursion scope inductiveInfo.coreName inductiveInfo.numParams
         major indices minors).map .singleton
     | some application => (psErasurePlanGroupRecursion environment scope application).map .group
-  if groupApplication.any (psGroupRecursorUsesHypotheses environment) && recursionPlan.isNone then
+  if groupApplication.any psEliminationRecursorUsesHypotheses && recursionPlan.isNone then
     throw .unsupportedRuntimeTerm
+  if let some application := groupApplication then
+    if application.slot.family.isStructure then
+      let workers := match recursionPlan with
+        | some (.group plan) => some plan
+        | _ => none
+      return some (← psEraseEliminationStructureSlot environment scope eraseAt application workers)
   let scrutinee ← eraseAt scope major
   -- Scalar elimination inspects a major and extracts its payload. Preserve
   -- the existing once-only capture before either generated use.
@@ -1620,11 +1697,7 @@ def psEraseRuntimeRecursorApplication
     if alternatives.isEmpty then
       let familyPosition ← match groupApplication with
         | none => pure 0
-        | some application =>
-          match (application.group.members.zipIdx).find?
-              (fun pair => psNameEq pair.1.name inductiveInfo.coreName) with
-          | none => throw .unsupportedRuntimeTerm
-          | some pair => pure pair.2
+        | some application => pure application.slotIndex
       let some motive := view.args[inductiveInfo.numParams + familyPosition]?
         | throw .unsupportedApplication
       let resultType ← psEraseRuntimeType environment scope

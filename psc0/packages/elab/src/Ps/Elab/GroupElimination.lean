@@ -40,6 +40,60 @@ def psElabRecursorArguments {α : Type} (items : List α)
       arguments := term :: tail.arguments
       cursor := tail.cursor }
 
+structure PsElabEliminationRecursorPlan where
+  plan : PsInductiveEliminationPlan
+  slotIndex : Nat
+  slot : PsInductiveEliminationSlot
+  recursor : PsRecursorInfo
+  levels : List PsLevel
+  context : PsElabContext
+  cursor : PsExpr
+
+def psElabEliminationRecursorPlanFor (context : PsElabContext)
+    (family : PsInductiveInfo) (levels : List PsLevel)
+    (parameters : List PsExpr) (motiveLevel : PsLevel) :
+    Except PsElabError PsElabEliminationRecursorPlan := do
+  let some plan := psInductiveEliminationPlanFor
+      (psWhnf context.environment context.metaContext psLocalEmpty)
+      (psEnvironmentFindInductive context.environment)
+      (psEnvironmentFindConstructor context.environment)
+      (psEnvironmentFindRecursor context.environment) family
+    | throw .matchRecursorUnsupported
+  let name := psNameAppendStr family.name "rec"
+  let some (slotIndex, slot) := psInductiveEliminationSlotFor plan name
+    | throw .matchRecursorUnsupported
+  let some recursor := psEnvironmentFindRecursor context.environment name
+    | throw .matchRecursorUnsupported
+  if parameters.length != family.numParams then throw .matchParameterArity
+  let recursorLevels ← psElabRecursorLevels family recursor levels motiveLevel
+  let applied ← psElabApplyCore context (.constE recursor.name recursorLevels) parameters
+  return {
+    plan, slotIndex, slot, recursor
+    levels := recursorLevels
+    context := applied.context
+    cursor := applied.type }
+
+def psElabEliminationConstructors (context : PsElabContext)
+    (plan : PsInductiveEliminationPlan) :
+    Except PsElabError (List (Nat × PsInductiveEliminationSlot × PsInductiveEliminationConstructor)) := do
+  let members ← (plan.slots.zipIdx).mapM fun (slot, index) =>
+    slot.constructors.mapM fun constructor => do
+      let some registered := psEnvironmentFindConstructor context.environment constructor.info.name
+        | throw (.matchConstructorUnknown constructor.info.name)
+      if !psNameEq registered.inductiveName slot.family.name ||
+          registered.constructorIndex != constructor.info.constructorIndex ||
+          registered.numParams != slot.family.numParams ||
+          registered.numFields != constructor.info.numFields ||
+          !psExprAlphaEq registered.type constructor.info.type ||
+          !psInductiveGroupNamesEqual registered.levelParams slot.family.levelParams ||
+          !psInductiveEliminationConstructorMetadataValid slot constructor then
+        throw .matchRecursorUnsupported
+      return (index, slot, constructor)
+  return members.flatten
+
+-- Existing direct consumers retain their contract while using the same
+-- complete slot owner. A singleton public family with nested slots is not a
+-- singleton eliminator and cannot silently enter a direct-group strategy.
 structure PsElabGroupRecursorPlan where
   group : PsInductiveGroupPlan
   recursor : PsRecursorInfo
@@ -51,35 +105,24 @@ def psElabGroupRecursorPlanFor (context : PsElabContext)
     (family : PsInductiveInfo) (levels : List PsLevel)
     (parameters : List PsExpr) (motiveLevel : PsLevel) :
     Except PsElabError PsElabGroupRecursorPlan := do
-  let some group := psInductiveGroupPlanFor
-      (psEnvironmentFindInductive context.environment)
-      (psEnvironmentFindRecursor context.environment) family
-    | throw .matchRecursorUnsupported
-  let some recursor := psEnvironmentFindRecursor context.environment
-      (psNameAppendStr family.name "rec")
-    | throw .matchRecursorUnsupported
-  if parameters.length != family.numParams then throw .matchParameterArity
-  let recursorLevels ← psElabRecursorLevels family recursor levels motiveLevel
-  let applied ← psElabApplyCore context (.constE recursor.name recursorLevels) parameters
+  let complete ← psElabEliminationRecursorPlanFor context family levels parameters motiveLevel
+  if complete.plan.slots.length != complete.plan.group.members.length then
+    throw .matchRecursorUnsupported
   return {
-    group, recursor
-    levels := recursorLevels
-    context := applied.context
-    cursor := applied.type }
+    group := complete.plan.group, recursor := complete.recursor
+    levels := complete.levels
+    context := complete.context
+    cursor := complete.cursor }
 
 -- The flattened minor slots retain their owner as well as their local ordinal.
 -- Every consumer uses this same order, including the singleton case.
 def psElabGroupConstructors (context : PsElabContext) (group : PsInductiveGroupPlan) :
     Except PsElabError (List (PsInductiveInfo × PsConstructorInfo)) := do
-  let families ← group.members.mapM fun family =>
-    (family.constructors.zipIdx).mapM fun (name, index) => do
-      let some constructor := psEnvironmentFindConstructor context.environment name
-        | throw (.matchConstructorUnknown name)
-      if !psNameEq constructor.inductiveName family.name ||
-          constructor.constructorIndex != index ||
-          constructor.numParams != family.numParams ||
-          !psInductiveGroupNamesEqual constructor.levelParams family.levelParams ||
-          !psConstructorRecursiveFieldsOrdered constructor then
-        throw .matchRecursorUnsupported
-      return (family, constructor)
-  return families.flatten
+  let some plan := psBuildInductiveEliminationPlan
+      (psWhnf context.environment context.metaContext psLocalEmpty)
+      (psEnvironmentFindInductive context.environment)
+      (psEnvironmentFindConstructor context.environment) group
+    | throw .matchRecursorUnsupported
+  if plan.slots.length != group.members.length then throw .matchRecursorUnsupported
+  let constructors ← psElabEliminationConstructors context plan
+  return constructors.map (fun (_, slot, constructor) => (slot.family, constructor.info))

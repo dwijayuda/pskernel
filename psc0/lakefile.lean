@@ -51,6 +51,7 @@ lean_lib PsCore where
   srcDir := "packages/core/src"
   roots := #[
     `Ps.Core.Level,
+    `Ps.Core.LevelNormalize,
     `Ps.Core.Expr,
     `Ps.Core.Abstract,
     `Ps.Core.Builtin,

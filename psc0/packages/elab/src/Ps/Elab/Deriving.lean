@@ -35,7 +35,7 @@ def psElabDeriveGroupHandler (environment : PsEnvironment)
   let name ← psElabDeriveSourceFamily origin
   let some info := psEnvironmentFindInductive environment name
     | throw (.data "derived family is not an inductive")
-  let some group := psInductiveGroupPlanFor
+  let some group := psInductiveGroupIdentityFor
       (psEnvironmentFindInductive environment) (psEnvironmentFindRecursor environment) info
     | throw (.data "deriving requires a complete inductive group")
   let names := origin.members.filterMap fun member =>

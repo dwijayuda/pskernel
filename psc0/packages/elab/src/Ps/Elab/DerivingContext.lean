@@ -7,6 +7,7 @@ import Ps.Elab.GroupElimination
 structure PsElabDeriveContext where
   info : PsInductiveInfo
   group : PsInductiveGroupPlan
+  elimination : PsInductiveEliminationPlan
   context : PsElabContext
   parametersRev : List PsElabTypedBinder
   indicesRev : List PsElabTypedBinder := []
@@ -16,6 +17,7 @@ structure PsElabDeriveContext where
 structure PsElabDeriveCapabilities where
   groups : Bool := false
   indices : Bool := false
+  nested : Bool := false
 
 def psElabDeriveSourceFamily (origin : PsElabBatchOrigin) : Except PsElabError PsName := do
   let some member := origin.members.find? (fun member =>
@@ -31,20 +33,29 @@ def psElabDerivePrepare (environment : PsEnvironment)
   let name ← psElabDeriveSourceFamily origin
   let some info := psEnvironmentFindInductive environment name
     | throw (.data "derived family is not an inductive")
-  let some group := psInductiveGroupPlanFor
+  let some group := psInductiveGroupIdentityFor
       (psEnvironmentFindInductive environment) (psEnvironmentFindRecursor environment) info
     | throw (.data "deriving requires a complete inductive group")
   if !capabilities.groups && group.members.length != 1 then
     throw (.data "deriving handler requires a singleton family")
   if !capabilities.indices && group.members.any (·.numIndices != 0) then
     throw (.data "deriving indexed families is not yet implemented")
+  let some elimination := psBuildInductiveEliminationPlan
+      (psWhnf environment psMetaEmpty psLocalEmpty)
+      (psEnvironmentFindInductive environment) (psEnvironmentFindConstructor environment) group
+    | throw (.data "deriving requires a complete inductive group")
+  if !psInductiveEliminationRecursorsRegistered (psWhnf environment psMetaEmpty psLocalEmpty)
+      (psEnvironmentFindRecursor environment) elimination then
+    throw (.data "deriving requires a complete inductive group")
+  if !capabilities.nested && elimination.slots.length != group.members.length then
+    throw (.data "recursive deriving requires the M3 data machinery")
   let parameters ← psElabOpenCoreTelescope 4096
     (psElabContextEmpty environment info.levelParams) info.type (some info.numParams)
   let indices ← psElabOpenCoreTelescope 4096 parameters.context parameters.body (some info.numIndices)
   let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param))
     (psElabBinderArguments parameters.bindersRev ++ psElabBinderArguments indices.bindersRev)
   return {
-    info, group
+    info, group, elimination
     context := indices.context
     parametersRev := parameters.bindersRev.map fun binder => { binder with binder := .implicit }
     indicesRev := indices.bindersRev.map fun binder => { binder with binder := .implicit }
@@ -221,41 +232,98 @@ def psElabDeriveMotiveAt (motives : List (PsName × PsExpr))
     | throw (.data "deriving member motive is missing")
   return psExprApplyMany motive (family.indices ++ [value])
 
+def psElabDeriveSlotIndices (plan : PsElabDeriveContext) (context : PsElabContext)
+    (slot : PsInductiveEliminationSlot) (type : PsExpr) : Except PsElabError (List PsExpr) := do
+  let normalized := psWhnf context.environment context.metaContext context.localContext type
+  let some indices := psInductiveEliminationIndicesAt
+      (psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext)
+      plan.elimination slot (plan.info.levelParams.map PsLevel.param)
+      (psElabBinderArguments plan.parametersRev) normalized
+    | throw (.data "deriving field has incompatible specialization parameters or indices")
+  return indices
+
+def psElabDeriveSlotConstructor (plan : PsElabDeriveContext)
+    (constructor : PsInductiveEliminationConstructor) : Except PsElabError (PsExpr × PsExpr) := do
+  let parameters := psElabBinderArguments plan.parametersRev
+  let levels := plan.info.levelParams.map PsLevel.param
+  let some head := psInductiveEliminationInstantiate plan.elimination levels parameters constructor.head
+    | throw (.data "deriving constructor specialization is invalid")
+  let type := psExprInstantiateLevelParams plan.info.levelParams levels constructor.type
+  let cursor ← psElabProjectionApplyParameters plan.context parameters type
+  return (head, cursor)
+
+def psElabDeriveSlotFields (plan : PsElabDeriveContext)
+    (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor) :
+    Except PsElabError PsElabDeriveFields := do
+  if !psConstructorRecursiveFieldsOrdered constructor.info then
+    throw (.data "deriving recursive field metadata is invalid")
+  if slot.publicMember then
+    if constructor.recursiveFields.any (fun edge => !constructor.info.recursiveFields.contains edge.1) then
+      throw (.data "deriving direct field is absent from recursive metadata")
+    if constructor.info.recursiveFields != constructor.recursiveFields.map Prod.fst then
+      throw (.data "deriving recursive field metadata is invalid")
+  let (_, cursor) ← psElabDeriveSlotConstructor plan constructor
+  let opened ← psElabOpenCoreTelescope 4096 plan.context cursor (some constructor.info.numFields)
+  let fields := opened.bindersRev.reverse
+  let proofs ← fields.zipIdx.mapM fun (field, index) => do
+    let edge := constructor.recursiveFields.find? (fun edge => edge.1 == index)
+    if let some (_, target) := edge then
+      let some target := plan.elimination.slots[target]?
+        | throw (.data "deriving field target slot is absent")
+      let _ ← psElabDeriveSlotIndices plan opened.context target field.type
+      pure ()
+    let level ← psElabExpressionSort opened.context field.type
+    if psLevelEquivalent level .zero then return true
+    if edge.isNone && !psExprFVarsInContext plan.context.localContext field.type then
+      throw (.data "deriving requires independent runtime field types")
+    if edge.isNone && plan.group.members.any (fun member => psExprHasConst member.name field.type) then
+      throw (.data "deriving recursive field is not a supported elimination slot")
+    return false
+  let _ ← psElabDeriveSlotIndices plan opened.context slot opened.body
+  return { constructor := constructor.info, cursor, fields, proofs }
+
+structure PsElabDeriveHypothesis where
+  fieldId : Nat
+  target : Nat
+  value : PsExpr
+
 -- One induction owner supplies every motive and every minor of the complete
 -- registered group. A result callback receives the actual member type at its
 -- own indices. Branches receive only real, checked recursor hypotheses keyed
 -- by field ID; no recursive dictionary or partial definition is introduced.
-def psElabDeriveEliminateGroup (plan : PsElabDeriveContext)
+def psElabDeriveEliminateSlots (plan : PsElabDeriveContext)
     (context : PsElabContext) (allowDirectRecursion : Bool)
-    (result : PsInductiveInfo → PsExpr → PsExpr → PsExpr)
-    (branch : PsElabContext → PsInductiveInfo → PsConstructorInfo → List PsElabTypedBinder →
-      List (Nat × PsExpr) → PsExpr → Except PsElabError PsExpr) :
+    (result : Nat → PsInductiveEliminationSlot → PsExpr → PsExpr → PsExpr)
+    (branch : PsElabContext → Nat → PsInductiveEliminationSlot →
+      PsInductiveEliminationConstructor → List PsElabTypedBinder →
+      List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr) :
     Except PsElabError PsExpr := do
+  let some (selectedIndex, selected) := psInductiveEliminationSlotFor plan.elimination
+      (psNameAppendStr plan.info.name "rec") | throw (.data "deriving selected slot is absent")
   let major := psLocalPushBinding context.localContext (psRootName "value") plan.family .explicit
   let inner := psElabContextWithLocal context major.context
-  let resultType := result plan.info plan.family (.fvar major.id)
+  let resultType := result selectedIndex selected plan.family (.fvar major.id)
   let level ← psElabExpressionSort inner resultType
   let parameters := psElabBinderArguments plan.parametersRev
-  let recursor ← psElabGroupRecursorPlanFor context plan.info
+  let recursor ← psElabEliminationRecursorPlanFor context plan.info
     (plan.info.levelParams.map PsLevel.param) parameters level
-  if !psInductiveGroupNamesEqual (psInductiveGroupNames recursor.group)
-      (psInductiveGroupNames plan.group) then
+  if !psInductiveGroupNamesEqual (recursor.plan.slots.map (·.recursorName))
+      (plan.elimination.slots.map (·.recursorName)) then
     throw (.data "deriving group changed after preparation")
-  let constructors ← psElabGroupConstructors recursor.context recursor.group
-  let motives ← psElabRecursorArguments recursor.group.members
-    (fun current info type => do
-      let opened ← psElabOpenCoreTelescope 4096 current type (some (info.numIndices + 1))
+  let constructors ← psElabEliminationConstructors recursor.context recursor.plan
+  let motives ← psElabRecursorArguments recursor.plan.slots.zipIdx
+    (fun current (slot, index) type => do
+      let opened ← psElabOpenCoreTelescope 4096 current type (some (slot.family.numIndices + 1))
       let major :: indicesRev := opened.bindersRev
         | throw (.data "deriving motive has no major premise")
-      let some family ← psElabDeriveFamilyView plan opened.context major.type
-        | throw (.data "deriving motive major is not a group member")
+      let actualIndices ← psElabDeriveSlotIndices plan opened.context slot major.type
       let indices := psElabBinderArguments indicesRev
-      if !psNameEq family.info.name info.name || family.indices.length != indices.length ||
-          !(family.indices.zip indices).all (fun pair =>
+      if actualIndices.length != indices.length ||
+          !(actualIndices.zip indices).all (fun pair =>
             psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
               opened.context.localContext pair.fst pair.snd) then
         throw (.data "deriving motive does not bind its member indices")
-      let body := result info major.type (.fvar major.id)
+      let body := result index slot major.type (.fvar major.id)
       return {
         context := psElabLeaveScope current opened.context
         term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
@@ -263,42 +331,44 @@ def psElabDeriveEliminateGroup (plan : PsElabDeriveContext)
   -- Apply these closed motives in branch scopes. Reinvoking a callback after
   -- opening fields could capture one of its synthetic local IDs, notably the
   -- right-hand argument in the existing DecidableEq singleton consumer.
-  let motivesByFamily := (recursor.group.members.zip motives.arguments).map fun pair =>
-    (pair.fst.name, pair.snd)
+  let motiveAt := fun (current : PsElabContext) (target : Nat) (type value : PsExpr) => do
+    let some slot := recursor.plan.slots[target]?
+      | throw (PsElabError.data "deriving field target slot is absent")
+    let some motive := motives.arguments[target]?
+      | throw (PsElabError.data "deriving slot motive is missing")
+    let indices ← psElabDeriveSlotIndices plan current slot type
+    pure (psExprApplyMany motive (indices ++ [value]))
   let minors ← psElabRecursorArguments constructors
-    (fun current (owner, ctor) type => do
-      if !allowDirectRecursion && !ctor.recursiveFields.isEmpty then
+    (fun current (slotIndex, slot, constructor) type => do
+      let ctor := constructor.info
+      if !allowDirectRecursion && !constructor.recursiveFields.isEmpty then
         throw (.data "recursive deriving requires the M3 data machinery")
       if !psConstructorRecursiveFieldsOrdered ctor then
         throw (.data "deriving recursive field metadata is invalid")
       let opened ← psElabOpenCoreTelescope 4096 current type
-        (some (ctor.numFields + ctor.recursiveFields.length))
+        (some (ctor.numFields + constructor.recursiveFields.length))
       let binders := opened.bindersRev.reverse
       let fields := binders.take ctor.numFields
-      let hypotheses ← (ctor.recursiveFields.zip (binders.drop ctor.numFields)).mapM
-        (fun (index, hypothesis) => do
+      let hypotheses ← (constructor.recursiveFields.zip (binders.drop ctor.numFields)).mapM
+        (fun ((index, target), hypothesis) => do
           let some field := fields[index]?
             | throw (.data "deriving induction hypothesis has no field")
-          let some child ← psElabDeriveFamilyView plan opened.context field.type
-            | throw (.data "deriving recursive field is not a uniform direct group family")
-          let expected ← psElabDeriveMotiveAt motivesByFamily child (.fvar field.id)
+          let expected ← motiveAt opened.context target field.type (.fvar field.id)
           if !psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
               opened.context.localContext hypothesis.type expected then
             throw (.data "deriving induction hypothesis type mismatch")
-          return (field.id, PsExpr.fvar hypothesis.id))
-      let value := psExprApplyMany (.constE ctor.name (plan.info.levelParams.map PsLevel.param))
-        (parameters ++ fields.map (fun field => .fvar field.id))
+          return (PsElabDeriveHypothesis.mk field.id target (.fvar hypothesis.id)))
+      let some head := psInductiveEliminationInstantiate recursor.plan
+          (plan.info.levelParams.map PsLevel.param) parameters constructor.head
+        | throw (.data "deriving constructor specialization is invalid")
+      let value := psExprApplyMany head (fields.map (fun field => .fvar field.id))
       let valueType ← (psInferType opened.context.environment opened.context.metaContext
         opened.context.localContext value).mapError PsElabError.infer
-      let some family ← psElabDeriveFamilyView plan opened.context valueType
-        | throw (.data "deriving constructor result mismatch")
-      if !psNameEq family.info.name owner.name then
-        throw (.data "deriving constructor result mismatch")
-      let expected ← psElabDeriveMotiveAt motivesByFamily family value
+      let expected ← motiveAt opened.context slotIndex valueType value
       if !psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
           opened.context.localContext opened.body expected then
         throw (.data "deriving recursor minor conclusion mismatch")
-      let body ← (branch opened.context owner ctor fields hypotheses value).mapError
+      let body ← (branch opened.context slotIndex slot constructor fields hypotheses value).mapError
         (.atDeclaration ctor.name)
       return {
         context := psElabLeaveScope current opened.context
@@ -311,6 +381,22 @@ def psElabDeriveEliminateGroup (plan : PsElabDeriveContext)
   let checked ← psElabResolvedTerm (psElabLeaveScope context minors.context) term
     (some (psLogicPi major.id "value" plan.family resultType))
   return checked.term
+
+-- Direct deriving consumers keep their existing callback and refusal contract.
+-- The implementation is the same complete slot owner used by nested Hashable.
+def psElabDeriveEliminateGroup (plan : PsElabDeriveContext)
+    (context : PsElabContext) (allowDirectRecursion : Bool)
+    (result : PsInductiveInfo → PsExpr → PsExpr → PsExpr)
+    (branch : PsElabContext → PsInductiveInfo → PsConstructorInfo → List PsElabTypedBinder →
+      List (Nat × PsExpr) → PsExpr → Except PsElabError PsExpr) :
+    Except PsElabError PsExpr := do
+  if plan.elimination.slots.length != plan.group.members.length then
+    throw (.data "recursive deriving requires the M3 data machinery")
+  psElabDeriveEliminateSlots plan context allowDirectRecursion
+    (fun _ slot type value => result slot.family type value)
+    (fun current _ slot constructor fields hypotheses value =>
+      branch current slot.family constructor.info fields
+        (hypotheses.map (fun hypothesis => (hypothesis.fieldId, hypothesis.value))) value)
 
 -- The legacy contract denotes one family. Keeping this wrapper strict avoids
 -- silently promoting consumers such as DecidableEq to incomplete group motives.

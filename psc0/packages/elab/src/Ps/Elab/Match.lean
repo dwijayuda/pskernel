@@ -210,6 +210,7 @@ def psElabMatchFields (names : List PsSyntaxName) (context : PsElabContext)
       (PsElabTypedBinder.mk pushed.id name pi.domain pi.binder :: bindersRev)
 
 def psElabMatchHypotheses (fields : List PsElabTypedBinder) (recursiveFields : List Nat)
+    (visibleFields : List Nat)
     (context : PsElabContext) (cursor : PsExpr)
     (bindersRev : List PsElabTypedBinder := []) :
     Except PsElabError PsElabOpenTelescope := do
@@ -223,12 +224,12 @@ def psElabMatchHypotheses (fields : List PsElabTypedBinder) (recursiveFields : L
     let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
     let next := psElabContextWithLocal context pushed.context
     let next := match context.structuralRecursion with
-      | some recursion => if recursion.collectCalls then
+      | some recursion => if recursion.collectCalls && visibleFields.contains index then
           psElabContextWithStructuralRecursion next
             (some { recursion with calls := (field.id, pushed.id) :: recursion.calls })
         else next
       | none => next
-    psElabMatchHypotheses fields rest next
+    psElabMatchHypotheses fields rest visibleFields next
       (psExprInstantiate1 pi.body (.fvar pushed.id))
       (PsElabTypedBinder.mk pushed.id name pi.domain pi.binder :: bindersRev)
 
@@ -248,10 +249,10 @@ def psElabMatchAnonymousFields (context : PsElabContext) (type : PsExpr) (count 
 
 abbrev PsElabMatchMinorResult := PsElabRecursorArgument
 
-def psElabMatchMinor (context : PsElabContext)
+def psElabMatchMinorWithHypotheses (context : PsElabContext)
     (info : PsInductiveInfo) (levels : List PsLevel) (parameters : List PsExpr)
     (plan : PsElabMatchPlan) (ctorName : PsName) (alternative : Option PsElabMatchAlternative)
-    (minorType : PsExpr) (retainHypotheses : Bool := true) :
+    (minorType : PsExpr) (visibleFields : List Nat) :
     Except PsElabError PsElabMatchMinorResult := do
   let some ctor := psEnvironmentFindConstructor context.environment ctorName
     | throw (.matchConstructorUnknown ctorName)
@@ -276,7 +277,9 @@ def psElabMatchMinor (context : PsElabContext)
     | some id => substitutions ++ [(id, constructor)]
   let aliases ← substitutions.foldlM psElabMatchAlias { context := fields.context, valuesRev := [] }
   let hypotheses ← psElabMatchHypotheses fields.bindersRev.reverse ctor.recursiveFields
-    aliases.context fields.body
+    visibleFields aliases.context fields.body
+  let visibleHypotheses := (ctor.recursiveFields.zip hypotheses.bindersRev.reverse).filterMap
+    (fun (index, binder) => if visibleFields.contains index then some binder else none)
   let finish := fun context target => do
     let some alternative := alternative | throw PsElabError.matchNonExhaustive
     let generalized ← psElabOpenDependents plan.generalized {
@@ -289,7 +292,9 @@ def psElabMatchMinor (context : PsElabContext)
     -- A cases specialization cannot expose a companion motive's dummy result
     -- as an induction hypothesis. Keep the real binders for the recursor term,
     -- but remove them from source name resolution and new proof-goal contexts.
-    let hidden := if retainHypotheses then [] else hypotheses.bindersRev.map (·.id)
+    let visibleIds := visibleHypotheses.map (·.id)
+    let hidden := hypotheses.bindersRev.filterMap
+      (fun binder => if visibleIds.contains binder.id then none else some binder.id)
     let branchContext := psElabContextWithLocal generalized.context {
       generalized.context.localContext with
       declarations := generalized.context.localContext.declarations.filter
@@ -298,7 +303,7 @@ def psElabMatchMinor (context : PsElabContext)
       context := psElabContextAfterStructuralFields branchContext
       target := generalized.body
       fields := fields.bindersRev.reverse
-      hypotheses := if retainHypotheses then hypotheses.bindersRev.reverse else []
+      hypotheses := visibleHypotheses
       clearedIds }
     psElabCloseDependents context generalized body target
   let flexible := fields.bindersRev.map (fun binder => binder.id) ++ plan.constraintVariables
@@ -309,6 +314,18 @@ def psElabMatchMinor (context : PsElabContext)
       psElabLambdaAbstractions hypotheses.bindersRev ++ psElabLambdaAbstractions fields.bindersRev)
     body.term minorType
   return { context := closed.context, term := closed.term }
+
+-- Direct-family callers retain this interface. The full elimination-slot
+-- consumer below chooses visibility per actual recursive field instead.
+def psElabMatchMinor (context : PsElabContext)
+    (info : PsInductiveInfo) (levels : List PsLevel) (parameters : List PsExpr)
+    (plan : PsElabMatchPlan) (ctorName : PsName) (alternative : Option PsElabMatchAlternative)
+    (minorType : PsExpr) (retainHypotheses : Bool := true) :
+    Except PsElabError PsElabMatchMinorResult := do
+  let some ctor := psEnvironmentFindConstructor context.environment ctorName
+    | throw (.matchConstructorUnknown ctorName)
+  psElabMatchMinorWithHypotheses context info levels parameters plan ctorName alternative
+    minorType (if retainHypotheses then ctor.recursiveFields else [])
 
 -- Pinned Lean's cases_on.cpp specializes unused motives to PUnit at exactly
 -- the eliminator's universe. Both constants come from the ordinary checked
@@ -383,17 +400,17 @@ def psElabMatchWith (elaborate : PsElaborator)
   -- Reverted dependent parameters can raise the motive's universe above that
   -- of the original expected result. Infer the completed motive, not a proxy.
   let level ← psElabMatchMotiveLevel context plan.motive
-  let recursor ← psElabGroupRecursorPlanFor context info levels parameters level
+  let recursor ← psElabEliminationRecursorPlanFor context info levels parameters level
   let alternatives ← prepare recursor.context info
-  let constructors ← psElabGroupConstructors recursor.context recursor.group
-  let singleton := recursor.group.members.length == 1
-  let unit ← if singleton then pure none else
+  let constructors ← psElabEliminationConstructors recursor.context recursor.plan
+  let singleton := recursor.plan.group.members.length == 1
+  let unit ← if recursor.plan.slots.length == 1 then pure none else
     pure (some (← psElabMatchUnit recursor.context level))
-  let motives ← psElabRecursorArguments recursor.group.members
-    (fun current family type => do
-      if psNameEq family.name info.name then return { context := current, term := plan.motive }
+  let motives ← psElabRecursorArguments recursor.plan.slots.zipIdx
+    (fun current (slot, index) type => do
+      if index == recursor.slotIndex then return { context := current, term := plan.motive }
       let some unit := unit | throw .matchRecursorUnsupported
-      psElabMatchConstantArgument current type (family.numIndices + 1) unit.fst)
+      psElabMatchConstantArgument current type (slot.family.numIndices + 1) unit.fst)
     recursor.context recursor.cursor
   -- Ordinary group matching is a cases specialization. It supplies no map
   -- from fields to recursive source calls: such calls need a complete motive
@@ -402,14 +419,17 @@ def psElabMatchWith (elaborate : PsElaborator)
       psElabStructuralMatchContext motives.context scrutinee.term expectedType plan info.numIndices
     else psElabContextAfterStructuralFields motives.context
   let minors ← psElabRecursorArguments constructors
-    (fun current (family, constructor) type => do
-      if psNameEq family.name info.name then
-        psElabMatchMinor current info levels parameters plan constructor.name
-          (psElabMatchAlternativeFind constructor.name alternatives) type singleton
+    (fun current (index, _, constructor) type => do
+      if index == recursor.slotIndex then
+        let visible := if singleton then constructor.recursiveFields.filterMap
+          (fun (field, target) => if target == recursor.slotIndex then some field else none)
+          else []
+        psElabMatchMinorWithHypotheses current info levels parameters plan constructor.info.name
+          (psElabMatchAlternativeFind constructor.info.name alternatives) type visible
       else
         let some unit := unit | throw .matchRecursorUnsupported
         psElabMatchConstantArgument current type
-          (constructor.numFields + constructor.recursiveFields.length) unit.snd)
+          (constructor.info.numFields + constructor.recursiveFields.length) unit.snd)
     minorContext motives.cursor
   let term := psExprApplyMany (.constE recursor.recursor.name recursor.levels)
     (parameters ++ motives.arguments ++ minors.arguments ++ indices ++

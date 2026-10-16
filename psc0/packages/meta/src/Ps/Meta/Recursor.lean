@@ -1,7 +1,43 @@
 import Ps.Meta.Iota
+import Ps.Meta.Reduce
 import Ps.Core.Abstract
 import Ps.Core.Equality
 import Ps.Environment.LocalContext
+
+-- Every recursor in a nested declaration retains the same public group, but
+-- its varying argument can belong to a specialized existing container. The
+-- canonical slot plan resolves that identity before consumers split arguments.
+structure PsEliminationRecursorApplication where
+  info : PsRecursorInfo
+  plan : PsInductiveEliminationPlan
+  slotIndex : Nat
+  slot : PsInductiveEliminationSlot
+  head : PsExpr
+  fixedArgs : List PsExpr
+  indices : List PsExpr
+  major : PsExpr
+  suffix : List PsExpr
+
+def psEliminationRecursorApplication (environment : PsEnvironment) (expr : PsExpr) :
+    Option PsEliminationRecursorApplication := do
+  let view := psReduceAppView expr
+  let .constE name levels := view.head | none
+  let info ← psEnvironmentFindRecursor environment name
+  let anchorName ← info.inductiveNames.head?
+  let anchor ← psEnvironmentFindInductive environment anchorName
+  let plan ← psInductiveEliminationPlanFor
+    (psWhnf environment psMetaEmpty psLocalEmpty)
+    (psEnvironmentFindInductive environment) (psEnvironmentFindConstructor environment)
+    (psEnvironmentFindRecursor environment) anchor
+  let (slotIndex, slot) ← psInductiveEliminationSlotFor plan name
+  let _ ← psInductiveEliminationFamilyLevels plan info levels
+  let prefixSize := info.numParams + info.numMotives + info.numMinors
+  let major ← view.args[prefixSize + info.numIndices]?
+  return {
+    info, plan, slotIndex, slot, head := view.head
+    fixedArgs := view.args.take prefixSize
+    indices := (view.args.drop prefixSize).take info.numIndices
+    major, suffix := view.args.drop (prefixSize + info.numIndices + 1) }
 
 -- One layout owns the common motive/minor prefix and the selected family's
 -- varying telescope. The legacy singleton view below remains a strict subset.
@@ -17,28 +53,12 @@ structure PsGroupRecursorApplication where
 
 def psGroupRecursorApplication (environment : PsEnvironment) (expr : PsExpr) :
     Option PsGroupRecursorApplication := do
-  let view := psReduceAppView expr
-  let .constE name levels := view.head | none
-  let info ← psEnvironmentFindRecursor environment name
-  let familyName ← info.inductiveNames.find?
-    (fun family => psNameEq name (psNameAppendStr family "rec"))
-  let family ← psEnvironmentFindInductive environment familyName
-  let group ← psInductiveGroupPlanFor
-    (psEnvironmentFindInductive environment) (psEnvironmentFindRecursor environment) family
-  let constructorsValid := group.members.all fun member =>
-    member.constructors.all fun name =>
-      match psEnvironmentFindConstructor environment name with
-      | some constructor => psConstructorRecursiveFieldsOrdered constructor
-      | none => false
-  if !psInductiveGroupRecursorShapeValid group family info ||
-      levels.length != info.levelParams.length || !constructorsValid then none else do
-    let prefixSize := info.numParams + info.numMotives + info.numMinors
-    let major ← view.args[prefixSize + info.numIndices]?
-    return {
-      info, family, group, head := view.head, fixedArgs := view.args.take prefixSize
-      indices := (view.args.drop prefixSize).take info.numIndices
-      major, suffix := view.args.drop (prefixSize + info.numIndices + 1)
-    }
+  let view ← psEliminationRecursorApplication environment expr
+  if !view.slot.publicMember || view.plan.slots.length != view.plan.group.members.length then none
+  else return {
+    info := view.info, family := view.slot.family, group := view.plan.group
+    head := view.head, fixedArgs := view.fixedArgs, indices := view.indices
+    major := view.major, suffix := view.suffix }
 
 -- The single-family recursor contract is shared by preparation and runtime
 -- lowering. It does not infer recursion from a name or constructor spelling.
@@ -118,12 +138,29 @@ def psGroupRecursorUsesHypotheses (environment : PsEnvironment)
         | none => true
     | _, _ => true
 
+def psEliminationRecursorUsesHypotheses (view : PsEliminationRecursorApplication) : Bool :=
+  (view.plan.slots.flatMap (·.constructors)).zipIdx |>.any fun (constructor, index) =>
+    match view.fixedArgs[view.info.numParams + view.info.numMotives + index]? with
+    | none => true
+    | some minor =>
+      if constructor.recursiveFields.isEmpty then false else
+        match psRecursorStripLambdas
+            (constructor.info.numFields + constructor.recursiveFields.length) minor with
+        | some body => psRecursorUsesBound body constructor.recursiveFields.length 0
+        | none => true
+
 -- These records locate ordinary checked definitions. They are not admission
 -- evidence: before erasure the complete equations below are reconstructed from
 -- the retained declarations and compared, including all lexical captures.
 structure PsRecursorWorker where
   family : PsName
   name : PsName
+  -- Direct workers retain the canonical family.rec default. Auxiliary slots
+  -- need their actual rec_N identity: several slots can share List as owner.
+  recursorName : Option PsName := none
+
+def psRecursorWorkerRecursorName (worker : PsRecursorWorker) : PsName :=
+  worker.recursorName.getD (psNameAppendStr worker.family "rec")
 
 structure PsRecursorWorkerGroup where
   workers : List PsRecursorWorker
@@ -161,17 +198,19 @@ structure PsRecursorWorkerView where
   levels : List PsName
   captures : List (PsExpr × PsBinderInfo)
   recursorLevels : List PsLevel
-  application : PsGroupRecursorApplication
+  application : PsEliminationRecursorApplication
 
 def psRecursorWorkerView (environment : PsEnvironment) (captureCount : Nat)
     (worker : PsRecursorWorker) : Option PsRecursorWorkerView := do
   let some (.definitionDecl name levels type value) := psEnvironmentFind environment worker.name | none
   if !psNameEq name worker.name then none else do
-    let family ← psEnvironmentFindInductive environment worker.family
-    let opened ← psRecursorOpenWorker 4096 (captureCount + family.numIndices + 1)
+    let recursor ← psEnvironmentFindRecursor environment (psRecursorWorkerRecursorName worker)
+    let opened ← psRecursorOpenWorker 4096 (captureCount + recursor.numIndices + 1)
       psLocalEmpty type value
-    let application ← psGroupRecursorApplication environment opened.value
-    if application.group.members.length < 2 || !psNameEq application.family.name worker.family ||
+    let application ← psEliminationRecursorApplication environment opened.value
+    if application.plan.slots.length < 2 ||
+        !psNameEq application.slot.recursorName (psRecursorWorkerRecursorName worker) ||
+        !psNameEq application.slot.family.name worker.family ||
         !application.suffix.isEmpty ||
         !psRecursorExprsEqual (application.indices ++ [application.major])
           (opened.arguments.drop captureCount) then none else do
@@ -194,15 +233,15 @@ def psValidateRecursorWorkerGroups (environment : PsEnvironment)
     let first :: _ := group.workers | throw "empty recursor worker group"
     let some anchor := psRecursorWorkerView environment group.captureCount first
       | throw "recursor worker does not retain its exact group equation"
-    if !psInductiveGroupNamesEqual (group.workers.map (·.family))
-        (psInductiveGroupNames anchor.application.group) then
-      throw "recursor workers do not cover the complete ordered group"
+    if !psInductiveGroupNamesEqual (group.workers.map psRecursorWorkerRecursorName)
+        (anchor.application.plan.slots.map (·.recursorName)) then
+      throw "recursor workers do not cover the complete ordered elimination slots"
     for worker in group.workers do
       let some view := psRecursorWorkerView environment group.captureCount worker
         | throw "recursor worker does not retain its exact group equation"
       if !psInductiveGroupNamesEqual view.levels anchor.levels ||
-          !psInductiveGroupNamesEqual (psInductiveGroupNames view.application.group)
-            (psInductiveGroupNames anchor.application.group) ||
+          !psInductiveGroupNamesEqual (view.application.plan.slots.map (·.recursorName))
+            (anchor.application.plan.slots.map (·.recursorName)) ||
           !psRecursorExprsEqual (view.recursorLevels.map PsExpr.sortE)
             (anchor.recursorLevels.map PsExpr.sortE) ||
           view.captures.length != anchor.captures.length ||

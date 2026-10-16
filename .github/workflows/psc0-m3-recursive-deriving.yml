@@ -104,8 +104,8 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural
-          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive
+          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive
           # Collect every independent source-check failure; all fixtures remain required.
           m3_fixture_status=0
           m3_check_fixture() {
@@ -126,6 +126,7 @@ jobs:
           m3_check_fixture ../dist/m3-mutual-partial/check.log .lake/build/bin/pscv0_m3_mutual_partial ../dist/m3-mutual-partial
           m3_check_fixture ../dist/m3-inductive-deriving/check.log .lake/build/bin/pscv0_m3_inductive_deriving ../dist/m3-inductive-deriving
           m3_check_fixture ../dist/m3-mutual-structural/check.log .lake/build/bin/pscv0_m3_mutual_structural ../dist/m3-mutual-structural
+          m3_check_fixture ../dist/m3-nested-inductive/check.log .lake/build/bin/pscv0_m3_nested_inductive ../dist/m3-nested-inductive
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-runtime/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-well-founded/source-sha.txt
@@ -133,6 +134,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-partial/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-structural/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-nested-inductive/source-sha.txt
           test "$m3_fixture_status" -eq 0
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         with:
@@ -167,6 +169,9 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-mutual-structural/mutualstructural.ts --outDir ../dist/m3-mutual-structural/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee ../dist/m3-mutual-structural/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric ../dist/m3-mutual-structural/ts/mutualstructural.js | tee ../dist/m3-mutual-structural/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-nested-inductive/nestedfold.ts --outDir ../dist/m3-nested-inductive/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect ../dist/m3-nested-inductive/ts/nestedfold.js | tee ../dist/m3-nested-inductive/ts.log
       - name: Execute Rust with the existing pinned dependency lock
         run: |
           set -euo pipefail
@@ -185,6 +190,8 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-deriving/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-structural/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-nested-inductive/rust.log
       - name: Execute GC core and components against the native oracle
         run: |
           set -euo pipefail
@@ -205,6 +212,7 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput | tee ../dist/m3-mutual-partial/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr | tee ../dist/m3-inductive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee ../dist/m3-mutual-structural/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/wasm.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -217,6 +225,7 @@ jobs:
             psc0/dist/m3-mutual-partial/
             psc0/dist/m3-inductive-deriving/
             psc0/dist/m3-mutual-structural/
+            psc0/dist/m3-nested-inductive/
           if-no-files-found: warn
           retention-days: 30
 

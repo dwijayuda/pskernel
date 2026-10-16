@@ -146,6 +146,7 @@ structure PsRuntimeConstructorField where
   name : String
   type : PsVerifiedIrType
   recursive : Bool
+  recursiveTarget : Option PsName := none
 
 structure PsRuntimeConstructorInfo where
   inductiveName : String
@@ -165,17 +166,25 @@ structure PsRuntimeInductiveInfo where
   numIndices : Nat := 0
   sourceTypeIndices : List Nat := []
   group : Option PsInductiveGroupPlan := none
+  elimination : Option (PsInductiveEliminationPlan × Nat) := none
 
 def psRuntimeRecursorMotives (info : PsRuntimeInductiveInfo) : Nat :=
-  info.group.map (fun group => group.members.length) |>.getD 1
+  match info.elimination with
+  | some (plan, _) => plan.slots.length
+  | none => info.group.map (fun group => group.members.length) |>.getD 1
 
 def psRuntimeRecursorMinors (info : PsRuntimeInductiveInfo) : Nat :=
-  info.group.map psInductiveGroupNumMinors |>.getD info.constructors.length
+  match info.elimination with
+  | some (plan, _) => psInductiveEliminationNumMinors plan
+  | none => info.group.map psInductiveGroupNumMinors |>.getD info.constructors.length
 
 def psRuntimeRecursorMinorOffset (info : PsRuntimeInductiveInfo) : Option Nat :=
-  match info.group with
-  | none => some 0
-  | some group => psInductiveGroupMinorOffset group info.coreName
+  match info.elimination with
+  | some (plan, index) => psInductiveEliminationMinorOffset plan index
+  | none =>
+    match info.group with
+    | none => some 0
+    | some group => psInductiveGroupMinorOffset group info.coreName
 
 -- Used by both partial-application completion and recursor lowering.
 def psRuntimeRecursorArity (info : PsRuntimeInductiveInfo) : Nat :=
@@ -238,13 +247,13 @@ def psErasureNatRecursor : PsRuntimeInductiveInfo :=
       (PsRuntimeConstructorInfo.mk "Nat" "zero" psNatZeroName 0 List.nil 0)
       (List.cons
         (PsRuntimeConstructorInfo.mk "Nat" "succ" psNatSuccName 0
-          (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil) 1)
-        List.nil)) 0 [] none
+          (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true none) List.nil) 1)
+        List.nil)) 0 [] none none
 
 def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Bool" psBoolName (psNameAppendStr psBoolName "rec") 0 []
     [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [] 0,
-     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0 [] none
+     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0 [] none none
 
 -- Int has two Nat payloads, neither recursively contains an Int. Its runtime
 -- representation is primitive, so elimination uses a sign split rather than
@@ -252,9 +261,9 @@ def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
 def psErasureIntRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Int" psIntName (psNameAppendStr psIntName "rec") 0 []
     [PsRuntimeConstructorInfo.mk "Int" "ofNat" psIntOfNatName 0
-       [PsRuntimeConstructorField.mk 0 "magnitude" (.primitive .nat) false] 1,
+       [PsRuntimeConstructorField.mk 0 "magnitude" (.primitive .nat) false none] 1,
      PsRuntimeConstructorInfo.mk "Int" "negSucc" psIntNegSuccName 0
-       [PsRuntimeConstructorField.mk 0 "predecessor" (.primitive .nat) false] 1] 0 [] none
+       [PsRuntimeConstructorField.mk 0 "predecessor" (.primitive .nat) false none] 1] 0 [] none none
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :

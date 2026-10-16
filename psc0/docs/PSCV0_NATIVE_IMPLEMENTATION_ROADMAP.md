@@ -1,4 +1,110 @@
-## M3+B current checkpoint: accepted group deriving; recursion candidate
+## M3+B current roadmap checkpoint — shared nested elimination candidate
+
+Latest fully accepted compiler/test remains
+`01d762eb02eab1d2f795e5338cb3586cd1d1ace0`, recorded in the group-deriving receipt.
+The repaired typed-WF and total-mutual candidate
+`62a43dcc1ac9069533e4a48bf54639121cb265fd` has passed F1 `38973463203`,
+F2 `38973463414`, F3/F4 `38973463241` and focused `38973463517` (15/15).
+The full native gate `38973463333` is still running. Its focused log confirms
+all source checks, fresh-kernel equations and JS/TS/Rust/V8/Wasmtime execution,
+including all twelve WF and six structural outputs. This is not yet five-gate
+acceptance. Earlier failed candidate details below remain historical evidence.
+
+This commit adds shared nested elimination and Hashable as a new compiler/test
+candidate. It requires its own exact-SHA native, F1, F2, F3/F4 and focused success;
+neither earlier native results nor focused passes qualify a different tip.
+
+M3+B remains OPEN at approximately 60% (50–70% engineering uncertainty).
+All six exit weights remain data 30, source 15, total recursion 20, P0 15,
+P1 10 and integration 10; accepted contributions remain 17, 10, 10, 13, 1
+and 7 points. Unqualified code adds no accepted points.
+
+| Exit | Candidate advancement | Remaining acceptance |
+| --- | --- | --- |
+| Data, elimination, deriving | Complete selected nested/mutual/indexed slot plan, full recursor signatures, Match, nested Hashable and runtime traversal | Qualify this exact tip; expand remaining nested deriving |
+| Source strategies | Existing selected heads/suffixes and compatible total mutual construction | Typed local where/capture/SCC owner and full source strategy matrix |
+| Total recursion | Typed dependent WF and exact direct mutual equations passed focused at 62a43dcc | Finish its native gate; checked local-match equation transport and broader selected relations/packing |
+| P0 ordinary execution | Accepted opaque logical/body identity and actual singleton/mutual runtime | Qualify new local/mixed SCC closure cases when implemented |
+| P1 | Exact assumption audit and fail-closed source behavior | Pinned construction requires forbidden Classical.choice |
+| Cross-stage integration | Existing baseline has five exact-SHA gates; 62a43dcc has four | Obtain native evidence and then all five gates for this nested candidate |
+
+### One shared visible and nested elimination plan
+
+Core's checked slot plan retains each visible family and each selected nested
+specialization: its actual type former, common parameters, own indices,
+constructor head/telescope, recursor identity and ordered recursive-field
+targets. List, Option, Array and Prod slots retain their actual container
+declarations; no virtual datatype or fabricated recursive metadata is emitted.
+Public recursors and auxiliary rec_N entries must match complete reconstructed
+telescopes, including motive universes and every real child hypothesis.
+
+Discovery follows the pinned raw structural specialization keys and queue order.
+Definitionally equal List(Key A) and List(Id(Key A)) keep distinct slots.
+A raw prepass checks uniform family arguments and universe variables before
+reduction can erase an occurrence. Existing source uniformity diagnostics remain.
+Core.LevelNormalize owns the unchanged normalization definitions; the former
+Meta module is a compatibility import, with no Core-to-Meta dependency.
+
+The canonical bridge now accepts the actual retained environment through
+psEncodeCheckedAdmissionsCanonicalIn. All three Compiler.Api admission paths
+supply it. Fresh official Lean regenerates recursors from the original visible
+group; the obsolete shallow unit-wrapper adaptation is removed. The legacy
+environment-free API still handles direct batches and refuses nested batches
+without their actual container declarations.
+
+Iota, source Match, deriving, checked worker lifting and typed erasure consume
+the same complete plan. Every worker retains an exact closed recursor equation,
+the common capture telescope and all slot identities. Dispatch selects rec_N
+plus its actual specialized child type and indices, never just a base name such
+as List. Array/Prod elimination binds the actual major and each typed projection
+once. Array uses the existing checked List conversion and shares that allocation
+between its field and corresponding IH. No backend-specific recursion is added.
+
+### Nested Hashable and qualification scope
+
+The shared deriving cursor now constructs selected nested Hashable for the
+four actual containers. List/Array preserve native left-fold order and seed 7;
+Option preserves native none/some policy; Prod combines left then right.
+Real slot hypotheses supply recursive results. No self dictionary or production
+partial-recursion fallback replaces total checked elimination.
+
+Pscv0M3NestedInductive covers a six-slot singleton, a nested mutual group with
+alpha-renamed dependent parameters, an indexed public family with its own
+unindexed List slot, repeated/deep specializations, and the distinct raw Id key.
+Fresh-kernel full-signature witnesses, actual cross-slot equations/reduction,
+generic hash laws, source cases and direct selected-child recursion accompany
+seven independent native runtime outputs. Equal-count stale signatures, missing
+or duplicate auxiliaries, universe/order errors, worker aliasing, nonuniform raw
+occurrences and constructor-local specialization captures have explicit refusals.
+The two old capability negatives now exercise still-unsupported function-valued
+nested fields; their original runtime exports and observations are unchanged.
+
+The focused workflow builds the new executable and runs its source/kernel check
+plus JS, strict compiled TS, locked Rust, V8 GC and Wasmtime against the existing
+generic runner. Every existing fixture, command, output, count, checksum, pinned
+dependency and budget remains. Source aggregation now requires all ten fixtures.
+Each Rust input generator remains immediately paired with its own execution.
+
+### Remaining obligations
+
+This candidate does not establish nested Repr/BEq/DecidableEq/Inhabited, arbitrary
+containers, constructor-local specialization parameters or function-valued nested
+fields. Default source induction on mutual/nested types retains the pinned
+refusal without an explicitly selected supported eliminator. The .ps mutual
+grammar remains def/function-only. The direct structural-SCC API does not admit
+nested recursive fields.
+
+Flat where/capture/SCC source ownership and exact checked transport between WF
+match equations are being implemented separately. Broader WF argument/relation
+packing and the remaining deriving/recursion matrix are still open. P1 remains
+blocked by Classical.choice in pinned Lean.Order.fix/CCPO.csup and its equations.
+Only propext and Quot.sound are approved. Native portable .lean, the existing
+official checking boundary, PR draft/open/original base and all M4/M5 boundaries
+remain fixed.
+
+---
+
+## M3+B earlier checkpoint: accepted group deriving; recursion candidate
 
 Accepted compiler/test `01d762eb02eab1d2f795e5338cb3586cd1d1ace0` has all five gates green:
 native `38967030820` (33/33), F1 `38967031191`, F2 `38967030836`,

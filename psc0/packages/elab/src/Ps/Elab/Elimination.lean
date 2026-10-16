@@ -42,12 +42,16 @@ def psProofEliminate (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
   let read := fun current _ expected => psElabResolvedTerm current value.term expected
   let result ← psElabMatchWith read (fun current info => do
     if induction then
-      let some group := psInductiveGroupPlanFor
+      let some group := psInductiveGroupIdentityFor
           (psEnvironmentFindInductive current.environment)
           (psEnvironmentFindRecursor current.environment) info
         | throw .matchRecursorUnsupported
       if group.members.length != 1 then
         throw (.proof "group induction requires a complete motive family")
+      let some recursor := psEnvironmentFindRecursor current.environment
+          (psNameAppendStr info.name "rec") | throw .matchRecursorUnsupported
+      if recursor.numMotives != 1 then
+        throw (.proof "nested induction requires an explicit eliminator")
     info.constructors.mapM fun name => do
       let some ctor := psEnvironmentFindConstructor current.environment name
         | throw (.matchConstructorUnknown name)

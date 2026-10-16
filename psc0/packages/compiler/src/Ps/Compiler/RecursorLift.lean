@@ -88,25 +88,25 @@ def psRecursorLiftHelper (state : PsRecursorLiftState) (locals : PsLocalContext)
     state := { state with environment, helpersRev := declaration :: state.helpersRev }
     term := psReduceApply (.constE name (state.levels.map PsLevel.param)) (arguments ++ view.suffix) }
 
--- A mutual fold has one ordinary definition per family. Each definition is
+-- A fold has one ordinary definition per actual elimination slot. Each definition is
 -- the corresponding checked recursor with the SAME closed capture telescope
 -- and fixed arguments, followed by that family's fresh indices and major.
 -- No logical recursive reference between helper definitions is introduced.
 def psRecursorLiftGroup (state : PsRecursorLiftState) (locals : PsLocalContext)
-    (view : PsGroupRecursorApplication) : Except String PsRecursorLiftResult := do
+    (view : PsEliminationRecursorApplication) : Except String PsRecursorLiftResult := do
   let .constE _ recursorLevels := view.head | throw "group recursor head is not a constant"
   let context := psRecursorLiftContext state locals
-  let prototypes ← view.group.members.mapM fun family => do
-    let head := PsExpr.constE (psNameAppendStr family.name "rec") recursorLevels
+  let prototypes ← view.plan.slots.mapM fun slot => do
+    let head := PsExpr.constE slot.recursorName recursorLevels
     let headType ← psRecursorLiftInfer state locals head
     let some cursor := psReduceApplyType (psWhnf state.environment psMetaEmpty locals)
         headType view.fixedArgs | throw "group recursor fixed arguments do not match its telescope"
     let opened ← (psElabOpenCoreTelescope 4096 context cursor
-      (some (family.numIndices + 1))).mapError (fun _ => "cannot open group worker telescope")
+      (some (slot.family.numIndices + 1))).mapError (fun _ => "cannot open group worker telescope")
     let value := psCloseElabLambdaBinders psMetaEmpty opened.bindersRev
       (psReduceApply head (view.fixedArgs ++ psElabBinderArguments opened.bindersRev))
     let type := psCloseElabForallBinders psMetaEmpty opened.bindersRev opened.body
-    return (family.name, type, value)
+    return (slot, type, value)
   let dependencies := prototypes.foldl (fun expression entry =>
     PsExpr.app expression (.app entry.2.1 entry.2.2)) (.sortE .zero)
   let captures := psRecursorLiftCaptures locals (.sortE .zero) dependencies
@@ -118,11 +118,15 @@ def psRecursorLiftGroup (state : PsRecursorLiftState) (locals : PsLocalContext)
       let declaration := PsDeclaration.definitionDecl name state.levels type value
       let some environment := psEnvironmentAdd state.environment declaration
         | throw "group recursor worker name collision"
+      let worker : PsRecursorWorker := {
+        family := entry.1.family.name, name
+        recursorName := if entry.1.publicMember then none else some entry.1.recursorName }
       return ({ state with environment, helpersRev := declaration :: state.helpersRev },
-        { family := entry.1, name : PsRecursorWorker } :: acc.2)) (state, [])
+        worker :: acc.2)) (state, [])
   let group : PsRecursorWorkerGroup := { workers := workersRev.reverse, captureCount := captures.length }
   psValidateRecursorWorkerGroups state.environment [group]
-  let some worker := group.workers.find? (fun worker => psNameEq worker.family view.family.name)
+  let some worker := group.workers.find?
+      (fun worker => psNameEq (psRecursorWorkerRecursorName worker) view.slot.recursorName)
     | throw "group recursor worker is missing its selected family"
   let some (.definitionDecl _ _ _ value) := psEnvironmentFind state.environment worker.name
     | throw "group recursor worker definition is missing"
@@ -189,8 +193,8 @@ def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
         (head.state, headType, [])
       let state := arguments.fst
       let term := psReduceApply head.term arguments.snd.snd.reverse
-      if let some group := psGroupRecursorApplication state.environment term then
-        if group.group.members.length > 1 && psGroupRecursorUsesHypotheses state.environment group then
+      if let some group := psEliminationRecursorApplication state.environment term then
+        if group.plan.slots.length > 1 && psEliminationRecursorUsesHypotheses group then
           return ← psRecursorLiftGroup state locals group
       let some view := psRecursorApplication state.environment term | return { state, term }
       if !psRecursorUsesHypotheses state.environment view then return { state, term }

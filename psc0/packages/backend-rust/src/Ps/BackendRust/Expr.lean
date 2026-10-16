@@ -2,6 +2,7 @@ import Ps.BackendRust.Captures
 import Ps.BackendRust.Intrinsic
 import Ps.BackendRust.Layout
 import Ps.Codegen.Doc
+import Ps.CompilerIr.CheckTypes
 
 def psRustResult {α : Type} (value : Except PsRustEmitError α) : Except String α :=
   value.mapError (fun error => "PSCV0-RUST: " ++ reprStr error)
@@ -61,7 +62,7 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
         if ctx.locals.contains name then
           return .text (if preserve.contains name then psRustClonePrinted name else name)
         else psRustGlobalValue ctx name
-    | .intrinsic op resultType args =>
+    | .intrinsic op typeArguments args =>
         -- Name complex operands once, in order. Borrowed variables avoid a
         -- needless BigInt/array clone; owned updates can retain uniqueness.
         let mut statements := []
@@ -86,11 +87,12 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
               statements := .append (.text ("let " ++ temporary ++ " = ")) (.append value (.text ";")) :: statements
               printed := temporary :: printed
         let value ← psRustResult (psRustEmitIntrinsicFromPrinted op printed.reverse)
-        -- Preserve the checked result type at every primitive boundary. A
-        -- nested empty collection has no element-bearing operand from which
-        -- Rust can recover its type. This also covers future polymorphic
-        -- primitives without special-casing a source fixture or operation.
-        let type ← psRustResult (psRustEmitType resultType)
+        -- Reuse the checked IR's instantiated signature, not a second typing
+        -- table. A nested empty collection has no element-bearing operand
+        -- from which Rust could recover its type arguments.
+        let signature ← (psIrCheckIntrinsicSignature op typeArguments).mapError
+          (fun issue => "PSCV0-RUST: " ++ issue.code ++ ": " ++ issue.detail)
+        let type ← psRustResult (psRustEmitType signature.resultType)
         let result := "__ps_result_" ++ toString fuel
         return psDocBlock "" (statements.reverse ++ [
           .text ("let " ++ result ++ ": " ++ type ++ " = " ++ value ++ ";"),

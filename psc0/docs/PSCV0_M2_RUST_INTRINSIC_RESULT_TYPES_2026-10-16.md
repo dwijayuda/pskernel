@@ -1,27 +1,25 @@
-# M2+A — retain checked intrinsic result types in Rust emission
+# M2+A — retain instantiated intrinsic result types in Rust emission
 
-## Observed boundary
+## Reproducer and evidence
 
-Native38827509921 at fe702130e6a1e12c529b4fd592db954f096b8493 passed compiler/parser/assets, all source/Standard/solver/source-info/module checks, GC Wasm/core/components and JS/TS qualification. All35 platform probes passed for each32/64 profile under V8, Wasmtime, JS, TS and Rust. The1069 shared application observations passed both TypeScript and direct JavaScript. The subsequent Rust shared application failed to compile with E0282 at application.rs:15589: `__ps_array_empty_with_capacity(&(__ps_arg_65531_0))` lacked an inferable element type. Native repeated Wasmtime and performance steps were skipped.
+Native run38827509921/job116738299607 at fe702130e6a1e12c529b4fd592db954f096b8493 passed compiler/parser/assets/source/Standard/modules, GC/core/components and JS/TS. Both32/64 platform suites passed35 probes each on V8, Wasmtime, JS, TS and Rust. Both JS and TS passed1069 shared application observations. The Rust shared application then failed E0282 at application.rs:15589: `__ps_array_empty_with_capacity(&(__ps_arg_65531_0))` has no inferable element type. Native repeated Wasmtime and performance were skipped.
 
-Exact evidence was read from the original completed job116738299607 using compact read-only diagnostic38828783509/job116742409590 (afc619b81406647b55c58e8ea30973680f0658df). Artifact12016012693 has digest sha256:159ccb002c743b1c25d8fa3add7eaa3d046b950aa85b739b0a0bb47a1f980181. Its actual Standard manifest reports3599 declarations,39 classes,355 ordinary instances and13 defaults; both approved assumptions and all three pins remain unchanged.
+Read-only cloud diagnostic38828783509/job116742409590 extracted the original logs and artifact12016012693, digest sha256:159ccb002c743b1c25d8fa3add7eaa3d046b950aa85b739b0a0bb47a1f980181. The manifest measured3599 declarations,39 classes,355 ordinary instances and13 defaults. No declaration or surface pin changed.
 
-## Source study and root cause
+## Source study and API correction
 
-Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
+Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc: `src/Lean/Compiler/IR/Basic.lean` FnBody.vdecl retains IRType; `src/Lean/Compiler/IR/EmitLLVM.lean` declareVar/declareVars/emitVDecl preserve typed bindings in target emission. This is an architectural reference, not a new LLVM dependency. Rust's official E0282 reference uses Vec::new as the example of return-only generic ambiguity; a typed local binding resolves it. References: https://doc.rust-lang.org/error_codes/E0282.html and https://doc.rust-lang.org/reference/statements.html#let-statements . Rust remains pinned1.98.1.
 
-- `src/Lean/Compiler/IR/Basic.lean`, `FnBody.vdecl`: runtime bindings retain their `IRType`.
-- `src/Lean/Compiler/IR/EmitLLVM.lean`, `declareVars`, `declareVar`, `emitVDecl`: declared runtime types reach target allocation and typed emission. This is an architectural reference only; no LLVM dependency is added to PSC0.
-- Rust's official E0282 explanation uses `Vec::new()` as the canonical return-only type-parameter ambiguity and permits a typed local binding as its resolution: https://doc.rust-lang.org/error_codes/E0282.html . The `let` statement's type annotation supplies this constraint: https://doc.rust-lang.org/reference/statements.html#let-statements . Inspected16 October2026; compilation remains pinned to Rust1.98.1.
+The first attempt dc4a3c01c9b5972df65e1f6481d7a6c50a030dfe FAILED Lean compilation in native38829386400 and candidate38829386386. It misread `PsVerifiedIrExpr.intrinsic`'s second field as a result type. `Ps.CompilerIr.Model` actually stores `List PsVerifiedIrType` type arguments. The exact compile diagnostic at Expr.lean:93:48 rejected that list where one type was expected. No runtime or logical gate passed that attempt; earlier wording claiming a directly stored result type was incorrect.
 
-PSC0 already has the validated result type in `PsVerifiedIrExpr.intrinsic`. `Ps.BackendRust.Expr.psRustExpr` matched it as `_`, then emitted untyped operand temporaries and a raw runtime-helper expression. A consumer such as collection size can erase all information needed to infer the empty collection's element type. This is lost target typing information, not a Lean logical/model or platform-width defect. Ordinary source let/lambda/constructor/call emission already retains explicit runtime types or generic arguments.
+The existing authoritative `Ps.CompilerIr.CheckTypes.psIrCheckIntrinsicSignature(operation,typeArguments)` already produces the fully instantiated parameter/result signature and refuses wrong type arities. Its empty-array signature is `[Nat] -> Array element`. Its map/filter/fold/build and scalar branches cover the complete IR enum. Reuse this owner rather than inventing another signature table or treating a type-argument list as a result.
 
-## Coherent correction
+## Correct implementation
 
-Retain the result type at the shared intrinsic expression boundary. After exactly the same ordered, once-only operand evaluation and borrowed/owned operand decisions, emit a block-local `let __ps_result_<fuel>: <checked Rust type> = <existing intrinsic expression>;` and return that binding by move. The existing `psRustEmitType` renderer is reused, including its fail-closed unknown/named-arity checks. No host type inference, cast, unchecked representation or source-name special case is introduced.
+`Ps.BackendRust.Expr` now imports the existing CheckTypes module, passes the intrinsic's actual type arguments to that signature function, preserves its diagnostic on error, and renders `signature.resultType` through the existing Rust type renderer. After unchanged ordered, once-only argument evaluation and borrowing/ownership choices, the existing primitive expression is assigned to a block-local explicitly typed result and returned by move.
 
-This covers every intrinsic result rather than adding an Array.filter or empty-array fixture exception. The body/helper selection, argument ordering, liveness/capture/clone analysis, runtime representations, IR validation, public ABI and logical environment are unchanged. The temporary is block-local, evaluated once and returned without a new clone. This does not introduce a new compiler pass or module.
+No new IR fields, inference engine, signature registry, cast, runtime helper, representation, logical assumption or source-name special case is added. Intrinsic operands, liveness/capture/clone decisions, and public ABI are unchanged. The shared signature remains the source of truth. This handles the entire intrinsic family, including return-only generic collection types, without a fixture-specific exception.
 
-## Validation and scope
+## Acceptance
 
-Reuse the existing failing shared application plus both platform profiles and the full current qualification pipeline; no extra test corpus, assertion rewrite, budget or source fixture change. The new native run must compile and execute all1069 Rust observations, then complete repeated native Wasmtime and performance gates. Earlier JS/TS/GC success is prior evidence, not a replacement for the new exact-commit run. M2+A remains OPEN pending full research qualification, exit reconciliation and history-preserving exact-integration qualification.
+Reuse the existing failing application and both platform profiles; no new test corpus, rewritten runtime assertion, budget increase or qualification-gate change. Fresh native qualification must compile and run all1069 Rust observations and complete native Wasmtime/performance. M2+A remains OPEN pending full research, exit reconciliation and history-preserving exact-integration qualification. Prior green gates are historical evidence, not a substitute for the new exact commit.

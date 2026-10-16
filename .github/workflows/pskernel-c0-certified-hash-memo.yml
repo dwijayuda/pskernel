@@ -1,0 +1,44 @@
+name: PSKernel-C0 certified exact hash DAG memo
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-certified-hash-memo.yml'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedHashMemo.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedHashMemoRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-hash-equivalence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Prove memo hash result equals the existing Lean 4.35 source hash
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build PsKernelC0
+          lake env lean --run test/C0CertifiedHashMemoRegression.lean
+          echo "C0_CERTIFIED_HASH_SOURCE complete_source_equation=Lean collision_safe=yes"
+      - name: Preserve core native checked acceptance and negative gates
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_CERTIFIED_HASH_REGRESSIONS official_fixture=pass negative=pass"

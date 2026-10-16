@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Instantiate
+import Ps.KernelCore.Architecture.CertifiedInstantiateMemo
 
 /-
 Cheap application construction and beta reduction helpers used by the kernel.

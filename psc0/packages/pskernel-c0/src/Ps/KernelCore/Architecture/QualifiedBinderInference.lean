@@ -92,7 +92,13 @@ theorem psKernelC0LambdaFull_source
       context state name domain body binderInfo =
     psKernelInferCoreWithFuelUsing fuel onCheckedApp whnf defeq
       context state (.lam name domain body binderInfo) false := by
-  cases fuel <;> rfl
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      simp [psKernelC0LambdaFullWithFuel,
+        psKernelInferCoreWithFuelUsing,
+        psKernelInferCoreWithFuelUsingSourceFrames,
+        psKernelInferCacheEligible]
 
 /-- Source equality of the entire dependent Π checked operation for
     every starting source context/state, fuel, safety level and callback.
@@ -111,7 +117,13 @@ theorem psKernelC0PiFull_source
       context state name domain body binderInfo =
     psKernelInferCoreWithFuelUsing fuel onCheckedApp whnf defeq
       context state (.forallE name domain body binderInfo) false := by
-  cases fuel <;> rfl
+  cases fuel with
+  | zero => rfl
+  | succ remaining =>
+      simp [psKernelC0PiFullWithFuel,
+        psKernelInferCoreWithFuelUsing,
+        psKernelInferCoreWithFuelUsingSourceFrames,
+        psKernelInferCacheEligible]
 
 /-- Match the real source full-check specialization. It is essential
     that any recursively checked applications inside the binder continue

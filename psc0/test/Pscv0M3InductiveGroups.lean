@@ -17,7 +17,9 @@ mutual
     | join (previous : M3GroupLeft A)
 end
 
-def m3GroupOracle : M3GroupLeft Nat → Nat :=
+-- These are logical recursor oracles checked by rfl, not native runtime
+-- functions: Lean's code generator also refuses direct mutual recursors.
+noncomputable def m3GroupOracle : M3GroupLeft Nat → Nat :=
   @M3GroupLeft.rec Nat (fun _ => Nat) (fun _ => Nat)
     0 (fun _ _ ih => Nat.succ ih) (fun _ ih => Nat.succ ih)
 
@@ -48,7 +50,7 @@ mutual
     | wrap (n : Nat) (left : M3DependentLeft A a) : M3DependentRight A a n
 end
 
-def m3DependentOracle : M3DependentRight Nat 7 5 → Nat :=
+noncomputable def m3DependentOracle : M3DependentRight Nat 7 5 → Nat :=
   @M3DependentRight.rec Nat 7 (fun _ => Nat) (fun _ _ => Nat)
     0 (fun _ ih => Nat.succ ih) (fun n _ ih => Nat.add n ih) 5
 

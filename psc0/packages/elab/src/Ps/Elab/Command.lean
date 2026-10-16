@@ -232,7 +232,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
         (psElabStableMemberOrigins result.declarations 0) none
       pure ({ result, origin := { origin with sourceInfo := result.sourceInfo } } :
         PsElabDeclarationBatchWithOriginsResult)
-    | _ => (psElabDeclarationBatchWithOrigins state.environment
+    | _ =>
+      (psElabDeclarationBatchWithOrigins state.environment
         state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
           (fun error => PsElabError.atDeclaration name error.error)
   let batch ← match registration with

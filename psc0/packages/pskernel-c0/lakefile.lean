@@ -18,6 +18,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.CertifiedWork,
     `Ps.KernelCore.Architecture.CertifiedCheckedDAGMemo,
     `Ps.KernelCore.Architecture.VerifiedIndexedHash,
+    `Ps.KernelCore.Architecture.VerifiedIndexedCacheState,
     `Ps.KernelCore.Architecture.CertifiedInstantiateMemo,
     `Ps.KernelCore.Architecture.CertifiedDefEqPairHash,
     `Ps.KernelCore.Architecture.CertifiedCheckedDAGTrace,

@@ -1,0 +1,115 @@
+name: PSKernel-C0 checked type cache A/B on pinned WF
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-checked-cache-ablation.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  variant:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [checked-app, checked-app-binder]
+    env:
+      C0_CHECKED_CACHE_VARIANT: ${{ matrix.variant }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Qualify exact original Lean 4.35.0 source and official kernel
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake build lean4export &&
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' > "$RUNNER_TEMP/wf-checked-cache.ndjson" &&
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-checked-cache.ndjson" > "$RUNNER_TEMP/wf-cache-official.txt" 2>&1)
+          test "$(wc -l < "$RUNNER_TEMP/wf-checked-cache.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-checked-cache.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-checked-cache.ndjson" | sha256sum -c -
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-cache-official.txt"
+          echo "C0_CHECKED_CACHE_PINNED source_sha256=verified official_lean=accepted fuel=4096"
+      - name: Enable checked-app memo only in disposable native branch checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          variant=os.environ["C0_CHECKED_CACHE_VARIANT"]
+          path=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean")
+          s=path.read_text()
+          old="  | PsKernelExpr.app _ _ =>\n      inferOnly"
+          assert s.count(old)==1, "Unexpected source cache policy"
+          s=s.replace(old,"  | PsKernelExpr.app _ _ =>\n      true")
+          if variant=="checked-app-binder":
+              for tag in ("lam","forallE"):
+                  old="  | PsKernelExpr."+tag+" _ _ _ _ =>\n      inferOnly"
+                  assert s.count(old)==1,tag
+                  s=s.replace(old,"  | PsKernelExpr."+tag+" _ _ _ _ =>\n      true")
+          elif variant != "checked-app":
+              raise ValueError("Unknown variant")
+          path.write_text(s)
+          print("C0_CHECKED_CACHE_ABLATION=disposable only_source_result_qualification_pending",variant)
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+      - name: Preserve malformed inputs, rejected proofs and zero-fuel verdicts
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ProofCongruenceRegression.lean
+          echo "C0_CHECKED_CACHE_NEGATIVES=pass"
+          echo "C0_CHECKED_CACHE_FORMAL_PROVENANCE=UNQUALIFIED_must_reprove_full_checker_states"
+      - name: Test real previously timed-out theorem with unchanged fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-checked-cache-resources.txt" \
+              timeout 330s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-checked-cache.ndjson" 4096
+          ) > "$RUNNER_TEMP/wf-checked-cache-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_CHECKED_CACHE_EXIT=$rc variant=$C0_CHECKED_CACHE_VARIANT"
+          grep -F 'C0_REAL_EXPORT replay_outcome=' "$RUNNER_TEMP/wf-checked-cache-c0.txt" | tail -n 2 || true
+          if test "$rc" -eq 0 &&
+              grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' \
+                "$RUNNER_TEMP/wf-checked-cache-c0.txt"; then
+            echo "C0_CHECKED_CACHE_DIAGNOSTIC_RESULT=accepted_candidate_only_no_formal_source_refinement"
+          else
+            echo "C0_CHECKED_CACHE_DIAGNOSTIC_RESULT=not_qualified_timeout_or_checker_error"
+            tail -n 15 "$RUNNER_TEMP/wf-checked-cache-c0.txt"
+          fi
+          cat "$RUNNER_TEMP/wf-checked-cache-resources.txt" | grep -E 'Elapsed \(wall clock\)|Maximum resident set size|Exit status' || true
+          echo "C0_CHECKED_CACHE_SOURCE_AUTHORITY=unchanged_production_branch"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-cache-${{ matrix.variant }}
+          path: |
+            ${{ runner.temp }}/wf-cache-official.txt
+            ${{ runner.temp }}/wf-checked-cache-c0.txt
+            ${{ runner.temp }}/wf-checked-cache-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

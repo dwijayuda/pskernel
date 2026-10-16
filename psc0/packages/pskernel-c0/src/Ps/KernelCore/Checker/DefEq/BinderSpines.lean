@@ -21,16 +21,12 @@ def psKernelDefEqFinish
     (value : Bool) :
     Prod Bool PsKernelCheckerState :=
   if value then
-    Prod.mk
-      true
-      (psKernelCheckerStateWithSuccess
-        state
-        (psKernelExprPairSetInsert
-          state.success
-          left
-          right))
-  else
-    Prod.mk false state
+    if psKernelSemanticPairCacheEligible left right then
+      Prod.mk true
+        (psKernelCheckerStateWithSuccess state
+          (psKernelExprPairSetInsert state.success left right))
+    else Prod.mk true state
+  else Prod.mk false state
 
 def psKernelDefEqWithLocal
     (context : PsKernelCheckerContext)
@@ -187,15 +183,15 @@ def psKernelDefEqLambdaSpineWithFuel
                           Prod.fst (Prod.snd openedLocal);
                         let nextState :=
                           Prod.snd (Prod.snd openedLocal);
-                        smaller
-                          defeq
-                          child
-                          nextState
-                          leftBody
-                          rightBody
-                          (List.cons (PsKernelExpr.fvar fresh) subst)
-                          nextLeftRanges
-                          nextRightRanges
+                        match smaller
+                            defeq child nextState leftBody rightBody
+                            (List.cons (PsKernelExpr.fvar fresh) subst)
+                            nextLeftRanges nextRightRanges with
+                        | Except.error error => Except.error error
+                        | Except.ok childResult =>
+                            Except.ok (Prod.mk childResult.fst
+                              (psKernelCheckerStateExitLocalScope
+                                nextState childResult.snd))
                       else
                         smaller
                           defeq
@@ -367,15 +363,15 @@ def psKernelDefEqForallSpineWithFuel
                           Prod.fst (Prod.snd openedLocal);
                         let nextState :=
                           Prod.snd (Prod.snd openedLocal);
-                        smaller
-                          defeq
-                          child
-                          nextState
-                          leftBody
-                          rightBody
-                          (List.cons (PsKernelExpr.fvar fresh) subst)
-                          nextLeftRanges
-                          nextRightRanges
+                        match smaller
+                            defeq child nextState leftBody rightBody
+                            (List.cons (PsKernelExpr.fvar fresh) subst)
+                            nextLeftRanges nextRightRanges with
+                        | Except.error error => Except.error error
+                        | Except.ok childResult =>
+                            Except.ok (Prod.mk childResult.fst
+                              (psKernelCheckerStateExitLocalScope
+                                nextState childResult.snd))
                       else
                         smaller
                           defeq

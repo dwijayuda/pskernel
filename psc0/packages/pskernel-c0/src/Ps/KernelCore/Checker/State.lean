@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Acceleration.Cache
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 structure PsKernelCheckerState where
   nextFresh : Nat
@@ -154,3 +155,16 @@ def psKernelCheckerStateFreshName
       success := state.success
       failure := state.failure
     }
+
+/-- Restore parent semantic caches when leaving a local checker scope.
+Only the monotone global fresh-name counter may flow out of the child. -/
+def psKernelCheckerStateExitLocalScope
+    (parent child : PsKernelCheckerState) : PsKernelCheckerState :=
+  { nextFresh := Nat.max parent.nextFresh child.nextFresh
+    inferOnly := parent.inferOnly
+    checkedInfer := parent.checkedInfer
+    whnfCore := parent.whnfCore
+    whnf := parent.whnf
+    unfold := parent.unfold
+    success := parent.success
+    failure := parent.failure }

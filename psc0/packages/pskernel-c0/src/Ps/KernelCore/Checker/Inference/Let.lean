@@ -226,7 +226,8 @@ def psKernelInferLetHead
             (Prod.mk
               result
               (psKernelCacheInferResultWithKnownHash
-                (Prod.snd bodyResult)
+                (psKernelCheckerStateExitLocalScope
+                  state1 (Prod.snd bodyResult))
                 inferOnly
                 expr
                 result

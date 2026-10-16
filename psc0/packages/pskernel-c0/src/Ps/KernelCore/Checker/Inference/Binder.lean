@@ -167,7 +167,8 @@ def psKernelInferLambdaHead
             (Prod.mk
               result
               (psKernelCacheInferResult
-                (Prod.snd bodyResult)
+                (psKernelCheckerStateExitLocalScope
+                  state1 (Prod.snd bodyResult))
                 inferOnly
                 expr
                 result))
@@ -264,7 +265,8 @@ def psKernelInferForallHead
                     (Prod.mk
                       result
                       (psKernelCacheInferResult
-                        (Prod.snd bodySort)
+                        (psKernelCheckerStateExitLocalScope
+                          state1 (Prod.snd bodySort))
                         inferOnly
                         expr
                         result))

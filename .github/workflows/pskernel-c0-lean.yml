@@ -302,6 +302,9 @@ jobs:
       - name: Matched validated-work versus replay-per-query source microbenchmark
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0CertifiedWorkPerfMicrobench.lean
+      - name: Metatheory semantic scope negative regression
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0MetatheoryScopeRegression.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

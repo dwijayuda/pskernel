@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       candidate_run:
-        description: Optional completed native run to compare on the same runner
+        description: Completed native run to compare on the same runner
         required: false
-        default: ''
+        default: '38838737641'
 permissions:
   contents: read
   actions: read
@@ -24,7 +24,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          CANDIDATE_RUN: ${{ inputs.candidate_run || '' }}
+          CANDIDATE_RUN: ${{ inputs.candidate_run || '38838737641' }}
         run: |
           python3 - <<'PY'
           import io, json, os, re, urllib.request, urllib.error, zipfile, pathlib
@@ -68,8 +68,22 @@ jobs:
               source = (directory / 'runtime.mjs').read_text()
               print('CODE', label, 'bytes', len(source), 'generators', source.count('function*'), 'schedulerCalls', source.count('__ps$invoke'))
               for part in re.split(r'(?=export function |function\* __ps\$impl\$)', source):
-                  if re.search(r'(m1ListAt|m1ArrayAt|m1FromList|m1ToList|List.*getElem|Array.*getElem|Option.*getD)', part[:250]):
+                  if re.search(r'(m1ListAt|m1ArrayAt|m1FromList|m1ToList|m3Keep|List.*getElem|Array.*getElem|Option.*getD)', part[:250]):
                       print('HOT_FUNCTION', label, part[:2000])
+              historical = json.loads((directory / 'historical.json').read_text())
+              if historical['sourceSha'] != receipt['head_sha']: raise ValueError('benchmark source SHA mismatch')
+              print('HISTORICAL_NOT_PAIRED', label, json.dumps({'preludeMs': historical['preludeMs'], 'compiler': historical['compiler'], 'runtime': [{k:r[k] for k in ['name','size','medianNs','nativeLeanMedianNs','ratioToNativeLean']} for r in historical['runtime']]}))
+              if label == 'candidate':
+                  gates = get('/actions/runs?head_sha=' + receipt['head_sha'] + '&per_page=20')['workflow_runs']
+                  for gate in gates:
+                      print('EXACT_CI', gate['id'], gate['name'], gate['head_sha'], gate['status'], gate['conclusion'])
+                  jobs = get('/actions/runs/' + run + '/jobs')['jobs']
+                  for job in jobs:
+                      print('NATIVE_STEPS', job['id'], len(job['steps']), [(s['name'],s['conclusion']) for s in job['steps'] if s['conclusion'] != 'success'])
+                      log = download('/actions/jobs/' + str(job['id']) + '/logs').decode('utf-8-sig')
+                      for line in log.splitlines():
+                          if any(marker in line for marker in ['PSCV0_M3_ECMA:', 'PSCV0_M3_GENERIC_RECURSION:', '1069 shared', '1069 observations', 'PSCV0_M1_PERFORMANCE:']):
+                              print('QUALIFICATION_LOG', line[:3000])
               receipts.append({'label': label, 'run': run, 'head': receipt['head_sha'], 'artifact': artifact['id'], 'digest': artifact.get('digest')})
           pathlib.Path('.study/receipts.json').write_text(json.dumps(receipts))
           print('RECEIPTS', json.dumps(receipts))
@@ -121,6 +135,7 @@ jobs:
               for (const [k,op] of operations.entries()) {
                 await post('Profiler.enable'); await post('Profiler.start'); batch(op,count);
                 const {profile} = await post('Profiler.stop');
+                await writeFile(`.study/${receipts[k].label}-${name}-${size}.cpuprofile`,JSON.stringify(profile));
                 const hits = profile.nodes.filter(n => n.hitCount).sort((a,b) => b.hitCount-a.hitCount).slice(0,6).map(n => ({function:n.callFrame.functionName,line:n.callFrame.lineNumber,hits:n.hitCount}));
                 const row = {label:receipts[k].label,name,size,iterations:count,firstMeasuredNs:cold[k],samplesNs:samples[k],medianNs:median(samples[k]),nsPerCall:median(samples[k])/count,profileTop:hits};
                 rows.push(row); console.log('STUDY',JSON.stringify(row));
@@ -128,11 +143,19 @@ jobs:
             }
           }
           profiler.disconnect();
-          await writeFile('.study/results.json',JSON.stringify({schema:'pscv0-m3-runtime-study/1',node:process.version,receipts,method:'Dynamic checked inputs; adaptive shared batch; eight warmup batches; seven alternated samples; profiler measured separately. Does not assert steady state or compare different machines.',rows},null,2));
+          const comparisons = rows.filter(r => r.label === 'candidate').map(candidate => {
+            const baseline = rows.find(r => r.label === 'baseline' && r.name === candidate.name && r.size === candidate.size);
+            assert.equal(baseline.iterations,candidate.iterations);
+            const row = {name:candidate.name,size:candidate.size,iterations:candidate.iterations,baselineNsPerCall:baseline.nsPerCall,candidateNsPerCall:candidate.nsPerCall,speedup:baseline.medianNs/candidate.medianNs};
+            console.log('PAIRED',JSON.stringify(row)); return row;
+          });
+          await writeFile('.study/results.json',JSON.stringify({schema:'pscv0-m3-runtime-study/1',node:process.version,receipts,method:'Dynamic checked inputs; adaptive shared batch; eight warmup batches; seven alternated samples; profiler measured separately. Does not assert steady state or compare different machines.',rows,comparisons},null,2));
           JS
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: pscv0-m3-runtime-study-${{ github.sha }}
           path: .study/
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 30

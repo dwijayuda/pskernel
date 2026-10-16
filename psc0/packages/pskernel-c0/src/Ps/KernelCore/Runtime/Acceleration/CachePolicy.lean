@@ -25,27 +25,28 @@ def psKernelSemanticPairCacheEligible
   psKernelSemanticCacheEligible left &&
     psKernelSemanticCacheEligible right
 
-/-- Historical cache selector; retained as a mathematical source oracle.
-The original order scanned every expression for FVars before noticing that
-checked applications and checked binders are never cache candidates. -/
-def psKernelInferCacheEligibleSource
+/-- Historical source cache policy. Keep its exact definitional normal form
+so existing native checker refinement and cache-state proofs continue to
+reason about the same source function; compiler acceleration is separate. -/
+def psKernelInferCacheEligible
     (inferOnly : Bool)
-    (expr : PsKernelExpr) : Bool :=
+    (expr : PsKernelExpr) :
+    Bool :=
   if psKernelSemanticCacheEligible expr then
     match expr with
-    | .lit _ => false
-    | .app _ _ => inferOnly
-    | .lam _ _ _ _ => inferOnly
-    | .forallE _ _ _ _ => inferOnly
+    | PsKernelExpr.lit _ => false
+    | PsKernelExpr.app _ _ => inferOnly
+    | PsKernelExpr.lam _ _ _ _ => inferOnly
+    | PsKernelExpr.forallE _ _ _ _ => inferOnly
     | _ => true
-  else false
+  else
+    false
 
-/-- Source-exact selector; test the cheap shape/mode before recursively
-querying local-variable containment. Checked application/lambda/Pi and any
-literal cannot enter either infer cache, so do not traverse their DAG just
-to discover that the historical result is already false. Infer-only terms
-still obey the exact original FVar scope guard. -/
-def psKernelInferCacheEligible
+/-- Faster but exactly equal native implementation. Checked application,
+lambda and Pi nodes cannot be cached, regardless of FVar contents; do not
+expand a shared DAG to find FVars before making that cheap decision.
+For other forms and infer-only checking preserve the original eligibility. -/
+def psKernelC0FastInferCacheEligible
     (inferOnly : Bool)
     (expr : PsKernelExpr) : Bool :=
   match expr with
@@ -54,16 +55,23 @@ def psKernelInferCacheEligible
       inferOnly && psKernelSemanticCacheEligible expr
   | _ => psKernelSemanticCacheEligible expr
 
-/-- All-input identity of the *actual Boolean cache policy*, including
-local FVar handling, binder forms and infer-only versus checked mode.
-This is not a new semantic cache and cannot authorize any cached typing. -/
-theorem psKernelInferCacheEligible_source
+/-- All-input semantic equivalence of the fast candidate to the unmodified
+source cache policy: this proves the complete Boolean decision, including
+FVar scope restrictions, before any native compiler replacement is enabled. -/
+theorem psKernelC0FastInferCacheEligible_source
     (inferOnly : Bool) (expr : PsKernelExpr) :
-    psKernelInferCacheEligible inferOnly expr =
-      psKernelInferCacheEligibleSource inferOnly expr := by
+    psKernelC0FastInferCacheEligible inferOnly expr =
+      psKernelInferCacheEligible inferOnly expr := by
   cases expr <;> cases inferOnly <;>
-    simp [psKernelInferCacheEligible, psKernelInferCacheEligibleSource]
+    simp [psKernelC0FastInferCacheEligible, psKernelInferCacheEligible]
 
+/-- Retain the source checker and all existing kernel proofs verbatim.
+The verified native compiler route only changes a pure selection algorithm;
+it never inserts or reads unverified type, equality or admission facts. -/
+@[csimp] theorem psKernelInferCacheEligible_csimp :
+    @psKernelInferCacheEligible = @psKernelC0FastInferCacheEligible := by
+  funext inferOnly expr
+  exact (psKernelC0FastInferCacheEligible_source inferOnly expr).symm
 
 /-!
 Source-equivalent DAG-aware FVar membership for semantic cache eligibility.

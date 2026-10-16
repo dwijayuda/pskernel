@@ -45,6 +45,11 @@ structure PsElabMutualGroupOrigin where
   memberCount : Nat
   span : PsSourceSpan
 
+structure PsElabLocalDefinitionOrigin where
+  name : PsName
+  span : PsSourceSpan
+  declarations : List PsName
+
 structure PsElabBatchOrigin where
   sourceIndex : Nat
   sourceName : PsSyntaxName
@@ -53,6 +58,7 @@ structure PsElabBatchOrigin where
   normalization : Option PsElabNormalizationOrigin
   sourceInfo : List PsElabSourceInfo := []
   mutualGroup : Option PsElabMutualGroupOrigin := none
+  localDefinitions : List PsElabLocalDefinitionOrigin := []
 
 structure PsElabOriginError where
   error : PsElabError
@@ -86,6 +92,9 @@ structure PsElabNormalizedDefinitionResult where
 def psElabOriginSource
     (source : PsSyntaxDeclaration) : Prod PsSyntaxName PsSourceSpan :=
   match source with
+  | .whereDeclaration declaration _ span =>
+      let parent := psElabOriginSource declaration
+      (parent.fst, PsSourceSpan.mk parent.snd.start span.stop)
   | PsSyntaxDeclaration.definition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.partialDefinition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.fixedpointDefinition name _ _ _ span => Prod.mk name span
@@ -310,6 +319,8 @@ def psElabDeclaration
       -- The definition and its checked equation are one source-owned batch.
       -- A single-declaration caller must not silently discard the equation.
       Except.error (.data "PSCV0-WF-BATCH: well-founded declarations require declaration-batch elaboration")
+  | .whereDeclaration _ _ _ =>
+      Except.error (.data "PSCV0-WHERE-BATCH: local definitions require typed command-batch elaboration")
   | .theoremDecl name binders type value _ =>
       psElabDeclarationParts
         environment

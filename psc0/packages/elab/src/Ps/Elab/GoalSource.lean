@@ -9,7 +9,8 @@ def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
     environment := context.environment
     scope := { namePrefix := scope.namePrefix, opened := scope.opened }
     privateAliases := scope.privateAliases
-    mutualAliases := scope.mutualAliases } bound source
+    mutualAliases := scope.mutualAliases
+    localAliases := scope.localAliases } bound source
   return resolved.term
 
 def psProofMain (state : PsProofState) :

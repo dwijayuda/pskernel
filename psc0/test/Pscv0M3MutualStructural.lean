@@ -1,6 +1,7 @@
 import Ps.Host.NativeV7
 import PsKernelLean.Admission
 import Lean.Util.CollectAxioms
+import Pscv0M3PreDefinitions
 
 -- Independent ordinary Lean source. These functions use Lean's structural
 -- mutual elaborator, not the portable implementation's recursor terms.
@@ -281,16 +282,19 @@ private def checkRefusals (environment : PsEnvironment) : IO (List PsDeclaration
   expectRefused environment "changed uniform parameter"
     "mutual\nfunction bad(A: Type, xs: List(A)): Nat := match xs with { | .nil => 0 | .cons head tail => bad(Bool, List.nil) }\nend\n" "FIXED-CALL"
   expectRefused environment "incompatible motive universes"
-    ("universe u\nsection\nvariable (A: Type u) (a: A)\nmutual\n" ++
-      "function bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => 1 }\n" ++
-      "function other(n: Nat): A := match n with { | 0 => a | k + 1 => a }\nend\nend\n") "SORT"
+    ("universe u\n" ++
+      "function retainA(A: Type u, a: A, n: Nat): A := a\n" ++
+      "function retainNat(A: Type u, a: A, n: Nat): Nat := n\n" ++
+      "section\nvariable (A: Type u) (a: A)\nmutual\n" ++
+      "function bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => retainNat(A, other(k), 1) }\n" ++
+      "function other(n: Nat): A := match n with { | 0 => a | k + 1 => retainA(A, a, bad(k)) }\nend\nend\n") "SORT"
   let higher ← elaborate environment "function m3HigherRelation(x: Nat, y: Nat): Prop := True\n"
   expectRefused higher.result.environment "checked Acc function-valued recursive field"
     "mutual\nfunction bad(n: Nat, tree: Acc(m3HigherRelation, n)): Nat := match tree with { | .intro x below => bad(0, below(0, True.intro)) }\nend\n"
     "DIRECT-FIELD"
-  expectRefused environment "different structural groups"
-    ("mutual\nfunction bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => 1 }\n" ++
-      "function other(x: Bool): Nat := match x with { | .false => 0 | .true => 1 }\nend\n") "GROUP"
+  expectRefused environment "cyclic incompatible structural groups"
+    ("mutual\nfunction bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => other(List.cons(k, List.nil)) }\n" ++
+      "function other(xs: List(Nat)): Nat := match xs with { | .nil => 0 | .cons head tail => bad(head) }\nend\n") "GROUP"
   let failed ← fromExcept (psPscv0ParseProgram
     ("mutual\nfunction atomicFirst(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => atomicSecond(k) }\n" ++
       "function atomicSecond(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => atomicSecond(n) }\nend\n"))
@@ -349,6 +353,7 @@ def main (args : List String) : IO Unit := do
     ((psAddDeclarationList psSelfHostProdPreludeEnvironment group.declarations).mapError psCompilerPscv0ElabError)
   let compiled ← elaborate environment source
   checkConstruction compiled
+  let preDefinitions ← M3PreDefinitions.check
   let refusalFoundation ← checkRefusals environment
   let equations ← elaborate compiled.result.environment equationSource
   let runtime ← elaborate compiled.result.environment wrappers
@@ -357,6 +362,7 @@ def main (args : List String) : IO Unit := do
     ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations).mapError psCompilerPscv0ElabError)
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  let _ ← checked prelude preDefinitions
   let _ ← checked prelude refusalFoundation
   let admitted ← checked prelude (declarations ++ equations.result.declarations)
   let closedEquations := [false, true].flatMap fun flag =>

@@ -1668,6 +1668,7 @@ def psParseProofScriptDeclaration
 def psProofScriptDeclarationStop
     (declaration : PsSyntaxDeclaration) : PsSourcePos :=
   match declaration with
+  | .whereDeclaration _ _ span => span.stop
   | .definition _ _ _ _ span => span.stop
   | .partialDefinition _ _ _ _ span => span.stop
   | .fixedpointDefinition _ _ _ _ span => span.stop

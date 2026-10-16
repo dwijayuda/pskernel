@@ -292,6 +292,12 @@ lean_lib PsElab where
     `Ps.Elab.Scope,
     `Ps.Elab.Mutual,
     `Ps.Elab.MutualStructural,
+    `Ps.Elab.PreDefinition.Basic,
+    `Ps.Elab.PreDefinition,
+    `Ps.Elab.RecursorEquation,
+    `Ps.Elab.WhereScope,
+    `Ps.Elab.Where,
+    `Ps.Elab.WhereWellFounded,
     `Ps.Elab.Command
   ]
 

@@ -1,5 +1,6 @@
 import Ps.Elab.Mutual
 import Ps.Elab.Match
+import Ps.Elab.RecursorEquation
 import Ps.Meta.Recursor
 
 -- Direct structural mutual definitions use the same ownership invariant as
@@ -31,7 +32,7 @@ def psElabMutualStructuralApplyType (context : PsElabContext)
 
 structure PsElabMutualStructuralInput where
   header : PsElabPartialHeader
-  source : PsScopedMutualMember
+  span : PsSourceSpan
   ownBinders : List PsElabTypedBinder
   context : PsElabContext
   body : PsExpr
@@ -66,18 +67,16 @@ def psElabMutualStructuralPeers (context : PsElabContext) (captures : List PsExp
       return (psElabContextWithLocal state.fst pushed.context,
         state.snd ++ [(pushed.id, entry.snd)])) (context, [])
 
-def psElabMutualStructuralInputFor (captured : PsElabTypedBindersResult)
-    (headers : List PsElabPartialHeader) (members : List PsScopedMutualMember)
-    (header : PsElabPartialHeader) (member : PsScopedMutualMember) :
+-- This boundary consumes a checked Core body, not lifted or reconstructed
+-- source syntax. Full peers have already been specialized at the validated
+-- common capture prefix. All original member-specific header slots remain.
+def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
+    (header : PsElabPartialHeader) (checkedContext : PsElabContext)
+    (body : PsExpr) (peers : List (Nat × Nat)) (span : PsSourceSpan)
+    (sourceInfo : PsElabSourceInfo) :
     Except PsElabError PsElabMutualStructuralInput := do
-  let .definition _ _ _ sourceBody _ := member.source
-    | throw (psElabMutualStructuralError "STRATEGY" "expected an ordinary body")
-  match sourceBody with
-  | .matchMany [.reference _] _ _ => pure ()
-  | _ => throw (psElabMutualStructuralError "ROOT" "selected direct structural body requires a root match on one explicit header parameter")
-  let (context, peers) ← psElabMutualStructuralPeers header.context
-    (psElabBinderArguments captured.bindersRev) headers members
-  let checked ← psElabTerm context sourceBody (some header.openType)
+  let checked ← psElabResolvedTerm checkedContext body (some header.openType)
+  let context := checked.context
   let ownBinders := (header.bindersRev.reverse.drop captured.bindersRev.length).map fun binder =>
     { binder with type := psMetaInstantiate checked.context.metaContext binder.type }
   let body := psMetaInstantiate checked.context.metaContext checked.term
@@ -108,10 +107,25 @@ def psElabMutualStructuralInputFor (captured : PsElabTypedBindersResult)
       majorType.args.length != application.family.numParams + application.family.numIndices then
     throw (psElabMutualStructuralError "MAJOR" "major family telescope does not match its recursor")
   return {
-    header, source := member, ownBinders
+    header, span, ownBinders
     context := checked.context
     body, peers, application, familyLevels, majorId, indexIds
-    sourceInfo := psElabFinishSourceInfo checked.context header.name }
+    sourceInfo }
+
+def psElabMutualStructuralInputFor (captured : PsElabTypedBindersResult)
+    (headers : List PsElabPartialHeader) (members : List PsScopedMutualMember)
+    (header : PsElabPartialHeader) (member : PsScopedMutualMember) :
+    Except PsElabError PsElabMutualStructuralInput := do
+  let .definition _ _ _ sourceBody span := member.source
+    | throw (psElabMutualStructuralError "STRATEGY" "expected an ordinary body")
+  match sourceBody with
+  | .matchMany [.reference _] _ _ => pure ()
+  | _ => throw (psElabMutualStructuralError "ROOT" "selected direct structural body requires a root match on one explicit header parameter")
+  let (context, peers) ← psElabMutualStructuralPeers header.context
+    (psElabBinderArguments captured.bindersRev) headers members
+  let checked ← psElabTerm context sourceBody (some header.openType)
+  psElabMutualStructuralInputFromChecked captured header checked.context checked.term peers
+    span (psElabFinishSourceInfo checked.context header.name)
 
 structure PsElabMutualStructuralFunction where
   input : PsElabMutualStructuralInput
@@ -642,64 +656,11 @@ def psElabMutualStructuralValue (recursor : PsElabMutualStructuralRecursor)
 -- equation. Companion motives are checked PUnit at the actual motive level.
 def psElabMutualStructuralEquationProof (context : PsElabContext)
     (fn : PsElabMutualStructuralFunction) (expected : PsExpr) :
-    Except PsElabError PsExpr := do
-  let info := fn.input.application.family
-  let familyLevels := fn.input.familyLevels
-  let uniformArgs := fn.input.application.fixedArgs.take info.numParams
-  let indices := fn.input.indexIds.map PsExpr.fvar
-  let major := PsExpr.fvar fn.input.majorId
-  let motive ← psElabMatchMotive context info familyLevels uniformArgs indices major expected
-  let level ← psElabMatchMotiveLevel context motive.motive
-  let recursor ← psElabGroupRecursorPlanFor context info familyLevels uniformArgs level
-  let constructors ← psElabGroupConstructors recursor.context recursor.group
-  let motives ← psElabRecursorArguments recursor.group.members
-    (fun current family domain => do
-      if psNameEq family.name info.name then
-        return { context := current, term := motive.motive }
-      let opened ← psElabOpenCoreTelescope 4096 current domain (some (family.numIndices + 1))
-      let .sortE actualLevel := psWhnf opened.context.environment opened.context.metaContext
-          opened.context.localContext opened.body
-        | throw (psElabMutualStructuralError "EQUATION" "companion motive has no actual Sort domain")
-      let unit ← psElabMatchUnit opened.context actualLevel
-      return {
-        context := psElabLeaveScope current opened.context
-        term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev unit.fst })
-    recursor.context recursor.cursor
-  let span := (psElabOriginSource fn.input.source.source).snd
-  let minors ← psElabRecursorArguments constructors
-    (fun current (family, constructor) domain => do
-      if psNameEq family.name info.name then
-        let alternative : PsElabMatchAlternative := {
-          constructorName := constructor.name
-          fieldNames := (List.range constructor.numFields).map fun index =>
-            PsSyntaxName.mk ["$psc0MutualEquation", psNatToString index] span
-          elaborate := fun branch => do
-            let view := psExprAppView (psWhnf branch.context.environment
-              branch.context.metaContext branch.context.localContext branch.target)
-            let .constE name [resultLevel] := view.head
-              | throw (psElabMutualStructuralError "EQUATION" "constructor branch is not an equality")
-            let [type, left, _] := view.args
-              | throw (psElabMutualStructuralError "EQUATION" "constructor equality has the wrong telescope")
-            if !psNameEq name (psRootName "Eq") then
-              throw (psElabMutualStructuralError "EQUATION" "constructor branch changed the equation owner")
-            psElabResolvedTerm branch.context (psLogicRefl resultLevel type left) (some branch.target)
-          span }
-        psElabMatchMinor current info familyLevels uniformArgs motive constructor.name
-          (some alternative) domain false
-      else
-        let opened ← psElabOpenCoreTelescope 4096 current domain
-          (some (constructor.numFields + constructor.recursiveFields.length))
-        let actualLevel ← psElabExpressionSort opened.context opened.body
-        let unit ← psElabMatchUnit opened.context actualLevel
-        let checked ← psElabResolvedTerm opened.context unit.snd (some opened.body)
-        return {
-          context := psElabLeaveScope current checked.context
-          term := psCloseElabLambdaBinders checked.context.metaContext opened.bindersRev checked.term })
-    motives.context motives.cursor
-  let proof := psExprApplyMany (.constE recursor.recursor.name recursor.levels)
-    (uniformArgs ++ motives.arguments ++ minors.arguments ++ indices ++ [major] ++ motive.arguments)
-  let checked ← psElabResolvedTerm (psElabLeaveScope context minors.context) proof (some expected)
-  return psMetaInstantiate checked.context.metaContext checked.term
+    Except PsElabError PsExpr :=
+  (psElabRecursorEquationProof context (.fvar fn.input.majorId) expected fn.input.span).mapError
+    (fun error => match error with
+      | .data message => psElabMutualStructuralError "EQUATION" message
+      | error => error)
 
 def psElabMutualStructuralEquation (environment : PsEnvironment)
     (levels : List PsName) (plan : PsElabMutualStructuralPlan)
@@ -731,22 +692,16 @@ def psElabMutualStructuralEquation (environment : PsEnvironment)
   let checked ← psElabResolvedTerm (psElabContextEmpty environment levels) closed.fst (some closed.snd)
   return .theoremDecl (psNameAppendStr header.name "eq_def") levels closed.snd checked.term
 
-def psElabStructuralMutualBatch (environment : PsEnvironment) (levelNames : List PsName)
-    (capturedSyntax : List PsScopeBinder) (members : List PsScopedMutualMember) :
+def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List PsName)
+    (captured : PsElabTypedBindersResult) (inputs : List PsElabMutualStructuralInput)
+    (retainBlockLevels : Bool) :
     Except PsElabError PsElabMutualBatchResult := do
-  if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
-  let captured ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) capturedSyntax
-  let headers ← members.mapM fun member => do
-    let name := (psSyntaxNameToName (psElabOriginSource member.source).fst).getD .anonymous
-    (psElabMutualStructuralHeader captured member).mapError (.atDeclaration name)
+  let headers := inputs.map (·.header)
   let ownedNames := headers.flatMap fun header => [header.name, psNameAppendStr header.name "eq_def"]
   for name in ownedNames do
     if (psEnvironmentFind environment name).isSome ||
         (ownedNames.filter (psNameEq name)).length != 1 then
       throw (.duplicateDeclaration name)
-  let inputs ← (headers.zip members).mapM fun (header, member) =>
-    (psElabMutualStructuralInputFor captured headers members header member).mapError
-      (.atDeclaration header.name)
   let plan ← psElabMutualStructuralPrepare captured inputs
   let recursor ← psElabMutualStructuralRecursorFor plan
   let values ← (List.range headers.length).mapM fun index => do
@@ -755,8 +710,11 @@ def psElabStructuralMutualBatch (environment : PsEnvironment) (levelNames : List
     (psElabMutualStructuralValue recursor index).mapError (.atDeclaration header.name)
   -- Include retained source bodies in the common universe union: eq_def
   -- publishes that exact body even if its case specialization erased a type.
-  let levels := psElabDeclarationLevels levelNames
+  let usedLevels := psElabDeclarationLevels levelNames
     (headers.map (·.type) ++ values ++ inputs.map (·.body))
+  if retainBlockLevels && usedLevels.any (fun name => !levelNames.any (psNameEq name)) then
+    throw (psElabMutualStructuralError "UNIVERSES" "checked component introduced a level outside its closed source block")
+  let levels := if retainBlockLevels then levelNames else usedLevels
   let declarations ← (headers.zip values).mapM fun (header, value) => do
     let checked ← psElabResolvedTerm (psElabContextEmpty environment levels) value (some header.type)
     return PsDeclaration.definitionDecl header.name levels header.type checked.term
@@ -777,4 +735,31 @@ def psElabStructuralMutualBatch (environment : PsEnvironment) (levelNames : List
       declarations := declarations ++ equations
       sourceInfo := inputs.map (·.sourceInfo) }
     members := owned }
+
+-- An SCC must retain the original block-wide universe layout even when one
+-- of those levels belongs only to a disconnected source member. All real
+-- definitions and their exact source equations use this same fixed layout.
+def psElabStructuralMutualFromChecked (environment : PsEnvironment)
+    (levelNames : List PsName) (captured : PsElabTypedBindersResult)
+    (inputs : List PsElabMutualStructuralInput) :
+    Except PsElabError PsElabMutualBatchResult :=
+  psElabMutualStructuralClose environment levelNames captured inputs true
+
+def psElabStructuralMutualBatch (environment : PsEnvironment) (levelNames : List PsName)
+    (capturedSyntax : List PsScopeBinder) (members : List PsScopedMutualMember) :
+    Except PsElabError PsElabMutualBatchResult := do
+  if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
+  let captured ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) capturedSyntax
+  let headers ← members.mapM fun member => do
+    let name := (psSyntaxNameToName (psElabOriginSource member.source).fst).getD .anonymous
+    (psElabMutualStructuralHeader captured member).mapError (.atDeclaration name)
+  let ownedNames := headers.flatMap fun header => [header.name, psNameAppendStr header.name "eq_def"]
+  for name in ownedNames do
+    if (psEnvironmentFind environment name).isSome ||
+        (ownedNames.filter (psNameEq name)).length != 1 then
+      throw (.duplicateDeclaration name)
+  let inputs ← (headers.zip members).mapM fun (header, member) =>
+    (psElabMutualStructuralInputFor captured headers members header member).mapError
+      (.atDeclaration header.name)
+  psElabMutualStructuralClose environment levelNames captured inputs false
 

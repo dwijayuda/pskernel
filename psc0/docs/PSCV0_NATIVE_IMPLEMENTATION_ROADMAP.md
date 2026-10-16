@@ -1,4 +1,117 @@
-## M3+B current roadmap checkpoint — shared nested elimination candidate
+## M3+B current roadmap checkpoint — local definitions and typed component candidate
+
+Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
+All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
+F1 38976284003, F2 38976283981, F3/F4 38976283973 and focused 38976283967
+(15/15). The receipt is
+`docs/PSCV0_M3_NESTED_ELIMINATION_TYPED_RECURSION_QUALIFICATION_2026-10-16.md`.
+It qualifies the accumulated typed-WF/direct-mutual-structural changes and
+complete selected nested elimination/Hashable, including all existing outputs
+on all five targets. The original native workloads and measurement step pass.
+
+M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
+55–75% engineering uncertainty). All six weights remain data 30, source 15,
+total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
+are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Current candidate: owned local definitions and typed dependency components
+
+This commit adds the selected flat v7.2 where block and one typed predefinition
+owner shared by source mutual groups, local definitions and unregistered
+standalone WF/P1 hints. Syntax retains each local def, optional local result,
+default, complete body/suffix span and enclosing declaration. Both printers
+preserve the selected language's spelling and ownership. The .ps mutual
+grammar remains def/function-only; no mutual inductive grammar is introduced.
+
+WhereScope resolves headers/defaults without sibling aliases and bodies with
+the real scoped aliases. Actual typed body/header fvars determine captures;
+source-name occurrence lists are only candidates. Transitive peer captures
+include type, instance, value and proof dependencies. Parent-body lambda/let
+locals do not enter helper scope. Local binders can shadow helper aliases.
+Private module names, monotone fresh IDs, postponed constraints and full
+original-block universe closure are retained before dependency partition.
+
+PreDefinition.Basic carries closed peer types, checked bodies with actual peer
+fvars, source header count, exact captures, retained source hints and ownership.
+PreDefinition independently validates these invariants, computes dependencies
+from typed values, partitions deterministic SCCs and substitutes already
+checked predecessor constants. Common captures and whole-block levels are
+checked before specialization. A late failure returns no partially committed
+command environment.
+
+The effective strategy comes from the typed component and the original main
+sources. Pinned TerminationHints.ensureNone emits warnings, not rejections.
+Genuine nonrecursive components use checked ordinary declarations and exact
+eq_def theorems before unused WF/P1 hints are considered. Actual proof-valued
+nonrecursive local helpers become checked theorem declarations. An original
+partial main gives every lifted local helper inherited partial intent before
+SCC partition; a recursive inherited helper retains opaque P0/body identity
+even when its raw source owns an unused termination_by or partial_fixpoint
+hint. Those hints and spans remain in the AST and supply no WF/P1 evidence.
+Explicit source partial retains v7.2's independently inhabited logical opacity,
+including the established standalone/all-explicit-partial paths. No P0 defining
+equation is emitted.
+
+Recursive total components use the existing direct structural owner. A selected
+recursive WF singleton is reconstructed under the actual typed callback through
+WhereWellFounded. The exact returned definition and equation are checked against
+the retained source body. RecursorEquation owns checked case/rfl transport using
+the complete actual elimination plan. It can locate an original header major
+below actual typed result lambdas while proving equality of the complete returned
+functions in the original header context. Result lambdas do not become source
+parameters, captures or measure variables. An independently checked wrong
+zero-function/equation must fail at the exact constructor-case proof obligation.
+
+Source provenance retains each real qualified local name, full local span and
+actual emitted declaration membership. NativeV7's production batch mapping uses
+that local span for helper declarations and generated worker ancestry. Ordinary
+origins with no locals preserve their existing JSON shape; local metadata is
+serialized explicitly when present.
+
+### Qualification plan and preserved workloads
+
+Pscv0M3Where checks independent pinned declarations, all-kind captures, forward
+inference/defaults, sibling and parent/helper recursion, proof shadowing, private
+identities, block-wide inherited P0, ignored hints, local WF and actual production
+origin serialization. Its seven Host requests and six scalar outputs use the
+existing JS, strict TS, locked Rust, V8 GC and Wasmtime runner. The workflow now
+requires eleven source checks and retains every existing target command.
+
+Pscv0M3PreDefinitions adds typed corruption checks through the existing structural
+fixture executable. Existing mutual-P0 request counts/outputs remain unchanged.
+The WF fixture still has sixteen Host requests and twelve runtime outputs.
+Its obsolete nonrecursive-WF refusal is replaced by a native/portable ordinary
+unused-hint acceptance; all fourteen remaining negative slots keep exact owners.
+The unsaturated-header negative is made otherwise well typed so it still reaches
+the WF-ARITY rule after the new shared typed prepass. No expected runtime value,
+benchmark checksum, pin, heartbeat/depth ceiling or workflow budget is changed.
+
+This candidate has static and independent review only at publication. It needs
+native, F1, F2, F3/F4 and focused success at one current compiler/test SHA.
+The fbbc5271 receipt does not qualify these source changes. Let the full native
+gate finish when the other four gates pass before publishing the next feature.
+
+### Remaining boundaries and next work
+
+Unused hints are still name-resolved before SCC selection; an unknown or
+out-of-scope name can therefore fail even when the hint would be unused.
+This is not full unused-hint diagnostic parity. Registered standalone WF,
+abbrev/opaque where registration and optional top-level result annotations keep
+their current separate limitations. The selected local omitted result supports
+nondependent codomain inference; genuinely dependent omitted results need an
+annotation. Local nested where, attributes, theorem/instance/function/const and
+mutual blocks remain outside the selected local grammar.
+
+True multi-member WF, broader actual relation/argument packing, additional
+structural shapes and further deriving remain open. Recursive P1 retains the
+exact Classical.choice assumption refusal. A nonrecursive unused suffix is not
+P1 implementation. Native portable .lean, official Lean 4.35.0 at the pinned
+commit, the exact v7.2 reference blob, approved propext/Quot.sound, PR draft/open
+on its original base and all M4/M5 boundaries remain unchanged.
+
+---
+
+## M3+B earlier roadmap checkpoint — shared nested elimination candidate
 
 Latest fully accepted compiler/test remains
 `01d762eb02eab1d2f795e5338cb3586cd1d1ace0`, recorded in the group-deriving receipt.

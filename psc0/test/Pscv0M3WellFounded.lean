@@ -119,17 +119,44 @@ theorem bounded_step (k : Nat) :
   congrArg (fun (value : Fin (Nat.succ k + 1)) => value.val)
     (bounded.eq_def (Nat.succ k))
 
+-- Pinned Main handles genuine nonrecursive definitions before unused hints.
+-- The unused section variable must not become an extra declared parameter.
+section
+variable (unused : Nat)
+def unusedWF (n : Nat) : Nat := n
+termination_by unused
+
+def unusedP1 (n : Nat) : Nat := n
+partial_fixpoint
+end
+
+theorem unusedWF_step (n : Nat) : unusedWF n = n := rfl
+theorem unusedP1_step (n : Nat) : unusedP1 n = n := rfl
+
 run_cmd do
   for name in #[``WellFounded.Nat.fix, ``WellFounded.Nat.fix_eq,
       ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease,
       ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly,
-      ``reverseList, ``digest, ``iterate, ``dependentState, ``bounded, ``bounded_step] do
+      ``reverseList, ``digest, ``iterate, ``dependentState, ``bounded, ``bounded_step,
+      ``unusedWF, ``unusedP1, ``unusedWF_step, ``unusedP1_step] do
     let axioms ← Lean.collectAxioms name
     unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
       throwError "WF oracle uses an unapproved assumption: {name}: {axioms}"
     Lean.logInfo m!"PSCV0_M3_WF_ASSUMPTIONS: {name}: {axioms}"
+  let environment ← Lean.getEnv
+  for name in [``unusedWF, ``unusedP1] do
+    match environment.find? name with
+    | some (.defnInfo _) => pure ()
+    | _ => throwError "an unused hint changed the native nonrecursive declaration kind: {name}"
 
 end M3WellFoundedOracle
+
+private def unusedHintSource : String :=
+  "section\nvariable (unused: Nat)\n" ++
+  "function m3wfunused(n: Nat): Nat := n\ntermination_by unused\n" ++
+  "function m3p1unused(n: Nat): Nat := n\npartial_fixpoint\nend\n" ++
+  "theorem unusedWFEquation(n: Nat): m3wfunused(n) = n := by { exact m3wfunused.eq_def(n) }\n" ++
+  "theorem unusedP1Equation(n: Nat): m3p1unused(n) = n := by { exact m3p1unused.eq_def(n) }\n"
 
 private def skipSource : String :=
   "function m3wfskip(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3wfskip(k - 1) + 1 }\n" ++
@@ -371,6 +398,29 @@ private def checkResultApplication (environment : PsEnvironment) : IO Unit := do
   | .ok _ => throw (IO.userError "WF accepted a stale runtime entry argument order")
   | .error _ => pure ()
 
+-- An ignored hint owns no extra section capture or fixedpoint dependency.
+private def checkUnusedHints : IO Unit := do
+  let parsed ← match psCompilerParsePscv0 unusedHintSource with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  let result ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
+  for name in [psRootName "m3wfunused", psRootName "m3p1unused"] do
+    match psEnvironmentFind result.result.environment name,
+        psEnvironmentFind result.result.environment (psNameAppendStr name "eq_def") with
+    | some (.definitionDecl _ levels type value), some (.theoremDecl _ _ equationType proof) =>
+      let .forallE _ domain codomain _ := type
+        | throw (IO.userError "an unused hint changed the ordinary source header")
+      if !levels.isEmpty || !psExprAlphaEq domain (.constE psNatName []) ||
+          !psExprAlphaEq codomain (.constE psNatName []) ||
+          psExprHasConst psWellFoundedFixName value || psExprHasConst psWellFoundedFixEqName proof ||
+          psExprHasUnresolvedMeta type || psExprHasUnresolvedMeta value ||
+          psExprHasUnresolvedMeta equationType || psExprHasUnresolvedMeta proof ||
+          !(psExprFVarIds value).isEmpty || !(psExprFVarIds proof).isEmpty then
+        throw (IO.userError "an unused hint added a capture or invoked WF construction instead of a checked ordinary equation")
+    | _, _ => throw (IO.userError "a genuine nonrecursive WF/P1 source lost its checked ordinary definition/equation")
+
 -- Inspect the real typed construction separately from runtime observations.
 -- In particular an opaque P0 declaration, an axiom, or a self-referential
 -- definition cannot stand in for WellFounded.Nat.fix or its checked equation.
@@ -453,54 +503,53 @@ private def checkConstruction : IO Unit := do
         info.runtimeArity != runtimeArity || info.typeArity != typeArity then
       throw (IO.userError ("WF changed universe closure or typed entry roles for " ++ text))
   checkResultApplication result.result.environment
-  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, no recursive axiom or P0 marker"
+  checkUnusedHints
+  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, ordinary unused-hint definitions without extra captures, no recursive axiom or P0 marker"
 
-private def refusals : List (String × String × String) := [
+private def checks : List (String × String × Option String) := [
   ("same-size",
     "function bad(n: Nat): Nat := bad(n)\ntermination_by n\n",
-    "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-DECREASE"),
   ("false-measure",
     "function bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by 0\n",
-    "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-DECREASE"),
   ("only-first-goal",
     branchBody ++ "decreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n",
-    "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-DECREASE"),
   ("unresolved-proof",
     skipSource.replace "exact Nat.lt_succ_of_le(Nat.sub_le(k, 1))" "refine _",
-    "PSCV0-WF-DECREASE"),
-  ("nonrecursive",
-    "function bad(n: Nat): Nat := n\ntermination_by n\n",
-    "PSCV0-WF-NOT-RECURSIVE"),
+    some "PSCV0-WF-DECREASE"),
+  ("ordinary-unused-hints", unusedHintSource, none),
   ("nondecreasing-Bool-domain",
     "function bad(n: Bool): Nat := bad(n)\ntermination_by 0\n",
-    "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-DECREASE"),
   ("nondecreasing-Bool-result",
     "function bad(n: Nat): Bool := bad(n)\ntermination_by n\n",
-    "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-DECREASE"),
   ("unchanged-parameters",
     "function bad(n: Nat, k: Nat): Nat := bad(n, k)\ntermination_by n\n",
-    "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-DECREASE"),
   ("two-changing-measure-dependencies",
     "function bad(n: Nat, acc: Nat): Nat := match n with { | 0 => acc | k + 1 => bad(k, acc + 1) }\ntermination_by n + acc\n",
-    "PSCV0-WF-MEASURE-STATE"),
+    some "PSCV0-WF-MEASURE-STATE"),
   ("changing-major-domain",
     "function bad(n: Nat, i: Fin(n + 1)): Nat := match n with { | 0 => 0 | k + 1 => bad(k, Fin.mk(0, Nat.zero_lt_succ(k))) }\ntermination_by i.val\n",
-    "PSCV0-WF-MAJOR-DOMAIN"),
+    some "PSCV0-WF-MAJOR-DOMAIN"),
   ("incomplete-recursive-header",
-    "function bad(step: Nat, n: Nat): Nat := bad(n)\ntermination_by n\n",
-    "PSCV0-WF-ARITY"),
+    "function bad(step: Nat, n: Nat): Nat := {\n  let callback: Nat -> Nat := bad(n)\n  callback(n)\n}\ntermination_by n\n",
+    some "PSCV0-WF-ARITY"),
   ("function-result-measure-scope",
     "function bad(n: Nat): Nat -> Nat := fun (seed: Nat) => bad(n)(seed)\ntermination_by seed\n",
-    "unknown name seed"),
+    some "unknown name seed"),
   ("body-lambda-is-not-a-header-parameter",
     "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by 0\n",
-    "PSCV0-WF-TELESCOPE"),
+    some "PSCV0-WF-TELESCOPE"),
   ("body-lambda-measure-scope",
     "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by n\n",
-    "unknown name n"),
+    some "unknown name n"),
   ("escaping-self",
     "function bad(n: Nat): Nat := (fun (f: Nat -> Nat) => f(n))(bad)\ntermination_by n\n",
-    "PSCV0-WF-ESCAPE")]
+    some "PSCV0-WF-ESCAPE")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
@@ -517,7 +566,7 @@ def main (args : List String) : IO Unit := do
       "m3wfoffsetoutput", "m3wfstatesoutput", "m3wffixedoutput",
       "m3wflistoutput", "m3wffunctionoutput", "m3wfdependentstateoutput",
       "m3wfdependentresultoutput"] }
-  let requests := #[request] ++ (refusals.map fun (_, text, _) =>
+  let requests := #[request] ++ (checks.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
@@ -533,12 +582,15 @@ def main (args : List String) : IO Unit := do
       match file.payload with
       | .text value => IO.FS.writeFile (directory / file.path) value
       | .binary value => IO.FS.writeBinFile (directory / file.path) value
-  for ((label, _, expected), index) in refusals.zipIdx do
+  for ((label, _, expected), index) in checks.zipIdx do
     let some outcome := batch.results[index + 1]?
-      | throw (IO.userError ("missing WF refusal: " ++ label))
-    match outcome with
-    | .ok _ => throw (IO.userError ("WF unexpectedly accepted " ++ label))
-    | .error error =>
+      | throw (IO.userError ("missing WF source check: " ++ label))
+    match expected, outcome with
+    | none, .ok _ => pure ()
+    | none, .error error =>
+      throw (IO.userError (label ++ " unexpectedly failed: " ++ error.phase ++ ": " ++ error.message))
+    | some _, .ok _ => throw (IO.userError ("WF unexpectedly accepted " ++ label))
+    | some expected, .error error =>
       if error.phase != "elaborate" || (error.message.splitOn expected).length < 2 then
         throw (IO.userError (label ++ " failed at wrong phase/rule: " ++
           error.phase ++ ": " ++ error.message))

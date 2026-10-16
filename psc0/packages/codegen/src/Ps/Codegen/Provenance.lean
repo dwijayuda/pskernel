@@ -16,12 +16,20 @@ structure PsSourceMutualGroupOrigin where
   memberCount : Nat
   span : PsSourceSpan
 
+-- Local definitions retain their source order and the exact declarations
+-- emitted by elaboration, including equations and ordinary partial bodies.
+structure PsSourceLocalDefinitionOrigin where
+  name : String
+  span : PsSourceSpan
+  declarations : List String
+
 structure PsSourceOrigin where
   identity : PsSourceIdentity
   span : PsSourceSpan
   generatedReason : Option String := none
   sourceIndex : Option Nat := none
   mutualGroup : Option PsSourceMutualGroupOrigin := none
+  localDefinitions : List PsSourceLocalDefinitionOrigin := []
 
 structure PsEmissionContext where
   sourceName : String := "application.ps"

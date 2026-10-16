@@ -2,6 +2,8 @@ import Ps.Elab.Scope
 import Ps.Elab.Deriving
 import Ps.Elab.Mutual
 import Ps.Elab.MutualStructural
+import Ps.Elab.WhereWellFounded
+import Ps.Elab.PreDefinition
 
 structure PsCommandState where
   environment : PsEnvironment
@@ -24,6 +26,8 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   let resolver := { resolver with selfName := some name.segments }
   let visit := psScopeTerm 4096 resolver
   match source with
+  | .whereDeclaration .. =>
+    throw (.scope "PSCV0-WHERE-BATCH: local definitions require typed command-batch scope")
   | .definition _ binders type value span
   | .partialDefinition _ binders type value span
   | .fixedpointDefinition _ binders type value span
@@ -143,9 +147,93 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
   return { state with scope := { state.scope with included } }
 
 
+-- Scope one original source block, elaborate its typed local captures, then
+-- let the checked dependency owner partition it. Helpers retain their own
+-- source information while their declarations belong to the parent's origin.
+def psElabCommandPreDefinitions (state : PsCommandState)
+    (members : List PsSyntaxMutualMember) (span : PsSourceSpan) (isMutual : Bool) :
+    Except PsElabError PsCommandState := do
+  if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
+  let qualified := members.map fun member =>
+    psScopeQualified state.scope (psElabOriginSource member.declaration).fst
+  let names := qualified.map (·.segments)
+  for sourceName in qualified do
+    if (names.filter (· == sourceName.segments)).length != 1 then
+      let some name := psSyntaxNameToName sourceName | throw .emptyName
+      throw (.duplicateDeclaration name)
+  let aliases := (members.zip qualified).foldl (fun aliases entry =>
+    if entry.fst.isPrivate && !state.moduleIdentity.isEmpty then
+      (entry.snd.segments,
+        ["$psc0Private"] ++ state.moduleIdentity.splitOn "." ++ entry.snd.segments) :: aliases
+    else aliases) state.privateAliases
+  let resolver : PsScopeResolver := {
+    environment := state.environment
+    scope := state.scope
+    privateAliases := aliases }
+  let names := qualified.map fun name =>
+    (psScopePrivateRewrite resolver name.segments).getD name.segments
+  let peerAliases := names.zipIdx.map fun (name, index) =>
+    (name, ["$psc0Mutual", psNatToString index])
+  let resolver := { resolver with mutualNames := names, mutualAliases := peerAliases }
+  let scopedMembers ← (members.zip peerAliases).mapM fun (member, alias) =>
+    psScopePreDefinition resolver member
+      (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)
+  let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
+  let candidateCaptures := psScopeSelect state.scope used
+  let prepared ← psElabPreparePreDefinitionsWithSource state.environment
+    (state.scope.levelNames.map psRootName) candidateCaptures scopedMembers span
+  let block := prepared.block
+  let result ← psElabPreDefinitionBatch state.environment block
+    (some (psElabWhereWellFounded prepared))
+  if result.members.length != block.members.length then
+    throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
+  let environment ← psAddDeclarationList state.environment result.batch.declarations
+  let outputs := block.members.zip result.members
+  let origins := scopedMembers.zipIdx.map fun (member, index) =>
+    let owned := outputs.filter (fun output => output.fst.sourceIndex == index)
+    let declarations := owned.flatMap (·.snd.declarations)
+    let origin := psElabBatchOriginAt (state.originsRev.length + index) member.source
+      (psElabStableMemberOrigins declarations 0) none
+    { origin with
+      sourceInfo := owned.flatMap (·.snd.sourceInfo)
+      localDefinitions := owned.filterMap fun (input, result) =>
+        match input.source with
+        | .localDefinition _ source => some {
+            name := input.name
+            span := source.span
+            declarations := result.declarations.map psDeclarationName }
+        | .declaration _ => none
+      mutualGroup := if isMutual then some {
+        firstSourceIndex := state.originsRev.length
+        memberIndex := index
+        memberCount := scopedMembers.length
+        span } else none }
+  let privateNames := outputs.flatMap fun (member, result) =>
+    if member.isPrivate then result.declarations.map psDeclarationName
+    else result.declarations.filterMap fun declaration =>
+      match declaration with | .partialDecl name .. => some name | _ => none
+  let namespaces := result.batch.declarations.foldl (fun acc declaration =>
+    ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc)
+    state.namespaces
+  return { state with
+    environment, namespaces
+    originsRev := origins.reverse ++ state.originsRev
+    declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
+    privateNames := privateNames ++ state.privateNames
+    privateAliases := aliases }
+
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
     (registration : Option PsSyntaxRegistration) (isPrivate : Bool := false) :
     Except PsElabError PsCommandState := do
+  -- The typed dependency owner decides whether a retained recursion hint is
+  -- used. A genuine nonrecursive definition never invokes WF or P1 admission.
+  let usePreDefinitions := match source with
+    | .whereDeclaration .. => true
+    | .wellFoundedDefinition .. | .fixedpointDefinition .. => registration.isNone
+    | _ => false
+  if usePreDefinitions then
+    return ← psElabCommandPreDefinitions state
+      [PsSyntaxMutualMember.mk source isPrivate registration] (psElabOriginSource source).snd false
   let qualified := psScopeQualified state.scope (psElabOriginSource source).fst
   -- Only explicit project modules mangle private identities. Single-file
   -- elaboration retains its existing standalone naming contract.
@@ -243,7 +331,7 @@ def psElabMutualStrategy (members : List PsSyntaxMutualMember) : Except PsElabEr
   if members.any (fun member => member.registration.isSome) then
     throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
 
-def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualMember)
+def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntaxMutualMember)
     (span : PsSourceSpan) : Except PsElabError PsCommandState := do
   psElabMutualStrategy members
   let qualified := members.map fun member =>
@@ -306,6 +394,15 @@ def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualM
     declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
     privateNames := privateNames ++ state.privateNames
     privateAliases := aliases }
+
+def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualMember)
+    (span : PsSourceSpan) : Except PsElabError PsCommandState := do
+  -- Preserve the established explicit-partial top-level route. The shared
+  -- local preparation owns where blocks and total/mixed source components.
+  if !members.isEmpty && members.all (fun member => match member.declaration with
+      | .partialDefinition .. => true | _ => false) then
+    psElabCommandPartialMutual state members span
+  else psElabCommandPreDefinitions state members span true
 
 -- Deriving owns Core generation in a shared parameter/universe telescope.
 -- This command owns source order, registration and provenance for all handlers.

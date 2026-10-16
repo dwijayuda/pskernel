@@ -139,6 +139,60 @@ structure PsElabWellFoundedResult where
   metaContext : PsMetaContext
   sourceInfo : PsElabSourceInfo
 
+-- Source preparation supplies a real checked header, keeping lifted captures
+-- separate from the original explicit recursion arguments. A body scope may
+-- add checked local aliases for already constructed predecessors. Those lets
+-- are eliminated before the final fixedpoint is closed and checked.
+structure PsElabWellFoundedTypedHeader where
+  context : PsElabContext
+  parametersRev : List PsElabTypedBinder
+  resultType : PsExpr
+  functionName : PsName
+  capturesRev : List PsElabTypedBinder := []
+  bodyLocalContext : Option PsLocalContext := none
+  preserveLevels : Bool := false
+
+def psElabWellFoundedHeaderScope (header : PsElabWellFoundedTypedHeader) :
+    Except PsElabError (PsElabContext × PsLocalContext × List (Nat × PsExpr)) := do
+  let parameters := header.parametersRev ++ header.capturesRev
+  let ids := parameters.map (·.id)
+  let context := header.context
+  if ids.eraseDups.length != ids.length ||
+      context.localContext.declarations.length != ids.length then
+    throw (.data "PSCV0-WF-HEADER: the typed header must contain exactly its distinct original parameter and capture bindings")
+  for parameter in parameters do
+    let some (.binding _ name type binder) := psLocalFindById context.localContext parameter.id
+      | throw (.data "PSCV0-WF-HEADER: a typed header slot is not a real local binding")
+    if !psNameEq name parameter.name || !psBinderInfoEq binder parameter.binder ||
+        !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext type parameter.type then
+      throw (.data "PSCV0-WF-HEADER: a retained header slot changed its actual name, type or binder kind")
+  let body := header.bodyLocalContext.getD context.localContext
+  let bodyIds := body.declarations.map psLocalDeclId
+  if bodyIds.eraseDups.length != bodyIds.length || !ids.all bodyIds.contains then
+    throw (.data "PSCV0-WF-HEADER: the source body scope lost or duplicated a header slot")
+  let captures := header.capturesRev.map (·.id)
+  let aliases ← body.declarations.foldlM (fun (aliases : List (Nat × PsExpr)) declaration => do
+    match declaration with
+    | .binding id name type binder =>
+      let some parameter := parameters.find? (fun parameter => parameter.id == id)
+        | throw (.data "PSCV0-WF-HEADER: the source body scope introduced an unowned binding")
+      if (!captures.contains id && !psNameEq name parameter.name) ||
+          !psBinderInfoEq binder parameter.binder ||
+          !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext type parameter.type then
+        throw (.data "PSCV0-WF-HEADER: the source body scope changed a typed header slot")
+      return aliases
+    | .letDecl id _ type value =>
+      if ids.contains id || !psExprFVarsInContext context.localContext type ||
+          !psExprFVarsInContext context.localContext value then
+        throw (.data "PSCV0-WF-HEADER: a predecessor alias is not an application of checked globals in the original header")
+      let _ ← psElabResolvedTerm context value (some type)
+      return aliases ++ [(id, value)]) []
+  let nextId := max context.localContext.nextId body.nextId
+  if bodyIds.any (fun id => id >= nextId) then
+    throw (.data "PSCV0-WF-HEADER: the source body scope reused an active local identity")
+  return ({ context with localContext := { context.localContext with nextId } },
+    { body with nextId }, aliases)
+
 def psElabWellFoundedLambdas (binders : List PsElabTypedBinder) (body : PsExpr) : PsExpr :=
   binders.foldr (fun binder body =>
     .lam binder.name binder.type (psExprAbstractFVar binder.id body) binder.binder) body
@@ -187,13 +241,13 @@ def psElabWellFoundedCongrArg (context : PsElabContext)
 -- the Nat-valued measure. The measured argument's domain depends only on fixed
 -- captures; changing state and the declared result form a dependent motive.
 -- No body lambda enters the header or the termination clause's lexical scope.
-def psElabWellFoundedParts (elaborate : PsElaborator)
-    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
-    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
-    (levelNames : List PsName := []) :
+def psElabWellFoundedTypedParts (elaborate : PsElaborator)
+    (name : PsName) (header : PsElabWellFoundedTypedHeader)
+    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
     Except PsElabError PsElabWellFoundedResult := do
-  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let (headerContext, bodyLocalContext, aliases) ← psElabWellFoundedHeaderScope header
+  let environment := headerContext.environment
+  let levelNames := headerContext.levelNames
   let equationName := psNameAppendStr name "eq_def"
   if (psEnvironmentFind environment name).isSome then
     throw (.duplicateDeclaration name)
@@ -203,40 +257,43 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     | throw (.data "PSCV0-WF-FOUNDATION: checked WellFounded.Nat.fix is unavailable")
   let some (.theoremDecl ..) := psEnvironmentFind environment psWellFoundedFixEqName
     | throw (.data "PSCV0-WF-FOUNDATION: checked WellFounded.Nat.fix_eq is unavailable")
-  let binderResult ← psElabTypedBinders elaborate
-    (psElabContextEmpty environment levelNames) binders
-  let parameters := binderResult.bindersRev.reverse
+  let parameters := header.parametersRev.reverse
+  let captures := header.capturesRev.reverse
+  let captureIds := captures.map (·.id)
   if parameters.isEmpty then
     throw (.data "PSCV0-WF-TELESCOPE: the selected slice requires explicit typed header parameters")
   for parameter in parameters do
     let .explicit := parameter.binder
       | throw (.data "PSCV0-WF-TELESCOPE: the selected header parameters must be explicit")
-  let annotation ← psElabType elaborate binderResult.context typeSyntax
+  let _ ← psElabExpressionSort headerContext header.resultType
   let nat := PsExpr.constE psNatName []
   -- The self callback is not in scope in the result annotation or measure.
-  let measured ← elaborate annotation.context termination.measure (some nat)
+  let measured ← elaborate headerContext termination.measure (some nat)
   let measureBody := psMetaInstantiate measured.context.metaContext measured.term
   if psExprHasUnresolvedMeta (psElabGeneralizeExpr measureBody) then
     throw (.data "PSCV0-WF-MEASURE: unresolved Nat-valued measure")
   let parameterIds := parameters.map (·.id)
-  if !(psExprFVarIds measureBody).all parameterIds.contains then
+  if !(psExprFVarIds measureBody).all (parameterIds ++ captureIds).contains then
     throw (.data "PSCV0-WF-MEASURE: the measure escaped its declared header scope")
   let declaredParameters := parameters.map fun parameter =>
     { parameter with type := psMetaInstantiate measured.context.metaContext parameter.type }
-  let declaredResult := psMetaInstantiate measured.context.metaContext annotation.type
+  let declaredResult := psMetaInstantiate measured.context.metaContext header.resultType
   let declaredType := psElabWellFoundedForalls declaredParameters declaredResult
   if psExprHasUnresolvedMeta (psElabGeneralizeExpr declaredType) then
     throw (.data "PSCV0-WF-TELESCOPE: the complete declared parameter and result types must be resolved")
   -- Probe with a hygienic local function, not a temporary declaration/axiom.
   -- The probe owns no final proof goals, source information, or body value.
+  let bodyHeader := { measured.context with
+    localContext := { bodyLocalContext with
+      nextId := max bodyLocalContext.nextId measured.context.localContext.nextId } }
   let probeName := psNameAppendNum (psRootName "_psc0WellFoundedProbe")
-    measured.context.localContext.nextId
-  let probe := psLocalPushBinding measured.context.localContext probeName declaredType .explicit
-  let probeContext := { measured.context with
+    bodyHeader.localContext.nextId
+  let probe := psLocalPushBinding bodyHeader.localContext probeName declaredType .explicit
+  let probeContext := { bodyHeader with
     localContext := probe.context
     structuralRecursion := none
     wellFoundedRecursion := some {
-      functionName := name, callbackName := probeName
+      functionName := header.functionName, callbackName := probeName
       parameterIds := parameterIds, collectCalls := true, sourceType := some declaredType }
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
@@ -248,13 +305,14 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     probed.context.wellFoundedCallsRev.reverse measureBody
   let some major := declaredParameters.find? (fun parameter => parameter.id == plan.majorId)
     | throw (.data "PSCV0-WF-INTERNAL: selected parameter is not in the header")
-  if !(psExprFVarIds major.type).all plan.fixedIds.contains then
+  let fixedIds := captureIds ++ plan.fixedIds
+  if !(psExprFVarIds major.type).all fixedIds.contains then
     throw (.data "PSCV0-WF-MAJOR-DOMAIN: the measured argument's domain depends on changing state; dependent argument packing is unavailable")
   let states := declaredParameters.filter fun parameter => plan.stateIds.contains parameter.id
   let stateType := psElabWellFoundedForalls states declaredResult
   let measure := PsExpr.lam major.name major.type
     (psExprAbstractFVar major.id measureBody) .explicit
-  let localId := measured.context.localContext.nextId
+  let localId := bodyHeader.localContext.nextId
   let callbackName := psNameAppendNum (psRootName "_psc0WellFounded") localId
   let smallerMeasure := PsExpr.app measure (.fvar localId)
   let currentMeasure := PsExpr.app measure (.fvar major.id)
@@ -265,12 +323,12 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   let callbackType := psLogicPi localId "_smaller" major.type
     (psLogicPi (localId + 1) "_decreases" relation smallerStateType)
   let _ ← psElabExpressionSort measured.context callbackType
-  let callback := psLocalPushBinding measured.context.localContext callbackName callbackType .explicit
-  let bodyContext := { measured.context with
+  let callback := psLocalPushBinding bodyHeader.localContext callbackName callbackType .explicit
+  let bodyContext := { bodyHeader with
     localContext := callback.context
     structuralRecursion := none
     wellFoundedRecursion := some {
-      functionName := name, callbackName := callbackName
+      functionName := header.functionName, callbackName := callbackName
       parameterIds := parameterIds, majorId := plan.majorId
       stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }
     wellFoundedGoalsRev := []
@@ -283,13 +341,17 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   -- instantiated levels; unresolved term/proof holes remain an error.
   let normalize := fun (expression : PsExpr) =>
     psElabGeneralizeExpr (psMetaInstantiate solved.metaContext expression)
-  let body := normalize value.term
+  let normalizedAliases := aliases.map fun (id, value) => (id, normalize value)
+  let body := psElabSubstituteLocals normalizedAliases (normalize value.term)
   if psExprHasUnresolvedMeta body then
     throw (.data "PSCV0-WF-DECREASE: unresolved body or delayed proof abstraction")
   let declaredParameters := declaredParameters.map fun parameter =>
     { parameter with type := normalize parameter.type }
+  let captures := captures.map fun parameter =>
+    { parameter with type := normalize parameter.type }
+  let fullParameters := captures ++ declaredParameters
   let declaredResult := normalize declaredResult
-  let declaredType := psElabWellFoundedForalls declaredParameters declaredResult
+  let declaredType := psElabWellFoundedForalls fullParameters declaredResult
   let major := { major with type := normalize major.type }
   let states := states.map fun parameter => { parameter with type := normalize parameter.type }
   let stateType := psElabWellFoundedForalls states declaredResult
@@ -312,7 +374,7 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   let motive := PsExpr.lam major.name major.type
     (psExprAbstractFVar major.id stateType) .explicit
   if [major.type, motive, measure, functional].any (fun term =>
-      !(psExprFVarIds term).all plan.fixedIds.contains) then
+      !(psExprFVarIds term).all fixedIds.contains) then
     throw (.data "PSCV0-WF-SCOPE: the fixedpoint captured a changing parameter")
   if [declaredType, motive, measure, functional].any psExprHasUnresolvedMeta then
     throw (.data "PSCV0-WF-TELESCOPE: unresolved fixedpoint type or universe")
@@ -322,11 +384,14 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   let fixed := psExprApplyMany (.constE psWellFoundedFixName [domainLevel, stateLevel])
     [major.type, motive, measure, functional]
   let stateArguments := states.map (fun parameter => PsExpr.fvar parameter.id)
-  let declaredValue := psElabWellFoundedLambdas declaredParameters
+  let declaredValue := psElabWellFoundedLambdas fullParameters
     (psExprApplyMany fixed ([.fvar major.id] ++ stateArguments))
   if !(psExprFVarIds declaredType).isEmpty || !(psExprFVarIds declaredValue).isEmpty then
     throw (.data "PSCV0-WF-SCOPE: declaration retained an out-of-scope local")
-  let levels := psElabDeclarationLevels levelNames [declaredType, declaredValue]
+  let usedLevels := psElabDeclarationLevels levelNames [declaredType, declaredValue]
+  if header.preserveLevels && !usedLevels.all (fun used => levelNames.any (psNameEq used)) then
+    throw (.data "PSCV0-WF-LEVELS: the checked measure or body introduced a universe outside its original source block")
+  let levels := if header.preserveLevels then levelNames else usedLevels
   let closedContext := psElabContextEmpty environment levels
   let _ ← psElabResolvedTerm closedContext declaredValue (some declaredType)
   let declaration := PsDeclaration.definitionDecl name levels declaredType declaredValue
@@ -341,8 +406,8 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
   let decrease := psExprApplyMany (.constE (psNameAppendStr psNatName "lt") [])
     [.app measure y, .app measure x]
   let self := PsExpr.constE name (levels.map PsLevel.param)
-  let originalArguments := declaredParameters.map (fun parameter => PsExpr.fvar parameter.id)
-  let recursiveArguments := declaredParameters.map fun parameter =>
+  let originalArguments := fullParameters.map (fun parameter => PsExpr.fvar parameter.id)
+  let recursiveArguments := fullParameters.map fun parameter =>
     if parameter.id == major.id then y else PsExpr.fvar parameter.id
   let smallerStates := states.map fun parameter =>
     { parameter with type := psExprInstantiate1 (psExprAbstractFVar major.id parameter.type) y }
@@ -373,13 +438,34 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     psElabWellFoundedCongrArg equationContext stateType declaredResult
       (.app fixed x) sourceRhs applyStates fullEquality
   let rhs := psExprApplyMany sourceRhs stateArguments
-  let equationType := psElabWellFoundedForalls declaredParameters
+  let equationType := psElabWellFoundedForalls fullParameters
     (psLogicEq resultLevel declaredResult (psExprApplyMany self originalArguments) rhs)
-  let equationValue := psElabWellFoundedLambdas declaredParameters equationProof
-  let equationLevels := psElabDeclarationLevels levels [equationType, equationValue]
+  let equationValue := psElabWellFoundedLambdas fullParameters equationProof
+  let usedEquationLevels := psElabDeclarationLevels levels [equationType, equationValue]
+  if header.preserveLevels && !usedEquationLevels.all (fun used => levels.any (psNameEq used)) then
+    throw (.data "PSCV0-WF-LEVELS: the checked source equation introduced a universe outside its original source block")
+  let equationLevels := if header.preserveLevels then levels else usedEquationLevels
   let _ ← psElabResolvedTerm (psElabContextEmpty withDefinition equationLevels)
     equationValue (some equationType)
   let equation := PsDeclaration.theoremDecl equationName equationLevels equationType equationValue
   return {
     declaration, equation, metaContext := solved.metaContext
     sourceInfo := psElabFinishSourceInfo solved name }
+
+-- The existing standalone route still elaborates its own selected header.
+-- Lifted local definitions enter the same construction through TypedParts.
+def psElabWellFoundedParts (elaborate : PsElaborator)
+    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
+    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
+    (typeSyntax valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
+    (levelNames : List PsName := []) :
+    Except PsElabError PsElabWellFoundedResult := do
+  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let binderResult ← psElabTypedBinders elaborate
+    (psElabContextEmpty environment levelNames) binders
+  let annotation ← psElabType elaborate binderResult.context typeSyntax
+  psElabWellFoundedTypedParts elaborate name {
+    context := annotation.context
+    parametersRev := binderResult.bindersRev
+    resultType := annotation.type
+    functionName := name } valueSyntax termination

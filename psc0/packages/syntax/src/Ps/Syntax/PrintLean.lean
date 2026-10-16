@@ -487,10 +487,31 @@ def psPrintLeanTermination (termination : PsSyntaxTermination) :
     | some _ => throw (.unsupportedSourceForm "decreasing_by requires a proof sequence")
   return "\ntermination_by " ++ measure ++ proof
 
+def psPrintLeanLocalDefinition (declaration : PsSyntaxLocalDefinition) :
+    Except PsSourcePrintError String := do
+  let name ← psPrintSyntaxName declaration.name
+  let binders ← psPrintLeanMapBinders psPrintLeanBinder declaration.binders
+  let annotation ← match declaration.type with
+    | none => pure ""
+    | some type => do
+      let printed ← psPrintLeanTerm type
+      pure (" : " ++ printed)
+  let value ← psPrintLeanTerm declaration.value
+  let suffix ← match declaration.recursion with
+    | none => pure ""
+    | some (.fixedpoint _) => pure "\npartial_fixpoint"
+    | some (.total termination) => psPrintLeanTermination termination
+  return name ++ psPrintLeanSpaceJoinedSuffix binders ++ annotation ++ " := " ++ value ++ suffix
+
 def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
+  | .whereDeclaration parent locals _ => do
+      let parent ← psPrintLeanDeclaration parent
+      let locals ← locals.mapM psPrintLeanLocalDefinition
+      if locals.isEmpty then throw (.unsupportedSourceForm "where requires local definitions")
+      return parent ++ "\nwhere\n  " ++ (String.intercalate "\n" locals).replace "\n" "\n  "
   | .definition name binders type value _
   | .fixedpointDefinition name binders type value _
   | .wellFoundedDefinition name binders type value _ _ => do

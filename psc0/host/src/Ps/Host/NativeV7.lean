@@ -119,6 +119,13 @@ private def mutualGroupOriginJson (group : PsSourceMutualGroupOrigin) : Lean.Jso
     ("sourceStartByte", toJson group.span.start.byteOffset),
     ("sourceEndByte", toJson group.span.stop.byteOffset)]
 
+private def localDefinitionOriginJson (localOrigin : PsSourceLocalDefinitionOrigin) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("semantic", toJson localOrigin.name),
+    ("sourceStartByte", toJson localOrigin.span.start.byteOffset),
+    ("sourceEndByte", toJson localOrigin.span.stop.byteOffset),
+    ("declarations", toJson localOrigin.declarations)]
+
 -- Used by CLI publication and fixture inspection of the same emitted origins.
 -- Per-member source coordinates and complete mutual-command ownership survive
 -- all target backends; neither is reconstructed from generated symbols.
@@ -128,11 +135,39 @@ def sourceOriginJson (name : String) (origin : PsSourceOrigin) : Lean.Json :=
     ("sourceStartByte", toJson origin.span.start.byteOffset),
     ("sourceEndByte", toJson origin.span.stop.byteOffset),
     ("generatedReason", toJson origin.generatedReason)]
-  Lean.Json.mkObj (fields ++ match origin.mutualGroup with
+  let sourceIndex := if origin.mutualGroup.isSome || !origin.localDefinitions.isEmpty then
+    [("sourceIndex", toJson origin.sourceIndex)] else []
+  let mutualGroup := match origin.mutualGroup with
     | none => []
-    | some group => [
-        ("sourceIndex", toJson origin.sourceIndex),
-        ("mutualGroup", mutualGroupOriginJson group)])
+    | some group => [("mutualGroup", mutualGroupOriginJson group)]
+  let localDefinitions := if origin.localDefinitions.isEmpty then [] else
+    [("localDefinitions", Lean.Json.arr (origin.localDefinitions.map localDefinitionOriginJson).toArray)]
+  Lean.Json.mkObj (fields ++ sourceIndex ++ mutualGroup ++ localDefinitions)
+
+-- Emission and source-oracle fixtures use this same mapping. Helper ownership
+-- is an elaborator result, never inferred from a generated name suffix.
+def sourceOriginsForBatch (fileName : String) (batch : PsElabBatchOrigin) :
+    List (String × PsSourceOrigin) :=
+  let localDefinitions := batch.localDefinitions.map fun localOrigin => {
+    name := psNameToString localOrigin.name
+    span := localOrigin.span
+    declarations := localOrigin.declarations.map psNameToString : PsSourceLocalDefinitionOrigin }
+  batch.members.map fun member =>
+    let localOrigin := batch.localDefinitions.find? fun localOrigin =>
+      localOrigin.declarations.any (psNameEq member.name)
+    (psNameToString member.name, {
+      identity := { file := fileName, declaration := psNameToString member.name }
+      span := (localOrigin.map (·.span)).getD batch.span
+      sourceIndex := some batch.sourceIndex
+      mutualGroup := batch.mutualGroup.map fun group => {
+        firstSourceIndex := group.firstSourceIndex
+        memberIndex := group.memberIndex
+        memberCount := group.memberCount
+        span := group.span }
+      localDefinitions
+      generatedReason := match member.role with
+        | .sourceDeclaration | .inductiveType | .structureType => none
+        | _ => some "elaboration member of source declaration" : PsSourceOrigin })
 
 private def fromResult {α : Type} (phase : String)
     (result : Except String α) : ExceptT Diagnostic IO α :=
@@ -267,19 +302,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
       | some value => value.origins.map (fun batch => (request.sourceName, batch))
       | none => []
   let origins := originBatches.flatMap fun (fileName, batch) =>
-    batch.members.map fun member =>
-      (psNameToString member.name, {
-        identity := { file := fileName, declaration := psNameToString member.name }
-        span := batch.span
-        sourceIndex := some batch.sourceIndex
-        mutualGroup := batch.mutualGroup.map fun group => {
-          firstSourceIndex := group.firstSourceIndex
-          memberIndex := group.memberIndex
-          memberCount := group.memberCount
-          span := group.span }
-        generatedReason := match member.role with
-          | .sourceDeclaration | .inductiveType | .structureType => none
-          | _ => some "elaboration member of source declaration" : PsSourceOrigin })
+    sourceOriginsForBatch fileName batch
   let origins := output.originParents.foldl (fun origins (helper, parent) =>
     match origins.find? (fun entry => entry.fst == psNameToString parent) with
     | none => origins

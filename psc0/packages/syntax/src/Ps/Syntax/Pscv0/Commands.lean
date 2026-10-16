@@ -76,8 +76,6 @@ def psPscv0ReadTermination (cursor : PsTokenCursor) :
   if ["termination_by", "decreasing_by", "partial_fixpoint"].any
       (psTokenCursorAtText next) then
     throw "PSCV0-REC-STRATEGY-01: duplicate or incompatible recursion suffix"
-  if psTokenCursorAtText next "where" then
-    throw "PSCV0-FEATURE-UNAVAILABLE: well-founded local where declarations"
   let span := PsSourceSpan.mk keyword.token.span.start stop
   let termination := PsSyntaxTermination.mk measure.value decreasing span
   return PsParseResult.mk termination next
@@ -86,7 +84,7 @@ def psPscv0ReadTermination (cursor : PsTokenCursor) :
 -- strategy after the body. The source parser owns that syntax; elaboration
 -- owns the construction's dependency/assumption gate. In particular, never
 -- reinterpret a valid P1 suffix as the head of the following declaration.
-def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
+def psPscv0ReadValueDeclarationWithoutWhere (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) := do
   let parsed ← psPscv0ReadValueDeclarationBody cursor
   if psTokenCursorAtText parsed.cursor "decreasing_by" then
@@ -112,14 +110,86 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
     throw "PSCV0-REC-STRATEGY-01: fixedpoint cannot combine with another recursion suffix"
   if psTokenCursorAtText suffix.cursor "monotonicity" then
     throw "PSCV0-FIXPOINT-01: explicit monotonicity syntax is not selected by v7.2"
-  if psTokenCursorAtText suffix.cursor "where" then
-    throw "PSCV0-FEATURE-UNAVAILABLE: fixedpoint where declarations"
   let .definition name binders type value span := parsed.value
     | throw "PSCV0-REC-STRATEGY-01: fixedpoint requires a function-like declaration"
   let sourceSpan := PsSourceSpan.mk span.start suffix.token.span.stop
   let declaration := PsSyntaxDeclaration.fixedpointDefinition
     name binders type value sourceSpan
   return PsParseResult.mk declaration suffix.cursor
+
+def psPscv0ReadLocalDefinition (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxLocalDefinition) := do
+  if !psTokenCursorAtText cursor "def" then
+    throw "PSCV0-D-WHERE-01: where admits only selected local def declarations"
+  let keyword ← psPscv0Expect cursor "def"
+  let name ← (psParseProofScriptDeclaredName keyword.cursor).mapError psPscv0ParseError
+  if name.value.segments.length != 1 then
+    throw "PSCV0-D-WHERE-01: local definition requires one unqualified identifier"
+  let binders ← (psPscv0ParameterGroups (psPscv0ParseTerm true) (psPscv0ParseTerm false)
+    (name.cursor.remaining.length + 1) true false false name.cursor []).mapError psPscv0ParseError
+  let (type, next) ← if psTokenCursorAtText binders.cursor ":" then do
+      let colon ← psPscv0Expect binders.cursor ":"
+      let type ← psPscv0ReadAnnotation true colon.cursor
+      pure (some type.value, type.cursor)
+    else pure (none, binders.cursor)
+  let assign ← psPscv0Expect next ":="
+  let body ← (psPscv0ParseDefinitionBody assign.cursor).mapError psPscv0ParseError
+  let (recursion, next, stop) ←
+    if psTokenCursorAtText body.cursor "termination_by" then do
+      let suffix ← psPscv0ReadTermination body.cursor
+      pure (some (PsSyntaxLocalRecursion.total suffix.value), suffix.cursor, suffix.value.span.stop)
+    else if psTokenCursorAtText body.cursor "partial_fixpoint" then do
+      let suffix ← psPscv0Expect body.cursor "partial_fixpoint"
+      pure (some (PsSyntaxLocalRecursion.fixedpoint suffix.token.span), suffix.cursor, suffix.token.span.stop)
+    else pure (none, body.cursor, psProofScriptTermStop body.value)
+  if ["termination_by", "decreasing_by", "partial_fixpoint"].any (psTokenCursorAtText next) then
+    throw "PSCV0-REC-STRATEGY-01: duplicate or incompatible local recursion suffix"
+  if psTokenCursorAtText next "monotonicity" then
+    throw "PSCV0-FIXPOINT-01: explicit monotonicity syntax is not selected by v7.2"
+  if psTokenCursorAtText next "where" then
+    throw "PSCV0-D-WHERE-01: nested local where declarations are not selected"
+  let localDefinition : PsSyntaxLocalDefinition := {
+    name := name.value
+    binders := binders.value
+    type
+    value := body.value
+    recursion
+    span := PsSourceSpan.mk keyword.token.span.start stop }
+  return PsParseResult.mk localDefinition next
+
+def psPscv0ReadLocalDefinitions (fuel : Nat) (cursor : PsTokenCursor)
+    (localsRev : List PsSyntaxLocalDefinition) :
+    Except String (PsParseResult (List PsSyntaxLocalDefinition)) := do
+  match fuel with
+  | 0 => throw "PSCV0-D-WHERE-01: local declaration budget exhausted"
+  | fuel + 1 =>
+    if psTokenCursorAtText cursor "}" then
+      if localsRev.isEmpty then throw "PSCV0-D-WHERE-01: where requires a local definition"
+      return PsParseResult.mk localsRev.reverse cursor
+    let localDefinition ← psPscv0ReadLocalDefinition cursor
+    if localsRev.any (fun previous => previous.name.segments == localDefinition.value.name.segments) then
+      throw "PSCV0-D-WHERE-01: duplicate local definition"
+    let next ← if psTokenCursorAtText localDefinition.cursor "}" then pure localDefinition.cursor
+      else (psParseProofScriptCommandSeparator localDefinition.value.span.stop
+        localDefinition.cursor).mapError psPscv0ParseError
+    psPscv0ReadLocalDefinitions fuel next (localDefinition.value :: localsRev)
+
+def psPscv0ReadWhereSuffix (parsed : PsParseResult PsSyntaxDeclaration) :
+    Except String (PsParseResult PsSyntaxDeclaration) := do
+  if !psTokenCursorAtText parsed.cursor "where" then return parsed
+  let keyword ← psPscv0Expect parsed.cursor "where"
+  let opening ← psPscv0Expect keyword.cursor "{"
+  let locals ← psPscv0ReadLocalDefinitions (opening.cursor.remaining.length + 1) opening.cursor []
+  let closing ← psPscv0Expect locals.cursor "}"
+  if ["termination_by", "decreasing_by", "partial_fixpoint", "where"].any
+      (psTokenCursorAtText closing.cursor) then
+    throw "PSCV0-REC-STRATEGY-01: recursion suffix belongs before where"
+  let whereSpan := PsSourceSpan.mk keyword.token.span.start closing.token.span.stop
+  return PsParseResult.mk (.whereDeclaration parsed.value locals.value whereSpan) closing.cursor
+
+def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxDeclaration) := do
+  psPscv0ReadWhereSuffix (← psPscv0ReadValueDeclarationWithoutWhere cursor)
 
 def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
@@ -146,12 +216,8 @@ def psPscv0ReadSpecialDeclaration (cursor : PsTokenCursor) :
   if ["partial_fixpoint", "termination_by", "decreasing_by"].any
       (psTokenCursorAtText parsed.cursor) then
     throw "PSCV0-REC-STRATEGY-01: partial modifier cannot own a total or fixedpoint suffix"
-  -- Local where construction is a separate pending source family; do not
-  -- swallow it or lose its ownership while introducing the partial prefix.
-  if psTokenCursorAtText parsed.cursor "where" then
-    throw "PSCV0-FEATURE-UNAVAILABLE: partial where declarations"
   let sourceSpan := PsSourceSpan.mk marker.token.span.start span.stop
-  return { parsed with value := .partialDefinition name binders type value sourceSpan }
+  psPscv0ReadWhereSuffix { parsed with value := .partialDefinition name binders type value sourceSpan }
 
 def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=

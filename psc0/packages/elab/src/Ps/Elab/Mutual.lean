@@ -1,5 +1,6 @@
 import Ps.Elab.Scope
 import Ps.Elab.Declaration
+import Ps.Elab.PreDefinition.Basic
 
 -- Constructive part of pinned Lean's PreDefinition/MkInhabitant: every
 -- parameter supplies an Inhabited value in this witness-only local scope.
@@ -117,12 +118,7 @@ def psScopeMutualMember (resolver : PsScopeResolver)
     used := psScopeUnion binders.used (psScopeUnion type.used value.used)
     isPrivate := member.isPrivate }
 
-structure PsElabPartialHeader where
-  name : PsName
-  context : PsElabContext
-  bindersRev : List PsElabTypedBinder
-  openType : PsExpr
-  type : PsExpr
+abbrev PsElabPartialHeader := PsElabCheckedHeader
 
 -- Scope and typed headers are shared by logical strategies. This function
 -- introduces only the real parameter telescope, never a declaration or a
@@ -255,5 +251,47 @@ def psElabPartialMutualBatch (environment : PsEnvironment) (levelNames : List Ps
   if !psElabMutualLevelNamesEqual finalLevels (psElabMutualBatchLevels levelNames final) then
     throw (.data "PSCV0-MUTUAL-UNIVERSES: checked mutual universe closure did not stabilize")
   return final
+
+-- A typed SCC already owns its exact closed headers and source bodies. Its
+-- remaining free variables are full peers in this component; dependencies
+-- outside the SCC have become actual checked constants. Independently build
+-- all logical inhabitants before substituting any peer into any body.
+def psElabPartialMutualFromChecked (environment : PsEnvironment)
+    (levels : List PsName) (members : List PsElabPreDefinition) :
+    Except PsElabError PsElabMutualBatchResult := do
+  if members.isEmpty then
+    throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: empty partial component")
+  let ownedNames := members.flatMap fun member => [member.name, PsName.num member.name 0]
+  for name in ownedNames do
+    if (psEnvironmentFind environment name).isSome ||
+        (ownedNames.filter (psNameEq name)).length != 1 then
+      throw (.duplicateDeclaration name)
+  let logicals ← members.mapM fun member => do
+    if psExprHasUnresolvedMeta member.type || !psExprFVarsInContext psLocalEmpty member.type then
+      throw (.data "PSCV0-PREDEFINITION-HEADER: partial header is not closed")
+    let witness ← (psElabPartialInhabitant environment levels member.type).mapError
+      (.atDeclaration member.name)
+    return PsDeclaration.opaqueDecl member.name levels member.type witness
+  let staged ← psAddDeclarationList environment logicals
+  let replacements := members.map fun member =>
+    (member.peerId, PsExpr.constE member.name (levels.map PsLevel.param))
+  let bodies ← members.mapM fun member => do
+    let value := psElabSubstituteLocals replacements member.value
+    if psExprHasUnresolvedMeta value || !psExprFVarsInContext psLocalEmpty value then
+      throw (.data "PSCV0-PREDEFINITION-BODY: partial body retains an unowned peer")
+    let checked ← (psElabResolvedTerm (psElabContextEmpty staged levels)
+      value (some member.type)).mapError (.atDeclaration member.name)
+    let implementationName := PsName.num member.name 0
+    return ({
+      declaration := PsDeclaration.partialDecl implementationName levels member.type checked.term
+      sourceInfo := { member.sourceInfo with owner := implementationName } } : PsElabPartialBody)
+  let _ ← psAddDeclarationList staged (bodies.map (·.declaration))
+  return {
+    batch := {
+      declarations := logicals ++ bodies.map (·.declaration)
+      sourceInfo := bodies.map (·.sourceInfo) }
+    members := (logicals.zip bodies).map fun (logical, body) => {
+      declarations := [logical, body.declaration]
+      sourceInfo := [body.sourceInfo] } }
 
 

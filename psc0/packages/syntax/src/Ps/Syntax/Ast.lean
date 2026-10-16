@@ -77,6 +77,9 @@ structure PsSyntaxProofScope where
   -- Delayed proof terms resolve a mutual peer to its checked local alias,
   -- which already supplies the common captured telescope with all binder kinds.
   mutualAliases : List (List String × List String) := []
+  -- Flat where locals shadow the enclosing section/parameter scope, while
+  -- bindings introduced inside a helper or proof retain ordinary precedence.
+  localAliases : List (String × List String) := []
 
 -- Operator intent survives parsing so elaboration can join operand types before
 -- inserting coercions. Ordinary named calls keep their ordinary semantics.
@@ -252,7 +255,27 @@ structure PsSyntaxTermination where
   decreasing : Option PsSyntaxTerm := none
   span : PsSourceSpan
 
+-- Local `def` is owned source syntax, not a top-level command. Its optional
+-- result annotation and recursion suffix survive until typed group preparation.
+inductive PsSyntaxLocalRecursion where
+  | total (termination : PsSyntaxTermination)
+  | fixedpoint (span : PsSourceSpan)
+
+structure PsSyntaxLocalDefinition where
+  name : PsSyntaxName
+  binders : List (PsSyntaxBinderHead × PsSyntaxTerm)
+  type : Option PsSyntaxTerm
+  value : PsSyntaxTerm
+  recursion : Option PsSyntaxLocalRecursion
+  span : PsSourceSpan
+
 inductive PsSyntaxDeclaration where
+  -- The wrapped declaration retains its own head, body and suffix. The last
+  -- span belongs to `where { ... }`; helper bodies are not declaration bodies.
+  | whereDeclaration
+      (declaration : PsSyntaxDeclaration)
+      (locals : List PsSyntaxLocalDefinition)
+      (span : PsSourceSpan)
   | definition
       (name : PsSyntaxName)
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))

@@ -5,6 +5,20 @@ namespace M3MutualPartialOracle
 
 def applyPeer (f : Nat → Nat) (n : Nat) : Nat := f n
 
+-- Pinned Main applies the partial strategy to this complete recursive clique,
+-- including the plain member. This divergent logical oracle is never run.
+mutual
+  partial def mixedFirst (n : Nat) : Nat := mixedSecond n
+  def mixedSecond (n : Nat) : Nat := mixedFirst n
+end
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for name in [``mixedFirst, ``mixedSecond] do
+    match environment.find? name with
+    | some (.opaqueInfo _) => pure ()
+    | _ => throwError "native mixed partial clique member is not opaque: {name}"
+
 mutual
   partial def left (bias n : Nat) : Nat :=
     match n with
@@ -147,6 +161,12 @@ private def universeSource : String :=
   "  partial function universeRight(n: Nat): Nat := n\n" ++
   "end\n"
 
+private def mixedSource : String :=
+  "mutual\n" ++
+  "partial function first(n: Nat): Nat := second(n)\n" ++
+  "function second(n: Nat): Nat := first(n)\n" ++
+  "end\n"
+
 private def exports : List (String × (Bool → UInt64)) :=
   [("m3mutualoutput", M3MutualPartialOracle.output),
    ("m3mutualcaptureoutput", M3MutualPartialOracle.captureOutput),
@@ -258,12 +278,34 @@ private def checkConstruction : IO (List PsElabBatchOrigin) := do
       | throw (IO.userError "missing body-universe mutual identity")
     ensure (psElabMutualLevelNamesEqual levels [psRootName "u"])
       "body-only universe did not enter every final mutual signature"
+  let mixed ← elaborate mixedSource
+  ensure (mixed.result.declarations.length == 4 && mixed.origins.length == 2)
+    "mixed partial clique lost one effective logical/body owner"
+  for (name, peer) in [("first", "second"), ("second", "first")] do
+    let name := psRootName name
+    let peer := psRootName peer
+    let some (.opaqueDecl logical logicalLevels logicalType witness) :=
+        psEnvironmentFind mixed.result.environment name
+      | throw (IO.userError "mixed partial clique left a public member transparent")
+    let some (.partialDecl implementation levels type value) :=
+        psEnvironmentFind mixed.result.environment (PsName.num name 0)
+      | throw (IO.userError "mixed partial clique discarded the member's actual checked body")
+    ensure (psNameEq logical name && psNameEq implementation (PsName.num name 0) &&
+      psElabMutualLevelNamesEqual logicalLevels levels && psExprAlphaEq logicalType type &&
+      !psExprAlphaEq witness value && psExprHasConst peer value &&
+      (psExprFVarIds value).isEmpty && !psExprHasUnresolvedMeta value &&
+      (psEnvironmentFind mixed.result.environment (psNameAppendStr name "eq_def")).isNone)
+      "effective partial member changed opacity, exact body, peer closure or equation ownership"
+    ensure (mixed.origins.any (fun origin => origin.members.length == 2 &&
+      origin.members.any (fun member => psNameEq member.name name) &&
+      origin.members.any (fun member => psNameEq member.name implementation)))
+      "mixed partial clique lost per-source logical/body provenance"
   let duplicate ← parse "mutual\npartial function same(n: Nat): Nat := n\npartial function same(n: Nat): Nat := n\nend\n"
   match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment duplicate with
   | .error (.duplicateDeclaration name) =>
     ensure (psNameEq name (psRootName "same")) "duplicate mutual diagnostic lost its owner"
   | _ => throw (IO.userError "duplicate mutual headers were not refused atomically")
-  IO.println "PSCV0_M3_MUTUAL_CONSTRUCTION: PASS atomic command/member origins, distinct inhabited opaque/body identities, all-kind block captures, bare peers, shadowing, private aliases and common universe closure"
+  IO.println "PSCV0_M3_MUTUAL_CONSTRUCTION: PASS atomic command/member origins, distinct inhabited opaque/body identities, native mixed-clique effective opacity, all-kind block captures, bare peers, shadowing, private aliases and common universe closure"
   return compiled.origins
 
 private def checkPublishedOrigins (expected : List PsElabBatchOrigin)
@@ -346,17 +388,15 @@ private def checks : Array Check :=
     { label := "total-strategy-refused", request := {
         source := "mutual\nfunction first(n: Nat): Nat := second(n)\nfunction second(n: Nat): Nat := first(n)\nend\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-MUTUAL-TOTAL:") },
-    { label := "mixed-strategy-refused", request := {
-        source := "mutual\npartial function first(n: Nat): Nat := second(n)\nfunction second(n: Nat): Nat := first(n)\nend\n" }
-      failure := some ("elaborate", "PSCV0-DATA: PSCV0-MUTUAL-STRATEGY:") },
+    { label := "mixed-partial-clique", request := { source := mixedSource } },
     { label := "partial-registration-refused", request := {
         source := "mutual\n@[default_instance] partial function first(n: Nat): Nat := n\nend\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-TERM-02-HEAD:") },
     { label := "p1-assumption-refused", request := {
         source := "mutual\nfunction first(n: Nat): Nat := first(n)\npartial_fixpoint\nend\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-FIXPOINT-ASSUMPTION:") },
-    { label := "wf-group-refused", request := {
-        source := "mutual\nfunction first(n: Nat): Nat := first(n)\ntermination_by n\nend\n" }
+    { label := "partial-wf-clique-refused", request := {
+        source := "mutual\npartial function first(n: Nat): Nat := second(n)\nfunction second(n: Nat): Nat := first(n)\ntermination_by n\nend\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-MUTUAL-WF:") },
     { label := "private-import-refused", request := {
         project with

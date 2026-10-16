@@ -29,6 +29,7 @@ structure PsScopeResolver where
   mutualNames : List (List String) := []
   -- A body sees typed local lets applying each real opaque to common captures.
   mutualAliases : List (List String × List String) := []
+  localAliases : List (String × List String) := []
 
 def psScopeKey (name : PsSyntaxName) : String := String.intercalate "." name.segments
 
@@ -98,6 +99,8 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
   let rooted := name.segments.head? == some "_root_"
   if !rooted then
     if bound.contains first then return (name, [])
+    if let some (_, replacement) := resolver.localAliases.find? (fun entry => entry.fst == first) then
+      return ({ name with segments := replacement ++ segments.drop 1 }, [])
     if psScopeHasVariable resolver.scope first then
       return (name, [first])
   if resolver.deferProofNames then return (name, [])
@@ -291,7 +294,8 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return { term := .byE tactics {
         namePrefix := resolver.scope.namePrefix, opened := resolver.scope.opened,
         privateAliases := resolver.privateAliases
-        mutualAliases := resolver.mutualAliases } span, used }
+        mutualAliases := resolver.mutualAliases
+        localAliases := resolver.localAliases } span, used }
     | .reference name =>
       let resolved ← psScopeResolve resolver bound name
       return { term := .reference resolved.fst, used := resolved.snd }

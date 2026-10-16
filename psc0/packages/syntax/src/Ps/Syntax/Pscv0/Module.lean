@@ -62,8 +62,16 @@ def psPscv0JoinTermLists (values : List (List PsSyntaxTerm)) : List PsSyntaxTerm
   | [] => []
   | first :: rest => psListAppend first (psPscv0JoinTermLists rest)
 
+def psPscv0LocalDefinitionTerms (declaration : PsSyntaxLocalDefinition) : List PsSyntaxTerm :=
+  declaration.type.toList ++ [declaration.value] ++ declaration.binders.map Prod.snd ++
+    match declaration.recursion with
+    | some (.total termination) => termination.measure :: termination.decreasing.toList
+    | _ => []
+
 def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxTerm :=
   match declaration with
+  | .whereDeclaration parent locals _ =>
+      psPscv0DeclarationTerms parent ++ locals.flatMap psPscv0LocalDefinitionTerms
   | .definition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .partialDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .fixedpointDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
@@ -94,6 +102,12 @@ def psPscv0AttachDeclaration (proofScript : Bool) (tokens : List PsToken)
   | Except.error error => Except.error error
   | Except.ok _ =>
       match declaration with
+      | .whereDeclaration parent locals _ => do
+          let attached ← psPscv0AttachDeclaration proofScript tokens blocks errorName discardName parent
+          if attached.doBody.isSome || locals.any (fun localDefinition =>
+              (psPscv0BodyBlock blocks localDefinition.value).isSome) then
+            throw "PSCV0-D-WHERE-01: flat do adapter cannot own local definition bodies"
+          return PsPscv0SurfaceDeclaration.mk attached.keyword declaration none
       | .partialDefinition _ _ _ value span =>
           -- Preserve source strategy. The flat translator does not silently
           -- route partial typed-do through its older Except-only adapter.

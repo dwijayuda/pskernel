@@ -41,6 +41,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0RecursiveQualifiedLetRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0RecursiveQualifiedProjectionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedContextualWhnfRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ConstructorFieldFuelSeparationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedZetaWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedBetaWhnfRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0QualifiedRecursiveWhnfRegression.lean'
@@ -259,6 +260,9 @@ jobs:
       - name: C0 independently refined checked projection major types
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0RecursiveQualifiedProjectionRegression.lean
+      - name: C0 ordinary/mutual constructor traversal versus checker fuel
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ConstructorFieldFuelSeparationRegression.lean
       - name: C0 source-proved independently refined checked let children
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0RecursiveQualifiedLetRegression.lean

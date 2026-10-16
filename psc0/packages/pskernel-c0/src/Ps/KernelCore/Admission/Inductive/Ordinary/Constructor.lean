@@ -225,7 +225,7 @@ def psKernelSimpleIndicesContainTarget
           rest
 
 def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelName ->
     List PsKernelLevel ->
@@ -248,7 +248,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
           "simple inductive recursive-argument budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelAnalyzeSimpleRecursiveArgumentWithFuel remaining;
+        psKernelAnalyzeSimpleRecursiveArgumentWithFuel remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (target : PsKernelName)
@@ -259,7 +259,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
         (revArgs : List PsKernelOpenBinder) =>
         match
             psKernelSessionWhnf
-              remaining
+              checkerFuel
               session
               type with
         | Except.error error =>
@@ -294,7 +294,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                 | PsKernelExpr.forallE userName domain body binderInfo =>
                     match
                         psKernelSessionWhnf
-                          remaining
+                          checkerFuel
                           (Prod.snd reducedResult)
                           domain with
                     | Except.error error =>
@@ -315,7 +315,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                         else
                           match
                               psKernelSessionCheck
-                                remaining
+                                checkerFuel
                                 (Prod.snd domainReduced)
                                 domain with
                           | Except.error error =>
@@ -323,7 +323,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                           | Except.ok domainType =>
                               match
                                   psKernelSessionEnsureSort
-                                    remaining
+                                    checkerFuel
                                     (Prod.snd domainType)
                                     (Prod.fst domainType) with
                               | Except.error error =>
@@ -386,6 +386,7 @@ def psKernelAnalyzeSimpleRecursiveArgument
     Except String PsKernelRecursiveArgumentResult :=
   psKernelAnalyzeSimpleRecursiveArgumentWithFuel
     (Nat.succ fuel)
+    fuel
     session
     target
     levels
@@ -395,7 +396,7 @@ def psKernelAnalyzeSimpleRecursiveArgument
     List.nil
 
 def psKernelOpenSimpleConstructorFieldsWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelName ->
     List PsKernelLevel ->
@@ -422,7 +423,7 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
           "simple inductive field budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelOpenSimpleConstructorFieldsWithFuel remaining;
+        psKernelOpenSimpleConstructorFieldsWithFuel remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (target : PsKernelName)
@@ -439,7 +440,7 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
             | PsKernelExpr.forallE userName domain body binderInfo =>
                 match
                     psKernelSessionCheck
-                      remaining
+                      checkerFuel
                       session
                       domain with
                 | Except.error error =>
@@ -447,7 +448,7 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                 | Except.ok domainType =>
                     match
                         psKernelSessionEnsureSort
-                          remaining
+                          checkerFuel
                           (Prod.snd domainType)
                           (Prod.fst domainType) with
                     | Except.error error =>
@@ -481,7 +482,7 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                               binderInfo;
                           match
                               psKernelAnalyzeSimpleRecursiveArgument
-                                remaining
+                                checkerFuel
                                 (Prod.snd localResult)
                                 target
                                 levels
@@ -541,6 +542,7 @@ def psKernelOpenSimpleConstructorFields
     Except String PsKernelOpenFieldsResult :=
   psKernelOpenSimpleConstructorFieldsWithFuel
     (Nat.succ fuel)
+    fuel
     session
     target
     levels

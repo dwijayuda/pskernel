@@ -681,7 +681,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgument
     (PsKernelExpr.fvar field.internalName)
 
 def psKernelOpenSimpleMutualConstructorFieldsWithFuel
-    (fuel : Nat) :
+    (fuel checkerFuel : Nat) :
     PsKernelCheckerSession ->
     List PsKernelName ->
     List PsKernelSimpleMutualTypeShape ->
@@ -709,7 +709,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
   | Nat.succ remaining =>
       let smaller :=
         psKernelOpenSimpleMutualConstructorFieldsWithFuel
-          remaining;
+          remaining checkerFuel;
       fun
         (session : PsKernelCheckerSession)
         (targets : List PsKernelName)
@@ -730,7 +730,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                 binderInfo =>
                 match
                     psKernelSessionCheck
-                      remaining
+                      checkerFuel
                       session
                       domain with
                 | Except.error error =>
@@ -738,7 +738,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                 | Except.ok domainType =>
                     match
                         psKernelSessionEnsureSort
-                          remaining
+                          checkerFuel
                           (Prod.snd domainType)
                           (Prod.fst domainType) with
                     | Except.error error =>
@@ -774,7 +774,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                               binderInfo;
                           match
                               psKernelAnalyzeSimpleMutualRecursiveArgument
-                                remaining
+                                checkerFuel
                                 child
                                 targets
                                 shapes
@@ -834,6 +834,7 @@ def psKernelOpenSimpleMutualConstructorFields
     Except String PsKernelMutualOpenFieldsResult :=
   psKernelOpenSimpleMutualConstructorFieldsWithFuel
     (Nat.succ fuel)
+    fuel
     session
     targets
     shapes

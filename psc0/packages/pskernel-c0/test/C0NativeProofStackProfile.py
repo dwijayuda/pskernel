@@ -22,13 +22,20 @@ PROFILE_BEGIN = "C0_WF_PROFILE_SAMPLE_BEGIN"
 PROFILE_END = "C0_WF_PROFILE_SAMPLE_END"
 
 
-def sample(exe, source, preload, log, samples, interval):
+def sample(exe, source, preload, log, samples, interval, wait_for=None, max_wait=800):
     env = dict(os.environ)
     env["LD_PRELOAD"] = str(preload)
     env["LEAN_BACKTRACE"] = "0"
     with log.open("w", encoding="utf8") as out:
+        cmd = [str(exe), "--require-accepted", str(source), "4096"]
+        if wait_for is not None:
+            # Buffer only active-declaration trace output. The C0 binary
+            # still runs the unchanged source checker at the same fuel.
+            cmd = ["stdbuf", "-oL", "-eL", str(exe),
+                   "--require-accepted", "--trace-declarations",
+                   str(source), "4096"]
         proc = subprocess.Popen(
-            [str(exe), "--require-accepted", str(source), "4096"],
+            cmd,
             env=env, stdout=out, stderr=subprocess.STDOUT,
             start_new_session=True,
         )
@@ -37,7 +44,30 @@ def sample(exe, source, preload, log, samples, interval):
         assert platform.machine() == "x86_64", "tgkill syscall pinned to x86_64 runner"
         libc = ctypes.CDLL(None, use_errno=True)
         SYS_tgkill = 234
-        for iteration in range(samples):
+        reached = wait_for is None
+        if wait_for is not None:
+            # Wait until the exact problematic declaration enters its native
+            # proof-body checker; sampling from startup confounds the heavy
+            # theorem with initial environment checking.
+            needle = wait_for.encode("utf8")
+            cursor = 0
+            carry = b""
+            for _ in range(max_wait):
+                time.sleep(1)
+                if proc.poll() is not None:
+                    break
+                with log.open("rb") as reader:
+                    reader.seek(cursor)
+                    fragment = reader.read()
+                    cursor = reader.tell()
+                if needle in carry + fragment:
+                    reached = True
+                    print(f"C0_PROFILE_TARGET_REACHED marker={wait_for}")
+                    break
+                carry = (carry + fragment)[-len(needle):]
+            if not reached:
+                print(f"C0_PROFILE_TARGET_NOT_REACHED marker={wait_for} max_wait={max_wait}")
+        for iteration in range(samples if reached else 0):
             time.sleep(interval)
             if proc.poll() is not None:
                 break
@@ -82,7 +112,7 @@ def sample(exe, source, preload, log, samples, interval):
         print(f"C0_WF_PROFILE_INTENT samples={samples} interval_seconds={interval} sampled={attempts}")
         print(f"C0_WF_PROFILE_WORKER_SAMPLES={worker_attempts}")
         print(f"C0_WF_PROFILE_PROCESS status={status} diagnostic_stopped={status is None}")
-    return attempts
+    return attempts, reached
 
 
 def analyze(log: Path, binary: Path, summary: Path):
@@ -193,12 +223,21 @@ def main():
     arg.add_argument("summary", type=Path)
     arg.add_argument("--samples", type=int, default=12)
     arg.add_argument("--interval", type=float, default=5)
+    arg.add_argument("--wait-for", default=None,
+                     help="sample only after this exact native declaration marker")
+    arg.add_argument("--max-wait", type=int, default=800)
     a = arg.parse_args()
     if not (1 <= a.samples <= 20 and 0.5 <= a.interval <= 10):
         raise ValueError("sampling bounds cannot be disabled")
+    if not (30 <= a.max_wait <= 850):
+        raise ValueError("max-wait must remain a bounded number of seconds")
     exe, source, lib = (x.resolve() for x in (a.binary, a.source, a.preload))
-    sample(exe, source, lib, a.log, a.samples, a.interval)
+    attempts, reached = sample(
+        exe, source, lib, a.log, a.samples, a.interval,
+        wait_for=a.wait_for, max_wait=a.max_wait)
     analyze(a.log, exe, a.summary)
+    if not reached or attempts == 0:
+        raise RuntimeError("source checker never entered the requested sampled phase")
 
 
 if __name__ == "__main__":

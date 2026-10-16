@@ -15,7 +15,7 @@ jobs:
       contents: write
       actions: read
     steps:
-      - name: Prepare one reviewed fixture replacement without moving any ref
+      - name: Prepare two reviewed fixture replacements without moving any ref
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import base64, difflib, hashlib, io, json, os, re, urllib.request, zipfile
+          import base64, difflib, hashlib, io, json, os, re, urllib.request, urllib.error, urllib.parse, zipfile
           repo = os.environ['REPOSITORY']
           assert repo == 'dwijayuda/pskernel'
           base = 'https://api.github.com/repos/' + repo
@@ -40,28 +40,44 @@ jobs:
           raw = base64.b64decode(item['content'])
           assert blob_sha(raw) == old_sha
           text = raw.decode('utf-8')
-          old = 'inductive RecursiveCell where { | nil | cons(next: RecursiveCell) } deriving BEq'
-          new = 'inductive RecursiveCell where { | nil | cons(next: List RecursiveCell) } deriving BEq'
-          assert text.count(old) == 1
-          updated = text.replace(old, new)
+          updated = text
+          replacements = [
+            ('inductive RecursiveCell where { | nil | cons(next: RecursiveCell) } deriving BEq',
+             'inductive RecursiveCell where { | nil | cons(next: List RecursiveCell) } deriving BEq'),
+            ('inductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: Chain A) } deriving BEq',
+             'inductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: List(Chain A)) } deriving BEq')]
+          for old, new in replacements:
+              assert updated.count(old) == 1
+              updated = updated.replace(old, new)
           print(''.join(difflib.unified_diff(text.splitlines(True), updated.splitlines(True), fromfile='Pscv0NativeTests.lean', tofile='Pscv0NativeTests.lean')))
-          for index, line in enumerate(text.splitlines(), 1):
-              if 'deriving BEq' in line or 'derivingBoundaries' in line or 'RecursiveBEq' in line:
-                  print('BEQ_SOURCE', index, line[:600])
           prepared_sha = blob_sha(updated.encode())
           result = api('/git/blobs', {'content': updated, 'encoding': 'utf-8'})
           assert result['sha'] == prepared_sha
-          print('PREPARED_NATIVE_BLOB', prepared_sha)
-          print('No branch, commit, tracked file, PR or workflow run was modified by this job.')
+          print('PREPARED_NATIVE_BLOB', prepared_sha, flush=True)
+          print('No branch, commit, tracked file, PR or workflow run was modified by this job.', flush=True)
           run = api('/actions/runs/38902937385')
           assert run['head_sha'] == '34426e22d9038fc8383722f047e39d93997e898c'
           assert run['status'] == 'completed' and run['conclusion'] == 'success'
           artifacts = api('/actions/runs/38902937385/artifacts')['artifacts']
           artifact, = [a for a in artifacts if a['name'] == 'pscv0-m3-recursive-hash-' + run['head_sha']]
-          print('FOCUSED_ARTIFACT', artifact['id'], artifact.get('digest'), artifact['size_in_bytes'])
+          print('FOCUSED_ARTIFACT', artifact['id'], artifact.get('digest'), artifact['size_in_bytes'], flush=True)
+          # GitHub returns a signed storage URL. Never forward API credentials
+          # to that host; it authenticates the one download with its URL alone.
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, hdrs, newurl):
+                  return None
           req = urllib.request.Request(base + '/actions/artifacts/' + str(artifact['id']) + '/zip', headers=headers)
-          with urllib.request.urlopen(req, timeout=60) as r:
-              archive = r.read()
+          try:
+              with urllib.request.build_opener(NoRedirect()).open(req, timeout=60) as r:
+                  archive = r.read()
+          except urllib.error.HTTPError as e:
+              assert e.code in (301, 302, 303, 307, 308)
+              location = e.headers['Location']
+              url = urllib.parse.urlsplit(location)
+              assert url.scheme == 'https' and (url.hostname.endswith('.blob.core.windows.net') or url.hostname.endswith('.actions.githubusercontent.com'))
+              with urllib.request.urlopen(location, timeout=60) as r:
+                  archive = r.read()
+          print('DOWNLOADED_SHA256', hashlib.sha256(archive).hexdigest())
           with zipfile.ZipFile(io.BytesIO(archive)) as z:
               for filename in z.namelist():
                   if filename.endswith(('expected.json', 'check.log')):

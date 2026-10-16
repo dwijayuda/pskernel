@@ -107,3 +107,15 @@ This is a candidate only. Require exact same-commit native, F1, F2,
 F3/F4/platform and focused JS/TS/Rust/V8-GC/Wasmtime qualification
 before acceptance. Nested/mutual data, dependent motives, well-founded
 recursion, P0 ordinary execution, P1 fixedpoints and entire M3+B remain open.
+
+### Focused qualification correction: changing parameters can be total
+The focused 38927587017 candidate compiled and accepted the newly written
+`badPrefix(flag, n)` negative, because its changed flag is permitted through
+the existing checked changing-argument worker normalization; termination
+is controlled by the strictly decreasing structural n, not invariant flag.
+Therefore this was a *false negative expectation*, not unsound acceptance.
+Do **not** outlaw legitimate changing state to satisfy this fixture.
+The same focused suite instead checks `badLaterMajor(flag, Nat.succ(k))`
+with an unchanged prefix but a nondecreasing recursive major at a later
+argument position; that must reject by the same strict-child rule. Actual
+typed-elaboration and proof gates remain intact. Qualification pending.

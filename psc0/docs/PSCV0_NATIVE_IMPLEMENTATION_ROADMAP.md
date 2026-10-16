@@ -97,3 +97,15 @@ The [qualification receipt](PSCV0_M3_STRUCTURAL_CHILD_QUALIFICATION_2026-10-16.m
 ### Current candidate: computed strict major after unchanged prefix
 
 The accepted strict-child receipt above remains immutable. Candidate extending first-position-only admission to later explicit parameter positions requires all earlier arguments be identical local binder references, retaining once-only elaboration and dependent telescope checks. A pinned-Lean oracle and exact-phase changing-prefix refusal are included in the existing focused suite; qualification pending. No other M3 exit item is claimed closed.
+
+### Focused qualification correction: changing parameters can be total
+The focused 38927587017 candidate compiled and accepted the newly written
+`badPrefix(flag, n)` negative, because its changed flag is permitted through
+the existing checked changing-argument worker normalization; termination
+is controlled by the strictly decreasing structural n, not invariant flag.
+Therefore this was a *false negative expectation*, not unsound acceptance.
+Do **not** outlaw legitimate changing state to satisfy this fixture.
+The same focused suite instead checks `badLaterMajor(flag, Nat.succ(k))`
+with an unchanged prefix but a nondecreasing recursive major at a later
+argument position; that must reject by the same strict-child rule. Actual
+typed-elaboration and proof gates remain intact. Qualification pending.

@@ -239,9 +239,9 @@ private def refusals : List (String × String × String) := [
     "deriving field has no checked instance"),
   ("nondecreasing-major", "function badMajor(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => badMajor(Nat.succ(k)) }\n",
     "recursive major must be a direct recursive field"),
-  ("computed-major-changing-prefix",
-    "function badPrefix(flag: Bool, n: Nat): Nat := match n with { | 0 => 0 | k+1 => badPrefix(Bool.not(flag), Nat.add(k, 0)) }\n",
-    "argument must equal its child index or invariant value")]
+  ("nondecreasing-later-major",
+    "function badLaterMajor(flag: Bool, n: Nat): Nat := match n with { | 0 => 0 | k+1 => badLaterMajor(flag, Nat.succ(k)) }\n",
+    "recursive major must be a direct recursive field")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")

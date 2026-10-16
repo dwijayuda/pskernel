@@ -374,3 +374,24 @@ theorem psKernelReduceNatWith_nonNatBinary
       (.app (.app (.const name []) left) right) =
       Except.ok (Prod.mk Option.none state) := by
   simp [psKernelReduceNatWith, nonNat]
+
+
+/-- The precise first-operand stopping rule from Lean 4.35
+`reduce_bin_nat_op`: after the checked callback returns a nonnumeral left
+WHNF, the reducer returns that callback's state without ever evaluating the
+right operand. This is an all-input source result, not a fuel waiver. -/
+theorem psKernelReduceNatWith_stuckLeft
+    (publicWhnf : PsKernelCheckerContext -> PsKernelCheckerState ->
+      PsKernelExpr -> Except String (PsKernelExpr × PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state state1 : PsKernelCheckerState)
+    (name : PsKernelName)
+    (left right leftReduced : PsKernelExpr)
+    (recognized : psKernelNatBinaryPrimitiveName name = true)
+    (leftWhnf : publicWhnf context state left =
+      Except.ok (leftReduced, state1))
+    (stuck : psKernelExprNatLiteralValue leftReduced = none) :
+    psKernelReduceNatWith publicWhnf context state
+      (.app (.app (.const name []) left) right) =
+      Except.ok (Prod.mk Option.none state1) := by
+  simp [psKernelReduceNatWith, recognized, leftWhnf, stuck]

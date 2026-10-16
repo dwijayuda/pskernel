@@ -89,16 +89,16 @@ def psElabWhereTypedHeader (context : PsElabContext)
     | some result, _ => pure { result with context := parameters.context }
     | none, some source => psElabType psElabTerm parameters.context source
     | none, none => throw (psElabWhereError "HEADER" "missing codomain inference owner")
-  let meta := result.context.metaContext
+  let metaContext := result.context.metaContext
   let bindersRev := parameters.bindersRev.map fun binder =>
-    { binder with type := psMetaInstantiate meta binder.type }
+    { binder with type := psMetaInstantiate metaContext binder.type }
   if bindersRev.any (fun binder => psExprHasTermMeta binder.type) then
     throw (psElabWhereError "HEADER" "local parameter types and defaults must be resolved before peer headers enter")
-  let openType := psMetaInstantiate meta result.type
+  let openType := psMetaInstantiate metaContext result.type
   if !inferred && psExprHasTermMeta openType then
     throw (psElabWhereError "HEADER" "an explicit result annotation contains unresolved terms")
-  let sourceType := psCloseElabForallBinders meta bindersRev openType
-  let _ ← (psInferType context.environment meta context.localContext sourceType).mapError PsElabError.infer
+  let sourceType := psCloseElabForallBinders metaContext bindersRev openType
+  let _ ← (psInferType context.environment metaContext context.localContext sourceType).mapError PsElabError.infer
   return (result.context, bindersRev, openType, sourceType, inferred)
 
 def psElabWhereMainHeader (context : PsElabContext)
@@ -232,17 +232,17 @@ def psElabWhereParentBodies (shared : PsElabContext) (mainPeers : List PsLocalDe
   psElabWhereCheckInferredCodomain final parent
   return (psElabLeaveScope shared final, body :: bodies)
 
-def psElabWhereGeneralizeBinder (meta : PsMetaContext) (binder : PsElabTypedBinder) :
+def psElabWhereGeneralizeBinder (metaContext : PsMetaContext) (binder : PsElabTypedBinder) :
     PsElabTypedBinder :=
-  { binder with type := psElabGeneralizeExpr (psMetaInstantiate meta binder.type) }
+  { binder with type := psElabGeneralizeExpr (psMetaInstantiate metaContext binder.type) }
 
-def psElabWhereInput (meta : PsMetaContext) (body : PsElabWhereBody) :
+def psElabWhereInput (metaContext : PsMetaContext) (body : PsElabWhereBody) :
     Except PsElabError PsElabWhereClosedInput := do
-  let value := psElabSubstituteLocals body.aliases (psMetaInstantiate meta body.value)
-  let openType := psMetaInstantiate meta body.header.openType
-  let bindersRev := body.header.bindersRev.map (psElabWhereGeneralizeBinder meta)
+  let value := psElabSubstituteLocals body.aliases (psMetaInstantiate metaContext body.value)
+  let openType := psMetaInstantiate metaContext body.header.openType
+  let bindersRev := body.header.bindersRev.map (psElabWhereGeneralizeBinder metaContext)
   let ambient := body.header.ambient.map fun capture =>
-    { capture with binder := psElabWhereGeneralizeBinder meta capture.binder }
+    { capture with binder := psElabWhereGeneralizeBinder metaContext capture.binder }
   if psExprHasTermMeta value || psExprHasTermMeta openType then
     throw (psElabWhereError "INFER-TYPE"
       "a body or result remains unresolved; an inferred dependent local codomain requires an explicit annotation")

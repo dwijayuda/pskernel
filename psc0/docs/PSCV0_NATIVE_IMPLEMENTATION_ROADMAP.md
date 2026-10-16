@@ -14,6 +14,27 @@ M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
 total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
 are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
 
+### Qualification repair: reserved local identifier
+
+The combined source/deriving compiler/test SHA
+`37ffb9a356e6ff04c5b607b2c6537469dc5ec32d` failed all five gates.
+Focused run 38978211015 (job 117232632319) stopped compiling Where.lean:
+Lean 4.35 reserves the word meta, used as a local/parameter name in three
+new declarations. The remaining reported Where errors follow those parse
+failures. No candidate source/kernel/runtime acceptance was reached.
+
+This isolated repair renames those bindings and their references to metaContext.
+A text audit of all newly introduced source paths found no other such reserved
+binding. Types, values, scopes, closure algorithms, assertions, original outputs,
+request counts, resource limits and dependency pins are unchanged. The repaired
+tip requires its own five successful gates; fbbc5271 remains the accepted SHA.
+
+A separate source review found that section dependencies used only by an
+actually recursive WF hint/proof must be retained before capture closure.
+That substantive repair is being developed through the shared typed component
+and WF preparation owners. Unused nonrecursive/inherited-P0 hints must still
+add no captures. It is not included in this lexical repair.
+
 ### Current candidate: complete selected nested Repr and BEq
 
 The preceding source checkpoint is `c55a7caf857959e07c0e86b8496b422289c8b82b`.

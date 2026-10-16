@@ -1,3 +1,22 @@
+## Accepted common nested container ownership — 17 October 2026
+
+Exact implementation `a7c6dade87a9d8df74d5248e8276623e7870078c` passed all five same-commit workflows:
+native `38946629082` (33/33), F1 `38946629149`, F2 `38946629024`,
+F3/F4 `38946629155`, focused `38946629090`.
+Read `psc0/docs/PSCV0_M3_NESTED_SHARED_MODEL_QUALIFICATION_2026-10-17.md`.
+`Ps.Core.Nested` now owns selected List/Option/Array/Prod field
+shapes used by both source-positivity checks and checked canonical
+recursor bridging; check-only Option/Prod oracles pass. Actual nested
+recursive traversal/mutual/indexed group expansion is not closed.
+
+The next **unqualified** P0 candidate will connect an independently
+kernel-checked logical opaque `partial` declaration with its private
+actual-body executable view *only for explicitly ordinary-checked builds*.
+Verified requests must reject rather than downgrade. Preserve the
+current partial blocker in generic compiler library entry points and the
+canonical checking stream. This does **not** establish P1, verified
+runtime correspondence, M4 effects or full M3+B.
+
 ## Accepted Array nested constructor adaptation — current checkpoint
 
 **Compiler `8f217a80a6010b5db83affb5f608d494521b44bf`**: native

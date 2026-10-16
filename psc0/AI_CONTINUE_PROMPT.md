@@ -389,3 +389,19 @@ Original negatives and other runtime observations are unchanged.
 If the existing erasure/runtime refuses, inspect the actual shared
 runtime representation and report the unsupported boundary instead of
 loosening an unrelated checker.
+
+## Candidate: Array-nested shallow runtime (focused-only test, pending)
+
+Following the successful check-only `Array Rose` admission on
+`8f217a80` focused run `38943289601`, this **test-only** child
+adds the same monomorphic `M3NestedArrayRose` to the existing selected
+executable source and one `Bool → UInt64` observation:
+`m3nestedarrayoutput`. For false it constructs `node(#[])`,
+for true it constructs `leaf`. An independent pinned Lean oracle
+computes both results; existing JS, strict TS, Rust, V8 GC core and
+Wasmtime exact-output scripts check the new export without widening
+ABI or weakening original assertions. A fully qualified check-only
+inductive does not automatically mean its backend representation is
+safe; any failure must be traced through shared erasure and IR instead
+of inventing a backend value. This is shallow elimination, **not**
+nested recursive traversal/deriving or the complete M3+B exit.

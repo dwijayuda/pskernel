@@ -125,3 +125,19 @@ recursion unchanged. The full five-gate exact-commit acceptance is pending.
 ## Accepted M3+B fixed and evolving prefix recursion
 
 Compiler/test `8f8aa47fc3b742488bd1ce4ad15024a63c0b6d4f` passed native 38928344482 (33/33 steps), F1 38928344465, F2 38928344501, F3/F4/platform 38928344471 and focused 38928344644 (pinned Lean / JS / TS / Rust / V8 GC / Wasmtime). Read [exact qualification](PSCV0_M3_PREFIX_RECURSION_QUALIFICATION_2026-10-16.md). Both unchanged-prefix computed child and separately checked evolving-prefix worker normalization are qualified in the selected family. Prior candidate pending statuses are historical. M3+B overall OPEN; source strategy, nested/indexed/mutual data, larger elimination, total well-founded recursion, P0/P1 and full cross-stage exit remain pending.
+
+## New v7.2 M3 total recursion conversion candidate — exact CI pending
+This descendant of accepted compiler `8f8aa47f` and docs `88931aa3`
+extends the shared, portable `Ps.Meta.NatReduce` conversion with **exact**
+open `Nat.sub a 0 ↝ a` (stable Lean 4.35.0 `Init/Prelude.lean`).
+It is a definitional right-zero equation, not an arithmetic decreasing
+heuristic, and does not admit `Nat.sub k 1` as a structural subterm.
+
+The existing focused independent pinned-Lean oracle and generated application
+now exercise `normalizedSubChild`, a checked source unfolding equation and
+one additional Bool→UInt64 output per flag in all previously supported lanes.
+The new `badSubMajor(Nat.sub(k,1))` negative must reject at the structural
+major rule. Existing strict-child, fixed/evolving-prefix, direct-recursive
+deriving, benchmark, module, proof, erasure and runtime cases are preserved.
+Five exact-commit native/F1/F2/F3-F4/focused workflows are REQUIRED before
+admission. No new speedup or entire M3+B closure is claimed.

@@ -101,9 +101,16 @@ theorem psKernelC0MetadataInfer_source
                           (.mdata md body) none
                        else Option.none) = some ty := by
                     simpa [psKernelExprMapGet, psKernelInferCacheEligible, cache, term] using cached
-                  simpa [psKernelInferCoreWithFuelUsing,
+                  have hcacheExact :
+                      (if psKernelSemanticCacheEligible (.mdata md body) then
+                        psKernelExprMapGetWithKnownHash
+                          (if inferOnly then state.inferOnly else state.checkedInfer)
+                          (.mdata md body) none
+                       else Option.none) = some ty := by
+                    simpa only [term] using hcache
+                  simp [psKernelInferCoreWithFuelUsing,
                     psKernelInferCoreWithFuelUsingSourceFrames,
-                    psKernelInferCacheEligible, hcache, depth]
+                    psKernelInferCacheEligible, hcacheExact, depth, term]
           | none =>
               cases depth : psKernelCheckerContextEnterRecDepth context with
               | error reason =>

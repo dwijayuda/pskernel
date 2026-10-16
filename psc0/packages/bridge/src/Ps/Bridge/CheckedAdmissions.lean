@@ -1,5 +1,6 @@
 import Ps.Bridge.Json
 import Ps.Core.Declaration
+import Ps.Core.Nested
 import Ps.Core.Abstract
 import Ps.Core.Subst
 import Ps.Core.Equality
@@ -780,31 +781,13 @@ def psCheckedNestedRoots (all : List PsDeclaration) (name : PsName) (constructor
         | Option.some info =>
             smaller (psCheckedNestedAddTypes name (psListMap psCheckedNestedBinderType (psCheckedNestedOpen 0 info.type)) shapes)
 
-def psCheckedNestedContainerFields (type : PsExpr) : Except PsCheckedAdmissionCodecError (List (List PsExpr)) :=
-  match type with
-  | PsExpr.app fn arg =>
-      match fn with
-      | PsExpr.constE name levels =>
-          if psNameEq name (psCheckedNestedName "List") then
-            Except.ok (List.cons List.nil (List.cons (List.cons arg (List.cons type List.nil)) List.nil))
-          else if psNameEq name (psCheckedNestedName "Option") then
-            Except.ok (List.cons List.nil (List.cons (List.cons arg List.nil) List.nil))
-          else if psNameEq name (psCheckedNestedName "Array") then
-            -- Pinned Lean 4.35.0 Init/Prelude: Array α is a structure with
-            -- one field, toList : List α. Its nested motive must therefore
-            -- also account for the List α occurrence. No new checked
-            -- recursor, source assumption or executable representation.
-            let list := PsExpr.app (PsExpr.constE (psCheckedNestedName "List") levels) arg
-            Except.ok (List.cons (List.cons list List.nil) List.nil)
-          else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-      | PsExpr.app head left =>
-          match head with
-          | PsExpr.constE name _ =>
-              if psNameEq name (psCheckedNestedName "Prod") then Except.ok (List.cons (List.cons left (List.cons arg List.nil)) List.nil)
-              else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-          | _ => Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-      | _ => Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-  | _ => Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
+-- Constructor metadata has exactly one owner in Ps.Core.Nested.
+-- Admission still requires the official kernel to check the normalized view.
+def psCheckedNestedContainerFields (type : PsExpr) :
+    Except PsCheckedAdmissionCodecError (List (List PsExpr)) := do
+  let some selected := psSelectedNestedContainer? type
+    | throw .unsupportedDeclaration
+  return psSelectedNestedContainerConstructorFields selected
 
 def psCheckedNestedConcat {alpha : Type} (lists : List (List alpha)) : List alpha :=
   match lists with

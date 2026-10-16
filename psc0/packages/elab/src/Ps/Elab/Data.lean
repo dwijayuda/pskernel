@@ -1,5 +1,6 @@
 import Ps.Elab.Term
 import Ps.Meta.Inductive
+import Ps.Core.Nested
 
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
@@ -29,14 +30,6 @@ def psElabReverseDeclarations (declarations : List PsDeclaration) : List PsDecla
   declarations.reverse
 
 def psElabAppendDeclarations (left right : List PsDeclaration) : List PsDeclaration := left ++ right
-
-def psElabContainerRecursiveName (name : PsName) : Bool :=
-  if psNameEq name psListName then
-    true
-  else if psNameEq name psOptionName then
-    true
-  else
-    psNameEq name psArrayName
 
 -- Every occurrence must use the same uniform parameters. Indices are checked
 -- by ordinary application elaboration and may vary between constructors/fields.
@@ -81,21 +74,11 @@ def psElabValidateNestedRecursiveFieldWithFuel
     if psNameEq head info.name then
       let _ ← psElabDataIndices context info parameters fieldType
       return ()
-    if psElabContainerRecursiveName head then
-      match view.args with
-      | [argument] =>
-        psElabValidateNestedRecursiveFieldWithFuel remaining context info
-          parameters argument
-      | _ => throw (.data "unsupported recursive field; expected a positive direct family occurrence")
-    else if psNameEq head psProdName then
-      match view.args with
-      | [left, right] => do
-        psElabValidateNestedRecursiveFieldWithFuel remaining context info
-          parameters left
-        psElabValidateNestedRecursiveFieldWithFuel remaining context info
-          parameters right
-      | _ => throw (.data "unsupported recursive field; expected a positive direct family occurrence")
-    else throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+    let some selected := psSelectedNestedContainer? fieldType
+      | throw (.data "unsupported recursive field; expected a positive direct family occurrence")
+    for element in psSelectedNestedContainerElements selected do
+      psElabValidateNestedRecursiveFieldWithFuel remaining context info
+        parameters element
 
 def psElabDataRecursiveFields (context : PsElabContext) (info : PsInductiveInfo)
     (parameters : List PsExpr) (fields : List PsElabTypedBinder) :

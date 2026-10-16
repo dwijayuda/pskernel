@@ -421,3 +421,25 @@ inductive does not automatically mean its backend representation is
 safe; any failure must be traced through shared erasure and IR instead
 of inventing a backend value. This is shallow elimination, **not**
 nested recursive traversal/deriving or the complete M3+B exit.
+
+## M3+B candidate: one selected nested-container model (qualification pending)
+
+New portable native `Ps.Core.Nested` is the sole owner of the
+pinned Lean 4.35.0 List/Option/Array/Prod constructor-field shapes
+and positive nested child positions. `Ps.Elab.Data` and the canonical
+`Ps.Bridge.CheckedAdmissions` adapter now consume this same view,
+rather than independently recognizing or encoding the containers.
+The elaborator still checks uniform family parameters for each
+occurrence and the official kernel checks all generated declarations.
+No new constructor shape, induction hypothesis, axiom, recursion
+strategy, erasure privilege, target ABI or benchmark budget was added.
+
+The existing focused native-oracle and five-target fixture still tests
+the accepted shallow List/Array runtime work. Two small, separately
+check-only Option/Prod family requests and corresponding pinned-Lean
+equations exercise previously untested bridge shapes, while all
+existing phase-specific negatives and outputs remain unchanged.
+Selected nested *shallow* checking is not nested recursive
+traversal, deriving, indexed/mutual group support, P0/P1 or M3 exit.
+Full native/F1/F2/F3-F4/focused same-commit gates are required
+before acceptance. Preserve older qualified receipts and PR #109.

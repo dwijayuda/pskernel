@@ -132,3 +132,25 @@ Project source imports and public/private interfaces are implemented for bounded
 **Current accepted M3 checkpoints:** direct recursive `Hashable`/`Repr`/`BEq`/`DecidableEq`; checked computed strict children; fixed and evolving prefix recursion; exact open `Nat.add a 0` and `Nat.sub a 0`. Selected `HAdd` `k + 0` source and two-discriminant `Bool × Nat` pattern fixtures passed their focused lanes on recent descendants, with full native acceptance recorded for compiler `33c569e08af2484d90f3bd0b0da7a97cfaf1ad3a`. More general nested/mutual/data, P0/P1 and full M3 completion remain open.
 
 Historical documents are evidence, not the source of current implementation authority. Update this document only when actual owner boundaries change.
+
+## M3+B candidate: one selected nested-container model (qualification pending)
+
+New portable native `Ps.Core.Nested` is the sole owner of the
+pinned Lean 4.35.0 List/Option/Array/Prod constructor-field shapes
+and positive nested child positions. `Ps.Elab.Data` and the canonical
+`Ps.Bridge.CheckedAdmissions` adapter now consume this same view,
+rather than independently recognizing or encoding the containers.
+The elaborator still checks uniform family parameters for each
+occurrence and the official kernel checks all generated declarations.
+No new constructor shape, induction hypothesis, axiom, recursion
+strategy, erasure privilege, target ABI or benchmark budget was added.
+
+The existing focused native-oracle and five-target fixture still tests
+the accepted shallow List/Array runtime work. Two small, separately
+check-only Option/Prod family requests and corresponding pinned-Lean
+equations exercise previously untested bridge shapes, while all
+existing phase-specific negatives and outputs remain unchanged.
+Selected nested *shallow* checking is not nested recursive
+traversal, deriving, indexed/mutual group support, P0/P1 or M3 exit.
+Full native/F1/F2/F3-F4/focused same-commit gates are required
+before acceptance. Preserve older qualified receipts and PR #109.

@@ -181,6 +181,28 @@ def nestedArrayRoseTag : M3NestedArrayRose → Nat
 example (xs : Array M3NestedArrayRose) :
     nestedArrayRoseTag (.node xs) = 1 := rfl
 
+inductive M3NestedOptionRose where
+  | leaf
+  | node : Option M3NestedOptionRose → M3NestedOptionRose
+
+def nestedOptionRoseTag : M3NestedOptionRose → Nat
+  | .leaf => 0
+  | .node _ => 1
+
+example (xs : Option M3NestedOptionRose) :
+    nestedOptionRoseTag (.node xs) = 1 := rfl
+
+inductive M3NestedProdRose where
+  | leaf
+  | node : Prod M3NestedProdRose M3NestedProdRose → M3NestedProdRose
+
+def nestedProdRoseTag : M3NestedProdRose → Nat
+  | .leaf => 0
+  | .node _ => 1
+
+example (xs : Prod M3NestedProdRose M3NestedProdRose) :
+    nestedProdRoseTag (.node xs) = 1 := rfl
+
 def nestedArrayRoseOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (nestedArrayRoseTag
     (if flag then M3NestedArrayRose.leaf else M3NestedArrayRose.node #[]))
@@ -364,7 +386,18 @@ def main (args : List String) : IO Unit := do
       "inductive M3NestedArrayRose where { | leaf | node(children: Array M3NestedArrayRose) }\n" ++
       "function m3nestedarraytag(r: M3NestedArrayRose): Nat := match r with { | M3NestedArrayRose.leaf => 0 | M3NestedArrayRose.node children => 1 }\n"
     sourceName := "m3-nested-array-rose.ps" }
-  let requests := #[request, nestedRequest, nestedArrayRequest] ++ (refusals.map fun (_, text, _) =>
+  let nestedOptionRequest : PsV7Native.Request := {
+    source :=
+      "inductive M3NestedOptionRose where { | leaf | node(children: Option M3NestedOptionRose) }\n" ++
+      "function m3nestedoptiontag(r: M3NestedOptionRose): Nat := match r with { | M3NestedOptionRose.leaf => 0 | M3NestedOptionRose.node children => 1 }\n"
+    sourceName := "m3-nested-option-rose.ps" }
+  let nestedProdRequest : PsV7Native.Request := {
+    source :=
+      "inductive M3NestedProdRose where { | leaf | node(children: Prod M3NestedProdRose M3NestedProdRose) }\n" ++
+      "function m3nestedprodtag(r: M3NestedProdRose): Nat := match r with { | M3NestedProdRose.leaf => 0 | M3NestedProdRose.node children => 1 }\n"
+    sourceName := "m3-nested-prod-rose.ps" }
+  let requests := #[request, nestedRequest, nestedArrayRequest, nestedOptionRequest,
+    nestedProdRequest] ++ (refusals.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
@@ -396,8 +429,18 @@ def main (args : List String) : IO Unit := do
   | .ok nested =>
     if !nested.artifacts.isEmpty || nested.declarationCount < 4 then
       throw (IO.userError "nested Array check-only failed declaration/artifact boundary")
+  for (label, index) in [("Option", 3), ("Prod", 4)] do
+    let some outcome := batch.results[index]? |
+      throw (IO.userError ("missing nested " ++ label ++ " admission"))
+    match outcome with
+    | .error error =>
+      throw (IO.userError ("nested " ++ label ++ " check-only: " ++
+        error.phase ++ ": " ++ error.message))
+    | .ok nested =>
+      if !nested.artifacts.isEmpty || nested.declarationCount < 4 then
+        throw (IO.userError ("nested " ++ label ++ " admission/artifact boundary"))
   for ((label, _, expected), i) in refusals.zipIdx do
-    let some outcome := batch.results[i + 3]? | throw (IO.userError "missing deriving refusal")
+    let some outcome := batch.results[i + 5]? | throw (IO.userError "missing deriving refusal")
     match outcome with
     | .ok _ => throw (IO.userError ("deriving unexpectedly accepted " ++ label))
     | .error error =>

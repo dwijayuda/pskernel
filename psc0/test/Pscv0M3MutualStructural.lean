@@ -279,7 +279,8 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
     ("mutual\nfunction atomicFirst(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => atomicSecond(k) }\n" ++
       "function atomicSecond(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => atomicSecond(n) }\nend\n"))
   match psElabProgramWithOrigins environment failed with
-  | .error error => ensure ((refusal error).startsWith "PSCV0-MUTUAL-TOTAL: DECREASE:")
+  | .error error =>
+    ensure ((refusal error).startsWith "PSCV0-MUTUAL-TOTAL: DECREASE:")
       "late member failure lost its exact decrease refusal"
   | .ok _ => throw (IO.userError "late nondecreasing member was admitted")
   ensure ((psEnvironmentFind environment (psRootName "atomicFirst")).isNone &&

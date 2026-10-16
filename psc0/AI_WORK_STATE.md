@@ -20,9 +20,18 @@ source strategies 10/15, total recursion 10/20, P0 13/15, P1 1/10,
 integration 7/10. This is an engineering estimate, not a conformance rate.
 All six exits remain in the denominator. Unqualified code adds no points.
 
-The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`; this
-commit adds total mutual structural construction. Qualify the combined tip
-on all five gates. Neither recursion change is independently accepted yet.
+The typed well-founded source commit is `c69c45213e75aef292183078a1a8a736319cb2fa`;
+total mutual structural construction is `293a6f797d8135e10c407779a8dc429afa8345f6`.
+The combined candidate passed F1 `38969444791`, F2 `38969444690` and F3/F4
+`38969444693`, but focused run `38969444761` failed while compiling the new
+mutual-structural fixture. Its late-member refusal branch had a Lean layout
+error: the assertion message was parsed outside the `ensure` application.
+This commit repairs only that layout and preserves every assertion and
+expected result. The production recursion modules and well-founded fixture
+compiled in that run; focused runtime steps were not reached. Native run
+`38969444762` is historical evidence for the previous candidate, not a pass
+for this repair. Qualify the repaired compiler/test tip on all five gates.
+Neither new recursion feature is fully accepted yet.
 
 ### Typed well-founded recursion candidate
 

@@ -159,6 +159,16 @@ jobs:
               *)
                 echo "C0_ARENA_EXPLOIT case=$name classification=unrecognized_result" >&2; exit 1;;
             esac
+            if [ "$name" = largeElimBoom ]; then
+              # An ordinary two-constructor Prop cannot have a recursor
+              # that eliminates into arbitrary Type. This authentic forged
+              # export now requires a true independently derived rejection.
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" \
+                "$RUNNER_TEMP/arena435-$name-c0.txt"
+              grep -Fq "invalid Prop recursor: large elimination from multiple constructors" \
+                "$RUNNER_TEMP/arena435-$name-c0.txt"
+              echo "C0_ARENA_LARGE_ELIM official=rejected c0=rejected independent_rule=Prop_multiple_constructors"
+            fi
           done
           echo "C0_ARENA_EXPLOIT_GATES native_kernel=false_accept_forbidden historical_bytes_unchanged=true"
       - uses: actions/upload-artifact@v4

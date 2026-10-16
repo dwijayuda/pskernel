@@ -105,4 +105,40 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "large-elimination traversal overran")
 
-  IO.println "C0_CONSTRUCTOR_FIELD_FUEL ordinary=separate mutual=separate params=separate indices=separate elimination=separate zero_checker=declined exhausted_walk=declined"
+  -- A short checked definition can unfold to a longer nested function
+  -- domain. The positivity/recursive-argument walk must have enough
+  -- syntactic steps for that expansion without bypassing checker fuel.
+  let aliasName : PsKernelName := .str .anonymous "FieldSpineAlias"
+  let aliasValue : PsKernelExpr :=
+    .forallE name sort0 (.forallE name sort0 sort0 .default) .default
+  let aliasDef : PsKernelDefinitionInfo := {
+    base := {
+      name := aliasName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := aliasValue
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let aliasEnv ← match psKernelAddDefinition 64
+      psKernelEnvironmentEmpty aliasDef
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error e => throw (IO.userError ("checked alias definition rejected: " ++ e))
+  let aliasSession := psKernelMkCheckerSession aliasEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let aliasField : PsKernelOpenBinder :=
+    PsKernelOpenBinder.mk name name sort0 .default
+  let analysis ← match psKernelAnalyzeSimpleMutualRecursiveArgument
+      64 aliasSession [] [] [] [] aliasField (.const aliasName []) with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("checked alias Pi spine ran out of traversal fuel: " ++ e))
+  if analysis.recursiveInfo.isSome then
+    throw (IO.userError "nonrecursive checked alias gained recursive field")
+  match psKernelAnalyzeSimpleMutualRecursiveArgument
+      0 aliasSession [] [] [] [] aliasField (.const aliasName []) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "zero checker fuel traversed a checked alias")
+
+  IO.println "C0_CONSTRUCTOR_FIELD_FUEL ordinary=separate mutual=separate params=separate indices=separate elimination=separate alias_pi=checked zero_checker=declined exhausted_walk=declined"

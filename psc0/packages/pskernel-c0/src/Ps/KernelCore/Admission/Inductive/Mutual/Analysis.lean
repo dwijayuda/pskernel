@@ -667,8 +667,11 @@ def psKernelAnalyzeSimpleMutualRecursiveArgument
     (field : PsKernelOpenBinder)
     (domain : PsKernelExpr) :
     Except String PsKernelMutualRecursiveArgumentResult :=
+  -- WHNF may unfold a small constant into a larger recursive Π spine.
+  -- Preserve the structural traversal bound without letting source syntax
+  -- size alone exhaust a perfectly valid checked alias expansion.
   psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
-    (Nat.succ (psKernelExprNodeCount domain))
+    (Nat.succ (Nat.max checkerFuel (psKernelExprNodeCount domain)))
     checkerFuel
     session
     targets

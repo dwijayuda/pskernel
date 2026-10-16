@@ -185,3 +185,38 @@ theorem psKernelC0InstOneMemoizedChanged_source
     psKernelC0InstOneMemoizedChanged expr replacement offset =
       psKernelC0ExprInstantiateOneChanged expr replacement offset :=
   (psKernelC0InstOneMemoGo replacement expr offset .empty).1.source
+
+
+/-- Exact public single-variable instantiation, retaining the existing
+binder-headed loose-variable fast path and every capture-avoidance decision.
+The only substituted computation is the source-proved changed-flag worker. -/
+def psKernelC0MemoizedInstantiate1
+    (expr replacement : PsKernelExpr) : PsKernelExpr :=
+  match expr with
+  | .lam _ _ _ _
+  | .forallE _ _ _ _
+  | .letE _ _ _ _ _ =>
+      if psKernelExprHasLooseBVar expr then
+        (psKernelC0InstOneMemoizedChanged expr replacement 0).1
+      else expr
+  | _ =>
+      (psKernelC0InstOneMemoizedChanged expr replacement 0).1
+
+/-- Full behavioral equivalence for the public beta/zeta instantiation API,
+including all original binder-headed shortcut decisions. -/
+theorem psKernelC0MemoizedInstantiate1_source
+    (expr replacement : PsKernelExpr) :
+    psKernelC0MemoizedInstantiate1 expr replacement =
+      psKernelExprInstantiate1 expr replacement := by
+  cases expr <;>
+    simp only [psKernelC0MemoizedInstantiate1,
+      psKernelExprInstantiate1,
+      psKernelC0InstOneMemoizedChanged_source]
+
+/-- Source-exact native compiler replacement. Lean checks the full
+function equality, so codegen may accelerate every consumer importing this
+module without changing the formal meaning or accepting unchecked terms. -/
+@[csimp] theorem psKernelExprInstantiate1_csimp :
+    @psKernelExprInstantiate1 = @psKernelC0MemoizedInstantiate1 := by
+  funext expr replacement
+  exact (psKernelC0MemoizedInstantiate1_source expr replacement).symm

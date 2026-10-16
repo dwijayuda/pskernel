@@ -11,6 +11,7 @@ structure PsRecursorLiftState where
   levels : List PsName
   nextName : Nat := 0
   helpersRev : List PsDeclaration := []
+  workerGroupsRev : List PsRecursorWorkerGroup := []
 
 structure PsRecursorLiftResult where
   state : PsRecursorLiftState
@@ -87,6 +88,55 @@ def psRecursorLiftHelper (state : PsRecursorLiftState) (locals : PsLocalContext)
     state := { state with environment, helpersRev := declaration :: state.helpersRev }
     term := psReduceApply (.constE name (state.levels.map PsLevel.param)) (arguments ++ view.suffix) }
 
+-- A mutual fold has one ordinary definition per family. Each definition is
+-- the corresponding checked recursor with the SAME closed capture telescope
+-- and fixed arguments, followed by that family's fresh indices and major.
+-- No logical recursive reference between helper definitions is introduced.
+def psRecursorLiftGroup (state : PsRecursorLiftState) (locals : PsLocalContext)
+    (view : PsGroupRecursorApplication) : Except String PsRecursorLiftResult := do
+  let .constE _ recursorLevels := view.head | throw "group recursor head is not a constant"
+  let context := psRecursorLiftContext state locals
+  let prototypes ← view.group.members.mapM fun family => do
+    let head := PsExpr.constE (psNameAppendStr family.name "rec") recursorLevels
+    let headType ← psRecursorLiftInfer state locals head
+    let some cursor := psReduceApplyType (psWhnf state.environment psMetaEmpty locals)
+        headType view.fixedArgs | throw "group recursor fixed arguments do not match its telescope"
+    let opened ← (psElabOpenCoreTelescope 4096 context cursor
+      (some (family.numIndices + 1))).mapError (fun _ => "cannot open group worker telescope")
+    let value := psCloseElabLambdaBinders psMetaEmpty opened.bindersRev
+      (psReduceApply head (view.fixedArgs ++ psElabBinderArguments opened.bindersRev))
+    let type := psCloseElabForallBinders psMetaEmpty opened.bindersRev opened.body
+    return (family.name, type, value)
+  let dependencies := prototypes.foldl (fun expression entry =>
+    PsExpr.app expression (.app entry.2.1 entry.2.2)) (.sortE .zero)
+  let captures := psRecursorLiftCaptures locals (.sortE .zero) dependencies
+  let (state, workersRev) ← prototypes.foldlM
+    (fun (acc : PsRecursorLiftState × List PsRecursorWorker) entry => do
+      let (name, state) ← psRecursorLiftFreshName 4096 acc.1
+      let type := psCloseElabForallBinders psMetaEmpty captures.reverse entry.2.1
+      let value := psCloseElabLambdaBinders psMetaEmpty captures.reverse entry.2.2
+      let declaration := PsDeclaration.definitionDecl name state.levels type value
+      let some environment := psEnvironmentAdd state.environment declaration
+        | throw "group recursor worker name collision"
+      return ({ state with environment, helpersRev := declaration :: state.helpersRev },
+        { family := entry.1, name : PsRecursorWorker } :: acc.2)) (state, [])
+  let group : PsRecursorWorkerGroup := { workers := workersRev.reverse, captureCount := captures.length }
+  psValidateRecursorWorkerGroups state.environment [group]
+  let some worker := group.workers.find? (fun worker => psNameEq worker.family view.family.name)
+    | throw "group recursor worker is missing its selected family"
+  let some (.definitionDecl _ _ _ value) := psEnvironmentFind state.environment worker.name
+    | throw "group recursor worker definition is missing"
+  let arguments := captures.map (fun binder => PsExpr.fvar binder.id) ++ view.indices ++ [view.major]
+  let some restored := psRecursorWorkerBetaApply value arguments
+    | throw "group recursor worker substitution failed"
+  let original := psReduceApply view.head (view.fixedArgs ++ view.indices ++ [view.major])
+  if !psExprAlphaEq restored original then throw "group recursor worker changed its original computation"
+  return {
+    state := { state with workerGroupsRev := group :: state.workerGroupsRev }
+    term := psReduceApply (.constE worker.name (state.levels.map PsLevel.param))
+      (arguments ++ view.suffix)
+  }
+
 -- Only a declaration's leading lambda telescope may reuse its recursion
 -- equation. Every nested computation has its own major and lexical captures.
 def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
@@ -139,6 +189,9 @@ def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
         (head.state, headType, [])
       let state := arguments.fst
       let term := psReduceApply head.term arguments.snd.snd.reverse
+      if let some group := psGroupRecursorApplication state.environment term then
+        if group.group.members.length > 1 && psGroupRecursorUsesHypotheses state.environment group then
+          return ← psRecursorLiftGroup state locals group
       let some view := psRecursorApplication state.environment term | return { state, term }
       if !psRecursorUsesHypotheses state.environment view then return { state, term }
       let minors := view.fixedArgs.drop (view.info.numParams + 1)
@@ -152,27 +205,40 @@ def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
 structure PsRecursorLiftOutput where
   result : PsElabModuleResult
   parents : List (PsName × PsName)
+  workerGroups : List PsRecursorWorkerGroup := []
+
+structure PsRecursorLiftDeclarationsState where
+  environment : PsEnvironment
+  declarationsRev : List PsDeclaration := []
+  parents : List (PsName × PsName) := []
+  workerGroupsRev : List PsRecursorWorkerGroup := []
 
 def psRecursorLiftDeclarationsWithOrigins (environment : PsEnvironment)
     (declarations : List PsDeclaration) : Except String PsRecursorLiftOutput := do
   let result ← declarations.foldlM
-    (fun (acc : PsEnvironment × List PsDeclaration × List (PsName × PsName)) declaration => do
+    (fun (acc : PsRecursorLiftDeclarationsState) declaration => do
       match declaration with
       | .definitionDecl name levels type value =>
-        let state : PsRecursorLiftState := { environment := acc.fst, owner := name, levels }
+        let state : PsRecursorLiftState := { environment := acc.environment, owner := name, levels }
         let lifted ← (psRecursorLiftVisit 4096 true [] state psLocalEmpty value type).mapError
           (fun message => message ++ " (in " ++ psNameToString name ++ ")")
         let rewritten := PsDeclaration.definitionDecl name levels type lifted.term
         let environment := { lifted.state.environment with
           declarations := rewritten :: psEnvironmentRemoveName name lifted.state.environment.declarations
           index := psEnvironmentIndexInsert lifted.state.environment.index rewritten }
-        return (environment, rewritten :: (lifted.state.helpersRev ++ acc.snd.fst),
-          (lifted.state.helpersRev.map fun helper => (psDeclarationName helper, name)) ++ acc.snd.snd)
-      | _ => return (acc.fst, declaration :: acc.snd.fst, acc.snd.snd)) (environment, [], [])
+        return {
+          environment
+          declarationsRev := rewritten :: (lifted.state.helpersRev ++ acc.declarationsRev)
+          parents := (lifted.state.helpersRev.map fun helper => (psDeclarationName helper, name)) ++ acc.parents
+          workerGroupsRev := lifted.state.workerGroupsRev ++ acc.workerGroupsRev
+        }
+      | _ => return { acc with declarationsRev := declaration :: acc.declarationsRev }) { environment }
   return {
-    result := { environment := result.fst, declarations := result.snd.fst.reverse }
-    parents := result.snd.snd }
+    result := { environment := result.environment, declarations := result.declarationsRev.reverse }
+    parents := result.parents
+    workerGroups := result.workerGroupsRev.reverse }
 
 def psRecursorLiftDeclarations (environment : PsEnvironment)
     (declarations : List PsDeclaration) : Except String PsElabModuleResult :=
   (psRecursorLiftDeclarationsWithOrigins environment declarations).map (·.result)
+

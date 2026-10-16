@@ -20,6 +20,9 @@ inductive PsCompilerError where
 
 structure PsCompilerAdmissionReadyModule where
   declarations : List PsDeclaration
+  -- Locators for ordinary definitions retained in declarations, never checker
+  -- authority. Erasure validates every complete companion equation afresh.
+  recursorWorkerGroups : List PsRecursorWorkerGroup := []
 
 -- A preparation checkpoint is local to one compiler instance. Keep the complete
 -- environment and declaration accumulator together; neither is a checked claim.
@@ -125,7 +128,7 @@ def psCompilerPrepareElaboratedWithOutput
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
       let prepared : PsCompilerAdmissionReadyModule :=
-        PsCompilerAdmissionReadyModule.mk elaborated.declarations;
+        { declarations := elaborated.declarations, recursorWorkerGroups := lifted.workerGroups };
       let admissions : String := String.Internal.append canonicalAdmissions "\n";
       Except.ok
         (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions lifted.parents)
@@ -360,7 +363,9 @@ def psCompilerErasePreparedRuntimeView
     environment
     runtimePrelude
     runtimeDeclarations
-    (runtimePrelude.map psDeclarationName) targetWordSize).mapError
+    (runtimePrelude.map psDeclarationName ++ prepared.recursorWorkerGroups.flatMap
+      (fun group => group.workers.map (·.name))) targetWordSize
+    prepared.recursorWorkerGroups).mapError
       PsCompilerError.erasure
 
 -- Ordinary partial execution only. The native host must have already

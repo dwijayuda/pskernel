@@ -1,4 +1,5 @@
 import Ps.Erasure.Recursion
+import Ps.Erasure.WellFounded
 import Ps.Erasure.Array
 import Ps.Erasure.Float
 import Ps.Erasure.Platform
@@ -1200,7 +1201,7 @@ def psErasureFindMatchBinding
 def psOpenMatchMinorHypotheses
     (environment : PsEnvironment)
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
-    (recursionPlan : Option PsErasureRecursionPlan) (bindings : List PsVerifiedIrMatchBinding)
+    (recursionPlan : Option PsErasureRecursionDispatch) (bindings : List PsVerifiedIrMatchBinding)
     (fields : List PsRuntimeConstructorField) :
     PsOpenMatchHypotheses -> Except PsErasureError PsOpenMatchHypotheses :=
   match fields with
@@ -1241,7 +1242,7 @@ def psOpenMatchMinorHypotheses
                 let replacement : Except PsErasureError (Option PsVerifiedIrExpr) :=
                   match recursionPlan with
                   | none => Except.ok none
-                  | some plan => (psErasureRecursiveCall environment eraseAt
+                  | some plan => (psErasureDispatchRecursiveCall environment eraseAt
                       state.scope plan binding.name).map some;
                 match replacement with
                 | Except.error error => Except.error error
@@ -1262,7 +1263,7 @@ def psEraseMatchMinor
       Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope)
     (substitutions : List (String × PsVerifiedIrType))
-    (recursionPlan : Option PsErasureRecursionPlan)
+    (recursionPlan : Option PsErasureRecursionDispatch)
     (ctorInfo : PsRuntimeConstructorInfo)
     (minor : PsExpr) :
     Except PsErasureError PsErasedMatchMinor :=
@@ -1369,8 +1370,8 @@ def psEraseStructureRecursorMinor
                       match eraseAt scope major with
                       | Except.error error => Except.error error
                       | Except.ok scrutinee =>
-                          let recursionPlan := psErasurePlanRecursion scope structureInfo.coreName
-                            structureInfo.numParams major [] [minor];
+                          let recursionPlan := (psErasurePlanRecursion scope structureInfo.coreName
+                            structureInfo.numParams major [] [minor]).map PsErasureRecursionDispatch.singleton;
                           let majorName :=
                             psErasureLocalName scope "_psStructureMajor" "_psStructureMajor"
                               scope.localContext.nextId;
@@ -1442,7 +1443,7 @@ def psEraseMatchAlternativesWorker
     (environment : PsEnvironment)
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope) (substitutions : List (String × PsVerifiedIrType))
-    (recursionPlan : Option PsErasureRecursionPlan) (arguments : List PsExpr) (minorStart : Nat)
+    (recursionPlan : Option PsErasureRecursionDispatch) (arguments : List PsExpr) (minorStart : Nat)
     (constructors : List PsRuntimeConstructorInfo) :
     Nat -> List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) ->
     Except PsErasureError (List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :=
@@ -1482,7 +1483,7 @@ def psEraseMatchAlternatives
     (environment : PsEnvironment)
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope) (substitutions : List (String × PsVerifiedIrType))
-    (recursionPlan : Option PsErasureRecursionPlan) (arguments : List PsExpr) (minorStart : Nat)
+    (recursionPlan : Option PsErasureRecursionDispatch) (arguments : List PsExpr) (minorStart : Nat)
     (index : Nat) (constructors : List PsRuntimeConstructorInfo)
     (alternativesRev : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :
     Except PsErasureError (List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :=
@@ -1544,164 +1545,94 @@ def psEraseIntRecursorAlternatives
   | _ => .error PsErasureError.binderMismatch
 
 def psEraseRuntimeRecursorApplication
-    (environment : PsEnvironment)
-    (scope : PsErasureScope)
-    (eraseAt :
-      PsErasureScope ->
-      PsExpr ->
-      Except PsErasureError PsVerifiedIrExpr)
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
     (view : PsErasureAppView) :
-    Except PsErasureError (Option PsVerifiedIrExpr) :=
-  match view.head with
-  | .constE name _ =>
-      match psErasureLookupRecursor scope.runtimeRecursors name with
-      | Option.none => Except.ok Option.none
-      | Option.some inductiveInfo =>
-          let expectedArity := psRuntimeRecursorArity inductiveInfo;
-          if psErasureBoolNot (Nat.beq (psListLength view.args) expectedArity) then
-            Except.error PsErasureError.unsupportedApplication
-          else
-            match (do
-              let selected ← psErasureSelectSourceTypeArguments
-                (psListTake inductiveInfo.numParams view.args)
-                inductiveInfo.sourceTypeIndices
-              psListMapExcept (psEraseRuntimeType environment scope) selected) with
-            | Except.error error => Except.error error
-            | Except.ok typeArguments =>
-                if
-                    psErasureBoolNot
-                      (Nat.beq (psListLength typeArguments)
-                        (psListLength inductiveInfo.typeParameters)) then
-                  Except.error PsErasureError.unsupportedApplication
-                else
-                  let convert : (PsVerifiedIrTypeParameter × PsVerifiedIrType) -> (String × PsVerifiedIrType) :=
-                    fun (entry : PsVerifiedIrTypeParameter × PsVerifiedIrType) =>
-                      match entry with
-                      | Prod.mk parameter value => Prod.mk parameter.name value;
-                  let substitutions :=
-                    psListMap convert (psListZip inductiveInfo.typeParameters typeArguments);
-                  let minorStart := Nat.add inductiveInfo.numParams 1;
-                  let majorIndex := Nat.sub expectedArity 1;
-                  match psErasureExprListAt view.args majorIndex with
-                  | Option.none =>
-                      Except.error PsErasureError.unsupportedApplication
-                  | Option.some major =>
-                      match eraseAt scope major with
-                      | Except.error error => Except.error error
-                      | Except.ok scrutinee =>
-                          let indices := (view.args.drop
-                            (minorStart + inductiveInfo.constructors.length)).take inductiveInfo.numIndices;
-                          let minors := (view.args.drop minorStart).take inductiveInfo.constructors.length;
-                          let recursionPlan := psErasurePlanRecursion scope inductiveInfo.coreName
-                            inductiveInfo.numParams major indices minors;
-                          -- Scalar elimination inspects a major and extracts its
-                          -- payload. Capture computations once before either use.
-                          let majorIsValue : Bool :=
-                            match scrutinee with
-                            | PsVerifiedIrExpr.var _ => true
-                            | PsVerifiedIrExpr.literal literal =>
-                                match literal with
-                                | PsVerifiedIrLiteral.natural _ | PsVerifiedIrLiteral.integer _ => true
-                                | _ => false
-                            | _ => false;
-                          let isNat := psNameEq inductiveInfo.coreName psNatName;
-                          let isInt := psNameEq inductiveInfo.coreName psIntName;
-                          let scalarType := if isNat then PsVerifiedIrPrimitiveType.nat
-                            else PsVerifiedIrPrimitiveType.int;
-                          let scalarMajorName : Option String :=
-                            if isNat || isInt then
-                              if majorIsValue then Option.none
-                              else Option.some
-                                (psErasureLocalName scope "_psScalarMajor" "_psScalarMajor"
-                                  scope.localContext.nextId)
-                            else Option.none;
-                          let majorNameFresh : Bool :=
-                            match scalarMajorName with
-                            | Option.none => true
-                            | Option.some localName =>
-                                psErasureBoolNot (psErasureLocalNameUsed scope localName);
-                          if psErasureBoolNot majorNameFresh then
-                            Except.error PsErasureError.fuelExhausted
-                          else
-                            -- Reserve only the emitted name before opening minors.
-                            -- byCore and every Core local remain unchanged. count is
-                            -- the freshness bound and includes this one reservation.
-                            let minorScope : PsErasureScope :=
-                              match scalarMajorName with
-                              | Option.none => scope
-                              | Option.some localName =>
-                                  let reservedNames : PsErasureDeclarationNames :=
-                                    { scope.declarationNames with
-                                      byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
-                                        (PsName.str PsName.anonymous localName) true
-                                      count := scope.declarationNames.count + 1 };
-                                  { scope with declarationNames := reservedNames };
-                            match
-                                psEraseMatchAlternatives
-                                  environment
-                                  eraseAt
-                                  minorScope
-                                  substitutions
-                                  recursionPlan
-                                  view.args
-                                  minorStart
-                                  0
-                                  inductiveInfo.constructors
-                                  [] with
-                            | Except.error error => Except.error error
-                            | Except.ok alternatives =>
-                                if psNameEq inductiveInfo.coreName psBoolName then
-                                  match alternatives with
-                                  | [(_, [], onFalse), (_, [], onTrue)] =>
-                                    Except.ok (some (.ifE scrutinee onTrue onFalse))
-                                  | _ => Except.error PsErasureError.binderMismatch
-                                else if isNat || isInt then
-                                  let majorReference : PsVerifiedIrExpr :=
-                                    match scalarMajorName with
-                                    | Option.none => scrutinee
-                                    | Option.some localName => PsVerifiedIrExpr.var localName;
-                                  let lowered := if isNat then
-                                    psEraseNatRecursorAlternatives majorReference alternatives
-                                    else psEraseIntRecursorAlternatives majorReference alternatives;
-                                  match lowered with
-                                  | Except.error error => Except.error error
-                                  | Except.ok lowered =>
-                                      let result : PsVerifiedIrExpr :=
-                                        match scalarMajorName with
-                                        | Option.none => lowered
-                                        | Option.some localName =>
-                                            PsVerifiedIrExpr.letE localName
-                                              (PsVerifiedIrType.primitive scalarType)
-                                              scrutinee lowered;
-                                      Except.ok (Option.some result)
-                                else
-                                  let matched : PsVerifiedIrExpr :=
-                                    PsVerifiedIrExpr.matchE inductiveInfo.name
-                                      typeArguments scrutinee alternatives;
-                                  if psListIsEmpty alternatives then
-                                    match psErasureExprListAt view.args inductiveInfo.numParams with
-                                    | Option.none =>
-                                        Except.error PsErasureError.unsupportedApplication
-                                    | Option.some motive =>
-                                        -- Core already checked the motive at this major.
-                                        -- A typed IR let carries that result into inference-only
-                                        -- positions without changing the original IR model.
-                                        match psEraseRuntimeType environment scope
-                                            (((view.args.drop (minorStart + inductiveInfo.constructors.length)).take
-                                              inductiveInfo.numIndices ++ [major]).foldl PsExpr.app motive) with
-                                        | Except.error error => Except.error error
-                                        | Except.ok resultType =>
-                                            let resultName :=
-                                              psErasureLocalName scope "emptyResult" "emptyResult"
-                                                scope.localContext.nextId;
-                                            if psErasureLocalNameUsed scope resultName then
-                                              Except.error PsErasureError.fuelExhausted
-                                            else
-                                              Except.ok (Option.some
-                                                (PsVerifiedIrExpr.letE resultName resultType
-                                                  matched (PsVerifiedIrExpr.var resultName)))
-                                  else Except.ok (Option.some matched)
-  | _ => Except.ok Option.none
+    Except PsErasureError (Option PsVerifiedIrExpr) := do
+  let .constE name _ := view.head | return none
+  let some inductiveInfo := psErasureLookupRecursor scope.runtimeRecursors name | return none
+  if view.args.length != psRuntimeRecursorArity inductiveInfo then throw .unsupportedApplication
+  -- Builtin and singleton scopes keep their existing runtime layout. A group
+  -- additionally requires its complete registered Core recursor equation.
+  let groupApplication ← match inductiveInfo.group with
+    | none => pure none
+    | some group => do
+      let some application := psGroupRecursorApplication environment
+          (psErasureApplyCoreArguments view.head view.args) | throw .unsupportedRuntimeTerm
+      if !psNameEq application.family.name inductiveInfo.coreName ||
+          !psInductiveGroupNamesEqual (psInductiveGroupNames application.group)
+            (psInductiveGroupNames group) then throw .unsupportedRuntimeTerm
+      pure (some application)
+  let selected ← psErasureSelectSourceTypeArguments
+    (view.args.take inductiveInfo.numParams) inductiveInfo.sourceTypeIndices
+  let typeArguments ← selected.mapM (psEraseRuntimeType environment scope)
+  if typeArguments.length != inductiveInfo.typeParameters.length then throw .unsupportedApplication
+  let substitutions := (inductiveInfo.typeParameters.zip typeArguments).map
+    (fun pair => (pair.1.name, pair.2))
+  let some offset := psRuntimeRecursorMinorOffset inductiveInfo | throw .unsupportedRuntimeTerm
+  let minorStart := inductiveInfo.numParams + psRuntimeRecursorMotives inductiveInfo + offset
+  let minors := (view.args.drop minorStart).take inductiveInfo.constructors.length
+  let indexStart := inductiveInfo.numParams + psRuntimeRecursorMotives inductiveInfo +
+    psRuntimeRecursorMinors inductiveInfo
+  let indices := (view.args.drop indexStart).take inductiveInfo.numIndices
+  let some major := view.args[indexStart + inductiveInfo.numIndices]?
+    | throw .unsupportedApplication
+  let recursionPlan : Option PsErasureRecursionDispatch :=
+    match groupApplication with
+    | none =>
+      (psErasurePlanRecursion scope inductiveInfo.coreName inductiveInfo.numParams
+        major indices minors).map .singleton
+    | some application => (psErasurePlanGroupRecursion environment scope application).map .group
+  if groupApplication.any (psGroupRecursorUsesHypotheses environment) && recursionPlan.isNone then
+    throw .unsupportedRuntimeTerm
+  let scrutinee ← eraseAt scope major
+  -- Scalar elimination inspects a major and extracts its payload. Preserve
+  -- the existing once-only capture before either generated use.
+  let majorIsValue := match scrutinee with
+    | .var _ | .literal (.natural _) | .literal (.integer _) => true
+    | _ => false
+  let isNat := psNameEq inductiveInfo.coreName psNatName
+  let isInt := psNameEq inductiveInfo.coreName psIntName
+  let scalarType := if isNat then PsVerifiedIrPrimitiveType.nat else .int
+  let scalarMajorName := if (isNat || isInt) && !majorIsValue then
+      some (psErasureLocalName scope "_psScalarMajor" "_psScalarMajor" scope.localContext.nextId)
+    else none
+  let minorScope ← match scalarMajorName with
+    | none => pure scope
+    | some localName =>
+      if psErasureLocalNameUsed scope localName then throw .fuelExhausted
+      else pure (psErasureReserveOutputName scope localName)
+  let alternatives ← psEraseMatchAlternatives environment eraseAt minorScope substitutions
+    recursionPlan view.args minorStart 0 inductiveInfo.constructors []
+  if psNameEq inductiveInfo.coreName psBoolName then
+    match alternatives with
+    | [(_, [], onFalse), (_, [], onTrue)] => return some (.ifE scrutinee onTrue onFalse)
+    | _ => throw .binderMismatch
+  else if isNat || isInt then
+    let majorReference := scalarMajorName.map PsVerifiedIrExpr.var |>.getD scrutinee
+    let lowered ← if isNat then psEraseNatRecursorAlternatives majorReference alternatives
+      else psEraseIntRecursorAlternatives majorReference alternatives
+    return some (match scalarMajorName with
+      | none => lowered
+      | some localName => .letE localName (.primitive scalarType) scrutinee lowered)
+  else
+    let matched := PsVerifiedIrExpr.matchE inductiveInfo.name typeArguments scrutinee alternatives
+    if alternatives.isEmpty then
+      let familyPosition ← match groupApplication with
+        | none => pure 0
+        | some application =>
+          match (application.group.members.zipIdx).find?
+              (fun pair => psNameEq pair.1.name inductiveInfo.coreName) with
+          | none => throw .unsupportedRuntimeTerm
+          | some pair => pure pair.2
+      let some motive := view.args[inductiveInfo.numParams + familyPosition]?
+        | throw .unsupportedApplication
+      let resultType ← psEraseRuntimeType environment scope
+        (psReduceApply motive (indices ++ [major]))
+      let resultName := psErasureLocalName scope "emptyResult" "emptyResult" scope.localContext.nextId
+      if psErasureLocalNameUsed scope resultName then throw .fuelExhausted
+      return some (.letE resultName resultType matched (.var resultName))
+    else return some matched
 
 def psErasureFindProjectionField
     (index : Nat)
@@ -2320,70 +2251,74 @@ def psEraseRuntimeExprWithFuelWorker
               fun (nextScope : PsErasureScope) (value : PsExpr) =>
                 smaller nextScope
                   value;
-            match psEraseSpecialBoundary eraseAt environment scope view with
-            | Except.error error => Except.error error
-            | Except.ok special =>
-                match special with
-                | Option.some result => Except.ok result
-                | Option.none =>
-                    match psEraseDecisionApplication eraseAt environment scope view with
-                    | Except.error error => Except.error error
-                    | Except.ok candidate =>
-                        match candidate with
-                        | Option.some lowered => Except.ok lowered
-                        | Option.none =>
-                            match
-                                psErasePrimitiveApplication
-                                  environment
-                                  scope
-                                  erase
-                                  view with
-                            | Except.error error => Except.error error
-                            | Except.ok candidate =>
-                                match candidate with
-                                | Option.some lowered => Except.ok lowered
-                                | Option.none =>
-                                    match
-                                        psEraseRuntimeStructureApplication
-                                          environment
-                                          scope
-                                          erase
-                                          view with
-                                    | Except.error error => Except.error error
-                                    | Except.ok candidate =>
-                                        match candidate with
-                                        | Option.some lowered => Except.ok lowered
-                                        | Option.none =>
-                                            match
-                                                psEraseRuntimeConstructorApplication
-                                                  environment
-                                                  scope
-                                                  erase
-                                                  view with
-                                            | Except.error error => Except.error error
-                                            | Except.ok candidate =>
-                                                match candidate with
-                                                | Option.some lowered => Except.ok lowered
-                                                | Option.none =>
-                                                    match
-                                                        psEraseRuntimeRecursorApplication
-                                                          environment
-                                                          scope
-                                                          eraseAt
-                                                          view with
-                                                    | Except.error error => Except.error error
-                                                    | Except.ok candidate =>
-                                                        match candidate with
-                                                        | Option.some lowered => Except.ok lowered
-                                                        | Option.none =>
-                                                            match psEraseRuntimeStructureRecursorApplication
-                                                                environment scope eraseAt view with
-                                                            | Except.error error => Except.error error
-                                                            | Except.ok structureRecursor =>
-                                                                match structureRecursor with
-                                                                | Option.some lowered => Except.ok lowered
-                                                                | Option.none =>
-                                                                    psEraseGeneralApplication erase environment scope view
+            match psEraseWellFoundedApplication environment scope eraseAt view with
+            | .error error => .error error
+            | .ok (some lowered) => .ok lowered
+            | .ok none =>
+                match psEraseSpecialBoundary eraseAt environment scope view with
+                | Except.error error => Except.error error
+                | Except.ok special =>
+                    match special with
+                    | Option.some result => Except.ok result
+                    | Option.none =>
+                        match psEraseDecisionApplication eraseAt environment scope view with
+                        | Except.error error => Except.error error
+                        | Except.ok candidate =>
+                            match candidate with
+                            | Option.some lowered => Except.ok lowered
+                            | Option.none =>
+                                match
+                                    psErasePrimitiveApplication
+                                      environment
+                                      scope
+                                      erase
+                                      view with
+                                | Except.error error => Except.error error
+                                | Except.ok candidate =>
+                                    match candidate with
+                                    | Option.some lowered => Except.ok lowered
+                                    | Option.none =>
+                                        match
+                                            psEraseRuntimeStructureApplication
+                                              environment
+                                              scope
+                                              erase
+                                              view with
+                                        | Except.error error => Except.error error
+                                        | Except.ok candidate =>
+                                            match candidate with
+                                            | Option.some lowered => Except.ok lowered
+                                            | Option.none =>
+                                                match
+                                                    psEraseRuntimeConstructorApplication
+                                                      environment
+                                                      scope
+                                                      erase
+                                                      view with
+                                                | Except.error error => Except.error error
+                                                | Except.ok candidate =>
+                                                    match candidate with
+                                                    | Option.some lowered => Except.ok lowered
+                                                    | Option.none =>
+                                                        match
+                                                            psEraseRuntimeRecursorApplication
+                                                              environment
+                                                              scope
+                                                              eraseAt
+                                                              view with
+                                                        | Except.error error => Except.error error
+                                                        | Except.ok candidate =>
+                                                            match candidate with
+                                                            | Option.some lowered => Except.ok lowered
+                                                            | Option.none =>
+                                                                match psEraseRuntimeStructureRecursorApplication
+                                                                    environment scope eraseAt view with
+                                                                | Except.error error => Except.error error
+                                                                | Except.ok structureRecursor =>
+                                                                    match structureRecursor with
+                                                                    | Option.some lowered => Except.ok lowered
+                                                                    | Option.none =>
+                                                                        psEraseGeneralApplication erase environment scope view
         | .lam name type body binder =>
             let kind :=
               psErasureClassifyBinder
@@ -2632,3 +2567,4 @@ def psEraseRuntimeExpr
     (expr : PsExpr) :
     Except PsErasureError PsVerifiedIrExpr :=
   psEraseRuntimeExprWithFuel environment scope 4096 expr
+

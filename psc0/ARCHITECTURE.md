@@ -1,4 +1,15 @@
-## M3+B current candidate: selected P0 ordinary partial body execution (NOT qualified)
+## M3+B current candidate: typed group execution and Nat-measure recursion
+
+The current compiler candidate adds exact checked companion workers for
+complete direct-recursive inductive groups and a selected Nat-measure
+well-founded source/Core/runtime path. Both require the new checkpoint's own
+five gates. The latest fully accepted compiler at preparation remains
+`a7c6dade87a9d8df74d5248e8276623e7870078c`; source Match/deriving and broader
+nested/total/mutual strategies remain open. P1 is unavailable under the
+unchanged two-assumption policy. See both handoffs for exact CI lineage.
+The dated candidate sections below are historical checkpoints.
+
+## M3+B earlier candidate: selected P0 ordinary partial body execution
 
 A new explicit `PsV7Native.Assurance` request/response distinguishes
 `ordinary-checked` from unimplemented verified grades; verified
@@ -111,13 +122,15 @@ The earlier PSC2 self-host bootstrap plan formerly stored at this path is retain
 
 **Current proven-by-CI boundary:** selected source and modules are accepted by official Lean; typed erasure and IR validation reject unsupported forms; published JS/TS/Rust/Wasm scalar and bounded recursive programs have differential oracles. This **does not prove** the elaborator's interpretation of every `.ps` source, the semantics of all primitives, general backend preservation, or complete v7.2 conformance. Never call a diagnostic receipt, serialized check result, or raw `PsVerifiedIrModule` a user-mintable verification capability.
 
-**Selected already implemented:** scopes/public-private module interfaces, dependency ordering, scoped tabled typeclass solver with answer replay, selected dependent/indexed data and match matrices, checked direct-recursive deriving, structural recursion and checked Core definitional equality, explicit runtime type/proof/index erasure, IR validation, multi-target emission and measured runtime baselines. Current candidates add explicit ordinary P0 body/assurance identity and native atomic inductive-group formation; acceptance requires each candidate's own five gates. **Not fully implemented:** nested/group match and deriving consumers, full well-founded/strategy matrix, general P0 closure coverage, P1 fixedpoints, M4 effects/contracts/verified evidence, complete incremental tooling/optimization.
+**Selected already implemented:** scopes/public-private module interfaces, dependency ordering, scoped tabled typeclass solver with answer replay, selected dependent/indexed data and match matrices, checked direct-recursive deriving, structural recursion and checked Core definitional equality, explicit runtime type/proof/index erasure, IR validation, multi-target emission and measured runtime baselines. Current candidates add explicit ordinary P0 body/assurance identity, native atomic inductive-group formation/reduction, typed group companion workers, and checked Nat-measure recursion; acceptance requires each candidate's own five gates. **Not fully implemented:** nested/group match and deriving consumers, full well-founded/strategy matrix, general P0 closure coverage, P1 fixedpoints, M4 effects/contracts/verified evidence, complete incremental tooling/optimization.
 
 ## 3. Target shared semantic architecture — no alternative proof kernel
 
 ### 3.1 A single, group-aware inductive and recursion owner (M3+B)
 
 `Ps.Core.InductiveGroup` now owns an ordered group plan: family order determines motive order, and each family's constructor order determines its segment of the common minor telescope. Existing retained recursor metadata owns explicit group membership. `Ps.Elab.Data.psElabInductiveGroup` stages common headers and constructors, builds all motives before all minors, and reuses the same path for singleton declarations. `Ps.Bridge.CheckedAdmissions` checks unique related records and serializes one atomic official inductive batch. `Ps.Meta.Iota` consumes the same ordered plan for global minor offsets and cross-family recursive hypotheses, preserving common arguments and each family's own indices. Independent kernel equations and portable reduction comparisons qualify this candidate separately from source and runtime consumers. Constructor-only singleton compatibility retains no claim of explicit mutual membership.
+
+`Ps.Meta.Recursor` exposes the complete group application while retaining the strict singleton API. `Ps.Compiler.RecursorLift` constructs one ordinary checked worker per family, sharing captured locals and the common recursor prefix. Names and capture count locate those workers; before typed erasure, their complete equations, captures, levels, group order and runtime identities are revalidated. Each recursive field dispatches through its actual family worker with that family's indices and return type using ordinary call erasure. These records are not admission evidence. No backend-specific mutual-fold semantics are introduced.
 
 The shared owner and its remaining consumer obligations are:
 
@@ -133,6 +146,8 @@ Official comparison: pinned `Lean/Elab/MutualInductive.lean` stages group header
 Represent total structural, total well-founded, ordinary `partial`, fixedpoint and restricted `unsafe` as **distinct source strategies**, keeping declaration and suffix ownership separate from executable admission. The parser and scope retain a valid `partial_fixpoint` suffix as `fixedpointDefinition`; the elaborator refuses it at the exact assumption boundary. Pinned `Lean.Order.fix` uses `CCPO.csup`, which uses `Classical.choice`, including for existing Unit/Option CCPO instances; `fix_eq` and actual generated equations carry that dependency. The independent oracle records this blocker outside the admitted compiler Standard.
 
 Source `partial` creates (a) a public logically opaque, independently inhabited declaration and (b) a private typed actual-body marker. After official checking of the original graph, the native host's explicit ordinary path pairs their matching types/universes and selects the actual body for runtime erasure. It retains the original logical graph and admits no defining equation for the opaque function. Generic library erasure still rejects markers. Single-source and project CLI requests carry assurance, and published origins take the returned assurance. These selected P0 candidates require exact integration qualification; general closure behavior remains open. Verified partial behavior still requires a checked operational model and source/body/target refinement.
+
+`Ps.Syntax` retains total `termination_by` and optional `decreasing_by by { ... }` as a `wellFoundedDefinition`, including scope and spans. `Ps.Elab.WellFounded` currently constructs the selected one-explicit-Nat-argument/Nat-result case using the checked Standard's `WellFounded.Nat.fix`. Each recursive call has a scoped synthetic-opaque decrease goal; one tactic sequence runs over their creation order. Definition and checked `fix_eq`-derived `.eq_def` theorem form one source-owned declaration batch. `Ps.Erasure.WellFounded` recognizes the actual typed root construction and lowers the proof-restricted callback through the existing curried proof-slot ABI. It uses no partial marker, assumed equation, arbitrary fuel, extra axiom or strategy-name shortcut. Broader telescopes, relations, mutual cliques and general open-match equation normalization remain explicit work.
 
 Exactly one approved logical basis (current policy `propext`, `Quot.sound`), with explicit primitive and foreign-runtime trust ledger; any additional permitted assumptions require an explicit future policy decision. Succeeding at type checking must not silently change an explicit verified request to ordinary output.
 
@@ -153,7 +168,7 @@ Project source imports and public/private interfaces are implemented for bounded
 | Area | Lean 4.35 architectural fact | PSC0 current / target judgment |
 | --- | --- | --- |
 | Meta/elaboration | Rich dependent metavariable solver, tabled typeclass resolution, incremental command processing | Native solver and scopes exist; selected subset is intentional, but broad completeness/tooling is behind Lean |
-| Inductives/termination | Group-aware inductive elaboration, recursors, structural/WF/partial/fixpoint strategies | Shared native group formation, atomic admission and portable reduction candidate; group match/deriving/runtime consumers and total WF recursion remain critical |
+| Inductives/termination | Group-aware inductive elaboration, recursors, structural/WF/partial/fixpoint strategies | Shared group formation/admission/reduction, typed companion execution and Nat-measure recursion candidates; source group Match/deriving, broader nested traversal and total/mutual strategies remain critical |
 | Kernel | Small mature checking kernel | Correct choice: **reuse official Lean**, never replace or bypass it in active PSC0 |
 | Compiler optimizer | LCNF, pure/monomorphic/impure stages, pass validation and mature runtime | Checked expression IR + specialization are real, but not yet equivalent in pass structure or performance |
 | Backend/ABI | Native-oriented runtime/foreign interfaces | PSC0's direct JS/TS/Rust/GC/components are a real specialized portability advantage on supported cases |

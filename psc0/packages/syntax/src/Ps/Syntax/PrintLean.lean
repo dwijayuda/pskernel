@@ -476,15 +476,28 @@ def psPrintLeanConstructor
             | .error error => .error error
             | .ok type => .ok ("  | " ++ name ++ suffix ++ " : " ++ type)
 
+def psPrintLeanTermination (termination : PsSyntaxTermination) :
+    Except PsSourcePrintError String := do
+  let measure ← psPrintLeanTerm termination.measure
+  let proof ← match termination.decreasing with
+    | none => pure ""
+    | some (.byE tactics _ _) => do
+      let body ← psPrintTactics psPrintLeanTerm 4096 tactics
+      pure ("\ndecreasing_by\n  " ++ body.replace "\n" "\n  ")
+    | some _ => throw (.unsupportedSourceForm "decreasing_by requires a proof sequence")
+  return "\ntermination_by " ++ measure ++ proof
+
 def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
   | .definition name binders type value _
-  | .fixedpointDefinition name binders type value _ =>
-      let suffix := match declaration with
-        | .fixedpointDefinition .. => "\npartial_fixpoint"
-        | _ => "";
+  | .fixedpointDefinition name binders type value _
+  | .wellFoundedDefinition name binders type value _ _ => do
+      let suffix ← match declaration with
+        | .fixedpointDefinition .. => pure "\npartial_fixpoint"
+        | .wellFoundedDefinition _ _ _ _ termination _ => psPrintLeanTermination termination
+        | _ => pure ""
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>

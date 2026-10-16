@@ -244,6 +244,7 @@ def psCompilerPreparePscv0Project (entryName : String)
   let order ← psPscv0ProjectOrder (active.length + 1) active []
   let mut built : List PsPscv0BuiltModule := []
   let mut declarations : List PsDeclaration := []
+  let mut recursorWorkerGroups : List PsRecursorWorkerGroup := []
   let mut globalNames : List PsName := []
   let mut origins : List PsPscv0ProjectOrigin := []
   let mut mainNames : List PsName := []
@@ -295,12 +296,13 @@ def psCompilerPreparePscv0Project (entryName : String)
       ownNames, privateNames := hidden, exposedNames := elaborated.exposedNames, interface }]
     built := built ++ [{ name := item.name, interface, ownNames }]
     declarations := declarations ++ own
+    recursorWorkerGroups := recursorWorkerGroups ++ output.prepared.recursorWorkerGroups
     origins := origins ++ [{
       moduleName := item.name, sourceName := item.sourceName, source := item.source,
       batches := elaborated.origins, parents := output.originParents }]
     if item.name == entryName then
       mainNames := ownPublic.declarations.map psDeclarationName
-  let prepared : PsCompilerAdmissionReadyModule := { declarations }
+  let prepared : PsCompilerAdmissionReadyModule := { declarations, recursorWorkerGroups }
   -- Source-level 'public import' is a transitive API view for importing
   -- modules, not an instruction to export dependency functions from the
   -- executable entry artifact. Link every dependency, expose entry names only.
@@ -308,3 +310,4 @@ def psCompilerPreparePscv0Project (entryName : String)
     !mainNames.any (psNameEq name))
   let admissions ← (psCompilerAdmissionsFromPrepared prepared).mapError psCompilerPscv0Error
   return { prepared, admissions, mainNames, libraryNames, origins, moduleProfiles }
+

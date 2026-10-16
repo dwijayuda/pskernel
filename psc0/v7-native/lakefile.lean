@@ -67,3 +67,11 @@ lean_exe pscv0_m3_inductive_groups where
   srcDir := "../test"
   root := `Pscv0M3InductiveGroups
 
+lean_exe pscv0_m3_well_founded where
+  srcDir := "../test"
+  root := `Pscv0M3WellFounded
+
+lean_exe pscv0_m3_inductive_runtime where
+  srcDir := "../test"
+  root := `Pscv0M3InductiveRuntime
+

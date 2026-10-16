@@ -1671,6 +1671,7 @@ def psProofScriptDeclarationStop
   | .definition _ _ _ _ span => span.stop
   | .partialDefinition _ _ _ _ span => span.stop
   | .fixedpointDefinition _ _ _ _ span => span.stop
+  | .wellFoundedDefinition _ _ _ _ _ span => span.stop
   | .theoremDecl _ _ _ _ span => span.stop
   | .inductiveDecl _ _ _ _ span => span.stop
   | .structureDecl _ _ _ _ span => span.stop

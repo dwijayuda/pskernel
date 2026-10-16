@@ -25,6 +25,7 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   | .definition _ binders type value span
   | .partialDefinition _ binders type value span
   | .fixedpointDefinition _ binders type value span
+  | .wellFoundedDefinition _ binders type value _ span
   | .theoremDecl _ binders type value span =>
     let isTheorem := match source with | .theoremDecl _ _ _ _ _ => true | _ => false
     let isPartial := match source with | .partialDefinition _ _ _ _ _ => true | _ => false
@@ -32,9 +33,17 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let binders ← psScopeBinders visit [] binders
     let type ← visit binders.bound type
     let value ← visit binders.bound value
+    let termination ← match source with
+      | .wellFoundedDefinition _ _ _ _ suffix _ => do
+        let measure ← visit binders.bound suffix.measure
+        let proof ← suffix.decreasing.mapM (visit binders.bound)
+        let retained := { suffix with measure := measure.term, decreasing := proof.map (·.term) }
+        let used := psScopeUnion measure.used (proof.map (·.used) |>.getD [])
+        pure (some (retained, used))
+      | _ => pure none
     let header := psScopeUnion binders.used type.used
     let used := if isTheorem then psScopeUnion header resolver.scope.included
-      else psScopeUnion header value.used
+      else psScopeUnion header (psScopeUnion value.used (termination.map Prod.snd |>.getD []))
     let captured := psScopeSelect resolver.scope used
     if isTheorem && !value.used.all (fun key => captured.any (fun b => (psScopeBinderKeys b.fst).contains key)) then
       throw (.scope "theorem proof uses a section variable absent from its header; use include")
@@ -52,6 +61,8 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
       return .partialDefinition name (captured ++ binders.binders) type.term value.term span
     if isFixedpoint then
       return .fixedpointDefinition name (captured ++ binders.binders) type.term value.term span
+    if let some (suffix, _) := termination then
+      return .wellFoundedDefinition name (captured ++ binders.binders) type.term value.term suffix span
     return .definition name (captured ++ binders.binders) type.term value.term span
   | .structureDecl _ params result fields span =>
     let params ← psScopeBinders visit [] params

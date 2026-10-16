@@ -1,4 +1,39 @@
-## Current M3+B shared-owner candidate — 17 October 2026
+## Current M3+B candidate — typed group execution and checked Nat measures
+
+Exit 1 now has candidate companion-worker execution on the retained complete
+inductive-group plan, with shared captures and distinct per-family indices
+and results. Exact checked worker equations and runtime identities are
+revalidated before ordinary typed call erasure. The independent fixture
+executes a parametric cross-family fold on all five target lanes and rejects
+a well-typed stale worker equation. Source group Match/deriving and broader
+nested recursive traversal remain open.
+
+Exits 2 and 3 gain candidate measure/proof/span ownership and the selected
+one-explicit-Nat-argument/Nat-result total recursion construction. The actual
+body uses checked `WellFounded.Nat.fix`; each call needs a scoped decrease
+proof, and `.eq_def` follows from checked `fix_eq`. Runtime lowering consumes
+that typed construction. Independent proof/runtime fixtures cover arithmetic
+decrease, ordered multiple call goals, shifted measure, default proof,
+private namespace resolution, successor equation and phase-specific refusals.
+Broader argument telescopes, mutual function cliques and general equation
+normalization are still obligations.
+
+Exit 4 includes the previously added P0 assurance/body identity and captured
+recursive closure. The corrected group/P0/deriving focused suite passed at
+test-only `0179354359c9e75de3e7b6f74d7e86835232dff6`, run `38958044907`.
+Its predecessor's F1/F2/F3-F4 and full native passes do not constitute
+five-gate same-commit acceptance. This new compiler checkpoint
+must pass its own full native, F1, F2, F3/F4 and expanded focused workflows.
+
+Exit 5 remains blocked by the actual `Classical.choice` dependency of pinned
+`Lean.Order.fix`/`CCPO.csup` and its equations. The approved policy remains
+only `propext` and `Quot.sound`; no P1 artifact or proof assumption is enabled.
+Exit 6 and M3+B remain OPEN. The last fully accepted compiler is
+`a7c6dade87a9d8df74d5248e8276623e7870078c`; approximately 40% was qualified
+before these candidates (30–50% engineering uncertainty). Keep all six exit
+criteria in the denominator and preserve workloads, checksums and budgets.
+
+## Earlier M3+B shared-owner candidate — 17 October 2026
 
 Native group formation now has one `Ps.Core.InductiveGroup` plan, staged
 `Ps.Elab.Data` construction, and atomic canonical admission. The candidate

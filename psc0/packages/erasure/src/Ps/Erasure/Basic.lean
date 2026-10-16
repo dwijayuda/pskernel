@@ -8,6 +8,7 @@ import Ps.Meta.Context
 import Ps.Meta.Infer
 import Ps.Meta.Inductive
 import Ps.Meta.Reduce
+import Ps.Meta.Recursor
 
 -- Persistent collision buckets accelerate lookup without changing name equality
 -- or first-entry precedence. They contain compiler data, never admission authority.
@@ -163,16 +164,30 @@ structure PsRuntimeInductiveInfo where
   constructors : List PsRuntimeConstructorInfo
   numIndices : Nat := 0
   sourceTypeIndices : List Nat := []
+  group : Option PsInductiveGroupPlan := none
+
+def psRuntimeRecursorMotives (info : PsRuntimeInductiveInfo) : Nat :=
+  info.group.map (fun group => group.members.length) |>.getD 1
+
+def psRuntimeRecursorMinors (info : PsRuntimeInductiveInfo) : Nat :=
+  info.group.map psInductiveGroupNumMinors |>.getD info.constructors.length
+
+def psRuntimeRecursorMinorOffset (info : PsRuntimeInductiveInfo) : Option Nat :=
+  match info.group with
+  | none => some 0
+  | some group => psInductiveGroupMinorOffset group info.coreName
 
 -- Used by both partial-application completion and recursor lowering.
 def psRuntimeRecursorArity (info : PsRuntimeInductiveInfo) : Nat :=
-  info.numParams + 1 + info.constructors.length + info.numIndices + 1
+  info.numParams + psRuntimeRecursorMotives info + psRuntimeRecursorMinors info + info.numIndices + 1
 
 structure PsErasureCurrentDefinition where
   name : String
   -- Only declaration binders contribute; restore their order at recursive calls.
   typeArgumentsRev : List PsVerifiedIrType
   runtimeParameters : List String
+  coreName : Option PsName := none
+  coreParametersRev : List PsExpr := []
 
 structure PsErasureScope where
   localContext : PsLocalContext
@@ -188,6 +203,7 @@ structure PsErasureScope where
   currentDefinition : Option PsErasureCurrentDefinition
   -- Immutable execution profile, separate from the abstract logical environment.
   targetWordSize : Option PsVerifiedIrWordSize := none
+  recursorWorkerGroups : List PsRecursorWorkerGroup := []
 
 -- Resolve target-dependent representations once, before strict IR validation.
 -- This never changes a Core type, opaque value, or kernel reduction rule.
@@ -1035,3 +1051,4 @@ def psErasureSingleRuntimeField (scope : PsErasureScope) (owner : PsName) :
   let [field] := info.fields | throw .unsupportedRuntimeTerm
   if info.unboxed || !info.typeParameters.isEmpty then throw .unsupportedRuntimeTerm
   return (info, field)
+

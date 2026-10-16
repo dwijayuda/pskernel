@@ -330,8 +330,8 @@ def main : IO Unit := do
   expectIotaRefusal group.declarations (psReduceApply probeView.head (probeView.args.take 6 ++ [wrongMajor]))
 
   -- The same closed Core expressions have checked kernel equations above.
-  -- Portable conversion now agrees; source matching and runtime remain gated
-  -- on their still-single-family consumers.
+  -- Portable conversion agrees. Source matching and the legacy singleton
+  -- runtime view still refuse groups; companion-worker tests own group runtime.
   let environment ← portableEnvironment group.declarations
   portableReduction environment groupProbe 2
   let dependentEnvironment ← portableEnvironment dependent.declarations
@@ -345,5 +345,5 @@ def main : IO Unit := do
   match psElabProgramWithOrigins environment program with
   | .error error => ensure (matchRefused error) ("wrong group match refusal: " ++ elabMessage error)
   | .ok _ => throw (IO.userError "source group match silently enabled")
-  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures and portable group reduction against independent checked equations; malformed groups and unfinished Match/runtime consumers refused"
+  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures and portable group reduction against independent checked equations; malformed groups, source Match and legacy singleton runtime view refused"
 

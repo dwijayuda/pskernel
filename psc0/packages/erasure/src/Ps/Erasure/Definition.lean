@@ -172,6 +172,8 @@ def psEraseOpenDefinitionWithFuel
                     domain
                     binder;
                 let openedVariable := PsExpr.fvar pushed.id;
+                let scope := { scope with currentDefinition := scope.currentDefinition.map fun current =>
+                  { current with coreParametersRev := openedVariable :: current.coreParametersRev } };
                 let nextType :=
                   psExprInstantiate1 typeBody openedVariable;
                 let nextValue :=
@@ -194,10 +196,8 @@ def psEraseOpenDefinitionWithFuel
                       | Option.none => Option.none
                       | Option.some current =>
                           Option.some
-                            (PsErasureCurrentDefinition.mk
-                              current.name
-                              (List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev)
-                              current.runtimeParameters);
+                            { current with typeArgumentsRev :=
+                              List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev };
                     let nextScope : PsErasureScope :=
                       { scope with
                         localContext := pushed.context
@@ -239,10 +239,8 @@ def psEraseOpenDefinitionWithFuel
                           | Option.none => Option.none
                           | Option.some current =>
                               Option.some
-                                (PsErasureCurrentDefinition.mk
-                                  current.name
-                                  current.typeArgumentsRev
-                                  (psErasureAppendRuntimeParameter current.runtimeParameters parameterName));
+                                { current with runtimeParameters :=
+                                  psErasureAppendRuntimeParameter current.runtimeParameters parameterName };
                         let nextScope : PsErasureScope :=
                           { scope with
                             localContext := pushed.context
@@ -357,7 +355,8 @@ def psEraseDefinition
     | Except.ok entryScope =>
         let definitionScope : PsErasureScope :=
           { entryScope with currentDefinition := (Option.some
-              (PsErasureCurrentDefinition.mk outputName List.nil List.nil)) };
+              { name := outputName, typeArgumentsRev := [], runtimeParameters := []
+                coreName := some name }) };
         match psLowerStructureRecursors environment value with
         | Except.error error => Except.error error
         | Except.ok normalizedValue =>
@@ -489,12 +488,29 @@ def psEraseCoreModuleWithRuntimePrelude
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration)
     (internalRuntimeNames : List PsName := [])
-    (targetWordSize : Option PsVerifiedIrWordSize := none) :
-    Except PsErasureError PsVerifiedIrModule :=
+    (targetWordSize : Option PsVerifiedIrWordSize := none)
+    (recursorWorkerGroups : List PsRecursorWorkerGroup := []) :
+    Except PsErasureError PsVerifiedIrModule := do
+  (psValidateRecursorWorkerGroups environment recursorWorkerGroups).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
+  -- An ordinary partial-runtime view may replace only its paired opaque body.
+  -- Companion workers must still be the exact retained checked definitions,
+  -- once each, even when this lower-level entry receives an explicit view.
+  for worker in recursorWorkerGroups.flatMap (·.workers) do
+    let [actual] := runtimeDeclarations.filter
+      (fun declaration => psNameEq (psDeclarationName declaration) worker.name)
+      | throw .unsupportedRuntimeTerm
+    let some retained := psEnvironmentFind environment worker.name
+      | throw .unsupportedRuntimeTerm
+    match actual, retained with
+    | .definitionDecl _ levels type value, .definitionDecl _ keptLevels keptType keptValue =>
+      if !psInductiveGroupNamesEqual levels keptLevels || !psExprAlphaEq type keptType ||
+          !psExprAlphaEq value keptValue then throw .unsupportedRuntimeTerm
+    | _, _ => throw .unsupportedRuntimeTerm
   let names := psErasureDeclarationNames runtimeDeclarations;
-  let baseScopeResult := PsFloatRuntime.reserve { (psErasureScopeEmpty names) with targetWordSize }
+  let baseScopeResult := PsFloatRuntime.reserve { (psErasureScopeEmpty names) with targetWordSize, recursorWorkerGroups }
   match baseScopeResult with
   | Except.error error => Except.error error
   | Except.ok baseScope =>
@@ -562,3 +578,4 @@ def psEraseCoreModule
     environment
     List.nil
     declarations
+

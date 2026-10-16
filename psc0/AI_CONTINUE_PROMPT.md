@@ -1,3 +1,64 @@
+## M3+B candidate — group runtime and checked Nat-measure recursion
+
+This checkpoint combines the retained atomic inductive-group implementation
+with typed companion-worker execution and selected total well-founded
+recursion. It is a **compiler candidate requiring all five gates on its own
+exact SHA**, not a full M3+B acceptance claim.
+
+The group runtime path constructs one ordinary checked definition per family
+from the actual complete recursor application. All workers retain the same
+capture telescope, levels, parameters, motives and minor arguments; only the
+family's own indices and major vary. A small names/capture-count record locates
+these definitions. Before erasure, their complete retained equations and
+runtime declaration identities are revalidated. Cross-family recursive calls
+reuse ordinary typed call erasure, including erased slots and distinct result
+types. No sidecar record grants proof or kernel authority. Native group syntax
+does not expand v7.2's def/function-only source mutual grammar.
+
+A total `termination_by` declaration now retains its measure and optional
+`decreasing_by by { ... }` proof, scope and source spans. The selected executable
+slice has one explicit Nat argument and Nat result. Its real logical body uses
+the already checked `WellFounded.Nat.fix`; each source recursive call creates
+a scoped decrease goal, and one proof sequence handles all goals in creation
+order. The source-owned batch also contains a checked `f.eq_def` theorem from
+`WellFounded.Nat.fix_eq`. This is exact fixedpoint unfolding; constructor
+branch equations reduce, while broader open-match equation normalization is
+not claimed. Runtime lowering recognizes that actual typed construction and
+erases its checked decrease proof through the ordinary function ABI.
+
+Focused evidence adds a parametric group fold with captured state, differing
+family index counts/result types, and rejection of a well-typed stale worker
+equation. The independent well-founded fixture covers arithmetic decrease,
+multiple ordered proof goals, a nonidentity measure, default proof, source
+ownership/private scope, a checked successor equation, and semantic refusals.
+Both execute scalar observations across JS, compiled TS, Rust, V8 GC and
+Wasmtime using the existing pinned tools. Original workloads, iteration counts,
+checksums and budgets are unchanged.
+
+Earlier group production `c16d16be58efbf4b40a467af25db59c88c648a10` passed F1
+`38956942775`, F2 `38956942665`, F3/F4 `38956942889` and full native
+`38956942787`. The corrected independent
+group oracle on test-only `0179354359c9e75de3e7b6f74d7e86835232dff6` passed
+focused `38958044907`, including the P0 captured recursive closure and existing
+deriving target matrix. The earlier focused failures were test import,
+parameter-spelling and direct mutual-recursor code-generation issues, not
+relaxed expectations. These results span SHAs and do not establish same-commit
+integration acceptance.
+
+Latest fully accepted baseline at preparation remains
+`a7c6dade87a9d8df74d5248e8276623e7870078c`. P1 remains fail-closed:
+pinned `Lean.Order.fix` / `CCPO.csup` and generated equations require
+unapproved `Classical.choice`; the independent oracle observes this exact
+dependency outside the admitted Standard. Approved assumptions remain only
+`propext` and `Quot.sound`.
+
+M3+B stays OPEN. Approximately 40% was fully qualified before this candidate
+(30–50% engineering uncertainty); do not count candidate code as accepted
+coverage. Source group Match/deriving, broader nested traversal, broader total
+and mutual-recursion strategies remain critical work. No M4 verification,
+effect, general preservation or new performance claim is made. PR #109 remains
+draft/open/unmerged. Preserve the historical checkpoints and receipts below.
+
 ## M3+B candidate — atomic groups, portable reduction and ordinary closures (17 October 2026)
 
 The native `psElabInductiveGroup` entry point now stages all family headers,

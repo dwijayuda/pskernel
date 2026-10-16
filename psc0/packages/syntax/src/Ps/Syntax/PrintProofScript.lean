@@ -530,15 +530,28 @@ def psPrintProofScriptConstructor
             | .error error => .error error
             | .ok type => .ok ("  | " ++ name ++ suffix ++ " : " ++ type)
 
+def psPrintProofScriptTermination (termination : PsSyntaxTermination) :
+    Except PsSourcePrintError String := do
+  let measure ← psPrintProofScriptTerm termination.measure
+  let proof ← match termination.decreasing with
+    | none => pure ""
+    | some (.byE tactics scope span) => do
+      let body ← psPrintProofScriptTerm (.byE tactics scope span)
+      pure ("\ndecreasing_by " ++ body)
+    | some _ => throw (.unsupportedSourceForm "decreasing_by requires a proof sequence")
+  return "\ntermination_by " ++ measure ++ proof
+
 def psPrintProofScriptDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
   | .definition name binders type value _
-  | .fixedpointDefinition name binders type value _ =>
-      let suffix := match declaration with
-        | .fixedpointDefinition .. => "\npartial_fixpoint"
-        | _ => "";
+  | .fixedpointDefinition name binders type value _
+  | .wellFoundedDefinition name binders type value _ _ => do
+      let suffix ← match declaration with
+        | .fixedpointDefinition .. => pure "\npartial_fixpoint"
+        | .wellFoundedDefinition _ _ _ _ termination _ => psPrintProofScriptTermination termination
+        | _ => pure ""
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>

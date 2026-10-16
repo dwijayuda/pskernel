@@ -49,6 +49,39 @@ def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
                                 Except.ok (PsParseResult.mk declaration body.cursor)
               else Except.error "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED"
 
+-- v7.2 selects measure-first termination and owns the decreasing_by by {...}
+-- transformation. Retain the complete byE (including its scope and span), so
+-- the elaborator can run one tactic sequence over its ordered call goals.
+def psPscv0ReadTermination (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxTermination) := do
+  let keyword ← psPscv0Expect cursor "termination_by"
+  if psTokenCursorAtText keyword.cursor "structural" then
+    throw "PSCV0-TERM-01: termination_by structural is not selected; provide a measure"
+  if psTokenCursorAtText keyword.cursor "partial_fixpoint" then
+    throw "PSCV0-REC-STRATEGY-01: total and fixedpoint suffixes cannot combine"
+  let measure ← (psPscv0ParseTerm false keyword.cursor).mapError psPscv0ParseError
+  let (decreasing, next, stop) ←
+    if psTokenCursorAtText measure.cursor "decreasing_by" then do
+      let decrease ← psPscv0Expect measure.cursor "decreasing_by"
+      if !psTokenCursorAtText decrease.cursor "by" then
+        throw "PSCV0-TERM-01: decreasing_by requires by { tactics }"
+      let byKeyword ← psPscv0Expect decrease.cursor "by"
+      if !psTokenCursorAtText byKeyword.cursor "{" then
+        throw "PSCV0-TERM-01: decreasing_by requires by { tactics }"
+      let proof ← (psPscv0ParseTerm false decrease.cursor).mapError psPscv0ParseError
+      let .byE _ _ span := proof.value
+        | throw "PSCV0-TERM-01: decreasing_by requires a proof sequence"
+      pure (some proof.value, proof.cursor, span.stop)
+    else pure (none, measure.cursor, psProofScriptTermStop measure.value)
+  if ["termination_by", "decreasing_by", "partial_fixpoint"].any
+      (psTokenCursorAtText next) then
+    throw "PSCV0-REC-STRATEGY-01: duplicate or incompatible recursion suffix"
+  if psTokenCursorAtText next "where" then
+    throw "PSCV0-FEATURE-UNAVAILABLE: well-founded local where declarations"
+  let span := PsSourceSpan.mk keyword.token.span.start stop
+  let termination := PsSyntaxTermination.mk measure.value decreasing span
+  return PsParseResult.mk termination next
+
 -- Lean 4.35 Parser.Termination.suffix and elabTerminationHints retain the
 -- strategy after the body. The source parser owns that syntax; elaboration
 -- owns the construction's dependency/assumption gate. In particular, never
@@ -56,6 +89,19 @@ def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
 def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) := do
   let parsed ← psPscv0ReadValueDeclarationBody cursor
+  if psTokenCursorAtText parsed.cursor "decreasing_by" then
+    throw "PSCV0-TERM-01: decreasing_by requires a preceding termination_by measure"
+  if psTokenCursorAtText parsed.cursor "termination_by" then do
+    let some head := psTokenCursorPeek cursor | throw "PSCV0-DECLARATION-MISSING"
+    if !["def", "function", "const", "abbrev", "opaque"].contains head.text then
+      throw "PSCV0-REC-STRATEGY-01: total recursion suffix requires a selected total value declaration"
+    let termination ← psPscv0ReadTermination parsed.cursor
+    let .definition name binders type value span := parsed.value
+      | throw "PSCV0-REC-STRATEGY-01: total suffix requires a value declaration"
+    let sourceSpan := PsSourceSpan.mk span.start termination.value.span.stop
+    let declaration := PsSyntaxDeclaration.wellFoundedDefinition
+      name binders type value termination.value sourceSpan
+    return PsParseResult.mk declaration termination.cursor
   if !psTokenCursorAtText parsed.cursor "partial_fixpoint" then return parsed
   let some head := psTokenCursorPeek cursor | throw "PSCV0-DECLARATION-MISSING"
   if !["def", "function"].contains head.text then

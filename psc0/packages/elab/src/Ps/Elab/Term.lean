@@ -3,6 +3,7 @@ import Ps.Elab.Operator
 import Ps.Elab.Record
 import Ps.Elab.Universe
 import Ps.Elab.Proof
+import Ps.Elab.WellFounded
 import Ps.Elab.PatternMatrix
 
 import Ps.Elab.Do
@@ -208,6 +209,13 @@ def psElabStructuralReferenceEscapes
             | Option.some _ => false
           else false
 
+def psTryElabRecursionSelfCall (elaborate : PsElaborator)
+    (context : PsElabContext) (fn : PsSyntaxTerm) (arguments : List PsSyntaxTerm)
+    (expected : Option PsExpr) : Except PsElabError (Option PsElabTermResult) := do
+  match ← psTryElabWellFoundedSelfCall elaborate context fn arguments expected with
+  | some result => return some result
+  | none => psTryElabStructuralSelfCall elaborate context fn arguments expected
+
 def psElabTermWithFuel
     (fuel : Nat) :
     PsElabContext ->
@@ -235,7 +243,9 @@ def psElabTermWithFuel
             let readHead : PsElaborator := fun ctx source target =>
               match source with
               | .reference name =>
-                  if psElabStructuralReferenceEscapes ctx name then
+                  if psElabWellFoundedReferenceEscapes ctx name then
+                    Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must be a full positional call")
+                  else if psElabStructuralReferenceEscapes ctx name then
                     Except.error PsElabError.structuralRecursionEscapingReference
                   else psElabReference ctx name target
               | _ => smaller ctx source target
@@ -248,14 +258,16 @@ def psElabTermWithFuel
             | .ascription value type _ => psElabAscription smaller context value type expected
             | .call fn args span =>
                 if args.all (fun arg => arg.fst.isNone) && !args.isEmpty then
-                  -- Reuse the structural-call path for positional applications.
+                  -- Preserve the selected recursion path for positional calls.
                   smaller context (.app fn (args.map Prod.snd) span) expected
                 else
                   match readHead context fn none with
                   | .error error => .error error
                   | .ok head => psElabCall smaller head args expected
             | .reference name =>
-                if psElabStructuralReferenceEscapes context name then
+                if psElabWellFoundedReferenceEscapes context name then
+                  Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must be a full positional call")
+                else if psElabStructuralReferenceEscapes context name then
                   Except.error PsElabError.structuralRecursionEscapingReference
                 else
                   match psElabReference context name Option.none with
@@ -337,7 +349,7 @@ def psElabTermWithFuel
                 | List.nil => Except.error PsElabError.emptyCallUnsupported
                 | List.cons _ _ =>
                     match
-                        psTryElabStructuralSelfCall
+                        psTryElabRecursionSelfCall
                           smaller
                           context
                           fn
@@ -370,3 +382,4 @@ def psElabTerm
     let result ← psElabTermWithFuel 4096 { context with postponing := true } term expected
     let result ← psElabDrainPending (psElabTermWithFuel 4096) result
     return { result with context := { result.context with postponing := context.postponing } }
+

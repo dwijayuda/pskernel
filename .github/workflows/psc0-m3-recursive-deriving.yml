@@ -13,8 +13,11 @@ on:
       - 'psc0/v7-native/**'
       - 'psc0/test/Pscv0M3RecursiveDeriving.lean'
       - 'psc0/test/Pscv0M3InductiveGroups.lean'
+      - 'psc0/test/Pscv0M3InductiveRuntime.lean'
+      - 'psc0/test/Pscv0M3WellFounded.lean'
       - 'psc0/test/Pscv0M3PartialFixpointAssumptions.lean'
       - 'psc0/scripts/pscv0-m3-recursive-deriving.mjs'
+      - 'psc0/scripts/pscv0-m3-runtime.mjs'
       - '.github/workflows/psc0-m3-recursive-deriving.yml'
   workflow_dispatch:
 
@@ -95,12 +98,16 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups
-          mkdir -p ../dist/m3-recursive-deriving
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded
+          mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded
           .lake/build/bin/pscv0_m3_inductive_groups | tee ../dist/m3-recursive-deriving/inductive-groups.log
           lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean | tee ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log
           .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/check.log
+          .lake/build/bin/pscv0_m3_inductive_runtime ../dist/m3-inductive-runtime | tee ../dist/m3-inductive-runtime/check.log
+          .lake/build/bin/pscv0_m3_well_founded ../dist/m3-well-founded | tee ../dist/m3-well-founded/check.log
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-recursive-deriving/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-runtime/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-well-founded/source-sha.txt
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         with:
           path: |
@@ -116,12 +123,22 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-recursive-deriving/hashing.ts --outDir ../dist/m3-recursive-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/js.log
           node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-recursive-deriving ../dist/m3-recursive-deriving/ts/hashing.js | tee ../dist/m3-recursive-deriving/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-inductive-runtime/groupfold.ts --outDir ../dist/m3-inductive-runtime/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright | tee ../dist/m3-inductive-runtime/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright ../dist/m3-inductive-runtime/ts/groupfold.js | tee ../dist/m3-inductive-runtime/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-well-founded/wellfounded.ts --outDir ../dist/m3-well-founded/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput | tee ../dist/m3-well-founded/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput ../dist/m3-well-founded/ts/wellfounded.js | tee ../dist/m3-well-founded/ts.log
       - name: Execute Rust with the existing pinned dependency lock
         run: |
           set -euo pipefail
           rustup toolchain install 1.98.1 --profile minimal
           node ../scripts/pscv0-m3-recursive-deriving.mjs rust ../dist/m3-recursive-deriving
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-recursive-deriving/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-runtime/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-well-founded/rust.log
       - name: Execute GC core and components against the native oracle
         run: |
           set -euo pipefail
@@ -136,11 +153,16 @@ jobs:
           export PATH="$RUNNER_TEMP/pscv0-m3-wasm/wasm-tools-1.261.0-x86_64-linux:$RUNNER_TEMP/pscv0-m3-wasm/wasmtime-v49.0.2-x86_64-linux:$PATH"
           cd "$GITHUB_WORKSPACE/psc0/v7-native"
           node ../scripts/pscv0-m3-recursive-deriving.mjs wasm ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright | tee ../dist/m3-inductive-runtime/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput | tee ../dist/m3-well-founded/wasm.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
           name: pscv0-m3-recursive-hash-${{ github.sha }}
-          path: psc0/dist/m3-recursive-deriving/
+          path: |
+            psc0/dist/m3-recursive-deriving/
+            psc0/dist/m3-inductive-runtime/
+            psc0/dist/m3-well-founded/
           if-no-files-found: warn
           retention-days: 30
 

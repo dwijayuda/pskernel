@@ -65,3 +65,64 @@ def psErasureRecursiveCall (environment : PsEnvironment)
     | some replacement => replacement.snd
     | none => .var entry.fst
   return .call (.var current.name) current.typeArgumentsRev.reverse arguments
+
+structure PsErasureGroupRecursionPlan where
+  workers : PsRecursorWorkerGroup
+  captures : List PsExpr
+  levels : List PsLevel
+
+inductive PsErasureRecursionDispatch where
+  | singleton (plan : PsErasureRecursionPlan)
+  | group (plan : PsErasureGroupRecursionPlan)
+
+-- Only the exact root equation of a validated worker may dispatch its IHs.
+-- A nested fold or changed capture cannot reuse a caller merely because its
+-- major happens to have the same family. The raw entry telescope is retained.
+def psErasurePlanGroupRecursion (environment : PsEnvironment) (scope : PsErasureScope)
+    (view : PsGroupRecursorApplication) : Option PsErasureGroupRecursionPlan := do
+  let current ← scope.currentDefinition
+  let name ← current.coreName
+  let [workers] := scope.recursorWorkerGroups.filter
+    (fun group => group.workers.any (fun worker => psNameEq worker.name name)) | none
+  let worker ← workers.workers.find? (fun worker => psNameEq worker.name name)
+  if !psNameEq worker.family view.family.name || !view.suffix.isEmpty then none else do
+    let some (.definitionDecl _ levels _ value) := psEnvironmentFind environment name | none
+    let arguments := current.coreParametersRev.reverse
+    if arguments.length != workers.captureCount + view.info.numIndices + 1 then none else do
+      let original ← psRecursorWorkerBetaApply value arguments
+      if !psExprAlphaEq original
+          (psReduceApply view.head (view.fixedArgs ++ view.indices ++ [view.major])) then none
+      else return {
+        workers, captures := arguments.take workers.captureCount
+        levels := levels.map PsLevel.param
+      }
+
+def psErasureGroupRecursiveCall (environment : PsEnvironment)
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (scope : PsErasureScope) (plan : PsErasureGroupRecursionPlan) (childName : String) :
+    Except PsErasureError PsVerifiedIrExpr := do
+  let some child := scope.runtimeLocals.find? (fun entry => entry.2 == childName)
+    | throw .binderMismatch
+  let some declaration := psLocalFindById scope.localContext child.1 | throw .binderMismatch
+  let view := psReduceAppView (psWhnf environment psMetaEmpty scope.localContext
+    (psLocalDeclType declaration))
+  let .constE owner _ := view.head | throw .unsupportedRuntimeTerm
+  let some worker := plan.workers.workers.find? (fun worker => psNameEq worker.family owner)
+    | throw .unsupportedRuntimeTerm
+  let some family := psEnvironmentFindInductive environment owner | throw .unsupportedRuntimeTerm
+  if view.args.length != family.numParams + family.numIndices then throw .unsupportedRuntimeTerm
+  -- Reuse ordinary checked declaration-call erasure for type arguments,
+  -- erased indices, proof slots and the target worker's distinct return type.
+  -- No runtime slot or cross-family call signature is guessed here.
+  let call := psReduceApply (.constE worker.name plan.levels)
+    (plan.captures ++ view.args.drop family.numParams ++ [.fvar child.1])
+  eraseAt { scope with currentDefinition := none } call
+
+def psErasureDispatchRecursiveCall (environment : PsEnvironment)
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (scope : PsErasureScope) (plan : PsErasureRecursionDispatch) (childName : String) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  match plan with
+  | .singleton plan => psErasureRecursiveCall environment eraseAt scope plan childName
+  | .group plan => psErasureGroupRecursiveCall environment eraseAt scope plan childName
+

@@ -79,6 +79,7 @@ def psElabOriginSource
   | PsSyntaxDeclaration.definition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.partialDefinition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.fixedpointDefinition name _ _ _ span => Prod.mk name span
+  | PsSyntaxDeclaration.wellFoundedDefinition name _ _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.structureDecl name _ _ _ span => Prod.mk name span
@@ -295,6 +296,10 @@ def psElabDeclaration
       -- not a parser error or an assertion about every constructive fixpoint.
       -- Do not relabel P1 as P0 or an ordinary total definition to evade it.
       Except.error (.data "PSCV0-FIXPOINT-ASSUMPTION: selected Lean.Order.fix construction requires unapproved Classical.choice through CCPO.csup; partial_fixpoint admission is unavailable")
+  | .wellFoundedDefinition _ _ _ _ _ _ =>
+      -- The definition and its checked equation are one source-owned batch.
+      -- A single-declaration caller must not silently discard the equation.
+      Except.error (.data "PSCV0-WF-BATCH: well-founded declarations require declaration-batch elaboration")
   | .theoremDecl name binders type value _ =>
       psElabDeclarationParts
         environment
@@ -398,6 +403,13 @@ def psElabDeclarationBatchStable
     (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationBatchResult :=
   match source with
+  | .wellFoundedDefinition name binders type value termination _ =>
+      match psElabWellFoundedParts psElabDeclarationTermCallback
+          environment name binders type value termination levelNames with
+      | .error error => .error error
+      | .ok result =>
+          .ok (PsElabDeclarationBatchResult.mk
+            [result.declaration, result.equation] [result.sourceInfo])
   | .inductiveDecl name params resultType constructors _ =>
       psElabInductiveDeclaration
         environment

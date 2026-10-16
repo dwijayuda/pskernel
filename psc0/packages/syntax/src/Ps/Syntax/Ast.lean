@@ -241,6 +241,14 @@ structure PsSyntaxImport where
   -- public interface. Ordinary imports remain visible only in this module.
   isPublic : Bool := false
 
+-- The selected total suffix retains its measure, proof-body scope and source
+-- span independently of the function body. `decreasing` is a byE node when
+-- present; native printing removes its term-level by/braces for decreasing_by.
+structure PsSyntaxTermination where
+  measure : PsSyntaxTerm
+  decreasing : Option PsSyntaxTerm := none
+  span : PsSourceSpan
+
 inductive PsSyntaxDeclaration where
   | definition
       (name : PsSyntaxName)
@@ -262,6 +270,13 @@ inductive PsSyntaxDeclaration where
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | wellFoundedDefinition
+      (name : PsSyntaxName)
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+      (type : PsSyntaxTerm)
+      (value : PsSyntaxTerm)
+      (termination : PsSyntaxTermination)
       (span : PsSourceSpan)
   | theoremDecl
       (name : PsSyntaxName)

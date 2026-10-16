@@ -1,0 +1,92 @@
+name: PSKernel-C0 native source-integrated hard WF replay
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-wf-native-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-wf-exact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build source-integrated native checker at pinned 4.35.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+            lake build c0OfficialReplay
+            lake env lean --run test/C0ProofCongruenceRegression.lean
+            lake env lean --run test/C0OfficialNdjsonReplay.lean
+          )
+          echo "C0_NATIVE_WF_TRUST_GATES source_semantics=unmodified native_negatives=pass"
+      - name: Export exact official WF theorem and validate before C0 checking
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- 'WellFounded.partialExtrinsicFix₃_eq_partialExtrinsicFix' \
+              > "$RUNNER_TEMP/wf-native-435.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/wf-native-435.ndjson" \
+              > "$RUNNER_TEMP/wf-native-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/wf-native-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/wf-native-435.ndjson")" -eq 15758
+          test "$(stat -c%s "$RUNNER_TEMP/wf-native-435.ndjson")" -eq 777157
+          echo "1d97cdd876069322a27ab69b2a1607e615695c8c0be065bbbb0db476833b5abe  $RUNNER_TEMP/wf-native-435.ndjson" | sha256sum -c -
+          echo "C0_NATIVE_WF_OFFICIAL=accepted exact_records=15758"
+      - name: Check actual unmodified-source C0 artifact, fuel 4096
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/wf-native-resources.txt" \
+              timeout 540s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/wf-native-435.ndjson" 4096
+          ) > "$RUNNER_TEMP/wf-native-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_NATIVE_WF_PROCESS_EXIT=$rc"
+          grep 'C0_REAL_EXPORT replay_outcome' "$RUNNER_TEMP/wf-native-c0.txt" | tail -n 3 || true
+          grep 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/wf-native-c0.txt" | tail -n 5 || true
+          if test "$rc" -eq 0 &&
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=15758 fuel=4096' "$RUNNER_TEMP/wf-native-c0.txt"; then
+            echo "C0_NATIVE_WF_VERDICT=ACCEPTED_exact_original_source"
+          elif test "$rc" -eq 124; then
+            echo "C0_NATIVE_WF_VERDICT=NOT_QUALIFIED_HOST_TIMEOUT"
+          else
+            echo "C0_NATIVE_WF_VERDICT=NOT_QUALIFIED_CHECK_SOURCE_LOG"
+            tail -n 30 "$RUNNER_TEMP/wf-native-c0.txt"
+          fi
+          cat "$RUNNER_TEMP/wf-native-resources.txt"
+          echo "C0_NATIVE_WF_SCOPE=isolated_15758_not_full_Init"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-real-wf-native-qualification
+          path: |
+            ${{ runner.temp }}/wf-native-official.txt
+            ${{ runner.temp }}/wf-native-c0.txt
+            ${{ runner.temp }}/wf-native-resources.txt
+          if-no-files-found: warn
+          retention-days: 14

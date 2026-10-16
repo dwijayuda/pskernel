@@ -1,0 +1,42 @@
+name: PSKernel-C0 proof-constrained exact recursive app equality
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-fast-app-eq.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/FastExactAppEq.lean'
+      - 'psc0/packages/pskernel-c0/test/C0FastExactAppEqRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-app-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Require pinned Lean 4.35.0 and proof-producing recursive equality
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build Ps.KernelCore.Core.FastExactAppEq
+          timeout 35s lake env lean --run test/C0FastExactAppEqRegression.lean
+          echo "C0_FAST_APP_EQ_SOURCE=proof_checked exact_full_ast=yes"
+      - name: Preserve original native checker negative semantics
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake build c0OfficialReplay
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          echo "C0_FAST_APP_EQ_NEGATIVE=pass no_checker_changes=yes"

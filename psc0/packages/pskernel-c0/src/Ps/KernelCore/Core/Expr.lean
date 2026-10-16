@@ -793,6 +793,26 @@ def psKernelExprGetAppArgs
     expr
     List.nil
 
+/-- Source identity for splitting an application spine on demand. This
+justifies reading the head first and allocating arguments only when the
+head has the expected form; the original left-to-right argument order is
+unchanged on every expression. -/
+private theorem psKernelExprGetAppFnArgsWorker_components
+    (expr : PsKernelExpr) (args : List PsKernelExpr) :
+    psKernelExprGetAppFnArgsWorker expr args =
+      (psKernelExprGetAppFn expr, psKernelExprGetAppArgsWorker expr args) := by
+  induction expr generalizing args with
+  | app fn arg fnIH argIH =>
+      exact fnIH (arg :: args)
+  all_goals rfl
+
+theorem psKernelExprGetAppFnArgs_components
+    (expr : PsKernelExpr) :
+    psKernelExprGetAppFnArgs expr =
+      (psKernelExprGetAppFn expr, psKernelExprGetAppArgs expr) := by
+  simpa only [psKernelExprGetAppFnArgs, psKernelExprGetAppArgs] using
+    (psKernelExprGetAppFnArgsWorker_components expr [])
+
 def psKernelExprListLength
     (values : List PsKernelExpr) : Nat :=
   match values with

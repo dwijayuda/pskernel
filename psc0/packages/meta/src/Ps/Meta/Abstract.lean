@@ -6,6 +6,7 @@ import Ps.Meta.Context
 structure PsMetaTemplateParameter where
   type : PsExpr
   locals : List Nat
+  numScopeArgs : Nat := 0
 
 structure PsMetaTemplate where
   levels : Nat
@@ -94,7 +95,8 @@ def psMetaAbstract (context : PsMetaContext) (locals : PsLocalContext)
   let parameters ← (declarations.zip types).mapM fun (declaration, type) => do
     let parameter : PsMetaTemplateParameter := {
       type := (← psMetaMapExpr terms levelMap type)
-      locals := declaration.localContext.declarations.map psLocalDeclId }
+      locals := declaration.localContext.declarations.map psLocalDeclId
+      numScopeArgs := declaration.numScopeArgs }
     return parameter
   return {
     levels := levels.length
@@ -117,7 +119,7 @@ def psMetaOpenTemplate (context : PsMetaContext) (locals : PsLocalContext)
           parameter.locals.contains (psLocalDeclId declaration)) }
       let type ← psMetaMapExpr (state.2[·]?) (levels[·]?) parameter.type
       if !psExprFVarsInContext scope type then none else
-      let fresh := psMetaFresh state.1 scope type .natural
+      let fresh := psMetaFresh state.1 scope type .natural {} parameter.numScopeArgs
       return (fresh.context, state.2 ++ [fresh.expr])) (context, [])
   let value ← psMetaMapExpr (terms[·]?) (levels[·]?) template.value
   let type ← psMetaMapExpr (terms[·]?) (levels[·]?) template.type
@@ -128,5 +130,6 @@ def psMetaOpenTemplate (context : PsMetaContext) (locals : PsLocalContext)
 def psMetaTemplateSameType (left right : PsMetaTemplate) : Bool :=
   left.levels == right.levels && left.parameters.length == right.parameters.length &&
     (left.parameters.zip right.parameters).all (fun (a, b) =>
-      a.locals == b.locals && psExprAlphaEq a.type b.type) &&
+      a.locals == b.locals && a.numScopeArgs == b.numScopeArgs &&
+        psExprAlphaEq a.type b.type) &&
     psExprAlphaEq left.type right.type

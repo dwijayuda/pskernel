@@ -173,7 +173,10 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
   if constrained then
     match majorId with
     | some id =>
-      if psElabExprContainsLocal id expected ||
+      -- The constrained motive retains the original major. An unknown result
+      -- may become constant while its checked branches elaborate.
+      if (!psElabExpectedTypeIsUnconstrained context expected &&
+          psElabExprContainsLocal id expected) ||
           dependents.any (fun entry => psElabExprContainsLocal id entry.binder.type) then
         throw (.refinement "fixed-index matching with major-dependent result/context requires heterogeneous transport")
     | none => pure ()
@@ -395,7 +398,7 @@ def psElabMatchWith (elaborate : PsElaborator)
   if typeView.args.length != info.numParams + info.numIndices then throw .matchParameterArity
   let parameters := typeView.args.take info.numParams
   let indices := typeView.args.drop info.numParams
-  let expectedType := psMetaInstantiate context.metaContext expectedType
+  let expectedType := psWhnfCore context.metaContext context.localContext expectedType
   let plan ← psElabMatchMotive context info levels parameters indices scrutinee.term expectedType
   -- Reverted dependent parameters can raise the motive's universe above that
   -- of the original expected result. Infer the completed motive, not a proxy.

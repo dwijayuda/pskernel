@@ -2,7 +2,9 @@ import Ps.Elab.Basic
 
 -- Only failures that can change after inference are resumable. Name/grammar,
 -- resource and structural-recursion refusals remain immediate diagnostics.
-def psElabErrorMayPostpone : PsElabError → Bool
+def psElabErrorMayPostpone (error : PsElabError) : Bool :=
+  if psElabErrorIsResource error then false else
+  match error with
   | .typeMismatch | .implicitApplicationUnsupported | .unresolvedMetavariable
   | .unsupportedTerm | .infer _ | .matchExpectedType | .matchScrutineeUnsupported
   | .proof _ => true
@@ -39,7 +41,7 @@ def psElabDelayBefore (context : PsElabContext) (source : PsSyntaxTerm)
   | some type =>
     let type := psWhnf context.environment context.metaContext context.localContext type
     match source with
-    | .record _ _ => match type with | .mvar _ => true | _ => false
+    | .record _ _ => psElabExpectedTypeIsUnconstrained context type
     | .byE _ _ _ => psExprHasTermMeta type
     | _ => false
 
@@ -65,8 +67,9 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
     (work : PsElabPendingWork) : Except PsElabError PsElabContext := do
   match work with
   | .core scope constraint =>
-    let some metaContext := psSyntheticAttempt scope.environment scope.instances
-        context.metaContext constraint |
+    let attempted ← (psSyntheticAttemptChecked scope.environment scope.instances
+      context.metaContext constraint).mapError (fun _ => PsElabError.fuelExhausted)
+    let some metaContext := attempted |
       match constraint with
       | .instanceGoal _ => throw .implicitApplicationUnsupported
       | _ => throw .typeMismatch
@@ -78,8 +81,9 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
       { context := saved, term := psMetaInstantiate saved.metaContext value,
         type := psMetaInstantiate saved.metaContext actual }
       (some (psMetaInstantiate saved.metaContext declaration.type))
-    let some metaContext := psSyntheticAssign saved.environment result.context.metaContext
-        id result.term | throw .typeMismatch
+    let assigned ← (psSyntheticAssignChecked saved.environment result.context.metaContext
+      id result.term).mapError (fun _ => PsElabError.fuelExhausted)
+    let some metaContext := assigned | throw .typeMismatch
     return psElabLeaveScope context (psElabContextWithMeta result.context metaContext)
   | .sourceTerm scope id source =>
     let saved := psElabRestoreScope { context with postponing := false } scope
@@ -93,9 +97,18 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
       if psExprHasTermMeta type then throw (.proof "postponed tactic goal is unresolved")
     | _ => pure ()
     let result ← elaborate saved source (some type)
-    let some metaContext := psSyntheticAssign saved.environment result.context.metaContext
-        id result.term | throw .typeMismatch
+    let assigned ← (psSyntheticAssignChecked saved.environment result.context.metaContext
+      id result.term).mapError (fun _ => PsElabError.fuelExhausted)
+    let some metaContext := assigned | throw .typeMismatch
     return psElabLeaveScope context (psElabContextWithMeta result.context metaContext)
+
+-- Ordinary blocked work remains retryable; an actual resource refusal aborts
+-- the checked worklist before another item or default can run.
+def psElabResumeWorkAttempt (elaborate : PsElaborator) (context : PsElabContext)
+    (work : PsElabPendingWork) : Except Unit (Option PsElabContext) :=
+  match psElabResumeWork elaborate context work with
+  | .ok result => .ok (some result)
+  | .error error => if psElabErrorIsResource error then .error () else .ok none
 
 def psElabPendingPriorities : PsElabPendingWork → List Nat
   | .core scope constraint => psSyntheticConstraintPriorities scope.instances constraint
@@ -118,10 +131,10 @@ def psElabProgressInstancePending (context : PsElabContext)
   let attempt := fun (current : PsElabContext) (work : PsElabPendingWork) =>
     match work with
     | .core scope (.instanceGoal id) =>
-      (psSyntheticAttempt scope.environment scope.instances current.metaContext
-        (.instanceGoal id)).map (psElabContextWithMeta current)
-    | _ => none
-  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
+      (psSyntheticAttemptChecked scope.environment scope.instances current.metaContext
+        (.instanceGoal id)).map (fun result => result.map (psElabContextWithMeta current))
+    | _ => .ok none
+  let solved := psSyntheticQueueSolveChecked attempt psElabPendingIsDefault
     psElabPendingPriorities psElabResumeDefault
     { context with pending := [] } context.pending.reverse false limit
   if solved.resourceExceeded then throw .fuelExhausted
@@ -176,9 +189,8 @@ def psElabRecoverPendingProjection (context : PsElabContext)
 def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
     (limit : Nat := 32768) : Except PsElabError PsElabTermResult := do
   let context := { result.context with pending := [], postponing := false }
-  let attempt := fun current work =>
-    (psElabResumeWork elaborate current work).toOption
-  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
+  let attempt := psElabResumeWorkAttempt elaborate
+  let solved := psSyntheticQueueSolveChecked attempt psElabPendingIsDefault
     psElabPendingPriorities psElabResumeDefault
     context result.context.pending.reverse true limit
   if solved.resourceExceeded then throw .fuelExhausted
@@ -197,9 +209,9 @@ def psElabProgressPending (elaborate : PsElaborator) (context : PsElabContext)
     (limit : Nat := 32768) : Except PsElabError PsElabContext := do
   let attempt := fun current work =>
     match work with
-    | .sourceTerm .. => none
-    | _ => (psElabResumeWork elaborate current work).toOption
-  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
+    | .sourceTerm .. => .ok none
+    | _ => psElabResumeWorkAttempt elaborate current work
+  let solved := psSyntheticQueueSolveChecked attempt psElabPendingIsDefault
     psElabPendingPriorities psElabResumeDefault
     { context with pending := [] } context.pending.reverse false limit
   if solved.resourceExceeded then throw .fuelExhausted

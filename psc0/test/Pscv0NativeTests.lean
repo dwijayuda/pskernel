@@ -2792,6 +2792,110 @@ private def sourceInfoBoundaries : IO Unit := do
         throw (IO.userError "source information escaped its saved local scope")
   IO.println "PSCV0_M2_SOURCE_INFO: ordered binders, references, insertions, scoped resumption PASS"
 
+private def resultFamilyBoundaries : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let nat := PsExpr.constE psNatName []
+  let fin := fun index => PsExpr.app (.constE (psRootName "Fin") []) index
+  let succ := fun value => PsExpr.app
+    (.constE (psNameAppendStr psNatName "succ") []) value
+  let argument := psLocalPushBinding psLocalEmpty (psRootName "n") nat .explicit
+  let input := PsExpr.fvar argument.id
+  let finType := fin (succ input)
+  let level := psMetaFreshLevel psMetaEmpty
+  let familyType := PsExpr.forallE (psRootName "n") nat
+    (.sortE (.succ level.level)) .explicit
+  let family := psMetaFresh level.context psLocalEmpty familyType .natural {} 1
+  let .mvar familyId := family.expr | throw (IO.userError "result family ID")
+  let application := PsExpr.app family.expr input
+  let expectedFamily := PsExpr.lam (psRootName "n") nat
+    (fin (succ (.bvar 0))) .explicit
+  let some (marked, [.fvar actualArgument]) :=
+      psUnifyResultFamilyView family.context application
+    | throw (IO.userError "complete marked result family was not recognized")
+  unless marked.id == familyId && marked.numScopeArgs == 1 &&
+      actualArgument == argument.id do
+    throw (IO.userError "result family provenance or actual argument changed")
+  let solved := psUnify environment argument.context family.context application finType
+  let some assignment := psMetaFindAssignment solved.context familyId
+    | throw (IO.userError "dependent result family did not acquire an assignment")
+  unless solved.success && !solved.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate solved.context assignment) expectedFamily &&
+      psExprAlphaEq (psMetaInstantiate solved.context (.sortE level.level)) (.sortE .zero) &&
+      !solved.context.levels.assignments.isEmpty &&
+      psDefEqReadOnlyWithEnv environment solved.context argument.context application finType do
+    throw (IO.userError "dependent result family lost its checked lambda or result universe")
+  -- A pending Nat index still carries n in its saved creation scope.
+  -- Do not choose R := Fin and index := n through application congruence.
+  let index := psMetaFresh family.context argument.context nat .natural
+  let .mvar indexId := index.expr | throw (IO.userError "scoped result index ID")
+  let pendingType := fin index.expr
+  let blocked := psUnify environment argument.context index.context application pendingType
+  unless !blocked.success && !blocked.resourceExceeded &&
+      (psMetaFindAssignment blocked.context familyId).isNone &&
+      (psMetaFindAssignment blocked.context indexId).isNone &&
+      blocked.context.assignments.isEmpty && blocked.context.delayed.isEmpty &&
+      blocked.context.nextId == index.context.nextId &&
+      blocked.context.declarations.length == index.context.declarations.length &&
+      blocked.context.levels.assignments.isEmpty &&
+      blocked.context.levels.declarations == index.context.levels.declarations &&
+      blocked.context.levels.nextId == index.context.levels.nextId do
+    throw (IO.userError "pending result index escaped its scope or leaked speculative assignments")
+  let some savedFamily := psMetaFindDecl blocked.context familyId
+    | throw (IO.userError "blocked result family declaration disappeared")
+  let some savedIndex := psMetaFindDecl blocked.context indexId
+    | throw (IO.userError "blocked result index declaration disappeared")
+  let [.binding savedId savedName savedType savedBinder] := savedIndex.localContext.declarations
+    | throw (IO.userError "blocked result index lost its saved local binding")
+  unless savedFamily.numScopeArgs == 1 && savedFamily.localContext.nextId == 0 &&
+      savedFamily.localContext.declarations.isEmpty &&
+      psExprAlphaEq savedFamily.type familyType &&
+      savedIndex.numScopeArgs == 0 && psExprAlphaEq savedIndex.type nat &&
+      psMetaVarIsNatural blocked.context familyId && psMetaVarIsNatural blocked.context indexId &&
+      savedIndex.localContext.nextId == argument.context.nextId &&
+      savedId == argument.id && psNameEq savedName (psRootName "n") &&
+      psExprAlphaEq savedType nat && psBinderInfoEq savedBinder .explicit do
+    throw (IO.userError "failed family comparison rewrote a declaration or narrowed its saved scope")
+  let checkedIndex := psUnify environment argument.context blocked.context index.expr (succ input)
+  let resumed := psUnify environment argument.context checkedIndex.context application pendingType
+  unless checkedIndex.success && !checkedIndex.resourceExceeded &&
+      resumed.success && !resumed.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate resumed.context index.expr) (succ input) &&
+      psExprAlphaEq (psMetaInstantiate resumed.context family.expr) expectedFamily do
+    throw (IO.userError "a checked dependent index did not wake its unchanged result family")
+  -- Eq first compares universes and the family, then assigns its first
+  -- endpoint. A mismatch only at the final endpoint must discard that work.
+  let left := psLocalPushBinding argument.context (psRootName "left") finType .explicit
+  let right := psLocalPushBinding left.context (psRootName "right") finType .explicit
+  let endpoint := psMetaFresh family.context right.context application .natural
+  let .mvar endpointId := endpoint.expr | throw (IO.userError "result family endpoint ID")
+  let eqType := fun sortLevel domain first last =>
+    psExprApplyMany (.constE (psRootName "Eq") [sortLevel]) [domain, first, last]
+  let actual := eqType (.succ level.level) application endpoint.expr endpoint.expr
+  let same := eqType (.succ .zero) finType (.fvar left.id) (.fvar left.id)
+  let unequal := eqType (.succ .zero) finType (.fvar left.id) (.fvar right.id)
+  unless (psInferType environment endpoint.context right.context actual).isOk &&
+      (psInferType environment endpoint.context right.context unequal).isOk do
+    throw (IO.userError "result family rollback fixture constructed an illtyped proposition")
+  let compatible := psUnify environment right.context endpoint.context actual same
+  unless compatible.success && !compatible.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate compatible.context family.expr) expectedFamily &&
+      psExprAlphaEq (psMetaInstantiate compatible.context endpoint.expr) (.fvar left.id) &&
+      psExprAlphaEq (psMetaInstantiate compatible.context (.sortE level.level)) (.sortE .zero) &&
+      !compatible.context.levels.assignments.isEmpty do
+    throw (IO.userError "result family rollback control did not solve its complete equality")
+  let rejected := psUnify environment right.context endpoint.context actual unequal
+  unless !rejected.success && !rejected.resourceExceeded &&
+      (psMetaFindAssignment rejected.context familyId).isNone &&
+      (psMetaFindAssignment rejected.context endpointId).isNone &&
+      rejected.context.assignments.isEmpty && rejected.context.delayed.isEmpty &&
+      rejected.context.nextId == endpoint.context.nextId &&
+      rejected.context.declarations.length == endpoint.context.declarations.length &&
+      rejected.context.levels.assignments.isEmpty &&
+      rejected.context.levels.declarations == endpoint.context.levels.declarations &&
+      rejected.context.levels.nextId == endpoint.context.levels.nextId do
+    throw (IO.userError "unequal endpoint leaked result family, endpoint or universe assignments")
+  IO.println "PSCV0_NATIVE_RESULT_FAMILY: PASS checked dependent family, preserved pending index scope, checked resumption and complete equality rollback"
+
 private def syntheticBoundaries : IO Unit := do
   let environment := psSelfHostProdPreludeEnvironment
   let nat := PsExpr.constE psNatName []
@@ -2917,6 +3021,52 @@ private def syntheticBoundaries : IO Unit := do
       !(psExprFVarIds scopedEvidence).contains late.id do
     throw (IO.userError "later caller instance overrode a queued instance's creation scope")
   IO.println "PSCV0_NATIVE_EXPECTED_INSTANCE: PASS inferred input, complete rollback and saved scope"
+  -- A real low-fuel inference error must stop before postponement or a
+  -- queued default can turn the same continuation into a successful term.
+  let resourceType := psMetaFresh psMetaEmpty psLocalEmpty type .syntheticOpaque
+  let .mvar resourceTypeId := resourceType.expr | throw (IO.userError "resource type ID")
+  let resourceGoal := psMetaFresh resourceType.context psLocalEmpty resourceType.expr .syntheticOpaque
+  let .mvar resourceGoalId := resourceGoal.expr | throw (IO.userError "resource goal ID")
+  let resourceContext := psElabContextWithMeta (psElabContextEmpty environment) resourceGoal.context
+  let resourceContext := { resourceContext with postponing := true }
+  let resourceSource := PsSyntaxTerm.natural "0" {
+    start := { byteOffset := 0, line := 1, column := 1 }
+    stop := { byteOffset := 1, line := 1, column := 2 } }
+  let resourceElaborate : PsElaborator := fun current _ expected => do
+    let term := PsExpr.lit (.natural 0)
+    let blocked := expected.toList.any (fun target =>
+      psExprHasTermMeta (psMetaInstantiate current.metaContext target))
+    let actual ← (if blocked then
+        psInferTypeWithFuel current.environment current.metaContext current.localContext 0 term
+      else psInferType current.environment current.metaContext current.localContext term).mapError
+        PsElabError.infer
+    psElabFinalizeExpected { context := current, term, type := actual } expected
+  match psElabWithPostponement
+      (fun _ => resourceElaborate resourceContext resourceSource (some resourceType.expr))
+      resourceContext resourceSource (some resourceType.expr) with
+  | .error (.infer .fuelExhausted) => pure ()
+  | _ => throw (IO.userError "inference fuel refusal became postponed source work")
+  let resourceScope := psElabSaveScope resourceContext
+  let resourceQueue := { resourceContext with pending := [
+    .core resourceScope (.defaultValue resourceTypeId nat),
+    .sourceTerm resourceScope resourceGoalId resourceSource] }
+  let resourceRoot ← get "resource queue root"
+    ((psElabResolvedTerm resourceQueue (.sortE .zero) none).mapError psCompilerPscv0ElabError)
+  match psElabDrainPending resourceElaborate resourceRoot with
+  | .error .fuelExhausted => pure ()
+  | _ => throw (IO.userError "checked source queue ran a default after inference fuel refusal")
+  -- The default really would unlock this continuation; the refusal above is
+  -- caused by the resource boundary, not by a permanently invalid fixture.
+  let some resourceFixed := psSyntheticAssign environment resourceGoal.context resourceTypeId nat |
+    throw (IO.userError "resource fixture type default could not be assigned")
+  let resourceControl := { resourceRoot with
+    context := psElabContextWithMeta resourceQueue resourceFixed }
+  match psElabDrainPending resourceElaborate resourceControl with
+  | .ok result =>
+    unless (psMetaFindAssignment result.context.metaContext resourceGoalId).isSome do
+      throw (IO.userError "fixed resource continuation was not assigned")
+  | .error _ => throw (IO.userError "fixed resource continuation did not complete")
+  IO.println "PSCV0_NATIVE_SYNTHETIC_RESOURCE: PASS inference fuel, postponement and checked drain"
   let parsed ← get "generalized fixture parse" (psCompilerParsePscv0 generalizedFixture)
   let elaborated ← get "generalized fixture elaboration"
     ((psElabProgram environment parsed).mapError psCompilerPscv0ElabError)
@@ -3909,6 +4059,7 @@ def main : IO Unit := do
   projectBoundaries
   derivingBoundaries
   sourceInfoBoundaries
+  resultFamilyBoundaries
   syntheticBoundaries
   defaultInstanceBoundaries
   postponedBoundaries

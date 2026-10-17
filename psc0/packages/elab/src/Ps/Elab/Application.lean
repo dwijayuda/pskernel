@@ -110,8 +110,8 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
   | some target =>
     let targetShape := psWhnf current.context.environment current.context.metaContext
       current.context.localContext target
-    let enabled := match targetShape with
-      | .mvar _ => false
+    let enabled := if psElabExpectedTypeIsUnconstrained current.context targetShape then false else
+      match targetShape with
       | .sortE level => !psLevelEquivalent level .zero
       | _ => true
     if !enabled then return current
@@ -128,12 +128,20 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
 
 -- Drain scoped constraints before a dependent argument. Individually checked
 -- progress is retained even when another item still needs a later argument.
-def psElabResolveSynthetic (current : PsElabTermResult)
-    (pending : List PsSyntheticConstraint) : PsElabApplicationResult :=
+def psElabResolveSyntheticChecked (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabApplicationResult := do
   let solved := psSyntheticSolve current.context.environment current.context.instances
     current.context.metaContext pending.reverse (!current.context.postponing)
-  { result := psElabResultWithMeta current solved.context current.type
+  if solved.resourceExceeded then throw .fuelExhausted
+  return { result := psElabResultWithMeta current solved.context current.type
     constraintsRev := solved.pending.reverse }
+
+-- Retain the original result-only interface for existing callers.
+def psElabResolveSynthetic (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : PsElabApplicationResult :=
+  (psElabResolveSyntheticChecked current pending).toOption.getD {
+    result := psElabResultWithMeta current current.context.metaContext current.type
+    constraintsRev := pending }
 
 -- One ordered engine owns positional/named arguments, defaults and implicits.
 -- A matching expected function type preserves partial application. Explicit
@@ -158,15 +166,17 @@ def psElabApplyOrderedWith {α : Type}
         -- function type still preserves PSCV0's existing partial-application rule.
         let targetType := psWhnf current.context.environment current.context.metaContext
           current.context.localContext target
-        let preserve := match currentType, targetType with
-          | .forallE _ domain _ binder, .mvar _ =>
+        let preserve := match currentType with
+          | .forallE _ domain _ binder =>
+            if psElabExpectedTypeIsUnconstrained current.context targetType then
               psBinderAcceptsExplicitArgument binder &&
                 (!complete || (psElabDefaultValue current.context domain).isNone)
-          | _, _ => true
+            else true
+          | _ => true
         if preserve then
           match psElabUnifyExpected current (some target) with
           | .ok result => return { result, constraintsRev := pending }
-          | .error _ => pure ()
+          | .error error => if psElabErrorIsResource error then throw error else pure ()
       | none => pure ()
     match currentType with
     | .forallE name domain body binder =>
@@ -184,7 +194,7 @@ def psElabApplyOrderedWith {α : Type}
       match selected.1 with
       | some source =>
         let current ← psElabPropagateExpected current positions names expected
-        let resolved := psElabResolveSynthetic current pending
+        let resolved ← psElabResolveSyntheticChecked current pending
         let current := resolved.result
         let pending := resolved.constraintsRev
         let argument ← elaborate current.context source
@@ -232,7 +242,8 @@ def psElabApplyOrderedWith {α : Type}
     | _ =>
       if !positions.isEmpty || !names.isEmpty then
         let callable ← (psElabEnsureFunction current).mapError fun error =>
-          if positions.isEmpty then .invalidArgument "unknown named argument" else error
+          if psElabErrorIsResource error then error
+          else if positions.isEmpty then .invalidArgument "unknown named argument" else error
         psElabApplyOrderedWith elaborate fuel callable positions names pending complete expected
       else return { result := current, constraintsRev := pending }
 
@@ -264,8 +275,10 @@ def psElabFinishApplication (application : PsElabApplicationResult)
   do
     -- Propagate convertible result information before dictionary/default work.
     -- A failed attempt is speculative; adaptation is retried after the queue.
-    let current := (psElabUnifyExpected application.result expected).toOption.getD
-      application.result
+    let current ← match psElabUnifyExpected application.result expected with
+      | .ok result => pure result
+      | .error error => if psElabErrorIsResource error then throw error
+        else pure application.result
     let current ← psElabSolveSynthetic current application.constraintsRev.reverse
     psElabFinalizeExpected current expected
 
@@ -301,6 +314,7 @@ def psElabCompleteEmpty (elaborate : PsElaborator) (application : PsElabApplicat
     if !isUnitFamily then throw .emptyCallUnsupported
     let unified := psUnify current.context.environment current.context.localContext
       current.context.metaContext domain (.constE psUnitName [])
+    if unified.resourceExceeded then throw .fuelExhausted
     if !unified.success then throw .emptyCallUnsupported
     let context := psElabContextWithMeta current.context unified.context
     let domain := psMetaInstantiate unified.context domain

@@ -49,10 +49,23 @@ inductive PsElabError where
   | structuralRecursionDependentParameter
   | structuralRecursionEscapingReference
 
+-- Resource failures cannot become speculative mismatches or resumable work.
+def psElabErrorIsResource : PsElabError → Bool
+  | .fuelExhausted | .infer .fuelExhausted => true
+  | .atDeclaration _ error | .atContext _ error => psElabErrorIsResource error
+  | _ => false
+
 structure PsElabTermResult where
   context : PsElabContext
   term : PsExpr
   type : PsExpr
+
+-- Callers supply a weak-head-normalized type. A result family's explicit
+-- scope arguments do not make its unsolved result structurally known.
+def psElabExpectedTypeIsUnconstrained (context : PsElabContext) (type : PsExpr) : Bool :=
+  match type with
+  | .mvar _ => true
+  | _ => (psUnifyResultFamilyView context.metaContext type).isSome
 
 def psElabBoolNot (value : Bool) : Bool :=
   if value then false else true
@@ -170,6 +183,7 @@ def psElabApplyCore (context : PsElabContext) (head : PsExpr)
       current.context.localContext argument).mapError PsElabError.infer
     let unified := psUnify current.context.environment current.context.localContext
       current.context.metaContext pi.domain actual
+    if unified.resourceExceeded then throw .fuelExhausted
     if !unified.success then throw .typeMismatch
     return psElabResultWithMeta {
       context := current.context, term := .app current.term argument
@@ -191,7 +205,9 @@ def psElabUnifyExpected
           result.context.metaContext
           result.type
           expectedType;
-      if unified.success then
+      if unified.resourceExceeded then
+        Except.error PsElabError.fuelExhausted
+      else if unified.success then
         Except.ok
           (psElabResultWithMeta
             result
@@ -281,6 +297,7 @@ def psElabFinalizeExpected (result : PsElabTermResult) (expected : Option PsExpr
   match psElabUnifyExpected result expected with
   | .ok checked => return checked
   | .error error =>
+    if psElabErrorIsResource error then throw error
     let some target := expected | throw error
     -- Keep a typed result hole while its actual/expected type is blocked.
     -- Mandatory defaults and later arguments may resolve it before a Coe
@@ -303,7 +320,7 @@ def psElabFinalizeExpected (result : PsElabTermResult) (expected : Option PsExpr
       context.localContext target (.constE psBoolName [])
     let converted ← (if isProp && isBool then psElabDecideProposition result
         else psElabCoerce result "Coe" (some target)).mapError fun failure =>
-      match failure with | .fuelExhausted => failure | _ => error
+      if psElabErrorIsResource failure then failure else error
     psElabUnifyExpected converted expected
 
 def psElabEnsureFunction (result : PsElabTermResult) :
@@ -313,7 +330,7 @@ def psElabEnsureFunction (result : PsElabTermResult) :
   | .forallE _ _ _ _ => return result
   | _ =>
     let converted ← (psElabCoerce result "CoeFun" none true).mapError fun error =>
-      match error with | .fuelExhausted => error | _ => .infer .expectedFunction
+      if psElabErrorIsResource error then error else .infer .expectedFunction
     match psWhnf converted.context.environment converted.context.metaContext
         converted.context.localContext converted.type with
     | .forallE _ _ _ _ => return converted
@@ -326,7 +343,7 @@ def psElabEnsureType (result : PsElabTermResult) :
   | .sortE _ => return result
   | _ =>
     let converted ← (psElabCoerce result "CoeSort" none).mapError fun error =>
-      match error with | .fuelExhausted => error | _ => .infer .expectedSort
+      if psElabErrorIsResource error then error else .infer .expectedSort
     let _ ← (psInferEnsureSort converted.context.environment converted.context.metaContext
       converted.context.localContext converted.type).mapError PsElabError.infer
     return converted
@@ -662,6 +679,7 @@ def psElabNumericLiteral (context : PsElabContext) (family method : String)
     | none => pure context
     | some type =>
       let unified := psUnify context.environment context.localContext context.metaContext target.expr type
+      if unified.resourceExceeded then throw .fuelExhausted
       if !unified.success then throw .typeMismatch
       pure (psElabContextWithMeta context unified.context)
   let goal ← psElabApplyCore context

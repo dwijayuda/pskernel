@@ -799,9 +799,9 @@ private def refusals : List (String × String × String) := [
   ("local-wf-nondecrease",
     "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := helper(k)\ntermination_by k\n}\n",
     "PSCV0-WF-DECREASE"),
-  ("inferred-dependent-codomain",
-    "function bad(n: Nat): Nat := Fin.val(helper(n))\nwhere { def helper(k: Nat) := Fin.mk(k, Nat.lt_succ_self(k)) }\n",
-    "PSCV0-WHERE-INFER-TYPE")]
+  ("illtyped-inferred-dependent-codomain",
+    "function bad(n: Nat): Nat := Fin.val(helper(n))\nwhere { def helper(k: Nat) := Fin.mk(true, Nat.lt_succ_self(k)) }\n",
+    "PSCV0-TYPE-MISMATCH")]
 
 end M3Where
 

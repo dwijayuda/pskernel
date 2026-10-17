@@ -35,8 +35,9 @@ def psElabBinderName (type : Option PsExpr) (kind : PsSyntaxBinderKind)
       match psWhnf state.context.environment state.context.metaContext
           state.context.localContext expected with
       | .forallE name domain body binder => pure (some (PsForallView.mk name domain body binder))
-      | .mvar _ => pure none
-      | _ => throw (.infer .expectedFunction)
+      | type =>
+        if psElabExpectedTypeIsUnconstrained state.context type then pure none
+        else throw (.infer .expectedFunction)
   let type := match type, expectedPi with
     | some type, _ => PsElabTypeResult.mk state.context type
     | none, some pi => PsElabTypeResult.mk state.context pi.domain
@@ -46,6 +47,7 @@ def psElabBinderName (type : Option PsExpr) (kind : PsSyntaxBinderKind)
     | some pi =>
       let unified := psUnify type.context.environment type.context.localContext
         type.context.metaContext type.type pi.domain
+      if unified.resourceExceeded then throw .fuelExhausted
       if unified.success then pure unified.context else throw .typeMismatch
   let context := psElabContextWithMeta type.context constraints
   let binder := psElabBinderKindToCore kind

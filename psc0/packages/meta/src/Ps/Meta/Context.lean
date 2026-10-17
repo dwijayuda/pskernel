@@ -20,6 +20,9 @@ structure PsMetaVarDecl where
   localContext : PsLocalContext
   kind : PsMetaVarKind
   origin : PsMetaOrigin := {}
+  -- A natural omitted-result family is applied to this complete own-binder spine.
+  -- Zero keeps ordinary metavariables outside the bounded family assignment rule.
+  numScopeArgs : Nat := 0
 
 structure PsMetaAssignment where
   id : Nat
@@ -102,7 +105,8 @@ def psMetaFresh
     (context : PsMetaContext)
     (localContext : PsLocalContext)
     (type : PsExpr)
-    (kind : PsMetaVarKind) (origin : PsMetaOrigin := {}) : PsMetaFreshResult :=
+    (kind : PsMetaVarKind) (origin : PsMetaOrigin := {})
+    (numScopeArgs : Nat := 0) : PsMetaFreshResult :=
   let id := context.nextId;
   let declaration : PsMetaVarDecl := {
     id := id
@@ -110,6 +114,7 @@ def psMetaFresh
     localContext := localContext
     kind := kind
     origin := origin
+    numScopeArgs := numScopeArgs
   };
   {
     context := {
@@ -306,6 +311,19 @@ def psExprMetaIds : PsExpr → List Nat
   | .letE _ a b c => psExprMetaIds a ++ psExprMetaIds b ++ psExprMetaIds c
   | .proj _ _ value => psExprMetaIds value
   | _ => []
+
+-- Readiness for abstraction without narrowing another hole's captured scope.
+-- Pending terms are safe only when every possible future assignment already
+-- belongs to the requested locals. This does not replace type or occurs checks.
+def psMetaExprScopeSafe (context : PsMetaContext) (locals : PsLocalContext)
+    (expression : PsExpr) : Bool :=
+  let expression := psMetaInstantiate context expression
+  psExprFVarsInContext locals expression &&
+    (psExprMetaIds expression).all (fun id =>
+      match psMetaFindDecl context id with
+      | none => false
+      | some declaration => declaration.localContext.declarations.all
+          (fun localDecl => psLocalContainsId locals (psLocalDeclId localDecl)))
 
 -- Occurs checks follow both ordinary and delayed assignments. Checking only
 -- the visible proxy would miss a cycle through an unclosed scope.

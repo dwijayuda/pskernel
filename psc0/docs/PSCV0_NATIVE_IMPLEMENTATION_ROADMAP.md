@@ -1,131 +1,143 @@
-## Authoritative current checkpoint — independent WF accepted; typed generic P0 harness candidate, 2026-10-17
+## Authoritative current checkpoint — generic P0 accepted; dependent result inference candidate, 2026-10-17
 
-Accepted compiler/test SHA: `c23a6fb479d3c930dc97f9f13c0421b307e462a2`.
+Accepted compiler/test SHA: `82b248a3ee2cd9246756690db23b7dffd612e022`.
 All five gates completed successfully at that exact SHA. The accepted focused
-total is **940 observed comparisons** and the weighted engineering estimate
-remains **78/100**. The [complete independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
-records the source, repairs, all gates, artifacts, runtime counts and bounds.
+total is **960 observed comparisons** and the weighted engineering estimate
+remains **78/100**. The [generic-P0 receipt](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md)
+records the exact source, harness correction, all gates, artifacts and counts.
+The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) retains the preceding 940 baseline.
 
-The containing commit corrects only host type annotations in the separate
-generic mutual ordinary-P0 runtime harness. Its new tests remain **unqualified**
-until all five gates pass at this corrected compiler/test SHA. The compiler,
-source programs, native oracle values, assurance checks and runtime assertions
-are unchanged. Verify live HEAD before any write, and let healthy native CI
-finish before pushing another compiler/test revision.
+The containing commit introduces the separate bounded own-binder-dependent
+omitted-result inference candidate. Its compiler and new source/native tests
+remain **unqualified** until all five gates pass at its own exact SHA. Static
+review is complete; it is not successful compilation or runtime evidence.
+Verify live HEAD before any write and let healthy native CI finish before
+pushing another compiler/test revision.
 
-### Previous P0 attempt and exact repair
-
-The first P0 candidate was `075a381d5fefcb5d4ac40a49d4da42d8e3985024`.
-Focused run [39036074336](https://github.com/dwijayuda/pskernel/actions/runs/39036074336),
-job `117405982802`, failed while compiling the new host harness, before runtime
-assertions. Its 99,505-character log contains the successful
-`PSCV0_M3_P0_GENERIC_NATIVE` declaration/assumption marker, then unresolved
-optional-array element types at fixture lines 605–611. No focused artifact or
-new runtime comparisons were produced.
-
-The repair annotates `PsV7Native.Batch`, `PsV7Native.Result`, the optional
-`Except Diagnostic Result` lookups and the numeric index list. These are the
-actual types exported by `Ps.Host.NativeV7`; no test predicate was relaxed.
-The original native P0 source and every observation stay intact.
-
-At that failed candidate, Native Linux run
-[39036074254](https://github.com/dwijayuda/pskernel/actions/runs/39036074254),
-job `117405982891`, completed successfully with all 34 reported steps before this repair was pushed. F1
-[39036074245](https://github.com/dwijayuda/pskernel/actions/runs/39036074245),
-F2 [39036074326](https://github.com/dwijayuda/pskernel/actions/runs/39036074326)
-and F3/F4/platform
-[39036074316](https://github.com/dwijayuda/pskernel/actions/runs/39036074316)
-succeeded. The failed focused gate prevents accepting 960 from that attempt.
-
-### Accepted evidence
+### Accepted generic P0 evidence
 
 | Gate | Run | Job | Result |
 | --- | --- | --- | --- |
-| Native Linux | [39034525558](https://github.com/dwijayuda/pskernel/actions/runs/39034525558) | `117401567568` | SUCCESS; all 34 reported steps |
-| Focused M3 | [39034525589](https://github.com/dwijayuda/pskernel/actions/runs/39034525589) | `117401567829` | SUCCESS; all 15 reported steps |
-| F1 canonical model | [39034525557](https://github.com/dwijayuda/pskernel/actions/runs/39034525557) | `117401567532` | SUCCESS; all 10 reported steps |
-| F2 logical operations | [39034525553](https://github.com/dwijayuda/pskernel/actions/runs/39034525553) | `117401567564` | SUCCESS; all 9 reported steps |
-| F3/F4/platform | [39034525602](https://github.com/dwijayuda/pskernel/actions/runs/39034525602) | `117401567830` | SUCCESS; all 11 reported steps |
+| Native Linux | [39037331359](https://github.com/dwijayuda/pskernel/actions/runs/39037331359) | `117409699566` | SUCCESS; all 34 reported steps |
+| Focused M3 | [39037331391](https://github.com/dwijayuda/pskernel/actions/runs/39037331391) | `117409699812` | SUCCESS; all 15 reported steps |
+| F1 canonical model | [39037331355](https://github.com/dwijayuda/pskernel/actions/runs/39037331355) | `117409699515` | SUCCESS; all 10 reported steps |
+| F2 logical operations | [39037331395](https://github.com/dwijayuda/pskernel/actions/runs/39037331395) | `117409699959` | SUCCESS; all 9 reported steps |
+| F3/F4/platform | [39037331418](https://github.com/dwijayuda/pskernel/actions/runs/39037331418) | `117409699543` | SUCCESS; all 11 reported steps |
 
-Focused artifact **12101547251** contains 267 files / 2,857,573 bytes,
-SHA-256 `b2ee8740307b6a7bd47ea3fcce4494da3c0e17f5bee40c33e7dd462da481af73`.
-Native artifact **12102340396** is 6,797,403 bytes,
-SHA-256 `b3147a6954a79f7fe5f0f5d32b06cb50d79055b3c5199fa2b925d2cc9a58788d`.
-Focused/native logs are 7,705,040 / 4,478,235 characters.
+Focused artifact **12103270800** contains 286 files / 3,038,425 bytes,
+SHA-256 `1dfd2f978908211bac2e35652c66f65d529ad49955617efd9a377728423c2380`.
+Native artifact **12102584599** is 6,796,905 bytes,
+SHA-256 `7918b7afaff029352de34a03f1fda602c59bac6b748ab8ea438956e972960a92`.
+Published focused/native logs are 8,253,670 / 4,475,093 characters.
 
-The accepted run built all 668 focused jobs, retained 14 outer fixtures and
-completed 21 WF requests (two positives, 19 refusals). All 38 native WF
-assumption closures use only the approved set. The 70 scalar exports contribute
-700 comparisons and the original 24 deriving exports contribute 240. Exact
-anchored output contains 24/12/12 scalar ECMA/Rust/Wasm markers plus the original
-2/1/1 markers. The two independent WF exports contribute 20 new comparisons.
 
-### Retained implementation repairs
+The same generic mutual ordinary-partial pair is instantiated at Nat and Bool
+in one emitted module, with explicit dictionaries, distinct seeds, both entry
+directions and both Boolean inputs. Native expected results remain Nat
+false/true **2947/4123**, Bool false/true **12/21**. Two exports add 20 actual
+comparisons through JavaScript, strict compiled TypeScript, locked Rust, V8
+core and Wasmtime components. The total is 72 scalar exports / 720 comparisons
+plus the original 24 deriving exports / 240 comparisons.
 
-Expected-result equality recovers only the actual pending ordinary instance
-blocking a projection, after earlier comparisons learn its input type. It uses
-saved goal scopes, checks progress, retries the same equality and fully rolls
-back on failure. Native regression explicitly passes inferred input, complete
-term/universe rollback and saved scope.
+Real opaque/private-body pairs, complete universe and source telescopes,
+dictionary projection, peer forwarding, source origins and logical opacity
+are checked. Both verified assurance requests remain exact refusals without
+executable artifacts. These ordinary observations are not verified backend
+correspondence. The compiler implementation at this accepted P0 SHA is unchanged
+from the accepted independent-WF SHA; its fixture and workflow add runtime
+coverage, not a new operational semantics.
 
-Exact WF equations retain checked reflexivity and can split a remaining scoped
-canonical recursor major when a nested match requires it. Every leaf and complete
-equation are checked; the 64 bound limits nested depth, not total branch work.
+### New compiler candidate and why it is needed
 
-The packed functional preserves its source-curried callback in a typed Core let.
-Nested recursor helpers capture that value; the raw packed callback and exact
-adapter stay in the parent erasure owner. Logical zeta equality, closure,
-source equations and official-kernel checks remain. The WF source, original
-decrease proofs, 19 negative controls, oracles and runtime assertions are intact.
-Independent packing extends an already-credited mechanism and adds no score point.
+The previous omitted-result hole was created before a declaration's own
+binders and could not express a codomain such as Fin(n + 1) inferred from its
+body. The candidate creates a natural family over the resolved own-binder
+telescope in the enclosing locals. The family is applied to the original
+arguments, so checked caller constraints and body inference can both reach it.
+Explicit top-level result holes remain distinct from omitted annotations;
+local explicit result holes retain their selected inference behavior. Own
+parameter types/defaults must resolve before peer headers enter.
 
-### Current generic P0 candidate and qualification obligation
+Only a natural, unassigned, non-delayed metavariable with positive
+numScopeArgs and exactly that full application spine receives the family rule.
+The metadata survives template export, fresh replay and duplicate comparison.
+Pattern candidates abstract distinct actual binding locals in application
+order. Constant candidates build their telescope from the declared family
+type and require the result to be a Sort. Every candidate is checked in its
+creation locals, including type, occurs and scope checks, then retries the
+complete original equality before assignments commit.
 
-The nested `p0-generic/p0generic` fixture instantiates the same mutual partial
-pair at Nat and Bool in one emitted module. Explicit dictionaries, distinct
-seeds, both recursive entry directions and both Boolean inputs distinguish the
-actual runtime bodies from logical inhabitant substitution. Native oracle values
-are Nat false/true **2947/4123**, Bool false/true **12/21**.
+Pending metavariables must already have safe saved scopes. The family rule
+does not narrow another hole's scope to guess a solution. A blocked family can
+still benefit from ordinary delta conversion, but cannot fall through to
+generic application congruence and guess R := Fin / index := n. Failed
+comparisons restore term/universe assignments, declarations and delayed state.
 
-Two exports request all five targets under ordinary assurance. Separate
-closed-verified and boundary-qualified-verified requests must fail at the exact
-assurance boundary without executable artifacts. Construction checks retain
-the two real opaque/private-body pairs, universe parameters, original four-binder
-telescopes, dictionary projection, peer forwarding, source origins and absence
-of a logical `eq_def`.
+The existing elaboration schedule recognizes an unresolved full family as
+an unknown expected result. Lambdas may infer their shape, records wait for
+a known structure, and tactics keep their unresolved-goal gate. Mandatory
+defaults and caller-driven constraints retain their existing owners. A fixed
+index match may defer unknown result dependence while preserving the dependent
+context refusal and final checked recursor construction. Solved families are
+beta-reduced before capture closure; all original unresolved-term, lifted-type,
+body and official-kernel checks remain.
 
-The original fixture and workflow are preserved byte-for-byte outside the
-additive 204 fixture lines and eight workflow lines. JavaScript, strict compiled
-TypeScript, locked Rust, V8 core and Wasmtime components each run both exports
-and both flags. These are **20 planned comparisons**, taking the total to 960
-only after this new candidate completes all five gates.
+Actual resource errors propagate through migrated instance checks/search,
+synthetic assignment/default attempts, checked queues and elaborator fallback
+owners. A checked queue abort restores its original context and pending order
+while retaining attempts consumed. It stops before another item or default.
+Legacy Option/result-only compatibility APIs and existing low-level fuel
+policies remain; this is not a global resource-policy rewrite.
 
-### Next compiler feature under review
+### Candidate validation obligation
 
-Own-binder-dependent omitted-result inference is not implemented in this
-candidate. A natural family over the declared own-binder telescope is being
-prepared with explicit `numScopeArgs` provenance, checked pattern/constant
-assignments, exact scope readiness and transactional rollback. A one-way
-opaque delayed family is rejected because it loses caller-driven constraints.
+The change touches 12 compiler files and three existing fixtures, with no
+runtime export or workflow changes. Static review checked exact staged blobs,
+API order, scope/rollback behavior, template provenance, fixture preservation
+and the pinned native source. The Native fixture is strictly additive:
+151 lines leave its previous source byte-for-byte intact.
 
-The review also covers closure/default scheduling, saved record/tactic
-continuations, constant-result fixed-index matches and explicit resource
-failure propagation. Source positives include direct/forward Fin results,
-own type-binder dependencies, explicit caller constraints and retained old
-closures/records; native queue/unifier regressions remain to be qualified.
-Do not claim this feature from staged patch text.
+The result-inference fixture now proposes 19 independent native examples,
+19 source theorems, 18 closed total-definition checks, the original three
+opaque/private partial pairs, and seven source requests (one positive and six
+exact refusals). Positives include direct and forward dependent Fin results,
+a qualified helper without accidental parent capture, explicit caller results,
+a saved tactic, a caller-selected numeral dictionary returning 23, a resumed
+record body, a fixed-index match and a result dependent on an own type binder.
+Original closures, defaults, solved headers and ambient captures remain.
+
+The obsolete dependent-result refusal is replaced with an actual illtyped
+Fin constructor; body-only binder inference gets its own header refusal.
+The separate where fixture retains its original seven requests/six refusals.
+
+Additive native regressions must prove checked family/universe assignment,
+an unchanged pending index scope without speculative head guessing, successful
+resumption after the index is checked, and complete equality rollback after a
+productive control. A separate real zero-fuel inference refusal must remain an
+error through postponement and checked queue drain even when a later default
+would otherwise unlock the same valid continuation.
+
+Require Native Linux, focused M3, F1, F2 and F3/F4/platform at one exact new
+compiler/test SHA. All 960 accepted runtime comparisons must still pass.
+No additional runtime-comparison count is claimed for the source-only
+inference examples. Preserve all current assertions and resource budgets.
 
 ### Fixed bounds and continuation policy
 
-M3+B, M4 and M5 remain open. Broader indexed binary deriving, nested/source
-induction, larger changing packs, arbitrary WF telescopes, general mutual WF
-and the complete P0 matrix remain. Only `propext` and `Quot.sound` are approved;
-P1 remains refused because of `Classical.choice`. Ordinary observations are not
-verified backend correspondence.
+This is bounded inference for owned result families, not general higher-order
+unification or completeness. Checked constant approximation is eager; arbitrary
+application inversion and scheduling/backtracking beyond these rules remain
+outside the claim. Some dependent or ambiguous callers may require annotations.
 
-Lean remains 4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
-The sole forward language authority is `psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`,
-blob `694115223777599ba28ee175e14bb642b7b6aa4b`. Use connected GitHub and cloud
+M3+B, M4 and M5 remain open. Broader indexed binary deriving, nested/source
+induction, larger changing WF packs, arbitrary measure telescopes, general
+mutual WF and the complete P0 matrix remain. Only propext and Quot.sound are
+approved; P1 remains refused because of Classical.choice. The engineering
+estimate remains 78/100 until a separately justified milestone exit is accepted.
+
+Lean remains 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+The sole forward language authority is psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md,
+blob 694115223777599ba28ee175e14bb642b7b6aa4b. Use connected GitHub and cloud
 Linux only, with expected-HEAD non-force branch updates. PR #109 stays
 draft/open/unmerged on its original base.
 

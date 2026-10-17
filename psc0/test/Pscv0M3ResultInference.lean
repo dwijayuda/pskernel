@@ -16,6 +16,46 @@ def localHole (n : Nat) := helper n
 where
   helper (k : Nat) : _ := k + 1
 
+-- These result families depend on each declaration's own parameter.
+def dependent (n : Nat) := Fin.mk n (Nat.lt_succ_self n)
+
+def dependentForward (n : Nat) := helper (n + 1)
+where
+  helper (k : Nat) := Fin.mk k (Nat.lt_succ_self k)
+
+def dependentValue (n : Nat) : Nat := Fin.val (helper n)
+where
+  helper (k : Nat) := Fin.mk k (Nat.lt_succ_self k)
+
+-- Caller constraints must still reach an omitted/local-hole result before
+-- numeral defaulting or a saved tactic continuation is resumed.
+def callerProof (n : Nat) : Nat := helper n
+where
+  helper (k : Nat) : _ := by exact k
+
+structure CallerToken where
+  value : Nat
+
+instance callerTokenZero : OfNat CallerToken 0 where
+  ofNat := CallerToken.mk 23
+
+mutual
+  def caller (n : Nat) : CallerToken := callee 1
+  def callee (n : Nat) := 0
+end
+
+-- Match and record bodies retain their existing expected-type inference.
+inductive ZeroIndex : Nat → Type where
+  | zero : ZeroIndex 0
+
+def fixedIndex (x : ZeroIndex 0) :=
+  match x with
+  | .zero => 0
+
+def recordCaller (n : Nat) : CallerToken := helper n
+where
+  helper (k : Nat) := { value := k }
+
 mutual
   def even (n : Nat) :=
     match n with
@@ -49,14 +89,31 @@ variable (A : Type u) (a : A)
 def pick (n : Nat) := if n == 0 then a else a
 end
 
+-- The result and the later binder domain both depend on the first own binder.
+def ownIdentity (A : Type u) (a : A) := a
+
 example : value = 11 := rfl
 example : identity 8 = 8 := rfl
 example : closure 3 4 = 7 := rfl
 example : (defaulted : Nat) = 5 := rfl
 example : headerSolved 0 rfl = 0 := rfl
 example : localHole 4 = 5 := rfl
+example (n : Nat) :
+    dependent n = (Fin.mk n (Nat.lt_succ_self n) : Fin (n + 1)) := rfl
+example (n : Nat) :
+    dependentForward n =
+      (Fin.mk (n + 1) (Nat.lt_succ_self (n + 1)) : Fin ((n + 1) + 1)) := rfl
+example (k : Nat) :
+    dependentForward.helper k = (Fin.mk k (Nat.lt_succ_self k) : Fin (k + 1)) := rfl
+example (n : Nat) : dependentValue n = n := rfl
+example (n : Nat) : callerProof n = n := rfl
+example (n : Nat) : caller n = CallerToken.mk 23 := rfl
+example (n : Nat) : callee n = CallerToken.mk 23 := rfl
+example : (fixedIndex ZeroIndex.zero : Nat) = 0 := rfl
+example (n : Nat) : recordCaller n = CallerToken.mk n := rfl
 example : even 4 = true := rfl
 example : odd 4 = false := rfl
+example (A : Type u) (a : A) : ownIdentity A a = a := rfl
 example : @pick Nat 17 1 = 17 := rfl
 
 -- This guard must pass in cloud CI before the corresponding source-oracle
@@ -85,6 +142,23 @@ private def source : String :=
   "function riHeaderSolved(n: _, h: n = (0: Nat)): Nat := n\n" ++
   "function riLocalHole(n: Nat) := helper(n)\n" ++
   "where { def helper(k: Nat): _ := k + 1 }\n" ++
+  "function riDependent(n: Nat) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
+  "function riDependentForward(n: Nat) := helper(n + 1)\n" ++
+  "where { def helper(k: Nat) := Fin.mk(k, Nat.lt_succ_self(k)) }\n" ++
+  "function riDependentValue(n: Nat): Nat := Fin.val(helper(n))\n" ++
+  "where { def helper(k: Nat) := Fin.mk(k, Nat.lt_succ_self(k)) }\n" ++
+  "function riCallerProof(n: Nat): Nat := helper(n)\n" ++
+  "where { def helper(k: Nat): _ := by { exact k } }\n" ++
+  "structure RICallerToken where { value: Nat }\n" ++
+  "instance riCallerTokenZero: OfNat(RICallerToken, 0) where { ofNat := RICallerToken.mk(23) }\n" ++
+  "mutual\n" ++
+  "function riCaller(n: Nat): RICallerToken := riCallee(1)\n" ++
+  "function riCallee(n: Nat) := 0\n" ++
+  "end\n" ++
+  "inductive RIZeroIndex: Nat -> Type where { | zero: RIZeroIndex(0) }\n" ++
+  "function riFixedIndex(x: RIZeroIndex(0)) := match x with { | RIZeroIndex.zero => 0 }\n" ++
+  "function riRecordCaller(n: Nat): RICallerToken := helper(n)\n" ++
+  "where { def helper(k: Nat) := { value := k } }\n" ++
   "mutual\n" ++
   "function riEven(n: Nat) := match n with { | 0 => true | k + 1 => riOdd(k) }\n" ++
   "function riOdd(n: Nat) := match n with { | 0 => false | k + 1 => riEven(k) }\n" ++
@@ -97,14 +171,25 @@ private def source : String :=
   "universe u\nsection\nvariable (A: Type u) (a: A)\n" ++
   "function riPick(n: Nat) := if (n == 0) { a } else { a }\n" ++
   "end\n" ++
+  "function riOwnIdentity(A: Type u, a: A) := a\n" ++
   "theorem riValueEq: riValue = 11 := by { rfl }\n" ++
   "theorem riIdentityEq: riIdentity(8) = 8 := by { rfl }\n" ++
   "theorem riClosureEq: riClosure(3)(4) = 7 := by { rfl }\n" ++
   "theorem riDefaultedEq: riDefaulted() = 5 := by { rfl }\n" ++
   "theorem riHeaderSolvedEq: riHeaderSolved(0, Eq.refl(0)) = 0 := by { rfl }\n" ++
   "theorem riLocalHoleEq: riLocalHole(4) = 5 := by { rfl }\n" ++
+  "theorem riDependentEq(n: Nat): riDependent(n) = (Fin.mk(n, Nat.lt_succ_self(n)): Fin(n + 1)) := by { rfl }\n" ++
+  "theorem riDependentForwardEq(n: Nat): riDependentForward(n) = (Fin.mk(n + 1, Nat.lt_succ_self(n + 1)): Fin((n + 1) + 1)) := by { rfl }\n" ++
+  "theorem riDependentHelperEq(k: Nat): riDependentForward.helper(k) = (Fin.mk(k, Nat.lt_succ_self(k)): Fin(k + 1)) := by { rfl }\n" ++
+  "theorem riDependentValueEq(n: Nat): riDependentValue(n) = n := by { rfl }\n" ++
+  "theorem riCallerProofEq(n: Nat): riCallerProof(n) = n := by { rfl }\n" ++
+  "theorem riCallerEq(n: Nat): riCaller(n) = RICallerToken.mk(23) := by { rfl }\n" ++
+  "theorem riCalleeType(n: Nat): riCallee(n) = RICallerToken.mk(23) := by { rfl }\n" ++
+  "theorem riFixedIndexEq: (riFixedIndex(RIZeroIndex.zero): Nat) = 0 := by { rfl }\n" ++
+  "theorem riRecordCallerEq(n: Nat): riRecordCaller(n) = RICallerToken.mk(n) := by { rfl }\n" ++
   "theorem riEvenEq: riEven(4) = true := by { rfl }\n" ++
   "theorem riOddEq: riOdd(4) = false := by { rfl }\n" ++
+  "theorem riOwnIdentityEq(A: Type u, a: A): riOwnIdentity(A, a) = a := by { rfl }\n" ++
   "theorem riPickEq: riPick(Nat, 17, 1) = 17 := by { rfl }\n"
 
 private def checkRepresentation : IO Unit := do
@@ -149,6 +234,8 @@ private def checkCore : IO Unit := do
     psCompilerPscv0ElabError)
   let environment := compiled.result.environment
   for name in ["riValue", "riIdentity", "riClosure", "riDefaulted", "riHeaderSolved", "riLocalHole",
+      "riDependent", "riDependentForward", "riDependentValue", "riCallerProof", "riCaller", "riCallee",
+      "riFixedIndex", "riRecordCaller", "riOwnIdentity",
       "riEven", "riOdd", "riPick"] do
     let some (.definitionDecl _ _ type value) := psEnvironmentFind environment (psRootName name)
       | throw (IO.userError ("inferred main did not produce a checked total definition: " ++ name))
@@ -173,8 +260,10 @@ private def refusals : List (String × String × String) := [
   ("explicit-mutual-main-hole",
     "mutual\nfunction riBad(n: Nat): _ := n\nend\n", "PSCV0-WHERE-HEADER"),
   ("unresolved-omitted-result", "const riBad := _\n", "PSCV0-WHERE-INFER-TYPE"),
-  ("dependent-omitted-result",
-    "function riBad(n: Nat) := Fin.mk(n, Nat.lt_succ_self(n))\n", "PSCV0-WHERE-INFER-TYPE"),
+  ("body-only-binder-inference",
+    "function riBad(n: _) := Nat.succ(n)\n", "PSCV0-WHERE-HEADER"),
+  ("illtyped-omitted-result",
+    "function riBad(n: Nat) := Fin.mk(true, Nat.lt_succ_self(n))\n", "PSCV0-TYPE-MISMATCH"),
   ("inferred-fixedpoint-policy",
     "function riBad(flag: Bool) := if (flag) { false } else { riBad(flag) }\npartial_fixpoint\n",
     "PSCV0-FIXPOINT-ASSUMPTION")]
@@ -204,7 +293,7 @@ def check : IO Unit := do
       ensure (error.phase == "elaborate" && (error.message.splitOn rule).length > 1)
         (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
     | _ => throw (IO.userError ("unexpected result-inference acceptance: " ++ label))
-  IO.println "PSCV0_M3_RESULT_INFERENCE: PASS independent native omitted/main-hole/local-hole boundaries, preserved source printing, checked total and partial headers, recursive predefinitions, scoped captures and exact refusals"
+  IO.println "PSCV0_M3_RESULT_INFERENCE: PASS independent native dependent result families, caller-guided inference and main-hole/local-hole boundaries, preserved source printing, checked total and partial headers, recursive predefinitions, scoped captures and exact refusals"
 
 end M3ResultInference
 

@@ -17,16 +17,24 @@ structure PsSyntheticQueueResult (σ α : Type) where
 
 abbrev PsSyntheticResult := PsSyntheticQueueResult PsMetaContext PsSyntheticConstraint
 
-def psSyntheticAssign (environment : PsEnvironment) (context : PsMetaContext)
-    (id : Nat) (value : PsExpr) : Option PsMetaContext := do
-  let declaration ← psMetaFindDecl context id
-  let checked ← psInstanceCheck environment declaration.localContext context declaration.type value
-  let value ← checked.value
+def psSyntheticAssignChecked (environment : PsEnvironment) (context : PsMetaContext)
+    (id : Nat) (value : PsExpr) : Except Unit (Option PsMetaContext) := do
+  let some declaration := psMetaFindDecl context id | return none
+  let checked ← psInstanceCheckChecked environment declaration.localContext context declaration.type value
+  let some checked := checked | return none
+  let some value := checked.value | return none
   match psMetaFindAssignment checked.context id with
-  | none => psMetaAssign checked.context id value
+  | none => return psMetaAssign checked.context id value
   | some prior =>
     let unified := psUnify environment declaration.localContext checked.context prior value
-    if unified.success then some unified.context else none
+    if unified.resourceExceeded then throw ()
+    return if unified.success then some unified.context else none
+
+def psSyntheticAssign (environment : PsEnvironment) (context : PsMetaContext)
+    (id : Nat) (value : PsExpr) : Option PsMetaContext :=
+  match psSyntheticAssignChecked environment context id value with
+  | .ok result => result
+  | .error () => none
 
 -- Reuse one checked instance-attempt boundary for ordinary and nested-default
 -- work. Search counters remain available to the enclosing default budget.
@@ -38,28 +46,39 @@ def psSyntheticInstanceAttempt (environment : PsEnvironment) (index : PsInstance
   | some declaration =>
     match psMetaFindAssignment context id with
     | some value =>
-      match psSyntheticAssign environment context id value with
-      | some checked => { result := psSynthSuccess checked value, table := {} }
-      | none => { result := psSynthFailure context, table := {} }
+      match psSyntheticAssignChecked environment context id value with
+      | .error () => { result := psSynthFailure context, table := { resourceExceeded := true } }
+      | .ok (some checked) => { result := psSynthSuccess checked value, table := {} }
+      | .ok none => { result := psSynthFailure context, table := {} }
     | none =>
       let searched := psSynthInstanceWithLimits environment declaration.localContext index
         context 64 limits (psMetaInstantiate context declaration.type)
       match searched.result.value with
       | none => searched
       | some value =>
-        match psSyntheticAssign environment searched.result.context id value with
-        | some checked => { searched with result := psSynthSuccess checked value }
-        | none => { searched with result := psSynthFailure context }
+        match psSyntheticAssignChecked environment searched.result.context id value with
+        | .error () => { searched with result := psSynthFailure context
+            table := { searched.table with resourceExceeded := true } }
+        | .ok (some checked) => { searched with result := psSynthSuccess checked value }
+        | .ok none => { searched with result := psSynthFailure context }
 
-def psSyntheticAttempt (environment : PsEnvironment) (index : PsInstanceIndex)
-    (context : PsMetaContext) : PsSyntheticConstraint → Option PsMetaContext
+def psSyntheticAttemptChecked (environment : PsEnvironment) (index : PsInstanceIndex)
+    (context : PsMetaContext) : PsSyntheticConstraint → Except Unit (Option PsMetaContext)
   | .expectedType locals actual expected =>
     let unified := psUnify environment locals context actual expected
-    if unified.success then some unified.context else none
-  | .defaultValue id value => psSyntheticAssign environment context id value
+    if unified.resourceExceeded then .error () else
+    .ok (if unified.success then some unified.context else none)
+  | .defaultValue id value => psSyntheticAssignChecked environment context id value
   | .instanceGoal id =>
     let checked := psSyntheticInstanceAttempt environment index context id
-    checked.result.value.map (fun _ => checked.result.context)
+    if checked.table.resourceExceeded then .error () else
+    .ok (checked.result.value.map (fun _ => checked.result.context))
+
+def psSyntheticAttempt (environment : PsEnvironment) (index : PsInstanceIndex)
+    (context : PsMetaContext) (constraint : PsSyntheticConstraint) : Option PsMetaContext :=
+  match psSyntheticAttemptChecked environment index context constraint with
+  | .ok result => result
+  | .error () => none
 
 
 -- Default-instance search follows Lean 4.35.0 Lean/Elab/SyntheticMVars.lean
@@ -104,6 +123,7 @@ def psSyntheticDefaultSearch (fuel : Nat) (environment : PsEnvironment)
       if !candidate.success then continue
       let checked := psUnifyWithTransparency .instances environment declaration.localContext
         candidate.context candidate.resultType declaration.type
+      if checked.resourceExceeded then return { context, remaining, exhausted := true }
       if !checked.success then continue
       let pending := candidate.arguments.filterMap fun arg =>
         if arg.isInstance then
@@ -113,8 +133,10 @@ def psSyntheticDefaultSearch (fuel : Nat) (environment : PsEnvironment)
       remaining := solved.remaining
       if solved.exhausted then return { context, remaining, exhausted := true }
       if !solved.success then continue
-      if let some next := psSyntheticAssign environment solved.context id candidate.value then
-        return { context := next, remaining, success := true }
+      match psSyntheticAssignChecked environment solved.context id candidate.value with
+      | .error () => return { context, remaining, exhausted := true }
+      | .ok (some next) => return { context := next, remaining, success := true }
+      | .ok none => pure ()
     return { context, remaining }
 
 def psSyntheticDefaultGoals (fuel : Nat) (environment : PsEnvironment)
@@ -174,6 +196,7 @@ def psSyntheticDefaultEligibility (environment : PsEnvironment) (index : PsInsta
     if !candidate.success then continue
     let checked := psUnifyWithTransparency .instances environment declaration.localContext
       candidate.context candidate.resultType target.type
+    if checked.resourceExceeded then throw ()
     if checked.success then return (true, remaining)
   return (false, remaining)
 
@@ -182,10 +205,10 @@ def psSyntheticAttemptDefault (environment : PsEnvironment) (index : PsInstanceI
     Except Unit (Option PsMetaContext) :=
   match constraint with
   | .defaultValue id value =>
-    .ok (if priority == 0 then psSyntheticAssign environment context id value else none)
+    if priority == 0 then psSyntheticAssignChecked environment context id value else .ok none
   | .instanceGoal id =>
     if (psMetaFindAssignment context id).isSome then
-      .ok (psSyntheticAttempt environment index context constraint)
+      psSyntheticAttemptChecked environment index context constraint
     else do
       let (eligible, remaining) ← psSyntheticDefaultEligibility environment index context id
         psInstanceMaxCandidateChecks
@@ -225,24 +248,34 @@ def psSyntheticIsDefault : PsSyntheticConstraint → Bool
   | .defaultValue _ _ => true
   | _ => false
 
-def psSyntheticQueuePass {σ α : Type}
-    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+def psSyntheticQueuePassChecked {σ α : Type}
+    (attempt : σ → α → Except Unit (Option σ)) (isDefault : α → Bool)
     (limit : Nat) (pending : List α)
     (state : PsSyntheticQueueResult σ α) : PsSyntheticQueueResult σ α :=
   match pending with
   | [] => { state with pending := state.pending.reverse }
   | constraint :: rest =>
     if isDefault constraint then
-      psSyntheticQueuePass attempt isDefault limit rest
+      psSyntheticQueuePassChecked attempt isDefault limit rest
         { state with pending := constraint :: state.pending }
     else if state.attempts >= limit then
       { state with pending := state.pending.reverse ++ pending, resourceExceeded := true }
     else
-      let solved := attempt state.context constraint
-      psSyntheticQueuePass attempt isDefault limit rest {
-        state with context := solved.getD state.context
-                   pending := if solved.isSome then state.pending else constraint :: state.pending
-                   attempts := state.attempts + 1 }
+      match attempt state.context constraint with
+      | .error () => { state with pending := state.pending.reverse ++ pending
+          attempts := state.attempts + 1, resourceExceeded := true }
+      | .ok solved =>
+        psSyntheticQueuePassChecked attempt isDefault limit rest {
+          state with context := solved.getD state.context
+                     pending := if solved.isSome then state.pending else constraint :: state.pending
+                     attempts := state.attempts + 1 }
+
+def psSyntheticQueuePass {σ α : Type}
+    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+    (limit : Nat) (pending : List α)
+    (state : PsSyntheticQueueResult σ α) : PsSyntheticQueueResult σ α :=
+  psSyntheticQueuePassChecked (fun context constraint => .ok (attempt context constraint))
+    isDefault limit pending state
 
 -- Apply at most one default, then resume ordinary synthesis. The priority
 -- belongs to each captured scope; an unrelated registry cannot supply evidence.
@@ -269,8 +302,8 @@ def psSyntheticQueueDefault {σ α : Type}
 
 -- Every productive round removes a constraint. Defaults run only after
 -- ordinary work reaches quiescence; a single default can wake ordinary work.
-def psSyntheticQueueRun {σ α : Type} (fuel : Nat)
-    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+def psSyntheticQueueRunChecked {σ α : Type} (fuel : Nat)
+    (attempt : σ → α → Except Unit (Option σ)) (isDefault : α → Bool)
     (attemptDefault : σ → α → Nat → Except Unit (Option σ)) (priorities : α → List Nat)
     (allowDefaults : Bool) (limit : Nat)
     (state : PsSyntheticQueueResult σ α) : PsSyntheticQueueResult σ α :=
@@ -278,17 +311,36 @@ def psSyntheticQueueRun {σ α : Type} (fuel : Nat)
   | 0 => { state with resourceExceeded := !state.pending.isEmpty }
   | fuel + 1 =>
     if state.pending.isEmpty then state else
-    let ordinary := psSyntheticQueuePass attempt isDefault limit state.pending
+    let ordinary := psSyntheticQueuePassChecked attempt isDefault limit state.pending
       { state with pending := [] }
     if ordinary.resourceExceeded then ordinary else
     if ordinary.pending.length < state.pending.length then
-      psSyntheticQueueRun fuel attempt isDefault attemptDefault priorities allowDefaults limit ordinary
+      psSyntheticQueueRunChecked fuel attempt isDefault attemptDefault priorities allowDefaults limit ordinary
     else if !allowDefaults then ordinary else
       let defaults := psSyntheticQueueDefault attemptDefault priorities limit ordinary
       if defaults.resourceExceeded then defaults else
       if defaults.pending.length < ordinary.pending.length then
-        psSyntheticQueueRun fuel attempt isDefault attemptDefault priorities allowDefaults limit defaults
+        psSyntheticQueueRunChecked fuel attempt isDefault attemptDefault priorities allowDefaults limit defaults
       else defaults
+
+def psSyntheticQueueRun {σ α : Type} (fuel : Nat)
+    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+    (attemptDefault : σ → α → Nat → Except Unit (Option σ)) (priorities : α → List Nat)
+    (allowDefaults : Bool) (limit : Nat)
+    (state : PsSyntheticQueueResult σ α) : PsSyntheticQueueResult σ α :=
+  psSyntheticQueueRunChecked fuel (fun context constraint => .ok (attempt context constraint))
+    isDefault attemptDefault priorities allowDefaults limit state
+
+def psSyntheticQueueSolveChecked {σ α : Type}
+    (attempt : σ → α → Except Unit (Option σ)) (isDefault : α → Bool)
+    (priorities : α → List Nat)
+    (attemptDefault : σ → α → Nat → Except Unit (Option σ))
+    (context : σ) (pending : List α)
+    (allowDefaults : Bool := true) (limit : Nat := 32768) :
+    PsSyntheticQueueResult σ α :=
+  let result := psSyntheticQueueRunChecked (pending.length + 1) attempt isDefault
+    attemptDefault priorities allowDefaults limit { context, pending }
+  if result.resourceExceeded then { result with context, pending } else result
 
 def psSyntheticQueueSolve {σ α : Type}
     (attempt : σ → α → Option σ) (isDefault : α → Bool)
@@ -297,13 +349,12 @@ def psSyntheticQueueSolve {σ α : Type}
     (context : σ) (pending : List α)
     (allowDefaults : Bool := true) (limit : Nat := 32768) :
     PsSyntheticQueueResult σ α :=
-  let result := psSyntheticQueueRun (pending.length + 1) attempt isDefault
-    attemptDefault priorities allowDefaults limit { context, pending }
-  if result.resourceExceeded then { result with context, pending } else result
+  psSyntheticQueueSolveChecked (fun context constraint => .ok (attempt context constraint))
+    isDefault priorities attemptDefault context pending allowDefaults limit
 
 def psSyntheticSolve (environment : PsEnvironment) (index : PsInstanceIndex)
     (context : PsMetaContext) (pending : List PsSyntheticConstraint)
     (allowDefaults : Bool := true) (limit : Nat := 32768) : PsSyntheticResult :=
-  psSyntheticQueueSolve (psSyntheticAttempt environment index) psSyntheticIsDefault
+  psSyntheticQueueSolveChecked (psSyntheticAttemptChecked environment index) psSyntheticIsDefault
     (psSyntheticConstraintPriorities index) (psSyntheticAttemptDefault environment index)
     context pending allowDefaults limit

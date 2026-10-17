@@ -260,9 +260,10 @@ def psInstancePublish (environment : PsEnvironment) (state : PsInstanceSearchSta
   | none => state
   | some generator =>
     if generator.answer.isSome || height > state.maxHeight then state else
-    match psInstanceCheck environment generator.locals context generator.target value with
-    | none => state
-    | some checked =>
+    match psInstanceCheckChecked environment generator.locals context generator.target value with
+    | .error () => { state with table := { state.table with resourceExceeded := true } }
+    | .ok none => state
+    | .ok (some checked) =>
       match checked.value.bind (fun value =>
           (psMetaAbstract checked.context generator.locals value generator.target).map (value, ·)) with
       | none => state
@@ -328,7 +329,9 @@ def psInstanceGenerate (environment : PsEnvironment)
           if !candidate.success then state else
           let checked := psUnifyWithTransparency .instances environment generator.locals candidate.context
             candidate.resultType generator.target
-          if !checked.success then state else
+          if checked.resourceExceeded then
+            { state with table := { state.table with resourceExceeded := true } }
+          else if !checked.success then state else
           let pending := candidate.arguments.filterMap fun arg =>
             if arg.isInstance then
               match arg.expr with | .mvar id => some id | _ => none
@@ -365,14 +368,22 @@ def psInstanceConsume (environment : PsEnvironment)
         psInstanceAwait environment state generator.scope generator.locals
           consumer.context target (.argument { consumer with pending } id target)
 
+def psInstanceReceiveChecked (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (target : PsExpr) (ownsContext : Bool)
+    (answer : PsInstanceTableAnswer) : Except Unit (Option PsSynthInstanceResult) :=
+  if ownsContext then
+    psInstanceCheckChecked environment locals answer.context target answer.value
+  else
+    match psMetaOpenTemplate context locals answer.template with
+    | none => .ok none
+    | some (context, value, _) => psInstanceCheckChecked environment locals context target value
+
 def psInstanceReceive (environment : PsEnvironment) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) (ownsContext : Bool)
-    (answer : PsInstanceTableAnswer) : Option PsSynthInstanceResult := do
-  if ownsContext then
-    psInstanceCheck environment locals answer.context target answer.value
-  else do
-    let (context, value, _) ← psMetaOpenTemplate context locals answer.template
-    psInstanceCheck environment locals context target value
+    (answer : PsInstanceTableAnswer) : Option PsSynthInstanceResult :=
+  match psInstanceReceiveChecked environment locals context target ownsContext answer with
+  | .ok result => result
+  | .error () => none
 
 def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchState)
     (subscription : PsInstanceSubscription) (answer : PsInstanceTableAnswer) :
@@ -390,10 +401,11 @@ def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchStat
     | .argument consumer id target =>
       let height := max consumer.height (answer.height + 1)
       if height > state.maxHeight then state else
-      match psInstanceReceive environment generator.locals consumer.context target
+      match psInstanceReceiveChecked environment generator.locals consumer.context target
           subscription.ownsContext answer with
-      | none => state
-      | some checked =>
+      | .error () => { state with table := { state.table with resourceExceeded := true } }
+      | .ok none => state
+      | .ok (some checked) =>
         match checked.value.bind (psMetaAssign checked.context id) with
         | none => state
         | some context =>
@@ -401,10 +413,11 @@ def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchStat
     | .abstraction abstraction =>
       let height := answer.height + 1
       if height > state.maxHeight then state else
-      match psInstanceReceive environment abstraction.locals generator.context abstraction.target
+      match psInstanceReceiveChecked environment abstraction.locals generator.context abstraction.target
           subscription.ownsContext answer with
-      | none => state
-      | some checked =>
+      | .error () => { state with table := { state.table with resourceExceeded := true } }
+      | .ok none => state
+      | .ok (some checked) =>
         match checked.value with
         | none => state
         | some value =>
@@ -442,19 +455,22 @@ def psSynthInstanceWithLimits (environment : PsEnvironment) (locals : PsLocalCon
     limits, maxHeight := height, registry := psInstanceRegistry index }
   let (initial, _) := psInstanceAcquire environment initial 0 locals context target
   let final := psInstanceRun limits.transitions environment initial
-  let result := if final.table.resourceExceeded then psSynthFailure context else
+  let failure : Bool → PsInstanceTabledResult := fun exhausted => {
+    result := psSynthFailure context
+    table := { final.table with resourceExceeded := final.table.resourceExceeded || exhausted } }
+  if final.table.resourceExceeded then failure true else
     match (final.generators[0]?).bind (·.answer) with
-    | none => psSynthFailure context
+    | none => failure false
     | some answer =>
       -- Selection ignores outputs; this final check intentionally cannot
       -- backtrack into lower-priority instances to satisfy a preferred output.
-      match psInstanceCheck environment locals answer.context target answer.value with
-      | some checked =>
+      match psInstanceCheckChecked environment locals answer.context target answer.value with
+      | .error () => failure true
+      | .ok none => failure false
+      | .ok (some checked) =>
         match checked.value with
         | some value =>
           if psExprHasTermMeta value ||
-              psExprHasTermMeta (psMetaInstantiate checked.context target) then psSynthFailure context
-          else checked
-        | none => psSynthFailure context
-      | none => psSynthFailure context
-  { result, table := final.table }
+              psExprHasTermMeta (psMetaInstantiate checked.context target) then failure false
+          else { result := checked, table := final.table }
+        | none => failure false

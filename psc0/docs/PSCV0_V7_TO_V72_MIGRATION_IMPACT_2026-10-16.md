@@ -14,41 +14,47 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — independent WF accepted, typed generic P0 harness candidate, 17 October 2026
+## Current M3+B implementation checkpoint — generic P0 accepted, dependent result inference candidate, 17 October 2026
 
-Accepted compiler/test SHA is `c23a6fb479d3c930dc97f9f13c0421b307e462a2`: **78/100** weighted progress and
-**940 observed focused comparisons**. The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
-records all five successful same-SHA gates, complete artifacts, exact logical
-construction, 38 approved native assumption closures, 21 WF requests and all
-runtime lanes. Independent two-changing-argument packing is qualified; no extra
-whole score point is assigned for extending the already-credited pair mechanism.
+Accepted compiler/test SHA is `82b248a3ee2cd9246756690db23b7dffd612e022`: **78/100** weighted progress and
+**960 observed focused comparisons** after all five same-SHA gates passed.
+The [generic P0 receipt](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md)
+records exact source construction, native oracle, verified-assurance refusals,
+all runtime lanes, gate/job and artifact identities and the harness-only repair.
+The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
+retains the preceding 940 baseline and its qualified construction repairs.
 
-The original independent decrease proofs, native oracles, public equations and
-19 refusal controls are unchanged. Transactional queued-instance recovery fixed
-expected-type inference; checked nested constructor cases fixed exact equation
-transport; a typed source-curried callback let keeps packed adapters inside their
-erasure owner. Native Linux passes the new inferred-input/rollback/saved-scope
-regressions and the complete original source/Standard/backend gates.
+Generic P0 executes both entries of one polymorphic mutual partial pair at Nat
+and Bool, with explicit dictionaries, distinct seeds and both flags in one
+emitted module. Two exports add 20 comparisons to the unchanged 940. The
+ordinary logical/body identities and both verified-assurance refusals remain.
+Native Linux completed all 34 steps before the next compiler/test push.
 
-The separate generic mutual ordinary-P0 fixture covers Nat and Bool, real
-dictionaries/seeds, two exports, five runtime lanes and two exact verified
-assurance refusals. First candidate `075a381d5fefcb5d4ac40a49d4da42d8e3985024`
-failed host harness compilation in focused run 39036074336 / job 117405982802 before
-runtime assertions. Its native declaration/assumption marker passed, but no new
-comparisons or focused artifact were produced. Native run 39036074254
-completed successfully with all 34 reported steps before this repair was pushed; F1/F2/F3 succeeded.
+The containing revision introduces a separate bounded own-binder-dependent
+omitted-result inference candidate. It allocates checked natural families over
+resolved own binders, preserves scope provenance through replay, and uses
+checked pattern/constant assignments with complete equality rollback.
+Unknown-result scheduling retains closure, defaults, records, tactics and
+checked fixed-index matches. Structured resource errors propagate through the
+migrated instance/synthetic/elaborator owners without fallback or defaulting.
 
-The containing revision adds explicit host batch/result/lookup/index types only.
-Source, independent native oracles, runtime expectations and assurance refusals
-are unchanged. Its 20 comparisons remain planned until all five fresh gates
-pass at one corrected compiler/test SHA; only then may 960 be accepted.
+The 12 compiler files and three test fixtures remain unqualified until all five
+fresh gates pass at this exact new compiler/test SHA. The fixture proposes 19
+native examples and 19 source theorems, 18 closed total definitions, three
+original partial pairs and six exact refusals. Additive native tests cover
+productive family/universe assignment, pending index scope and checked wakeup,
+complete equality rollback and genuine inference fuel errors. No new runtime
+count is assigned to source-only examples; all 960 observations must remain.
 
-Own-binder-dependent omitted-result inference and its checked resource path
-remain a later candidate. Larger WF packs, arbitrary/variable measure codomains,
-general mutual WF, broader indexed binary deriving, nested/source induction and
-the complete P0 matrix remain open. P1 retains its audited `Classical.choice`
-refusal. M3+B, M4 and M5 remain open. The adoption matrix below is historical
-policy/owner evidence and does not override this exact acceptance checkpoint.
+The new rule is bounded and does not provide general higher-order completeness
+or arbitrary application inversion. Eager constant approximation, legacy
+compatibility wrappers and pre-existing low-level fuel policies remain.
+Larger changing WF packs, arbitrary measure telescopes, general mutual WF,
+broader indexed binary deriving, nested/source induction and the complete P0
+matrix remain open. P1 retains its audited Classical.choice refusal; only
+propext and Quot.sound are approved. M3+B, M4 and M5 remain open.
+The adoption matrix below is historical policy/owner evidence and does not
+override this exact acceptance checkpoint.
 
 ## Rule-to-change and implementation matrix
 

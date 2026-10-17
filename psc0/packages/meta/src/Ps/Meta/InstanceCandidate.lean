@@ -82,13 +82,25 @@ def psPrepareInstance
 -- A template replay is re-inferred in the receiver's own snapshot. Natural
 -- inference parameters may remain while a consumer resolves later subgoals;
 -- publication separately verifies that no synthetic obligations were abstracted.
+def psInstanceCheckChecked (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (target value : PsExpr) :
+    Except Unit (Option PsSynthInstanceResult) :=
+  match psInferType environment context locals value with
+  | .error .fuelExhausted => .error ()
+  | .error _ => .ok none
+  | .ok type =>
+    let checked := psUnify environment locals context type target
+    if checked.resourceExceeded then .error () else
+    .ok (if checked.success then
+      some (psSynthSuccess checked.context (psMetaInstantiate checked.context value))
+    else none)
+
+-- Compatibility API for callers that only distinguish solved from blocked.
 def psInstanceCheck (environment : PsEnvironment) (locals : PsLocalContext)
-    (context : PsMetaContext) (target value : PsExpr) : Option PsSynthInstanceResult := do
-  let .ok type := psInferType environment context locals value | none
-  let checked := psUnify environment locals context type target
-  if checked.success then
-    some (psSynthSuccess checked.context (psMetaInstantiate checked.context value))
-  else none
+    (context : PsMetaContext) (target value : PsExpr) : Option PsSynthInstanceResult :=
+  match psInstanceCheckChecked environment locals context target value with
+  | .ok result => result
+  | .error () => none
 
 -- Closed evidence remains a useful stronger boundary for callers and audits.
 def psInstanceReplay (environment : PsEnvironment) (locals : PsLocalContext)

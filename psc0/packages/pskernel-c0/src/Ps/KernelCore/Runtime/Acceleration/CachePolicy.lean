@@ -318,3 +318,38 @@ theorem psKernelC0AdaptiveHasFVar_source (expr : PsKernelExpr) :
     @psKernelExprHasFVar = @psKernelC0AdaptiveHasFVar := by
   funext expr
   exact (psKernelC0AdaptiveHasFVar_source expr).symm
+
+/-!
+**Pinned Lean 4.35 WHNF optimization boundary.**
+
+The real `shared-subterm` profiler repeatedly entered
+`psKernelSemanticCacheEligible` from WHNF. Existing compiler-only
+`psKernelExprHasFVar_csimp` does not itself establish that the call site
+has been rewritten. Certify the *complete cache-eligibility decision* and
+replace that function at the compiler boundary. All source-level kernel
+terms, trusted cache admission conditions, scopes and DefEq outcomes stay
+exactly unchanged.
+-/
+
+/-- Context-free exact cache eligibility, not a memoized checked result. -/
+def psKernelC0AdaptiveSemanticCacheEligible
+    (expr : PsKernelExpr) : Bool :=
+  !psKernelC0AdaptiveHasFVar expr
+
+/-- Every compiled Boolean decision equals the original semantic
+    cache guard, including all FVar-positive and shared-DAG cases. -/
+theorem psKernelC0AdaptiveSemanticCacheEligible_source
+    (expr : PsKernelExpr) :
+    psKernelC0AdaptiveSemanticCacheEligible expr =
+      psKernelSemanticCacheEligible expr := by
+  simp only [psKernelC0AdaptiveSemanticCacheEligible,
+    psKernelSemanticCacheEligible, psKernelC0AdaptiveHasFVar_source]
+
+/-- Source-preserving native compilation route for the actual WHNF
+    eligibility service; never permits a checked inference or DefEq
+    result without the original semantic local-context guard. -/
+@[csimp] theorem psKernelSemanticCacheEligible_csimp :
+    @psKernelSemanticCacheEligible =
+      @psKernelC0AdaptiveSemanticCacheEligible := by
+  funext expr
+  exact (psKernelC0AdaptiveSemanticCacheEligible_source expr).symm

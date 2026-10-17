@@ -1,0 +1,137 @@
+name: PSKernel-C0 long Array reverse resource diagnostic (NOT conformance)
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-pair-fvar-array-reverse-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  accepted-real-array-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Pin exact official Lean 4.35 acceptance and dependency-closed Array proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- \
+              '_private.Init.Data.Array.Lemmas.0.Array.toList_reverse.go._unary' \
+              > "$RUNNER_TEMP/c0-real-array-reverse.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-real-array-reverse.ndjson" \
+              > "$RUNNER_TEMP/official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/c0-real-array-reverse.ndjson")" -eq 123090
+          test "$(stat -c%s "$RUNNER_TEMP/c0-real-array-reverse.ndjson")" -eq 6262324
+          echo "25428bd2c43f00196f3d5624a0a60da4d287f722523fc909e0156ea5699391be  $RUNNER_TEMP/c0-real-array-reverse.ndjson" | sha256sum -c -
+          echo "C0_PAIR_FVAR_ARRAY_SOURCE original_Lean435=true native_sha256_verified=true official=accepted records=123090"
+      - name: PR131 prior certified pair-cache source baseline (diagnostic only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch -q --no-tags --depth=1 origin 6aca24f4ae6f22e8962b7b068ceb9bb80b12446b
+          test "$(git rev-parse FETCH_HEAD)" = 6aca24f4ae6f22e8962b7b068ceb9bb80b12446b
+          for path in \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean; do
+            git show FETCH_HEAD:"$path" > "$path"
+          done
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-baseline-resources.txt" \
+              timeout 540s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-real-array-reverse.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-baseline.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_PAIR_FVAR_ARRAY_BENCH variant=original exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=123090 fuel=4096' \
+              "$RUNNER_TEMP/array-baseline.txt"
+            echo "C0_PAIR_FVAR_ARRAY_BENCH variant=baseline checked_accepted=true"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_PAIR_FVAR_ARRAY_BENCH variant=baseline NOT_QUALIFIED_HOST_TIMEOUT=true"
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/array-baseline.txt"; then
+            echo "C0_PAIR_FVAR_ARRAY_BENCH variant=baseline NOT_QUALIFIED_SOURCE_RESOURCE=true"
+          else
+            tail -n 25 "$RUNNER_TEMP/array-baseline.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/array-baseline-resources.txt" || true
+      - name: Candidate source-exact DefEq lookup-first composition (diagnostic only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean; do
+            git show HEAD:"$path" > "$path"
+          done
+          (cd psc0/packages/pskernel-c0 && \
+            lake build c0OfficialReplay && \
+            lake env lean --run test/C0DeepPtrExprEqRegression.lean && \
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-certified-resources.txt" \
+              timeout 540s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-real-array-reverse.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-certified.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_PAIR_FVAR_ARRAY_BENCH variant=source_certified exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=123090 fuel=4096' \
+              "$RUNNER_TEMP/array-certified.txt"
+            echo "C0_PAIR_FVAR_ARRAY_BENCH variant=candidate checked_accepted=true"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_PAIR_FVAR_ARRAY_BENCH variant=candidate NOT_QUALIFIED_HOST_TIMEOUT=true"
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/array-certified.txt"; then
+            echo "C0_PAIR_FVAR_ARRAY_BENCH variant=candidate NOT_QUALIFIED_SOURCE_RESOURCE=true"
+          else
+            tail -n 25 "$RUNNER_TEMP/array-certified.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/array-certified-resources.txt" || true
+          echo "C0_PAIR_FVAR_ARRAY_SCOPE diagnostic_only=true same_runner=true exact_unchanged_export=true fuel=4096 source_theorems=true no_admission_shortcut=true isolated_dependency_not_full_Init=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-pair-fvar-real-array-reverse-ab
+          path: |
+            ${{ runner.temp }}/array-baseline.txt
+            ${{ runner.temp }}/array-certified.txt
+            ${{ runner.temp }}/array-baseline-resources.txt
+            ${{ runner.temp }}/array-certified-resources.txt
+            ${{ runner.temp }}/official.txt
+          if-no-files-found: warn
+          retention-days: 21

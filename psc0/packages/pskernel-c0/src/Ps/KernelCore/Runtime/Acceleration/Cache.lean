@@ -395,27 +395,52 @@ structure PsKernelC0ExactHash (expr : PsKernelExpr) where
 
 structure PsKernelC0HashMemoEntry where
   expr : PsKernelExpr
+  -- Full nonauthoritative bucket selector, before its radix truncation.
+  -- A mismatched selector can only MISS a memo entry, never certify a hit.
+  fullIndexHint : Nat
   checkedHash : PsKernelC0ExactHash expr
 
 abbrev PsKernelC0ExactHashMemo :=
   PsKernelC0HashTrie PsKernelC0HashMemoEntry
 
-private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :=
+/-!
+Official Lean 4.35's native runtime uses immutable reference-counted syntax
+objects. The compiled address is ONLY a bucket hint; it is never substituted
+for exact expression equality or for a theorem about the computed hash.
+A stale, nonunique or colliding address merely misses the memo and recomputes
+the mathematically exact source hash. The self-hostable Lean source fallback
+continues to use a total portable structural hash.
+-/
+private unsafe def psKernelC0HashMemoBucketNative
+    (expr : PsKernelExpr) : Nat :=
+  (ptrAddrUnsafe expr).toNat / psKernelC0Radix
+
+@[implemented_by psKernelC0HashMemoBucketNative]
+private def psKernelC0HashMemoBucket
+    (expr : PsKernelExpr) : Nat :=
   psKernelC0MemoShapeHash 4 expr
 
 private def psKernelC0HashMemoFind
-    (expr : PsKernelExpr) :
+    (expr : PsKernelExpr) (fullIndexHint : Nat) :
     List PsKernelC0HashMemoEntry → Option (PsKernelC0ExactHash expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
-      | .isTrue h =>
-          some {
-            value := entry.checkedHash.value
-            source := entry.checkedHash.source.trans
-              (congrArg psKernelExprHash h.symm)
-          }
-      | .isFalse _ => psKernelC0HashMemoFind expr rest
+      -- The first comparison is a cheap *negative filter*. Even identical
+      -- source terms can have different native addresses; such misses
+      -- recompute. The only path returning cached data still derives a
+      -- typed, exact proof of structural term equality on that hit.
+      if entry.fullIndexHint == fullIndexHint then
+        match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+        | .isTrue h =>
+            some {
+              value := entry.checkedHash.value
+              source := entry.checkedHash.source.trans
+                (congrArg psKernelExprHash h.symm)
+            }
+        | .isFalse _ =>
+            psKernelC0HashMemoFind expr fullIndexHint rest
+      else
+        psKernelC0HashMemoFind expr fullIndexHint rest
 
 /-- Leaf terms whose source hash is cheaper than a trie lookup.
 This is only a non-semantic memo selection heuristic. -/
@@ -431,9 +456,9 @@ private def psKernelC0HashMemoLookup
   if psKernelC0HashMemoCheapLeaf expr then
     none
   else
-    psKernelC0HashMemoFind expr
-      (psKernelC0TrieBucket psKernelC0IndexDepth memo
-        (psKernelC0HashMemoBucket expr))
+    let fullHint := psKernelC0HashMemoBucket expr
+    psKernelC0HashMemoFind expr fullHint
+      (psKernelC0TrieBucket psKernelC0IndexDepth memo fullHint)
 
 private def psKernelC0HashMemoInsert
     (expr : PsKernelExpr)
@@ -444,7 +469,8 @@ private def psKernelC0HashMemoInsert
   let entries :=
     psKernelC0TrieBucket psKernelC0IndexDepth memo bucketHash
   psKernelC0TrieSet psKernelC0IndexDepth memo bucketHash
-    ({ expr := expr, checkedHash := value } :: entries)
+    ({ expr := expr, fullIndexHint := bucketHash,
+       checkedHash := value } :: entries)
 
 /-- A source-certified hash and the updated operation-local memo. -/
 private def psKernelC0ExactHashStore

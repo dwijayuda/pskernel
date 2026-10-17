@@ -46,9 +46,14 @@ def main() -> int:
        "unqualified_negative_inductive_or_safety_metadata",
        "unqualified_negative_raw_declaration_format",
        "unqualified_official_duplicate_declaration_driver")}
-    if not expected or len(expected)>25:
+    if len(expected)>25:
         raise ValueError(f"invalid remaining negative diagnostic scope: {len(expected)}")
     tests=check_archive(args.archive)
+    if len(tests)!=193:
+        raise ValueError("the immutable 193-case Arena negative audit source changed")
+    # Zero remaining negative semantic debts is a successful, checkable
+    # terminal inventory state, not a reason to fail diagnostics. The 16
+    # separate resource/reference items are tracked in the full suite.
     seen=[]
     with TemporaryDirectory() as d:
         for kind,name,original in tests:

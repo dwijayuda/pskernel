@@ -214,6 +214,7 @@ def psPrintLeanTermWithFuel
         psPrintLeanTermWithFuel remaining;
       match term with
       | .hole _ => Except.ok "_"
+      | .omittedType _ => Except.error (.unsupportedSourceForm "omitted result annotation outside a declaration")
       | .optionalType type value _ => do
           let type ← smaller type
           let value ← smaller value
@@ -519,57 +520,19 @@ def psPrintLeanDeclaration
         | .fixedpointDefinition .. => pure "\npartial_fixpoint"
         | .wellFoundedDefinition _ _ _ _ termination _ => psPrintLeanTermination termination
         | _ => pure ""
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError (List String) :=
-            psPrintLeanMapBinders psPrintLeanBinder binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintLeanTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintLeanTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      let binderSuffix :=
-                        psPrintLeanSpaceJoinedSuffix printedBinders;
-                      Except.ok
-                        (psPrintLeanConcat6
-                          "def "
-                          printedName
-                          binderSuffix
-                          " : "
-                          printedType
-                          (psPrintLeanConcat2 " := " printedValue) ++ suffix)
-  | .partialDefinition name binders type value _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError (List String) :=
-            psPrintLeanMapBinders psPrintLeanBinder binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintLeanTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintLeanTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      let binderSuffix :=
-                        psPrintLeanSpaceJoinedSuffix printedBinders;
-                      Except.ok
-                        (psPrintLeanConcat6
-                          "partial def "
-                          printedName
-                          binderSuffix
-                          " : "
-                          printedType
-                          (psPrintLeanConcat2 " := " printedValue))
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
+      let annotation ← psPrintDeclarationResult psPrintLeanTerm type
+      let printedValue ← psPrintLeanTerm value
+      return "def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
+        annotation ++ " := " ++ printedValue ++ suffix
+  | .partialDefinition name binders type value _ => do
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
+      let annotation ← psPrintDeclarationResult psPrintLeanTerm type
+      let printedValue ← psPrintLeanTerm value
+      return "partial def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
+        annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error

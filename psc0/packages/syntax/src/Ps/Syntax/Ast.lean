@@ -94,6 +94,9 @@ inductive PsSyntaxTerm where
   | sortE (isType : Bool) (level : PsSyntaxLevel) (span : PsSourceSpan)
   | reference (name : PsSyntaxName)
   | hole (span : PsSourceSpan)
+  -- Declaration-only absence of a result annotation. Keep it distinct from
+  -- an explicit `_`, so source printing never turns inference into a header.
+  | omittedType (span : PsSourceSpan)
   -- Binder-only source annotation; checked as Lean's reducible optParam type.
   | optionalType (type value : PsSyntaxTerm) (span : PsSourceSpan)
   | ascription (value type : PsSyntaxTerm) (span : PsSourceSpan)
@@ -208,6 +211,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .byE _ _ span => span
   | .sortE _ _ span => span
   | .hole span => span
+  | .omittedType span => span
   | .optionalType _ _ span => span
   | .ascription _ _ span => span
   | .call _ _ span => span

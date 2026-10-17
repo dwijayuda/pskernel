@@ -79,9 +79,13 @@ def psElabWhereEnter (shared lexical : PsElabContext) : PsElabContext :=
 -- metavariable assignment check prevents it acquiring a removed local.
 -- A genuinely dependent inferred codomain therefore needs an annotation.
 def psElabWhereTypedHeader (context : PsElabContext)
-    (binders : List PsScopeBinder) (annotation : Option PsSyntaxTerm) :
+    (binders : List PsScopeBinder) (annotation : Option PsSyntaxTerm)
+    (allowExplicitHole : Bool := true) :
     Except PsElabError (PsElabContext × List PsElabTypedBinder × PsExpr × PsExpr × Bool) := do
-  let inferred := match annotation with | none | some (.hole _) => true | _ => false
+  let inferred := match annotation with
+    | none | some (.omittedType _) => true
+    | some (.hole _) => allowExplicitHole
+    | _ => false
   let placeholder := if inferred then some (psElabFreshType context) else none
   let initial := placeholder.map (·.context) |>.getD context
   let parameters ← psElabTypedBinders psElabTerm initial binders
@@ -109,7 +113,9 @@ def psElabWhereMainHeader (context : PsElabContext)
   let some name := psSyntaxNameToName sourceName | throw .emptyName
   let some alias := psSyntaxNameToName member.alias | throw .emptyName
   let (context, bindersRev, openType, sourceType, inferredResult) ←
-    (psElabWhereTypedHeader context binders (some type)).mapError (.atDeclaration name)
+    -- Native MutualDef closes explicit main headers before body elaboration;
+    -- native LetRec deliberately permits body inference for local `: _`.
+    (psElabWhereTypedHeader context binders (some type) false).mapError (.atDeclaration name)
   return {
     name, alias, sourceIndex, context, ambient, bindersRev, openType, sourceType, inferredResult
     source := .declaration member.source

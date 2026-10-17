@@ -133,6 +133,14 @@ def psPrintSyntaxSort (isType : Bool) (level : PsSyntaxLevel) : String :=
   | true, _ => "(Type " ++ psPrintSyntaxLevel level ++ ")"
   | false, _ => "(Sort " ++ psPrintSyntaxLevel level ++ ")"
 
+-- The absence marker has no term spelling. Only declaration printers may
+-- consume it, preserving the distinction between no annotation and `: _`.
+def psPrintDeclarationResult (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (type : PsSyntaxTerm) : Except PsSourcePrintError String := do
+  match type with
+  | .omittedType _ => return ""
+  | _ => return " : " ++ (← printTerm type)
+
 def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
     (fuel : Nat) (tactics : List PsSyntaxTactic) : Except PsSourcePrintError String := do
   match fuel with

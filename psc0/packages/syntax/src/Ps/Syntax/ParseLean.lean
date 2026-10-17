@@ -2682,6 +2682,17 @@ def psFinishLeanValueDeclaration
     cursor := cursor
   }
 
+-- Preserve the same declaration-only absence emitted by PrintLean. An
+-- explicit `_` remains a term annotation and keeps its header boundary.
+def psParseLeanDeclarationResult (required : Bool) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if !required && psTokenCursorAtText cursor ":=" then
+    let some token := psTokenCursorPeek cursor
+      | throw (PsParseError.unexpectedEnd "declaration result")
+    return PsParseResult.mk (.omittedType (PsSourceSpan.mk token.span.start token.span.start)) cursor
+  let colon ← psTokenCursorExpectText cursor ":"
+  psParseLeanTerm colon.cursor
+
 def psParseLeanDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -2738,12 +2749,9 @@ def psParseLeanDeclaration
                       [] with
                   | Except.error error => Except.error error
                   | Except.ok binders =>
-                      match psTokenCursorExpectText binders.cursor ":" with
+                      match psParseLeanDeclarationResult isTheorem binders.cursor with
                       | Except.error error => Except.error error
-                      | Except.ok afterColon =>
-                          match psParseLeanTerm afterColon.cursor with
-                          | Except.error error => Except.error error
-                          | Except.ok type =>
+                      | Except.ok type =>
                               if psTokenCursorAtText type.cursor ":=" then
                                 match psTokenCursorAdvance type.cursor with
                                 | Option.none =>

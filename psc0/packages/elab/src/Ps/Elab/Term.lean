@@ -254,6 +254,7 @@ def psElabTermWithFuel
             | .doE items _ => psElabDo smaller context items expected
             | .byE tactics scope _ => psElabProof smaller context tactics scope expected
             | .hole _ => Except.ok (psElabHole context expected)
+            | .omittedType _ => Except.error (.data "PSCV0-RESULT-ANNOTATION: omitted result syntax is declaration-only")
             | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected
             | .call fn args span =>

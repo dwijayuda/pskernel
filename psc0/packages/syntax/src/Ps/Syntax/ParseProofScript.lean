@@ -140,6 +140,7 @@ def psProofScriptTermWithSpan
   | .doE items _ => .doE items span
   | .byE tactics scope _ => .byE tactics scope span
   | .hole _ => .hole span
+  | .omittedType _ => .omittedType span
   | .optionalType type value _ => .optionalType type value span
   | .ascription value type _ => .ascription value type span
   | .call fn args _ => .call fn args span

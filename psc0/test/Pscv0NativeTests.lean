@@ -928,7 +928,7 @@ private def application : String :=
   "const nested: Nat := apply(fun x =>\n" ++
   "  let f: Nat -> Nat := fun x => x\n" ++
   "  f(x), 11)\n" ++
-  "const declared: _ := 12\n" ++
+  "const declared: Nat := 12\n" ++
   "namespace Library\n" ++
   "const fallback: Nat := 17\n" ++
   "function defaulted(first: Nat := fallback, second: Nat := first): Nat := second\n" ++

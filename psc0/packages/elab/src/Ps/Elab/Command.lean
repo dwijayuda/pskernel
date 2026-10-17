@@ -229,6 +229,10 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   -- used. A genuine nonrecursive definition never invokes WF or P1 admission.
   let usePreDefinitions := match source with
     | .whereDeclaration .. => true
+    | .definition _ _ (.omittedType _) _ _
+    | .partialDefinition _ _ (.omittedType _) _ _
+    | .wellFoundedDefinition _ _ (.omittedType _) _ _ _
+    | .fixedpointDefinition _ _ (.omittedType _) _ _ => true
     | .wellFoundedDefinition .. | .fixedpointDefinition .. => registration.isNone
     | _ => false
   if usePreDefinitions then
@@ -400,6 +404,7 @@ def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualM
   -- Preserve the established explicit-partial top-level route. The shared
   -- local preparation owns where blocks and total/mixed source components.
   if !members.isEmpty && members.all (fun member => match member.declaration with
+      | .partialDefinition _ _ (.omittedType _) _ _ => false
       | .partialDefinition .. => true | _ => false) then
     psElabCommandPartialMutual state members span
   else psElabCommandPreDefinitions state members span true

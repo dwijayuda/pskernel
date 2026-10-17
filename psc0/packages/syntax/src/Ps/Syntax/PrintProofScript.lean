@@ -144,6 +144,7 @@ def psPrintProofScriptTermWithFuel
         psPrintProofScriptTermWithFuel remaining;
       match term with
       | .hole _ => Except.ok "_"
+      | .omittedType _ => Except.error (.unsupportedSourceForm "omitted result annotation outside a declaration")
       | .optionalType type value _ => do
           let type ← smaller type
           let value ← smaller value
@@ -573,53 +574,19 @@ def psPrintProofScriptDeclaration
         | .fixedpointDefinition .. => pure "\npartial_fixpoint"
         | .wellFoundedDefinition _ _ _ _ termination _ => psPrintProofScriptTermination termination
         | _ => pure ""
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError String :=
-            psPrintProofScriptDeclarationBinders binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintProofScriptTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintProofScriptTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      Except.ok
-                        (psPrintProofScriptConcat6
-                          "def "
-                          printedName
-                          printedBinders
-                          " : "
-                          printedType
-                          (psPrintProofScriptConcat2 " := " printedValue) ++ suffix)
-  | .partialDefinition name binders type value _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError String :=
-            psPrintProofScriptDeclarationBinders binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintProofScriptTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintProofScriptTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      Except.ok
-                        (psPrintProofScriptConcat6
-                          "partial def "
-                          printedName
-                          printedBinders
-                          " : "
-                          printedType
-                          (psPrintProofScriptConcat2 " := " printedValue))
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintProofScriptDeclarationBinders binders
+      let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
+      let printedValue ← psPrintProofScriptTerm value
+      return "def " ++ printedName ++ printedBinders ++
+        annotation ++ " := " ++ printedValue ++ suffix
+  | .partialDefinition name binders type value _ => do
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintProofScriptDeclarationBinders binders
+      let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
+      let printedValue ← psPrintProofScriptTerm value
+      return "partial def " ++ printedName ++ printedBinders ++
+        annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error

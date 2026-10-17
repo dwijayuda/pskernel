@@ -243,6 +243,12 @@ def psElabDeclarationParts
   let binderResult ← psElabTypedBinders psElabDeclarationTermCallback
     (psElabContextEmpty environment levelNames) binders
   let annotation ← psElabType psElabDeclarationTermCallback binderResult.context typeSyntax
+  -- Pinned MutualDef.elabHeaders resolves an explicitly supplied header
+  -- before any body. Local let-rec inference has its separate source owner.
+  let header := psCloseElabForallBinders annotation.context.metaContext
+    binderResult.bindersRev annotation.type
+  if psExprHasTermMeta (psMetaInstantiate annotation.context.metaContext header) then
+    throw (.data "PSCV0-DECLARATION-HEADER: an explicit header must resolve parameter and result types before the body")
   let valueContext := if isTheorem then annotation.context else
     psElabContextWithStructuralRecursion annotation.context
       (psElabStructuralRecursionFromSource name binderResult.bindersRev

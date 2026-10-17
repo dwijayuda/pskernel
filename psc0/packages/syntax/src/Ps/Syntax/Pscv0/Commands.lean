@@ -1,6 +1,17 @@
 import Ps.Syntax.Pscv0.Read
 import Ps.Syntax.Pscv0.Data
 
+-- The header owns whether its result annotation exists. Lean's omitted
+-- result is not an explicit `_`; retain that distinction through printing.
+def psPscv0ReadDeclarationResult (required : Bool) (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxTerm) := do
+  if !required && psTokenCursorAtText cursor ":=" then
+    let some token := psTokenCursorPeek cursor | throw "PSCV0-DECLARATION-MISSING"
+    let span := PsSourceSpan.mk token.span.start token.span.start
+    return PsParseResult.mk (.omittedType span) cursor
+  let colon ← psPscv0Expect cursor ":"
+  psPscv0ReadAnnotation true colon.cursor
+
 -- The annotation parser owns nested terms; the declaration consumes only its
 -- own assignment token. No scan to the first top-level := is involved.
 def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
@@ -26,27 +37,29 @@ def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
                   psProofScriptBindersHaveExplicit binders.value
                 else true;
               if signatureValid then
-                match psPscv0Expect binders.cursor ":" with
+                -- Omission is selected here for the shared value owner. The
+                -- existing abbrev registration route remains explicit-only;
+                -- v7.2 requires an explicit result annotation for opaque.
+                match psPscv0ReadDeclarationResult
+                    (!["def", "function", "const"].contains keyword.token.text)
+                    binders.cursor with
                 | Except.error error => Except.error error
-                | Except.ok colon =>
-                    match psPscv0ReadAnnotation true colon.cursor with
+                | Except.ok resultType =>
+                    match psPscv0Expect resultType.cursor ":=" with
                     | Except.error error => Except.error error
-                    | Except.ok resultType =>
-                        match psPscv0Expect resultType.cursor ":=" with
-                        | Except.error error => Except.error error
-                        | Except.ok assign =>
-                            match psPscv0ParseDefinitionBody assign.cursor with
-                            | Except.error error => Except.error (psPscv0ParseError error)
-                            | Except.ok body =>
-                                let span := PsSourceSpan.mk keyword.token.span.start
-                                  (psProofScriptTermStop body.value);
-                                let declaration : PsSyntaxDeclaration :=
-                                  if psStringEq keyword.token.text "theorem" then
-                                    PsSyntaxDeclaration.theoremDecl name.value binders.value
-                                      resultType.value body.value span
-                                  else PsSyntaxDeclaration.definition name.value binders.value
-                                    resultType.value body.value span;
-                                Except.ok (PsParseResult.mk declaration body.cursor)
+                    | Except.ok assign =>
+                        match psPscv0ParseDefinitionBody assign.cursor with
+                        | Except.error error => Except.error (psPscv0ParseError error)
+                        | Except.ok body =>
+                            let span := PsSourceSpan.mk keyword.token.span.start
+                              (psProofScriptTermStop body.value);
+                            let declaration : PsSyntaxDeclaration :=
+                              if psStringEq keyword.token.text "theorem" then
+                                PsSyntaxDeclaration.theoremDecl name.value binders.value
+                                  resultType.value body.value span
+                              else PsSyntaxDeclaration.definition name.value binders.value
+                                resultType.value body.value span;
+                            Except.ok (PsParseResult.mk declaration body.cursor)
               else Except.error "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED"
 
 -- v7.2 selects measure-first termination and owns the decreasing_by by {...}

@@ -1,4 +1,114 @@
-## M3+B current architecture checkpoint — nested Repr binder and Boolean demand observation
+## M3+B current architecture checkpoint — source/deriving accepted; foundation audit and main inference pending
+
+Latest fully accepted compiler/test:
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`.
+All five gates passed at that exact SHA:
+
+| Gate | Run | Result |
+| --- | --- | --- |
+| Native Linux | [38991805487](https://github.com/dwijayuda/pskernel/actions/runs/38991805487) | SUCCESS, all 34 reported steps |
+| F1 | [38991805477](https://github.com/dwijayuda/pskernel/actions/runs/38991805477) | SUCCESS |
+| F2 | [38991805491](https://github.com/dwijayuda/pskernel/actions/runs/38991805491) | SUCCESS |
+| F3/F4 | [38991805538](https://github.com/dwijayuda/pskernel/actions/runs/38991805538) | SUCCESS |
+| Focused M3 | [38991805453](https://github.com/dwijayuda/pskernel/actions/runs/38991805453) | SUCCESS, all 15 reported steps |
+
+The exact receipt is
+`docs/PSCV0_M3_SOURCE_GROUP_DERIVING_QUALIFICATION_2026-10-17.md`.
+It qualifies the accumulated shared predefinitions, source-local where/capture/
+SCC work, nested Repr/BEq and direct mutual DecidableEq/ordered group Inhabited.
+The original native workloads, 13 outer source fixtures, exact worker invariants,
+open checked equations, native strings and every five-target lane passed.
+
+The accepted M3+B engineering estimate is now **74/100**, approximately **70–75%**.
+Contributions are data 24/30, source 13/15, total recursion 14/20, P0 13/15,
+P1 1/10 and integration 9/10. This is not measured language coverage.
+M3+B, M4+C/D and M5+E remain open. Neither candidate below adds accepted points.
+
+### Current candidate lineage and reviewed changes
+
+This compiler/test candidate descends from preparation commit
+[`ff97dd3d`](https://github.com/dwijayuda/pskernel/commit/ff97dd3d904f824da9c097491571dbdb7f9240e7),
+whose parent is the accepted `03000e7b`. The preparation and main-inference
+changes are separate linear commits; their combined tip requires the full
+five-gate matrix. Fetch fresh PR #109 HEAD before every subsequent write.
+
+The WF preparation imports the exact **34-declaration**, **466,947-byte** asset,
+SHA-256 `b6bd56c4ab6378905d1d3ac2f0155eb5bc4742be3e19e684d64ac1a3007716f3`.
+`StandardWellFounded` assembles a proposed logical environment with the two
+actual classes, four ordinary instances, native priorities/reducibility and
+the `sizeOf` export alias. `Nat.lt_wfRel` and `emptyWf` are named reducible
+dictionaries, not instance registrations; `instSizeOfDefault` is an ordinary
+low-priority instance, not a `default_instance`.
+
+The existing authoring step now compares regenerated data byte-for-byte and
+runs `--check-well-founded-foundation`. The audit independently reexports
+every stored declaration from pinned native Lean, compares full Core and
+metadata, exercises real instance selection, replays the strict kernel and
+three actual recursor rules, and reports prospective FNV/declaration/surface
+fingerprints through their existing owners. Active Standard, all expected
+identity pins and runtime selection remain unchanged. Successful preparation
+must report `activeFoundationDeclarations: 0`. Do not guess prospective pins.
+
+Optional main results now have declaration-only `.omittedType` syntax,
+distinct from an explicit `:_`. Selected def/function/const and partial
+heads route omission through the existing typed predefinition owner; generic
+term elaboration does not manufacture an inference hole from the marker.
+The known result metavariable is allocated before the main's own binders.
+An own-binder-dependent inferred codomain still needs an annotation.
+
+Pinned `MutualDef.elabHeaders` requires unresolved term holes in explicit
+main headers to be solved before the body; `LetRec` has the distinct local
+boundary. Direct and shared main header owners now enforce that distinction,
+while local `:_` inference remains. A later-binder constraint may still solve
+an earlier header hole. Both declaration printers and the corresponding
+narrow Lean reader preserve omission rather than printing `:_`.
+
+The new `Pscv0M3ResultInference` check is invoked inside Where. It adds exactly
+**six source-only requests** (one positive and five refusals), eight omitted
+total heads, three omitted partial heads, one header-solved regression, nine
+native total equations and three native partial scalar checks. Original Where
+seven-request/six-export and all 13 outer invocation contracts remain.
+The original native semantic corpus still has four successes and 92 refusals.
+Its `declared` fixture now writes `Nat` explicitly, retaining the name/value
+12; the paired native `def explicitHole : _ := 12` rejection guard must pass
+before this semantic correction is qualified. No new portable runtime result
+is claimed from the source-only inference batch.
+
+Optional abbrev results retain their existing registration limitation; opaque
+and theorem headers remain explicit in the selected source grammar. Broader
+dependent result inference, legacy direct-module inference, P1 support and
+runtime WF dictionaries are not supplied by this slice.
+
+### Next executable work
+
+Inspect all five automatically triggered runs at the combined candidate HEAD.
+Repair any actual failure without changing the expected values or gates.
+If all five pass, record the exact source acceptance and independently observed
+WF audit JSON. Activate `psStandardWellFoundedExtend` after the frozen
+`psSelfHostProdPreWellFoundedPreludeEnvironment` boundary, using only the
+reported FNV, declaration SHA-256 and surface SHA-256 in their existing owners;
+then qualify that active Standard at one SHA.
+
+Three further independent candidates are under preparation/review:
+constructor-directed indexed Inhabited through result-first unification;
+checked nominal empty dictionary definitions through existing layouts; and
+typed generic relation selection/fix construction at the current one-changing-
+argument boundary. They remain unqualified. Dependent unary packing, broader
+mutual WF, indexed binary deriving, remaining P0 and final integration remain.
+
+P1 still fails closed: pinned `Lean.Order.CCPO.csup`, `Lean.Order.fix` and
+the native Unit/Option equations require `Classical.choice`. Only
+`propext` and `Quot.sound` remain approved. Preserve the exact dependency audit.
+
+Native Lean 4.35.0 / `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+language v7.2 blob `694115223777599ba28ee175e14bb642b7b6aa4b`.
+Use connected GitHub and cloud CI; no local compiler execution or clone.
+PR #109 remains open/draft/unmerged on its original base; use fresh non-force
+expected-HEAD updates and preserve concurrent history.
+
+---
+
+## M3+B preceding architecture checkpoint — nested Repr binder and Boolean demand observation
 
 Compiler/test parent: `8390cdc647ce0f5e5bd45678f000795ea5afb93c`.
 Latest fully accepted compiler/test remains

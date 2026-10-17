@@ -104,6 +104,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .doE items _ => items.flatMap (psSyntaxDoTerms 4096)
   | .byE tactics _ _ => tactics.flatMap (psSyntaxTacticTerms 4096)
   | .hole _ => []
+  | .omittedType _ => []
   | .optionalType type value _ => [type, value]
   | .ascription value type _ => [value, type]
   | .call fn args _ => fn :: args.map Prod.snd

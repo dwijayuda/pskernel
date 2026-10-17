@@ -2234,6 +2234,23 @@ def c0ExportRejectLossyImports : IO Unit := do
     if result != expected then
       throw (IO.userError s!"wrong input category {label}: {repr result}")
 
+/-- Explicit nonlogical source tracking does not admit executable/partial
+    definitions, and checked logical proofs cannot refer to them. -/
+def c0ExportNonlogicalSafetyRegression : IO Unit := do
+  let cases : List (String × C0ExportVerdict) := [
+    ("C0ArenaSafetySafeAccept.ndjson", .accepted),
+    ("C0ArenaSafetyUnsafeReject.ndjson", .rejected),
+    ("C0ArenaSafetyPartialReject.ndjson", .rejected),
+    ("C0ArenaSafetyUnsafeDecline.ndjson", .unsupported)
+  ]
+  for (file, expected) in cases do
+    let input ← IO.FS.readFile ("test/" ++ file)
+    let streamed := c0ExportVerdictOnline input
+    let batched := c0ExportVerdictBatch input
+    if streamed != expected || batched != expected then
+      throw (IO.userError s!"C0 nonlogical safety provenance regression {file}: ${repr streamed}, ${repr batched} expected ${repr expected}")
+  IO.println "C0_ARENA_SAFETY_PROVENANCE safe=accepted unsafe_proof=rejected partial_proof=rejected unsafe_only=unsupported nonadmitting=true"
+
 /-- Cross-check category handling and bounded-fuel exhaustion without
     weakening the checked source rules to make an expected result pass. -/
 def c0ExportOnlineOutcomes : IO Unit := do
@@ -2379,6 +2396,7 @@ def main (args : List String) : IO Unit := do
     throw (IO.userError "strict NDJSON replay declined accepted input")
   c0ExportRejectLossyImports
   c0ExportRejectForgedInductiveMetadata
+  c0ExportNonlogicalSafetyRegression
   c0ExportOnlineOutcomes
   let cases : List (String × Bool) := [
     ("C0OfficialAccept.ndjson", true),

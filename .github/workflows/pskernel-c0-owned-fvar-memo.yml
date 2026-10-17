@@ -33,4 +33,15 @@ jobs:
           lake build c0OfficialReplay
           lake env lean --run test/C0OwnedFVarMemoRegression.lean
           lake env lean --run test/C0OfficialNdjsonReplay.lean
+          # Explicit checker-state lineage and semantic consumers: the new
+          # source-only memo must not alter sealed publication, WHNF or
+          # local-context equality and must not grant a new admission.
+          lake env lean --run test/C0SealedStateRegression.lean
+          lake env lean --run test/C0SealedAuditedStateRegression.lean
+          lake env lean --run test/C0QualifiedContextualWhnfRegression.lean
+          lake env lean --run test/C0QualifiedRecursiveWhnfRegression.lean
+          lake env lean --run test/C0SourceCertifiedFVarMemoRegression.lean
+          lake env lean --run test/C0QualifiedInferenceRegression.lean
+          lake env lean --run test/C0VerifiedSessionRegression.lean
+          lake env lean --run test/C0VerifiedProviderPublicationRegression.lean
           echo "C0_OWNED_FVAR_CI pinned=Lean_4.35.0 source_proof=true no_new_kernel_admission=true"

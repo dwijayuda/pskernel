@@ -452,122 +452,132 @@ def psKernelC0ExactHashWithMemo
     (expr : PsKernelExpr)
     (memo : PsKernelC0ExactHashMemo) :
     PsKernelC0ExactHash expr × PsKernelC0ExactHashMemo :=
-  match psKernelC0HashMemoLookup expr memo with
-  | some cached => (cached, memo)
-  | none =>
-      match expr with
-      | .app fn arg =>
-          let (left, m1) := psKernelC0ExactHashWithMemo fn memo
-          let (right, m2) := psKernelC0ExactHashWithMemo arg m1
-          let hash := psKernelCacheMix
-            (psKernelCacheMix 26 left.value) right.value
-          let proof : hash = psKernelExprHash (.app fn arg) := by
-            change psKernelCacheMix
-              (psKernelCacheMix 26 left.value) right.value =
-              psKernelCacheMix
-                (psKernelCacheMix 26 (psKernelExprHash fn))
-                (psKernelExprHash arg)
-            rw [left.source, right.source]
-          psKernelC0ExactHashStore m2 ⟨hash, proof⟩
-      | .lam name ty body info =>
-          let (left, m1) := psKernelC0ExactHashWithMemo ty memo
-          let (right, m2) := psKernelC0ExactHashWithMemo body m1
-          let hash := psKernelCacheMix
-            (psKernelCacheMix 27 left.value) right.value
-          let proof : hash = psKernelExprHash (.lam name ty body info) := by
-            change psKernelCacheMix
-              (psKernelCacheMix 27 left.value) right.value =
-              psKernelCacheMix
-                (psKernelCacheMix 27 (psKernelExprHash ty))
-                (psKernelExprHash body)
-            rw [left.source, right.source]
-          psKernelC0ExactHashStore m2 ⟨hash, proof⟩
-      | .forallE name ty body info =>
-          let (left, m1) := psKernelC0ExactHashWithMemo ty memo
-          let (right, m2) := psKernelC0ExactHashWithMemo body m1
-          let hash := psKernelCacheMix
-            (psKernelCacheMix 28 left.value) right.value
-          let proof : hash = psKernelExprHash (.forallE name ty body info) := by
-            change psKernelCacheMix
-              (psKernelCacheMix 28 left.value) right.value =
-              psKernelCacheMix
-                (psKernelCacheMix 28 (psKernelExprHash ty))
-                (psKernelExprHash body)
-            rw [left.source, right.source]
-          psKernelC0ExactHashStore m2 ⟨hash, proof⟩
-      | .letE name ty value body nondep =>
-          let (a, m1) := psKernelC0ExactHashWithMemo ty memo
-          let (b, m2) := psKernelC0ExactHashWithMemo value m1
-          let (c, m3) := psKernelC0ExactHashWithMemo body m2
-          let hash := psKernelCacheMix
-            (psKernelCacheMix
-              (psKernelCacheMix
-                (psKernelCacheMix 29 a.value) b.value)
-              c.value)
-            (if nondep then 1 else 0)
-          let proof : hash =
-              psKernelExprHash (.letE name ty value body nondep) := by
-            change psKernelCacheMix
-              (psKernelCacheMix
-                (psKernelCacheMix
-                  (psKernelCacheMix 29 a.value) b.value)
-                c.value)
-              (if nondep then 1 else 0) =
-              psKernelCacheMix
+  -- A de Bruijn index or Nat literal has a constant-time source hash.
+  -- Looking up and then inserting it into a persistent proof-carrying trie
+  -- can cost more than simply recomputing its source-certified hash.
+  -- Do not create or reuse any memo entry for these cheap leaves.
+  match expr with
+  | .bvar n =>
+      (⟨psKernelCacheMix 21 n, rfl⟩, memo)
+  | .lit (.nat n) =>
+      (⟨psKernelCacheMix 30 (psKernelCacheMix 19 n), rfl⟩, memo)
+  | _ =>
+      match psKernelC0HashMemoLookup expr memo with
+      | some cached => (cached, memo)
+      | none =>
+          match expr with
+          | .app fn arg =>
+              let (left, m1) := psKernelC0ExactHashWithMemo fn memo
+              let (right, m2) := psKernelC0ExactHashWithMemo arg m1
+              let hash := psKernelCacheMix
+                (psKernelCacheMix 26 left.value) right.value
+              let proof : hash = psKernelExprHash (.app fn arg) := by
+                change psKernelCacheMix
+                  (psKernelCacheMix 26 left.value) right.value =
+                  psKernelCacheMix
+                    (psKernelCacheMix 26 (psKernelExprHash fn))
+                    (psKernelExprHash arg)
+                rw [left.source, right.source]
+              psKernelC0ExactHashStore m2 ⟨hash, proof⟩
+          | .lam name ty body info =>
+              let (left, m1) := psKernelC0ExactHashWithMemo ty memo
+              let (right, m2) := psKernelC0ExactHashWithMemo body m1
+              let hash := psKernelCacheMix
+                (psKernelCacheMix 27 left.value) right.value
+              let proof : hash = psKernelExprHash (.lam name ty body info) := by
+                change psKernelCacheMix
+                  (psKernelCacheMix 27 left.value) right.value =
+                  psKernelCacheMix
+                    (psKernelCacheMix 27 (psKernelExprHash ty))
+                    (psKernelExprHash body)
+                rw [left.source, right.source]
+              psKernelC0ExactHashStore m2 ⟨hash, proof⟩
+          | .forallE name ty body info =>
+              let (left, m1) := psKernelC0ExactHashWithMemo ty memo
+              let (right, m2) := psKernelC0ExactHashWithMemo body m1
+              let hash := psKernelCacheMix
+                (psKernelCacheMix 28 left.value) right.value
+              let proof : hash = psKernelExprHash (.forallE name ty body info) := by
+                change psKernelCacheMix
+                  (psKernelCacheMix 28 left.value) right.value =
+                  psKernelCacheMix
+                    (psKernelCacheMix 28 (psKernelExprHash ty))
+                    (psKernelExprHash body)
+                rw [left.source, right.source]
+              psKernelC0ExactHashStore m2 ⟨hash, proof⟩
+          | .letE name ty value body nondep =>
+              let (a, m1) := psKernelC0ExactHashWithMemo ty memo
+              let (b, m2) := psKernelC0ExactHashWithMemo value m1
+              let (c, m3) := psKernelC0ExactHashWithMemo body m2
+              let hash := psKernelCacheMix
                 (psKernelCacheMix
                   (psKernelCacheMix
-                    (psKernelCacheMix 29 (psKernelExprHash ty))
-                    (psKernelExprHash value))
-                  (psKernelExprHash body))
+                    (psKernelCacheMix 29 a.value) b.value)
+                  c.value)
                 (if nondep then 1 else 0)
-            rw [a.source, b.source, c.source]
-          psKernelC0ExactHashStore m3 ⟨hash, proof⟩
-      | .mdata md body =>
-          let (value, m1) := psKernelC0ExactHashWithMemo body memo
-          let hash := psKernelCacheMix (psKernelCacheMix 31 md) value.value
-          let proof : hash = psKernelExprHash (.mdata md body) := by
-            change psKernelCacheMix (psKernelCacheMix 31 md) value.value =
-              psKernelCacheMix (psKernelCacheMix 31 md)
-                (psKernelExprHash body)
-            rw [value.source]
-          psKernelC0ExactHashStore m1 ⟨hash, proof⟩
-      | .proj name i body =>
-          let (value, m1) := psKernelC0ExactHashWithMemo body memo
-          let hash := psKernelCacheMix
-            (psKernelCacheMix
-              (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
-            value.value
-          let proof : hash = psKernelExprHash (.proj name i body) := by
-            change psKernelCacheMix
-              (psKernelCacheMix
-                (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
-              value.value =
-              psKernelCacheMix
+              let proof : hash =
+                  psKernelExprHash (.letE name ty value body nondep) := by
+                change psKernelCacheMix
+                  (psKernelCacheMix
+                    (psKernelCacheMix
+                      (psKernelCacheMix 29 a.value) b.value)
+                    c.value)
+                  (if nondep then 1 else 0) =
+                  psKernelCacheMix
+                    (psKernelCacheMix
+                      (psKernelCacheMix
+                        (psKernelCacheMix 29 (psKernelExprHash ty))
+                        (psKernelExprHash value))
+                      (psKernelExprHash body))
+                    (if nondep then 1 else 0)
+                rw [a.source, b.source, c.source]
+              psKernelC0ExactHashStore m3 ⟨hash, proof⟩
+          | .mdata md body =>
+              let (value, m1) := psKernelC0ExactHashWithMemo body memo
+              let hash := psKernelCacheMix (psKernelCacheMix 31 md) value.value
+              let proof : hash = psKernelExprHash (.mdata md body) := by
+                change psKernelCacheMix (psKernelCacheMix 31 md) value.value =
+                  psKernelCacheMix (psKernelCacheMix 31 md)
+                    (psKernelExprHash body)
+                rw [value.source]
+              psKernelC0ExactHashStore m1 ⟨hash, proof⟩
+          | .proj name i body =>
+              let (value, m1) := psKernelC0ExactHashWithMemo body memo
+              let hash := psKernelCacheMix
                 (psKernelCacheMix
                   (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
-                (psKernelExprHash body)
-            rw [value.source]
-          psKernelC0ExactHashStore m1 ⟨hash, proof⟩
-      | .bvar n =>
-          psKernelC0ExactHashStore memo
-            ⟨psKernelCacheMix 21 n, rfl⟩
-      | .fvar n =>
-          psKernelC0ExactHashStore memo
-            ⟨psKernelCacheMix 22 (psKernelCacheNameHash n), rfl⟩
-      | .mvar n =>
-          psKernelC0ExactHashStore memo
-            ⟨psKernelCacheMix 23 (psKernelCacheNameHash n), rfl⟩
-      | .sort l =>
-          psKernelC0ExactHashStore memo
-            ⟨psKernelCacheMix 24 (psKernelCacheLevelHash l), rfl⟩
-      | .const n ls =>
-          psKernelC0ExactHashStore memo
-            ⟨psKernelCacheMix
-              (psKernelCacheMix 25 (psKernelCacheNameHash n))
-              (psKernelCacheLevelListHash ls), rfl⟩
-      | .lit v =>
-          psKernelC0ExactHashStore memo
-            ⟨psKernelCacheMix 30 (psKernelCacheLiteralHash v), rfl⟩
+                value.value
+              let proof : hash = psKernelExprHash (.proj name i body) := by
+                change psKernelCacheMix
+                  (psKernelCacheMix
+                    (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
+                  value.value =
+                  psKernelCacheMix
+                    (psKernelCacheMix
+                      (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
+                    (psKernelExprHash body)
+                rw [value.source]
+              psKernelC0ExactHashStore m1 ⟨hash, proof⟩
+          | .bvar n =>
+              psKernelC0ExactHashStore memo
+                ⟨psKernelCacheMix 21 n, rfl⟩
+          | .fvar n =>
+              psKernelC0ExactHashStore memo
+                ⟨psKernelCacheMix 22 (psKernelCacheNameHash n), rfl⟩
+          | .mvar n =>
+              psKernelC0ExactHashStore memo
+                ⟨psKernelCacheMix 23 (psKernelCacheNameHash n), rfl⟩
+          | .sort l =>
+              psKernelC0ExactHashStore memo
+                ⟨psKernelCacheMix 24 (psKernelCacheLevelHash l), rfl⟩
+          | .const n ls =>
+              psKernelC0ExactHashStore memo
+                ⟨psKernelCacheMix
+                  (psKernelCacheMix 25 (psKernelCacheNameHash n))
+                  (psKernelCacheLevelListHash ls), rfl⟩
+          | .lit v =>
+              psKernelC0ExactHashStore memo
+                ⟨psKernelCacheMix 30 (psKernelCacheLiteralHash v), rfl⟩
 
 /-- An externally usable, operation-local exact hash. The original source
 function is independently available as the proof target and regression

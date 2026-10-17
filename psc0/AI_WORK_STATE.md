@@ -1,5 +1,10 @@
 # PSC0 v7.2 AI work state — 18 October 2026
 
+## N-ary packing root-cause repair
+
+The first three-field failure in7712f7e2/39077335588 came from treating psReduceApply as beta reduction; it only constructs applications. A shared manifest-family instantiator now feeds every nested domain walk, including erasure entry validation. This is the general owned-telescope correction; the three/four-slot cases, proof checks and all refusal criteria remain unchanged. Qualification is pending. Diagnostic checkpoint7fb82b13 remains in history. Generic P1/noncomputable candidateee9067f7 is under39078076219; do not infer its pending results. Main stays five-gate accepted atde667946. Shared ordinary WF applications are drafted separately, and M3+B remains open.
+
+
 ## WF packing diagnostic checkpoint
 
 Preparation run39077335588 at7712f7e2 built successfully, retained P0/source and P1 checks passed, but the new three-field WF case failed with an application type mismatch while constructing packedThree. Its old noncomputable fixture also failed at Lean syntax/type diagnostics already corrected inee9067f7. No n-ary qualification is claimed. Candidateee9067f7 is running under39078076219. The WF constructor now retains phase labels for packed-domain construction, inverse-image relation, packed entry and raw callback type, so the next result identifies the violated invariant without changing acceptance. Shared ordinary application work remains an unpublished draft. Main remains five-gate accepted atde667946; M3+B remains open.

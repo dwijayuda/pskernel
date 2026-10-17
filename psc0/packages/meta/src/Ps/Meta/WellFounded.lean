@@ -189,6 +189,14 @@ def psWellFoundedPairTypeChecked (environment : PsEnvironment) (metaContext : Ps
   let _ ← psInferEnsureSort environment metaContext locals sort
   return type
 
+-- Owned packing layers use a manifest lambda family. Instantiate it before
+-- inspecting the next layer; psReduceApply only builds applications and does
+-- not perform beta reduction. Leave an arbitrary final user family opaque.
+def psWellFoundedPairTailType (packing : PsWellFoundedPairPacking) (first : PsExpr) : PsExpr :=
+  match packing.secondFamily with
+  | .lam _ _ body _ => psExprInstantiate1 body first
+  | family => .app family first
+
 def psWellFoundedPairPack (packing : PsWellFoundedPairPacking)
     (first second : PsExpr) : PsExpr :=
   psReduceApply (.constE (psNameAppendStr psWellFoundedPairName "mk") packing.levels)
@@ -245,7 +253,7 @@ def psWellFoundedTuplePack (domain : PsExpr) (values : List PsExpr) :
   | [value] => return value
   | first :: second :: rest =>
     let some packing := psWellFoundedPairPackingView domain | throw .applicationTypeMismatch
-    let tailDomain := psReduceApply packing.secondFamily [first]
+    let tailDomain := psWellFoundedPairTailType packing first
     let tail ← psWellFoundedTuplePack tailDomain (second :: rest)
     return psWellFoundedPairPack packing first tail
 
@@ -279,7 +287,7 @@ def psWellFoundedTupleOpen (locals : PsLocalContext) (domain : PsExpr)
   | name :: next :: rest =>
     let some packing := psWellFoundedPairPackingView domain | throw .applicationTypeMismatch
     let pushed := psLocalPushBinding locals name packing.firstType .explicit
-    let tailDomain := psReduceApply packing.secondFamily [.fvar pushed.id]
+    let tailDomain := psWellFoundedPairTailType packing (.fvar pushed.id)
     let (inner, tail) ← psWellFoundedTupleOpen pushed.context tailDomain (next :: rest)
     return (inner, { id := pushed.id, name, type := packing.firstType } :: tail)
 
@@ -330,7 +338,7 @@ def psWellFoundedTupleCases (environment : PsEnvironment) (metaContext : PsMetaC
     let motive := PsExpr.lam (psRootName "_packed") domain
       (psExprAbstractFVar majorId codomain) .explicit
     let first := psLocalPushBinding locals firstName packing.firstType .explicit
-    let tailDomain := psReduceApply packing.secondFamily [.fvar first.id]
+    let tailDomain := psWellFoundedPairTailType packing (.fvar first.id)
     let tail := psLocalPushBinding first.context nextName tailDomain .explicit
     let constructed := psWellFoundedPairPack packing (.fvar first.id) (.fvar tail.id)
     let innerCodomain := psReduceApply motive [constructed]

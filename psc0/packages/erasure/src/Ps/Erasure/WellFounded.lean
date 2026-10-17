@@ -102,7 +102,7 @@ def psErasureWellFoundedTupleEntrySlots (fuel : Nat) (domain major : PsExpr) :
       let some packing := psWellFoundedPairPackingView domain | throw .unsupportedRuntimeTerm
       let some (.fvar firstId, tail) := psWellFoundedPairUnpack packing major
         | throw .unsupportedRuntimeTerm
-      let tailDomain := psReduceApply packing.secondFamily [.fvar firstId]
+      let tailDomain := psWellFoundedPairTailType packing (.fvar firstId)
       let ids ← psErasureWellFoundedTupleEntrySlots fuel tailDomain tail
       return firstId :: ids
 

@@ -29,3 +29,19 @@ Extend the existing consolidated WF fixture, preserving all prior controls. Nati
 The former three-measured-field negative still has no decrease proof. Its required refusal moves from the removed arity limitation to the actual unsolved decrease goal; it is not accepted without evidence. The explicit positive definitions supply real checked lexicographic proofs.
 
 Implementation candidate only: no new qualification or runtime totals are claimed until the retained cloud gates complete. No Standard identity, assumption, budget, verified-assurance rule or target representation changes.
+
+## Dependent-family instantiation invariant
+
+Preparation39077335588 passed the compiler build and previous pair cases but
+failed the first three-field construction. Inspection found that psReduceApply
+is an application constructor (args.foldl PsExpr.app), not beta reduction.
+The next-layer view was therefore inspecting (fun x => PSigma ...) value
+instead of the owned PSigma constructor.
+
+One shared psWellFoundedPairTailType instantiates the manifest lambda family
+before descending. Type packing, telescope opening, dependent elimination and
+runtime-entry reconstruction use this same operation. An arbitrary final user
+family remains opaque; this adds no conversion rule or source-specific branch.
+It follows the explicit bindingBody.instantiate1 operation in pinned
+ArgsPacker.Unary.pack and beta application in its casesOn implementation.
+Three/four-slot and user-PSigma controls remain unchanged; qualification pending.

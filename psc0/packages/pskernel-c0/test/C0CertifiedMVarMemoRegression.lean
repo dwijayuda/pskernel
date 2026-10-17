@@ -38,10 +38,22 @@ def main : IO Unit := do
     if psKernelC0MemoizedHasMVar expr != expected ||
         psKernelC0AdaptiveHasMVar expr != expected then
       throw (IO.userError "memoized MVar membership differs from original source")
+  -- The combined declaration screen must retain the old error
+  -- precedence with direct certified MVar and FVar checks. It may never
+  -- decide positivity from a syntactic hash or a cache hit alone.
+  for expr in cases do
+    let expected : Except String Unit :=
+      if psKernelExprHasMVar expr then
+        .error "declaration has metavariables"
+      else if psKernelExprHasFVar expr then
+        .error "declaration has free variables"
+      else .ok ()
+    if psKernelCheckNoMVarNoFVar expr != expected then
+      throw (IO.userError "complete declaration screening diverged from original source")
   -- 2^24 *expanded* occurrences share only 25 physical source nodes.
   -- The type-level source theorem guarantees equivalence on this input too.
   let large := c0MVarDag 24 ty
   if psKernelC0MemoizedHasMVar large ||
       psKernelC0AdaptiveHasMVar large then
     throw (IO.userError "shared DAG with no metavariables was misclassified")
-  IO.println "C0_MVAR_DAG source_equal=Lean_proved checked_cases=15 shared_depth=24 positive_levels=pass no_admission=true"
+  IO.println "C0_MVAR_DAG source_equal=Lean_proved checked_cases=15 shared_depth=24 combined_MVar_FVar_error_order=pass no_admission=true"

@@ -70,3 +70,10 @@ Preparation `e8cb72b8c2bb5b08433b455b66e887f6bf79fcbe` passed [run39075748079](h
 This checkpoint promotes the same qualified compiler/test content to main for Native/M3/F1/F2/F3 integration. No backend runtime parity or complete M3 claim follows from preparation. The P1 observer adds30 required comparisons. Run all retained cases and report actual totals.
 
 Root causes resolved: correct Lean4.35.0 congrArg Core argument order, retained old policy cases now logical-only positives, native constructor-pattern spelling in the fixture, and fixture-only IO diagnostic syntax. No compiler grammar, proof criterion, negative criterion or budget was weakened. See [P1 design and evidence](PSCV0_M3_PARTIAL_FIXPOINT_ACTIVATION_2026-10-18.md).
+
+
+## Generic, section and dependent-result qualification candidate
+
+The selected P1 integration is accepted at de6679464cac9780bae7066052714c53984dbd00 (all five workflows; see current handoff receipt). This extension reuses the existing fixture and runtime lanes. Independent pinned Lean definitions and portable source cover an implicit universe-polymorphic type with a seed witness, a section helper capturing both a seed and Inhabited dictionary, and a dependent Fin result. Public equations are checked at the actual header; three retained body markers, closed universes, private helper ownership and complete runtime adapters are inspected. One combined observer adds10 comparisons to the existing30; expected40 is not a measured result until runtime gates complete.
+
+Primary references re-studied: pinned Lean4.35.0 tests/elab/partial_fixpoint.lean (computeLfp', whileSome, dependent1/2/3, noninhabited and where helpers), tests/elab/partial_fixpoint_mutual.lean, PreDefinition/PartialFixpoint/Main and Eqns, and the existing PSC0 fixedpoint CCPO, source-equation and runtime ownership mechanisms. This is conformance qualification of those mechanisms, not a new backend or independent P1 implementation. No trusted assumption, proof criterion or verified fallback is added.

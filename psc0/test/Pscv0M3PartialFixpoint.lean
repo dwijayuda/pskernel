@@ -58,6 +58,51 @@ def mutualOutput (flag : Bool) : UInt64 :=
   let n := if flag then 2 else 3
   UInt64.ofNat (100 * left n + right n)
 
+universe u
+
+def generic {A : Type u} (seed : A) (n : Nat) : A :=
+  match n with
+  | 0 => seed
+  | k + 1 => generic seed k
+partial_fixpoint
+
+section
+variable {A : Type u} [dictionary : Inhabited A] (seed : A)
+
+def scoped (n : Nat) : A := helper n
+where
+  helper (k : Nat) : A :=
+    match k with
+    | 0 => Inhabited.default
+    | j + 1 => match j with
+      | 0 => seed
+      | h + 1 => helper h
+  partial_fixpoint
+
+end
+
+def dependent (bound n : Nat) (seed : Fin (bound + 1)) : Fin (bound + 1) :=
+  match n with
+  | 0 => seed
+  | k + 1 => dependent bound k seed
+partial_fixpoint
+
+theorem genericEquation {A : Type u} (seed : A) (n : Nat) :
+    generic seed n = (match n with | 0 => seed | k + 1 => generic seed k) :=
+  generic.eq_def seed n
+
+theorem dependentEquation (bound n : Nat) (seed : Fin (bound + 1)) :
+    dependent bound n seed =
+      (match n with | 0 => seed | k + 1 => dependent bound k seed) :=
+  dependent.eq_def bound n seed
+
+def genericOutput (flag : Bool) : UInt64 :=
+  let n := if flag then 4 else 3
+  let bound := if flag then 7 else 5
+  UInt64.ofNat (generic (if flag then 11 else 13) n +
+    100 * scoped (if flag then 17 else 19) n +
+    10000 * (dependent bound n ⟨bound, Nat.lt_succ_self bound⟩).val)
+
 -- These exact source shapes used to be refused only by the two-axiom policy.
 -- They are logical-only sentinels. Never evaluate their divergent branches.
 mutual
@@ -101,6 +146,7 @@ run_cmd do
     | _ => throwError "native P1 source did not produce a checked definition: {name}"
   for name in [``countdown, ``optionCountdown, ``left, ``right,
       ``countdownEquation, ``optionEquation, ``leftEquation, ``rightEquation,
+      ``generic, ``scoped, ``dependent, ``genericEquation, ``dependentEquation,
       ``first, ``bad, ``riBad, ``fixed] do
     let axioms ← Lean.collectAxioms name
     unless axioms.contains ``Classical.choice &&
@@ -132,8 +178,18 @@ private def definitionsSource : String :=
   "function p1Right(n: Nat): Nat := match n with { | 0 => 41 | k + 1 => p1Left(k) }\npartial_fixpoint\n" ++
   "end\n"
 
+private def extendedSource : String :=
+  "universe u\n" ++
+  "function p1Generic {A: Type u} (seed: A, n: Nat): A := match n with { | 0 => seed | k + 1 => p1Generic(seed, k) }\npartial_fixpoint\n" ++
+  "theorem p1GenericEquation {A: Type u} (seed: A, n: Nat): Eq(p1Generic(seed, n), match n with { | 0 => seed | k + 1 => p1Generic(seed, k) }) := by { exact p1Generic.eq_def(seed, n) }\n" ++
+  "section\nvariable {A: Type u} [dictionary: Inhabited A] (seed: A)\n" ++
+  "function p1Scoped(n: Nat): A := helper(n)\nwhere { def helper(k: Nat): A := match k with { | 0 => Inhabited.default | j + 1 => match j with { | 0 => seed | h + 1 => helper(h) } } partial_fixpoint }\nend\n" ++
+  "function p1Dependent(bound: Nat, n: Nat, seed: Fin(bound + 1)): Fin(bound + 1) := match n with { | 0 => seed | k + 1 => p1Dependent(bound, k, seed) }\npartial_fixpoint\n" ++
+  "theorem p1DependentEquation(bound: Nat, n: Nat, seed: Fin(bound + 1)): Eq(p1Dependent(bound, n, seed), match n with { | 0 => seed | k + 1 => p1Dependent(bound, k, seed) }) := by { exact p1Dependent.eq_def(bound, n, seed) }\n"
+
 private def source : String :=
-  definitionsSource ++
+  definitionsSource ++ extendedSource ++
+  "function m3p1generic(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 4 } else { 3 }\n let bound: Nat := if (flag) { 7 } else { 5 }\n UInt64.ofNat(p1Generic(if (flag) { 11 } else { 13 }, n) + 100 * p1Scoped(if (flag) { 17 } else { 19 }, n) + 10000 * Fin.val(p1Dependent(bound, n, Fin.mk(bound, Nat.lt_succ_self(bound))))) }\n" ++
   "function m3p1countdown(flag: Bool): UInt64 := UInt64.ofNat(p1Countdown(if (flag) { 17 } else { 29 }, if (flag) { 4 } else { 3 }))\n" ++
   "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some value => value + 5 })\n" ++
   "function m3p1mutual(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 2 } else { 3 }\n UInt64.ofNat(100 * p1Left(n) + p1Right(n)) }\n"
@@ -155,7 +211,8 @@ private def logicalOnlySources : List (String × String) :=
 private def exports : List (String × (Bool → UInt64)) :=
   [("m3p1countdown", M3PartialFixpointOracle.countdownOutput),
    ("m3p1option", M3PartialFixpointOracle.optionOutput),
-   ("m3p1mutual", M3PartialFixpointOracle.mutualOutput)]
+   ("m3p1mutual", M3PartialFixpointOracle.mutualOutput),
+   ("m3p1generic", M3PartialFixpointOracle.genericOutput)]
 
 private def binderNames : PsExpr → List String
   | .forallE name _ body _ => psNameToString name :: binderNames body
@@ -311,6 +368,44 @@ private def checkConstruction (prelude : Lean.Kernel.Environment) :
       "P1 runtime entry does not contain its actual retained source body"
   IO.println "PSCV0_M3_P1_CONSTRUCTION: PASS four source members, three actual fix auxiliaries, common PProd projections, complete checked whole/source equations, private ownership and exact runtime-body substitution"
   return prepared
+
+private def checkExtended (prelude : Lean.Kernel.Environment) : IO Unit := do
+  let compiled ← elaborate extendedSource
+  let output ← fromExcept ((psCompilerPrepareElaboratedWithOutput compiled.result).mapError
+    psCompilerPscv0Error)
+  let prepared := output.prepared
+  checkOfficial prelude prepared "generic-section-helper-dependent-result"
+  let bodies := prepared.declarations.filter fun declaration =>
+    match declaration with | .partialDecl .. => true | _ => false
+  ensure (bodies.length == 3) "extended P1 lost one of its real recursive bodies"
+  for body in bodies do
+    let .partialDecl (.num name 0) levels type value := body
+      | throw (IO.userError "extended P1 body lost its owned identity")
+    ensure (!([type, value].any psExprHasUnresolvedMeta) &&
+      [type, value].all (fun term => (psExprFVarIds term).isEmpty))
+      "extended P1 retained an unresolved universe or local"
+    let some (.theoremDecl _ equationLevels _ equation) :=
+        psEnvironmentFind compiled.result.environment (psNameAppendStr name "eq_def")
+      | throw (IO.userError "extended P1 lost its exact source equation")
+    ensure (psElabMutualLevelNamesEqual levels equationLevels &&
+      !psExprHasUnresolvedMeta equation && (psExprFVarIds equation).isEmpty)
+      "extended P1 source equation escaped its actual universe telescope"
+  let some (.definitionDecl _ genericLevels genericType _) :=
+      psEnvironmentFind compiled.result.environment (psRootName "p1Generic")
+    | throw (IO.userError "generic P1 definition is missing")
+  ensure (genericLevels.map psNameToString == ["u"] &&
+    binderNames genericType == ["A", "seed", "n"])
+    "generic P1 changed its original universe or source header"
+  let locals := compiled.origins.flatMap (fun origin => origin.localDefinitions)
+  ensure (!locals.isEmpty && locals.all (fun localDefinition =>
+    localDefinition.declarations.all (fun name => compiled.privateNames.any (psNameEq name))))
+    "generic P1 helper escaped its source owner"
+  let runtime ← fromExcept ((psCompilerOrdinaryPartialRuntimeDeclarations
+    prepared.declarations).mapError psCompilerPscv0Error)
+  ensure (!(runtime.any (fun declaration =>
+    match declaration with | .partialDecl .. => true | _ => false)))
+    "generic P1 runtime retained an unadapted body marker"
+  IO.println "PSCV0_M3_P1_EXTENDED: PASS checked generic universes and implicit type, section/helper captures, dependent Fin result, exact equations and owned runtime adapters"
 
 private def checkAdapterNegatives (prelude : Lean.Kernel.Environment)
     (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
@@ -468,7 +563,7 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       exports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 30 terminating runtime comparisons follow"
+  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 40 terminating runtime comparisons follow"
 
 def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -480,6 +575,7 @@ def main (args : List String) : IO Unit := do
     | .ok environment => pure environment
     | .error error => throw (IO.userError (error.kind.code ++ ": " ++ error.message))
   let prepared ← checkConstruction prelude
+  checkExtended prelude
   checkAdapterNegatives prelude prepared
   checkLogicalOnly prelude
   checkNonmonotoneRefusal

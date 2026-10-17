@@ -1,5 +1,16 @@
 # Continue PSC0 v7.2 — Complete M3+B autonomously
 
+## Generic P1 and noncomputable fixture qualification candidate
+
+Main is accepted at de6679464cac9780bae7066052714c53984dbd00 on Native39076409463, M3 39076409661, F1 39076409639, F2 39076409495 and F3 39076409521. Aggregate focused counts remain unreported after transport failures.
+
+Preparation now extends the existing P1 fixture with universe/implicit-type, section/helper/instance capture and dependent Fin-result controls, exact source equations and one additional10-comparison observer (40 P1 comparisons required total). The existing native/source models are independent; current verification and refusal controls remain required. A small selected-environment inventory reports actual PSum/PSigma availability for subsequent mutual WF design; it does not authorize absent declarations.
+
+Noncomputable predecessor7da95293 passed every retained preparation check before its new fixture failed to compile. The fixture is corrected as one set: Nat annotations at the semireducible type alias, exact pinned native diagnostic text, record field separators and a reserved identifier. Noncomputable source acceptance and runtime parity are still pending. N-ary WF candidate7712f7e2 is under run39077335588 and has built successfully; do not infer final qualification. Main has not been advanced.
+
+Shared ordinary recursive-application work is designed and drafted separately but is not included here. Remaining M3 exits still require its implicit/default/named semantics, compatible mutual WF, complete selected data/source matrix and exact-SHA integration. No PSKernel-Core, self-hosting or C5 work.
+
+
 ## Accepted P1 integration receipt — 18 October 2026
 
 All five workflows succeeded on **de6679464cac9780bae7066052714c53984dbd00**: Native39076409463 (job117524368250), focused M3 39076409661 (job117524368606), F1 39076409639, F2 39076409495 and F3 39076409521. The focused job executed its directJS/strict-TypeScript, Rust and V8-GC/Wasmtime runtime steps successfully. Full focused-log retrieval failed repeatedly; no aggregate total is relabeled as measured. This closes selected P1 integration, not the complete generic/dependent P1 matrix or M3+B.

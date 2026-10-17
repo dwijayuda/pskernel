@@ -15,14 +15,14 @@ noncomputable def specProof (n : Nat) : n = n := rfl
 
 def keep (n : SpecType) (_ : specNat () = specNat ()) : SpecType := n
 def output (flag : Bool) : UInt64 :=
-  UInt64.ofNat (keep (if flag then 17 else 29) rfl)
+  UInt64.ofNat (keep (if flag then (17 : Nat) else (29 : Nat)) rfl)
 
-/-- error: depends on -/
-#guard_msgs (error, drop warning, substring := true) in
+/-- error: failed to compile definition, consider marking it as 'noncomputable' because it depends on 'specIdentity', which is 'noncomputable' -/
+#guard_msgs (error, drop warning) in
 def bad : Nat := specIdentity 3
 
-/-- error: cannot mix computable and non-computable definitions -/
-#guard_msgs (error, drop warning, substring := true) in
+/-- error: invalid mutually recursive definitions, cannot mix computable and non-computable definitions -/
+#guard_msgs (error, drop warning) in
 mutual
   noncomputable def mixedLeft (n : Nat) := n
   def mixedRight (n : Nat) := n
@@ -59,7 +59,7 @@ private def declarationsSource : String :=
 private def source : String :=
   declarationsSource ++
   "theorem proofUse(n: Nat): Eq(n, n) := by { exact specProof(n) }\n" ++
-  "function m3noncomp(flag: Bool): UInt64 := UInt64.ofNat(keep(if (flag) { 17 } else { 29 }, by { rfl }))\n"
+  "function m3noncomp(flag: Bool): UInt64 := UInt64.ofNat(keep(if (flag) { (17 : Nat) } else { (29 : Nat) }, by { rfl }))\n"
 
 private def genericSource : String :=
   "universe u\nsection\nvariable {A: Type u} [evidence: Nonempty(A)] (seed: A)\n" ++
@@ -122,9 +122,9 @@ private def requestCases : List (String × PsV7Native.Request × Option (String 
       some ("assurance", "PSCV0-NONCOMPUTABLE-EXEC:")),
    ("explicit-noncomputable-export", { executable with exports := .selected ["specIdentity"] },
       some ("assurance", "PSCV0-NONCOMPUTABLE-EXEC:")),
-   ("imported-logical-only", { modules := [provider]
+   ("imported-logical-only", { modules := [provider],
       source := "import Spec\ntheorem visibleRefl(n: Nat): Eq(visible(n), visible(n)) := by { rfl }\n" }, none),
-   ("imported-computational-use", { executable with modules := [provider]
+   ("imported-computational-use", { executable with modules := [provider],
       source := "import Spec\nfunction bad(flag: Bool): Nat := visible(3)\n" },
       some ("assurance", "PSCV0-NONCOMPUTABLE-EXEC:")),
    ("mixed-main-modifiers", { source :=
@@ -155,8 +155,8 @@ def main (args : List String) : IO Unit := do
           match file.payload with
           | .text value => IO.FS.writeFile (directory / file.path) value
           | .binary value => IO.FS.writeBinFile (directory / file.path) value
-    | some (phase, prefix), .error error =>
-      ensure (error.phase == phase && error.message.startsWith prefix)
+    | some (phase, expectedPrefix), .error error =>
+      ensure (error.phase == phase && error.message.startsWith expectedPrefix)
         (label ++ ": wrong boundary: " ++ error.phase ++ ": " ++ error.message)
     | none, .error error =>
       throw (IO.userError (label ++ ": " ++ error.phase ++ ": " ++ error.message))

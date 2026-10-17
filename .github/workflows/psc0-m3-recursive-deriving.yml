@@ -191,10 +191,10 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-partial-fixpoint/p1fixedpoint.ts --outDir ../dist/m3-partial-fixpoint/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           "$TSC" --ignoreConfig ../dist/m3-noncomputable/noncomputable.ts --outDir ../dist/m3-noncomputable/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial/p0-nonempty p0nonempty m3p0nonempty | tee ../dist/m3-mutual-partial/p0-nonempty/js.log
-          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual | tee ../dist/m3-partial-fixpoint/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual,m3p1generic | tee ../dist/m3-partial-fixpoint/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-noncomputable noncomputable m3noncomp | tee ../dist/m3-noncomputable/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial/p0-nonempty p0nonempty m3p0nonempty ../dist/m3-mutual-partial/p0-nonempty/ts/p0nonempty.js | tee ../dist/m3-mutual-partial/p0-nonempty/ts.log
-          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual ../dist/m3-partial-fixpoint/ts/p1fixedpoint.js | tee ../dist/m3-partial-fixpoint/ts.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual,m3p1generic ../dist/m3-partial-fixpoint/ts/p1fixedpoint.js | tee ../dist/m3-partial-fixpoint/ts.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-noncomputable noncomputable m3noncomp ../dist/m3-noncomputable/ts/noncomputable.js | tee ../dist/m3-noncomputable/ts.log
           "$TSC" --ignoreConfig ../dist/m3-inductive-deriving/groupderive.ts --outDir ../dist/m3-inductive-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr | tee ../dist/m3-inductive-deriving/js.log
@@ -241,7 +241,7 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-partial/p0-generic/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-partial/p0-nonempty p0nonempty m3p0nonempty
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-partial/p0-nonempty/rust.log
-          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual,m3p1generic
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-noncomputable noncomputable m3noncomp
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-partial-fixpoint/rust.log
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-noncomputable/rust.log
@@ -283,7 +283,7 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput | tee ../dist/m3-mutual-partial/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial/p0-generic p0generic m3p0genericnat,m3p0genericbool | tee ../dist/m3-mutual-partial/p0-generic/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial/p0-nonempty p0nonempty m3p0nonempty | tee ../dist/m3-mutual-partial/p0-nonempty/wasm.log
-          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual | tee ../dist/m3-partial-fixpoint/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual,m3p1generic | tee ../dist/m3-partial-fixpoint/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-noncomputable noncomputable m3noncomp | tee ../dist/m3-noncomputable/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr | tee ../dist/m3-inductive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving/indexed-beq indexedbeq m3indexedbeqnat,m3indexedbeqbool | tee ../dist/m3-inductive-deriving/indexed-beq/wasm.log

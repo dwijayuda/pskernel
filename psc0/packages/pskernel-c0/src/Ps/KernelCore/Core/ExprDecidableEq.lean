@@ -315,7 +315,8 @@ The historical Boolean comparator is NOT structural PsKernelExpr equality:
 it intentionally ignores lambda/Pi binder names and BinderInfo, and let
 binder names. Full DecidableEq is therefore not a correct replacement.
 
-For a given pair of original expressions, every memo entry contains a
+For a given pair of ORIGINAL expression objects (retained with Lean's
+as-patterns rather than freshly rebuilt constructor nodes), every memo entry contains a
 dependent all-input proof that its Boolean result is exactly the old
 psKernelC0FullPairedExprEq. The memo stores only source-syntax facts, no
 DefEq decision, type, proof, environment or local-context assumption.
@@ -382,9 +383,7 @@ def psKernelC0LegacyPairGo :
     (left right : PsKernelExpr) →
     PsKernelC0LegacyPairMemo →
       PsKernelC0LegacyPairProof left right × PsKernelC0LegacyPairMemo
-  | .app lf la, .app rf ra, memo =>
-      let left := PsKernelExpr.app lf la
-      let right := PsKernelExpr.app rf ra
+  | left@(.app lf la), right@(.app rf ra), memo =>
       match psKernelC0LegacyPairFind left right
           (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
       | some cached => (cached, memo)
@@ -409,9 +408,7 @@ def psKernelC0LegacyPairGo :
                 rw [← f.source]
                 simp [hf]⟩
             psKernelC0LegacyPairStore proof m1
-  | .lam ln lt lb li, .lam rn rt rb ri, memo =>
-      let left := PsKernelExpr.lam ln lt lb li
-      let right := PsKernelExpr.lam rn rt rb ri
+  | left@(.lam ln lt lb li), right@(.lam rn rt rb ri), memo =>
       match psKernelC0LegacyPairFind left right
           (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
       | some cached => (cached, memo)
@@ -436,9 +433,7 @@ def psKernelC0LegacyPairGo :
                 rw [← t.source]
                 simp [ht]⟩
             psKernelC0LegacyPairStore proof m1
-  | .forallE ln lt lb li, .forallE rn rt rb ri, memo =>
-      let left := PsKernelExpr.forallE ln lt lb li
-      let right := PsKernelExpr.forallE rn rt rb ri
+  | left@(.forallE ln lt lb li), right@(.forallE rn rt rb ri), memo =>
       match psKernelC0LegacyPairFind left right
           (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
       | some cached => (cached, memo)
@@ -463,9 +458,7 @@ def psKernelC0LegacyPairGo :
                 rw [← t.source]
                 simp [ht]⟩
             psKernelC0LegacyPairStore proof m1
-  | .letE ln lt lv lb ld, .letE rn rt rv rb rd, memo =>
-      let left := PsKernelExpr.letE ln lt lv lb ld
-      let right := PsKernelExpr.letE rn rt rv rb rd
+  | left@(.letE ln lt lv lb ld), right@(.letE rn rt rv rb rd), memo =>
       match psKernelC0LegacyPairFind left right
           (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
       | some cached => (cached, memo)
@@ -507,9 +500,7 @@ def psKernelC0LegacyPairGo :
                 rw [← t.source]
                 simp [ht]⟩
             psKernelC0LegacyPairStore proof m1
-  | .mdata lm le, .mdata rm re, memo =>
-      let left := PsKernelExpr.mdata lm le
-      let right := PsKernelExpr.mdata rm re
+  | left@(.mdata lm le), right@(.mdata rm re), memo =>
       match psKernelC0LegacyPairFind left right
           (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
       | some cached => (cached, memo)
@@ -521,9 +512,7 @@ def psKernelC0LegacyPairGo :
                 (decide (lm = rm) && psKernelC0FullPairedExprEq le re)
               rw [e.source]⟩
           psKernelC0LegacyPairStore proof m1
-  | .proj ln li le, .proj rn ri re, memo =>
-      let left := PsKernelExpr.proj ln li le
-      let right := PsKernelExpr.proj rn ri re
+  | left@(.proj ln li le), right@(.proj rn ri re), memo =>
       match psKernelC0LegacyPairFind left right
           (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
       | some cached => (cached, memo)

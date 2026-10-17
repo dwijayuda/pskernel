@@ -66,6 +66,7 @@ jobs:
           set -euo pipefail
           marker=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["wait_for"])' \
             "$RUNNER_TEMP/c0-arena-hot-source.json")
+          set +e
           python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
             "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
             "$RUNNER_TEMP/c0-arena-hot.ndjson" \
@@ -73,7 +74,20 @@ jobs:
             "$RUNNER_TEMP/c0-arena-hot-stacks.txt" \
             "$RUNNER_TEMP/c0-arena-hot-summary.json" \
             --samples 12 --interval 2 --max-wait 170 --wait-for "$marker"
-          python3 - <<'PY'
+          profile_rc=$?
+          set -e
+          if [ "$profile_rc" -ne 0 ]; then
+            if grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' \
+                "$RUNNER_TEMP/c0-arena-hot-stacks.txt"; then
+              echo "C0_ARENA_HOT_RESULT case=${{ matrix.case }} classification=resourceExhausted source_checker_not_completed=true sampled_only=true"
+              grep -F 'C0_REAL_EXPORT replay_outcome=' "$RUNNER_TEMP/c0-arena-hot-stacks.txt" | tail -n 1
+            else
+              echo "C0_ARENA_HOT_PROFILE_FAILED case=${{ matrix.case }} exit=$profile_rc"
+              tail -n 35 "$RUNNER_TEMP/c0-arena-hot-stacks.txt" || true
+              exit "$profile_rc"
+            fi
+          else
+            python3 - <<'PY'
           import json,os,pathlib
           base=pathlib.Path(os.environ["RUNNER_TEMP"])
           source=json.loads((base/"c0-arena-hot-source.json").read_text())
@@ -84,6 +98,7 @@ jobs:
               print(f"C0_ARENA_HOT_FRAME case={source['case']} samples={count} symbol={sym}",flush=True)
           print(f"C0_ARENA_HOT_RESULT case={source['case']} samples={summary['native_stack_samples']} sampled_only=true source_bytes_exact=true")
           PY
+          fi
       - name: Strict independent 90-second source checker status (never fake acceptance)
         shell: bash
         run: |

@@ -204,6 +204,57 @@ def psKernelNatBinaryPrimitiveName (name : PsKernelName) : Bool :=
   psKernelNameEq name psKernelNatShiftLeftName ||
   psKernelNameEq name psKernelNatShiftRightName
 
+/-- The native Nat dispatcher pays for the `Nat` namespace just once.
+Most two-argument kernel applications do not have a Nat head, so this
+avoids fourteen redundant nested-name/UTF-8 comparisons on the hot WHNF
+path. It does not inspect operands or produce any new reduction. -/
+def psKernelC0FastNatBinaryPrimitiveName (name : PsKernelName) : Bool :=
+  match name with
+  | .str parent suffix =>
+      psKernelNameEq parent psKernelNatName &&
+        (psKernelStringEq suffix "add" ||
+         psKernelStringEq suffix "sub" ||
+         psKernelStringEq suffix "mul" ||
+         psKernelStringEq suffix "pow" ||
+         psKernelStringEq suffix "gcd" ||
+         psKernelStringEq suffix "mod" ||
+         psKernelStringEq suffix "div" ||
+         psKernelStringEq suffix "beq" ||
+         psKernelStringEq suffix "ble" ||
+         psKernelStringEq suffix "land" ||
+         psKernelStringEq suffix "lor" ||
+         psKernelStringEq suffix "xor" ||
+         psKernelStringEq suffix "shiftLeft" ||
+         psKernelStringEq suffix "shiftRight")
+  | _ => false
+
+/-- The optimized dispatch table is definitionally identical in all
+cases, including foreign namespaces, unknown Nat names and nested names.
+Its output is *only* a reduction-selection Boolean, not a theorem fact. -/
+theorem psKernelC0FastNatBinaryPrimitiveName_source (name : PsKernelName) :
+    psKernelC0FastNatBinaryPrimitiveName name =
+      psKernelNatBinaryPrimitiveName name := by
+  cases name with
+  | anonymous => rfl
+  | num _ _ => rfl
+  | str parent suffix =>
+      cases h : psKernelNameEq parent psKernelNatName with
+      | false =>
+          simp [psKernelC0FastNatBinaryPrimitiveName,
+            psKernelNatBinaryPrimitiveName, psKernelNatAddName, psKernelNatSubName, psKernelNatMulName, psKernelNatPowName, psKernelNatGcdName, psKernelNatModName, psKernelNatDivName, psKernelNatBeqName, psKernelNatBleName, psKernelNatLandName, psKernelNatLorName, psKernelNatXorName, psKernelNatShiftLeftName, psKernelNatShiftRightName,
+            psKernelNameEq, h]
+      | true =>
+          simp [psKernelC0FastNatBinaryPrimitiveName,
+            psKernelNatBinaryPrimitiveName, psKernelNatAddName, psKernelNatSubName, psKernelNatMulName, psKernelNatPowName, psKernelNatGcdName, psKernelNatModName, psKernelNatDivName, psKernelNatBeqName, psKernelNatBleName, psKernelNatLandName, psKernelNatLorName, psKernelNatXorName, psKernelNatShiftLeftName, psKernelNatShiftRightName,
+            psKernelNameEq, h]
+
+/-- Source-exact native compiler specialization; imported native code may
+avoid repeated namespace comparisons without changing pinned kernel results. -/
+@[csimp] theorem psKernelNatBinaryPrimitiveName_csimp :
+    @psKernelNatBinaryPrimitiveName = @psKernelC0FastNatBinaryPrimitiveName := by
+  funext name
+  exact (psKernelC0FastNatBinaryPrimitiveName_source name).symm
+
 def psKernelReduceNatBinary
     (maxNatSize : Nat)
     (op : PsKernelName)

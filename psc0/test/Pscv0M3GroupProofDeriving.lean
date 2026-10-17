@@ -1,4 +1,5 @@
 import Ps.Host.NativeV7
+import Pscv0M3IndexedInhabited
 import PsKernelLean.Admission
 
 -- Independent pinned native handlers. The portable declarations below are
@@ -510,3 +511,4 @@ def main (args : List String) : IO Unit := do
       outputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_GROUP_PROOF_DERIVING: PASS checked direct mutual DecidableEq with dependent proof fields, complete group projections/discriminators, native ordered nested defaults and exact parameter requirements; nested DecidableEq/indexed boundaries retained; five-target parity follows"
+  M3IndexedInhabited.check ((directory / "indexed-inhabited").toString)

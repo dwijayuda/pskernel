@@ -38,6 +38,11 @@ lean_lib PsV7M3PreDefinitionChecks where
   srcDir := "../test"
   roots := #[`Pscv0M3PreDefinitions]
 
+-- Constructor-directed indexed defaults invoked by the group proof fixture.
+lean_lib PsV7M3IndexedInhabitedChecks where
+  srcDir := "../test"
+  roots := #[`Pscv0M3IndexedInhabited]
+
 -- Source-only omitted-result evidence invoked by the existing where fixture.
 lean_lib PsV7M3ResultInferenceChecks where
   srcDir := "../test"

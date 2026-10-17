@@ -28,6 +28,18 @@ mutual
     deriving Hashable, Repr
 end
 
+-- The nonindexed member has an inhabited leaf. The indexed member has only
+-- zero/successor results, so native constructor-directed defaults cannot
+-- produce a value uniformly at an arbitrary rigid index.
+deriving instance Inhabited for M3DeriveIndexedLeft
+
+example {A : Type u} [Inhabited A] {a : A} :
+    (default : M3DeriveIndexedLeft A a) = .leaf default := rfl
+
+/-- error: failed to generate `Inhabited` instance for `M3DeriveIndexedRight` -/
+#guard_msgs (error, drop warning, substring := true) in
+deriving instance Inhabited for M3DeriveIndexedRight
+
 inductive M3DeriveSourceIndexed : Nat → Type where
   | zero : M3DeriveSourceIndexed 0
   | step (n : Nat) : M3DeriveSourceIndexed (Nat.succ n)
@@ -251,10 +263,13 @@ private def checkRefusals (environment : PsEnvironment)
     "deriving indexed families is not yet implemented"
     (psElabDeriveGroupHandler environment indexedOrigin
       { segments := ["BEq"], span := indexedOrigin.span })
-  for handler in ["Inhabited", "DecidableEq"] do
-    expectRefused ("indexed group " ++ handler) "deriving indexed families is not yet implemented"
-      (psElabDeriveHandler environment indexedOrigin
-        { segments := [handler], span := indexedOrigin.span })
+  expectRefused "indexed group Inhabited cannot cover arbitrary rigid indices"
+    "Inhabited deriving requires a constructor with inhabitable fields"
+    (psElabDeriveGroupHandler environment indexedOrigin
+      { segments := ["Inhabited"], span := indexedOrigin.span })
+  expectRefused "indexed group DecidableEq" "deriving indexed families is not yet implemented"
+    (psElabDeriveHandler environment indexedOrigin
+      { segments := ["DecidableEq"], span := indexedOrigin.span })
   expectRefused "reordered retained group origin"
     "deriving origin does not retain the complete ordered group"
     (psElabDeriveGroupHandler environment { origin with members := origin.members.reverse }
@@ -273,7 +288,7 @@ private def checkRefusals (environment : PsEnvironment)
     (.constructorDecl { constructor with recursiveFields := [1] })
   expectRefused "omitted direct child metadata" "deriving direct field is absent from recursive metadata"
     (psElabDeriveGroupHandler omitted origin { segments := ["Hashable"], span := origin.span })
-  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association and indexed BEq/DecidableEq/Inhabited boundaries"
+  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association, indexed BEq/DecidableEq boundaries and constructor-directed indexed Inhabited refusal"
 
 private def checkPlans (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do

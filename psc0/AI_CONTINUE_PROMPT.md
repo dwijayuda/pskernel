@@ -1,4 +1,4 @@
-## Authoritative current checkpoint — generic P0 accepted; dependent result inference branch-layout retry, 2026-10-17
+## Authoritative current checkpoint — generic P0 accepted; dependent result inference annotation-branch retry, 2026-10-17
 
 Accepted compiler/test SHA: `82b248a3ee2cd9246756690db23b7dffd612e022`.
 All five gates completed successfully at that exact SHA. The accepted focused
@@ -8,13 +8,13 @@ records the exact source, harness correction, all gates, artifacts and counts.
 The [independent-WF receipt](docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) retains the preceding 940 baseline.
 
 The containing commit retries the separate bounded own-binder-dependent
-omitted-result inference candidate after three observed build failures.
+omitted-result inference candidate after four observed build failures.
 Its compiler and new source/native tests remain **unqualified** until all five
 gates pass at its own exact SHA. Static review is not successful compilation
 or runtime evidence. Verify live HEAD before any write and let healthy native
 CI finish before pushing another compiler/test revision.
 
-### Observed host layout failures and current retry
+### Observed host build failures and current retry
 
 The first candidate `d5ba914b029ad2fbcf661968e1616529b7855d0d` completed all five gates with
 compilation failures: Native [39038894477](https://github.com/dwijayuda/pskernel/actions/runs/39038894477),
@@ -60,12 +60,30 @@ F3/F4 [39039973779](https://github.com/dwijayuda/pskernel/actions/runs/390399737
 Native job `117417265374` published 92,461 log characters; focused job
 `117417265814` published 88,897. Both report Unit/PsElabTermResult mismatches
 at Application:280:4 and :282:24, then an unexpected `else` at :283:8.
-The else was outdented relative to an inline branch conditional. The current
-retry moves the complete if/then/else onto one indented branch-expression line.
+The else was outdented relative to an inline branch conditional. That
+retry moved the complete if/then/else onto one indented branch-expression line.
 Only whitespace changes; the resource refusal and fallback expressions remain
 identical. No new native/source behavior assertion or runtime check ran at
 the failed SHA. Review found no other newly added conditional with this layout
 hazard. All five failed runs completed before the next compiler/test push.
+
+The branch-layout retry `d7b42ebf8b53fcf61852836181c37c867c93e674`
+compiled Application, Match and Term, then all five gates failed at
+Where.psElabWhereTypedHeader: Native [39040281210](https://github.com/dwijayuda/pskernel/actions/runs/39040281210),
+focused [39040281196](https://github.com/dwijayuda/pskernel/actions/runs/39040281196),
+F1 [39040281204](https://github.com/dwijayuda/pskernel/actions/runs/39040281204),
+F2 [39040281209](https://github.com/dwijayuda/pskernel/actions/runs/39040281209) and
+F3/F4 [39040281206](https://github.com/dwijayuda/pskernel/actions/runs/39040281206).
+Native job `117418169228` published 92,652 log characters; focused job
+`117418169258` published 90,846. Both report Where:93:11: the optional
+annotation result was returned from the enclosing function, whose result must
+be the complete five-field checked header tuple. The current retry changes
+that one branch producer from `return some (...)` to `pure (some (...))`.
+The optional annotation now flows to its binding and the existing subsequent
+parameter, annotation, family, closure and type checks. No other source,
+assertion, oracle, workflow or resource budget changes. Review found no other
+new Elab nested return with this owner mismatch. No new behavior tests ran
+at the failed SHA, and all five runs completed before this retry.
 
 ### Accepted generic P0 evidence
 

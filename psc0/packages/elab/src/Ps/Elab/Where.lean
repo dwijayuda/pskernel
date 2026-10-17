@@ -90,7 +90,7 @@ def psElabWhereTypedHeader (context : PsElabContext)
   let annotationResult ← if inferred then pure none else do
     let some source := annotation
       | throw (psElabWhereError "HEADER" "missing codomain inference owner")
-    return some (← psElabType psElabTerm parameters.context source)
+    pure (some (← psElabType psElabTerm parameters.context source))
   let headerContext := annotationResult.map (·.context) |>.getD parameters.context
   let bindersRev := parameters.bindersRev.map fun binder =>
     { binder with type := psMetaInstantiate headerContext.metaContext binder.type }

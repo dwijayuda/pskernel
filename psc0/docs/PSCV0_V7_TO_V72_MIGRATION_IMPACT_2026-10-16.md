@@ -14,72 +14,77 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — generic P0 accepted, dependent result inference annotation-branch retry, 17 October 2026
+## Current M3+B implementation checkpoint — bounded result families accepted, 17 October 2026
 
-Accepted compiler/test SHA is `82b248a3ee2cd9246756690db23b7dffd612e022`: **78/100** weighted progress and
-**960 observed focused comparisons** after all five same-SHA gates passed.
+Accepted compiler/test SHA is `0e2f5c461d30457caee322b8135293597f55ac4b`. All five gates passed
+at that exact SHA: Native 34 steps, focused M3 15, and F1/F2/F3-F4-platform
+10/9/11. The focused total remains **960 observed comparisons**, and the
+engineering estimate stays **78/100**. This containing checkpoint changes
+documentation only.
+
+The [result-family receipt](PSCV0_M3_RESULT_FAMILY_QUALIFICATION_2026-10-17.md)
+records the exact implementation, source and Native boundary checks, all gate/
+job and artifact identities, four failed host-build attempts and bounded repairs.
 The [generic P0 receipt](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md)
-records exact source construction, native oracle, verified-assurance refusals,
-all runtime lanes, gate/job and artifact identities and the harness-only repair.
-The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
-retains the preceding 940 baseline and its qualified construction repairs.
+retains accepted `82b248a3ee2cd9246756690db23b7dffd612e022` and its 20 added generic
+comparisons. The [independent WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
+retains the preceding 940 construction checkpoint.
 
-Generic P0 executes both entries of one polymorphic mutual partial pair at Nat
-and Bool, with explicit dictionaries, distinct seeds and both flags in one
-emitted module. Two exports add 20 comparisons to the unchanged 940. The
-ordinary logical/body identities and both verified-assurance refusals remain.
-Native Linux completed all 34 steps before the next compiler/test push.
+An omitted result now uses a natural family over the resolved own-binder
+telescope, in the enclosing scope, applied to the original arguments. Body and
+checked caller constraints reach the same family. Only marked full natural
+applications receive the bounded pattern/constant rule, with type/occurs/scope
+checks and complete-equality rollback. Pending index scopes are preserved;
+blocked families cannot guess their heads through application congruence.
+Explicit main holes, own-binder completion, defaults, lexical capture closure,
+tactic/record scheduling and official-kernel checks remain.
 
-The first result-family candidate `d5ba914b029ad2fbcf661968e1616529b7855d0d` failed all five
-build gates. Native job 117414179275 (run 39038894477; 92,941 log characters)
-and focused job 117414179725 (run 39038894559) report two record-field syntax
-errors in Synthetic.lean:60:71 and :265:77. No new native/source tests ran.
-The comma-only retry `854e2f48f91eb0ebbe336259dbf8ec7ff4b3481b` also failed
-all five gates, with the same errors shifted one column. Native run 39039646657
-(job 117416328279; 89,934 log characters) and focused run 39039646620
-(job 117416328595; 86,829 characters) reached no new behavior tests.
-The pinned sepByIndent/checkColGe parser rule requires aligned fields even
-after commas. The next retry `2d8721309f85fed0f897e801fd51cc105d216220` aligned those four
-records and compiled the Synthetic/Basic/Postponed/Binders chain. All five
-gates then failed at Application:280/282/283: an outdented else caused
-Unit/PsElabTermResult mismatches and an unexpected-token error. Native
-run 39039973782/job 117417265374 published 92,461 characters; focused
-run 39039973822/job 117417265814 published 88,897. No new behavior tests ran.
-The branch-layout retry `d7b42ebf8b53fcf61852836181c37c867c93e674` corrected
-that conditional and compiled Application/Match/Term, then all five gates
-failed at Where:93:11. The annotation's Option result was returned from the
-enclosing header routine instead of produced as the branch value. Native
-run 39040281210/job 117418169228 published 92,652 characters; focused
-run 39040281196/job 117418169258 published 90,846. No new behavior tests ran.
-The containing revision changes that one producer to pure(some(...)), keeping
-the optional annotation's binding and every subsequent header check intact.
-All failed runs completed before the retry. No fixture, assertion, oracle,
-workflow, resource budget or trust boundary changes.
-The accepted 82b248a3 baseline and 960 observations remain the acceptance boundary.
+The source-only fixture compiled 19 pinned native equality examples and checked
+19 source theorems, 18 closed total definitions, three original opaque/private
+partial pairs and six exact elaborate-phase refusals. Cases include direct and
+forward dependent Fin results, a qualified helper without unused parent
+capture, caller-selected dictionary and saved tactic, record resumption,
+fixed-index matching and an own type-binder dependency. It adds no executable
+artifact or runtime export.
 
-The containing revision retains the separate bounded own-binder-dependent
-omitted-result inference candidate. It allocates checked natural families over
-resolved own binders, preserves scope provenance through replay, and uses
-checked pattern/constant assignments with complete equality rollback.
-Unknown-result scheduling retains closure, defaults, records, tactics and
-checked fixed-index matches. Structured resource errors propagate through the
-migrated instance/synthetic/elaborator owners without fallback or defaulting.
+Actual Native output confirms checked family/universe assignment, preserved
+pending index scope, checked resumption and complete later-failure rollback.
+A separate real inference-fuel refusal survives postponement and checked queue
+drain; the same continuation succeeds when its default is preassigned.
+Concrete resource failures propagate through the migrated instance, synthetic
+and elaborator owners before fallback or another default. Legacy compatibility
+wrappers and pre-existing low-level fuel policies remain.
 
-The 12 compiler files and three test fixtures remain unqualified until all five
-fresh gates pass at this exact new compiler/test SHA. The fixture proposes 19
-native examples and 19 source theorems, 18 closed total definitions, three
-original partial pairs and six exact refusals. Additive native tests cover
-productive family/universe assignment, pending index scope and checked wakeup,
-complete equality rollback and genuine inference fuel errors. No new runtime
-count is assigned to source-only examples; all 960 observations must remain.
+The completed focused log retains all 56 runtime PASS markers unchanged from
+the P0 baseline: 72 scalar exports / 720 comparisons plus 24 original deriving
+exports / 240 comparisons across both flags and all five execution modes.
+Generic mutual P0 retains Nat/Bool instantiations, dictionaries/seeds, both
+entry directions, Nat 2947/4123 and Bool 12/21 native values, actual opaque/body
+identities and both verified-assurance refusals. Ordinary observations grant
+no logical partial-body equation or verified backend correspondence.
 
-The new rule is bounded and does not provide general higher-order completeness
-or arbitrary application inversion. Eager constant approximation, legacy
-compatibility wrappers and pre-existing low-level fuel policies remain.
+All 38 WF and 10 Where assumption closures remain approved. Native retains the
+Standard and proof assets, 1,069 shared observations in direct JS/compiled TS/
+Rust, repeated components/post-return and 100,000/50,000 generic Nat/Bool steps.
+The Native/focused logs contain 4,476,633/8,264,521 characters. Their artifacts
+are 12103729665 (6,797,268 bytes) and 12103214519 (286 files; 3,038,443 bytes);
+the receipt records all matching SHA-256/upload identities.
+
+The engineering source bucket remains 14/15 because general unused-hint
+diagnostic parity is still open. The next bounded source cell is a checked
+nonrecursive Where helper whose unused unknown measure currently fails before
+typed component classification. Pinned Lean handles the nonrecursive component
+first, then warns about unused hints without elaborating them. A future repair
+must preserve raw suffixes/spans, real header/body dependencies and capture
+closure, active recursive checks and original-main strategy compatibility.
+
+Inference remains bounded, with eager checked constant approximation and no
+claim of general higher-order completeness or arbitrary application inversion.
 Larger changing WF packs, arbitrary measure telescopes, general mutual WF,
 broader indexed binary deriving, nested/source induction and the complete P0
-matrix remain open. P1 retains its audited Classical.choice refusal; only
-propext and Quot.sound are approved. M3+B, M4 and M5 remain open.
+matrix remain open. Only propext and Quot.sound are approved; P1 retains its
+audited Classical.choice refusal. M3+B, M4 and M5 remain open.
+
 The adoption matrix below is historical policy/owner evidence and does not
 override this exact acceptance checkpoint.
 

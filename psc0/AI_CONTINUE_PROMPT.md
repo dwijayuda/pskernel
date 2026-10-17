@@ -1,216 +1,164 @@
-## Authoritative current checkpoint — generic P0 accepted; dependent result inference annotation-branch retry, 2026-10-17
+## Authoritative current checkpoint — own-binder result families accepted, 2026-10-17
 
-Accepted compiler/test SHA: `82b248a3ee2cd9246756690db23b7dffd612e022`.
+Accepted compiler/test SHA: `0e2f5c461d30457caee322b8135293597f55ac4b`.
 All five gates completed successfully at that exact SHA. The accepted focused
-total is **960 observed comparisons** and the weighted engineering estimate
-remains **78/100**. The [generic-P0 receipt](docs/PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md)
-records the exact source, harness correction, all gates, artifacts and counts.
-The [independent-WF receipt](docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) retains the preceding 940 baseline.
+total remains **960 actual comparisons**, and the weighted engineering estimate
+remains **78/100**. The containing checkpoint changes documentation only.
 
-The containing commit retries the separate bounded own-binder-dependent
-omitted-result inference candidate after four observed build failures.
-Its compiler and new source/native tests remain **unqualified** until all five
-gates pass at its own exact SHA. Static review is not successful compilation
-or runtime evidence. Verify live HEAD before any write and let healthy native
-CI finish before pushing another compiler/test revision.
+The [result-family qualification receipt](docs/PSCV0_M3_RESULT_FAMILY_QUALIFICATION_2026-10-17.md) records the
+bounded inference rule, resource ownership, exact source/native cases, all
+gates and artifacts, four failed host-build attempts and their repairs.
+The [generic P0 receipt](docs/PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md) retains the preceding accepted
+`82b248a3ee2cd9246756690db23b7dffd612e022` / 960 baseline. The
+[independent WF receipt](docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) records the preceding 940 checkpoint.
 
-### Observed host build failures and current retry
-
-The first candidate `d5ba914b029ad2fbcf661968e1616529b7855d0d` completed all five gates with
-compilation failures: Native [39038894477](https://github.com/dwijayuda/pskernel/actions/runs/39038894477),
-focused M3 [39038894559](https://github.com/dwijayuda/pskernel/actions/runs/39038894559),
-F1 [39038894464](https://github.com/dwijayuda/pskernel/actions/runs/39038894464),
-F2 [39038894460](https://github.com/dwijayuda/pskernel/actions/runs/39038894460) and
-F3/F4 [39038894520](https://github.com/dwijayuda/pskernel/actions/runs/39038894520).
-Native job `117414179275` published 92,941 log characters and reported
-`unexpected identifier; expected '}'` at Synthetic.lean:60:71 and :265:77.
-The focused log independently reports those same two errors. Context, Abstract,
-Unify, InstanceCandidate and InstanceSearch compiled; no new native/source
-assertion or runtime qualification executed.
-
-The first retry `854e2f48f91eb0ebbe336259dbf8ec7ff4b3481b` added four
-record-field commas, but that correction was insufficient. All five gates
-again completed with failure: Native [39039646657](https://github.com/dwijayuda/pskernel/actions/runs/39039646657),
-focused [39039646620](https://github.com/dwijayuda/pskernel/actions/runs/39039646620),
-F1 [39039646706](https://github.com/dwijayuda/pskernel/actions/runs/39039646706),
-F2 [39039646777](https://github.com/dwijayuda/pskernel/actions/runs/39039646777) and
-F3/F4 [39039646671](https://github.com/dwijayuda/pskernel/actions/runs/39039646671).
-Native job `117416328279` published 89,934 log characters; focused job
-`117416328595` published 86,829. Both report the same two Synthetic errors,
-shifted to :60:72 and :265:78. No new behavior assertion or runtime check ran.
-
-The pinned [structure parser](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term.lean#L352-L356)
-uses [sepByIndent/checkColGe](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Extra.lean#L208-L210):
-subsequent fields must start at or to the right of the first field, including
-after a comma. The aligned-record retry placed all outer fields on aligned lines
-at those same four records in Synthetic, Application and Where. A token check
-confirms that only whitespace and record separators change. No semantic logic,
-source example, assertion, oracle, workflow or resource budget changes.
-All prior runs were completed before this retry; no healthy native CI was
-canceled or superseded. Fresh complete same-SHA qualification is required.
-
-
-The aligned-record retry `2d8721309f85fed0f897e801fd51cc105d216220`
-compiled Synthetic, Basic, Abstraction, Postponed and Binders, then all five
-gates failed at Application.psElabFinishApplication: Native [39039973782](https://github.com/dwijayuda/pskernel/actions/runs/39039973782),
-focused [39039973822](https://github.com/dwijayuda/pskernel/actions/runs/39039973822),
-F1 [39039973831](https://github.com/dwijayuda/pskernel/actions/runs/39039973831),
-F2 [39039973880](https://github.com/dwijayuda/pskernel/actions/runs/39039973880) and
-F3/F4 [39039973779](https://github.com/dwijayuda/pskernel/actions/runs/39039973779).
-Native job `117417265374` published 92,461 log characters; focused job
-`117417265814` published 88,897. Both report Unit/PsElabTermResult mismatches
-at Application:280:4 and :282:24, then an unexpected `else` at :283:8.
-The else was outdented relative to an inline branch conditional. That
-retry moved the complete if/then/else onto one indented branch-expression line.
-Only whitespace changes; the resource refusal and fallback expressions remain
-identical. No new native/source behavior assertion or runtime check ran at
-the failed SHA. Review found no other newly added conditional with this layout
-hazard. All five failed runs completed before the next compiler/test push.
-
-The branch-layout retry `d7b42ebf8b53fcf61852836181c37c867c93e674`
-compiled Application, Match and Term, then all five gates failed at
-Where.psElabWhereTypedHeader: Native [39040281210](https://github.com/dwijayuda/pskernel/actions/runs/39040281210),
-focused [39040281196](https://github.com/dwijayuda/pskernel/actions/runs/39040281196),
-F1 [39040281204](https://github.com/dwijayuda/pskernel/actions/runs/39040281204),
-F2 [39040281209](https://github.com/dwijayuda/pskernel/actions/runs/39040281209) and
-F3/F4 [39040281206](https://github.com/dwijayuda/pskernel/actions/runs/39040281206).
-Native job `117418169228` published 92,652 log characters; focused job
-`117418169258` published 90,846. Both report Where:93:11: the optional
-annotation result was returned from the enclosing function, whose result must
-be the complete five-field checked header tuple. The current retry changes
-that one branch producer from `return some (...)` to `pure (some (...))`.
-The optional annotation now flows to its binding and the existing subsequent
-parameter, annotation, family, closure and type checks. No other source,
-assertion, oracle, workflow or resource budget changes. Review found no other
-new Elab nested return with this owner mismatch. No new behavior tests ran
-at the failed SHA, and all five runs completed before this retry.
-
-### Accepted generic P0 evidence
+### Complete same-SHA qualification
 
 | Gate | Run | Job | Result |
 | --- | --- | --- | --- |
-| Native Linux | [39037331359](https://github.com/dwijayuda/pskernel/actions/runs/39037331359) | `117409699566` | SUCCESS; all 34 reported steps |
-| Focused M3 | [39037331391](https://github.com/dwijayuda/pskernel/actions/runs/39037331391) | `117409699812` | SUCCESS; all 15 reported steps |
-| F1 canonical model | [39037331355](https://github.com/dwijayuda/pskernel/actions/runs/39037331355) | `117409699515` | SUCCESS; all 10 reported steps |
-| F2 logical operations | [39037331395](https://github.com/dwijayuda/pskernel/actions/runs/39037331395) | `117409699959` | SUCCESS; all 9 reported steps |
-| F3/F4/platform | [39037331418](https://github.com/dwijayuda/pskernel/actions/runs/39037331418) | `117409699543` | SUCCESS; all 11 reported steps |
+| Native Linux | [39040588006](https://github.com/dwijayuda/pskernel/actions/runs/39040588006) | `117419140165` | SUCCESS; all 34 reported steps |
+| Focused M3 | [39040587989](https://github.com/dwijayuda/pskernel/actions/runs/39040587989) | `117419139972` | SUCCESS; all 15 reported steps |
+| F1 canonical model | [39040587981](https://github.com/dwijayuda/pskernel/actions/runs/39040587981) | `117419139877` | SUCCESS; all 10 reported steps |
+| F2 logical operations | [39040588008](https://github.com/dwijayuda/pskernel/actions/runs/39040588008) | `117419139837` | SUCCESS; all 9 reported steps |
+| F3/F4/platform | [39040587982](https://github.com/dwijayuda/pskernel/actions/runs/39040587982) | `117419140082` | SUCCESS; all 11 reported steps |
 
-Focused artifact **12103270800** contains 286 files / 3,038,425 bytes,
-SHA-256 `1dfd2f978908211bac2e35652c66f65d529ad49955617efd9a377728423c2380`.
-Native artifact **12102584599** is 6,796,905 bytes,
-SHA-256 `7918b7afaff029352de34a03f1fda602c59bac6b748ab8ea438956e972960a92`.
-Published focused/native logs are 8,253,670 / 4,475,093 characters.
+Native/focused completed logs contain 4,476,633 /
+8,264,521 characters. Focused artifact 12103214519 has
+286 files / 3,038,443 bytes, SHA-256
+`31119835fc1aef644509103d290cf118f20577158864b03223327524da773ac8`.
+Native artifact 12103729665 has 6,797,268 bytes,
+SHA-256 `09a19655357ca975337902a831a3c7b86f9a4390ecca91676ae7aecec957aad1`.
+All metadata matches completed upload receipts. Artifact ZIP contents were
+not independently reopened.
 
+### Newly accepted source behavior
 
-The same generic mutual ordinary-partial pair is instantiated at Nat and Bool
-in one emitted module, with explicit dictionaries, distinct seeds, both entry
-directions and both Boolean inputs. Native expected results remain Nat
-false/true **2947/4123**, Bool false/true **12/21**. Two exports add 20 actual
-comparisons through JavaScript, strict compiled TypeScript, locked Rust, V8
-core and Wasmtime components. The total is 72 scalar exports / 720 comparisons
-plus the original 24 deriving exports / 240 comparisons.
+An omitted result can now depend on a declaration's own resolved binders.
+The result is a natural family in the enclosing scope, applied to the original
+arguments. Body inference and checked caller constraints reach the same
+family. The complete own telescope is resolved before peer headers enter;
+explicit main result holes retain their distinct refusal, while selected
+local explicit holes can use body inference.
 
-Real opaque/private-body pairs, complete universe and source telescopes,
-dictionary projection, peer forwarding, source origins and logical opacity
-are checked. Both verified assurance requests remain exact refusals without
-executable artifacts. These ordinary observations are not verified backend
-correspondence. The compiler implementation at this accepted P0 SHA is unchanged
-from the accepted independent-WF SHA; its fixture and workflow add runtime
-coverage, not a new operational semantics.
+The unifier applies the rule only to a marked, natural, unassigned,
+non-delayed metavariable at its exact full argument spine. Distinct actual
+bindings can be abstracted in application order. A constant approximation must
+fit the family creation scope and its declared type. Both paths retain type,
+occurs and scope checks and retry the complete original equality before
+committing. Scope-argument metadata survives template export/replay.
 
-### New compiler candidate and why it is needed
+An unresolved index retains its full saved creation scope. A blocked family
+cannot fall through to application congruence and guess R := Fin / index := n.
+Failed comparisons restore term/universe assignments, declaration/allocation
+state and delayed state. Ordinary conversion can still unblock a family.
 
-The previous omitted-result hole was created before a declaration's own
-binders and could not express a codomain such as Fin(n + 1) inferred from its
-body. The candidate creates a natural family over the resolved own-binder
-telescope in the enclosing locals. The family is applied to the original
-arguments, so checked caller constraints and body inference can both reach it.
-Explicit top-level result holes remain distinct from omitted annotations;
-local explicit result holes retain their selected inference behavior. Own
-parameter types/defaults must resolve before peer headers enter.
+Application, lambda, record, tactic and fixed-index match owners recognize a
+full unknown family. Caller constraints, defaults, saved scopes, dependent
+context refusal and final checked recursor construction remain. Solved
+families are beta-reduced before capture closure. Every final type/body and
+official-kernel check is retained.
 
-Only a natural, unassigned, non-delayed metavariable with positive
-numScopeArgs and exactly that full application spine receives the family rule.
-The metadata survives template export, fresh replay and duplicate comparison.
-Pattern candidates abstract distinct actual binding locals in application
-order. Constant candidates build their telescope from the declared family
-type and require the result to be a Sort. Every candidate is checked in its
-creation locals, including type, occurs and scope checks, then retries the
-complete original equality before assignments commit.
-
-Pending metavariables must already have safe saved scopes. The family rule
-does not narrow another hole's scope to guess a solution. A blocked family can
-still benefit from ordinary delta conversion, but cannot fall through to
-generic application congruence and guess R := Fin / index := n. Failed
-comparisons restore term/universe assignments, declarations and delayed state.
-
-The existing elaboration schedule recognizes an unresolved full family as
-an unknown expected result. Lambdas may infer their shape, records wait for
-a known structure, and tactics keep their unresolved-goal gate. Mandatory
-defaults and caller-driven constraints retain their existing owners. A fixed
-index match may defer unknown result dependence while preserving the dependent
-context refusal and final checked recursor construction. Solved families are
-beta-reduced before capture closure; all original unresolved-term, lifted-type,
-body and official-kernel checks remain.
-
-Actual resource errors propagate through migrated instance checks/search,
-synthetic assignment/default attempts, checked queues and elaborator fallback
-owners. A checked queue abort restores its original context and pending order
-while retaining attempts consumed. It stops before another item or default.
-Legacy Option/result-only compatibility APIs and existing low-level fuel
+Actual resource failures propagate through the migrated instance, synthetic,
+checked-queue and elaborator owners. A checked queue stops before another
+item/default, restoring original context and pending order while retaining
+consumed attempt counts. Existing compatibility wrappers and low-level fuel
 policies remain; this is not a global resource-policy rewrite.
 
-### Candidate validation obligation
+### Actual source and native evidence
 
-The change touches 12 compiler files and three existing fixtures, with no
-runtime export or workflow changes. Static review checked exact staged blobs,
-API order, scope/rollback behavior, template provenance, fixture preservation
-and the pinned native source. The Native fixture is strictly additive:
-151 lines leave its previous source byte-for-byte intact.
+The focused source step compiled 668 jobs and ran 14 outer fixture commands.
+The result-inference fixture compiled 19 independent pinned native equality
+examples and checked 19 source theorems, 18 closed total definitions and the
+original three opaque/private partial pairs. Its source-only successful request
+produces no executable artifacts; six negative requests fail at their exact
+elaborate-phase owners.
 
-The result-inference fixture now proposes 19 independent native examples,
-19 source theorems, 18 closed total-definition checks, the original three
-opaque/private partial pairs, and seven source requests (one positive and six
-exact refusals). Positives include direct and forward dependent Fin results,
-a qualified helper without accidental parent capture, explicit caller results,
-a saved tactic, a caller-selected numeral dictionary returning 23, a resumed
-record body, a fixed-index match and a result dependent on an own type binder.
-Original closures, defaults, solved headers and ambient captures remain.
+Cases include direct Fin(n + 1), forward application at n + 1, a qualified
+helper without unused parent capture, explicit Nat observation, saved tactic,
+caller-directed OfNat producing token value 23, fixed-index matching, record
+resumption and an own Type u binder. Original defaults, solved headers,
+closures, mutual total/partial bodies, captured parameters and source printing
+remain. Native partial controls return 4/4/6. The main Where request batch retains
+seven requests (one five-target success, six refusals); its separate inherited
+partial-hint batch retains eight (one source-only success, seven refusals).
 
-The obsolete dependent-result refusal is replaced with an actual illtyped
-Fin constructor; body-only binder inference gets its own header refusal.
-The separate where fixture retains its original seven requests/six refusals.
+Native adds 151 lines with its prior source byte-for-byte preserved. Actual
+completed output confirms checked family/universe assignment; a blocked
+pending index without scope pruning or speculative assignments; checked
+resumption; a productive equality control and full later-failure rollback.
+A real zero-fuel inference error survives postponement and checked draining,
+while preassigning the same default permits the same continuation to succeed.
 
-Additive native regressions must prove checked family/universe assignment,
-an unchanged pending index scope without speculative head guessing, successful
-resumption after the index is checked, and complete equality rollback after a
-productive control. A separate real zero-fuel inference refusal must remain an
-error through postponement and checked queue drain even when a later default
-would otherwise unlock the same valid continuation.
+The four initial matrices failed during host compilation. Repairs addressed
+record-field alignment, an outdented conditional and an annotation branch's
+enclosing early return. The comma-only first repair was insufficient.
+No source fixture, assertion, oracle, workflow or resource budget was weakened.
 
-Require Native Linux, focused M3, F1, F2 and F3/F4/platform at one exact new
-compiler/test SHA. All 960 accepted runtime comparisons must still pass.
-No additional runtime-comparison count is claimed for the source-only
-inference examples. Preserve all current assertions and resource budgets.
+### Retained source, trust and runtime evidence
 
-### Fixed bounds and continuation policy
+All 56 retained runtime PASS markers match the accepted P0 baseline exactly:
+26 scalar ECMA, 13 scalar Rust, 13 scalar Wasm, plus 2/1/1 for original deriving.
+Each scalar suite runs both flags; each Wasm marker covers V8 core and
+Wasmtime components. The total remains 72 scalar exports / 720 comparisons
+plus 24 original deriving exports / 240 comparisons: 96 exports across five
+execution modes, 960 observed comparisons.
 
-This is bounded inference for owned result families, not general higher-order
-unification or completeness. Checked constant approximation is eager; arbitrary
-application inversion and scheduling/backtracking beyond these rules remain
-outside the claim. Some dependent or ambiguous callers may require annotations.
+Generic P0 retains both entries at Nat/Bool with dictionaries and seeds in
+one module, Nat false/true 2947/4123 and Bool false/true 12/21. Both verified
+requests refuse without executable artifacts; ordinary observations grant no
+partial-body logical equation or verified backend correspondence. The shared
+runtime runner and all emitted fixture sources are unchanged in this slice.
 
-M3+B, M4 and M5 remain open. Broader indexed binary deriving, nested/source
-induction, larger changing WF packs, arbitrary measure telescopes, general
-mutual WF and the complete P0 matrix remain. Only propext and Quot.sound are
-approved; P1 remains refused because of Classical.choice. The engineering
-estimate remains 78/100 until a separately justified milestone exit is accepted.
+The original WF fixture retains 21 requests (two positive, 19 exact refusals)
+and 38 printed approved assumption closures. All 10 Where closures are also
+approved. The P0 generic native closure check and P1 Classical.choice refusal
+remain. Independent WF capture and checked-equation construction stay covered.
 
-Lean remains 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-The sole forward language authority is psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md,
-blob 694115223777599ba28ee175e14bb642b7b6aa4b. Use connected GitHub and cloud
-Linux only, with expected-HEAD non-force branch updates. PR #109 stays
-draft/open/unmerged on its original base.
+Native retained the Standard at 3,633 declarations/41 classes/359 instances,
+FNV 4990397000639020696 and Standard SHA-256
+5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7.
+The real three-module application, 1,069 shared observations in direct JS,
+compiled TS and Rust, repeated Wasmtime calls/post-return, 100,000/50,000
+generic Nat/Bool steps and M1 JSON sourceSha at the accepted commit all pass.
+
+### Engineering estimate and next bounded source cell
+
+The accepted rubric stays data 25/30, source 14/15, total recursion 16/20,
+P0 13/15, P1 1/10 and integration 9/10, totaling 78/100. The earlier source point
+already grouped optional result inference with inherited-partial hint fidelity.
+No additional point is awarded for syntax repairs, regressions or source-only
+examples.
+
+The next concrete source obligation is unused-hint diagnostic parity for a
+checked nonrecursive Where helper. The current ordinary-unused-unknown-measure
+fixture still refuses an unknown measure in a nonrecursive helper body.
+WhereScope scopes the suffix before the typed PreDefinition component graph
+can establish nonrecursion. Pinned Lean Main processes a nonrecursive member
+first and TerminationHints.ensureNone warns without elaborating the unused
+hint. Reconcile those existing owners while retaining raw suffixes/spans,
+checked header/body dependencies, capture closure, active recursive
+measure/proof checks and original-main compatibility. Do not infer
+nonrecursion from a superficial source-name scan.
+
+This inference remains bounded. Checked constant approximation is eager;
+arbitrary application inversion, general higher-order completeness and new
+scheduling/backtracking remain outside its acceptance. Some dependent or
+ambiguous callers may require annotations. Broader indexed binary deriving,
+nested/source induction, larger changing WF packs, arbitrary measure
+telescopes, general mutual WF and the full P0 matrix remain open.
+
+### Fixed authority and continuation policy
+
+M3+B, M4 and M5 remain open. Only propext and Quot.sound are approved.
+P1 stays unavailable because of its audited Classical.choice dependency.
+Lean remains 4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+The sole forward authority is psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md,
+blob `694115223777599ba28ee175e14bb642b7b6aa4b`.
+
+Use connected GitHub and cloud Linux only. Verify live HEAD before each write
+and use expected-HEAD non-force updates. Let healthy Native CI finish before
+another compiler/test push. Every new compiler/test candidate needs all five
+gates at one exact SHA. PR #109 stays draft/open/unmerged on its original base.
 
 ## Historical checkpoints — superseded by the checkpoint above
 

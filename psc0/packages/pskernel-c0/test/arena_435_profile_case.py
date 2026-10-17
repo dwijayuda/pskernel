@@ -37,11 +37,11 @@ def main() -> None:
     label, name, original = matched[0]
     adapted, proof = adapt_legacy_envelope(original)
     records = [json.loads(line) for line in adapted.splitlines()]
-    theorem_records = [i for i, record in enumerate(records, 1)
-                       if "thm" in record]
-    if not theorem_records:
-        raise ValueError("selected performance case lacks a source theorem")
-    marker = "C0_REAL_EXPORT_DECL_BEGIN record=" + str(theorem_records[-1])
+    checked_records = [i for i, record in enumerate(records, 1)
+                       if any(key in record for key in ("thm", "def", "opaque"))]
+    if not checked_records:
+        raise ValueError("selected performance case lacks a source definition or theorem")
+    marker = "C0_REAL_EXPORT_DECL_BEGIN record=" + str(checked_records[-1])
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_bytes(adapted)
     a.marker_out.write_text(marker + "\n")
@@ -53,13 +53,13 @@ def main() -> None:
         "expected_old_arena_label": label,
         "source_provenance": proof,
         "records": len(records),
-        "theorem_records": theorem_records,
+        "checked_declaration_records": checked_records,
         "sampled_final_declaration_marker": marker,
         "kernel_acceptance_qualified": False,
     }
     a.receipt.write_text(json.dumps(receipt, indent=2) + "\n")
     print(f"C0_ARENA_PERF_INPUT case={name} records={len(records)} "
-          f"last_theorem={theorem_records[-1]} body_exact={proof['body_bytes_identical']}")
+          f"last_checked_decl={checked_records[-1]} body_exact={proof['body_bytes_identical']}")
     print(f"C0_ARENA_PERF_MARKER {marker}")
 
 

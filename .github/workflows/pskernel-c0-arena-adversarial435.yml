@@ -150,17 +150,24 @@ jobs:
           )
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/arena435-imaxMutualPrefix-c0.txt"
           echo "C0_ARENA_MUTUAL_RECURSOR_FIDELITY genuine_positive=accepted generated_metadata=exact no_parser_header_rewrite=true"
-      - name: Fail closed on forged mutual recursor multiplicity and K metadata
+      - name: Canonical recursor names reject; unaudited K mismatch still declines
         shell: bash
         run: |
           set -euo pipefail
           for label in duplicateRecName forgedRecK; do
             (
               cd psc0/packages/pskernel-c0
-              timeout 35s .lake/build/bin/c0OfficialReplay "$RUNNER_TEMP/arena435-$label.ndjson" 4096
+              timeout 35s .lake/build/bin/c0OfficialReplay --trace-declarations "$RUNNER_TEMP/arena435-$label.ndjson" 4096
             ) > "$RUNNER_TEMP/arena435-$label-c0.txt" 2>&1
-            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.unsupported" "$RUNNER_TEMP/arena435-$label-c0.txt"
-            echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=unsupported no_admission=true"
+            if [ "$label" = duplicateRecName ]; then
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" "$RUNNER_TEMP/arena435-$label-c0.txt"
+              grep -Fq "invalid Lean 4.35 canonical recursor name family" "$RUNNER_TEMP/arena435-$label-c0.txt"
+              echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=rejected exact_generated_rec_name=verified"
+            else
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" "$RUNNER_TEMP/arena435-$label-c0.txt"
+              grep -Fq "invalid Lean 4.35 K flag on non-singleton inductive" "$RUNNER_TEMP/arena435-$label-c0.txt"
+              echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=rejected non_singleton_K_invariant=verified"
+            fi
           done
       - name: Require real official rejection and classify native C0 without false acceptance
         shell: bash

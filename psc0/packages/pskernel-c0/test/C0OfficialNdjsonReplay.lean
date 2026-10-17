@@ -395,6 +395,14 @@ def c0ExportReadQuot
   return { base := { name := name, levelParams := levels, type := type },
            kind := kind }
 
+/-- Lean 4.35 src/kernel/inductive.cpp::check_constructors counts ALL
+raw Pi binders in constructor type, then subtracts the number of
+inductive parameters. This check is independent of C0 recursor metadata
+and does not consult potentially forged exporter field counts. -/
+def c0ExportConstructorRawPiArity : PsKernelExpr → Nat
+  | .forallE _ _ body _ => 1 + c0ExportConstructorRawPiArity body
+  | _ => 0
+
 def c0ExportReadInductiveGroup
     (st : C0ExportTables) (block : Lean.Json) :
     Except String C0ExportInductiveGroup := do
@@ -405,12 +413,43 @@ def c0ExportReadInductiveGroup
   let types ← ts.toList.mapM (c0ExportReadInductiveType st)
   let expectedCtors ← cs.toList.mapM (c0ExportReadConstructor st)
   let expectedRecs ← rs.toList.mapM (c0ExportReadRecursor st)
+  -- Pinned Lean 4.35 src/kernel/environment.cpp::check_name disallows
+  -- reusing a constructor name within any generated inductive block.
+  -- Check exact full names, not exporter IDs or hashes. Such duplicates
+  -- cannot describe a valid checked inductive, even when each cidx is 0.
+  let ctorNames := expectedCtors.map (fun c => c.base.name)
+  if ctorNames.any (fun name =>
+      (ctorNames.filter (fun x => psKernelNameEq x name)).length != 1) then
+    throw "invalid Lean 4.35 duplicate constructor name in inductive family"
   let some first := types.head?
     | throw "malformed NDJSON empty inductive group"
   let names := types.map (fun t => t.base.name)
   let hasNested := types.any (fun t => t.numNested != 0)
   if hasNested && types.length != 1 then
     throw "unsupported NDJSON nested mutual group"
+  if !hasNested then
+    -- The pinned src/kernel/inductive.cpp::declare_recursors forms
+    -- rec_ty := mk_pi(info.m_major, C_app), then adds further binders.
+    -- Therefore every generated ordinary/mutual recursor starts with
+    -- at least one raw Pi; a raw constant of type False cannot be one.
+    for rec in expectedRecs do
+      match rec.base.type with
+      | .forallE _ _ _ _ => pure ()
+      | _ => throw "invalid Lean 4.35 generated recursor has no Pi binder"
+    -- An exported constructor's numFields is NOT a trusted authority.
+    -- A mismatch with its own raw binder telescope cannot arise from
+    -- pinned Lean 4.35, independent of any C0 cache or generated recursor.
+    for ctor in expectedCtors do
+      let arity := c0ExportConstructorRawPiArity ctor.base.type
+      if arity < ctor.numParams ||
+          ctor.numFields != arity - ctor.numParams then
+        throw "invalid Lean 4.35 constructor raw field arity"
+    -- src/kernel/inductive.cpp::init_K_target requires exactly one
+    -- inductive and one constructor; forged K on a non-singleton
+    -- family is invalid, regardless of all other metadata.
+    if (types.length != 1 || expectedCtors.length != 1) &&
+        expectedRecs.any (fun r => r.k) then
+      throw "invalid Lean 4.35 K flag on non-singleton inductive"
   if types.any (fun t => t.isUnsafe) ||
       expectedCtors.any (fun c => c.isUnsafe) ||
       expectedRecs.any (fun c => c.isUnsafe) then
@@ -435,7 +474,11 @@ def c0ExportReadInductiveGroup
     (expectedCtors.filter (fun c =>
       psKernelNameEq c.induct ty.base.name)).length)).foldl (· + ·) 0
   if listedCount != expectedCtors.length then
-    throw "malformed NDJSON constructor with unknown inductive owner"
+    -- Official src/kernel/inductive.cpp::check_constructors constructs
+    -- only family-owned constructor declarations. A constructor with
+    -- no owner in the same declared family is a semantic invalidity,
+    -- not a merely unsupported export schema.
+    throw "invalid Lean 4.35 constructor owner absent from inductive family"
   let recNames := expectedRecs.map (fun r => r.base.name)
   let generatedNames := types.map (fun t =>
     psKernelSimpleRecName t.base.name)
@@ -444,9 +487,13 @@ def c0ExportReadInductiveGroup
   -- auxiliary names: do not guess their spelling here. Instead, every
   -- exported recursor is checked *after* independent native generation,
   -- including its type, motive/indices, constructor rules and safety.
+  -- Lean 4.35 src/kernel/inductive.cpp::mk_rec_name always constructs
+  -- I ++ ".rec" for ordinary/mutual families. A missing, duplicate
+  -- or extra recursor is impossible in a valid non-nested declaration.
+  -- Nested-generated names retain their separate restoration checks.
   if !hasNested &&
       !c0ExportSameRecursorNameFamily recNames generatedNames then
-    throw "unsupported NDJSON recursor family is not canonical"
+    throw "invalid Lean 4.35 canonical recursor name family"
   let toCtor (c : PsKernelConstructorInfo) :
       PsKernelSimpleConstructorDecl :=
     { name := c.base.name, type := c.base.type }
@@ -758,18 +805,25 @@ def c0ExportForbiddenPropLargeElim
     (group : C0ExportInductiveGroup) : Bool :=
   match group.source with
   | .ordinary decl =>
-      match decl.type with
-      | .sort .zero =>
-          if decl.ctors.length > 1 then
-            group.expectedRecs.any fun exported =>
-              match psKernelEnvironmentFind checked exported.base.name with
-              | some (.recInfo generated) =>
-                  generated.base.levelParams.length == decl.levelParams.length &&
-                  exported.base.levelParams.length >
-                    generated.base.levelParams.length
-              | _ => false
-          else false
-      | _ => false
+      -- Lean 4.35 inductive.cpp::elim_only_at_universe_zero forbids
+      -- large elimination for >1 ctor whenever the result universe MAY
+      -- be zero. Sort 0 and Sort u both have such an instantiation.
+      -- Never extrapolate this to arbitrary imax/max or Pi levels without
+      -- proving the corresponding never-zero normalization rule.
+      let mayBeProp : Bool :=
+        match decl.type with
+        | .sort .zero => true
+        | .sort (.param _) => true
+        | _ => false
+      if mayBeProp && decl.ctors.length > 1 then
+        group.expectedRecs.any fun exported =>
+          match psKernelEnvironmentFind checked exported.base.name with
+          | some (.recInfo generated) =>
+              generated.base.levelParams.length == decl.levelParams.length &&
+              exported.base.levelParams.length >
+                generated.base.levelParams.length
+          | _ => false
+      else false
   | _ => false
 
 /-- One declaration check, preserving the kernel's typed error category.
@@ -856,7 +910,16 @@ inductive C0ExportVerdict where
   deriving BEq, Repr
 
 def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
-  if message.startsWith "unsupported" ||
+  -- Only this source-grounded canonical generator invariant warrants
+  -- semantic invalidity without generalizing over unsupported metadata.
+  if message == "invalid Lean 4.35 canonical recursor name family" ||
+      message == "invalid Lean 4.35 duplicate constructor name in inductive family" ||
+      message == "invalid Lean 4.35 constructor raw field arity" ||
+      message == "invalid Lean 4.35 K flag on non-singleton inductive" ||
+      message == "invalid Lean 4.35 generated recursor has no Pi binder" ||
+      message == "invalid Lean 4.35 constructor owner absent from inductive family" then
+    .rejected
+  else if message.startsWith "unsupported" ||
       message.startsWith "NDJSON exported by an unsupported" then
     .unsupported
   else
@@ -2135,8 +2198,11 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
     if input == valid then
       throw (IO.userError ("ineffective inductive metadata mutation: " ++ label))
     let verdict := c0ExportVerdictOnline input
-    if verdict == .accepted || verdict == .rejected then
-      throw (IO.userError s!"forged inductive metadata was treated as kernel verdict {label}: {repr verdict}")
+    if label == "constructor-field-count" then
+      if verdict != .rejected then
+        throw (IO.userError s!"forged raw constructor arity escaped explicit source invariant: {repr verdict}")
+    else if verdict == .accepted || verdict == .rejected then
+      throw (IO.userError s!"unproved generated metadata was treated as kernel verdict {label}: {repr verdict}")
 
 /-- Only a positively accepted replay is a successful strict command.
     The ordinary diagnostic command keeps all original non-accepting outcomes.
@@ -2159,7 +2225,16 @@ def c0ExportRecursorNameFamilyRegression : IO Unit := do
       c0ExportSameRecursorNameFamily [a, b] [a, c] ||
       c0ExportSameRecursorNameFamily [a, b, b] [a, b, c] then
     throw (IO.userError "mutual recursor exact name multiset regression")
-  IO.println "C0_RECURSOR_NAME_MANIFEST order_independent=pass multiplicity=exact forged_names=denied"
+  if c0ExportClassifyInputError "invalid Lean 4.35 canonical recursor name family" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 duplicate constructor name in inductive family" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 constructor raw field arity" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 K flag on non-singleton inductive" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 generated recursor has no Pi binder" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 constructor owner absent from inductive family" != .rejected ||
+      c0ExportClassifyInputError "unsupported generated recursor K/safety mismatch" != .unsupported ||
+      c0ExportClassifyInputError "malformed NDJSON inductive constructor metadata" != .malformed then
+    throw (IO.userError "canonical recursor invalidity category violated")
+  IO.println "C0_RECURSOR_NAME_MANIFEST order_independent=pass multiplicity=exact forged_names=denied canonical_invalid=rejected"
 
 /-- Opt-in strict admission CLI; unchanged source checking and trace. -/
 def c0ExportPrintFileOutcome

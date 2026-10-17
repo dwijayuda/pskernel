@@ -365,6 +365,7 @@ private def psKernelC0LegacyPairFind
         psKernelC0LegacyPairFind left right leftHint rightHint tail
 
 private def psKernelC0LegacyPairStore
+    (leftHint rightHint : Nat)
     {left right : PsKernelExpr}
     (certified : PsKernelC0LegacyPairProof left right)
     (memo : PsKernelC0LegacyPairMemo) :
@@ -372,27 +373,28 @@ private def psKernelC0LegacyPairStore
   (certified, {
     left := left
     right := right
-    leftHint := psKernelC0PairIndexHint left
-    rightHint := psKernelC0PairIndexHint right
+    leftHint := leftHint
+    rightHint := rightHint
     certified := certified
   } :: memo)
 
 /-- Exact old semantics on each nested shared pair, with memo hits
     proof-checked for both original operand identities. -/
-def psKernelC0LegacyPairGo :
+def psKernelC0LegacyPairGoWithHints :
     (left right : PsKernelExpr) →
+    Nat → Nat →
     PsKernelC0LegacyPairMemo →
       PsKernelC0LegacyPairProof left right × PsKernelC0LegacyPairMemo
-  | (.app lf la), (.app rf ra), memo =>
+  | (.app lf la), (.app rf ra), leftHint, rightHint, memo =>
        let lhs := PsKernelExpr.app lf la
        let rhs := PsKernelExpr.app rf ra
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
+          leftHint rightHint memo with
       | some cached => (cached, memo)
       | none =>
-          let (f, m1) := psKernelC0LegacyPairGo lf rf memo
+          let (f, m1) := psKernelC0LegacyPairGoWithHints lf rf (psKernelC0PairIndexHint lf) (psKernelC0PairIndexHint rf) memo
           if hf : f.value = true then
-            let (a, m2) := psKernelC0LegacyPairGo la ra m1
+            let (a, m2) := psKernelC0LegacyPairGoWithHints la ra (psKernelC0PairIndexHint la) (psKernelC0PairIndexHint ra) m1
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨a.value, by
                 change a.value =
@@ -400,7 +402,7 @@ def psKernelC0LegacyPairGo :
                    psKernelC0FullPairedExprEq la ra)
                 rw [← f.source, ← a.source]
                 simp [hf]⟩
-            psKernelC0LegacyPairStore proof m2
+            psKernelC0LegacyPairStore leftHint rightHint proof m2
           else
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨false, by
@@ -409,17 +411,17 @@ def psKernelC0LegacyPairGo :
                    psKernelC0FullPairedExprEq la ra)
                 rw [← f.source]
                 simp [hf]⟩
-            psKernelC0LegacyPairStore proof m1
-  | (.lam ln lt lb li), (.lam rn rt rb ri), memo =>
+            psKernelC0LegacyPairStore leftHint rightHint proof m1
+  | (.lam ln lt lb li), (.lam rn rt rb ri), leftHint, rightHint, memo =>
        let lhs := PsKernelExpr.lam ln lt lb li
        let rhs := PsKernelExpr.lam rn rt rb ri
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
+          leftHint rightHint memo with
       | some cached => (cached, memo)
       | none =>
-          let (t, m1) := psKernelC0LegacyPairGo lt rt memo
+          let (t, m1) := psKernelC0LegacyPairGoWithHints lt rt (psKernelC0PairIndexHint lt) (psKernelC0PairIndexHint rt) memo
           if ht : t.value = true then
-            let (b, m2) := psKernelC0LegacyPairGo lb rb m1
+            let (b, m2) := psKernelC0LegacyPairGoWithHints lb rb (psKernelC0PairIndexHint lb) (psKernelC0PairIndexHint rb) m1
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨b.value, by
                 change b.value =
@@ -427,7 +429,7 @@ def psKernelC0LegacyPairGo :
                    psKernelC0FullPairedExprEq lb rb)
                 rw [← t.source, ← b.source]
                 simp [ht]⟩
-            psKernelC0LegacyPairStore proof m2
+            psKernelC0LegacyPairStore leftHint rightHint proof m2
           else
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨false, by
@@ -436,17 +438,17 @@ def psKernelC0LegacyPairGo :
                    psKernelC0FullPairedExprEq lb rb)
                 rw [← t.source]
                 simp [ht]⟩
-            psKernelC0LegacyPairStore proof m1
-  | (.forallE ln lt lb li), (.forallE rn rt rb ri), memo =>
+            psKernelC0LegacyPairStore leftHint rightHint proof m1
+  | (.forallE ln lt lb li), (.forallE rn rt rb ri), leftHint, rightHint, memo =>
        let lhs := PsKernelExpr.forallE ln lt lb li
        let rhs := PsKernelExpr.forallE rn rt rb ri
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
+          leftHint rightHint memo with
       | some cached => (cached, memo)
       | none =>
-          let (t, m1) := psKernelC0LegacyPairGo lt rt memo
+          let (t, m1) := psKernelC0LegacyPairGoWithHints lt rt (psKernelC0PairIndexHint lt) (psKernelC0PairIndexHint rt) memo
           if ht : t.value = true then
-            let (b, m2) := psKernelC0LegacyPairGo lb rb m1
+            let (b, m2) := psKernelC0LegacyPairGoWithHints lb rb (psKernelC0PairIndexHint lb) (psKernelC0PairIndexHint rb) m1
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨b.value, by
                 change b.value =
@@ -454,7 +456,7 @@ def psKernelC0LegacyPairGo :
                    psKernelC0FullPairedExprEq lb rb)
                 rw [← t.source, ← b.source]
                 simp [ht]⟩
-            psKernelC0LegacyPairStore proof m2
+            psKernelC0LegacyPairStore leftHint rightHint proof m2
           else
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨false, by
@@ -463,19 +465,19 @@ def psKernelC0LegacyPairGo :
                    psKernelC0FullPairedExprEq lb rb)
                 rw [← t.source]
                 simp [ht]⟩
-            psKernelC0LegacyPairStore proof m1
-  | (.letE ln lt lv lb ld), (.letE rn rt rv rb rd), memo =>
+            psKernelC0LegacyPairStore leftHint rightHint proof m1
+  | (.letE ln lt lv lb ld), (.letE rn rt rv rb rd), leftHint, rightHint, memo =>
        let lhs := PsKernelExpr.letE ln lt lv lb ld
        let rhs := PsKernelExpr.letE rn rt rv rb rd
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
+          leftHint rightHint memo with
       | some cached => (cached, memo)
       | none =>
-          let (t, m1) := psKernelC0LegacyPairGo lt rt memo
+          let (t, m1) := psKernelC0LegacyPairGoWithHints lt rt (psKernelC0PairIndexHint lt) (psKernelC0PairIndexHint rt) memo
           if ht : t.value = true then
-            let (v, m2) := psKernelC0LegacyPairGo lv rv m1
+            let (v, m2) := psKernelC0LegacyPairGoWithHints lv rv (psKernelC0PairIndexHint lv) (psKernelC0PairIndexHint rv) m1
             if hv : v.value = true then
-              let (b, m3) := psKernelC0LegacyPairGo lb rb m2
+              let (b, m3) := psKernelC0LegacyPairGoWithHints lb rb (psKernelC0PairIndexHint lb) (psKernelC0PairIndexHint rb) m2
               let proof : PsKernelC0LegacyPairProof lhs rhs :=
                 ⟨b.value && psKernelBoolEq ld rd, by
                   change (b.value && psKernelBoolEq ld rd) =
@@ -485,7 +487,7 @@ def psKernelC0LegacyPairGo :
                      psKernelBoolEq ld rd)
                   rw [← t.source, ← v.source, ← b.source]
                   simp [ht, hv]⟩
-              psKernelC0LegacyPairStore proof m3
+              psKernelC0LegacyPairStore leftHint rightHint proof m3
             else
               let proof : PsKernelC0LegacyPairProof lhs rhs :=
                 ⟨false, by
@@ -496,7 +498,7 @@ def psKernelC0LegacyPairGo :
                      psKernelBoolEq ld rd)
                   rw [← t.source, ← v.source]
                   simp [ht, hv]⟩
-              psKernelC0LegacyPairStore proof m2
+              psKernelC0LegacyPairStore leftHint rightHint proof m2
           else
             let proof : PsKernelC0LegacyPairProof lhs rhs :=
               ⟨false, by
@@ -507,40 +509,53 @@ def psKernelC0LegacyPairGo :
                    psKernelBoolEq ld rd)
                 rw [← t.source]
                 simp [ht]⟩
-            psKernelC0LegacyPairStore proof m1
-  | (.mdata lm le), (.mdata rm re), memo =>
+            psKernelC0LegacyPairStore leftHint rightHint proof m1
+  | (.mdata lm le), (.mdata rm re), leftHint, rightHint, memo =>
        let lhs := PsKernelExpr.mdata lm le
        let rhs := PsKernelExpr.mdata rm re
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
+          leftHint rightHint memo with
       | some cached => (cached, memo)
       | none =>
-          let (e, m1) := psKernelC0LegacyPairGo le re memo
+          let (e, m1) := psKernelC0LegacyPairGoWithHints le re (psKernelC0PairIndexHint le) (psKernelC0PairIndexHint re) memo
           let proof : PsKernelC0LegacyPairProof lhs rhs :=
             ⟨decide (lm = rm) && e.value, by
               change (decide (lm = rm) && e.value) =
                 (decide (lm = rm) && psKernelC0FullPairedExprEq le re)
               rw [e.source]⟩
-          psKernelC0LegacyPairStore proof m1
-  | (.proj ln li le), (.proj rn ri re), memo =>
+          psKernelC0LegacyPairStore leftHint rightHint proof m1
+  | (.proj ln li le), (.proj rn ri re), leftHint, rightHint, memo =>
        let lhs := PsKernelExpr.proj ln li le
        let rhs := PsKernelExpr.proj rn ri re
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
+          leftHint rightHint memo with
       | some cached => (cached, memo)
       | none =>
-          let (e, m1) := psKernelC0LegacyPairGo le re memo
+          let (e, m1) := psKernelC0LegacyPairGoWithHints le re (psKernelC0PairIndexHint le) (psKernelC0PairIndexHint re) memo
           let proof : PsKernelC0LegacyPairProof lhs rhs :=
             ⟨psKernelNameEq ln rn && decide (li = ri) && e.value, by
               change (psKernelNameEq ln rn && decide (li = ri) && e.value) =
                 (psKernelNameEq ln rn && decide (li = ri) &&
                  psKernelC0FullPairedExprEq le re)
               rw [e.source]⟩
-          psKernelC0LegacyPairStore proof m1
-  | left, right, memo =>
+          psKernelC0LegacyPairStore leftHint rightHint proof m1
+  | left, right, _, _, memo =>
       let proof : PsKernelC0LegacyPairProof left right :=
         ⟨psKernelC0FullPairedExprEq left right, rfl⟩
       (proof, memo)
+
+/-- Hash ORIGINAL source nodes before dependent matching. The numerical
+    pointer hint is never an Eq witness: the only cache-hit transport in
+    psKernelC0LegacyPairFind still proves both endpoint equalities.
+    Rebuilding branch constructors for Lean's dependent proof does not
+    silently replace the node identity used for indexing. -/
+def psKernelC0LegacyPairGo
+    (left right : PsKernelExpr)
+    (memo : PsKernelC0LegacyPairMemo) :
+    PsKernelC0LegacyPairProof left right × PsKernelC0LegacyPairMemo :=
+  psKernelC0LegacyPairGoWithHints left right
+    (psKernelC0PairIndexHint left)
+    (psKernelC0PairIndexHint right) memo
 
 /-- Source-pure, all-input semantic (binder-name-erasing) DAG equality. -/
 def psKernelC0LegacyMemoExprEq

@@ -69,6 +69,9 @@ structure PsKernelC0StoredNode where
   -- Exact upper bound for loose de Bruijn variables: max loose index + 1.
   -- Zero means no loose variables. Derived only from canonical children.
   looseBVarRange : Nat
+  -- Pure, context-independent syntactic FVar membership.
+  -- Computed once from same-owner child nodes; NOT a cached type/DefEq.
+  hasFVar : Bool
 
 /--
   Share the persistent radix-16 index with the checker caches.
@@ -156,6 +159,41 @@ def psKernelC0NodeLooseRange
   | .mdata _ body => range body
   | .proj _ _ body => range body
   | _ => 0
+
+/-- The only semantic fact recorded here is a source *syntax* predicate.
+No local context, environment or proof judgment can enter this metadata.
+Missing child IDs return false only for diagnostic calls; interning admits
+composites exclusively after psKernelC0NodeValid has verified every handle. -/
+def psKernelC0ChildHasFVar
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Bool :=
+  match psKernelC0StoreGet store id with
+  | some stored => stored.hasFVar
+  | none => false
+
+/-- Compose exactly the existing source psKernelExprHasFVar constructor
+equations, using immutable same-owner child metadata in O(arity) work. -/
+def psKernelC0NodeHasFVar
+    (store : PsKernelC0TermStore)
+    (node : PsKernelC0Node) : Bool :=
+  let child := psKernelC0ChildHasFVar store
+  match node with
+  | .fvar _ => true
+  | .app fn arg => child fn || child arg
+  | .lam _ ty body _ => child ty || child body
+  | .forallE _ ty body _ => child ty || child body
+  | .letE _ ty value body _ =>
+      child ty || child value || child body
+  | .mdata _ body => child body
+  | .proj _ _ body => child body
+  | _ => false
+
+/-- Read the memoized *pure syntax* fact by the owning store and node ID.
+A missing ID remains an invalid lookup, never 'FVar-free' evidence. -/
+def psKernelC0StoredHasFVar
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option Bool :=
+  (psKernelC0StoreGet store id).map (fun stored => stored.hasFVar)
 
 /-- Include every binder identity field in the canonical-node hash.
     This is only an acceleration hint: exact node equality still guards
@@ -339,7 +377,8 @@ def psKernelC0Intern
         let entry : PsKernelC0StoredNode :=
           { node := node, hash := hash, checkerHash := checkerHash,
             depth := psKernelC0NodeDepth store node,
-            looseBVarRange := psKernelC0NodeLooseRange store node }
+            looseBVarRange := psKernelC0NodeLooseRange store node,
+            hasFVar := psKernelC0NodeHasFVar store node }
         let index :=
           psKernelC0TermTrieReplace
             psKernelC0IndexDepth store.index hash (List.cons id bucket)

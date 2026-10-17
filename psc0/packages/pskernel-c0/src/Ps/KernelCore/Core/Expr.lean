@@ -225,6 +225,61 @@ def psKernelExprEqLegacy
             else false
         | _ => false
 
+
+/-- Fully recursive native paired equality. The original source comparator
+above eagerly created curried closures for each left subtree before checking
+the right constructor. Pairing both constructors at EVERY recursion avoids
+that work when kinds disagree; it keeps binder-name/annotation erasure and
+all metadata, literal, universe and constructor-specific choices unchanged. -/
+def psKernelC0FullPairedExprEq : PsKernelExpr → PsKernelExpr → Bool
+  | .bvar a, .bvar b => Nat.beq a b
+  | .fvar a, .fvar b => psKernelNameEq a b
+  | .mvar a, .mvar b => psKernelNameEq a b
+  | .sort a, .sort b => psKernelLevelEq a b
+  | .const a als, .const b bls =>
+      psKernelNameEq a b && psKernelLevelListEq als bls
+  | .app af aa, .app bf ba =>
+      psKernelC0FullPairedExprEq af bf &&
+      psKernelC0FullPairedExprEq aa ba
+  | .lam _ aty ab _, .lam _ bty bb _ =>
+      psKernelC0FullPairedExprEq aty bty &&
+      psKernelC0FullPairedExprEq ab bb
+  | .forallE _ aty ab _, .forallE _ bty bb _ =>
+      psKernelC0FullPairedExprEq aty bty &&
+      psKernelC0FullPairedExprEq ab bb
+  | .letE _ aty av ab an, .letE _ bty bv bb bn =>
+      psKernelC0FullPairedExprEq aty bty &&
+      psKernelC0FullPairedExprEq av bv &&
+      psKernelC0FullPairedExprEq ab bb &&
+      psKernelBoolEq an bn
+  | .lit a, .lit b => psKernelLiteralEq a b
+  | .mdata am ab, .mdata bm bb =>
+      Nat.beq am bm && psKernelC0FullPairedExprEq ab bb
+  | .proj an ai ab, .proj bn bi bb =>
+      psKernelNameEq an bn && Nat.beq ai bi &&
+      psKernelC0FullPairedExprEq ab bb
+  | _, _ => false
+
+/-- Every recursive Boolean result is exactly the historical source for
+all terms, not just shallow wrapper nodes. Crucially this preserves the
+historical deliberate omission of lambda/Pi binder display names and info. -/
+theorem psKernelC0FullPairedExprEq_source
+    (left right : PsKernelExpr) :
+    psKernelC0FullPairedExprEq left right =
+      psKernelExprEqLegacy left right := by
+  induction left generalizing right <;>
+    cases right <;>
+    simp [psKernelC0FullPairedExprEq, psKernelExprEqLegacy,
+      Bool.and_assoc, *]
+
+/-- Proof-constrained native implementation for every call to historical
+recursive equality. The source checker/DefEq and existing Lean proofs retain
+their old definitions; only compiled work is short-circuited earlier. -/
+@[csimp] theorem psKernelExprEqLegacy_compiler_eq_fullPaired :
+    @psKernelExprEqLegacy = @psKernelC0FullPairedExprEq := by
+  funext left right
+  exact (psKernelC0FullPairedExprEq_source left right).symm
+
 /-
 C0 constructor-paired kernel equality.
 

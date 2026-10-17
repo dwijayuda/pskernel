@@ -119,6 +119,12 @@ jobs:
         run: |
           set -euo pipefail
           .lake/build/bin/pscv0_m3_partial_fixpoint_export ../dist/m3-foundation-preparation/StandardPartialFixpointCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-export.log
+      - name: Compile retained order data and inspect native instance metadata
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake build Ps.Environment.StandardPartialFixpointData 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-data-build.log
+          lake env lean --run ../scripts/Pscv0M3PartialFixpointMetadata.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-metadata.log
       - name: Check selected partial and ordinary section source behavior
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

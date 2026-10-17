@@ -932,7 +932,7 @@ private def checkUnusedHints : IO Unit := do
 private def sectionInstanceSource : String :=
   "abbrev SectionDictionary(_tag: Nat): Type := Inhabited(Nat)\n" ++
   "section\n" ++
-  "variable (tag: Nat, unused: Nat) [d: SectionDictionary(tag)]\n" ++
+  "variable (tag: Nat) (unused: Nat) [d: SectionDictionary(tag)]\n" ++
   "function sectionPlain(n: Nat): Nat := Inhabited.default + n\n" ++
   "function sectionHinted(n: Nat): Nat := Inhabited.default + n\n" ++
   "termination_by tag\n" ++

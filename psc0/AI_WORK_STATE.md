@@ -1,4 +1,4 @@
-## Authoritative current checkpoint — generic P0 accepted; dependent result inference layout retry, 2026-10-17
+## Authoritative current checkpoint — generic P0 accepted; dependent result inference branch-layout retry, 2026-10-17
 
 Accepted compiler/test SHA: `82b248a3ee2cd9246756690db23b7dffd612e022`.
 All five gates completed successfully at that exact SHA. The accepted focused
@@ -8,13 +8,13 @@ records the exact source, harness correction, all gates, artifacts and counts.
 The [independent-WF receipt](docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) retains the preceding 940 baseline.
 
 The containing commit retries the separate bounded own-binder-dependent
-omitted-result inference candidate after two observed build failures.
+omitted-result inference candidate after three observed build failures.
 Its compiler and new source/native tests remain **unqualified** until all five
 gates pass at its own exact SHA. Static review is not successful compilation
 or runtime evidence. Verify live HEAD before any write and let healthy native
 CI finish before pushing another compiler/test revision.
 
-### Observed parser failures and layout-only retry
+### Observed host layout failures and current retry
 
 The first candidate `d5ba914b029ad2fbcf661968e1616529b7855d0d` completed all five gates with
 compilation failures: Native [39038894477](https://github.com/dwijayuda/pskernel/actions/runs/39038894477),
@@ -42,13 +42,30 @@ shifted to :60:72 and :265:78. No new behavior assertion or runtime check ran.
 The pinned [structure parser](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term.lean#L352-L356)
 uses [sepByIndent/checkColGe](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Extra.lean#L208-L210):
 subsequent fields must start at or to the right of the first field, including
-after a comma. The containing retry places all outer fields on aligned lines
+after a comma. The aligned-record retry placed all outer fields on aligned lines
 at those same four records in Synthetic, Application and Where. A token check
 confirms that only whitespace and record separators change. No semantic logic,
 source example, assertion, oracle, workflow or resource budget changes.
 All prior runs were completed before this retry; no healthy native CI was
 canceled or superseded. Fresh complete same-SHA qualification is required.
 
+
+The aligned-record retry `2d8721309f85fed0f897e801fd51cc105d216220`
+compiled Synthetic, Basic, Abstraction, Postponed and Binders, then all five
+gates failed at Application.psElabFinishApplication: Native [39039973782](https://github.com/dwijayuda/pskernel/actions/runs/39039973782),
+focused [39039973822](https://github.com/dwijayuda/pskernel/actions/runs/39039973822),
+F1 [39039973831](https://github.com/dwijayuda/pskernel/actions/runs/39039973831),
+F2 [39039973880](https://github.com/dwijayuda/pskernel/actions/runs/39039973880) and
+F3/F4 [39039973779](https://github.com/dwijayuda/pskernel/actions/runs/39039973779).
+Native job `117417265374` published 92,461 log characters; focused job
+`117417265814` published 88,897. Both report Unit/PsElabTermResult mismatches
+at Application:280:4 and :282:24, then an unexpected `else` at :283:8.
+The else was outdented relative to an inline branch conditional. The current
+retry moves the complete if/then/else onto one indented branch-expression line.
+Only whitespace changes; the resource refusal and fallback expressions remain
+identical. No new native/source behavior assertion or runtime check ran at
+the failed SHA. Review found no other newly added conditional with this layout
+hazard. All five failed runs completed before the next compiler/test push.
 
 ### Accepted generic P0 evidence
 

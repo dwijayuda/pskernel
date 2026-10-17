@@ -14,7 +14,7 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — generic P0 accepted, dependent result inference layout retry, 17 October 2026
+## Current M3+B implementation checkpoint — generic P0 accepted, dependent result inference branch-layout retry, 17 October 2026
 
 Accepted compiler/test SHA is `82b248a3ee2cd9246756690db23b7dffd612e022`: **78/100** weighted progress and
 **960 observed focused comparisons** after all five same-SHA gates passed.
@@ -39,9 +39,15 @@ all five gates, with the same errors shifted one column. Native run 39039646657
 (job 117416328279; 89,934 log characters) and focused run 39039646620
 (job 117416328595; 86,829 characters) reached no new behavior tests.
 The pinned sepByIndent/checkColGe parser rule requires aligned fields even
-after commas. The containing revision lays out all outer fields at those four
-records on aligned subsequent lines. Only whitespace/record separators change;
-no semantic logic, fixture, assertion, oracle, workflow or budget changes.
+after commas. The next retry `2d8721309f85fed0f897e801fd51cc105d216220` aligned those four
+records and compiled the Synthetic/Basic/Postponed/Binders chain. All five
+gates then failed at Application:280/282/283: an outdented else caused
+Unit/PsElabTermResult mismatches and an unexpected-token error. Native
+run 39039973782/job 117417265374 published 92,461 characters; focused
+run 39039973822/job 117417265814 published 88,897. No new behavior tests ran.
+The containing revision moves that complete conditional to its own branch
+line; only whitespace changes. All failed runs completed before this push.
+No semantic logic, fixture, assertion, oracle, workflow or budget changes.
 The accepted 82b248a3 baseline and 960 observations remain the acceptance boundary.
 
 The containing revision retains the separate bounded own-binder-dependent

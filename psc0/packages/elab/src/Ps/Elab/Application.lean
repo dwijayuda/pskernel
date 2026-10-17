@@ -279,8 +279,8 @@ def psElabFinishApplication (application : PsElabApplicationResult)
     -- A failed attempt is speculative; adaptation is retried after the queue.
     let current ← match psElabUnifyExpected application.result expected with
       | .ok result => pure result
-      | .error error => if psElabErrorIsResource error then throw error
-        else pure application.result
+      | .error error =>
+        if psElabErrorIsResource error then throw error else pure application.result
     let current ← psElabSolveSynthetic current application.constraintsRev.reverse
     psElabFinalizeExpected current expected
 

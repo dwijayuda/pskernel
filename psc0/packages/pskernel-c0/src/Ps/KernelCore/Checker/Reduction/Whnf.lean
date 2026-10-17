@@ -165,8 +165,10 @@ def psKernelWhnfWithFuel
                               expr
                               core
         | _ =>
+            let (eligible, state) :=
+              psKernelC0SemanticEligibilityWithState state expr
             match
-                (if psKernelSemanticCacheEligible expr then
+                (if eligible then
                   psKernelExprMapGet state.whnf expr
                  else Option.none) with
             | Option.some cached =>

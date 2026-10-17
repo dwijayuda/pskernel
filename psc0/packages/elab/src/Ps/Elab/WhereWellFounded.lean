@@ -122,4 +122,4 @@ def psElabWhereWellFounded (prepared : PsElabWherePrepared)
     resultType := input.openType
     functionName := input.header.alias
     bodyLocalContext := some bodyLocalContext
-    preserveLevels := true } input.header.sourceBody termination
+    preserveLevels := true } input.header.sourceBody termination (some (psElabTermWithFuel 4096))

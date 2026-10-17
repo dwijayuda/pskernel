@@ -432,7 +432,8 @@ def psElabDeclarationBatchStable
   match source with
   | .wellFoundedDefinition name binders type value termination _ =>
       match psElabWellFoundedParts psElabDeclarationTermCallback
-          environment name binders type value termination levelNames with
+          environment name binders type value termination levelNames
+          (some (psElabTermWithFuel 4096)) with
       | .error error => .error error
       | .ok result =>
           .ok (PsElabDeclarationBatchResult.mk

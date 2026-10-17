@@ -2,7 +2,7 @@
 // No compiler algorithm or acceptance policy is implemented here.
 import assert from 'node:assert/strict';
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
-import {pathToFileURL} from 'node:url';
+import {fileURLToPath, pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import path from 'node:path';
 
@@ -38,7 +38,8 @@ if (mode === 'ecma') {
   console.log('PSCV0_M3_RUNTIME_ECMA: PASS ' + file);
 } else if (mode === 'rust') {
   // Reuse the existing dependency lock and selected runtime-check target.
-  const output = path.resolve(directory, '..', 'pscv0-native');
+  // Cargo owns one harness path even when a fixture directory is nested.
+  const output = fileURLToPath(new URL('../dist/pscv0-native/', import.meta.url));
   await mkdir(output, {recursive:true});
   const generatedPath = path.relative(output, path.join(directory, stem + '.rs'));
   const assertions = expected.flatMap(row => names.map(name =>

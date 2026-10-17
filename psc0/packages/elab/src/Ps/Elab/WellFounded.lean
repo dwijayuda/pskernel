@@ -411,6 +411,7 @@ def psElabWellFoundedApplicationFailureDetails (elaborate : PsElaborator)
 -- This probe runs only after the original tactic run failed. Its independent
 -- elaborations cannot update that run, solve its goals, or replace its error.
 def psElabWellFoundedExactFailureDetails (elaborate : PsElaborator)
+    (argumentElaborate : Option PsElaborator)
     (scope : PsSyntaxProofScope) (state : PsProofState)
     (source : PsSyntaxTerm) (span : PsSourceSpan) : Except PsElabError String := do
   let state ← psProofNormalize state
@@ -444,14 +445,19 @@ def psElabWellFoundedExactFailureDetails (elaborate : PsElaborator)
     "; target={" ++ psElabWellFoundedGoalSketch context target ++ "}" ++
     "; target-guided replay stage=" ++ guided ++
     "; application-prefix diagnostics={" ++
-      psElabWellFoundedApplicationFailureDetails elaborate context source target ++ "}" ++
+      (match argumentElaborate with
+      | none => "unavailable: caller did not supply a recursive argument worker"
+      | some worker =>
+        "recursive-worker replay without per-argument drain (separate caller budget); " ++
+          psElabWellFoundedApplicationFailureDetails worker context source target) ++ "}" ++
     "; separate proof replay WITHOUT target (not the original actual type)={" ++ independent ++ "}" ++
     "; saved locals newest-first (first 64 of " ++
       psNatToString context.localContext.declarations.length ++ ")=[" ++
       String.intercalate " | " localText ++ "]"
 
 def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
-    (context : PsElabContext) (decreasing : Option PsSyntaxTerm) :
+    (context : PsElabContext) (decreasing : Option PsSyntaxTerm)
+    (diagnosticElaborate : Option PsElaborator := none) :
     Except PsElabError PsElabContext := do
   let calls := context.wellFoundedGoalsRev.reverse
   if calls.isEmpty then
@@ -470,7 +476,7 @@ def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
       | .error error =>
         match tactics, calls with
         | [.exactE source false _], [(_, span)] =>
-          match psElabWellFoundedExactFailureDetails elaborate scope state source span with
+          match psElabWellFoundedExactFailureDetails elaborate diagnosticElaborate scope state source span with
           | .ok details => throw (.atContext details error)
           | .error _ => throw error
         | _, _ => throw error
@@ -739,7 +745,8 @@ def psElabWellFoundedPairCallbackEquality (context : PsElabContext)
 -- No body lambda enters the header or the termination clause's lexical scope.
 def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
-    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
+    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
+    (diagnosticElaborate : Option PsElaborator := none) :
     Except PsElabError PsElabWellFoundedResult := do
   let (headerContext, bodyLocalContext, aliases) ← psElabWellFoundedHeaderScope header
   let environment := headerContext.environment
@@ -870,7 +877,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     (elaborate bodyContext valueSyntax (some declaredResult))
   psElabRecursionValidateFixedParameters value.context plan value.context.wellFoundedCallsRev
   let solved ← psElabWellFoundedAt "decrease goals"
-    (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing)
+    (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing diagnosticElaborate)
   -- Generalize only at this actual declaration boundary, as ordinary checked
   -- declarations do. All terms and the equation's local telescope use the same
   -- instantiated levels; unresolved term/proof holes remain an error.
@@ -996,11 +1003,15 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
 
 -- Keep the original entry point and add the actual declaration identity to
 -- failures from every phase of its unchanged construction.
+-- A diagnostic argument worker must not drain after each source argument.
+-- Source callers supply psElabTermWithFuel 4096 as a separate replay budget.
+-- Ordinary elaboration and proof execution continue to use elaborate.
 def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
-    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
+    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
+    (diagnosticElaborate : Option PsElaborator := none) :
     Except PsElabError PsElabWellFoundedResult :=
-  (psElabWellFoundedTypedPartsCore elaborate name header valueSyntax termination).mapError
+  (psElabWellFoundedTypedPartsCore elaborate name header valueSyntax termination diagnosticElaborate).mapError
     (fun error => .atDeclaration name error)
 
 -- The existing standalone route still elaborates its own selected header.
@@ -1009,7 +1020,8 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
     (typeSyntax valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
-    (levelNames : List PsName := []) :
+    (levelNames : List PsName := [])
+    (diagnosticElaborate : Option PsElaborator := none) :
     Except PsElabError PsElabWellFoundedResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let binderResult ← psElabTypedBinders elaborate
@@ -1019,4 +1031,4 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     context := annotation.context
     parametersRev := binderResult.bindersRev
     resultType := annotation.type
-    functionName := name } valueSyntax termination
+    functionName := name } valueSyntax termination diagnosticElaborate

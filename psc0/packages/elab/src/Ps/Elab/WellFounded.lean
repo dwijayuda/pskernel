@@ -364,7 +364,12 @@ def psElabWellFoundedFunctional (context : PsElabContext)
     let raw := psLocalPushBinding context.localContext rawName callbackType .explicit
     let curried ← psElabWellFoundedCurryCallback { context with localContext := raw.context }
       packing sourceCallbackType (.fvar raw.id)
-    let body := psExprInstantiate1 (psExprAbstractFVar callbackId body) curried
+    -- Keep the typed source callback as a local value. Nested recursor
+    -- closure conversion must capture this curried ABI, not the raw packed
+    -- callback inside its adapter. The let remains definitionally equal to
+    -- substitution, and executable preparation consumes its exact adapter.
+    let body := PsExpr.letE callbackName sourceCallbackType curried
+      (psExprAbstractFVar callbackId body)
     let inner := PsExpr.lam rawName callbackType
       (psExprAbstractFVar raw.id body) .explicit
     let packedName := psRootName "_psc0Packed"

@@ -16,97 +16,45 @@ Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from t
 
 ## Current M3+B implementation checkpoint — independent WF candidate, 17 October 2026
 
-The initial nested-equation revision `438dd91e` stopped at a missing explicit
-`Ps.Meta.Recursor` import; this candidate corrects that dependency. The proof
-construction remains pending all-five-gate qualification.
+Accepted compiler/test baseline remains `60586b7e12aee97954d27e698666a8a2531a0db4`,
+78/100 weighted progress and 920 focused comparisons; see its
+[complete receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md).
+The current independent two-changing-argument extension reuses the checked
+PSigma pack with a constant second family. It preserves exactly two ordered
+distinct changing IDs, fixed captures, checked decreases and equations,
+typed erasure and the original curried ABI. Existing unary-major/state support
+and the pinned variable-measure-codomain refusal are unchanged.
 
-At the latest tested compiler/test SHA `5b87922e40eac81889a78364fa33a34ada2a2c0b`,
-the original three independent-WF decrease proofs now elaborate and all three
-foundation gates pass. Focused construction advances to exact source-equation
-transport for the nested two-coordinate match. This candidate extends its
-existing checked constructor cases recursively when branch reflexivity is
-blocked by another actual local recursor major; no induction hypothesis
-authorizes an equation, and every leaf remains checked reflexivity.
-Native qualification also requires the new regression's reserved local-name
-correction. No 940-comparison or new score claim is accepted until all five
-gates complete at one compiler/test SHA.
+At `9c3e76b14f91158d3c1c2e6753fdd2942716cb4e`, all focused build jobs and
+complete WF construction pass, including the original three decrease proofs
+and exact retained-source equations. Executable preparation then fails on
+`PSigma.mk` inside a lifted independentRight worker.
+The containing candidate preserves the checked curried callback adapter as
+a typed local let so nested workers capture its source ABI; existing exact
+adapter replacement still rejects every residual raw callback. It does not
+add arbitrary PSigma runtime support. All source proofs, existing native
+oracles and 19 refusal controls remain unchanged.
 
+Transactional instance recovery and nested checked constructor cases are
+retained from earlier candidates. Their observed progression and the complete
+latest matrix are recorded in the work-state checkpoint. Independent-WF
+acceptance requires all five gates at one exact compiler/test SHA and all
+940 planned comparisons. No extra score point is assigned to this bounded
+extension of pair packing.
 
-The accepted compiler/test baseline is `60586b7e12aee97954d27e698666a8a2531a0db4`
-at 78/100 weighted engineering progress. Its
-[complete receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md)
-records the completed five-gate qualification, including omitted main result
-inference within the selected boundary, indexed Inhabited, nominal empty
-dictionaries, generic fixed-codomain WF relations and dependent pair packing.
-M3+B is open; these are bounded admissions, not full v7.2 coverage.
+The separate generic mutual ordinary-P0 runtime fixture is prepared with
+Nat/Bool seed/default distinctions and explicit verified-assurance refusals.
+It must earn its own 20 comparisons after independent-WF qualification.
+Own-binder-dependent result inference remains under design; caller-driven
+type constraints and default/proof scheduling must be preserved. Larger
+changing packs, arbitrary WF telescopes, general mutual WF, broader indexed
+binary deriving and the full M3+B exits remain open. P1 still refuses the
+audited Classical.choice dependency.
 
-The current unqualified candidate addresses the remaining independent
-two-changing-argument WF boundary in v7.2 total recursion. It reuses the
-actual checked PSigma construction with a constant second family, preserving
-exactly two source-ordered distinct changing IDs, capture and codomain
-closure, checked decreases and equations, typed erasure and the curried ABI.
-New left/right lexicographic programs and three well-typed entry-identity
-controls are added. The sum nondecrease refusal retains its source and moves
-to PSCV0-WF-DECREASE; the old tuple refusal is replaced by the genuinely
-nondecreasing measure Prod.mk(n + acc, 0), also at that rule and elaboration phase.
-
-Qualification still requires all five gates on the same compiler/test SHA.
-The planned focused total is 940 comparisons, up from 920; no additional
-runtime or progress credit is assigned before observed assertions pass.
-Packing more than two changing arguments, arbitrary telescopes,
-general mutual WF and the complete P0 matrix remain open. The existing
-unary-major route still permits multiple state arguments. Variable measure
-codomains remain refused consistently with pinned Lean, and the audited
-P1 assumption boundary remains blocked. The v7.2 reference blob and pinned Lean are unchanged.
-
-The implementation descriptions and next-slice recommendations in the
-adoption-era matrix below are historical snapshots. This checkpoint and
-the current handoffs/roadmap supersede their old pending/blanket-rejection
-statements; their specification comparison remains retained as provenance.
-
-### First independent-WF matrix and failure diagnosis
-
-Candidate `fa68104af911aedc7b80bc56906da24bd6a9def9` remains unqualified:
-native/F1/F2/F3 completed successfully, while focused run 39026724062 failed
-in the portable independentRight decrease proof after native oracles and
-portable independentLeft/equation passed. Runtime steps were skipped.
-Native run 39026724076 completed all 34 steps before the next branch update.
-
-The current diagnostic wraps the original proof elaborator without changing
-its inputs or successful result and adds actual expected types, source spans
-and captured goal locals only after failure. It does not replay a proof or
-change the source definition/proofs. The accepted baseline remains 78/100
-and 920 comparisons; 940 is still planned. Larger packed telescopes remain
-unqualified. Variable measure codomains retain pinned-Lean refusal semantics.
-
-### Actual callback trace and application diagnosis
-
-Revision `b27407a3905883e5f4b3aac8a67cc8b6b5e71e02` remains unqualified.
-Its focused run 39028057176 failed on the original first proof at bytes
-6588..6626, `Prod.Lex.right(0, Nat.lt_succ_self(k))`. The captured
-lower and upper pairs, latest refined callback and k are correct; the
-three saved goals retain source order. F1/F2/F3 completed successfully.
-Native [run 39028057191](https://github.com/dwijayuda/pskernel/actions/runs/39028057191), job 117382850031, completed all 34 steps successfully at 11:34:13 UTC. The full healthy native run finished before the next branch update.
-
-The next diagnostic observes actual application and postponed-check
-failure state without changing source proofs or successful elaboration.
-An unknown-numeral/packed-projection interaction is a hypothesis until
-that trace establishes it. No additional acceptance or progress credit
-is assigned. Temporary diagnostics must be removed before final production
-qualification, followed by all five completed same-SHA gates.
-
-### Transactional instance-recovery candidate
-
-The completed `cb0b1e85` diagnostic matrix passed F1/F2/F3 and failed focused
-WF plus an existing native negative's error classification. The actual retained
-independentRight proof inferred Nat.le and equal successor endpoints before
-the final expected-term check. The new candidate introduces an opt-in blocked
-projection/ordinary-instance recovery inside the existing complete equality
-transaction, with checked assignment, saved scopes, full rollback and explicit
-resource failure. Application/Postponed/WF temporary wrappers are removed;
-original proof order and negative phase expectations remain. Direct native
-regressions and all five same-SHA gates must pass before acceptance.
-The accepted compiler remains `60586b7e`, 78/100 and 920 comparisons.
+The adoption-era matrix below is historical implementation guidance.
+Its specification comparison remains provenance; this checkpoint and the
+current roadmap supersede its pending/blanket-rejection descriptions.
+The v7.2 reference, Lean pin and approved assumption set are unchanged.
 
 ## Rule-to-change and implementation matrix
 

@@ -211,7 +211,9 @@ def psElabMonotonicitySolve (fuel : Nat) (state : PsProofState) :
     let state ← psProofNormalize state
     if state.goals.isEmpty then return state
     let (goal, context, target) ← psProofMain state
-    let target := psMetaInstantiate context.metaContext target
+    -- Constructor cases retain the motive application in each goal type.
+    -- Expose its beta/local-let head without unfolding the monotone predicate.
+    let target := psWhnfCore context.metaContext context.localContext target
     match target with
     | .forallE .. =>
       return ← psElabMonotonicitySolve fuel (← psProofIntro state none)

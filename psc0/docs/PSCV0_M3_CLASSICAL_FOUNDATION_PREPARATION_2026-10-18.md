@@ -1,5 +1,16 @@
 # M3+B implementation preparation — Order proofs, source privacy, WF state and indexed BEq
 
+## Preparation 6 — observed synthesis, branch-goal and visibility repairs
+
+Preparation [f44d8800](https://github.com/dwijayuda/pskernel/commit/f44d8800f9e32cd405851e2b5beb40a8a7f0c402), [run39068710115](https://github.com/dwijayuda/pskernel/actions/runs/39068710115), failed three required checks: the section visibility probe used an unsupported nullary function; CCPO function-space search could not instantiate its natural type-family parameter; and monotonicity classification saw an unreduced constructor-case motive application. Native compiler/foundation builds, retained117-declaration/6-rule Order export, P0 Nonempty, larger WF state construction and indexed BEq source/native/kernel/emission checks passed. No backend runtime comparisons execute in this preparation workflow.
+
+This descendant changes the section probe to a supported one-argument function while preserving its exact visibility refusal; marks only fresh natural instance-candidate parameters whose visible full Pi telescope ends in Sort for the existing checked complete-spine family solver; and exposes beta/local-let heads before monotonicity goal classification while leaving original-goal proof checking intact. The Order audit preserves its original three dictionary assertions, adds a dependent Pi/native control, requires four closed dictionaries, and replays all four actual witness definitions in the same fresh official-kernel batch.
+
+The active Standard remains the pre-Order3635/42/359/13 surface and its immutable pins. Order/P1 activation remains pending a completed proposed audit and all nine portable monotonicity proofs plus the nonmonotone refusal. Native authoring export, emission and partial proof progress are not that qualification.
+
+Main foundation compiler [f271f2a3](https://github.com/dwijayuda/pskernel/commit/f271f2a35789b120dbe1a6dcd5a555db44e72134) has now passed Native39068626607 (34/34 steps), focused39068626598 (15/15), F139068626634, F239068626600 and F339068626601 on that exact SHA. Its runtime/artifact evidence is being recorded independently. M3+B remains OPEN; the larger Match/noncomputable/mutual-WF candidates are not selected by this repair commit.
+
+
 ## Preparation5 — repair host fixture parsing and native proof-oracle inference
 
 Preparation5dd8ed9701b215bf808ea1e058e382b3f639710a completed [run39067140365](https://github.com/dwijayuda/pskernel/actions/runs/39067140365). Native compiler build, exact primitive/closure/strict manifest checks, retained Order export/data/metadata and the new indexed BEq source/native/kernel/emission suite passed. The recursive deriving suite also passed. Runtime comparisons still require the focused runner lanes.

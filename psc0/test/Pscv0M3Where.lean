@@ -1047,7 +1047,7 @@ private def checkSectionInstances : IO Unit := do
          modules := [{ name := "SectionProvider", sourceName := "section-provider.ps", source := sectionInstanceSource }] } :
         PsV7Native.Request)] ++
     (rejected.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray ++ #[
-      ({ source := "import SectionProvider\nfunction leakedEquation := sectionPlain.eq_def\n",
+      ({ source := "import SectionProvider\nfunction leakedEquation(n: Nat) := sectionPlain.eq_def\n",
          sourceName := "section-equation-leak.ps", moduleName := "Main",
          modules := [{ name := "SectionProvider", sourceName := "section-provider.ps", source := sectionInstanceSource }] } :
         PsV7Native.Request),

@@ -38,6 +38,14 @@ def psBinderInfoIsInstance (binder : PsBinderInfo) : Bool :=
   | .instanceImplicit => true
   | _ => false
 
+-- Fresh type-family parameters may use the checked complete-spine assignment
+-- rule. Only a syntactically visible Pi telescope ending in Sort is marked;
+-- value functions and unresolved/aliased codomains keep ordinary behavior.
+private def psInstanceTypeFamilyArity : PsExpr → Option Nat
+  | .sortE _ => some 0
+  | .forallE _ _ body _ => (psInstanceTypeFamilyArity body).map Nat.succ
+  | _ => none
+
 -- Candidate preparation owns a speculative snapshot. No assignments from it
 -- are committed until the resulting witness has been checked by its consumer.
 def psPrepareInstanceWithFuel (environment : PsEnvironment)
@@ -52,8 +60,10 @@ def psPrepareInstanceWithFuel (environment : PsEnvironment)
     match type with
     | .forallE _ domain body binder =>
       let isInstance := psBinderInfoIsInstance binder
+      let numScopeArgs := if isInstance then 0 else
+        (psInstanceTypeFamilyArity domain).getD 0
       let fresh := psMetaFresh context localContext domain
-        (if isInstance then .synthetic else .natural)
+        (if isInstance then .synthetic else .natural) {} numScopeArgs
       psPrepareInstanceWithFuel environment localContext fresh.context
         (.app value fresh.expr) (psExprInstantiate1 body fresh.expr)
         ({ expr := fresh.expr, type := domain, isInstance } :: arguments) fuel

@@ -1327,9 +1327,15 @@ def checkPartialFixpointFoundation : IO Unit := do
   | .error message => throw (IO.userError message)
   -- Actual dictionary search must use the selected native Option/Pi/PProd
   -- instances, as well as retain their exact registration metadata.
+  -- This native control is elaborated independently of the portable terms.
+  let _ : Lean.Order.CCPO ((n : Nat) → Option (Fin (n + 1))) := inferInstance
   let nat := PsExpr.constE psNatName []
   let option := psExprApplyMany (.constE (psRootName "Option") [.zero]) [nat]
   let functionType := PsExpr.forallE .anonymous nat option .explicit
+  let indexedOption := psExprApplyMany (.constE (psRootName "Option") [.zero])
+    [.app (.constE (psRootName "Fin") [])
+      (.app (.constE (psNameAppendStr psNatName "succ") []) (.bvar 0))]
+  let dependentFunctionType := PsExpr.forallE .anonymous nat indexedOption .explicit
   let product := psExprApplyMany (.constE (psRootName "PProd") [.succ .zero, .succ .zero])
     [option, option]
   let ccpo := fun type => PsExpr.app
@@ -1337,23 +1343,33 @@ def checkPartialFixpointFoundation : IO Unit := do
   let goals : List (String × PsExpr × PsName) := [
     ("CCPO (Option Nat)", ccpo option, psDecisionName "Lean.Order.instCCPOOption"),
     ("CCPO (Nat → Option Nat)", ccpo functionType, psDecisionName "Lean.Order.instCCPOPi"),
+    ("CCPO ((n : Nat) → Option (Fin (n + 1)))", ccpo dependentFunctionType,
+      psDecisionName "Lean.Order.instCCPOPi"),
     ("CCPO (PProd (Option Nat) (Option Nat))", ccpo product,
       psDecisionName "Lean.Order.instCCPOPProd")]
-  for (label, target, expected) in goals do
+  let mut witnessDeclarations : List PsDeclaration := []
+  for ((label, target, expected), index) in goals.zipIdx do
     let found := psSynthInstanceWithTable proposed psLocalEmpty proposed.instances psMetaEmpty 64 target
     let some value := found.result.value
       | throw (IO.userError ("P1 foundation synthesis failed: " ++ label))
-    let .constE actual _ := (psInferAppView (psMetaInstantiate found.result.context value)).head
+    let value := psMetaInstantiate found.result.context value
+    let .constE actual _ := (psInferAppView value).head
       | throw (IO.userError ("P1 foundation synthesis has no dictionary head: " ++ label))
-    unless psNameEq actual expected && !found.table.resourceExceeded do
-      throw (IO.userError ("P1 foundation selected the wrong dictionary: " ++ label))
-  checkCandidate (candidates ++ base.declarations) candidates
+    unless psNameEq actual expected && !found.table.resourceExceeded &&
+        !psExprHasUnresolvedMeta value && psExprFVarsInContext psLocalEmpty value do
+      throw (IO.userError ("P1 foundation selected the wrong or open dictionary: " ++ label))
+    witnessDeclarations := .definitionDecl
+      (.num (psRootName "$psc0P1FoundationWitness") index) [] target value :: witnessDeclarations
+  checkCandidate (witnessDeclarations ++ candidates ++ base.declarations)
+    (witnessDeclarations ++ candidates)
   let compared ← checkRecursorRules native (candidates ++ base.declarations) candidates
   unless compared == 6 do
     throw (IO.userError "P1 foundation recursor-rule inventory differs")
   IO.println (Lean.Json.mkObj [
     ("schema", Lean.toJson ("pscv0-partial-fixpoint-foundation-audit/1" : String)),
     ("leanCommit", Lean.toJson Lean.githash),
+    ("synthesizedDictionaries", Lean.toJson witnessDeclarations.length),
+    ("synthesisGoals", Lean.toJson (goals.map (fun entry => entry.1))),
     ("candidateDeclarations", Lean.toJson candidates.length),
     ("candidateAxioms", Lean.toJson ([] : List String)),
     ("kernelChecked", Lean.toJson true),

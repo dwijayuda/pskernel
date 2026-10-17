@@ -7,6 +7,7 @@ on:
       - '.github/workflows/pskernel-c0-arena-435-hotspot.yml'
       - 'psc0/packages/pskernel-c0/test/C0Arena435HotCase.py'
       - 'psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofSampler.c'
       - 'psc0/packages/pskernel-c0/src/**'
   workflow_dispatch:
 permissions:
@@ -18,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [app-lam, beta-ladder, let-ladder, shared-subterm]
+        case: [shared-subterm]
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
@@ -96,6 +97,18 @@ jobs:
           assert not summary["successful_source_acceptance"]
           for sym,count in summary["top_inclusive_functions"][:15]:
               print(f"C0_ARENA_HOT_FRAME case={source['case']} samples={count} symbol={sym}",flush=True)
+          # Compress long consecutive DecEq recursion into run lengths, so
+          # the actual calling checker/memo is visible below frame 65.
+          for i,stack in enumerate(summary["example_stacks"][:4]):
+              runs=[]
+              for frame in stack:
+                  name=frame["function"]
+                  if runs and runs[-1][0]==name:
+                      runs[-1][1]+=1
+                  else:
+                      runs.append([name,1])
+              print("C0_ARENA_HOT_DEEP_STACK case="+source["case"]+
+                    " sample="+str(i)+" runs="+json.dumps(runs),flush=True)
           print(f"C0_ARENA_HOT_RESULT case={source['case']} samples={summary['native_stack_samples']} sampled_only=true source_bytes_exact=true")
           PY
           fi

@@ -130,6 +130,29 @@ def psKernelDefEqQuickAfterCommon
       Except.ok
         (Prod.mk Option.none state)
 
+/-- Pure quick-DefEq success-cache guard with the cheap miss FIRST.
+    Most comparisons are cache misses. Historically the guard scanned both
+    expressions for FVars before querying the success pair, potentially
+    expanding a shared DAG. The original guard is a pure conjunction,
+    so the order can change cost but not the source Boolean judgment. -/
+def psKernelC0CertifiedDefEqSuccessGuard
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : Bool :=
+  psKernelExprPairSetContains state.success left right &&
+    psKernelC0CertifiedSemanticPairEligible left right
+
+/-- Exact original source Boolean for EVERY checker state and pair,
+    including local FVars and both cached and uncached comparisons. -/
+theorem psKernelC0CertifiedDefEqSuccessGuard_source
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) :
+    psKernelC0CertifiedDefEqSuccessGuard state left right =
+      (psKernelSemanticPairCacheEligible left right &&
+        psKernelExprPairSetContains state.success left right) := by
+  simp only [psKernelC0CertifiedDefEqSuccessGuard,
+    psKernelC0CertifiedSemanticPairEligible_source]
+  exact Bool.and_comm _ _
+
 /-- General-purpose quick path retains its original guard semantics. -/
 def psKernelDefEqQuick
     (defeq :
@@ -150,8 +173,10 @@ def psKernelDefEqQuick
   if psKernelExprEq left right then
     Except.ok
       (Prod.mk (Option.some true) state)
-  else if psKernelSemanticPairCacheEligible left right &&
-      psKernelExprPairSetContains state.success left right then
+  -- The all-input source-equivalent certified pair guard avoids the
+  -- historical exponential FVar traversal in quick DefEq cache screening.
+  -- Actual equality/cache success remains checked by the original set.
+  else if psKernelC0CertifiedDefEqSuccessGuard state left right then
     Except.ok
       (Prod.mk (Option.some true) state)
   else

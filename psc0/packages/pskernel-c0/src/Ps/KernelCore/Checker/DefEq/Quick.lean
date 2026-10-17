@@ -131,6 +131,27 @@ def psKernelDefEqQuickAfterCommon
       Except.ok
         (Prod.mk Option.none state)
 
+/-- Source-exact success-pair fast miss: checking the pair set first
+    avoids traversing a large shared term for FVars when no successful
+    DefEq result has been cached. A hit still requires the exact original
+    FVar/local-context eligibility; neither pointer nor hash is an Eq fact. -/
+def psKernelC0QuickPairSuccessGuard
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : Bool :=
+  psKernelExprPairSetContains state.success left right &&
+    psKernelSemanticPairCacheEligible left right
+
+/-- All-input equivalence including cached-hit, miss and FVar scopes.
+    This rewrites only a Boolean conjunction, never source DefEq/fuel. -/
+theorem psKernelC0QuickPairSuccessGuard_source
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) :
+    psKernelC0QuickPairSuccessGuard state left right =
+      (psKernelSemanticPairCacheEligible left right &&
+        psKernelExprPairSetContains state.success left right) := by
+  simp only [psKernelC0QuickPairSuccessGuard]
+  exact Bool.and_comm _ _
+
 /-- General-purpose quick path retains its original guard semantics. -/
 def psKernelDefEqQuick
     (defeq :
@@ -151,8 +172,7 @@ def psKernelDefEqQuick
   if psKernelC0MemoizedExprEq left right then
     Except.ok
       (Prod.mk (Option.some true) state)
-  else if psKernelSemanticPairCacheEligible left right &&
-      psKernelExprPairSetContains state.success left right then
+  else if psKernelC0QuickPairSuccessGuard state left right then
     Except.ok
       (Prod.mk (Option.some true) state)
   else

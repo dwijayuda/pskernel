@@ -1,4 +1,4 @@
-## M3+B current checkpoint — preserve the nested Repr accumulator binder
+## M3+B current checkpoint — nested Repr binder and Boolean demand observation
 
 Compiler/test parent: `8390cdc647ce0f5e5bd45678f000795ea5afb93c`.
 Latest fully accepted compiler/test remains
@@ -38,6 +38,32 @@ It changes only Repr term construction; no recursor, unifier, runtime,
 assumption or acceptance owner is changed. Existing native strings,
 source/equation checks, target outputs, worker invariants and all workloads
 remain unchanged. The existing failure already provides the regression case.
+
+### Follow-up at the Repr repair SHA
+
+Compiler/test `e85012f5f6d5a9e702779c0b13372e46eac1af0f` passed
+native [38990964855](https://github.com/dwijayuda/pskernel/actions/runs/38990964855),
+F1 [38990964834](https://github.com/dwijayuda/pskernel/actions/runs/38990964834),
+F2 [38990964835](https://github.com/dwijayuda/pskernel/actions/runs/38990964835)
+and F3/F4 [38990964874](https://github.com/dwijayuda/pskernel/actions/runs/38990964874).
+Focused [38990964814](https://github.com/dwijayuda/pskernel/actions/runs/38990964814)
+(job 117273057497) passed the previously rejected Repr construction and reached
+`check comparison order: native List/Array comparison order changed`.
+
+The next failure is the fixture's observation of a blocked Bool recursor:
+`psReduceIota` reduces its major to select a constructor, but returns `none`
+when that major is a free variable. `psWhnfSpineWithTransparencyFuel` then
+preserves the original recursor application, including the unreduced major.
+The old assertion compared that raw argument with the expected free variable.
+It now separately WHNF-reduces the observed major before the same exact
+alpha-equality check. Bounded failure diagnostics retain both forms.
+This changes no production reducer or BEq construction.
+
+Pinned Lean `Init/Data/List/Basic.lean` compares the first element first;
+`Init/Data/Array/Basic.lean:isEqvAux` checks equal lengths and compares the
+last element first. Those exact expected variables, native oracles, unequal
+length refusal, second-demand check and both open kernel-checked equations
+are preserved. The correction still awaits all five gates at one SHA.
 
 Next: inspect all five automatically triggered qualification gates for this
 repair at the same compiler/test SHA; repair any actual remaining failure.

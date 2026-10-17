@@ -585,8 +585,16 @@ private def checkComparisonOrder (environment : PsEnvironment) : IO (List PsDecl
       | throw (IO.userError "comparison did not demand its first unresolved Boolean guard")
     let some guard := reduced.args[3]?
       | throw (IO.userError "comparison guard is absent")
+    -- A blocked recursor preserves its original application arguments:
+    -- psReduceIota reduces the major to select a constructor, but returns none
+    -- for an unresolved guard. Observe that major in WHNF before comparing it.
+    let demandedGuard := psWhnf environment psMetaEmpty last.context guard
     ensure (psNameEq name (psNameAppendStr psBoolName "rec") &&
-      psExprAlphaEq guard (.fvar expectedGuard)) "native List/Array comparison order changed"
+      psExprAlphaEq demandedGuard (.fvar expectedGuard))
+      ("native List/Array comparison order changed; expected " ++
+        traceExpr 8 (.fvar expectedGuard) ++ ", head " ++ psNameToString name ++
+        ", raw guard " ++ traceExpr 16 guard ++
+        ", demanded guard " ++ traceExpr 16 demandedGuard)
   ensure (psExprAlphaEq (psWhnf environment psMetaEmpty last.context
     (compare (asArray left) (asArray short))) no)
     "Array demanded a field comparison before rejecting unequal lengths"

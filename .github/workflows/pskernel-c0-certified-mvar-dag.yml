@@ -7,6 +7,7 @@ on:
       - '.github/workflows/pskernel-c0-certified-mvar-dag.yml'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedMVarMemoRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedUndefMemoRegression.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,8 +32,9 @@ jobs:
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
           lake build c0OfficialReplay
           lake env lean --run test/C0CertifiedMVarMemoRegression.lean
+          lake env lean --run test/C0CertifiedUndefMemoRegression.lean
           lake env lean --run test/C0OfficialNdjsonReplay.lean
-          echo "C0_MVAR_DAG_CERT exact_source_refinement=true all_input_thm=checked negative_admission_regressions=pass"
+          echo "C0_MVAR_UNDEF_DAG_CERT exact_source_refinement=true first_offender_semantics=preserved negative_admission_regressions=pass"
       - name: Prepare immutable official-positive Arena app-lam DAG source
         shell: bash
         run: |
@@ -90,7 +92,8 @@ jobs:
           grep -Fq 'psKernelC0AdaptiveHasMVar_source' "$source_file"
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           (cd psc0/packages/pskernel-c0 &&
-            lake env lean --run test/C0CertifiedMVarMemoRegression.lean)
+            lake env lean --run test/C0CertifiedMVarMemoRegression.lean
+          lake env lean --run test/C0CertifiedUndefMemoRegression.lean)
           set +e
           (cd psc0/packages/pskernel-c0 && \
             /usr/bin/time -v -o "$RUNNER_TEMP/mvar-candidate-resources.txt" \

@@ -107,5 +107,4 @@ def psKernelC0DeepPtrDecEq :
       -- Leaves and mixed constructor tags are decided by the pinned source
       -- instance; those contain no recursive PsKernelExpr child comparisons.
       withPtrEqDecEq left right (fun _ => inferInstance)
-termination_by sizeOf left
-decreasing_by simp_wf
+

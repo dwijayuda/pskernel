@@ -24,7 +24,11 @@ permissions:
 jobs:
   native-435-adapted-arena:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
@@ -59,13 +63,81 @@ jobs:
             --checker psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay \
             --official-project psc0/packages/pskernel-c0 \
             --out "$RUNNER_TEMP/pskernel-c0-arena-435-compat.json" \
-            --fuel 4096 --timeout 20 | tee "$RUNNER_TEMP/pskernel-c0-arena-435-compat.log"
+            --fuel 4096 --timeout 20 --shard-count 4 --shard-index ${{ matrix.shard }} | tee "$RUNNER_TEMP/pskernel-c0-arena-435-compat.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pskernel-c0-arena-435-compat-full
+          name: pskernel-c0-arena-435-compat-shard-${{ matrix.shard }}
           path: |
             ${{ runner.temp }}/pskernel-c0-arena-435-compat.json
             ${{ runner.temp }}/pskernel-c0-arena-435-compat.log
           if-no-files-found: warn
           retention-days: 21
+
+  aggregate-native-435:
+    if: always()
+    needs: native-435-adapted-arena
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pskernel-c0-arena-435-compat-shard-*
+          path: arena-shards
+      - name: Combine all 193 unique cases, enforce independent kernel verdicts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections
+          import json
+          import pathlib
+          import sys
+
+          paths=sorted(pathlib.Path("arena-shards").glob("*/pskernel-c0-arena-435-compat.json"))
+          assert len(paths)==4, f"expected four complete shard reports, got {len(paths)}"
+          items=[]
+          indices=set()
+          for p in paths:
+              report=json.loads(p.read_text())
+              assert report["archive_cases"]==193
+              assert report["shard_count"]==4
+              assert report["shard_index"] not in indices
+              indices.add(report["shard_index"])
+              assert report["selected_cases"]==len(report["tests"])
+              items+=report["tests"]
+          assert indices=={0,1,2,3}, indices
+          assert len(items)==193, len(items)
+          ids=[(t["original_expected"],t["name"]) for t in items]
+          assert len(set(ids))==193, "duplicate or missing source identities"
+          counts=collections.Counter(t["classification"] for t in items)
+          acceptable=sum(t["classification"]=="correct" for t in items)
+          adapted=sum(t.get("adaptation",{}).get("body_bytes_identical") is True for t in items)
+          assert adapted==193, f"source-body byte invariant failed: {adapted}/193"
+          summary={
+              "source":"Lean Kernel Arena September 2026 3.1.0 exports; explicit header-only compatibility adaptation",
+              "target":"Lean 4.35.0",
+              "historical_raw_archive_same_byte_verdict":False,
+              "total":193,
+              "source_body_identical":adapted,
+              "actual_matched_verdicts":acceptable,
+              "counts":dict(sorted(counts.items())),
+              "tests":items,
+          }
+          output=pathlib.Path("arena435-compat-aggregate.json")
+          output.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n")
+          print(f"C0_ARENA_435_AGGREGATE total=193 body_exact={adapted} checked_agreements={acceptable} counts={dict(sorted(counts.items()))}")
+          if counts.get("false_accept") or counts.get("false_reject") or counts.get("adaptation_error"):
+              print("C0_ARENA_435_AGGREGATE_GATES invalid_verdict_or_adapter_failure=true",file=sys.stderr)
+              sys.exit(1)
+          if not acceptable:
+              print("C0_ARENA_435_AGGREGATE_GATES no_qualified_results=true",file=sys.stderr)
+              sys.exit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-435-compat-aggregate
+          path: arena435-compat-aggregate.json
+          if-no-files-found: warn
+          retention-days: 30

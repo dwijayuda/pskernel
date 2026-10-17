@@ -580,7 +580,7 @@ private def traceWFElaborationFailure (label : String) (program : PsSyntaxProgra
           | .declaration source | .registeredDeclaration source _
           | .privateDeclaration source | .privateRegisteredDeclaration source _
           | .derivingDeclaration source _ _ => [source]
-          | .mutualDeclarations members _ => members.map (·.declaration)
+          | .mutualDeclarations members _ => members.map PsSyntaxMutualMember.declaration
           | _ => []
         let names := sources.map fun source =>
           String.intercalate "." (psScopeQualified state.scope (psElabOriginSource source).fst).segments

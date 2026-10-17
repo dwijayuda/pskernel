@@ -1,4 +1,31 @@
-## Current well-founded construction diagnostic — 2026-10-17
+## Current well-founded diagnostic projection follow-up — 2026-10-17
+
+At `83083f458cd97a7f0e5cc2f213c559b09157cca7`, the production diagnostic
+owners and native compiler compiled successfully. F1
+[39004560584](https://github.com/dwijayuda/pskernel/actions/runs/39004560584),
+F2 [39004560578](https://github.com/dwijayuda/pskernel/actions/runs/39004560578)
+and F3/F4 [39004560546](https://github.com/dwijayuda/pskernel/actions/runs/39004560546)
+passed. [Native 39004560563](https://github.com/dwijayuda/pskernel/actions/runs/39004560563),
+job `117314263520`, completed **all 34 reported steps successfully**.
+Its audit is field-for-field identical to the completed `62ee4014` audit:
+34 active additions, no candidate axioms, three compared recursor rules and
+the same selected Standard identities. All original source/Standard,
+modules, GC/components, TypeScript, Rust, repeated Wasmtime and measurements
+passed. The GC report retains five scalar worlds, 1,069 shared observations,
+ten natural-limb checks and binary/Wat equivalence. Measurements record
+the exact `83083f45` source SHA, four compiler configurations and twelve
+runtime rows. Native artifact `12090802497` is 6,797,925 bytes, SHA-256
+`9adf8d48fdb6e6f5ed215c473a24026ba9049f1540f6e3dfdc7f956dab19675d`.
+This run completed before the correction was pushed.
+[Focused 39004560539](https://github.com/dwijayuda/pskernel/actions/runs/39004560539),
+job `117314263245`, then reported a single fixture compile error: Lean could
+not infer the input type of `members.map (·.declaration)` in the new
+failure replay helper. The existing accessor
+`PsSyntaxMutualMember.declaration` supplies that exact type explicitly.
+This one-line correction preserves the identical projection, mutual-member
+order, replay state and original failure. No source fixture or backend
+parity ran in that failed job, and no focused artifact was uploaded.
+The underlying WF type mismatch still requires the diagnostic run.
 
 At `62ee40146ebd9f83f96ad854368a97455250916b`,
 [native 39002967810](https://github.com/dwijayuda/pskernel/actions/runs/39002967810)

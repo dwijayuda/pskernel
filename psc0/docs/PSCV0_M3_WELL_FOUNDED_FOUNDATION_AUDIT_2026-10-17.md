@@ -116,3 +116,56 @@ Accepted compiler/test SHA remains
 unqualified. P1 remains blocked by `Classical.choice`; only `propext` and
 `Quot.sound` are approved. Lean stays at 4.35.0,
 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. PR 109 stays draft/open/unmerged.
+
+## Activated native replay completed — 2026-10-17
+
+The later compiler/test SHA
+`3c5f51a2ffdc9cabfe386ab6fd1c7a1bb82e6ff5` selects the audited extension.
+[Native run 39000431708](https://github.com/dwijayuda/pskernel/actions/runs/39000431708),
+job `117302002147`, completed successfully: all 34 reported steps passed,
+including every original source/Standard, module, GC/component, TypeScript, Rust,
+repeated Wasmtime and measurement workload. The independent audit now reports
+`activeFoundationDeclarations: 34`; its other inventory and pin values agree
+exactly with the earlier proposed audit.
+
+```json
+{
+  "activeFoundationDeclarations": 34,
+  "candidateAxioms": [],
+  "candidateDeclarations": 34,
+  "kernelChecked": true,
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "proposedClasses": 41,
+  "proposedDeclarations": 3633,
+  "proposedInstances": 359,
+  "proposedStandardFNV": "fnv1a64:4990397000639020696",
+  "proposedStandardSHA256": "sha256:5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7",
+  "proposedSurfaceSHA256": "sha256:7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6",
+  "recursorRulesCompared": 3,
+  "runtimeQualified": false,
+  "schema": "pscv0-well-founded-foundation-audit/1"
+}
+```
+
+Native artifact `12088873997`, `pscv0-v7-native-3c5f51a2ffdc9cabfe386ab6fd1c7a1bb82e6ff5`,
+6,797,540 bytes, digest `sha256:ea7b06cce1a363b24de67f9a9441531ab93121e1b69cbaddc2adfa32085af7f4`.
+The artifact was created on 2026-10-17 at 04:06:40 UTC.
+The helper retains `runtimeQualified: false` because it certifies its own
+foundation audit only; successful runtime workloads are separate evidence.
+
+F1 [39000431683](https://github.com/dwijayuda/pskernel/actions/runs/39000431683),
+F2 [39000431695](https://github.com/dwijayuda/pskernel/actions/runs/39000431695)
+and F3/F4 [39000431730](https://github.com/dwijayuda/pskernel/actions/runs/39000431730)
+also passed. Focused
+[39000431684](https://github.com/dwijayuda/pskernel/actions/runs/39000431684)
+compiled all 668 jobs and passed all prior source-construction checks, including
+generic lexicographic fix/equations and indexed Inhabited. It failed the new
+empty-dictionary fixture's expected raw guard shape before target comparisons.
+That fixture-only error is repaired by requiring the actual checked Bool equality
+guard. The combined next candidate includes separately reviewed dependent packing
+and inherited-partial hint scoping, with all five gates still required together.
+
+This activated native replay is preserved evidence, not a five-gate acceptance.
+Accepted compiler/test SHA remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, **74/100**, M3+B open.
+

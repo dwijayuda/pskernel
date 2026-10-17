@@ -1,3 +1,39 @@
+## Current checkpoint — active foundation replay preserved, next matrix pending
+
+[Native 39000431708](https://github.com/dwijayuda/pskernel/actions/runs/39000431708)
+at `3c5f51a2ffdc9cabfe386ab6fd1c7a1bb82e6ff5` completed successfully:
+all 34 reported steps passed. The independent audit confirms all 34 foundation
+additions active, no candidate axioms, three checked recursor rules, 3,633
+declarations, 41 classes and 359 ordinary instances. Observed FNV, declaration
+SHA-256 and surface SHA-256 exactly match the independently measured activation
+pins. Original source/Standard, modules, GC/components, TypeScript, Rust, repeated
+Wasmtime and measurements all passed. Native artifact `12088873997` is
+6,797,540 bytes, digest `sha256:ea7b06cce1a363b24de67f9a9441531ab93121e1b69cbaddc2adfa32085af7f4`.
+The [foundation receipt](https://github.com/dwijayuda/pskernel/blob/psc0/pscv0-v7-native-lean-v1/psc0/docs/PSCV0_M3_WELL_FOUNDED_FOUNDATION_AUDIT_2026-10-17.md)
+now records both the proposed audit and this completed activated replay.
+
+F1, F2 and F3/F4 also passed at `3c5f51a2`. The focused suite compiled all
+668 jobs and passed the previous source checks, result inference, generic
+lexicographic fix/equations and indexed Inhabited. Its sole failure was the
+empty-producer fixture's bare-variable guard pattern; the compiler correctly
+retains its checked Boolean equality decision in raw IR. The exact pattern is
+corrected without production changes; no five-target parity is credited yet.
+
+The next combined candidate retains separate linear commits for dependent
+argument packing (`dea57c8d`), inherited-partial hint scoping (`af5bf403`)
+and the empty guard fixture repair (`ebf6e8c1`). Independent implementation
+reviews and exact file/hash reconciliations are complete. Run all five gates at
+the final combined compiler/test SHA, investigate any concrete failure and record
+acceptance only when every required gate passes there. The current failed matrix
+is not accepted, and the already completed native result is preserved.
+
+Accepted compiler/test remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+The source authority, Lean 4.35.0 commit, approved `propext`/`Quot.sound`,
+P1 `Classical.choice` block, cloud-only execution and PR 109 draft/open/unmerged
+status remain fixed. Historical preparation entries below retain their status
+at the time they were written.
+
 ## Current focused fixture repair and next combined qualification — 2026-10-17
 
 At `3c5f51a2ffdc9cabfe386ab6fd1c7a1bb82e6ff5`, F1

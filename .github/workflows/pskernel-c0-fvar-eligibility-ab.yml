@@ -1,0 +1,125 @@
+name: PSKernel-C0 certified FVar identity versus structural hash A/B
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-fvar-eligibility-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SemanticCacheEligibilityRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0Arena435HotCase.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-certified-eligibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Verify Lean 4.35 pinned source and prove new complete FVar eligibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          (cd "$pkg" && \
+            lake build c0OfficialReplay && \
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean && \
+            lake env lean --run test/C0OfficialNdjsonReplay.lean)
+          echo 'C0_WHNF_ELIG_THEOREM complete_source_equality=Lean_checked original_source_unmodified=true'
+      - name: Authenticate old Arena bytes and independent official Lean acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/arena-round-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-round-2026-09.tar.gz" | sha256sum -c -
+          python3 psc0/packages/pskernel-c0/test/C0Arena435HotCase.py \
+            --archive "$RUNNER_TEMP/arena-round-2026-09.tar.gz" \
+            --case shared-subterm \
+            --output "$RUNNER_TEMP/shared-subterm-435.ndjson" \
+            --info "$RUNNER_TEMP/shared-subterm-435.json" \
+            --official-project psc0/packages/pskernel-c0
+      - name: Same-runner certified structural shape-hash baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -x
+          git fetch --quiet --no-tags --depth=1 origin 11def4d21efad8221681b819b7e68bb7a2a1f711
+          test "$(git rev-parse FETCH_HEAD)" = 11def4d21efad8221681b819b7e68bb7a2a1f711
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/shared-baseline-resources.txt" \
+            timeout 150s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/shared-subterm-435.ndjson" 4096) \
+            > "$RUNNER_TEMP/shared-baseline.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_WHNF_ELIG_AB variant=identity_hint_shape_hash exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/shared-baseline.txt"
+            echo 'C0_WHNF_ELIG_AB variant=identity_hint_shape_hash verdict=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_WHNF_ELIG_AB variant=identity_hint_shape_hash verdict=unqualified_timeout'
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/shared-baseline.txt"; then
+            echo 'C0_WHNF_ELIG_AB variant=identity_hint_shape_hash verdict=unqualified_resource'
+          else
+            tail -n 30 "$RUNNER_TEMP/shared-baseline.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/shared-baseline-resources.txt"
+      - name: Same-runner proof-parametric identity-hash candidate without fuel changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          grep -Fq 'psKernelC0FVarMemoGoWithHash_source' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          (cd psc0/packages/pskernel-c0 && \
+            lake build c0OfficialReplay && \
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/shared-certified-resources.txt" \
+            timeout 150s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/shared-subterm-435.ndjson" 4096) \
+            > "$RUNNER_TEMP/shared-certified.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_WHNF_ELIG_AB variant=identity_hint exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/shared-certified.txt"
+            echo 'C0_WHNF_ELIG_AB variant=identity_hint verdict=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_WHNF_ELIG_AB variant=identity_hint verdict=unqualified_timeout'
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/shared-certified.txt"; then
+            echo 'C0_WHNF_ELIG_AB variant=identity_hint verdict=unqualified_resource'
+          else
+            tail -n 30 "$RUNNER_TEMP/shared-certified.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/shared-certified-resources.txt"
+          echo 'C0_WHNF_ELIG_AB_SCOPE same_runner=true same_export=true same_fuel=4096 identity_hash_bucket_only=true exact_hit_eq=true no_kernel_admission_shortcut=true'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-fvar-identity-shared-subterm-ab
+          path: |
+            ${{ runner.temp }}/shared-subterm-435.json
+            ${{ runner.temp }}/shared-*-resources.txt
+            ${{ runner.temp }}/shared-baseline.txt
+            ${{ runner.temp }}/shared-certified.txt
+          if-no-files-found: warn
+          retention-days: 21

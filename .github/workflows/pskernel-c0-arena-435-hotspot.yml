@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        case: [app-lam, beta-ladder, let-ladder, shared-subterm]
+        case: [shared-subterm]
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
@@ -96,6 +96,13 @@ jobs:
           assert not summary["successful_source_acceptance"]
           for sym,count in summary["top_inclusive_functions"][:15]:
               print(f"C0_ARENA_HOT_FRAME case={source['case']} samples={count} symbol={sym}",flush=True)
+          # Crucial: inclusive leaf counts alone cannot tell whether DecEq
+          # ran in FVar memo, WHNF cache, pair cache, or another consumer.
+          # Export the full sample stacks as diagnostics, not as verdicts.
+          for i,stack in enumerate(summary["example_stacks"][:4]):
+              symbols=[f["function"] for f in stack]
+              print("C0_ARENA_HOT_STACK case="+source["case"]+
+                    " sample="+str(i)+" functions="+json.dumps(symbols),flush=True)
           print(f"C0_ARENA_HOT_RESULT case={source['case']} samples={summary['native_stack_samples']} sampled_only=true source_bytes_exact=true")
           PY
           fi

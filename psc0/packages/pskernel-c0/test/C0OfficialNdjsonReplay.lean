@@ -406,6 +406,57 @@ def c0ExportConstructorRawPiArity : PsKernelExpr → Nat
   | .forallE _ _ body _ => 1 + c0ExportConstructorRawPiArity body
   | _ => 0
 
+/-- Strip exactly n raw Pi constructors; never WHNF, instantiate or
+    assume untrusted exported metadata is a checked type. -/
+def c0ExportSkipMinorForalls : Nat → PsKernelExpr → Option PsKernelExpr
+  | 0, expr => some expr
+  | n + 1, .forallE _ _ body _ =>
+      c0ExportSkipMinorForalls n body
+  | _, _ => none
+
+/-- Strip exactly n raw lambdas from a generated computation rule. -/
+def c0ExportSkipRuleLambdas : Nat → PsKernelExpr → Option PsKernelExpr
+  | 0, expr => some expr
+  | n + 1, .lam _ _ body _ =>
+      c0ExportSkipRuleLambdas n body
+  | _, _ => none
+
+/-- Pinned Lean 4.35 inductive.cpp constructs each minor type with
+    mk_pi(b_u, mk_pi(v, C_app)) and its rule body with
+    mk_app(mk_app(minors[minor_idx], b_u), v).
+    In an ordinary single-inductive family, b_u are the constructor
+    fields and v are induction hypotheses. Thus if the literal RHS has
+    the canonical minor BVar head, it must apply exactly as many
+    arguments as the corresponding minor type has raw Pi binders.
+    A mismatch is impossible in generated valid output even if the
+    export came from an older buggy kernel's recursor generator.
+    This is ONLY an invalidity witness: unknown or noncanonical
+    shapes never cause an accepting shortcut. -/
+def c0ExportRecursorRuleMinorArityMismatch
+    (recursor : PsKernelRecursorInfo)
+    (ctorIndex : Nat)
+    (rule : PsKernelRecursorRule) : Bool :=
+  let minorBinderPos :=
+    recursor.numParams + recursor.numMotives + ctorIndex
+  match c0ExportSkipMinorForalls minorBinderPos recursor.base.type with
+  | some (.forallE _ minorType _ _) =>
+      let nLambdas :=
+        recursor.numParams + recursor.numMotives +
+        recursor.numMinors + rule.nFields
+      match c0ExportSkipRuleLambdas nLambdas rule.rhs with
+      | some core =>
+          match psKernelExprGetAppFn core with
+          | .bvar minorIndex =>
+              let expectedIndex :=
+                rule.nFields + (recursor.numMinors - (ctorIndex + 1))
+              if minorIndex == expectedIndex then
+                psKernelExprListLength (psKernelExprGetAppArgs core) !=
+                  c0ExportConstructorRawPiArity minorType
+              else false
+          | _ => false
+      | none => false
+  | _ => false
+
 def c0ExportReadInductiveGroup
     (st : C0ExportTables) (block : Lean.Json) :
     Except String C0ExportInductiveGroup := do
@@ -497,6 +548,25 @@ def c0ExportReadInductiveGroup
   if !hasNested &&
       !c0ExportSameRecursorNameFamily recNames generatedNames then
     throw "invalid Lean 4.35 canonical recursor name family"
+  -- The single-inductive generated rule template has a unique, precise
+  -- minor binder for each constructor. Compare ONLY independently
+  -- identified literal minor applications to their own declared minor
+  -- Pi arity; other shapes remain subject to C0's full source checker.
+  if !hasNested && types.length == 1 &&
+      expectedRecs.length == 1 then
+    if let some recursor := expectedRecs.head? then
+      if recursor.numMotives == 1 &&
+          recursor.numMinors == expectedCtors.length &&
+          recursor.rules.length == expectedCtors.length then
+        for i in [:expectedCtors.length] do
+          let some ctor := expectedCtors[i]?
+            | throw "malformed NDJSON constructor metadata index"
+          let some rule := recursor.rules[i]?
+            | throw "malformed NDJSON recursor rule index"
+          if psKernelNameEq ctor.base.name rule.ctor &&
+              rule.nFields == ctor.numFields &&
+              c0ExportRecursorRuleMinorArityMismatch recursor i rule then
+            throw "invalid Lean 4.35 recursor rule underapplies its minor premise"
   let toCtor (c : PsKernelConstructorInfo) :
       PsKernelSimpleConstructorDecl :=
     { name := c.base.name, type := c.base.type }
@@ -979,7 +1049,8 @@ def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
       message == "invalid Lean 4.35 constructor raw field arity" ||
       message == "invalid Lean 4.35 K flag on non-singleton inductive" ||
       message == "invalid Lean 4.35 generated recursor has no Pi binder" ||
-      message == "invalid Lean 4.35 constructor owner absent from inductive family" then
+      message == "invalid Lean 4.35 constructor owner absent from inductive family" ||
+      message == "invalid Lean 4.35 recursor rule underapplies its minor premise" then
     .rejected
   else if message.startsWith "unsupported" ||
       message.startsWith "NDJSON exported by an unsupported" then
@@ -2337,6 +2408,7 @@ def c0ExportRecursorNameFamilyRegression : IO Unit := do
       c0ExportClassifyInputError "invalid Lean 4.35 K flag on non-singleton inductive" != .rejected ||
       c0ExportClassifyInputError "invalid Lean 4.35 generated recursor has no Pi binder" != .rejected ||
       c0ExportClassifyInputError "invalid Lean 4.35 constructor owner absent from inductive family" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 recursor rule underapplies its minor premise" != .rejected ||
       c0ExportClassifyInputError "unsupported generated recursor K/safety mismatch" != .unsupported ||
       c0ExportClassifyInputError "malformed NDJSON inductive constructor metadata" != .malformed then
     throw (IO.userError "canonical recursor invalidity category violated")

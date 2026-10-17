@@ -14,7 +14,7 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — generic P0 accepted, dependent result inference syntax retry, 17 October 2026
+## Current M3+B implementation checkpoint — generic P0 accepted, dependent result inference layout retry, 17 October 2026
 
 Accepted compiler/test SHA is `82b248a3ee2cd9246756690db23b7dffd612e022`: **78/100** weighted progress and
 **960 observed focused comparisons** after all five same-SHA gates passed.
@@ -34,9 +34,14 @@ The first result-family candidate `d5ba914b029ad2fbcf661968e1616529b7855d0d` fai
 build gates. Native job 117414179275 (run 39038894477; 92,941 log characters)
 and focused job 117414179725 (run 39038894559) report two record-field syntax
 errors in Synthetic.lean:60:71 and :265:77. No new native/source tests ran.
-The containing retry adds exactly four commas across Synthetic, Application
-and Where: two observed errors and two matching precompile layout hazards.
-No semantic logic, fixture, assertion, oracle, workflow or budget changes.
+The comma-only retry `854e2f48f91eb0ebbe336259dbf8ec7ff4b3481b` also failed
+all five gates, with the same errors shifted one column. Native run 39039646657
+(job 117416328279; 89,934 log characters) and focused run 39039646620
+(job 117416328595; 86,829 characters) reached no new behavior tests.
+The pinned sepByIndent/checkColGe parser rule requires aligned fields even
+after commas. The containing revision lays out all outer fields at those four
+records on aligned subsequent lines. Only whitespace/record separators change;
+no semantic logic, fixture, assertion, oracle, workflow or budget changes.
 The accepted 82b248a3 baseline and 960 observations remain the acceptance boundary.
 
 The containing revision retains the separate bounded own-binder-dependent

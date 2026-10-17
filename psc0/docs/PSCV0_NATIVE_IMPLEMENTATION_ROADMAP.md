@@ -1,4 +1,4 @@
-## Authoritative current checkpoint — generic P0 accepted; dependent result inference retry, 2026-10-17
+## Authoritative current checkpoint — generic P0 accepted; dependent result inference layout retry, 2026-10-17
 
 Accepted compiler/test SHA: `82b248a3ee2cd9246756690db23b7dffd612e022`.
 All five gates completed successfully at that exact SHA. The accepted focused
@@ -8,13 +8,13 @@ records the exact source, harness correction, all gates, artifacts and counts.
 The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) retains the preceding 940 baseline.
 
 The containing commit retries the separate bounded own-binder-dependent
-omitted-result inference candidate after the observed first build failure.
+omitted-result inference candidate after two observed build failures.
 Its compiler and new source/native tests remain **unqualified** until all five
 gates pass at its own exact SHA. Static review is not successful compilation
 or runtime evidence. Verify live HEAD before any write and let healthy native
 CI finish before pushing another compiler/test revision.
 
-### Observed first candidate failure and syntax-only retry
+### Observed parser failures and layout-only retry
 
 The first candidate `d5ba914b029ad2fbcf661968e1616529b7855d0d` completed all five gates with
 compilation failures: Native [39038894477](https://github.com/dwijayuda/pskernel/actions/runs/39038894477),
@@ -28,13 +28,26 @@ The focused log independently reports those same two errors. Context, Abstract,
 Unify, InstanceCandidate and InstanceSearch compiled; no new native/source
 assertion or runtime qualification executed.
 
-The containing retry adds exactly four record-field commas across Synthetic,
-Application and Where. Two repair the observed Synthetic errors; two repair
-the matching Elab layout hazards before those files could compile. No semantic
-logic, source example, assertion, oracle, workflow or resource budget changes.
-Static review of the remaining added records found no further concrete layout
-hazard. All prior runs were completed before this retry; no healthy native CI
-was canceled or superseded. Fresh complete same-SHA qualification is required.
+The first retry `854e2f48f91eb0ebbe336259dbf8ec7ff4b3481b` added four
+record-field commas, but that correction was insufficient. All five gates
+again completed with failure: Native [39039646657](https://github.com/dwijayuda/pskernel/actions/runs/39039646657),
+focused [39039646620](https://github.com/dwijayuda/pskernel/actions/runs/39039646620),
+F1 [39039646706](https://github.com/dwijayuda/pskernel/actions/runs/39039646706),
+F2 [39039646777](https://github.com/dwijayuda/pskernel/actions/runs/39039646777) and
+F3/F4 [39039646671](https://github.com/dwijayuda/pskernel/actions/runs/39039646671).
+Native job `117416328279` published 89,934 log characters; focused job
+`117416328595` published 86,829. Both report the same two Synthetic errors,
+shifted to :60:72 and :265:78. No new behavior assertion or runtime check ran.
+
+The pinned [structure parser](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Term.lean#L352-L356)
+uses [sepByIndent/checkColGe](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Parser/Extra.lean#L208-L210):
+subsequent fields must start at or to the right of the first field, including
+after a comma. The containing retry places all outer fields on aligned lines
+at those same four records in Synthetic, Application and Where. A token check
+confirms that only whitespace and record separators change. No semantic logic,
+source example, assertion, oracle, workflow or resource budget changes.
+All prior runs were completed before this retry; no healthy native CI was
+canceled or superseded. Fresh complete same-SHA qualification is required.
 
 
 ### Accepted generic P0 evidence

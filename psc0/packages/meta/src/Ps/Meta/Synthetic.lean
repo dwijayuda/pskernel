@@ -57,7 +57,9 @@ def psSyntheticInstanceAttempt (environment : PsEnvironment) (index : PsInstance
       | none => searched
       | some value =>
         match psSyntheticAssignChecked environment searched.result.context id value with
-        | .error () => { searched with result := psSynthFailure context,
+        | .error () =>
+          { searched with
+            result := psSynthFailure context
             table := { searched.table with resourceExceeded := true } }
         | .ok (some checked) => { searched with result := psSynthSuccess checked value }
         | .ok none => { searched with result := psSynthFailure context }
@@ -262,8 +264,11 @@ def psSyntheticQueuePassChecked {σ α : Type}
       { state with pending := state.pending.reverse ++ pending, resourceExceeded := true }
     else
       match attempt state.context constraint with
-      | .error () => { state with pending := state.pending.reverse ++ pending,
-          attempts := state.attempts + 1, resourceExceeded := true }
+      | .error () =>
+        { state with
+          pending := state.pending.reverse ++ pending
+          attempts := state.attempts + 1
+          resourceExceeded := true }
       | .ok solved =>
         psSyntheticQueuePassChecked attempt isDefault limit rest {
           state with context := solved.getD state.context

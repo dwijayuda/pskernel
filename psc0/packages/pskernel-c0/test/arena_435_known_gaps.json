@@ -4,14 +4,17 @@
   "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
   "lean_target": "4.35.0",
   "pinned_lean_git": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-  "status": "27 known unqualified cases remain; 16 exact independently qualifying cases are required to check, including 14 newly verified structural/official-environment negative targets. Do not count unqualified as passes.",
+  "status": "24 known unqualified cases remain. These are NOT accepted/rejected verdicts. 19 exact cases are now mandatory independently checked results; a regression to unsupported fails CI.",
   "evidence": [
     "https://github.com/dwijayuda/pskernel/actions/runs/39006816117",
     "https://github.com/dwijayuda/pskernel/actions/runs/39007503159",
     "https://github.com/dwijayuda/pskernel/actions/runs/39008796107"
   ],
   "required_correct_cases": [
+    "bugs/ctor-num-fields.ndjson",
+    "bugs/nat-rec-k-lie.ndjson",
     "bugs/orphan-rec.ndjson",
+    "bugs/rec-k-lie.ndjson",
     "other/extra-rec.ndjson",
     "other/level-index-out-of-order.ndjson",
     "other/sparse-name-index.ndjson",
@@ -30,14 +33,6 @@
   ],
   "known_gaps": [
     {
-      "name": "bugs/ctor-num-fields.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
       "name": "bugs/large-elim-param.ndjson",
       "allowed": [
         "correct",
@@ -54,23 +49,7 @@
       "class": "unqualified_negative_inductive_or_safety_metadata"
     },
     {
-      "name": "bugs/nat-rec-k-lie.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
       "name": "bugs/nat-rec-rules.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "bugs/rec-k-lie.ndjson",
       "allowed": [
         "correct",
         "c0_unsupported"

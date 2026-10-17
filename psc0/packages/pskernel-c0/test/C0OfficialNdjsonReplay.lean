@@ -395,6 +395,14 @@ def c0ExportReadQuot
   return { base := { name := name, levelParams := levels, type := type },
            kind := kind }
 
+/-- Lean 4.35 src/kernel/inductive.cpp::check_constructors counts ALL
+raw Pi binders in constructor type, then subtracts the number of
+inductive parameters. This check is independent of C0 recursor metadata
+and does not consult potentially forged exporter field counts. -/
+def c0ExportConstructorRawPiArity : PsKernelExpr → Nat
+  | .forallE _ _ body _ => 1 + c0ExportConstructorRawPiArity body
+  | _ => 0
+
 def c0ExportReadInductiveGroup
     (st : C0ExportTables) (block : Lean.Json) :
     Except String C0ExportInductiveGroup := do
@@ -419,6 +427,21 @@ def c0ExportReadInductiveGroup
   let hasNested := types.any (fun t => t.numNested != 0)
   if hasNested && types.length != 1 then
     throw "unsupported NDJSON nested mutual group"
+  if !hasNested then
+    -- An exported constructor's numFields is NOT a trusted authority.
+    -- A mismatch with its own raw binder telescope cannot arise from
+    -- pinned Lean 4.35, independent of any C0 cache or generated recursor.
+    for ctor in expectedCtors do
+      let arity := c0ExportConstructorRawPiArity ctor.base.type
+      if arity < ctor.numParams ||
+          ctor.numFields != arity - ctor.numParams then
+        throw "invalid Lean 4.35 constructor raw field arity"
+    -- src/kernel/inductive.cpp::init_K_target requires exactly one
+    -- inductive and one constructor; forged K on a non-singleton
+    -- family is invalid, regardless of all other metadata.
+    if (types.length != 1 || expectedCtors.length != 1) &&
+        expectedRecs.any (fun r => r.k) then
+      throw "invalid Lean 4.35 K flag on non-singleton inductive"
   if types.any (fun t => t.isUnsafe) ||
       expectedCtors.any (fun c => c.isUnsafe) ||
       expectedRecs.any (fun c => c.isUnsafe) then
@@ -871,7 +894,9 @@ def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
   -- Only this source-grounded canonical generator invariant warrants
   -- semantic invalidity without generalizing over unsupported metadata.
   if message == "invalid Lean 4.35 canonical recursor name family" ||
-      message == "invalid Lean 4.35 duplicate constructor name in inductive family" then
+      message == "invalid Lean 4.35 duplicate constructor name in inductive family" ||
+      message == "invalid Lean 4.35 constructor raw field arity" ||
+      message == "invalid Lean 4.35 K flag on non-singleton inductive" then
     .rejected
   else if message.startsWith "unsupported" ||
       message.startsWith "NDJSON exported by an unsupported" then
@@ -2152,8 +2177,11 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
     if input == valid then
       throw (IO.userError ("ineffective inductive metadata mutation: " ++ label))
     let verdict := c0ExportVerdictOnline input
-    if verdict == .accepted || verdict == .rejected then
-      throw (IO.userError s!"forged inductive metadata was treated as kernel verdict {label}: {repr verdict}")
+    if label == "constructor-field-count" then
+      if verdict != .rejected then
+        throw (IO.userError s!"forged raw constructor arity escaped explicit source invariant: {repr verdict}")
+    else if verdict == .accepted || verdict == .rejected then
+      throw (IO.userError s!"unproved generated metadata was treated as kernel verdict {label}: {repr verdict}")
 
 /-- Only a positively accepted replay is a successful strict command.
     The ordinary diagnostic command keeps all original non-accepting outcomes.
@@ -2178,6 +2206,8 @@ def c0ExportRecursorNameFamilyRegression : IO Unit := do
     throw (IO.userError "mutual recursor exact name multiset regression")
   if c0ExportClassifyInputError "invalid Lean 4.35 canonical recursor name family" != .rejected ||
       c0ExportClassifyInputError "invalid Lean 4.35 duplicate constructor name in inductive family" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 constructor raw field arity" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 K flag on non-singleton inductive" != .rejected ||
       c0ExportClassifyInputError "unsupported generated recursor K/safety mismatch" != .unsupported ||
       c0ExportClassifyInputError "malformed NDJSON inductive constructor metadata" != .malformed then
     throw (IO.userError "canonical recursor invalidity category violated")

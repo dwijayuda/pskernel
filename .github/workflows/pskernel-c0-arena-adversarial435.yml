@@ -164,8 +164,9 @@ jobs:
               grep -Fq "invalid Lean 4.35 canonical recursor name family" "$RUNNER_TEMP/arena435-$label-c0.txt"
               echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=rejected exact_generated_rec_name=verified"
             else
-              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.unsupported" "$RUNNER_TEMP/arena435-$label-c0.txt"
-              echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=unsupported unproved_K_rule=unchanged"
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" "$RUNNER_TEMP/arena435-$label-c0.txt"
+              grep -Fq "invalid Lean 4.35 K flag on non-singleton inductive" "$RUNNER_TEMP/arena435-$label-c0.txt"
+              echo "C0_ARENA_SYNTHETIC_NEGATIVE label=$label verdict=rejected non_singleton_K_invariant=verified"
             fi
           done
       - name: Require real official rejection and classify native C0 without false acceptance

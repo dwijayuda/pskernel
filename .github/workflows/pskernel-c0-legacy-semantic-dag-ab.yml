@@ -6,6 +6,7 @@ on:
       - '.github/workflows/pskernel-c0-legacy-semantic-dag-ab.yml'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean'
       - 'psc0/packages/pskernel-c0/test/C0LegacySemanticDAGRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0DefEqPairGuardRegression.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
@@ -83,6 +84,8 @@ jobs:
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           set +e
           (
@@ -114,6 +117,8 @@ jobs:
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean
           grep -Fq 'psKernelC0MemoizedExprEq left right' \
             psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           grep -Fq '@[csimp] theorem psKernelExprEqLegacy_compiler_eq_certifiedMemo' \
@@ -146,7 +151,7 @@ jobs:
             exit 1
           fi
           grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/candidate-resources.txt" || true
-          echo "C0_SEMANTIC_DAG_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true original_binder_semantics_preserved=true all_input_Lean_source_proof=true only_ExprDecidableEq_and_DefEq_root_changed=true fuel_4096=true no_acceptance_shortcut=true"
+          echo "C0_SEMANTIC_DAG_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true original_binder_semantics_preserved=true all_input_Lean_source_proof=true all_input_source_lemma=true knot_and_quick_refinement=true fuel_4096=true no_acceptance_shortcut=true"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

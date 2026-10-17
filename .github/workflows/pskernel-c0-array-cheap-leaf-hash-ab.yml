@@ -1,0 +1,133 @@
+name: PSKernel-C0 Array proof cheap leaf hash A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-array-cheap-leaf-hash-ab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cheap-leaf-hash-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Produce exact real Array.extract_append_extract official-positive closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- Array.extract_append_extract \
+              > "$RUNNER_TEMP/c0-array-extract.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-array-extract.ndjson" \
+              > "$RUNNER_TEMP/c0-array-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/c0-array-official.txt"
+          wc -lc "$RUNNER_TEMP/c0-array-extract.ndjson"
+          sha256sum "$RUNNER_TEMP/c0-array-extract.ndjson"
+          echo "C0_LEAF_AB_REFERENCE official=accepted pinned=Lean_4.35.0 target=Array.extract_append_extract"
+      - name: Qualified original leaf trie memo replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean")
+          data=p.read_text()
+          marker="private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :=\n  psKernelC0MemoShapeHash 4 expr"
+          assert data.count(marker)==1, "Original memo selector changed; refuse experiment"
+          print("C0_LEAF_AB_VARIANT=original exact_source_hash_proof=unchanged")
+          PY
+          # GitHub Actions performs a shallow checkout; explicitly fetch the
+          # immutable pre-leaf baseline commit before reading its blob.
+          git fetch --quiet --no-tags --depth=1 origin bc5b0e9319994e7c00382911afe8fae7434d60d8
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          grep -Fq 'private def psKernelC0HashMemoBucket' psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          echo 'C0_LEAF_AB_BASELINE=locked_pre_staging_Cache'
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-original-resources.txt" \
+              timeout 480s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-extract.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-original-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_LEAF_AB_RESULT variant=original exit=$rc"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/array-original-c0.txt" | tail -n 5 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/array-original-c0.txt" | tail -n 5 || true
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/array-original-c0.txt"
+            echo "C0_LEAF_AB_CLASS variant=original classification=checked_accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_LEAF_AB_CLASS variant=original classification=unqualified_host_timeout"
+          else
+            tail -n 40 "$RUNNER_TEMP/array-original-c0.txt"
+            exit "$rc"
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size|Exit status' "$RUNNER_TEMP/array-original-resources.txt" || true
+      - name: Source-proven direct bvar Nat leaf hashing on same runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean")
+          data=p.read_text()
+          marker="private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :=\n  psKernelC0MemoShapeHash 4 expr"
+          assert data.count(marker)==1, "Original memo selector changed; refuse experiment"
+          assert "  | .lit (.nat n)" in data
+          print("C0_LEAF_AB_VARIANT=staged exact_source_hash_proof=unchanged")
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-fast-leaf-resources.txt" \
+              timeout 480s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-extract.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-fast-leaf-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_LEAF_AB_RESULT variant=fast_leaf exit=$rc"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/array-fast-leaf-c0.txt" | tail -n 5 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/array-fast-leaf-c0.txt" | tail -n 5 || true
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/array-fast-leaf-c0.txt"
+            echo "C0_LEAF_AB_CLASS variant=fast_leaf classification=checked_accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_LEAF_AB_CLASS variant=fast_leaf classification=unqualified_host_timeout"
+          else
+            tail -n 40 "$RUNNER_TEMP/array-fast-leaf-c0.txt"
+            exit "$rc"
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size|Exit status' "$RUNNER_TEMP/array-fast-leaf-resources.txt" || true
+          echo "C0_LEAF_AB_SCOPE source_result_proved_no_memo_admission_change=true same_runner_official_positive_not_full_Init_or_WF"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-array-cheap-leaf-hash-ab
+          path: |
+            ${{ runner.temp }}/array-*-resources.txt
+            ${{ runner.temp }}/array-*-c0.txt
+            ${{ runner.temp }}/c0-array-official.txt
+          if-no-files-found: warn
+          retention-days: 14

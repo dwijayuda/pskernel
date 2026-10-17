@@ -1058,7 +1058,10 @@ def exportWellFoundedCandidate (output : System.FilePath) : IO Unit := do
 -- replayed through the same trust-zero admission and recursor-rule owners.
 def checkWellFoundedFoundation : IO Unit := do
   Lean.initSearchPath (← Lean.findSysroot)
-  let native ← Lean.importModules #[{ module := `Init }] {}
+  -- Class and instance metadata live in persistent environment extensions.
+  -- A declaration-only import leaves those extensions at their initial state.
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "WF foundation audit requires the pinned Lean commit")
   let base := psSelfHostProdPreWellFoundedPreludeEnvironment

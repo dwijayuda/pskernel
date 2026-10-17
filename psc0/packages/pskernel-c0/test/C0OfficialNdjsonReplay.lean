@@ -428,6 +428,14 @@ def c0ExportReadInductiveGroup
   if hasNested && types.length != 1 then
     throw "unsupported NDJSON nested mutual group"
   if !hasNested then
+    -- The pinned src/kernel/inductive.cpp::declare_recursors forms
+    -- rec_ty := mk_pi(info.m_major, C_app), then adds further binders.
+    -- Therefore every generated ordinary/mutual recursor starts with
+    -- at least one raw Pi; a raw constant of type False cannot be one.
+    for rec in expectedRecs do
+      match rec.base.type with
+      | .forallE _ _ _ _ => pure ()
+      | _ => throw "invalid Lean 4.35 generated recursor has no Pi binder"
     -- An exported constructor's numFields is NOT a trusted authority.
     -- A mismatch with its own raw binder telescope cannot arise from
     -- pinned Lean 4.35, independent of any C0 cache or generated recursor.
@@ -466,7 +474,11 @@ def c0ExportReadInductiveGroup
     (expectedCtors.filter (fun c =>
       psKernelNameEq c.induct ty.base.name)).length)).foldl (· + ·) 0
   if listedCount != expectedCtors.length then
-    throw "malformed NDJSON constructor with unknown inductive owner"
+    -- Official src/kernel/inductive.cpp::check_constructors constructs
+    -- only family-owned constructor declarations. A constructor with
+    -- no owner in the same declared family is a semantic invalidity,
+    -- not a merely unsupported export schema.
+    throw "invalid Lean 4.35 constructor owner absent from inductive family"
   let recNames := expectedRecs.map (fun r => r.base.name)
   let generatedNames := types.map (fun t =>
     psKernelSimpleRecName t.base.name)
@@ -903,7 +915,9 @@ def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
   if message == "invalid Lean 4.35 canonical recursor name family" ||
       message == "invalid Lean 4.35 duplicate constructor name in inductive family" ||
       message == "invalid Lean 4.35 constructor raw field arity" ||
-      message == "invalid Lean 4.35 K flag on non-singleton inductive" then
+      message == "invalid Lean 4.35 K flag on non-singleton inductive" ||
+      message == "invalid Lean 4.35 generated recursor has no Pi binder" ||
+      message == "invalid Lean 4.35 constructor owner absent from inductive family" then
     .rejected
   else if message.startsWith "unsupported" ||
       message.startsWith "NDJSON exported by an unsupported" then
@@ -2215,6 +2229,8 @@ def c0ExportRecursorNameFamilyRegression : IO Unit := do
       c0ExportClassifyInputError "invalid Lean 4.35 duplicate constructor name in inductive family" != .rejected ||
       c0ExportClassifyInputError "invalid Lean 4.35 constructor raw field arity" != .rejected ||
       c0ExportClassifyInputError "invalid Lean 4.35 K flag on non-singleton inductive" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 generated recursor has no Pi binder" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 constructor owner absent from inductive family" != .rejected ||
       c0ExportClassifyInputError "unsupported generated recursor K/safety mismatch" != .unsupported ||
       c0ExportClassifyInputError "malformed NDJSON inductive constructor metadata" != .malformed then
     throw (IO.userError "canonical recursor invalidity category violated")

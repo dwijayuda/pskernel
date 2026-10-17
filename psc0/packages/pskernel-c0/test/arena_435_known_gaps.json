@@ -4,7 +4,7 @@
   "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
   "lean_target": "4.35.0",
   "pinned_lean_git": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-  "status": "21 exact known unqualified cases remain, not passing verdicts. 22 independently required complete cases include 20 recent actual negative-rule improvements and two existing sparse positives. Future declines on these mandatory cases fail CI.",
+  "status": "19 formerly unqualified cases remain, NOT passing verdicts. 24 verified target cases MUST produce full independent Lean 4.35 / C0 parity; future declined results on any mandatory case are fatal.",
   "evidence": [
     "https://github.com/dwijayuda/pskernel/actions/runs/39006816117",
     "https://github.com/dwijayuda/pskernel/actions/runs/39007503159",
@@ -20,11 +20,13 @@
     "bugs/rec-k-lie.ndjson",
     "other/extra-rec.ndjson",
     "other/level-index-out-of-order.ndjson",
+    "other/orphan-ctor.ndjson",
     "other/sparse-name-index.ndjson",
     "tutorial/046_inductBadNonSort.ndjson",
     "tutorial/047_inductBadNonSort2.ndjson",
     "tutorial/048_inductLevelParam.ndjson",
     "tutorial/049_inductTooFewParams.ndjson",
+    "tutorial/073_BogusRecursor.ndjson",
     "tutorial/132_dup_defs.ndjson",
     "tutorial/133_dup_ind_def.ndjson",
     "tutorial/134_dup_ctor_def.ndjson",
@@ -42,14 +44,6 @@
         "c0_unsupported"
       ],
       "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "other/orphan-ctor.ndjson",
-      "allowed": [
-        "correct",
-        "c0_malformed"
-      ],
-      "class": "unqualified_negative_raw_declaration_format"
     },
     {
       "name": "perf/app-lam.ndjson",
@@ -210,14 +204,6 @@
         "official_timeout"
       ],
       "class": "unqualified_resource_or_performance"
-    },
-    {
-      "name": "tutorial/073_BogusRecursor.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
     },
     {
       "name": "tutorial/140_falseFromUnsafe.ndjson",

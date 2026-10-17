@@ -181,7 +181,7 @@ def main() -> int:
             if row["name"] in known_by_name or "correct" not in row["allowed"]:
                 raise ValueError("invalid or duplicated known-gap entry")
             known_by_name[row["name"]] = set(row["allowed"])
-        if len(known_by_name) != 21:
+        if len(known_by_name) != 19:
             raise ValueError("unexpected known-gap ledger size")
 
     results = []

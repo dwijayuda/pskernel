@@ -1,0 +1,120 @@
+name: PSKernel-C0 certified WHNF semantic-cache FVar policy
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-certified-fvar-whnf.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SemanticCacheDAGRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certified-fvar-whnf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Compile complete Lean proof and C0 official checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0SemanticCacheDAGRegression.lean
+          lake env lean --run test/C0SourceCertifiedFVarMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          echo "C0_FVAR_SEMANTIC source_certified=true admission_tests=pass"
+      - name: Authenticate exact official-positive shared-subterm Arena export
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/arena-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-2026-09.tar.gz" | sha256sum -c -
+          python3 - <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          sys.path.insert(0,"psc0/packages/pskernel-c0/test")
+          from arena_conformance import check_archive
+          from arena_lean435_compat import adapt_legacy_envelope,official_reference
+          xs=[(l,raw) for l,n,raw in check_archive(Path(os.environ["RUNNER_TEMP"])/"arena-2026-09.tar.gz")
+              if n=="perf/shared-subterm.ndjson"]
+          assert len(xs)==1 and xs[0][0]=="good"
+          inp,proof=adapt_legacy_envelope(xs[0][1])
+          assert proof["body_bytes_identical"]
+          assert proof["original_sha256"]=="2df9f9fbfb7167bb9e0d004ff25afd99fa434113fc343f130eb459661f40e29b"
+          path=Path(os.environ["RUNNER_TEMP"])/"c0-shared-subterm.ndjson"
+          path.write_bytes(inp)
+          official=official_reference(Path("psc0/packages/pskernel-c0"),path.resolve(),120)
+          assert official["verdict"]=="accepted",official
+          print("C0_FVAR_WHNF_SOURCE body_exact=true archive_sha=verified official_lean435=accepted",flush=True)
+          PY
+      - name: Pinned original cached WHNF source at same runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          src=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          cp "$src" "$RUNNER_TEMP/qualified-fast-cachepolicy.lean"
+          git fetch --quiet --no-tags --depth=1 origin a7746475d5a0e58cbf0f2c8bd59e548f14930f17
+          git show FETCH_HEAD:"$src" > "$src"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/fvar-baseline-resources.txt" \
+            timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/c0-shared-subterm.ndjson" 4096) \
+            > "$RUNNER_TEMP/fvar-baseline.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_FVAR_WHNF_AB variant=original exit=$rc"
+          grep -F "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/fvar-baseline.txt" | tail -n 1 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/fvar-baseline-resources.txt" || true
+      - name: Source-proved optimized native cache eligibility, same export and fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          src=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          cp "$RUNNER_TEMP/qualified-fast-cachepolicy.lean" "$src"
+          grep -Fq 'psKernelC0FastSemanticCacheEligible_source' "$src"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          (cd psc0/packages/pskernel-c0 && lake env lean --run test/C0SemanticCacheDAGRegression.lean)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/fvar-candidate-resources.txt" \
+            timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/c0-shared-subterm.ndjson" 4096) \
+            > "$RUNNER_TEMP/fvar-candidate.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_FVAR_WHNF_AB variant=certified exit=$rc"
+          grep -F "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/fvar-candidate.txt" | tail -n 1 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/fvar-candidate-resources.txt" || true
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/fvar-candidate.txt"
+            echo "C0_FVAR_WHNF_AB certified=ACCEPTED"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_FVAR_WHNF_AB certified=NOT_QUALIFIED_HOST_TIMEOUT"
+          else
+            echo "C0_FVAR_WHNF_AB certified=NOT_QUALIFIED_OTHER exit=$rc"
+            tail -n 24 "$RUNNER_TEMP/fvar-candidate.txt"
+          fi
+          echo "C0_FVAR_WHNF_AB native_source_exact=true same_runner=true unchanged_fuel=4096"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-fvar-whnf-source-ab
+          path: |
+            ${{ runner.temp }}/fvar-*-resources.txt
+            ${{ runner.temp }}/fvar-*.txt
+          if-no-files-found: warn
+          retention-days: 21

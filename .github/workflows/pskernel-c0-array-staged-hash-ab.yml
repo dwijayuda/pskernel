@@ -54,7 +54,10 @@ jobs:
           assert data.count(marker)==1, "Original memo selector changed; refuse experiment"
           print("C0_STAGED_AB_VARIANT=original exact_source_hash_proof=unchanged")
           PY
-          git show c5c0bb5aede90768fb904ef02768625e27041c6d:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          # GitHub Actions performs a shallow checkout; explicitly fetch the
+          # immutable pre-staging baseline commit before reading its blob.
+          git fetch --quiet --no-tags --depth=1 origin c5c0bb5aede90768fb904ef02768625e27041c6d
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
           grep -Fq 'private def psKernelC0HashMemoBucket' psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
           echo 'C0_STAGED_AB_BASELINE=locked_pre_staging_Cache'
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)

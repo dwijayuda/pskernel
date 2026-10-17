@@ -1,5 +1,10 @@
 # PSC0 v7.2 AI work state — 18 October 2026
 
+## WF packing diagnostic checkpoint
+
+Preparation run39077335588 at7712f7e2 built successfully, retained P0/source and P1 checks passed, but the new three-field WF case failed with an application type mismatch while constructing packedThree. Its old noncomputable fixture also failed at Lean syntax/type diagnostics already corrected inee9067f7. No n-ary qualification is claimed. Candidateee9067f7 is running under39078076219. The WF constructor now retains phase labels for packed-domain construction, inverse-image relation, packed entry and raw callback type, so the next result identifies the violated invariant without changing acceptance. Shared ordinary application work remains an unpublished draft. Main remains five-gate accepted atde667946; M3+B remains open.
+
+
 ## Generic P1 and noncomputable fixture qualification candidate
 
 Main is accepted at de6679464cac9780bae7066052714c53984dbd00 on Native39076409463, M3 39076409661, F1 39076409639, F2 39076409495 and F3 39076409521. Aggregate focused counts remain unreported after transport failures.

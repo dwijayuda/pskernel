@@ -514,9 +514,10 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
         match declaredParameters.find? (fun parameter => parameter.id == id) with
         | some parameter => pure parameter
         | none => throw (.data "PSCV0-WF-INTERNAL: packed parameter is not in the owned header")
-      let domain ← (psWellFoundedTupleTypeChecked environment measured.context.metaContext
-        measured.context.localContext (packed.map fun parameter => .fvar parameter.id)).mapError
-          PsElabError.infer
+      let domain ← psElabWellFoundedAt "packed domain"
+        ((psWellFoundedTupleTypeChecked environment measured.context.metaContext
+          measured.context.localContext (packed.map fun parameter => .fvar parameter.id)).mapError
+            PsElabError.infer)
       pure (PsElabWellFoundedArgument.dependentTuple packed domain)
   let domain := psElabWellFoundedArgumentDomain argument
   if !(psExprFVarIds domain).all fixedIds.contains then
@@ -535,8 +536,9 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   if psExprHasUnresolvedMeta (psElabGeneralizeExpr dictionaryValue) ||
       !(psExprFVarIds dictionaryValue).all fixedIds.contains then
     throw (.data "PSCV0-WF-RELATION: the selected relation dictionary is unresolved or captures changing state")
-  let relationPlan ← (psWellFoundedPlanForMeasure environment dictionary.context.metaContext
-    dictionary.context.localContext domain measureType measure dictionaryValue).mapError PsElabError.infer
+  let relationPlan ← psElabWellFoundedAt "measure inverse image"
+    ((psWellFoundedPlanForMeasure environment dictionary.context.metaContext
+      dictionary.context.localContext domain measureType measure dictionaryValue).mapError PsElabError.infer)
   let fixName := psWellFoundedConstructionFixName relationPlan.construction
   let equationConstant := psWellFoundedConstructionEquationName relationPlan.construction
   let some (.definitionDecl ..) := psEnvironmentFind environment fixName
@@ -548,12 +550,14 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
       nextId := max bodyHeader.localContext.nextId dictionary.context.localContext.nextId } }
   let localId := bodyHeader.localContext.nextId
   let callbackName := psNameAppendNum (psRootName "_psc0WellFounded") localId
-  let currentMajor ← psElabWellFoundedArgumentCurrent argument
+  let currentMajor ← psElabWellFoundedAt "packed entry"
+    (psElabWellFoundedArgumentCurrent argument)
   let relation := psWellFoundedDecreases relationPlan (.fvar localId) currentMajor
   let smallerStateType := psElabWellFoundedArgumentAt argument (.fvar localId) stateType
   let callbackType := psLogicPi localId "_smaller" domain
     (psLogicPi (localId + 1) "_decreases" relation smallerStateType)
-  let _ ← psElabExpressionSort bodyHeader callbackType
+  let _ ← psElabWellFoundedAt "raw callback type"
+    (psElabExpressionSort bodyHeader callbackType)
   let sourceCallbackType ← psElabWellFoundedAt "source callback type"
     (psElabWellFoundedSourceCallbackType bodyHeader argument callbackType)
   let callback := psLocalPushBinding bodyHeader.localContext callbackName sourceCallbackType .explicit

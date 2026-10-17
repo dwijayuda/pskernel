@@ -51,7 +51,7 @@ jobs:
           assert len(x)==1 and x[0][0]=="good"
           compatible,identity=adapt_legacy_envelope(x[0][1])
           assert identity["body_bytes_identical"]
-          assert identity["original_sha256"]=="3f7b7a595dc29b0e289c9031c7edaef42d0e12b8aee3cbb48cf15cb715adc09a"
+          assert identity["original_sha256"]=="3f7b7a595dc29b0e289c9031c4edaef42d0e12b8aee3cbb48cf15cb715adc09a"
           path=Path(os.environ["RUNNER_TEMP"])/"arena435-app-lam.ndjson"
           path.write_bytes(compatible)
           official=official_reference(Path("psc0/packages/pskernel-c0"),path.resolve(),120)

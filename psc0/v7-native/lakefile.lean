@@ -152,3 +152,8 @@ lean_exe pscv0_m3_mutual_well_founded_export where
   srcDir := "../scripts"
   root := `Pscv0M3MutualWellFoundedExport
   supportInterpreter := true
+
+-- Focused typed-packing proof probe; separate from source mutual WF admission.
+lean_exe pscv0_m3_mutual_packing where
+  srcDir := "../test"
+  root := `Pscv0M3MutualPacking

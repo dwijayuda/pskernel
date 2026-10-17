@@ -104,7 +104,7 @@ jobs:
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving pscv0_m3_group_proof_deriving pscv0_m3_empty_dictionaries pscv0_m3_partial_fixpoint pscv0_m3_noncomputable
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving pscv0_m3_group_proof_deriving pscv0_m3_empty_dictionaries pscv0_m3_partial_fixpoint pscv0_m3_noncomputable pscv0_m3_mutual_packing
           mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive ../dist/m3-where ../dist/m3-nested-deriving ../dist/m3-group-proof-deriving ../dist/m3-group-proof-deriving/indexed-inhabited ../dist/m3-empty-dictionaries
           mkdir -p ../dist/m3-mutual-partial/p0-generic
           mkdir -p ../dist/m3-inductive-deriving/indexed-beq
@@ -122,6 +122,7 @@ jobs:
               m3_fixture_status=1
             fi
           }
+          m3_check_fixture ../dist/m3-recursive-deriving/mutual-packing.log .lake/build/bin/pscv0_m3_mutual_packing
           m3_check_fixture ../dist/m3-recursive-deriving/inductive-groups.log .lake/build/bin/pscv0_m3_inductive_groups
           m3_check_fixture ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean
           m3_check_fixture ../dist/m3-recursive-deriving/check.log .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-recursive-deriving

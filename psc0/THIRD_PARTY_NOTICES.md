@@ -226,3 +226,18 @@ at eb6cafb7290e8bd5f2937522d8d804f58f02bafc, under Apache-2.0.
 The portable implementation adds bounded typed argument capture to its existing
 application owner; it does not copy Lean's host elaborator or temporary axiom path.
 Retain the upstream notices and LEAN-APACHE-2.0.txt above.
+
+### Arity-owned component packing and retained PSum foundation
+
+Ps.Meta.MutualPacking adapts the Mutual algorithms of
+src/Lean/Meta/ArgsPacker.lean at Lean4.35.0
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2024 Lean FRO, LLC. Author: Joachim Breitner. Apache-2.0.
+Modifications: portable Core and explicit contexts, total structural traversal,
+checked universe compatibility, manifest constructor/arity validation.
+
+StandardPSumData.lean retains exact kernel-checked declarations generated
+from pinned Init/Core.lean. Copyright (c) 2014 Microsoft Corporation.
+Author: Leonardo de Moura. Apache-2.0; see LEAN-APACHE-2.0.txt.
+The standalone five-declaration asset has no assumptions; its retention
+does not select it into the Standard environment or authorize source mutual WF.

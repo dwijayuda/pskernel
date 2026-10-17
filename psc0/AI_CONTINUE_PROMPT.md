@@ -18,7 +18,14 @@ Preparation psc0/m3-fixedpoint-foundation-20261018 holds later source work.
 Keep PR109 draft/open/unmerged; attach it in a new chat. Fresh-ref expected-head
 non-force writes only; never supersede a healthy main Native run.
 
-Current slice: n-ary WF/shared ordinary applications passed construction,
+Latest preparation adds retained exact standalone PSum bytes and portable
+Meta/MutualPacking with a focused independent kernel probe. The asset is not
+selected, and source mutual WF is still refused. The export was checked at
+f58d7e1/run39079183717; packing qualification is pending. Bridge candidate
+abfc20d3/run39079996655 passed native signature/closure before its intended
+strict digest refusal. Retrieve final measurements and pin only reviewed values.
+
+Current source slice: n-ary WF/shared ordinary applications passed construction,
 refusals and five-target emission at5b614f3/run39078823496; target execution
 is pending. Extended generic P1 kernel checks passed before an incorrect
 helper-privacy fixture assertion. Its correction now checks pinned native

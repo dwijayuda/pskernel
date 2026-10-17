@@ -1,6 +1,9 @@
 # Typed mutual WF component design and PSum authoring
 
-Status: design and standalone native export candidate. Mutual WF source admission is still unavailable.
+Status: standalone export independently passed; exact6779-byte five-declaration
+asset retained. Portable typed component packing and its consolidated kernel
+probe are candidates awaiting qualification. Standard selection, source mutual
+WF admission, exact unfolding equations and runtime ownership remain separate.
 
 Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc is the reference.
 Study: Init/Core.lean PSum; Lean/Meta/ArgsPacker.lean Unary and Mutual;
@@ -74,3 +77,15 @@ qualification, and avoid introducing a second elaborator.
 M3+B remains open. Main stays at its accepted exact-SHA receipt. M4 effects
 and contracts and M5 target correspondence/C5 remain separate. No PSKernel-Core
 or self-hosting activity.
+
+## Runtime ownership refinement
+
+A public fixedpoint equation is necessary but insufficient for ordinary runtime
+adaptation: even a genuine proof of f = f says nothing about replacing its body.
+The runtime owner must reconstruct every curried callback from the checked
+component's actual functional and full original entry telescope, match its
+typed adapters exactly, and reject remaining raw callbacks. Preserve the
+singleton WF adapter's complete-before/after type checks. Factor the source
+adapter rather than rewriting already checked matches with stale majors.
+The current packing library supplies only domain/motive operations; it does
+not confer this execution authority.

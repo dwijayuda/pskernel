@@ -1,0 +1,141 @@
+import Ps.Host.NativeV7
+import Ps.Environment.StandardPSumData
+import Ps.Meta.MutualPacking
+import PsKernelLean.Admission
+
+-- Native dependent/heterogeneous oracle for the same three owned slots.
+namespace M3MutualPackingOracle
+def first (n : Nat) : Fin (n + 1) := ⟨n, Nat.lt_succ_self n⟩
+def second (b : Bool) : Bool := b
+def third (s : PSum Nat Bool) : PSum Nat Bool := s
+def packed (x : PSum Nat (PSum Bool (PSum Nat Bool))) :
+    (match x with
+      | .inl n => Fin (n + 1)
+      | .inr (.inl _) => Bool
+      | .inr (.inr _) => PSum Nat Bool) :=
+  match x with
+  | .inl n => first n
+  | .inr (.inl b) => second b
+  | .inr (.inr s) => third s
+example (n : Nat) : packed (.inl n) = first n := rfl
+example (b : Bool) : packed (.inr (.inl b)) = second b := rfl
+example (s : PSum Nat Bool) : packed (.inr (.inr s)) = third s := rfl
+end M3MutualPackingOracle
+
+private def ensure (condition : Bool) (message : String) : IO Unit :=
+  unless condition do throw (IO.userError message)
+
+private def fromExcept (result : Except String α) : IO α :=
+  match result with
+  | .ok value => pure value
+  | .error message => throw (IO.userError message)
+
+private def build : Except String (List PsDeclaration) := do
+  let environment := psStandardPSumDeclarations.foldl psEnvironmentInsert
+    psSelfHostProdPreludeEnvironment
+  let environment := psStandardPSumReducibility.foldl
+    (fun env (name, status) => psEnvironmentSetReducibility env name status) environment
+  let source :=
+    "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
+    "function packingSecond(b: Bool): Bool := b\n" ++
+    "function packingThird(s: PSum(Nat, Bool)): PSum(Nat, Bool) := s\n"
+  let parsed ← psPscv0ParseProgram source
+  let elaborated ← (psElabProgramWithOrigins environment parsed).mapError psCompilerPscv0ElabError
+  let environment := elaborated.result.environment
+  let names := ["packingFirst", "packingSecond", "packingThird"].map psRootName
+  let declarations ← names.mapM fun name =>
+    match psEnvironmentFind environment name with
+    | some declaration => pure declaration
+    | none => throw "packing source declaration is missing"
+  let types := declarations.map psDeclarationType
+  let values := names.map fun name => PsExpr.constE name []
+  let type ← (psMutualPackingUncurryType environment psMetaEmpty psLocalEmpty types).mapError
+    (fun _ => "packing dependent type construction failed")
+  let body ← (psMutualPackingUncurry environment psMetaEmpty psLocalEmpty type values).mapError
+    (fun _ => "packing heterogeneous function construction failed")
+  let name := psRootName "packingCombined"
+  let packed := PsDeclaration.definitionDecl name [] type body
+  let environment := psEnvironmentInsert environment packed
+  let mut proofs := []
+  for index in [0, 1, 2] do
+    let projected ← (psMutualPackingProjection environment psMetaEmpty psLocalEmpty
+      3 index (.constE name [])).mapError (fun _ => "packing projection failed")
+    let some originalType := types[index]? | throw "packing original type is missing"
+    let some original := values[index]? | throw "packing original value is missing"
+    let context := psElabContextEmpty environment []
+    let checked ← (psElabResolvedTerm context projected (some originalType)).mapError psCompilerPscv0ElabError
+    let equality ← (psElabWellFoundedExtensionalEquality 1 checked.context
+      originalType projected original).mapError psCompilerPscv0ElabError
+    let level ← (psElabExpressionSort checked.context originalType).mapError psCompilerPscv0ElabError
+    proofs := proofs ++ [.theoremDecl (psNameAppendNum (psRootName "packingEquation") index) []
+      (psLogicEq level originalType projected original) equality]
+  let parameter ← (psInferEnsureForall environment psMetaEmpty psLocalEmpty type).mapError
+    (fun _ => "packing result is not unary")
+  let originalDomains ← (psMutualPackingDomains 3 parameter.domain).mapError
+    (fun _ => "packing original domains are missing")
+  if originalDomains.length != 3 then throw "packing flattened a user PSum domain"
+  let userSum := psExprApplyMany (.constE (psRootName "PSum") [.succ .zero, .succ .zero])
+    [.constE psNatName [], .constE psBoolName []]
+  let some lastDomain := originalDomains[2]? | throw "packing final domain is missing"
+  if !psExprAlphaEq lastDomain userSum then throw "packing changed the final source PSum"
+  let samples := [PsExpr.lit (.natural 3), .constE psBoolTrueName [],
+    psExprApplyMany (.constE (psNameAppendStr (psRootName "PSum") "inr")
+      [.succ .zero, .succ .zero])
+      [.constE psNatName [], .constE psBoolName [], .constE psBoolFalseName []]]
+  for (value, index) in samples.zipIdx do
+    let injected ← (psMutualPackingPack 3 parameter.domain index value).mapError
+      (fun _ => "packing injection failed")
+    let some (observedIndex, observedValue) :=
+      psMutualPackingUnpack 3 parameter.domain injected
+      | throw "packing constructor round-trip failed"
+    if observedIndex != index || !psExprAlphaEq value observedValue then
+      throw "packing changed member index or user value"
+  match psMutualPackingPack 3 parameter.domain 3 (.lit (.natural 0)) with
+  | .error _ => pure ()
+  | .ok _ => throw "packing accepted an unowned member index"
+  if (psMutualPackingUnpack 3 parameter.domain (.lit (.natural 0))).isSome then
+    throw "packing accepted a missing component constructor"
+  -- Unlike Sum, the component encoding also accepts arbitrary Sorts,
+  -- including Prop and heterogeneous universe parameters.
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let a := psLocalPushBinding psLocalEmpty (psRootName "A") (.sortE (.param u)) .implicit
+  let b := psLocalPushBinding a.context (psRootName "B") (.sortE (.param v)) .implicit
+  let x := psLocalPushBinding b.context (psRootName "x") (.fvar a.id) .explicit
+  let sortDomain ← (psMutualPackingDomain environment psMetaEmpty x.context
+    [.fvar a.id, .fvar b.id]).mapError (fun _ => "packing arbitrary Sorts failed")
+  let sortBody ← (psMutualPackingPack 2 sortDomain 0 (.fvar x.id)).mapError
+    (fun _ => "packing arbitrary Sort injection failed")
+  let sortType := psLogicPi a.id "A" (.sortE (.param u))
+    (psLogicPi b.id "B" (.sortE (.param v))
+      (psLogicPi x.id "x" (.fvar a.id) sortDomain) .implicit) .implicit
+  let sortValue := psLogicLam a.id "A" (.sortE (.param u))
+    (psLogicLam b.id "B" (.sortE (.param v))
+      (psLogicLam x.id "x" (.fvar a.id) sortBody) .implicit) .implicit
+  let _ ← (psElabResolvedTerm (psElabContextEmpty environment [u, v])
+    sortValue (some sortType)).mapError psCompilerPscv0ElabError
+  let sorts := PsDeclaration.definitionDecl (psRootName "packingSorts") [u, v] sortType sortValue
+  return psStandardPSumDeclarations ++ elaborated.result.declarations ++ [packed, sorts] ++ proofs
+
+def main : IO Unit := do
+  ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"
+  let declarations ← fromExcept build
+  let admissions ← fromExcept ((psCompilerAdmissionsFromPrepared { declarations }).mapError
+    psCompilerPscv0Error)
+  let decoded ← fromExcept ((PsKernelLean.decodeCanonicalAdmissions admissions).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message))
+  let prelude ← match ← PsKernelLean.buildLeanPreludeEnvironment with
+    | .ok environment => pure environment
+    | .error error => throw (IO.userError error.message)
+  let checked ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    (do
+      let mut environment := prelude
+      for declaration in decoded do
+        let declaration := PsKernelLean.psKernelWithDefinitionHeight environment declaration
+        match environment.addDeclCore 2000000 20000 declaration none with
+        | .ok next => environment := next
+        | .error error => throw ("packing official kernel: " ++
+            PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
+      pure () : Except String Unit)
+  fromExcept checked
+  IO.println "PSCV0_M3_MUTUAL_PACKING: PASS three heterogeneous dependent components, exact checked projection equations, user PSum ownership and malformed index/constructor refusals; source mutual WF is separate"

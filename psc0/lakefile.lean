@@ -121,7 +121,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardReprCollections,
     `Ps.Environment.StandardWellFoundedData, `Ps.Environment.StandardWellFounded,
     `Ps.Environment.StandardClassical, `Ps.Environment.StandardPartialFixpointData,
-    `Ps.Environment.StandardPartialFixpoint,
+    `Ps.Environment.StandardPartialFixpoint, `Ps.Environment.StandardPSumData,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]
@@ -252,7 +252,7 @@ lean_lib PsMeta where
     `Ps.Meta.InstanceCandidate,
     `Ps.Meta.InstanceKey, `Ps.Meta.InstanceSearch,
     `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
-    `Ps.Meta.Infer, `Ps.Meta.WellFounded,
+    `Ps.Meta.Infer, `Ps.Meta.WellFounded, `Ps.Meta.MutualPacking,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView
   ]
 

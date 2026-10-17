@@ -124,6 +124,13 @@ jobs:
         run: |
           set -euo pipefail
           .lake/build/bin/pscv0_m3_mutual_well_founded_export ../dist/m3-foundation-preparation/StandardPSumCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/psum-export.log
+      - name: Check retained PSum bytes and dependent component packing
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          cmp ../dist/m3-foundation-preparation/StandardPSumCandidate.lean ../packages/environment/src/Ps/Environment/StandardPSumData.lean
+          lake build pscv0_m3_mutual_packing 2>&1 | tee ../dist/m3-foundation-preparation/packing-build.log
+          .lake/build/bin/pscv0_m3_mutual_packing 2>&1 | tee ../dist/m3-foundation-preparation/packing.log
       - name: Compile retained order data and inspect native instance metadata
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

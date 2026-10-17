@@ -259,13 +259,12 @@ def psKernelWhnfCoreWithFuelRanges
                       | _ => letFrames
                   | _ => []
                 let cached :=
-                  if psKernelSemanticCacheEligible expr then
-                    match currentFrames with
+                  psKernelC0LookupBeforeEligibility expr
+                    (match currentFrames with
                     | (_, hash) :: _ =>
                         psKernelExprMapGetWithKnownHash state.whnfCore expr
                           (some hash)
-                    | [] => psKernelExprMapGet state.whnfCore expr
-                  else Option.none
+                    | [] => psKernelExprMapGet state.whnfCore expr)
                 match cached with
                 | Option.some cached =>
                     Except.ok

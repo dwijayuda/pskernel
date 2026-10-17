@@ -15,6 +15,41 @@ recursor-rule validation. Infer-only application, lambda and forall results
 remain memoized because whole-expression inference results are commonly reused.
 -/
 
+/-!
+**Source-equivalent lookup-first WHNF experiment.**
+
+The source checker consults a WHNF cache only if an expression has no free
+variables. This ordered guard forces an expensive FVar walk even when a
+lookup would miss. The alternative checks whether a cache hit exists first,
+and performs the **unchanged** semantic eligibility predicate on that hit.
+Because neither access nor predicate mutates the cache, the result equals
+the exact original expression for EVERY cache and expression, including
+forged free-variable terms and any hash collisions.
+
+It is not safe to omit the eligibility test on a hit or to treat a hash
+match as expression equality. The helper never does either. It only
+reorders the independent *pure* computations. A miss never approves or
+publishes a term.
+-/
+
+/-- Probe a verified exact cache lookup before the costly free-variable
+check; only a true checked entry may be returned. -/
+def psKernelC0LookupBeforeEligibility {α : Type}
+    (expr : PsKernelExpr) (rawHit : Option α) : Option α :=
+  match rawHit with
+  | none => none
+  | some value =>
+      if psKernelSemanticCacheEligible expr then some value else none
+
+/-- All-input equality to the original source cache-read guard. This
+does not require any assumption about the originating cache or context. -/
+theorem psKernelC0LookupBeforeEligibility_source {α : Type}
+    (expr : PsKernelExpr) (rawHit : Option α) :
+    psKernelC0LookupBeforeEligibility expr rawHit =
+      (if psKernelSemanticCacheEligible expr then rawHit else none) := by
+  cases rawHit <;> cases (psKernelSemanticCacheEligible expr) <;>
+    rfl
+
 /-- Semantic facts cannot be reused across structurally forgeable FVar
 identities introduced inside temporary local contexts. -/
 def psKernelSemanticCacheEligible (expr : PsKernelExpr) : Bool :=

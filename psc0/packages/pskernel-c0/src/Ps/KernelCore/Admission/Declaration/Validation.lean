@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Session
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Core declaration validation shared by all admission operations.
@@ -191,6 +192,235 @@ def psKernelExprHasMVar
       psKernelExprHasMVar body
   | _ =>
       false
+
+/-!
+Proof-bearing, per-query DAG-aware metavariable membership. The exact source
+algorithm above remains independently available; only the native compiler
+gets a proved equal implementation. Ordinary metadata leaves and linear
+syntax pay no memo allocation. Every hash collision is checked by equality.
+-/
+
+structure PsKernelC0ExactMVar (expr : PsKernelExpr) where
+  value : Bool
+  source : value = psKernelExprHasMVar expr
+
+structure PsKernelC0MVarMemoEntry where
+  expr : PsKernelExpr
+  certified : PsKernelC0ExactMVar expr
+
+abbrev PsKernelC0MVarMemo :=
+  PsKernelC0HashTrie PsKernelC0MVarMemoEntry
+
+private def psKernelC0MVarMemoFind (expr : PsKernelExpr) :
+    List PsKernelC0MVarMemoEntry →
+      Option (PsKernelC0ExactMVar expr)
+  | [] => none
+  | entry :: rest =>
+      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      | .isTrue equal =>
+          some (by
+            cases equal
+            exact entry.certified)
+      | .isFalse _ =>
+          psKernelC0MVarMemoFind expr rest
+
+private def psKernelC0MVarMemoLookup
+    (expr : PsKernelExpr) (memo : PsKernelC0MVarMemo) :
+    Option (PsKernelC0ExactMVar expr) :=
+  psKernelC0MVarMemoFind expr
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo
+      (psKernelC0MemoShapeHash 4 expr))
+
+private def psKernelC0MVarMemoStore
+    {expr : PsKernelExpr}
+    (memo : PsKernelC0MVarMemo)
+    (checked : PsKernelC0ExactMVar expr) :
+    PsKernelC0ExactMVar expr × PsKernelC0MVarMemo :=
+  let hash := psKernelC0MemoShapeHash 4 expr
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
+  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
+    ({ expr := expr, certified := checked } :: bucket))
+
+/-- One memo per query, never transported across checker or expression states. -/
+def psKernelC0MVarMemoGo :
+    (expr : PsKernelExpr) → PsKernelC0MVarMemo →
+      PsKernelC0ExactMVar expr × PsKernelC0MVarMemo
+  | expr, memo =>
+      match psKernelC0MVarMemoLookup expr memo with
+      | some checked => (checked, memo)
+      | none =>
+          match expr with
+          | .app fn arg =>
+              let (f, m1) := psKernelC0MVarMemoGo fn memo
+              -- The source predicate short-circuits on the function side.
+              -- Do not traverse a potentially enormous argument DAG when
+              -- the left child already certifies the presence of an MVar.
+              if h : f.value = true then
+                let checked : PsKernelC0ExactMVar (.app fn arg) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasMVar fn then true
+                       else psKernelExprHasMVar arg)
+                    rw [← f.source]
+                    simp [h]⟩
+                psKernelC0MVarMemoStore m1 checked
+              else
+                let (a, m2) := psKernelC0MVarMemoGo arg m1
+                let checked : PsKernelC0ExactMVar (.app fn arg) :=
+                  ⟨a.value, by
+                    change a.value =
+                      (if psKernelExprHasMVar fn then true
+                       else psKernelExprHasMVar arg)
+                    rw [← f.source, ← a.source]
+                    simp [h]⟩
+                psKernelC0MVarMemoStore m2 checked
+          | .lam name ty body info =>
+              let (t, m1) := psKernelC0MVarMemoGo ty memo
+              if ht : t.value = true then
+                let checked : PsKernelC0ExactMVar (.lam name ty body info) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasMVar ty then true
+                       else psKernelExprHasMVar body)
+                    rw [← t.source]
+                    simp [ht]⟩
+                psKernelC0MVarMemoStore m1 checked
+              else
+                let (b, m2) := psKernelC0MVarMemoGo body m1
+                let checked : PsKernelC0ExactMVar (.lam name ty body info) :=
+                  ⟨b.value, by
+                    change b.value =
+                      (if psKernelExprHasMVar ty then true
+                       else psKernelExprHasMVar body)
+                    rw [← t.source, ← b.source]
+                    simp [ht]⟩
+                psKernelC0MVarMemoStore m2 checked
+          | .forallE name ty body info =>
+              let (t, m1) := psKernelC0MVarMemoGo ty memo
+              if ht : t.value = true then
+                let checked : PsKernelC0ExactMVar (.forallE name ty body info) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasMVar ty then true
+                       else psKernelExprHasMVar body)
+                    rw [← t.source]
+                    simp [ht]⟩
+                psKernelC0MVarMemoStore m1 checked
+              else
+                let (b, m2) := psKernelC0MVarMemoGo body m1
+                let checked : PsKernelC0ExactMVar (.forallE name ty body info) :=
+                  ⟨b.value, by
+                    change b.value =
+                      (if psKernelExprHasMVar ty then true
+                       else psKernelExprHasMVar body)
+                    rw [← t.source, ← b.source]
+                    simp [ht]⟩
+                psKernelC0MVarMemoStore m2 checked
+          | .letE name ty val body nondep =>
+              let (t, m1) := psKernelC0MVarMemoGo ty memo
+              if ht : t.value = true then
+                let checked : PsKernelC0ExactMVar
+                    (.letE name ty val body nondep) :=
+                  ⟨true, by
+                    change true =
+                      (if psKernelExprHasMVar ty then true
+                       else if psKernelExprHasMVar val then true
+                       else psKernelExprHasMVar body)
+                    rw [← t.source]
+                    simp [ht]⟩
+                psKernelC0MVarMemoStore m1 checked
+              else
+                let (v, m2) := psKernelC0MVarMemoGo val m1
+                if hv : v.value = true then
+                  let checked : PsKernelC0ExactMVar
+                      (.letE name ty val body nondep) :=
+                    ⟨true, by
+                      change true =
+                        (if psKernelExprHasMVar ty then true
+                         else if psKernelExprHasMVar val then true
+                         else psKernelExprHasMVar body)
+                      rw [← t.source, ← v.source]
+                      simp [ht, hv]⟩
+                  psKernelC0MVarMemoStore m2 checked
+                else
+                  let (b, m3) := psKernelC0MVarMemoGo body m2
+                  let checked : PsKernelC0ExactMVar
+                      (.letE name ty val body nondep) :=
+                    ⟨b.value, by
+                      change b.value =
+                        (if psKernelExprHasMVar ty then true
+                         else if psKernelExprHasMVar val then true
+                         else psKernelExprHasMVar body)
+                      rw [← t.source, ← v.source, ← b.source]
+                      simp [ht, hv]⟩
+                  psKernelC0MVarMemoStore m3 checked
+          | .mdata md body =>
+              let (b, m1) := psKernelC0MVarMemoGo body memo
+              let checked : PsKernelC0ExactMVar (.mdata md body) :=
+                ⟨b.value, by
+                  change b.value = psKernelExprHasMVar body
+                  exact b.source⟩
+              psKernelC0MVarMemoStore m1 checked
+          | .proj name i body =>
+              let (b, m1) := psKernelC0MVarMemoGo body memo
+              let checked : PsKernelC0ExactMVar (.proj name i body) :=
+                ⟨b.value, by
+                  change b.value = psKernelExprHasMVar body
+                  exact b.source⟩
+              psKernelC0MVarMemoStore m1 checked
+          | .mvar name =>
+              psKernelC0MVarMemoStore memo
+                (⟨true, rfl⟩ : PsKernelC0ExactMVar (.mvar name))
+          | .bvar index =>
+              psKernelC0MVarMemoStore memo
+                (⟨false, rfl⟩ : PsKernelC0ExactMVar (.bvar index))
+          | .fvar name =>
+              psKernelC0MVarMemoStore memo
+                (⟨false, rfl⟩ : PsKernelC0ExactMVar (.fvar name))
+          | .sort level =>
+              psKernelC0MVarMemoStore memo
+                (⟨psKernelLevelHasMVar level, rfl⟩ :
+                  PsKernelC0ExactMVar (.sort level))
+          | .const name levels =>
+              psKernelC0MVarMemoStore memo
+                (⟨psKernelLevelsHaveMVar levels, rfl⟩ :
+                  PsKernelC0ExactMVar (.const name levels))
+          | .lit literal =>
+              psKernelC0MVarMemoStore memo
+                (⟨false, rfl⟩ : PsKernelC0ExactMVar (.lit literal))
+
+
+/-- Shared-DAG metavariable check, certified equal to the original
+source-level checking predicate (including universe metavariables). -/
+def psKernelC0MemoizedHasMVar (expr : PsKernelExpr) : Bool :=
+  (psKernelC0MVarMemoGo expr .empty).1.value
+
+theorem psKernelC0MemoizedHasMVar_source (expr : PsKernelExpr) :
+    psKernelC0MemoizedHasMVar expr = psKernelExprHasMVar expr :=
+  (psKernelC0MVarMemoGo expr .empty).1.source
+
+/-- Reuse FVar's PURE shape heuristics: neither searches for an FVar nor
+introduces any shared source context. The source predicate remains the fast
+path for a shallow linear expression; the memo is per-call and immutable. -/
+def psKernelC0AdaptiveHasMVar (expr : PsKernelExpr) : Bool :=
+  if psKernelC0FVarMemoComplexApp 8 expr ||
+      psKernelC0FVarMemoBinderPrefix 12 expr then
+    psKernelC0MemoizedHasMVar expr
+  else psKernelExprHasMVar expr
+
+theorem psKernelC0AdaptiveHasMVar_source (expr : PsKernelExpr) :
+    psKernelC0AdaptiveHasMVar expr = psKernelExprHasMVar expr := by
+  unfold psKernelC0AdaptiveHasMVar
+  split
+  · exact psKernelC0MemoizedHasMVar_source expr
+  · rfl
+
+/-- Compiler-only source-equivalent native optimization. No new logical
+admission premise, no unsound cross-environment cache and no fuel changes. -/
+@[csimp] theorem psKernelExprHasMVar_csimp :
+    @psKernelExprHasMVar = @psKernelC0AdaptiveHasMVar := by
+  funext expr
+  exact (psKernelC0AdaptiveHasMVar_source expr).symm
 
 def psKernelCheckNoMVarNoFVar
     (expr : PsKernelExpr) :

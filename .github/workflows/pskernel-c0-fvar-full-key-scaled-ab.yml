@@ -1,0 +1,147 @@
+name: PSKernel-C0 FVar map scaled source-generated Lean 4.35 A/B
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-fvar-full-key-scaled-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scaled-shared-subterm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        depth: [128, 256]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Independently regenerate genuine Lean 4.35 scaled Arena source
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          curl -fL --retry 3 -o "$RUNNER_TEMP/lean4export/C0ScaledShared.lean" \
+            https://raw.githubusercontent.com/leanprover/lean-kernel-arena/5d7ca987618f1136aaa296057b50a2c10c4ce77a/tests/perf/shared-subterm.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,hashlib
+          p=Path(os.environ["RUNNER_TEMP"])/"lean4export"/"C0ScaledShared.lean"
+          source=p.read_bytes()
+          original=b"let n := 1000"
+          assert source.count(original)==1, "the immutable Arena source changed"
+          modified=source.replace(original,b"let n := ${{ matrix.depth }}")
+          p.write_bytes(modified)
+          print("C0_FVAR_SCALED_SOURCE original_sha256="+hashlib.sha256(source).hexdigest()+
+                " modified_sha256="+hashlib.sha256(modified).hexdigest()+
+                " depth=${{ matrix.depth }} genuine_native_435=true single_parameter_adaptation=true")
+          PY
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env lean -o .lake/build/lib/lean/C0ScaledShared.olean C0ScaledShared.lean
+            lake env .lake/build/bin/lean4export C0ScaledShared -- kernel_shared_subterm \
+              > "$RUNNER_TEMP/c0-scaled-shared.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-scaled-shared.ndjson" \
+              > "$RUNNER_TEMP/c0-scaled-official.txt" 2>&1
+          )
+          grep -Fq 'Lean default kernel accepts the solution' "$RUNNER_TEMP/c0-scaled-official.txt"
+          python3 - <<'PY'
+          import os,json,hashlib,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"c0-scaled-shared.ndjson"
+          raw=p.read_bytes()
+          meta=json.loads(raw.partition(b"\n")[0])["meta"]
+          assert meta["lean"]=={"version":"4.35.0","githash":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+          assert meta["format"]["version"]=="3.1.0"
+          print("C0_FVAR_SCALED_EXPORT records="+str(len(raw.splitlines()))+
+                " sha256="+hashlib.sha256(raw).hexdigest()+
+                " official_435=accepted body_native_generated=true")
+          PY
+      - name: Shape-trie source-certified baseline at unchanged fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --quiet --no-tags --depth=1 origin 11def4d21efad8221681b819b7e68bb7a2a1f711
+          test "$(git rev-parse FETCH_HEAD)" = 11def4d21efad8221681b819b7e68bb7a2a1f711
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/baseline-time.txt" \
+            timeout 155s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/c0-scaled-shared.ndjson" 4096) \
+            > "$RUNNER_TEMP/baseline-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_FVAR_SCALED_AB variant=shape_trie depth=${{ matrix.depth }} exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/baseline-c0.txt"
+            echo 'C0_FVAR_SCALED_AB baseline=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_FVAR_SCALED_AB baseline=unqualified_timeout'
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/baseline-c0.txt"; then
+            echo 'C0_FVAR_SCALED_AB baseline=unqualified_resource'
+          else
+            tail -n 30 "$RUNNER_TEMP/baseline-c0.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/baseline-time.txt" || true
+      - name: Full-key source-certified map candidate at unchanged fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          grep -Fq 'Std.HashMap Nat' psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          (cd psc0/packages/pskernel-c0 && \
+            lake build c0OfficialReplay && \
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/full-key-time.txt" \
+            timeout 155s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/c0-scaled-shared.ndjson" 4096) \
+            > "$RUNNER_TEMP/full-key-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_FVAR_SCALED_AB variant=full_key_map depth=${{ matrix.depth }} exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/full-key-c0.txt"
+            echo 'C0_FVAR_SCALED_AB candidate=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_FVAR_SCALED_AB candidate=unqualified_timeout'
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/full-key-c0.txt"; then
+            echo 'C0_FVAR_SCALED_AB candidate=unqualified_resource'
+          else
+            tail -n 30 "$RUNNER_TEMP/full-key-c0.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/full-key-time.txt" || true
+          echo 'C0_FVAR_SCALED_SCOPE official_Lean435=accepted shape_and_map_same_source=true full_Arena_1000_not_claimed=true fuel=4096'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-fvar-full-key-scaled-${{ matrix.depth }}
+          path: |
+            ${{ runner.temp }}/c0-scaled-official.txt
+            ${{ runner.temp }}/baseline-c0.txt
+            ${{ runner.temp }}/full-key-c0.txt
+            ${{ runner.temp }}/baseline-time.txt
+            ${{ runner.temp }}/full-key-time.txt
+          if-no-files-found: warn
+          retention-days: 21

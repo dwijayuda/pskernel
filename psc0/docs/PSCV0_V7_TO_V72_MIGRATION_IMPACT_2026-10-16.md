@@ -14,117 +14,136 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — unused-hint candidate, 17 October 2026
+## Current M3+B implementation checkpoint — qualified unused termination hints
 
-The containing compiler/test revision is not yet qualified. Accepted
-`0e2f5c461d30457caee322b8135293597f55ac4b` / documentation
-`e00f189cd4ce13da8cf37bf503884b339b553ec5` remains the five-gate baseline:
-**960 observed runtime comparisons**, **78/100** engineering estimate.
+Accepted compiler/test SHA:
+[`e6b7f11750fdde6e1feacab86cfb32f2a82be8a5`](https://github.com/dwijayuda/pskernel/commit/e6b7f11750fdde6e1feacab86cfb32f2a82be8a5).
+All five gates pass at that exact revision. The
+[complete qualification receipt](PSCV0_M3_UNUSED_HINTS_QUALIFICATION_2026-10-17.md) records source ownership,
+native controls, actual portable checks, both failed attempts and repairs,
+gate/job/artifact identities, runtime accounting and the next source gap.
 
-### First qualification failure and bounded repair
+The preceding accepted compiler/test was
+`0e2f5c461d30457caee322b8135293597f55ac4b`, recorded by documentation
+checkpoint `e00f189cd4ce13da8cf37bf503884b339b553ec5`. Its own-binder
+result-family and resource-error acceptance remains historical evidence.
+This checkpoint retains **960 observed runtime comparisons** and
+**78/100**. M3+B, M4 and M5 remain open.
 
-Initial candidate `9af377a8da017d0ef3440968e353010063fb9481` failed the focused
-host test build in [run 39047098395](https://github.com/dwijayuda/pskernel/actions/runs/39047098395),
-job `117437900445`: local identifiers matches (line 736) and scoped (line 830)
-are reserved Lean tokens. Its completed 104,970-character log reports the
-Pscv0M3Where parse errors before source/runtime fixture execution.
-This revision renames those local bindings to matchingDiagnostics and
-scopedMain, with their uses. No compiler logic, assertion, source example,
-oracle, workflow or budget changes. F1/F2/F3 passed at the first candidate.
-The healthy Native run was allowed to complete before this repair was pushed. The repaired revision still requires a fresh five-gate
-matrix at one exact SHA; prior per-gate results cannot be mixed into it.
+| Gate | Run | Job | Result |
+| --- | --- | --- | --- |
+| Native Linux | [39051402014](https://github.com/dwijayuda/pskernel/actions/runs/39051402014) | [117450565117](https://github.com/dwijayuda/pskernel/actions/runs/39051402014/job/117450565117) | SUCCESS; 34/34 reported steps |
+| Focused M3 | [39051402005](https://github.com/dwijayuda/pskernel/actions/runs/39051402005) | [117450565084](https://github.com/dwijayuda/pskernel/actions/runs/39051402005/job/117450565084) | SUCCESS; 15/15 reported steps |
+| F1 | [39051401994](https://github.com/dwijayuda/pskernel/actions/runs/39051401994) | [117450565166](https://github.com/dwijayuda/pskernel/actions/runs/39051401994/job/117450565166) | SUCCESS; 10/10 reported steps |
+| F2 | [39051401917](https://github.com/dwijayuda/pskernel/actions/runs/39051401917) | [117450564916](https://github.com/dwijayuda/pskernel/actions/runs/39051401917/job/117450564916) | SUCCESS; 9/9 reported steps |
+| F3 | [39051402080](https://github.com/dwijayuda/pskernel/actions/runs/39051402080) | [117450565404](https://github.com/dwijayuda/pskernel/actions/runs/39051402080/job/117450565404) | SUCCESS; 11/11 reported steps |
 
-### Second host-test failure and explicit-type/call repair
+### Qualified v7.2 behavior
 
-The next candidate `81413f4052ccb0ca89c605d7aec6a99fa35ec3eb` failed focused
-[run 39048426579](https://github.com/dwijayuda/pskernel/actions/runs/39048426579),
-job `117441769021`, during host elaboration at line 869. The expected type of
-the new lookup's .ok pattern remained unresolved. Its complete
-104,783-character log contains those two follow-on pattern errors; the new
-source fixtures and runtime comparisons were not executed, and no artifact
-was produced. Reaching the final numbered Lake job was not a successful build.
+Typed nonrecursive Where/main definitions now ignore unused hint payloads
+and emit the pinned single/combined/fixedpoint warning after successful
+checked construction. Raw suffix syntax and source spans are retained.
+A saved original resolver/header scope defers active hint resolution to
+the selected well-founded consumer; hint syntax supplies no capture or
+termination evidence. Actual typed SCCs and checked type/body dependencies
+remain the recursion and capture authority.
 
-This revision explicitly types Batch, the Nat positive-index list and
-Option (Except Diagnostic Result) lookups, with qualified Except patterns.
-A further source review caught four mixed named/positional dictionary calls:
-captured tag is explicit, so the existing application owner correctly treats
-the positional argument and named tag as a duplicate. All four observations
-now use named tag, d and n arguments. Their bodies, actual dictionaries and
-44/10 expected values are unchanged; no acceptance assertion is weakened.
-No compiler logic, workflow or resource budget changes in this repair.
+Ordinary value predefinitions receive the full checked section context,
+including local dictionaries, before capture pruning. Matching plain and
+hinted Where functions select actual dictionaries 41/7 and return 44/10,
+retaining the legitimate tag/d type dependency. A separate Type u /
+Inhabited A pair keeps complete Nat-to-Nat headers without hint-only type,
+instance or universe captures. Theorem include/omit policy is preserved.
 
-F1/F2/F3 passed at 814; healthy Native was allowed to complete before another
-compiler/test push. These are candidate gate results only. The containing
-repair still needs all five gates at its own exact SHA.
+Successful batch origins and Native source-only/emitted results carry
+source-owned warning diagnostics. JSON preserves source, phase, severity,
+exact message and all six start/end byte/line/column coordinates. The
+imported-provider test keeps hint-provider.ps even when hint-entry.ps is
+the entry filename.
 
-This candidate corrects eager resolution of unused total hints on typed
-nonrecursive Where helpers. Main/local suffixes remain raw with their
-original spans; saved header scope is consumed only by active well-founded
-elaboration. Full checked section locals/instances are available while
-typing value predefinitions, followed by existing real type/body capture
-pruning. Hint-only names cannot make a dictionary available to the body or
-enlarge a final capture telescope.
+The completed focused gate passes all fifteen steps and 670 build jobs:
+five exact native warning guards, eleven matched native/source rfl pairs,
+four complete native @ helper controls, thirteen portable definition/eq_def
+pairs, two new source-only successes and four phase/rule refusals. The
+retained partial/main batches still have six refusals each and now check
+two and six warnings respectively. The thirteen unique source warning sites
+are distinct from the five new native guards and add no runtime exports.
 
-After successful checked nonrecursive definition/equation or partial-body
-construction, per-member unused-hint warnings travel through source origins
-into successful source-only/emitted Native results and JSON. The represented
-single-clause/combined warning messages match pinned Lean. Coordinates
-faithfully expose retained syntax: main partial_fixpoint currently owns the
-whole declaration span. Successful-result diagnostics are transactional;
-native cumulative warning logs on later failing inputs are not claimed.
+All fourteen outer fixture commands and fifty-six runtime PASS markers
+remain. Actual comparisons are 72 scalar exports × two flags × five lanes
+= 720, plus 24 original deriving exports × two × five = 240, totaling 960.
+Direct JS, compiled TS, locked Rust, V8 GC core and Wasmtime components all
+compare against the corresponding native oracle. The retained nineteen
+result-family equations/theorems, 21-request WF fixture with nineteen
+refusals, 38 WF and 10 Where approved assumption closures, and generic
+P0/P1 boundaries pass again.
 
-The proposed source fixture includes five exact native warning guards,
-eleven matching native/source rfl equations, four complete native helper
-headers and thirteen portable ordinary definition/equation headers. The
-matched reducible dictionary pair checks actual tag/d captures and two
-different dictionaries; hint-only type/instance captures must disappear.
-Two positive source-only requests check single-source and provider-module
-diagnostic identity and all six JSON coordinates. Four new negative
-requests retain exact header/body/active-hint ownership. The former ordinary
-unknown-measure refusal becomes a positive; the other six inherited-partial
-refusals remain, alongside two successful inherited-partial warnings and six
-warnings in the existing five-target emitted result.
+Native passes all 34 steps and retains 1,069 observations each in direct
+JS, compiled TS and Rust, generic Nat/Bool execution at 100,000/50,000 steps,
+the linked three-module application, four-module GC application and repeated
+component-host checks. Standard remains 3,633 declarations / 41 classes /
+359 instances, FNV 4990397000639020696; exact Standard/surface SHA-256 values
+and the matching M1 sourceSha are recorded in the full receipt.
+The pinned Wasmtime host still warns that explicit post_return is deprecated
+and has no effect; the passing host marker is recorded with that limitation.
+F1/F2/F3 checked exports and strict retained assets also pass.
 
-No runtime export, workflow, shared runtime runner, trust policy or resource
-budget changes. All five gates must pass at one new exact compiler/test SHA;
-none of the above candidate assertions is execution evidence until then.
+### Failed-candidate history and bounded scope
 
-The [result-family receipt](PSCV0_M3_RESULT_FAMILY_QUALIFICATION_2026-10-17.md)
-retains the previous exact qualification. Its failed-comparison rollback
-claim applies at the public equality/family transaction; a low-level worker
-may still return a partial context under its pre-existing API. The
-[generic P0](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md) and
-[independent WF](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) receipts
-retain preceding qualified cells.
+The initial `9af377a8da017d0ef3440968e353010063fb9481` focused run
+[39047098395](https://github.com/dwijayuda/pskernel/actions/runs/39047098395)
+failed on reserved local names matches/scoped. The six-line rename repair
+`81413f4052ccb0ca89c605d7aec6a99fa35ec3eb` then failed focused
+[39048426579](https://github.com/dwijayuda/pskernel/actions/runs/39048426579)
+because the new indexed pattern's expected type was unresolved. The final
+repair explicitly types the Batch/Nat-index/Option-Except values and patterns.
+A pre-push source review also changed four dictionary calls to all-named
+tag/d/n arguments; expected values 44/10 and all assertions remain.
 
-### Next concrete source-scope boundary
+Both failed attempts stopped during the host build, before the fourteen
+outer fixture commands and portable source/runtime checks, and produced
+no focused artifact. Compile-time native controls can run during host
+elaboration before a later host error. Every preceding healthy Native
+run completed before its successor compiler/test push. No earlier per-gate
+pass is substituted into the accepted matrix.
 
-A follow-up source audit identifies a separate legacy ordinary-definition
-gap. An explicit-result function with no Where block and no hint still takes
-Command's psScopeDeclaration route. Its source-used-key selection can omit
-a local dictionary whose alias type depends on a section tag when neither
-tag nor the dictionary name occurs in the header/body. The equivalent
-hinted definition takes typed predefinitions and sees the full context.
-This gap is inferred from current source; it has not been qualified by a new
-plain/hinted execution pair in this cell.
+Compiler logic was unchanged after the initial candidate. Relative to the
+preceding checkpoint, the complete series changes eight compiler files by
++136/-43 lines and the existing Where fixture by +356/-5. No workflow,
+runtime export, runner, resource budget, language authority or Lean pin
+changed. Artifact metadata and completed upload receipts agree; archive
+contents were not independently reopened or rehashed.
 
-The next bounded obligation is ordinary definition section-instance parity
-across those routes: matching native/portable plain and hinted definitions,
-two nonzero actual dictionaries, complete capture headers and exact
-equations, while preserving private aliases, registered abbrev behavior,
-theorem include/omit policy and all five gates. The present dictionary
-regression is explicitly a Where/predefinition pair. It does not establish
-the complete legacy ordinary-definition source exit.
+### Remaining source obligation
 
-This bounded source repair receives no automatic score increase. Complete
-source parity, broader dependent inference, larger changing WF packs,
-arbitrary measure telescopes, general mutual WF, broader indexed binary
-deriving, nested/source induction and the complete P0 matrix remain open.
-Only propext and Quot.sound are approved; P1 retains its audited
-Classical.choice refusal. M3+B, M4 and M5 remain open.
+The next concrete gap is a plain explicit-result ordinary definition with
+no Where block or hint. Its legacy psScopeDeclaration route can omit a
+body-selected local dictionary whose alias type depends on an otherwise
+unmentioned section tag. The hinted equivalent takes typed predefinitions
+and sees the full section context. This gap is inferred from source;
+the current qualified dictionary pair covers Where/predefinitions only.
 
-The adoption matrix below is historical policy/owner evidence and does not
-override this candidate or its preceding exact acceptance checkpoint.
+Next qualify matching native/portable unregistered ordinary definitions in
+a nonempty section through the existing typed owner, with actual
+dictionaries 41/7, all-named tag/d/n calls, complete headers and equations.
+Preserve private aliases, registered abbrev/attribute/instance behavior,
+theorem include/omit and typed recursion ownership.
+
+Warnings are exposed with an overall successful result; parity with Lean's
+cumulative log before a later failure is not claimed. Coordinates retain
+ProofScript spans, including the whole-declaration main partial_fixpoint
+span. No standalone decreasing_by, termination_by? or structural-hint
+grammar expansion is established. The prior rollback claim applies to the
+public equality/family transaction, not every raw worker return contract.
+
+The rubric remains data 25/30, source 14/15, total recursion 16/20,
+P0 13/15, P1 1/10 and integration 9/10. Complete source parity, broader
+inference, indexed binary deriving, nested/source induction, larger changing
+WF packs, arbitrary measure telescopes, general mutual WF and the full P0
+matrix remain open. Only propext and Quot.sound are approved; P1 retains
+its audited Classical.choice refusal.
+
+The adoption matrix and language authority below remain unchanged.
 
 ## Rule-to-change and implementation matrix
 

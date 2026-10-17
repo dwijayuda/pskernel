@@ -1,3 +1,5 @@
+# Recheck corrected source-certified leaf fast path after preserving the
+# original dependent memo recursion; only native code-generation work differs.
 name: PSKernel-C0 Array proof cheap leaf hash A/B
 on:
   push:

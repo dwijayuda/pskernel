@@ -7,6 +7,13 @@ on:
       - '.github/workflows/pskernel-c0-arena-adversarial435.yml'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
       - 'psc0/packages/pskernel-c0/src/**'
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-adversarial435.yml'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -195,6 +202,54 @@ jobs:
             fi
           done
           echo "C0_ARENA_EXPLOIT_GATES native_kernel=false_accept_forbidden historical_bytes_unchanged=true"
+      - name: Re-export and strictly reject separate K-reduction and projection exploits
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Separate Arena-authored invalidity classes, NEVER counted as
+          # checks of the original Lean 4.29.1 archived export bytes.
+          revision=5d7ca987618f1136aaa296057b50a2c10c4ce77a
+          for case_name in k-rec-conv proj-non-structure; do
+            case "$case_name" in
+              k-rec-conv) module=ArenaKRecConv;;
+              proj-non-structure) module=ArenaProjNonStructure;;
+              *) echo "unexpected case" >&2; exit 1;;
+            esac
+            curl -fL --retry 3 -o "$RUNNER_TEMP/$module.lean" \
+              "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/bugs/$case_name.lean"
+            (
+              cd "$RUNNER_TEMP/lean4export"
+              cp "$RUNNER_TEMP/$module.lean" "$module.lean"
+              lake env lean -o ".lake/build/lib/lean/$module.olean" "$module.lean"
+              lake env .lake/build/bin/lean4export "$module" -- bad \
+                > "$RUNNER_TEMP/arena435-$case_name.ndjson"
+            )
+            path="$RUNNER_TEMP/arena435-$case_name.ndjson"
+            python3 - "$path" <<'PY'
+          import json,sys
+          with open(sys.argv[1], "rb") as f:
+              meta=json.loads(f.readline())["meta"]
+          assert meta["lean"] == {
+              "version":"4.35.0",
+              "githash":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+          assert meta["exporter"]["version"] == "3.1.0"
+          print("C0_ARENA_NEW_CLASS source_pinned=true native_export=true")
+          PY
+            official_rc=0
+            (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$path") \
+              > "$RUNNER_TEMP/arena435-$case_name-official.txt" 2>&1 || official_rc=$?
+            test "$official_rc" -ne 0
+            grep -Fq "Lean default kernel rejects the solution" \
+              "$RUNNER_TEMP/arena435-$case_name-official.txt"
+            c0_rc=0
+            (cd psc0/packages/pskernel-c0 && \
+              timeout 150s .lake/build/bin/c0OfficialReplay "$path" 4096) \
+              > "$RUNNER_TEMP/arena435-$case_name-c0.txt" 2>&1 || c0_rc=$?
+            test "$c0_rc" -eq 0
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" \
+              "$RUNNER_TEMP/arena435-$case_name-c0.txt"
+            echo "C0_ARENA_NEW_CLASS case=$case_name official=rejected c0=rejected native_lean=4.35.0"
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:

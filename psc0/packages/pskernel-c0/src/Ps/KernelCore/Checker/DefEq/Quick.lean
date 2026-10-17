@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.DefEq.BinderSpines
 import Ps.KernelCore.Core.ExprDecidableEq
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Lean 4.34 quick definitional-equality rules.
@@ -133,13 +134,16 @@ def psKernelDefEqQuickAfterCommon
 
 /-- Source-exact success-pair fast miss: checking the pair set first
     avoids traversing a large shared term for FVars when no successful
-    DefEq result has been cached. A hit still requires the exact original
-    FVar/local-context eligibility; neither pointer nor hash is an Eq fact. -/
+    DefEq result has been cached. Only on a hit, check the source-certified
+    DAG-aware FVar predicates on BOTH expressions. This preserves all
+    original free-variable and local-context restrictions; neither a
+    hash nor a pointer grants a DefEq result. -/
 def psKernelC0QuickPairSuccessGuard
     (state : PsKernelCheckerState)
     (left right : PsKernelExpr) : Bool :=
   psKernelExprPairSetContains state.success left right &&
-    psKernelSemanticPairCacheEligible left right
+    (!psKernelC0AdaptiveHasFVar left &&
+      !psKernelC0AdaptiveHasFVar right)
 
 /-- All-input equivalence including cached-hit, miss and FVar scopes.
     This rewrites only a Boolean conjunction, never source DefEq/fuel. -/
@@ -149,7 +153,9 @@ theorem psKernelC0QuickPairSuccessGuard_source
     psKernelC0QuickPairSuccessGuard state left right =
       (psKernelSemanticPairCacheEligible left right &&
         psKernelExprPairSetContains state.success left right) := by
-  simp only [psKernelC0QuickPairSuccessGuard]
+  simp only [psKernelC0QuickPairSuccessGuard,
+    psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
+    psKernelC0AdaptiveHasFVar_source]
   exact Bool.and_comm _ _
 
 /-- General-purpose quick path retains its original guard semantics. -/

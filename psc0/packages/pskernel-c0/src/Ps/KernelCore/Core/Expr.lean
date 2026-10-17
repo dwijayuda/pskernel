@@ -275,7 +275,7 @@ theorem psKernelC0FullPairedExprEq_source
 /-- Proof-constrained native implementation for every call to historical
 recursive equality. The source checker/DefEq and existing Lean proofs retain
 their old definitions; only compiled work is short-circuited earlier. -/
-@[csimp] theorem psKernelExprEqLegacy_compiler_eq_fullPaired :
+theorem psKernelExprEqLegacy_compiler_eq_fullPaired :
     @psKernelExprEqLegacy = @psKernelC0FullPairedExprEq := by
   funext left right
   exact (psKernelC0FullPairedExprEq_source left right).symm

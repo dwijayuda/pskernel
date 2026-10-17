@@ -16,6 +16,10 @@ Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from t
 
 ## Current M3+B implementation checkpoint — independent WF candidate, 17 October 2026
 
+The initial nested-equation revision `438dd91e` stopped at a missing explicit
+`Ps.Meta.Recursor` import; this candidate corrects that dependency. The proof
+construction remains pending all-five-gate qualification.
+
 At the latest tested compiler/test SHA `5b87922e40eac81889a78364fa33a34ada2a2c0b`,
 the original three independent-WF decrease proofs now elaborate and all three
 foundation gates pass. Focused construction advances to exact source-equation

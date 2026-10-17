@@ -14,6 +14,16 @@ The last accepted compiler/test SHA remains
 The planned independent-WF total of 940 is not yet accepted. No extra whole
 engineering point is assigned to this extension of already-credited pair packing.
 
+### Compile correction before qualification
+
+The first nested-cases revision `438dd91e3cb9372a4993a5accf9935d2004923de`
+stopped all five gates at compilation: the new equation module used
+`psEliminationRecursorApplication` without importing its owner.
+The containing candidate adds the explicit `Ps.Meta.Recursor` dependency,
+whose imports remain below Elab, and preserves the reviewed proof construction.
+These failed runs are Native39032739369, focused39032739376, F1 39032739383,
+F2 39032739385 and F3/F4/platform39032739384. No runtime evidence was produced.
+
 ### Latest cloud result and remaining equation owner
 
 At `5b87922e40eac81889a78364fa33a34ada2a2c0b`, the Meta/elaborator compiler

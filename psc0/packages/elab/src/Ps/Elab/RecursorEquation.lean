@@ -1,4 +1,5 @@
 import Ps.Elab.Match
+import Ps.Meta.Recursor
 
 def psElabRecursorEquationError (message : String) : PsElabError :=
   .data ("PSCV0-RECURSOR-EQUATION: " ++ message)

@@ -41,6 +41,29 @@ def main : IO Unit := do
           !psKernelExprEqual exact.1 checked.1 then
           throw (IO.userError "memoized instantiation diverges from exact original source")
 
+  -- Force two keys into the SAME shallow hash bucket but with different
+  -- binder offsets. Offsets differ by the hash modulus: an exact syntax
+  -- hit alone must never reuse a result from the wrong binder scope.
+  let zeroBVar : PsKernelExpr := .bvar 0
+  let farOffset := psKernelCacheHashModulus
+  if psKernelCacheMix (psKernelC0MemoShapeHash 3 zeroBVar) 0 !=
+      psKernelCacheMix (psKernelC0MemoShapeHash 3 zeroBVar) farOffset then
+    throw (IO.userError "binder offset collision test was not constructed")
+  let firstCertified :=
+    psKernelC0InstOneMemoGo replacement zeroBVar 0 .empty
+  let secondCertified :=
+    psKernelC0InstOneMemoGo replacement zeroBVar farOffset
+      firstCertified.2
+  let expectedFar :=
+    psKernelC0ExprInstantiateOneChanged zeroBVar replacement farOffset
+  if firstCertified.1.value.2 != true ||
+      secondCertified.1.value.2 != false ||
+      !psKernelExprEqual secondCertified.1.value.1 expectedFar.1 ||
+      secondCertified.1.value.2 != expectedFar.2 then
+    throw (IO.userError
+      "memo reused checked substitution across incompatible binder offsets")
+  IO.println "C0_CERTIFIED_INSTANTIATE_MEMO colliding_offset_keys=source_exact false_reuse=blocked"
+
   let depth := 26
   let expanded := c0InstMemoShared (.bvar 0) depth
   let begin ← IO.monoNanosNow

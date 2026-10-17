@@ -425,13 +425,14 @@ admission premise, no unsound cross-environment cache and no fuel changes. -/
 def psKernelCheckNoMVarNoFVar
     (expr : PsKernelExpr) :
     Except String Unit :=
-  -- Directly consume the certified source-equal result. In particular,
-  -- do not depend on when the native compiler applies @[csimp] inside
-  -- the module that also defines the original recursive predicate.
+  -- Consume the independent source-certified MVar and FVar predicates
+  -- directly: compiler csimp application inside the module defining the
+  -- old predicates is not assumed. Each predicate has an all-input proof,
+  -- so the exact historical MVar-before-FVar error order is preserved.
   if psKernelC0AdaptiveHasMVar expr then
     Except.error
       "declaration has metavariables"
-  else if psKernelExprHasFVar expr then
+  else if psKernelC0AdaptiveHasFVar expr then
     Except.error
       "declaration has free variables"
   else
@@ -447,7 +448,8 @@ theorem psKernelC0CheckNoMVarNoFVar_source (expr : PsKernelExpr) :
         Except.error "declaration has free variables"
        else Except.ok ()) := by
   simp only [psKernelCheckNoMVarNoFVar,
-    psKernelC0AdaptiveHasMVar_source]
+    psKernelC0AdaptiveHasMVar_source,
+    psKernelC0AdaptiveHasFVar_source]
 
 def psKernelCheckLevelParams
     (expr : PsKernelExpr)

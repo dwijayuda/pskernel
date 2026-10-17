@@ -94,23 +94,33 @@ structure PsKernelC0ExactFVar (expr : PsKernelExpr) where
 
 structure PsKernelC0FVarMemoEntry where
   expr : PsKernelExpr
+  -- All bits of the per-query bucket hint, not just the radix trie
+  -- suffix. This is only a prefilter for expensive exact equality.
+  fullIndexHint : Nat
   certified : PsKernelC0ExactFVar expr
 
 abbrev PsKernelC0FVarMemo :=
   PsKernelC0HashTrie PsKernelC0FVarMemoEntry
 
-private def psKernelC0FVarMemoFind (expr : PsKernelExpr) :
+private def psKernelC0FVarMemoFind
+    (expr : PsKernelExpr) (fullIndexHint : Nat) :
     List PsKernelC0FVarMemoEntry →
       Option (PsKernelC0ExactFVar expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
-      | .isTrue equal =>
-          some (by
-            cases equal
-            exact entry.certified)
-      | .isFalse _ =>
-          psKernelC0FVarMemoFind expr rest
+      -- Address/shape hashes can collide or disagree even for equivalent
+      -- terms. A mismatch only SKIPS a memo hit and reruns the source;
+      -- a match still invokes the proven exact equality witness.
+      if entry.fullIndexHint == fullIndexHint then
+        match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+        | .isTrue equal =>
+            some (by
+              cases equal
+              exact entry.certified)
+        | .isFalse _ =>
+            psKernelC0FVarMemoFind expr fullIndexHint rest
+      else
+        psKernelC0FVarMemoFind expr fullIndexHint rest
 
 /-!
 A memo hash is a NON-SEMANTIC index, never a decision about FVars.
@@ -141,9 +151,9 @@ private def psKernelC0FVarMemoLookup
     (indexHash : PsKernelExpr → Nat)
     (expr : PsKernelExpr) (memo : PsKernelC0FVarMemo) :
     Option (PsKernelC0ExactFVar expr) :=
-  psKernelC0FVarMemoFind expr
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (indexHash expr))
+  let hint := indexHash expr
+  psKernelC0FVarMemoFind expr hint
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo hint)
 
 private def psKernelC0FVarMemoStore
     (indexHash : PsKernelExpr → Nat)
@@ -154,7 +164,7 @@ private def psKernelC0FVarMemoStore
   let hash := indexHash expr
   let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
   (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
-    ({ expr := expr, certified := checked } :: bucket))
+    ({ expr := expr, fullIndexHint := hash, certified := checked } :: bucket))
 
 /-- One memo per query, never transported across checker or expression states. -/
 def psKernelC0FVarMemoGoWithHash

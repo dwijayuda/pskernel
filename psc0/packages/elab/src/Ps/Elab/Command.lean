@@ -175,9 +175,16 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let peerAliases := names.zipIdx.map fun (name, index) =>
     (name, ["$psc0Mutual", psNatToString index])
   let resolver := { resolver with mutualNames := names, mutualAliases := peerAliases }
+  -- Validate every original main before inherited local intent can affect
+  -- scope. Pinned Main ignores local hints in an all-partial block without
+  -- elaborating their names; body/header names still use the normal resolver.
+  let mainSources := members.map (fun member => PsElabPreDefinitionSource.declaration member.declaration)
+  psElabPreDefinitionCheckMainModifiers mainSources
+  let inheritedPartial := psElabPreDefinitionHasPartialMain mainSources
   let scopedMembers ← (members.zip peerAliases).mapM fun (member, alias) =>
     psScopePreDefinition resolver member
       (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)
+      inheritedPartial
   let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
   let candidateCaptures := psScopeSelect state.scope used
   let prepared ← psElabPreparePreDefinitionsWithSource state.environment

@@ -179,6 +179,88 @@ run_cmd do
   | some (.thmInfo _) => pure ()
   | _ => throwError "an inferred proof-valued local helper did not become a theorem"
 
+
+-- Main chooses inherited partial before elaborating local hints. These names
+-- are intentionally unknown; only warnings for unused hints are permitted.
+section
+variable (hintOnly : Nat)
+
+#guard_msgs (drop warning) in
+mutual
+  partial def unknownHints (base n : Nat) : Nat := loop n + proofLoop n
+  where
+    loop (k : Nat) : Nat :=
+      match k with
+      | 0 => base + 1
+      | j + 1 => loop j + 2
+    termination_by missingMeasure
+    decreasing_by exact hintOnly
+    proofLoop (k : Nat) : Nat :=
+      match k with
+      | 0 => base + 3
+      | j + 1 => proofLoop j + 3
+    termination_by k + hintOnly
+    decreasing_by exact missingProof
+  partial def unknownHintsPeer (n : Nat) : Nat :=
+    if n == 0 then 5 else unknownHintsPeer (n - 1) + 1
+end
+end
+
+example : Nat → Nat → Nat := unknownHints.loop
+example : Nat → Nat → Nat := unknownHints.proofLoop
+example : Nat → Nat := unknownHintsPeer
+
+/-- error: Unknown identifier `missingMeasure` -/
+#guard_msgs (error, drop warning, substring := true) in
+def activeUnknownMeasure (n : Nat) : Nat := loop n
+where
+  loop (k : Nat) : Nat :=
+    match k with | 0 => 0 | j + 1 => loop j + 1
+  termination_by missingMeasure
+
+/-- error: Unknown identifier `missingProof` -/
+#guard_msgs (error, drop warning, substring := true) in
+def activeUnknownProof (n : Nat) : Nat := loop n
+where
+  loop (k : Nat) : Nat :=
+    match k with | 0 => 0 | j + 1 => loop j + 1
+  termination_by k
+  decreasing_by exact missingProof
+
+/-- error: Unknown identifier `missingHeader` -/
+#guard_msgs (error, drop warning, substring := true) in
+partial def unknownHintHeader (n : Nat) : Nat := loop n
+where
+  loop (k : missingHeader) : Nat := 0
+  termination_by missingMeasure
+
+/-- error: Unknown identifier `missingBody` -/
+#guard_msgs (error, drop warning, substring := true) in
+partial def unknownHintBody (n : Nat) : Nat := loop n
+where
+  loop (k : Nat) : Nat := missingBody
+  termination_by missingMeasure
+
+/-- error: invalid mutually recursive definitions, cannot mix partial and non-partial definitions -/
+#guard_msgs (error, drop warning, substring := true) in
+mutual
+  partial def mixedUnknownHintPartial (n : Nat) : Nat := mixedUnknownHintPartial n
+  def mixedUnknownHintPlain (n : Nat) : Nat := loop n
+  where
+    loop (k : Nat) : Nat := loop k
+    termination_by missingMeasure
+end
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for name in [``unknownHints.loop, ``unknownHints.proofLoop, ``unknownHintsPeer] do
+    match environment.find? name with
+    | some (.opaqueInfo _) => pure ()
+    | _ => throwError "ignored unknown hints changed a native partial helper's strategy: {name}"
+    let axioms ← Lean.collectAxioms name
+    unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
+      throwError "unknown-hint native oracle uses an unapproved assumption: {name}: {axioms}"
+
 end M3WhereOracle
 
 namespace M3Where
@@ -407,6 +489,151 @@ private def checkSource : IO Unit := do
     | .ok _ => throw (IO.userError "malformed or unselected local source was accepted")
   IO.println "PSCV0_M3_WHERE_SOURCE: PASS original header boundary, omitted local result, typed default, ordered local/suffix spans, printers and grammar refusals"
 
+
+private def partialHintSource : String :=
+  "section\nvariable (hintOnly: Nat)\nmutual\n" ++
+  "partial function phMain(base: Nat, n: Nat): Nat := loop(n) + proofLoop(n)\n" ++
+  "where {\n" ++
+  "  def loop(k: Nat): Nat := match k with { | 0 => base + 1 | j + 1 => loop(j) + 2 }\n" ++
+  "  termination_by missingMeasure\n" ++
+  "  decreasing_by by { exact hintOnly }\n" ++
+  "  def proofLoop(k: Nat): Nat := match k with { | 0 => base + 3 | j + 1 => proofLoop(j) + 3 }\n" ++
+  "  termination_by k + hintOnly\n" ++
+  "  decreasing_by by { exact missingProof }\n" ++
+  "}\n" ++
+  "partial function phPeer(n: Nat): Nat := if (n == 0) { 5 } else { phPeer(n - 1) + 1 }\n" ++
+  "end\nend\n"
+
+private def partialHintRefusals : List (String × String × String) := [
+  ("active-unknown-measure",
+    "function active(n: Nat): Nat := loop(n)\nwhere {\n" ++
+    "  def loop(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => loop(j) + 1 }\n" ++
+    "  termination_by missingMeasure\n}\n", "PSCV0-SCOPE: unknown name missingMeasure"),
+  ("active-unknown-proof",
+    "function active(n: Nat): Nat := loop(n)\nwhere {\n" ++
+    "  def loop(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => loop(j) + 1 }\n" ++
+    "  termination_by k\n  decreasing_by by { exact missingProof }\n}\n",
+    "PSCV0-SCOPE: unknown name missingProof"),
+  -- General nonrecursive hint parity is outside this bounded P0 change.
+  ("ordinary-unused-unknown-measure",
+    "function ordinary(n: Nat): Nat := loop(n)\nwhere {\n" ++
+    "  def loop(k: Nat): Nat := k\n  termination_by missingMeasure\n}\n",
+    "PSCV0-SCOPE: unknown name missingMeasure"),
+  ("partial-local-header",
+    "partial function header(n: Nat): Nat := loop(n)\nwhere {\n" ++
+    "  def loop(k: missingHeader): Nat := 0\n  termination_by missingMeasure\n}\n",
+    "PSCV0-SCOPE: unknown name missingHeader"),
+  ("partial-main-header",
+    "partial function header(n: missingHeader): Nat := loop(0)\nwhere {\n" ++
+    "  def loop(k: Nat): Nat := 0\n  termination_by missingMeasure\n}\n",
+    "PSCV0-SCOPE: unknown name missingHeader"),
+  ("partial-local-body",
+    "partial function body(n: Nat): Nat := loop(n)\nwhere {\n" ++
+    "  def loop(k: Nat): Nat := missingBody\n  termination_by missingMeasure\n}\n",
+    "PSCV0-SCOPE: unknown name missingBody"),
+  ("mixed-original-main-before-hints",
+    partialHintSource.replace "partial function phPeer" "function phPeer",
+    "PSCV0-MUTUAL-STRATEGY: cannot mix partial and non-partial original main definitions")]
+
+private def partialHintSpanEq (left right : PsSourceSpan) : Bool :=
+  left.start.byteOffset == right.start.byteOffset &&
+  left.start.line == right.start.line && left.start.column == right.start.column &&
+  left.stop.byteOffset == right.stop.byteOffset &&
+  left.stop.line == right.stop.line && left.stop.column == right.stop.column
+
+private def partialHintText (suffix : PsSyntaxTermination) : IO String :=
+  fromExcept ((psPrintProofScriptDeclaration (.wellFoundedDefinition
+    (PsSyntaxName.mk ["hint"] suffix.span) []
+    (.reference (PsSyntaxName.mk ["Nat"] suffix.span))
+    (.natural "0" suffix.span) suffix suffix.span)).mapError
+      (fun _ => "retained local hint could not be printed"))
+
+private def checkPartialHintScopes : IO Unit := do
+  ensure (M3WhereOracle.unknownHints 7 3 == 33 &&
+    M3WhereOracle.unknownHints 13 4 == 50)
+    "native ignored-hint bodies or real enclosing captures changed"
+  let parsed ← fromExcept (psPscv0ParseProgram partialHintSource)
+  let groups := parsed.commands.filterMap fun command =>
+    match command with | .mutualDeclarations members _ => some members | _ => none
+  let [members] := groups | throw (IO.userError "unknown hints lost their original mutual source block")
+  let [main, _] := members | throw (IO.userError "unknown hints lost a compatible original main")
+  let mainSources := members.map (fun member => PsElabPreDefinitionSource.declaration member.declaration)
+  let _ ← fromExcept ((psElabPreDefinitionCheckMainModifiers mainSources).mapError psCompilerPscv0ElabError)
+  let inheritedPartial := psElabPreDefinitionHasPartialMain mainSources
+  ensure inheritedPartial "unknown hints no longer exercise inherited partial intent"
+  let .whereDeclaration _ originals _ := main.declaration
+    | throw (IO.userError "unknown hints lost their local source owners")
+  let scopedMain ← fromExcept ((psScopePreDefinition
+    { environment := psSelfHostProdPreludeEnvironment, scope := {} } main
+    (PsSyntaxName.mk ["$partialHintMain"] (psElabOriginSource main.declaration).snd)
+    inheritedPartial).mapError psCompilerPscv0ElabError)
+  ensure (scopedMain.locals.length == 2 && !scopedMain.used.contains "hintOnly" &&
+    !scopedMain.used.contains "missingMeasure" && !scopedMain.used.contains "missingProof")
+    "unused local hints requested a section capture or unresolved dependency"
+  for (original, scopedLocal) in originals.zip scopedMain.locals do
+    let some (.total before) := original.recursion
+      | throw (IO.userError "unknown hint lost its parsed total suffix")
+    let some (.total after) := scopedLocal.source.recursion
+      | throw (IO.userError "inherited partial discarded its unused suffix")
+    let beforeText ← partialHintText before
+    let afterText ← partialHintText after
+    ensure (beforeText == afterText && partialHintSpanEq before.span after.span &&
+      partialHintSpanEq (psSyntaxTermSpan before.measure) (psSyntaxTermSpan after.measure) &&
+      partialHintSpanEq original.span scopedLocal.source.span)
+      "unused local measure/proof syntax or source span changed during scope"
+    match before.decreasing, after.decreasing with
+    | some first, some second =>
+      ensure (partialHintSpanEq (psSyntaxTermSpan first) (psSyntaxTermSpan second))
+        "unused proof hint lost its original span"
+    | _, _ => throw (IO.userError "unused proof hint was discarded")
+  let compiled ← fromExcept ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed
+    "PartialHintScope").mapError psCompilerPscv0ElabError)
+  let environment := compiled.result.environment
+  for (name, parameters) in [
+      (psRootName "phMain", ["base", "n"]),
+      (psNameAppendStr (psRootName "phMain") "loop", ["base", "k"]),
+      (psNameAppendStr (psRootName "phMain") "proofLoop", ["base", "k"]),
+      (psRootName "phPeer", ["n"])] do
+    match psEnvironmentFind environment name,
+        psEnvironmentFind environment (PsName.num name 0) with
+    | some (.opaqueDecl _ levels type witness), some (.partialDecl _ bodyLevels bodyType body) =>
+      ensure (levels.isEmpty && bodyLevels.isEmpty && binderNames type == parameters &&
+        psExprAlphaEq type bodyType && !psExprHasUnresolvedMeta type &&
+        !psExprHasUnresolvedMeta witness && !psExprHasUnresolvedMeta body &&
+        (psExprFVarIds type).isEmpty && (psExprFVarIds witness).isEmpty &&
+        (psExprFVarIds body).isEmpty && !psExprHasConst name witness)
+        "unknown hints changed partial strategy, real captures or logical/body closure"
+      if !psNameEq name (psRootName "phMain") then
+        ensure (psExprHasConst name body)
+          "ignored hints replaced an actual recursive body with its logical inhabitant"
+    | _, _ => throw (IO.userError "unknown hints lost independently inhabited opaque/body ownership")
+    ensure ((psEnvironmentFind environment (psNameAppendStr name "eq_def")).isNone)
+      "ignored termination hints created a partial defining equation"
+  let localOrigins := compiled.origins.flatMap (·.localDefinitions)
+  ensure (localOrigins.length == 2) "unknown hints changed local provenance membership"
+  for (original, origin) in originals.zip localOrigins do
+    ensure (partialHintSpanEq original.span origin.span && !origin.declarations.isEmpty)
+      "unknown hints moved a local span or discarded its emitted identities"
+  let requests := #[({ source := partialHintSource, sourceName := "m3-partial-hint-scope.ps" } :
+    PsV7Native.Request)] ++
+    (partialHintRefusals.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray
+  let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  match (batch.results[0]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+  | some (Except.ok result) =>
+    ensure (result.declarationCount > 0 && result.artifacts.isEmpty)
+      "source-only partial hint qualification returned an empty or executable result"
+  | some (Except.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  | none => throw (IO.userError "missing partial hint qualification result")
+  for ((label, _, rule), index) in partialHintRefusals.zipIdx do
+    match batch.results[index + 1]? with
+    | some (.error error) =>
+      ensure (error.phase == "elaborate" && (error.message.splitOn rule).length > 1)
+        (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
+    | _ => throw (IO.userError ("unexpected partial hint acceptance: " ++ label))
+  IO.println "PSCV0_M3_PARTIAL_HINT_SCOPE: PASS pinned native ignored measures/proofs, validated all-partial main ownership, raw local hint spans, actual captures and opaque/body identities; active hints, headers, bodies and mixed mains still refuse"
+
 private def checkConstruction : IO Unit := do
   let parsed ← fromExcept (psPscv0ParseProgram source)
   let compiled ← fromExcept ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed
@@ -583,6 +810,7 @@ def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "where qualification requires pinned Lean"
   M3ResultInference.check
+  checkPartialHintScopes
   checkSource
   checkConstruction
   let request : PsV7Native.Request := {

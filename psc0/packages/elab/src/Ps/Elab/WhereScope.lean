@@ -57,7 +57,8 @@ def psScopeWhereTermination (resolver : PsScopeResolver) (bound : List String)
 -- Header annotations/defaults see the enclosing header before local helpers
 -- enter. Bodies see the local helper frame; own/nested binders shadow it.
 def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMember)
-    (alias : PsSyntaxName) : Except PsElabError PsScopedPreDefinition := do
+    (alias : PsSyntaxName) (inheritedPartial : Bool := false) :
+    Except PsElabError PsScopedPreDefinition := do
   let (base, locals, whereSpan) ← psWhereSourceParts member.declaration
   let (sourceName, sourceBinders, sourceType, sourceValue) ← psWhereValueParts base
   let qualified := psScopeQualified resolver.scope sourceName
@@ -97,8 +98,14 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
     let localValue ← psScopeTerm 4096 bodyResolver localBound localDefinition.value
     let (recursion, recursionUsed) ← match localDefinition.recursion with
       | some (.total suffix) => do
-        let suffix ← psScopeWhereTermination resolver localBinders.bound suffix
-        pure (some (PsSyntaxLocalRecursion.total suffix.fst), suffix.snd)
+        if inheritedPartial then
+          -- The command has already checked all original main modifiers.
+          -- Keep the exact unused source/spans; it supplies neither names nor
+          -- captures. The local header and body above remain fully scoped.
+          pure (some (PsSyntaxLocalRecursion.total suffix), [])
+        else
+          let suffix ← psScopeWhereTermination resolver localBinders.bound suffix
+          pure (some (PsSyntaxLocalRecursion.total suffix.fst), suffix.snd)
       | some (.fixedpoint span) => pure (some (PsSyntaxLocalRecursion.fixedpoint span), [])
       | none => pure (none, [])
     let some shortName := localDefinition.name.segments.head? | throw .emptyName

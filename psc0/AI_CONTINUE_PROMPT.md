@@ -1,3 +1,62 @@
+## Prepared inherited-partial hint scoping repair — 2026-10-17
+
+The existing scope pass resolved a local `termination_by` measure before choosing
+the helper's inherited partial strategy. That incorrectly rejected an unknown
+measure name even when every original main declaration was compatibly partial and
+the pinned native compiler would leave the local suffix unused.
+
+`Ps.Elab.Command` now applies the existing original-main modifier check after
+duplicate/private-name preparation and before member scoping. Only after that
+check succeeds does it pass inherited partial intent. `Ps.Elab.WhereScope`
+uses a default-false flag to preserve the exact raw local total suffix while
+collecting no used names from it in that bounded case. Main/local headers,
+local bodies, parent termination clauses, ordinary hint scoping, later strategy
+checks and actual capture dependency closure retain their existing owners.
+
+The pinned native sequence is documented by
+[MutualDef.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/MutualDef.lean),
+[PreDefinition/Main.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/Main.lean)
+and
+[TerminationHint.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/TerminationHint.lean):
+validate original main modifiers, inherit partial intent, choose partial before
+termination-hint elaboration, then issue unused-hint warnings without name resolution.
+
+The existing Where fixture adds eight nested source-only requests: one positive
+and seven phase-specific controls. Its original seven requests, six exports and
+runtime batch remain; the outer fixture count stays 14. The positive checks two
+recursive helpers and a disconnected partial peer, unknown measure/proof names,
+native values 33 and 50, real base captures and original public binder order,
+four closed opaque/private-body pairs, recursive self references, no invented
+`eq_def`, and local provenance. It compares retained measure/proof text and
+byte/line/column spans and excludes hint-only used names.
+
+The seven controls retain unknown active measures, unknown active decreasing
+proofs, an ordinary nonrecursive unknown measure, unknown local/main headers,
+an unknown local body, and mixed original-main modifiers. Active proof names are
+re-scoped by `GoalSource.psProofSource` in the actual goal context; the expected
+error is `PSCV0-SCOPE: unknown name missingProof`. Ordinary nonrecursive hint
+parity is explicitly outside this bounded repair.
+
+The three exact candidate files were independently reviewed and reconstructed from
+verified canonical GitHub blobs after a scratch transport outage. Root separately
+matched all byte counts, SHA-256 and Git blob identities before preparation:
+
+| File | Bytes | SHA-256 | Git blob |
+| --- | ---: | --- | --- |
+| `psc0/packages/elab/src/Ps/Elab/Command.lean` | 29542 | `93dc5244adb21f97a6b65c486cfe3d13dc9929cf2873a56b6ba40b45da39d2ef` | `d51fdee11c8e92e069b216cbff3783316f01a2f8` |
+| `psc0/packages/elab/src/Ps/Elab/WhereScope.lean` | 7681 | `54479332ce1bb8da9958a80d1d20e0f1123808f44dd1fc02762be119ebe7a3af` | `02ee7700560453efe1084ec6a43f5462d734c8c8` |
+| `psc0/test/Pscv0M3Where.lean` | 46173 | `08c5536cbf5a550fa3eed948c809f03c6798123a73a560ee250d37af9721ae05` | `73c5176b0ce9af6695d0d8cca83e4388298e2e0b` |
+
+This changes source fidelity within existing P0 behavior; it introduces no runtime
+mechanism, new logical assumption or P0 closure. Full cloud compilation and the
+same-SHA five-gate matrix remain required. At this preparation, the separately
+reviewed dependent packing commit is also an unqualified candidate.
+
+Accepted compiler/test SHA remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+The pinned Lean/toolchain, approved `propext`/`Quot.sound`, P1
+`Classical.choice` refusal and PR 109 draft/open/unmerged boundaries remain fixed.
+
 ## Prepared dependent argument packing candidate — 2026-10-17
 
 This candidate follows the activated generic relation implementation. It extends

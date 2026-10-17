@@ -326,11 +326,11 @@ def psKernelC0FVarMemoGo
 
 /-- Exact memoized source predicate for any syntax DAG. -/
 def psKernelC0MemoizedHasFVar (expr : PsKernelExpr) : Bool :=
-  (psKernelC0FVarMemoGo expr .empty).1.value
+  (psKernelC0FVarMemoGo expr (∅ : PsKernelC0FVarMemo)).1.value
 
 theorem psKernelC0MemoizedHasFVar_source (expr : PsKernelExpr) :
     psKernelC0MemoizedHasFVar expr = psKernelExprHasFVar expr :=
-  (psKernelC0FVarMemoGo expr .empty).1.source
+  (psKernelC0FVarMemoGo expr (∅ : PsKernelC0FVarMemo)).1.source
 
 /-- A bounded lookahead avoids constructing a memo for ordinary linear apps. -/
 def psKernelC0FVarMemoComplexApp : Nat → PsKernelExpr → Bool

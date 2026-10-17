@@ -5,9 +5,9 @@ on:
     paths:
       - '.github/workflows/pskernel-c0-legacy-semantic-dag-ab.yml'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
       - 'psc0/packages/pskernel-c0/test/C0LegacySemanticDAGRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0DefEqPairGuardRegression.lean'
-      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
       - 'psc0/packages/pskernel-c0/test/C0SemanticCacheEligibilityRegression.lean'
@@ -81,6 +81,8 @@ jobs:
           test "$(git rev-parse FETCH_HEAD)" = 78b350690c612f9f03cbdc309903a1a67a38ee65
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           set +e
           (
@@ -110,6 +112,10 @@ jobs:
           set -euo pipefail
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
+          grep -Fq 'psKernelC0MemoizedExprEq left right' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           grep -Fq '@[csimp] theorem psKernelExprEqLegacy_compiler_eq_certifiedMemo' \
             psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
           (cd psc0/packages/pskernel-c0 && \
@@ -140,7 +146,7 @@ jobs:
             exit 1
           fi
           grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/candidate-resources.txt" || true
-          echo "C0_SEMANTIC_DAG_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true original_binder_semantics_preserved=true all_input_Lean_source_proof=true only_ExprDecidableEq_file_changed=true fuel_4096=true no_acceptance_shortcut=true"
+          echo "C0_SEMANTIC_DAG_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true original_binder_semantics_preserved=true all_input_Lean_source_proof=true only_ExprDecidableEq_and_DefEq_root_changed=true fuel_4096=true no_acceptance_shortcut=true"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

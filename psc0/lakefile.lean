@@ -120,6 +120,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatString,
     `Ps.Environment.StandardReprCollections,
     `Ps.Environment.StandardWellFoundedData, `Ps.Environment.StandardWellFounded,
+    `Ps.Environment.StandardClassical,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]

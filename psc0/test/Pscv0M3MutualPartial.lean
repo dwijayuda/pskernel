@@ -152,6 +152,33 @@ run_cmd do
       throwError "generic P0 oracle uses an unapproved assumption: {name}: {axioms}"
   Lean.logInfo "PSCV0_M3_P0_GENERIC_NATIVE: PASS actual generic opaque entries, common instance/seed telescope and allowed native logical assumption closure"
 
+-- The producer supplies executable results but no Inhabited A dictionary.
+-- Only the independent Nonempty instance can inhabit the logical opaque.
+partial def p0Nonempty {A : Type u} [evidence : Nonempty A]
+    (producer : Nat → A) (n : Nat) : A :=
+  match n with
+  | 0 => producer 17
+  | k + 1 => p0Nonempty (A := A) (evidence := evidence) producer k
+
+example : ∀ (A : Type u), Nonempty A → (Nat → A) → Nat → A := @p0Nonempty
+
+def p0NonemptyOutput (flag : Bool) : UInt64 :=
+  let producer := fun (value : Nat) => value + (if flag then 41 else 53)
+  UInt64.ofNat (@p0Nonempty Nat (Nonempty.intro 997) producer (if flag then 2 else 3))
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``p0Nonempty with
+  | some (.opaqueInfo _) => pure ()
+  | _ => throwError "native Nonempty-only P0 entry is not logically opaque"
+  for name in [``p0Nonempty, ``p0NonemptyOutput] do
+    let axioms ← Lean.collectAxioms name
+    unless axioms.contains ``Classical.choice &&
+        axioms.all (fun name =>
+          name == ``propext || name == ``Quot.sound || name == ``Classical.choice) do
+      throwError "Nonempty-only P0 oracle lost its exact approved choice closure: {name}: {axioms}"
+  Lean.logInfo "PSCV0_M3_P0_NONEMPTY_NATIVE: PASS opaque producer entry and approved Classical.choice closure"
+
 end M3MutualPartialOracle
 
 namespace M3MutualPartial
@@ -626,6 +653,142 @@ private def checkP0GenericRuntime (directory : System.FilePath) : IO Unit := do
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_P0_GENERIC: PASS native Nat/Bool parity oracles, fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 20 runtime comparisons follow"
 
+private def p0NonemptySource : String :=
+  "universe u\n" ++
+  "partial function p0nonempty{A: Type u}[evidence: Nonempty(A)](producer: Nat -> A, n: Nat): A := match n with { | 0 => producer(17) | k + 1 => p0nonempty(producer, k, A := A, evidence := evidence) }\n" ++
+  "function p0producerTrue(n: Nat): Nat := n + 41\n" ++
+  "function p0producerFalse(n: Nat): Nat := n + 53\n" ++
+  "function m3p0nonempty(flag: Bool): UInt64 := {\n" ++
+  " let producer: Nat -> Nat := if (flag) { p0producerTrue } else { p0producerFalse }\n" ++
+  " let evidence: Nonempty(Nat) := Nonempty.intro(997)\n" ++
+  " let n: Nat := if (flag) { 2 } else { 3 }\n" ++
+  " UInt64.ofNat(p0nonempty(producer, n, A := Nat, evidence := evidence)) }\n"
+
+private def checkClassicalFoundation : IO Unit := do
+  let prior := psSelfHostProdPreClassicalPreludeEnvironment
+  let environment := psSelfHostProdPreludeEnvironment
+  let duplicates := psStandardClassicalDeclarations.filter fun declaration =>
+    psEnvironmentContains prior (psDeclarationName declaration)
+  for declaration in psStandardClassicalExpectedDeclarations do
+    let name := psDeclarationName declaration
+    IO.println ("PSCV0_M3_CLASSICAL_BASE: " ++ psNameToString name ++
+      " present=" ++ toString (psEnvironmentContains prior name))
+  ensure (psStandardClassicalPrerequisiteDeclarations.length == 3 &&
+    psStandardClassicalDeclarations.length == 2 &&
+    psStandardClassicalPrerequisiteDeclarations.all (fun declaration =>
+      psEnvironmentContains prior (psDeclarationName declaration)))
+    "Classical asset lost its three existing Nonempty prerequisites or two new declarations"
+  for declaration in psStandardClassicalPrerequisiteDeclarations do
+    fromExcept (psStandardAuditDeclaration prior declaration)
+  ensure duplicates.isEmpty
+    ("Classical asset duplicates declarations in its frozen base: " ++
+      String.intercalate ", " (duplicates.map (fun declaration =>
+        psNameToString (psDeclarationName declaration))))
+  fromExcept (psStandardClassicalAudit environment)
+  let nonemptyName := psRootName "Nonempty"
+  ensure ((environment.classes.filter (psNameEq nonemptyName)).length == 1 &&
+    (environment.classParameters.filter (fun entry => psNameEq entry.fst nonemptyName)).length == 1)
+    "Nonempty class metadata was duplicated"
+  let choiceNames := [coreName ["Classical", "choice"], coreName ["Classical", "ofNonempty"]]
+  ensure (!(psSelfHostRuntimePreludeDeclarationsWithProd.any fun declaration =>
+    choiceNames.any (psNameEq (psDeclarationName declaration))))
+    "logical choice acquired an executable prelude entry"
+  IO.println "PSCV0_M3_CLASSICAL_FOUNDATION: PASS three unchanged Nonempty prerequisites, two new exact classical declarations, unique Nonempty class and no choice runtime entry"
+
+private def checkP0NonemptyConstruction : IO Unit := do
+  let compiled ← elaborate p0NonemptySource
+  let environment := compiled.result.environment
+  let name := psRootName "p0nonempty"
+  let some (.opaqueDecl logical logicalLevels logicalType witness) :=
+      psEnvironmentFind environment name
+    | throw (IO.userError "Nonempty-only P0 lost its logical opaque")
+  let some (.partialDecl implementation levels type value) :=
+      psEnvironmentFind environment (PsName.num name 0)
+    | throw (IO.userError "Nonempty-only P0 lost its actual private body")
+  let choice := coreName ["Classical", "choice"]
+  let ofNonempty := coreName ["Classical", "ofNonempty"]
+  ensure (psNameEq logical name && psNameEq implementation (PsName.num name 0) &&
+    psElabMutualLevelNamesEqual logicalLevels levels &&
+    psElabMutualLevelNamesEqual levels [psRootName "u"] &&
+    psExprAlphaEq logicalType type && binderNames type == ["A", "evidence", "producer", "n"] &&
+    !psExprAlphaEq witness value && psExprHasConst ofNonempty witness &&
+    !psExprHasConst choice value && !psExprHasConst ofNonempty value &&
+    !psExprHasConst (psRootName "Inhabited") type &&
+    (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty &&
+    (psExprFVarIds witness).isEmpty && !psExprHasUnresolvedMeta type &&
+    !psExprHasUnresolvedMeta value && !psExprHasUnresolvedMeta witness &&
+    compiled.privateNames.any (psNameEq implementation) &&
+    (psEnvironmentFind environment (psNameAppendStr name "eq_def")).isNone)
+    "Nonempty-only P0 changed its telescope, logical choice, actual body, closure or equation policy"
+  let opened ← fromExcept ((psElabPreDefinitionOpen 4
+    (psElabContextEmpty environment levels) type witness).mapError psCompilerPscv0ElabError)
+  let [typeParameter, evidence, producer, n] := opened.bindersRev.reverse
+    | throw (IO.userError "Nonempty-only P0 opening lost its four own binders")
+  ensure (psBinderInfoEq typeParameter.binder .implicit &&
+    psBinderInfoEq evidence.binder .instanceImplicit &&
+    psBinderInfoEq producer.binder .explicit && psBinderInfoEq n.binder .explicit &&
+    psExprAlphaEq opened.type (.fvar typeParameter.id))
+    "Nonempty-only P0 changed an original binder kind or its generic result"
+  let view := psExprAppView opened.value
+  match view.head, view.args with
+  | .constE actual _, [.fvar actualType, .fvar actualEvidence] =>
+    ensure (psNameEq actual ofNonempty && actualType == typeParameter.id &&
+      actualEvidence == evidence.id)
+      "logical choice bypassed the retained Nonempty evidence"
+  | _, _ => throw (IO.userError "Nonempty-only witness is not the checked ofNonempty application")
+  IO.println "PSCV0_M3_P0_NONEMPTY_CONSTRUCTION: PASS exact generic opaque/private-body pair, retained Nonempty evidence, separate choice witness and no logical equation"
+
+private def checkP0NonemptyRuntime (directory : System.FilePath) : IO Unit := do
+  IO.FS.createDirAll directory
+  IO.FS.writeFile (directory / "p0nonempty.ps") p0NonemptySource
+  ensure (M3MutualPartialOracle.p0NonemptyOutput false == 70 &&
+    M3MutualPartialOracle.p0NonemptyOutput true == 58)
+    "independent native Nonempty-only producer observations changed"
+  checkP0NonemptyConstruction
+  let ordinary : PsV7Native.Request := {
+    source := p0NonemptySource
+    sourceName := "p0nonempty.ps"
+    outputStem := "p0nonempty"
+    assurance := .ordinaryChecked
+    exports := .selected ["m3p0nonempty"]
+    targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] }
+  let requests := #[ordinary,
+    { ordinary with assurance := .closedVerified },
+    { ordinary with assurance := .boundaryQualifiedVerified }]
+  let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  ensure (batch.results.size == requests.size) "Nonempty-only P0 batch omitted an assurance result"
+  let some first := (batch.results[0]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result))
+    | throw (IO.userError "Nonempty-only P0 ordinary result is missing")
+  let result : PsV7Native.Result ← match first with
+    | .ok result => pure result
+    | .error error => throw (IO.userError ("Nonempty-only P0 ordinary request failed at " ++
+        error.phase ++ ": " ++ error.message))
+  ensure (PsV7Native.assuranceLabel result.assurance == "ordinary-checked" &&
+    result.declarationCount > 0 && result.artifacts.map (·.target) == ordinary.targets &&
+    result.artifacts.all (fun artifact => !artifact.files.isEmpty))
+    "Nonempty-only P0 changed assurance or omitted a requested target bundle"
+  for index in ([1, 2] : List Nat) do
+    match (batch.results[index]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+    | some (.error error) =>
+      ensure (error.phase == "assurance" &&
+        error.message.startsWith "PSCV0-ASSURANCE-DOWNGRADE:")
+        ("Nonempty-only P0 verified request failed at the wrong boundary: " ++
+          error.phase ++ ": " ++ error.message)
+    | _ => throw (IO.userError "Nonempty-only P0 verified request acquired ordinary fallback or artifacts")
+  for artifact in result.artifacts do
+    for file in artifact.files do
+      match file.payload with
+      | .text value => IO.FS.writeFile (directory / file.path) value
+      | .binary value => IO.FS.writeBinFile (directory / file.path) value
+  let rows := [false, true].map fun flag =>
+    Lean.Json.mkObj [
+      ("flag", Lean.toJson flag),
+      ("m3p0nonempty", Lean.toJson (toString (M3MutualPartialOracle.p0NonemptyOutput flag).toNat))]
+  IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
+  IO.println "PSCV0_M3_P0_NONEMPTY: PASS native producer oracle, fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 10 runtime comparisons follow"
+
 end M3MutualPartial
 
 open M3MutualPartial in
@@ -633,6 +796,7 @@ def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "mutual qualification requires the pinned Lean"
+  checkClassicalFoundation
   checkParserRefusals
   let expectedOrigins ← checkConstruction
   let selected := checks
@@ -673,5 +837,6 @@ def main (args : List String) : IO Unit := do
       exports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   checkP0GenericRuntime (directory / "p0-generic")
+  checkP0NonemptyRuntime (directory / "p0-nonempty")
   IO.println "PSCV0_M3_MUTUAL: PASS fresh official-kernel P0 groups, native section/universe signatures, imported ordinary five-target emission and exact strategy/assurance refusals; native runtime parity follows"
 

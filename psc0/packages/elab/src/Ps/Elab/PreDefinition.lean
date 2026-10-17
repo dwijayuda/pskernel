@@ -495,7 +495,7 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
     if !psElabPreDefinitionExplicitPartial member then
       return ← psElabPreDefinitionNonrecursive environment levels member
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .fixedpoint) then
-    throw (.data "PSCV0-FIXPOINT-ASSUMPTION: selected Lean.Order.fix construction requires unapproved Classical.choice through CCPO.csup; partial_fixpoint admission is unavailable")
+    throw (.data "PSCV0-FIXPOINT-ASSUMPTION: Classical.choice is approved; selected Lean.Order.fix dependency closure and checked portable partial_fixpoint construction are not yet available")
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
     let [member] := members
       | throw (.data "PSCV0-MUTUAL-WF: a recursive component with a well-founded suffix requires one independently checked measured member; mixed partial or multiple-member well-founded cliques are unavailable")

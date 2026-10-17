@@ -142,7 +142,7 @@ def unqualifiedM2AFeatures : List String :=
 def selectedProofPrerequisites : List String :=
   ["Std.WP.Triple", "Gadget.assertGadget"]
 
-def selectedFoundationAssumptions : List String := ["propext", "Quot.sound"]
+def selectedFoundationAssumptions : List String := ["propext", "Quot.sound", "Classical.choice"]
 
 def selectedProfilePolicies : List String := [
   "source-public-names-by-default",
@@ -226,7 +226,7 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- F4 display registrations independently measured at native38789249978.
 -- WF surface independently audited at 078fb1e2 / native 38998692067.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6"
+  "sha256:22963f394b344142cfcca1584d14eae6286941ebc1d4f0897f05a6c6518da6df"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=
@@ -282,6 +282,7 @@ def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
   selectedProofClosureAudit env
+  psStandardClassicalAudit env
   standardInstanceIndexAudit env
   -- Reuse, do not replace, the independently pinned dual registry hashes.
   match psStandardSnapshotValidate env psStandardSnapshotExpected with

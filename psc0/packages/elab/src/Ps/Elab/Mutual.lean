@@ -2,11 +2,11 @@ import Ps.Elab.Scope
 import Ps.Elab.Declaration
 import Ps.Elab.PreDefinition.Basic
 
--- Constructive part of pinned Lean's PreDefinition/MkInhabitant: every
--- parameter supplies an Inhabited value in this witness-only local scope.
--- Search uses the existing shared constraint engine, not the recursive body.
--- The Nonempty/Classical fallback is deliberately unavailable under the
--- current approved assumption policy. No witness instance escapes this call.
+-- Pinned Lean's PreDefinition/MkInhabitant: every parameter supplies an
+-- Inhabited value in this witness-only local scope. Search tries Inhabited
+-- first, then Nonempty and the approved Classical.ofNonempty wrapper.
+-- Neither the recursive body nor a peer supplies its own logical witness.
+-- No witness-only instance escapes this call; resource refusals propagate.
 def psElabPartialInhabitant (environment : PsEnvironment)
     (levels : List PsName) (type : PsExpr) : Except PsElabError PsExpr := do
   let initial := psElabContextEmpty environment levels
@@ -33,14 +33,25 @@ def psElabPartialInhabitant (environment : PsEnvironment)
   let level ← (psInferEnsureSort environment context.metaContext context.localContext
     sort).mapError PsElabError.infer
   let target := PsExpr.app (.constE className [level]) opened.body
-  let dictionary ← (psElabSynthesizeInstance context target).mapError fun error =>
-    match error with
-    | .implicitApplicationUnsupported =>
-      .data "PSCV0-TERM-02-INHABITED: no constructive result inhabitant in the selected environment"
-    | _ => error
-  let value ← psElabApplyCore dictionary.context
-    (.constE (psNameAppendStr className "default") [level])
-    [opened.body, dictionary.term]
+  let value ← match psElabSynthesizeInstance context target with
+    | .ok dictionary =>
+      psElabApplyCore dictionary.context
+        (.constE (psNameAppendStr className "default") [level])
+        [opened.body, dictionary.term]
+    | .error .implicitApplicationUnsupported => do
+      -- Retry from the original search context. A failed Inhabited attempt
+      -- must not constrain the independent Nonempty witness.
+      let nonemptyTarget := PsExpr.app
+        (.constE (psRootName "Nonempty") [level]) opened.body
+      let evidence ← (psElabSynthesizeInstance context nonemptyTarget).mapError fun error =>
+        match error with
+        | .implicitApplicationUnsupported =>
+          .data "PSCV0-TERM-02-INHABITED: no result inhabitant from Inhabited or Nonempty in the selected environment"
+        | _ => error
+      psElabApplyCore evidence.context
+        (.constE (psNameAppendStr (psRootName "Classical") "ofNonempty") [level])
+        [opened.body, evidence.term]
+    | .error error => throw error
   let witness := psCloseElabLambdaBinders value.context.metaContext opened.bindersRev
     (psMetaInstantiate value.context.metaContext value.term)
   if psExprHasUnresolvedMeta witness then throw .unresolvedMetavariable

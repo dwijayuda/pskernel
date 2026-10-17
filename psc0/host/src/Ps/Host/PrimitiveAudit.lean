@@ -56,10 +56,11 @@ def primitiveAudit : IO Lean.Json := do
     let reviewed := modeledSignatures.any (fun entry => entry.1 == psNameToString name)
     let opaquePrimitive := ["mixHash", "String.hash", "Float.toString", "Float32.toString",
       "Float.toFloat32", "Float32.toFloat", "System.Platform.getNumBits"].contains (psNameToString name)
-    let logicalAssumption := ["propext", "Quot.sound"].contains (psNameToString name)
+    let logicalAssumption := ["propext", "Quot.sound", "Classical.choice"].contains (psNameToString name)
     let kernelQuotient := match declaration with | .quotientDecl .. => true | _ => false
     let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd",
-      "List.foldl", "List.reverse", "List.reverseAux"].contains
+      "List.foldl", "List.reverse", "List.reverseAux", "Nonempty", "Nonempty.intro",
+      "Nonempty.rec", "Classical.ofNonempty"].contains
       (psNameToString name)
     let checkedArray := ["Array", "Array.map", "Array.filter", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)

@@ -368,8 +368,8 @@ private def checkAdapterNegatives (prelude : Lean.Kernel.Environment)
 
 private def checkLogicalOnly (prelude : Lean.Kernel.Environment) : IO Unit := do
   for (label, text) in logicalOnlySources do
-    let compiled ← (elaborate text).catch (fun error =>
-      throw (IO.userError (label ++ ": " ++ error.toString)))
+    let compiled ← try elaborate text catch error =>
+      throw (IO.userError (label ++ ": " ++ error.toString))
     ensure (compiled.result.declarations.any (fun declaration =>
       match declaration with | .partialDecl .. => true | _ => false))
       ("former P1 source no longer exercises a recursive implementation: " ++ label)

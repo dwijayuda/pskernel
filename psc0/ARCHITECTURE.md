@@ -1,85 +1,107 @@
-## Current well-founded diagnostic projection follow-up — 2026-10-17
+## Current packed decrease-proof investigation — 2026-10-17
 
-At `83083f458cd97a7f0e5cc2f213c559b09157cca7`, the production diagnostic
-owners and native compiler compiled successfully. F1
-[39004560584](https://github.com/dwijayuda/pskernel/actions/runs/39004560584),
-F2 [39004560578](https://github.com/dwijayuda/pskernel/actions/runs/39004560578)
-and F3/F4 [39004560546](https://github.com/dwijayuda/pskernel/actions/runs/39004560546)
-passed. [Native 39004560563](https://github.com/dwijayuda/pskernel/actions/runs/39004560563),
-job `117314263520`, completed **all 34 reported steps successfully**.
-Its audit is field-for-field identical to the completed `62ee4014` audit:
-34 active additions, no candidate axioms, three compared recursor rules and
-the same selected Standard identities. All original source/Standard,
-modules, GC/components, TypeScript, Rust, repeated Wasmtime and measurements
-passed. The GC report retains five scalar worlds, 1,069 shared observations,
-ten natural-limb checks and binary/Wat equivalence. Measurements record
-the exact `83083f45` source SHA, four compiler configurations and twelve
-runtime rows. Native artifact `12090802497` is 6,797,925 bytes, SHA-256
+At `5d92eb87072c8561bcbba1399e6944a312e38c60`,
+[focused 39005757780](https://github.com/dwijayuda/pskernel/actions/runs/39005757780),
+job `117317784085`, compiled **all 668 jobs**. The corrected command
+diagnostic identifies **original command 24, `m3wfpacked`, during decrease
+goal solving**. Its preceding origin is `m3wfrelationRightStep`: the earlier
+unary and generic-relation declarations elaborated successfully. The original
+error remains `PsElabError.typeMismatch`, rendered as
+`PSCV0-TYPE-MISMATCH (at well-founded decrease goals) (in m3wfpacked)`.
+Generated functional, callback equality, closed-definition and equation
+checks have not been reached for that declaration.
+
+The independent native packed definitions and equations compile and pass
+their assumption audit. Native `packed` and `packedBounded` require no
+assumptions; their checked step equations use only `Quot.sound`. Static
+inspection confirms ordered hygienic argument captures and restoration of
+the saved decrease-goal context. The current nullary error does not establish
+the semantic cause, so no proof, relation, unifier or acceptance check is
+changed to make the fixture pass.
+
+All fourteen required outer source invocations ran; WF alone failed.
+The other thirteen passed, including the nested result-inference,
+inherited-partial hint, indexed Inhabited and nominal empty-dictionary
+checks. WF syntax/printing passed, but its construction failure prevented
+the twenty-one-request WF batch and every focused runtime lane.
+The P1 assumption audit passed its refusal: `Classical.choice` stays blocked.
+Focused diagnostic artifact `12091077511` is 2,030,287 bytes, SHA-256
+`117aa01ef45d6e0490734b3d80dbae93c55f2cb16a30f0aa49ee432e9cbac2cb`.
+No candidate runtime comparisons are accepted from this failed job.
+
+At the same `5d92eb87` SHA,
+[native 39005757915](https://github.com/dwijayuda/pskernel/actions/runs/39005757915),
+job `117317784456`, completed **all 34 reported steps successfully** before
+this follow-up was pushed. F1
+[39005757848](https://github.com/dwijayuda/pskernel/actions/runs/39005757848),
+F2 [39005757834](https://github.com/dwijayuda/pskernel/actions/runs/39005757834)
+and F3/F4
+[39005757761](https://github.com/dwijayuda/pskernel/actions/runs/39005757761)
+also passed. The foundation audit is field-for-field identical to the
+completed `83083f45` audit: 34 active additions, no candidate axioms,
+three compared recursor rules and the exact 3,633-declaration,
+41-class/359-instance selected Standard identities. Its audit object retains
+`runtimeQualified: false`; the separate runtime workloads provide the
+execution evidence. Original source/Standard, modules, GC/components,
+TypeScript, Rust, repeated Wasmtime and measurement workloads all passed.
+The GC report retains five scalar worlds, 1,069 shared observations, ten
+natural-limb checks and binary/Wat equivalence. Measurements record the
+exact `5d92eb87` source SHA, prelude initialization of 7,909 ms, four
+compiler configurations and twelve runtime rows with the established
+warmup/sample method. Native artifact `12090919212` is 6,796,886 bytes,
+SHA-256
+`d2a7e83c7e705d735504f3d1d78c89a2c8c6f661927f7e414e840b0d603ad625`.
+Four gates passed; the focused decrease-proof failure blocks acceptance.
+
+This follow-up changes only the completed failure path in the WF goal
+solver. The original `psProofRun` executes first and returns successful
+results unchanged. After a failure involving exactly one original call
+goal and one direct non-refine `exact`, bounded diagnostics report its
+instantiated target, weak-head application spine and relation endpoints,
+saved local IDs/names/types/let values, goal ID and original call span.
+A target-guided replay distinguishes proof elaboration/synthesis from goal
+assignment; a separate no-target replay is explicitly labelled independent
+evidence, not the original failed attempt's actual type. Probes start from
+the original state, cannot update the failed run and always retain the
+original error. No general term retry, source program, native oracle,
+equation, assumption check, refusal or target comparison changes.
+
+The exact single-owner candidate has independent static review:
+`psc0/packages/elab/src/Ps/Elab/WellFounded.lean`, 49,258 UTF-8 bytes,
+Git blob `3393a727b5fdd5dea48a68a35442c11e9a9c3a9a`, SHA-256
+`78b99e58c6b111069aaa115f776d6f8c2028e188d571756fa32376a52bd1334f`.
+Reversing its two exact edits restores base blob
+`ae03d72b3345d14f104c61c2c67ecb5b05eef52a` byte for byte.
+The next concrete task is to inspect this goal report, repair the evidenced
+cause, then complete all five gates at one compiler/test SHA.
+
+The preceding `83083f458cd97a7f0e5cc2f213c559b09157cca7` matrix completed
+native [39004560563](https://github.com/dwijayuda/pskernel/actions/runs/39004560563)
+with all 34 steps successful and all three fast gates green.
+Its focused job stopped at the diagnostic fixture's shorthand projection;
+`5d92eb87` corrected that one line to the existing qualified accessor.
+Native artifact `12090802497` is 6,797,925 bytes, SHA-256
 `9adf8d48fdb6e6f5ed215c473a24026ba9049f1540f6e3dfdc7f956dab19675d`.
-This run completed before the correction was pushed.
-[Focused 39004560539](https://github.com/dwijayuda/pskernel/actions/runs/39004560539),
-job `117314263245`, then reported a single fixture compile error: Lean could
-not infer the input type of `members.map (·.declaration)` in the new
-failure replay helper. The existing accessor
-`PsSyntaxMutualMember.declaration` supplies that exact type explicitly.
-This one-line correction preserves the identical projection, mutual-member
-order, replay state and original failure. No source fixture or backend
-parity ran in that failed job, and no focused artifact was uploaded.
-The underlying WF type mismatch still requires the diagnostic run.
-
-At `62ee40146ebd9f83f96ad854368a97455250916b`,
-[native 39002967810](https://github.com/dwijayuda/pskernel/actions/runs/39002967810)
-completed **all 34 reported steps successfully**. F1
-[39002967812](https://github.com/dwijayuda/pskernel/actions/runs/39002967812),
-F2 [39002967824](https://github.com/dwijayuda/pskernel/actions/runs/39002967824)
-and F3/F4 [39002967884](https://github.com/dwijayuda/pskernel/actions/runs/39002967884)
-also passed at that exact SHA. The native audit retains 34 active foundation
-additions, no candidate axioms, three compared recursor rules and the exact
-3,633-declaration, 41-class/359-instance Standard identities. Original
-source/Standard, module application, GC/components, TypeScript, Rust,
-repeated Wasmtime and measurement workloads all passed. JavaScript,
-TypeScript and Rust each retain 1,069 shared observations. Native artifact
-`12089929030` is 6,796,826 bytes, SHA-256
+The preceding `62ee40146ebd9f83f96ad854368a97455250916b` native matrix
+also completed all 34 steps successfully; its focused job first exposed
+the then-unlocated WF mismatch. Native artifact `12089929030` is
+6,796,826 bytes, SHA-256
 `c57fae74b2a7c454e282e29803b1b2206aed83c7624606708a0771e5415e2cc3`.
-
-[Focused 39002967826](https://github.com/dwijayuda/pskernel/actions/runs/39002967826),
-job `117309564200`, compiled **all 668 jobs**, including the repaired native
-packing oracle. Native `packed` and `packedBounded` report no assumptions;
-their checked step equations use only `Quot.sound`. WF source syntax and
-printing passed, followed by a single `PSCV0-TYPE-MISMATCH` before the WF
-construction PASS. The raw `PsElabError.typeMismatch` has no expected/actual
-payload. Both the initial aggregate program elaboration and the later
-unused-hint check can produce that same message, so the existing log does
-not yet identify a failing declaration or establish a packing-specific cause.
-All other required outer source fixtures continued and passed, including
-result inference, inherited-partial hint scoping, Where construction,
-indexed Inhabited, nominal empty IR and empty-dictionary emission.
-Focused backend parity was skipped. Its diagnostic artifact `12090007524`
-is 2,030,162 bytes, SHA-256
+Focused artifact `12090007524` is 2,030,162 bytes, SHA-256
 `6ff4cad00071ae8d38cf2ae3fe1269f8a53133ec63fcf3f9277d5859085dd4b3`.
-
-This follow-up adds failure diagnostics without changing successful
-qualification or accepting an unchecked term. After either original
-whole-program elaboration fails, the fixture replays the identical parsed
-command stream from the identical initial environment, reports its first
-failing original command and qualified names, then rethrows the original
-error. WF owner context identifies the existing elaboration/checking phase;
-failed generated expected-type checks include bounded actual/expected type
-sketches. Context preserves the original error and marker. The existing Where missing-name
-predicate unwraps that context while retaining its exact leaf/name comparison.
-Source programs,
-native oracles, equations, assumption checks, refusals and all target
-comparisons remain unchanged. A new complete five-gate matrix is required
-after the diagnostic result is resolved.
+These completed native runs retain the identical active foundation audit
+and original workloads; failed focused runs remain diagnostic evidence.
 
 The cumulative result-inference, indexed Inhabited, nominal empty dictionary,
 active foundation, generic relation, dependent packing and partial-hint
 candidate remains unaccepted. Accepted compiler/test remains
 `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
-The prior active-foundation evidence and exact pins remain in the foundation
-receipt. Only `propext` and `Quot.sound` are approved; P1 remains blocked
-by `Classical.choice`. Execution stays on connected GitHub cloud Linux,
-and PR #109 stays draft/open/unmerged on its original base.
+The reviewed conditional 78/100 estimate requires the complete same-SHA
+qualification and has not been awarded. The score is an engineering
+estimate, not measured language coverage. Only `propext` and `Quot.sound`
+are approved; P1 remains blocked by `Classical.choice`. Execution stays on
+connected GitHub cloud Linux, and PR #109 stays draft/open/unmerged on its
+original base.
 
 ## Current checkpoint — active foundation replay preserved, next matrix pending
 

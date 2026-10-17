@@ -187,6 +187,63 @@ def psElabWellFoundedDefaultGoals (state : PsProofState) :
     current := { solved with goals := current.goals }
   psProofNormalize current
 
+-- Render only a failed direct-exact goal. Keep the original term as well as
+-- its weak-head application spine; normalize the two endpoints separately.
+def psElabWellFoundedGoalSketch (context : PsElabContext) (type : PsExpr) : String :=
+  let type := psMetaInstantiate context.metaContext type
+  let norm := psWhnf context.environment context.metaContext context.localContext
+  let sketch := psElabWellFoundedExprSketch 7
+  let view := psExprAppView (norm type)
+  let arguments := (view.args.take 8).map sketch
+  let endpoints := match view.args.drop (view.args.length - 2) with
+    | [left, right] =>
+      "; endpoint[0]-whnf=" ++ sketch (norm left) ++
+        "; endpoint[1]-whnf=" ++ sketch (norm right)
+    | _ => "; endpoints=<fewer than two arguments>"
+  "raw=" ++ sketch type ++ "; whnf-head=" ++ sketch view.head ++
+    "; whnf-args=[" ++ String.intercalate ", " arguments ++
+    (if view.args.length > 8 then ", ..." else "") ++ "]" ++ endpoints
+
+-- This probe runs only after the original tactic run failed. Its independent
+-- elaborations cannot update that run, solve its goals, or replace its error.
+def psElabWellFoundedExactFailureDetails (elaborate : PsElaborator)
+    (scope : PsSyntaxProofScope) (state : PsProofState)
+    (source : PsSyntaxTerm) (span : PsSourceSpan) : Except PsElabError String := do
+  let state ← psProofNormalize state
+  let (goal, context, target) ← psProofMain state
+  let source ← psProofSource scope context source
+  let localText := (context.localContext.declarations.take 64).map fun (entry : PsLocalDecl) =>
+    let instantiate := psMetaInstantiate context.metaContext
+    let value := match entry with
+      | .binding .. => ""
+      | .letDecl _ _ _ value => " := " ++ psElabWellFoundedExprSketch 7 (instantiate value)
+    "f#" ++ psNatToString (psLocalDeclId entry) ++ " " ++
+      psNameToString (psLocalDeclUserName entry) ++ " : " ++
+      psElabWellFoundedExprSketch 7 (instantiate (psLocalDeclType entry)) ++ value
+  let guided := match psProofWithTermSynthesis elaborate context
+      (fun current => elaborate current source (some target)) with
+    | .error _ => "proof elaboration or pending synthesis"
+    | .ok value =>
+      if psExprHasTermMeta (psMetaInstantiate value.context.metaContext value.term) then
+        "exact hole check"
+      else
+        match psProofAssign (psProofUpdate state value.context) goal.id value.term with
+        | .error _ => "goal assignment recheck"
+        | .ok _ => "failure not reproduced through goal assignment"
+  let independent := match psProofWithTermSynthesis elaborate context
+      (fun current => elaborate current source none) with
+    | .error _ => "elaboration failed; no type available"
+    | .ok value => psElabWellFoundedGoalSketch value.context value.type
+  return "well-founded direct-exact failure; goal=?m" ++ psNatToString goal.id ++
+    "; call-span-bytes=" ++ psNatToString span.start.byteOffset ++ ".." ++
+      psNatToString span.stop.byteOffset ++
+    "; target={" ++ psElabWellFoundedGoalSketch context target ++ "}" ++
+    "; target-guided replay stage=" ++ guided ++
+    "; separate proof replay WITHOUT target (not the original actual type)={" ++ independent ++ "}" ++
+    "; saved locals newest-first (first 64 of " ++
+      psNatToString context.localContext.declarations.length ++ ")=[" ++
+      String.intercalate " | " localText ++ "]"
+
 def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
     (context : PsElabContext) (decreasing : Option PsSyntaxTerm) :
     Except PsElabError PsElabContext := do
@@ -201,7 +258,16 @@ def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
     goals }
   let solved ← match decreasing with
     | none => psElabWellFoundedDefaultGoals state
-    | some (.byE tactics scope _) => psProofRun elaborate scope 4096 state tactics
+    | some (.byE tactics scope _) =>
+      match psProofRun elaborate scope 4096 state tactics with
+      | .ok solved => pure solved
+      | .error error =>
+        match tactics, calls with
+        | [.exactE source false _], [(_, span)] =>
+          match psElabWellFoundedExactFailureDetails elaborate scope state source span with
+          | .ok details => throw (.atContext details error)
+          | .error _ => throw error
+        | _, _ => throw error
     | some _ =>
       throw (.data "PSCV0-WF-PROOF: decreasing_by requires the selected by { tactic sequence } body")
   let solved ← psProofNormalize solved

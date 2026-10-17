@@ -13,31 +13,63 @@ structure PsElabRecursorArguments where
   arguments : List PsExpr
   cursor : PsExpr
 
+-- Diagnostic consumers receive only the actual failed check's inputs. The
+-- default callback is identity, and no diagnostic runs on a successful path.
+structure PsElabRecursorArgumentFailure where
+  stage : String
+  context : PsElabContext
+  expected : Option PsExpr := none
+  term : Option PsExpr := none
+  actual : Option PsExpr := none
+
+abbrev PsElabRecursorArgumentDiagnostic :=
+  PsElabRecursorArgumentFailure → PsElabError → PsElabError
+
 -- Callers may retain the source owner of a generated argument on failure.
 -- The default leaves the original error and all checked argument work intact.
 def psElabRecursorArguments {α : Type} (items : List α)
     (make : PsElabContext → α → PsExpr → Except PsElabError PsElabRecursorArgument)
     (context : PsElabContext) (cursor : PsExpr)
-    (decorate : α → PsElabError → PsElabError := fun _ error => error) :
+    (decorate : α → PsElabError → PsElabError := fun _ error => error)
+    (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
     Except PsElabError PsElabRecursorArguments := do
   match items with
   | [] => return { context, arguments := [], cursor }
   | item :: rest =>
     let pi ← (psInferEnsureForall context.environment context.metaContext
-      context.localContext cursor).mapError (fun error => decorate item (.infer error))
-    let argument ← (make context item pi.domain).mapError (decorate item)
+      context.localContext cursor).mapError fun error =>
+        decorate item (diagnose {
+          stage := "argument cursor"
+          context := context
+          expected := some cursor } (.infer error))
+    let argument ← (make context item pi.domain).mapError fun error =>
+      decorate item (diagnose {
+        stage := "argument construction"
+        context := context
+        expected := some pi.domain } error)
     let actual ← (psInferType argument.context.environment argument.context.metaContext
-      argument.context.localContext argument.term).mapError (fun error => decorate item (.infer error))
+      argument.context.localContext argument.term).mapError fun error =>
+        decorate item (diagnose {
+          stage := "closed argument inference"
+          context := argument.context
+          expected := some pi.domain
+          term := some argument.term } (.infer error))
     let unified := psUnify argument.context.environment argument.context.localContext
       argument.context.metaContext pi.domain actual
     -- These are complete Core recursor arguments. Preserve the application
     -- error that final Core inference reports, including forbidden Prop
     -- elimination, while rejecting the incompatible domain at this cursor.
-    if !unified.success then throw (decorate item (.infer .applicationTypeMismatch))
+    if !unified.success then
+      throw (decorate item (diagnose {
+        stage := "argument type unification"
+        context := argument.context
+        expected := some pi.domain
+        term := some argument.term
+        actual := some actual } (.infer .applicationTypeMismatch)))
     let context := psElabContextWithMeta argument.context unified.context
     let term := psMetaInstantiate context.metaContext argument.term
     let tail ← psElabRecursorArguments rest make context
-      (psExprInstantiate1 pi.body term) decorate
+      (psExprInstantiate1 pi.body term) decorate diagnose
     return {
       context := tail.context
       arguments := term :: tail.arguments

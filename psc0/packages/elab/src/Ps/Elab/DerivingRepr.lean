@@ -248,7 +248,8 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
   else throw (.data "Repr deriving has no selected container policy")
 
 def psElabDeriveReprInductive (plan : PsElabDeriveContext)
-    (constructors : List PsElabDeriveReprSlotConstructor) (atomic : List Bool) :
+    (constructors : List PsElabDeriveReprSlotConstructor) (atomic : List Bool)
+    (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
     Except PsElabError PsExpr :=
   psElabDeriveEliminateSlots plan plan.context true
     (fun _ slot _ _ => psElabDeriveReprSlotResult slot)
@@ -260,9 +261,12 @@ def psElabDeriveReprInductive (plan : PsElabDeriveContext)
         psElabDeriveReprPublicBranch plan atomic context entry constructor fields hypotheses
       else
         psElabDeriveReprContainerBranch plan atomic context slotIndex slot entry constructor fields hypotheses)
+    diagnose
 
 def psElabDeriveRepr (environment : PsEnvironment)
-    (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
+    (origin : PsElabBatchOrigin)
+    (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
+    Except PsElabError PsDeclaration := do
   let plan ← psElabDerivePrepare environment origin { groups := true, indices := true, nested := true }
   let plan := psElabDeriveRequirements plan (psRootName "Repr")
   let type ← psElabDeriveClassType plan.context (psRootName "Repr") plan.family
@@ -276,7 +280,7 @@ def psElabDeriveRepr (environment : PsEnvironment)
       let constructors ← plan.elimination.slots.zipIdx.mapM fun (slot, index) =>
         slot.constructors.mapM (psElabDeriveReprPlanSlot plan index slot)
       let atomic ← plan.elimination.slots.mapM (psElabDeriveReprAtomicList plan)
-      psElabDeriveReprInductive plan constructors.flatten atomic
+      psElabDeriveReprInductive plan constructors.flatten atomic diagnose
   let value := psExprApplyMany (.constE (psDecisionName "Repr.mk") levels) [plan.family, method]
   psElabDeriveFinish plan "instRepr" type value
 

@@ -275,6 +275,133 @@ private def marker : PsDeclaration :=
     (psLogicLam 0 "A" (.sortE (.succ level))
       (psLogicLam 1 "a" parameter value .implicit) .implicit)
 
+-- This bounded renderer and inference walk run only while replaying an already
+-- failed derivation. Every type and local scope comes from the ordinary Core
+-- owners; the trace never supplies a replacement term or an acceptance result.
+private def traceLevel : Nat → PsLevel → String
+  | 0, _ => "..."
+  | _ + 1, .zero => "0"
+  | fuel + 1, .succ level => "(" ++ traceLevel fuel level ++ "+1)"
+  | fuel + 1, .max left right =>
+      "max(" ++ traceLevel fuel left ++ "," ++ traceLevel fuel right ++ ")"
+  | fuel + 1, .imax left right =>
+      "imax(" ++ traceLevel fuel left ++ "," ++ traceLevel fuel right ++ ")"
+  | _ + 1, .param name => psNameToString name
+  | _ + 1, .mvar id => "?u" ++ toString id
+
+private def traceExpr : Nat → PsExpr → String
+  | 0, _ => "..."
+  | _ + 1, .bvar index => "#" ++ toString index
+  | _ + 1, .fvar id => "$" ++ toString id
+  | _ + 1, .mvar id => "?" ++ toString id
+  | fuel + 1, .sortE level => "Sort(" ++ traceLevel fuel level ++ ")"
+  | fuel + 1, .constE name levels =>
+      psNameToString name ++ ".{" ++
+        String.intercalate "," (levels.map (traceLevel fuel)) ++ "}"
+  | fuel + 1, .app fn argument =>
+      "(" ++ traceExpr fuel fn ++ " " ++ traceExpr fuel argument ++ ")"
+  | fuel + 1, .lam name type body _ =>
+      "(fun " ++ psNameToString name ++ ":" ++ traceExpr fuel type ++
+        " => " ++ traceExpr fuel body ++ ")"
+  | fuel + 1, .forallE name type body _ =>
+      "(forall " ++ psNameToString name ++ ":" ++ traceExpr fuel type ++
+        ", " ++ traceExpr fuel body ++ ")"
+  | fuel + 1, .letE name type value body =>
+      "(let " ++ psNameToString name ++ ":" ++ traceExpr fuel type ++
+        " := " ++ traceExpr fuel value ++ "; " ++ traceExpr fuel body ++ ")"
+  | _ + 1, .lit (.natural value) => toString value
+  | _ + 1, .lit (.string value) => "'" ++ value ++ "'"
+  | fuel + 1, .proj name index value =>
+      "(" ++ psNameToString name ++ "." ++ toString index ++ " " ++
+        traceExpr fuel value ++ ")"
+
+private def traceLocals (context : PsElabContext) : String :=
+  "\n  locals (next " ++ toString context.localContext.nextId ++ "): " ++
+    String.intercalate "\n    " (context.localContext.declarations.reverse.map fun declaration =>
+      "$" ++ toString (psLocalDeclId declaration) ++ " " ++
+        psNameToString (psLocalDeclUserName declaration) ++ " : " ++
+        traceExpr 24 (psLocalDeclType declaration))
+
+private def traceType (context : PsElabContext) (term : PsExpr) : String :=
+  match psInferType context.environment context.metaContext context.localContext term with
+  | .error error => psCompilerPscv0ElabError (.infer error)
+  | .ok type => traceExpr 24 type ++ "\n    whnf " ++ traceExpr 24
+      (psWhnf context.environment context.metaContext context.localContext type)
+
+private def traceApplication (context : PsElabContext) (fn argument : PsExpr) : String :=
+  let expected : Except PsInferError PsExpr := do
+    let type ← psInferType context.environment context.metaContext context.localContext fn
+    let pi ← psInferEnsureForall context.environment context.metaContext context.localContext type
+    pure pi.domain
+  let expected := match expected with
+    | .ok type => traceExpr 24 type ++ "\n    whnf " ++ traceExpr 24
+        (psWhnf context.environment context.metaContext context.localContext type)
+    | .error error => psCompilerPscv0ElabError (.infer error)
+  "\n  first failing application:" ++
+    "\n    function " ++ traceExpr 32 fn ++
+    "\n    function type " ++ traceType context fn ++
+    "\n    argument " ++ traceExpr 32 argument ++
+    "\n    expected argument type " ++ expected ++
+    "\n    actual argument type " ++ traceType context argument ++ traceLocals context
+
+private def traceFirstFailure (fuel : Nat) (context : PsElabContext)
+    (term : PsExpr) : Option String := do
+  match fuel with
+  | 0 => return "\n  diagnostic traversal reached its depth bound"
+  | fuel + 1 =>
+    match psInferType context.environment context.metaContext context.localContext term with
+    | .ok _ => none
+    | .error error =>
+      let fallback := "\n  failing term " ++ traceExpr 32 term ++ "\n    " ++
+        psCompilerPscv0ElabError (.infer error) ++ traceLocals context
+      match term with
+      | .app fn argument =>
+        if let some failure := traceFirstFailure fuel context fn then return failure
+        if let some failure := traceFirstFailure fuel context argument then return failure
+        return traceApplication context fn argument
+      | .lam name type body binder | .forallE name type body binder =>
+        if let some failure := traceFirstFailure fuel context type then return failure
+        let .ok typeType := psInferType context.environment context.metaContext
+            context.localContext type | return fallback
+        let .ok _ := psInferEnsureSort context.environment context.metaContext
+            context.localContext typeType | return fallback
+        let pushed := psLocalPushBinding context.localContext name type binder
+        let inner := psElabContextWithLocal context pushed.context
+        return (traceFirstFailure fuel inner (psExprInstantiate1 body (.fvar pushed.id))).getD fallback
+      | .letE name type value body =>
+        if let some failure := traceFirstFailure fuel context type then return failure
+        if let some failure := traceFirstFailure fuel context value then return failure
+        let .ok typeType := psInferType context.environment context.metaContext
+            context.localContext type | return fallback
+        let .ok _ := psInferEnsureSort context.environment context.metaContext
+            context.localContext typeType | return fallback
+        let .ok valueType := psInferType context.environment context.metaContext
+            context.localContext value | return fallback
+        if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+            context.localContext type valueType then return fallback
+        let pushed := psLocalPushLet context.localContext name type value
+        let inner := psElabContextWithLocal context pushed.context
+        return (traceFirstFailure fuel inner (psExprInstantiate1 body (.fvar pushed.id))).getD fallback
+      | .proj _ _ value =>
+        return (traceFirstFailure fuel context value).getD fallback
+      | _ => return fallback
+
+private def traceRecursorFailure (failure : PsElabRecursorArgumentFailure)
+    (error : PsElabError) : PsElabError :=
+  let context := failure.context
+  let showTerm := fun (label : String) (term : Option PsExpr) =>
+    match term with
+    | none => ""
+    | some term => "\n  " ++ label ++ " " ++ traceExpr 32 term ++
+        "\n    whnf " ++ traceExpr 24
+          (psWhnf context.environment context.metaContext context.localContext term)
+  let application := match failure.term with
+    | none => ""
+    | some term => (traceFirstFailure 128 context term).getD ""
+  .data (psCompilerPscv0ElabError error ++ "\nrecursor check stage: " ++ failure.stage ++
+    showTerm "expected" failure.expected ++ showTerm "term" failure.term ++
+    showTerm "actual type" failure.actual ++ application ++ traceLocals context)
+
 -- Replay only a failing group through its same public member handler to retain
 -- the precise generated declaration identity. Successful derivation is unchanged.
 private def deriveFailure (environment : PsEnvironment) (origin : PsElabBatchOrigin)
@@ -288,11 +415,17 @@ private def deriveFailure (environment : PsEnvironment) (origin : PsElabBatchOri
       match entry.role with
       | .inductiveType | .structureType => psNameEq entry.name member.name
       | _ => true
-    match psElabDeriveHandler environment { origin with members := selected } handler with
+    let replay := if handler.segments == ["Repr"] then
+        (psElabDeriveRepr environment { origin with members := selected }
+          traceRecursorFailure).map (fun _ => ())
+      else
+        (psElabDeriveHandler environment { origin with members := selected } handler).map
+          (fun _ => ())
+    match replay with
     | .ok _ => pure ()
-    | .error _ =>
+    | .error error =>
       return "derive " ++ psNameToString member.name ++ "." ++
-        String.intercalate "." handler.segments ++ ": " ++ psCompilerPscv0ElabError original
+        String.intercalate "." handler.segments ++ ": " ++ psCompilerPscv0ElabError error
   return "derive group " ++ String.intercalate "." handler.segments ++ ": " ++
     psCompilerPscv0ElabError original
 

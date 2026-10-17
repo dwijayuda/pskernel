@@ -1,4 +1,4 @@
-## M3+B current roadmap checkpoint — right-case induction scope and generated-argument diagnostics
+## M3+B current roadmap checkpoint — precise nested recursor failure trace
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
@@ -13,6 +13,61 @@ M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
 55–75% engineering uncertainty). All six weights remain data 30, source 15,
 total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
 are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Complete nested recursor failure evidence
+
+Compiler/test `77d8578984e7a640c3c1d922cd90e9341466027e` passed
+native [38986515634](https://github.com/dwijayuda/pskernel/actions/runs/38986515634)
+(job 117259146722, all 34 reported steps), F1
+[38986515562](https://github.com/dwijayuda/pskernel/actions/runs/38986515562),
+F2 [38986515545](https://github.com/dwijayuda/pskernel/actions/runs/38986515545)
+and F3/F4 [38986515520](https://github.com/dwijayuda/pskernel/actions/runs/38986515520).
+Native artifact 12082764468 contains 6,796,399 bytes, SHA-256
+`c0c2e3840f5f25ebea93c70600339324b6c3f4032ae02352b6f86250bbe55c6e`.
+The complete original native workloads, repeated components and measurements
+remain passing.
+
+Focused [38986515599](https://github.com/dwijayuda/pskernel/actions/runs/38986515599)
+(job 117259146484) now passes GroupProof with its original two two-member
+worker groups and three-capture invariant. Where also remains passing.
+The sole remaining source fixture failure is
+`derive M3NestedDisplay.Repr: PSCV0-ELABORATION: application argument type mismatch (in Prod.mk) (in M3NestedDisplay.rec_4)`.
+Target execution was skipped, so this is still not five-gate acceptance.
+
+The reported rec_4 is the outer `Prod Display (Prod Branch Display)`
+specialization. Both fields use actual checked IHs: the left returns
+`Nat -> Format`, and the right is the inner tuple accumulator
+`List Format -> List Format`. This minor does not use a separately
+synthesized tuple dictionary. Static inspection has not established a
+semantic correction. The actual failed check must determine the repair.
+
+An optional identity-default diagnostic callback now carries the existing
+failed check's stage, actual context, expected type, generated term and
+already inferred type when available. It distinguishes cursor opening,
+argument construction, specialized constructor-value inference, closed
+argument inference and argument-type unification. The normal public handler
+retains identity behavior. Only the existing fixture's replay of an already
+failed Repr member installs the diagnostic callback. Its bounded renderer
+and first-failing-application walk delegate to the existing Core inference,
+sort/forall, local-scope and definitional-equality owners. They print actual
+function/argument/expected/actual types and local IDs, and never manufacture
+a term, change the acceptance result or run on a successful derivation.
+
+This checkpoint changes three elaborator modules and that failure replay,
+plus both handoffs, architecture and roadmap. The successful generated
+terms, check order, native oracles, source requests, outputs, exports,
+budgets, pins and all logical/runtime policies are unchanged. Continue from
+the next cloud failure payload, repair its actual owner, then qualify all
+five gates at one compiler/test SHA before accepting the accumulated slice.
+
+The reviewed WF foundation/relation/empty-dictionary and omitted-result
+candidates remain staged. The indexed-dependent-case fixture has been
+corrected against the actual prepared representation: two mutual worker
+groups plus a separately typed singleton Vec helper, with all previous
+positive source/equation/output evidence preserved. Dependent unary packet
+construction and exact curried-adapter cancellation now have a frozen draft
+and independent native fixture pending review; indexed constructor-directed
+Inhabited is being implemented in isolation. None adds accepted percentage.
 
 ### Right-case induction scope and generated-argument diagnostics
 

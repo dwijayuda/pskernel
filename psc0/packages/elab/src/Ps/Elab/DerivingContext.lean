@@ -297,7 +297,8 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
     (result : Nat → PsInductiveEliminationSlot → PsExpr → PsExpr → PsExpr)
     (branch : PsElabContext → Nat → PsInductiveEliminationSlot →
       PsInductiveEliminationConstructor → List PsElabTypedBinder →
-      List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr) :
+      List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr)
+    (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
     Except PsElabError PsExpr := do
   let some selected := plan.elimination.slots[selectedIndex]?
     | throw (.data "deriving selected slot is absent")
@@ -330,7 +331,7 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
         context := psElabLeaveScope current opened.context
         term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
     recursor.context recursor.cursor
-    (fun (slot, _) error => .atDeclaration slot.recursorName error)
+    (fun (slot, _) error => .atDeclaration slot.recursorName error) diagnose
   -- Apply these closed motives in branch scopes. Reinvoking a callback after
   -- opening fields could capture one of its synthetic local IDs, notably the
   -- right-hand argument in the existing DecidableEq singleton consumer.
@@ -366,7 +367,11 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
         | throw (.data "deriving constructor specialization is invalid")
       let value := psExprApplyMany head (fields.map (fun field => .fvar field.id))
       let valueType ← (psInferType opened.context.environment opened.context.metaContext
-        opened.context.localContext value).mapError PsElabError.infer
+        opened.context.localContext value).mapError fun error =>
+          diagnose {
+            stage := "specialized constructor value inference"
+            context := opened.context
+            term := some value } (.infer error)
       let expected ← motiveAt opened.context slotIndex valueType value
       if !psDefEqReadOnlyWithEnv opened.context.environment opened.context.metaContext
           opened.context.localContext opened.body expected then
@@ -378,7 +383,7 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
         term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
     motives.context motives.cursor
     (fun (_, slot, constructor) error =>
-      .atDeclaration slot.recursorName (.atDeclaration constructor.info.name error))
+      .atDeclaration slot.recursorName (.atDeclaration constructor.info.name error)) diagnose
   let term := psLogicLam major.id "value" family
     (psExprApplyMany (.constE selected.recursorName recursor.levels)
       (parameters ++ motives.arguments ++ minors.arguments ++
@@ -397,11 +402,12 @@ def psElabDeriveEliminateSlots (plan : PsElabDeriveContext)
     (result : Nat → PsInductiveEliminationSlot → PsExpr → PsExpr → PsExpr)
     (branch : PsElabContext → Nat → PsInductiveEliminationSlot →
       PsInductiveEliminationConstructor → List PsElabTypedBinder →
-      List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr) :
+      List PsElabDeriveHypothesis → PsExpr → Except PsElabError PsExpr)
+    (diagnose : PsElabRecursorArgumentDiagnostic := fun _ error => error) :
     Except PsElabError PsExpr := do
   let some (selectedIndex, _) := psInductiveEliminationSlotFor plan.elimination
       (psNameAppendStr plan.info.name "rec") | throw (.data "deriving selected slot is absent")
-  psElabDeriveEliminateSlotAt plan context selectedIndex plan.family allowDirectRecursion result branch
+  psElabDeriveEliminateSlotAt plan context selectedIndex plan.family allowDirectRecursion result branch diagnose
 
 -- Direct deriving consumers keep their existing callback and refusal contract.
 -- The implementation is the same complete slot owner used by nested Hashable.

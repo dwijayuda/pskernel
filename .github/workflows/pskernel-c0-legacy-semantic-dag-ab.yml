@@ -1,0 +1,155 @@
+name: PSKernel-C0 source-certified legacy semantic DAG memo A/B
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-legacy-semantic-dag-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
+      - 'psc0/packages/pskernel-c0/test/C0LegacySemanticDAGRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0DefEqPairGuardRegression.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SemanticCacheEligibilityRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-vs-deep-equality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    strategy:
+      fail-fast: false
+      matrix:
+        depth: [24, 28, 30, 32]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Generate genuine upstream scaled shared-graph declaration under pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          curl -fLsS --retry 3 -o "$RUNNER_TEMP/SharedOriginal.lean" \
+            https://raw.githubusercontent.com/leanprover/lean-kernel-arena/5d7ca987618f1136aaa296057b50a2c10c4ce77a/tests/perf/shared-subterm.lean
+          TEST_DEPTH=${{ matrix.depth }} python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,os
+          d=Path(os.environ["RUNNER_TEMP"])
+          raw=(d/"SharedOriginal.lean").read_bytes()
+          assert raw.count(b"let n := 1000")==1
+          depth=int(os.environ["TEST_DEPTH"])
+          assert depth in (24,28,30,32)
+          updated=raw.replace(b"let n := 1000",f"let n := {depth}".encode())
+          (d/"ScaledSharedSubterm.lean").write_bytes(updated)
+          print(f"C0_SEMANTIC_DAG_AB_SOURCE depth={depth} original_sha256="+hashlib.sha256(raw).hexdigest()+" changed_sha256="+hashlib.sha256(updated).hexdigest()+" only_depth_literal=true")
+          PY
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            cp "$RUNNER_TEMP/ScaledSharedSubterm.lean" ScaledSharedSubterm.lean
+            lake env lean -o .lake/build/lib/lean/ScaledSharedSubterm.olean ScaledSharedSubterm.lean
+            lake env .lake/build/bin/lean4export ScaledSharedSubterm -- kernel_shared_subterm > "$RUNNER_TEMP/c0-dag-n32.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-dag-n32.ndjson" > "$RUNNER_TEMP/official.txt" 2>&1
+          )
+          grep -Fq 'Lean default kernel accepts the solution' "$RUNNER_TEMP/official.txt"
+          python3 - <<'PY'
+          import json,hashlib,os,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"c0-dag-n32.ndjson"
+          raw=p.read_bytes()
+          lines=raw.splitlines()
+          header=json.loads(lines[0])["meta"]
+          assert header["lean"]=={"version":"4.35.0","githash":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+          assert len(lines)>200 and "thm" in json.loads(lines[-1])
+          print(f"C0_SEMANTIC_DAG_AB_EXPORT official=accepted genuine_Lean_435=true records={len(lines)} sha256={hashlib.sha256(raw).hexdigest()}")
+          PY
+      - name: Baseline PR133 exact checker with original recursive legacy equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch -q --no-tags --depth=1 origin 78b350690c612f9f03cbdc309903a1a67a38ee65
+          test "$(git rev-parse FETCH_HEAD)" = 78b350690c612f9f03cbdc309903a1a67a38ee65
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/baseline-resources.txt" \
+              timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-dag-n32.ndjson" 4096
+          ) > "$RUNNER_TEMP/baseline-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_SEMANTIC_DAG_AB_RESULT variant=pr133_original_legacy exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/baseline-c0.txt"
+            echo "C0_SEMANTIC_DAG_AB_VERDICT variant=pr133_original_legacy verdict=accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_SEMANTIC_DAG_AB_VERDICT variant=pr133_original_legacy verdict=unqualified_timeout"
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/baseline-c0.txt"; then
+            echo "C0_SEMANTIC_DAG_AB_VERDICT variant=pr133_original_legacy verdict=unqualified_resource"
+          else
+            tail -n 25 "$RUNNER_TEMP/baseline-c0.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/baseline-resources.txt" || true
+      - name: Candidate compiler-only all-input certified paired legacy equality
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          grep -Fq '@[csimp] theorem psKernelExprEqLegacy_compiler_eq_certifiedMemo' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          (cd psc0/packages/pskernel-c0 && \
+            lake build c0OfficialReplay && \
+            lake env lean --run test/C0DeepPtrExprEqRegression.lean && \
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean && \
+            lake env lean --run test/C0DefEqPairGuardRegression.lean && \
+            lake env lean --run test/C0LegacySemanticDAGRegression.lean)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/candidate-resources.txt" \
+              timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-dag-n32.ndjson" 4096
+          ) > "$RUNNER_TEMP/candidate-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_SEMANTIC_DAG_AB_RESULT variant=source_certified_pair_memo exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/candidate-c0.txt"
+            echo "C0_SEMANTIC_DAG_AB_VERDICT variant=source_certified_pair_memo verdict=accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_SEMANTIC_DAG_AB_VERDICT variant=source_certified_pair_memo verdict=unqualified_timeout"
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/candidate-c0.txt"; then
+            echo "C0_SEMANTIC_DAG_AB_VERDICT variant=source_certified_pair_memo verdict=unqualified_resource"
+          else
+            tail -n 25 "$RUNNER_TEMP/candidate-c0.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/candidate-resources.txt" || true
+          echo "C0_SEMANTIC_DAG_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true original_binder_semantics_preserved=true all_input_Lean_source_proof=true only_ExprDecidableEq_file_changed=true fuel_4096=true no_acceptance_shortcut=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-legacy-semantic-dag-scaled-${{ matrix.depth }}
+          path: |
+            ${{ runner.temp }}/baseline-c0.txt
+            ${{ runner.temp }}/candidate-c0.txt
+            ${{ runner.temp }}/baseline-resources.txt
+            ${{ runner.temp }}/candidate-resources.txt
+            ${{ runner.temp }}/official.txt
+          if-no-files-found: warn
+          retention-days: 21

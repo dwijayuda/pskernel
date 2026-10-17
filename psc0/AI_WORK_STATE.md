@@ -1,4 +1,4 @@
-## Authoritative current checkpoint — M3+B independent two-argument WF candidate, 2026-10-17
+## Authoritative current checkpoint — M3+B independent WF proof diagnosis, 2026-10-17
 
 The next bounded M3+B slice extends the existing checked PSigma route to
 exactly two changing header arguments whose types may be independent.
@@ -14,6 +14,58 @@ checked equations and assumption closure, 68 scalar exports / 680 comparisons
 plus the separate 24-export / 240-comparison recursive suite, totaling 920.
 The earlier application-instance scheduling repair and canonical Rust harness
 path repair are retained without modification.
+
+### Failed first matrix and current faithful diagnostic
+
+The complete first matrix at
+`fa68104af911aedc7b80bc56906da24bd6a9def9` is **not accepted**:
+
+| Gate | Run / job | Completed result |
+| --- | --- | --- |
+| Native Linux | [39026724076](https://github.com/dwijayuda/pskernel/actions/runs/39026724076) / 117379051447 | SUCCESS; 34 steps; completed 11:12:46 UTC |
+| Focused M3 | [39026724062](https://github.com/dwijayuda/pskernel/actions/runs/39026724062) / 117379051332 | FAILURE in new portable independentRight decrease proof |
+| F1 | [39026724139](https://github.com/dwijayuda/pskernel/actions/runs/39026724139) / 117379051863 | SUCCESS; 10 steps |
+| F2 | [39026724118](https://github.com/dwijayuda/pskernel/actions/runs/39026724118) / 117379051676 | SUCCESS; 9 steps |
+| F3/F4/platform | [39026724073](https://github.com/dwijayuda/pskernel/actions/runs/39026724073) / 117379051731 | SUCCESS; 11 steps |
+
+The focused native build completed all 668 jobs. Both new native definitions
+have empty assumption closures; their three native public equations use only
+Quot.sound. The portable independentLeft definition and its equation
+elaborated before original command 30, m3wfindependentRight, failed with
+PSCV0-TYPE-MISMATCH at the well-founded decrease-goals phase.
+All thirteen other outer source fixtures ran. Runtime steps were skipped;
+there are no new runtime comparisons from this failed matrix.
+
+The completed focused log is 114,057 characters. Artifact 12098459717 is
+2,030,302 bytes, SHA-256
+`d916ca54ecc552435ab77050e927995b045445dba05c0d1999affabc3a10b5e5`.
+The completed native log is 4,477,827 characters. Artifact 12098513651 is
+6,797,413 bytes, SHA-256
+`0857f7b415a7373cb6199c685450f93a55ffbe538dec5c73859a01fec03d6aee`.
+The healthy native run completed before advancing the branch.
+
+Independent static reviews found no demonstrated match/refinement or proof
+ordering defect. Do not reorder the three original proofs or rewrite the
+function to evade this case. The current owner adds only a failure-context
+diagnostic: WF blob `5033f4a5647c4fc23174c058e5a0288fb5a272e4`,
+50,092 bytes. Its exact two-stage transform was independently reviewed
+and reverses to the original candidate owner.
+
+The wrapper calls the existing elaborate callback once with its original
+context, syntax and expected target. It forwards success unchanged and
+retains the original error. Only on error does it sketch proof syntax/span,
+instantiated/weak-head target and captured locals. Any proof-run error also
+includes initial saved goals in source order with each goal's own local
+context. These observations show callback inputs, not an internally evolved
+argument-failure context; they perform no proof replay, synthesis or drain.
+Source/native definitions, three proof inputs, fixture blob cf91f5d5 and
+workflow blob 0e5c8c5c are unchanged. All five gates must run again at the
+next final compiler/test SHA; diagnostic evidence is not acceptance.
+
+The actual construction source is 7,239 UTF-8 bytes. Its three proof calls
+have byte spans 6588..6626, 6638..6681 and 6693..6735, respectively.
+The main runtime source is a different concatenation, with those positions
+652 bytes later. Use the actual construction map to read its failure trace.
 
 ### Bounded implementation
 
@@ -82,9 +134,9 @@ handoffs, architecture, roadmap, migration matrix and the original draft PR.
 Broader indexed binary deriving, arbitrary positive containers and
 function-valued nested fields, source induction/nested elimination,
 own-binder dependent omitted main codomains, broader unused-hint diagnostics,
-more than two changing arguments, arbitrary WF telescopes, variable measure
-codomains, general mutual WF and the complete P0 combination matrix remain
-open. Own-binder result inference and the generic P0 runtime matrix have
+packing more than two changing arguments, arbitrary WF telescopes, general
+mutual WF and the complete P0 combination matrix remain open. Variable
+measure codomains remain refused consistently with pinned Lean. Own-binder result inference and the generic P0 runtime matrix have
 concrete follow-up proposals but are deliberately outside this WF batch.
 
 Only propext and Quot.sound are approved assumptions. P1 remains blocked

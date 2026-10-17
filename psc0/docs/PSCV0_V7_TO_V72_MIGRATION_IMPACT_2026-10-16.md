@@ -46,6 +46,21 @@ adoption-era matrix below are historical snapshots. This checkpoint and
 the current handoffs/roadmap supersede their old pending/blanket-rejection
 statements; their specification comparison remains retained as provenance.
 
+### First independent-WF matrix and failure diagnosis
+
+Candidate `fa68104af911aedc7b80bc56906da24bd6a9def9` remains unqualified:
+native/F1/F2/F3 completed successfully, while focused run 39026724062 failed
+in the portable independentRight decrease proof after native oracles and
+portable independentLeft/equation passed. Runtime steps were skipped.
+Native run 39026724076 completed all 34 steps before the next branch update.
+
+The current diagnostic wraps the original proof elaborator without changing
+its inputs or successful result and adds actual expected types, source spans
+and captured goal locals only after failure. It does not replay a proof or
+change the source definition/proofs. The accepted baseline remains 78/100
+and 920 comparisons; 940 is still planned. Larger packed telescopes remain
+unqualified. Variable measure codomains retain pinned-Lean refusal semantics.
+
 ## Rule-to-change and implementation matrix
 
 Status baseline below: source inspected at `867d76f992293977ab54e3c7fcb4c87a088e2462`; qualified runtime compiler `133af061d6aaff0eb6ed990abd341ca2a44d15e9`. **Specified** means normative design. **Pending** is not a successful source or artifact admission. Each implementation slice must add its exact tested/qualified commit and phase evidence.

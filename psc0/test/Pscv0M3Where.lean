@@ -669,10 +669,10 @@ private def unusedHintSource : String :=
   "theorem uhShadowEq: Eq(uhShadow(8), 8) := by { rfl }\n" ++
   "theorem uhShadowHelperEq: Eq(uhShadow.shadow(8), 8) := by { rfl }\n" ++
   "theorem uhMainEq: Eq(uhMain(9), 9) := by { rfl }\n" ++
-  "theorem uhDictPlainEq: Eq(hintDictPlain(3, tag := 7, d := Inhabited.mk(41)), 44) := by { rfl }\n" ++
-  "theorem uhDictIgnoredEq: Eq(hintDictIgnored(3, tag := 7, d := Inhabited.mk(41)), 44) := by { rfl }\n" ++
-  "theorem uhDictPlainOtherEq: Eq(hintDictPlain(3, tag := 7, d := Inhabited.mk(7)), 10) := by { rfl }\n" ++
-  "theorem uhDictIgnoredOtherEq: Eq(hintDictIgnored(3, tag := 7, d := Inhabited.mk(7)), 10) := by { rfl }\n" ++
+  "theorem uhDictPlainEq: Eq(hintDictPlain(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
+  "theorem uhDictIgnoredEq: Eq(hintDictIgnored(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
+  "theorem uhDictPlainOtherEq: Eq(hintDictPlain(tag := 7, d := Inhabited.mk(7), n := 3), 10) := by { rfl }\n" ++
+  "theorem uhDictIgnoredOtherEq: Eq(hintDictIgnored(tag := 7, d := Inhabited.mk(7), n := 3), 10) := by { rfl }\n" ++
   "theorem uhTypePlainEq: Eq(uhTypePlain(3), 0) := by { rfl }\n" ++
   "theorem uhTypeHintedEq: Eq(uhTypeHinted(3), 0) := by { rfl }\n"
 
@@ -859,24 +859,25 @@ private def checkUnusedHints : IO Unit := do
          modules := [{ name := "HintProvider", sourceName := "hint-provider.ps", source := unusedHintSource }] } :
         PsV7Native.Request)] ++
     (unusedHintRefusals.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray
-  let batch ← match ← PsV7Native.runBatch requests with
+  let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
   ensure (batch.results.size == 6) "unused-hint source-only batch lost a positive or refusal"
-  for (index, entrySource, warningSource) in [
-      (0, "m3-unused-hints.ps", "m3-unused-hints.ps"), (1, "hint-entry.ps", "hint-provider.ps")] do
-    match batch.results[index]? with
-    | some (.ok result) =>
+  let positiveSources : List (Nat × String × String) := [
+    (0, "m3-unused-hints.ps", "m3-unused-hints.ps"), (1, "hint-entry.ps", "hint-provider.ps")]
+  for (index, entrySource, warningSource) in positiveSources do
+    match (batch.results[index]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+    | some (Except.ok result) =>
       ensure (result.declarationCount > 0 && result.artifacts.isEmpty &&
         PsV7Native.assuranceLabel result.assurance == "ordinary-checked")
         "unused-hint source-only qualification lost checked declarations or requested an executable result"
       checkHintDiagnostics warningSource expected result.diagnostics
       checkHintResultJson entrySource result
-    | some (.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
+    | some (Except.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
     | none => throw (IO.userError "missing unused-hint source-only result")
   for ((label, _, rule), index) in unusedHintRefusals.zipIdx do
-    match batch.results[index + 2]? with
-    | some (.error error) =>
+    match (batch.results[index + 2]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+    | some (Except.error error) =>
       ensure (error.phase == "elaborate" && (error.message.splitOn rule).length > 1)
         (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
     | _ => throw (IO.userError ("unexpected unused-hint acceptance: " ++ label))

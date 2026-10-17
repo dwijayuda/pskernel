@@ -20,6 +20,29 @@ oracle, workflow or budget changes. F1/F2/F3 passed at the first candidate.
 The healthy Native run was allowed to complete before this repair was pushed. The repaired revision still requires a fresh five-gate
 matrix at one exact SHA; prior per-gate results cannot be mixed into it.
 
+### Second host-test failure and explicit-type/call repair
+
+The next candidate `81413f4052ccb0ca89c605d7aec6a99fa35ec3eb` failed focused
+[run 39048426579](https://github.com/dwijayuda/pskernel/actions/runs/39048426579),
+job `117441769021`, during host elaboration at line 869. The expected type of
+the new lookup's .ok pattern remained unresolved. Its complete
+104,783-character log contains those two follow-on pattern errors; the new
+source fixtures and runtime comparisons were not executed, and no artifact
+was produced. Reaching the final numbered Lake job was not a successful build.
+
+This revision explicitly types Batch, the Nat positive-index list and
+Option (Except Diagnostic Result) lookups, with qualified Except patterns.
+A further source review caught four mixed named/positional dictionary calls:
+captured tag is explicit, so the existing application owner correctly treats
+the positional argument and named tag as a duplicate. All four observations
+now use named tag, d and n arguments. Their bodies, actual dictionaries and
+44/10 expected values are unchanged; no acceptance assertion is weakened.
+No compiler logic, workflow or resource budget changes in this repair.
+
+F1/F2/F3 passed at 814; healthy Native was allowed to complete before another
+compiler/test push. These are candidate gate results only. The containing
+repair still needs all five gates at its own exact SHA.
+
 ### Candidate behavior and ownership
 
 The recorded nonrecursive Where unknown-measure refusal is being corrected

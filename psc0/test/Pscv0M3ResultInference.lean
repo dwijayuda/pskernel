@@ -127,8 +127,10 @@ private def checkRepresentation : IO Unit := do
     ensure ((explicitText.splitOn " : _").length > 1)
       "the printer discarded an explicit result annotation"
     let replay ← fromExcept (psPscv0ParseSource proofScript (printed ++ "\n"))
-    match replay.declarations.map (·.declaration) with
-    | [.definition _ _ (.omittedType _) _ _] => pure ()
+    let replayDeclarations : List PsSyntaxDeclaration :=
+      replay.declarations.map PsPscv0SurfaceDeclaration.declaration
+    match replayDeclarations with
+    | [PsSyntaxDeclaration.definition _ _ (.omittedType _) _ _] => pure ()
     | _ => throw (IO.userError "source printing changed omitted-result ownership")
   let surface ← fromExcept (psPscv0ParseSource true "const surfaceValue := 11\n")
   for proofScript in [false, true] do
@@ -187,14 +189,14 @@ def check : IO Unit := do
   checkCore
   let requests := #[({ source, sourceName := "m3-result-inference.ps" } : PsV7Native.Request)] ++
     (refusals.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray
-  let batch ← match ← PsV7Native.runBatch requests with
+  let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
-  match batch.results[0]? with
-  | some (.ok result) =>
+  match (batch.results[0]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+  | some (Except.ok result) =>
     ensure (result.declarationCount > 0 && result.artifacts.isEmpty)
       "source-only inference qualification returned an empty or executable result"
-  | some (.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  | some (Except.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
   | none => throw (IO.userError "missing inference qualification result")
   for ((label, _, rule), index) in refusals.zipIdx do
     match batch.results[index + 1]? with

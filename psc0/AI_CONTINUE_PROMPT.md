@@ -1,3 +1,24 @@
+## Current build correction — foundation roots and fixture typing
+
+The predecessor `4f31ce951d4d599b52a08fc4b607fb63fb8e5298` failed all five
+cloud gates during compilation. [Native run 38993252190](https://github.com/dwijayuda/pskernel/actions/runs/38993252190)
+reported that `Ps.Environment.StandardWellFounded` had no built object.
+[Focused run 38993252168](https://github.com/dwijayuda/pskernel/actions/runs/38993252168)
+also reported two underconstrained patterns in the new result-inference fixture.
+
+This follow-up registers both prepared Environment modules in the parent Lake
+library's explicit roots and gives the fixture's parsed declaration projection
+and batch result patterns their concrete existing types. The production
+optional-result modules compiled at the predecessor. These repairs change no
+source request, assertion, oracle, runtime export or admission policy.
+The proposed Standard remains inactive and its identity observations have not
+yet run. A fresh complete same-SHA matrix is required.
+
+The accepted compiler/test SHA remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, score **74/100**.
+The prior checkpoint below retains its accepted receipt and candidate design;
+its earlier pending build observation is superseded by this correction.
+
 ## M3+B current checkpoint — source/deriving accepted; foundation audit and main inference pending
 
 Latest fully accepted compiler/test:

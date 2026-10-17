@@ -168,6 +168,28 @@ def main : IO Unit := do
       throw (IO.userError "Nat binary namespace specialization changed result")
   IO.println "C0_LEAN435 nat_binary_single_namespace_source_equivalence=pass"
 
+  -- The paired name comparator is a pure structural specialization of
+  -- historical name equality, including numerical and Unicode segments.
+  -- Include same-name distinct-value construction, mismatched leaf kinds,
+  -- nested namespaces and explicit outer shape collisions.
+  let unicodeName : PsKernelName :=
+    .str (.str .anonymous "α") "κernel"
+  let pairedNameFixtures : List PsKernelName := [
+    .anonymous, .num .anonymous 0, .num .anonymous 17,
+    .str .anonymous "Nat", .str .anonymous "Other",
+    .str psKernelNatName "add", .str psKernelNatName "addExtra",
+    .str (.str .anonymous "Other") "add",
+    .str (.num psKernelNatName 1) "add",
+    .num (.str .anonymous "Nat") 0,
+    unicodeName, .str (.str .anonymous "α") "κernel",
+    .str (.str .anonymous "α") "kernel"
+  ]
+  for lhs in pairedNameFixtures do
+    for rhs in pairedNameFixtures do
+      if psKernelC0PairedNameEq lhs rhs != psKernelNameEq lhs rhs then
+        throw (IO.userError "Source-exact paired name comparator mismatch")
+  IO.println "C0_LEAN435 source_exact_native_paired_names=pass"
+
   -- Cache policy is Boolean work selection, not theorem admission.
   -- The native candidate bypasses FVar traversal on checked applications,
   -- lambdas, Pi and literals, but equals the unchanged source Boolean.

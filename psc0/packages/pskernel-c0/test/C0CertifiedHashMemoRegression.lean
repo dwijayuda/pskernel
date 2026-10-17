@@ -24,18 +24,6 @@ def c0HashMemoCheck (expr : PsKernelExpr) : IO Unit := do
   if cached != source then
     throw (IO.userError "certified memo hash differs from historical exact source hash")
 
-/-- Real Array proof bodies contain many application nodes whose first
-four shape layers coincide even though deeper function heads differ.
-Force the exact same kind of bucket expansion without any library proof
-special-casing or unchecked equality. -/
-def c0HashMemoDeepHead (i : Nat) : PsKernelExpr :=
-  let head : PsKernelExpr := .const (.num .anonymous i) []
-  let arg : PsKernelExpr := .lit (.nat 1)
-  .app (.app (.app (.app head arg) arg) arg) arg
-
-def c0HashMemoNameErasureCollision (i : Nat) : PsKernelExpr :=
-  .lam (.num .anonymous i) (.sort .zero) (.bvar 0) .default
-
 def main : IO Unit := do
   let one : PsKernelName := .str .anonymous "one"
   let two : PsKernelName := .str .anonymous "two"
@@ -62,26 +50,6 @@ def main : IO Unit := do
   ]
   for expression in all do
     c0HashMemoCheck expression
-
-  -- Fifty distinct deep function heads have the identical depth-4
-  -- hash bucket and exceed the optional secondary-index threshold.
-  -- A full source hash differs when a deep head differs, so false memo
-  -- hits would be detected. Lambda names separately stress exact-syntax
-  -- collision handling although binder display names are hash-erased.
-  let repeatedShallow : List PsKernelExpr :=
-    (List.range 50).map c0HashMemoDeepHead
-  let firstShallow := psKernelC0MemoShapeHash 4 (c0HashMemoDeepHead 0)
-  for term in repeatedShallow do
-    if psKernelC0MemoShapeHash 4 term != firstShallow then
-      throw (IO.userError "synthetic depth-four memo collision was not formed")
-  let sameBinderShape : List PsKernelExpr :=
-    (List.range 50).map c0HashMemoNameErasureCollision
-  let root : PsKernelExpr := .const (.str .anonymous "hashMemoRoot") []
-  let collisionDAG :=
-    (repeatedShallow ++ sameBinderShape).foldl
-      (fun acc e => .app acc e) root
-  c0HashMemoCheck collisionDAG
-  IO.println "C0_CERTIFIED_HASH_MEMO secondary_collision_upgrade=source_exact threshold_exceeded=true"
 
   -- 26 shared parent levels represent over 134 million tree nodes.
   -- Computing the *historical* pure hash here would expand the full

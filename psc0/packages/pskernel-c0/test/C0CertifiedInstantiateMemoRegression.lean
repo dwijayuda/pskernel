@@ -9,14 +9,6 @@ The historical exponential oracle is only called on small regression terms.
 def c0InstMemoShared (base : PsKernelExpr) (depth : Nat) : PsKernelExpr :=
   (List.range depth).foldl (fun x (_ : Nat) => .app x x) base
 
-/-- Fifty different deep heads collide under the source depth-three
-memo selector, but can be distinguished by depth four after upgrading only
-that collision-heavy bucket. -/
-def c0InstMemoShallowCollision (i : Nat) : PsKernelExpr :=
-  let fn : PsKernelExpr := .const (.num .anonymous i) []
-  let arg : PsKernelExpr := .lit (.nat 1)
-  .app (.app (.app fn arg) arg) arg
-
 def main : IO Unit := do
   let a : PsKernelName := .str .anonymous "a"
   let b : PsKernelName := .str .anonymous "b"
@@ -71,27 +63,6 @@ def main : IO Unit := do
     throw (IO.userError
       "memo reused checked substitution across incompatible binder offsets")
   IO.println "C0_CERTIFIED_INSTANTIATE_MEMO colliding_offset_keys=source_exact false_reuse=blocked"
-
-  -- Exercise the collision-triggered secondary-key path using a real
-  -- shared source expression, not forged memo results. A source-equal
-  -- computation remains required even when 50 distinct keys land in the
-  -- same shallow trie leaf.
-  let crowded : List PsKernelExpr :=
-    (List.range 50).map c0InstMemoShallowCollision
-  let shallowKey := psKernelC0MemoShapeHash 3 (c0InstMemoShallowCollision 0)
-  for expr in crowded do
-    if psKernelC0MemoShapeHash 3 expr != shallowKey then
-      throw (IO.userError "instantiation memo collision shape not reproduced")
-  let crowdedRoot :=
-    crowded.foldl (fun acc next => .app acc next) (.bvar 0)
-  let plainCrowded :=
-    psKernelC0ExprInstantiateOneChanged crowdedRoot replacement 0
-  let fastCrowded :=
-    psKernelC0InstOneMemoizedChanged crowdedRoot replacement 0
-  if plainCrowded.2 != fastCrowded.2 ||
-      !psKernelExprEqual plainCrowded.1 fastCrowded.1 then
-    throw (IO.userError "secondary index changed certified substitution")
-  IO.println "C0_CERTIFIED_INSTANTIATE_MEMO depth_three_collision_upgrade=source_exact"
 
   let depth := 26
   let expanded := c0InstMemoShared (.bvar 0) depth

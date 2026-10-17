@@ -1343,9 +1343,11 @@ private def refusals : List (String × String × String) := [
   ("local-nondecrease",
     "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => helper(k) } }\n",
     "PSCV0-MUTUAL-TOTAL: DECREASE"),
-  ("local-fixedpoint-policy",
-    "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := helper(k) partial_fixpoint }\n",
-    "PSCV0-FIXPOINT-ASSUMPTION"),
+  -- The unchanged former policy case is checked without execution by the
+  -- P1 fixture. A recursive result inspection remains a monotonicity refusal.
+  ("local-fixedpoint-nonmonotone",
+    "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := helper(k) + 1 partial_fixpoint }\n",
+    "PSCV0-FIXPOINT-MONOTONICITY"),
   ("local-wf-nondecrease",
     "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := helper(k)\ntermination_by k\n}\n",
     "PSCV0-WF-DECREASE"),

@@ -1,4 +1,16 @@
-## Active work — approved Lean standard logical foundation (18 October 2026)
+## Latest checkpoint — checked P1 activation candidate, 18 October 2026
+
+Preparation `a53b36512fc8616e5f6cb1db1ed262448a1fd3b7` passed [all preparation checks](https://github.com/dwijayuda/pskernel/actions/runs/39073278997). The section fixture now passes with the full missing constant reported at elaboration; public interface theorems and private signatures retain their original visibility checks. The run also passed the 117-declaration Order replay, four actual dictionaries, nine checked monotonicity proofs, evolving-state WF, and indexed/recursive deriving construction and emission. These are focused preparation results, not backend-runtime or complete M3 evidence.
+
+This candidate reconciles the qualified preparation with main `f271f2a35789b120dbe1a6dcd5a555db44e72134`, preserving both histories and main's foundation/P0 integration documents. Main's five workflows succeeded, including all 34 Native job steps. The historical focused970 total still awaits successful log retrieval; do not call the expected count observed.
+
+Generated declaration visibility now follows typed source ownership: only each actual public source member is exported, while auxiliary/whole-equation/body support stays private. The P1 module fixture checks a private callee plus an explicit public equation.
+
+P1 now selects the independently replayed Order environment (3752 declarations,44 classes,370 ordinary instances,13 defaults) and dispatches typed recursive fixedpoint components to the checked logical construction. Source equations use fix_eq and congruence. The runtime adapter validates the full retained functional and component membership. The existing P1 fixture is now required, including kernel-valid adversarial body mismatch and both verified-assurance refusals. Its two exact formerly policy-refused divergent sources are logical-only positives, never executed. Equivalent nonmonotone source cases retain actual semantic refusals.
+
+See [activation design](PSCV0_M3_PARTIAL_FIXPOINT_ACTIVATION_2026-10-18.md) for pinned Lean source/test references, design choices and immutable registry identities. P1 source/kernel/emission qualification is pending on this candidate; 30 added five-lane runtime observations are required, not yet observed. No source axiom, proof hole, runtime choice primitive, PSKernel-Core, self-hosting or C5 is enabled.
+
+Next: finish P1 preparation, preserve all required cases, promote the coherent candidate for all five exact-SHA integration gates, and close the remaining selected generic/source/data/mutual-WF cells against the unchanged six M3+B exits. **M3+B remains open.**
 
 ## Active checkpoint — 18 October 2026: section-equation diagnostic ownership
 
@@ -12,6 +24,31 @@ The current correction preserves full qualified-name errors at term elaboration 
 
 Next: qualify this preparation checkpoint, reconcile both branch histories, select the independently replayed Order closure, activate and qualify the actual checked P1 construction/runtime ownership, and close the six M3+B exits. M3+B is not complete. Keep all four handoff/roadmap documents current; do not supersede a healthy Native run.
 
+
+The user explicitly approved `Classical.choice` and other needed logical axioms in pinned Lean's standard approved inventory, and instructed autonomous continuation of M3+B. The inventory at Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is `propext`, `Quot.sound`, `Classical.choice`. This decision supersedes the older two-axiom-only policy statements retained below.
+
+Follow the [foundation decision and M3+B exit ledger](PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md). Exact declaration/provenance and transitive closure audits, official kernel checking, source-axiom/proof-hole bans, computational-closure checks and verified-admission gates remain required. Choice is a logical assumption, not a runtime implementation.
+
+Last qualified compiler/test remains `e6b7f11750fdde6e1feacab86cfb32f2a82be8a5`, all five gates successful. Its artifacts retain their original foundation and unchanged acceptance. The expanded foundation, P0 Nonempty fallback, P1 order-library probe and plain ordinary section-dictionary fix are in preparation; no new compiler qualification or score increase is claimed.
+
+Continue through the six selected M3+B exits. Preserve v7.2, native portable Lean, GitHub/cloud Linux only, expected-HEAD/non-force changes, and PR109 draft/open/unmerged on its original base. Never supersede a healthy Native run. M4/M5 obligations retain their written staging.
+
+#
+## Current integration candidate — exact choice foundation and P0 Nonempty fallback
+
+The implementation now adds the exact pinned Lean 4.35.0 Classical.choice axiom and checked Classical.ofNonempty definition, and registers the existing Nonempty class. Nonempty/intro/rec are audited prerequisites, not duplicate new declarations. P0 first searches constructively for Inhabited, then uses independent Nonempty evidence only when required. The actual recursive source body remains separate from the opaque logical inhabitant.
+
+The selected foundation is exactly propext, Quot.sound and Classical.choice. No further axiom, source axiom, proof hole or runtime choice intrinsic is added. Standard is 3635 declarations, 42 classes, 359 ordinary instances and 13 defaults, with explicitly reviewed pins observed in preparation runs 39064740499 and 39065744204.
+
+This compiler/test revision is a candidate awaiting all five same-SHA gates. The new P0 source/body/native controls passed preparatory construction, official-kernel ordinary emission and exact verified refusals; its ten runtime comparisons must still execute in the focused gate. Last full acceptance remains e6b7f11750fdde6e1feacab86cfb32f2a82be8a5 and 960 comparisons. Do not claim 970 or new acceptance before completed logs.
+
+The separate preparation branch now contains commit 5dd8ed9701b215bf808ea1e058e382b3f639710a and cloud run 39067140365: repaired generated-equation privacy, larger WF state, indexed BEq, checked P1 runtime ownership, the retained Order audit and portable monotonicity proof probes. Those changes are not included in this foundation-only integration and remain independently under qualification. Continue them while allowing the healthy Native gate to finish.
+
+See [the current integration receipt](PSCV0_M3_CLASSICAL_P0_INTEGRATION_2026-10-18.md) and the existing six-exit M3+B ledger. M3+B remains open. Keep v7.2, pinned Lean, GitHub/cloud Linux only, fresh expected-HEAD/non-force updates and PR109 draft/open/unmerged on its original base. Historical sections below describe their original compiler identities and are superseded only where this current checkpoint says so.
+
+---
+
+## Active work — approved Lean standard logical foundation (18 October 2026)
 
 The user explicitly approved `Classical.choice` and other needed logical axioms in pinned Lean's standard approved inventory, and instructed autonomous continuation of M3+B. The inventory at Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is `propext`, `Quot.sound`, `Classical.choice`. This decision supersedes the older two-axiom-only policy statements retained below.
 

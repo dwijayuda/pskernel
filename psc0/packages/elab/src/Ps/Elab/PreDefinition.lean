@@ -1,5 +1,6 @@
 import Ps.Elab.PreDefinition.Basic
 import Ps.Elab.MutualStructural
+import Ps.Elab.PartialFixpoint
 
 -- The source owner closes real local captures before this boundary. This
 -- module owns the checked dependency graph and all downstream publication;
@@ -495,7 +496,7 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
     if !psElabPreDefinitionExplicitPartial member then
       return ← psElabPreDefinitionNonrecursive environment levels member
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .fixedpoint) then
-    throw (.data "PSCV0-FIXPOINT-ASSUMPTION: Classical.choice is approved; selected Lean.Order.fix dependency closure and checked portable partial_fixpoint construction are not yet available")
+    return ← psElabFixedpointFromChecked environment levels nextId members
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
     let [member] := members
       | throw (.data "PSCV0-MUTUAL-WF: a recursive component with a well-founded suffix requires one independently checked measured member; mixed partial or multiple-member well-founded cliques are unavailable")

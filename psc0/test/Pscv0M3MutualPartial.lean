@@ -483,9 +483,11 @@ private def checks : Array Check :=
     { label := "partial-registration-refused", request := {
         source := "mutual\n@[default_instance] partial function first(n: Nat): Nat := n\nend\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-TERM-02-HEAD:") },
-    { label := "p1-assumption-refused", request := {
-        source := "mutual\nfunction first(n: Nat): Nat := first(n)\npartial_fixpoint\nend\n" }
-      failure := some ("elaborate", "PSCV0-DATA: PSCV0-FIXPOINT-ASSUMPTION:") },
+    -- The exact former policy refusal is now a kernel-checked logical-only
+    -- positive in Pscv0M3PartialFixpoint; retain an actual semantic negative.
+    { label := "p1-nonmonotone-refused", request := {
+        source := "mutual\nfunction first(n: Nat): Nat := first(n) + 1\npartial_fixpoint\nend\n" }
+      failure := some ("elaborate", "PSCV0-DATA: PSCV0-FIXPOINT-MONOTONICITY:") },
     { label := "partial-wf-clique-refused", request := {
         source := "mutual\npartial function first(n: Nat): Nat := second(n)\nfunction second(n: Nat): Nat := first(n)\ntermination_by n\nend\n" }
       failure := some ("elaborate", "PSCV0-DATA: PSCV0-MUTUAL-STRATEGY:") },

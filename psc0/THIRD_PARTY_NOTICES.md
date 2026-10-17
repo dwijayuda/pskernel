@@ -192,3 +192,16 @@ upstream proof text is replaced and no new foundation axiom is added.
 source module reifies the same constructive formula in checked Core.
 No proprietary code, axiom, unknown term or unverified semantic
 assumption is introduced.
+
+
+## Selected partial fixpoints and monotonicity (Lean 4.35.0)
+
+The portable proof-producing algorithms in `Ps.Elab.PartialFixpoint` and
+`Ps.Elab.Monotonicity` adapt Lean's
+`src/Lean/Elab/PreDefinition/PartialFixpoint/{Main,Eqns}.lean` and
+`src/Lean/Elab/Tactic/Monotonicity.lean` at commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Copyright (c) 2024 Lean FRO, LLC. All rights reserved. Author: Joachim Breitner.
+Released under Apache License 2.0, subject to the upstream notice above.
+The retained `StandardPartialFixpointData.lean` asset carries the pinned
+`Init.Internal.Order.Basic` declaration bodies and its own attribution.

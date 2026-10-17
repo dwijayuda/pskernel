@@ -1,6 +1,7 @@
 import Ps.Environment.StandardPlatformWords
 import Ps.Environment.StandardWellFounded
 import Ps.Environment.StandardClassical
+import Ps.Environment.StandardPartialFixpoint
 import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardLogicInstances
 import Ps.Environment.StandardOperatorProtocol
@@ -151,7 +152,7 @@ def psSelfHostProdPrePartialFixpointPreludeEnvironment : PsEnvironment :=
   psStandardClassicalExtend psSelfHostProdPreClassicalPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psSelfHostProdPrePartialFixpointPreludeEnvironment
+  psStandardPartialFixpointExtend psSelfHostProdPrePartialFixpointPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

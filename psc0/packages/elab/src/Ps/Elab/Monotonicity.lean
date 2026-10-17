@@ -1,3 +1,9 @@
+/-
+Selected algorithms adapted from Lean 4.35.0 (eb6cafb7290e8bd5f2937522d8d804f58f02bafc).
+Copyright (c) 2024 Lean FRO, LLC. All rights reserved.
+Released under Apache 2.0; see THIRD_PARTY_NOTICES.md.
+Upstream author: Joachim Breitner.
+-/
 import Ps.Elab.Term
 import Ps.Meta.Recursor
 

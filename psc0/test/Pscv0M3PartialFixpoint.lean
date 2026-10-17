@@ -363,6 +363,13 @@ private def checkNonmonotoneRefusal : IO Unit := do
   | .ok _ => throw (IO.userError "nonmonotone Nat functional was accepted")
   IO.println "PSCV0_M3_P1_NONMONOTONE: PASS exact checked-monotonicity refusal"
 
+-- Generated whole-function equations mention actual private callees.
+-- Their visibility follows source ownership, not their declaration kind.
+private def moduleProvider : String :=
+  "private function p1Seed(n: Nat): Nat := n + 7\n" ++
+  "function p1Visible(n: Nat): Nat := match n with { | 0 => p1Seed(2) | k + 1 => p1Visible(k) }\npartial_fixpoint\n" ++
+  "theorem p1PublicEquation(n: Nat): Eq(p1Visible(n), match n with { | 0 => 9 | k + 1 => p1Visible(k) }) := by { exact p1Visible.eq_def(n) }\n"
+
 private def emitRuntime (directory : System.FilePath) : IO Unit := do
   IO.FS.createDirAll directory
   IO.FS.writeFile (directory / "p1fixedpoint.ps") source
@@ -378,9 +385,15 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     assurance := .ordinaryChecked
     exports := .selected (exports.map Prod.fst)
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] }
+  let moduleRequest : PsV7Native.Request := {
+    source := "import P1Provider\nfunction client(n: Nat): Nat := p1Visible(n)\ntheorem clientEquation(n: Nat): Eq(p1Visible(n), match n with { | 0 => 9 | k + 1 => p1Visible(k) }) := by { exact p1PublicEquation(n) }\n"
+    sourceName := "p1-client.ps", moduleName := "Main"
+    modules := [{ name := "P1Provider", sourceName := "p1-provider.ps", source := moduleProvider }] }
   let requests := #[ordinary,
     { ordinary with assurance := .closedVerified },
-    { ordinary with assurance := .boundaryQualifiedVerified }]
+    { ordinary with assurance := .boundaryQualifiedVerified },
+    moduleRequest,
+    { moduleRequest with source := "import P1Provider\nfunction leak(n: Nat) := p1Visible.eq_def\n" }]
   let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
@@ -405,6 +418,21 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
         ("P1 verified request failed at the wrong boundary: " ++
           error.phase ++ ": " ++ error.message)
     | _ => throw (IO.userError "P1 verified request acquired an ordinary fallback or artifacts")
+  match (batch.results[3]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+  | some (.ok imported) =>
+    ensure (imported.artifacts.isEmpty && imported.declarationCount > 0 &&
+      PsV7Native.assuranceLabel imported.assurance == "ordinary-checked")
+      "P1 module-only check lost its ordinary source identity"
+  | some (.error error) => throw (IO.userError ("P1 public interface failed at " ++
+      error.phase ++ ": " ++ error.message))
+  | none => throw (IO.userError "P1 public interface result is missing")
+  match (batch.results[4]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+  | some (.error error) =>
+    ensure (error.phase == "module" &&
+      (error.message.splitOn "PSCV0-UNKNOWN-NAME: p1Visible.eq_def").length > 1)
+      ("P1 hidden equation failed at the wrong owner: " ++ error.phase ++ ": " ++ error.message)
+  | _ => throw (IO.userError "P1 hidden equation escaped its source module")
+  IO.println "PSCV0_M3_P1_MODULES: PASS private-callee body, hidden generated support and explicit checked public equation"
   for artifact in result.artifacts do
     for file in artifact.files do
       match file.payload with

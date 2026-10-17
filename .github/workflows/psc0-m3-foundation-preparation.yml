@@ -175,6 +175,13 @@ jobs:
           lake build pscv0_m3_inductive_deriving pscv0_m3_recursive_deriving 2>&1 | tee ../dist/m3-foundation-preparation/deriving-build.log
           .lake/build/bin/pscv0_m3_inductive_deriving ../dist/m3-foundation-preparation/inductive-deriving 2>&1 | tee ../dist/m3-foundation-preparation/inductive-deriving/check.log
           .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-foundation-preparation/recursive-deriving 2>&1 | tee ../dist/m3-foundation-preparation/recursive-deriving/check.log
+      - name: Check selected P1 construction, exact equations and runtime emission
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/partial-fixpoint
+          lake build pscv0_m3_partial_fixpoint 2>&1 | tee ../dist/m3-foundation-preparation/partial-fixpoint/build.log
+          .lake/build/bin/pscv0_m3_partial_fixpoint ../dist/m3-foundation-preparation/partial-fixpoint 2>&1 | tee ../dist/m3-foundation-preparation/partial-fixpoint/check.log
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always() && !cancelled() && steps.build.outcome != 'skipped'
         with:

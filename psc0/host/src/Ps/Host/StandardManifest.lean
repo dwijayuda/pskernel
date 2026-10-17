@@ -225,8 +225,10 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Independently measured at both strict boundaries in native38781449363.
 -- F4 display registrations independently measured at native38789249978.
 -- WF surface independently audited at 078fb1e2 / native 38998692067.
+-- Order closure/metadata independently replayed and measured in preparation
+-- run 39069995046, commit 0093a0ae; frozen pre-Order export boundary retained.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:22963f394b344142cfcca1584d14eae6286941ebc1d4f0897f05a6c6518da6df"
+  "sha256:f364e3d926e0c7c198e6807a79d26e389afeb8d2ad1a7fe8761944fa3282a5a3"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

@@ -1,4 +1,16 @@
-# M3+B — approved Lean foundation and completion ledger
+## Latest checkpoint — checked P1 activation candidate, 18 October 2026
+
+Preparation `a53b36512fc8616e5f6cb1db1ed262448a1fd3b7` passed [all preparation checks](https://github.com/dwijayuda/pskernel/actions/runs/39073278997). The section fixture now passes with the full missing constant reported at elaboration; public interface theorems and private signatures retain their original visibility checks. The run also passed the 117-declaration Order replay, four actual dictionaries, nine checked monotonicity proofs, evolving-state WF, and indexed/recursive deriving construction and emission. These are focused preparation results, not backend-runtime or complete M3 evidence.
+
+This candidate reconciles the qualified preparation with main `f271f2a35789b120dbe1a6dcd5a555db44e72134`, preserving both histories and main's foundation/P0 integration documents. Main's five workflows succeeded, including all 34 Native job steps. The historical focused970 total still awaits successful log retrieval; do not call the expected count observed.
+
+Generated declaration visibility now follows typed source ownership: only each actual public source member is exported, while auxiliary/whole-equation/body support stays private. The P1 module fixture checks a private callee plus an explicit public equation.
+
+P1 now selects the independently replayed Order environment (3752 declarations,44 classes,370 ordinary instances,13 defaults) and dispatches typed recursive fixedpoint components to the checked logical construction. Source equations use fix_eq and congruence. The runtime adapter validates the full retained functional and component membership. The existing P1 fixture is now required, including kernel-valid adversarial body mismatch and both verified-assurance refusals. Its two exact formerly policy-refused divergent sources are logical-only positives, never executed. Equivalent nonmonotone source cases retain actual semantic refusals.
+
+See [activation design](PSCV0_M3_PARTIAL_FIXPOINT_ACTIVATION_2026-10-18.md) for pinned Lean source/test references, design choices and immutable registry identities. P1 source/kernel/emission qualification is pending on this candidate; 30 added five-lane runtime observations are required, not yet observed. No source axiom, proof hole, runtime choice primitive, PSKernel-Core, self-hosting or C5 is enabled.
+
+Next: finish P1 preparation, preserve all required cases, promote the coherent candidate for all five exact-SHA integration gates, and close the remaining selected generic/source/data/mutual-WF cells against the unchanged six M3+B exits. **M3+B remains open.**
 
 ## Active checkpoint — 18 October 2026: section-equation diagnostic ownership
 
@@ -12,6 +24,9 @@ The current correction preserves full qualified-name errors at term elaboration 
 
 Next: qualify this preparation checkpoint, reconcile both branch histories, select the independently replayed Order closure, activate and qualify the actual checked P1 construction/runtime ownership, and close the six M3+B exits. M3+B is not complete. Keep all four handoff/roadmap documents current; do not supersede a healthy Native run.
 
+
+
+# M3+B — approved Lean foundation and completion ledger
 
 ## Authority and current state
 
@@ -49,15 +64,15 @@ The official kernel checks each axiom's well-formed type and subsequent declarat
 
 ## Implementation work
 
-| Work item | Owner / mechanism | Initial status | Required evidence |
+| Work item | Owner / mechanism | Current status | Required evidence |
 | --- | --- | --- | --- |
-| FND-1 exact choice foundation | Selected Standard, official replay, StandardManifest, PrimitiveAudit | Authorized; implementation in progress | Pinned signature, exact native closure, regenerated environment/surface identities, all existing admission refusals |
-| P0-1 Nonempty fallback | `Ps.Elab.Mutual.psElabPartialInhabitant` | Implementation in progress | Native-compatible constructive-first search and checked Nonempty fallback; body-sensitive execution; opacity and uninhabited-result refusals |
-| P1-1 order-library closure | Native authoring export and portable declaration replay | Probe in preparation | Required CCPO/order/monotonicity/fix/equation declarations exported with complete proof/value/type dependencies and official trust-zero replay |
-| P1-2 logical elaborator | Typed recursive components and selected fixedpoint consumer | Unimplemented | Actual functional, order instance, monotonicity proof, checked fixedpoint declaration, retained captures/universes/mutual projections |
-| P1-3 exact equations | Pinned fix_eq-based proof construction | Unimplemented | Generated source equations independently checked; no assumed equations or proof holes |
-| P1-4 ordinary implementation | Explicit P1 logical/body ownership and validated runtime view | Unimplemented | Original logical graph preserved; exact recursive body selected for ordinary execution; type/telescope/identity checks |
-| SRC-1 plain section dictionary | Existing typed predefinition route for unregistered ordinary section definitions | Implementation in progress | True no-Where/no-hint native/portable controls, two actual dictionaries, complete capture headers/equations, preserved registration/privacy/theorem policies |
+| FND-1 exact choice foundation | Selected Standard, official replay, StandardManifest, PrimitiveAudit | Qualified at f271f2a3: all five exact-SHA workflows succeeded | Pinned signature, exact native closure, regenerated environment/surface identities, all existing admission refusals |
+| P0-1 Nonempty fallback | `Ps.Elab.Mutual.psElabPartialInhabitant` | Qualified five-gate foundation/P0 integration at f271f2a3; exact focused count unconfirmed | Native-compatible constructive-first search and checked Nonempty fallback; body-sensitive execution; opacity and uninhabited-result refusals |
+| P1-1 order-library closure | Native authoring export and portable declaration replay | 117-declaration replay, four dictionaries and immutable pins qualified at a53b3651; selected by this candidate | Required CCPO/order/monotonicity/fix/equation declarations exported with complete proof/value/type dependencies and official trust-zero replay |
+| P1-2 logical elaborator | Typed recursive components and selected fixedpoint consumer | Active checked dispatch in this candidate; source/kernel fixture pending | Actual functional, order instance, monotonicity proof, checked fixedpoint declaration, retained captures/universes/mutual projections |
+| P1-3 exact equations | Pinned fix_eq-based proof construction | Exact fix_eq/congruence construction activated; fresh source equation qualification pending | Generated source equations independently checked; no assumed equations or proof holes |
+| P1-4 ordinary implementation | Explicit P1 logical/body ownership and validated runtime view | Complete-layout ordinary adapter activated; source/kernel/emission/runtime qualification pending | Original logical graph preserved; exact recursive body selected for ordinary execution; type/telescope/identity checks |
+| SRC-1 plain section dictionary | Existing typed predefinition route for unregistered ordinary section definitions | Capture/header/private-equation source checks qualified at a53b3651 / 39073278997 | True no-Where/no-hint native/portable controls, two actual dictionaries, complete capture headers/equations, preserved registration/privacy/theorem policies |
 
 The P1 library probe is authoring evidence only. Native `import Lean`, a parsed suffix, an unused-suffix warning, or approval of choice does not implement portable P1. Keep unsupported active fixedpoint admission unavailable until its actual construction and runtime path are implemented and qualified. Update the reason for that refusal to describe the current missing implementation rather than the superseded approval restriction.
 
@@ -85,3 +100,7 @@ Prepare the foundation/library probe early while closing independent source/data
 ## Evidence updates
 
 This document records authorization and the initial implementation ledger. Subsequent commits must record actual candidate SHAs, observed probe results, retained source assets, qualification results and any remaining blocker. No new compiler acceptance or M3 completion is claimed by this initial checkpoint.
+
+### Foundation-only main integration
+
+The current integration publishes the exact choice/Classical.ofNonempty declarations, existing Nonempty class registration, audited immutable pins and constructive-first P0 Nonempty fallback. Preparatory runs [39064740499](https://github.com/dwijayuda/pskernel/actions/runs/39064740499) and [39065744204](https://github.com/dwijayuda/pskernel/actions/runs/39065744204) passed these foundation/construction/emission cells but failed separate section candidates. The current five same-SHA gates are pending; [the integration receipt](PSCV0_M3_CLASSICAL_P0_INTEGRATION_2026-10-18.md) distinguishes required970 comparisons from historical accepted960. Larger source/WF/BEq/P1 work continues at [preparation5dd8ed97](https://github.com/dwijayuda/pskernel/commit/5dd8ed9701b215bf808ea1e058e382b3f639710a) and [run39067140365](https://github.com/dwijayuda/pskernel/actions/runs/39067140365). M3+B remains open.

@@ -78,6 +78,13 @@ jobs:
           test "$(git rev-parse FETCH_HEAD)" = 41322875539de66acf9eb9b01ddf73df82a61bf2
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          # This candidate additionally changed CachePolicy to call typed
+          # psKernelC0ExactPairEq. Restore ORIGINAL CachePolicy together
+          # with original ExprDecidableEq so the source-control A/B can
+          # compile exactly the pinned production baseline, not a mixed
+          # dependency graph with an unresolved symbol.
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean \
@@ -111,6 +118,8 @@ jobs:
           set -euo pipefail
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean \

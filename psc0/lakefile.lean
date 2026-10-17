@@ -250,7 +250,7 @@ lean_lib PsMeta where
     `Ps.Meta.InstanceCandidate,
     `Ps.Meta.InstanceKey, `Ps.Meta.InstanceSearch,
     `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
-    `Ps.Meta.Infer,
+    `Ps.Meta.Infer, `Ps.Meta.WellFounded,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView
   ]
 

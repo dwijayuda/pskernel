@@ -119,6 +119,30 @@ theorem bounded_step (k : Nat) :
   congrArg (fun (value : Fin (Nat.succ k + 1)) => value.val)
     (bounded.eq_def (Nat.succ k))
 
+-- Both real lexicographic constructors solve their distinct native decrease
+-- goals. Only n is measured; acc remains changing state of the unary domain.
+def relationLeft (acc n step : Nat) : Nat :=
+  match n with
+  | 0 => acc
+  | k + 1 => relationLeft (acc + step) (k - 1) step
+termination_by (n, 0)
+decreasing_by exact Prod.Lex.left 0 0 (Nat.lt_succ_of_le (Nat.sub_le _ _))
+
+theorem relationLeft_step (acc k step : Nat) :
+    relationLeft acc (Nat.succ k) step = relationLeft (acc + step) (k - 1) step :=
+  relationLeft.eq_def acc (Nat.succ k) step
+
+def relationRight (n : Nat) : Nat :=
+  match n with
+  | 0 => 1
+  | k + 1 => relationRight k + 2
+termination_by (0, n)
+decreasing_by exact Prod.Lex.right 0 (Nat.lt_succ_self _)
+
+theorem relationRight_step (k : Nat) :
+    relationRight (Nat.succ k) = relationRight k + 2 :=
+  relationRight.eq_def (Nat.succ k)
+
 -- Pinned Main handles genuine nonrecursive definitions before unused hints.
 -- The unused section variable must not become an extra declared parameter.
 section
@@ -135,9 +159,11 @@ theorem unusedP1_step (n : Nat) : unusedP1 n = n := rfl
 
 run_cmd do
   for name in #[``WellFounded.Nat.fix, ``WellFounded.Nat.fix_eq,
+      ``WellFounded.fix, ``WellFounded.fix_eq,
       ``skip, ``skip_step, ``branches, ``shiftedMeasure, ``defaultDecrease,
       ``accumulate, ``offset, ``offset_step, ``twoStates, ``fixedOnly,
       ``reverseList, ``digest, ``iterate, ``dependentState, ``bounded, ``bounded_step,
+      ``relationLeft, ``relationLeft_step, ``relationRight, ``relationRight_step,
       ``unusedWF, ``unusedP1, ``unusedWF_step, ``unusedP1_step] do
     let axioms ← Lean.collectAxioms name
     unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
@@ -213,6 +239,16 @@ private def typedSource : String :=
   "decreasing_by by { exact Nat.lt_succ_self(k) }\n" ++
   "theorem m3wfboundedStep(k: Nat): Fin.val(m3wfbounded(Nat.succ(k))) = Fin.val(m3wfbounded(k)) + 1 := by { exact congrArg((fun (value: Fin(Nat.succ(k) + 1)) => Fin.val(value)), m3wfbounded.eq_def(Nat.succ(k))) }\n"
 
+private def relationSource : String :=
+  "function m3wfrelationLeft(acc: Nat, n: Nat, step: Nat): Nat := match n with { | 0 => acc | k + 1 => m3wfrelationLeft(acc + step, k - 1, step) }\n" ++
+  "termination_by Prod.mk(n, 0)\n" ++
+  "decreasing_by by { exact Prod.Lex.left(0, 0, Nat.lt_succ_of_le(Nat.sub_le(k, 1))) }\n" ++
+  "theorem m3wfrelationLeftStep(acc: Nat, k: Nat, step: Nat): m3wfrelationLeft(acc, Nat.succ(k), step) = m3wfrelationLeft(acc + step, k - 1, step) := by { exact m3wfrelationLeft.eq_def(acc, Nat.succ(k), step) }\n" ++
+  "function m3wfrelationRight(n: Nat): Nat := match n with { | 0 => 1 | k + 1 => m3wfrelationRight(k) + 2 }\n" ++
+  "termination_by Prod.mk(0, n)\n" ++
+  "decreasing_by by { exact Prod.Lex.right(0, Nat.lt_succ_self(k)) }\n" ++
+  "theorem m3wfrelationRightStep(k: Nat): m3wfrelationRight(Nat.succ(k)) = m3wfrelationRight(k) + 2 := by { exact m3wfrelationRight.eq_def(Nat.succ(k)) }\n"
+
 private def source : String :=
   skipSource ++
   "theorem m3wfskipStep(k: Nat): m3wfskip(Nat.succ(k)) = m3wfskip(k - 1) + 1 := by { exact m3wfskip.eq_def(Nat.succ(k)) }\n" ++
@@ -226,11 +262,15 @@ private def source : String :=
   "decreasing_by by { exact Nat.succ_le_succ(Nat.succ_le_succ(Nat.sub_le(k, 1))) }\n" ++
   "function m3wfdefault(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3wfdefault(k) + 1 }\n" ++
   "termination_by n\n" ++
-  scopeSource ++ parameterSource ++ typedSource ++
+  scopeSource ++ parameterSource ++ typedSource ++ relationSource ++
   "function m3wfskipoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfskip(if (flag) { 17 } else { 10 }))\n" ++
   "function m3wfbranchesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfbranches(if (flag) { 9 } else { 6 }))\n" ++
   "function m3wfshiftoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfshift(if (flag) { 17 } else { 10 }))\n" ++
   "function m3wfdefaultoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfdefault(if (flag) { 17 } else { 10 }))\n" ++
+  "function m3wfrelationsoutput(flag: Bool): UInt64 := {\n" ++
+  "  let n: Nat := if (flag) { 17 } else { 10 }\n" ++
+  "  UInt64.ofNat(m3wfrelationLeft(5, n, 3) + 1000 * m3wfrelationRight(n))\n" ++
+  "}\n" ++
   "function m3wfaccoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfaccumulate(5, if (flag) { 17 } else { 10 }, 3))\n" ++
   "function m3wfoffsetoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfoffset(5, if (flag) { 17 } else { 10 }, 3))\n" ++
   "function m3wfstatesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfstates(3, if (flag) { 17 } else { 10 }, 5, 2))\n" ++
@@ -425,7 +465,7 @@ private def checkUnusedHints : IO Unit := do
 -- In particular an opaque P0 declaration, an axiom, or a self-referential
 -- definition cannot stand in for WellFounded.Nat.fix or its checked equation.
 private def checkConstruction : IO Unit := do
-  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource) with
+  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource ++ relationSource) with
     | .ok value => pure value
     | .error error => throw (IO.userError error)
   let some iterateCommand := parsed.commands.find? (fun command =>
@@ -443,6 +483,22 @@ private def checkConstruction : IO Unit := do
   let result ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
     | .ok value => pure value
     | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
+  -- These Core witnesses distinguish the real lexicographic constructors and
+  -- generic fix/equation from the retained Nat specialization checked below.
+  for (sourceName, constructor) in [("m3wfrelationLeft", "left"), ("m3wfrelationRight", "right")] do
+    let name := psRootName sourceName
+    match psEnvironmentFind result.result.environment name,
+        psEnvironmentFind result.result.environment (psNameAppendStr name "eq_def") with
+    | some (.definitionDecl _ _ type value), some (.theoremDecl _ _ equationType proof) =>
+      let lexConstructor := psNameAppendStr (psNameAppendStr psProdName "Lex") constructor
+      unless psExprHasConst psWellFoundedGenericFixName value &&
+          psExprHasConst psWellFoundedGenericFixEqName proof &&
+          psExprHasConst lexConstructor value &&
+          !psExprHasConst psWellFoundedFixName value && !psExprHasConst name value &&
+          !([type, value, equationType, proof].any psExprHasUnresolvedMeta) &&
+          ([type, value, equationType, proof].all fun term => (psExprFVarIds term).isEmpty) do
+        throw (IO.userError "generic WF lost its checked lexicographic proof, exact equation or closed construction")
+    | _, _ => throw (IO.userError "generic WF did not produce its real definition and checked equation")
   let name := psRootName "m3wfskip"
   let equationName := psNameAppendStr name "eq_def"
   match psEnvironmentFind result.result.environment name with
@@ -504,7 +560,7 @@ private def checkConstruction : IO Unit := do
       throw (IO.userError ("WF changed universe closure or typed entry roles for " ++ text))
   checkResultApplication result.result.environment
   checkUnusedHints
-  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, ordinary unused-hint definitions without extra captures, no recursive axiom or P0 marker"
+  IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix and generic lexicographic fix, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, ordinary unused-hint definitions without extra captures, no recursive axiom or P0 marker"
 
 private def checks : List (String × String × Option String) := [
   ("same-size",
@@ -549,7 +605,16 @@ private def checks : List (String × String × Option String) := [
     some "unknown name n"),
   ("escaping-self",
     "function bad(n: Nat): Nat := (fun (f: Nat -> Nat) => f(n))(bad)\ntermination_by n\n",
-    some "PSCV0-WF-ESCAPE")]
+    some "PSCV0-WF-ESCAPE"),
+  ("tuple measure captures two changing arguments",
+    "function bad(n: Nat, acc: Nat): Nat := match n with { | 0 => acc | k + 1 => bad(k, acc + 1) }\ntermination_by Prod.mk(n, acc)\n",
+    some "PSCV0-WF-MEASURE-STATE"),
+  ("measure codomain depends on changing argument",
+    "function bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by Fin.mk(n, Nat.lt_succ_self(n))\n",
+    some "PSCV0-WF-MEASURE-TYPE"),
+  ("generic relation does not justify a same-argument call",
+    "function bad(n: Nat): Nat := bad(n)\ntermination_by Prod.mk(n, 0)\n",
+    some "PSCV0-WF-DECREASE")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
@@ -565,7 +630,7 @@ def main (args : List String) : IO Unit := do
       "m3wfshiftoutput", "m3wfdefaultoutput", "m3wfaccoutput",
       "m3wfoffsetoutput", "m3wfstatesoutput", "m3wffixedoutput",
       "m3wflistoutput", "m3wffunctionoutput", "m3wfdependentstateoutput",
-      "m3wfdependentresultoutput"] }
+      "m3wfdependentresultoutput", "m3wfrelationsoutput"] }
   let requests := #[request] ++ (checks.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -612,6 +677,8 @@ def main (args : List String) : IO Unit := do
       ("m3wffunctionoutput", Lean.toJson (toString (M3WellFoundedOracle.iterate (· + 3) n 5))),
       ("m3wfdependentstateoutput", Lean.toJson (toString (M3WellFoundedOracle.dependentState
         (fun _ => Nat) True True.intro n ⟨n, Nat.lt_succ_self n⟩))),
-      ("m3wfdependentresultoutput", Lean.toJson (toString (M3WellFoundedOracle.bounded n).val))]
+      ("m3wfdependentresultoutput", Lean.toJson (toString (M3WellFoundedOracle.bounded n).val)),
+      ("m3wfrelationsoutput", Lean.toJson (toString
+        (M3WellFoundedOracle.relationLeft 5 n 3 + 1000 * M3WellFoundedOracle.relationRight n)))]
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_WELL_FOUNDED: PASS checked ordered decreases, typed fixed/evolving arguments, polymorphic domains, function results, dependent Fin state/result, all-kind entry slots, public equations, semantic refusals and five-target emission; runtime parity follows"

@@ -43,7 +43,7 @@ def psElabRecursionParameterDependencies (context : PsElabContext)
     if known.contains id || !dependencies.any known.contains then known
     else known ++ [id]) roots
 
-def psElabRecursionNatParameterPlan (context : PsElabContext)
+def psElabRecursionMeasureParameterPlan (context : PsElabContext)
     (ids : List Nat) (calls : List PsElabRecursionCall) (measure : PsExpr) :
     Except PsElabError PsElabRecursionParameterPlan := do
   if calls.isEmpty then
@@ -53,7 +53,7 @@ def psElabRecursionNatParameterPlan (context : PsElabContext)
   let dependencies := psExprFVarIds measure
   let measuredVarying := ids.filter fun id => varying.contains id && dependencies.contains id
   if measuredVarying.length > 1 then
-    throw (.data "PSCV0-WF-MEASURE-STATE: the selected Nat-valued measure may depend on at most one changing parameter; packing several measured arguments is unavailable")
+    throw (.data "PSCV0-WF-MEASURE-STATE: the termination measure may depend on at most one changing parameter; packing several measured arguments is unavailable")
   -- Constant/same-size candidates still create their genuine impossible
   -- decrease goals, preserving the established DECREASE diagnostic.
   let some majorId := measuredVarying.head? <|>

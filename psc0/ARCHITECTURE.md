@@ -1539,3 +1539,44 @@ contracts and runtime outputs are preserved.
 
 No completed five-gate success is claimed. Accepted compiler/test SHA remains
 `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+
+## Prepared typed well-founded relation selection — 2026-10-17
+
+This candidate extends the checked unary changing-argument route from a Nat-only
+measure to an explicitly typed fixed-codomain measure with an actual synthesized
+`WellFoundedRelation` dictionary. It shares a typed relation/fix application plan
+between elaboration and erasure; both consumers still validate actual checked Core
+in the original local context. Fixed captures, evolving/dependent state, source
+argument order, explicit proof slots, result applications and public equations retain
+their existing checks. No runtime relation is guessed from source spelling.
+
+The pinned native selection rule is retained: use `WellFounded.Nat.fix` only when
+the codomain converts to Nat and the selected dictionary converts to `Nat.lt_wfRel`.
+Otherwise construct the real `invImage` dictionary, its relation and well-founded
+proof projections, `WellFounded.fix`, and `WellFounded.fix_eq`. The bounded
+selected proof closure does not include Lean's `opaqueId` barrier; the direct
+proof remains subject to inference, independent kernel admission and performance
+qualification. No assumption, conversion rule or unchecked body is added.
+
+Seven reviewed files add the shared Meta owner, source and typed erasure consumers,
+the existing Lake registration, and native/source lexicographic left/right examples
+with open public equations and Core-kind checks. The WF batch becomes 19 requests:
+two positives and 17 semantic refusals. All 12 prior scalar exports remain, with
+`m3wfrelationsoutput` as the thirteenth: ten additional comparisons over two
+Boolean inputs and JavaScript, strict TypeScript, locked Rust, V8 GC and Wasmtime.
+The added refusals retain multiple measured changing parameters, varying measure
+codomains and an unproved same-argument generic recursive call.
+
+This prepared implementation depends on activating the exact independently audited
+WF foundation. The following activation must use the completed native audit's
+observed FNV, declaration SHA-256 and source-surface SHA-256, then qualify the final
+selected Standard and compiler through all five cloud gates at one SHA. Neither
+the audit step nor this reviewed source candidate adds accepted points.
+
+The separate seven-file dependent-argument packing candidate remains staged and
+unqualified. Its reviewed patch SHA-256 is
+`0dfb9d68393fb9b707e0d27ec71d84e40da8d3222eec8b7c8d3e82c882e0afe7`.
+It is not included in this relation-selection commit.
+
+Accepted compiler/test SHA remains `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`;
+weighted M3+B remains **74/100**, open. PR 109 remains draft/open/unmerged.

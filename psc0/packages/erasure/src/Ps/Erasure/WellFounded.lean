@@ -1,10 +1,11 @@
 import Ps.Erasure.Recursion
 import Ps.Erasure.Entry
+import Ps.Meta.WellFounded
 
 /-
-Runtime equation for the checked Nat-measure fixpoint.
+Runtime equation for the checked unary well-founded fixpoint.
 Pinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
-Init/WF.lean:494-517 gives Nat.fix/fix_eq; WF/Fix.lean:78-87 puts
+Init/WF.lean gives the generic and Nat fixedpoints; WF/Fix.lean:78-87 puts
 the smaller argument before its proof and remaining state arguments.
 
 The exact typed definition, its complete entry telescope and actual fix
@@ -14,7 +15,7 @@ The ordinary typed eraser owns the callback's proof slot and function ABI.
 -/
 
 def psErasureWellFoundedFixName : PsName :=
-  psNameAppendStr (psNameAppendStr (psRootName "WellFounded") "Nat") "fix"
+  psWellFoundedFixName
 
 -- Open only actual lambda binders, without unfolding the fixpoint itself.
 def psErasureWellFoundedOpenValue (arguments : List PsExpr) (value : PsExpr) :
@@ -85,11 +86,15 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
     (view : PsErasureAppView) :
     Except PsErasureError (Option PsVerifiedIrExpr) := do
-  let .constE name levels := view.head | return none
-  if !psNameEq name psErasureWellFoundedFixName then return none
-  let domain :: motive :: measure :: functional :: major :: arguments := view.args
-    | throw .unsupportedApplication
-  if levels.length != 2 then throw .unsupportedRuntimeTerm
+  let viewed ← (psWellFoundedFixApplicationView view.head view.args).mapError (fun error =>
+    match error with
+    | .expectedFunction => PsErasureError.unsupportedApplication
+    | _ => PsErasureError.unsupportedRuntimeTerm)
+  let some fixed := viewed | return none
+  let motive := fixed.motive
+  let functional := fixed.functional
+  let major := fixed.major
+  let arguments := fixed.arguments
   let entry ← psErasureValidateRootEntry environment scope
   let applied := psExprApplyMany view.head view.args
   if !psExprAlphaEq entry.value applied ||
@@ -121,7 +126,7 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
     if fixedIds.contains (psLocalDeclId declaration) &&
         (psExprFVarIds (psLocalDeclType declaration)).any changingIds.contains then
       throw .unsupportedRuntimeTerm
-  if [domain, motive, measure, functional].any (fun term =>
+  if (psWellFoundedPlanTerms fixed.plan ++ [motive, functional]).any (fun term =>
       !(psExprFVarIds term).all fixedIds.contains) then
     throw .unsupportedRuntimeTerm
   let resultType ← (psInferType environment psMetaEmpty scope.localContext applied).mapError

@@ -1,21 +1,18 @@
 import Ps.Elab.Proof
 import Ps.Elab.RecursionParameters
 import Ps.Elab.Universe
+import Ps.Meta.WellFounded
 
 /-
-Selected Nat-measure recursion, grounded in Lean 4.35.0
+Selected unary well-founded recursion, grounded in Lean 4.35.0
 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
-  Lean/Elab/PreDefinition/WF/Fix.lean (replaceRecApps, solveDecreasingGoals,
-  mkFix), WF/Unfold.lean, and Init/WF.lean:470-517.
-The checked Standard already contains WellFounded.Nat.fix and fix_eq.
+  Lean/Elab/PreDefinition/WF/Rel.lean, WF/Fix.lean (replaceRecApps,
+  solveDecreasingGoals, mkFix), WF/Unfold.lean, and Init/WF.lean.
+The shared typed relation owner retains the qualified Nat specialization
+and selects generic WellFounded.fix from an actual checked dictionary.
 This module constructs their actual typed application; it introduces no
 recursive axiom, opacity marker, fuel bound, or unchecked equation.
 -/
-
-def psWellFoundedFixName : PsName :=
-  psNameAppendStr (psNameAppendStr (psRootName "WellFounded") "Nat") "fix"
-def psWellFoundedFixEqName : PsName :=
-  psNameAppendStr (psNameAppendStr (psRootName "WellFounded") "Nat") "fix_eq"
 
 def psElabWellFoundedIsNat (context : PsElabContext) (type : PsExpr) : Bool :=
   psDefEqReadOnlyWithEnv context.environment context.metaContext
@@ -238,8 +235,8 @@ def psElabWellFoundedCongrArg (context : PsElabContext)
     [domain, range, left, right, function, proof]
 
 -- Explicit typed header parameters may be fixed or evolve independently of
--- the Nat-valued measure. The measured argument's domain depends only on fixed
--- captures; changing state and the declared result form a dependent motive.
+-- the typed measure. Its codomain and the measured argument's domain depend
+-- only on fixed captures; changing state and the result form a dependent motive.
 -- No body lambda enters the header or the termination clause's lexical scope.
 def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
@@ -253,10 +250,6 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     throw (.duplicateDeclaration name)
   if (psEnvironmentFind environment equationName).isSome then
     throw (.duplicateDeclaration equationName)
-  let some (.definitionDecl ..) := psEnvironmentFind environment psWellFoundedFixName
-    | throw (.data "PSCV0-WF-FOUNDATION: checked WellFounded.Nat.fix is unavailable")
-  let some (.theoremDecl ..) := psEnvironmentFind environment psWellFoundedFixEqName
-    | throw (.data "PSCV0-WF-FOUNDATION: checked WellFounded.Nat.fix_eq is unavailable")
   let parameters := header.parametersRev.reverse
   let captures := header.capturesRev.reverse
   let captureIds := captures.map (·.id)
@@ -266,14 +259,16 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     let .explicit := parameter.binder
       | throw (.data "PSCV0-WF-TELESCOPE: the selected header parameters must be explicit")
   let _ ← psElabExpressionSort headerContext header.resultType
-  let nat := PsExpr.constE psNatName []
-  -- The self callback is not in scope in the result annotation or measure.
-  let measured ← elaborate headerContext termination.measure (some nat)
+  -- As in TerminationMeasure.elab, infer the real codomain; the self callback
+  -- is not in scope in the result annotation or measure.
+  let measured ← elaborate headerContext termination.measure none
   let measureBody := psMetaInstantiate measured.context.metaContext measured.term
-  if psExprHasUnresolvedMeta (psElabGeneralizeExpr measureBody) then
-    throw (.data "PSCV0-WF-MEASURE: unresolved Nat-valued measure")
+  let measureType := psMetaInstantiate measured.context.metaContext measured.type
+  if [measureBody, measureType].any (fun term =>
+      psExprHasUnresolvedMeta (psElabGeneralizeExpr term)) then
+    throw (.data "PSCV0-WF-MEASURE: unresolved termination measure or codomain")
   let parameterIds := parameters.map (·.id)
-  if !(psExprFVarIds measureBody).all (parameterIds ++ captureIds).contains then
+  if !(psExprFVarIds measureBody ++ psExprFVarIds measureType).all (parameterIds ++ captureIds).contains then
     throw (.data "PSCV0-WF-MEASURE: the measure escaped its declared header scope")
   let declaredParameters := parameters.map fun parameter =>
     { parameter with type := psMetaInstantiate measured.context.metaContext parameter.type }
@@ -301,28 +296,47 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   if psExprHasUnresolvedMeta (psElabGeneralizeExpr
       (psMetaInstantiate probed.context.metaContext probed.term)) then
     throw (.data "PSCV0-WF-PARAMETERS: unresolved provisional body while checking fixed arguments")
-  let plan ← psElabRecursionNatParameterPlan probed.context parameterIds
+  let plan ← psElabRecursionMeasureParameterPlan probed.context parameterIds
     probed.context.wellFoundedCallsRev.reverse measureBody
   let some major := declaredParameters.find? (fun parameter => parameter.id == plan.majorId)
     | throw (.data "PSCV0-WF-INTERNAL: selected parameter is not in the header")
   let fixedIds := captureIds ++ plan.fixedIds
   if !(psExprFVarIds major.type).all fixedIds.contains then
     throw (.data "PSCV0-WF-MAJOR-DOMAIN: the measured argument's domain depends on changing state; dependent argument packing is unavailable")
+  -- Rel.checkCodomains requires the measure's type to be independent of the
+  -- varying arguments. This unary slice does not introduce dependent packing.
+  if !(psExprFVarIds measureType).all fixedIds.contains then
+    throw (.data "PSCV0-WF-MEASURE-TYPE: the measure codomain depends on changing arguments; dependent measure packing is unavailable")
   let states := declaredParameters.filter fun parameter => plan.stateIds.contains parameter.id
   let stateType := psElabWellFoundedForalls states declaredResult
   let measure := PsExpr.lam major.name major.type
     (psExprAbstractFVar major.id measureBody) .explicit
+  let measureLevel ← psElabExpressionSort measured.context measureType
+  let dictionary ← psElabSynthesizeInstance measured.context
+    (.app (.constE psWellFoundedRelationName [measureLevel]) measureType)
+  let dictionaryValue := psMetaInstantiate dictionary.context.metaContext dictionary.term
+  if psExprHasUnresolvedMeta (psElabGeneralizeExpr dictionaryValue) ||
+      !(psExprFVarIds dictionaryValue).all fixedIds.contains then
+    throw (.data "PSCV0-WF-RELATION: the selected relation dictionary is unresolved or captures changing state")
+  let relationPlan ← (psWellFoundedPlanForMeasure environment dictionary.context.metaContext
+    dictionary.context.localContext major.type measureType measure dictionaryValue).mapError PsElabError.infer
+  let fixName := psWellFoundedConstructionFixName relationPlan.construction
+  let equationConstant := psWellFoundedConstructionEquationName relationPlan.construction
+  let some (.definitionDecl ..) := psEnvironmentFind environment fixName
+    | throw (.data ("PSCV0-WF-FOUNDATION: checked " ++ psNameToString fixName ++ " is unavailable"))
+  let some (.theoremDecl ..) := psEnvironmentFind environment equationConstant
+    | throw (.data ("PSCV0-WF-FOUNDATION: checked " ++ psNameToString equationConstant ++ " is unavailable"))
+  let bodyHeader := { dictionary.context with
+    localContext := { bodyHeader.localContext with
+      nextId := max bodyHeader.localContext.nextId dictionary.context.localContext.nextId } }
   let localId := bodyHeader.localContext.nextId
   let callbackName := psNameAppendNum (psRootName "_psc0WellFounded") localId
-  let smallerMeasure := PsExpr.app measure (.fvar localId)
-  let currentMeasure := PsExpr.app measure (.fvar major.id)
-  let relation := psExprApplyMany (.constE (psNameAppendStr psNatName "lt") [])
-    [smallerMeasure, currentMeasure]
+  let relation := psWellFoundedDecreases relationPlan (.fvar localId) (.fvar major.id)
   let smallerStateType := psExprInstantiate1
     (psExprAbstractFVar major.id stateType) (.fvar localId)
   let callbackType := psLogicPi localId "_smaller" major.type
     (psLogicPi (localId + 1) "_decreases" relation smallerStateType)
-  let _ ← psElabExpressionSort measured.context callbackType
+  let _ ← psElabExpressionSort bodyHeader callbackType
   let callback := psLocalPushBinding bodyHeader.localContext callbackName callbackType .explicit
   let bodyContext := { bodyHeader with
     localContext := callback.context
@@ -356,15 +370,15 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   let states := states.map fun parameter => { parameter with type := normalize parameter.type }
   let stateType := psElabWellFoundedForalls states declaredResult
   let callbackType := normalize callbackType
-  let measure := normalize measure
-  let localDeclarations := measured.context.localContext.declarations.map fun declaration =>
+  let relationPlan := psWellFoundedPlanMap normalize relationPlan
+  let localDeclarations := dictionary.context.localContext.declarations.map fun declaration =>
     match declaration with
     | .binding id name type binder => .binding id name (normalize type) binder
     | .letDecl id name type value => .letDecl id name (normalize type) (normalize value)
-  let localContext := { measured.context.localContext with
+  let localContext := { dictionary.context.localContext with
     declarations := localDeclarations
-    nextId := max measured.context.localContext.nextId solved.localContext.nextId }
-  let normalizedContext := { measured.context with
+    nextId := max dictionary.context.localContext.nextId solved.localContext.nextId }
+  let normalizedContext := { dictionary.context with
     localContext := localContext
     metaContext := psMetaEmpty }
   let stateBody := psElabWellFoundedLambdas states body
@@ -373,16 +387,15 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
       (.lam callbackName callbackType (psExprAbstractFVar callback.id stateBody) .explicit)) .explicit
   let motive := PsExpr.lam major.name major.type
     (psExprAbstractFVar major.id stateType) .explicit
-  if [major.type, motive, measure, functional].any (fun term =>
+  if (psWellFoundedPlanTerms relationPlan ++ [motive, functional]).any (fun term =>
       !(psExprFVarIds term).all fixedIds.contains) then
     throw (.data "PSCV0-WF-SCOPE: the fixedpoint captured a changing parameter")
-  if [declaredType, motive, measure, functional].any psExprHasUnresolvedMeta then
+  if (psWellFoundedPlanTerms relationPlan ++ [declaredType, motive, functional]).any psExprHasUnresolvedMeta then
     throw (.data "PSCV0-WF-TELESCOPE: unresolved fixedpoint type or universe")
   let domainLevel ← psElabExpressionSort normalizedContext major.type
   let stateLevel ← psElabExpressionSort normalizedContext stateType
   let resultLevel ← psElabExpressionSort normalizedContext declaredResult
-  let fixed := psExprApplyMany (.constE psWellFoundedFixName [domainLevel, stateLevel])
-    [major.type, motive, measure, functional]
+  let fixed := PsExpr.app (psWellFoundedFixBase relationPlan [domainLevel, stateLevel] motive) functional
   let stateArguments := states.map (fun parameter => PsExpr.fvar parameter.id)
   let declaredValue := psElabWellFoundedLambdas fullParameters
     (psExprApplyMany fixed ([.fvar major.id] ++ stateArguments))
@@ -403,8 +416,7 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   let x := PsExpr.fvar major.id
   let yId := normalizedContext.localContext.nextId
   let y := PsExpr.fvar yId
-  let decrease := psExprApplyMany (.constE (psNameAppendStr psNatName "lt") [])
-    [.app measure y, .app measure x]
+  let decrease := psWellFoundedDecreases relationPlan y x
   let self := PsExpr.constE name (levels.map PsLevel.param)
   let originalArguments := fullParameters.map (fun parameter => PsExpr.fvar parameter.id)
   let recursiveArguments := fullParameters.map fun parameter =>
@@ -418,8 +430,7 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     (psLogicLam (yId + 1) "_decreases" decrease (.app fixed y))
   let rawRhs := psExprApplyMany functional [x, rawCallback]
   let sourceRhs := psExprApplyMany functional [x, unfoldCallback]
-  let rawProof := psExprApplyMany (.constE psWellFoundedFixEqName [domainLevel, stateLevel])
-    [major.type, motive, measure, functional, x]
+  let rawProof := psWellFoundedEquation relationPlan [domainLevel, stateLevel] motive functional x
   let equationContext := { normalizedContext with environment := withDefinition }
   let equationProof ← if states.isEmpty then pure rawProof else do
     for constantName in [psRootName "funext", psRootName "congrArg", psNameAppendStr psEqName "trans"] do

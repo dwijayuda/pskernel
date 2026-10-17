@@ -1,132 +1,142 @@
-## Current packed proof expected-type investigation — 2026-10-17
+## Current packed proof nested-application investigation — 2026-10-17
 
-At `f7a470106043576c9bec7ce00324d025b3c447d2`, all five gates
-completed failure with the same sole Lean compile diagnostic:
-`packages/elab/src/Ps/Elab/WellFounded.lean:290:68: unexpected identifier; expected '}'`.
-The comma-only correction did not resolve the mixed inline/newline record
-layout. This follow-up places all three fields on equally indented lines,
-matching the established multiline record-update form. It preserves every
-field value and every failure-only diagnostic probe.
+At `5c62fa2f9cf8e774d92443d2352f43c3139a5840`, the corrected diagnostic
+compiled successfully and all five gates completed. Native, F1, F2 and
+F3/F4 passed; focused M3 retained the original packed decrease-proof failure.
 
-The completed runs are native
-[39008743686](https://github.com/dwijayuda/pskernel/actions/runs/39008743686),
-focused [39008743677](https://github.com/dwijayuda/pskernel/actions/runs/39008743677),
-F1 [39008743656](https://github.com/dwijayuda/pskernel/actions/runs/39008743656),
-F2 [39008743694](https://github.com/dwijayuda/pskernel/actions/runs/39008743694)
-and F3/F4
-[39008743659](https://github.com/dwijayuda/pskernel/actions/runs/39008743659).
-Native job `117326502878` and focused job `117326502816` stopped during
-compilation. Native reported 10 successful steps, one failed compile step,
-23 skipped steps and zero cancellations. Its completed log is 89,987
-characters; the focused log is 89,133 characters.
-The failed native diagnostic artifact `12092505070` is 40,255 bytes,
-SHA-256 `6cf163fcafae33ef81e9bc8ae30e772bef061cafd701a790bc18bf27e7c3c8f3`.
-Focused uploaded no artifact. No source fixture, new goal trace,
-foundation audit or runtime workload ran at this SHA.
+| Gate | Completed run | Result |
+| --- | --- | --- |
+| Native Linux | [39009261498](https://github.com/dwijayuda/pskernel/actions/runs/39009261498) | SUCCESS; all 34 steps |
+| Focused M3 | [39009261544](https://github.com/dwijayuda/pskernel/actions/runs/39009261544) | FAILURE; all 668 compile jobs passed |
+| F1 | [39009261518](https://github.com/dwijayuda/pskernel/actions/runs/39009261518) | SUCCESS |
+| F2 | [39009261521](https://github.com/dwijayuda/pskernel/actions/runs/39009261521) | SUCCESS |
+| F3/F4/platform | [39009261520](https://github.com/dwijayuda/pskernel/actions/runs/39009261520) | SUCCESS |
 
-The preceding `a2128efbbc6c03640a107f85b9426f7f198eeece` matrix likewise
-failed during compilation at the same record, column 67:
-native [39008409040](https://github.com/dwijayuda/pskernel/actions/runs/39008409040),
-focused [39008406807](https://github.com/dwijayuda/pskernel/actions/runs/39008406807),
-F1 [39008406946](https://github.com/dwijayuda/pskernel/actions/runs/39008406946),
-F2 [39008406839](https://github.com/dwijayuda/pskernel/actions/runs/39008406839),
-F3/F4 [39008406784](https://github.com/dwijayuda/pskernel/actions/runs/39008406784).
-Its failed native artifact `12091638306` is 40,247 bytes, SHA-256
-`0d896b037f52ea098288c1fdf38af4c02bd1ba1409c23816566fdf49fc626110`.
-It also produced no source or runtime evidence. These failed syntax
-attempts do not establish the underlying proof mismatch or its repair.
-
-At `d4a44928bc4fa386508683a12fc637e0ef5ce89d`,
-[focused 39006900669](https://github.com/dwijayuda/pskernel/actions/runs/39006900669),
-job `117321101773`, compiled **all 668 jobs**. Its complete log contains the
-targeted failure for original command 24, `m3wfpacked`, during decrease
-goal solving. The original error remains `PSCV0-TYPE-MISMATCH`.
-
-The actual saved goal is `?m105`, from recursive-call byte span
-4291..4368. Its current pair contains `Nat.succ f#20` and the refined
-`acc` at `f#23`. Its smaller pair contains ordered captured arguments
-`f#29` and `f#31`: `k - 1` and the checked `Fin.mk(k - 1, ...)`.
-The local `k` at `f#25` is a let alias of `f#20`.
-The independent no-target proof replay uses the same refined `acc`.
-Thus this trace does **not** support the stale-acc hypothesis or a packing
-callback scope change.
-
-The goal reduces to `Prod.Lex` with Nat size relations, which are convertible
-to `Nat.lt`: the pinned Nat SizeOf instance is the identity. The separate
-proof replay without a target instead infers `Nat.le` with first coordinate
-`Nat.succ(k - 1)`; its second relation is unresolved. This is explicitly
-independent replay evidence, not the actual type of the original failed
-attempt. The target-guided replay fails during proof elaboration or pending
-synthesis, before goal assignment.
-
-Static inspection verifies that source calls preserve their expected type
-and that the existing application owner attempts expected-result propagation
-before the last proof argument. Such an attempt commits only when its whole
-result constraint succeeds; failed unification restores the original meta
-context. The precise failed component and pending-work state are not yet
-observed, so this commit makes no semantic repair.
-
+Focused job `117328031859` produced the complete 142,559-character log.
 All fourteen required outer source invocations ran; WF alone failed.
 The other thirteen passed, including result inference, inherited-partial
 hint scoping, Where, indexed Inhabited and nominal empty dictionaries.
-WF syntax/printing passed. The construction failure prevented its
-twenty-one-request batch and all focused backend execution.
-The P1 assumption audit passed its `Classical.choice` refusal.
-Focused diagnostic artifact `12091079414` is 2,031,379 bytes, SHA-256
-`26bc2bece0bed3dbce06037331e8aa28f229a5e5aa17917dd76b916ba2474224`.
+WF syntax/printing passed. Its unchanged construction failure prevented
+the twenty-one-request batch and all focused backend execution.
+The P1 assumption audit retained its `Classical.choice` refusal.
+Focused diagnostic artifact `12092218329` is 2,031,837 bytes, SHA-256
+`fc8bf4042c8c99eaf4290d466466c6b7b0beb9cd5bbe24c270a4a78cfa849c33`.
 
-At the same `d4a44928` SHA,
-[native 39006900686](https://github.com/dwijayuda/pskernel/actions/runs/39006900686),
-job `117321102425`, completed **all 34 reported steps successfully** before
-the next push. F1
-[39006900681](https://github.com/dwijayuda/pskernel/actions/runs/39006900681),
-F2 [39006900666](https://github.com/dwijayuda/pskernel/actions/runs/39006900666)
-and F3/F4
-[39006900698](https://github.com/dwijayuda/pskernel/actions/runs/39006900698)
-also passed. The foundation audit is field-for-field identical to `5d92eb87`:
-34 active additions, no candidate axioms, three compared recursor rules and
-the same 3,633 declarations, 41 classes and 359 instances with exact
-selected Standard identities. The audit retains `runtimeQualified: false`;
-the separate source and runtime workloads provide the execution evidence.
-Original source/Standard, modules, GC/components, TypeScript, Rust,
-repeated Wasmtime and measurements passed. The GC report retains five
-scalar worlds, 1,069 shared observations, ten natural-limb checks and
-binary/Wat equivalence. Measurements name the exact `d4a44928` SHA,
-prelude initialization of 7,897 ms, four compiler configurations and twelve
-runtime rows with the established warmup/sample method.
+The actual source failure remains original command 24, `m3wfpacked`,
+after `m3wfrelationRightStep`, during decrease-goal solving.
+The original error remains `PSCV0-TYPE-MISMATCH`.
+Saved goal `?m105` comes from recursive-call byte span 4291..4368.
+Its current pair contains `Nat.succ f#20` and refined `acc` at `f#23`;
+the smaller pair contains ordered captured arguments `f#29` and `f#31`,
+namely `k - 1` and its checked `Fin.mk(k - 1, ...)`.
+Local `k` at `f#25` is a let alias of `f#20`.
+The separate no-target proof also uses refined `acc`, ruling out the
+stale-accumulator hypothesis at this call.
+
+The new outer-application trace establishes:
+- The final `Prod.Lex.left` callback has zero scoped pending items.
+- The separate incomplete prefix has zero constructor constraints.
+- Expected-result propagation is eligible and its complete constraint succeeds.
+- No separately threaded WHNF spine component fails.
+- Raw, lightweight-progress and forced-full-drain probes give identical
+  successful constraints and empty queues.
+- The existing application engine already supplies the required Nat size
+  relation on the two PSigma first projections to the final proof argument.
+  Its WHNF is `Nat.le`; the current endpoint reduces to `Nat.succ f#20`.
+
+Consequently an outer pending-work scheduling repair is not supported.
+Application, Postponed and Unify are unchanged. The separately inferred
+whole proof without an expected type choosing `Nat.le` is still only
+independent replay evidence, not the actual type of the failed target-guided
+attempt. The remaining uncertainty is inside
+`Nat.lt_succ_of_le(Nat.sub_le(k, 1))` or subsequent full-application
+finalization/synthesis. No semantic cause or repair is claimed yet.
+
+This follow-up replaces only the existing failure-only application-report
+function with a bounded nested report. It follows the three direct final-
+argument callbacks for `Prod.Lex.left`, `Nat.lt_succ_of_le` and
+`Nat.sub_le`, using explicit decreasing Nat fuel (initially three).
+Only the top wrapper resets pending/postponing; nested reports preserve
+the entire actual intercepted callback context.
+The probes separately report target-guided elaboration and drain, full
+ordered application and finalization, independently inferred no-target
+type, ordinary Core checking against the actual domain, and direct
+type-unification/conversion-spine results. Every replay is disposable;
+none updates the original failed run or is treated as an accepted proof.
+
+The original `psProofRun` occurs once and retains its success result and
+failure rethrow. Source terms, native oracles, equations, assumption checks,
+refusals, fixture bytes and target comparisons remain unchanged.
+The candidate is independently reconstructed and reviewed:
+`psc0/packages/elab/src/Ps/Elab/WellFounded.lean`, 61,306 UTF-8 bytes,
+Git blob `59feb253b053cfd3817018be4c97e0ec82ce787a`, SHA-256
+`0ac25aae31a20ea36df316d36e3754f9a3e5cba2cd89f61d7ac248184f145ea5`.
+Reversing its one block replacement restores the exact 56,374-byte
+`5c62fa2f` owner, blob `2ae8d6710f8851d53f6c7c1644fa7873552120f7`.
+Review checked the actual error constructors, all result types, aligned
+record fields, strict fuel decrease and isolation of replay contexts.
+Cloud compilation and the resulting nested trace remain the next checks.
+
+Native job `117328031714` finished all 34 steps successfully at
+2026-10-17 06:29:53 UTC, before this follow-up push. Its complete log is
+4,477,490 characters. Native artifact `12093005278` is 6,797,365 bytes,
+SHA-256 `921ceabe6c7e88d226082068c4b10a026fb6b47eaa3459ef3633ff2f1a741244`.
+No healthy native run was cancelled.
+
+The completed native foundation audit is field-for-field identical to
+the preceding activated runs: 34 active additions, 34 candidates,
+no candidate axioms, native kernel validation and three compared
+recursor rules. The selected Standard retains 3,633 declarations,
+41 classes and 359 instances, with exact identities:
+- FNV `fnv1a64:4990397000639020696`
+- Standard SHA-256 `5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7`
+- Source-surface SHA-256 `7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6`
+
+The audit's `runtimeQualified: false` field keeps its own scope; the
+separate original source/runtime workloads provide execution evidence.
+JavaScript, TypeScript and Rust retain 1,069 shared observations each.
+Platform contracts retain 35 probes per profile for Wasm, ECMA and Rust.
+Application/module checks retain `App.compute(7)=18`, entry exports and
+three-file provenance, linked three-module Rust execution and four-module
+V8/Wasmtime GC execution. The GC report retains five scalar worlds,
+1,069 observations, ten natural-limb checks, `gcInsideComponent: true`
+and `coreBinaryWatEqual: true`. Repeated Wasmtime observations, aggregates,
+normalization, indirect parameters, repeated calls and post-return passed.
+Direct-JS artifacts retain 1,239 declaration mappings and 52 generated-
+parent origins; generic Nat/Bool recursion passed at 100,000/50,000 steps.
+Measurements name the exact `5c62fa2f` SHA and pinned Lean commit,
+prelude initialization of 5,957 ms, four compiler configurations and twelve
+runtime rows with one warmup, five runtime samples and three compiler
+samples after warmup. These original native results do not qualify the
+additional focused runtime workload that was skipped.
+
+Earlier semantic evidence remains at
+`d4a44928bc4fa386508683a12fc637e0ef5ce89d`:
+native [39006900686](https://github.com/dwijayuda/pskernel/actions/runs/39006900686)
+passed all 34 steps, F1/F2/F3 passed, and
+focused [39006900669](https://github.com/dwijayuda/pskernel/actions/runs/39006900669)
+compiled all 668 jobs before exposing the saved packed decrease goal.
 Native artifact `12091312912` is 6,797,371 bytes, SHA-256
 `6b8c2d76863024b6bb3d365489216aaf1cae65a3ad4dd70815df04acba2778f7`.
-Four gates passed; the focused decrease-proof failure blocks acceptance.
+Focused artifact `12091079414` is 2,031,379 bytes, SHA-256
+`26bc2bece0bed3dbce06037331e8aa28f229a5e5aa17917dd76b916ba2474224`.
+Its 34-declaration audit and original workloads matched; prelude was
+7,897 ms. The outer pending-work uncertainty from that run is now resolved
+by the successful `5c62fa2f` expected-result probe.
 
-This follow-up extends only the already-failed direct-exact report.
-Separate constructor-prefix probes record scoped pending-work kinds and
-constructor-constraint counts, expected-result eligibility and success,
-and the first failed component of a separately threaded weak-head
-application-spine comparison. Pair endpoints include separately reduced
-fields. An indexed replay through the existing application owner stops at
-the last argument callback to report the exact expected proof domain that
-the current ordering supplies. Independent lightweight-progress and forced
-full-drain probes report whether either changes the same result constraint.
-Each report explicitly labels its replay scope; none updates the original
-failed run or is treated as a successful original proof.
-
-The original `psProofRun`, source terms, native oracles, equations,
-assumption checks, refusals, general application/unification owners and
-target comparisons remain unchanged. The additional work is reached only
-after the original single direct-exact/single-goal failure, and all existing
-error preservation and diagnostic bounds remain.
-The next concrete task is to inspect the first failed result component,
-identify the supported repair, and complete the full five-gate matrix.
-
-The exact one-owner candidate has independent static reconstruction:
-`psc0/packages/elab/src/Ps/Elab/WellFounded.lean`, 56,374 UTF-8 bytes,
-Git blob `2ae8d6710f8851d53f6c7c1644fa7873552120f7`, SHA-256
-`1c2dc7ee98d0aa3932cd96122f6c3a3d78ae9c6ea45bbba799800fe0de8ba093`.
-Reversing the diagnostic insertions restores the 49,258-byte `d4a44928` owner,
-blob `3393a727b5fdd5dea48a68a35442c11e9a9c3a9a`, exactly.
-A local diagnostic binder is named `prefixResult` to avoid depending on
-notation-keyword parsing. No compile or semantic result is claimed before
-the corrected cloud run.
+The intermediate `a2128efb` and `f7a47010` matrices failed compilation
+only, respectively at `WellFounded.lean:290:67` and `:290:68`.
+Adding a comma did not fix the field-column check; the uniform multiline
+layout at `5c62fa2f` did. They produced no source, audit or runtime evidence.
+The native runs were
+[39008409040](https://github.com/dwijayuda/pskernel/actions/runs/39008409040)
+and [39008743686](https://github.com/dwijayuda/pskernel/actions/runs/39008743686).
+Their diagnostic artifacts were `12091638306`, 40,247 bytes,
+SHA-256 `0d896b037f52ea098288c1fdf38af4c02bd1ba1409c23816566fdf49fc626110`,
+and `12092505070`, 40,255 bytes,
+SHA-256 `6cf163fcafae33ef81e9bc8ae30e772bef061cafd701a790bc18bf27e7c3c8f3`.
+Both focused artifact lists were empty. Complete matrices remain in the
+preceding checkpoint history at the exact commits.
 
 Previous native evidence remains complete. At
 `5d92eb87072c8561bcbba1399e6944a312e38c60`,

@@ -276,56 +276,137 @@ def psElabWellFoundedPrefixConstraint (current : PsElabTermResult)
         psNatToString left.args.length ++ "/" ++ psNatToString right.args.length ++ ")={" ++
         psElabWellFoundedSpineFailure context 0 pairs ++ "}"
 
+def psElabWellFoundedFailureTag : PsElabError → String
+  | .typeMismatch => "typeMismatch"
+  | .infer .applicationTypeMismatch => "infer.applicationTypeMismatch"
+  | .infer _ => "infer"
+  | .fuelExhausted => "fuelExhausted"
+  | .unresolvedMetavariable => "unresolvedMetavariable"
+  | .implicitApplicationUnsupported => "implicitApplicationUnsupported"
+  | .proof message => "proof: " ++ message
+  | .scope message => "scope: " ++ message
+  | .data message => "data: " ++ message
+  | .atDeclaration name error =>
+    psNameToString name ++ ": " ++ psElabWellFoundedFailureTag error
+  | .atContext label error => label ++ ": " ++ psElabWellFoundedFailureTag error
+  | _ => "other PsElabError"
+
+def psElabWellFoundedProbeResult (result : Except PsElabError PsElabTermResult) : String :=
+  match result with
+  | .error error => "error=" ++ psElabWellFoundedFailureTag error
+  | .ok value =>
+    "success; source-pending=" ++ psElabWellFoundedPendingSketch value.context ++
+      "; inferred-type={" ++ psElabWellFoundedGoalSketch value.context value.type ++ "}"
+
+-- These replays start from the actual intercepted callback context. Their
+-- results are disposable and never replace the original elaboration or error.
+def psElabWellFoundedArgumentFailureDetails (elaborate : PsElaborator)
+    (context : PsElabContext) (source : PsSyntaxTerm) (target : PsExpr) : String :=
+  let guided := elaborate context source (some target)
+  let guidedDrain := match guided with
+    | .error error => .error error
+    | .ok value => psElabDrainPending elaborate value
+  let independent := match elaborate context source none with
+    | .error error => .error error
+    | .ok value => psElabDrainPending elaborate value
+  let conversion := match independent with
+    | .error error => "unavailable: " ++ psElabWellFoundedFailureTag error
+    | .ok value =>
+      let current := value.context
+      let unified := psUnify current.environment current.localContext current.metaContext value.type target
+      let checked := psElabResolvedTerm current value.term (some target)
+      let norm := psWhnf current.environment current.metaContext current.localContext
+      let left := psExprAppView (norm value.type)
+      let right := psExprAppView (norm target)
+      let pairs := ((left.head, right.head) :: left.args.zip right.args).take 9
+      "type-unify=" ++ (if unified.success then "success" else "failure") ++
+        "; checked-term={" ++ psElabWellFoundedProbeResult checked ++ "}" ++
+        "; target={" ++ psElabWellFoundedGoalSketch current target ++ "}" ++
+        "; separate conversion spine (head then args; arity " ++
+          psNatToString left.args.length ++ "/" ++ psNatToString right.args.length ++ ")={" ++
+          psElabWellFoundedSpineFailure current 0 pairs ++ "}"
+  "target-guided source elaboration={" ++ psElabWellFoundedProbeResult guided ++
+    "}; separate guided drain={" ++ psElabWellFoundedProbeResult guidedDrain ++
+    "}; independent WITHOUT-target elaboration and drain={" ++
+      psElabWellFoundedProbeResult independent ++ "}; independent conversion={" ++ conversion ++ "}"
+
+def psElabWellFoundedApplicationFailureDetailsWithFuel (fuel : Nat) (elaborate : PsElaborator)
+    (context : PsElabContext) (source : PsSyntaxTerm) (target : PsExpr) : String :=
+  match fuel with
+  | 0 => "last-argument application depth limit"
+  | remaining + 1 =>
+    let call := match source with
+      | .app (.reference name) args _ => some (name, args)
+      | .call (.reference name) args _ =>
+        if args.all (fun arg => arg.fst.isNone) then some (name, args.map Prod.snd) else none
+      | _ => none
+    match call with
+    | none => "not a direct positional reference application"
+    | some (name, args) =>
+      if args.isEmpty || args.length > 16 then "argument count outside diagnostic bound" else
+      let context := { context with sourceSpan := some (psSyntaxTermSpan source) }
+      match psElabReference context name none with
+      | .error _ => "separate raw-head replay failed"
+      | .ok head =>
+        let intercepted := psElabApplyOrderedWith
+          (fun (current : PsElabContext) (argument : Nat × PsSyntaxTerm) expected =>
+            if argument.fst + 1 == args.length then
+              let details := match expected with
+                | none => "no expected domain"
+                | some type =>
+                  psElabWellFoundedArgumentFailureDetails elaborate current argument.snd type ++
+                    "; nested last-argument application={" ++
+                    psElabWellFoundedApplicationFailureDetailsWithFuel remaining
+                      elaborate current argument.snd type ++ "}"
+              .error (.atContext
+                ("intercepted final callback; source-pending=" ++
+                  psElabWellFoundedPendingSketch current ++ "; proof-domain={" ++
+                  (match expected with
+                  | none => "none"
+                  | some type => psElabWellFoundedGoalSketch current type) ++
+                    "}; argument-probes={" ++ details ++ "}") .typeMismatch)
+            else elaborate current argument.snd expected)
+          4096 head ((List.range args.length).zip args) [] [] true (some target)
+        let callback := match intercepted with
+          | .error (.atContext label .typeMismatch) => label
+          | .error _ => "replay failed before final callback"
+          | .ok _ => "replay did not intercept a final callback"
+        let full := match psElabApplyOrdered elaborate 4096 head args [] [] true (some target) with
+          | .error error => "ordered application error=" ++ psElabWellFoundedFailureTag error
+          | .ok application =>
+            let finished := psElabFinishApplication application (some target)
+            let drained := match finished with
+              | .error error => .error error
+              | .ok value => psElabDrainPending elaborate value
+            "ordered application={" ++ psElabWellFoundedProbeResult (.ok application.result) ++
+              "; constructor-constraints=" ++ psNatToString application.constraintsRev.length ++
+              "}; finish={" ++ psElabWellFoundedProbeResult finished ++
+              "}; separate final drain={" ++ psElabWellFoundedProbeResult drained ++ "}"
+        let prefixResult := psElabApplyOrdered elaborate 4096 head
+          (args.take (args.length - 1)) [] [] false none
+        let report := match prefixResult with
+          | .error _ => "separate incomplete-prefix replay failed"
+          | .ok prefixResult =>
+            let describe := fun (value : PsElabTermResult) =>
+              psElabWellFoundedPrefixConstraint value prefixResult.constraintsRev target
+            let progress := match psElabProgressPending elaborate prefixResult.result.context with
+              | .error _ => "light progress failed"
+              | .ok progressed => describe { prefixResult.result with context := progressed }
+            let drained := match psElabDrainPending elaborate prefixResult.result with
+              | .error _ => "full drain failed"
+              | .ok value => describe value
+            "raw={" ++ describe prefixResult.result ++ "}; separate light-progress={" ++ progress ++
+              "}; separate forced-full-drain={" ++ drained ++ "}"
+        "separate ordered application replay={" ++ callback ++
+          "}; separate full application stages={" ++ full ++
+          "}; separate incomplete-prefix probes={" ++ report ++ "}"
+
 def psElabWellFoundedApplicationFailureDetails (elaborate : PsElaborator)
     (context : PsElabContext) (source : PsSyntaxTerm) (target : PsExpr) : String :=
-  let call := match source with
-    | .app (.reference name) args _ => some (name, args)
-    | .call (.reference name) args _ =>
-      if args.all (fun arg => arg.fst.isNone) then some (name, args.map Prod.snd) else none
-    | _ => none
-  match call with
-  | none => "not a direct positional reference application"
-  | some (name, args) =>
-    if args.isEmpty || args.length > 16 then "argument count outside diagnostic bound" else
-    let context := { context with
-      pending := []
-      postponing := true
-      sourceSpan := some (psSyntaxTermSpan source) }
-    match psElabReference context name none with
-    | .error _ => "separate raw-head replay failed"
-    | .ok head =>
-      let intercepted := psElabApplyOrderedWith
-        (fun (current : PsElabContext) (argument : Nat × PsSyntaxTerm) expected =>
-          if argument.fst + 1 == args.length then
-            .error (.atContext
-              ("intercepted final callback; source-pending=" ++
-                psElabWellFoundedPendingSketch current ++ "; proof-domain={" ++
-                (match expected with
-                | none => "none"
-                | some type => psElabWellFoundedGoalSketch current type) ++ "}") .typeMismatch)
-          else elaborate current argument.snd expected)
-        4096 head ((List.range args.length).zip args) [] [] true (some target)
-      let callback := match intercepted with
-        | .error (.atContext label .typeMismatch) => label
-        | .error _ => "replay failed before final callback"
-        | .ok _ => "replay did not intercept a final callback"
-      let prefixResult := psElabApplyOrdered elaborate 4096 head
-        (args.take (args.length - 1)) [] [] false none
-      let report := match prefixResult with
-        | .error _ => "separate incomplete-prefix replay failed"
-        | .ok prefixResult =>
-          let describe := fun (value : PsElabTermResult) =>
-            psElabWellFoundedPrefixConstraint value prefixResult.constraintsRev target
-          let progress := match psElabProgressPending elaborate prefixResult.result.context with
-            | .error _ => "light progress failed"
-            | .ok progressed => describe { prefixResult.result with context := progressed }
-          let drained := match psElabDrainPending elaborate prefixResult.result with
-            | .error _ => "full drain failed"
-            | .ok value => describe value
-          "raw={" ++ describe prefixResult.result ++ "}; separate light-progress={" ++ progress ++
-            "}; separate forced-full-drain={" ++ drained ++ "}"
-      "separate ordered application replay={" ++ callback ++
-        "}; separate incomplete-prefix probes={" ++ report ++ "}"
+  let context := { context with
+    pending := []
+    postponing := true }
+  psElabWellFoundedApplicationFailureDetailsWithFuel 3 elaborate context source target
 
 -- This probe runs only after the original tactic run failed. Its independent
 -- elaborations cannot update that run, solve its goals, or replace its error.

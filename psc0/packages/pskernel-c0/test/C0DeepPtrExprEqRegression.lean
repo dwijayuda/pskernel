@@ -62,4 +62,26 @@ def main : IO Unit := do
   let negative := PsKernelExpr.app child diff
   if c0TestDecideResult lhs negative then
     throw (IO.userError "pointer-shared negative 2^24 DAG falsely accepted")
-  IO.println "C0_DEEP_PTR_DECEQ exact_typed_proof=true ordinary_cases=22 shared_2pow24=pass negative=pass no_admission=true"
+  -- The two operands are independently reconstructed yet internally
+  -- share each child twice. Root-only pointer equality still does O(2^n)
+  -- source work; the dependent pair memo visits each shared pair once.
+  let independentlySharedA := c0SharedExpression 12 atom
+  let independentlySharedB := c0SharedExpression 12 atom
+  let independentlyDifferent := c0SharedExpression 12 diff
+  match psKernelC0ExactPairEq independentlySharedA independentlySharedB with
+  | .isTrue _ => pure ()
+  | .isFalse _ =>
+      throw (IO.userError "independently shared equal DAGs were rejected")
+  match psKernelC0ExactPairEq independentlySharedA independentlyDifferent with
+  | .isTrue _ =>
+      throw (IO.userError "memoized pair hash incorrectly proved unequal DAGs equal")
+  | .isFalse _ => pure ()
+  for (a, b) in sourceCases do
+    let original := c0OldDecideResult a b
+    let cached : Bool :=
+      match psKernelC0ExactPairEq a b with
+      | .isTrue _ => true
+      | .isFalse _ => false
+    if cached != original then
+      throw (IO.userError "dependent pair memo disagrees with original full DecidableEq")
+  IO.println "C0_DEEP_PTR_DECEQ exact_typed_proof=true ordinary_cases=22 shared_2pow24=pass independently_shared_2pow12=pass pair_memo=source_proof no_admission=true"

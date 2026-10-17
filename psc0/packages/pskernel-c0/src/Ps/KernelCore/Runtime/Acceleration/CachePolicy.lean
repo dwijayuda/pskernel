@@ -359,3 +359,40 @@ theorem psKernelC0AdaptiveSemanticCacheEligible_source
       @psKernelC0AdaptiveSemanticCacheEligible := by
   funext expr
   exact (psKernelC0AdaptiveSemanticCacheEligible_source expr).symm
+
+/-!
+The measured native `shared-subterm` n32 DefEq root (PR #126) was
+repeatedly inside the ORIGINAL FVar recursion through
+`psKernelSemanticPairCacheEligible` and `psKernelDefEqQuick`.
+Optimizing the single-expression WHNF eligibility alone did not rewrite
+this two-expression source call. Select source-equivalent DAG-aware
+eligibility explicitly at the DefEq lookup call site, preserving exact
+FVar scope restrictions and the original success-only pair cache.
+-/
+
+/-- A cache *eligibility* decision only; never a proof or DefEq result.
+    In particular no successful pair is admitted without the original
+    FVar-free check and exact checked-source pair lookup. -/
+def psKernelC0CertifiedSemanticPairEligible
+    (left right : PsKernelExpr) : Bool :=
+  psKernelC0AdaptiveSemanticCacheEligible left &&
+    psKernelC0AdaptiveSemanticCacheEligible right
+
+/-- Complete Boolean equivalence to the original pair cache guard,
+    for all contexts, expressions, and checker states. -/
+theorem psKernelC0CertifiedSemanticPairEligible_source
+    (left right : PsKernelExpr) :
+    psKernelC0CertifiedSemanticPairEligible left right =
+      psKernelSemanticPairCacheEligible left right := by
+  simp only [psKernelC0CertifiedSemanticPairEligible,
+    psKernelSemanticPairCacheEligible,
+    psKernelC0AdaptiveSemanticCacheEligible_source]
+
+/-- The compiled pair-guard call also has an all-input source proof.
+    This is a performance selection only: a false or undecidable
+    term-equality cache never becomes true from this rule. -/
+@[csimp] theorem psKernelSemanticPairCacheEligible_csimp :
+    @psKernelSemanticPairCacheEligible =
+      @psKernelC0CertifiedSemanticPairEligible := by
+  funext left right
+  exact (psKernelC0CertifiedSemanticPairEligible_source left right).symm

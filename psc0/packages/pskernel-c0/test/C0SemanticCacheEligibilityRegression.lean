@@ -40,4 +40,17 @@ def main : IO Unit := do
     if selected != expected ||
         selected != !psKernelC0MemoizedHasFVar expr then
       throw (IO.userError "whole-source semantic cache-eligibility verdict diverged")
-  IO.println "C0_WHNF_ELIG source_proved=all_inputs selected=15 shared_DAG=pass FVar_scope_guard=unchanged no_admission=true"
+  for left in cases do
+    for right in cases do
+      if psKernelC0CertifiedSemanticPairEligible left right !=
+          psKernelSemanticPairCacheEligible left right then
+        throw (IO.userError "DefEq pair eligibility differs from the source")
+  -- Compare source parity including a deep shared DAG on one side and a
+  -- context-local free variable on the other; no cache leak can be hidden.
+  let large := c0EligSharedDAG 18 atom
+  for pair in [(large, large), (large, yes), (yes, large),
+      (c0EligSharedDAG 18 yes, large)] do
+    if psKernelC0CertifiedSemanticPairEligible pair.1 pair.2 !=
+        psKernelSemanticPairCacheEligible pair.1 pair.2 then
+      throw (IO.userError "shared DefEq cache guard source divergence")
+  IO.println "C0_WHNF_ELIG source_proved=all_inputs selected=15 pair_guards=225 shared_DAG=pass FVar_scope_guard=unchanged no_admission=true"

@@ -150,7 +150,10 @@ def psKernelDefEqQuick
   if psKernelExprEq left right then
     Except.ok
       (Prod.mk (Option.some true) state)
-  else if psKernelSemanticPairCacheEligible left right &&
+  -- The all-input source-equivalent certified pair guard avoids the
+  -- historical exponential FVar traversal in quick DefEq cache screening.
+  -- Actual equality/cache success remains checked by the original set.
+  else if psKernelC0CertifiedSemanticPairEligible left right &&
       psKernelExprPairSetContains state.success left right then
     Except.ok
       (Prod.mk (Option.some true) state)

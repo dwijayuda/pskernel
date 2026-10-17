@@ -387,7 +387,7 @@ def psKernelC0LegacyPairGo :
        let lhs := PsKernelExpr.app lf la
        let rhs := PsKernelExpr.app rf ra
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
+          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
       | some cached => (cached, memo)
       | none =>
           let (f, m1) := psKernelC0LegacyPairGo lf rf memo
@@ -414,7 +414,7 @@ def psKernelC0LegacyPairGo :
        let lhs := PsKernelExpr.lam ln lt lb li
        let rhs := PsKernelExpr.lam rn rt rb ri
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
+          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
       | some cached => (cached, memo)
       | none =>
           let (t, m1) := psKernelC0LegacyPairGo lt rt memo
@@ -441,7 +441,7 @@ def psKernelC0LegacyPairGo :
        let lhs := PsKernelExpr.forallE ln lt lb li
        let rhs := PsKernelExpr.forallE rn rt rb ri
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
+          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
       | some cached => (cached, memo)
       | none =>
           let (t, m1) := psKernelC0LegacyPairGo lt rt memo
@@ -468,7 +468,7 @@ def psKernelC0LegacyPairGo :
        let lhs := PsKernelExpr.letE ln lt lv lb ld
        let rhs := PsKernelExpr.letE rn rt rv rb rd
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
+          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
       | some cached => (cached, memo)
       | none =>
           let (t, m1) := psKernelC0LegacyPairGo lt rt memo
@@ -512,7 +512,7 @@ def psKernelC0LegacyPairGo :
        let lhs := PsKernelExpr.mdata lm le
        let rhs := PsKernelExpr.mdata rm re
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
+          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
       | some cached => (cached, memo)
       | none =>
           let (e, m1) := psKernelC0LegacyPairGo le re memo
@@ -526,7 +526,7 @@ def psKernelC0LegacyPairGo :
        let lhs := PsKernelExpr.proj ln li le
        let rhs := PsKernelExpr.proj rn ri re
       match psKernelC0LegacyPairFind lhs rhs
-          (psKernelC0PairIndexHint left) (psKernelC0PairIndexHint right) memo with
+          (psKernelC0PairIndexHint lhs) (psKernelC0PairIndexHint rhs) memo with
       | some cached => (cached, memo)
       | none =>
           let (e, m1) := psKernelC0LegacyPairGo le re memo

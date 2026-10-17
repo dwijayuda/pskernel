@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Ops
+import Ps.KernelCore.Core.ExprDecidableEq
 import Ps.KernelCore.Checker.DefEq.FullShape
 
 /-
@@ -534,7 +535,10 @@ def psKernelDefEqSourceStepWithFuel
   | Except.error error =>
       Except.error error
   | Except.ok nextContext =>
-      if psKernelExprEq left right then
+      -- Complete all-input source equality is proved in Core.ExprDecidableEq;
+      -- use it at the ACTUAL hot DefEq root rather than relying on a
+      -- compiler csimp declaration that is imported after Core.Expr.
+      if psKernelC0MemoizedExprEq left right then
         Except.ok
           (psKernelDefEqFinish
             state

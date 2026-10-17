@@ -35,6 +35,7 @@ def psWhereValueParts (source : PsSyntaxDeclaration) :
     Except PsElabError (PsSyntaxName × List PsScopeBinder × PsSyntaxTerm × PsSyntaxTerm) :=
   match source with
   | .definition name binders type value _ | .partialDefinition name binders type value _
+  | .noncomputableDefinition name binders type value _
   | .fixedpointDefinition name binders type value _
   | .wellFoundedDefinition name binders type value _ _ => pure (name, binders, type, value)
   | _ => throw (.scope "PSCV0-D-WHERE-01: typed recursive groups require selected value declarations")
@@ -45,6 +46,7 @@ def psWhereMapValue (source : PsSyntaxDeclaration) (name : PsSyntaxName)
   match source with
   | .definition _ _ _ _ span => pure (.definition name binders type value span)
   | .partialDefinition _ _ _ _ span => pure (.partialDefinition name binders type value span)
+  | .noncomputableDefinition _ _ _ _ span => pure (.noncomputableDefinition name binders type value span)
   | .fixedpointDefinition _ _ _ _ span => pure (.fixedpointDefinition name binders type value span)
   | .wellFoundedDefinition _ _ _ _ _ span =>
     match termination with

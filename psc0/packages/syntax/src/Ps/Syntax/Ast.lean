@@ -292,6 +292,14 @@ inductive PsSyntaxDeclaration where
       (type : PsSyntaxTerm)
       (value : PsSyntaxTerm)
       (span : PsSourceSpan)
+  -- A logical definition with no executable implementation. This is source
+  -- policy metadata, never a new Core declaration or logical assumption.
+  | noncomputableDefinition
+      (name : PsSyntaxName)
+      (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+      (type : PsSyntaxTerm)
+      (value : PsSyntaxTerm)
+      (span : PsSourceSpan)
   -- Retain the requested P1 strategy through parsing and scope resolution.
   -- Its eventual fixed-point construction has a separate assumption gate;
   -- this node is neither a total definition nor an opaque P0 implementation.

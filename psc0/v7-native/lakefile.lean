@@ -87,6 +87,10 @@ lean_exe pscv0_m3_partial_fixpoint_probe where
   root := `Pscv0M3PartialFixpointProbe
   supportInterpreter := true
 
+lean_exe pscv0_m3_noncomputable where
+  srcDir := "../test"
+  root := `Pscv0M3Noncomputable
+
 lean_exe pscv0_m3_partial_fixpoint where
   srcDir := "../test"
   root := `Pscv0M3PartialFixpoint

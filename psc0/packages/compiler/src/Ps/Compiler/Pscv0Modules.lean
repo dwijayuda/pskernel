@@ -95,6 +95,7 @@ structure PsPscv0ModuleInterface where
   instances : List PsInstanceEntry := []
   defaults : List PsInstanceEntry := []
   reducibility : List (PsName × PsReducibility) := []
+  noncomputableNames : List PsName := []
 
 def psPscv0ImportedDeclaration (exposed : List PsName) : PsDeclaration → PsDeclaration
   | .definitionDecl name levels type value =>
@@ -126,7 +127,9 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
   let reducibility := right.reducibility.foldl (fun acc item =>
     if acc.any (fun prior => psNameEq prior.fst item.fst) then acc else acc ++ [item])
     left.reducibility
-  { declarations, classes, classParameters, instances, defaults, reducibility }
+  let noncomputableNames := right.noncomputableNames.foldl (fun names name =>
+    if names.any (psNameEq name) then names else names ++ [name]) left.noncomputableNames
+  { declarations, classes, classParameters, instances, defaults, reducibility, noncomputableNames }
 
 -- Public identity is selected from source-command ownership, rather than from
 -- the final runtime IR (which also contains private and generated workers).
@@ -147,7 +150,8 @@ def psPscv0OwnInterface (environment : PsEnvironment)
   let defaults := environment.instances.defaults.filter visible
   { declarations := publicDecls.map (psPscv0ImportedDeclaration exposed),
     classes, classParameters, instances, defaults,
-    reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name)) }
+    reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name))
+    noncomputableNames := names.filter (psEnvironmentIsNoncomputable environment) }
 
 -- The same instance may reach a client through two public-import paths.
 -- Register it exactly once, without changing the relative instance priorities.
@@ -176,6 +180,7 @@ def psPscv0InstallInterface (environment : PsEnvironment)
     else psInstanceIndexAddDefault index entry) instances
   let environment := view.reducibility.foldl (fun env (name, status) =>
     psEnvironmentSetReducibility env name status) environment
+  let environment := view.noncomputableNames.foldl psEnvironmentMarkNoncomputable environment
   return { environment with classes, classParameters, instances }
 
 def psPscv0ExprConstants : PsExpr → List PsName
@@ -245,6 +250,7 @@ def psCompilerPreparePscv0Project (entryName : String)
   let mut built : List PsPscv0BuiltModule := []
   let mut declarations : List PsDeclaration := []
   let mut recursorWorkerGroups : List PsRecursorWorkerGroup := []
+  let mut noncomputableNames : List PsName := []
   let mut globalNames : List PsName := []
   let mut origins : List PsPscv0ProjectOrigin := []
   let mut mainNames : List PsName := []
@@ -297,12 +303,13 @@ def psCompilerPreparePscv0Project (entryName : String)
     built := built ++ [{ name := item.name, interface, ownNames }]
     declarations := declarations ++ own
     recursorWorkerGroups := recursorWorkerGroups ++ output.prepared.recursorWorkerGroups
+    noncomputableNames := noncomputableNames ++ output.prepared.noncomputableNames
     origins := origins ++ [{
       moduleName := item.name, sourceName := item.sourceName, source := item.source,
       batches := elaborated.origins, parents := output.originParents }]
     if item.name == entryName then
       mainNames := ownPublic.declarations.map psDeclarationName
-  let prepared : PsCompilerAdmissionReadyModule := { declarations, recursorWorkerGroups }
+  let prepared : PsCompilerAdmissionReadyModule := { declarations, recursorWorkerGroups, noncomputableNames }
   -- Source-level 'public import' is a transitive API view for importing
   -- modules, not an instruction to export dependency functions from the
   -- executable entry artifact. Link every dependency, expose entry names only.

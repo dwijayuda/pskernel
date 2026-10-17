@@ -59,7 +59,7 @@ def psElabWhereStrategy (source : PsSyntaxDeclaration) :
     Except PsElabError PsElabPreDefinitionStrategy := do
   let (source, _, _) ← psWhereSourceParts source
   match source with
-  | .definition .. => return .total
+  | .definition .. | .noncomputableDefinition .. => return .total
   | .partialDefinition .. => return .partial
   | .wellFoundedDefinition .. => return .wellFounded
   | .fixedpointDefinition .. => return .fixedpoint

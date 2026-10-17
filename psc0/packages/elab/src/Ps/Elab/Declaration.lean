@@ -98,6 +98,7 @@ def psElabOriginSource
       (parent.fst, PsSourceSpan.mk parent.snd.start span.stop)
   | PsSyntaxDeclaration.definition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.partialDefinition name _ _ _ span => Prod.mk name span
+  | PsSyntaxDeclaration.noncomputableDefinition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.fixedpointDefinition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.wellFoundedDefinition name _ _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span
@@ -317,11 +318,10 @@ def psElabDeclaration
         binders
         type
         value
+  | .noncomputableDefinition .. =>
+      Except.error (.data "PSCV0-NONCOMPUTABLE-BATCH: noncomputable policy requires typed command-batch elaboration")
   | .fixedpointDefinition _ _ _ _ _ =>
-      -- This is the audited dependency of the mandated pinned construction,
-      -- not a parser error or an assertion about every constructive fixpoint.
-      -- Do not relabel P1 as P0 or an ordinary total definition to evade it.
-      Except.error (.data "PSCV0-FIXPOINT-ASSUMPTION: selected Lean.Order.fix construction requires unapproved Classical.choice through CCPO.csup; partial_fixpoint admission is unavailable")
+      Except.error (.data "PSCV0-FIXPOINT-BATCH: fixedpoint declarations require typed command-batch elaboration")
   | .wellFoundedDefinition _ _ _ _ _ _ =>
       -- The definition and its checked equation are one source-owned batch.
       -- A single-declaration caller must not silently discard the equation.

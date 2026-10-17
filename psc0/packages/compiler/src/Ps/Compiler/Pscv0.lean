@@ -83,6 +83,7 @@ def psCompilerPscv0ErasureError : PsErasureError → String
   | .inDeclaration name cause => psCompilerPscv0ErasureError cause ++ " (in " ++ psNameToString name ++ ")"
   | .unsupportedApplication => "unsupported application"
   | .unknownConstant name => "unknown constant " ++ psNameToString name
+  | .noncomputableDependency name => "PSCV0-NONCOMPUTABLE-EXEC: computational dependency on " ++ psNameToString name
 
 def psCompilerPscv0Error : PsCompilerError → String
   | .normalization message => "PSCV0-PREPARATION: " ++ message

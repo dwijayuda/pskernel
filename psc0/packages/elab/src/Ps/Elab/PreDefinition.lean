@@ -33,6 +33,7 @@ def psElabPreDefinitionSourceBinders (member : PsElabPreDefinition) :
   | .declaration source =>
     match psElabPreDefinitionDeclarationHead source with
     | .definition _ binders _ _ _ | .partialDefinition _ binders _ _ _
+      | .noncomputableDefinition _ binders _ _ _
       | .fixedpointDefinition _ binders _ _ _ | .wellFoundedDefinition _ binders _ _ _ _ =>
       return binders
     | _ => throw (psElabPreDefinitionError "SOURCE" "checked predefinition has no def/function source owner")
@@ -48,7 +49,7 @@ def psElabPreDefinitionSourceStrategy (members : List PsElabPreDefinition)
   match member.source with
   | .declaration source =>
     match psElabPreDefinitionDeclarationHead source with
-    | .definition .. => return .total
+    | .definition .. | .noncomputableDefinition .. => return .total
     | .partialDefinition .. => return .partial
     | .wellFoundedDefinition .. => return .wellFounded
     | .fixedpointDefinition .. => return .fixedpoint

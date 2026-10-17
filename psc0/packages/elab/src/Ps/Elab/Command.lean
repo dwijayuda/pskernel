@@ -26,6 +26,8 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   let resolver := { resolver with selfName := some name.segments }
   let visit := psScopeTerm 4096 resolver
   match source with
+  | .noncomputableDefinition .. =>
+    throw (.data "PSCV0-NONCOMPUTABLE-BATCH: noncomputable policy requires typed command-batch elaboration")
   | .whereDeclaration .. =>
     throw (.scope "PSCV0-WHERE-BATCH: local definitions require typed command-batch scope")
   | .definition _ binders type value span
@@ -197,6 +199,11 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   if result.members.length != block.members.length then
     throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
   let environment ← psAddDeclarationList state.environment result.batch.declarations
+  let environment := if members.any (fun member =>
+      psElabPreDefinitionDeclarationNoncomputable member.declaration) then
+    result.batch.declarations.foldl (fun env declaration =>
+      psEnvironmentMarkNoncomputable env (psDeclarationName declaration)) environment
+  else environment
   let outputs := block.members.zip result.members
   let origins := scopedMembers.zipIdx.map fun (member, index) =>
     let owned := outputs.filter (fun output => output.fst.sourceIndex == index)
@@ -244,7 +251,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   -- The typed dependency owner decides whether a retained recursion hint is
   -- used. A genuine nonrecursive definition never invokes WF or P1 admission.
   let usePreDefinitions := match source with
-    | .whereDeclaration .. => true
+    | .whereDeclaration .. | .noncomputableDefinition .. => true
     | .definition _ _ (.omittedType _) _ _
     | .partialDefinition _ _ (.omittedType _) _ _
     | .wellFoundedDefinition _ _ (.omittedType _) _ _ _
@@ -340,7 +347,7 @@ def psElabMutualStrategy (members : List PsSyntaxMutualMember) : Except PsElabEr
   if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
   if members.any (fun member => match member.declaration with
       | .fixedpointDefinition .. => true | _ => false) then
-    throw (.data "PSCV0-FIXPOINT-ASSUMPTION: selected Lean.Order.fix construction requires unapproved Classical.choice through CCPO.csup; partial_fixpoint admission is unavailable")
+    throw (.data "PSCV0-FIXPOINT-BATCH: fixedpoint components require the typed predefinition owner")
   if members.any (fun member => match member.declaration with
       | .wellFoundedDefinition .. => true | _ => false) then
     throw (.data "PSCV0-MUTUAL-WF: mutual well-founded recursion requires a checked group construction; admission is unavailable")

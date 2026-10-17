@@ -2275,12 +2275,19 @@ def psEraseRuntimeExprWithFuelWorker
   match fuel with
   | Nat.zero => fun (_scope : PsErasureScope) (_expr : PsExpr) => Except.error PsErasureError.fuelExhausted
   | Nat.succ remaining =>
-    fun (scope : PsErasureScope) (expr : PsExpr) =>
+    fun (scope : PsErasureScope) (expr : PsExpr) => do
       let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=
         fun (nextScope : PsErasureScope) (value : PsExpr) =>
           let eraseAtRemainingFuel : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=
             psEraseRuntimeExprWithFuelWorker environment remaining;
           eraseAtRemainingFuel (psErasureNestedRuntimeScope nextScope) value;
+      -- This visitor receives retained computational terms. Checked binder
+      -- roles already skip proof, type and index arguments. Inspect the raw
+      -- head before projection expansion can hide its execution policy.
+      let forbidden := match (psErasureAppView expr).head with
+        | .constE name _ => if psEnvironmentIsNoncomputable environment name then some name else none
+        | _ => none
+      if let some name := forbidden then throw (.noncomputableDependency name)
       match psErasureExpandUnboxedProjection environment scope expr with
       | some expanded => smaller scope expanded
       | none => match expr with

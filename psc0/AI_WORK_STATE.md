@@ -41,9 +41,15 @@ This checkpoint promotes the same qualified compiler/test content to main for Na
 Root causes resolved: correct Lean4.35.0 congrArg Core argument order, retained old policy cases now logical-only positives, native constructor-pattern spelling in the fixture, and fixture-only IO diagnostic syntax. No compiler grammar, proof criterion, negative criterion or budget was weakened. See [P1 design and evidence](docs/PSCV0_M3_PARTIAL_FIXPOINT_ACTIVATION_2026-10-18.md).
 
 
-## Next coherent source-policy slice
+## Noncomputable source-policy candidate — 18 October 2026
 
-A native .lean implementation of proof/spec-only noncomputable declarations has been designed and prepared separately, but is not included in this P1 integration checkpoint. It will retain source-owned policy through imports/preparation, preserve checked logical definitions, and reject executable computational dependencies in shared erasure. It must be committed and qualified independently. Do not infer its acceptance from this checkpoint.
+Main integration is running at de6679464cac9780bae7066052714c53984dbd00. F1 39076409639, F2 39076409495 and F3 39076409521 succeeded; Native39076409463 and focused M3 39076409661 remain running. Do not supersede healthy Native. Last accepted complete five-gate main remains f271f2a35789b120dbe1a6dcd5a555db44e72134.
+
+Preparation now implements noncomputable def/function as source execution policy, retaining unchanged kernel-checked logical declarations. Indexed environment metadata survives preparation, public interfaces, private project closure and source printing; generated helpers inherit ownership. Shared erasure omits these implementations and rejects computational references while permitting erased proof/type uses. Original mutual mains must agree on computability. No new trusted assumption or Standard asset is introduced. The consolidated native/source/import/erasure fixture plans10 runtime comparisons across five targets; compilation, kernel qualification and runtime evidence are pending. See [design and pinned Lean references](docs/PSCV0_M3_NONCOMPUTABLE_2026-10-18.md).
+
+This slice does not close M3+B. Generic/dependent P1 qualification, generalized and mutual WF handling, the remaining selected data/source matrix and exact-SHA five-gate integration remain open.
+
+
 
 ## Selected P1 Standard identities
 
@@ -58,7 +64,7 @@ Accepted main before Order:3635 declarations,42 classes,359 ordinary instances,1
 
 ## Next work, in dependency order
 
-1. Finish current preparation qualification. Read exact failed diagnostics and root causes; retain all acceptance criteria. Preparation is a focused construction/emission gate, not backend runtime parity.
+1. Qualify the noncomputable preparation candidate; current main P1 integration runs at de6679464cac9780bae7066052714c53984dbd00. Read exact failed diagnostics and root causes; retain all acceptance criteria. Preparation is a focused construction/emission gate, not backend runtime parity.
 2. Promote a qualified coherent source candidate to main while preserving both histories, then allow Native, focused M3, F1, F2 and F3 to finish on one exact compiler/test SHA. Do not advance main while Native is healthy and running. P1 adds30 required observations; a later noncomputable slice plans10. Preserve all prior cases and report only actual executed totals.
 3. Close selected generic/section/capture/dependent-result P1 coverage and actual ordinary runtime evidence. Current P1 uses checked Pi/PProd CCPO lifting, independent flat-order inhabitation, monotonicity, Order.fix/fix_eq and exact source equations. Runtime ownership reconstructs the entire retained functional; a kernel-valid unrelated equality cannot authorize a different body. Exact negative/verified boundaries remain.
 4. Generalize total WF argument handling, then compatible mutual WF through the same abstraction. Existing code has explicit-only source calls and exactly-two measured/dependent slots. Keep actual source header ownership, evaluation order, dependent refinement, checked decreases and equations. Use pinned ArgsPacker.Unary's n-ary right-associated PSigma algorithm and WF/PackMutual's PSum component packing; do not flatten a user PSigma field or introduce two-function/three-argument special cases. Check selected PSum foundation availability before using it.

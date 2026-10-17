@@ -172,6 +172,16 @@ structure PsEnvironment where
   -- Aliases never create kernel declarations or new proof authority.
   exportedAliases : List (PsName × PsName) := []
   reducibility : PsBucketIndex (PsName × PsReducibility) := .empty
+  -- Lean NoncomputableAttr-style execution policy; invisible to kernel typing.
+  noncomputableIndex : PsBucketIndex PsName := .empty
+
+def psEnvironmentIsNoncomputable (environment : PsEnvironment) (name : PsName) : Bool :=
+  (psBucketFind 16 environment.noncomputableIndex (psEnvironmentNameHash name)).any (psNameEq name)
+
+def psEnvironmentMarkNoncomputable (environment : PsEnvironment) (name : PsName) : PsEnvironment :=
+  if psEnvironmentIsNoncomputable environment name then environment else
+    { environment with noncomputableIndex := psBucketInsert 16 environment.noncomputableIndex
+        (psEnvironmentNameHash name) name }
 
 def psEnvironmentReducibility? (environment : PsEnvironment) (name : PsName) :
     Option PsReducibility :=

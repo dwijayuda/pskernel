@@ -1,5 +1,14 @@
 # Continue PSC0 v7.2 — Complete M3+B autonomously
 
+## Noncomputable source-policy candidate — 18 October 2026
+
+Main integration is running at de6679464cac9780bae7066052714c53984dbd00. F1 39076409639, F2 39076409495 and F3 39076409521 succeeded; Native39076409463 and focused M3 39076409661 remain running. Do not supersede healthy Native. Last accepted complete five-gate main remains f271f2a35789b120dbe1a6dcd5a555db44e72134.
+
+Preparation now implements noncomputable def/function as source execution policy, retaining unchanged kernel-checked logical declarations. Indexed environment metadata survives preparation, public interfaces, private project closure and source printing; generated helpers inherit ownership. Shared erasure omits these implementations and rejects computational references while permitting erased proof/type uses. Original mutual mains must agree on computability. No new trusted assumption or Standard asset is introduced. The consolidated native/source/import/erasure fixture plans10 runtime comparisons across five targets; compilation, kernel qualification and runtime evidence are pending. See [design and pinned Lean references](docs/PSCV0_M3_NONCOMPUTABLE_2026-10-18.md).
+
+This slice does not close M3+B. Generic/dependent P1 qualification, generalized and mutual WF handling, the remaining selected data/source matrix and exact-SHA five-gate integration remain open.
+
+
 Read AI_WORK_STATE.md first, then PSCV0_LANGUAGE_REFERENCE_v7.2.md, the current M3 foundation/exit ledger, implementation roadmap and dated P1/noncomputable design receipts. This prompt supersedes historical checkpoint narratives; use live repository state as truth.
 
 Work only through the connected GitHub tools and GitHub Linux CI on dwijayuda/pskernel. Do not clone or run local builds/tests, do not use Desktop Commander, and do not start PSKernel-Core/C0/self-hosting/C5. Keep implementation native portable .lean and independent checking by official Lean4.35.0 at eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Approved foundation is exactly propext, Quot.sound and Classical.choice. Wasm uses GC internally and linear memory only at explicit ABI boundaries.

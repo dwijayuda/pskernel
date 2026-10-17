@@ -121,6 +121,12 @@ inductive PsErasureError where
   | inDeclaration (name : PsName) (cause : PsErasureError)
   | unsupportedApplication
   | unknownConstant (name : PsName)
+  | noncomputableDependency (name : PsName)
+
+def psErasureNoncomputableDependency? : PsErasureError → Option PsName
+  | .noncomputableDependency name => some name
+  | .inDeclaration _ error => psErasureNoncomputableDependency? error
+  | _ => none
 
 structure PsRuntimeStructureField where
   sourceIndex : Nat
@@ -564,7 +570,8 @@ def psErasureAddDeclarationEntry
     (entries : PsErasureNameIndex PsErasureEntryInfo) :
     Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
   -- The emitted declaration loop drops these definitions before opening binders.
-  if psErasureIsNonRuntimeDeclaration environment type then Except.ok entries
+  if psEnvironmentIsNoncomputable environment name ||
+      psErasureIsNonRuntimeDeclaration environment type then Except.ok entries
   else
     match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
     | Except.error error => Except.error error

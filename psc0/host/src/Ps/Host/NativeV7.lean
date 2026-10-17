@@ -296,12 +296,21 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
   -- view available to proof elaboration or verified artifact admission.
   let partialBody := output.prepared.declarations.any fun decl =>
     match decl with | .partialDecl .. => true | _ => false
-  let ir ← fromResult "erase"
-    ((if partialBody then
-        psCompilerOrdinaryPartialIrFromCheckedPrepared output.prepared request.targetWordSize
-      else
-        psCompilerVerifiedIrFromPrepared output.prepared request.targetWordSize
-      ).mapError psCompilerPscv0Error)
+  if let .selected names := request.exports then
+    if let some name := output.prepared.noncomputableNames.find? (fun name =>
+        names.contains (psNameToString name)) then
+      throw { phase := "assurance", message :=
+        "PSCV0-NONCOMPUTABLE-EXEC: requested executable export " ++ psNameToString name }
+  let erased := if partialBody then
+    psCompilerOrdinaryPartialIrFromCheckedPrepared output.prepared request.targetWordSize
+  else psCompilerVerifiedIrFromPrepared output.prepared request.targetWordSize
+  let ir ← match erased with
+    | .ok ir => pure ir
+    | .error (.erasure error) =>
+      match psErasureNoncomputableDependency? error with
+      | some _ => throw { phase := "assurance", message := psCompilerPscv0ErasureError error }
+      | none => throw { phase := "erase", message := psCompilerPscv0Error (.erasure error) }
+    | .error error => throw { phase := "erase", message := psCompilerPscv0Error error }
   let ir := match project with
     | none => ir
     | some value =>

@@ -23,6 +23,8 @@ structure PsCompilerAdmissionReadyModule where
   -- Locators for ordinary definitions retained in declarations, never checker
   -- authority. Erasure validates every complete companion equation afresh.
   recursorWorkerGroups : List PsRecursorWorkerGroup := []
+  -- Source execution policy is separate from the unchanged checked graph.
+  noncomputableNames : List PsName := []
 
 -- A preparation checkpoint is local to one compiler instance. Keep the complete
 -- environment and declaration accumulator together; neither is a checked claim.
@@ -128,7 +130,10 @@ def psCompilerPrepareElaboratedWithOutput
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
       let prepared : PsCompilerAdmissionReadyModule :=
-        { declarations := elaborated.declarations, recursorWorkerGroups := lifted.workerGroups };
+        { declarations := elaborated.declarations, recursorWorkerGroups := lifted.workerGroups
+          noncomputableNames := elaborated.declarations.filterMap (fun declaration =>
+            let name := psDeclarationName declaration
+            if psEnvironmentIsNoncomputable elaborated.environment name then some name else none) };
       let admissions : String := String.Internal.append canonicalAdmissions "\n";
       Except.ok
         (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions lifted.parents)
@@ -303,7 +308,7 @@ def psCompilerEnvironmentFromPrepared
       | Except.error error =>
           Except.error (PsCompilerError.elaboration error)
       | Except.ok environment =>
-          Except.ok environment
+          Except.ok (prepared.noncomputableNames.foldl psEnvironmentMarkNoncomputable environment)
 
 -- Runtime substitution is permitted only for the checked fixedpoint layout
 -- emitted by the predefinition owner. The equation alone is insufficient:

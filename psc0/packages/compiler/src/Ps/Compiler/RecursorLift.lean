@@ -223,6 +223,9 @@ def psRecursorLiftDeclarationsWithOrigins (environment : PsEnvironment)
     (fun (acc : PsRecursorLiftDeclarationsState) declaration => do
       match declaration with
       | .definitionDecl name levels type value =>
+        -- Proof/spec-only code needs no executable recursor workers.
+        if psEnvironmentIsNoncomputable acc.environment name then
+          return { acc with declarationsRev := declaration :: acc.declarationsRev }
         let state : PsRecursorLiftState := { environment := acc.environment, owner := name, levels }
         let lifted ← (psRecursorLiftVisit 4096 true [] state psLocalEmpty value type).mapError
           (fun message => message ++ " (in " ++ psNameToString name ++ ")")

@@ -182,6 +182,13 @@ jobs:
           mkdir -p ../dist/m3-foundation-preparation/partial-fixpoint
           lake build pscv0_m3_partial_fixpoint 2>&1 | tee ../dist/m3-foundation-preparation/partial-fixpoint/build.log
           .lake/build/bin/pscv0_m3_partial_fixpoint ../dist/m3-foundation-preparation/partial-fixpoint 2>&1 | tee ../dist/m3-foundation-preparation/partial-fixpoint/check.log
+      - name: Check noncomputable logical ownership and executable dependency boundary
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/noncomputable
+          lake build pscv0_m3_noncomputable 2>&1 | tee ../dist/m3-foundation-preparation/noncomputable/build.log
+          .lake/build/bin/pscv0_m3_noncomputable ../dist/m3-foundation-preparation/noncomputable 2>&1 | tee ../dist/m3-foundation-preparation/noncomputable/check.log
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always() && !cancelled() && steps.build.outcome != 'skipped'
         with:

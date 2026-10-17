@@ -514,6 +514,7 @@ def psPrintLeanDeclaration
       if locals.isEmpty then throw (.unsupportedSourceForm "where requires local definitions")
       return parent ++ "\nwhere\n  " ++ (String.intercalate "\n" locals).replace "\n" "\n  "
   | .definition name binders type value _
+  | .noncomputableDefinition name binders type value _
   | .fixedpointDefinition name binders type value _
   | .wellFoundedDefinition name binders type value _ _ => do
       let suffix ← match declaration with
@@ -524,7 +525,10 @@ def psPrintLeanDeclaration
       let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
       let annotation ← psPrintDeclarationResult psPrintLeanTerm type
       let printedValue ← psPrintLeanTerm value
-      return "def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
+      let prefix := match declaration with
+        | .noncomputableDefinition .. => "noncomputable def "
+        | _ => "def "
+      return prefix ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
       let printedName ← psPrintSyntaxName name

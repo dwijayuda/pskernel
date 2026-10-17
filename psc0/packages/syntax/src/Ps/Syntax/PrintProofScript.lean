@@ -568,6 +568,7 @@ def psPrintProofScriptDeclaration
       if locals.isEmpty then throw (.unsupportedSourceForm "where requires local definitions")
       return parent ++ "\nwhere {\n  " ++ (String.intercalate "\n" locals).replace "\n" "\n  " ++ "\n}"
   | .definition name binders type value _
+  | .noncomputableDefinition name binders type value _
   | .fixedpointDefinition name binders type value _
   | .wellFoundedDefinition name binders type value _ _ => do
       let suffix ← match declaration with
@@ -578,7 +579,10 @@ def psPrintProofScriptDeclaration
       let printedBinders ← psPrintProofScriptDeclarationBinders binders
       let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
       let printedValue ← psPrintProofScriptTerm value
-      return "def " ++ printedName ++ printedBinders ++
+      let prefix := match declaration with
+        | .noncomputableDefinition .. => "noncomputable def "
+        | _ => "def "
+      return prefix ++ printedName ++ printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
       let printedName ← psPrintSyntaxName name

@@ -33,6 +33,11 @@ def psElabPreDefinitionDeclarationExplicitPartial : PsSyntaxDeclaration → Bool
   | .partialDefinition .. => true
   | _ => false
 
+def psElabPreDefinitionDeclarationNoncomputable : PsSyntaxDeclaration → Bool
+  | .whereDeclaration parent _ _ => psElabPreDefinitionDeclarationNoncomputable parent
+  | .noncomputableDefinition .. => true
+  | _ => false
+
 def psElabPreDefinitionSourceExplicitPartial : PsElabPreDefinitionSource → Bool
   | .declaration source => psElabPreDefinitionDeclarationExplicitPartial source
   | .localDefinition .. => false
@@ -51,6 +56,13 @@ def psElabPreDefinitionCheckMainModifiers
   let first :: remaining := mainModifiers | return ()
   if remaining.any (fun modifier => modifier != first) then
     throw (.data "PSCV0-MUTUAL-STRATEGY: cannot mix partial and non-partial original main definitions")
+  let computeModifiers := sources.filterMap fun source =>
+    match source with
+    | .declaration declaration => some (psElabPreDefinitionDeclarationNoncomputable declaration)
+    | .localDefinition .. => none
+  let first :: remaining := computeModifiers | return ()
+  if remaining.any (fun modifier => modifier != first) then
+    throw (.data "PSCV0-MUTUAL-STRATEGY: cannot mix computable and noncomputable original main definitions")
 
 -- After the original-main compatibility check, pinned
 -- MutualDef.getModifiersForLetRecs derives helper intent from the complete

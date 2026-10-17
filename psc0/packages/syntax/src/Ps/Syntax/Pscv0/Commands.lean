@@ -221,16 +221,20 @@ def psPscv0ReadSpecialDeclaration (cursor : PsTokenCursor) :
     throw "PSCV0-REC-STRATEGY-01: duplicate or combined special modifiers"
   if !["def", "function"].contains head.text then
     throw "PSCV0-TERM-02-HEAD: special modifier requires def or function"
-  if marker.token.text != "partial" then
+  if !["partial", "noncomputable"].contains marker.token.text then
     throw ("PSCV0-FEATURE-UNAVAILABLE: " ++ marker.token.text ++ " requires selected semantic admission")
   let parsed ← psPscv0ReadValueDeclarationBody marker.cursor
   let .definition name binders type value span := parsed.value
     | throw "PSCV0-TERM-02-HEAD: expected function-like declaration"
   if ["partial_fixpoint", "termination_by", "decreasing_by"].any
       (psTokenCursorAtText parsed.cursor) then
-    throw "PSCV0-REC-STRATEGY-01: partial modifier cannot own a total or fixedpoint suffix"
+    throw ("PSCV0-REC-STRATEGY-01: " ++ marker.token.text ++
+      " modifier cannot own a total or fixedpoint suffix")
   let sourceSpan := PsSourceSpan.mk marker.token.span.start span.stop
-  psPscv0ReadWhereSuffix { parsed with value := .partialDefinition name binders type value sourceSpan }
+  let declaration := if marker.token.text == "noncomputable" then
+    PsSyntaxDeclaration.noncomputableDefinition name binders type value sourceSpan
+  else PsSyntaxDeclaration.partialDefinition name binders type value sourceSpan
+  psPscv0ReadWhereSuffix { parsed with value := declaration }
 
 def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=

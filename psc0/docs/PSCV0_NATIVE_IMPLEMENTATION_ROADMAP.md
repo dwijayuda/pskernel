@@ -1,5 +1,14 @@
 ## Qualified P1 preparation; main integration pending
 
+## Noncomputable source-policy candidate — 18 October 2026
+
+Main integration is running at de6679464cac9780bae7066052714c53984dbd00. F1 39076409639, F2 39076409495 and F3 39076409521 succeeded; Native39076409463 and focused M3 39076409661 remain running. Do not supersede healthy Native. Last accepted complete five-gate main remains f271f2a35789b120dbe1a6dcd5a555db44e72134.
+
+Preparation now implements noncomputable def/function as source execution policy, retaining unchanged kernel-checked logical declarations. Indexed environment metadata survives preparation, public interfaces, private project closure and source printing; generated helpers inherit ownership. Shared erasure omits these implementations and rejects computational references while permitting erased proof/type uses. Original mutual mains must agree on computability. No new trusted assumption or Standard asset is introduced. The consolidated native/source/import/erasure fixture plans10 runtime comparisons across five targets; compilation, kernel qualification and runtime evidence are pending. See [design and pinned Lean references](PSCV0_M3_NONCOMPUTABLE_2026-10-18.md).
+
+This slice does not close M3+B. Generic/dependent P1 qualification, generalized and mutual WF handling, the remaining selected data/source matrix and exact-SHA five-gate integration remain open.
+
+
 Preparation `e8cb72b8c2bb5b08433b455b66e887f6bf79fcbe` passed [run39075748079](https://github.com/dwijayuda/pskernel/actions/runs/39075748079), job117522420411, in full. Observed: Order asset replay/audits; four portable order dictionaries; nine monotonicity proofs and nonmonotone refusal; retained source/P0/WF/indexed/recursive-deriving checks; four P1 source members in three actual fixedpoint components; exact whole/source equations; official-kernel checks under unchanged2m/20k limits; complete packed runtime ownership; kernel-valid adversarial mismatch and missing-layout refusals; all five exact historical policy-only programs checked logically and never executed; module private-callee/support hiding and explicit public equations; ordinary five-target emission and both verified-assurance refusals.
 
 This checkpoint promotes the same qualified compiler/test content to main for Native/M3/F1/F2/F3 integration. No backend runtime parity or complete M3 claim follows from preparation. The P1 observer adds30 required comparisons. Run all retained cases and report actual totals.

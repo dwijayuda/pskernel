@@ -318,3 +318,31 @@ theorem psKernelC0AdaptiveHasFVar_source (expr : PsKernelExpr) :
     @psKernelExprHasFVar = @psKernelC0AdaptiveHasFVar := by
   funext expr
   exact (psKernelC0AdaptiveHasFVar_source expr).symm
+
+/-!
+An explicitly source-equal native replacement of semantic-cache eligibility.
+
+`psKernelExprHasFVar` already has a proved adaptive DAG memo above, but
+source `psKernelSemanticCacheEligible` itself may remain an old compiled call
+site in WHNF because it was defined before that csimp theorem. Route the
+entire pure policy through the exact proved FVar selector, so the WHNF
+cache gate cannot rewalk a large shared source DAG unnecessarily. The
+source policy itself, the FVar scope invariant and all returned cache data
+are unchanged.
+-/
+
+def psKernelC0FastSemanticCacheEligible (expr : PsKernelExpr) : Bool :=
+  !psKernelC0AdaptiveHasFVar expr
+
+theorem psKernelC0FastSemanticCacheEligible_source (expr : PsKernelExpr) :
+    psKernelC0FastSemanticCacheEligible expr =
+      psKernelSemanticCacheEligible expr := by
+  unfold psKernelC0FastSemanticCacheEligible psKernelSemanticCacheEligible
+  rw [psKernelC0AdaptiveHasFVar_source expr]
+
+/-- All-input proven compiler optimization; hash buckets NEVER authorize
+expression equality, local-context transport, type checking or admission. -/
+@[csimp] theorem psKernelSemanticCacheEligible_csimp :
+    @psKernelSemanticCacheEligible = @psKernelC0FastSemanticCacheEligible := by
+  funext expr
+  exact (psKernelC0FastSemanticCacheEligible_source expr).symm

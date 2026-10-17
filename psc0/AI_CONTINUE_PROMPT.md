@@ -23,7 +23,9 @@ Meta/MutualPacking with a focused independent kernel probe. The asset is not
 selected, and source mutual WF is still refused. The export was checked at
 f58d7e1/run39079183717; packing qualification is pending. Bridge candidate
 abfc20d3/run39079996655 passed native signature/closure before its intended
-strict digest refusal. Retrieve final measurements and pin only reviewed values.
+strict digest refusal. The completed run independently measured the exact new FNV/snapshot/surface
+digests now published in the strict guards; see work state. Noncomputable
+metadata/proof/type erasure passed. Finish full source/runtime qualification.
 
 Current source slice: n-ary WF/shared ordinary applications passed construction,
 refusals and five-target emission at5b614f3/run39078823496; target execution
@@ -32,8 +34,7 @@ helper-privacy fixture assertion. Its correction now checks pinned native
 source-helper visibility and hides generated support through the actual
 module interface. Noncomputable qualification exposed the already-checked but
 unregistered instNonemptyOfInhabited. The current candidate registers/audits
-that general bridge; strict manifest pins await independently observed Linux
-digests. PSum authoring f58d7e1/run39079183717 passed its export step; fetch
+that general bridge; strict manifest pins use the independently observed Linux digests. PSum authoring f58d7e1/run39079183717 passed its export step; fetch
 completed logs and exact source bytes. PSum activation/mutual WF are not done.
 
 Continue candidate qualification and reviewed digest publication, then exact-SHA

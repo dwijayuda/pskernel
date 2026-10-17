@@ -1,3 +1,25 @@
+## Reviewed constructive Nonempty registration identities
+
+Preparationabfc20d35f33694ff9e6d17e0d482cf5ef7c6796 /
+run39079996655/job117534897115 independently confirmed the exact pinned native
+signature of instNonemptyOfInhabited, native priority1000 and no axiom dependencies.
+Noncomputable metadata/section/helper/preparation/proof-and-type erasure passed.
+The remaining source gates stopped at the deliberately unchanged strict digest
+guard; no weaker admission was used.
+
+The only selected environment change is this ordinary instance registration:
+3752 declarations,44 classes,371 ordinary instances,13 defaults expected.
+The strict guard independently measured FNV7907908279927868945,
+snapshot SHA855c1945851fc7983481cb271120ab12ceb78537ce6faef61e0b36f87ff99eec,
+surface SHA24e975d8e8d8b61df05bcc78a488a7e9f7465f99972577110876f5f4e39d08d5.
+These exact values replace the previous immutable pins. No new declaration,
+axiom, primitive or classical decision instance. Full candidate qualification
+remains pending; observed registration identity is not runtime evidence.
+
+Typed component-packing candidateb9406c2f0b333ad2b25a41cabdc8485673a4d852
+is under39080316054. Its standalone PSum asset remains unselected, so it does
+not change these identities. Main stays accepted atde667946. M3+B remains open.
+
 ## Retained PSum and typed component-packing candidate
 
 Standalone exportf58d7e1f68112a4efe94eedc8d224fb967087dff /

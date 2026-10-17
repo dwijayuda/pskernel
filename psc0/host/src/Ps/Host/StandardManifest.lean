@@ -227,8 +227,10 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- WF surface independently audited at 078fb1e2 / native 38998692067.
 -- Order closure/metadata independently replayed and measured in preparation
 -- run 39069995046, commit 0093a0ae; frozen pre-Order export boundary retained.
+-- Nonempty bridge native priority/signature and strict digest observed at
+-- abfc20d3 / preparation39079996655; exact original guards retained.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:f364e3d926e0c7c198e6807a79d26e389afeb8d2ad1a7fe8761944fa3282a5a3"
+  "sha256:24e975d8e8d8b61df05bcc78a488a7e9f7465f99972577110876f5f4e39d08d5"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

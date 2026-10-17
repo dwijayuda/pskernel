@@ -1,5 +1,12 @@
 ## Qualified P1 preparation; main integration pending
 
+## Accepted P1 integration receipt — 18 October 2026
+
+All five workflows succeeded on **de6679464cac9780bae7066052714c53984dbd00**: Native39076409463 (job117524368250), focused M3 39076409661 (job117524368606), F1 39076409639, F2 39076409495 and F3 39076409521. The focused job executed its directJS/strict-TypeScript, Rust and V8-GC/Wasmtime runtime steps successfully. Full focused-log retrieval failed repeatedly; no aggregate total is relabeled as measured. This closes selected P1 integration, not the complete generic/dependent P1 matrix or M3+B.
+
+Main remains at that accepted SHA. Preparation compiler candidate7712f7e208f02c77163c8d0074ed3d2e39d2a0c5 adds noncomputable source policy and n-ary WF. Noncomputable predecessor7da95293 is being qualified by39077074720; n-ary run39077335588 is queued behind it. Do not infer either result from main's success. A generic/section/instance/dependent-result P1 extension is prepared separately but is not committed in this documentation receipt. Next: finish candidate qualification, shared ordinary recursive applications, compatible mutual WF and the remaining six-exit matrix. Both AI handoffs and the roadmap remain current; no PSKernel-Core/self-host/C5 work is authorized here.
+
+
 ## N-ary WF construction candidate — 18 October 2026
 
 The preparation branch now replaces pair-only measured/dependent parameter packing with one arity-aware shared mechanism for type construction, currying, dependent elimination, callback equality and exact runtime entry adaptation. Fixed captures and residual state retain their original ownership. Existing pair controls remain; the consolidated WF fixture adds native/source three- and four-field cases, an explicit unfolding equation, a user-PSigma nonflattening control and10 required runtime comparisons. See [n-ary WF design](PSCV0_M3_NARY_WF_2026-10-18.md). Candidate qualification is pending. No assumption, Standard snapshot, verified-assurance rule or budget changes.

@@ -250,6 +250,63 @@ jobs:
               "$RUNNER_TEMP/arena435-$case_name-c0.txt"
             echo "C0_ARENA_NEW_CLASS case=$case_name official=rejected c0=rejected native_lean=4.35.0"
           done
+      - name: Check substitution-sensitive Prop sort after native 4.35 re-export
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Unlike the frozen hash-collision recursor exports, this upstream
+          # exploit is declared independently of fresh-name hash collisions.
+          # It targets a stuck proposition sort after substituting a proof.
+          revision=5d7ca987618f1136aaa296057b50a2c10c4ce77a
+          name=ArenaProjSubstProp
+          curl -fL --retry 3 -o "$RUNNER_TEMP/$name.lean" \
+            "https://raw.githubusercontent.com/leanprover/lean-kernel-arena/$revision/tests/bugs/proj-of-subst-prop.lean"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            cp "$RUNNER_TEMP/$name.lean" "$name.lean"
+            # The 4.35 API adds an explicit maxRecDepth USize argument.
+            # Change only that call signature; preserve all exploit declarations.
+            python3 - "$name.lean" <<'PY'
+          from pathlib import Path
+          import hashlib,sys
+          p=Path(sys.argv[1])
+          raw=p.read_bytes()
+          old=b"env.addDeclCore 0 decl none (doCheck := false)"
+          new=b"env.addDeclCore 0 10000 decl none (doCheck := false)"
+          assert raw.count(old) == 1, "upstream source changed; refuse adaptation"
+          p.write_bytes(raw.replace(old, new))
+          print("C0_ARENA_SUBST_PROP orig_sha256="+hashlib.sha256(raw).hexdigest()+
+                " api_adaptation=addDeclCore_maxRecDepth_only")
+          PY
+            lake env lean -o ".lake/build/lib/lean/$name.olean" "$name.lean"
+            lake env .lake/build/bin/lean4export "$name" -- inconsistent \
+              > "$RUNNER_TEMP/arena435-projOfSubstProp.ndjson"
+          )
+          path="$RUNNER_TEMP/arena435-projOfSubstProp.ndjson"
+          python3 - "$path" <<'PY'
+          import json,sys
+          with open(sys.argv[1], "rb") as f:
+              header=json.loads(f.readline())["meta"]
+          assert header["lean"] == {
+              "version":"4.35.0",
+              "githash":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+          assert header["exporter"]["version"] == "3.1.0"
+          print("C0_ARENA_SUBST_PROP native435_header=verified historical_bytes_untouched=true")
+          PY
+          official_rc=0
+          (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$path") \
+            > "$RUNNER_TEMP/arena435-projOfSubstProp-official.txt" 2>&1 || official_rc=$?
+          test "$official_rc" -ne 0
+          grep -Fq "Lean default kernel rejects the solution" \
+            "$RUNNER_TEMP/arena435-projOfSubstProp-official.txt"
+          c0_rc=0
+          (cd psc0/packages/pskernel-c0 && \
+            timeout 150s .lake/build/bin/c0OfficialReplay "$path" 4096) \
+            > "$RUNNER_TEMP/arena435-projOfSubstProp-c0.txt" 2>&1 || c0_rc=$?
+          test "$c0_rc" -eq 0
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" \
+            "$RUNNER_TEMP/arena435-projOfSubstProp-c0.txt"
+          echo "C0_ARENA_SUBST_PROP official=rejected c0=rejected native=4.35.0 source=upstream_immutable"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

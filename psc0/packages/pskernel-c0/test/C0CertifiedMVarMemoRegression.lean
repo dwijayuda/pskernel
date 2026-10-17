@@ -48,8 +48,13 @@ def main : IO Unit := do
       else if psKernelExprHasFVar expr then
         .error "declaration has free variables"
       else .ok ()
-    if psKernelCheckNoMVarNoFVar expr != expected then
-      throw (IO.userError "complete declaration screening diverged from original source")
+    match psKernelCheckNoMVarNoFVar expr, expected with
+    | .ok _, .ok _ => pure ()
+    | .error actual, .error original =>
+        if actual != original then
+          throw (IO.userError "declaration screening altered historical error precedence")
+    | _, _ =>
+        throw (IO.userError "declaration screening changed accepted/rejected status")
   -- 2^24 *expanded* occurrences share only 25 physical source nodes.
   -- The type-level source theorem guarantees equivalence on this input too.
   let large := c0MVarDag 24 ty

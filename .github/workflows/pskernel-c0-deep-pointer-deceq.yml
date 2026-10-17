@@ -1,0 +1,36 @@
+name: PSKernel-C0 exact deep pointer DAG equality qualification
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-deep-pointer-deceq.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+      - 'psc0/packages/pskernel-c0/test/C0DeepPtrExprEqRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prove-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Pin Lean 4.35 and check exact typed equality construction
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0DeepPtrExprEqRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          echo "C0_DEEP_PTR_QUALIFIED pinned_Lean435=true exact_Decidable_eq=true no_trusted_admission_changed=true"

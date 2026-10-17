@@ -1,9 +1,16 @@
 import Ps.Elab.Scope
 
+-- A termination suffix is resolved only if checked dependency dispatch uses it.
+-- Keep the original header scope separately from the untouched source syntax.
+structure PsWhereTerminationScope where
+  resolver : PsScopeResolver
+  bound : List String
+
 structure PsScopedLocalDefinition where
   source : PsSyntaxLocalDefinition
   name : PsName
   alias : PsSyntaxName
+  terminationScope : Option PsWhereTerminationScope := none
 
 structure PsScopedPreDefinition where
   source : PsSyntaxDeclaration
@@ -12,6 +19,7 @@ structure PsScopedPreDefinition where
   used : List String
   isPrivate : Bool
   registration : Option PsSyntaxRegistration
+  terminationScope : Option PsWhereTerminationScope := none
 
 def psWhereSourceParts (source : PsSyntaxDeclaration) :
     Except PsElabError (PsSyntaxDeclaration × List PsSyntaxLocalDefinition × Option PsSourceSpan) := do
@@ -85,40 +93,36 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
     mutualAliases := qualifiedFrame ++ resolver.mutualAliases }
   let parentBound := binders.bound.filter (fun key => !helperNames.contains key)
   let value ← psScopeTerm 4096 bodyResolver parentBound sourceValue
-  let (termination, terminationUsed) ← match base with
-    | .wellFoundedDefinition _ _ _ _ suffix _ => do
-      let suffix ← psScopeWhereTermination resolver binders.bound suffix
-      pure (some suffix.fst, suffix.snd)
-    | _ => pure (none, [])
+  let termination := match base with
+    | .wellFoundedDefinition _ _ _ _ suffix _ => some suffix
+    | _ => none
+  let terminationScope := termination.map fun _ =>
+    ({ resolver, bound := binders.bound } : PsWhereTerminationScope)
   let scopedLocals ← (locals.zip helperAliases).mapM fun (localDefinition, localAlias) => do
     let localBinders ← psScopeBinders (psScopeTerm 4096 resolver) binders.bound localDefinition.binders
     let localType ← localDefinition.type.mapM (psScopeTerm 4096 resolver localBinders.bound)
     let ownNames := localDefinition.binders.flatMap (fun binder => psScopeBinderKeys binder.fst)
     let localBound := ownNames ++ parentBound
     let localValue ← psScopeTerm 4096 bodyResolver localBound localDefinition.value
-    let (recursion, recursionUsed) ← match localDefinition.recursion with
-      | some (.total suffix) => do
-        if inheritedPartial then
-          -- The command has already checked all original main modifiers.
-          -- Keep the exact unused source/spans; it supplies neither names nor
-          -- captures. The local header and body above remain fully scoped.
-          pure (some (PsSyntaxLocalRecursion.total suffix), [])
-        else
-          let suffix ← psScopeWhereTermination resolver localBinders.bound suffix
-          pure (some (PsSyntaxLocalRecursion.total suffix.fst), suffix.snd)
-      | some (.fixedpoint span) => pure (some (PsSyntaxLocalRecursion.fixedpoint span), [])
-      | none => pure (none, [])
+    -- Header and body lookup remain checked above. Hints never contribute
+    -- section capture keys or decide whether the typed body is recursive.
+    let terminationScope := if inheritedPartial then none else
+      match localDefinition.recursion with
+      | some (.total _) =>
+        some ({ resolver, bound := localBinders.bound } : PsWhereTerminationScope)
+      | _ => none
     let some shortName := localDefinition.name.segments.head? | throw .emptyName
     let scopedLocal : PsScopedLocalDefinition := {
       source := { localDefinition with
         binders := localBinders.binders
         type := localType.map (·.term)
         value := localValue.term
-        recursion }
+        recursion := localDefinition.recursion }
       name := psNameAppendStr coreName shortName
-      alias := localAlias }
+      alias := localAlias
+      terminationScope }
     let used := psScopeUnion localBinders.used (psScopeUnion (localType.map (·.used) |>.getD [])
-      (psScopeUnion localValue.used recursionUsed))
+      localValue.used)
     return (scopedLocal, used)
   let mapped ← psWhereMapValue base name binders.binders type.term value.term termination
   let source := match whereSpan with
@@ -128,6 +132,7 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
     source, alias
     locals := scopedLocals.map Prod.fst
     used := scopedLocals.foldl (fun used entry => psScopeUnion used entry.snd)
-      (psScopeUnion binders.used (psScopeUnion type.used (psScopeUnion value.used terminationUsed)))
+      (psScopeUnion binders.used (psScopeUnion type.used value.used))
     isPrivate := member.isPrivate
-    registration := member.registration }
+    registration := member.registration
+    terminationScope }

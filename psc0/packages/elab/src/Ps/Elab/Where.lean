@@ -27,6 +27,7 @@ structure PsElabWhereHeader where
   sourceBody : PsSyntaxTerm
   inferredResult : Bool
   peerId : Nat := 0
+  terminationScope : Option PsWhereTerminationScope := none
 
 structure PsElabWhereBody where
   header : PsElabWhereHeader
@@ -135,7 +136,8 @@ def psElabWhereMainHeader (context : PsElabContext)
     isPrivate := member.isPrivate
     registration := member.registration
     strategy := ← psElabWhereStrategy member.source
-    sourceBody := value }
+    sourceBody := value
+    terminationScope := member.terminationScope }
 
 def psElabWhereHelperHeader (context : PsElabContext)
     (mainSources : List PsElabPreDefinitionSource) (parent : PsElabWhereHeader)
@@ -157,7 +159,8 @@ def psElabWhereHelperHeader (context : PsElabContext)
     registration := none
     strategy := ← psElabWhereLocalStrategy mainSources source
     ambient := parent.ambient ++ ownCaptures
-    sourceBody := source.value }
+    sourceBody := source.value
+    terminationScope := localDefinition.terminationScope }
 
 def psElabWherePeers (context : PsElabContext) (headers : List PsElabWhereHeader) :
     Except PsElabError (PsElabContext × List PsElabWhereHeader) := do

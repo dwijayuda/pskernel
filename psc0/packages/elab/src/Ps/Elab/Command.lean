@@ -185,10 +185,12 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     psScopePreDefinition resolver member
       (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)
       inheritedPartial
-  let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
-  let candidateCaptures := psScopeSelect state.scope used
+  -- Pinned definition bodies see the complete checked section telescope.
+  -- Hints cannot enable a local dictionary by contributing source-name keys.
+  -- Where's typed capture closure retains only actual type/body dependencies.
+  let sectionContext := state.scope.variables.map (·.binder)
   let prepared ← psElabPreparePreDefinitionsWithSource state.environment
-    (state.scope.levelNames.map psRootName) candidateCaptures scopedMembers span
+    (state.scope.levelNames.map psRootName) sectionContext scopedMembers span
   let block := prepared.block
   let result ← psElabPreDefinitionBatch state.environment block
     (some (psElabWhereWellFounded prepared))
@@ -203,6 +205,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
       (psElabStableMemberOrigins declarations 0) none
     { origin with
       sourceInfo := owned.flatMap (·.snd.sourceInfo)
+      diagnostics := owned.flatMap (·.snd.diagnostics)
       localDefinitions := owned.filterMap fun (input, result) =>
         match input.source with
         | .localDefinition _ source => some {

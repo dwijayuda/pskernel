@@ -14,79 +14,62 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — bounded result families accepted, 17 October 2026
+## Current M3+B implementation checkpoint — unused-hint candidate, 17 October 2026
 
-Accepted compiler/test SHA is `0e2f5c461d30457caee322b8135293597f55ac4b`. All five gates passed
-at that exact SHA: Native 34 steps, focused M3 15, and F1/F2/F3-F4-platform
-10/9/11. The focused total remains **960 observed comparisons**, and the
-engineering estimate stays **78/100**. This containing checkpoint changes
-documentation only.
+The containing compiler/test revision is not yet qualified. Accepted
+`0e2f5c461d30457caee322b8135293597f55ac4b` / documentation
+`e00f189cd4ce13da8cf37bf503884b339b553ec5` remains the five-gate baseline:
+**960 observed runtime comparisons**, **78/100** engineering estimate.
+
+This candidate corrects eager resolution of unused total hints on typed
+nonrecursive Where helpers. Main/local suffixes remain raw with their
+original spans; saved header scope is consumed only by active well-founded
+elaboration. Full checked section locals/instances are available while
+typing value predefinitions, followed by existing real type/body capture
+pruning. Hint-only names cannot make a dictionary available to the body or
+enlarge a final capture telescope.
+
+After successful checked nonrecursive definition/equation or partial-body
+construction, per-member unused-hint warnings travel through source origins
+into successful source-only/emitted Native results and JSON. The represented
+single-clause/combined warning messages match pinned Lean. Coordinates
+faithfully expose retained syntax: main partial_fixpoint currently owns the
+whole declaration span. Successful-result diagnostics are transactional;
+native cumulative warning logs on later failing inputs are not claimed.
+
+The proposed source fixture includes five exact native warning guards,
+eleven matching native/source rfl equations, four complete native helper
+headers and thirteen portable ordinary definition/equation headers. The
+matched reducible dictionary pair checks actual tag/d captures and two
+different dictionaries; hint-only type/instance captures must disappear.
+Two positive source-only requests check single-source and provider-module
+diagnostic identity and all six JSON coordinates. Four new negative
+requests retain exact header/body/active-hint ownership. The former ordinary
+unknown-measure refusal becomes a positive; the other six inherited-partial
+refusals remain, alongside two successful inherited-partial warnings and six
+warnings in the existing five-target emitted result.
+
+No runtime export, workflow, shared runtime runner, trust policy or resource
+budget changes. All five gates must pass at one new exact compiler/test SHA;
+none of the above candidate assertions is execution evidence until then.
 
 The [result-family receipt](PSCV0_M3_RESULT_FAMILY_QUALIFICATION_2026-10-17.md)
-records the exact implementation, source and Native boundary checks, all gate/
-job and artifact identities, four failed host-build attempts and bounded repairs.
-The [generic P0 receipt](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md)
-retains accepted `82b248a3ee2cd9246756690db23b7dffd612e022` and its 20 added generic
-comparisons. The [independent WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
-retains the preceding 940 construction checkpoint.
+retains the previous exact qualification. Its failed-comparison rollback
+claim applies at the public equality/family transaction; a low-level worker
+may still return a partial context under its pre-existing API. The
+[generic P0](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md) and
+[independent WF](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) receipts
+retain preceding qualified cells.
 
-An omitted result now uses a natural family over the resolved own-binder
-telescope, in the enclosing scope, applied to the original arguments. Body and
-checked caller constraints reach the same family. Only marked full natural
-applications receive the bounded pattern/constant rule, with type/occurs/scope
-checks and complete-equality rollback. Pending index scopes are preserved;
-blocked families cannot guess their heads through application congruence.
-Explicit main holes, own-binder completion, defaults, lexical capture closure,
-tactic/record scheduling and official-kernel checks remain.
-
-The source-only fixture compiled 19 pinned native equality examples and checked
-19 source theorems, 18 closed total definitions, three original opaque/private
-partial pairs and six exact elaborate-phase refusals. Cases include direct and
-forward dependent Fin results, a qualified helper without unused parent
-capture, caller-selected dictionary and saved tactic, record resumption,
-fixed-index matching and an own type-binder dependency. It adds no executable
-artifact or runtime export.
-
-Actual Native output confirms checked family/universe assignment, preserved
-pending index scope, checked resumption and complete later-failure rollback.
-A separate real inference-fuel refusal survives postponement and checked queue
-drain; the same continuation succeeds when its default is preassigned.
-Concrete resource failures propagate through the migrated instance, synthetic
-and elaborator owners before fallback or another default. Legacy compatibility
-wrappers and pre-existing low-level fuel policies remain.
-
-The completed focused log retains all 56 runtime PASS markers unchanged from
-the P0 baseline: 72 scalar exports / 720 comparisons plus 24 original deriving
-exports / 240 comparisons across both flags and all five execution modes.
-Generic mutual P0 retains Nat/Bool instantiations, dictionaries/seeds, both
-entry directions, Nat 2947/4123 and Bool 12/21 native values, actual opaque/body
-identities and both verified-assurance refusals. Ordinary observations grant
-no logical partial-body equation or verified backend correspondence.
-
-All 38 WF and 10 Where assumption closures remain approved. Native retains the
-Standard and proof assets, 1,069 shared observations in direct JS/compiled TS/
-Rust, repeated components/post-return and 100,000/50,000 generic Nat/Bool steps.
-The Native/focused logs contain 4,476,633/8,264,521 characters. Their artifacts
-are 12103729665 (6,797,268 bytes) and 12103214519 (286 files; 3,038,443 bytes);
-the receipt records all matching SHA-256/upload identities.
-
-The engineering source bucket remains 14/15 because general unused-hint
-diagnostic parity is still open. The next bounded source cell is a checked
-nonrecursive Where helper whose unused unknown measure currently fails before
-typed component classification. Pinned Lean handles the nonrecursive component
-first, then warns about unused hints without elaborating them. A future repair
-must preserve raw suffixes/spans, real header/body dependencies and capture
-closure, active recursive checks and original-main strategy compatibility.
-
-Inference remains bounded, with eager checked constant approximation and no
-claim of general higher-order completeness or arbitrary application inversion.
-Larger changing WF packs, arbitrary measure telescopes, general mutual WF,
-broader indexed binary deriving, nested/source induction and the complete P0
-matrix remain open. Only propext and Quot.sound are approved; P1 retains its
-audited Classical.choice refusal. M3+B, M4 and M5 remain open.
+This bounded source repair receives no automatic score increase. Complete
+source parity, broader dependent inference, larger changing WF packs,
+arbitrary measure telescopes, general mutual WF, broader indexed binary
+deriving, nested/source induction and the complete P0 matrix remain open.
+Only propext and Quot.sound are approved; P1 retains its audited
+Classical.choice refusal. M3+B, M4 and M5 remain open.
 
 The adoption matrix below is historical policy/owner evidence and does not
-override this exact acceptance checkpoint.
+override this candidate or its preceding exact acceptance checkpoint.
 
 ## Rule-to-change and implementation matrix
 

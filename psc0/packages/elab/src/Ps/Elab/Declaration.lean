@@ -59,6 +59,7 @@ structure PsElabBatchOrigin where
   sourceInfo : List PsElabSourceInfo := []
   mutualGroup : Option PsElabMutualGroupOrigin := none
   localDefinitions : List PsElabLocalDefinitionOrigin := []
+  diagnostics : List PsDiagnostic := []
 
 structure PsElabOriginError where
   error : PsElabError
@@ -435,8 +436,10 @@ def psElabDeclarationBatchStable
           environment name binders type value termination levelNames with
       | .error error => .error error
       | .ok result =>
-          .ok (PsElabDeclarationBatchResult.mk
-            [result.declaration, result.equation] [result.sourceInfo])
+          .ok {
+            declarations := [result.declaration, result.equation]
+            sourceInfo := [result.sourceInfo]
+          }
   | .inductiveDecl name params resultType constructors _ =>
       psElabInductiveDeclaration
         environment

@@ -288,6 +288,34 @@ def psElabPreDefinitionStructural (environment : PsEnvironment)
       (psElabPreDefinitionSourceSpan member) member.sourceInfo).mapError (.atDeclaration member.name)
   psElabStructuralMutualFromChecked environment levels captured inputs
 
+-- Called only after the selected definition/body construction succeeds.
+-- These diagnostics describe unused source; they supply no proof or captures.
+def psElabPreDefinitionUnusedHints (source : PsElabPreDefinitionSource)
+    (reason : String) : List PsDiagnostic :=
+  let totalHint (termination : PsSyntaxTermination) : PsDiagnostic :=
+    let kind := if termination.decreasing.isSome then "unused termination hints" else "unused `termination_by`"
+    {
+      severity := .warning
+      message := kind ++ ", function is " ++ reason
+      span := termination.span
+    }
+  let fixedHint (span : PsSourceSpan) : PsDiagnostic := {
+    severity := .warning
+    message := "unused `partial_fixpoint`, function is " ++ reason
+    span
+  }
+  match source with
+  | .declaration source =>
+    match psElabPreDefinitionDeclarationHead source with
+    | .wellFoundedDefinition _ _ _ _ termination _ => [totalHint termination]
+    | .fixedpointDefinition _ _ _ _ span => [fixedHint span]
+    | _ => []
+  | .localDefinition _ source =>
+    match source.recursion with
+    | some (.total termination) => [totalHint termination]
+    | some (.fixedpoint span) => [fixedHint span]
+    | none => []
+
 -- Nonrecursive source and inherited-partial helpers use their already
 -- checked ordinary values. The exact equation is proved after the actual
 -- declaration is staged; no body witness or provisional global is introduced.
@@ -330,7 +358,8 @@ def psElabPreDefinitionNonrecursive (environment : PsEnvironment)
   let _ ← psAddDeclarationList staged [equation]
   let batch : PsElabDeclarationBatchResult := {
     declarations := [declaration, equation]
-    sourceInfo := [member.sourceInfo] }
+    sourceInfo := [member.sourceInfo]
+    diagnostics := psElabPreDefinitionUnusedHints member.source "not recursive" }
   return { batch, members := [batch] }
 
 -- A returned function can contain the retained source match below its own
@@ -480,7 +509,16 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
   -- component, including inherited local helpers. Every resulting member has
   -- its own independently inhabited logical identity and actual body marker.
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .partial) then
-    return ← psElabPartialMutualFromChecked environment levels members
+    let result ← psElabPartialMutualFromChecked environment levels members
+    if result.members.length != members.length then
+      throw (psElabPreDefinitionError "OWNERSHIP" "partial consumer changed component member ownership")
+    let checkedMembers := (members.zip result.members).map fun (member, batch) =>
+      { batch with diagnostics := batch.diagnostics ++
+          psElabPreDefinitionUnusedHints member.source "partial" }
+    return {
+      batch := { result.batch with diagnostics := checkedMembers.flatMap (·.diagnostics) }
+      members := checkedMembers
+    }
   if members.all (fun member => psElabPreDefinitionStrategyEq member.strategy .total) then
     return ← psElabPreDefinitionStructural environment levels nextId members
   throw (psElabPreDefinitionError "STRATEGY" "recursive component mixes incompatible checked logical strategies")
@@ -551,6 +589,7 @@ def psElabPreDefinitionBatch (environment : PsEnvironment)
   return {
     batch := {
       declarations := staged.declarations
-      sourceInfo := members.flatMap (·.sourceInfo) }
+      sourceInfo := members.flatMap (·.sourceInfo)
+      diagnostics := members.flatMap (·.diagnostics) }
     members }
 

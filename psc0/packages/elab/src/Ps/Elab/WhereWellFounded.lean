@@ -105,6 +105,14 @@ def psElabWhereWellFounded (prepared : PsElabWherePrepared)
         declarations := bodyContext.localContext.declarations.filter (fun declaration => ownIds.contains (psLocalDeclId declaration)) ++
           bodyContext.localContext.declarations.filter (fun declaration => !ownIds.contains (psLocalDeclId declaration)) }
   let termination ← psElabWhereTermination input.header.source
+  -- Only the checked recursive WF consumer resolves the retained hint.
+  -- Resolution keeps the original header namespace and aliases; elaboration
+  -- below still sees only the actual closed body/type capture telescope.
+  let termination ← match input.header.terminationScope with
+    | none => pure termination
+    | some saved => do
+      let scopedTermination ← psScopeWhereTermination saved.resolver saved.bound termination
+      pure scopedTermination.fst
   -- The decreasing clause belongs to the original header, before helpers
   -- enter. Restore its captured lookup names through the exact renamed IDs.
   let proofAliases := renames.map fun (_, shortName, hidden) =>

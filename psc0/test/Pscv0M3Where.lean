@@ -261,6 +261,83 @@ run_cmd do
     unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
       throwError "unknown-hint native oracle uses an unapproved assumption: {name}: {axioms}"
 
+-- Pinned unused-hint decisions follow checked body dependencies.
+/-- warning: unused `termination_by`, function is not recursive -/
+#guard_msgs in
+def ordinary (n : Nat) : Nat := loop n
+where
+  loop (k : Nat) : Nat := k
+  termination_by missingMeasure
+
+section
+variable (hintOnly : Nat)
+
+/-- warning: unused termination hints, function is not recursive -/
+#guard_msgs in
+def uhShadow (n : Nat) : Nat := shadow n
+where
+  shadow (shadow : Nat) : Nat := shadow
+  termination_by hintOnly
+  decreasing_by exact missingProof
+
+end
+
+/-- warning: unused `termination_by`, function is not recursive -/
+#guard_msgs in
+def uhMain (n : Nat) : Nat := n
+termination_by missingMain
+
+abbrev UhHintDictionary (_tag : Nat) : Type := Inhabited Nat
+
+section
+variable (tag : Nat) [d : UhHintDictionary tag]
+
+def hintDictPlain (n : Nat) : Nat := helper n
+where
+  helper (k : Nat) : Nat := default + k
+
+/-- warning: unused `termination_by`, function is not recursive -/
+#guard_msgs in
+def hintDictIgnored (n : Nat) : Nat := helper n
+where
+  helper (k : Nat) : Nat := default + k
+  termination_by tag
+
+end
+
+section
+variable {A : Type u} [aInhabited : Inhabited A]
+
+def uhTypePlain (n : Nat) : Nat := helper n
+where
+  helper (_k : Nat) : Nat := default
+
+/-- warning: unused `termination_by`, function is not recursive -/
+#guard_msgs in
+def uhTypeHinted (n : Nat) : Nat := helper n
+where
+  helper (_k : Nat) : Nat := default
+  termination_by A
+
+end
+
+example : ordinary 7 = 7 := rfl
+example : ordinary.loop 7 = 7 := rfl
+example : uhShadow 8 = 8 := rfl
+example : uhShadow.shadow 8 = 8 := rfl
+example : uhMain 9 = 9 := rfl
+example : @hintDictPlain 7 (Inhabited.mk 41) 3 = 44 := rfl
+example : @hintDictIgnored 7 (Inhabited.mk 41) 3 = 44 := rfl
+example : @hintDictPlain 7 (Inhabited.mk 7) 3 = 10 := rfl
+example : @hintDictIgnored 7 (Inhabited.mk 7) 3 = 10 := rfl
+example : uhTypePlain 3 = 0 := rfl
+example : uhTypeHinted 3 = 0 := rfl
+example : Nat → Nat := @ordinary.loop
+example : Nat → Nat := @uhShadow.shadow
+example : Nat → Nat := @uhTypePlain.helper
+example : Nat → Nat := @uhTypeHinted.helper
+
+
 end M3WhereOracle
 
 namespace M3Where
@@ -515,11 +592,6 @@ private def partialHintRefusals : List (String × String × String) := [
     "  def loop(k: Nat): Nat := match k with { | 0 => 0 | j + 1 => loop(j) + 1 }\n" ++
     "  termination_by k\n  decreasing_by by { exact missingProof }\n}\n",
     "PSCV0-SCOPE: unknown name missingProof"),
-  -- General nonrecursive hint parity is outside this bounded P0 change.
-  ("ordinary-unused-unknown-measure",
-    "function ordinary(n: Nat): Nat := loop(n)\nwhere {\n" ++
-    "  def loop(k: Nat): Nat := k\n  termination_by missingMeasure\n}\n",
-    "PSCV0-SCOPE: unknown name missingMeasure"),
   ("partial-local-header",
     "partial function header(n: Nat): Nat := loop(n)\nwhere {\n" ++
     "  def loop(k: missingHeader): Nat := 0\n  termination_by missingMeasure\n}\n",
@@ -548,6 +620,267 @@ private def partialHintText (suffix : PsSyntaxTermination) : IO String :=
     (.reference (PsSyntaxName.mk ["Nat"] suffix.span))
     (.natural "0" suffix.span) suffix suffix.span)).mapError
       (fun _ => "retained local hint could not be printed"))
+
+private def unusedHintSource : String :=
+  "function ordinary(n: Nat): Nat := loop(n)\n" ++
+  "where {\n" ++
+  "  def loop(k: Nat): Nat := k\n" ++
+  "  termination_by missingMeasure\n" ++
+  "}\n" ++
+  "section\n" ++
+  "variable (hintOnly: Nat)\n" ++
+  "function uhShadow(n: Nat): Nat := shadow(n)\n" ++
+  "where {\n" ++
+  "  def shadow(shadow: Nat): Nat := shadow\n" ++
+  "  termination_by hintOnly\n" ++
+  "  decreasing_by by { exact missingProof }\n" ++
+  "}\n" ++
+  "end\n" ++
+  "function uhMain(n: Nat): Nat := n\n" ++
+  "termination_by missingMain\n" ++
+  "abbrev UhHintDictionary(_tag: Nat): Type := Inhabited(Nat)\n" ++
+  "section\n" ++
+  "variable (tag: Nat) [d: UhHintDictionary(tag)]\n" ++
+  "function hintDictPlain(n: Nat): Nat := helper(n)\n" ++
+  "where {\n" ++
+  "  def helper(k: Nat): Nat := Inhabited.default + k\n" ++
+  "}\n" ++
+  "function hintDictIgnored(n: Nat): Nat := helper(n)\n" ++
+  "where {\n" ++
+  "  def helper(k: Nat): Nat := Inhabited.default + k\n" ++
+  "  termination_by tag\n" ++
+  "}\n" ++
+  "end\n" ++
+  "section\n" ++
+  "universe u\n" ++
+  "variable {A: Type u} [aInhabited: Inhabited(A)]\n" ++
+  "function uhTypePlain(n: Nat): Nat := helper(n)\n" ++
+  "where {\n" ++
+  "  def helper(_k: Nat): Nat := Inhabited.default\n" ++
+  "}\n" ++
+  "function uhTypeHinted(n: Nat): Nat := helper(n)\n" ++
+  "where {\n" ++
+  "  def helper(_k: Nat): Nat := Inhabited.default\n" ++
+  "  termination_by A\n" ++
+  "}\n" ++
+  "end\n" ++
+  "theorem uhOrdinaryEq: Eq(ordinary(7), 7) := by { rfl }\n" ++
+  "theorem uhOrdinaryHelperEq: Eq(ordinary.loop(7), 7) := by { rfl }\n" ++
+  "theorem uhShadowEq: Eq(uhShadow(8), 8) := by { rfl }\n" ++
+  "theorem uhShadowHelperEq: Eq(uhShadow.shadow(8), 8) := by { rfl }\n" ++
+  "theorem uhMainEq: Eq(uhMain(9), 9) := by { rfl }\n" ++
+  "theorem uhDictPlainEq: Eq(hintDictPlain(3, tag := 7, d := Inhabited.mk(41)), 44) := by { rfl }\n" ++
+  "theorem uhDictIgnoredEq: Eq(hintDictIgnored(3, tag := 7, d := Inhabited.mk(41)), 44) := by { rfl }\n" ++
+  "theorem uhDictPlainOtherEq: Eq(hintDictPlain(3, tag := 7, d := Inhabited.mk(7)), 10) := by { rfl }\n" ++
+  "theorem uhDictIgnoredOtherEq: Eq(hintDictIgnored(3, tag := 7, d := Inhabited.mk(7)), 10) := by { rfl }\n" ++
+  "theorem uhTypePlainEq: Eq(uhTypePlain(3), 0) := by { rfl }\n" ++
+  "theorem uhTypeHintedEq: Eq(uhTypeHinted(3), 0) := by { rfl }\n"
+
+
+private def unusedHintRefusals : List (String × String × String) := [
+  ("ordinary-unused-header",
+    "function bad(n: Nat): Nat := helper(n)\nwhere {\n  def helper(k: missingHeader): Nat := 0\n  termination_by missingMeasure\n}\n",
+    "PSCV0-SCOPE: unknown name missingHeader"),
+  ("ordinary-unused-body",
+    "function bad(n: Nat): Nat := helper(n)\nwhere {\n  def helper(k: Nat): Nat := missingBody\n  termination_by missingMeasure\n}\n",
+    "PSCV0-SCOPE: unknown name missingBody"),
+  ("ordinary-unused-typed-body",
+    "function bad(n: Nat): Nat := helper(n)\nwhere {\n  def helper(k: Nat): Nat := true\n  termination_by missingMeasure\n}\n",
+    "PSCV0-TYPE-MISMATCH"),
+  ("active-main-unknown-measure",
+    "function bad(n: Nat): Nat := bad(n)\ntermination_by missingMain\n",
+    "PSCV0-SCOPE: unknown name missingMain")]
+
+
+
+-- Expected messages are explicit fixture observations. Span ownership comes
+-- from the retained parser tree, independently of the warning producer.
+private def hintDiagnosticExpected (parsed : PsSyntaxProgram)
+    (cases : List (String × Option String × String)) :
+    IO (List (String × PsSourceSpan)) := do
+  let declarations := parsed.commands.flatMap fun command =>
+    match command with
+    | .declaration source => [source]
+    | .mutualDeclarations members _ => members.map (·.declaration)
+    | _ => []
+  let mut expected : List (String × PsSourceSpan) := []
+  for (parent, helper, message) in cases do
+    let some source := declarations.find? (fun source =>
+      (psElabOriginSource source).fst.segments == [parent])
+      | throw (IO.userError ("missing warning source owner " ++ parent))
+    let span ← match helper with
+      | some helper => do
+        let .whereDeclaration _ locals _ := source
+          | throw (IO.userError "warning lost its local source frame")
+        let some localDefinition := locals.find? (fun localDefinition =>
+          localDefinition.name.segments == [helper])
+          | throw (IO.userError ("missing warning helper " ++ helper))
+        match localDefinition.recursion with
+        | some (.total termination) => pure termination.span
+        | some (.fixedpoint span) => pure span
+        | none => throw (IO.userError "warning target has no retained local suffix")
+      | none =>
+        match source with
+        | .wellFoundedDefinition _ _ _ _ termination _ => pure termination.span
+        | .fixedpointDefinition _ _ _ _ span => pure span
+        | _ => throw (IO.userError "warning target has no retained main suffix")
+    expected := expected ++ [(message, span)]
+  return expected
+
+private def checkHintDiagnostics (sourceName : String)
+    (expected : List (String × PsSourceSpan))
+    (diagnostics : List PsV7Native.SourceDiagnostic) : IO Unit := do
+  ensure (diagnostics.length == expected.length)
+    ("wrong warning count for " ++ sourceName)
+  for (message, span) in expected do
+    let matches := diagnostics.filter (fun entry =>
+      entry.sourceName == sourceName && entry.diagnostic.message == message &&
+      partialHintSpanEq entry.diagnostic.span span)
+    let [entry] := matches
+      | throw (IO.userError ("missing or duplicate source-owned warning: " ++ message))
+    ensure (match entry.diagnostic.severity with | .warning => true | _ => false)
+      "unused hint acquired a non-warning severity"
+
+private def checkHintResultJson (entrySource : String)
+    (result : PsV7Native.Result) : IO Unit := do
+  let json := PsV7Native.resultJson entrySource (.ok result)
+  let serialized ← fromExcept (json.getObjValAs? (List Lean.Json) "diagnostics")
+  ensure (serialized.length == result.diagnostics.length)
+    "successful result JSON discarded source diagnostics"
+  for (entry, serialized) in result.diagnostics.zip serialized do
+    let source ← fromExcept (serialized.getObjValAs? String "source")
+    let phase ← fromExcept (serialized.getObjValAs? String "phase")
+    let severity ← fromExcept (serialized.getObjValAs? String "severity")
+    let message ← fromExcept (serialized.getObjValAs? String "message")
+    let firstByte ← fromExcept (serialized.getObjValAs? Nat "sourceStartByte")
+    let lastByte ← fromExcept (serialized.getObjValAs? Nat "sourceEndByte")
+    let firstLine ← fromExcept (serialized.getObjValAs? Nat "sourceStartLine")
+    let firstColumn ← fromExcept (serialized.getObjValAs? Nat "sourceStartColumn")
+    let lastLine ← fromExcept (serialized.getObjValAs? Nat "sourceEndLine")
+    let lastColumn ← fromExcept (serialized.getObjValAs? Nat "sourceEndColumn")
+    let diagnostic := entry.diagnostic
+    ensure (source == entry.sourceName && phase == "elaborate" && severity == "warning" &&
+      message == diagnostic.message && firstByte == diagnostic.span.start.byteOffset &&
+      lastByte == diagnostic.span.stop.byteOffset && firstLine == diagnostic.span.start.line &&
+      firstColumn == diagnostic.span.start.column && lastLine == diagnostic.span.stop.line &&
+      lastColumn == diagnostic.span.stop.column)
+      "serialized warning changed its own source, severity, text or coordinates"
+
+
+private def checkUnusedHints : IO Unit := do
+  let parsed ← fromExcept (psPscv0ParseProgram unusedHintSource)
+  let expected ← hintDiagnosticExpected parsed [
+    ("ordinary", some "loop", "unused `termination_by`, function is not recursive"),
+    ("uhShadow", some "shadow", "unused termination hints, function is not recursive"),
+    ("uhMain", none, "unused `termination_by`, function is not recursive"),
+    ("hintDictIgnored", some "helper", "unused `termination_by`, function is not recursive"),
+    ("uhTypeHinted", some "helper", "unused `termination_by`, function is not recursive")]
+  ensure (expected.length == 5) "unused-hint fixture lost an independent warning observation"
+  let compiled ← fromExcept ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed
+    "UnusedHints").mapError psCompilerPscv0ElabError)
+  let environment := compiled.result.environment
+  for (segments, parameters) in [
+      (["ordinary"], ["n"]), (["ordinary", "loop"], ["k"]),
+      (["uhShadow"], ["n"]), (["uhShadow", "shadow"], ["shadow"]),
+      (["uhMain"], ["n"]),
+      (["hintDictPlain"], ["tag", "d", "n"]), (["hintDictPlain", "helper"], ["tag", "d", "k"]),
+      (["hintDictIgnored"], ["tag", "d", "n"]), (["hintDictIgnored", "helper"], ["tag", "d", "k"]),
+      (["uhTypePlain"], ["n"]), (["uhTypePlain", "helper"], ["_k"]),
+      (["uhTypeHinted"], ["n"]), (["uhTypeHinted", "helper"], ["_k"])] do
+    let name := psSyntaxNameAppendSegments segments .anonymous
+    match psEnvironmentFind environment name,
+        psEnvironmentFind environment (psNameAppendStr name "eq_def") with
+    | some (.definitionDecl _ levels type value),
+        some (.theoremDecl _ equationLevels equationType proof) =>
+      ensure (levels.isEmpty && equationLevels.isEmpty && binderNames type == parameters &&
+        [type, value, equationType, proof].all (fun expression =>
+          !psExprHasUnresolvedMeta expression && (psExprFVarIds expression).isEmpty) &&
+        !psExprHasConst psWellFoundedFixName value &&
+        (psEnvironmentFind environment (PsName.num name 0)).isNone)
+        ("unused hint changed checked definition/equation ownership or captures: " ++ psNameToString name)
+      if parameters.length == 1 then
+        match type with
+        | .forallE _ parameterType resultType _ =>
+          ensure (psExprAlphaEq parameterType (.constE (psRootName "Nat") []) &&
+            psExprAlphaEq resultType (.constE (psRootName "Nat") []))
+            "hint-only section type or instance entered a complete Nat-to-Nat header"
+        | _ => throw (IO.userError "noncapturing helper lost its complete Nat-to-Nat header")
+    | _, _ => throw (IO.userError ("unused hint lost ordinary checked definition/equation: " ++ psNameToString name))
+  for suffix in [[], ["helper"]] do
+    let first := psSyntaxNameAppendSegments (["hintDictPlain"] ++ suffix) .anonymous
+    let second := psSyntaxNameAppendSegments (["hintDictIgnored"] ++ suffix) .anonymous
+    match psEnvironmentFind environment first, psEnvironmentFind environment second with
+    | some (.definitionDecl _ _ firstType _), some (.definitionDecl _ _ secondType _) =>
+      ensure (psExprAlphaEq firstType secondType)
+        "ignored hint changed a body-selected dictionary or its dependent capture telescope"
+    | _, _ => throw (IO.userError "missing matched section dictionary definitions")
+  let diagnostics := compiled.origins.flatMap fun origin =>
+    origin.diagnostics.map fun diagnostic =>
+      ({ sourceName := "m3-unused-hints.ps", diagnostic } : PsV7Native.SourceDiagnostic)
+  checkHintDiagnostics "m3-unused-hints.ps" expected diagnostics
+  for parent in ["ordinary", "uhShadow"] do
+    let some original := parsed.commands.findSome? (fun command =>
+      match command with
+      | .declaration source =>
+        if (psElabOriginSource source).fst.segments == [parent] then some source else none
+      | _ => none)
+      | throw (IO.userError "missing raw unused-hint source")
+    let .whereDeclaration _ locals _ := original
+      | throw (IO.userError "unused hint lost its local source wrapper")
+    let scoped ← fromExcept ((psScopePreDefinition
+      { environment := psSelfHostProdPreludeEnvironment, scope := {} }
+      { declaration := original }
+      (PsSyntaxName.mk [parent] (psElabOriginSource original).snd) false).mapError psCompilerPscv0ElabError)
+    ensure (scoped.locals.length == locals.length && !scoped.used.contains "hintOnly" &&
+      !scoped.used.contains "missingMeasure" && !scoped.used.contains "missingProof")
+      "ignored total hints requested a source capture before typed dispatch"
+    for (originalLocal, scopedLocal) in locals.zip scoped.locals do
+      let some (.total before) := originalLocal.recursion
+        | throw (IO.userError "unused hint lost its original total suffix")
+      let some (.total after) := scopedLocal.source.recursion
+        | throw (IO.userError "unused hint discarded its retained total suffix")
+      let beforeText ← partialHintText before
+      let afterText ← partialHintText after
+      ensure (scopedLocal.terminationScope.isSome && beforeText == afterText &&
+        partialHintSpanEq before.span after.span &&
+        partialHintSpanEq (psSyntaxTermSpan before.measure) (psSyntaxTermSpan after.measure) &&
+        partialHintSpanEq originalLocal.span scopedLocal.source.span)
+        "unused total hint changed raw text, deferred header scope or source spans"
+      match before.decreasing, after.decreasing with
+      | some first, some second =>
+        ensure (partialHintSpanEq (psSyntaxTermSpan first) (psSyntaxTermSpan second))
+          "unused total proof hint lost its original span"
+      | none, none => pure ()
+      | _, _ => throw (IO.userError "unused total proof hint was added or removed")
+  let requests := #[
+      ({ source := unusedHintSource, sourceName := "m3-unused-hints.ps" } : PsV7Native.Request),
+      ({ source := "import HintProvider\nfunction entry(n: Nat): Nat := ordinary(n)\n",
+         sourceName := "hint-entry.ps", moduleName := "Main",
+         modules := [{ name := "HintProvider", sourceName := "hint-provider.ps", source := unusedHintSource }] } :
+        PsV7Native.Request)] ++
+    (unusedHintRefusals.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  ensure (batch.results.size == 6) "unused-hint source-only batch lost a positive or refusal"
+  for (index, entrySource, warningSource) in [
+      (0, "m3-unused-hints.ps", "m3-unused-hints.ps"), (1, "hint-entry.ps", "hint-provider.ps")] do
+    match batch.results[index]? with
+    | some (.ok result) =>
+      ensure (result.declarationCount > 0 && result.artifacts.isEmpty &&
+        PsV7Native.assuranceLabel result.assurance == "ordinary-checked")
+        "unused-hint source-only qualification lost checked declarations or requested an executable result"
+      checkHintDiagnostics warningSource expected result.diagnostics
+      checkHintResultJson entrySource result
+    | some (.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
+    | none => throw (IO.userError "missing unused-hint source-only result")
+  for ((label, _, rule), index) in unusedHintRefusals.zipIdx do
+    match batch.results[index + 2]? with
+    | some (.error error) =>
+      ensure (error.phase == "elaborate" && (error.message.splitOn rule).length > 1)
+        (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
+    | _ => throw (IO.userError ("unexpected unused-hint acceptance: " ++ label))
+  IO.println "PSCV0_M3_UNUSED_HINTS: PASS five exact pinned native warnings, eleven matched rfl equations, thirteen closed ordinary definition/equation headers, ignored measure/proof capture exclusion, body-selected dictionary parity, retained raw spans, source-only/project diagnostic JSON and four exact refusals"
 
 private def checkPartialHintScopes : IO Unit := do
   ensure (M3WhereOracle.unknownHints 7 3 == 33 &&
@@ -625,6 +958,11 @@ private def checkPartialHintScopes : IO Unit := do
   | some (Except.ok result) =>
     ensure (result.declarationCount > 0 && result.artifacts.isEmpty)
       "source-only partial hint qualification returned an empty or executable result"
+    let expected ← hintDiagnosticExpected parsed [
+    ("phMain", some "loop", "unused termination hints, function is partial"),
+    ("phMain", some "proofLoop", "unused termination hints, function is partial")]
+    checkHintDiagnostics "m3-partial-hint-scope.ps" expected result.diagnostics
+    checkHintResultJson "m3-partial-hint-scope.ps" result
   | some (Except.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
   | none => throw (IO.userError "missing partial hint qualification result")
   for ((label, _, rule), index) in partialHintRefusals.zipIdx do
@@ -811,6 +1149,7 @@ def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "where qualification requires pinned Lean"
   M3ResultInference.check
+  checkUnusedHints
   checkPartialHintScopes
   checkSource
   checkConstruction
@@ -830,6 +1169,17 @@ def main (args : List String) : IO Unit := do
     | .ok value => pure value
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
   ensure (result.artifacts.length == 5) "where did not emit all five targets"
+  let parsed ← fromExcept (psPscv0ParseProgram (source ++ equations ++ wrappers))
+  let expected ← hintDiagnosticExpected parsed [
+    ("wdisconnected", some "loop", "unused termination hints, function is partial"),
+    ("wdisconnected", some "bump", "unused `partial_fixpoint`, function is not recursive"),
+    ("wdisconnected", some "measured", "unused termination hints, function is not recursive"),
+    ("wdisconnected", some "fixedLoop", "unused `partial_fixpoint`, function is partial"),
+    ("wredundantWF", none, "unused `termination_by`, function is not recursive"),
+    ("wredundantP1", none, "unused `partial_fixpoint`, function is not recursive")]
+  checkHintDiagnostics "m3-where.ps" expected result.diagnostics
+  checkHintResultJson "m3-where.ps" result
+  IO.println "PSCV0_M3_HINT_DIAGNOSTICS: PASS two inherited-partial warnings and six emitted warnings with exact source-owned text, severity and coordinates"
   let directory := System.FilePath.mk directory
   IO.FS.createDirAll directory
   IO.FS.writeFile (directory / "wherefixture.ps") (source ++ equations ++ wrappers)

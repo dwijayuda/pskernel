@@ -2,10 +2,12 @@ import Ps.Elab.Term
 import Ps.Meta.Inductive
 import Ps.Core.Nested
 import Ps.Core.InductiveGroup
+import Ps.Foundation.Diagnostic
 
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
   sourceInfo : List PsElabSourceInfo := []
+  diagnostics : List PsDiagnostic := []
 
 def psSyntaxConstructorCoreName (inductiveName : PsName)
     (sourceName : PsSyntaxName) : Option PsName :=

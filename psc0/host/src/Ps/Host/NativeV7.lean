@@ -99,7 +99,13 @@ structure Timings where
   eraseMs : Nat := 0
   emitMs : Nat := 0
 
+-- Successful source diagnostics retain their own file and exact source span.
+structure SourceDiagnostic where
+  sourceName : String
+  diagnostic : PsDiagnostic
+
 structure Result where
+  diagnostics : List SourceDiagnostic := []
   assurance : Assurance := .ordinaryChecked
   moduleProfiles : List PsPscv0ModuleProfile := []
   declarationCount : Nat
@@ -261,8 +267,23 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
   else {
     parseMs := t1 - t0, elaborateMs := t2 - t1,
     prepareMs := t3 - t2, kernelMs := t4 - t3 }
+  let originBatches : List (String × PsElabBatchOrigin) :=
+    match project with
+    | some value =>
+      value.origins.flatMap fun file =>
+        let sourceName := if file.moduleName == request.moduleName then
+          request.sourceName else file.sourceName
+        file.batches.map (fun batch => (sourceName, batch))
+    | none =>
+      match elaborated with
+      | some value => value.origins.map (fun batch => (request.sourceName, batch))
+      | none => []
+  let diagnostics := originBatches.flatMap fun (sourceName, batch) =>
+    batch.diagnostics.map fun diagnostic =>
+      ({ sourceName, diagnostic } : SourceDiagnostic)
   if request.targets.isEmpty then
     return {
+      diagnostics
       moduleProfiles := (project.map (·.moduleProfiles)).getD []
       declarationCount := output.prepared.declarations.length
       artifacts := []
@@ -290,17 +311,6 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
         ir.structures.any (fun s => s.name == name) ||
         ir.inductives.any (fun i => i.name == name)
       { ir with internalNames := ir.internalNames ++ names }
-  let originBatches : List (String × PsElabBatchOrigin) :=
-    match project with
-    | some value =>
-      value.origins.flatMap fun file =>
-        let sourceName := if file.moduleName == request.moduleName then
-          request.sourceName else file.sourceName
-        file.batches.map (fun batch => (sourceName, batch))
-    | none =>
-      match elaborated with
-      | some value => value.origins.map (fun batch => (request.sourceName, batch))
-      | none => []
   let origins := originBatches.flatMap fun (fileName, batch) =>
     sourceOriginsForBatch fileName batch
   let origins := output.originParents.foldl (fun origins (helper, parent) =>
@@ -336,6 +346,7 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
           PsWasm.emit checked context (target == .wasmComponent) request.exports)
   let t6 ← IO.monoMsNow
   return {
+    diagnostics
     moduleProfiles := (project.map (·.moduleProfiles)).getD []
     declarationCount := output.prepared.declarations.length
     artifacts := artifacts.map (fun artifact => { artifact with targetWordSize := request.targetWordSize })
@@ -385,6 +396,24 @@ def timingsJson (t : Timings) : Lean.Json :=
     ("prepareMs", toJson t.prepareMs), ("kernelMs", toJson t.kernelMs),
     ("eraseMs", toJson t.eraseMs), ("emitMs", toJson t.emitMs)]
 
+def sourceDiagnosticJson (entry : SourceDiagnostic) : Lean.Json :=
+  let diagnostic := entry.diagnostic
+  let severity := match diagnostic.severity with
+    | .error => "error"
+    | .warning => "warning"
+    | .info => "info"
+  Lean.Json.mkObj [
+    ("source", toJson entry.sourceName),
+    ("phase", toJson ("elaborate" : String)),
+    ("severity", toJson severity),
+    ("message", toJson diagnostic.message),
+    ("sourceStartByte", toJson diagnostic.span.start.byteOffset),
+    ("sourceEndByte", toJson diagnostic.span.stop.byteOffset),
+    ("sourceStartLine", toJson diagnostic.span.start.line),
+    ("sourceStartColumn", toJson diagnostic.span.start.column),
+    ("sourceEndLine", toJson diagnostic.span.stop.line),
+    ("sourceEndColumn", toJson diagnostic.span.stop.column)]
+
 def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.Json :=
   let identity := [
     ("source", toJson sourceName), ("leanVersion", toJson Lean.versionString),
@@ -397,6 +426,7 @@ def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.
   | .ok value => Lean.Json.mkObj (identity ++ [
       ("accepted", toJson true), ("assurance", toJson (assuranceLabel value.assurance)),
       ("declarations", toJson value.declarationCount),
+      ("diagnostics", toJson (value.diagnostics.map sourceDiagnosticJson)),
       ("targetWordSize", toJson (value.targetWordSize.map psIrWordSizeBits)),
       ("timings", timingsJson value.timings)])
 

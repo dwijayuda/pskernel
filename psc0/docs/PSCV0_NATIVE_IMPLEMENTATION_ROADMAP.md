@@ -1,151 +1,101 @@
-## Authoritative current checkpoint — own-binder result families accepted, 2026-10-17
+## Authoritative current checkpoint — unused-hint candidate, 2026-10-17
 
-Accepted compiler/test SHA: `0e2f5c461d30457caee322b8135293597f55ac4b`.
-All five gates completed successfully at that exact SHA. The accepted focused
-total remains **960 actual comparisons**, and the weighted engineering estimate
-remains **78/100**. The containing checkpoint changes documentation only.
+This compiler/test revision is a candidate and is not yet qualified.
+The preceding accepted compiler/test SHA is
+`0e2f5c461d30457caee322b8135293597f55ac4b`, recorded by documentation checkpoint
+`e00f189cd4ce13da8cf37bf503884b339b553ec5`. Its five successful gates and
+**960 actual runtime comparisons** remain the accepted baseline. The weighted
+engineering estimate remains **78/100**.
 
-The [result-family qualification receipt](PSCV0_M3_RESULT_FAMILY_QUALIFICATION_2026-10-17.md) records the
-bounded inference rule, resource ownership, exact source/native cases, all
-gates and artifacts, four failed host-build attempts and their repairs.
-The [generic P0 receipt](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md) retains the preceding accepted
-`82b248a3ee2cd9246756690db23b7dffd612e022` / 960 baseline. The
-[independent WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md) records the preceding 940 checkpoint.
+### Candidate behavior and ownership
 
-### Complete same-SHA qualification
+The recorded nonrecursive Where unknown-measure refusal is being corrected
+at the existing typed predefinition owner. Main and local total suffixes
+retain their raw measure/proof syntax and spans. Scope saves the original
+resolver and header-bound names in a sidecar, without collecting captures
+from hint syntax. The typed body graph still determines component recursion;
+there is no source-name approximation.
 
-| Gate | Run | Job | Result |
-| --- | --- | --- | --- |
-| Native Linux | [39040588006](https://github.com/dwijayuda/pskernel/actions/runs/39040588006) | `117419140165` | SUCCESS; all 34 reported steps |
-| Focused M3 | [39040587989](https://github.com/dwijayuda/pskernel/actions/runs/39040587989) | `117419139972` | SUCCESS; all 15 reported steps |
-| F1 canonical model | [39040587981](https://github.com/dwijayuda/pskernel/actions/runs/39040587981) | `117419139877` | SUCCESS; all 10 reported steps |
-| F2 logical operations | [39040588008](https://github.com/dwijayuda/pskernel/actions/runs/39040588008) | `117419139837` | SUCCESS; all 9 reported steps |
-| F3/F4/platform | [39040587982](https://github.com/dwijayuda/pskernel/actions/runs/39040587982) | `117419140082` | SUCCESS; all 11 reported steps |
+Ordinary typed predefinitions receive the full already checked section
+telescope, including local instances. The existing checked type/body capture
+closure then prunes that context. This prevents a hint-only section name
+from deciding which dictionary the body can use. The change is bounded to
+the predefinition path and does not change theorem include/omit policy.
 
-Native/focused completed logs contain 4,476,633 /
-8,264,521 characters. Focused artifact 12103214519 has
-286 files / 3,038,443 bytes, SHA-256
-`31119835fc1aef644509103d290cf118f20577158864b03223327524da773ac8`.
-Native artifact 12103729665 has 6,797,268 bytes,
-SHA-256 `09a19655357ca975337902a831a3c7b86f9a4390ecca91676ae7aecec957aad1`.
-All metadata matches completed upload receipts. Artifact ZIP contents were
-not independently reopened.
+The existing active well-founded consumer alone resolves its retained
+measure/proof in the saved header scope, before the existing proof-alias
+rewrite. It still sees only actual checked captures and own parameters.
+Unknown active hints, unused section locals in active hints, invalid
+headers/bodies and incompatible original main modifiers remain refusals.
 
-### Newly accepted source behavior
+A successfully checked ordinary nonrecursive definition and its exact
+equation now carry an unused-hint warning. Successful partial construction
+carries the corresponding partial warning. Per-member batches retain each
+warning through source origins; Native successful source-only and emitted
+results expose file, severity, message and all six stored byte/line/column
+coordinates through a diagnostics JSON array. Pinned single-clause and
+combined-hint message selection is preserved for represented suffixes.
 
-An omitted result can now depend on a declaration's own resolved binders.
-The result is a natural family in the enclosing scope, applied to the original
-arguments. Body inference and checked caller constraints reach the same
-family. The complete own telescope is resolved before peer headers enter;
-explicit main result holes retain their distinct refusal, while selected
-local explicit holes can use body inference.
+Diagnostics are transactional with an overall successful compiler result.
+This is not a claim of identical cumulative message logs on failing Lean
+inputs. Main partial_fixpoint syntax retains the whole declaration span, so
+its diagnostic uses that actual retained span. No narrower keyword span is
+invented; standalone decreasing_by, termination_by? and structural-hint
+grammar are not newly represented.
 
-The unifier applies the rule only to a marked, natural, unassigned,
-non-delayed metavariable at its exact full argument spine. Distinct actual
-bindings can be abstracted in application order. A constant approximation must
-fit the family creation scope and its declared type. Both paths retain type,
-occurs and scope checks and retry the complete original equality before
-committing. Scope-argument metadata survives template export/replay.
+### Candidate regressions and retained gates
 
-An unresolved index retains its full saved creation scope. A blocked family
-cannot fall through to application congruence and guess R := Fin / index := n.
-Failed comparisons restore term/universe assignments, declaration/allocation
-state and delayed state. Ordinary conversion can still unblock a family.
+The changed existing Where fixture proposes five exact pinned native warning
+guards, eleven independent native/source rfl equations, four explicit
+complete native helper headers, and thirteen closed ordinary portable
+definition/equation headers. A reducible dictionary-alias pair must select
+the same actual local dictionary with and without a hint, retaining tag/d
+through its real type dependency; a distinct hint-only type/instance pair
+must retain complete Nat-to-Nat headers without extra captures.
 
-Application, lambda, record, tactic and fixed-index match owners recognize a
-full unknown family. Caller constraints, defaults, saved scopes, dependent
-context refusal and final checked recursor construction remain. Solved
-families are beta-reduced before capture closure. Every final type/body and
-official-kernel check is retained.
+The new source-only batch has two positive requests (single source and a
+project provider with a different entry filename) plus four exact
+elaborate-phase refusals. It checks raw suffix text/spans, typed diagnostics
+and successful JSON coordinates. The exact former nonrecursive unknown
+measure refusal becomes a positive; the other six inherited-partial
+refusals remain. The existing inherited-partial success must expose two
+warnings. The original main Where batch still has one five-target success
+and six refusals, and now checks its six existing unused-hint warnings
+through emission and JSON.
 
-Actual resource failures propagate through the migrated instance, synthetic,
-checked-queue and elaborator owners. A checked queue stops before another
-item/default, restoring original context and pending order while retaining
-consumed attempt counts. Existing compatibility wrappers and low-level fuel
-policies remain; this is not a global resource-policy rewrite.
+These are candidate assertions, not accepted execution evidence. No workflow,
+runtime export, shared runtime runner, native axiom policy or resource budget
+changes. The expected runtime total remains 960; qualify it from completed
+logs at the candidate SHA. The entire five-gate matrix must pass at that one
+compiler/test SHA before accepting this correction.
 
-### Actual source and native evidence
+Independent source review found and repaired one affected positional
+PsElabDeclarationBatchResult constructor using a named record. Bounded
+audits found no other affected positional constructors in the inspected
+batch/origin/native and Where consumers. This review does not substitute
+for host compilation or official-kernel/source/runtime gates.
 
-The focused source step compiled 668 jobs and ran 14 outer fixture commands.
-The result-inference fixture compiled 19 independent pinned native equality
-examples and checked 19 source theorems, 18 closed total definitions and the
-original three opaque/private partial pairs. Its source-only successful request
-produces no executable artifacts; six negative requests fail at their exact
-elaborate-phase owners.
+### Retained accepted evidence and precise limits
 
-Cases include direct Fin(n + 1), forward application at n + 1, a qualified
-helper without unused parent capture, explicit Nat observation, saved tactic,
-caller-directed OfNat producing token value 23, fixed-index matching, record
-resumption and an own Type u binder. Original defaults, solved headers,
-closures, mutual total/partial bodies, captured parameters and source printing
-remain. Native partial controls return 4/4/6. The main Where request batch retains
-seven requests (one five-target success, six refusals); its separate inherited
-partial-hint batch retains eight (one source-only success, seven refusals).
+The [result-family receipt](PSCV0_M3_RESULT_FAMILY_QUALIFICATION_2026-10-17.md)
+contains the accepted own-binder inference and resource-error checkpoint,
+its five gate identities, 960 runtime observations and four initial host
+build failures. The [generic P0 receipt](PSCV0_M3_GENERIC_P0_RUNTIME_QUALIFICATION_2026-10-17.md)
+and [independent WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
+retain their preceding qualified construction/runtime cells.
 
-Native adds 151 lines with its prior source byte-for-byte preserved. Actual
-completed output confirms checked family/universe assignment; a blocked
-pending index without scope pruning or speculative assignments; checked
-resumption; a productive equality control and full later-failure rollback.
-A real zero-fuel inference error survives postponement and checked draining,
-while preassigning the same default permits the same continuation to succeed.
+Precision for the previous result-family rollback claim: the transaction
+restores public equality/family comparison state on failure. A low-level
+worker can still return a partial context under its pre-existing API; the
+accepted claim is not a rewrite of every raw worker's return contract.
 
-The four initial matrices failed during host compilation. Repairs addressed
-record-field alignment, an outdented conditional and an annotation branch's
-enclosing early return. The comma-only first repair was insufficient.
-No source fixture, assertion, oracle, workflow or resource budget was weakened.
-
-### Retained source, trust and runtime evidence
-
-All 56 retained runtime PASS markers match the accepted P0 baseline exactly:
-26 scalar ECMA, 13 scalar Rust, 13 scalar Wasm, plus 2/1/1 for original deriving.
-Each scalar suite runs both flags; each Wasm marker covers V8 core and
-Wasmtime components. The total remains 72 scalar exports / 720 comparisons
-plus 24 original deriving exports / 240 comparisons: 96 exports across five
-execution modes, 960 observed comparisons.
-
-Generic P0 retains both entries at Nat/Bool with dictionaries and seeds in
-one module, Nat false/true 2947/4123 and Bool false/true 12/21. Both verified
-requests refuse without executable artifacts; ordinary observations grant no
-partial-body logical equation or verified backend correspondence. The shared
-runtime runner and all emitted fixture sources are unchanged in this slice.
-
-The original WF fixture retains 21 requests (two positive, 19 exact refusals)
-and 38 printed approved assumption closures. All 10 Where closures are also
-approved. The P0 generic native closure check and P1 Classical.choice refusal
-remain. Independent WF capture and checked-equation construction stay covered.
-
-Native retained the Standard at 3,633 declarations/41 classes/359 instances,
-FNV 4990397000639020696 and Standard SHA-256
-5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7.
-The real three-module application, 1,069 shared observations in direct JS,
-compiled TS and Rust, repeated Wasmtime calls/post-return, 100,000/50,000
-generic Nat/Bool steps and M1 JSON sourceSha at the accepted commit all pass.
-
-### Engineering estimate and next bounded source cell
-
-The accepted rubric stays data 25/30, source 14/15, total recursion 16/20,
-P0 13/15, P1 1/10 and integration 9/10, totaling 78/100. The earlier source point
-already grouped optional result inference with inherited-partial hint fidelity.
-No additional point is awarded for syntax repairs, regressions or source-only
-examples.
-
-The next concrete source obligation is unused-hint diagnostic parity for a
-checked nonrecursive Where helper. The current ordinary-unused-unknown-measure
-fixture still refuses an unknown measure in a nonrecursive helper body.
-WhereScope scopes the suffix before the typed PreDefinition component graph
-can establish nonrecursion. Pinned Lean Main processes a nonrecursive member
-first and TerminationHints.ensureNone warns without elaborating the unused
-hint. Reconcile those existing owners while retaining raw suffixes/spans,
-checked header/body dependencies, capture closure, active recursive
-measure/proof checks and original-main compatibility. Do not infer
-nonrecursion from a superficial source-name scan.
-
-This inference remains bounded. Checked constant approximation is eager;
-arbitrary application inversion, general higher-order completeness and new
-scheduling/backtracking remain outside its acceptance. Some dependent or
-ambiguous callers may require annotations. Broader indexed binary deriving,
-nested/source induction, larger changing WF packs, arbitrary measure
-telescopes, general mutual WF and the full P0 matrix remain open.
+The rubric remains data 25/30, source 14/15, total recursion 16/20,
+P0 13/15, P1 1/10 and integration 9/10. This source-only warning repair earns
+no automatic point or new runtime coverage. A successful matrix can close
+the recorded typed nonrecursive Where diagnostic cell, while the complete
+source exit and broader inference, indexed binary deriving, nested/source
+induction, larger changing WF packs, arbitrary measure telescopes, general
+mutual WF and the complete P0 matrix remain open.
 
 ### Fixed authority and continuation policy
 

@@ -4,7 +4,7 @@
   "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
   "lean_target": "4.35.0",
   "pinned_lean_git": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-  "status": "24 known unqualified cases remain. These are NOT accepted/rejected verdicts. 19 exact cases are now mandatory independently checked results; a regression to unsupported fails CI.",
+  "status": "21 exact known unqualified cases remain, not passing verdicts. 22 independently required complete cases include 20 recent actual negative-rule improvements and two existing sparse positives. Future declines on these mandatory cases fail CI.",
   "evidence": [
     "https://github.com/dwijayuda/pskernel/actions/runs/39006816117",
     "https://github.com/dwijayuda/pskernel/actions/runs/39007503159",
@@ -12,7 +12,10 @@
   ],
   "required_correct_cases": [
     "bugs/ctor-num-fields.ndjson",
+    "bugs/large-elim-param.ndjson",
+    "bugs/level-imax-leq.ndjson",
     "bugs/nat-rec-k-lie.ndjson",
+    "bugs/nat-rec-rules.ndjson",
     "bugs/orphan-rec.ndjson",
     "bugs/rec-k-lie.ndjson",
     "other/extra-rec.ndjson",
@@ -32,30 +35,6 @@
     "tutorial/139_DupConCon.ndjson"
   ],
   "known_gaps": [
-    {
-      "name": "bugs/large-elim-param.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "bugs/level-imax-leq.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "bugs/nat-rec-rules.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
     {
       "name": "bugs/rec-missing-ih.ndjson",
       "allowed": [

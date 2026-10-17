@@ -793,18 +793,25 @@ def c0ExportForbiddenPropLargeElim
     (group : C0ExportInductiveGroup) : Bool :=
   match group.source with
   | .ordinary decl =>
-      match decl.type with
-      | .sort .zero =>
-          if decl.ctors.length > 1 then
-            group.expectedRecs.any fun exported =>
-              match psKernelEnvironmentFind checked exported.base.name with
-              | some (.recInfo generated) =>
-                  generated.base.levelParams.length == decl.levelParams.length &&
-                  exported.base.levelParams.length >
-                    generated.base.levelParams.length
-              | _ => false
-          else false
-      | _ => false
+      -- Lean 4.35 inductive.cpp::elim_only_at_universe_zero forbids
+      -- large elimination for >1 ctor whenever the result universe MAY
+      -- be zero. Sort 0 and Sort u both have such an instantiation.
+      -- Never extrapolate this to arbitrary imax/max or Pi levels without
+      -- proving the corresponding never-zero normalization rule.
+      let mayBeProp : Bool :=
+        match decl.type with
+        | .sort .zero => true
+        | .sort (.param _) => true
+        | _ => false
+      if mayBeProp && decl.ctors.length > 1 then
+        group.expectedRecs.any fun exported =>
+          match psKernelEnvironmentFind checked exported.base.name with
+          | some (.recInfo generated) =>
+              generated.base.levelParams.length == decl.levelParams.length &&
+              exported.base.levelParams.length >
+                generated.base.levelParams.length
+          | _ => false
+      else false
   | _ => false
 
 /-- One declaration check, preserving the kernel's typed error category.

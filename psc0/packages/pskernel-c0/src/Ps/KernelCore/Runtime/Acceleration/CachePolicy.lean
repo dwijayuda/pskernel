@@ -15,6 +15,11 @@ recursor-rule validation. Infer-only application, lambda and forall results
 remain memoized because whole-expression inference results are commonly reused.
 -/
 
+/-- Semantic facts cannot be reused across structurally forgeable FVar
+identities introduced inside temporary local contexts. -/
+def psKernelSemanticCacheEligible (expr : PsKernelExpr) : Bool :=
+  !psKernelExprHasFVar expr
+
 /-!
 **Source-equivalent lookup-first WHNF experiment.**
 
@@ -47,13 +52,9 @@ theorem psKernelC0LookupBeforeEligibility_source {α : Type}
     (expr : PsKernelExpr) (rawHit : Option α) :
     psKernelC0LookupBeforeEligibility expr rawHit =
       (if psKernelSemanticCacheEligible expr then rawHit else none) := by
-  cases rawHit <;> cases (psKernelSemanticCacheEligible expr) <;>
-    rfl
-
-/-- Semantic facts cannot be reused across structurally forgeable FVar
-identities introduced inside temporary local contexts. -/
-def psKernelSemanticCacheEligible (expr : PsKernelExpr) : Bool :=
-  !psKernelExprHasFVar expr
+  cases rawHit with
+  | none => simp [psKernelC0LookupBeforeEligibility]
+  | some _ => rfl
 
 def psKernelSemanticPairCacheEligible
     (left right : PsKernelExpr) : Bool :=

@@ -112,34 +112,58 @@ private def psKernelC0FVarMemoFind (expr : PsKernelExpr) :
       | .isFalse _ =>
           psKernelC0FVarMemoFind expr rest
 
+/-!
+A memo hash is a NON-SEMANTIC index, never a decision about FVars.
+The native identity hash can miss structurally-equal values with different
+addresses, but such misses only recompute the fully checked source result.
+Every hit still verifies exact typed expression equality before reusing
+the attached Lean proof, even if addresses collide. Portable PSC0 v7.2
+uses the structural shape-hash fallback.
+
+The theorem below proves the memo's Boolean result equals the original
+source check for EVERY hash function; identity hashing does not add any
+assumption to kernel admission or convertibility.
+-/
+private unsafe def psKernelC0FVarMemoIdentityHashNative
+    (expr : PsKernelExpr) : Nat :=
+  (ptrAddrUnsafe expr).toNat
+
+@[implemented_by psKernelC0FVarMemoIdentityHashNative]
+private def psKernelC0FVarMemoIdentityHash
+    (expr : PsKernelExpr) : Nat :=
+  psKernelC0MemoShapeHash 4 expr
+
 private def psKernelC0FVarMemoLookup
+    (indexHash : PsKernelExpr → Nat)
     (expr : PsKernelExpr) (memo : PsKernelC0FVarMemo) :
     Option (PsKernelC0ExactFVar expr) :=
   psKernelC0FVarMemoFind expr
     (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (psKernelC0MemoShapeHash 4 expr))
+      (indexHash expr))
 
 private def psKernelC0FVarMemoStore
+    (indexHash : PsKernelExpr → Nat)
     {expr : PsKernelExpr}
     (memo : PsKernelC0FVarMemo)
     (checked : PsKernelC0ExactFVar expr) :
     PsKernelC0ExactFVar expr × PsKernelC0FVarMemo :=
-  let hash := psKernelC0MemoShapeHash 4 expr
+  let hash := indexHash expr
   let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
   (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
     ({ expr := expr, certified := checked } :: bucket))
 
 /-- One memo per query, never transported across checker or expression states. -/
-def psKernelC0FVarMemoGo :
+def psKernelC0FVarMemoGoWithHash
+    (indexHash : PsKernelExpr → Nat) :
     (expr : PsKernelExpr) → PsKernelC0FVarMemo →
       PsKernelC0ExactFVar expr × PsKernelC0FVarMemo
   | expr, memo =>
-      match psKernelC0FVarMemoLookup expr memo with
+      match psKernelC0FVarMemoLookup indexHash expr memo with
       | some checked => (checked, memo)
       | none =>
           match expr with
           | .app fn arg =>
-              let (f, m1) := psKernelC0FVarMemoGo fn memo
+              let (f, m1) := psKernelC0FVarMemoGoWithHash indexHash fn memo
               -- The source predicate short-circuits on the function side.
               -- Do not traverse a potentially enormous argument DAG when
               -- the left child already certifies the presence of an FVar.
@@ -151,9 +175,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar arg)
                     rw [← f.source]
                     simp [h]⟩
-                psKernelC0FVarMemoStore m1 checked
+                psKernelC0FVarMemoStore indexHash m1 checked
               else
-                let (a, m2) := psKernelC0FVarMemoGo arg m1
+                let (a, m2) := psKernelC0FVarMemoGoWithHash indexHash arg m1
                 let checked : PsKernelC0ExactFVar (.app fn arg) :=
                   ⟨a.value, by
                     change a.value =
@@ -161,9 +185,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar arg)
                     rw [← f.source, ← a.source]
                     simp [h]⟩
-                psKernelC0FVarMemoStore m2 checked
+                psKernelC0FVarMemoStore indexHash m2 checked
           | .lam name ty body info =>
-              let (t, m1) := psKernelC0FVarMemoGo ty memo
+              let (t, m1) := psKernelC0FVarMemoGoWithHash indexHash ty memo
               if ht : t.value = true then
                 let checked : PsKernelC0ExactFVar (.lam name ty body info) :=
                   ⟨true, by
@@ -172,9 +196,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar body)
                     rw [← t.source]
                     simp [ht]⟩
-                psKernelC0FVarMemoStore m1 checked
+                psKernelC0FVarMemoStore indexHash m1 checked
               else
-                let (b, m2) := psKernelC0FVarMemoGo body m1
+                let (b, m2) := psKernelC0FVarMemoGoWithHash indexHash body m1
                 let checked : PsKernelC0ExactFVar (.lam name ty body info) :=
                   ⟨b.value, by
                     change b.value =
@@ -182,9 +206,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar body)
                     rw [← t.source, ← b.source]
                     simp [ht]⟩
-                psKernelC0FVarMemoStore m2 checked
+                psKernelC0FVarMemoStore indexHash m2 checked
           | .forallE name ty body info =>
-              let (t, m1) := psKernelC0FVarMemoGo ty memo
+              let (t, m1) := psKernelC0FVarMemoGoWithHash indexHash ty memo
               if ht : t.value = true then
                 let checked : PsKernelC0ExactFVar (.forallE name ty body info) :=
                   ⟨true, by
@@ -193,9 +217,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar body)
                     rw [← t.source]
                     simp [ht]⟩
-                psKernelC0FVarMemoStore m1 checked
+                psKernelC0FVarMemoStore indexHash m1 checked
               else
-                let (b, m2) := psKernelC0FVarMemoGo body m1
+                let (b, m2) := psKernelC0FVarMemoGoWithHash indexHash body m1
                 let checked : PsKernelC0ExactFVar (.forallE name ty body info) :=
                   ⟨b.value, by
                     change b.value =
@@ -203,9 +227,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar body)
                     rw [← t.source, ← b.source]
                     simp [ht]⟩
-                psKernelC0FVarMemoStore m2 checked
+                psKernelC0FVarMemoStore indexHash m2 checked
           | .letE name ty val body nondep =>
-              let (t, m1) := psKernelC0FVarMemoGo ty memo
+              let (t, m1) := psKernelC0FVarMemoGoWithHash indexHash ty memo
               if ht : t.value = true then
                 let checked : PsKernelC0ExactFVar
                     (.letE name ty val body nondep) :=
@@ -216,9 +240,9 @@ def psKernelC0FVarMemoGo :
                        else psKernelExprHasFVar body)
                     rw [← t.source]
                     simp [ht]⟩
-                psKernelC0FVarMemoStore m1 checked
+                psKernelC0FVarMemoStore indexHash m1 checked
               else
-                let (v, m2) := psKernelC0FVarMemoGo val m1
+                let (v, m2) := psKernelC0FVarMemoGoWithHash indexHash val m1
                 if hv : v.value = true then
                   let checked : PsKernelC0ExactFVar
                       (.letE name ty val body nondep) :=
@@ -229,9 +253,9 @@ def psKernelC0FVarMemoGo :
                          else psKernelExprHasFVar body)
                       rw [← t.source, ← v.source]
                       simp [ht, hv]⟩
-                  psKernelC0FVarMemoStore m2 checked
+                  psKernelC0FVarMemoStore indexHash m2 checked
                 else
-                  let (b, m3) := psKernelC0FVarMemoGo body m2
+                  let (b, m3) := psKernelC0FVarMemoGoWithHash indexHash body m2
                   let checked : PsKernelC0ExactFVar
                       (.letE name ty val body nondep) :=
                     ⟨b.value, by
@@ -241,39 +265,56 @@ def psKernelC0FVarMemoGo :
                          else psKernelExprHasFVar body)
                       rw [← t.source, ← v.source, ← b.source]
                       simp [ht, hv]⟩
-                  psKernelC0FVarMemoStore m3 checked
+                  psKernelC0FVarMemoStore indexHash m3 checked
           | .mdata md body =>
-              let (b, m1) := psKernelC0FVarMemoGo body memo
+              let (b, m1) := psKernelC0FVarMemoGoWithHash indexHash body memo
               let checked : PsKernelC0ExactFVar (.mdata md body) :=
                 ⟨b.value, by
                   change b.value = psKernelExprHasFVar body
                   exact b.source⟩
-              psKernelC0FVarMemoStore m1 checked
+              psKernelC0FVarMemoStore indexHash m1 checked
           | .proj name i body =>
-              let (b, m1) := psKernelC0FVarMemoGo body memo
+              let (b, m1) := psKernelC0FVarMemoGoWithHash indexHash body memo
               let checked : PsKernelC0ExactFVar (.proj name i body) :=
                 ⟨b.value, by
                   change b.value = psKernelExprHasFVar body
                   exact b.source⟩
-              psKernelC0FVarMemoStore m1 checked
+              psKernelC0FVarMemoStore indexHash m1 checked
           | .fvar name =>
-              psKernelC0FVarMemoStore memo
+              psKernelC0FVarMemoStore indexHash memo
                 (⟨true, rfl⟩ : PsKernelC0ExactFVar (.fvar name))
           | .bvar index =>
-              psKernelC0FVarMemoStore memo
+              psKernelC0FVarMemoStore indexHash memo
                 (⟨false, rfl⟩ : PsKernelC0ExactFVar (.bvar index))
           | .mvar name =>
-              psKernelC0FVarMemoStore memo
+              psKernelC0FVarMemoStore indexHash memo
                 (⟨false, rfl⟩ : PsKernelC0ExactFVar (.mvar name))
           | .sort level =>
-              psKernelC0FVarMemoStore memo
+              psKernelC0FVarMemoStore indexHash memo
                 (⟨false, rfl⟩ : PsKernelC0ExactFVar (.sort level))
           | .const name levels =>
-              psKernelC0FVarMemoStore memo
+              psKernelC0FVarMemoStore indexHash memo
                 (⟨false, rfl⟩ : PsKernelC0ExactFVar (.const name levels))
           | .lit literal =>
-              psKernelC0FVarMemoStore memo
+              psKernelC0FVarMemoStore indexHash memo
                 (⟨false, rfl⟩ : PsKernelC0ExactFVar (.lit literal))
+
+/-- The source Boolean is independent of the index-hash function.
+This is stronger than proving equality to any particular structural hash. -/
+theorem psKernelC0FVarMemoGoWithHash_source
+    (indexHash : PsKernelExpr → Nat)
+    (expr : PsKernelExpr)
+    (memo : PsKernelC0FVarMemo) :
+    (psKernelC0FVarMemoGoWithHash indexHash expr memo).1.value =
+      psKernelExprHasFVar expr :=
+  (psKernelC0FVarMemoGoWithHash indexHash expr memo).1.source
+
+/-- Exact original public result and proof, with native hash only a hint. -/
+def psKernelC0FVarMemoGo
+    (expr : PsKernelExpr)
+    (memo : PsKernelC0FVarMemo) :
+    PsKernelC0ExactFVar expr × PsKernelC0FVarMemo :=
+  psKernelC0FVarMemoGoWithHash psKernelC0FVarMemoIdentityHash expr memo
 
 /-- Exact memoized source predicate for any syntax DAG. -/
 def psKernelC0MemoizedHasFVar (expr : PsKernelExpr) : Bool :=

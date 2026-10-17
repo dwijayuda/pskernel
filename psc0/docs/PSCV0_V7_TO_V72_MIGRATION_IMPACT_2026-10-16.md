@@ -14,47 +14,33 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — independent WF candidate, 17 October 2026
+## Current M3+B implementation checkpoint — independent WF accepted, generic P0 candidate, 17 October 2026
 
-Accepted compiler/test baseline remains `60586b7e12aee97954d27e698666a8a2531a0db4`,
-78/100 weighted progress and 920 focused comparisons; see its
-[complete receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md).
-The current independent two-changing-argument extension reuses the checked
-PSigma pack with a constant second family. It preserves exactly two ordered
-distinct changing IDs, fixed captures, checked decreases and equations,
-typed erasure and the original curried ABI. Existing unary-major/state support
-and the pinned variable-measure-codomain refusal are unchanged.
+Accepted compiler/test SHA is `c23a6fb479d3c930dc97f9f13c0421b307e462a2`: **78/100** weighted progress and
+**940 observed focused comparisons**. The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
+records all five successful same-SHA gates, complete artifacts, exact logical
+construction, 38 approved native assumption closures, 21 WF requests and all
+runtime lanes. Independent two-changing-argument packing is qualified; no extra
+whole score point is assigned for extending the already-credited pair mechanism.
 
-At `9c3e76b14f91158d3c1c2e6753fdd2942716cb4e`, all focused build jobs and
-complete WF construction pass, including the original three decrease proofs
-and exact retained-source equations. Executable preparation then fails on
-`PSigma.mk` inside a lifted independentRight worker.
-The containing candidate preserves the checked curried callback adapter as
-a typed local let so nested workers capture its source ABI; existing exact
-adapter replacement still rejects every residual raw callback. It does not
-add arbitrary PSigma runtime support. All source proofs, existing native
-oracles and 19 refusal controls remain unchanged.
+The original independent decrease proofs, native oracles, public equations and
+19 refusal controls are unchanged. Transactional queued-instance recovery fixed
+expected-type inference; checked nested constructor cases fixed exact equation
+transport; a typed source-curried callback let keeps packed adapters inside their
+erasure owner. Native Linux passes the new inferred-input/rollback/saved-scope
+regressions and the complete original source/Standard/backend gates.
 
-Transactional instance recovery and nested checked constructor cases are
-retained from earlier candidates. Their observed progression and the complete
-latest matrix are recorded in the work-state checkpoint. Independent-WF
-acceptance requires all five gates at one exact compiler/test SHA and all
-940 planned comparisons. No extra score point is assigned to this bounded
-extension of pair packing.
+The containing commit adds a separate generic mutual ordinary-P0 fixture at Nat
+and Bool, with real dictionaries/seeds, two exports, five runtime lanes and two
+verified-assurance refusals. Its 20 comparisons remain planned until the new
+candidate passes all five gates at one exact SHA; only then may 960 be accepted.
 
-The separate generic mutual ordinary-P0 runtime fixture is prepared with
-Nat/Bool seed/default distinctions and explicit verified-assurance refusals.
-It must earn its own 20 comparisons after independent-WF qualification.
-Own-binder-dependent result inference remains under design; caller-driven
-type constraints and default/proof scheduling must be preserved. Larger
-changing packs, arbitrary WF telescopes, general mutual WF, broader indexed
-binary deriving and the full M3+B exits remain open. P1 still refuses the
-audited Classical.choice dependency.
-
-The adoption-era matrix below is historical implementation guidance.
-Its specification comparison remains provenance; this checkpoint and the
-current roadmap supersede its pending/blanket-rejection descriptions.
-The v7.2 reference, Lean pin and approved assumption set are unchanged.
+Own-binder-dependent omitted-result inference and its checked resource path
+remain a later candidate. Larger WF packs, arbitrary/variable measure codomains,
+general mutual WF, broader indexed binary deriving, nested/source induction and
+the complete P0 matrix remain open. P1 retains its audited `Classical.choice`
+refusal. M3+B, M4 and M5 remain open. The adoption matrix below is historical
+policy/owner evidence and does not override this exact acceptance checkpoint.
 
 ## Rule-to-change and implementation matrix
 

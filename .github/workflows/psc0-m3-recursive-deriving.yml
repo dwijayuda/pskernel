@@ -106,6 +106,7 @@ jobs:
           set -euo pipefail
           lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving pscv0_m3_group_proof_deriving pscv0_m3_empty_dictionaries
           mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive ../dist/m3-where ../dist/m3-nested-deriving ../dist/m3-group-proof-deriving ../dist/m3-group-proof-deriving/indexed-inhabited ../dist/m3-empty-dictionaries
+          mkdir -p ../dist/m3-mutual-partial/p0-generic
           # Collect every independent source-check failure; all fixtures remain required.
           m3_fixture_status=0
           m3_check_fixture() {
@@ -136,6 +137,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-well-founded/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-match/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-partial/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-partial/p0-generic/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-structural/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-nested-inductive/source-sha.txt
@@ -172,6 +174,9 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-mutual-partial/mutual.ts --outDir ../dist/m3-mutual-partial/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput | tee ../dist/m3-mutual-partial/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput ../dist/m3-mutual-partial/ts/mutual.js | tee ../dist/m3-mutual-partial/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-mutual-partial/p0-generic/p0generic.ts --outDir ../dist/m3-mutual-partial/p0-generic/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial/p0-generic p0generic m3p0genericnat,m3p0genericbool | tee ../dist/m3-mutual-partial/p0-generic/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-partial/p0-generic p0generic m3p0genericnat,m3p0genericbool ../dist/m3-mutual-partial/p0-generic/ts/p0generic.js | tee ../dist/m3-mutual-partial/p0-generic/ts.log
           "$TSC" --ignoreConfig ../dist/m3-inductive-deriving/groupderive.ts --outDir ../dist/m3-inductive-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr | tee ../dist/m3-inductive-deriving/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr ../dist/m3-inductive-deriving/ts/groupderive.js | tee ../dist/m3-inductive-deriving/ts.log
@@ -210,6 +215,8 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-match/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-partial/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-partial/p0-generic p0generic m3p0genericnat,m3p0genericbool
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-partial/p0-generic/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-deriving/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric
@@ -244,6 +251,7 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-well-founded wellfounded m3wfskipoutput,m3wfbranchesoutput,m3wfshiftoutput,m3wfdefaultoutput,m3wfaccoutput,m3wfoffsetoutput,m3wfstatesoutput,m3wffixedoutput,m3wflistoutput,m3wffunctionoutput,m3wfdependentstateoutput,m3wfdependentresultoutput,m3wfrelationsoutput,m3wfpackedoutput,m3wfindependentleftoutput,m3wfindependentrightoutput | tee ../dist/m3-well-founded/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-match groupmatch m3matchleft,m3matchright,m3matchnested,m3matchzero | tee ../dist/m3-inductive-match/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial mutual m3mutualoutput,m3mutualcaptureoutput,m3mutualdisconnectedoutput,m3mutualnullaryoutput,m3mutualshadowoutput | tee ../dist/m3-mutual-partial/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-partial/p0-generic p0generic m3p0genericnat,m3p0genericbool | tee ../dist/m3-mutual-partial/p0-generic/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr | tee ../dist/m3-inductive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee ../dist/m3-mutual-structural/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/wasm.log

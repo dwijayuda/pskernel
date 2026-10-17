@@ -1,5 +1,6 @@
 import Ps.Host.NativeV7
 import PsKernelLean.Admission
+import Lean.Util.CollectAxioms
 
 namespace M3MutualPartialOracle
 
@@ -102,6 +103,54 @@ def nullaryOutput (flag : Bool) : UInt64 :=
 def shadowOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (shadowLeft (if flag then 7 else 11) (if flag then 100 else 200)
     (if flag then 3 else 4))
+
+-- Ordinary P0 generic runtime oracle. Both entries retain a common runtime
+-- dictionary and seed; alternating entry/parity distinguishes the actual
+-- bodies from their separately inhabited logical opaque values.
+section
+variable {A : Type u} [dictionary : Inhabited A] (seed : A)
+
+mutual
+  partial def p0Left (n : Nat) : A :=
+    match n with
+    | 0 => seed
+    | k + 1 => p0Right k
+  partial def p0Right (n : Nat) : A :=
+    match n with
+    | 0 => default
+    | k + 1 => p0Left k
+end
+end
+
+example : ∀ (A : Type u), Inhabited A → A → Nat → A := @p0Left
+example : ∀ (A : Type u), Inhabited A → A → Nat → A := @p0Right
+
+def p0NatOutput (flag : Bool) : UInt64 :=
+  let dictionary : Inhabited Nat := ⟨if flag then 23 else 29⟩
+  let seed : Nat := if flag then 41 else 47
+  let n : Nat := if flag then 2 else 3
+  let left := @p0Left Nat dictionary seed n
+  let right := @p0Right Nat dictionary seed n
+  UInt64.ofNat (100 * left + right)
+
+def p0BoolOutput (flag : Bool) : UInt64 :=
+  let dictionary : Inhabited Bool := ⟨true⟩
+  let n : Nat := if flag then 2 else 3
+  let left := @p0Left Bool dictionary false n
+  let right := @p0Right Bool dictionary false n
+  UInt64.ofNat ((if left then 10 else 20) + (if right then 1 else 2))
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for name in [``p0Left, ``p0Right] do
+    match environment.find? name with
+    | some (.opaqueInfo _) => pure ()
+    | _ => throwError "native generic P0 member is not logically opaque: {name}"
+  for name in [``p0Left, ``p0Right, ``p0NatOutput, ``p0BoolOutput] do
+    let axioms ← Lean.collectAxioms name
+    unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
+      throwError "generic P0 oracle uses an unapproved assumption: {name}: {axioms}"
+  Lean.logInfo "PSCV0_M3_P0_GENERIC_NATIVE: PASS actual generic opaque entries, common instance/seed telescope and allowed native logical assumption closure"
 
 end M3MutualPartialOracle
 
@@ -423,6 +472,159 @@ private def checks : Array Check :=
     { label := "boundary-qualified-verified-refused", request := { project with assurance := .boundaryQualifiedVerified }
       failure := some ("assurance", "PSCV0-ASSURANCE-DOWNGRADE:") } ]
 
+-- This nested suite preserves the original imported mutual fixture, its five
+-- exports and every refusal. It adds two concrete runtime specializations of
+-- one generic P0 pair, with nonstandard dictionaries and both entry directions.
+private def p0GenericSource : String :=
+  "universe u\nsection\n" ++
+  "variable {A: Type u} [dictionary: Inhabited A] (seed: A)\n" ++
+  "mutual\n" ++
+  "  partial function p0genericLeft(n: Nat): A := match n with { | 0 => seed | k + 1 => p0genericRight(k) }\n" ++
+  "  partial function p0genericRight(n: Nat): A := match n with { | 0 => Inhabited.default | k + 1 => p0genericLeft(k) }\n" ++
+  "end\nend\n" ++
+  "function m3p0genericnat(flag: Bool): UInt64 := {\n" ++
+  " let dictionary: Inhabited(Nat) := Inhabited.mk(if (flag) { 23 } else { 29 })\n" ++
+  " let seed: Nat := if (flag) { 41 } else { 47 }\n" ++
+  " let n: Nat := if (flag) { 2 } else { 3 }\n" ++
+  " let left: Nat := p0genericLeft(seed, n, A := Nat, dictionary := dictionary)\n" ++
+  " let right: Nat := p0genericRight(seed, n, A := Nat, dictionary := dictionary)\n" ++
+  " UInt64.ofNat(100 * left + right) }\n" ++
+  "function m3p0genericbool(flag: Bool): UInt64 := {\n" ++
+  " let dictionary: Inhabited(Bool) := Inhabited.mk(true)\n" ++
+  " let n: Nat := if (flag) { 2 } else { 3 }\n" ++
+  " let left: Bool := p0genericLeft(false, n, A := Bool, dictionary := dictionary)\n" ++
+  " let right: Bool := p0genericRight(false, n, A := Bool, dictionary := dictionary)\n" ++
+  " UInt64.ofNat((if (left) { 10 } else { 20 }) + (if (right) { 1 } else { 2 })) }\n"
+
+private def p0GenericExports : List (String × (Bool → UInt64)) :=
+  [("m3p0genericnat", M3MutualPartialOracle.p0NatOutput),
+   ("m3p0genericbool", M3MutualPartialOracle.p0BoolOutput)]
+
+private def p0GenericCoreAny (predicate : PsExpr → Bool) (value : PsExpr) : Bool :=
+  predicate value ||
+    match value with
+    | .app fn arg => p0GenericCoreAny predicate fn || p0GenericCoreAny predicate arg
+    | .lam _ type body _ | .forallE _ type body _ =>
+      p0GenericCoreAny predicate type || p0GenericCoreAny predicate body
+    | .letE _ type assigned body =>
+      p0GenericCoreAny predicate type || p0GenericCoreAny predicate assigned ||
+        p0GenericCoreAny predicate body
+    | .proj _ _ value => p0GenericCoreAny predicate value
+    | _ => false
+
+private def checkP0GenericConstruction : IO Unit := do
+  let compiled ← elaborate p0GenericSource
+  let environment := compiled.result.environment
+  ensure ((compiled.result.declarations.filter (fun declaration =>
+      match declaration with | .partialDecl .. => true | _ => false)).length == 2)
+    "generic P0 pair lost one actual private body"
+  for (name, peer) in [("p0genericLeft", "p0genericRight"), ("p0genericRight", "p0genericLeft")] do
+    let name := psRootName name
+    let peer := psRootName peer
+    let some (.opaqueDecl logical logicalLevels logicalType witness) :=
+        psEnvironmentFind environment name
+      | throw (IO.userError "generic P0 member lost its logical opacity")
+    let some (.partialDecl implementation levels type value) :=
+        psEnvironmentFind environment (PsName.num name 0)
+      | throw (IO.userError "generic P0 member lost its actual checked private body")
+    ensure (psNameEq logical name && psNameEq implementation (PsName.num name 0) &&
+      psElabMutualLevelNamesEqual logicalLevels levels &&
+      psElabMutualLevelNamesEqual levels [psRootName "u"] &&
+      psExprAlphaEq logicalType type && !psExprAlphaEq witness value &&
+      binderNames type == ["A", "dictionary", "seed", "n"] &&
+      !psExprHasUnresolvedMeta type && !psExprHasUnresolvedMeta value &&
+      (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty &&
+      compiled.privateNames.any (psNameEq implementation) &&
+      (psEnvironmentFind environment (psNameAppendStr name "eq_def")).isNone)
+      "generic P0 logical/body identity, universe, closure, ordered captures or equation policy changed"
+    let opened ← fromExcept ((psElabPreDefinitionOpen 4
+      (psElabContextEmpty environment levels) type value).mapError psCompilerPscv0ElabError)
+    let [typeParameter, dictionary, seed, n] := opened.bindersRev.reverse
+      | throw (IO.userError "generic P0 opening lost its four original binders")
+    ensure (psBinderInfoEq typeParameter.binder .implicit &&
+      psBinderInfoEq dictionary.binder .instanceImplicit &&
+      psBinderInfoEq seed.binder .explicit && psBinderInfoEq n.binder .explicit &&
+      psExprAlphaEq seed.type (.fvar typeParameter.id) &&
+      psExprAlphaEq opened.type (.fvar typeParameter.id))
+      "generic P0 opened result or runtime seed differs from its actual type parameter"
+    let preservedPeer := p0GenericCoreAny (fun term =>
+      let view := psExprAppView term
+      match view.head, view.args with
+      | .constE actual _, [.fvar actualType, .fvar actualDictionary, .fvar actualSeed, _] =>
+        psNameEq actual peer && actualType == typeParameter.id &&
+          actualDictionary == dictionary.id && actualSeed == seed.id
+      | _, _ => false) opened.value
+    ensure preservedPeer
+      "generic P0 recursive peer call changed the actual type/dictionary/seed capture prefix"
+    if psNameEq name (psRootName "p0genericRight") then
+      let actualDefault := p0GenericCoreAny (fun term =>
+        let view := psExprAppView term
+        match view.head, view.args with
+        | .constE actual _, [.fvar actualType, .fvar actualDictionary] =>
+          psNameEq actual (psNameAppendStr (psRootName "Inhabited") "default") &&
+            actualType == typeParameter.id && actualDictionary == dictionary.id
+        | _, _ =>
+          match term with
+          | .proj actual 0 (.fvar actualDictionary) =>
+            psNameEq actual (psRootName "Inhabited") && actualDictionary == dictionary.id
+          | _ => false) opened.value
+      ensure actualDefault
+        "generic P0 default bypassed the actual retained Inhabited dictionary"
+    ensure (compiled.origins.any (fun origin => origin.members.length == 2 &&
+      origin.members.any (fun member => psNameEq member.name name) &&
+      origin.members.any (fun member => psNameEq member.name implementation)))
+      "generic P0 source member lost its exact logical/private-body ownership"
+  IO.println "PSCV0_M3_P0_GENERIC_CONSTRUCTION: PASS two actual opaque/private-body pairs, complete generic headers, exact peer capture forwarding, retained dictionary projection and no logical equations"
+
+private def checkP0GenericRuntime (directory : System.FilePath) : IO Unit := do
+  IO.FS.createDirAll directory
+  IO.FS.writeFile (directory / "p0generic.ps") p0GenericSource
+  ensure (M3MutualPartialOracle.p0NatOutput false == 2947 &&
+    M3MutualPartialOracle.p0NatOutput true == 4123 &&
+    M3MutualPartialOracle.p0BoolOutput false == 12 &&
+    M3MutualPartialOracle.p0BoolOutput true == 21)
+    "independent native P0 parity or supplied-dictionary observations changed"
+  checkP0GenericConstruction
+  let ordinary : PsV7Native.Request := {
+    source := p0GenericSource, sourceName := "p0generic.ps", outputStem := "p0generic"
+    assurance := .ordinaryChecked
+    exports := .selected (p0GenericExports.map Prod.fst)
+    targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] }
+  let requests := #[ordinary,
+    { ordinary with assurance := .closedVerified },
+    { ordinary with assurance := .boundaryQualifiedVerified }]
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  ensure (batch.results.size == requests.size) "generic P0 batch omitted an assurance result"
+  let some first := batch.results[0]? | throw (IO.userError "generic P0 ordinary result is missing")
+  let result ← match first with
+    | .ok result => pure result
+    | .error error => throw (IO.userError ("generic P0 ordinary request failed at " ++
+        error.phase ++ ": " ++ error.message))
+  ensure (PsV7Native.assuranceLabel result.assurance == "ordinary-checked" &&
+    result.declarationCount > 0 && result.artifacts.map (·.target) == ordinary.targets &&
+    result.artifacts.all (fun artifact => !artifact.files.isEmpty))
+    "generic P0 changed assurance or omitted one requested target bundle"
+  for index in [1, 2] do
+    match batch.results[index]? with
+    | some (.error error) =>
+      ensure (error.phase == "assurance" &&
+        error.message.startsWith "PSCV0-ASSURANCE-DOWNGRADE:")
+        ("generic P0 verified request failed at the wrong boundary: " ++
+          error.phase ++ ": " ++ error.message)
+    | _ => throw (IO.userError "generic P0 verified request acquired an ordinary fallback or artifacts")
+  for artifact in result.artifacts do
+    for file in artifact.files do
+      match file.payload with
+      | .text value => IO.FS.writeFile (directory / file.path) value
+      | .binary value => IO.FS.writeBinFile (directory / file.path) value
+  let rows := [false, true].map fun flag =>
+    Lean.Json.mkObj (("flag", Lean.toJson flag) ::
+      p0GenericExports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
+  IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
+  IO.println "PSCV0_M3_P0_GENERIC: PASS native Nat/Bool parity oracles, fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 20 runtime comparisons follow"
+
 end M3MutualPartial
 
 open M3MutualPartial in
@@ -469,5 +671,6 @@ def main (args : List String) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       exports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
+  checkP0GenericRuntime (directory / "p0-generic")
   IO.println "PSCV0_M3_MUTUAL: PASS fresh official-kernel P0 groups, native section/universe signatures, imported ordinary five-target emission and exact strategy/assurance refusals; native runtime parity follows"
 

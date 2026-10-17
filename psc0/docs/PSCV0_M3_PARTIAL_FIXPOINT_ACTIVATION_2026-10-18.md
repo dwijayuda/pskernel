@@ -62,3 +62,11 @@ All other preparation steps passed. The P1 emission request stopped at a fixture
 
 Main remains `f271f2a35789b120dbe1a6dcd5a555db44e72134`, with its five successful workflows; no healthy main Native run was superseded. M3+B is incomplete. Continue P1 emission/integration, then source-policy/noncomputable ownership, selected generic/section fixedpoints and generalized measured recursion according to the six exits. A noncomputable implementation/design is being prepared independently from pinned NoncomputableAttr, MutualDef, PreDefinition/Basic and Compiler/LCNF/ToLCNF; it is not yet committed or qualified.
 
+
+## Qualified P1 preparation; main integration pending
+
+Preparation `e8cb72b8c2bb5b08433b455b66e887f6bf79fcbe` passed [run39075748079](https://github.com/dwijayuda/pskernel/actions/runs/39075748079), job117522420411, in full. Observed: Order asset replay/audits; four portable order dictionaries; nine monotonicity proofs and nonmonotone refusal; retained source/P0/WF/indexed/recursive-deriving checks; four P1 source members in three actual fixedpoint components; exact whole/source equations; official-kernel checks under unchanged2m/20k limits; complete packed runtime ownership; kernel-valid adversarial mismatch and missing-layout refusals; all five exact historical policy-only programs checked logically and never executed; module private-callee/support hiding and explicit public equations; ordinary five-target emission and both verified-assurance refusals.
+
+This checkpoint promotes the same qualified compiler/test content to main for Native/M3/F1/F2/F3 integration. No backend runtime parity or complete M3 claim follows from preparation. The P1 observer adds30 required comparisons. Run all retained cases and report actual totals.
+
+Root causes resolved: correct Lean4.35.0 congrArg Core argument order, retained old policy cases now logical-only positives, native constructor-pattern spelling in the fixture, and fixture-only IO diagnostic syntax. No compiler grammar, proof criterion, negative criterion or budget was weakened. See [P1 design and evidence](PSCV0_M3_PARTIAL_FIXPOINT_ACTIVATION_2026-10-18.md).

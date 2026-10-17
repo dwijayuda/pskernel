@@ -1,0 +1,36 @@
+name: PSKernel-C0 owned source-certified FVar memo native
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-owned-fvar-memo.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/Whnf.lean'
+      - 'psc0/packages/pskernel-c0/test/C0OwnedFVarMemoRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-owned-fvar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Verify exact native Lean 4.35, source proof, original checker acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0OwnedFVarMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          echo "C0_OWNED_FVAR_CI pinned=Lean_4.35.0 source_proof=true no_new_kernel_admission=true"

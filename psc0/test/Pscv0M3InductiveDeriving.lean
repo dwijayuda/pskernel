@@ -117,6 +117,56 @@ def indexedRightText (flag : Bool) : String :=
 
 end M3InductiveDerivingOracle
 
+-- The index dictionary is deliberately nonreflexive. Derived comparison must
+-- omit direct index fields while still calling a payload's actual dictionary.
+inductive IndexedBEq : Nat → Type where
+  | intro (n : Nat) : IndexedBEq n
+  deriving BEq
+
+inductive M3DeriveIndexedBEq (I A : Type) : I → Type where
+  | first (index : I) (value : A) : M3DeriveIndexedBEq I A index
+  | second (index : I) (value : A) : M3DeriveIndexedBEq I A index
+  deriving BEq
+
+example (n : Nat) : (IndexedBEq.intro n == IndexedBEq.intro n) = true := rfl
+
+example (index : M3DeriveAtom) (left right : Nat) :
+    ((M3DeriveIndexedBEq.first index left : M3DeriveIndexedBEq M3DeriveAtom Nat index) ==
+      M3DeriveIndexedBEq.first index right) = (left == right) := rfl
+
+example (index : M3DeriveAtom) (left right : Bool) :
+    ((M3DeriveIndexedBEq.second index left : M3DeriveIndexedBEq M3DeriveAtom Bool index) ==
+      M3DeriveIndexedBEq.second index right) = (left == right) := rfl
+
+namespace M3IndexedBEqOracle
+
+def natOutput (flag : Bool) : UInt64 :=
+  let index := M3DeriveAtom.atom flag
+  let n : Nat := if flag then 71 else 13
+  let x : M3DeriveIndexedBEq M3DeriveAtom Nat index := .first index n
+  let y : M3DeriveIndexedBEq M3DeriveAtom Nat index :=
+    .first index (if flag then n else n + 1)
+  let other : M3DeriveIndexedBEq M3DeriveAtom Nat index := .second index n
+  let payload : M3DeriveIndexedBEq Bool M3DeriveAtom flag := .first flag (.atom flag)
+  M3InductiveDerivingOracle.eqBits (x == x) (x == y) (y == x)
+    (x == other) (other == x) (other == other) (payload == payload)
+
+def boolOutput (flag : Bool) : UInt64 :=
+  let index := M3DeriveAtom.atom flag
+  let x : M3DeriveIndexedBEq M3DeriveAtom Bool index := .first index flag
+  let y : M3DeriveIndexedBEq M3DeriveAtom Bool index := .first index false
+  let other : M3DeriveIndexedBEq M3DeriveAtom Bool index := .second index flag
+  let payload : M3DeriveIndexedBEq Bool M3DeriveAtom flag := .second flag (.atom (!flag))
+  M3InductiveDerivingOracle.eqBits (x == x) (x == y) (y == x)
+    (x == other) (other == x) (other == other) (payload == payload)
+
+example : natOutput false = 33 := rfl
+example : natOutput true = 39 := rfl
+example : boolOutput false = 39 := rfl
+example : boolOutput true = 33 := rfl
+
+end M3IndexedBEqOracle
+
 namespace M3InductiveDeriving
 
 private def ensure (condition : Bool) (message : String) : IO Unit :=
@@ -141,6 +191,33 @@ private def indexedSource : String :=
   "universe u\n" ++
   "inductive M3DeriveIndexedLeft(A: Type u, a: A): Type u where { | leaf(value: A) | node(n: Nat, next: M3DeriveIndexedRight(A, a, n)) }\n" ++
   "inductive M3DeriveIndexedRight(B: Type u, b: B): Nat -> Type u where { | stop: M3DeriveIndexedRight(B, b, 0) | step(n: Nat, head: M3DeriveIndexedLeft(B, b), tail: M3DeriveIndexedRight(B, b, n)): M3DeriveIndexedRight(B, b, Nat.succ(n)) }\n"
+
+private def indexedBEqSource : String :=
+  "inductive IndexedBEq: Nat -> Type where { | intro(n: Nat): IndexedBEq n } deriving BEq\n" ++
+  "theorem m3indexedBareEq(n: Nat): (IndexedBEq.intro(n) == IndexedBEq.intro(n)) = true := by { rfl }\n" ++
+  "inductive M3DeriveAtom where { | atom(flag: Bool) }\n" ++
+  "instance m3DeriveAtomBEq: BEq M3DeriveAtom where { beq(left: M3DeriveAtom, right: M3DeriveAtom): Bool := false }\n" ++
+  "inductive M3DeriveIndexedBEq(I: Type, A: Type): I -> Type where { | first(index: I, value: A): M3DeriveIndexedBEq(I, A, index) | second(index: I, value: A): M3DeriveIndexedBEq(I, A, index) } deriving BEq\n" ++
+  "theorem m3indexedNatLaw(index: M3DeriveAtom, left: Nat, right: Nat): ((M3DeriveIndexedBEq.first(index, left): M3DeriveIndexedBEq(M3DeriveAtom, Nat, index)) == M3DeriveIndexedBEq.first(index, right)) = (left == right) := by { rfl }\n" ++
+  "theorem m3indexedBoolLaw(index: M3DeriveAtom, left: Bool, right: Bool): ((M3DeriveIndexedBEq.second(index, left): M3DeriveIndexedBEq(M3DeriveAtom, Bool, index)) == M3DeriveIndexedBEq.second(index, right)) = (left == right) := by { rfl }\n" ++
+  "function m3IndexedBEqBits(a: Bool, b: Bool, c: Bool, d: Bool, e: Bool, f: Bool, g: Bool): UInt64 := UInt64.ofNat((if (a) { 1 } else { 0 }) + (if (b) { 2 } else { 0 }) + (if (c) { 4 } else { 0 }) + (if (d) { 8 } else { 0 }) + (if (e) { 16 } else { 0 }) + (if (f) { 32 } else { 0 }) + (if (g) { 64 } else { 0 }))\n" ++
+  "function m3indexedbeqnat(flag: Bool): UInt64 := {\n" ++
+  " let index: M3DeriveAtom := M3DeriveAtom.atom(flag)\n" ++
+  " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
+  " let x: M3DeriveIndexedBEq(M3DeriveAtom, Nat, index) := M3DeriveIndexedBEq.first(index, n)\n" ++
+  " let y: M3DeriveIndexedBEq(M3DeriveAtom, Nat, index) := M3DeriveIndexedBEq.first(index, if (flag) { n } else { n + 1 })\n" ++
+  " let other: M3DeriveIndexedBEq(M3DeriveAtom, Nat, index) := M3DeriveIndexedBEq.second(index, n)\n" ++
+  " let payload: M3DeriveIndexedBEq(Bool, M3DeriveAtom, flag) := M3DeriveIndexedBEq.first(flag, M3DeriveAtom.atom(flag))\n" ++
+  " m3IndexedBEqBits(x == x, x == y, y == x, x == other, other == x, other == other, payload == payload)\n" ++
+  "}\n" ++
+  "function m3indexedbeqbool(flag: Bool): UInt64 := {\n" ++
+  " let index: M3DeriveAtom := M3DeriveAtom.atom(flag)\n" ++
+  " let x: M3DeriveIndexedBEq(M3DeriveAtom, Bool, index) := M3DeriveIndexedBEq.first(index, flag)\n" ++
+  " let y: M3DeriveIndexedBEq(M3DeriveAtom, Bool, index) := M3DeriveIndexedBEq.first(index, false)\n" ++
+  " let other: M3DeriveIndexedBEq(M3DeriveAtom, Bool, index) := M3DeriveIndexedBEq.second(index, flag)\n" ++
+  " let payload: M3DeriveIndexedBEq(Bool, M3DeriveAtom, flag) := M3DeriveIndexedBEq.second(flag, M3DeriveAtom.atom(!flag))\n" ++
+  " m3IndexedBEqBits(x == x, x == y, y == x, x == other, other == x, other == other, payload == payload)\n" ++
+  "}\n"
 
 private def logicalSource : String :=
   "theorem m3deriveHashLaw(n: Nat): Hashable.hash((M3DeriveTree.node(M3DeriveForest.cons(M3DeriveTree.leaf(n), M3DeriveForest.nil)) : M3DeriveTree(Nat, 0))) = mixHash(UInt64.ofNat(1), mixHash(mixHash(UInt64.ofNat(1), mixHash(UInt64.ofNat(0), Hashable.hash(n))), UInt64.ofNat(0))) := by { rfl }\n" ++
@@ -383,6 +460,10 @@ private def outputCases : List (String × (Bool → UInt64)) :=
    ("m3deriveindexedhash", M3InductiveDerivingOracle.indexedHashOutput),
    ("m3deriveindexedrepr", fun _ => 3)]
 
+private def indexedBEqOutputCases : List (String × (Bool → UInt64)) :=
+  [("m3indexedbeqnat", M3IndexedBEqOracle.natOutput),
+   ("m3indexedbeqbool", M3IndexedBEqOracle.boolOutput)]
+
 private def witness (name : String) (flag : Bool) (expected : UInt64) : PsDeclaration :=
   let uint64 := PsExpr.constE (psRootName "UInt64") []
   let argument := PsExpr.constE (if flag then psBoolTrueName else psBoolFalseName) []
@@ -395,19 +476,90 @@ private def witness (name : String) (flag : Bool) (expected : UInt64) : PsDeclar
   .theoremDecl (psRootName (name ++ (if flag then "TrueEquation" else "FalseEquation")))
     [] proposition proof
 
-private def emit (ir : PsVerifiedIrModule) : Except String (List PsEmissionArtifact) := do
-  let context : PsEmissionContext := {
-    sourceName := "m3-group-deriving.ps", sourceText := runtimeSource, outputStem := "groupderive" }
+private def emit (ir : PsVerifiedIrModule) (sourceText : String := runtimeSource)
+    (outputStem : String := "groupderive") (outputNames : List String := outputCases.map Prod.fst)
+    (sourceName : String := "m3-group-deriving.ps") : Except String (List PsEmissionArtifact) := do
+  let context : PsEmissionContext := { sourceName, sourceText, outputStem }
   let (_, artifacts) ← psWithCheckedIr psIrCheckDefaultOptions ir fun checked => do
     let ecma ← PsEcma.plan checked
     let js ← PsEcma.emitProgram ecma .javascript context
     let ts ← PsEcma.emitProgram ecma .typescript context
-    let rust ← psRustEmitReadable checked "groupderive" []
-    let exports := PsApiExposure.selected (outputCases.map Prod.fst)
+    let rust ← psRustEmitReadable checked outputStem []
+    let exports := PsApiExposure.selected outputNames
     let core ← PsWasm.emit checked context false exports
     let component ← PsWasm.emit checked context true exports
     return [js, ts, rust, core, component]
   return artifacts
+
+private def checkIndexedBEq (directory : System.FilePath)
+    (prelude : Lean.Kernel.Environment) : IO Unit := do
+  IO.FS.createDirAll directory
+  IO.FS.writeFile (directory / "deriving.ps") indexedBEqSource
+  let result ← sourceResult psSelfHostProdPreludeEnvironment indexedBEqSource
+  let environment := result.result.environment
+  for family in ["IndexedBEq", "M3DeriveIndexedBEq"] do
+    let name := psNameAppendStr (psRootName family) "instBEq"
+    let some (.definitionDecl _ _ type value) := psEnvironmentFind environment name
+      | throw (IO.userError "indexed BEq did not generate an ordinary checked instance")
+    ensure (!psExprHasUnresolvedMeta type && !psExprHasUnresolvedMeta value &&
+      psExprFVarsInContext psLocalEmpty type && psExprFVarsInContext psLocalEmpty value)
+      "indexed BEq instance retained a metavariable or an unbound local"
+    ensure (psExprHasConst (psNameAppendStr (psRootName family) "rec") value)
+      "indexed BEq lost the registered indexed recursor"
+  let some (.definitionDecl _ levels type _) := psEnvironmentFind environment
+      (psNameAppendStr (psRootName "M3DeriveIndexedBEq") "instBEq")
+    | throw (IO.userError "generic indexed BEq instance is absent")
+  let opened ← fromExcept ((psElabOpenCoreTelescope 4096
+    (psElabContextEmpty environment levels) type (some 5)).mapError psCompilerPscv0ElabError)
+  let [indexType, payloadType, indexValue, indexDictionary, payloadDictionary] :=
+      opened.bindersRev.reverse
+    | throw (IO.userError "indexed BEq changed its parameter, index or dictionary telescope")
+  let indexClass ← fromExcept ((psElabDeriveClassType opened.context
+    (psRootName "BEq") (.fvar indexType.id)).mapError psCompilerPscv0ElabError)
+  let payloadClass ← fromExcept ((psElabDeriveClassType opened.context
+    (psRootName "BEq") (.fvar payloadType.id)).mapError psCompilerPscv0ElabError)
+  ensure (psBinderInfoEq indexType.binder .implicit &&
+    psBinderInfoEq payloadType.binder .implicit && psBinderInfoEq indexValue.binder .implicit &&
+    psBinderInfoEq indexDictionary.binder .instanceImplicit &&
+    psBinderInfoEq payloadDictionary.binder .instanceImplicit &&
+    psExprAlphaEq indexValue.type (.fvar indexType.id) &&
+    psDefEqReadOnlyWithEnv environment psMetaEmpty opened.context.localContext
+      indexDictionary.type indexClass &&
+    psDefEqReadOnlyWithEnv environment psMetaEmpty opened.context.localContext
+      payloadDictionary.type payloadClass)
+    "indexed BEq inferred a dictionary for the value index or changed a parameter requirement"
+  for (label, text, expected) in [
+      ("non-pattern index",
+        "inductive IndexedSucc: Nat -> Type where { | intro(n: Nat): IndexedSucc(Nat.succ(n)) } deriving BEq\n",
+        "indexed BEq deriving requires direct constructor index fields"),
+      ("dependent payload",
+        "inductive IndexedPayload: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedPayload(n) } deriving BEq\n",
+        "deriving requires independent runtime field types"),
+      ("missing payload dictionary",
+        "inductive IndexedMissing: Nat -> Type where { | intro(n: Nat, value: Nat -> Nat): IndexedMissing(n) } deriving BEq\n",
+        "deriving field has no checked instance")] do
+    let parsed ← fromExcept (psPscv0ParseProgram text)
+    expectRefused label expected (psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed)
+  let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
+    { environment, declarations := result.result.declarations }).mapError psCompilerPscv0Error)
+  let admitted ← checked prelude prepared.prepared.declarations
+  let equations := [false, true].flatMap fun flag =>
+    indexedBEqOutputCases.map fun (name, oracle) => witness name flag (oracle flag)
+  let _ ← checked admitted equations
+  let ir ← fromExcept ((psCompilerVerifiedIrFromPrepared prepared.prepared).mapError psCompilerPscv0Error)
+  let artifacts ← fromExcept (emit ir indexedBEqSource "indexedbeq"
+    (indexedBEqOutputCases.map Prod.fst) "m3-indexed-beq.ps")
+  ensure (artifacts.length == 5) "indexed BEq did not emit all five targets"
+  for artifact in artifacts do
+    for file in artifact.files do
+      match file.payload with
+      | .text value => IO.FS.writeFile (directory / file.path) value
+      | .binary value => IO.FS.writeBinFile (directory / file.path) value
+  let rows := [false, true].map fun flag =>
+    Lean.Json.mkObj (("flag", Lean.toJson flag) ::
+      indexedBEqOutputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
+  IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
+  IO.println "PSCV0_M3_INDEXED_BEQ: PASS direct index fields, checked Nat/Bool defining laws and four closed native-oracle equations, ordinary recursor instances and parameter dictionaries, retained dependent/non-pattern/missing-dictionary refusals; five-target runtime parity follows"
 
 end M3InductiveDeriving
 
@@ -468,3 +620,4 @@ def main (args : List String) : IO Unit := do
       outputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_INDUCTIVE_DERIVING: PASS native deriving oracles, fresh checked group instances/workers and constructor laws, ordered real child IHs, indexed Hashable/Repr, nonreflexive BEq and five-target emission; runtime parity follows"
+  checkIndexedBEq (directory / "indexed-beq") prelude

@@ -10,6 +10,7 @@ import Ps.Meta.Reduce
 import Ps.Host.StandardSource
 import Ps.Host.StandardManifest
 import Ps.Environment.StandardWellFounded
+import Ps.Environment.StandardPartialFixpoint
 import Ps.Host.FloatConstructive
 import Ps.Host.FloatCanonicalContracts
 
@@ -1058,7 +1059,7 @@ def exportWellFoundedCandidate (output : System.FilePath) : IO Unit := do
 -- kernel replay and recursor-rule comparison before any source is written.
 -- Monadic instances and executable P1 lowering remain separate work.
 def exportPartialFixpointCandidate (output : System.FilePath) : IO Unit := do
-  let selected := psSelfHostProdPreludeEnvironment.declarations
+  let selected := psSelfHostProdPrePartialFixpointPreludeEnvironment.declarations
   let candidates : List Lean.Name := [
     `Classical.ofNonempty,
     `Lean.Order.PartialOrder, `Lean.Order.CCPO, `Lean.Order.CCPO.csup,
@@ -1209,6 +1210,149 @@ def checkWellFoundedFoundation : IO Unit := do
     throw (IO.userError "WF foundation recursor-rule inventory differs")
   IO.println (Lean.Json.mkObj [
     ("schema", Lean.toJson ("pscv0-well-founded-foundation-audit/1" : String)),
+    ("leanCommit", Lean.toJson Lean.githash),
+    ("candidateDeclarations", Lean.toJson candidates.length),
+    ("candidateAxioms", Lean.toJson ([] : List String)),
+    ("kernelChecked", Lean.toJson true),
+    ("recursorRulesCompared", Lean.toJson compared),
+    ("proposedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint proposed)),
+    ("proposedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint proposed)),
+    ("proposedSurfaceSHA256", Lean.toJson (standardSurfaceManifestSHA256 proposed)),
+    ("proposedDeclarations", Lean.toJson proposed.declarations.length),
+    ("proposedClasses", Lean.toJson proposed.classes.length),
+    ("proposedInstances", Lean.toJson proposed.instances.entries.length),
+    ("activeFoundationDeclarations", Lean.toJson activeNames.length),
+    ("runtimeQualified", Lean.toJson false)]).compress
+
+-- Audit the retained Order asset against the frozen pre-Order boundary.
+-- Every Core declaration, reducibility choice and selected class/instance
+-- record is compared with pinned native Lean before any selected-stage pin
+-- can change. This audit also emits proposed identities for explicit review.
+def checkPartialFixpointFoundation : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  -- Class and instance metadata live in persistent environment extensions.
+  -- A declaration-only import leaves those extensions at their initial state.
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Init.Internal.Order.Basic }] {} (loadExts := true)
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "P1 foundation audit requires the pinned Lean commit")
+  let base := psSelfHostProdPrePartialFixpointPreludeEnvironment
+  let candidates := psStandardPartialFixpointCandidateDeclarations
+  let names := candidates.map psDeclarationName
+  unless candidates.length == 117 && (names.map psNameToString).eraseDups.length == 117 do
+    throw (IO.userError "P1 foundation declaration inventory differs")
+  unless psStandardPartialFixpointCandidateBoundary.length == base.declarations.length &&
+      psStandardPartialFixpointCandidateBoundary.all (psEnvironmentContains base) do
+    throw (IO.userError "P1 foundation frozen boundary differs")
+  if names.any (psEnvironmentContains base) then
+    throw (IO.userError "P1 foundation authoring stage contains its own candidate")
+  let activeNames := names.filter (psEnvironmentContains psSelfHostProdPreludeEnvironment)
+  unless activeNames.isEmpty || activeNames.length == candidates.length do
+    throw (IO.userError "P1 foundation is only partially present in the active Standard")
+  let proposed := psStandardPartialFixpointExtend base
+  unless proposed.declarations.length == base.declarations.length + candidates.length do
+    throw (IO.userError "P1 foundation extension replaced a prior declaration")
+  for declaration in candidates do
+    let name := psDeclarationName declaration
+    match declaration with
+    | .axiomDecl .. | .quotientDecl .. | .partialDecl .. =>
+      throw (IO.userError ("P1 foundation contains a prohibited declaration: " ++ psNameToString name))
+    | _ => pure ()
+    let some upstream := native.find? (PsKernelLean.toLeanName name)
+      | throw (IO.userError ("P1 foundation native reference missing: " ++ psNameToString name))
+    let reference ← match exportDeclaration native [] upstream with
+      | .ok reference => pure reference
+      | .error message => throw (IO.userError message)
+    unless psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration reference do
+      throw (IO.userError ("P1 foundation stored Core differs from native: " ++ psNameToString name))
+    let some selected := psEnvironmentFind proposed name
+      | throw (IO.userError ("P1 foundation declaration not selected: " ++ psNameToString name))
+    unless psStandardSnapshotDeclaration selected == psStandardSnapshotDeclaration declaration do
+      throw (IO.userError ("P1 foundation extension altered a declaration: " ++ psNameToString name))
+    if (psDeclarationValue declaration).isSome then
+      unless psReducibilityName (psEnvironmentReducibility proposed name) ==
+          (Lean.getReducibilityStatusCore native (PsKernelLean.toLeanName name)).toAttrString do
+        throw (IO.userError ("P1 foundation reducibility differs: " ++ psNameToString name))
+  for name in [`Lean.Order.PartialOrder, `Lean.Order.CCPO] do
+    let portable := exportName name
+    let some (_, parameters) := proposed.classParameters.find? (fun entry => psNameEq entry.1 portable)
+      | throw (IO.userError ("P1 foundation class metadata missing: " ++ toString name))
+    unless Lean.isClass native name && proposed.classes.any (psNameEq portable) &&
+        (Lean.getOutParamPositions? native name).map Array.toList == some parameters.outputs &&
+        (Lean.getOutLevelParamPositions? native name).map Array.toList == some parameters.outputLevels do
+      throw (IO.userError ("P1 foundation class metadata differs: " ++ toString name))
+  let isNamed := fun (name : PsName) (entry : PsInstanceEntry) =>
+    match entry.value with
+    | .constE actual _ => psNameEq actual name
+    | _ => false
+  let registrations : List (Lean.Name × Lean.Name) := [
+    (`Lean.Order.CCPO.toPartialOrder, `Lean.Order.PartialOrder),
+    (`Lean.Order.instOrderPi, `Lean.Order.PartialOrder),
+    (`Lean.Order.instCCPOPi, `Lean.Order.CCPO),
+    (`Lean.Order.instPartialOrderPProd, `Lean.Order.PartialOrder),
+    (`Lean.Order.instCCPOPProd, `Lean.Order.CCPO),
+    (`Lean.Order.instPartialOrderOption, `Lean.Order.PartialOrder),
+    (`Lean.Order.instCCPOOption, `Lean.Order.CCPO),
+    (`Lean.Order.instPartialOrderUnit, `Lean.Order.PartialOrder),
+    (`Lean.Order.instCCPOUnit, `Lean.Order.CCPO),
+    (`Lean.Order.FlatOrder.instOrder, `Lean.Order.PartialOrder),
+    (`Lean.Order.FlatOrder.instCCPO, `Lean.Order.CCPO)]
+  for (name, className) in registrations do
+    let some upstream := (Lean.Meta.instanceExtension.getState native).instanceNames.find? name
+      | throw (IO.userError ("P1 foundation native instance missing: " ++ toString name))
+    let [selected] := proposed.instances.entries.filter (isNamed (exportName name))
+      | throw (IO.userError ("P1 foundation instance missing or duplicated: " ++ toString name))
+    unless selected.priority == upstream.priority &&
+        selected.className.any (psNameEq (exportName className)) do
+      throw (IO.userError ("P1 foundation instance priority/class differs: " ++ toString name))
+    if proposed.instances.defaults.any (isNamed (exportName name)) then
+      throw (IO.userError ("P1 foundation ordinary instance entered default_instance: " ++ toString name))
+  -- Logical dependency import does not silently turn classical decisions or
+  -- proof helpers into globally selected dictionary/runtime mechanisms.
+  let registeredNames := registrations.map (fun entry => exportName entry.1)
+  for declaration in candidates do
+    let name := psDeclarationName declaration
+    if !(registeredNames.any (psNameEq name)) &&
+        (proposed.instances.entries ++ proposed.instances.defaults).any (isNamed name) then
+      throw (IO.userError ("P1 foundation imported an unselected instance: " ++ psNameToString name))
+  unless proposed.classes.length == base.classes.length + 2 &&
+      proposed.instances.entries.length == base.instances.entries.length + registrations.length &&
+      proposed.instances.defaults.length == base.instances.defaults.length do
+    throw (IO.userError "P1 foundation changed the exact class/ordinary/default inventory")
+  match selectedProofClosureAudit proposed with
+  | .ok () => pure ()
+  | .error message => throw (IO.userError message)
+  match standardInstanceIndexAudit proposed with
+  | .ok () => pure ()
+  | .error message => throw (IO.userError message)
+  -- Actual dictionary search must use the selected native Option/Pi/PProd
+  -- instances, as well as retain their exact registration metadata.
+  let nat := PsExpr.constE psNatName []
+  let option := psExprApplyMany (.constE (psRootName "Option") [.zero]) [nat]
+  let functionType := PsExpr.forallE .anonymous nat option .explicit
+  let product := psExprApplyMany (.constE (psRootName "PProd") [.succ .zero, .succ .zero])
+    [option, option]
+  let ccpo := fun type => PsExpr.app
+    (.constE (psDecisionName "Lean.Order.CCPO") [.succ .zero]) type
+  let goals : List (String × PsExpr × PsName) := [
+    ("CCPO (Option Nat)", ccpo option, psDecisionName "Lean.Order.instCCPOOption"),
+    ("CCPO (Nat → Option Nat)", ccpo functionType, psDecisionName "Lean.Order.instCCPOPi"),
+    ("CCPO (PProd (Option Nat) (Option Nat))", ccpo product,
+      psDecisionName "Lean.Order.instCCPOPProd")]
+  for (label, target, expected) in goals do
+    let found := psSynthInstanceWithTable proposed psLocalEmpty proposed.instances psMetaEmpty 64 target
+    let some value := found.result.value
+      | throw (IO.userError ("P1 foundation synthesis failed: " ++ label))
+    let .constE actual _ := (psInferAppView (psMetaInstantiate found.result.context value)).head
+      | throw (IO.userError ("P1 foundation synthesis has no dictionary head: " ++ label))
+    unless psNameEq actual expected && !found.table.resourceExceeded do
+      throw (IO.userError ("P1 foundation selected the wrong dictionary: " ++ label))
+  checkCandidate (candidates ++ base.declarations) candidates
+  let compared ← checkRecursorRules native (candidates ++ base.declarations) candidates
+  unless compared == 6 do
+    throw (IO.userError "P1 foundation recursor-rule inventory differs")
+  IO.println (Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-partial-fixpoint-foundation-audit/1" : String)),
     ("leanCommit", Lean.toJson Lean.githash),
     ("candidateDeclarations", Lean.toJson candidates.length),
     ("candidateAxioms", Lean.toJson ([] : List String)),

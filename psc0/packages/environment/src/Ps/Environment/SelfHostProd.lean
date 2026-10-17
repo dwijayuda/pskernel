@@ -146,8 +146,12 @@ def psSelfHostProdPreWellFoundedPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreClassicalPreludeEnvironment : PsEnvironment :=
   psStandardWellFoundedExtend psSelfHostProdPreWellFoundedPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen boundary for the reviewed Order asset; do not export against itself.
+def psSelfHostProdPrePartialFixpointPreludeEnvironment : PsEnvironment :=
   psStandardClassicalExtend psSelfHostProdPreClassicalPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPrePartialFixpointPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

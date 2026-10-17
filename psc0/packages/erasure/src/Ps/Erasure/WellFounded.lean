@@ -105,11 +105,13 @@ def psErasureWellFoundedPairEntry (environment : PsEnvironment)
     throw .unsupportedRuntimeTerm
   return (packing, firstId, secondId)
 
--- The runtime callback retains the two source arguments and ordinary Unit
--- proof slot. Its body calls the real public function in full header order.
+-- The runtime callback retains the two source arguments, ordinary Unit
+-- proof slot and dependent state telescope. It calls the real public function
+-- in the original header order, replacing only the selected changing slots.
 def psErasureWellFoundedPairCallback (environment : PsEnvironment)
     (scope : PsErasureScope) (name : PsName) (levels : List PsLevel)
-    (entryArguments : List PsExpr) (firstId secondId : Nat) (sourceType : PsExpr) :
+    (entryArguments : List PsExpr) (firstId secondId : Nat) (sourceType : PsExpr)
+    (stateIds : List Nat := []) :
     Except PsErasureError PsExpr := do
   let first ← (psInferEnsureForall environment psMetaEmpty scope.localContext sourceType).mapError
     (fun _ => PsErasureError.binderMismatch)
@@ -127,20 +129,33 @@ def psErasureWellFoundedPairCallback (environment : PsEnvironment)
     | throw .unsupportedRuntimeTerm
   if !psBinderInfoEq proof.binder .explicit then throw .unsupportedRuntimeTerm
   let evidence := psLocalPushBinding secondLocal.context proof.name proof.domain proof.binder
-  let resultType := psExprInstantiate1 proof.body (.fvar evidence.id)
+  let mut localContext := evidence.context
+  let mut resultType := psExprInstantiate1 proof.body (.fvar evidence.id)
+  let mut replacements := [(firstId, PsExpr.fvar firstLocal.id),
+    (secondId, PsExpr.fvar secondLocal.id)]
+  let mut bindersRev : List PsErasureWellFoundedBinder := [
+    .mk evidence.id proof.name proof.domain proof.binder,
+    .mk secondLocal.id second.name second.domain second.binder,
+    .mk firstLocal.id first.name first.domain first.binder]
+  for id in stateIds do
+    let state ← (psInferEnsureForall environment psMetaEmpty localContext resultType).mapError
+      (fun _ => PsErasureError.binderMismatch)
+    if !psBinderInfoEq state.binder .explicit then throw .unsupportedRuntimeTerm
+    let pushed := psLocalPushBinding localContext state.name state.domain state.binder
+    replacements := replacements ++ [(id, .fvar pushed.id)]
+    bindersRev := .mk pushed.id state.name state.domain state.binder :: bindersRev
+    localContext := pushed.context
+    resultType := psExprInstantiate1 state.body (.fvar pushed.id)
   let arguments ← entryArguments.mapM fun entry => do
     let .fvar id := entry | throw PsErasureError.unsupportedRuntimeTerm
-    return if id == firstId then .fvar firstLocal.id
-      else if id == secondId then .fvar secondLocal.id else entry
+    return ((replacements.find? (fun pair => pair.fst == id)).map Prod.snd).getD entry
   let self := psExprApplyMany (.constE name levels) arguments
-  let inferred ← (psInferType environment psMetaEmpty evidence.context self).mapError
+  let inferred ← (psInferType environment psMetaEmpty localContext self).mapError
     (fun _ => PsErasureError.unsupportedRuntimeTerm)
-  if !psDefEqReadOnlyWithEnv environment psMetaEmpty evidence.context inferred resultType then
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty localContext inferred resultType then
     throw .unsupportedRuntimeTerm
-  let value := PsExpr.lam first.name first.domain
-    (psExprAbstractFVar firstLocal.id (.lam second.name second.domain
-      (psExprAbstractFVar secondLocal.id (.lam proof.name proof.domain
-        (psExprAbstractFVar evidence.id self) proof.binder)) second.binder)) first.binder
+  let value := bindersRev.foldl (fun body binder =>
+    PsExpr.lam binder.name binder.type (psExprAbstractFVar binder.id body) binder.binder) self
   let inferred ← (psInferType environment psMetaEmpty scope.localContext value).mapError
     (fun _ => PsErasureError.unsupportedRuntimeTerm)
   if !psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext inferred sourceType then
@@ -183,7 +198,8 @@ def psEraseWellFoundedPairBody (environment : PsEnvironment)
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
     (entry : PsErasureRootEntry) (packing : PsWellFoundedPairPacking)
     (firstId secondId : Nat) (callbackName : PsName)
-    (callbackType body : PsExpr) (applicationArguments : List PsExpr) :
+    (callbackType body : PsExpr) (applicationArguments : List PsExpr)
+    (stateIds : List Nat := []) (stateArguments : List PsExpr := []) :
     Except PsErasureError PsVerifiedIrExpr := do
   let some (.binding _ firstName _ _) := psLocalFindById scope.localContext firstId
     | throw .unsupportedRuntimeTerm
@@ -195,7 +211,8 @@ def psEraseWellFoundedPairBody (environment : PsEnvironment)
   let raw := psLocalPushBinding scope.localContext callbackName callbackType .explicit
   let adapter ← (psWellFoundedPairCurryCallback environment psMetaEmpty raw.context packing
     sourceType (.fvar raw.id)).mapError (fun _ => PsErasureError.unsupportedRuntimeTerm)
-  let sourceBody := psExprApplyMany (psExprInstantiate1 body (.fvar raw.id)) applicationArguments
+  let sourceBody := psExprApplyMany (psExprInstantiate1 body (.fvar raw.id))
+    (stateArguments ++ applicationArguments)
   let beforeType ← (psInferType environment psMetaEmpty raw.context sourceBody).mapError
     (fun _ => PsErasureError.unsupportedRuntimeTerm)
   if !psDefEqReadOnlyWithEnv environment psMetaEmpty raw.context beforeType entry.type then
@@ -210,7 +227,7 @@ def psEraseWellFoundedPairBody (environment : PsEnvironment)
   if !psDefEqReadOnlyWithEnv environment psMetaEmpty curried.context afterType entry.type then
     throw .unsupportedRuntimeTerm
   let recursiveCore ← psErasureWellFoundedPairCallback environment scope entry.name
-    entry.levelArguments entry.headerArguments firstId secondId sourceType
+    entry.levelArguments entry.headerArguments firstId secondId sourceType stateIds
   let recursiveValue ← eraseAt { scope with currentDefinition := none } recursiveCore
   let bodyScope := { scope with
     localContext := curried.context
@@ -255,7 +272,6 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
   let (majorIds, packing) ← match major with
     | .fvar id => pure ([id], none)
     | _ => do
-      if !stateIds.isEmpty then throw .unsupportedRuntimeTerm
       let (packing, firstId, secondId) ← psErasureWellFoundedPairEntry environment
         scope entryIds fixed.plan.domain major
       pure ([firstId, secondId], some (packing, firstId, secondId))
@@ -282,7 +298,7 @@ def psEraseWellFoundedApplication (environment : PsEnvironment)
     | throw .unsupportedRuntimeTerm
   if let some (packing, firstId, secondId) := packing then
     return some (← psEraseWellFoundedPairBody environment scope eraseAt entry
-      packing firstId secondId callbackName callbackType body applicationArguments)
+      packing firstId secondId callbackName callbackType body applicationArguments stateIds stateArguments)
   let [majorId] := majorIds | throw .unsupportedRuntimeTerm
   let recursiveCore ← psErasureWellFoundedCallback environment scope entry.name
     entry.levelArguments entry.headerArguments majorId stateIds callbackType

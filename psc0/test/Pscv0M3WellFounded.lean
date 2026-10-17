@@ -222,6 +222,21 @@ theorem independentRight_reset (bias j step : Nat) :
       independentRight bias j step step :=
   independentRight.eq_def bias (Nat.succ j) step 0
 
+
+-- The measured dependent pair stays separate from a changing leading state.
+-- The fixed bias between the packed slots must retain its original position.
+def packedState (total n bias : Nat) (acc : Fin (n + 1)) : Nat :=
+  match n with
+  | 0 => total + bias + acc.val
+  | k + 1 => packedState (total + acc.val + 1) k bias ⟨0, Nat.zero_lt_succ k⟩
+termination_by (n, acc.val)
+decreasing_by exact Prod.Lex.left 0 acc.val (Nat.lt_succ_self k)
+
+theorem packedState_step (total k bias : Nat) (acc : Fin (Nat.succ k + 1)) :
+    packedState total (Nat.succ k) bias acc =
+      packedState (total + acc.val + 1) k bias ⟨0, Nat.zero_lt_succ k⟩ :=
+  packedState.eq_def total (Nat.succ k) bias acc
+
 -- The formerly unsupported second-slot measure must still refuse the
 -- recursive call with n = 1, i = 0: packing cannot turn 0 < 0 into a proof.
 theorem packed_zero_does_not_decrease : ¬ (0 : Nat) < 0 := Nat.not_lt_zero 0
@@ -250,6 +265,7 @@ run_cmd do
       ``packed, ``packed_step, ``packedBounded, ``packedBounded_step,
       ``independentLeft, ``independentLeft_step,
       ``independentRight, ``independentRight_step, ``independentRight_reset,
+      ``packedState, ``packedState_step,
       ``packed_zero_does_not_decrease,
       ``unusedWF, ``unusedP1, ``unusedWF_step, ``unusedP1_step] do
     let axioms ← Lean.collectAxioms name
@@ -367,6 +383,15 @@ private def independentSource : String :=
   "theorem m3wfindependentRightStep(bias: Nat, j: Nat, step: Nat, k: Nat): m3wfindependentRight(bias, Nat.succ(j), step, Nat.succ(k)) = m3wfindependentRight(bias, Nat.succ(j), step, k) + step := by { exact m3wfindependentRight.eq_def(bias, Nat.succ(j), step, Nat.succ(k)) }\n" ++
   "theorem m3wfindependentRightReset(bias: Nat, j: Nat, step: Nat): m3wfindependentRight(bias, Nat.succ(j), step, 0) = m3wfindependentRight(bias, j, step, step) := by { exact m3wfindependentRight.eq_def(bias, Nat.succ(j), step, 0) }\n"
 
+private def packingStateSource : String :=
+  "function m3wfpackedState(total: Nat, n: Nat, bias: Nat, acc: Fin(n + 1)): Nat := match n with {\n" ++
+  "  | 0 => total + bias + Fin.val(acc)\n" ++
+  "  | k + 1 => m3wfpackedState(total + Fin.val(acc) + 1, k, bias, Fin.mk(0, Nat.zero_lt_succ(k)))\n" ++
+  "}\n" ++
+  "termination_by Prod.mk(n, Fin.val(acc))\n" ++
+  "decreasing_by by { exact Prod.Lex.left(0, Fin.val(acc), Nat.lt_succ_self(k)) }\n" ++
+  "theorem m3wfpackedStateStep(total: Nat, k: Nat, bias: Nat, acc: Fin(Nat.succ(k) + 1)): m3wfpackedState(total, Nat.succ(k), bias, acc) = m3wfpackedState(total + Fin.val(acc) + 1, k, bias, Fin.mk(0, Nat.zero_lt_succ(k))) := by { exact m3wfpackedState.eq_def(total, Nat.succ(k), bias, acc) }\n"
+
 private def source : String :=
   skipSource ++
   "theorem m3wfskipStep(k: Nat): m3wfskip(Nat.succ(k)) = m3wfskip(k - 1) + 1 := by { exact m3wfskip.eq_def(Nat.succ(k)) }\n" ++
@@ -381,6 +406,7 @@ private def source : String :=
   "function m3wfdefault(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3wfdefault(k) + 1 }\n" ++
   "termination_by n\n" ++
   scopeSource ++ parameterSource ++ typedSource ++ relationSource ++ packingSource ++ independentSource ++
+  packingStateSource ++
   "function m3wfskipoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfskip(if (flag) { 17 } else { 10 }))\n" ++
   "function m3wfbranchesoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfbranches(if (flag) { 9 } else { 6 }))\n" ++
   "function m3wfshiftoutput(flag: Bool): UInt64 := UInt64.ofNat(m3wfshift(if (flag) { 17 } else { 10 }))\n" ++
@@ -568,7 +594,7 @@ private def checkResultApplication (environment : PsEnvironment) : IO Unit := do
 -- must be refused even when an ordinary pair-shaped expression is supplied.
 private def checkPackedEntry (environment : PsEnvironment) (sourceName : String)
     (runtimeParameters : List String) (firstPosition secondPosition : Nat)
-    (expectDependency : Bool) : IO Unit := do
+    (expectDependency : Bool) (statePositions : List Nat := []) : IO Unit := do
   let name := psRootName sourceName
   let some declaration := psEnvironmentFind environment name
     | throw (IO.userError "missing packed WF declaration")
@@ -610,14 +636,73 @@ private def checkPackedEntry (environment : PsEnvironment) (sourceName : String)
       scope entryIds fixed.plan.domain fixed.major with
     | .ok value => pure value
     | .error _ => throw (IO.userError "the actual two-field pack was rejected")
+  let stateIds ← statePositions.mapM fun position =>
+    match entryIds[position]? with
+    | some id => pure id
+    | none => throw (IO.userError "packed-state fixture selected a missing original state slot")
+  let stateArguments := stateIds.map PsExpr.fvar
   if entryIds[firstPosition]? != some firstId || entryIds[secondPosition]? != some secondId ||
       entryIds.length != runtimeParameters.length || !entry.applicationArguments.isEmpty ||
-      !fixed.arguments.isEmpty then
-    throw (IO.userError "packed WF changed its original header slots or fixed captures")
+      fixed.arguments.length != stateArguments.length ||
+      !(fixed.arguments.zip stateArguments).all (fun pair => psExprAlphaEq pair.fst pair.snd) then
+    throw (IO.userError "packed WF changed its original header slots, state or fixed captures")
   let some (.binding _ secondName secondType secondBinder) := psLocalFindById localContext secondId
     | throw (IO.userError "packed WF lost its original second binding")
   if (psExprFVarIds secondType).contains firstId != expectDependency then
     throw (IO.userError "packed WF changed the dependency of its actual second field")
+  if !stateIds.isEmpty then
+    let .lam _ callbackType _ .explicit :=
+        psWhnf environment psMetaEmpty scope.localContext (.app fixed.functional fixed.major)
+      | throw (IO.userError "packed-state functional lost its checked callback binder")
+    let some (.binding _ firstName _ _) := psLocalFindById localContext firstId
+      | throw (IO.userError "packed state lost its first original entry slot")
+    let sourceType ← match psWellFoundedPairCurryType environment psMetaEmpty localContext
+        packing firstName secondName callbackType with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "packed-state callback lost the shared curried telescope")
+    let recursiveCore ← match psErasureWellFoundedPairCallback environment scope entry.name
+        entry.levelArguments entry.headerArguments firstId secondId sourceType stateIds with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "packed-state runtime callback was rejected")
+    let mut callbackLocals := localContext
+    let mut callbackBody := recursiveCore
+    let mut callbackArguments : List PsExpr := []
+    for _ in List.range (3 + stateIds.length) do
+      let .lam callbackName callbackDomain callbackTail callbackBinder := callbackBody
+        | throw (IO.userError "packed-state runtime callback lost an argument or proof slot")
+      let pushed := psLocalPushBinding callbackLocals callbackName callbackDomain callbackBinder
+      callbackLocals := pushed.context
+      callbackArguments := callbackArguments ++ [.fvar pushed.id]
+      callbackBody := psExprInstantiate1 callbackTail (.fvar pushed.id)
+    let some firstArgument := callbackArguments[0]?
+      | throw (IO.userError "missing first curried callback argument")
+    let some secondArgument := callbackArguments[1]?
+      | throw (IO.userError "missing second curried callback argument")
+    let [_, _, _, nextState] := callbackArguments
+      | throw (IO.userError "packed-state fixture lost its one trailing state binder")
+    let [_, _, capturedBias, _] := entry.headerArguments
+      | throw (IO.userError "packed-state fixture lost its fixed middle capture")
+    -- This fixture's source order is total, n, bias, acc; the callback order
+    -- is smaller n, smaller acc, decrease proof, next total.
+    let expectedArguments := [nextState, firstArgument, capturedBias, secondArgument]
+    let call := psErasureAppView callbackBody
+    if !psExprAlphaEq call.head (.constE entry.name entry.levelArguments) ||
+        call.args.length != expectedArguments.length ||
+        !(call.args.zip expectedArguments).all (fun pair => psExprAlphaEq pair.fst pair.snd) then
+      throw (IO.userError "packed-state callback changed source argument order or a fixed capture")
+    let invalidProofType ← match sourceType with
+      | .forallE first firstType (.forallE second secondType
+          (.forallE proof _ result proofBinder) secondBinder) firstBinder =>
+        pure (PsExpr.forallE first firstType (.forallE second secondType
+          (.forallE proof (.constE psNatName []) result proofBinder) secondBinder) firstBinder)
+      | _ => throw (IO.userError "packed-state source callback lost its proof telescope")
+    let _ ← match psInferType environment psMetaEmpty localContext invalidProofType with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "non-proof callback control was not a well-formed type")
+    match psErasureWellFoundedPairCallback environment scope entry.name
+        entry.levelArguments entry.headerArguments firstId secondId invalidProofType stateIds with
+    | .ok _ => throw (IO.userError "packed-state erasure accepted a runtime Nat as its decrease proof slot")
+    | .error _ => pure ()
   let foreign := psLocalPushBinding localContext secondName secondType secondBinder
   let foreignScope := { scope with localContext := foreign.context }
   let foreignMajor := psWellFoundedPairPack packing (.fvar firstId) (.fvar foreign.id)
@@ -700,7 +785,7 @@ private def checkUnusedHints : IO Unit := do
 -- In particular an opaque P0 declaration, an axiom, or a self-referential
 -- definition cannot stand in for WellFounded.Nat.fix or its checked equation.
 private def checkConstruction : IO Unit := do
-  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource ++ relationSource ++ packingSource ++ independentSource) with
+  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource ++ relationSource ++ packingSource ++ independentSource ++ packingStateSource) with
     | .ok value => pure value
     | .error error => throw (IO.userError error)
   let some iterateCommand := parsed.commands.find? (fun command =>
@@ -737,7 +822,8 @@ private def checkConstruction : IO Unit := do
         throw (IO.userError "generic WF lost its checked lexicographic proof, exact equation or closed construction")
     | _, _ => throw (IO.userError "generic WF did not produce its real definition and checked equation")
   for (text, constructors) in [("m3wfpacked", ["left"]), ("m3wfpackedBounded", ["left"]),
-      ("m3wfindependentLeft", ["left"]), ("m3wfindependentRight", ["left", "right"])] do
+      ("m3wfindependentLeft", ["left"]), ("m3wfindependentRight", ["left", "right"]),
+      ("m3wfpackedState", ["left"])] do
     let name := psRootName text
     match psEnvironmentFind result.result.environment name,
         psEnvironmentFind result.result.environment (psNameAppendStr name "eq_def") with
@@ -805,7 +891,8 @@ private def checkConstruction : IO Unit := do
     ("m3wfpacked", ["u"], [.index, .proof, .proof, .runtime, .runtime, .runtime], 5, 0),
     ("m3wfpackedBounded", [], [.runtime, .runtime], 2, 0),
     ("m3wfindependentLeft", ["u"], [.index, .proof, .proof, .runtime, .runtime, .runtime], 5, 0),
-    ("m3wfindependentRight", [], [.runtime, .runtime, .runtime, .runtime], 4, 0)]
+    ("m3wfindependentRight", [], [.runtime, .runtime, .runtime, .runtime], 4, 0),
+    ("m3wfpackedState", [], [.runtime, .runtime, .runtime, .runtime], 4, 0)]
   for (text, expectedLevels, expectedKinds, runtimeArity, typeArity) in expectedEntries do
     let name := psRootName text
     let some (.definitionDecl _ levels type value) := psEnvironmentFind result.result.environment name
@@ -820,6 +907,12 @@ private def checkConstruction : IO Unit := do
   checkPackedEntry result.result.environment "m3wfpackedBounded" ["packedN", "packedAcc"] 0 1 true
   checkPackedEntry result.result.environment "m3wfindependentRight"
     ["independentBias", "independentLeft", "independentStep", "independentRight"] 1 3 false
+  checkPackedEntry result.result.environment "m3wfpackedState"
+    ["changingTotal", "packedN", "fixedBias", "packedAcc"] 1 3 true [0]
+  if M3WellFoundedOracle.packedState 5 2 7 ⟨2, Nat.lt_succ_self 2⟩ != 16 ||
+      M3WellFoundedOracle.packedState 4 3 2 ⟨3, Nat.lt_succ_self 3⟩ != 12 then
+    throw (IO.userError "independent native packed-state observations changed")
+  IO.println "PSCV0_M3_WF_PACKED_STATE: PASS checked pair-plus-state source equation, native 16/12 observations, original entry order and fixed capture, shared typed callback state forwarding, rejected non-proof callback and invalid packed entries"
   checkResultApplication result.result.environment
   checkUnusedHints
   IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix, generic lexicographic fix and dependent/independent PSigma packing, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, ordinary unused-hint definitions without extra captures, no recursive axiom or P0 marker"
@@ -876,7 +969,19 @@ private def checks : List (String × String × Option String) := [
     some "PSCV0-WF-MEASURE-TYPE"),
   ("three-changing-dependent-pack-slots",
     "function bad(n: Nat, i: Fin(n + 1), total: Nat): Nat := match n with { | 0 => total | k + 1 => bad(k, Fin.mk(0, Nat.zero_lt_succ(k)), total + 1) }\ntermination_by Prod.mk(n, Fin.val(i))\n",
+    some "PSCV0-WF-DECREASE"),
+  ("three-measured-changing-pack-slots",
+    "function bad(n: Nat, i: Fin(n + 1), total: Nat): Nat := match n with { | 0 => total | k + 1 => bad(k, Fin.mk(0, Nat.zero_lt_succ(k)), total + 1) }\ntermination_by Prod.mk(n, Fin.val(i) + total)\n",
     some "PSCV0-WF-MEASURE-STATE"),
+  ("packed-state-stale-dependent-argument",
+    packingStateSource.replace "Fin.mk(0, Nat.zero_lt_succ(k))" "acc",
+    some "PSCV0-TYPE-MISMATCH"),
+  ("packed-state-unresolved-decrease-proof",
+    packingStateSource.replace "exact Prod.Lex.left(0, Fin.val(acc), Nat.lt_succ_self(k))" "refine _",
+    some "PSCV0-WF-DECREASE"),
+  ("packed-state-changing-measure-codomain",
+    packingStateSource.replace "termination_by Prod.mk(n, Fin.val(acc))" "termination_by acc",
+    some "PSCV0-WF-MEASURE-TYPE"),
   ("dependent-pack-measure-codomain",
     "function bad(n: Nat, i: Fin(n + 1)): Nat := match n with { | 0 => 0 | k + 1 => bad(k, Fin.mk(0, Nat.zero_lt_succ(k))) }\ntermination_by i\n",
     some "PSCV0-WF-MEASURE-TYPE"),

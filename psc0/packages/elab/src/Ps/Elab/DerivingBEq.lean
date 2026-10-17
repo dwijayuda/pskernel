@@ -3,15 +3,17 @@ Reference: Lean 4.35.0 Lean/Elab/Deriving/BEq.lean at eb6cafb.
 Copyright (c) 2020 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; see THIRD_PARTY_NOTICES.md.
 Adaptation: checked Core induction for complete uniform nonindexed groups,
-including selected nested containers. No partial fallback or assumed self
+including selected nested containers, and nonrecursive indexed singletons
+with direct index fields. No partial fallback or assumed self
 dictionary. Independent runtime fields retain the shared admissibility boundary.
 -/
 import Ps.Elab.DerivingContext
 
--- Distinguish erased proof fields, independent dictionaries and actual child
--- induction evidence. A missing dictionary can never masquerade as recursion.
+-- Distinguish erased proofs, determined indices, independent dictionaries and
+-- actual child induction evidence. A missing dictionary is never recursion.
 inductive PsElabDeriveBEqField where
   | erased
+  | index
   | independent (compare : PsExpr)
   | recursive
 
@@ -41,7 +43,7 @@ def psElabDeriveBEqCompare (comparisons : List PsElabDeriveBEqField)
     throw (.data "BEq deriving field alignment mismatch")
   let values ← ((comparisons.zip left).zip right).mapM fun ((compare, lhs), rhs) => do
     match compare with
-    | .erased => return none
+    | .erased | .index => return none
     | .independent compare => return some (psExprApplyMany compare [lhs, rhs])
     | .recursive =>
       let .fvar id := lhs | throw (.data "BEq deriving recursive field is not a local")
@@ -84,12 +86,28 @@ def psElabDeriveBEqSlotResult (slot : PsInductiveEliminationSlot) (family : PsEx
     .forallE (psRootName "reverse") bool (psExprLiftBVars 1 0 result) .explicit
   else result
 
+-- Only direct constructor index fields are omitted from binary comparison.
+-- Both inputs have the same checked family indices. Independent payloads
+-- retain their actual dictionaries; a non-pattern index needs a richer motive.
+def psElabDeriveBEqIndexFields (fields : PsElabDeriveFields) :
+    Except PsElabError (List Nat) := do
+  let fieldIds := fields.fields.map (·.id)
+  let mut determined : List Nat := []
+  for index in fields.resultIndices do
+    if (psExprFVarIds index).any fieldIds.contains then
+      let .fvar id := index
+        | throw (.data "indexed BEq deriving requires direct constructor index fields")
+      determined := id :: determined
+  return determined
+
 def psElabDeriveBEqPlanSlot (plan : PsElabDeriveContext) (slotIndex : Nat)
     (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor) :
     Except PsElabError PsElabDeriveBEqSlotConstructor := do
   let fields ← psElabDeriveSlotFields plan slot constructor
+  let indexFields ← psElabDeriveBEqIndexFields fields
   let comparisons ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveBEqField.erased
+    if indexFields.contains field.id then return PsElabDeriveBEqField.index
     if constructor.recursiveFields.any (fun edge => edge.1 == index) then
       return PsElabDeriveBEqField.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "BEq") field.type
@@ -206,7 +224,12 @@ def psElabDeriveBEqInductive (plan : PsElabDeriveContext)
 
 def psElabDeriveBEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
-  let plan ← psElabDerivePrepare environment origin { groups := true, nested := true }
+  let plan ← psElabDerivePrepare environment origin { groups := true, indices := true, nested := true }
+  if plan.group.members.any (·.numIndices != 0) then
+    if plan.group.members.length != 1 || plan.elimination.slots.length != 1 ||
+        plan.elimination.slots.any (fun slot =>
+          slot.constructors.any (fun constructor => !constructor.recursiveFields.isEmpty)) then
+      throw (.data "deriving indexed families is not yet implemented")
   let className := psRootName "BEq"
   let plan := psElabDeriveRequirements plan className
   let type ← psElabDeriveClassType plan.context className plan.family

@@ -151,6 +151,30 @@ jobs:
         run: |
           set -euo pipefail
           lake build Ps.Elab.Monotonicity Ps.Elab.PartialFixpoint 2>&1 | tee ../dist/m3-foundation-preparation/monotonicity-build.log
+      - name: Compile proposed Order audit and monotonicity proofs
+        id: order_probe_build
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake build pscv0_m3_partial_fixpoint_probe 2>&1 | tee ../dist/m3-foundation-preparation/order-probe-build.log
+      - name: Audit retained Order declarations and selected metadata
+        if: ${{ !cancelled() && steps.order_probe_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_probe foundation 2>&1 | tee ../dist/m3-foundation-preparation/order-probe-audit.log
+      - name: Construct portable monotonicity proofs and replay in fresh kernel
+        if: ${{ !cancelled() && steps.order_probe_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_probe monotonicity 2>&1 | tee ../dist/m3-foundation-preparation/monotonicity-proof.log
+      - name: Check indexed BEq source, native laws and kernel equations
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/inductive-deriving ../dist/m3-foundation-preparation/recursive-deriving
+          lake build pscv0_m3_inductive_deriving pscv0_m3_recursive_deriving 2>&1 | tee ../dist/m3-foundation-preparation/deriving-build.log
+          .lake/build/bin/pscv0_m3_inductive_deriving ../dist/m3-foundation-preparation/inductive-deriving 2>&1 | tee ../dist/m3-foundation-preparation/inductive-deriving/check.log
+          .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-foundation-preparation/recursive-deriving 2>&1 | tee ../dist/m3-foundation-preparation/recursive-deriving/check.log
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always() && !cancelled() && steps.build.outcome != 'skipped'
         with:

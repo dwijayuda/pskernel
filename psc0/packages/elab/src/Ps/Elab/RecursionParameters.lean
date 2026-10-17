@@ -67,17 +67,26 @@ def psElabRecursionMeasureParameterPlan (context : PsElabContext)
   -- while leaving a first-only measure on the existing unary/state route.
   let dependentMajor := majorDependencies.any fun id => id != majorId && varying.contains id
   if measuredVarying.length > 1 || dependentMajor then do
-    -- The additional route owns exactly two changing header binders in
-    -- source order. A constant second family uses the same checked PSigma
-    -- encoding; a third changing slot stays outside this bounded route.
-    -- Full fixed-capture/type closure is rechecked by the source constructor.
-    let [firstId, secondId] := ids.filter varying.contains
-      | throw (.data "PSCV0-WF-MEASURE-STATE: pair packing requires exactly two changing parameters")
+    -- Close the measure's changing roots through their actual binder types.
+    -- Locals are newest first, so every selected slot is visited before its
+    -- older dependencies. Fixed captures do not become packed arguments.
+    let packedDependencies := context.localContext.declarations.foldl (fun selected declaration =>
+      if selected.contains (psLocalDeclId declaration) then
+        selected ++ psExprFVarIds
+          (psMetaInstantiate context.metaContext (psLocalDeclType declaration))
+      else selected) measuredVarying
+    let [firstId, secondId] := ids.filter (fun id =>
+        varying.contains id && packedDependencies.contains id)
+      | throw (.data "PSCV0-WF-MEASURE-STATE: pair packing requires exactly two changing measured or dependent parameters")
     let some _ := psLocalFindById context.localContext secondId
       | throw (.data "PSCV0-WF-INTERNAL: missing second packed parameter binding")
+    -- Unmeasured changing parameters keep the existing curried state order.
+    -- The source constructor rechecks the complete domain and fixed closure.
+    let stateIds := ids.filter fun id =>
+      varying.contains id && id != firstId && id != secondId
     return {
       parameterIds := ids, majorId := firstId, packedIds := some (firstId, secondId)
-      fixedIds := ids.filter (fun id => !varying.contains id), stateIds := [] }
+      fixedIds := ids.filter (fun id => !varying.contains id), stateIds }
   let changing := psElabRecursionParameterDependencies context (varying ++ [majorId])
   let stateIds := ids.filter fun id => id != majorId && changing.contains id
   if stateIds.any dependencies.contains then

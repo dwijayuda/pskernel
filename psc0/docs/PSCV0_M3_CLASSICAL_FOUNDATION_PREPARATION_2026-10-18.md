@@ -1,3 +1,26 @@
+# M3+B implementation preparation — Order proofs, source privacy, WF state and indexed BEq
+
+## Current candidate
+
+This preparation revision adds checked-owner implementations and concrete cloud checks. M3+B is still open. The main integration branch and the historical all-five compiler qualification remain unchanged until the new candidate passes and is deliberately promoted.
+
+The prior preparation head is `c47e9d23bdec1d55d32dcf8a8d5d6efcb024d357`. Its [cloud run 39065744204](https://github.com/dwijayuda/pskernel/actions/runs/39065744204) completed. Native build, exact classical signatures/closure, strict selected manifest, fresh-kernel Order export/replay, six recursor comparisons, retained OrderData compilation, exact native metadata and the P0 Nonempty construction/emission checks passed. The section source check failed specifically because the generated sectionViaPrivate.eq_def public signature mentioned its private callee.
+
+## Changes under qualification
+
+- Generated equations for non-exposed typed predefinitions are private, following pinned Lean Meta/Eqns.mkEqLikeNameFor. Explicit source interface theorems retain their declared visibility. The section fixture now checks successful interface import, failed generated-equation import, and the unchanged explicit-private-signature guard.
+- The retained 117-declaration Order asset has a separate candidate extension with two classes and eleven ordinary instances. All eleven priorities are 1000 and neither class has output parameters, as observed in the prior native metadata probe. The audit compares exact native declarations, reducibility, class and instance records, checks actual dictionary search, replays the complete closure and prints proposed immutable digests.
+- The frozen pre-Order environment remains the selected Standard in this revision. No manifest pin is guessed. Importing the closure does not register Classical.propDecidable as an ordinary instance.
+- Monotonicity proof production constructs actual identity/application/projection/lambda/product/conditional/case proofs. The new harness requires nine portable proofs, fresh checking of every proof, a well-typed nonmonotone refusal and replay from an empty official kernel. These are required checks, not yet observed successes at this revision.
+- WF planning retains two measured changing parameters plus separate evolving state, with exact equation and typed callback ownership. The additive fixture checks dependent state and argument order without changing the historical runtime rows.
+- Indexed BEq accepts the selected nonrecursive singleton families with direct constructor index fields. It omits only index-determined fields and keeps independent payload dictionaries, including an intentionally nonreflexive control. Recursive/group indexed refusals remain. The nested fixture and focused workflow require twenty additional runtime comparisons when emitted programs actually execute.
+- The ordinary P1 runtime adapter validates the complete packed fixedpoint component, exact member projections and whole equations, and reconstructs the actual functional from retained bodies. Auxiliary-owned recursor helpers are the only restored definitions. An unrelated true equation cannot authorize body replacement. Existing generic verified gates remain in place.
+- The new P1 source fixture is retained for the next source-dispatch integration. It contains exact logical-only former-refusal programs, four source members in three components, checked unfolding equations, an officially well-typed adversarial mismatch, terminating native observations and thirty required runtime comparisons. P1 source dispatch remains unavailable in this revision.
+
+Only Classical.choice is newly added to the previously approved propext/Quot.sound foundation. No new logical axiom is required by the Order closure. The previous selected counts and pins remain 3635 declarations, 42 classes, 359 ordinary instances, 13 defaults; FNV8892060683078164058, environment SHA85c0bcd0991126d00b7c1ad723182f8a3023bf9dedda79246d8ca1206750b14c and surface SHA22963f394b344142cfcca1584d14eae6286941ebc1d4f0897f05a6c6518da6df.
+
+## Historical preparation record
+
 # M3+B classical foundation and P1 library preparation
 
 ## Current result

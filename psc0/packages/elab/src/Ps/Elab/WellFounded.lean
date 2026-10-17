@@ -425,9 +425,10 @@ def psElabWellFoundedCongrArg (context : PsElabContext)
 -- A public curried call on p.fst/p.snd reconstructs a pair. Portable
 -- conversion deliberately has no pair eta shortcut. Prove callback equality
 -- by eliminating the real PSigma, where both reconstructions reduce to the
--- same constructor, and use the existing checked funext for its proof slot.
+-- same constructor, and use checked funext for its proof and state slots.
 def psElabWellFoundedPairCallbackEquality (context : PsElabContext)
-    (packing : PsWellFoundedPairPacking) (type left right : PsExpr) :
+    (packing : PsWellFoundedPairPacking) (type left right : PsExpr)
+    (stateCount : Nat := 0) :
     Except PsElabError PsExpr := do
   let parameter ← (psInferEnsureForall context.environment context.metaContext
     context.localContext type).mapError PsElabError.infer
@@ -449,7 +450,8 @@ def psElabWellFoundedPairCallbackEquality (context : PsElabContext)
   let second := psLocalPushBinding first.context secondName secondType .explicit
   let constructed := psWellFoundedPairPack packing (.fvar first.id) (.fvar second.id)
   let pointType := psExprInstantiate1 parameter.body constructed
-  let point ← psElabWellFoundedExtensionalEquality 1 { context with localContext := second.context }
+  let point ← psElabWellFoundedExtensionalEquality (1 + stateCount)
+    { context with localContext := second.context }
     pointType (.app left constructed) (.app right constructed)
   let minor := PsExpr.lam firstName packing.firstType
     (psExprAbstractFVar first.id (.lam secondName secondType
@@ -543,7 +545,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
         | throw (.data "PSCV0-WF-INTERNAL: missing first packed parameter")
       let some second := declaredParameters.find? (fun parameter => parameter.id == secondId)
         | throw (.data "PSCV0-WF-INTERNAL: missing second packed parameter")
-      if firstId == secondId || !plan.stateIds.isEmpty then
+      if firstId == secondId then
         throw (.data "PSCV0-WF-PACK: the selected pack is not exactly two distinct changing parameters")
       let family := PsExpr.lam first.name first.type
         (psExprAbstractFVar first.id second.type) .explicit
@@ -701,7 +703,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
         let some packing := psWellFoundedPairPackingView domain
           | throw (.data "PSCV0-WF-PACK: equation lost its exact dependent domain")
         psElabWellFoundedPairCallbackEquality equationContext packing
-          callbackType rawCallback unfoldCallback
+          callbackType rawCallback unfoldCallback states.length
     let transported ← psElabWellFoundedCongrArg equationContext callbackType stateType
       rawCallback unfoldCallback (.app functional x) callbackEquality
     let fullEquality := psExprApplyMany (.constE (psNameAppendStr psEqName "trans") [stateLevel])

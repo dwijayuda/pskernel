@@ -1003,6 +1003,16 @@ private def checkSectionInstances : IO Unit := do
   for name in [privateName, psNameAppendStr privateName "eq_def"] do
     ensure (compiled.privateNames.any (psNameEq name))
       "plain private definition or checked equation lost module ownership"
+  for shortName in ["sectionPlain", "sectionHinted", "sectionViaPrivate", "sectionPruned"] do
+    let name := psRootName shortName
+    ensure (!compiled.privateNames.any (psNameEq name) &&
+      compiled.privateNames.any (psNameEq (psNameAppendStr name "eq_def")))
+      "non-exposed section definition or generated equation has incorrect module visibility"
+  let some (.theoremDecl _ _ privateEquationType _) :=
+      psEnvironmentFind environment (psNameAppendStr (psRootName "sectionViaPrivate") "eq_def")
+    | throw (IO.userError "local checked equation was discarded instead of hidden from import")
+  ensure (psExprHasConst privateName privateEquationType)
+    "private-call equation no longer states the exact retained source body"
   ensure ((psEnvironmentFind environment (psRootName "sectionPrivate")).isNone)
     "plain private section declaration acquired a public alias"
   let aliasName := psRootName "sectionAlias"
@@ -1032,15 +1042,24 @@ private def checkSectionInstances : IO Unit := do
       "theorem proof uses a section variable absent from its header; use include")]
   let requests := #[
       ({ source := sectionInstanceSource, sourceName := "m3-section-instances.ps" } : PsV7Native.Request),
-      ({ source := "import SectionProvider\nfunction entry(n: Nat): Nat := sectionPlain(tag := 7, d := Inhabited.mk(41), n := n)\ntheorem exposedAlias: Eq(sectionAlias(3), 4) := by { rfl }\n",
+      ({ source := "import SectionProvider\nfunction entry(n: Nat): Nat := sectionPlain(tag := 7, d := Inhabited.mk(41), n := n)\ntheorem exposedAlias: Eq(sectionAlias(3), 4) := by { rfl }\ntheorem importedInterface: Eq(sectionViaPrivate(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { exact sectionViaPrivateEq }\n",
          sourceName := "section-entry.ps", moduleName := "Main",
          modules := [{ name := "SectionProvider", sourceName := "section-provider.ps", source := sectionInstanceSource }] } :
         PsV7Native.Request)] ++
-    (rejected.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray
+    (rejected.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray ++ #[
+      ({ source := "import SectionProvider\nfunction leakedEquation := sectionPlain.eq_def\n",
+         sourceName := "section-equation-leak.ps", moduleName := "Main",
+         modules := [{ name := "SectionProvider", sourceName := "section-provider.ps", source := sectionInstanceSource }] } :
+        PsV7Native.Request),
+      ({ source := "import PrivateSignature\nconst entry: Nat := 0\n",
+         sourceName := "section-signature-entry.ps", moduleName := "Main",
+         modules := [{ name := "PrivateSignature", sourceName := "private-signature.ps",
+           source := "private const hidden: Nat := 7\ntheorem forbidden: Eq(hidden, hidden) := by { rfl }\n" }] } :
+        PsV7Native.Request)]
   let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
-  ensure (batch.results.size == 4) "section-instance batch lost a positive or refusal"
+  ensure (batch.results.size == 6) "section-instance batch lost a positive or refusal"
   let positiveSources : List (Nat × String × String) := [
     (0, "m3-section-instances.ps", "m3-section-instances.ps"),
     (1, "section-entry.ps", "section-provider.ps")]
@@ -1060,7 +1079,15 @@ private def checkSectionInstances : IO Unit := do
       ensure (error.phase == "elaborate" && (error.message.splitOn rule).length > 1)
         (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
     | _ => throw (IO.userError ("unexpected section-instance acceptance: " ++ label))
-  IO.println "PSCV0_M3_SECTION_INSTANCES: PASS plain no-Where dictionary parity, eight matched native/source rfl equations, six native headers, five closed ordinary definition/equation pairs, pruned unused captures, private ownership, registered abbreviation exposure, theorem include/omit, one exact source-owned warning and two source-only positives plus two refusals"
+  for (index, rule) in [
+      (4, "PSCV0-SCOPE: unknown name sectionPlain.eq_def"),
+      (5, "PSCV0-MODULE: public signature references private name in forbidden")] do
+    match (batch.results[index]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+    | some (Except.error error) =>
+      ensure (error.phase == "module" && (error.message.splitOn rule).length > 1)
+        ("section equation visibility refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
+    | _ => throw (IO.userError "a hidden equation or explicit private signature escaped the module boundary")
+  IO.println "PSCV0_M3_SECTION_INSTANCES: PASS plain no-Where dictionary parity, eight matched native/source rfl equations, six native headers, five closed ordinary definition/equation pairs, pruned unused captures, private ownership and local-only generated equations, explicit public interface theorem, registered abbreviation exposure, theorem include/omit, one exact source-owned warning and two source-only positives plus four refusals"
 
 private def checkPartialHintScopes : IO Unit := do
   ensure (M3WhereOracle.unknownHints 7 3 == 33 &&

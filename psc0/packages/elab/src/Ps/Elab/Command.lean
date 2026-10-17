@@ -218,10 +218,17 @@ def psElabCommandPreDefinitions (state : PsCommandState)
         memberIndex := index
         memberCount := scopedMembers.length
         span } else none }
+  -- These typed predefinitions have no exposed-body registration. Their
+  -- generated unfolding equations remain local, as in pinned mkEqLikeNameFor.
+  -- Explicit source theorems keep their own source visibility.
   let privateNames := outputs.flatMap fun (member, result) =>
     if member.isPrivate then result.declarations.map psDeclarationName
     else result.declarations.filterMap fun declaration =>
-      match declaration with | .partialDecl name .. => some name | _ => none
+      match declaration with
+      | .partialDecl name .. => some name
+      | .theoremDecl name .. =>
+        if psNameEq name (psNameAppendStr member.name "eq_def") then some name else none
+      | _ => none
   let namespaces := result.batch.declarations.foldl (fun acc declaration =>
     ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc)
     state.namespaces

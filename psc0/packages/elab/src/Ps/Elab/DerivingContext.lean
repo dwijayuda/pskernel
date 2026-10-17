@@ -182,6 +182,7 @@ structure PsElabDeriveFields where
   cursor : PsExpr
   fields : List PsElabTypedBinder
   proofs : List Bool
+  resultIndices : List PsExpr := []
 
 -- Recursion is an explicit handler capability, not permission to bypass the
 -- family/field checks. Direct recursive fields must agree with both metadata
@@ -279,8 +280,8 @@ def psElabDeriveSlotFields (plan : PsElabDeriveContext)
     if edge.isNone && plan.group.members.any (fun member => psExprHasConst member.name field.type) then
       throw (.data "deriving recursive field is not a supported elimination slot")
     return false
-  let _ ← psElabDeriveSlotIndices plan opened.context slot opened.body
-  return { constructor := constructor.info, cursor, fields, proofs }
+  let resultIndices ← psElabDeriveSlotIndices plan opened.context slot opened.body
+  return { constructor := constructor.info, cursor, fields, proofs, resultIndices }
 
 structure PsElabDeriveHypothesis where
   fieldId : Nat

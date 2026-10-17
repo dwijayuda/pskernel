@@ -17,7 +17,7 @@ lean_lib PsKernelLean where
 lean_lib PsV7Host where
   srcDir := "../host/src"
   roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit, `Ps.Host.StandardClosure, `Ps.Host.StandardSource, `Ps.Host.StandardExport, `Ps.Host.StandardManifest, `Ps.Host.FloatConstructive, `Ps.Host.FloatCanonical,
-    `Ps.Host.FloatCanonicalContracts]
+    `Ps.Host.FloatCanonicalContracts, `Ps.Host.MonotonicityProbe]
 
 lean_lib PsV7ParserChecks where
   srcDir := "../scripts"
@@ -81,6 +81,15 @@ lean_exe pscv0_m3_partial_fixpoint_export where
   srcDir := "../scripts"
   root := `Pscv0M3PartialFixpointExport
   supportInterpreter := true
+
+lean_exe pscv0_m3_partial_fixpoint_probe where
+  srcDir := "../scripts"
+  root := `Pscv0M3PartialFixpointProbe
+  supportInterpreter := true
+
+lean_exe pscv0_m3_partial_fixpoint where
+  srcDir := "../test"
+  root := `Pscv0M3PartialFixpoint
 
 lean_exe pscv0_m3_recursive_deriving where
   srcDir := "../test"

@@ -451,7 +451,7 @@ private def refusals : List (String × String × String) := [
     "deriving field has no checked instance"),
   ("beq-nested-function-field", "inductive NestedBEq where { | node(children: List(Nat -> NestedBEq)) } deriving BEq\n",
     "unsupported recursive field; expected a positive direct family occurrence"),
-  ("beq-indexed", "inductive IndexedBEq: Nat -> Type where { | intro(n: Nat): IndexedBEq n } deriving BEq\n",
+  ("beq-indexed-recursive", "inductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\n",
     "deriving indexed families is not yet implemented"),
   ("beq-missing-field-dictionary", "inductive FunctionBEq where { | leaf(value: Nat -> Nat) | node(next: FunctionBEq) } deriving BEq\n",
     "deriving field has no checked instance"),

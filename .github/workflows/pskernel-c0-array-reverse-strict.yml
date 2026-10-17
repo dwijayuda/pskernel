@@ -1,0 +1,81 @@
+name: PSKernel-C0 pinned Array reverse theorem strict acceptance
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-array-reverse-strict.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified-reverse-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build only checked native kernel, never a compiler/backend experiment
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+            lake build c0OfficialReplay
+            lake env lean --run test/C0ProofCongruenceRegression.lean
+            lake env lean --run test/C0CertifiedHashMemoRegression.lean
+            lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          )
+      - name: Require immutable 123090-record official-accepted Array reverse proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- \
+              '_private.Init.Data.Array.Lemmas.0.Array.toList_reverse.go._unary' \
+              > "$RUNNER_TEMP/c0-array-reverse-strict.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-array-reverse-strict.ndjson" \
+              > "$RUNNER_TEMP/c0-array-reverse-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/c0-array-reverse-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/c0-array-reverse-strict.ndjson")" -eq 123090
+          test "$(stat -c%s "$RUNNER_TEMP/c0-array-reverse-strict.ndjson")" -eq 6262324
+          echo "25428bd2c43f00196f3d5624a0a60da4d287f722523fc909e0156ea5699391be  $RUNNER_TEMP/c0-array-reverse-strict.ndjson" | sha256sum -c -
+          echo "C0_ARRAY_REVERSE_STRICT_PINNED official=accepted source_bytes=6262324 records=123090"
+      - name: Require genuinely checked C0 acceptance under identical fuel 4096
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/c0-array-reverse-resource.txt" \
+              timeout 1200s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-reverse-strict.ndjson" 4096
+          ) | tee "$RUNNER_TEMP/c0-array-reverse-c0.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=123090 fuel=4096" \
+            "$RUNNER_TEMP/c0-array-reverse-c0.txt"
+          echo "C0_ARRAY_REVERSE_STRICT_VERDICT=ACCEPTED_original_native_source exact_proof=verified"
+          echo "C0_ARRAY_REVERSE_SCOPE=isolated_dependency_not_entire_Init"
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/c0-array-reverse-resource.txt" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-array-reverse-strict
+          path: |
+            ${{ runner.temp }}/c0-array-reverse-c0.txt
+            ${{ runner.temp }}/c0-array-reverse-resource.txt
+            ${{ runner.temp }}/c0-array-reverse-official.txt
+          if-no-files-found: warn
+          retention-days: 14

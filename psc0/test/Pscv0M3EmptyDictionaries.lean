@@ -185,7 +185,8 @@ private def checkConstruction : IO Unit := do
     "closed empty dictionary lost its checked initializer"
   let consumer ← requireDeclaration ir "m3emptyconsume"
   match consumer.parameters with
-  | [value, _] => ensure (isNamed "M3EmptyRelation" value.type)
+  | [value, _] =>
+    ensure (isNamed "M3EmptyRelation" value.type)
       "empty dictionary argument was reclassified as a proof slot"
   | _ => throw (IO.userError "empty dictionary call arity changed")
   let some inhabited := ir.structures.find? (fun layout => layout.name == "Inhabited")
@@ -237,7 +238,8 @@ def main (args : List String) : IO Unit := do
       | throw (IO.userError "missing empty dictionary refusal")
     match outcome with
     | .ok _ => throw (IO.userError ("empty dictionary unexpectedly crossed " ++ phase))
-    | .error error => ensure (error.phase == phase && (error.message.splitOn expected).length > 1)
+    | .error error =>
+      ensure (error.phase == phase && (error.message.splitOn expected).length > 1)
         ("empty dictionary failed at wrong boundary: " ++ error.phase ++ ": " ++ error.message)
   let rows := [false, true].map fun flag =>
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::

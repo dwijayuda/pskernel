@@ -4,12 +4,19 @@ import PsKernelLean.Admission
 -- Independent native constructors and defaults at the required Lean pin.
 -- Result indices determine constructor fields before any defaults are chosen.
 universe u
+
+section NativeIndexedDefaults
+
+-- Keep the same declared index telescope as the portable fixture. Native
+-- promotion would turn fixed constructor indices into uniform parameters.
+set_option inductive.autoPromoteIndices false
+
 mutual
   inductive M3IndexedDefaultFirst (A : Type u) (a : A) : Nat → Type u where
     | mk (n : Nat) (value : A) : M3IndexedDefaultFirst A a n
-  inductive M3IndexedDefaultSecond (B : Type u) (b : B) : Nat → Type u where
-    | mk (n : Nat) (parent : M3IndexedDefaultFirst B b n) :
-        M3IndexedDefaultSecond B b n
+  inductive M3IndexedDefaultSecond (A : Type u) (a : A) : Nat → Type u where
+    | mk (n : Nat) (parent : M3IndexedDefaultFirst A a n) :
+        M3IndexedDefaultSecond A a n
 end
 
 /-- error: failed to generate `Inhabited` instance for `M3IndexedDefaultSecond` -/
@@ -51,6 +58,19 @@ inductive M3IndexedDefaultNoIndexInstance : Type u → Type (u + 1) where
 #guard_msgs (error, drop warning, substring := true) in
 deriving instance Inhabited for M3IndexedDefaultNoIndexInstance
 
+run_cmd do
+  for (name, parameters, indices) in [
+      (``M3IndexedDefaultFirst, 2, 1), (``M3IndexedDefaultSecond, 2, 1),
+      (``M3IndexedDefaultDependent, 2, 2), (``M3IndexedDefaultChoice, 2, 1),
+      (``M3IndexedDefaultOnlyZero, 0, 1), (``M3IndexedDefaultLoop, 2, 1),
+      (``M3IndexedDefaultNoIndexInstance, 0, 1)] do
+    let info ← Lean.getConstInfoInduct name
+    unless info.numParams == parameters && info.numIndices == indices do
+      throwError "native indexed oracle changed its parameter/index telescope: {name}: {info.numParams}/{info.numIndices}"
+  Lean.logInfo "PSCV0_M3_INDEXED_NATIVE: PASS exact declared parameter/index telescopes, including the uninhabited type index"
+
+end NativeIndexedDefaults
+
 namespace M3IndexedInhabitedOracle
 
 example {A : Type u} [Inhabited A] (a : A) (n : Nat) :
@@ -66,21 +86,36 @@ example {A : Type u} [Inhabited A] (a : A) (n : Nat) (point : Fin (Nat.succ n)) 
 example {A : Type u} (a : A) (n : Nat) :
     (default : M3IndexedDefaultChoice A a n) = .empty n := rfl
 
+-- Match a generalized index telescope, inspecting the actual constructor
+-- fields of the native derived value before choosing the scalar observation.
+private def firstScore : (n : Nat) → M3IndexedDefaultFirst Nat 0 n → Nat
+  | _, .mk k item => 3 * k + item
+
+private def secondScore : (n : Nat) → M3IndexedDefaultSecond Nat 0 n → Nat
+  | _, .mk k (.mk m item) => k + 2 * m + item
+
+private def dependentScore :
+    (n : Nat) → (point : Fin (Nat.succ n)) →
+      M3IndexedDefaultDependent Nat 0 n point → Nat
+  | _, _, .mk k selected item => k + 2 * selected.val + item
+
+private def choiceScore : (n : Nat) → M3IndexedDefaultChoice Nat 0 n → Nat
+  | _, .needs k item => 1000 + k + item
+  | _, .empty k => k + 5
+
 def firstOutput (flag : Bool) : UInt64 :=
   let n := if flag then 43 else 17
   let value : M3IndexedDefaultFirst Nat 0 n :=
     letI : Inhabited Nat := ⟨n + 7⟩
     default
-  match value with
-  | .mk k item => UInt64.ofNat (3 * k + item)
+  UInt64.ofNat (firstScore n value)
 
 def secondOutput (flag : Bool) : UInt64 :=
   let n := if flag then 43 else 17
   let value : M3IndexedDefaultSecond Nat 0 n :=
     letI : Inhabited Nat := ⟨n + 11⟩
     default
-  match value with
-  | .mk k (.mk m item) => UInt64.ofNat (k + 2 * m + item)
+  UInt64.ofNat (secondScore n value)
 
 def dependentOutput (flag : Bool) : UInt64 :=
   let n := if flag then 43 else 17
@@ -88,15 +123,12 @@ def dependentOutput (flag : Bool) : UInt64 :=
   let value : M3IndexedDefaultDependent Nat 0 n point :=
     letI : Inhabited Nat := ⟨n + 13⟩
     default
-  match value with
-  | .mk k selected item => UInt64.ofNat (k + 2 * selected.val + item)
+  UInt64.ofNat (dependentScore n point value)
 
 def choiceOutput (flag : Bool) : UInt64 :=
   let n := if flag then 43 else 17
   let value : M3IndexedDefaultChoice Nat 0 n := default
-  match value with
-  | .needs k item => UInt64.ofNat (1000 + k + item)
-  | .empty k => UInt64.ofNat (k + 5)
+  UInt64.ofNat (choiceScore n value)
 
 end M3IndexedInhabitedOracle
 

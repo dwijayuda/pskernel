@@ -58,6 +58,8 @@ lean_lib PsV7FloatConstructiveOracle where
 lean_exe pscv0_native where
   srcDir := "../scripts"
   root := `Pscv0Native
+  -- Persistent-extension import runs pinned Init initializers during the WF audit.
+  supportInterpreter := true
 
 lean_exe pscv0_native_checks where
   srcDir := "../test"

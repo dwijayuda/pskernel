@@ -2122,3 +2122,39 @@ requires its own focused qualification and does not inherit the
 earlier full native result. No new compiler semantic implementation,
 kernel, assumptions, backend special cases or performance budget.
 
+## Cloud fixture and metadata runtime follow-up — 2026-10-17
+
+The repair compiler/test head `5ed2d88c961f04f05a62181a43e4dd2d551a73ef`
+compiled the production compiler. F1 [38997709319](https://github.com/dwijayuda/pskernel/actions/runs/38997709319),
+F2 [38997709253](https://github.com/dwijayuda/pskernel/actions/runs/38997709253), and
+F3/F4 [38997709351](https://github.com/dwijayuda/pskernel/actions/runs/38997709351) passed.
+Native [38997709234](https://github.com/dwijayuda/pskernel/actions/runs/38997709234)
+and focused [38997709365](https://github.com/dwijayuda/pskernel/actions/runs/38997709365)
+failed at distinct observed boundaries; no accepted points are added.
+
+Native job `117293801945` reproduced the exact 34-declaration, zero-candidate-axiom,
+three-recursor-rule WF asset (466,947 bytes; SHA-256
+`b6bd56c4ab6378905d1d3ac2f0155eb5bc4742be3e19e684d64ac1a3007716f3`).
+The initialized import then needed the native external symbol `IO.getRandomBytes`.
+Pinned Lake's `LeanExeConfig.supportInterpreter` exposes executable symbols to the
+interpreter; this follow-up enables it only on `pscv0_native`, which runs the audit.
+Native source/Standard checks still passed at 5ed2d88, but later module/runtime
+workloads were skipped after the audit failure. No prospective WF pins were printed
+or activated. The active 3,599 declarations, 39 classes and 355 ordinary instances
+and all three Standard/surface pins remain unchanged.
+
+Focused job `117293802567` rejected two multiline assertion branches in the empty
+dictionary fixture. Their branch bodies are now indented as complete applications;
+both predicates, messages and refusal boundaries are unchanged.
+
+The indexed native oracle also exposed parameter-name agreement in mutual
+inductives, native index promotion, and matches over fixed local index values.
+The fixture correction preserves genuinely indexed native declarations, asserts
+their exact parameter/index counts, and computes native outputs through generalized
+observers of the actual derived defaults. The portable constructor-directed owner,
+four derived instances, four native/portable generic equations, eight checked output
+equations, four refusal contracts, five target lanes, and all prior fixtures remain.
+A fresh complete five-gate matrix at the resulting head is required.
+
+Accepted compiler/test SHA remains `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`;
+weighted M3+B remains **74/100**, open. PR 109 remains draft/open/unmerged.

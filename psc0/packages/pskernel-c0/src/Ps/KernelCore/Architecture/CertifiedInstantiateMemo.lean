@@ -40,17 +40,20 @@ private def psKernelC0InstOneMemoFind
       Option (PsKernelC0InstOneExact replacement expr offset)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
-      | .isTrue he =>
-          if ho : entry.offset = offset then
+      -- The binder offset is an integral part of the certified key.
+      -- Reject a different offset BEFORE running potentially expensive
+      -- exact structural equality on a collision-heavy syntax bucket.
+      if ho : entry.offset = offset then
+        match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+        | .isTrue he =>
             some (by
               cases he
               cases ho
               exact entry.exact)
-          else
+        | .isFalse _ =>
             psKernelC0InstOneMemoFind expr offset rest
-      | .isFalse _ =>
-          psKernelC0InstOneMemoFind expr offset rest
+      else
+        psKernelC0InstOneMemoFind expr offset rest
 
 private def psKernelC0InstOneMemoLookup
     {replacement : PsKernelExpr}

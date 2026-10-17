@@ -2854,6 +2854,69 @@ private def syntheticBoundaries : IO Unit := do
   unless exhausted.resourceExceeded &&
       exhausted.context.assignments.length == dictionary.context.assignments.length do
     throw (IO.userError "synthetic resource refusal leaked assignments")
+  -- Learn the numeral's type inside equality before its ordinary dictionary
+  -- can be synthesized. This is the circularity behind the WF result failure.
+  let numeralLevel := psMetaFreshLevel psMetaEmpty
+  let numeralType := psMetaFresh numeralLevel.context psLocalEmpty
+    (.sortE (.succ numeralLevel.level)) .natural
+  let numeralGoal := psExprApplyMany
+    (.constE (psRootName "OfNat") [numeralLevel.level])
+    [numeralType.expr, .lit (.natural 0)]
+  let numeralDictionary := psMetaFresh numeralType.context psLocalEmpty numeralGoal .synthetic
+  let .mvar numeralTypeId := numeralType.expr | throw (IO.userError "numeral type ID")
+  let .mvar numeralDictionaryId := numeralDictionary.expr |
+    throw (IO.userError "numeral dictionary ID")
+  let numeral := psExprApplyMany
+    (.constE (psNameAppendStr (psRootName "OfNat") "ofNat") [numeralLevel.level])
+    [numeralType.expr, .lit (.natural 0), numeralDictionary.expr]
+  let eqType := fun level domain left right =>
+    psExprApplyMany (.constE (psRootName "Eq") [level]) [domain, left, right]
+  let actual := eqType (.succ numeralLevel.level) numeralType.expr numeral numeral
+  let target := eqType (.succ .zero) nat (.lit (.natural 0)) (.lit (.natural 0))
+  let initial := psElabContextWithMeta (psElabContextEmpty environment) numeralDictionary.context
+  let pending : PsElabContext := { initial with
+    postponing := true
+    pending := [.core (psElabSaveScope initial) (.instanceGoal numeralDictionaryId)] }
+  let ordinary := psUnify environment psLocalEmpty numeralDictionary.context actual target
+  if ordinary.success then
+    throw (IO.userError "instance-recovery regression no longer reaches its intended blocker")
+  let recovered := psUnifyWithRecovery (psElabRecoverPendingProjection pending)
+    environment psLocalEmpty numeralDictionary.context actual target
+  let some evidence := psMetaFindAssignment recovered.context numeralDictionaryId |
+    throw (IO.userError "expected equality did not recover its ordinary numeral instance")
+  unless recovered.success && !recovered.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate recovered.context numeralType.expr) nat &&
+      psDefEqReadOnlyWithEnv environment recovered.context psLocalEmpty actual target do
+    throw (IO.userError "expected equality lost its newly learned numeral type")
+  -- A later unequal endpoint must discard the inferred type, universe,
+  -- synthesized dictionary and any search-created metavariables together.
+  let unequal := eqType (.succ .zero) nat (.lit (.natural 0)) (.lit (.natural 1))
+  let rolledBack := psUnifyWithRecovery (psElabRecoverPendingProjection pending)
+    environment psLocalEmpty numeralDictionary.context actual unequal
+  unless !rolledBack.success && !rolledBack.resourceExceeded &&
+      (psMetaFindAssignment rolledBack.context numeralTypeId).isNone &&
+      (psMetaFindAssignment rolledBack.context numeralDictionaryId).isNone &&
+      rolledBack.context.nextId == numeralDictionary.context.nextId &&
+      rolledBack.context.assignments.length == numeralDictionary.context.assignments.length &&
+      rolledBack.context.levels.assignments.length == numeralDictionary.context.levels.assignments.length &&
+      rolledBack.context.levels.nextId == numeralDictionary.context.levels.nextId do
+    throw (IO.userError "failed complete equality leaked recovered instance or universe assignments")
+  -- This opaque local was introduced after the queued goal. Its dictionary
+  -- cannot replace the evidence available in the goal's creation scope.
+  let late := psLocalPushBinding psLocalEmpty (psRootName "lateNumeral")
+    (psExprApplyMany (.constE (psRootName "OfNat") [.zero]) [nat, .lit (.natural 0)])
+    .instanceImplicit
+  let later := { pending with localContext := late.context }
+  let scoped := psUnifyWithRecovery (psElabRecoverPendingProjection later)
+    environment late.context numeralDictionary.context actual target
+  let some scopedEvidence := psMetaFindAssignment scoped.context numeralDictionaryId |
+    throw (IO.userError "projection recovery lost its saved instance scope")
+  unless scoped.success && !scoped.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate scoped.context scopedEvidence)
+        (psMetaInstantiate recovered.context evidence) &&
+      !(psExprFVarIds scopedEvidence).contains late.id do
+    throw (IO.userError "later caller instance overrode a queued instance's creation scope")
+  IO.println "PSCV0_NATIVE_EXPECTED_INSTANCE: PASS inferred input, complete rollback and saved scope"
   let parsed ← get "generalized fixture parse" (psCompilerParsePscv0 generalizedFixture)
   let elaborated ← get "generalized fixture elaboration"
     ((psElabProgram environment parsed).mapError psCompilerPscv0ElabError)

@@ -9,6 +9,7 @@ import Ps.Meta.Infer
 structure PsUnifyResult where
   context : PsMetaContext
   success : Bool
+  resourceExceeded : Bool := false
 
 def psUnifySuccess (context : PsMetaContext) : PsUnifyResult :=
   { context := context, success := true }
@@ -58,7 +59,7 @@ def psUnifyAssign
       | .error _ => psUnifyFailure context
       | .ok type =>
         let checked := unifyTypes context declaration.type type
-        if !checked.success then psUnifyFailure context else
+        if !checked.success then { checked with context } else
           match psMetaAssign checked.context id value with
           | none => psUnifyFailure context
           | some next => psUnifySuccess next
@@ -126,7 +127,7 @@ def psUnifyRigidApplication
     -- retry from the original snapshot and require it before committing.
     let args := arguments (psUnifySuccess context)
     if args.success then psUnifyLevelLists leftLevels args.context rightLevels else args
-  if result.success then some result else none
+  if result.success || result.resourceExceeded then some result else none
 
 -- Solve flexible heads before delta reduction. In particular ?A := Alias
 -- must retain the checked source identity: reducing Alias to Nat here would
@@ -146,9 +147,14 @@ def psUnifyFlexible
     | .mvar a, _ => some (assign a right)
     | _, .mvar b => some (assign b left)
     | _, _ => none
-  if result.success then some result else none
+  if result.success || result.resourceExceeded then some result else none
 
-def psUnifyWithFuelWorker (transparency : PsTransparency)
+-- Recovery is supplied by a higher layer to resolve a checked reduction blocker.
+-- The default public worker uses no recovery, so Meta does not depend on
+-- typeclass search or elaborator work queues.
+def psUnifyWithFuelRecoverWorker
+    (recover : Option (PsMetaContext → PsExpr → PsExpr → Option PsUnifyResult))
+    (transparency : PsTransparency)
     (fuel : Nat) :
     PsEnvironment ->
     PsLocalContext ->
@@ -170,209 +176,230 @@ def psUnifyWithFuelWorker (transparency : PsTransparency)
           (context : PsMetaContext)
           (left : PsExpr)
           (right : PsExpr) =>
-        -- Structural reflexivity is sufficient and must precede speculative
-        -- congruence, proof inference and normalization. No assignments arise.
-        let left := psMetaInstantiate context left
-        let right := psMetaInstantiate context right
-        if psExprAlphaEq left right then psUnifySuccess context else
-        let smaller :
-            PsEnvironment ->
-            PsLocalContext ->
-            PsMetaContext ->
-            PsExpr ->
-            PsExpr ->
-            PsUnifyResult :=
-          psUnifyWithFuelWorker transparency remaining;
-        let assign : Nat -> PsExpr -> PsUnifyResult :=
-          psUnifyAssign (smaller environment localContext) environment localContext context;
-        let flexible := psUnifyFlexible assign context
-          (psWhnfCore context localContext left) (psWhnfCore context localContext right)
-        match flexible.orElse (fun _ =>
-          psUnifyRigidApplication (smaller environment localContext)
-            context localContext left right) with
-        | some result => result
-        | none =>
-          let leftValue := psWhnfWithTransparency transparency environment context localContext left;
-          let rightValue := psWhnfWithTransparency transparency environment context localContext right;
-          if psExprAlphaEq leftValue rightValue then
-            psUnifySuccess context
-          else if psUnifyGroundProofIrrelevance transparency environment localContext context leftValue rightValue then
-            psUnifySuccess context
-          else
-            match leftValue with
-            | .mvar leftId =>
-                match rightValue with
-                | .mvar rightId =>
-                    if Nat.beq leftId rightId then
-                      psUnifySuccess context
-                    else if psMetaVarIsNatural context rightId then
-                      if psMetaVarIsNatural context leftId then
-                        if psMetaVarAssignable context leftId then
-                          assign leftId rightValue
+        let attempted : PsUnifyResult :=
+          -- Structural reflexivity is sufficient and must precede speculative
+          -- congruence, proof inference and normalization. No assignments arise.
+          let left := psMetaInstantiate context left
+          let right := psMetaInstantiate context right
+          if psExprAlphaEq left right then psUnifySuccess context else
+          let smaller :
+              PsEnvironment ->
+              PsLocalContext ->
+              PsMetaContext ->
+              PsExpr ->
+              PsExpr ->
+              PsUnifyResult :=
+            psUnifyWithFuelRecoverWorker recover transparency remaining;
+          let assign : Nat -> PsExpr -> PsUnifyResult :=
+            psUnifyAssign (smaller environment localContext) environment localContext context;
+          let flexible := psUnifyFlexible assign context
+            (psWhnfCore context localContext left) (psWhnfCore context localContext right)
+          match flexible.orElse (fun _ =>
+            psUnifyRigidApplication (smaller environment localContext)
+              context localContext left right) with
+          | some result => result
+          | none =>
+            let leftValue := psWhnfWithTransparency transparency environment context localContext left;
+            let rightValue := psWhnfWithTransparency transparency environment context localContext right;
+            if psExprAlphaEq leftValue rightValue then
+              psUnifySuccess context
+            else if psUnifyGroundProofIrrelevance transparency environment localContext context leftValue rightValue then
+              psUnifySuccess context
+            else
+              match leftValue with
+              | .mvar leftId =>
+                  match rightValue with
+                  | .mvar rightId =>
+                      if Nat.beq leftId rightId then
+                        psUnifySuccess context
+                      else if psMetaVarIsNatural context rightId then
+                        if psMetaVarIsNatural context leftId then
+                          if psMetaVarAssignable context leftId then
+                            assign leftId rightValue
+                          else
+                            assign rightId leftValue
                         else
                           assign rightId leftValue
+                      else if psMetaVarAssignable context leftId then
+                        assign leftId rightValue
                       else
                         assign rightId leftValue
-                    else if psMetaVarAssignable context leftId then
+                  | _ =>
                       assign leftId rightValue
-                    else
-                      assign rightId leftValue
-                | _ =>
-                    assign leftId rightValue
-            | .sortE leftLevel =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .sortE rightLevel =>
-                    let unified := psLevelUnify context.levels leftLevel rightLevel;
-                    if unified.success then
-                      psUnifySuccess (psMetaSetLevels context unified.context)
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .constE leftName leftLevels =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .constE rightName rightLevels =>
-                    if psNameEq leftName rightName then
-                      psUnifyLevelLists leftLevels context rightLevels
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .app leftFn leftArg =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .app rightFn rightArg =>
-                    let fnResult :=
-                      smaller
-                        environment
-                        localContext
-                        context
-                        leftFn
-                        rightFn;
-                    if fnResult.success then
-                      smaller
-                        environment
-                        localContext
-                        fnResult.context
-                        leftArg
-                        rightArg
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .lam leftName leftType leftBody _ =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .lam rightName rightType rightBody _ =>
-                    let typeResult :=
-                      smaller
-                        environment
-                        localContext
-                        context
-                        leftType
-                        rightType;
-                    if typeResult.success then
-                      let pushed :=
-                        psLocalPushBinding
-                          localContext
-                          rightName
-                          rightType
-                          PsBinderInfo.explicit;
-                      let fvar := PsExpr.fvar pushed.id;
-                      smaller
-                        environment
-                        pushed.context
-                        typeResult.context
-                        (psExprInstantiate1 leftBody fvar)
-                        (psExprInstantiate1 rightBody fvar)
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .forallE leftName leftType leftBody _ =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .forallE rightName rightType rightBody _ =>
-                    let typeResult :=
-                      smaller
-                        environment
-                        localContext
-                        context
-                        leftType
-                        rightType;
-                    if typeResult.success then
-                      let pushed :=
-                        psLocalPushBinding
-                          localContext
-                          rightName
-                          rightType
-                          PsBinderInfo.explicit;
-                      let fvar := PsExpr.fvar pushed.id;
-                      smaller
-                        environment
-                        pushed.context
-                        typeResult.context
-                        (psExprInstantiate1 leftBody fvar)
-                        (psExprInstantiate1 rightBody fvar)
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .letE _ _ _ _ =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | _ => psUnifyFailure context
-            | .lit leftLiteral =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .lit rightLiteral =>
-                    if psLiteralEq leftLiteral rightLiteral then
-                      psUnifySuccess context
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .fvar leftId =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .fvar rightId =>
-                    if Nat.beq leftId rightId then
-                      psUnifySuccess context
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .bvar leftIndex =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .bvar rightIndex =>
-                    if Nat.beq leftIndex rightIndex then
-                      psUnifySuccess context
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
-            | .proj leftType leftIndex leftProjValue =>
-                match rightValue with
-                | .mvar id =>
-                    assign id leftValue
-                | .proj rightType rightIndex rightProjValue =>
-                    if psNameEq leftType rightType then
-                      if Nat.beq leftIndex rightIndex then
+              | .sortE leftLevel =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .sortE rightLevel =>
+                      let unified := psLevelUnify context.levels leftLevel rightLevel;
+                      if unified.success then
+                        psUnifySuccess (psMetaSetLevels context unified.context)
+                      else
+                        psUnifyFailure context
+                  | _ => psUnifyFailure context
+              | .constE leftName leftLevels =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .constE rightName rightLevels =>
+                      if psNameEq leftName rightName then
+                        psUnifyLevelLists leftLevels context rightLevels
+                      else
+                        psUnifyFailure context
+                  | _ => psUnifyFailure context
+              | .app leftFn leftArg =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .app rightFn rightArg =>
+                      let fnResult :=
                         smaller
                           environment
                           localContext
                           context
-                          leftProjValue
-                          rightProjValue
+                          leftFn
+                          rightFn;
+                      if fnResult.success then
+                        smaller
+                          environment
+                          localContext
+                          fnResult.context
+                          leftArg
+                          rightArg
+                      else
+                        { fnResult with context }
+                  | _ => psUnifyFailure context
+              | .lam leftName leftType leftBody _ =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .lam rightName rightType rightBody _ =>
+                      let typeResult :=
+                        smaller
+                          environment
+                          localContext
+                          context
+                          leftType
+                          rightType;
+                      if typeResult.success then
+                        let pushed :=
+                          psLocalPushBinding
+                            localContext
+                            rightName
+                            rightType
+                            PsBinderInfo.explicit;
+                        let fvar := PsExpr.fvar pushed.id;
+                        smaller
+                          environment
+                          pushed.context
+                          typeResult.context
+                          (psExprInstantiate1 leftBody fvar)
+                          (psExprInstantiate1 rightBody fvar)
+                      else
+                        { typeResult with context }
+                  | _ => psUnifyFailure context
+              | .forallE leftName leftType leftBody _ =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .forallE rightName rightType rightBody _ =>
+                      let typeResult :=
+                        smaller
+                          environment
+                          localContext
+                          context
+                          leftType
+                          rightType;
+                      if typeResult.success then
+                        let pushed :=
+                          psLocalPushBinding
+                            localContext
+                            rightName
+                            rightType
+                            PsBinderInfo.explicit;
+                        let fvar := PsExpr.fvar pushed.id;
+                        smaller
+                          environment
+                          pushed.context
+                          typeResult.context
+                          (psExprInstantiate1 leftBody fvar)
+                          (psExprInstantiate1 rightBody fvar)
+                      else
+                        { typeResult with context }
+                  | _ => psUnifyFailure context
+              | .letE _ _ _ _ =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | _ => psUnifyFailure context
+              | .lit leftLiteral =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .lit rightLiteral =>
+                      if psLiteralEq leftLiteral rightLiteral then
+                        psUnifySuccess context
                       else
                         psUnifyFailure context
-                    else
-                      psUnifyFailure context
-                | _ => psUnifyFailure context
+                  | _ => psUnifyFailure context
+              | .fvar leftId =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .fvar rightId =>
+                      if Nat.beq leftId rightId then
+                        psUnifySuccess context
+                      else
+                        psUnifyFailure context
+                  | _ => psUnifyFailure context
+              | .bvar leftIndex =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .bvar rightIndex =>
+                      if Nat.beq leftIndex rightIndex then
+                        psUnifySuccess context
+                      else
+                        psUnifyFailure context
+                  | _ => psUnifyFailure context
+              | .proj leftType leftIndex leftProjValue =>
+                  match rightValue with
+                  | .mvar id =>
+                      assign id leftValue
+                  | .proj rightType rightIndex rightProjValue =>
+                      if psNameEq leftType rightType then
+                        if Nat.beq leftIndex rightIndex then
+                          smaller
+                            environment
+                            localContext
+                            context
+                            leftProjValue
+                            rightProjValue
+                        else
+                          psUnifyFailure context
+                      else
+                        psUnifyFailure context
+                  | _ => psUnifyFailure context
+        if attempted.success || attempted.resourceExceeded then attempted else
+          match recover with
+          | none => attempted
+          | some recover =>
+            -- Retry from the subcomparison's original snapshot, never from an
+            -- unsuccessful congruence branch's speculative assignments.
+            match recover context
+                (psWhnfWithTransparency transparency environment context localContext left)
+                (psWhnfWithTransparency transparency environment context localContext right) with
+            | none => attempted
+            | some recovered =>
+              if recovered.resourceExceeded then { recovered with context } else
+              if !recovered.success then attempted else
+                let retried := psUnifyWithFuelRecoverWorker (some recover) transparency remaining
+                  environment localContext recovered.context left right
+                if retried.success then retried else { retried with context }
+
+def psUnifyWithFuelWorker (transparency : PsTransparency) (fuel : Nat) :
+    PsEnvironment → PsLocalContext → PsMetaContext → PsExpr → PsExpr → PsUnifyResult :=
+  psUnifyWithFuelRecoverWorker none transparency fuel
 
 def psUnifyWithFuel
     (environment : PsEnvironment)
@@ -397,7 +424,7 @@ def psUnify
     (right : PsExpr) : PsUnifyResult :=
   let result :=
     psUnifyWithFuel environment localContext context 512 left right;
-  if result.success then result else psUnifyFailure context
+  if result.success then result else { result with context }
 
 -- Search restricts delta reduction without changing kernel conversion.
 -- Roll back the entire attempt on failure, including universes.
@@ -405,4 +432,14 @@ def psUnifyWithTransparency (transparency : PsTransparency)
     (environment : PsEnvironment) (locals : PsLocalContext)
     (context : PsMetaContext) (left right : PsExpr) : PsUnifyResult :=
   let result := psUnifyWithFuelWorker transparency 512 environment locals context left right
-  if result.success then result else psUnifyFailure context
+  if result.success then result else { result with context }
+
+-- Only a complete equality commits recovery work. All term and universe
+-- assignments, including checked instance evidence, roll back on failure.
+def psUnifyWithRecovery
+    (recover : PsMetaContext → PsExpr → PsExpr → Option PsUnifyResult)
+    (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (left right : PsExpr) : PsUnifyResult :=
+  let result := psUnifyWithFuelRecoverWorker (some recover) .all 512
+    environment locals context left right
+  if result.success then result else { result with context }

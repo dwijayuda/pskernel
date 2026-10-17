@@ -120,8 +120,10 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
     | some result =>
       let context ← psElabProgressInstancePending current.context
       let current := { current with context }
-      let solved := psSyntheticSolve current.context.environment current.context.instances
-        current.context.metaContext [.expectedType current.context.localContext result target] false
+      let solved := psUnifyWithRecovery (psElabRecoverPendingProjection current.context)
+        current.context.environment current.context.localContext
+        current.context.metaContext result target
+      if solved.resourceExceeded then throw .fuelExhausted
       return psElabResultWithMeta current solved.context current.type
 
 -- Drain scoped constraints before a dependent argument. Individually checked
@@ -181,27 +183,12 @@ def psElabApplyOrderedWith {α : Type}
         | none, [] => pure (none, [], names)
       match selected.1 with
       | some source =>
-        let beforePropagation := current
-        let current ← (psElabPropagateExpected current positions names expected).mapError
-          (psElabDiagnosticError (fun _ =>
-            "application propagate; binder=" ++ psNameToString name ++
-              "; domain=" ++ psElabDiagnosticExpression beforePropagation.context domain ++
-              "; expected=" ++ psElabDiagnosticExpected beforePropagation.context expected ++
-              "; before=[" ++ psElabDiagnosticResult beforePropagation ++ "]"))
-        let afterPropagation := current
+        let current ← psElabPropagateExpected current positions names expected
         let resolved := psElabResolveSynthetic current pending
         let current := resolved.result
         let pending := resolved.constraintsRev
-        let argument ← (elaborate current.context source
-          (some (psMetaInstantiate current.context.metaContext domain))).mapError
-          (psElabDiagnosticError (fun _ =>
-            "application argument; binder=" ++ psNameToString name ++
-              "; domain=" ++ psElabDiagnosticExpression current.context domain ++
-              "; expected=" ++ psElabDiagnosticExpected current.context expected ++
-              "; before-propagation=[" ++ psElabDiagnosticResult beforePropagation ++
-              "]; after-propagation=[" ++ psElabDiagnosticResult afterPropagation ++
-              "]; after-synthetics=[" ++ psElabDiagnosticResult current ++
-              "]; carried-constraints=" ++ psElabDiagnosticConstraints current.context pending))
+        let argument ← elaborate current.context source
+          (some (psMetaInstantiate current.context.metaContext domain))
         psElabApplyOrderedWith elaborate fuel (psElabApplyValue current argument body)
           selected.2.1 selected.2.2 pending complete expected
       | none =>
@@ -279,21 +266,8 @@ def psElabFinishApplication (application : PsElabApplicationResult)
     -- A failed attempt is speculative; adaptation is retried after the queue.
     let current := (psElabUnifyExpected application.result expected).toOption.getD
       application.result
-    let afterUnify := current
-    let current ← (psElabSolveSynthetic current application.constraintsRev.reverse).mapError
-      (psElabDiagnosticError (fun _ =>
-        "application finish-synthetics; expected=" ++
-          psElabDiagnosticExpected afterUnify.context expected ++
-          "; before-unify=[" ++ psElabDiagnosticResult application.result ++
-          "]; after-unify=[" ++ psElabDiagnosticResult afterUnify ++
-          "]; carried-constraints=" ++
-          psElabDiagnosticConstraints afterUnify.context application.constraintsRev.reverse))
-    (psElabFinalizeExpected current expected).mapError
-      (psElabDiagnosticError (fun _ =>
-        "application finalize; expected=" ++ psElabDiagnosticExpected current.context expected ++
-          "; before-unify=[" ++ psElabDiagnosticResult application.result ++
-          "]; after-unify=[" ++ psElabDiagnosticResult afterUnify ++
-          "]; after-synthetics=[" ++ psElabDiagnosticResult current ++ "]"))
+    let current ← psElabSolveSynthetic current application.constraintsRev.reverse
+    psElabFinalizeExpected current expected
 
 -- APP-03 is an elaboration request, distinct from a written Unit argument.
 -- Only a callable head may be completed. An unresolved domain is never guessed

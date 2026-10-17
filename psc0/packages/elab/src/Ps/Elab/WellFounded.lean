@@ -67,53 +67,6 @@ def psElabWellFoundedExprSketch (fuel : Nat) (expression : PsExpr) : String :=
     | .proj name index value =>
       "(proj " ++ psNameToString name ++ "." ++ psNatToString index ++ " " ++ child value ++ ")"
 
--- Failure-only proof diagnostics retain the existing elaborator callback and
--- its inputs. Source sketches are bounded and never print literal string data.
-def psElabWellFoundedSourceSketch (fuel : Nat) (source : PsSyntaxTerm) : String :=
-  match fuel with
-  | 0 => "..."
-  | fuel + 1 =>
-    let child := psElabWellFoundedSourceSketch fuel
-    match source with
-    | .reference name => String.intercalate "." name.segments
-    | .natural value _ => value
-    | .hole _ => "_"
-    | .bool value _ => if value then "true" else "false"
-    | .call function arguments _ =>
-      child function ++ "(" ++ String.intercalate ", " ((arguments.take 8).map fun argument =>
-        (match argument.fst with
-          | none => ""
-          | some name => String.intercalate "." name.segments ++ " := ") ++
-          child argument.snd) ++ (if arguments.length > 8 then ", ..." else "") ++ ")"
-    | .app function arguments _ =>
-      "(" ++ child function ++ " " ++
-        String.intercalate " " ((arguments.take 8).map child) ++
-        (if arguments.length > 8 then " ..." else "") ++ ")"
-    | .operatorE _ _ spelling arguments _ =>
-      spelling ++ "(" ++ String.intercalate ", " ((arguments.take 8).map child) ++
-        (if arguments.length > 8 then ", ..." else "") ++ ")"
-    | .ascription value type _ => "(" ++ child value ++ " : " ++ child type ++ ")"
-    | .string _ _ => "<string>"
-    | .character _ _ => "<character>"
-    | _ => "<term>"
-
--- The same bounded captured-context view is used for the attempted proof and
--- for every saved goal, including failures after term elaboration succeeds.
-def psElabWellFoundedLocalsSketch (metaContext : PsMetaContext)
-    (localContext : PsLocalContext) : String :=
-  let locals := (localContext.declarations.take 40).map fun declaration =>
-    let value := match declaration with
-      | .binding _ _ _ _ => ""
-      | .letDecl _ _ _ value => " := " ++ psElabWellFoundedExprSketch 12
-          (psMetaInstantiate metaContext value)
-    psNameToString (psLocalDeclUserName declaration) ++ "@f#" ++
-      psNatToString (psLocalDeclId declaration) ++ " : " ++
-      psElabWellFoundedExprSketch 12
-        (psMetaInstantiate metaContext (psLocalDeclType declaration)) ++ value
-  "newest-first(" ++ psNatToString localContext.declarations.length ++
-    ")=[" ++ String.intercalate "; " locals ++
-    (if localContext.declarations.length > 40 then "; ..." else "") ++ "]"
-
 def psElabWellFoundedAt {α : Type} (label : String)
     (result : Except PsElabError α) : Except PsElabError α :=
   result.mapError (fun error => .atContext ("well-founded " ++ label) error)
@@ -248,46 +201,7 @@ def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
     goals }
   let solved ← match decreasing with
     | none => psElabWellFoundedDefaultGoals state
-    | some (.byE tactics scope _) => do
-      let diagnosticElaborate : PsElaborator := fun current source expected =>
-        match elaborate current source expected with
-        | .ok value => .ok value
-        | .error error =>
-          let span := psSyntaxTermSpan source
-          let expectedSketch := match expected with
-            | none => "<none>"
-            | some target => psElabWellFoundedExprSketch 16
-                (psMetaInstantiate current.metaContext target)
-          let expectedWhnf := match expected with
-            | none => "<none>"
-            | some target => psElabWellFoundedExprSketch 16
-                (psWhnf current.environment current.metaContext current.localContext target)
-          .error (.atContext
-            ("well-founded decreasing_by callback; proof-span=" ++
-              psNatToString span.start.byteOffset ++ ".." ++ psNatToString span.stop.byteOffset ++
-              "; proof=" ++ psElabWellFoundedSourceSketch 10 source ++
-              "; expected=" ++ expectedSketch ++ "; expected-whnf=" ++ expectedWhnf ++
-              "; locals=" ++ psElabWellFoundedLocalsSketch
-                current.metaContext current.localContext) error)
-      match psProofRun diagnosticElaborate scope 4096 state tactics with
-      | .ok solved => pure solved
-      | .error error =>
-        let initialGoals := calls.map fun (id, span) =>
-          let target := match psMetaFindDecl context.metaContext id with
-            | none => "<missing>"
-            | some declaration =>
-              psElabWellFoundedExprSketch 16
-                (psMetaInstantiate context.metaContext declaration.type) ++
-                "; whnf=" ++ psElabWellFoundedExprSketch 16
-                  (psWhnf context.environment context.metaContext
-                    declaration.localContext declaration.type) ++
-                "; locals=" ++ psElabWellFoundedLocalsSketch
-                  context.metaContext declaration.localContext
-          "?m" ++ psNatToString id ++ "@" ++ psNatToString span.start.byteOffset ++
-            ".." ++ psNatToString span.stop.byteOffset ++ " : " ++ target
-        throw (.atContext
-          ("well-founded decreasing_by initial goals in source order=[" ++
-            String.intercalate " | " initialGoals ++ "]") error)
+    | some (.byE tactics scope _) => psProofRun elaborate scope 4096 state tactics
     | some _ =>
       throw (.data "PSCV0-WF-PROOF: decreasing_by requires the selected by { tactic sequence } body")
   let solved ← psProofNormalize solved

@@ -1,221 +1,111 @@
-## Authoritative current checkpoint — M3+B independent WF proof diagnosis, 2026-10-17
+## Authoritative current checkpoint — transactional WF instance recovery candidate, 2026-10-17
 
-The next bounded M3+B slice extends the existing checked PSigma route to
-exactly two changing header arguments whose types may be independent.
-Independent implementation and fixture review are complete. **This candidate
-is not yet qualified.** The accepted compiler/test baseline remains
-`60586b7e12aee97954d27e698666a8a2531a0db4`, with its documentation at
-`3e79dab87afe9b0b204307dec4590b2d33600352` and **78/100** weighted
-engineering estimate. M3+B remains open; this is not measured language coverage.
+This compiler/test candidate repairs expected-result inference for the existing
+independent two-changing-argument well-founded recursion slice. It is based on
+exact branch parent `cb0b1e85c51c53a4af4f5da1c6ef68213fbb9b1e`.
+The containing commit is **not accepted until all five gates finish successfully
+at its exact SHA**. Verify the live branch before writing.
 
-The [accepted dependent-WF/indexed-default receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md)
-retains the complete previous acceptance: five successful same-SHA gates,
-checked equations and assumption closure, 68 scalar exports / 680 comparisons
-plus the separate 24-export / 240-comparison recursive suite, totaling 920.
-The earlier application-instance scheduling repair and canonical Rust harness
-path repair are retained without modification.
+The last accepted compiler/test SHA remains
+`60586b7e12aee97954d27e698666a8a2531a0db4`, with its
+[complete receipt](PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md),
+**78/100** weighted engineering progress and **920 observed focused comparisons**.
+The planned independent-WF total of 940 is not yet accepted. No extra whole
+engineering point is assigned to this extension of already-credited pair packing.
 
-### Failed first matrix and faithful WF diagnostic
+### Actual diagnostic evidence
 
-The complete first matrix at
-`fa68104af911aedc7b80bc56906da24bd6a9def9` is **not accepted**:
+The latest inspected diagnostic was `cb0b1e85c51c53a4af4f5da1c6ef68213fbb9b1e`.
+All five runs completed before this candidate's branch update:
 
 | Gate | Run / job | Completed result |
 | --- | --- | --- |
-| Native Linux | [39026724076](https://github.com/dwijayuda/pskernel/actions/runs/39026724076) / 117379051447 | SUCCESS; 34 steps; completed 11:12:46 UTC |
-| Focused M3 | [39026724062](https://github.com/dwijayuda/pskernel/actions/runs/39026724062) / 117379051332 | FAILURE in new portable independentRight decrease proof |
-| F1 | [39026724139](https://github.com/dwijayuda/pskernel/actions/runs/39026724139) / 117379051863 | SUCCESS; 10 steps |
-| F2 | [39026724118](https://github.com/dwijayuda/pskernel/actions/runs/39026724118) / 117379051676 | SUCCESS; 9 steps |
-| F3/F4/platform | [39026724073](https://github.com/dwijayuda/pskernel/actions/runs/39026724073) / 117379051731 | SUCCESS; 11 steps |
+| Native Linux | [39029656053](https://github.com/dwijayuda/pskernel/actions/runs/39029656053) / 117387388655 | FAILURE at source/Standard negative-test classification; build and preceding checks passed |
+| Focused M3 | [39029655972](https://github.com/dwijayuda/pskernel/actions/runs/39029655972) / 117387388319 | FAILURE after all 668 build jobs; independentRight first decrease proof |
+| F1 | [39029655990](https://github.com/dwijayuda/pskernel/actions/runs/39029655990) | SUCCESS |
+| F2 | [39029655988](https://github.com/dwijayuda/pskernel/actions/runs/39029655988) | SUCCESS |
+| F3/F4/platform | [39029655976](https://github.com/dwijayuda/pskernel/actions/runs/39029655976) | SUCCESS |
 
-The focused native build completed all 668 jobs. Both new native definitions
-have empty assumption closures; their three native public equations use only
-Quot.sound. The portable independentLeft definition and its equation
-elaborated before original command 30, m3wfindependentRight, failed with
-PSCV0-TYPE-MISMATCH at the well-founded decrease-goals phase.
-All thirteen other outer source fixtures ran. Runtime steps were skipped;
-there are no new runtime comparisons from this failed matrix.
+The focused log has 184,035 characters. Artifact 12100081247 is 2,033,537 bytes,
+SHA-256 `773d890faffa55455e6d338fe56fc73f412567d7085d150465d5e4976a403a9e`.
+The native log has 1,325,015 characters. Artifact 12099657760 is 3,701,108 bytes,
+SHA-256 `1f12881cf1565b7dbfaf24b3b9227b122e9d1aec500f3e98b394f4e8b274ed4f`.
+These are failed diagnostic artifacts; skipped runtime steps earn no comparisons.
 
-The completed focused log is 114,057 characters. Artifact 12098459717 is
-2,030,302 bytes, SHA-256
-`d916ca54ecc552435ab77050e927995b045445dba05c0d1999affabc3a10b5e5`.
-The completed native log is 4,477,827 characters. Artifact 12098513651 is
-6,797,413 bytes, SHA-256
-`0857f7b415a7373cb6199c685450f93a55ffbe538dec5c73859a01fec03d6aee`.
-The healthy native run completed before advancing the branch.
+The actual first proof at construction bytes 6588..6626 remains
+`Prod.Lex.right(0, Nat.lt_succ_self(k))`. The failed retained term has
+`Nat.le` for its second relation and `Nat.succ k` for both right coordinates.
+The first relation is still unassigned. Its numeral dictionary is solved only
+by the final drain, when the incorrectly inferred proof term is already retained.
+The captured decrease goal has the correct lower/upper pairs and source order.
 
-Independent static reviews found no demonstrated match/refinement or proof
-ordering defect. Do not reorder the three original proofs or rewrite the
-function to evade this case. The WF owner includes a failure-context
-diagnostic: WF blob `5033f4a5647c4fc23174c058e5a0288fb5a272e4`,
-50,092 bytes. Its exact two-stage transform was independently reviewed
-and reverses to the original candidate owner.
+The diagnostic wrapper also changed the old operator-default-interference
+refusal's reported classification to generic `PSCV0-ELABORATION`, failing an
+existing native negative. The underlying `OfNat Bag 2` refusal remains correct.
+Remove the wrappers; preserve the original expected phase and rule.
 
-The wrapper calls the existing elaborate callback once with its original
-context, syntax and expected target. It forwards success unchanged and
-retains the original error. Only on error does it sketch proof syntax/span,
-instantiated/weak-head target and captured locals. Any proof-run error also
-includes initial saved goals in source order with each goal's own local
-context. These observations show callback inputs, not an internally evolved
-argument-failure context; they perform no proof replay, synthesis or drain.
-Source/native definitions, three proof inputs, fixture blob cf91f5d5 and
-workflow blob 0e5c8c5c are unchanged. All five gates must run again at the
-next final compiler/test SHA; diagnostic evidence is not acceptance.
+### Correct owner and candidate behavior
 
-The actual construction source is 7,239 UTF-8 bytes. Its three proof calls
-have byte spans 6588..6626, 6638..6681 and 6693..6735, respectively.
-The main runtime source is a different concatenation, with those positions
-652 bytes later. Use the actual construction map to read its failure trace.
+Source review identifies a circular dependency: eligible result comparison
+learns the numeral's type from earlier arguments of the expected `Prod.Lex`
+application, then blocks while reducing its unresolved `OfNat` field.
+Ordinary instance progress before this comparison cannot use assignments learned
+inside it. Rolling the whole failed comparison back loses those assignments,
+and subsequent proof elaboration can infer `Nat.le` from `Nat.lt_succ_self`.
+The actual trace establishes that downstream result; new direct tests and the
+unchanged WF workload must establish that this repair closes the cause.
 
-### Callback evidence and current application diagnosis
+Pinned Lean 4.35.0's
+[ExprDefEq.unstuckMVar](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Meta/ExprDefEq.lean),
+[SynthInstance.synthPendingImp](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Meta/SynthInstance.lean)
+and [App.propagateExpectedType](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/App.lean)
+provide the comparison model.
 
-The second compiler/test revision,
-`b27407a3905883e5f4b3aac8a67cc8b6b5e71e02`, also remains unqualified.
-Focused [run 39028057176](https://github.com/dwijayuda/pskernel/actions/runs/39028057176),
-job 117382849922, completed with failure at 11:21:53 UTC. F1
-[39028057167](https://github.com/dwijayuda/pskernel/actions/runs/39028057167),
-F2 [39028057166](https://github.com/dwijayuda/pskernel/actions/runs/39028057166),
-and F3/F4/platform
-[39028057173](https://github.com/dwijayuda/pskernel/actions/runs/39028057173)
-all completed successfully. Native [run 39028057191](https://github.com/dwijayuda/pskernel/actions/runs/39028057191), job 117382850031, completed all 34 steps successfully at 11:34:13 UTC. The full healthy native run finished before the next branch update.
+The Meta unifier gains an opt-in recovery callback at a blocked recursive
+comparison; all existing entry points retain an inert callback. Eligible
+application-result propagation supplies the existing postponed-work owner's
+recovery. It follows only a projection's reduction dependency to an actual
+queued ordinary instance, uses the queue's captured environment/registry and
+the metavariable's creation locals, checks the synthesized assignment, and
+retries the same equality with decreasing fuel. It does not default types,
+run source/proof continuations, or treat equality of a prefix as success.
+Failure restores the whole comparison's meta/universe snapshot; resource
+failure remains explicit. Solved queued items are removed by the ordinary
+queue later, preserving its scope and order.
 
-The actual failed callback is the first original proof, byte span
-6588..6626: `Prod.Lex.right(0, Nat.lt_succ_self(k))`.
-Its first saved decrease goal is ?m39 at recursive-call span 6328..6366.
-The captured lower pair has first field f34, a let-bound source Nat zero,
-and second field f36, a let-bound alias of the branch's k. Its upper pair
-is `PSigma.mk Nat.zero (Nat.succ k)`. The latest refined callback and k
-are correct. The three saved goals retain source order at spans
-6328..6366, 6415..6456 and 6468..6510. This is evidence against a
-branch-refinement or goal-order repair; it does not expose the internal
-argument-elaboration state.
+Direct native regressions cover a type learned before numeral-field reduction,
+rollback after recovery followed by a genuinely unequal endpoint, and a later
+caller instance that must not override the pending goal's saved scope.
+The original source functions, three decrease proofs, native oracles, 19 WF
+refusal controls and all existing runtime assertions are unchanged.
+Temporary Application/Postponed/WF diagnostics are removed.
 
-The 167,493-character completed focused log and artifact 12098539447
-(2,031,953 bytes; SHA-256
-`c1b063d1b7f1da33e789ee637941d5e4b33763e2898c2dce646777f97851cd36`)
-preserve the full trace. All 38 native WF assumption markers remain within
-the allowed closure. Runtime steps were skipped and this diagnostic
-revision adds no runtime comparisons.
+### Immediate qualification and continuation
 
-Independent reviews identify a specific, still-unproven inference
-hypothesis: an initially unknown numeral type and its ordinary OfNat
-instance may remain unresolved while expected-result comparison projects
-a PSigma coordinate. A later postponed expected-term check may preserve
-the consequence. No production scheduling or reduction change follows
-from that hypothesis alone.
+Inspect Native Linux, focused M3, F1, F2 and F3/F4/platform at the containing
+compiler/test commit. Fix actual failures without weakening source semantics
+or phase-specific controls. Require actual 16-export WF execution and all other
+focused suites, public equations, native assumption closures, exact typed
+adapters and complete artifacts before accepting 940 comparisons.
+Do not cancel healthy runs or advance the compiler while native qualification
+is still healthy and running. Then record a complete independent-WF receipt.
 
-The current temporary Application/Postponed diagnostic observes only the
-actual error path. Application blob
-`26b2f7ac904ccc85f425459ea130d17e42e22053` (19,067 bytes) records
-before/after expected-result propagation, argument domain, carried
-synthetics and finalization inputs when the existing call errors.
-Postponed blob `f2aa778c79ffa5474ce78fcd9829a8b89ca1ca3b`
-(16,788 bytes) also annotates the queue owner's existing final blocked-work
-diagnostic call with its retained term/type/target, saved local scope and
-remaining queue. That call is not replayed or duplicated.
+After this slice, the next prepared bounded P0 work is generic mutual ordinary
+runtime at both Nat and Bool with distinct seed/default behavior. Its existing
+generic fixture is source-only; a new five-lane execution case must earn its
+own evidence. Own-binder dependent inferred codomains, broader indexed binary
+deriving, nested/source induction, larger changing packs, arbitrary WF
+telescopes and general mutual WF remain open.
 
-Only retryable errors receive a lazy reserved-prefix wrapper; the
-postponement classifier transparently unwraps exactly that new prefix.
-Nonretryable errors retain their original constructors, preserving
-structural-recursion fallbacks, nonexhaustive-match handling and resource
-errors. Description strings are never evaluated for successful calls or
-nonretryable failures. Expression depth is bounded at 12, meta sketches
-at 8, displayed metas/locals at 24 and pending constraints at 12, with
-counts/truncation explicit and string data masked. The code performs no
-extra synthesis, assignment, defaulting or proof replay; successful
-results and the underlying failed computation are preserved. Six exact
-transforms reverse to the fetched b274 owners. These observations retain
-boundary inputs, not a speculative partially failed inference state.
-
-The original functions, three decrease proofs, 19 refusal controls and
-five runtime lanes are unchanged. Remove temporary diagnostic code once
-the actual failure is understood, then require all five gates at the
-final production SHA.
-
-### Bounded implementation
-
-Three occurrence restrictions are removed in the recursion parameter planner,
-WF source constructor and typed erasure entry. The same real PSigma
-construction represents a constant second family. No Meta construction,
-proof rule, backend lowering or allowed assumption changes.
-
-The selected route still requires exactly two distinct changing header IDs
-in source order after dependency closure. A third changing slot is refused by this pair-packing route.
-The second actual binding, full packed domain, fixed captures, fixed measure
-codomain, relation dictionary, final fixed-argument revalidation, relation,
-motive and functional closure remain checked. Public equations retain actual
-fix_eq, PSigma elimination and checked extensional transport.
-
-The erasure entry still recognizes exactly one PSigma layer and its actual
-PSigma.mk term, with the original IDs and order. The typed curried callback
-adapter, full before/after body type checks, raw-callback rejection, public
-curried argument positions and ordinary proof Unit slots are preserved.
-Measures that select only one independent changing argument retain the
-existing unary-domain/state route.
-
-Pinned Lean 4.35.0 [ArgsPacker.Unary.packType](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Meta/ArgsPacker.lean)
-constructs PSigma families without an occurrence requirement. Its
-[WF relation owner](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/WF/Rel.lean)
-retains the fixed-codomain condition and actual dictionary/inverse image.
-The existing checked PSC0 Meta pair constructor is unchanged.
-
-### Qualification obligations
-
-Two added native/source functions exercise left-coordinate decrease and a
-combination of right-coordinate countdown with left-coordinate reset.
-Interleaved fixed parameters, erased family/proof captures, real public
-equations and exact erasure metadata are checked. The independent Nat/Nat
-entry controls first prove swapped, duplicated and foreign same-typed fields
-well typed, then require the preserved entry identity/order checks to reject them.
-The existing dependent Fin cases and all fourteen prior WF exports remain.
-
-The additive n + acc nondecrease source is unchanged and now requires
-PSCV0-WF-DECREASE after the newly supported packing owner. The obsolete
-tuple-packing refusal becomes the genuinely nondecreasing measure
-Prod.mk(n + acc, 0) with the existing call bad(k, acc + 1), likewise requiring
-PSCV0-WF-DECREASE. These remain elaboration-phase refusals; arbitrary failure
-is not accepted. The WF batch retains 21 requests, two positive and nineteen
-required refusals.
-
-The focused workflow adds two Bool-to-UInt64 exports to each of its four
-runner invocations, covering five execution lanes. If all assertions pass,
-WF exports increase from 14 to 16, scalar comparisons from 680 to 700, and
-combined focused comparisons from 920 to 940. These numbers are planned
-assertions, not observed results. The original fourteen outer fixtures and
-the independent recursive deriving suite remain required.
-
-Run Native Linux, focused M3, F1 canonical model, F2 operations and
-F3/F4/platform on the same final compiler/test SHA. Inspect completed
-native/focused logs, actual assertion markers, all required refusals,
-assumption closures and artifact digests before recording acceptance.
-Do not cancel a healthy native run or push another compiler revision while
-it is running. Keep the accepted score at 78. Independent review assigns no additional
-whole point to this extension of already-credited PSigma machinery. Record the result in
-`psc0/docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md`, both
-handoffs, architecture, roadmap, migration matrix and the original draft PR.
-
-### Remaining scope and authority
-
-Broader indexed binary deriving, arbitrary positive containers and
-function-valued nested fields, source induction/nested elimination,
-own-binder dependent omitted main codomains, broader unused-hint diagnostics,
-packing more than two changing arguments, arbitrary WF telescopes, general
-mutual WF and the complete P0 combination matrix remain open. Variable
-measure codomains remain refused consistently with pinned Lean. Own-binder result inference and the generic P0 runtime matrix have
-concrete follow-up proposals but are deliberately outside this WF batch.
-
-Only propext and Quot.sound are approved assumptions. P1 remains blocked
-by the audited Classical.choice dependency in Lean.Order and the selected
-native Unit/Option fixed points. Ordinary runtime observations do not
-establish verified artifact correspondence. M3+B, M4 and M5 remain open.
-
-The sole language authority remains `psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`,
-blob `694115223777599ba28ee175e14bb642b7b6aa4b`. Pinned Lean is 4.35.0
-at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
-GitHub is canonical; compiler/build/test execution stays on connected cloud
-Linux with no local clone, filesystem, shell or Lean/Lake execution.
-PR #109 remains draft/open/unmerged on
-`psc0/pscv0-v7-m1-parser-ownership-v1`.
+M3+B, M4 and M5 remain open. Only `propext` and `Quot.sound` are approved.
+P1 remains blocked by the audited `Classical.choice` dependency; variable
+measure codomains retain the pinned-Lean refusal. Ordinary observations do
+not prove verified backend correspondence. The sole language authority is
+`psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`, blob
+`694115223777599ba28ee175e14bb642b7b6aa4b`; Lean is 4.35.0,
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Use connected GitHub and cloud
+Linux with expected-HEAD, non-force updates. PR #109 remains draft/open/unmerged
+on its original base.
 
 ## Historical checkpoints — superseded by the checkpoint above
 

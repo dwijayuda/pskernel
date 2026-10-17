@@ -79,6 +79,19 @@ that trace establishes it. No additional acceptance or progress credit
 is assigned. Temporary diagnostics must be removed before final production
 qualification, followed by all five completed same-SHA gates.
 
+### Transactional instance-recovery candidate
+
+The completed `cb0b1e85` diagnostic matrix passed F1/F2/F3 and failed focused
+WF plus an existing native negative's error classification. The actual retained
+independentRight proof inferred Nat.le and equal successor endpoints before
+the final expected-term check. The new candidate introduces an opt-in blocked
+projection/ordinary-instance recovery inside the existing complete equality
+transaction, with checked assignment, saved scopes, full rollback and explicit
+resource failure. Application/Postponed/WF temporary wrappers are removed;
+original proof order and negative phase expectations remain. Direct native
+regressions and all five same-SHA gates must pass before acceptance.
+The accepted compiler remains `60586b7e`, 78/100 and 920 comparisons.
+
 ## Rule-to-change and implementation matrix
 
 Status baseline below: source inspected at `867d76f992293977ab54e3c7fcb4c87a088e2462`; qualified runtime compiler `133af061d6aaff0eb6ed990abd341ca2a44d15e9`. **Specified** means normative design. **Pending** is not a successful source or artifact admission. Each implementation slice must add its exact tested/qualified commit and phase evidence.

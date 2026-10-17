@@ -1,3 +1,15 @@
+## Latest compiler build follow-up
+
+The candidate `e9b2075e9898ffd2e7561e6f4faafae95ff96cfa` failed all five
+cloud gates during compilation. [Native 38997375085](https://github.com/dwijayuda/pskernel/actions/runs/38997375085)
+and [focused 38997375006](https://github.com/dwijayuda/pskernel/actions/runs/38997375006)
+report one error in DerivingInhabited: an immutable `value` shadows its mutable
+accumulator. This follow-up names that accumulator `constructorValue`; the
+algorithm, requests, assertions, native oracles and runtime exports are unchanged.
+The indexed/default fixtures and initialized metadata audit have not yet run at
+this candidate. A fresh complete matrix is required. The accepted compiler/test
+SHA remains `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, **74/100**.
+
 ## Current M3+B candidate — indexed defaults, empty dictionaries and metadata audit repair
 
 Latest fully accepted compiler/test remains

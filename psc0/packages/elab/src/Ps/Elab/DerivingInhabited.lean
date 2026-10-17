@@ -18,7 +18,7 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
   let (initial, type) ← psElabDeriveConstructor plan constructor
   let mut context := plan.context
   let mut cursor := type
-  let mut value := initial
+  let mut constructorValue := initial
   let mut fields : List (Nat × PsExpr) := []
   for _ in [:constructor.numFields] do
     let field ← (psInferEnsureForall context.environment context.metaContext
@@ -28,7 +28,7 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
     context := psElabContextWithMeta context fresh.context
     fields := fields ++ [(id, field.domain)]
     cursor := psExprInstantiate1 field.body fresh.expr
-    value := .app value fresh.expr
+    constructorValue := .app constructorValue fresh.expr
   let result := psUnify context.environment context.localContext context.metaContext
     cursor plan.family
   if !result.success then
@@ -53,7 +53,7 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
       if !assigned.success then
         throw (.data "derived constructor default does not fill its field")
       context := psElabContextWithMeta checked.context assigned.context
-  let value := psMetaInstantiate context.metaContext value
+  let value := psMetaInstantiate context.metaContext constructorValue
   let checked ← psElabResolvedTerm context value (some plan.family)
   let value := psMetaInstantiate checked.context.metaContext checked.term
   if psExprHasUnresolvedMeta value then throw .unresolvedMetavariable

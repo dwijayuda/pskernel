@@ -2907,12 +2907,12 @@ private def syntheticBoundaries : IO Unit := do
     (psExprApplyMany (.constE (psRootName "OfNat") [.zero]) [nat, .lit (.natural 0)])
     .instanceImplicit
   let later := { pending with localContext := late.context }
-  let scoped := psUnifyWithRecovery (psElabRecoverPendingProjection later)
+  let scopedRecovery := psUnifyWithRecovery (psElabRecoverPendingProjection later)
     environment late.context numeralDictionary.context actual target
-  let some scopedEvidence := psMetaFindAssignment scoped.context numeralDictionaryId |
+  let some scopedEvidence := psMetaFindAssignment scopedRecovery.context numeralDictionaryId |
     throw (IO.userError "projection recovery lost its saved instance scope")
-  unless scoped.success && !scoped.resourceExceeded &&
-      psExprAlphaEq (psMetaInstantiate scoped.context scopedEvidence)
+  unless scopedRecovery.success && !scopedRecovery.resourceExceeded &&
+      psExprAlphaEq (psMetaInstantiate scopedRecovery.context scopedEvidence)
         (psMetaInstantiate recovered.context evidence) &&
       !(psExprFVarIds scopedEvidence).contains late.id do
     throw (IO.userError "later caller instance overrode a queued instance's creation scope")

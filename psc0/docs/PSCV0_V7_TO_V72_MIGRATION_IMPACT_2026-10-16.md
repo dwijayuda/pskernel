@@ -16,6 +16,18 @@ Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from t
 
 ## Current M3+B implementation checkpoint — independent WF candidate, 17 October 2026
 
+At the latest tested compiler/test SHA `5b87922e40eac81889a78364fa33a34ada2a2c0b`,
+the original three independent-WF decrease proofs now elaborate and all three
+foundation gates pass. Focused construction advances to exact source-equation
+transport for the nested two-coordinate match. This candidate extends its
+existing checked constructor cases recursively when branch reflexivity is
+blocked by another actual local recursor major; no induction hypothesis
+authorizes an equation, and every leaf remains checked reflexivity.
+Native qualification also requires the new regression's reserved local-name
+correction. No 940-comparison or new score claim is accepted until all five
+gates complete at one compiler/test SHA.
+
+
 The accepted compiler/test baseline is `60586b7e12aee97954d27e698666a8a2531a0db4`
 at 78/100 weighted engineering progress. Its
 [complete receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md)

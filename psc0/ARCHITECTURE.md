@@ -1,8 +1,9 @@
-## Authoritative current checkpoint — transactional WF instance recovery candidate, 2026-10-17
+## Authoritative current checkpoint — nested WF equation transport candidate, 2026-10-17
 
-This compiler/test candidate repairs expected-result inference for the existing
-independent two-changing-argument well-founded recursion slice. It is based on
-exact branch parent `cb0b1e85c51c53a4af4f5da1c6ef68213fbb9b1e`.
+This compiler/test candidate extends checked equation transport for nested
+matches in the independent two-changing-argument well-founded recursion slice.
+It retains the transactional expected-result instance recovery from parent
+`5b87922e40eac81889a78364fa33a34ada2a2c0b`.
 The containing commit is **not accepted until all five gates finish successfully
 at its exact SHA**. Verify the live branch before writing.
 
@@ -12,6 +13,33 @@ The last accepted compiler/test SHA remains
 **78/100** weighted engineering progress and **920 observed focused comparisons**.
 The planned independent-WF total of 940 is not yet accepted. No extra whole
 engineering point is assigned to this extension of already-credited pair packing.
+
+### Latest cloud result and remaining equation owner
+
+At `5b87922e40eac81889a78364fa33a34ada2a2c0b`, the Meta/elaborator compiler
+modules built successfully and F1, F2 and F3/F4/platform passed:
+[39031926790](https://github.com/dwijayuda/pskernel/actions/runs/39031926790),
+[39031926794](https://github.com/dwijayuda/pskernel/actions/runs/39031926794) and
+[39031926791](https://github.com/dwijayuda/pskernel/actions/runs/39031926791).
+[Native 39031926760](https://github.com/dwijayuda/pskernel/actions/runs/39031926760)
+failed because a new direct test used Lean's reserved word `scoped` as a local
+identifier; this candidate renames it without changing the assertions.
+
+[Focused 39031926761](https://github.com/dwijayuda/pskernel/actions/runs/39031926761)
+now advances past the unchanged three decrease proofs. It fails later at
+`PSCV0-PREDEFINITION-WF-EQUATION`: checked constructor cases cannot yet prove
+the generated RHS equal to `independentRight`'s retained source RHS. The
+equation owner splits the outer major only and requires reflexivity immediately
+in each branch, while this fixture has an inner match on the second independent
+coordinate. This is a new construction failure, not accepted runtime evidence.
+
+The candidate preserves that checked reflexivity attempt. On its failure only,
+it locates an actual local major at the head of a remaining canonical recursor
+on an equality side and constructs another ordinary checked cases proof.
+Each step uses the existing typed motive, index/dependent refinement and
+constructor machinery; induction hypotheses remain hidden. The proof depth is
+bounded, and every leaf still requires checked reflexivity. The original
+retained source equation, public left side and final kernel checks remain exact.
 
 ### Actual diagnostic evidence
 
@@ -78,7 +106,7 @@ rollback after recovery followed by a genuinely unequal endpoint, and a later
 caller instance that must not override the pending goal's saved scope.
 The original source functions, three decrease proofs, native oracles, 19 WF
 refusal controls and all existing runtime assertions are unchanged.
-Temporary Application/Postponed/WF diagnostics are removed.
+Temporary application/postponed expected-term wrappers and the latest WF proof-shape tracing are removed; earlier bounded WF error context remains.
 
 ### Immediate qualification and continuation
 
@@ -106,6 +134,7 @@ not prove verified backend correspondence. The sole language authority is
 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Use connected GitHub and cloud
 Linux with expected-HEAD, non-force updates. PR #109 remains draft/open/unmerged
 on its original base.
+
 
 ## Historical checkpoints — superseded by the checkpoint above
 

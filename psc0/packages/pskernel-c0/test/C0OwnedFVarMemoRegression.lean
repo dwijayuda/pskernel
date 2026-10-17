@@ -36,9 +36,15 @@ def main : IO Unit := do
     let again := psKernelC0SemanticEligibilityWithState first.2 expr
     if again.1 != original then
       throw (IO.userError "memo hit altered source eligibility")
+    -- The memo theorem is parametric in the exact bucket selector.
+    -- Even an adversarial all-collision hash cannot turn a cache entry
+    -- into unverified FVar absence.
+    let colliding := psKernelC0FVarMemoGoWithHash (fun _ => 0) expr state.semanticFVarMemo
+    if colliding.1.value != psKernelExprHasFVar expr then
+      throw (IO.userError "all-collision source-proof memo mismatch")
     let restored := psKernelCheckerStateExitLocalScope state again.2
     let afterScope := psKernelC0SemanticEligibilityWithState restored expr
     if afterScope.1 != original then
       throw (IO.userError "pure FVar fact leaked semantic local-scope authority")
     state := afterScope.2
-  IO.println "C0_OWNED_FVAR source_all_input=Lean_proved cases=13 across_scope=pass repeated_lookup=pass semantic_caches_preserved=true no_admission=true"
+  IO.println "C0_OWNED_FVAR source_all_input=Lean_proved cases=13 across_scope=pass repeated_lookup=pass semantic_caches_preserved=true arbitrary_hash=Lean_proved all_collisions=pass no_admission=true"

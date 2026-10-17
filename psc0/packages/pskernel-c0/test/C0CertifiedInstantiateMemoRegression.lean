@@ -20,6 +20,27 @@ def main : IO Unit := do
         (.lam a (.sort .zero)
           (.app (.mdata 19 (.bvar 1))
             (.proj b 2 (.bvar 3))) .default) .implicit) false
+  -- Non-bvar source atoms are not affected by single-binder substitution.
+  -- The certified runtime should neither look them up nor populate a
+  -- collision-index trie. BVars still require exact per-offset memoization.
+  let atomicUnchanged : List PsKernelExpr := [
+    .fvar a, .mvar b, .sort .zero,
+    .sort (.max .zero (.succ .zero)),
+    .const (.str .anonymous "VeryLongQualifiedName") [.zero],
+    .lit (.nat 13), .lit (.str "κernel")
+  ]
+  for atom in atomicUnchanged do
+    let (proof, memo) := psKernelC0InstOneMemoGo replacement atom 2 .empty
+    let _source :
+        proof.value = psKernelC0ExprInstantiateOneChanged atom replacement 2 :=
+      proof.source
+    if proof.value.2 || !psKernelExprEqual proof.value.1 atom then
+      throw (IO.userError "non-BVar instantiation atom changed source")
+    match memo with
+    | .empty => pure ()
+    | _ => throw (IO.userError "non-BVar atom polluted instantiation memo")
+  IO.println "C0_CERTIFIED_INSTANTIATE_MEMO immutable_atom_leaves=source_exact memo_unchanged=true"
+
   let samples : List PsKernelExpr := [
     base, .bvar 1, .bvar 12, .sort .zero, .fvar a,
     .app base base,

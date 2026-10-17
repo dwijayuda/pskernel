@@ -12,6 +12,7 @@ it does not supply an equation or permit an unchecked recursive call.
 structure PsElabRecursionParameterPlan where
   parameterIds : List Nat
   majorId : Nat
+  packedIds : Option (Nat × Nat) := none
   fixedIds : List Nat
   stateIds : List Nat
 
@@ -52,13 +53,33 @@ def psElabRecursionMeasureParameterPlan (context : PsElabContext)
     (ids.filter fun id => !psElabRecursionParameterIsFixed context ids calls id)
   let dependencies := psExprFVarIds measure
   let measuredVarying := ids.filter fun id => varying.contains id && dependencies.contains id
-  if measuredVarying.length > 1 then
-    throw (.data "PSCV0-WF-MEASURE-STATE: the termination measure may depend on at most one changing parameter; packing several measured arguments is unavailable")
   -- Constant/same-size candidates still create their genuine impossible
   -- decrease goals, preserving the established DECREASE diagnostic.
   let some majorId := measuredVarying.head? <|>
       (ids.find? varying.contains) <|> (ids.find? dependencies.contains) <|> ids.head?
     | throw (.data "PSCV0-WF-TELESCOPE: the selected slice requires an explicit header parameter")
+  let some major := psLocalFindById context.localContext majorId
+    | throw (.data "PSCV0-WF-INTERNAL: missing measured parameter binding")
+  let majorDependencies := psExprFVarIds
+    (psMetaInstantiate context.metaContext (psLocalDeclType major))
+  -- A projection-only measure on the second slot need not mention its
+  -- dependent domain in Core. Select from actual binder dependencies too,
+  -- while leaving a first-only measure on the existing unary/state route.
+  let dependentMajor := majorDependencies.any fun id => id != majorId && varying.contains id
+  if measuredVarying.length > 1 || dependentMajor then do
+    -- The additional route owns exactly two dependency-ordered changing
+    -- binders. Independent tuples and a third changing slot stay outside it.
+    -- Full fixed-capture/type closure is rechecked by the source constructor.
+    let [firstId, secondId] := ids.filter varying.contains
+      | throw (.data "PSCV0-WF-MEASURE-STATE: dependent packing requires exactly two changing parameters")
+    let some second := psLocalFindById context.localContext secondId
+      | throw (.data "PSCV0-WF-INTERNAL: missing dependent parameter binding")
+    let secondType := psMetaInstantiate context.metaContext (psLocalDeclType second)
+    if (psExprFVarIds secondType).contains firstId then
+      return {
+        parameterIds := ids, majorId := firstId, packedIds := some (firstId, secondId)
+        fixedIds := ids.filter (fun id => !varying.contains id), stateIds := [] }
+    throw (.data "PSCV0-WF-MEASURE-STATE: the termination measure may depend on at most one changing parameter; packing several measured arguments is unavailable")
   let changing := psElabRecursionParameterDependencies context (varying ++ [majorId])
   let stateIds := ids.filter fun id => id != majorId && changing.contains id
   if stateIds.any dependencies.contains then

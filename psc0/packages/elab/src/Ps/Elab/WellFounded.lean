@@ -52,13 +52,23 @@ def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
   let (next, term) ← if recursion.collectCalls then
       pure (current, psExprApplyMany (.fvar (psLocalDeclId callback)) captured.values)
     else do
-      let some argument := psElabRecursionParameterArgument
-          recursion.parameterIds captured.values recursion.majorId
-        | throw (.data "PSCV0-WF-INTERNAL: missing measured recursive argument")
       let parameter ← (psInferEnsureForall current.environment current.metaContext
         current.localContext (psLocalDeclType callback)).mapError PsElabError.infer
+      let (recursiveArguments, afterArguments) ← match recursion.packedIds with
+        | none =>
+          match psElabRecursionParameterArgument recursion.parameterIds captured.values recursion.majorId with
+          | some value => pure ([value], psExprInstantiate1 parameter.body value)
+          | none => throw (.data "PSCV0-WF-INTERNAL: missing measured recursive argument")
+        | some (firstId, secondId) => do
+          let some first := psElabRecursionParameterArgument recursion.parameterIds captured.values firstId
+            | throw (.data "PSCV0-WF-INTERNAL: missing first packed recursive argument")
+          let some second := psElabRecursionParameterArgument recursion.parameterIds captured.values secondId
+            | throw (.data "PSCV0-WF-INTERNAL: missing second packed recursive argument")
+          let secondParameter ← (psInferEnsureForall current.environment current.metaContext
+            current.localContext (psExprInstantiate1 parameter.body first)).mapError PsElabError.infer
+          pure ([first, second], psExprInstantiate1 secondParameter.body second)
       let proof ← (psInferEnsureForall current.environment current.metaContext
-        current.localContext (psExprInstantiate1 parameter.body argument)).mapError PsElabError.infer
+        current.localContext afterArguments).mapError PsElabError.infer
       let states ← recursion.stateIds.mapM fun id =>
         match psElabRecursionParameterArgument recursion.parameterIds captured.values id with
         | some value => pure value
@@ -71,7 +81,7 @@ def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
         metaContext := fresh.context
         wellFoundedGoalsRev := (goal, span) :: current.wellFoundedGoalsRev }
       pure (next, psExprApplyMany (.fvar (psLocalDeclId callback))
-        ([argument, fresh.expr] ++ states))
+        (recursiveArguments ++ [fresh.expr] ++ states))
   let resolved ← psElabResolvedTerm next term (some captured.resultType)
   let resultType := psMetaInstantiate resolved.context.metaContext resolved.type
   -- Independent result types already belong to the caller's scope. Delaying
@@ -198,6 +208,104 @@ def psElabWellFoundedForalls (binders : List PsElabTypedBinder) (body : PsExpr) 
   binders.foldr (fun binder body =>
     .forallE binder.name binder.type (psExprAbstractFVar binder.id body) binder.binder) body
 
+-- A dependent pair is a single logical fixpoint domain. Its original two
+-- header slots remain distinct; fixed captures are never part of the pair.
+inductive PsElabWellFoundedArgument where
+  | unary (major : PsElabTypedBinder)
+  | dependentPair (first second : PsElabTypedBinder) (domain : PsExpr)
+
+def psElabWellFoundedArgumentDomain : PsElabWellFoundedArgument → PsExpr
+  | .unary major => major.type
+  | .dependentPair _ _ domain => domain
+
+def psElabWellFoundedArgumentAt (argument : PsElabWellFoundedArgument)
+    (value term : PsExpr) : PsExpr :=
+  match argument with
+  | .unary major => psExprInstantiate1 (psExprAbstractFVar major.id term) value
+  | .dependentPair first second _ =>
+    psElabSubstituteLocals [
+      (first.id, psWellFoundedPairFirst value),
+      (second.id, psWellFoundedPairSecond value)] term
+
+def psElabWellFoundedArgumentLambda (argument : PsElabWellFoundedArgument)
+    (freshId : Nat) (body : PsExpr) : PsExpr :=
+  match argument with
+  | .unary major =>
+    .lam major.name major.type (psExprAbstractFVar major.id body) .explicit
+  | .dependentPair _ _ domain =>
+    .lam (psRootName "_psc0Packed") domain
+      (psExprAbstractFVar freshId (psElabWellFoundedArgumentAt argument (.fvar freshId) body)) .explicit
+
+def psElabWellFoundedArgumentCurrent (argument : PsElabWellFoundedArgument) :
+    Except PsElabError PsExpr := do
+  match argument with
+  | .unary major => return .fvar major.id
+  | .dependentPair first second domain =>
+    let some packing := psWellFoundedPairPackingView domain
+      | throw (.data "PSCV0-WF-PACK: selected domain is not an exact dependent pair")
+    return psWellFoundedPairPack packing (.fvar first.id) (.fvar second.id)
+
+def psElabWellFoundedArgumentMap (normalize : PsExpr → PsExpr) :
+    PsElabWellFoundedArgument → PsElabWellFoundedArgument
+  | .unary major => .unary { major with type := normalize major.type }
+  | .dependentPair first second domain =>
+    .dependentPair { first with type := normalize first.type }
+      { second with type := normalize second.type } (normalize domain)
+
+-- Source matches generalize this curried callback at its actual two binder
+-- types. The shared constructor is also the runtime owner's exact adapter
+-- view; no abstract dependent pair enters the source callback's runtime ABI.
+def psElabWellFoundedSourceCallbackType (context : PsElabContext)
+    (argument : PsElabWellFoundedArgument) (callbackType : PsExpr) :
+    Except PsElabError PsExpr := do
+  match argument with
+  | .unary _ => return callbackType
+  | .dependentPair first second domain =>
+    let some packing := psWellFoundedPairPackingView domain
+      | throw (.data "PSCV0-WF-PACK: source callback lost its exact dependent domain")
+    (psWellFoundedPairCurryType context.environment context.metaContext
+      context.localContext packing first.name second.name callbackType).mapError PsElabError.infer
+
+def psElabWellFoundedCurryCallback (context : PsElabContext)
+    (packing : PsWellFoundedPairPacking) (sourceType callback : PsExpr) :
+    Except PsElabError PsExpr := do
+  (psWellFoundedPairCurryCallback context.environment context.metaContext
+    context.localContext packing sourceType callback).mapError PsElabError.infer
+
+-- Keep the body under its original dependent binders. The checked eliminator
+-- moves that body beneath the unary domain; no free-variable cast or sigma
+-- eta rule is used. This is the one-layer form of ArgsPacker.Unary.uncurry.
+def psElabWellFoundedFunctional (context : PsElabContext)
+    (argument : PsElabWellFoundedArgument) (callbackId : Nat)
+    (callbackName : PsName) (sourceCallbackType callbackType motive body : PsExpr) :
+    Except PsElabError PsExpr := do
+  match argument with
+  | .unary major =>
+    let inner := PsExpr.lam callbackName callbackType
+      (psExprAbstractFVar callbackId body) .explicit
+    return .lam major.name major.type (psExprAbstractFVar major.id inner) .explicit
+  | .dependentPair first second domain =>
+    let some packing := psWellFoundedPairPackingView domain
+      | throw (.data "PSCV0-WF-PACK: functional lost its exact dependent domain")
+    let rawName := psRootName "_psc0PackedCallback"
+    let raw := psLocalPushBinding context.localContext rawName callbackType .explicit
+    let curried ← psElabWellFoundedCurryCallback { context with localContext := raw.context }
+      packing sourceCallbackType (.fvar raw.id)
+    let body := psExprInstantiate1 (psExprAbstractFVar callbackId body) curried
+    let inner := PsExpr.lam rawName callbackType
+      (psExprAbstractFVar raw.id body) .explicit
+    let packedName := psRootName "_psc0Packed"
+    let packed := psLocalPushBinding context.localContext packedName domain .explicit
+    let value := PsExpr.fvar packed.id
+    let resultType := PsExpr.forallE callbackName
+      (psElabWellFoundedArgumentAt argument value callbackType) (.app motive value) .explicit
+    let level ← psElabExpressionSort { context with localContext := packed.context } resultType
+    let casesMotive := PsExpr.lam packedName domain
+      (psExprAbstractFVar packed.id resultType) .explicit
+    let minor := psElabWellFoundedLambdas [first, second] inner
+    let cases := psWellFoundedPairCases packing level casesMotive value minor
+    return .lam packedName domain (psExprAbstractFVar packed.id cases) .explicit
+
 -- This explicit proof is needed because portable conversion does not add
 -- function eta. The leaf compares fully applied terms by checked conversion;
 -- every function layer is justified by the Standard's actual funext theorem.
@@ -233,6 +341,51 @@ def psElabWellFoundedCongrArg (context : PsElabContext)
   let rangeLevel ← psElabExpressionSort context range
   return psExprApplyMany (.constE (psRootName "congrArg") [domainLevel, rangeLevel])
     [domain, range, left, right, function, proof]
+
+
+-- A public curried call on p.fst/p.snd reconstructs a pair. Portable
+-- conversion deliberately has no pair eta shortcut. Prove callback equality
+-- by eliminating the real PSigma, where both reconstructions reduce to the
+-- same constructor, and use the existing checked funext for its proof slot.
+def psElabWellFoundedPairCallbackEquality (context : PsElabContext)
+    (packing : PsWellFoundedPairPacking) (type left right : PsExpr) :
+    Except PsElabError PsExpr := do
+  let parameter ← (psInferEnsureForall context.environment context.metaContext
+    context.localContext type).mapError PsElabError.infer
+  if !psWellFoundedDefEq context.environment context.metaContext context.localContext
+      parameter.domain (psWellFoundedPairType packing) then
+    throw (.data "PSCV0-WF-PACK: callback equality has a different packed domain")
+  let packed := psLocalPushBinding context.localContext parameter.name parameter.domain parameter.binder
+  let inner := { context with localContext := packed.context }
+  let value := PsExpr.fvar packed.id
+  let resultType := psExprInstantiate1 parameter.body value
+  let resultLevel ← psElabExpressionSort inner resultType
+  let equality := psLogicEq resultLevel resultType (.app left value) (.app right value)
+  let casesMotive := PsExpr.lam parameter.name parameter.domain
+    (psExprAbstractFVar packed.id equality) parameter.binder
+  let firstName := psRootName "_packFirst"
+  let secondName := psRootName "_packSecond"
+  let first := psLocalPushBinding context.localContext firstName packing.firstType .explicit
+  let secondType := PsExpr.app packing.secondFamily (.fvar first.id)
+  let second := psLocalPushBinding first.context secondName secondType .explicit
+  let constructed := psWellFoundedPairPack packing (.fvar first.id) (.fvar second.id)
+  let pointType := psExprInstantiate1 parameter.body constructed
+  let point ← psElabWellFoundedExtensionalEquality 1 { context with localContext := second.context }
+    pointType (.app left constructed) (.app right constructed)
+  let minor := PsExpr.lam firstName packing.firstType
+    (psExprAbstractFVar first.id (.lam secondName secondType
+      (psExprAbstractFVar second.id point) .explicit)) .explicit
+  let cases := psWellFoundedPairCases packing .zero casesMotive value minor
+  let pointwise := PsExpr.lam parameter.name parameter.domain
+    (psExprAbstractFVar packed.id cases) parameter.binder
+  let motive := PsExpr.lam parameter.name parameter.domain
+    (psExprAbstractFVar packed.id resultType) parameter.binder
+  let domainLevel ← psElabExpressionSort context parameter.domain
+  let proof := psExprApplyMany (.constE (psRootName "funext") [domainLevel, resultLevel])
+    [parameter.domain, motive, left, right, pointwise]
+  let typeLevel ← psElabExpressionSort context type
+  let checked ← psElabResolvedTerm context proof (some (psLogicEq typeLevel type left right))
+  return checked.term
 
 -- Explicit typed header parameters may be fixed or evolve independently of
 -- the typed measure. Its codomain and the measured argument's domain depend
@@ -301,16 +454,31 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   let some major := declaredParameters.find? (fun parameter => parameter.id == plan.majorId)
     | throw (.data "PSCV0-WF-INTERNAL: selected parameter is not in the header")
   let fixedIds := captureIds ++ plan.fixedIds
-  if !(psExprFVarIds major.type).all fixedIds.contains then
-    throw (.data "PSCV0-WF-MAJOR-DOMAIN: the measured argument's domain depends on changing state; dependent argument packing is unavailable")
+  let argument ← match plan.packedIds with
+    | none => pure (PsElabWellFoundedArgument.unary major)
+    | some (firstId, secondId) => do
+      let some first := declaredParameters.find? (fun parameter => parameter.id == firstId)
+        | throw (.data "PSCV0-WF-INTERNAL: missing first dependent parameter")
+      let some second := declaredParameters.find? (fun parameter => parameter.id == secondId)
+        | throw (.data "PSCV0-WF-INTERNAL: missing second dependent parameter")
+      if firstId == secondId || !plan.stateIds.isEmpty ||
+          !(psExprFVarIds second.type).contains firstId then
+        throw (.data "PSCV0-WF-PACK: the selected pack is not exactly two dependent changing parameters")
+      let family := PsExpr.lam first.name first.type
+        (psExprAbstractFVar first.id second.type) .explicit
+      let domain ← (psWellFoundedPairTypeChecked environment measured.context.metaContext
+        measured.context.localContext first.type family).mapError PsElabError.infer
+      pure (PsElabWellFoundedArgument.dependentPair first second domain)
+  let domain := psElabWellFoundedArgumentDomain argument
+  if !(psExprFVarIds domain).all fixedIds.contains then
+    throw (.data "PSCV0-WF-MAJOR-DOMAIN: the measured argument's domain depends on changing state outside the selected dependent pair")
   -- Rel.checkCodomains requires the measure's type to be independent of the
-  -- varying arguments. This unary slice does not introduce dependent packing.
+  -- varying arguments, including both slots of the selected dependent pair.
   if !(psExprFVarIds measureType).all fixedIds.contains then
     throw (.data "PSCV0-WF-MEASURE-TYPE: the measure codomain depends on changing arguments; dependent measure packing is unavailable")
   let states := declaredParameters.filter fun parameter => plan.stateIds.contains parameter.id
   let stateType := psElabWellFoundedForalls states declaredResult
-  let measure := PsExpr.lam major.name major.type
-    (psExprAbstractFVar major.id measureBody) .explicit
+  let measure := psElabWellFoundedArgumentLambda argument bodyHeader.localContext.nextId measureBody
   let measureLevel ← psElabExpressionSort measured.context measureType
   let dictionary ← psElabSynthesizeInstance measured.context
     (.app (.constE psWellFoundedRelationName [measureLevel]) measureType)
@@ -319,7 +487,7 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
       !(psExprFVarIds dictionaryValue).all fixedIds.contains then
     throw (.data "PSCV0-WF-RELATION: the selected relation dictionary is unresolved or captures changing state")
   let relationPlan ← (psWellFoundedPlanForMeasure environment dictionary.context.metaContext
-    dictionary.context.localContext major.type measureType measure dictionaryValue).mapError PsElabError.infer
+    dictionary.context.localContext domain measureType measure dictionaryValue).mapError PsElabError.infer
   let fixName := psWellFoundedConstructionFixName relationPlan.construction
   let equationConstant := psWellFoundedConstructionEquationName relationPlan.construction
   let some (.definitionDecl ..) := psEnvironmentFind environment fixName
@@ -331,19 +499,21 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
       nextId := max bodyHeader.localContext.nextId dictionary.context.localContext.nextId } }
   let localId := bodyHeader.localContext.nextId
   let callbackName := psNameAppendNum (psRootName "_psc0WellFounded") localId
-  let relation := psWellFoundedDecreases relationPlan (.fvar localId) (.fvar major.id)
-  let smallerStateType := psExprInstantiate1
-    (psExprAbstractFVar major.id stateType) (.fvar localId)
-  let callbackType := psLogicPi localId "_smaller" major.type
+  let currentMajor ← psElabWellFoundedArgumentCurrent argument
+  let relation := psWellFoundedDecreases relationPlan (.fvar localId) currentMajor
+  let smallerStateType := psElabWellFoundedArgumentAt argument (.fvar localId) stateType
+  let callbackType := psLogicPi localId "_smaller" domain
     (psLogicPi (localId + 1) "_decreases" relation smallerStateType)
   let _ ← psElabExpressionSort bodyHeader callbackType
-  let callback := psLocalPushBinding bodyHeader.localContext callbackName callbackType .explicit
+  let sourceCallbackType ← psElabWellFoundedSourceCallbackType bodyHeader argument callbackType
+  let callback := psLocalPushBinding bodyHeader.localContext callbackName sourceCallbackType .explicit
   let bodyContext := { bodyHeader with
     localContext := callback.context
     structuralRecursion := none
     wellFoundedRecursion := some {
       functionName := header.functionName, callbackName := callbackName
       parameterIds := parameterIds, majorId := plan.majorId
+      packedIds := plan.packedIds
       stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
@@ -366,10 +536,13 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   let fullParameters := captures ++ declaredParameters
   let declaredResult := normalize declaredResult
   let declaredType := psElabWellFoundedForalls fullParameters declaredResult
-  let major := { major with type := normalize major.type }
+  let argument := psElabWellFoundedArgumentMap normalize argument
+  let domain := psElabWellFoundedArgumentDomain argument
+  let currentMajor := normalize currentMajor
   let states := states.map fun parameter => { parameter with type := normalize parameter.type }
   let stateType := psElabWellFoundedForalls states declaredResult
   let callbackType := normalize callbackType
+  let sourceCallbackType := normalize sourceCallbackType
   let relationPlan := psWellFoundedPlanMap normalize relationPlan
   let localDeclarations := dictionary.context.localContext.declarations.map fun declaration =>
     match declaration with
@@ -382,23 +555,21 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     localContext := localContext
     metaContext := psMetaEmpty }
   let stateBody := psElabWellFoundedLambdas states body
-  let functional := PsExpr.lam major.name major.type
-    (psExprAbstractFVar major.id
-      (.lam callbackName callbackType (psExprAbstractFVar callback.id stateBody) .explicit)) .explicit
-  let motive := PsExpr.lam major.name major.type
-    (psExprAbstractFVar major.id stateType) .explicit
+  let motive := psElabWellFoundedArgumentLambda argument normalizedContext.localContext.nextId stateType
+  let functional ← psElabWellFoundedFunctional normalizedContext argument
+    callback.id callbackName sourceCallbackType callbackType motive stateBody
   if (psWellFoundedPlanTerms relationPlan ++ [motive, functional]).any (fun term =>
       !(psExprFVarIds term).all fixedIds.contains) then
     throw (.data "PSCV0-WF-SCOPE: the fixedpoint captured a changing parameter")
   if (psWellFoundedPlanTerms relationPlan ++ [declaredType, motive, functional]).any psExprHasUnresolvedMeta then
     throw (.data "PSCV0-WF-TELESCOPE: unresolved fixedpoint type or universe")
-  let domainLevel ← psElabExpressionSort normalizedContext major.type
+  let domainLevel ← psElabExpressionSort normalizedContext domain
   let stateLevel ← psElabExpressionSort normalizedContext stateType
   let resultLevel ← psElabExpressionSort normalizedContext declaredResult
   let fixed := PsExpr.app (psWellFoundedFixBase relationPlan [domainLevel, stateLevel] motive) functional
   let stateArguments := states.map (fun parameter => PsExpr.fvar parameter.id)
   let declaredValue := psElabWellFoundedLambdas fullParameters
-    (psExprApplyMany fixed ([.fvar major.id] ++ stateArguments))
+    (psExprApplyMany fixed ([currentMajor] ++ stateArguments))
   if !(psExprFVarIds declaredType).isEmpty || !(psExprFVarIds declaredValue).isEmpty then
     throw (.data "PSCV0-WF-SCOPE: declaration retained an out-of-scope local")
   let usedLevels := psElabDeclarationLevels levelNames [declaredType, declaredValue]
@@ -413,41 +584,48 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   -- The callback calls the actual public f in original header order. Its
   -- dependent state domains are specialized to the smaller major before any
   -- state binder is opened. Explicit extensionality justifies state lambdas.
-  let x := PsExpr.fvar major.id
+  let x := currentMajor
   let yId := normalizedContext.localContext.nextId
   let y := PsExpr.fvar yId
   let decrease := psWellFoundedDecreases relationPlan y x
   let self := PsExpr.constE name (levels.map PsLevel.param)
   let originalArguments := fullParameters.map (fun parameter => PsExpr.fvar parameter.id)
   let recursiveArguments := fullParameters.map fun parameter =>
-    if parameter.id == major.id then y else PsExpr.fvar parameter.id
+    psElabWellFoundedArgumentAt argument y (.fvar parameter.id)
   let smallerStates := states.map fun parameter =>
-    { parameter with type := psExprInstantiate1 (psExprAbstractFVar major.id parameter.type) y }
-  let unfoldCallback := psLogicLam yId "_smaller" major.type
+    { parameter with type := psElabWellFoundedArgumentAt argument y parameter.type }
+  let unfoldCallback := psLogicLam yId "_smaller" domain
     (psLogicLam (yId + 1) "_decreases" decrease
       (psElabWellFoundedLambdas smallerStates (psExprApplyMany self recursiveArguments)))
-  let rawCallback := psLogicLam yId "_smaller" major.type
+  let rawCallback := psLogicLam yId "_smaller" domain
     (psLogicLam (yId + 1) "_decreases" decrease (.app fixed y))
   let rawRhs := psExprApplyMany functional [x, rawCallback]
   let sourceRhs := psExprApplyMany functional [x, unfoldCallback]
   let rawProof := psWellFoundedEquation relationPlan [domainLevel, stateLevel] motive functional x
   let equationContext := { normalizedContext with environment := withDefinition }
-  let equationProof ← if states.isEmpty then pure rawProof else do
+  let equationProof ← if states.isEmpty && plan.packedIds.isNone then pure rawProof else do
     for constantName in [psRootName "funext", psRootName "congrArg", psNameAppendStr psEqName "trans"] do
       match psEnvironmentFind environment constantName with
       | some (.theoremDecl ..) | some (.definitionDecl ..) => pure ()
       | _ => throw (.data "PSCV0-WF-FOUNDATION: checked equality transport is unavailable")
-    let callbackEquality ← psElabWellFoundedExtensionalEquality (2 + states.length)
-      equationContext callbackType rawCallback unfoldCallback
+    let callbackEquality ← match argument with
+      | .unary _ => psElabWellFoundedExtensionalEquality (2 + states.length)
+          equationContext callbackType rawCallback unfoldCallback
+      | .dependentPair _ _ domain => do
+        let some packing := psWellFoundedPairPackingView domain
+          | throw (.data "PSCV0-WF-PACK: equation lost its exact dependent domain")
+        psElabWellFoundedPairCallbackEquality equationContext packing
+          callbackType rawCallback unfoldCallback
     let transported ← psElabWellFoundedCongrArg equationContext callbackType stateType
       rawCallback unfoldCallback (.app functional x) callbackEquality
     let fullEquality := psExprApplyMany (.constE (psNameAppendStr psEqName "trans") [stateLevel])
       [stateType, .app fixed x, rawRhs, sourceRhs, rawProof, transported]
-    let applyName := psRootName "_applyState"
-    let applyStates := PsExpr.lam applyName stateType
-      (psExprApplyMany (.bvar 0) stateArguments) .explicit
-    psElabWellFoundedCongrArg equationContext stateType declaredResult
-      (.app fixed x) sourceRhs applyStates fullEquality
+    if states.isEmpty then pure fullEquality else do
+      let applyName := psRootName "_applyState"
+      let applyStates := PsExpr.lam applyName stateType
+        (psExprApplyMany (.bvar 0) stateArguments) .explicit
+      psElabWellFoundedCongrArg equationContext stateType declaredResult
+        (.app fixed x) sourceRhs applyStates fullEquality
   let rhs := psExprApplyMany sourceRhs stateArguments
   let equationType := psElabWellFoundedForalls fullParameters
     (psLogicEq resultLevel declaredResult (psExprApplyMany self originalArguments) rhs)

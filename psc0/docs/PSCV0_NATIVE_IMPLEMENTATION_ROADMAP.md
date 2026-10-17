@@ -1,3 +1,60 @@
+## Prepared dependent argument packing candidate — 2026-10-17
+
+This candidate follows the activated generic relation implementation. It extends
+the selected single-function WF route to exactly two dependency-ordered changing
+header binders, when the second binder's type depends on the first and the explicit
+fixed-codomain measure requires that pair. Fixed parameters and captures stay
+outside the pack. First-only measures keep their established unary dependent-state
+route. Independent tuples, a third changing binder, mutual PSum packing and
+changing measure codomains remain refused.
+
+The logical owner constructs and checks the actual one-layer `PSigma` type,
+constructor and eliminator, real `WellFounded.fix` and `fix_eq`, and public
+curried equation. A nested user PSigma field is not flattened. Callback equality
+eliminates the actual pair and retains the entire dependent proof-binder function
+inside the motive before existing checked `funext`, `congrArg` and `Eq.trans`.
+There is no pair-eta assumption or new conversion rule.
+
+Typed erasure recognizes only the same fully checked root/fix/domain/constructor
+and two distinct original header IDs in source order. Its shared exact adapter
+view checks the complete dependent callback type, capture closure and entry result
+before replacing that adapter with the same-typed curried public-self callback.
+It requires at least one replacement and refuses any remaining raw callback.
+Arguments retain original header positions, including interleaved fixed parameters,
+single evaluation and the explicit erased proof slot. Ordinary runtime beta
+reduction and backend layouts are unchanged.
+
+The existing WF fixture retains every prior request/export and adds native/source
+packed examples, including dependent Fin results, open public equations, actual
+Core proof/adapter checks, and malformed reversed/duplicated/foreign pack-field
+refusals. Its batch becomes 21 requests (two positives and 19 refusals), with the
+fourteenth export `m3wfpackedoutput`: ten additional comparisons over two Boolean
+inputs and five targets. Three-changing-argument and varying-codomain source
+refusals remain explicit; the previously blocked dependent-domain example now
+reaches its actual false-decrease obligation and remains refused there.
+
+The original independently reviewed seven-file patch has SHA-256
+`0dfb9d68393fb9b707e0d27ec71d84e40da8d3222eec8b7c8d3e82c882e0afe7`.
+All frozen base/candidate byte counts, SHA-256 and Git blob identities were
+independently reconciled before this preparation. This candidate carries forward
+the cloud-proven generic syntax repair from `3c5f51a2`: reserved `meta`
+binders are renamed to `metaContext`, including the three new packing helpers,
+and the shared returned record fields are explicitly aligned. The frozen source
+hash is historical; the prepared candidate's Meta bytes therefore differ.
+
+At preparation, F1, F2 and F3/F4 passed at
+`3c5f51a2ffdc9cabfe386ab6fd1c7a1bb82e6ff5`; native and focused qualification
+were still running. This staged packing implementation has not been compiled or
+executed. Full same-SHA five-gate success remains required before acceptance.
+The separate partial-hint scoping patch has completed static review and integrity
+reconciliation but is not included in this packing commit.
+
+Accepted compiler/test remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+P1 remains blocked by `Classical.choice`; only `propext` and `Quot.sound`
+are approved. Lean 4.35.0, cloud-only execution and PR 109 draft/open/unmerged
+status remain fixed.
+
 ## Current compilation follow-up — 2026-10-17
 
 The activated relation candidate `25ceded396878ce16b5effc25886b069c5ee0238`

@@ -281,7 +281,7 @@ lean_lib PsElab where
     `Ps.Elab.Conditional,
     `Ps.Elab.Do,
     `Ps.Elab.Term,
-    `Ps.Elab.Monotonicity,
+    `Ps.Elab.Monotonicity, `Ps.Elab.PartialFixpoint,
     `Ps.Elab.Recursion,
     `Ps.Elab.Data,
     `Ps.Elab.Declaration,

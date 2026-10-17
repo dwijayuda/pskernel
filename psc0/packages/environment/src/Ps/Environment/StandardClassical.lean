@@ -3,7 +3,7 @@ import Ps.Environment.StandardInhabited
 -- Pinned Lean 4.35.0 Init/Prelude foundation. Nonempty eliminates into Prop;
 -- Classical.choice is the approved logical axiom, with no executable entry.
 -- The witness wrapper is the checked definition used by native P0 fallback.
-def psStandardClassicalDeclarations : List PsDeclaration :=
+def psStandardClassicalExpectedDeclarations : List PsDeclaration :=
   let u := psRootName "u"
   let level := PsLevel.param u
   let sort := PsExpr.sortE level
@@ -43,21 +43,38 @@ def psStandardClassicalDeclarations : List PsDeclaration :=
     .axiomDecl choiceName [u] choiceType,
     .definitionDecl ofNonemptyName [u] ofNonemptyType ofNonemptyValue ]
 
+-- Nonempty and its checked introduction/recursor already belong to Standard.
+-- Audit these prerequisites unchanged; add only the two missing classical names.
+def psStandardClassicalPrerequisiteDeclarations : List PsDeclaration :=
+  psStandardClassicalExpectedDeclarations.take 3
+
+def psStandardClassicalDeclarations : List PsDeclaration :=
+  psStandardClassicalExpectedDeclarations.drop 3
+
 -- This extends only the logical environment. Choice and its wrapper must not
 -- become runtime primitives or enter the executable prelude catalogue.
 def psStandardClassicalExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardClassicalDeclarations.foldl
     (fun env declaration => (psEnvironmentAdd env declaration).getD env) environment
   let className := psRootName "Nonempty"
+  let classes :=
+    if environment.classes.any (psNameEq className) then
+      environment.classes
+    else
+      className :: environment.classes
+  let classParameters :=
+    if environment.classParameters.any (fun entry => psNameEq entry.fst className) then
+      environment.classParameters
+    else
+      (className, { outputs := [], outputLevels := [] }) :: environment.classParameters
   { environment with
-    classes := className :: environment.classes
-    classParameters := (className,
-      { outputs := [], outputLevels := [] }) :: environment.classParameters }
+    classes := classes
+    classParameters := classParameters }
 
 -- Exact declaration and class metadata audit; official kernel replay and the
 -- independent native signature audit remain required qualification gates.
 def psStandardClassicalAudit (environment : PsEnvironment) : Except String Unit := do
-  for declaration in psStandardClassicalDeclarations do
+  for declaration in psStandardClassicalExpectedDeclarations do
     psStandardAuditDeclaration environment declaration
   if !environment.classes.any (psNameEq (psRootName "Nonempty")) then
     throw "PSCV0-STANDARD: missing Nonempty class registration"

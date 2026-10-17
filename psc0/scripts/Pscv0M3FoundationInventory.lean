@@ -3,7 +3,7 @@ import Ps.Environment.SelfHostProd
 def main : IO Unit := do
   let before := psSelfHostProdPreClassicalPreludeEnvironment
   let after := psSelfHostProdPreludeEnvironment
-  for declaration in psStandardClassicalDeclarations do
+  for declaration in psStandardClassicalExpectedDeclarations do
     let name := psDeclarationName declaration
     IO.println ("PSCV0_M3_FOUNDATION_INVENTORY " ++ psNameToString name ++
       " before=" ++ toString (psEnvironmentFind before name).isSome ++

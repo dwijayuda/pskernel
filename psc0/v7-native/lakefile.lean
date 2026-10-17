@@ -76,6 +76,12 @@ lean_exe pscv0_m1_performance where
 
 -- The host and portable libraries share Ps.*. Let Lake supply exact module
 -- dependencies instead of an ad hoc LEAN_PATH namespace overlay.
+-- Host-owned module dependencies select PsV7Host during native order authoring.
+lean_exe pscv0_m3_partial_fixpoint_export where
+  srcDir := "../scripts"
+  root := `Pscv0M3PartialFixpointExport
+  supportInterpreter := true
+
 lean_exe pscv0_m3_recursive_deriving where
   srcDir := "../test"
   root := `Pscv0M3RecursiveDeriving

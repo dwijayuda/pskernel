@@ -1,4 +1,5 @@
 import Ps.Elab.Term
+import Ps.Meta.Recursor
 
 -- Pinned Lean's monotonicity tactic constructs ordinary proofs from the
 -- selected order lemmas. This consumer uses the shared portable goal,
@@ -42,8 +43,10 @@ def psElabMonotonicityCases (state : PsProofState) (majorId : Nat) :
   let (goal, context, target) ← psProofMain state
   if !psLocalContainsId context.localContext majorId then
     throw (.proof "monotonicity case major is outside the current local context")
+  let position : PsSourcePos := { byteOffset := 0, line := 1, column := 1 }
+  let span := context.sourceSpan.getD { start := position, stop := position }
   let source : PsSyntaxTerm := .reference
-    (PsSyntaxName.mk ["$psc0MonotonicityMajor"] context.sourceSpan)
+    (PsSyntaxName.mk ["$psc0MonotonicityMajor"] span)
   let read := fun current _ expected =>
     psElabResolvedTerm current (.fvar majorId) expected
   let result ← psElabMatchWith read (fun current info =>

@@ -294,7 +294,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- Both strict entry points independently measured these at native38789249978.
 -- WF extension independently audited at 078fb1e2 / native 38998692067.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:4990397000639020696"
+  "fnv1a64:8892060683078164058"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -462,7 +462,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- agreed in native run 38798802729; checked 196-entry asset replay also passed.
 -- WF extension independently audited at 078fb1e2 / native 38998692067.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7"
+  "sha256:85c0bcd0991126d00b7c1ad723182f8a3023bf9dedda79246d8ca1206750b14c"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

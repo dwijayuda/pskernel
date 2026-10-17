@@ -961,11 +961,12 @@ private def checkSectionInstances : IO Unit := do
   -- These controls must reach the ordinary command route without local helpers
   -- or a retained suffix. The hinted definition is a separate parity control.
   for shortName in ["sectionPlain", "sectionPrivate", "sectionViaPrivate", "sectionPruned"] do
-    let some (.definition _ _ (.reference resultName) _ _) := parsed.commands.findSome? (fun command =>
+    let source : Option PsSyntaxDeclaration := parsed.commands.findSome? (fun command =>
       match command with
       | .declaration source | .privateDeclaration source =>
         if (psElabOriginSource source).fst.segments == [shortName] then some source else none
       | _ => none)
+    let some (.definition _ _ (.reference resultName) _ _) := source
       | throw (IO.userError ("section control lost its plain explicit definition: " ++ shortName))
     ensure (resultName.segments == ["Nat"]) "plain section control lost its explicit Nat result"
   let expected ← hintDiagnosticExpected parsed [

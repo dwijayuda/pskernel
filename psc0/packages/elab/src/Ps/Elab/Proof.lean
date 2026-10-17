@@ -41,6 +41,7 @@ def psProofApplyTerm (fuel : Nat) (current : PsElabTermResult) (target : PsExpr)
   | fuel + 1 =>
     let unified := psUnify current.context.environment current.context.localContext
       current.context.metaContext current.type target
+    if unified.resourceExceeded then throw .fuelExhausted
     if unified.success then
       return { current with context := psElabContextWithMeta current.context unified.context }
     let pi ← (psInferEnsureForall current.context.environment current.context.metaContext

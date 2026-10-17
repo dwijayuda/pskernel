@@ -3,8 +3,9 @@ import Ps.Host.StandardExport
 /-!
 Native-only P1 order-library export probe.
 
-Run from psc0/v7-native after building Ps.Host.StandardExport:
-  lake env lean --run ../scripts/Pscv0M3PartialFixpointExport.lean OUTPUT
+Run from psc0/v7-native using Lake's owned host module dependencies:
+  lake build pscv0_m3_partial_fixpoint_export
+  .lake/build/bin/pscv0_m3_partial_fixpoint_export OUTPUT
 
 The native reference environment is used only to collect pinned declarations.
 Every emitted portable declaration is converted and replayed through the

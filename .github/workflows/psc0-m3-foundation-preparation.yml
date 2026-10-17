@@ -96,12 +96,12 @@ jobs:
         id: build
         run: |
           set -euo pipefail
-          mkdir -p ../dist/m3-foundation-preparation/where ../dist/m3-foundation-preparation/partial/p0-generic
+          mkdir -p ../dist/m3-foundation-preparation/where ../dist/m3-foundation-preparation/partial/p0-generic ../dist/m3-foundation-preparation/partial/p0-nonempty
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-foundation-preparation/source-sha.txt
           lean --version | tee ../dist/m3-foundation-preparation/toolchain.txt
           grep -F '4.35.0' ../dist/m3-foundation-preparation/toolchain.txt
           grep -F 'eb6cafb' ../dist/m3-foundation-preparation/toolchain.txt
-          lake build pscv0_native Ps.Host.StandardExport 2>&1 | tee ../dist/m3-foundation-preparation/build.log
+          lake build pscv0_native pscv0_m3_partial_fixpoint_export 2>&1 | tee ../dist/m3-foundation-preparation/build.log
       - name: Check exact primitive signatures and logical closure
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -118,12 +118,12 @@ jobs:
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          lake env lean --run ../scripts/Pscv0M3PartialFixpointExport.lean ../dist/m3-foundation-preparation/StandardPartialFixpointCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-export.log
+          .lake/build/bin/pscv0_m3_partial_fixpoint_export ../dist/m3-foundation-preparation/StandardPartialFixpointCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-export.log
       - name: Check selected partial and ordinary section source behavior
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          lake build pscv0_m3_where pscv0_m3_mutual_partial 2>&1 | tee ../dist/m3-foundation-preparation/fixture-build.log
+          lake build pscv0_m3_where pscv0_m3_mutual_partial pscv0_m3_well_founded 2>&1 | tee ../dist/m3-foundation-preparation/fixture-build.log
           m3_foundation_fixture_status=0
           m3_foundation_check() {
             local m3_foundation_log="$1"
@@ -137,12 +137,14 @@ jobs:
           m3_foundation_check ../dist/m3-foundation-preparation/partial-fixpoint-assumptions.log lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean
           m3_foundation_check ../dist/m3-foundation-preparation/where/check.log .lake/build/bin/pscv0_m3_where ../dist/m3-foundation-preparation/where
           m3_foundation_check ../dist/m3-foundation-preparation/partial/check.log .lake/build/bin/pscv0_m3_mutual_partial ../dist/m3-foundation-preparation/partial
+          mkdir -p ../dist/m3-foundation-preparation/well-founded
+          m3_foundation_check ../dist/m3-foundation-preparation/well-founded/check.log .lake/build/bin/pscv0_m3_well_founded ../dist/m3-foundation-preparation/well-founded
           test "$m3_foundation_fixture_status" -eq 0
       - name: Compile the checked monotonicity proof producer
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
-          lake build Ps.Elab.Monotonicity 2>&1 | tee ../dist/m3-foundation-preparation/monotonicity-build.log
+          lake build Ps.Elab.Monotonicity Ps.Elab.PartialFixpoint 2>&1 | tee ../dist/m3-foundation-preparation/monotonicity-build.log
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always() && !cancelled() && steps.build.outcome != 'skipped'
         with:

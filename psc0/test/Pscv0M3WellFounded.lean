@@ -562,6 +562,39 @@ private def checkPackedEntry (environment : PsEnvironment) : IO Unit := do
   | .ok _ => throw (IO.userError "packed WF accepted a foreign field as an original entry argument")
   | .error _ => pure ()
 
+-- Failure-only replay of the original command stream. The successful
+-- qualification still uses psElabProgramWithOrigins on the complete program.
+private def traceWFElaborationFailure (label : String) (program : PsSyntaxProgram) : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let namespaces := environment.declarations.foldl (fun acc declaration =>
+    ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc) []
+  let mut state : PsCommandState := { environment, namespaces }
+  let mut failed := false
+  for (command, index) in program.commands.zipIdx do
+    if !failed then
+      match psElabCommand state command with
+      | .ok next => state := next
+      | .error error =>
+        failed := true
+        let sources := match command with
+          | .declaration source | .registeredDeclaration source _
+          | .privateDeclaration source | .privateRegisteredDeclaration source _
+          | .derivingDeclaration source _ _ => [source]
+          | .mutualDeclarations members _ => members.map (·.declaration)
+          | _ => []
+        let names := sources.map fun source =>
+          String.intercalate "." (psScopeQualified state.scope (psElabOriginSource source).fst).segments
+        let previous := match state.originsRev with
+          | origin :: _ => String.intercalate "." origin.sourceName.segments
+          | [] => "<none>"
+        let kind := match error with
+          | .typeMismatch => "PsElabError.typeMismatch (no expected/actual payload)"
+          | .atDeclaration name _ => "PsElabError.atDeclaration " ++ psNameToString name
+          | _ => "other PsElabError"
+        IO.println s!"PSCV0_M3_WF_ELAB_FAILURE: {label}; original-command={index + 1}; names={String.intercalate ", " names}; previous-origin={previous}; kind={kind}; {psCompilerPscv0ElabError error}"
+  if !failed then
+    IO.println s!"PSCV0_M3_WF_ELAB_FAILURE: {label}; all {program.commands.length} original commands replayed; open-scopes={state.frames.length}"
+
 -- An ignored hint owns no extra section capture or fixedpoint dependency.
 private def checkUnusedHints : IO Unit := do
   let parsed ← match psCompilerParsePscv0 unusedHintSource with
@@ -569,7 +602,9 @@ private def checkUnusedHints : IO Unit := do
     | .error error => throw (IO.userError error)
   let result ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
     | .ok value => pure value
-    | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
+    | .error error => do
+      traceWFElaborationFailure "unused-hints" parsed
+      throw (IO.userError (psCompilerPscv0ElabError error))
   for name in [psRootName "m3wfunused", psRootName "m3p1unused"] do
     match psEnvironmentFind result.result.environment name,
         psEnvironmentFind result.result.environment (psNameAppendStr name "eq_def") with
@@ -606,7 +641,9 @@ private def checkConstruction : IO Unit := do
     throw (IO.userError "WF result lambda crossed the source header/measure boundary")
   let result ← match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
     | .ok value => pure value
-    | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
+    | .error error => do
+      traceWFElaborationFailure "construction" parsed
+      throw (IO.userError (psCompilerPscv0ElabError error))
   -- These Core witnesses distinguish the real lexicographic constructors and
   -- generic fix/equation from the retained Nat specialization checked below.
   for (sourceName, constructor) in [("m3wfrelationLeft", "left"), ("m3wfrelationRight", "right")] do

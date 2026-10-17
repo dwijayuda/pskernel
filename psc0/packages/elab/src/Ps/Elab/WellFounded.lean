@@ -14,6 +14,78 @@ This module constructs their actual typed application; it introduces no
 recursive axiom, opacity marker, fuel bound, or unchecked equation.
 -/
 
+-- These sketches are diagnostic only. Bounded descent retains open local/meta
+-- identities and universe structure without normalizing or printing string data.
+def psElabWellFoundedLevelSketch (fuel : Nat) (level : PsLevel) : String :=
+  match fuel with
+  | 0 => "..."
+  | fuel + 1 =>
+    match level with
+    | .zero => "0"
+    | .succ inner => "succ(" ++ psElabWellFoundedLevelSketch fuel inner ++ ")"
+    | .max left right =>
+      "max(" ++ psElabWellFoundedLevelSketch fuel left ++ "," ++
+        psElabWellFoundedLevelSketch fuel right ++ ")"
+    | .imax left right =>
+      "imax(" ++ psElabWellFoundedLevelSketch fuel left ++ "," ++
+        psElabWellFoundedLevelSketch fuel right ++ ")"
+    | .param name => psNameToString name
+    | .mvar id => "?u" ++ psNatToString id
+
+def psElabWellFoundedBinderSketch : PsBinderInfo → String
+  | .explicit => "explicit"
+  | .implicit => "implicit"
+  | .strictImplicit => "strictImplicit"
+  | .instanceImplicit => "instanceImplicit"
+
+def psElabWellFoundedExprSketch (fuel : Nat) (expression : PsExpr) : String :=
+  match fuel with
+  | 0 => "..."
+  | fuel + 1 =>
+    let child := psElabWellFoundedExprSketch fuel
+    match expression with
+    | .bvar index => "#" ++ psNatToString index
+    | .fvar id => "f#" ++ psNatToString id
+    | .mvar id => "?m" ++ psNatToString id
+    | .sortE level => "Sort(" ++ psElabWellFoundedLevelSketch 4 level ++ ")"
+    | .constE name levels =>
+      let universes := (levels.take 4).map (psElabWellFoundedLevelSketch 4)
+      psNameToString name ++ ".{" ++ String.intercalate "," universes ++
+        (if levels.length > 4 then ",..." else "") ++ "}"
+    | .app function argument => "(" ++ child function ++ " " ++ child argument ++ ")"
+    | .lam name type body binder =>
+      "(lam " ++ psElabWellFoundedBinderSketch binder ++ " " ++ psNameToString name ++
+        " : " ++ child type ++ " => " ++ child body ++ ")"
+    | .forallE name type body binder =>
+      "(forall " ++ psElabWellFoundedBinderSketch binder ++ " " ++ psNameToString name ++
+        " : " ++ child type ++ ", " ++ child body ++ ")"
+    | .letE name type value body =>
+      "(let " ++ psNameToString name ++ " : " ++ child type ++ " := " ++
+        child value ++ "; " ++ child body ++ ")"
+    | .lit (.natural value) => psNatToString value
+    | .lit (.string _) => "<string>"
+    | .proj name index value =>
+      "(proj " ++ psNameToString name ++ "." ++ psNatToString index ++ " " ++ child value ++ ")"
+
+def psElabWellFoundedAt {α : Type} (label : String)
+    (result : Except PsElabError α) : Except PsElabError α :=
+  result.mapError (fun error => .atContext ("well-founded " ++ label) error)
+
+-- The original check and successful result are unchanged. Only after failure
+-- do we infer the same term once more to describe its actual type; that result
+-- is never used to accept a term or to replace the original error.
+def psElabWellFoundedChecked (label : String) (context : PsElabContext)
+    (term expected : PsExpr) : Except PsElabError PsElabTermResult :=
+  match psElabResolvedTerm context term (some expected) with
+  | .ok result => .ok result
+  | .error error =>
+    let actual := match psInferType context.environment context.metaContext context.localContext term with
+      | .ok type => psElabWellFoundedExprSketch 7 type
+      | .error _ => "<inference failed>"
+    .error (.atContext
+      ("well-founded " ++ label ++ "; actual=" ++ actual ++
+        "; expected=" ++ psElabWellFoundedExprSketch 7 expected) error)
+
 def psElabWellFoundedIsNat (context : PsElabContext) (type : PsExpr) : Bool :=
   psDefEqReadOnlyWithEnv context.environment context.metaContext
     context.localContext type (.constE psNatName [])
@@ -315,7 +387,8 @@ def psElabWellFoundedExtensionalEquality (count : Nat) (context : PsElabContext)
   | 0 =>
     let level ← psElabExpressionSort context type
     let proof := psLogicRefl level type left
-    let checked ← psElabResolvedTerm context proof (some (psLogicEq level type left right))
+    let checked ← psElabWellFoundedChecked "callback extensionality leaf" context proof
+      (psLogicEq level type left right)
     return checked.term
   | count + 1 =>
     let pi ← (psInferEnsureForall context.environment context.metaContext
@@ -384,14 +457,15 @@ def psElabWellFoundedPairCallbackEquality (context : PsElabContext)
   let proof := psExprApplyMany (.constE (psRootName "funext") [domainLevel, resultLevel])
     [parameter.domain, motive, left, right, pointwise]
   let typeLevel ← psElabExpressionSort context type
-  let checked ← psElabResolvedTerm context proof (some (psLogicEq typeLevel type left right))
+  let checked ← psElabWellFoundedChecked "pair callback equality" context proof
+    (psLogicEq typeLevel type left right)
   return checked.term
 
 -- Explicit typed header parameters may be fixed or evolve independently of
 -- the typed measure. Its codomain and the measured argument's domain depend
 -- only on fixed captures; changing state and the result form a dependent motive.
 -- No body lambda enters the header or the termination clause's lexical scope.
-def psElabWellFoundedTypedParts (elaborate : PsElaborator)
+def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
     (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
     Except PsElabError PsElabWellFoundedResult := do
@@ -414,7 +488,8 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   let _ ← psElabExpressionSort headerContext header.resultType
   -- As in TerminationMeasure.elab, infer the real codomain; the self callback
   -- is not in scope in the result annotation or measure.
-  let measured ← elaborate headerContext termination.measure none
+  let measured ← psElabWellFoundedAt "measure"
+    (elaborate headerContext termination.measure none)
   let measureBody := psMetaInstantiate measured.context.metaContext measured.term
   let measureType := psMetaInstantiate measured.context.metaContext measured.type
   if [measureBody, measureType].any (fun term =>
@@ -445,7 +520,8 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
       parameterIds := parameterIds, collectCalls := true, sourceType := some declaredType }
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
-  let probed ← elaborate probeContext valueSyntax (some declaredResult)
+  let probed ← psElabWellFoundedAt "probe body"
+    (elaborate probeContext valueSyntax (some declaredResult))
   if psExprHasUnresolvedMeta (psElabGeneralizeExpr
       (psMetaInstantiate probed.context.metaContext probed.term)) then
     throw (.data "PSCV0-WF-PARAMETERS: unresolved provisional body while checking fixed arguments")
@@ -505,7 +581,8 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   let callbackType := psLogicPi localId "_smaller" domain
     (psLogicPi (localId + 1) "_decreases" relation smallerStateType)
   let _ ← psElabExpressionSort bodyHeader callbackType
-  let sourceCallbackType ← psElabWellFoundedSourceCallbackType bodyHeader argument callbackType
+  let sourceCallbackType ← psElabWellFoundedAt "source callback type"
+    (psElabWellFoundedSourceCallbackType bodyHeader argument callbackType)
   let callback := psLocalPushBinding bodyHeader.localContext callbackName sourceCallbackType .explicit
   let bodyContext := { bodyHeader with
     localContext := callback.context
@@ -517,9 +594,11 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
       stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
-  let value ← elaborate bodyContext valueSyntax (some declaredResult)
+  let value ← psElabWellFoundedAt "source body"
+    (elaborate bodyContext valueSyntax (some declaredResult))
   psElabRecursionValidateFixedParameters value.context plan value.context.wellFoundedCallsRev
-  let solved ← psElabWellFoundedSolveGoals elaborate value.context termination.decreasing
+  let solved ← psElabWellFoundedAt "decrease goals"
+    (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing)
   -- Generalize only at this actual declaration boundary, as ordinary checked
   -- declarations do. All terms and the equation's local telescope use the same
   -- instantiated levels; unresolved term/proof holes remain an error.
@@ -556,8 +635,9 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     metaContext := psMetaEmpty }
   let stateBody := psElabWellFoundedLambdas states body
   let motive := psElabWellFoundedArgumentLambda argument normalizedContext.localContext.nextId stateType
-  let functional ← psElabWellFoundedFunctional normalizedContext argument
-    callback.id callbackName sourceCallbackType callbackType motive stateBody
+  let functional ← psElabWellFoundedAt "functional"
+    (psElabWellFoundedFunctional normalizedContext argument
+      callback.id callbackName sourceCallbackType callbackType motive stateBody)
   if (psWellFoundedPlanTerms relationPlan ++ [motive, functional]).any (fun term =>
       !(psExprFVarIds term).all fixedIds.contains) then
     throw (.data "PSCV0-WF-SCOPE: the fixedpoint captured a changing parameter")
@@ -577,7 +657,7 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     throw (.data "PSCV0-WF-LEVELS: the checked measure or body introduced a universe outside its original source block")
   let levels := if header.preserveLevels then levelNames else usedLevels
   let closedContext := psElabContextEmpty environment levels
-  let _ ← psElabResolvedTerm closedContext declaredValue (some declaredType)
+  let _ ← psElabWellFoundedChecked "closed declaration" closedContext declaredValue declaredType
   let declaration := PsDeclaration.definitionDecl name levels declaredType declaredValue
   let some withDefinition := psEnvironmentAdd environment declaration
     | throw (.duplicateDeclaration name)
@@ -635,12 +715,21 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
   if header.preserveLevels && !usedEquationLevels.all (fun used => levels.any (psNameEq used)) then
     throw (.data "PSCV0-WF-LEVELS: the checked source equation introduced a universe outside its original source block")
   let equationLevels := if header.preserveLevels then levels else usedEquationLevels
-  let _ ← psElabResolvedTerm (psElabContextEmpty withDefinition equationLevels)
-    equationValue (some equationType)
+  let _ ← psElabWellFoundedChecked "closed equation" (psElabContextEmpty withDefinition equationLevels)
+    equationValue equationType
   let equation := PsDeclaration.theoremDecl equationName equationLevels equationType equationValue
   return {
     declaration, equation, metaContext := solved.metaContext
     sourceInfo := psElabFinishSourceInfo solved name }
+
+-- Keep the original entry point and add the actual declaration identity to
+-- failures from every phase of its unchanged construction.
+def psElabWellFoundedTypedParts (elaborate : PsElaborator)
+    (name : PsName) (header : PsElabWellFoundedTypedHeader)
+    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
+    Except PsElabError PsElabWellFoundedResult :=
+  (psElabWellFoundedTypedPartsCore elaborate name header valueSyntax termination).mapError
+    (fun error => .atDeclaration name error)
 
 -- The existing standalone route still elaborates its own selected header.
 -- Lifted local definitions enter the same construction through TypedParts.

@@ -364,6 +364,7 @@ private def missingHintName (expected : String) : PsElabError → Bool
   | .unknownName name => psNameToString name == expected
   | .scope message => message == ("unknown name " ++ expected)
   | .atDeclaration _ error => missingHintName expected error
+  | .atContext _ error => missingHintName expected error
   | _ => false
 
 private def equations : String :=

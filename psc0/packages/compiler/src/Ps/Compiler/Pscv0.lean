@@ -43,6 +43,8 @@ def psCompilerPscv0InferError : PsInferError → String
 def psCompilerPscv0ElabError : PsElabError → String
   | .atDeclaration name error =>
       psCompilerPscv0ElabError error ++ " (in " ++ psNameToString name ++ ")"
+  | .atContext label error =>
+      psCompilerPscv0ElabError error ++ " (at " ++ label ++ ")"
   | .infer error => "PSCV0-ELABORATION: " ++ psCompilerPscv0InferError error
   | .scope message => "PSCV0-SCOPE: " ++ message
   | .data message => "PSCV0-DATA: " ++ message

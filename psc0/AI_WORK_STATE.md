@@ -1,38 +1,53 @@
-## Current native packing oracle layout follow-up — 2026-10-17
+## Current well-founded construction diagnostic — 2026-10-17
 
-The compiler layout repair at `3c503150004a628853a28357aa7bd67c27fa4f89`
-restored native compiler compilation. F1 [39001644087](https://github.com/dwijayuda/pskernel/actions/runs/39001644087),
-F2 [39001644049](https://github.com/dwijayuda/pskernel/actions/runs/39001644049)
-and F3/F4 [39001643982](https://github.com/dwijayuda/pskernel/actions/runs/39001643982)
-all passed at that exact SHA.
+At `62ee40146ebd9f83f96ad854368a97455250916b`,
+[native 39002967810](https://github.com/dwijayuda/pskernel/actions/runs/39002967810)
+completed **all 34 reported steps successfully**. F1
+[39002967812](https://github.com/dwijayuda/pskernel/actions/runs/39002967812),
+F2 [39002967824](https://github.com/dwijayuda/pskernel/actions/runs/39002967824)
+and F3/F4 [39002967884](https://github.com/dwijayuda/pskernel/actions/runs/39002967884)
+also passed at that exact SHA. The native audit retains 34 active foundation
+additions, no candidate axioms, three compared recursor rules and the exact
+3,633-declaration, 41-class/359-instance Standard identities. Original
+source/Standard, module application, GC/components, TypeScript, Rust,
+repeated Wasmtime and measurement workloads all passed. JavaScript,
+TypeScript and Rust each retain 1,069 shared observations. Native artifact
+`12089929030` is 6,796,826 bytes, SHA-256
+`c57fae74b2a7c454e282e29803b1b2206aed83c7624606708a0771e5415e2cc3`.
 
-[Focused 39001643951](https://github.com/dwijayuda/pskernel/actions/runs/39001643951),
-job `117305636544`, then reached compilation of the new native packing
-oracle. Its `decreasing_by exact Prod.Lex.left ...` proof had a detached
-continuation line, leaving the constructor partially applied. The later
-missing `packed.eq_def` and rejected `sorryAx` diagnostics follow that
-parse/type error. This fixture-only repair joins the complete existing proof
-term onto one line. Its non-whitespace text is identical; the source program,
-native oracle expression, equation, assumption audit, refusal cases and all
-runtime comparisons remain unchanged. Source fixture execution and target
-parity did not run in that failed focused job.
+[Focused 39002967826](https://github.com/dwijayuda/pskernel/actions/runs/39002967826),
+job `117309564200`, compiled **all 668 jobs**, including the repaired native
+packing oracle. Native `packed` and `packedBounded` report no assumptions;
+their checked step equations use only `Quot.sound`. WF source syntax and
+printing passed, followed by a single `PSCV0-TYPE-MISMATCH` before the WF
+construction PASS. The raw `PsElabError.typeMismatch` has no expected/actual
+payload. Both the initial aggregate program elaboration and the later
+unused-hint check can produce that same message, so the existing log does
+not yet identify a failing declaration or establish a packing-specific cause.
+All other required outer source fixtures continued and passed, including
+result inference, inherited-partial hint scoping, Where construction,
+indexed Inhabited, nominal empty IR and empty-dictionary emission.
+Focused backend parity was skipped. Its diagnostic artifact `12090007524`
+is 2,030,162 bytes, SHA-256
+`6ff4cad00071ae8d38cf2ae3fe1269f8a53133ec63fcf3f9277d5859085dd4b3`.
 
-[Native 39001643989](https://github.com/dwijayuda/pskernel/actions/runs/39001643989),
-job `117305636419`, completed **all 34 reported steps successfully** at the
-same `3c503150` SHA. The audit observes 34 active additions, no candidate
-axioms, three recursor rules and the unchanged 3,633-declaration,
-41-class/359-instance Standard identities. Original source/Standard,
-module application, GC/components, TypeScript, Rust, repeated Wasmtime and
-measurement workloads all passed. JavaScript, TypeScript and Rust each
-retain 1,069 shared observations. Artifact `12089319155` is 6,797,379 bytes,
-SHA-256 `c15e785cd14040361a61a35290c9d1176640503a2c3203f31731fe26eb8d865f`.
-This completed native evidence is preserved; the failed focused fixture
-still prevents acceptance of that SHA.
+This follow-up adds failure diagnostics without changing successful
+qualification or accepting an unchecked term. After either original
+whole-program elaboration fails, the fixture replays the identical parsed
+command stream from the identical initial environment, reports its first
+failing original command and qualified names, then rethrows the original
+error. WF owner context identifies the existing elaboration/checking phase;
+failed generated expected-type checks include bounded actual/expected type
+sketches. Context preserves the original error and marker. The existing Where missing-name
+predicate unwraps that context while retaining its exact leaf/name comparison.
+Source programs,
+native oracles, equations, assumption checks, refusals and all target
+comparisons remain unchanged. A new complete five-gate matrix is required
+after the diagnostic result is resolved.
 
-The complete cumulative result-inference, indexed Inhabited, nominal empty
-dictionary, active foundation, generic relation, dependent packing and
-partial-hint candidate requires a new successful same-SHA five-gate matrix.
-Accepted compiler/test remains
+The cumulative result-inference, indexed Inhabited, nominal empty dictionary,
+active foundation, generic relation, dependent packing and partial-hint
+candidate remains unaccepted. Accepted compiler/test remains
 `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
 The prior active-foundation evidence and exact pins remain in the foundation
 receipt. Only `propext` and `Quot.sound` are approved; P1 remains blocked

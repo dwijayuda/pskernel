@@ -26,6 +26,7 @@ inductive PsElabError where
   | proof (message : String)
   | refinement (message : String)
   | atDeclaration (name : PsName) (error : PsElabError)
+  | atContext (label : String) (error : PsElabError)
   | unsupportedTerm
   | matchExpectedType
   | matchScrutineeUnsupported

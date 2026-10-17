@@ -1,5 +1,12 @@
 # AI_WORK_STATE — PSKernel-C0 live checkpoint
 
+## 17 October 2026 — Source-level substitution Prop bug family: native re-export qualification
+
+- [PR #111](https://github.com/dwijayuda/pskernel/pull/111) **MERGED** (merge commit `a32144550e0dd1be5457c6bc25dcdd12a171e7e0`), augmenting exact Lean 4.35 differential checking with upstream Arena `proj-of-subst-prop`. Unlike the hash-dependent older recursor exploits, this probes nontransitive algorithmic DefEq plus substitution-sensitive proposition sort directly; the invariant is `infer → WHNF → sort` or fail closed, not "stuck means not a proposition".
+- Native [CI 39005621483](https://github.com/dwijayuda/pskernel/actions/runs/39005621483) **SUCCESS**: upstream test source pinned to `5d7ca987618f1136aaa296057b50a2c10c4ce77a`, original SHA-256 `00f6fdccd0c7222c0b4112e7e1d6cd9382108f636cad49db13ecde541b62c21a`. Only the historical `Environment.addDeclCore` API call was adapted to Lean 4.35's explicit `maxRecDepth` argument. Native official checker **rejected** and C0 **rejected** identical actual re-export bytes. All previously qualified tests in that workflow also passed. First two PR test attempts failed **before** exporter/kernel checking because of the upstream API change; they were not kernel failures.
+- The resulting strict native 4.35 negative test is a useful representative case, not full Lean soundness or coverage on the frozen 193 old-version Arena archive. No new accepting kernel rule or trusted allowance was introduced.
+- Full analysis and next critical-path actions are documented in [C0_INDEPENDENT_KERNEL_ASSURANCE_AUDIT_2026-10-17.md](C0_INDEPENDENT_KERNEL_ASSURANCE_AUDIT_2026-10-17.md), §9.
+
 ## 17 October 2026 — Independent assurance audit and additional exact-version negative tests (PR #110)
 
 - Source-grounded [kernel comparison and defect audit](C0_INDEPENDENT_KERNEL_ASSURANCE_AUDIT_2026-10-17.md) added on topic branch `research/pskernel-c0-independent-assurance-20261017`, originating from active C0 `1a33b20e306b97fb05da92670636b8ae9ad13094`. No accepting checker/inductive/recursor source was altered.

@@ -127,11 +127,17 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=20)
     ap.add_argument("--per-label", type=int, default=0,
                     help="diagnostic pilot: N bad + N good; 0 processes all 193")
+    ap.add_argument("--shard-index", type=int, default=0)
+    ap.add_argument("--shard-count", type=int, default=1)
     ap.add_argument("--require-complete", action="store_true",
                     help="fail if any C0 outcome is unqualified, not just false accepts")
     args = ap.parse_args()
     if args.fuel < 1 or args.timeout < 1 or args.per_label < 0:
         ap.error("fuel, timeout and per-label bounds must be valid")
+    if args.shard_count < 1 or not 0 <= args.shard_index < args.shard_count:
+        ap.error("invalid deterministic shard index/count")
+    if args.per_label and args.shard_count != 1:
+        ap.error("per-label pilot cannot be combined with full sharding")
     checker = args.checker.resolve(strict=True)
     project = args.official_project.resolve(strict=True)
     all_cases = check_archive(args.archive)
@@ -141,7 +147,8 @@ def main() -> int:
         cases = ([x for x in all_cases if x[0] == "bad"][:args.per_label] +
                  [x for x in all_cases if x[0] == "good"][:args.per_label])
     else:
-        cases = all_cases
+        cases = [case for index, case in enumerate(all_cases)
+                 if index % args.shard_count == args.shard_index]
     if not cases:
         raise ValueError("no Arena cases selected")
 
@@ -188,7 +195,9 @@ def main() -> int:
         "declaration_body_bytes_are_never_rewritten": True,
         "archive_cases": len(all_cases),
         "selected_cases": len(cases),
-        "full_suite": not args.per_label,
+        "full_suite": not args.per_label and args.shard_count == 1,
+        "shard_index": args.shard_index,
+        "shard_count": args.shard_count,
         "counts": dict(sorted(counts.items())),
         "official_verified_accepts": correct_accept,
         "official_verified_rejects": correct_reject,

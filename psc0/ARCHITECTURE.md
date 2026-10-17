@@ -1515,3 +1515,27 @@ A fresh complete five-gate matrix at the resulting head is required.
 
 Accepted compiler/test SHA remains `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`;
 weighted M3+B remains **74/100**, open. PR 109 remains draft/open/unmerged.
+
+## Native indexed parent-observer follow-up — 2026-10-17
+
+At `078fb1e2c22f79e7f4eae2f21863e2cad4fa1434`, F1
+[38998692100](https://github.com/dwijayuda/pskernel/actions/runs/38998692100), F2
+[38998692059](https://github.com/dwijayuda/pskernel/actions/runs/38998692059), and F3/F4
+[38998692085](https://github.com/dwijayuda/pskernel/actions/runs/38998692085) passed.
+Native [38998692067](https://github.com/dwijayuda/pskernel/actions/runs/38998692067),
+job `117296813544`, passed the initialized WF foundation audit and is still
+running its later workloads at this checkpoint. Retrieve the completed audit JSON
+before using any prospective identity; no pin is inferred from a successful step.
+
+Focused [38998692088](https://github.com/dwijayuda/pskernel/actions/runs/38998692088),
+job `117296813222`, has one remaining compilation error: the nested native
+`Second.mk k (First.mk m item)` pattern attempts to refine the already-bound
+index `k`. The exact seven native parameter/index counts passed, every native
+default equation and refusal compiled, and the empty dictionary executable built.
+The repair inspects the parent through its own generalized `parentScore` helper,
+then combines the actual outer index with the actual parent index and payload.
+The portable fixture namespace is byte-identical. All existing equations, refusal
+contracts and runtime outputs are preserved.
+
+No completed five-gate success is claimed. Accepted compiler/test SHA remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.

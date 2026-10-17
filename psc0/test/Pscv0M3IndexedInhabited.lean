@@ -91,8 +91,11 @@ example {A : Type u} (a : A) (n : Nat) :
 private def firstScore : (n : Nat) → M3IndexedDefaultFirst Nat 0 n → Nat
   | _, .mk k item => 3 * k + item
 
+private def parentScore : (n : Nat) → M3IndexedDefaultFirst Nat 0 n → Nat
+  | _, .mk m item => 2 * m + item
+
 private def secondScore : (n : Nat) → M3IndexedDefaultSecond Nat 0 n → Nat
-  | _, .mk k (.mk m item) => k + 2 * m + item
+  | _, .mk k parent => k + parentScore k parent
 
 private def dependentScore :
     (n : Nat) → (point : Fin (Nat.succ n)) →

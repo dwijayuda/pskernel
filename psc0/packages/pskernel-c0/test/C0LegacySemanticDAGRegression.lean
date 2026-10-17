@@ -49,6 +49,8 @@ def main : IO Unit := do
     let fresh := psKernelC0LegacyMemoExprEq lhs rhs
     if old != fresh then
       throw (IO.userError "DAG semantic equality diverged from old source")
+    if psKernelExprEq lhs rhs != psKernelC0MemoizedExprEq lhs rhs then
+      throw (IO.userError "DefEq root semantic equality diverged from original")
   if !psKernelC0LegacyMemoExprEq lamA lamB ||
       !psKernelC0LegacyMemoExprEq piA piB ||
       !psKernelC0LegacyMemoExprEq leftDag rightDag then

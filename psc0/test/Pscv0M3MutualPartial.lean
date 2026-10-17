@@ -593,12 +593,13 @@ private def checkP0GenericRuntime (directory : System.FilePath) : IO Unit := do
   let requests := #[ordinary,
     { ordinary with assurance := .closedVerified },
     { ordinary with assurance := .boundaryQualifiedVerified }]
-  let batch ← match ← PsV7Native.runBatch requests with
+  let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
   ensure (batch.results.size == requests.size) "generic P0 batch omitted an assurance result"
-  let some first := batch.results[0]? | throw (IO.userError "generic P0 ordinary result is missing")
-  let result ← match first with
+  let some first := (batch.results[0]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result))
+    | throw (IO.userError "generic P0 ordinary result is missing")
+  let result : PsV7Native.Result ← match first with
     | .ok result => pure result
     | .error error => throw (IO.userError ("generic P0 ordinary request failed at " ++
         error.phase ++ ": " ++ error.message))
@@ -606,8 +607,8 @@ private def checkP0GenericRuntime (directory : System.FilePath) : IO Unit := do
     result.declarationCount > 0 && result.artifacts.map (·.target) == ordinary.targets &&
     result.artifacts.all (fun artifact => !artifact.files.isEmpty))
     "generic P0 changed assurance or omitted one requested target bundle"
-  for index in [1, 2] do
-    match batch.results[index]? with
+  for index in ([1, 2] : List Nat) do
+    match (batch.results[index]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
     | some (.error error) =>
       ensure (error.phase == "assurance" &&
         error.message.startsWith "PSCV0-ASSURANCE-DOWNGRADE:")

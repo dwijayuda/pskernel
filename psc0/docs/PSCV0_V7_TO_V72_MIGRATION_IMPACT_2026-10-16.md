@@ -14,7 +14,7 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
-## Current M3+B implementation checkpoint — independent WF accepted, generic P0 candidate, 17 October 2026
+## Current M3+B implementation checkpoint — independent WF accepted, typed generic P0 harness candidate, 17 October 2026
 
 Accepted compiler/test SHA is `c23a6fb479d3c930dc97f9f13c0421b307e462a2`: **78/100** weighted progress and
 **940 observed focused comparisons**. The [independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
@@ -30,10 +30,18 @@ transport; a typed source-curried callback let keeps packed adapters inside thei
 erasure owner. Native Linux passes the new inferred-input/rollback/saved-scope
 regressions and the complete original source/Standard/backend gates.
 
-The containing commit adds a separate generic mutual ordinary-P0 fixture at Nat
-and Bool, with real dictionaries/seeds, two exports, five runtime lanes and two
-verified-assurance refusals. Its 20 comparisons remain planned until the new
-candidate passes all five gates at one exact SHA; only then may 960 be accepted.
+The separate generic mutual ordinary-P0 fixture covers Nat and Bool, real
+dictionaries/seeds, two exports, five runtime lanes and two exact verified
+assurance refusals. First candidate `075a381d5fefcb5d4ac40a49d4da42d8e3985024`
+failed host harness compilation in focused run 39036074336 / job 117405982802 before
+runtime assertions. Its native declaration/assumption marker passed, but no new
+comparisons or focused artifact were produced. Native run 39036074254
+completed successfully with all 34 reported steps before this repair was pushed; F1/F2/F3 succeeded.
+
+The containing revision adds explicit host batch/result/lookup/index types only.
+Source, independent native oracles, runtime expectations and assurance refusals
+are unchanged. Its 20 comparisons remain planned until all five fresh gates
+pass at one corrected compiler/test SHA; only then may 960 be accepted.
 
 Own-binder-dependent omitted-result inference and its checked resource path
 remain a later candidate. Larger WF packs, arbitrary/variable measure codomains,

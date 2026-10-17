@@ -1,4 +1,4 @@
-## Authoritative current checkpoint — independent WF accepted; generic P0 candidate, 2026-10-17
+## Authoritative current checkpoint — independent WF accepted; typed generic P0 harness candidate, 2026-10-17
 
 Accepted compiler/test SHA: `c23a6fb479d3c930dc97f9f13c0421b307e462a2`.
 All five gates completed successfully at that exact SHA. The accepted focused
@@ -6,11 +6,36 @@ total is **940 observed comparisons** and the weighted engineering estimate
 remains **78/100**. The [complete independent-WF receipt](PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md)
 records the source, repairs, all gates, artifacts, runtime counts and bounds.
 
-The containing commit adds the separate generic mutual ordinary-P0 fixture
-and workflow entries. Its new tests remain **unqualified** until all five gates
-pass at its own exact SHA. The compiler implementation is unchanged from the
-accepted SHA. Verify live HEAD before any write, and let healthy native CI
+The containing commit corrects only host type annotations in the separate
+generic mutual ordinary-P0 runtime harness. Its new tests remain **unqualified**
+until all five gates pass at this corrected compiler/test SHA. The compiler,
+source programs, native oracle values, assurance checks and runtime assertions
+are unchanged. Verify live HEAD before any write, and let healthy native CI
 finish before pushing another compiler/test revision.
+
+### Previous P0 attempt and exact repair
+
+The first P0 candidate was `075a381d5fefcb5d4ac40a49d4da42d8e3985024`.
+Focused run [39036074336](https://github.com/dwijayuda/pskernel/actions/runs/39036074336),
+job `117405982802`, failed while compiling the new host harness, before runtime
+assertions. Its 99,505-character log contains the successful
+`PSCV0_M3_P0_GENERIC_NATIVE` declaration/assumption marker, then unresolved
+optional-array element types at fixture lines 605–611. No focused artifact or
+new runtime comparisons were produced.
+
+The repair annotates `PsV7Native.Batch`, `PsV7Native.Result`, the optional
+`Except Diagnostic Result` lookups and the numeric index list. These are the
+actual types exported by `Ps.Host.NativeV7`; no test predicate was relaxed.
+The original native P0 source and every observation stay intact.
+
+At that failed candidate, Native Linux run
+[39036074254](https://github.com/dwijayuda/pskernel/actions/runs/39036074254),
+job `117405982891`, completed successfully with all 34 reported steps before this repair was pushed. F1
+[39036074245](https://github.com/dwijayuda/pskernel/actions/runs/39036074245),
+F2 [39036074326](https://github.com/dwijayuda/pskernel/actions/runs/39036074326)
+and F3/F4/platform
+[39036074316](https://github.com/dwijayuda/pskernel/actions/runs/39036074316)
+succeeded. The failed focused gate prevents accepting 960 from that attempt.
 
 ### Accepted evidence
 
@@ -70,7 +95,7 @@ telescopes, dictionary projection, peer forwarding, source origins and absence
 of a logical `eq_def`.
 
 The original fixture and workflow are preserved byte-for-byte outside the
-additive 203 fixture lines and eight workflow lines. JavaScript, strict compiled
+additive 204 fixture lines and eight workflow lines. JavaScript, strict compiled
 TypeScript, locked Rust, V8 core and Wasmtime components each run both exports
 and both flags. These are **20 planned comparisons**, taking the total to 960
 only after this new candidate completes all five gates.
@@ -103,7 +128,6 @@ The sole forward language authority is `psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`,
 blob `694115223777599ba28ee175e14bb642b7b6aa4b`. Use connected GitHub and cloud
 Linux only, with expected-HEAD non-force branch updates. PR #109 stays
 draft/open/unmerged on its original base.
-
 
 ## Historical checkpoints — superseded by the checkpoint above
 

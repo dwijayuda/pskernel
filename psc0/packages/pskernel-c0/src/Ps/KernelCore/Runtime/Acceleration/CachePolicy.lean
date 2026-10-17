@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Acceleration.CertifiedNodeCountMemo
+import Std.Data.HashMap.Basic
 
 /-
 Non-semantic checker cache policy.
@@ -96,8 +97,11 @@ structure PsKernelC0FVarMemoEntry where
   expr : PsKernelExpr
   certified : PsKernelC0ExactFVar expr
 
+/-- Per-operation full-key hashed lookup, not a 16-bit shape-trie.
+    HashMap only chooses candidate lists; every hit is still rechecked by
+    exact proof-constrained expression equality. -/
 abbrev PsKernelC0FVarMemo :=
-  PsKernelC0HashTrie PsKernelC0FVarMemoEntry
+  Std.HashMap Nat (List PsKernelC0FVarMemoEntry)
 
 private def psKernelC0FVarMemoFind (expr : PsKernelExpr) :
     List PsKernelC0FVarMemoEntry →
@@ -141,9 +145,9 @@ private def psKernelC0FVarMemoLookup
     (indexHash : PsKernelExpr → Nat)
     (expr : PsKernelExpr) (memo : PsKernelC0FVarMemo) :
     Option (PsKernelC0ExactFVar expr) :=
-  psKernelC0FVarMemoFind expr
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (indexHash expr))
+  match memo[indexHash expr]? with
+  | some entries => psKernelC0FVarMemoFind expr entries
+  | none => none
 
 private def psKernelC0FVarMemoStore
     (indexHash : PsKernelExpr → Nat)
@@ -152,8 +156,8 @@ private def psKernelC0FVarMemoStore
     (checked : PsKernelC0ExactFVar expr) :
     PsKernelC0ExactFVar expr × PsKernelC0FVarMemo :=
   let hash := indexHash expr
-  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
-  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
+  let bucket := (memo[hash]?).getD []
+  (checked, memo.insert hash
     ({ expr := expr, certified := checked } :: bucket))
 
 /-- One memo per query, never transported across checker or expression states. -/

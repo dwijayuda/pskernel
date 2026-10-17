@@ -120,6 +120,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatString,
     `Ps.Environment.StandardReprCollections,
     `Ps.Environment.StandardWellFoundedData, `Ps.Environment.StandardWellFounded,
+    `Ps.Environment.StandardClassical,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]
@@ -280,6 +281,7 @@ lean_lib PsElab where
     `Ps.Elab.Conditional,
     `Ps.Elab.Do,
     `Ps.Elab.Term,
+    `Ps.Elab.Monotonicity,
     `Ps.Elab.Recursion,
     `Ps.Elab.Data,
     `Ps.Elab.Declaration,

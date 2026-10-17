@@ -338,6 +338,52 @@ example : Nat → Nat := @uhTypePlain.helper
 example : Nat → Nat := @uhTypeHinted.helper
 
 
+
+abbrev SectionDictionary (_tag : Nat) : Type := Inhabited Nat
+
+section
+variable (tag unused : Nat) [d : SectionDictionary tag]
+
+def sectionPlain (n : Nat) : Nat := default + n
+
+/-- warning: unused `termination_by`, function is not recursive -/
+#guard_msgs in
+def sectionHinted (n : Nat) : Nat := default + n
+termination_by tag
+
+private def sectionPrivate (n : Nat) : Nat := default + n
+
+def sectionViaPrivate (n : Nat) : Nat :=
+  @sectionPrivate tag d n
+
+def sectionPruned (n : Nat) : Nat := n
+
+abbrev sectionAlias (n : Nat) : Nat := n + 1
+
+end
+
+section
+variable (proofOnly : True)
+include proofOnly
+theorem sectionIncluded : True := proofOnly
+omit proofOnly
+end
+
+example : @sectionPlain 7 (Inhabited.mk 41) 3 = 44 := rfl
+example : @sectionHinted 7 (Inhabited.mk 41) 3 = 44 := rfl
+example : @sectionPlain 7 (Inhabited.mk 7) 3 = 10 := rfl
+example : @sectionHinted 7 (Inhabited.mk 7) 3 = 10 := rfl
+example : @sectionViaPrivate 7 (Inhabited.mk 41) 3 = 44 := rfl
+example : @sectionViaPrivate 7 (Inhabited.mk 7) 3 = 10 := rfl
+example : sectionPruned 3 = 3 := rfl
+example : sectionAlias 3 = 4 := rfl
+example : ∀ (tag : Nat), SectionDictionary tag → Nat → Nat := @sectionPlain
+example : ∀ (tag : Nat), SectionDictionary tag → Nat → Nat := @sectionHinted
+example : ∀ (tag : Nat), SectionDictionary tag → Nat → Nat := @sectionViaPrivate
+example : Nat → Nat := @sectionPruned
+example : Nat → Nat := @sectionAlias
+example : True → True := @sectionIncluded
+
 end M3WhereOracle
 
 namespace M3Where
@@ -883,6 +929,138 @@ private def checkUnusedHints : IO Unit := do
     | _ => throw (IO.userError ("unexpected unused-hint acceptance: " ++ label))
   IO.println "PSCV0_M3_UNUSED_HINTS: PASS five exact pinned native warnings, eleven matched rfl equations, thirteen closed ordinary definition/equation headers, ignored measure/proof capture exclusion, body-selected dictionary parity, retained raw spans, source-only/project diagnostic JSON and four exact refusals"
 
+private def sectionInstanceSource : String :=
+  "abbrev SectionDictionary(_tag: Nat): Type := Inhabited(Nat)\n" ++
+  "section\n" ++
+  "variable (tag: Nat, unused: Nat) [d: SectionDictionary(tag)]\n" ++
+  "function sectionPlain(n: Nat): Nat := Inhabited.default + n\n" ++
+  "function sectionHinted(n: Nat): Nat := Inhabited.default + n\n" ++
+  "termination_by tag\n" ++
+  "private function sectionPrivate(n: Nat): Nat := Inhabited.default + n\n" ++
+  "function sectionViaPrivate(n: Nat): Nat := sectionPrivate(tag := tag, d := d, n := n)\n" ++
+  "function sectionPruned(n: Nat): Nat := n\n" ++
+  "abbrev sectionAlias(n: Nat): Nat := n + 1\n" ++
+  "end\n" ++
+  "section\n" ++
+  "variable (proofOnly: True)\n" ++
+  "include proofOnly\n" ++
+  "theorem sectionIncluded: True := proofOnly\n" ++
+  "omit proofOnly\n" ++
+  "end\n" ++
+  "theorem sectionPlainEq: Eq(sectionPlain(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
+  "theorem sectionHintedEq: Eq(sectionHinted(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
+  "theorem sectionPlainOtherEq: Eq(sectionPlain(tag := 7, d := Inhabited.mk(7), n := 3), 10) := by { rfl }\n" ++
+  "theorem sectionHintedOtherEq: Eq(sectionHinted(tag := 7, d := Inhabited.mk(7), n := 3), 10) := by { rfl }\n" ++
+  "theorem sectionViaPrivateEq: Eq(sectionViaPrivate(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
+  "theorem sectionViaPrivateOtherEq: Eq(sectionViaPrivate(tag := 7, d := Inhabited.mk(7), n := 3), 10) := by { rfl }\n" ++
+  "theorem sectionPrunedEq: Eq(sectionPruned(3), 3) := by { rfl }\n" ++
+  "theorem sectionAliasEq: Eq(sectionAlias(3), 4) := by { rfl }\n"
+
+private def checkSectionInstances : IO Unit := do
+  let parsed ← fromExcept (psPscv0ParseProgram sectionInstanceSource)
+  -- These controls must reach the ordinary command route without local helpers
+  -- or a retained suffix. The hinted definition is a separate parity control.
+  for shortName in ["sectionPlain", "sectionPrivate", "sectionViaPrivate", "sectionPruned"] do
+    let some (.definition _ _ (.reference resultName) _ _) := parsed.commands.findSome? (fun command =>
+      match command with
+      | .declaration source | .privateDeclaration source =>
+        if (psElabOriginSource source).fst.segments == [shortName] then some source else none
+      | _ => none)
+      | throw (IO.userError ("section control lost its plain explicit definition: " ++ shortName))
+    ensure (resultName.segments == ["Nat"]) "plain section control lost its explicit Nat result"
+  let expected ← hintDiagnosticExpected parsed [
+    ("sectionHinted", none, "unused `termination_by`, function is not recursive")]
+  let compiled ← fromExcept ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed
+    "SectionBody").mapError psCompilerPscv0ElabError)
+  let environment := compiled.result.environment
+  let privateName := psSyntaxNameAppendSegments ["$psc0Private", "SectionBody", "sectionPrivate"] .anonymous
+  for (name, parameters) in [
+      (psRootName "sectionPlain", ["tag", "d", "n"]),
+      (psRootName "sectionHinted", ["tag", "d", "n"]),
+      (privateName, ["tag", "d", "n"]),
+      (psRootName "sectionViaPrivate", ["tag", "d", "n"]),
+      (psRootName "sectionPruned", ["n"])] do
+    match psEnvironmentFind environment name,
+        psEnvironmentFind environment (psNameAppendStr name "eq_def") with
+    | some (.definitionDecl _ levels type value),
+        some (.theoremDecl _ equationLevels equationType proof) =>
+      ensure (levels.isEmpty && equationLevels.isEmpty && binderNames type == parameters &&
+        [type, value, equationType, proof].all (fun expression =>
+          !psExprHasUnresolvedMeta expression && (psExprFVarIds expression).isEmpty) &&
+        !psExprHasConst psWellFoundedFixName value &&
+        (psEnvironmentFind environment (PsName.num name 0)).isNone)
+        ("plain section definition lost checked ownership or actual captures: " ++ psNameToString name)
+    | _, _ => throw (IO.userError ("missing ordinary section definition/equation: " ++ psNameToString name))
+  let some (.definitionDecl _ _ plainType _) :=
+      psEnvironmentFind environment (psRootName "sectionPlain")
+    | throw (IO.userError "missing plain section dictionary definition")
+  for name in [psRootName "sectionHinted", privateName, psRootName "sectionViaPrivate"] do
+    let some (.definitionDecl _ _ type _) := psEnvironmentFind environment name
+      | throw (IO.userError "missing section dictionary parity definition")
+    ensure (psExprAlphaEq plainType type)
+      "plain, hinted or private use selected a different section dictionary telescope"
+  for name in [privateName, psNameAppendStr privateName "eq_def"] do
+    ensure (compiled.privateNames.any (psNameEq name))
+      "plain private definition or checked equation lost module ownership"
+  ensure ((psEnvironmentFind environment (psRootName "sectionPrivate")).isNone)
+    "plain private section declaration acquired a public alias"
+  let aliasName := psRootName "sectionAlias"
+  let some (.definitionDecl _ _ aliasType aliasValue) := psEnvironmentFind environment aliasName
+    | throw (IO.userError "registered section abbreviation lost its checked definition")
+  ensure (binderNames aliasType == ["n"] && compiled.exposedNames.any (psNameEq aliasName) &&
+    psExprAlphaEq (psWhnfWithTransparency .reducible environment psMetaEmpty psLocalEmpty
+      (.constE aliasName [])) aliasValue)
+    "registered section abbreviation lost pruning, exposure or reducible registration"
+  let some (.theoremDecl _ _ includedType includedProof) :=
+      psEnvironmentFind environment (psRootName "sectionIncluded")
+    | throw (IO.userError "section include lost its theorem declaration")
+  ensure (binderNames includedType == ["proofOnly"] &&
+    [includedType, includedProof].all (fun expression =>
+      !psExprHasUnresolvedMeta expression && (psExprFVarIds expression).isEmpty))
+    "ordinary section route changed the theorem include boundary"
+  let diagnostics := compiled.origins.flatMap fun origin =>
+    origin.diagnostics.map fun diagnostic =>
+      ({ sourceName := "m3-section-instances.ps", diagnostic } : PsV7Native.SourceDiagnostic)
+  checkHintDiagnostics "m3-section-instances.ps" expected diagnostics
+  let rejected : List (String × String × String) := [
+    ("plain-illtyped-body",
+      "section\nvariable (tag: Nat)\nfunction bad(n: Nat): Nat := true\nend\n",
+      "PSCV0-TYPE-MISMATCH"),
+    ("theorem-after-omit",
+      "section\nvariable (proofOnly: True)\ninclude proofOnly\nomit proofOnly\ntheorem bad: True := proofOnly\nend\n",
+      "theorem proof uses a section variable absent from its header; use include")]
+  let requests := #[
+      ({ source := sectionInstanceSource, sourceName := "m3-section-instances.ps" } : PsV7Native.Request),
+      ({ source := "import SectionProvider\nfunction entry(n: Nat): Nat := sectionPlain(tag := 7, d := Inhabited.mk(41), n := n)\ntheorem exposedAlias: Eq(sectionAlias(3), 4) := by { rfl }\n",
+         sourceName := "section-entry.ps", moduleName := "Main",
+         modules := [{ name := "SectionProvider", sourceName := "section-provider.ps", source := sectionInstanceSource }] } :
+        PsV7Native.Request)] ++
+    (rejected.map fun (_, text, _) => ({ source := text } : PsV7Native.Request)).toArray
+  let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (error.phase ++ ": " ++ error.message))
+  ensure (batch.results.size == 4) "section-instance batch lost a positive or refusal"
+  let positiveSources : List (Nat × String × String) := [
+    (0, "m3-section-instances.ps", "m3-section-instances.ps"),
+    (1, "section-entry.ps", "section-provider.ps")]
+  for (index, entrySource, warningSource) in positiveSources do
+    match (batch.results[index]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+    | some (Except.ok result) =>
+      ensure (result.declarationCount > 0 && result.artifacts.isEmpty &&
+        PsV7Native.assuranceLabel result.assurance == "ordinary-checked")
+        "section-instance source-only result lost ordinary checked assurance"
+      checkHintDiagnostics warningSource expected result.diagnostics
+      checkHintResultJson entrySource result
+    | some (Except.error error) => throw (IO.userError (error.phase ++ ": " ++ error.message))
+    | none => throw (IO.userError "missing section-instance source-only result")
+  for ((label, _, rule), index) in rejected.zipIdx do
+    match (batch.results[index + 2]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
+    | some (Except.error error) =>
+      ensure (error.phase == "elaborate" && (error.message.splitOn rule).length > 1)
+        (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
+    | _ => throw (IO.userError ("unexpected section-instance acceptance: " ++ label))
+  IO.println "PSCV0_M3_SECTION_INSTANCES: PASS plain no-Where dictionary parity, eight matched native/source rfl equations, six native headers, five closed ordinary definition/equation pairs, pruned unused captures, private ownership, registered abbreviation exposure, theorem include/omit, one exact source-owned warning and two source-only positives plus two refusals"
+
 private def checkPartialHintScopes : IO Unit := do
   ensure (M3WhereOracle.unknownHints 7 3 == 33 &&
     M3WhereOracle.unknownHints 13 4 == 50)
@@ -1151,6 +1329,7 @@ def main (args : List String) : IO Unit := do
     "where qualification requires pinned Lean"
   M3ResultInference.check
   checkUnusedHints
+  checkSectionInstances
   checkPartialHintScopes
   checkSource
   checkConstruction

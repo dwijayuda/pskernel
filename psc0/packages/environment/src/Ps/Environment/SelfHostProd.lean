@@ -1,5 +1,6 @@
 import Ps.Environment.StandardPlatformWords
 import Ps.Environment.StandardWellFounded
+import Ps.Environment.StandardClassical
 import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardLogicInstances
 import Ps.Environment.StandardOperatorProtocol
@@ -141,8 +142,12 @@ def psSelfHostProdPreWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardOperatorProtocolExtend <| psStandardLogicExtend <| PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
     psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Keep all preceding authoring boundaries independent of Classical.
+def psSelfHostProdPreClassicalPreludeEnvironment : PsEnvironment :=
   psStandardWellFoundedExtend psSelfHostProdPreWellFoundedPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardClassicalExtend psSelfHostProdPreClassicalPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

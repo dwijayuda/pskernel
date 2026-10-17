@@ -243,6 +243,10 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     | .partialDefinition _ _ (.omittedType _) _ _
     | .wellFoundedDefinition _ _ (.omittedType _) _ _ _
     | .fixedpointDefinition _ _ (.omittedType _) _ _ => true
+    -- Ordinary bodies must also see section instances whose dependency keys
+    -- occur only in a candidate dictionary type. Typed closure prunes captures.
+    -- Explicit registrations and theorem include/omit keep their existing owner.
+    | .definition .. => registration.isNone && !state.scope.variables.isEmpty
     | .wellFoundedDefinition .. | .fixedpointDefinition .. => registration.isNone
     | _ => false
   if usePreDefinitions then

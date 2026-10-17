@@ -7,8 +7,9 @@ Independent official Lean 4.35.0 P1 assumption oracle.
 
 Pin: eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
 This module is outside PSC0's portable compiler, selected Standard and
-canonical admission closure. It observes a forbidden dependency; it does
-not approve it or provide an implementation of `.ps` partial_fixpoint.
+canonical admission closure. It records the pinned construction's actual
+logical dependencies under the user-approved standard axiom profile. It does
+not itself implement or admit portable `.ps` partial_fixpoint.
 
 Pinned construction:
 * Lean/Elab/PreDefinition/PartialFixpoint/Main.lean:104,191 synthesizes the
@@ -21,6 +22,7 @@ Pinned construction:
 
 The Unit and Option cases already have CCPO instances, so this blocker is
 independent of the separate Classical.ofNonempty fallback for flat orders.
+The approved standard inventory is propext, Quot.sound and Classical.choice.
 All loops below are inspected logically and are never executed.
 -/
 
@@ -72,4 +74,4 @@ run_cmd do
 end Pscv0M3PartialFixpointAssumptions
 
 def main : IO Unit :=
-  IO.println "PSCV0_M3_P1_ASSUMPTIONS: PASS pinned Unit/Option fixed points and checked equations require forbidden Classical.choice; P1 remains unavailable"
+  IO.println "PSCV0_M3_P1_ASSUMPTIONS: PASS pinned Unit/Option fixed points and checked equations require approved Classical.choice; portable P1 construction remains unavailable"

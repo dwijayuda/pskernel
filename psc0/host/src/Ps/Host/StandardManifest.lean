@@ -142,7 +142,7 @@ def unqualifiedM2AFeatures : List String :=
 def selectedProofPrerequisites : List String :=
   ["Std.WP.Triple", "Gadget.assertGadget"]
 
-def selectedFoundationAssumptions : List String := ["propext", "Quot.sound"]
+def selectedFoundationAssumptions : List String := ["propext", "Quot.sound", "Classical.choice"]
 
 def selectedProfilePolicies : List String := [
   "source-public-names-by-default",
@@ -282,6 +282,7 @@ def standardInstanceIndexAudit (env : PsEnvironment) : Except String Unit := do
 def standardSurfaceManifestAudit (env : PsEnvironment) :
     Except String Unit := do
   selectedProofClosureAudit env
+  psStandardClassicalAudit env
   standardInstanceIndexAudit env
   -- Reuse, do not replace, the independently pinned dual registry hashes.
   match psStandardSnapshotValidate env psStandardSnapshotExpected with

@@ -405,6 +405,14 @@ def c0ExportReadInductiveGroup
   let types ← ts.toList.mapM (c0ExportReadInductiveType st)
   let expectedCtors ← cs.toList.mapM (c0ExportReadConstructor st)
   let expectedRecs ← rs.toList.mapM (c0ExportReadRecursor st)
+  -- Pinned Lean 4.35 src/kernel/environment.cpp::check_name disallows
+  -- reusing a constructor name within any generated inductive block.
+  -- Check exact full names, not exporter IDs or hashes. Such duplicates
+  -- cannot describe a valid checked inductive, even when each cidx is 0.
+  let ctorNames := expectedCtors.map (fun c => c.base.name)
+  if ctorNames.any (fun name =>
+      (ctorNames.filter (fun x => psKernelNameEq x name)).length != 1) then
+    throw "invalid Lean 4.35 duplicate constructor name in inductive family"
   let some first := types.head?
     | throw "malformed NDJSON empty inductive group"
   let names := types.map (fun t => t.base.name)
@@ -862,7 +870,8 @@ inductive C0ExportVerdict where
 def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
   -- Only this source-grounded canonical generator invariant warrants
   -- semantic invalidity without generalizing over unsupported metadata.
-  if message == "invalid Lean 4.35 canonical recursor name family" then
+  if message == "invalid Lean 4.35 canonical recursor name family" ||
+      message == "invalid Lean 4.35 duplicate constructor name in inductive family" then
     .rejected
   else if message.startsWith "unsupported" ||
       message.startsWith "NDJSON exported by an unsupported" then
@@ -2168,6 +2177,7 @@ def c0ExportRecursorNameFamilyRegression : IO Unit := do
       c0ExportSameRecursorNameFamily [a, b, b] [a, b, c] then
     throw (IO.userError "mutual recursor exact name multiset regression")
   if c0ExportClassifyInputError "invalid Lean 4.35 canonical recursor name family" != .rejected ||
+      c0ExportClassifyInputError "invalid Lean 4.35 duplicate constructor name in inductive family" != .rejected ||
       c0ExportClassifyInputError "unsupported generated recursor K/safety mismatch" != .unsupported ||
       c0ExportClassifyInputError "malformed NDJSON inductive constructor metadata" != .malformed then
     throw (IO.userError "canonical recursor invalidity category violated")

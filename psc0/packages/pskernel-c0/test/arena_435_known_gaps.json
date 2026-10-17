@@ -4,14 +4,29 @@
   "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
   "lean_target": "4.35.0",
   "pinned_lean_git": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-  "status": "Known unqualified case outcomes. This is NOT a list of accepted test cases and does not waive any false acceptance, false rejection, transport integrity, adapter exception, or new unqualified case.",
+  "status": "27 known unqualified cases remain; 16 exact independently qualifying cases are required to check, including 14 newly verified structural/official-environment negative targets. Do not count unqualified as passes.",
   "evidence": [
     "https://github.com/dwijayuda/pskernel/actions/runs/39006816117",
-    "https://github.com/dwijayuda/pskernel/actions/runs/39007503159"
+    "https://github.com/dwijayuda/pskernel/actions/runs/39007503159",
+    "https://github.com/dwijayuda/pskernel/actions/runs/39008796107"
   ],
   "required_correct_cases": [
+    "bugs/orphan-rec.ndjson",
+    "other/extra-rec.ndjson",
     "other/level-index-out-of-order.ndjson",
-    "other/sparse-name-index.ndjson"
+    "other/sparse-name-index.ndjson",
+    "tutorial/046_inductBadNonSort.ndjson",
+    "tutorial/047_inductBadNonSort2.ndjson",
+    "tutorial/048_inductLevelParam.ndjson",
+    "tutorial/049_inductTooFewParams.ndjson",
+    "tutorial/132_dup_defs.ndjson",
+    "tutorial/133_dup_ind_def.ndjson",
+    "tutorial/134_dup_ctor_def.ndjson",
+    "tutorial/135_dup_rec_def.ndjson",
+    "tutorial/136_misnamed_rec_user.ndjson",
+    "tutorial/137_dup_rec_def2.ndjson",
+    "tutorial/138_dup_ctor_rec.ndjson",
+    "tutorial/139_DupConCon.ndjson"
   ],
   "known_gaps": [
     {
@@ -55,14 +70,6 @@
       "class": "unqualified_negative_inductive_or_safety_metadata"
     },
     {
-      "name": "bugs/orphan-rec.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
       "name": "bugs/rec-k-lie.ndjson",
       "allowed": [
         "correct",
@@ -72,14 +79,6 @@
     },
     {
       "name": "bugs/rec-missing-ih.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "other/extra-rec.ndjson",
       "allowed": [
         "correct",
         "c0_unsupported"
@@ -255,108 +254,12 @@
       "class": "unqualified_resource_or_performance"
     },
     {
-      "name": "tutorial/046_inductBadNonSort.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/047_inductBadNonSort2.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/048_inductLevelParam.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/049_inductTooFewParams.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
       "name": "tutorial/073_BogusRecursor.ndjson",
       "allowed": [
         "correct",
         "c0_unsupported"
       ],
       "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/132_dup_defs.ndjson",
-      "allowed": [
-        "correct",
-        "official_driver_error"
-      ],
-      "class": "unqualified_official_duplicate_declaration_driver"
-    },
-    {
-      "name": "tutorial/133_dup_ind_def.ndjson",
-      "allowed": [
-        "correct",
-        "official_driver_error"
-      ],
-      "class": "unqualified_official_duplicate_declaration_driver"
-    },
-    {
-      "name": "tutorial/134_dup_ctor_def.ndjson",
-      "allowed": [
-        "correct",
-        "official_driver_error"
-      ],
-      "class": "unqualified_official_duplicate_declaration_driver"
-    },
-    {
-      "name": "tutorial/135_dup_rec_def.ndjson",
-      "allowed": [
-        "correct",
-        "official_driver_error"
-      ],
-      "class": "unqualified_official_duplicate_declaration_driver"
-    },
-    {
-      "name": "tutorial/136_misnamed_rec_user.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/137_dup_rec_def2.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/138_dup_ctor_rec.ndjson",
-      "allowed": [
-        "correct",
-        "official_driver_error"
-      ],
-      "class": "unqualified_official_duplicate_declaration_driver"
-    },
-    {
-      "name": "tutorial/139_DupConCon.ndjson",
-      "allowed": [
-        "correct",
-        "official_driver_error"
-      ],
-      "class": "unqualified_official_duplicate_declaration_driver"
     },
     {
       "name": "tutorial/140_falseFromUnsafe.ndjson",

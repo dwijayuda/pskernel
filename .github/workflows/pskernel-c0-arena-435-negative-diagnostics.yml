@@ -35,7 +35,7 @@ jobs:
           curl -fL --retry 3 -o "$RUNNER_TEMP/arena-round.tar.gz" \
             https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
           echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-round.tar.gz" | sha256sum -c -
-      - name: Identify root categories in exactly 25 previously unqualified negatives
+      - name: Diagnose the exact remaining native-4.35 unqualified negatives
         shell: bash
         run: |
           set -euo pipefail

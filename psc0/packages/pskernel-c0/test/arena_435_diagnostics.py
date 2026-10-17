@@ -46,8 +46,8 @@ def main() -> int:
        "unqualified_negative_inductive_or_safety_metadata",
        "unqualified_negative_raw_declaration_format",
        "unqualified_official_duplicate_declaration_driver")}
-    if len(expected)!=25:
-        raise ValueError(f"not 25 focused non-performance cases: {len(expected)}")
+    if not expected or len(expected)>25:
+        raise ValueError(f"invalid remaining negative diagnostic scope: {len(expected)}")
     tests=check_archive(args.archive)
     seen=[]
     with TemporaryDirectory() as d:
@@ -68,7 +68,7 @@ def main() -> int:
         raise ValueError("incomplete focused archived identity coverage")
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps({"lean":TARGET,"cases":seen},indent=2,ensure_ascii=False)+"\n")
-    print(f"C0_ARENA_435_DEBT_RESULT exactly_{len(seen)}_original_cases_diagnosed=true "
+    print(f"C0_ARENA_435_DEBT_RESULT exactly_{len(seen)}_remaining_cases_diagnosed=true "
           "admitted_anything=false",flush=True)
     return 0
 

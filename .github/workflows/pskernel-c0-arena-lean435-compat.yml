@@ -119,7 +119,7 @@ jobs:
           counts=collections.Counter(t["classification"] for t in items)
           ledger=json.loads(pathlib.Path("psc0/packages/pskernel-c0/test/arena_435_known_gaps.json").read_text())
           known={row["name"]:set(row["allowed"]) for row in ledger["known_gaps"]}
-          assert len(known)==41
+          assert len(known)==27
           required=set(ledger["required_correct_cases"])
           violations=[]
           for t in items:

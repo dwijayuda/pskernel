@@ -121,3 +121,7 @@ lean_exe pscv0_m3_nested_deriving where
 lean_exe pscv0_m3_group_proof_deriving where
   srcDir := "../test"
   root := `Pscv0M3GroupProofDeriving
+
+lean_exe pscv0_m3_empty_dictionaries where
+  srcDir := "../test"
+  root := `Pscv0M3EmptyDictionaries

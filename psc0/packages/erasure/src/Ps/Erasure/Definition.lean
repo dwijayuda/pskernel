@@ -341,7 +341,8 @@ def psEraseDefinition
     (type value : PsExpr) :
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
   if psErasureIsNonRuntimeDeclaration environment type ||
-      psErasureIsErasedDictionary environment 4096 psLocalEmpty type ||
+      (psErasureIsErasedDictionary environment 4096 psLocalEmpty type &&
+        !psErasureHasEmptyStructureResult environment scope.runtimeStructures 4096 psLocalEmpty type) ||
       psErasureUnboxedProjection environment scope 4096 psLocalEmpty [] value then
     Except.ok Option.none
   else

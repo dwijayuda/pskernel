@@ -1,3 +1,92 @@
+## Current M3+B candidate — indexed defaults, empty dictionaries and metadata audit repair
+
+Latest fully accepted compiler/test remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, engineering estimate **74/100**.
+All five complete gates at one compiler/test SHA are required for any new
+acceptance. M3+B remains open.
+
+### Last completed matrix
+
+At `8456aa25ba3320baf9394185436a536563f79483`:
+
+| Gate | Run | Result |
+| --- | --- | --- |
+| Native Linux | [38993828912](https://github.com/dwijayuda/pskernel/actions/runs/38993828912) | FAILURE in the proposed foundation metadata audit; later default-success workloads skipped |
+| F1 | [38993828876](https://github.com/dwijayuda/pskernel/actions/runs/38993828876) | SUCCESS |
+| F2 | [38993828857](https://github.com/dwijayuda/pskernel/actions/runs/38993828857) | SUCCESS |
+| F3/F4 | [38993828873](https://github.com/dwijayuda/pskernel/actions/runs/38993828873) | SUCCESS |
+| Focused M3 | [38993828837](https://github.com/dwijayuda/pskernel/actions/runs/38993828837) | SUCCESS, including result inference and every existing target lane |
+
+The missing Lake roots and fixture typing failures are resolved. Focused job
+117281812142 prints `PSCV0_M3_RESULT_INFERENCE: PASS`: omission/main-hole/local-hole
+ownership, printing, closed total/partial headers, captures and exact refusals.
+All 13 original outer fixtures passed. This is evidence, not an accepted SHA.
+
+Native job 117281812537 regenerated the exact foundation asset: 34 declarations,
+zero candidate axioms, three native recursor rules, 2,329 shared source nodes and
+466,947 bytes. SHA-256:
+`b6bd56c4ab6378905d1d3ac2f0155eb5bc4742be3e19e684d64ac1a3007716f3`.
+The byte comparison and 34 native Core/reducibility comparisons passed; the
+next check reported `WF foundation class metadata differs: SizeOf`.
+
+### Three separate linear implementation changes
+
+1. **Metadata audit initialization.** Pinned
+   [Lean.Environment](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Environment.lean)
+   documents that `importModules` defaults to `loadExts := false`: declarations
+   remain available, but class/instance extensions retain initial state. The
+   host-only audit now uses the documented initializer lifecycle and
+   `loadExts := true`. Exact class/out-parameter/output-level, instance priority,
+   synthesis, Core, reducibility and kernel comparisons remain. No absent
+   metadata is defaulted away. The active Standard and every pin remain fixed.
+
+2. **Indexed Inhabited.** The existing owner opens the complete constructor field
+   telescope as typed metavariables, unifies its result with the requested
+   family, then fills remaining fields with checked defaults. Native constructor
+   order, two passes, uniform-parameter-only requirements, ordered registration,
+   final type checking and closure are preserved. The new helper has four
+   indexed native/portable families, four instances, four complete recursor
+   signatures, four generic equations, eight kernel output equations, four paired
+   refusals and four scalar exports on two inputs; it requires zero workers.
+   Existing GroupProof retains six instances, thirteen signatures, two groups
+   with two workers and three captures each, and four exports. An obsolete
+   direct-member Inhabited refusal is replaced by the same-origin full-group
+   arbitrary-index refusal with paired native evidence. Seven effective
+   refusals and six existing exports remain; BEq/DecidableEq checks are intact.
+
+3. **Nominal empty dictionaries.** The ordinary definition filter retains a
+   dictionary producer only when its actual return family has an already
+   prepared, matching, fully applied boxed structure layout with zero retained
+   fields. Existing nominal types, records, producer/forwarding/initializer
+   calls, argument slots and typed IR own execution. Nonempty specialization,
+   proof/type erasure, foreign restrictions and backend representations remain.
+   The new executable has three host requests: a five-target positive program,
+   an incorrect-proof refusal and a validating-adapter refusal for foreign
+   proof-bearing dictionary results. Four exports cover relation dictionaries,
+   closed initializers, an ordinary empty structure and a nonempty control.
+
+All original 13 outer source invocations are retained; the empty fixture makes
+14. Indexed and empty outputs require 80 additional scalar comparisons across
+five targets. These changes have independent static review and still require
+their actual complete cloud matrix.
+
+### Next work and fixed boundaries
+
+Use only a successful audit's observed Standard FNV, declaration SHA-256 and
+surface SHA-256 to activate the foundation. The separately reviewed generic
+relation candidate then constructs the actual dictionary inverse image and
+Nat/generic fix/equation through one typed owner; its unary changing-argument
+boundary and existing dependent-state route remain. It is not integrated by
+this checkpoint. Checked PSigma packing for two dependent measured arguments is
+being implemented separately with original curried calls and source equations.
+
+Broader indexed binary deriving, positive/function containers, dependent/mutual
+WF exits, remaining P0 work and final integration remain. P1 is still blocked by
+Classical.choice; only propext and Quot.sound are approved. M4+C/D and M5+E stay
+open. Connected GitHub and pinned cloud execution remain canonical. The user
+has explicitly authorized GitHub access going forward. PR109 stays draft, open
+and unmerged on its original base, with history preserved.
+
 ## Current build correction — foundation roots and fixture typing
 
 The predecessor `4f31ce951d4d599b52a08fc4b607fb63fb8e5298` failed all five

@@ -453,6 +453,31 @@ def psErasureIsErasedDictionary (environment : PsEnvironment) (fuel : Nat)
         cursor := psExprInstantiate1 body (.fvar pushed.id)
       return true
 
+-- A prepared empty structure is a runtime singleton. Its constructors already
+-- have the checked nominal record representation with no retained fields.
+-- Keep ordinary producer/forwarding calls even when all logical fields erase;
+-- recognizing a dictionary does not make its computation a proof.
+def psErasureHasEmptyStructureResult (environment : PsEnvironment)
+    (structures : PsErasureNameIndex PsRuntimeStructureInfo) (fuel : Nat)
+    (locals : PsLocalContext) (type : PsExpr) : Bool :=
+  match fuel with
+  | 0 => false
+  | fuel + 1 =>
+    match psWhnf environment psMetaEmpty locals type with
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding locals name domain binder
+      psErasureHasEmptyStructureResult environment structures fuel pushed.context
+        (psExprInstantiate1 body (.fvar pushed.id))
+    | result =>
+      let view := psInferAppView result
+      match view.head with
+      | .constE name _ =>
+        match psErasureLookupStructure structures name with
+        | some layout => !layout.unboxed && layout.fields.isEmpty &&
+            psNameEq layout.coreName name && view.args.length == layout.numParams
+        | none => false
+      | _ => false
+
 def psErasureClassifyBinder
     (environment : PsEnvironment)
     (localContext : PsLocalContext)

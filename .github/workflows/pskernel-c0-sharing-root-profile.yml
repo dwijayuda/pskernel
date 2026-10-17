@@ -1,0 +1,139 @@
+name: PSKernel-C0 Lean 4.35 shared graph evaluation root profiler
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-sharing-root-profile.yml'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-graph-declaration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Native original source checker and independent sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc &&
+            lake build c0OfficialReplay)
+          cc -O2 -fPIC -shared -o "$RUNNER_TEMP/c0-shared-sampler.so" psc0/packages/pskernel-c0/test/C0NativeProofSampler.c
+          test -s "$RUNNER_TEMP/c0-shared-sampler.so"
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py
+      - name: Re-export exact upstream source at n32 with official Lean 4.35
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          curl -fLsS --retry 3 -o "$RUNNER_TEMP/SharedOriginal.lean" https://raw.githubusercontent.com/leanprover/lean-kernel-arena/5d7ca987618f1136aaa296057b50a2c10c4ce77a/tests/perf/shared-subterm.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,hashlib
+          base=Path(os.environ["RUNNER_TEMP"])
+          source=(base/"SharedOriginal.lean").read_bytes()
+          assert source.count(b"let n := 1000")==1
+          changed=source.replace(b"let n := 1000",b"let n := 32")
+          (base/"ScaledSharedSubterm.lean").write_bytes(changed)
+          print("C0_GRAPH_SOURCE old_sha256="+hashlib.sha256(source).hexdigest()+
+                " n32_sha256="+hashlib.sha256(changed).hexdigest()+
+                " only_literal_n_changed=true")
+          PY
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            cp "$RUNNER_TEMP/ScaledSharedSubterm.lean" ScaledSharedSubterm.lean
+            lake env lean -o .lake/build/lib/lean/ScaledSharedSubterm.olean ScaledSharedSubterm.lean
+            lake env .lake/build/bin/lean4export ScaledSharedSubterm -- kernel_shared_subterm > "$RUNNER_TEMP/c0-shared-source.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-shared-source.ndjson" > "$RUNNER_TEMP/c0-shared-official.txt" 2>&1
+          )
+          grep -Fq 'Lean default kernel accepts the solution' "$RUNNER_TEMP/c0-shared-official.txt"
+          python3 - <<'PY'
+          import os,hashlib,json,pathlib
+          b=pathlib.Path(os.environ["RUNNER_TEMP"])
+          p=b/"c0-shared-source.ndjson"
+          raw=p.read_bytes()
+          records=raw.splitlines()
+          head=json.loads(records[0])["meta"]
+          assert head['lean']=={'version':'4.35.0','githash':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'}
+          assert len(records)>200
+          assert 'thm' in json.loads(records[-1])
+          (b/"c0-shared-target-marker.txt").write_text(f"C0_REAL_EXPORT_DECL_BEGIN record={len(records)}")
+          print(f"C0_GRAPH_EXPORT records={len(records)} sha256={hashlib.sha256(raw).hexdigest()} official=accepted native_source=true")
+          PY
+      - name: Capture complete active-worker call stacks in stalled n32 theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker=$(cat "$RUNNER_TEMP/c0-shared-target-marker.txt")
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$RUNNER_TEMP/c0-shared-source.ndjson" \
+            "$RUNNER_TEMP/c0-shared-sampler.so" \
+            "$RUNNER_TEMP/c0-shared-stacks.txt" \
+            "$RUNNER_TEMP/c0-shared-summary.json" \
+            --samples 16 --interval 2 --max-wait 150 --wait-for "$marker"
+          python3 - <<'PY'
+          import json,os,pathlib
+          b=pathlib.Path(os.environ["RUNNER_TEMP"])
+          x=json.loads((b/"c0-shared-summary.json").read_text())
+          assert x["native_stack_samples"]>=4
+          assert not x["successful_source_acceptance"]
+          print(f"C0_GRAPH_PROFILE samples={x['native_stack_samples']} source_checker_original=true")
+          for name,count in x["top_inclusive_functions"][:22]:
+              print(f"C0_GRAPH_INCLUSIVE frames={count} symbol={name}")
+          for idx,stack in enumerate(x["example_stacks"]):
+              print(f"C0_GRAPH_STACK_BEGIN id={idx}")
+              for depth,frame in enumerate(stack[:36]):
+                  print(f"C0_GRAPH_STACK_FRAME stack={idx} depth={depth} symbol={frame['function']} source={frame['source']}")
+              print(f"C0_GRAPH_STACK_END id={idx}")
+          PY
+      - name: Observe strict same-source checker verdict without changing fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/c0-shared-resources.txt" \
+            timeout 65s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted --trace-declarations "$RUNNER_TEMP/c0-shared-source.ndjson" 4096) \
+            > "$RUNNER_TEMP/c0-shared-verdict.txt" 2>&1
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/c0-shared-verdict.txt"
+            echo 'C0_GRAPH_VERDICT accepted_by_full_checker=true'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_GRAPH_VERDICT unqualified_host_timeout=true'
+          else
+            grep -F 'C0_REAL_EXPORT replay_outcome' "$RUNNER_TEMP/c0-shared-verdict.txt" | tail -n 1 || true
+            echo "C0_GRAPH_VERDICT not_qualified_other_exit=$rc"
+          fi
+          grep -F 'C0_REAL_EXPORT_DECL_BEGIN' "$RUNNER_TEMP/c0-shared-verdict.txt" | tail -n 3 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/c0-shared-resources.txt" || true
+          echo 'C0_GRAPH_SCOPE diagnostic_only=true original_source_checker=true fuel_4096=true no_admission_from_sampler=true'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-shared-graph-native-435-n32
+          path: |
+            ${{ runner.temp }}/c0-shared-target-marker.txt
+            ${{ runner.temp }}/c0-shared-summary.json
+            ${{ runner.temp }}/c0-shared-stacks.txt
+            ${{ runner.temp }}/c0-shared-verdict.txt
+            ${{ runner.temp }}/c0-shared-resources.txt
+          if-no-files-found: warn
+          retention-days: 21

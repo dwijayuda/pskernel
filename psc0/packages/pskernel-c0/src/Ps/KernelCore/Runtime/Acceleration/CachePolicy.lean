@@ -1,4 +1,5 @@
 import Ps.KernelCore.Runtime.Acceleration.CertifiedNodeCountMemo
+import Ps.KernelCore.Core.ExprDecidableEq
 
 /-
 Non-semantic checker cache policy.
@@ -104,7 +105,11 @@ private def psKernelC0FVarMemoFind (expr : PsKernelExpr) :
       Option (PsKernelC0ExactFVar expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      -- The memo hit remains a typed proof of exact source syntax Eq.
+      -- Recurse with pointer-checked, pair-memoized DecidableEq, rather
+      -- than exponentially rechecking independently shared DAG children.
+      -- No pointer inequality is treated as semantic inequality.
+      match psKernelC0ExactPairEq expr entry.expr with
       | .isTrue equal =>
           some (by
             cases equal

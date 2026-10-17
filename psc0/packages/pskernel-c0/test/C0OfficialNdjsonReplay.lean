@@ -444,9 +444,13 @@ def c0ExportReadInductiveGroup
   -- auxiliary names: do not guess their spelling here. Instead, every
   -- exported recursor is checked *after* independent native generation,
   -- including its type, motive/indices, constructor rules and safety.
+  -- Lean 4.35 src/kernel/inductive.cpp::mk_rec_name always constructs
+  -- I ++ ".rec" for ordinary/mutual families. A missing, duplicate
+  -- or extra recursor is impossible in a valid non-nested declaration.
+  -- Nested-generated names retain their separate restoration checks.
   if !hasNested &&
       !c0ExportSameRecursorNameFamily recNames generatedNames then
-    throw "unsupported NDJSON recursor family is not canonical"
+    throw "invalid Lean 4.35 canonical recursor name family"
   let toCtor (c : PsKernelConstructorInfo) :
       PsKernelSimpleConstructorDecl :=
     { name := c.base.name, type := c.base.type }
@@ -856,7 +860,11 @@ inductive C0ExportVerdict where
   deriving BEq, Repr
 
 def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
-  if message.startsWith "unsupported" ||
+  -- Only this source-grounded canonical generator invariant warrants
+  -- semantic invalidity without generalizing over unsupported metadata.
+  if message == "invalid Lean 4.35 canonical recursor name family" then
+    .rejected
+  else if message.startsWith "unsupported" ||
       message.startsWith "NDJSON exported by an unsupported" then
     .unsupported
   else
@@ -2159,7 +2167,11 @@ def c0ExportRecursorNameFamilyRegression : IO Unit := do
       c0ExportSameRecursorNameFamily [a, b] [a, c] ||
       c0ExportSameRecursorNameFamily [a, b, b] [a, b, c] then
     throw (IO.userError "mutual recursor exact name multiset regression")
-  IO.println "C0_RECURSOR_NAME_MANIFEST order_independent=pass multiplicity=exact forged_names=denied"
+  if c0ExportClassifyInputError "invalid Lean 4.35 canonical recursor name family" != .rejected ||
+      c0ExportClassifyInputError "unsupported generated recursor K/safety mismatch" != .unsupported ||
+      c0ExportClassifyInputError "malformed NDJSON inductive constructor metadata" != .malformed then
+    throw (IO.userError "canonical recursor invalidity category violated")
+  IO.println "C0_RECURSOR_NAME_MANIFEST order_independent=pass multiplicity=exact forged_names=denied canonical_invalid=rejected"
 
 /-- Opt-in strict admission CLI; unchanged source checking and trace. -/
 def c0ExportPrintFileOutcome

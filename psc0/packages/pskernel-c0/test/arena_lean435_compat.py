@@ -21,6 +21,7 @@ from collections import Counter
 import hashlib
 import json
 import pathlib
+import re
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
@@ -81,6 +82,28 @@ def adapt_legacy_envelope(original: bytes) -> tuple[bytes, dict]:
     }
 
 
+def parse_official_reference_result(output: str, returncode: int) -> dict:
+    """Distinguish a real native kernel duplicate from arbitrary driver crashes.
+
+    Lean 4.35 environment::check_name raises already_declared_exception.
+    leanchecker prints exactly one 'uncaught exception: Duplicate declaration'
+    line (without its usual rejection marker). Never use a generic exception
+    as evidence of a kernel rejection.
+    """
+    ok = "Lean default kernel accepts the solution" in output
+    bad = "Lean default kernel rejects the solution" in output
+    if ok != bad and ((ok and returncode == 0) or (bad and returncode != 0)):
+        return {"verdict": "accepted" if ok else "rejected",
+                "returncode": returncode, "reason": "official_leanchecker_verdict"}
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    if (returncode != 0 and not ok and not bad and len(lines) == 1 and
+        re.fullmatch(r"uncaught exception: Duplicate declaration: [^\\s]+", lines[0])):
+        return {"verdict": "rejected", "returncode": returncode,
+                "reason": "official_kernel_duplicate_declaration"}
+    return {"verdict": "driver_error", "returncode": returncode,
+            "detail": output[-ERROR_LIMIT:]}
+
+
 def official_reference(project: pathlib.Path, path: pathlib.Path, timeout: int) -> dict:
     try:
         done = subprocess.run(
@@ -92,16 +115,7 @@ def official_reference(project: pathlib.Path, path: pathlib.Path, timeout: int) 
         return {"verdict": "timeout"}
     except OSError as e:
         return {"verdict": "driver_error", "error": str(e)[:ERROR_LIMIT]}
-    output = done.stdout + "\n" + done.stderr
-    ok = "Lean default kernel accepts the solution" in output
-    bad = "Lean default kernel rejects the solution" in output
-    if ok == bad or (ok and done.returncode != 0) or (bad and done.returncode == 0):
-        return {
-            "verdict": "driver_error", "returncode": done.returncode,
-            "detail": output[-ERROR_LIMIT:],
-        }
-    return {"verdict": "accepted" if ok else "rejected", "returncode": done.returncode}
-
+    return parse_official_reference_result(done.stdout + "\n" + done.stderr, done.returncode)
 
 def classify(official: dict, c0: dict) -> str:
     ov = official["verdict"]

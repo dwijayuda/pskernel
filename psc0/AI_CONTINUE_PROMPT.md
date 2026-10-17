@@ -1,27 +1,40 @@
 ## Current packed proof expected-type investigation — 2026-10-17
 
-At `a2128efbbc6c03640a107f85b9426f7f198eeece`, all five gates
+At `f7a470106043576c9bec7ce00324d025b3c447d2`, all five gates
 completed failure with the same sole Lean compile diagnostic:
-`packages/elab/src/Ps/Elab/WellFounded.lean:290:67: unexpected identifier; expected '}'`.
-The new diagnostic record update continued `sourceSpan` after inline
-fields without a separator. This follow-up adds exactly one comma after
-`postponing := true`, preserving all three field values and every probe.
+`packages/elab/src/Ps/Elab/WellFounded.lean:290:68: unexpected identifier; expected '}'`.
+The comma-only correction did not resolve the mixed inline/newline record
+layout. This follow-up places all three fields on equally indented lines,
+matching the established multiline record-update form. It preserves every
+field value and every failure-only diagnostic probe.
 
 The completed runs are native
-[39008409040](https://github.com/dwijayuda/pskernel/actions/runs/39008409040),
+[39008743686](https://github.com/dwijayuda/pskernel/actions/runs/39008743686),
+focused [39008743677](https://github.com/dwijayuda/pskernel/actions/runs/39008743677),
+F1 [39008743656](https://github.com/dwijayuda/pskernel/actions/runs/39008743656),
+F2 [39008743694](https://github.com/dwijayuda/pskernel/actions/runs/39008743694)
+and F3/F4
+[39008743659](https://github.com/dwijayuda/pskernel/actions/runs/39008743659).
+Native job `117326502878` and focused job `117326502816` stopped during
+compilation. Native reported 10 successful steps, one failed compile step,
+23 skipped steps and zero cancellations. Its completed log is 89,987
+characters; the focused log is 89,133 characters.
+The failed native diagnostic artifact `12092505070` is 40,255 bytes,
+SHA-256 `6cf163fcafae33ef81e9bc8ae30e772bef061cafd701a790bc18bf27e7c3c8f3`.
+Focused uploaded no artifact. No source fixture, new goal trace,
+foundation audit or runtime workload ran at this SHA.
+
+The preceding `a2128efbbc6c03640a107f85b9426f7f198eeece` matrix likewise
+failed during compilation at the same record, column 67:
+native [39008409040](https://github.com/dwijayuda/pskernel/actions/runs/39008409040),
 focused [39008406807](https://github.com/dwijayuda/pskernel/actions/runs/39008406807),
 F1 [39008406946](https://github.com/dwijayuda/pskernel/actions/runs/39008406946),
-F2 [39008406839](https://github.com/dwijayuda/pskernel/actions/runs/39008406839)
-and F3/F4
-[39008406784](https://github.com/dwijayuda/pskernel/actions/runs/39008406784).
-Native job `117325511588` and focused job `117325505251` stopped during
-compilation; no source fixture, new goal trace, foundation audit or runtime
-workload ran. The failed native diagnostic artifact `12091638306` is
-40,247 bytes, SHA-256
+F2 [39008406839](https://github.com/dwijayuda/pskernel/actions/runs/39008406839),
+F3/F4 [39008406784](https://github.com/dwijayuda/pskernel/actions/runs/39008406784).
+Its failed native artifact `12091638306` is 40,247 bytes, SHA-256
 `0d896b037f52ea098288c1fdf38af4c02bd1ba1409c23816566fdf49fc626110`.
-Focused uploaded no artifact. The one-character repair has independent
-static review and exact reverse reconstruction. All prior semantic evidence
-below remains scoped to the completed earlier commits.
+It also produced no source or runtime evidence. These failed syntax
+attempts do not establish the underlying proof mismatch or its repair.
 
 At `d4a44928bc4fa386508683a12fc637e0ef5ce89d`,
 [focused 39006900669](https://github.com/dwijayuda/pskernel/actions/runs/39006900669),
@@ -106,9 +119,9 @@ The next concrete task is to inspect the first failed result component,
 identify the supported repair, and complete the full five-gate matrix.
 
 The exact one-owner candidate has independent static reconstruction:
-`psc0/packages/elab/src/Ps/Elab/WellFounded.lean`, 56,364 UTF-8 bytes,
-Git blob `7ba4fdfab2d52d71b6c300631d25b2116ffdcaf8`, SHA-256
-`8bcec206afc6d24598faad89c67bc0f2cb777dbca4804730edf2cfad2103289e`.
+`psc0/packages/elab/src/Ps/Elab/WellFounded.lean`, 56,374 UTF-8 bytes,
+Git blob `2ae8d6710f8851d53f6c7c1644fa7873552120f7`, SHA-256
+`1c2dc7ee98d0aa3932cd96122f6c3a3d78ae9c6ea45bbba799800fe0de8ba093`.
 Reversing the diagnostic insertions restores the 49,258-byte `d4a44928` owner,
 blob `3393a727b5fdd5dea48a68a35442c11e9a9c3a9a`, exactly.
 A local diagnostic binder is named `prefixResult` to avoid depending on

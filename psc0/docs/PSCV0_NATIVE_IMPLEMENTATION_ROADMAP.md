@@ -1,3 +1,23 @@
+## Current compilation follow-up — 2026-10-17
+
+The activated relation candidate `25ceded396878ce16b5effc25886b069c5ee0238`
+failed all five gates during compilation.
+[Native 39000205978](https://github.com/dwijayuda/pskernel/actions/runs/39000205978),
+job `117301338195`, and
+[focused 39000205972](https://github.com/dwijayuda/pskernel/actions/runs/39000205972),
+job `117301338355`, report two source syntax defects in the new shared Meta
+relation owner: the reserved `meta` token was used as a binder, and two
+multiline returned structures had insufficient field indentation. This follow-up
+renames the binder to `metaContext` and writes the record fields explicitly.
+The typed construction, evidence checks, requests, oracles and observed
+foundation pins are unchanged. Runtime qualification has not run at this candidate.
+A fresh full same-SHA matrix is required.
+
+Accepted compiler/test SHA remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+The completed foundation audit at `078fb1e2` remains valid evidence for its
+proposed identities. PR 109 remains draft/open/unmerged.
+
 ## Current checkpoint — audited WF activation candidate, 2026-10-17
 
 This checkpoint supersedes the historical status entries below. The latest fully

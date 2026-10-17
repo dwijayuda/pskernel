@@ -64,30 +64,30 @@ def psWellFoundedDecreases (plan : PsWellFoundedRelationPlan)
 
 -- Use the existing typed, read-only conversion rule. Proof irrelevance is
 -- needed for the real sizeOfWFRel/Nat instance proof; no meta is assigned.
-def psWellFoundedDefEq (environment : PsEnvironment) (meta : PsMetaContext)
+def psWellFoundedDefEq (environment : PsEnvironment) (metaContext : PsMetaContext)
     (locals : PsLocalContext) (left right : PsExpr) : Bool :=
-  psDefEqReadOnlyWithTransparencyProofs .«default» environment meta
-    (psInferGroundProofIrrelevanceAt .«default» (psInferType environment meta)
-      environment meta) 256 locals left right
+  psDefEqReadOnlyWithTransparencyProofs .«default» environment metaContext
+    (psInferGroundProofIrrelevanceAt .«default» (psInferType environment metaContext)
+      environment metaContext) 256 locals left right
 
-def psWellFoundedPlanForMeasure (environment : PsEnvironment) (meta : PsMetaContext)
+def psWellFoundedPlanForMeasure (environment : PsEnvironment) (metaContext : PsMetaContext)
     (locals : PsLocalContext) (domain codomain measure dictionary : PsExpr) :
     Except PsInferError PsWellFoundedRelationPlan := do
-  let domainSort ← psInferType environment meta locals domain
-  let domainLevel ← psInferEnsureSort environment meta locals domainSort
-  let codomainSort ← psInferType environment meta locals codomain
-  let codomainLevel ← psInferEnsureSort environment meta locals codomainSort
+  let domainSort ← psInferType environment metaContext locals domain
+  let domainLevel ← psInferEnsureSort environment metaContext locals domainSort
+  let codomainSort ← psInferType environment metaContext locals codomain
+  let codomainLevel ← psInferEnsureSort environment metaContext locals codomainSort
   let pulled := psReduceApply (.constE (psRootName "invImage") [domainLevel, codomainLevel])
     [domain, codomain, measure, dictionary]
   -- Inference checks the actual measure domain/codomain and dictionary type.
-  let pulledType ← psInferType environment meta locals pulled
+  let pulledType ← psInferType environment metaContext locals pulled
   let expected := PsExpr.app (.constE psWellFoundedRelationName [domainLevel]) domain
-  if !psWellFoundedDefEq environment meta locals pulledType expected then
+  if !psWellFoundedDefEq environment metaContext locals pulledType expected then
     throw .applicationTypeMismatch
   let nat := PsExpr.constE psNatName []
   let natRelation := PsExpr.constE (psNameAppendStr psNatName "lt_wfRel") []
-  let construction := if psWellFoundedDefEq environment meta locals codomain nat &&
-      psWellFoundedDefEq environment meta locals dictionary natRelation then
+  let construction := if psWellFoundedDefEq environment metaContext locals codomain nat &&
+      psWellFoundedDefEq environment metaContext locals dictionary natRelation then
     PsWellFoundedConstruction.natMeasure measure
   else
     -- Both projections retain the real checked inverse-image dictionary.
@@ -128,10 +128,20 @@ def psWellFoundedFixApplicationView (head : PsExpr) (arguments : List PsExpr) :
   if psNameEq name psWellFoundedFixName then
     let domain :: motive :: measure :: functional :: major :: rest := arguments
       | throw .expectedFunction
-    return some { plan := { domain, construction := .natMeasure measure }
-      levels, motive, functional, major, arguments := rest }
+    return some {
+      plan := { domain, construction := .natMeasure measure }
+      levels := levels
+      motive := motive
+      functional := functional
+      major := major
+      arguments := rest }
   else
     let domain :: motive :: relation :: wellFounded :: functional :: major :: rest := arguments
       | throw .expectedFunction
-    return some { plan := { domain, construction := .relation relation wellFounded }
-      levels, motive, functional, major, arguments := rest }
+    return some {
+      plan := { domain, construction := .relation relation wellFounded }
+      levels := levels
+      motive := motive
+      functional := functional
+      major := major
+      arguments := rest }

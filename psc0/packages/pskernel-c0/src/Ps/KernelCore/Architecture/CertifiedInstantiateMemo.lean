@@ -25,6 +25,9 @@ structure PsKernelC0InstOneMemoEntry (replacement : PsKernelExpr) where
   expr : PsKernelExpr
   offset : Nat
   exact : PsKernelC0InstOneExact replacement expr offset
+  /-- Optional depth-4 lookup hint for a large colliding bucket only.
+      This is neither a substitution result nor an equality certificate. -/
+  deepBucket : Option Nat := none
 
 abbrev PsKernelC0InstOneMemo (replacement : PsKernelExpr) :=
   PsKernelC0HashTrie (PsKernelC0InstOneMemoEntry replacement)
@@ -33,37 +36,62 @@ private def psKernelC0InstOneMemoHash
     (expr : PsKernelExpr) (offset : Nat) : Nat :=
   psKernelCacheMix (psKernelC0MemoShapeHash 3 expr) offset
 
+private def psKernelC0InstOneMemoDeepHash
+    (expr : PsKernelExpr) (offset : Nat) : Nat :=
+  psKernelCacheMix (psKernelC0MemoShapeHash 4 expr) offset
+
+/-- Below this limit, an additional shape pass would usually cost more than
+the small exact-match search. Only a full bucket crosses into the deeper
+filter, and that transition is local to this one substitution operation. -/
+private def psKernelC0InstOneMemoSplitLimit : Nat := 32
+
 private def psKernelC0InstOneMemoFind
     {replacement : PsKernelExpr}
-    (expr : PsKernelExpr) (offset : Nat) :
+    (expr : PsKernelExpr) (offset : Nat) (deep : Option Nat) :
     List (PsKernelC0InstOneMemoEntry replacement) →
       Option (PsKernelC0InstOneExact replacement expr offset)
   | [] => none
   | entry :: rest =>
-      -- The binder offset is an integral part of the certified key.
-      -- Reject a different offset BEFORE running potentially expensive
-      -- exact structural equality on a collision-heavy syntax bucket.
+      -- Scope compatibility precedes all expensive structural equality.
       if ho : entry.offset = offset then
-        match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
-        | .isTrue he =>
-            some (by
-              cases he
-              cases ho
-              exact entry.exact)
-        | .isFalse _ =>
-            psKernelC0InstOneMemoFind expr offset rest
-      else
-        psKernelC0InstOneMemoFind expr offset rest
+        let eligible :=
+          match deep with
+          | some selector => entry.deepBucket == some selector
+          | none => true
+        if eligible then
+          match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+          | .isTrue he =>
+              some (by
+                cases he
+                cases ho
+                exact entry.exact)
+          | .isFalse _ =>
+              psKernelC0InstOneMemoFind expr offset deep rest
+        else psKernelC0InstOneMemoFind expr offset deep rest
+      else psKernelC0InstOneMemoFind expr offset deep rest
 
 private def psKernelC0InstOneMemoLookup
     {replacement : PsKernelExpr}
     (expr : PsKernelExpr) (offset : Nat)
     (memo : PsKernelC0InstOneMemo replacement) :
     Option (PsKernelC0InstOneExact replacement expr offset) :=
-  psKernelC0InstOneMemoFind expr offset
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (psKernelC0InstOneMemoHash expr offset))
+  let entries :=
+    psKernelC0TrieBucket psKernelC0IndexDepth memo
+      (psKernelC0InstOneMemoHash expr offset)
+  let deep :=
+    match entries with
+    | first :: _ =>
+        if first.deepBucket.isSome then
+          some (psKernelC0InstOneMemoDeepHash expr offset)
+        else none
+    | [] => none
+  psKernelC0InstOneMemoFind expr offset deep entries
 
+/-- Optionally upgrade a hash bucket ONLY after a heavy same-shape collision
+has been witnessed. Every old entry gets its deterministic depth-4 lookup
+hint exactly once; subsequent entries in that bucket get one such hint.
+Even if a hint misses, the original source computation is rerun, and exact
+proof-constrained expression+offset equality remains required for any hit. -/
 private def psKernelC0InstOneMemoInsert
     {replacement : PsKernelExpr}
     {expr : PsKernelExpr} {offset : Nat}
@@ -71,9 +99,28 @@ private def psKernelC0InstOneMemoInsert
     (checked : PsKernelC0InstOneExact replacement expr offset) :
     PsKernelC0InstOneMemo replacement :=
   let hash := psKernelC0InstOneMemoHash expr offset
-  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
-  psKernelC0TrieSet psKernelC0IndexDepth memo hash
-    ({ expr := expr, offset := offset, exact := checked } :: bucket)
+  let entries := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
+  let candidate : PsKernelC0InstOneMemoEntry replacement :=
+    { expr := expr, offset := offset, exact := checked }
+  let inserted :=
+    match entries with
+    | [] => [candidate]
+    | first :: _ =>
+        if first.deepBucket.isSome then
+          { candidate with
+            deepBucket := some (psKernelC0InstOneMemoDeepHash expr offset) }
+            :: entries
+        else if entries.length < psKernelC0InstOneMemoSplitLimit then
+          candidate :: entries
+        else
+          let upgraded := entries.map (fun old =>
+            { old with
+              deepBucket := some
+                (psKernelC0InstOneMemoDeepHash old.expr old.offset) })
+          { candidate with
+            deepBucket := some (psKernelC0InstOneMemoDeepHash expr offset) }
+            :: upgraded
+  psKernelC0TrieSet psKernelC0IndexDepth memo hash inserted
 
 private def psKernelC0InstOneMemoStore
     {replacement expr : PsKernelExpr} {offset : Nat}

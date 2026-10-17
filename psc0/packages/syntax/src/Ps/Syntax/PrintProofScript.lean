@@ -579,10 +579,10 @@ def psPrintProofScriptDeclaration
       let printedBinders ← psPrintProofScriptDeclarationBinders binders
       let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
       let printedValue ← psPrintProofScriptTerm value
-      let prefix := match declaration with
+      let declarationPrefix := match declaration with
         | .noncomputableDefinition .. => "noncomputable def "
         | _ => "def "
-      return prefix ++ printedName ++ printedBinders ++
+      return declarationPrefix ++ printedName ++ printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
       let printedName ← psPrintSyntaxName name

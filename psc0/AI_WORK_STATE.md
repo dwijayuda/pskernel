@@ -1,5 +1,7 @@
 # PSC0 v7.2 AI work state — 18 October 2026
 
+Preparation39076689910 at c1ed399d stopped at Lean parsing: the environment record-update application needed explicit continuation indentation, and `prefix` is a reserved parser keyword in both printers. These authoring defects are corrected together; no acceptance behavior or runtime criterion changed. Source-policy qualification remains pending.
+
 ## Mission and constraints
 
 Complete M3+B autonomously against the six written exits in [the roadmap](docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md#m3b-detailed-exit--v72) and [the exit ledger](docs/PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md). M2+A is complete at 2a7072064974cb0d051a1773a26caf15fc59838b. M3+B is open; M4+C/D and M5+E follow. Do not stop merely because a slice passes.

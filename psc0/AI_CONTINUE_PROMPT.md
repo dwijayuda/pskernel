@@ -1,5 +1,7 @@
 # Continue PSC0 v7.2 — Complete M3+B autonomously
 
+Preparation39076689910 at c1ed399d stopped at Lean parsing: the environment record-update application needed explicit continuation indentation, and `prefix` is a reserved parser keyword in both printers. These authoring defects are corrected together; no acceptance behavior or runtime criterion changed. Source-policy qualification remains pending.
+
 ## Noncomputable source-policy candidate — 18 October 2026
 
 Main integration is running at de6679464cac9780bae7066052714c53984dbd00. F1 39076409639, F2 39076409495 and F3 39076409521 succeeded; Native39076409463 and focused M3 39076409661 remain running. Do not supersede healthy Native. Last accepted complete five-gate main remains f271f2a35789b120dbe1a6dcd5a555db44e72134.

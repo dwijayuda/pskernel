@@ -525,10 +525,10 @@ def psPrintLeanDeclaration
       let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
       let annotation ← psPrintDeclarationResult psPrintLeanTerm type
       let printedValue ← psPrintLeanTerm value
-      let prefix := match declaration with
+      let declarationPrefix := match declaration with
         | .noncomputableDefinition .. => "noncomputable def "
         | _ => "def "
-      return prefix ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
+      return declarationPrefix ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
       let printedName ← psPrintSyntaxName name

@@ -212,14 +212,16 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
     let first ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 0
     let id := context.localContext.nextId
     let initial := psSelfHostListConsOf psFormatType first (.fvar id)
+    -- This bound do-if shares the enclosing return continuation. Yield its
+    -- body with pure so every path reaches the accumulator lambda below.
     let body ←
       if let some child := hypotheses.find? (fun hypothesis => hypothesis.fieldId == right.id) then do
         let some target := plan.elimination.slots[child.target]?
           | throw (.data "Repr Prod right target slot is absent")
-        if psElabDeriveReprIsProdSlot target then return PsExpr.app child.value initial
+        if psElabDeriveReprIsProdSlot target then pure (PsExpr.app child.value initial)
         else
           let rendered ← psElabDeriveReprHypothesis plan atomic child 0
-          return psSelfHostListConsOf psFormatType rendered initial
+          pure (psSelfHostListConsOf psFormatType rendered initial)
       else do
         let some (some tuple) := entry.tuples[1]?
           | throw (.data "Repr Prod right field has no checked tuple dictionary")

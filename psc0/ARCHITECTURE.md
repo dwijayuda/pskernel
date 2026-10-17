@@ -1,4 +1,55 @@
-## M3+B current architecture checkpoint — precise nested recursor failure trace
+## M3+B current architecture checkpoint — preserve the nested Repr accumulator binder
+
+Compiler/test parent: `8390cdc647ce0f5e5bd45678f000795ea5afb93c`.
+Latest fully accepted compiler/test remains
+`fbbc5271419dde8b183be723f07ff1f75a462013`.
+M3+B remains open at the existing accepted weighted estimate of 67/100;
+this repair adds no accepted points until all five gates pass at one SHA.
+
+At the parent, native [38987840319](https://github.com/dwijayuda/pskernel/actions/runs/38987840319),
+F1 [38987840312](https://github.com/dwijayuda/pskernel/actions/runs/38987840312),
+F2 [38987840405](https://github.com/dwijayuda/pskernel/actions/runs/38987840405)
+and F3/F4 [38987840305](https://github.com/dwijayuda/pskernel/actions/runs/38987840305)
+passed. Focused [38987840331](https://github.com/dwijayuda/pskernel/actions/runs/38987840331)
+(job 117263334273) passed Where and the original GroupProof worker invariant,
+then rejected nested Repr during closed minor inference.
+
+The exact failed term for the outer Prod minor contains
+`ihRight (List.cons Format (ihLeft 0) $39)` without its required
+`fun tail : List Format => ...`. The orphan accumulator is subsequently
+looked up as the reopened `fst : Display` binder, explaining the reported
+List Format versus Display argument mismatch. The actual constructor,
+closed motives, field order and checked IH ownership are consistent.
+
+The cause is the two `return` expressions inside the bound
+`let body ← if ...` in `psElabDeriveReprContainerBranch`. Pinned Lean
+4.35.0's `Lean/Elab/BuiltinDo/Basic.lean:elabDoIdDecl` elaborates that RHS
+with the enclosing return continuation; `BuiltinDo/Jump.lean:elabDoReturn`
+invokes that continuation instead of the binder's success continuation.
+Thus both recursive-right branches could leave the function before
+`psLogicLam` closes the accumulator. The old elaborator's
+`Do/Legacy.lean:doLetArrowToCode` and flattened `doNested` agree.
+Source pin: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+
+Both branches now yield with `pure`, matching the independent tuple
+dictionary branch, so all successful paths construct the same tail lambda.
+The correction covers both a nested Prod right IH and a non-Prod right IH.
+It changes only Repr term construction; no recursor, unifier, runtime,
+assumption or acceptance owner is changed. Existing native strings,
+source/equation checks, target outputs, worker invariants and all workloads
+remain unchanged. The existing failure already provides the regression case.
+
+Next: inspect all five automatically triggered qualification gates for this
+repair at the same compiler/test SHA; repair any actual remaining failure.
+Then integrate the highest-priority reviewed M3+B slice. Optional main-result
+inference is being independently reconstructed/reviewed; WF foundation,
+relation selection, empty dictionaries, dependent packing and indexed
+deriving remain unqualified staged obligations. No P1 support is claimed
+beyond its existing fail-closed Classical.choice audit.
+
+---
+
+## M3+B preceding architecture checkpoint — precise nested recursor failure trace
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),

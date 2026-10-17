@@ -124,6 +124,198 @@ def psKernelFindUndefExprLevelParam
   | _ =>
       Option.none
 
+/-!
+A source-exact, per-query memo for the FIRST undefined universe level name in
+an expression. The original recursive function above remains the specification.
+
+The allowed universe-parameter list is FIXED for the entire memo's lifetime
+and is a type-level index on every stored result. The immutable trie hashes
+select a bucket only; every candidate uses proof-constrained pointer/structural
+equality. Neither a hash collision nor any previously checked environment
+can grant admission or change which offending name is reported.
+-/
+
+structure PsKernelC0ExactUndef
+    (allowed : List PsKernelName) (expr : PsKernelExpr) where
+  value : Option PsKernelName
+  source : value = psKernelFindUndefExprLevelParam expr allowed
+
+structure PsKernelC0UndefMemoEntry (allowed : List PsKernelName) where
+  expr : PsKernelExpr
+  certified : PsKernelC0ExactUndef allowed expr
+
+abbrev PsKernelC0UndefMemo (allowed : List PsKernelName) :=
+  PsKernelC0HashTrie (PsKernelC0UndefMemoEntry allowed)
+
+private def psKernelC0UndefMemoFind
+    {allowed : List PsKernelName} (expr : PsKernelExpr) :
+    List (PsKernelC0UndefMemoEntry allowed) →
+      Option (PsKernelC0ExactUndef allowed expr)
+  | [] => none
+  | entry :: rest =>
+      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      | .isTrue equal =>
+          some (by
+            cases equal
+            exact entry.certified)
+      | .isFalse _ =>
+          psKernelC0UndefMemoFind expr rest
+
+private def psKernelC0UndefMemoLookup
+    (allowed : List PsKernelName) (expr : PsKernelExpr)
+    (memo : PsKernelC0UndefMemo allowed) :
+    Option (PsKernelC0ExactUndef allowed expr) :=
+  psKernelC0UndefMemoFind expr
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo
+      (psKernelC0MemoShapeHash 4 expr))
+
+private def psKernelC0UndefMemoStore
+    {allowed : List PsKernelName} {expr : PsKernelExpr}
+    (memo : PsKernelC0UndefMemo allowed)
+    (checked : PsKernelC0ExactUndef allowed expr) :
+    PsKernelC0ExactUndef allowed expr × PsKernelC0UndefMemo allowed :=
+  let hash := psKernelC0MemoShapeHash 4 expr
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
+  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
+    ({expr := expr, certified := checked} :: bucket))
+
+/-- Combine two source-proven independent results in original left-to-right
+order, retaining the FIRST offender and never reordering two distinct names. -/
+private def psKernelC0UndefFirst
+    (first second : Option PsKernelName) : Option PsKernelName :=
+  match first with
+  | some name => some name
+  | none => second
+
+/-- Independently computes the exact original first offending name, threading
+one certified immutable memo across descendants in a shared expression DAG. -/
+def psKernelC0UndefMemoGo (allowed : List PsKernelName) :
+    (expr : PsKernelExpr) → PsKernelC0UndefMemo allowed →
+      PsKernelC0ExactUndef allowed expr × PsKernelC0UndefMemo allowed
+  | expr, memo =>
+      match psKernelC0UndefMemoLookup allowed expr memo with
+      | some checked => (checked, memo)
+      | none =>
+          match expr with
+          | .app fn arg =>
+              let (f, m1) := psKernelC0UndefMemoGo allowed fn memo
+              let (a, m2) := psKernelC0UndefMemoGo allowed arg m1
+              let checked : PsKernelC0ExactUndef allowed (.app fn arg) :=
+                ⟨psKernelC0UndefFirst f.value a.value, by
+                  change psKernelC0UndefFirst f.value a.value =
+                    (match psKernelFindUndefExprLevelParam fn allowed with
+                     | some name => some name
+                     | none => psKernelFindUndefExprLevelParam arg allowed)
+                  rw [← f.source, ← a.source]
+                  rfl⟩
+              psKernelC0UndefMemoStore m2 checked
+          | .lam name ty body info =>
+              let (t, m1) := psKernelC0UndefMemoGo allowed ty memo
+              let (b, m2) := psKernelC0UndefMemoGo allowed body m1
+              let checked : PsKernelC0ExactUndef allowed (.lam name ty body info) :=
+                ⟨psKernelC0UndefFirst t.value b.value, by
+                  change psKernelC0UndefFirst t.value b.value =
+                    (match psKernelFindUndefExprLevelParam ty allowed with
+                     | some name => some name
+                     | none => psKernelFindUndefExprLevelParam body allowed)
+                  rw [← t.source, ← b.source]
+                  rfl⟩
+              psKernelC0UndefMemoStore m2 checked
+          | .forallE name ty body info =>
+              let (t, m1) := psKernelC0UndefMemoGo allowed ty memo
+              let (b, m2) := psKernelC0UndefMemoGo allowed body m1
+              let checked : PsKernelC0ExactUndef allowed (.forallE name ty body info) :=
+                ⟨psKernelC0UndefFirst t.value b.value, by
+                  change psKernelC0UndefFirst t.value b.value =
+                    (match psKernelFindUndefExprLevelParam ty allowed with
+                     | some name => some name
+                     | none => psKernelFindUndefExprLevelParam body allowed)
+                  rw [← t.source, ← b.source]
+                  rfl⟩
+              psKernelC0UndefMemoStore m2 checked
+          | .letE name ty val body nondep =>
+              let (t, m1) := psKernelC0UndefMemoGo allowed ty memo
+              let (v, m2) := psKernelC0UndefMemoGo allowed val m1
+              let (b, m3) := psKernelC0UndefMemoGo allowed body m2
+              let checked : PsKernelC0ExactUndef allowed (.letE name ty val body nondep) :=
+                ⟨psKernelC0UndefFirst t.value
+                    (psKernelC0UndefFirst v.value b.value), by
+                  change psKernelC0UndefFirst t.value
+                      (psKernelC0UndefFirst v.value b.value) =
+                    (match psKernelFindUndefExprLevelParam ty allowed with
+                     | some name => some name
+                     | none =>
+                         match psKernelFindUndefExprLevelParam val allowed with
+                         | some name => some name
+                         | none => psKernelFindUndefExprLevelParam body allowed)
+                  rw [← t.source, ← v.source, ← b.source]
+                  rfl⟩
+              psKernelC0UndefMemoStore m3 checked
+          | .mdata md body =>
+              let (b, m1) := psKernelC0UndefMemoGo allowed body memo
+              let checked : PsKernelC0ExactUndef allowed (.mdata md body) :=
+                ⟨b.value, by
+                  change b.value = psKernelFindUndefExprLevelParam body allowed
+                  exact b.source⟩
+              psKernelC0UndefMemoStore m1 checked
+          | .proj name i body =>
+              let (b, m1) := psKernelC0UndefMemoGo allowed body memo
+              let checked : PsKernelC0ExactUndef allowed (.proj name i body) :=
+                ⟨b.value, by
+                  change b.value = psKernelFindUndefExprLevelParam body allowed
+                  exact b.source⟩
+              psKernelC0UndefMemoStore m1 checked
+          | .sort level =>
+              psKernelC0UndefMemoStore memo
+                (⟨psKernelFindUndefLevelParam level allowed, rfl⟩ :
+                  PsKernelC0ExactUndef allowed (.sort level))
+          | .const name levels =>
+              psKernelC0UndefMemoStore memo
+                (⟨psKernelFindUndefInLevels levels allowed, rfl⟩ :
+                  PsKernelC0ExactUndef allowed (.const name levels))
+          | .bvar index =>
+              psKernelC0UndefMemoStore memo
+                (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.bvar index))
+          | .fvar name =>
+              psKernelC0UndefMemoStore memo
+                (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.fvar name))
+          | .mvar name =>
+              psKernelC0UndefMemoStore memo
+                (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.mvar name))
+          | .lit literal =>
+              psKernelC0UndefMemoStore memo
+                (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.lit literal))
+
+def psKernelC0MemoizedFindUndefExprLevelParam
+    (expr : PsKernelExpr) (allowed : List PsKernelName) :
+    Option PsKernelName :=
+  (psKernelC0UndefMemoGo allowed expr .empty).1.value
+
+theorem psKernelC0MemoizedFindUndefExprLevelParam_source
+    (expr : PsKernelExpr) (allowed : List PsKernelName) :
+    psKernelC0MemoizedFindUndefExprLevelParam expr allowed =
+      psKernelFindUndefExprLevelParam expr allowed :=
+  (psKernelC0UndefMemoGo allowed expr .empty).1.source
+
+/-- Pure DAG-shape selector only; the original source remains the exact
+fallback for shallow linear expressions. -/
+def psKernelC0AdaptiveFindUndefExprLevelParam
+    (expr : PsKernelExpr) (allowed : List PsKernelName) :
+    Option PsKernelName :=
+  if psKernelC0FVarMemoComplexApp 8 expr ||
+      psKernelC0FVarMemoBinderPrefix 12 expr then
+    psKernelC0MemoizedFindUndefExprLevelParam expr allowed
+  else psKernelFindUndefExprLevelParam expr allowed
+
+theorem psKernelC0AdaptiveFindUndefExprLevelParam_source
+    (expr : PsKernelExpr) (allowed : List PsKernelName) :
+    psKernelC0AdaptiveFindUndefExprLevelParam expr allowed =
+      psKernelFindUndefExprLevelParam expr allowed := by
+  unfold psKernelC0AdaptiveFindUndefExprLevelParam
+  split
+  · exact psKernelC0MemoizedFindUndefExprLevelParam_source expr allowed
+  · rfl
+
 def psKernelLevelHasMVar
     (level : PsKernelLevel) : Bool :=
   match level with
@@ -455,8 +647,10 @@ def psKernelCheckLevelParams
     (expr : PsKernelExpr)
     (allowed : List PsKernelName) :
     Except String Unit :=
+  -- Source-verified FIRST undefined name, computed without unfolding a
+  -- shared expression DAG exponentially.
   match
-      psKernelFindUndefExprLevelParam
+      psKernelC0AdaptiveFindUndefExprLevelParam
         expr
         allowed with
   | Option.some _ =>
@@ -464,6 +658,19 @@ def psKernelCheckLevelParams
         "invalid reference to undefined universe level parameter"
   | Option.none =>
       Except.ok ()
+
+/-- Prove the COMPLETE original declaration universe-validation result,
+including the first offending parameter and exact error message. -/
+theorem psKernelC0CheckLevelParams_source
+    (expr : PsKernelExpr) (allowed : List PsKernelName) :
+    psKernelCheckLevelParams expr allowed =
+      (match psKernelFindUndefExprLevelParam expr allowed with
+       | some _ =>
+           (Except.error "invalid reference to undefined universe level parameter" :
+             Except String Unit)
+       | none => Except.ok ()) := by
+  simp only [psKernelCheckLevelParams,
+    psKernelC0AdaptiveFindUndefExprLevelParam_source]
 
 def psKernelCheckConstantBaseWithSession
     (fuel : Nat)

@@ -52,7 +52,7 @@ private def psKernelC0DecidableViaIff
 def psKernelC0DeepPtrDecEq :
     (left right : PsKernelExpr) → Decidable (left = right)
   | .app lf la, .app rf ra =>
-      withPtrEqDecEq (.app lf la) (.app rf ra) (fun _ =>
+      withPtrEqDecEq (PsKernelExpr.app lf la) (PsKernelExpr.app rf ra) (fun _ =>
         letI : Decidable (lf = rf) := psKernelC0DeepPtrDecEq lf rf
         letI : Decidable (la = ra) := psKernelC0DeepPtrDecEq la ra
         psKernelC0DecidableViaIff
@@ -60,7 +60,7 @@ def psKernelC0DeepPtrDecEq :
             lf = rf ∧ la = ra by simp)
           (inferInstance : Decidable (lf = rf ∧ la = ra)))
   | .lam ln lt lb li, .lam rn rt rb ri =>
-      withPtrEqDecEq (.lam ln lt lb li) (.lam rn rt rb ri) (fun _ =>
+      withPtrEqDecEq (PsKernelExpr.lam ln lt lb li) (PsKernelExpr.lam rn rt rb ri) (fun _ =>
         letI : Decidable (lt = rt) := psKernelC0DeepPtrDecEq lt rt
         letI : Decidable (lb = rb) := psKernelC0DeepPtrDecEq lb rb
         psKernelC0DecidableViaIff
@@ -69,7 +69,7 @@ def psKernelC0DeepPtrDecEq :
           (inferInstance :
             Decidable (ln = rn ∧ lt = rt ∧ lb = rb ∧ li = ri)))
   | .forallE ln lt lb li, .forallE rn rt rb ri =>
-      withPtrEqDecEq (.forallE ln lt lb li) (.forallE rn rt rb ri) (fun _ =>
+      withPtrEqDecEq (PsKernelExpr.forallE ln lt lb li) (PsKernelExpr.forallE rn rt rb ri) (fun _ =>
         letI : Decidable (lt = rt) := psKernelC0DeepPtrDecEq lt rt
         letI : Decidable (lb = rb) := psKernelC0DeepPtrDecEq lb rb
         psKernelC0DecidableViaIff
@@ -79,7 +79,7 @@ def psKernelC0DeepPtrDecEq :
           (inferInstance :
             Decidable (ln = rn ∧ lt = rt ∧ lb = rb ∧ li = ri)))
   | .letE ln lt lv lb ld, .letE rn rt rv rb rd =>
-      withPtrEqDecEq (.letE ln lt lv lb ld) (.letE rn rt rv rb rd) (fun _ =>
+      withPtrEqDecEq (PsKernelExpr.letE ln lt lv lb ld) (PsKernelExpr.letE rn rt rv rb rd) (fun _ =>
         letI : Decidable (lt = rt) := psKernelC0DeepPtrDecEq lt rt
         letI : Decidable (lv = rv) := psKernelC0DeepPtrDecEq lv rv
         letI : Decidable (lb = rb) := psKernelC0DeepPtrDecEq lb rb
@@ -90,14 +90,14 @@ def psKernelC0DeepPtrDecEq :
           (inferInstance :
             Decidable (ln = rn ∧ lt = rt ∧ lv = rv ∧ lb = rb ∧ ld = rd)))
   | .mdata lm le, .mdata rm re =>
-      withPtrEqDecEq (.mdata lm le) (.mdata rm re) (fun _ =>
+      withPtrEqDecEq (PsKernelExpr.mdata lm le) (PsKernelExpr.mdata rm re) (fun _ =>
         letI : Decidable (le = re) := psKernelC0DeepPtrDecEq le re
         psKernelC0DecidableViaIff
           (show PsKernelExpr.mdata lm le = PsKernelExpr.mdata rm re ↔
             lm = rm ∧ le = re by simp)
           (inferInstance : Decidable (lm = rm ∧ le = re)))
   | .proj ln li le, .proj rn ri re =>
-      withPtrEqDecEq (.proj ln li le) (.proj rn ri re) (fun _ =>
+      withPtrEqDecEq (PsKernelExpr.proj ln li le) (PsKernelExpr.proj rn ri re) (fun _ =>
         letI : Decidable (le = re) := psKernelC0DeepPtrDecEq le re
         psKernelC0DecidableViaIff
           (show PsKernelExpr.proj ln li le = PsKernelExpr.proj rn ri re ↔

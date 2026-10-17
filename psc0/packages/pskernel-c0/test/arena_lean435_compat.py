@@ -97,7 +97,7 @@ def parse_official_reference_result(output: str, returncode: int) -> dict:
                 "returncode": returncode, "reason": "official_leanchecker_verdict"}
     lines = [line.strip() for line in output.splitlines() if line.strip()]
     if (returncode != 0 and not ok and not bad and len(lines) == 1 and
-        re.fullmatch(r"uncaught exception: Duplicate declaration: [^\\s]+", lines[0])):
+        re.fullmatch(r"uncaught exception: Duplicate declaration: \S+", lines[0])):
         return {"verdict": "rejected", "returncode": returncode,
                 "reason": "official_kernel_duplicate_declaration"}
     return {"verdict": "driver_error", "returncode": returncode,

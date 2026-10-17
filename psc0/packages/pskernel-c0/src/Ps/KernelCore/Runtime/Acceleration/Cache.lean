@@ -396,6 +396,9 @@ structure PsKernelC0ExactHash (expr : PsKernelExpr) where
 structure PsKernelC0HashMemoEntry where
   expr : PsKernelExpr
   checkedHash : PsKernelC0ExactHash expr
+  /-- This is ONLY an optional deterministic secondary lookup hint.
+      Never a certificate of expression equality or hash correctness. -/
+  deepBucket : Option Nat := none
 
 abbrev PsKernelC0ExactHashMemo :=
   PsKernelC0HashTrie PsKernelC0HashMemoEntry
@@ -403,28 +406,55 @@ abbrev PsKernelC0ExactHashMemo :=
 private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :=
   psKernelC0MemoShapeHash 4 expr
 
+/-- The secondary selector becomes worthwhile only after a genuine
+collision-heavy four-level bucket has grown large. Other nodes never
+pay for depth-5 shape hashing. -/
+private def psKernelC0HashMemoSplitLimit : Nat := 32
+
 private def psKernelC0HashMemoFind
-    (expr : PsKernelExpr) :
+    (expr : PsKernelExpr) (deep : Option Nat) :
     List PsKernelC0HashMemoEntry → Option (PsKernelC0ExactHash expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
-      | .isTrue h =>
-          some {
-            value := entry.checkedHash.value
-            source := entry.checkedHash.source.trans
-              (congrArg psKernelExprHash h.symm)
-          }
-      | .isFalse _ => psKernelC0HashMemoFind expr rest
+      let eligible :=
+        match deep with
+        | some selector => entry.deepBucket == some selector
+        | none => true
+      if eligible then
+        match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+        | .isTrue h =>
+            some {
+              value := entry.checkedHash.value
+              source := entry.checkedHash.source.trans
+                (congrArg psKernelExprHash h.symm)
+            }
+        | .isFalse _ => psKernelC0HashMemoFind expr deep rest
+      else psKernelC0HashMemoFind expr deep rest
 
+/-- A missing or misclassified secondary hint cannot *create* a kernel fact:
+the exact typed identity proof is required on every hit, and misses fall
+back to structural source hash computation. The entire memo is local to one
+hash operation. -/
 private def psKernelC0HashMemoLookup
     (expr : PsKernelExpr)
     (memo : PsKernelC0ExactHashMemo) :
     Option (PsKernelC0ExactHash expr) :=
-  psKernelC0HashMemoFind expr
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (psKernelC0HashMemoBucket expr))
+  let entries :=
+    psKernelC0TrieBucket psKernelC0IndexDepth memo
+      (psKernelC0HashMemoBucket expr)
+  let deep :=
+    match entries with
+    | first :: _ =>
+        if first.deepBucket.isSome then
+          some (psKernelC0MemoShapeHash 5 expr)
+        else none
+    | [] => none
+  psKernelC0HashMemoFind expr deep entries
 
+/-- Upgrade ONLY a bucket that grows past 32 exact-hash memo entries.
+All its old entries receive deterministic depth-5 secondary keys once.
+Thereafter insertions calculate the extra hash only for that large bucket,
+and exact expression equality remains the ultimate hit criterion. -/
 private def psKernelC0HashMemoInsert
     (expr : PsKernelExpr)
     (value : PsKernelC0ExactHash expr)
@@ -433,8 +463,24 @@ private def psKernelC0HashMemoInsert
   let bucketHash := psKernelC0HashMemoBucket expr
   let entries :=
     psKernelC0TrieBucket psKernelC0IndexDepth memo bucketHash
-  psKernelC0TrieSet psKernelC0IndexDepth memo bucketHash
-    ({ expr := expr, checkedHash := value } :: entries)
+  let candidate : PsKernelC0HashMemoEntry :=
+    { expr := expr, checkedHash := value }
+  let inserted :=
+    match entries with
+    | [] => [candidate]
+    | first :: _ =>
+        if first.deepBucket.isSome then
+          { candidate with
+            deepBucket := some (psKernelC0MemoShapeHash 5 expr) } :: entries
+        else if entries.length < psKernelC0HashMemoSplitLimit then
+          candidate :: entries
+        else
+          let upgraded := entries.map (fun old =>
+            { old with
+              deepBucket := some (psKernelC0MemoShapeHash 5 old.expr) })
+          { candidate with
+            deepBucket := some (psKernelC0MemoShapeHash 5 expr) } :: upgraded
+  psKernelC0TrieSet psKernelC0IndexDepth memo bucketHash inserted
 
 /-- A source-certified hash and the updated operation-local memo. -/
 private def psKernelC0ExactHashStore

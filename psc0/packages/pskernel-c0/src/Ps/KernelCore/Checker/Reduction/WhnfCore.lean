@@ -78,7 +78,7 @@ def psKernelWhnfCoreFinishWithKnownHash
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if cheapProj || !psKernelSemanticCacheEligible original then
+  if cheapProj || !psKernelC0FastSemanticCacheEligible original then
     Except.ok (Prod.mk result state)
   else
     let nextCache :=
@@ -109,7 +109,7 @@ def psKernelWhnfFinish
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if psKernelSemanticCacheEligible original then
+  if psKernelC0FastSemanticCacheEligible original then
     let nextCache := psKernelExprMapInsert state.whnf original result
     Except.ok (Prod.mk result
       (psKernelCheckerStateWithWhnf state nextCache))
@@ -259,7 +259,7 @@ def psKernelWhnfCoreWithFuelRanges
                       | _ => letFrames
                   | _ => []
                 let cached :=
-                  if psKernelSemanticCacheEligible expr then
+                  if psKernelC0FastSemanticCacheEligible expr then
                     match currentFrames with
                     | (_, hash) :: _ =>
                         psKernelExprMapGetWithKnownHash state.whnfCore expr

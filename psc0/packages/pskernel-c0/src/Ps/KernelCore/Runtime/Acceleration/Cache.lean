@@ -411,7 +411,7 @@ private def psKernelC0HashMemoFind
       -- The dependent proof-carrying exact test now shortcuts shared
       -- pointer children at EVERY level, not merely at the root.
       -- Any structural mismatch still causes a miss, never admission.
-      match psKernelC0DeepPtrDecEq expr entry.expr with
+      match psKernelC0ExactPairEq expr entry.expr with
       | .isTrue h =>
           some {
             value := entry.checkedHash.value

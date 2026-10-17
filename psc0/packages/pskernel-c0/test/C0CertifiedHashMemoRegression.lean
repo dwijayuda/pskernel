@@ -31,6 +31,23 @@ def main : IO Unit := do
   let f : PsKernelExpr := .fvar one
   let x : PsKernelExpr := .bvar 0
   let base : PsKernelExpr := .app (.const one [.zero]) (.lit (.nat 2))
+  -- Cheap leaf hashes are already the original source formula.
+  -- The optimized worker must return that proof WITHOUT extending its
+  -- operation-local trie with an unnecessary leaf memo entry.
+  let bv : PsKernelExpr := .bvar 13
+  let natLeaf : PsKernelExpr := .lit (.nat 2048)
+  let (bvCert, bvMemo) := psKernelC0ExactHashWithMemo bv .empty
+  let (natCert, natMemo) := psKernelC0ExactHashWithMemo natLeaf .empty
+  let _bvSource : bvCert.value = psKernelExprHash bv := bvCert.source
+  let _natSource : natCert.value = psKernelExprHash natLeaf := natCert.source
+  if bvCert.value != psKernelExprHash bv ||
+      natCert.value != psKernelExprHash natLeaf then
+    throw (IO.userError "source-certified direct leaf hash mismatch")
+  match bvMemo, natMemo with
+  | .empty, .empty => pure ()
+  | _, _ => throw (IO.userError "cheap leaf hash unnecessarily mutated memo")
+  IO.println "C0_CERTIFIED_HASH_MEMO direct_bvar_nat_leaves=source_exact memo_unchanged=true"
+
   let all : List PsKernelExpr := [
     .bvar 0, .bvar 13, .fvar one, .mvar one,
     .sort .zero, .sort (.max .zero (.succ .zero)),

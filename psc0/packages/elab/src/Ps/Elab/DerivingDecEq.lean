@@ -168,8 +168,20 @@ def psElabDeriveDecEqRightCases (plan : PsElabDeriveContext)
   psElabDeriveEliminateSlotAt plan context slotIndex member.family true
     (fun rightIndex _ _ right =>
       if rightIndex == slotIndex then target right else psDecisionType truth)
-    (fun rightContext rightIndex _ rightConstructor rightFields _ right => do
+    (fun rightContext rightIndex _ rightConstructor rightFields rightHypotheses right => do
       if rightIndex != slotIndex then return trivial
+      -- Cases evidence is not used by the decision. Keep its real minor
+      -- binders outside, but do not let equality substitution reopen and
+      -- reapply an unused right IH as a dependent proof-context argument.
+      let hidden ← rightHypotheses.mapM fun hypothesis => do
+        let .fvar id := hypothesis.value
+          | throw (.data "DecidableEq right hypothesis is not a local")
+        pure id
+      let localContext := {
+        rightContext.localContext with
+        declarations := rightContext.localContext.declarations.filter
+          (fun declaration => !hidden.contains (psLocalDeclId declaration)) }
+      let rightContext := psElabContextWithLocal rightContext localContext
       if !psNameEq constructor.info.name rightConstructor.info.name then
         return ← psElabDeriveDecEqDifferent member rightContext constructor.info left right
       let some entry := constructors.find? (fun candidate =>

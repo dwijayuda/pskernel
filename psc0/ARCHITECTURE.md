@@ -1,4 +1,4 @@
-## M3+B current architecture checkpoint — source qualification and nested failure diagnosis
+## M3+B current architecture checkpoint — right-case induction scope and generated-argument diagnostics
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
@@ -13,6 +13,58 @@ M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
 55–75% engineering uncertainty). All six weights remain data 30, source 15,
 total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
 are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Right-case induction scope and generated-argument diagnostics
+
+Compiler/test `bfede05f9e6e8f4444b5d0539b59b74e9acd23cf` passed
+native [38985507691](https://github.com/dwijayuda/pskernel/actions/runs/38985507691)
+(job 117255929670, all 34 reported steps), F1
+[38985507686](https://github.com/dwijayuda/pskernel/actions/runs/38985507686),
+F2 [38985507695](https://github.com/dwijayuda/pskernel/actions/runs/38985507695)
+and F3/F4 [38985507705](https://github.com/dwijayuda/pskernel/actions/runs/38985507705).
+Native artifact 12083525971 contains 6,795,650 bytes; its archive SHA-256 is
+`e80b981ba2734b2d0a7c227184cf7e2df4ff5228d5b3f02bc4652350436d5bfb`.
+This includes the original source/Standard, module, GC/component,
+TypeScript, Rust, repeated Wasmtime and measurement gates. The prior
+`6a8bc71c` native run 38984039232 also completed all 34 steps successfully.
+
+Focused [38985507703](https://github.com/dwijayuda/pskernel/actions/runs/38985507703)
+(job 117255929507) compiled all fixtures and passed Where's complete source,
+capture/SCC, local-WF and emission checks. It then reported
+`derive M3NestedDisplay.Repr: PSCV0-ELABORATION: application argument type mismatch`
+and the unchanged GroupProof left-IH worker invariant. Target execution
+was skipped. Four passing gates therefore do not accept this compiler.
+
+The concrete GroupProof cause is unused right-side induction hypotheses
+remaining in the context consumed by equality substitution. Self-recursive
+right IH types mention the right child; dependency reopening consequently
+reapplies those unused IHs inside the proof, making recursor lifting retain
+extra workers. The right-case callback now removes only the actual right-IH
+local IDs from its proof-construction context. Their complete real lambda
+binders remain in the enclosing checked minor. All left IHs, actual fields,
+family parameters and checked target remain unchanged. The removed IHs
+were opened after the fields/captures and cannot be dependencies of those
+earlier declarations. No recursion, erasure or worker-count policy changes.
+The fixture still requires exactly two two-member worker groups with three
+captures, and reports actual worker/recursor identities on failure.
+
+The nested Repr cause is not yet established. The shared actual-recursor
+argument walker now accepts an optional error decorator, defaulting to
+identity; it decorates only its existing ensure-forall, generation, inference
+and unification failures. Deriving supplies the actual slot recursor and,
+for minors, the actual constructor identity. Final method checking retains
+the selected recursor context. The successful checked terms, processing
+order and inferences are identical; the next cloud log must identify the
+failing argument before a semantic correction is selected.
+
+This coherent checkpoint changes three elaborator modules, one diagnostic
+fixture and the four handoff/architecture/roadmap records. No expected value,
+source fixture, request count, output/export, budget, pin, Core/kernel policy
+or backend behavior is changed. Qualify all five gates at one exact new
+compiler/test SHA. The accepted baseline and weighted estimate above remain
+unchanged. Reviewed WF foundation/relation/empty-dictionary, omitted-result
+inference and indexed dependent-case candidates remain separate unqualified
+work; dependent unary argument packing is being prepared in isolation.
 
 ### Source qualification repair and precise failure context
 

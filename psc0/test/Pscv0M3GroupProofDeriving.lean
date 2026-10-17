@@ -475,9 +475,14 @@ def main (args : List String) : IO Unit := do
   let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
     { environment := runtime.result.environment, declarations }).mapError psCompilerPscv0Error)
   let workers := prepared.prepared.recursorWorkerGroups
+  let workerDescription := String.intercalate "; " (workers.map fun group =>
+    "captures=" ++ toString group.captureCount ++ " workers=[" ++
+      String.intercalate ", " (group.workers.map fun worker =>
+        psNameToString worker.name ++ ":" ++ psNameToString (psRecursorWorkerRecursorName worker)) ++ "]")
   ensure (workers.length == 2 && workers.all (fun group =>
     group.workers.length == 2 && group.captureCount == 3))
-    "mutual decisions lost actual left IH workers or traversed right-side/projection IHs"
+    ("mutual decisions lost actual left IH workers or traversed right-side/projection IHs; " ++
+      "actual groups=" ++ toString workers.length ++ " [" ++ workerDescription ++ "]")
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
   let admitted ← checked runtime.result.environment prelude prepared.prepared.declarations

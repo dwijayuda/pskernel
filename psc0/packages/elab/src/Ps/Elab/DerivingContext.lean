@@ -330,6 +330,7 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
         context := psElabLeaveScope current opened.context
         term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
     recursor.context recursor.cursor
+    (fun (slot, _) error => .atDeclaration slot.recursorName error)
   -- Apply these closed motives in branch scopes. Reinvoking a callback after
   -- opening fields could capture one of its synthetic local IDs, notably the
   -- right-hand argument in the existing DecidableEq singleton consumer.
@@ -376,12 +377,15 @@ def psElabDeriveEliminateSlotAt (plan : PsElabDeriveContext)
         context := psElabLeaveScope current opened.context
         term := psCloseElabLambdaBinders opened.context.metaContext opened.bindersRev body })
     motives.context motives.cursor
+    (fun (_, slot, constructor) error =>
+      .atDeclaration slot.recursorName (.atDeclaration constructor.info.name error))
   let term := psLogicLam major.id "value" family
     (psExprApplyMany (.constE selected.recursorName recursor.levels)
       (parameters ++ motives.arguments ++ minors.arguments ++
         indices ++ [.fvar major.id]))
-  let checked ← psElabResolvedTerm (psElabLeaveScope context minors.context) term
-    (some (psLogicPi major.id "value" family resultType))
+  let checked ← (psElabResolvedTerm (psElabLeaveScope context minors.context) term
+    (some (psLogicPi major.id "value" family resultType))).mapError
+      (.atDeclaration selected.recursorName)
   return checked.term
 
 -- Public handlers retain their selected family and index telescope. Binary

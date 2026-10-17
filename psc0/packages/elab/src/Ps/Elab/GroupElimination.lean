@@ -13,28 +13,31 @@ structure PsElabRecursorArguments where
   arguments : List PsExpr
   cursor : PsExpr
 
+-- Callers may retain the source owner of a generated argument on failure.
+-- The default leaves the original error and all checked argument work intact.
 def psElabRecursorArguments {α : Type} (items : List α)
     (make : PsElabContext → α → PsExpr → Except PsElabError PsElabRecursorArgument)
-    (context : PsElabContext) (cursor : PsExpr) :
+    (context : PsElabContext) (cursor : PsExpr)
+    (decorate : α → PsElabError → PsElabError := fun _ error => error) :
     Except PsElabError PsElabRecursorArguments := do
   match items with
   | [] => return { context, arguments := [], cursor }
   | item :: rest =>
     let pi ← (psInferEnsureForall context.environment context.metaContext
-      context.localContext cursor).mapError PsElabError.infer
-    let argument ← make context item pi.domain
+      context.localContext cursor).mapError (fun error => decorate item (.infer error))
+    let argument ← (make context item pi.domain).mapError (decorate item)
     let actual ← (psInferType argument.context.environment argument.context.metaContext
-      argument.context.localContext argument.term).mapError PsElabError.infer
+      argument.context.localContext argument.term).mapError (fun error => decorate item (.infer error))
     let unified := psUnify argument.context.environment argument.context.localContext
       argument.context.metaContext pi.domain actual
     -- These are complete Core recursor arguments. Preserve the application
     -- error that final Core inference reports, including forbidden Prop
     -- elimination, while rejecting the incompatible domain at this cursor.
-    if !unified.success then throw (.infer .applicationTypeMismatch)
+    if !unified.success then throw (decorate item (.infer .applicationTypeMismatch))
     let context := psElabContextWithMeta argument.context unified.context
     let term := psMetaInstantiate context.metaContext argument.term
     let tail ← psElabRecursorArguments rest make context
-      (psExprInstantiate1 pi.body term)
+      (psExprInstantiate1 pi.body term) decorate
     return {
       context := tail.context
       arguments := term :: tail.arguments

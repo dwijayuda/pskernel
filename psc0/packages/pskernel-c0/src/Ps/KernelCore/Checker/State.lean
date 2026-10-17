@@ -10,6 +10,9 @@ structure PsKernelCheckerState where
   unfold : PsKernelExprMap
   success : PsKernelExprPairSet
   failure : PsKernelExprPairSet
+  -- Pure, context-independent source-certified FVar-membership memo.
+  -- Never stores types, DefEq facts, or admissions.
+  semanticFVarMemo : PsKernelC0FVarMemo := PsKernelC0HashTrie.empty
 
 def psKernelCheckerStateEmpty :
     PsKernelCheckerState :=
@@ -22,6 +25,7 @@ def psKernelCheckerStateEmpty :
     unfold := psKernelExprMapEmpty
     success := psKernelExprPairSetEmpty
     failure := psKernelExprPairSetEmpty
+    semanticFVarMemo := PsKernelC0HashTrie.empty
   }
 
 def psKernelCheckerStateWithInferOnly
@@ -37,6 +41,7 @@ def psKernelCheckerStateWithInferOnly
     unfold := state.unfold
     success := state.success
     failure := state.failure
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateWithCheckedInfer
@@ -52,6 +57,7 @@ def psKernelCheckerStateWithCheckedInfer
     unfold := state.unfold
     success := state.success
     failure := state.failure
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateWithWhnfCore
@@ -67,6 +73,7 @@ def psKernelCheckerStateWithWhnfCore
     unfold := state.unfold
     success := state.success
     failure := state.failure
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateWithWhnf
@@ -82,6 +89,7 @@ def psKernelCheckerStateWithWhnf
     unfold := state.unfold
     success := state.success
     failure := state.failure
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateWithUnfold
@@ -97,6 +105,7 @@ def psKernelCheckerStateWithUnfold
     unfold := cache
     success := state.success
     failure := state.failure
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateWithSuccess
@@ -112,6 +121,7 @@ def psKernelCheckerStateWithSuccess
     unfold := state.unfold
     success := cache
     failure := state.failure
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateWithFailure
@@ -127,6 +137,7 @@ def psKernelCheckerStateWithFailure
     unfold := state.unfold
     success := state.success
     failure := cache
+    semanticFVarMemo := state.semanticFVarMemo
   }
 
 def psKernelCheckerStateFreshName
@@ -154,6 +165,7 @@ def psKernelCheckerStateFreshName
       unfold := state.unfold
       success := state.success
       failure := state.failure
+      semanticFVarMemo := state.semanticFVarMemo
     }
 
 /-- Restore parent semantic caches when leaving a local checker scope.
@@ -167,4 +179,54 @@ def psKernelCheckerStateExitLocalScope
     whnf := parent.whnf
     unfold := parent.unfold
     success := parent.success
-    failure := parent.failure }
+    failure := parent.failure
+    -- Presence of an FVar is a pure syntactic fact independent of scope.
+    semanticFVarMemo := child.semanticFVarMemo }
+
+/-!
+Source-proved, state-owned FVar memo. Repeated WHNF requests can reuse
+certificates for identical immutable syntax DAGs rather than traversing
+an expanded graph. Every entry is indexed by exact syntax and carries a
+Lean proof of equality with `psKernelExprHasFVar`.
+
+No entry is a type, DefEq fact or checked declaration; all existing
+semantic caches still obey parent-scope restoration. A source-only FVar
+presence certificate can leave local scope without changing semantics.
+-/
+
+/-- Original eligibility result and a state that differs ONLY in its
+nonsemantic proof-carrying membership memo. -/
+def psKernelC0SemanticEligibilityWithState
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) : Bool × PsKernelCheckerState :=
+  let checked := psKernelC0FVarMemoGo expr state.semanticFVarMemo
+  (!checked.1.value, { state with semanticFVarMemo := checked.2 })
+
+/-- All-input original eligibility equality; no fuel, scope or cache
+assumptions. The memo's source proof is sufficient on every lookup. -/
+theorem psKernelC0SemanticEligibilityWithState_source
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    (psKernelC0SemanticEligibilityWithState state expr).1 =
+      psKernelSemanticCacheEligible expr := by
+  change Bool.not
+      (psKernelC0FVarMemoGo expr state.semanticFVarMemo).1.value =
+        Bool.not (psKernelExprHasFVar expr)
+  exact congrArg Bool.not
+    (psKernelC0FVarMemoGo expr state.semanticFVarMemo).1.source
+
+/-- The nonsemantic lookup cannot alter resource or checker caches. -/
+theorem psKernelC0SemanticEligibilityWithState_preservesFresh
+    (state : PsKernelCheckerState) (expr : PsKernelExpr) :
+    (psKernelC0SemanticEligibilityWithState state expr).2.nextFresh =
+      state.nextFresh := rfl
+
+theorem psKernelC0SemanticEligibilityWithState_preservesWhnf
+    (state : PsKernelCheckerState) (expr : PsKernelExpr) :
+    (psKernelC0SemanticEligibilityWithState state expr).2.whnf =
+      state.whnf := rfl
+
+theorem psKernelC0SemanticEligibilityWithState_preservesWhnfCore
+    (state : PsKernelCheckerState) (expr : PsKernelExpr) :
+    (psKernelC0SemanticEligibilityWithState state expr).2.whnfCore =
+      state.whnfCore := rfl

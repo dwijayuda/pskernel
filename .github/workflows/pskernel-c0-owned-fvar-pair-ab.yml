@@ -1,0 +1,147 @@
+name: PSKernel-C0 typed pair vs checker-owned FVar source A/B
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-owned-fvar-pair-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/Whnf.lean'
+      - 'psc0/packages/pskernel-c0/test/C0OwnedFVarMemoRegression.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scaled-whole-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        depth: [24, 28, 32]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Pin genuine 4.35 source adaptation, export, and official acceptance
+        env:
+          TEST_DEPTH: ${{ matrix.depth }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cd psc0/packages/pskernel-c0 && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          curl -fLsS --retry 3 -o "$RUNNER_TEMP/shared-original.lean" https://raw.githubusercontent.com/leanprover/lean-kernel-arena/5d7ca987618f1136aaa296057b50a2c10c4ce77a/tests/perf/shared-subterm.lean
+          python3 - <<'PY'
+          import hashlib,os,pathlib
+          raw=(pathlib.Path(os.environ["RUNNER_TEMP"])/"shared-original.lean").read_bytes()
+          assert raw.count(b"let n := 1000")==1, "upstream source changed"
+          n=int(os.environ["TEST_DEPTH"])
+          assert n in (24,28,32)
+          adapted=raw.replace(b"let n := 1000",f"let n := {n}".encode())
+          (pathlib.Path(os.environ["RUNNER_TEMP"])/"ScaledSharedSubterm.lean").write_bytes(adapted)
+          print("C0_OWNED_PAIR_FVAR_AB_SOURCE native_Lean=4.35.0 original_sha256="+hashlib.sha256(raw).hexdigest()+
+                " scaled_sha256="+hashlib.sha256(adapted).hexdigest()+f" scaled_n={n} changed_only_depth_literal=true")
+          PY
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            cp "$RUNNER_TEMP/ScaledSharedSubterm.lean" ScaledSharedSubterm.lean
+            lake env lean -o .lake/build/lib/lean/ScaledSharedSubterm.olean ScaledSharedSubterm.lean
+            lake env .lake/build/bin/lean4export ScaledSharedSubterm -- kernel_shared_subterm > "$RUNNER_TEMP/scaled.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/scaled.ndjson" > "$RUNNER_TEMP/scaled-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/scaled-official.txt"
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"scaled.ndjson"
+          assert p.stat().st_size>1024
+          with p.open('rb') as f: m=json.loads(f.readline())['meta']
+          assert m['lean']=={'version':'4.35.0','githash':'eb6cafb7290e8bd5f2937522d8d804f58f02bafc'}
+          assert m['format']['version']=='3.1.0'
+          print("C0_OWNED_PAIR_FVAR_AB_EXPORT source_generated_native=true official=accepted records="+str(sum(1 for _ in p.open('rb')))+
+                " sha256="+hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+      - name: Check original state-scope and FVar semantics at exact baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch -q --no-tags --depth=1 origin 6aca24f4ae6f22e8962b7b068ceb9bb80b12446b
+          test "$(git rev-parse FETCH_HEAD)" = 6aca24f4ae6f22e8962b7b068ceb9bb80b12446b
+          for file in \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/Whnf.lean; do
+            git show "FETCH_HEAD:$file" > "$file"
+          done
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && /usr/bin/time -v -o "$RUNNER_TEMP/baseline-resources.txt" timeout 95s .lake/build/bin/c0OfficialReplay --require-accepted "$RUNNER_TEMP/scaled.ndjson" 4096) > "$RUNNER_TEMP/baseline.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_OWNED_PAIR_FVAR_AB_BENCH variant=exact_pair_no_owned_memo rc=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/baseline.txt"
+            echo 'C0_OWNED_FVAR_AB_BENCH variant=exact_pair_no_owned_memo verdict=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_OWNED_FVAR_AB_BENCH variant=exact_pair_no_owned_memo verdict=unqualified_timeout'
+          elif [ "$rc" -eq 1 ] && grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted" "$RUNNER_TEMP/baseline.txt"; then
+            echo 'C0_OWNED_FVAR_AB_BENCH variant=exact_pair_no_owned_memo verdict=unqualified_resource'
+          else
+            tail -n 30 "$RUNNER_TEMP/baseline.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/baseline-resources.txt"
+      - name: Check checker-owned source-certified membership state on identical bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/Whnf.lean; do
+            git show "HEAD:$file" > "$file"
+          done
+          grep -Fq 'psKernelC0SemanticEligibilityWithState_source' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/State.lean
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay &&
+              lake env lean --run test/C0OwnedFVarMemoRegression.lean &&
+              lake env lean --run test/C0OfficialNdjsonReplay.lean)
+          set +e
+          (cd psc0/packages/pskernel-c0 && /usr/bin/time -v -o "$RUNNER_TEMP/candidate-resources.txt" timeout 95s .lake/build/bin/c0OfficialReplay --require-accepted "$RUNNER_TEMP/scaled.ndjson" 4096) > "$RUNNER_TEMP/candidate.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_OWNED_FVAR_AB_BENCH variant=exact_pair_plus_owned_memo rc=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/candidate.txt"
+            echo 'C0_OWNED_FVAR_AB_BENCH variant=exact_pair_plus_owned_memo verdict=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_OWNED_FVAR_AB_BENCH variant=exact_pair_plus_owned_memo verdict=unqualified_timeout'
+          elif [ "$rc" -eq 1 ] && grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted" "$RUNNER_TEMP/candidate.txt"; then
+            echo 'C0_OWNED_FVAR_AB_BENCH variant=exact_pair_plus_owned_memo verdict=unqualified_resource'
+          else
+            tail -n 30 "$RUNNER_TEMP/candidate.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/candidate-resources.txt"
+          echo 'C0_OWNED_PAIR_FVAR_AB_SCOPE identical_native_export=true same_runner=true fuel_4096=true baseline_pair_proven=true candidate_pure_owner_memo=Lean_proved scope_authority_unchanged=true'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-owned-pair-depth-${{ matrix.depth }}
+          path: |
+            ${{ runner.temp }}/scaled-official.txt
+            ${{ runner.temp }}/baseline.txt
+            ${{ runner.temp }}/candidate.txt
+            ${{ runner.temp }}/baseline-resources.txt
+            ${{ runner.temp }}/candidate-resources.txt
+          if-no-files-found: warn
+          retention-days: 21

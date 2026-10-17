@@ -78,21 +78,26 @@ def psKernelWhnfCoreFinishWithKnownHash
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if cheapProj || !psKernelSemanticCacheEligible original then
+  if cheapProj then
     Except.ok (Prod.mk result state)
   else
-    let nextCache :=
-      psKernelExprMapInsertWithKnownHash
-        state.whnfCore
-        original
-        result
-        knownHash;
-    Except.ok
-      (Prod.mk
-        result
-        (psKernelCheckerStateWithWhnfCore
-          state
-          nextCache))
+    let (eligible, state) :=
+      psKernelC0SemanticEligibilityWithState state original
+    if !eligible then
+      Except.ok (Prod.mk result state)
+    else
+      let nextCache :=
+        psKernelExprMapInsertWithKnownHash
+          state.whnfCore
+          original
+          result
+          knownHash;
+      Except.ok
+        (Prod.mk
+          result
+          (psKernelCheckerStateWithWhnfCore
+            state
+            nextCache))
 
 def psKernelWhnfCoreFinish
     (original : PsKernelExpr)
@@ -109,7 +114,9 @@ def psKernelWhnfFinish
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if psKernelSemanticCacheEligible original then
+  let (eligible, state) :=
+    psKernelC0SemanticEligibilityWithState state original
+  if eligible then
     let nextCache := psKernelExprMapInsert state.whnf original result
     Except.ok (Prod.mk result
       (psKernelCheckerStateWithWhnf state nextCache))
@@ -258,8 +265,13 @@ def psKernelWhnfCoreWithFuelRanges
                           else []
                       | _ => letFrames
                   | _ => []
+                -- Pure FVar membership is independent of context. Every
+                -- memo hit carries an exact source theorem for its syntax;
+                -- the only checker-state change is nonsemantic memo ownership.
+                let (eligible, state) :=
+                  psKernelC0SemanticEligibilityWithState state expr
                 let cached :=
-                  if psKernelSemanticCacheEligible expr then
+                  if eligible then
                     match currentFrames with
                     | (_, hash) :: _ =>
                         psKernelExprMapGetWithKnownHash state.whnfCore expr

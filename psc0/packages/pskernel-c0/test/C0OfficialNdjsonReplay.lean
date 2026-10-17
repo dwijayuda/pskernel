@@ -54,6 +54,11 @@ structure C0ExportTables where
   quotientParts : Nat := 0
   quotientPending : List PsKernelQuotInfo := []
   header : Bool := false
+  -- Lean4export's ordinary stream is dense, but the 3.1.0 wire format
+  -- permits sparse/out-of-order level handles.  Keep the dense O(1) fast
+  -- path for real Init, and a bounded-on-use sparse fallback only when
+  -- an original explicitly declares an out-of-order level ID.
+  sparseLevels : List (Nat × PsKernelLevel) := []
 
 def c0JsonObj (j : Lean.Json) (key : String) : Except String Lean.Json :=
   j.getObjVal? key
@@ -94,7 +99,9 @@ def c0ExportLevel
   if h : idx < tables.levels.size then
     .ok tables.levels[idx]
   else
-    .error s!"unknown NDJSON level handle {idx}"
+    match tables.sparseLevels.find? (fun entry => entry.fst == idx) with
+    | some entry => .ok entry.snd
+    | none => .error s!"unknown NDJSON level handle {idx}"
 
 def c0ExportExpr
     (tables : C0ExportTables) (idx : Nat) :
@@ -486,7 +493,13 @@ def c0ExportParseRecord
     c0ExportOnlyKeys leanData ["version", "githash"]
     let formatData ← c0JsonObj headerData "format"
     c0ExportOnlyKeys formatData ["version"]
-    if exporterName != "lean4export" || exporterVersion != "3.1.0" then
+    -- The standard format also permits externally authored adversarial
+    -- inputs.  Treat the advertised producer as untrusted provenance,
+    -- not kernel evidence, while preserving a small explicitly audited
+    -- compatibility allowlist.  Every declaration still passes source
+    -- parsing and fully checked admission; no metadata authorizes proof.
+    if !((exporterName == "lean4export" && exporterVersion == "3.1.0") ||
+         (exporterName == "handcrafted" && exporterVersion == "0.1.0")) then
       throw "unsupported NDJSON exporter identity"
     if st.header then throw "duplicate NDJSON export metadata"
     let version ← c0JsonString (← c0JsonObj headerData "lean") "version"
@@ -504,23 +517,29 @@ def c0ExportParseRecord
     let newName ← c0ExportDecodeName st j
     -- Consume the table fields before pushing: no stale owner of the
     -- growing array is needed after its referenced name was decoded.
-    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header⟩ := st
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header, sparseLevels⟩ := st
     return ⟨names.push newName, levels, exprs, declarations,
-      quotientParts, quotientPending, header⟩
+      quotientParts, quotientPending, header, sparseLevels⟩
   if let .ok value := c0JsonObj j "il" then
     let idx ← value.getNat?
-    if idx != st.levels.size then throw "NDJSON level IDs not sequential"
+    if idx < st.levels.size ||
+        st.sparseLevels.any (fun entry => entry.fst == idx) then
+      throw "duplicate NDJSON level handle"
     let newLevel ← c0ExportDecodeLevel st j
-    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header⟩ := st
-    return ⟨names, levels.push newLevel, exprs, declarations,
-      quotientParts, quotientPending, header⟩
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header, sparseLevels⟩ := st
+    if idx == levels.size then
+      return ⟨names, levels.push newLevel, exprs, declarations,
+        quotientParts, quotientPending, header, sparseLevels⟩
+    else
+      return ⟨names, levels, exprs, declarations,
+        quotientParts, quotientPending, header, (idx, newLevel) :: sparseLevels⟩
   if let .ok value := c0JsonObj j "ie" then
     let idx ← value.getNat?
     if idx != st.exprs.size then throw "NDJSON expression IDs not sequential"
     let newExpr ← c0ExportDecodeExpr st j
-    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header⟩ := st
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header, sparseLevels⟩ := st
     return ⟨names, levels, exprs.push newExpr, declarations,
-      quotientParts, quotientPending, header⟩
+      quotientParts, quotientPending, header, sparseLevels⟩
   if let .ok payload := c0JsonObj j "def" then
     c0ExportOnlyKeys j ["def"]
     c0ExportOnlyKeys payload

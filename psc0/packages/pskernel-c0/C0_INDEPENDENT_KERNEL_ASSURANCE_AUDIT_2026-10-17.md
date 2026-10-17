@@ -122,3 +122,16 @@ Each test is fetched from immutable upstream source `5d7ca987618f1136aaa296057b5
 ### Final disposition
 
 This is **partial, evidence-based completion of the requested large research program**, not closure of full Lean correctness, a consistency theorem, performance parity or the full Init/Std/Mathlib corpus. The present engineering return is a risk-ranked audit and targeted native negative-gate expansion. Continue from the scoped, source-grounded defects above; preserve other concurrent C0 work.
+
+
+## 9. Follow-up: substitution-sensitive Prop projection (PR #111, independently qualified)
+
+At native 4.35, the official Lean kernel now rejects an upstream `proj-of-subst-prop` exploit in which a proof substitution changes whether an inductive family's result sort reduces to `Prop`. Unlike the historical `rec-missing-ih` hash-collision exploit, upstream explicitly states that this defect family does **not** depend on hash caches; see [Lean Kernel Arena's exploit specification](https://github.com/leanprover/lean-kernel-arena/blob/5d7ca987618f1136aaa296057b50a2c10c4ce77a/tests/bugs/proj-of-subst-prop.yaml) and the official [#14807](https://github.com/leanprover/lean4/pull/14807) fix. The right invariant is **never treat a stuck inferred result as evidence that a type is not a proposition**: reduce the inferred type and require it to be a genuine sort, or reject.
+
+The C0 source already includes that pattern in `Checker/Projection.lean::psKernelProjectionEnsureSortWith` and `Checker/DefEq/FinalRules.lean::psKernelDefEqIsPropWith`. A unit inspection of those helpers alone is not full proof across admission and substitution. Thus [PR #111](https://github.com/dwijayuda/pskernel/pull/111) adds an end-to-end, separately qualified re-export of immutable upstream source under exact Lean 4.35 and exporter v3.1.0.
+
+**Source adapter boundary:** Upstream test bytes SHA-256 `00f6fdccd0c7222c0b4112e7e1d6cd9382108f636cad49db13ecde541b62c21a`, fetched from the immutable Arena commit. The historical `Environment.addDeclCore` signature `env.addDeclCore 0 decl none (doCheck := false)` was mechanically adapted **only** to `env.addDeclCore 0 10000 decl none (doCheck := false)` for native Lean 4.35, which demands the explicit maximum-recursion argument. No exploit declaration, proof term, test expectation, or export header was altered.
+
+**Actual terminal evidence:** [CI 39005621483](https://github.com/dwijayuda/pskernel/actions/runs/39005621483) **SUCCESS**: official `leanchecker --from-export` **rejected**, C0 `c0OfficialReplay` **rejected** the **identical** newly generated export; `C0_ARENA_SUBST_PROP official=rejected c0=rejected native=4.35.0`. The same CI retained qualified negative `k-rec-conv` and `proj-non-structure` and the existing two Arena-authored invalid inputs. This additional case is qualified within the **native adapted-source denominator**, not the frozen older-version 193-case suite.
+
+The corrected native test constitutes a new `C0-AUD-08 (P1 resolved representative regression)` entry: actual deep proposition-sort validation is demonstrated for a sophisticated finite case, but **does not** imply general soundness, a verified consistency theorem, or full external Arena version compatibility.

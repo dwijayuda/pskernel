@@ -165,8 +165,8 @@ private def logicalSource : String :=
   "section\nvariable {A: Type u} {B: Type u} [dictionary: Inhabited A]\n" ++
   "function m3RequiredFirstValue(dummy: Unit): M3RequiredFirst(A, B) := Inhabited.default\n" ++
   "function m3RequiredSecondValue(dummy: Unit): M3RequiredSecond(A, B) := Inhabited.default\n" ++
-  "theorem m3RequiredFirstEquation(dummy: Unit): m3RequiredFirstValue(dummy) = M3RequiredFirst.mk(Inhabited.default, List.nil) := by { rfl }\n" ++
-  "theorem m3RequiredSecondEquation(dummy: Unit): m3RequiredSecondValue(dummy) = M3RequiredSecond.fromFirst(M3RequiredFirst.mk(Inhabited.default, List.nil)) := by { rfl }\n" ++
+  "theorem m3RequiredFirstEquation(dummy: Unit): m3RequiredFirstValue(dummy, A := A, B := B) = M3RequiredFirst.mk(Inhabited.default, List.nil) := by { rfl }\n" ++
+  "theorem m3RequiredSecondEquation(dummy: Unit): m3RequiredSecondValue(dummy, A := A, B := B) = M3RequiredSecond.fromFirst(M3RequiredFirst.mk(Inhabited.default, List.nil)) := by { rfl }\n" ++
   "end\n"
 
 private def runtimeSource : String :=

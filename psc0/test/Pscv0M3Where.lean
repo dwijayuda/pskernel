@@ -202,7 +202,7 @@ private def genericSource : String :=
   "variable {A: Type u} [dictionary: Inhabited A] (fallback: A) (h: True)\n" ++
   "function wpick(n: Nat): A := loop(n)\n" ++
   "where {\n" ++
-  "  def loop(k: Nat): A := match k with { | 0 => default | j + 1 => alternate(j) }\n" ++
+  "  def loop(k: Nat): A := match k with { | 0 => Inhabited.default | j + 1 => alternate(j) }\n" ++
   "  def alternate(k: Nat): A := match k with { | 0 => fallback | j + 1 =>\n" ++
   "    let witness: True := h\n" ++
   "    loop(j) }\n" ++

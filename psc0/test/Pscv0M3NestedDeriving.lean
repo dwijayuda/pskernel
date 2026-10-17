@@ -137,6 +137,12 @@ private def fromExcept (result : Except String α) : IO α :=
   | .ok value => pure value
   | .error error => throw (IO.userError error)
 
+-- Failure context does not change the admitted source or any expected value.
+-- Native fixture execution has several checked Core stages before publication.
+private def inPhase (phase : String) (action : IO α) : IO α := do
+  try action
+  catch error => throw (IO.userError (phase ++ ": " ++ error.toString))
+
 private def literal (value : String) : String := (Lean.toJson value).compress
 
 private def groupSource : String :=
@@ -249,7 +255,8 @@ private def add (environment : PsEnvironment) (declarations : List PsDeclaration
 private def register (environment : PsEnvironment) (declarations : List PsDeclaration) : IO PsEnvironment := do
   let environment ← add environment declarations
   fromExcept ((declarations.foldlM (fun current declaration =>
-    psElabRegisterInstance current (psDeclarationName declaration) 1000) environment).mapError
+    (psElabRegisterInstance current (psDeclarationName declaration) 1000).mapError
+      (.atDeclaration (psDeclarationName declaration))) environment).mapError
       psCompilerPscv0ElabError)
 
 private def call (name : PsName) (levels : List PsLevel) (arguments : List PsExpr) : PsExpr :=
@@ -268,17 +275,65 @@ private def marker : PsDeclaration :=
     (psLogicLam 0 "A" (.sortE (.succ level))
       (psLogicLam 1 "a" parameter value .implicit) .implicit)
 
+-- Replay only a failing group through its same public member handler to retain
+-- the precise generated declaration identity. Successful derivation is unchanged.
+private def deriveFailure (environment : PsEnvironment) (origin : PsElabBatchOrigin)
+    (handler : PsSyntaxName) (original : PsElabError) : String := Id.run do
+  let members := origin.members.filter fun entry =>
+    match entry.role with
+    | .inductiveType | .structureType => true
+    | _ => false
+  for member in members do
+    let selected := origin.members.filter fun entry =>
+      match entry.role with
+      | .inductiveType | .structureType => psNameEq entry.name member.name
+      | _ => true
+    match psElabDeriveHandler environment { origin with members := selected } handler with
+    | .ok _ => pure ()
+    | .error _ =>
+      return "derive " ++ psNameToString member.name ++ "." ++
+        String.intercalate "." handler.segments ++ ": " ++ psCompilerPscv0ElabError original
+  return "derive group " ++ String.intercalate "." handler.segments ++ ": " ++
+    psCompilerPscv0ElabError original
+
 private def derive (environment : PsEnvironment) (origin : PsElabBatchOrigin)
     (handlers : List String) : IO (List PsDeclaration) := do
-  let declarations ← fromExcept ((handlers.mapM fun handler =>
-    psElabDeriveGroupHandler environment origin { segments := [handler], span := origin.span }).mapError
-      psCompilerPscv0ElabError)
+  let declarations ← handlers.mapM fun text => do
+    let handler : PsSyntaxName := { segments := [text], span := origin.span }
+    fromExcept ((psElabDeriveGroupHandler environment origin handler).mapError
+      (deriveFailure environment origin handler))
   return declarations.flatten
+
+private def commandLabel (command : PsSyntaxCommand) (index : Nat) : String :=
+  let source := match command with
+    | .declaration source | .privateDeclaration source
+    | .registeredDeclaration source _ | .privateRegisteredDeclaration source _
+    | .derivingDeclaration source _ _ => some source
+    | _ => none
+  match source with
+  | none => "source command " ++ toString index
+  | some source =>
+    let (name, span) := psElabOriginSource source
+    "source " ++ String.intercalate "." name.segments ++ " bytes " ++
+      toString span.start.byteOffset ++ "-" ++ toString span.stop.byteOffset
+
+-- The normal public program entry remains authoritative. Only a failure
+-- replays its same command fold to attach the actual source name and span.
+private def sourceFailure (environment : PsEnvironment) (program : PsSyntaxProgram)
+    (original : PsElabError) : String := Id.run do
+  let namespaces := environment.declarations.foldl (fun acc declaration =>
+    ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc) []
+  let mut state : PsCommandState := { environment, namespaces }
+  for (command, index) in program.commands.zipIdx do
+    match psElabCommand state command with
+    | .ok next => state := next
+    | .error _ => return commandLabel command index ++ ": " ++ psCompilerPscv0ElabError original
+  return psCompilerPscv0ElabError original
 
 private def sourceResult (environment : PsEnvironment) (text : String) :
     IO PsElabModuleWithOriginsResult := do
   let parsed ← fromExcept (psPscv0ParseProgram text)
-  fromExcept ((psElabProgramWithOrigins environment parsed).mapError psCompilerPscv0ElabError)
+  fromExcept ((psElabProgramWithOrigins environment parsed).mapError (sourceFailure environment parsed))
 
 private def checked (environment : PsEnvironment) (prelude : Lean.Kernel.Environment)
     (declarations : List PsDeclaration) : IO Lean.Kernel.Environment := do
@@ -311,7 +366,7 @@ private def expectRefused (label expected : String) (result : Except PsElabError
 
 private def checkPlans (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do
-  let plan ← fromExcept ((psElabDerivePrepare environment origin
+  let plan ← inPhase "psElabDerivePrepare M3NestedDisplay" <| fromExcept ((psElabDerivePrepare environment origin
     { groups := true, indices := true, nested := true }).mapError psCompilerPscv0ElabError)
   ensure (plan.parametersRev.length == 2 && plan.elimination.slots.length == 9 &&
     psInductiveEliminationNumMinors plan.elimination == 18)
@@ -319,8 +374,10 @@ private def checkPlans (environment : PsEnvironment)
   let marked := psElabDeriveRequirements plan (psRootName "Repr")
   ensure (marked.requirementsRev.length == 1)
     "Repr generated a dictionary for the value parameter or a recursive family"
-  let atomic ← fromExcept ((plan.elimination.slots.mapM
-    (psElabDeriveReprAtomicList marked)).mapError psCompilerPscv0ElabError)
+  let atomic ← fromExcept (plan.elimination.slots.mapM fun slot =>
+    (psElabDeriveReprAtomicList marked slot).mapError fun error =>
+      "psElabDeriveReprAtomicList " ++ psNameToString slot.recursorName ++ ": " ++
+        psCompilerPscv0ElabError error)
   ensure (atomic == [false, false, true, false, false, false, false, false, false])
     "List specialization did not select the actual ReprAtom marker"
   let some listBranch := plan.elimination.slots[2]?
@@ -340,7 +397,7 @@ private def checkPlans (environment : PsEnvironment)
     "deriving field has incompatible specialization parameters or indices"
     (psElabDeriveEliminateSlotAt plan plan.context 2 wrongFamily true
       (fun _ _ _ _ => .constE psNatName []) (fun _ _ _ _ _ _ _ => pure (.lit (.natural 0))))
-  let indexed ← fromExcept ((psElabDerivePrepare environment indexedOrigin
+  let indexed ← inPhase "psElabDerivePrepare M3NestedIndexedDisplay" <| fromExcept ((psElabDerivePrepare environment indexedOrigin
     { groups := true, indices := true, nested := true }).mapError psCompilerPscv0ElabError)
   ensure (indexed.indicesRev.length == 1 &&
     indexed.elimination.slots.map (·.family.numIndices) == [1, 0])
@@ -460,25 +517,25 @@ def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "nested deriving qualification requires the pinned Lean"
-  let (group, origin) ← fromExcept (elaborateGroup groupSource)
-  let (indexed, indexedOrigin) ← fromExcept (elaborateGroup indexedSource)
+  let (group, origin) ← inPhase "elaborate visible group" <| fromExcept (elaborateGroup groupSource)
+  let (indexed, indexedOrigin) ← inPhase "elaborate indexed group" <| fromExcept (elaborateGroup indexedSource)
   let groups := group.declarations ++ indexed.declarations
-  let input ← add psSelfHostProdPreludeEnvironment groups
-  let input ← register input [marker]
-  checkPlans input origin indexedOrigin
+  let input ← inPhase "admit data groups" <| add psSelfHostProdPreludeEnvironment groups
+  let input ← inPhase "admit ReprAtom marker" <| register input [marker]
+  inPhase "check slot plans" <| checkPlans input origin indexedOrigin
   -- Both handlers see the same pre-instance environment. They cannot search
   -- for a partially generated self/group dictionary during induction.
   let ordinary ← derive input origin ["Repr", "BEq"]
   let dependent ← derive input indexedOrigin ["Repr"]
   let instances := ordinary ++ dependent
   ensure (instances.length == 5) "nested deriving did not generate each requested public instance"
-  let registered ← register input instances
-  let orderEquations ← checkComparisonOrder registered
-  let logical ← sourceResult registered logicalSource
-  let runtime ← sourceResult registered runtimeSource
-  checkPortableReduction runtime.result.environment
+  let registered ← inPhase "admit derived instances" <| register input instances
+  let orderEquations ← inPhase "check comparison order" <| checkComparisonOrder registered
+  let logical ← inPhase "elaborate logical source" <| sourceResult registered logicalSource
+  let runtime ← inPhase "elaborate runtime source" <| sourceResult registered runtimeSource
+  inPhase "check portable reduction" <| checkPortableReduction runtime.result.environment
   let declarations := groups ++ [marker] ++ instances ++ runtime.result.declarations
-  let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
+  let prepared ← inPhase "prepare checked runtime" <| fromExcept ((psCompilerPrepareElaboratedWithOutput
     { environment := runtime.result.environment, declarations }).mapError psCompilerPscv0Error)
   let workers := prepared.prepared.recursorWorkerGroups
   ensure (workers.length == 5 &&
@@ -487,18 +544,23 @@ def main (args : List String) : IO Unit := do
     "nested deriving lost heterogeneous slot closures or traversed right-side BEq hypotheses"
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
-  let admitted ← checked runtime.result.environment prelude prepared.prepared.declarations
+  let admitted ← inPhase "kernel admit prepared declarations" <|
+    checked runtime.result.environment prelude prepared.prepared.declarations
   let signatures := signatureWitnesses groups
   ensure (signatures.length == 11) "nested deriving lost a full visible/auxiliary signature witness"
-  let admitted ← checked runtime.result.environment admitted (signatures ++ orderEquations)
-  let _ ← checked logical.result.environment admitted logical.result.declarations
+  let admitted ← inPhase "kernel admit signatures and order equations" <|
+    checked runtime.result.environment admitted (signatures ++ orderEquations)
+  let _ ← inPhase "kernel admit logical source" <|
+    checked logical.result.environment admitted logical.result.declarations
   -- Repr compares full independently rendered native text in the runtime
   -- lanes. Every BEq output additionally has a fresh-kernel closed equation.
   let equations := [false, true].flatMap fun flag =>
     (outputCases.drop 3).map (fun (name, oracle) => witness name flag (oracle flag))
-  let _ ← checked runtime.result.environment admitted equations
-  let ir ← fromExcept ((psCompilerVerifiedIrFromPrepared prepared.prepared).mapError psCompilerPscv0Error)
-  let artifacts ← fromExcept (emit ir)
+  let _ ← inPhase "kernel admit runtime equations" <|
+    checked runtime.result.environment admitted equations
+  let ir ← inPhase "erase prepared runtime" <|
+    fromExcept ((psCompilerVerifiedIrFromPrepared prepared.prepared).mapError psCompilerPscv0Error)
+  let artifacts ← inPhase "emit targets" <| fromExcept (emit ir)
   ensure (artifacts.length == 5) "nested deriving did not emit every target"
   let directory := System.FilePath.mk directory
   IO.FS.createDirAll directory

@@ -1,4 +1,4 @@
-## M3+B current roadmap checkpoint — native oracle qualification repair
+## M3+B current roadmap checkpoint — source qualification and nested failure diagnosis
 
 Latest fully accepted compiler/test: `fbbc5271419dde8b183be723f07ff1f75a462013`.
 All five gates passed at that SHA: native 38976283998 (33/33 reported steps),
@@ -13,6 +13,47 @@ M3+B remains OPEN at approximately 65–70% (weighted estimate 67/100;
 55–75% engineering uncertainty). All six weights remain data 30, source 15,
 total recursion 20, P0 15, P1 10 and integration 10; accepted contributions
 are 21, 10, 14, 13, 1 and 8. Unqualified local candidates add no points.
+
+### Source qualification repair and precise failure context
+
+Compiler/test `6a8bc71c4916fe753e1c8c20a739428df725b757` compiled all
+focused fixtures and passed the first ten independent source checks,
+including the repaired native guards and complete PreDefinitions checks.
+F1 [38984039237](https://github.com/dwijayuda/pskernel/actions/runs/38984039237),
+F2 [38984039188](https://github.com/dwijayuda/pskernel/actions/runs/38984039188)
+and F3/F4 [38984039301](https://github.com/dwijayuda/pskernel/actions/runs/38984039301)
+passed. Focused [38984039160](https://github.com/dwijayuda/pskernel/actions/runs/38984039160)
+(job 117251226237) then reported three elaboration failures. Target lanes
+were skipped, so the accumulated source/deriving candidate remains unqualified.
+
+- Where's generic local-body fixture used bare `default`; the selected
+  Standard registers the actual method `Inhabited.default`. The portable
+  source now names that method. The independent native `default` oracle,
+  actual local dictionary, all-kind captures, seven requests, six exports
+  and sixteen local-origin assertions are unchanged.
+- The two generic required-default equations omitted every explicit use of
+  their section type parameters. Source scope consequently retained neither
+  A/B nor the dependent `Inhabited A` dictionary. Named `A := A, B := B`
+  arguments now state the intended generic equations. Their native witnesses,
+  actual dictionary requirements, kernel checks and output values remain.
+- NestedDeriving returned only `application argument type mismatch`.
+  No semantic correction is claimed for that error yet. Failure-only context
+  now identifies the public family/handler, actual source command/name/byte
+  span, registration, slot plan or checked pipeline stage. Successful calls,
+  source text, complete native strings, comparison-order checks, six exports
+  and all expected values are unchanged. The next cloud log must identify
+  the failing owner before a production repair is selected.
+
+Native [38984039232](https://github.com/dwijayuda/pskernel/actions/runs/38984039232)
+(job 117251226673) had passed source/Standard, modules, GC/components,
+compiled TypeScript and locked Rust, and was running the repeated Wasmtime
+embedding at the last pre-commit observation. It is not an acceptance
+receipt. All five required gates must pass at one exact compiler/test SHA.
+
+The reviewed WF asset/relation/empty-dictionary and omitted-result/dependent
+case drafts remain separate unqualified work. This commit changes only the
+three focused fixtures and the four handoff/architecture/roadmap records.
+Production semantics, original workloads, budgets and pins are unchanged.
 
 ### Native oracle qualification correction
 

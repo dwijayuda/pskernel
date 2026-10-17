@@ -18,7 +18,14 @@ Preparation psc0/m3-fixedpoint-foundation-20261018 holds later source work.
 Keep PR109 draft/open/unmerged; attach it in a new chat. Fresh-ref expected-head
 non-force writes only; never supersede a healthy main Native run.
 
-Latest preparation adds retained exact standalone PSum bytes and portable
+Latest candidate adds shared fixed-parameter correspondence, adapted from pinned
+FixedParams.Info and used by the singleton WF planner. Its native graph
+differential is in the same consolidated packing probe; qualification is pending.
+Packing itself passed atb9406c2/run39080316054. Reviewed pin candidate
+abe1adc2/run39080406371 has passed strict surface/closure gates and is still
+running source checks. Do not infer its final result.
+
+Earlier preparation adds retained exact standalone PSum bytes and portable
 Meta/MutualPacking with a focused independent kernel probe. The asset is not
 selected, and source mutual WF is still refused. The export was checked at
 f58d7e1/run39079183717; packing qualification is pending. Bridge candidate

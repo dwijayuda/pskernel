@@ -1,5 +1,6 @@
 import Ps.Elab.Binders
 import Ps.Elab.Application
+import Ps.Elab.FixedParameters
 
 /-
 Typed fixed/evolving parameter ownership, following Lean 4.35.0
@@ -45,13 +46,34 @@ def psElabRecursionParameterDependencies (context : PsElabContext)
     if known.contains id || !dependencies.any known.contains then known
     else known ++ [id]) roots
 
+-- The singleton consumer uses the same correspondence closure as mutual
+-- components. Observations are made in each actual branch scope; dependent
+-- header slots become varying through the graph, never through source names.
+def psElabRecursionFixedParameterPlan (context : PsElabContext)
+    (ids : List Nat) (calls : List PsElabRecursionCall) :
+    Except PsElabError PsFixedParameterPlan := do
+  let dependencies := ids.zipIdx.map fun (id, index) =>
+    let closed := psElabRecursionParameterDependencies context [id]
+    ids.zipIdx.filterMap fun (dependent, position) =>
+      if position != index && closed.contains dependent then some position else none
+  let observations := calls.map fun call => ({
+    caller := 0, callee := 0
+    arguments := ids.zipIdx.map fun (id, index) =>
+      if psElabRecursionParameterIsFixed context ids [call] id then some index else none
+  } : PsFixedParameterCall)
+  let graph ← (psFixedParameterAnalyze [dependencies] observations).mapError PsElabError.data
+  (psFixedParameterPermutation graph).mapError PsElabError.data
+
 def psElabRecursionMeasureParameterPlan (context : PsElabContext)
     (ids : List Nat) (calls : List PsElabRecursionCall) (measure : PsExpr) :
     Except PsElabError PsElabRecursionParameterPlan := do
   if calls.isEmpty then
     throw (.data "PSCV0-WF-NOT-RECURSIVE: termination_by was supplied for a nonrecursive declaration")
-  let varying := psElabRecursionParameterDependencies context
-    (ids.filter fun id => !psElabRecursionParameterIsFixed context ids calls id)
+  let fixed ← psElabRecursionFixedParameterPlan context ids calls
+  let [permutation] := fixed.permutations
+    | throw (.data "PSCV0-WF-INTERNAL: singleton parameter analysis lost its owner")
+  let varying := (ids.zip permutation).filterMap fun (id, index) =>
+    if index.isNone then some id else none
   let dependencies := psExprFVarIds measure
   let measuredVarying := ids.filter fun id => varying.contains id && dependencies.contains id
   -- Constant/same-size candidates still create their genuine impossible

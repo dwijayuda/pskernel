@@ -2,6 +2,8 @@ import Ps.Host.NativeV7
 import Ps.Environment.StandardPSumData
 import Ps.Meta.MutualPacking
 import PsKernelLean.Admission
+import Ps.Elab.FixedParameters
+import Lean.Elab.PreDefinition.FixedParams
 
 -- Native dependent/heterogeneous oracle for the same three owned slots.
 namespace M3MutualPackingOracle
@@ -29,6 +31,39 @@ private def fromExcept (result : Except String α) : IO α :=
   match result with
   | .ok value => pure value
   | .error message => throw (IO.userError message)
+
+private def checkFixedParameters : IO Unit := do
+  let dependencies : List (List (List Nat)) :=
+    [[[1], [], []], [[], [2], []], [[], [], [0]]]
+  let calls : List PsFixedParameterCall := [
+    { caller := 0, callee := 1, arguments := [none, some 0, some 1] },
+    { caller := 1, callee := 2, arguments := [some 2, none, some 1] },
+    { caller := 2, callee := 0, arguments := [some 2, some 0, none] }]
+  let graph ← fromExcept (psFixedParameterAnalyze dependencies calls)
+  let plan ← fromExcept (psFixedParameterPermutation graph)
+  ensure (plan == { count := 2, permutations :=
+      [[some 0, some 1, none], [none, some 0, some 1], [some 1, none, some 0]] })
+    "fixed parameter permutations lost typed dependency or reordered ownership"
+  let changed : PsFixedParameterCall :=
+    { caller := 2, callee := 0, arguments := [none, some 0, none] }
+  for observations in [calls, calls ++ [changed]] do
+    let portable ← fromExcept (psFixedParameterAnalyze dependencies observations)
+    let mut native := (Lean.Elab.FixedParams.Info.init
+      (dependencies.toArray.map fun slots => slots.toArray.map List.toArray)).addSelfCalls
+    for call in observations do
+      for (argument, slot) in call.arguments.zipIdx do
+        native := match argument with
+          | none => native.setVarying call.callee slot
+          | some parameter => native.setCallerParam call.callee slot call.caller parameter
+    let expected := native.graph.toList.map fun slots =>
+      slots.toList.map fun incoming => incoming.map Array.toList
+    ensure (portable == expected)
+      "fixed-parameter finite closure differs from pinned native correspondence"
+  match psFixedParameterAnalyze dependencies
+      [{ caller := 3, callee := 0, arguments := [none, none, none] }] with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "fixed analysis accepted an unowned caller")
+  IO.println "PSCV0_M3_FIXED_PARAMETERS: PASS pinned native graph differential, three reordered member headers, transitive variation and dependent-type propagation"
 
 private def build : Except String (List PsDeclaration) := do
   let environment := psStandardPSumDeclarations.foldl psEnvironmentInsert
@@ -119,6 +154,7 @@ private def build : Except String (List PsDeclaration) := do
 
 def main : IO Unit := do
   ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"
+  checkFixedParameters
   let declarations ← fromExcept build
   let admissions ← fromExcept ((psCompilerAdmissionsFromPrepared { declarations }).mapError
     psCompilerPscv0Error)

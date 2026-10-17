@@ -1,3 +1,21 @@
+## Shared fixed-parameter analysis candidate
+
+The retained PSum/typed-packing probe passed official-kernel construction and
+three dependent projection equations atb9406c2f0b333ad2b25a41cabdc8485673a4d852 /
+run39080316054/job117535798439. Its other source gates stopped only at the
+then-old registry pins. Reviewed pin candidateabe1adc2ff96c632dd9ed82b8ae6357832545a32
+is running under39080406371/job117536629068; strict surface and closure audits
+have passed. Full source/emission qualification remains pending.
+
+The next candidate adapts pinned FixedParams.Info as a finite correspondence
+graph, including reordered member headers and transitive type dependencies.
+The singleton WF planner supplies its actual typed observations to the same
+owner, retaining final fixed-argument validation. The consolidated packing
+probe compares the graph directly with native Lean's algorithm. No source
+mutual WF acceptance, Standard selection or runtime claim follows.
+See PSCV0_M3_MUTUAL_WF_2026-10-18.md. Main stays five-gate accepted atde667946;
+M3+B remains open.
+
 ## Reviewed constructive Nonempty registration identities
 
 Preparationabfc20d35f33694ff9e6d17e0d482cf5ef7c6796 /

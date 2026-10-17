@@ -241,3 +241,12 @@ from pinned Init/Core.lean. Copyright (c) 2014 Microsoft Corporation.
 Author: Leonardo de Moura. Apache-2.0; see LEAN-APACHE-2.0.txt.
 The standalone five-declaration asset has no assumptions; its retention
 does not select it into the Standard environment or authorize source mutual WF.
+
+### Fixed-parameter correspondence
+
+Ps.Elab.FixedParameters adapts src/Lean/Elab/PreDefinition/FixedParams.lean
+at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2025 Lean FRO, LLC. Author: Joachim Breitner. Apache-2.0.
+Modifications: explicit validated list indices, finite monotone closure with
+a derived structural bound, and portable checked-source observations.
+Native Info is imported only by the independent test oracle.

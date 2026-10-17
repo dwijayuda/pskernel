@@ -271,7 +271,7 @@ lean_lib PsElab where
     `Ps.Elab.Elimination,
     `Ps.Elab.Proof,
     `Ps.Elab.WellFounded,
-    `Ps.Elab.RecursionParameters,
+    `Ps.Elab.FixedParameters, `Ps.Elab.RecursionParameters,
     `Ps.Elab.Application, `Ps.Elab.Operator,
     `Ps.Elab.Record,
     `Ps.Elab.Refinement,

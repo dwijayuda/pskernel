@@ -89,3 +89,28 @@ singleton WF adapter's complete-before/after type checks. Factor the source
 adapter rather than rewriting already checked matches with stale majors.
 The current packing library supplies only domain/motive operations; it does
 not confer this execution authority.
+
+## Shared fixed-parameter correspondence
+
+Pinned Lean4.35.0 FixedParams.lean uses a graph of original member/parameter
+positions, not equal source names or cross-owner numeric local IDs.
+An edge records reducible equality without proof irrelevance at an actual
+typed call. Conflicting incoming positions, unmatched arguments, transitive
+variation and parameter-type dependencies remove a fixed candidate.
+The complete SCC then has one corresponding slot per member; permutations
+retain the first member's order and allow other headers to reorder it.
+
+Ps.Elab.FixedParameters adapts that finite graph with total structural
+traversal. Unknown edges and varying slots are distinct. Each closure step
+adds a correspondence or makes a one-way varying transition, so a bound
+derived from the real slot/member counts suffices; it is not a language fuel
+limit. Input identities, header arities and dependency indices are validated.
+The permutation consumer rejects incomplete or non-bijective components.
+
+The existing singleton WF planner now uses the same analysis, supplying
+real branch-scoped argument observations and typed dependency closure.
+Final source calls still independently validate every selected fixed slot.
+The packing probe compares two three-member reordered graphs directly
+against pinned Lean's Info implementation, including cascading variation.
+Source mutual WF callback construction, equations and runtime ownership
+remain unimplemented; this analysis alone cannot authorize recursion.

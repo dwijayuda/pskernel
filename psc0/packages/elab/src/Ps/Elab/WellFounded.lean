@@ -287,7 +287,7 @@ def psElabWellFoundedApplicationFailureDetails (elaborate : PsElaborator)
   | none => "not a direct positional reference application"
   | some (name, args) =>
     if args.isEmpty || args.length > 16 then "argument count outside diagnostic bound" else
-    let context := { context with pending := [], postponing := true
+    let context := { context with pending := [], postponing := true,
       sourceSpan := some (psSyntaxTermSpan source) }
     match psElabReference context name none with
     | .error _ => "separate raw-head replay failed"

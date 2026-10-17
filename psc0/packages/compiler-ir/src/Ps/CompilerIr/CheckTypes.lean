@@ -34,12 +34,16 @@ def psIrCheckPrimitiveName (type : PsVerifiedIrPrimitiveType) : String :=
   | .string => "string"
   | .unit => "unit"
 
--- Optional scalar capabilities are outside the current active runtime contract.
+-- Target-sized words require an explicit source width. Operation families
+-- retain their own qualification gates independently of scalar transport.
 def psIrCheckPrimitive (type : PsVerifiedIrPrimitiveType) :
     Except PsIrCheckIssue Unit :=
   match type with
   | .nat => Except.ok Unit.unit
   | .int => Except.ok Unit.unit
+  | .uint8 | .uint16 | .uint32 | .uint64
+  | .int8 | .int16 | .int32 | .int64 => Except.ok Unit.unit
+  | .float | .float32 => Except.ok Unit.unit
   | .bool => Except.ok Unit.unit
   | .char => Except.ok Unit.unit
   | .string => Except.ok Unit.unit
@@ -401,6 +405,46 @@ def psIrCheckSubstitute
     (List.cons (PsIrCheckSubstitutionTask.type type) List.nil)
     List.nil
 
+-- Fixed-width unsigned values have the same semantics on every target.
+-- The descriptor refuses target-sized/signed conversions rather than guessing.
+def psIrUnsignedType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  match type with
+  | .uint8 => .ok (.primitive .uint8)
+  | .uint16 => .ok (.primitive .uint16)
+  | .uint32 => .ok (.primitive .uint32)
+  | .uint64 => .ok (.primitive .uint64)
+  | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "unsigned-width")
+
+-- The signed and unsigned fixed-width carriers have distinct checked
+-- canonical ranges; platform-size carriers remain unqualified until their
+-- explicit target-width contract is available at the IR boundary.
+def psIrSignedType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  match type with
+  | .int8 => .ok (.primitive .int8)
+  | .int16 => .ok (.primitive .int16)
+  | .int32 => .ok (.primitive .int32)
+  | .int64 => .ok (.primitive .int64)
+  | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "signed-width")
+
+-- A signed wrapper stores the exact two's-complement bits of its unsigned
+-- carrier. This is an explicit checked reinterpretation, not a numeric cast
+-- or a change to signed comparison semantics.
+def psIrSignedUnsignedType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  match type with
+  | .int8 => .ok (.primitive .uint8)
+  | .int16 => .ok (.primitive .uint16)
+  | .int32 => .ok (.primitive .uint32)
+  | .int64 => .ok (.primitive .uint64)
+  | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "signed-carrier")
+
+def psIrMachineType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  if psIrMachineIntegerIsSigned type then psIrSignedType type
+  else psIrUnsignedType type
+
 def psIrCheckLiteralType
     (literal : PsVerifiedIrLiteral) :
     Except PsIrCheckIssue PsVerifiedIrType :=
@@ -409,9 +453,17 @@ def psIrCheckLiteralType
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
   | .integer _ =>
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int)
-  | .machineInteger _ _ =>
-      Except.error
-        (psIrCheckIssue "scalar-capability-unqualified" "machine-integer-literal")
+  | .machineInteger type value => do
+      let result ← psIrMachineType type
+      -- The unprofiled public IR still refuses USize/ISize. Any future
+      -- target-profile admission must validate the backend for that width.
+      let some _ := psIrMachineIntegerWidthWithTarget none type
+        | throw (psIrCheckIssue "scalar-capability-unqualified" "platform-width")
+      if !psIrMachineIntegerLiteralInRangeWithTarget none type value then
+        throw (psIrCheckIssue "machine-integer-literal-range"
+          (if psIrMachineIntegerIsSigned type then "signed-canonical"
+           else "unsigned-canonical"))
+      return result
   | .string _ =>
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string)
   | .bool _ =>
@@ -476,19 +528,64 @@ def psIrCheckIntrinsicSignature
   let char := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char;
   let string := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string;
   match operation with
-  | .machineIntBinary _ _ =>
-      Except.error
-        (psIrCheckIssue "scalar-capability-unqualified" "machine-integer-operation")
-  | .machineIntCompare _ _ =>
-      Except.error
-        (psIrCheckIssue "scalar-capability-unqualified" "machine-integer-operation")
-  | .floatBinary _ _ =>
-      Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")
-  | .floatCompare _ _ =>
-      Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")
+  | .hashMix => psIrCheckSignatureNoTypes typeArguments
+      [.primitive .uint64, .primitive .uint64] (.primitive .uint64)
+  | .stringHash => psIrCheckSignatureNoTypes typeArguments [string] (.primitive .uint64)
+  | .unsignedOfNat type => do
+      psIrCheckSignatureNoTypes typeArguments [nat] (← psIrUnsignedType type)
+  | .signedOfNat type => do
+      psIrCheckSignatureNoTypes typeArguments [nat] (← psIrSignedType type)
+  | .signedToUnsigned type => do
+      let signed ← psIrSignedType type
+      let unsigned ← psIrSignedUnsignedType type
+      psIrCheckSignatureNoTypes typeArguments [signed] unsigned
+  | .unsignedToNat type => do
+      psIrCheckSignatureNoTypes typeArguments [← psIrUnsignedType type] nat
+  | .machineIntBinary type _ => do
+      let value ← psIrMachineType type
+      psIrCheckSignatureNoTypes typeArguments [value, value] value
+  | .machineIntCompare type _ => do
+      let value ← psIrMachineType type
+      psIrCheckSignatureNoTypes typeArguments [value, value] bool
+  | .floatConvert source target =>
+      let valueType := fun (type : PsVerifiedIrFloatingType) => PsVerifiedIrType.primitive
+        (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [valueType source] (valueType target)
+  | .floatOfWord type word => do
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [← psIrMachineType word] value
+  | .floatToWord type word => do
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] (← psIrMachineType word)
+  | .floatOfBits type =>
+      let (bits, value) : PsVerifiedIrType × PsVerifiedIrType := match type with
+        | .float => (.primitive .uint64, .primitive .float)
+        | .float32 => (.primitive .uint32, .primitive .float32)
+      psIrCheckSignatureNoTypes typeArguments [bits] value
+  | .floatToBits type =>
+      let (bits, value) : PsVerifiedIrType × PsVerifiedIrType := match type with
+        | .float => (.primitive .uint64, .primitive .float)
+        | .float32 => (.primitive .uint32, .primitive .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] bits
+  | .floatUnary type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] value
+  | .floatTest type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value] bool
+  | .floatBinary type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value, value] value
+  | .floatCompare type _ =>
+      let value := PsVerifiedIrType.primitive (match type with | .float => .float | .float32 => .float32)
+      psIrCheckSignatureNoTypes typeArguments [value, value] bool
   | .natAdd => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natSub => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMul => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
+  | .natLog2 => psIrCheckSignatureNoTypes typeArguments [nat] nat
+  | .natShiftLeft | .natShiftRight => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
+  | .intPow => psIrCheckSignatureNoTypes typeArguments [int, nat] int
+  | .natPow => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natDiv => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMod => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natEq => psIrCheckSignatureNoTypes typeArguments [nat, nat] bool
@@ -496,6 +593,7 @@ def psIrCheckIntrinsicSignature
   | .natLe => psIrCheckSignatureNoTypes typeArguments [nat, nat] bool
   | .natLt => psIrCheckSignatureNoTypes typeArguments [nat, nat] bool
   | .intOfNat => psIrCheckSignatureNoTypes typeArguments [nat] int
+  | .intToNat => psIrCheckSignatureNoTypes typeArguments [int] nat
   | .intRepr => psIrCheckSignatureNoTypes typeArguments [int] string
   | .intNegSucc => psIrCheckSignatureNoTypes typeArguments [nat] int
   | .intNeg => psIrCheckSignatureNoTypes typeArguments [int] int
@@ -521,7 +619,18 @@ def psIrCheckIntrinsicSignature
   | .stringGet => psIrCheckSignatureNoTypes typeArguments [string, nat] char
   | .stringAtEnd => psIrCheckSignatureNoTypes typeArguments [string, nat] bool
   | .stringExtract => psIrCheckSignatureNoTypes typeArguments [string, nat, nat] string
+  | .stringToUtf8 => psIrCheckSignatureNoTypes typeArguments [string]
+      (psIrCheckArrayType (.primitive .uint8))
+  | .utf8Valid => psIrCheckSignatureNoTypes typeArguments
+      [psIrCheckArrayType (.primitive .uint8)] bool
+  | .utf8Decode => psIrCheckSignatureNoTypes typeArguments
+      [psIrCheckArrayType (.primitive .uint8)] string
   | .stringEq => psIrCheckSignatureNoTypes typeArguments [string, string] bool
+  | .arrayBuild =>
+      psIrCheckSignatureTwoTypes typeArguments (fun element state =>
+        PsIrCheckSignature.mk
+          [nat, state, .function [state] element, .function [state] state]
+          (psIrCheckArrayType element))
   | .arrayEmptyWithCapacity =>
       let build : PsVerifiedIrType -> PsIrCheckSignature :=
         fun (element : PsVerifiedIrType) =>
@@ -567,6 +676,11 @@ def psIrCheckIntrinsicSignature
             [PsVerifiedIrType.function [element] result, psIrCheckArrayType element]
             (psIrCheckArrayType result);
       psIrCheckSignatureTwoTypes typeArguments build
+  | .arrayFilter =>
+      psIrCheckSignatureOneType typeArguments fun element =>
+        PsIrCheckSignature.mk
+          [PsVerifiedIrType.function [element] bool, psIrCheckArrayType element, nat, nat]
+          (psIrCheckArrayType element)
   | .arrayFoldl =>
       let build : PsVerifiedIrType -> PsVerifiedIrType -> PsIrCheckSignature :=
         fun (element : PsVerifiedIrType) (accumulator : PsVerifiedIrType) =>

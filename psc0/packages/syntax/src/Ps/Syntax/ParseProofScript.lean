@@ -33,23 +33,21 @@ def psProofScriptBoolOr
 
 def psParseProofScriptImport
     (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult PsSyntaxImport) :=
-  match psTokenCursorExpectText cursor "import" with
-  | Except.error error => Except.error error
-  | Except.ok keyword =>
-      match psParseSyntaxName keyword.cursor with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          Except.ok {
-            value := {
-              moduleName := name.value
-              span := {
-                start := keyword.token.span.start
-                stop := name.value.span.stop
-              }
-            }
-            cursor := name.cursor
-          }
+    Except PsParseError (PsParseResult PsSyntaxImport) := do
+  let publicToken ← if psTokenCursorAtText cursor "public" then
+    (psTokenCursorExpectText cursor "public").map some
+  else pure none
+  let keyword ← psTokenCursorExpectText
+    (publicToken.map (·.cursor) |>.getD cursor) "import"
+  let name ← psParseSyntaxName keyword.cursor
+  return {
+    value := {
+      moduleName := name.value
+      span := {
+        start := (publicToken.map (·.token.span.start)).getD keyword.token.span.start
+        stop := name.value.span.stop }
+      isPublic := publicToken.isSome }
+    cursor := name.cursor }
 
 structure PsProofScriptCallArgs where
   args : List PsSyntaxTerm
@@ -139,22 +137,35 @@ def psProofScriptTermWithSpan
     (term : PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   match term with
+  | .doE items _ => .doE items span
+  | .byE tactics scope _ => .byE tactics scope span
+  | .hole _ => .hole span
+  | .omittedType _ => .omittedType span
+  | .optionalType type value _ => .optionalType type value span
+  | .ascription value type _ => .ascription value type span
+  | .call fn args _ => .call fn args span
+  | .operatorE kind name spelling args _ => .operatorE kind name spelling args span
   | .reference name =>
       PsSyntaxTerm.reference { segments := name.segments, span := span }
+  | .scientific value _ => PsSyntaxTerm.scientific value span
   | .natural value _ => PsSyntaxTerm.natural value span
+  | .sortE isType level _ => PsSyntaxTerm.sortE isType level span
   | .string value _ => PsSyntaxTerm.string value span
   | .character value _ => PsSyntaxTerm.character value span
   | .bool value _ => PsSyntaxTerm.bool value span
   | .unit _ => PsSyntaxTerm.unit span
   | .record fields _ => PsSyntaxTerm.record fields span
+  | .recordUpdate source fields _ => .recordUpdate source fields span
   | .app fn args _ => PsSyntaxTerm.app fn args span
   | .lambda binders body _ => PsSyntaxTerm.lambda binders body span
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span
   | .letE name type value body _ =>
       PsSyntaxTerm.letE name type value body span
-  | .ifE condition yes no _ => PsSyntaxTerm.ifE condition yes no span
-  | .matchE scrutinee alternatives _ =>
-      PsSyntaxTerm.matchE scrutinee alternatives span
+  | .haveE name type value body _ =>
+      PsSyntaxTerm.haveE name type value body span
+  | .ifE name condition yes no _ => PsSyntaxTerm.ifE name condition yes no span
+  | .matchMany scrutinees alternatives _ =>
+      PsSyntaxTerm.matchMany scrutinees alternatives span
 
 def psProofScriptLaterLine
     (previous : PsSourcePos)
@@ -284,7 +295,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "where" then true
   else if psStringEq text "with" then true
   else if psStringEq text "else" then true
-  else if psStringEq text "fun" then true
+  else if ["fun", "λ", "forall", "∀", "↦"].contains text then true
   else if psStringEq text "let" then true
   else if psStringEq text "if" then true
   else if psStringEq text "match" then true
@@ -296,6 +307,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "decreasing_by" then true
   else if psStringEq text "namespace" then true
   else if psStringEq text "section" then true
+  else if ["open", "variable", "include", "omit", "universe"].contains text then true
   else if psStringEq text "end" then true
   else if psStringEq text "class" then true
   else if psStringEq text "instance" then true
@@ -1061,6 +1073,7 @@ def psParseProofScriptTermWithFuel
                                                     Except.ok {
                                                       value :=
                                                         PsSyntaxTerm.ifE
+                                                          none
                                                           condition.value
                                                           thenBranch.value
                                                           elseBranch.value
@@ -1451,6 +1464,7 @@ def psParseProofScriptStructureDeclaration
                                   PsSyntaxDeclaration.structureDecl
                                     name.value
                                     params.value
+                                    none
                                     fields.value
                                     {
                                       start := keyword.token.span.start
@@ -1655,11 +1669,14 @@ def psParseProofScriptDeclaration
 def psProofScriptDeclarationStop
     (declaration : PsSyntaxDeclaration) : PsSourcePos :=
   match declaration with
+  | .whereDeclaration _ _ span => span.stop
   | .definition _ _ _ _ span => span.stop
   | .partialDefinition _ _ _ _ span => span.stop
+  | .fixedpointDefinition _ _ _ _ span => span.stop
+  | .wellFoundedDefinition _ _ _ _ _ span => span.stop
   | .theoremDecl _ _ _ _ span => span.stop
   | .inductiveDecl _ _ _ _ span => span.stop
-  | .structureDecl _ _ _ span => span.stop
+  | .structureDecl _ _ _ _ span => span.stop
 
 def psParseProofScriptImportsWithFuel
     (fuel : Nat) :
@@ -1684,7 +1701,8 @@ def psParseProofScriptImportsWithFuel
             List PsSyntaxImport ->
             Except PsParseError (PsParseResult (List PsSyntaxImport)) :=
           psParseProofScriptImportsWithFuel remaining;
-        if psTokenCursorAtText cursor "import" then
+        if psTokenCursorAtText cursor "import" ||
+            psTokenCursorAtText cursor "public" then
           match psParseProofScriptImport cursor with
           | Except.error error => Except.error error
           | Except.ok parsed =>
@@ -1787,3 +1805,4 @@ def psParseProofScriptSource
       | Except.error error =>
           Except.error (PsProofScriptFrontendError.parse error)
       | Except.ok module => Except.ok module
+

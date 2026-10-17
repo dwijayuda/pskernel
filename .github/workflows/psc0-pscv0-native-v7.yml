@@ -1,0 +1,336 @@
+name: PSC0 v7.2 native Lean development (Linux)
+on:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1, psc0/pscv0-v7-f3-conversions-research, psc0/pscv0-v7-platform-words-research]
+    paths:
+      # M3 acceptance uses one compiler/test SHA, including fixture-only repairs.
+      - 'psc0/test/Pscv0M3*.lean'
+      - 'psc0/scripts/pscv0-m3-*.mjs'
+      - 'psc0/packages/**/src/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/host/src/Ps/Host/*.lean'
+      - 'psc0/v7-native/**'
+      - 'psc0/lean-toolchain'
+      - 'psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md'
+      - 'psc0/docs/PSCV0_REFERENCE_ADOPTION.json'
+      - 'psc0/scripts/pscv0-reference-identity.mjs'
+      - 'psc0/lakefile.lean'
+      - 'psc0/scripts/Pscv0Native.lean'
+      - 'psc0/scripts/Pscv0M1Harness.lean'
+      - 'psc0/scripts/pscv0-native-*.mjs'
+      - 'psc0/scripts/pscv0-m1-cases.json'
+      - 'psc0/test/Pscv0NativeTests.lean'
+      - 'psc0/test/Pscv0PlatformTests.lean'
+      - 'psc0/test/Pscv0GetElemOracle.lean'
+      - 'psc0/test/Pscv0FloatConstructiveOracle.lean'
+      - 'psc0/test/Pscv0M1Performance.lean'
+      - 'psc0/test/Pscv0WasmTests.lean'
+      - '.github/workflows/psc0-pscv0-native-v7.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc0-v7-native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+            /psc0/v7-native/
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/scripts/
+            /psc0/test/Pscv0NativeTests.lean
+            /psc0/test/Pscv0PlatformTests.lean
+            /psc0/test/Pscv0GetElemOracle.lean
+            /psc0/test/Pscv0FloatConstructiveOracle.lean
+            /psc0/test/Pscv0M1Performance.lean
+            /psc0/test/Pscv0WasmTests.lean
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Guard source closure and native-only development policy
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test ! -d ../packages/pskernel-core
+          node ../scripts/pscv0-native-profile.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Compile current Lean sources into native compiler and compact checks
+        id: build
+        run: |
+          set -euo pipefail
+          lean --version | tee ../dist/pscv0-native/toolchain.txt
+          grep -F '4.35.0' ../dist/pscv0-native/toolchain.txt
+          grep -F 'eb6cafb' ../dist/pscv0-native/toolchain.txt
+          START=$(date +%s%3N)
+          lake build pscv0_native pscv0_native_checks pscv0_wasm_checks pscv0_m1_performance 2>&1 | tee ../dist/pscv0-native/build.log
+          BUILT=$(date +%s%3N)
+          lake build pscv0_native pscv0_native_checks pscv0_wasm_checks pscv0_m1_performance > ../dist/pscv0-native/warm-build.log 2>&1
+          WARM=$(date +%s%3N)
+          printf '{"initialBuildMs":%s,"warmBuildMs":%s}\n' "$((BUILT-START))" "$((WARM-BUILT))" | tee ../dist/pscv0-native/build-timings.json
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: always() && !cancelled() && steps.build.outcome != 'skipped'
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-${{ github.sha }}
+      - name: Run existing parser corpus and native checked compiler cases in one process
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --audit-primitives | tee ../dist/pscv0-native/primitive-audit.json
+          .lake/build/bin/pscv0_native --audit-standard-closure > ../dist/pscv0-native/standard-closure.json
+          .lake/build/bin/pscv0_native --audit-standard-surface > ../dist/pscv0-native/standard-surface.json
+          .lake/build/bin/pscv0_native --export-scalar-arithmetic ../dist/pscv0-native/StandardScalarArithmeticData.lean > ../dist/pscv0-native/standard-export.log
+          cmp ../packages/environment/src/Ps/Environment/StandardScalarArithmeticData.lean ../dist/pscv0-native/StandardScalarArithmeticData.lean
+          .lake/build/bin/pscv0_native --export-unsigned-foundation ../dist/pscv0-native/StandardUnsignedFoundationData.lean > ../dist/pscv0-native/unsigned-export.log
+          cmp ../packages/environment/src/Ps/Environment/StandardUnsignedFoundationData.lean ../dist/pscv0-native/StandardUnsignedFoundationData.lean
+          .lake/build/bin/pscv0_native --export-hash-foundation ../dist/pscv0-native/StandardHashFoundationData.lean > ../dist/pscv0-native/hash-export.log
+          cmp ../packages/environment/src/Ps/Environment/StandardHashFoundationData.lean ../dist/pscv0-native/StandardHashFoundationData.lean
+          .lake/build/bin/pscv0_native --check-quotient-foundation | tee ../dist/pscv0-native/quotient-foundation.log
+      - name: Regenerate and check the admitted unsigned proof asset
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-unsigned-operations-candidate ../dist/pscv0-native/StandardUnsignedOperationsData.lean | tee ../dist/pscv0-native/unsigned-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardUnsignedOperationsData.lean ../dist/pscv0-native/StandardUnsignedOperationsData.lean
+      - name: Regenerate and audit proposed well-founded foundation
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-well-founded-candidate ../dist/pscv0-native/StandardWellFoundedCandidate.lean | tee ../dist/pscv0-native/well-founded-candidate.log
+          sha256sum ../dist/pscv0-native/StandardWellFoundedCandidate.lean | tee ../dist/pscv0-native/well-founded-candidate.sha256
+          cmp ../packages/environment/src/Ps/Environment/StandardWellFoundedData.lean ../dist/pscv0-native/StandardWellFoundedCandidate.lean
+          .lake/build/bin/pscv0_native --check-well-founded-foundation | tee ../dist/pscv0-native/well-founded-foundation-audit.json
+      # F0 checked logical identity is a selected Standard asset; freeze the
+      # original pre-F0 boundary, regenerate byte-for-byte and preserve the
+      # approved foundation. Executable Float remains pending F1-F4.
+      - name: Review kernel-checked Float and Float32 identity candidate
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-float-identity-candidate ../dist/pscv0-native/StandardFloatIdentityCandidate.lean | tee ../dist/pscv0-native/float-identity-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatIdentityData.lean ../dist/pscv0-native/StandardFloatIdentityCandidate.lean
+      # The native F1 float-bit exporter still refuses unapproved Classical.choice.
+      # Preserve that refusal; it is not part of the selected Standard yet.
+      - name: Review kernel-checked signed logical identities
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-signed-identity-candidate ../dist/pscv0-native/StandardSignedIdentityCandidate.lean | tee ../dist/pscv0-native/signed-identity-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardSignedIdentityData.lean ../dist/pscv0-native/StandardSignedIdentityCandidate.lean
+
+      # The two candidates are independent and must both pass before their
+      # own selected stages can be frozen. Neither enables an IR runtime.
+      - name: Kernel-review Float and Float32 read-only bit projections
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-float-tobits-candidate ../dist/pscv0-native/StandardFloatToBitsCandidate.lean | tee ../dist/pscv0-native/float-tobits-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatToBitsData.lean ../dist/pscv0-native/StandardFloatToBitsCandidate.lean
+      - name: Kernel-review pure signed BitVec arithmetic closure
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-signed-operations-candidate ../dist/pscv0-native/StandardSignedOperationsCandidate.lean | tee ../dist/pscv0-native/signed-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardSignedOperationsData.lean ../dist/pscv0-native/StandardSignedOperationsCandidate.lean
+      - name: Regenerate checked Int arithmetic definitions and symbolic laws
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-int-arithmetic-model-candidate ../dist/pscv0-native/StandardIntArithmeticData.lean | tee ../dist/pscv0-native/int-arithmetic-model.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardIntArithmeticData.lean ../dist/pscv0-native/StandardIntArithmeticData.lean
+      - name: Regenerate minimal checked Float constructors
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          # Lean resolves a namespace at its first root; local Ps.Host must
+          # precede the parent workspace's separate Ps namespace.
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-constructors-candidate ../dist/pscv0-native/StandardFloatConstructorsData.lean | tee ../dist/pscv0-native/float-constructors.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../dist/pscv0-native/StandardFloatConstructorsData.lean ../packages/environment/src/Ps/Environment/StandardFloatConstructorsData.lean
+      - name: Regenerate checked Float operations and decisions
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-operations-candidate ../dist/pscv0-native/FloatOperationsCandidate.lean > ../dist/pscv0-native/float-operations.log
+          grep -v '^PSCV0_STANDARD_SOURCE ' ../dist/pscv0-native/float-operations.log
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatOperationsData.lean ../dist/pscv0-native/FloatOperationsCandidate.lean
+          sha256sum ../dist/pscv0-native/FloatOperationsCandidate.lean
+      - name: Regenerate checked scientific and numeric conversions
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-conversions-candidate ../dist/pscv0-native/FloatConversionsCandidate.lean > ../dist/pscv0-native/float-conversions.log
+          grep -v '^PSCV0_STANDARD_SOURCE ' ../dist/pscv0-native/float-conversions.log
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean ../dist/pscv0-native/FloatConversionsCandidate.lean
+          sha256sum ../dist/pscv0-native/FloatConversionsCandidate.lean
+      - name: Regenerate checked Float display and cross-width contracts
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-float-display-candidate ../dist/pscv0-native/FloatDisplayCandidate.lean | tee ../dist/pscv0-native/float-display.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardFloatDisplayData.lean ../dist/pscv0-native/FloatDisplayCandidate.lean
+      - name: Regenerate checked abstract platform words
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          BASE_LEAN_PATH="$(lake env printenv LEAN_PATH)"
+          lake env env LEAN_PATH="$PWD/.lake/build/lib/lean:$BASE_LEAN_PATH" .lake/build/bin/pscv0_native --export-platform-words-candidate ../dist/pscv0-native/PlatformWordsCandidate.lean | tee ../dist/pscv0-native/platform-words.log | grep -v '^PSCV0_STANDARD_SOURCE '
+          cmp ../packages/environment/src/Ps/Environment/StandardPlatformWordsData.lean ../dist/pscv0-native/PlatformWordsCandidate.lean
+      - name: Qualify checked source and admitted Standard
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native_checks | tee ../dist/pscv0-native/checks.log
+          .lake/build/bin/pscv0_native --version | tee ../dist/pscv0-native/native-version.json
+          .lake/build/bin/pscv0_native --emit-all ../dist/pscv0-native/application.ps ../dist/pscv0-native/application | tee ../dist/pscv0-native/emit.log
+      - name: Check and emit a real three-module application
+        run: |
+          set -euo pipefail
+          MANIFEST=../v7-native/module-fixture/project.json
+          .lake/build/bin/pscv0_native --audit-project-graph "$MANIFEST" > ../dist/pscv0-native/project-source-graph.json
+          .lake/build/bin/pscv0_native --check-project "$MANIFEST"
+          .lake/build/bin/pscv0_native --emit-project-all "$MANIFEST" ../dist/pscv0-native/modules/app
+          node ../scripts/pscv0-native-project.mjs ../dist/pscv0-native/modules/app
+      - name: Qualify GC core runtime and component formats
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pscv0-wasm-tools"
+          cd "$RUNNER_TEMP/pscv0-wasm-tools"
+          curl -fsSL https://github.com/bytecodealliance/wasm-tools/releases/download/v1.261.0/wasm-tools-1.261.0-x86_64-linux.tar.gz -o wasm-tools.tar.gz
+          echo 'ad62b2176037e93e1348cb65d6212d128ca9f097b63d155569f25215818ff7b1  wasm-tools.tar.gz' | sha256sum -c -
+          curl -fsSL https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.2/wasmtime-v49.0.2-x86_64-linux.tar.xz -o wasmtime.tar.xz
+          echo 'a4d6e9e3a5a60f527cf7793d674c48930c80c2e8977995b8a275cad3254b9322  wasmtime.tar.xz' | sha256sum -c -
+          tar -xzf wasm-tools.tar.gz
+          tar -xJf wasmtime.tar.xz
+          export PATH="$RUNNER_TEMP/pscv0-wasm-tools/wasm-tools-1.261.0-x86_64-linux:$RUNNER_TEMP/pscv0-wasm-tools/wasmtime-v49.0.2-x86_64-linux:$PATH"
+          cd "$GITHUB_WORKSPACE/psc0/v7-native"
+          node ../scripts/pscv0-native-platform.mjs wasm ../dist/pscv0-native/platform | tee ../dist/pscv0-native/platform/wasm.log
+          .lake/build/bin/pscv0_wasm_checks
+          .lake/build/bin/pscv0_native --emit-wasm ../dist/pscv0-native/wasm/scalar.ps ../dist/pscv0-native/wasm/scalar ../dist/pscv0-native/wasm/exports.json
+          node ../scripts/pscv0-native-wasm-observations.mjs ../dist/pscv0-native
+          .lake/build/bin/pscv0_native --emit-wasm ../dist/pscv0-native/wasm/observations.ps ../dist/pscv0-native/wasm/observations ../dist/pscv0-native/wasm/observations.exports.json
+          .lake/build/bin/pscv0_native --emit-wasm ../dist/pscv0-native/wasm/aggregate.ps ../dist/pscv0-native/wasm/aggregate ../dist/pscv0-native/wasm/aggregate.exports.json
+          node ../scripts/pscv0-native-wasm-abi.mjs ../dist/pscv0-native/wasm | tee ../dist/pscv0-native/wasm/abi-qualification.log
+          node ../scripts/pscv0-native-wasm.mjs ../dist/pscv0-native/wasm | tee ../dist/pscv0-native/wasm/qualification.log
+          .lake/build/bin/pscv0_native --emit-project-wasm-core ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/core
+          wasm-tools validate ../dist/pscv0-native/modules/core.core.wasm
+          .lake/build/bin/pscv0_native --emit-project-wasm ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/component ../v7-native/module-fixture/exports.json
+          wasm-tools validate ../dist/pscv0-native/modules/component.wasm
+          # Exercise the module dependency graph in real Wasm engines, not
+          # merely in a binary validator. The generated Bool probe calls the
+          # existing App -> Facade -> Vault graph and privately linked seed.
+          .lake/build/bin/pscv0_native --check-project ../v7-native/module-fixture/project-wasm.json
+          .lake/build/bin/pscv0_native --emit-project-wasm-core ../v7-native/module-fixture/project-wasm.json ../dist/pscv0-native/modules/probe
+          .lake/build/bin/pscv0_native --emit-project-wasm ../v7-native/module-fixture/project-wasm.json ../dist/pscv0-native/modules/probe-component ../v7-native/module-fixture/wasm-exports.json
+          node ../scripts/pscv0-native-project-wasm.mjs ../dist/pscv0-native/modules/probe ../dist/pscv0-native/modules/probe-component | tee ../dist/pscv0-native/modules/wasm-runtime.log
+      - name: Compile and run the small emitted application with pinned TypeScript
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/pscv0-native-tools" --ignore-scripts --no-audit --no-fund --no-package-lock typescript@7.0.2
+          TSC="$RUNNER_TEMP/pscv0-native-tools/node_modules/.bin/tsc"
+          "$TSC" --version | tee ../dist/pscv0-native/typescript-version.txt
+          grep -Fx 'Version 7.0.2' ../dist/pscv0-native/typescript-version.txt
+          node ../scripts/pscv0-native-platform.mjs ecma ../dist/pscv0-native/platform "$TSC" | tee ../dist/pscv0-native/platform/ecma.log
+          mkdir -p ../dist/pscv0-native/ts-compiled
+          "$TSC" --ignoreConfig ../dist/pscv0-native/application.ts --outDir ../dist/pscv0-native/ts-compiled --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/ts-compiled/application.js typescript | tee ../dist/pscv0-native/runtime.log
+          node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/application.js directjs | tee ../dist/pscv0-native/directjs-runtime.log
+          mkdir -p ../dist/pscv0-native/ts-compiled-modules
+          "$TSC" --ignoreConfig ../dist/pscv0-native/modules/app.ts --outDir ../dist/pscv0-native/ts-compiled-modules --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-native-project.mjs ../dist/pscv0-native/modules/app ../dist/pscv0-native/ts-compiled-modules/app.js
+          node ../scripts/pscv0-native-directjs.mjs ../dist/pscv0-native
+          "$TSC" --ignoreConfig ../dist/pscv0-native/declaration-consumer/consumer.ts --target ES2020 --module ES2020 --moduleResolution bundler --strict --noEmit --pretty false
+      - name: Compile and run the same application with pinned Rust
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.98.1 --profile minimal
+          rustup run 1.98.1 rustc --version | tee ../dist/pscv0-native/rust-version.txt
+          node ../scripts/pscv0-native-platform.mjs rust ../dist/pscv0-native/platform
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-platform-check 2>&1 | tee ../dist/pscv0-native/platform/rust.log
+          node ../scripts/pscv0-native-rust.mjs ../dist/pscv0-native
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release 2>&1 | tee ../dist/pscv0-native/rust-runtime.log
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-module-check 2>&1 | tee ../dist/pscv0-native/modules/rust-runtime.log
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/v7-native/wasm-host/target
+            ~/.cargo/registry
+          key: pscv0-wasm-host-${{ runner.os }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.toml') }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.lock') }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-wasm-host-${{ runner.os }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.toml') }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.lock') }}-
+            pscv0-wasm-host-${{ runner.os }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.toml') }}-
+      - name: Qualify repeated component calls with pinned native Wasmtime embedding
+        id: component-host
+        run: |
+          set -euo pipefail
+          rustup run 1.98.1 cargo run --manifest-path wasm-host/Cargo.toml --locked -- ../dist/pscv0-native/wasm 2>&1 | tee ../dist/pscv0-native/wasm/component-host.log
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: always() && !cancelled() && steps.component-host.outcome != 'skipped'
+        with:
+          path: |
+            psc0/v7-native/wasm-host/target
+            ~/.cargo/registry
+          key: pscv0-wasm-host-${{ runner.os }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.toml') }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.lock') }}-${{ github.sha }}
+      - name: Measure M1 compiler and collection runtime costs
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m1_performance ../dist/pscv0-native/m1-performance
+          node ../scripts/pscv0-native-m1-performance.mjs ../dist/pscv0-native/m1-performance | tee ../dist/pscv0-native/m1-performance/comparison.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-v7-native-${{ github.sha }}
+          path: psc0/dist/pscv0-native/
+          if-no-files-found: warn
+          retention-days: 30
+

@@ -1,0 +1,695 @@
+# Faithful Std.Format and Repr design
+
+Current pin: Lean 4.35.0, eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+This design continues existing M2+A, not a new milestone sequence.
+
+## Source and regression study
+
+Studied Init/Data/Format/Basic.lean, Init/Data/Format/Instances.lean,
+Init/Data/Repr.lean and Lean/Elab/Deriving/Repr.lean at the pin.
+Relevant upstream tests: tests/elab/Format.lean (fill and oversized groups),
+formatHardLineBreaks.lean (hard newlines and re-flattening), derivingRepr.lean
+(structures, proofs/types, recursive/indexed cases) and charQuote.lean.
+
+These files are unchanged in the complete RC4-to-stable comparison.
+Upstream sources are Apache-2.0; retain attribution and license for adaptations.
+
+## Architectural choice
+
+Retain the actual Std.Format inductive and FlattenBehavior enumeration.
+Public Repr.reprPrec returns a document, never an ersatz String. Use ordinary
+checked Core definitions, the existing typed IR, algebraic data and closures.
+The portable closure must not import Lean's elaborator, formatter or compiler.
+
+Follow the upstream Wadler-style two-stage algorithm: spaceUptoLine measures
+documents with flattening and indentation context; pretty processes work groups
+with allOrNone/fill behavior and flatten-allowed state. Preserve hard lines,
+forced alignment, signed nesting, Unicode scalar column counts, group remainder
+fitting and precedence. Tags do not alter pure pretty output; effectful
+MonadPrettyFormat callbacks are a separate API, not silently discarded there.
+
+A total implementation may replace upstream private partial worklists with an
+input-derived bound. Use the invariant: remaining weight equals two per Format
+node, plus each text's remaining UTF-8 bytes, plus one per work group. Each
+render transition strictly decreases this weight: a newly pushed group costs one
+while consuming a two-weight group node; text splitting consumes at least one
+byte; an empty-group transition consumes one group. Initialize with the exact
+document weight plus the initial group. No fixed limit or truncated user output.
+This algorithm/invariant needs validation; it is not a formal proof claim.
+
+Keep the document fold, layout measurement, worklist renderer and Repr handlers
+separate. Use existing Core binder/recursor builders where suitable; a small
+static telescope helper may remove repeated declaration-construction details,
+but must not become a second parser/elaborator or alter source semantics.
+
+## Handler semantics
+
+Use shared parameter/universe telescopes, class lookup and eliminator generation.
+Repr's structure field labels/default indentation and constructor qualification,
+explicit argument filtering, application precedence, proof/type placeholders and
+quoting follow the pinned handler. Scalar and selected collection instances need
+faithful documents/formatting too. Format.joinSep is polymorphic through ToFormat;
+do not replace it with a monomorphic List Format API.
+
+Keep recursive/indexed deriving and computational dependent fields with M3+B's
+shared data/termination mechanisms, as already assigned. The current M2 scope is
+independent nonrecursive families; no claims for the deferred upstream cases.
+
+## Validation boundary
+
+Use a compact shared document/deriving batch against native Lean, including
+upstream hard-line and fill counterexamples, negative nesting, Unicode, narrow
+width and application parentheses. Then use existing kernel/strict IR and
+JS/TS/Rust/GC-Wasm integration gates. Do not add backend-specific format printers,
+weaken unknown-type checks or use formatting axioms to obtain green output.
+
+Current status: pure Format is implemented and qualified below; ToFormat/Repr
+and the effectful callback API remain pending.
+
+## Pure layout implementation
+
+StandardFormatData/Basic own the real algebra and document operations;
+Support owns scalar scanning and Core construction vocabulary; Measure and Work
+own fitting; Render owns pure transitions and the input-weight-bounded driver.
+StandardFormat integrates this closure with normal kernel admission and typed
+runtime erasure. No backend formatter, new axiom or runtime primitive is added.
+The static data helper allocates constructor fields beyond every minor's binder
+IDs and is limited to closed nonindexed Type-0 declarations.
+
+Eleven shared observations cover upstream hard-line/fill regressions, scalar
+column widths, negative nesting, alignment/forced alignment, initial column,
+and empty-versus-nil. The independent native oracle checks the same expected
+values. Profile /55 identifies this expansion. Signature/status/digest review
+and full cross-target qualification are pending. Repr, ToFormat, polymorphic
+joinSep and effectful prettyM are not implemented by this foundation.
+
+## Reviewed snapshot
+
+Linux [38442009692](https://github.com/dwijayuda/pskernel/actions/runs/38442009692)
+at `32aab6ae2be26d101449489c4a0a14ea011ab686` compiled all 198 portable /
+206 native modules, including the independent native formatting oracle, and
+passed primitive signature/reducibility audits. The strict registry gate then
+reported the expected 79-declaration expansion: no new axiom, primitive, class,
+instance or alias. Expected roster: 394 declarations /18 classes /54 instances.
+Reviewed FNV `fnv1a64:17804548636281664114`; SHA-256
+`sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1`.
+Full kernel/IR/runtime qualification follows; it is not established by compilation.
+
+## Constructor field identity correction
+
+At `f8832f0` / Linux 38442244676, native source/oracle, all semantic
+and official-kernel checks, selected snapshot (394/18/54), typed IR and project
+emission passed. WAT round-trip parsing exposed a pre-existing target naming
+error: a compiler discriminator called `tag` collided with Format.tag's payload.
+
+Before changing the layout, studied pinned Lean
+[NameMangling](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Compiler/NameMangling.lean),
+[EmitC](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Compiler/LCNF/EmitC.lean)
+and [mangling tests](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/tests/elab/mangling.lean).
+Lean separates runtime constructor tags from source-name mangling; it has no
+corresponding WAT emitter. The WebAssembly
+[text type rules](https://webassembly.github.io/spec/core/text/types.html#composite-types)
+require a well-formed local field identifier context.
+
+PSC0 now allocates the backend discriminator once per family against every
+constructor's payload names using the existing fresh-name allocator. The base
+and every subtype retain the same allocated spelling; field indices and physical
+layout are unchanged. The target validator rejects duplicate names in every
+structure before rendering. WAT and binary debug metadata consume the same
+layout field table. No Format-specific field rename or printer exception.
+
+The sibling-backend review found ECMAScript discriminator keys use fresh Symbols
+(rather than source string field keys), while Rust uses native enum variants;
+neither shares this WAT field-name collision. One existing Wasm qualification
+batch now also requires early refusal of a duplicate target field table.
+
+## Qualification complete
+
+Executable `49324765c1dc4e1c601dc0cded6118822c1922bc`;
+[green Linux 38442705296](https://github.com/dwijayuda/pskernel/actions/runs/38442705296).
+**313 shared runtime observations**, four panic contracts, **198 portable /
+206 native modules**, profile `pscv0-v7-native-bounded/55`.
+Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+independent oracle, official kernel, semantic/refusal and graph gates, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and existing performance
+gates passed. These measurements do not establish performance parity.
+
+Standard: **394 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:17804548636281664114`;
+SHA `sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1`.
+The pure Std.Format algebra, measurement and renderer are ordinary checked
+definitions over the shared IR, including hard-line/fill behavior, Unicode
+columns, signed nesting, alignment and initial column. No formatting axiom,
+backend formatter or new runtime primitive. WAT constructor discriminator names
+are allocated separately from payload fields; physical indices are unchanged.
+
+Quoting and checked Int.toNat remain qualified. Quoting comparisons use native
+evaluation because upstream String.Internal.append is kernel-opaque; they are
+not kernel equality proofs. Int runtime conversion preserves arbitrary precision.
+Historical RC4 receipts retain their original identities.
+
+Full M2+A is **not complete**. Next: ToFormat/Repr and remaining A/M2.
+
+The weight argument justifies termination for public pretty's derived bound;
+it is not a formally checked termination or renderer-equivalence theorem.
+Repr-specific source study additionally includes pinned Init/Data/Int/Repr.lean
+(negative integer parentheses), tests/elab/repr.lean (tuples/atomic lists),
+repr_empty.lean (Empty as a parameter) and repr_issue.lean (opaque Id wrappers).
+Keep those requirements distinct from this qualified pure Format boundary.
+
+The additional early-refusal case and full existing integration suite also pass
+at `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`,
+[Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672).
+This is the newest qualified source/test boundary; 313 shared observations,
+394/18/54 Standard roster and both digests are unchanged.
+
+## ToFormat/Repr implementation phase (qualification pending)
+
+Reference: official Lean **4.35.0**, commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Studied [Format Basic](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Format/Basic.lean),
+[Format Instances](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Format/Instances.lean),
+[Repr](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Repr.lean),
+[Int Repr](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Int/Repr.lean),
+[deriving Repr](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/Deriving/Repr.lean),
+Init/Notation.lean (`max_prec = 1024`), Init/Prelude.lean and
+Init/Data/List/Basic.lean. Relevant tests: derivingRepr, repr, repr_empty,
+repr_issue, Format, formatHardLineBreaks and charQuote.
+
+The old Type-0 List declaration cannot implement the actual universe-polymorphic
+joinSep API. Replace its handwritten telescope with the same explicit-local
+builder used for Option; List.rec has levels [resultSort, elementUniverse].
+Promote the selected List operations, including independent map/fold input and
+output universes. Ground collection adapters explicitly instantiate zero.
+Proof-bearing List indexing and the Array/Prod model remain selected Type-0
+APIs and are not claimed to be promoted by this phase.
+
+Formatting dictionaries are ordinary one-field structures. Std.ToFormat's
+ToString fallback has priority 100; identity/structural instances have 1000.
+Join combinators reuse the shared checked List.foldl; no duplicate traversal
+or backend formatter is introduced. ReprAtom is an empty ordinary class and
+selects the later atomic-list instance at the same priority as Lean.
+
+Deriving plans each field printer once in the parameter context. Structures use
+projections and field labels; constructors print qualified names and explicit
+fields only. Proof/type values print underscores; constructor arguments use
+precedence 1024, including nullary constructors in application contexts.
+Formatting is a checked Format term, never a string-generation shortcut.
+Dependent runtime field types, recursive and indexed families stay with M3+B.
+Generated declarations retain the existing source-command origin machinery.
+
+Qualification: 17 compact observations, independently checked by native Lean,
+are added to the existing shared backend table. Repr missing-dictionary and
+recursive refusal cases extend the existing boundary group. Both Standard
+digest guards remain strict pending explicit review of the new roster.
+Remaining selected formatting APIs/instances, Hashable/numeric dependencies,
+broader M2 evidence and the Phase A manifest remain open; this is not M2+A
+completion.
+
+The first kernel pass found one old alias constructor that copied List.get?'s
+type while discarding its universe parameters. Replace that pattern with
+psDeclarationAlias: target identity, universe telescope and type travel together.
+The sibling copied-type registrations were reviewed; they already retain their
+levels. List.get?Internal now shares the actual polymorphic target.
+
+The same phase also supplies String.toFormat soft-line conversion, Format
+append/coercion/default instances, tuple flattening through ReprTuple, Array
+fill rendering, Fin display and the explicit Id instance. String conversion
+uses one byte-bounded UTF-8 cursor pass and no intermediate split list. Tuple
+formatting accumulates a reversed document list and reverses once, as upstream.
+Array Repr always uses bracketFill, independently of ReprAtom.
+Eight additional shared observations extend the same small native oracle group.
+No new runtime primitive. Prod/Array retain their explicit selected Type-0
+boundary. Kernel/runtime qualification is still pending.
+
+Kernel admission now accepts the promoted prelude. Executable qualification
+then exposed a second part of the alias contract: a bare polymorphic constant
+has no raw lambda entry prefix in the portable IR. After studying pinned
+Lean/Compiler/LCNF/ToLCNF.lean (etaExpandN, etaIfUnderApplied, visitLambda,
+mkOverApplication), tests/compile/arity_bug1.lean, tests/elab/eta_lambda_lift.lean
+and compiler_reduce_arity_fully.lean, psDeclarationAlias now builds precisely
+the target's existing raw lambda prefix around the reference. It does not copy
+the implementation or expand a computed function result. The ordinary kernel
+checks the resulting alias, and the established erasure entry/calling convention
+remains shared across all backends. This preserves the earlier M0 evaluation
+boundary rather than introducing an alias-specific backend path.
+
+## Shared public methods and default completion
+
+The same checked bodies now own public Bool.repr, Nat.repr, Option.repr,
+List.repr and List.repr' plus their dictionaries. Decidable.repr examines the
+checked computational Bool; reflection proofs remain erased. This adds seven
+declarations and one instance to the pending display roster, without an axiom
+or primitive. Char.repr already existed and is retained.
+
+A nested generic call exposed an M2 application invariant: an unconstrained
+expected metavariable must not preserve an omitted optParam as a function value.
+Study: stable Lean src/Lean/Elab/App.lean processExplicitArg/finalize and
+ tests/elab/optParam.lean, floatOptParam.lean, defaultValueParamIssue.lean.
+The shared application engine now fills such defaults before assigning the
+unknown expected type. PSCV0's previously qualified explicit expected-function
+partial applications remain intact. displayIdentity exercises this through the
+independent Lean oracle and every runtime target. Diagnostics distinguish
+instance failure and resource exhaustion instead of reporting a generic failure.
+Three additional existing-batch observations cover positive/negative decision
+representations and direct public numeric representation. Qualification pending.
+
+Reviewed stable public-method extension, Linux 38449538089: the native build,
+independent oracle and signature/reducibility audit passed. The strict digest
+guard intentionally refused the seven added declarations (five shared public
+methods plus Decidable method/instance), one added instance and changed printer
+references. New FNV fnv1a64:2066895107454337978; SHA-256
+sha256:94a92697fa582ab59fd6b0e466a4dd68b8386f2503af16d703d5603f7b07644b.
+Both guards remain strict. Runtime qualification still pending.
+
+Id display revealed its missing upstream numeral dictionary, not a Repr or
+unification defect. Stable Init/Control/Id.lean explicitly declares
+[OfNat α n] : OfNat (Id α) n because Id is not instance-transparent. The
+portable Numeric module now reproduces that universe-aware checked dictionary
+and records its level parameters in the instance index. General instance
+transparency remains unchanged. The existing Id observation covers the path;
+no duplicate fixture or special-case literal rewrite is added.
+
+Reviewed Id dictionary delta (one declaration/instance only), Linux38450100204:
+FNV fnv1a64:10063720084149863531; SHA-256
+sha256:eef203f0a5b182e3cc21330d1d39e670013e48b9aab48b6485f8d9eb89bafce5.
+Native build and oracle pass. Strict guard values updated to this exact roster;
+341 shared runtime observations and four panic contracts await qualification.
+
+## Universe and empty-marker representation closure
+
+Stable Init/Prelude.lean and Init/Data/List/Basic.lean define Inhabited List
+without an element dictionary and BEq/List.beq at the element universe.
+The remaining ground-only dictionaries now carry that universe, including the
+function-valued outer recursor result sort. Public List.beq and the dictionary
+share one body; the private duplicate worker name is removed. One existing
+kernel conformance group and its pinned Lean oracle cover arbitrary universes
+and the Type-valued empty-list default. Selected Array remains Type-0.
+
+Linux 38450541085 passed every native semantic/module/deriving/search gate,
+then strict IR rejected a reference to an omitted ReprAtom dictionary. This
+was a mismatch between definition filtering and ordinary binder representation:
+a vacuous all-fields-erased predicate discarded zero-field Type-valued classes,
+while applications correctly retained their singleton values. Studied pinned
+Lean/Compiler/LCNF/ToLCNF.lean visit/visitAppArg/visitCtor: proofs and type formers
+are erased; ordinary constructors remain data. Restrict specialized dictionary
+filtering to classes with actual erased fields. Empty classes now use the
+existing shared empty-structure representation at definitions and uses.
+No Repr-specific erasure/backend exception; existing atomic-list observations
+exercise the invariant on all targets. Runtime qualification remains pending.
+
+Reviewed List-universe delta after the native build/oracle in Linux38451439577:
+List Inhabited/BEq now bind the element universe; the former private comparison
+worker is the public List.beq with its pinned reducibility. Roster counts remain
+460/22/88. FNV fnv1a64:2548399426123262483; SHA-256
+sha256:79e34c4fd2bb8e491d624c86ccb644bf96b2442e090137d01b3c74ca72bfaeaf.
+Both strict digest guards are updated to the reviewed semantics, not bypassed.
+
+## Next dependency: checked scalar library reuse
+
+Hashable's UInt64 API requires modular arithmetic and a genuine bounded-value
+logical model. Pinned Prelude.lean, UInt/Basic.lean, UInt/BasicAux.lean,
+BitVec/Basic.lean, Nat/Div/Basic.lean, runtime/hash.h, runtime/hash.cpp and
+runtime/object.cpp were reviewed. The portable Nat.mod axiom supports closed
+kernel literal reduction but cannot justify the general Nat.mod_lt theorem.
+Do not fake that theorem or replace UInt64's public type with Nat.
+
+Before choosing manual proof adaptation versus importing a small checked Core
+closure, a native-only authoring audit measures the upstream dependencies of
+Nat.mod_lt, BitVec.ofNat, UInt64.ofNat/xor, mixHash, String.hash and Float's
+scientific conversion. Source references: pinned Lean/Declaration.lean and
+Lean/Util/CollectAxioms.lean (visited-before-descent, type plus proof/body
+traversal); this audit also follows mutual families and recursor rules. It
+reports name collisions with the selected portable environment as boundaries
+requiring review, not as compatible imports. It admits no declarations and is
+not a conformance test or an implementation of the missing scalar operations.
+The native audit is outside the portable dependency graph; no host elaborator
+enters the eventual portable/self-host closure.
+
+## Full display qualification — ToFormat/Repr (14 October 2026)
+
+Executable `e565bbe6bab75baf4fa511640e1f82744f400032`;
+[green Linux 38451656694](https://github.com/dwijayuda/pskernel/actions/runs/38451656694).
+**341 shared runtime observations**, four panic contracts, **204 portable /
+212 native modules**, profile `pscv0-v7-native-bounded/56`.
+Official **Lean 4.35.0**, independent oracle, semantic/refusal/search checks,
+strict IR, JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, projects and
+existing performance gates pass. Performance parity is not established.
+
+Standard: **460 declarations /22 classes /88 instances**.
+FNV `fnv1a64:2548399426123262483`;
+SHA `sha256:79e34c4fd2bb8e491d624c86ccb644bf96b2442e090137d01b3c74ca72bfaeaf`.
+
+Genuine ToFormat/Repr/ReprAtom/ReprTuple classes, checked scalar/collection
+display methods, selected nonrecursive Repr deriving, precedence, quoting,
+proof/type placeholders, UTF-8 soft lines, tuple flattening and fill layouts
+are qualified. List and selected APIs/defaults/BEq retain element universes;
+map/folds retain independent result universes. Array/Prod and proof-taking
+List indexing retain their documented Type-0 boundary.
+
+Shared fixes preserve aliases' actual raw lambda entry prefixes, complete
+omitted defaults under unknown expected types, and retain empty Type-valued
+class dictionaries as runtime singletons. Explicit OfNat Id follows upstream;
+no broader instance transparency or special literal rewrite was introduced.
+
+[Design, sources and qualification](PSCV0_A_FORMAT_REPR_2026-10-14.md).
+**Full M2+A remains incomplete.** Continue Hashable/scalar dependencies,
+remaining selected Standard APIs, comprehensive manifest, broader M2 evidence
+and C5 semantic retention. Recursive/indexed/dependent deriving remains M3+B.
+
+The next commit adds only a host-side dependency audit; its new native module
+has not yet been qualified at this receipt. Portable sources are unchanged.
+
+Pinned-source closure audit qualified in green Linux38452305890 at
+41773101289525e4b1e5c062cb0c6721323740b7 (204 portable/213 native modules;
+all 341 existing observations remain green). Counts: Nat.mod_lt 211,
+BitVec.ofNat 249, UInt64.ofNat 252, UInt64.xor 550, mixHash 156,
+String.hash 337, Float 739 and Float.ofScientific 2288. The first three
+closures contain no axioms; UInt64.xor/Float include propext/Quot.sound and
+scientific conversion additionally includes Classical.choice. This argues
+against a blanket full scalar-library import. Source tests studied include
+collectAxioms.lean and the native ofScientific bit-pattern harness (including
+subnormal double-rounding vectors); decimal text equality is insufficient.
+
+Next authoring experiment: cut Nat.mod_lt's native dependency graph at existing
+portable names and submit its remaining genuine upstream declarations to a
+fresh officially checked portable prelude. Regenerate inductive constructors/
+recursors through the kernel; reject new axioms, quotient primitives, unsafe and
+partial declarations. Record exact rejected declarations and blocked dependents.
+The experiment discards its environment; no imports or failures enter production
+compilation. Its purpose is to identify which old logical models must change
+coherently before exporting a small reviewed closure, rather than assuming
+shared names imply compatible semantics.
+
+## Arithmetic logical models
+
+Source study of pinned Prelude.lean (Nat.add/sub/mul/beq and the modCore/fuel
+proofs) identifies opaque arithmetic assumptions as an obstacle to reusing
+upstream general proofs. Replace the four selected opaque declarations with
+small checked recursor definitions preserving the upstream open-term equations:
+add/sub/mul recurse on the right operand; beq compares constructor shapes.
+The existing Nat.pred and Nat.ble models are shared. Closed primitive reduction
+and typed backend intrinsics retain their fast path. Source-observable
+reducibility of add/sub/mul is instance_reducible, as in stable Lean.
+
+Six open-term rfl equations extend the existing checked source/oracle group;
+all existing cross-target arithmetic observations remain the runtime validation.
+The primitive audit records these as checked logical models with separate
+runtime implementations. No new axiom or runtime operation. Both Standard
+digests remain strict pending intentional body/metadata review.
+
+First reuse probe (green Linux38453128536, 3619d97dbed4a9e6c7defc7df07e1428cf65dd8b)
+admitted 58 new genuine declarations against the unchanged portable prelude.
+Five upstream bodies failed kernel checking: Nat.sub_le,
+Nat.succ_sub_succ_eq_sub, Nat.eq_or_lt_of_le._f, Nat.not_succ_le_self._f
+and _private.Init.Prelude.0.noConfusion_of_Nat.aux._f. Their 20 blocked
+dependents include Nat.mod_lt. This is a negative compatibility result, not
+an imported library or a failing acceptance test. The arithmetic logical-model
+phase addresses the opaque arithmetic cause; remaining failures require exact
+kernel type diagnostics before selecting any additional architecture change.
+
+Linux38453677893 built the arithmetic models, independent oracle and native
+signature/reducibility audit. The reuse probe now admits all dependencies and
+rejects only Nat.mod_lt against the still-opaque Nat.mod. This isolates the
+remaining dependency to the genuine modulo logical model; the other apparent
+proof failures were all consequences of opaque elementary arithmetic.
+Reviewed unchanged 460/22/88 roster with four axiom-to-definition replacements
+and three reducibility changes: FNV fnv1a64:16989132783207094075; SHA-256
+sha256:be1c0bcd7657628f0efc6e24164ff1439cda6162c0b85f3e96448f22806a0ecf.
+Both strict guards are repinned; full runtime qualification remains pending.
+
+## Preserve application spines during weak-head reduction
+
+The arithmetic models passed official kernel checks and all six open-term
+source/oracle equations. Existing derivingHighEqualProof then exposed a shared
+normalizer defect at the ordinary 751 comparison: projection/delta reduction
+normalized the function in isolation, unfolding Nat.beq's logical recursor
+before its pending literal arguments could reach primitive reduction. This
+exhausted the existing reduction bound; increasing that bound would hide the
+same family of failures for larger literals.
+
+Studied stable Lean/Meta/WHNF.lean whnfCore, deltaBetaDefinition, unfoldDefinition?,
+reduceNat? and whnfImp, plus tests/elab/whnfProj.lean and 6123_mod_cast.lean.
+The environment-aware portable worker now carries the entire pending application
+spine through beta/delta/local-let/projection steps. It reuses psReduceAppView,
+primitive reduction and metadata-driven iota; no primitive-specific dictionary
+exception is added. Projection majors are normalized once. Transparency rules,
+opaque boundaries and public resource limits remain unchanged. The existing
+large derived BEq proof, scalar runtime observations and scope/transparency/search
+gates validate the change; no new isolated test loop is added.
+
+
+### Checked upstream scalar Core authoring
+
+The native-only `Ps.Host.StandardExport` authoring tool converts the minimal
+`Nat.mod_lt` dependency closure, cutting at the existing portable declarations
+except `Nat.mod`. It preserves types, universes, binder information, proof bodies
+and definition reducibility. It removes kernel-irrelevant expression metadata.
+It refuses new axioms, quotient primitives, unsafe/partial declarations,
+metavariables/free variables and currently unsupported mutual/nested/reflexive
+families. Inductive admission regenerates constructors/recursors; their converted
+signatures are compared with the kernel-generated signatures. The complete
+candidate, including the existing portable boundary, must pass fresh trust-zero
+official kernel replay before any source is exported.
+
+This is an authoring tool, not a host-library import into the portable compiler.
+It emits a reviewed `.lean` Core data asset with a frozen regeneration boundary
+and upstream Apache-2.0 provenance. Logical dependency availability does not
+automatically register native classes/instances or promise executable backend
+support for every helper. Existing runtime primitives remain separate obligations.
+The first export is a candidate, not production admission or qualification.
+
+References at the stable pin: `Lean/Declaration.lean`, `Lean/Expr.lean`,
+`Lean/Structure.lean`, `Lean/ReducibilityAttrs.lean`,
+`Lean/Util/CollectAxioms.lean`, `tests/elab/collectAxioms.lean`,
+`Init/Prelude.lean` (Nat.modCore/mod and bound proofs).
+
+Checked elementary arithmetic and the complete-spine normalizer passed Linux
+[38454972480](https://github.com/dwijayuda/pskernel/actions/runs/38454972480)
+at `0f16a4ec6b6d9f3137649f47364dd7b17efd8877`: existing native semantic
+and independent oracle checks, 341 cross-target observations, four panic
+contracts, Wasm GC/component/ABI/project and performance gates. Standard has
+460 declarations /22 classes /88 instances, profile /57;
+FNV `fnv1a64:16989132783207094075`, SHA
+`sha256:be1c0bcd7657628f0efc6e24164ff1439cda6162c0b85f3e96448f22806a0ecf`.
+The source guard's native inventory previously omitted the authoring audit;
+it is corrected to include the audit/export roots in the next change.
+
+
+### Avoid evaluation for reflexive conversion
+
+The green /57 run exposed a performance defect: elaborating the shared Wasm
+observation wrappers took 536,228 ms, while erasure/emission took 137/334 ms.
+Conversion and unification normalized identical expressions before testing
+reflexivity. Checked arithmetic bodies made this avoidable work expensive.
+The shared read-only conversion and assigning unifier now instantiate the
+current metavariable context, then accept structural alpha equality before
+normalization/congruence/proof inference. This sufficient equality rule neither
+assigns a metavariable nor relies on transparency; unequal terms retain every
+existing typed, scoped and resource-limited check. The environment-free walker
+also avoids normalizing equal syntax.
+
+Pinned source: `Lean/Meta/ExprDefEq.lean`, especially
+`isDefEqQuickOther` and `isExprDefEqAuxImpl`. Studied regression references:
+`tests/elab/isDefEqPerfIssue.lean`, `isDefEqProjPerfIssue.lean`,
+`isDefEqCheckAssignmentBug.lean`. Reuse the existing independent semantics,
+negative inference/search gates and all runtime wrappers to measure the result;
+do not raise limits, bypass proof checks or change the test expressions.
+
+
+The converted candidate's kernel diagnostic isolated another missing logical
+model: `ite` was still an axiom although `dite` was checked. In the positive
+branch of `Nat.mod_lt`, Lean needs `ite P (.isTrue h) t e` to reduce to `t`.
+The conditional subsystem now defines `ite` as the pinned nondependent wrapper
+over `dite`, with `implicitReducible` status. It is a general repair to the
+logical conditional contract; no theorem-specific rewrite or proof replacement.
+Two open-proposition branch equations join the existing compact source/oracle
+batch. Existing backend branch lowering and panic tests retain lazy execution.
+
+
+### Scalar arithmetic asset admission
+
+Linux [38457448536](https://github.com/dwijayuda/pskernel/actions/runs/38457448536)
+at `ed64b95cfd9da44bef2c5c70ddfe374088f771ef` exported **102 declarations,
+386,235 UTF-8 bytes** after fresh official kernel replay of the converted
+candidate. No new axioms, partial/unsafe declarations or quotient primitives.
+This closes `Nat.mod_lt` with the actual upstream `Nat.mod` logical model.
+The subsequent compact checks stopped at the intentionally unchanged registry
+drift gate; this authoring receipt is not full compiler qualification.
+
+The reviewed machine-owned `StandardScalarArithmeticData.lean` asset is admitted
+by a small environment owner. It adds 101 names and replaces the old Nat.mod
+axiom; ite was separately replaced by its checked definition. The frozen 459-name
+boundary makes regeneration stable when other libraries are added later. Linux
+regenerates and byte-compares the asset. Production compilation imports portable
+Core data only; the host exporter is not a portable dependency. Imported logical
+class/dictionary dependencies do not automatically become search registrations
+or public executable APIs. Existing Nat.mod intrinsic lowering remains in use.
+The existing source/oracle batch gains open-term zero reduction, the general
+bound and a proof-carrying Fin constructor; no new test suite is added.
+
+
+Linux [38457886177](https://github.com/dwijayuda/pskernel/actions/runs/38457886177)
+at `2bf14d5b0364722112b32890216aa7fb2a7cc9b8` compiled the actual portable
+asset, passed byte-identical regeneration and native signature/reducibility
+audits, then stopped at the unchanged registry guard. The reviewed /58 roster
+is **561 declarations /22 classes /88 instances**, **206 portable /216 native
+modules**. Intentional drift: ite's axiom becomes a definition; Nat.mod's axiom
+becomes the native model; 101 checked dependencies are added. No added axiom,
+class registration or global instance. Accept the observed canonical payload:
+FNV `fnv1a64:6200500133443239461`; SHA
+`sha256:c40b99aa82ba0be17ae07354e65b731a99e95d2e5bf9b3708ef56cec0be599b1`.
+Keep both exact guards; source/backend qualification is the next run.
+
+
+### Qualified scalar foundation and conversion performance
+
+Executable `cb4e8617cf7c9e19a567b391b093e3fac65fa143`, Linux
+[38458234955](https://github.com/dwijayuda/pskernel/actions/runs/38458234955)
+is green: all native/oracle/source/refusal/search and existing backend,
+component, project, ABI and performance gates; 341 shared observations and four
+panic contracts retained. The open conditional equations, mod-zero equation,
+general bound and proof-carrying Fin source compile and check successfully.
+The same 1,323-declaration Wasm source now elaborates in **172 ms**, versus
+536,228 ms before reflexivity was tested before normalization. Its 190 ms erasure
+and 403 ms emission remain separately measured. No budgets were increased.
+
+Next scalar design references additionally studied at the pin:
+`Lean/Compiler/LCNF/Irrelevant.lean`, `MonoTypes.lean`, `ToImpureType.lean`,
+`Types.lean`, and `Lean/Compiler/IR/ToIRType.lean`. Lean distinguishes builtin
+machine representations from single-relevant-field structure elimination.
+PSC0 already has machine integer IR and arithmetic/comparison backends. Extend
+that mechanism for conversions and shifts. Keep logical bounds and explicit
+foreign API construction constraints despite proof erasure; generalizing the
+current special wrapper unboxing without preserving the public API plan would
+be incorrect. Full A remains open.
+
+## Unsigned scalar boundary (implementation in progress)
+
+Lean reference: pinned Init/Prelude (BitVec.ofFin, UInt.ofBitVec, projections,
+ofNatLT), Init/Data/UInt/BasicAux (wrapping conversions and OfNat), and
+Lean/Compiler/LCNF/ToImpureType.builtinImpureType? / IR/ToIRType. Relevant
+upstream tests: tests/elab/bitvec_fin_literal_norm.lean and
+tests/compile/initUnboxed.lean. Lean preserves checked Fin bounds in the logic
+and chooses machine representations at compilation; PSC0 follows that split.
+
+Linux 38459688059 checked the 80-declaration unsigned dependency closure in
+a fresh trust-zero official kernel and passed the existing integration suite.
+It adds no axiom and replaces the four UInt type axioms with actual BitVec
+structures. Its 557-name boundary is now frozen for byte-identical regeneration.
+The executable environment explicitly registers only the four OfNat instances;
+proof dependencies do not implicitly gain search/runtime entries.
+
+One unsigned conversion family extends existing machine arithmetic IR. Only
+target-independent unsigned 8/16/32/64 widths are admitted. Nat conversion
+wraps modulo the width before Number conversion in JS/TS, uses low BigUint
+digits in Rust, and takes low immutable GC limbs in Wasm. Generic UInt64
+crossings use a distinct i64 GC box. Fin/BitVec retain their prepared records,
+and their proof-bearing foreign construction remains refused. Constructor,
+projection, higher-order conversion and structure matching share this boundary.
+
+Nat.pow uses its exported checked native model and binary exponentiation at
+runtime. Both logical/exporter admission and runtime conformance are required;
+kernel acceptance does not prove backend equivalence. A compact fixture is
+added to the existing native oracle and shared runtime table; qualification is
+pending. Signed, target-sized and floating capabilities remain separate.
+
+Export boundary invariant: a frozen name set is paired with its explicit
+pre-admission Standard stage. Reading those names from the final environment
+was incorrect once UInt axioms became structures: old assets would see the
+new type without its constructor metadata. Core, scalar-arithmetic and unsigned
+stages now make that dependency explicit; no mutable/latest lookup is used to
+replay an earlier asset. Both regeneration comparisons remain mandatory.
+
+The Canonical ABI plan now retains a list of typed flat slots, replacing a
+count that implicitly meant i32. Unsigned scalars share one WIT descriptor;
+records concatenate slots and variants join differing integer slots to i64.
+Incoming joined slots are narrowed to the chosen case before canonical storage.
+Memory operations include explicit ABI-only 64-bit load/store; scalar results
+select a matching i32/i64 post-return signature. Pure scalar components remain
+memory-free; GC runtime storage has not moved to linear memory.
+
+Reference: WebAssembly/component-model design/mvp/CanonicalABI.md, sections
+alignment, element size, flatten_type, flatten_variant/join and lift_flat
+(read 14 October 2026); format qualification retains pinned wasm-tools 1.261.0
+and Wasmtime 49.0.2. Existing aggregate fixtures now also cover mixed u8/u64
+records, joined variants, and repeated i64 result/post-return lifetimes.
+
+## Unsigned runtime qualification and Hashable implementation
+
+Unsigned profile /59 is green at fd554c4612d14ff154bced721a4ea6e5dd16df64,
+[Linux 38463484850](https://github.com/dwijayuda/pskernel/actions/runs/38463484850):
+359 shared observations, four panic contracts; 637 declarations/22 classes/
+92 instances; 211 portable/221 native modules. All existing kernel, native
+oracle, semantic/refusal/search, strict IR, JS/TS/Rust, GC Wasm, component,
+ABI, project and performance gates pass. This includes UInt64 wide generic
+boxing, wrapping of arbitrary Nat values, genuine BitVec/Fin conversions and
+UInt64-containing public records/variants, typed Canonical ABI flat slots,
+compact scalar storage and i64 post-return signatures.
+
+Hashable /60 implementation is submitted for qualification; it is not yet
+validated. Lean sources: Init/Prelude.lean, Init/Data/Hashable.lean,
+Lean/Elab/Deriving/Hashable.lean, runtime/hash.h, runtime/hash.cpp and
+tests/elab/derivingHashable{,2}.lean at the pinned commit.
+
+The 17-declaration native foundation was independently exported and checked
+by the official trust-level-zero kernel at Linux38462478718. Hashable accepts
+Sort u; mixHash and String.hash remain opaque. Candidate logical dependencies
+do not automatically register instances or executable code. The exporter
+replays against the frozen pre-hash unsigned stage and regeneration is strict.
+
+Ordinary checked instance builders cover the selected scalar, proof,
+Option/List, Array/Prod, Fin, Unit/Empty profile; Array/Prod retain the existing
+Type-0 scope. Shared registration helpers were extracted from formatting
+ownership into StandardClass. Deriving uses the shared telescope, universe,
+instance and eliminator mechanisms. It starts with the constructor ordinal
+and mixes every field, including implicit and proof fields. Dependent proof
+dictionaries are synthesized in the opened branch context. Recursive/indexed/
+dependent computational fields remain in M3+B.
+
+Two typed runtime operations own hashing: hashMix(UInt64,UInt64) and
+stringHash(String). Pair mixing preserves Lean's unusual XOR-by-multiplier
+step. String hashing follows MurmurHash64A over UTF-8 bytes with seed 11 and
+explicit little-endian decoding. No big-endian native parity is claimed.
+JS/TS share an AST implementation; Rust uses wrapping u64 arithmetic;
+Wasm traverses GC bytes with i64 operations, with no linear memory.
+The existing native oracle and shared backend observation table receive
+boundary, tail-byte, Unicode/NUL, proof-field, implicit-field and container cases.
+
+### Scalar elimination and declaration-stable erased calls
+
+Hashable qualification at `fc8c73b` exposed missing builtin `Int.rec`
+lowering. The repair adds the ordinary two-constructor metadata (`ofNat n`,
+`negSucc n`) and translates elimination to a sign split, with payloads
+`toNat x` and `toNat (-x) - 1`. A computed major is captured once, sharing
+the existing Nat elimination mechanism. Partial recursor applications continue
+through the existing special-entry completion path; no Hashable-specific rule.
+
+The same review identified a general ABI invariant: calls must retain the
+binder mask of the original declaration, even when a Sort-polymorphic type
+parameter is instantiated at Prop. Reclassifying its instantiated telescope
+can change type-argument count. Known entries now consume their recorded mask;
+proof-specialized runtime slots and actual proposition carriers use the existing
+ignored Unit representation. This does not assign types to unsupported indices.
+
+Primary reference: Lean `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
+`src/Lean/Compiler/LCNF/Types.lean` (`toLCNFType`, `isPropFormer`),
+`MonoTypes.lean`, `Irrelevant.lean`, and `ToImpureType.lean`.
+PSC0 preserves its stricter typed IR and rejects unsupported dependent carriers
+rather than importing Lean's any-type fallback. These are independently written
+adaptations of the invariants. Validation combines existing hash proof-field
+cases, a Sort-to-Prop entry/partial entry, and positive/zero/negative Int matches
+against the pinned native oracle and the shared backend suite. Qualification pending.
+
+### Qualified /60 receipt
+
+Executable `d72fc7779b2e8d130915dfe4ace339634ba0addd`,
+[Linux38466179341](https://github.com/dwijayuda/pskernel/actions/runs/38466179341),
+passed all existing gates: native source/oracle, official kernel, strict Standard
+fingerprints, semantic/refusal/search checks, IR, 399 shared JS/TS/Rust/GC-Wasm
+observations, four panic contracts, WIT/WAT/components, public ABI, projects and
+performance budgets. Closure: 217 portable /227 native modules; Standard672
+/23 classes /109 instances. Fingerprints: FNV10680386315174967875;
+SHA2569a54d5747d3047abff68e3bd872b791f3489f719cf83e8aba6776d342f045cc0.
+This qualifies the selected Hashable and scalar-erasure boundary above; it does
+not complete M2+A or recursive/indexed/dependent deriving.

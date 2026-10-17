@@ -1,18 +1,5 @@
 import Ps.BackendWasm.Type
 
-def psWasmMachineIntegerIsSigned :
-    PsVerifiedIrMachineIntegerType -> Bool
-  | .uint8 => false
-  | .uint16 => false
-  | .uint32 => false
-  | .uint64 => false
-  | .usize => false
-  | .int8 => true
-  | .int16 => true
-  | .int32 => true
-  | .int64 => true
-  | .isize => true
-
 def psWasmMachineIntegerIs64
     (profile : PsWasmTargetProfile) :
     PsVerifiedIrMachineIntegerType -> Bool
@@ -56,6 +43,10 @@ def psWasmLowerMachineIntegerLiteral
     constant
     (psWasmNormalizeMachineInteger type)
 
+def psWasmWordDivisionName (wide signed remainder : Bool) : String :=
+  "__ps_word_" ++ (if signed then "s" else "u") ++
+    (if remainder then "rem" else "div") ++ (if wide then "64" else "32")
+
 def psWasmMachineIntegerBinaryInstruction
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)
@@ -69,6 +60,10 @@ def psWasmMachineIntegerBinaryInstruction
     | .bitAnd => PsWasmInstruction.i64And
     | .bitOr => PsWasmInstruction.i64Or
     | .bitXor => PsWasmInstruction.i64Xor
+    | .div => .call (psWasmWordDivisionName true (psIrMachineIntegerIsSigned type) false)
+    | .mod => .call (psWasmWordDivisionName true (psIrMachineIntegerIsSigned type) true)
+    | .shiftLeft => .word .i64Shl
+    | .shiftRight => .word (if psIrMachineIntegerIsSigned type then .i64ShrS else .i64ShrU)
   else
     match operation with
     | .add => PsWasmInstruction.i32Add
@@ -77,25 +72,35 @@ def psWasmMachineIntegerBinaryInstruction
     | .bitAnd => PsWasmInstruction.i32And
     | .bitOr => PsWasmInstruction.i32Or
     | .bitXor => PsWasmInstruction.i32Xor
+    | .div => .call (psWasmWordDivisionName false (psIrMachineIntegerIsSigned type) false)
+    | .mod => .call (psWasmWordDivisionName false (psIrMachineIntegerIsSigned type) true)
+    | .shiftLeft => .word .i32Shl
+    | .shiftRight => if psIrMachineIntegerIsSigned type then .word .i32ShrS else .i32ShrU
 
 def psWasmLowerMachineIntegerBinary
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerBinaryOp) :
     List PsWasmInstruction :=
-  List.cons
-    (psWasmMachineIntegerBinaryInstruction
-      profile
-      type
-      operation)
-    (psWasmNormalizeMachineInteger type)
+  -- The top stack operand is the shift count. Wasm already masks by 32/64;
+  -- narrow integers need their own width mask before the same instruction.
+  let narrowShift := match operation with
+    | .shiftLeft | .shiftRight =>
+      match psIrMachineIntegerFixedWidth type with
+      | some 8 => [.i32Const 7, .i32And]
+      | some 16 => [.i32Const 15, .i32And]
+      | _ => []
+    | _ => []
+  narrowShift ++ [psWasmMachineIntegerBinaryInstruction profile type operation] ++
+    psWasmNormalizeMachineInteger type
+
 
 def psWasmMachineIntegerCompareInstruction
     (profile : PsWasmTargetProfile)
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerCompareOp) :
     PsWasmInstruction :=
-  let signed := psWasmMachineIntegerIsSigned type;
+  let signed := psIrMachineIntegerIsSigned type;
   if psWasmMachineIntegerIs64 profile type then
     match operation with
     | .eq => PsWasmInstruction.i64Eq

@@ -240,6 +240,11 @@ def psIrCheckModuleSizeWorker
                     (List.cons (PsIrCheckSizeTask.text name) (List.cons (PsIrCheckSizeTask.types arguments) rest)) next
           | .expression value =>
               match value with
+              | .unreachable type =>
+                  psIrCheckModuleSizeWorker limit remaining (PsIrCheckSizeTask.type type :: rest) next
+              | .panic message type =>
+                  psIrCheckModuleSizeWorker limit remaining
+                    (PsIrCheckSizeTask.text message :: PsIrCheckSizeTask.type type :: rest) next
               | .literal literal =>
                   psIrCheckModuleSizeWorker limit remaining
                     (List.cons (PsIrCheckSizeTask.literal literal) rest) next
@@ -295,6 +300,9 @@ def psIrCheckModuleSizeWorker
                     rest next
           | .intrinsic value =>
               match value with
+              | .unsignedOfNat _ | .unsignedToNat _ =>
+                  psIrCheckModuleSizeWorker limit remaining
+                    (List.cons PsIrCheckSizeTask.scalar rest) next
               | .machineIntBinary _ _ =>
                   psIrCheckModuleSizeWorker limit remaining
                     (List.cons PsIrCheckSizeTask.scalar (List.cons PsIrCheckSizeTask.scalar rest)) next

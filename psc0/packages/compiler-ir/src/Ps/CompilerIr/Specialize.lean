@@ -618,6 +618,12 @@ def psIrSpecializeRewriteExprWithFuel
           module
           substitution
       match expression with
+      | .unreachable type => do
+          let lowered ← rewriteType type
+          return { expr := .unreachable lowered.type, requests := lowered.requests }
+      | .panic message type => do
+          let lowered ← rewriteType type
+          return { expr := .panic message lowered.type, requests := lowered.requests }
       | .literal literal =>
           Except.ok {
             expr := PsVerifiedIrExpr.literal literal

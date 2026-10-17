@@ -26,8 +26,13 @@ structure PsPscv0SurfaceModule where
   discardName : PsSyntaxName
 
 def psPscv0LanguageEdition : String := "pscv0"
+-- Normative document identity is distinct from implemented/qualified features.
+-- Historical v7/v7.1 files are provenance, never alternate source modes.
+def psPscv0ReferenceRevision : String := "v7.2"
+def psPscv0ReferencePath : String := "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md"
 def psPscv0ReferenceSha256 : String :=
-  "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5"
+  "c65487eccbd2829d1d9e5e1be3bc7f4cb37849b841ab3257ea0dd47665b8a30e"
+def psPscv0ReferenceGitBlob : String := "694115223777599ba28ee175e14bb642b7b6aa4b"
 def psPscv0SurfaceCapability : String := "declaration-except-do/1"
 def psPscv0FullConformance : Bool := false
 
@@ -91,27 +96,38 @@ def psPscv0RecordTerm (field : Prod PsSyntaxName PsSyntaxTerm) : PsSyntaxTerm :=
 def psPscv0TermBinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0AlternativeTerm
-    (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) : PsSyntaxTerm :=
+    (alternative : List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) : PsSyntaxTerm :=
   alternative.snd.fst
 
 def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   match term with
+  | .doE items _ => items.flatMap (psSyntaxDoTerms 4096)
+  | .byE tactics _ _ => tactics.flatMap (psSyntaxTacticTerms 4096)
+  | .hole _ => []
+  | .omittedType _ => []
+  | .optionalType type value _ => [type, value]
+  | .ascription value type _ => [value, type]
+  | .call fn args _ => fn :: args.map Prod.snd
+  | .operatorE _ name _ args _ => .reference name :: args
   | .reference _ => []
+  | .sortE _ _ _ => []
   | .natural _ _ => []
+  | .scientific _ _ => []
   | .string _ _ => []
   | .character _ _ => []
   | .bool _ _ => []
   | .unit _ => []
   | .record fields _ => psListMap psPscv0RecordTerm fields
+  | .recordUpdate source fields _ => source :: psListMap psPscv0RecordTerm fields
   | .app fn args _ => List.cons fn args
   | .lambda binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
   | .forallE binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
-  | .letE _ type value body _ =>
+  | .letE _ type value body _ | .haveE _ type value body _ =>
       match type with
       | none => [value, body]
       | some annotation => [annotation, value, body]
-  | .ifE condition yes no _ => [condition, yes, no]
-  | .matchE scrutinee alternatives _ => List.cons scrutinee (psListMap psPscv0AlternativeTerm alternatives)
+  | .ifE _ condition yes no _ => [condition, yes, no]
+  | .matchMany scrutinees alternatives _ => scrutinees ++ alternatives.map psPscv0AlternativeTerm
 
 -- The seed supports structurally recursive function-valued results. Keeping
 -- term as that returned function's argument preserves the complete Pi type
@@ -270,14 +286,16 @@ def psPscv0PrintDoBlock (proofScript : Bool) (block : PsPscv0DoBlock) : Except S
       if proofScript then Except.ok (psPscv0Cat ["do {\n", body, "\n}"])
       else Except.ok (psPscv0Cat ["do\n", body])
 
+-- Generated helpers name the selected effect absolutely; surrounding namespaces
+-- and source locals cannot capture these compiler-introduced references.
 def psPscv0ExceptCall (constructor : String) (value : PsSyntaxTerm) (span : PsSourceSpan) : PsSyntaxTerm :=
-  PsSyntaxTerm.app (PsSyntaxTerm.reference (PsSyntaxName.mk ["Except", constructor] span)) [value] span
+  PsSyntaxTerm.app (PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "Except", constructor] span)) [value] span
 
 def psPscv0BindMatch (action : PsSyntaxTerm) (name errorName : PsSyntaxName)
     (continuation : PsSyntaxTerm) (span : PsSourceSpan) : PsSyntaxTerm :=
   let failure := psPscv0ExceptCall "error" (PsSyntaxTerm.reference errorName) span;
-  let errorPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["Except", "error"] span) [errorName] span;
-  let okPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["Except", "ok"] span) [name] span;
+  let errorPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["_root_", "Except", "error"] span) [errorName] span;
+  let okPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["_root_", "Except", "ok"] span) [name] span;
   PsSyntaxTerm.matchE action
     [Prod.mk errorPattern (Prod.mk failure span), Prod.mk okPattern (Prod.mk continuation span)] span
 

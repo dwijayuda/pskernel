@@ -1,5 +1,5 @@
 import Ps.Core.Builtin
-import Ps.Environment.Basic
+import Ps.Environment.Decision
 
 def psPreludeAdd
     (environment : PsEnvironment)
@@ -130,60 +130,60 @@ def psPreludeProdSndType : PsExpr :=
       PsBinderInfo.implicit)
     PsBinderInfo.implicit
 
-def psPreludeArrayOf : PsExpr -> PsExpr :=
-  fun (alpha : PsExpr) => PsExpr.app (PsExpr.constE psArrayName []) alpha
+def psPreludeArrayOf (alpha : PsExpr) (level : PsLevel := .zero) : PsExpr :=
+  .app (.constE psArrayName [level]) alpha
 
-def psPreludeArrayType : PsExpr :=
+def psPreludeArrayType (u : PsLevel := .param psPreludeUName) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
-    psPreludeTypeType
+    (.sortE (.succ u))
+    (.sortE (.succ u))
     PsBinderInfo.explicit
 
-def psPreludeArrayEmptyType : PsExpr :=
+def psPreludeArrayEmptyType (u : PsLevel := .param psPreludeUName) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeNName
       psPreludeNatType
-      (psPreludeArrayOf (PsExpr.bvar 1))
+      (psPreludeArrayOf (PsExpr.bvar 1) u)
       PsBinderInfo.explicit)
     PsBinderInfo.implicit
 
-def psPreludeArraySizeType : PsExpr :=
+def psPreludeArraySizeType (u : PsLevel := .param psPreludeUName) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeAName
-      (psPreludeArrayOf (PsExpr.bvar 0))
+      (psPreludeArrayOf (PsExpr.bvar 0) u)
       psPreludeNatType
       PsBinderInfo.explicit)
     PsBinderInfo.implicit
 
-def psPreludeArrayPushType : PsExpr :=
+def psPreludeArrayPushType (u : PsLevel := .param psPreludeUName) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeAName
-      (psPreludeArrayOf (PsExpr.bvar 0))
+      (psPreludeArrayOf (PsExpr.bvar 0) u)
       (PsExpr.forallE
         psPreludeBName
         (PsExpr.bvar 1)
-        (psPreludeArrayOf (PsExpr.bvar 2))
+        (psPreludeArrayOf (PsExpr.bvar 2) u)
         PsBinderInfo.explicit)
       PsBinderInfo.explicit)
     PsBinderInfo.implicit
 
-def psPreludeArrayGetDType : PsExpr :=
+def psPreludeArrayGetDType (u : PsLevel := .param psPreludeUName) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeAName
-      (psPreludeArrayOf (PsExpr.bvar 0))
+      (psPreludeArrayOf (PsExpr.bvar 0) u)
       (PsExpr.forallE
         psPreludeNName
         psPreludeNatType
@@ -196,20 +196,20 @@ def psPreludeArrayGetDType : PsExpr :=
       PsBinderInfo.explicit)
     PsBinderInfo.implicit
 
-def psPreludeArraySetIfInBoundsType : PsExpr :=
+def psPreludeArraySetIfInBoundsType (u : PsLevel := .param psPreludeUName) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeAName
-      (psPreludeArrayOf (PsExpr.bvar 0))
+      (psPreludeArrayOf (PsExpr.bvar 0) u)
       (PsExpr.forallE
         psPreludeNName
         psPreludeNatType
         (PsExpr.forallE
           psPreludeBName
           (PsExpr.bvar 2)
-          (psPreludeArrayOf (PsExpr.bvar 3))
+          (psPreludeArrayOf (PsExpr.bvar 3) u)
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
       PsBinderInfo.explicit)
@@ -222,20 +222,21 @@ def psPreludeAlphaToBeta : PsExpr :=
     (PsExpr.bvar 1)
     PsBinderInfo.explicit
 
-def psPreludeArrayMapType : PsExpr :=
+def psPreludeArrayMapType (u : PsLevel := .param psPreludeUName)
+    (v : PsLevel := .param (psRootName "v")) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeBName
-      psPreludeTypeType
+      (.sortE (.succ v))
       (PsExpr.forallE
         (psRootName "f")
         psPreludeAlphaToBeta
         (PsExpr.forallE
           psPreludeAName
-          (psPreludeArrayOf (PsExpr.bvar 2))
-          (psPreludeArrayOf (PsExpr.bvar 2))
+          (psPreludeArrayOf (PsExpr.bvar 2) u)
+          (psPreludeArrayOf (PsExpr.bvar 2) v)
           PsBinderInfo.explicit)
         PsBinderInfo.explicit)
       PsBinderInfo.implicit)
@@ -252,13 +253,14 @@ def psPreludeFoldFunctionType : PsExpr :=
       PsBinderInfo.explicit)
     PsBinderInfo.explicit
 
-def psPreludeArrayFoldlType : PsExpr :=
+def psPreludeArrayFoldlType (u : PsLevel := .param psPreludeUName)
+    (v : PsLevel := .param (psRootName "v")) : PsExpr :=
   PsExpr.forallE
     psPreludeAlphaName
-    psPreludeTypeType
+    (.sortE (.succ u))
     (PsExpr.forallE
       psPreludeBName
-      psPreludeTypeType
+      (.sortE (.succ v))
       (PsExpr.forallE
         (psRootName "f")
         psPreludeFoldFunctionType
@@ -267,7 +269,7 @@ def psPreludeArrayFoldlType : PsExpr :=
           (PsExpr.bvar 1)
           (PsExpr.forallE
             psPreludeAName
-            (psPreludeArrayOf (PsExpr.bvar 3))
+            (psPreludeArrayOf (PsExpr.bvar 3) u)
             (PsExpr.forallE
               (psRootName "start")
               psPreludeNatType
@@ -844,37 +846,37 @@ def psPreludeEnvProd2 : PsEnvironment :=
 
 def psPreludeEnvArray0 : PsEnvironment :=
   psPreludeAdd psPreludeEnvProd2
-    (PsDeclaration.axiomDecl psArrayName [] psPreludeArrayType)
+    (PsDeclaration.axiomDecl psArrayName [psPreludeUName] psPreludeArrayType)
 
 def psPreludeEnvArray1 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray0
     (PsDeclaration.axiomDecl
-      psArrayEmptyWithCapacityName [] psPreludeArrayEmptyType)
+      psArrayEmptyWithCapacityName [psPreludeUName] psPreludeArrayEmptyType)
 
 def psPreludeEnvArray2 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray1
-    (PsDeclaration.axiomDecl psArraySizeName [] psPreludeArraySizeType)
+    (PsDeclaration.axiomDecl psArraySizeName [psPreludeUName] psPreludeArraySizeType)
 
 def psPreludeEnvArray3 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray2
-    (PsDeclaration.axiomDecl psArrayPushName [] psPreludeArrayPushType)
+    (PsDeclaration.axiomDecl psArrayPushName [psPreludeUName] psPreludeArrayPushType)
 
 def psPreludeEnvArray4 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray3
-    (PsDeclaration.axiomDecl psArrayGetDName [] psPreludeArrayGetDType)
+    (PsDeclaration.axiomDecl psArrayGetDName [psPreludeUName] psPreludeArrayGetDType)
 
 def psPreludeEnvArray5 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray4
     (PsDeclaration.axiomDecl
-      psArraySetIfInBoundsName [] psPreludeArraySetIfInBoundsType)
+      psArraySetIfInBoundsName [psPreludeUName] psPreludeArraySetIfInBoundsType)
 
 def psPreludeEnvArray6 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray5
-    (PsDeclaration.axiomDecl psArrayMapName [] psPreludeArrayMapType)
+    (PsDeclaration.axiomDecl psArrayMapName [psPreludeUName, psRootName "v"] psPreludeArrayMapType)
 
 def psPreludeEnvArray7 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray6
-    (PsDeclaration.axiomDecl psArrayFoldlName [] psPreludeArrayFoldlType)
+    (PsDeclaration.axiomDecl psArrayFoldlName [psPreludeUName, psRootName "v"] psPreludeArrayFoldlType)
 
 def psPreludeEnv17 : PsEnvironment :=
   psPreludeAdd psPreludeEnvArray7
@@ -888,6 +890,27 @@ def psPreludeEnv19 : PsEnvironment :=
   psPreludeAdd psPreludeEnv18
     (PsDeclaration.axiomDecl psBoolDecEqName [] psPreludeBoolDecEqType)
 
+-- Lean RC4 Init.Prelude.optParam: (α : Sort u) → α → Sort u := α.
+-- This is a checked reducible definition, not an axiom or kernel extension.
+def psOptParamDeclaration : PsDeclaration :=
+  let u := psRootName "u"
+  let alpha := psRootName "α"
+  let value := psRootName "default"
+  let sort := PsExpr.sortE (.param u)
+  PsDeclaration.definitionDecl psOptParamName [u]
+    (.forallE alpha sort (.forallE value (.bvar 0) sort .explicit) .explicit)
+    (.lam alpha sort (.lam value (.bvar 0) (.bvar 1) .explicit) .explicit)
+
+-- RC4 Init.Control.Id: the identity effect is an ordinary reducible type.
+def psIdDeclaration : PsDeclaration :=
+  let u := psRootName "u"
+  let type := PsExpr.sortE (.succ (.param u))
+  .definitionDecl (psRootName "Id") [u]
+    (.forallE (psRootName "type") type type .explicit)
+    (.lam (psRootName "type") type (.bvar 0) .explicit)
+
 def psBootstrapPreludeEnvironment : PsEnvironment :=
-  psPreludeAdd psPreludeEnv19
-      (PsDeclaration.axiomDecl psIteName [psPreludeUName] psPreludeIteType)
+  psDecisionPrelude <| psConnectivePrelude <| psLogicPrelude <| (fun env => psPreludeAdd env psIdDeclaration) <| psPreludeAdd
+    (psPreludeAdd psPreludeEnv19
+      (PsDeclaration.axiomDecl psIteName [psPreludeUName] psPreludeIteType))
+    psOptParamDeclaration

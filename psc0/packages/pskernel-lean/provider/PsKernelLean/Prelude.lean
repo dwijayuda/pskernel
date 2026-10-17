@@ -26,6 +26,72 @@ def kernelExceptionSummary : Lean.Kernel.Exception -> String
   | .deepRecursion => "deep-recursion"
   | .interrupted => "interrupted"
 
+-- Keep structured kernel failure context for authoring imported Core assets.
+-- This changes diagnostics only; admission still checks every declaration.
+def kernelExceptionContext : Lean.Kernel.Exception → String
+  | .appTypeMismatch _ _ app functionType argumentType =>
+    "\napplication: " ++ app.dbgToString ++ "\nfunction type: " ++
+      functionType.dbgToString ++ "\nargument type: " ++ argumentType.dbgToString
+  | .declTypeMismatch _ _ type => "\ngiven type: " ++ type.dbgToString
+  | _ => ""
+
+-- Lean 4.35.0 src/Lean/Environment.lean:getMaxHeight and
+-- src/Lean/Declaration.lean:ReducibilityHints:
+-- Regular definitions are assigned height = 1 + the greatest regular height
+-- among the constants referenced by their *body*. Kernel lazy delta
+-- reduction uses these heights to choose which side to unfold first.
+--
+-- The standalone provider has a synchronous Kernel.Environment (not the
+-- elaborator's asynchronous environment) and no structural recursion height
+-- overrides; this is the pinned getMaxHeight rule for this closure.
+-- Abbrev/opaque hints, when explicitly present, remain untouched. These hints
+-- affect checking performance, NEVER validity or proof admission.
+def psKernelDefinitionHeight
+    (env : Lean.Kernel.Environment) (value : Lean.Expr) : UInt32 :=
+  let maximum := value.foldConsts (0 : UInt32) fun name greatest =>
+    match env.find? name with
+    | some (.defnInfo info) =>
+      match info.hints with
+      | .regular height => if height > greatest then height else greatest
+      | _ => greatest
+    | _ => greatest
+  maximum + 1
+
+def psKernelWithDefinitionHeight
+    (env : Lean.Kernel.Environment) (declaration : Lean.Declaration) :
+    Lean.Declaration :=
+  match declaration with
+  | .defnDecl info =>
+    match info.hints with
+    | .regular _ =>
+      .defnDecl { info with hints := .regular (psKernelDefinitionHeight env info.value) }
+    | _ => declaration
+  | _ => declaration
+
+-- Pinned Lean 4.35.0 has TWO thread-local counters: runtime/alloc.cpp owns
+-- IO.getNumHeartbeats; runtime/interrupt.cpp owns the C++ kernel counter.
+-- Resetting the former cannot reset the latter. runtime/object.cpp:run_task
+-- resets the kernel counter before every task, including reused pool workers.
+-- Use that native task boundary, as Lean/AddDecl.lean does for kernel work.
+-- Await completion before using the checked environment; errors stay errors.
+-- Default pool priority avoids one OS thread per declaration. The caller's
+-- counters are untouched, and the caller still chooses the same finite limits.
+def withFreshKernelHeartbeatScope {ε α : Type}
+    (action : Unit → Except ε α) : IO (Except ε α) := do
+  let task ← IO.asTask do
+    let before ← IO.getNumHeartbeats
+    let result ← IO.lazyPure action
+    let after ← IO.getNumHeartbeats
+    return (result, after - before)
+  let (result, allocations) ← IO.ofExcept (← IO.wait task)
+  match result with
+  | .ok value => return .ok value
+  | .error error =>
+    -- Allocation telemetry is NOT the C++ kernel heartbeat counter.
+    IO.println ("PSCV0_KERNEL_HEARTBEAT_AUDIT: task allocations=" ++
+      toString allocations)
+    return .error error
+
 def findConstructorInfo : List PsDeclaration -> PsName -> Option PsConstructorInfo
   | [], _ => none
   | declaration :: rest, name =>
@@ -59,6 +125,9 @@ def convertConstructors
 def toLeanPreludeDeclaration
     (allDeclarations : List PsDeclaration) :
     PsDeclaration -> Except PsKernelLeanError (Option Lean.Declaration)
+  | .quotientDecl name _ _ kind =>
+      if psNameEq name (psQuotientKindName kind) then pure (some .quotDecl)
+      else throw (preludeMismatch "invalid kernel quotient identity")
   | .axiomDecl name levelParams type => do
       let convertedType ← toLeanExpr type
       pure <| some <| .axiomDecl {
@@ -116,59 +185,116 @@ def toLeanPreludeDeclaration
   | .recursorDecl _ => .ok none
 
 inductive PreludeAdmissionAttempt where
-  | admitted (env : Lean.Environment)
+  | admitted (env : Lean.Kernel.Environment)
   | deferred
+
+-- Checking owns a Kernel.Environment, not the elaborator's AsyncConsts index.
+-- Full imported private names remain distinct. Every declaration is checked by
+-- the official C++ kernel at trust zero; no unchecked insertion API is used.
+-- Quotient descriptors validate members of one atomically generated group.
+def quotientGroupPresent (env : Lean.Kernel.Environment) : Except PsKernelLeanError Bool := do
+  let members : List (Lean.Name × Lean.QuotKind) :=
+    [(`Quot, .type), (`Quot.mk, .ctor), (`Quot.lift, .lift), (`Quot.ind, .ind)]
+  let mut present := 0
+  for (name, kind) in members do
+    match env.find? name with
+    | none => pure ()
+    | some (.quotInfo info) =>
+        unless info.name == name && info.kind == kind do
+          throw (preludeMismatch "kernel quotient group has inconsistent identities")
+        present := present + 1
+    | some _ => throw (preludeMismatch "kernel quotient name is already occupied")
+  unless present == 0 || present == members.length do
+    throw (preludeMismatch "kernel quotient group is incomplete")
+  unless env.quotInit == (present != 0) do
+    throw (preludeMismatch "kernel quotient initialization flag differs from its group")
+  return present != 0
+
+def validateQuotientDescriptor (env : Lean.Kernel.Environment) (declaration : PsDeclaration) :
+    Except PsKernelLeanError Unit := do
+  if let .quotientDecl name levels type kind := declaration then
+    let some (.quotInfo generated) := env.find? (toLeanName name)
+      | throw (preludeMismatch "missing regenerated quotient metadata")
+    let generatedKind := match generated.kind with
+      | .type => PsQuotientKind.type | .ctor => .ctor
+      | .lift => .lift | .ind => .ind
+    let convertedType ← toLeanExpr type
+    unless generated.levelParams == toLeanNames levels &&
+        generated.type == convertedType &&
+        psQuotientKindTag generatedKind == psQuotientKindTag kind do
+      throw (preludeMismatch "regenerated quotient signature or kind differs")
 
 def tryPreludeDeclaration
     (allDeclarations : List PsDeclaration)
-    (env : Lean.Environment)
-    (declaration : PsDeclaration) :
+    (env : Lean.Kernel.Environment)
+    (declaration : PsDeclaration)
+    (maxHeartbeats : USize := 2000000)
+    (maxRecDepth : USize := 20000) :
     Except PsKernelLeanError PreludeAdmissionAttempt := do
   let converted? ← toLeanPreludeDeclaration allDeclarations declaration
   match converted? with
   | none => pure (.admitted env)
   | some converted =>
-      match env.addDeclCore 2000000 20000 converted none true with
-      | .ok next => pure (.admitted next)
+      if let .quotientDecl .. := declaration then
+        if ← quotientGroupPresent env then
+          validateQuotientDescriptor env declaration
+          return .admitted env
+      let converted := psKernelWithDefinitionHeight env converted
+      match env.addDeclCore maxHeartbeats maxRecDepth converted none with
+      | .ok next =>
+          validateQuotientDescriptor next declaration
+          pure (.admitted next)
       | .error (.unknownConstant _ _) => pure .deferred
       | .error error =>
           throw (preludeMismatch
-            ("Lean 4.34 kernel rejected PSC2 provider prelude declaration " ++
+            ("official Lean kernel rejected portable Standard declaration " ++
               psNameToString (psDeclarationName declaration) ++
-              " (" ++ kernelExceptionSummary error ++ ")"))
+              " (" ++ kernelExceptionSummary error ++ ")" ++ kernelExceptionContext error))
 
+-- The frozen, reviewed Standard can use Lean's import-time kernel budget
+-- (0/0). Standalone authoring and untrusted submissions keep finite budgets.
+-- Every declaration is still checked at trust zero, regardless of budget.
 def replayPreludePass
-    (allDeclarations : List PsDeclaration) :
-    List PsDeclaration -> Lean.Environment ->
-    Except PsKernelLeanError (Lean.Environment × List PsDeclaration)
+    (allDeclarations : List PsDeclaration)
+    (maxHeartbeats : USize := 2000000)
+    (maxRecDepth : USize := 20000) :
+    List PsDeclaration -> Lean.Kernel.Environment ->
+    Except PsKernelLeanError (Lean.Kernel.Environment × List PsDeclaration)
   | [], env => .ok (env, [])
   | declaration :: rest, env => do
-      let attempt ← tryPreludeDeclaration allDeclarations env declaration
+      let attempt ← tryPreludeDeclaration allDeclarations env declaration maxHeartbeats maxRecDepth
       match attempt with
       | .admitted next =>
-          replayPreludePass allDeclarations rest next
+          replayPreludePass allDeclarations maxHeartbeats maxRecDepth rest next
       | .deferred =>
-          let (next, deferred) ← replayPreludePass allDeclarations rest env
+          let (next, deferred) ← replayPreludePass allDeclarations maxHeartbeats maxRecDepth rest env
           pure (next, declaration :: deferred)
 
 partial def replayPreludeDeclarations
     (allDeclarations pending : List PsDeclaration)
-    (env : Lean.Environment) :
-    Except PsKernelLeanError Lean.Environment := do
-  let (next, deferred) ← replayPreludePass allDeclarations pending env
+    (env : Lean.Kernel.Environment)
+    (maxHeartbeats : USize := 2000000)
+    (maxRecDepth : USize := 20000) :
+    Except PsKernelLeanError Lean.Kernel.Environment := do
+  let (next, deferred) ← replayPreludePass allDeclarations maxHeartbeats maxRecDepth pending env
   match deferred with
   | [] => pure next
   | first :: _ =>
       if deferred.length == pending.length then
         throw (preludeMismatch
-          ("unresolved PSC2 provider prelude dependencies; first pending declaration: " ++
+          ("unresolved portable Standard dependencies; first pending declaration: " ++
             psNameToString (psDeclarationName first)))
       else
-        replayPreludeDeclarations allDeclarations deferred next
+        replayPreludeDeclarations allDeclarations deferred next maxHeartbeats maxRecDepth
 
-def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Environment) := do
-  let env ← Lean.mkEmptyEnvironment 0
+def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Kernel.Environment) := do
+  let env := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   let declarations := psSelfHostProdPreludeEnvironment.declarations
-  pure <| replayPreludeDeclarations declarations declarations.reverse env
+  -- Lean 4.35.0 Environment.lean import path checks immutable declarations
+  -- with kenv.addDeclCore 0 0. This provider entry is only for the selected,
+  -- separately SHA/FNV-guarded Standard. Ordinary source admission retains
+  -- 2,000,000 heartbeats and depth 20,000 in NativeV7.check/Admission.
+  -- 0 is Lean's import-time resource policy, NOT unchecked insertion.
+  pure <| replayPreludeDeclarations declarations declarations.reverse env 0 0
 
 end PsKernelLean

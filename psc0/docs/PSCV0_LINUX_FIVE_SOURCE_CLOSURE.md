@@ -1,5 +1,14 @@
 # PSCV0 v7 — Linux-only five-authored-source compiler closure
 
+Historical qualification reconciled, 13 October 2026: live
+[Linux 38134451122](https://github.com/dwijayuda/pskernel/actions/runs/38134451122)
+at `0e8996d2aff414986f04dbc68c2689aaf118fb48` completed successfully. Its
+compiler-closure job reports 20 modules, five v7-authored inputs, identical
+canonical admissions/TS/JS and passing Linux runtime. No kernel or Windows tests
+or full compiler fixed point ran. The pending wording below describes the
+pre-run plan; it is superseded by this receipt. This historical success does
+not promote current compiler source authority. [Current audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
+
 **Status:** source-selection compiler milestone **pending cloud CI**. **Branch:** `psc0/pscv0-linux-source-closure-v1`. **Source language:** solely [PSCV0 v7](../PSCV0_LANGUAGE_REFERENCE.md), SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`. There are no old .ps parser compatibility paths.
 
 ## Why this milestone is different from the fast graph

@@ -10,9 +10,9 @@ def psPscv0ArrowDomain
   match type with
   | .forallE _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .lambda _ _ _ => psPrintLeanConcat3 "(" printed ")"
-  | .letE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
-  | .ifE _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
-  | .matchE _ _ _ => psPrintLeanConcat3 "(" printed ")"
+  | .letE _ _ _ _ _ | .haveE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
+  | .ifE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
+  | .matchMany _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | _ => printed
 
 def psPscv0PrintLeanTypeWithFuel (fuel : Nat) :
@@ -26,22 +26,14 @@ def psPscv0PrintLeanTypeWithFuel (fuel : Nat) :
         match term with
         | .forallE binders body _ =>
             let printBinder : Prod PsSyntaxBinderHead PsSyntaxTerm -> Except PsSourcePrintError String :=
-              fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-                let head := binder.fst;
-                match psPrintSyntaxName head.name with
-                | Except.error error => Except.error error
-                | Except.ok name =>
-                    match smaller binder.snd with
-                    | Except.error error => Except.error error
-                    | Except.ok typeText =>
-                        let anonymous : Bool :=
-                          match head.kind with
-                          | .explicit => psStringEq name "_"
-                          | _ => false;
-                        if anonymous then Except.ok (psPscv0ArrowDomain binder.snd typeText)
-                        else
-                          let delimiters := psPrintBinderDelimiters head.kind;
-                          Except.ok (psPrintLeanConcat5 delimiters.fst name " : " typeText delimiters.snd);
+              fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+                let head := binder.fst
+                let typeText ← smaller binder.snd
+                let anonymous := match head.kind with
+                  | .explicit => head.name.segments == ["_"] && head.moreNames.isEmpty
+                  | _ => false
+                if anonymous then return psPscv0ArrowDomain binder.snd typeText
+                psPrintTypedBinder head typeText;
             match psListMapExcept printBinder binders with
             | Except.error error => Except.error error
             | Except.ok domains =>
@@ -70,13 +62,6 @@ def psPscv0PrintLeanType (term : PsSyntaxTerm) : Except PsSourcePrintError Strin
   psPscv0PrintLeanTypeWithFuel 4096 term
 
 def psPscv0PrintLeanBinder (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  let head := binder.fst;
-  match psPrintSyntaxName head.name with
-  | Except.error error => Except.error error
-  | Except.ok name =>
-      match psPscv0PrintLeanType binder.snd with
-      | Except.error error => Except.error error
-      | Except.ok typeText =>
-          let delimiters := psPrintBinderDelimiters head.kind;
-          Except.ok (psPrintLeanConcat5 delimiters.fst name " : " typeText delimiters.snd)
+    Except PsSourcePrintError String := do
+  let typeText ← psPscv0PrintLeanType binder.snd
+  psPrintTypedBinder binder.fst typeText

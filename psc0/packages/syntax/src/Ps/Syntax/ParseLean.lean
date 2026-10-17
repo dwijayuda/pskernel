@@ -1577,6 +1577,7 @@ def psParseLeanTermWithFuel
                                 Except.ok {
                                   value :=
                                     PsSyntaxTerm.ifE
+                                      none
                                       condition.value
                                       thenBranch.value
                                       elseBranch.value
@@ -2055,6 +2056,7 @@ def psParseLeanStructureDeclaration
                           PsSyntaxDeclaration.structureDecl
                             name.value
                             params.value
+                            none
                             fields.value
                             {
                               start := keyword.token.span.start
@@ -2285,9 +2287,17 @@ def psLeanPatternHeadEq
       match right with
       | .wildcard _ => true
       | _ => false
-  | .constructor leftName _ _ =>
+  | .natural value _ =>
       match right with
-      | .constructor rightName _ _ =>
+      | .natural other _ => value == other
+      | _ => false
+  | .variable leftName =>
+      match right with
+      | .variable rightName => psLeanStringListEq leftName.segments rightName.segments
+      | _ => false
+  | .ctor leftName _ _ =>
+      match right with
+      | .ctor rightName _ _ =>
           psLeanStringListEq
             leftName.segments
             rightName.segments
@@ -2672,6 +2682,17 @@ def psFinishLeanValueDeclaration
     cursor := cursor
   }
 
+-- Preserve the same declaration-only absence emitted by PrintLean. An
+-- explicit `_` remains a term annotation and keeps its header boundary.
+def psParseLeanDeclarationResult (required : Bool) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if !required && psTokenCursorAtText cursor ":=" then
+    let some token := psTokenCursorPeek cursor
+      | throw (PsParseError.unexpectedEnd "declaration result")
+    return PsParseResult.mk (.omittedType (PsSourceSpan.mk token.span.start token.span.start)) cursor
+  let colon ← psTokenCursorExpectText cursor ":"
+  psParseLeanTerm colon.cursor
+
 def psParseLeanDeclaration
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) :=
@@ -2728,12 +2749,9 @@ def psParseLeanDeclaration
                       [] with
                   | Except.error error => Except.error error
                   | Except.ok binders =>
-                      match psTokenCursorExpectText binders.cursor ":" with
+                      match psParseLeanDeclarationResult isTheorem binders.cursor with
                       | Except.error error => Except.error error
-                      | Except.ok afterColon =>
-                          match psParseLeanTerm afterColon.cursor with
-                          | Except.error error => Except.error error
-                          | Except.ok type =>
+                      | Except.ok type =>
                               if psTokenCursorAtText type.cursor ":=" then
                                 match psTokenCursorAdvance type.cursor with
                                 | Option.none =>

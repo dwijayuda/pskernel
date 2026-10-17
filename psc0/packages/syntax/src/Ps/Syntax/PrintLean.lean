@@ -213,8 +213,41 @@ def psPrintLeanTermWithFuel
           PsSyntaxTerm -> Except PsSourcePrintError String :=
         psPrintLeanTermWithFuel remaining;
       match term with
+      | .hole _ => Except.ok "_"
+      | .omittedType _ => Except.error (.unsupportedSourceForm "omitted result annotation outside a declaration")
+      | .optionalType type value _ => do
+          let type ← smaller type
+          let value ← smaller value
+          return type ++ " := " ++ value
+      | .ascription value type _ => do
+          let value ← smaller value
+          let type ← smaller type
+          return "(" ++ value ++ " : " ++ type ++ ")"
+      | .operatorE kind _ spelling arguments _ => do
+          psPrintSyntaxOperator kind spelling (← arguments.mapM smaller)
+      | .call fn args _ => do
+          if args.isEmpty then
+            throw (.unsupportedSourceForm "empty invocation requires typed completion")
+          let head ← smaller fn
+          let arguments ← args.mapM fun (label, value) => do
+            let value ← smaller value
+            match label with
+            | none => pure ("(" ++ value ++ ")")
+            | some name =>
+              let name ← psPrintSyntaxName name
+              pure ("(" ++ name ++ " := " ++ value ++ ")")
+          return "(" ++ head ++ ") " ++ psPrintJoin " " arguments
+      | .doE items _ => do
+          let body ← psPrintDoItems false smaller 4096 items
+          return "do\n  " ++ body.replace "\n" "\n  "
+      | .byE tactics _ _ => do
+          let body ← psPrintTactics smaller 4096 tactics
+          return "by\n  " ++ body.replace "\n" "\n  "
+      | .sortE isType level _ => .ok (psPrintSyntaxSort isType level)
       | .reference name =>
           psPrintSyntaxName name
+      | .scientific text _ =>
+          Except.ok text
       | .natural text _ =>
           Except.ok text
       | .string text _ =>
@@ -249,6 +282,13 @@ def psPrintLeanTermWithFuel
           | Except.ok printedFields =>
               Except.ok
                 (psPrintLeanConcat3 "{ " (psPrintJoin ", " printedFields) " }")
+      | .recordUpdate source fields _ => do
+          let source ← smaller source
+          let fields ← fields.mapM fun (name, value) => do
+            let name ← psPrintSyntaxName name
+            let value ← smaller value
+            pure (name ++ " := " ++ value)
+          return "{ " ++ source ++ " with " ++ psPrintJoin ", " fields ++ " }"
       | .app fn args _ =>
           if psPrintLeanBoolNot (psSyntaxTermSimpleForApplication fn) then
             Except.error PsSourcePrintError.unsupportedApplication
@@ -285,24 +325,9 @@ def psPrintLeanTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintLeanConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintLeanMapBinders printBinder binders;
@@ -322,24 +347,9 @@ def psPrintLeanTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintLeanConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintLeanMapBinders printBinder binders;
@@ -350,8 +360,8 @@ def psPrintLeanTermWithFuel
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
-                    (psPrintArrowChain printedBinders printedBody)
-      | .letE name type value body _ =>
+                    (psPrintLeanConcat4 "forall " (psPrintJoin " " printedBinders) ", " printedBody)
+      | .letE name type value body _ | .haveE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
           | Except.ok printedName =>
@@ -375,13 +385,13 @@ def psPrintLeanTermWithFuel
                       | Except.ok printedBody =>
                           Except.ok
                             (psPrintLeanConcat6
-                              "let "
+                              (match term with | .haveE .. => "have " | _ => "let ")
                               printedName
                               printedType
                               " := "
                               printedValue
                               (psPrintLeanConcat2 "; " printedBody))
-      | .ifE condition thenBranch elseBranch _ =>
+      | .ifE proofName condition thenBranch elseBranch _ =>
           match smaller condition with
           | Except.error error => Except.error error
           | Except.ok printedCondition =>
@@ -394,54 +404,22 @@ def psPrintLeanTermWithFuel
                       Except.ok
                         (psPrintLeanConcat6
                           "if "
-                          printedCondition
+                          ((match proofName with
+                            | none => ""
+                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
                           " then "
                           printedThen
                           " else "
                           printedElse)
-      | .matchE scrutinee alternatives _ =>
-          match smaller scrutinee with
-          | Except.error error => Except.error error
-          | Except.ok printedScrutinee =>
-              let printAlternative :
-                  Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
-                    Except PsSourcePrintError String :=
-                fun (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) =>
-                  match alternative with
-                  | Prod.mk pattern bodyAndSpan =>
-                      match bodyAndSpan with
-                      | Prod.mk body _ =>
-                          match psPrintPattern pattern with
-                          | Except.error error => Except.error error
-                          | Except.ok printedPattern =>
-                              match
-                                  smaller body with
-                              | Except.error error => Except.error error
-                              | Except.ok printedBody =>
-                                  Except.ok
-                                    (psPrintLeanConcat4
-                                      "  | "
-                                      printedPattern
-                                      " => "
-                                      printedBody);
-              let printedAlternativesResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintLeanMapAlternatives
-                  printAlternative
-                  alternatives;
-              match printedAlternativesResult with
-              | Except.error error => Except.error error
-              | Except.ok printedAlternatives =>
-                  match printedAlternatives with
-                  | List.nil =>
-                      Except.ok (psPrintLeanConcat2 "nomatch " printedScrutinee)
-                  | List.cons _ _ =>
-                      Except.ok
-                        (psPrintLeanConcat4
-                          "match "
-                          printedScrutinee
-                          " with\n"
-                          (psPrintJoin "\n" printedAlternatives))
+      | .matchMany scrutinees alternatives _ => do
+          let scrutinees ← scrutinees.mapM smaller
+          let discriminants := String.intercalate ", " scrutinees
+          let alternatives ← alternatives.mapM fun (patterns, body, _) => do
+            let patterns ← patterns.mapM psPrintPattern
+            let body ← smaller body
+            return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
+          if alternatives.isEmpty then return "nomatch " ++ discriminants
+          return "match " ++ discriminants ++ " with\n" ++ String.intercalate "\n" alternatives
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :
@@ -450,23 +428,9 @@ def psPrintLeanTerm
 
 def psPrintLeanBinder
     (binder : PsSyntaxBinderHead × PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  match binder with
-  | Prod.mk head type =>
-      match psPrintSyntaxName head.name with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          match psPrintLeanTerm type with
-          | Except.error error => Except.error error
-          | Except.ok printedType =>
-              let delimiters := psPrintBinderDelimiters head.kind;
-              Except.ok
-                (psPrintLeanConcat5
-                  delimiters.fst
-                  name
-                  " : "
-                  printedType
-                  delimiters.snd)
+    Except PsSourcePrintError String := do
+  let type ← psPrintLeanTerm binder.snd
+  psPrintTypedBinder binder.fst type
 
 def psPrintLeanStructureField
     (field : PsSyntaxBinderHead × PsSyntaxTerm) :
@@ -506,64 +470,69 @@ def psPrintLeanConstructor
             | List.nil => ""
             | List.cons _ _ =>
                 psPrintLeanConcat2 " " (psPrintJoin " " fields);
-          Except.ok (psPrintLeanConcat3 "  | " name suffix)
+          match constructor.resultType with
+          | none => Except.ok (psPrintLeanConcat3 "  | " name suffix)
+          | some type =>
+            match psPrintLeanTerm type with
+            | .error error => .error error
+            | .ok type => .ok ("  | " ++ name ++ suffix ++ " : " ++ type)
+
+def psPrintLeanTermination (termination : PsSyntaxTermination) :
+    Except PsSourcePrintError String := do
+  let measure ← psPrintLeanTerm termination.measure
+  let proof ← match termination.decreasing with
+    | none => pure ""
+    | some (.byE tactics _ _) => do
+      let body ← psPrintTactics psPrintLeanTerm 4096 tactics
+      pure ("\ndecreasing_by\n  " ++ body.replace "\n" "\n  ")
+    | some _ => throw (.unsupportedSourceForm "decreasing_by requires a proof sequence")
+  return "\ntermination_by " ++ measure ++ proof
+
+def psPrintLeanLocalDefinition (declaration : PsSyntaxLocalDefinition) :
+    Except PsSourcePrintError String := do
+  let name ← psPrintSyntaxName declaration.name
+  let binders ← psPrintLeanMapBinders psPrintLeanBinder declaration.binders
+  let annotation ← match declaration.type with
+    | none => pure ""
+    | some type => do
+      let printed ← psPrintLeanTerm type
+      pure (" : " ++ printed)
+  let value ← psPrintLeanTerm declaration.value
+  let suffix ← match declaration.recursion with
+    | none => pure ""
+    | some (.fixedpoint _) => pure "\npartial_fixpoint"
+    | some (.total termination) => psPrintLeanTermination termination
+  return name ++ psPrintLeanSpaceJoinedSuffix binders ++ annotation ++ " := " ++ value ++ suffix
 
 def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
-  | .definition name binders type value _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError (List String) :=
-            psPrintLeanMapBinders psPrintLeanBinder binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintLeanTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintLeanTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      let binderSuffix :=
-                        psPrintLeanSpaceJoinedSuffix printedBinders;
-                      Except.ok
-                        (psPrintLeanConcat6
-                          "def "
-                          printedName
-                          binderSuffix
-                          " : "
-                          printedType
-                          (psPrintLeanConcat2 " := " printedValue))
-  | .partialDefinition name binders type value _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError (List String) :=
-            psPrintLeanMapBinders psPrintLeanBinder binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintLeanTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintLeanTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      let binderSuffix :=
-                        psPrintLeanSpaceJoinedSuffix printedBinders;
-                      Except.ok
-                        (psPrintLeanConcat6
-                          "partial def "
-                          printedName
-                          binderSuffix
-                          " : "
-                          printedType
-                          (psPrintLeanConcat2 " := " printedValue))
+  | .whereDeclaration parent locals _ => do
+      let parent ← psPrintLeanDeclaration parent
+      let locals ← locals.mapM psPrintLeanLocalDefinition
+      if locals.isEmpty then throw (.unsupportedSourceForm "where requires local definitions")
+      return parent ++ "\nwhere\n  " ++ (String.intercalate "\n" locals).replace "\n" "\n  "
+  | .definition name binders type value _
+  | .fixedpointDefinition name binders type value _
+  | .wellFoundedDefinition name binders type value _ _ => do
+      let suffix ← match declaration with
+        | .fixedpointDefinition .. => pure "\npartial_fixpoint"
+        | .wellFoundedDefinition _ _ _ _ termination _ => psPrintLeanTermination termination
+        | _ => pure ""
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
+      let annotation ← psPrintDeclarationResult psPrintLeanTerm type
+      let printedValue ← psPrintLeanTerm value
+      return "def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
+        annotation ++ " := " ++ printedValue ++ suffix
+  | .partialDefinition name binders type value _ => do
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
+      let annotation ← psPrintDeclarationResult psPrintLeanTerm type
+      let printedValue ← psPrintLeanTerm value
+      return "partial def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
+        annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -630,33 +599,17 @@ def psPrintLeanDeclaration
                           printedResult
                           " where\n"
                           (psPrintJoin "\n" printedConstructors))
-  | .structureDecl name params fields _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedParamsResult :
-              Except PsSourcePrintError (List String) :=
-            psPrintLeanMapBinders psPrintLeanBinder params;
-          match printedParamsResult with
-          | Except.error error => Except.error error
-          | Except.ok printedParams =>
-              let printedFieldsResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintLeanMapBinders
-                  psPrintLeanStructureField
-                  fields;
-              match printedFieldsResult with
-              | Except.error error => Except.error error
-              | Except.ok printedFields =>
-                  let paramSuffix :=
-                    psPrintLeanSpaceJoinedSuffix printedParams;
-                  Except.ok
-                    (psPrintLeanConcat5
-                      "structure "
-                      printedName
-                      paramSuffix
-                      " where\n"
-                      (psPrintJoin "\n" printedFields))
+  | .structureDecl name params result fields _ => do
+      let name ← psPrintSyntaxName name
+      let params ← psPrintLeanMapBinders psPrintLeanBinder params
+      let result ← match result with
+        | none => pure ""
+        | some type => do
+          let type ← psPrintLeanTerm type
+          pure (" : " ++ type)
+      let fields ← psPrintLeanMapBinders psPrintLeanStructureField fields
+      return "structure " ++ name ++ psPrintLeanSpaceJoinedSuffix params ++ result ++
+        " where\n" ++ psPrintJoin "\n" fields
 
 def psPrintLeanImport
     (sourceImport : PsSyntaxImport) :
@@ -730,3 +683,4 @@ def psPrintLeanModule
   match module with
   | PsSyntaxModule.mk sourceImports sourceDeclarations =>
       psPrintLeanModuleParts sourceImports sourceDeclarations
+

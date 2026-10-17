@@ -45,6 +45,7 @@ def psBuildErasureDeclarationNamesWorker
       let sourceName : Option PsName :=
         match declaration with
         | PsDeclaration.definitionDecl name _ _ _ => Option.some name
+        | PsDeclaration.opaqueDecl name _ _ _ => Option.some name
         | PsDeclaration.partialDecl name _ _ _ => Option.some name
         | PsDeclaration.theoremDecl name _ _ _ => Option.some name
         | PsDeclaration.inductiveDecl info => Option.some info.name
@@ -171,11 +172,23 @@ def psEraseOpenDefinitionWithFuel
                     domain
                     binder;
                 let openedVariable := PsExpr.fvar pushed.id;
+                let scope := { scope with
+                  currentDefinition := scope.currentDefinition.map fun current =>
+                    { current with coreParametersRev := openedVariable :: current.coreParametersRev } };
                 let nextType :=
                   psExprInstantiate1 typeBody openedVariable;
                 let nextValue :=
                   psExprInstantiate1 valueBody openedVariable;
                 match kind with
+                | PsErasedBinderKind.index =>
+                    -- This checked binder is a higher-kinded type former or
+                    -- predicate. Its value may determine later Core types but
+                    -- cannot be reified as a runtime generic or executable slot.
+                    let nextScope := { scope with
+                      localContext := pushed.context
+                      erasedLocals := pushed.id :: scope.erasedLocals }
+                    smaller nextScope nextType nextValue typeIndex
+                      typeParametersRev parametersRev
                 | PsErasedBinderKind.type =>
                     let parameterName :=
                       String.Internal.append "T" (psNatToString typeIndex);
@@ -184,23 +197,15 @@ def psEraseOpenDefinitionWithFuel
                       | Option.none => Option.none
                       | Option.some current =>
                           Option.some
-                            (PsErasureCurrentDefinition.mk
-                              current.name
-                              (List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev)
-                              current.runtimeParameters);
+                            { current with
+                              typeArgumentsRev :=
+                                List.cons (PsVerifiedIrType.typeParameter parameterName) current.typeArgumentsRev };
                     let nextScope : PsErasureScope :=
-                      PsErasureScope.mk
-                        pushed.context
-                        scope.runtimeLocals
-                        (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals)
-                        (List.cons pushed.id scope.erasedLocals)
-                        scope.declarationNames
-                        scope.runtimeConstructors
-                        scope.runtimeRecursors
-                        scope.runtimeStructures
-                        scope.runtimeStructureConstructors
-                        scope.runtimeExpressions
-                        nextCurrentDefinition;
+                      { scope with
+                        localContext := pushed.context
+                        typeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.typeLocals)
+                        erasedLocals := (List.cons pushed.id scope.erasedLocals)
+                        currentDefinition := nextCurrentDefinition };
                     smaller
                       nextScope
                       nextType
@@ -211,26 +216,15 @@ def psEraseOpenDefinitionWithFuel
                         typeParametersRev)
                       parametersRev
                 | PsErasedBinderKind.proof =>
-                    let nextScope : PsErasureScope :=
-                      PsErasureScope.mk
-                        pushed.context
-                        scope.runtimeLocals
-                        scope.typeLocals
-                        (List.cons pushed.id scope.erasedLocals)
-                        scope.declarationNames
-                        scope.runtimeConstructors
-                        scope.runtimeRecursors
-                        scope.runtimeStructures
-                        scope.runtimeStructureConstructors
-                        scope.runtimeExpressions
-                        scope.currentDefinition;
-                    smaller
-                      nextScope
-                      nextType
-                      nextValue
-                      typeIndex
-                      typeParametersRev
-                      parametersRev
+                    let (parameter, proofScope) :=
+                      psErasureOpenProofSlot scope pushed.context pushed.id
+                    let current := proofScope.currentDefinition.map fun current =>
+                      { current with
+                        runtimeParameters :=
+                          psErasureAppendRuntimeParameter current.runtimeParameters parameter.name }
+                    smaller { proofScope with currentDefinition := current }
+                      nextType nextValue typeIndex typeParametersRev
+                      (parameter :: parametersRev)
                 | PsErasedBinderKind.runtime =>
                     let parameterName :=
                       psErasureLocalName scope
@@ -248,23 +242,14 @@ def psEraseOpenDefinitionWithFuel
                           | Option.none => Option.none
                           | Option.some current =>
                               Option.some
-                                (PsErasureCurrentDefinition.mk
-                                  current.name
-                                  current.typeArgumentsRev
-                                  (psErasureAppendRuntimeParameter current.runtimeParameters parameterName));
+                                { current with
+                                  runtimeParameters :=
+                                    psErasureAppendRuntimeParameter current.runtimeParameters parameterName };
                         let nextScope : PsErasureScope :=
-                          PsErasureScope.mk
-                            pushed.context
-                            (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals)
-                            scope.typeLocals
-                            scope.erasedLocals
-                            scope.declarationNames
-                            scope.runtimeConstructors
-                            scope.runtimeRecursors
-                            scope.runtimeStructures
-                            scope.runtimeStructureConstructors
-                            scope.runtimeExpressions
-                            nextCurrentDefinition;
+                          { scope with
+                            localContext := pushed.context
+                            runtimeLocals := (List.cons (Prod.mk pushed.id parameterName) scope.runtimeLocals)
+                            currentDefinition := nextCurrentDefinition };
                         smaller
                           nextScope
                           nextType
@@ -345,14 +330,9 @@ def psErasureEnsureDefinitionEntry
           scope.declarationNames.entries with
       | Except.error error => Except.error error
       | Except.ok entries =>
-          let names := PsErasureDeclarationNames.mk
-            scope.declarationNames.byCore scope.declarationNames.byOutput
-            scope.declarationNames.count entries;
+          let names := { scope.declarationNames with entries := entries };
           Except.ok
-            (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
-              scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
-              scope.runtimeStructures scope.runtimeStructureConstructors
-              scope.runtimeExpressions scope.currentDefinition)
+            ({ scope with declarationNames := names })
 
 def psEraseDefinition
     (environment : PsEnvironment)
@@ -360,7 +340,10 @@ def psEraseDefinition
     (name : PsName)
     (type value : PsExpr) :
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
-  if psErasureIsProp environment psLocalEmpty type then
+  if psErasureIsNonRuntimeDeclaration environment type ||
+      (psErasureIsErasedDictionary environment 4096 psLocalEmpty type &&
+        !psErasureHasEmptyStructureResult environment scope.runtimeStructures 4096 psLocalEmpty type) ||
+      psErasureUnboxedProjection environment scope 4096 psLocalEmpty [] value then
     Except.ok Option.none
   else
     let outputName : String :=
@@ -376,19 +359,10 @@ def psEraseDefinition
     | Except.error error => Except.error error
     | Except.ok entryScope =>
         let definitionScope : PsErasureScope :=
-          PsErasureScope.mk
-            entryScope.localContext
-            entryScope.runtimeLocals
-            entryScope.typeLocals
-            entryScope.erasedLocals
-            entryScope.declarationNames
-            entryScope.runtimeConstructors
-            entryScope.runtimeRecursors
-            entryScope.runtimeStructures
-            entryScope.runtimeStructureConstructors
-            entryScope.runtimeExpressions
-            (Option.some
-              (PsErasureCurrentDefinition.mk outputName List.nil List.nil));
+          { entryScope with
+            currentDefinition := (Option.some {
+              name := outputName, typeArgumentsRev := [], runtimeParameters := []
+              coreName := some name }) };
         match psLowerStructureRecursors environment value with
         | Except.error error => Except.error error
         | Except.ok normalizedValue =>
@@ -400,6 +374,13 @@ def psEraseDefinition
                   normalizedValue with
             | Except.error error => Except.error error
             | Except.ok opened =>
+                -- This frozen Standard body is kernel-defeq to default, but
+                -- is intentionally nonreturning in generated runtime code.
+                let opened :=
+                  if psNameEq name (psRootName "outOfBounds") then
+                    { opened with body :=
+                      PsVerifiedIrExpr.panic "index out of bounds" opened.resultType }
+                  else opened
                 -- Keep the actual aligned Core entry prefix. A computed function
                 -- result is evaluated here and returned as a canonical unary value.
                 if psListIsEmpty opened.parameters then
@@ -450,7 +431,7 @@ def psEraseDefinitionsLoopWorker
       match declaration with
       | PsDeclaration.definitionDecl name _ type value =>
           match psEraseDefinition environment scope name type value with
-          | Except.error error => Except.error error
+          | Except.error error => Except.error (.inDeclaration name error)
           | Except.ok result =>
               match result with
               | Option.none =>
@@ -458,9 +439,10 @@ def psEraseDefinitionsLoopWorker
               | Option.some lowered =>
                   psEraseDefinitionsLoopWorker environment scope rest
                     (List.cons lowered declarationsRev)
-      | PsDeclaration.partialDecl name _ type value =>
+      | PsDeclaration.partialDecl name _ type value
+      | PsDeclaration.opaqueDecl name _ type value =>
           match psEraseDefinition environment scope name type value with
-          | Except.error error => Except.error error
+          | Except.error error => Except.error (.inDeclaration name error)
           | Except.ok result =>
               match result with
               | Option.none =>
@@ -486,51 +468,114 @@ def psErasureAppendDeclarations (declarations : List PsDeclaration) : List PsDec
       let smaller : List PsDeclaration -> List PsDeclaration := psErasureAppendDeclarations rest;
       fun (tail : List PsDeclaration) => List.cons declaration (smaller tail)
 
+-- Foreign marshalling cannot reconstruct erased proof obligations. Preserve a
+-- conservative algebraic-data classification while the source layout is still
+-- available. Indices, value parameters and erased constructor fields require
+-- an explicit validating adapter instead of an automatic structural export.
+def psErasureForeignData (scope : PsErasureScope) (declarations : List PsDeclaration) :
+    List (String × Bool) :=
+  declarations.filterMap fun declaration =>
+    match declaration with
+    | .inductiveDecl info =>
+      match psErasureLookupStructure scope.runtimeStructures info.name with
+      | some runtime => if runtime.unboxed then none else some (runtime.name,
+          info.numIndices == 0 && info.numParams == runtime.typeParameters.length &&
+          runtime.numFields == runtime.fields.length)
+      | none =>
+        match psErasureLookupRecursor scope.runtimeRecursors (psNameAppendStr info.name "rec") with
+        | none => none
+        | some runtime => some (runtime.name,
+            info.numIndices == 0 && info.numParams == runtime.typeParameters.length &&
+            runtime.constructors.all (fun c => c.numFields == c.fields.length))
+    | _ => none
+
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
-    (declarations : List PsDeclaration) :
-    Except PsErasureError PsVerifiedIrModule :=
+    (declarations : List PsDeclaration)
+    (internalRuntimeNames : List PsName := [])
+    (targetWordSize : Option PsVerifiedIrWordSize := none)
+    (recursorWorkerGroups : List PsRecursorWorkerGroup := []) :
+    Except PsErasureError PsVerifiedIrModule := do
+  (psValidateRecursorWorkerGroups environment recursorWorkerGroups).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
+  -- An ordinary partial-runtime view may replace only its paired opaque body.
+  -- Companion workers must still be the exact retained checked definitions,
+  -- once each, even when this lower-level entry receives an explicit view.
+  for worker in recursorWorkerGroups.flatMap (·.workers) do
+    let [actual] := runtimeDeclarations.filter
+      (fun declaration => psNameEq (psDeclarationName declaration) worker.name)
+      | throw .unsupportedRuntimeTerm
+    let some retained := psEnvironmentFind environment worker.name
+      | throw .unsupportedRuntimeTerm
+    match actual, retained with
+    | .definitionDecl _ levels type value, .definitionDecl _ keptLevels keptType keptValue =>
+      if !psInductiveGroupNamesEqual levels keptLevels || !psExprAlphaEq type keptType ||
+          !psExprAlphaEq value keptValue then throw .unsupportedRuntimeTerm
+    | _, _ => throw .unsupportedRuntimeTerm
   let names := psErasureDeclarationNames runtimeDeclarations;
-  let baseScope := psErasureScopeEmpty names;
-  match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with
+  let baseScopeResult := PsFloatRuntime.reserve { (psErasureScopeEmpty names) with targetWordSize, recursorWorkerGroups }
+  match baseScopeResult with
   | Except.error error => Except.error error
-  | Except.ok entryScope =>
-      match
-          psPrepareRuntimeStructures
-            environment
-            runtimeDeclarations
-            runtimeDeclarations
-            entryScope
-            [] with
-      | Except.error error => Except.error error
-      | Except.ok preparedStructures =>
-          match
-              psPrepareRuntimeInductives
-                environment
-                runtimeDeclarations
-                runtimeDeclarations
-                preparedStructures.scope
-                [] with
-          | Except.error error => Except.error error
-          | Except.ok preparedInductives =>
-              match
-                  psEraseDefinitionsLoop
-                    environment
-                    preparedInductives.scope
-                    declarations
-                    [] with
-              | Except.error error => Except.error error
-              | Except.ok lowered =>
-                  Except.ok {
-                    imports := []
-                    structures := preparedStructures.ir
-                    inductives := preparedInductives.ir
-                    declarations := lowered
-                  }
-
+  | Except.ok baseScope =>
+    match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with
+    | Except.error error => Except.error error
+    | Except.ok entryScope =>
+        match
+            psPrepareRuntimeStructures
+              environment
+              runtimeDeclarations
+              runtimeDeclarations
+              entryScope
+              [] with
+        | Except.error error => Except.error error
+        | Except.ok preparedStructures =>
+            match
+                psPrepareRuntimeInductives
+                  environment
+                  runtimeDeclarations
+                  runtimeDeclarations
+                  preparedStructures.scope
+                  [] with
+            | Except.error error => Except.error error
+            | Except.ok preparedInductives =>
+                match
+                    psEraseDefinitionsLoop
+                      environment
+                      preparedInductives.scope
+                      runtimeDeclarations
+                      [] with
+                | Except.error error => Except.error error
+                | Except.ok lowered => do
+                    let support ← PsFloatRuntime.declarations preparedInductives.scope
+                    -- Follow support dependencies to a fixed point, then emit only
+                    -- reachable helpers. Their names were reserved before locals.
+                    let used := (List.range support.length).foldl (fun (needed : List PsVerifiedIrDeclaration) _ =>
+                      needed ++ support.filter (fun helper =>
+                        !needed.any (fun d => d.name == helper.name) &&
+                        (lowered ++ needed).any (fun d =>
+                          psErasureIrUsesNameWithFuel 4096 d.body helper.name))) []
+                    Except.ok {
+                      foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
+                      -- The canonical Standard declaration roster includes
+                      -- proof-valued class methods. They have no executable
+                      -- representation and therefore no IR export identity.
+                      -- Keep only names with actual checked runtime output;
+                      -- never weaken the downstream internal-name validator.
+                      internalNames := used.map (·.name) ++ (internalRuntimeNames.filterMap
+                        (psErasureLookupName preparedInductives.scope.declarationNames)).filter
+                        (fun name =>
+                          lowered.any (fun entry => entry.name == name) ||
+                          preparedStructures.ir.any (fun entry => entry.name == name) ||
+                          preparedInductives.ir.any (fun entry => entry.name == name))
+                      imports := []
+                      structures := preparedStructures.ir
+                      inductives := preparedInductives.ir
+                      declarations := used ++ lowered
+                    }
+  
 def psEraseCoreModule
     (environment : PsEnvironment)
     (declarations : List PsDeclaration) :
@@ -539,3 +584,4 @@ def psEraseCoreModule
     environment
     List.nil
     declarations
+

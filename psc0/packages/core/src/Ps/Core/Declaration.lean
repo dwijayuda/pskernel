@@ -29,7 +29,32 @@ structure PsRecursorInfo where
   numMotives : Nat
   numMinors : Nat
 
+-- Kernel-generated quotient constants are distinct from axioms and inductives.
+-- Their signatures are regenerated and checked by the official Lean provider.
+inductive PsQuotientKind where
+  | type
+  | ctor
+  | lift
+  | ind
+
+def psQuotientKindTag : PsQuotientKind → String
+  | .type => "type"
+  | .ctor => "ctor"
+  | .lift => "lift"
+  | .ind => "ind"
+
+def psQuotientKindName : PsQuotientKind → PsName
+  | .type => .str .anonymous "Quot"
+  | .ctor => .str (.str .anonymous "Quot") "mk"
+  | .lift => .str (.str .anonymous "Quot") "lift"
+  | .ind => .str (.str .anonymous "Quot") "ind"
+
 inductive PsDeclaration where
+  | quotientDecl
+      (name : PsName)
+      (levelParams : List PsName)
+      (type : PsExpr)
+      (kind : PsQuotientKind)
   | axiomDecl
       (name : PsName)
       (levelParams : List PsName)

@@ -1,8 +1,19 @@
 import Ps.Erasure.Inductive
 
+def psErasureTypeHasUnknown (fuel : Nat) (type : PsVerifiedIrType) : Bool :=
+  match fuel with
+  | 0 => true
+  | fuel + 1 => match type with
+    | .unknown => true
+    | .function args result =>
+      args.any (psErasureTypeHasUnknown fuel) || psErasureTypeHasUnknown fuel result
+    | .named _ args => args.any (psErasureTypeHasUnknown fuel)
+    | _ => false
+
 structure PsPreparedStructureResult where
   scope : PsErasureScope
   ir : PsVerifiedIrStructure
+  unboxed : Bool := false
 
 def psPrepareRuntimeStructure
     (environment : PsEnvironment)
@@ -70,15 +81,22 @@ def psPrepareRuntimeStructure
                               let makeIrField : PsRuntimeStructureField -> PsVerifiedIrStructureField :=
                                 fun (field : PsRuntimeStructureField) =>
                                   PsVerifiedIrStructureField.mk field.name field.type;
+                              let unboxed := constructorInfo.numFields == 1 &&
+                                constructorInfo.recursiveFields.isEmpty &&
+                                parameters.sourceTypeIndices.length < info.numParams &&
+                                fields.any (fun field => psErasureTypeHasUnknown 4096 field.type);
                               let runtimeInfo : PsRuntimeStructureInfo := {
+                                unboxed
                                 name := outputName
                                 coreName := info.name
                                 constructorName := constructorName
                                 numParams := info.numParams
                                 typeParameters := parameters.typeParameters
+                                sourceTypeIndices := parameters.sourceTypeIndices
                                 fields := fields
+                                numFields := constructorInfo.numFields
                               };
-                              let nextScope : PsErasureScope := {
+                              let nextScope : PsErasureScope := { scope with
                                 localContext := scope.localContext
                                 runtimeLocals := scope.runtimeLocals
                                 typeLocals := scope.typeLocals
@@ -95,7 +113,7 @@ def psPrepareRuntimeStructure
                                 currentDefinition := Option.none
                               };
                               Except.ok (PsPreparedStructureResult.mk nextScope
-                                (PsVerifiedIrStructure.mk outputName parameters.typeParameters (psListMap makeIrField fields)))
+                                (PsVerifiedIrStructure.mk outputName parameters.typeParameters (psListMap makeIrField fields)) unboxed)
         | List.cons _ _ => Except.error PsErasureError.unsupportedRuntimeTerm
     | _ => Except.error PsErasureError.unsupportedRuntimeTerm
 
@@ -115,22 +133,23 @@ def psPrepareRuntimeStructures
       Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))
   | List.cons declaration rest =>
       match declaration with
-      | .inductiveDecl info =>
-          if info.isStructure then
+      | .inductiveDecl info => do
+          let proofFamily ← (psInductiveIsProp environment info).mapError (fun _ => PsErasureError.unsupportedRuntimeTerm)
+          if info.isStructure && !proofFamily then
             match
                 psPrepareRuntimeStructure
                   environment
                   declarations
                   scope
                   info with
-            | Except.error error => Except.error error
+            | Except.error error => Except.error (.inDeclaration info.name error)
             | Except.ok prepared =>
                 psPrepareRuntimeStructures
                   environment
                   declarations
                   rest
                   prepared.scope
-                  (List.cons prepared.ir structuresRev)
+                  (if prepared.unboxed then structuresRev else List.cons prepared.ir structuresRev)
           else
             psPrepareRuntimeStructures
               environment

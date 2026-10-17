@@ -1,0 +1,584 @@
+# PSCV0 Native Standard Environment Snapshot v1
+
+## Current qualified checkpoint — 15 October 2026
+
+**Qualified implementation: `38dbbfb9826490d02a44e6ab5b518a9946849345`.** [Native compiler/backend CI 38715710210](https://github.com/dwijayuda/pskernel/actions/runs/38715710210) and [independent portable Float replay 38715710273](https://github.com/dwijayuda/pskernel/actions/runs/38715710273) both passed at this exact commit. The subsequent handoff update changes documentation only.
+
+Completed this continuation:
+- **Checked Int arithmetic:** 28 native declarations/laws replace exactly four historical computational axioms; existing runtime intrinsics remain independently audited. Main `e322eff798a96db14b5deed24824ccf3c2fcc783` passed native38706796031 and Float38706795768.
+- **Complete universe-polymorphic List indexing and actual kernel-counter isolation:** main `e5d1bdd6d667057bfd5376e8b39f3069f1dfc93c` passed native38711192827 and Float38711192777. One shared awaited pooled-task mechanism owns independent admission; source requests keep the cumulative 2,000,000-heartbeat /20,000-depth budget. IO allocation telemetry is a separate counter.
+- **Logical Float constructors:** only 21 checked validity/constructor declarations plus Float.ofBits/Float32.ofBits typed wrappers are selected. The 307,290-byte source asset regenerates exactly (SHA-256 `3042b3db951a1c68f8df24c5161889841082f9f4ee03783e1e5b4da918b3f9a7`). Checked source accepts both widths and bit projections; wrong-width arguments and unsupported executable Float are refused.
+- **Independent proof closure:** 30 roots /922 declarations /11 recursor rules, including the four mask-equivalence bridges, replay successfully with only propext/Quot.sound. The 11,097,675-byte audit asset (SHA-256 `564b48590fde9074679ec5e8d72f746fda4069f382b7cbcdd6101ba0c7bda622`) stays outside selected Standard.
+
+The native workflow passed all 29 steps, including **699 existing observations each for JS, TypeScript and Rust**, GC Wasm/core and component validation, repeated native Wasmtime calls, asset byte comparison, source refusals and performance checks. These observations are scoped evidence, not backend metatheory or full v7 conformance.
+
+Selected Standard: **1,879 declarations /25 classes /226 instances**. FNV `fnv1a64:9256054256618924345`; declaration SHA-256 `0f62a5df0a7273a183e10700bf8eb49563afd0ff8d03b7be3935d4d310a12f04`; surface SHA-256 `240050e325b7c7d06827c36bffe7ed017ef18680b61ccf4fa7701807a62874b4`.
+
+**M2 + Phase A is NOT complete.** Next required work is F1 executable model erasure, typed IR, GC boxing, all backends and explicit ABI, followed by F2 arithmetic/equality, F3 scientific/conversions, F4 qualification, target-sized words and remaining authoritative language/Standard exits. The existing scalar-completion design records the studied Lean runtime representation and Canonical ABI dependencies. C5, self-hosting/bootstrap, compiler-source .ps translation and pskernel-core remain excluded.
+
+No new trusted assumptions or proof placeholders. Native upstream Float correspondence still transitively imports Classical.choice and remains unselected. PR109 stays draft on its original base. Read live HEAD before further writes.
+
+## Historical checkpoints (superseded by the current receipt)
+
+## M2+A selected signed-to-Int snapshot — independently observed (14 October 2026)
+
+The native Lean 4.35.0 kernel compiled all four `IntN.toInt` implementations and the source-model equality certificates at `09965258ad0fb0c206fe7ea7a0386241b5078496`. The pinned semantic audit independently refused a missing `implicit_reducible` status at `6fe1a56`; commit `09965258` corrected it to the exact upstream metadata without relaxing any checks. [Linux 38563557310](https://github.com/dwijayuda/pskernel/actions/runs/38563557310) then correctly refused the previous Standard fingerprint and independently observed **FNV `fnv1a64:12853239104520417295`** and **SHA-256 `sha256:7b6a29baea2279dc88dd94de1635937a23befd79830330874daeb5fdad778c43`**. Both are now pinned unchanged in the strict registry guards. The projected selected Standard is **1,683 declarations, 23 classes, 189 ordered instances** (previously 1,679 declarations). The four definitions add no search instance or axiom and are generated from the identical native `BitVec.toInt` two's-complement formula. **Full execution qualification is still pending**: next Linux run must pass ten common-source conversion vectors and all other JS/TS/Rust/Wasm GC/Wasmtime checks. Last fully green is the earlier `fe88e7f` signed/bitvector model proof checkpoint (27 steps, 457 runtime observations). Signed shifts, comparisons, `IntN.ofInt`, Float, platform-width integers and comprehensive Phase A exit remain incomplete.
+
+
+
+## M2+A signed dictionary candidate — independently measured strict registry (14 October 2026)
+
+Linux [run 38556955048](https://github.com/dwijayuda/pskernel/actions/runs/38556955048)
+at `a4fdce4089f544311487048c6d773e4754eff1d7` compiled
+the complete new signed dictionary source, regenerated all prior
+reviewed logical assets, and correctly refused the outdated Standard
+hashes before source/runtime admission. The newly observed selected
+Standard fingerprints are **FNV
+`fnv1a64:11697716145196202262`** and **SHA-256
+`sha256:47b1598e2faa1ccbe80d183aeeaaa9f1a5444d1fd2878ae40f4bbe21c3d25cc4`**.
+These exact independent values are now pinned in both strict snapshot
+guards; **the new stage is not yet fully qualified**. Its 36 checked
+HAdd/HSub/HMul/HDiv/HMod/Neg/OfNat/BEq/Inhabited dictionary declarations
+and 36 explicit registrations should extend the preceding
+1,643-declaration /23-class /153-instance roster; do not assert
+new counts or cross-target parity until the next full green Linux run.
+The previous fully green accepted executable remains `514f537`,
+[CI 38555495881](https://github.com/dwijayuda/pskernel/actions/runs/38555495881)
+(448 shared observations, native Lean signed oracle, V8 GC and Wasmtime).
+No new axioms, psKernel-core, self-hosting, or Float-ofBits approval.
+
+
+
+## M2+A checked signed operations and Float bit reads — snapshot review (14 October 2026)
+
+At commit `7bea16a0614be79e51c1ebbb99f926eda342b1fa`, [Linux CI 38549762258](https://github.com/dwijayuda/pskernel/actions/runs/38549762258) compiled and independently regenerated the two disjoint selected Core assets **byte-for-byte**: 62 checked Int8/Int16/Int32/Int64/BitVec method definitions and six Float/Float32 read-only bit-model definitions. The original frozen /61+signed identity prelude was preserved as the noncircular export boundary; no axiom, choice, source acceptance exception, instance or class was added. Official kernel replay and candidate checks passed before the selected Standard correctly refused the old digest. The observed next snapshot is **FNV `fnv1a64:2992617569121253333`** and **SHA-256 `sha256:4fc70a9fac595be03500185122459263e1a9e75141bc8fd39a680785d682e8a3`**. The expected 1,643 declarations (previously 1,575 plus 68, unchanged 23 classes and 153 instances) are subject to full regression confirmation; this edit pins only these independently measured hashes.
+
+**Important remaining work:** These imported definitions are logical Core, not yet executable signed/Float operations. F1 `ofBits`, NaN canonicalization, arithmetic and scientific literals, signed Int-valued conversions, signed shifts and comparisons, typed signed/float IR and ABI, all-target runtime evidence, selected arrays/bytes/library and comprehensive environment manifest remain open. The latest fully green selected Standard before this digest edit remains `d112580` in CI 38546207955. Continue M2+A in native portable `.lean`; no pskernel-core, self-hosting or unsound foundation expansion.
+
+
+
+## Current signed selected Standard — independent digest review (14 October 2026)
+
+At commit `8bee79d6c116ef102d0bc5bc4b4be7ae97f135e7`, [Linux 38545886718](https://github.com/dwijayuda/pskernel/actions/runs/38545886718) compiled the checked 15-entry SInt family asset, regenerated it **byte-for-byte** from the original pre-signed Standard, and rechecked all five recursor rule contracts. Its selected-Standard guard correctly refused the previous snapshot and independently reported **1,575 declarations, 23 classes and 153 instances** (net +10 actual declarations replacing five axioms); FNV `fnv1a64:545524655185859287`; SHA-256 `sha256:2675059835d6278a4c7ac8871a3df937835d2ee57912dfd7b9b296576df30c1f`. These precise observed values are now pinned without weakening the two strict registry guards. **This revision still needs its next complete green Linux regression.** No new trusted axioms, signed runtime arithmetic, portable USize/ISize execution or F1 Float bit interfaces are claimed. F1 awaits a sound resolution of the `Classical.choice` proof dependency; other M2+A exits remain open.
+
+
+
+## F0 selected Standard digest — independently observed (14 October 2026)
+
+Linux [run #38534047864](https://github.com/dwijayuda/pskernel/actions/runs/38534047864) at `bdfdb6b6402618908c1d52aa6494f37df7483713` compiled the newly selected 51-entry Float/Float32 Core model, independently regenerated its 254,044-byte source **byte-for-byte**, passed the F0 annotation and native-kernel negative probes, and correctly refused the previous /61 Standard digest. The run's independent candidate for the new selected Standard fingerprint was **FNV `fnv1a64:4585335486592655667`** and **SHA-256 `sha256:3bed7c1104a6209f6af124e932ce7c7ae6401f0f9483896e6730c51ffd35d0ca`**. These are now pinned in `StandardSnapshot.lean` without weakening either validation guard. The new selected environment is **pending full official kernel, source, runtime and CI qualification**; the last fully green regression remains `bb2dbbcc` on the unchanged /61 environment. F1–F4 executable Float, M2+A and later milestones remain open.
+
+
+
+## Qualified /61 checkpoint — 14 October 2026
+
+Executable `34ff236b6fe9f936d7d44b8ace1c70612c7cc66e` passed all established Linux gates in [run 38515443060](https://github.com/dwijayuda/pskernel/actions/runs/38515443060).
+Selected Standard: 1516 declarations, 23 classes, 153 instances; FNV `fnv1a64:6333670853941549394`; SHA `sha256:ebf02f5f8dfecf3769cbaeaa52e39dac3ba9c8dc034ea5284655da324bc75d60`.
+426 shared runtime observations for JS/TS/Rust, GC Wasm/Wasmtime component, source/official kernel, negative conformance and existing performance gates passed.
+APP-03 PUnit empty invocation now resolves only known Unit/PUnit universe constraints via checked unification and validates the inserted inhabitant; it does not invent arbitrary empty arguments.
+This is a qualified selected /61 integration; remaining M2+A, full v7, C5, self-hosting, and formal backend preservation are not complete.
+Pinned upstream Lean 4.35.0 commit: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Earlier /60 and failed /61 evidence below is historical.
+
+
+## Current qualified boundary — stable Lean and quoting (14 October 2026)
+
+Executable `0c6b7ee6896524b69858d3524356d7a30a4c7272`;
+[green Linux 38437704653](https://github.com/dwijayuda/pskernel/actions/runs/38437704653).
+**298 shared runtime observations**, four panic contracts, **189 portable /
+197 native modules**, profile `pscv0-v7-native-bounded/53`.
+Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+independent oracle, semantic/refusal and graph gates, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and performance gates passed.
+
+Standard: **313 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:723655421381520752`;
+SHA `sha256:41b2e17bbe8468c04e69a11df63e1656603e88ecd67b9965ffcc3e2953769e8e`.
+Character and Unicode string quoting use five checked definitions and existing
+scalar/string operations; no added axiom or primitive. Quoting is independently
+compared through native evaluation because upstream String.Internal.append
+is kernel-opaque. Historical RC4 receipts retain their original identities.
+
+Full M2+A is **not complete**. Next: checked Int constructors/recursor/toNat
+with typed runtime conversion, then faithful Std.Format/Repr and remaining A/M2.
+
+
+## Current qualified boundary — M2+A transparency (13 October 2026)
+
+Executable `35e239193e69cc466b81ac57282df1b1500f4927`;
+[green Linux 38433276797](https://github.com/dwijayuda/pskernel/actions/runs/38433276797).
+**293 shared runtime observations**, four panic contracts, **188 portable /
+196 native modules**, profile `pscv0-v7-native-bounded/51`.
+Official RC4 kernel and independent oracle, all existing semantic/refusal and
+instance graph gates, strict IR, readable JS/TS/Rust, V8/Wasmtime GC,
+WIT/WAT/component/ABI, project and performance gates passed.
+
+Standard remains **308 declarations /18 classes /54 instances**. Its canonical
+v2 payload includes declaration reducibility:
+FNV `fnv1a64:1901246055571366448`;
+SHA `sha256:799539fdf6557760d1c9134439ac6ea811915c7c6b054164310c11aa3e017136`.
+
+Instance target/candidate preparation, selection unification and generator keys
+now use pinned instance transparency. Checked evidence/default assignment uses
+ordinary conversion. Flexible type inference preserves original checked terms
+before delta reduction. Abbreviations and instance metadata survive imports.
+The independent audit verifies selected upstream definition statuses.
+
+[Transparency design and evidence](PSCV0_M2_INSTANCE_TRANSPARENCY_2026-10-13.md).
+Full M2+A is **not complete**. Checked string quoting is the next implementation,
+pending a strict digest review and all-target qualification.
+
+## Current qualification — direct coercions and typed postponed results (13 October 2026)
+
+Executable `35641f810e31f3c9d309c01028acd53ebe4112d9`;
+[green Linux 38430940757](https://github.com/dwijayuda/pskernel/actions/runs/38430940757).
+**293 shared runtime observations**, four panic contracts, **187 portable /
+195 native modules**, profile `pscv0-v7-native-bounded/50`. Official RC4
+kernel, independent oracle, all semantic/refusal gates, strict IR, readable
+JS/TS/Rust, GC-Wasm V8/Wasmtime, WIT/WAT/components and project gates passed.
+
+- Direct Coe, CoeFun and CoeSort use one checked class projection; no coercion
+  chains or implicit lifting. Applications, annotations and expected types share
+  these operations. Local dictionaries and APP-03 completion are qualified.
+- Expected-term adaptation joins the transactional source/Core worklist.
+  Mandatory defaults resolve before blocked result adaptation; failed attempts
+  retain the original lexical scope and cannot leak assignments.
+- Nonrecursive one-field wrappers whose erased uniform parameter determines
+  their field use the concrete field representation. Type/proof-only fields
+  erase; runtime fields depending on existential type fields remain refused.
+  This does not introduce general higher-rank or existential runtime IR.
+
+Standard: **308 declarations / 18 classes / 54 instances**, adding nine checked
+coercion declarations and no global instances, axioms or primitives.
+FNV `fnv1a64:946298686920218861`;
+SHA `sha256:9afbebe8bf188a119b1bc223bc7f793da6f2dc08db9caa98e381d9e97662b234`.
+See [direct coercion design/evidence](PSCV0_M2_DIRECT_COERCIONS_2026-10-13.md).
+
+**M2+A remains incomplete.** The next source change introduces explicit
+instance-search transparency, module-preserved reducibility and a reviewed
+digest update; it is not yet qualified. Continue remaining Repr/Hashable,
+faithful selected scalar/Float/BitVec/bytes/string/collection APIs, comprehensive
+manifest, broader M2 coverage and C5 semantic retention. Keep the accepted
+**M2+A → M3+B → M4+C/D → M5/E** dependencies and unchanged exit gates.
+Native .lean and official Lean only; no pskernel-core, self-hosting or
+compiler-source migration.
+
+
+## Current qualification — M2+A scheduling, indexed lookup and literals (13 October 2026)
+
+Executable `4d2e644d3974a6e6a4b68a15b7148bdb4f83e372`;
+[green Linux 38425066964](https://github.com/dwijayuda/pskernel/actions/runs/38425066964).
+**285 shared runtime observations**, four panic contracts, **186 portable /
+194 native modules**, profile `pscv0-v7-native-bounded/50`.
+Official Lean RC4 kernel, independent oracle, semantic refusals, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI and project checks passed.
+
+- One transactional worklist now serves Core constraints and captured source
+  terms. Later arguments can determine record/lambda/tactic types; numeral
+  fallback and mandatory defaults run after ordinary work reaches quiescence.
+- Global instances are indexed by class while preserving priority/tie order.
+  Generator buckets use rigid class plus lexical scope, followed by full
+  definitionally-equal input checks. At 32 goals: zero generator comparisons
+  across classes, 528 within one class. No general linearity claim.
+- Numeric literals use genuine checked OfNat dictionaries. Typed Core
+  application resolves class universes before search; deriving reuses it.
+  Custom numeric types, local dictionaries and higher universes are qualified.
+
+Standard: **299 declarations / 15 classes / 54 instances**.
+The reviewed change adds OfNat/constructor/projection and Nat/Int dictionaries,
+without new axioms or primitives.
+FNV `fnv1a64:4206739069382061916`;
+SHA-256 `sha256:00c6142b5f5b0e47abb8b317dc4fff3d595ab9f5e931822c4f48fca809758647`.
+
+Direct Coe/CoeFun/CoeSort boundaries are implemented but **qualification is
+pending** in subsequent source commits. They add nine checked declarations,
+three classes and no global instances. Keep strict digest review.
+See [scheduling and lookup](PSCV0_M2_POSTPONED_ELABORATION_2026-10-13.md)
+and [direct coercion design](PSCV0_M2_DIRECT_COERCIONS_2026-10-13.md).
+
+**M2+A is not complete.** Continue autonomously: remaining Repr/Hashable,
+faithful scalar/Float/BitVec/bytes/string/collection APIs, comprehensive
+module/notation/handler/tactic/effect/assumption manifest, broader M2 coverage
+and C5 semantic retention. Keep dependent/indexed/recursive deriving with M3's
+shared data/transport/termination work. Preserve
+**M2+A → M3+B → M4+C/D → M5/E**; do not redefine the exit gates.
+Native .lean, official kernel, GitHub source operations and Linux CI only.
+No pskernel-core, self-hosting or compiler-source migration.
+
+## Prior qualification — M2+A checked equality and structure defaults (13 October 2026)
+
+Executable `d7e28a3870cdc399eca3c63c6d305b10109d2eca`; [green Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663).
+**276 shared runtime observations** (all prior 263 retained), four panic
+contracts, **183 portable / 191 native modules**, profile
+`pscv0-v7-native-bounded/49`. Official Lean RC4 kernel, independent upstream
+deriving oracle, 92 semantic refusals, existing do/opacity checks, strict IR,
+JS/TS/Rust, V8/Wasmtime GC/component/ABI, declarations/maps and project gates pass.
+
+- `DecidableEq` derives checked decisions for non-indexed, nonrecursive
+  families with independent runtime fields, including generic universes,
+  empty families and dependent proof fields. It uses Eq.rec/congruence and
+  existing dependent-context substitution; no BEq-to-equality axiom.
+- `BEq` skips proof fields and shares the new recursor builder.
+  `Inhabited` honors explicit structure defaults and still prunes unused
+  parameter assumptions. Record/constructor completion uses the shared queue.
+- Typed proof conversion is shared by application/let inference and
+  unification. Different propositions and runtime values remain distinct.
+  Record and deriving diagnostics retain their source/constructor owners.
+
+Standard now has **294 declarations / 14 classes / 52 instances**. The only
+additions are checked `DecidableEq`/`decEq` definitions; no new axiom,
+primitive, class or global instance.
+FNV `fnv1a64:8231265721298810139`;
+SHA-256 `sha256:89c4125cc3ca36bf198421e64673659a0acdf0207004af46738d36d32fcfd540`.
+
+[Design, reviewed Standard change and exact evidence](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md).
+**Selected milestone complete; full M2, Phase A and v7 remain open.**
+Continue **M2+A → M3+B → M4+C/D → M5/E**. Repr needs faithful Std.Format,
+quoting and rendering; Hashable needs UInt64/mixHash and their audited runtime
+correspondence. Keep indexed/recursive deriving and dependent computational
+fields with M3's general data/transport/termination mechanisms. Broader M2
+scheduling/scoping/scaling, selected APIs, the complete manifest and C5
+retention/publication remain on the existing roadmap. Native Lean only;
+no pskernel-core, self-hosting or compiler-source migration.
+
+## Prior qualification — M2+A generalized answers and synthetic constraints (13 October 2026)
+
+Executable `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`;
+[green Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335):
+**263 shared runtime observations**, four panic contracts, **182 portable /
+190 native modules**. Official Lean RC4 kernel and independent oracle,
+92 phase-specific semantic refusals, existing do/opacity checks, strict IR,
+JS/TS/Rust, V8/Wasmtime GC/component/ABI, declarations/maps and project gates passed.
+Standard remains 292 declarations / 14 classes / 52 instances, with unchanged
+FNV `fnv1a64:5949916575031563783` and
+SHA-256 `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+
+Scoped natural term/universe answer templates now freshen on shared replay.
+The graph retains generalized answers and checks each receiving target;
+root answers cannot retain term parameters. One scoped queue handles expected
+types, instance holes and mandatory omitted defaults for calls/records/proof
+applications. The old instance-only retry loop is removed. Global registration
+also checks synthesis order and determined outputs. All mechanisms remain
+portable native Lean under official checking.
+
+[Design, exact evidence and boundaries](PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md).
+The type-polymorphic local-dictionary case is kernel-qualified and explicitly
+refused at erasure pending higher-rank runtime IR. Nat-indexed dictionary
+sharing is qualified across every existing target. Generalized graph evidence:
+6 generators / 6 answers / 1 generalized / 1 freshened shared answer. Earlier
+widths 1/8/32 retain 2 generators, 3 candidates and 7/21/69 transitions.
+
+**This completes the selected M2+A milestone, not full M2, A or v7.**
+Continue **M2+A → M3+B → M4+C/D → M5/E**. Remaining M2 includes broader
+postponed syntax/tactic scheduling, scoping/depth parity, search scaling and C5
+occurrence retention. Remaining A includes Repr/DecidableEq/Hashable, structure
+defaults, proof-field deriving and the comprehensive manifest. Keep dependent/
+indexed/recursive deriving with M3+B. No pskernel-core or self-hosting.
+
+## Prior qualification — M2 + Phase A deriving (13 October 2026)
+
+Executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
+[green Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952):
+260 shared runtime observations, four panic contracts, 180 portable / 188 native
+modules. Official Lean RC4 kernel/oracle, semantic refusals, strict IR and all
+existing JS/TS/Rust/GC-Wasm/component gates passed. Standard remains
+292 declarations / 14 classes / 52 instances with unchanged M1 FNV/SHA digests.
+
+Parameter/universe-aware `Inhabited` and independent nonrecursive `BEq` now
+share one family telescope and checked instance-search path. Inhabited uses
+RC4 two-pass constructor selection and prunes unused requirements. Structures
+keep projection comparisons; fieldless/payload inductives share a recursor
+builder with actual motive universes and fresh local identities.
+
+M2 also gains actual-universe projection inference, common-successor maximum
+normalization, and checked rigid-spine matching that can defer head-level
+constraints until typed arguments determine them. No unresolved equality is
+committed, and the generator/consumer ownership/replay contract is unchanged.
+
+[Design, boundaries and qualification](PSCV0_M2_A_DERIVING_2026-10-13.md);
+[prior graph invariants and growth evidence](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+**Follow M2+A → M3+B → M4+C/D**, then M5/E. Full M2, A and v7 remain incomplete.
+The later qualification above adds generalized answer abstraction/freshening
+and the selected shared constraint queue; keep dependent/indexed/recursive
+deriving with M3+B. Repr/DecidableEq/Hashable and the other documented A gaps
+remain open. Native Lean / official checking only; no pskernel-core or self-hosting.
+
+## Current roadmap integration — readable outputs (13 October 2026)
+
+The [source, historical-branch and qualification audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) is now the
+current output plan. JS/TS/Rust/WAT/WIT are implemented for the qualified native
+subset; existing bounded Lean/PS printers and historical round trips are reusable,
+but full C5 reconstruction is not implemented. Do not rebuild existing emitters
+or merge unrelated historical backends.
+
+M1 is complete at the executable/run below. Next: M2 + remaining A, then M3 + B,
+M4 + C/D, and M5/E. Retain C5 source/binder/occurrence information alongside its
+M2–M4 semantic owners; complete C5 source publication and correspondence under
+M5/E after the required A–D language closure. This replaces the old blanket
+C5-after-all-A–E scheduling rule. No new milestone track is added.
+
+**Current code boundary:** the qualifications above cover bounded M2 instance
+search, generic deriving, generalized answers and the selected shared constraint
+queue. Full postponed-syntax/tactic scheduling remains open.
+No C5 source emitter or source-authority migration was added. Native `.lean`, official checking,
+GitHub source operations and Linux CI remain authoritative. No pskernel-core
+or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.
+
+## M1 completion checkpoint — preserved baseline (13 October 2026)
+
+This section records the M1 completion baseline. The M2 qualification above
+supersedes its executable status. Older pending-M1 statements are historical.
+
+- **Qualified executable:** `c00e146bd5c97788a4a6a39221849973aeafda84`.
+- **Green Linux CI:** [38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
+- **250 shared runtime observations**, four shared panic cases, official kernel,
+  independent RC4 oracle, negative/coherence and all existing backend gates passed.
+- **292 declarations / 14 classes / 52 instances**; **175 portable / 183 native modules**.
+- FNV: `fnv1a64:5949916575031563783`.
+- SHA-256: `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+
+M1 acceptance, selected universe/proof-automation scope, runtime-override ledger
+and measured compiler/runtime costs are recorded in
+[M1 completion evidence](PSCV0_M1_COMPLETION_2026-10-13.md). Generated JS still has substantial overhead
+versus native Lean (roughly 492–3357x in these small batch measurements).
+M1 completion does not establish performance parity, full M2/A/v7 completion,
+or formal compiler semantic preservation.
+
+**Accepted interleaving:** M2 with remaining A; M3 with B; M4 with C/D;
+final M5/E qualification. Collect E evidence and apply measured M5 improvements
+throughout. Continue the shared instance-search architecture alongside
+the Phase A handlers that rely on it. Preserve native portable Lean,
+official checking, GitHub source operations, Linux CI, branch/draft PR 109,
+Wasm GC internals and explicit ABI-only linear memory. C5 is integrated as above; compiler-source migration,
+pskernel-core and self-hosting remain deferred.
+
+## Prior qualified checkpoint — M1 coherence and measurements (13 October 2026)
+
+- **Executable:** `6a6037c311f306d82e43221ed527c7326e5785dc`.
+- **Green Linux qualification:** [38387492672](https://github.com/dwijayuda/pskernel/actions/runs/38387492672).
+- **246 shared runtime observations**, all prior observations retained, four panic
+  contracts, official kernel/RC4 oracle and all backend gates passed.
+- Standard remains **292 declarations / 14 classes / 52 instances** and
+  **175 portable / 183 native modules**, with the Array checkpoint digests below.
+
+Explicit high-priority custom optional dictionaries take precedence over the
+generic default. Direct and Fin-adapted lawfulness refuse the deliberately
+unlawful optional implementation. Independent RC4 negative cases passed.
+
+Controlled samples now exist in the CI artifact's `m1-performance/` directory.
+At 16/128 declarations, checked-index elaboration medians were 2/15 ms versus
+1/2 ms for direct-return bodies under identical binder telescopes; prelude
+admission was 8 ms. Phase timings are recorded separately.
+
+Generated JS lookup/conversion costs are substantially above native Lean:
+the first measurement shows roughly 451–3206x batch-time ratios across these
+small operations. Array and List-head lookup remain roughly size-independent;
+List-tail and conversion costs grow with size. This is evidence of significant
+remaining runtime overhead, not high-performance parity or a formal complexity
+proof. Native Lean uses a different runtime and optimized standard library.
+Retain the raw samples, setup exclusions and checksums when comparing changes.
+M5 should address shared calling conventions, specialization and allocation,
+not add Standard-name-specific backend shortcuts.
+
+**Final M1 qualification is still pending** for the runtime-override ledger and
+remaining representation-boundary probes (partial conversions, Array elimination,
+empty Fin access and position coverage). Tail benchmark repetitions are reduced
+from 128 to 16 per sample to keep routine CI economical while retaining five
+measured samples and matched native/JS workloads. This changes measurement
+duration, not correctness or acceptance criteria.
+
+## Prior qualified checkpoint — M1 checked Array and conversions (13 October 2026)
+
+This section supersedes older implementation-status statements below.
+
+- **Executable:** [af96aa405a2b2f94df9a5dada607b4fc455fc624](https://github.com/dwijayuda/pskernel/commit/af96aa405a2b2f94df9a5dada607b4fc455fc624).
+- **Green Linux qualification:** [38386745772](https://github.com/dwijayuda/pskernel/actions/runs/38386745772), official Lean 4.35.0-rc4.
+- **Selected Standard:** 292 declarations, 14 classes, 52 ordered instances; 175 portable / 183 native modules.
+- **Frozen FNV:** `fnv1a64:5949916575031563783`.
+- **Frozen SHA-256:** `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+- **244 shared runtime observations** passed in JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 remain.
+- Four shared panic contracts passed, including empty Array bang access.
+
+Array now has a checked List-backed logical model, actual size bounds, proof
+access, optimized optional/bang dictionaries and both checked lawfulness laws.
+The seven previous selected Array primitive axioms are replaced by checked
+logical definitions. Efficient backend intrinsics remain a separately audited
+runtime boundary; kernel checking is not a proof of backend equivalence.
+
+Explicit Array.mk/List.toArray conversion uses a typed sized builder with
+prepared List metadata. Every backend allocates private array storage and
+traverses linearly; no backend hardcodes List tags or copies each persistent
+prefix. Array.toList uses a typed fold and checked reverse, also linear.
+Persistent updates, oversized indices, Fin adapter behavior and Nat/Bool
+conversion cases passed. Array and List remain selected Type-0 collections;
+Option and generic indexing/adapters retain the qualified universe closure.
+
+**M1 remains incomplete pending final evidence:** explicit adverse-dictionary
+coherence/priority checks and representative compiler/runtime performance
+comparisons. Full M2 begins only after M1 acceptance, then interleaves with A.
+No C5, self-hosting or pskernel-core.
+
+## Prior qualified checkpoint — M1 List/Fin indexing (13 October 2026)
+
+This section supersedes older checkpoint claims below.
+
+- **Executable:** [e73ce2bbff522e5888a409b7b114042877d71943](https://github.com/dwijayuda/pskernel/commit/e73ce2bbff522e5888a409b7b114042877d71943).
+- **Green Linux qualification:** [38384869133](https://github.com/dwijayuda/pskernel/actions/runs/38384869133), official Lean 4.35.0-rc4.
+- **Selected Standard:** 277 declarations, 14 classes, 49 ordered instances; 173 portable / 181 native Lean modules.
+- **Frozen FNV:** `fnv1a64:1660797324209886684`.
+- **Frozen SHA-256:** `sha256:1937840a8a4fda1612e3e03e17860b4abad97b355beb6a896eee4c2171abbb3d`.
+- **227 shared runtime observations** passed in direct JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 observations remain.
+- Three panic cases passed in JS/TS/Rust and V8/Wasmtime core/component execution.
+
+Qualified: checked Fin structure and original-predicate-preserving Nat-to-Fin
+index adapters; List proof/automatic/optional/bang access; both List lawfulness
+proofs; matching Fin adapter lawfulness. Optional List access uses a single
+structural traversal, without a preliminary length pass. The official kernel
+accepted every added logical definition. The pinned source oracle, negative
+invalid-bound cases, strict IR and existing integration gates passed.
+
+One family-parameter classification now erases numeric datatype parameters
+without erasing ordinary computational Nat function arguments. List.get's Fin
+value survives while its bound proof does not. A Fin bound does not authorize
+access to a smaller collection. The selected List universe is still Type 0;
+Option and generic Fin adapters retain their qualified universe parameters.
+
+**M1 remains incomplete.** Next: checked Array logical model, genuine size-bound
+indexing, explicit linear-time logical/runtime conversions, alias/large-index
+coverage, and controlled representative performance comparisons. Full M2 starts
+after M1 acceptance, interleaved with feature A as the user requested. C5,
+pskernel-core and self-hosting remain excluded.
+
+## Prior qualified checkpoint — M1 universes and bounded index proofs (13 October 2026)
+
+This section supersedes older checkpoint claims below.
+
+- **Executable:** [4fe35ca32b8f3b49f85b89bb9b699d95f7fd7b7d](https://github.com/dwijayuda/pskernel/commit/4fe35ca32b8f3b49f85b89bb9b699d95f7fd7b7d).
+- **Green Linux qualification:** [38382777891](https://github.com/dwijayuda/pskernel/actions/runs/38382777891), official Lean 4.35.0-rc4.
+- **Selected Standard:** 258 declarations, 14 classes, 43 ordered instances; 171 portable / 179 native Lean modules.
+- **Frozen FNV:** `fnv1a64:7381279441732502588`.
+- **Frozen SHA-256:** `sha256:c1444324de1014fa01b9c82fb09f2a6ab96b824ac08ae6b6e548e2145fd61c85`.
+- **215 shared runtime observations** passed in direct JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 observations remain.
+
+Qualified: universe-polymorphic Option constructors/recursor, map/bind/getD/filter,
+BEq and Inhabited; GetElem?, default implementation and both LawfulGetElem laws
+at the element universe; higher-universe dictionary synthesis and erasure.
+Explicit Option.bind may change universes; monadic Option do fixes a single
+universe as RC4 does. An independent oracle and a negative do case cover that boundary.
+
+Index automation now constructs checked natural-order proofs from definitional
+normalization, closed comparisons, successor rules and bounded local transitivity
+search. It is not full omega. Large natural indices remain arbitrary precision.
+The unifier first tries congruence for a shared named application head, retaining
+dictionary argument identity; failure rolls back and uses ordinary reduction.
+This avoids unfolding an inferable dictionary argument into applied metavariables.
+
+The official kernel admitted the selected definitions and source proofs; strict
+IR and all existing runtime gates passed. Single-run all-target timings: parse
+110 ms, elaborate 93 ms, prepare 121 ms, kernel 70 ms, erase 251 ms, emit 494 ms.
+These are observations, not a controlled performance comparison.
+
+**M1 remains incomplete.** Next: checked List/Fin indexing and optimized optional
+laws, Array logical model and genuine size bounds, panic/alias/large-index coverage,
+and controlled representative performance comparisons. Full M2 waiter tabling,
+C5, pskernel-core and self-hosting remain excluded. Read live HEAD and CI first.
+
+## Prior qualified checkpoint — M1 natural order (13 October 2026)
+
+This section supersedes older status statements below; historical evidence is preserved.
+
+- **Executable:** [064baf31641ff19785feae1416eb353b38737794](https://github.com/dwijayuda/pskernel/commit/064baf31641ff19785feae1416eb353b38737794).
+- **Green Linux qualification:** [38379674588](https://github.com/dwijayuda/pskernel/actions/runs/38379674588), official Lean 4.35.0-rc4.
+- **Selected Standard:** 258 declarations, 14 classes, 43 ordered instances.
+- **Frozen FNV:** `fnv1a64:10485782345918084284`.
+- **Frozen SHA-256:** `sha256:37a8c7e027c548b59a82060556e194051867ee10d02e5b02b1f20c4875693ce5`.
+- **Native closure:** 171 portable / 179 total Lean modules.
+- **Runtime observations:** 206 shared cases, preserving the previous 198; direct JS, strict TS, Rust, Wasm GC and Wasmtime component gates passed.
+
+Qualified additions: Prop-only Nat.le recursor; checked zero, successor,
+transitivity, predecessor/inversion and impossible-zero proofs; checked
+Nat.ble logical model; checked Boolean reflection; Nat.decLe/Nat.decLt
+dictionaries. Decidable.intro and its computational projection now erase
+consistently to Bool. The reflection field is erased, not trusted as an
+unchecked witness. Runtime comparison keeps the existing Nat.ble intrinsic.
+
+The same run checked the independent RC4 source oracle and false-bound
+rejection, admitted source proofs with the official kernel, validated strict
+IR and qualified emitted artifacts. This is **not a compiler correctness
+proof or full M1 completion**. A single measured all-target application run
+reported prelude 10 ms, parse 98 ms, elaborate 93 ms, prepare 297 ms,
+kernel 66 ms, erase 112 ms and emit 455 ms; these are observations, not
+controlled performance comparisons.
+
+**Next M1 dependencies:** universe-polymorphic Option/GetElem?/laws and
+universe-aware do binding; bounded proof-producing index automation; complete
+List/Array/Fin indexing, optimized optional laws, coherent panic behavior and
+representative performance comparisons. Full M2 tabling, C5, pskernel-core
+and self-hosting remain excluded. Re-read live HEAD and CI before editing.
+Do not repeat the older Decidable-uniqueness work: it was already qualified.
+
+
+## Latest qualified selected roster — 13 October 2026
+
+**Newest independently qualified executable:** [`e0ac8c69c928261e21e9593ed3f2f4aa5157385a`](https://github.com/dwijayuda/pskernel/commit/e0ac8c69c928261e21e9593ed3f2f4aa5157385a), Linux GitHub Actions [38335736466](https://github.com/dwijayuda/pskernel/actions/runs/38335736466) **passed** (13 October 2026). This supersedes older executable-status statements below, which remain as preserved history. The pinned upstream is Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`). The selected Standard now contains **234 declarations, 14 classes, 40 instances**, FNV `fnv1a64:403111548970955669`, SHA-256 `sha256:6e6f1fad15d4f0cb401a09c1ebc219c3f60dd50acb21061ca9eee4ab782bd85e`; portable/native closure remains 170/178 `.lean` modules with 198 shared runtime observations on TS, direct JS, Rust, and Wasm GC/Wasmtime.
+
+The four additional checked declarations reconstruct `Decidable` as a computational decision with checked reflection evidence, rather than relying on the older opaque declarations. Both digest gates use the exact new selected AST payload and were tested by GitHub Actions. The older 230-declaration counts and fingerprints below are preserved historical baselines, not the current selected registry. This does **not** prove consistency, complete Lean compatibility or runtime correctness beyond tested observations.
+
+
+**Status:** Reviewed and frozen *selected* 230-declaration source roster, not the full Lean RC4 Standard universe, dependency closure or ProofScript v7 conformance.
+
+- Official Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+- Selected native environment: `psSelfHostProdPreludeEnvironment`.
+- Current qualified executable source: `fc8bc8b1f16ed993fb144e2d396c0760c068630b`; [all-green Linux run 38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371).
+- Earlier 208-declaration FNV qualification: `c810d6fe15d064968008d09849efd9ac5b2820de`, [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524). Portable SHA-256 first qualified in `2a75d31c`, [Linux 38295519668](https://github.com/dwijayuda/pskernel/actions/runs/38295519668); mandatory dual gate qualified `381ae99f`, [Linux 38295808926](https://github.com/dwijayuda/pskernel/actions/runs/38295808926).
+- Snapshot records: **230 checked declarations**, **14 registered classes**, **40 ordered instance registrations**.
+- Selected roster FNV: **`fnv1a64:17137083495666611555`**.
+- Selected roster SHA-256: **`sha256:b0ddaa7acc463b9457aac13bd8f08a2f6f8e64bba32b76f7e469ebf1a973f08f`**.
+
+## Canonical encoding and exact coverage
+
+`Ps.Environment.StandardSnapshot` deterministically serializes each *installed
+selected* Core declaration: kind, name, universe parameters, types and bodies,
+constructor/recursor metadata and recursive field identities. It also records
+class names and input/output metadata, instance types, values, priorities and
+ordering, class identity and source aliases. All nodes are tagged; every
+component is length-prefixed by UTF-8 byte length. The payload includes the
+upstream Lean 4.35.0-rc4 commit and exact declaration representation.
+
+Two **independent expected digests** now guard that same payload. FNV-1a 64-bit
+is a fast reproducible drift detector and not cryptographic. The portable,
+pure-native Lean SHA-256 computes the standard 256-bit digest of the canonical
+UTF-8 bytes (FIPS 180-4 algorithm); it is tested against the published empty,
+ASCII and Unicode known-answer vectors. `psStandardSnapshotValidate` must
+first pass exact selected declaration/instance auditing, then match the
+explicit FNV and SHA-256 constants. Wrong expected SHA-256 and added alias
+registrations fail closed.
+This mandatory validator is now called by direct PSCV0 elaboration, the native
+multi-module project planner and once per native batch host invocation before
+admission or executable emission. The host reports Standard integrity drift
+at the `prelude` phase; it does not substitute for official Lean kernel checks. No crypto FFI or unchecked hash primitive is used.
+
+The previous 212-entry freeze added four checked `List.take`/`List.drop`
+and `List.rec`/`Nat.rec` worker definitions. The current 215-entry
+selected roster adds exactly the kernel-checked `GetElem` inductive class,
+constructor and method projection, with one extra class registration; no
+List/Array `GetElem` instance has been installed. Its full selected
+Core/class/instance/alias serialization and both digests were explicitly
+reviewed and pinned at `e1d463e10cbf5edd817e362ed35b21ee82c8c85b` ([Linux 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212)).
+
+## Limitations and remaining acceptance gates
+
+A cryptographic digest protects integrity *of the encoded payload*; it does not
+make an incomplete manifest complete or confer formal soundness. This payload
+does **not** yet cover all official Lean RC4 declarations or upstream module
+imports, notation, coercions, all deriving handlers, tactic registrations,
+effects/IO/FFI capabilities, exhaustive assumptions and erasure provenance,
+the external build supply chain or a metatheory/consistency proof.
+Independent official Lean kernel admission and backend/primitive audits remain
+separate from hash matching. Runtime preservation for newly added APIs on all
+backends still requires its own observation corpus where not yet included.
+
+For every intentional selected Standard change: review changed Core semantics
+and trust inputs; run official Lean and negative tests; capture the new FNV
+and SHA-256 **from the reviewed source**; update both expected values explicitly
+and qualify the full Linux matrix. Do not auto-accept observed drift. Preserve
+historical qualified source commits and CI evidence.
+

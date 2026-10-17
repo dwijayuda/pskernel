@@ -1,70 +1,6 @@
-import Ps.BackendTs.Type
-
-def psTsLookup (entries : List (String × String)) : String -> Option String :=
-  match entries with
-  | List.nil => fun (_name : String) => Option.none
-  | List.cons entry rest =>
-      let smaller : String -> Option String := psTsLookup rest;
-      fun (name : String) =>
-        match entry with
-        | Prod.mk key value => if psStringEq key name then Option.some value else smaller name
-
-def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :=
-  match fuel with
-  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
-  | Nat.succ remaining =>
-      fun (expr : PsVerifiedIrExpr) (name : String) =>
-        let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
-        let uses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => smaller value name;
-        let parameterUses : PsVerifiedIrParameter -> Bool :=
-          fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
-        let bindingUses : PsVerifiedIrMatchBinding -> Bool :=
-          fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name name;
-        let fieldUses : (String × PsVerifiedIrExpr) -> Bool :=
-          fun (field : String × PsVerifiedIrExpr) =>
-            match field with
-            | Prod.mk _ value => smaller value name;
-        let alternativeUses : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Bool :=
-          fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-            match alternative with
-            | Prod.mk _ detail =>
-                match detail with
-                | Prod.mk bindings body =>
-                    if psListAny bindingUses bindings then true else smaller body name;
-        match expr with
-        | .literal _ => false
-        | .var value => psStringEq value name
-        | .intrinsic _ _ arguments => psListAny uses arguments
-        | .lambda parameters _ body =>
-            if psListAny parameterUses parameters then true else smaller body name
-        | .call fn _ arguments => if smaller fn name then true else psListAny uses arguments
-        | .letE localName _ value body =>
-            if psStringEq localName name then true
-            else if smaller value name then true else smaller body name
-        | .ifE condition thenBranch elseBranch =>
-            if smaller condition name then true
-            else if smaller thenBranch name then true else smaller elseBranch name
-        | .record _ _ fields => psListAny fieldUses fields
-        | .projection _ _ target _ => smaller target name
-        | .constructor _ _ _ fields => psListAny fieldUses fields
-        | .matchE _ _ scrutinee alternatives =>
-            if smaller scrutinee name then true else psListAny alternativeUses alternatives
-
-def psTsFreshMatchTempWorker
-    (expr : PsVerifiedIrExpr) (attempts : Nat) (index : Nat) : String :=
-  match attempts with
-  | Nat.zero => "__ps$match$overflow"
-  | Nat.succ remaining =>
-      let candidate := String.Internal.append "__ps$match$" (psNatToString index);
-      if psTsExprUsesNameWithFuel 4096 expr candidate then
-        psTsFreshMatchTempWorker expr remaining (Nat.succ index)
-      else candidate
-
-def psTsFreshMatchTempLoop (expr : PsVerifiedIrExpr) (index attempts : Nat) : String :=
-  psTsFreshMatchTempWorker expr attempts index
-
-def psTsFreshMatchTemp (expr : PsVerifiedIrExpr) : String :=
-  psTsFreshMatchTempLoop expr 0 4096
+import Ps.BackendTs.Analysis
+import Ps.BackendEcma.Hash
+import Ps.BackendEcma.Intrinsic
 
 def psTsEmitTypeArguments (arguments : List PsVerifiedIrType) : Except PsTsEmitError String :=
   match psListMapExcept psTsEmitType arguments with
@@ -73,60 +9,17 @@ def psTsEmitTypeArguments (arguments : List PsVerifiedIrType) : Except PsTsEmitE
       if psListIsEmpty printed then Except.ok ""
       else Except.ok (psTsJoin "" ["<", psTsJoin ", " printed, ">"])
 
-def psTsNormalizeMachineInteger
-    (type : PsVerifiedIrMachineIntegerType)
-    (value : String) :
-    Except PsTsEmitError String :=
-  match type with
-  | .uint8 =>
-      Except.ok (psTsJoin "" ["((", value, ") & 255)"])
-  | .uint16 =>
-      Except.ok (psTsJoin "" ["((", value, ") & 65535)"])
-  | .uint32 =>
-      Except.ok (psTsJoin "" ["((", value, ") >>> 0)"])
-  | .int8 =>
-      Except.ok (psTsJoin "" ["(((", value, ") << 24) >> 24)"])
-  | .int16 =>
-      Except.ok (psTsJoin "" ["(((", value, ") << 16) >> 16)"])
-  | .int32 =>
-      Except.ok (psTsJoin "" ["((", value, ") | 0)"])
-  | .uint64 =>
-      Except.ok (psTsJoin "" ["BigInt.asUintN(64, (", value, "))"])
-  | .int64 =>
-      Except.ok (psTsJoin "" ["BigInt.asIntN(64, (", value, "))"])
-  | .usize =>
-      Except.error PsTsEmitError.targetWordSizeRequired
-  | .isize =>
-      Except.error PsTsEmitError.targetWordSizeRequired
-
-def psTsMachineIntegerBinaryRaw
-    (type : PsVerifiedIrMachineIntegerType)
-    (operation : PsVerifiedIrIntegerBinaryOp)
-    (left right : String) : String :=
-  match operation with
-  | .add => psTsJoin "" ["(", left, " + ", right, ")"]
-  | .sub => psTsJoin "" ["(", left, " - ", right, ")"]
-  | .mul =>
-      match type with
-      | .uint8 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .uint16 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .uint32 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .int8 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .int16 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .int32 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | _ => psTsJoin "" ["(", left, " * ", right, ")"]
-  | .bitAnd => psTsJoin "" ["(", left, " & ", right, ")"]
-  | .bitOr => psTsJoin "" ["(", left, " | ", right, ")"]
-  | .bitXor => psTsJoin "" ["(", left, " ^ ", right, ")"]
-
+-- The legacy printer delegates machine arithmetic to the same ECMAScript
+-- expression plan as direct JS/TS; there is only one numeric semantics owner.
 def psTsEmitMachineIntegerBinary
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerBinaryOp)
-    (left right : String) :
-    Except PsTsEmitError String :=
-  psTsNormalizeMachineInteger
-    type
-    (psTsMachineIntegerBinaryRaw type operation left right)
+    (left right : String) : Except PsTsEmitError String := do
+  let expression ← (PsEcma.machineBinary type operation (PsEcma.id left) (PsEcma.id right)).mapError
+    (fun _ => .targetWordSizeRequired)
+  let doc ← (PsEcma.exprDoc .typescript 4096 expression).mapError (fun _ => .intrinsicArity)
+  let rendered ← (psRenderDoc doc).mapError (fun _ => .intrinsicArity)
+  return rendered.text
 
 def psTsEmitMachineIntegerCompare
     (operation : PsVerifiedIrIntegerCompareOp)
@@ -224,6 +117,24 @@ def psTsPrinted5 (emit : String -> String -> String -> String -> String -> Excep
 def psTsEmitIntrinsicFromPrinted
     (operation : PsVerifiedIrIntrinsic) (arguments : List String) : Except PsTsEmitError String :=
   match operation with
+  | .hashMix | .stringHash => do
+      let (parameters, body) := match operation with
+        | .hashMix => (PsEcma.hashMixParameters, PsEcma.hashMixBody)
+        | _ => ([{ name := "text", type := "string" }], PsEcma.stringHashBody)
+      if parameters.length != arguments.length then throw .intrinsicArity
+      let expression := PsEcma.invoke parameters "bigint" body (arguments.map PsEcma.id)
+      let doc ← (PsEcma.exprDoc .typescript 4096 expression).mapError (fun _ => .intrinsicArity)
+      let result ← (psRenderDoc doc).mapError (fun _ => .intrinsicArity)
+      return result.text
+  | .unsignedOfNat type =>
+      psTsPrinted1 (fun value =>
+        let width := match type with
+          | .uint8 => 8 | .uint16 => 16 | .uint32 => 32 | .uint64 => 64 | _ => 0
+        if width == 0 then .error .intrinsicArity else
+          let wrapped := "BigInt.asUintN(" ++ toString width ++ ", " ++ value ++ ")"
+          .ok (match type with | .uint64 => wrapped | _ => "Number(" ++ wrapped ++ ")")) arguments
+  | .unsignedToNat _ =>
+      psTsPrinted1 (fun value => .ok ("BigInt(" ++ value ++ ")")) arguments
   | .machineIntBinary type integerOperation =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
@@ -256,6 +167,9 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["((__ps_a: bigint, __ps_b: bigint) => ", "(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(", left, ", ", right, ")"]);
       psTsPrinted2 emit arguments
+  | .natShiftLeft => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " << " ++ b ++ ")")) arguments
+  | .natShiftRight => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " >> " ++ b ++ ")")) arguments
+  | .natPow | .intPow => psTsPrinted2 (fun a b => .ok ("(" ++ a ++ " ** " ++ b ++ ")")) arguments
   | .natMul =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
@@ -298,6 +212,9 @@ def psTsEmitIntrinsicFromPrinted
         fun (value : String) =>
           Except.ok value;
       psTsPrinted1 emit arguments
+  | .intToNat =>
+      psTsPrinted1 (fun value => Except.ok
+        (psTsJoin "" ["((value: bigint): bigint => value < 0n ? 0n : value)(", value, ")"])) arguments
   | .intRepr =>
       let emit : String -> Except PsTsEmitError String :=
         fun (value : String) =>
@@ -431,11 +348,22 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["((__ps_s: string, __ps_b: bigint, __ps_e: bigint) => { ", "if (__ps_b >= __ps_e) return \"\"; let __ps_i = 0n; ", "let __ps_started = false; let __ps_out = \"\"; ", "for (const __ps_c of __ps_s) { ", "const __ps_cp = __ps_c.codePointAt(0) ?? 0; ", "const __ps_w = BigInt(__ps_cp <= 0x7f ? 1 : ", "__ps_cp <= 0x7ff ? 2 : __ps_cp <= 0xffff ? 3 : 4); ", "if (!__ps_started) { if (__ps_i === __ps_b) __ps_started = true; ", "else { __ps_i += __ps_w; continue; } } ", "if (__ps_i === __ps_e) return __ps_out; ", "__ps_out += __ps_c; __ps_i += __ps_w; } return __ps_out; })(", value, ", ", start, ", ", stop, ")"]);
       psTsPrinted3 emit arguments
+  | .stringToUtf8 | .utf8Valid | .utf8Decode =>
+      let helper := match operation with
+        | .stringToUtf8 => "__ps$stringToUtf8"
+        | .utf8Valid => "__ps$utf8Valid"
+        | _ => "__ps$utf8Decode"
+      psTsPrinted1 (fun value => .ok (helper ++ "(" ++ value ++ ")")) arguments
   | .stringEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
           Except.ok (psTsJoin "" ["(((", left, ") as string) === ((", right, ") as string))"]);
       psTsPrinted2 emit arguments
+  | .arrayBuild =>
+      match arguments with
+      | [count, seed, head, tail] =>
+          .ok ("(<T, S>(count: bigint, state: S, head: (s: S) => T, tail: (s: S) => S): T[] => { const result: T[] = []; for (let i = 0n; i < count; i++) { result.push(head(state)); state = tail(state); } return result; })(" ++ count ++ ", " ++ seed ++ ", " ++ head ++ ", " ++ tail ++ ")")
+      | _ => .error .intrinsicArity
   | .arrayEmptyWithCapacity =>
       let emit : String -> Except PsTsEmitError String :=
         fun (capacity : String) =>
@@ -482,6 +410,16 @@ def psTsEmitIntrinsicFromPrinted
           Except.ok
             (psTsJoin "" ["(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: A[]): B[] => ", "__ps_a.map((__ps_x) => __ps_f(__ps_x)))(", fn, ", ", array, ")"]);
       psTsPrinted2 emit arguments
+  | .arrayFilter =>
+      match arguments with
+      | [fn, array, start, stop] =>
+        .ok (psTsJoin "" [
+          "(<A>(predicate: (value: A) => boolean, array: A[], start: bigint, stop: bigint): A[] => { ",
+          "const result: A[] = []; const size = BigInt(array.length); const end = stop < size ? stop : size; ",
+          "for (let index = start; index < end; index += 1n) { const value = array[Number(index)]!; ",
+          "if (predicate(value)) result.push(value); } return result; })(",
+          fn, ", ", array, ", ", start, ", ", stop, ")"])
+      | _ => .error PsTsEmitError.intrinsicArity
   | .arrayFoldl =>
       let emit : String -> String -> String -> String -> String -> Except PsTsEmitError String :=
         fun (fn : String) (init : String) (array : String) (start : String) (stop : String) =>
@@ -522,6 +460,10 @@ def psTsEmitExprWithFuel
     fun (expr : PsVerifiedIrExpr) =>
       let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
       match expr with
+      | .unreachable _ => Except.ok "((): never => { throw new Error(\"unreachable match branch\"); })()"
+      | .panic message _ =>
+          Except.ok (psTsJoin "" ["((): never => { throw new Error(",
+            psJsonQuote message, "); })()"])
       | .literal literal =>
           psTsEmitLiteral literal
       | .var name =>

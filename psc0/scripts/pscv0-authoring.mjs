@@ -61,7 +61,7 @@ export async function readAuthoringInputs(){
   assert.equal(manifest.referenceGitBlobSha1,identity.gitBlobSha1);
   assert.equal(manifest.referenceRevision,'v7');
   assert.equal(manifest.referenceDocumentPath,'PSCV0_LANGUAGE_REFERENCE.md');
-  assert.equal(manifest.referenceLeanCommit,'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364');
+  assert.equal(manifest.referenceLeanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
   assert.equal(manifest.sourceSelection,'explicit-module-map-no-fallback');
   assert.equal(manifest.sourcePolicy,'pscv0-v7-only-no-legacy-fallback');
   assert.equal(manifest.backwardCompatibilityRequired,false);

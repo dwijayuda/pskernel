@@ -1,53 +1,256 @@
-def psRustRuntimeConcat
-    (values : List String) : String :=
-  match values with
-  | List.nil =>
-      ""
-  | List.cons value rest =>
-      String.Internal.append
-        value
-        (psRustRuntimeConcat rest)
+-- Versioned runtime support, emitted as a separate Rust module.
+-- Keep PSC arithmetic and Unicode contracts explicit at this boundary.
+def psRustRuntimePrelude : String := r#"
+#![forbid(unsafe_code)]
+pub use num_bigint::{BigInt as PsInt, BigUint as PsNat};
+use num_traits::{ToPrimitive, Zero};
+use std::rc::Rc;
+use std::str::FromStr;
 
-def psRustRuntimePrelude : String :=
-  psRustRuntimeConcat
-    [
-      "#![forbid(unsafe_code)]\n",
-      "use num_bigint::{BigInt as PsInt, BigUint as PsNat};\n",
-      "use num_traits::{ToPrimitive, Zero};\n",
-      "use std::str::FromStr;\n",
-      "fn __ps_nat_lit(text: &str) -> PsNat { PsNat::from_str(text).expect(\"valid generated Nat literal\") }\n",
-      "fn __ps_int_lit(text: &str) -> PsInt { PsInt::from_str(text).expect(\"valid generated Int literal\") }\n",
-      "fn __ps_nat_add(a: &PsNat, b: &PsNat) -> PsNat { a + b }\n",
-      "fn __ps_nat_sub(a: &PsNat, b: &PsNat) -> PsNat { if a >= b { a - b } else { PsNat::zero() } }\n",
-      "fn __ps_nat_mul(a: &PsNat, b: &PsNat) -> PsNat { a * b }\n",
-      "fn __ps_nat_div(a: &PsNat, b: &PsNat) -> PsNat { if b.is_zero() { PsNat::zero() } else { a / b } }\n",
-      "fn __ps_nat_mod(a: &PsNat, b: &PsNat) -> PsNat { if b.is_zero() { a.clone() } else { a % b } }\n",
-      "fn __ps_uint8_of_nat(value: &PsNat) -> u8 { (value % PsNat::from(256u16)).to_u8().expect(\"mod 256 fits u8\") }\n",
-      "fn __ps_int_of_nat(value: &PsNat) -> PsInt { PsInt::from(value.clone()) }\n",
-      "fn __ps_int_neg_succ(value: &PsNat) -> PsInt { -(PsInt::from(value.clone()) + PsInt::from(1u8)) }\n",
-      "fn __ps_int_neg(value: &PsInt) -> PsInt { -value }\n",
-      "fn __ps_int_add(a: &PsInt, b: &PsInt) -> PsInt { a + b }\n",
-      "fn __ps_int_sub(a: &PsInt, b: &PsInt) -> PsInt { a - b }\n",
-      "fn __ps_int_mul(a: &PsInt, b: &PsInt) -> PsInt { a * b }\n",
-      "fn __ps_char_of_nat(value: &PsNat) -> char { match value.to_u32().and_then(char::from_u32) { Some(c) => c, None => '\\0' } }\n",
-      "fn __ps_char_to_nat(value: char) -> PsNat { PsNat::from(value as u32) }\n",
-      "fn __ps_string_push(left: &String, right: char) -> String { let mut out = left.clone(); out.push(right); out }\n",
-      "fn __ps_string_singleton(value: char) -> String { value.to_string() }\n",
-      "fn __ps_string_length(value: &String) -> PsNat { PsNat::from(value.chars().count()) }\n",
-      "fn __ps_string_append(left: &String, right: &String) -> String { let mut out = left.clone(); out.push_str(right); out }\n",
-      "fn __ps_string_utf8_byte_size(value: &String) -> PsNat { PsNat::from(value.len()) }\n",
-      "fn __ps_string_next(value: &String, position: &PsNat) -> PsNat { let i = match position.to_usize() { Some(value) => value, None => return position.clone() + PsNat::from(1u8) }; match value.get(i..) { Some(rest) => match rest.chars().next() { Some(c) => position.clone() + PsNat::from(c.len_utf8()), None => position.clone() + PsNat::from(1u8) }, None => position.clone() + PsNat::from(1u8) } }\n",
-      "fn __ps_string_get(value: &String, position: &PsNat) -> char { let i = match position.to_usize() { Some(value) => value, None => return 'A' }; match value.get(i..) { Some(rest) => match rest.chars().next() { Some(c) => c, None => 'A' }, None => 'A' } }\n",
-      "fn __ps_string_at_end(value: &String, position: &PsNat) -> bool { position >= &PsNat::from(value.len()) }\n",
-      "fn __ps_string_extract(value: &String, begin: &PsNat, end: &PsNat) -> String { if begin >= end { return String::new(); } let i = match begin.to_usize() { Some(value) => value, None => return String::new() }; let rest = match value.get(i..) { Some(value) => value, None => return String::new() }; let mut index = begin.clone(); let mut out = String::new(); for c in rest.chars() { if &index == end { return out; } out.push(c); index += PsNat::from(c.len_utf8()); } out }\n",
-      "fn __ps_string_eq(left: &String, right: &String) -> bool { left == right }\n",
-      "fn __ps_array_empty_with_capacity<T>(_capacity: &PsNat) -> Vec<T> { Vec::new() }\n",
-      "fn __ps_array_size<T>(value: &Vec<T>) -> PsNat { PsNat::from(value.len()) }\n",
-      "fn __ps_array_push<T: Clone>(array: &Vec<T>, value: &T) -> Vec<T> { let mut out = array.clone(); out.push(value.clone()); out }\n",
-      "fn __ps_array_get<T: Clone>(array: &Vec<T>, index: &PsNat) -> T { let i = index.to_usize().expect(\"proved Array index fits usize\"); array[i].clone() }\n",
-      "fn __ps_array_get_d<T: Clone>(array: &Vec<T>, index: &PsNat, fallback: &T) -> T { if index >= &PsNat::from(array.len()) { fallback.clone() } else { array[index.to_usize().expect(\"bounded Array index fits usize\")].clone() } }\n",
-      "fn __ps_array_set<T: Clone>(array: &Vec<T>, index: &PsNat, value: &T) -> Vec<T> { let mut out = array.clone(); let i = index.to_usize().expect(\"proved Array index fits usize\"); out[i] = value.clone(); out }\n",
-      "fn __ps_array_set_if_in_bounds<T: Clone>(array: &Vec<T>, index: &PsNat, value: &T) -> Vec<T> { if index >= &PsNat::from(array.len()) { array.clone() } else { let mut out = array.clone(); let i = index.to_usize().expect(\"bounded Array index fits usize\"); out[i] = value.clone(); out } }\n",
-      "fn __ps_array_map<A: Clone, B>(f: std::rc::Rc<dyn Fn(A) -> B>, array: &Vec<A>) -> Vec<B> { array.iter().cloned().map(|value| f(value)).collect() }\n",
-      "fn __ps_array_foldl<A: Clone, B: Clone>(f: std::rc::Rc<dyn Fn(B, A) -> B>, init: &B, array: &Vec<A>, start: &PsNat, stop: &PsNat) -> B { let size = PsNat::from(array.len()); let end = if stop <= &size { stop.clone() } else { size }; let mut index = start.clone(); let mut acc = init.clone(); while index < end { let i = index.to_usize().expect(\"bounded Array fold index fits usize\"); acc = f(acc, array[i].clone()); index += PsNat::from(1u8); } acc }\n"
-    ]
+pub(super) fn __ps_float32_of_bits(bits: u32) -> f32 {
+    let value = f32::from_bits(bits);
+    if value.is_nan() { f32::from_bits(0x7fc00000) } else { value }
+}
+pub(super) fn __ps_float32_to_bits(value: f32) -> u32 {
+    if value.is_nan() { 0x7fc00000 } else { value.to_bits() }
+}
+
+pub(super) fn __ps_float64_of_bits(bits: u64) -> f64 {
+    let value = f64::from_bits(bits);
+    if value.is_nan() { f64::from_bits(0x7ff8000000000000) } else { value }
+}
+pub(super) fn __ps_float64_to_bits(value: f64) -> u64 {
+    if value.is_nan() { 0x7ff8000000000000 } else { value.to_bits() }
+}
+
+// Adapted from Lean 4.35.0 runtime/hash.h and hash.cpp (Microsoft, Apache-2.0).
+// Canonical little-endian MurmurHash2 bytes; pair mixing uses Lean's XOR step.
+const HASH_MULTIPLIER: u64 = 0xc6a4a7935bd1e995;
+pub(super) fn __ps_hash_mix(seed: u64, mut key: u64) -> u64 {
+    key = key.wrapping_mul(HASH_MULTIPLIER);
+    key ^= key >> 47;
+    key ^= HASH_MULTIPLIER;
+    (seed ^ key).wrapping_mul(HASH_MULTIPLIER)
+}
+pub(super) fn __ps_string_hash(text: &str) -> u64 {
+    let bytes = text.as_bytes();
+    let mut hash = 11 ^ (bytes.len() as u64).wrapping_mul(HASH_MULTIPLIER);
+    let mut chunks = bytes.chunks_exact(8);
+    for chunk in &mut chunks {
+        let mut key = u64::from_le_bytes(chunk.try_into().expect("eight-byte chunk"));
+        key = key.wrapping_mul(HASH_MULTIPLIER);
+        key ^= key >> 47;
+        key = key.wrapping_mul(HASH_MULTIPLIER);
+        hash = (hash ^ key).wrapping_mul(HASH_MULTIPLIER);
+    }
+    let tail = chunks.remainder();
+    for (index, byte) in tail.iter().enumerate() {
+        hash ^= (*byte as u64) << (index * 8);
+    }
+    if !tail.is_empty() { hash = hash.wrapping_mul(HASH_MULTIPLIER); }
+    hash ^= hash >> 47;
+    hash = hash.wrapping_mul(HASH_MULTIPLIER);
+    hash ^ (hash >> 47)
+}
+
+pub type PsArray<T> = Rc<Vec<T>>;
+
+pub(super) fn __ps_nat_lit(text: &str) -> PsNat {
+    PsNat::from_str(text).expect("valid generated Nat literal")
+}
+pub(super) fn __ps_int_lit(text: &str) -> PsInt {
+    PsInt::from_str(text).expect("valid generated Int literal")
+}
+
+// Counts remain arbitrary-precision. Oversized right shifts return zero before
+// machine conversion; an unallocatable left result is a resource failure.
+pub(super) fn __ps_nat_shift_left(a: &PsNat, b: &PsNat) -> PsNat {
+    if a.is_zero() { return PsNat::zero(); }
+    a << b.to_usize().expect("Nat left-shift result exceeds addressable memory")
+}
+pub(super) fn __ps_nat_shift_right(a: &PsNat, b: &PsNat) -> PsNat {
+    if b >= &PsNat::from(a.bits()) { return PsNat::zero(); }
+    a >> b.to_usize().expect("bounded Nat shift count")
+}
+pub(super) fn __ps_int_pow(a: &PsInt, b: &PsNat) -> PsInt {
+    let magnitude = PsInt::from(__ps_nat_pow(a.magnitude(), b));
+    if a.sign() == num_bigint::Sign::Minus && b.bit(0) { -magnitude } else { magnitude }
+}
+
+pub(super) fn __ps_nat_add(a: &PsNat, b: &PsNat) -> PsNat { a + b }
+pub(super) fn __ps_nat_sub(a: &PsNat, b: &PsNat) -> PsNat {
+    if a >= b { a - b } else { PsNat::zero() }
+}
+pub(super) fn __ps_nat_mul(a: &PsNat, b: &PsNat) -> PsNat { a * b }
+pub(super) fn __ps_nat_pow(base: &PsNat, exponent: &PsNat) -> PsNat {
+    let mut base = base.clone();
+    let mut exponent = exponent.clone();
+    let mut result = PsNat::from(1u8);
+    while !exponent.is_zero() {
+        if exponent.bit(0) { result *= &base; }
+        exponent >>= 1usize;
+        if !exponent.is_zero() { base = &base * &base; }
+    }
+    result
+}
+pub(super) fn __ps_nat_div(a: &PsNat, b: &PsNat) -> PsNat {
+    if b.is_zero() { PsNat::zero() } else { a / b }
+}
+pub(super) fn __ps_nat_mod(a: &PsNat, b: &PsNat) -> PsNat {
+    if b.is_zero() { a.clone() } else { a % b }
+}
+pub(super) fn __ps_int_to_nat(value: &PsInt) -> PsNat {
+    value.to_biguint().unwrap_or_else(PsNat::zero)
+}
+pub(super) fn __ps_int_of_nat(value: &PsNat) -> PsInt { PsInt::from(value.clone()) }
+pub(super) fn __ps_int_neg_succ(value: &PsNat) -> PsInt {
+    -(PsInt::from(value.clone()) + PsInt::from(1u8))
+}
+pub(super) fn __ps_int_neg(value: &PsInt) -> PsInt { -value }
+pub(super) fn __ps_int_add(a: &PsInt, b: &PsInt) -> PsInt { a + b }
+pub(super) fn __ps_int_sub(a: &PsInt, b: &PsInt) -> PsInt { a - b }
+pub(super) fn __ps_int_mul(a: &PsInt, b: &PsInt) -> PsInt { a * b }
+pub(super) fn __ps_char_of_nat(value: &PsNat) -> char {
+    value.to_u32().and_then(char::from_u32).unwrap_or('\0')
+}
+pub(super) fn __ps_char_to_nat(value: char) -> PsNat { PsNat::from(value as u32) }
+pub(super) fn __ps_string_push(mut left: String, right: char) -> String {
+    left.push(right);
+    left
+}
+pub(super) fn __ps_string_singleton(value: char) -> String { value.to_string() }
+pub(super) fn __ps_string_length(value: &String) -> PsNat {
+    PsNat::from(value.chars().count())
+}
+pub(super) fn __ps_string_append(mut left: String, right: &String) -> String {
+    left.push_str(right);
+    left
+}
+pub(super) fn __ps_string_utf8_byte_size(value: &String) -> PsNat {
+    PsNat::from(value.len())
+}
+pub(super) fn __ps_string_next(value: &String, position: &PsNat) -> PsNat {
+    let next = position.to_usize()
+        .and_then(|i| value.get(i..))
+        .and_then(|rest| rest.chars().next());
+    position + PsNat::from(next.map_or(1, char::len_utf8))
+}
+pub(super) fn __ps_string_get(value: &String, position: &PsNat) -> char {
+    position.to_usize()
+        .and_then(|i| value.get(i..))
+        .and_then(|rest| rest.chars().next())
+        .unwrap_or('A')
+}
+pub(super) fn __ps_string_at_end(value: &String, position: &PsNat) -> bool {
+    position >= &PsNat::from(value.len())
+}
+pub(super) fn __ps_string_extract(value: &String, begin: &PsNat, end: &PsNat) -> String {
+    if begin >= end { return String::new(); }
+    let rest = match begin.to_usize().and_then(|i| value.get(i..)) {
+        Some(rest) => rest,
+        None => return String::new(),
+    };
+    let mut index = begin.clone();
+    let mut out = String::new();
+    for c in rest.chars() {
+        if &index == end { break; }
+        out.push(c);
+        index += PsNat::from(c.len_utf8());
+    }
+    out
+}
+pub(super) fn __ps_string_to_utf8(value: &String) -> PsArray<u8> {
+    Rc::new(value.as_bytes().to_vec())
+}
+pub(super) fn __ps_utf8_valid(value: &PsArray<u8>) -> bool {
+    std::str::from_utf8(value.as_slice()).is_ok()
+}
+pub(super) fn __ps_utf8_decode(value: &PsArray<u8>) -> String {
+    std::str::from_utf8(value.as_slice()).unwrap_or("").to_owned()
+}
+pub(super) fn __ps_string_eq(left: &String, right: &String) -> bool { left == right }
+pub(super) fn __ps_array_empty_with_capacity<T>(capacity: &PsNat) -> PsArray<T> {
+    Rc::new(Vec::with_capacity(capacity.to_usize().unwrap_or(0)))
+}
+// This builder owns its unpublished Vec; no persistent prefix is copied.
+pub(super) fn __ps_array_build<T, S: Clone>(
+    count: &PsNat, mut state: S,
+    head: Rc<dyn Fn(S) -> T>, tail: Rc<dyn Fn(S) -> S>,
+) -> PsArray<T> {
+    let count = count.to_usize().expect("Array allocation size fits usize");
+    let mut result = Vec::with_capacity(count);
+    for _ in 0..count {
+        result.push(head(state.clone()));
+        state = tail(state);
+    }
+    Rc::new(result)
+}
+pub(super) fn __ps_array_size<T>(value: &PsArray<T>) -> PsNat { PsNat::from(value.len()) }
+pub(super) fn __ps_array_push<T: Clone>(mut array: PsArray<T>, value: T) -> PsArray<T> {
+    Rc::make_mut(&mut array).push(value);
+    array
+}
+pub(super) fn __ps_array_get<T: Clone>(array: &PsArray<T>, index: &PsNat) -> T {
+    let i = index.to_usize().expect("proved Array index fits usize");
+    array[i].clone()
+}
+pub(super) fn __ps_array_get_d<T: Clone>(array: &PsArray<T>, index: &PsNat, fallback: &T) -> T {
+    if index >= &PsNat::from(array.len()) {
+        fallback.clone()
+    } else {
+        array[index.to_usize().expect("bounded Array index fits usize")].clone()
+    }
+}
+pub(super) fn __ps_array_set<T: Clone>(
+    mut array: PsArray<T>, index: &PsNat, value: T,
+) -> PsArray<T> {
+    let i = index.to_usize().expect("proved Array index fits usize");
+    Rc::make_mut(&mut array)[i] = value;
+    array
+}
+pub(super) fn __ps_array_set_if_in_bounds<T: Clone>(
+    mut array: PsArray<T>, index: &PsNat, value: T,
+) -> PsArray<T> {
+    if index < &PsNat::from(array.len()) {
+        let i = index.to_usize().expect("bounded Array index fits usize");
+        Rc::make_mut(&mut array)[i] = value;
+    }
+    array
+}
+pub(super) fn __ps_array_map<A: Clone, B>(
+    f: Rc<dyn Fn(A) -> B>, array: &PsArray<A>,
+) -> PsArray<B> {
+    Rc::new(array.iter().cloned().map(|value| f(value)).collect())
+}
+pub(super) fn __ps_array_filter<A: Clone>(
+    predicate: Rc<dyn Fn(A) -> bool>, array: &PsArray<A>,
+    start: &PsNat, stop: &PsNat,
+) -> PsArray<A> {
+    let size = PsNat::from(array.len());
+    let begin = start.min(&size).to_usize().expect("bounded Array start fits usize");
+    let end = stop.min(&size).to_usize().expect("bounded Array stop fits usize");
+    let mut result = Vec::with_capacity(end.saturating_sub(begin));
+    for index in begin..end {
+        let value = array[index].clone();
+        if predicate(value.clone()) {
+            result.push(value);
+        }
+    }
+    Rc::new(result)
+}
+pub(super) fn __ps_array_foldl<A: Clone, B: Clone>(
+    f: Rc<dyn Fn(B, A) -> B>, init: &B, array: &PsArray<A>,
+    start: &PsNat, stop: &PsNat,
+) -> B {
+    let size = PsNat::from(array.len());
+    let end = if stop <= &size { stop.clone() } else { size };
+    let mut index = start.clone();
+    let mut acc = init.clone();
+    while index < end {
+        let i = index.to_usize().expect("bounded Array fold index fits usize");
+        acc = f(acc, array[i].clone());
+        index += PsNat::from(1u8);
+    }
+    acc
+}
+"#

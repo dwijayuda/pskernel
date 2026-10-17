@@ -1,0 +1,19 @@
+{
+  "version": "1.3.0",
+  "packagesDir": ".lake/packages",
+  "packages": [
+    {
+      "type": "path",
+      "name": "proofscriptSelfhost",
+      "scope": "",
+      "configFile": "lakefile.lean",
+      "manifestFile": "lake-manifest.json",
+      "inherited": false,
+      "dir": "..",
+      "copy": false
+    }
+  ],
+  "name": "pscv0Native",
+  "lakeDir": ".lake",
+  "fixedToolchain": true
+}

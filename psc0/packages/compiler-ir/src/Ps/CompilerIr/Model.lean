@@ -41,6 +41,55 @@ inductive PsVerifiedIrMachineIntegerType where
   | int64
   | isize
 
+def psIrMachineIntegerFixedWidth : PsVerifiedIrMachineIntegerType → Option Nat
+  | .uint8 | .int8 => some 8
+  | .uint16 | .int16 => some 16
+  | .uint32 | .int32 => some 32
+  | .uint64 | .int64 => some 64
+  | .usize | .isize => none
+
+def psIrMachineIntegerIsSigned : PsVerifiedIrMachineIntegerType → Bool
+  | .int8 | .int16 | .int32 | .int64 | .isize => true
+  | _ => false
+
+-- Lean 4.35.0 Init/System/Platform.lean proves that the native
+-- platform word width is either 32 or 64 bits. The compiler must select
+-- its *target* width explicitly; never infer the build host's width.
+inductive PsVerifiedIrWordSize where
+  | bits32
+  | bits64
+
+def psIrWordSizeBits : PsVerifiedIrWordSize → Nat
+  | .bits32 => 32
+  | .bits64 => 64
+
+-- A target-sized integer has NO canonical width when the target is
+-- absent. Fixed-width integers remain target-independent.
+def psIrMachineIntegerWidthWithTarget
+    (wordSize : Option PsVerifiedIrWordSize)
+    (type : PsVerifiedIrMachineIntegerType) : Option Nat :=
+  match type with
+  | .usize | .isize => wordSize.map psIrWordSizeBits
+  | _ => psIrMachineIntegerFixedWidth type
+
+-- One exact range predicate, shared by the checked IR and backend lowering.
+-- The representation uses canonical signed values, not wrapped source Nat
+-- literals or a silently inferred 64-bit platform.
+def psIrMachineIntegerLiteralInRangeWithTarget
+    (wordSize : Option PsVerifiedIrWordSize)
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) : Bool :=
+  match psIrMachineIntegerWidthWithTarget wordSize type with
+  | none => false
+  | some bits =>
+      if psIrMachineIntegerIsSigned type then
+        let bound : Int := Int.ofNat (2 ^ (bits - 1))
+        decide (-bound ≤ value ∧ value < bound)
+      else
+        decide (0 ≤ value ∧ value < Int.ofNat (2 ^ bits))
+
+-- Division truncates toward zero; /0 = 0 and %0 = the dividend.
+-- Shifts reduce their second operand modulo the value width.
 inductive PsVerifiedIrIntegerBinaryOp where
   | add
   | sub
@@ -48,6 +97,10 @@ inductive PsVerifiedIrIntegerBinaryOp where
   | bitAnd
   | bitOr
   | bitXor
+  | div
+  | mod
+  | shiftLeft
+  | shiftRight
 
 inductive PsVerifiedIrIntegerCompareOp where
   | eq
@@ -66,6 +119,15 @@ inductive PsVerifiedIrFloatBinaryOp where
   | sub
   | mul
   | div
+
+inductive PsVerifiedIrFloatUnaryOp where
+  | neg
+  | abs
+
+inductive PsVerifiedIrFloatTestOp where
+  | isNaN
+  | isInf
+  | isFinite
 
 inductive PsVerifiedIrFloatCompareOp where
   | eq
@@ -86,12 +148,26 @@ inductive PsVerifiedIrLiteral where
   | unit
 
 inductive PsVerifiedIrIntrinsic where
+  | hashMix
+  | stringHash
+  | unsignedOfNat (type : PsVerifiedIrMachineIntegerType)
+  | signedOfNat (type : PsVerifiedIrMachineIntegerType)
+  | signedToUnsigned (type : PsVerifiedIrMachineIntegerType)
+  | unsignedToNat (type : PsVerifiedIrMachineIntegerType)
   | machineIntBinary
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerBinaryOp)
   | machineIntCompare
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerCompareOp)
+  -- Fixed-width IEEE conversion; nearest-even to floats, saturating/truncating to words.
+  | floatConvert (source target : PsVerifiedIrFloatingType)
+  | floatOfWord (type : PsVerifiedIrFloatingType) (word : PsVerifiedIrMachineIntegerType)
+  | floatToWord (type : PsVerifiedIrFloatingType) (word : PsVerifiedIrMachineIntegerType)
+  | floatOfBits (type : PsVerifiedIrFloatingType)
+  | floatToBits (type : PsVerifiedIrFloatingType)
+  | floatUnary (type : PsVerifiedIrFloatingType) (operation : PsVerifiedIrFloatUnaryOp)
+  | floatTest (type : PsVerifiedIrFloatingType) (operation : PsVerifiedIrFloatTestOp)
   | floatBinary
       (type : PsVerifiedIrFloatingType)
       (operation : PsVerifiedIrFloatBinaryOp)
@@ -101,6 +177,11 @@ inductive PsVerifiedIrIntrinsic where
   | natAdd
   | natSub
   | natMul
+  | natShiftLeft
+  | natShiftRight
+  | intPow
+  | natPow
+  | natLog2
   | natDiv
   | natMod
   | natEq
@@ -109,6 +190,7 @@ inductive PsVerifiedIrIntrinsic where
   | natLt
   | intOfNat
   | intRepr
+  | intToNat
   | intNegSucc
   | intNeg
   | intAdd
@@ -133,7 +215,12 @@ inductive PsVerifiedIrIntrinsic where
   | stringGet
   | stringAtEnd
   | stringExtract
+  | stringToUtf8
+  | utf8Valid
+  | utf8Decode
   | stringEq
+  -- Sized pure sequence builder; mutable storage never escapes before completion.
+  | arrayBuild
   | arrayEmptyWithCapacity
   | arraySize
   | arrayPush
@@ -142,6 +229,7 @@ inductive PsVerifiedIrIntrinsic where
   | arraySet
   | arraySetIfInBounds
   | arrayMap
+  | arrayFilter
   | arrayFoldl
 
 structure PsVerifiedIrParameter where
@@ -154,6 +242,8 @@ structure PsVerifiedIrMatchBinding where
   type : PsVerifiedIrType
 
 inductive PsVerifiedIrExpr where
+  | unreachable (resultType : PsVerifiedIrType)
+  | panic (message : String) (resultType : PsVerifiedIrType)
   | literal (value : PsVerifiedIrLiteral)
   | var (name : String)
   | intrinsic
@@ -240,10 +330,16 @@ structure PsVerifiedIrExternalImport where
   type : PsVerifiedIrType
 
 structure PsVerifiedIrModule where
+  -- Conservative pre-erasure evidence for safe structural foreign values.
+  -- Empty/absent metadata never authorizes a named aggregate export.
+  foreignData : List (String × Bool) := []
   imports : List PsVerifiedIrExternalImport
   structures : List PsVerifiedIrStructure
   inductives : List PsVerifiedIrInductive
   declarations : List PsVerifiedIrDeclaration
+  -- Internal checked support symbols remain reachable but are never selected
+  -- as the application's public API.
+  internalNames : List String := []
 
 def psVerifiedIrModuleEmpty : PsVerifiedIrModule :=
   {

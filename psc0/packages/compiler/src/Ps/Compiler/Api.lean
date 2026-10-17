@@ -3,12 +3,14 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.SelfHostProd
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
+import Ps.Compiler.RecursorLift
 
 inductive PsCompilerSourceKind where
   | lean
   | proofScript
 
 inductive PsCompilerError where
+  | normalization (message : String)
   | translation (error : PsTranslationError)
   | leanFrontend (error : PsLeanFrontendError)
   | proofScriptFrontend (error : PsProofScriptFrontendError)
@@ -18,6 +20,9 @@ inductive PsCompilerError where
 
 structure PsCompilerAdmissionReadyModule where
   declarations : List PsDeclaration
+  -- Locators for ordinary definitions retained in declarations, never checker
+  -- authority. Erasure validates every complete companion equation afresh.
+  recursorWorkerGroups : List PsRecursorWorkerGroup := []
 
 -- A preparation checkpoint is local to one compiler instance. Keep the complete
 -- environment and declaration accumulator together; neither is a checked claim.
@@ -32,10 +37,22 @@ structure PsCompilerPreparationOutput where
   prepared : PsCompilerAdmissionReadyModule
   environment : PsEnvironment
   admissions : String
+  originParents : List (PsName × PsName) := []
 
 structure PsCompilerPreparationStepWithOriginsResult where
   state : PsCompilerPreparationState
   origins : List PsElabBatchOrigin
+
+-- Check the retained partial implementation as an ordinary opaque body,
+-- AFTER its separately inhabited public logical identity. This is a checking
+-- view only: retain the original strategy marker in the prepared graph.
+-- No body equation, runtime override, unchecked admission or new axiom is
+-- introduced. An invalid self-reference is still rejected by the kernel.
+def psCompilerLogicalCheckingView (declarations : List PsDeclaration) : List PsDeclaration :=
+  declarations.map fun declaration =>
+    match declaration with
+    | .partialDecl name levels type value => .opaqueDecl name levels type value
+    | _ => declaration
 
 def psCompilerTranslateSource
     (sourceKind targetKind : PsCompilerSourceKind)
@@ -100,18 +117,21 @@ def psCompilerElaborateSource
 
 def psCompilerPrepareElaboratedWithOutput
     (elaborated : PsElabModuleResult) :
-    Except PsCompilerError PsCompilerPreparationOutput :=
+    Except PsCompilerError PsCompilerPreparationOutput := do
+  let lifted ← (psRecursorLiftDeclarationsWithOrigins elaborated.environment
+    elaborated.declarations).mapError PsCompilerError.normalization
+  let elaborated := lifted.result
   match
-      psEncodeCheckedAdmissionsCanonical
-        elaborated.declarations with
+      psEncodeCheckedAdmissionsCanonicalIn elaborated.environment
+        (psCompilerLogicalCheckingView elaborated.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
       let prepared : PsCompilerAdmissionReadyModule :=
-        PsCompilerAdmissionReadyModule.mk elaborated.declarations;
+        { declarations := elaborated.declarations, recursorWorkerGroups := lifted.workerGroups };
       let admissions : String := String.Internal.append canonicalAdmissions "\n";
       Except.ok
-        (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions)
+        (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions lifted.parents)
 
 def psCompilerPrepareElaborated
     (elaborated : PsElabModuleResult) :
@@ -233,8 +253,8 @@ def psCompilerValidatePrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError Unit :=
   match
-      psEncodeCheckedAdmissionsCanonical
-        prepared.declarations with
+      psEncodeCheckedAdmissionsCanonicalIn psSelfHostProdPreludeEnvironment
+        (psCompilerLogicalCheckingView prepared.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok _ =>
@@ -243,7 +263,8 @@ def psCompilerValidatePrepared
 def psCompilerAdmissionsFromPrepared
     (prepared : PsCompilerAdmissionReadyModule) :
     Except PsCompilerError String :=
-  match psEncodeCheckedAdmissionsCanonical prepared.declarations with
+  match psEncodeCheckedAdmissionsCanonicalIn psSelfHostProdPreludeEnvironment
+      (psCompilerLogicalCheckingView prepared.declarations) with
   | Except.error error =>
       Except.error (PsCompilerError.admission error)
   | Except.ok canonicalAdmissions =>
@@ -284,38 +305,109 @@ def psCompilerEnvironmentFromPrepared
       | Except.ok environment =>
           Except.ok environment
 
+-- The official checker sees the public independently inhabited opaque
+-- declaration, and the private actual source body through a separately
+-- checked opaque implementation marker. For *ordinary execution only*,
+-- connect that actual body to the public runtime name. This transformation
+-- is not a new proof equation and must never replace the canonical checked
+-- Core graph or be called to authorize verified emission.
+def psCompilerOrdinaryPartialRuntimeDeclarations
+    (declarations : List PsDeclaration) :
+    Except PsCompilerError (List PsDeclaration) := do
+  let implementations := declarations.filter fun declaration =>
+    match declaration with | .partialDecl .. => true | _ => false
+  for implementation in implementations do
+    let .partialDecl privateName levels type _ := implementation
+      | throw (.normalization "PSCV0-PARTIAL: malformed implementation marker")
+    let owners := declarations.filter fun declaration =>
+      match declaration with
+      | .opaqueDecl name .. => psNameEq (PsName.num name 0) privateName
+      | _ => false
+    match owners with
+    | [.opaqueDecl _ publicLevels publicType _] =>
+        if levels.length != publicLevels.length ||
+            !(levels.zip publicLevels).all (fun pair =>
+              psNameEq pair.fst pair.snd) ||
+            !psExprAlphaEq type publicType then
+          throw (.normalization "PSCV0-PARTIAL: private implementation/type mismatch")
+    | _ => throw (.normalization "PSCV0-PARTIAL: missing unique opaque logical owner")
+  return declarations.filterMap fun declaration =>
+    match declaration with
+    | .partialDecl .. => none
+    | .opaqueDecl name levels type _ =>
+        let candidate := implementations.find? fun implementation =>
+          match implementation with
+          | .partialDecl privateName .. =>
+              psNameEq (PsName.num name 0) privateName
+          | _ => false
+        match candidate with
+        | some (.partialDecl _ _ _ body) =>
+            some (.definitionDecl name levels type body)
+        | _ => some declaration
+    | _ => some declaration
+
+-- Host-owned execution may erase a runtime representation ONLY after it
+-- checked the ORIGINAL canonical logical admissions with Lean 4.35.0.
+-- Keep the source logical environment; change only the runtime declaration
+-- bodies/identities passed to erasure. The resulting IR still requires the
+-- full typed validator and backend capability checks.
+def psCompilerErasePreparedRuntimeView
+    (prepared : PsCompilerAdmissionReadyModule)
+    (runtimeDeclarations : List PsDeclaration)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
+    Except PsCompilerError PsVerifiedIrModule := do
+  let environment ← psCompilerEnvironmentFromPrepared prepared
+  let runtimePrelude := psSelfHostRuntimePreludeDeclarationsWithProd ++
+    (if targetWordSize.isSome then psStandardPlatformRuntimeDeclarations ++
+      psStandardOperatorProtocolRuntimeDeclarations environment true else [])
+  (psEraseCoreModuleWithRuntimePrelude
+    environment
+    runtimePrelude
+    runtimeDeclarations
+    (runtimePrelude.map psDeclarationName ++ prepared.recursorWorkerGroups.flatMap
+      (fun group => group.workers.map (·.name))) targetWordSize
+    prepared.recursorWorkerGroups).mapError
+      PsCompilerError.erasure
+
+-- Ordinary partial execution only. The native host must have already
+-- independently kernel-accepted psCompilerLogicalCheckingView on the exact
+-- original prepared graph. A caller cannot mint proof authority via this API.
+def psCompilerOrdinaryPartialIrFromCheckedPrepared
+    (prepared : PsCompilerAdmissionReadyModule)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
+    Except PsCompilerError PsVerifiedIrModule := do
+  let runtime ← psCompilerOrdinaryPartialRuntimeDeclarations prepared.declarations
+  psCompilerErasePreparedRuntimeView prepared runtime targetWordSize
+
 def psCompilerVerifiedIrFromPrepared
-    (prepared : PsCompilerAdmissionReadyModule) :
-    Except PsCompilerError PsVerifiedIrModule :=
-  match psCompilerEnvironmentFromPrepared prepared with
-  | Except.error error =>
-      Except.error error
-  | Except.ok environment =>
-      match
-          psEraseCoreModuleWithRuntimePrelude
-            environment
-            psSelfHostRuntimePreludeDeclarationsWithProd
-            prepared.declarations with
-      | Except.error error =>
-          Except.error (PsCompilerError.erasure error)
-      | Except.ok ir =>
-          Except.ok ir
+    (prepared : PsCompilerAdmissionReadyModule)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
+    Except PsCompilerError PsVerifiedIrModule := do
+  -- The general source/library API must remain fail-closed for partial
+  -- implementations. Only the native host's explicitly ordinary runtime
+  -- path may lower the paired body, after real official kernel admission.
+  if prepared.declarations.any (fun declaration =>
+      match declaration with | .partialDecl .. => true | _ => false) then
+    throw (.normalization "PSCV0-PARTIAL-RUNTIME-PENDING: partial logical checking does not admit executable output")
+  psCompilerErasePreparedRuntimeView prepared prepared.declarations targetWordSize
 
 def psCompilerVerifiedIrFromElaborated
-    (elaborated : PsElabModuleResult) :
+    (elaborated : PsElabModuleResult)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule :=
   match psCompilerPrepareElaborated elaborated with
   | Except.error error =>
       Except.error error
   | Except.ok prepared =>
-      psCompilerVerifiedIrFromPrepared prepared
+      psCompilerVerifiedIrFromPrepared prepared targetWordSize
 
 def psCompilerVerifiedIrSource
     (sourceKind : PsCompilerSourceKind)
-    (source : String) :
+    (source : String)
+    (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule :=
   match psCompilerPrepareSource sourceKind source with
   | Except.error error =>
       Except.error error
   | Except.ok prepared =>
-      psCompilerVerifiedIrFromPrepared prepared
+      psCompilerVerifiedIrFromPrepared prepared targetWordSize

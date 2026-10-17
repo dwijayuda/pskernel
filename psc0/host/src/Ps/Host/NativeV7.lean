@@ -1,0 +1,433 @@
+import Ps.Compiler.Pscv0Modules
+import Ps.BackendTs.Readable
+import Ps.BackendRust.Module
+import Ps.BackendWasm.Module
+import Ps.CompilerIr.Checked
+import Ps.Codegen.Api
+import Ps.Codegen.Provenance
+import PsKernelLean.Protocol
+import PsKernelLean.Prelude
+
+open Lean (toJson)
+
+namespace PsV7Native
+
+-- Shared by diagnostics and the executable version response.
+def profile : String := "pscv0-v7-native-bounded/73"
+
+def leanVersion : String := "4.35.0"
+def leanCommit : String := "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+
+structure Diagnostic where
+  phase : String
+  message : String
+  deriving Repr
+
+-- Ordinary vs verified must be an explicit host-owned request, never
+-- inferred from whether a partial body happened to typecheck.
+inductive Assurance where
+  | ordinaryChecked
+  | closedVerified
+  | boundaryQualifiedVerified
+
+def assuranceLabel : Assurance → String
+  | .ordinaryChecked => "ordinary-checked"
+  | .closedVerified => "closed-verified"
+  | .boundaryQualifiedVerified => "boundary-qualified-verified"
+
+def parseAssuranceLabel : String → Except String Assurance
+  | "ordinary-checked" => .ok .ordinaryChecked
+  | "closed-verified" => .ok .closedVerified
+  | "boundary-qualified-verified" => .ok .boundaryQualifiedVerified
+  | _ => .error "PSCV0-ASSURANCE-OPTION: expected ordinary-checked, closed-verified or boundary-qualified-verified"
+
+-- Parse host options before reading input files or requesting any artifacts.
+-- The existing ordinary development default is explicit here; a supplied
+-- verified grade is retained unchanged and must reach the assurance gate.
+structure CliOptions where
+  assurance : Assurance := .ordinaryChecked
+  targetWordSize : Option PsVerifiedIrWordSize := none
+  arguments : List String
+
+private def parseCliOptionsAux : List String → Option Assurance →
+    Option PsVerifiedIrWordSize → Except String CliOptions
+  | "--assurance" :: value :: rest, assurance, targetWordSize => do
+    if assurance.isSome then
+      throw "PSCV0-ASSURANCE-OPTION: duplicate --assurance"
+    let selected ← parseAssuranceLabel value
+    parseCliOptionsAux rest (some selected) targetWordSize
+  | ["--assurance"], _, _ =>
+    .error "PSCV0-ASSURANCE-OPTION: missing assurance value"
+  | "--word-size" :: value :: rest, assurance, targetWordSize => do
+    if targetWordSize.isSome then
+      throw "PSCV0-TARGET-WORD-SIZE: duplicate --word-size"
+    let selected ← match value with
+      | "32" => pure PsVerifiedIrWordSize.bits32
+      | "64" => pure PsVerifiedIrWordSize.bits64
+      | _ => throw "PSCV0-TARGET-WORD-SIZE: expected 32 or 64"
+    parseCliOptionsAux rest assurance (some selected)
+  | ["--word-size"], _, _ =>
+    .error "PSCV0-TARGET-WORD-SIZE: expected 32 or 64"
+  | arguments, assurance, targetWordSize => do
+    if arguments.contains "--assurance" then
+      throw "PSCV0-ASSURANCE-OPTION: --assurance must precede the command"
+    if arguments.contains "--word-size" then
+      throw "PSCV0-TARGET-WORD-SIZE: --word-size must precede the command"
+    return { assurance := assurance.getD .ordinaryChecked, targetWordSize, arguments }
+
+def parseCliOptions (arguments : List String) : Except String CliOptions :=
+  parseCliOptionsAux arguments none none
+
+structure Request where
+  source : String
+  assurance : Assurance := .ordinaryChecked
+  sourceName : String := "application.ps"
+  outputStem : String := "module"
+  targets : List PsEmissionTarget := []
+  targetWordSize : Option PsVerifiedIrWordSize := none
+  exports : PsApiExposure := .allRuntime
+  -- Optional explicitly named source dependencies. Empty preserves the
+  -- original isolated single-file entry point and its strict import refusal.
+  moduleName : String := "Main"
+  modules : List PsPscv0ModuleSource := []
+
+structure Timings where
+  parseMs : Nat := 0
+  elaborateMs : Nat := 0
+  prepareMs : Nat := 0
+  kernelMs : Nat := 0
+  eraseMs : Nat := 0
+  emitMs : Nat := 0
+
+-- Successful source diagnostics retain their own file and exact source span.
+structure SourceDiagnostic where
+  sourceName : String
+  diagnostic : PsDiagnostic
+
+structure Result where
+  diagnostics : List SourceDiagnostic := []
+  assurance : Assurance := .ordinaryChecked
+  moduleProfiles : List PsPscv0ModuleProfile := []
+  declarationCount : Nat
+  artifacts : List PsEmissionArtifact
+  timings : Timings
+  targetWordSize : Option PsVerifiedIrWordSize := none
+
+structure Batch where
+  preludeMs : Nat
+  results : Array (Except Diagnostic Result)
+
+private def mutualGroupOriginJson (group : PsSourceMutualGroupOrigin) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("firstSourceIndex", toJson group.firstSourceIndex),
+    ("memberIndex", toJson group.memberIndex),
+    ("memberCount", toJson group.memberCount),
+    ("sourceStartByte", toJson group.span.start.byteOffset),
+    ("sourceEndByte", toJson group.span.stop.byteOffset)]
+
+private def localDefinitionOriginJson (localOrigin : PsSourceLocalDefinitionOrigin) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("semantic", toJson localOrigin.name),
+    ("sourceStartByte", toJson localOrigin.span.start.byteOffset),
+    ("sourceEndByte", toJson localOrigin.span.stop.byteOffset),
+    ("declarations", toJson localOrigin.declarations)]
+
+-- Used by CLI publication and fixture inspection of the same emitted origins.
+-- Per-member source coordinates and complete mutual-command ownership survive
+-- all target backends; neither is reconstructed from generated symbols.
+def sourceOriginJson (name : String) (origin : PsSourceOrigin) : Lean.Json :=
+  let fields := [
+    ("semantic", toJson name), ("file", toJson origin.identity.file),
+    ("sourceStartByte", toJson origin.span.start.byteOffset),
+    ("sourceEndByte", toJson origin.span.stop.byteOffset),
+    ("generatedReason", toJson origin.generatedReason)]
+  let sourceIndex := if origin.mutualGroup.isSome || !origin.localDefinitions.isEmpty then
+    [("sourceIndex", toJson origin.sourceIndex)] else []
+  let mutualGroup := match origin.mutualGroup with
+    | none => []
+    | some group => [("mutualGroup", mutualGroupOriginJson group)]
+  let localDefinitions := if origin.localDefinitions.isEmpty then [] else
+    [("localDefinitions", Lean.Json.arr (origin.localDefinitions.map localDefinitionOriginJson).toArray)]
+  Lean.Json.mkObj (fields ++ sourceIndex ++ mutualGroup ++ localDefinitions)
+
+-- Emission and source-oracle fixtures use this same mapping. Helper ownership
+-- is an elaborator result, never inferred from a generated name suffix.
+def sourceOriginsForBatch (fileName : String) (batch : PsElabBatchOrigin) :
+    List (String × PsSourceOrigin) :=
+  let localDefinitions := batch.localDefinitions.map fun localOrigin => {
+    name := psNameToString localOrigin.name
+    span := localOrigin.span
+    declarations := localOrigin.declarations.map psNameToString : PsSourceLocalDefinitionOrigin }
+  batch.members.map fun member =>
+    let localOrigin := batch.localDefinitions.find? fun localOrigin =>
+      localOrigin.declarations.any (psNameEq member.name)
+    (psNameToString member.name, {
+      identity := { file := fileName, declaration := psNameToString member.name }
+      span := (localOrigin.map (·.span)).getD batch.span
+      sourceIndex := some batch.sourceIndex
+      mutualGroup := batch.mutualGroup.map fun group => {
+        firstSourceIndex := group.firstSourceIndex
+        memberIndex := group.memberIndex
+        memberCount := group.memberCount
+        span := group.span }
+      localDefinitions
+      generatedReason := match member.role with
+        | .sourceDeclaration | .inductiveType | .structureType => none
+        | _ => some "elaboration member of source declaration" : PsSourceOrigin })
+
+private def fromResult {α : Type} (phase : String)
+    (result : Except String α) : ExceptT Diagnostic IO α :=
+  match result with
+  | .ok value => pure value
+  | .error message => throw { phase, message }
+
+-- Use the established canonical bridge, including nested-recursion adaptation.
+-- Kernel submission is synchronous and explicitly enables checking.
+-- No elaborator recovery, unchecked admission, or alternate checker fallback.
+private def check (prelude : Lean.Kernel.Environment) (admissions : String)
+    (heartbeatDeadline : USize) : Except String Unit := do
+  let declarations ← (PsKernelLean.decodeCanonicalAdmissions admissions).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message)
+  let mut environment := prelude
+  for original in declarations do
+    -- Source definitions use the same Lean kernel lazy-delta strategy as the
+    -- checked Standard, but keep finite 2m/20k admission budgets and fail closed.
+    let declaration := PsKernelLean.psKernelWithDefinitionHeight environment original
+    match environment.addDeclCore heartbeatDeadline 20000 declaration none with
+    | .ok next => environment := next
+    | .error error =>
+      -- Preserve the exact rejected declaration and kernel category. This is
+      -- diagnostic evidence, not an alternate admission or retry path.
+      let names := String.intercalate "," (declaration.getNames.map toString)
+      throw ("official kernel rejected " ++ names ++
+        " (" ++ PsKernelLean.kernelExceptionSummary error ++ ")" ++
+        PsKernelLean.kernelExceptionContext error)
+  pure ()
+
+-- Source requests and authoring admissions share the native task boundary.
+-- One source request retains its existing cumulative 2m/20k kernel budget.
+-- Allocation telemetry is distinct from the C++ kernel's heartbeat counter.
+private def checkWithScopedHeartbeats (prelude : Lean.Kernel.Environment)
+    (admissions : String) : IO (Except String Unit) := do
+  let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    check prelude admissions 2000000
+  IO.println ("PSCV0_KERNEL_BUDGET: " ++
+    (if result.isOk then "accepted" else "rejected") ++
+    " kernel-heartbeat-limit=2000000 recursion-limit=20000")
+  return result
+
+private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
+    ExceptT Diagnostic IO Result := do
+  match request.assurance with
+  | .ordinaryChecked => pure ()
+  | .closedVerified | .boundaryQualifiedVerified =>
+      throw { phase := "assurance", message :=
+        "PSCV0-ASSURANCE-DOWNGRADE: verified emission requires unavailable model/refinement and target proofs; no ordinary fallback" }
+  let t0 ← IO.monoMsNow
+  let project ← if request.modules.isEmpty then
+    pure none
+  else
+    (fromResult "module" (psCompilerPreparePscv0Project request.moduleName
+      (request.modules ++ [{ name := request.moduleName, source := request.source, sourceName := request.sourceName }]))).map some
+  let parsed ← match project with
+    | some _ => pure none
+    | none => (fromResult "parse" (psCompilerParsePscv0 request.source)).map some
+  let t1 ← IO.monoMsNow
+  let elaborated ← match parsed with
+    | none => pure none
+    | some parsed =>
+      (fromResult "elaborate" ((psElabProgramWithOrigins
+        psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)).map some
+  let t2 ← IO.monoMsNow
+  let output ← match project with
+    | some value =>
+      pure ({ prepared := value.prepared
+              environment := psSelfHostProdPreludeEnvironment
+              admissions := value.admissions
+              originParents := value.origins.flatMap (·.parents) :
+        PsCompilerPreparationOutput })
+    | none =>
+      match elaborated with
+      | some value =>
+        fromResult "prepare" ((psCompilerPrepareElaboratedWithOutput value.result).mapError
+          psCompilerPscv0Error)
+      | none => throw { phase := "prepare", message := "missing prepared source" }
+  let t3 ← IO.monoMsNow
+  -- The C++ kernel's maximum heartbeat does not reset its thread-local
+  -- heartbeat counter. The independently checked source must not inherit
+  -- the unlimited, proof-heavy Standard replay's cumulative count.
+  -- Maintain the SAME 2m heartbeat / 20k recursion limit in `check`.
+  let checked ← checkWithScopedHeartbeats prelude output.admissions
+  let _ ← fromResult "kernel" checked
+  let t4 ← IO.monoMsNow
+  let timings : Timings := if project.isSome then {
+    -- The graph planner owns parsing and each module's elaboration/preparation.
+    parseMs := 0, elaborateMs := 0,
+    prepareMs := t3 - t0, kernelMs := t4 - t3 }
+  else {
+    parseMs := t1 - t0, elaborateMs := t2 - t1,
+    prepareMs := t3 - t2, kernelMs := t4 - t3 }
+  let originBatches : List (String × PsElabBatchOrigin) :=
+    match project with
+    | some value =>
+      value.origins.flatMap fun file =>
+        let sourceName := if file.moduleName == request.moduleName then
+          request.sourceName else file.sourceName
+        file.batches.map (fun batch => (sourceName, batch))
+    | none =>
+      match elaborated with
+      | some value => value.origins.map (fun batch => (request.sourceName, batch))
+      | none => []
+  let diagnostics := originBatches.flatMap fun (sourceName, batch) =>
+    batch.diagnostics.map fun diagnostic =>
+      ({ sourceName, diagnostic } : SourceDiagnostic)
+  if request.targets.isEmpty then
+    return {
+      diagnostics
+      moduleProfiles := (project.map (·.moduleProfiles)).getD []
+      declarationCount := output.prepared.declarations.length
+      artifacts := []
+      targetWordSize := request.targetWordSize
+      assurance := request.assurance
+      timings := timings }
+  -- The original prepared logical graph was checked with the official kernel
+  -- above. Only explicit ordinary requests may lower the separately checked
+  -- private partial body to the public runtime name. Never make that runtime
+  -- view available to proof elaboration or verified artifact admission.
+  let partialBody := output.prepared.declarations.any fun decl =>
+    match decl with | .partialDecl .. => true | _ => false
+  let ir ← fromResult "erase"
+    ((if partialBody then
+        psCompilerOrdinaryPartialIrFromCheckedPrepared output.prepared request.targetWordSize
+      else
+        psCompilerVerifiedIrFromPrepared output.prepared request.targetWordSize
+      ).mapError psCompilerPscv0Error)
+  let ir := match project with
+    | none => ir
+    | some value =>
+      let libraryNames := value.libraryNames.map psNameToString
+      let names := libraryNames.filter fun name =>
+        ir.declarations.any (fun d => d.name == name) ||
+        ir.structures.any (fun s => s.name == name) ||
+        ir.inductives.any (fun i => i.name == name)
+      { ir with internalNames := ir.internalNames ++ names }
+  let origins := originBatches.flatMap fun (fileName, batch) =>
+    sourceOriginsForBatch fileName batch
+  let origins := output.originParents.foldl (fun origins (helper, parent) =>
+    match origins.find? (fun entry => entry.fst == psNameToString parent) with
+    | none => origins
+    | some (_, origin) => (psNameToString helper, { origin with
+        identity := { origin.identity with declaration := psNameToString helper }
+        generatedReason := some ("recursor worker of " ++ psNameToString parent) }) :: origins) origins
+  let sourceFiles := match project with
+    | none => []
+    | some value => value.origins.map fun file =>
+      (if file.moduleName == request.moduleName then request.sourceName
+       else file.sourceName, file.source)
+  let context : PsEmissionContext := {
+    sourceName := request.sourceName
+    sourceText := request.source
+    outputStem := request.outputStem
+    origins := origins
+    sourceFiles }
+  let t5 ← IO.monoMsNow
+  let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked => do
+    let ecma ← if request.targets.any (fun t => t == .typescript || t == .javascript) then
+      (PsEcma.plan checked).map some else pure none
+    request.targets.mapM fun target =>
+      match target with
+      | .typescript | .javascript =>
+        match ecma with
+        | none => .error "PSCV0-ECMA: missing planned program"
+        | some program => PsEcma.emitProgram program
+            (if target == .typescript then .typescript else .javascript) context
+      | .rust => psRustEmitReadable checked request.outputStem origins
+      | .wasmCore | .wasmComponent =>
+          PsWasm.emit checked context (target == .wasmComponent) request.exports)
+  let t6 ← IO.monoMsNow
+  return {
+    diagnostics
+    moduleProfiles := (project.map (·.moduleProfiles)).getD []
+    declarationCount := output.prepared.declarations.length
+    artifacts := artifacts.map (fun artifact => { artifact with targetWordSize := request.targetWordSize })
+    targetWordSize := request.targetWordSize
+    assurance := request.assurance
+    timings := { timings with eraseMs := t5 - t4, emitMs := t6 - t5 } }
+
+-- A batch shares only the immutable checked prelude. Inputs remain independent:
+-- successful or failed requests cannot leak declarations into the next source.
+-- Callers supply source, never an environment or a claimed checked token.
+def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
+  if Lean.versionString != leanVersion || Lean.githash != leanCommit then
+    return .error {
+      phase := "toolchain"
+      message := "expected Lean " ++ leanVersion ++ " at " ++ leanCommit ++
+        ", got " ++ Lean.versionString ++ " at " ++ Lean.githash }
+  -- Audit once per batch before either isolated single-file elaboration or
+  -- the dependency graph is allowed to prepare executable admissions.
+  if let .error message := psCompilerValidatePscv0Standard then
+    return .error { phase := "prelude", message }
+  let t0 ← IO.monoMsNow
+  let initial ← PsKernelLean.buildLeanPreludeEnvironment
+  let t1 ← IO.monoMsNow
+  match initial with
+  | .error error =>
+      -- Old provider diagnostics carry its old version label; do not reuse that
+      -- identity in this 4.35.0 host. The error kind still identifies the boundary.
+      return .error { phase := "prelude", message := error.kind.code ++ ": " ++ error.message }
+  | .ok prelude =>
+      -- A batch request is the actual IO isolation unit. In pinned Lean's
+      -- Scope allocation accounting for portable elaboration separately.
+      -- This IO counter is NOT the C++ kernel counter: checked source admission
+      -- owns a native task boundary and keeps its 2m/20k limits.
+      let results ← requests.mapM fun request => do
+        let previous ← IO.getNumHeartbeats
+        IO.setNumHeartbeats 0
+        try
+          let result ← (compile prelude request).run
+          return result
+        finally
+          IO.setNumHeartbeats previous
+      return .ok { preludeMs := t1 - t0, results }
+
+def timingsJson (t : Timings) : Lean.Json :=
+  Lean.Json.mkObj [
+    ("parseMs", toJson t.parseMs), ("elaborateMs", toJson t.elaborateMs),
+    ("prepareMs", toJson t.prepareMs), ("kernelMs", toJson t.kernelMs),
+    ("eraseMs", toJson t.eraseMs), ("emitMs", toJson t.emitMs)]
+
+def sourceDiagnosticJson (entry : SourceDiagnostic) : Lean.Json :=
+  let diagnostic := entry.diagnostic
+  let severity := match diagnostic.severity with
+    | .error => "error"
+    | .warning => "warning"
+    | .info => "info"
+  Lean.Json.mkObj [
+    ("source", toJson entry.sourceName),
+    ("phase", toJson ("elaborate" : String)),
+    ("severity", toJson severity),
+    ("message", toJson diagnostic.message),
+    ("sourceStartByte", toJson diagnostic.span.start.byteOffset),
+    ("sourceEndByte", toJson diagnostic.span.stop.byteOffset),
+    ("sourceStartLine", toJson diagnostic.span.start.line),
+    ("sourceStartColumn", toJson diagnostic.span.start.column),
+    ("sourceEndLine", toJson diagnostic.span.stop.line),
+    ("sourceEndColumn", toJson diagnostic.span.stop.column)]
+
+def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.Json :=
+  let identity := [
+    ("source", toJson sourceName), ("leanVersion", toJson Lean.versionString),
+    ("leanCommit", toJson Lean.githash), ("provider", toJson ("lean4-cpp" : String)),
+    ("profile", toJson profile)]
+  match result with
+  | .error error => Lean.Json.mkObj (identity ++ [
+      ("accepted", toJson false), ("phase", toJson error.phase),
+      ("message", toJson error.message)])
+  | .ok value => Lean.Json.mkObj (identity ++ [
+      ("accepted", toJson true), ("assurance", toJson (assuranceLabel value.assurance)),
+      ("declarations", toJson value.declarationCount),
+      ("diagnostics", toJson (value.diagnostics.map sourceDiagnosticJson)),
+      ("targetWordSize", toJson (value.targetWordSize.map psIrWordSizeBits)),
+      ("timings", timingsJson value.timings)])
+
+end PsV7Native

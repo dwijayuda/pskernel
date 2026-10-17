@@ -1,178 +1,171 @@
-import Ps.Environment.SelfHostPrelude
+import Ps.Environment.StandardPlatformWords
+import Ps.Environment.StandardWellFounded
+import Ps.Environment.StandardArrayFilter
+import Ps.Environment.StandardLogicInstances
+import Ps.Environment.StandardOperatorProtocol
+import Ps.Environment.StandardUtf8
+import Ps.Environment.StandardFloatDisplay
+import Ps.Environment.StandardScientific
+import Ps.Environment.StandardOperatorDefaults
+import Ps.Environment.StandardIntArithmetic
+import Ps.Environment.StandardScalarArithmetic
+import Ps.Environment.StandardUnsigned
+import Ps.Environment.StandardUnsignedOperations
+import Ps.Environment.StandardFloatIdentity
+import Ps.Environment.StandardSignedIdentity
+import Ps.Environment.StandardSignedOperations
+import Ps.Environment.StandardFloatToBits
+import Ps.Environment.StandardFloatCanonical
+import Ps.Environment.StandardFloatOperations
+import Ps.Environment.StandardFloatConstructors
+import Ps.Environment.StandardSignedScalar
+import Ps.Environment.StandardSignedToInt
+import Ps.Environment.StandardSignedOfInt
+import Ps.Environment.StandardSignedShift
+import Ps.Environment.StandardSignedClamp
+import Ps.Environment.StandardSignedAbs
+import Ps.Environment.StandardSignedOrder
+import Ps.Environment.StandardSignedNumeric
+import Ps.Environment.StandardBoolWord
+import Ps.Environment.StandardUnsignedOrder
+import Ps.Environment.StandardUnsignedPower
+import Ps.Environment.StandardUnsignedOfInt
+import Ps.Environment.StandardUnsignedClamp
+import Ps.Environment.StandardSum
+import Ps.Environment.StandardByteArray
+import Ps.Environment.StandardByteArrayCollection
+import Ps.Environment.StandardHashable
+import Ps.Environment.StandardCoercion
+import Ps.Environment.StandardReducibility
+import Ps.Environment.StandardReprCollections
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
 
-def psSelfHostProdOf
-    (alpha beta : PsExpr) : PsExpr :=
-  PsExpr.app
-    (PsExpr.app
-      (PsExpr.constE psProdName [])
-      alpha)
-    beta
+def psSelfHostProdCorePreludeEnvironment : PsEnvironment :=
+  let withProduct := psStandardProductDataDeclarations.foldl
+    psEnvironmentInsert psSelfHostPreludeEnvironment
+  psStandardReducibilityExtend <| psStandardReprCollectionsExtend <|
+    psStandardFormatStringExtend <| psStandardReprExtend <|
+    psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <|
+    psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <|
+    psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <|
+    psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend <|
+    (fun env => [psStandardOutOfBoundsDeclaration,
+      psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env) <|
+    psStandardLawfulGetElemExtend <| psStandardExceptExtend <|
+    psStandardProductExtend <| psStandardInhabitedExtend withProduct
 
-def psSelfHostProdMkOf
-    (alpha beta fst snd : PsExpr) : PsExpr :=
-  PsExpr.app
-    (PsExpr.app
-      (PsExpr.app
-        (PsExpr.app
-          (PsExpr.constE psProdMkName [])
-          alpha)
-        beta)
-      fst)
-    snd
+-- Explicit library stages also own the frozen authoring-export boundaries.
+-- Later structure replacements cannot change an earlier asset's replay base.
+def psSelfHostProdScalarPreludeEnvironment : PsEnvironment :=
+  psStandardScalarArithmeticExtend psSelfHostProdCorePreludeEnvironment
+
+def psSelfHostProdUnsignedPreludeEnvironment : PsEnvironment :=
+  psStandardUnsignedExtend psSelfHostProdScalarPreludeEnvironment
+
+def psSelfHostProdHashPreludeEnvironment : PsEnvironment :=
+  psStandardHashableExtend psSelfHostProdUnsignedPreludeEnvironment
+
+-- Separate immutable exporter stage: the selected F0 environment must
+-- never serve as its own checked-asset boundary.
+def psSelfHostProdPreFloatPreludeEnvironment : PsEnvironment :=
+  psStandardUnsignedOperationsExtend psSelfHostProdHashPreludeEnvironment
+
+-- Frozen pre-signed environment serves as the authoring boundary for
+-- exact checked SInt family regeneration. Do not close over its own output.
+def psSelfHostProdPreSignedPreludeEnvironment : PsEnvironment :=
+  psStandardFloatIdentityExtend psSelfHostProdPreFloatPreludeEnvironment
+
+-- Both independent checked method assets are generated against this
+-- immutable pre-method boundary. Replaying either cannot depend on itself.
+def psSelfHostProdPreM2AMethodPreludeEnvironment : PsEnvironment :=
+  psStandardSignedIdentityExtend psSelfHostProdPreSignedPreludeEnvironment
+
+def psSelfHostProdPreSignedScalarPreludeEnvironment : PsEnvironment :=
+  psStandardFloatToBitsExtend <|
+    psStandardSignedOperationsExtend psSelfHostProdPreM2AMethodPreludeEnvironment
+
+def psSelfHostProdPreSignedToIntPreludeEnvironment : PsEnvironment :=
+  psStandardSignedScalarExtend psSelfHostProdPreSignedScalarPreludeEnvironment
+
+def psSelfHostProdPreSignedOfIntPreludeEnvironment : PsEnvironment :=
+  psStandardSignedToIntExtend psSelfHostProdPreSignedToIntPreludeEnvironment
+
+def psSelfHostProdPreSignedShiftPreludeEnvironment : PsEnvironment :=
+  psStandardSignedOfIntExtend psSelfHostProdPreSignedOfIntPreludeEnvironment
+
+-- Frozen input for exact Int arithmetic asset regeneration.
+def psSelfHostProdPreIntArithmeticPreludeEnvironment : PsEnvironment :=
+  psStandardFloatCanonicalExtend <|
+  psStandardByteArrayCollectionExtend <|
+    psStandardByteArrayExtend <|
+    psStandardSumExtend <|
+    psStandardUnsignedClampExtend <|
+    psStandardUnsignedOfIntExtend <|
+    psStandardUnsignedPowerExtend <|
+    psStandardUnsignedOrderExtend <|
+    psStandardBoolWordExtend <|
+    psStandardSignedNumericExtend <|
+    psStandardSignedOrderExtend <|
+    psStandardSignedAbsExtend <|
+    psStandardSignedClampExtend <|
+    psStandardSignedShiftExtend psSelfHostProdPreSignedShiftPreludeEnvironment
+
+-- Frozen input for the small logical Float constructor asset.
+def psSelfHostProdPreFloatConstructorsPreludeEnvironment : PsEnvironment :=
+  psStandardIntArithmeticExtend psSelfHostProdPreIntArithmeticPreludeEnvironment
+
+-- Frozen F2 input: selected operations must never cut their own replay.
+def psSelfHostProdPreFloatOperationsPreludeEnvironment : PsEnvironment :=
+  psStandardFloatConstructorsExtend psSelfHostProdPreFloatConstructorsPreludeEnvironment
+
+def psSelfHostProdPreLiteralPreludeEnvironment : PsEnvironment :=
+  psStandardFloatOperationsExtend psSelfHostProdPreFloatOperationsPreludeEnvironment
+
+-- Immutable F3 authoring boundary, preceding OfScientific source selection.
+def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
+  psStandardOperatorDefaultsExtend psSelfHostProdPreLiteralPreludeEnvironment
+
+-- Frozen F4 input, prior to native display and opaque cross-width selection.
+def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
+  psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
+
+-- Frozen logical boundary for explicit target-word profile authoring.
+def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
+  psStandardFloatDisplayExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
+
+-- Frozen input for checked well-founded relation authoring. Later relation
+-- declarations must never become their own export or replay boundary.
+def psSelfHostProdPreWellFoundedPreludeEnvironment : PsEnvironment :=
+  psStandardOperatorProtocolExtend <| psStandardLogicExtend <| PsStandardUtf8.extend <| psStandardArrayFilterExtend <|
+    psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  let uName := psRootName "u";
-  let alphaName := psRootName "α";
-  let betaName := psRootName "β";
-  let motiveName := psRootName "_motive";
-  let minorName := psRootName "_mk";
-  let majorName := psRootName "_major";
-  let fstName := psRootName "fst";
-  let sndName := psRootName "snd";
-  let typeType := PsExpr.sortE (PsLevel.succ PsLevel.zero);
-  let prodType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (PsExpr.forallE
-        betaName
-        typeType
-        typeType
-        PsBinderInfo.explicit)
-      PsBinderInfo.explicit;
-  let prodMkType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (PsExpr.forallE
-        betaName
-        typeType
-        (PsExpr.forallE
-          fstName
-          (PsExpr.bvar 1)
-          (PsExpr.forallE
-            sndName
-            (PsExpr.bvar 1)
-            (psSelfHostProdOf
-              (PsExpr.bvar 3)
-              (PsExpr.bvar 2))
-            PsBinderInfo.explicit)
-          PsBinderInfo.explicit)
-        PsBinderInfo.implicit)
-      PsBinderInfo.implicit;
-  let motiveType :=
-    PsExpr.forallE
-      majorName
-      (psSelfHostProdOf
-        (PsExpr.bvar 1)
-        (PsExpr.bvar 0))
-      (PsExpr.sortE (PsLevel.param uName))
-      PsBinderInfo.explicit;
-  let minorType :=
-    PsExpr.forallE
-      fstName
-      (PsExpr.bvar 2)
-      (PsExpr.forallE
-        sndName
-        (PsExpr.bvar 2)
-        (PsExpr.app
-          (PsExpr.bvar 2)
-          (psSelfHostProdMkOf
-            (PsExpr.bvar 4)
-            (PsExpr.bvar 3)
-            (PsExpr.bvar 1)
-            (PsExpr.bvar 0)))
-        PsBinderInfo.explicit)
-      PsBinderInfo.explicit;
-  let recType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (PsExpr.forallE
-        betaName
-        typeType
-        (PsExpr.forallE
-          motiveName
-          motiveType
-          (PsExpr.forallE
-            minorName
-            minorType
-            (PsExpr.forallE
-              majorName
-              (psSelfHostProdOf
-                (PsExpr.bvar 3)
-                (PsExpr.bvar 2))
-              (PsExpr.app
-                (PsExpr.bvar 2)
-                (PsExpr.bvar 0))
-              PsBinderInfo.explicit)
-            PsBinderInfo.explicit)
-          PsBinderInfo.explicit)
-        PsBinderInfo.implicit)
-      PsBinderInfo.implicit;
-  let withProd :=
-    psSelfHostReplacePreludeAxiom
-      psSelfHostPreludeEnvironment
-      (PsDeclaration.inductiveDecl
-        (PsInductiveInfo.mk
-          psProdName
-          []
-          prodType
-          2
-          0
-          [psProdMkName]
-          true));
-  let withProdMk :=
-    psPreludeAdd withProd
-      (PsDeclaration.constructorDecl
-        (PsConstructorInfo.mk
-          psProdMkName
-          []
-          prodMkType
-          psProdName
-          0
-          2
-          2
-          []));
-  psPreludeAdd withProdMk
-    (PsDeclaration.recursorDecl
-      (PsRecursorInfo.mk
-        psSelfHostProdRecName
-        [uName]
-        recType
-        [psProdName]
-        2
-        0
-        1
-        1))
+  psStandardWellFoundedExtend psSelfHostProdPreWellFoundedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  match
-      psEnvironmentFind
-        psSelfHostProdPreludeEnvironment
-        psProdName with
-  | none => List.nil
-  | some prodDeclaration =>
-      match
-          psEnvironmentFind
-            psSelfHostProdPreludeEnvironment
-            psProdMkName with
-      | none => List.nil
-      | some prodMkDeclaration =>
-          match
-              psEnvironmentFind
-                psSelfHostProdPreludeEnvironment
-                psSelfHostProdRecName with
-          | none => List.nil
-          | some prodRecDeclaration =>
-              List.cons
-                prodDeclaration
-                (List.cons
-                  prodMkDeclaration
-                  (List.cons
-                    prodRecDeclaration
-                    psSelfHostRuntimePreludeDeclarations))
+  let prodDeclarations := psStandardProductDataDeclarations
+  -- Preserve dependency-first order for eager nullary runtime values.
+  -- The checked ByteArray.empty value must initialize before the checked
+  -- Inhabited ByteArray dictionary captures it in the shared executable IR.
+  -- This order is shared by JS, TypeScript, Rust and Wasm, not a JS workaround.
+  let prior := psStandardFloatOperationsRuntimeDeclarations ++ psStandardFloatModelRuntimeDeclarations ++ psStandardFloatModelProjectionRuntimeDeclarations ++ psStandardFloatCanonicalRuntimeDeclarations ++ psStandardByteArrayRuntimeDeclarations ++ psStandardByteArrayCollectionRuntimeDeclarations ++ psStandardSumRuntimeDeclarations ++ psStandardUnsignedClampRuntimeDeclarations ++ psStandardUnsignedOfIntRuntimeDeclarations ++ psStandardUnsignedPowerRuntimeDeclarations ++ psStandardUnsignedOrderRuntimeDeclarations ++ psStandardBoolWordRuntimeDeclarations ++ psStandardSignedNumericRuntimeDeclarations ++ psStandardSignedOrderRuntimeDeclarations ++ psStandardSignedAbsRuntimeDeclarations ++ psStandardSignedClampRuntimeDeclarations ++ psStandardSignedShiftRuntimeDeclarations ++ psStandardSignedOfIntRuntimeDeclarations ++ psStandardSignedToIntRuntimeDeclarations ++ psStandardSignedScalarRuntimeDeclarations ++ psStandardUnsignedOperationsRuntimeDeclarations ++ psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+    prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
+    psStandardProductDeclarations ++ psStandardExceptDeclarations ++
+    -- Class evidence and method projections must enter typed runtime erasure
+    -- through the same pinned, officially checked Standard declarations.
+    psStandardGetElemClass ++ psStandardGetElemOptionalDeclarations ++
+    psStandardLawfulGetElemClass ++
+    [psStandardOutOfBoundsDeclaration, psStandardGetElemBangDefaultDeclaration] ++
+    psStandardGetElemOptionalDefaultDeclarations ++ psStandardNatOrderDeclarations ++
+    psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
+    psStandardArrayRuntimeDeclarations
+
+  psStandardOperatorProtocolRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    psStandardLogicRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    PsStandardUtf8.runtimeDeclarations ++ psStandardFloatDisplayRuntimeDeclarations ++ psStandardScientificRuntimeDeclarations ++
+    psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    prior.filter (fun declaration =>
+      !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration)))

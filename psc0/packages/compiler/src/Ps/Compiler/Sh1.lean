@@ -355,6 +355,10 @@ def psSh1SyntaxTermStep
               "do semantics are outside the enabled source profile"
               moduleName owner (Option.some origin))
       | Option.none => Except.ok state
+  | PsSyntaxTerm.scientific _ span =>
+      Except.error (psSh1SourceFailure "source-scientific-unsupported"
+        "scientific literals are outside the frozen SH1 source profile"
+        moduleName owner (some span))
   | PsSyntaxTerm.natural _ _ => Except.ok state
   | PsSyntaxTerm.string _ _ => Except.ok state
   | PsSyntaxTerm.character _ _ => Except.ok state
@@ -362,6 +366,9 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.unit _ => Except.ok state
   | PsSyntaxTerm.record fields _ =>
       Except.ok (psSh1SyntaxSchedule state [PsSh1SyntaxTask.fields owner region fields])
+  | PsSyntaxTerm.recordUpdate source fields _ =>
+      Except.ok (psSh1SyntaxSchedule state
+        [PsSh1SyntaxTask.term owner region source, PsSh1SyntaxTask.fields owner region fields])
   | PsSyntaxTerm.app fn args _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.term owner region fn, PsSh1SyntaxTask.terms owner region args])
@@ -380,7 +387,7 @@ def psSh1SyntaxTermStep
       | Option.some annotation =>
           Except.ok (psSh1SyntaxSchedule state
             (List.cons (PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type annotation) bodies))
-  | PsSyntaxTerm.ifE condition thenBranch elseBranch _ =>
+  | PsSyntaxTerm.ifE _ condition thenBranch elseBranch _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.term owner region condition,
          PsSh1SyntaxTask.term owner region thenBranch,
@@ -462,7 +469,7 @@ def psSh1SourceDeclarationName (source : PsSyntaxDeclaration) : PsSyntaxName :=
   | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => name
   | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => name
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ _ => name
-  | PsSyntaxDeclaration.structureDecl name _ _ _ => name
+  | PsSyntaxDeclaration.structureDecl name _ _ _ _ => name
 
 
 -- General partial definitions are excluded. Theorems use the existing
@@ -495,10 +502,12 @@ def psSh1SyntaxDeclarationBodyStep
             List.cons (PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type type) tail;
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
         (List.cons (PsSh1SyntaxTask.binders owner params) withResult))
-  | PsSyntaxDeclaration.structureDecl name params fields _ =>
+  | PsSyntaxDeclaration.structureDecl name params result fields _ =>
       let owner : String := psSh1NameText name.segments;
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
-        [PsSh1SyntaxTask.binders owner params, PsSh1SyntaxTask.binders owner fields])
+        ([PsSh1SyntaxTask.binders owner params] ++
+          result.toList.map (PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type) ++
+          [PsSh1SyntaxTask.binders owner fields]))
 
 
 def psSh1SyntaxDeclarationStep

@@ -8,6 +8,8 @@ def m1Shape (fuel : Nat) (term : PsSyntaxTerm) : String :=
     let shape := m1Shape n
     match term with
     | .reference name => psPscv0NameText name
+    | .sortE isType level _ => psPrintSyntaxSort isType level
+    | .call fn args _ => "app(" ++ shape fn ++ ";" ++ String.intercalate ", " (args.map (fun a => shape a.snd)) ++ ")"
     | .app fn args _ => "app(" ++ shape fn ++ ";" ++ String.intercalate ", " (args.map shape) ++ ")"
     | .forallE binders body _ =>
       "pi(" ++ String.intercalate ", " (binders.map (fun b => shape b.snd)) ++ ";" ++ shape body ++ ")"

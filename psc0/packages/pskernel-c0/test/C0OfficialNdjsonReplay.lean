@@ -837,8 +837,6 @@ def c0ExportForbiddenPropLargeElim
       else false
   | _ => false
 
-/-- One declaration check, preserving the kernel's typed error category.
-    The source recursive checker is the *only* acceptance authority. -/
 /-- Exact syntactic const reference through every source expression
     constructor. This is queried ONLY when earlier nonlogical definitions
     were tracked; full source checking remains the admission authority. -/
@@ -866,6 +864,8 @@ partial def c0ExportExprMentionsNonlogical
       c0ExportExprMentionsNonlogical blocked term
   | _ => false
 
+/-- One declaration check, preserving typed kernel errors.
+    Only full source checking can admit a declaration. -/
 def c0ExportCheckOne
     (env : PsKernelEnvironment)
     (info : C0ExportDeclaration)
@@ -1053,10 +1053,10 @@ def c0ExportStepDetailed
           throw (.checked env declaration (.rejectedInvalid
             "duplicate unsafe/partial definition name"))
         nonlogical := (name, safety) :: nonlogical
-    | .theoremDecl theorem =>
+    | .theoremDecl info =>
         let blockedNames := nonlogical.map Prod.fst
-        if c0ExportExprMentionsNonlogical blockedNames theorem.value ||
-            c0ExportExprMentionsNonlogical blockedNames theorem.base.type then
+        if c0ExportExprMentionsNonlogical blockedNames info.value ||
+            c0ExportExprMentionsNonlogical blockedNames info.base.type then
           throw (.checked env declaration (.rejectedInvalid
             "safe theorem uses previously exported unsafe/partial declaration"))
         match c0ExportCheckOne env declaration fuel with

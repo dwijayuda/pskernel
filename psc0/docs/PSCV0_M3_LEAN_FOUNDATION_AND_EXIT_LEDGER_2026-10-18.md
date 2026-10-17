@@ -1,5 +1,21 @@
 ## Qualified P1 preparation; main integration pending
 
+## Standalone PSum foundation authoring candidate
+
+The native inventory confirms PSum is absent. The new authoring path exports
+its five roots against an empty standalone boundary, replays them from an
+empty official kernel and compares generated recursor rules. It uses the
+existing Standard exporter and pinned Lean4.35.0; no new assumption or
+registration is requested. Candidate qualification and selection remain
+separate. See PSCV0_M3_MUTUAL_WF_2026-10-18.md for the component design and
+required ownership/equation/runtime invariants. Source mutual WF still refuses.
+
+Shared ordinary WF applications are committed at5b614f357bacf00403132e314dd63733342dc70a,
+including the n-ary family-instantiation repair and corrected oracle fixtures;
+qualification is pending. Main remains five-gate accepted atde6679464cac9780bae7066052714c53984dbd00.
+Continue the M3+B six-exit ledger; no PSKernel-Core, self-hosting or C5.
+
+
 ## Shared WF application candidate
 
 The ordinary application engine now optionally captures a bounded original source telescope. WF calls share its named/implicit/instance/default elaboration and synthetic constraints; each argument is retained once before dependent packing. Original public binder kinds and dependent residual state remain intact, and the complete callback is checked again by erasure. The existing WF fixture adds independent Lean/source generic/dictionary/named/default/implicit-major cases, an exact unfolding equation, ten required runtime comparisons and shared named-argument refusals. See PSCV0_M3_WF_APPLICATIONS_2026-10-18.md. Qualification is pending; no new acceptance or speed claim.
@@ -189,3 +205,19 @@ This document records authorization and the initial implementation ledger. Subse
 ### Foundation-only main integration
 
 The current integration publishes the exact choice/Classical.ofNonempty declarations, existing Nonempty class registration, audited immutable pins and constructive-first P0 Nonempty fallback. Preparatory runs [39064740499](https://github.com/dwijayuda/pskernel/actions/runs/39064740499) and [39065744204](https://github.com/dwijayuda/pskernel/actions/runs/39065744204) passed these foundation/construction/emission cells but failed separate section candidates. The current five same-SHA gates are pending; [the integration receipt](PSCV0_M3_CLASSICAL_P0_INTEGRATION_2026-10-18.md) distinguishes required970 comparisons from historical accepted960. Larger source/WF/BEq/P1 work continues at [preparation5dd8ed97](https://github.com/dwijayuda/pskernel/commit/5dd8ed9701b215bf808ea1e058e382b3f639710a) and [run39067140365](https://github.com/dwijayuda/pskernel/actions/runs/39067140365). M3+B remains open.
+
+### Native default-induction refusal classification
+
+Pinned Lean4.35.0 Lean/Elab/Tactic/Induction.lean:getElimNameInfo rejects
+default induction on mutually inductive and nested families. The exact
+upstream tests/elab_fail/inductionMutual.lean and errorOnInductionForNested.lean
+and their expected diagnostics confirm these are native refusals. PSC0's
+retained group/nested default-induction negatives are therefore compatible
+boundaries, not missing default-motive synthesis. Existing explicit complete
+recursor-family proofs remain the positive path.
+
+Do not generalize that finding to other negatives: fixed-index matching
+whose result/context depends on the original major still needs a separate
+heterogeneous-transport assessment; a source refusal is not by itself a
+native refusal. The final selected data matrix must distinguish it.
+

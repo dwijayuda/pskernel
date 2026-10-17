@@ -101,7 +101,7 @@ jobs:
           lean --version | tee ../dist/m3-foundation-preparation/toolchain.txt
           grep -F '4.35.0' ../dist/m3-foundation-preparation/toolchain.txt
           grep -F 'eb6cafb' ../dist/m3-foundation-preparation/toolchain.txt
-          lake build pscv0_native pscv0_m3_partial_fixpoint_export 2>&1 | tee ../dist/m3-foundation-preparation/build.log
+          lake build pscv0_native pscv0_m3_partial_fixpoint_export pscv0_m3_mutual_well_founded_export 2>&1 | tee ../dist/m3-foundation-preparation/build.log
       - name: Check exact primitive signatures and logical closure
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -119,6 +119,11 @@ jobs:
         run: |
           set -euo pipefail
           .lake/build/bin/pscv0_m3_partial_fixpoint_export ../dist/m3-foundation-preparation/StandardPartialFixpointCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-export.log
+      - name: Export standalone pinned PSum foundation
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_mutual_well_founded_export ../dist/m3-foundation-preparation/StandardPSumCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/psum-export.log
       - name: Compile retained order data and inspect native instance metadata
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

@@ -146,3 +146,9 @@ lean_exe pscv0_m3_group_proof_deriving where
 lean_exe pscv0_m3_empty_dictionaries where
   srcDir := "../test"
   root := `Pscv0M3EmptyDictionaries
+
+-- Standalone PSum library authoring for the typed mutual WF domain.
+lean_exe pscv0_m3_mutual_well_founded_export where
+  srcDir := "../scripts"
+  root := `Pscv0M3MutualWellFoundedExport
+  supportInterpreter := true

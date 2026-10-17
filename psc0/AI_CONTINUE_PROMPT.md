@@ -1,5 +1,21 @@
 # Continue PSC0 v7.2 — Complete M3+B autonomously
 
+## Standalone PSum foundation authoring candidate
+
+The native inventory confirms PSum is absent. The new authoring path exports
+its five roots against an empty standalone boundary, replays them from an
+empty official kernel and compares generated recursor rules. It uses the
+existing Standard exporter and pinned Lean4.35.0; no new assumption or
+registration is requested. Candidate qualification and selection remain
+separate. See PSCV0_M3_MUTUAL_WF_2026-10-18.md for the component design and
+required ownership/equation/runtime invariants. Source mutual WF still refuses.
+
+Shared ordinary WF applications are committed at5b614f357bacf00403132e314dd63733342dc70a,
+including the n-ary family-instantiation repair and corrected oracle fixtures;
+qualification is pending. Main remains five-gate accepted atde6679464cac9780bae7066052714c53984dbd00.
+Continue the M3+B six-exit ledger; no PSKernel-Core, self-hosting or C5.
+
+
 ## Shared WF application candidate
 
 The ordinary application engine now optionally captures a bounded original source telescope. WF calls share its named/implicit/instance/default elaboration and synthetic constraints; each argument is retained once before dependent packing. Original public binder kinds and dependent residual state remain intact, and the complete callback is checked again by erasure. The existing WF fixture adds independent Lean/source generic/dictionary/named/default/implicit-major cases, an exact unfolding equation, ten required runtime comparisons and shared named-argument refusals. See PSCV0_M3_WF_APPLICATIONS_2026-10-18.md. Qualification is pending; no new acceptance or speed claim.

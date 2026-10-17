@@ -1,0 +1,118 @@
+name: PSKernel-C0 source-certified full-key exact hash memo
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-exact-hash-full-key.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedHashMemoRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-hash-certificate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Fully check source hash equality and 4.35 negative cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && \
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc && \
+            lake build PsKernelC0 c0OfficialReplay && \
+            lake env lean --run test/C0CertifiedHashMemoRegression.lean && \
+            lake env lean --run test/C0OfficialNdjsonReplay.lean && \
+            lake env lean --run test/C0ProofCongruenceRegression.lean)
+          echo 'C0_HASHMAP_SOURCE_CERT all_inputs=Lean_proved arbitrary_hash=Lean_proved collision_rejects=pass admission_unchanged=true'
+      - name: Reproduce authentic SHA-qualified archived proof for 4.35 checking
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o "$RUNNER_TEMP/arena-round.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-round.tar.gz" | sha256sum -c -
+          python3 psc0/packages/pskernel-c0/test/C0Arena435HotCase.py \
+            --archive "$RUNNER_TEMP/arena-round.tar.gz" \
+            --case shared-subterm \
+            --output "$RUNNER_TEMP/hash-map-shared-435.ndjson" \
+            --info "$RUNNER_TEMP/hash-map-shared-source.json" \
+            --official-project psc0/packages/pskernel-c0
+      - name: Same-runner original exact source-hash-memo baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --quiet --no-tags --depth=1 origin c8e7fce4b1cb2d723fb3824a8c09b4df3483f142
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/hash-shape-time.txt" \
+            timeout 150s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/hash-map-shared-435.ndjson" 4096) \
+            > "$RUNNER_TEMP/hash-shape.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_HASHMAP_AB original exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/hash-shape.txt"
+            echo "C0_HASHMAP_AB original=checked_accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_HASHMAP_AB original=unqualified_host_timeout"
+          elif [ "$rc" -eq 1 ] && grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted" "$RUNNER_TEMP/hash-shape.txt"; then
+            echo "C0_HASHMAP_AB original=unqualified_source_fuel"
+          else
+            tail -n 35 "$RUNNER_TEMP/hash-shape.txt"; exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/hash-shape-time.txt" || true
+      - name: Same-runner full key map, same export and source fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          grep -Fq 'Std.HashMap Nat (List PsKernelC0HashMemoEntry)' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/hash-full-key-time.txt" \
+            timeout 150s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/hash-map-shared-435.ndjson" 4096) \
+            > "$RUNNER_TEMP/hash-full-key.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_HASHMAP_AB candidate exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/hash-full-key.txt"
+            echo "C0_HASHMAP_AB candidate=checked_accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_HASHMAP_AB candidate=unqualified_host_timeout"
+          elif [ "$rc" -eq 1 ] && grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted" "$RUNNER_TEMP/hash-full-key.txt"; then
+            echo "C0_HASHMAP_AB candidate=unqualified_source_fuel"
+          else
+            tail -n 35 "$RUNNER_TEMP/hash-full-key.txt"; exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/hash-full-key-time.txt" || true
+          echo "C0_HASHMAP_SCOPE same_runner=true native_Lean435=true original_Sep_export_body_exact=true source_fuel=4096 pointer_index_not_authority=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-exact-hash-map-ab
+          path: |
+            ${{ runner.temp }}/hash-*-time.txt
+            ${{ runner.temp }}/hash-shape.txt
+            ${{ runner.temp }}/hash-full-key.txt
+            ${{ runner.temp }}/hash-map-shared-source.json
+          if-no-files-found: warn
+          retention-days: 21

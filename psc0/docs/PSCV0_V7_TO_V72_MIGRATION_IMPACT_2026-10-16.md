@@ -1,3 +1,11 @@
+## Approved foundation implementation — 18 October 2026
+
+The user has approved the needed pinned Lean standard logical axioms (`propext`, `Quot.sound`, `Classical.choice`) and continued M3+B implementation. See the [foundation decision and exit ledger](PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md). This resolves the earlier two-axiom policy restriction prospectively; actual P1 construction and expanded-foundation qualification remain required.
+
+The v7.2 language authority and adoption identity are unchanged. Earlier compiler qualifications, migration analysis and their original assumption sets are retained verbatim below.
+
+---
+
 # PSC0 v7 to v7.2 migration impact and evidence
 
 16 October 2026. User instruction: **v7.2 is the sole forward `.ps` target; no legacy compatibility modes.** Apply the [stage directive](PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md) before every new slice. Preserve historical references, qualified code and receipts. This matrix describes specification differences and inspected owners, not completed implementation of every row.

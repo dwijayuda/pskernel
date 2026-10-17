@@ -1,3 +1,19 @@
+## Active work — approved Lean standard logical foundation (18 October 2026)
+
+The user explicitly approved `Classical.choice` and other needed logical axioms in pinned Lean's standard approved inventory, and instructed autonomous continuation of M3+B. The inventory at Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is `propext`, `Quot.sound`, `Classical.choice`. This decision supersedes the older two-axiom-only policy statements retained below.
+
+Follow the [foundation decision and M3+B exit ledger](PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md). Exact declaration/provenance and transitive closure audits, official kernel checking, source-axiom/proof-hole bans, computational-closure checks and verified-admission gates remain required. Choice is a logical assumption, not a runtime implementation.
+
+Last qualified compiler/test remains `e6b7f11750fdde6e1feacab86cfb32f2a82be8a5`, all five gates successful. Its artifacts retain their original foundation and unchanged acceptance. The expanded foundation, P0 Nonempty fallback, P1 order-library probe and plain ordinary section-dictionary fix are in preparation; no new compiler qualification or score increase is claimed.
+
+Continue through the six selected M3+B exits. Preserve v7.2, native portable Lean, GitHub/cloud Linux only, expected-HEAD/non-force changes, and PR109 draft/open/unmerged on its original base. Never supersede a healthy Native run. M4/M5 obligations retain their written staging.
+
+### Retained previous checkpoint — historical evidence
+
+The original preceding document follows verbatim. Its earlier policy and in-flight instructions are historical wherever superseded by the active authorization above.
+
+---
+
 ## Authoritative current checkpoint — qualified unused termination hints
 
 Accepted compiler/test SHA:

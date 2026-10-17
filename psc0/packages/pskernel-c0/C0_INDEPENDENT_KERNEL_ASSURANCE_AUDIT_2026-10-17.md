@@ -110,7 +110,7 @@ For each gate report: commit, toolchain and exporter commit, exact export SHA an
 
 ## 8. Current engineering change accompanying this audit
 
-[Updated targeted native Arena workflow](../../../../.github/workflows/pskernel-c0-arena-adversarial435.yml) adds PR-based qualification and **two separate third-party-authored bug classes**:
+[Updated targeted native Arena workflow](../../../.github/workflows/pskernel-c0-arena-adversarial435.yml) adds PR-based qualification and **two separate third-party-authored bug classes**:
 
 - `k-rec-conv`: K-like recursor conversion incorrectly considered definitional equality.
 - `proj-non-structure`: projecting from a non-structure inductive proposition.

@@ -565,3 +565,41 @@ theorem psKernelC0LegacyMemoExprEq_source
     @psKernelExprEqLegacy = @psKernelC0LegacyMemoExprEq := by
   funext left right
   exact (psKernelC0LegacyMemoExprEq_source left right).symm
+
+/-- Source-exact top-level semantic comparator. The historical checker
+    uses psKernelExprEq at the DefEq root; its recursive children call the
+    older curried comparator. Explicitly route only those children through
+    the previously certified operation-local semantic pair memo instead of
+    depending on delayed compiler substitution in Core.Expr. Binder display
+    names and annotations remain deliberately ignored, as before. -/
+def psKernelC0MemoizedExprEq : PsKernelExpr → PsKernelExpr → Bool
+  | .app af aa, .app bf ba =>
+      psKernelC0LegacyMemoExprEq af bf &&
+      psKernelC0LegacyMemoExprEq aa ba
+  | .lam _ aty ab _, .lam _ bty bb _ =>
+      psKernelC0LegacyMemoExprEq aty bty &&
+      psKernelC0LegacyMemoExprEq ab bb
+  | .forallE _ aty ab _, .forallE _ bty bb _ =>
+      psKernelC0LegacyMemoExprEq aty bty &&
+      psKernelC0LegacyMemoExprEq ab bb
+  | .letE _ aty av ab an, .letE _ bty bv bb bn =>
+      psKernelC0LegacyMemoExprEq aty bty &&
+      psKernelC0LegacyMemoExprEq av bv &&
+      psKernelC0LegacyMemoExprEq ab bb &&
+      psKernelBoolEq an bn
+  | .mdata am ab, .mdata bm bb =>
+      Nat.beq am bm && psKernelC0LegacyMemoExprEq ab bb
+  | .proj an ai ab, .proj bn bi bb =>
+      psKernelNameEq an bn && Nat.beq ai bi &&
+      psKernelC0LegacyMemoExprEq ab bb
+  | left, right => psKernelExprEq left right
+
+/-- Every top-level root comparison exactly matches the original checker
+    Boolean on ALL inputs. This does not infer type equality or bypass any
+    reduction/resource checks. -/
+theorem psKernelC0MemoizedExprEq_source
+    (left right : PsKernelExpr) :
+    psKernelC0MemoizedExprEq left right = psKernelExprEq left right := by
+  cases left <;> cases right <;>
+    simp [psKernelC0MemoizedExprEq, psKernelExprEq,
+      psKernelC0LegacyMemoExprEq_source]

@@ -25,7 +25,7 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 
-from arena_conformance import check_archive, decode_source_pin, run_one
+from arena_conformance import ARCHIVE_SHA256, check_archive, decode_source_pin, run_one
 
 TARGET = {"version": "4.35.0", "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
 FORMAT = "3.1.0"
@@ -127,6 +127,8 @@ def main() -> int:
     ap.add_argument("--timeout", type=int, default=20)
     ap.add_argument("--per-label", type=int, default=0,
                     help="diagnostic pilot: N bad + N good; 0 processes all 193")
+    ap.add_argument("--known-gaps", type=pathlib.Path,
+                    help="allow only exact reviewed unqualified cases, never wrong kernel verdicts")
     ap.add_argument("--shard-index", type=int, default=0)
     ap.add_argument("--shard-count", type=int, default=1)
     ap.add_argument("--require-complete", action="store_true",
@@ -151,6 +153,22 @@ def main() -> int:
                  if index % args.shard_count == args.shard_index]
     if not cases:
         raise ValueError("no Arena cases selected")
+
+    known_by_name = {}
+    required_correct = set()
+    if args.known_gaps:
+        ledger = json.loads(args.known_gaps.read_text())
+        if (ledger.get("archive_sha256") != ARCHIVE_SHA256 or
+            ledger.get("lean_target") != TARGET["version"] or
+            ledger.get("pinned_lean_git") != TARGET["githash"]):
+            raise ValueError("known-gap ledger does not match the pinned source")
+        required_correct = set(ledger["required_correct_cases"])
+        for row in ledger["known_gaps"]:
+            if row["name"] in known_by_name or "correct" not in row["allowed"]:
+                raise ValueError("invalid or duplicated known-gap entry")
+            known_by_name[row["name"]] = set(row["allowed"])
+        if len(known_by_name) != 41:
+            raise ValueError("unexpected known-gap ledger size")
 
     results = []
     with TemporaryDirectory(prefix="c0-arena-435-compat-") as tmp:
@@ -198,6 +216,7 @@ def main() -> int:
         "full_suite": not args.per_label and args.shard_count == 1,
         "shard_index": args.shard_index,
         "shard_count": args.shard_count,
+        "bounded_known_gap_ledger": bool(args.known_gaps),
         "counts": dict(sorted(counts.items())),
         "official_verified_accepts": correct_accept,
         "official_verified_rejects": correct_reject,
@@ -209,16 +228,33 @@ def main() -> int:
     print(f"C0_ARENA_435_COMPAT_SUMMARY selected={len(cases)} official_accept={correct_accept} "
           f"official_reject={correct_reject} expected_drift={changed} "
           f"counts={dict(sorted(counts.items()))}", flush=True)
-    bad = any(key in counts for key in
-              ("false_accept", "false_reject", "adaptation_error", "official_driver_error",
-               "official_timeout", "c0_error"))
+    # Explicit known limitations are not passing results. Reject any newly
+    # unqualified case, false acceptance or false rejection.
+    violations = []
+    for item in results:
+        cl = item["classification"]
+        name = item["name"]
+        if name in required_correct and cl != "correct":
+            violations.append(f"mandatory positive must check: {name}: {cl}")
+        elif cl in ("false_accept", "false_reject", "adaptation_error", "c0_error"):
+            violations.append(f"unconditional invalidity: {name}: {cl}")
+        elif cl != "correct":
+            if args.known_gaps:
+                if cl not in known_by_name.get(name, set()):
+                    violations.append(f"new/unlisted unqualified case: {name}: {cl}")
+            elif cl.startswith("official_"):
+                violations.append(f"official reference failure: {name}: {cl}")
     if args.require_complete and counts.get("correct", 0) != len(cases):
-        bad = True
-    if counts.get("correct", 0) == 0:
-        bad = True
-    if bad:
-        print("C0_ARENA_435_COMPAT_GATE incomplete_or_wrong_verdict=true", file=sys.stderr)
-    return 1 if bad else 0
+        violations.append("complete C0 support is not qualified")
+    if not counts.get("correct", 0):
+        violations.append("zero independently matched cases")
+    for issue in violations:
+        print("C0_ARENA_435_COMPAT_VIOLATION " + issue, file=sys.stderr)
+    print(f"C0_ARENA_435_COMPAT_GATE bounded_valid={not violations} "
+          f"matched={counts.get('correct',0)}/{len(cases)} "
+          f"unqualified={len(cases)-counts.get('correct',0)} "
+          f"complete={counts.get('correct',0)==len(cases)}", flush=True)
+    return 1 if violations else 0
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
-          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2d8d804f58f02bafc 2>/dev/null || git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
           test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
           curl -fLsS --retry 3 -o "$RUNNER_TEMP/SharedOriginal.lean" https://raw.githubusercontent.com/leanprover/lean-kernel-arena/5d7ca987618f1136aaa296057b50a2c10c4ce77a/tests/perf/shared-subterm.lean
           python3 - <<'PY'

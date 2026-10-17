@@ -104,7 +104,13 @@ private def psKernelC0FVarMemoFind (expr : PsKernelExpr) :
       Option (PsKernelC0ExactFVar expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      -- Under WHNF a memo bucket may contain two independently allocated,
+      -- internally shared DAGs. Original recursive DecidableEq expands both
+      -- children at each node, so a repeated pair can take exponential
+      -- comparison work. The typed pair memo always returns actual
+      -- Decidable (expr = entry.expr) evidence on a hit/miss; the source
+      -- FVar membership certificate can only be transported by that Eq.
+      match psKernelC0ExactPairEq expr entry.expr with
       | .isTrue equal =>
           some (by
             cases equal

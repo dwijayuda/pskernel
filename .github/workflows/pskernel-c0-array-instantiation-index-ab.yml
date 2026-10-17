@@ -48,7 +48,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean")
+          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean")
           data=p.read_text()
           marker="private def psKernelC0InstOneMemoHash"
           assert data.count(marker)==1, "Original memo selector changed; refuse experiment"
@@ -57,8 +57,8 @@ jobs:
           # GitHub Actions performs a shallow checkout; explicitly fetch the
           # immutable pre-staging baseline commit before reading its blob.
           git fetch --quiet --no-tags --depth=1 origin e3509105a6a21b20a5c0759dc127ce7502d38700
-          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean
-          grep -Fq 'private def psKernelC0InstOneMemoHash' psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean
+          grep -Fq 'private def psKernelC0InstOneMemoHash' psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean
           echo 'C0_INST_INDEX_AB_BASELINE=locked_pre_staging_instantiate_memo'
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           set +e
@@ -87,10 +87,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean > psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean
           python3 - <<'PY'
           from pathlib import Path
-          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CertifiedInstantiateMemo.lean")
+          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean")
           data=p.read_text()
           marker="private def psKernelC0InstOneMemoHash"
           assert data.count(marker)==1, "Original memo selector changed; refuse experiment"

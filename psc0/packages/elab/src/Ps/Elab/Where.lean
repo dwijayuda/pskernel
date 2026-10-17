@@ -105,7 +105,7 @@ def psElabWhereTypedHeader (context : PsElabContext)
         PsElabError.infer
       let fresh := psMetaFresh level.context context.localContext familyType
         .natural {} bindersRev.length
-      pure ({ context := psElabContextWithMeta headerContext fresh.context
+      pure ({ context := psElabContextWithMeta headerContext fresh.context,
         type := psExprApplyMany fresh.expr (psElabBinderArguments bindersRev) } : PsElabTypeResult)
   let metaContext := result.context.metaContext
   let openType := psMetaInstantiate metaContext result.type

@@ -133,7 +133,7 @@ def psElabResolveSyntheticChecked (current : PsElabTermResult)
   let solved := psSyntheticSolve current.context.environment current.context.instances
     current.context.metaContext pending.reverse (!current.context.postponing)
   if solved.resourceExceeded then throw .fuelExhausted
-  return { result := psElabResultWithMeta current solved.context current.type
+  return { result := psElabResultWithMeta current solved.context current.type,
     constraintsRev := solved.pending.reverse }
 
 -- Retain the original result-only interface for existing callers.

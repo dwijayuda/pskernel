@@ -314,6 +314,37 @@ jobs:
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.rejected" \
             "$RUNNER_TEMP/arena435-projOfSubstProp-c0.txt"
           echo "C0_ARENA_SUBST_PROP official=rejected c0=rejected native=4.35.0 source=upstream_immutable"
+      - name: Exact Lean 4.35 logical safety-provenance differential
+        shell: bash
+        run: |
+          set -euo pipefail
+          for entry in SafeAccept UnsafeReject PartialReject; do
+            path="$GITHUB_WORKSPACE/psc0/packages/pskernel-c0/test/C0ArenaSafety$entry.ndjson"
+            native_rc=0
+            (
+              cd "$RUNNER_TEMP/lean4export"
+              lake env leanchecker --from-export "$path"
+            ) > "$RUNNER_TEMP/arena435-safety-$entry-official.txt" 2>&1 || native_rc=$?
+            if [ "$entry" = SafeAccept ]; then
+              test "$native_rc" -eq 0
+              grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/arena435-safety-$entry-official.txt"
+              expected="accepted"
+            else
+              test "$native_rc" -ne 0
+              grep -Fq "Lean default kernel rejects the solution" "$RUNNER_TEMP/arena435-safety-$entry-official.txt"
+              expected="rejected"
+            fi
+            (cd psc0/packages/pskernel-c0 && timeout 120s .lake/build/bin/c0OfficialReplay "$path" 4096) \
+              > "$RUNNER_TEMP/arena435-safety-$entry-c0.txt" 2>&1
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.$expected" "$RUNNER_TEMP/arena435-safety-$entry-c0.txt"
+            echo "C0_ARENA_SAFETY_DIFF case=$entry official=$expected c0=$expected"
+          done
+          path="$GITHUB_WORKSPACE/psc0/packages/pskernel-c0/test/C0ArenaSafetyUnsafeDecline.ndjson"
+          (cd psc0/packages/pskernel-c0 && timeout 120s .lake/build/bin/c0OfficialReplay "$path" 4096) \
+            > "$RUNNER_TEMP/arena435-safety-standalone-c0.txt" 2>&1
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.unsupported" \
+            "$RUNNER_TEMP/arena435-safety-standalone-c0.txt"
+          echo "C0_ARENA_SAFETY_DIFF standalone_unsafe=unsupported cannot_admit_unchecked=true"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

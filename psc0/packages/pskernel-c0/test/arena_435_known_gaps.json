@@ -4,7 +4,7 @@
   "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
   "lean_target": "4.35.0",
   "pinned_lean_git": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-  "status": "19 formerly unqualified cases remain, NOT passing verdicts. 24 verified target cases MUST produce full independent Lean 4.35 / C0 parity; future declined results on any mandatory case are fatal.",
+  "status": "17 explicitly unqualified cases remain (one nested-recursion negative, 16 resource/reference cases). The two proof attempts using prior unsafe/partial definitions MUST now reject under independently checked Lean 4.35.",
   "evidence": [
     "https://github.com/dwijayuda/pskernel/actions/runs/39006816117",
     "https://github.com/dwijayuda/pskernel/actions/runs/39007503159",
@@ -34,7 +34,9 @@
     "tutorial/136_misnamed_rec_user.ndjson",
     "tutorial/137_dup_rec_def2.ndjson",
     "tutorial/138_dup_ctor_rec.ndjson",
-    "tutorial/139_DupConCon.ndjson"
+    "tutorial/139_DupConCon.ndjson",
+    "tutorial/140_falseFromUnsafe.ndjson",
+    "tutorial/141_falseFromPartial.ndjson"
   ],
   "known_gaps": [
     {
@@ -204,22 +206,6 @@
         "official_timeout"
       ],
       "class": "unqualified_resource_or_performance"
-    },
-    {
-      "name": "tutorial/140_falseFromUnsafe.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
-    },
-    {
-      "name": "tutorial/141_falseFromPartial.ndjson",
-      "allowed": [
-        "correct",
-        "c0_unsupported"
-      ],
-      "class": "unqualified_negative_inductive_or_safety_metadata"
     }
   ]
 }

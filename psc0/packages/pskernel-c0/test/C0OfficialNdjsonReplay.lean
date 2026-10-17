@@ -32,6 +32,9 @@ structure C0ExportInductiveGroup where
 inductive C0ExportDeclaration where
   | axiomDecl (value : PsKernelAxiomInfo)
   | definition (value : PsKernelDefinitionInfo)
+  -- A nonlogical unsafe/partial source may be syntactically read to retain
+  -- exact provenance, but is NEVER inserted into the checked environment.
+  | nonlogicalDefinition (name : PsKernelName) (safety : String)
   | theoremDecl (value : PsKernelTheoremInfo)
   | opaqueDecl (value : PsKernelOpaqueInfo)
   | inductiveGroup (value : C0ExportInductiveGroup)
@@ -625,7 +628,8 @@ def c0ExportParseRecord
     let ty ← c0ExportExpr st (← c0JsonNat payload "type")
     let value ← c0ExportExpr st (← c0JsonNat payload "value")
     let safety ← c0JsonString payload "safety"
-    if safety != "safe" then throw "unsupported safety policy"
+    if safety != "safe" && safety != "unsafe" && safety != "partial" then
+      throw "unsupported safety policy"
     let hintValue ← c0JsonObj payload "hints"
     let hints ←
       match hintValue.getStr? with
@@ -636,6 +640,13 @@ def c0ExportParseRecord
           c0ExportOnlyKeys hintValue ["regular"]
           let height ← c0JsonNat hintValue "regular"
           pure (PsKernelReducibilityHints.regular height)
+    if safety != "safe" then
+      -- Preserve the complete source definition's raw name, type/value and
+      -- original safety label without admitting a logical declaration.
+      -- A later safe theorem may be rejected only on real use of this
+      -- proven unsafe/partial source; otherwise the stream must decline.
+      return { st with declarations :=
+        .nonlogicalDefinition name safety :: st.declarations }
     let definition : PsKernelDefinitionInfo := {
       base := { name := name, levelParams := params, type := ty }
       value := value
@@ -826,8 +837,35 @@ def c0ExportForbiddenPropLargeElim
       else false
   | _ => false
 
-/-- One declaration check, preserving the kernel's typed error category.
-    The source recursive checker is the *only* acceptance authority. -/
+/-- Exact syntactic const reference through every source expression
+    constructor. This is queried ONLY when earlier nonlogical definitions
+    were tracked; full source checking remains the admission authority. -/
+partial def c0ExportExprMentionsNonlogical
+    (blocked : List PsKernelName) (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | .const name _ =>
+      blocked.any (fun x => psKernelNameEq x name)
+  | .app fn arg =>
+      c0ExportExprMentionsNonlogical blocked fn ||
+        c0ExportExprMentionsNonlogical blocked arg
+  | .lam _ type body _ =>
+      c0ExportExprMentionsNonlogical blocked type ||
+        c0ExportExprMentionsNonlogical blocked body
+  | .forallE _ type body _ =>
+      c0ExportExprMentionsNonlogical blocked type ||
+        c0ExportExprMentionsNonlogical blocked body
+  | .letE _ type value body _ =>
+      c0ExportExprMentionsNonlogical blocked type ||
+        c0ExportExprMentionsNonlogical blocked value ||
+        c0ExportExprMentionsNonlogical blocked body
+  | .proj _ _ term =>
+      c0ExportExprMentionsNonlogical blocked term
+  | .mdata _ term =>
+      c0ExportExprMentionsNonlogical blocked term
+  | _ => false
+
+/-- One declaration check, preserving typed kernel errors.
+    Only full source checking can admit a declaration. -/
 def c0ExportCheckOne
     (env : PsKernelEnvironment)
     (info : C0ExportDeclaration)
@@ -838,6 +876,8 @@ def c0ExportCheckOne
         psKernelAddAxiom fuel env value 4096 psKernelLeanNatMaxSizeDefault
     | .definition value =>
         psKernelAddDefinition fuel env value 4096 psKernelLeanNatMaxSizeDefault
+    | .nonlogicalDefinition _ _ =>
+        Except.error "unsupported nonlogical source requires separate checking"
     | .theoremDecl value =>
         psKernelAddTheorem fuel env value 4096 psKernelLeanNatMaxSizeDefault
     | .opaqueDecl value =>
@@ -890,11 +930,33 @@ def c0ExportCheckOne
 def c0ExportCheckDefinitions (infos : List C0ExportDeclaration) :
     Except PsKernelError Bool := do
   let mut env := psKernelEnvironmentEmpty
+  let mut blocked : List PsKernelName := []
   for info in infos do
-    match c0ExportCheckOne env info with
-    | .ok next => env := next
-    | .error (.rejectedInvalid _) => return false
-    | .error error => throw error
+    match info with
+    | .nonlogicalDefinition name _ =>
+        -- No unsafe/partial term is ever placed in the trusted environment.
+        if blocked.any (fun x => psKernelNameEq x name) ||
+            (psKernelEnvironmentFind env name).isSome then
+          return false
+        blocked := name :: blocked
+    | .theoremDecl value =>
+        -- Official Lean 4.35 type_checker.cpp::infer_const refuses
+        -- safe proofs referring to prior unsafe/partial definitions.
+        if !blocked.isEmpty &&
+            (c0ExportExprMentionsNonlogical blocked value.value ||
+             c0ExportExprMentionsNonlogical blocked value.base.type) then
+          return false
+        match c0ExportCheckOne env info with
+        | .ok next => env := next
+        | .error (.rejectedInvalid _) => return false
+        | .error error => throw error
+    | _ =>
+        match c0ExportCheckOne env info with
+        | .ok next => env := next
+        | .error (.rejectedInvalid _) => return false
+        | .error error => throw error
+  if !blocked.isEmpty then
+    throw (.declinedUnsupported "nonlogical source declarations were not admitted")
   return true
 
 /-- The conformance harness distinguishes official acceptance/rejection from
@@ -950,6 +1012,8 @@ structure C0ExportOnlineState where
   tables : C0ExportTables := {}
   environment : PsKernelEnvironment := psKernelEnvironmentEmpty
   checkedCount : Nat := 0
+  -- Source provenance ONLY. These names are never trusted declarations.
+  nonlogical : List (PsKernelName × String) := []
 
 /-- An error retains only its actual reason and, for a checker error,
     the exact environment and declaration at the failed admission. Successful
@@ -972,7 +1036,7 @@ def c0ExportStepFailureVerdict : C0ExportStepFailure → C0ExportVerdict
 def c0ExportStepDetailed
     (state : C0ExportOnlineState) (raw : String) (fuel : Nat) :
     Except C0ExportStepFailure C0ExportOnlineState := do
-  let ⟨tables, initialEnv, initialChecked⟩ := state
+  let ⟨tables, initialEnv, initialChecked, initialNonlogical⟩ := state
   let record ← match Lean.Json.parse raw with
     | .ok value => pure value
     | .error message => throw (.malformedJson message)
@@ -981,16 +1045,39 @@ def c0ExportStepDetailed
     | .error message => throw (.invalidInput message)
   let mut env := initialEnv
   let mut checked := initialChecked
+  let mut nonlogical := initialNonlogical
   for declaration in parsed.declarations do
-    match c0ExportCheckOne env declaration fuel with
-    | .ok next =>
-        env := next
-        checked := checked + 1
-    | .error error => throw (.checked env declaration error)
+    match declaration with
+    | .nonlogicalDefinition name safety =>
+        if nonlogical.any (fun x => psKernelNameEq x.fst name) ||
+            (psKernelEnvironmentFind env name).isSome then
+          throw (.checked env declaration (.rejectedInvalid
+            "duplicate unsafe/partial definition name"))
+        nonlogical := (name, safety) :: nonlogical
+    | .theoremDecl info =>
+        -- No nonlogical prior declaration means zero new proof traversal
+        -- on full Init / Std / Mathlib. Only the tainted path is scanned.
+        if !nonlogical.isEmpty &&
+            (c0ExportExprMentionsNonlogical (nonlogical.map Prod.fst) info.value ||
+             c0ExportExprMentionsNonlogical (nonlogical.map Prod.fst) info.base.type) then
+          throw (.checked env declaration (.rejectedInvalid
+            "safe theorem uses previously exported unsafe/partial declaration"))
+        match c0ExportCheckOne env declaration fuel with
+        | .ok next =>
+            env := next
+            checked := checked + 1
+        | .error error => throw (.checked env declaration error)
+    | _ =>
+        match c0ExportCheckOne env declaration fuel with
+        | .ok next =>
+            env := next
+            checked := checked + 1
+        | .error error => throw (.checked env declaration error)
   return {
     tables := { parsed with declarations := [] }
     environment := env
     checkedCount := checked
+    nonlogical := nonlogical
   }
 
 /-- Preserve the original public pure verdict and transition API. -/
@@ -1002,9 +1089,11 @@ def c0ExportStep
   | .error failure => .error (c0ExportStepFailureVerdict failure)
 
 def c0ExportFinish (state : C0ExportOnlineState) : C0ExportVerdict :=
-  if !state.tables.header || state.checkedCount == 0 then .malformed
+  if !state.tables.header then .malformed
   else if state.tables.quotientParts != 0 &&
       state.tables.quotientParts != 4 then .malformed
+  else if !state.nonlogical.isEmpty then .unsupported
+  else if state.checkedCount == 0 then .malformed
   else .accepted
 
 /-- In-memory regression entry point shares the exact same step semantics
@@ -2148,6 +2237,23 @@ def c0ExportRejectLossyImports : IO Unit := do
     if result != expected then
       throw (IO.userError s!"wrong input category {label}: {repr result}")
 
+/-- Explicit nonlogical source tracking does not admit executable/partial
+    definitions, and checked logical proofs cannot refer to them. -/
+def c0ExportNonlogicalSafetyRegression : IO Unit := do
+  let cases : List (String × C0ExportVerdict) := [
+    ("C0ArenaSafetySafeAccept.ndjson", .accepted),
+    ("C0ArenaSafetyUnsafeReject.ndjson", .rejected),
+    ("C0ArenaSafetyPartialReject.ndjson", .rejected),
+    ("C0ArenaSafetyUnsafeDecline.ndjson", .unsupported)
+  ]
+  for (file, expected) in cases do
+    let input ← IO.FS.readFile ("test/" ++ file)
+    let streamed := c0ExportVerdictOnline input
+    let batched := c0ExportVerdictBatch input
+    if streamed != expected || batched != expected then
+      throw (IO.userError s!"C0 nonlogical safety provenance regression {file}: ${repr streamed}, ${repr batched} expected ${repr expected}")
+  IO.println "C0_ARENA_SAFETY_PROVENANCE safe=accepted unsafe_proof=rejected partial_proof=rejected unsafe_only=unsupported nonadmitting=true"
+
 /-- Cross-check category handling and bounded-fuel exhaustion without
     weakening the checked source rules to make an expected result pass. -/
 def c0ExportOnlineOutcomes : IO Unit := do
@@ -2293,6 +2399,7 @@ def main (args : List String) : IO Unit := do
     throw (IO.userError "strict NDJSON replay declined accepted input")
   c0ExportRejectLossyImports
   c0ExportRejectForgedInductiveMetadata
+  c0ExportNonlogicalSafetyRegression
   c0ExportOnlineOutcomes
   let cases : List (String × Bool) := [
     ("C0OfficialAccept.ndjson", true),

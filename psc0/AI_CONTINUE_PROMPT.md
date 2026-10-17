@@ -7,6 +7,19 @@ The preceding accepted compiler/test SHA is
 **960 actual runtime comparisons** remain the accepted baseline. The weighted
 engineering estimate remains **78/100**.
 
+### First qualification failure and bounded repair
+
+Initial candidate `9af377a8da017d0ef3440968e353010063fb9481` failed the focused
+host test build in [run 39047098395](https://github.com/dwijayuda/pskernel/actions/runs/39047098395),
+job `117437900445`: local identifiers matches (line 736) and scoped (line 830)
+are reserved Lean tokens. Its completed 104,970-character log reports the
+Pscv0M3Where parse errors before source/runtime fixture execution.
+This revision renames those local bindings to matchingDiagnostics and
+scopedMain, with their uses. No compiler logic, assertion, source example,
+oracle, workflow or budget changes. F1/F2/F3 passed at the first candidate.
+The healthy Native run was allowed to complete before this repair was pushed. The repaired revision still requires a fresh five-gate
+matrix at one exact SHA; prior per-gate results cannot be mixed into it.
+
 ### Candidate behavior and ownership
 
 The recorded nonrecursive Where unknown-measure refusal is being corrected
@@ -96,6 +109,25 @@ the recorded typed nonrecursive Where diagnostic cell, while the complete
 source exit and broader inference, indexed binary deriving, nested/source
 induction, larger changing WF packs, arbitrary measure telescopes, general
 mutual WF and the complete P0 matrix remain open.
+
+### Next concrete source-scope boundary
+
+A follow-up source audit identifies a separate legacy ordinary-definition
+gap. An explicit-result function with no Where block and no hint still takes
+Command's psScopeDeclaration route. Its source-used-key selection can omit
+a local dictionary whose alias type depends on a section tag when neither
+tag nor the dictionary name occurs in the header/body. The equivalent
+hinted definition takes typed predefinitions and sees the full context.
+This gap is inferred from current source; it has not been qualified by a new
+plain/hinted execution pair in this cell.
+
+The next bounded obligation is ordinary definition section-instance parity
+across those routes: matching native/portable plain and hinted definitions,
+two nonzero actual dictionaries, complete capture headers and exact
+equations, while preserving private aliases, registered abbrev behavior,
+theorem include/omit policy and all five gates. The present dictionary
+regression is explicitly a Where/predefinition pair. It does not establish
+the complete legacy ordinary-definition source exit.
 
 ### Fixed authority and continuation policy
 

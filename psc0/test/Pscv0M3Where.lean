@@ -733,10 +733,10 @@ private def checkHintDiagnostics (sourceName : String)
   ensure (diagnostics.length == expected.length)
     ("wrong warning count for " ++ sourceName)
   for (message, span) in expected do
-    let matches := diagnostics.filter (fun entry =>
+    let matchingDiagnostics := diagnostics.filter (fun entry =>
       entry.sourceName == sourceName && entry.diagnostic.message == message &&
       partialHintSpanEq entry.diagnostic.span span)
-    let [entry] := matches
+    let [entry] := matchingDiagnostics
       | throw (IO.userError ("missing or duplicate source-owned warning: " ++ message))
     ensure (match entry.diagnostic.severity with | .warning => true | _ => false)
       "unused hint acquired a non-warning severity"
@@ -827,14 +827,14 @@ private def checkUnusedHints : IO Unit := do
       | throw (IO.userError "missing raw unused-hint source")
     let .whereDeclaration _ locals _ := original
       | throw (IO.userError "unused hint lost its local source wrapper")
-    let scoped ← fromExcept ((psScopePreDefinition
+    let scopedMain ← fromExcept ((psScopePreDefinition
       { environment := psSelfHostProdPreludeEnvironment, scope := {} }
       { declaration := original }
       (PsSyntaxName.mk [parent] (psElabOriginSource original).snd) false).mapError psCompilerPscv0ElabError)
-    ensure (scoped.locals.length == locals.length && !scoped.used.contains "hintOnly" &&
-      !scoped.used.contains "missingMeasure" && !scoped.used.contains "missingProof")
+    ensure (scopedMain.locals.length == locals.length && !scopedMain.used.contains "hintOnly" &&
+      !scopedMain.used.contains "missingMeasure" && !scopedMain.used.contains "missingProof")
       "ignored total hints requested a source capture before typed dispatch"
-    for (originalLocal, scopedLocal) in locals.zip scoped.locals do
+    for (originalLocal, scopedLocal) in locals.zip scopedMain.locals do
       let some (.total before) := originalLocal.recursion
         | throw (IO.userError "unused hint lost its original total suffix")
       let some (.total after) := scopedLocal.source.recursion

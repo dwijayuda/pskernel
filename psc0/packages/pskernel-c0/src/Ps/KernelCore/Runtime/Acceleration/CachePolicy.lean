@@ -126,7 +126,11 @@ assumption to kernel admission or convertibility.
 -/
 private unsafe def psKernelC0FVarMemoIdentityHashNative
     (expr : PsKernelExpr) : Nat :=
-  (ptrAddrUnsafe expr).toNat
+  -- Lean runtime objects are word-aligned; discard the pointer's low
+  -- alignment nibble to use all four radix-16 index levels. This shift
+  -- affects performance ONLY: hash collisions and even inconsistent
+  -- hash observations cannot make an exact checked hit.
+  (ptrAddrUnsafe expr).toNat / psKernelC0Radix
 
 @[implemented_by psKernelC0FVarMemoIdentityHashNative]
 private def psKernelC0FVarMemoIdentityHash

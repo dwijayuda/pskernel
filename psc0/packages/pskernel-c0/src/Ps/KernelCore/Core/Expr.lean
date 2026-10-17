@@ -254,9 +254,9 @@ def psKernelC0FullPairedExprEq : PsKernelExpr → PsKernelExpr → Bool
       psKernelBoolEq an bn
   | .lit a, .lit b => psKernelLiteralEq a b
   | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelC0FullPairedExprEq ab bb
+      decide (am = bm) && psKernelC0FullPairedExprEq ab bb
   | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi &&
+      psKernelNameEq an bn && decide (ai = bi) &&
       psKernelC0FullPairedExprEq ab bb
   | _, _ => false
 

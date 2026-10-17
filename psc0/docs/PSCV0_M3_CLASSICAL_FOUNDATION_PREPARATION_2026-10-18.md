@@ -1,5 +1,13 @@
 # M3+B implementation preparation — Order proofs, source privacy, WF state and indexed BEq
 
+## Preparation5 — repair host fixture parsing and native proof-oracle inference
+
+Preparation5dd8ed9701b215bf808ea1e058e382b3f639710a completed [run39067140365](https://github.com/dwijayuda/pskernel/actions/runs/39067140365). Native compiler build, exact primitive/closure/strict manifest checks, retained Order export/data/metadata and the new indexed BEq source/native/kernel/emission suite passed. The recursive deriving suite also passed. Runtime comparisons still require the focused runner lanes.
+
+Two host fixture failures blocked the other new checks: a multiline nested section module record was parsed at the wrong field indentation, and native monotone_ite/dite reference lambdas plus flat-order numerals lacked explicit types. This revision puts the record on one line and supplies those expected native types. Assertions, source programs, portable proof goals, resource budgets and all computational/refusal boundaries are unchanged. The source/WF fixture execution and Order/monotonicity proof audits remain pending the repaired run.
+
+The foundation-only main integration is now f271f2a35789b120dbe1a6dcd5a555db44e72134. Its full five-gate qualification is separate and must finish without canceling a healthy Native run.
+
 ## Current candidate
 
 This preparation revision adds checked-owner implementations and concrete cloud checks. M3+B is still open. The main integration branch and the historical all-five compiler qualification remain unchanged until the new candidate passes and is deliberately promoted.

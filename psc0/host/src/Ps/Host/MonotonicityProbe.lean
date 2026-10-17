@@ -41,13 +41,14 @@ private theorem independentMatch (flag : Bool) :
 
 private theorem independentIte (p : Prop) [Decidable p] :
     monotone (fun (f : Nat → Option Nat) => if p then none else f 3) :=
-  monotone_ite p (fun _ => none) (fun f => f 3)
+  monotone_ite p (fun (_ : Nat → Option Nat) => none) (fun (f : Nat → Option Nat) => f 3)
     (monotone_const none) (monotone_apply 3 (fun f => f) monotone_id)
 
 private theorem independentDite (p : Prop) [Decidable p] :
     monotone (fun (f : Nat → Option Nat) =>
       dite p (fun _ => none) (fun _ => f 3)) :=
-  monotone_dite p (fun _ _ => none) (fun f _ => f 3)
+  monotone_dite p (fun (_ : Nat → Option Nat) (_ : p) => none)
+    (fun (f : Nat → Option Nat) (_ : ¬ p) => f 3)
     (monotone_const (fun _ => none))
     (monotone_of_monotone_apply _ fun _ => monotone_apply 3 (fun f => f) monotone_id)
 
@@ -58,7 +59,8 @@ private theorem decreasingCounterexample :
     ¬ @monotone Nat (FlatOrder.instOrder (b := 1)) Nat
       (FlatOrder.instOrder (b := 1)) Nat.pred := by
   intro h
-  have impossible : FlatOrder.rel (b := 1) 0 1 := h 1 2 FlatOrder.rel.bot
+  have impossible : FlatOrder.rel (b := (1 : Nat)) (0 : Nat) (1 : Nat) :=
+    h 1 2 FlatOrder.rel.bot
   cases impossible
 
 end PsV7MonotonicityOracle

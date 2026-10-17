@@ -1053,8 +1053,7 @@ private def checkSectionInstances : IO Unit := do
         PsV7Native.Request),
       ({ source := "import PrivateSignature\nconst entry: Nat := 0\n",
          sourceName := "section-signature-entry.ps", moduleName := "Main",
-         modules := [{ name := "PrivateSignature", sourceName := "private-signature.ps",
-           source := "private const hidden: Nat := 7\ntheorem forbidden: Eq(hidden, hidden) := by { rfl }\n" }] } :
+         modules := [{ name := "PrivateSignature", sourceName := "private-signature.ps", source := "private const hidden: Nat := 7\ntheorem forbidden: Eq(hidden, hidden) := by { rfl }\n" }] } :
         PsV7Native.Request)]
   let batch : PsV7Native.Batch ← match ← PsV7Native.runBatch requests with
     | .ok value => pure value

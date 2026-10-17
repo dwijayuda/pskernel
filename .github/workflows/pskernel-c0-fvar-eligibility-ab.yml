@@ -1,4 +1,4 @@
-name: PSKernel-C0 certified FVar identity versus structural hash A/B
+name: PSKernel-C0 certified FVar full-key map versus shape trie A/B
 on:
   pull_request:
     branches:
@@ -66,25 +66,29 @@ jobs:
             > "$RUNNER_TEMP/shared-baseline.txt" 2>&1
           rc=$?
           set -e
-          echo "C0_WHNF_ELIG_AB variant=identity_hint_shape_hash exit=$rc"
+          echo "C0_WHNF_ELIG_AB variant=certified_shape_trie exit=$rc"
           if [ "$rc" -eq 0 ]; then
             grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/shared-baseline.txt"
-            echo 'C0_WHNF_ELIG_AB variant=identity_hint_shape_hash verdict=accepted'
+            echo 'C0_WHNF_ELIG_AB variant=certified_shape_trie verdict=accepted'
           elif [ "$rc" -eq 124 ]; then
-            echo 'C0_WHNF_ELIG_AB variant=identity_hint_shape_hash verdict=unqualified_timeout'
+            echo 'C0_WHNF_ELIG_AB variant=certified_shape_trie verdict=unqualified_timeout'
           elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/shared-baseline.txt"; then
-            echo 'C0_WHNF_ELIG_AB variant=identity_hint_shape_hash verdict=unqualified_resource'
+            echo 'C0_WHNF_ELIG_AB variant=certified_shape_trie verdict=unqualified_resource'
           else
             tail -n 30 "$RUNNER_TEMP/shared-baseline.txt"
             exit 1
           fi
           grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/shared-baseline-resources.txt"
-      - name: Same-runner proof-parametric identity-hash candidate without fuel changes
+      - name: Same-runner proof-parametric full-key identity map candidate without fuel changes
         shell: bash
         run: |
           set -euo pipefail
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          grep -Fq 'abbrev PsKernelC0FVarMemo :=' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          grep -Fq 'Std.HashMap Nat' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
           grep -Fq 'psKernelC0FVarMemoGoWithHash_source' \
             psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
           (cd psc0/packages/pskernel-c0 && \
@@ -98,24 +102,24 @@ jobs:
             > "$RUNNER_TEMP/shared-certified.txt" 2>&1
           rc=$?
           set -e
-          echo "C0_WHNF_ELIG_AB variant=identity_hint exit=$rc"
+          echo "C0_WHNF_ELIG_AB variant=certified_full_key_map exit=$rc"
           if [ "$rc" -eq 0 ]; then
             grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/shared-certified.txt"
-            echo 'C0_WHNF_ELIG_AB variant=identity_hint verdict=accepted'
+            echo 'C0_WHNF_ELIG_AB variant=certified_full_key_map verdict=accepted'
           elif [ "$rc" -eq 124 ]; then
-            echo 'C0_WHNF_ELIG_AB variant=identity_hint verdict=unqualified_timeout'
+            echo 'C0_WHNF_ELIG_AB variant=certified_full_key_map verdict=unqualified_timeout'
           elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/shared-certified.txt"; then
-            echo 'C0_WHNF_ELIG_AB variant=identity_hint verdict=unqualified_resource'
+            echo 'C0_WHNF_ELIG_AB variant=certified_full_key_map verdict=unqualified_resource'
           else
             tail -n 30 "$RUNNER_TEMP/shared-certified.txt"
             exit 1
           fi
           grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/shared-certified-resources.txt"
-          echo 'C0_WHNF_ELIG_AB_SCOPE same_runner=true same_export=true same_fuel=4096 identity_hash_bucket_only=true exact_hit_eq=true no_kernel_admission_shortcut=true'
+          echo 'C0_WHNF_ELIG_AB_SCOPE same_runner=true same_export=true same_fuel=4096 full_key_map_bucket_only=true exact_hit_eq=true no_kernel_admission_shortcut=true'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: pskernel-c0-fvar-identity-shared-subterm-ab
+          name: pskernel-c0-fvar-full-key-shared-subterm-ab
           path: |
             ${{ runner.temp }}/shared-subterm-435.json
             ${{ runner.temp }}/shared-*-resources.txt

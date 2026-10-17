@@ -1,3 +1,26 @@
+## Current packing proof layout follow-up — 2026-10-17
+
+The combined candidate `176ac54106b2f7c6f37fb0733af69c609454b137`
+failed all five gates during compilation. [Native 39001455448](https://github.com/dwijayuda/pskernel/actions/runs/39001455448),
+job `117305073630`, and [focused 39001455422](https://github.com/dwijayuda/pskernel/actions/runs/39001455422),
+job `117305073435`, report the same layout error in the packing equation owner.
+The unary callback-equality branch starts a multiline function call after its
+same-line arrow; the continuation is parsed as another do element, causing a
+cascading missing-case/type error. This repair places the function call on its
+own indented branch-body line. No expression, proof argument, branch, source
+request, oracle, runtime output or refusal is removed or changed.
+
+A fresh complete matrix is required. Native workloads and source fixtures did
+not run at the failed combined SHA. The completed all-34-step active-foundation
+native replay at `3c5f51a2` and its exact hashes/artifact remain preserved in
+the foundation receipt. The combined packing, partial-hint and empty-guard
+candidate remains unqualified.
+
+Accepted compiler/test stays
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+All fixed toolchain, assumption, cloud-execution and draft/open/unmerged PR
+boundaries remain unchanged.
+
 ## Current checkpoint — active foundation replay preserved, next matrix pending
 
 [Native 39000431708](https://github.com/dwijayuda/pskernel/actions/runs/39000431708)

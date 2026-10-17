@@ -609,7 +609,8 @@ def psElabWellFoundedTypedParts (elaborate : PsElaborator)
       | some (.theoremDecl ..) | some (.definitionDecl ..) => pure ()
       | _ => throw (.data "PSCV0-WF-FOUNDATION: checked equality transport is unavailable")
     let callbackEquality ← match argument with
-      | .unary _ => psElabWellFoundedExtensionalEquality (2 + states.length)
+      | .unary _ =>
+        psElabWellFoundedExtensionalEquality (2 + states.length)
           equationContext callbackType rawCallback unfoldCallback
       | .dependentPair _ _ domain => do
         let some packing := psWellFoundedPairPackingView domain

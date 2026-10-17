@@ -1,0 +1,378 @@
+{
+  "version": 1,
+  "archive_round": "round-2026-09",
+  "archive_sha256": "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d",
+  "lean_target": "4.35.0",
+  "pinned_lean_git": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "status": "Known unqualified case outcomes. This is NOT a list of accepted test cases and does not waive any false acceptance, false rejection, transport integrity, adapter exception, or new unqualified case.",
+  "evidence": [
+    "https://github.com/dwijayuda/pskernel/actions/runs/39006816117",
+    "https://github.com/dwijayuda/pskernel/actions/runs/39007503159"
+  ],
+  "required_correct_cases": [
+    "other/level-index-out-of-order.ndjson",
+    "other/sparse-name-index.ndjson"
+  ],
+  "known_gaps": [
+    {
+      "name": "bugs/ctor-num-fields.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/large-elim-param.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/level-imax-leq.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/nat-rec-k-lie.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/nat-rec-rules.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/orphan-rec.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/rec-k-lie.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "bugs/rec-missing-ih.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "other/extra-rec.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "other/orphan-ctor.ndjson",
+      "allowed": [
+        "correct",
+        "c0_malformed"
+      ],
+      "class": "unqualified_negative_raw_declaration_format"
+    },
+    {
+      "name": "perf/app-lam.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/beta-ladder.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/church-numerals.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/discarded-argument-match.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/discarded-argument.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/folded-constant-first.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/folded-constant-last.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/fueled-chain.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/grind-ring-5.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/let-ladder.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/magma-list-deep-n21.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/magma-list-deep-n36.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/magma-list-pair-n21.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/magma-list-pair-n7.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/refute-cheap-last.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "perf/shared-subterm.ndjson",
+      "allowed": [
+        "correct",
+        "c0_timeout",
+        "c0_resourceExhausted",
+        "official_timeout"
+      ],
+      "class": "unqualified_resource_or_performance"
+    },
+    {
+      "name": "tutorial/046_inductBadNonSort.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/047_inductBadNonSort2.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/048_inductLevelParam.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/049_inductTooFewParams.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/073_BogusRecursor.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/132_dup_defs.ndjson",
+      "allowed": [
+        "correct",
+        "official_driver_error"
+      ],
+      "class": "unqualified_official_duplicate_declaration_driver"
+    },
+    {
+      "name": "tutorial/133_dup_ind_def.ndjson",
+      "allowed": [
+        "correct",
+        "official_driver_error"
+      ],
+      "class": "unqualified_official_duplicate_declaration_driver"
+    },
+    {
+      "name": "tutorial/134_dup_ctor_def.ndjson",
+      "allowed": [
+        "correct",
+        "official_driver_error"
+      ],
+      "class": "unqualified_official_duplicate_declaration_driver"
+    },
+    {
+      "name": "tutorial/135_dup_rec_def.ndjson",
+      "allowed": [
+        "correct",
+        "official_driver_error"
+      ],
+      "class": "unqualified_official_duplicate_declaration_driver"
+    },
+    {
+      "name": "tutorial/136_misnamed_rec_user.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/137_dup_rec_def2.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/138_dup_ctor_rec.ndjson",
+      "allowed": [
+        "correct",
+        "official_driver_error"
+      ],
+      "class": "unqualified_official_duplicate_declaration_driver"
+    },
+    {
+      "name": "tutorial/139_DupConCon.ndjson",
+      "allowed": [
+        "correct",
+        "official_driver_error"
+      ],
+      "class": "unqualified_official_duplicate_declaration_driver"
+    },
+    {
+      "name": "tutorial/140_falseFromUnsafe.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    },
+    {
+      "name": "tutorial/141_falseFromPartial.ndjson",
+      "allowed": [
+        "correct",
+        "c0_unsupported"
+      ],
+      "class": "unqualified_negative_inductive_or_safety_metadata"
+    }
+  ]
+}

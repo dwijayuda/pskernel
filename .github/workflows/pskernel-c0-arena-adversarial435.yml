@@ -264,6 +264,20 @@ jobs:
           (
             cd "$RUNNER_TEMP/lean4export"
             cp "$RUNNER_TEMP/$name.lean" "$name.lean"
+            # The 4.35 API adds an explicit maxRecDepth USize argument.
+            # Change only that call signature; preserve all exploit declarations.
+            python3 - "$name.lean" <<'PY'
+          from pathlib import Path
+          import hashlib,sys
+          p=Path(sys.argv[1])
+          raw=p.read_bytes()
+          old=b"env.addDeclCore 800000 decl none (doCheck := false)"
+          new=b"env.addDeclCore 800000 10000 decl none (doCheck := false)"
+          assert raw.count(old) == 1, "upstream source changed; refuse adaptation"
+          p.write_bytes(raw.replace(old, new))
+          print("C0_ARENA_SUBST_PROP orig_sha256="+hashlib.sha256(raw).hexdigest()+
+                " api_adaptation=addDeclCore_maxRecDepth_only")
+          PY
             lake env lean -o ".lake/build/lib/lean/$name.olean" "$name.lean"
             lake env .lake/build/bin/lean4export "$name" -- inconsistent \
               > "$RUNNER_TEMP/arena435-projOfSubstProp.ndjson"

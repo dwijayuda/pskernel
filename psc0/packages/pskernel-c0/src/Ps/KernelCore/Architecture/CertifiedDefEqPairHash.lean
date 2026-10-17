@@ -21,7 +21,7 @@ result contains no permission to admit a proof, just a Nat cache key. -/
 def psKernelC0MemoizedPairHash
     (left right : PsKernelExpr) : Nat :=
   let (lh, memo) :=
-    psKernelC0ExactHashWithMemo left PsKernelC0HashTrie.empty
+    psKernelC0ExactHashWithMemo left (∅ : PsKernelC0ExactHashMemo)
   let (rh, _) := psKernelC0ExactHashWithMemo right memo
   (lh.value + rh.value) % psKernelCacheHashModulus
 
@@ -31,7 +31,7 @@ theorem psKernelC0MemoizedPairHash_source
     psKernelC0MemoizedPairHash left right =
       psKernelExprPairHash left right := by
   let leftHash :=
-    psKernelC0ExactHashWithMemo left PsKernelC0HashTrie.empty
+    psKernelC0ExactHashWithMemo left (∅ : PsKernelC0ExactHashMemo)
   let rightHash :=
     psKernelC0ExactHashWithMemo right leftHash.2
   change
@@ -42,7 +42,7 @@ theorem psKernelC0MemoizedPairHash_source
   rw [leftHash.1.source, rightHash.1.source]
 
 /-- Bounded, syntactic, non-semantic routing guard. Short spines retain
-the original two exact hashes and avoid allocating a memo trie. -/
+the original two exact hashes and avoid allocating a memo map. -/
 def psKernelC0PairHashMemoWorthwhile (left right : PsKernelExpr) : Bool :=
   psKernelExprGetAppNumArgs left >= 16 &&
   psKernelExprGetAppNumArgs right >= 16

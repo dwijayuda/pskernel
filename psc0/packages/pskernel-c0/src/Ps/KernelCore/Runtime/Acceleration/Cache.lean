@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.ExprDecidableEq
+import Std.Data.HashMap.Basic
 
 def psKernelCacheHashModulus : Nat :=
   65521
@@ -397,10 +398,22 @@ structure PsKernelC0HashMemoEntry where
   expr : PsKernelExpr
   checkedHash : PsKernelC0ExactHash expr
 
+/-- A whole Nat-key, per-operation map instead of a truncated
+    16-bit radix index. The map is NOT a trusted equality decision. -/
 abbrev PsKernelC0ExactHashMemo :=
-  PsKernelC0HashTrie PsKernelC0HashMemoEntry
+  Std.HashMap Nat (List PsKernelC0HashMemoEntry)
 
-private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :=
+/-- Runtime address is a bucket *hint only*, not source equality or proof
+    validity. Both true pointer collisions and pointer reuse cannot change
+    the checked source answer: a cache hit still requires full exact
+    withPtrEqDecEq and carries its own Lean proof.
+    The pure source has a portable bounded-shape index. -/
+private unsafe def psKernelC0ExactHashIndexNative
+    (expr : PsKernelExpr) : Nat :=
+  (ptrAddrUnsafe expr).toNat / psKernelC0Radix
+
+@[implemented_by psKernelC0ExactHashIndexNative]
+private def psKernelC0ExactHashIndex (expr : PsKernelExpr) : Nat :=
   psKernelC0MemoShapeHash 4 expr
 
 private def psKernelC0HashMemoFind
@@ -425,50 +438,52 @@ private def psKernelC0HashMemoCheapLeaf : PsKernelExpr → Bool
   | _ => false
 
 private def psKernelC0HashMemoLookup
+    (indexHash : PsKernelExpr → Nat)
     (expr : PsKernelExpr)
     (memo : PsKernelC0ExactHashMemo) :
     Option (PsKernelC0ExactHash expr) :=
   if psKernelC0HashMemoCheapLeaf expr then
     none
   else
-    psKernelC0HashMemoFind expr
-      (psKernelC0TrieBucket psKernelC0IndexDepth memo
-        (psKernelC0HashMemoBucket expr))
+    match memo[indexHash expr]? with
+    | some entries => psKernelC0HashMemoFind expr entries
+    | none => none
 
 private def psKernelC0HashMemoInsert
+    (indexHash : PsKernelExpr → Nat)
     (expr : PsKernelExpr)
     (value : PsKernelC0ExactHash expr)
     (memo : PsKernelC0ExactHashMemo) :
     PsKernelC0ExactHashMemo :=
-  let bucketHash := psKernelC0HashMemoBucket expr
-  let entries :=
-    psKernelC0TrieBucket psKernelC0IndexDepth memo bucketHash
-  psKernelC0TrieSet psKernelC0IndexDepth memo bucketHash
-    ({ expr := expr, checkedHash := value } :: entries)
+  let key := indexHash expr
+  let entries := (memo[key]?).getD []
+  memo.insert key ({ expr := expr, checkedHash := value } :: entries)
 
 /-- A source-certified hash and the updated operation-local memo. -/
 private def psKernelC0ExactHashStore
+    (indexHash : PsKernelExpr → Nat)
     {expr : PsKernelExpr}
     (memo : PsKernelC0ExactHashMemo)
     (value : PsKernelC0ExactHash expr) :
     PsKernelC0ExactHash expr × PsKernelC0ExactHashMemo :=
-  (value, psKernelC0HashMemoInsert expr value memo)
+  (value, psKernelC0HashMemoInsert indexHash expr value memo)
 
 /-- Fully structural source-certified memo recursion. For every subtree,
 only an EXACT syntax match can reuse a previously proved hash. The returned
 proof is constructed compositionally from children's source hash equations.
 No arbitrary hash table, untrusted pointer, or cache value is imported. -/
-def psKernelC0ExactHashWithMemo
+def psKernelC0ExactHashWithMemoWithHash
+    (indexHash : PsKernelExpr → Nat)
     (expr : PsKernelExpr)
     (memo : PsKernelC0ExactHashMemo) :
     PsKernelC0ExactHash expr × PsKernelC0ExactHashMemo :=
-  match psKernelC0HashMemoLookup expr memo with
+  match psKernelC0HashMemoLookup indexHash expr memo with
   | some cached => (cached, memo)
   | none =>
       match expr with
       | .app fn arg =>
-          let (left, m1) := psKernelC0ExactHashWithMemo fn memo
-          let (right, m2) := psKernelC0ExactHashWithMemo arg m1
+          let (left, m1) := psKernelC0ExactHashWithMemoWithHash indexHash fn memo
+          let (right, m2) := psKernelC0ExactHashWithMemoWithHash indexHash arg m1
           let hash := psKernelCacheMix
             (psKernelCacheMix 26 left.value) right.value
           let proof : hash = psKernelExprHash (.app fn arg) := by
@@ -478,10 +493,10 @@ def psKernelC0ExactHashWithMemo
                 (psKernelCacheMix 26 (psKernelExprHash fn))
                 (psKernelExprHash arg)
             rw [left.source, right.source]
-          psKernelC0ExactHashStore m2 ⟨hash, proof⟩
+          psKernelC0ExactHashStore indexHash m2 ⟨hash, proof⟩
       | .lam name ty body info =>
-          let (left, m1) := psKernelC0ExactHashWithMemo ty memo
-          let (right, m2) := psKernelC0ExactHashWithMemo body m1
+          let (left, m1) := psKernelC0ExactHashWithMemoWithHash indexHash ty memo
+          let (right, m2) := psKernelC0ExactHashWithMemoWithHash indexHash body m1
           let hash := psKernelCacheMix
             (psKernelCacheMix 27 left.value) right.value
           let proof : hash = psKernelExprHash (.lam name ty body info) := by
@@ -491,10 +506,10 @@ def psKernelC0ExactHashWithMemo
                 (psKernelCacheMix 27 (psKernelExprHash ty))
                 (psKernelExprHash body)
             rw [left.source, right.source]
-          psKernelC0ExactHashStore m2 ⟨hash, proof⟩
+          psKernelC0ExactHashStore indexHash m2 ⟨hash, proof⟩
       | .forallE name ty body info =>
-          let (left, m1) := psKernelC0ExactHashWithMemo ty memo
-          let (right, m2) := psKernelC0ExactHashWithMemo body m1
+          let (left, m1) := psKernelC0ExactHashWithMemoWithHash indexHash ty memo
+          let (right, m2) := psKernelC0ExactHashWithMemoWithHash indexHash body m1
           let hash := psKernelCacheMix
             (psKernelCacheMix 28 left.value) right.value
           let proof : hash = psKernelExprHash (.forallE name ty body info) := by
@@ -504,11 +519,11 @@ def psKernelC0ExactHashWithMemo
                 (psKernelCacheMix 28 (psKernelExprHash ty))
                 (psKernelExprHash body)
             rw [left.source, right.source]
-          psKernelC0ExactHashStore m2 ⟨hash, proof⟩
+          psKernelC0ExactHashStore indexHash m2 ⟨hash, proof⟩
       | .letE name ty value body nondep =>
-          let (a, m1) := psKernelC0ExactHashWithMemo ty memo
-          let (b, m2) := psKernelC0ExactHashWithMemo value m1
-          let (c, m3) := psKernelC0ExactHashWithMemo body m2
+          let (a, m1) := psKernelC0ExactHashWithMemoWithHash indexHash ty memo
+          let (b, m2) := psKernelC0ExactHashWithMemoWithHash indexHash value m1
+          let (c, m3) := psKernelC0ExactHashWithMemoWithHash indexHash body m2
           let hash := psKernelCacheMix
             (psKernelCacheMix
               (psKernelCacheMix
@@ -531,18 +546,18 @@ def psKernelC0ExactHashWithMemo
                   (psKernelExprHash body))
                 (if nondep then 1 else 0)
             rw [a.source, b.source, c.source]
-          psKernelC0ExactHashStore m3 ⟨hash, proof⟩
+          psKernelC0ExactHashStore indexHash m3 ⟨hash, proof⟩
       | .mdata md body =>
-          let (value, m1) := psKernelC0ExactHashWithMemo body memo
+          let (value, m1) := psKernelC0ExactHashWithMemoWithHash indexHash body memo
           let hash := psKernelCacheMix (psKernelCacheMix 31 md) value.value
           let proof : hash = psKernelExprHash (.mdata md body) := by
             change psKernelCacheMix (psKernelCacheMix 31 md) value.value =
               psKernelCacheMix (psKernelCacheMix 31 md)
                 (psKernelExprHash body)
             rw [value.source]
-          psKernelC0ExactHashStore m1 ⟨hash, proof⟩
+          psKernelC0ExactHashStore indexHash m1 ⟨hash, proof⟩
       | .proj name i body =>
-          let (value, m1) := psKernelC0ExactHashWithMemo body memo
+          let (value, m1) := psKernelC0ExactHashWithMemoWithHash indexHash body memo
           let hash := psKernelCacheMix
             (psKernelCacheMix
               (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
@@ -557,21 +572,21 @@ def psKernelC0ExactHashWithMemo
                   (psKernelCacheMix 32 (psKernelCacheNameHash name)) i)
                 (psKernelExprHash body)
             rw [value.source]
-          psKernelC0ExactHashStore m1 ⟨hash, proof⟩
+          psKernelC0ExactHashStore indexHash m1 ⟨hash, proof⟩
       | .bvar n =>
           -- Source is a constant-time exact hash; memo writes are costlier.
           (⟨psKernelCacheMix 21 n, rfl⟩, memo)
       | .fvar n =>
-          psKernelC0ExactHashStore memo
+          psKernelC0ExactHashStore indexHash memo
             ⟨psKernelCacheMix 22 (psKernelCacheNameHash n), rfl⟩
       | .mvar n =>
-          psKernelC0ExactHashStore memo
+          psKernelC0ExactHashStore indexHash memo
             ⟨psKernelCacheMix 23 (psKernelCacheNameHash n), rfl⟩
       | .sort l =>
-          psKernelC0ExactHashStore memo
+          psKernelC0ExactHashStore indexHash memo
             ⟨psKernelCacheMix 24 (psKernelCacheLevelHash l), rfl⟩
       | .const n ls =>
-          psKernelC0ExactHashStore memo
+          psKernelC0ExactHashStore indexHash memo
             ⟨psKernelCacheMix
               (psKernelCacheMix 25 (psKernelCacheNameHash n))
               (psKernelCacheLevelListHash ls), rfl⟩
@@ -580,21 +595,38 @@ def psKernelC0ExactHashWithMemo
           (⟨psKernelCacheMix 30 (psKernelCacheMix 19 n), rfl⟩, memo)
       | .lit (.str s) =>
           -- String hashing is not constant-time; preserve reuse here.
-          psKernelC0ExactHashStore memo
+          psKernelC0ExactHashStore indexHash memo
             ⟨psKernelCacheMix 30 (psKernelCacheLiteralHash (.str s)), rfl⟩
+
+/-- Public exact-memo route. Runtime-only pointer bucket selection affects
+    work, but the returned value is source-proved for EVERY expression. -/
+def psKernelC0ExactHashWithMemo
+    (expr : PsKernelExpr) (memo : PsKernelC0ExactHashMemo) :
+    PsKernelC0ExactHash expr × PsKernelC0ExactHashMemo :=
+  psKernelC0ExactHashWithMemoWithHash psKernelC0ExactHashIndex expr memo
+
+/-- Stronger parametric oracle: even a pathological all-collision hint
+    returns the ORIGINAL exact source expression hash. -/
+theorem psKernelC0ExactHashWithMemoWithHash_source
+    (indexHash : PsKernelExpr → Nat)
+    (expr : PsKernelExpr)
+    (memo : PsKernelC0ExactHashMemo) :
+    (psKernelC0ExactHashWithMemoWithHash indexHash expr memo).1.value =
+      psKernelExprHash expr :=
+  (psKernelC0ExactHashWithMemoWithHash indexHash expr memo).1.source
 
 /-- An externally usable, operation-local exact hash. The original source
 function is independently available as the proof target and regression
 oracle. Every complete invocation starts with a private empty memo. -/
 def psKernelC0ExactMemoizedExprHash (expr : PsKernelExpr) : Nat :=
-  (psKernelC0ExactHashWithMemo expr .empty).1.value
+  (psKernelC0ExactHashWithMemo expr (∅ : PsKernelC0ExactHashMemo)).1.value
 
 /-- Strong all-input hash equivalence; neither collisions nor native pointer
 shortcuts can change the original source hash, under ANY expression. -/
 theorem psKernelC0ExactMemoizedExprHash_source
     (expr : PsKernelExpr) :
     psKernelC0ExactMemoizedExprHash expr = psKernelExprHash expr :=
-  (psKernelC0ExactHashWithMemo expr .empty).1.source
+  (psKernelC0ExactHashWithMemo expr (∅ : PsKernelC0ExactHashMemo)).1.source
 
 /-- Native compiler replacement with a FULL Lean proof: every expression
 returns precisely the historical C0 hash, including shape-hash collisions.

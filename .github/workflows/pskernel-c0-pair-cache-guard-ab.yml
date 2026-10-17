@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/pskernel-c0-pair-cache-guard-ab.yml'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean'
+      - 'psc0/packages/pskernel-c0/test/C0DefEqPairGuardRegression.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
@@ -116,12 +117,13 @@ jobs:
           done
           grep -Fq 'psKernelC0CertifiedSemanticPairEligible_source' \
             psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
-          grep -Fq 'psKernelC0CertifiedSemanticPairEligible left right' \
+          grep -Fq 'psKernelC0CertifiedDefEqSuccessGuard_source' \
             psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean
           (cd psc0/packages/pskernel-c0 && \
             lake build c0OfficialReplay && \
             lake env lean --run test/C0DeepPtrExprEqRegression.lean && \
-            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean)
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean && \
+            lake env lean --run test/C0DefEqPairGuardRegression.lean)
           set +e
           (
             cd psc0/packages/pskernel-c0
@@ -144,7 +146,7 @@ jobs:
             exit 1
           fi
           grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/candidate-resources.txt" || true
-          echo "C0_PAIR_GUARD_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true exact_pair_proofs=true all_input_pair_guard_equivalence=true fuel_4096=true no_acceptance_shortcut=true"
+          echo "C0_PAIR_GUARD_AB_SCOPE depth=${{ matrix.depth }} same_runner=true same_native_source_export=true exact_pair_proofs=true all_input_pair_guard_equivalence=true lookup_before_FVar_scan=true fuel_4096=true no_acceptance_shortcut=true"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

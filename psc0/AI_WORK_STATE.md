@@ -1,175 +1,206 @@
-## Current packed proof argument-scheduling investigation — 2026-10-17
+## Current packed decrease-proof synthesis repair — 2026-10-17
 
-At `afd370e7503d87524d84f4c8c9d7a0d909b14254`, all five gates
-completed. Native, F1, F2 and F3/F4 passed; focused M3 compiled all
-668 jobs and retained the original packed decrease-proof failure.
+The corrected recursive-worker diagnostic at
+`7f9d7d9a2abfc911f885976ca52f5b0275b42c72` identifies the source
+construction failure. All five gates completed before this follow-up:
+native and the three fast gates passed; focused M3 compiled all 668
+jobs and failed at the unchanged packed decrease proof.
 
 | Gate | Completed run | Result |
 | --- | --- | --- |
-| Native Linux | [39010566006](https://github.com/dwijayuda/pskernel/actions/runs/39010566006) | SUCCESS; all 34 steps |
-| Focused M3 | [39010565960](https://github.com/dwijayuda/pskernel/actions/runs/39010565960) | FAILURE; all 668 compile jobs passed |
-| F1 | [39010565929](https://github.com/dwijayuda/pskernel/actions/runs/39010565929) | SUCCESS; all 10 steps |
-| F2 | [39010565939](https://github.com/dwijayuda/pskernel/actions/runs/39010565939) | SUCCESS; all 9 steps |
-| F3/F4/platform | [39010565942](https://github.com/dwijayuda/pskernel/actions/runs/39010565942) | SUCCESS; all 11 steps |
+| Native Linux | [39011918522](https://github.com/dwijayuda/pskernel/actions/runs/39011918522) | SUCCESS; all 34 steps |
+| Focused M3 | [39011918501](https://github.com/dwijayuda/pskernel/actions/runs/39011918501) | FAILURE; all 668 compile jobs passed |
+| F1 | [39011918500](https://github.com/dwijayuda/pskernel/actions/runs/39011918500) | SUCCESS; all 10 steps |
+| F2 | [39011918498](https://github.com/dwijayuda/pskernel/actions/runs/39011918498) | SUCCESS; all 9 steps |
+| F3/F4/platform | [39011918515](https://github.com/dwijayuda/pskernel/actions/runs/39011918515) | SUCCESS; all 11 steps |
 
-Focused job `117332037885` produced the complete 189,490-character log.
-All fourteen required outer source invocations ran; WF alone failed.
-The other thirteen passed, including result inference, inherited-partial
-hint scoping, Where, indexed Inhabited and nominal empty dictionaries.
-WF syntax/printing passed. Its unchanged construction failure prevented
-the twenty-one-request batch and all focused backend execution.
-The P1 assumption audit retained its `Classical.choice` refusal.
-Focused artifact `12092074084` is 2,033,631 bytes, SHA-256
-`e3d9971cad3a69627e30b1d5c5c31f8b9e8f58a1f32be2b825dbc7c2335dc441`.
+The focused job `117336083130` has a complete 179,905-character log.
+All fourteen outer source fixtures ran, with the same 48 PASS markers as
+the preceding candidate: WF syntax/printing and the other thirteen
+fixtures passed. WF construction alone failed. Its twenty-one-request
+batch and every focused runtime lane remained skipped.
+Artifact `12093223176` is 2,032,997 bytes, SHA-256
+`6c94ed725c654645e5ed24d9edd1cecadf3d4f475476d3eac30805aa017f5b06`.
 
-The actual source failure remains original command 24, `m3wfpacked`,
-after `m3wfrelationRightStep`, during decrease-goal solving.
-The original error remains `PSCV0-TYPE-MISMATCH`.
-Saved goal `?m105` comes from recursive-call byte span 4291..4368.
-Its current pair contains `Nat.succ f#20` and refined `acc` at `f#23`;
-the smaller pair contains ordered captured arguments `f#29` and `f#31`,
-namely `k - 1` and its checked `Fin.mk(k - 1, ...)`.
-Local `k` at `f#25` is a let alias of `f#20`.
-The separate no-target proof also uses refined `acc`; no stale-
-accumulator repair is indicated at this call.
+### Observed cause
 
-The completed 34,641-character nested trace reports success for every
-manual ordered application, finalization, drain, direct nested argument,
-ordinary Core check and expected-type conversion. It exposed a material
-diagnostic-fidelity difference:
-- `Declaration.lean` supplies `psElabDeclarationTermCallback = psElabTerm`.
-- `WhereWellFounded.lean` also supplies `psElabTerm`.
-- `Term.lean`'s top-level `psElabTerm` always drains pending work,
-  including permitted defaults, after the whole source term.
-- The actual source application instead supplies recursive
-  `psElabTermWithFuel remaining` to each argument.
-- The manual direct probes reused the top-level callback for each argument.
-  They therefore drained work between arguments that the actual source
-  path had retained until a later synthesis point.
+The original error is `PSCV0-TYPE-MISMATCH`, command 24,
+`m3wfpacked`, after `m3wfrelationRightStep`, during decrease-goal
+solving. The first complete trace is 29,967 characters, emitted at
+07:01:55.1825513 UTC after all 668 compile jobs passed at
+07:00:58.7130569 UTC.
 
-The earlier conclusion that outer pending-work scheduling was ruled out
-is withdrawn. Empty queues and successful expected propagation in the
-`5c62fa2f` and `afd370e7` manual replays do not establish the original
-argument schedule. Their conversion successes describe those disposable
-replay contexts only. No semantic cause or scheduling repair is accepted.
+Saved goal `?m105` retains recursive-call byte span 4291..4368.
+The current pair uses `Nat.succ f#20` and refined accumulator `f#23`;
+the smaller pair uses the hygienically captured `k - 1` and checked
+`Fin.mk(k - 1, ...)` values. The separate proof replay uses the same
+refined accumulator. No stale local is substituted.
 
-This follow-up corrects only diagnostic callback fidelity. A separately
-supplied raw term worker is forwarded through the existing declaration
-and local-WF entry points to the already-failed direct-exact report.
-Original measure, body, proof execution and whole-source classification
-keep their existing elaborator. Only disposable direct application and
-nested argument probes use the raw worker. The replay uses an explicit
-4096 worker budget; the real recursive callback has a slightly smaller
-budget, and no fuel failure was observed. Top-level pending/postponing
-setup and nested whole-context preservation remain unchanged.
+The faithful raw application trace establishes:
+- The first explicit `Prod.Lex.left` argument is the smaller product's
+  second coordinate `b₁ = k - 1`.
+- Its numeral retains exactly one source-context pending item:
+  `core.instance ?m123`, occurring as `OfNat.ofNat Nat 1 ?m123`.
+- The constructor-constraint queue is empty.
+- Expected-result propagation is eligible, but the complete expected
+  constraint fails, with one constraint remaining and no resource issue.
+- The separate threaded conversion first fails at spine slot 5, the
+  smaller product pair, where the unresolved numeral instance prevents
+  conversion to the goal's already checked `k - 1`.
+- Existing light synthesis resolves that sole ordinary instance to
+  `PsStandard.instOfNatNat 1`, clears the queue and makes the same
+  expected constraint succeed. No spine component then fails.
+- A forced full drain gives the same result, but is unnecessary.
 
-Independent reconstruction verified each exact base, unique replacement anchors,
-and byte-for-byte reversal. The correction changes three owner files:
+Without that available instance, the complete expected-type attempt rolls
+back and the decrease callback receives unresolved relation application
+`?m119 ?m121 ?m131`. Its nested proof then infers `Nat.le` with a
+shifted first endpoint. Finalization queues `expectedTerm ?m138`, and
+the final drain fails the original target with `typeMismatch`.
+This is an inference-order defect, not an invalid arithmetic proof.
+
+Earlier `5c62fa2f` and `afd370e7` probes had used top-level
+`psElabTerm` for each argument, forcing a full drain between arguments.
+Their empty queues and successful comparisons did not characterize the
+original source schedule. The stronger conclusion was withdrawn before
+the corrected `7f9d7d9a` probe established the cause.
+
+### Repair under qualification
+
+The repair progresses only ready ordinary instance constraints from the
+source context inside the existing enabled, eligible expected-result
+branch. The no-expected-type path, unresolved-target exclusion,
+Prop-target exclusion and ineligible-result path retain their behavior.
+The original result eligibility is determined before synthesis.
+The same complete expected-type comparison then uses the progressed
+context, preserving all existing unification and assignment checks.
+
+Instance search uses each pending item's captured environment and
+instance registry. Failed searches preserve the previous context; checked
+successful progress is retained. Default values, default-instance search,
+source continuations and expected-term/coercion resumptions do not run
+at this boundary. Constructor constraints keep their existing ordering.
+The full returned context and pending queue are preserved.
+
+This order follows the pinned Lean application owner: resulting-type
+eligibility precedes `trySynthesizeAppInstMVars`, which precedes the
+expected-type comparison. The implementation remains in PSCV0's existing
+checked instance and application owners.
+
+Independent reconstruction verified exact original blobs, unique edits and
+byte-for-byte reversal for the two semantic owners:
 
 | Owner | UTF-8 bytes | Git blob | SHA-256 |
 | --- | ---: | --- | --- |
-| `WellFounded.lean` | 62,113 | `7e0e420a17c7410b1ccb86a556dc9131d6275f06` | `db0793040a324588cd50c13aa8cfc6ec2e1f7e26c4f0fae52629db528f44d115` |
-| `Declaration.lean` | 26,704 | `ca6901ce5bb9cdc3379db31985facda8e85d9b1f` | `fc9fd3cb249b4906249d2b08135a74c2672c55c625d68b698ca88e6a5c4c4dd1` |
-| `WhereWellFounded.lean` | 7,586 | `dcfb6bab268992c976eeb6d31755549ed52030ff` | `b82a7744e7b7de483494ca0bea30eae3461935df27e3907088ef6f62710dba5e` |
+| `Postponed.lean` | 8,256 | `02454575e32cf98add4a2c4c215908ba2c5530d0` | `e65d2d5bd51b606469fbbbacfb75cd5822f11635c23d207a598267a538a089b5` |
+| `Application.lean` | 17,112 | `38b24a2bc0f062204cb34b829ed3eba1ea954744` | `dc43ed2900dce8485a920d6ac7ed87915272d68f3311f567568d06bfc8e51832` |
 
-The ten WF replacements only forward the optional worker and select it
-inside failure reporting. Each source caller adds one raw-worker argument.
-If a caller provides no worker, the application probe is explicitly
-unavailable; it never silently falls back to a draining callback.
+The instance helper reuses the checked queue engine with defaults disabled
+and advances only scoped `core.instance` items. Application adds the
+Postponed import and a monadic return; its sole caller binds that checked
+result before the unchanged constructor-constraint resolution.
 
-The original `psProofRun` executes once, retains its success result and
-rethrows the same original failure. Source terms, fixture bytes, native
-oracles, equations, assumptions, refusals and runtime comparisons remain
-unchanged. No production Application, Operator, Postponed, Unify or
-reduction behavior is modified by this diagnostic correction.
-The next authoritative check is the unchanged focused source request
-followed, on failure only, by the corrected callback trace.
+The temporary deep goal/application replay helpers and optional raw-worker
+plumbing are removed. The well-founded owner is restored to the exact
+45,504-byte phase-only version, blob
+`ae03d72b3345d14f104c61c2c67ecb5b05eef52a`, SHA-256
+`54d7928989a3d2fcb0ebab0562767d067e264523d72d106a0eb3ff68c0001d3e`.
+Useful declaration/phase and checked-expression error contexts remain.
+Both raw-worker caller additions are reversed. Original proof execution,
+source request, native oracles, assumptions, equations, refusal controls
+and runtime comparisons remain unchanged.
 
-An independent workload review also found a Rust harness destination bug.
-The indexed suite lives under
-`dist/m3-group-proof-deriving/indexed-inhabited`, but the old runner
-chose `../pscv0-native` relative to each fixture directory. It would
-write the indexed assertions under the group-proof folder while Cargo's
-fixed target remained `dist/pscv0-native/rust-checks.rs`, re-running the
-preceding empty-dictionary harness. That would omit eight indexed Rust
-comparisons despite a successful Cargo exit.
-
-The runner now derives the canonical harness destination from its own
-module URL. The original top-level fixtures retain the same destination;
-the nested indexed fixture writes to the actual Cargo target. Its
-generated-module relative path, exact Boolean inputs, UInt64 oracle
-checks, assertion loops and all five runtime lanes are unchanged.
-Acceptance must include `PSCV0_M3_RUNTIME_RUST: PASS indexedinhabited`;
-`RUST_READY` or Cargo success alone is insufficient.
-The repaired `psc0/scripts/pscv0-m3-runtime.mjs` is 4,142 bytes,
-Git blob `83f069245f7b94fa5a9bce4779ab6619b46512c3`, SHA-256
+The canonical nested Rust harness repair from `7f9d7d9a` remains:
+`psc0/scripts/pscv0-m3-runtime.mjs`, 4,142 bytes,
+blob `83f069245f7b94fa5a9bce4779ab6619b46512c3`, SHA-256
 `2c63a01c05a98563ef1e261ccaaaa769485c5229ce37ee462a2f8c3d494645ca`.
-Both replacements reverse to original blob
-`b7538edec49a899fad90bf9ec85367b5abb8d024`. No previously skipped
-runtime comparison is claimed as executed by this static repair.
+It writes indexed assertions to Cargo's real target rather than rerunning
+the preceding empty-dictionary harness. This correction preserves every
+oracle value and Boolean assertion loop. Actual acceptance requires the
+exact `PSCV0_M3_RUNTIME_RUST: PASS indexedinhabited` execution marker.
 
-Native job `117332037915` ran from 06:36:59 to 06:50:31 UTC and finished
-all 34 steps before this follow-up push; the run updated at 06:50:32 UTC.
-Its complete log is 4,477,720 characters with 157 parsed JSON records.
-Native artifact `12093236587` is 6,797,372 bytes, created 06:50:28 UTC,
-SHA-256 `6766cada4b6760628e215e61cf5d715bd7b1e3825d29ab8db5ad743599b57b5b`.
-No healthy native run was cancelled.
+### Completed native evidence
 
-The native foundation audit is field-for-field identical to the
-preceding activated runs: 34 active additions, 34 candidates, no
-candidate axioms, native kernel validation and three compared recursor
-rules. The selected Standard retains 3,633 declarations, 41 classes and
-359 instances, with exact identities:
+Native job `117336083138` ran from 06:59:01 to 07:14:08 UTC.
+Run `39011918522` finalized at 07:14:09 UTC with all 34 steps
+successful, before this repair was pushed. No healthy run was cancelled.
+Its complete log is 4,477,507 characters with 157 parsed JSON records.
+Artifact `12093840404` is 6,797,366 bytes, created 07:14:07 UTC,
+SHA-256 `b04b17a57e97d19e59829737bb40892b62628947689a7127a91d404ef086ff62`.
+
+The foundation audit is field-for-field identical to preceding activated
+runs: 34 active additions, 34 candidates, no candidate axioms, native
+kernel validation and three compared recursor rules. The selected
+Standard retains 3,633 declarations, 41 classes and 359 instances:
 - FNV `fnv1a64:4990397000639020696`
 - Standard SHA-256 `5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7`
 - Source-surface SHA-256 `7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6`
 
-The audit's `runtimeQualified: false` field keeps its own scope;
-separate original source/runtime workloads provide execution evidence.
-JavaScript, TypeScript and Rust each retain 1,069 shared observations.
-Platform contracts retain 35 probes per profile for Wasm, ECMA and Rust.
-Application/module checks retain `App.compute(7)=18`, entry exports and
-three-file provenance, linked three-module Rust execution and four-module
-V8/Wasmtime GC execution. GC retains five scalar worlds, 1,069
-observations, ten natural-limb checks, `gcInsideComponent: true` and
+The audit's `runtimeQualified: false` field retains its own scope;
+the separate later native workloads provide execution evidence.
+JavaScript, TypeScript and Rust each report 1,069 shared observations.
+Platform contracts retain 35 probes per profile across Wasm, ECMA and
+Rust. The linked application returns `App.compute(7)=18` with three-file
+provenance; linked three-module Rust and four-module V8/Wasmtime GC
+execution pass. GC retains five scalar worlds, 1,069 observations, ten
+natural-limb checks, `gcInsideComponent: true` and
 `coreBinaryWatEqual: true`. Repeated Wasmtime observations, aggregates,
-normalization, indirect parameters, repeated calls and post-return passed.
-Direct-JS artifacts retain 1,239 declaration mappings and 52 generated-
-parent origins; generic Nat/Bool recursion passed at 100,000/50,000 steps.
-Measurements name the exact `afd370e7` source SHA and pinned Lean commit,
-a 6,385 ms prelude initialization, four compiler configurations and
-twelve runtime rows with one warmup, five runtime samples and three
-compiler samples after warmup. These measurements compare matching
-operations in different runtime systems, not compiler equivalence.
-These native results do not qualify the skipped additional focused
-runtime workload.
+normalization, indirect parameters, repeated calls and post-return pass.
+Direct-JS provenance retains 1,239 declaration mappings and 52 generated-
+parent origins. Generic Nat/Bool recursion runs at 100,000/50,000 steps.
 
-The preceding completed matrix at
-`5c62fa2f9cf8e774d92443d2352f43c3139a5840` likewise had native and all
-three fast gates green, with the same focused source failure.
-Native [39009261498](https://github.com/dwijayuda/pskernel/actions/runs/39009261498)
-passed all 34 steps; artifact `12093005278`, 6,797,365 bytes,
-SHA-256 `921ceabe6c7e88d226082068c4b10a026fb6b47eaa3459ef3633ff2f1a741244`.
-Focused [39009261544](https://github.com/dwijayuda/pskernel/actions/runs/39009261544)
-compiled all 668 jobs; artifact `12092218329`, 2,031,837 bytes,
-SHA-256 `fc8bf4042c8c99eaf4290d466466c6b7b0beb9cd5bbe24c270a4a78cfa849c33`.
-Its outer manual replay is subject to the callback-fidelity correction
-above. Earlier complete matrices and compile-only diagnostic repairs
-remain in the exact preceding commits and continuity history.
+Measurements name the exact `7f9d7d9a` source SHA and pinned Lean commit,
+a 6,470 ms prelude initialization, four compiler configurations and twelve
+runtime rows. The established method uses one warmup, five runtime
+samples and three compiler samples after warmup, excluding setup.
+Matching operations in different runtime systems are not a compiler-
+equivalence benchmark. These native successes do not count the focused
+runtime workload skipped after the packed source failure.
+
+The preceding completed `afd370e7` native run `39010566006` also passed
+all 34 steps. Its artifact `12093236587` is 6,797,372 bytes,
+SHA-256 `6766cada4b6760628e215e61cf5d715bd7b1e3825d29ab8db5ad743599b57b5b`.
+Focused artifact `12092074084` is 2,033,631 bytes,
+SHA-256 `e3d9971cad3a69627e30b1d5c5c31f8b9e8f58a1f32be2b825dbc7c2335dc441`.
+Earlier complete and compile-only matrices remain in the preceding
+exact commits and continuity history.
+
+### Acceptance boundary
 
 Accepted compiler/test remains
 `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
 The cumulative result-inference, indexed default, empty dictionary,
-generic relation, dependent packing and partial-hint candidate remains
-unaccepted until all five gates pass at one compiler/test SHA.
-The planned focused scalar workload is twelve suites, 68 exports and
-680 comparisons across five lanes, plus original recursive Hashable.
-Those extra comparisons have not yet executed successfully.
-The reviewed conditional 78/100 estimate has not been awarded; these
-are engineering estimates, not measured language coverage.
+generic relation, dependent packing and partial-hint changes remain under
+qualification until all five gates pass at one compiler/test SHA.
+The reviewed conditional 78/100 estimate is not yet awarded.
+These are engineering estimates, not measured language coverage.
 
-Only `propext` and `Quot.sound` are approved. P1 remains blocked by
-`Classical.choice`. Lean stays pinned to 4.35.0 at
+The planned scalar workload retains all 58 baseline exports and adds ten:
+two WF outputs, four nominal-empty dictionary outputs and four indexed
+defaults. Twelve suites and 68 exports give 680 comparisons across direct
+JavaScript, compiled TypeScript, Rust, V8 GC core and Wasmtime components,
+with both Boolean inputs. The separate original recursive Hashable
+workload retains 24 exports and 240 comparisons; the combined planned
+total is 920. No additional runtime comparison is accepted from a skipped
+backend step.
+
+Qualification requires actual per-suite execution markers: 24 scalar
+ECMA PASS lines, twelve distinct scalar Rust PASS stems and twelve scalar
+Wasm PASS stems (each covering core and component), together with the
+separate original Hashable lane markers. Mere Rust harness preparation or
+an unrelated Cargo success is insufficient. All expected decimal UInt64
+values, exact export/ABI checks and assertion loops remain mandatory.
+
+Residual bounds include broader indexed binary deriving, arbitrary
+positive/function-valued nested containers, complete source-induction
+boundaries, main codomains depending on their own binders without
+annotations, broader hint parity, independent/more-than-two changing
+argument packing, variable measure codomains, general mutual WF and the
+full P0 combination matrix. M3+B, M4 and M5 remain open.
+
+Only `propext` and `Quot.sound` are approved.
+P1 remains blocked by its audited `Classical.choice` dependency.
+Lean stays pinned to 4.35.0 at
 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 The v7.2 language authority remains blob
 `694115223777599ba28ee175e14bb642b7b6aa4b`.

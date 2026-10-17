@@ -187,277 +187,8 @@ def psElabWellFoundedDefaultGoals (state : PsProofState) :
     current := { solved with goals := current.goals }
   psProofNormalize current
 
--- Render only a failed direct-exact goal. Keep the original term as well as
--- its weak-head application spine; normalize the two endpoints separately.
-def psElabWellFoundedGoalSketch (context : PsElabContext) (type : PsExpr) : String :=
-  let type := psMetaInstantiate context.metaContext type
-  let norm := psWhnf context.environment context.metaContext context.localContext
-  let sketch := psElabWellFoundedExprSketch 7
-  let view := psExprAppView (norm type)
-  let arguments := (view.args.take 8).map sketch
-  let endpoints := match view.args.drop (view.args.length - 2) with
-    | [left, right] =>
-      "; endpoint[0]-whnf=" ++ sketch (norm left) ++
-        "; endpoint[1]-whnf=" ++ sketch (norm right)
-    | _ => "; endpoints=<fewer than two arguments>"
-  "raw=" ++ sketch type ++ "; whnf-head=" ++ sketch view.head ++
-    "; whnf-args=[" ++ String.intercalate ", " arguments ++
-    (if view.args.length > 8 then ", ..." else "") ++ "]" ++ endpoints
-
--- These application probes run only inside the failed direct-exact report.
--- They keep constructor constraints separate from scoped source continuations.
-def psElabWellFoundedPendingSketch (context : PsElabContext) : String :=
-  let entries := (context.pending.take 16).map fun work =>
-    match work with
-    | .core _ (.instanceGoal id) => "core.instance ?m" ++ psNatToString id
-    | .core _ (.defaultValue id _) => "core.default ?m" ++ psNatToString id
-    | .core _ (.expectedType _ _ _) => "core.expectedType"
-    | .expectedTerm _ id value type =>
-      "expectedTerm ?m" ++ psNatToString id ++ " value=" ++
-        psElabWellFoundedExprSketch 7 (psMetaInstantiate context.metaContext value) ++
-        " type=" ++ psElabWellFoundedExprSketch 7 (psMetaInstantiate context.metaContext type)
-    | .sourceTerm _ id _ => "sourceTerm ?m" ++ psNatToString id
-  psNatToString context.pending.length ++ " [" ++ String.intercalate " | " entries ++
-    (if context.pending.length > 16 then " | ..." else "") ++ "]"
-
-def psElabWellFoundedEndpointSketch (context : PsElabContext) (value : PsExpr) : String :=
-  let norm := psWhnf context.environment context.metaContext context.localContext
-  let value := norm (psMetaInstantiate context.metaContext value)
-  let view := psExprAppView value
-  let fields := match view.head with
-    | .constE name _ =>
-      if psNameToString name == "Prod.mk" && view.args.length == 4 then
-        "; pair-fields-whnf=[" ++ String.intercalate ", "
-          ((view.args.drop 2).map fun field => psElabWellFoundedExprSketch 7 (norm field)) ++ "]"
-      else ""
-    | _ => ""
-  psElabWellFoundedExprSketch 7 value ++ fields
-
--- Slot zero is the WHNF head; subsequent slots are its arguments in order.
--- Successful diagnostic constraints are threaded only through this replay.
-def psElabWellFoundedSpineFailure (context : PsElabContext) (slot : Nat)
-    (pairs : List (PsExpr × PsExpr)) : String :=
-  match pairs with
-  | [] => "none in inspected spine"
-  | (left, right) :: rest =>
-    let unified := psUnify context.environment context.localContext context.metaContext left right
-    if unified.success then
-      psElabWellFoundedSpineFailure (psElabContextWithMeta context unified.context) (slot + 1) rest
-    else
-      "slot=" ++ psNatToString slot ++ "; left={" ++
-        psElabWellFoundedEndpointSketch context left ++ "}; right={" ++
-        psElabWellFoundedEndpointSketch context right ++ "}"
-
-def psElabWellFoundedPrefixConstraint (current : PsElabTermResult)
-    (pending : List PsSyntheticConstraint) (target : PsExpr) : String :=
-  let context := current.context
-  let norm := psWhnf context.environment context.metaContext context.localContext
-  let enabled := match norm target with
-    | .mvar _ => false
-    | .sortE level => !psLevelEquivalent level .zero
-    | _ => true
-  let queues := "source-pending=" ++ psElabWellFoundedPendingSketch context ++
-    "; constructor-constraints=" ++ psNatToString pending.length
-  if !enabled then queues ++ "; result-propagation=target disabled" else
-  match psElabApplicationResultType context 4096 current.type 1 [] with
-  | none => queues ++ "; result-propagation=ineligible"
-  | some result =>
-    let solved := psSyntheticSolve context.environment context.instances context.metaContext
-      [.expectedType context.localContext result target] false
-    let left := psExprAppView (norm result)
-    let right := psExprAppView (norm target)
-    let pairs := ((left.head, right.head) :: left.args.zip right.args).take 9
-    queues ++ "; result-propagation=eligible; expected-constraint=" ++
-      (if solved.pending.isEmpty && !solved.resourceExceeded then "success" else "failure") ++
-      "; expected-constraints-remaining=" ++ psNatToString solved.pending.length ++
-      "; resource-exceeded=" ++ (if solved.resourceExceeded then "true" else "false") ++
-      "; result={" ++ psElabWellFoundedGoalSketch context result ++ "}" ++
-      "; separate threaded WHNF spine (head then args; arity " ++
-        psNatToString left.args.length ++ "/" ++ psNatToString right.args.length ++ ")={" ++
-        psElabWellFoundedSpineFailure context 0 pairs ++ "}"
-
-def psElabWellFoundedFailureTag : PsElabError → String
-  | .typeMismatch => "typeMismatch"
-  | .infer .applicationTypeMismatch => "infer.applicationTypeMismatch"
-  | .infer _ => "infer"
-  | .fuelExhausted => "fuelExhausted"
-  | .unresolvedMetavariable => "unresolvedMetavariable"
-  | .implicitApplicationUnsupported => "implicitApplicationUnsupported"
-  | .proof message => "proof: " ++ message
-  | .scope message => "scope: " ++ message
-  | .data message => "data: " ++ message
-  | .atDeclaration name error =>
-    psNameToString name ++ ": " ++ psElabWellFoundedFailureTag error
-  | .atContext label error => label ++ ": " ++ psElabWellFoundedFailureTag error
-  | _ => "other PsElabError"
-
-def psElabWellFoundedProbeResult (result : Except PsElabError PsElabTermResult) : String :=
-  match result with
-  | .error error => "error=" ++ psElabWellFoundedFailureTag error
-  | .ok value =>
-    "success; source-pending=" ++ psElabWellFoundedPendingSketch value.context ++
-      "; inferred-type={" ++ psElabWellFoundedGoalSketch value.context value.type ++ "}"
-
--- These replays start from the actual intercepted callback context. Their
--- results are disposable and never replace the original elaboration or error.
-def psElabWellFoundedArgumentFailureDetails (elaborate : PsElaborator)
-    (context : PsElabContext) (source : PsSyntaxTerm) (target : PsExpr) : String :=
-  let guided := elaborate context source (some target)
-  let guidedDrain := match guided with
-    | .error error => .error error
-    | .ok value => psElabDrainPending elaborate value
-  let independent := match elaborate context source none with
-    | .error error => .error error
-    | .ok value => psElabDrainPending elaborate value
-  let conversion := match independent with
-    | .error error => "unavailable: " ++ psElabWellFoundedFailureTag error
-    | .ok value =>
-      let current := value.context
-      let unified := psUnify current.environment current.localContext current.metaContext value.type target
-      let checked := psElabResolvedTerm current value.term (some target)
-      let norm := psWhnf current.environment current.metaContext current.localContext
-      let left := psExprAppView (norm value.type)
-      let right := psExprAppView (norm target)
-      let pairs := ((left.head, right.head) :: left.args.zip right.args).take 9
-      "type-unify=" ++ (if unified.success then "success" else "failure") ++
-        "; checked-term={" ++ psElabWellFoundedProbeResult checked ++ "}" ++
-        "; target={" ++ psElabWellFoundedGoalSketch current target ++ "}" ++
-        "; separate conversion spine (head then args; arity " ++
-          psNatToString left.args.length ++ "/" ++ psNatToString right.args.length ++ ")={" ++
-          psElabWellFoundedSpineFailure current 0 pairs ++ "}"
-  "target-guided source elaboration={" ++ psElabWellFoundedProbeResult guided ++
-    "}; separate guided drain={" ++ psElabWellFoundedProbeResult guidedDrain ++
-    "}; independent WITHOUT-target elaboration and drain={" ++
-      psElabWellFoundedProbeResult independent ++ "}; independent conversion={" ++ conversion ++ "}"
-
-def psElabWellFoundedApplicationFailureDetailsWithFuel (fuel : Nat) (elaborate : PsElaborator)
-    (context : PsElabContext) (source : PsSyntaxTerm) (target : PsExpr) : String :=
-  match fuel with
-  | 0 => "last-argument application depth limit"
-  | remaining + 1 =>
-    let call := match source with
-      | .app (.reference name) args _ => some (name, args)
-      | .call (.reference name) args _ =>
-        if args.all (fun arg => arg.fst.isNone) then some (name, args.map Prod.snd) else none
-      | _ => none
-    match call with
-    | none => "not a direct positional reference application"
-    | some (name, args) =>
-      if args.isEmpty || args.length > 16 then "argument count outside diagnostic bound" else
-      let context := { context with sourceSpan := some (psSyntaxTermSpan source) }
-      match psElabReference context name none with
-      | .error _ => "separate raw-head replay failed"
-      | .ok head =>
-        let intercepted := psElabApplyOrderedWith
-          (fun (current : PsElabContext) (argument : Nat × PsSyntaxTerm) expected =>
-            if argument.fst + 1 == args.length then
-              let details := match expected with
-                | none => "no expected domain"
-                | some type =>
-                  psElabWellFoundedArgumentFailureDetails elaborate current argument.snd type ++
-                    "; nested last-argument application={" ++
-                    psElabWellFoundedApplicationFailureDetailsWithFuel remaining
-                      elaborate current argument.snd type ++ "}"
-              .error (.atContext
-                ("intercepted final callback; source-pending=" ++
-                  psElabWellFoundedPendingSketch current ++ "; proof-domain={" ++
-                  (match expected with
-                  | none => "none"
-                  | some type => psElabWellFoundedGoalSketch current type) ++
-                    "}; argument-probes={" ++ details ++ "}") .typeMismatch)
-            else elaborate current argument.snd expected)
-          4096 head ((List.range args.length).zip args) [] [] true (some target)
-        let callback := match intercepted with
-          | .error (.atContext label .typeMismatch) => label
-          | .error _ => "replay failed before final callback"
-          | .ok _ => "replay did not intercept a final callback"
-        let full := match psElabApplyOrdered elaborate 4096 head args [] [] true (some target) with
-          | .error error => "ordered application error=" ++ psElabWellFoundedFailureTag error
-          | .ok application =>
-            let finished := psElabFinishApplication application (some target)
-            let drained := match finished with
-              | .error error => .error error
-              | .ok value => psElabDrainPending elaborate value
-            "ordered application={" ++ psElabWellFoundedProbeResult (.ok application.result) ++
-              "; constructor-constraints=" ++ psNatToString application.constraintsRev.length ++
-              "}; finish={" ++ psElabWellFoundedProbeResult finished ++
-              "}; separate final drain={" ++ psElabWellFoundedProbeResult drained ++ "}"
-        let prefixResult := psElabApplyOrdered elaborate 4096 head
-          (args.take (args.length - 1)) [] [] false none
-        let report := match prefixResult with
-          | .error _ => "separate incomplete-prefix replay failed"
-          | .ok prefixResult =>
-            let describe := fun (value : PsElabTermResult) =>
-              psElabWellFoundedPrefixConstraint value prefixResult.constraintsRev target
-            let progress := match psElabProgressPending elaborate prefixResult.result.context with
-              | .error _ => "light progress failed"
-              | .ok progressed => describe { prefixResult.result with context := progressed }
-            let drained := match psElabDrainPending elaborate prefixResult.result with
-              | .error _ => "full drain failed"
-              | .ok value => describe value
-            "raw={" ++ describe prefixResult.result ++ "}; separate light-progress={" ++ progress ++
-              "}; separate forced-full-drain={" ++ drained ++ "}"
-        "separate ordered application replay={" ++ callback ++
-          "}; separate full application stages={" ++ full ++
-          "}; separate incomplete-prefix probes={" ++ report ++ "}"
-
-def psElabWellFoundedApplicationFailureDetails (elaborate : PsElaborator)
-    (context : PsElabContext) (source : PsSyntaxTerm) (target : PsExpr) : String :=
-  let context := { context with
-    pending := []
-    postponing := true }
-  psElabWellFoundedApplicationFailureDetailsWithFuel 3 elaborate context source target
-
--- This probe runs only after the original tactic run failed. Its independent
--- elaborations cannot update that run, solve its goals, or replace its error.
-def psElabWellFoundedExactFailureDetails (elaborate : PsElaborator)
-    (argumentElaborate : Option PsElaborator)
-    (scope : PsSyntaxProofScope) (state : PsProofState)
-    (source : PsSyntaxTerm) (span : PsSourceSpan) : Except PsElabError String := do
-  let state ← psProofNormalize state
-  let (goal, context, target) ← psProofMain state
-  let source ← psProofSource scope context source
-  let localText := (context.localContext.declarations.take 64).map fun (entry : PsLocalDecl) =>
-    let instantiate := psMetaInstantiate context.metaContext
-    let value := match entry with
-      | .binding .. => ""
-      | .letDecl _ _ _ value => " := " ++ psElabWellFoundedExprSketch 7 (instantiate value)
-    "f#" ++ psNatToString (psLocalDeclId entry) ++ " " ++
-      psNameToString (psLocalDeclUserName entry) ++ " : " ++
-      psElabWellFoundedExprSketch 7 (instantiate (psLocalDeclType entry)) ++ value
-  let guided := match psProofWithTermSynthesis elaborate context
-      (fun current => elaborate current source (some target)) with
-    | .error _ => "proof elaboration or pending synthesis"
-    | .ok value =>
-      if psExprHasTermMeta (psMetaInstantiate value.context.metaContext value.term) then
-        "exact hole check"
-      else
-        match psProofAssign (psProofUpdate state value.context) goal.id value.term with
-        | .error _ => "goal assignment recheck"
-        | .ok _ => "failure not reproduced through goal assignment"
-  let independent := match psProofWithTermSynthesis elaborate context
-      (fun current => elaborate current source none) with
-    | .error _ => "elaboration failed; no type available"
-    | .ok value => psElabWellFoundedGoalSketch value.context value.type
-  return "well-founded direct-exact failure; goal=?m" ++ psNatToString goal.id ++
-    "; call-span-bytes=" ++ psNatToString span.start.byteOffset ++ ".." ++
-      psNatToString span.stop.byteOffset ++
-    "; target={" ++ psElabWellFoundedGoalSketch context target ++ "}" ++
-    "; target-guided replay stage=" ++ guided ++
-    "; application-prefix diagnostics={" ++
-      (match argumentElaborate with
-      | none => "unavailable: caller did not supply a recursive argument worker"
-      | some worker =>
-        "recursive-worker replay without per-argument drain (separate caller budget); " ++
-          psElabWellFoundedApplicationFailureDetails worker context source target) ++ "}" ++
-    "; separate proof replay WITHOUT target (not the original actual type)={" ++ independent ++ "}" ++
-    "; saved locals newest-first (first 64 of " ++
-      psNatToString context.localContext.declarations.length ++ ")=[" ++
-      String.intercalate " | " localText ++ "]"
-
 def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
-    (context : PsElabContext) (decreasing : Option PsSyntaxTerm)
-    (diagnosticElaborate : Option PsElaborator := none) :
+    (context : PsElabContext) (decreasing : Option PsSyntaxTerm) :
     Except PsElabError PsElabContext := do
   let calls := context.wellFoundedGoalsRev.reverse
   if calls.isEmpty then
@@ -470,16 +201,7 @@ def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
     goals }
   let solved ← match decreasing with
     | none => psElabWellFoundedDefaultGoals state
-    | some (.byE tactics scope _) =>
-      match psProofRun elaborate scope 4096 state tactics with
-      | .ok solved => pure solved
-      | .error error =>
-        match tactics, calls with
-        | [.exactE source false _], [(_, span)] =>
-          match psElabWellFoundedExactFailureDetails elaborate diagnosticElaborate scope state source span with
-          | .ok details => throw (.atContext details error)
-          | .error _ => throw error
-        | _, _ => throw error
+    | some (.byE tactics scope _) => psProofRun elaborate scope 4096 state tactics
     | some _ =>
       throw (.data "PSCV0-WF-PROOF: decreasing_by requires the selected by { tactic sequence } body")
   let solved ← psProofNormalize solved
@@ -745,8 +467,7 @@ def psElabWellFoundedPairCallbackEquality (context : PsElabContext)
 -- No body lambda enters the header or the termination clause's lexical scope.
 def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
-    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
-    (diagnosticElaborate : Option PsElaborator := none) :
+    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
     Except PsElabError PsElabWellFoundedResult := do
   let (headerContext, bodyLocalContext, aliases) ← psElabWellFoundedHeaderScope header
   let environment := headerContext.environment
@@ -877,7 +598,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     (elaborate bodyContext valueSyntax (some declaredResult))
   psElabRecursionValidateFixedParameters value.context plan value.context.wellFoundedCallsRev
   let solved ← psElabWellFoundedAt "decrease goals"
-    (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing diagnosticElaborate)
+    (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing)
   -- Generalize only at this actual declaration boundary, as ordinary checked
   -- declarations do. All terms and the equation's local telescope use the same
   -- instantiated levels; unresolved term/proof holes remain an error.
@@ -1003,15 +724,11 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
 
 -- Keep the original entry point and add the actual declaration identity to
 -- failures from every phase of its unchanged construction.
--- A diagnostic argument worker must not drain after each source argument.
--- Source callers supply psElabTermWithFuel 4096 as a separate replay budget.
--- Ordinary elaboration and proof execution continue to use elaborate.
 def psElabWellFoundedTypedParts (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
-    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
-    (diagnosticElaborate : Option PsElaborator := none) :
+    (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
     Except PsElabError PsElabWellFoundedResult :=
-  (psElabWellFoundedTypedPartsCore elaborate name header valueSyntax termination diagnosticElaborate).mapError
+  (psElabWellFoundedTypedPartsCore elaborate name header valueSyntax termination).mapError
     (fun error => .atDeclaration name error)
 
 -- The existing standalone route still elaborates its own selected header.
@@ -1020,8 +737,7 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
     (typeSyntax valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination)
-    (levelNames : List PsName := [])
-    (diagnosticElaborate : Option PsElaborator := none) :
+    (levelNames : List PsName := []) :
     Except PsElabError PsElabWellFoundedResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let binderResult ← psElabTypedBinders elaborate
@@ -1031,4 +747,4 @@ def psElabWellFoundedParts (elaborate : PsElaborator)
     context := annotation.context
     parametersRev := binderResult.bindersRev
     resultType := annotation.type
-    functionName := name } valueSyntax termination diagnosticElaborate
+    functionName := name } valueSyntax termination

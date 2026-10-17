@@ -110,6 +110,25 @@ def psElabResumeDefault (context : PsElabContext)
         (fun result => result.map (psElabContextWithMeta context))
   | _ => .ok none
 
+-- Before propagating an eligible application result, resolve ready instance
+-- work from earlier arguments. Keep defaults, expected-term adaptations and
+-- source continuations on their existing queues and preserve captured scopes.
+def psElabProgressInstancePending (context : PsElabContext)
+    (limit : Nat := 32768) : Except PsElabError PsElabContext := do
+  let attempt := fun (current : PsElabContext) (work : PsElabPendingWork) =>
+    match work with
+    | .core scope (.instanceGoal id) =>
+      (psSyntheticAttempt scope.environment scope.instances current.metaContext
+        (.instanceGoal id)).map (psElabContextWithMeta current)
+    | _ => none
+  let solved := psSyntheticQueueSolve attempt psElabPendingIsDefault
+    psElabPendingPriorities psElabResumeDefault
+    { context with pending := [] } context.pending.reverse false limit
+  if solved.resourceExceeded then throw .fuelExhausted
+  return { solved.context with
+    pending := solved.pending.reverse
+    postponing := context.postponing }
+
 def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
     (limit : Nat := 32768) : Except PsElabError PsElabTermResult := do
   let context := { result.context with pending := [], postponing := false }

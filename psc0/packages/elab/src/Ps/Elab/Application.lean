@@ -1,4 +1,5 @@
 import Ps.Elab.Basic
+import Ps.Elab.Postponed
 
 def psBinderAcceptsExplicitArgument (binder : PsBinderInfo) : Bool :=
   match binder with
@@ -103,9 +104,9 @@ def psElabApplicationResultType (context : PsElabContext) (fuel : Nat)
 
 def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
     (positions : List α) (names : List (PsName × α))
-    (expected : Option PsExpr) : PsElabTermResult :=
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
   match expected with
-  | none => current
+  | none => return current
   | some target =>
     let targetShape := psWhnf current.context.environment current.context.metaContext
       current.context.localContext target
@@ -113,13 +114,15 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
       | .mvar _ => false
       | .sortE level => !psLevelEquivalent level .zero
       | _ => true
-    if !enabled then current else
+    if !enabled then return current
     match psElabApplicationResultType current.context 4096 current.type positions.length (names.map (·.fst)) with
-    | none => current
+    | none => return current
     | some result =>
+      let context ← psElabProgressInstancePending current.context
+      let current := { current with context }
       let solved := psSyntheticSolve current.context.environment current.context.instances
         current.context.metaContext [.expectedType current.context.localContext result target] false
-      psElabResultWithMeta current solved.context current.type
+      return psElabResultWithMeta current solved.context current.type
 
 -- Drain scoped constraints before a dependent argument. Individually checked
 -- progress is retained even when another item still needs a later argument.
@@ -178,7 +181,7 @@ def psElabApplyOrderedWith {α : Type}
         | none, [] => pure (none, [], names)
       match selected.1 with
       | some source =>
-        let current := psElabPropagateExpected current positions names expected
+        let current ← psElabPropagateExpected current positions names expected
         let resolved := psElabResolveSynthetic current pending
         let current := resolved.result
         let pending := resolved.constraintsRev

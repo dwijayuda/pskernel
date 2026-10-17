@@ -34,7 +34,7 @@ First complete legacy-body pass at [workflow 39006816117](https://github.com/dwi
 
 Of 150 verified matches, 105 were official+C0 acceptances and 45 were official+C0 rejections. The historical labels differed from official 4.35 in **7** cases; this must be recorded as version-semantic drift, not assigned to C0 automatically. The first full run deliberately FAILED strict qualification because of unresolved cases. No evidence of false acceptance was observed among qualified official reference verdicts.
 
-There are two notable **valid handcrafted sparse-table** cases `other/level-index-out-of-order.ndjson` and `other/sparse-name-index.ndjson`. Their 3.1.0 wire format is valid even though the exporter producer is `handcrafted 0.1.0` rather than `lean4export 3.1.0`. The importer now has a narrowly recognized handcrafted source envelope and dedicated sparse ID paths for names, levels and expressions, retaining dense persistent-array operations for normal exports. They remain unqualified until *this exact changed parser* has green CI verdicts. No ordinary source checker, reduction or declaration admission rule is altered.
+There are two notable **valid handcrafted sparse-table** cases `other/level-index-out-of-order.ndjson` and `other/sparse-name-index.ndjson`. Their 3.1.0 wire format is valid even though the exporter producer is `handcrafted 0.1.0` rather than `lean4export 3.1.0`. The importer now has a narrowly recognized handcrafted source envelope and dedicated sparse ID paths for names, levels and expressions, retaining dense persistent-array operations for normal exports. Both formerly unqualified legitimate sparse-index cases have now been independently **accepted** by official Lean 4.35 and the changed C0 importer in [native CI 39007503159](https://github.com/dwijayuda/pskernel/actions/runs/39007503159), and that status was retained in the exact PR-head dual-verdict qualification. No ordinary source checker, reduction or declaration admission rule is altered.
 
 The same run identified 18 unsupported **negative** recursor/inductive/safety metadata cases, plus other performance and host failures. A parser-level refusal is **not** a semantic rejection, and must remain classified as unsupported until source-level negative validation justifies a true rejection.
 
@@ -42,7 +42,7 @@ The same run identified 18 unsupported **negative** recursor/inductive/safety me
 
 `.github/workflows/pskernel-c0-arena-lean435-compat.yml` checks all **193 cases** on four deterministic shards selected by input order modulo four. The aggregate job requires all four unique shard reports, no duplicate or missing case, intact source-body byte equality for each of 193, and zero confirmed false acceptance/rejection or transport errors. Each shard uploads its per-case evidence including original bytes SHA, adapted SHA, source metadata, official verdict, C0 verdict, resources, and old-label drift; aggregation never replaces the underlying artifacts.
 
-**Performance classification:** The 13 C0 timeouts and two exhausted-budget cases are open throughput/resource work, not false rejection; the official `perf/magma-list-deep-n36` timeout is an unqualified oracle result. Do not increase kernel fuel or omit checking merely to improve nominal coverage. Profile and fix repeated checked inference/WHNF/DefEq and substitutions under identical real corpus evidence.
+**Performance classification:** The first full sequential run reported 13 C0 timeouts; the exact PR-head four-shard comparison still recorded 12 C0 timeouts and two source-fuel exhaustions. These are open throughput/resource work, not false rejection. The two official-source reference timeouts are unqualified oracle results. Do not increase kernel fuel or omit checking merely to improve nominal coverage. Profile and fix repeated checked inference/WHNF/DefEq and substitutions under identical real corpus evidence.
 
 ## Next acceptance milestones
 
@@ -53,3 +53,26 @@ The same run identified 18 unsupported **negative** recursor/inductive/safety me
 5. **Throughput:** Address the real Array lambda/Pi/repeated inference hotspot with source-/state-/fuel-equivalent checked DAG reuse. Same-runner accepted workload A/B is required; local hash-bucket tuning alone has not provided material gains.
 
 This scope does not establish kernel mathematical soundness, model consistency, original archived same-byte parity, complete native 4.35 source conformance, or performance equality with official Lean.
+
+## Qualified bounded milestone — 17 October 2026, merged PR #112
+
+**Merged change:** [PR #112](https://github.com/dwijayuda/pskernel/pull/112), merge commit [`e63183ba`](https://github.com/dwijayuda/pskernel/commit/e63183ba215720b3c7221b9b874450b8667497d0). The following checks passed on exact PR HEAD `9f6ff4d232950440b96b775076302e9192dd51e5`: [four-way native 4.35 compatibility 39008026715](https://github.com/dwijayuda/pskernel/actions/runs/39008026715), [native Arena exploits 39008026729](https://github.com/dwijayuda/pskernel/actions/runs/39008026729), and [immutable archived source-provenance 39008027473](https://github.com/dwijayuda/pskernel/actions/runs/39008027473).
+
+The full aggregate completed with the following **strictly limited** result:
+
+| Target-4.35 verdict classification | Count | What it establishes |
+| --- | ---: | --- |
+| Official/C0 matching real acceptance or rejection | **152** | Independent same-adapted-byte target-4.35 verdict agreement |
+| C0 unsupported, chiefly explicitly malformed negative metadata | 18 | No semantic C0 invalidity verdict; pending research |
+| C0 malformed for the negative orphan constructor | 1 | Fail-closed parse outcome, not equivalent to semantic rejection |
+| C0 timeout | 12 | No qualified verdict; priority performance debt |
+| C0 source fuel exhausted | 2 | No qualified verdict; cannot turn into acceptance by waiving budget |
+| Official source driver error (duplicate declaration cases) | 6 | Independent reference could not produce an ordinary accept/reject label |
+| Official timeout | 2 | No independent reference result; must not count C0's response as proven correct |
+| **Total** | **193** | **Every original Arena identity and declaration-body byte accounted for** |
+
+The aggregate verifies **193/193 unchanged declaration-body bytes**, unique case identities, all four shards and **zero observed false acceptance/false rejection among independently compared verdicts**. The 41 outstanding entries appear explicitly in `test/arena_435_known_gaps.json` with frozen permitted **unqualified** classifications; this is an assurance-debt ledger, *not* a set of passed tests. Each shard and the aggregate reject newly observed false acceptance/rejection, source byte mismatch, previously passing sparse-input declines, new unqualified outcomes or unlisted case names. The strict `--require-complete` path remains unsatisfied.
+
+**The original historic archive no longer results in 193 meaningless version declines:** `.github/workflows/pskernel-c0-external-arena.yml` validates historical archival provenance without generating kernel verdict claims, while `.github/workflows/pskernel-c0-arena-lean435-compat.yml` evaluates the complete collection under an explicitly labeled test-only compatibility adaptation using **the actual official 4.35 and native C0 checker**. These are distinct from the 4.35-source-rebuilt external Arena tests under `pskernel-c0-arena-adversarial435.yml`.
+
+Next work: remediate only genuine documented defects, finish separate validity witnesses for unsupported negative recursor metadata (without fabricated rejection), investigate official duplicate-name driver exceptions, and improve checked repeated inference, beta/WHNF, and binder substitution enough to remove timeouts at unchanged kernel fuel. Completion of *native generated* Arena, full Init/Std/Mathlib, formal consistency and PSC0 v7.2 self-hostability remain separate milestones.

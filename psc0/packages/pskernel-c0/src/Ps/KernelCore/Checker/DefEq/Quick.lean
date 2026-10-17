@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.DefEq.BinderSpines
+import Ps.KernelCore.Core.ExprDecidableEq
 
 /-
 Lean 4.34 quick definitional-equality rules.
@@ -147,7 +148,7 @@ def psKernelDefEqQuick
       (Prod
         (Option Bool)
         PsKernelCheckerState) :=
-  if psKernelExprEq left right then
+  if psKernelC0MemoizedExprEq left right then
     Except.ok
       (Prod.mk (Option.some true) state)
   else if psKernelSemanticPairCacheEligible left right &&

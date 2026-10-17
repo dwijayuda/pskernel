@@ -1,0 +1,109 @@
+name: PSKernel-C0 pinned full paired expression equality A/B
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-full-paired-expr-ab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired-expr-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Rebuild two immutable officially checked Init dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- Int.Internal.Linear.cooper_dvd_right > "$RUNNER_TEMP/cooper.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/cooper.ndjson" > "$RUNNER_TEMP/cooper-official.txt" 2>&1
+            lake env .lake/build/bin/lean4export Init -- 'BitVec.lt_of_isSome_getElem?' > "$RUNNER_TEMP/bitvec.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/bitvec.ndjson" > "$RUNNER_TEMP/bitvec-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/cooper-official.txt"
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/bitvec-official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/cooper.ndjson")" -eq 114487
+          test "$(stat -c%s "$RUNNER_TEMP/cooper.ndjson")" -eq 5847444
+          echo "2e57b983242e47f7dd1c95679ee0697b21aae688bfd38b6039d95c23b49100c1  $RUNNER_TEMP/cooper.ndjson" | sha256sum -c -
+          test "$(wc -l < "$RUNNER_TEMP/bitvec.ndjson")" -eq 21407
+          test "$(stat -c%s "$RUNNER_TEMP/bitvec.ndjson")" -eq 1176296
+          echo "ee71d2fcc99e0ff1b5a7f37c7a9b609999e8e027f24635e784095db9cab3f1c3  $RUNNER_TEMP/bitvec.ndjson" | sha256sum -c -
+          echo "C0_EXPR_AB_PINNED official_lean=accepted both_corpora=true fuel=4096"
+      - name: Historical curried recursive expression equality (disposable native checkout)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Expr.lean")
+          t=p.read_text()
+          needle="@[csimp] theorem psKernelExprEqLegacy_compiler_eq_fullPaired"
+          assert t.count(needle)==1
+          p.write_text(t.replace(needle,"theorem psKernelExprEqLegacy_compiler_eq_fullPaired"))
+          print("C0_EXPR_AB_VARIANT original=source csimp=disabled equivalence_theorem=retained")
+          PY
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          for corpus in cooper bitvec; do
+            if [ "$corpus" = cooper ]; then expected=114487; else expected=21407; fi
+            for n in 1 2; do
+              (
+                cd psc0/packages/pskernel-c0
+                /usr/bin/time -f '%e %M' -o "$RUNNER_TEMP/original-$corpus-$n.time" \
+                  timeout 90s .lake/build/bin/c0OfficialReplay --require-accepted "$RUNNER_TEMP/$corpus.ndjson" 4096
+              ) > "$RUNNER_TEMP/original-$corpus-$n.out" 2>&1
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=$expected fuel=4096" "$RUNNER_TEMP/original-$corpus-$n.out"
+              read -r elapsed rss < "$RUNNER_TEMP/original-$corpus-$n.time"
+              echo "C0_EXPR_AB_METRIC variant=original corpus=$corpus sample=$n elapsed_seconds=$elapsed rss_kib=$rss exact_accept=true"
+            done
+          done
+      - name: Lean-proved full paired expression equality (same runner)
+        shell: bash
+        run: |
+          set -euo pipefail
+          path=psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Expr.lean
+          git show HEAD:"$path" > "$path"
+          grep -Fq '@[csimp] theorem psKernelExprEqLegacy_compiler_eq_fullPaired' "$path"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          for corpus in cooper bitvec; do
+            if [ "$corpus" = cooper ]; then expected=114487; else expected=21407; fi
+            for n in 1 2; do
+              (
+                cd psc0/packages/pskernel-c0
+                /usr/bin/time -f '%e %M' -o "$RUNNER_TEMP/fast-$corpus-$n.time" \
+                  timeout 90s .lake/build/bin/c0OfficialReplay --require-accepted "$RUNNER_TEMP/$corpus.ndjson" 4096
+              ) > "$RUNNER_TEMP/fast-$corpus-$n.out" 2>&1
+              grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=$expected fuel=4096" "$RUNNER_TEMP/fast-$corpus-$n.out"
+              read -r elapsed rss < "$RUNNER_TEMP/fast-$corpus-$n.time"
+              echo "C0_EXPR_AB_METRIC variant=fast corpus=$corpus sample=$n elapsed_seconds=$elapsed rss_kib=$rss exact_accept=true"
+            done
+          done
+          echo "C0_EXPR_AB_SCOPE=two_positive_dependencies_not_WF_or_full_Init"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-full-paired-expr-matched-ab
+          path: |
+            ${{ runner.temp }}/original-*.time
+            ${{ runner.temp }}/fast-*.time
+            ${{ runner.temp }}/original-*.out
+            ${{ runner.temp }}/fast-*.out
+          if-no-files-found: warn
+          retention-days: 14

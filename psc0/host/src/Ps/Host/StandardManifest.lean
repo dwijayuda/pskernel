@@ -224,8 +224,9 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- F3: OfScientific class, two scientific/two numeral dictionaries, default501.
 -- Independently measured at both strict boundaries in native38781449363.
 -- F4 display registrations independently measured at native38789249978.
+-- WF surface independently audited at 078fb1e2 / native 38998692067.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:117f2692ea15046020e113cd0454c5befa73479ec43e9923cafcbfc1e2031ed8"
+  "sha256:7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

@@ -1,4 +1,5 @@
 import Ps.Environment.StandardPlatformWords
+import Ps.Environment.StandardWellFounded
 import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardLogicInstances
 import Ps.Environment.StandardOperatorProtocol
@@ -141,7 +142,7 @@ def psSelfHostProdPreWellFoundedPreludeEnvironment : PsEnvironment :=
     psStandardPlatformExtend psSelfHostProdPrePlatformWordsPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psSelfHostProdPreWellFoundedPreludeEnvironment
+  psStandardWellFoundedExtend psSelfHostProdPreWellFoundedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

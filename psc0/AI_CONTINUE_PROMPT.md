@@ -1,3 +1,54 @@
+## Current checkpoint — audited WF activation candidate, 2026-10-17
+
+This checkpoint supersedes the historical status entries below. The latest fully
+accepted compiler/test SHA is still
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+
+Native [38998692067](https://github.com/dwijayuda/pskernel/actions/runs/38998692067)
+at `078fb1e2c22f79e7f4eae2f21863e2cad4fa1434` is now complete:
+all 34 reported steps succeeded, including exact WF asset regeneration,
+initialized independent metadata/kernel audit and every original native workload.
+F1, F2 and F3/F4 also passed at that SHA. Focused
+[38998692088](https://github.com/dwijayuda/pskernel/actions/runs/38998692088)
+failed at one native indexed parent-pattern refinement; its generalized observer
+repair is the linear commit `75be0cabaa4885e98362712b61b88be5fd0cd5d5`.
+
+The following relation-selection commit
+`490a4dfcac81e42a56eeb6121112c3e20e2731e2` adds actual fixed-codomain
+`WellFoundedRelation` synthesis, typed generic fix/equation construction and
+matching erasure, with native/source lexicographic left/right evidence and ten
+additional target comparisons. Its existing unary changing-argument boundary
+remains. Separate dependent argument packing is not included.
+
+This activation extends the selected Standard from its unchanged frozen pre-WF
+input. It uses exactly the completed independent audit's observed pins:
+
+- FNV: `fnv1a64:4990397000639020696`.
+- Declaration SHA-256: `sha256:5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7`.
+- Surface SHA-256: `sha256:7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6`.
+
+The audited extension has 3,633 declarations, 41 classes and 359 ordinary
+instances, with 34 added declarations, zero candidate axioms and three checked
+recursor rules. At the audit SHA, none of those additions was active.
+The audit's `runtimeQualified: false` does not count as activated runtime
+qualification. The [foundation audit receipt](https://github.com/dwijayuda/pskernel/blob/psc0/pscv0-v7-native-lean-v1/psc0/docs/PSCV0_M3_WELL_FOUNDED_FOUNDATION_AUDIT_2026-10-17.md)
+records the exact JSON, native artifact, frozen boundary and evidence limits.
+
+Next: run all five gates at the final activated compiler/test SHA, repair concrete
+failures, and record acceptance only after every gate succeeds there. The
+result-inference, indexed Inhabited, nominal empty dictionary and generic relation
+changes remain cumulative candidates until that matrix passes. Then integrate
+the separately reviewed dependent packing patch
+`0dfb9d68393fb9b707e0d27ec71d84e40da8d3222eec8b7c8d3e82c882e0afe7`
+and qualify again. The source partial-hint scoping follow-up is independently
+under review and is not part of this activation.
+
+Lean 4.35.0 and its pinned commit, the forward v7.2 authority, only approved
+`propext`/`Quot.sound`, P1's `Classical.choice` block, cloud-only execution and
+PR 109 draft/open/unmerged status remain fixed.
+
+## Historical implementation checkpoints
+
 ## Latest compiler build follow-up
 
 The candidate `e9b2075e9898ffd2e7561e6f4faafae95ff96cfa` failed all five

@@ -1,0 +1,123 @@
+name: PSKernel-C0 Arena 4.35 source-hotspot isolation
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-435-hotspot.yml'
+      - 'psc0/packages/pskernel-c0/test/C0Arena435HotCase.py'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bounded-hotspot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [app-lam, beta-ladder, let-ladder, shared-subterm]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build exact C0 and isolated native checker sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          (cd "$pkg" && lake build c0OfficialReplay)
+          python3 -m py_compile "$pkg/test/arena_conformance.py" \
+            "$pkg/test/arena_lean435_compat.py" \
+            "$pkg/test/C0NativeProofStackProfile.py" \
+            "$pkg/test/C0Arena435HotCase.py"
+          cc -O2 -fPIC -shared -o "$RUNNER_TEMP/pskernel-c0-native-sampler.so" \
+            "$pkg/test/C0NativeProofSampler.c"
+          test -s "$RUNNER_TEMP/pskernel-c0-native-sampler.so"
+      - name: Obtain immutable 193-case September archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 \
+            -o "$RUNNER_TEMP/lean-arena-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-2026-09.tar.gz" | sha256sum -c -
+      - name: Prepare exact-byte adapted case and independently qualify official acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/C0Arena435HotCase.py \
+            --archive "$RUNNER_TEMP/lean-arena-2026-09.tar.gz" \
+            --case ${{ matrix.case }} \
+            --output "$RUNNER_TEMP/c0-arena-hot.ndjson" \
+            --info "$RUNNER_TEMP/c0-arena-hot-source.json" \
+            --official-project psc0/packages/pskernel-c0
+      - name: Sample exact native checked declaration and report top inclusive stacks
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["wait_for"])' \
+            "$RUNNER_TEMP/c0-arena-hot-source.json")
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$RUNNER_TEMP/c0-arena-hot.ndjson" \
+            "$RUNNER_TEMP/pskernel-c0-native-sampler.so" \
+            "$RUNNER_TEMP/c0-arena-hot-stacks.txt" \
+            "$RUNNER_TEMP/c0-arena-hot-summary.json" \
+            --samples 12 --interval 2 --max-wait 170 --wait-for "$marker"
+          python3 - <<'PY'
+          import json,os,pathlib
+          base=pathlib.Path(os.environ["RUNNER_TEMP"])
+          source=json.loads((base/"c0-arena-hot-source.json").read_text())
+          summary=json.loads((base/"c0-arena-hot-summary.json").read_text())
+          assert summary["native_stack_samples"]>0
+          assert not summary["successful_source_acceptance"]
+          for sym,count in summary["top_inclusive_functions"][:15]:
+              print(f"C0_ARENA_HOT_FRAME case={source['case']} samples={count} symbol={sym}",flush=True)
+          print(f"C0_ARENA_HOT_RESULT case={source['case']} samples={summary['native_stack_samples']} sampled_only=true source_bytes_exact=true")
+          PY
+      - name: Strict independent 90-second source checker status (never fake acceptance)
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/c0-arena-hot-resources.txt" \
+            timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted --trace-declarations "$RUNNER_TEMP/c0-arena-hot.ndjson" 4096) \
+            > "$RUNNER_TEMP/c0-arena-hot-verdict.txt" 2>&1
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" \
+              "$RUNNER_TEMP/c0-arena-hot-verdict.txt"
+            echo "C0_ARENA_HOT_CHECK case=${{ matrix.case }} qualification=accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_ARENA_HOT_CHECK case=${{ matrix.case }} qualification=NOT_QUALIFIED_HOST_TIMEOUT"
+          else
+            grep -F "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/c0-arena-hot-verdict.txt" | tail -n 1 || true
+            echo "C0_ARENA_HOT_CHECK case=${{ matrix.case }} qualification=NOT_QUALIFIED_OTHER exit=$rc"
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' \
+            "$RUNNER_TEMP/c0-arena-hot-resources.txt" || true
+          echo "C0_ARENA_HOT_SCOPE diagnostic_only=true native_source_untouched=true fuel=4096"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-435-hotspot-${{ matrix.case }}
+          path: |
+            ${{ runner.temp }}/c0-arena-hot-source.json
+            ${{ runner.temp }}/c0-arena-hot-summary.json
+            ${{ runner.temp }}/c0-arena-hot-stacks.txt
+            ${{ runner.temp }}/c0-arena-hot-verdict.txt
+            ${{ runner.temp }}/c0-arena-hot-resources.txt
+          if-no-files-found: warn
+          retention-days: 21

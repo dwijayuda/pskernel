@@ -163,7 +163,10 @@ private def checkConstruction : IO Unit := do
       isNamed "M3EmptyRelation" producer.resultType)
     "empty producer lost its generic nominal return or runtime Bool argument"
   match producer.parameters, producer.body with
-  | [parameter], .ifE (.var condition) (.record left [_] []) (.record right [_] []) =>
+  -- Bool source conditions retain their actual checked Decidable equality
+  -- in raw IR; backend optimization has not simplified that guard here.
+  | [parameter], .ifE (.intrinsic .boolEq [] [.var condition, .literal (.bool true)])
+      (.record left [_] []) (.record right [_] []) =>
     ensure (parameter.name == condition && left == "M3EmptyRelation" && right == left)
       "empty producer changed its checked conditional construction"
   | _, _ => throw (IO.userError "empty producer no longer evaluates its runtime branch")

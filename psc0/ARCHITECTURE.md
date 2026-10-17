@@ -1,3 +1,46 @@
+## Current focused fixture repair and next combined qualification — 2026-10-17
+
+At `3c5f51a2ffdc9cabfe386ab6fd1c7a1bb82e6ff5`, F1
+[39000431683](https://github.com/dwijayuda/pskernel/actions/runs/39000431683), F2
+[39000431695](https://github.com/dwijayuda/pskernel/actions/runs/39000431695) and F3/F4
+[39000431730](https://github.com/dwijayuda/pskernel/actions/runs/39000431730) passed.
+Native [39000431708](https://github.com/dwijayuda/pskernel/actions/runs/39000431708),
+job `117302002147`, remains active at this preparation; the activated
+foundation audit, admitted Standard and module checks have passed.
+
+Focused [39000431684](https://github.com/dwijayuda/pskernel/actions/runs/39000431684),
+job `117302001981`, compiled all 668 jobs. It passed the existing source suites,
+result inference, real Nat/generic lexicographic fix and public equations,
+indexed Inhabited construction and refusals. The last empty-dictionary fixture
+failed its raw producer-body assertion; target runtime comparisons were skipped.
+
+The failure is an exact fixture-shape mismatch. `Ps.Elab.Conditional` constructs
+`Bool.decEq flag Bool.true` for a Boolean source condition.
+`Ps.Erasure.Expr.psEraseDecisionApplication` preserves the actual decision as
+`.intrinsic .boolEq [] [.var flag, .literal (.bool true)]`, and
+`psCompilerVerifiedIrFromPrepared` returns that raw erasure before backend
+optimization. The fixture previously expected a bare variable. This repair
+requires the exact existing equality guard, the original runtime parameter and
+both correctly named empty-record branches. It changes no production owner,
+native oracle, export, refusal or nominal-value/evaluation contract.
+
+The separately reviewed two-dependent-argument packing and inherited-partial
+hint-scoping changes precede this fixture repair as distinct commits. Their
+construction, fixtures and limits are recorded below. They remain unqualified;
+the former adds ten target comparisons, and the latter adds eight nested
+source-only requests while preserving every existing Where export.
+
+After preserving the completed native result, qualify the combined candidate
+through all five cloud gates at one compiler/test SHA. No partial source success,
+audit step or reviewed implementation adds accepted points before that matrix.
+This groups a demonstrated fixture-only repair with the reviewed next slices;
+the current failed matrix is not promoted to acceptance.
+
+Accepted compiler/test remains
+`03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
+Only `propext`/`Quot.sound` remain approved; P1's `Classical.choice`
+block, Lean 4.35.0 pin, cloud-only execution and draft/open/unmerged PR 109 remain.
+
 ## Prepared inherited-partial hint scoping repair — 2026-10-17
 
 The existing scope pass resolved a local `termination_by` measure before choosing

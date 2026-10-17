@@ -55,14 +55,29 @@ private def psKernelC0InstOneMemoFind
       else
         psKernelC0InstOneMemoFind expr offset rest
 
+/-- Unlike BVars, these atom forms cannot be substituted by the
+single-binder instantiator. Their original changed-flag result is exactly
+(expr, false); memo lookup/insertion is needless work, even for large
+name/level-bearing constants. -/
+private def psKernelC0InstOneMemoCheapLeaf : PsKernelExpr → Bool
+  | .fvar _ => true
+  | .mvar _ => true
+  | .sort _ => true
+  | .const _ _ => true
+  | .lit _ => true
+  | _ => false
+
 private def psKernelC0InstOneMemoLookup
     {replacement : PsKernelExpr}
     (expr : PsKernelExpr) (offset : Nat)
     (memo : PsKernelC0InstOneMemo replacement) :
     Option (PsKernelC0InstOneExact replacement expr offset) :=
-  psKernelC0InstOneMemoFind expr offset
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (psKernelC0InstOneMemoHash expr offset))
+  if psKernelC0InstOneMemoCheapLeaf expr then
+    none
+  else
+    psKernelC0InstOneMemoFind expr offset
+      (psKernelC0TrieBucket psKernelC0IndexDepth memo
+        (psKernelC0InstOneMemoHash expr offset))
 
 private def psKernelC0InstOneMemoInsert
     {replacement : PsKernelExpr}
@@ -171,9 +186,18 @@ def psKernelC0InstOneMemoGo
                 simp only [psKernelC0ExprInstantiateOneChanged]
                 rw [← b.source]
               psKernelC0InstOneMemoStore m1 ⟨result, equality⟩
-          | other =>
-              let value := psKernelC0ExprInstantiateOneChanged other replacement offset
+          | .bvar n =>
+              -- Bound variables can select/lift the replacement; keep exact
+              -- per-offset memoization and dependent proof transport.
+              let value := psKernelC0ExprInstantiateOneChanged (.bvar n)
+                replacement offset
               psKernelC0InstOneMemoStore memo ⟨value, rfl⟩
+          | other =>
+              -- The remaining atom constructors cannot be substituted.
+              -- Return source's exact changed flag without touching memo.
+              let value := psKernelC0ExprInstantiateOneChanged other
+                replacement offset
+              (⟨value, rfl⟩, memo)
 
 /-- Original source's *changed-flag* algorithm, memoized precisely. -/
 def psKernelC0InstOneMemoizedChanged

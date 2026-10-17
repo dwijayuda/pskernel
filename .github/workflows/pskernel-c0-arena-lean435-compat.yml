@@ -1,0 +1,71 @@
+name: PSKernel-C0 Arena 4.35 explicit legacy-body differential
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-lean435-compat.yml'
+      - 'psc0/packages/pskernel-c0/test/arena_lean435_compat.py'
+      - 'psc0/packages/pskernel-c0/test/arena_conformance.py'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-lean435-compat.yml'
+      - 'psc0/packages/pskernel-c0/test/arena_lean435_compat.py'
+      - 'psc0/packages/pskernel-c0/test/arena_conformance.py'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-435-adapted-arena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Pin native Lean, compile actual C0, and check adapter source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          python3 -m py_compile test/arena_conformance.py test/arena_lean435_compat.py
+          lake build c0OfficialReplay
+      - name: Authenticate original September Arena archive without mutating it
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+      - name: PILOT - check real archived declaration bodies using independent Lean 4.35 oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/arena_lean435_compat.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --checker psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay \
+            --official-project psc0/packages/pskernel-c0 \
+            --out "$RUNNER_TEMP/pskernel-c0-arena-435-compat.json" \
+            --fuel 4096 --timeout 20 --per-label 4 | tee "$RUNNER_TEMP/pskernel-c0-arena-435-compat.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-435-compat-pilot
+          path: |
+            ${{ runner.temp }}/pskernel-c0-arena-435-compat.json
+            ${{ runner.temp }}/pskernel-c0-arena-435-compat.log
+          if-no-files-found: warn
+          retention-days: 21

@@ -626,6 +626,19 @@ def psElabProjectionReference
       let result ← if selected.snd.isEmpty then psElabResolvedTerm context baseTerm expected
         else do
           let base ← psElabResolvedTerm context baseTerm none
+          -- Pinned Lean Elab.App.resolveLValAux preserves the complete
+          -- qualified constant when a non-structure global has no member.
+          -- Do not turn a hidden/missing global suffix into an unsupported
+          -- source form, or retry another base after name selection.
+          match selected.fst with
+          | .global _ =>
+            let type := psWhnf base.context.environment
+              base.context.metaContext base.context.localContext base.type
+            match (psInferAppView type).head with
+            | .constE .. | .mvar .. => pure ()
+            | _ => throw (.unknownName (psSyntaxNameAppendSegments
+                (psSyntaxNameRootSegments sourceName.segments) .anonymous))
+          | .local _ => pure ()
           let projected ← psElabProjectionChain context base selected.snd
           psElabFinalizeExpected projected expected
       return { result with

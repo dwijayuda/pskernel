@@ -369,6 +369,12 @@ theorem sectionIncluded : True := proofOnly
 omit proofOnly
 end
 
+-- A missing suffix on a global function is an unknown constant at
+-- term elaboration, after the visible function prefix has resolved.
+/-- error: Unknown constant `M3WhereOracle.sectionPlain.missingEquation` -/
+#guard_msgs (error, substring := true) in
+#check sectionPlain.missingEquation
+
 example : @sectionPlain 7 (Inhabited.mk 41) 3 = 44 := rfl
 example : @sectionHinted 7 (Inhabited.mk 41) 3 = 44 := rfl
 example : @sectionPlain 7 (Inhabited.mk 7) 3 = 10 := rfl
@@ -1079,12 +1085,12 @@ private def checkSectionInstances : IO Unit := do
         (label ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
     | _ => throw (IO.userError ("unexpected section-instance acceptance: " ++ label))
   for (index, rule) in [
-      (4, "PSCV0-SCOPE: unknown name sectionPlain.eq_def"),
+      (4, "PSCV0-UNKNOWN-NAME: sectionPlain.eq_def"),
       (5, "PSCV0-MODULE: public signature references private name in forbidden")] do
     match (batch.results[index]? : Option (Except PsV7Native.Diagnostic PsV7Native.Result)) with
     | some (Except.error error) =>
       ensure (error.phase == "module" && (error.message.splitOn rule).length > 1)
-        ("section equation visibility refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
+        ("section equation visibility case " ++ toString index ++ " refused at wrong owner: " ++ error.phase ++ ": " ++ error.message)
     | _ => throw (IO.userError "a hidden equation or explicit private signature escaped the module boundary")
   IO.println "PSCV0_M3_SECTION_INSTANCES: PASS plain no-Where dictionary parity, eight matched native/source rfl equations, six native headers, five closed ordinary definition/equation pairs, pruned unused captures, private ownership and local-only generated equations, explicit public interface theorem, registered abbreviation exposure, theorem include/omit, one exact source-owned warning and two source-only positives plus four refusals"
 

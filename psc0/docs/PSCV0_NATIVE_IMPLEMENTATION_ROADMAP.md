@@ -1,5 +1,18 @@
 ## Active work — approved Lean standard logical foundation (18 October 2026)
 
+## Active checkpoint — 18 October 2026: section-equation diagnostic ownership
+
+Main `f271f2a35789b120dbe1a6dcd5a555db44e72134` has successful Native, focused M3, F1, F2 and F3 workflow conclusions (runs 39068626607, 39068626598, 39068626634, 39068626600, 39068626601). Exact runtime totals still require log verification; do not promote the expected 970 comparisons to observed evidence.
+
+Preparation `0093a0ae3aca4a80d67a439c43822a18918d56f8` remains unintegrated. Run 39069995046 passed the retained Order export/replay, actual order-instance synthesis, nine monotonicity proofs, WF evolving-state construction, indexed BEq construction, and the remaining preparation checks. Its section fixture failed because an imported hidden equation followed a visible global-function prefix and became a projection error.
+
+Pinned Lean 4.35.0 [App.resolveLValAux](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/App.lean#L1580) reports the complete missing constant for this case; [Meta.mkEqLikeNameFor](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Meta/Eqns.lean) keeps generated equations private when the defining body is not exposed. Studied upstream projection refusals in `tests/elab/invalidProjection.lean` and the omitted-result header path in `Elab/MutualDef.lean`.
+
+The current correction preserves full qualified-name errors at term elaboration for non-structure globals. It neither exposes equations nor restricts the valid omitted-result syntax. The module fixture now requires `PSCV0-UNKNOWN-NAME: sectionPlain.eq_def`, and includes a native missing-member control. Public interface proofs, private-signature rejection, and successful structure projections retain their original owners. This diagnostic correction is pending cloud CI.
+
+Next: qualify this preparation checkpoint, reconcile both branch histories, select the independently replayed Order closure, activate and qualify the actual checked P1 construction/runtime ownership, and close the six M3+B exits. M3+B is not complete. Keep all four handoff/roadmap documents current; do not supersede a healthy Native run.
+
+
 The user explicitly approved `Classical.choice` and other needed logical axioms in pinned Lean's standard approved inventory, and instructed autonomous continuation of M3+B. The inventory at Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is `propext`, `Quot.sound`, `Classical.choice`. This decision supersedes the older two-axiom-only policy statements retained below.
 
 Follow the [foundation decision and M3+B exit ledger](PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md). Exact declaration/provenance and transitive closure audits, official kernel checking, source-axiom/proof-hole bans, computational-closure checks and verified-admission gates remain required. Choice is a logical assumption, not a runtime implementation.

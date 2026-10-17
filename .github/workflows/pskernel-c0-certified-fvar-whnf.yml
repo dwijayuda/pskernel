@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/pskernel-c0-certified-fvar-whnf.yml'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean'
       - 'psc0/packages/pskernel-c0/test/C0SemanticCacheDAGRegression.lean'
   workflow_dispatch:
 permissions:
@@ -63,10 +64,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          src=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
-          cp "$src" "$RUNNER_TEMP/qualified-fast-cachepolicy.lean"
+          policy=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          whnf=psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean
+          cp "$policy" "$RUNNER_TEMP/qualified-fast-cachepolicy.lean"
+          cp "$whnf" "$RUNNER_TEMP/qualified-fast-whnfcore.lean"
           git fetch --quiet --no-tags --depth=1 origin a7746475d5a0e58cbf0f2c8bd59e548f14930f17
-          git show FETCH_HEAD:"$src" > "$src"
+          git show FETCH_HEAD:"$policy" > "$policy"
+          git show FETCH_HEAD:"$whnf" > "$whnf"
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           set +e
           (cd psc0/packages/pskernel-c0 && \
@@ -83,9 +87,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          src=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
-          cp "$RUNNER_TEMP/qualified-fast-cachepolicy.lean" "$src"
-          grep -Fq 'psKernelC0FastSemanticCacheEligible_source' "$src"
+          policy=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          whnf=psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean
+          cp "$RUNNER_TEMP/qualified-fast-cachepolicy.lean" "$policy"
+          cp "$RUNNER_TEMP/qualified-fast-whnfcore.lean" "$whnf"
+          grep -Fq 'psKernelC0FastSemanticCacheEligible_source' "$policy"
+          test "$(grep -o 'psKernelC0FastSemanticCacheEligible' "$whnf" | wc -l)" -eq 3
           (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
           (cd psc0/packages/pskernel-c0 && lake env lean --run test/C0SemanticCacheDAGRegression.lean)
           set +e

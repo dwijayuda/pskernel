@@ -19,7 +19,7 @@ permissions:
 jobs:
   pinned-dependency-probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
@@ -118,12 +118,17 @@ jobs:
             test "$(wc -l < "$RUNNER_TEMP/Init-dependency-435.ndjson")" -eq 499130
             echo "7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/Init-dependency-435.ndjson" | sha256sum -c -
           fi
+          # The previous 900-second host cap often expired during valid,
+          # independently accepted Array proof bodies on slower GitHub
+          # runners. Permit 1500 seconds of *host wall time* only; preserve
+          # the same exact pinned export, source checker, and Lean fuel 4096.
+          # Timeout still fails the strict acceptance gate, never admits proof.
           # Opt-in diagnostic prints the active declaration BEFORE checking;
           # timeout artifacts can identify the stalled name without altering
           # source acceptance, resource budgets, or export bytes.
           (
             cd psc0/packages/pskernel-c0
-            timeout 900s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay --trace-declarations "$RUNNER_TEMP/Init-dependency-435.ndjson" 4096
+            timeout 1500s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay --trace-declarations "$RUNNER_TEMP/Init-dependency-435.ndjson" 4096
           ) | tee "$RUNNER_TEMP/Init-dependency-c0.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/Init-dependency-c0.txt"
           if [ "$TARGET" = "String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep" ]; then

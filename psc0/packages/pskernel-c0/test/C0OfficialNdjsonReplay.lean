@@ -942,8 +942,9 @@ def c0ExportCheckDefinitions (infos : List C0ExportDeclaration) :
     | .theoremDecl value =>
         -- Official Lean 4.35 type_checker.cpp::infer_const refuses
         -- safe proofs referring to prior unsafe/partial definitions.
-        if c0ExportExprMentionsNonlogical blocked value.value ||
-            c0ExportExprMentionsNonlogical blocked value.base.type then
+        if !blocked.isEmpty &&
+            (c0ExportExprMentionsNonlogical blocked value.value ||
+             c0ExportExprMentionsNonlogical blocked value.base.type) then
           return false
         match c0ExportCheckOne env info with
         | .ok next => env := next
@@ -1054,9 +1055,11 @@ def c0ExportStepDetailed
             "duplicate unsafe/partial definition name"))
         nonlogical := (name, safety) :: nonlogical
     | .theoremDecl info =>
-        let blockedNames := nonlogical.map Prod.fst
-        if c0ExportExprMentionsNonlogical blockedNames info.value ||
-            c0ExportExprMentionsNonlogical blockedNames info.base.type then
+        -- No nonlogical prior declaration means zero new proof traversal
+        -- on full Init / Std / Mathlib. Only the tainted path is scanned.
+        if !nonlogical.isEmpty &&
+            (c0ExportExprMentionsNonlogical (nonlogical.map Prod.fst) info.value ||
+             c0ExportExprMentionsNonlogical (nonlogical.map Prod.fst) info.base.type) then
           throw (.checked env declaration (.rejectedInvalid
             "safe theorem uses previously exported unsafe/partial declaration"))
         match c0ExportCheckOne env declaration fuel with

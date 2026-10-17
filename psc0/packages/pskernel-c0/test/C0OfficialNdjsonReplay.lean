@@ -59,6 +59,10 @@ structure C0ExportTables where
   -- path for real Init, and a bounded-on-use sparse fallback only when
   -- an original explicitly declares an out-of-order level ID.
   sparseLevels : List (Nat × PsKernelLevel) := []
+  -- All three 3.1.0 interned-table domains can use sparse IDs. Retain
+  -- ordinary dense PersistentArray O(1) lookup on official full Init.
+  sparseNames : List (Nat × PsKernelName) := []
+  sparseExprs : List (Nat × PsKernelExpr) := []
 
 def c0JsonObj (j : Lean.Json) (key : String) : Except String Lean.Json :=
   j.getObjVal? key
@@ -91,7 +95,9 @@ def c0ExportName
   if h : idx < tables.names.size then
     .ok tables.names[idx]
   else
-    .error s!"unknown NDJSON name handle {idx}"
+    match tables.sparseNames.find? (fun entry => entry.fst == idx) with
+    | some entry => .ok entry.snd
+    | none => .error s!"unknown NDJSON name handle {idx}"
 
 def c0ExportLevel
     (tables : C0ExportTables) (idx : Nat) :
@@ -109,7 +115,9 @@ def c0ExportExpr
   if h : idx < tables.exprs.size then
     .ok tables.exprs[idx]
   else
-    .error s!"unknown NDJSON expression handle {idx}"
+    match tables.sparseExprs.find? (fun entry => entry.fst == idx) with
+    | some entry => .ok entry.snd
+    | none => .error s!"unknown NDJSON expression handle {idx}"
 
 def c0ExportNames
     (tables : C0ExportTables) (j : Lean.Json) :
@@ -513,33 +521,50 @@ def c0ExportParseRecord
   if !st.header then throw "NDJSON declaration preceded export metadata"
   if let .ok value := c0JsonObj j "in" then
     let idx ← value.getNat?
-    if idx != st.names.size then throw "NDJSON name IDs not sequential"
+    if idx < st.names.size ||
+        st.sparseNames.any (fun entry => entry.fst == idx) then
+      throw "duplicate NDJSON name handle"
     let newName ← c0ExportDecodeName st j
-    -- Consume the table fields before pushing: no stale owner of the
-    -- growing array is needed after its referenced name was decoded.
-    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header, sparseLevels⟩ := st
-    return ⟨names.push newName, levels, exprs, declarations,
-      quotientParts, quotientPending, header, sparseLevels⟩
+    -- Preserve dense storage with zero extra lookup in common exporter input.
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header,
+          sparseLevels, sparseNames, sparseExprs⟩ := st
+    if idx == names.size then
+      return ⟨names.push newName, levels, exprs, declarations,
+        quotientParts, quotientPending, header, sparseLevels, sparseNames, sparseExprs⟩
+    else
+      return ⟨names, levels, exprs, declarations,
+        quotientParts, quotientPending, header, sparseLevels,
+        (idx, newName) :: sparseNames, sparseExprs⟩
   if let .ok value := c0JsonObj j "il" then
     let idx ← value.getNat?
     if idx < st.levels.size ||
         st.sparseLevels.any (fun entry => entry.fst == idx) then
       throw "duplicate NDJSON level handle"
     let newLevel ← c0ExportDecodeLevel st j
-    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header, sparseLevels⟩ := st
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header,
+          sparseLevels, sparseNames, sparseExprs⟩ := st
     if idx == levels.size then
       return ⟨names, levels.push newLevel, exprs, declarations,
-        quotientParts, quotientPending, header, sparseLevels⟩
+        quotientParts, quotientPending, header, sparseLevels, sparseNames, sparseExprs⟩
     else
       return ⟨names, levels, exprs, declarations,
-        quotientParts, quotientPending, header, (idx, newLevel) :: sparseLevels⟩
+        quotientParts, quotientPending, header, (idx, newLevel) :: sparseLevels,
+        sparseNames, sparseExprs⟩
   if let .ok value := c0JsonObj j "ie" then
     let idx ← value.getNat?
-    if idx != st.exprs.size then throw "NDJSON expression IDs not sequential"
+    if idx < st.exprs.size ||
+        st.sparseExprs.any (fun entry => entry.fst == idx) then
+      throw "duplicate NDJSON expression handle"
     let newExpr ← c0ExportDecodeExpr st j
-    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header, sparseLevels⟩ := st
-    return ⟨names, levels, exprs.push newExpr, declarations,
-      quotientParts, quotientPending, header, sparseLevels⟩
+    let ⟨names, levels, exprs, declarations, quotientParts, quotientPending, header,
+          sparseLevels, sparseNames, sparseExprs⟩ := st
+    if idx == exprs.size then
+      return ⟨names, levels, exprs.push newExpr, declarations,
+        quotientParts, quotientPending, header, sparseLevels, sparseNames, sparseExprs⟩
+    else
+      return ⟨names, levels, exprs, declarations,
+        quotientParts, quotientPending, header, sparseLevels, sparseNames,
+        (idx, newExpr) :: sparseExprs⟩
   if let .ok payload := c0JsonObj j "def" then
     c0ExportOnlyKeys j ["def"]
     c0ExportOnlyKeys payload

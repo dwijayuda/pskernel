@@ -95,10 +95,10 @@ def psErasureWellFoundedPairEntry (environment : PsEnvironment)
     | throw .unsupportedRuntimeTerm
   if firstId == secondId || firstSlot != firstId || secondSlot != secondId then
     throw .unsupportedRuntimeTerm
-  let some (.binding _ _ secondType _) := psLocalFindById scope.localContext secondId
+  -- A constant second family is a valid PSigma domain too. The actual
+  -- second entry must still be a binding; the full pair type is checked below.
+  let some (.binding _ _ _ _) := psLocalFindById scope.localContext secondId
     | throw .unsupportedRuntimeTerm
-  if !(psExprFVarIds secondType).contains firstId then
-    throw .unsupportedRuntimeTerm
   let inferred ← (psInferType environment psMetaEmpty scope.localContext major).mapError
     (fun _ => PsErasureError.unsupportedRuntimeTerm)
   if !psWellFoundedDefEq environment psMetaEmpty scope.localContext inferred domain then

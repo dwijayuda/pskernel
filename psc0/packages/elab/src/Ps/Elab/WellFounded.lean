@@ -280,8 +280,9 @@ def psElabWellFoundedForalls (binders : List PsElabTypedBinder) (body : PsExpr) 
   binders.foldr (fun binder body =>
     .forallE binder.name binder.type (psExprAbstractFVar binder.id body) binder.binder) body
 
--- A dependent pair is a single logical fixpoint domain. Its original two
--- header slots remain distinct; fixed captures are never part of the pair.
+-- A PSigma pair is a single logical fixpoint domain, including a constant
+-- second family. Its original two header slots remain distinct; fixed
+-- captures are never part of the pair.
 inductive PsElabWellFoundedArgument where
   | unary (major : PsElabTypedBinder)
   | dependentPair (first second : PsElabTypedBinder) (domain : PsExpr)
@@ -534,12 +535,11 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     | none => pure (PsElabWellFoundedArgument.unary major)
     | some (firstId, secondId) => do
       let some first := declaredParameters.find? (fun parameter => parameter.id == firstId)
-        | throw (.data "PSCV0-WF-INTERNAL: missing first dependent parameter")
+        | throw (.data "PSCV0-WF-INTERNAL: missing first packed parameter")
       let some second := declaredParameters.find? (fun parameter => parameter.id == secondId)
-        | throw (.data "PSCV0-WF-INTERNAL: missing second dependent parameter")
-      if firstId == secondId || !plan.stateIds.isEmpty ||
-          !(psExprFVarIds second.type).contains firstId then
-        throw (.data "PSCV0-WF-PACK: the selected pack is not exactly two dependent changing parameters")
+        | throw (.data "PSCV0-WF-INTERNAL: missing second packed parameter")
+      if firstId == secondId || !plan.stateIds.isEmpty then
+        throw (.data "PSCV0-WF-PACK: the selected pack is not exactly two distinct changing parameters")
       let family := PsExpr.lam first.name first.type
         (psExprAbstractFVar first.id second.type) .explicit
       let domain ← (psWellFoundedPairTypeChecked environment measured.context.metaContext

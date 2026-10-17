@@ -14,6 +14,38 @@ All three complete immutable references were retrieved and byte-checked from imp
 
 Stable Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` is unchanged from the qualified compiler. Historical RC prose in the original reference is provenance, not a reason to downgrade the compiler pin. v7.2 §14.10 makes active clauses authoritative and repairs historical C04/C05 wording. Most new recursion/assurance semantics originated in v7.1 and are retained, not introduced anew by Markdown formatting.
 
+## Current M3+B implementation checkpoint — independent WF candidate, 17 October 2026
+
+The accepted compiler/test baseline is `60586b7e12aee97954d27e698666a8a2531a0db4`
+at 78/100 weighted engineering progress. Its
+[complete receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md)
+records the completed five-gate qualification, including omitted main result
+inference within the selected boundary, indexed Inhabited, nominal empty
+dictionaries, generic fixed-codomain WF relations and dependent pair packing.
+M3+B is open; these are bounded admissions, not full v7.2 coverage.
+
+The current unqualified candidate addresses the remaining independent
+two-changing-argument WF boundary in v7.2 total recursion. It reuses the
+actual checked PSigma construction with a constant second family, preserving
+exactly two source-ordered distinct changing IDs, capture and codomain
+closure, checked decreases and equations, typed erasure and the curried ABI.
+New left/right lexicographic programs and three well-typed entry-identity
+controls are added. The sum nondecrease refusal retains its source and moves
+to PSCV0-WF-DECREASE; the old tuple refusal is replaced by the genuinely
+nondecreasing measure Prod.mk(n + acc, 0), also at that rule and elaboration phase.
+
+Qualification still requires all five gates on the same compiler/test SHA.
+The planned focused total is 940 comparisons, up from 920; no additional
+runtime or progress credit is assigned before observed assertions pass.
+More than two changing arguments, arbitrary telescopes, variable codomains,
+general mutual WF, the complete P0 matrix and the audited P1 assumption
+boundary remain open. The v7.2 reference blob and pinned Lean are unchanged.
+
+The implementation descriptions and next-slice recommendations in the
+adoption-era matrix below are historical snapshots. This checkpoint and
+the current handoffs/roadmap supersede their old pending/blanket-rejection
+statements; their specification comparison remains retained as provenance.
+
 ## Rule-to-change and implementation matrix
 
 Status baseline below: source inspected at `867d76f992293977ab54e3c7fcb4c87a088e2462`; qualified runtime compiler `133af061d6aaff0eb6ed990abd341ca2a44d15e9`. **Specified** means normative design. **Pending** is not a successful source or artifact admission. Each implementation slice must add its exact tested/qualified commit and phase evidence.

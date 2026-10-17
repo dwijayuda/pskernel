@@ -67,19 +67,17 @@ def psElabRecursionMeasureParameterPlan (context : PsElabContext)
   -- while leaving a first-only measure on the existing unary/state route.
   let dependentMajor := majorDependencies.any fun id => id != majorId && varying.contains id
   if measuredVarying.length > 1 || dependentMajor then do
-    -- The additional route owns exactly two dependency-ordered changing
-    -- binders. Independent tuples and a third changing slot stay outside it.
+    -- The additional route owns exactly two changing header binders in
+    -- source order. A constant second family uses the same checked PSigma
+    -- encoding; a third changing slot stays outside this bounded route.
     -- Full fixed-capture/type closure is rechecked by the source constructor.
     let [firstId, secondId] := ids.filter varying.contains
-      | throw (.data "PSCV0-WF-MEASURE-STATE: dependent packing requires exactly two changing parameters")
-    let some second := psLocalFindById context.localContext secondId
-      | throw (.data "PSCV0-WF-INTERNAL: missing dependent parameter binding")
-    let secondType := psMetaInstantiate context.metaContext (psLocalDeclType second)
-    if (psExprFVarIds secondType).contains firstId then
-      return {
-        parameterIds := ids, majorId := firstId, packedIds := some (firstId, secondId)
-        fixedIds := ids.filter (fun id => !varying.contains id), stateIds := [] }
-    throw (.data "PSCV0-WF-MEASURE-STATE: the termination measure may depend on at most one changing parameter; packing several measured arguments is unavailable")
+      | throw (.data "PSCV0-WF-MEASURE-STATE: pair packing requires exactly two changing parameters")
+    let some _ := psLocalFindById context.localContext secondId
+      | throw (.data "PSCV0-WF-INTERNAL: missing second packed parameter binding")
+    return {
+      parameterIds := ids, majorId := firstId, packedIds := some (firstId, secondId)
+      fixedIds := ids.filter (fun id => !varying.contains id), stateIds := [] }
   let changing := psElabRecursionParameterDependencies context (varying ++ [majorId])
   let stateIds := ids.filter fun id => id != majorId && changing.contains id
   if stateIds.any dependencies.contains then

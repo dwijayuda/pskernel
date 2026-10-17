@@ -1,214 +1,110 @@
-## Authoritative current acceptance — M3+B dependent WF and indexed defaults, 2026-10-17
+## Authoritative current checkpoint — M3+B independent two-argument WF candidate, 2026-10-17
 
-Accepted compiler/test SHA:
-`60586b7e12aee97954d27e698666a8a2531a0db4`.
-The cumulative slice is now qualified at **78/100**, up from 74/100.
-This is a weighted engineering estimate, approximately 75–80% through the
-selected M3+B exits; it is not measured language coverage. M3+B remains open.
+The next bounded M3+B slice extends the existing checked PSigma route to
+exactly two changing header arguments whose types may be independent.
+Independent implementation and fixture review are complete. **This candidate
+is not yet qualified.** The accepted compiler/test baseline remains
+`60586b7e12aee97954d27e698666a8a2531a0db4`, with its documentation at
+`3e79dab87afe9b0b204307dec4590b2d33600352` and **78/100** weighted
+engineering estimate. M3+B remains open; this is not measured language coverage.
 
-The [complete qualification receipt](https://github.com/dwijayuda/pskernel/blob/psc0/pscv0-v7-native-lean-v1/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md)
-records source and runtime scope, checked equations, assumption closure,
-all five gate identities, artifact digests, repairs and residual limits.
-This section supersedes earlier candidate and failure checkpoints retained
-below. This acceptance-record update changes documentation only. The compiler/test
-SHA above identifies the code and fixtures exercised by the completed gates.
+The [accepted dependent-WF/indexed-default receipt](https://github.com/dwijayuda/pskernel/blob/3e79dab87afe9b0b204307dec4590b2d33600352/psc0/docs/PSCV0_M3_DEPENDENT_WF_INDEXED_QUALIFICATION_2026-10-17.md)
+retains the complete previous acceptance: five successful same-SHA gates,
+checked equations and assumption closure, 68 scalar exports / 680 comparisons
+plus the separate 24-export / 240-comparison recursive suite, totaling 920.
+The earlier application-instance scheduling repair and canonical Rust harness
+path repair are retained without modification.
 
-| Gate | Run | Job | Result |
-| --- | --- | --- | --- |
-| Native Linux | [39013004162](https://github.com/dwijayuda/pskernel/actions/runs/39013004162) | `117339312610` | SUCCESS; all 34 reported steps |
-| Focused M3 | [39013004160](https://github.com/dwijayuda/pskernel/actions/runs/39013004160) | `117339312632` | SUCCESS; all 15 reported steps |
-| F1 canonical model | [39013004195](https://github.com/dwijayuda/pskernel/actions/runs/39013004195) | `117339312771` | SUCCESS; all 10 reported steps |
-| F2 operations | [39013004178](https://github.com/dwijayuda/pskernel/actions/runs/39013004178) | `117339312891` | SUCCESS; all 9 reported steps |
-| F3/F4/platform | [39013004170](https://github.com/dwijayuda/pskernel/actions/runs/39013004170) | `117339312589` | SUCCESS; all 11 reported steps |
+### Bounded implementation
 
-All five runs target the exact accepted SHA and completed successfully.
-The native pipeline completed before this documentation update; no
-healthy native run was cancelled.
+Three occurrence restrictions are removed in the recursion parameter planner,
+WF source constructor and typed erasure entry. The same real PSigma
+construction represents a constant second family. No Meta construction,
+proof rule, backend lowering or allowed assumption changes.
 
-### Accepted cumulative behavior
+The selected route still requires exactly two distinct changing header IDs
+in source order after dependency closure. A third changing slot is refused.
+The second actual binding, full packed domain, fixed captures, fixed measure
+codomain, relation dictionary, final fixed-argument revalidation, relation,
+motive and functional closure remain checked. Public equations retain actual
+fix_eq, PSigma elimination and checked extensional transport.
 
-- Omitted main result annotations use the shared predefinitions for the
-  selected total and partial heads, preserving the distinction from an
-  explicit main hole and the native local-result boundary.
-- Indexed `Inhabited` unifies the full constructor result before filling
-  unresolved fields in telescope order, retaining constructor ordering,
-  uniform parameter requirements and sequential group registration.
-- Fully applied prepared nominal dictionaries with zero retained fields
-  remain ordinary runtime values, with producer/forwarder/initializer calls
-  and argument slots. Nonempty, foreign and proof controls remain checked.
-- The independently audited 34-declaration WF foundation is active.
-  Fixed-codomain measures synthesize the actual relation and checked
-  inverse-image/generic fix construction.
-- Exactly two dependency-ordered changing header arguments use one real
-  PSigma layer. Fixed and captured arguments stay outside the pack; the
-  public curried ABI, dependent types and interleaved fixed argument stay
-  in their source positions. Public equations use actual fix_eq, pair
-  elimination and checked extensional transport.
-- Inherited-partial local hints retain raw unused syntax only after every
-  original main modifier is validated. Hint-only captures are excluded;
-  actual captures, active hints, headers, bodies and mixed-main refusals
-  remain checked.
+The erasure entry still recognizes exactly one PSigma layer and its actual
+PSigma.mk term, with the original IDs and order. The typed curried callback
+adapter, full before/after body type checks, raw-callback rejection, public
+curried argument positions and ordinary proof Unit slots are preserved.
+Measures that select only one independent changing argument retain the
+existing unary-domain/state route.
 
-The focused workflow passed all 668 build jobs and fourteen outer source
-fixtures. Indexed Inhabited remains nested inside group proof deriving;
-six result-inference and eight partial-hint source requests remain nested
-inside Where. They are not additional outer fixtures.
+Pinned Lean 4.35.0 [ArgsPacker.Unary.packType](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Meta/ArgsPacker.lean)
+constructs PSigma families without an occurrence requirement. Its
+[WF relation owner](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/WF/Rel.lean)
+retains the fixed-codomain condition and actual dictionary/inverse image.
+The existing checked PSC0 Meta pair constructor is unchanged.
 
-The unchanged WF fixture (blob
-`8f5e8d6caee85aa22ec5082530b132cf82f1d5d0`, 52,240 bytes) completed
-twenty-one requests: two positive requests and nineteen required refusals.
-Both packed definitions, their actual generic fix/PSigma construction,
-public equations, full closure and exact typed erasure metadata passed.
-Native packed definitions have no axioms; their step equations each use
-only `Quot.sound`. All 33 printed WF assumption closures stay within the
-approved set.
+### Qualification obligations
 
-### Observed focused runtime evidence
+Two added native/source functions exercise left-coordinate decrease and a
+combination of right-coordinate countdown with left-coordinate reset.
+Interleaved fixed parameters, erased family/proof captures, real public
+equations and exact erasure metadata are checked. The independent Nat/Nat
+entry controls first prove swapped, duplicated and foreign same-typed fields
+well typed, then require the preserved entry identity/order checks to reject them.
+The existing dependent Fin cases and all fourteen prior WF exports remain.
 
-Twelve scalar suites retain all 58 prior exports and add ten, for 68
-exports, both Boolean inputs and **680 observed comparisons** across
-direct JavaScript, strict compiled TypeScript, locked Rust, V8 GC core and
-Wasmtime components. The original recursive deriving suite separately
-retains 24 exports and **240 comparisons**. The combined focused total is
-**920 comparisons across thirteen runtime suites**.
+The additive n + acc nondecrease source is unchanged and now requires
+PSCV0-WF-DECREASE after the newly supported packing owner. The obsolete
+tuple-packing refusal becomes the genuinely nondecreasing measure
+Prod.mk(n + acc, 0) with the existing call bad(k, acc + 1), likewise requiring
+PSCV0-WF-DECREASE. These remain elaboration-phase refusals; arbitrary failure
+is not accepted. The WF batch retains 21 requests, two positive and nineteen
+required refusals.
 
-Actual output contains exactly 24 scalar ECMA PASS lines, twelve distinct
-scalar Rust PASS stems and twelve scalar Wasm PASS stems, with each suite
-appearing once per lane. Each Wasm pass covers separate core and component
-assertions. The dedicated original suite contributes its own 2/1/1 markers.
-The indexed Rust suite prints its own PASS after its own harness preparation.
-No comparison is inferred from preparation alone.
+The focused workflow adds two Bool-to-UInt64 exports to each of its four
+runner invocations, covering five execution lanes. If all assertions pass,
+WF exports increase from 14 to 16, scalar comparisons from 680 to 700, and
+combined focused comparisons from 920 to 940. These numbers are planned
+assertions, not observed results. The original fourteen outer fixtures and
+the independent recursive deriving suite remain required.
 
-Focused run [39013004160](https://github.com/dwijayuda/pskernel/actions/runs/39013004160),
-job `117339312632`, has all 15 reported steps successful and a complete
-7,699,576-character log. Artifact `12093283123` contains 267 files,
-is 2,844,284 bytes, and has SHA-256
-`0e6af29411dfa8c4f43fcc32badc143765d36c56af1f45ab3ceef1e26323de07`.
+Run Native Linux, focused M3, F1 canonical model, F2 operations and
+F3/F4/platform on the same final compiler/test SHA. Inspect completed
+native/focused logs, actual assertion markers, all required refusals,
+assumption closures and artifact digests before recording acceptance.
+Do not cancel a healthy native run or push another compiler revision while
+it is running. Keep the accepted score at 78 until evidence and independent
+review justify an update. Record the result in
+`psc0/docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md`, both
+handoffs, architecture, roadmap, migration matrix and the original draft PR.
 
-### Cause and accepted repair
+### Remaining scope and authority
 
-The faithful raw-worker diagnostic at `7f9d7d9a` established that the
-first explicit `Prod.Lex.left` coordinate retained an ordinary numeral
-instance. This blocked the eligible expected-result comparison at the
-smaller pair. Its rollback left the nested arithmetic proof to infer a
-different relation. Resolving that one available instance made the same
-complete expected constraint succeed.
+Broader indexed binary deriving, arbitrary positive containers and
+function-valued nested fields, source induction/nested elimination,
+own-binder dependent omitted main codomains, broader unused-hint diagnostics,
+more than two changing arguments, arbitrary WF telescopes, variable measure
+codomains, general mutual WF and the complete P0 combination matrix remain
+open. Own-binder result inference and the generic P0 runtime matrix have
+concrete follow-up proposals but are deliberately outside this WF batch.
 
-The accepted repair progresses only scoped ordinary instance work inside
-the existing enabled/eligible application-result branch, after result
-eligibility and before the unchanged comparison. It preserves checked
-assignment, captured scopes, queue order, the full returned context and
-resource failures. Defaults, source continuations, expected-term
-adaptations and coercion resumptions do not run at this boundary.
-The original proof source, unifier, reducer and constructor-constraint
-ordering remain intact.
+Only propext and Quot.sound are approved assumptions. P1 remains blocked
+by the audited Classical.choice dependency in Lean.Order and the selected
+native Unit/Option fixed points. Ordinary runtime observations do not
+establish verified artifact correspondence. M3+B, M4 and M5 remain open.
 
-Production owner blobs are Application
-`38b24a2bc0f062204cb34b829ed3eba1ea954744` and Postponed
-`02454575e32cf98add4a2c4c215908ba2c5530d0`.
-Temporary deep replay diagnostics and raw-worker plumbing are removed;
-the WF owner is exactly restored to phase-only blob
-`ae03d72b3345d14f104c61c2c67ecb5b05eef52a`.
-Earlier manual replays used a stronger top-level callback and did not
-reproduce the original schedule; their stronger conclusion was withdrawn.
-
-The separate Rust harness path repair uses the runtime script's own URL
-to locate Cargo's canonical `dist/pscv0-native/rust-checks.rs`.
-This prevents the nested indexed suite from rerunning the preceding
-empty-dictionary harness. All oracle values and assertion loops remain
-unchanged. Runner blob:
-`83f069245f7b94fa5a9bce4779ab6619b46512c3`.
-
-### Completed native regression and foundation evidence
-
-Native [39013004162](https://github.com/dwijayuda/pskernel/actions/runs/39013004162),
-job `117339312610`, ran from 07:16:15 to 07:33:52 UTC, with all 34
-reported steps successful. The full log is 4,478,854 characters, with
-157 JSON records. Artifact `12094485892` is 6,797,545 bytes, created
-07:33:49 UTC, SHA-256
-`17fe748f9e214a470876129d1f76833e64e46ba08c560967ef7afb9b3fd25feb`.
-
-The unchanged activated audit reports 34 active additions, no candidate
-axioms, native kernel validation and three compared recursor rules.
-The selected Standard retains 3,633 declarations, 41 classes and
-359 instances:
-
-- FNV: `fnv1a64:4990397000639020696`.
-- Standard SHA-256:
-  `5e96678b7ca94ac8dcb63d36cee81c5997287f507ce8c0c26d28321b37ce97d7`.
-- Source-surface SHA-256:
-  `7a996cfc6253693799d43fdcf78dd7f30eb0713a3eb31831daa9d804faf818c6`.
-
-The audit helper's `runtimeQualified: false` remains scoped to the
-foundation audit. Separately completed runtime gates establish execution.
-
-Original source/refusal checks, captured synthetic scopes, defaults,
-quiescence and rollback, postponed syntax and numeral fallback all pass.
-JS, TS and Rust each retain 1,069 shared observations; platform profiles
-retain 35 probes. Linked `App.compute(7)=18`, three-file provenance,
-four-module V8/Wasmtime GC and three-module Rust pass. GC retains five
-scalar worlds, ten limb checks, binary/Wat equality and GC inside a
-component. Direct-JS origins retain 1,239 mappings and 52 generated-parent
-origins. Repeated Wasmtime host calls and generic Nat/Bool
-100,000/50,000-step execution pass.
-
-M1 names the exact accepted source SHA and pinned Lean, reports a
-7,853 ms prelude initialization, four compiler configurations and twelve
-runtime rows. The established warmup/sample method excludes setup.
-This is not a compiler-equivalence benchmark or a claimed speedup.
-
-### Progress and next obligations
-
-| Exit | Weight | Previous accepted | Current accepted |
-| --- | ---: | ---: | ---: |
-| Data, elimination and deriving | 30 | 24 | 25 |
-| v7.2 source strategies | 15 | 13 | 14 |
-| Total structural/WF recursion | 20 | 14 | 16 |
-| P0 ordinary partial execution | 15 | 13 | 13 |
-| P1 selected partial_fixpoint | 10 | 1 | 1 |
-| Cross-stage integration | 10 | 9 | 9 |
-| **Total** | **100** | **74** | **78** |
-
-Indexed defaults and empty dictionaries earn one combined data point;
-result inference and partial-hint fidelity earn one source point;
-generic relation selection and dependent packing earn two total-recursion
-points. Instance ordering, diagnostic removal, syntax/fixture repairs,
-initialization and the Rust harness correction receive no separate credit.
-
-Continue from this accepted compiler/test SHA. Do not reopen the repaired
-packed decrease proof or repeat a completed matrix without a new concrete
-change. Choose the next bounded unclosed M3+B exit from current evidence
-and keep all existing source, equation, refusal and runtime contracts.
-
-Remaining obligations are broader indexed binary BEq/DecidableEq,
-arbitrary positive containers and function-valued nested fields, complete
-source-induction/nested-eliminator boundaries, inferred main codomains
-depending on their own binders, broader unused-hint diagnostic parity,
-independent changing pairs, more than two changing slots, arbitrary
-telescopes, variable measure codomains, general mutual WF and the complete
-P0 combination/acceptance matrix. An unclosed P0 matrix is not itself
-evidence of a new isolated mechanism defect. M3+B, M4 and M5 remain open.
-
-Only `propext` and `Quot.sound` are approved assumptions. P1 stays
-blocked by the audited `Classical.choice` dependency in Lean.Order and
-the selected native Unit/Option fixed points; the negative-control
-fixture still reports P1 unavailable.
-
-Pinned Lean is 4.35.0 at
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
-The v7.2 language authority remains
-`psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`, blob
-`694115223777599ba28ee175e14bb642b7b6aa4b`.
-GitHub remains canonical; compiler/build/test execution stays on connected
-cloud Linux, with no local clone or local Lean/Lake run.
+The sole language authority remains `psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md`,
+blob `694115223777599ba28ee175e14bb642b7b6aa4b`. Pinned Lean is 4.35.0
+at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+GitHub is canonical; compiler/build/test execution stays on connected cloud
+Linux with no local clone, filesystem, shell or Lean/Lake execution.
 PR #109 remains draft/open/unmerged on
 `psc0/pscv0-v7-m1-parser-ownership-v1`.
 
-## Historical checkpoints — superseded by the acceptance above
+## Historical checkpoints — superseded by the checkpoint above
 
 The retained material below records earlier candidates and decisions.
-Any old current/pending/accepted-SHA statement is historical; the
-authoritative accepted state is the completed matrix above.
+Old current/pending/accepted-SHA statements are historical; the current
+candidate and the qualified baseline are explicitly distinguished above.
 
 ## Current checkpoint — active foundation replay preserved, next matrix pending
 

@@ -12,7 +12,7 @@ it does not supply an equation or permit an unchecked recursive call.
 structure PsElabRecursionParameterPlan where
   parameterIds : List Nat
   majorId : Nat
-  packedIds : Option (Nat × Nat) := none
+  packedIds : List Nat := []
   fixedIds : List Nat
   stateIds : List Nat
 
@@ -74,19 +74,17 @@ def psElabRecursionMeasureParameterPlan (context : PsElabContext)
       if selected.contains (psLocalDeclId declaration) then
         selected ++ psExprFVarIds
           (psMetaInstantiate context.metaContext (psLocalDeclType declaration))
-      else selected) measuredVarying
-    let [firstId, secondId] := ids.filter (fun id =>
-        varying.contains id && packedDependencies.contains id)
-      | throw (.data "PSCV0-WF-MEASURE-STATE: pair packing requires exactly two changing measured or dependent parameters")
-    let some _ := psLocalFindById context.localContext secondId
-      | throw (.data "PSCV0-WF-INTERNAL: missing second packed parameter binding")
-    -- Unmeasured changing parameters keep the existing curried state order.
-    -- The source constructor rechecks the complete domain and fixed closure.
-    let stateIds := ids.filter fun id =>
-      varying.contains id && id != firstId && id != secondId
+      else selected) (majorId :: measuredVarying)
+    let packedIds := ids.filter (fun id =>
+      varying.contains id && packedDependencies.contains id)
+    let firstId :: _ :: _ := packedIds
+      | throw (.data "PSCV0-WF-INTERNAL: a dependent pack lost its changing parameter telescope")
+    -- Unmeasured changing parameters keep their original curried state order.
+    let stateIds := ids.filter fun id => varying.contains id && !packedIds.contains id
     return {
-      parameterIds := ids, majorId := firstId, packedIds := some (firstId, secondId)
+      parameterIds := ids, majorId := firstId, packedIds
       fixedIds := ids.filter (fun id => !varying.contains id), stateIds }
+
   let changing := psElabRecursionParameterDependencies context (varying ++ [majorId])
   let stateIds := ids.filter fun id => id != majorId && changing.contains id
   if stateIds.any dependencies.contains then

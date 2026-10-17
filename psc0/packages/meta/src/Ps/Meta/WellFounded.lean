@@ -6,8 +6,8 @@ Pinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
 Lean/Elab/PreDefinition/WF/Rel.lean:57-69 and WF/Fix.lean:281-319.
 The source owner supplies the already checked unary domain and measure.
 This owner selects the actual dictionary, relation, fixpoint and equation
-shape. The bounded pair helpers below share its checked domain encoding;
-they do not choose source parameters or prove a recursive call decreases.
+shape. The arity-aware telescope helpers below share its checked domain
+encoding; they do not choose source parameters or prove a call decreases.
 -/
 
 -- Keep the established names for the qualified Nat specialization.
@@ -218,47 +218,126 @@ def psWellFoundedPairUnpack (packing : PsWellFoundedPairPacking)
         !psExprAlphaEq secondFamily packing.secondFamily then none
     else some (first, second)
 
--- The logical and runtime owners use the same exact curried adapter. Its
--- first two binders are the original dependent slots; the third is the
--- checked smaller-than proof. No runtime beta rule is added by this view.
-def psWellFoundedPairCurryType (environment : PsEnvironment) (metaContext : PsMetaContext)
-    (locals : PsLocalContext) (packing : PsWellFoundedPairPacking)
-    (firstName secondName : PsName) (callbackType : PsExpr) :
+/-!
+N-ary dependent packing adapts Lean/Meta/ArgsPacker.Unary (4.35.0).
+Arity is supplied by the owned telescope, never inferred from a user type.
+The last field is left intact even when it is itself a PSigma.
+-/
+
+def psWellFoundedTupleTypeChecked (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (locals : PsLocalContext) (values : List PsExpr) : Except PsInferError PsExpr := do
+  match values with
+  | [] => throw .expectedFunction
+  | [value] => psInferType environment metaContext locals value
+  | first :: second :: rest =>
+    let .fvar id := first | throw .applicationTypeMismatch
+    let some declaration := psLocalFindById locals id | throw .applicationTypeMismatch
+    let firstType ← psInferType environment metaContext locals first
+    let tailType ← psWellFoundedTupleTypeChecked environment metaContext locals (second :: rest)
+    let family := PsExpr.lam (psLocalDeclUserName declaration) firstType
+      (psExprAbstractFVar id tailType) .explicit
+    psWellFoundedPairTypeChecked environment metaContext locals firstType family
+
+def psWellFoundedTuplePack (domain : PsExpr) (values : List PsExpr) :
+    Except PsInferError PsExpr := do
+  match values with
+  | [] => throw .expectedFunction
+  | [value] => return value
+  | first :: second :: rest =>
+    let some packing := psWellFoundedPairPackingView domain | throw .applicationTypeMismatch
+    let tailDomain := psReduceApply packing.secondFamily [first]
+    let tail ← psWellFoundedTuplePack tailDomain (second :: rest)
+    return psWellFoundedPairPack packing first tail
+
+def psWellFoundedTupleProjections (arity : Nat) (value : PsExpr) : List PsExpr :=
+  match arity with
+  | 0 => []
+  | 1 => [value]
+  | n + 2 => psWellFoundedPairFirst value ::
+      psWellFoundedTupleProjections (n + 1) (psWellFoundedPairSecond value)
+
+structure PsWellFoundedTupleBinder where
+  id : Nat
+  name : PsName
+  type : PsExpr
+
+def psWellFoundedTupleLambdas (binders : List PsWellFoundedTupleBinder) (body : PsExpr) : PsExpr :=
+  binders.foldr (fun binder body =>
+    .lam binder.name binder.type (psExprAbstractFVar binder.id body) .explicit) body
+
+def psWellFoundedTupleForalls (binders : List PsWellFoundedTupleBinder) (body : PsExpr) : PsExpr :=
+  binders.foldr (fun binder body =>
+    .forallE binder.name binder.type (psExprAbstractFVar binder.id body) .explicit) body
+
+def psWellFoundedTupleOpen (locals : PsLocalContext) (domain : PsExpr)
+    (names : List PsName) : Except PsInferError (PsLocalContext × List PsWellFoundedTupleBinder) := do
+  match names with
+  | [] => throw .expectedFunction
+  | [name] =>
+    let pushed := psLocalPushBinding locals name domain .explicit
+    return (pushed.context, [{ id := pushed.id, name, type := domain }])
+  | name :: next :: rest =>
+    let some packing := psWellFoundedPairPackingView domain | throw .applicationTypeMismatch
+    let pushed := psLocalPushBinding locals name packing.firstType .explicit
+    let tailDomain := psReduceApply packing.secondFamily [.fvar pushed.id]
+    let (inner, tail) ← psWellFoundedTupleOpen pushed.context tailDomain (next :: rest)
+    return (inner, { id := pushed.id, name, type := packing.firstType } :: tail)
+
+def psWellFoundedTupleCurryType (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (locals : PsLocalContext) (names : List PsName) (callbackType : PsExpr) :
     Except PsInferError PsExpr := do
   let parameter ← psInferEnsureForall environment metaContext locals callbackType
-  if !psWellFoundedDefEq environment metaContext locals parameter.domain
-      (psWellFoundedPairType packing) then
-    throw .applicationTypeMismatch
-  let first := psLocalPushBinding locals firstName packing.firstType .explicit
-  let secondType := PsExpr.app packing.secondFamily (.fvar first.id)
-  let second := psLocalPushBinding first.context secondName secondType .explicit
-  let pair := psWellFoundedPairPack packing (.fvar first.id) (.fvar second.id)
-  let body := psExprInstantiate1 parameter.body pair
-  let type := PsExpr.forallE firstName packing.firstType
-    (psExprAbstractFVar first.id (.forallE secondName secondType
-      (psExprAbstractFVar second.id body) .explicit)) .explicit
+  let (_, binders) ← psWellFoundedTupleOpen locals parameter.domain names
+  let packed ← psWellFoundedTuplePack parameter.domain (binders.map fun binder => .fvar binder.id)
+  let type := psWellFoundedTupleForalls binders (psExprInstantiate1 parameter.body packed)
   let sort ← psInferType environment metaContext locals type
   let _ ← psInferEnsureSort environment metaContext locals sort
   return type
 
-def psWellFoundedPairCurryCallback (environment : PsEnvironment) (metaContext : PsMetaContext)
-    (locals : PsLocalContext) (packing : PsWellFoundedPairPacking)
-    (sourceType callback : PsExpr) : Except PsInferError PsExpr := do
-  let first ← psInferEnsureForall environment metaContext locals sourceType
-  let firstLocal := psLocalPushBinding locals first.name first.domain first.binder
-  let second ← psInferEnsureForall environment metaContext firstLocal.context
-    (psExprInstantiate1 first.body (.fvar firstLocal.id))
-  let secondLocal := psLocalPushBinding firstLocal.context second.name second.domain second.binder
-  let proof ← psInferEnsureForall environment metaContext secondLocal.context
-    (psExprInstantiate1 second.body (.fvar secondLocal.id))
-  let evidence := psLocalPushBinding secondLocal.context proof.name proof.domain proof.binder
-  let pair := psWellFoundedPairPack packing (.fvar firstLocal.id) (.fvar secondLocal.id)
-  let body := psReduceApply callback [pair, .fvar evidence.id]
-  let value := PsExpr.lam first.name first.domain
-    (psExprAbstractFVar firstLocal.id (.lam second.name second.domain
-      (psExprAbstractFVar secondLocal.id (.lam proof.name proof.domain
-        (psExprAbstractFVar evidence.id body) proof.binder)) second.binder)) first.binder
+-- Retain an explicit proof lambda: the exact same adapter is reconstructed by
+-- erasure and is checked against the complete source callback telescope.
+def psWellFoundedTupleCurryCallback (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (locals : PsLocalContext) (names : List PsName) (sourceType callback : PsExpr) :
+    Except PsInferError PsExpr := do
+  let callbackType ← psInferType environment metaContext locals callback
+  let parameter ← psInferEnsureForall environment metaContext locals callbackType
+  let (inner, binders) ← psWellFoundedTupleOpen locals parameter.domain names
+  let packed ← psWellFoundedTuplePack parameter.domain (binders.map fun binder => .fvar binder.id)
+  let proof ← psInferEnsureForall environment metaContext inner
+    (psExprInstantiate1 parameter.body packed)
+  let evidence := psLocalPushBinding inner proof.name proof.domain proof.binder
+  let body := psReduceApply callback [packed, .fvar evidence.id]
+  let value := psWellFoundedTupleLambdas binders
+    (.lam proof.name proof.domain (psExprAbstractFVar evidence.id body) proof.binder)
   let inferred ← psInferType environment metaContext locals value
   if !psWellFoundedDefEq environment metaContext locals inferred sourceType then
     throw .applicationTypeMismatch
   return value
+
+-- Iterated dependent elimination, not projection substitution plus an eta
+-- conversion rule. The major is an actual local; codomain may depend on it.
+def psWellFoundedTupleCases (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (locals : PsLocalContext) (names : List PsName) (majorId : Nat)
+    (resultLevel : PsLevel) (codomain alternative : PsExpr) : Except PsInferError PsExpr := do
+  let major := PsExpr.fvar majorId
+  match names with
+  | [] => throw .expectedFunction
+  | [_] => return psReduceApply alternative [major]
+  | firstName :: nextName :: rest =>
+    let domain ← psInferType environment metaContext locals major
+    let some packing := psWellFoundedPairPackingView
+        (psWhnf environment metaContext locals domain) | throw .applicationTypeMismatch
+    let motive := PsExpr.lam (psRootName "_packed") domain
+      (psExprAbstractFVar majorId codomain) .explicit
+    let first := psLocalPushBinding locals firstName packing.firstType .explicit
+    let tailDomain := psReduceApply packing.secondFamily [.fvar first.id]
+    let tail := psLocalPushBinding first.context nextName tailDomain .explicit
+    let constructed := psWellFoundedPairPack packing (.fvar first.id) (.fvar tail.id)
+    let innerCodomain := psReduceApply motive [constructed]
+    let inner ← psWellFoundedTupleCases environment metaContext tail.context
+      (nextName :: rest) tail.id resultLevel innerCodomain
+      (psReduceApply alternative [.fvar first.id])
+    let minor := PsExpr.lam firstName packing.firstType
+      (psExprAbstractFVar first.id (.lam nextName tailDomain
+        (psExprAbstractFVar tail.id inner) .explicit)) .explicit
+    return psWellFoundedPairCases packing resultLevel motive major minor

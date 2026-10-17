@@ -1,5 +1,14 @@
 ## Qualified P1 preparation; main integration pending
 
+## N-ary WF construction candidate — 18 October 2026
+
+The preparation branch now replaces pair-only measured/dependent parameter packing with one arity-aware shared mechanism for type construction, currying, dependent elimination, callback equality and exact runtime entry adaptation. Fixed captures and residual state retain their original ownership. Existing pair controls remain; the consolidated WF fixture adds native/source three- and four-field cases, an explicit unfolding equation, a user-PSigma nonflattening control and10 required runtime comparisons. See [n-ary WF design](PSCV0_M3_NARY_WF_2026-10-18.md). Candidate qualification is pending. No assumption, Standard snapshot, verified-assurance rule or budget changes.
+
+Noncomputable predecessor7da95293 remains under preparation39077074720; its result must be checked independently. Main P1 integration stays at de6679464cac9780bae7066052714c53984dbd00: focused M3 39076409661 and F1/F2/F3 succeeded, Native39076409463 is still running. The focused runtime steps succeeded, but complete log transport failed twice, so no aggregate count is presented as measured. Do not supersede healthy Native.
+
+Remaining M3 work includes qualifying these candidates, ordinary implicit/default/named recursive applications, compatible mutual WF, selected generic/dependent P1 coverage, all six exit cells and final exact-SHA integration. M3+B is open.
+
+
 Preparation39076835034 at a04006c5 confirmed both printers compile, then exposed the new declaration variant missing from the shared source-term traversal. The complete module validation/flat-translation boundary now retains that variant; native typed-do remains on the existing native path. Environment metadata uses the established record-field layout. The remaining syntax and elaboration source modules were inspected together for declaration dispatch; source-policy CI remains pending.
 
 Preparation39076689910 at c1ed399d stopped at Lean parsing: the environment record-update application needed explicit continuation indentation, and `prefix` is a reserved parser keyword in both printers. These authoring defects are corrected together; no acceptance behavior or runtime criterion changed. Source-policy qualification remains pending.

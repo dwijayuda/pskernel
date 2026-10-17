@@ -205,3 +205,15 @@ Copyright (c) 2024 Lean FRO, LLC. All rights reserved. Author: Joachim Breitner.
 Released under Apache License 2.0, subject to the upstream notice above.
 The retained `StandardPartialFixpointData.lean` asset carries the pinned
 `Init.Internal.Order.Basic` declaration bodies and its own attribution.
+
+
+### N-ary dependent argument packing
+
+The portable arity-directed packing, currying and dependent elimination algorithms
+in Ps.Meta.WellFounded adapt src/Lean/Meta/ArgsPacker.lean at pinned Lean4.35.0
+commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2024 Lean FRO, LLC. All rights reserved. Author: Joachim Breitner.
+Released under Apache License2.0; see the retained LEAN-APACHE-2.0.txt.
+Modifications: explicit portable Core/local-context operations, structural list
+recursion, checked construction and source-entry validation, selected nonempty
+WF telescopes, and explicit kernel-checked callback extensionality.

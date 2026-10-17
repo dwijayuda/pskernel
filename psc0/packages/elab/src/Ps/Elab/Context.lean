@@ -24,7 +24,7 @@ structure PsElabWellFoundedRecursion where
   callbackName : PsName
   parameterIds : List Nat := []
   majorId : Nat := 0
-  packedIds : Option (Nat × Nat) := none
+  packedIds : List Nat := []
   stateIds : List Nat := []
   fixedIds : List Nat := []
   collectCalls : Bool := false

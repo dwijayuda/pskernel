@@ -36,16 +36,15 @@ def main : IO Unit := do
   -- operation-local trie with an unnecessary leaf memo entry.
   let bv : PsKernelExpr := .bvar 13
   let natLeaf : PsKernelExpr := .lit (.nat 2048)
-  let (bvCert, bvMemo) := psKernelC0ExactHashWithMemo bv .empty
-  let (natCert, natMemo) := psKernelC0ExactHashWithMemo natLeaf .empty
+  let (bvCert, bvMemo) := psKernelC0ExactHashWithMemo bv (∅ : PsKernelC0ExactHashMemo)
+  let (natCert, natMemo) := psKernelC0ExactHashWithMemo natLeaf (∅ : PsKernelC0ExactHashMemo)
   let _bvSource : bvCert.value = psKernelExprHash bv := bvCert.source
   let _natSource : natCert.value = psKernelExprHash natLeaf := natCert.source
   if bvCert.value != psKernelExprHash bv ||
       natCert.value != psKernelExprHash natLeaf then
     throw (IO.userError "source-certified direct leaf hash mismatch")
-  match bvMemo, natMemo with
-  | .empty, .empty => pure ()
-  | _, _ => throw (IO.userError "cheap leaf hash unnecessarily mutated memo")
+  if !bvMemo.isEmpty || !natMemo.isEmpty then
+    throw (IO.userError "cheap leaf hash unnecessarily mutated memo")
   IO.println "C0_CERTIFIED_HASH_MEMO direct_bvar_nat_leaves=source_exact memo_unchanged=true"
 
   let all : List PsKernelExpr := [
@@ -67,6 +66,13 @@ def main : IO Unit := do
   ]
   for expression in all do
     c0HashMemoCheck expression
+    -- The memo hash index can have ALL keys colliding; it still cannot
+    -- return an incorrect source hash or grant an unverified cache fact.
+    let pureSource := psKernelExprHash expression
+    let colliding := (psKernelC0ExactHashWithMemoWithHash
+      (fun _ => 0) expression (∅ : PsKernelC0ExactHashMemo)).1
+    if colliding.value != pureSource then
+      throw (IO.userError "all-collision hash map changed source exact hash")
 
   -- 26 shared parent levels represent over 134 million tree nodes.
   -- Computing the *historical* pure hash here would expand the full
@@ -79,4 +85,4 @@ def main : IO Unit := do
   let after ← IO.monoNanosNow
   if memoized != expected then
     throw (IO.userError "large shared hash memo differs from exact hash recurrence")
-  IO.println s!"C0_CERTIFIED_HASH_MEMO small_source=pass collision_safety=source_proved shared_depth={depth} memo_ms={(after - before)/1000000} exact_source_proof=Lean"
+  IO.println s!"C0_CERTIFIED_HASH_MEMO small_source=pass arbitrary_hash=Lean_proved all_collision=pass shared_depth={depth} memo_ms={(after - before)/1000000} exact_source_proof=Lean"

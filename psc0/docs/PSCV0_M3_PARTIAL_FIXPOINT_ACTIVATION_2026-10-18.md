@@ -53,3 +53,12 @@ All five exact formerly policy-refused programs are now retained together as ker
 
 Qualification of this correction is pending. Main remains `f271f2a35789b120dbe1a6dcd5a555db44e72134`; no main Native run was superseded. M3+B remains open. After P1 preparation passes, promote with preserved history and require the five main workflows at one exact SHA before claiming integration. Then close remaining source strategies, generic/section P1, generalized measured recursion and six-exit matrix gaps.
 
+
+## P1 logical-construction milestone — 18 October 2026
+
+At `762e2ba6e835734351ad94b37cbb39ab5581318d`, [preparation run 39075270327](https://github.com/dwijayuda/pskernel/actions/runs/39075270327) independently checked all four P1 source members in three actual fixpoint components, their whole/source equations, common mutual PProd projections and exact runtime-body identities under the unchanged official-kernel 2m/20k limits. The kernel-valid adversarial self-equation/body mismatch was rejected by the runtime adapter. Missing/opaque auxiliaries and incomplete packed components also retained their refusals. All five byte-identical historical policy-only programs passed logical checking and none was executed.
+
+All other preparation steps passed. The P1 emission request stopped at a fixture grammar error: `Option.some(value)` is an expression call, not a native constructor pattern. This candidate corrects it to `Option.some value`, preserving the selected grammar and compiler acceptance rules. Emission, module controls, 30 runtime comparisons and five-workflow integration remain pending. The previous fixture-only IO diagnostic compile error at e66588f9 was fixed in762e2ba6.
+
+Main remains `f271f2a35789b120dbe1a6dcd5a555db44e72134`, with its five successful workflows; no healthy main Native run was superseded. M3+B is incomplete. Continue P1 emission/integration, then source-policy/noncomputable ownership, selected generic/section fixedpoints and generalized measured recursion according to the six exits. A noncomputable implementation/design is being prepared independently from pinned NoncomputableAttr, MutualDef, PreDefinition/Basic and Compiler/LCNF/ToLCNF; it is not yet committed or qualified.
+

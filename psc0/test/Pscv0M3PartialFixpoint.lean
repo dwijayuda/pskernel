@@ -135,7 +135,7 @@ private def definitionsSource : String :=
 private def source : String :=
   definitionsSource ++
   "function m3p1countdown(flag: Bool): UInt64 := UInt64.ofNat(p1Countdown(if (flag) { 17 } else { 29 }, if (flag) { 4 } else { 3 }))\n" ++
-  "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some(value) => value + 5 })\n" ++
+  "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some value => value + 5 })\n" ++
   "function m3p1mutual(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 2 } else { 3 }\n UInt64.ofNat(100 * p1Left(n) + p1Right(n)) }\n"
 
 -- Byte-identical former policy-refusal requests from P0, Where, result

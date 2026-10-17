@@ -40,4 +40,12 @@ def main : IO Unit := do
     if selected != expected ||
         selected != !psKernelC0MemoizedHasFVar expr then
       throw (IO.userError "whole-source semantic cache-eligibility verdict diverged")
-  IO.println "C0_WHNF_ELIG source_proved=all_inputs selected=15 shared_DAG=pass FVar_scope_guard=unchanged no_admission=true"
+  -- The full source proof is parametric in arbitrary hash functions.
+  -- A pathologically colliding hash must not change any Boolean result.
+  -- This guards against treating identity/hash coincidences as equality.
+  let constantHash : PsKernelExpr → Nat := fun _ => 0
+  for expr in cases do
+    if (psKernelC0FVarMemoGoWithHash constantHash expr .empty).1.value !=
+        psKernelExprHasFVar expr then
+      throw (IO.userError "arbitrary hash collision authorized wrong FVar membership")
+  IO.println "C0_WHNF_ELIG source_proved=all_inputs arbitrary_hash=Lean_proved all_collision=pass selected=15 FVar_scope_guard=unchanged no_admission=true"

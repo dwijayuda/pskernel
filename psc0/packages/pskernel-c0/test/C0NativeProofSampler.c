@@ -15,8 +15,9 @@ static volatile sig_atomic_t sample_number = 0;
 
 static void snapshot(int signal_number) {
     (void)signal_number;
-    void *frames[65];
-    int count = backtrace(frames, 65);
+    /* Diagnostic depth: expose the caller BELOW 200+ recursive DecEq frames. */
+    void *frames[385];
+    int count = backtrace(frames, 385);
     const char banner[] = "\nC0_WF_PROFILE_SAMPLE_BEGIN\n";
     const char end[] = "C0_WF_PROFILE_SAMPLE_END\n";
     sample_number++;

@@ -37,9 +37,11 @@ nondecreasing measure Prod.mk(n + acc, 0), also at that rule and elaboration pha
 Qualification still requires all five gates on the same compiler/test SHA.
 The planned focused total is 940 comparisons, up from 920; no additional
 runtime or progress credit is assigned before observed assertions pass.
-More than two changing arguments, arbitrary telescopes, variable codomains,
-general mutual WF, the complete P0 matrix and the audited P1 assumption
-boundary remain open. The v7.2 reference blob and pinned Lean are unchanged.
+Packing more than two changing arguments, arbitrary telescopes,
+general mutual WF and the complete P0 matrix remain open. The existing
+unary-major route still permits multiple state arguments. Variable measure
+codomains remain refused consistently with pinned Lean, and the audited
+P1 assumption boundary remains blocked. The v7.2 reference blob and pinned Lean are unchanged.
 
 The implementation descriptions and next-slice recommendations in the
 adoption-era matrix below are historical snapshots. This checkpoint and
@@ -60,6 +62,22 @@ and captured goal locals only after failure. It does not replay a proof or
 change the source definition/proofs. The accepted baseline remains 78/100
 and 920 comparisons; 940 is still planned. Larger packed telescopes remain
 unqualified. Variable measure codomains retain pinned-Lean refusal semantics.
+
+### Actual callback trace and application diagnosis
+
+Revision `b27407a3905883e5f4b3aac8a67cc8b6b5e71e02` remains unqualified.
+Its focused run 39028057176 failed on the original first proof at bytes
+6588..6626, `Prod.Lex.right(0, Nat.lt_succ_self(k))`. The captured
+lower and upper pairs, latest refined callback and k are correct; the
+three saved goals retain source order. F1/F2/F3 completed successfully.
+Native [run 39028057191](https://github.com/dwijayuda/pskernel/actions/runs/39028057191), job 117382850031, completed all 34 steps successfully at 11:34:13 UTC. The full healthy native run finished before the next branch update.
+
+The next diagnostic observes actual application and postponed-check
+failure state without changing source proofs or successful elaboration.
+An unknown-numeral/packed-projection interaction is a hypothesis until
+that trace establishes it. No additional acceptance or progress credit
+is assigned. Temporary diagnostics must be removed before final production
+qualification, followed by all five completed same-SHA gates.
 
 ## Rule-to-change and implementation matrix
 

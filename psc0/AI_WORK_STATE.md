@@ -15,7 +15,7 @@ plus the separate 24-export / 240-comparison recursive suite, totaling 920.
 The earlier application-instance scheduling repair and canonical Rust harness
 path repair are retained without modification.
 
-### Failed first matrix and current faithful diagnostic
+### Failed first matrix and faithful WF diagnostic
 
 The complete first matrix at
 `fa68104af911aedc7b80bc56906da24bd6a9def9` is **not accepted**:
@@ -46,7 +46,7 @@ The healthy native run completed before advancing the branch.
 
 Independent static reviews found no demonstrated match/refinement or proof
 ordering defect. Do not reorder the three original proofs or rewrite the
-function to evade this case. The current owner adds only a failure-context
+function to evade this case. The WF owner includes a failure-context
 diagnostic: WF blob `5033f4a5647c4fc23174c058e5a0288fb5a272e4`,
 50,092 bytes. Its exact two-stage transform was independently reviewed
 and reverses to the original candidate owner.
@@ -67,6 +67,71 @@ have byte spans 6588..6626, 6638..6681 and 6693..6735, respectively.
 The main runtime source is a different concatenation, with those positions
 652 bytes later. Use the actual construction map to read its failure trace.
 
+### Callback evidence and current application diagnosis
+
+The second compiler/test revision,
+`b27407a3905883e5f4b3aac8a67cc8b6b5e71e02`, also remains unqualified.
+Focused [run 39028057176](https://github.com/dwijayuda/pskernel/actions/runs/39028057176),
+job 117382849922, completed with failure at 11:21:53 UTC. F1
+[39028057167](https://github.com/dwijayuda/pskernel/actions/runs/39028057167),
+F2 [39028057166](https://github.com/dwijayuda/pskernel/actions/runs/39028057166),
+and F3/F4/platform
+[39028057173](https://github.com/dwijayuda/pskernel/actions/runs/39028057173)
+all completed successfully. Native [run 39028057191](https://github.com/dwijayuda/pskernel/actions/runs/39028057191), job 117382850031, completed all 34 steps successfully at 11:34:13 UTC. The full healthy native run finished before the next branch update.
+
+The actual failed callback is the first original proof, byte span
+6588..6626: `Prod.Lex.right(0, Nat.lt_succ_self(k))`.
+Its first saved decrease goal is ?m39 at recursive-call span 6328..6366.
+The captured lower pair has first field f34, a let-bound source Nat zero,
+and second field f36, a let-bound alias of the branch's k. Its upper pair
+is `PSigma.mk Nat.zero (Nat.succ k)`. The latest refined callback and k
+are correct. The three saved goals retain source order at spans
+6328..6366, 6415..6456 and 6468..6510. This is evidence against a
+branch-refinement or goal-order repair; it does not expose the internal
+argument-elaboration state.
+
+The 167,493-character completed focused log and artifact 12098539447
+(2,031,953 bytes; SHA-256
+`c1b063d1b7f1da33e789ee637941d5e4b33763e2898c2dce646777f97851cd36`)
+preserve the full trace. All 38 native WF assumption markers remain within
+the allowed closure. Runtime steps were skipped and this diagnostic
+revision adds no runtime comparisons.
+
+Independent reviews identify a specific, still-unproven inference
+hypothesis: an initially unknown numeral type and its ordinary OfNat
+instance may remain unresolved while expected-result comparison projects
+a PSigma coordinate. A later postponed expected-term check may preserve
+the consequence. No production scheduling or reduction change follows
+from that hypothesis alone.
+
+The current temporary Application/Postponed diagnostic observes only the
+actual error path. Application blob
+`26b2f7ac904ccc85f425459ea130d17e42e22053` (19,067 bytes) records
+before/after expected-result propagation, argument domain, carried
+synthetics and finalization inputs when the existing call errors.
+Postponed blob `f2aa778c79ffa5474ce78fcd9829a8b89ca1ca3b`
+(16,788 bytes) also annotates the queue owner's existing final blocked-work
+diagnostic call with its retained term/type/target, saved local scope and
+remaining queue. That call is not replayed or duplicated.
+
+Only retryable errors receive a lazy reserved-prefix wrapper; the
+postponement classifier transparently unwraps exactly that new prefix.
+Nonretryable errors retain their original constructors, preserving
+structural-recursion fallbacks, nonexhaustive-match handling and resource
+errors. Description strings are never evaluated for successful calls or
+nonretryable failures. Expression depth is bounded at 12, meta sketches
+at 8, displayed metas/locals at 24 and pending constraints at 12, with
+counts/truncation explicit and string data masked. The code performs no
+extra synthesis, assignment, defaulting or proof replay; successful
+results and the underlying failed computation are preserved. Six exact
+transforms reverse to the fetched b274 owners. These observations retain
+boundary inputs, not a speculative partially failed inference state.
+
+The original functions, three decrease proofs, 19 refusal controls and
+five runtime lanes are unchanged. Remove temporary diagnostic code once
+the actual failure is understood, then require all five gates at the
+final production SHA.
+
 ### Bounded implementation
 
 Three occurrence restrictions are removed in the recursion parameter planner,
@@ -75,7 +140,7 @@ construction represents a constant second family. No Meta construction,
 proof rule, backend lowering or allowed assumption changes.
 
 The selected route still requires exactly two distinct changing header IDs
-in source order after dependency closure. A third changing slot is refused.
+in source order after dependency closure. A third changing slot is refused by this pair-packing route.
 The second actual binding, full packed domain, fixed captures, fixed measure
 codomain, relation dictionary, final fixed-argument revalidation, relation,
 motive and functional closure remain checked. Public equations retain actual
@@ -124,8 +189,8 @@ F3/F4/platform on the same final compiler/test SHA. Inspect completed
 native/focused logs, actual assertion markers, all required refusals,
 assumption closures and artifact digests before recording acceptance.
 Do not cancel a healthy native run or push another compiler revision while
-it is running. Keep the accepted score at 78 until evidence and independent
-review justify an update. Record the result in
+it is running. Keep the accepted score at 78. Independent review assigns no additional
+whole point to this extension of already-credited PSigma machinery. Record the result in
 `psc0/docs/PSCV0_M3_INDEPENDENT_WF_QUALIFICATION_2026-10-17.md`, both
 handoffs, architecture, roadmap, migration matrix and the original draft PR.
 

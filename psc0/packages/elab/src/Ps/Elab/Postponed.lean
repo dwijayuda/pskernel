@@ -1,12 +1,168 @@
 import Ps.Elab.Basic
 
+private def psElabDiagnosticPrefix : String := "PSCV0-ELAB-DIAGNOSTIC: "
+
 -- Only failures that can change after inference are resumable. Name/grammar,
 -- resource and structural-recursion refusals remain immediate diagnostics.
 def psElabErrorMayPostpone : PsElabError → Bool
   | .typeMismatch | .implicitApplicationUnsupported | .unresolvedMetavariable
   | .unsupportedTerm | .infer _ | .matchExpectedType | .matchScrutineeUnsupported
   | .proof _ => true
+  | .atContext label error =>
+    label.startsWith psElabDiagnosticPrefix && psElabErrorMayPostpone error
   | _ => false
+
+-- Temporary diagnostics are transparent to retry classification. All other
+-- failures retain their original constructors for owner-specific fallbacks.
+-- The description is evaluated only for a retryable error, never on success.
+def psElabDiagnosticError (describe : Unit → String) (error : PsElabError) : PsElabError :=
+  if psElabErrorMayPostpone error then
+    .atContext (psElabDiagnosticPrefix ++ describe ()) error
+  else error
+
+-- Bounded sketches retain open term/universe identities and mask string data.
+def psElabDiagnosticLevelSketch (fuel : Nat) (level : PsLevel) : String :=
+  match fuel with
+  | 0 => "..."
+  | fuel + 1 =>
+    match level with
+    | .zero => "0"
+    | .succ inner => "succ(" ++ psElabDiagnosticLevelSketch fuel inner ++ ")"
+    | .max left right =>
+      "max(" ++ psElabDiagnosticLevelSketch fuel left ++ "," ++
+        psElabDiagnosticLevelSketch fuel right ++ ")"
+    | .imax left right =>
+      "imax(" ++ psElabDiagnosticLevelSketch fuel left ++ "," ++
+        psElabDiagnosticLevelSketch fuel right ++ ")"
+    | .param name => psNameToString name
+    | .mvar id => "?u" ++ psNatToString id
+
+def psElabDiagnosticBinderSketch : PsBinderInfo → String
+  | .explicit => "explicit"
+  | .implicit => "implicit"
+  | .strictImplicit => "strictImplicit"
+  | .instanceImplicit => "instanceImplicit"
+
+def psElabDiagnosticExprSketch (fuel : Nat) (expression : PsExpr) : String :=
+  match fuel with
+  | 0 => "..."
+  | fuel + 1 =>
+    let child := psElabDiagnosticExprSketch fuel
+    match expression with
+    | .bvar index => "#" ++ psNatToString index
+    | .fvar id => "f#" ++ psNatToString id
+    | .mvar id => "?m" ++ psNatToString id
+    | .sortE level => "Sort(" ++ psElabDiagnosticLevelSketch 4 level ++ ")"
+    | .constE name levels =>
+      let universes := (levels.take 4).map (psElabDiagnosticLevelSketch 4)
+      psNameToString name ++ ".{" ++ String.intercalate "," universes ++
+        (if levels.length > 4 then ",..." else "") ++ "}"
+    | .app function argument => "(" ++ child function ++ " " ++ child argument ++ ")"
+    | .lam name type body binder =>
+      "(lam " ++ psElabDiagnosticBinderSketch binder ++ " " ++ psNameToString name ++
+        " : " ++ child type ++ " => " ++ child body ++ ")"
+    | .forallE name type body binder =>
+      "(forall " ++ psElabDiagnosticBinderSketch binder ++ " " ++ psNameToString name ++
+        " : " ++ child type ++ ", " ++ child body ++ ")"
+    | .letE name type value body =>
+      "(let " ++ psNameToString name ++ " : " ++ child type ++ " := " ++
+        child value ++ "; " ++ child body ++ ")"
+    | .lit (.natural value) => psNatToString value
+    | .lit (.string _) => "<string>"
+    | .proj name index value =>
+      "(proj " ++ psNameToString name ++ "." ++ psNatToString index ++ " " ++ child value ++ ")"
+
+def psElabDiagnosticExpression (context : PsElabContext) (expression : PsExpr) : String :=
+  psElabDiagnosticExprSketch 12 (psMetaInstantiate context.metaContext expression)
+
+def psElabDiagnosticExpected (context : PsElabContext) (expected : Option PsExpr) : String :=
+  match expected with
+  | none => "<none>"
+  | some type => psElabDiagnosticExpression context type
+
+def psElabDiagnosticGoalType (context : PsElabContext) (id : Nat) : String :=
+  match psMetaFindDecl context.metaContext id with
+  | none => "<missing>"
+  | some declaration => psElabDiagnosticExpression context declaration.type
+
+def psElabDiagnosticLocals (locals : PsLocalContext) : String :=
+  let entries := (locals.declarations.take 24).map fun declaration =>
+    psNameToString (psLocalDeclUserName declaration) ++ "@f#" ++
+      psNatToString (psLocalDeclId declaration)
+  "next=" ++ psNatToString locals.nextId ++ "; newest-first(" ++
+    psNatToString locals.declarations.length ++ ")=[" ++ String.intercalate "," entries ++
+    (if locals.declarations.length > 24 then ",..." else "") ++ "]"
+
+def psElabDiagnosticConstraint (context : PsElabContext)
+    (constraint : PsSyntheticConstraint) : String :=
+  match constraint with
+  | .instanceGoal id => "instance ?m" ++ psNatToString id ++ " : " ++
+      psElabDiagnosticGoalType context id
+  | .expectedType locals actual expected =>
+      "expectedType " ++ psElabDiagnosticExpression context actual ++ " ~ " ++
+        psElabDiagnosticExpression context expected ++ "; locals=[" ++
+        psElabDiagnosticLocals locals ++ "]"
+  | .defaultValue id value => "default ?m" ++ psNatToString id ++ " := " ++
+      psElabDiagnosticExpression context value
+
+def psElabDiagnosticConstraints (context : PsElabContext)
+    (constraints : List PsSyntheticConstraint) : String :=
+  "[" ++ String.intercalate " | "
+    ((constraints.take 12).map (psElabDiagnosticConstraint context)) ++
+    (if constraints.length > 12 then " | ..." else "") ++ "]"
+
+def psElabDiagnosticPending (context : PsElabContext) (work : PsElabPendingWork) : String :=
+  match work with
+  | .core _ constraint => "core " ++ psElabDiagnosticConstraint context constraint
+  | .expectedTerm scope id value actual =>
+    "expectedTerm ?m" ++ psNatToString id ++ "; term=" ++
+      psElabDiagnosticExpression context value ++ "; actual=" ++
+      psElabDiagnosticExpression context actual ++ "; target=" ++
+      psElabDiagnosticGoalType context id ++ "; saved-locals=[" ++
+      psElabDiagnosticLocals scope.localContext ++ "]"
+  | .sourceTerm scope id source =>
+    let span := psSyntaxTermSpan source
+    "sourceTerm ?m" ++ psNatToString id ++ "; source-span=" ++
+      psNatToString span.start.byteOffset ++ ".." ++ psNatToString span.stop.byteOffset ++
+      "; target=" ++ psElabDiagnosticGoalType context id ++ "; saved-locals=[" ++
+      psElabDiagnosticLocals scope.localContext ++ "]"
+
+def psElabDiagnosticPendingList (context : PsElabContext) (pending : List PsElabPendingWork) :
+    String :=
+  "[" ++ String.intercalate " | " ((pending.take 12).map (psElabDiagnosticPending context)) ++
+    (if pending.length > 12 then " | ..." else "") ++ "]"
+
+def psElabDiagnosticContext (context : PsElabContext) : String :=
+  let span := match context.sourceSpan with
+    | none => "<none>"
+    | some span => psNatToString span.start.byteOffset ++ ".." ++
+        psNatToString span.stop.byteOffset
+  let metas := (context.metaContext.declarations.take 24).map fun declaration =>
+    let kind := match declaration.kind with
+      | .natural => "natural"
+      | .synthetic => "synthetic"
+      | .syntheticOpaque => "syntheticOpaque"
+    let value := match psMetaFindAssignment context.metaContext declaration.id with
+      | none => if (psMetaFindDelayed context.metaContext declaration.id).isSome then
+          "<delayed>" else "<unassigned>"
+      | some value => psElabDiagnosticExprSketch 8
+          (psMetaInstantiate context.metaContext value)
+    "?m" ++ psNatToString declaration.id ++ ":" ++ kind ++ " : " ++
+      psElabDiagnosticExprSketch 8
+        (psMetaInstantiate context.metaContext declaration.type) ++ " := " ++ value
+  "span=" ++ span ++ "; postponing=" ++ (if context.postponing then "true" else "false") ++
+    "; locals=[" ++ psElabDiagnosticLocals context.localContext ++
+    "]; metas-next=" ++ psNatToString context.metaContext.nextId ++ "; metas-newest-first(" ++
+    psNatToString context.metaContext.declarations.length ++ ")=[" ++
+    String.intercalate " | " metas ++
+    (if context.metaContext.declarations.length > 24 then " | ..." else "") ++
+    "]; pending-newest-first(" ++ psNatToString context.pending.length ++ ")=" ++
+    psElabDiagnosticPendingList context context.pending
+
+def psElabDiagnosticResult (result : PsElabTermResult) : String :=
+  "term=" ++ psElabDiagnosticExpression result.context result.term ++
+    "; type=" ++ psElabDiagnosticExpression result.context result.type ++
+    "; context=[" ++ psElabDiagnosticContext result.context ++ "]"
 
 def psElabHasPendingInput (context : PsElabContext) (expected : Option PsExpr) : Bool :=
   let unresolved := fun term =>
@@ -141,7 +297,15 @@ def psElabDrainPending (elaborate : PsElaborator) (result : PsElabTermResult)
   -- Re-run just the first blocked item for its owning diagnostic. The queue
   -- attempt has already rolled back every unsuccessful speculative change.
   if let some work := solved.pending.head? then
-    let _ ← psElabResumeWork elaborate solved.context work
+    let _ ← (psElabResumeWork elaborate solved.context work).mapError
+      (psElabDiagnosticError (fun _ =>
+        let scope := match work with
+          | .core scope _ | .expectedTerm scope _ _ _ | .sourceTerm scope _ _ => scope
+        let saved := psElabRestoreScope { solved.context with postponing := false } scope
+        "drain blocked-work; work=[" ++ psElabDiagnosticPending saved work ++
+          "]; retained-context=[" ++ psElabDiagnosticContext saved ++
+          "]; remaining-queue(" ++ psNatToString solved.pending.length ++ ")=" ++
+          psElabDiagnosticPendingList saved solved.pending))
     throw .unresolvedMetavariable
   return psElabResultWithMeta { result with context := solved.context }
     solved.context.metaContext result.type

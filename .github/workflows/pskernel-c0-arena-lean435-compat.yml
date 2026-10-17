@@ -1,0 +1,160 @@
+name: PSKernel-C0 Arena 4.35 explicit legacy-body differential
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-lean435-compat.yml'
+      - 'psc0/packages/pskernel-c0/test/arena_lean435_compat.py'
+      - 'psc0/packages/pskernel-c0/test/arena_435_known_gaps.json'
+      - 'psc0/packages/pskernel-c0/test/arena_conformance.py'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-lean435-compat.yml'
+      - 'psc0/packages/pskernel-c0/test/arena_lean435_compat.py'
+      - 'psc0/packages/pskernel-c0/test/arena_435_known_gaps.json'
+      - 'psc0/packages/pskernel-c0/test/arena_conformance.py'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-435-adapted-arena:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Pin native Lean, compile actual C0, and check adapter source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          python3 -m py_compile test/arena_conformance.py test/arena_lean435_compat.py
+          lake build c0OfficialReplay
+      - name: Authenticate original September Arena archive without mutating it
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" | sha256sum -c -
+      - name: Check all 193 archived declaration bodies using independent Lean 4.35 oracle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/arena_lean435_compat.py \
+            --archive "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+            --checker psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay \
+            --official-project psc0/packages/pskernel-c0 \
+            --out "$RUNNER_TEMP/pskernel-c0-arena-435-compat.json" \
+            --fuel 4096 --timeout 20 --known-gaps psc0/packages/pskernel-c0/test/arena_435_known_gaps.json --shard-count 4 --shard-index ${{ matrix.shard }} | tee "$RUNNER_TEMP/pskernel-c0-arena-435-compat.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-435-compat-shard-${{ matrix.shard }}
+          path: |
+            ${{ runner.temp }}/pskernel-c0-arena-435-compat.json
+            ${{ runner.temp }}/pskernel-c0-arena-435-compat.log
+          if-no-files-found: warn
+          retention-days: 21
+
+  aggregate-native-435:
+    if: always()
+    needs: native-435-adapted-arena
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pskernel-c0-arena-435-compat-shard-*
+          path: arena-shards
+      - name: Combine all 193 unique cases, enforce independent kernel verdicts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections
+          import json
+          import pathlib
+          import sys
+
+          paths=sorted(pathlib.Path("arena-shards").glob("*/pskernel-c0-arena-435-compat.json"))
+          assert len(paths)==4, f"expected four complete shard reports, got {len(paths)}"
+          items=[]
+          indices=set()
+          for p in paths:
+              report=json.loads(p.read_text())
+              assert report["archive_cases"]==193
+              assert report["shard_count"]==4
+              assert report["shard_index"] not in indices
+              indices.add(report["shard_index"])
+              assert report["selected_cases"]==len(report["tests"])
+              items+=report["tests"]
+          assert indices=={0,1,2,3}, indices
+          assert len(items)==193, len(items)
+          ids=[(t["original_expected"],t["name"]) for t in items]
+          assert len(set(ids))==193, "duplicate or missing source identities"
+          counts=collections.Counter(t["classification"] for t in items)
+          ledger=json.loads(pathlib.Path("psc0/packages/pskernel-c0/test/arena_435_known_gaps.json").read_text())
+          known={row["name"]:set(row["allowed"]) for row in ledger["known_gaps"]}
+          assert len(known)==41
+          required=set(ledger["required_correct_cases"])
+          violations=[]
+          for t in items:
+              cl=t["classification"]
+              name=t["name"]
+              if name in required and cl!="correct":
+                  violations.append((name,cl,"mandatory positive must check"))
+              elif cl in ("false_accept","false_reject","adaptation_error","c0_error"):
+                  violations.append((name,cl,"unconditional invalidity"))
+              elif cl!="correct" and cl not in known.get(name,set()):
+                  violations.append((name,cl,"new unqualified case"))
+          acceptable=sum(t["classification"]=="correct" for t in items)
+          adapted=sum(t.get("adaptation",{}).get("body_bytes_identical") is True for t in items)
+          assert adapted==193, f"source-body byte invariant failed: {adapted}/193"
+          summary={
+              "source":"Lean Kernel Arena September 2026 3.1.0 exports; explicit header-only compatibility adaptation",
+              "target":"Lean 4.35.0",
+              "historical_raw_archive_same_byte_verdict":False,
+              "total":193,
+              "source_body_identical":adapted,
+              "actual_matched_verdicts":acceptable,
+              "counts":dict(sorted(counts.items())),
+              "tests":items,
+          }
+          output=pathlib.Path("arena435-compat-aggregate.json")
+          output.write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n")
+          print(f"C0_ARENA_435_AGGREGATE total=193 body_exact={adapted} checked_agreements={acceptable} counts={dict(sorted(counts.items()))}")
+          if violations:
+              print("C0_ARENA_435_AGGREGATE_GATES unexpected_outcomes="+str(violations),file=sys.stderr)
+              sys.exit(1)
+          if not acceptable:
+              print("C0_ARENA_435_AGGREGATE_GATES no_qualified_results=true",file=sys.stderr)
+              sys.exit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-435-compat-aggregate
+          path: arena435-compat-aggregate.json
+          if-no-files-found: warn
+          retention-days: 30

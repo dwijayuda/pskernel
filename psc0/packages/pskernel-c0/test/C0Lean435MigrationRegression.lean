@@ -146,6 +146,28 @@ def main : IO Unit := do
     throw (IO.userError "Unrecognized reducer entered Nat binary dispatch")
   IO.println "C0_LEAN435 non_nat_binary_avoids_eager_operand_whnf=pass"
 
+  -- Every Nat primitive remains enabled, while all unrelated names stay
+  -- ineligible. The fast native dispatcher must equal the original,
+  -- including names with a familiar suffix in an unrelated namespace.
+  let foreignNamespace : PsKernelName :=
+    .str .anonymous "Other"
+  let dispatchNames : List PsKernelName :=
+    knownNatBinaryNames ++ [
+      notNatName, psKernelStringName, .anonymous, .num .anonymous 0,
+      .str psKernelNatName "unknown",
+      .str psKernelNatName "addExtra",
+      .str psKernelNatName "shiftRightExtra",
+      .str foreignNamespace "add",
+      .str foreignNamespace "shiftRight",
+      .str (.str foreignNamespace "Nat") "add",
+      .str (.num psKernelNatName 17) "add"
+    ]
+  for name in dispatchNames do
+    if psKernelC0FastNatBinaryPrimitiveName name !=
+        psKernelNatBinaryPrimitiveName name then
+      throw (IO.userError "Nat binary namespace specialization changed result")
+  IO.println "C0_LEAN435 nat_binary_single_namespace_source_equivalence=pass"
+
   -- Cache policy is Boolean work selection, not theorem admission.
   -- The native candidate bypasses FVar traversal on checked applications,
   -- lambdas, Pi and literals, but equals the unchanged source Boolean.

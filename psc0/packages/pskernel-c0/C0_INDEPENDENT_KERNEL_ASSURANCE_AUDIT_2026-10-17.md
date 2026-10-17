@@ -117,7 +117,7 @@ For each gate report: commit, toolchain and exporter commit, exact export SHA an
 
 Each test is fetched from immutable upstream source `5d7ca987618f1136aaa296057b50a2c10c4ce77a`, rebuilt with the **real Lean 4.35.0** toolchain, exported with the pinned exporter, verifies the exporter/version header, requires the official `leanchecker --from-export` to **reject**, and requires C0 itself to **reject** the *identical* NDJSON export. Thus a silent version decline, host error, false acceptance, or mere parser skip cannot pass.
 
-**Qualification is PENDING until a terminal CI job proves these two new cases on this exact branch/commit.** No new checker acceptance rule, semantic fast path, compiler code, Rust experiment or self-host implementation was modified.
+**Qualification VERIFIED for the new native exploit workflow in [PR #110 run 39004983564](https://github.com/dwijayuda/pskernel/actions/runs/39004983564), completed successfully at the PR HEAD `0179d4d1375b65740594befc74b30d47fe0a372b`.** Terminal job logs contain exact `C0_ARENA_NEW_CLASS` verdicts: `k-rec-conv official=rejected c0=rejected` and `proj-non-structure official=rejected c0=rejected`. The existing `imaxPropBadFalse` and `largeElimBoom` negatives also truly rejected. This is a focused two-case semantic assurance increment, **not** the 193-case archived compatibility qualification. No new checker acceptance rule, semantic fast path, compiler code, Rust experiment or self-host implementation was modified.
 
 ### Final disposition
 

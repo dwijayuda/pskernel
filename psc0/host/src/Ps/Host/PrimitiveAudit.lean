@@ -60,7 +60,7 @@ def primitiveAudit : IO Lean.Json := do
     let kernelQuotient := match declaration with | .quotientDecl .. => true | _ => false
     let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd",
       "List.foldl", "List.reverse", "List.reverseAux", "Nonempty", "Nonempty.intro",
-      "Nonempty.rec", "Classical.ofNonempty"].contains
+      "Nonempty.rec", "instNonemptyOfInhabited", "Classical.ofNonempty"].contains
       (psNameToString name)
     let checkedArray := ["Array", "Array.map", "Array.filter", "Array.setIfInBounds", "Array.getD",
       "Array.push", "Array.size", "Array.emptyWithCapacity"].contains (psNameToString name)

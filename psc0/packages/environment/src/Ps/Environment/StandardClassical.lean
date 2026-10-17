@@ -69,7 +69,19 @@ def psStandardClassicalExtend (environment : PsEnvironment) : PsEnvironment :=
       (className, { outputs := [], outputLevels := [] }) :: environment.classParameters
   { environment with
     classes := classes
-    classParameters := classParameters }
+    classParameters := classParameters
+    -- Init/Prelude's constructive theorem is already in the checked closure.
+    -- Select its ordinary instance explicitly; logical inclusion alone does
+    -- not register a dictionary. The strict audit below rejects absence.
+    instances := match psEnvironmentFind environment (psRootName "instNonemptyOfInhabited") with
+      | none => environment.instances
+      | some declaration => psInstanceIndexAdd environment.instances {
+          value := .constE (psDeclarationName declaration)
+            ((psDeclarationLevelParams declaration).map PsLevel.param)
+          levelParams := psDeclarationLevelParams declaration
+          type := psDeclarationType declaration
+          className := some className
+          priority := 1000 } }
 
 -- Exact declaration and class metadata audit; official kernel replay and the
 -- independent native signature audit remain required qualification gates.
@@ -78,3 +90,7 @@ def psStandardClassicalAudit (environment : PsEnvironment) : Except String Unit 
     psStandardAuditDeclaration environment declaration
   if !environment.classes.any (psNameEq (psRootName "Nonempty")) then
     throw "PSCV0-STANDARD: missing Nonempty class registration"
+  let some declaration@(.theoremDecl ..) :=
+      psEnvironmentFind environment (psRootName "instNonemptyOfInhabited")
+    | throw "PSCV0-STANDARD: missing checked Inhabited-to-Nonempty theorem"
+  psStandardAuditInstance environment declaration

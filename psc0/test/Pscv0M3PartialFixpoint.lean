@@ -81,6 +81,10 @@ where
 
 end
 
+-- A source where helper of a public definition retains its qualified name.
+example {A : Type u} [Inhabited A] (seed : A) : Nat → A :=
+  sectionValue.helper seed
+
 def dependent (bound n : Nat) (seed : Fin (bound + 1)) : Fin (bound + 1) :=
   match n with
   | 0 => seed
@@ -397,9 +401,17 @@ private def checkExtended (prelude : Lean.Kernel.Environment) : IO Unit := do
     binderNames genericType == ["A", "seed", "n"])
     "generic P1 changed its original universe or source header"
   let locals := compiled.origins.flatMap (fun origin => origin.localDefinitions)
+  let hidden := compiled.privateNames ++ psPscv0GeneratedPrivateNames compiled.origins
+  let interface := psPscv0OwnInterface compiled.result.environment
+    compiled.result.declarations hidden compiled.exposedNames
+  let exported := interface.declarations.map psDeclarationName
   ensure (!locals.isEmpty && locals.all (fun localDefinition =>
-    localDefinition.declarations.all (fun name => compiled.privateNames.any (psNameEq name))))
-    "generic P1 helper escaped its source owner"
+    localDefinition.declarations.all (fun name =>
+      if psNameEq name localDefinition.name then
+        exported.any (psNameEq name)
+      else
+        hidden.any (psNameEq name) && !exported.any (psNameEq name))))
+    "generic P1 changed source helper visibility or exposed generated support"
   let runtime ← fromExcept ((psCompilerOrdinaryPartialRuntimeDeclarations
     prepared.declarations).mapError psCompilerPscv0Error)
   ensure (!(runtime.any (fun declaration =>

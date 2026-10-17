@@ -7,4 +7,6 @@ set_option pp.universes true
 #print Nonempty.rec
 #print Classical.choice
 #print Classical.ofNonempty
+#print instNonemptyOfInhabited
+#print axioms instNonemptyOfInhabited
 #print axioms Classical.ofNonempty

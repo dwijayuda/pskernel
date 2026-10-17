@@ -1,3 +1,24 @@
+## Current checkpoint: ordinary WF preparation passed; bridge and visibility qualification
+
+At5b614f357bacf00403132e314dd63733342dc70a, preparation39078823496/job117532224707
+passed n-ary WF construction, shared named/default/implicit/instance calls,
+all retained refusals and five-target emission. Runtime parity is pending.
+Generic/section/helper/dependent P1 passed official kernel checking, then a
+fixture incorrectly required the public source helper itself to be private.
+Pinned Lean retains its qualified source name; the corrected fixture checks
+the actual interface, preserves this visibility and hides generated support.
+Compiler visibility semantics are unchanged.
+
+Noncomputable specNat exposed the unregistered checked theorem
+instNonemptyOfInhabited. The candidate explicitly selects this general
+constructive bridge and audits its native signature/priority; no new declaration,
+assumption or primitive. Strict pins remain unchanged pending independent
+Linux observations. PSum authoring f58d7e1/run39079183717 passed its standalone
+export step; full candidate capture/activation is pending. Main remains
+five-gate accepted atde6679464cac9780bae7066052714c53984dbd00.
+Both AI handoffs are consolidated; historical narratives below are dated
+evidence, not current pending instructions. M3+B remains open.
+
 ## Qualified P1 preparation; main integration pending
 
 ## Standalone PSum foundation authoring candidate

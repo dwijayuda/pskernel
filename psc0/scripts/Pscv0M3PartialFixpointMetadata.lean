@@ -27,10 +27,13 @@ def main : IO Unit := do
     (`Lean.Order.instPartialOrderUnit, `Lean.Order.PartialOrder),
     (`Lean.Order.instCCPOUnit, `Lean.Order.CCPO),
     (`Lean.Order.FlatOrder.instOrder, `Lean.Order.PartialOrder),
-    (`Lean.Order.FlatOrder.instCCPO, `Lean.Order.CCPO)]
+    (`Lean.Order.FlatOrder.instCCPO, `Lean.Order.CCPO),
+    (`instNonemptyOfInhabited, `Nonempty)]
   for (name, className) in registrations do
     let some entry := (Lean.Meta.instanceExtension.getState native).instanceNames.find? name
       | throw (IO.userError ("missing native P1 instance: " ++ toString name))
+    unless entry.priority == 1000 do
+      throw (IO.userError ("selected native instance priority changed: " ++ toString name))
     IO.println (Lean.Json.mkObj [
       ("schema", Lean.toJson ("pscv0-p1-native-instance/1" : String)),
       ("name", Lean.toJson (toString name)),

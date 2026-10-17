@@ -42,3 +42,14 @@ Broader selected generic/section/mutual-WF matrix closure and all six M3+B exits
 ## Generated visibility
 
 Only the actual identity of each public typed predefinition enters its module interface. All support declarations owned by that member stay private, regardless of declaration kind or suffix. This includes the whole-function equality used by the P1 runtime ownership check, whose type contains the real source body and can reference a private callee. The source-defined interface theorem is independently public. The P1 module control requires an imported public unfolding theorem to work while the generated eq_def remains inaccessible. This applies the pinned mkEqLikeNameFor invariant through the existing typed ownership records.
+
+## P1 qualification correction — 18 October 2026
+
+Candidate `f7c34243e017bf672893f1a624f9d0a1126fc750` failed [preparation run 39074107811](https://github.com/dwijayuda/pskernel/actions/runs/39074107811). The Order registry/audits, nine checked monotonicity proofs, P0, WF and indexed BEq checks passed. P1 source construction failed with a type mismatch; three historical policy-only negatives also remained after policy activation.
+
+Pinned Lean `src/Init/Prelude.lean` declares congrArg arguments as type, range, left, right, function, proof. P1 supplied the function before the endpoints. The existing WF congruence constructor was already correct. This candidate corrects P1 application order and adds owned application/equation diagnostic context; it changes no proof requirement or kernel boundary. Pinned PartialFixpoint/Eqns.lean applies congrArg to the projection and fix_eq proof through native implicit inference; PSC0 supplies the actual full Core argument order.
+
+All five exact formerly policy-refused programs are now retained together as kernel-checked logical-only positives, including omitted result inference and a private namespace definition. Native Lean controls accompany them. None is emitted or executed. Genuine nonmonotone and assurance refusals remain required.
+
+Qualification of this correction is pending. Main remains `f271f2a35789b120dbe1a6dcd5a555db44e72134`; no main Native run was superseded. M3+B remains open. After P1 preparation passes, promote with preserved history and require the five main workflows at one exact SHA before claiming integration. Then close remaining source strategies, generic/section P1, generalized measured recursion and six-exit matrix gaps.
+

@@ -263,10 +263,9 @@ private def refusals : List (String × String × String) := [
   ("body-only-binder-inference",
     "function riBad(n: _) := Nat.succ(n)\n", "PSCV0-WHERE-HEADER"),
   ("illtyped-omitted-result",
-    "function riBad(n: Nat) := Fin.mk(true, Nat.lt_succ_self(n))\n", "PSCV0-TYPE-MISMATCH"),
-  ("inferred-fixedpoint-policy",
-    "function riBad(flag: Bool) := if (flag) { false } else { riBad(flag) }\npartial_fixpoint\n",
-    "PSCV0-FIXPOINT-ASSUMPTION")]
+    "function riBad(n: Nat) := Fin.mk(true, Nat.lt_succ_self(n))\n", "PSCV0-TYPE-MISMATCH")]
+-- The exact former inferred-fixedpoint-policy program is now a logical-only
+-- positive in Pscv0M3PartialFixpoint; its divergent branch is never executed.
 
 def check : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)

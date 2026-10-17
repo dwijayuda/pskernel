@@ -59,7 +59,7 @@ def mutualOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (100 * left n + right n)
 
 -- These exact source shapes used to be refused only by the two-axiom policy.
--- They are logical-only sentinels. Never evaluate either divergent function.
+-- They are logical-only sentinels. Never evaluate their divergent branches.
 mutual
   def first (n : Nat) : Nat := first n
   partial_fixpoint
@@ -70,6 +70,24 @@ where
   helper (k : Nat) : Nat := helper k
   partial_fixpoint
 
+def riBad (flag : Bool) := if flag then false else riBad flag
+partial_fixpoint
+
+def fixed (n : Nat) : Nat := fixed n
+partial_fixpoint
+
+namespace Fix
+private def fixed (n : Nat) : Nat := fixed n
+partial_fixpoint
+
+run_cmd do
+  let axioms ← Lean.collectAxioms ``fixed
+  unless axioms.contains ``Classical.choice &&
+      axioms.all (fun name => name == ``propext || name == ``Quot.sound ||
+        name == ``Classical.choice) do
+    throwError "native private P1 closure changed: {axioms}"
+end Fix
+
 /-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
 def nonMonotone (n : Nat) : Nat := nonMonotone n + 1
@@ -77,13 +95,13 @@ partial_fixpoint
 
 run_cmd do
   let environment ← Lean.getEnv
-  for name in [``countdown, ``optionCountdown, ``left, ``right, ``first, ``bad] do
+  for name in [``countdown, ``optionCountdown, ``left, ``right, ``first, ``bad, ``riBad, ``fixed] do
     match environment.find? name with
     | some (.defnInfo _) => pure ()
     | _ => throwError "native P1 source did not produce a checked definition: {name}"
   for name in [``countdown, ``optionCountdown, ``left, ``right,
       ``countdownEquation, ``optionEquation, ``leftEquation, ``rightEquation,
-      ``first, ``bad] do
+      ``first, ``bad, ``riBad, ``fixed] do
     let axioms ← Lean.collectAxioms name
     unless axioms.contains ``Classical.choice &&
         axioms.all (fun axiomName => axiomName == ``propext ||
@@ -120,12 +138,19 @@ private def source : String :=
   "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some(value) => value + 5 })\n" ++
   "function m3p1mutual(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 2 } else { 3 }\n UInt64.ofNat(100 * p1Left(n) + p1Right(n)) }\n"
 
--- Byte-identical to the former P0 and Where policy-refusal requests.
+-- Byte-identical former policy-refusal requests from P0, Where, result
+-- inference and recursive-deriving fixtures. They remain logical-only.
 private def logicalOnlySources : List (String × String) :=
   [("former-p1-assumption-refused",
     "mutual\nfunction first(n: Nat): Nat := first(n)\npartial_fixpoint\nend\n"),
    ("former-local-fixedpoint-policy",
-    "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := helper(k) partial_fixpoint }\n")]
+    "function bad(n: Nat): Nat := helper(n)\nwhere { def helper(k: Nat): Nat := helper(k) partial_fixpoint }\n"),
+   ("former-inferred-fixedpoint-policy",
+    "function riBad(flag: Bool) := if (flag) { false } else { riBad(flag) }\npartial_fixpoint\n"),
+   ("former-fixedpoint-choice",
+    "function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\n"),
+   ("former-fixedpoint-private-choice",
+    "namespace Fix\nprivate function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\nend Fix\n")]
 
 private def exports : List (String × (Bool → UInt64)) :=
   [("m3p1countdown", M3PartialFixpointOracle.countdownOutput),
@@ -343,14 +368,15 @@ private def checkAdapterNegatives (prelude : Lean.Kernel.Environment)
 
 private def checkLogicalOnly (prelude : Lean.Kernel.Environment) : IO Unit := do
   for (label, text) in logicalOnlySources do
-    let compiled ← elaborate text
+    let compiled ← (elaborate text).catch (fun error =>
+      throw (IO.userError (label ++ ": " ++ error.toString)))
     ensure (compiled.result.declarations.any (fun declaration =>
       match declaration with | .partialDecl .. => true | _ => false))
       ("former P1 source no longer exercises a recursive implementation: " ++ label)
     let output ← fromExcept ((psCompilerPrepareElaboratedWithOutput compiled.result).mapError
       psCompilerPscv0Error)
     checkOfficial prelude output.prepared label
-  IO.println "PSCV0_M3_P1_LOGICAL_ONLY: PASS both exact former policy-refusal programs are kernel-checked logical definitions; neither was emitted or executed"
+  IO.println "PSCV0_M3_P1_LOGICAL_ONLY: PASS all five exact former policy-refusal programs are kernel-checked logical definitions; none was emitted or executed"
 
 private def checkNonmonotoneRefusal : IO Unit := do
   let parsed ← fromExcept (psPscv0ParseProgram

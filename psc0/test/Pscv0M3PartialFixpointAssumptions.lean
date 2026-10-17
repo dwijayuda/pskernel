@@ -20,7 +20,7 @@ Pinned construction:
 * Init/Classical.lean:19-20,29-30 implements choose using Classical.choice.
 * PartialFixpoint/Eqns.lean:52-54 constructs equations using Order.fix_eq.
 
-The Unit and Option cases already have CCPO instances, so this blocker is
+The Unit and Option cases already have CCPO instances, so this assumption is
 independent of the separate Classical.ofNonempty fallback for flat orders.
 The approved standard inventory is propext, Quot.sound and Classical.choice.
 All loops below are inspected logically and are never executed.
@@ -61,7 +61,7 @@ private def checkChoiceDependency (name : Lean.Name) :
 
 run_cmd do
   -- Monotonicity itself can be proved without importing classical choice.
-  -- The fixed-point construction is the distinct source of the blocker.
+  -- The fixed-point construction is the distinct source of Classical.choice.
   let monotonicityAxioms ← Lean.collectAxioms ``Lean.Order.monotone_id
   unless monotonicityAxioms.isEmpty do
     throwError "P1 assumption oracle: monotone_id changed axiom closure: {monotonicityAxioms}"
@@ -74,4 +74,4 @@ run_cmd do
 end Pscv0M3PartialFixpointAssumptions
 
 def main : IO Unit :=
-  IO.println "PSCV0_M3_P1_ASSUMPTIONS: PASS pinned Unit/Option fixed points and checked equations require approved Classical.choice; portable P1 construction remains unavailable"
+  IO.println "PSCV0_M3_P1_ASSUMPTIONS: PASS pinned Unit/Option fixed points and checked equations require approved Classical.choice; portable construction and runtime ownership are qualified separately"

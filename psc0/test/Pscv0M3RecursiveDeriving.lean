@@ -427,13 +427,9 @@ private def checkFixedpointSource : IO Unit := do
   | _ => throw (IO.userError "flat source lowering discarded fixedpoint strategy")
   IO.println "PSCV0_M3_FIXEDPOINT_SOURCE: PASS retained suffix, nullary/private/span ownership and incompatible strategy refusals; assumption admission checked separately"
 
+-- Exact former fixedpoint-choice/private-choice requests are retained as
+-- kernel-checked logical-only positives in Pscv0M3PartialFixpoint.
 private def refusals : List (String × String × String) := [
-  ("fixedpoint-choice",
-    "function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\n",
-    "PSCV0-FIXPOINT-ASSUMPTION"),
-  ("fixedpoint-private-choice",
-    "namespace Fix\nprivate function fixed(n: Nat): Nat := fixed(n)\npartial_fixpoint\nend Fix\n",
-    "PSCV0-FIXPOINT-ASSUMPTION"),
   ("nested-function-field", "inductive NestedHash where { | node(children: List(Nat -> NestedHash)) } deriving Hashable\n",
     "unsupported recursive field; expected a positive direct family occurrence"),
   ("nested-nonuniform-parameter",

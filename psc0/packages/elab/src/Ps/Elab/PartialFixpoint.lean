@@ -17,7 +17,8 @@ def psElabFixedpointError (rule message : String) : PsElabError :=
 def psElabFixedpointGlobal (context : PsElabContext) (name : PsName)
     (arguments : List PsExpr) : Except PsElabError PsElabTermResult := do
   let (context, head) ← psElabResolvedReference context (.global name)
-  psElabApplyCore context head arguments
+  (psElabApplyCore context head arguments).mapError
+    (.atContext ("partial_fixpoint application " ++ psNameToString name))
 
 def psElabFixedpointOrder (context : PsElabContext) (suffix : String)
     (arguments : List PsExpr) : Except PsElabError PsElabTermResult :=
@@ -226,11 +227,12 @@ def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsN
       (psElabFixedpointProjection members.length index (.bvar 0)) .explicit
     let fixedApplication ← psElabApplyCore equation.context functional [fixedValue]
     let proof ← psElabFixedpointGlobal fixedApplication.context (psRootName "congrArg")
-      [packedType, member.type, projection, fixedValue, fixedApplication.term, equation.term]
+      [packedType, member.type, fixedValue, fixedApplication.term, projection, equation.term]
     let level ← psElabExpressionSort proof.context member.type
     let expected := psLogicEq level member.type
       (.constE member.name (levels.map PsLevel.param)) sourceValue
-    let checked ← psElabResolvedTerm proof.context proof.term (some expected)
+    let checked ← (psElabResolvedTerm proof.context proof.term (some expected)).mapError
+      (.atContext ("partial_fixpoint equation " ++ psNameToString member.name))
     let value := psMetaInstantiate checked.context.metaContext checked.term
     if psExprHasUnresolvedMeta value || !psExprFVarsInContext psLocalEmpty value then
       throw (psElabFixedpointError "EQUATION" "whole-function unfolding proof is not closed")

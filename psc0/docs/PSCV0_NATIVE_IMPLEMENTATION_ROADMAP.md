@@ -1,25 +1,43 @@
-## Current packing proof layout follow-up — 2026-10-17
+## Current native packing oracle layout follow-up — 2026-10-17
 
-The combined candidate `176ac54106b2f7c6f37fb0733af69c609454b137`
-failed all five gates during compilation. [Native 39001455448](https://github.com/dwijayuda/pskernel/actions/runs/39001455448),
-job `117305073630`, and [focused 39001455422](https://github.com/dwijayuda/pskernel/actions/runs/39001455422),
-job `117305073435`, report the same layout error in the packing equation owner.
-The unary callback-equality branch starts a multiline function call after its
-same-line arrow; the continuation is parsed as another do element, causing a
-cascading missing-case/type error. This repair places the function call on its
-own indented branch-body line. No expression, proof argument, branch, source
-request, oracle, runtime output or refusal is removed or changed.
+The compiler layout repair at `3c503150004a628853a28357aa7bd67c27fa4f89`
+restored native compiler compilation. F1 [39001644087](https://github.com/dwijayuda/pskernel/actions/runs/39001644087),
+F2 [39001644049](https://github.com/dwijayuda/pskernel/actions/runs/39001644049)
+and F3/F4 [39001643982](https://github.com/dwijayuda/pskernel/actions/runs/39001643982)
+all passed at that exact SHA.
 
-A fresh complete matrix is required. Native workloads and source fixtures did
-not run at the failed combined SHA. The completed all-34-step active-foundation
-native replay at `3c5f51a2` and its exact hashes/artifact remain preserved in
-the foundation receipt. The combined packing, partial-hint and empty-guard
-candidate remains unqualified.
+[Focused 39001643951](https://github.com/dwijayuda/pskernel/actions/runs/39001643951),
+job `117305636544`, then reached compilation of the new native packing
+oracle. Its `decreasing_by exact Prod.Lex.left ...` proof had a detached
+continuation line, leaving the constructor partially applied. The later
+missing `packed.eq_def` and rejected `sorryAx` diagnostics follow that
+parse/type error. This fixture-only repair joins the complete existing proof
+term onto one line. Its non-whitespace text is identical; the source program,
+native oracle expression, equation, assumption audit, refusal cases and all
+runtime comparisons remain unchanged. Source fixture execution and target
+parity did not run in that failed focused job.
 
-Accepted compiler/test stays
+[Native 39001643989](https://github.com/dwijayuda/pskernel/actions/runs/39001643989),
+job `117305636419`, completed **all 34 reported steps successfully** at the
+same `3c503150` SHA. The audit observes 34 active additions, no candidate
+axioms, three recursor rules and the unchanged 3,633-declaration,
+41-class/359-instance Standard identities. Original source/Standard,
+module application, GC/components, TypeScript, Rust, repeated Wasmtime and
+measurement workloads all passed. JavaScript, TypeScript and Rust each
+retain 1,069 shared observations. Artifact `12089319155` is 6,797,379 bytes,
+SHA-256 `c15e785cd14040361a61a35290c9d1176640503a2c3203f31731fe26eb8d865f`.
+This completed native evidence is preserved; the failed focused fixture
+still prevents acceptance of that SHA.
+
+The complete cumulative result-inference, indexed Inhabited, nominal empty
+dictionary, active foundation, generic relation, dependent packing and
+partial-hint candidate requires a new successful same-SHA five-gate matrix.
+Accepted compiler/test remains
 `03000e7b0c257fb8f8d2e2b387b7b65a53e8f504`, weighted **74/100**, M3+B open.
-All fixed toolchain, assumption, cloud-execution and draft/open/unmerged PR
-boundaries remain unchanged.
+The prior active-foundation evidence and exact pins remain in the foundation
+receipt. Only `propext` and `Quot.sound` are approved; P1 remains blocked
+by `Classical.choice`. Execution stays on connected GitHub cloud Linux,
+and PR #109 stays draft/open/unmerged on its original base.
 
 ## Current checkpoint — active foundation replay preserved, next matrix pending
 

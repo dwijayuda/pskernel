@@ -152,8 +152,7 @@ def packed (family : Nat → Type u) (p : Prop) (h : p)
   | k + 1 => acc.val + packed family p h (k - 1) step
       ⟨k - 1, Nat.lt_succ_self (k - 1)⟩
 termination_by (n, acc.val)
-decreasing_by exact Prod.Lex.left (k - 1) acc.val
-  (Nat.lt_succ_of_le (Nat.sub_le k 1))
+decreasing_by exact Prod.Lex.left (k - 1) acc.val (Nat.lt_succ_of_le (Nat.sub_le k 1))
 
 theorem packed_step (family : Nat → Type u) (p : Prop) (h : p)
     (k step : Nat) (acc : Fin (Nat.succ k + 1)) :

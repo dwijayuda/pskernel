@@ -1,0 +1,129 @@
+name: PSKernel-C0 certified DefEq pair guard accepted Array source A/B
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-v7-rust-20261012]
+    paths:
+      - '.github/workflows/pskernel-c0-defeq-pair-guard-array-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean'
+      - 'psc0/packages/pskernel-c0/test/C0DefEqPairGuardRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  paired-genuine-array:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Re-export genuine Lean 4.35 official-positive Array proof once
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- Array.extract_append_extract \
+              > "$RUNNER_TEMP/array-extract-435.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/array-extract-435.ndjson" \
+              > "$RUNNER_TEMP/array-official.txt" 2>&1
+          )
+          grep -Fq 'Lean default kernel accepts the solution' "$RUNNER_TEMP/array-official.txt"
+          python3 - <<'PY'
+          import hashlib,json,os,pathlib
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"array-extract-435.ndjson"
+          raw=p.read_bytes()
+          header=json.loads(raw.splitlines()[0])["meta"]
+          assert header["lean"] == {"version":"4.35.0","githash":"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"}
+          print(f"C0_PAIR_GUARD_ARRAY_SOURCE official=accepted records={len(raw.splitlines())} sha256={hashlib.sha256(raw).hexdigest()}")
+          PY
+      - name: Source-exact PR131 certified pair/FVar baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch -q --no-tags --depth=1 origin 6aca24f4ae6f22e8962b7b068ceb9bb80b12446b
+          test "$(git rev-parse FETCH_HEAD)" = 6aca24f4ae6f22e8962b7b068ceb9bb80b12446b
+          for file in \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean; do
+            git show FETCH_HEAD:"$file" > "$file"
+          done
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-guard-baseline-resources.txt" \
+              timeout 600s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/array-extract-435.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-guard-baseline.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_PAIR_GUARD_ARRAY_RESULT variant=certified_pair_baseline exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/array-guard-baseline.txt"
+            echo 'C0_PAIR_GUARD_ARRAY_VERDICT variant=certified_pair_baseline verdict=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_PAIR_GUARD_ARRAY_VERDICT variant=certified_pair_baseline verdict=NOT_QUALIFIED_TIMEOUT'
+          else
+            tail -n 45 "$RUNNER_TEMP/array-guard-baseline.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/array-guard-baseline-resources.txt"
+      - name: Source-proved cache lookup first, identical Array bytes and fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean; do
+            git show HEAD:"$file" > "$file"
+          done
+          grep -Fq 'psKernelC0CertifiedDefEqSuccessGuard_source' \
+            psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean
+          (
+            cd psc0/packages/pskernel-c0
+            lake build c0OfficialReplay
+            lake env lean --run test/C0DefEqPairGuardRegression.lean
+          )
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-guard-candidate-resources.txt" \
+              timeout 600s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted "$RUNNER_TEMP/array-extract-435.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-guard-candidate.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_PAIR_GUARD_ARRAY_RESULT variant=lookup_first_guard exit=$rc"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' "$RUNNER_TEMP/array-guard-candidate.txt"
+            echo 'C0_PAIR_GUARD_ARRAY_VERDICT variant=lookup_first_guard verdict=accepted'
+          elif [ "$rc" -eq 124 ]; then
+            echo 'C0_PAIR_GUARD_ARRAY_VERDICT variant=lookup_first_guard verdict=NOT_QUALIFIED_TIMEOUT'
+          else
+            tail -n 45 "$RUNNER_TEMP/array-guard-candidate.txt"
+            exit 1
+          fi
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/array-guard-candidate-resources.txt"
+          echo 'C0_PAIR_GUARD_ARRAY_SCOPE same_runner=true official_positive=true same_bytes=true source_4096=true exact_all_state_refinement=true'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-exact-array-guard-ab
+          path: |
+            ${{ runner.temp }}/array-guard-*.txt
+            ${{ runner.temp }}/array-official.txt
+          if-no-files-found: warn
+          retention-days: 21

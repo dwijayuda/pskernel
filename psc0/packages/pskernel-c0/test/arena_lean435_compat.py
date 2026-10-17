@@ -50,8 +50,11 @@ def adapt_legacy_envelope(original: bytes) -> tuple[bytes, dict]:
         raise ValueError("missing Lean source provenance")
     if meta.get("format", {}).get("version") != FORMAT:
         raise ValueError("source export format is incompatible with 3.1.0")
-    if meta.get("exporter", {}).get("version") != FORMAT:
-        raise ValueError("source exporter is incompatible with 3.1.0")
+    exporter = meta.get("exporter")
+    if not isinstance(exporter, dict) or not isinstance(exporter.get("name"), str) or not isinstance(exporter.get("version"), str):
+        raise ValueError("unrecognized original exporter identity")
+    # The export format, not the producer's own version number, defines the
+    # wire schema. Arena includes deliberate hand-crafted 3.1.0 exports.
     original_lean = dict(meta["lean"])
     if sorted(original_lean) != ["githash", "version"]:
         raise ValueError("unexpected Lean metadata fields")
@@ -135,8 +138,6 @@ def main() -> int:
     if len(all_cases) != EXPECTED_ARCHIVE_SIZE:
         raise ValueError(f"expected {EXPECTED_ARCHIVE_SIZE} immutable Arena cases, got {len(all_cases)}")
     if args.per_label:
-        cases = [x for label in ("bad", "good")
-                 for x in all_cases if x[0] == label][:0]
         cases = ([x for x in all_cases if x[0] == "bad"][:args.per_label] +
                  [x for x in all_cases if x[0] == "good"][:args.per_label])
     else:
@@ -166,6 +167,7 @@ def main() -> int:
             except (UnicodeError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
                 record["classification"] = "adaptation_error"
                 record["error"] = f"{type(exc).__name__}: {exc}"
+                print(f"C0_ARENA_435_COMPAT_ADAPTATION_ERROR name={name} error={record['error']}", flush=True)
             results.append(record)
             print(f"C0_ARENA_435_COMPAT case={i+1}/{len(cases)} "
                   f"name={name} original={expected} "

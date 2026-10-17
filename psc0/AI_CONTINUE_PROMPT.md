@@ -1,5 +1,7 @@
 # Continue PSC0 v7.2 — Complete M3+B autonomously
 
+Preparation39076835034 at a04006c5 confirmed both printers compile, then exposed the new declaration variant missing from the shared source-term traversal. The complete module validation/flat-translation boundary now retains that variant; native typed-do remains on the existing native path. Environment metadata uses the established record-field layout. The remaining syntax and elaboration source modules were inspected together for declaration dispatch; source-policy CI remains pending.
+
 Preparation39076689910 at c1ed399d stopped at Lean parsing: the environment record-update application needed explicit continuation indentation, and `prefix` is a reserved parser keyword in both printers. These authoring defects are corrected together; no acceptance behavior or runtime criterion changed. Source-policy qualification remains pending.
 
 ## Noncomputable source-policy candidate — 18 October 2026

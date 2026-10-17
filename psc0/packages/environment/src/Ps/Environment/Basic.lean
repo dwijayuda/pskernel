@@ -180,8 +180,8 @@ def psEnvironmentIsNoncomputable (environment : PsEnvironment) (name : PsName) :
 
 def psEnvironmentMarkNoncomputable (environment : PsEnvironment) (name : PsName) : PsEnvironment :=
   if psEnvironmentIsNoncomputable environment name then environment else
-    { environment with noncomputableIndex :=
-        psBucketInsert 16 environment.noncomputableIndex (psEnvironmentNameHash name) name }
+    { environment with
+      noncomputableIndex := psBucketInsert 16 environment.noncomputableIndex (psEnvironmentNameHash name) name }
 
 def psEnvironmentReducibility? (environment : PsEnvironment) (name : PsName) :
     Option PsReducibility :=

@@ -72,7 +72,8 @@ def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxT
   match declaration with
   | .whereDeclaration parent locals _ =>
       psPscv0DeclarationTerms parent ++ locals.flatMap psPscv0LocalDefinitionTerms
-  | .definition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .definition _ binders type value _
+  | .noncomputableDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .partialDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .fixedpointDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .wellFoundedDefinition _ binders type value termination _ =>
@@ -108,6 +109,11 @@ def psPscv0AttachDeclaration (proofScript : Bool) (tokens : List PsToken)
               (psPscv0BodyBlock blocks localDefinition.value).isSome) then
             throw "PSCV0-D-WHERE-01: flat do adapter cannot own local definition bodies"
           return PsPscv0SurfaceDeclaration.mk attached.keyword declaration none
+      | .noncomputableDefinition _ _ _ value span =>
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: noncomputable do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
       | .partialDefinition _ _ _ value span =>
           -- Preserve source strategy. The flat translator does not silently
           -- route partial typed-do through its older Except-only adapter.

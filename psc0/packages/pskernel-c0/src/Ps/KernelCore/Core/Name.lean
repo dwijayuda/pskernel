@@ -201,6 +201,45 @@ def psKernelNameEq
               false
         | _ => false
 
+
+/-- Native-friendly source-exact structural name equality. The historical
+portable PsKernelName comparator returns a closure at each left-name node.
+Pairing the constructor match eliminates those per-level comparator closures
+while retaining UTF-8 character comparisons and exact recursive order. -/
+def psKernelC0PairedNameEq : PsKernelName → PsKernelName → Bool
+  | .anonymous, .anonymous => true
+  | .str lp lv, .str rp rv =>
+      if psKernelStringEq lv rv then
+        psKernelC0PairedNameEq lp rp
+      else false
+  | .num lp lv, .num rp rv =>
+      if Nat.beq lv rv then
+        psKernelC0PairedNameEq lp rp
+      else false
+  | _, _ => false
+
+/-- No pointer, hash or untrusted equality assumption: even different
+physical allocations and all Unicode name components produce exactly the
+historical Boolean for every source pair. -/
+theorem psKernelC0PairedNameEq_source (left right : PsKernelName) :
+    psKernelC0PairedNameEq left right = psKernelNameEq left right := by
+  induction left generalizing right with
+  | anonymous =>
+      cases right <;> rfl
+  | str parent value ih =>
+      cases right <;>
+        simp [psKernelC0PairedNameEq, psKernelNameEq, ih]
+  | num parent value ih =>
+      cases right <;>
+        simp [psKernelC0PairedNameEq, psKernelNameEq, ih]
+
+/-- Native compiler substitution is justified by full function equality,
+and cannot change exported kernel judgments or the trusted source. -/
+@[csimp] theorem psKernelNameEq_compiler_eq_paired :
+    @psKernelNameEq = @psKernelC0PairedNameEq := by
+  funext left right
+  exact (psKernelC0PairedNameEq_source left right).symm
+
 def psKernelNameAppendAfter
     (name : PsKernelName)
     (suffix : String) : PsKernelName :=

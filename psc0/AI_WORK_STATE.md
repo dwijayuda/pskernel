@@ -1,5 +1,14 @@
 # PSC0 v7.2 AI work state — 18 October 2026
 
+## Shared WF application candidate
+
+The ordinary application engine now optionally captures a bounded original source telescope. WF calls share its named/implicit/instance/default elaboration and synthetic constraints; each argument is retained once before dependent packing. Original public binder kinds and dependent residual state remain intact, and the complete callback is checked again by erasure. The existing WF fixture adds independent Lean/source generic/dictionary/named/default/implicit-major cases, an exact unfolding equation, ten required runtime comparisons and shared named-argument refusals. See PSCV0_M3_WF_APPLICATIONS_2026-10-18.md. Qualification is pending; no new acceptance or speed claim.
+
+The n-ary family-instantiation repair368789fb is retained. Previous run39078076219 at ee9067f7 repeated that known packing failure and exposed only authoring errors before the new P1/noncomputable fixtures ran: a reserved Lean identifier and multiline inline-record layout. This candidate renames the native oracle identifier and places the affected records on single lines without changing source cases or predicates. The same run's inventory confirms PSum/inl/inr/rec/casesOn are absent from selected Standard; PSigma/mk/casesOn are present. Compatible mutual WF therefore requires a separately checked PSum foundation and a common typed component packing mechanism.
+
+Main remains accepted at de6679464cac9780bae7066052714c53984dbd00 with all five gates. Preparation results are not main acceptance. Continue qualification, compatible mutual WF and the six-exit matrix. No PSKernel-Core, self-hosting or C5 work.
+
+
 ## N-ary packing root-cause repair
 
 The first three-field failure in7712f7e2/39077335588 came from treating psReduceApply as beta reduction; it only constructs applications. A shared manifest-family instantiator now feeds every nested domain walk, including erasure entry validation. This is the general owned-telescope correction; the three/four-slot cases, proof checks and all refusal criteria remain unchanged. Qualification is pending. Diagnostic checkpoint7fb82b13 remains in history. Generic P1/noncomputable candidateee9067f7 is under39078076219; do not infer its pending results. Main stays five-gate accepted atde667946. Shared ordinary WF applications are drafted separately, and M3+B remains open.

@@ -300,6 +300,42 @@ theorem packedThree_step (total k bias : Nat) (i : Fin (Nat.succ k + 1)) :
       packedThree (total + bias) k bias ⟨0, Nat.zero_lt_succ k⟩ :=
   packedThree.eq_def total (Nat.succ k) bias i
 
+
+-- The ordinary application telescope also owns recursive implicit, instance,
+-- named and dependent-default arguments. These use Lean's own elaborator.
+def genericArgs {A : Type u} [Inhabited A] (seed : A) (n : Nat) (acc : Nat := 0) : A :=
+  match n with
+  | 0 => if acc == 0 then Inhabited.default else seed
+  | k + 1 => genericArgs (n := k) (acc := acc + 1) (seed := seed)
+termination_by n
+decreasing_by exact Nat.lt_succ_self _
+
+def defaultReset (n : Nat) (acc : Nat := n + 7) : Nat :=
+  match n with
+  | 0 => acc
+  | k + 1 => defaultReset (n := k)
+termination_by n
+decreasing_by exact Nat.lt_succ_self _
+
+def implicitMajor {n : Nat} (seed : Fin (n + 1)) : Nat :=
+  match n with
+  | 0 => seed.val
+  | k + 1 => seed.val + implicitMajor (seed := ⟨0, Nat.zero_lt_succ k⟩) (n := k)
+termination_by n
+decreasing_by exact Nat.lt_succ_self _
+
+theorem defaultReset_step (k acc : Nat) :
+    defaultReset (Nat.succ k) acc = defaultReset (n := k) :=
+  defaultReset.eq_def (Nat.succ k) acc
+
+run_cmd do
+  for name in [``packedThree, ``packedFour, ``packedThree_step,
+      ``genericArgs, ``defaultReset, ``implicitMajor, ``defaultReset_step] do
+    let axioms ← Lean.collectAxioms name
+    unless axioms.all (fun name => name == ``propext || name == ``Quot.sound) do
+      throwError "WF oracle uses an unapproved assumption: {name}: {axioms}"
+    Lean.logInfo m!"PSCV0_M3_WF_ASSUMPTIONS: {name}: {axioms}"
+
 end M3WellFoundedOracle
 
 private def unusedHintSource : String :=
@@ -423,6 +459,18 @@ private def narySource : String :=
   "termination_by Prod.mk(n, Fin.val(i) + left + right)\n" ++
   "decreasing_by by { exact Prod.Lex.left(0 + (left + bias) + (right + left), Fin.val(i) + left + right, Nat.lt_succ_self(k)) }\n"
 
+private def argumentSource : String :=
+  "function wfGenericArgs {A: Type u} [dictionary: Inhabited A] (seed: A, n: Nat, acc: Nat := 0): A := match n with { | 0 => if (acc == 0) { Inhabited.default } else { seed } | k + 1 => wfGenericArgs(n := k, acc := acc + 1, seed := seed) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_self(k) }\n" ++
+  "function wfDefaultReset(n: Nat, acc: Nat := n + 7): Nat := match n with { | 0 => acc | k + 1 => wfDefaultReset(n := k) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_self(k) }\n" ++
+  "function wfImplicitMajor {n: Nat} (seed: Fin(n + 1)): Nat := match n with { | 0 => seed.val | k + 1 => seed.val + wfImplicitMajor(seed := Fin.mk(0, Nat.zero_lt_succ(k)), n := k) }\n" ++
+  "termination_by n\n" ++
+  "decreasing_by by { exact Nat.lt_succ_self(k) }\n" ++
+  "theorem wfDefaultReset_step(k: Nat, acc: Nat): Eq(wfDefaultReset(Nat.succ(k), acc), wfDefaultReset(n := k)) := by { exact wfDefaultReset.eq_def(Nat.succ(k), acc) }\n"
+
 private def source : String :=
   skipSource ++
   "theorem m3wfskipStep(k: Nat): m3wfskip(Nat.succ(k)) = m3wfskip(k - 1) + 1 := by { exact m3wfskip.eq_def(Nat.succ(k)) }\n" ++
@@ -437,7 +485,11 @@ private def source : String :=
   "function m3wfdefault(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => m3wfdefault(k) + 1 }\n" ++
   "termination_by n\n" ++
   scopeSource ++ parameterSource ++ typedSource ++ relationSource ++ packingSource ++ independentSource ++
-  packingStateSource ++ narySource ++
+  packingStateSource ++ narySource ++ argumentSource ++
+  "function m3wfargumentsoutput(flag: Bool): UInt64 := {\n" ++
+  "  let n: Nat := if (flag) { 4 } else { 0 }\n" ++
+  "  UInt64.ofNat(wfGenericArgs(if (flag) { 17 } else { 29 }, n) + 100 * wfDefaultReset(n, 99) + 10000 * wfImplicitMajor(n := n, seed := Fin.mk(n, Nat.lt_succ_self(n))))\n" ++
+  "}\n" ++
   "function m3wfnaryoutput(flag: Bool): UInt64 := {\n" ++
   "  let n: Nat := if (flag) { 7 } else { 4 }\n" ++
   "  let i: Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
@@ -851,7 +903,7 @@ private def checkUserSigmaSlot : IO Unit := do
 
 private def checkConstruction : IO Unit := do
   checkUserSigmaSlot
-  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource ++ relationSource ++ packingSource ++ independentSource ++ packingStateSource ++ narySource) with
+  let parsed ← match psCompilerParsePscv0 (skipSource ++ scopeSource ++ parameterSource ++ typedSource ++ relationSource ++ packingSource ++ independentSource ++ packingStateSource ++ narySource ++ argumentSource) with
     | .ok value => pure value
     | .error error => throw (IO.userError error)
   let some iterateCommand := parsed.commands.find? (fun command =>
@@ -932,7 +984,8 @@ private def checkConstruction : IO Unit := do
   | _ => throw (IO.userError "WF private declaration batch changed shape")
   for (text, hasState) in [("m3wfaccumulate", true), ("m3wfoffset", true),
       ("m3wfstates", true), ("m3wffixed", false), ("m3wfreverse", true),
-      ("m3wfiterate", false), ("m3wfdependent", true), ("m3wfbounded", false)] do
+      ("m3wfiterate", false), ("m3wfdependent", true), ("m3wfbounded", false),
+      ("wfGenericArgs", true), ("wfDefaultReset", true), ("wfImplicitMajor", true)] do
     let name := psRootName text
     match psEnvironmentFind result.result.environment name with
     | some (.definitionDecl _ _ type value) =>
@@ -960,7 +1013,10 @@ private def checkConstruction : IO Unit := do
     ("m3wfindependentRight", [], [.runtime, .runtime, .runtime, .runtime], 4, 0),
     ("m3wfpackedState", [], [.runtime, .runtime, .runtime, .runtime], 4, 0),
     ("packedThree", [], [.runtime, .runtime, .runtime, .runtime], 4, 0),
-    ("packedFour", [], [.runtime, .runtime, .runtime, .runtime, .runtime, .runtime], 6, 0)]
+    ("packedFour", [], [.runtime, .runtime, .runtime, .runtime, .runtime, .runtime], 6, 0),
+    ("wfGenericArgs", ["u"], [.type, .runtime, .runtime, .runtime, .runtime], 4, 1),
+    ("wfDefaultReset", [], [.runtime, .runtime], 2, 0),
+    ("wfImplicitMajor", [], [.runtime, .runtime], 2, 0)]
   for (text, expectedLevels, expectedKinds, runtimeArity, typeArity) in expectedEntries do
     let name := psRootName text
     let some (.definitionDecl _ levels type value) := psEnvironmentFind result.result.environment name
@@ -986,6 +1042,12 @@ private def checkConstruction : IO Unit := do
   IO.println "PSCV0_M3_WF_CONSTRUCTION: PASS real polymorphic Nat.fix, generic lexicographic fix and dependent/independent PSigma packing, dependent call proofs and motives, public fix_eq equations with checked extensional transport, universe closure, all-kind entries and result applications, private scope, ordinary unused-hint definitions without extra captures, no recursive axiom or P0 marker"
 
 private def checks : List (String × String × Option String) := [
+  ("recursive-unknown-name",
+    "function bad(n: Nat): Nat := bad(missing := n)\ntermination_by n\n",
+    some "unknown named argument"),
+  ("recursive-duplicate-name",
+    "function bad(n: Nat): Nat := bad(n := n, n := n)\ntermination_by n\n",
+    some "duplicate named argument"),
   ("same-size",
     "function bad(n: Nat): Nat := bad(n)\ntermination_by n\n",
     some "PSCV0-WF-DECREASE"),
@@ -1072,7 +1134,7 @@ def main (args : List String) : IO Unit := do
       "m3wfoffsetoutput", "m3wfstatesoutput", "m3wffixedoutput",
       "m3wflistoutput", "m3wffunctionoutput", "m3wfdependentstateoutput",
       "m3wfdependentresultoutput", "m3wfrelationsoutput", "m3wfpackedoutput",
-      "m3wfindependentleftoutput", "m3wfindependentrightoutput", "m3wfnaryoutput"] }
+      "m3wfindependentleftoutput", "m3wfindependentrightoutput", "m3wfnaryoutput", "m3wfargumentsoutput"] }
   let requests := #[request] ++ (checks.map fun (_, text, _) =>
     ({ source := text } : PsV7Native.Request)).toArray
   let batch ← match ← PsV7Native.runBatch requests with
@@ -1106,6 +1168,10 @@ def main (args : List String) : IO Unit := do
     let branchN := if flag then 9 else 6
     Lean.Json.mkObj [
       ("flag", Lean.toJson flag),
+      ("m3wfargumentsoutput", Lean.toJson (toString (let argumentN := if flag then 4 else 0;
+        M3WellFoundedOracle.genericArgs (if flag then 17 else 29) argumentN +
+          100 * M3WellFoundedOracle.defaultReset argumentN 99 +
+          10000 * M3WellFoundedOracle.implicitMajor (n := argumentN) ⟨argumentN, Nat.lt_succ_self argumentN⟩))),
       ("m3wfnaryoutput", Lean.toJson (toString (let packedN := if flag then 7 else 4;
         M3WellFoundedOracle.packedThree 5 packedN 3 ⟨packedN, Nat.lt_succ_self packedN⟩ +
           1000 * M3WellFoundedOracle.packedFour 2 packedN 3 4 2 ⟨packedN, Nat.lt_succ_self packedN⟩))),

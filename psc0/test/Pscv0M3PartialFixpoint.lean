@@ -69,7 +69,7 @@ partial_fixpoint
 section
 variable {A : Type u} [dictionary : Inhabited A] (seed : A)
 
-def scoped (n : Nat) : A := helper n
+def sectionValue (n : Nat) : A := helper n
 where
   helper (k : Nat) : A :=
     match k with
@@ -100,7 +100,7 @@ def genericOutput (flag : Bool) : UInt64 :=
   let n := if flag then 4 else 3
   let bound := if flag then 7 else 5
   UInt64.ofNat (generic (if flag then 11 else 13) n +
-    100 * scoped (if flag then 17 else 19) n +
+    100 * sectionValue (if flag then 17 else 19) n +
     10000 * (dependent bound n ⟨bound, Nat.lt_succ_self bound⟩).val)
 
 -- These exact source shapes used to be refused only by the two-axiom policy.
@@ -146,7 +146,7 @@ run_cmd do
     | _ => throwError "native P1 source did not produce a checked definition: {name}"
   for name in [``countdown, ``optionCountdown, ``left, ``right,
       ``countdownEquation, ``optionEquation, ``leftEquation, ``rightEquation,
-      ``generic, ``scoped, ``dependent, ``genericEquation, ``dependentEquation,
+      ``generic, ``sectionValue, ``dependent, ``genericEquation, ``dependentEquation,
       ``first, ``bad, ``riBad, ``fixed] do
     let axioms ← Lean.collectAxioms name
     unless axioms.contains ``Classical.choice &&

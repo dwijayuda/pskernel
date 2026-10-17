@@ -1,4 +1,5 @@
 import Ps.Elab.Binders
+import Ps.Elab.Application
 
 /-
 Typed fixed/evolving parameter ownership, following Lean 4.35.0
@@ -108,27 +109,44 @@ structure PsElabRecursionArguments where
   abstractions : List PsMetaAbstraction
   resultType : PsExpr
 
--- A permutation must not reorder or repeat source argument computations.
--- Keep one checked Core let for each original argument, in source order,
--- including fixed arguments; only their bound references are rearranged.
+-- The ordinary application owner supplies every written, implicit, instance
+-- and default argument. Its capture mode retains each once before a recursive
+-- consumer permutes the complete typed header. The anonymous local is only a
+-- type-correct application head; it is removed before the real call is built.
 def psElabRecursionCaptureArguments (elaborate : PsElaborator)
-    (context : PsElabContext) (arguments : List PsSyntaxTerm) (sourceType : PsExpr) :
+    (context : PsElabContext)
+    (arguments : List (Option PsSyntaxName × PsSyntaxTerm))
+    (sourceType : PsExpr) (parameterCount : Nat) (expected : Option PsExpr) :
     Except PsElabError PsElabRecursionArguments := do
-  let mut current := context
-  let mut values := []
-  let mut abstractions := []
-  let mut cursor := sourceType
-  for source in arguments do
-    let parameter ← (psInferEnsureForall current.environment current.metaContext
-      current.localContext cursor).mapError PsElabError.infer
-    let .explicit := parameter.binder
-      | throw (.data "PSCV0-WF-TELESCOPE: recursive calls require the complete explicit header telescope")
-    let argument ← elaborate current source (some parameter.domain)
-    let type := psMetaInstantiate argument.context.metaContext parameter.domain
-    let name := psNameAppendNum (psRootName "_psc0CallArgument") argument.context.localContext.nextId
-    let captured := psLocalPushLet argument.context.localContext name type argument.term
-    current := { argument.context with localContext := captured.context }
-    values := values ++ [.fvar captured.id]
-    abstractions := .letE captured.id name type argument.term :: abstractions
-    cursor := psExprInstantiate1 parameter.body (.fvar captured.id)
-  return { context := current, values, abstractions, resultType := cursor }
+  let head := psLocalPushBinding context.localContext .anonymous sourceType .explicit
+  let inner := psElabContextWithLocal context head.context
+  let grouped ← psElabCallArguments arguments [] []
+  let application ← (psElabApplyOrderedWith elaborate 4096
+    { context := inner, term := .fvar head.id, type := sourceType }
+    grouped.fst grouped.snd [] true expected (some { remaining := parameterCount })).mapError
+      (fun error => match error with
+        | .invalidArgument "arguments exceed the owned source telescope" =>
+          .data "PSCV0-WF-ARITY: the recursive call exceeds its source header telescope"
+        | _ => error)
+  let some capture := application.capture
+    | throw (.data "PSCV0-WF-INTERNAL: ordinary application lost its argument capture")
+  if capture.remaining != 0 || capture.valuesRev.length != parameterCount then
+    throw (.data "PSCV0-WF-ARITY: the recursive call must complete its source header telescope")
+  -- Expected information has already flowed through the shared worker.
+  -- Do not coerce the entire temporary application: only its arguments and
+  -- exact declared result type belong to the recursive consumer.
+  let resolved ← psElabFinishApplication application none
+  let values := capture.valuesRev.reverse
+  let expressions := resolved.type :: values ++ capture.abstractionsRev.flatMap
+    (fun abstraction => match abstraction with
+      | .letE _ _ type value => [type, value]
+      | _ => [])
+  if expressions.any (fun term =>
+      (psExprFVarIds (psMetaInstantiate resolved.context.metaContext term)).contains head.id) then
+    throw (.data "PSCV0-WF-INTERNAL: temporary source application escaped into a retained argument")
+  let locals := { resolved.context.localContext with
+    declarations := resolved.context.localContext.declarations.filter
+      (fun declaration => psLocalDeclId declaration != head.id) }
+  return {
+    context := { resolved.context with localContext := locals }
+    values, abstractions := capture.abstractionsRev, resultType := resolved.type }

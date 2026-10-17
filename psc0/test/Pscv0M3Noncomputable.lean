@@ -122,10 +122,8 @@ private def requestCases : List (String × PsV7Native.Request × Option (String 
       some ("assurance", "PSCV0-NONCOMPUTABLE-EXEC:")),
    ("explicit-noncomputable-export", { executable with exports := .selected ["specIdentity"] },
       some ("assurance", "PSCV0-NONCOMPUTABLE-EXEC:")),
-   ("imported-logical-only", { modules := [provider],
-      source := "import Spec\ntheorem visibleRefl(n: Nat): Eq(visible(n), visible(n)) := by { rfl }\n" }, none),
-   ("imported-computational-use", { executable with modules := [provider],
-      source := "import Spec\nfunction bad(flag: Bool): Nat := visible(3)\n" },
+   ("imported-logical-only", { modules := [provider], source := "import Spec\ntheorem visibleRefl(n: Nat): Eq(visible(n), visible(n)) := by { rfl }\n" }, none),
+   ("imported-computational-use", { executable with modules := [provider], source := "import Spec\nfunction bad(flag: Bool): Nat := visible(3)\n" },
       some ("assurance", "PSCV0-NONCOMPUTABLE-EXEC:")),
    ("mixed-main-modifiers", { source :=
       "mutual\nnoncomputable function left(n: Nat): Nat := n\nfunction right(n: Nat): Nat := n\nend\n" },

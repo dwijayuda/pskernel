@@ -217,3 +217,12 @@ Released under Apache License2.0; see the retained LEAN-APACHE-2.0.txt.
 Modifications: explicit portable Core/local-context operations, structural list
 recursion, checked construction and source-entry validation, selected nonempty
 WF telescopes, and explicit kernel-checked callback extensionality.
+
+### Shared WF application ownership
+
+The application/recursive-argument design follows pinned Lean4.35.0
+src/Lean/Elab/App.lean and src/Lean/Elab/PreDefinition/WF/PackMutual.lean
+at eb6cafb7290e8bd5f2937522d8d804f58f02bafc, under Apache-2.0.
+The portable implementation adds bounded typed argument capture to its existing
+application owner; it does not copy Lean's host elaborator or temporary axiom path.
+Retain the upstream notices and LEAN-APACHE-2.0.txt above.

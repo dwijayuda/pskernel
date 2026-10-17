@@ -16,9 +16,17 @@ def psBinderIsInstanceImplicit (binder : PsBinderInfo) : Bool :=
   | .instanceImplicit => true
   | _ => false
 
+-- A consumer may own a finite source header and retain each actual argument
+-- exactly once before rearranging it. Ordinary applications leave this off.
+structure PsElabApplicationCapture where
+  remaining : Nat
+  valuesRev : List PsExpr := []
+  abstractionsRev : List PsMetaAbstraction := []
+
 structure PsElabApplicationResult where
   result : PsElabTermResult
   constraintsRev : List PsSyntheticConstraint
+  capture : Option PsElabApplicationCapture := none
 
 def psSyntaxTermListIsEmpty
     (values : List PsSyntaxTerm) : Bool :=
@@ -60,6 +68,23 @@ def psElabApplyValue (current argument : PsElabTermResult) (body : PsExpr) :
   { context := argument.context
     term := .app current.term argument.term
     type := psExprInstantiate1 body argument.term }
+
+def psElabApplyCapturedValue (current argument : PsElabTermResult) (body : PsExpr)
+    (capture : Option PsElabApplicationCapture) :
+    PsElabTermResult × Option PsElabApplicationCapture :=
+  match capture with
+  | none => (psElabApplyValue current argument body, none)
+  | some capture =>
+    let type := psMetaInstantiate argument.context.metaContext argument.type
+    let name := psNameAppendNum (psRootName "_psc0CallArgument") argument.context.localContext.nextId
+    let pushed := psLocalPushLet argument.context.localContext name type argument.term
+    let reference := PsExpr.fvar pushed.id
+    let retained := { argument with
+      context := { argument.context with localContext := pushed.context }, term := reference }
+    (psElabApplyValue current retained body, some {
+      remaining := capture.remaining - 1
+      valuesRev := reference :: capture.valuesRev
+      abstractionsRev := .letE pushed.id name type argument.term :: capture.abstractionsRev })
 
 -- Defaults are closed with the declaration telescope as optParam applications.
 -- Instantiating a preceding codomain therefore substitutes preceding arguments
@@ -152,8 +177,14 @@ def psElabApplyOrderedWith {α : Type}
     (elaborate : PsElabContext → α → Option PsExpr → Except PsElabError PsElabTermResult) (fuel : Nat)
     (current : PsElabTermResult) (positions : List α)
     (names : List (PsName × α)) (pending : List PsSyntheticConstraint)
-    (complete : Bool := true) (expected : Option PsExpr := none) :
+    (complete : Bool := true) (expected : Option PsExpr := none)
+    (capture : Option PsElabApplicationCapture := none) :
     Except PsElabError PsElabApplicationResult := do
+  if capture.any (fun capture => capture.remaining == 0) then
+    if !positions.isEmpty then
+      throw (.invalidArgument "arguments exceed the owned source telescope")
+    if !names.isEmpty then throw (.invalidArgument "unknown named argument")
+    return { result := current, constraintsRev := pending, capture }
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
@@ -177,7 +208,7 @@ def psElabApplyOrderedWith {α : Type}
           | _ => true
         if preserve then
           match psElabUnifyExpected current (some target) with
-          | .ok result => return { result, constraintsRev := pending }
+          | .ok result => return { result, constraintsRev := pending, capture }
           | .error error => if psElabErrorIsResource error then throw error else pure ()
       | none => pure ()
     match currentType with
@@ -201,8 +232,9 @@ def psElabApplyOrderedWith {α : Type}
         let pending := resolved.constraintsRev
         let argument ← elaborate current.context source
           (some (psMetaInstantiate current.context.metaContext domain))
-        psElabApplyOrderedWith elaborate fuel (psElabApplyValue current argument body)
-          selected.2.1 selected.2.2 pending complete expected
+        let (next, capture) := psElabApplyCapturedValue current argument body capture
+        psElabApplyOrderedWith elaborate fuel next
+          selected.2.1 selected.2.2 pending complete expected capture
       | none =>
         if explicit && (complete || !names.isEmpty) then
           match psElabDefaultValue current.context domain with
@@ -217,17 +249,17 @@ def psElabApplyOrderedWith {α : Type}
                 (.insertedArgument current.context.sourceSpan .defaultValue name
                   current.term fresh.expr domain)
               term := fresh.expr, type := domain }
-            return ← psElabApplyOrderedWith elaborate fuel
-              (psElabApplyValue current argument body) positions names
-              (.defaultValue id value :: pending) complete expected
+            let (next, capture) := psElabApplyCapturedValue current argument body capture
+            return ← psElabApplyOrderedWith elaborate fuel next positions names
+              (.defaultValue id value :: pending) complete expected capture
           | none => pure ()
         if (explicit || (psBinderIsStrictImplicit binder && !complete)) &&
             positions.isEmpty && names.isEmpty then
-          return { result := current, constraintsRev := pending }
+          return { result := current, constraintsRev := pending, capture }
         let kind := if psBinderIsInstanceImplicit binder then
           PsMetaVarKind.synthetic else PsMetaVarKind.natural
         let fresh := psMetaFresh current.context.metaContext current.context.localContext domain kind
-        let next : PsElabTermResult := {
+        let argument : PsElabTermResult := {
           context := psElabRecordInfo
             (psElabContextWithMeta current.context fresh.context)
             (.insertedArgument current.context.sourceSpan
@@ -235,19 +267,20 @@ def psElabApplyOrderedWith {α : Type}
                else if psBinderIsStrictImplicit binder then .strictImplicit
                else if explicit then .inferredExplicit else .implicit)
               name current.term fresh.expr domain)
-          term := .app current.term fresh.expr
-          type := psExprInstantiate1 body fresh.expr }
+          term := fresh.expr
+          type := domain }
+        let (next, capture) := psElabApplyCapturedValue current argument body capture
         let pending := if psBinderIsInstanceImplicit binder then
           match fresh.expr with | .mvar id => .instanceGoal id :: pending | _ => pending
           else pending
-        psElabApplyOrderedWith elaborate fuel next positions names pending complete expected
+        psElabApplyOrderedWith elaborate fuel next positions names pending complete expected capture
     | _ =>
       if !positions.isEmpty || !names.isEmpty then
         let callable ← (psElabEnsureFunction current).mapError fun error =>
           if psElabErrorIsResource error then error
           else if positions.isEmpty then .invalidArgument "unknown named argument" else error
-        psElabApplyOrderedWith elaborate fuel callable positions names pending complete expected
-      else return { result := current, constraintsRev := pending }
+        psElabApplyOrderedWith elaborate fuel callable positions names pending complete expected capture
+      else return { result := current, constraintsRev := pending, capture }
 
 -- Ordinary calls and records share the same telescope walk. A record update
 -- supplies either source syntax or an already typed Core projection.

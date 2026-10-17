@@ -102,16 +102,16 @@ def psElabWellFoundedReferenceEscapes
 -- particular, a successor branch must get measure(y) < measure(succ k), not
 -- the stale outer major's type. The matcher already owns that generalization.
 def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
-    (context : PsElabContext) (fn : PsSyntaxTerm) (arguments : List PsSyntaxTerm)
+    (context : PsElabContext) (fn : PsSyntaxTerm)
+    (arguments : List (Option PsSyntaxName × PsSyntaxTerm))
     (expected : Option PsExpr) : Except PsElabError (Option PsElabTermResult) := do
   let some recursion := context.wellFoundedRecursion | return none
   let .reference sourceName := fn | return none
   if !psElabWellFoundedReferenceEscapes context sourceName then return none
-  if arguments.length != recursion.parameterIds.length then
-    throw (.data "PSCV0-WF-ARITY: the recursive call must supply the complete explicit header telescope")
   let some sourceType := recursion.sourceType
     | throw (.data "PSCV0-WF-INTERNAL: missing recursive source telescope")
   let captured ← psElabRecursionCaptureArguments elaborate context arguments sourceType
+    recursion.parameterIds.length expected
   let some callback := psLocalFindUser captured.context.localContext recursion.callbackName
     | throw (.data "PSCV0-WF-INTERNAL: missing refined recursive callback")
   let span := context.sourceSpan.getD (psSyntaxTermSpan fn)
@@ -154,7 +154,7 @@ def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
   -- Independent result types already belong to the caller's scope. Delaying
   -- them on unresolved dictionaries in argument let values would hide a real
   -- function result behind an opaque type meta before a chained application.
-  -- Value closure still retains every original argument let in source order.
+  -- Value closure still retains every actual argument let in the shared application order.
   let closedType ← if !psExprHasTermMeta resultType &&
       psExprFVarsInContext context.localContext resultType then
     psElabResolvedTerm (psElabLeaveScope context resolved.context) resultType none
@@ -214,7 +214,7 @@ structure PsElabWellFoundedResult where
   sourceInfo : PsElabSourceInfo
 
 -- Source preparation supplies a real checked header, keeping lifted captures
--- separate from the original explicit recursion arguments. A body scope may
+-- separate from the original recursion arguments. A body scope may
 -- add checked local aliases for already constructed predecessors. Those lets
 -- are eliminated before the final fixedpoint is closed and checked.
 structure PsElabWellFoundedTypedHeader where
@@ -359,7 +359,8 @@ def psElabWellFoundedFunctional (context : PsElabContext)
     let resultType := PsExpr.forallE callbackName
       (psElabWellFoundedArgumentAt argument value callbackType) (.app motive value) .explicit
     let level ← psElabExpressionSort { context with localContext := packed.context } resultType
-    let minor := psElabWellFoundedLambdas parameters inner
+    let minor := psElabWellFoundedLambdas
+      (parameters.map fun parameter => { parameter with binder := .explicit }) inner
     let cases ← (psWellFoundedTupleCases context.environment context.metaContext
       packed.context (parameters.map (·.name)) packed.id level resultType minor).mapError PsElabError.infer
     return .lam packedName domain (psExprAbstractFVar packed.id cases) .explicit
@@ -438,7 +439,7 @@ def psElabWellFoundedTupleCallbackEquality (context : PsElabContext)
     (psLogicEq typeLevel type left right)
   return checked.term
 
--- Explicit typed header parameters may be fixed or evolve independently of
+-- Typed header parameters may be fixed or evolve independently of
 -- the typed measure. Its codomain and the measured argument's domain depend
 -- only on fixed captures; changing state and the result form a dependent motive.
 -- No body lambda enters the header or the termination clause's lexical scope.
@@ -458,10 +459,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let captures := header.capturesRev.reverse
   let captureIds := captures.map (·.id)
   if parameters.isEmpty then
-    throw (.data "PSCV0-WF-TELESCOPE: the selected slice requires explicit typed header parameters")
-  for parameter in parameters do
-    let .explicit := parameter.binder
-      | throw (.data "PSCV0-WF-TELESCOPE: the selected header parameters must be explicit")
+    throw (.data "PSCV0-WF-TELESCOPE: the selected slice requires typed header parameters")
   let _ ← psElabExpressionSort headerContext header.resultType
   -- As in TerminationMeasure.elab, infer the real codomain; the self callback
   -- is not in scope in the result annotation or measure.

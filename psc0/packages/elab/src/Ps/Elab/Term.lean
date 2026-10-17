@@ -212,7 +212,8 @@ def psElabStructuralReferenceEscapes
 def psTryElabRecursionSelfCall (elaborate : PsElaborator)
     (context : PsElabContext) (fn : PsSyntaxTerm) (arguments : List PsSyntaxTerm)
     (expected : Option PsExpr) : Except PsElabError (Option PsElabTermResult) := do
-  match ← psTryElabWellFoundedSelfCall elaborate context fn arguments expected with
+  match ← psTryElabWellFoundedSelfCall elaborate context fn
+      (arguments.map fun value => (none, value)) expected with
   | some result => return some result
   | none => psTryElabStructuralSelfCall elaborate context fn arguments expected
 
@@ -244,7 +245,7 @@ def psElabTermWithFuel
               match source with
               | .reference name =>
                   if psElabWellFoundedReferenceEscapes ctx name then
-                    Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must be a full positional call")
+                    Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must complete its source header")
                   else if psElabStructuralReferenceEscapes ctx name then
                     Except.error PsElabError.structuralRecursionEscapingReference
                   else psElabReference ctx name target
@@ -258,13 +259,16 @@ def psElabTermWithFuel
             | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected
             | .call fn args span =>
-                if args.all (fun arg => arg.fst.isNone) && !args.isEmpty then
-                  -- Preserve the selected recursion path for positional calls.
-                  smaller context (.app fn (args.map Prod.snd) span) expected
-                else
-                  match readHead context fn none with
-                  | .error error => .error error
-                  | .ok head => psElabCall smaller head args expected
+                match psTryElabWellFoundedSelfCall smaller context fn args expected with
+                | .error error => .error error
+                | .ok (some result) => .ok result
+                | .ok none =>
+                  if args.all (fun arg => arg.fst.isNone) && !args.isEmpty then
+                    smaller context (.app fn (args.map Prod.snd) span) expected
+                  else
+                    match readHead context fn none with
+                    | .error error => .error error
+                    | .ok head => psElabCall smaller head args expected
             | .reference name =>
                 if psElabWellFoundedReferenceEscapes context name then
                   Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must be a full positional call")

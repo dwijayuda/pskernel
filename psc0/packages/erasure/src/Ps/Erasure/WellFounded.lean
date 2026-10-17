@@ -66,7 +66,6 @@ def psErasureWellFoundedCallback (environment : PsEnvironment)
   for id in stateIds do
     let state ← (psInferEnsureForall environment psMetaEmpty localContext resultType).mapError
       (fun _ => PsErasureError.binderMismatch)
-    if !psBinderInfoEq state.binder .explicit then throw .unsupportedRuntimeTerm
     let pushed := psLocalPushBinding localContext state.name state.domain state.binder
     replacements := replacements ++ [(id, .fvar pushed.id)]
     bindersRev := .mk pushed.id state.name state.domain state.binder :: bindersRev

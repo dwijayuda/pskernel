@@ -1,0 +1,33 @@
+name: PSC0 Lean 4.35 Wasm shared admission contracts
+on:
+  push:
+    branches:
+      - feature/psc0-v72-lean435-wasm-admission-integration-v1
+    paths:
+      - '.github/workflows/psc0-lean435-wasm-admission-contracts.yml'
+      - 'psc0/packages/pskernel-lean-wasm/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  admission-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: psc0/packages/pskernel-lean-wasm
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Parse every source and eagerly construct every canonical fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in psc0/packages/pskernel-lean-wasm/index.mjs psc0/packages/pskernel-lean-wasm/scripts/*.mjs; do
+            node --check "$f"
+          done
+          node --test \
+            psc0/packages/pskernel-lean-wasm/scripts/test-corpus.mjs \
+            psc0/packages/pskernel-lean-wasm/scripts/test-provider-transport.mjs \
+            psc0/packages/pskernel-lean-wasm/scripts/test-host.mjs

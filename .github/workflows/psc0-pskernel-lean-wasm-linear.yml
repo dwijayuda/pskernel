@@ -19,7 +19,7 @@ permissions:
 
 concurrency:
   group: psc0-lean435-linear-wasm-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   full-cpp-kernel-wasm:
@@ -44,6 +44,20 @@ jobs:
             node --check "$f"
           done
           node --test psc0/packages/pskernel-lean-wasm/scripts/test-host.mjs
+      - name: Qualify live PSC0 source closure before expensive kernel build
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest="$RUNNER_TEMP/psc0-wasm-closure/closure.json"
+          node psc0/packages/pskernel-lean-wasm/scripts/plan-closure.mjs \
+            "$GITHUB_WORKSPACE/psc0" "$RUNNER_TEMP/psc0-wasm-closure/src" "$manifest"
+          node -e '
+            const fs=require("node:fs");
+            const data=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+            if(data.source!=="live-psc0" || data.modules.length<10 ||
+               data.modules.at(-1)?.module!=="PsKernelLeanWasm.Main") process.exit(1);
+            console.log("PSC0_LINEAR_KERNEL_SOURCE_CLOSURE:",data.modules.length);
+          ' "$manifest"
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0/v7-native

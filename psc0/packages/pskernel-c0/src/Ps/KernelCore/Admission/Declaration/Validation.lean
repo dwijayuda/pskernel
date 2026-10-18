@@ -135,6 +135,28 @@ equality. Neither a hash collision nor any previously checked environment
 can grant admission or change which offending name is reported.
 -/
 
+/-!
+Native-only, *non-authoritative* syntax memo index for the previous
+source-certified MVar and first-undefined-level-parameter scans. The old
+depth-four shape selector is retained as a portable Lean source definition;
+native compilation can use immutable runtime node identity as a bucket hint.
+
+Every bucket hit is separately validated by a proof-producing exact
+structural `Decidable (expr = entry.expr)`. The pointer index is NEVER a
+proof of equality, a free-variable authorization, or a checking decision.
+Crucially, this hint is captured on the ORIGINAL scrutinee before dependent
+constructor matching may rebuild a root object. Therefore lookup and store
+use the SAME key for a single source node even if its proof-carrying result
+is represented by a reconstructed constructor.
+-/
+private unsafe def psKernelC0AdmissionNodeHintNative
+    (expr : PsKernelExpr) : Nat :=
+  (ptrAddrUnsafe expr).toNat / 16
+
+@[implemented_by psKernelC0AdmissionNodeHintNative]
+private def psKernelC0AdmissionNodeHint (expr : PsKernelExpr) : Nat :=
+  psKernelC0MemoShapeHash 4 expr
+
 structure PsKernelC0ExactUndef
     (allowed : List PsKernelName) (expr : PsKernelExpr) where
   value : Option PsKernelName
@@ -153,7 +175,7 @@ private def psKernelC0UndefMemoFind
       Option (PsKernelC0ExactUndef allowed expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      match psKernelC0DeepPtrDecEq expr entry.expr with
       | .isTrue equal =>
           some (by
             cases equal
@@ -163,20 +185,19 @@ private def psKernelC0UndefMemoFind
 
 private def psKernelC0UndefMemoLookup
     (allowed : List PsKernelName) (expr : PsKernelExpr)
-    (memo : PsKernelC0UndefMemo allowed) :
+    (hint : Nat) (memo : PsKernelC0UndefMemo allowed) :
     Option (PsKernelC0ExactUndef allowed expr) :=
   psKernelC0UndefMemoFind expr
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (psKernelC0MemoShapeHash 4 expr))
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo hint)
 
 private def psKernelC0UndefMemoStore
+    (hint : Nat)
     {allowed : List PsKernelName} {expr : PsKernelExpr}
     (memo : PsKernelC0UndefMemo allowed)
     (checked : PsKernelC0ExactUndef allowed expr) :
     PsKernelC0ExactUndef allowed expr × PsKernelC0UndefMemo allowed :=
-  let hash := psKernelC0MemoShapeHash 4 expr
-  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
-  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hint
+  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hint
     ({expr := expr, certified := checked} :: bucket))
 
 /-- Combine two source-proven independent results in original left-to-right
@@ -193,7 +214,8 @@ def psKernelC0UndefMemoGo (allowed : List PsKernelName) :
     (expr : PsKernelExpr) → PsKernelC0UndefMemo allowed →
       PsKernelC0ExactUndef allowed expr × PsKernelC0UndefMemo allowed
   | expr, memo =>
-      match psKernelC0UndefMemoLookup allowed expr memo with
+      let hint := psKernelC0AdmissionNodeHint expr
+      match psKernelC0UndefMemoLookup allowed expr hint memo with
       | some checked => (checked, memo)
       | none =>
           match expr with
@@ -208,7 +230,7 @@ def psKernelC0UndefMemoGo (allowed : List PsKernelName) :
                      | none => psKernelFindUndefExprLevelParam arg allowed)
                   rw [← f.source, ← a.source]
                   rfl⟩
-              psKernelC0UndefMemoStore m2 checked
+              psKernelC0UndefMemoStore hint m2 checked
           | .lam name ty body info =>
               let (t, m1) := psKernelC0UndefMemoGo allowed ty memo
               let (b, m2) := psKernelC0UndefMemoGo allowed body m1
@@ -220,7 +242,7 @@ def psKernelC0UndefMemoGo (allowed : List PsKernelName) :
                      | none => psKernelFindUndefExprLevelParam body allowed)
                   rw [← t.source, ← b.source]
                   rfl⟩
-              psKernelC0UndefMemoStore m2 checked
+              psKernelC0UndefMemoStore hint m2 checked
           | .forallE name ty body info =>
               let (t, m1) := psKernelC0UndefMemoGo allowed ty memo
               let (b, m2) := psKernelC0UndefMemoGo allowed body m1
@@ -232,7 +254,7 @@ def psKernelC0UndefMemoGo (allowed : List PsKernelName) :
                      | none => psKernelFindUndefExprLevelParam body allowed)
                   rw [← t.source, ← b.source]
                   rfl⟩
-              psKernelC0UndefMemoStore m2 checked
+              psKernelC0UndefMemoStore hint m2 checked
           | .letE name ty val body nondep =>
               let (t, m1) := psKernelC0UndefMemoGo allowed ty memo
               let (v, m2) := psKernelC0UndefMemoGo allowed val m1
@@ -250,40 +272,40 @@ def psKernelC0UndefMemoGo (allowed : List PsKernelName) :
                          | none => psKernelFindUndefExprLevelParam body allowed)
                   rw [← t.source, ← v.source, ← b.source]
                   rfl⟩
-              psKernelC0UndefMemoStore m3 checked
+              psKernelC0UndefMemoStore hint m3 checked
           | .mdata md body =>
               let (b, m1) := psKernelC0UndefMemoGo allowed body memo
               let checked : PsKernelC0ExactUndef allowed (.mdata md body) :=
                 ⟨b.value, by
                   change b.value = psKernelFindUndefExprLevelParam body allowed
                   exact b.source⟩
-              psKernelC0UndefMemoStore m1 checked
+              psKernelC0UndefMemoStore hint m1 checked
           | .proj name i body =>
               let (b, m1) := psKernelC0UndefMemoGo allowed body memo
               let checked : PsKernelC0ExactUndef allowed (.proj name i body) :=
                 ⟨b.value, by
                   change b.value = psKernelFindUndefExprLevelParam body allowed
                   exact b.source⟩
-              psKernelC0UndefMemoStore m1 checked
+              psKernelC0UndefMemoStore hint m1 checked
           | .sort level =>
-              psKernelC0UndefMemoStore memo
+              psKernelC0UndefMemoStore hint memo
                 (⟨psKernelFindUndefLevelParam level allowed, rfl⟩ :
                   PsKernelC0ExactUndef allowed (.sort level))
           | .const name levels =>
-              psKernelC0UndefMemoStore memo
+              psKernelC0UndefMemoStore hint memo
                 (⟨psKernelFindUndefInLevels levels allowed, rfl⟩ :
                   PsKernelC0ExactUndef allowed (.const name levels))
           | .bvar index =>
-              psKernelC0UndefMemoStore memo
+              psKernelC0UndefMemoStore hint memo
                 (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.bvar index))
           | .fvar name =>
-              psKernelC0UndefMemoStore memo
+              psKernelC0UndefMemoStore hint memo
                 (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.fvar name))
           | .mvar name =>
-              psKernelC0UndefMemoStore memo
+              psKernelC0UndefMemoStore hint memo
                 (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.mvar name))
           | .lit literal =>
-              psKernelC0UndefMemoStore memo
+              psKernelC0UndefMemoStore hint memo
                 (⟨none, rfl⟩ : PsKernelC0ExactUndef allowed (.lit literal))
 
 def psKernelC0MemoizedFindUndefExprLevelParam
@@ -408,7 +430,7 @@ private def psKernelC0MVarMemoFind (expr : PsKernelExpr) :
       Option (PsKernelC0ExactMVar expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      match psKernelC0DeepPtrDecEq expr entry.expr with
       | .isTrue equal =>
           some (by
             cases equal
@@ -417,20 +439,20 @@ private def psKernelC0MVarMemoFind (expr : PsKernelExpr) :
           psKernelC0MVarMemoFind expr rest
 
 private def psKernelC0MVarMemoLookup
-    (expr : PsKernelExpr) (memo : PsKernelC0MVarMemo) :
+    (expr : PsKernelExpr) (hint : Nat)
+    (memo : PsKernelC0MVarMemo) :
     Option (PsKernelC0ExactMVar expr) :=
   psKernelC0MVarMemoFind expr
-    (psKernelC0TrieBucket psKernelC0IndexDepth memo
-      (psKernelC0MemoShapeHash 4 expr))
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo hint)
 
 private def psKernelC0MVarMemoStore
+    (hint : Nat)
     {expr : PsKernelExpr}
     (memo : PsKernelC0MVarMemo)
     (checked : PsKernelC0ExactMVar expr) :
     PsKernelC0ExactMVar expr × PsKernelC0MVarMemo :=
-  let hash := psKernelC0MemoShapeHash 4 expr
-  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
-  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hash
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hint
+  (checked, psKernelC0TrieSet psKernelC0IndexDepth memo hint
     ({ expr := expr, certified := checked } :: bucket))
 
 /-- One memo per query, never transported across checker or expression states. -/
@@ -438,7 +460,8 @@ def psKernelC0MVarMemoGo :
     (expr : PsKernelExpr) → PsKernelC0MVarMemo →
       PsKernelC0ExactMVar expr × PsKernelC0MVarMemo
   | expr, memo =>
-      match psKernelC0MVarMemoLookup expr memo with
+      let hint := psKernelC0AdmissionNodeHint expr
+      match psKernelC0MVarMemoLookup expr hint memo with
       | some checked => (checked, memo)
       | none =>
           match expr with
@@ -455,7 +478,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar arg)
                     rw [← f.source]
                     simp [h]⟩
-                psKernelC0MVarMemoStore m1 checked
+                psKernelC0MVarMemoStore hint m1 checked
               else
                 let (a, m2) := psKernelC0MVarMemoGo arg m1
                 let checked : PsKernelC0ExactMVar (.app fn arg) :=
@@ -465,7 +488,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar arg)
                     rw [← f.source, ← a.source]
                     simp [h]⟩
-                psKernelC0MVarMemoStore m2 checked
+                psKernelC0MVarMemoStore hint m2 checked
           | .lam name ty body info =>
               let (t, m1) := psKernelC0MVarMemoGo ty memo
               if ht : t.value = true then
@@ -476,7 +499,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar body)
                     rw [← t.source]
                     simp [ht]⟩
-                psKernelC0MVarMemoStore m1 checked
+                psKernelC0MVarMemoStore hint m1 checked
               else
                 let (b, m2) := psKernelC0MVarMemoGo body m1
                 let checked : PsKernelC0ExactMVar (.lam name ty body info) :=
@@ -486,7 +509,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar body)
                     rw [← t.source, ← b.source]
                     simp [ht]⟩
-                psKernelC0MVarMemoStore m2 checked
+                psKernelC0MVarMemoStore hint m2 checked
           | .forallE name ty body info =>
               let (t, m1) := psKernelC0MVarMemoGo ty memo
               if ht : t.value = true then
@@ -497,7 +520,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar body)
                     rw [← t.source]
                     simp [ht]⟩
-                psKernelC0MVarMemoStore m1 checked
+                psKernelC0MVarMemoStore hint m1 checked
               else
                 let (b, m2) := psKernelC0MVarMemoGo body m1
                 let checked : PsKernelC0ExactMVar (.forallE name ty body info) :=
@@ -507,7 +530,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar body)
                     rw [← t.source, ← b.source]
                     simp [ht]⟩
-                psKernelC0MVarMemoStore m2 checked
+                psKernelC0MVarMemoStore hint m2 checked
           | .letE name ty val body nondep =>
               let (t, m1) := psKernelC0MVarMemoGo ty memo
               if ht : t.value = true then
@@ -520,7 +543,7 @@ def psKernelC0MVarMemoGo :
                        else psKernelExprHasMVar body)
                     rw [← t.source]
                     simp [ht]⟩
-                psKernelC0MVarMemoStore m1 checked
+                psKernelC0MVarMemoStore hint m1 checked
               else
                 let (v, m2) := psKernelC0MVarMemoGo val m1
                 if hv : v.value = true then
@@ -533,7 +556,7 @@ def psKernelC0MVarMemoGo :
                          else psKernelExprHasMVar body)
                       rw [← t.source, ← v.source]
                       simp [ht, hv]⟩
-                  psKernelC0MVarMemoStore m2 checked
+                  psKernelC0MVarMemoStore hint m2 checked
                 else
                   let (b, m3) := psKernelC0MVarMemoGo body m2
                   let checked : PsKernelC0ExactMVar
@@ -545,40 +568,40 @@ def psKernelC0MVarMemoGo :
                          else psKernelExprHasMVar body)
                       rw [← t.source, ← v.source, ← b.source]
                       simp [ht, hv]⟩
-                  psKernelC0MVarMemoStore m3 checked
+                  psKernelC0MVarMemoStore hint m3 checked
           | .mdata md body =>
               let (b, m1) := psKernelC0MVarMemoGo body memo
               let checked : PsKernelC0ExactMVar (.mdata md body) :=
                 ⟨b.value, by
                   change b.value = psKernelExprHasMVar body
                   exact b.source⟩
-              psKernelC0MVarMemoStore m1 checked
+              psKernelC0MVarMemoStore hint m1 checked
           | .proj name i body =>
               let (b, m1) := psKernelC0MVarMemoGo body memo
               let checked : PsKernelC0ExactMVar (.proj name i body) :=
                 ⟨b.value, by
                   change b.value = psKernelExprHasMVar body
                   exact b.source⟩
-              psKernelC0MVarMemoStore m1 checked
+              psKernelC0MVarMemoStore hint m1 checked
           | .mvar name =>
-              psKernelC0MVarMemoStore memo
+              psKernelC0MVarMemoStore hint memo
                 (⟨true, rfl⟩ : PsKernelC0ExactMVar (.mvar name))
           | .bvar index =>
-              psKernelC0MVarMemoStore memo
+              psKernelC0MVarMemoStore hint memo
                 (⟨false, rfl⟩ : PsKernelC0ExactMVar (.bvar index))
           | .fvar name =>
-              psKernelC0MVarMemoStore memo
+              psKernelC0MVarMemoStore hint memo
                 (⟨false, rfl⟩ : PsKernelC0ExactMVar (.fvar name))
           | .sort level =>
-              psKernelC0MVarMemoStore memo
+              psKernelC0MVarMemoStore hint memo
                 (⟨psKernelLevelHasMVar level, rfl⟩ :
                   PsKernelC0ExactMVar (.sort level))
           | .const name levels =>
-              psKernelC0MVarMemoStore memo
+              psKernelC0MVarMemoStore hint memo
                 (⟨psKernelLevelsHaveMVar levels, rfl⟩ :
                   PsKernelC0ExactMVar (.const name levels))
           | .lit literal =>
-              psKernelC0MVarMemoStore memo
+              psKernelC0MVarMemoStore hint memo
                 (⟨false, rfl⟩ : PsKernelC0ExactMVar (.lit literal))
 
 

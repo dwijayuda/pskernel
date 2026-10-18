@@ -107,6 +107,43 @@ def m3strategies (flag : Bool) : UInt64 :=
   UInt64.ofNat (parityPartial (if flag then 4 else 3) +
     100 * parityFixed (if flag then 7 else 9) (if flag then 3 else 4))
 
+inductive ParityBranch where
+  | leaf (value : Nat)
+  | node (children : forall (i : Nat), i = i → ParityBranch)
+def branchFold (tree : ParityBranch) : Nat :=
+  match tree with
+  | ParityBranch.leaf value => value
+  | ParityBranch.node children => Nat.succ (branchFold (children 2 (Eq.refl 2)))
+mutual
+def branchFirst (bias : Nat) (tree : ParityBranch) : Nat :=
+  match tree with
+  | ParityBranch.leaf value => bias + value
+  | ParityBranch.node children => branchSecond (children 3 (Eq.refl 3)) (bias + 1)
+def branchSecond (tree : ParityBranch) (bias : Nat) : Nat :=
+  match tree with
+  | ParityBranch.leaf value => bias + value
+  | ParityBranch.node children => branchFirst (bias + 2) (children 4 (Eq.refl 4))
+end
+def branchByRec (tree : ParityBranch) : Nat :=
+  ParityBranch.rec (motive := fun (_ : ParityBranch) => Nat)
+    (fun (value : Nat) => value)
+    (fun (children : forall (i : Nat), i = i → ParityBranch) (ih : forall (i : Nat), i = i → Nat) =>
+      Nat.succ (ih 5 (Eq.refl 5))) tree
+theorem branchRefl (tree : ParityBranch) : branchFold tree = branchFold tree :=
+  ParityBranch.rec (motive := fun (t : ParityBranch) => branchFold t = branchFold t)
+    (fun (value : Nat) => Eq.refl value)
+    (fun (children : forall (i : Nat), i = i → ParityBranch)
+      (ih : forall (i : Nat) (h : i = i), branchFold (children i h) = branchFold (children i h)) =>
+      congrArg Nat.succ (ih 2 (Eq.refl 2))) tree
+def m3fields (flag : Bool) : UInt64 :=
+  let seed := if flag then 7 else 11
+  let tree := ParityBranch.node (fun (i : Nat) (h : i = i) =>
+    ParityBranch.node (fun (j : Nat) (g : j = j) => ParityBranch.leaf (seed + i + j)))
+  UInt64.ofNat (branchFold tree + 100 * branchFirst 3 tree + 10000 * branchByRec tree)
+
+example : m3fields true = 192013 := rfl
+example : m3fields false = 232417 := rfl
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -154,6 +191,12 @@ private def strategyLeanSource : String :=
 private def strategyPsSource : String :=
   "partial def parityPartial(n: Nat): Nat := match n with { | 0 => 0 | Nat.succ k => Nat.succ(parityPartial(k)) }\ndef parityFixed(seed: Nat, n: Nat): Nat := match n with { | 0 => seed | Nat.succ k => parityFixed(seed, k) }\npartial_fixpoint\nfunction m3strategies(flag: Bool): UInt64 := UInt64.ofNat(parityPartial(if (flag) { 4 } else { 3 }) + 100 * parityFixed(if (flag) { 7 } else { 9 }, if (flag) { 3 } else { 4 }))\n"
 
+private def fieldsLeanSource : String :=
+  "inductive ParityBranch where\n  | leaf (value : Nat)\n  | node (children : forall (i : Nat), i = i → ParityBranch)\ndef branchFold (tree : ParityBranch) : Nat :=\n  match tree with\n  | ParityBranch.leaf value => value\n  | ParityBranch.node children => Nat.succ (branchFold (children 2 (Eq.refl 2)))\nmutual\ndef branchFirst (bias : Nat) (tree : ParityBranch) : Nat :=\n  match tree with\n  | ParityBranch.leaf value => bias + value\n  | ParityBranch.node children => branchSecond (children 3 (Eq.refl 3)) (bias + 1)\ndef branchSecond (tree : ParityBranch) (bias : Nat) : Nat :=\n  match tree with\n  | ParityBranch.leaf value => bias + value\n  | ParityBranch.node children => branchFirst (bias + 2) (children 4 (Eq.refl 4))\nend\ndef branchByRec (tree : ParityBranch) : Nat :=\n  ParityBranch.rec (motive := fun (_ : ParityBranch) => Nat)\n    (fun (value : Nat) => value)\n    (fun (children : forall (i : Nat), i = i → ParityBranch) (ih : forall (i : Nat), i = i → Nat) =>\n      Nat.succ (ih 5 (Eq.refl 5))) tree\ntheorem branchRefl (tree : ParityBranch) : branchFold tree = branchFold tree :=\n  ParityBranch.rec (motive := fun (t : ParityBranch) => branchFold t = branchFold t)\n    (fun (value : Nat) => Eq.refl value)\n    (fun (children : forall (i : Nat), i = i → ParityBranch)\n      (ih : forall (i : Nat) (h : i = i), branchFold (children i h) = branchFold (children i h)) =>\n      congrArg Nat.succ (ih 2 (Eq.refl 2))) tree\ndef m3fields (flag : Bool) : UInt64 :=\n  let seed := if flag then 7 else 11\n  let tree := ParityBranch.node (fun (i : Nat) (h : i = i) =>\n    ParityBranch.node (fun (j : Nat) (g : j = j) => ParityBranch.leaf (seed + i + j)))\n  UInt64.ofNat (branchFold tree + 100 * branchFirst 3 tree + 10000 * branchByRec tree)\n"
+
+private def fieldsPsSource : String :=
+  "inductive ParityBranch where {\n  | leaf(value: Nat)\n  | node(children: forall (i: Nat), i = i -> ParityBranch)\n}\nfunction branchFold(tree: ParityBranch): Nat := match tree with {\n  | ParityBranch.leaf value => value\n  | ParityBranch.node children => Nat.succ(branchFold(children(2, Eq.refl(2))))\n}\nmutual\nfunction branchFirst(bias: Nat, tree: ParityBranch): Nat := match tree with {\n  | ParityBranch.leaf value => bias + value\n  | ParityBranch.node children => branchSecond(children(3, Eq.refl(3)), bias + 1)\n}\nfunction branchSecond(tree: ParityBranch, bias: Nat): Nat := match tree with {\n  | ParityBranch.leaf value => bias + value\n  | ParityBranch.node children => branchFirst(bias + 2, children(4, Eq.refl(4)))\n}\nend\nfunction branchByRec(tree: ParityBranch): Nat :=\n  ParityBranch.rec(motive := fun (_: ParityBranch) => Nat,\n    fun (value: Nat) => value,\n    fun (children: forall (i: Nat), i = i -> ParityBranch) (ih: forall (i: Nat), i = i -> Nat) =>\n      Nat.succ(ih(5, Eq.refl(5))), tree)\ntheorem branchRefl(tree: ParityBranch): branchFold(tree) = branchFold(tree) :=\n  ParityBranch.rec(motive := fun (t: ParityBranch) => branchFold(t) = branchFold(t),\n    fun (value: Nat) => Eq.refl(value),\n    fun (children: forall (i: Nat), i = i -> ParityBranch)\n      (ih: forall (i: Nat) (h: i = i), branchFold(children(i, h)) = branchFold(children(i, h))) =>\n      congrArg(Nat.succ, ih(2, Eq.refl(2))), tree)\nfunction m3fields(flag: Bool): UInt64 :=\n  let seed := if (flag) { 7 } else { 11 }\n  let tree := ParityBranch.node(fun (i: Nat) (h: i = i) =>\n    ParityBranch.node(fun (j: Nat) (g: j = j) => ParityBranch.leaf(seed + i + j)))\n  UInt64.ofNat(branchFold(tree) + 100 * branchFirst(3, tree) + 10000 * branchByRec(tree))\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -171,7 +214,24 @@ private def compareCheckedValues (left right : List PsDeclaration) : IO Unit := 
       ensure (psNameEq ln rn && psElabMutualLevelNamesEqual ll rl &&
         psExprAlphaEq lt rt && psExprAlphaEq lv rv)
         ("source adapters changed checked value " ++ psNameToString ln)
-    | _, _ => throw (IO.userError "parity fixture expected matching checked definition, theorem, opaque or partial identities")
+    | .inductiveDecl l, .inductiveDecl r =>
+      ensure (psNameEq l.name r.name && psElabMutualLevelNamesEqual l.levelParams r.levelParams &&
+        psExprAlphaEq l.type r.type && l.numParams == r.numParams && l.numIndices == r.numIndices &&
+        psElabMutualLevelNamesEqual l.constructors r.constructors && l.isStructure == r.isStructure)
+        "source adapters changed an inductive family"
+    | .constructorDecl l, .constructorDecl r =>
+      ensure (psNameEq l.name r.name && psElabMutualLevelNamesEqual l.levelParams r.levelParams &&
+        psExprAlphaEq l.type r.type && psNameEq l.inductiveName r.inductiveName &&
+        l.constructorIndex == r.constructorIndex && l.numParams == r.numParams &&
+        l.numFields == r.numFields && l.recursiveFields == r.recursiveFields)
+        "source adapters changed constructor field metadata"
+    | .recursorDecl l, .recursorDecl r =>
+      ensure (psNameEq l.name r.name && psElabMutualLevelNamesEqual l.levelParams r.levelParams &&
+        psExprAlphaEq l.type r.type && psElabMutualLevelNamesEqual l.inductiveNames r.inductiveNames &&
+        l.numParams == r.numParams && l.numIndices == r.numIndices &&
+        l.numMotives == r.numMotives && l.numMinors == r.numMinors)
+        "source adapters changed a recursor telescope"
+    | _, _ => throw (IO.userError "source adapters changed a checked declaration kind")
 
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -191,6 +251,17 @@ def check (root : System.FilePath) : IO Unit := do
   let _ ← fromExcept (psWithCheckedIr psIrCheckDefaultOptions totalIr fun _ => pure ())
   compareCheckedValues (← fromExcept (checkedDeclarations .lean strategyLeanSource))
     (← fromExcept (checkedDeclarations .proofScript strategyPsSource))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean fieldsLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript fieldsPsSource))
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean, "inductive Negative where\n  | wrap (f : Negative → Nat)\n"),
+      (.proofScript, "inductive Negative where { | wrap(f: Negative -> Nat) }\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerElaboratePscv0 program with
+    | .error error =>
+      ensure (((psCompilerPscv0Error error).splitOn "recursive family occurs in a function-field domain").length > 1)
+        "negative function-field occurrence lost its positivity diagnosis"
+    | .ok _ => throw (IO.userError "negative function-field occurrence was admitted")
   let grouped := "def grouped {T : Type} {first value : T} := value\n"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean grouped))
     (← fromExcept (checkedDeclarations .proofScript grouped))
@@ -244,10 +315,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -286,7 +357,8 @@ def check (root : System.FilePath) : IO Unit := do
           ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat)),
           ("m3control", Lean.toJson (toString (M3InputParityOracle.m3control flag).toNat)),
           ("m3mutual", Lean.toJson (toString (M3InputParityOracle.m3mutual flag).toNat)),
-          ("m3strategies", Lean.toJson (toString (M3InputParityOracle.m3strategies flag).toNat))]
+          ("m3strategies", Lean.toJson (toString (M3InputParityOracle.m3strategies flag).toNat)),
+          ("m3fields", Lean.toJson (toString (M3InputParityOracle.m3fields flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, positive dependent function fields with singleton/mutual recursion and explicit induction, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

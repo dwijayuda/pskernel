@@ -290,6 +290,7 @@ lean_lib PsElab where
     `Ps.Elab.PatternMatrix,
     `Ps.Elab.Conditional,
     `Ps.Elab.Do,
+    `Ps.Elab.StructuralField,
     `Ps.Elab.Term,
     `Ps.Elab.Monotonicity, `Ps.Elab.PartialFixpoint,
     `Ps.Elab.Recursion,

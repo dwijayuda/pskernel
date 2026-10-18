@@ -10,61 +10,70 @@ structure PsErasureRecursionPlan where
   family : PsName
   numParams : Nat
   numIndices : Nat
-  majorParameter : Nat
-  indexParameters : List (Nat × Nat)
+  majorId : Nat
+  indexIds : List (Nat × Nat)
 
-def psErasureFindStringIndex (target : String) (values : List String) (index : Nat) : Option Nat :=
-  match values with
-  | [] => none
-  | value :: rest => if value == target then some index
-    else psErasureFindStringIndex target rest (index + 1)
-
-def psErasureRecursionParameter (scope : PsErasureScope) (expr : PsExpr) : Option (Nat × Nat) := do
-  let some current := scope.currentDefinition | none
+def psErasureRecursionParameter (scope : PsErasureScope) (expr : PsExpr) : Option Nat := do
+  let current ← scope.currentDefinition
+  let _ ← current.coreName
   let .fvar id := expr | none
-  let name ← psErasureLookupNat scope.runtimeLocals id
-  let position ← psErasureFindStringIndex name current.runtimeParameters 0
-  return (id, position)
+  if current.coreParametersRev.any (psExprAlphaEq expr) then some id else none
 
 def psErasurePlanRecursion (scope : PsErasureScope) (family : PsName)
     (numParams : Nat) (major : PsExpr) (indices minors : List PsExpr) :
     Option PsErasureRecursionPlan := do
   let _ ← psRecursorVaryingLocals major indices minors
-  let (_, majorParameter) ← psErasureRecursionParameter scope major
-  let positions ← (indices.zipIdx).mapM fun entry => do
-    let (id, parameter) ← psErasureRecursionParameter scope entry.fst
-    return (id, parameter, entry.snd)
-  return {
-    family := family
-    numParams := numParams
-    numIndices := indices.length
-    majorParameter := majorParameter
-    indexParameters := positions.map (fun entry => entry.snd) }
+  let majorId ← psErasureRecursionParameter scope major
+  let indexIds ← (indices.zipIdx).mapM fun (index, position) => do
+    let id ← psErasureRecursionParameter scope index
+    return (id, position)
+  return { family, numParams, numIndices := indices.length, majorId, indexIds }
 
-def psErasureRecursiveCall (environment : PsEnvironment)
-    (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
-    (scope : PsErasureScope) (plan : PsErasureRecursionPlan) (childName : String) :
-    Except PsErasureError PsVerifiedIrExpr := do
+-- Build the actual dependent call before erasing it. Core identities, rather
+-- than runtime positions, also handle erased indices and function fields.
+def psErasureRecursiveCoreCall (environment : PsEnvironment)
+    (scope : PsErasureScope) (plan : PsErasureRecursionPlan) (child : PsExpr) :
+    Except PsErasureError PsExpr := do
   let some current := scope.currentDefinition | throw .unsupportedRuntimeTerm
-  let some child := scope.runtimeLocals.find? (fun entry => entry.snd == childName)
-    | throw .binderMismatch
-  let some declaration := psLocalFindById scope.localContext child.fst | throw .binderMismatch
-  let view := psErasureAppView (psWhnf environment psMetaEmpty scope.localContext
-    (psLocalDeclType declaration))
+  let some name := current.coreName | throw .unsupportedRuntimeTerm
+  if psErasureLookupName scope.declarationNames name != some current.name then
+    throw .unsupportedRuntimeTerm
+  let some declaration := psEnvironmentFind environment name | throw .unsupportedRuntimeTerm
+  let type ← (psInferType environment psMetaEmpty scope.localContext child).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  let view := psErasureAppView (psWhnf environment psMetaEmpty scope.localContext type)
   let .constE family _ := view.head | throw .unsupportedRuntimeTerm
   if !psNameEq family plan.family || view.args.length != plan.numParams + plan.numIndices then
     throw .unsupportedRuntimeTerm
   let indices := view.args.drop plan.numParams
-  let replacements ← plan.indexParameters.mapM fun entry => do
-    let some index := indices[entry.snd]? | throw .unsupportedRuntimeTerm
-    let value ← eraseAt { scope with currentDefinition := none } index
-    return (entry.fst, value)
-  let replacements := (plan.majorParameter, PsVerifiedIrExpr.var childName) :: replacements
-  let arguments := current.runtimeParameters.zipIdx |>.map fun entry =>
-    match replacements.find? (fun replacement => replacement.fst == entry.snd) with
-    | some replacement => replacement.snd
-    | none => .var entry.fst
-  return .call (.var current.name) current.typeArgumentsRev.reverse arguments
+  let replacements ← plan.indexIds.mapM fun (id, position) => do
+    let some index := indices[position]? | throw PsErasureError.unsupportedRuntimeTerm
+    return (id, index)
+  let replacements := (plan.majorId, child) :: replacements
+  let arguments ← current.coreParametersRev.reverse.mapM fun argument => do
+    let .fvar id := argument | throw PsErasureError.unsupportedRuntimeTerm
+    return match replacements.find? (fun entry => entry.1 == id) with
+      | some (_, replacement) => replacement
+      | none => argument
+  return psReduceApply (.constE name ((psDeclarationLevelParams declaration).map PsLevel.param)) arguments
+
+-- A positive field telescope and its IH telescope have exactly the same
+-- domains and binder kinds. Build Core lambdas once; ordinary erasure handles
+-- type, proof, index and runtime arguments uniformly for every backend.
+def psErasureRecursiveFieldHypothesis (fuel : Nat) (environment : PsEnvironment)
+    (call : PsErasureScope → PsExpr → Except PsErasureError PsExpr)
+    (scope : PsErasureScope) (child type : PsExpr) : Except PsErasureError PsExpr := do
+  match fuel with
+  | 0 => throw .unsupportedRuntimeTerm
+  | fuel + 1 =>
+    match psWhnf environment psMetaEmpty scope.localContext type with
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding scope.localContext name domain binder
+      let value ← psErasureRecursiveFieldHypothesis fuel environment call
+        { scope with localContext := pushed.context }
+        (.app child (.fvar pushed.id)) (psExprInstantiate1 body (.fvar pushed.id))
+      return .lam name domain (psExprAbstractFVar pushed.id value) binder
+    | _ => call scope child
 
 structure PsErasureGroupRecursionPlan where
   workers : PsRecursorWorkerGroup
@@ -126,22 +135,28 @@ def psErasureGroupRecursiveCoreCall (environment : PsEnvironment)
   -- No runtime slot or cross-family call signature is guessed here.
   return psReduceApply (.constE worker.name plan.levels) (plan.captures ++ indices ++ [child])
 
-def psErasureGroupRecursiveCall (environment : PsEnvironment)
-    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
-    (scope : PsErasureScope) (plan : PsErasureGroupRecursionPlan) (childName : String)
-    (target : Option PsName) : Except PsErasureError PsVerifiedIrExpr := do
-  let some child := scope.runtimeLocals.find? (fun entry => entry.2 == childName)
-    | throw .binderMismatch
-  let some target := target | throw .unsupportedRuntimeTerm
-  let call ← psErasureGroupRecursiveCoreCall environment scope plan (.fvar child.1) target
-  eraseAt { scope with currentDefinition := none } call
+def psErasureDispatchRecursiveCoreCall (environment : PsEnvironment)
+    (scope : PsErasureScope) (plan : PsErasureRecursionDispatch) (child : PsExpr)
+    (target : Option PsName := none) : Except PsErasureError PsExpr := do
+  let type ← (psInferType environment psMetaEmpty scope.localContext child).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  let call := fun scope child => match plan with
+    | .singleton plan => psErasureRecursiveCoreCall environment scope plan child
+    | .group plan => do
+      let some target := target | throw .unsupportedRuntimeTerm
+      psErasureGroupRecursiveCoreCall environment scope plan child target
+  psErasureRecursiveFieldHypothesis 4096 environment call scope child type
 
 def psErasureDispatchRecursiveCall (environment : PsEnvironment)
     (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope) (plan : PsErasureRecursionDispatch) (childName : String)
-    (target : Option PsName := none) :
-    Except PsErasureError PsVerifiedIrExpr :=
-  match plan with
-  | .singleton plan => psErasureRecursiveCall environment eraseAt scope plan childName
-  | .group plan => psErasureGroupRecursiveCall environment eraseAt scope plan childName target
-
+    (expected : PsExpr) (target : Option PsName := none) :
+    Except PsErasureError PsVerifiedIrExpr := do
+  let some (id, _) := scope.runtimeLocals.find? (fun entry => entry.2 == childName)
+    | throw .binderMismatch
+  let hypothesis ← psErasureDispatchRecursiveCoreCall environment scope plan (.fvar id) target
+  let actual ← (psInferType environment psMetaEmpty scope.localContext hypothesis).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext actual expected then
+    throw .binderMismatch
+  eraseAt { scope with currentDefinition := none } hypothesis

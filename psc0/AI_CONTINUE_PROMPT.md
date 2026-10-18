@@ -155,3 +155,31 @@ Further data research: kernel/inductive.cpp, Structural/{BRecOn,IndPred,Main},
 Meta/PProdN, tests/elab/structuralOverNested.lean and structuralRec1/2.lean.
 Retain upstream notices. Fresh common fixed IDs must stay disjoint from original
 headers because psElabSubstituteLocals is ordered; do not change its semantics.
+
+## Positive dependent recursive fields — preparation implementation
+
+The next coherent M3+B slice implements positive function-valued constructor
+fields through the shared owned frontend and eraser. This preparation commit
+is NOT yet qualified. Main remains 33676076: F1/F2/F3 and M3 backend execution
+are successful; Native is still running. Do not supersede healthy main Native.
+
+Data traverses Pi codomains in fresh local contexts, rejects recursive family
+occurrences in domains, and retains uniform parameter checks. Shared structural
+lookup applies a field's actual arguments to its real IH; mutual ownership
+selects the source function component only after those arguments. The native
+inductive-predicate restriction remains; Acc's explicit large recursor does not
+allow automatic Type-valued recursion. No hypothetical IH is manufactured.
+
+Runtime IHs now use typed Core calls with the original declaration identities,
+opened Core header, and actual child indices. One field telescope closure
+builder serves singleton, mutual and auxiliary structure slots. The inferred
+replacement type must match the actual minor IH domain before ordinary erasure.
+No backend-specific closure construction, primitive, assumption or budget change.
+
+The existing paired input fixture now covers a positive field with a dependent
+proof argument, singleton and reordered-state mutual recursion, an explicit
+recursor and consumed proof IH. Both real grammars must agree on declaration
+metadata and checked values; a parsed negative field domain must fail positivity.
+The existing five-target observers add m3fields; no new test executable or lane.
+See docs/PSCV0_M3_POSITIVE_FUNCTION_FIELDS_2026-10-18.md. Next: complete preparation,
+inspect existing controls, then integrate this exact code only when main is idle.

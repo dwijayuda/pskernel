@@ -1243,7 +1243,7 @@ def psOpenMatchMinorHypotheses
                   match recursionPlan with
                   | none => Except.ok none
                   | some plan => (psErasureDispatchRecursiveCall environment eraseAt
-                      state.scope plan binding.name field.recursiveTarget).map some;
+                      state.scope plan binding.name domain field.recursiveTarget).map some;
                 match replacement with
                 | Except.error error => Except.error error
                 | Except.ok value =>
@@ -1584,8 +1584,8 @@ def psEraseEliminationStructureSlot (environment : PsEnvironment) (scope : PsEra
     let some target := application.plan.slots[targetIndex]? | throw PsErasureError.unsupportedRuntimeTerm
     match recursion with
     | some recursion =>
-      psErasureGroupRecursiveCoreCall environment inner recursion
-        (.fvar field.id) target.recursorName
+      psErasureDispatchRecursiveCoreCall environment inner (.group recursion)
+        (.fvar field.id) (some target.recursorName)
     | none =>
       -- An unused binder can be substituted with its real Core hypothesis.
       -- Raw beta substitution drops it before erasure; no unit or fake IH is

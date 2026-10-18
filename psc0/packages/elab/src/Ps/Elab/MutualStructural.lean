@@ -2,12 +2,13 @@ import Ps.Elab.Mutual
 import Ps.Elab.Match
 import Ps.Elab.RecursorEquation
 import Ps.Meta.Recursor
+import Ps.Elab.StructuralField
 
 -- Direct structural mutual definitions use the same ownership invariant as
 -- pinned Lean Structural.Positions: every source function occupies exactly
 -- one ordered component of its actual inductive family's motive. The source
 -- may assign zero, one or several functions to a family. This selected owner
--- uses ordinary recursors and direct fields, not the separate below/brecOn
+-- uses ordinary recursors and positive fields, not the separate below/brecOn
 -- course-of-values construction.
 def psElabMutualStructuralError (rule message : String) : PsElabError :=
   .data ("PSCV0-MUTUAL-TOTAL: " ++ rule ++ ": " ++ message)
@@ -361,7 +362,6 @@ def psElabMutualStructuralMotiveAt (motives : List (PsName × PsExpr))
 
 structure PsElabMutualStructuralChild where
   fieldId : Nat
-  family : PsElabMutualStructuralFamily
   hypothesis : PsExpr
 
 def psElabMutualStructuralChildren (plan : PsElabMutualStructuralPlan)
@@ -373,21 +373,28 @@ def psElabMutualStructuralChildren (plan : PsElabMutualStructuralPlan)
       hypotheses.length != constructor.recursiveFields.length then
     throw (psElabMutualStructuralError "FIELD-METADATA" "constructor fields and actual ordered hypotheses disagree")
   for (field, index) in fields.zipIdx do
-    let family ← psElabMutualStructuralFamilyView plan context field.type
+    let opened ← psElabOpenCoreTelescope 4096 context field.type none
+    let family ← psElabMutualStructuralFamilyView plan opened.context opened.body
     if constructor.recursiveFields.contains index then
       if family.isNone then
-        throw (psElabMutualStructuralError "DIRECT-FIELD" "function-valued or nested recursive fields require a separate structural construction")
+        throw (psElabMutualStructuralError "DIRECT-FIELD" "recursive field codomain is not a direct group family")
     else if family.isSome then
-      throw (psElabMutualStructuralError "FIELD-METADATA" "a direct child is absent from recursive metadata")
+      throw (psElabMutualStructuralError "FIELD-METADATA" "a positive child is absent from recursive metadata")
   (constructor.recursiveFields.zip hypotheses).mapM fun (index, hypothesis) => do
     let some field := fields[index]?
       | throw (psElabMutualStructuralError "FIELD-METADATA" "hypothesis has no corresponding field")
-    let some family ← psElabMutualStructuralFamilyView plan context field.type
+    let opened ← psElabOpenCoreTelescope 4096 context field.type none
+    let some family ← psElabMutualStructuralFamilyView plan opened.context opened.body
       | throw (psElabMutualStructuralError "DIRECT-FIELD" "hypothesis is not for a direct group child")
-    let expected ← psElabMutualStructuralMotiveAt motives family (.fvar field.id)
+    let major := psExprApplyMany (.fvar field.id) (psElabBinderArguments opened.bindersRev)
+    let expected ← psElabMutualStructuralMotiveAt motives family major
+    if !opened.bindersRev.isEmpty &&
+        !(← psElabStructuralFieldSortAllowed opened.context family.info expected) then
+      throw (psElabMutualStructuralError "DIRECT-FIELD" "automatic recursion over a predicate requires a Prop-valued motive")
+    let expected := psCloseElabForallBinders opened.context.metaContext opened.bindersRev expected
     if !psElabMutualStructuralEqual context hypothesis.type expected then
       throw (psElabMutualStructuralError "IH-TYPE" "actual induction hypothesis does not belong to this child")
-    return { fieldId := field.id, family, hypothesis := .fvar hypothesis.id }
+    return { fieldId := field.id, hypothesis := .fvar hypothesis.id }
 
 def psElabMutualStructuralSourceMap (fn : PsElabMutualStructuralFunction)
     (indices : List PsExpr) (major : PsExpr) (stateArgs : List PsExpr) :
@@ -435,24 +442,31 @@ def psElabMutualStructuralCall (plan : PsElabMutualStructuralPlan)
     if !psElabMutualStructuralEqual context actual expected then
       throw (psElabMutualStructuralError "FIXED-CALL" "recursive call changes a uniform fixed parameter")
   let major ← psElabMutualStructuralMappedArgument actuals target.input.majorId
-  let .fvar childId := psWhnf context.environment context.metaContext context.localContext major
-    | throw (psElabMutualStructuralError "DECREASE" "recursive major is not an actual strict constructor field")
+  let some (childId, fieldArgs) := psElabStructuralFieldArguments context
+      (children.map (·.fieldId)) major
+    | throw (psElabMutualStructuralError "DECREASE" "recursive major has no checked strict-child hypothesis")
   let some child := children.find? (fun child => child.fieldId == childId)
     | throw (psElabMutualStructuralError "DECREASE" "recursive major has no checked strict-child hypothesis")
-  if !psNameEq child.family.info.name target.input.application.family.name then
+  let majorType ← (psInferType context.environment context.metaContext
+    context.localContext major).mapError PsElabError.infer
+  let some family ← psElabMutualStructuralFamilyView plan context majorType
+    | throw (psElabMutualStructuralError "CHILD-FAMILY" "applied field is not a group family")
+  if !psNameEq family.info.name target.input.application.family.name then
     throw (psElabMutualStructuralError "CHILD-FAMILY" "peer is assigned to a different child family")
   let indices ← target.input.indexIds.mapM (psElabMutualStructuralMappedArgument actuals)
-  if indices.length != child.family.indices.length ||
-      !(indices.zip child.family.indices).all (fun pair =>
+  if indices.length != family.indices.length ||
+      !(indices.zip family.indices).all (fun pair =>
         psElabMutualStructuralEqual context pair.fst pair.snd) then
     throw (psElabMutualStructuralError "CHILD-INDICES" "peer indices do not match the actual recursive field")
+  let hypothesis ← psElabApplyCore context child.hypothesis fieldArgs
+  let context := hypothesis.context
   psElabMutualStructuralCheckMapping context target actuals
   let expected ← psElabMutualStructuralApplyType context target.input.header.type
     (psElabBinderArguments plan.capturesRev ++ args)
-  let positions ← psElabMutualStructuralPositions plan child.family.info.name
+  let positions ← psElabMutualStructuralPositions plan family.info.name
   let some (_, position) := positions.zipIdx.find? (fun entry => entry.fst == targetIndex)
     | throw (psElabMutualStructuralError "OWNERSHIP" "peer is absent from the child's component list")
-  let selected ← psElabMutualStructuralProject context positions.length position child.hypothesis
+  let selected ← psElabMutualStructuralProject context positions.length position hypothesis.term
   let stateArgs ← target.stateBinders.mapM fun binder =>
     psElabMutualStructuralMappedArgument actuals binder.id
   let applied ← psElabApplyCore context selected (stateArgs ++ args.drop arity)

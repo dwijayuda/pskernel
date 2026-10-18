@@ -1,0 +1,82 @@
+name: PSC0 v7.2 Wasm-GC kernel source rebuild (Linux)
+
+on:
+  push:
+    branches:
+      - feature/psc0-v72-pskernel-lean-wasm-gc-v1
+    paths:
+      - 'psc0/packages/pskernel-lean-wasm/**'
+      - '.github/workflows/psc0-pskernel-lean-wasm-gc.yml'
+      - 'psc0/packages/**/src/**'
+      - 'psc0/host/src/**'
+      - 'psc0/v7-native/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc0-v72-wasm-gc-kernel-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  wasm-gc-source:
+    name: Real GC module and fail-closed non-checker API
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Source closure, Lean 4.35 / v7.2 identity, and mandatory refusal API
+        working-directory: psc0
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/scripts/verify-source.mjs
+          node packages/pskernel-lean-wasm/scripts/test.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Build native PSC0 v7.2 compiler at exact Lean 4.35.0 pin
+        working-directory: psc0/v7-native
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          lake build pscv0_native
+      - name: Check source with official Lean kernel and emit real Wasm GC
+        working-directory: psc0
+        shell: bash
+        run: |
+          set -euo pipefail
+          input=packages/pskernel-lean-wasm/src/PsKernelLeanWasmGc/Probe.lean
+          output=packages/pskernel-lean-wasm/dist/gc-probe
+          mkdir -p packages/pskernel-lean-wasm/dist
+          v7-native/.lake/build/bin/pscv0_native --check "$input"
+          v7-native/.lake/build/bin/pscv0_native --emit-wasm-core "$input" "$output"
+          test -s "${output}.core.wasm"
+          test -s "${output}.core.wat"
+          test -s "${output}.origins.json"
+      - name: Wasm-GC binary validation and runtime semantics (not kernel checking)
+        working-directory: psc0
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/scripts/test-probe.mjs
+      - name: Retain probe binaries for provenance, NOT VSIX publishing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: psc0-wasm-gc-probe-NOT-a-kernel
+          path: psc0/packages/pskernel-lean-wasm/dist/
+          if-no-files-found: error

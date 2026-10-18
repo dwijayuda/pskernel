@@ -1,159 +1,66 @@
-import {spawnSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
-import {closeSync,mkdtempSync,openSync,rmSync,writeFileSync} from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import {verifyWasmPrebuiltManifest} from './host/prebuilt.mjs';
+/*
+ * PSC0 v7.2 Wasm-GC kernel development entry.
+ * NO checker implementation is currently bundled. Never treat a GC transport
+ * self-test or the official native Lean compiler's checked emission as an
+ * independent Lean kernel implementation.
+ */
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-export const leanKernelProviderProtocol='pskernel-lean/1';
-export const leanKernelProviderName='lean4-cpp';
-export const leanKernelProviderVersion='4.34.0';
-export const leanKernelProviderCommit='293d5d0c0c3f3dded4688b3ccd6a33939ac5102b';
-export const leanKernelProviderProfile='lean4.34-core';
+export const leanKernelProviderProtocol = 'pskernel-lean-wasm-gc/0';
+export const leanKernelProviderVersion = '4.35.0';
+export const leanKernelProviderCommit = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
+export const leanKernelLanguageProfile = 'pscv0-v7.2';
 
-const bundledLauncherPath=fileURLToPath(
-  new URL('./wasm/pskernel-lean.cjs',import.meta.url),
-);
-
-function providerOptions(options={}){
-  const {
-    launcherPath=bundledLauncherPath,
-    nodePath=process.execPath,
-    maxBuffer=16*1024*1024,
-    timeoutMs=60000,
-  }=options;
-  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<=0){
-    throw new TypeError('timeoutMs must be a positive integer');
-  }
-  return {
-    launcherPath,
-    nodePath,
-    maxBuffer,
-    timeoutMs,
-    // An absent/undefined option still resolves to the bundled artifact.
-    // Select integrity checking from the effective launcher, not key presence.
-    verifyBundledPrebuilt:launcherPath===bundledLauncherPath,
-  };
-}
-
-function runProviderCommand(command,options,input){
-  if(options.verifyBundledPrebuilt){
-    verifyWasmPrebuiltManifest();
-  }
-
-  // Emscripten's synchronous stdin reader can see EAGAIN on Node's nonblocking
-  // spawnSync input pipe. A private file descriptor supplies the exact bytes,
-  // including multi-megabyte requests, without changing the provider protocol.
-  let directory,fd,run;
-  try{
-    if(input!==undefined){
-      directory=mkdtempSync(path.join(os.tmpdir(),'psc2-wasm-input-'));
-      const inputPath=path.join(directory,'admissions.json');
-      writeFileSync(inputPath,input,{encoding:'utf8',mode:0o600});
-      fd=openSync(inputPath,'r');
-    }
-    run=spawnSync(options.nodePath,[options.launcherPath,command],{
-      stdio:[fd??'ignore','pipe','pipe'],
-      encoding:'utf8',
-      maxBuffer:options.maxBuffer,
-      timeout:options.timeoutMs,
-      killSignal:'SIGKILL',
-      windowsHide:true,
-    });
-  }finally{
-    if(fd!==undefined)closeSync(fd);
-    if(directory!==undefined)rmSync(directory,{recursive:true,force:true});
-  }
-
-  if(run.error){
-    throw new Error(
-      `failed to start Lean WASM kernel provider: ${run.error.message}`,
-      {cause:run.error},
-    );
-  }
-  if(run.status!==0){
-    const stderr=(run.stderr??'').trim();
-    throw new Error(
-      `Lean WASM kernel provider exited ${String(run.status)}`+
-      `${stderr?`: ${stderr}`:''}`,
-    );
-  }
-
-  const output=(run.stdout??'').trim();
-  try{
-    return JSON.parse(output);
-  }catch(cause){
-    throw new Error(
-      `Lean WASM kernel provider returned invalid JSON: ${output.slice(0,500)}`,
-      {cause},
-    );
+export class KernelNotReadyError extends Error {
+  constructor() {
+    super('PSC0-WASM-GC-KERNEL-NOT-READY: no qualified Lean 4.35.0 GC-native proof checker is bundled');
+    this.name = 'KernelNotReadyError';
+    this.code = 'PSC0-WASM-GC-KERNEL-NOT-READY';
   }
 }
 
-function verifyProviderIdentity(result){
-  if(result?.protocol!==leanKernelProviderProtocol){
-    throw new Error(
-      `Lean WASM kernel provider protocol mismatch: ${String(result?.protocol)}`,
-    );
-  }
-  if(result?.provider!==leanKernelProviderName){
-    throw new Error(
-      `Lean WASM kernel provider identity mismatch: ${String(result?.provider)}`,
-    );
-  }
-  if(result?.leanVersion!==leanKernelProviderVersion){
-    throw new Error(
-      `Lean WASM kernel provider version mismatch: ${String(result?.leanVersion)}`,
-    );
-  }
-  if(result?.leanCommit!==leanKernelProviderCommit){
-    throw new Error(
-      `Lean WASM kernel provider commit mismatch: ${String(result?.leanCommit)}`,
-    );
-  }
-  if(result?.profile!==leanKernelProviderProfile){
-    throw new Error(
-      `Lean WASM kernel provider profile mismatch: ${String(result?.profile)}`,
-    );
-  }
-  return result;
-}
-
-async function checkWithOptions(source,options){
-  if(typeof source!=='string'){
-    throw new TypeError('Lean WASM kernel provider input must be a string');
-  }
-
-  const result=verifyProviderIdentity(
-    runProviderCommand('--check',options,source),
-  );
-  if(typeof result?.accepted!=='boolean'){
-    throw new Error(
-      'Lean WASM kernel provider result is missing boolean accepted',
-    );
-  }
-  return result;
-}
-
-export async function createKernel(options={}){
-  const resolved=providerOptions(options);
-  const metadata=verifyProviderIdentity(
-    runProviderCommand('--health',resolved),
-  );
-  if(metadata?.status!=='ok'){
-    throw new Error(
-      `Lean WASM kernel provider health mismatch: ${String(metadata?.status)}`,
-    );
-  }
-
+export function kernelStatus() {
   return Object.freeze({
-    metadata:Object.freeze({...metadata}),
-    checkCanonicalAdmissions(source){
-      return checkWithOptions(source,resolved);
-    },
+    protocol: leanKernelProviderProtocol,
+    leanVersion: leanKernelProviderVersion,
+    leanCommit: leanKernelProviderCommit,
+    languageProfile: leanKernelLanguageProfile,
+    target: 'wasm-gc-core',
+    checkerReady: false,
+    admissionSupported: false,
+    assurance: 'unavailable',
   });
 }
 
-export async function checkCanonicalAdmissions(source,options={}){
-  return checkWithOptions(source,providerOptions(options));
+// Unavailable is NOT a kernel rejection. Callers must not report "invalid proof".
+export async function createKernel() {
+  throw new KernelNotReadyError();
+}
+
+export async function checkCanonicalAdmissions(source) {
+  if (typeof source !== 'string') throw new TypeError('canonical admissions must be a string');
+  throw new KernelNotReadyError();
+}
+
+// DEVELOPMENT-ONLY test of PSC0's Wasm-GC backend, not part of proof admission.
+// Does not initialize or return a kernel provider.
+export async function loadGcProbe({ binaryPath } = {}) {
+  const file = binaryPath === undefined
+    ? fileURLToPath(new URL('./dist/gc-probe.core.wasm', import.meta.url))
+    : resolve(binaryPath);
+  const bytes = await readFile(file);
+  const module = await WebAssembly.compile(bytes);
+  if (WebAssembly.Module.imports(module).length !== 0 ||
+      WebAssembly.Module.exports(module).some(entry => entry.kind === 'memory')) {
+    throw new Error('PSC0-WASM-GC-PROBE: expected a standalone module without linear memory or imports');
+  }
+  const instance = await WebAssembly.instantiate(module);
+  const functions = WebAssembly.Module.exports(module)
+    .filter(entry => entry.kind === 'function' && entry.name.includes('pskernelWasmGcProbe'));
+  if (functions.length !== 1 || typeof instance.exports[functions[0].name] !== 'function') {
+    throw new Error('PSC0-WASM-GC-PROBE: missing or ambiguous probe export');
+  }
+  return Object.freeze({ probe: instance.exports[functions[0].name], module });
 }

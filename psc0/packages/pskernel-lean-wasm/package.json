@@ -1,54 +1,38 @@
 {
   "name": "@proofscript/pskernel-lean-wasm",
-  "version": "4.34.0",
-  "description": "ProofScript PSC0 pskernel-lean-wasm kernel provider",
+  "version": "4.35.0-gc.0",
+  "private": true,
+  "description": "PSC0 v7.2 GC-native kernel development package (checker not yet qualified)",
   "type": "module",
-  "private": false,
-  "main": "./index.mjs",
-  "types": "./dist/index.d.ts",
   "license": "UNLICENSED",
-  "engines": {
-    "node": ">=22.23.3"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dwijayuda/pskernel.git",
-    "directory": "psc0/packages/pskernel-lean-wasm"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
+  "main": "./index.mjs",
   "exports": {
     ".": "./index.mjs",
     "./metadata/lean": "./LEAN_SOURCE_PIN.json",
-    "./metadata/emscripten": "./EMSCRIPTEN_PIN.json",
-    "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
-    "./metadata/prebuilt": "./PREBUILT_WASM_MANIFEST.json",
-    "./metadata/proofscript-source": "./PROOFSCRIPT_SOURCE_MANIFEST.json",
     "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "scripts": {
+    "check:source": "node scripts/verify-source.mjs",
+    "test": "node scripts/test.mjs",
+    "test:gc": "node scripts/test-probe.mjs"
   },
   "files": [
     "index.mjs",
-    "host/",
-    "wasm/",
-    "provider/",
-    "kernel/",
-    "source/",
+    "src/",
     "scripts/",
-    "patches/",
-    "LEAN_LICENSE",
-    "*.json",
     "README.md",
-    "BUILDING.md"
+    "ARCHITECTURE.md",
+    "LEAN_SOURCE_PIN.json"
   ],
   "proofscript": {
-    "npmArchitecture": "psc0-monolithic-runtime-with-scoped-source-packages/1",
-    "sourceVariants": [
-      "ps",
-      "lean"
-    ],
-    "publishingRequiresBuild": true,
-    "nonPortableProviderSources": true,
-    "leanSemanticVersion": "4.34.0"
+    "toolchain": "leanprover/lean4:v4.35.0",
+    "languageProfile": "pscv0-v7.2",
+    "target": "wasm-gc-core",
+    "role": "experimental-external-checker",
+    "kernelReady": false,
+    "allowsVerifiedAdmission": false
   }
 }

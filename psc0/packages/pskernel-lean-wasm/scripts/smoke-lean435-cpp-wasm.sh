@@ -38,3 +38,43 @@ cmake --build "$build" --target leanrt leancpp_1 -j2
 test -s "$build/lib/lean/libleanrt.a"
 test -s "$build/lib/temp/libleancpp_1.a"
 echo 'PSC0_LEAN435_CPP_SMOKE_PASS: actual wasm32 runtime and C++ kernel archives compiled'
+
+# This is a second, strictly diagnostic boundary: link the REAL official C++
+# kernel/runtime archives to a standalone wasm32 executable and verify startup
+# and a kernel-expression constructor. It is NOT a proof-admissions checker.
+cat > "$build/lean_kernel_link_probe.cpp" <<'CPP'
+#include <cstdio>
+#include "kernel/init_module.h"
+#include "kernel/expr.h"
+#include "kernel/level.h"
+
+extern "C" void lean_initialize();
+
+int main() {
+    lean_initialize();
+    lean::expr zeroSort = lean::mk_sort(lean::mk_level_zero());
+    if (!lean::is_sort(zeroSort) || !lean::sort_level(zeroSort).is_zero())
+        return 7;
+    std::puts("PSC0_LEAN435_WASM_CPP_KERNEL_LINK_AND_EXPR: PASS");
+    return 0;
+}
+CPP
+em++ -O2 -fwasm-exceptions -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=node \
+  -sEXIT_RUNTIME=1 \
+  -I"$upstream/src" -I"$upstream/src/include" -I"$build/include" \
+  "$build/lean_kernel_link_probe.cpp" \
+  "$build/lib/temp/libleancpp_1.a" "$build/lib/lean/libleanrt.a" \
+  -lnodefs.js -lstdc++ -o "$build/lean-kernel-link-probe.cjs"
+test -s "$build/lean-kernel-link-probe.wasm"
+output="$(node "$build/lean-kernel-link-probe.cjs")"
+test "$output" = 'PSC0_LEAN435_WASM_CPP_KERNEL_LINK_AND_EXPR: PASS'
+node -e '
+const fs=require("node:fs");
+const b=fs.readFileSync(process.argv[1]);
+if(b.subarray(0,4).toString("hex")!=="0061736d")process.exit(1);
+const m=new WebAssembly.Module(b);
+if(![...WebAssembly.Module.exports(m),...WebAssembly.Module.imports(m)]
+  .some(e=>e.kind==="memory"))process.exit(1);
+console.log("PSC0_LEAN435_WASM_CPP_KERNEL_LINEAR_MEMORY: PASS");
+' "$build/lean-kernel-link-probe.wasm"
+echo 'PSC0_LEAN435_CPP_SMOKE_COMPLETE: C++ archives, Wasm linking and startup PASS'

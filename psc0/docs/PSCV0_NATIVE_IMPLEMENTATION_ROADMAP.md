@@ -210,3 +210,12 @@ lexer's explicit EOF token, and native command separation permits EOF without a
 final newline. These are shared syntax/scope invariants, not weakened assertions.
 The exact native/portable shadowing rejections and prior positive observations
 remain required. Main stays 037fda49; the new preparation child must qualify first.
+
+## Native term construction layout — qualification pending
+
+Preparation3897a2e2 / run39088402975 / job117559717894 failed compilation in
+the new Lean.Term module at five multiline record expressions. Shared binder,
+scope, command and retained semantic modules compiled. AST construction is now
+bound before the parse-result record throughout the affected term reader;
+no semantic or acceptance change. Qualification of the complete native term
+and ordered-binder slice remains pending. Main is still037fda49.

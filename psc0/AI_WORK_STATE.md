@@ -1,3 +1,12 @@
+## Native term construction layout — qualification pending
+
+Preparation3897a2e2 / run39088402975 / job117559717894 failed compilation in
+the new Lean.Term module at five multiline record expressions. Shared binder,
+scope, command and retained semantic modules compiled. AST construction is now
+bound before the parse-result record throughout the affected term reader;
+no semantic or acceptance change. Qualification of the complete native term
+and ordered-binder slice remains pending. Main is still037fda49.
+
 ## Binder-view construction and complete prefix ownership — qualification pending
 
 43a91de8 / run39088233267 / job117559220561 failed production compilation:

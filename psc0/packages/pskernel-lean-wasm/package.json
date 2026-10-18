@@ -29,6 +29,8 @@
     "LEAN_SOURCE_PIN.json",
     "EMSCRIPTEN_PIN.json",
     "PREBUILT_WASM_MANIFEST.json",
-    "wasm/"
+    "wasm/",
+    "LEAN_LICENSE",
+    "MIGRATION_EVIDENCE_4_34_TO_4_35.md"
   ]
 }

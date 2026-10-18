@@ -68,13 +68,15 @@ def psPscv0CaseNames (fuel : Nat) (cursor : PsTokenCursor) :
       value := PsSyntaxName.mk [name.token.text] name.token.span :: rest.value
       cursor := rest.cursor }
 
-def psPscv0ReadTactics (read readType : PsPscv0TermReader) (fuel : Nat)
+def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermReader) (fuel : Nat)
     (boundary : Option PsSourcePos) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List PsSyntaxTactic)) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    let some token := psTokenCursorPeek cursor | throw (.unexpectedEnd "tactic block")
+    let some token := psTokenCursorPeek cursor
+      | if nativeLayout then return { value := [], cursor }
+        else throw (.unexpectedEnd "tactic block")
     if token.text == "}" || boundary.any (fun pos =>
         token.span.start.line > pos.line && token.span.start.column <= pos.column) then
       return { value := [], cursor }
@@ -100,7 +102,7 @@ def psPscv0ReadTactics (read readType : PsPscv0TermReader) (fuel : Nat)
           pure (if name.value.segments == ["_"] then none else some name.value, name.cursor)
         let names ← psPscv0CaseNames fuel cursor
         let arrow ← psTokenCursorExpectText names.cursor "=>"
-        let body ← psPscv0ReadTactics read readType fuel (some token.span.start) arrow.cursor
+        let body ← psPscv0ReadTacticsFor nativeLayout read readType fuel (some token.span.start) arrow.cursor
         if body.value.isEmpty then throw (psProofScriptExpectedError "case tactic body" arrow.cursor)
         pure (.caseE tag names.value body.value token.span, body.cursor)
       | .localE isLet =>
@@ -118,19 +120,25 @@ def psPscv0ReadTactics (read readType : PsPscv0TermReader) (fuel : Nat)
       | .reflexivity => pure (.reflexivity token.span, head.cursor)
       | .constructor => pure (.constructor token.span, head.cursor)
       | .focus bullet =>
-        let body ← psPscv0ReadTactics read readType fuel (some token.span.start) head.cursor
+        let body ← psPscv0ReadTacticsFor nativeLayout read readType fuel (some token.span.start) head.cursor
         if body.value.isEmpty then throw (psProofScriptExpectedError "focused tactic" head.cursor)
         pure (.focus body.value bullet token.span, body.cursor)
       | .each anyGoal =>
-        let body ← psPscv0ReadTactics read readType fuel (some token.span.start) head.cursor
+        let body ← psPscv0ReadTacticsFor nativeLayout read readType fuel (some token.span.start) head.cursor
         if body.value.isEmpty then throw (psProofScriptExpectedError "focused tactic" head.cursor)
         pure (.each body.value anyGoal token.span, body.cursor)
     let consumed := cursor.remaining.take (cursor.remaining.length - next.remaining.length)
     let stop := (consumed.getLast?).map (·.span.stop) |>.getD token.span.stop
-    if !psTokenCursorAtText next "}" && !psProofScriptLaterLine stop next then
+    let semicolon := nativeLayout && psTokenCursorAtText next ";"
+    let next ← if semicolon then
+      pure (← psTokenCursorExpectText next ";").cursor else pure next
+    if !psTokenCursorDone next && !psTokenCursorAtText next "}" &&
+        !psProofScriptLaterLine stop next && !semicolon then
       throw (psProofScriptExpectedError "newline-separated tactic" next)
-    let rest ← psPscv0ReadTactics read readType fuel boundary next
+    let rest ← psPscv0ReadTacticsFor nativeLayout read readType fuel boundary next
     return { value := tactic :: rest.value, cursor := rest.cursor }
+
+def psPscv0ReadTactics := psPscv0ReadTacticsFor false
 
 def psPscv0ReadProof (read readType : PsPscv0TermReader) (fuel : Nat)
     (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do

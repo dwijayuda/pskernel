@@ -10,14 +10,22 @@ inductive PsSyntaxBinderKind where
   | strictImplicit
   | instanceImplicit
 
--- A nonempty native group shares one annotation. The first name preserves
--- unary construction; moreNames retains the group boundary until elaboration.
+-- Source grouping is retained independently of the ordered semantic telescope.
+-- Scoped singleton binder views retain their original group for source receipts.
+structure PsSyntaxBinderOrigin where
+  names : List PsSyntaxName
+  index : Nat
+
+-- A native group shares annotation syntax, elaborated at each name's prefix.
+-- moreNames retains the source group before scope resolution.
+
 structure PsSyntaxBinderHead where
   group ::
   name : PsSyntaxName
   kind : PsSyntaxBinderKind
   span : PsSourceSpan
   moreNames : List PsSyntaxName := []
+  origin : Option PsSyntaxBinderOrigin := none
 
 def PsSyntaxBinderHead.mk (name : PsSyntaxName) (kind : PsSyntaxBinderKind)
     (span : PsSourceSpan) : PsSyntaxBinderHead :=

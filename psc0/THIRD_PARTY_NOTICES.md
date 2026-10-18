@@ -317,3 +317,15 @@ Corporation; upstream authors include Leonardo de Moura. Apache-2.0.
 Modifications: owned portable command AST, shared source-language scope and
 binder readers, bounded native grammar, explicit source-kind routing and no
 host parser/elaborator dependency. Retain licenses/LEAN-APACHE-2.0.txt.
+
+### Ordered binder views and native term grammar
+
+Ps.Elab.Scope/Binders and Ps.Syntax.Lean.Term adapt the selected architecture
+of Lean4.35.0 Elab/Binders.lean (toBinderViews, elabBinderViews,
+elabFunBinderViews), Parser/Term.lean (argument, matchAlts) and
+Parser/Term/Basic.lean (binders, tacticSeq), at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Copyright (c) 2019 Microsoft
+Corporation; upstream authors include Leonardo de Moura, Sebastian Ullrich and
+Mario Carneiro. Apache-2.0. Modifications: portable explicit contexts, structural
+bounded readers, selected common AST/primitives and separate source provenance.
+Retain licenses/LEAN-APACHE-2.0.txt and upstream notices.

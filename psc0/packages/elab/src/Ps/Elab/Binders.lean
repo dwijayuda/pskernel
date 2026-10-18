@@ -21,10 +21,9 @@ structure PsElabBinderState where
   bindersRev : List PsElabTypedBinder
   expected : Option PsExpr
 
--- One ordered name walk consumes the expected telescope. Concrete group
--- annotations are elaborated before entering this walk and reused by identity.
--- Inferred domains remain per-name, so (x y : _) can use different expected
--- domains without inventing a dependency in the shared source annotation.
+-- One ordered name walk consumes the expected telescope. Both explicit
+-- annotations and inferred domains use the context at the current name,
+-- following pinned Lean 4.35.0 elabBinderViews/elabFunBinderViews.
 def psElabBinderName (type : Option PsExpr) (kind : PsSyntaxBinderKind)
     (state : PsElabBinderState) (sourceName : PsSyntaxName) :
     Except PsElabError PsElabBinderState := do
@@ -57,24 +56,45 @@ def psElabBinderName (type : Option PsExpr) (kind : PsSyntaxBinderKind)
     bindersRev := PsElabTypedBinder.mk pushed.id name type.type binder :: state.bindersRev
     expected := expectedPi.map (fun pi => psExprInstantiate1 pi.body (.fvar pushed.id)) }
 
--- Group scope is a semantic boundary, not parser expansion into repeated
--- annotations. All names enter only after their annotation has been elaborated.
+-- Preserve source-group information while elaborating each binder view in
+-- sequence. The same mechanism handles scoped declarations and direct terms.
+def psElabBinderGroupNames (elaborate : PsElaborator)
+    (sourceType : PsSyntaxTerm) (kind : PsSyntaxBinderKind)
+    (names : List PsSyntaxName) (state : PsElabBinderState) :
+    Except PsElabError PsElabBinderState := do
+  match names with
+  | [] => return state
+  | name :: rest =>
+    let (type, state) ← match sourceType with
+      | .hole _ => pure (none, state)
+      | _ => do
+        let annotation ← psElabType elaborate state.context sourceType
+        pure (some annotation.type, { state with context := annotation.context })
+    let state ← psElabBinderName type kind state name
+    psElabBinderGroupNames elaborate sourceType kind rest state
+
 def psElabBindersWithExpected (elaborate : PsElaborator)
     (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (state : PsElabBinderState) : Except PsElabError PsElabBinderState := do
   match entries with
   | [] => return state
   | (head, sourceType) :: rest =>
-    let (type, state) ← match sourceType with
-      | .hole _ => pure (none, state)
-      | _ => do
-        let annotation ← psElabType elaborate state.context sourceType
-        pure (some annotation.type, { state with context := annotation.context })
     let previous := state.bindersRev.length
-    let state ← (psSyntaxBinderNames head).foldlM (psElabBinderName type head.kind) state
-    let ids := (state.bindersRev.take (state.bindersRev.length - previous)).reverse.map (·.id)
-    let state := { state with
-      context := psElabRecordInfo state.context (.binderGroup head sourceType ids) }
+    let state ← psElabBinderGroupNames elaborate sourceType head.kind
+      (psSyntaxBinderNames head) state
+    let receipt := match head.origin with
+      | none => some (head, state.bindersRev.length - previous)
+      | some origin =>
+        if origin.index + 1 != origin.names.length then none
+        else match origin.names with
+          | [] => none
+          | name :: moreNames => some ({ head with name, moreNames, origin := none }, origin.names.length)
+    let context := match receipt with
+      | none => state.context
+      | some (sourceHead, count) =>
+        let ids := (state.bindersRev.take count).reverse.map (·.id)
+        psElabRecordInfo state.context (.binderGroup sourceHead sourceType ids)
+    let state := { state with context }
     psElabBindersWithExpected elaborate rest state
 
 def psElabTypedBindersAcc (elaborate : PsElaborator)

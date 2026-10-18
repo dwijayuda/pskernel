@@ -72,3 +72,36 @@ Preparation9223dd76/run39086928911 failed at the native authoring build because
 `scoped` was used as a local name; it is a Lean keyword. The child renames those
 locals and the analogous `syntax` local in the paired fixture. No parser rule,
 semantic assertion, foundation or budget changes. Execution remains pending.
+
+## Native term and binder-prefix correction — qualification pending
+
+Preparation2f82244c/run39087221158/job117556210481 completed FAILURE. The native
+compiler built; packing found a .ps fixture semicolon (the selected separator is
+newline), and the new native control rejected the shadowing group {T value : T}.
+The fixture also used unavailable Except.isError; the child uses !isOk.
+
+This is a real semantic finding, not just a fixture repair. Pinned Lean
+Elab/Binders.lean:136-168,208-235,423-456 expands names into binder views and
+elaborates each annotation in the preceding names' context. PSC0's earlier
+group-wide annotation cache incorrectly ignored shadowing. Shared Scope and
+Binders now process names in order. Group-origin metadata preserves the existing
+multi-name source receipt and actual ordered local IDs after scope expansion.
+Old successful outputs keep their values using valid non-shadowing names; the
+exact rejected shadowing forms remain explicit native/portable negative controls.
+The canonical v7.2 ordered telescope rule is unchanged. Earlier bounded M2 job
+success does not establish correctness of the contradicted binder interpretation.
+
+The native program now uses an owned rich term reader, sharing v7 literals,
+sort/universe nodes, operators, named-call AST, binder groups, projections/indexing
+and tactic nodes. Native application checks actual whitespace and indentation
+per Parser.Term.argument:885-897. Native conditional, match-row and tactic layout
+remain grammar-owned. ProofScript keeps comma calls, braced blocks and newline
+term separators. This is not conversion through .ps or a host compiler fallback.
+
+Shared Core comparisons now cover grouped parameters, universe inference,
+operators, named arguments and a scientific Float literal; actual native input
+proofs reach the official kernel. Five target emissions and two mixed-module
+directions remain in the existing paired fixture. Native data/class/instance/
+deriving/where/do/full-termination syntax and complete mutual WF remain open.
+No foundation, assumption, budget or runtime acceptance is relaxed. Do not
+promote until complete preparation and exact-SHA integration qualify the child.

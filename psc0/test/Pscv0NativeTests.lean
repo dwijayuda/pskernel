@@ -993,7 +993,7 @@ private def application : String :=
   "const dependentId: (A: Type) -> A -> A := λ (A: Type) x => x\n" ++
   "const dependentAnswer: Nat := dependentId(Nat, 45)\n" ++
   "theorem quantifiedProof: ∀ (P: Prop), P -> P := λ (P: Prop) proof => proof\n" ++
-  "const groupLocal: forall (T: Type), T -> T -> T := fun (T: Type) (T x: T) => x\n" ++
+  "const groupLocal: forall (T: Type), T -> T -> T := fun (T: Type) (first x: T) => x\n" ++
   "const groupOuter: Nat := groupLocal(Nat, 1, 51)\n" ++
   "const groupPi: (A B: Type) -> A -> B -> B := fun (A B: Type) (x: A) (y: B) => y\n" ++
   "const groupArrow: Nat := groupPi(Bool, Nat, true, 52)\n" ++
@@ -1001,7 +1001,7 @@ private def application : String :=
   "const groupBareAnswer: Nat := groupBare(Nat, Bool, 53, true)\n" ++
   "const groupInferred: Nat -> Bool -> Bool := fun (x y) => y\n" ++
   "const groupInferredAnswer: Bool := groupInferred(0, true)\n" ++
-  "const groupGlobal: Nat -> Nat -> Nat := fun (Nat x: Nat) => x\n" ++
+  "const groupGlobal: Nat -> Nat -> Nat := fun (first x: Nat) => x\n" ++
   "const groupGlobalAnswer: Nat := groupGlobal(0, 54)\n" ++
   "function groupImplicit{A B: Type}(x: A, y: B): B := y\n" ++
   "function groupStrict⦃A B: Type⦄(x: A, y: B): B := y\n" ++
@@ -1018,15 +1018,15 @@ private def application : String :=
   "const groupFoldAnswer: Nat := groupFold(Nat, Bool, 57, [true,], 0)\n" ++
   "namespace Data\n" ++
   "structure Duo{A B: Type} where {\n" ++
-  "  (A spare: A)\n" ++
+  "  (first spare: A)\n" ++
   "  convert: forall (x y: Nat), B\n" ++
   "}\n" ++
   "const duo: Duo(A := Nat, B := Nat) := {\n" ++
-  "  A := 1,\n" ++
+  "  first := 1,\n" ++
   "  spare := 61,\n" ++
   "  convert := fun (x y) => y\n" ++
   "}\n" ++
-  "const dataRecord: Nat := duo.convert(duo.A, duo.spare)\n" ++
+  "const dataRecord: Nat := duo.convert(duo.first, duo.spare)\n" ++
   "inductive Event(A: Type){B C: Type}(D: Type): Type where {\n" ++
   "  | idle\n" ++
   "  | item(seed: A){n m: Nat}(choose: forall (x y: A), A := fun (x y) => y)\n" ++

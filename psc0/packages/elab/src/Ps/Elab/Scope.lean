@@ -142,18 +142,36 @@ structure PsScopeBindersResult where
   bound : List String
   used : List String
 
--- An annotation sees preceding groups; all names of its group enter together.
+-- Pinned Lean 4.35.0 toBinderViews/elabBinderViews processes group names
+-- in order. Resolve each annotation in that actual prefix; preserving a
+-- pre-resolved shared type would hide shadowing from later binder views.
+def psScopeBinderNames (visit : PsScopeVisitor) (bound : List String)
+    (head : PsSyntaxBinderHead) (type : PsSyntaxTerm) (names : List PsSyntaxName) :
+    Except PsElabError PsScopeBindersResult := do
+  match names with
+  | [] => return { binders := [], bound, used := [] }
+  | name :: rest =>
+    let annotation ← visit bound type
+    let next ← psScopeBinderNames visit (psScopeKey name :: bound) head type rest
+    let origin := head.origin.getD {
+      names := psSyntaxBinderNames head
+      index := (psSyntaxBinderNames head).length - names.length }
+    return {
+      binders := ({ head with name, moreNames := [], origin := some origin }, annotation.term) :: next.binders
+      bound := next.bound
+      used := psScopeUnion annotation.used next.used }
+
 def psScopeBinders (visit : PsScopeVisitor) (bound : List String)
     (binders : List PsScopeBinder) : Except PsElabError PsScopeBindersResult := do
   match binders with
   | [] => return { binders := [], bound, used := [] }
   | (head, type) :: rest =>
-    let annotation ← visit bound type
-    let next ← psScopeBinders visit (psScopeBinderKeys head ++ bound) rest
+    let group ← psScopeBinderNames visit bound head type (psSyntaxBinderNames head)
+    let next ← psScopeBinders visit group.bound rest
     return {
-      binders := (head, annotation.term) :: next.binders
+      binders := group.binders ++ next.binders
       bound := next.bound
-      used := psScopeUnion annotation.used next.used }
+      used := psScopeUnion group.used next.used }
 
 def psScopeSelfArguments (resolver : PsScopeResolver) (bound : List String)
     (fn : PsSyntaxTerm) : Except PsElabError (List PsSyntaxTerm) := do

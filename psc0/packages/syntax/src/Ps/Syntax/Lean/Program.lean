@@ -1,4 +1,5 @@
 import Ps.Syntax.ParseLean
+import Ps.Syntax.Lean.Term
 import Ps.Syntax.Pscv0.ProgramRead
 
 -- Owned native surface adapter, following Lean 4.35.0 Parser.Command and
@@ -7,10 +8,18 @@ import Ps.Syntax.Pscv0.ProgramRead
 -- source text. Unsupported native forms fail before the shared semantic owner.
 def psLeanProgramBinders (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
-  psPscv0ParameterGroups psParseLeanTerm psParseLeanTerm 4096 false false false cursor []
+  psPscv0ParameterGroups (psLeanReadTerm true) (psLeanReadTerm false) 4096 false false false cursor []
 
--- Preserve the actual source group. In (A value : A), the annotation is
--- elaborated before either new name enters scope, including a shadowing A.
+-- Groups retain syntax ownership; shared scope/elaboration processes their
+-- binder views in native order, including annotation/default shadowing.
+def psLeanProgramResult (required : Bool) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if !required && psTokenCursorAtText cursor ":=" then
+    let some token := psTokenCursorPeek cursor | throw (.unexpectedEnd "result")
+    return { value := .omittedType { start := token.span.start, stop := token.span.start }, cursor }
+  let colon ← psTokenCursorExpectText cursor ":"
+  psLeanReadTerm true colon.cursor
+
 def psLeanProgramValue (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) := do
   let some first := psTokenCursorAdvance cursor | throw "PSCV0-LEAN-DECLARATION"
@@ -22,10 +31,10 @@ def psLeanProgramValue (cursor : PsTokenCursor) :
     throw "PSCV0-LEAN-DECLARATION: selected value declaration required"
   let name ← (psParseSyntaxName head.cursor).mapError psPscv0ParseError
   let binders ← (psLeanProgramBinders name.cursor).mapError psPscv0ParseError
-  let type ← (psParseLeanDeclarationResult (head.token.text != "def") binders.cursor).mapError
+  let type ← (psLeanProgramResult (head.token.text != "def") binders.cursor).mapError
     psPscv0ParseError
   let assign ← psPscv0Expect type.cursor ":="
-  let body ← (psParseLeanTerm assign.cursor).mapError psPscv0ParseError
+  let body ← (psLeanReadTerm false assign.cursor).mapError psPscv0ParseError
   let span := PsSourceSpan.mk first.token.span.start (psLeanTermStop body.value)
   let declaration :=
     if modifier == "partial" then
@@ -55,7 +64,7 @@ def psLeanProgramValue (cursor : PsTokenCursor) :
     let suffix ← psPscv0Expect body.cursor "termination_by"
     if psTokenCursorAtText suffix.cursor "structural" then
       throw "PSCV0-TERM-01: termination_by structural is not selected"
-    let measure ← (psParseLeanTerm suffix.cursor).mapError psPscv0ParseError
+    let measure ← (psLeanReadTerm false suffix.cursor).mapError psPscv0ParseError
     if ["termination_by", "decreasing_by", "partial_fixpoint"].any
         (psTokenCursorAtText measure.cursor) then
       throw "PSCV0-LEAN-TERMINATION: duplicate suffix or unsupported native decreasing proof"

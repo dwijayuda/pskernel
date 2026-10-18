@@ -174,7 +174,7 @@ def psPscv0IndexMethod (name : String) (args : List PsSyntaxTerm)
   .call (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
     (args.map fun arg => (none, arg)) span
 
-def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
+def psPscv0PostfixFor (commaCalls : Bool) (read : PsPscv0TermReader) (fuel : Nat)
     (current : PsSyntaxTerm) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   match fuel with
@@ -199,7 +199,7 @@ def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
         else if adjacent && psTokenCursorAtText close.cursor "'" then do
           let quote ← psTokenCursorExpectText close.cursor "'"
           let primary ← psPscv0Primary read quote.cursor
-          let proof ← psPscv0Postfix read fuel primary.value primary.cursor
+          let proof ← psPscv0PostfixFor commaCalls read fuel primary.value primary.cursor
           pure ("GetElem.getElem", [current, index.value, proof.value],
             proof.cursor, psSyntaxTermSpan proof.value)
         else
@@ -208,7 +208,7 @@ def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
           pure ("GetElem.getElem", [current, index.value, assumption],
             close.cursor, close.token.span)
       let span := psSyntaxSpanJoin (psSyntaxTermSpan current) lastSpan
-      return ← psPscv0Postfix read fuel
+      return ← psPscv0PostfixFor commaCalls read fuel
         (psPscv0IndexMethod method args span) finalCursor
     -- Lean 4.35.0 Parser.Term.proj accepts a no-whitespace trailing
     -- projection on ANY term, not only on a bare identifier. PSCV0 keeps
@@ -230,13 +230,17 @@ def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
       let projected := PsSyntaxTerm.reference
         (PsSyntaxName.mk [binderText, field.token.text] span)
       let result := PsSyntaxTerm.letE binder none current projected span
-      return ← psPscv0Postfix read fuel result field.cursor
-    if !(psTokenCursorAtText cursor "(" && psProofScriptCallAdjacent current cursor) then
+      return ← psPscv0PostfixFor commaCalls read fuel result field.cursor
+    if !commaCalls || !(psTokenCursorAtText cursor "(" && psProofScriptCallAdjacent current cursor) then
       return { value := current, cursor }
     let opening ← psTokenCursorExpectText cursor "("
     let args ← psPscv0CallArguments read (fuel + 1) opening.cursor false []
     let close ← psTokenCursorExpectText args.cursor ")"
-    psPscv0Postfix read fuel
+    psPscv0PostfixFor commaCalls read fuel
       (.call current args.value (psSyntaxSpanJoin (psSyntaxTermSpan current) close.token.span))
       close.cursor
 
+
+-- Existing ProofScript readers select comma-call syntax. Native readers share
+-- indexing/projection ownership but select native application separately.
+def psPscv0Postfix := psPscv0PostfixFor true

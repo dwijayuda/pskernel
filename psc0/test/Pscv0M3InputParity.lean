@@ -11,8 +11,17 @@ end Shared
 open Shared
 def m3parity (flag : Bool) : UInt64 :=
   UInt64.ofNat (if flag then addSeed 8 5 else withDefault 3)
+def grouped {T : Type} {first value : T} := value
+example : @grouped Nat 3 4 = 4 := rfl
+/-- error: type expected -/
+#guard_msgs (error, drop warning, substring := true) in
 def shadow {T : Type} {T value : T} := value
-example : @shadow Nat 3 4 = 4 := rfl
+/-- error: type expected -/
+#guard_msgs (error, drop warning, substring := true) in
+def lambdaShadow : (T : Type) → T → T → T := fun (T : Type) (T value : T) => value
+/-- error: type expected -/
+#guard_msgs (error, drop warning, substring := true) in
+def globalShadow : Nat → Nat → Nat := fun (Nat value : Nat) => value
 example : m3parity false = 4 := rfl
 example : m3parity true = 13 := rfl
 end M3InputParityOracle
@@ -60,19 +69,38 @@ def check (root : System.FilePath) : IO Unit := do
   let native ← fromExcept (checkedDeclarations .lean leanSource)
   let proofscript ← fromExcept (checkedDeclarations .proofScript psSource)
   compareDefinitions native proofscript
-  let grouped := "def shadow {T : Type} {T value : T} := value\n"
+  let grouped := "def grouped {T : Type} {first value : T} := value\n"
   compareDefinitions (← fromExcept (checkedDeclarations .lean grouped))
     (← fromExcept (checkedDeclarations .proofScript grouped))
+  let richLean := "universe u\ndef identity {A : Type u} (a : A) : A := a\n" ++
+    "def choose (x y : Nat) (flag : Bool) : Nat := if flag then x + y else x\n" ++
+    "def chosen : Nat := choose (flag := true) (y := 4) (x := 3)\n" ++
+    "def scalar : Float := 1.25\n"
+  let richPs := "universe u\nfunction identity{A: Type u}(a: A): A := a\n" ++
+    "function choose(x: Nat, y: Nat, flag: Bool): Nat := if (flag) { x + y } else { x }\n" ++
+    "const chosen: Nat := choose(flag := true, y := 4, x := 3)\n" ++
+    "const scalar: Float := 1.25\n"
+  compareDefinitions (← fromExcept (checkedDeclarations .lean richLean))
+    (← fromExcept (checkedDeclarations .proofScript richPs))
+  ensure (!(psCompilerParsePscv0 "def bad : Nat := Nat.succ(3)\n" .lean).isOk)
+    "native application lost Lean's whitespace requirement"
   -- Real input routing, not a host oracle or source-printer round trip.
   for (kind, wrong) in [(PsCompilerSourceKind.lean, psSource),
       (PsCompilerSourceKind.proofScript, leanSource)] do
-    ensure ((psCompilerParsePscv0 wrong kind).isError)
+    ensure (!(psCompilerParsePscv0 wrong kind).isOk)
       "source-kind selection silently accepted the other grammar"
   for source in ["axiom unapproved : Nat\n",
       "def f (n : Nat) : Nat := n\ntermination_by structural n\n",
       "def f (n : Nat) : Nat := n\npartial_fixpoint monotonicity by exact id\n"] do
-    ensure ((psCompilerParsePscv0 source .lean).isError)
+    ensure (!(psCompilerParsePscv0 source .lean).isOk)
       "native source selection admitted an unselected declaration or strategy"
+  for (kind, text) in [
+      (PsCompilerSourceKind.lean, "def shadow {T : Type} {T value : T} := value\n"),
+      (.proofScript, "def shadow {T : Type} {T value : T} := value\n"),
+      (.lean, "def bad : (T : Type) -> T -> T -> T := fun (T : Type) (T value : T) => value\n"),
+      (.proofScript, "const bad: forall (T: Type), T -> T -> T := fun (T: Type) (T value: T) => value\n")] do
+    ensure (!(checkedDeclarations kind text).isOk)
+      "binder annotation ignored native prefix shadowing"
   let provider : PsPscv0ModuleSource := {
     name := "Library", sourceKind := .lean
     source := "def library (n : Nat) : Nat := Nat.succ n\n" }
@@ -85,7 +113,7 @@ def check (root : System.FilePath) : IO Unit := do
     outputStem := "inputparity", exports := .selected ["m3parity"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean leanSource "native-input", request .proofScript psSource "proofscript-input",
+    request .lean (leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -122,5 +150,5 @@ def check (root : System.FilePath) : IO Unit := do
           ("flag", Lean.toJson flag),
           ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, scope/default/group ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

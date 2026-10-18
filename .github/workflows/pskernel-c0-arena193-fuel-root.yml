@@ -1,0 +1,61 @@
+name: PSKernel-C0 Arena193 genuine resource and oracle root diagnostics
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-pointer-structural-hash-bucket-20261018]
+    paths:
+      - '.github/workflows/pskernel-c0-arena193-fuel-root.yml'
+      - 'psc0/packages/pskernel-c0/test/C0Arena435ResourceRootDiagnostics.py'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pinned-lean435-fuel-roots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build unchanged checker and source-certified validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+            lake build c0OfficialReplay
+            lake env lean --run test/C0CertifiedMVarMemoRegression.lean
+            lake env lean --run test/C0CertifiedUndefMemoRegression.lean
+          )
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0Arena435ResourceRootDiagnostics.py
+      - name: Authenticate original Arena 193 source without modifying declarations
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/arena-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-2026-09.tar.gz" | sha256sum -c -
+      - name: Capture real C0 beta/Church source budget and 4.35 magma oracle results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/C0Arena435ResourceRootDiagnostics.py \
+            --archive "$RUNNER_TEMP/arena-2026-09.tar.gz" \
+            --checker psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay \
+            --official-project psc0/packages/pskernel-c0 \
+            | tee "$RUNNER_TEMP/arena193-resource-diagnostics.txt"
+          grep -Fq "C0_ARENA193_FUEL_DIAGNOSTIC completed=true" "$RUNNER_TEMP/arena193-resource-diagnostics.txt"
+          echo "C0_ARENA193_DIAGNOSTIC_ONLY=true cannot_upgrade_timeout_to_acceptance=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena193-real-435-resource-roots
+          path: ${{ runner.temp }}/arena193-resource-diagnostics.txt
+          if-no-files-found: warn
+          retention-days: 21

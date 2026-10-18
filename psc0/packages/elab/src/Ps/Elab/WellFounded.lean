@@ -473,12 +473,19 @@ def psElabWellFoundedTupleCallbackEquality (context : PsElabContext)
 -- Source recursive calls stay ordinary typed peer applications until the
 -- compiled match has specialized its alternatives. Decrease goals are created
 -- only by this Core pass; the unrestricted peers are absent from their scopes.
+structure PsElabWellFoundedCoreRowCallback where
+  majors : List PsExpr
+  flags : List Bool
+  type : PsExpr
+  unrefinedType : PsExpr
+
 structure PsElabWellFoundedCoreCall where
   sourceId : Nat
   callback : PsExpr
   recursion : PsElabWellFoundedRecursion
   fixedArguments : List (Nat × PsExpr) := []
   span : PsSourceSpan
+  rowCallback? : Option PsElabWellFoundedCoreRowCallback := none
 
 structure PsElabWellFoundedCoreMinor where
   scope : PsElabSavedScope
@@ -506,6 +513,7 @@ structure PsElabWellFoundedCoreSource where
   arguments : List PsExpr
   callbacks : List PsExpr
   discrIds : List Nat
+  rowCallbacks : List PsElabWellFoundedCoreRowCallback
 
 def psElabWellFoundedCoreHasCalls (calls : List PsElabWellFoundedCoreCall)
     (term : PsExpr) : Bool :=
@@ -652,6 +660,17 @@ def psElabWellFoundedCorePrepareSource (context : PsElabContext)
   let actual := raw ++ calls.map (·.callback) ++ arguments.drop flags.length
   let applied ← psElabApplyCore closed.context closed.term actual
   let checked ← psElabResolvedTerm applied.context applied.term (some source.type)
+  let rowCallbacks ← (calls.zip callbacks).mapM fun (call, callback) => do
+    let type ← (psInferType body.context.environment body.context.metaContext
+      body.context.localContext callback).mapError PsElabError.infer
+    let unrefinedType ← (psInferType body.context.environment body.context.metaContext
+      body.context.localContext call.callback).mapError PsElabError.infer
+    let effectiveFlags := (raw.zip flags).map fun (argument, allowed) =>
+      allowed && (match argument with | .fvar _ => true | _ => false)
+    return ({ majors := majorArguments, flags := effectiveFlags,
+      type := psMetaInstantiate body.context.metaContext type,
+      unrefinedType := psMetaInstantiate body.context.metaContext unrefinedType } :
+      PsElabWellFoundedCoreRowCallback)
   let discrIds := replacements.filterMap fun entry =>
     match entry.snd with | .fvar id => some id | _ => none
   return some {
@@ -663,7 +682,8 @@ def psElabWellFoundedCorePrepareSource (context : PsElabContext)
     expected := source.type
     arguments := actual
     callbacks
-    discrIds := discrIds.eraseDups }
+    discrIds := discrIds.eraseDups
+    rowCallbacks }
 
 -- The result-prefix length is actual MatchPlan ownership, not the number of
 -- forall binders left by the user's result. Companion motive slots own none.
@@ -803,6 +823,128 @@ abbrev PsElabWellFoundedCoreRewriter :=
   Bool → PsElabContext → List PsElabWellFoundedCoreCall → Option (List Nat) → PsExpr →
     Except PsElabError (PsElabTermResult × Bool)
 
+-- Restore the source row's caller scope before opening its generic pattern
+-- telescope. Compiler fields and automatic equations are not tactic hypotheses.
+def psElabWellFoundedCoreRowScope (context : PsElabContext)
+    (row : PsElabCoreRow) : Except PsElabError PsElabContext := do
+  for value in row.callerValues do
+    if !psMetaExprScopeSafe context.metaContext context.localContext value then
+      throw (.data "PSCV0-WF-ROW: source caller identity escaped its checked scope")
+    let _ ← (psInferType context.environment context.metaContext
+      context.localContext value).mapError PsElabError.infer
+    pure ()
+  let roots := row.callerValues.flatMap fun value =>
+    psExprFVarIds (psMetaInstantiate context.metaContext value)
+  let ids := context.localContext.declarations.foldl (fun selected declaration =>
+    if selected.contains (psLocalDeclId declaration) then
+      let terms := match declaration with
+        | .binding _ _ type _ => [type]
+        | .letDecl _ _ type value => [type, value]
+      selected ++ terms.flatMap (fun term =>
+        psExprFVarIds (psMetaInstantiate context.metaContext term))
+    else selected) roots
+  let localContext := { context.localContext with
+    declarations := context.localContext.declarations.filter fun declaration =>
+      ids.contains (psLocalDeclId declaration)
+    nameAliases := context.localContext.nameAliases.filter fun alias => ids.contains alias.id }
+  for declaration in localContext.declarations do
+    let terms := match declaration with
+      | .binding _ _ type _ => [type]
+      | .letDecl _ _ type value => [type, value]
+    if terms.any (fun term => !psMetaExprScopeSafe context.metaContext localContext term) then
+      throw (.data "PSCV0-WF-ROW: restored caller declaration has an unowned dependency")
+  return { context with
+    localContext
+    auxiliaryLocalIds := context.auxiliaryLocalIds.filter ids.contains }
+
+-- The row callback is formed from the source match's complete ds/Y template,
+-- never by reversing constructor values in an already compiled alternative.
+-- Check the entire extended row and its actual application before creating
+-- any decrease goal. Nested source matches retain their own boundaries.
+def psElabWellFoundedCoreRewriteRow (rewrite : PsElabWellFoundedCoreRewriter)
+    (preparing : Bool) (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (compiler : Option (List Nat))
+    (row : PsElabCoreRow) (value type : PsExpr) (arguments : List PsExpr) :
+    Except PsElabError (PsElabTermResult × Bool) := do
+  if arguments.length < row.binderCount then
+    throw (.data "PSCV0-WF-ROW: actual row argument arity changed")
+  let ownedArguments := arguments.take row.binderCount
+  let suffix := arguments.drop row.binderCount
+  let original ← psElabApplyCore context value ownedArguments
+  let callbackTypes ← calls.mapM fun call =>
+    (psInferType original.context.environment original.context.metaContext
+      original.context.localContext call.callback).mapError PsElabError.infer
+  let caller ← psElabWellFoundedCoreRowScope original.context row
+  if !psMetaExprScopeSafe caller.metaContext caller.localContext type ||
+      !psMetaExprScopeSafe caller.metaContext caller.localContext value then
+    throw (.data "PSCV0-WF-ROW: generic row retains a compiler-only local")
+  let opened ← psElabOpenCoreTelescope 4096 caller type (some row.binderCount)
+  let rowArguments := psElabBinderArguments opened.bindersRev
+  let (patternContext, patterns) ← row.patterns.foldlM
+    (fun (state : PsElabContext × List PsExpr) pattern => do
+      let result ← psElabApplyCore state.fst pattern rowArguments
+      return (result.context, state.snd ++ [result.term])) (opened.context, [])
+  let mut current := patternContext
+  let mut callbacksRev : List PsElabTypedBinder := []
+  let mut refined := false
+  for (call, originalType) in calls.zip callbackTypes do
+    let (callbackType, unrefinedType) ← if compiler.isSome then do
+      let some template := call.rowCallback?
+        | throw (.data "PSCV0-WF-ROW: source callback template is absent")
+      if template.majors.length != patterns.length ||
+          template.flags.length != patterns.length then
+        throw (.data "PSCV0-WF-ROW: generic LHS changed the complete discriminator telescope")
+      let replacements := ((template.majors.zip template.flags).zip patterns).reverse.filterMap
+        fun entry =>
+          let ((major, allowed), pattern) := entry
+          if allowed then
+            match major with | .fvar id => some (id, pattern) | _ => none
+          else none
+      pure (psElabSubstituteLocals replacements template.type, template.unrefinedType)
+    else pure (originalType, originalType)
+    let callbackType := psMetaInstantiate current.metaContext callbackType
+    let unrefinedType := psMetaInstantiate current.metaContext unrefinedType
+    if !psMetaExprScopeSafe current.metaContext current.localContext callbackType ||
+        !psMetaExprScopeSafe current.metaContext current.localContext unrefinedType then
+      throw (.data "PSCV0-WF-ROW: callback type escaped the generic source row")
+    let _ ← psElabExpressionSort current callbackType
+    if compiler.isSome && !psDefEqReadOnlyWithEnv current.environment current.metaContext
+        current.localContext callbackType unrefinedType then
+      refined := true
+    let name := call.recursion.callbackName
+    let pushed := psLocalPushBinding current.localContext name callbackType .explicit
+    current := { current with
+      localContext := pushed.context
+      auxiliaryLocalIds := pushed.id :: current.auxiliaryLocalIds }
+    callbacksRev := PsElabTypedBinder.mk pushed.id name callbackType .explicit :: callbacksRev
+  for (name, index) in row.aliases do
+    let some (.fvar id) := rowArguments[index]?
+      | throw (.data "PSCV0-WF-ROW: source alias does not identify a real row binder")
+    let some locals := psLocalAddNameAlias current.localContext name id
+      | throw (.data "PSCV0-WF-ROW: source alias target is absent")
+    current := { current with localContext := locals }
+  let generic := psElabWellFoundedCoreBeta 4096 (psExprApplyMany value rowArguments)
+  let generic ← psElabResolvedTerm current generic (some opened.body)
+  let bindersRev := callbacksRev ++ opened.bindersRev
+  let domain := psCloseElabForallBinders generic.context.metaContext bindersRev generic.type
+  let closed := psCloseElabLambdaBinders generic.context.metaContext bindersRev generic.term
+  let outer := psElabLeaveScope original.context generic.context
+  let checked ← psElabResolvedTerm outer closed (some domain)
+  let actualArguments := ownedArguments ++ calls.map (·.callback)
+  let checked ← psElabApplyCore checked.context checked.term actualArguments
+  let checked ← psElabResolvedTerm checked.context checked.term (some original.type)
+  let inner := psElabRestoreScope checked.context (psElabSaveScope generic.context)
+  let callbacks := psElabBinderArguments callbacksRev
+  let rowCalls := (calls.zip callbacks).map fun (call, callback) =>
+    { call with callback, rowCallback? := none }
+  let (body, _) ← rewrite preparing inner rowCalls none generic.term
+  let closed ← psElabWellFoundedCoreClose checked.context body.context
+    bindersRev body.term domain
+  let applied ← psElabApplyCore closed.context closed.term actualArguments
+  let result ← psElabResolvedTerm applied.context applied.term (some original.type)
+  let result ← psElabApplyCore result.context result.term suffix
+  return (result, refined)
+
 def psElabWellFoundedCoreFinishRecursor (rewrite : PsElabWellFoundedCoreRewriter)
     (preparing : Bool) (calls : List PsElabWellFoundedCoreCall)
     (plan : PsElabWellFoundedCoreRecursor) :
@@ -835,8 +977,11 @@ def psElabWellFoundedCoreProbeSource (rewrite : PsElabWellFoundedCoreRewriter)
     (calls : List PsElabWellFoundedCoreCall) (plan : PsElabWellFoundedCoreSource) :
     Except PsElabError (Option (PsElabWellFoundedCoreSource × PsElabTermResult)) := do
   let inner := psElabRestoreScope plan.outer plan.scope
-  let branchCalls := (calls.zip plan.callbacks).map fun (call, callback) =>
-    { call with callback }
+  if calls.length != plan.callbacks.length || calls.length != plan.rowCallbacks.length then
+    throw (.data "PSCV0-WF-ROW: prepared callback ownership arity changed")
+  let branchCalls := ((calls.zip plan.callbacks).zip plan.rowCallbacks).map
+    fun ((call, callback), rowCallback) =>
+      { call with callback, rowCallback? := some rowCallback }
   let (body, refined) ← rewrite true inner branchCalls (some plan.discrIds) plan.body
   if !refined then return none
   let closed ← psElabWellFoundedCoreClose plan.outer body.context
@@ -863,8 +1008,11 @@ def psElabWellFoundedCoreFinishSource (rewrite : PsElabWellFoundedCoreRewriter)
     (calls : List PsElabWellFoundedCoreCall) (plan : PsElabWellFoundedCoreSource) :
     Except PsElabError PsElabTermResult := do
   let inner := psElabRestoreScope plan.outer plan.scope
-  let branchCalls := (calls.zip plan.callbacks).map fun (call, callback) =>
-    { call with callback }
+  if calls.length != plan.callbacks.length || calls.length != plan.rowCallbacks.length then
+    throw (.data "PSCV0-WF-ROW: prepared callback ownership arity changed")
+  let branchCalls := ((calls.zip plan.callbacks).zip plan.rowCallbacks).map
+    fun ((call, callback), rowCallback) =>
+      { call with callback, rowCallback? := some rowCallback }
   let (body, _) ← rewrite false inner branchCalls (some plan.discrIds) plan.body
   let closed ← psElabWellFoundedCoreClose plan.outer body.context
     plan.bindersRev body.term plan.type
@@ -932,9 +1080,10 @@ def psElabWellFoundedCoreRewrite (fuel : Nat) (preparing : Bool)
           -- refinement uses the original callback in the original source scope.
           return ← rewrite preparing argumentContext calls none original
         | .row =>
-          -- The checked RHS is only beta-instantiated. Its real lexical lets
-          -- were retained outside this marker; no source expression is re-elaborated.
-          return ← rewrite preparing argumentContext calls none original
+          let some row := boundary.row?
+            | throw (.data "PSCV0-WF-ROW: checked source row metadata is absent")
+          return ← psElabWellFoundedCoreRewriteRow rewrite preparing argumentContext
+            calls compiler row value type arguments
         | .primitive selectedSlot prefixArity =>
           if arguments.length != prefixArity then
             throw (.data "PSCV0-WF-BOUNDARY: primitive result-prefix arity mismatch")

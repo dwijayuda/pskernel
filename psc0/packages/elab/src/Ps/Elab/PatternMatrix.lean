@@ -111,7 +111,10 @@ def psElabPatternRefineRow (refinements : PsElabRefinements)
     checked? := row.checked?.map fun checked =>
       { checked with
         term := psElabSubstituteLocals refinements checked.term
-        type := psElabSubstituteLocals refinements checked.type } }
+        type := psElabSubstituteLocals refinements checked.type
+        metadata := {
+          checked.metadata with
+          patterns := checked.metadata.patterns.map (psElabSubstituteLocals refinements) } } }
 
 -- A hidden index hint names only a surviving pattern local. A solved index
 -- never becomes an unconditional source let binding.
@@ -165,7 +168,7 @@ def psElabPatternRequiredIds (context : PsElabContext)
     (row.generalized ++ row.bindings).flatMap (fun binding => [binding.value, binding.type]) ++
       row.equations.flatMap (fun binding => [binding.equation.proof, binding.equation.type]) ++
       row.arguments.map Prod.snd ++
-      row.checked?.toList.flatMap (fun checked => [checked.term, checked.type])
+      row.checked?.toList.flatMap (fun checked => [checked.term, checked.type] ++ checked.metadata.patterns)
   let values := values.map (psMetaInstantiate context.metaContext)
   context.localContext.declarations.reverse.filterMap fun declaration =>
     let id := psLocalDeclId declaration
@@ -561,7 +564,7 @@ def psElabPatternSourceLoop (fuel : Nat) (branch : PsElaborator)
       psElabPatternSourceLoop fuel branch inputs rows baseMatchType expected generalizing? (some cause)
     | .error error => throw error
 
-def psElabMatchMatrixSourceWith (elaborate branch : PsElaborator) (context : PsElabContext)
+def psElabMatchMatrixFullSourceWith (elaborate branch : PsElaborator) (context : PsElabContext)
     (sources : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
     (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
     (generalizing? : Option Bool) (expected : Option PsExpr) :
@@ -589,6 +592,36 @@ def psElabMatchMatrixSourceWith (elaborate branch : PsElaborator) (context : PsE
   let abstractions := inputs.locals.reverse.map fun (binder, value) =>
     PsMetaAbstraction.letE binder.id binder.name binder.type value
   psElabAbstract context result.context abstractions result.term expected
+
+-- Lean 4.35 Elab.Match.expandSimpleMatch: the unflagged, unnamed,
+-- single identifier row is an ordinary local let.
+def psElabSimpleMatchVariable (context : PsElabContext)
+    (sourceName : PsSyntaxName) : Bool :=
+  if sourceName.segments.length != 1 || psSyntaxNameIsWildcardBinder sourceName then false
+  else
+    match psElabResolveReferenceBase context.localContext context.environment sourceName with
+    | none => true
+    | some (.local _, []) => true
+    | some (.global name, []) =>
+      (psEnvironmentFindConstructor context.environment name).isNone
+    | _ => false
+
+def psElabMatchMatrixSourceWith (elaborate branch : PsElaborator) (context : PsElabContext)
+    (sources : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
+    (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+    (generalizing? : Option Bool) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  match sources, alternatives, generalizing? with
+  | [source], [([.variable sourceName], body, _)], none => do
+    if source.equationName?.isSome || !psElabSimpleMatchVariable context sourceName then
+      return ← psElabMatchMatrixFullSourceWith elaborate branch context
+        sources alternatives generalizing? expected
+    let some name := psSyntaxNameToName sourceName | throw .emptyName
+    let valueResult ← psElabLocalValue elaborate context none source.term
+    psElabLetAfterValue branch context name valueResult.type valueResult body expected
+  | _, _, _ =>
+    psElabMatchMatrixFullSourceWith elaborate branch context
+      sources alternatives generalizing? expected
 
 def psElabMatchMatrixSource (elaborate : PsElaborator) : PsElabContext →
     List (PsSyntaxMatchDiscriminant PsSyntaxTerm) →

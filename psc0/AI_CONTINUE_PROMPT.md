@@ -1,5 +1,55 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Generic WF rows and corrected native controls — qualification pending
+
+Preparation [39153367900](https://github.com/dwijayuda/pskernel/actions/runs/39153367900)
+at 4a91370ab5230c34ccf5d0037682cd3328bf7e34 compiled the new elaborator
+modules, and recursor-authoring job 117751423031 passed. Foundation job
+117751423376 failed while compiling the native input-parity controls; source,
+kernel, IR and backend execution for this candidate had not run.
+
+The pinned native errors corrected earlier fixture assumptions. A plain single
+variable match follows ordinary let generalization; the intended generalized
+positive now says generalizing := true, and the plain form is a paired typed
+refusal. The mixed catch-all decrease proof was invalid natively because its
+row variable remains generic. It is now a strict decrease refusal. Checked row
+metadata retains the generic full LHS and protected caller identities through
+typed anchors. WF opens that generic row before creating decrease goals and
+excludes compiler-only field and equality hypotheses.
+
+The former inline function-to-container recursion is a native refusal. The
+positive uses the native explicit mutual helper shape, retaining the same
+inputs and 11110611/102201400 observations; the original inline form remains
+a native and paired DECREASE control. The typed descendant owner now checks
+the inherited reflexive-field instantiation at the final recursive call.
+Registered numeric classes carry their inferable Nat index and explicit getter
+arguments. Both ordinary and default instances reject uninferable arguments,
+matching the pinned registration check. Numeric observations remain 8765/10987.
+
+The named function equation uses a pointwise native proof followed by funext.
+The exact inline observations use checked equation simplification without a
+budget increase. Predicate refusal controls collect deferred native termination
+errors correctly. Four fresh registered Prop source pairs exercise ordinary
+checked helper publication and opaque/abbrev/instance/default-instance kinds;
+proof-valued instances publish as theorems. Batch and member helper provenance
+must agree before publication.
+
+Whole-match WF sources cover dependent multi-discriminators, generalized
+dependencies, computed discriminators, ordinary user recursors and catch-all
+rows. Three strict source refusals identify the decrease phase. The thirteenth
+runtime export m3wfboundaries expects false 222 and true 434 in both grammars
+and all retained backend lanes. Plain/named/indexed predicate sources also
+participate in the full checked compilation requests.
+
+The indexed DecidableEq and recursive indexed BEq native controls compiled
+without errors in 39153367900, exposing retained deriving work. No portable
+deriving refusal has yet been relaxed. Selected function-valued const WF,
+indexed/dependent deriving, user-container closure and Option.bind fixedpoint
+coverage remain open. The last fully qualified preparation is still
+39138442923 at 1b7513339f22a5db24750485148603622e5ff018. All six M3+B exits
+remain OPEN. Main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058;
+final Native/M3/F1/F2/F3 must pass on one complete compiler/test SHA.
+
 ## Whole-match WF and predicate owners — qualification pending
 
 Preparation [39151862873](https://github.com/dwijayuda/pskernel/actions/runs/39151862873)

@@ -176,8 +176,8 @@ jobs:
           for kind in lean ps; do
             parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
             "$TSC" --ignoreConfig "$parity_dir/inputparity.ts" --outDir "$parity_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const | tee "$parity_dir/js.log"
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const,m3wfboundaries | tee "$parity_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const,m3wfboundaries "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
           done
           structural_dir=../dist/m3-foundation-preparation/mutual-structural
           "$TSC" --ignoreConfig "$structural_dir/mutualstructural.ts" --outDir "$structural_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
@@ -190,7 +190,7 @@ jobs:
           rustup toolchain install 1.98.1 --profile minimal
           for kind in lean ps; do
             parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
-            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const
+            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const,m3wfboundaries
             rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$parity_dir/rust.log"
           done
           structural_dir=../dist/m3-foundation-preparation/mutual-structural
@@ -212,7 +212,7 @@ jobs:
           cd "$GITHUB_WORKSPACE/psc0/v7-native"
           for kind in lean ps; do
             parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
-            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const | tee "$parity_dir/wasm.log"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors,m3matches,m3structural,m3inline,m3registered,m3const,m3wfboundaries | tee "$parity_dir/wasm.log"
           done
           structural_dir=../dist/m3-foundation-preparation/mutual-structural
           node ../scripts/pscv0-m3-runtime.mjs wasm "$structural_dir" mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee "$structural_dir/wasm.log"

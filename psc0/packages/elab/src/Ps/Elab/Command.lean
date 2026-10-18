@@ -222,10 +222,21 @@ def psElabCommandStructuralHelpers (environment : PsEnvironment)
 
 def psElabCommandRegisteredResult (environment : PsEnvironment)
     (levels : List PsName) (member : PsElabPreDefinition)
-    (result : PsElabPreDefinitionBatchResult) (asOpaque : Bool) :
+    (result : PsElabPreDefinitionBatchResult) (asOpaque : Bool) (asInstance : Bool := false) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   let [owned] := result.members
     | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source lost its single checked owner")
+  if result.batch.structuralHelpers.length != owned.structuralHelpers.length ||
+      !(result.batch.structuralHelpers.zip owned.structuralHelpers).all (fun pair =>
+        psNameEq pair.fst.owner pair.snd.owner &&
+          pair.fst.families.length == pair.snd.families.length &&
+          (pair.fst.families.zip pair.snd.families).all (fun families =>
+            psElabCommandStructuralHelperEqual (.inductiveDecl families.fst)
+              (.inductiveDecl families.snd)) &&
+          pair.fst.declarations.length == pair.snd.declarations.length &&
+          (pair.fst.declarations.zip pair.snd.declarations).all (fun declarations =>
+            psElabCommandStructuralHelperEqual declarations.fst declarations.snd)) then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: batch and member structural provenance differ")
   let helpers := owned.structuralHelpers.flatMap (·.declarations)
   let helperCount := helpers.length
   if owned.declarations.length != helperCount + 1 ||
@@ -247,7 +258,12 @@ def psElabCommandRegisteredResult (environment : PsEnvironment)
     throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source changed its actual declaration or header")
   let staged ← psElabCommandStructuralHelpers environment member.name owned.structuralHelpers
   let checked ← psElabResolvedTerm (psElabContextEmpty staged levels) value (some type)
+  let proofInstance ← if asInstance then do
+      let level ← psElabExpressionSort checked.context type
+      pure (psLevelEquivalent level .zero)
+    else pure false
   let declaration := if asOpaque then PsDeclaration.opaqueDecl name levels type checked.term
+    else if proofInstance then PsDeclaration.theoremDecl name levels type checked.term
     else PsDeclaration.definitionDecl name levels type checked.term
   let declarations := helpers ++ [declaration]
   return {
@@ -329,6 +345,9 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     | none, _ => pure result
     | some .opaqueDecl, [member] =>
       psElabCommandRegisteredResult state.environment block.levelNames member result true
+    | some (.instanceDecl _), [member]
+    | some (.defaultInstanceDecl _ _), [member] =>
+      psElabCommandRegisteredResult state.environment block.levelNames member result false true
     | some _, [member] =>
       psElabCommandRegisteredResult state.environment block.levelNames member result false
     | _, _ =>

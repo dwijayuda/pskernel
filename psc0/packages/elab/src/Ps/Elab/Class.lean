@@ -139,6 +139,13 @@ def psElabInstanceOrder (fuel : Nat) (context : PsElabContext)
 
 def psElabCheckInstanceOrder (telescope : PsElabOpenTelescope) : Except PsElabError Unit := do
   let binders := telescope.bindersRev.reverse
+  -- Pinned checkImpossibleInstance rejects arguments absent from the result
+  -- and all instance premises, after closing their actual type dependencies.
+  let possible := psElabInstanceKnown (binders.length + 1) binders
+    ((psExprFVarIds telescope.body ++
+      (binders.filter (fun binder => psBinderInfoIsInstance binder.binder)).map (·.id)).eraseDups)
+  if !(binders.all (fun binder => possible.contains binder.id)) then
+    throw (.data "instance has an argument that cannot be inferred from its result or instance premises")
   let inputs ← psElabInstanceInputs telescope.context telescope.body
   let known := psElabInstanceKnown (binders.length + 1) binders inputs
   let pending := binders.filter (fun binder => psBinderInfoIsInstance binder.binder)

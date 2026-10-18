@@ -78,12 +78,21 @@ inductive PsElabCoreBoundaryKind where
   | row
   | primitive (selectedSlot prefixArity : Nat)
 
+-- Each pattern is a typed lambda over the entire checked row prefix.
+-- Caller values precede this match's ds/ys and equation binders.
+structure PsElabCoreRow where
+  binderCount : Nat
+  patterns : List PsExpr
+  aliases : List (PsName × Nat)
+  callerValues : List PsExpr
+
 structure PsElabCoreBoundary where
   name : PsName
   kind : PsElabCoreBoundaryKind
   type : PsExpr
   value : PsExpr
   localIds : List Nat
+  row? : Option PsElabCoreRow := none
 
 structure PsElabContext where
   environment : PsEnvironment

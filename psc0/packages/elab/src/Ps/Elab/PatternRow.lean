@@ -22,6 +22,7 @@ structure PsElabCheckedPatternRow where
   numEquations : Nat
   equationBinders : List Nat
   aliases : List (PsName × Nat)
+  metadata : PsElabCoreRow
 
 structure PsElabPatternLhs where
   context : PsElabContext
@@ -428,12 +429,24 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
       | throw (.refinement "pattern argument identity unavailable")
     let .fvar id := entry.snd | throw (.refinement "pattern argument identity unavailable")
     return (id, occurrence.path)
+  let rowIds := bindersRev.reverse.map (·.id)
+  let sourceAliases ← aliases.mapM fun (name, id) => do
+    let some (_, position) := rowIds.zipIdx.find? (fun entry => entry.fst == id)
+      | throw (.refinement "checked row source alias identity unavailable")
+    return (name, position)
+  let metadata : PsElabCoreRow := {
+    binderCount := rowIds.length
+    patterns := values.map (psCloseElabLambdaBinders closed.context.metaContext bindersRev)
+    aliases := sourceAliases
+    callerValues := outer.localContext.declarations.reverse.map
+      (fun declaration => PsExpr.fvar (psLocalDeclId declaration)) }
+  psElabCoreRowValidate closed.context closed.type metadata
   return (closed.context, {
     term := closed.term, type := closed.type
     binders := opened.bindersRev.reverse.map (·.id)
     slots, numEquations := equationsRev.length
     equationBinders := equationsRev.reverse.map (·.id)
-    aliases })
+    aliases, metadata })
 
 -- Compiler application checks the real field values and then the exact named
 -- proof domains. It neither reopens source syntax nor assumes a branch proof.
@@ -463,6 +476,7 @@ def psElabApplyPatternRow (context : PsElabContext) (row : PsElabCheckedPatternR
     | some entry => pure entry.snd
   let checked ← psElabResolvedTerm context row.term (some row.type)
   let boundary ← psElabCoreBoundaryOpen checked.context .row checked.term checked.type
+    (some row.metadata)
   let applied ← psElabApplyCore boundary.context (.fvar boundary.id) argumentValues
   if equations.length != row.numEquations || row.equationBinders.length != row.numEquations then
     throw (.refinement "checked pattern row equation arity mismatch")

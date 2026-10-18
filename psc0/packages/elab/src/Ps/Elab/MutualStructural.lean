@@ -762,6 +762,10 @@ structure PsElabMutualStructuralChild where
   fieldId : Nat
   slotIndex : Nat
   hypothesis : PsExpr
+  -- Actual arguments used to inspect ancestral reflexive fields. Native
+  -- toBelowAux instantiates these telescopes from the final major's trailing
+  -- arguments; an inline case cannot invent that instantiation.
+  reflexiveArguments : List (List PsExpr) := []
 
 def psElabMutualStructuralChildren (plan : PsElabMutualStructuralPlan)
     (context : PsElabContext) (motives : List PsExpr)
@@ -1275,6 +1279,12 @@ def psElabMutualStructuralCall (plan : PsElabMutualStructuralPlan)
       !(indices.zip family.indices).all (fun pair =>
         psElabMutualStructuralEqual context pair.fst pair.snd) then
     throw (psElabMutualStructuralError "CHILD-INDICES" "peer indices do not match the actual recursive field")
+  for arguments in child.reflexiveArguments do
+    if fieldArgs.length < arguments.length ||
+        !((fieldArgs.drop (fieldArgs.length - arguments.length)).zip arguments).all
+          (fun pair => psElabMutualStructuralEqual context pair.fst pair.snd) then
+      throw (psElabMutualStructuralError "DECREASE"
+        "recursive major does not instantiate its inherited reflexive-field telescope")
   let hypothesis ← psElabApplyCore context child.hypothesis fieldArgs
   let context := hypothesis.context
   psElabMutualStructuralCheckMapping context target actuals
@@ -1697,6 +1707,10 @@ def psElabMutualStructuralDescend (plan : PsElabMutualStructuralPlan)
               targetConstructor.info.numFields != constructor.info.numFields then
             throw (psElabMutualStructuralError "CONSTRUCTOR" "nested minor changes its descendant constructor")
           psElabMutualStructuralDescendantChildren plan inner family.slot targetConstructor fields dictionary
+      let inherited := child.reflexiveArguments ++
+        (if fieldArgs.isEmpty then [] else [fieldArgs])
+      let nestedChildren := nestedChildren.map fun nested =>
+        { nested with reflexiveArguments := inherited ++ nested.reflexiveArguments }
       let original := psExprApplyMany (.constE owner.recursorName originalLevels)
         (sourceFixed ++ indices ++ [major])
       let some reduced := psReduceIota

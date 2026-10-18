@@ -514,6 +514,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let probe := psLocalPushBinding bodyHeader.localContext probeName declaredType .explicit
   let probeContext := { bodyHeader with
     localContext := probe.context
+    auxiliaryLocalIds := probe.id :: bodyHeader.auxiliaryLocalIds
     structuralRecursion := none
     wellFoundedRecursions := [{
       functionName := header.functionName, callbackName := probeName
@@ -586,6 +587,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let callback := psLocalPushBinding bodyHeader.localContext callbackName sourceCallbackType .explicit
   let bodyContext := { bodyHeader with
     localContext := callback.context
+    auxiliaryLocalIds := callback.id :: bodyHeader.auxiliaryLocalIds
     structuralRecursion := none
     wellFoundedRecursions := [{
       functionName := header.functionName, callbackName := callbackName

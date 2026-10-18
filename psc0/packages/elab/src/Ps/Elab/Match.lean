@@ -2,6 +2,70 @@ import Ps.Elab.Equality
 import Ps.Elab.Application
 import Ps.Elab.GroupElimination
 
+-- A source equation keeps its original expression and its real checked proof.
+-- Source binders expose homogeneous Eq exactly when the actual types align.
+structure PsElabSourceMatchEquation where
+  original : PsExpr
+  proof : PsExpr
+  type : PsExpr
+
+def psElabSourceMatchEquationConvert (context : PsElabContext)
+    (type proof expected : PsExpr) : Except PsElabError PsElabTermResult := do
+  let checked ← psElabResolvedTerm context proof (some type)
+  let context := checked.context
+  if psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext
+      checked.type expected then
+    return ← psElabResolvedTerm context checked.term (some expected)
+  let actual := psExprAppView (psWhnf context.environment context.metaContext context.localContext checked.type)
+  let wanted := psExprAppView (psWhnf context.environment context.metaContext context.localContext expected)
+  match actual.head, wanted.head with
+  | .constE name _, .constE target _ =>
+    if psNameEq name psEqName && psNameEq target (psRootName "HEq") then
+      let equation ← psElabEquationView context checked.type checked.term
+      let result := fun right => psExprApplyMany (.constE (psRootName "HEq") [equation.level])
+        [equation.type, equation.left, equation.type, right]
+      let base := psExprApplyMany (.constE (psNameAppendStr (psRootName "HEq") "refl") [equation.level])
+        [equation.type, equation.left]
+      let proof ← psElabEquationRec context equation result base
+      return ← psElabResolvedTerm context proof (some expected)
+    if psNameEq name (psRootName "HEq") && psNameEq target psEqName then
+      let equation ← psElabEquationView context checked.type checked.term
+      return ← psElabResolvedTerm context equation.proof (some expected)
+    psElabResolvedTerm context checked.term (some expected)
+  | _, _ => psElabResolvedTerm context checked.term (some expected)
+
+def psElabSourceMatchEquationNormalize (context : PsElabContext)
+    (source : PsElabSourceMatchEquation) :
+    Except PsElabError (PsElabContext × PsElabSourceMatchEquation) := do
+  let checked ← psElabResolvedTerm context source.proof (some source.type)
+  let context := checked.context
+  let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext checked.type)
+  match view.head, view.args with
+  | .constE name [level], [leftType, left, rightType, right] =>
+    if psNameEq name (psRootName "HEq") &&
+        psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext leftType rightType then
+      let target := psLogicEq level leftType left right
+      let result ← psElabSourceMatchEquationConvert context checked.type checked.term target
+      return (result.context, { source with proof := result.term, type := result.type })
+    return (context, { source with proof := checked.term, type := checked.type })
+  | _, _ => return (context, { source with proof := checked.term, type := checked.type })
+
+def psElabSourceMatchEquationType (context : PsElabContext)
+    (original current : PsExpr) (retainHEq : Bool) : Except PsElabError PsExpr := do
+  let (type, _) ← psElabIndexEquation context original current
+  let view := psExprAppView type
+  match view.head, view.args with
+  | .constE name [level], [domain, left, right] =>
+    if retainHEq && psNameEq name psEqName then
+      return psExprApplyMany (.constE (psRootName "HEq") [level]) [domain, left, domain, right]
+    return type
+  | _, _ => return type
+
+def psElabSourceMatchProofIds (source : Option PsElabSourceMatchEquation) : List Nat :=
+  match source with
+  | some { proof := .fvar id, .. } => [id]
+  | _ => []
+
 -- Branch consumers receive typed elimination metadata; patterns and tactics
 -- share refinement without reconstructing fields or induction hypotheses.
 structure PsElabMatchBranch where
@@ -10,6 +74,8 @@ structure PsElabMatchBranch where
   fields : List PsElabTypedBinder
   hypotheses : List PsElabTypedBinder
   clearedIds : List Nat
+  refinements : PsElabRefinements := []
+  sourceEquation? : Option PsElabSourceMatchEquation := none
 
 structure PsElabMatchAlternative where
   constructorName : PsName
@@ -132,6 +198,10 @@ structure PsElabMatchPlan where
   generalized : List PsElabDependentLocal
   constraints : List PsExpr
   arguments : List PsExpr
+  sourceEquation? : Option PsElabSourceMatchEquation := none
+  indexArguments : List PsExpr := []
+  sourceIndices : List PsExpr := []
+  argumentMetaContext? : Option PsMetaContext := none
 
 def psElabMatchIndexMap (parameters indices : List PsExpr) : List (Nat × Nat) :=
   (indices.zipIdx).filterMap fun entry =>
@@ -142,14 +212,33 @@ def psElabMatchIndexMap (parameters indices : List PsExpr) : List (Nat × Nat) :
       else none
     | _ => none
 
+-- Retained Matrix values need their earlier type/value dependencies as well.
+-- This backwards closure does not inspect source RHS names.
+def psElabMatchRequiredDependencies (context : PsElabContext) (ids : List Nat) : List Nat :=
+  context.localContext.declarations.foldl (fun required declaration =>
+    if required.contains (psLocalDeclId declaration) then
+      let type := psMetaInstantiate context.metaContext (psLocalDeclType declaration)
+      let valueIds := match declaration with
+        | .binding .. => []
+        | .letDecl _ _ _ value => psExprFVarIds (psMetaInstantiate context.metaContext value)
+      (required ++ psExprFVarIds type ++ valueIds).eraseDups
+    else required) ids
+
 def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
     (levels : List PsLevel) (parameters indices : List PsExpr)
-    (major expected : PsExpr) : Except PsElabError PsElabMatchPlan := do
+    (major expected : PsExpr)
+    (generalizedIds? : Option (List Nat) := none) (requiredIds : List Nat := [])
+    (sourceEquation? : Option PsElabSourceMatchEquation := none)
+    (protectedIds : List Nat := []) (sourceIndices : List PsExpr := []) :
+    Except PsElabError PsElabMatchPlan := do
+  if !sourceIndices.isEmpty && sourceIndices.length != indices.length then
+    throw (.refinement "source match index metadata arity mismatch")
   let type := psExprInstantiateLevelParams info.levelParams levels info.type
   let cursor ← psElabMatchApplyParameters context parameters type
   let opened ← psElabOpenCoreTelescope 4096 context cursor (some info.numIndices)
   let freshIndices := psElabBinderArguments opened.bindersRev
-  let indexMap := psElabMatchIndexMap parameters indices
+  let indexMap := (psElabMatchIndexMap parameters indices).filter
+    (fun entry => !protectedIds.contains entry.fst)
   let constrained := indexMap.length != indices.length
   let indexMap := if constrained then [] else indexMap
   let substitutions := indexMap.filterMap fun entry =>
@@ -160,28 +249,48 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
     | .fvar id => if parameters.any (psElabExprContainsLocal id) ||
         indices.any (psElabExprContainsLocal id) then none else some id
     | _ => none
-  -- A constrained motive keeps outer indices in their original scope. Only
-  -- equality elimination may generalize them and their dependent values.
+  -- Outer source indices remain rigid. A source-only typed retry may add a
+  -- checked private index telescope; automatic constraints cannot rename them.
   let constraintVariables := if !constrained then [] else
     context.localContext.declarations.filterMap fun declaration =>
       let id := psLocalDeclId declaration
-      if indices.any (psElabExprContainsLocal id) &&
+      if !protectedIds.contains id && indices.any (psElabExprContainsLocal id) &&
           !(parameters.any (psElabExprContainsLocal id)) then some id else none
   let roots := indexMap.map Prod.fst ++ majorId.toList
-  let dependents := psElabDependentLocals context roots []
-  let generalized := if constrained then [] else dependents
+  let dependents := psElabDependentLocals context roots
+    (protectedIds ++ psElabSourceMatchProofIds sourceEquation?)
+  let required := psElabMatchRequiredDependencies context
+    (requiredIds ++ generalizedIds?.getD [])
+  let generalized := if constrained then [] else
+    dependents.filter fun entry => generalizedIds?.isNone || required.contains entry.binder.id
   let body := psElabCloseDependentType generalized expected
   let body := if constrained then body else
     psElabSubstituteLocals (substitutions ++ majorId.toList.map (fun id => (id, .fvar pushed.id))) body
-  -- Keep the original major and its dependent context in the target. After
-  -- the index constraints align its type, the final major equation transports
-  -- both together through the shared dependent equality eliminator.
+  let equalityContext := psElabContextWithLocal opened.context pushed.context
   let equations ← if !constrained then pure [] else do
-    let equalityContext := psElabContextWithLocal opened.context pushed.context
     let indexEquations ← (freshIndices.zip indices).mapM fun (fresh, original) =>
       psElabIndexEquation equalityContext fresh original
     let majorEquation ← psElabIndexEquation equalityContext (.fvar pushed.id) major
     pure (indexEquations ++ [majorEquation])
+  -- This source slot is separate from the automatic constraint queue. Build
+  -- its ORIGINAL side after ordinary abstraction so no current-index/major
+  -- substitution can sweep through the preserved source expression or type.
+  let (body, sourceArguments, argumentMetaContext?) ← match sourceEquation? with
+    | none => pure (body, [], none)
+    | some source => do
+      let sourceView := psExprAppView
+        (psWhnf context.environment context.metaContext context.localContext source.type)
+      let retainHEq := match sourceView.head with
+        | .constE name _ => psNameEq name (psRootName "HEq")
+        | _ => false
+      let equationType ← psElabSourceMatchEquationType equalityContext source.original
+        (.fvar pushed.id) retainHEq
+      let atActual := (freshIndices.zip indices).filterMap fun (fresh, actual) =>
+        match fresh with | .fvar id => some (id, actual) | _ => none
+      let actualType := psElabSubstituteLocals (atActual ++ [(pushed.id, major)]) equationType
+      let argument ← psElabSourceMatchEquationConvert context source.type source.proof actualType
+      pure (.forallE (psRootName "_sourceEq") equationType body .explicit,
+        [argument.term], some argument.context.metaContext)
   let body := (equations.zipIdx).foldr (fun entry body =>
     psLogicPi (pushed.id + 1 + entry.snd) "_indexEq" entry.fst.fst body) body
   let motive := psCloseElabLambdaBinders context.metaContext opened.bindersRev
@@ -189,8 +298,8 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
   return {
     motive, indices := indexMap, majorId, constraintVariables, generalized
     constraints := equations.map Prod.fst
-    arguments := equations.map Prod.snd ++
-      psElabDependentArguments generalized }
+    arguments := equations.map Prod.snd ++ sourceArguments ++ psElabDependentArguments generalized
+    sourceEquation?, indexArguments := indices, sourceIndices, argumentMetaContext? }
 
 def psElabMatchFields (names : List PsSyntaxName) (context : PsElabContext)
     (cursor : PsExpr) (bindersRev : List PsElabTypedBinder := []) :
@@ -219,7 +328,8 @@ def psElabMatchHypotheses (fields : List PsElabTypedBinder) (recursiveFields : L
       context.localContext cursor).mapError PsElabError.infer
     let name := psNameAppendNum (psRootName "_ih") index
     let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
-    let next := psElabContextWithLocal context pushed.context
+    let next := { context with localContext := pushed.context
+      auxiliaryLocalIds := pushed.id :: context.auxiliaryLocalIds }
     let next := match context.structuralRecursion with
       | some recursion => if recursion.collectCalls && visibleFields.contains index then
           psElabContextWithStructuralRecursion next
@@ -277,18 +387,30 @@ def psElabMatchMinorWithHypotheses (context : PsElabContext)
     visibleFields aliases.context fields.body
   let visibleHypotheses := (ctor.recursiveFields.zip hypotheses.bindersRev.reverse).filterMap
     (fun (index, binder) => if visibleFields.contains index then some binder else none)
-  let finish := fun context target => do
+  let finish := fun (refinements : PsElabRefinements) (context : PsElabContext) (target : PsExpr) => do
     let some alternative := alternative | throw PsElabError.matchNonExhaustive
+    let (equationContext, branchTarget, equationBinder?, sourceEquation?) ← match plan.sourceEquation? with
+      | none => pure (context, target, none, none)
+      | some source => do
+        let pi ← (psInferEnsureForall context.environment context.metaContext
+          context.localContext target).mapError PsElabError.infer
+        if !psBinderInfoEq pi.binder .explicit then throw .matchRecursorUnsupported
+        let name := psNameAppendNum (psRootName "$psc0MatchEquation") context.localContext.nextId
+        let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
+        let inner := psElabContextWithLocal context pushed.context
+        let (inner, equation) ← psElabSourceMatchEquationNormalize inner {
+          original := source.original, proof := .fvar pushed.id, type := pi.domain }
+        pure (inner, psExprInstantiate1 pi.body (.fvar pushed.id),
+          some (PsElabTypedBinder.mk pushed.id name pi.domain pi.binder), some equation)
     let generalized ← psElabOpenDependents plan.generalized {
-      context, body := target, bindersRev := [], aliasesRev := []
-      replacements := substitutions }
+      context := equationContext, body := branchTarget, bindersRev := [], aliasesRev := []
+      replacements := substitutions ++ refinements }
     let majorIds := plan.majorId.toList
     let clearedIds := majorIds ++ plan.generalized.map (·.binder.id) ++
       aliases.sourcesRev.filterMap (fun (original, alias) =>
         if majorIds.contains original then some alias else none)
-    -- A cases specialization cannot expose a companion motive's dummy result
-    -- as an induction hypothesis. Keep the real binders for the recursor term,
-    -- but remove them from source name resolution and new proof-goal contexts.
+    -- Retain real recursor binders while keeping dummy companion hypotheses
+    -- outside source name resolution and new proof-goal contexts.
     let visibleIds := visibleHypotheses.map (·.id)
     let hidden := hypotheses.bindersRev.filterMap
       (fun binder => if visibleIds.contains binder.id then none else some binder.id)
@@ -301,12 +423,22 @@ def psElabMatchMinorWithHypotheses (context : PsElabContext)
       target := generalized.body
       fields := fields.bindersRev.reverse
       hypotheses := visibleHypotheses
-      clearedIds }
-    psElabCloseDependents context generalized body target
+      clearedIds
+      refinements := generalized.replacements
+      sourceEquation? }
+    let body ← psElabCloseDependents equationContext generalized body branchTarget
+    match equationBinder? with
+    | none => pure body
+    | some binder => psElabAbstract context body.context
+        [.lambdaE binder.id binder.name binder.type binder.binder] body.term target
   let flexible := fields.bindersRev.map (fun binder => binder.id) ++
     plan.constraintVariables ++ (if plan.constraints.isEmpty then [] else plan.majorId.toList)
-  let body ← psElabSolveIndexConstraints 256 plan.constraints.length flexible (hypotheses.bindersRev.map (fun binder => binder.id))
-    finish hypotheses.context hypotheses.body
+  let requests := ((plan.sourceIndices.zip indices).zip plan.indexArguments).map
+    fun ((original, left), right) =>
+      ({ original, left, right, named := plan.sourceEquation?.isSome } : PsElabIndexRefinementCandidate)
+  let body ← psElabSolveIndexConstraintsWithRefinements 256 plan.constraints.length flexible
+    (hypotheses.bindersRev.map (fun binder => binder.id) ++ psElabSourceMatchProofIds plan.sourceEquation?)
+    finish [] hypotheses.context hypotheses.body requests
   let closed ← psElabAbstract context body.context
     (psElabAliasAbstractions aliases.valuesRev ++
       psElabLambdaAbstractions hypotheses.bindersRev ++ psElabLambdaAbstractions fields.bindersRev)
@@ -378,13 +510,28 @@ def psElabMatchMotiveLevel (context : PsElabContext) (motive : PsExpr) :
   (psInferEnsureSort context.environment context.metaContext
     telescope.context.localContext telescope.body).mapError PsElabError.infer
 
-def psElabMatchWith (elaborate : PsElaborator)
+-- Typed consumers retain their actual discriminant and type across refinement.
+-- Recheck that pair in its current context; no source name is resolved again.
+def psElabMatchTypedWith
     (prepare : PsElabContext -> PsInductiveInfo -> Except PsElabError (List PsElabMatchAlternative))
-    (context : PsElabContext) (scrutineeSyntax : PsSyntaxTerm)
-    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+    (scrutinee : PsElabTermResult) (expected : Option PsExpr)
+    (equationName? : Option PsSyntaxName := none)
+    (generalizing? : Option Bool := none)
+    (generalizedIds? : Option (List Nat) := none)
+    (requiredIds : List Nat := [])
+    (sourceEquation? : Option PsElabSourceMatchEquation := none)
+    (protectedIds : List Nat := []) (sourceIndices : List PsExpr := []) :
+    Except PsElabError PsElabTermResult := do
   let some expectedType := expected | throw .matchExpectedType
-  let scrutinee ← elaborate context scrutineeSyntax none
-  let context := scrutinee.context
+  let scrutinee ← psElabResolvedTerm scrutinee.context scrutinee.term (some scrutinee.type)
+  let context ← match sourceEquation? with
+    | none => pure scrutinee.context
+    | some source => do
+      let (type, _) ← psElabIndexEquation scrutinee.context source.original scrutinee.term
+      let checked ← psElabSourceMatchEquationConvert scrutinee.context source.type source.proof type
+      pure checked.context
+  if equationName?.isSome != sourceEquation?.isSome then
+    throw (.refinement "source match equation metadata/proof ownership mismatch")
   let typeView := psExprAppView
     (psWhnf context.environment context.metaContext context.localContext scrutinee.type)
   let .constE name levels := typeView.head | throw .matchScrutineeUnsupported
@@ -394,7 +541,13 @@ def psElabMatchWith (elaborate : PsElaborator)
   let parameters := typeView.args.take info.numParams
   let indices := typeView.args.drop info.numParams
   let expectedType := psWhnfCore context.metaContext context.localContext expectedType
+  let generalizedIds? := if generalizedIds?.isSome then generalizedIds? else
+    if generalizing? == some false then some [] else none
   let plan ← psElabMatchMotive context info levels parameters indices scrutinee.term expectedType
+    generalizedIds? requiredIds sourceEquation? protectedIds sourceIndices
+  let context := match plan.argumentMetaContext? with
+    | some metaContext => psElabContextWithMeta context metaContext
+    | none => context
   -- Reverted dependent parameters can raise the motive's universe above that
   -- of the original expected result. Infer the completed motive, not a proxy.
   let level ← psElabMatchMotiveLevel context plan.motive
@@ -436,3 +589,13 @@ def psElabMatchWith (elaborate : PsElaborator)
   psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
 
 
+
+-- Syntax and tactic callers keep their existing default behavior. Source
+-- matrices enter through the typed interface after their one input elaboration.
+def psElabMatchWith (elaborate : PsElaborator)
+    (prepare : PsElabContext -> PsInductiveInfo -> Except PsElabError (List PsElabMatchAlternative))
+    (context : PsElabContext) (scrutineeSyntax : PsSyntaxTerm)
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+  let some _ := expected | throw .matchExpectedType
+  let scrutinee ← elaborate context scrutineeSyntax none
+  psElabMatchTypedWith prepare scrutinee expected

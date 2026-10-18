@@ -392,21 +392,27 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return {
         term := .ifE name condition.term yes.term no.term span
         used := psScopeUnion condition.used (psScopeUnion yes.used no.used) }
-    | .matchMany scrutinees alternatives span =>
-      let scrutinees ← scrutinees.mapM (visit bound)
+    | .matchMany discriminants alternatives generalizing? span =>
+      let equationKeys := (psSyntaxMatchEquationNames discriminants).map psScopeKey
+      let discriminants ← discriminants.mapM fun discriminant => do
+        let term ← visit bound discriminant.term
+        return (discriminant, term)
       let alternatives ← alternatives.mapM fun (patterns, body, bodySpan) => do
         let patterns ← patterns.mapM (psScopePattern fuel resolver)
         let names := patterns.flatMap (psSyntaxPatternNames 4096)
         let keys := names.map psScopeKey
         if keys.any (fun key => (keys.filter (· == key)).length > 1) then
           throw (.scope "duplicate pattern variable")
-        let body ← visit (keys ++ bound) body
+        -- Native withEqs extends the RHS scope after every pattern binder.
+        let body ← visit (equationKeys ++ keys ++ bound) body
         return (patterns, body, bodySpan)
       return {
-        term := .matchMany (scrutinees.map (·.term))
-          (alternatives.map fun (patterns, body, bodySpan) => (patterns, body.term, bodySpan)) span
+        term := .matchMany
+          (discriminants.map fun (discriminant, term) => { discriminant with term := term.term })
+          (alternatives.map fun (patterns, body, bodySpan) => (patterns, body.term, bodySpan))
+          generalizing? span
         used := alternatives.foldl (fun acc alt => psScopeUnion acc alt.snd.fst.used)
-          (scrutinees.foldl (fun acc item => psScopeUnion acc item.used) []) }
+          (discriminants.foldl (fun acc item => psScopeUnion acc item.snd.used) []) }
     | _ => return { term := source }
 
 def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxName :=

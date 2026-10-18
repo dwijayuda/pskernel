@@ -288,6 +288,7 @@ lean_lib PsElab where
     `Ps.Elab.GroupElimination,
     `Ps.Elab.Equality,
     `Ps.Elab.Match,
+    `Ps.Elab.MatchGeneralization,
     `Ps.Elab.PatternMatrix,
     `Ps.Elab.Conditional,
     `Ps.Elab.Do,

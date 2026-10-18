@@ -325,13 +325,8 @@ def psElabTermWithFuel
                   thenBranch
                   elseBranch
                   expected
-            | .matchMany scrutinee alternatives _ =>
-                psElabMatchMatrix
-                  smaller
-                  context
-                  scrutinee
-                  alternatives
-                  expected
+            | .matchMany discriminants alternatives generalizing? _ =>
+                psElabMatchMatrixSource smaller context discriminants alternatives generalizing? expected
             | .app fn args _ =>
                 -- An adjacent empty call has its own completion path above.
                 match args with

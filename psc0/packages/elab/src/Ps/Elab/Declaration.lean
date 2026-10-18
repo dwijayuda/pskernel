@@ -183,8 +183,8 @@ def psElabStructuralRecursionFromSource
     (resultType : PsExpr) :
     Option PsElabStructuralRecursion :=
   match body with
-  | .matchMany [scrutinee] _ _ =>
-      match scrutinee with
+  | .matchMany [scrutinee] _ _ _ =>
+      match scrutinee.term with
       | .reference scrutineeName =>
           match psSyntaxNameToName scrutineeName with
           | none =>

@@ -58,6 +58,7 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .data message => "PSCV0-DATA: " ++ message
   | .proof message => "PSCV0-PROOF: " ++ message
   | .refinement message => "PSCV0-MATCH: " ++ message
+  | .sourceMatchIndexRefinement _ _ cause => psCompilerPscv0ElabError cause
   | .matchNonExhaustive => "PSCV0-MATCH: missing feasible constructor branch"
   | .invalidArgument message => "PSCV0-ARGUMENT: " ++ message
   | .invalidNatural value => "PSCV0-LITERAL: invalid natural " ++ value

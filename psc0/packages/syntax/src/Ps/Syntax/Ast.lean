@@ -107,6 +107,17 @@ inductive PsSyntaxArgumentPlacement where
   | namedPriority
   deriving BEq
 
+-- A match equation name is source metadata. The discriminant itself is
+-- elaborated once; equation scope begins only in the alternative body.
+structure PsSyntaxMatchDiscriminant (α : Type) where
+  term : α
+  equationName? : Option PsSyntaxName := none
+
+def psSyntaxMatchEquationNames {α : Type}
+    (discriminants : List (PsSyntaxMatchDiscriminant α)) : List PsSyntaxName :=
+  discriminants.filterMap fun discriminant =>
+    discriminant.equationName?.filter fun name => name.segments != ["_"]
+
 mutual
 inductive PsSyntaxTerm where
   | doE (items : List PsSyntaxDoItem) (span : PsSourceSpan)
@@ -160,8 +171,9 @@ inductive PsSyntaxTerm where
       (elseBranch : PsSyntaxTerm)
       (span : PsSourceSpan)
   | matchMany
-      (scrutinees : List PsSyntaxTerm)
+      (discriminants : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
       (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+      (generalizing? : Option Bool)
       (span : PsSourceSpan)
 
 -- Do is source control syntax. Effect selection belongs to typed elaboration.
@@ -221,7 +233,8 @@ def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTe
 def PsSyntaxTerm.matchE (scrutinee : PsSyntaxTerm)
     (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .matchMany [scrutinee] (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) span
+  .matchMany [{ term := scrutinee }]
+    (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) none span
 
 def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan :=
   { start := start.start, stop := stop.stop }
@@ -249,7 +262,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .forallE _ _ span => span
   | .letE _ _ _ _ span | .haveE _ _ _ _ span => span
   | .ifE _ _ _ _ span => span
-  | .matchMany _ _ span => span
+  | .matchMany _ _ _ span => span
 
 def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
   | .natural _ span => span

@@ -65,8 +65,9 @@ def psElabMutualStructuralPeers (context : PsElabContext) (captures : List PsExp
         throw (psElabMutualStructuralError "OWNERSHIP" "local peer alias is shadowed")
       let type ← psElabMutualStructuralApplyType state.fst entry.fst.fst.type captures
       let pushed := psLocalPushBinding state.fst.localContext alias type .explicit
-      return (psElabContextWithLocal state.fst pushed.context,
-        state.snd ++ [(pushed.id, entry.snd)])) (context, [])
+      let context := { state.fst with localContext := pushed.context
+        auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+      return (context, state.snd ++ [(pushed.id, entry.snd)])) (context, [])
 
 -- This boundary consumes a checked Core body, not lifted or reconstructed
 -- source syntax. Full peers have already been specialized at the validated
@@ -120,7 +121,7 @@ def psElabMutualStructuralInputFor (captured : PsElabTypedBindersResult)
   let .definition _ _ _ sourceBody span := member.source
     | throw (psElabMutualStructuralError "STRATEGY" "expected an ordinary body")
   match sourceBody with
-  | .matchMany [.reference _] _ _ => pure ()
+  | .matchMany [⟨.reference _, _⟩] _ _ _ => pure ()
   | _ => throw (psElabMutualStructuralError "ROOT" "selected direct structural body requires a root match on one explicit header parameter")
   let (context, peers) ← psElabMutualStructuralPeers header.context
     (psElabBinderArguments captured.bindersRev) headers members

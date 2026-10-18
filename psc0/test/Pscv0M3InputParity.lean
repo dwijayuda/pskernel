@@ -248,6 +248,136 @@ def m3recursors (flag : Bool) : UInt64 :=
 example : m3recursors true = 251417 := rfl
 example : m3recursors false = 241312 := rfl
 
+def matchDefault (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=
+  match a with
+  | true => h1 (Eq.refl true)
+  | false => h2 (Eq.refl false)
+
+def matchTrue (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=
+  match (generalizing := true) a with
+  | true => h1 (Eq.refl true)
+  | false => h2 (Eq.refl false)
+
+def matchFalse (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=
+  match (generalizing := false) h : a with
+  | true => h1 h
+  | false => h2 h
+
+def matchLets (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=
+  let first : a = true → Nat := h1
+  let second : a = false → Nat := h2
+  match h : a with
+  | true => first h
+  | false => second h
+
+def matchComputed (a : Bool) (h1 : Bool.not a = true → Nat)
+    (h2 : Bool.not a = false → Nat) : Nat :=
+  match h : Bool.not a with
+  | true => h1 h
+  | false => h2 h
+
+def matchMixed (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=
+  match a, Bool.not a with
+  | true, false => h1 (Eq.refl true)
+  | false, true => h2 (Eq.refl false)
+  | _, _ => 0
+
+def matchOriginalValue (a b : Bool) (h : a = b) : Nat := if b then 13 else 17
+
+def matchOriginal (a : Bool) : Nat :=
+  match h : a with
+  | true => matchOriginalValue a true h
+  | false => matchOriginalValue a false h
+
+theorem matchDependentTarget (a : Bool) (h : a = a) : h = h :=
+  match a with
+  | true => Eq.refl h
+  | false => Eq.refl h
+
+def m3matches (flag : Bool) : UInt64 :=
+  let first : flag = true → Nat := fun (_ : flag = true) => 3
+  let second : flag = false → Nat := fun (_ : flag = false) => 5
+  let computedFirst : Bool.not flag = true → Nat := fun (_ : Bool.not flag = true) => 7
+  let computedSecond : Bool.not flag = false → Nat := fun (_ : Bool.not flag = false) => 11
+  UInt64.ofNat (matchDefault flag first second +
+    10 * matchTrue flag first second +
+    100 * matchFalse flag first second +
+    1000 * matchLets flag first second +
+    10000 * matchComputed flag computedFirst computedSecond +
+    100000 * matchMixed flag first second +
+    1000000 * matchOriginal flag)
+
+example : m3matches true = 13413333 := rfl
+example : m3matches false = 17575555 := rfl
+
+class MatchPolicyWitness (a : Bool) where
+  mark : Nat
+
+def matchInstanceOriginal (a : Bool) (w : MatchPolicyWitness a)
+    (b : Bool) (h : a = b) : True := True.intro
+
+theorem matchInstance (a : Bool) [w : MatchPolicyWitness a] : True :=
+  match h : a with
+  | true => matchInstanceOriginal a w true h
+  | false => matchInstanceOriginal a w false h
+
+def matchAux (n : Nat) : Nat :=
+  match h : n with
+  | 0 => 0
+  | Nat.succ k => Nat.succ (matchAux k)
+termination_by n
+decreasing_by
+  exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)
+
+example (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match (generalizing := false) a with
+      | true => h1 (Eq.refl true)
+      | false => h2 (Eq.refl false)
+  exact True.intro
+
+example (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match h : a with
+      | true => h1 h
+      | false => h2 h
+  exact True.intro
+
+example (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match (generalizing := true) h : a with
+      | true => h1 h
+      | false => h2 h
+  exact True.intro
+
+example (a : Bool) (h1 : Bool.not a = true → Nat) (h2 : Bool.not a = false → Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match Bool.not a with
+      | true => h1 (Eq.refl true)
+      | false => h2 (Eq.refl false)
+  exact True.intro
+
+example (a : Bool) (h : a = a) : True := by
+  fail_if_success
+    have rejected : h = h :=
+      match (generalizing := false) a with
+      | true => Eq.refl h
+      | false => Eq.refl h
+  exact True.intro
+
+example (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match (generalizing := false) a, Bool.not a with
+      | true, false => h1 (Eq.refl true)
+      | false, true => h2 (Eq.refl false)
+      | _, _ => 0
+  exact True.intro
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -307,6 +437,18 @@ private def recursorLeanSource : String :=
 private def recursorPsSource : String :=
   "function recursorNat(n: Nat): Nat :=\n  Nat.rec(3, succ := fun (k: Nat) (ih: Nat) => ih + k + 2,\n    t := n, motive := fun (_: Nat) => Nat)\nfunction recursorExcept(value: Except(Nat, Nat)): Nat :=\n  Except.rec(fun (n: Nat) => n + 10, ok := fun (n: Nat) => n + 20,\n    t := value, motive := fun (_: Except(Nat, Nat)) => Nat)\ntheorem recursorEmpty(value: Empty): value = value :=\n  Empty.rec(fun (t: Empty) => t = t, value)\ntheorem recursorFalse(h: False): h = h :=\n  False.rec(fun (t: False) => t = t, h)\ntheorem recursorNatZero: recursorNat(0) = 3 := by { rfl }\ntheorem recursorExceptError(n: Nat): recursorExcept(Except.error(n)) = n + 10 := by { rfl }\ntheorem recursorExceptOk(n: Nat): recursorExcept(Except.ok(n)) = n + 20 := by { rfl }\nfunction m3recursors(flag: Bool): UInt64 :=\n  let n := if (flag) { 4 } else { 3 }\n  let error: Except(Nat, Nat) := Except.error(n)\n  let ok: Except(Nat, Nat) := Except.ok(n + 1)\n  UInt64.ofNat(recursorNat(n) + 100 * recursorExcept(error) + 10000 * recursorExcept(ok))\n"
 
+private def matchLeanSource : String :=
+  "def matchDefault (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match a with\n  | true => h1 (Eq.refl true)\n  | false => h2 (Eq.refl false)\n\ndef matchTrue (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := true) a with\n  | true => h1 (Eq.refl true)\n  | false => h2 (Eq.refl false)\n\ndef matchFalse (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := false) h : a with\n  | true => h1 h\n  | false => h2 h\n\ndef matchLets (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  let first : a = true → Nat := h1\n  let second : a = false → Nat := h2\n  match h : a with\n  | true => first h\n  | false => second h\n\ndef matchComputed (a : Bool) (h1 : Bool.not a = true → Nat)\n    (h2 : Bool.not a = false → Nat) : Nat :=\n  match h : Bool.not a with\n  | true => h1 h\n  | false => h2 h\n\ndef matchMixed (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match a, Bool.not a with\n  | true, false => h1 (Eq.refl true)\n  | false, true => h2 (Eq.refl false)\n  | _, _ => 0\n\ndef matchOriginalValue (a b : Bool) (h : a = b) : Nat := if b then 13 else 17\n\ndef matchOriginal (a : Bool) : Nat :=\n  match h : a with\n  | true => matchOriginalValue a true h\n  | false => matchOriginalValue a false h\n\ntheorem matchDependentTarget (a : Bool) (h : a = a) : h = h :=\n  match a with\n  | true => Eq.refl h\n  | false => Eq.refl h\n\ndef m3matches (flag : Bool) : UInt64 :=\n  let first : flag = true → Nat := fun (_ : flag = true) => 3\n  let second : flag = false → Nat := fun (_ : flag = false) => 5\n  let computedFirst : Bool.not flag = true → Nat := fun (_ : Bool.not flag = true) => 7\n  let computedSecond : Bool.not flag = false → Nat := fun (_ : Bool.not flag = false) => 11\n  UInt64.ofNat (matchDefault flag first second +\n    10 * matchTrue flag first second +\n    100 * matchFalse flag first second +\n    1000 * matchLets flag first second +\n    10000 * matchComputed flag computedFirst computedSecond +\n    100000 * matchMixed flag first second +\n    1000000 * matchOriginal flag)\n"
+
+private def matchPsSource : String :=
+  "function matchDefault(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match a with {\n  | true => h1(Eq.refl(true))\n  | false => h2(Eq.refl(false))\n  }\n\nfunction matchTrue(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := true) a with {\n  | true => h1(Eq.refl(true))\n  | false => h2(Eq.refl(false))\n  }\n\nfunction matchFalse(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := false) h: a with {\n  | true => h1(h)\n  | false => h2(h)\n  }\n\nfunction matchLets(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  let first: a = true -> Nat := h1\n  let second: a = false -> Nat := h2\n  match h: a with {\n  | true => first(h)\n  | false => second(h)\n  }\n\nfunction matchComputed(a: Bool, h1: Bool.not(a) = true -> Nat, h2: Bool.not(a) = false -> Nat): Nat :=\n  match h: Bool.not(a) with {\n  | true => h1(h)\n  | false => h2(h)\n  }\n\nfunction matchMixed(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match a, Bool.not(a) with {\n  | true, false => h1(Eq.refl(true))\n  | false, true => h2(Eq.refl(false))\n  | _, _ => 0\n  }\n\nfunction matchOriginalValue(a: Bool, b: Bool, h: a = b): Nat := if (b) { 13 } else { 17 }\n\nfunction matchOriginal(a: Bool): Nat :=\n  match h: a with {\n  | true => matchOriginalValue(a, true, h)\n  | false => matchOriginalValue(a, false, h)\n  }\n\ntheorem matchDependentTarget(a: Bool, h: a = a): h = h :=\n  match a with {\n  | true => Eq.refl(h)\n  | false => Eq.refl(h)\n  }\n\nfunction m3matches(flag: Bool): UInt64 :=\n  let first: flag = true -> Nat := fun (_: flag = true) => 3\n  let second: flag = false -> Nat := fun (_: flag = false) => 5\n  let computedFirst: Bool.not(flag) = true -> Nat := fun (_: Bool.not(flag) = true) => 7\n  let computedSecond: Bool.not(flag) = false -> Nat := fun (_: Bool.not(flag) = false) => 11\n  UInt64.ofNat(matchDefault(flag, first, second) +\n    10 * matchTrue(flag, first, second) +\n    100 * matchFalse(flag, first, second) +\n    1000 * matchLets(flag, first, second) +\n    10000 * matchComputed(flag, computedFirst, computedSecond) +\n    100000 * matchMixed(flag, first, second) +\n    1000000 * matchOriginal(flag))\n"
+
+private def matchPolicyLeanSource : String :=
+  "class MatchPolicyWitness (a : Bool) where\n  mark : Nat\n\ndef matchInstanceOriginal (a : Bool) (w : MatchPolicyWitness a)\n    (b : Bool) (h : a = b) : True := True.intro\n\ntheorem matchInstance (a : Bool) [w : MatchPolicyWitness a] : True :=\n  match h : a with\n  | true => matchInstanceOriginal a w true h\n  | false => matchInstanceOriginal a w false h\n\ndef matchAux (n : Nat) : Nat :=\n  match h : n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (matchAux k)\ntermination_by n\ndecreasing_by\n  exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)\n"
+
+private def matchPolicyPsSource : String :=
+  "class MatchPolicyWitness(a: Bool) where {\n  mark: Nat\n}\n\nfunction matchInstanceOriginal(a: Bool, w: MatchPolicyWitness a, b: Bool, h: a = b): True := True.intro\n\ntheorem matchInstance(a: Bool)[w: MatchPolicyWitness a]: True :=\n  match h: a with {\n  | true => matchInstanceOriginal(a, w, true, h)\n  | false => matchInstanceOriginal(a, w, false, h)\n  }\n\nfunction matchAux(n: Nat): Nat :=\n  match h: n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(matchAux(k))\n  }\ntermination_by n\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(k, t), h), Nat.lt_succ_self(k))\n}\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -349,6 +491,12 @@ private def recursorMotiveTypeFailure : PsElabError → Bool
   | .typeMismatch => true
   | _ => false
 
+private def matchPolicyTypeFailure : PsElabError → Bool
+  | .atDeclaration _ cause => matchPolicyTypeFailure cause
+  | .atContext _ cause => matchPolicyTypeFailure cause
+  | .typeMismatch | .infer .applicationTypeMismatch | .infer .letTypeMismatch => true
+  | _ => false
+
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
@@ -371,6 +519,38 @@ def check (root : System.FilePath) : IO Unit := do
     (← fromExcept (checkedDeclarations .proofScript fieldsPsSource))
   compareCheckedValues (← fromExcept (checkedDeclarations .lean recursorLeanSource))
     (← fromExcept (checkedDeclarations .proofScript recursorPsSource))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean matchLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript matchPsSource))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean matchPolicyLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript matchPolicyPsSource))
+  for (label, leanText, psText) in [
+      ("false keeps handlers at the original major",
+        "def bad (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := false) a with\n  | true => h1 (Eq.refl true)\n  | false => h2 (Eq.refl false)\n",
+        "function bad(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := false) a with {\n  | true => h1(Eq.refl(true))\n  | false => h2(Eq.refl(false))\n  }\n"),
+      ("default generalizes handlers but preserves named equation originals",
+        "def bad (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match h : a with\n  | true => h1 h\n  | false => h2 h\n",
+        "function bad(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match h: a with {\n  | true => h1(h)\n  | false => h2(h)\n  }\n"),
+      ("true generalizes handlers but preserves named equation originals",
+        "def bad (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := true) h : a with\n  | true => h1 h\n  | false => h2 h\n",
+        "function bad(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := true) h: a with {\n  | true => h1(h)\n  | false => h2(h)\n  }\n"),
+      ("computed majors do not seed optional local generalization",
+        "def bad (a : Bool) (h1 : Bool.not a = true → Nat) (h2 : Bool.not a = false → Nat) : Nat :=\n  match Bool.not a with\n  | true => h1 (Eq.refl true)\n  | false => h2 (Eq.refl false)\n",
+        "function bad(a: Bool, h1: Bool.not(a) = true -> Nat, h2: Bool.not(a) = false -> Nat): Nat :=\n  match Bool.not(a) with {\n  | true => h1(Eq.refl(true))\n  | false => h2(Eq.refl(false))\n  }\n"),
+      ("false does not repair a dependent result by optional binding",
+        "theorem bad (a : Bool) (h : a = a) : h = h :=\n  match (generalizing := false) a with\n  | true => Eq.refl h\n  | false => Eq.refl h\n",
+        "theorem bad(a: Bool, h: a = a): h = h :=\n  match (generalizing := false) a with {\n  | true => Eq.refl(h)\n  | false => Eq.refl(h)\n  }\n"),
+      ("false remains false for mixed majors",
+        "def bad (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := false) a, Bool.not a with\n  | true, false => h1 (Eq.refl true)\n  | false, true => h2 (Eq.refl false)\n  | _, _ => 0\n",
+        "function bad(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := false) a, Bool.not(a) with {\n  | true, false => h1(Eq.refl(true))\n  | false, true => h2(Eq.refl(false))\n  | _, _ => 0\n  }\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        ensure (matchPolicyTypeFailure cause)
+          (label ++ " lost its type-checking refusal: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " failed outside elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " was accepted"))
   for (kind, source) in [
       (PsCompilerSourceKind.lean, "inductive Negative where\n  | wrap (f : Negative → Nat)\n"),
       (.proofScript, "inductive Negative where { | wrap(f: Negative -> Nat) }\n")] do
@@ -493,10 +673,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -537,7 +717,8 @@ def check (root : System.FilePath) : IO Unit := do
           ("m3mutual", Lean.toJson (toString (M3InputParityOracle.m3mutual flag).toNat)),
           ("m3strategies", Lean.toJson (toString (M3InputParityOracle.m3strategies flag).toNat)),
           ("m3fields", Lean.toJson (toString (M3InputParityOracle.m3fields flag).toNat)),
-          ("m3recursors", Lean.toJson (toString (M3InputParityOracle.m3recursors flag).toNat))]
+          ("m3recursors", Lean.toJson (toString (M3InputParityOracle.m3recursors flag).toNat)),
+          ("m3matches", Lean.toJson (toString (M3InputParityOracle.m3matches flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, positive dependent function fields with singleton/mutual recursion and explicit induction, native public Nat/Except recursors and Empty/False motives, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, positive dependent function fields with singleton/mutual recursion and explicit induction, native public Nat/Except recursors and Empty/False motives, source match names/generalizing policy with checked equation origins and paired type refusals, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

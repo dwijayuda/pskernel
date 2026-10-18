@@ -1,5 +1,28 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Source-match implementation candidate — qualification pending
+
+The source-match candidate adds the shared named/generalizing AST metadata,
+grammar-specific parsers/printers, the checked complete discriminant/dependent
+local telescope, real Eq/HEq proof slots, and saved-scope typed index retry.
+Optional source policy keeps let/instance/auxiliary recursion exclusions separate
+from mandatory refinement transport. Both source adapters enter the same typed
+matrix and selected kernel relation.
+
+The paired input fixture now includes native acceptance/refusal controls,
+matching actual .lean/.ps input strings, declaration/Core comparison, and the
+eighth runtime export m3matches (true13413333; false17575555). All seven existing
+exports, refusal checks, selected recursor pins, workflow commands and resource
+budgets are retained. This is an implementation candidate, not successful CI
+evidence; inspect the exact commit's preparation jobs before recording results.
+
+Review and completion continue on nested source-binding visibility and the
+shared structural owner for computed uniform parameters, returned-function
+binders, and complete nested elimination slots. No direct-field-only probe is
+evidence for recursive calls beneath a nested container. All six written exits
+remain the denominator, with Native/M3/F1/F2/F3 still required on one final SHA.
+Main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058.
+
 Read AI_WORK_STATE.md, the canonical PSCV0_LANGUAGE_REFERENCE_v7.2.md,
 ARCHITECTURE.md, native roadmap and six-exit ledger. Continue implementation,
 not a status-only response. Fetch fresh main/preparation refs and exact-SHA CI

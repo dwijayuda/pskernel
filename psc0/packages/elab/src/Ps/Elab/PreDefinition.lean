@@ -146,7 +146,8 @@ def psElabPreDefinitionParameterOwners (environment : PsEnvironment)
   let declarations := members.map fun member =>
     PsLocalDecl.binding member.peerId member.name member.type .explicit
   let context := { psElabContextEmpty environment levels with
-    localContext := { nextId, declarations } }
+    localContext := { nextId, declarations }
+    auxiliaryLocalIds := ids }
   let targets := members.map fun member =>
     ({ peerId := member.peerId, name := member.name
        arity := psElabPreDefinitionHeaderCount member } : PsElabRecursionCallTarget)
@@ -291,7 +292,9 @@ def psElabPreDefinitionStructural (environment : PsEnvironment)
         let _ ← psElabExpressionSort state.fst type
         let name := PsName.num (psRootName "$psc0PreDefinitionPeer") index
         let pushed := psLocalPushBinding state.fst.localContext name type .explicit
-        return (psElabContextWithLocal state.fst pushed.context,
+        let context := { state.fst with localContext := pushed.context
+          auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+        return (context,
           state.snd ++ [{ fullId := target.peerId, specializedId := pushed.id, memberIndex := index }]))
       (opened.context, [])
     let body ← psElabPreDefinitionSpecialize 4096 captures peers opened.value

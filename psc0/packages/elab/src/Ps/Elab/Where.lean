@@ -171,8 +171,9 @@ def psElabWherePeers (context : PsElabContext) (headers : List PsElabWhereHeader
     let _ ← (psInferType state.fst.environment state.fst.metaContext state.fst.localContext type).mapError
       PsElabError.infer
     let pushed := psLocalPushBinding state.fst.localContext header.alias type .explicit
-    return (psElabContextWithLocal state.fst pushed.context,
-      state.snd ++ [{ header with peerId := pushed.id }] )) (context, [])
+    let context := { state.fst with localContext := pushed.context
+      auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+    return (context, state.snd ++ [{ header with peerId := pushed.id }] )) (context, [])
 
 def psElabWhereLexicalAliases (context : PsElabContext) (helpers : List PsElabWhereHeader) :
     Except PsElabError (PsElabContext × List (Nat × PsExpr)) := do
@@ -203,7 +204,8 @@ def psElabWhereParentBodies (shared : PsElabContext) (mainPeers : List PsLocalDe
     Except PsElabError (PsElabContext × List PsElabWhereBody) := do
   let parentScope := { parent.context with
     localContext := { parent.context.localContext with
-      declarations := mainPeers ++ parent.context.localContext.declarations } }
+      declarations := mainPeers ++ parent.context.localContext.declarations }
+    auxiliaryLocalIds := mainPeers.map psLocalDeclId ++ parent.context.auxiliaryLocalIds }
   let parentContext := psElabWhereEnter shared parentScope
   let (headerContext, helpers) ← locals.foldlM
     (fun (state : PsElabContext × List PsElabWhereHeader) localDefinition => do
@@ -324,7 +326,9 @@ def psElabWhereLift (shared : PsElabContext) (availableLevels : List PsName)
       let sort ← (psInferType state.fst.environment psMetaEmpty psLocalEmpty type).mapError PsElabError.infer
       let _ ← (psInferEnsureSort state.fst.environment psMetaEmpty psLocalEmpty sort).mapError PsElabError.infer
       let pushed := psLocalPushBinding state.fst.localContext input.header.alias type .explicit
-      return (psElabContextWithLocal state.fst pushed.context, state.snd ++ [pushed.id]))
+      let context := { state.fst with localContext := pushed.context
+        auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+      return (context, state.snd ++ [pushed.id]))
     (initial, ([] : List Nat))
   let replacements := (inputs.zip fullPeers).map fun (input, id) =>
     (input.header.peerId, psExprApplyMany (.fvar id)

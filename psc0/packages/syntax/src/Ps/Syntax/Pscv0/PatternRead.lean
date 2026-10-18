@@ -116,6 +116,53 @@ def psPscv0Discriminants (read : PsPscv0TermReader) (fuel : Nat) (cursor : PsTok
       return { value := value.value :: rest.value, cursor := rest.cursor }
     return { value := [value.value], cursor := value.cursor }
 
+-- These two optional source annotations belong only to match. nomatch keeps
+-- the ordinary term-list reader above.
+def psPscv0MatchGeneralizing (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (Option Bool)) := do
+  let starts := match cursor.remaining with
+    | opening :: name :: _ => opening.text == "(" && name.text == "generalizing"
+    | _ => false
+  if !starts then return { value := none, cursor }
+  let opening ← psTokenCursorExpectText cursor "("
+  let name ← psTokenCursorExpectText opening.cursor "generalizing"
+  let assign ← psTokenCursorExpectText name.cursor ":="
+  let some token := psTokenCursorPeek assign.cursor |
+    throw (.unexpectedEnd "true or false")
+  if token.text != "true" && token.text != "false" then
+    throw (psProofScriptExpectedError "true or false" assign.cursor)
+  let flag ← psTokenCursorExpectText assign.cursor token.text
+  let close ← psTokenCursorExpectText flag.cursor ")"
+  return { value := some (token.text == "true"), cursor := close.cursor }
+
+def psPscv0MatchEquationName (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (Option PsSyntaxName)) := do
+  match psParseSyntaxNameWith true cursor with
+  | .ok name =>
+    if psTokenCursorAtText name.cursor ":" then
+      let colon ← psTokenCursorExpectText name.cursor ":"
+      return { value := some name.value, cursor := colon.cursor }
+    return { value := none, cursor }
+  | .error .fuelExhausted => throw .fuelExhausted
+  | .error _ => return { value := none, cursor }
+
+def psPscv0MatchDiscriminants (read : PsPscv0TermReader) (fuel : Nat)
+    (cursor : PsTokenCursor) :
+    Except PsParseError
+      (PsParseResult (List (PsSyntaxMatchDiscriminant PsSyntaxTerm))) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let name ← psPscv0MatchEquationName cursor
+    let value ← read name.cursor
+    let discriminant : PsSyntaxMatchDiscriminant PsSyntaxTerm :=
+      { term := value.value, equationName? := name.value }
+    if psTokenCursorAtText value.cursor "," then
+      let comma ← psTokenCursorExpectText value.cursor ","
+      let rest ← psPscv0MatchDiscriminants read fuel comma.cursor
+      return { value := discriminant :: rest.value, cursor := rest.cursor }
+    return { value := [discriminant], cursor := value.cursor }
+
 def psPscv0MatchRows (read : PsPscv0TermReader) (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) := do
   match fuel with
@@ -135,17 +182,19 @@ def psPscv0MatchRows (read : PsPscv0TermReader) (fuel : Nat) (cursor : PsTokenCu
 def psPscv0ReadMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
     (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
   let some keyword := psTokenCursorAdvance cursor | throw (.unexpectedEnd "match")
-  let inputs ← psPscv0Discriminants read fuel keyword.cursor
   if impossible then
+    let inputs ← psPscv0Discriminants read fuel keyword.cursor
     let some last := inputs.value.getLast? | throw (.unexpectedEnd "nomatch discriminant")
-    return { value := .matchMany inputs.value []
+    return { value := .matchMany (inputs.value.map fun term => { term }) [] none
                (psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan last))
              cursor := inputs.cursor }
+  let generalizing ← psPscv0MatchGeneralizing keyword.cursor
+  let inputs ← psPscv0MatchDiscriminants read fuel generalizing.cursor
   let withToken ← psTokenCursorExpectText inputs.cursor "with"
   let opening ← psTokenCursorExpectText withToken.cursor "{"
   let rows ← psPscv0MatchRows read fuel opening.cursor
   let close ← psTokenCursorExpectText rows.cursor "}"
-  return { value := .matchMany inputs.value rows.value
+  return { value := .matchMany inputs.value rows.value generalizing.value
              (psSyntaxSpanJoin keyword.token.span close.token.span)
            cursor := close.cursor }
 

@@ -236,6 +236,7 @@ def psElabWhereWellFoundedComponentBody
       | throw (psElabWhereError "WF-TELESCOPE" "component target has no varying source parameter")
     bodyContext := { bodyContext with
       localContext := callback.context
+      auxiliaryLocalIds := callback.id :: bodyContext.auxiliaryLocalIds
       wellFoundedRecursions := bodyContext.wellFoundedRecursions ++ [{
         functionName := target.input.header.functionName, callbackName
         parameterIds := targetParameters.map (·.id), majorId, packedIds

@@ -25,6 +25,8 @@ inductive PsElabError where
   | data (message : String)
   | proof (message : String)
   | refinement (message : String)
+  -- Internal, type-directed source retry; the original diagnosis is retained.
+  | sourceMatchIndexRefinement (indices : List PsExpr) (named : Bool) (cause : PsElabError)
   | atDeclaration (name : PsName) (error : PsElabError)
   | atContext (label : String) (error : PsElabError)
   | unsupportedTerm
@@ -52,7 +54,8 @@ inductive PsElabError where
 -- Resource failures cannot become speculative mismatches or resumable work.
 def psElabErrorIsResource : PsElabError → Bool
   | .fuelExhausted | .infer .fuelExhausted => true
-  | .atDeclaration _ error | .atContext _ error => psElabErrorIsResource error
+  | .atDeclaration _ error | .atContext _ error | .sourceMatchIndexRefinement _ _ error =>
+      psElabErrorIsResource error
   | _ => false
 
 structure PsElabTermResult where

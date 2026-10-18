@@ -127,7 +127,8 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
       | none => [value, body]
       | some annotation => [annotation, value, body]
   | .ifE _ condition yes no _ => [condition, yes, no]
-  | .matchMany scrutinees alternatives _ => scrutinees ++ alternatives.map psPscv0AlternativeTerm
+  | .matchMany discriminants alternatives _ _ =>
+      discriminants.map (·.term) ++ alternatives.map psPscv0AlternativeTerm
 
 -- The seed supports structurally recursive function-valued results. Keeping
 -- term as that returned function's argument preserves the complete Pi type

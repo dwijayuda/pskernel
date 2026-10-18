@@ -408,11 +408,19 @@ def psElabRecursionWalkWithFuel
                             thenResult.term elseResult.term span)
                           (psListAppend conditionResult.changedIds
                             (psListAppend thenResult.changedIds elseResult.changedIds)))
-        | PsSyntaxTerm.matchMany scrutinees alternatives span => do
-            let scrutinees ← scrutinees.mapM (smaller context)
-            let alternatives ← psElabRecursionWalkAlternatives smaller alternatives context
-            return .mk (.matchMany (scrutinees.map (·.term)) alternatives.fst span)
-              (scrutinees.flatMap (·.changedIds) ++ alternatives.snd)
+        | PsSyntaxTerm.matchMany discriminants alternatives generalizing? span => do
+            let equationNames := psSyntaxMatchEquationNames discriminants
+            let discriminants ← discriminants.mapM fun discriminant => do
+              let term ← smaller context discriminant.term
+              return (discriminant, term)
+            -- The alternative walker introduces every pattern name first.
+            let walkBody := fun context source =>
+              smaller (psElabRecursionPushNames equationNames context) source
+            let alternatives ← psElabRecursionWalkAlternatives walkBody alternatives context
+            return .mk (.matchMany
+                (discriminants.map fun (discriminant, term) => { discriminant with term := term.term })
+                alternatives.fst generalizing? span)
+              (discriminants.flatMap (fun item => item.snd.changedIds) ++ alternatives.snd)
         | _ => Except.ok (PsElabRecursionWalkResult.mk source List.nil)
 
 def psElabRecursionParameterIds (binders : List PsElabTypedBinder) : List Nat :=
@@ -640,7 +648,7 @@ def psElabRecursionBuildNormalizationWithOrigin
                 | Except.error error => Except.error error
                 | Except.ok renamedValue =>
                     match renamedValue.term with
-                    | PsSyntaxTerm.matchMany [major] alternatives matchSpan =>
+                    | PsSyntaxTerm.matchMany [major] alternatives generalizing? matchSpan =>
                         let fixed := psElabRecursionSelectedBinders
                           plan.generalizedIds false typed renamedBinders;
                         let state := psElabRecursionSelectedBinders
@@ -658,7 +666,7 @@ def psElabRecursionBuildNormalizationWithOrigin
                           PsSyntaxTerm.forallE state renamedType.term span;
                         let workerValue : PsSyntaxTerm :=
                           PsSyntaxTerm.matchMany [major]
-                            (psElabRecursionWrapAlternatives state alternatives) matchSpan;
+                            (psElabRecursionWrapAlternatives state alternatives) generalizing? matchSpan;
                         let normalization : PsElabStructuralNormalization :=
                           PsElabStructuralNormalization.mk
                             plan.functionName workerName fixed workerType workerValue
@@ -696,7 +704,7 @@ def psElabPlanStructuralNormalizationWithOrigin
     (levelNames : List PsName := []) :
     Except PsElabError (Option PsElabStructuralNormalizationWithOrigin) :=
   match valueSyntax with
-  | PsSyntaxTerm.matchMany [scrutinee] _ _ =>
+  | PsSyntaxTerm.matchMany [scrutinee] _ _ _ =>
       match psSyntaxNameToName nameSyntax with
       | Option.none => Except.error PsElabError.emptyName
       | Option.some name =>
@@ -704,7 +712,7 @@ def psElabPlanStructuralNormalizationWithOrigin
               (psElabContextEmpty environment levelNames) binders with
           | Except.error error => Except.error error
           | Except.ok binderResult =>
-              match psElabRecursionLocalId binderResult.context.localContext scrutinee with
+              match psElabRecursionLocalId binderResult.context.localContext scrutinee.term with
               | Option.none => Except.ok Option.none
               | Option.some majorId =>
                   let typed := psElabTypedBinderListReverse binderResult.bindersRev;

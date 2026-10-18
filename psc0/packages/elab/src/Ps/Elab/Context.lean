@@ -63,6 +63,8 @@ structure PsElabSavedScope where
   levelNames : List PsName
   sourceSpan : Option PsSourceSpan := none
   wellFoundedRecursions : List PsElabWellFoundedRecursion := []
+  -- Explicit lexical ownership for compiler-created recursion locals.
+  auxiliaryLocalIds : List Nat := []
 
 inductive PsElabPendingWork where
   | core (scope : PsElabSavedScope) (constraint : PsSyntheticConstraint)
@@ -82,6 +84,8 @@ structure PsElabContext where
   collectInfo : Bool := true
   infoRev : List PsElabInfoEntry := []
   wellFoundedRecursions : List PsElabWellFoundedRecursion := []
+  -- Explicit lexical ownership for compiler-created recursion locals.
+  auxiliaryLocalIds : List Nat := []
   -- Like infoRev, this is an event stream, not saved lexical authority.
   -- Each metavariable owns its original complete branch context.
   wellFoundedGoalsRev : List (Nat × PsSourceSpan) := []
@@ -113,7 +117,8 @@ def psElabSaveScope (context : PsElabContext) : PsElabSavedScope :=
   { environment := context.environment, localContext := context.localContext,
     instances := context.instances, structuralRecursion := context.structuralRecursion,
     levelNames := context.levelNames, sourceSpan := context.sourceSpan
-    wellFoundedRecursions := context.wellFoundedRecursions }
+    wellFoundedRecursions := context.wellFoundedRecursions
+    auxiliaryLocalIds := context.auxiliaryLocalIds }
 
 def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : PsElabContext :=
   { context with
@@ -123,6 +128,7 @@ def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : Ps
     instances := scope.instances
     structuralRecursion := scope.structuralRecursion
     wellFoundedRecursions := scope.wellFoundedRecursions
+    auxiliaryLocalIds := scope.auxiliaryLocalIds
     levelNames := scope.levelNames, sourceSpan := scope.sourceSpan }
 
 -- Root fields keep their established call map in every nested body. Only the

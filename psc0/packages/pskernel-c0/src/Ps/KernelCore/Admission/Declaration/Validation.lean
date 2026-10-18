@@ -123,37 +123,6 @@ def psKernelFindUndefExprLevelParam
   | _ =>
       Option.none
 
-def psKernelLevelHasMVar
-    (level : PsKernelLevel) : Bool :=
-  match level with
-  | PsKernelLevel.mvar _ =>
-      true
-  | PsKernelLevel.succ inner =>
-      psKernelLevelHasMVar inner
-  | PsKernelLevel.max left right =>
-      if psKernelLevelHasMVar left then
-        true
-      else
-        psKernelLevelHasMVar right
-  | PsKernelLevel.imax left right =>
-      if psKernelLevelHasMVar left then
-        true
-      else
-        psKernelLevelHasMVar right
-  | _ =>
-      false
-
-def psKernelLevelsHaveMVar
-    (levels : List PsKernelLevel) : Bool :=
-  match levels with
-  | List.nil =>
-      false
-  | List.cons head tail =>
-      if psKernelLevelHasMVar head then
-        true
-      else
-        psKernelLevelsHaveMVar tail
-
 def psKernelExprHasMVar
     (expr : PsKernelExpr) : Bool :=
   match expr with
@@ -192,10 +161,23 @@ def psKernelExprHasMVar
   | _ =>
       false
 
+/-- The native node's MVar presence is **exactly** the original
+recursive syntactic predicate on every possible expression, including
+universe MVars on sorts and constants. This is a theorem about the pure
+computed-field definition, not an assertion about unvalidated metadata,
+pointer identity or the Lean native compiler's runtime correctness. -/
+theorem psKernelC0MVarFlag_source (expr : PsKernelExpr) :
+    expr.psKernelC0MVarFlag = psKernelExprHasMVar expr := by
+  induction expr <;>
+    simp [PsKernelExpr.psKernelC0MVarFlag, psKernelExprHasMVar, *]
+
 def psKernelCheckNoMVarNoFVar
     (expr : PsKernelExpr) :
     Except String Unit :=
-  if psKernelExprHasMVar expr then
+  -- Source-certified constant-time node metadata eliminates an exponential
+  -- syntax traversal on shared closed declaration DAGs. The original
+  -- MVar-before-FVar error precedence and pure source predicate remain.
+  if expr.psKernelC0MVarFlag then
     Except.error
       "declaration has metavariables"
   else if psKernelExprHasFVar expr then
@@ -203,6 +185,18 @@ def psKernelCheckNoMVarNoFVar
       "declaration has free variables"
   else
     Except.ok ()
+
+/-- Exact old declaration preflight, including original MVar-before-FVar
+error precedence. Only the syntactic MVar predicate implementation differs.
+No new allowed axiom, proof admission or cache result is introduced. -/
+theorem psKernelC0NodeFlagAdmission_source (expr : PsKernelExpr) :
+    psKernelCheckNoMVarNoFVar expr =
+      (if psKernelExprHasMVar expr then
+         (Except.error "declaration has metavariables" : Except String Unit)
+       else if psKernelExprHasFVar expr then
+         Except.error "declaration has free variables"
+       else Except.ok ()) := by
+  simp only [psKernelCheckNoMVarNoFVar, psKernelC0MVarFlag_source]
 
 def psKernelCheckLevelParams
     (expr : PsKernelExpr)

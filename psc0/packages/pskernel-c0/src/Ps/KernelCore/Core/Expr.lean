@@ -39,6 +39,35 @@ inductive PsKernelExpr where
       (typeName : PsKernelName)
       (index : Nat)
       (expr : PsKernelExpr)
+with
+  /-- Immutable metavariable-presence flag computed ONCE for each native
+      expression node from child flags. It is only a syntactic summary.
+      No declaration, theorem or DefEq decision can be inferred from it
+      without the all-input source-equivalence theorem in Validation.lean.
+
+      Lean 4's `@[computed_field]` native implementation is compiler/runtime
+      machinery; the pure definition below is the kernel source oracle.
+      The compiler/runtime trust assumption is explicitly distinct from the
+      source theorem and must be independently audited before production. -/
+  @[computed_field] psKernelC0MVarFlag : PsKernelExpr → Bool
+    | .bvar _ => false
+    | .fvar _ => false
+    | .mvar _ => true
+    | .sort level => psKernelLevelHasMVar level
+    | .const _ levels => psKernelLevelsHaveMVar levels
+    | .app fn arg =>
+        if fn.psKernelC0MVarFlag then true else arg.psKernelC0MVarFlag
+    | .lam _ ty body _ =>
+        if ty.psKernelC0MVarFlag then true else body.psKernelC0MVarFlag
+    | .forallE _ ty body _ =>
+        if ty.psKernelC0MVarFlag then true else body.psKernelC0MVarFlag
+    | .letE _ ty value body _ =>
+        if ty.psKernelC0MVarFlag then true
+        else if value.psKernelC0MVarFlag then true
+        else body.psKernelC0MVarFlag
+    | .lit _ => false
+    | .mdata _ body => body.psKernelC0MVarFlag
+    | .proj _ _ body => body.psKernelC0MVarFlag
 
 def psKernelBoolEq
     (left : Bool)

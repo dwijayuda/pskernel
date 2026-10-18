@@ -974,3 +974,37 @@ def psKernelFindUndefInLevels
           psKernelFindUndefInLevels
             tail
             allowed
+
+/-! Pure universe metavariable summaries, also used as fields on
+source-certified immutable kernel expression nodes. -/
+def psKernelLevelHasMVar
+    (level : PsKernelLevel) : Bool :=
+  match level with
+  | PsKernelLevel.mvar _ =>
+      true
+  | PsKernelLevel.succ inner =>
+      psKernelLevelHasMVar inner
+  | PsKernelLevel.max left right =>
+      if psKernelLevelHasMVar left then
+        true
+      else
+        psKernelLevelHasMVar right
+  | PsKernelLevel.imax left right =>
+      if psKernelLevelHasMVar left then
+        true
+      else
+        psKernelLevelHasMVar right
+  | _ =>
+      false
+
+def psKernelLevelsHaveMVar
+    (levels : List PsKernelLevel) : Bool :=
+  match levels with
+  | List.nil =>
+      false
+  | List.cons head tail =>
+      if psKernelLevelHasMVar head then
+        true
+      else
+        psKernelLevelsHaveMVar tail
+

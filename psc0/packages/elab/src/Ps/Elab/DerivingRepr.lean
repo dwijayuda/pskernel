@@ -225,7 +225,7 @@ def psElabDeriveReprParameters (plan : PsElabDeriveContext)
           let printer ← if psLevelEquivalent level .zero then pure none else do
             match psWhnf context.environment context.metaContext context.localContext pi.domain with
             | .sortE _ => pure none
-            | _ => return some (← psElabDeriveReprDictionary context pi.domain)
+            | _ => pure (some (← psElabDeriveReprDictionary context pi.domain))
           pure (state.snd ++ [psElabDeriveReprField printer parameter 1024])
         else pure state.snd
       return (psExprInstantiate1 pi.body parameter, documents)) (type, [])

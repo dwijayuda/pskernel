@@ -333,7 +333,9 @@ def psElabInductiveGroupContext (first header : PsElabInductiveHeader)
   let commonIds := first.bindersRev.map (·.id)
   let aliases := (first.bindersRev.zip header.bindersRev).flatMap fun (common, source) =>
     (psLocalVisibleNames header.context.localContext source.id).map fun name =>
-      ({ userName := name, id := common.id,
+      ({
+        userName := name
+        id := common.id
         beforeId := first.context.localContext.nextId } : PsLocalNameAlias)
   let localContext := {
     first.context.localContext with declarations
@@ -562,8 +564,9 @@ def psElabInductiveGroup (environment : PsEnvironment)
   let recursors ← psBuildInductiveGroupRecursors parameters.context
     parameters.bindersRev plan constructors
   let diagnostics := if highUniverse then
-      [{ severity := .warning,
-        message := "inferred universe level may be unnecessarily high; provide an explicit resulting sort to select a smaller valid universe",
+      [{
+        severity := .warning
+        message := "inferred universe level may be unnecessarily high; provide an explicit resulting sort to select a smaller valid universe"
         span := sourceSpan }]
     else []
   return { declarations := declarations ++ constructors ++ recursors, sourceInfo, diagnostics }

@@ -22,7 +22,7 @@ def psElabDeriveReprPlan (plan : PsElabDeriveContext) (name : PsName) :
   let fields ← psElabDeriveFieldsWithRecursion plan name (!plan.info.isStructure)
   let printers ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof || (!plan.info.isStructure && !psBinderInfoEq field.binder .explicit) then return none
-    if fields.constructor.recursiveFields.contains index then return none
+    if fields.directRecursiveFields.contains index then return none
     match psWhnf plan.context.environment plan.context.metaContext
         plan.context.localContext field.type with
     | .sortE _ => return none
@@ -99,7 +99,7 @@ def psElabDeriveReprPlanSlot (plan : PsElabDeriveContext) (slotIndex : Nat)
     (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor) :
     Except PsElabError PsElabDeriveReprSlotConstructor := do
   let fields ← psElabDeriveSlotFields plan slot constructor
-  let recursive := fun (index : Nat) => constructor.recursiveFields.any (fun edge => edge.1 == index)
+  let recursive := fun (index : Nat) => fields.directRecursiveFields.contains index
   let tupleField := fun (index : Nat) => psElabDeriveReprIsProdSlot slot && index == 1
   let printers ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof || recursive index || tupleField index ||
@@ -161,11 +161,11 @@ def psElabDeriveReprHypothesis (plan : PsElabDeriveContext) (atomic : List Bool)
   else return .app hypothesis.value (psFormatNat precedence)
 
 def psElabDeriveReprSlotField (plan : PsElabDeriveContext) (atomic : List Bool)
-    (entry : PsElabDeriveReprSlotConstructor) (constructor : PsInductiveEliminationConstructor)
+    (entry : PsElabDeriveReprSlotConstructor)
     (fields : List PsElabTypedBinder) (hypotheses : List PsElabDeriveHypothesis)
     (index precedence : Nat) : Except PsElabError PsExpr := do
   let some field := fields[index]? | throw (.data "Repr deriving field alignment mismatch")
-  if constructor.recursiveFields.any (fun edge => edge.1 == index) then
+  if entry.fields.directRecursiveFields.contains index then
     let some hypothesis := hypotheses.find? (fun hypothesis => hypothesis.fieldId == field.id)
       | throw (.data "Repr deriving recursive field has no checked induction printer")
     psElabDeriveReprHypothesis plan atomic hypothesis precedence
@@ -182,7 +182,7 @@ def psElabDeriveReprPublicBranch (plan : PsElabDeriveContext) (atomic : List Boo
   let append := fun a b => psFormatCall "append" [a, b]
   let body ← fields.zipIdx.foldlM (fun acc (field, index) => do
     if !psBinderInfoEq field.binder .explicit then return acc
-    let rendered ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses index 1024
+    let rendered ← psElabDeriveReprSlotField plan atomic entry fields hypotheses index 1024
     return append (append acc (psFormatCall "line")) rendered)
     (psReprText (psNameToString constructor.info.name))
   let id := context.localContext.nextId
@@ -201,7 +201,7 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
     match fields with
     | [] => return psSelfHostListNilOf psFormatType
     | [_, tail] =>
-      let head ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 0
+      let head ← psElabDeriveReprSlotField plan atomic entry fields hypotheses 0 0
       let some rest := hypotheses.find? (fun hypothesis => hypothesis.fieldId == tail.id)
         | throw (.data "Repr List tail has no checked document hypothesis")
       if rest.target != slotIndex then throw (.data "Repr List tail targets another specialization")
@@ -209,7 +209,7 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
     | _ => throw (.data "Repr List constructor telescope mismatch")
   else if psElabDeriveReprIsProdSlot slot then
     let [_, right] := fields | throw (.data "Repr Prod constructor telescope mismatch")
-    let first ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 0
+    let first ← psElabDeriveReprSlotField plan atomic entry fields hypotheses 0 0
     let id := context.localContext.nextId
     let initial := psSelfHostListConsOf psFormatType first (.fvar id)
     -- This bound do-if shares the enclosing return continuation. Yield its
@@ -242,7 +242,7 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
     match fields with
     | [] => return psLogicLam id "prec" psOrderNat (psReprText "none")
     | [_] =>
-      let rendered ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 1024
+      let rendered ← psElabDeriveReprSlotField plan atomic entry fields hypotheses 0 1024
       let body := psReprAddAppParen
         (psFormatCall "append" [psReprText "some ", rendered]) (.fvar id)
       return psLogicLam id "prec" psOrderNat body

@@ -71,3 +71,17 @@ and proves branchByRec_agrees against an executable structural reference. The
 PSC0 source fixtures still contain the explicit primitive recursor and still
 must emit and execute it on all targets. Native kernel agreement, the executable
 reference and backend execution remain distinct evidence layers.
+
+## Class dictionaries versus pointwise induction
+
+Pinned Deriving/Hashable.mkMatch, Repr.mkBodyForInduct, BEq and DecEq classify
+only an actual direct family application as a recursive class-method call. A
+function-valued field uses ordinary dictionary synthesis. DerivingContext now
+records directRecursiveFields separately from immutable constructor recursion
+metadata. It validates codomains and every full pointwise IH, retaining all
+recursor binders, then exposes only direct IHs to class handlers. This distinction
+is shared by direct and nested plans; no per-handler function hashes/printers or
+fake dictionaries are introduced. Existing absent-dictionary controls remain
+negative; a real supplied function Hashable instance is a new positive in the
+existing paired runtime fixture. The .ps fixture follows its positional-before-
+named argument rule; native Lean's broader named placement is not imported.

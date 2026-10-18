@@ -24,7 +24,7 @@ def psElabDeriveDecEqPlan (plan : PsElabDeriveContext) (name : PsName) :
   let fields ← psElabDeriveFieldsWithRecursion plan name true
   let decisions ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveDecEqDecision.erased
-    if fields.constructor.recursiveFields.contains index then
+    if fields.directRecursiveFields.contains index then
       return PsElabDeriveDecEqDecision.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "DecidableEq") field.type
     return PsElabDeriveDecEqDecision.independent (← psElabDeriveInstance plan.context target)

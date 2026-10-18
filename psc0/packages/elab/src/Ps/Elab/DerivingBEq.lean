@@ -26,7 +26,7 @@ def psElabDeriveBEqPlanConstructor (plan : PsElabDeriveContext) (name : PsName) 
   let fields ← psElabDeriveFieldsWithRecursion plan name true
   let comparisons ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveBEqField.erased
-    if fields.constructor.recursiveFields.contains index then
+    if fields.directRecursiveFields.contains index then
       return PsElabDeriveBEqField.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "BEq") field.type
     let dictionary ← psElabDeriveInstance plan.context target
@@ -108,7 +108,7 @@ def psElabDeriveBEqPlanSlot (plan : PsElabDeriveContext) (slotIndex : Nat)
   let comparisons ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveBEqField.erased
     if indexFields.contains field.id then return PsElabDeriveBEqField.index
-    if constructor.recursiveFields.any (fun edge => edge.1 == index) then
+    if fields.directRecursiveFields.contains index then
       return PsElabDeriveBEqField.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "BEq") field.type
     let dictionary ← psElabDeriveInstance plan.context target

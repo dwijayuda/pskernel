@@ -153,3 +153,26 @@ Structural/{BRecOn,IndPred,Main,FindRecArg}; Meta/PProdN;
 Meta/Constructions/BRecOn; tests/elab/structuralOverNested.lean.
 Retain upstream notices. Native portable .lean, official kernel, GitHub/Linux
 only; no local checkout/build/test, pskernel-core, self-hosting or immediate C5.
+
+## Function-field qualification follow-up
+
+f3798882 / run39100665889 failed only the source and deriving steps; build,
+selected manifest, packing/ownership, indexed cases, Order/P1 and noncomputable
+checks passed. Full log retained by its GitHub artifact; no runtime failure was
+reported. Causes: the new .ps fixture placed positional arguments after a named
+motive (unselected syntax), and old deriving code confused pointwise recursive
+fields with direct class-method IHs.
+
+The PS fixture now keeps named motives last. Shared DerivingContext validates
+positive field codomains and full actual IH telescopes, but marks only direct
+fields for recursive class methods. Pointwise function IHs remain checked and
+bound, while ordinary dictionaries handle functions, matching pinned native
+Hashable/Repr/BEq/DecEq. Existing negative function-field fixtures now require the
+missing-dictionary error instead of the obsolete positive-data refusal. The
+paired positive fixture supplies a real function Hashable dictionary, derives
+Hashable for ParityBranch and observes the native-equivalent hash as part of
+m3fields (expected192013/232417 unchanged). No assertion is dropped.
+
+This child remains unqualified until preparation passes. Main remains fully
+qualified33676076. Both handoffs, roadmap and exit receipt were updated at that
+completed integration milestone; continue qualification before promoting code.

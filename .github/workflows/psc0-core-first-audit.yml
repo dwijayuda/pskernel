@@ -1,0 +1,52 @@
+name: PSC0 Core-first source inventory (Linux)
+
+on:
+  push:
+    branches: [psc0/core-first-environments-20261019]
+    paths:
+      - 'psc0/**'
+      - '.github/workflows/psc0-core-first-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc0-core-first-source-audit-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the exact qualified Stage 0
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 33676076bcda7b0de5ec1f9803f49b8b1d28a058
+          path: stage0
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+      - name: Check out the candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: candidate
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+      - name: Audit exact source imports, feature signals, assets and package manifests
+        shell: bash
+        run: |
+          python3 candidate/psc0/scripts/core-first-source-audit.py --stage0 stage0 --candidate candidate --output audit/source-inventory.json
+          sha256sum audit/source-inventory.json > audit/SHA256SUMS
+      - name: Preserve the complete source inventory
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: psc0-core-first-source-audit-${{ github.sha }}
+          path: audit/
+          if-no-files-found: error
+          retention-days: 30

@@ -2,7 +2,8 @@
 
 Status: standalone export independently passed; exact6779-byte five-declaration
 asset retained. Portable typed component packing and its consolidated kernel
-probe are candidates awaiting qualification. Standard selection, source mutual
+probe passed preparation at abe1adc2, run39080406371. Full main integration
+is running; the next callback/correspondence extension is a candidate. Standard selection, source mutual
 WF admission, exact unfolding equations and runtime ownership remain separate.
 
 Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc is the reference.
@@ -114,3 +115,34 @@ The packing probe compares two three-member reordered graphs directly
 against pinned Lean's Info implementation, including cascading variation.
 Source mutual WF callback construction, equations and runtime ownership
 remain unimplemented; this analysis alone cannot authorize recursion.
+
+## Branch-scoped callee ownership
+
+Pinned WF/Fix.lean replaceRecApps, processSumCasesOn and
+processPSigmaCasesOn keep proof-restricted callbacks under each actual refined
+branch; cached rewrites are scoped by the local context. PSC0 keeps its
+source re-elaboration design and extends the existing saved lexical authority
+to a list of hygienic callbacks. Calls record their exact callee and complete
+typed argument vector. Ordinary application still owns inference, defaults,
+named arguments and argument evaluation.
+
+For lifted captures, the closed original callee telescope is instantiated
+from hygienic names resolved in the current refined scope. A cached original
+free variable would refer to the wrong major after matching. Normal source
+local shadows take precedence; bare recursive values remain refused.
+Decrease proof elaboration removes all callback authority.
+
+Typed parameter correspondence now consumes actual per-owner contexts,
+headers and callee-tagged calls. It compares only real caller parameters
+against actual call arguments, with reducible proof-relevant conversion.
+Equal local IDs across different owners have no meaning. The singleton
+planner uses this same owner and retains its final fixed-slot revalidation.
+
+The consolidated packing probe covers both callees, a refined capture alias,
+ordinary shadowing, saved-scope restoration, escape refusal, two reordered
+typed owners and an external-callee refusal. This candidate does not yet
+admit mutual source WF: the common measure, complete functional, exact
+equations and whole-component executable adaptation remain necessary.
+
+References: pinned tests/elab/fixedParamsReorder.lean and
+funind_mutual_dep.lean; native test_sorry is not copied or admitted.

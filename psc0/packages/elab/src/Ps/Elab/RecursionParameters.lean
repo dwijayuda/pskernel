@@ -46,30 +46,65 @@ def psElabRecursionParameterDependencies (context : PsElabContext)
     if known.contains id || !dependencies.any known.contains then known
     else known ++ [id]) roots
 
--- The singleton consumer uses the same correspondence closure as mutual
--- components. Observations are made in each actual branch scope; dependent
--- header slots become varying through the graph, never through source names.
-def psElabRecursionFixedParameterPlan (context : PsElabContext)
-    (ids : List Nat) (calls : List PsElabRecursionCall) :
+-- An owner carries its actual original header and the observations made
+-- while elaborating its body. Numeric local IDs never identify another owner.
+structure PsElabRecursionParameterOwner where
+  name : PsName
+  context : PsElabContext
+  parameterIds : List Nat
+  calls : List PsElabRecursionCall
+
+-- Typed observations share one correspondence owner for unary and mutual
+-- components. Pinned FixedParams compares reducibly without proof
+-- irrelevance; equal spellings or equal numeric IDs across owners are not
+-- evidence. Every comparison uses the caller's actual captured branch.
+def psElabRecursionComponentFixedParameterPlan
+    (owners : List PsElabRecursionParameterOwner) :
     Except PsElabError PsFixedParameterPlan := do
-  let dependencies := ids.zipIdx.map fun (id, index) =>
-    let closed := psElabRecursionParameterDependencies context [id]
-    ids.zipIdx.filterMap fun (dependent, position) =>
-      if position != index && closed.contains dependent then some position else none
-  let observations := calls.map fun call => ({
-    caller := 0, callee := 0
-    arguments := ids.zipIdx.map fun (id, index) =>
-      if psElabRecursionParameterIsFixed context ids [call] id then some index else none
-  } : PsFixedParameterCall)
-  let graph ← (psFixedParameterAnalyze [dependencies] observations).mapError PsElabError.data
+  let mut names : List PsName := []
+  let mut dependencies := []
+  for owner in owners do
+    if names.any (psNameEq owner.name) ||
+        owner.parameterIds.eraseDups.length != owner.parameterIds.length then
+      throw (.data "PSCV0-WF-PARAMETERS: duplicate component or header identity")
+    names := names ++ [owner.name]
+    if owner.parameterIds.any (fun id =>
+        (psLocalFindById owner.context.localContext id).isNone) then
+      throw (.data "PSCV0-WF-PARAMETERS: original header binding is unavailable")
+    dependencies := dependencies ++ [owner.parameterIds.zipIdx.map fun (id, index) =>
+      let closed := psElabRecursionParameterDependencies owner.context [id]
+      owner.parameterIds.zipIdx.filterMap fun (dependent, position) =>
+        if position != index && closed.contains dependent then some position else none]
+  let mut observations := []
+  for (owner, caller) in owners.zipIdx do
+    for call in owner.calls do
+      let some (target, callee) := owners.zipIdx.find? (fun (target, _) =>
+          psNameEq target.name call.callee)
+        | throw (.data "PSCV0-WF-PARAMETERS: call target is outside the owned component")
+      if call.arguments.length != target.parameterIds.length then
+        throw (.data "PSCV0-WF-PARAMETERS: call changed its original target header")
+      let arguments := call.arguments.map fun argument =>
+        let argument := psMetaInstantiate owner.context.metaContext argument
+        if psExprHasUnresolvedMeta argument then none else
+          (owner.parameterIds.zipIdx.find? fun (id, _) =>
+            (psLocalFindById call.localContext id).isSome &&
+              psDefEqReadOnlyWithTransparency .reducible owner.context.environment
+                owner.context.metaContext call.localContext (.fvar id) argument).map Prod.snd
+      observations := observations ++ [{ caller, callee, arguments }]
+  let graph ← (psFixedParameterAnalyze dependencies observations).mapError PsElabError.data
   (psFixedParameterPermutation graph).mapError PsElabError.data
 
+def psElabRecursionFixedParameterPlan (context : PsElabContext)
+    (name : PsName) (ids : List Nat) (calls : List PsElabRecursionCall) :
+    Except PsElabError PsFixedParameterPlan :=
+  psElabRecursionComponentFixedParameterPlan [{ name, context, parameterIds := ids, calls }]
+
 def psElabRecursionMeasureParameterPlan (context : PsElabContext)
-    (ids : List Nat) (calls : List PsElabRecursionCall) (measure : PsExpr) :
+    (name : PsName) (ids : List Nat) (calls : List PsElabRecursionCall) (measure : PsExpr) :
     Except PsElabError PsElabRecursionParameterPlan := do
   if calls.isEmpty then
     throw (.data "PSCV0-WF-NOT-RECURSIVE: termination_by was supplied for a nonrecursive declaration")
-  let fixed ← psElabRecursionFixedParameterPlan context ids calls
+  let fixed ← psElabRecursionFixedParameterPlan context name ids calls
   let [permutation] := fixed.permutations
     | throw (.data "PSCV0-WF-INTERNAL: singleton parameter analysis lost its owner")
   let varying := (ids.zip permutation).filterMap fun (id, index) =>

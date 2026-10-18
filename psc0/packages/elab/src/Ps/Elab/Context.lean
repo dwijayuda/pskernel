@@ -29,10 +29,14 @@ structure PsElabWellFoundedRecursion where
   fixedIds : List Nat := []
   collectCalls : Bool := false
   sourceType : Option PsExpr := none
+  -- Original captured arguments are resolved by hygienic names after matching
+  -- refines their bindings. The complete source type is instantiated there.
+  capturedNames : List PsName := []
 
 -- Typed call observations retain their actual branch scope. Invariant
 -- analysis must compare these arguments, not the spelling of source names.
 structure PsElabRecursionCall where
+  callee : PsName
   localContext : PsLocalContext
   arguments : List PsExpr
   span : PsSourceSpan
@@ -58,7 +62,7 @@ structure PsElabSavedScope where
   structuralRecursion : Option PsElabStructuralRecursion
   levelNames : List PsName
   sourceSpan : Option PsSourceSpan := none
-  wellFoundedRecursion : Option PsElabWellFoundedRecursion := none
+  wellFoundedRecursions : List PsElabWellFoundedRecursion := []
 
 inductive PsElabPendingWork where
   | core (scope : PsElabSavedScope) (constraint : PsSyntheticConstraint)
@@ -77,7 +81,7 @@ structure PsElabContext where
   sourceSpan : Option PsSourceSpan := none
   collectInfo : Bool := true
   infoRev : List PsElabInfoEntry := []
-  wellFoundedRecursion : Option PsElabWellFoundedRecursion := none
+  wellFoundedRecursions : List PsElabWellFoundedRecursion := []
   -- Like infoRev, this is an event stream, not saved lexical authority.
   -- Each metavariable owns its original complete branch context.
   wellFoundedGoalsRev : List (Nat × PsSourceSpan) := []
@@ -109,7 +113,7 @@ def psElabSaveScope (context : PsElabContext) : PsElabSavedScope :=
   { environment := context.environment, localContext := context.localContext,
     instances := context.instances, structuralRecursion := context.structuralRecursion,
     levelNames := context.levelNames, sourceSpan := context.sourceSpan
-    wellFoundedRecursion := context.wellFoundedRecursion }
+    wellFoundedRecursions := context.wellFoundedRecursions }
 
 def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : PsElabContext :=
   { context with
@@ -118,7 +122,7 @@ def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : Ps
       nextId := max scope.localContext.nextId context.localContext.nextId }
     instances := scope.instances
     structuralRecursion := scope.structuralRecursion
-    wellFoundedRecursion := scope.wellFoundedRecursion
+    wellFoundedRecursions := scope.wellFoundedRecursions
     levelNames := scope.levelNames, sourceSpan := scope.sourceSpan }
 
 -- Root fields keep their established call map in every nested body. Only the

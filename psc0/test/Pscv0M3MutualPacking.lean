@@ -65,11 +65,90 @@ private def checkFixedParameters : IO Unit := do
   | .ok _ => throw (IO.userError "fixed analysis accepted an unowned caller")
   IO.println "PSCV0_M3_FIXED_PARAMETERS: PASS pinned native graph differential, three reordered member headers, transitive variation and dependent-type propagation"
 
+-- A source call uses the current lexical capture after refinement, and
+-- records the actual callee. These are typed local probes, not permission
+-- to admit a source mutual WF declaration or to adapt its runtime body.
+private def checkCallbackScopes (environment : PsEnvironment) : Except String Unit := do
+  let pos : PsSourcePos := { byteOffset := 0, line := 1, column := 1 }
+  let span : PsSourceSpan := { start := pos, stop := pos }
+  let sourceName := fun name => ({ segments := [name], span } : PsSyntaxName)
+  let nat := PsExpr.constE psNatName []
+  let unary := PsExpr.forallE (psRootName "n") nat nat .explicit
+  let complete := PsExpr.forallE (psRootName "capture") nat unary .explicit
+  let f := psLocalPushBinding psLocalEmpty (psRootName "_checkedF") complete .explicit
+  let g := psLocalPushBinding f.context (psRootName "_checkedG") complete .explicit
+  let hidden := psRootName "$psc0Capture"
+  let original := psLocalPushLet g.context hidden nat (.lit (.natural 0))
+  -- Match refinement shadows a lookup name with a fresh checked alias.
+  let refined := psLocalPushLet original.context hidden nat (.lit (.natural 3))
+  let context := { psElabContextEmpty environment [] with
+    localContext := refined.context
+    wellFoundedRecursions := [
+      { functionName := psRootName "peerF", callbackName := psRootName "_checkedF"
+        parameterIds := [100, 101], sourceType := some complete
+        capturedNames := [hidden], collectCalls := true },
+      { functionName := psRootName "peerG", callbackName := psRootName "_checkedG"
+        parameterIds := [200, 201], sourceType := some complete
+        capturedNames := [hidden], collectCalls := true }] }
+  for (name, callback) in [("peerF", f.id), ("peerG", g.id)] do
+    let source := PsSyntaxTerm.call (.reference (sourceName name))
+      [(none, .natural "2" span)] span
+    let checked ← (psElabTerm context source (some nat)).mapError psCompilerPscv0ElabError
+    let expected := psExprApplyMany (.fvar callback)
+      [.lit (.natural 3), .lit (.natural 2)]
+    if !psDefEqReadOnlyWithEnv environment checked.context.metaContext
+        checked.context.localContext checked.term expected then
+      throw "callback selected a stale capture or another member"
+    let [call] := checked.context.wellFoundedCallsRev
+      | throw "callback observation lost its original call"
+    if !psNameEq call.callee (psRootName name) || call.arguments.length != 2 then
+      throw "callback observation changed callee or complete header"
+  let identity := PsExpr.lam (psRootName "n") nat (.bvar 0) .explicit
+  let shadow := psLocalPushLet context.localContext (psRootName "peerG") unary identity
+  let shadowed := { context with localContext := shadow.context }
+  let checked ← (psElabTerm shadowed
+    (.call (.reference (sourceName "peerG")) [(none, .natural "2" span)] span)
+    (some nat)).mapError psCompilerPscv0ElabError
+  if !checked.context.wellFoundedCallsRev.isEmpty ||
+      !psDefEqReadOnlyWithEnv environment checked.context.metaContext
+        checked.context.localContext checked.term (.lit (.natural 2)) then
+    throw "ordinary local shadow was misclassified as a recursive call"
+  match psElabTerm context (.reference (sourceName "peerG")) none with
+  | .error _ => pure ()
+  | .ok _ => throw "proof-restricted member escaped as an ordinary value"
+  let restored := psElabRestoreScope { context with wellFoundedRecursions := [] }
+    (psElabSaveScope context)
+  if restored.wellFoundedRecursions.length != 2 then
+    throw "saved scope lost member callback authority"
+  -- Equal numeric IDs in different owners remain unrelated. Only the actual
+  -- cross-call arguments establish the reordered correspondence.
+  let a := psLocalPushBinding psLocalEmpty (psRootName "a") nat .explicit
+  let b := psLocalPushBinding a.context (psRootName "b") nat .explicit
+  let first := { psElabContextEmpty environment [] with localContext := b.context }
+  let b' := psLocalPushBinding psLocalEmpty (psRootName "b") nat .explicit
+  let a' := psLocalPushBinding b'.context (psRootName "a") nat .explicit
+  let second := { psElabContextEmpty environment [] with localContext := a'.context }
+  let owners : List PsElabRecursionParameterOwner := [
+    { name := psRootName "first", context := first, parameterIds := [a.id, b.id]
+      calls := [{ callee := psRootName "second", localContext := b.context
+        arguments := [.fvar b.id, .fvar a.id], span }] },
+    { name := psRootName "second", context := second, parameterIds := [b'.id, a'.id]
+      calls := [{ callee := psRootName "first", localContext := a'.context
+        arguments := [.fvar a'.id, .fvar b'.id], span }] }]
+  let plan ← (psElabRecursionComponentFixedParameterPlan owners).mapError psCompilerPscv0ElabError
+  if plan != { count := 2, permutations := [[some 0, some 1], [some 1, some 0]] } then
+    throw "typed member analysis confused cross-owner local identities"
+  let some owner := owners.head? | throw "missing owned header"
+  match psElabRecursionComponentFixedParameterPlan [owner] with
+  | .error _ => pure ()
+  | .ok _ => throw "typed member analysis accepted a callee outside the component"
+
 private def build : Except String (List PsDeclaration) := do
   let environment := psStandardPSumDeclarations.foldl psEnvironmentInsert
     psSelfHostProdPreludeEnvironment
   let environment := psStandardPSumReducibility.foldl
     (fun env (name, status) => psEnvironmentSetReducibility env name status) environment
+  checkCallbackScopes environment
   let source :=
     "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
     "function packingSecond(b: Bool): Bool := b\n" ++
@@ -174,4 +253,5 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
+  IO.println "PSCV0_M3_CALLBACK_SCOPES: PASS two typed callees, current refined capture, ordinary local shadow, saved scope, escape refusal and cross-owner parameter correspondence"
   IO.println "PSCV0_M3_MUTUAL_PACKING: PASS three heterogeneous dependent components, exact checked projection equations, user PSum ownership and malformed index/constructor refusals; source mutual WF is separate"

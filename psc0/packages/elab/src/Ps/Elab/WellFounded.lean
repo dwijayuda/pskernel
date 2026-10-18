@@ -4,7 +4,7 @@ import Ps.Elab.Universe
 import Ps.Meta.WellFounded
 
 /-
-Selected unary well-founded recursion, grounded in Lean 4.35.0
+Selected well-founded recursion, grounded in Lean 4.35.0
 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
   Lean/Elab/PreDefinition/WF/Rel.lean, WF/Fix.lean (replaceRecApps,
   solveDecreasingGoals, mkFix), WF/Unfold.lean, and Init/WF.lean.
@@ -90,44 +90,61 @@ def psElabWellFoundedIsNat (context : PsElabContext) (type : PsExpr) : Bool :=
   psDefEqReadOnlyWithEnv context.environment context.metaContext
     context.localContext type (.constE psNatName [])
 
+def psElabWellFoundedRecursionForName
+    (context : PsElabContext) (sourceName : PsSyntaxName) :
+    Option PsElabWellFoundedRecursion := do
+  let name ← psSyntaxNameToName sourceName
+  if (psLocalFindUser context.localContext name).isSome then none else
+    context.wellFoundedRecursions.find? (fun recursion =>
+      psNameEq name recursion.functionName)
+
 def psElabWellFoundedReferenceEscapes
     (context : PsElabContext) (sourceName : PsSyntaxName) : Bool :=
-  match context.wellFoundedRecursion, psSyntaxNameToName sourceName with
-  | some recursion, some name =>
-    psNameEq name recursion.functionName &&
-      (psLocalFindUser context.localContext name).isNone
-  | _, _ => false
+  (psElabWellFoundedRecursionForName context sourceName).isSome
 
 -- Read the current callback telescope after dependent match refinement. In
 -- particular, a successor branch must get measure(y) < measure(succ k), not
 -- the stale outer major's type. The matcher already owns that generalization.
-def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
+def psTryElabWellFoundedCall (elaborate : PsElaborator)
     (context : PsElabContext) (fn : PsSyntaxTerm)
     (arguments : List (Option PsSyntaxName × PsSyntaxTerm))
     (expected : Option PsExpr) : Except PsElabError (Option PsElabTermResult) := do
-  let some recursion := context.wellFoundedRecursion | return none
   let .reference sourceName := fn | return none
-  if !psElabWellFoundedReferenceEscapes context sourceName then return none
-  let some sourceType := recursion.sourceType
+  let some recursion := psElabWellFoundedRecursionForName context sourceName | return none
+  let some completeType := recursion.sourceType
     | throw (.data "PSCV0-WF-INTERNAL: missing recursive source telescope")
-  let captured ← psElabRecursionCaptureArguments elaborate context arguments sourceType
-    recursion.parameterIds.length expected
+  let (scope, sourceType, captures) ← recursion.capturedNames.foldlM
+    (fun (state : PsElabContext × PsExpr × List PsExpr) name => do
+      let (current, type, values) := state
+      let some binding := psLocalFindUser current.localContext name
+        | throw (.data "PSCV0-WF-CAPTURE: a source capture lost its refined lexical binding")
+      let parameter ← (psInferEnsureForall current.environment current.metaContext
+        current.localContext type).mapError PsElabError.infer
+      let value ← psElabResolvedTerm current (.fvar (psLocalDeclId binding)) (some parameter.domain)
+      return (value.context, psExprInstantiate1 parameter.body value.term, values ++ [value.term]))
+    (context, completeType, [])
+  if captures.length > recursion.parameterIds.length then
+    throw (.data "PSCV0-WF-CAPTURE: captures exceed the original header")
+  let captured ← psElabRecursionCaptureArguments elaborate scope arguments sourceType
+    (recursion.parameterIds.length - captures.length) expected
+  let values := captures ++ captured.values
   let some callback := psLocalFindUser captured.context.localContext recursion.callbackName
     | throw (.data "PSCV0-WF-INTERNAL: missing refined recursive callback")
   let span := context.sourceSpan.getD (psSyntaxTermSpan fn)
   let call : PsElabRecursionCall := {
     localContext := captured.context.localContext
-    arguments := captured.values
+    arguments := values
+    callee := recursion.functionName
     span := span }
   let current := { captured.context with
     wellFoundedCallsRev := call :: captured.context.wellFoundedCallsRev }
   let (next, term) ← if recursion.collectCalls then
-      pure (current, psExprApplyMany (.fvar (psLocalDeclId callback)) captured.values)
+      pure (current, psExprApplyMany (.fvar (psLocalDeclId callback)) values)
     else do
       let recursiveIds := if recursion.packedIds.isEmpty then
         [recursion.majorId] else recursion.packedIds
       let recursiveArguments ← recursiveIds.mapM fun id =>
-        match psElabRecursionParameterArgument recursion.parameterIds captured.values id with
+        match psElabRecursionParameterArgument recursion.parameterIds values id with
         | some value => pure value
         | none => throw (.data "PSCV0-WF-INTERNAL: missing measured recursive argument")
       let afterArguments ← recursiveArguments.foldlM (fun type value => do
@@ -137,7 +154,7 @@ def psTryElabWellFoundedSelfCall (elaborate : PsElaborator)
       let proof ← (psInferEnsureForall current.environment current.metaContext
         current.localContext afterArguments).mapError PsElabError.infer
       let states ← recursion.stateIds.mapM fun id =>
-        match psElabRecursionParameterArgument recursion.parameterIds captured.values id with
+        match psElabRecursionParameterArgument recursion.parameterIds values id with
         | some value => pure value
         | none => throw (.data "PSCV0-WF-INTERNAL: missing recursive state argument")
       let fresh := psMetaFresh current.metaContext current.localContext
@@ -192,7 +209,7 @@ def psElabWellFoundedSolveGoals (elaborate : PsElaborator)
   -- A proof may use facts from a call's captured branch context, but cannot
   -- create new source recursive calls while proving those calls decrease.
   let state : PsProofState := {
-    context := { context with wellFoundedRecursion := none }
+    context := { context with wellFoundedRecursions := [] }
     goals }
   let solved ← match decreasing with
     | none => psElabWellFoundedDefaultGoals state
@@ -490,9 +507,9 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let probeContext := { bodyHeader with
     localContext := probe.context
     structuralRecursion := none
-    wellFoundedRecursion := some {
+    wellFoundedRecursions := [{
       functionName := header.functionName, callbackName := probeName
-      parameterIds := parameterIds, collectCalls := true, sourceType := some declaredType }
+      parameterIds := parameterIds, collectCalls := true, sourceType := some declaredType }]
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
   let probed ← psElabWellFoundedAt "probe body"
@@ -500,7 +517,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   if psExprHasUnresolvedMeta (psElabGeneralizeExpr
       (psMetaInstantiate probed.context.metaContext probed.term)) then
     throw (.data "PSCV0-WF-PARAMETERS: unresolved provisional body while checking fixed arguments")
-  let plan ← psElabRecursionMeasureParameterPlan probed.context parameterIds
+  let plan ← psElabRecursionMeasureParameterPlan probed.context header.functionName parameterIds
     probed.context.wellFoundedCallsRev.reverse measureBody
   let some major := declaredParameters.find? (fun parameter => parameter.id == plan.majorId)
     | throw (.data "PSCV0-WF-INTERNAL: selected parameter is not in the header")
@@ -562,11 +579,11 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let bodyContext := { bodyHeader with
     localContext := callback.context
     structuralRecursion := none
-    wellFoundedRecursion := some {
+    wellFoundedRecursions := [{
       functionName := header.functionName, callbackName := callbackName
       parameterIds := parameterIds, majorId := plan.majorId
       packedIds := plan.packedIds
-      stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }
+      stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }]
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
   let value ← psElabWellFoundedAt "source body"

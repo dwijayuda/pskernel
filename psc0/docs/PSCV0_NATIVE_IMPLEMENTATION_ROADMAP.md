@@ -1,3 +1,25 @@
+## Current receipt: qualified source slice, main integration and callback candidate
+
+Preparation abe1adc2ff96c632dd9ed82b8ae6357832545a32 /
+39080406371 /117536629068 completed SUCCESS: strict native foundation,
+WF n-ary/ordinary-application source construction and emission, extended P1
+kernel equations and visibility, noncomputable boundary and PSum packing.
+Main has fast-forwarded to that exact candidate. Five-gate integration runs:
+Native39081215932, M3 39081215919, F1 39081215915, F2 39081215934, F3 39081216307.
+They are running; de667946 remains the last complete five-gate acceptance.
+
+Prep32af8e2/run39080826738 has passed build/strict/packing/native fixed-parameter
+graph checks and is still running retained source checks. Its current child
+extends shared WF lexical authority to multiple typed callees, resolves captures
+in the actual refined scope and feeds callee-tagged calls to typed per-owner
+parameter correspondence. Singleton WF uses the same owner. Qualification is
+pending. This does not yet admit source mutual WF or select the PSum asset.
+See PSCV0_M3_MUTUAL_WF_2026-10-18.md and consolidated AI_WORK_STATE.md.
+
+M3+B remains open at the six-exit boundary. Historical pending narratives below
+are dated records, superseded by this receipt; no runtime count is inferred
+from successful emission.
+
 ## Shared fixed-parameter analysis candidate
 
 The retained PSum/typed-packing probe passed official-kernel construction and

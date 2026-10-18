@@ -212,7 +212,7 @@ def psElabStructuralReferenceEscapes
 def psTryElabRecursionSelfCall (elaborate : PsElaborator)
     (context : PsElabContext) (fn : PsSyntaxTerm) (arguments : List PsSyntaxTerm)
     (expected : Option PsExpr) : Except PsElabError (Option PsElabTermResult) := do
-  match ← psTryElabWellFoundedSelfCall elaborate context fn
+  match ← psTryElabWellFoundedCall elaborate context fn
       (arguments.map fun value => (none, value)) expected with
   | some result => return some result
   | none => psTryElabStructuralSelfCall elaborate context fn arguments expected
@@ -259,7 +259,7 @@ def psElabTermWithFuel
             | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected
             | .call fn args span =>
-                match psTryElabWellFoundedSelfCall smaller context fn args expected with
+                match psTryElabWellFoundedCall smaller context fn args expected with
                 | .error error => .error error
                 | .ok (some result) => .ok result
                 | .ok none =>

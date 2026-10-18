@@ -1,201 +1,120 @@
-# PSC0 v7.2 work state — 18 October 2026
+# PSC0 v7.2 AI work state — M3+B
 
-## Mission and operating constraints
+Updated 2026-10-18. Repository and live exact-SHA CI are authoritative.
+This concise checkpoint supersedes historical pending narratives in older docs.
 
-Complete all six M3+B exits, then stop before M4+C/D. M2+A is accepted at
-2a7072064974cb0d051a1773a26caf15fc59838b. M3+B remains open.
+## Work contract
 
-Use the connected GitHub tools and GitHub Linux CI exclusively on
-dwijayuda/pskernel. No local checkout, compiler, build/test execution or
-Desktop Commander. Keep implementation native portable .lean, checked by the
-official Lean 4.35.0 kernel at eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-Study corresponding pinned sources/tests before each substantial feature,
-document adaptations and attribution. No PSKernel-Core/C0, self-hosting or
-C5 execution. Wasm GC internally; linear memory only at explicit ABI boundaries.
-Approved logical foundation: propext, Quot.sound, Classical.choice, exactly.
-Classical.propDecidable is not an automatic executable instance.
+Complete all six M3+B exits autonomously through connected GitHub tools and
+GitHub Linux CI only. No local checkout/files/build/test/compiler or Desktop
+Commander. Portable native .lean; official Lean4.35.0,
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Study pinned implementations and
+tests before design; document adaptations and Apache-2.0 attribution.
+Minimal coherent validation; no PSKernel-Core/C0, self-hosting or C5.
+Approved assumptions: propext, Quot.sound, Classical.choice. Wasm GC internally;
+linear memory only at explicit ABI boundaries. Never weaken acceptance.
 
-Main: psc0/pscv0-v7-native-lean-v1.
-Preparation: psc0/m3-fixedpoint-foundation-20261018.
-PR109 stays draft/open/unmerged; base psc0/pscv0-v7-m1-parser-ownership-v1.
-Read fresh refs and relevant CI before writes; expected-head non-force updates
-only. Preserve concurrent history. Do not supersede/cancel healthy Native.
-Preparation concurrency keeps one active run; do not infer success from queuing.
+Repo dwijayuda/pskernel. Main psc0/pscv0-v7-native-lean-v1.
+Prep psc0/m3-fixedpoint-foundation-20261018. PR109 remains draft/open/unmerged.
+Fresh-ref expected-head non-force writes. Preserve concurrent history.
+Never supersede/cancel a healthy main Native run. Prep concurrency keeps
+cancel-in-progress:false; leave healthy work running and avoid excess queueing.
 
-Canonical spec: PSCV0_LANGUAGE_REFERENCE_v7.2.md.
-Detailed exits: docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md and
-docs/PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md.
-Implement coherent mechanisms before focused/integration validation; no
-acceptance relaxation, false equations or runtime body substitutions.
-After each meaningful slice update both AI handoffs, roadmap and exit ledger.
+## Exact evidence and current branches
 
-## Accepted compiler and independent evidence
+Last complete five-gate acceptance:
+de6679464cac9780bae7066052714c53984dbd00.
+Native39076409463, focusedM3 39076409661, F1 39076409639,
+F2 39076409495, F3 39076409521 all succeeded, reverified live.
+Focused backend steps passed, but its whole-job log transport failed; no
+measured aggregate count was claimed.
 
-Main is de6679464cac9780bae7066052714c53984dbd00. All five gates succeeded:
-Native39076409463 (job117524368250), M3 39076409661 (job117524368606),
-F1 39076409639, F2 39076409495, F3 39076409521.
-Focused JS/strict-TS, Rust and V8-GC/Wasmtime runtime steps succeeded.
-Full log transport failed; no measured aggregate total is claimed.
-Historical estimated78/100 is not feature coverage or acceptance.
+Main has now fast-forwarded to abe1adc2ff96c632dd9ed82b8ae6357832545a32.
+Its prep run39080406371/job117536629068 completed SUCCESS.
+Main integration is running at that exact SHA:
+Native39081215932, focusedM3 39081215919, F1 39081215915,
+F2 39081215934, F3 39081216307. Fetch final results before promotion/claims.
 
-This includes selected P1 construction: actual Order.fix auxiliaries, common
-Pi/PProd carriers, checked monotonicity, whole/source equations, validated
-ordinary runtime substitution, module ownership and unchanged verified refusals.
-See PSCV0_M3_PARTIAL_FIXPOINT_ACTIVATION_2026-10-18.md for its evidence.
+Verified preparation at abe1 includes:
+- Exact native instNonemptyOfInhabited signature, no axioms, priority1000;
+  strict selected surface, closure and manifest audits.
+- N-ary dependent WF packing, shared ordinary named/default/implicit/instance
+  applications, exact equations/refusals and five-target emission.
+- Extended P1 generic universes, section/helper captures and dependent result,
+  independently kernel-checked equations and runtime-body ownership.
+- Noncomputable logical ownership, proof/type erasure, imported/private policy,
+  direct/transitive/export refusals and five-target emission.
+- Standalone exact PSum bytes and kernel-checked typed component packing.
+These are construction/emission receipts; target execution awaits main M3.
 
-Accepted Standard:3752 declarations,44 classes,370 ordinary instances,13 defaults.
-FNV18189421774150997966;
-snapshot SHA19acd30faa99f70362aac15e2e2a65f8fffe69a560e8fc0c329b4d3cc3635312;
-surface SHA f364e3d926e0c7c198e6807a79d26e389afeb8d2ad1a7fe8761944fa3282a5a3.
-Order asset117 declarations/9530 shared nodes/1574504 bytes/6 recursor rules.
-Preserve its independent pre-Order authoring boundary.
+Prep parent32af8e2af9e7ed188532fe8e0ae0cf3ebfbd77d3 adds the finite fixed-parameter
+graph and singleton integration. Run39080826738/job117538048531 is in progress;
+build, strict audits and the packing/native graph differential steps passed.
+Full retained source checks are still running.
 
-## Current fixed-parameter slice
+The current child candidate extends saved lexical WF authority to multiple
+hygienic callees and records the exact callee on each typed observation.
+Lifted captures resolve their current refined lexical binding before ordinary
+application completes the original target telescope. Local shadows and bare
+recursive-value refusal remain. Decreasing proofs clear all callback authority.
+Typed owner analysis now uses actual per-owner headers and branch-scoped calls;
+singleton WF uses the same mechanism. Consolidated packing probe adds two
+callees, refined captures, shadowing, saved scope, cross-owner reordered headers
+and outside-component refusal. Candidate compilation/qualification is pending.
+No source mutual WF acceptance or runtime claim follows from these mechanisms.
 
-The retained PSum/typed-packing probe passed official-kernel construction and
-three dependent projection equations atb9406c2f0b333ad2b25a41cabdc8485673a4d852 /
-run39080316054/job117535798439. Its other source gates stopped only at the
-then-old registry pins. Reviewed pin candidateabe1adc2ff96c632dd9ed82b8ae6357832545a32
-is running under39080406371/job117536629068; strict surface and closure audits
-have passed. Full source/emission qualification remains pending.
+## Selected foundation
 
-The next candidate adapts pinned FixedParams.Info as a finite correspondence
-graph, including reordered member headers and transitive type dependencies.
-The singleton WF planner supplies its actual typed observations to the same
-owner, retaining final fixed-argument validation. The consolidated packing
-probe compares the graph directly with native Lean's algorithm. No source
-mutual WF acceptance, Standard selection or runtime claim follows.
-See PSCV0_M3_MUTUAL_WF_2026-10-18.md. Main stays five-gate accepted atde667946;
-M3+B remains open.
-
-
-## Reviewed preparation identities
-
-Preparationabfc20d35f33694ff9e6d17e0d482cf5ef7c6796 /
-run39079996655/job117534897115 independently confirmed the exact pinned native
-signature of instNonemptyOfInhabited, native priority1000 and no axiom dependencies.
-Noncomputable metadata/section/helper/preparation/proof-and-type erasure passed.
-The remaining source gates stopped at the deliberately unchanged strict digest
-guard; no weaker admission was used.
-
-The only selected environment change is this ordinary instance registration:
-3752 declarations,44 classes,371 ordinary instances,13 defaults expected.
-The strict guard independently measured FNV7907908279927868945,
+At abe1 strict pins are FNV7907908279927868945,
 snapshot SHA855c1945851fc7983481cb271120ab12ceb78537ce6faef61e0b36f87ff99eec,
 surface SHA24e975d8e8d8b61df05bcc78a488a7e9f7465f99972577110876f5f4e39d08d5.
-These exact values replace the previous immutable pins. No new declaration,
-axiom, primitive or classical decision instance. Full candidate qualification
-remains pending; observed registration identity is not runtime evidence.
+The constructive bridge is one ordinary instance registration of an existing
+checked theorem, not a new declaration/axiom/primitive. Keep Classical.propDecidable
+out of automatic runtime instance selection and retain the frozen Order authoring
+boundary. The five-declaration, two-rule, zero-assumption PSum asset is exactly
+6779 UTF8 bytes and still UNSELECTED. Its independent export and byte comparison
+passed; activation requires reviewed strict manifest identities.
 
-Typed component-packing candidateb9406c2f0b333ad2b25a41cabdc8485673a4d852
-is under39080316054. Its standalone PSum asset remains unselected, so it does
-not change these identities. Main stays accepted atde667946. M3+B remains open.
+## Remaining work, in dependency order
 
+1. Finish current prep and main CI; distinguish actual runtime comparisons
+   from expected counts. P1 now requires40, noncomputable10, and WF includes
+   both n-ary and ordinary-application observations. Preserve every prior case.
+2. Complete mutual WF using arity-owned PSum/PSigma packing, common fixed
+   parameters/permutations, original capture owner/id identities, actual
+   measures/relation, branch-scoped decrease proofs and public projections.
+   No Bool-tag or two-member shortcut and no provisional axioms.
+3. Derive exact public equations from real fix_eq with checked cases/funext;
+   independently compare against retained original source bodies. Runtime
+   adaptation must validate the complete actual functional and all typed
+   callbacks. A kernel-valid f=f cannot authorize replacing an executable body.
+   Current multi-member WF refusal stays until this full path is complete.
+4. Assess/complete major-dependent constrained matching through the pinned
+   Eq/HEq generalization design. Default mutual/nested induction refusals are
+   intentional in Lean and remain separate from this real transport question.
+5. Reconcile all six exits: data/elimination/deriving, strategies,
+   structural/WF, P0, P1, and exact-SHA five-gate integration. M3+B is OPEN.
+   Do not drift into M4 effects/contracts or M5 correspondence/C5.
 
-## Latest typed component-packing slice
+## Source owners and references
 
-Standalone exportf58d7e1f68112a4efe94eedc8d224fb967087dff /
-run39079183717/job117533634051 passed empty-kernel replay:5 declarations,
-2 generated recursor rules compared,0 assumptions,6779 source bytes.
-The exact JSON chunks are retained as StandardPSumData.lean and CI compares
-regenerated bytes with that file. The asset is not selected into Standard.
+Elab/WhereScope, Where, PreDefinition, Command own source scopes, captures,
+components and visibility. Elab/PartialFixpoint, Monotonicity and Compiler/Api
+own checked P1 and executable adaptation. Elab/FixedParameters,
+RecursionParameters, Application, WellFounded, WhereWellFounded,
+Meta/MutualPacking, Meta/WellFounded and Erasure/WellFounded own WF.
+Environment, Compiler/Api/Pscv0Modules, Erasure, Host/NativeV7 own noncomputable
+policy. Consolidated test/Pscv0M3*.lean and scripts/pscv0-m3-runtime.mjs provide
+focused source/kernel/backend evidence.
 
-Meta/MutualPacking now implements the pinned ArgsPacker.Mutual mechanisms:
-count-owned domains/injections/views, dependent codomains, uncurrying and
-checked projections. It depends only on portable Meta.Infer. The focused
-native/source/Core probe checks three heterogeneous members, dependent Fin
-results, exact kernel-checked projection equations, arbitrary Sort universes,
-an original final PSum field, and malformed index/constructor refusal.
-Qualification is pending; this does not authorize source mutual WF or runtime
-component adaptation. See PSCV0_M3_MUTUAL_WF_2026-10-18.md.
+Pinned references: FixedParams, ArgsPacker, WF/{Main,PackMutual,Rel,Fix,Unfold},
+PartialFixpoint/{Main,Eqns}, Monotonicity, Init/Internal/Order/Basic,
+MutualDef, Where, App, NoncomputableAttr, LCNF/ToLCNF, Meta/Tactic/Cases,
+Generalize and Elab/Tactic/Induction. Tests include fixedParamsReorder,
+funind_mutual_dep, wfrecUnary, mutual_termination_by_errors, termination_by_where,
+partial_fixpoint*, usesOfNoncomputable, noncomputableUnused, optParam,
+invalidNamedArgs, inductionMutual and errorOnInductionForNested.
+Never copy upstream test_sorry into proof authority.
 
-Bridge/visibility candidateabfc20d35f33694ff9e6d17e0d482cf5ef7c6796
-is running in39079996655/job117534897115. Native signature/closure checks
-passed; strict registry audit refused the intended metadata change.
-Retrieve final independently observed digests before pinning.
-Main remains five-gate accepted atde667946; M3+B remains open.
-
-
-## Current preparation and verified boundary
-
-Preparation f58d7e1f68112a4efe94eedc8d224fb967087dff stages standalone PSum
-authoring; run39079183717/job117533634051 has passed its export step.
-Fetch the completed result and exact JSON source chunks before retaining an asset.
-PSum is not selected and mutual WF remains an explicit refusal.
-
-Predecessor5b614f357bacf00403132e314dd63733342dc70a /
-run39078823496/job117532224707 passed WF construction, all retained refusals
-and five-target emission. It covers n-ary three/four-field dependent PSigma
-packing and shared ordinary named/default/implicit/instance applications.
-No new runtime parity claim yet. psReduceApply only constructs applications:
-the shared pair-tail instantiator now beta-instantiates the owned lambda family
-before every nested walk, including erasure. See n-ary WF and WF applications
-dated design documents.
-
-The same run independently kernel-checked the extended generic/section/helper/
-dependent-result P1 program before a fixture visibility assertion failed.
-Root: source where helpers of public parents retain qualified source names in
-pinned Lean; only generated support is hidden. The current candidate checks the
-real module interface plus source origins, and adds a native source witness.
-It does not change compiler visibility to satisfy an incorrect private-list test.
-
-Noncomputable source metadata, dependency rejection, logical/proof/type erasure,
-module/private closure and source printing are implemented but not yet qualified.
-The run stopped at missing Nonempty instance synthesis in specNat.
-The existing checked theorem instNonemptyOfInhabited was present but unregistered.
-The current candidate explicitly registers that general bridge at native priority
-1000, audits it, and includes exact native signature/metadata observations.
-No new declaration, axiom or runtime primitive is added. Strict Standard pins now use the independent Linux observations recorded above.
-There is one additional ordinary instance; do not guess or dynamically accept digests.
-See PSCV0_M3_NONCOMPUTABLE_2026-10-18.md.
-
-## Next work in dependency order
-
-1. Qualify the current bridge/visibility candidate. Retrieve exact Standard
-   digest observations from the strict refusal and inspect native priority,
-   primitive signature and kernel closure checks before updating reviewed pins.
-   Complete noncomputable, generic P1 and retained construction/emission checks.
-2. Retain the exact standalone PSum candidate only after its empty-kernel replay
-   and recursor-rule equality checks pass. Activation is separate.
-3. Promote a qualified coherent candidate and let all five main gates finish at
-   one compiler/test SHA. P1 requires40 observations, noncomputable10; WF adds
-   n-ary and ordinary-application observations. Preserve previous cases and
-   report actual executed totals, not expected totals.
-4. Implement compatible mutual WF through shared typed PSum component packing
-   and PSigma per-member telescopes. No Bool-tag/two-member special case.
-   Retain original headers, capture owner/id identities, common relation,
-   actual proof-producing decreases, public equations and runtime validation.
-   A kernel-valid self-equality alone cannot authorize an executable body:
-   reconstruct and validate the actual complete functional.
-5. Reconcile all six exits: data/elimination/deriving, source strategies,
-   structural/WF, P0, P1, exact-SHA five-gate integration. Native default induction
-   rejects mutual/nested types (Induction.getElimNameInfo); these exact negative
-   controls are not missing positive capabilities. Separately assess compound/
-   repeated index and major-dependent match transport; native Cases uses
-   Eq/HEq generalization and it is not equivalent to default induction refusal.
-6. Stop only at complete M3+B or a genuine user-dependent blocker. Do not drift
-   into M4 effects/contracts or M5/C5. Kernel proof, runtime observations and
-   formal backend preservation are different evidence layers.
-
-## Relevant owners and references
-
-Syntax/Pscv0: heads/suffixes/modifiers. Elab/WhereScope, Where, PreDefinition,
-Command: original scopes/capture closure/components/support visibility.
-Elab/PartialFixpoint, Monotonicity and Compiler/Api: checked P1 and validated
-ordinary runtime view. Elab/RecursionParameters, Application, WellFounded,
-WhereWellFounded, Meta/WellFounded and Erasure/WellFounded: shared typed WF.
-Environment/Basic, Compiler/Api/Pscv0Modules, Erasure and host/NativeV7:
-noncomputable execution policy. test/Pscv0M3*.lean and
-scripts/pscv0-m3-runtime.mjs: consolidated controls and runtime parity.
-
-Pinned references studied: PartialFixpoint Main/Eqns, Monotonicity,
-Init/Internal/Order/Basic, Init/Prelude, Meta/ArgsPacker, WF/PackMutual/Main/Rel,
-MutualDef, PreDefinition/Basic, App, NoncomputableAttr, LCNF/ToLCNF,
-Elab/Tactic/Induction and Meta/Tactic/Cases/Generalize.
-Tests include partial_fixpoint*, usesOfNoncomputable, noncomputableUnused,
-wfrecUnary, mutual_termination_by_errors, termination_by_where, optParam,
-invalidNamedArgs, fixedParamsReorder, funind_mutual_dep, inductionMutual and
-errorOnInductionForNested. Never copy upstream test_sorry into proof authority.
-
-Older receipts remain in Git history and dated documents. This consolidated
-state supersedes historical pending narratives in those receipts.
+Update this file, AI_CONTINUE_PROMPT.md, roadmap and exit ledger at every
+meaningful slice. Stop only at complete M3+B or a genuine user-dependent blocker.

@@ -55,6 +55,17 @@ await modify('src/runtime/memory.cpp',[
   ['default max memory Unit ABI','extern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory() {',
     '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory(lean_obj_arg) {\n#else\nextern "C" LEAN_EXPORT lean_obj_res lean_internal_get_default_max_memory() {\n#endif'],
 ]);
+// Lean 4.35.0 src/runtime/uv/system.h declares a uint64_t gid, but its
+// no-libuv fallback in system.cpp accidentally omits that argument. Native
+// libuv builds use the other implementation and do not expose this mismatch.
+// Fix ONLY that exact fallback signature, without altering behavior, while
+// retaining the official header contract. GitHub CI run #39122290519.
+await modify('src/runtime/uv/system.cpp',[
+  ['no-libuv osGetGroup ABI matches header',
+   'extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_group() {',
+   'extern "C" LEAN_EXPORT lean_obj_res lean_uv_os_get_group(uint64_t /* gid */) {'],
+]);
+
 await modify('src/runtime/interrupt.cpp',[
   ['default heartbeat Unit ABI','extern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat() {',
     '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat(lean_obj_arg) {\n#else\nextern "C" LEAN_EXPORT obj_res lean_internal_get_default_max_heartbeat() {\n#endif'],

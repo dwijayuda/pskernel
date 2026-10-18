@@ -20,3 +20,7 @@ Immediate next: inspect workflow execution, repair verified toolchain/ABI
 failures without bypassing any check, stage actual Lean 4.35 Wasm bytes.
 Then expand conformance to full Standard and Lean Arena; benchmark startup,
 memory, real declaration workload. Never publish an unchecked artifact.
+
+## 2026-10-18: Stage1 wasm32 runtime blocker
+
+CI #39122290519: source closure, Elan, Emscripten, i386 bootstrap and stage1 libc/uv progressed; compilation failed at `src/runtime/uv/system.cpp` no-libuv `lean_uv_os_get_group` signature mismatch against its header. This is the *first real* C++ stage1 error, not a parity failure. The exact narrow fallback signature fix and an early upstream-runtime source preflight have been prepared. The complete wasm kernel remains unbuilt and unqualified until Linux CI plus native/Wasm differential tests pass. No VSIX work.

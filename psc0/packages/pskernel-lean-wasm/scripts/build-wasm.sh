@@ -48,6 +48,7 @@ test "$(git -C "$lean_source" rev-parse HEAD)" = "$lean_commit"
 git -C "$lean_source" reset -q --hard "$lean_commit"
 git -C "$lean_source" clean -q -fdx
 node "$script_dir/apply-lean435-compat.mjs" "$lean_source"
+node "$script_dir/verify-lean435-runtime.mjs" "$lean_source"
 for helper in "$lean_source/src/bin/leanmake" "$lean_source/src/bin/leanc.in"; do
   test -f "$helper" || { echo "upstream helper missing $helper" >&2; exit 1; }
   chmod +x "$helper"

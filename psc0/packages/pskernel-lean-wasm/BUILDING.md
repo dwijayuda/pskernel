@@ -74,3 +74,9 @@ A successful result must pass:
 **Status:** No current-turn CI completion or binary availability is implied
 by this document. Verify the Actions run and `PREBUILT_WASM_MANIFEST.json`
 on the feature branch.
+
+## Exact Lean 4.35.0 libuv fallback compatibility
+
+The Linux run [#39122290519](https://github.com/dwijayuda/pskernel/actions/runs/39122290519) reached stage1 `leanrt` compilation and exposed a mismatched C++ fallback: `src/runtime/uv/system.h` declares `lean_uv_os_get_group(uint64_t gid)`, while the no-libuv implementation of `src/runtime/uv/system.cpp` previously defined it without the required argument. The patched C++ implementation retains the original unsupported-without-libuv behavior; only its parameter signature changes. This is **not** a kernel soundness or admission bypass.
+
+The exact source patch applies only to the ignored pinned upstream checkout. The CI preflight now fetches the exact Lean commit, checks the complete set of guarded rewrites and their idempotence, and calls `scripts/verify-lean435-runtime.mjs` before the costly stage0/stage1 cross-build. The build repeats these checks after resetting and repatching the source checkout.

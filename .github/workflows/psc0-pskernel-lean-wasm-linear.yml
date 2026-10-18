@@ -66,6 +66,22 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
+      - name: Preflight exact Lean 4.35.0 C++ fallback signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          upstream="$GITHUB_WORKSPACE/psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-src"
+          mkdir -p "$upstream"
+          git -C "$upstream" init -q
+          git -C "$upstream" remote add origin https://github.com/leanprover/lean4.git
+          git -C "$upstream" fetch --depth 1 origin eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git -C "$upstream" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$upstream" rev-parse HEAD)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          node psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$upstream"
+          node psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs "$upstream"
+          # Guarded rewrites must remain idempotent and whitespace-clean.
+          node psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$upstream"
+          git -C "$upstream" diff --check
       - name: Install Linux native i386 prerequisites
         shell: bash
         run: |

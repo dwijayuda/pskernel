@@ -1,5 +1,21 @@
 # PSC0 v7.2 work state — M3+B
 
+## Structural build correction — qualification pending
+
+Preparation [39151186342](https://github.com/dwijayuda/pskernel/actions/runs/39151186342)
+at cf05b1515b29e6b766f58e7113c0a0a9b83063f3 compiled PatternMatrix and
+WellFounded in both mandatory jobs. It failed in MutualStructural on three
+record layouts and a nested match arm whose return escaped into the enclosing
+recursor-argument callback. This candidate fixes those four compiler errors;
+the unit motive and checked source semantics are unchanged.
+
+The twelve runtime observations and all existing source refusals remain
+mandatory. No source or runtime qualification is inferred from these builds.
+Whole-match WF boundary transport, the separate checked predicate-below owner,
+and selected function-valued WF handling remain in progress. Main remains
+33676076bcda7b0de5ec1f9803f49b8b1d28a058. All six M3+B exits remain OPEN and
+Native/M3/F1/F2/F3 must pass on one complete compiler/test SHA.
+
 ## Paired recursion and row controls — qualification pending
 
 Preparation [39150007070](https://github.com/dwijayuda/pskernel/actions/runs/39150007070)

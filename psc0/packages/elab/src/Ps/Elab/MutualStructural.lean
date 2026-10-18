@@ -206,7 +206,10 @@ def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
   if psExprHasUnresolvedMeta sourceBody then throw .unresolvedMetavariable
   let opened ← if bodyParameters then
       psElabMutualStructuralOpenBodyParameters 4096 checked.context header.openType sourceBody
-    else pure ({ context := checked.context, bindersRev := [], type := header.openType,
+    else pure ({
+      context := checked.context
+      bindersRev := []
+      type := header.openType
       body := sourceBody } : PsElabMutualStructuralBodyParameters)
   let bodyBindersRev := opened.bindersRev
   let header ← if bodyBindersRev.isEmpty then pure sourceHeader else do
@@ -321,7 +324,9 @@ def psElabMutualStructuralParameterOwners (inputs : List PsElabMutualStructuralI
     let targets ← input.peers.mapM fun (peerId, targetIndex) => do
       let some target := inputs[targetIndex]?
         | throw (psElabMutualStructuralError "OWNERSHIP" "parameter observation has no target owner")
-      return ({ peerId, name := target.header.name,
+      return ({
+        peerId
+        name := target.header.name
         arity := target.ownBinders.length } : PsElabRecursionCallTarget)
     let calls ← psElabRecursionCollectCalls 4096 input.context targets input.span input.body
     return {
@@ -1089,7 +1094,9 @@ def psElabMutualStructuralDescendantChildren (plan : PsElabMutualStructuralPlan)
     let expected := psCloseElabForallBinders arguments.context.metaContext arguments.bindersRev expected
     let hypothesis ← psElabMutualStructuralProject context constructor.recursiveFields.length position below
     let checked ← psElabResolvedTerm context hypothesis (some expected)
-    return { fieldId := field.id, slotIndex := targetSlot,
+    return {
+      fieldId := field.id
+      slotIndex := targetSlot
       hypothesis := psMetaInstantiate checked.context.metaContext checked.term }
 
 -- Push an existing descendant dictionary through an actual checked case.
@@ -1164,7 +1171,7 @@ def psElabMutualStructuralDescend (plan : PsElabMutualStructuralPlan)
       let some mapping := mappings[slotIndex]?
         | throw (psElabMutualStructuralError "OWNERSHIP" "nested motive has no specialization correspondence")
       let belowType ← match mapping with
-        | none => return (← psElabMutualStructuralPackUnit result.context descendants.level).fst
+        | none => (psElabMutualStructuralPackUnit result.context descendants.level).map (·.fst)
         | some targetSlot =>
           psElabMutualStructuralDescendantType plan result.context targetSlot indices major
       let type := PsExpr.forallE (psRootName "_nestedBelow") belowType

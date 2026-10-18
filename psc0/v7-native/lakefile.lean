@@ -16,7 +16,7 @@ lean_lib PsKernelLean where
 
 lean_lib PsV7Host where
   srcDir := "../host/src"
-  roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit, `Ps.Host.StandardClosure, `Ps.Host.StandardSource, `Ps.Host.StandardExport, `Ps.Host.StandardManifest, `Ps.Host.FloatConstructive, `Ps.Host.FloatCanonical,
+  roots := #[`Ps.Host.NativeV7, `Ps.Host.PrimitiveAudit, `Ps.Host.StandardClosure, `Ps.Host.StandardSource, `Ps.Host.StandardExport, `Ps.Host.RecursorSource, `Ps.Host.StandardManifest, `Ps.Host.FloatConstructive, `Ps.Host.FloatCanonical,
     `Ps.Host.FloatCanonicalContracts, `Ps.Host.MonotonicityProbe]
 
 lean_lib PsV7ParserChecks where

@@ -1,5 +1,15 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Explicit native witness universes — audit build correction
+
+Preparation [39167564091](https://github.com/dwijayuda/pskernel/actions/runs/39167564091)
+at 533edcb2212f30e0e7055695ddc1d86a1345cdb2 stopped all three jobs at
+two universe-inference errors in the new native Option bind witness helpers.
+Those local class/Option levels are now explicitly zero, matching the portable
+witness targets. The separate native source and expanded Bind/Monad/MonoBind
+class/instance metadata checks passed. No foundation, source or runtime pass is
+claimed for the failed build; selection remains unchanged and all six exits OPEN.
+
 ## Checked scope fixes and independent additive Option bind audit
 
 Preparation [39166058244](https://github.com/dwijayuda/pskernel/actions/runs/39166058244)

@@ -1783,8 +1783,8 @@ def checkOptionBindFoundation (assetPath : System.FilePath) : IO Unit := do
   | .ok () => pure ()
   | .error error => throw (IO.userError error)
   -- Native source independently elaborates the same two superclass goals.
-  let _ : Monad Option := inferInstance
-  let _ : Bind Option := inferInstance
+  let _ : Monad.{0, 0} Option.{0} := inferInstance
+  let _ : Bind.{0, 0} Option.{0} := inferInstance
   let option := PsExpr.constE (psRootName "Option") [.zero]
   let dictionary ← match psElabResolvedTerm (psElabContextEmpty proposed)
       (.constE (psDecisionName "Lean.Order.instMonoBindOption") [.zero]) none with

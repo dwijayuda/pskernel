@@ -117,13 +117,12 @@ def psLeanTermMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
   let value := PsSyntaxTerm.matchMany inputs.value rows.value span
   return { value, cursor := rows.cursor }
 
-def psLeanTermProof (read readType : PsPscv0TermReader) (fuel : Nat)
-    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
-  let keyword ← psTokenCursorExpectText cursor "by"
-  let some first := psTokenCursorPeek keyword.cursor | throw (.unexpectedEnd "native tactic sequence")
+def psLeanTermTactics (read readType : PsPscv0TermReader) (fuel : Nat)
+    (keyword : PsSourceSpan) (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let some first := psTokenCursorPeek cursor | throw (.unexpectedEnd "native tactic sequence")
   let braced := first.text == "{"
-  let start ← if braced then pure (← psTokenCursorExpectText keyword.cursor "{").cursor
-    else pure keyword.cursor
+  let start ← if braced then pure (← psTokenCursorExpectText cursor "{").cursor
+    else pure cursor
   let boundary := if braced then none else
     some { first.span.start with line := 0, column := first.span.start.column - 1 }
   let tactics ← psPscv0ReadTacticsFor true read readType fuel boundary start
@@ -131,10 +130,15 @@ def psLeanTermProof (read readType : PsPscv0TermReader) (fuel : Nat)
   let finalCursor ← if braced then pure (← psTokenCursorExpectText tactics.cursor "}").cursor
     else pure tactics.cursor
   let consumed := cursor.remaining.take (cursor.remaining.length - finalCursor.remaining.length)
-  let stop := (consumed.getLast?).map (·.span.stop) |>.getD keyword.token.span.stop
-  let span := PsSourceSpan.mk keyword.token.span.start stop
+  let stop := (consumed.getLast?).map (·.span.stop) |>.getD keyword.stop
+  let span := PsSourceSpan.mk keyword.start stop
   let value := PsSyntaxTerm.byE tactics.value {} span
   return { value, cursor := finalCursor }
+
+def psLeanTermProof (read readType : PsPscv0TermReader) (fuel : Nat)
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let keyword ← psTokenCursorExpectText cursor "by"
+  psLeanTermTactics read readType fuel keyword.token.span keyword.cursor
 
 def psLeanTermLocal (read readType continuation : PsPscv0TermReader)
     (isHave : Bool) (cursor : PsTokenCursor) :

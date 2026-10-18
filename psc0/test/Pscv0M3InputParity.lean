@@ -37,13 +37,22 @@ class Sized (A : Type) where
 instance (priority := high) sizedNat : Sized Nat where
   size n := n
 def m3data (flag : Bool) : UInt64 :=
-  let b := ParityBox.mk (if flag then 6 else 9)
+  let b := ParityBox.mk (keep (if flag then 6 else 9))
   let packed := ParityMaybe.some (Sized.size b.value)
   UInt64.ofNat (match packed with
     | ParityMaybe.none => 0
     | ParityMaybe.some value => if b == b then value else 0)
-example : m3data true = 6 := rfl
-example : m3data false = 9 := rfl
+
+where
+  keep (n : Nat) : Nat :=
+    match n with
+    | 0 => 0
+    | Nat.succ k => Nat.succ (keep k)
+  termination_by n
+  decreasing_by exact Nat.lt_succ_self k
+
+example : m3data true = 6 := by simp [m3data, m3data.keep]
+example : m3data false = 9 := by simp [m3data, m3data.keep]
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -68,10 +77,10 @@ private def psSource : String :=
   "function m3parity(flag: Bool): UInt64 := UInt64.ofNat(if (flag) { addSeed(8, 5) } else { withDefault(3) })\n"
 
 private def dataLeanSource : String :=
-  "structure ParityBox where\n  value : Nat\n  deriving Inhabited, BEq\ninductive ParityMaybe where\n  | none\n  | some (value : Nat)\n  deriving Inhabited, BEq\nclass Sized (A : Type) where\n  size : A → Nat\n@[default_instance 200]\ninstance (priority := high) sizedNat : Sized Nat where\n  size n := n\ndef m3data (flag : Bool) : UInt64 :=\n  let b := ParityBox.mk (if flag then 6 else 9)\n  let packed := ParityMaybe.some (Sized.size b.value)\n  UInt64.ofNat (match packed with\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if b == b then value else 0)\n"
+  "structure ParityBox where\n  value : Nat\n  deriving Inhabited, BEq\ninductive ParityMaybe where\n  | none\n  | some (value : Nat)\n  deriving Inhabited, BEq\nclass Sized (A : Type) where\n  size : A → Nat\n@[default_instance 200]\ninstance (priority := high) sizedNat : Sized Nat where\n  size n := n\ndef m3data (flag : Bool) : UInt64 :=\n  let b := ParityBox.mk (keep (if flag then 6 else 9))\n  let packed := ParityMaybe.some (Sized.size b.value)\n  UInt64.ofNat (match packed with\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if b == b then value else 0)\nwhere\n  keep (n : Nat) : Nat :=\n    match n with\n    | 0 => 0\n    | Nat.succ k => Nat.succ (keep k)\n  termination_by n\n  decreasing_by exact Nat.lt_succ_self k\n"
 
 private def dataPsSource : String :=
-  "structure ParityBox where {\n  value: Nat\n} deriving Inhabited, BEq\ninductive ParityMaybe where {\n  | none\n  | some(value: Nat)\n} deriving Inhabited, BEq\nclass Sized(A: Type) where {\n  size: A -> Nat\n}\n@[default_instance 200]\ninstance (priority := high) sizedNat: Sized Nat where {\n  size(n: Nat): Nat := n\n}\nfunction m3data(flag: Bool): UInt64 :=\n  let b := ParityBox.mk(if (flag) { 6 } else { 9 })\n  let packed := ParityMaybe.some(Sized.size(b.value))\n  UInt64.ofNat(match packed with {\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if (b == b) { value } else { 0 }\n  })\n"
+  "structure ParityBox where {\n  value: Nat\n} deriving Inhabited, BEq\ninductive ParityMaybe where {\n  | none\n  | some(value: Nat)\n} deriving Inhabited, BEq\nclass Sized(A: Type) where {\n  size: A -> Nat\n}\n@[default_instance 200]\ninstance (priority := high) sizedNat: Sized Nat where {\n  size(n: Nat): Nat := n\n}\nfunction m3data(flag: Bool): UInt64 :=\n  let b := ParityBox.mk(keep(if (flag) { 6 } else { 9 }))\n  let packed := ParityMaybe.some(Sized.size(b.value))\n  UInt64.ofNat(match packed with {\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if (b == b) { value } else { 0 }\n  })\nwhere {\n  def keep(n: Nat): Nat := match n with {\n    | 0 => 0\n    | Nat.succ k => Nat.succ(keep(k))\n  }\n  termination_by n\n  decreasing_by by { exact Nat.lt_succ_self(k) }\n}\n"
 
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do

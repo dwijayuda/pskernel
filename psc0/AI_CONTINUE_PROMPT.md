@@ -1,3 +1,25 @@
+## Native where and explicit decrease proofs — qualification pending
+
+b8b9bea7/run39089323375/job117562902854 completed FAILURE only at the known
+definition-only fixture comparison; production and native data oracles compiled.
+b95c6293/run39089622847/job117564131092 is running with complete definition/
+equation comparison. Do not cancel it. The current child adds native where local
+definitions, per-helper suffixes and native decreasing_by tactic sequences using
+the existing shared scope/capture/recursion/proof/runtime owners. Native by terms
+and decrease proofs share one tactic-sequence reader.
+
+The same two-source data fixture now executes a local well-founded identity
+helper with explicit Nat.lt_succ_self evidence, retaining native6/9 outputs and
+the existing backend matrix. No added workflow or foundation assumption.
+Pinned Parser.Term/Extra, Elab.Binders/MutualDef/LetRec and termination_by_where
+were studied; upstream illustrative axioms were not imported. Nested local where
+and unselected structural/monotonicity forms remain refused.
+
+This is an implemented but unqualified adapter slice, not source mutual-WF
+completion. Main037fda49 stays unchanged. Finish preparation and exact-SHA five
+gate integration, including the repaired P1 Rust lane, before any completion
+claim. Native do and other selected grammar gaps require reconciliation.
+
 ## Checked declaration-batch comparison — qualification pending
 
 af9a0e31/run39088772197/job117561623591 completed FAILURE only in the

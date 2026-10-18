@@ -143,3 +143,27 @@ pinned-native observations per source kind, reused by the five backend observers
 No extra workflow, foundation axiom or runtime intrinsic is introduced.
 Full native where/do/termination syntax and mutual WF remain separate open work.
 Qualification is pending; source emission is not runtime observation.
+
+## Native local definitions and termination proofs — qualification pending
+
+Studied pinned Parser/Term.lean:594-746 (Termination.suffix and whereDecls),
+Parser/Extra.lean:196-215, Elab/Binders.expandWhereDecls,
+Elab/MutualDef.declValToTerm, Elab/LetRec (typed headers, remembered parameters
+and lifting), and tests/elab/termination_by_where.lean. The upstream test has
+axiom declarations for its illustrative decreasing functions; no such axiom or
+proof authority is imported here.
+
+Native Declarations owns the selected header/suffix/local-declaration grammar.
+It constructs the same PsSyntaxTermination and PsSyntaxLocalDefinition nodes.
+The native where list owns indentation and optional semicolons; .ps retains
+local def heads/braces/newlines. Native decreasing_by reads a native tactic
+sequence; .ps retains decreasing_by by { ... }. The common native tactic reader
+is shared by by terms and decrease proofs. Existing scope/capture/dependency,
+strategy selection, measure/decrease construction, equation and runtime owners
+are unchanged. Nested where, explicit structural hints and unselected
+monotonicity still refuse according to v7.2.
+
+The existing two-source data export now traverses a local well-founded identity
+helper with an explicit checked decrease proof. Its same native6/9 observations
+remain the required five-backend oracle. No new executable fixture or workflow.
+This is input adaptation, not completion of source mutual WF.

@@ -339,3 +339,13 @@ Lean is Copyright (c) Microsoft Corporation and Lean FRO, LLC under Apache-2.0.
 PSC0 shares its own selected AST/elaborators; these source references and the
 corresponding upstream instanceWhere/derivingRepr/defaultInstanceWithPrio tests
 guide semantics and conformance. Existing upstream license/notice material remains.
+
+### Native where and termination input grammar (2026-10-18)
+
+Design references are Lean4.35.0 at
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`:
+`Parser/Term.lean`, `Parser/Extra.lean`, `Elab/Binders.lean`,
+`Elab/MutualDef.lean` and `Elab/LetRec.lean`.
+Copyright (c) Microsoft Corporation / Lean FRO, LLC, Apache-2.0;
+existing upstream license material is retained. Upstream tests are semantic
+references only; their illustrative axioms are not PSC0 foundation declarations.

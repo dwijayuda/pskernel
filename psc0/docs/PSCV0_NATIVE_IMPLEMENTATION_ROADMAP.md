@@ -1,19 +1,25 @@
 # PSCV0 native implementation roadmap — v7.2 sole target
 
-## Recursor authoring qualified; selected source qualification pending
+## Selected recursor source qualified in preparation
 
-The correction passed both mandatory preparation jobs at 73690ab2 /
-[run 39135290050](https://github.com/dwijayuda/pskernel/actions/runs/39135290050).
-The complete candidate is reviewed:109 native recursors,24 preserving public
-metadata replacements,40 symbolic iota rules,3757 declarations and no changed
-assumptions. [The selection receipt](PSCV0_M3_RECURSOR_SELECTION_2026-10-18.md)
-records exact source bytes, independent identities and archive authentication.
+[Preparation 39138442923](https://github.com/dwijayuda/pskernel/actions/runs/39138442923)
+completed SUCCESS at **1b7513339f22a5db24750485148603622e5ff018**. Both mandatory jobs passed:
+recursor-authoring117707694190 and foundation117707694427. The selected file was
+regenerated, compared byte-for-byte, and independently checked against its fixed
+source SHA256. All109 pinned public telescopes match, with zero differences and
+exactly the six unchanged compiler-owned helpers.
 
-The commit containing this update selects the exact generated asset only at the
-final Standard stage, preserves every frozen authoring base, and adds actual
-paired recursor source qualification. Its own CI is pending. Main remains
-33676076; no full exit closure or five-gate integration is inferred. Continue
-named/generalizing matches and every remaining cell of the six written exits.
+Actual .lean and .ps recursor inputs passed parsing, elaboration, exact checked
+declaration comparison, official-kernel checks, eight phase-correct refusals,
+and JavaScript/strict TypeScript/Rust/Wasm GC/component execution. All six older
+runtime exports remain; m3recursors is251417 for true and241312 for false.
+All retained foundation, indexed/HEq, deriving, structural/WF, P0/P1 and ownership
+checks passed within preparation scope. No old failure became optional.
+
+[The selection receipt](PSCV0_M3_RECURSOR_SELECTION_2026-10-18.md) records exact
+source and artifact identities. Main remains33676076; its five historical gates
+are not relabeled. M3+B and complete input parity remain OPEN. Named/generalizing
+match implementation and the complete six-exit evidence audit remain in progress.
 
 Updated 18 October 2026. **The forward feature/semantic contract for both `.ps` and `.lean` inputs is [v7.2](../PSCV0_LANGUAGE_REFERENCE_v7.2.md), with their respective source syntax.** No v7/v7.1 compatibility mode, legacy grammar fallback or architectural restart. Apply the user's [stage directive](PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md) before every new slice. The [migration matrix](PSCV0_V7_TO_V72_MIGRATION_IMPACT_2026-10-16.md) separates actual semantic changes from formatting and specified behavior from implemented/qualified capability.
 

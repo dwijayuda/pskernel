@@ -36,7 +36,7 @@ Prep cancel-in-progress:false; keep at most one active and one pending run.
 
 ## Current state and evidence
 
-Latest fully qualified five-gate compiler/test SHA and current main:
+Latest fully qualified five-gate compiler/test SHA:
 **5785ada4d0521eaa910a57adc8569dbe95d4c5fe**.
 Native39094184382, M339094184399, F139094184384, F239094184401 and
 F339094184409 all completed SUCCESS. Receipt:
@@ -86,9 +86,9 @@ WF/{PackMutual,Rel,Fix,Eqns,Unfold}, ArgsPacker and upstream fixedParams tests w
 studied; notices retained.
 
 Next:
-1. Main5785ada4 integration completed all five gates; receipt and both handoffs
-   are updated. Exact-equation preparation is green at6cdb9a6e. Promote that
-   qualified child with fresh refs; do not rerun unchanged preparation.
+1. Main6cdb9a6e is integrating after its successful preparation, promoted only
+   after all5785ada4 gates finished. Do not cancel/supersede healthy Native.
+   Latest runtime ownership candidate is on preparation; inspect its CI first.
 2. Implement total mutual WF executable ownership after auditing the whole
    preparation/RecursorLift/erasure/assurance path. The provisional design is
    docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md. Derive actual bodies from the
@@ -117,3 +117,14 @@ Standalone PSum has5 declarations,2 rules,0 assumptions,6779 UTF8 bytes and is
 still UNSELECTED. Activation requires reviewed strict manifest/surface identities.
 
 Update both handoffs, roadmap and exit ledger at every completed milestone slice.
+
+## Runtime ownership candidate (qualification pending)
+
+The new candidate adds ordinary checked private WF bodies derived from the actual
+logical functional, shared helper restoration with P1, and independent executable
+ownership checks. Existing packing validation now covers prepared helper recovery,
+complete projection coverage and same-typed private-body forgery refusal. Source
+mutual WF dispatch and strict PSum selection remain disabled; this is not backend
+execution evidence. Next inspect preparation CI, then activate both source kinds
+and qualify the existing backend lanes. Current main is6cdb9a6e; latest fully
+qualified five-gate checkpoint remains5785ada4. See runtime design note.

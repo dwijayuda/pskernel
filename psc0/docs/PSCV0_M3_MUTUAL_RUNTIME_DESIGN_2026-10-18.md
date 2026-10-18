@@ -1,6 +1,4 @@
-# Mutual WF executable ownership — design under evaluation
-
-PROVISIONAL design under study; not implemented:
+Implementation candidate (qualification pending):
 Use ordinary checked private implementation definitions (not partialDecl and no
 new Core variant). After logical auxiliary/public definitions and exact source
 equations are checked, derive each implementation body DIRECTLY from the checked
@@ -28,10 +26,9 @@ auxiliary/public definitions and alpha-compares with retained private body after
 restoring only private-owned RecursorLift helpers (existing P1 restore pattern).
 Wrong body/owner/equation cannot obtain executable authority. Shared helper
 implementation for producer/validator avoids duplicate algorithms; all actual
-type inference is in original contexts. Restore auxiliary-owned helpers too, or
-prefer skip RecursorLift on recognized logical-only component auxiliary (it is
-never executed); private implementation recursors still get ordinary checked
-workers and their proofs in canonical admissions. Native host checks the entire
+type inference is in original contexts. Restore auxiliary-owned helpers too; do not skip RecursorLift. Private
+implementation recursors still get ordinary checked workers and their proofs
+in canonical admissions. Native host checks the entire
 original graph before runtime-view substitution. Preserve worker ownership.
 Need inspect naming/origin/assurance/readable-output interactions and full
 RecursorLift pipeline before implementing. Add focused tampered-private-body
@@ -81,4 +78,10 @@ Further subsystem audit:
   definitions with partial safety after WF logic; PSC0 should retain stronger
   independent actual-functional recovery rather than importing unsafe machinery.
 
-This design is not implemented or qualified; re-evaluate before changing code.
+Candidate now implements shared Elab/WellFoundedRuntime, independent
+Compiler/WellFoundedRuntime ownership, and shared RuntimeOwnership helpers used
+by P1 and total WF. The existing three-member packing fixture checks original
+headers, complete component coverage, prepared helper restoration and same-typed
+forged private bodies; all original and prepared bodies go through the official
+kernel. This candidate does not activate source dispatch or select PSum, and
+runtime backend execution is still pending. No test budget or foundation changes.

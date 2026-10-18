@@ -174,6 +174,8 @@ lean_lib PsCompiler where
     `Ps.Compiler,
     `Ps.Compiler.Api,
     `Ps.Compiler.RecursorLift,
+    `Ps.Compiler.RuntimeOwnership,
+    `Ps.Compiler.WellFoundedRuntime,
     `Ps.Compiler.Sh1,
     `Ps.Compiler.Pscv0,
     `Ps.Compiler.Pscv0Modules
@@ -310,6 +312,7 @@ lean_lib PsElab where
     `Ps.Elab.Where,
     `Ps.Elab.WhereWellFounded,
     `Ps.Elab.WhereMutualWellFounded,
+    `Ps.Elab.WellFoundedRuntime,
     `Ps.Elab.Command
   ]
 

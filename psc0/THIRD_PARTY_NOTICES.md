@@ -364,3 +364,12 @@ and src/Lean/Meta/ArgsPacker.lean. Copyright Microsoft Corporation and Lean FRO,
 LLC; authors Leonardo de Moura and Joachim Breitner; Apache-2.0. The source
 adapter reuses PSC0's typed header, scope and packing owners, without importing
 upstream temporary axioms or unselected source capabilities.
+
+Total mutual WF execution design references Lean4.35.0 commit
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+src/Lean/Elab/PreDefinition/WF/Main.lean, Basic.lean and
+src/Lean/Meta/ArgsPacker.lean; Copyright (c) Microsoft Corporation and respective
+contributors, Apache-2.0 (authors Leonardo de Moura and Joachim Breitner).
+PSC0 derives ordinary checked bodies from the logical functional and independently
+validates them after recursor preparation; it does not import unsafe compilation
+or temporary source axioms. See licenses and existing attribution above.

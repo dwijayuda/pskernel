@@ -234,8 +234,39 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
     measured.plan (bodies.map (·.branch))).mapError (fun _ => "source component functional failed")
   let sourceResult ← (psElabWhereFinishWellFoundedComponent measured bodies built).mapError
     psCompilerPscv0ElabError
-  if sourceResult.members.length != 3 || sourceResult.batch.declarations.length != 7 then
-    throw "source component lost checked public definitions or exact retained-source equations"
+  if sourceResult.members.length != 3 || sourceResult.batch.declarations.length != 10 then
+    throw "source component lost checked public definitions, exact equations or ordinary runtime bodies"
+  let logical ← (psAddDeclarationList environment sourceResult.batch.declarations).mapError
+    psCompilerPscv0ElabError
+  let lifted ← psRecursorLiftDeclarationsWithOrigins logical sourceResult.batch.declarations
+  let (runtime, omitted) ← (psCompilerWellFoundedRuntimeView lifted.result.environment
+    lifted.result.declarations lifted.result.declarations).mapError psCompilerPscv0ElabError
+  let auxiliary := psNameAppendStr (psRootName "callFirst") "_mutual"
+  if omitted != [auxiliary] || runtime.any (fun declaration =>
+      let name := psDeclarationName declaration
+      psNameEq name auxiliary || psCompilerRuntimeHelperOwned auxiliary name) then
+    throw "runtime recovery retained its logical-only component auxiliary"
+  for source in prepared.block.members do
+    let privateName := PsName.num source.name 0
+    if runtime.any (fun declaration => psNameEq (psDeclarationName declaration) privateName) then
+      throw "runtime recovery retained a private alias"
+    let some (.definitionDecl _ privateLevels privateType _) :=
+        psCompilerRuntimeUnique lifted.result.declarations privateName
+      | throw "runtime recovery lost its checked ordinary implementation"
+    let forged := PsDeclaration.definitionDecl privateName privateLevels privateType
+      (.constE source.name (privateLevels.map PsLevel.param))
+    -- A same-typed public reference is kernel-valid but is not the recovered
+    -- functional body. Neither typing nor an arbitrary equation authorizes it.
+    let changed := lifted.result.declarations.map fun declaration =>
+      if psNameEq (psDeclarationName declaration) privateName then forged else declaration
+    match psCompilerWellFoundedRuntimeView lifted.result.environment changed changed with
+    | .error _ => pure ()
+    | .ok _ => throw "runtime ownership accepted a different well-typed private body"
+  let missing := lifted.result.declarations.filter fun declaration =>
+    !psNameEq (psDeclarationName declaration) (PsName.num (psRootName "callSecond") 0)
+  match psCompilerWellFoundedRuntimeView lifted.result.environment missing missing with
+  | .error _ => pure ()
+  | .ok _ => throw "runtime ownership accepted incomplete component coverage"
   -- Underapplication is conservative analysis, not permission to escape a
   -- proof-restricted callback. The omitted source slots must become varying.
   let some owner := owners.head? | throw "missing retained source owner"
@@ -255,7 +286,7 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
       context.localContext.nextId [malformed] with
   | .error _ => pure ()
   | .ok _ => throw "retained-call analysis accepted an unowned Core value"
-  return sourceResult.batch.declarations
+  return lifted.result.declarations
 
 private def checkFixedScopes (environment : PsEnvironment) :
     Except String (List PsDeclaration) := do
@@ -545,7 +576,8 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
-  IO.println "PSCV0_M3_SOURCE_COMPONENT: PASS original three-member source bodies, shared fixed measure codomain, refined per-callee callbacks, real decrease goals, closed dependent public projections and exact retained-source equations checked by the official kernel; source dispatch and executable ownership remain separate"
+  IO.println "PSCV0_M3_WF_RUNTIME_OWNERSHIP: PASS actual-functional recovery into ordinary checked private definitions, original header/returned-function ownership, prepared helper restoration, complete coverage and same-typed private-body forgery refusals; source dispatch and backend execution remain separate"
+  IO.println "PSCV0_M3_SOURCE_COMPONENT: PASS original three-member source bodies, shared fixed measure codomain, refined per-callee callbacks, real decrease goals, closed dependent public projections and exact retained-source equations checked by the official kernel; source dispatch and backend execution remain separate"
   IO.println "PSCV0_M3_RETAINED_CALLS: PASS source-owned reordered dependent headers, actual branch and let scopes, full application spines, returned-function arity and conservative underapplication; source mutual WF remains separate"
   IO.println "PSCV0_M3_FIXED_SCOPES: PASS three reordered polymorphic headers, dependent fixed values, implicit binder preservation, returned-function ownership, exact kernel equations and malformed/dependent mapping refusals"
   IO.println "PSCV0_M3_COMPONENT_FIX: PASS heterogeneous dependent result family, common Nat measure, three typed decreasing callbacks, actual checked fix_eq member equations and incomplete/dependent-measure refusals; source mutual WF is separate"

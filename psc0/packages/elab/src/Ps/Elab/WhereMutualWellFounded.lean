@@ -1,5 +1,5 @@
 import Ps.Elab.WhereWellFounded
-import Ps.Elab.PreDefinition
+import Ps.Elab.WellFoundedRuntime
 import Ps.Meta.MutualWellFounded
 
 /-!
@@ -7,7 +7,8 @@ Source-owned components for Lean4.35.0-style mutual WF construction.
 Pinned PreDefinition/FixedParams, WF/{PackMutual,Rel,Fix} and Meta/ArgsPacker
 own the reference algorithms. See THIRD_PARTY_NOTICES.md.
 This stage preserves the original source telescope and independently checked
-retained calls. It constructs internal recursive functionals but grants no public source equation or runtime authority.
+retained calls. It constructs logical functionals, exact equations and checked ordinary runtime
+bodies. Independent compiler ownership validation is still required for execution.
 -/
 
 structure PsElabWhereWellFoundedComponentMember where
@@ -343,5 +344,12 @@ def psElabWhereFinishWellFoundedComponent
   -- member, with all genuine public definitions available to kernel inference.
   let result ← psElabPreDefinitionWellFoundedResults environment levels
     (component.members.map (·.source)) results
-  return { result with batch := { result.batch with
-    declarations := auxiliary :: result.batch.declarations } }
+  let logical ← psAddDeclarationList environment result.batch.declarations
+  let implementations ← psElabWellFoundedRuntimeBodies logical auxiliaryName
+    (component.members.map fun member => member.source.name)
+  let _ ← psAddDeclarationList logical implementations
+  return { result with
+    batch := { result.batch with
+      declarations := auxiliary :: (result.batch.declarations ++ implementations) }
+    members := (result.members.zip implementations).map fun (member, implementation) =>
+      { member with declarations := member.declarations ++ [implementation] } }

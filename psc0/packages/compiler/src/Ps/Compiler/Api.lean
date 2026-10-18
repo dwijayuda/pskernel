@@ -3,7 +3,7 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.SelfHostProd
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
-import Ps.Compiler.RecursorLift
+import Ps.Compiler.WellFoundedRuntime
 
 inductive PsCompilerSourceKind where
   | lean
@@ -336,24 +336,6 @@ private structure PsCompilerFixedpointRuntimeMember where
   auxiliary : PsName
   path : List Nat
 
-private def psCompilerFixedpointLevelsEq (left right : List PsName) : Bool :=
-  left.length == right.length &&
-    (left.zip right).all (fun pair => psNameEq pair.fst pair.snd)
-
-private def psCompilerFixedpointClosed (expression : PsExpr) : Bool :=
-  !psExprHasUnresolvedMeta expression && psExprFVarsInContext psLocalEmpty expression
-
-private def psCompilerFixedpointUnique (declarations : List PsDeclaration)
-    (name : PsName) : Option PsDeclaration :=
-  match declarations.filter (fun declaration => psNameEq (psDeclarationName declaration) name) with
-  | [declaration] => some declaration
-  | _ => none
-
-private def psCompilerFixedpointHelperOwned (auxiliary name : PsName) : Bool :=
-  match name with
-  | .num (.str owner "_rec") _ => psNameEq owner auxiliary
-  | _ => false
-
 private def psCompilerFixedpointProjectionView (levels : List PsName) :
     PsExpr → Option (PsName × List Nat)
   | .constE name arguments =>
@@ -376,49 +358,6 @@ private def psCompilerFixedpointPath (count index : Nat) : List Nat :=
 
 private def psCompilerFixedpointProject (path : List Nat) (value : PsExpr) : PsExpr :=
   path.foldl (fun value index => .proj (psRootName "PProd") index value) value
-
--- Recursor preparation closes helpers and independently checks exact beta
--- restoration. Undo only those auxiliary-owned helper definitions, plus
--- beta/zeta; never unfold a public definition or Order.fix during this check.
-private def psCompilerFixedpointRestore (fuel : Nat)
-    (declarations : List PsDeclaration) (auxiliary : PsName) (expression : PsExpr) :
-    Except String PsExpr := do
-  match fuel with
-  | 0 => throw "restoration budget exhausted"
-  | fuel + 1 =>
-    match expression with
-    | .constE name arguments =>
-      if !psCompilerFixedpointHelperOwned auxiliary name then return expression
-      let some (.definitionDecl _ parameters type value) :=
-          psCompilerFixedpointUnique declarations name
-        | throw "missing unique auxiliary recursor helper"
-      if parameters.length != arguments.length ||
-          !psCompilerFixedpointClosed type || !psCompilerFixedpointClosed value then
-        throw "auxiliary recursor helper is not closed at its declared universes"
-      psCompilerFixedpointRestore fuel declarations auxiliary
-        (psExprInstantiateLevelParams parameters arguments value)
-    | .app fn argument =>
-      let fn ← psCompilerFixedpointRestore fuel declarations auxiliary fn
-      let argument ← psCompilerFixedpointRestore fuel declarations auxiliary argument
-      match fn with
-      | .lam _ _ body _ =>
-        psCompilerFixedpointRestore fuel declarations auxiliary (psExprInstantiate1 body argument)
-      | _ => return .app fn argument
-    | .letE _ _ value body =>
-      let value ← psCompilerFixedpointRestore fuel declarations auxiliary value
-      psCompilerFixedpointRestore fuel declarations auxiliary (psExprInstantiate1 body value)
-    | .lam name type body binder =>
-      return .lam name
-        (← psCompilerFixedpointRestore fuel declarations auxiliary type)
-        (← psCompilerFixedpointRestore fuel declarations auxiliary body) binder
-    | .forallE name type body binder =>
-      return .forallE name
-        (← psCompilerFixedpointRestore fuel declarations auxiliary type)
-        (← psCompilerFixedpointRestore fuel declarations auxiliary body) binder
-    | .proj typeName index value =>
-      return .proj typeName index
-        (← psCompilerFixedpointRestore fuel declarations auxiliary value)
-    | _ => return expression
 
 private def psCompilerFixedpointReplacePeers
     (members : List PsCompilerFixedpointRuntimeMember) (expression : PsExpr) : PsExpr :=
@@ -482,10 +421,10 @@ private def psCompilerFixedpointCheckComponent
   if !psNameEq auxiliary (PsName.num first.name 1) then
     throw "fixedpoint auxiliary does not belong to the first packed member"
   let some (.definitionDecl _ levels packedType fixedValue) :=
-      psCompilerFixedpointUnique declarations auxiliary
+      psCompilerRuntimeUnique declarations auxiliary
     | throw "missing unique checked fixedpoint auxiliary"
-  if !psCompilerFixedpointClosed packedType || !psCompilerFixedpointClosed fixedValue ||
-      !(ordered.all (fun member => psCompilerFixedpointLevelsEq levels member.levels)) then
+  if !psCompilerRuntimeClosed packedType || !psCompilerRuntimeClosed fixedValue ||
+      !(ordered.all (fun member => psCompilerRuntimeLevelsEq levels member.levels)) then
     throw "fixedpoint auxiliary or member universes are not closed and shared"
   let fixed := psReduceAppView fixedValue
   let .constE fixedName [_] := fixed.head | throw "auxiliary is not an exact Order.fix"
@@ -500,10 +439,10 @@ private def psCompilerFixedpointCheckComponent
   if !psExprAlphaEq functionalType packedType then throw "functional domain mismatch"
   for member in ordered do
     let some (.theoremDecl _ equationLevels equationType equationProof) :=
-        psCompilerFixedpointUnique declarations (PsName.num member.name 2)
+        psCompilerRuntimeUnique declarations (PsName.num member.name 2)
       | throw "missing unique checked whole-function equation"
-    if !psCompilerFixedpointLevelsEq levels equationLevels ||
-        !psCompilerFixedpointClosed equationType || !psCompilerFixedpointClosed equationProof then
+    if !psCompilerRuntimeLevelsEq levels equationLevels ||
+        !psCompilerRuntimeClosed equationType || !psCompilerRuntimeClosed equationProof then
       throw "whole-function equation is not closed at the component universes"
     let equation := psReduceAppView equationType
     let .constE equationName [_] := equation.head | throw "whole-function equation is not Eq"
@@ -514,13 +453,13 @@ private def psCompilerFixedpointCheckComponent
         !psExprAlphaEq right member.body then
       throw "whole-function equation does not state the exact retained body"
   let entries ← ordered.mapM fun member => do
-    let restored ← psCompilerFixedpointRestore 4096 declarations auxiliary member.body
+    let restored ← psCompilerRuntimeRestore 4096 declarations auxiliary member.body
     return (member, psCompilerFixedpointReplacePeers ordered restored)
   let body ← psCompilerFixedpointPack entries packedType
   let reconstructed := PsExpr.lam (psRootName "$psc0Fix") packedType
     (psExprAbstractFVar 0 body) .explicit
-  let restored ← psCompilerFixedpointRestore 4096 declarations auxiliary functional
-  let reconstructed ← psCompilerFixedpointRestore 4096 declarations auxiliary reconstructed
+  let restored ← psCompilerRuntimeRestore 4096 declarations auxiliary functional
+  let reconstructed ← psCompilerRuntimeRestore 4096 declarations auxiliary reconstructed
   if !psExprAlphaEq restored reconstructed then
     throw "retained source bodies do not reconstruct the checked fixedpoint functional"
 
@@ -552,14 +491,14 @@ private def psCompilerOrdinaryPartialRuntimeView
         | .opaqueDecl name levels type value => (name, levels, type, value, false)
         | .definitionDecl name levels type value => (name, levels, type, value, true)
         | _ => (.anonymous, [], .sortE .zero, .sortE .zero, false)
-      if !psCompilerFixedpointLevelsEq levels publicLevels ||
+      if !psCompilerRuntimeLevelsEq levels publicLevels ||
           !psExprAlphaEq type publicType then
         throw (.normalization "PSCV0-PARTIAL: private implementation/type mismatch")
       if (declarations.filter (fun declaration =>
           psNameEq (psDeclarationName declaration) name)).length != 1 then
         throw (.normalization "PSCV0-PARTIAL: missing unique opaque logical owner")
       if fixedpoint then
-        if !psCompilerFixedpointClosed type || !psCompilerFixedpointClosed body then
+        if !psCompilerRuntimeClosed type || !psCompilerRuntimeClosed body then
           throw (.normalization "PSCV0-FIXPOINT-RUNTIME: retained source body is not closed")
         let some (auxiliary, path) := psCompilerFixedpointProjectionView levels value
           | throw (.normalization "PSCV0-FIXPOINT-RUNTIME: public value is not an exact packed projection")
@@ -574,7 +513,7 @@ private def psCompilerOrdinaryPartialRuntimeView
   let runtime := declarations.filterMap fun declaration =>
     let omitted := match declaration with
       | .definitionDecl name .. => auxiliaries.any (fun auxiliary =>
-        psNameEq name auxiliary || psCompilerFixedpointHelperOwned auxiliary name)
+        psNameEq name auxiliary || psCompilerRuntimeHelperOwned auxiliary name)
       | _ => false
     if omitted then none else
       match declaration with
@@ -635,18 +574,13 @@ def psCompilerOrdinaryPartialIrFromCheckedPrepared
     (prepared : PsCompilerAdmissionReadyModule)
     (targetWordSize : Option PsVerifiedIrWordSize := none) :
     Except PsCompilerError PsVerifiedIrModule := do
-  let (runtime, auxiliaries) ← psCompilerOrdinaryPartialRuntimeView prepared.declarations
-  let mut workerGroups : List PsRecursorWorkerGroup := []
-  for group in prepared.recursorWorkerGroups do
-    let allOwned := !group.workers.isEmpty && auxiliaries.any (fun auxiliary =>
-      group.workers.all (fun worker => psCompilerFixedpointHelperOwned auxiliary worker.name))
-    let anyOwned := group.workers.any (fun worker => auxiliaries.any (fun auxiliary =>
-      psCompilerFixedpointHelperOwned auxiliary worker.name))
-    if allOwned then pure ()
-    else if anyOwned then
-      throw (.normalization "PSCV0-FIXPOINT-RUNTIME: logical auxiliary owns only part of a worker group")
-    else
-      workerGroups := workerGroups ++ [group]
+  let (runtime, partialAuxiliaries) ← psCompilerOrdinaryPartialRuntimeView prepared.declarations
+  let environment ← psCompilerEnvironmentFromPrepared prepared
+  let (runtime, totalAuxiliaries) ←
+    (psCompilerWellFoundedRuntimeView environment prepared.declarations runtime).mapError
+      PsCompilerError.elaboration
+  let workerGroups ← (psCompilerRuntimeWorkerGroups prepared.recursorWorkerGroups
+    (partialAuxiliaries ++ totalAuxiliaries)).mapError PsCompilerError.normalization
   psCompilerErasePreparedRuntimeViewWithGroups prepared runtime workerGroups targetWordSize
 
 def psCompilerVerifiedIrFromPrepared
@@ -659,7 +593,13 @@ def psCompilerVerifiedIrFromPrepared
   if prepared.declarations.any (fun declaration =>
       match declaration with | .partialDecl .. => true | _ => false) then
     throw (.normalization "PSCV0-PARTIAL-RUNTIME-PENDING: partial logical checking does not admit executable output")
-  psCompilerErasePreparedRuntimeView prepared prepared.declarations targetWordSize
+  let environment ← psCompilerEnvironmentFromPrepared prepared
+  let (runtime, auxiliaries) ←
+    (psCompilerWellFoundedRuntimeView environment prepared.declarations prepared.declarations).mapError
+      PsCompilerError.elaboration
+  let groups ← (psCompilerRuntimeWorkerGroups prepared.recursorWorkerGroups auxiliaries).mapError
+    PsCompilerError.normalization
+  psCompilerErasePreparedRuntimeViewWithGroups prepared runtime groups targetWordSize
 
 def psCompilerVerifiedIrFromElaborated
     (elaborated : PsElabModuleResult)

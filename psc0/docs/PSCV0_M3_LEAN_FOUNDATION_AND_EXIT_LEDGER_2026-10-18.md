@@ -41,9 +41,9 @@ The official kernel checks each axiom's well-formed type and subsequent declarat
 | FND-1 exact choice foundation | Selected Standard, official replay, StandardManifest, PrimitiveAudit | Qualified at f271f2a3: all five exact-SHA workflows succeeded | Pinned signature, exact native closure, regenerated environment/surface identities, all existing admission refusals |
 | P0-1 Nonempty fallback | `Ps.Elab.Mutual.psElabPartialInhabitant` | Qualified five-gate foundation/P0 integration at f271f2a3; exact focused count unconfirmed | Native-compatible constructive-first search and checked Nonempty fallback; body-sensitive execution; opacity and uninhabited-result refusals |
 | P1-1 order-library closure | Native authoring export and portable declaration replay | 117-declaration replay, four dictionaries and immutable pins qualified at a53b3651; active and strictly audited at abe1adc2 | Required CCPO/order/monotonicity/fix/equation declarations exported with complete proof/value/type dependencies and official trust-zero replay |
-| P1-2 logical elaborator | Typed recursive components and selected fixedpoint consumer | Qualified source/kernel preparation at abe1adc2, including generic/section/helper/dependent cases; main runtime pending | Actual functional, order instance, monotonicity proof, checked fixedpoint declaration, retained captures/universes/mutual projections |
-| P1-3 exact equations | Pinned fix_eq-based proof construction | Exact source equations independently kernel checked at abe1adc2; main integration pending | Generated source equations independently checked; no assumed equations or proof holes |
-| P1-4 ordinary implementation | Explicit P1 logical/body ownership and validated runtime view | Complete-layout adapter, adversarial refusals and five-target emission passed at abe1adc2; main runtime pending | Original logical graph preserved; exact recursive body selected for ordinary execution; type/telescope/identity checks |
+| P1-2 logical elaborator | Typed recursive components and selected fixedpoint consumer | Qualified source/kernel preparation at abe1adc2, including generic/section/helper/dependent cases; all five target lanes passed | Actual functional, order instance, monotonicity proof, checked fixedpoint declaration, retained captures/universes/mutual projections |
+| P1-3 exact equations | Pinned fix_eq-based proof construction | Exact source equations independently kernel checked at abe1adc2; all five main gates passed | Generated source equations independently checked; no assumed equations or proof holes |
+| P1-4 ordinary implementation | Explicit P1 logical/body ownership and validated runtime view | Complete-layout adapter, adversarial refusals and five-target emission passed at abe1adc2; all five target lanes passed | Original logical graph preserved; exact recursive body selected for ordinary execution; type/telescope/identity checks |
 | SRC-1 plain section dictionary | Existing typed predefinition route for unregistered ordinary section definitions | Capture/header/private-equation source checks qualified at a53b3651 / 39073278997 | True no-Where/no-hint native/portable controls, two actual dictionaries, complete capture headers/equations, preserved registration/privacy/theorem policies |
 
 The P1 source consumer is implemented and independently kernel checked, including exact equations and complete-layout executable ownership. The standalone library probe remains authoring evidence only. Native imports, parsed suffixes and unused-hint warnings do not substitute for source/body qualification. The extended runtime matrix still awaits its exact main integration receipt.
@@ -75,19 +75,20 @@ Prepare the foundation/library probe early while closing independent source/data
 The current branch/CI state and strict identities are consolidated in
 [AI_WORK_STATE.md](../AI_WORK_STATE.md); the current dependency order is in the
 [roadmap](PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md#current-m3-checkpoint-and-remaining-dependencies).
-Preparationabe1adc2/39080406371 and32af8e2/39080826738 completed successfully.
-Mainabe1adc2 has successful F1/F2/F3 and running Native/M3 at this checkpoint.
-Callback candidate03ab1dce/39081538098 has a failed focused packing step;
-production and retained WF/P1/noncomputable checks passed. The new fixture failed
-to parse a nested record; this candidate corrects only its field layout, retaining
-all assertions. No new accepted
-exit or runtime count is inferred.
+Mainabe1adc2 now has all five gates successful: Native39081215932,
+M3 39081215919, F1 39081215915, F2 39081215934 and F3 39081216307.
+The [integration receipt](PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md)
+records exact artifact digests, strict pins and qualified scope. This includes
+target execution for extended P1, n-ary WF/ordinary calls and noncomputable policy.
 
-The current heterogeneous-match candidate adds ordered Eq/HEq constraints and
-existing dependent-context transport, replacing the old fixed-major refusal
-with native-positive source/kernel cases. Its five-target observer adds ten
-required runtime comparisons (group-match40 to50), without dropping old cases.
-It is not qualified until preparation and subsequent main integration pass.
+Prep32af8e2/39080826738 passed fixed-parameter correspondence.
+Prep593a1bf/39082224478 passed typed multi-callee scope, fixed-major Eq/HEq
+matching and retained WF/P1/noncomputable checks, but the omitted-result
+riFixedIndexEq rfl assertion failed. The next child elides transport only after
+checking the final telescope types and reused base, following pinned Subst.
+The unchanged fixture validates this inference invariant. Completed checked
+unary packing now also covers dependent headers, final user PSigma values and
+returned functions in the existing consolidated probe. Qualification is pending.
 
 M3+B remains open. Remaining total-recursion work includes compatible mutual WF
 through the actual typed PSum/PSigma domain, common fixed parameters and measure,

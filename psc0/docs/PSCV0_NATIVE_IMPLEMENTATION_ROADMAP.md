@@ -74,30 +74,30 @@ Next measured work is actual-IR closure/dictionary specialization and safe recur
 
 ## Current M3 checkpoint and remaining dependencies
 
-Last complete five-gate acceptance: de6679464cac9780bae7066052714c53984dbd00.
-Main is abe1adc2ff96c632dd9ed82b8ae6357832545a32 after successful full preparation
-39080406371. F1 39081215915, F2 39081215934 and F3 39081216307 succeeded;
-Native39081215932 and focusedM3 39081215919 remain in progress.
-Do not supersede the healthy Native run or infer runtime results from emission.
+Main abe1adc2ff96c632dd9ed82b8ae6357832545a32 now has all five gates
+successful: Native39081215932, focusedM3 39081215919, F1 39081215915,
+F2 39081215934 and F3 39081216307.
+[Exact receipt](PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md) records artifacts,
+strict identities and scope. N-ary WF/ordinary applications, extended P1 and
+noncomputable execution are qualified across all five targets at that SHA.
 
-Prep32af8e2af9e7ed188532fe8e0ae0cf3ebfbd77d3 /39080826738 succeeded:
-shared finite fixed-parameter graph matches pinned Lean, singleton WF retains
-its source/equation checks, dependent PSum packing passes independent kernel
-admission, and all retained preparation checks passed.
-Multi-callee/capture candidate03ab1dce70d34c869e226942bba5a9a904029a82 /
-39081538098 has a failed consolidated packing step; production build passed.
-Its new fixture had a nested-record layout error at line133; corrected field
-layout preserves every assertion. Retained WF/P1/noncomputable source checks
-passed at that SHA. The new callback probe itself remains unqualified.
+Prep32af8e2/run39080826738 passed the common fixed-parameter graph and pinned
+native differential. Prep593a1bf/run39082224478 passed the multi-callee scope
+probe, new fixed-major/context Eq/HEq match fixture and retained WF/P1/noncomputable.
+One retained omitted-result rfl equation failed. The next child compares final
+telescope types after branch inference before eliding unnecessary transport;
+no test is weakened. Its checked unary PSigma operations preserve source arity,
+dependent fields, user PSigma values and returned functions. Qualification is
+pending; these shared mechanisms prepare complete mutual WF.
 
-Preparation-qualified capabilities at abe1 include n-ary WF packing and ordinary
-named/default/implicit/instance application, extended generic/section/helper/
-dependent P1, noncomputable ownership and execution boundaries, and the audited
-constructive Nonempty bridge. The standalone PSum asset remains unselected.
-Current next candidate is the [heterogeneous match transport design](PSCV0_M3_HETEROGENEOUS_MATCH_2026-10-18.md);
-source mutual WF still requires its common measure, complete functional,
-exact original-body equations and validated whole-component runtime adapter.
-See [mutual WF design](PSCV0_M3_MUTUAL_WF_2026-10-18.md).
+Remaining: finish this preparation and five-gate integration; complete source
+mutual WF with common measure, original capture/header ownership, branch decrease
+proofs, exact source equations and whole-functional runtime validation.
+The runtime view must recover typed public members from the actual checked
+functional before erasure: a PSum-dependent result is not an unknown IR type.
+The retained standalone PSum asset remains unselected.
+See [mutual WF design](PSCV0_M3_MUTUAL_WF_2026-10-18.md) and
+[dependent match design](PSCV0_M3_HETEROGENEOUS_MATCH_2026-10-18.md).
 
 The authoritative six exits above are unchanged. Native default mutual/nested
 induction refusals are intentional; major-dependent fixed-index matching is a

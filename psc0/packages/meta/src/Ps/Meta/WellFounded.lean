@@ -349,3 +349,84 @@ def psWellFoundedTupleCases (environment : PsEnvironment) (metaContext : PsMetaC
       (psExprAbstractFVar first.id (.lam nextName tailDomain
         (psExprAbstractFVar tail.id inner) .explicit)) .explicit
     return psWellFoundedPairCases packing resultLevel motive major minor
+
+-- The original source arity controls telescope opening. A returned function
+-- is part of the result and never silently becomes another packed argument.
+private def psWellFoundedSourceOpen (environment : PsEnvironment)
+    (metaContext : PsMetaContext) (locals : PsLocalContext)
+    (names : List PsName) (type : PsExpr) :
+    Except PsInferError (PsLocalContext × List PsWellFoundedTupleBinder × PsExpr) := do
+  match names with
+  | [] => return (locals, [], type)
+  | name :: names =>
+    let parameter ← psInferEnsureForall environment metaContext locals type
+    let pushed := psLocalPushBinding locals name parameter.domain .explicit
+    let (inner, binders, result) ← psWellFoundedSourceOpen environment metaContext
+      pushed.context names (psExprInstantiate1 parameter.body (.fvar pushed.id))
+    return (inner, { id := pushed.id, name, type := parameter.domain } :: binders, result)
+
+-- ArgsPacker.Unary.uncurryType, with the exact original header as authority.
+-- The final source field retains its identity even if its type is PSigma.
+def psWellFoundedTupleUncurryType (environment : PsEnvironment)
+    (metaContext : PsMetaContext) (locals : PsLocalContext)
+    (names : List PsName) (sourceType : PsExpr) : Except PsInferError PsExpr := do
+  if names.isEmpty then throw .expectedFunction
+  let (inner, binders, result) ← psWellFoundedSourceOpen environment metaContext
+    locals names sourceType
+  let domain ← psWellFoundedTupleTypeChecked environment metaContext inner
+    (binders.map fun binder => .fvar binder.id)
+  let major := psLocalPushBinding { locals with nextId := inner.nextId }
+    (psRootName "_packed") domain .explicit
+  let values := psWellFoundedTupleProjections binders.length (.fvar major.id)
+  let codomain := (binders.zip values).foldl (fun body (binder, value) =>
+    psExprInstantiate1 (psExprAbstractFVar binder.id body) value) result
+  let type := PsExpr.forallE (psRootName "_packed") domain
+    (psExprAbstractFVar major.id codomain) .explicit
+  let sort ← psInferType environment metaContext locals type
+  let _ ← psInferEnsureSort environment metaContext locals sort
+  return type
+
+-- Dependent elimination preserves the actual curried body, rather than
+-- relying on a sigma eta conversion rule. Both the branch result and the
+-- complete unary function are independently inferred in their real contexts.
+def psWellFoundedTupleUncurry (environment : PsEnvironment)
+    (metaContext : PsMetaContext) (locals : PsLocalContext)
+    (names : List PsName) (type source : PsExpr) : Except PsInferError PsExpr := do
+  if names.isEmpty then throw .expectedFunction
+  let parameter ← psInferEnsureForall environment metaContext locals type
+  let (inner, binders) ← psWellFoundedTupleOpen locals parameter.domain names
+  let values := binders.map fun binder => PsExpr.fvar binder.id
+  let packed ← psWellFoundedTuplePack parameter.domain values
+  let body := psReduceApply source values
+  let inferred ← psInferType environment metaContext inner body
+  let expected := psExprInstantiate1 parameter.body packed
+  if !psWellFoundedDefEq environment metaContext inner inferred expected then
+    throw .applicationTypeMismatch
+  let alternative := psWellFoundedTupleLambdas binders body
+  let major := psLocalPushBinding { locals with nextId := inner.nextId }
+    parameter.name parameter.domain .explicit
+  let codomain := psExprInstantiate1 parameter.body (.fvar major.id)
+  let sort ← psInferType environment metaContext major.context codomain
+  let level ← psInferEnsureSort environment metaContext major.context sort
+  let body ← psWellFoundedTupleCases environment metaContext major.context names
+    major.id level codomain alternative
+  let value := PsExpr.lam parameter.name parameter.domain
+    (psExprAbstractFVar major.id body) .explicit
+  let inferred ← psInferType environment metaContext locals value
+  if !psWellFoundedDefEq environment metaContext locals inferred type then
+    throw .applicationTypeMismatch
+  return value
+
+def psWellFoundedTupleCurry (environment : PsEnvironment)
+    (metaContext : PsMetaContext) (locals : PsLocalContext)
+    (names : List PsName) (sourceType function : PsExpr) : Except PsInferError PsExpr := do
+  let type ← psInferType environment metaContext locals function
+  let parameter ← psInferEnsureForall environment metaContext locals type
+  let (_, binders) ← psWellFoundedTupleOpen locals parameter.domain names
+  let packed ← psWellFoundedTuplePack parameter.domain
+    (binders.map fun binder => .fvar binder.id)
+  let value := psWellFoundedTupleLambdas binders (.app function packed)
+  let inferred ← psInferType environment metaContext locals value
+  if !psWellFoundedDefEq environment metaContext locals inferred sourceType then
+    throw .applicationTypeMismatch
+  return value

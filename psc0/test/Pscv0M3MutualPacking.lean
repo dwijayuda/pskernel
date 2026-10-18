@@ -158,7 +158,8 @@ private def build : Except String (List PsDeclaration) := do
   let source :=
     "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
     "function packingSecond(b: Bool): Bool := b\n" ++
-    "function packingThird(s: PSum(Nat, Bool)): PSum(Nat, Bool) := s\n"
+    "function packingThird(s: PSum(Nat, Bool)): PSum(Nat, Bool) := s\n" ++
+    "function packingDependent(n: Nat, x: Fin(n + 1), s: PSigma(Nat, fun (k: Nat) => Fin(k + 1))): Nat -> Fin(n + 1) := fun (ignored: Nat) => x\n"
   let parsed ← psPscv0ParseProgram source
   let elaborated ← (psElabProgramWithOrigins environment parsed).mapError psCompilerPscv0ElabError
   let environment := elaborated.result.environment
@@ -189,6 +190,30 @@ private def build : Except String (List PsDeclaration) := do
     let level ← (psElabExpressionSort checked.context originalType).mapError psCompilerPscv0ElabError
     proofs := proofs ++ [.theoremDecl (psNameAppendNum (psRootName "packingEquation") index) []
       (psLogicEq level originalType projected original) equality]
+  -- A dependent three-slot source header has an original PSigma in its
+  -- final slot and a returned function. Neither may be flattened by packing.
+  let dependentName := psRootName "packingDependent"
+  let some dependent := psEnvironmentFind environment dependentName
+    | throw "missing original dependent source"
+  let sourceType := psDeclarationType dependent
+  let slotNames := ["n", "x", "s"].map psRootName
+  let unaryType ← (psWellFoundedTupleUncurryType environment psMetaEmpty psLocalEmpty
+    slotNames sourceType).mapError (fun _ => "dependent unary type failed")
+  let unaryBody ← (psWellFoundedTupleUncurry environment psMetaEmpty psLocalEmpty
+    slotNames unaryType (.constE dependentName [])).mapError
+      (fun _ => "dependent unary body failed")
+  let unaryName := psRootName "packingDependentUnary"
+  let unary := PsDeclaration.definitionDecl unaryName [] unaryType unaryBody
+  let environment := psEnvironmentInsert environment unary
+  let curried ← (psWellFoundedTupleCurry environment psMetaEmpty psLocalEmpty
+    slotNames sourceType (.constE unaryName [])).mapError
+      (fun _ => "dependent original header reconstruction failed")
+  let context := psElabContextEmpty environment []
+  let proof ← (psElabWellFoundedExtensionalEquality 4 context sourceType
+    curried (.constE dependentName [])).mapError psCompilerPscv0ElabError
+  let level ← (psElabExpressionSort context sourceType).mapError psCompilerPscv0ElabError
+  proofs := proofs ++ [.theoremDecl (psRootName "packingDependentEquation") []
+    (psLogicEq level sourceType curried (.constE dependentName [])) proof]
   let parameter ← (psInferEnsureForall environment psMetaEmpty psLocalEmpty type).mapError
     (fun _ => "packing result is not unary")
   let originalDomains ← (psMutualPackingDomains 3 parameter.domain).mapError
@@ -235,7 +260,7 @@ private def build : Except String (List PsDeclaration) := do
   let _ ← (psElabResolvedTerm (psElabContextEmpty environment [u, v])
     sortValue (some sortType)).mapError psCompilerPscv0ElabError
   let sorts := PsDeclaration.definitionDecl (psRootName "packingSorts") [u, v] sortType sortValue
-  return psStandardPSumDeclarations ++ elaborated.result.declarations ++ [packed, sorts] ++ proofs
+  return psStandardPSumDeclarations ++ elaborated.result.declarations ++ [packed, sorts, unary] ++ proofs
 
 def main : IO Unit := do
   ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"
@@ -260,4 +285,4 @@ def main : IO Unit := do
       pure () : Except String Unit)
   fromExcept checked
   IO.println "PSCV0_M3_CALLBACK_SCOPES: PASS two typed callees, current refined capture, ordinary local shadow, saved scope, escape refusal and cross-owner parameter correspondence"
-  IO.println "PSCV0_M3_MUTUAL_PACKING: PASS three heterogeneous dependent components, exact checked projection equations, user PSum ownership and malformed index/constructor refusals; source mutual WF is separate"
+  IO.println "PSCV0_M3_MUTUAL_PACKING: PASS three heterogeneous dependent components, complete unary currying with dependent header and returned function, exact checked projection equations, user PSum ownership and malformed index/constructor refusals; source mutual WF is separate"

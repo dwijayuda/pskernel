@@ -254,9 +254,9 @@ Native Info is imported only by the independent test oracle.
 ### Heterogeneous indexed elimination and branch-scoped WF callbacks
 
 Ps.Elab.Match/Equality adapt the constraint and substitution design of
-src/Lean/Meta/Tactic/Cases.lean and UnifyEq.lean at pinned Lean4.35.0
+src/Lean/Meta/Tactic/Cases.lean, UnifyEq.lean and Subst.lean at pinned Lean4.35.0
 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-Copyright (c) 2021-2022 Microsoft Corporation. Author: Leonardo de Moura.
+Copyright (c) 2020-2022 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0; retain LEAN-APACHE-2.0.txt and upstream notices.
 Modifications: explicit portable Core, structural constraint traversal,
 existing dependent-context reversion, and checked Eq/HEq proof construction.

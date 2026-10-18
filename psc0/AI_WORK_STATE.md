@@ -22,21 +22,16 @@ cancel-in-progress:false; leave healthy work running and avoid excess queueing.
 
 ## Exact evidence and current branches
 
-Last complete five-gate acceptance:
-de6679464cac9780bae7066052714c53984dbd00.
-Native39076409463, focusedM3 39076409661, F1 39076409639,
-F2 39076409495, F3 39076409521 all succeeded, reverified live.
-Focused backend steps passed, but its whole-job log transport failed; no
-measured aggregate count was claimed.
+Last complete five-gate acceptance and main HEAD:
+abe1adc2ff96c632dd9ed82b8ae6357832545a32.
+Native39081215932, focusedM3 39081215919, F1 39081215915,
+F2 39081215934 and F3 39081216307 all completed SUCCESS, re-read live.
+Exact artifact IDs/digests and scope are retained in
+docs/PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md.
+Every required backend step passed. Whole focused-job log retrieval failed;
+no measured aggregate runtime count is claimed.
 
-Main has now fast-forwarded to abe1adc2ff96c632dd9ed82b8ae6357832545a32.
-Its prep run39080406371/job117536629068 completed SUCCESS.
-Main integration is running at that exact SHA:
-Native39081215932 and focusedM3 39081215919 are still running.
-F1 39081215915, F2 39081215934 and F3 39081216307 completed SUCCESS.
-Fetch final Native/M3 results before promotion/claims.
-
-Verified preparation at abe1 includes:
+Qualified at abe1:
 - Exact native instNonemptyOfInhabited signature, no axioms, priority1000;
   strict selected surface, closure and manifest audits.
 - N-ary dependent WF packing, shared ordinary named/default/implicit/instance
@@ -46,35 +41,38 @@ Verified preparation at abe1 includes:
 - Noncomputable logical ownership, proof/type erasure, imported/private policy,
   direct/transitive/export refusals and five-target emission.
 - Standalone exact PSum bytes and kernel-checked typed component packing.
-These are construction/emission receipts; target execution awaits main M3.
+Source/kernel/construction and five-target execution passed at the same SHA.
 
 Prep32af8e2af9e7ed188532fe8e0ae0cf3ebfbd77d3 adds the finite fixed-parameter
 graph and singleton integration. Run39080826738/job117538048531 completed
 SUCCESS, including the pinned native graph differential and all retained checks.
 
-Candidate03ab1dce70d34c869e226942bba5a9a904029a82 extends saved lexical WF authority to multiple
-hygienic callees and records the exact callee on each typed observation.
-Lifted captures resolve their current refined lexical binding before ordinary
-application completes the original target telescope. Local shadows and bare
-recursive-value refusal remain. Decreasing proofs clear all callback authority.
-Typed owner analysis now uses actual per-owner headers and branch-scoped calls;
-singleton WF uses the same mechanism. Consolidated packing probe adds two
-callees, refined captures, shadowing, saved scope, cross-owner reordered headers
-and outside-component refusal. Run39081538098/job117539508499 compiled production
-and passed retained WF/P1/noncomputable source checks. Only the new packing fixture
-failed to parse a nested record at line133. The current candidate fixes its field
-layout without changing assertions; the new callback probe remains unqualified.
-No source mutual WF acceptance or runtime claim follows from these mechanisms.
+Prep593a1bf957e45cf3790d7a6bff006855a25fb1dc/run39082224478:
+production build, multi-callee scope/capture probe, heterogeneous match fixture,
+retained WF/P1/noncomputable checks passed. One retained source step failed:
+riFixedIndexEq in omitted result-type inference no longer reduced by rfl.
+No assertion or acceptance criterion was relaxed.
 
-The same candidate implements major-dependent constrained matching using ordered
-Eq/HEq index and major constraints, existing eq_of_heq after type alignment, and
-the shared dependent-context Eq.rec transport. No new foundation declaration.
-It substitutes actual free variables before proof-irrelevant equality, following
-pinned UnifyEq. The existing match fixture gains fixed-major/context, compound
-and repeated-index positives plus a computational dependent callback; missing HEq
-still refuses. Group-match observations increase40 to50 across all five lanes.
-Preparation adds this existing fixture's kernel/emission check. Qualification is
-pending; see docs/PSCV0_M3_HETEROGENEOUS_MATCH_2026-10-18.md.
+The current child completes transport elision after branch metavariables are
+solved: compare the final complete telescopes by existing read-only conversion,
+then check the reused base against the original target. Pinned Subst.tryToSkip
+and tests2552/substWithoutExpectedType are the reference. This is a general
+scope/inference invariant, not a literal or fixture-specific reduction rule.
+
+The child also completes ordinary unary PSigma uncurry-type/uncurry/curry helpers
+using exact source arity and checked dependent cases. The consolidated packing
+probe adds a three-slot dependent header, a final user PSigma, a returned function
+and an independently checked exact round-trip equation. This and the transport
+correction await preparation; source mutual WF is still refused.
+
+Multi-callee lexical authority records exact callees, resolves current hygienic
+captures, honors local shadows, restores saved scopes and prevents bare callback
+escape. The typed owner analysis shares the finite native-style correspondence
+graph and does not equate numeric local IDs from different owners.
+Ordered Eq/HEq match constraints support fixed majors/dependent contexts,
+compound/repeated indices and impossible cases, with no foundation extension.
+The new group-match runtime observer requires50 comparisons across five lanes;
+main runtime qualification of this later transport remains pending.
 
 ## Selected foundation
 
@@ -90,9 +88,9 @@ passed; activation requires reviewed strict manifest identities.
 
 ## Remaining work, in dependency order
 
-1. Finish current prep and main CI; distinguish actual runtime comparisons
-   from expected counts. P1 now requires40, noncomputable10, and WF includes
-   both n-ary and ordinary-application observations. Preserve every prior case.
+1. Finish preparation of completed-type transport elision and complete unary
+   packing. Preserve riFixedIndexEq unchanged. Promote only a qualified candidate,
+   then run Native/M3/F1/F2/F3 at its exact SHA, including the new match observer.
 2. Complete mutual WF using arity-owned PSum/PSigma packing, common fixed
    parameters/permutations, original capture owner/id identities, actual
    measures/relation, branch-scoped decrease proofs and public projections.

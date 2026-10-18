@@ -10,28 +10,24 @@ PSKernel-Core/C0/self-host/C5. Approved assumptions are exactly propext,
 Quot.sound, Classical.choice. Wasm GC inside; linear memory at explicit boundaries.
 
 Main psc0/pscv0-v7-native-lean-v1 is now abe1adc2ff96c632dd9ed82b8ae6357832545a32.
-Its prep39080406371 passed completely. Native39081215932 and M3 39081215919 are running; F1 39081215915,
-F2 39081215934 and F3 39081216307 passed.
-Last full five-gate acceptance remains de6679464cac9780bae7066052714c53984dbd00.
-Never supersede/cancel a healthy main Native. PR109 stays draft/open/unmerged;
-attach it in a new chat. Fresh refs, expected-head non-force writes only.
+All five exact-SHA gates succeeded: Native39081215932, M3 39081215919,
+F1 39081215915, F2 39081215934, F3 39081216307. See the abe1 integration
+receipt for artifact digests. Main five-target execution is qualified; do not
+invent measured aggregate counts from workflow requirements.
+PR109 remains draft/open/unmerged; attach it in a new chat. Fresh refs and
+expected-head non-force updates only. Never supersede a healthy Native run.
 
-Prep psc0/m3-fixedpoint-foundation-20261018 includes qualified fixed-parameter
-analysis32af8e2/run39080826738 (all checks passed). Callback/capture and typed-owner
-candidate03ab1dce/run39081538098 passed production/WF/P1/noncomputable checks;
-the new consolidated packing fixture alone had a nested-record parse error.
-The current child corrects its layout with assertions unchanged and adds
-ordered Eq/HEq match transport through existing dependent-context elimination.
-Its existing match fixture gains fixed, compound and repeated-index positives
-and a computational dependent callback (group-match runtime40 to50).
-Both new probes and transport integration are pending qualification.
-See the heterogeneous-match design and current work state. Roadmap/ledger were
-consolidated; historical checkpoint narratives remain in Git history.
-
-Abe1 preparation qualified n-ary WF/shared ordinary applications, extended
-generic/section/helper/dependent P1, noncomputable policy and the constructive
-Nonempty bridge. Exact strict pins and source/kernel receipts are in work state.
-Emission is not runtime parity: inspect main M3 results and measured totals.
+Prep psc0/m3-fixedpoint-foundation-20261018:
+32af8e2/run39080826738 passed fixed-parameter analysis. At593a1bf/run39082224478,
+multi-callee/capture and heterogeneous match probes passed, as did production
+and retained WF/P1/noncomputable. One retained omitted-result rfl equation failed:
+riFixedIndexEq. The current child compares completed telescope types after
+branch inference, following pinned Subst.tryToSkip, and checks the reused base.
+The original assertion remains unchanged. It also completes checked unary
+uncurry/curry with exact source arity; the existing packing fixture covers a
+dependent header, user PSigma final slot and returned function.
+These additions await qualification. Both handoffs and the ledger describe the
+completed/pending boundary; no full M3 acceptance is claimed.
 
 Continue the complete mutual-WF path using shared typed PSum/PSigma packing,
 fixed permutations and original capture/header ownership, actual branch decrease

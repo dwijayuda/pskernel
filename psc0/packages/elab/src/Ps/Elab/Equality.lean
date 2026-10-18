@@ -184,13 +184,13 @@ def psElabSubstituteEquation
   let body ← finish opened.context opened.body
   let base ← psElabCloseDependents context opened body specialized
   -- Native substCore's tryToSkip avoids Eq.rec when the completed dependent
-  -- target did not change. Alias refinement still happened in the body;
-  -- the checked base already has the original telescope in this case.
-  if psExprAlphaEq telescope specialized then
-    return {
-      context := base.context
-      type := target
-      term := psExprApplyMany base.term (psElabDependentArguments dependents) }
+  -- target did not change. Branch elaboration can solve an omitted result
+  -- metavariable, so compare with its final assignments and conversion rather
+  -- than the stale syntax captured before finish. Alias refinement remains.
+  if psDefEqReadOnlyWithEnv base.context.environment base.context.metaContext
+      base.context.localContext telescope specialized then
+    return ← psElabResolvedTerm base.context
+      (psExprApplyMany base.term (psElabDependentArguments dependents)) (some target)
   let transported ← psElabEquationRec base.context equation
     (fun value => psElabSubstituteLocals [(id, value)] telescope) base.term
   return {

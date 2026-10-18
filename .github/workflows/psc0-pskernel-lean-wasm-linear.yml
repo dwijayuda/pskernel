@@ -93,6 +93,14 @@ jobs:
             build-essential cmake git make clang gcc-multilib g++-multilib \
             libc6-dev-i386 libuv1-dev:i386 libssl-dev:i386 pkgconf:i386
           test -x /usr/bin/i386-linux-gnu-pkg-config
+      - name: Fingerprint exact native i386 compiler for cache isolation
+        id: stage1-host-fingerprint
+        shell: bash
+        run: |
+          set -euo pipefail
+          compiler_hash="$(clang++ --version | head -1 | sha256sum | cut -d ' ' -f1)"
+          test "${#compiler_hash}" -eq 64
+          echo "clangKey=$compiler_hash" >> "$GITHUB_OUTPUT"
       # Restore a build *cache*, not a qualified proof checker. The build
       # validates the complete SHA-256 manifest before using any cached .olean
       # or C++/Lean library; current admissions and parity always run afresh.
@@ -101,7 +109,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build
-          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh', 'psc0/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
+          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ steps.stage1-host-fingerprint.outputs.clangKey }}-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh', 'psc0/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
       - name: Fetch exact Emscripten 6.0.9 and cross-build Lean kernel into Wasm
         shell: bash
         run: |
@@ -131,7 +139,7 @@ jobs:
         continue-on-error: true
         with:
           path: psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build
-          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh', 'psc0/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
+          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ steps.stage1-host-fingerprint.outputs.clangKey }}-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh', 'psc0/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
       # A build-only diagnostic artifact is NOT a qualified checker and is
       # not committed or packed. It preserves exact checked binaries when
       # later native/Wasm parity or distribution qualification fails.

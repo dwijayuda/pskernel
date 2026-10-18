@@ -31,6 +31,21 @@ for (const relative of paths) {
     if (pkg.name !== '@proofscript/stdlib' || pkg.private !== false || config.library?.modulePrefix !== 'ProofScript' || config.library?.sourceRoot !== 'src') throw new Error('PSC_NPM_WORKSPACE_STDLIB_SOURCE');
     await need(path.join(root, 'stdlib/ProofScript')); continue;
   }
+  if (relative === 'packages/pskernel-lean-wasm') {
+    // A new GC-native proof checker does not exist yet. This source-only
+    // development package must never satisfy publishable provider contracts.
+    if (pkg.name !== '@proofscript/pskernel-lean-wasm' ||
+        pkg.private !== true || config.kernelReady !== false ||
+        config.allowsVerifiedAdmission !== false ||
+        config.languageProfile !== 'pscv0-v7.2' ||
+        config.target !== 'wasm-gc-core') {
+      throw new Error('PSC0_WASM_GC_UNQUALIFIED_PACKAGE_CONTRACT');
+    }
+    await need(path.join(directory, 'index.mjs'));
+    await need(path.join(directory, 'src/PsKernelLeanWasmGc/Probe.lean'));
+    await need(path.join(directory, 'scripts/verify-source.mjs'));
+    continue;
+  }
   if (relative.startsWith('packages/')) {
     const name = path.basename(relative);
     if (pkg.name !== '@proofscript/' + name || pkg.private !== false || pkg.publishConfig?.access !== 'public' || config.npmArchitecture !== 'psc0-monolithic-runtime-with-scoped-source-packages/1') throw new Error('PSC_NPM_PUBLISHABLE_SCHEMA: ' + name);

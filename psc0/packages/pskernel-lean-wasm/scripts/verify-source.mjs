@@ -6,6 +6,13 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = async name => JSON.parse(await readFile(resolve(root, name), 'utf8'));
 const pkg = await readJson('package.json');
+const parentRoot = resolve(root, '../..');
+const distribution = await readFile(resolve(parentRoot, 'scripts/npm-distribution.mjs'), 'utf8');
+const metaPackage = JSON.parse(await readFile(resolve(parentRoot, 'packages/proofscript/package.json'), 'utf8'));
+assert.ok(!/const optionalNames=\[[^\n]*'pskernel-lean-wasm'/.test(distribution),
+  'unqualified Wasm-GC kernel cannot enter npm distribution');
+assert.ok(!metaPackage.proofscript.optionalPackages.includes('@proofscript/pskernel-lean-wasm'),
+  'meta package cannot advertise unfinished GC kernel');
 const pin = await readJson('LEAN_SOURCE_PIN.json');
 assert.equal(pkg.name, '@proofscript/pskernel-lean-wasm');
 assert.equal(pkg.private, true, 'unqualified checker must not be published');

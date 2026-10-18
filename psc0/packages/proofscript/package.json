@@ -78,7 +78,6 @@
       "@proofscript/backend-wasm",
       "@proofscript/cli",
       "@proofscript/pskernel-lean",
-      "@proofscript/pskernel-lean-wasm",
       "@proofscript/stdlib"
     ],
     "checkerProvider": "@proofscript/pskernel-core/check",

@@ -10,6 +10,9 @@ on:
       - 'psc0/packages/**/src/**'
       - 'psc0/host/src/**'
       - 'psc0/v7-native/**'
+      - 'psc0/scripts/check-workspace.mjs'
+      - 'psc0/scripts/npm-distribution.mjs'
+      - 'psc0/packages/proofscript/package.json'
   workflow_dispatch:
 
 permissions:
@@ -40,6 +43,7 @@ jobs:
           set -euo pipefail
           node packages/pskernel-lean-wasm/scripts/verify-source.mjs
           node packages/pskernel-lean-wasm/scripts/test.mjs
+          node scripts/check-workspace.mjs
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0/v7-native

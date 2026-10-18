@@ -11,9 +11,10 @@ const dist = join(root,'dist/npm-distribution');
 const build = join(root,'dist/npm-build');
 const V='0.1.0-psc0.1';
 const coreNames=['foundation','syntax','core','environment','meta','elab','bridge','compiler-ir','erasure','compiler','backend-ts','bootstrap','pskernel-core'];
-const optionalNames=['backend-js','backend-rust','backend-wasm','cli','pskernel-lean-wasm','pskernel-lean','stdlib'];
+// The Wasm-GC checker is explicitly unqualified/private: never stage or publish it.
+const optionalNames=['backend-js','backend-rust','backend-wasm','cli','pskernel-lean','stdlib'];
 const names=[...coreNames,...optionalNames];
-const providerNames=new Set(['pskernel-lean-wasm','pskernel-lean']);
+const providerNames=new Set(['pskernel-lean']);
 const directNames=new Set(['compiler','pskernel-core']);
 const sourceOnlyNames=new Set(['stdlib']);
 const hash=b=>createHash('sha256').update(b).digest('hex');

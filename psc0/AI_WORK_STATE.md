@@ -1,5 +1,43 @@
 # PSC0 v7.2 work state — M3+B
 
+## Function-valued WF and dependency ownership — qualification pending
+
+Preparation [39162423016](https://github.com/dwijayuda/pskernel/actions/runs/39162423016)
+at 3242a4943bb0f3b52c7699de0b3f493755ccd3da compiled all shared modules and
+native fixtures. Recursor authoring passed. Foundation exported and kernel-checked
+the proposed Option bind closure: 153 declarations, 15 compared recursor rules,
+10736 shared source nodes and 1759771 source bytes, using only propext,
+Quot.sound and Classical.choice. This closure is not selected. The separate bind
+job stopped on the direct-Option.bind refusal message prefix after the generic
+Bind.bind positive compiled; that prefix is corrected here.
+
+Portable execution exposed phantom recursive references in compiler row metadata.
+This candidate excludes auxiliary peer inventories from caller anchors, marks
+compiler lexical helper aliases as auxiliary, and reconstructs WF row scopes from
+actual source-call and caller-value dependencies. Existing typing, real source
+dependencies, recursion graph validation and callback scope checks remain mandatory.
+
+Function-valued WF opens only actual checked leading lambdas after the complete
+source header has been elaborated. The source measure scope and full public
+equations are preserved; checked pointwise proofs lift through funext. Owned
+captured-call prefixes and source-header arity govern retained function calls.
+Goal cleanup follows actual dependent context and does not retain unrelated
+contradictions. Decrease-goal ordering retains the checked operational call order.
+
+Native and paired fresh-source controls cover a recursive const, returned and
+retained functions, mutual recursion, and a fixed returned argument. A fourteenth
+runtime export is added; all thirteen existing exports remain. The retained-call
+packing fixture keeps its original three-slot owner assertions and separately
+checks the four operational slots, three fixed classes and exact permutations.
+All strict source-header, scope, fixed-parameter and decrease refusals remain.
+
+This candidate has not passed Linux CI. Remaining known blockers include selected
+Lean named-argument indentation, indexed lawful dictionary registration, and the
+complete deriving and fixedpoint extensions. All six M3+B exits remain OPEN.
+Main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058; the last fully qualified
+preparation is 39138442923 at 1b7513339f22a5db24750485148603622e5ff018.
+Final Native/M3/F1/F2/F3 qualification must use one complete compiler/test SHA.
+
 ## Native Option bind form and indexed record layout — qualification pending
 
 Preparation [39162103571](https://github.com/dwijayuda/pskernel/actions/runs/39162103571)

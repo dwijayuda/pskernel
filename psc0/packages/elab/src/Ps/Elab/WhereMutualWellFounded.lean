@@ -14,6 +14,8 @@ bodies. Independent compiler ownership validation is still required for executio
 structure PsElabWhereWellFoundedComponentMember where
   source : PsElabPreDefinition
   input : PsElabWhereWellFoundedInput
+  sourceInput : PsElabWhereWellFoundedInput
+  extraBindersRev : List PsElabTypedBinder := []
   permutation : List (Option Nat)
   specialized : PsElabRecursionSpecializedHeader
   varyingNames : List PsName
@@ -54,6 +56,115 @@ def psElabWhereCloseWellFoundedMeasure (levels : List PsName)
     pure ()
   return measure
 
+-- Keep source hint scope and the checked operational value prefix separate.
+-- The extra prefix is read only after the original measure has been checked.
+structure PsElabWhereWellFoundedOperationalInput where
+  source : PsElabPreDefinition
+  sourceInput : PsElabWhereWellFoundedInput
+  input : PsElabWhereWellFoundedInput
+  extraBindersRev : List PsElabTypedBinder
+  analysis : PsElabWellFoundedOperationalBody
+  closedMeasure : PsExpr
+
+def psElabWhereWellFoundedOperationalInputFor (prepared : PsElabWherePrepared)
+    (environment : PsEnvironment) (levels : List PsName) (nextId : Nat)
+    (members : List PsElabPreDefinition) (member : PsElabPreDefinition) :
+    Except PsElabError PsElabWhereWellFoundedOperationalInput := do
+  let sourceInput ← psElabWherePrepareWellFounded prepared environment levels member
+  let closedMeasure ← psElabWellFoundedAt "component measure"
+    (psElabWhereCloseWellFoundedMeasure levels member sourceInput)
+  let original := sourceInput.header
+  let parameters := original.capturesRev.reverse ++ original.parametersRev.reverse
+  let peerIds := members.map (·.peerId)
+  if peerIds.eraseDups.length != peerIds.length ||
+      peerIds.any (fun id => (psLocalFindById original.context.localContext id).isSome) then
+    throw (psElabWhereError "WF-IDENTITY" "operational analysis has overlapping source and peer identities")
+  let bodyLocals := original.bodyLocalContext.getD original.context.localContext
+  let start := max nextId (max original.context.localContext.nextId bodyLocals.nextId)
+  let peerDeclarations := members.map fun source =>
+    PsLocalDecl.binding source.peerId source.name source.type .explicit
+  let context := { original.context with
+    localContext := { original.context.localContext with
+      nextId := start
+      declarations := peerDeclarations ++ original.context.localContext.declarations }
+    auxiliaryLocalIds := peerIds ++ original.context.auxiliaryLocalIds
+    coreBoundaries := prepared.context.coreBoundaries }
+  if psExprHasUnresolvedMeta member.type || psExprHasUnresolvedMeta member.value ||
+      !psExprFVarsInContext psLocalEmpty member.type ||
+      !psExprFVarsInContext context.localContext member.value then
+    throw (psElabWhereError "WF-CLOSURE" "operational analysis contains unresolved or unowned retained Core")
+  let _ ← psElabResolvedTerm context member.value (some member.type)
+  let retained ← psElabPreDefinitionOpen (psElabPreDefinitionHeaderCount member)
+    context member.type member.value
+  if retained.bindersRev.length != parameters.length then
+    throw (psElabWhereError "WF-IDENTITY" "operational analysis changed the original capture/header count")
+  let replacements := (retained.bindersRev.reverse.map (·.id)).zip
+    (parameters.map fun binder => PsExpr.fvar binder.id)
+  let sourceBody := psElabSubstituteLocals replacements retained.value
+  let sourceType := psElabSubstituteLocals replacements retained.type
+  let context := { context with localContext := { context.localContext with
+    nextId := retained.context.localContext.nextId } }
+  if !psDefEqReadOnlyWithEnv environment context.metaContext context.localContext
+      sourceType original.resultType then
+    throw (psElabWhereError "WF-IDENTITY" "retained source result changed during typed reopening")
+  let operational ← psElabWellFoundedOpenBodyParameters 4096
+    context original.resultType sourceBody
+  let normalize := psMetaInstantiate operational.context.metaContext
+  let extraBindersRev := operational.bindersRev.map fun binder =>
+    { binder with type := normalize binder.type }
+  let resultType := normalize operational.type
+  let allBinders := extraBindersRev ++ original.parametersRev ++ original.capturesRev
+  let completeType := psCloseElabForallBinders psMetaEmpty allBinders resultType
+  if psExprHasUnresolvedMeta completeType || !psExprFVarsInContext psLocalEmpty completeType ||
+      !psDefEqReadOnlyWithEnv environment psMetaEmpty psLocalEmpty completeType member.type then
+    throw (psElabWhereError "WF-IDENTITY" "operational value prefix changed the complete source type")
+  let addExtras := fun (locals : PsLocalContext) =>
+    if extraBindersRev.isEmpty then locals else
+      { locals with
+        declarations := extraBindersRev.map psElabWhereBinderDeclaration ++ locals.declarations
+        nextId := max locals.nextId operational.context.localContext.nextId }
+  let input := if extraBindersRev.isEmpty then sourceInput else {
+    sourceInput with
+    header := {
+      original with
+      context := { original.context with localContext := addExtras original.context.localContext }
+      parametersRev := extraBindersRev ++ original.parametersRev
+      resultType
+      bodyLocalContext := original.bodyLocalContext.map addExtras } }
+  for binder in extraBindersRev do
+    if !psMetaExprScopeSafe input.header.context.metaContext
+        input.header.context.localContext binder.type then
+      throw (psElabWhereError "WF-CLOSURE" "an operational argument type retained a provisional peer")
+  return {
+    source := member
+    sourceInput
+    input
+    extraBindersRev
+    closedMeasure
+    analysis := { operational with
+      bindersRev := extraBindersRev
+      type := resultType
+      body := normalize operational.body } }
+
+def psElabWhereWellFoundedOperationalOwners
+    (inputs : List PsElabWhereWellFoundedOperationalInput) :
+    Except PsElabError (List PsElabRecursionParameterOwner) :=
+  inputs.mapM fun input => do
+    let (context, calls) ← inputs.foldlM
+      (fun (state : PsElabContext × List PsElabRecursionCall) target => do
+        let arity := target.input.header.capturesRev.length +
+          target.input.header.parametersRev.length
+        let (context, calls) ← psElabWellFoundedCollectCoreCalls 4096 state.fst
+          target.source.name target.source.peerId arity
+          (psElabPreDefinitionSourceSpan input.source) input.analysis.body
+        return (context, state.snd ++ calls)) (input.analysis.context, [])
+    return {
+      name := input.source.name
+      context
+      calls
+      parameterIds := (input.input.header.capturesRev.reverse ++
+        input.input.header.parametersRev.reverse).map (·.id) }
+
 def psElabWherePrepareWellFoundedComponent (prepared : PsElabWherePrepared)
     (environment : PsEnvironment) (levels : List PsName)
     (members : List PsElabPreDefinition) :
@@ -63,7 +174,17 @@ def psElabWherePrepareWellFoundedComponent (prepared : PsElabWherePrepared)
   if members.any (fun member => !psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
     throw (psElabWhereError "WF-STRATEGY" "every selected component member requires its own total measure")
   let nextId := max prepared.context.localContext.nextId prepared.block.context.localContext.nextId
-  let owners ← psElabPreDefinitionParameterOwners environment levels nextId members
+  let operationalInputs ← members.mapM
+    (psElabWhereWellFoundedOperationalInputFor prepared environment levels nextId members)
+  let hasExtra := operationalInputs.any (fun input => !input.extraBindersRev.isEmpty)
+  let owners ← if hasExtra then
+    psElabWhereWellFoundedOperationalOwners operationalInputs
+  else
+    psElabPreDefinitionParameterOwners environment levels nextId members
+  let nextId := if hasExtra then
+    operationalInputs.foldl (fun current input =>
+      max current input.analysis.context.localContext.nextId) nextId
+    else nextId
   let parameters ← psElabRecursionComponentFixedParameterPlan owners
   let some firstPermutation := parameters.permutations.head?
     | throw (psElabWhereError "WF-COMPONENT" "fixed parameter analysis lost its first owner")
@@ -72,15 +193,18 @@ def psElabWherePrepareWellFoundedComponent (prepared : PsElabWherePrepared)
   let fixed ← psElabRecursionOpenFixedScope initial first.type firstPermutation parameters.count
   let fixedValues := psElabBinderArguments fixed.bindersRev
   let fixedIds := fixed.bindersRev.map (·.id)
-  let measuredMembers ← (members.zip parameters.permutations).mapM fun (member, permutation) => do
-    let input ← psElabWherePrepareWellFounded prepared environment levels member
-    let closedMeasure ← psElabWhereCloseWellFoundedMeasure levels member input
+  let measuredMembers ← (operationalInputs.zip parameters.permutations).mapM fun (owned, permutation) => do
+    let member := owned.source
+    let input := owned.input
+    let closedMeasure := owned.closedMeasure
     let specialized ← psElabRecursionSpecializeHeader fixed.context member.type permutation fixedValues
     let names := specialized.bindersRev.reverse.map (·.name)
     if names.isEmpty then
-      throw (psElabWhereError "WF-TELESCOPE" "the selected component packing requires a varying source parameter")
+      throw (.atContext "well-founded fixed parameters"
+        (psElabWhereError "WF-TELESCOPE" "the selected component packing requires a varying source parameter"))
     let measureBody := psWhnfCore psMetaEmpty specialized.context.localContext
-      (psReduceApply closedMeasure specialized.arguments)
+      (psReduceApply closedMeasure
+        (specialized.arguments.take (psElabPreDefinitionHeaderCount member)))
     let checked ← psElabResolvedTerm specialized.context measureBody none
     let measureCodomain := psWhnfCore checked.context.metaContext
       checked.context.localContext checked.type
@@ -101,8 +225,16 @@ def psElabWherePrepareWellFoundedComponent (prepared : PsElabWherePrepared)
       if psExprHasUnresolvedMeta value || !psExprFVarsInContext fixed.context.localContext value then
         throw (psElabWhereError "WF-SCOPE" "packed measure retained a member-local identity")
     let result : PsElabWhereWellFoundedComponentMember := {
-      source := member, input, permutation, specialized
-      varyingNames := names, unaryType, measure, measureCodomain }
+      source := member
+      input
+      sourceInput := owned.sourceInput
+      extraBindersRev := owned.extraBindersRev
+      permutation
+      specialized
+      varyingNames := names
+      unaryType
+      measure
+      measureCodomain }
     return result
   if measuredMembers.length != members.length then
     throw (psElabWhereError "WF-COMPONENT" "fixed parameter plan changed component arity")
@@ -254,13 +386,38 @@ def psElabWhereWellFoundedComponentBody
       localContext := source.context
       auxiliaryLocalIds := source.id :: callback.id :: bodyContext.auxiliaryLocalIds
       wellFoundedRecursions := bodyContext.wellFoundedRecursions ++ [
-        { recursion with callbackName := sourceName, collectCalls := true }] }
+        { recursion with
+          callbackName := sourceName, collectCalls := true
+          parameterIds := (target.sourceInput.header.capturesRev.reverse ++
+            target.sourceInput.header.parametersRev.reverse).map (·.id) }] }
     coreCalls := coreCalls ++ [{
-      sourceId := source.id, callback := .fvar callback.id, recursion, fixedArguments
+      sourceId := source.id
+      callback := .fvar callback.id
+      recursion
+      fixedArguments
+      sourceArity? := some (psElabPreDefinitionHeaderCount target.source)
       span := psSyntaxTermSpan member.input.body }]
     adapters := adapters ++ [(callback.id, callbackName, sourceType, adapter)]
+  let hiddenIds := if member.extraBindersRev.isEmpty then [] else
+    adapters.map (fun adapter => adapter.fst) ++ member.extraBindersRev.map (·.id)
+  let sourceContext ← psElabWellFoundedHideOperationalScope bodyContext hiddenIds
   let value ← psElabWellFoundedAt "component source body"
-    (psElabTerm bodyContext member.input.body (some header.resultType))
+    (psElabTerm sourceContext member.input.body (some member.sourceInput.header.resultType))
+  let restored ← psElabWellFoundedRestoreOperationalScope bodyContext value.context hiddenIds
+  let value := { value with context := restored }
+  let value ← psElabWellFoundedAt "component operational body"
+    (psElabWellFoundedApplyBodyParameters value.context member.extraBindersRev
+      member.sourceInput.header.resultType value.term header.resultType)
+  let value ← if component.members.all (fun member => member.extraBindersRev.isEmpty) then
+    pure value
+  else do
+    let (context, calls) ← coreCalls.foldlM
+      (fun (state : PsElabContext × List PsElabRecursionCall) call => do
+        let (context, calls) ← psElabWellFoundedCollectCoreCalls 4096 state.fst
+          call.recursion.functionName call.sourceId call.recursion.parameterIds.length
+          call.span value.term
+        return (context, state.snd ++ calls)) (value.context, [])
+    pure { value with context := { context with wellFoundedCallsRev := calls.reverse } }
   psElabWhereComponentValidateCalls component fixed value.context
   let value ← psElabWellFoundedAt "compiled component recursive calls"
     (psElabWellFoundedCoreCalls value.context coreCalls value.term header.resultType)
@@ -353,10 +510,22 @@ def psElabWhereFinishWellFoundedComponent
       let proof := psWellFoundedEquation (psWellFoundedPlanMap instantiate component.plan.relation)
         [domainLevel, resultLevel] motive (instantiate built.functional) current
       let checked ← psElabResolvedTerm context proof none
-      let binders := header.parametersRev ++ header.capturesRev
+      let (equationType, equationValue) ← if member.extraBindersRev.isEmpty then
+        pure (checked.type, checked.term)
+      else do
+        let actual ← psElabRecursorEquationView checked.context checked.type
+        let left := psCloseElabLambdaBinders psMetaEmpty member.extraBindersRev actual.left
+        let right := psCloseElabLambdaBinders psMetaEmpty member.extraBindersRev actual.right
+        let pointwise := psCloseElabLambdaBinders psMetaEmpty member.extraBindersRev checked.term
+        let sourceType := member.sourceInput.header.resultType
+        let proof ← psElabWellFoundedPointwiseEquation member.extraBindersRev.length
+          checked.context sourceType left right pointwise
+        let level ← psElabExpressionSort checked.context sourceType
+        pure (psLogicEq level sourceType left right, proof)
+      let binders := member.sourceInput.header.parametersRev ++ member.sourceInput.header.capturesRev
       let equation := PsDeclaration.theoremDecl (psNameAppendStr member.source.name "eq_def") levels
-        (psCloseElabForallBinders psMetaEmpty binders checked.type)
-        (psCloseElabLambdaBinders psMetaEmpty binders checked.term)
+        (psCloseElabForallBinders psMetaEmpty binders equationType)
+        (psCloseElabLambdaBinders psMetaEmpty binders equationValue)
       return ({ declaration, equation, metaContext := psMetaEmpty
                 sourceInfo := body.sourceInfo } : PsElabWellFoundedResult)
   return { auxiliaries := [auxiliary], results }

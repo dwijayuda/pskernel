@@ -457,6 +457,40 @@ def psElabPreDefinitionCheckWellFoundedResult (environment : PsEnvironment)
 -- All actual public definitions are staged before any component equation.
 -- Reconstruct each right side from the retained original Core with every peer
 -- replaced by its checked public constant; a callback sidecar is not authority.
+-- Functional source results are compared pointwise before the existing checked
+-- constructor-case transport. Each new argument belongs to the actual Pi type;
+-- all of them are closed again by funext in the exact original source equation.
+def psElabPreDefinitionWellFoundedRhsProof (fuel : Nat) (context : PsElabContext)
+    (headerIds : List Nat) (type left right : PsExpr) (span : PsSourceSpan) :
+    Except PsElabError PsExpr := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let level ← psElabExpressionSort context type
+    let expected := psLogicEq level type left right
+    if psElabMutualStructuralEqual context left right then
+      let checked ← psElabResolvedTerm context (psLogicRefl level type left) (some expected)
+      return checked.term
+    match psWhnf context.environment context.metaContext context.localContext type with
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding context.localContext name domain binder
+      let inner := psElabContextWithLocal context pushed.context
+      let argument := PsExpr.fvar pushed.id
+      let resultType := psExprInstantiate1 body argument
+      let proof ← psElabPreDefinitionWellFoundedRhsProof fuel inner
+        (headerIds ++ [pushed.id]) resultType (.app left argument) (.app right argument) span
+      let domainLevel ← psElabExpressionSort context domain
+      let resultLevel ← psElabExpressionSort inner resultType
+      let motive := PsExpr.lam name domain (psExprAbstractFVar pushed.id resultType) binder
+      let pointwise := PsExpr.lam name domain (psExprAbstractFVar pushed.id proof) binder
+      let proof := psExprApplyMany (.constE (psRootName "funext") [domainLevel, resultLevel])
+        [domain, motive, left, right, pointwise]
+      let checked ← psElabResolvedTerm context proof (some expected)
+      return checked.term
+    | _ =>
+      let major ← psElabPreDefinitionEquationMajor 4096 context headerIds right
+      psElabRecursorEquationProof context major expected span
+
 def psElabPreDefinitionWellFoundedEquation (staged : PsEnvironment)
     (levels : List PsName) (members : List PsElabPreDefinition)
     (member : PsElabPreDefinition) (result : PsElabWellFoundedResult) :
@@ -496,12 +530,11 @@ def psElabPreDefinitionWellFoundedEquation (staged : PsEnvironment)
         !psElabMutualStructuralEqual actual.context actualEquation.type opened.type ||
         !psElabMutualStructuralEqual actual.context actualEquation.left left.term then
       throw (psElabPreDefinitionError "WF-EQUATION" "returned theorem changed the source result type or actual public left side")
-    let major ← psElabPreDefinitionEquationMajor 4096 actual.context
-      (opened.bindersRev.map (·.id)) opened.value
-    let transportType := psLogicEq resultLevel opened.type actualEquation.right opened.value
-    let transport ← (psElabRecursorEquationProof actual.context major
-      transportType (psElabPreDefinitionSourceSpan member)).mapError (fun _ =>
-        psElabPreDefinitionError "WF-EQUATION" "checked constructor cases do not prove the actual RHS equals the retained source RHS")
+    let transport ← (psElabPreDefinitionWellFoundedRhsProof 4096 actual.context
+      (opened.bindersRev.map (·.id)) opened.type actualEquation.right opened.value
+      (psElabPreDefinitionSourceSpan member)).mapError (fun error =>
+        if psElabErrorIsResource error then error else
+          psElabPreDefinitionError "WF-EQUATION" "checked extensionality and constructor cases do not prove the actual RHS equals the retained source RHS")
     let proof := psExprApplyMany (.constE (psNameAppendStr psEqName "trans") [resultLevel])
       [opened.type, left.term, actualEquation.right, opened.value, actual.term, transport]
     let checked ← (psElabResolvedTerm actual.context proof (some expectedEquation)).mapError (fun _ =>

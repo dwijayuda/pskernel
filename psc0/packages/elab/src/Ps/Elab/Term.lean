@@ -254,22 +254,28 @@ def psElabTermWithFuel
                     | .error error => .error error
                     | .ok head => psElabCall smaller head args expected placement
             | .reference name =>
-                if psElabWellFoundedReferenceEscapes context name then
-                  Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must complete its source header")
-                else if psElabStructuralReferenceEscapes context name then
-                  Except.error PsElabError.structuralRecursionEscapingReference
-                else
-                  match psElabReference context name Option.none with
-                  | Except.error error => Except.error error
-                  | Except.ok reference =>
-                      match psElabApplyArgs
-                          smaller
-                          reference
-                          []
-                          [] expected with
+                match psElabWellFoundedRecursionForName context name with
+                | some recursion =>
+                    if recursion.collectCalls &&
+                        recursion.parameterIds.length == recursion.capturedNames.length then
+                      match psTryElabWellFoundedCall smaller context (.reference name) [] expected with
+                      | .error error => .error error
+                      | .ok (some result) => .ok result
+                      | .ok none => .error (.data
+                          "PSCV0-WF-INTERNAL: an empty-header recursive reference lost its source owner")
+                    else
+                      Except.error (.data
+                        "PSCV0-WF-ESCAPE: a recursive reference must complete its source header")
+                | none =>
+                    if psElabStructuralReferenceEscapes context name then
+                      Except.error PsElabError.structuralRecursionEscapingReference
+                    else
+                      match psElabReference context name Option.none with
                       | Except.error error => Except.error error
-                      | Except.ok application =>
-                          psElabFinishApplication application expected
+                      | Except.ok reference =>
+                          match psElabApplyArgs smaller reference [] [] expected with
+                          | Except.error error => Except.error error
+                          | Except.ok application => psElabFinishApplication application expected
             | .sortE isType level _ => psElabSort context isType level expected
             | .scientific text _ =>
                 psElabScientific context text expected

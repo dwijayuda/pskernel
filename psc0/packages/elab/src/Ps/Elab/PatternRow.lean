@@ -438,8 +438,9 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
     binderCount := rowIds.length
     patterns := values.map (psCloseElabLambdaBinders closed.context.metaContext bindersRev)
     aliases := sourceAliases
-    callerValues := outer.localContext.declarations.reverse.map
-      (fun declaration => PsExpr.fvar (psLocalDeclId declaration)) }
+    callerValues := outer.localContext.declarations.reverse.filterMap fun declaration =>
+      let id := psLocalDeclId declaration
+      if outer.auxiliaryLocalIds.contains id then none else some (.fvar id) }
   psElabCoreRowValidate closed.context closed.type metadata
   return (closed.context, {
     term := closed.term, type := closed.type

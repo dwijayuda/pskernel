@@ -185,7 +185,10 @@ def psElabWhereLexicalAliases (context : PsElabContext) (helpers : List PsElabWh
     let type := psMetaInstantiate state.fst.metaContext helper.sourceType
     let value := PsExpr.fvar helper.peerId
     let pushed := psLocalPushLet state.fst.localContext name type value
-    return (psElabContextWithLocal state.fst pushed.context, state.snd ++ [(pushed.id, value)]))
+    let context := { state.fst with
+      localContext := pushed.context
+      auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+    return (context, state.snd ++ [(pushed.id, value)]))
     (context, [])
 
 def psElabWhereReadBody (shared lexical : PsElabContext) (header : PsElabWhereHeader)

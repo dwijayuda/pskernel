@@ -21,7 +21,7 @@ theorem auditOptionBindEquation (n : Nat) :
           Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=
   auditOptionBind.eq_def n
 
-/-- error: Cannot eliminate recursive call -/
+/-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
 def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=
   match n with

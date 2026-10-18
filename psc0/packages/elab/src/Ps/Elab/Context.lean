@@ -77,6 +77,7 @@ inductive PsElabCoreBoundaryKind where
   | source (discrFlags : List Bool) (proofCount : Nat)
   | row
   | primitive (selectedSlot prefixArity : Nat)
+  | recursiveCall (captureCount sourceArity : Nat)
 
 -- Each pattern is a typed lambda over the entire checked row prefix.
 -- Caller values precede this match's ds/ys and equation binders.

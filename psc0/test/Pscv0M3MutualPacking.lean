@@ -211,13 +211,41 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
   if plan != { count := 2, permutations :=
       [[some 0, some 1, none], [none, some 0, some 1], [some 0, none, some 1]] } then
     throw "retained source call analysis lost reordered dependent fixed parameters"
+  -- The source owner retains its three declared slots. Native WF then opens
+  -- the actual fourth value lambda; the unchanged k is a third fixed class.
+  let operationalNextId := max prepared.context.localContext.nextId
+    prepared.block.context.localContext.nextId
+  let operationalInputs ← (prepared.block.members.mapM
+    (psElabWhereWellFoundedOperationalInputFor prepared environment
+      prepared.block.levelNames operationalNextId prepared.block.members)).mapError
+        psCompilerPscv0ElabError
+  if operationalInputs.length != 3 || operationalInputs.any (fun input =>
+      input.extraBindersRev.length != 1 ||
+      input.sourceInput.header.parametersRev.length != 3 ||
+      !input.sourceInput.header.capturesRev.isEmpty ||
+      input.input.header.parametersRev.length != 4) then
+    throw "operational analysis changed the retained source header or missed its actual lambda"
+  let operationalOwners ← (psElabWhereWellFoundedOperationalOwners operationalInputs).mapError
+    psCompilerPscv0ElabError
+  if operationalOwners.length != 3 || operationalOwners.any (fun owner =>
+      owner.parameterIds.length != 4 || owner.calls.length != 1 ||
+        owner.calls.any (fun call => call.arguments.length != 4)) then
+    throw "operational analysis duplicated calls or lost the applied returned argument"
+  let operationalPlan ← (psElabRecursionComponentFixedParameterPlan operationalOwners).mapError
+    psCompilerPscv0ElabError
+  if operationalPlan != { count := 3, permutations :=
+      [[some 0, some 1, none, some 2], [none, some 0, some 1, some 2],
+        [some 0, none, some 1, some 2]] } then
+    throw "operational fixed analysis lost the unchanged returned lambda parameter"
   let measured ← (psElabWherePrepareWellFoundedComponent prepared environment
     prepared.block.levelNames prepared.block.members).mapError psCompilerPscv0ElabError
-  if measured.parameters != plan || measured.members.length != 3 ||
-      measured.fixedBindersRev.length != 2 ||
+  if measured.parameters != operationalPlan || measured.members.length != 3 ||
+      measured.fixedBindersRev.length != 3 ||
       measured.members.any (fun member => member.varyingNames.length != 1 ||
-        member.specialized.arguments.length != 3) then
-    throw "source component measures changed fixed correspondence or original arity"
+        member.sourceInput.header.parametersRev.length != 3 ||
+        member.extraBindersRev.length != 1 ||
+        member.specialized.arguments.length != 4) then
+    throw "measured component changed the checked four-slot operational correspondence"
   for member in measured.members do
     let expected := PsExpr.lam (psRootName "n") (.constE psNatName []) (.bvar 0) .explicit
     if !psWellFoundedDefEq environment psMetaEmpty measured.context.localContext

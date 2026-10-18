@@ -1266,6 +1266,119 @@ inductive IndexedMissingDecEq : Nat → Type where
   | intro (index : Nat) (value : Nat → Nat) : IndexedMissingDecEq index
   deriving DecidableEq
 
+def wfConstReturned (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) =>
+    match h : n with
+    | 0 => bias
+    | Nat.succ k => Nat.succ (wfConstReturned k (Nat.succ bias))
+termination_by n
+decreasing_by exact Nat.lt_succ_self k
+
+def wfConstClosed : (n : Nat) → (proof : n = n → False) → Nat :=
+  fun (n : Nat) (proof : n = n → False) =>
+    wfConstClosed (Nat.succ n)
+      (fun (_ : Nat.succ n = Nat.succ n) => proof (Eq.refl n))
+termination_by 0
+decreasing_by
+  have original : Nat.lt 0 0 := False.elim (proof (Eq.refl n))
+  exact original
+
+theorem wfConstReturnedSource (n : Nat) :
+    wfConstReturned n = (fun (bias : Nat) => match h : n with
+      | 0 => bias
+      | Nat.succ k => Nat.succ (wfConstReturned k (Nat.succ bias))) :=
+  by
+    funext bias
+    exact wfConstReturned.eq_def n bias
+
+theorem wfConstClosedSource :
+    wfConstClosed = (fun (n : Nat) (proof : n = n → False) =>
+      wfConstClosed (Nat.succ n)
+        (fun (_ : Nat.succ n = Nat.succ n) => proof (Eq.refl n))) :=
+  by
+    funext n proof
+    exact wfConstClosed.eq_def n proof
+
+def wfConstRetained (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) =>
+    match h : n with
+    | 0 => bias
+    | Nat.succ k =>
+      let step := wfConstRetained k
+      Nat.succ (step (Nat.succ bias))
+termination_by n
+decreasing_by exact Nat.lt_succ_self k
+
+mutual
+def wfConstMutualLeft (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) =>
+    match h : n with
+    | 0 => bias
+    | Nat.succ k => Nat.succ (wfConstMutualRight k (Nat.succ bias))
+termination_by n
+decreasing_by exact Nat.lt_succ_self k
+
+def wfConstMutualRight (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) =>
+    match h : n with
+    | 0 => bias
+    | Nat.succ k =>
+      let step := wfConstMutualLeft k
+      Nat.succ (step (Nat.succ bias))
+termination_by n
+decreasing_by exact Nat.lt_succ_self k
+end
+
+theorem wfConstMutualSource (n : Nat) :
+    wfConstMutualLeft n = (fun (bias : Nat) => match h : n with
+      | 0 => bias
+      | Nat.succ k => Nat.succ (wfConstMutualRight k (Nat.succ bias))) :=
+  by
+    funext bias
+    exact wfConstMutualLeft.eq_def n bias
+
+mutual
+def wfConstFixedLeft (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) =>
+    match h : n with
+    | 0 => bias
+    | Nat.succ k => Nat.succ (wfConstFixedRight k bias)
+termination_by n
+decreasing_by exact Nat.lt_succ_self k
+
+def wfConstFixedRight (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) =>
+    match h : n with
+    | 0 => bias
+    | Nat.succ k => Nat.succ (wfConstFixedLeft k bias)
+termination_by n
+decreasing_by exact Nat.lt_succ_self k
+end
+
+def m3constwf (flag : Bool) : UInt64 :=
+  let n := if flag then 4 else 2
+  let direct := wfConstReturned n 3
+  let retained := wfConstRetained n 3
+  let mutualResult := wfConstMutualLeft n 3
+  let fixedResult := wfConstFixedLeft (n + n) 3
+  UInt64.ofNat (if direct == retained && direct == mutualResult && direct == fixedResult
+    then direct else 0)
+
+run_cmd do
+  let command ← `(command|
+    def wfConstUnbound : Nat → Nat :=
+      fun (n : Nat) => wfConstUnbound (Nat.succ n)
+    termination_by n)
+  expectNativeWfBoundaryRefusal command
+
+run_cmd do
+  let command ← `(command|
+    def wfConstConstantBad : Nat → Nat :=
+      fun (n : Nat) => wfConstConstantBad (Nat.succ n)
+    termination_by 0
+    decreasing_by exact Nat.lt_succ_self 0)
+  expectNativeWfBoundaryRefusal command
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -1547,6 +1660,19 @@ private def wfBoundaryLeanSource : String :=
 private def wfBoundaryPsSource : String :=
   "structure WfBoundaryBox(n: Nat) where {\n  value: Nat\n}\n\nfunction wfBoundaryMeasure(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  WfBoundaryBox.value(p)\n\nfunction wfBoundaryPair(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n, p with {\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ(wfBoundaryPair(k, WfBoundaryBox.mk(v)))\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryGeneralized(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n with {\n  | 0 => 0\n  | Nat.succ k =>\n    match p with {\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ(wfBoundaryGeneralized(k, WfBoundaryBox.mk(v)))\n    }\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryComputed(n: Nat): Nat :=\n  match h: Nat.succ(n) with {\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ(wfBoundaryComputed(k))\n  }\ntermination_by Nat.succ(n)\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(Nat.succ(k), t), h),\n    Nat.lt_succ_self(Nat.succ(k)))\n}\n\nfunction wfBoundaryUserRecursor(n: Nat, impossible: n = n -> False): Nat :=\n  Nat.rec(0,\n    fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursor(k,\n      fun (_: k = k) => impossible(Eq.refl(n))),\n    n, motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction wfBoundaryCatchAll(n: Nat, impossible: n = n -> False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAll(Nat.succ(x),\n      fun (_: Nat.succ(x) = Nat.succ(x)) => impossible(Eq.refl(n)))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(Nat.succ(n), n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction m3wfboundaries(flag: Bool): UInt64 :=\n  let n: Nat := if (flag) { 4 } else { 2 }\n  UInt64.ofNat(wfBoundaryPair(n, WfBoundaryBox.mk(5)) +\n    10 * wfBoundaryGeneralized(n, WfBoundaryBox.mk(3)) +\n    100 * wfBoundaryComputed(n))\n"
 
+private def constWfLeanSource : String :=
+  "def wfConstReturned (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstReturned k (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\ndef wfConstClosed : (n : Nat) → (proof : n = n → False) → Nat :=\n  fun (n : Nat) (proof : n = n → False) =>\n    wfConstClosed (Nat.succ n)\n      (fun (_ : Nat.succ n = Nat.succ n) => proof (Eq.refl n))\ntermination_by 0\ndecreasing_by\n  have original : Nat.lt 0 0 := False.elim (proof (Eq.refl n))\n  exact original\n\ntheorem wfConstReturnedSource (n : Nat) :\n    wfConstReturned n = (fun (bias : Nat) => match h : n with\n      | 0 => bias\n      | Nat.succ k => Nat.succ (wfConstReturned k (Nat.succ bias))) :=\n  wfConstReturned.eq_def n\n\ntheorem wfConstClosedSource :\n    wfConstClosed = (fun (n : Nat) (proof : n = n → False) =>\n      wfConstClosed (Nat.succ n)\n        (fun (_ : Nat.succ n = Nat.succ n) => proof (Eq.refl n))) :=\n  wfConstClosed.eq_def\n\ndef wfConstRetained (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k =>\n      let step := wfConstRetained k\n      Nat.succ (step (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\nmutual\ndef wfConstMutualLeft (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstMutualRight k (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\ndef wfConstMutualRight (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k =>\n      let step := wfConstMutualLeft k\n      Nat.succ (step (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\nend\n\ntheorem wfConstMutualSource (n : Nat) :\n    wfConstMutualLeft n = (fun (bias : Nat) => match h : n with\n      | 0 => bias\n      | Nat.succ k => Nat.succ (wfConstMutualRight k (Nat.succ bias))) :=\n  wfConstMutualLeft.eq_def n\n\nmutual\ndef wfConstFixedLeft (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstFixedRight k bias)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\ndef wfConstFixedRight (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstFixedLeft k bias)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\nend\n\ndef m3constwf (flag : Bool) : UInt64 :=\n  let n := if flag then 4 else 2\n  let direct := wfConstReturned n 3\n  let retained := wfConstRetained n 3\n  let mutualResult := wfConstMutualLeft n 3\n  let fixedResult := wfConstFixedLeft (n + n) 3\n  UInt64.ofNat (if direct == retained && direct == mutualResult && direct == fixedResult\n    then direct else 0)\n"
+
+private def constWfPsSource : String :=
+  "function wfConstReturned(n: Nat): Nat -> Nat :=\n  fun (bias: Nat) => match h: n with {\n    | 0 => bias\n    | Nat.succ k => Nat.succ(wfConstReturned(k, Nat.succ(bias)))\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(k) }\n\nconst wfConstClosed: forall n : Nat, forall proof : (n = n -> False), Nat :=\n  fun (n: Nat) (proof: n = n -> False) =>\n    wfConstClosed(Nat.succ(n),\n      fun (_: Nat.succ(n) = Nat.succ(n)) => proof(Eq.refl(n)))\ntermination_by 0\ndecreasing_by by {\n  have original: Nat.lt(0, 0) := False.elim(proof(Eq.refl(n)))\n  exact original\n}\n\ntheorem wfConstReturnedSource(n: Nat):\n    wfConstReturned(n) = (fun (bias: Nat) => match h: n with {\n      | 0 => bias\n      | Nat.succ k => Nat.succ(wfConstReturned(k, Nat.succ(bias)))\n    }) := wfConstReturned.eq_def(n)\n\ntheorem wfConstClosedSource:\n    wfConstClosed = (fun (n: Nat) (proof: n = n -> False) =>\n      wfConstClosed(Nat.succ(n),\n        fun (_: Nat.succ(n) = Nat.succ(n)) => proof(Eq.refl(n)))) :=\n  wfConstClosed.eq_def\n\nfunction wfConstRetained(n: Nat): Nat -> Nat :=\n  fun (bias: Nat) => match h: n with {\n    | 0 => bias\n    | Nat.succ k =>\n      let step := wfConstRetained(k)\n      Nat.succ(step(Nat.succ(bias)))\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(k) }\n\nmutual\nfunction wfConstMutualLeft(n: Nat): Nat -> Nat :=\n  fun (bias: Nat) => match h: n with {\n    | 0 => bias\n    | Nat.succ k => Nat.succ(wfConstMutualRight(k, Nat.succ(bias)))\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(k) }\n\nfunction wfConstMutualRight(n: Nat): Nat -> Nat :=\n  fun (bias: Nat) => match h: n with {\n    | 0 => bias\n    | Nat.succ k =>\n      let step := wfConstMutualLeft(k)\n      Nat.succ(step(Nat.succ(bias)))\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(k) }\nend\n\ntheorem wfConstMutualSource(n: Nat):\n    wfConstMutualLeft(n) = (fun (bias: Nat) => match h: n with {\n      | 0 => bias\n      | Nat.succ k => Nat.succ(wfConstMutualRight(k, Nat.succ(bias)))\n    }) := wfConstMutualLeft.eq_def(n)\n\nmutual\nfunction wfConstFixedLeft(n: Nat): Nat -> Nat :=\n  fun (bias: Nat) => match h: n with {\n    | 0 => bias\n    | Nat.succ k => Nat.succ(wfConstFixedRight(k, bias))\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(k) }\n\nfunction wfConstFixedRight(n: Nat): Nat -> Nat :=\n  fun (bias: Nat) => match h: n with {\n    | 0 => bias\n    | Nat.succ k => Nat.succ(wfConstFixedLeft(k, bias))\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(k) }\nend\n\nfunction m3constwf(flag: Bool): UInt64 :=\n  let n := if (flag) { 4 } else { 2 }\n  let direct := wfConstReturned(n, 3)\n  let retained := wfConstRetained(n, 3)\n  let mutualResult := wfConstMutualLeft(n, 3)\n  let fixedResult := wfConstFixedLeft(n + n, 3)\n  UInt64.ofNat(if (direct == retained && direct == mutualResult && direct == fixedResult) {\n    direct\n  } else { 0 })\n"
+
+private def wfSelectedPhaseFailure (phase : String) : PsElabError → Bool
+  | .atDeclaration _ cause => wfSelectedPhaseFailure phase cause
+  | .atContext label cause =>
+    if label == "well-founded " ++ phase then !psElabErrorIsResource cause
+    else wfSelectedPhaseFailure phase cause
+  | _ => false
+
 private def wfBoundaryDecreaseFailure : PsElabError → Bool
   | .atDeclaration _ cause => wfBoundaryDecreaseFailure cause
   | .atContext label cause =>
@@ -1769,6 +1895,37 @@ def check (root : System.FilePath) : IO Unit := do
       | .error error =>
         throw (IO.userError (label ++ " failed outside elaboration: " ++ psCompilerPscv0Error error))
       | .ok _ => throw (IO.userError (label ++ " accepted an unrefined decrease proof"))
+  for (label, phase, leanText, psText) in [
+      ("unrelated False is removed from decrease scope",
+        "decrease goals",
+        "def wfBoundaryUserRecursorCleanupRefusal (n : Nat) (impossible : False) : Nat :=\n  Nat.rec (motive := fun (_ : Nat) => Nat) 0\n    (fun (k : Nat) (ih : Nat) => wfBoundaryUserRecursorCleanupRefusal k impossible) n\ntermination_by n\ndecreasing_by\n  have original : Nat.lt k n := False.elim impossible\n  exact original\n",
+        "function wfBoundaryUserRecursorCleanupRefusal(n: Nat, impossible: False): Nat :=\n  Nat.rec(0, fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursorCleanupRefusal(k, impossible), n,\n    motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible)\n  exact original\n}\n"),
+      ("all-fixed catch-all has no WF source argument",
+        "fixed parameters",
+        "def wfBoundaryCatchAllFixedRefusal (n : Nat) (impossible : False) : Nat :=\n  match n with\n  | x => wfBoundaryCatchAllFixedRefusal x impossible\ntermination_by n\ndecreasing_by\n  have original : Nat.lt n n := False.elim impossible\n  exact original\n",
+        "function wfBoundaryCatchAllFixedRefusal(n: Nat, impossible: False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAllFixedRefusal(x, impossible)\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(n, n) := False.elim(impossible)\n  exact original\n}\n"),
+      ("bare measure cannot name a returned lambda binder",
+        "measure",
+        "def wfConstUnbound : Nat → Nat :=\n  fun (n : Nat) => wfConstUnbound (Nat.succ n)\ntermination_by n\n",
+        "const wfConstUnbound: Nat -> Nat :=\n  fun (n: Nat) => wfConstUnbound(Nat.succ(n))\ntermination_by n\n"),
+      ("closed measure retains its actual decrease goal",
+        "decrease goals",
+        "def wfConstConstantBad : Nat → Nat :=\n  fun (n : Nat) => wfConstConstantBad (Nat.succ n)\ntermination_by 0\ndecreasing_by exact Nat.lt_succ_self 0\n",
+        "const wfConstConstantBad: Nat -> Nat :=\n  fun (n: Nat) => wfConstConstantBad(Nat.succ(n))\ntermination_by 0\ndecreasing_by by { exact Nat.lt_succ_self(0) }\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        ensure (wfSelectedPhaseFailure phase cause)
+          (label ++ " lost its expected WF phase: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " failed outside elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " was accepted"))
+  checkIndependentSourcePair "function-valued well-founded source"
+    constWfLeanSource constWfPsSource
+  ensure ((M3InputParityOracle.m3constwf false).toNat == 7 &&
+    (M3InputParityOracle.m3constwf true).toNat == 11)
+    "native function-valued WF observations changed"
   checkIndependentSourcePair "plain predicate" predicatePlainLeanSource predicatePlainPsSource
   checkIndependentSourcePair "named predicate" predicateNamedLeanSource predicateNamedPsSource
   checkIndependentSourcePair "indexed predicate" predicateIndexLeanSource predicateIndexPsSource
@@ -2120,10 +2277,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches", "m3structural", "m3inline", "m3registered", "m3const", "m3wfboundaries"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches", "m3structural", "m3inline", "m3registered", "m3const", "m3wfboundaries", "m3constwf"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (wfBoundaryLeanSource ++ predicatePlainLeanSource ++ predicateNamedLeanSource ++ predicateIndexLeanSource ++ inlineLeanSource ++ registeredLeanSource ++ structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (wfBoundaryPsSource ++ predicatePlainPsSource ++ predicateNamedPsSource ++ predicateIndexPsSource ++ inlinePsSource ++ registeredPsSource ++ structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (constWfLeanSource ++ wfBoundaryLeanSource ++ predicatePlainLeanSource ++ predicateNamedLeanSource ++ predicateIndexLeanSource ++ inlineLeanSource ++ registeredLeanSource ++ structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (constWfPsSource ++ wfBoundaryPsSource ++ predicatePlainPsSource ++ predicateNamedPsSource ++ predicateIndexPsSource ++ inlinePsSource ++ registeredPsSource ++ structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -2162,6 +2319,7 @@ def check (root : System.FilePath) : IO Unit := do
           ("m3registered", Lean.toJson (toString (M3InputParityOracle.m3registered flag).toNat)),
           ("m3const", Lean.toJson (toString (M3InputParityOracle.m3const flag).toNat)),
           ("m3wfboundaries", Lean.toJson (toString (M3InputParityOracle.m3wfboundaries flag).toNat)),
+          ("m3constwf", Lean.toJson (toString (M3InputParityOracle.m3constwf flag).toNat)),
           ("m3structural", Lean.toJson (toString (M3InputParityOracle.m3structural flag).toNat)),
           ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat)),
           ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat)),

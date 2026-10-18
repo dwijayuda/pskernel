@@ -227,7 +227,8 @@ def psElabDeriveIndexedBEqTest (plan : PsElabDeriveContext) (context : PsElabCon
       pure (PsExpr.app method field.right, (none : Option PsExpr))
     | none => do
       let target ← psElabDeriveClassType context (psRootName "BEq") field.leftType
-      let dictionary ← psElabDeriveInstance context target
+      let dictionary ← (psElabDeriveInstance context target).mapError
+        (.atContext "indexed BEq field dictionary")
       let .app (.constE _ levels) _ := target | throw .typeMismatch
       pure (psExprApplyMany (.constE (psNameAppendStr (psRootName "BEq") "beq") levels)
         [field.leftType, dictionary, field.left, field.right], some dictionary)
@@ -242,7 +243,8 @@ def psElabDeriveIndexedBEqEquality (context : PsElabContext)
     Except PsElabError PsElabEquation := do
   let (context, lawfulHead) ← psElabResolvedReference context (.global (psRootName "LawfulBEq"))
   let lawfulType ← psElabApplyCore context lawfulHead [field.leftType, dictionary]
-  let lawful ← psElabDeriveInstance lawfulType.context lawfulType.term
+  let lawful ← (psElabDeriveInstance lawfulType.context lawfulType.term).mapError
+    (.atContext "indexed BEq lawful dictionary")
   let (context, head) ← psElabResolvedReference lawfulType.context (.global (psNameAppendStr (psRootName "LawfulBEq") "eq_of_beq"))
   let checked ← psElabApplyCore context head
     [field.leftType, dictionary, lawful, field.left, field.right, proof]
@@ -276,7 +278,8 @@ def psElabDeriveIndexedBEqFields (fuel : Nat) (plan : PsElabDeriveContext)
         let bool := PsExpr.constE psBoolName []
         let proposition := psLogicEq (.succ .zero) bool tested.term (.constE psBoolTrueName [])
         let decisionType := psDecisionType proposition
-        let decision ← psElabDeriveInstance context decisionType
+        let decision ← (psElabDeriveInstance context decisionType).mapError
+          (.atContext "indexed BEq boolean-condition decision")
         let positive := psLocalPushBinding context.localContext (psRootName "equal") proposition .explicit
         let inner := psElabContextWithLocal context positive.context
         let equation ← psElabDeriveIndexedBEqEquality inner field dictionary (.fvar positive.id)

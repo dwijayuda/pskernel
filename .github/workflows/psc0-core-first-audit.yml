@@ -112,8 +112,8 @@ jobs:
           set -euo pipefail
           mkdir -p ../dist/core-first/seams
           lean --version | tee ../dist/core-first/seams/toolchain.txt
-          rg -F '4.35.0' ../dist/core-first/seams/toolchain.txt
-          rg -F 'eb6cafb' ../dist/core-first/seams/toolchain.txt
+          grep -F '4.35.0' ../dist/core-first/seams/toolchain.txt
+          grep -F 'eb6cafb' ../dist/core-first/seams/toolchain.txt
           /usr/bin/time -v -o ../dist/core-first/seams/build-resource.txt lake build pscv0_core_seams 2>&1 | tee ../dist/core-first/seams/build.log
       - name: Check isolated hashing, actual replay dependency and rejection
         run: |
@@ -201,8 +201,8 @@ jobs:
           mkdir -p ../dist/core-first/authoring
           printf '%s\n' "$GITHUB_SHA" > ../dist/core-first/authoring/source-sha.txt
           lean --version | tee ../dist/core-first/authoring/toolchain.txt
-          rg -F '4.35.0' ../dist/core-first/authoring/toolchain.txt
-          rg -F 'eb6cafb' ../dist/core-first/authoring/toolchain.txt
+          grep -F '4.35.0' ../dist/core-first/authoring/toolchain.txt
+          grep -F 'eb6cafb' ../dist/core-first/authoring/toolchain.txt
           /usr/bin/time -v -o ../dist/core-first/authoring/build-resource.txt lake build pscv0_native pscv0_native_checks pscv0_core_environment_export 2>&1 | tee ../dist/core-first/authoring/build.log
       - name: Preserve exact Full identities and independent checks
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}

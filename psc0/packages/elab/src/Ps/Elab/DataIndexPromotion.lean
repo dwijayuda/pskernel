@@ -99,13 +99,17 @@ def psElabDataPromoteIndices (context : PsElabContext)
   let extra := count - first.numParams
   if extra == 0 then return (context, group, declarations)
   let members := group.members.map fun info => {
-    info with numParams := info.numParams + extra, numIndices := info.numIndices - extra
+    info with
+    numParams := info.numParams + extra
+    numIndices := info.numIndices - extra
     type := psMetaInstantiate context.metaContext info.type }
   let constructors ← constructors.mapM fun info => do
     if extra > info.numFields || info.recursiveFields.any (· < extra) then
       throw (.data "promoted index overlaps a recursive constructor field")
     return PsDeclaration.constructorDecl {
-      info with numParams := info.numParams + extra, numFields := info.numFields - extra
+      info with
+      numParams := info.numParams + extra
+      numFields := info.numFields - extra
       recursiveFields := info.recursiveFields.map (· - extra)
       type := psMetaInstantiate context.metaContext info.type }
   return (context, { members }, constructors)

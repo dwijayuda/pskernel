@@ -211,7 +211,9 @@ def psElabDataInferResultLevel (context : PsElabContext)
         psLevelMax value (psElabLevelOffset lower (Int.ofNat offset - adjustment).toNat)) atZero)
       pure (!(← psElabDataLevelGeq 4096 ideal inferredLevel))
     else pure false
-  return (context, { level := inferredLevel, assignment? := some (result, inferred),
+  return (context, {
+    level := inferredLevel
+    assignment? := some (result, inferred)
     highUniverse })
 
 def psElabDataFieldUniverseConstraints (base : PsLevel)

@@ -2,6 +2,31 @@
 
 ## Checked source owners and dependent data candidate
 
+### Checked elimination target candidate and build progression
+
+The preparation runs [39175250728](https://github.com/dwijayuda/pskernel/actions/runs/39175250728)
+at d929b65741c25a9f6264283f05b2e76ec3d5ec58 and
+[39175344823](https://github.com/dwijayuda/pskernel/actions/runs/39175344823)
+at db4e7e28915d157515c60fdea41f17ba39acaca0 passed the new shared pattern
+modules and stopped on two record layouts in DataUniverseInference and
+DataIndexPromotion. This child formats those and the related Data update records.
+No new Data semantic result or final Fin digest has yet been measured.
+
+The selected cases/induction term owner now generalizes a computed target or
+let declaration through a checked complete Pi, typed goal assignment, and the
+existing scoped introduction. It preserves the original let/source scope.
+Induction additionally requires every implicit index and the major to be
+distinct variables, matching pinned Induction.checkInductionTargets; cases
+retains its own applicability. No new tactic grammar or eliminator syntax is
+selected. Native controls, independent actual .lean/.ps inputs, a computational
+predecessor rfl law, and strict fixed-index/repeated-index/ill-typed-generalization
+refusals are included in the existing full source and five-target requests.
+These new behavior checks remain pending Linux CI.
+
+Opaque P1 publication/runtime and cross-module abbrev dependency ownership
+remain separate open work. All six M3+B exits remain open until the complete
+source/runtime matrix and Native/M3/F1/F2/F3 pass on one exact final SHA.
+
 ### Preparation build correction
 
 [Preparation 39174010287](https://github.com/dwijayuda/pskernel/actions/runs/39174010287)

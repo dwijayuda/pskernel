@@ -1,5 +1,6 @@
 import Ps.Elab.GoalSource
 import Ps.Elab.Match
+import Ps.Elab.MatchGeneralization
 
 def psProofTag (parent child : String) : String :=
   if parent.isEmpty then child else if child.isEmpty then parent else parent ++ "." ++ child
@@ -32,16 +33,75 @@ def psProofEliminationGoal (tag : String) (induction : Bool) (branch : PsElabMat
     term := fresh.expr
     type := branch.target }
 
+-- Pinned Elab/Tactic/Induction.elabElimTargets generalizes computed
+-- expressions and let declarations before selecting the eliminator. Keep the
+-- original source scope; the checked new goal is applied to the original term.
+def psProofPrepareEliminationTarget (state : PsProofState) (goal : PsProofGoal)
+    (target : PsExpr) (value : PsElabTermResult) :
+    Except PsElabError (PsProofState × PsElabTermResult) := do
+  let term := psMetaInstantiate value.context.metaContext value.term
+  let shouldGeneralize ← match term with
+    | .fvar id =>
+      match psLocalFindById value.context.localContext id with
+      | some (.binding ..) => pure false
+      | some (.letDecl ..) => pure true
+      | none => throw (.proof "elimination target is absent from its checked local scope")
+    | _ => pure true
+  if !shouldGeneralize then
+    return (psProofUpdate state value.context, { value with term })
+  let (context, body) ← psElabSourceMatchKeyAbstract value.context term target
+  let name := PsName.num (psRootName "_eliminate") context.localContext.nextId
+  let domain := psMetaInstantiate context.metaContext value.type
+  let type := PsExpr.forallE name domain body .explicit
+  -- Native generalize checks the complete telescope before assigning the goal.
+  -- In particular, fixed dependent hypotheses cannot simply be relabeled.
+  let _ ← psElabExpressionSort context type
+  let fresh := psMetaFresh context.metaContext context.localContext type
+    .syntheticOpaque { tag := goal.tag }
+  let .mvar id := fresh.expr | throw (.proof "invalid generalized elimination goal")
+  let context := psElabContextWithMeta context fresh.context
+  let state ← psProofAssign (psProofUpdate state context) goal.id (.app fresh.expr term)
+  let state := {
+    state with
+    goals := { id, tag := goal.tag } :: state.goals.drop 1 }
+  let state ← psProofIntro state none
+  let (_, context, _) ← psProofMain state
+  let some declaration := psLocalFindUser context.localContext name
+    | throw (.proof "generalized elimination binder lost its checked identity")
+  let value ← psElabResolvedTerm context (.fvar (psLocalDeclId declaration)) none
+  return (state, value)
+
+-- Native checkInductionTargets checks all implicit indices and the major
+-- after target generalization. Cases deliberately does not impose this rule.
+def psProofCheckInductionTargets (context : PsElabContext) (info : PsInductiveInfo)
+    (major type : PsExpr) : Except PsElabError Unit := do
+  let type := psWhnf context.environment context.metaContext context.localContext
+    (psMetaInstantiate context.metaContext type)
+  let view := psInferAppView type
+  let .constE name _ := view.head
+    | throw (.proof "induction target has an inconsistent checked family telescope")
+  if !psNameEq name info.name || view.args.length != info.numParams + info.numIndices then
+    throw (.proof "induction target has an inconsistent checked family telescope")
+  let targets := view.args.drop info.numParams ++ [major]
+  let _ ← targets.foldlM (fun (seen : List Nat) term => do
+    let .fvar id := psMetaInstantiate context.metaContext term
+      | throw (.proof "induction target indices must be variables")
+    if seen.contains id then
+      throw (.proof "induction target and indices must be distinct")
+    return id :: seen) []
+  pure ()
+
 -- Tactics are consumers of the shared eliminator. Cases hides recursive IHs;
 -- induction retains them. Original majors/dependents leave the goal context,
 -- while the recursor's checked refinement opens their specialized replacements.
 def psProofEliminate (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (state : PsProofState) (source : PsSyntaxTerm) (induction : Bool) :
     Except PsElabError PsProofState := do
-  let (goal, context, target) ← psProofMain state
+  let (originalGoal, context, originalTarget) ← psProofMain state
   let source ← psProofSource scope context source
   let value ← elaborate context source none
-  let .fvar _ := value.term | throw (.proof "elimination currently requires a local hypothesis")
+  let (state, value) ← psProofPrepareEliminationTarget state originalGoal originalTarget value
+  let (goal, context, target) ← psProofMain state
   let read := fun current _ expected => psElabResolvedTerm current value.term expected
   let result ← psElabMatchWith read (fun current info => do
     if induction then
@@ -55,6 +115,7 @@ def psProofEliminate (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
           (psNameAppendStr info.name "rec") | throw .matchRecursorUnsupported
       if recursor.numMotives != 1 then
         throw (.proof "nested induction requires an explicit eliminator")
+      psProofCheckInductionTargets current info value.term value.type
     info.constructors.mapM fun name => do
       let some ctor := psEnvironmentFindConstructor current.environment name
         | throw (.matchConstructorUnknown name)

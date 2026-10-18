@@ -338,7 +338,8 @@ def psElabInductiveGroupContext (first header : PsElabInductiveHeader)
         id := common.id
         beforeId := first.context.localContext.nextId } : PsLocalNameAlias)
   let localContext := {
-    first.context.localContext with declarations
+    first.context.localContext with
+    declarations
     nameAliases := aliases ++ first.context.localContext.nameAliases.filter
       (fun alias => !commonIds.contains alias.id) }
   let context := { first.context with environment := environment, infoRev := [], localContext := localContext }
@@ -439,12 +440,14 @@ def psElabDataMapInfo (map : PsExpr → PsExpr) : PsElabInfo → PsElabInfo
 def psElabDataMapMeta (map : PsExpr → PsExpr) (context : PsMetaContext) : PsMetaContext :=
   { context with
     declarations := context.declarations.map fun declaration => {
-      declaration with type := map declaration.type
+      declaration with
+      type := map declaration.type
       localContext := psElabDataMapLocalContext map declaration.localContext }
     assignments := context.assignments.map fun assignment => {
       assignment with value := map assignment.value }
     delayed := context.delayed.map fun delayed => {
-      delayed with body := map delayed.body
+      delayed with
+      body := map delayed.body
       abstractions := delayed.abstractions.map fun abstraction =>
         match abstraction with
         | .lambdaE id name type binder => .lambdaE id name (map type) binder
@@ -474,7 +477,8 @@ def psElabDataFinalize (context : PsElabContext) (available : List PsName)
     psElabDataFinalizeExpr group.members first.levelParams levels (instantiate expression)
   let metaContext := psElabDataMapMeta map context.metaContext
   let context := {
-    context with metaContext
+    context with
+    metaContext
     localContext := psElabDataMapLocalContext map context.localContext
     infoRev := context.infoRev.map fun entry => {
       localContext := psElabDataMapLocalContext map entry.localContext
@@ -487,7 +491,8 @@ def psElabDataFinalize (context : PsElabContext) (available : List PsName)
       | throw (.data "constructor plan contains another declaration")
     return PsDeclaration.constructorDecl { info with levelParams := levels, type := map info.type }
   let sourceInfo := sourceInfo.map fun receipt => {
-    receipt with metaContext
+    receipt with
+    metaContext
     entries := receipt.entries.map fun entry => {
       localContext := psElabDataMapLocalContext map entry.localContext
       info := psElabDataMapInfo map entry.info } }
@@ -513,7 +518,8 @@ def psElabInductiveGroup (environment : PsEnvironment)
   let groupLevels := headerLevels.foldl (fun names name =>
     if names.any (psNameEq name) then names else names ++ [name]) levelNames
   let headers := headers.map fun header => {
-    header with info := { header.info with levelParams := groupLevels }
+    header with
+    info := { header.info with levelParams := groupLevels }
     context := psElabContextWithLocal (psElabContextWithMeta header.context metaContext)
       { header.context.localContext with nextId := nextLocalId } }
   let first :: _ := headers | throw (.data "empty inductive group")

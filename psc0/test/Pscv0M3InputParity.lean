@@ -1589,6 +1589,64 @@ run_cmd do
     termination_by n
     decreasing_by exact Nat.lt_succ_self n))
 
+theorem eliminationComputedCases (n : Nat) :
+    Nat.succ n = Nat.succ n := by
+  cases (Nat.succ n)
+  all_goals rfl
+
+theorem eliminationComputedInduction (n : Nat) :
+    Nat.succ n = Nat.succ n := by
+  induction (Nat.succ n)
+  all_goals rfl
+
+theorem eliminationLetInduction (n : Nat) : True := by
+  let saved : Nat := n
+  induction saved
+  all_goals
+    have keep : saved = n := by rfl
+    exact True.intro
+
+def eliminationComputedPred (n : Nat) : Nat := by
+  cases (Nat.succ n)
+  case zero => exact 0
+  case succ k => exact k
+
+theorem eliminationComputedPredEquation (n : Nat) :
+    eliminationComputedPred n = n := by rfl
+
+inductive EliminationDiagonal : Nat → Nat → Type where
+  | point (n : Nat) : EliminationDiagonal n n
+
+theorem eliminationVariableIndices (n m : Nat)
+    (x : EliminationDiagonal n m) : True := by
+  induction x
+  exact True.intro
+
+theorem eliminationFixedCases (x : EliminationDiagonal 0 0) : True := by
+  cases x
+  exact True.intro
+
+theorem eliminationRepeatedCases (n : Nat)
+    (x : EliminationDiagonal n n) : True := by
+  cases x
+  exact True.intro
+
+run_cmd do
+  expectNativeRegisteredOwnerRefusal "fixed induction index" (← `(command|
+    theorem eliminationFixedInduction (x : EliminationDiagonal 0 0) : True := by
+      induction x
+      exact True.intro))
+  expectNativeRegisteredOwnerRefusal "repeated induction index" (← `(command|
+    theorem eliminationRepeatedInduction (n : Nat)
+        (x : EliminationDiagonal n n) : True := by
+      induction x
+      exact True.intro))
+  expectNativeRegisteredOwnerRefusal "ill-typed target generalization" (← `(command|
+    theorem eliminationDependentGeneralization (n : Nat)
+        (x : EliminationDiagonal (Nat.succ n) (Nat.succ n)) : x = x := by
+      cases (Nat.succ n)
+      all_goals rfl))
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -1876,6 +1934,12 @@ private def wfBoundaryLeanSource : String :=
 private def wfBoundaryPsSource : String :=
   "structure WfBoundaryBox(n: Nat) where {\n  value: Nat\n}\n\nfunction wfBoundaryMeasure(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  WfBoundaryBox.value(p)\n\nfunction wfBoundaryPair(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n, p with {\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ(wfBoundaryPair(k, WfBoundaryBox.mk(v)))\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryGeneralized(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n with {\n  | 0 => 0\n  | Nat.succ k =>\n    match p with {\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ(wfBoundaryGeneralized(k, WfBoundaryBox.mk(v)))\n    }\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryComputed(n: Nat): Nat :=\n  match h: Nat.succ(n) with {\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ(wfBoundaryComputed(k))\n  }\ntermination_by Nat.succ(n)\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(Nat.succ(k), t), h),\n    Nat.lt_succ_self(Nat.succ(k)))\n}\n\nfunction wfBoundaryUserRecursor(n: Nat, impossible: n = n -> False): Nat :=\n  Nat.rec(0,\n    fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursor(k,\n      fun (_: k = k) => impossible(Eq.refl(n))),\n    n, motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction wfBoundaryCatchAll(n: Nat, impossible: n = n -> False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAll(Nat.succ(x),\n      fun (_: Nat.succ(x) = Nat.succ(x)) => impossible(Eq.refl(n)))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(Nat.succ(n), n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction m3wfboundaries(flag: Bool): UInt64 :=\n  let n: Nat := if (flag) { 4 } else { 2 }\n  UInt64.ofNat(wfBoundaryPair(n, WfBoundaryBox.mk(5)) +\n    10 * wfBoundaryGeneralized(n, WfBoundaryBox.mk(3)) +\n    100 * wfBoundaryComputed(n))\n"
 
+private def eliminationTargetLeanSource : String :=
+  "theorem eliminationComputedCases (n : Nat) :\n    Nat.succ n = Nat.succ n := by\n  cases (Nat.succ n)\n  all_goals rfl\n\ntheorem eliminationComputedInduction (n : Nat) :\n    Nat.succ n = Nat.succ n := by\n  induction (Nat.succ n)\n  all_goals rfl\n\ntheorem eliminationLetInduction (n : Nat) : True := by\n  let saved : Nat := n\n  induction saved\n  all_goals\n    have keep : saved = n := by rfl\n    exact True.intro\n\ndef eliminationComputedPred (n : Nat) : Nat := by\n  cases (Nat.succ n)\n  case zero => exact 0\n  case succ k => exact k\n\ntheorem eliminationComputedPredEquation (n : Nat) :\n    eliminationComputedPred n = n := by rfl\n\ninductive EliminationDiagonal : Nat → Nat → Type where\n  | point (n : Nat) : EliminationDiagonal n n\n\ntheorem eliminationVariableIndices (n m : Nat)\n    (x : EliminationDiagonal n m) : True := by\n  induction x\n  exact True.intro\n\ntheorem eliminationFixedCases (x : EliminationDiagonal 0 0) : True := by\n  cases x\n  exact True.intro\n\ntheorem eliminationRepeatedCases (n : Nat)\n    (x : EliminationDiagonal n n) : True := by\n  cases x\n  exact True.intro\n\n"
+
+private def eliminationTargetPsSource : String :=
+  "theorem eliminationComputedCases(n: Nat):\n    Nat.succ(n) = Nat.succ(n) := by {\n  cases Nat.succ(n)\n  all_goals { rfl }\n}\n\ntheorem eliminationComputedInduction(n: Nat):\n    Nat.succ(n) = Nat.succ(n) := by {\n  induction Nat.succ(n)\n  all_goals { rfl }\n}\n\ntheorem eliminationLetInduction(n: Nat): True := by {\n  let saved: Nat := n\n  induction saved\n  all_goals {\n    have keep: saved = n := by { rfl }\n    exact True.intro\n  }\n}\n\nfunction eliminationComputedPred(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact 0\n  case succ k => exact k\n}\n\ntheorem eliminationComputedPredEquation(n: Nat):\n    eliminationComputedPred(n) = n := by { rfl }\n\ninductive EliminationDiagonal: Nat -> Nat -> Type where {\n  | point(n: Nat): EliminationDiagonal(n, n)\n}\n\ntheorem eliminationVariableIndices(n: Nat, m: Nat,\n    x: EliminationDiagonal(n, m)): True := by {\n  induction x\n  exact True.intro\n}\n\ntheorem eliminationFixedCases(x: EliminationDiagonal(0, 0)): True := by {\n  cases x\n  exact True.intro\n}\n\ntheorem eliminationRepeatedCases(n: Nat,\n    x: EliminationDiagonal(n, n)): True := by {\n  cases x\n  exact True.intro\n}\n\n"
+
 private def opaqueProofWfLeanSource : String :=
   "opaque registeredOpaqueProofWf (n : Nat) : True :=\n  match n with\n  | 0 => True.intro\n  | k + 1 => registeredOpaqueProofWf (k - 1)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)\n\ntheorem registeredOpaqueProofWfUse : True := registeredOpaqueProofWf 4\n"
 
@@ -2152,10 +2216,41 @@ private def checkOpaqueProofWfMetadata (kind : PsCompilerSourceKind)
     !(compiled.exposedNames.any (psNameEq name)))
     "proof-valued opaque WF acquired an unfolding equation or abbreviation exposure"
 
+private def eliminationTargetRuleFailure (message : String) : PsElabError → Bool
+  | .atDeclaration _ cause => eliminationTargetRuleFailure message cause
+  | .atContext _ cause => eliminationTargetRuleFailure message cause
+  | .proof actual => actual == message
+  | _ => false
+
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
   checkCoreBoundaryControls
+  checkIndependentSourcePair "tactic target generalization and induction index policy"
+    eliminationTargetLeanSource eliminationTargetPsSource
+  for (label, rule, leanText, psText) in [
+      ("fixed induction index", "induction target indices must be variables",
+        "theorem eliminationFixedInduction (x : EliminationDiagonal 0 0) : True := by\n  induction x\n  exact True.intro\n",
+        "theorem eliminationFixedInduction(x: EliminationDiagonal(0, 0)): True := by {\n  induction x\n  exact True.intro\n}\n"),
+      ("repeated induction index", "induction target and indices must be distinct",
+        "theorem eliminationRepeatedInduction (n : Nat)\n    (x : EliminationDiagonal n n) : True := by\n  induction x\n  exact True.intro\n",
+        "theorem eliminationRepeatedInduction(n: Nat,\n    x: EliminationDiagonal(n, n)): True := by {\n  induction x\n  exact True.intro\n}\n"),
+      ("ill-typed target generalization", "",
+        "theorem eliminationDependentGeneralization (n : Nat)\n    (x : EliminationDiagonal (Nat.succ n) (Nat.succ n)) : x = x := by\n  cases (Nat.succ n)\n  all_goals rfl\n",
+        "theorem eliminationDependentGeneralization(n: Nat,\n    x: EliminationDiagonal(Nat.succ(n), Nat.succ(n))): x = x := by {\n  cases Nat.succ(n)\n  all_goals { rfl }\n}\n")] do
+    for (kind, prefix, source) in [
+        (PsCompilerSourceKind.lean, eliminationTargetLeanSource, leanText),
+        (.proofScript, eliminationTargetPsSource, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 (prefix ++ source) kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        let correct := if rule.isEmpty then matchPolicyTypeFailure cause
+          else eliminationTargetRuleFailure rule cause
+        ensure correct
+          (label ++ " refused at the wrong owner: " ++ psCompilerPscv0ElabError cause)
+      | .error error => throw (IO.userError (psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " unexpectedly accepted"))
+
   checkIndependentSourcePair "proof-valued opaque WF"
     opaqueProofWfLeanSource opaqueProofWfPsSource
   for (kind, source) in [(PsCompilerSourceKind.lean, opaqueProofWfLeanSource),
@@ -2714,7 +2809,7 @@ def check (root : System.FilePath) : IO Unit := do
     outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches", "m3structural", "m3inline", "m3registered", "m3const", "m3wfboundaries", "m3constwf", "m3registeredowners"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (opaqueProofWfLeanSource ++ registeredOwnerLeanSource ++ constWfLeanSource ++ wfBoundaryLeanSource ++ predicatePlainLeanSource ++ predicateNamedLeanSource ++ predicateIndexLeanSource ++ inlineLeanSource ++ registeredLeanSource ++ structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (opaqueProofWfPsSource ++ registeredOwnerPsSource ++ constWfPsSource ++ wfBoundaryPsSource ++ predicatePlainPsSource ++ predicateNamedPsSource ++ predicateIndexPsSource ++ inlinePsSource ++ registeredPsSource ++ structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (eliminationTargetLeanSource ++ opaqueProofWfLeanSource ++ registeredOwnerLeanSource ++ constWfLeanSource ++ wfBoundaryLeanSource ++ predicatePlainLeanSource ++ predicateNamedLeanSource ++ predicateIndexLeanSource ++ inlineLeanSource ++ registeredLeanSource ++ structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (eliminationTargetPsSource ++ opaqueProofWfPsSource ++ registeredOwnerPsSource ++ constWfPsSource ++ wfBoundaryPsSource ++ predicatePlainPsSource ++ predicateNamedPsSource ++ predicateIndexPsSource ++ inlinePsSource ++ registeredPsSource ++ structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },

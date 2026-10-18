@@ -1,0 +1,29 @@
+name: PSC0 Wasm semantic rejection parity preflight
+on:
+  push:
+    branches:
+      - feature/psc0-v72-wasm-specific-rejection-parity-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rejection-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: psc0/packages/pskernel-lean-wasm
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Verify shared native and wasm32 negative-case semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in psc0/packages/pskernel-lean-wasm/scripts/*.mjs; do
+            node --check "$script"
+          done
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-corpus.mjs
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-provider-transport.mjs
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-host.mjs

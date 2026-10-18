@@ -84,6 +84,8 @@ def check (root : System.FilePath) : IO Unit := do
     (← fromExcept (checkedDeclarations .proofScript richPs))
   ensure (!(psCompilerParsePscv0 "def bad : Nat := Nat.succ(3)\n" .lean).isOk)
     "native application lost Lean's whitespace requirement"
+  compareDefinitions (← fromExcept (checkedDeclarations .lean "section\nvariable (x y : Nat)\ndef selected := y\nend\n"))
+    (← fromExcept (checkedDeclarations .proofScript "section\nvariable (x y: Nat)\nconst selected: Nat := y\nend\n"))
   -- Real input routing, not a host oracle or source-printer round trip.
   for (kind, wrong) in [(PsCompilerSourceKind.lean, psSource),
       (PsCompilerSourceKind.proofScript, leanSource)] do
@@ -98,6 +100,8 @@ def check (root : System.FilePath) : IO Unit := do
       (PsCompilerSourceKind.lean, "def shadow {T : Type} {T value : T} := value\n"),
       (.proofScript, "def shadow {T : Type} {T value : T} := value\n"),
       (.lean, "def bad : (T : Type) -> T -> T -> T := fun (T : Type) (T value : T) => value\n"),
+      (.lean, "section\nvariable (Nat value : Nat)\nend\n"),
+      (.proofScript, "section\nvariable (Nat value: Nat)\nend\n"),
       (.proofScript, "const bad: forall (T: Type), T -> T -> T := fun (T: Type) (T value: T) => value\n")] do
     ensure (!(checkedDeclarations kind text).isOk)
       "binder annotation ignored native prefix shadowing"

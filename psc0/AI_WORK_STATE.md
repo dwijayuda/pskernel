@@ -1,3 +1,17 @@
+## Binder-view construction and complete prefix ownership — qualification pending
+
+43a91de8 / run39088233267 / job117559220561 failed production compilation:
+the new optional source-origin field is an explicit constructor argument in Lean.
+Both constructor sites now supply it. No semantic qualification ran on that SHA.
+
+Subsystem review also applies ordered annotation resolution to section-variable
+groups, not just declaration/lambda binders. Selected section captures retain only
+their selected origin names and IDs. Native tactic termination recognizes the
+lexer's explicit EOF token, and native command separation permits EOF without a
+final newline. These are shared syntax/scope invariants, not weakened assertions.
+The exact native/portable shadowing rejections and prior positive observations
+remain required. Main stays 037fda49; the new preparation child must qualify first.
+
 # PSC0 v7.2 AI work state — M3+B
 
 ## Native term and binder-prefix correction — qualification pending

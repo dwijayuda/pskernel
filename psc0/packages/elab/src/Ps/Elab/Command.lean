@@ -121,16 +121,19 @@ def psScopeOpen (state : PsCommandState) (name : PsSyntaxName) :
 def psScopeVariables (state : PsCommandState) (entries : List PsScopeBinder) :
     Except PsElabError PsCommandState := do
   let scope ← entries.foldlM (fun scope entry => do
-    let _ ← (psSyntaxBinderNames entry.fst).foldlM (fun seen name => do
+    let names := psSyntaxBinderNames entry.fst
+    (names.zipIdx).foldlM (fun scope (name, index) => do
       let key := psScopeKey name
       if name.segments.length != 1 || key == "_" then
         throw (.scope "section variable requires a name")
-      if psScopeHasVariable scope key || seen.contains key then
+      if psScopeHasVariable scope key then
         throw (.scope ("duplicate active section variable " ++ key))
-      pure (key :: seen)) ([] : List String)
-    let resolved ← psScopeTerm 4096 { environment := state.environment, scope } [] entry.snd
-    let entry := PsScopeVariable.mk (entry.fst, resolved.term) resolved.used
-    return { scope with variables := scope.variables ++ [entry] }) state.scope
+      -- Resolve and register each annotation in the preceding names' scope.
+      -- Delaying publication until the whole group hides native shadowing.
+      let resolved ← psScopeTerm 4096 { environment := state.environment, scope } [] entry.snd
+      let head := { entry.fst with name, moreNames := [], origin := some { names, index } }
+      let scopedEntry := PsScopeVariable.mk (head, resolved.term) resolved.used
+      pure { scope with variables := scope.variables ++ [scopedEntry] }) scope) state.scope
   let checked ← psElabTypedBinders psElabTerm (psElabContextEmpty state.environment (scope.levelNames.map psRootName))
     (scope.variables.map (·.binder))
   if checked.bindersRev.any (fun b =>

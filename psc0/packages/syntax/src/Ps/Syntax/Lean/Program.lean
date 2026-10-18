@@ -100,7 +100,8 @@ def psLeanProgramOrdinaryCommand (cursor : PsTokenCursor) (mutualMember : Bool :
   -- Native commands must end before the next line. The term reader retains
   -- exact token spans, including multiline bodies; no semicolon/braces adapter.
   if let some next := psTokenCursorPeek parsed.cursor then
-    if next.span.start.line <= (psProofScriptDeclarationStop parsed.value).line then
+    if !psTokenCursorDone parsed.cursor &&
+        next.span.start.line <= (psProofScriptDeclarationStop parsed.value).line then
       throw "PSCV0-LEAN-COMMAND-SEPARATOR: expected a new command line"
   return { value := command, cursor := parsed.cursor }
 

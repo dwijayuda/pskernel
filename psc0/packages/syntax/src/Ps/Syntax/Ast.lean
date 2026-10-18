@@ -29,7 +29,7 @@ structure PsSyntaxBinderHead where
 
 def PsSyntaxBinderHead.mk (name : PsSyntaxName) (kind : PsSyntaxBinderKind)
     (span : PsSourceSpan) : PsSyntaxBinderHead :=
-  .group name kind span []
+  .group name kind span [] none
 
 def psSyntaxBinderNames (head : PsSyntaxBinderHead) : List PsSyntaxName :=
   head.name :: head.moreNames
@@ -38,7 +38,11 @@ def psSyntaxBinderSelectNames (head : PsSyntaxBinderHead)
     (keep : PsSyntaxName → Bool) : Option PsSyntaxBinderHead :=
   match (psSyntaxBinderNames head).filter keep with
   | [] => none
-  | name :: moreNames => some { head with name, moreNames }
+  | name :: moreNames =>
+    let origin := head.origin.map fun origin => {
+      names := origin.names.filter keep
+      index := ((origin.names.take origin.index).filter keep).length }
+    some { head with name, moreNames, origin }
 
 def psSyntaxAnonymousInstanceBinder (head : PsSyntaxBinderHead) : Bool :=
   match head.kind, head.name.segments with

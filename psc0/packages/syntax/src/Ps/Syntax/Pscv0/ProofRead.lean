@@ -48,7 +48,7 @@ def psPscv0IntroNames (fuel line : Nat) (cursor : PsTokenCursor) :
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
     let some token := psTokenCursorPeek cursor | return { value := [], cursor }
-    if token.span.start.line != line || token.text == "}" then
+    if token.span.start.line != line || ["}", ";"].contains token.text then
       return { value := [], cursor }
     let name ← psTokenCursorExpectKind cursor .identifier
     let rest ← psPscv0IntroNames fuel line name.cursor
@@ -74,6 +74,7 @@ def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermRead
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    if nativeLayout && psTokenCursorDone cursor then return { value := [], cursor }
     let some token := psTokenCursorPeek cursor
       | if nativeLayout then return { value := [], cursor }
         else throw (.unexpectedEnd "tactic block")

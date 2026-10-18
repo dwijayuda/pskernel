@@ -56,7 +56,7 @@ def psPscv0BinderEntry (readType readValue : PsPscv0TermReader) (fuel : Nat)
     else pure type
   let head := PsSyntaxBinderHead.group
     (PsSyntaxName.mk [name.token.text] name.token.span) kind
-    (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value)) names.value
+    (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value)) names.value none
   return { value := (head, annotation.value), cursor := annotation.cursor }
 
 def psPscv0BinderEntries (readType readValue : PsPscv0TermReader)
@@ -136,8 +136,8 @@ def psPscv0AtLambdaArrow (cursor : PsTokenCursor) : Bool :=
   psTokenCursorAtText cursor "=>" || psTokenCursorAtText cursor "↦"
 
 -- Native term binders never acquire declaration commas or a hidden Unit.
--- A native group retains its names together; annotation scope ends before
--- all of them. Instance binders retain their separate one-name grammar.
+-- A native group retains its names together; shared elaboration visits each
+-- annotation at its ordered prefix. Instances keep their one-name grammar.
 def psPscv0TermBinders (read : PsPscv0TermReader) (quantified : Bool)
     (fuel : Nat) (cursor : PsTokenCursor)
     (acc : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :

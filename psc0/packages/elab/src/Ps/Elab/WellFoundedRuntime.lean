@@ -95,7 +95,17 @@ def psElabWellFoundedRuntimeBodies (environment : PsEnvironment)
       !psExprFVarsInContext psLocalEmpty type || !psExprFVarsInContext psLocalEmpty value then
     throw (psElabWellFoundedRuntimeError "auxiliary is not closed")
   let fixedCount := psElabWellFoundedRawArity value
-  let fixed ← psElabPreDefinitionOpen fixedCount (psElabContextEmpty environment levels) type value
+  -- Each original public header reopens from zero. The common fixed scope
+  -- must be disjoint from all of them: local substitution is ordered, so
+  -- overlapping source/target IDs could compose a permutation accidentally.
+  -- This is the same freshness invariant as RecursionOpenFixedScope.
+  let arities ← publicNames.mapM fun name =>
+    match psEnvironmentFind environment name with
+    | some (.definitionDecl _ _ _ body) => pure (psElabWellFoundedRawArity body)
+    | _ => throw (psElabWellFoundedRuntimeError "missing original public header")
+  let initial := { psElabContextEmpty environment levels with
+    localContext := { psLocalEmpty with nextId := arities.foldl max 0 } }
+  let fixed ← psElabPreDefinitionOpen fixedCount initial type value
   let parameter ← (psInferEnsureForall environment psMetaEmpty fixed.context.localContext
     fixed.type).mapError PsElabError.infer
   let probe := psLocalPushBinding fixed.context.localContext parameter.name parameter.domain .explicit

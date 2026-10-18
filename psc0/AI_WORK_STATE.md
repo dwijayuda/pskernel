@@ -128,3 +128,11 @@ mutual WF dispatch and strict PSum selection remain disabled; this is not backen
 execution evidence. Next inspect preparation CI, then activate both source kinds
 and qualify the existing backend lanes. Current main is6cdb9a6e; latest fully
 qualified five-gate checkpoint remains5785ada4. See runtime design note.
+
+Candidate3e226c69 built successfully; preparation39095552319 failed its new
+runtime packing check with expected-type failure. Root cause was overlapping
+common/original header local IDs during ordered substitution. The current child
+uses disjoint fresh fixed IDs above all original headers; validation pending.
+All other retained preparation checks passed. PSum candidate digests are now
+measured independently from a frozen pre-mutual boundary; selected Standard is
+unchanged. Source activation drafts are not published yet.

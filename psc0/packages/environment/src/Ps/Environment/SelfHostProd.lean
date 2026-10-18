@@ -151,8 +151,12 @@ def psSelfHostProdPreClassicalPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPrePartialFixpointPreludeEnvironment : PsEnvironment :=
   psStandardClassicalExtend psSelfHostProdPreClassicalPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen input for reviewed mutual WF component-domain selection.
+def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardPartialFixpointExtend psSelfHostProdPrePartialFixpointPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPreMutualWellFoundedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

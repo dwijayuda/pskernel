@@ -85,3 +85,15 @@ headers, complete component coverage, prepared helper restoration and same-typed
 forged private bodies; all original and prepared bodies go through the official
 kernel. This candidate does not activate source dispatch or select PSum, and
 runtime backend execution is still pending. No test budget or foundation changes.
+
+Fresh-scope review after candidate3e226c69 (preparation39095552319):
+the new runtime recovery opened a common fixed context at local zero, overlapping
+original member header IDs. Ordered local substitution then composed reordered
+parameters accidentally (e.g. a type became a value), correctly rejected by type
+inference. Source construction already used fresh disjoint IDs. Runtime recovery
+now allocates its common fixed scope above every actual original raw header.
+This preserves the existing ordered substitution contract and follows the same
+RecursionOpenFixedScope invariant; do not globally change substitution semantics.
+The existing three-member dependent/reordered fixture covers this family.
+The PSum exporter now measures the exact extended candidate against a frozen
+pre-mutual boundary, without changing selected manifests or selecting the asset.

@@ -132,7 +132,7 @@ def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
 
 -- Frozen F4 input, prior to native display and opaque cross-width selection.
 def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
-  psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
+  psStandardScientificExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
 
 -- Frozen logical boundary for explicit target-word profile authoring.
 def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=
@@ -164,9 +164,19 @@ def psSelfHostProdPreRecursorSurfacePreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
   psSelfHostProdPreRecursorSurfacePreludeEnvironment
 
+-- Structural mutual recursion bundles retained results in the checked
+-- Sort-polymorphic product. Logical inclusion alone does not register its
+-- runtime layout. Reuse only its existing data declarations so constructors,
+-- recursors and projections take the ordinary shared structure-lowering path.
+-- Do not replace the checked declaration or change any frozen replay boundary.
+def psSelfHostPProdRuntimeDataDeclarations : List PsDeclaration :=
+  ["PProd", "PProd.mk", "PProd.rec"].filterMap
+    (fun name => psEnvironmentFind psSelfHostProdPreludeEnvironment (psDecisionName name))
+
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  let prodDeclarations := psStandardProductDataDeclarations
+  let prodDeclarations := psStandardProductDataDeclarations ++
+    psSelfHostPProdRuntimeDataDeclarations
   -- Preserve dependency-first order for eager nullary runtime values.
   -- The checked ByteArray.empty value must initialize before the checked
   -- Inhabited ByteArray dictionary captures it in the shared executable IR.

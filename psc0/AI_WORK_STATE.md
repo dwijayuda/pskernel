@@ -112,3 +112,9 @@ original source arity or flatten a returned function into the header.
 Pinned WF/{Main,PackMutual,Rel,Fix,Eqns,Unfold}, Basic, ArgsPacker and fixedParams
 tests are the reference; notices retained. See the runtime design note and
 existing exact-component receipt for the independent equation/runtime boundaries.
+
+Activation preparation began at c15c2bc054555ea0a301f7eba6a7ec937f6a3623
+(run39096826484). The child also updates both adversarial singleton producer
+fixtures to the shared component result interface; their exact forged-source
+and returned-function rejection assertions are unchanged. Inspect the newest
+preparation SHA before promotion; no source/backend qualification is claimed.

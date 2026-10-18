@@ -256,31 +256,35 @@ private def checkAccepted (prepared : Prepared) (compiled : PsElabModuleWithOrig
 -- A completely checked constant implementation and its true equation are
 -- insufficient when they describe a different retained recursive source body.
 private def wrongWellFounded : PsElabPreDefinitionWellFoundedConsumer :=
-  fun environment levels member => do
+  fun environment levels members => do
+    let [member] := members
+      | throw (.data "singleton forged-source fixture requires one original owner")
     let value := PsExpr.lam (psRootName "n") (.constE psNatName []) (.lit (.natural 0)) .explicit
     let result ← psElabPreDefinitionNonrecursive environment levels { member with value }
     let [declaration, equation] := result.batch.declarations
       | throw (.data "malformed checked constant fixture")
-    return {
+    return { results := [{
       declaration, equation
       metaContext := (psElabContextEmpty environment levels).metaContext
-      sourceInfo := member.sourceInfo }
+      sourceInfo := member.sourceInfo }] }
 
 -- The result lambda remains outside the one-argument source header. Its true
 -- zero-body equation must still fail when case transport locates the retained
 -- source match under that lambda and checks the complete function equality.
 private def wrongFunctionWellFounded : PsElabPreDefinitionWellFoundedConsumer :=
-  fun environment levels member => do
+  fun environment levels members => do
+    let [member] := members
+      | throw (.data "singleton forged-source fixture requires one original owner")
     let nat := PsExpr.constE psNatName []
     let value := PsExpr.lam (psRootName "n") nat
       (.lam (psRootName "seed") nat (.lit (.natural 0)) .explicit) .explicit
     let result ← psElabPreDefinitionNonrecursive environment levels { member with value }
     let [declaration, equation] := result.batch.declarations
       | throw (.data "malformed checked constant-function fixture")
-    return {
+    return { results := [{
       declaration, equation
       metaContext := (psElabContextEmpty environment levels).metaContext
-      sourceInfo := member.sourceInfo }
+      sourceInfo := member.sourceInfo }] }
 
 private def checkWellFoundedIdentity : IO Unit := do
   let prepared ← prepare

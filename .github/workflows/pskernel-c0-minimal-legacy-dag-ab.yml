@@ -6,6 +6,9 @@ on:
       - '.github/workflows/pskernel-c0-minimal-legacy-dag-ab.yml'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean'
+      - 'psc0/packages/pskernel-c0/test/C0SemanticCacheEligibilityRegression.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean'
       - 'psc0/packages/pskernel-c0/test/C0LegacySemanticDAGRegression.lean'
   workflow_dispatch:
@@ -85,6 +88,8 @@ jobs:
           # dependency graph with an unresolved symbol.
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           git show FETCH_HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean \
@@ -120,6 +125,8 @@ jobs:
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean \
+            > psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean \
             > psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean
           git show HEAD:psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean \
@@ -131,7 +138,8 @@ jobs:
           (cd psc0/packages/pskernel-c0 && \
             lake build c0OfficialReplay && \
             lake env lean --run test/C0DeepPtrExprEqRegression.lean && \
-            lake env lean --run test/C0LegacySemanticDAGRegression.lean)
+            lake env lean --run test/C0LegacySemanticDAGRegression.lean && \
+            lake env lean --run test/C0SemanticCacheEligibilityRegression.lean)
           set +e
           (
             cd psc0/packages/pskernel-c0

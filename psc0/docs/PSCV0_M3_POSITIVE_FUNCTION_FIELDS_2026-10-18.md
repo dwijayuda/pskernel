@@ -62,3 +62,12 @@ Emission is not execution evidence. Existing invalid-field/owner/family/index,
 Acc predicate, nondecreasing-call and forged-runtime-body controls remain.
 
 No local builds, pskernel-core, self-hosting, C5 or expanded time budgets.
+
+## Native oracle boundary
+
+Lean4.35.0 rejects native code generation for the explicit ParityBranch.rec
+application. The native fixture retains it as a noncomputable logical definition
+and proves branchByRec_agrees against an executable structural reference. The
+PSC0 source fixtures still contain the explicit primitive recursor and still
+must emit and execute it on all targets. Native kernel agreement, the executable
+reference and backend execution remain distinct evidence layers.

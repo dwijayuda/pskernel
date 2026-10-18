@@ -188,3 +188,10 @@ Preparation 28e6b4fd / run39100352434 stopped at compilation: StructuralField
 needed the existing Refinement dependency that owns psExprAppView. The direct
 import is corrected here; no semantic check or acceptance criterion changed.
 Full positive-field qualification remains pending.
+
+Preparation5f494f22 / run39100503392 compiled the compiler changes but the native
+reference executable refused ParityBranch.rec code generation. Keep the native
+explicit recursor as a noncomputable checked definition; use a structural native
+runtime oracle with a kernel-checked equality theorem. PSC0 still receives and
+must execute the explicit recursor in both inputs. This is a reference-oracle
+separation, not a dropped positive requirement. Preparation is still pending.

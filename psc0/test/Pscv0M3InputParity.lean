@@ -124,7 +124,7 @@ def branchSecond (tree : ParityBranch) (bias : Nat) : Nat :=
   | ParityBranch.leaf value => bias + value
   | ParityBranch.node children => branchFirst (bias + 2) (children 4 (Eq.refl 4))
 end
-def branchByRec (tree : ParityBranch) : Nat :=
+noncomputable def branchByRec (tree : ParityBranch) : Nat :=
   ParityBranch.rec (motive := fun (_ : ParityBranch) => Nat)
     (fun (value : Nat) => value)
     (fun (children : forall (i : Nat), i = i → ParityBranch) (ih : forall (i : Nat), i = i → Nat) =>
@@ -135,11 +135,23 @@ theorem branchRefl (tree : ParityBranch) : branchFold tree = branchFold tree :=
     (fun (children : forall (i : Nat), i = i → ParityBranch)
       (ih : forall (i : Nat) (h : i = i), branchFold (children i h) = branchFold (children i h)) =>
       congrArg Nat.succ (ih 2 (Eq.refl 2))) tree
+-- Lean's code generator does not execute this primitive recursor. Retain its
+-- checked definition and prove the separately executable structural oracle.
+def branchByRecExec (tree : ParityBranch) : Nat :=
+  match tree with
+  | ParityBranch.leaf value => value
+  | ParityBranch.node children => Nat.succ (branchByRecExec (children 5 (Eq.refl 5)))
+
+theorem branchByRec_agrees (tree : ParityBranch) : branchByRec tree = branchByRecExec tree := by
+  induction tree with
+  | leaf value => rfl
+  | node children ih => exact congrArg Nat.succ (ih 5 (Eq.refl 5))
+
 def m3fields (flag : Bool) : UInt64 :=
   let seed := if flag then 7 else 11
   let tree := ParityBranch.node (fun (i : Nat) (h : i = i) =>
     ParityBranch.node (fun (j : Nat) (g : j = j) => ParityBranch.leaf (seed + i + j)))
-  UInt64.ofNat (branchFold tree + 100 * branchFirst 3 tree + 10000 * branchByRec tree)
+  UInt64.ofNat (branchFold tree + 100 * branchFirst 3 tree + 10000 * branchByRecExec tree)
 
 example : m3fields true = 192013 := rfl
 example : m3fields false = 232417 := rfl

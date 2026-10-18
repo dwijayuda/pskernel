@@ -1,4 +1,6 @@
 import Ps.KernelCore.Checker.DefEq.BinderSpines
+import Ps.KernelCore.Core.ExprDecidableEq
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Lean 4.34 quick definitional-equality rules.
@@ -130,6 +132,32 @@ def psKernelDefEqQuickAfterCommon
       Except.ok
         (Prod.mk Option.none state)
 
+/-- Source-exact success-pair fast miss: checking the pair set first
+    avoids traversing a large shared term for FVars when no successful
+    DefEq result has been cached. Only on a hit, check the source-certified
+    DAG-aware FVar predicates on BOTH expressions. This preserves all
+    original free-variable and local-context restrictions; neither a
+    hash nor a pointer grants a DefEq result. -/
+def psKernelC0QuickPairSuccessGuard
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : Bool :=
+  psKernelExprPairSetContains state.success left right &&
+    (!psKernelC0AdaptiveHasFVar left &&
+      !psKernelC0AdaptiveHasFVar right)
+
+/-- All-input equivalence including cached-hit, miss and FVar scopes.
+    This rewrites only a Boolean conjunction, never source DefEq/fuel. -/
+theorem psKernelC0QuickPairSuccessGuard_source
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) :
+    psKernelC0QuickPairSuccessGuard state left right =
+      (psKernelSemanticPairCacheEligible left right &&
+        psKernelExprPairSetContains state.success left right) := by
+  simp only [psKernelC0QuickPairSuccessGuard,
+    psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
+    psKernelC0AdaptiveHasFVar_source]
+  exact Bool.and_comm _ _
+
 /-- General-purpose quick path retains its original guard semantics. -/
 def psKernelDefEqQuick
     (defeq :
@@ -147,11 +175,10 @@ def psKernelDefEqQuick
       (Prod
         (Option Bool)
         PsKernelCheckerState) :=
-  if psKernelExprEq left right then
+  if psKernelC0MemoizedExprEq left right then
     Except.ok
       (Prod.mk (Option.some true) state)
-  else if psKernelSemanticPairCacheEligible left right &&
-      psKernelExprPairSetContains state.success left right then
+  else if psKernelC0QuickPairSuccessGuard state left right then
     Except.ok
       (Prod.mk (Option.some true) state)
   else

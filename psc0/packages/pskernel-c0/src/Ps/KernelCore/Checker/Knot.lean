@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Ops
+import Ps.KernelCore.Core.ExprDecidableEq
 import Ps.KernelCore.Checker.DefEq.FullShape
 
 /-
@@ -373,7 +374,7 @@ def psKernelDefEqCheckedTheoremProofPairWith
                   context state1 right with
               | .error _ => none
               | .ok (rightType, state2) =>
-                  if psKernelExprEq leftType rightType then
+                  if psKernelC0MemoizedExprEq leftType rightType then
                     match psKernelDefEqIsPropWith inferType whnf
                         context state2 leftType with
                     | .ok (true, state3) => some state3
@@ -435,7 +436,7 @@ def psKernelDefEqCheckedProofCongruenceWithFuel
       let smaller :=
         psKernelDefEqCheckedProofCongruenceWithFuel remaining fuel defeq
       fun context state left right =>
-        if psKernelExprEq left right then some state
+        if psKernelC0MemoizedExprEq left right then some state
         else
           match psKernelCheckerContextEnterRecDepth context with
           | .error _ => none
@@ -452,14 +453,14 @@ def psKernelDefEqCheckedProofCongruenceWithFuel
                           smaller nextContext state1 leftArg rightArg
               | .lam name domain leftBody info,
                 .lam _ otherDomain rightBody _ =>
-                  if psKernelExprEq domain otherDomain then
+                  if psKernelC0MemoizedExprEq domain otherDomain then
                     psKernelDefEqProofCongruenceOpenBinderWith
                       smaller fuel defeq nextContext state name domain
                       leftBody rightBody info
                   else none
               | .forallE name domain leftBody info,
                 .forallE _ otherDomain rightBody _ =>
-                  if psKernelExprEq domain otherDomain then
+                  if psKernelC0MemoizedExprEq domain otherDomain then
                     psKernelDefEqProofCongruenceOpenBinderWith
                       smaller fuel defeq nextContext state name domain
                       leftBody rightBody info
@@ -509,7 +510,7 @@ def psKernelDefEqTryLocalZetaRecovery
               budget context leftNormal
             let rhs := psKernelDefEqExpandLocalLetsWithFuel
               budget context rightNormal
-            if psKernelExprEq lhs rhs then some state2
+            if psKernelC0MemoizedExprEq lhs rhs then some state2
             else
               psKernelDefEqCheckedProofCongruenceWithFuel
                 (Nat.min fuel 192) fuel sourceDefEq context state2 lhs rhs
@@ -534,7 +535,10 @@ def psKernelDefEqSourceStepWithFuel
   | Except.error error =>
       Except.error error
   | Except.ok nextContext =>
-      if psKernelExprEq left right then
+      -- Complete all-input source equality is proved in Core.ExprDecidableEq;
+      -- use it at the ACTUAL hot DefEq root rather than relying on a
+      -- compiler csimp declaration that is imported after Core.Expr.
+      if psKernelC0MemoizedExprEq left right then
         Except.ok
           (psKernelDefEqFinish
             state
@@ -753,11 +757,11 @@ def psKernelDefEqSourceStepWithFuel
                                                                             Prod.fst rightFullResult;
                                                                           let changed :=
                                                                             if
-                                                                                psKernelExprEq
+                                                                                psKernelC0MemoizedExprEq
                                                                                   leftFull
                                                                                   leftDelta then
                                                                               if
-                                                                                  psKernelExprEq
+                                                                                  psKernelC0MemoizedExprEq
                                                                                     rightFull
                                                                                     rightDelta then
                                                                                 false

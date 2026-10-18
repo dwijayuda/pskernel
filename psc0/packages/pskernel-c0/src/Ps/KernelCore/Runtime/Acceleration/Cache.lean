@@ -408,7 +408,7 @@ private def psKernelC0HashMemoFind
     List PsKernelC0HashMemoEntry → Option (PsKernelC0ExactHash expr)
   | [] => none
   | entry :: rest =>
-      match withPtrEqDecEq expr entry.expr (fun _ => inferInstance) with
+      match psKernelC0ExactPairEq expr entry.expr with
       | .isTrue h =>
           some {
             value := entry.checkedHash.value

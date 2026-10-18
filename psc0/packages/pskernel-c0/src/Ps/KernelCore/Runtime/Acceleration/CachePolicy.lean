@@ -69,7 +69,7 @@ theorem psKernelC0FastInferCacheEligible_source
 /-- Retain the source checker and all existing kernel proofs verbatim.
 The verified native compiler route only changes a pure selection algorithm;
 it never inserts or reads unverified type, equality or admission facts. -/
-@[csimp] theorem psKernelInferCacheEligible_csimp :
+theorem psKernelInferCacheEligible_csimp :
     @psKernelInferCacheEligible = @psKernelC0FastInferCacheEligible := by
   funext inferOnly expr
   exact (psKernelC0FastInferCacheEligible_source inferOnly expr).symm
@@ -394,3 +394,53 @@ theorem psKernelC0CertifiedSemanticPairEligible_source
       @psKernelC0CertifiedSemanticPairEligible := by
   funext left right
   exact (psKernelC0CertifiedSemanticPairEligible_source left right).symm
+
+/-!
+**Probed native checked-inference eligibility hot path (Lean 4.35).**
+
+The exact shared-subterm profile of qualified PR #137 (run 39083779249)
+still reached psKernelExprHasFVar recursively from
+psKernelC0FastInferCacheEligible even after the WHNF and pair-guard fixes.
+Compiler rewriting the inner predicate alone does not guarantee the
+previously-compiled whole infer-eligibility service uses the DAG-aware
+algorithm. Keep the historical pure source definitions and their proofs;
+certify and compile-substitute the complete *outer* infer cache policy.
+
+In particular checked applications/lambdas/Pis are not cached, and neither
+a pointer nor a source hash can authorize checked inference or publication.
+-/
+
+/-- Source-exact native eligibility on *all* terms and both infer modes.
+    No checked term or free-variable local-context guard is newly cached. -/
+def psKernelC0DAGInferCacheEligible
+    (inferOnly : Bool)
+    (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | .lit _ => false
+  | .app _ _ | .lam _ _ _ _ | .forallE _ _ _ _ =>
+      inferOnly && psKernelC0AdaptiveSemanticCacheEligible expr
+  | _ => psKernelC0AdaptiveSemanticCacheEligible expr
+
+/-- Complete source-equivalence, including FVar-containing syntax,
+    infer-only versus checked mode, and non-application constructors. -/
+theorem psKernelC0DAGInferCacheEligible_source
+    (inferOnly : Bool) (expr : PsKernelExpr) :
+    psKernelC0DAGInferCacheEligible inferOnly expr =
+      psKernelInferCacheEligible inferOnly expr := by
+  calc
+    psKernelC0DAGInferCacheEligible inferOnly expr =
+        psKernelC0FastInferCacheEligible inferOnly expr := by
+          cases expr <;>
+            simp [psKernelC0DAGInferCacheEligible,
+              psKernelC0FastInferCacheEligible,
+              psKernelC0AdaptiveSemanticCacheEligible_source]
+    _ = psKernelInferCacheEligible inferOnly expr :=
+      psKernelC0FastInferCacheEligible_source inferOnly expr
+
+/-- Compiler-only exact replacement of the complete checked/infer cache
+    selector. Replaces the earlier compiler-only fast source selector,
+    which remains available with its independent theorem above. -/
+@[csimp] theorem psKernelInferCacheEligible_compiler_dag :
+    @psKernelInferCacheEligible = @psKernelC0DAGInferCacheEligible := by
+  funext inferOnly expr
+  exact (psKernelC0DAGInferCacheEligible_source inferOnly expr).symm

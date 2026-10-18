@@ -16,19 +16,19 @@ def profile : String := "pscv0-v7.2"
 def provider : String := "lean4-cpp"
 
 def identity : String :=
-  "\"protocol\":" ++ PsKernelLean.psJsonQuote protocol ++
-  ",\"provider\":" ++ PsKernelLean.psJsonQuote provider ++
-  ",\"leanVersion\":" ++ PsKernelLean.psJsonQuote version ++
-  ",\"leanCommit\":" ++ PsKernelLean.psJsonQuote commit ++
-  ",\"profile\":" ++ PsKernelLean.psJsonQuote profile
+  "\"protocol\":" ++ psJsonQuote protocol ++
+  ",\"provider\":" ++ psJsonQuote provider ++
+  ",\"leanVersion\":" ++ psJsonQuote version ++
+  ",\"leanCommit\":" ++ psJsonQuote commit ++
+  ",\"profile\":" ++ psJsonQuote profile
 
 def pinned : Bool :=
   Lean.versionString == version && Lean.githash == commit
 
 def rejected (kind message : String) (index : Option Nat := none) : String :=
   "{" ++ identity ++
-  ",\"accepted\":false,\"errorKind\":" ++ PsKernelLean.psJsonQuote kind ++
-  ",\"message\":" ++ PsKernelLean.psJsonQuote message ++
+  ",\"accepted\":false,\"errorKind\":" ++ psJsonQuote kind ++
+  ",\"message\":" ++ psJsonQuote message ++
   (match index with
    | none => ""
    | some value => ",\"declarationIndex\":" ++ toString value) ++ "}"

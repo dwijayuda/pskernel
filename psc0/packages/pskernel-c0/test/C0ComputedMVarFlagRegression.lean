@@ -53,6 +53,6 @@ def main : IO Unit := do
   let doneAt ← IO.monoNanosNow
   if (psKernelCheckNoMVarNoFVar opened).isOk then
     throw (IO.userError "declaration preflight admitted an MVar-positive DAG")
-  if (psKernelCheckNoMVarNoFVar closed).isError then
+  if !(psKernelCheckNoMVarNoFVar closed).isOk then
     throw (IO.userError "closed shared DAG was incorrectly rejected")
   IO.println s!"C0_NODE_MVAR_FIELD proof=all_inputs checked_cases=16 large_DAG_depth=4000 positive_and_negative=correct native_field_query_ms={(doneAt-start)/1000000} error_order_preserved=true no_axioms_or_admission_shortcuts=true"

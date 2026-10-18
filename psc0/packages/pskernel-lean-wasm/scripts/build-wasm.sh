@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# The repository root may pin an older Lean toolchain. Never inherit it for
+# the 4.35.0 cross-build, even when called from the checkout root.
+export LEAN_TOOLCHAIN='leanprover/lean4:v4.35.0'
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 package_root="$(cd "$script_dir/.." && pwd)"
 psc0="$(cd "$package_root/../.." && pwd)"

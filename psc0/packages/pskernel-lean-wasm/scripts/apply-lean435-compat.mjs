@@ -71,4 +71,14 @@ await modify('src/library/module.cpp',[
   ['region free ABI','extern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region, object *) {',
    '#if defined(LEAN_EMSCRIPTEN)\nextern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region) {\n#else\nextern "C" LEAN_EXPORT obj_res lean_compacted_region_free(obj_arg region, object *) {\n#endif'],
 ]);
+// Lean 4.35.0 has one exceptional executable link recipe that omits
+// LEANC_OPTS. A native i386 stage0 needs -m32 here as well.
+for(const relative of ['src/stdlib.make.in','stage0/src/stdlib.make.in']){
+  await modify(relative,[[
+    'native 32-bit leanir link flag propagation',
+    "\"${CMAKE_BINARY_DIR}/leanc.sh\" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${CMAKE_DYN_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} -o $@",
+    "\"${CMAKE_BINARY_DIR}/leanc.sh\" $< ${CMAKE_EXE_LINKER_FLAGS_MAKE} ${CMAKE_DYN_EXE_LINKER_FLAGS_MAKE} ${LEAN_EXE_LINKER_FLAGS} ${LEANC_OPTS} -o $@",
+  ]]);
+}
+
 console.log('PSC0_LEAN435_EMSCRIPTEN_COMPAT: exact source rewrites applied');

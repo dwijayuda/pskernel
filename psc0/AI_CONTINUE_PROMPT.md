@@ -41,11 +41,15 @@ job117549579617 completed SUCCESS for fixed scopes and shared source preparation
 These later constructions are not in main037's accepted compiler/test identity.
 
 Retained-call candidatea5287a1b50110d348303e67255ab888711931ff7,
-run39085518962/job117551185828, is still running but its existing packing step
-failed. The remaining retained checks continue. Full failure diagnostics have
-not yet been retrieved; do not promote or claim this candidate qualified.
-Diagnose the concrete cause before any correction; preserve the original
-acceptance assertions.
+run39085518962/job117551185828, completed FAILURE only in the packing build.
+The new native reference theorem used decide on an opaque well-founded mutual
+definition; reduction stopped at (callFirst 7 6 2).beq 7. Production and all other
+retained foundation/WF/P1/noncomputable checks passed. The portable new probe
+did not execute. The current child proves the identical expected equality using
+simp with Lean's checked generated unfolding equations. No compiler algorithm,
+expected result, acceptance condition, assumption or budget changes. Qualification
+of this correction and the new portable probe remains pending; do not promote
+until the entire preparation passes.
 
 Continue complete mutual-WF source/proof/runtime integration using the shared
 PSum/PSigma and fixed-scope owners. Preserve original capture identities, actual

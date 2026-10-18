@@ -36,3 +36,14 @@ unowned-Core refusal. Independent pinned native definitions cover the same sourc
 shape. Existing kernel equations, graph differential and all acceptance remain.
 These source-preparation observations do not claim recursive source admission or
 backend qualification, and the .lean oracle is not PSC0 .lean-input parity.
+
+## First qualification and native proof-method correction
+
+Candidatea5287a1/run39085518962/job117551185828 completed FAILURE only at
+building the new native reference theorem. Native decide cannot definitionally
+unfold the well-founded mutual fixedpoint; it stopped at (callFirst7 6 2).beq7.
+The child uses simp with the three actual generated unfolding equations to prove
+the same equality callFirst7 6 2=7. This is a proof-method correction in the
+independent oracle, not a changed compiler rule or weaker expected result.
+All production and other retained steps passed. The portable new observation
+probe still awaits execution; candidate publication is not qualification.

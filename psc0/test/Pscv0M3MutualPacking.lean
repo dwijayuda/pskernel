@@ -43,7 +43,9 @@ def callThird {C : Type} (n : Nat) (c : C) : Nat → C :=
     | m + 1 => callFirst c m k
 termination_by n
 end
-example : callFirst 7 6 2 = 7 := by decide
+-- Native well-founded equations are propositional; decide cannot unfold
+-- the opaque mutual fixedpoint. Use its checked generated equations.
+example : callFirst 7 6 2 = 7 := by simp [callFirst, callSecond, callThird]
 
 end M3MutualPackingOracle
 

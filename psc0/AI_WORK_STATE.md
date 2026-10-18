@@ -1,5 +1,16 @@
 # PSC0 v7.2 work state — M3+B
 
+## WF metadata record layout — qualification pending
+
+Preparation [39160080905](https://github.com/dwijayuda/pskernel/actions/runs/39160080905)
+at a9c795d47cae498c6763c6310afa45078fd3866e stopped in both build jobs on
+the callback-template record layout at WellFounded.lean:670. This candidate
+corrects that layout. The native controls and source/runtime lanes have not
+yet executed at this head. All thirteen runtime observations, paired refusal
+owners, metadata controls and fixed resource limits remain mandatory. Main
+and the last fully qualified preparation are unchanged; all six exits remain
+OPEN. Indexed deriving and function-valued WF extensions are staged separately.
+
 ## Generic WF rows and corrected native controls — qualification pending
 
 Preparation [39153367900](https://github.com/dwijayuda/pskernel/actions/runs/39153367900)

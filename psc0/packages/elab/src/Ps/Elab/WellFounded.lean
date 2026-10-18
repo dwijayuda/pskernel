@@ -667,8 +667,10 @@ def psElabWellFoundedCorePrepareSource (context : PsElabContext)
       body.context.localContext call.callback).mapError PsElabError.infer
     let effectiveFlags := (raw.zip flags).map fun (argument, allowed) =>
       allowed && (match argument with | .fvar _ => true | _ => false)
-    return ({ majors := majorArguments, flags := effectiveFlags,
-      type := psMetaInstantiate body.context.metaContext type,
+    return ({
+      majors := majorArguments
+      flags := effectiveFlags
+      type := psMetaInstantiate body.context.metaContext type
       unrefinedType := psMetaInstantiate body.context.metaContext unrefinedType } :
       PsElabWellFoundedCoreRowCallback)
   let discrIds := replacements.filterMap fun entry =>

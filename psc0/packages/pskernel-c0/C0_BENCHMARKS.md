@@ -1,5 +1,21 @@
 # PSKernel-C0 experimental performance measurements
 
+## 18 October 2026 — PR #140 native hash bucket pointer hint, whole Array accepted
+
+**Source and policy:** PR #140 from exact PR138 `2974bd9f`, Lean 4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, untouched kernel source fuel 4096 and approved axiom policy. Experimental *native-only, non-authoritative* one-level child-pointer bucket hint replaces repeated four-layer shape indexing in the exact source hash memo; original source implementation remains portable, and every candidate cache hit still checks `Decidable (sourceExpr = entryExpr)` before transporting its dependent hash certificate. No input bytes are changed.
+
+| Real source-generated whole-checker test | Original PR #138 | PR #140 candidate | Verdict |
+| --- | ---: | ---: | --- |
+| `shared-subterm` n24 [39089314051](https://github.com/dwijayuda/pskernel/actions/runs/39089314051) | 0.12 s | 0.11 s | Both C0 accepted |
+| `shared-subterm` n32 same workflow | 0.23 s | 0.20 s | Both C0 accepted |
+| `Array.extract_append_extract` 152,660 records [39089314069](https://github.com/dwijayuda/pskernel/actions/runs/39089314069) | **518.28 s** | **449.95 s** | Both C0 accepted |
+| Same Array process peak RSS | 236,192 KiB | 236,320 KiB | No meaningful memory improvement |
+| Real private Array proof record 130,834 | 308,683 ms | 271,546 ms | Both declaration proof steps completed |
+
+Array NDJSON exact SHA256 `ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a`, same official Lean checker accepted, same runner and no host timeout for either variant. **13.2% lower full Array wall time in one paired run**; this is a reproducible positive candidate, not a proven population average or evidence of whole-Init/Mathlib performance. Historical [PR #139](https://github.com/dwijayuda/pskernel/pull/139) equality rollback failed to accept this Array closure within 660s, so simply restoring old source semantic equality did not solve the whole proof.
+
+**Subsequent gates:** 193-case adapted Arena, native adversarial, strict exact 499,130-record dependency, then full 6,452,982-record Init/Std/Mathlib. CI success alone is never a checked theorem verdict.
+
 ## 18 October 2026 — source-exact cache policy causal experiments (Lean 4.35.0)
 
 Same runner **genuine source-exported `shared-subterm`** theorem with Lean 4.35 official oracle = accepted, exact source fuel 4096, source-compiled Lean proofs and exact checker's accepted verdict; timings measure the *whole C0 replay process*, not isolated cache helpers.

@@ -400,6 +400,55 @@ structure PsKernelC0HashMemoEntry where
 abbrev PsKernelC0ExactHashMemo :=
   PsKernelC0HashTrie PsKernelC0HashMemoEntry
 
+/-!
+A cheaper *native-only index hint*, NEVER a kernel judgment. Deep four-layer
+shape hashing shows substantial work in the genuine 4.35 Array proof profile.
+The source selector above is retained as the portable, source-defined fallback.
+
+Dependent pattern matching reconstructs a root constructor at hash-memo store
+sites. Its *child objects* are still the original immutable subexpressions,
+so index them rather than the freshly built root pointer. This makes bucket
+selection stable between a lookup and a store for the same shared children,
+without requiring a canonical global expression table. Equal child pointer
+hints can collide and distinct allocations can miss, but EVERY hit still
+passes the existing exact source expression equality/proof transport.
+
+No returned hash, cached type, WHNF, DefEq, axiom or declaration can be
+authorized by this non-semantic, strictly operation-local index.
+-/
+private unsafe def psKernelC0HashMemoBucketNative
+    (expr : PsKernelExpr) : Nat :=
+  let childHint (child : PsKernelExpr) : Nat :=
+    (ptrAddrUnsafe child).toNat / 16
+  match expr with
+  | .app fn arg =>
+      psKernelCacheMix
+        (psKernelCacheMix 26 (childHint fn)) (childHint arg)
+  | .lam _ ty body _ =>
+      psKernelCacheMix
+        (psKernelCacheMix 27 (childHint ty)) (childHint body)
+  | .forallE _ ty body _ =>
+      psKernelCacheMix
+        (psKernelCacheMix 28 (childHint ty)) (childHint body)
+  | .letE _ ty value body nondep =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          (psKernelCacheMix
+            (psKernelCacheMix 29 (childHint ty))
+            (childHint value))
+          (childHint body))
+        (if nondep then 1 else 0)
+  | .mdata metadata body =>
+      psKernelCacheMix (psKernelCacheMix 31 metadata) (childHint body)
+  | .proj _ index body =>
+      psKernelCacheMix
+        (psKernelCacheMix 32 index) (childHint body)
+  | other => psKernelC0MemoShapeHash 4 other
+
+/-- Portable original selection. Native compiler uses only child pointer
+    addresses as temporary bucket hints; the proof-carrying memo still
+    establishes its exact source result for every expression. -/
+@[implemented_by psKernelC0HashMemoBucketNative]
 private def psKernelC0HashMemoBucket (expr : PsKernelExpr) : Nat :=
   psKernelC0MemoShapeHash 4 expr
 

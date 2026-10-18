@@ -10,6 +10,7 @@ on:
   pull_request:
     branches:
       - perf/pskernel-c0-v7-rust-20261012
+      - perf/pskernel-c0-infer-dag-eligibility-20261018
     paths:
       - '.github/workflows/pskernel-c0-arena-adversarial435.yml'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'

@@ -284,3 +284,37 @@ This is an implemented but unqualified adapter slice, not source mutual-WF
 completion. Main037fda49 stays unchanged. Finish preparation and exact-SHA five
 gate integration, including the repaired P1 Rust lane, before any completion
 claim. Native do and other selected grammar gaps require reconciliation.
+
+## Current state and evidence
+
+Main is now b95c629380ba03638a14c708c5c584ef1b8eaf16, promoted non-force from
+037fda49 only after complete preparation succeeded. All five integration gates
+are RUNNING, not accepted yet:
+Native39090324651; M339090324683; F139090324667; F239090324693; F339090324659.
+Do not supersede or cancel healthy runs. The last five-gate accepted ancestor
+remains037fda49; see docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md.
+
+Preparation b95c6293 / run39089622847 / job117564131092 is SUCCESS.
+Artifact12122063924, SHA256
+8924921c8e5c1c8df51be7e57424b2bc6bc8bdb44e89482c7ec7ddd56bac2ab7.
+The full log records PSCV0_M3_INPUT_PARITY PASS, retained-call analysis PASS,
+dependent component packing PASS, and all retained preparation steps successful.
+This covers exact definition/equation comparison, grouped binder shadow refusals,
+universe/named/operator/scientific terms, native proofs, data/classes/instances/
+deriving, both mixed-module directions, official kernel, five-target emission,
+and assurance/noncomputable refusals. Backend runtime observations are PENDING.
+Receipt: docs/PSCV0_M3_NATIVE_INPUT_B95C6293_2026-10-18.md.
+
+Preparation code child3b95a506a46c164a63d01017490fe0949d178908 /
+run39090023014 / job117565128449 is RUNNING. It adds native where helpers and
+explicit decreasing_by tactic syntax using shared recursion/proof owners.
+The same paired data export exercises a local well-founded identity helper.
+The current documentation-only descendant changes no compiler/test inputs;
+the qualification identity for this native-where code is3b95a506.
+Fresh refs and complete logs override these checkpoints.
+
+**Historical P1 Rust gap:** the previous focused workflow overwrote its P1
+harness before Cargo ran. Preparation includes the producer/run ordering fix;
+the new focused integration must confirm actual P1 Rust observations. Prior
+workflow success alone is not that evidence. Source mutual WF is still refused.
+M3+B and full selected native grammar parity remain OPEN.

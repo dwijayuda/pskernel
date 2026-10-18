@@ -1,43 +1,3 @@
-## Native where and explicit decrease proofs — qualification pending
-
-b8b9bea7/run39089323375/job117562902854 completed FAILURE only at the known
-definition-only fixture comparison; production and native data oracles compiled.
-b95c6293/run39089622847/job117564131092 is running with complete definition/
-equation comparison. Do not cancel it. The current child adds native where local
-definitions, per-helper suffixes and native decreasing_by tactic sequences using
-the existing shared scope/capture/recursion/proof/runtime owners. Native by terms
-and decrease proofs share one tactic-sequence reader.
-
-The same two-source data fixture now executes a local well-founded identity
-helper with explicit Nat.lt_succ_self evidence, retaining native6/9 outputs and
-the existing backend matrix. No added workflow or foundation assumption.
-Pinned Parser.Term/Extra, Elab.Binders/MutualDef/LetRec and termination_by_where
-were studied; upstream illustrative axioms were not imported. Nested local where
-and unselected structural/monotonicity forms remain refused.
-
-This is an implemented but unqualified adapter slice, not source mutual-WF
-completion. Main037fda49 stays unchanged. Finish preparation and exact-SHA five
-gate integration, including the repaired P1 Rust lane, before any completion
-claim. Native do and other selected grammar gaps require reconciliation.
-
-## Checked declaration-batch comparison — qualification pending
-
-af9a0e31/run39088772197/job117561623591 completed FAILURE only in the
-combined source/Where step: "parity fixture expected ordinary definitions".
-The native then boundary is corrected. PreDefinitionNonrecursive deliberately
-publishes both each definition and its checked eq_def theorem. The paired fixture
-now compares both matching kinds, all names, universe lists, alpha-equal types and
-actual value/proof bodies. It does not filter out equations or accept a kind/count
-mismatch. This repairs the fixture's incomplete model of the existing compiler
-batch contract, without weakening comparison or changing logical declarations.
-
-b8b9bea7/run39089323375/job117562902854 has built the new native data adapter and
-is running retained qualification; it still contains the older comparison and
-must finish normally. This child also preserves selected registrations in native
-mutual members, matching the shared attributed-command owner. No run canceled,
-foundation or budget changed. The child still needs full qualification before
-main promotion; M3+B and full native syntax parity are OPEN.
-
 # Continue PSC0 v7.2 — Complete M3+B
 
 Continue implementation autonomously using repository truth. First read
@@ -81,28 +41,37 @@ Prep cancel-in-progress:false; keep at most one active and one pending run.
 
 ## Current state and evidence
 
-Main remains037fda4914ba30b5b8f2074e82ffbf9b0efeef0c. Native39084512384,
-M339084512415, F139084512357, F239084512390 and F339084512422 all succeeded
-at that SHA. Receipt: docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md.
-**Qualification gap:** the old focused Rust step overwrote the P1 harness before
-executing Cargo. Historical job success does not qualify those P1 Rust observations.
-The preparation workflow code now executes each harness immediately after generation;
-exact-SHA runtime requalification is still required. No aggregate runtime count claimed.
+Main is now b95c629380ba03638a14c708c5c584ef1b8eaf16, promoted non-force from
+037fda49 only after complete preparation succeeded. All five integration gates
+are RUNNING, not accepted yet:
+Native39090324651; M339090324683; F139090324667; F239090324693; F339090324659.
+Do not supersede or cancel healthy runs. The last five-gate accepted ancestor
+remains037fda49; see docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md.
 
-Preparation8f0950c0c918f077ba8a952fb8bc413b519c39b9 /
-run39088579549 / job117560230257 completed FAILURE with exactly one failed step:
-the native input fixture parsed then as an argument and reported
-PSCV0-PARSE: then at9:79; got else. All other steps passed. The complete retained
-call-analysis probe executed successfully, including reordered dependent headers,
-actual branch/let scopes, full application spines, returned-function arity and
-conservative underapplication. PSigma/PSum dependent construction and exact projection
-equations passed. These are bounded construction results; source mutual WF stays open.
+Preparation b95c6293 / run39089622847 / job117564131092 is SUCCESS.
+Artifact12122063924, SHA256
+8924921c8e5c1c8df51be7e57424b2bc6bc8bdb44e89482c7ec7ddd56bac2ab7.
+The full log records PSCV0_M3_INPUT_PARITY PASS, retained-call analysis PASS,
+dependent component packing PASS, and all retained preparation steps successful.
+This covers exact definition/equation comparison, grouped binder shadow refusals,
+universe/named/operator/scientific terms, native proofs, data/classes/instances/
+deriving, both mixed-module directions, official kernel, five-target emission,
+and assurance/noncomputable refusals. Backend runtime observations are PENDING.
+Receipt: docs/PSCV0_M3_NATIVE_INPUT_B95C6293_2026-10-18.md.
 
-Keyword correction af9a0e3133601917b3375b8a6e9c1708e9efef18 /
-run39088772197 / job117561623591 is still running when this checkpoint is written.
-It keeps the native keyword table at native application boundaries. Do not cancel it.
-The current preparation child adds native data/dictionary syntax; read its actual
-HEAD/run state before continuing. That addition is unqualified until CI completes.
+Preparation code child3b95a506a46c164a63d01017490fe0949d178908 /
+run39090023014 / job117565128449 is RUNNING. It adds native where helpers and
+explicit decreasing_by tactic syntax using shared recursion/proof owners.
+The same paired data export exercises a local well-founded identity helper.
+The current documentation-only descendant changes no compiler/test inputs;
+the qualification identity for this native-where code is3b95a506.
+Fresh refs and complete logs override these checkpoints.
+
+**Historical P1 Rust gap:** the previous focused workflow overwrote its P1
+harness before Cargo ran. Preparation includes the producer/run ordering fix;
+the new focused integration must confirm actual P1 Rust observations. Prior
+workflow success alone is not that evidence. Source mutual WF is still refused.
+M3+B and full selected native grammar parity remain OPEN.
 
 ## Current implementation
 
@@ -132,7 +101,8 @@ HEAD/run state before continuing. That addition is unqualified until CI complete
 
 See docs/PSCV0_M3_NATIVE_INPUT_ROUTING_2026-10-18.md and
 docs/PSCV0_M3_RETAINED_CALL_ANALYSIS_2026-10-18.md for design/source references.
-Native where/do/full termination grammar and full input parity remain open.
+Native where/decrease grammar is implemented in the pending child. Native do,
+remaining selected grammar gaps and full input parity still need reconciliation.
 
 ## Remaining work
 

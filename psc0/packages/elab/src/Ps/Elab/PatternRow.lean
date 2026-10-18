@@ -149,18 +149,18 @@ def psElabPatternRowElaborate (branch : PsElaborator) (fuel : Nat)
     | .variable source =>
       if psSyntaxNameIsWildcardBinder source then
         let value := psElabHole context (some expected)
-        return { context := value.context, value := value.term
+        return { context := value.context, value := value.term,
           occurrences := [{ value := value.term, path }], compilerPattern := pattern }
       let some name := psSyntaxNameToName source | throw .emptyName
       let some patternVar := variables.find? (fun patternVar => psNameEq patternVar.name name)
         | throw (.refinement "pattern variable declaration unavailable")
       let (context, success) ← psElabPatternRowUnify context patternVar.type expected
       if !success then throw .typeMismatch
-      return { context, value := .fvar patternVar.id
+      return { context, value := .fvar patternVar.id,
         occurrences := [{ value := .fvar patternVar.id, path }], compilerPattern := pattern }
     | .wildcard _ =>
       let value := psElabHole context (some expected)
-      return { context := value.context, value := value.term
+      return { context := value.context, value := value.term,
         occurrences := [{ value := value.term, path }], compilerPattern := pattern }
     | .inaccessible _ => throw .matchPatternUnsupported
     | _ =>

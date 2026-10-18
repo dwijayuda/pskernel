@@ -1,0 +1,102 @@
+name: PSKernel-C0 pinned Arena proof-body hot stack comparison
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-arena-perf-hot-paths.yml'
+      - 'psc0/packages/pskernel-c0/test/arena_435_profile_case.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-c0-heavy-proof-stacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [app-lam, let-ladder]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build unchanged native source checker and independent sampling hook
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+            lake build c0OfficialReplay
+          )
+          cc -O2 -fPIC -shared -o "$RUNNER_TEMP/c0-arena-perf-sampler.so" \
+            psc0/packages/pskernel-c0/test/C0NativeProofSampler.c
+          python3 -m py_compile \
+            psc0/packages/pskernel-c0/test/arena_435_profile_case.py \
+            psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py
+      - name: Validate immutable Arena corpus and select one actual expensive theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o "$RUNNER_TEMP/arena-original.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-original.tar.gz" | sha256sum -c -
+          python3 psc0/packages/pskernel-c0/test/arena_435_profile_case.py \
+            --archive "$RUNNER_TEMP/arena-original.tar.gz" \
+            --case "${{ matrix.case }}" \
+            --out "$RUNNER_TEMP/arena-perf-case.ndjson" \
+            --marker-out "$RUNNER_TEMP/arena-perf-marker.txt" \
+            --receipt "$RUNNER_TEMP/arena-perf-source.json"
+      - name: Independently require official Lean 4.35 acceptance of exact adapted bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            timeout 90s lake env leanchecker --from-export "$RUNNER_TEMP/arena-perf-case.ndjson"
+          ) > "$RUNNER_TEMP/arena-perf-official.txt" 2>&1
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/arena-perf-official.txt"
+          echo "C0_ARENA_PERF_REFERENCE case=${{ matrix.case }} official=accepted pin=Lean_4.35.0"
+      - name: Sample original native C0 worker ONLY after actual heavy theorem begins
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker="$(cat "$RUNNER_TEMP/arena-perf-marker.txt")"
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$RUNNER_TEMP/arena-perf-case.ndjson" \
+            "$RUNNER_TEMP/c0-arena-perf-sampler.so" \
+            "$RUNNER_TEMP/arena-perf-stacks.txt" \
+            "$RUNNER_TEMP/arena-perf-summary.json" \
+            --samples 12 --interval 1.5 --max-wait 120 --wait-for "$marker"
+          python3 - <<'PY'
+          import json,os,pathlib
+          base=pathlib.Path(os.environ["RUNNER_TEMP"])
+          source=json.loads((base/"arena-perf-source.json").read_text())
+          profile=json.loads((base/"arena-perf-summary.json").read_text())
+          assert source["source_provenance"]["body_bytes_identical"] is True
+          assert profile["diagnostic_only"] and profile["no_trusted_code_modified"]
+          assert profile["native_stack_samples"] > 0
+          assert not profile["successful_source_acceptance"], "sampler must not issue a proof receipt"
+          print(f"C0_ARENA_PERF_HOT case=${{ matrix.case }} stacks={profile['native_stack_samples']} source_body_exact=true original_source_checker=true accepting_result_not_claimed=true")
+          for fn,n in profile["top_inclusive_functions"][:15]:
+              print(f"C0_ARENA_PERF_FRAME case=${{ matrix.case }} inclusive_stacks={n} symbol={fn}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena-${{ matrix.case }}-hot-stacks
+          path: |
+            ${{ runner.temp }}/arena-perf-source.json
+            ${{ runner.temp }}/arena-perf-summary.json
+            ${{ runner.temp }}/arena-perf-stacks.txt
+            ${{ runner.temp }}/arena-perf-official.txt
+          if-no-files-found: warn
+          retention-days: 21

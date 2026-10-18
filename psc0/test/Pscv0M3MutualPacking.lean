@@ -242,7 +242,7 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
   let (runtime, omitted) ← (psCompilerWellFoundedRuntimeView lifted.result.environment
     lifted.result.declarations lifted.result.declarations).mapError psCompilerPscv0ElabError
   let auxiliary := psNameAppendStr (psRootName "callFirst") "_mutual"
-  if omitted != [auxiliary] || runtime.any (fun declaration =>
+  if !psCompilerRuntimeLevelsEq omitted [auxiliary] || runtime.any (fun declaration =>
       let name := psDeclarationName declaration
       psNameEq name auxiliary || psCompilerRuntimeHelperOwned auxiliary name) then
     throw "runtime recovery retained its logical-only component auxiliary"

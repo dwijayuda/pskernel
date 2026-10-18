@@ -1,5 +1,35 @@
 # Continue PSC0 v7.2 — Complete M3+B
 
+## Latest evidence boundary — read before acting
+
+Implementation/CI head is `d0146eaf1758b27cd7c8c29a75524f5021f8145d`, after
+`d1d8fa4293ddff18ee5e85bd27ab468191deca61`. This handoff-only child changes
+no compiler code. Preparation run39121411720/job117657617771 has overall
+FAILURE. The latest direct jobs API reports native build, primitive/closure
+and source checks plus JS/strict TS, Rust and Wasm GC/component execution PASS;
+unselected recursor authoring FAILS. Main33676076 was NOT promoted.
+
+Exact log provenance is unresolved. Earlier responses conflicted; a decoded-log
+request for job117657617771 returned oldrun39107031856/SHA01424b88 and its
+oldartifact12129350284 instead. Exclude it. Other retrieved traces disagreed
+with the exact committed runtime observer and Rust emitter. Do NOT patch alleged
+PProd projection/constructor or formatter bugs from those traces, repeat their
+runtime counts, or declare d0146eaf qualified from them. The Fin `Nat.lt` versus
+pinned `LT.lt` source distinction is independently observed, but the current
+candidate's complete failure roster still needs authenticated evidence.
+
+The API lists artifact12134487916 for d0146eaf/run39121411720, size2756338,
+digest `sha256:6e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff`.
+Archive bytes and internal source-sha/logs have NOT been verified. Inspect exact
+retained evidence through GitHub/Linux CI or a correctly attributed log read;
+check run, SHA, artifact identity and digest before relying on its observations.
+Do not repeatedly poll a misattributed endpoint. The existing evidence-inspect
+workflow is hard-coded to an unrelated SH1 archive, not a generic dispatcher.
+Keep all checks and fingerprints unchanged while resolving evidence provenance.
+M3+B and five-gate same-SHA integration remain OPEN.
+
+## Work contract and implementation continuation
+
 Continue useful implementation autonomously in `dwijayuda/pskernel`, preparation
 branch `psc0/m3-fixedpoint-foundation-20261018`. Read `AI_WORK_STATE.md` FIRST;
 it distinguishes the qualified main, pushed preparation and unqualified child.

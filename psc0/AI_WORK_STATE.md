@@ -3,6 +3,55 @@
 Updated 2026-10-18. Fresh GitHub refs and exact-SHA CI override this checkpoint.
 M3+B and full selected `.lean`/`.ps` input parity remain OPEN.
 
+## Latest observation — d0146eaf; log provenance unresolved
+
+Implementation/CI head: `d0146eaf1758b27cd7c8c29a75524f5021f8145d`, child of
+`d1d8fa4293ddff18ee5e85bd27ab468191deca61`. This handoff-only child does not
+change compiler code or qualify a new executable. Main was not promoted.
+
+Preparation run `39121411720`, job `117657617771`, reports completion with
+conclusion `failure`. The latest direct jobs-API response associates this job
+with d0146eaf and reports PASS for native build, primitive/closure audits,
+selected manifest, fixedpoint/PSum exports and packing, selected source checks,
+structural mutual source, JS/strict TypeScript execution, Rust execution,
+Wasm GC/component execution, and the remaining matching/deriving/P1 checks.
+Its unselected recursor-source authoring step reports FAILURE.
+Reference: https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39121411720/jobs
+
+These are API-reported step outcomes, NOT independently authenticated runtime
+values. Earlier responses conflicted about runtime-step conclusions. More
+importantly, a request to fetch job117657617771's decoded log returned content
+whose checkout, source SHA, artifact and run URL identify OLD run39107031856,
+SHA01424b88cc4f32b1a2682ee35c8432ea5c898a88 and artifact12129350284.
+That log is excluded entirely as evidence about d0146eaf. Other retrieved
+execution traces did not agree with the exact committed observer script or
+Rust backend. Do not turn those traces into alleged PProd projection bugs,
+formatter recursor defects, output-count claims, patches or qualified results.
+Do not repeatedly poll the same misattributed log endpoint.
+
+The artifacts API lists one d0146eaf archive for run39121411720:
+- id12134487916; name `pscv0-m3-foundation-preparation-d0146eaf1758b27cd7c8c29a75524f5021f8145d`;
+- size2756338; metadata digest
+  `sha256:6e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff`.
+Reference: https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39121411720/artifacts
+The archive bytes/internal source-sha and observations have NOT been read or
+verified. Metadata alone does not resolve the conflicting log provenance.
+
+Next evidence step is authenticated exact-run artifact inspection in GitHub
+Linux CI, or another successful exact-log retrieval with checked checkout/SHA.
+The existing `psc0-evidence-inspect.yml` is hard-coded to an unrelated historical
+SH1 artifact; do not dispatch it as though it inspected this run. Any adapted
+inspection must check the requested run/SHA/artifact/digest and must not execute
+untrusted archive scripts, mutate main, select new assets or relax checks.
+
+The independent Fin source distinction remains worth investigating: selected
+`StandardFin.lean` uses `Nat.lt` whereas pinned Lean's Fin field uses `LT.lt`.
+Do not infer the current candidate's complete failure roster from the excluded
+logs. Preserve strict authoring until actual expression-level evidence supports
+a semantics-preserving correction. No new recursor asset or pin was selected.
+M3+B, exact runtime evidence review and all five same-SHA integration gates
+remain OPEN. Sections below retain the preceding implementation checkpoint.
+
 ## Work contract
 
 Complete all six M3+B exits autonomously through GitHub connectors and GitHub

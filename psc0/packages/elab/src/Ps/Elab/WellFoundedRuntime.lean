@@ -90,11 +90,13 @@ private def psElabWellFoundedRuntimeValue (environment : PsEnvironment) : PsExpr
     (psEnvironmentFindConstructor environment name).isSome ||
       (psEnvironmentFindInductive environment name).isSome
   | .app fn argument =>
-    let .constE name _ := (psReduceAppView fn).head | false
-    ((psEnvironmentFindConstructor environment name).isSome ||
-      (psEnvironmentFindInductive environment name).isSome) &&
-      psElabWellFoundedRuntimeValue environment fn &&
-      psElabWellFoundedRuntimeValue environment argument
+    match (psReduceAppView fn).head with
+    | .constE name _ =>
+      ((psEnvironmentFindConstructor environment name).isSome ||
+        (psEnvironmentFindInductive environment name).isSome) &&
+        psElabWellFoundedRuntimeValue environment fn &&
+        psElabWellFoundedRuntimeValue environment argument
+    | _ => false
   | _ => false
 
 -- Specialize the checked packing program, never the public recursive functions.

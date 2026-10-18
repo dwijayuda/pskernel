@@ -170,3 +170,7 @@ simpCasesOnCtor?, plus WF/Main and Basic.addAndCompilePartialRec. This is
 Core construction using the existing reducer, with upstream notices retained;
 no target primitive, runtime PSum dependency, new axiom or budget change.
 Qualification is pending the newest preparation; main6cdb remains fully qualified.
+
+Packing specialization f52b4147 failed at compile time only: its pure Boolean
+value classifier used a do-style let-else. The child uses an ordinary match;
+no algorithm, fixture or acceptance condition changed. Qualification pending.

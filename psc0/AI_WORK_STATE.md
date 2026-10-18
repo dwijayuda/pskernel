@@ -163,3 +163,12 @@ it remains on the existing five-target execution path. This child is unqualified
 until its own preparation and integration complete. Leading-precedence terms
 (match/if/let/by) still require grouping in argument position. No grammar change
 to .ps, source rewriting or host elaboration is introduced.
+
+Pinned WF/Main.lean31-35 explicitly rejects members with no varying arguments.
+The existing check is the correct invariant, not a pending PUnit feature.
+Exact-public-equation candidate6cdb9a6ee36b3262b366d80f36c238b50fd9676d has
+preparation39093766354 pending behind native lambda argument39093434191.
+Do not supersede the healthy preparation run or its one pending child.
+
+Provisional runtime design: docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md.
+Re-evaluate against the full preparation/erasure/assurance pipeline before coding.

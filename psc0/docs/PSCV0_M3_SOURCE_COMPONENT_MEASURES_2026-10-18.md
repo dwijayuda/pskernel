@@ -36,9 +36,9 @@ No executable, workflow, budget increase or new trusted assumption is added.
 
 The public dispatcher still refuses source mutual WF. Complete public projections,
 exact equations against retained original bodies, typed executable ownership and
-strict PSum foundation selection before activating it. The current plan requires
-nonempty varying telescopes; zero-varying/PUnit handling cannot be inferred from a
-returned function. Standalone PSum remains unselected.
+strict PSum foundation selection before activating it. Pinned WF/Main.lean31-35 explicitly rejects members with no varying
+arguments. The nonempty-varying check therefore matches Lean4.35.0; PUnit is not
+a missing M3 capability. Standalone PSum remains unselected.
 
 ## Qualified construction and exact-equation candidate
 

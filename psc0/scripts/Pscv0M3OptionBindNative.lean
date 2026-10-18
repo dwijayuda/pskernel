@@ -7,36 +7,87 @@ namespace M3OptionBindNative
 
 def auditOptionBind (n : Nat) : Option Nat :=
   match n with
-  | 0 => some 0
+  | 0 => Option.some 0
   | k + 1 =>
     Bind.bind (auditOptionBind k) (fun value =>
-      Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))
+      Bind.bind (auditOptionBind value) (fun previous => Option.some (Nat.succ previous)))
 partial_fixpoint
 
 theorem auditOptionBindEquation (n : Nat) :
     auditOptionBind n = (match n with
-      | 0 => some 0
+      | 0 => Option.some 0
       | k + 1 =>
         Bind.bind (auditOptionBind k) (fun value =>
-          Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=
+          Bind.bind (auditOptionBind value) (fun previous => Option.some (Nat.succ previous)))) :=
   auditOptionBind.eq_def n
 
 /-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
 def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=
   match n with
-  | 0 => some 0
+  | 0 => Option.some 0
   | k + 1 =>
     Option.bind (auditOptionDirectBindRefusal k) (fun value =>
-      Option.bind (auditOptionDirectBindRefusal value) (fun previous => some (Nat.succ previous)))
+      Option.bind (auditOptionDirectBindRefusal value) (fun previous => Option.some (Nat.succ previous)))
 partial_fixpoint
 
 /-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
 def auditOptionInspection (n : Nat) : Option Nat :=
   match auditOptionInspection n with
-  | none => some 0
-  | some _ => none
+  | Option.none => Option.some 0
+  | Option.some _ => Option.none
+partial_fixpoint
+
+-- Eligible declaration heads are measured separately from the def/function
+-- runtime surface above. Opaque publication and lazy equation generation are
+-- independent native behaviors.
+abbrev auditP1Abbrev (n : Nat) : Nat :=
+  match n with
+  | 0 => 29
+  | k + 1 => auditP1Abbrev k
+partial_fixpoint
+
+theorem auditP1AbbrevEquation (n : Nat) :
+    auditP1Abbrev n = (match n with | 0 => 29 | k + 1 => auditP1Abbrev k) :=
+  auditP1Abbrev.eq_def n
+
+example : auditP1Abbrev 2 = 29 := by
+  fail_if_success rfl
+  simp only [auditP1Abbrev.eq_def]
+
+opaque auditP1Opaque (n : Nat) : Nat :=
+  match n with
+  | 0 => 31
+  | k + 1 => auditP1Opaque k
+partial_fixpoint
+
+run_meta do
+  match ← Lean.getConstInfo ``auditP1Abbrev with
+  | .defnInfo _ => pure ()
+  | _ => throwError "native P1 abbrev lost its definition kind"
+  unless (← Lean.getReducibilityStatus ``auditP1Abbrev) == .reducible do
+    throwError "native P1 abbrev lost its reducible status"
+  match ← Lean.getConstInfo ``auditP1Opaque with
+  | .opaqueInfo _ => pure ()
+  | _ => throwError "native P1 opaque lost its opaque declaration kind"
+  unless (← Lean.getReducibilityStatus ``auditP1Opaque) == .irreducible do
+    throwError "native P1 opaque changed its fixedpoint reducibility metadata"
+
+/-- error: failed to generate unfold theorem -/
+#guard_msgs (error, drop warning, substring := true) in
+#check auditP1Opaque.eq_def
+
+/-- error: Could not prove -/
+#guard_msgs (error, drop warning, substring := true) in
+abbrev auditP1AbbrevInspection (n : Nat) : Nat :=
+  auditP1AbbrevInspection n + 1
+partial_fixpoint
+
+/-- error: Could not prove -/
+#guard_msgs (error, drop warning, substring := true) in
+opaque auditP1OpaqueInspection (n : Nat) : Nat :=
+  auditP1OpaqueInspection n + 1
 partial_fixpoint
 
 end M3OptionBindNative
@@ -48,3 +99,8 @@ def main : IO Unit := do
     unless M3OptionBindNative.auditOptionBind argument == some expected do
       throw (IO.userError ("native Option bind observation differs at " ++ toString argument))
   IO.println "PSCV0_M3_P1_OPTION_BIND_NATIVE: PASS checked generic Bind action and continuation, original equation, direct Option.bind and nonmonotone inspection refusals and exact 0/3/4 observations"
+  for argument in ([0, 3, 4] : List Nat) do
+    unless M3OptionBindNative.auditP1Abbrev argument == 29 &&
+        M3OptionBindNative.auditP1Opaque argument == 31 do
+      throw (IO.userError ("native registered P1 observation differs at " ++ toString argument))
+  IO.println "PSCV0_M3_P1_HEADS_NATIVE: PASS abbrev equation/reducibility and opaque declaration/execution with unavailable unfolding equation; exact nonmonotone refusals"

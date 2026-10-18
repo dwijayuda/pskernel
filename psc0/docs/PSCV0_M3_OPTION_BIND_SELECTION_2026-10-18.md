@@ -1,5 +1,16 @@
 # M3 Option bind — independently audited selection candidate
 
+## Selection audit subsequently passed
+
+[Preparation 39170162742](https://github.com/dwijayuda/pskernel/actions/runs/39170162742)
+at 7348fc6ff25e5b5c3bb0490c0c038669bc4adbaf passed the exact selected manifest,
+both authoring jobs and the complete additive audit with activeOptionBindDeclarations
+36 and activeFinalOptionBindDeclarations 36. All identities below are unchanged.
+The complete runtime remains pending: the new source fixture first reached a
+missing native exported-name alias, before the projection erasure path. The next
+candidate uses fully qualified Option constructors in the actual native/paired
+sources and preserves every old expected observation.
+
 ## Authority and scope
 
 The sole normative language authority is PSCV0_LANGUAGE_REFERENCE_v7.2.md.

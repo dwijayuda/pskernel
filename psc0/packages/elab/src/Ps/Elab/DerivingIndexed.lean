@@ -301,6 +301,9 @@ def psElabDeriveIndexedBEqFields (fuel : Nat) (plan : PsElabDeriveContext)
           [bool, proposition, decision, onTrue.term, onFalse]
         return ← psElabResolvedTerm onTrue.context term (some bool)
       let remainder ← psElabDeriveIndexedBEqFields fuel plan context rest
+      if rest.all (fun entry => entry.determined || entry.proof) then
+        return ← psElabResolvedTerm remainder.context tested.term
+          (some (.constE psBoolName []))
       psElabResolvedTerm remainder.context (psElabDeriveIndexedAnd tested.term remainder.term)
         (some (.constE psBoolName []))
 

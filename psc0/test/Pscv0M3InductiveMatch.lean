@@ -264,6 +264,7 @@ private def checked (prelude : Lean.Kernel.Environment) (declarations : List PsD
 
 private def refusal : PsElabError → String
   | .atDeclaration _ error => refusal error
+  | .atContext _ error => refusal error
   | .typeMismatch => "type"
   | .matchNonExhaustive => "coverage"
   | .matchConstructorUnknown _ => "constructor"
@@ -273,6 +274,9 @@ private def refusal : PsElabError → String
   | .refinement message => "refinement:" ++ message
   | .infer .applicationTypeMismatch => "infer:application"
   | .infer (.unknownConstant name) => "missing:" ++ psNameToString name
+  | .data message =>
+    if message.startsWith "PSCV0-MUTUAL-TOTAL: DECREASE:" then "structural"
+    else psCompilerPscv0ElabError (.data message)
   | error => psCompilerPscv0ElabError error
 
 private def expectRefused (environment : PsEnvironment)

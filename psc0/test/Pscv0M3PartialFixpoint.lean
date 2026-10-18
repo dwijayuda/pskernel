@@ -60,42 +60,42 @@ def mutualOutput (flag : Bool) : UInt64 :=
 
 def auditOptionBind (n : Nat) : Option Nat :=
   match n with
-  | 0 => some 0
+  | 0 => Option.some 0
   | k + 1 =>
     Bind.bind (auditOptionBind k) (fun value =>
-      Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))
+      Bind.bind (auditOptionBind value) (fun previous => Option.some (Nat.succ previous)))
 partial_fixpoint
 
 theorem auditOptionBindEquation (n : Nat) :
     auditOptionBind n = (match n with
-      | 0 => some 0
+      | 0 => Option.some 0
       | k + 1 =>
         Bind.bind (auditOptionBind k) (fun value =>
-          Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=
+          Bind.bind (auditOptionBind value) (fun previous => Option.some (Nat.succ previous)))) :=
   auditOptionBind.eq_def n
 
 /-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
 def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=
   match n with
-  | 0 => some 0
+  | 0 => Option.some 0
   | k + 1 =>
     Option.bind (auditOptionDirectBindRefusal k) (fun value =>
-      Option.bind (auditOptionDirectBindRefusal value) (fun previous => some (Nat.succ previous)))
+      Option.bind (auditOptionDirectBindRefusal value) (fun previous => Option.some (Nat.succ previous)))
 partial_fixpoint
 
 /-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
 def auditOptionInspection (n : Nat) : Option Nat :=
   match auditOptionInspection n with
-  | none => some 0
-  | some _ => none
+  | Option.none => Option.some 0
+  | Option.some _ => Option.none
 partial_fixpoint
 
 def bindOutput (flag : Bool) : UInt64 :=
   UInt64.ofNat (match auditOptionBind (if flag then 4 else 3) with
-    | none => 997
-    | some value => value)
+    | Option.none => 997
+    | Option.some value => value)
 
 universe u
 
@@ -232,26 +232,26 @@ private def extendedSource : String :=
   "theorem p1DependentEquation(bound: Nat, n: Nat, seed: Fin(bound + 1)): Eq(p1Dependent(bound, n, seed), match n with { | 0 => seed | k + 1 => p1Dependent(bound, k, seed) }) := by { exact p1Dependent.eq_def(bound, n, seed) }\n"
 
 private def optionBindLeanSource : String :=
-  "def auditOptionBind (n : Nat) : Option Nat :=\n  match n with\n  | 0 => some 0\n  | k + 1 =>\n    Bind.bind (auditOptionBind k) (fun value =>\n      Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))\npartial_fixpoint\n\ntheorem auditOptionBindEquation (n : Nat) :\n    auditOptionBind n = (match n with\n      | 0 => some 0\n      | k + 1 =>\n        Bind.bind (auditOptionBind k) (fun value =>\n          Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=\n  auditOptionBind.eq_def n\n\n"
+  "def auditOptionBind (n : Nat) : Option Nat :=\n  match n with\n  | 0 => Option.some 0\n  | k + 1 =>\n    Bind.bind (auditOptionBind k) (fun value =>\n      Bind.bind (auditOptionBind value) (fun previous => Option.some (Nat.succ previous)))\npartial_fixpoint\n\ntheorem auditOptionBindEquation (n : Nat) :\n    auditOptionBind n = (match n with\n      | 0 => Option.some 0\n      | k + 1 =>\n        Bind.bind (auditOptionBind k) (fun value =>\n          Bind.bind (auditOptionBind value) (fun previous => Option.some (Nat.succ previous)))) :=\n  auditOptionBind.eq_def n\n\n"
 
 private def optionBindPsSource : String :=
   "function auditOptionBind(n: Nat): Option(Nat) := match n with {\n  | 0 => Option.some(0)\n  | k + 1 => Bind.bind(auditOptionBind(k), fun value =>\n    Bind.bind(auditOptionBind(value), fun previous => Option.some(Nat.succ(previous))))\n}\npartial_fixpoint\ntheorem auditOptionBindEquation(n: Nat):\n  Eq(auditOptionBind(n), match n with {\n    | 0 => Option.some(0)\n    | k + 1 => Bind.bind(auditOptionBind(k), fun value =>\n      Bind.bind(auditOptionBind(value), fun previous => Option.some(Nat.succ(previous))))\n  }) := by { exact auditOptionBind.eq_def(n) }\n"
 
 private def optionBindDirectLeanRefusal : String :=
-  "def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=\n  match n with\n  | 0 => some 0\n  | k + 1 =>\n    Option.bind (auditOptionDirectBindRefusal k) (fun value =>\n      Option.bind (auditOptionDirectBindRefusal value) (fun previous => some (Nat.succ previous)))\npartial_fixpoint\n\n"
+  "def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=\n  match n with\n  | 0 => Option.some 0\n  | k + 1 =>\n    Option.bind (auditOptionDirectBindRefusal k) (fun value =>\n      Option.bind (auditOptionDirectBindRefusal value) (fun previous => Option.some (Nat.succ previous)))\npartial_fixpoint\n\n"
 
 private def optionBindDirectPsRefusal : String :=
   "function auditOptionDirectBindRefusal(n: Nat): Option(Nat) := match n with {\n  | 0 => Option.some(0)\n  | k + 1 => Option.bind(auditOptionDirectBindRefusal(k), fun value =>\n    Option.bind(auditOptionDirectBindRefusal(value), fun previous => Option.some(Nat.succ(previous))))\n}\npartial_fixpoint\n"
 
 private def optionBindInspectionLeanRefusal : String :=
-  "def auditOptionInspection (n : Nat) : Option Nat :=\n  match auditOptionInspection n with\n  | none => some 0\n  | some _ => none\npartial_fixpoint\n"
+  "def auditOptionInspection (n : Nat) : Option Nat :=\n  match auditOptionInspection n with\n  | Option.none => Option.some 0\n  | Option.some _ => Option.none\npartial_fixpoint\n"
 
 private def optionBindInspectionPsRefusal : String :=
-  "function auditOptionInspection(n: Nat): Option(Nat) :=\n  match auditOptionInspection(n) with {\n    | .none => Option.some(0)\n    | .some _ => Option.none\n  }\npartial_fixpoint\n"
+  "function auditOptionInspection(n: Nat): Option(Nat) :=\n  match auditOptionInspection(n) with {\n    | Option.none => Option.some(0)\n    | Option.some _ => Option.none\n  }\npartial_fixpoint\n"
 
 private def optionBindRuntimeSource : String :=
   optionBindPsSource ++
-  "function m3p1bind(flag: Bool): UInt64 := UInt64.ofNat(match auditOptionBind(if (flag) { 4 } else { 3 }) with { | .none => 997 | .some value => value })\n"
+  "function m3p1bind(flag: Bool): UInt64 := UInt64.ofNat(match auditOptionBind(if (flag) { 4 } else { 3 }) with { | Option.none => 997 | Option.some value => value })\n"
 
 private def source : String :=
   definitionsSource ++ extendedSource ++ optionBindRuntimeSource ++

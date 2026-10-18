@@ -1,5 +1,43 @@
 # PSC0 v7.2 work state — M3+B
 
+## Selected Option bind audit passed; remaining source corrections
+
+[Preparation 39170162742](https://github.com/dwijayuda/pskernel/actions/runs/39170162742)
+at 7348fc6ff25e5b5c3bb0490c0c038669bc4adbaf passed both authoring jobs,
+the strict selected manifest and the full additive audit with all 36 declarations
+active at the named and final boundaries. The exact 3,793/48/375/13 inventory,
+118 public recursors and audited source/logical/surface digests passed unchanged.
+All eleven monotonicity proofs and both strict refusals passed.
+
+Typed function eta passed its native equations, two-way conversion, changed
+method/domain/order refusals and exact native lawful-proof identity check.
+Ordinary/dependent deriving handlers, metadata and source checks passed; both
+indexed group BEq/DecidableEq instances, twelve portable equations, six native
+BEq executions, six native DecidableEq equations and the retained ten-worker
+five-target emission passed. The earlier lawful dictionary failure is resolved.
+
+New P0 singleton body-only universe .lean/.ps construction and opacity controls
+passed. Complete WF construction, semantic refusals and five-target emission
+passed, as did structural mutual construction and checked source equations.
+The former group recursion refusal passed as a native/fresh-kernel strict-child
+source; its genuine reconstructed-parent control stopped at the exact structural
+DECREASE rule. This child recognizes that rule through context wrappers.
+
+The run remained failed: input parity stopped at indexedDecEqMajor; the later
+indexed BEq fixture stopped at m3indexedNatLaw; the new paired bind fixture stopped
+on an unqualified native exported Option constructor before erasure. This child
+removes the artificial final BEq conjunction while retaining all skipped-field
+checks, and qualifies the concrete paired/native Option constructor spellings.
+The original source equations and all previous runtime expectations are retained.
+
+A separate native probe now measures eligible abbrev/opaque P1 declaration heads,
+their actual reducibility, executable observations and equation availability.
+No portable head acceptance or verified assurance is inferred in advance.
+Data/dependent patterns and registered-main/local-helper ownership remain in
+progress. The complete fourteen-export execution matrix and selected bind
+backend runtime remain unqualified. All six M3+B exits stay OPEN; no main promotion.
+Final Native/M3/F1/F2/F3 still require one complete compiler/test SHA.
+
 ## Audited Option bind selection and checked conversion candidate
 
 Preparation [39167823787](https://github.com/dwijayuda/pskernel/actions/runs/39167823787)

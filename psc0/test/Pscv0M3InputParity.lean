@@ -1421,9 +1421,13 @@ def parserLayoutRefusals : List (String × String) := [
 run_cmd do
   let environment ← Lean.getEnv
   for (label, source) in parserLayoutRefusals do
-    match Lean.Parser.runParserCategory environment `command source with
-    | .error _ => pure ()
-    | .ok _ => throwError "native layout parser accepted {label}"
+    let inputContext := Lean.Parser.mkInputContext source "<native-layout-refusal>"
+    let parser := Lean.Parser.andthenFn Lean.Parser.whitespace
+      Lean.Parser.topLevelCommandParserFn
+    let state := parser.run inputContext { env := environment, options := {} }
+      (Lean.Parser.getTokenTable environment) (Lean.Parser.mkParserState source)
+    if state.allErrors.isEmpty && inputContext.atEnd state.pos then
+      throwError "native top-level layout parser accepted {label}"
 
 end M3InputParityOracle
 

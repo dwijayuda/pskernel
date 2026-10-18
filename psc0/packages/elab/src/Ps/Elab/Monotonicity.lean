@@ -101,6 +101,38 @@ def psElabMonotonicityCall (fuel : Nat) (context : PsElabContext)
         [left, right, domain, leftOrder, rightOrder, domainOrder, functional, proof.term])
     | _ => return none
 
+-- Pinned automatic monotonicity selects the generic Bind.bind method.
+-- Direct Option.bind calls are not indexed by that native rule. Read the
+-- selected dictionary's checked class application to retain the exact Bind
+-- and pointwise order arguments; the final application proves the original
+-- goal, including its actual method and dictionary.
+def psElabMonotonicityOptionBind (context : PsElabContext)
+    (domain domainOrder body : PsExpr) :
+    Except PsElabError (Option PsElabTermResult) := do
+  if !psElabHasLooseBound body then return none
+  let view := psExprAppView body
+  let .constE name _ := view.head | return none
+  if !psNameEq name (psNameAppendStr (psRootName "Bind") "bind") then
+    return none
+  let [_, _, source, target, action, continuation] := view.args | return none
+  if (psEnvironmentFind context.environment
+      (psElabMonotonicityName "instMonoBindOption")).isNone ||
+      (psEnvironmentFind context.environment
+        (psElabMonotonicityName "monotone_bind")).isNone then
+    return none
+  let dictionary ← psElabMonotonicityCore context "instMonoBindOption" []
+  let dictionaryType := psExprAppView dictionary.type
+  let .constE className _ := dictionaryType.head
+    | throw (.proof "selected Option monotone-bind dictionary has no class head")
+  if !psNameEq className (psElabMonotonicityName "MonoBind") then
+    throw (.proof "selected Option monotone-bind dictionary has a different class")
+  let [monad, binding, orders] := dictionaryType.args
+    | throw (.proof "selected Option monotone-bind dictionary has a different telescope")
+  let close := fun value => PsExpr.lam .anonymous domain value .explicit
+  return some (← psElabMonotonicityCore dictionary.context "monotone_bind"
+    [monad, binding, orders, dictionary.term, source, target, domain, domainOrder,
+      close action, close continuation])
+
 -- Supply the known functions in the selected compositional rules explicitly.
 -- The remaining arguments are ordinary checked monotonicity proof goals.
 def psElabMonotonicityCandidates (context : PsElabContext)
@@ -235,6 +267,19 @@ def psElabMonotonicitySolve (fuel : Nat) (state : PsProofState) :
     if let some proof ← psElabMonotonicityCall fuel context domain domainOrder body then
       let next ← psProofAssign (psProofUpdate state proof.context) goal.id proof.term
       return ← psElabMonotonicitySolve fuel next
+    -- Backtracking preserves the original state. The bind law leaves two
+    -- ordinary monotonicity obligations; resource failures still propagate.
+    let binding := do
+      let some value ← psElabMonotonicityOptionBind context domain domainOrder body
+        | return none
+      let value ← psProofApplyTerm 4096 value target
+      let next ← psProofApplied state goal context.metaContext.nextId value
+      return some (← psElabMonotonicitySolve fuel next)
+    match binding with
+    | .ok (some result) => return result
+    | .ok none => pure ()
+    | .error error =>
+      if psElabErrorIsResource error then throw error
     let candidates ← psElabMonotonicityCandidates context
       domain domainOrder codomain codomainOrder functional body
     for (lemma, arguments) in candidates do

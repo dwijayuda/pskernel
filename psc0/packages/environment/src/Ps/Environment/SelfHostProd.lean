@@ -164,10 +164,16 @@ def psSelfHostProdPreRecursorSurfacePreludeEnvironment : PsEnvironment :=
 
 -- Reviewed metadata-only replacements are selected only at the final stage.
 -- Preserve every earlier authoring base, including the pre-recursor snapshot.
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Freeze the complete preceding selection for the additive Option bind
+-- authoring boundary. Earlier Order, PSum and recursor stages retain their
+-- original declaration, metadata and registration identities.
+def psSelfHostProdPreOptionBindPreludeEnvironment : PsEnvironment :=
   psStandardLawfulBEqExtend <|
     psStandardRecursorSurfaceDeclarations.foldl psEnvironmentInsert
       psSelfHostProdPreRecursorSurfacePreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPreOptionBindPreludeEnvironment
 
 -- Structural mutual recursion bundles retained results in the checked
 -- Sort-polymorphic product. Logical inclusion alone does not register its

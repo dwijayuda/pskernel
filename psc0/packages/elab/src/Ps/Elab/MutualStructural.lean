@@ -1806,6 +1806,37 @@ def psElabMutualStructuralRewrite (fuel : Nat) (plan : PsElabMutualStructuralPla
 -- Reduce the selected real constructor case at its retained path, then
 -- independently check the result at that node's original type. The surrounding
 -- source application/projection context is rebuilt literally.
+-- The retained source case still contains its real provisional peers until
+-- Rewrite replaces their calls with checked strict-child hypotheses. Admit
+-- only those exact local declarations for this intermediate iota check;
+-- the subsequent rewrite and final branch check use the original minor scope.
+def psElabMutualStructuralIotaScope (context : PsElabContext)
+    (caller : PsElabMutualStructuralInput) : Except PsElabError PsElabContext := do
+  let peerIds := caller.peers.map Prod.fst
+  if peerIds.eraseDups.length != peerIds.length then
+    throw (psElabMutualStructuralError "OWNERSHIP" "provisional iota peers have repeated identities")
+  let mut current := context
+  for id in peerIds.reverse do
+    if (psLocalFindById context.localContext id).isSome then
+      throw (psElabMutualStructuralError "OWNERSHIP" "provisional iota peer collides with a minor local")
+    let some (.binding actualId name type binder) :=
+        psLocalFindById caller.context.localContext id
+      | throw (psElabMutualStructuralError "OWNERSHIP" "provisional iota peer has no checked local declaration")
+    if actualId != id then
+      throw (psElabMutualStructuralError "OWNERSHIP" "provisional iota peer lookup changed its identity")
+    let type := psMetaInstantiate caller.context.metaContext type
+    if !psMetaExprScopeSafe context.metaContext context.localContext type then
+      throw (psElabMutualStructuralError "CLOSURE" "provisional iota peer type escapes the actual minor scope")
+    let _ ← psElabExpressionSort context type
+    current := {
+      current with
+      localContext := {
+        current.localContext with
+        declarations := .binding id name type binder :: current.localContext.declarations
+        nextId := max current.localContext.nextId (id + 1) }
+      auxiliaryLocalIds := id :: current.auxiliaryLocalIds }
+  return current
+
 def psElabMutualStructuralIotaAt (context : PsElabContext) (path : List Nat)
     (source : PsExpr) : Except PsElabError PsExpr := do
   match path with
@@ -1835,7 +1866,8 @@ def psElabMutualStructuralBranchValue (resultBinders : Nat)
     (source expected : PsExpr) : Except PsElabError PsExpr := do
   match resultBinders with
   | 0 =>
-    let reduced ← psElabMutualStructuralIotaAt context caller.casePath source
+    let checking ← psElabMutualStructuralIotaScope context caller
+    let reduced ← psElabMutualStructuralIotaAt checking caller.casePath source
     let branch := psWhnf context.environment context.metaContext context.localContext reduced
     let value ← psElabMutualStructuralRewrite 4096 plan caller context children branch
     let checked ← psElabResolvedTerm context value (some expected)

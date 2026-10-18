@@ -1,5 +1,33 @@
 # PSC0 v7.2 work state — M3+B
 
+## Actual file-parser controls, structural peer scope and additive bind authoring
+
+Preparation [39165573234](https://github.com/dwijayuda/pskernel/actions/runs/39165573234)
+at 8f3776fac070b70f3053086c551fd599c9938024 compiled the shared parser and
+registration code. Both authoring jobs passed, including the actual LawfulBEq
+native class/output/priority metadata. Foundation stopped on one native parser
+control: the category-testing API intentionally has no top-level saved position.
+The six unchanged negative sources now use the pinned file parser entry, which
+establishes that position. The eight native positive layout declarations compiled.
+
+Structural source-row iota checking now temporarily restores only exact checked
+provisional peer declarations. The subsequent recursive-call rewrite, strict-child
+checks and final branch checks retain their original peer-free scope. This
+addresses the shared unknown-local boundary observed at 440e; qualification follows.
+
+Option bind authoring is now additive after the frozen selected recursor and
+LawfulBEq stage. The original 117-declaration Order exporter and every earlier
+authoring boundary remain intact. A separate three-root export measures its actual
+missing closure and uses distinct source symbols. The prior complete 153-declaration
+replay remains evidence for the logical construction; no new asset is selected.
+The shared proof producer recognizes only generic Bind.bind and applies the
+checked monotone_bind law to action and continuation. Direct Option.bind retains
+the native automatic-monotonicity boundary.
+
+All existing source, kernel, metadata and backend gates remain mandatory.
+Final registry pins await independently observed digests. Compound-major match
+and complete paired execution are still under review. All six exits remain OPEN.
+
 ## Parser/registration build layout correction — qualification pending
 
 Preparation [39165393535](https://github.com/dwijayuda/pskernel/actions/runs/39165393535)

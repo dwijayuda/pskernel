@@ -1,0 +1,44 @@
+name: PSC0 Lean-Wasm native admission corpus (Lean 4.35)
+on:
+  push:
+    branches:
+      - feature/psc0-v72-lean435-wasm-native-corpus-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-corpus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: psc0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Validate native corpus harness
+        run: |
+          set -euo pipefail
+          node --check psc0/packages/pskernel-lean-wasm/scripts/check-native-corpus.mjs
+          node --check psc0/packages/pskernel-lean-wasm/scripts/run-provider.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Build exact native 4.35.0 same-source kernel endpoint
+        working-directory: psc0/v7-native
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build pskernel_lean_wasm_native_ref
+      - name: Check real native official-kernel admissions
+        working-directory: psc0
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/scripts/check-native-corpus.mjs \
+            v7-native/.lake/build/bin/pskernel_lean_wasm_native_ref

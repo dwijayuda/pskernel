@@ -1,5 +1,14 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Parser/registration build layout correction — qualification pending
+
+Preparation [39165393535](https://github.com/dwijayuda/pskernel/actions/runs/39165393535)
+at 86fda802ab256a4d1c555c458529a8dcb4362774 stopped all three jobs during
+the shared build. The registration helper now uses an ordinary match expression;
+the selected parser's multiline local-declaration call has corrected indentation.
+The parser scope, checked dictionary policy, native controls and all existing
+gates are unchanged. No new source or runtime qualification is claimed.
+
 ## Scoped Lean layout and checked indexed equality law — qualification pending
 
 Preparation [39164763898](https://github.com/dwijayuda/pskernel/actions/runs/39164763898)

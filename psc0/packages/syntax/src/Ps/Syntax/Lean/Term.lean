@@ -183,8 +183,9 @@ def psLeanTermAtPrecedenceWithPosition (annotation : Bool) (minimum fuel : Nat)
       else if psTokenCursorAtText cursor "let" then
         if (cursor.remaining.drop 1).head?.any (fun token => [":", ":="].contains token.text) then
           psLeanTermLocal readPositioned readTypePositioned continuation false cursor
-        else psPscv0ReadLetWithSeparator readPositioned readTypePositioned
-          continuation psLeanBodySeparator fuel cursor
+        else
+          psPscv0ReadLetWithSeparator readPositioned readTypePositioned
+            continuation psLeanBodySeparator fuel cursor
       else if psTokenCursorAtText cursor "have" then
         psLeanTermLocal readPositioned readTypePositioned continuation true cursor
       else if psTokenCursorAtText cursor "show" then psPscv0ReadShow read readType cursor

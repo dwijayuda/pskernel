@@ -34,9 +34,10 @@ def psStandardRegisterClass (environment : PsEnvironment) (name : String) : PsEn
 -- already belong to the checked unsigned dependency closure.
 def psStandardLawfulBEqExtend (environment : PsEnvironment) : PsEnvironment :=
   let className := psRootName "LawfulBEq"
-  let some _ := psEnvironmentFindInductive environment className | environment
-  let some dictionary := psEnvironmentFind environment (psDecisionName "Nat.instLawfulBEq")
-    | environment
-  let environment := if environment.classes.any (psNameEq className) then environment
-    else psStandardRegisterClass environment "LawfulBEq"
-  psStandardRegisterInstances environment "LawfulBEq" [dictionary] 1000
+  match psEnvironmentFindInductive environment className,
+      psEnvironmentFind environment (psDecisionName "Nat.instLawfulBEq") with
+  | some _, some dictionary =>
+    let environment := if environment.classes.any (psNameEq className) then environment
+      else psStandardRegisterClass environment "LawfulBEq"
+    psStandardRegisterInstances environment "LawfulBEq" [dictionary] 1000
+  | _, _ => environment

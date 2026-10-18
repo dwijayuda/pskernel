@@ -1194,9 +1194,6 @@ private def checkIndexedBEq (directory : System.FilePath)
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_INDEXED_BEQ: PASS checked Nat/Bool defining laws, constructor-directed successor indices, native fixed-prefix Fin payloads, ordinary recursor instances and parameter dictionaries, retained missing-function-dictionary refusal; five-target runtime parity follows"
 
-end M3InductiveDeriving
-
-open M3InductiveDeriving in
 private def checkDataUnary (directory : System.FilePath)
     (prelude : Lean.Kernel.Environment) : IO Unit := do
   IO.FS.createDirAll directory
@@ -1256,6 +1253,9 @@ private def checkDataUnary (directory : System.FilePath)
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_DATA_UNARY: PASS paired checked omitted universes and fixed-prefix metadata, ordinary constructor parameters and dependent nested fields, shifted real recursive ordinals, exact Fin dictionaries and nonempty indexed BEq law, native Hashable/Repr observations, retained ambiguous-universe and function-dictionary refusals, four exports and five-target emission; runtime parity follows"
 
+end M3InductiveDeriving
+
+open M3InductiveDeriving in
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)

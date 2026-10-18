@@ -2310,6 +2310,16 @@ def psLeanPatternHeadEq
             rightName.segments
       | _ => false
 
+  | .dotCtor leftName _ _ =>
+      match right with
+      | .dotCtor rightName _ _ =>
+          psLeanStringListEq leftName.segments rightName.segments
+      | _ => false
+  | .inaccessible leftPattern =>
+      match right with
+      | .inaccessible rightPattern => psLeanPatternHeadEq leftPattern rightPattern
+      | _ => false
+
 def psLeanPatternListContainsHead
     (patterns : List PsSyntaxPattern)
     (target : PsSyntaxPattern) : Bool :=

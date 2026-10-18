@@ -97,7 +97,7 @@ def psElabPatternParameter (branch : PsElaborator) (fuel : Nat)
       let head ← match pattern with
         | .dotCtor .. => do
           let some expected := expected | throw .matchExpectedType
-          let view := psExprAppView
+          let view := psReduceAppView
             (psWhnf context.environment context.metaContext context.localContext expected)
           let .constE family _ := view.head | throw .matchScrutineeUnsupported
           let some familyInfo := psEnvironmentFindInductive context.environment family

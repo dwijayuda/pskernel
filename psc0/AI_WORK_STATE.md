@@ -2,6 +2,23 @@
 
 ## Checked source owners and dependent data candidate
 
+### Preparation build correction
+
+[Preparation 39174010287](https://github.com/dwijayuda/pskernel/actions/runs/39174010287)
+at 05761a66fed3deb58add5fad1263dfa38273a27c stopped in the shared build:
+ParseLean's pattern-head comparison lacked the two new pattern variants, and
+PatternSyntax referenced an application-view helper outside its import closure.
+No new Data behavior or final Fin digest was observed. This child corrects those
+owners and restores the Data fixture helper inside its original namespace.
+No semantic gate, expected runtime value, frozen stage or resource limit changes.
+
+Before that build, the independent native P1 commands and execution passed:
+abbrev/opaque heads returned 29/31, and same-clique where forms returned 37/39.
+The opaque main's helper and packed model remain ordinary definitions. Its
+public unfolding getter returns none, while the helper getter cannot produce
+its unfolding theorem. The remaining opaque P1 producer/runtime policy must
+preserve this actual distinction.
+
 [Preparation 39171716053](https://github.com/dwijayuda/pskernel/actions/runs/39171716053)
 at 65b510dc18ee9fa47cac7b28b6d672de73ea3f44 completed with failures in the
 remaining input-parity equality conversion and a stale successor-index refusal.

@@ -680,6 +680,7 @@ def psElabPreDefinitionBatch (environment : PsEnvironment)
     batch := {
       declarations := staged.declarations
       sourceInfo := members.flatMap (·.sourceInfo)
-      diagnostics := members.flatMap (·.diagnostics) }
+      diagnostics := members.flatMap (·.diagnostics)
+      structuralHelpers := members.flatMap (·.structuralHelpers) }
     members }
 

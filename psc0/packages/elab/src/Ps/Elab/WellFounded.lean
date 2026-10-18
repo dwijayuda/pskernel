@@ -1,3 +1,4 @@
+import Ps.Elab.CoreBoundary
 import Ps.Elab.Proof
 import Ps.Elab.RecursionParameters
 import Ps.Elab.Universe
@@ -485,6 +486,7 @@ structure PsElabWellFoundedCoreMinor where
   body : PsExpr
   domain : PsExpr
   callbacks : List PsExpr
+  discrIds : List Nat
 
 structure PsElabWellFoundedCoreRecursor where
   context : PsElabContext
@@ -492,7 +494,18 @@ structure PsElabWellFoundedCoreRecursor where
   minors : List PsElabWellFoundedCoreMinor
   indices : List PsExpr
   major : PsExpr
-  suffix : List PsExpr
+  arguments : List PsExpr
+
+structure PsElabWellFoundedCoreSource where
+  outer : PsElabContext
+  scope : PsElabSavedScope
+  bindersRev : List PsElabTypedBinder
+  body : PsExpr
+  type : PsExpr
+  expected : PsExpr
+  arguments : List PsExpr
+  callbacks : List PsExpr
+  discrIds : List Nat
 
 def psElabWellFoundedCoreHasCalls (calls : List PsElabWellFoundedCoreCall)
     (term : PsExpr) : Bool :=
@@ -575,11 +588,88 @@ def psElabWellFoundedCoreApply (context : PsElabContext)
     (fresh.expr :: states ++ arguments.drop recursion.parameterIds.length)
   return result
 
--- All canonical motive slots acquire the same callback arrows. Only the
--- selected slot substitutes its actual direct-fvar indices/major. This keeps
--- the complete mutual/nested recursor well typed without inventing an IH.
+-- Ownership is supplied by checked source/primitive descriptors. A source
+-- flag only permits a substitution when its actual current argument is a fvar.
+def psElabWellFoundedCoreReplacements (ids : List Nat)
+    (originals currents : List PsExpr) : List (Nat × PsExpr) :=
+  (originals.zip currents).reverse.filterMap fun (original, current) =>
+    match original with
+    | .fvar id => if ids.contains id then some (id, current) else none
+    | _ => none
+
+def psElabWellFoundedCoreCallbackBinders (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (replacements : List (Nat × PsExpr)) :
+    Except PsElabError (PsElabContext × List PsElabTypedBinder) :=
+  calls.foldlM (fun (state : PsElabContext × List PsElabTypedBinder) call => do
+    let type ← (psInferType state.fst.environment state.fst.metaContext
+      state.fst.localContext call.callback).mapError PsElabError.infer
+    let type := psElabSubstituteLocals replacements
+      (psMetaInstantiate state.fst.metaContext type)
+    let _ ← psElabExpressionSort state.fst type
+    let name := call.recursion.callbackName
+    let pushed := psLocalPushBinding state.fst.localContext name type .explicit
+    let context := psElabContextWithLocal state.fst pushed.context
+    let context := { context with auxiliaryLocalIds := pushed.id :: context.auxiliaryLocalIds }
+    return (context, PsElabTypedBinder.mk pushed.id name type .explicit :: state.snd))
+    (context, [])
+
+-- The entire ds/Y telescope is opened before the callback domains are formed.
+-- Source equation proofs follow these callbacks; they keep their original sides.
+def psElabWellFoundedCorePrepareSource (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (flags : List Bool) (proofCount : Nat)
+    (value type : PsExpr) (arguments : List PsExpr) :
+    Except PsElabError (Option PsElabWellFoundedCoreSource) := do
+  if arguments.length != flags.length + proofCount then
+    throw (.data "PSCV0-WF-BOUNDARY: source argument ownership arity mismatch")
+  if calls.isEmpty then return none
+  let raw := arguments.take flags.length
+  let ids := (raw.zip flags).filterMap fun (argument, allowed) =>
+    if allowed then
+      match argument with | .fvar id => some id | _ => none
+    else none
+  if ids.isEmpty then return none
+  let source ← psElabApplyCore context value arguments
+  let majors ← psElabOpenCoreTelescope 4096 source.context type (some flags.length)
+  let majorArguments := psElabBinderArguments majors.bindersRev
+  let replacements := ((raw.zip flags).zip majorArguments).reverse.filterMap fun entry =>
+    let ((original, allowed), current) := entry
+    if allowed then
+      match original with | .fvar id => some (id, current) | _ => none
+    else none
+  let (callbackContext, callbackBinders) ←
+    psElabWellFoundedCoreCallbackBinders majors.context calls replacements
+  let callbacks := psElabBinderArguments callbackBinders
+  let proofs ← psElabOpenCoreTelescope 4096 callbackContext majors.body (some proofCount)
+  let proofArguments := psElabBinderArguments proofs.bindersRev
+  let body := psElabWellFoundedCoreBeta 4096
+    (psExprApplyMany value (majorArguments ++ proofArguments))
+  let body ← psElabResolvedTerm proofs.context body (some proofs.body)
+  let bindersRev := proofs.bindersRev ++ callbackBinders ++ majors.bindersRev
+  let domain := psCloseElabForallBinders body.context.metaContext bindersRev body.type
+  let closed := psCloseElabLambdaBinders body.context.metaContext bindersRev body.term
+  let outer := psElabLeaveScope context body.context
+  let closed ← psElabResolvedTerm outer closed (some domain)
+  let actual := raw ++ calls.map (·.callback) ++ arguments.drop flags.length
+  let applied ← psElabApplyCore closed.context closed.term actual
+  let checked ← psElabResolvedTerm applied.context applied.term (some source.type)
+  let discrIds := replacements.filterMap fun entry =>
+    match entry.snd with | .fvar id => some id | _ => none
+  return some {
+    outer := checked.context
+    scope := psElabSaveScope body.context
+    bindersRev
+    body := body.term
+    type := domain
+    expected := source.type
+    arguments := actual
+    callbacks
+    discrIds := discrIds.eraseDups }
+
+-- The result-prefix length is actual MatchPlan ownership, not the number of
+-- forall binders left by the user's result. Companion motive slots own none.
 def psElabWellFoundedCoreMotive (context : PsElabContext)
-    (calls : List PsElabWellFoundedCoreCall) (view : PsEliminationRecursorApplication)
+    (calls : List PsElabWellFoundedCoreCall) (ids : List Nat)
+    (view : PsEliminationRecursorApplication) (prefixArguments : List PsExpr)
     (slot : PsInductiveEliminationSlot) (index : Nat) :
     Except PsElabError PsElabTermResult := do
   let some motive := view.fixedArgs[view.info.numParams + index]?
@@ -590,34 +680,33 @@ def psElabWellFoundedCoreMotive (context : PsElabContext)
     (some (slot.family.numIndices + 1))
   let arguments := psElabBinderArguments opened.bindersRev
   let value ← psElabApplyCore opened.context motive arguments
-  let discriminants := view.indices ++ [view.major]
+  let count := if index == view.slotIndex then prefixArguments.length else 0
+  let result ← psElabOpenCoreTelescope 4096 value.context value.term (some count)
+  let resultArguments := psElabBinderArguments result.bindersRev
   let replacements := if index == view.slotIndex then
-    (discriminants.zip arguments).reverse.filterMap fun (original, current) =>
-      match original with
-      | .fvar id => some (id, current)
-      | _ => none
+    psElabWellFoundedCoreReplacements ids
+      (view.indices ++ [view.major] ++ prefixArguments)
+      (arguments ++ resultArguments)
     else []
-  let domains ← calls.mapM fun call => do
-    let type ← (psInferType value.context.environment value.context.metaContext
-      value.context.localContext call.callback).mapError PsElabError.infer
-    let type := psElabSubstituteLocals replacements
-      (psMetaInstantiate value.context.metaContext type)
-    let _ ← psElabExpressionSort value.context type
-    return (call.recursion.callbackName, type)
-  let body := domains.foldr (fun (name, type) body =>
-    PsExpr.forallE name type (psExprLiftBVars 1 0 body) .explicit) value.term
-  let term := psCloseElabLambdaBinders value.context.metaContext opened.bindersRev body
-  psElabResolvedTerm (psElabLeaveScope context value.context) term none
+  let (inner, callbacks) ←
+    psElabWellFoundedCoreCallbackBinders result.context calls replacements
+  let body := psCloseElabForallBinders inner.metaContext
+    (callbacks ++ result.bindersRev) result.body
+  let term := psCloseElabLambdaBinders inner.metaContext opened.bindersRev body
+  psElabResolvedTerm (psElabLeaveScope context inner) term none
 
 def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
-    (calls : List PsElabWellFoundedCoreCall) (view : PsEliminationRecursorApplication)
+    (calls : List PsElabWellFoundedCoreCall) (ids : List Nat)
+    (view : PsEliminationRecursorApplication) (prefixArguments : List PsExpr)
     (original : PsExpr) : Except PsElabError (Option PsElabWellFoundedCoreRecursor) := do
   if calls.isEmpty || psEliminationRecursorUsesHypotheses view then return none
+  if !view.suffix.isEmpty then
+    throw (.data "PSCV0-WF-BOUNDARY: primitive value contains unowned result arguments")
   if (view.fixedArgs.take (view.info.numParams + view.info.numMotives)).any
       (psElabWellFoundedCoreHasCalls calls) then return none
   let (context, motives) ← view.plan.slots.zipIdx.foldlM
     (fun (state : PsElabContext × List PsExpr) (slot, index) => do
-      let motive ← psElabWellFoundedCoreMotive state.fst calls view slot index
+      let motive ← psElabWellFoundedCoreMotive state.fst calls ids view prefixArguments slot index
       return (motive.context, state.snd ++ [motive.term])) (context, [])
   let some motive := motives[view.slotIndex]? | throw .matchRecursorUnsupported
   let motiveLevel ← psElabMatchMotiveLevel context motive
@@ -628,21 +717,26 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
   let levels ← psElabRecursorLevels anchor view.info familyLevels motiveLevel
   let recursorBase ← psElabApplyCore context (.constE view.info.name levels)
     (view.fixedArgs.take view.info.numParams ++ motives)
-  let constructors := view.plan.slots.flatMap (·.constructors)
+  let constructors := view.plan.slots.zipIdx.flatMap fun (slot, owner) =>
+    slot.constructors.map fun constructor => (owner, constructor)
   if constructors.length != view.info.numMinors then throw .matchRecursorUnsupported
+  let selectedRoot := (view.indices ++ [view.major]).any fun argument =>
+    match argument with | .fvar id => ids.contains id | _ => false
   let mut current := recursorBase.context
   let mut cursor := recursorBase.type
   let mut minors : List PsElabWellFoundedCoreMinor := []
   let mut values : List PsExpr := []
   let mut refined := false
-  for (constructor, index) in constructors.zipIdx do
+  for ((owner, constructor), index) in constructors.zipIdx do
     let pi ← (psInferEnsureForall current.environment current.metaContext
       current.localContext cursor).mapError PsElabError.infer
     let count := constructor.info.numFields + constructor.recursiveFields.length
+    let resultCount := if owner == view.slotIndex then prefixArguments.length else 0
     let opened ← psElabOpenCoreTelescope 4096 current pi.domain
-      (some (count + calls.length))
+      (some (count + resultCount + calls.length))
     let arguments := psElabBinderArguments opened.bindersRev
-    let callbacks := arguments.drop count
+    let resultArguments := (arguments.drop count).take resultCount
+    let callbacks := arguments.drop (count + resultCount)
     if callbacks.length != calls.length then throw .matchRecursorUnsupported
     let callbackIds := callbacks.filterMap fun value =>
       match value with | .fvar id => some id | _ => none
@@ -651,7 +745,7 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
     let some minor := view.fixedArgs[view.info.numParams + view.info.numMotives + index]?
       | throw .matchRecursorUnsupported
     let body := psElabWellFoundedCoreBeta 4096
-      (psExprApplyMany minor (arguments.take count))
+      (psExprApplyMany minor (arguments.take (count + resultCount)))
     let checked ← psElabResolvedTerm inner body (some opened.body)
     for (call, callback) in calls.zip callbacks do
       let originalType ← (psInferType checked.context.environment checked.context.metaContext
@@ -661,6 +755,19 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
       if !psDefEqReadOnlyWithEnv checked.context.environment checked.context.metaContext
           checked.context.localContext originalType currentType then
         refined := true
+    -- Further compiler splits may inspect actual constructor fields of an
+    -- already authorized source discriminator. Computed-source aliases do not
+    -- confer this authority. IHs and arbitrary result suffixes never do either.
+    let fieldIds :=
+      if owner == view.slotIndex && selectedRoot then
+        (arguments.take constructor.info.numFields).filterMap fun argument =>
+          match argument with | .fvar id => some id | _ => none
+      else []
+    let replacements := if owner == view.slotIndex then
+      psElabWellFoundedCoreReplacements ids prefixArguments resultArguments else []
+    let resultIds := replacements.filterMap fun entry =>
+      match entry.snd with | .fvar id => some id | _ => none
+    let discrIds := (fieldIds ++ resultIds ++ ids).eraseDups
     let closed := psCloseElabLambdaBinders checked.context.metaContext
       opened.bindersRev checked.term
     let result ← psElabResolvedTerm (psElabLeaveScope current checked.context)
@@ -670,7 +777,8 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
       bindersRev := opened.bindersRev
       body := checked.term
       domain := pi.domain
-      callbacks }]
+      callbacks
+      discrIds }]
     values := values ++ [result.term]
     current := result.context
     cursor := psExprInstantiate1 pi.body result.term
@@ -678,109 +786,211 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
   let originalType ← (psInferType current.environment current.metaContext
     current.localContext original).mapError PsElabError.infer
   let extended := psExprApplyMany recursorBase.term
-    (values ++ view.indices ++ [view.major] ++ calls.map (·.callback) ++ view.suffix)
+    (values ++ view.indices ++ [view.major] ++ prefixArguments ++ calls.map (·.callback))
   let checked ← psElabResolvedTerm current extended (some originalType)
   return some {
     context := checked.context
     recursorBase := recursorBase.term
-    minors, indices := view.indices, major := view.major, suffix := view.suffix }
+    minors
+    indices := view.indices
+    major := view.major
+    arguments := prefixArguments }
 
--- The optional compiler transport has the native addArg? fallback. No failed
--- preparation state or proof goal escapes; resource failures remain visible.
-def psElabWellFoundedCoreTryRecursor (context : PsElabContext)
-    (calls : List PsElabWellFoundedCoreCall) (view : PsEliminationRecursorApplication)
-    (original : PsExpr) : Except PsElabError (Option PsElabWellFoundedCoreRecursor) :=
-  match psElabWellFoundedCorePrepareRecursor context calls view original with
-  | .ok result => .ok result
-  | .error error => if psElabErrorIsResource error then .error error else .ok none
-
+-- A pure preparation walk leaves the typed source peers intact. It can check
+-- every completed compiler telescope and report real branch refinement before
+-- any decrease metavariable is allocated. Row bodies end compiler ownership.
 abbrev PsElabWellFoundedCoreRewriter :=
-  PsElabContext → List PsElabWellFoundedCoreCall → PsExpr →
-    Except PsElabError PsElabTermResult
+  Bool → PsElabContext → List PsElabWellFoundedCoreCall → Option (List Nat) → PsExpr →
+    Except PsElabError (PsElabTermResult × Bool)
 
 def psElabWellFoundedCoreFinishRecursor (rewrite : PsElabWellFoundedCoreRewriter)
-    (calls : List PsElabWellFoundedCoreCall) (plan : PsElabWellFoundedCoreRecursor) :
-    Except PsElabError PsElabTermResult := do
+    (preparing : Bool) (calls : List PsElabWellFoundedCoreCall)
+    (plan : PsElabWellFoundedCoreRecursor) :
+    Except PsElabError (PsElabTermResult × Bool) := do
   let mut current := plan.context
   let mut minors : List PsExpr := []
   for minor in plan.minors do
     let inner := psElabRestoreScope current minor.scope
     let branchCalls := (calls.zip minor.callbacks).map fun (call, callback) =>
       { call with callback }
-    let body ← rewrite inner branchCalls minor.body
+    let (body, _) ← rewrite preparing inner branchCalls (some minor.discrIds) minor.body
     let closed ← psElabWellFoundedCoreClose current body.context
       minor.bindersRev body.term minor.domain
     current := closed.context
     minors := minors ++ [closed.term]
   let (varyingContext, varying) ← (plan.indices ++ [plan.major]).foldlM
     (fun (state : PsElabContext × List PsExpr) term => do
-      let value ← rewrite state.fst calls term
+      let (value, _) ← rewrite preparing state.fst calls none term
       return (value.context, state.snd ++ [value.term])) (current, [])
-  let (suffixContext, suffix) ← plan.suffix.foldlM
+  let (suffixContext, arguments) ← plan.arguments.foldlM
     (fun (state : PsElabContext × List PsExpr) term => do
-      let value ← rewrite state.fst calls term
+      let (value, _) ← rewrite preparing state.fst calls none term
       return (value.context, state.snd ++ [value.term])) (varyingContext, [])
-  psElabResolvedTerm suffixContext
-    (psExprApplyMany plan.recursorBase (minors ++ varying ++ calls.map (·.callback) ++ suffix)) none
+  let result ← psElabResolvedTerm suffixContext
+    (psExprApplyMany plan.recursorBase
+      (minors ++ varying ++ arguments ++ calls.map (·.callback))) none
+  return (result, true)
 
-def psElabWellFoundedCoreRewrite (fuel : Nat) (context : PsElabContext)
-    (calls : List PsElabWellFoundedCoreCall) (source : PsExpr) :
+def psElabWellFoundedCoreProbeSource (rewrite : PsElabWellFoundedCoreRewriter)
+    (calls : List PsElabWellFoundedCoreCall) (plan : PsElabWellFoundedCoreSource) :
+    Except PsElabError (Option (PsElabWellFoundedCoreSource × PsElabTermResult)) := do
+  let inner := psElabRestoreScope plan.outer plan.scope
+  let branchCalls := (calls.zip plan.callbacks).map fun (call, callback) =>
+    { call with callback }
+  let (body, refined) ← rewrite true inner branchCalls (some plan.discrIds) plan.body
+  if !refined then return none
+  let closed ← psElabWellFoundedCoreClose plan.outer body.context
+    plan.bindersRev body.term plan.type
+  let applied ← psElabApplyCore closed.context closed.term plan.arguments
+  let checked ← psElabResolvedTerm applied.context applied.term (some plan.expected)
+  return some ({ plan with outer := checked.context }, checked)
+
+-- The native addArg? fallback applies to the complete attempted source matcher.
+-- No failed preparation state or proof goal escapes; wrapped resource failures
+-- remain visible. A later failure while replacing calls is an actual failure.
+def psElabWellFoundedCoreTrySource (rewrite : PsElabWellFoundedCoreRewriter)
+    (context : PsElabContext) (calls : List PsElabWellFoundedCoreCall)
+    (flags : List Bool) (proofCount : Nat) (value type : PsExpr) (arguments : List PsExpr) :
+    Except PsElabError (Option (PsElabWellFoundedCoreSource × PsElabTermResult)) :=
+  match (do
+    let some plan ← psElabWellFoundedCorePrepareSource context calls flags proofCount
+      value type arguments | return none
+    psElabWellFoundedCoreProbeSource rewrite calls plan) with
+  | .ok result => .ok result
+  | .error error => if psElabErrorIsResource error then .error error else .ok none
+
+def psElabWellFoundedCoreFinishSource (rewrite : PsElabWellFoundedCoreRewriter)
+    (calls : List PsElabWellFoundedCoreCall) (plan : PsElabWellFoundedCoreSource) :
     Except PsElabError PsElabTermResult := do
+  let inner := psElabRestoreScope plan.outer plan.scope
+  let branchCalls := (calls.zip plan.callbacks).map fun (call, callback) =>
+    { call with callback }
+  let (body, _) ← rewrite false inner branchCalls (some plan.discrIds) plan.body
+  let closed ← psElabWellFoundedCoreClose plan.outer body.context
+    plan.bindersRev body.term plan.type
+  let applied ← psElabApplyCore closed.context closed.term plan.arguments
+  psElabResolvedTerm applied.context applied.term (some plan.expected)
+
+def psElabWellFoundedCoreBoundaryArguments (context : PsElabContext)
+    (body : PsExpr) : Except PsElabError (List PsExpr) := do
+  let view := psExprAppView body
+  let .bvar 0 := view.head
+    | throw (.data "PSCV0-WF-BOUNDARY: checked marker is not a direct closure application")
+  for argument in view.args do
+    -- Inference in the outer scope also rejects any occurrence of the marker
+    -- binder or other loose bvars inside its arguments.
+    let _ ← (psInferType context.environment context.metaContext
+      context.localContext argument).mapError PsElabError.infer
+  return view.args
+
+def psElabWellFoundedCoreRewriteArguments (rewrite : PsElabWellFoundedCoreRewriter)
+    (preparing : Bool) (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (compiler : Option (List Nat))
+    (arguments : List PsExpr) :
+    Except PsElabError (PsElabContext × List PsExpr × Bool) :=
+  arguments.foldlM
+    (fun (state : PsElabContext × List PsExpr × Bool) argument => do
+      let (value, refined) ← rewrite preparing state.fst calls compiler argument
+      return (value.context, state.snd.fst ++ [value.term], state.snd.snd || refined))
+    (context, [], false)
+
+def psElabWellFoundedCoreRewrite (fuel : Nat) (preparing : Bool)
+    (context : PsElabContext) (calls : List PsElabWellFoundedCoreCall)
+    (compiler : Option (List Nat)) (source : PsExpr) :
+    Except PsElabError (PsElabTermResult × Bool) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
     let term := psElabWellFoundedCoreBeta 4096
       (psMetaInstantiate context.metaContext source)
     if !psElabWellFoundedCoreHasCalls calls term then
-      return ← psElabResolvedTerm context term none
+      return (← psElabResolvedTerm context term none, false)
     let rewrite := psElabWellFoundedCoreRewrite fuel
     let view := psExprAppView term
     if let .fvar id := view.head then
       if let some call := calls.find? (fun call => call.sourceId == id) then
-        let (context, arguments) ← view.args.foldlM
-          (fun (state : PsElabContext × List PsExpr) argument => do
-            let value ← rewrite state.fst calls argument
-            return (value.context, state.snd ++ [value.term])) (context, [])
-        return ← psElabWellFoundedCoreApply context calls call arguments
-    if let some recursor := psEliminationRecursorApplication context.environment term then
-      if let some plan ← psElabWellFoundedCoreTryRecursor context calls recursor term then
-        return ← psElabWellFoundedCoreFinishRecursor rewrite calls plan
+        let (argumentContext, arguments, refined) ←
+          psElabWellFoundedCoreRewriteArguments rewrite preparing context calls compiler view.args
+        if preparing then
+          return (← psElabApplyCore argumentContext (.fvar id) arguments, refined)
+        return (← psElabWellFoundedCoreApply argumentContext calls call arguments, refined)
+    -- Consume authenticated closures before pushing a local let declaration:
+    -- their unchecked source peers must never enter a decrease-goal scope.
+    if let .letE name type value body := term then
+      if let some boundary ← psElabCoreBoundaryMatch context name type value then
+        let arguments ← psElabWellFoundedCoreBoundaryArguments context body
+        let (argumentContext, arguments, _) ←
+          psElabWellFoundedCoreRewriteArguments rewrite preparing context calls none arguments
+        let original := psExprApplyMany value arguments
+        match boundary.kind with
+        | .source flags proofCount =>
+          if let some (plan, prepared) ← psElabWellFoundedCoreTrySource rewrite
+              argumentContext calls flags proofCount value type arguments then
+            if preparing then return (prepared, false)
+            return (← psElabWellFoundedCoreFinishSource rewrite calls plan, false)
+          -- An ill-typed optional extension or absence of actual alternative
+          -- refinement uses the original callback in the original source scope.
+          return ← rewrite preparing argumentContext calls none original
+        | .row =>
+          -- The checked RHS is only beta-instantiated. Its real lexical lets
+          -- were retained outside this marker; no source expression is re-elaborated.
+          return ← rewrite preparing argumentContext calls none original
+        | .primitive selectedSlot prefixArity =>
+          if arguments.length != prefixArity then
+            throw (.data "PSCV0-WF-BOUNDARY: primitive result-prefix arity mismatch")
+          if let some ids := compiler then
+            let some recursor := psEliminationRecursorApplication argumentContext.environment value
+              | throw (.data "PSCV0-WF-BOUNDARY: primitive is not its checked canonical recursor")
+            if recursor.slotIndex != selectedSlot then
+              throw (.data "PSCV0-WF-BOUNDARY: primitive recursor slot changed")
+            if let some plan ← psElabWellFoundedCorePrepareRecursor argumentContext calls
+                ids recursor arguments original then
+              return ← psElabWellFoundedCoreFinishRecursor rewrite preparing calls plan
+          return ← rewrite preparing argumentContext calls compiler original
     match term with
     | .app fn argument =>
-      let fn ← rewrite context calls fn
-      let argument ← rewrite fn.context calls argument
-      psElabApplyCore argument.context fn.term [argument.term]
+      let (fn, first) ← rewrite preparing context calls compiler fn
+      let (argument, second) ← rewrite preparing fn.context calls compiler argument
+      let result ← psElabApplyCore argument.context fn.term [argument.term]
+      return (result, first || second)
     | .lam name domain body binder =>
-      let domain ← rewrite context calls domain
+      let (domain, first) ← rewrite preparing context calls compiler domain
       let _ ← psElabExpressionSort domain.context domain.term
       let pushed := psLocalPushBinding domain.context.localContext name domain.term binder
       let inner := psElabContextWithLocal domain.context pushed.context
-      let body ← rewrite inner calls (psExprInstantiate1 body (.fvar pushed.id))
+      let (body, second) ← rewrite preparing inner calls compiler
+        (psExprInstantiate1 body (.fvar pushed.id))
       let binders := [PsElabTypedBinder.mk pushed.id name domain.term binder]
       let type ← psElabAbstractType domain.context body.context
         [.forallE pushed.id name domain.term binder] body.type
       let inner := psElabContextWithMeta body.context type.context.metaContext
-      psElabWellFoundedCoreClose domain.context inner binders body.term type.term
+      let result ← psElabWellFoundedCoreClose domain.context inner binders body.term type.term
+      return (result, first || second)
     | .forallE name domain body binder =>
-      let domain ← rewrite context calls domain
+      let (domain, first) ← rewrite preparing context calls compiler domain
       let _ ← psElabExpressionSort domain.context domain.term
       let pushed := psLocalPushBinding domain.context.localContext name domain.term binder
       let inner := psElabContextWithLocal domain.context pushed.context
-      let body ← rewrite inner calls (psExprInstantiate1 body (.fvar pushed.id))
-      psElabAbstractType domain.context body.context
+      let (body, second) ← rewrite preparing inner calls compiler
+        (psExprInstantiate1 body (.fvar pushed.id))
+      let result ← psElabAbstractType domain.context body.context
         [.forallE pushed.id name domain.term binder] body.term
+      return (result, first || second)
     | .letE name type value body =>
-      let type ← rewrite context calls type
-      let value ← rewrite type.context calls value
+      let (type, first) ← rewrite preparing context calls compiler type
+      let (value, second) ← rewrite preparing type.context calls compiler value
       let value ← psElabResolvedTerm value.context value.term (some type.term)
       let pushed := psLocalPushLet value.context.localContext name type.term value.term
       let inner := psElabContextWithLocal value.context pushed.context
-      let body ← rewrite inner calls (psExprInstantiate1 body (.fvar pushed.id))
-      psElabCloseLetScope value.context body pushed.id name type.term value.term none
+      let (body, third) ← rewrite preparing inner calls compiler
+        (psExprInstantiate1 body (.fvar pushed.id))
+      let result ← psElabCloseLetScope value.context body pushed.id name type.term value.term none
+      return (result, first || second || third)
     | .proj name index value =>
-      let value ← rewrite context calls value
-      psElabResolvedTerm value.context (.proj name index value.term) none
-    | _ => psElabResolvedTerm context term none
+      let (value, refined) ← rewrite preparing context calls compiler value
+      let result ← psElabResolvedTerm value.context (.proj name index value.term) none
+      return (result, refined)
+    | _ => return (← psElabResolvedTerm context term none, false)
 
 def psElabWellFoundedCoreCalls (context : PsElabContext)
     (calls : List PsElabWellFoundedCoreCall) (body expected : PsExpr) :
@@ -803,7 +1013,7 @@ def psElabWellFoundedCoreCalls (context : PsElabContext)
       throw (.data "PSCV0-WF-INTERNAL: source call peer changed its checked telescope")
     let _ ← psElabResolvedTerm context call.callback none
   let context := { context with wellFoundedRecursions := [] }
-  let result ← psElabWellFoundedCoreRewrite 4096 context calls body
+  let (result, _) ← psElabWellFoundedCoreRewrite 4096 false context calls none body
   psElabResolvedTerm result.context result.term (some expected)
 
 def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)

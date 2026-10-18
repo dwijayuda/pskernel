@@ -275,6 +275,7 @@ lean_lib PsElab where
     `Ps.Elab.Postponed,
     `Ps.Elab.Universe,
     `Ps.Elab.Abstraction,
+    `Ps.Elab.CoreBoundary,
     `Ps.Elab.Binders,
     `Ps.Elab.Goals,
     `Ps.Elab.GoalSource,

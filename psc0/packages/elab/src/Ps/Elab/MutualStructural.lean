@@ -4,6 +4,7 @@ import Ps.Elab.RecursorEquation
 import Ps.Meta.Recursor
 import Ps.Elab.StructuralField
 import Ps.Elab.RecursionParameters
+import Ps.Elab.Data
 
 -- Direct structural mutual definitions use the same ownership invariant as
 -- pinned Lean Structural.Positions: every source function occupies exactly
@@ -271,9 +272,9 @@ def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
   let caseBody ← psElabResolvedTerm opened.context located.body (some header.openType)
   if !psElabMutualStructuralEqual caseBody.context body caseBody.term then
     throw (psElabMutualStructuralError "RESULT" "located case template differs from the retained source body")
-  let context := { caseBody.context with localContext :=
-    { caseBody.context.localContext with nextId :=
-      max caseBody.context.localContext.nextId located.context.localContext.nextId } }
+  let context := { caseBody.context with
+    localContext := { caseBody.context.localContext with
+      nextId := max caseBody.context.localContext.nextId located.context.localContext.nextId } }
   return {
     header, sourceHeader, sourceBody, bodyBindersRev, span, ownBinders, context
     body, peers, application, familyLevels, majorId, indexIds, sourceInfo
@@ -301,10 +302,26 @@ structure PsElabMutualStructuralFunction where
   fixed : List (Nat × PsExpr)
   stateBinders : List PsElabTypedBinder
 
+structure PsElabMutualStructuralPredicate where
+  declarations : List PsDeclaration
+  families : List PsInductiveInfo
+  parameters : List PsExpr
+  levels : List PsLevel
+
 structure PsElabMutualStructuralDescendants where
   componentLevel : PsLevel
   level : PsLevel
   motives : List PsExpr
+  predicate? : Option PsElabMutualStructuralPredicate := none
+
+def psElabMutualStructuralHelperDeclarations
+    (descendants? : Option PsElabMutualStructuralDescendants) : List PsDeclaration :=
+  match descendants? with
+  | none => []
+  | some descendants =>
+    match descendants.predicate? with
+    | none => []
+    | some predicate => predicate.declarations
 
 structure PsElabMutualStructuralPlan where
   context : PsElabContext
@@ -317,6 +334,21 @@ structure PsElabMutualStructuralPlan where
   functions : List PsElabMutualStructuralFunction
   positions : List (Nat × List Nat)
   descendants? : Option PsElabMutualStructuralDescendants := none
+
+def psElabMutualStructuralHelperOwnership (plan : PsElabMutualStructuralPlan) :
+    Except PsElabError (List PsElabStructuralHelperOwnership) := do
+  match plan.descendants? with
+  | none => return []
+  | some descendants =>
+    match descendants.predicate? with
+    | none => return []
+    | some predicate =>
+      let first :: _ := plan.functions
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helpers have no source owner")
+      return [{
+        owner := first.input.header.name
+        families := predicate.families
+        declarations := predicate.declarations }]
 
 def psElabMutualStructuralParameterOwners (inputs : List PsElabMutualStructuralInput) :
     Except PsElabError (List PsElabRecursionParameterOwner) := do
@@ -867,10 +899,232 @@ def psElabMutualStructuralNeedsDescendantsFor (plan : PsElabMutualStructuralPlan
         fn.input.caseBody) then return true
   return false
 
--- This is the pinned below construction expressed with the already admitted
--- complete recursor. It creates no declaration or new proof primitive. The
--- recursor's type-valued fold records, for each actual recursive field, its
--- source components together with the field's own descendant dictionary.
+-- Inductive predicates have a separate below owner. Each helper is an
+-- ordinary Prop family indexed by the original indices and original proof.
+-- Its parameters are the checked common capture/fixed telescope; its motive
+-- payload is specialized to this SCC, so no provisional function is a field.
+def psElabMutualStructuralPredicateHeaders (plan : PsElabMutualStructuralPlan) :
+    Except PsElabError (List PsInductiveInfo) := do
+  let first :: _ := plan.functions
+    | throw (psElabMutualStructuralError "OWNERSHIP" "predicate below has no source owner")
+  let parametersRev := plan.fixedRev ++ plan.capturesRev
+  let levels := plan.context.levelNames
+  plan.elimination.slots.zipIdx.mapM fun (slot, slotIndex) => do
+    let some typeFormer := psInductiveEliminationInstantiate plan.elimination
+        plan.familyLevels plan.uniformArgs slot.typeFormer
+      | throw (psElabMutualStructuralError "FAMILY" "predicate below family did not instantiate")
+    let checked ← psElabResolvedTerm plan.context typeFormer none
+    let opened ← psElabOpenCoreTelescope 4096 checked.context checked.type
+      (some slot.family.numIndices)
+    let .sortE level := psWhnf opened.context.environment opened.context.metaContext
+        opened.context.localContext opened.body
+      | throw (psElabMutualStructuralError "FAMILY" "predicate family does not end in a Sort")
+    if !psLevelEquivalent level .zero then
+      throw (psElabMutualStructuralError "PREDICATE-SORT" "predicate below requires every canonical family to inhabit Prop")
+    let majorType := psExprApplyMany checked.term (psElabBinderArguments opened.bindersRev)
+    let body := PsExpr.forallE (psRootName "_proof") majorType (.sortE .zero) .explicit
+    let type := psCloseElabForallBinders opened.context.metaContext parametersRev
+      (psCloseElabForallBinders opened.context.metaContext opened.bindersRev body)
+    if psExprHasUnresolvedMeta type || !psExprFVarsInContext psLocalEmpty type then
+      throw (psElabMutualStructuralError "CLOSURE" "predicate below header retains an unowned local")
+    let _ ← psElabExpressionSort (psElabContextEmpty plan.context.environment levels) type
+    let name := psNameAppendNum (psNameAppendStr first.input.header.name "_below") slotIndex
+    let constructors := slot.constructors.map fun constructor =>
+      psNameAppendNum (psNameAppendStr name "_intro") constructor.info.constructorIndex
+    return {
+      name, levelParams := levels, type
+      numParams := parametersRev.length
+      numIndices := slot.family.numIndices + 1
+      constructors, isStructure := false }
+
+def psElabMutualStructuralPredicateConstructor (plan : PsElabMutualStructuralPlan)
+    (context : PsElabContext) (families : List PsInductiveInfo)
+    (slotIndex : Nat) (owner : PsInductiveEliminationSlot)
+    (constructor : PsInductiveEliminationConstructor) :
+    Except PsElabError PsDeclaration := do
+  let some family := families[slotIndex]?
+    | throw (psElabMutualStructuralError "OWNERSHIP" "predicate constructor has no helper family")
+  let some name := family.constructors[constructor.info.constructorIndex]?
+    | throw (psElabMutualStructuralError "OWNERSHIP" "predicate constructor has no helper position")
+  let recursiveInfo := { constructor.info with
+    recursiveFields := constructor.recursiveFields.map Prod.fst }
+  if !psInductiveEliminationConstructorMetadataValid owner constructor ||
+      !psConstructorRecursiveFieldsOrdered recursiveInfo then
+    throw (psElabMutualStructuralError "FIELD-METADATA" "predicate below requires exact canonical recursive fields")
+  let parametersRev := plan.fixedRev ++ plan.capturesRev
+  let parameters := psElabBinderArguments parametersRev
+  let levels := plan.context.levelNames.map PsLevel.param
+  let some head := psInductiveEliminationInstantiate plan.elimination
+      plan.familyLevels plan.uniformArgs constructor.head
+    | throw (psElabMutualStructuralError "CONSTRUCTOR" "predicate original constructor did not instantiate")
+  let checked ← psElabResolvedTerm context head none
+  let opened ← psElabOpenCoreTelescope 4096 checked.context checked.type
+    (some constructor.info.numFields)
+  let fields := opened.bindersRev.reverse
+  let major := psExprApplyMany checked.term (fields.map (fun field => .fvar field.id))
+  let majorType ← (psInferType opened.context.environment opened.context.metaContext
+    opened.context.localContext major).mapError PsElabError.infer
+  let original ← psElabMutualStructuralFamilyAt plan opened.context slotIndex majorType
+  let mut current := opened.context
+  let mut payloadRev : List PsElabTypedBinder := []
+  for ((fieldIndex, targetSlot), position) in constructor.recursiveFields.zipIdx do
+    let some field := fields[fieldIndex]?
+      | throw (psElabMutualStructuralError "FIELD-METADATA" "predicate payload has no actual original field")
+    let some target := families[targetSlot]?
+      | throw (psElabMutualStructuralError "OWNERSHIP" "predicate child has no helper family")
+    let arguments ← psElabOpenCoreTelescope 4096 current field.type none
+    let childFamily ← psElabMutualStructuralFamilyAt plan arguments.context targetSlot arguments.body
+    let child := psExprApplyMany (.fvar field.id) (psElabBinderArguments arguments.bindersRev)
+    let below := psExprApplyMany (.constE target.name levels)
+      (parameters ++ childFamily.indices ++ [child])
+    let below ← psElabResolvedTerm arguments.context below (some (.sortE .zero))
+    let motive ← psElabMutualStructuralOwnedType plan below.context .zero
+      targetSlot childFamily.indices child
+    let belowType := psCloseElabForallBinders below.context.metaContext
+      arguments.bindersRev below.term
+    let motiveType := psCloseElabForallBinders below.context.metaContext
+      arguments.bindersRev motive
+    current := psElabLeaveScope current below.context
+    let belowName := psNameAppendNum (psRootName "_below") position
+    let pushedBelow := psLocalPushBinding current.localContext belowName belowType .explicit
+    current := psElabContextWithLocal current pushedBelow.context
+    let belowBinder : PsElabTypedBinder := {
+      id := pushedBelow.id, name := belowName, type := belowType, binder := .explicit }
+    let motiveName := psNameAppendNum (psRootName "_motive") position
+    let pushedMotive := psLocalPushBinding current.localContext motiveName motiveType .explicit
+    current := psElabContextWithLocal current pushedMotive.context
+    let motiveBinder : PsElabTypedBinder := {
+      id := pushedMotive.id, name := motiveName, type := motiveType, binder := .explicit }
+    payloadRev := motiveBinder :: belowBinder :: payloadRev
+  let result := psExprApplyMany (.constE family.name levels)
+    (parameters ++ original.indices ++ [major])
+  let checkedResult ← psElabResolvedTerm current result (some (.sortE .zero))
+  let fieldsRev := payloadRev ++ opened.bindersRev
+  -- The retained original fields are not recursive occurrences of the new
+  -- helper group. Recompute positions from the complete new constructor.
+  let recursiveFields ← psElabDataRecursiveFields checkedResult.context
+    { members := families } parameters fieldsRev.reverse
+  let expectedFields := constructor.recursiveFields.zipIdx.map fun (_, position) =>
+    constructor.info.numFields + 2 * position
+  if recursiveFields != expectedFields then
+    throw (psElabMutualStructuralError "FIELD-METADATA" "predicate helper recursive fields differ from their owned below payloads")
+  let type := psCloseElabImplicitBinders checkedResult.context.metaContext parametersRev
+    (psCloseElabForallBinders checkedResult.context.metaContext fieldsRev checkedResult.term)
+  if psExprHasUnresolvedMeta type || !psExprFVarsInContext psLocalEmpty type then
+    throw (psElabMutualStructuralError "CLOSURE" "predicate helper constructor retains an unowned local")
+  let _ ← psElabExpressionSort (psElabContextEmpty context.environment
+    plan.context.levelNames) type
+  return .constructorDecl {
+    name, levelParams := family.levelParams, type
+    inductiveName := family.name
+    constructorIndex := constructor.info.constructorIndex
+    numParams := family.numParams
+    numFields := fieldsRev.length
+    recursiveFields }
+
+def psElabMutualStructuralPredicateFor (plan : PsElabMutualStructuralPlan)
+    (componentLevel : PsLevel) :
+    Except PsElabError (Option PsElabMutualStructuralDescendants) := do
+  if !psLevelEquivalent componentLevel .zero then
+    throw (psElabMutualStructuralError "PREDICATE-SORT" "recursive predicate descendant motives must inhabit Prop")
+  let families ← psElabMutualStructuralPredicateHeaders plan
+  let headers := families.map PsDeclaration.inductiveDecl
+  let ownedNames := plan.functions.flatMap fun fn =>
+    [fn.input.header.name, psNameAppendStr fn.input.header.name "eq_def"]
+  let helperNames := families.flatMap fun family =>
+    family.name :: psNameAppendStr family.name "rec" :: family.constructors
+  for name in helperNames do
+    if (ownedNames.any (psNameEq name)) ||
+        (helperNames.filter (psNameEq name)).length != 1 then
+      throw (.duplicateDeclaration name)
+  let withHeaders ← psAddDeclarationList plan.context.environment headers
+  let headerContext := psElabContextWithEnvironment plan.context withHeaders
+  let originalConstructors ← psElabEliminationConstructors headerContext plan.elimination
+  let constructors ← originalConstructors.mapM fun (slotIndex, owner, constructor) =>
+    psElabMutualStructuralPredicateConstructor plan headerContext families
+      slotIndex owner constructor
+  let withConstructors ← psAddDeclarationList withHeaders constructors
+  let constructorContext := psElabContextWithEnvironment plan.context withConstructors
+  let recursors ← psBuildInductiveGroupRecursors constructorContext
+    (plan.fixedRev ++ plan.capturesRev) { members := families } constructors
+  let declarations := headers ++ constructors ++ recursors
+  let staged ← psAddDeclarationList plan.context.environment declarations
+  let context := psElabContextWithEnvironment plan.context staged
+  let parameters := psElabBinderArguments (plan.fixedRev ++ plan.capturesRev)
+  let levels := plan.context.levelNames.map PsLevel.param
+  let first :: _ := families
+    | throw (psElabMutualStructuralError "GROUP" "predicate helper group is empty")
+  let checked ← psElabEliminationRecursorPlanFor context first levels parameters .zero
+  if checked.plan.slots.length != families.length ||
+      !(checked.plan.slots.zip families).all (fun pair =>
+        psNameEq pair.fst.family.name pair.snd.name &&
+          pair.fst.family.numIndices == pair.snd.numIndices) then
+    throw (psElabMutualStructuralError "GROUP" "predicate helpers changed their exact canonical family order")
+  let motives ← families.mapM fun family => do
+    let applied ← psElabApplyCore context (.constE family.name levels) parameters
+    let term := psMetaInstantiate applied.context.metaContext applied.term
+    if psExprHasUnresolvedMeta term || !psExprFVarsInContext plan.context.localContext term then
+      throw (psElabMutualStructuralError "CLOSURE" "predicate helper motive retains an unowned local")
+    return term
+  return some {
+    componentLevel := .zero, level := .zero, motives
+    predicate? := some { declarations, families, parameters, levels } }
+
+-- Reify the below proof from the actual original recursor hypotheses.
+-- Each edge stores its own below proof and owned source component, in the
+-- same order as the freshly checked helper constructor telescope.
+def psElabMutualStructuralPredicateBelowValue (plan : PsElabMutualStructuralPlan)
+    (context : PsElabContext) (slotIndex : Nat)
+    (constructor : PsInductiveEliminationConstructor)
+    (fields hypotheses : List PsElabTypedBinder) :
+    Except PsElabError PsExpr := do
+  let some descendants := plan.descendants?
+    | throw (psElabMutualStructuralError "DESCENDANTS" "predicate minor has no below owner")
+  let some predicate := descendants.predicate?
+    | throw (psElabMutualStructuralError "DESCENDANTS" "predicate minor has no helper group")
+  let some family := predicate.families[slotIndex]?
+    | throw (psElabMutualStructuralError "OWNERSHIP" "predicate minor has no helper family")
+  let some constructorName := family.constructors[constructor.info.constructorIndex]?
+    | throw (psElabMutualStructuralError "OWNERSHIP" "predicate minor has no helper constructor")
+  if fields.length != constructor.info.numFields ||
+      hypotheses.length != constructor.recursiveFields.length then
+    throw (psElabMutualStructuralError "FIELD-METADATA" "predicate minor lost an original field or hypothesis")
+  let payload ← (constructor.recursiveFields.zip hypotheses).mapM
+    fun ((fieldIndex, targetSlot), hypothesis) => do
+      let some field := fields[fieldIndex]?
+        | throw (psElabMutualStructuralError "FIELD-METADATA" "predicate hypothesis has no exact original field")
+      let arguments ← psElabOpenCoreTelescope 4096 context field.type none
+      let childFamily ← psElabMutualStructuralFamilyAt plan arguments.context targetSlot arguments.body
+      let fieldArgs := psElabBinderArguments arguments.bindersRev
+      let child := psExprApplyMany (.fvar field.id) fieldArgs
+      let expected ← psElabMutualStructuralEnrichedType plan arguments.context .zero
+        targetSlot childFamily.indices child
+      let applied ← psElabApplyCore arguments.context (.fvar hypothesis.id) fieldArgs
+      let checked ← psElabResolvedTerm applied.context applied.term (some expected)
+      let below ← psElabMutualStructuralProject checked.context 2 1 checked.term
+      let owned ← psElabMutualStructuralProject checked.context 2 0 checked.term
+      return [
+        psCloseElabLambdaBinders checked.context.metaContext arguments.bindersRev below,
+        psCloseElabLambdaBinders checked.context.metaContext arguments.bindersRev owned]
+  let some head := psInductiveEliminationInstantiate plan.elimination
+      plan.familyLevels plan.uniformArgs constructor.head
+    | throw (psElabMutualStructuralError "CONSTRUCTOR" "predicate minor constructor did not instantiate")
+  let fieldArgs := fields.map (fun field => PsExpr.fvar field.id)
+  let major := psExprApplyMany head fieldArgs
+  let majorType ← (psInferType context.environment context.metaContext
+    context.localContext major).mapError PsElabError.infer
+  let original ← psElabMutualStructuralFamilyAt plan context slotIndex majorType
+  let expected ← psElabMutualStructuralDescendantType plan context
+    slotIndex original.indices major
+  let applied ← psElabApplyCore context (.constE constructorName predicate.levels)
+    (predicate.parameters ++ fieldArgs ++ payload.flatten)
+  let checked ← psElabResolvedTerm applied.context applied.term (some expected)
+  return psMetaInstantiate checked.context.metaContext checked.term
+
+-- Datatype below uses the already admitted complete recursor. Its
+-- type-valued fold records each actual recursive field's source components
+-- and descendant dictionary. Predicate families delegate to their distinct
+-- ordinary checked Prop helper group.
 def psElabMutualStructuralDescendantsFor (plan : PsElabMutualStructuralPlan)
     (componentLevel : PsLevel) :
     Except PsElabError (Option PsElabMutualStructuralDescendants) := do
@@ -889,9 +1143,9 @@ def psElabMutualStructuralDescendantsFor (plan : PsElabMutualStructuralPlan)
     familyLevels := familyLevels ++ [level]
   let some anchorLevel := familyLevels.head?
     | throw (psElabMutualStructuralError "GROUP" "descendant construction has no actual family sort")
-  -- Pinned Lean has a separate inductive-predicate construction. Keep the
-  -- existing direct Prop owner instead of inventing large elimination.
-  if psLevelEquivalent anchorLevel .zero then return none
+  -- Predicate descendants use an ordinary checked Prop helper group.
+  if psLevelEquivalent anchorLevel .zero then
+    return ← psElabMutualStructuralPredicateFor plan componentLevel
   let constructors ← psElabEliminationConstructors plan.context plan.elimination
   let mut level := familyLevels.foldl PsLevel.max (.max (.succ .zero) componentLevel)
   for (_, _, constructor) in constructors do
@@ -1065,6 +1319,61 @@ def psElabMutualStructuralCaseSlot (plan : PsElabMutualStructuralPlan)
   | [index] => return some index
   | _ => throw (psElabMutualStructuralError "GROUP" "nested case has ambiguous canonical specialization")
 
+-- A helper constructor retains the exact original fields. Stored motive
+-- proofs become child hypotheses only for those canonical fields, after
+-- checking both payload types against the real field's function telescope.
+def psElabMutualStructuralPredicateChildren (plan : PsElabMutualStructuralPlan)
+    (context : PsElabContext) (owner : PsInductiveEliminationSlot)
+    (constructor : PsInductiveEliminationConstructor)
+    (fields : List PsElabTypedBinder) :
+    Except PsElabError (List PsElabMutualStructuralChild) := do
+  let some descendants := plan.descendants?
+    | throw (psElabMutualStructuralError "DESCENDANTS" "predicate case has no below owner")
+  if descendants.predicate?.isNone then
+    throw (psElabMutualStructuralError "DESCENDANTS" "predicate case has no checked helper group")
+  let recursiveInfo := { constructor.info with
+    recursiveFields := constructor.recursiveFields.map Prod.fst }
+  if !psInductiveEliminationConstructorMetadataValid owner constructor ||
+      !psConstructorRecursiveFieldsOrdered recursiveInfo ||
+      fields.length != constructor.info.numFields + 2 * constructor.recursiveFields.length then
+    throw (psElabMutualStructuralError "FIELD-METADATA" "predicate case changed its exact constructor payload")
+  constructor.recursiveFields.zipIdx.mapM fun ((fieldIndex, targetSlot), position) => do
+    let some field := fields[fieldIndex]?
+      | throw (psElabMutualStructuralError "FIELD-METADATA" "predicate child has no retained original field")
+    let some belowBinder := fields[constructor.info.numFields + 2 * position]?
+      | throw (psElabMutualStructuralError "FIELD-METADATA" "predicate child has no stored below proof")
+    let some ownedBinder := fields[constructor.info.numFields + 2 * position + 1]?
+      | throw (psElabMutualStructuralError "FIELD-METADATA" "predicate child has no stored motive proof")
+    let arguments ← psElabOpenCoreTelescope 4096 context field.type none
+    let family ← psElabMutualStructuralFamilyAt plan arguments.context targetSlot arguments.body
+    let fieldArgs := psElabBinderArguments arguments.bindersRev
+    let child := psExprApplyMany (.fvar field.id) fieldArgs
+    let belowType ← psElabMutualStructuralDescendantType plan arguments.context
+      targetSlot family.indices child
+    let ownedType ← psElabMutualStructuralOwnedType plan arguments.context .zero
+      targetSlot family.indices child
+    let expectedBelow := psCloseElabForallBinders arguments.context.metaContext
+      arguments.bindersRev belowType
+    let expectedOwned := psCloseElabForallBinders arguments.context.metaContext
+      arguments.bindersRev ownedType
+    if !psElabMutualStructuralEqual context belowBinder.type expectedBelow ||
+        !psElabMutualStructuralEqual context ownedBinder.type expectedOwned then
+      throw (psElabMutualStructuralError "IH-TYPE" "predicate payload does not belong to its actual canonical child")
+    let below ← psElabApplyCore arguments.context (.fvar belowBinder.id) fieldArgs
+    let owned ← psElabApplyCore below.context (.fvar ownedBinder.id) fieldArgs
+    let pair ← psElabMutualStructuralPairValue owned.context owned.term below.term
+    let expected ← psElabMutualStructuralEnrichedType plan owned.context .zero
+      targetSlot family.indices child
+    let checked ← psElabResolvedTerm owned.context pair (some expected)
+    let hypothesis := psCloseElabLambdaBinders checked.context.metaContext
+      arguments.bindersRev checked.term
+    let expected := psCloseElabForallBinders checked.context.metaContext
+      arguments.bindersRev expected
+    let checked ← psElabResolvedTerm context hypothesis (some expected)
+    return {
+      fieldId := field.id, slotIndex := targetSlot
+      hypothesis := psMetaInstantiate checked.context.metaContext checked.term }
+
 def psElabMutualStructuralDescendantChildren (plan : PsElabMutualStructuralPlan)
     (context : PsElabContext) (owner : PsInductiveEliminationSlot)
     (constructor : PsInductiveEliminationConstructor)
@@ -1099,6 +1408,174 @@ def psElabMutualStructuralDescendantChildren (plan : PsElabMutualStructuralPlan)
       slotIndex := targetSlot
       hypothesis := psMetaInstantiate checked.context.metaContext checked.term }
 
+-- Predicate descent eliminates the checked below proof itself. The helper
+-- index carries the original proof, while its constructor preserves the
+-- original field identities and their owned motive/below payloads. Every
+-- motive remains in Prop; no elimination from a proof to a type is used.
+def psElabMutualStructuralPredicateDescend (plan : PsElabMutualStructuralPlan)
+    (context : PsElabContext) (children : List PsElabMutualStructuralChild)
+    (source : PsEliminationRecursorApplication)
+    (rewrite : PsElabContext → List PsElabMutualStructuralChild → PsExpr →
+      Except PsElabError PsExpr) : Except PsElabError PsExpr := do
+  let some descendants := plan.descendants?
+    | throw (psElabMutualStructuralError "DESCENDANTS" "predicate traversal has no below owner")
+  let some predicate := descendants.predicate?
+    | throw (psElabMutualStructuralError "DESCENDANTS" "predicate traversal has no checked helper group")
+  if psEliminationRecursorUsesHypotheses source then
+    throw (psElabMutualStructuralError "CASE-IH" "nested predicate source case uses induction hypotheses")
+  let major ← rewrite context children source.major
+  let some (fieldId, fieldArgs) := psElabStructuralFieldArguments context
+      (children.map (·.fieldId)) major
+    | throw (psElabMutualStructuralError "DECREASE" "nested predicate case has no strict parent field")
+  let some child := children.find? (fun child => child.fieldId == fieldId)
+    | throw (psElabMutualStructuralError "OWNERSHIP" "nested predicate case lost its strict parent field")
+  let hypothesis ← psElabApplyCore context child.hypothesis fieldArgs
+  let below ← psElabMutualStructuralProject hypothesis.context 2 1 hypothesis.term
+  let .constE _ originalLevels := source.head
+    | throw (psElabMutualStructuralError "ROOT" "predicate source case has no registered head")
+  let some sourceLevels := psInductiveEliminationFamilyLevels source.plan source.info originalLevels
+    | throw (psElabMutualStructuralError "GROUP" "predicate source levels do not instantiate its registered plan")
+  let parameters ← (source.fixedArgs.take source.info.numParams).mapM (rewrite context children)
+  let originalMotives ← ((source.fixedArgs.drop source.info.numParams).take source.info.numMotives).mapM
+    (rewrite context children)
+  if originalMotives.length != source.plan.slots.length then
+    throw (psElabMutualStructuralError "MOTIVE" "predicate case lost a registered source motive")
+  let mappings ← source.plan.slots.mapM fun slot => do
+    let some typeFormer := psInductiveEliminationInstantiate source.plan
+        sourceLevels parameters slot.typeFormer
+      | throw (psElabMutualStructuralError "FAMILY" "predicate source specialization did not instantiate")
+    let checked ← psElabResolvedTerm context typeFormer none
+    let opened ← psElabOpenCoreTelescope 4096 checked.context checked.type
+      (some slot.family.numIndices)
+    let type := psExprApplyMany checked.term (psElabBinderArguments opened.bindersRev)
+    let mapping ← psElabMutualStructuralCaseSlot plan opened.context slot.recursorName type
+    let some targetSlot := mapping
+      | throw (psElabMutualStructuralError "GROUP" "predicate case has an unowned canonical family")
+    return targetSlot
+  if mappings.length != predicate.families.length ||
+      mappings.eraseDups.length != predicate.families.length ||
+      mappings[source.slotIndex]? != some child.slotIndex then
+    throw (psElabMutualStructuralError "CHILD-FAMILY" "predicate source group is not an exact helper-family correspondence")
+  let some firstMotive := originalMotives.head?
+    | throw (psElabMutualStructuralError "MOTIVE" "predicate source has no motive")
+  let some firstSlot := source.plan.slots.head?
+    | throw (psElabMutualStructuralError "GROUP" "predicate source has no canonical slot")
+  let firstType ← (psInferType context.environment context.metaContext
+    context.localContext firstMotive).mapError PsElabError.infer
+  let firstTelescope ← psElabOpenCoreTelescope 4096 context firstType
+    (some (firstSlot.family.numIndices + 1))
+  let .sortE originalLevel := psWhnf firstTelescope.context.environment
+      firstTelescope.context.metaContext firstTelescope.context.localContext firstTelescope.body
+    | throw (psElabMutualStructuralError "MOTIVE" "predicate source motive does not end in a Sort")
+  if !psLevelEquivalent originalLevel .zero then
+    throw (psElabMutualStructuralError "PREDICATE-SORT" "nested predicate traversal requires a Prop-valued source motive")
+  let anchor :: _ := predicate.families
+    | throw (psElabMutualStructuralError "GROUP" "predicate helper group is empty")
+  let recursor ← psElabEliminationRecursorPlanFor context anchor predicate.levels
+    predicate.parameters .zero
+  if recursor.plan.slots.length != predicate.families.length ||
+      !(recursor.plan.slots.zip predicate.families).all (fun pair =>
+        psNameEq pair.fst.family.name pair.snd.name) then
+    throw (psElabMutualStructuralError "GROUP" "predicate traversal changed the checked helper slot order")
+  let motives ← psElabRecursorArguments recursor.plan.slots.zipIdx
+    (fun current (slot, slotIndex) domain => do
+      let opened ← psElabOpenCoreTelescope 4096 current domain
+        (some (slot.family.numIndices + 1))
+      let _helperProof :: originalMajor :: indicesRev := opened.bindersRev
+        | throw (psElabMutualStructuralError "MOTIVE" "predicate helper motive lost its original proof index")
+      let some (_, sourceSlotIndex) := mappings.zipIdx.find? (fun entry => entry.fst == slotIndex)
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helper motive has no original source slot")
+      let some originalMotive := originalMotives[sourceSlotIndex]?
+        | throw (psElabMutualStructuralError "MOTIVE" "predicate helper has no original source motive")
+      let indices := psElabBinderArguments indicesRev
+      let family ← psElabMutualStructuralFamilyAt plan opened.context slotIndex originalMajor.type
+      if family.indices.length != indices.length ||
+          !(family.indices.zip indices).all (fun pair =>
+            psElabMutualStructuralEqual opened.context pair.fst pair.snd) then
+        throw (psElabMutualStructuralError "MOTIVE" "predicate helper changed its original family indices")
+      let result ← psElabApplyCore opened.context originalMotive
+        (indices ++ [.fvar originalMajor.id])
+      let checked ← psElabResolvedTerm result.context result.term (some (.sortE .zero))
+      return {
+        context := psElabLeaveScope current checked.context
+        term := psCloseElabLambdaBinders checked.context.metaContext
+          opened.bindersRev checked.term })
+    recursor.context recursor.cursor
+  let constructors ← psElabEliminationConstructors motives.context recursor.plan
+  let sourceFixed := parameters ++ originalMotives ++
+    source.fixedArgs.drop (source.info.numParams + source.info.numMotives)
+  let minors ← psElabRecursorArguments constructors
+    (fun current (slotIndex, owner, constructor) domain => do
+      let some originalOwner := plan.elimination.slots[slotIndex]?
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helper constructor has no original family")
+      let some originalConstructor := originalOwner.constructors[constructor.info.constructorIndex]?
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helper constructor has no original position")
+      let some helperFamily := predicate.families[slotIndex]?
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helper constructor lost its registered family")
+      let some helperName := helperFamily.constructors[constructor.info.constructorIndex]?
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helper constructor lost its registered position")
+      let expectedEdges := originalConstructor.recursiveFields.zipIdx.map
+        fun ((_, targetSlot), position) =>
+          (originalConstructor.info.numFields + 2 * position, targetSlot)
+      if !psNameEq owner.family.name helperFamily.name ||
+          !psNameEq constructor.info.name helperName ||
+          constructor.info.numFields != originalConstructor.info.numFields +
+            2 * originalConstructor.recursiveFields.length ||
+          constructor.recursiveFields != expectedEdges then
+        throw (psElabMutualStructuralError "FIELD-METADATA" "predicate helper changed its original fields or below edges")
+      let opened ← psElabOpenCoreTelescope 4096 current domain
+        (some (constructor.info.numFields + constructor.recursiveFields.length))
+      let fields := opened.bindersRev.reverse.take constructor.info.numFields
+      let originalFields := fields.take originalConstructor.info.numFields
+      let nestedChildren ← psElabMutualStructuralPredicateChildren plan opened.context
+        originalOwner originalConstructor fields
+      let some head := psInductiveEliminationInstantiate plan.elimination
+          plan.familyLevels plan.uniformArgs originalConstructor.head
+        | throw (psElabMutualStructuralError "CONSTRUCTOR" "predicate original branch constructor did not instantiate")
+      let major := psExprApplyMany head (originalFields.map (fun field => .fvar field.id))
+      let majorType ← (psInferType opened.context.environment opened.context.metaContext
+        opened.context.localContext major).mapError PsElabError.infer
+      let some (_, sourceSlotIndex) := mappings.zipIdx.find? (fun entry => entry.fst == slotIndex)
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate helper minor has no original source slot")
+      let some sourceOwner := source.plan.slots[sourceSlotIndex]?
+        | throw (psElabMutualStructuralError "OWNERSHIP" "predicate original source slot is absent")
+      let some sourceConstructor := sourceOwner.constructors[originalConstructor.info.constructorIndex]?
+        | throw (psElabMutualStructuralError "CONSTRUCTOR" "predicate original source constructor is absent")
+      if !psNameEq sourceConstructor.info.name originalConstructor.info.name ||
+          sourceConstructor.info.numFields != originalConstructor.info.numFields then
+        throw (psElabMutualStructuralError "CONSTRUCTOR" "predicate case changed its original constructor")
+      let some indices := psInductiveEliminationIndicesAt
+          (psElabMutualStructuralEqual opened.context) source.plan sourceOwner
+          sourceLevels parameters majorType
+        | throw (psElabMutualStructuralError "CONSTRUCTOR" "predicate branch changes its source specialization")
+      let original := psExprApplyMany (.constE sourceOwner.recursorName originalLevels)
+        (sourceFixed ++ indices ++ [major])
+      let some reduced := psReduceIota
+          (psWhnf opened.context.environment opened.context.metaContext opened.context.localContext)
+          opened.context.environment original
+        | throw (psElabMutualStructuralError "IOTA" "predicate source case did not select its actual original constructor")
+      let value ← rewrite opened.context (nestedChildren ++ children) reduced
+      let checked ← psElabResolvedTerm opened.context value (some opened.body)
+      return {
+        context := psElabLeaveScope current checked.context
+        term := psCloseElabLambdaBinders checked.context.metaContext
+          opened.bindersRev checked.term })
+    motives.context motives.cursor
+  let indices ← source.indices.mapM (rewrite context children)
+  let suffix ← source.suffix.mapM (rewrite context children)
+  let some originalMotive := originalMotives[source.slotIndex]?
+    | throw (psElabMutualStructuralError "MOTIVE" "predicate result has no original source motive")
+  let result ← psElabApplyCore context originalMotive (indices ++ [major])
+  let expected ← psElabMutualStructuralApplyType result.context result.term suffix
+  let some selected := recursor.plan.slots[child.slotIndex]?
+    | throw (psElabMutualStructuralError "OWNERSHIP" "predicate result has no selected helper recursor")
+  let applied ← psElabApplyCore minors.context (.constE selected.recursorName recursor.levels)
+    (predicate.parameters ++ motives.arguments ++ minors.arguments ++ indices ++ [major, below] ++ suffix)
+  let checked ← psElabResolvedTerm applied.context applied.term (some expected)
+  let term := psMetaInstantiate checked.context.metaContext checked.term
+  if psExprHasUnresolvedMeta term then throw .unresolvedMetavariable
+  return term
+
 -- Push an existing descendant dictionary through an actual checked case.
 -- The extra motive argument specializes with that case's real constructor.
 -- Its projections then own the inner fields; syntax names are never evidence.
@@ -1109,6 +1586,8 @@ def psElabMutualStructuralDescend (plan : PsElabMutualStructuralPlan)
       Except PsElabError PsExpr) : Except PsElabError PsExpr := do
   let some descendants := plan.descendants?
     | throw (psElabMutualStructuralError "DESCENDANTS" "nested traversal has no checked dictionary")
+  if descendants.predicate?.isSome then
+    return ← psElabMutualStructuralPredicateDescend plan context children source rewrite
   if psEliminationRecursorUsesHypotheses source then
     throw (psElabMutualStructuralError "CASE-IH" "nested source case uses explicit induction hypotheses")
   let major ← rewrite context children source.major
@@ -1397,7 +1876,11 @@ def psElabMutualStructuralRecursorFor (plan : PsElabMutualStructuralPlan) :
   let descendants? ← if (← psElabMutualStructuralNeedsDescendantsFor plan) then
       psElabMutualStructuralDescendantsFor plan level
     else pure none
-  let plan := { plan with descendants? }
+  let helperDeclarations := psElabMutualStructuralHelperDeclarations descendants?
+  let environment ← psAddDeclarationList plan.context.environment helperDeclarations
+  let plan := { plan with
+    context := psElabContextWithEnvironment plan.context environment
+    descendants? }
   let motiveLevel := descendants?.map (·.level) |>.getD level
   let anchor :: _ := plan.elimination.group.members
     | throw (psElabMutualStructuralError "GROUP" "complete elimination plan has no public anchor")
@@ -1458,8 +1941,12 @@ def psElabMutualStructuralRecursorFor (plan : PsElabMutualStructuralPlan) :
       let value ← match plan.descendants? with
         | none => pure value
         | some descendants => do
-          let below ← psElabMutualStructuralPackValue opened.context descendants.level
-            ((binders.drop constructor.info.numFields).map (fun binder => .fvar binder.id))
+          let below ← if descendants.predicate?.isSome then
+              psElabMutualStructuralPredicateBelowValue plan opened.context slotIndex
+                constructor fields (binders.drop constructor.info.numFields)
+            else
+              psElabMutualStructuralPackValue opened.context descendants.level
+                ((binders.drop constructor.info.numFields).map (fun binder => .fvar binder.id))
           psElabMutualStructuralPairValue opened.context value below
       let checked ← psElabResolvedTerm opened.context value (some expected)
       return {
@@ -1487,7 +1974,7 @@ def psElabMutualStructuralValue (recursor : PsElabMutualStructuralRecursor)
   if inverse.length != plan.fixedRev.length then
     throw (psElabMutualStructuralError "FIXED" "definition has an incomplete inverse fixed mapping")
   let header := fn.input.header
-  let context := header.context
+  let context := psElabContextWithEnvironment header.context plan.context.environment
   let arguments := recursor.fixedArgs.map (psElabSubstituteLocals inverse)
   let indices := fn.input.indexIds.map PsExpr.fvar
   let major := PsExpr.fvar fn.input.majorId
@@ -1610,6 +2097,9 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
       throw (.duplicateDeclaration name)
   let plan ← psElabMutualStructuralPrepare captured inputs
   let recursor ← psElabMutualStructuralRecursorFor plan
+  let helperDeclarations := psElabMutualStructuralHelperDeclarations recursor.plan.descendants?
+  let helperOwnership ← psElabMutualStructuralHelperOwnership recursor.plan
+  let environment ← psAddDeclarationList environment helperDeclarations
   let values ← (List.range headers.length).mapM fun index => do
     let some header := headers[index]?
       | throw (psElabMutualStructuralError "OWNERSHIP" "closed definition has no header")
@@ -1631,8 +2121,17 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
     let owned := (declarations.zip inputs).map fun (declaration, input) =>
       ({ declarations := [declaration], sourceInfo := [input.sourceInfo] } :
         PsElabDeclarationBatchResult)
+    let owned := match owned with
+      | [] => []
+      | first :: rest =>
+        { first with
+          declarations := helperDeclarations ++ first.declarations
+          structuralHelpers := helperOwnership ++ first.structuralHelpers } :: rest
     return {
-      batch := { declarations, sourceInfo := inputs.map (·.sourceInfo) }
+      batch := {
+        declarations := helperDeclarations ++ declarations
+        sourceInfo := inputs.map (·.sourceInfo)
+        structuralHelpers := helperOwnership }
       members := owned }
   let equations ← (List.range headers.length).mapM fun index => do
     let some header := headers[index]?
@@ -1643,10 +2142,17 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
     ({
       declarations := [declaration, equation]
       sourceInfo := [input.sourceInfo] } : PsElabDeclarationBatchResult)
+  let owned := match owned with
+    | [] => []
+    | first :: rest =>
+      { first with
+        declarations := helperDeclarations ++ first.declarations
+        structuralHelpers := helperOwnership ++ first.structuralHelpers } :: rest
   return {
     batch := {
-      declarations := declarations ++ equations
-      sourceInfo := inputs.map (·.sourceInfo) }
+      declarations := helperDeclarations ++ declarations ++ equations
+      sourceInfo := inputs.map (·.sourceInfo)
+      structuralHelpers := helperOwnership }
     members := owned }
 
 -- An SCC must retain the original block-wide universe layout even when one

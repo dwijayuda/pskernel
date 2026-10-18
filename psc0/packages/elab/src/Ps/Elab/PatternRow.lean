@@ -462,7 +462,8 @@ def psElabApplyPatternRow (context : PsElabContext) (row : PsElabCheckedPatternR
     | none => throw (.refinement "checked pattern row argument unavailable")
     | some entry => pure entry.snd
   let checked ← psElabResolvedTerm context row.term (some row.type)
-  let applied ← psElabApplyCore checked.context checked.term argumentValues
+  let boundary ← psElabCoreBoundaryOpen checked.context .row checked.term checked.type
+  let applied ← psElabApplyCore boundary.context (.fvar boundary.id) argumentValues
   if equations.length != row.numEquations || row.equationBinders.length != row.numEquations then
     throw (.refinement "checked pattern row equation arity mismatch")
   let (applied, values) ← (row.equationBinders.zip equations).foldlM
@@ -475,4 +476,5 @@ def psElabApplyPatternRow (context : PsElabContext) (row : PsElabCheckedPatternR
       return (applied, state.snd ++ [(id, proof.term)]))
     (applied, row.binders.zip argumentValues)
   let checked ← psElabResolvedTerm applied.context applied.term (some expected)
-  psElabPatternRowReifyAliases checked.context row.aliases values checked.term expected
+  let closed ← psElabCoreBoundaryClose boundary checked (some expected)
+  psElabPatternRowReifyAliases closed.context row.aliases values closed.term expected

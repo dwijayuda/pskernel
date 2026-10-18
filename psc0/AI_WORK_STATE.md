@@ -1,5 +1,46 @@
 # PSC0 v7.2 work state — M3+B
 
+## Whole-match WF and predicate owners — qualification pending
+
+Preparation [39151862873](https://github.com/dwijayuda/pskernel/actions/runs/39151862873)
+at 7e53cf2d35a40947de6f60be4a45474acbe06ef4 cleared the four previously
+reported Structural errors, then stopped on a nested context record layout
+at line 276. That layout is corrected in this candidate.
+
+Match construction now retains checked source, row and primitive boundaries as
+ordinary typed lets. Consumption authenticates one consistent substitution
+across the retained type and value, checks local/metavariable scope, and uses
+an append-only descriptor identity. WF transports callbacks through the complete
+source telescope and actual compiler prefixes. A pure checked preparation pass
+requires real alternative refinement before allocating decrease goals. Row
+boundaries end compiler traversal; arbitrary user recursors receive no compiler
+authority. Exact fixed arguments and unrestricted-peer exclusion remain checked.
+
+Predicate structural descent has a separate ordinary Prop helper group. Actual
+canonical constructors retain their original fields and owned below/motive
+proofs. Helpers and source equations publish together. Registered singleton
+publication receives explicit structural helper provenance and checks the
+complete Prop group plus exactly one source declaration; generated-name
+prefixes cannot grant ownership. Opaque/abbrev/instance registration policies
+and the absence of registered eq_def publication are retained.
+
+Three independent paired predicate positives cover plain, named and indexed
+descent. Two strict refusals keep a valid deep child call before a reconstructed
+parent or unrelated-parameter call. Native refusal harnesses check an accepted
+shape first. Boundary controls cover consistent substitution, binder capture,
+universe/constructor changes, restored identity, scope-safe unresolved metas,
+hidden-local rejection and independent value typing. All twelve existing
+runtime exports and their expected values remain unchanged.
+
+The six-exit audit added native indexed DecidableEq and recursive indexed BEq
+controls to test apparent handler gaps against the pinned compiler. They are
+pending native observations; no deriving refusal has been relaxed here.
+Further complete WF/registered-predicate source controls and selected const WF
+handling remain in progress. No failed build or unexecuted fixture is a pass.
+All six M3+B exits remain OPEN. Main remains
+33676076bcda7b0de5ec1f9803f49b8b1d28a058; final Native/M3/F1/F2/F3 must pass on
+one complete compiler/test SHA.
+
 ## Structural build correction — qualification pending
 
 Preparation [39151186342](https://github.com/dwijayuda/pskernel/actions/runs/39151186342)

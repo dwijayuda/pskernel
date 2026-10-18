@@ -195,7 +195,7 @@ def psElabPatternMatrix (fuel : Nat) (branch : PsElaborator)
             match psElabMatchTypedWith (fun _ _ => pure [])
                 { context, term := column.major, type := column.type } (some expected)
                 column.source.equationName? generalizing? (some []) []
-                column.sourceEquation? protectedIds column.sourceIndices with
+                column.sourceEquation? protectedIds column.sourceIndices true with
             | .ok result => return result
             | .error .matchNonExhaustive => eliminate remaining
             | .error error => throw error
@@ -269,7 +269,7 @@ def psElabPatternMatrix (fuel : Nat) (branch : PsElaborator)
             span })
         { context, term := column.major, type := column.type } (some expected)
         column.source.equationName? generalizing? (some []) requiredIds
-        column.sourceEquation? protectedIds column.sourceIndices
+        column.sourceEquation? protectedIds column.sourceIndices true
 
 structure PsElabPatternInputs where
   context : PsElabContext
@@ -470,9 +470,15 @@ def psElabPatternRunPlan (branch : PsElaborator) (inputs : PsElabPatternInputs)
   let inner := psElabContextWithMeta result.context closedType.context.metaContext
   let closed ← psElabAbstract plan.context inner
     (psElabLambdaAbstractions bindersRev) result.term closedType.term
-  let applied ← psElabApplyCore closed.context closed.term arguments
+  let flags := (plan.rawMajors ++ selected.map (fun entry => PsExpr.fvar entry.fst)).map
+    fun major => match psMetaInstantiate closed.context.metaContext major with
+      | .fvar _ => true
+      | _ => false
+  let boundary ← psElabCoreBoundaryOpen closed.context
+    (.source flags equationBindersRev.length) closed.term closed.type
+  let applied ← psElabApplyCore boundary.context (.fvar boundary.id) arguments
   let applied ← psElabPatternApplyReflexivity equationBindersRev.length applied
-  psElabResolvedTerm applied.context applied.term (some expected)
+  psElabCoreBoundaryClose boundary applied (some expected)
 
 -- Retry indices are checked Core expressions from the saved caller scope.
 -- No source term is elaborated again while extending the base telescope.

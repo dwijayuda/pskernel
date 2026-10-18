@@ -1,6 +1,7 @@
 import Ps.Elab.Equality
 import Ps.Elab.Application
 import Ps.Elab.GroupElimination
+import Ps.Elab.CoreBoundary
 
 -- A source equation keeps its original expression and its real checked proof.
 -- Source binders expose homogeneous Eq exactly when the actual types align.
@@ -522,7 +523,8 @@ def psElabMatchTypedWith
     (generalizedIds? : Option (List Nat) := none)
     (requiredIds : List Nat := [])
     (sourceEquation? : Option PsElabSourceMatchEquation := none)
-    (protectedIds : List Nat := []) (sourceIndices : List PsExpr := []) :
+    (protectedIds : List Nat := []) (sourceIndices : List PsExpr := [])
+    (sourceCompiler : Bool := false) :
     Except PsElabError PsElabTermResult := do
   let some expectedType := expected | throw .matchExpectedType
   let scrutinee ← psElabResolvedTerm scrutinee.context scrutinee.term (some scrutinee.type)
@@ -585,10 +587,19 @@ def psElabMatchTypedWith
         psElabMatchConstantArgument current type
           (constructor.info.numFields + constructor.recursiveFields.length) unit.snd)
     minorContext motives.cursor
-  let term := psExprApplyMany (.constE recursor.recursor.name recursor.levels)
-    (parameters ++ motives.arguments ++ minors.arguments ++ indices ++
-      [scrutinee.term] ++ plan.arguments)
-  psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
+  let arguments := parameters ++ motives.arguments ++ minors.arguments ++ indices ++ [scrutinee.term]
+  let context := psElabLeaveScope context minors.context
+  if sourceCompiler then
+    let value ← psElabResolvedTerm context
+      (psExprApplyMany (.constE recursor.recursor.name recursor.levels) arguments) none
+    let boundary ← psElabCoreBoundaryOpen value.context
+      (.primitive recursor.slotIndex plan.arguments.length) value.term value.type
+    let applied ← psElabApplyCore boundary.context (.fvar boundary.id) plan.arguments
+    psElabCoreBoundaryClose boundary applied (some expectedType)
+  else
+    let term := psExprApplyMany (.constE recursor.recursor.name recursor.levels)
+      (arguments ++ plan.arguments)
+    psElabResolvedTerm context term (some expectedType)
 
 
 

@@ -155,6 +155,106 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
 -- Scope one original source block, elaborate its typed local captures, then
 -- let the checked dependency owner partition it. Helpers retain their own
 -- source information while their declarations belong to the parent's origin.
+-- Only the structural producer's declared helper kinds participate in this
+-- comparison. Definitions, equations, axioms and worker bodies cannot become
+-- helpers by a matching name or by occupying a convenient list position.
+def psElabCommandStructuralHelperEqual (left right : PsDeclaration) : Bool :=
+  match left, right with
+  | .inductiveDecl left, .inductiveDecl right =>
+    psNameEq left.name right.name &&
+      psInductiveGroupNamesEqual left.levelParams right.levelParams &&
+      psExprAlphaEq left.type right.type &&
+      left.numParams == right.numParams && left.numIndices == right.numIndices &&
+      psInductiveGroupNamesEqual left.constructors right.constructors &&
+      left.isStructure == right.isStructure
+  | .constructorDecl left, .constructorDecl right =>
+    psNameEq left.name right.name &&
+      psInductiveGroupNamesEqual left.levelParams right.levelParams &&
+      psExprAlphaEq left.type right.type &&
+      psNameEq left.inductiveName right.inductiveName &&
+      left.constructorIndex == right.constructorIndex &&
+      left.numParams == right.numParams && left.numFields == right.numFields &&
+      left.recursiveFields == right.recursiveFields
+  | .recursorDecl left, .recursorDecl right =>
+    psNameEq left.name right.name &&
+      psInductiveGroupNamesEqual left.levelParams right.levelParams &&
+      psExprAlphaEq left.type right.type &&
+      psInductiveGroupNamesEqual left.inductiveNames right.inductiveNames &&
+      left.numParams == right.numParams && left.numIndices == right.numIndices &&
+      left.numMotives == right.numMotives && left.numMinors == right.numMinors
+  | _, _ => false
+
+def psElabCommandStructuralHelpers (environment : PsEnvironment)
+    (owner : PsName) (groups : List PsElabStructuralHelperOwnership) :
+    Except PsElabError PsEnvironment := do
+  if groups.length > 1 then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: singleton source has multiple structural helper owners")
+  groups.foldlM (fun environment group => do
+    if !psNameEq group.owner owner then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helpers belong to another source")
+    let first :: _ := group.families
+      | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper group has no family")
+    let names := group.families.flatMap fun family =>
+      family.name :: psNameAppendStr family.name "rec" :: family.constructors
+    if names.length != group.declarations.length ||
+        (names.any (psNameEq owner)) ||
+        !(group.declarations.all fun declaration =>
+          names.any (psNameEq (psDeclarationName declaration)) &&
+            psElabCommandStructuralHelperEqual declaration declaration) then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural provenance includes an unowned declaration")
+    let staged ← psAddDeclarationList environment group.declarations
+    for family in group.families do
+      let some actual := psEnvironmentFindInductive staged family.name
+        | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper family is absent")
+      if !psElabCommandStructuralHelperEqual (.inductiveDecl actual) (.inductiveDecl family) ||
+          !psLevelEquivalent (← (psInductiveResultLevel staged actual).mapError PsElabError.infer) .zero then
+        throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper family changed its checked Prop header")
+    let initial := psElabContextEmpty staged first.levelParams
+    let parameters ← psElabOpenCoreTelescope 4096 initial first.type (some first.numParams)
+    let checked ← psElabEliminationRecursorPlanFor parameters.context first
+      (first.levelParams.map PsLevel.param) (psElabBinderArguments parameters.bindersRev) .zero
+    if checked.plan.slots.length != group.families.length ||
+        !(checked.plan.slots.zip group.families).all (fun pair =>
+          psNameEq pair.fst.family.name pair.snd.name) then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper group changed its canonical slots")
+    let _ ← psElabEliminationConstructors checked.context checked.plan
+    return staged) environment
+
+def psElabCommandRegisteredResult (environment : PsEnvironment)
+    (levels : List PsName) (member : PsElabPreDefinition)
+    (result : PsElabPreDefinitionBatchResult) (asOpaque : Bool) :
+    Except PsElabError PsElabPreDefinitionBatchResult := do
+  let [owned] := result.members
+    | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source lost its single checked owner")
+  let helpers := owned.structuralHelpers.flatMap (·.declarations)
+  let helperCount := helpers.length
+  if owned.declarations.length != helperCount + 1 ||
+      result.batch.declarations.length != helperCount + 1 ||
+      !((owned.declarations.take helperCount).zip helpers).all
+        (fun pair => psElabCommandStructuralHelperEqual pair.fst pair.snd) ||
+      !((result.batch.declarations.take helperCount).zip helpers).all
+        (fun pair => psElabCommandStructuralHelperEqual pair.fst pair.snd) then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source requires one checked definition and its owned structural helpers")
+  let [.definitionDecl name declarationLevels type value] := result.batch.declarations.drop helperCount
+    | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source did not produce an ordinary checked definition")
+  let [.definitionDecl ownedName ownedLevels ownedType ownedValue] := owned.declarations.drop helperCount
+    | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: member provenance lost its checked definition")
+  if !psNameEq name member.name || !psNameEq ownedName name ||
+      !psInductiveGroupNamesEqual declarationLevels levels ||
+      !psInductiveGroupNamesEqual ownedLevels declarationLevels ||
+      !psExprAlphaEq type member.type || !psExprAlphaEq ownedType type ||
+      !psExprAlphaEq ownedValue value then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source changed its actual declaration or header")
+  let staged ← psElabCommandStructuralHelpers environment member.name owned.structuralHelpers
+  let checked ← psElabResolvedTerm (psElabContextEmpty staged levels) value (some type)
+  let declaration := if asOpaque then PsDeclaration.opaqueDecl name levels type checked.term
+    else PsDeclaration.definitionDecl name levels type checked.term
+  let declarations := helpers ++ [declaration]
+  return {
+    result with
+    batch := { result.batch with declarations }
+    members := [{ owned with declarations }] }
+
 def psElabCommandPreDefinitionRegistration
     (members : List PsSyntaxMutualMember) (isMutual : Bool) :
     Option PsSyntaxRegistration :=
@@ -225,19 +325,14 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     registration.isNone
   if result.members.length != block.members.length then
     throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
-  let result ← match registration with
-    | some .opaqueDecl =>
-      match block.members, result.members, result.batch.declarations with
-      | [member], [owned], [.definitionDecl name levels type value] => do
-        if !psNameEq name member.name || owned.declarations.length != 1 then
-          throw (.data "PSCV0-PREDEFINITION-REGISTRATION: opaque source lost its checked declaration owner")
-        let declaration := PsDeclaration.opaqueDecl name levels type value
-        pure { result with
-          batch := { result.batch with declarations := [declaration] }
-          members := [{ owned with declarations := [declaration] }] }
-      | _, _, _ =>
-        throw (.data "opaque requires one checked definition; normalized workers pending")
-    | _ => pure result
+  let result ← match registration, block.members with
+    | none, _ => pure result
+    | some .opaqueDecl, [member] =>
+      psElabCommandRegisteredResult state.environment block.levelNames member result true
+    | some _, [member] =>
+      psElabCommandRegisteredResult state.environment block.levelNames member result false
+    | _, _ =>
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registration lost its single checked source owner")
   let environment ← psAddDeclarationList state.environment result.batch.declarations
   let environment := if members.any (fun member =>
       psElabPreDefinitionDeclarationNoncomputable member.declaration) then
@@ -299,7 +394,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     originsRev := origins.reverse ++ state.originsRev
     declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
     exposedNames := match registration with
-      | some .abbrevDecl => result.batch.declarations.map psDeclarationName ++ state.exposedNames
+      | some .abbrevDecl => block.members.map (·.name) ++ state.exposedNames
       | _ => state.exposedNames
     privateNames := privateNames ++ state.privateNames
     privateAliases := aliases }

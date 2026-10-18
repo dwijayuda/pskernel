@@ -822,6 +822,116 @@ instance refuseRegisteredDefault (n : Nat) : RegisteredDefault where
     | 0 => 5
     | Nat.succ k => Nat.succ (RegisteredDefault.value (refuseRegisteredDefault (Nat.succ k)))
 
+inductive PlainPredicate : Prop where
+  | base
+  | step (children : Nat → PlainPredicate)
+def predicatePlain (proof : PlainPredicate) : True :=
+  match proof with
+  | .base => True.intro
+  | .step children =>
+    match children 1 with
+    | .base => True.intro
+    | .step grandchildren => predicatePlain (grandchildren 1)
+theorem predicatePlainObserved :
+    predicatePlain (PlainPredicate.step (fun (_ : Nat) =>
+      PlainPredicate.step (fun (_ : Nat) => PlainPredicate.base))) = True.intro := by rfl
+
+inductive NamedPredicate : Prop where
+  | base
+  | step (children : Nat → NamedPredicate)
+def predicateNamed (proof : NamedPredicate) : True :=
+  match hp : proof with
+  | .base => let witness : proof = NamedPredicate.base := hp; True.intro
+  | .step children =>
+    match hc : children 1 with
+    | .base => True.intro
+    | .step grandchildren => predicateNamed (grandchildren 1)
+theorem predicateNamedObserved :
+    predicateNamed (NamedPredicate.step (fun (_ : Nat) =>
+      NamedPredicate.step (fun (_ : Nat) => NamedPredicate.base))) = True.intro := by rfl
+
+inductive ProofIndex : Nat → Prop where
+  | base : ProofIndex 0
+  | step (n : Nat) (child : ProofIndex n) : ProofIndex (Nat.succ n)
+def predicateIndex (n : Nat) (proof : ProofIndex n) : n = n :=
+  match h : proof with
+  | .base => Eq.refl 0
+  | .step k child =>
+    match hc : child with
+    | .base => Eq.refl 1
+    | .step j grandchild =>
+      congrArg Nat.succ (congrArg Nat.succ (predicateIndex j grandchild))
+theorem predicateIndexObserved :
+    predicateIndex 2 (ProofIndex.step 1 (ProofIndex.step 0 ProofIndex.base)) = Eq.refl 2 := by rfl
+
+inductive RefusalPredicate : Prop where
+  | base
+  | step (children : Nat → RefusalPredicate)
+inductive RefusalResult : Prop where
+  | base
+  | combine (left right : RefusalResult)
+
+example : True := by
+  have accepted : RefusalPredicate → RefusalResult :=
+    let rec goodProof (proof : RefusalPredicate) : RefusalResult :=
+      match hp : proof with
+      | .base => RefusalResult.base
+      | .step children =>
+        match hc : children 1 with
+        | .base => RefusalResult.base
+        | .step grandchildren =>
+          RefusalResult.combine (goodProof (grandchildren 1)) (goodProof (grandchildren 1))
+    goodProof
+  fail_if_success
+    have rejected : RefusalPredicate → RefusalResult :=
+      let rec badProof (proof : RefusalPredicate) : RefusalResult :=
+        match hp : proof with
+        | .base => RefusalResult.base
+        | .step children =>
+          match hc : children 1 with
+          | .base => RefusalResult.base
+          | .step grandchildren =>
+            RefusalResult.combine (badProof (grandchildren 1))
+              (badProof (RefusalPredicate.step children))
+      badProof
+  exact True.intro
+
+example : True := by
+  have accepted : RefusalPredicate → RefusalPredicate → RefusalResult :=
+    let rec goodProof (proof spare : RefusalPredicate) : RefusalResult :=
+      match hp : proof with
+      | .base => RefusalResult.base
+      | .step children =>
+        match hc : children 1 with
+        | .base => RefusalResult.base
+        | .step grandchildren =>
+          RefusalResult.combine (goodProof (grandchildren 1) spare) (goodProof (grandchildren 1) spare)
+    goodProof
+  fail_if_success
+    have rejected : RefusalPredicate → RefusalPredicate → RefusalResult :=
+      let rec badProof (proof spare : RefusalPredicate) : RefusalResult :=
+        match hp : proof with
+        | .base => RefusalResult.base
+        | .step children =>
+          match hc : children 1 with
+          | .base => RefusalResult.base
+          | .step grandchildren =>
+            RefusalResult.combine (badProof (grandchildren 1) spare) (badProof spare spare)
+      badProof
+  exact True.intro
+
+inductive AuditIndexedDecEq : Nat → Type where
+  | intro (n : Nat) : AuditIndexedDecEq n
+  deriving DecidableEq
+example (n : Nat) : decide (AuditIndexedDecEq.intro n = AuditIndexedDecEq.intro n) = true := rfl
+
+inductive AuditIndexedBEq : Nat → Type where
+  | stop : AuditIndexedBEq 0
+  | next (n : Nat) (child : AuditIndexedBEq n) : AuditIndexedBEq (Nat.succ n)
+  deriving BEq
+example : (AuditIndexedBEq.next 0 AuditIndexedBEq.stop ==
+    AuditIndexedBEq.next 0 AuditIndexedBEq.stop) = true := rfl
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -919,6 +1029,105 @@ private def registeredLeanSource : String :=
 private def registeredPsSource : String :=
   "opaque registeredOpaque(n: Nat): Nat := match h: n with {\n  | 0 => 2\n  | Nat.succ k => Nat.succ(registeredOpaque(k))\n}\nabbrev registeredAbbrev(n: Nat): Nat := match h: n with {\n  | 0 => 3\n  | Nat.succ k => Nat.succ(registeredAbbrev(k))\n}\nclass RegisteredValue where {\n  value: Nat\n}\ninstance registeredInstance(n: Nat): RegisteredValue where {\n  value := match h: n with {\n    | 0 => 4\n    | Nat.succ k => Nat.succ(RegisteredValue.value(registeredInstance(k)))\n  }\n}\nclass RegisteredDefault where {\n  value: Nat\n}\n@[default_instance 200]\ninstance registeredDefault(n: Nat): RegisteredDefault where {\n  value := match h: n with {\n    | 0 => 5\n    | Nat.succ k => Nat.succ(RegisteredDefault.value(registeredDefault(k)))\n  }\n}\nfunction m3registered(flag: Bool): UInt64 :=\n  let n := if (flag) { 3 } else { 5 }\n  UInt64.ofNat(registeredOpaque(n) + 10 * registeredAbbrev(n) +\n    100 * RegisteredValue.value(registeredInstance(n)) +\n    1000 * RegisteredDefault.value(registeredDefault(n)))\n"
 
+private def checkCoreBoundaryControls : IO Unit := do
+  let name := psRootName "x"
+  let prop := PsExpr.sortE .zero
+  let type := PsExpr.forallE name prop prop .explicit
+  let value := PsExpr.lam name prop (.bvar 0) .explicit
+  let argument := PsExpr.forallE name prop (.bvar 0) .explicit
+  let initial := psElabContextEmpty psEnvironmentEmpty
+  let opened ← fromExcept ((psElabCoreBoundaryOpen initial .row value type).mapError
+    psCompilerPscv0ElabError)
+  let applied ← fromExcept ((psElabApplyCore opened.context (.fvar opened.id) [argument]).mapError
+    psCompilerPscv0ElabError)
+  let closed ← fromExcept ((psElabCoreBoundaryClose opened applied (some prop)).mapError
+    psCompilerPscv0ElabError)
+  let .letE key actualType actualValue body := closed.term
+    | throw (IO.userError "checked Core boundary lost its actual let")
+  let view := psExprAppView body
+  ensure (psExprAlphaEq view.head (.bvar 0) && view.args.length == 1 &&
+    view.args.all (fun arg => psElabCoreBoundaryClosed arg))
+    "checked Core boundary lost its direct owned application"
+  let matched ← fromExcept ((psElabCoreBoundaryMatch closed.context key actualType actualValue).mapError
+    psCompilerPscv0ElabError)
+  ensure matched.isSome "checked Core boundary rejected its own checked template"
+  let restored := psElabRestoreScope closed.context (psElabSaveScope initial)
+  let second ← fromExcept ((psElabCoreBoundaryOpen restored .row value type).mapError
+    psCompilerPscv0ElabError)
+  ensure (!psNameEq second.name key && second.outer.coreBoundaries.length == 2)
+    "checked Core boundary identity was reused after scope restoration"
+  let accept := fun template actual =>
+    (psElabCoreBoundaryTemplate [0, 1] template actual []).isSome
+  ensure (accept (.app (.fvar 0) (.fvar 1)) (.app (.fvar 10) (.fvar 11)))
+    "checked Core boundary rejected consistent caller specialization"
+  for (label, template, actual) in [
+      ("repeated caller identity", PsExpr.app (.fvar 0) (.fvar 0),
+        PsExpr.app (.fvar 10) (.fvar 11)),
+      ("binder capture", PsExpr.lam name prop (.fvar 0) .explicit,
+        PsExpr.lam name prop (.bvar 0) .explicit),
+      ("bound index", PsExpr.lam name prop (.bvar 0) .explicit,
+        PsExpr.lam name prop (.bvar 1) .explicit),
+      ("binder kind", PsExpr.forallE name prop prop .explicit,
+        PsExpr.forallE name prop prop .implicit),
+      ("logical constructor", PsExpr.lam name prop (.bvar 0) .explicit,
+        PsExpr.forallE name prop (.bvar 0) .explicit),
+      ("constant universe", PsExpr.constE name [.zero],
+        PsExpr.constE name [.succ .zero]),
+      ("projection index", PsExpr.proj name 0 (.fvar 0),
+        PsExpr.proj name 1 (.fvar 0))] do
+    ensure (!(accept template actual)) ("checked Core boundary ignored " ++ label)
+  let entry : PsElabCoreBoundary := {
+    name := key, kind := .row
+    type := .forallE name (.fvar 0) (.fvar 0) .explicit
+    value := .lam name (.fvar 0) (.bvar 0) .explicit
+    localIds := [0] }
+  let context := { initial with coreBoundaries := [entry] }
+  let matched ← fromExcept ((psElabCoreBoundaryMatch context key type value).mapError
+    psCompilerPscv0ElabError)
+  ensure matched.isSome "checked Core boundary rejected shared type/value specialization"
+  let changed := PsExpr.lam name (.sortE (.succ .zero)) (.bvar 0) .explicit
+  let mismatch ← fromExcept ((psElabCoreBoundaryMatch context key type changed).mapError
+    psCompilerPscv0ElabError)
+  ensure mismatch.isNone "checked Core boundary used independent type/value substitutions"
+  let safe := psMetaFresh initial.metaContext initial.localContext prop .natural
+  let safeEntry := { entry with type := prop, value := safe.expr, localIds := [] }
+  let safeContext := { initial with metaContext := safe.context, coreBoundaries := [safeEntry] }
+  let matched ← fromExcept ((psElabCoreBoundaryMatch safeContext key prop safe.expr).mapError
+    psCompilerPscv0ElabError)
+  ensure matched.isSome "Core boundary rejected a scope-safe unresolved metavariable"
+  let hidden := psLocalPushBinding initial.localContext name prop .explicit
+  let escaping := psMetaFresh initial.metaContext hidden.context prop .natural
+  let escapingEntry := { entry with type := prop, value := escaping.expr, localIds := [] }
+  let escapingContext := {
+    initial with metaContext := escaping.context, coreBoundaries := [escapingEntry] }
+  let matched ← fromExcept ((psElabCoreBoundaryMatch escapingContext key prop escaping.expr).mapError
+    psCompilerPscv0ElabError)
+  ensure matched.isNone "Core boundary allowed a future assignment to capture a hidden local"
+  let invalid := { entry with type := prop, value := prop, localIds := [] }
+  match psElabCoreBoundaryMatch { initial with coreBoundaries := [invalid] } key prop prop with
+  | .error (.infer .letTypeMismatch) => pure ()
+  | .error error => throw (IO.userError ("Core boundary type check changed failure: " ++
+      psCompilerPscv0ElabError error))
+  | .ok _ => throw (IO.userError "Core boundary trusted metadata instead of checking its value")
+
+private def predicatePlainLeanSource : String :=
+  "inductive PlainPredicate : Prop where\n  | base\n  | step (children : Nat → PlainPredicate)\ndef predicatePlain (proof : PlainPredicate) : True :=\n  match proof with\n  | .base => True.intro\n  | .step children =>\n    match children 1 with\n    | .base => True.intro\n    | .step grandchildren => predicatePlain (grandchildren 1)\ntheorem predicatePlainObserved :\n    predicatePlain (PlainPredicate.step (fun (_ : Nat) =>\n      PlainPredicate.step (fun (_ : Nat) => PlainPredicate.base))) = True.intro := by rfl\n"
+
+private def predicatePlainPsSource : String :=
+  "inductive PlainPredicate: Prop where {\n  | base\n  | step(children: Nat -> PlainPredicate)\n}\nfunction predicatePlain(proof: PlainPredicate): True := match proof with {\n  | .base => True.intro\n  | .step children => match children(1) with {\n    | .base => True.intro\n    | .step grandchildren => predicatePlain(grandchildren(1))\n  }\n}\ntheorem predicatePlainObserved:\n  predicatePlain(PlainPredicate.step(fun (_: Nat) =>\n    PlainPredicate.step(fun (_: Nat) => PlainPredicate.base))) = True.intro := by { rfl }\n"
+
+private def predicateNamedLeanSource : String :=
+  "inductive NamedPredicate : Prop where\n  | base\n  | step (children : Nat → NamedPredicate)\ndef predicateNamed (proof : NamedPredicate) : True :=\n  match hp : proof with\n  | .base => let witness : proof = NamedPredicate.base := hp; True.intro\n  | .step children =>\n    match hc : children 1 with\n    | .base => True.intro\n    | .step grandchildren => predicateNamed (grandchildren 1)\ntheorem predicateNamedObserved :\n    predicateNamed (NamedPredicate.step (fun (_ : Nat) =>\n      NamedPredicate.step (fun (_ : Nat) => NamedPredicate.base))) = True.intro := by rfl\n"
+
+private def predicateNamedPsSource : String :=
+  "inductive NamedPredicate: Prop where {\n  | base\n  | step(children: Nat -> NamedPredicate)\n}\nfunction predicateNamed(proof: NamedPredicate): True := match hp: proof with {\n  | .base => let witness: proof = NamedPredicate.base := hp\n    True.intro\n  | .step children => match hc: children(1) with {\n    | .base => True.intro\n    | .step grandchildren => predicateNamed(grandchildren(1))\n  }\n}\ntheorem predicateNamedObserved:\n  predicateNamed(NamedPredicate.step(fun (_: Nat) =>\n    NamedPredicate.step(fun (_: Nat) => NamedPredicate.base))) = True.intro := by { rfl }\n"
+
+private def predicateIndexLeanSource : String :=
+  "inductive ProofIndex : Nat → Prop where\n  | base : ProofIndex 0\n  | step (n : Nat) (child : ProofIndex n) : ProofIndex (Nat.succ n)\ndef predicateIndex (n : Nat) (proof : ProofIndex n) : n = n :=\n  match h : proof with\n  | .base => Eq.refl 0\n  | .step k child =>\n    match hc : child with\n    | .base => Eq.refl 1\n    | .step j grandchild =>\n      congrArg Nat.succ (congrArg Nat.succ (predicateIndex j grandchild))\ntheorem predicateIndexObserved :\n    predicateIndex 2 (ProofIndex.step 1 (ProofIndex.step 0 ProofIndex.base)) = Eq.refl 2 := by rfl\n"
+
+private def predicateIndexPsSource : String :=
+  "inductive ProofIndex: Nat -> Prop where {\n  | base: ProofIndex(0)\n  | step(n: Nat, child: ProofIndex(n)): ProofIndex(Nat.succ(n))\n}\nfunction predicateIndex(n: Nat, proof: ProofIndex(n)): n = n := match h: proof with {\n  | .base => Eq.refl(0)\n  | .step k child => match hc: child with {\n    | .base => Eq.refl(1)\n    | .step j grandchild =>\n      congrArg(Nat.succ, congrArg(Nat.succ, predicateIndex(j, grandchild)))\n  }\n}\ntheorem predicateIndexObserved:\n  predicateIndex(2, ProofIndex.step(1, ProofIndex.step(0, ProofIndex.base))) = Eq.refl(2) := by { rfl }\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -973,9 +1182,42 @@ private def structuralRuleFailure (rule : String) : PsElabError → Bool
   | .data message => message.startsWith ("PSCV0-MUTUAL-TOTAL: " ++ rule ++ ":")
   | _ => false
 
+private def checkIndependentSourcePair (label leanText psText : String) : IO Unit := do
+  let native ← fromExcept ((checkedDeclarations .lean leanText).mapError (fun message => label ++ ": " ++ message))
+  let proofscript ← fromExcept ((checkedDeclarations .proofScript psText).mapError
+    (fun message => label ++ ": " ++ message))
+  compareCheckedValues native proofscript
+  for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    let elaborated ← fromExcept ((psCompilerElaboratePscv0 program).mapError psCompilerPscv0Error)
+    let ir ← fromExcept ((psCompilerVerifiedIrFromElaborated elaborated).mapError psCompilerPscv0Error)
+    let _ ← fromExcept (psWithCheckedIr psIrCheckDefaultOptions ir fun _ => pure ())
+
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
+  checkCoreBoundaryControls
+  checkIndependentSourcePair "plain predicate" predicatePlainLeanSource predicatePlainPsSource
+  checkIndependentSourcePair "named predicate" predicateNamedLeanSource predicateNamedPsSource
+  checkIndependentSourcePair "indexed predicate" predicateIndexLeanSource predicateIndexPsSource
+  checkIndependentSourcePair "predicate refusal family prefix"
+    "inductive RefusalPredicate : Prop where\n  | base\n  | step (children : Nat → RefusalPredicate)\ninductive RefusalResult : Prop where\n  | base\n  | combine (left right : RefusalResult)\n"
+    "inductive RefusalPredicate: Prop where {\n  | base\n  | step(children: Nat -> RefusalPredicate)\n}\ninductive RefusalResult: Prop where {\n  | base\n  | combine(left: RefusalResult, right: RefusalResult)\n}\n"
+  for (label, leanText, psText) in [
+      ("reconstructed predicate parent", "inductive RefusalPredicate : Prop where\n  | base\n  | step (children : Nat → RefusalPredicate)\ninductive RefusalResult : Prop where\n  | base\n  | combine (left right : RefusalResult)\ndef rejectedParent (proof : RefusalPredicate) : RefusalResult :=\n  match hp : proof with\n  | .base => RefusalResult.base\n  | .step children =>\n    match hc : children 1 with\n    | .base => RefusalResult.base\n    | .step grandchildren =>\n      RefusalResult.combine (rejectedParent (grandchildren 1))\n        (rejectedParent (RefusalPredicate.step children))\n",
+        "inductive RefusalPredicate: Prop where {\n  | base\n  | step(children: Nat -> RefusalPredicate)\n}\ninductive RefusalResult: Prop where {\n  | base\n  | combine(left: RefusalResult, right: RefusalResult)\n}\nfunction rejectedParent(proof: RefusalPredicate): RefusalResult := match hp: proof with {\n  | .base => RefusalResult.base\n  | .step children => match hc: children(1) with {\n    | .base => RefusalResult.base\n    | .step grandchildren =>\n      RefusalResult.combine(rejectedParent(grandchildren(1)),\n        rejectedParent(RefusalPredicate.step(children)))\n  }\n}\n"),
+      ("unrelated predicate parameter", "inductive RefusalPredicate : Prop where\n  | base\n  | step (children : Nat → RefusalPredicate)\ninductive RefusalResult : Prop where\n  | base\n  | combine (left right : RefusalResult)\ndef rejectedSpare (proof spare : RefusalPredicate) : RefusalResult :=\n  match hp : proof with\n  | .base => RefusalResult.base\n  | .step children =>\n    match hc : children 1 with\n    | .base => RefusalResult.base\n    | .step grandchildren =>\n      RefusalResult.combine (rejectedSpare (grandchildren 1) spare)\n        (rejectedSpare spare spare)\n",
+        "inductive RefusalPredicate: Prop where {\n  | base\n  | step(children: Nat -> RefusalPredicate)\n}\ninductive RefusalResult: Prop where {\n  | base\n  | combine(left: RefusalResult, right: RefusalResult)\n}\nfunction rejectedSpare(proof: RefusalPredicate, spare: RefusalPredicate): RefusalResult := match hp: proof with {\n  | .base => RefusalResult.base\n  | .step children => match hc: children(1) with {\n    | .base => RefusalResult.base\n    | .step grandchildren =>\n      RefusalResult.combine(rejectedSpare(grandchildren(1), spare), rejectedSpare(spare, spare))\n  }\n}\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        ensure (structuralRuleFailure "DECREASE" cause)
+          ("predicate strict-child refusal changed ownership for " ++ label ++ ": " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError ("predicate strict-child refusal escaped elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ =>
+        throw (IO.userError ("predicate recursion accepted a nonchild: " ++ label))
   let native ← fromExcept (checkedDeclarations .lean leanSource)
   let proofscript ← fromExcept (checkedDeclarations .proofScript psSource)
   compareCheckedValues native proofscript

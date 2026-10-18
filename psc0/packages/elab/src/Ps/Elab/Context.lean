@@ -71,6 +71,20 @@ inductive PsElabPendingWork where
   | expectedTerm (scope : PsElabSavedScope) (id : Nat) (value type : PsExpr)
   | sourceTerm (scope : PsElabSavedScope) (id : Nat) (source : PsSyntaxTerm)
 
+-- Compiler boundaries retain a checked source closure and its exact typed
+-- specialization template. The stream follows successful elaboration events.
+inductive PsElabCoreBoundaryKind where
+  | source (discrFlags : List Bool) (proofCount : Nat)
+  | row
+  | primitive (selectedSlot prefixArity : Nat)
+
+structure PsElabCoreBoundary where
+  name : PsName
+  kind : PsElabCoreBoundaryKind
+  type : PsExpr
+  value : PsExpr
+  localIds : List Nat
+
 structure PsElabContext where
   environment : PsEnvironment
   localContext : PsLocalContext
@@ -90,6 +104,7 @@ structure PsElabContext where
   -- Each metavariable owns its original complete branch context.
   wellFoundedGoalsRev : List (Nat × PsSourceSpan) := []
   wellFoundedCallsRev : List PsElabRecursionCall := []
+  coreBoundaries : List PsElabCoreBoundary := []
 
 def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
@@ -150,7 +165,8 @@ def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
     pending := inner.pending
     infoRev := inner.infoRev
     wellFoundedGoalsRev := inner.wellFoundedGoalsRev
-    wellFoundedCallsRev := inner.wellFoundedCallsRev }
+    wellFoundedCallsRev := inner.wellFoundedCallsRev
+    coreBoundaries := inner.coreBoundaries }
 
 def psElabContextWithEnvironment (context : PsElabContext)
     (environment : PsEnvironment) : PsElabContext :=

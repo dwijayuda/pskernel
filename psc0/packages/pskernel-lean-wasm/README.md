@@ -81,3 +81,18 @@ checked input SHA (no force or overwrite of new code).
 This is a real Wasm GC compiled output, not an independent Lean kernel
 and **cannot** verify proof admissions. `createKernel` and
 `checkCanonicalAdmissions` continue to refuse every request.
+
+## Shared PSC0 Core source closure — candidate
+
+An additional research fixture compiles **the actual current repository modules**
+`Ps.Foundation.Name`, `Ps.Core.Level`, and `Ps.Core.Expr` with the new
+`PsKernelLeanWasmGc.SourceClosure`. The manifest at
+`psc0/pskernel-lean-wasm-gc-project.json` resolves these files directly;
+no copied source, forked AST, or older PSC2 snapshot is permitted.
+
+Cloud CI checks the project graph, checks all declarations with official Lean
+4.35.0, emits a separate `dist/shared-core.core.wasm` GC artifact, and
+executes its Bool probe. This is a prerequisite for implementing the real
+kernel expression/universe model, **not** a completed proof checker. The
+existing compiled `wasm/gc-probe.core.wasm` remains the separately
+qualified and committed basic runtime probe.

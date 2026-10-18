@@ -24,3 +24,10 @@ for all builds/tests. No Desktop Commander, local builds or force pushes.
 Binary distribution (pending CI): stage and hash a real PSC0-emitted
 `wasm/gc-probe.core.wasm` into Git via a successful, same-SHA cloud CI
 job only. The binary must remain explicitly named PROBE, not KERNEL.
+
+## Current live-shared-Core experiment
+
+PSC0's real current `Ps.Foundation.Name` → `Ps.Core.Level` →
+`Ps.Core.Expr` sources are now included by explicit project manifest.
+Qualification is pending real GitHub Linux CI graph/check/gc emission/runtime.
+No accepting kernel rules or independent proof judgments are enabled.

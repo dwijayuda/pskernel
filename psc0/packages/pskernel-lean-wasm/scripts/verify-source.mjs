@@ -25,6 +25,16 @@ assert.equal(pin.kernelReady, false);
 const source = await readFile(resolve(root, 'src/PsKernelLeanWasmGc/Probe.lean'), 'utf8');
 assert.match(source, /structure PsKernelGcPair/);
 assert.match(source, /def pskernelWasmGcProbe/);
+const manifest=JSON.parse(await readFile(resolve(root,'../../pskernel-lean-wasm-gc-project.json'),'utf8'));
+assert.equal(manifest.entry,'PsKernelLeanWasmGc.SourceClosure');
+assert.equal(manifest.modules.length,4);
+const actualModules=new Set(manifest.modules.map(m=>m.name));
+for(const required of ['Ps.Foundation.Name','Ps.Core.Level','Ps.Core.Expr','PsKernelLeanWasmGc.SourceClosure']){
+  assert.ok(actualModules.has(required),'missing actual PSC0 source module '+required);
+}
+const closureSource=await readFile(resolve(root,'src/PsKernelLeanWasmGc/SourceClosure.lean'),'utf8');
+assert.match(closureSource,/import Ps.Core.Expr/);
+assert.match(closureSource,/def pskernelWasmGcSourceCoreProbe/);
 const obsolete = [
   'source', 'kernel', 'patches', 'provider-test', 'provider',
   'host', 'EMSCRIPTEN_PIN.json', 'PREBUILT_WASM_MANIFEST.json',

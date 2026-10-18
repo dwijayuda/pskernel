@@ -6,6 +6,7 @@ on:
       - feature/psc0-v72-pskernel-lean-wasm-gc-v1
     paths:
       - 'psc0/packages/pskernel-lean-wasm/**'
+      - 'psc0/pskernel-lean-wasm-gc-project.json'
       - '.github/workflows/psc0-pskernel-lean-wasm-gc.yml'
       - 'psc0/packages/**/src/**'
       - 'psc0/host/src/**'
@@ -80,6 +81,19 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean-wasm/scripts/test-probe.mjs
+      - name: Reuse live PSC0 Core expression source in a GC-native project
+        working-directory: psc0
+        shell: bash
+        run: |
+          set -euo pipefail
+          project=pskernel-lean-wasm-gc-project.json
+          stem=packages/pskernel-lean-wasm/dist/shared-core
+          v7-native/.lake/build/bin/pscv0_native --audit-project-graph "$project"
+          v7-native/.lake/build/bin/pscv0_native --check-project "$project"
+          v7-native/.lake/build/bin/pscv0_native --emit-project-wasm-core "$project" "$stem"
+          test -s "${stem}.core.wasm"
+          test -s "${stem}.core.wat"
+          node packages/pskernel-lean-wasm/scripts/test-source-closure.mjs
       - name: Stage and verify byte-identical checked GC probe
         working-directory: psc0
         shell: bash

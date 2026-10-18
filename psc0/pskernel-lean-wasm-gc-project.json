@@ -1,0 +1,21 @@
+{
+  "entry": "PsKernelLeanWasmGc.SourceClosure",
+  "modules": [
+    {
+      "name": "Ps.Foundation.Name",
+      "path": "packages/foundation/src/Ps/Foundation/Name.lean"
+    },
+    {
+      "name": "Ps.Core.Level",
+      "path": "packages/core/src/Ps/Core/Level.lean"
+    },
+    {
+      "name": "Ps.Core.Expr",
+      "path": "packages/core/src/Ps/Core/Expr.lean"
+    },
+    {
+      "name": "PsKernelLeanWasmGc.SourceClosure",
+      "path": "packages/pskernel-lean-wasm/src/PsKernelLeanWasmGc/SourceClosure.lean"
+    }
+  ]
+}

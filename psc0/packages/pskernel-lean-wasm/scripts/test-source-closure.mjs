@@ -1,0 +1,20 @@
+// Experimental separate GC closure (not a kernel admission API).
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {resolve, dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const file=p=>resolve(root,p);
+const binary=await readFile(file('dist/shared-core.core.wasm'));
+const wat=await readFile(file('dist/shared-core.core.wat'),'utf8');
+assert.match(wat,/\(struct\b|struct\.new/,'expected real GC structure in shared Core closure');
+assert.doesNotMatch(wat,/\(memory\b/,'no linear memory');
+const module=await WebAssembly.compile(binary);
+assert.equal(WebAssembly.Module.imports(module).length,0);
+assert.equal(WebAssembly.Module.exports(module).some(e=>e.kind==='memory'),false);
+const instance=await WebAssembly.instantiate(module);
+const funcs=WebAssembly.Module.exports(module).filter(e=>e.kind==='function'&&e.name.includes('pskernelWasmGcSourceCoreProbe'));
+assert.equal(funcs.length,1,'one real Core expression closure entry');
+assert.equal(instance.exports[funcs[0].name](0),0);
+assert.equal(instance.exports[funcs[0].name](1),1);
+console.log('PSC0_WASM_GC_SHARED_CORE: PASS (current PSC0 Name/Level/Expr sources compiled, no vendoring; NOT a kernel)');

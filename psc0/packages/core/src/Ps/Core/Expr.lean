@@ -39,10 +39,10 @@ def psExprApplyMany
   psExprApplyManyWorker arguments fn
 
 
-// Syntactic binder inference used by generated recursors. Lean 4.35.0
-// kernel/expr.cpp infer_implicit(strict=true) follows dependencies through
-// already implicit parameters, but never infers a binder from the result alone.
-// This analysis does not perform reduction or alter any binder domain.
+-- Syntactic binder inference used by generated recursors. Lean 4.35.0
+-- kernel/expr.cpp infer_implicit(strict=true) follows dependencies through
+-- already implicit parameters, but never infers a binder from the result alone.
+-- This analysis does not perform reduction or alter any binder domain.
 def psExprHasLooseBVar (expr : PsExpr) (index : Nat) : Bool :=
   match expr with
   | .bvar actual => actual == index

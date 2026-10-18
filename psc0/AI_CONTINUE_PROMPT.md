@@ -188,3 +188,7 @@ Preparation bba4f8b5/run39103375064 stopped before compiler build because the
 new Name helper used Lean's reserved keyword prefix as a binder. Renamed to
 originalPrefix; no algorithm or acceptance change. This child remains
 unqualified pending complete preparation.
+
+Preparation4a2b2ff4/run39103687263 stopped on comment delimiters in the new
+Core binder-analysis helpers. Corrected to Lean comments; the full feature and
+strict qualification obligations remain unchanged. No semantic result yet.

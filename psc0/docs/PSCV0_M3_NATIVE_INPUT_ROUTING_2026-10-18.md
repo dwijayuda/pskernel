@@ -66,3 +66,9 @@ qualify that overwritten lane; current same-SHA integration must run it again.
 Full mutual-WF source construction, exact body equations, validated typed
 runtime adaptation, native syntax parity and same-SHA five-gate acceptance stay
 in existing M3+B exits. No additional milestone or architecture track is created.
+
+
+Preparation9223dd76/run39086928911 failed at the native authoring build because
+`scoped` was used as a local name; it is a Lean keyword. The child renames those
+locals and the analogous `syntax` local in the paired fixture. No parser rule,
+semantic assertion, foundation or budget changes. Execution remains pending.

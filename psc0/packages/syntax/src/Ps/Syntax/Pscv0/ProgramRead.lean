@@ -130,10 +130,10 @@ def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor)
       PsSyntaxCommand.privateDeclaration parsed.value
     else PsSyntaxCommand.declaration parsed.value
     return { value := command, cursor := next }
-  if let some scoped ← psPscv0ReadScopeCommand
+  if let some scopeCommand ← psPscv0ReadScopeCommand
       (fun cursor => psPscv0ParameterGroups (psPscv0ParseTerm true)
         (psPscv0ParseTerm false) 4096 false false false cursor []) cursor then
-    return scoped
+    return scopeCommand
   let declaration ← psPscv0ReadDeclaration cursor
   let next ← (psParseProofScriptCommandSeparator
     (psProofScriptDeclarationStop declaration.value) declaration.cursor).mapError psPscv0ParseError

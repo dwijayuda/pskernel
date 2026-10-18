@@ -171,3 +171,9 @@ M4+C/D and M5+E; do not create another roadmap or reopen the historical bounded
 M2 acceptance. Use common syntax/semantic owners and paired source fixtures,
 not a second elaborator or a text/filename workaround. Do not claim parity before
 actual .lean input traverses PSC0's checked pipeline and required backend lanes.
+
+
+Preparation9223dd76/run39086928911 failed at the native authoring build because
+`scoped` was used as a local name; it is a Lean keyword. The child renames those
+locals and the analogous `syntax` local in the paired fixture. No parser rule,
+semantic assertion, foundation or budget changes. Execution remains pending.

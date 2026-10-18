@@ -40,8 +40,8 @@ private def psSource : String :=
 
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
-  let syntax ← psCompilerParsePscv0 source kind
-  let elaborated ← (psCompilerElaboratePscv0 syntax).mapError psCompilerPscv0Error
+  let program ← psCompilerParsePscv0 source kind
+  let elaborated ← (psCompilerElaboratePscv0 program).mapError psCompilerPscv0Error
   return elaborated.declarations
 
 private def compareDefinitions (left right : List PsDeclaration) : IO Unit := do

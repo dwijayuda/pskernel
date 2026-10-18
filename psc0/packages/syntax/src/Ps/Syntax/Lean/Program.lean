@@ -67,8 +67,8 @@ def psLeanProgramValue (cursor : PsTokenCursor) :
 def psLeanProgramOrdinaryCommand (cursor : PsTokenCursor) (mutualMember : Bool := false) :
     Except String (PsParseResult PsSyntaxCommand) := do
   if !mutualMember then
-    if let some scoped ← psPscv0ReadScopeCommand psLeanProgramBinders cursor then
-      return scoped
+    if let some scopeCommand ← psPscv0ReadScopeCommand psLeanProgramBinders cursor then
+      return scopeCommand
   let some first := psTokenCursorPeek cursor | throw "PSCV0-LEAN-COMMAND"
   let isPrivate := first.text == "private"
   let cursor ← if isPrivate then pure (← psPscv0Expect cursor "private").cursor else pure cursor

@@ -101,16 +101,20 @@ jobs:
           lean --version | tee ../dist/m3-foundation-preparation/toolchain.txt
           grep -F '4.35.0' ../dist/m3-foundation-preparation/toolchain.txt
           grep -F 'eb6cafb' ../dist/m3-foundation-preparation/toolchain.txt
-          lake build pscv0_native pscv0_m3_partial_fixpoint_export pscv0_m3_recursor_surface_export pscv0_m3_mutual_well_founded_export pscv0_m3_mutual_packing pscv0_m3_where pscv0_m3_mutual_partial pscv0_m3_well_founded 2>&1 | tee ../dist/m3-foundation-preparation/build.log
+          lake build pscv0_native pscv0_m3_partial_fixpoint_export pscv0_m3_recursor_surface_export pscv0_m3_mutual_well_founded_export pscv0_m3_mutual_packing pscv0_m3_mutual_structural pscv0_m3_where pscv0_m3_mutual_partial pscv0_m3_well_founded 2>&1 | tee ../dist/m3-foundation-preparation/build.log
       - name: Check exact primitive signatures and logical closure
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
           lake env lean --run ../scripts/Pscv0M3FoundationInventory.lean 2>&1 | tee ../dist/m3-foundation-preparation/foundation-inventory.log
-          .lake/build/bin/pscv0_m3_recursor_surface_export ../dist/m3-foundation-preparation/StandardRecursorSurfaceCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/recursor-surface-export.log
           .lake/build/bin/pscv0_native --audit-primitives > ../dist/m3-foundation-preparation/primitive-audit.json
           .lake/build/bin/pscv0_native --audit-standard-closure > ../dist/m3-foundation-preparation/standard-closure.json
           printf '%s\n' 'PSCV0_M3_AUDITS: PASS exact primitive and full logical closure audits; complete JSON retained in artifacts'
+      - name: Author and strictly check the unselected recursor source candidate
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_recursor_surface_export ../dist/m3-foundation-preparation/StandardRecursorSurfaceCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/recursor-surface-export.log
       - name: Strict selected manifest audit and independent candidate digests
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -139,6 +143,7 @@ jobs:
           lake build Ps.Environment.StandardPartialFixpointData 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-data-build.log
           lake env lean --run ../scripts/Pscv0M3PartialFixpointMetadata.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-metadata.log
       - name: Check selected partial and ordinary section source behavior
+        id: source_checks
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
@@ -158,6 +163,63 @@ jobs:
           mkdir -p ../dist/m3-foundation-preparation/well-founded
           m3_foundation_check ../dist/m3-foundation-preparation/well-founded/check.log .lake/build/bin/pscv0_m3_well_founded ../dist/m3-foundation-preparation/well-founded
           test "$m3_foundation_fixture_status" -eq 0
+      - name: Check structural mutual runtime source and assurance boundaries
+        id: structural_source
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/mutual-structural
+          .lake/build/bin/pscv0_m3_mutual_structural ../dist/m3-foundation-preparation/mutual-structural 2>&1 | tee ../dist/m3-foundation-preparation/mutual-structural/check.log
+      - name: Execute paired input and structural bundles in JavaScript and TypeScript
+        if: ${{ !cancelled() && steps.source_checks.outcome == 'success' && steps.structural_source.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/pscv0-m3-tools" --ignore-scripts --no-audit --no-fund --no-package-lock typescript@7.0.2
+          TSC="$RUNNER_TEMP/pscv0-m3-tools/node_modules/.bin/tsc"
+          "$TSC" --version | grep -Fx 'Version 7.0.2'
+          for kind in lean ps; do
+            parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
+            "$TSC" --ignoreConfig "$parity_dir/inputparity.ts" --outDir "$parity_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields | tee "$parity_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
+          done
+          structural_dir=../dist/m3-foundation-preparation/mutual-structural
+          "$TSC" --ignoreConfig "$structural_dir/mutualstructural.ts" --outDir "$structural_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma "$structural_dir" mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee "$structural_dir/js.log"
+          node ../scripts/pscv0-m3-runtime.mjs ecma "$structural_dir" mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric "$structural_dir/ts/mutualstructural.js" | tee "$structural_dir/ts.log"
+      - name: Execute paired input and structural bundles in Rust
+        if: ${{ !cancelled() && steps.source_checks.outcome == 'success' && steps.structural_source.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          rustup toolchain install 1.98.1 --profile minimal
+          for kind in lean ps; do
+            parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
+            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields
+            rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$parity_dir/rust.log"
+          done
+          structural_dir=../dist/m3-foundation-preparation/mutual-structural
+          node ../scripts/pscv0-m3-runtime.mjs rust "$structural_dir" mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$structural_dir/rust.log"
+      - name: Execute paired input and structural bundles in Wasm GC and components
+        if: ${{ !cancelled() && steps.source_checks.outcome == 'success' && steps.structural_source.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/pscv0-m3-wasm"
+          cd "$RUNNER_TEMP/pscv0-m3-wasm"
+          curl -fsSL https://github.com/bytecodealliance/wasm-tools/releases/download/v1.261.0/wasm-tools-1.261.0-x86_64-linux.tar.gz -o wasm-tools.tar.gz
+          echo 'ad62b2176037e93e1348cb65d6212d128ca9f097b63d155569f25215818ff7b1  wasm-tools.tar.gz' | sha256sum -c -
+          curl -fsSL https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.2/wasmtime-v49.0.2-x86_64-linux.tar.xz -o wasmtime.tar.xz
+          echo 'a4d6e9e3a5a60f527cf7793d674c48930c80c2e8977995b8a275cad3254b9322  wasmtime.tar.xz' | sha256sum -c -
+          tar -xzf wasm-tools.tar.gz
+          tar -xJf wasmtime.tar.xz
+          export PATH="$RUNNER_TEMP/pscv0-m3-wasm/wasm-tools-1.261.0-x86_64-linux:$RUNNER_TEMP/pscv0-m3-wasm/wasmtime-v49.0.2-x86_64-linux:$PATH"
+          cd "$GITHUB_WORKSPACE/psc0/v7-native"
+          for kind in lean ps; do
+            parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields | tee "$parity_dir/wasm.log"
+          done
+          structural_dir=../dist/m3-foundation-preparation/mutual-structural
+          node ../scripts/pscv0-m3-runtime.mjs wasm "$structural_dir" mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee "$structural_dir/wasm.log"
       - name: Check indexed cases and heterogeneous major/context transport
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

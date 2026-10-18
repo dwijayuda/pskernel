@@ -36,113 +36,78 @@ Prep cancel-in-progress:false; keep at most one active and one pending run.
 
 ## Current state and evidence
 
-Latest fully qualified compiler/test SHA:
+Latest fully qualified five-gate compiler/test SHA:
 **18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290**.
-All five exact-SHA gates completed SUCCESS: Native39092425439,
-M339092425489, F139092425401, F239092425419, F339092425556.
-Full run/job/artifact digest receipt:
+Native39092425439, M339092425489, F139092425401, F239092425419,
+F339092425556 all completed SUCCESS. Receipt:
 docs/PSCV0_M3_INTEGRATION_18FE0B3E_2026-10-18.md.
-Preparation39091873814/job117570152485 also passed at that exact SHA.
-Historicalb95c6293 remains qualified, but is no longer the latest checkpoint.
 
-This qualifies both input routes, ordered binder/section scope, native rich
-terms/proofs/data/classes/instances/deriving, mixed modules, local where/WF,
-pattern lets, if-let and typed do control. The paired m3parity/m3data/m3control
-fixtures share checked Core and equations and execute through the existing
-JavaScript, TypeScript, Rust, GC core and component observers. Actual P1 Rust
-execution is included. No aggregate runtime count is inferred from job metadata.
-Full native syntax parity and source mutual WF remain OPEN.
+Current main: **5785ada4d0521eaa910a57adc8569dbe95d4c5fe**.
+Preparation39093434191/job117575381994 completed SUCCESS; receipt
+docs/PSCV0_M3_NATIVE_LAMBDA_5785ADA4_2026-10-18.md.
+Native39094184382 and M339094184399 are RUNNING;
+F139094184384, F239094184401 and F339094184409 completed SUCCESS.
+Never supersede/cancel a healthy main Native. Main was promoted only after
+all18fe gates finished. Native lambda argument runtime integration is pending.
 
-Preparation3f7e0491341599cce3e259de640ae09a1b16f526 completed SUCCESS:
-run39093165102/job117574003095; artifact12123597417; SHA256
-1e5791d310d082d311dd782219cabe61f9b76c7313f695edcb87b69a9a39d97a.
-The complete log records SOURCE_COMPONENT PASS, including actual source bodies,
-refined callbacks, decrease goals and official-kernel fixedpoint equation.
-Receipt: docs/PSCV0_M3_SOURCE_COMPONENT_3F7E0491_2026-10-18.md.
-This qualifies internal construction only. Main18fe0b3e remains the latest
-five-gate runtime checkpoint. Native lambda argument5785ada4 has completed
-preparation39093434191/job117575381994 SUCCESS; artifact12123543616,
-SHA2564377f8e5e35b4e12291e128dda719285da7951aefe6ee2ffcb2c2d10073863ee.
-Receipt: docs/PSCV0_M3_NATIVE_LAMBDA_5785ADA4_2026-10-18.md.
-Current main is5785ada4d0521eaa910a57adc8569dbe95d4c5fe, promoted non-force
-after all18fe gates finished. Its five new gates are RUNNING:
-Native39094184382, M339094184399, F139094184384, F239094184401,
-F339094184409. Never supersede/cancel the healthy main Native.
+Latest fully successful preparation compiler/test SHA:
+**6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
+Run39093766354/job117576869290 completed SUCCESS; artifact12124171379,
+SHA25624765801ed8ccffd426e1190ed85dd35303be3e4917fdbdc7464779f424b67d2.
+Receipt: docs/PSCV0_M3_EXACT_COMPONENT_6CDB9A6E_2026-10-18.md.
+The full log confirms real three-member recursive bodies, fixed measures,
+refined callbacks, decrease proofs, a shared closed auxiliary, three public
+projections and exact retained-source equations checked by the official kernel.
+Singleton WF uses the same independent equation validator; all retained checks
+and input-parity preparation pass.
 
-The current preparation child builds one shared checked auxiliary, reconstructs
-public members in their original parameter order, and derives genuine fix_eq
-equations. PreDefinition now shares one exact retained-source equation validator
-between singleton and component WF; it stages all genuine definitions before
-replacing every retained peer. No reflexive f=f equation or source sidecar alone
-grants runtime authority. The existing kernel fixture now checks the three public
-members and exact retained-source equations. This child is UNQUALIFIED; source
-dispatch, executable recovery and strict PSum activation remain disabled.
-The preceding09bcae preparation failed because an unreduced closed dictionary
-application falsely retained unused varying arguments. The replacement follows
-pinned WF/Rel: establish one fixed codomain and synthesize a single relation
-dictionary in the common fixed scope. Per-member dictionary transport is removed.
+Historical3f7e0491 qualified internal bodies/fix_eq before public equations.
+Failed09bcae transported an unreduced dictionary application and counted unused
+varying arguments as dependencies. That design was removed: pinned WF/Rel first
+establishes one fixed codomain, then synthesizes a single dictionary in the fixed
+scope. WF/Main31-35 explicitly rejects zero-varying members, matching PSC0.
 
-The body candidate uses actual per-callee dependent callbacks, checks final fixed
-arguments in their branch scopes, solves genuine decrease goals, closes and checks
-the recursive functional and its fix_eq. It does not activate the public source
-dispatcher. Public projections, exact retained-body equations, typed executable
-ownership and strict PSum selection are still required.
-Fresh refs, complete logs and exact-SHA CI override this checkpoint.
+The public source dispatcher still refuses multi-member WF. Executable recovery
+and strict selected PSum activation remain pending. Passing internal constructor
+proofs does not establish runtime behavior. M3+B and full selected native grammar
+parity remain OPEN. Fresh refs, complete logs and exact-SHA CI override this file.
 
 ## Current implementation and next work
 
-- SourceKind routes .lean and .ps to their own PsSyntaxProgram parsers, then
-  shared scopes, elaboration, official checking, typed erasure, IR and targets.
-  Source text is never rewritten and no arbitrary host elaborator is invoked.
-- Scope/Binders/section variables elaborate each annotation at the preceding-name
-  prefix, following pinned Elab/Binders.lean. Group origin metadata preserves
-  receipts and selected captures. Three Lean shadowing refusals and paired Core
-  comparisons are qualified. The old invalid shadowing positives were corrected
-  with unchanged observations.
-- Native data/class/instance/deriving syntax reuses shared field and declaration
-  owners. Inferred native method parameters use expected class fields.
-- Lean/Declarations owns native local where helpers and raw
-  decreasing_by tactic sequences, reusing shared Where/PreDefinition/WF.
-- Lean/Control owns native do layout, optional/trailing semicolons,
-  dangling else and else-if. Selected bindings/returns/actions, pattern matrices,
-  expected effects and continuations stay shared. No new effect family is added.
-- One paired fixture now has three exports (m3parity, m3data, m3control) and
-  existing five-target observers; all three and the local WF helper are qualified
-  across all five integration gates at18fe.
+Both input kinds have separate surface grammars and share the same v7.2 semantic
+pipeline. The qualified paired fixture covers scopes, ordered binder annotations,
+defaults, rich terms/proofs, data/classes/instances/deriving, both mixed-module
+directions, local where/WF, pattern lets/if-let and typed do. The native lambda
+argument child follows Parser.Term.fun maxPrec and argument argPrec; its paired
+m3control observations remain6/8. All selected assurance refusals remain.
 
-Next actions:
-1. Qualify the source component measure/body candidate. Main18fe integration is complete. This reuses the existing retained-source packing fixture;
-   no new executable or workflow is added. Build that existing fixture before
-   long audits to catch authoring errors early. Exporter source bytes remain
-   in complete artifact logs/files; redundant console source dumps are filtered.
-   Acceptance checks, runtime lanes and budgets are unchanged.
-2. Finish the selected native source adapter audit. Source input parity is broader
-   than implementation .lean or oracle .lean coverage. Keep both grammars and all
-   assurance boundaries. Once prep passes, promote non-force and retain five gates.
-3. Complete source mutual WF with the existing retained-call, fixed-permutation,
-   typed PSigma/PSum packing and source-owned measure preparation. Current
-   PreDefinitionDispatch deliberately refuses multi-member WF components.
-4. Re-elaborate bodies under actual typed dependent callbacks in each branch.
-   Infer callback signatures from actual fix; build genuine per-callee injections
-   and decrease goals, respecting original captures/arity/returned functions.
-   Close public projections and derive exact equations from fix_eq plus checked
-   cases/funext. Independently compare retained original bodies; f=f is no runtime
-   authority. No temporary global axiom or partialDecl shortcut for total WF.
-5. Recover typed public-member execution before erasure. Inspect the complete
-   Erasure/WellFounded and Compiler/Api P1 ownership mechanisms before designing
-   this boundary; heterogeneous packed result motives cannot simply be assumed
-   to have one runtime type. Do not copy a shape-only body rewrite.
-6. Reconcile all six M3 exits and qualify one final compiler/test SHA across
-   Native, M3, F1, F2 and F3. M3+B remains OPEN. Do not start M4/C5 or relabel
-   the historical bounded M2 acceptance as full v7.2 completion.
+Mutual WF construction now owns retained source-call analysis, fixed permutations,
+original measure scopes, dependent packing, per-callee refined callbacks, decrease
+proofs, one shared auxiliary and exact public source equations. PreDefinition
+independently reconstructs each RHS from retained Core, shared with singleton WF.
+No Eq f=f, sidecar or name alone authorizes runtime. Pinned WF/Main, Basic,
+WF/{PackMutual,Rel,Fix,Eqns,Unfold}, ArgsPacker and upstream fixedParams tests were
+studied; notices retained.
 
-Pinned source/design references:
-docs/PSCV0_M3_NATIVE_INPUT_ROUTING_2026-10-18.md,
-docs/PSCV0_M3_RETAINED_CALL_ANALYSIS_2026-10-18.md.
-WF study: FixedParams, ArgsPacker, WF/{Main,PackMutual,Rel,Fix,Unfold};
-Fix.processSumCasesOn/processPSigmaCasesOn refines callbacks before recursive
-replacement. PSC0's existing singleton source re-elaboration preserves the same
-branch invariant. The internal source-body component candidate is implemented but not yet qualified.
+Next:
+1. Finish main5785ada4 integration without canceling healthy jobs. Record exact
+   jobs/artifact digests and update both handoffs. The exact-equation preparation
+   is green at6cdb9a6e; do not rerun it without new changes or unresolved concerns.
+2. Implement total mutual WF executable ownership after auditing the whole
+   preparation/RecursorLift/erasure/assurance path. The provisional design is
+   docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md. Derive actual bodies from the
+   checked functional, retain/check ordinary private definitions, and independently
+   validate executable ownership. Do not use partialDecl for total WF.
+3. Activate source dispatch and strict PSum selection only when logical equations,
+   executable ownership and paired .ps/.lean source behavior are coherent. Extend
+   existing meaningful fixtures/backend observers; no extra bootstrap/self-hosting
+   or test proliferation.
+4. Finish the selected native input audit and reconcile all six written M3 exits.
+   Data/elimination, owned strategies, total recursion, P0, P1 and cross-stage cells
+   require actual source/kernel/runtime or intended-refusal evidence. Do not infer
+   full completion from isolated examples or old bounded M2 acceptance.
+5. Qualify the completed compiler/test SHA across Native, M3, F1/F2/F3 with fresh
+   manifests and receipts. M4+C/D and M5+E/C5 remain later roadmap phases.
 
 ## Foundation identity
 
@@ -159,22 +124,4 @@ still UNSELECTED. Activation requires reviewed strict manifest/surface identitie
 
 Update both handoffs, roadmap and exit ledger at each completed milestone slice.
 
-## Native lambda argument candidate
-
-Pinned Parser.Term.fun has max precedence; Parser.Term.argument accepts it after
-native whitespace/indentation. The native adapter now reads fun/lambda bodies in
-argument position, sharing ordinary expected-type elaboration. The existing
-m3control paired fixture/native oracle includes the call with unchanged outputs;
-it remains on the existing five-target execution path. Preparation passed
-at5785ada4; runtime integration is running. Leading-precedence terms
-(match/if/let/by) still require grouping in argument position. No grammar change
-to .ps, source rewriting or host elaboration is introduced.
-
-Pinned WF/Main.lean31-35 explicitly rejects members with no varying arguments.
-The existing check is the correct invariant, not a pending PUnit feature.
-Exact-public-equation candidate6cdb9a6ee36b3262b366d80f36c238b50fd9676d has
-preparation39093766354/job117576869290 RUNNING. The native lambda
-argument preparation39093434191 completed SUCCESS.
-
-Provisional runtime design: docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md.
-Re-evaluate against the full preparation/erasure/assurance pipeline before coding.
+Update both handoffs, roadmap and exit ledger at every completed milestone slice.

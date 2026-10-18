@@ -40,6 +40,45 @@ Pinned WF/Main uses addAndCompilePartialRec after logical construction; adapt
 its separation without temporary axioms or total/partial strategy conflation.
 Source dispatch and PSum selection remain disabled until this is coherent.
 
-This note is not an implementation or qualification claim. The active code first
-qualifies public exact equations. Study pinned source and the complete affected
-subsystem before adopting or changing this design.
+Further subsystem audit:
+- Compiler/Api.prepare runs RecursorLift before canonical admissions; NativeV7
+  checks original admissions then chooses ordinary-partial or general runtime.
+  There is no export pruning before this whole prepared graph is checked.
+- A private ordinary implementation definition can reference genuine public
+  logical functions without creating a kernel cycle: publics reference the
+  closed WF auxiliary, which uses proof-restricted callbacks, not public names.
+- Prefer one shared typed recovery module under Elab/WellFoundedRuntime (pure
+  checked-Core work, no source parse) reused by producer and compiler validator;
+  Compiler already depends on Elab. No compiler->elab cycle is permitted.
+- Recover inventory from actual public raw lambda prefix + beta/zeta exposure of
+  aux fixedArgs packedEntry; original header count excludes returned lambdas
+  because public generated projection body is an application. Require complete
+  unique projection coverage, exact fixed fvar bijection and typed varying tuple.
+- Build aggregate of genuine public unary projections in the common fixed scope,
+  instantiate it back into each original member context, and build a two-binder
+  smaller/proof callback of the ACTUAL inferred callback type. Apply the actual
+  checked functional to current injection and this callback, close original
+  header, infer/check exact original type. This derived body contains no fixpoint.
+- Private implementation names can be PsName.num public 0 as ordinary definitions,
+  distinguished from P0/P1 partialDecl. No new Core declaration variant needed.
+- Independent runtime validator reconstructs this exact body from logical
+  auxiliary/publics and compares against private body after restoring only
+  private-owned RecursorLift helpers. Move/generalize existing P1 helper restore
+  (~55lines) into a shared pure module rather than duplicating it. Restore
+  auxiliary helpers too, or deliberately skip lifting logical-only auxiliary;
+  do not skip private implementation workers or their canonical kernel admission.
+- Runtime graph replaces public body with prepared private body, omits private
+  alias + packed auxiliary + auxiliary-owned helpers, keeps private-body workers.
+  Shared worker-group filtering must reject partially-owned groups. Apply total
+  WF recovery alongside P0/P1 ordinary runtime view, but keep general partial
+  guard and original logical environment/assurance rules.
+- Existing complete source fixture currently checks 1 shared auxiliary +3public
+  definitions +3exact equations; future executable activation needs actual body,
+  tampered private/body-owner refusal, paired .ps/.lean source observations and
+  existing five backend lanes. PSum selection then updates strict identities.
+- Pinned WF/Main31-35 explicitly refuses zero-varying members; no PUnit feature
+  is required. Basic.addAndCompilePartialRec280-294 compiles renamed original
+  definitions with partial safety after WF logic; PSC0 should retain stronger
+  independent actual-functional recovery rather than importing unsafe machinery.
+
+This design is not implemented or qualified; re-evaluate before changing code.

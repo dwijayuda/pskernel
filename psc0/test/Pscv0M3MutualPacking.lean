@@ -23,6 +23,28 @@ def packed (x : PSum Nat (PSum Bool (PSum Nat Bool))) :
 example (n : Nat) : packed (.inl n) = first n := rfl
 example (b : Bool) : packed (.inr (.inl b)) = second b := rfl
 example (s : PSum Nat Bool) : packed (.inr (.inr s)) = third s := rfl
+
+-- Same original three-slot headers, reordered fixed type/value parameters,
+-- local let aliases, and an overapplication belonging to a returned function.
+mutual
+def callFirst {A : Type} (a : A) (n : Nat) : Nat → A :=
+  fun k => match n with
+    | 0 => a
+    | m + 1 => let kept := a; callSecond m kept k
+termination_by n
+def callSecond (n : Nat) {B : Type} (b : B) : Nat → B :=
+  fun k => match n with
+    | 0 => b
+    | m + 1 => callThird m b k
+termination_by n
+def callThird {C : Type} (n : Nat) (c : C) : Nat → C :=
+  fun k => match n with
+    | 0 => c
+    | m + 1 => callFirst c m k
+termination_by n
+end
+example : callFirst 7 6 2 = 7 := by decide
+
 end M3MutualPackingOracle
 
 private def ensure (condition : Bool) (message : String) : IO Unit :=
@@ -149,6 +171,62 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
   match psElabRecursionComponentFixedParameterPlan [owner] with
   | .error _ => pure ()
   | .ok _ => throw "typed member analysis accepted a callee outside the component"
+
+-- Inspect source-owned Core before any recursive declaration is published.
+-- Native controls above and the existing graph differential cover the same
+-- parameter correspondence. This probe does not admit source mutual WF.
+private def checkRetainedOwners (environment : PsEnvironment) : Except String Unit := do
+  let source :=
+    "mutual {\n" ++
+    "def callFirst {A : Type} (a : A) (n : Nat) : Nat -> A := fun (k : Nat) => match n with { | 0 => a | m + 1 => let kept := a; callSecond(m, kept)(k) } termination_by n\n" ++
+    "def callSecond (n : Nat) {B : Type} (b : B) : Nat -> B := fun (k : Nat) => match n with { | 0 => b | m + 1 => callThird(m, b)(k) } termination_by n\n" ++
+    "def callThird {C : Type} (n : Nat) (c : C) : Nat -> C := fun (k : Nat) => match n with { | 0 => c | m + 1 => callFirst(c, m)(k) } termination_by n\n" ++
+    "}\n"
+  let parsed ← psPscv0ParseProgram source
+  let [.mutualDeclarations members span] := parsed.commands
+    | throw "retained-call source lost its owned mutual block"
+  let names := members.map fun member => (psElabOriginSource member.declaration).fst.segments
+  let aliases := names.zipIdx.map fun (name, index) =>
+    (name, ["$psc0Mutual", psNatToString index])
+  let resolver : PsScopeResolver := {
+    environment, scope := {}, mutualNames := names, mutualAliases := aliases }
+  let scopedMembers ← (members.zip aliases).mapM fun (member, alias) =>
+    (psScopePreDefinition resolver member
+      (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)).mapError
+        psCompilerPscv0ElabError
+  let prepared ← (psElabPreparePreDefinitionsWithSource environment [] []
+    scopedMembers span).mapError psCompilerPscv0ElabError
+  let context ← (psElabPreDefinitionValidate environment prepared.block).mapError
+    psCompilerPscv0ElabError
+  let owners ← (psElabPreDefinitionParameterOwners environment prepared.block.levelNames
+    context.localContext.nextId prepared.block.members).mapError psCompilerPscv0ElabError
+  if owners.length != 3 || owners.any (fun owner =>
+      owner.parameterIds.length != 3 || owner.calls.length != 1 ||
+        owner.calls.any (fun call => call.arguments.length != 3)) then
+    throw "retained-call analysis duplicated spines or consumed returned-function arguments"
+  let plan ← (psElabRecursionComponentFixedParameterPlan owners).mapError psCompilerPscv0ElabError
+  if plan != { count := 2, permutations :=
+      [[some 0, some 1, none], [none, some 0, some 1], [some 0, none, some 1]] } then
+    throw "retained source call analysis lost reordered dependent fixed parameters"
+  -- Underapplication is conservative analysis, not permission to escape a
+  -- proof-restricted callback. The omitted source slots must become varying.
+  let some owner := owners.head? | throw "missing retained source owner"
+  let some member := prepared.block.members.head? | throw "missing source member"
+  let some typeId := owner.parameterIds.head? | throw "missing type parameter"
+  let partialCall := PsExpr.app (.fvar member.peerId) (.fvar typeId)
+  let _ ← (psElabResolvedTerm owner.context partialCall none).mapError psCompilerPscv0ElabError
+  let calls ← (psElabRecursionCollectCalls 4096 owner.context
+    [{ peerId := member.peerId, name := member.name, arity := 3 }] span partialCall).mapError
+      psCompilerPscv0ElabError
+  let partialPlan ← (psElabRecursionComponentFixedParameterPlan
+    [{ owner with calls }]).mapError psCompilerPscv0ElabError
+  if partialPlan != { count := 1, permutations := [[some 0, none, none]] } then
+    throw "underapplication incorrectly treated missing arguments as fixed"
+  let malformed := { member with value := .fvar context.localContext.nextId }
+  match psElabPreDefinitionParameterOwners environment prepared.block.levelNames
+      context.localContext.nextId [malformed] with
+  | .error _ => pure ()
+  | .ok _ => throw "retained-call analysis accepted an unowned Core value"
 
 private def checkFixedScopes (environment : PsEnvironment) :
     Except String (List PsDeclaration) := do
@@ -306,6 +384,7 @@ private def build : Except String (List PsDeclaration) := do
   let environment := psStandardPSumReducibility.foldl
     (fun env (name, status) => psEnvironmentSetReducibility env name status) environment
   checkCallbackScopes environment
+  checkRetainedOwners environment
   let fixedScopeDeclarations ← checkFixedScopes environment
   let source :=
     "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
@@ -437,6 +516,7 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
+  IO.println "PSCV0_M3_RETAINED_CALLS: PASS source-owned reordered dependent headers, actual branch and let scopes, full application spines, returned-function arity and conservative underapplication; source mutual WF remains separate"
   IO.println "PSCV0_M3_FIXED_SCOPES: PASS three reordered polymorphic headers, dependent fixed values, implicit binder preservation, returned-function ownership, exact kernel equations and malformed/dependent mapping refusals"
   IO.println "PSCV0_M3_COMPONENT_FIX: PASS heterogeneous dependent result family, common Nat measure, three typed decreasing callbacks, actual checked fix_eq member equations and incomplete/dependent-measure refusals; source mutual WF is separate"
   IO.println "PSCV0_M3_CALLBACK_SCOPES: PASS two typed callees, current refined capture, ordinary local shadow, saved scope, escape refusal and cross-owner parameter correspondence"

@@ -297,3 +297,13 @@ Modifications: explicit portable local contexts, checked complete permutations,
 fresh common identities, actual dependent-domain checks and structural traversal.
 The native implementation and tests remain the reference; no host MetaM enters
 the portable compiler. Retain LEAN-APACHE-2.0.txt and upstream notices.
+
+### Retained typed call observations
+
+Ps.Elab.RecursionParameters and PreDefinition adapt getFixedParamsInfo in
+src/Lean/Elab/PreDefinition/FixedParams.lean at Lean4.35.0
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Copyright (c)2025 Lean FRO, LLC.
+Author: Joachim Breitner. Apache-2.0. Modifications: explicit portable local
+contexts, source-arity-owned application observations, structural bounded traversal
+and rechecking retained Core without host temporary axioms or IO references.
+Retain LEAN-APACHE-2.0.txt and upstream notices.

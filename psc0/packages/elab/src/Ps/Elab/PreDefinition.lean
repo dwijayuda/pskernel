@@ -1,4 +1,5 @@
 import Ps.Elab.PreDefinition.Basic
+import Ps.Elab.RecursionParameters
 import Ps.Elab.MutualStructural
 import Ps.Elab.PartialFixpoint
 
@@ -153,6 +154,40 @@ def psElabPreDefinitionValidate (environment : PsEnvironment)
     if !psNameEq member.sourceInfo.owner member.name then
       throw (psElabPreDefinitionError "SOURCE" "source information has a different declaration owner")
   return context
+
+-- Typed parameter observations come from the same retained source bodies
+-- that own the dependency SCC and final public equations. There is no second
+-- source probe whose capture resolution could disagree with that authority.
+def psElabPreDefinitionParameterOwners (environment : PsEnvironment)
+    (levels : List PsName) (nextId : Nat) (members : List PsElabPreDefinition) :
+    Except PsElabError (List PsElabRecursionParameterOwner) := do
+  let ids := members.map (·.peerId)
+  if members.isEmpty || ids.eraseDups.length != ids.length ||
+      ids.any (fun id => id >= nextId) then
+    throw (psElabPreDefinitionError "OWNERSHIP" "parameter analysis requires distinct fresh component peers")
+  let declarations := members.map fun member =>
+    PsLocalDecl.binding member.peerId member.name member.type .explicit
+  let context := { psElabContextEmpty environment levels with
+    localContext := { nextId, declarations } }
+  let targets := members.map fun member =>
+    ({ peerId := member.peerId, name := member.name
+       arity := psElabPreDefinitionHeaderCount member } : PsElabRecursionCallTarget)
+  members.mapM fun member => do
+    if psExprHasUnresolvedMeta member.type || psExprHasUnresolvedMeta member.value ||
+        !psExprFVarsInContext psLocalEmpty member.type ||
+        !psExprFVarsInContext context.localContext member.value then
+      throw (psElabPreDefinitionError "CLOSURE" "parameter analysis contains an unresolved or unowned Core identity")
+    let _ ← psElabExpressionSort context member.type
+    let _ ← psElabResolvedTerm context member.value (some member.type)
+    let opened ← psElabPreDefinitionOpen (psElabPreDefinitionHeaderCount member)
+      context member.type member.value
+    let calls ← psElabRecursionCollectCalls 4096 opened.context targets
+      (psElabPreDefinitionSourceSpan member) opened.value
+    return {
+      name := member.name
+      context := opened.context
+      parameterIds := opened.bindersRev.reverse.map (·.id)
+      calls }
 
 abbrev PsElabPreDefinitionGraph := List (Nat × List Nat)
 

@@ -4,15 +4,20 @@ Candidate child of3386891. Qualification pending; no source mutual-WF admission.
 
 ## Authority and reference
 
-PSC0's portable compiler is authored in native `.lean` under the v7.2 language
-and semantic contract. Use the selected v7.2 capabilities and audited library
-closure, retaining a clean path to future readable `.ps` reconstruction.
-Native Lean syntax remains native (v7.2 §§2, 11 and 14); `.ps` comma calls and
-braced layout are not imposed on `.lean`. Host Lean compiler/elaborator APIs
-belong only in the explicit host or independent reference-test boundary.
-Do not use unrestricted host functionality to bypass an unavailable portable
-capability. This is an authoring/design boundary, not a claim that PSC0 already
-self-compiles or that current CI establishes full v7.2 conformance.
+**Input-language contract clarified by the user on18 October:** both `.ps`
+and `.lean` files supplied to PSC0 follow the selected v7.2 language features,
+semantics and assurance rules when compiling to JavaScript, TypeScript, Rust,
+Wasm, WAT and other supported artifacts. This concerns compiler INPUTS; it is
+not merely an instruction about the compiler implementation's .lean files.
+The two source kinds keep their respective surface grammars: native Lean layout
+and application in .lean, owned ProofScript spelling in .ps. Both must converge
+on shared resolution/elaboration, checked Core, typed erasure, validated IR and
+backends. A .lean extension cannot bypass unsupported-feature, dependency,
+assumption, recursion or verification rules. Do not silently parse .lean as .ps,
+treat arbitrary host Lean as accepted input, or infer input parity from native
+reference tests. Record actual support separately until paired qualification
+passes. Compiler implementation remains native portable .lean; self-hosting
+and immediate C5 stay out of scope.
 
 Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
 [FixedParams.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/PreDefinition/FixedParams.lean),

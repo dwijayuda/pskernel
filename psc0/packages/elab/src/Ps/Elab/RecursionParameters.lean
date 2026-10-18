@@ -82,9 +82,12 @@ def psElabRecursionComponentFixedParameterPlan
       let some (target, callee) := owners.zipIdx.find? (fun (target, _) =>
           psNameEq target.name call.callee)
         | throw (.data "PSCV0-WF-PARAMETERS: call target is outside the owned component")
-      if call.arguments.length != target.parameterIds.length then
-        throw (.data "PSCV0-WF-PARAMETERS: call changed its original target header")
-      let arguments := call.arguments.map fun argument =>
+      if call.arguments.length > target.parameterIds.length then
+        throw (.data "PSCV0-WF-PARAMETERS: call exceeds its original target header")
+      -- Native FixedParams treats missing underapplication slots as varying.
+      -- This is conservative analysis only; it grants no call/decrease authority.
+      let arguments := target.parameterIds.zipIdx.map fun (_, index) => do
+        let argument ← call.arguments[index]?
         let argument := psMetaInstantiate owner.context.metaContext argument
         if psExprHasUnresolvedMeta argument then none else
           (owner.parameterIds.zipIdx.find? fun (id, _) =>
@@ -94,6 +97,60 @@ def psElabRecursionComponentFixedParameterPlan
       observations := observations ++ [{ caller, callee, arguments }]
   let graph ← (psFixedParameterAnalyze dependencies observations).mapError PsElabError.data
   (psFixedParameterPermutation graph).mapError PsElabError.data
+
+-- A retained typed peer has a closed source header. Arity includes its
+-- actual capture prefix but excludes any function in the result.
+structure PsElabRecursionCallTarget where
+  peerId : Nat
+  name : PsName
+  arity : Nat
+
+-- Observe complete application spines once in their actual binder contexts,
+-- as pinned FixedParams.getFixedParamsInfo does. The caller rechecks the
+-- retained Core before analysis. This visitor constructs no recursive term
+-- or proof and never changes the body. Missing arguments become conservative
+-- varying observations; overapplication belongs to the returned result.
+def psElabRecursionCollectCalls (fuel : Nat) (context : PsElabContext)
+    (targets : List PsElabRecursionCallTarget) (span : PsSourceSpan)
+    (term : PsExpr) : Except PsElabError (List PsElabRecursionCall) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let view := psExprAppView term
+    if let .fvar id := view.head then
+      if let some target := targets.find? (fun target => target.peerId == id) then
+        let nested ← view.args.mapM
+          (psElabRecursionCollectCalls fuel context targets span)
+        return {
+          callee := target.name
+          arguments := view.args.take target.arity
+          localContext := context.localContext
+          span } :: nested.flatten
+    match term with
+    | .app .. =>
+      let head ← psElabRecursionCollectCalls fuel context targets span view.head
+      let arguments ← view.args.mapM
+        (psElabRecursionCollectCalls fuel context targets span)
+      return head ++ arguments.flatten
+    | .lam name domain body binder | .forallE name domain body binder =>
+      let domainCalls ← psElabRecursionCollectCalls fuel context targets span domain
+      let pushed := psLocalPushBinding context.localContext name domain binder
+      let bodyCalls ← psElabRecursionCollectCalls fuel
+        (psElabContextWithLocal context pushed.context) targets span
+        (psExprInstantiate1 body (.fvar pushed.id))
+      return domainCalls ++ bodyCalls
+    | .letE name domain value body =>
+      let domainCalls ← psElabRecursionCollectCalls fuel context targets span domain
+      let valueCalls ← psElabRecursionCollectCalls fuel context targets span value
+      let pushed := psLocalPushLet context.localContext name domain value
+      let bodyCalls ← psElabRecursionCollectCalls fuel
+        (psElabContextWithLocal context pushed.context) targets span
+        (psExprInstantiate1 body (.fvar pushed.id))
+      return domainCalls ++ valueCalls ++ bodyCalls
+    | .proj _ _ value => psElabRecursionCollectCalls fuel context targets span value
+    | .bvar _ | .mvar _ =>
+      throw (.data "PSCV0-WF-PARAMETERS: retained call analysis found an open de Bruijn variable or unresolved metavariable")
+    | _ => return []
 
 -- Fixed correspondence is a complete permutation, never a partial map
 -- inferred from source spellings. This contract is shared by scope creation

@@ -13,15 +13,20 @@ validation; no PSKernel-Core/C0, self-hosting or C5. Approved assumptions exactl
 propext, Quot.sound, Classical.choice. Wasm GC internally; linear memory only
 at explicit ABI boundaries. Never weaken acceptance or enlarge budgets.
 
-PSC0's portable compiler is authored in native `.lean` under the v7.2 language
-and semantic contract. Use the selected v7.2 capabilities and audited library
-closure, retaining a clean path to future readable `.ps` reconstruction.
-Native Lean syntax remains native (v7.2 §§2, 11 and 14); `.ps` comma calls and
-braced layout are not imposed on `.lean`. Host Lean compiler/elaborator APIs
-belong only in the explicit host or independent reference-test boundary.
-Do not use unrestricted host functionality to bypass an unavailable portable
-capability. This is an authoring/design boundary, not a claim that PSC0 already
-self-compiles or that current CI establishes full v7.2 conformance.
+**Input-language contract clarified by the user on18 October:** both `.ps`
+and `.lean` files supplied to PSC0 follow the selected v7.2 language features,
+semantics and assurance rules when compiling to JavaScript, TypeScript, Rust,
+Wasm, WAT and other supported artifacts. This concerns compiler INPUTS; it is
+not merely an instruction about the compiler implementation's .lean files.
+The two source kinds keep their respective surface grammars: native Lean layout
+and application in .lean, owned ProofScript spelling in .ps. Both must converge
+on shared resolution/elaboration, checked Core, typed erasure, validated IR and
+backends. A .lean extension cannot bypass unsupported-feature, dependency,
+assumption, recursion or verification rules. Do not silently parse .lean as .ps,
+treat arbitrary host Lean as accepted input, or infer input parity from native
+reference tests. Record actual support separately until paired qualification
+passes. Compiler implementation remains native portable .lean; self-hosting
+and immediate C5 stay out of scope.
 
 Repo dwijayuda/pskernel. Main psc0/pscv0-v7-native-lean-v1; preparation
 psc0/m3-fixedpoint-foundation-20261018. PR109 stays draft/open/unmerged on
@@ -36,15 +41,14 @@ preparation39083926961/job117546418053. The unchanged riFixedIndexEq rfl
 assertion passes through native-style nullary-predicate K computation.
 Typed callback scopes, fixed-major Eq/HEq refinement, impossible cases,
 complete unary packing and retained WF/P1/noncomputable checks also passed.
-At this checkpoint main Native39084512384 and M3 39084512415 are running;
+At this checkpoint main Native39084512384 is running. FocusedM3 39084512415,
 F1 39084512357, F2 39084512390 and F3 39084512422 have succeeded.
-Do not claim new five-gate acceptance until both running gates finish.
+Do not claim new five-gate acceptance until Native finishes.
 The last complete five-gate receipt remains abe1adc2.
 
 Preparation3386891ffa1852e3c2596bc44f60a986bc7bc095/run39084134295/
-job117547901808 is running. The existing packing step completed successfully,
-including the new checked mutual functional construction. Whole preparation
-is not yet accepted. Source mutual WF remains refused.
+job117547901808 completed SUCCESS, including checked mutual functional
+construction and all retained checks. Source mutual WF remains refused.
 
 The exact abe1adc2 acceptance is in
 docs/PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md:
@@ -63,7 +67,7 @@ in the K/unary design docs and Git; no failed checkpoint is current acceptance.
 
 ## Current candidate and next dependency
 
-The current child adds fixed-parameter scope creation and per-member checked
+Candidateade87651 adds fixed-parameter scope creation and per-member checked
 specialization, including reordered dependent fixed parameters and returned
 functions. It factors existing Where WF preparation into a shared typed record.
 See docs/PSCV0_M3_FIXED_SCOPES_2026-10-18.md. Qualification is pending.
@@ -128,3 +132,40 @@ Never import upstream test_sorry as proof authority.
 
 Update both AI handoffs, roadmap and exit ledger at every meaningful slice.
 Stop only at complete M3+B or a genuine user-dependent blocker.
+
+## Latest qualification and current child
+
+Preparation3386891/run39084134295/job117547901808 completed SUCCESS.
+The whole component-construction probe and all retained foundation/source/WF/P1/
+noncomputable checks passed. Its branches remain nonrecursive; this is not source
+mutual-WF admission or executable adaptation.
+
+Scope candidateade87651f3365853702d3f1c733df5e05a1aafae/run39084942848/
+job117549579617 is running. Its packing step passed; whole acceptance is pending.
+Main037fda49 now has focusedM3 39084512415 and F1/F2/F3 successful; Native
+39084512384 is still running. Preserve it. Last complete five-gate acceptance
+remains abe1adc2 until that exact run succeeds.
+
+The current child analyzes fixed parameters from the independently rechecked
+retained Core source bodies, following pinned FixedParams.getFixedParamsInfo.
+It opens real binder/let contexts, observes complete application spines once,
+keeps returned-function arguments outside the original header and treats missing
+underapplication arguments conservatively as varying. This analysis grants no
+recursive-call permission. The existing packing executable adds three source-owned
+reordered generic members and independent native controls. Qualification pending.
+
+## Input parity within the existing roadmap
+
+Read docs/PSCV0_V72_INPUT_LANGUAGE_CONTRACT_2026-10-18.md. Atade87651,
+Compiler/Api.lean routes .lean through ParseLean into PsSyntaxModule, while
+Host/NativeV7.lean uses the Pscv0 PsSyntaxProgram frontend with no explicit source
+kind. ParseLean's declaration dispatch is the older def/partial-def/theorem/
+inductive/structure selection. Existing .ps qualification therefore does not
+establish .lean parity for newer scopes, strategies or mutual declarations.
+
+Close the selected M3+B input-routing/feature gap as part of its existing source
+strategy and cross-stage exits. Carry the same two-input obligation through
+M4+C/D and M5+E; do not create another roadmap or reopen the historical bounded
+M2 acceptance. Use common syntax/semantic owners and paired source fixtures,
+not a second elaborator or a text/filename workaround. Do not claim parity before
+actual .lean input traverses PSC0's checked pipeline and required backend lanes.

@@ -3,6 +3,23 @@ set -euo pipefail
 # The repository root may pin an older Lean toolchain. Never inherit it for
 # the 4.35.0 cross-build, even when called from the checkout root.
 export ELAN_TOOLCHAIN='leanprover/lean4:v4.35.0'
+
+# Stage and per-module diagnostics only. This changes neither compiler flags
+# nor the checker trust boundary. Each expensive command prints UTC begin/end
+# stamps so GitHub CI logs identify resource-intensive modules even on failure.
+psc0_timed() {
+  local phase="$1"; shift
+  local started="$SECONDS"
+  printf 'PSC0_WASM_TIMELINE BEGIN phase=%q utc=%s\n' "$phase" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if "$@"; then
+    printf 'PSC0_WASM_TIMELINE PASS phase=%q elapsed_s=%d utc=%s\n' "$phase" "$((SECONDS-started))" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  else
+    local code="$?"
+    printf 'PSC0_WASM_TIMELINE FAIL phase=%q status=%d elapsed_s=%d utc=%s\n' "$phase" "$code" "$((SECONDS-started))" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >&2
+    return "$code"
+  fi
+}
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 package_root="$(cd "$script_dir/.." && pwd)"
 psc0="$(cd "$package_root/../.." && pwd)"
@@ -54,40 +71,54 @@ for helper in "$lean_source/src/bin/leanmake" "$lean_source/src/bin/leanc.in"; d
   chmod +x "$helper"
 done
 
-rm -rf "$lean_build" "$overlay" "$output"
-mkdir -p "$lean_build" "$src" "$oleans" "$generated" "$objects" "$output"
-# Follow Lean's supported 32-bit native stage0 / wasm32 stage1 architecture,
-# not native x86_64 .olean reuse or C++ compilation via a GC probe.
-cmake -S "$lean_source" -B "$lean_build" -G 'Unix Makefiles' \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_C_COMPILER_WORKS=1 \
-  -DCMAKE_AR="$(command -v emar)" \
-  -DCMAKE_TOOLCHAIN_FILE="$toolchain" \
-  -DSTAGE0_USE_GMP=OFF \
-  -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse -DLEAN_DEFAULT_THREAD_STACK_SIZE=8388608' \
-  -DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse' \
-  -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
-  -DSTAGE0_CMAKE_C_COMPILER=clang \
-  -DSTAGE0_CMAKE_EXECUTABLE_SUFFIX='' \
-  -DSTAGE0_MMAP=OFF \
-  -DSTAGE0_CMAKE_LIBRARY_PATH=/usr/lib/i386-linux-gnu/ \
-  -DSTAGE0_PKG_CONFIG_EXECUTABLE=/usr/bin/i386-linux-gnu-pkg-config \
-  -DMULTI_THREAD=OFF -DUSE_GMP=OFF -DUSE_MIMALLOC=OFF \
-  -DUSE_LAKE=OFF -DMMAP=OFF -DLLVM=OFF -DCCACHE=OFF -DWFAIL=OFF \
-  -DLEAN_INSTALL_SUFFIX=-linux_wasm32
-
-echo "PSC0_WASM_CROSS_BUILD_STAGE0_BEGIN: native i386 Lean bootstrap"
-cmake --build "$lean_build" --target stage1-configure -j2
-echo "PSC0_WASM_CROSS_BUILD_STAGE0_CONFIGURED"
+# Retain only a cryptographically sealed same-toolchain bootstrap. A stage1
+# cache is *not* evidence that the kernel accepts proofs. Every request must
+# still pass current native/Wasm parity and the exact artifact release gates.
+rm -rf "$overlay" "$output"
+mkdir -p "$src" "$oleans" "$generated" "$objects" "$output"
+cache_record="$lean_build/.psc0-stage1-cache-manifest.json"
+if [[ -f "$cache_record" ]]; then
+  psc0_timed "stage1-cache-integrity" node "$script_dir/stage1-cache.mjs" verify "$lean_build"
+  echo "PSC0_WASM_STAGE1_CACHE_REUSED: pinned and hash-verified"
+else
+  # A build without a sealed manifest must start clean, never assume that
+  # incomplete or mismatched cached CMake outputs are a valid Lean toolchain.
+  rm -rf "$lean_build"
+  mkdir -p "$lean_build"
+  # Follow the old proven native i386 stage0 / Emscripten wasm32 stage1.
+  cmake -S "$lean_source" -B "$lean_build" -G 'Unix Makefiles' \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_COMPILER_WORKS=1 \
+    -DCMAKE_AR="$(command -v emar)" \
+    -DCMAKE_TOOLCHAIN_FILE="$toolchain" \
+    -DSTAGE0_USE_GMP=OFF \
+    -DSTAGE0_LEAN_EXTRA_CXX_FLAGS='-m32 -msse2 -mfpmath=sse -DLEAN_DEFAULT_THREAD_STACK_SIZE=8388608' \
+    -DSTAGE0_LEANC_OPTS='-m32 -msse2 -mfpmath=sse' \
+    -DSTAGE0_CMAKE_CXX_COMPILER=clang++ \
+    -DSTAGE0_CMAKE_C_COMPILER=clang \
+    -DSTAGE0_CMAKE_EXECUTABLE_SUFFIX='' \
+    -DSTAGE0_MMAP=OFF \
+    -DSTAGE0_CMAKE_LIBRARY_PATH=/usr/lib/i386-linux-gnu/ \
+    -DSTAGE0_PKG_CONFIG_EXECUTABLE=/usr/bin/i386-linux-gnu-pkg-config \
+    -DMULTI_THREAD=OFF -DUSE_GMP=OFF -DUSE_MIMALLOC=OFF \
+    -DUSE_LAKE=OFF -DMMAP=OFF -DLLVM=OFF -DCCACHE=OFF -DWFAIL=OFF \
+    -DLEAN_INSTALL_SUFFIX=-linux_wasm32
+  
+  echo "PSC0_WASM_CROSS_BUILD_STAGE0_BEGIN: native i386 Lean bootstrap"
+  psc0_timed "native-i386-stage0-bootstrap" cmake --build "$lean_build" --target stage1-configure -j2
+  echo "PSC0_WASM_CROSS_BUILD_STAGE0_CONFIGURED"
+  test -x "$stage0_lean" || { echo 'native i386 stage0 missing' >&2; exit 1; }
+  mkdir -p "$target_sysroot/Init" "$target_sysroot/Std" "$target_sysroot/Lean"
+  psc0_timed "wasm32-Lean-import-dependency-check" env LEAN_PATH="$target_sysroot" "$stage0_lean" --deps "$lean_source/src/Lean.lean"
+  for helper in "$stage1/bin/leanmake" "$stage1_leanc"; do
+    if [[ -f "$helper" ]]; then chmod +x "$helper"; fi
+  done
+  echo "PSC0_WASM_CROSS_BUILD_STAGE1_BEGIN: target compatible Init/Std/Lean and official C++ kernel"
+  psc0_timed "wasm32-lean-stdlib-and-cpp-archives" cmake --build "$stage1" --target make_stdlib leanrt leancpp_1 -j2
+  echo "PSC0_WASM_CROSS_BUILD_STAGE1_LIBRARIES_COMPILED"
+  psc0_timed "stage1-cache-seal" node "$script_dir/stage1-cache.mjs" seal "$lean_build"
+fi
 test -x "$stage0_lean" || { echo 'native i386 stage0 missing' >&2; exit 1; }
-mkdir -p "$target_sysroot/Init" "$target_sysroot/Std" "$target_sysroot/Lean"
-LEAN_PATH="$target_sysroot" "$stage0_lean" --deps "$lean_source/src/Lean.lean"
-for helper in "$stage1/bin/leanmake" "$stage1_leanc"; do
-  if [[ -f "$helper" ]]; then chmod +x "$helper"; fi
-done
-echo "PSC0_WASM_CROSS_BUILD_STAGE1_BEGIN: target compatible Init/Std/Lean and official C++ kernel"
-cmake --build "$stage1" --target make_stdlib leanrt leancpp_1 -j2
-echo "PSC0_WASM_CROSS_BUILD_STAGE1_LIBRARIES_COMPILED"
 test -f "$target_sysroot/Lean.olean"
 test -f "$stage1/lib/temp/libleancpp_1.a"
 test -f "$stage1/lib/lean/libleanrt.a"
@@ -95,8 +126,9 @@ test -f "$stage1/lib/lean/libInit.a"
 test -f "$stage1/lib/lean/libStd.a"
 test -f "$stage1/lib/lean/libLean.a"
 chmod +x "$stage1_leanc"
+psc0_timed "wasm32-Lean-import-dependency-check" env LEAN_PATH="$target_sysroot" "$stage0_lean" --deps "$lean_source/src/Lean.lean"
 
-node "$script_dir/plan-closure.mjs" "$psc0" "$src" "$closure"
+psc0_timed "live-PSC0-import-closure" node "$script_dir/plan-closure.mjs" "$psc0" "$src" "$closure"
 echo "PSC0_WASM_PROVIDER_SOURCE_CLOSURE_COMPLETE"
 mapfile -t modules < <(node -e 'for(const m of require(process.argv[1]).modules)console.log(m.module)' "$closure")
 test "${#modules[@]}" -gt 5 || { echo 'incomplete PSC0 import closure' >&2; exit 1; }
@@ -108,12 +140,13 @@ test "${#modules[@]}" -gt 5 || { echo 'incomplete PSC0 import closure' >&2; exit
     file="${module//.//}"
     mkdir -p "$(dirname "$oleans/$file")" "$(dirname "$generated/$file")"
     echo "PSC0_WASM35_PROVIDER_C_EMIT $module"
-    "$stage0_lean" -o "$oleans/$file.olean" -i "$oleans/$file.ilean" \
+    psc0_timed "provider-lean-to-C:$module:source-bytes=$(stat -c %s "$file.lean")" "$stage0_lean" -o "$oleans/$file.olean" -i "$oleans/$file.ilean" \
       --c="$generated/$file.c.tmp" "$file.lean"
     mv "$generated/$file.c.tmp" "$generated/$file.c"
   done
 )
 echo "PSC0_WASM_PROVIDER_LEAN_C_EMISSION_COMPLETE"
+find "$generated" -type f -name "*.c" -printf "%s %p\n" | sort -nr | head -n 12 || true
 mapfile -d '' cfiles < <(find "$generated" -type f -name '*.c' -print0 | sort -z)
 test "${#cfiles[@]}" -eq "${#modules[@]}" || {
   echo 'missing emitted C for provider import closure' >&2; exit 1;
@@ -122,7 +155,7 @@ object_files=()
 count=0
 for f in "${cfiles[@]}"; do
   object="$objects/$count.o"
-  "$stage1_leanc" -O3 -c "$f" -o "$object"
+  psc0_timed "provider-emscripten-C:$count:bytes=$(stat -c %s "$f")" "$stage1_leanc" -O3 -c "$f" -o "$object"
   object_files+=("$object")
   count=$((count+1))
 done
@@ -130,7 +163,7 @@ done
 echo "PSC0_WASM_PROVIDER_TARGET_OBJECTS_COMPILED count=${#object_files[@]}"
 # Kernel-only static link; no Lean shell/main global initializer, host-native
 # .olean, or previous PSC2 runtime artifacts enter the Wasm binary.
-LEAN_CC="$(command -v em++)" "$stage1_leanc" \
+psc0_timed "final-official-kernel-link" env LEAN_CC="$(command -v em++)" "$stage1_leanc" \
   "${object_files[@]}" -L"$stage1/lib/temp" -lleancpp_1 \
   -lInit -lStd -lLean -lnodefs.js -lleanrt -lstdc++ -O3 \
   -sENVIRONMENT=node -sEXIT_RUNTIME=1 \

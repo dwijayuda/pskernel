@@ -72,15 +72,14 @@ Prepare the foundation/library probe early while closing independent source/data
 
 ## Current state and evidence
 
-Latest fully qualified five-gate compiler/test SHA:
-**5785ada4d0521eaa910a57adc8569dbe95d4c5fe**.
-Native39094184382, M339094184399, F139094184384, F239094184401 and
-F339094184409 all completed SUCCESS. Receipt:
-docs/PSCV0_M3_INTEGRATION_5785ADA4_2026-10-18.md.
-Preparation39093434191/job117575381994 also completed SUCCESS.
-Native lambda arguments and paired source runtime observations are qualified.
-Previous fully qualified18fe0b3e retains its historical receipt. Never cancel or
-supersede a healthy main Native; this checkpoint finished before any promotion.
+Latest fully qualified five-gate compiler/test SHA and current main:
+**6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
+Native39095176453, M339095176451, F139095176460, F239095176458 and
+F339095176455 all completed SUCCESS. Receipt:
+docs/PSCV0_M3_INTEGRATION_6CDB9A6E_2026-10-18.md.
+Historical5785ada4 also completed all five gates and retains its receipt.
+Native lambda arguments and existing paired source runtime observations remain
+qualified. Never cancel/supersede a healthy main Native.
 
 Latest fully successful preparation compiler/test SHA:
 **6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
@@ -122,9 +121,9 @@ WF/{PackMutual,Rel,Fix,Eqns,Unfold}, ArgsPacker and upstream fixedParams tests w
 studied; notices retained.
 
 Next:
-1. Main6cdb9a6e is integrating after its successful preparation, promoted only
-   after all5785ada4 gates finished. Do not cancel/supersede healthy Native.
-   Latest runtime ownership candidate is on preparation; inspect its CI first.
+1. Main6cdb9a6e completed all five integration gates; latest receipt and both
+   handoffs are updated. Runtime ownership candidate9b5cc7c7 is preparing;
+   inspect its full CI before promotion or source activation.
 2. Implement total mutual WF executable ownership after auditing the whole
    preparation/RecursorLift/erasure/assurance path. The provisional design is
    docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md. Derive actual bodies from the
@@ -159,5 +158,10 @@ ownership checks. Existing packing validation now covers prepared helper recover
 complete projection coverage and same-typed private-body forgery refusal. Source
 mutual WF dispatch and strict PSum selection remain disabled; this is not backend
 execution evidence. Next inspect preparation CI, then activate both source kinds
-and qualify the existing backend lanes. Current main is6cdb9a6e; latest fully
-qualified five-gate checkpoint remains5785ada4. See runtime design note.
+and qualify the existing backend lanes. Current main and latest fully qualified five-gate checkpoint are6cdb9a6e. See runtime design note.
+
+Scope audit: canonical v7.2 lines1872-1890 selects function-like mutual blocks
+(def/function), not arbitrary native mutual commands. Native mutual inductive
+syntax is intentionally outside that selected source grammar; existing internal
+mutual/nested data and deriving APIs retain their separately scoped evidence.
+Do not expand the language merely to match unrestricted host Lean.

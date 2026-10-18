@@ -23,3 +23,34 @@ jobs:
           node --check psc0/packages/pskernel-lean-wasm/scripts/run-provider.mjs
           node --check psc0/packages/pskernel-lean-wasm/scripts/check-differential.mjs
           node --test psc0/packages/pskernel-lean-wasm/scripts/test-provider-transport.mjs
+      - name: Qualify exact Lean 4.35.0 compatibility rewrite without cross-build
+        shell: bash
+        run: |
+          set -euo pipefail
+          lean_source="$RUNNER_TEMP/lean4-pinned"
+          mkdir -p "$lean_source"
+          git -C "$lean_source" init -q
+          git -C "$lean_source" remote add origin https://github.com/leanprover/lean4.git
+          git -C "$lean_source" fetch --depth 1 origin eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git -C "$lean_source" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$lean_source" rev-parse HEAD)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          node psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$lean_source"
+          # Applying exact guarded rewrites twice must be idempotent.
+          node psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$lean_source"
+          git -C "$lean_source" diff --check
+      - name: Resolve current PSC0 source closure (no PSC2 snapshots)
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$RUNNER_TEMP/wasm-src-overlay"
+          manifest="$RUNNER_TEMP/wasm-src-overlay/closure.json"
+          node psc0/packages/pskernel-lean-wasm/scripts/plan-closure.mjs \
+            "$GITHUB_WORKSPACE/psc0" "$source_dir/src" "$manifest"
+          node -e '
+            const fs=require("node:fs");
+            const m=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));
+            if(m.source!=="live-psc0" || m.modules.length<10 ||
+               m.modules.at(-1)?.module!=="PsKernelLeanWasm.Main")
+              process.exit(1);
+            console.log("qualified live PSC0 modules:",m.modules.length);
+          ' "$manifest"

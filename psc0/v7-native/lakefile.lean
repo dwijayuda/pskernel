@@ -12,7 +12,7 @@ require proofscriptSelfhost from ".."
 lean_lib PsKernelLean where
   srcDir := "../packages/pskernel-lean/provider"
   roots := #[`PsKernelLean.Error, `PsKernelLean.Convert,
-    `PsKernelLean.Protocol, `PsKernelLean.Prelude, `PsKernelLean.Admission]
+    `PsKernelLean.Protocol, `PsKernelLean.Prelude, `PsKernelLean.Replay, `PsKernelLean.Admission]
 
 lean_lib PsV7Host where
   srcDir := "../host/src"
@@ -157,3 +157,13 @@ lean_exe pscv0_m3_mutual_well_founded_export where
 lean_exe pscv0_m3_mutual_packing where
   srcDir := "../test"
   root := `Pscv0M3MutualPacking
+
+-- Independent Core-first seam checks; no selected Core profile is implied.
+lean_exe pscv0_core_seams where
+  srcDir := "../test"
+  root := `Pscv0CoreSeams
+
+lean_exe pscv0_core_environment_export where
+  srcDir := "../scripts"
+  root := `Pscv0CoreEnvironmentExport
+  supportInterpreter := true

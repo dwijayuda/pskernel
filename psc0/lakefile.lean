@@ -129,7 +129,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardClassical, `Ps.Environment.StandardPartialFixpointData,
     `Ps.Environment.StandardPartialFixpoint, `Ps.Environment.StandardPSumData, `Ps.Environment.StandardPSum,
     `Ps.Environment.SelfHostProd,
-    `Ps.Environment.StandardSnapshot
+    `Ps.Environment.StandardSnapshot,
+    `Ps.Environment.Fingerprint
   ]
 
 lean_lib PsBridge where

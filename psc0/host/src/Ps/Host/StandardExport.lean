@@ -1395,4 +1395,46 @@ def checkPartialFixpointFoundation : IO Unit := do
     ("activeFoundationDeclarations", Lean.toJson activeNames.length),
     ("runtimeQualified", Lean.toJson false)]).compress
 
+-- Independent Core-first authoring profiles. These never consume the Full
+-- portable prelude or a legacy bootstrap axiom boundary.
+def coreBootstrapCandidateRoots : List Lean.Name :=
+  [`Nat, `Bool, `PUnit, `Unit, `Empty, `PEmpty,
+   `True, `False, `Eq, `HEq, `And, `Or, `Exists, `Nonempty,
+   `Prod, `PProd, `Sum, `Option, `List, `Except, `Decidable,
+   `id, `ite, `dite, `optParam, `outParam]
+
+def coreByteWordCandidateRoots : List Lean.Name :=
+  [`UInt8.ofNat, `UInt8.toUInt32, `UInt8.toUInt64,
+   `UInt32.ofNat, `UInt32.toNat, `UInt32.add, `UInt32.sub,
+   `UInt32.land, `UInt32.lor, `UInt32.xor, `UInt32.complement,
+   `UInt32.shiftLeft, `UInt32.shiftRight,
+   `UInt64.ofNat, `UInt64.toNat, `UInt64.toUInt8,
+   `UInt64.mul, `UInt64.xor, `UInt64.shiftRight,
+   `ByteArray, `ByteArray.mk, `ByteArray.size, `ByteArray.push,
+   `ByteArray.foldl, `String.toUTF8]
+
+def exportCoreBootstrapCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreBootstrapCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    shareSource := true
+    publicPrefix := "psCoreBootstrapCandidate"
+    privatePrefix := "coreBootstrapCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent Core-first bootstrap candidate from an empty kernel environment.\nActual native declarations; no Full boundary or legacy primitive assumptions.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+def exportCoreByteWordCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreBootstrapCandidateRoots ++ coreByteWordCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := [`propext, `Quot.sound]
+    eraseAutoParams := true
+    shareSource := true
+    publicPrefix := "psCoreByteWordCandidate"
+    privatePrefix := "coreByteWordCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative closure for the measured compiler byte/word workload.\nStandalone candidate; source compiler closure and runtime qualification remain separate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 end PsV7Native

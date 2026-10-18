@@ -35,6 +35,7 @@ FEATURES = {
     "termination_suffixes": r"(?m)^\s*termination_by\b",
     "deriving_clauses": r"\bderiving\b",
     "do_tokens": r"\bdo\b", "for_tokens": r"\bfor\b",
+    "while_tokens": r"\bwhile\b",
     "mutable_lets": r"\blet\s+mut\b", "where_tokens": r"\bwhere\b",
     "tactic_values": r":=\s*by\b",
 }
@@ -45,8 +46,10 @@ HEAVY_NAMES = {
 }
 
 def visible_lean(text):
-    """Blank nested comments/string literals, preserving physical line positions."""
-    out, pos, depth, string = [], 0, 0, False
+    """Blank nested comments and Lean quoted/raw/character literals, preserving lines."""
+    char_pattern = re.compile(r"'(?:\\(?:u\{[0-9a-fA-F]+\}|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|[^\r\n])|[^'\\\r\n])'")
+    raw_pattern = re.compile(r'r(#+)"')
+    out, pos, depth, string, raw_close = [], 0, 0, False, None
     while pos < len(text):
         pair, char = text[pos:pos + 2], text[pos]
         if depth:
@@ -58,6 +61,14 @@ def visible_lean(text):
                 depth -= 1
                 out.extend("  ")
                 pos += 2
+            else:
+                out.append("\n" if char == "\n" else " ")
+                pos += 1
+        elif raw_close is not None:
+            if text.startswith(raw_close, pos):
+                out.extend(" " * len(raw_close))
+                pos += len(raw_close)
+                raw_close = None
             else:
                 out.append("\n" if char == "\n" else " ")
                 pos += 1
@@ -79,21 +90,34 @@ def visible_lean(text):
             end = len(text) if end < 0 else end
             out.extend(" " * (end - pos))
             pos = end
-        elif char == '"':
-            string = True
-            out.append(" ")
-            pos += 1
         else:
-            out.append(char)
-            pos += 1
-    if depth or string:
+            literal = char_pattern.match(text, pos) if char == "'" else None
+            raw = raw_pattern.match(text, pos) if char == "r" else None
+            if literal:
+                out.extend(" " * len(literal.group(0)))
+                pos += len(literal.group(0))
+            elif raw:
+                raw_close = '"' + raw.group(1)
+                out.extend(" " * len(raw.group(0)))
+                pos += len(raw.group(0))
+            elif char == '"':
+                string = True
+                out.append(" ")
+                pos += 1
+            else:
+                out.append(char)
+                pos += 1
+    if depth or string or raw_close is not None:
         raise ValueError("unfinished comment/string in scanned Lean source")
     return "".join(out)
 
 def module_name(path):
+    # Current source owners only. Historical legacy copies are not native
+    # compiler roots, and must not shadow the current package of the same name.
     value = path.as_posix()
-    if "/src/" in value:
-        return value.split("/src/", 1)[1][:-5].replace("/", ".")
+    match = re.fullmatch(r"(?:packages/[^/]+/src|host/src)/(.+)\.lean", value)
+    if match:
+        return match.group(1).replace("/", ".")
     if value.startswith("packages/pskernel-lean/provider/"):
         return value.split("/provider/", 1)[1][:-5].replace("/", ".")
     return None
@@ -139,7 +163,7 @@ def audit(repository):
         code = visible_lean(data.decode("utf-8"))
         imports = []
         for line in code.splitlines():
-            match = re.fullmatch(r"\s*(?:public\s+)?(?:meta\s+)?import\s+(.+?)\s*", line)
+            match = re.fullmatch(r"\s*(?:(?:public|meta)\s+)*import\s+(?:all\s+)?(.+?)\s*", line)
             if match:
                 imports.extend(match.group(1).split())
         record = {
@@ -194,9 +218,20 @@ def main():
         if report["portableCompiler"]["unresolvedProjectImports"]:
             raise ValueError(label + " has unresolved portable compiler imports: " +
                              repr(report["portableCompiler"]["unresolvedProjectImports"]))
+    for name in ["Ps.Environment.Fingerprint", "PsKernelLean.Replay"]:
+        graph = candidate["rootClosures"][name]
+        if graph["unresolvedProjectImports"]:
+            raise ValueError("isolated seam has unresolved imports: " + name)
+        forbidden = [item for item in graph["modules"] if
+                     item in {"Ps.Environment.Prelude", "Ps.Environment.SelfHostPrelude",
+                              "Ps.Environment.SelfHostProd", "PsKernelLean.Prelude"} or
+                     item.startswith(("Ps.Environment.Standard", "Ps.Host."))]
+        if forbidden:
+            raise ValueError("isolated seam imports selected environment: " + repr(forbidden))
     report = {
         "schema": "psc0-core-first-source-audit/1",
         "claim": "source/import/package inventory only; not semantic closure, selfhost or verified qualification",
+        "moduleOwners": "current packages/*/src, host/src and pskernel-lean/provider; legacy copies excluded",
         "stage0": stage0, "candidate": candidate,
         "auditPeakResidentBytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024,
         "unmeasured": [
@@ -216,6 +251,13 @@ def main():
             "unresolvedProjectImports", "fullCompositionImports"]}
         print("PSC0_CORE_SOURCE_AUDIT " + json.dumps(
             {"label": label, "head": value["head"], **summary}, sort_keys=True))
+        for root_name in ["Ps.Environment.Fingerprint", "PsKernelLean.Replay"]:
+            graph = value["rootClosures"][root_name]
+            print("PSC0_CORE_SEAM_IMPORTS " + json.dumps({
+                "label": label, "root": root_name,
+                **{key: graph[key] for key in ["moduleCount", "sourceBytes",
+                    "externalImports", "unresolvedProjectImports", "fullCompositionImports"]}
+            }, sort_keys=True))
         print("PSC0_CORE_FEATURE_SIGNALS " + json.dumps(
             {"label": label, "signals": value["portableFeatureSignals"]}, sort_keys=True))
         for asset in value["heavyAssets"]:

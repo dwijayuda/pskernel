@@ -182,3 +182,14 @@ grammars. M3 closes its data/recursion/source capabilities through both inputs;
 M4+C/D adds effects/contracts through both; M5+E closes full selected conformance,
 readable output and C5. There is no duplicate input-parity roadmap. The source
 adapter and historical receipts document implemented and pending distinctions.
+
+## Native lambda argument candidate
+
+Pinned Parser.Term.fun has max precedence; Parser.Term.argument accepts it after
+native whitespace/indentation. The native adapter now reads fun/lambda bodies in
+argument position, sharing ordinary expected-type elaboration. The existing
+m3control paired fixture/native oracle includes the call with unchanged outputs;
+it remains on the existing five-target execution path. This child is unqualified
+until its own preparation and integration complete. Leading-precedence terms
+(match/if/let/by) still require grouping in argument position. No grammar change
+to .ps, source rewriting or host elaboration is introduced.

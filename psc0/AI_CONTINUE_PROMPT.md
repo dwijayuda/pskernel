@@ -143,3 +143,14 @@ still UNSELECTED. Activation requires reviewed strict manifest/surface identitie
 
 
 Update both handoffs, roadmap and exit ledger at each completed milestone slice.
+
+## Native lambda argument candidate
+
+Pinned Parser.Term.fun has max precedence; Parser.Term.argument accepts it after
+native whitespace/indentation. The native adapter now reads fun/lambda bodies in
+argument position, sharing ordinary expected-type elaboration. The existing
+m3control paired fixture/native oracle includes the call with unchanged outputs;
+it remains on the existing five-target execution path. This child is unqualified
+until its own preparation and integration complete. Leading-precedence terms
+(match/if/let/by) still require grouping in argument position. No grammar change
+to .ps, source rewriting or host elaboration is introduced.

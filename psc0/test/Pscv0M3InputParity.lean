@@ -65,7 +65,8 @@ def m3control (flag : Bool) : UInt64 :=
     return 11
   let extra : Id Nat := do { let n := 1; return n; }
   let extraValue : Nat := extra
-  UInt64.ofNat (if let .some n := amount then n + extraValue else 0)
+  let extraApplied : Nat := (fun (f : Nat → Nat) => f extraValue) fun (n : Nat) => n
+  UInt64.ofNat (if let .some n := amount then n + extraApplied else 0)
 
 example : m3control false = 6 := rfl
 example : m3control true = 8 := rfl
@@ -101,10 +102,10 @@ private def dataPsSource : String :=
   "structure ParityBox where {\n  value: Nat\n} deriving Inhabited, BEq\ninductive ParityMaybe where {\n  | none\n  | some(value: Nat)\n} deriving Inhabited, BEq\nclass Sized(A: Type) where {\n  size: A -> Nat\n}\n@[default_instance 200]\ninstance (priority := high) sizedNat: Sized Nat where {\n  size(n: Nat): Nat := n\n}\nfunction m3data(flag: Bool): UInt64 :=\n  let b := ParityBox.mk(keep(if (flag) { 6 } else { 9 }))\n  let packed := ParityMaybe.some(Sized.size(b.value))\n  UInt64.ofNat(match packed with {\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if (b == b) { value } else { 0 }\n  })\nwhere {\n  def keep(n: Nat): Nat := match n with {\n    | 0 => 0\n    | Nat.succ k => Nat.succ(keep(k))\n  }\n  termination_by n\n  decreasing_by by { exact Nat.lt_succ_self(k) }\n}\n"
 
 private def controlLeanSource : String :=
-  "def m3control (flag : Bool) : UInt64 :=\n  let (left, right) : Nat × Nat := (2, 3)\n  let amount : Option Nat := do\n    let (x, y) : Nat × Nat ← Option.some (left, right)\n    if !flag then\n      if let .some n := Option.some (x + y) then\n        return n\n    else if flag then\n      return 7\n    return 11\n  let extra : Id Nat := do { let n := 1; return n; }\n  let extraValue : Nat := extra\n  UInt64.ofNat (if let .some n := amount then n + extraValue else 0)\n"
+  "def m3control (flag : Bool) : UInt64 :=\n  let (left, right) : Nat × Nat := (2, 3)\n  let amount : Option Nat := do\n    let (x, y) : Nat × Nat ← Option.some (left, right)\n    if !flag then\n      if let .some n := Option.some (x + y) then\n        return n\n    else if flag then\n      return 7\n    return 11\n  let extra : Id Nat := do { let n := 1; return n; }\n  let extraValue : Nat := extra\n  let extraApplied : Nat := (fun (f : Nat → Nat) => f extraValue) fun (n : Nat) => n\n  UInt64.ofNat (if let .some n := amount then n + extraApplied else 0)\n"
 
 private def controlPsSource : String :=
-  "function m3control(flag: Bool): UInt64 :=\n  let (left, right): Nat × Nat := (2, 3)\n  let amount: Option Nat := do {\n    let (x, y): Nat × Nat ← Option.some((left, right))\n    if (!flag) {\n      if let .some n := Option.some(x + y) {\n        return n\n      }\n    } else {\n      if (flag) {\n        return 7\n      }\n    }\n    return 11\n  }\n  let extra: Id Nat := do {\n    let n := 1\n    return n\n  }\n  let extraValue: Nat := extra\n  UInt64.ofNat(if let .some n := amount { n + extraValue } else { 0 })\n"
+  "function m3control(flag: Bool): UInt64 :=\n  let (left, right): Nat × Nat := (2, 3)\n  let amount: Option Nat := do {\n    let (x, y): Nat × Nat ← Option.some((left, right))\n    if (!flag) {\n      if let .some n := Option.some(x + y) {\n        return n\n      }\n    } else {\n      if (flag) {\n        return 7\n      }\n    }\n    return 11\n  }\n  let extra: Id Nat := do {\n    let n := 1\n    return n\n  }\n  let extraValue: Nat := extra\n  let extraApplied: Nat := (fun (f: Nat -> Nat) => f(extraValue))(fun (n: Nat) => n)\n  UInt64.ofNat(if let .some n := amount { n + extraApplied } else { 0 })\n"
 
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do

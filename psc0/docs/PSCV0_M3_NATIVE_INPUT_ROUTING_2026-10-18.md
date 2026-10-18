@@ -210,3 +210,22 @@ main Native39090324651 is still running and must not be superseded. M3 artifact
 12122607390 SHA256d2c8ab4fa67959f0392979af88f2042a2fdfc06b2f3791e7bb3d3054717cc251.
 The complete focused log endpoint returned Transport closed; no aggregate
 observation count is claimed. Job steps include actual JS/TS, Rust and GC lanes.
+
+## Current qualification and argument-precedence completion
+
+The preceding chronological pending notes are superseded by the exact-SHA
+18fe0b3e five-gate receipt, PSCV0_M3_INTEGRATION_18FE0B3E_2026-10-18.md.
+Native, M3, F1, F2 and F3 all completed SUCCESS; both inputs' local WF and native
+control fixture execute through the retained target observers.
+
+The next small grammar completion follows pinned Parser.Term.fun (line386,
+maxPrec), argument (line890, argPrec), and Parser.Do.do (line365, argPrec).
+A native function argument may start with fun/lambda and own its full body.
+The adapter previously admitted do at argument precedence but missed lambda.
+It now routes those selected high-precedence introducers through the native
+reader while preserving whitespace, indentation, grouping and shared elaboration.
+Pinned tests/elab/implicitLambdaLocalWithoutType.lean was also reviewed for the
+expected-function boundary; the paired local fixture directly checks this syntax.
+The existing m3control oracle and both input strings now apply a typed lambda as
+an unparenthesized native argument; output observations remain6/8. Preparation
+and runtime qualification for this child are pending.

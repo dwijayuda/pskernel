@@ -9,13 +9,13 @@ def psLeanTermArgumentStart (annotation : Bool) (head : PsSyntaxTerm)
   | none => false
   | some token =>
     let span := psSyntaxTermSpan head
-    (token.text == "do" ||
+    (["do", "fun", "λ"].contains token.text ||
       (!psLeanReservedApplicationToken token && !psPscv0ReservedArgument token.text)) &&
       (psPscv0InfixToken cursor).isNone &&
       (annotation || !psTokenCursorStartsNamedAssignment cursor) &&
       token.span.start.byteOffset > span.stop.byteOffset &&
       (token.span.start.line == span.stop.line || token.span.start.column > span.start.column) &&
-      (["(", "[", "{", "#"].contains token.text ||
+      (["(", "[", "{", "#", "do", "fun", "λ"].contains token.text ||
         psTokenKindEq token.kind .identifier || psTokenKindEq token.kind .natural ||
         psTokenKindEq token.kind .scientific || psTokenKindEq token.kind .string ||
         psTokenKindEq token.kind .character)
@@ -48,9 +48,10 @@ def psLeanTermApplicationTail (read : PsPscv0TermReader) (annotation : Bool)
       let value ← read assign.cursor
       let close ← psTokenCursorExpectText value.cursor ")"
       pure (some name.value, value.value, close.cursor, close.token.span.stop)
-    else if psTokenCursorAtText cursor "do" then do
-      -- Pinned Parser.Do gives do argument precedence; retain native
-      -- whitespace/indentation and let the block own its complete body.
+    else if ["do", "fun", "λ"].any (psTokenCursorAtText cursor) then do
+      -- Pinned Term.fun has max precedence and Do.do argument precedence.
+      -- Both own their full bodies; leading-precedence terms such as match,
+      -- if, let and by still require grouping when used as arguments.
       let value ← read cursor
       pure (none, value.value, value.cursor, (psSyntaxTermSpan value.value).stop)
     else do

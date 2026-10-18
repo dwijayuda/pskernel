@@ -1,5 +1,19 @@
 # M3+B — approved Lean foundation and completion ledger
 
+## Latest bounded recursor correction — qualification pending
+
+Fresh a8151133 evidence currently places the failure after all copy helper controls,
+in Std.Format.rec generated-signature comparison. The pinned kernel consumes head
+optional type annotations from recursor binder domains. This correction preserves
+the frozen selected candidate exactly and compares its independently checked
+optional-domain view with the fresh generated signature. Other authorers retain
+literal equality. All replay/iota/closure/metadata/roster/digest checks remain.
+See [the exact diagnosis and controls](PSCV0_M3_RECURSOR_KERNEL_SIGNATURE_2026-10-18.md).
+The source/runtime and recursor-authoring preparation jobs must both pass at the
+new SHA. Archive authentication is separate evidence. No recursor asset selection,
+acceptance-cell closure, main promotion or M3+B completion is claimed yet.
+
+
 ## Authority and current state
 
 On 18 October 2026 at 00:50 Asia/Jakarta (17 October 2026 at 17:50 UTC), the user explicitly instructed:

@@ -136,8 +136,8 @@ private def sourceStatus (native : Lean.Environment) (name : Lean.Name) : String
 
 -- Always check the converted portable candidate, not just the original native
 -- entries. No axiom replacement for failed proofs, no unchecked addDecl path.
-private def checkCandidate (declarations candidates : List PsDeclaration) :
-    IO Lean.Kernel.Environment := do
+private def checkCandidate (declarations candidates : List PsDeclaration)
+    (retainedRecursors : List PsDeclaration := []) : IO Lean.Kernel.Environment := do
   let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   -- Authoring diagnostics collect independent root failures in one pass.
   -- Each independent admission owns the unchanged kernel budget, as source
@@ -181,8 +181,31 @@ private def checkCandidate (declarations candidates : List PsDeclaration) :
       -- Universe names are scoped by their declaration, not global identities.
       let expected := info.type.instantiateLevelParams info.levelParams
         (levels.map (fun level => Lean.Level.param (PsKernelLean.toLeanName level)))
-      unless expected == type do
-        throw (IO.userError ("regenerated metadata signature differs: " ++ toString name))
+      -- Ordinary asset authoring retains literal signature equality. Only the
+      -- recursor surface authorer supplies its immutable selected declarations.
+      -- Check preservation even when a stripped candidate equals the kernel type.
+      let signatureMatches ←
+        if retainedRecursors.isEmpty then pure (expected == type) else
+          match declaration with
+          | .recursorDecl _ =>
+            let some (.recursorDecl retained) := retainedRecursors.find? (fun d =>
+                psNameEq (psDeclarationName d) (psDeclarationName declaration))
+              | throw (IO.userError ("missing retained recursor signature: " ++ toString name))
+            unless retained.levelParams.map PsKernelLean.toLeanName ==
+                levels.map PsKernelLean.toLeanName do
+              throw (IO.userError ("retained recursor universes differ: " ++ toString name))
+            let .ok retainedType := PsKernelLean.toLeanExpr retained.type
+              | throw (IO.userError "retained recursor type conversion failed")
+            pure (RecursorSource.kernelSignatureMatches checked retainedType type expected)
+          | _ => pure (expected == type)
+      unless signatureMatches do
+        let diagnostic := if retainedRecursors.isEmpty then "" else
+          "\n" ++ (Lean.Json.mkObj [
+            ("schema", Lean.toJson ("pscv0-recursor-kernel-signature-failure/1" : String)),
+            ("recursor", Lean.toJson name.toString),
+            ("generated", Lean.toJson (reprStr expected)),
+            ("candidate", Lean.toJson (reprStr type))]).compress
+        throw (IO.userError ("regenerated metadata signature differs: " ++ toString name ++ diagnostic))
     | _ => pure ()
   return checked
 
@@ -1162,7 +1185,7 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
   let proposed := candidates.foldl psEnvironmentInsert base
   unless proposed.declarations.length == base.declarations.length do
     throw (IO.userError "recursor source correction expanded the selected foundation")
-  let checked ← checkCandidate proposed.declarations candidates
+  let checked ← checkCandidate proposed.declarations candidates base.declarations
   -- Compare computation with the official kernel's actual selected-profile
   -- recursors, including specialized universes. The source annotations still
   -- come independently from the pinned native library declarations.

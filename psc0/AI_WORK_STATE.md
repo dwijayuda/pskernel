@@ -3,6 +3,36 @@
 Updated 2026-10-18. Fresh exact-SHA GitHub evidence overrides this checkpoint.
 M3+B, full selected input parity and all-five-gate preparation integration remain OPEN.
 
+## Active correction — frozen recursor signature versus kernel annotations
+
+Fresh inspection still finds main `33676076bcda7b0de5ec1f9803f49b8b1d28a058`
+and preparation `a8151133504f382096acc2720945635d583b8d96`.
+Current exact-run logs AND the run-artifact API contradict the attached handoff:
+the five copy positives/eight refusals pass; authoring then fails at
+`regenerated metadata signature differs: Std.Format.rec`.
+Current archive 12138202529 is 2756552 bytes, SHA256
+`a3f17ab1d5ec43e465b3f79c5b7a54659b0ef6c06db822ffc22e3a8a1cd31333`.
+Independent current-archive authentication is queued by the read-only evidence
+workflow; do not yet claim its bytes were rehashed.
+
+This correction preserves the original transfer and every source/default guard.
+It adds an independent fresh-kernel signature view for verified head optParam
+annotations in forall domains, requiring candidate == frozen original first.
+All other exporters retain literal signature equality. Three new positives and
+twelve refusals supplement the original controls. Full replay/iota/closure/
+metadata/roster/digest checks remain. Selected assets and pins stay unchanged.
+
+The reviewed previously unpushed workflow commit `5b9a2ecb292926d6503f51372632dd5cab559541`
+is retained in this correction's ancestry. Both mandatory preparation jobs must
+pass at this correction SHA; source/runtime evidence alone is insufficient.
+Details and pinned source cause:
+docs/PSCV0_M3_RECURSOR_KERNEL_SIGNATURE_2026-10-18.md.
+
+This correction is UNQUALIFIED until its exact-SHA Linux results are observed.
+The candidate remains UNSELECTED. Complete next actual-input recursor-call
+qualification, then named/generalizing matches and all six M3+B exits. No
+healthy main run is cancelled or superseded.
+
 ## Work contract
 
 Repository dwijayuda/pskernel; main psc0/pscv0-v7-native-lean-v1; preparation

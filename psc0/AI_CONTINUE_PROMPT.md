@@ -1,5 +1,27 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Latest correction to inspect first
+
+Fresh a8151133 run 39130764541/job 117685265070 currently reports all five/eight
+copy controls PASS, then a generated Std.Format.rec signature mismatch. Current
+run-artifact API and upload agree on archive 12138202529, 2756552 bytes, digest
+a3f17ab1d5ec43e465b3f79c5b7a54659b0ef6c06db822ffc22e3a8a1cd31333.
+These supersede the attached handoff's third-helper failure and archive identity.
+Read docs/PSCV0_M3_RECURSOR_KERNEL_SIGNATURE_2026-10-18.md and inspect the current
+read-only authentication run before claiming independent archive rehashing.
+
+The current correction requires candidate == frozen selected type plus an
+independent narrowly checked optional forall-domain view matching fresh kernel
+generation. Original copy/default guards and every independent replay/iota/
+closure/metadata/roster/digest check stay intact. Other exporters keep literal
+signature equality. Both mandatory preparation jobs from retained workflow
+commit 5b9a2ecb must pass at the correction SHA. Three added positives/twelve
+refusals supplement the original five/eight. No selected bytes/pins changed.
+
+Continue through reviewed recursor selection, actual paired public source calls,
+then named/generalizing matches and complete six-exit/all-five-gate integration.
+Do not diagnose a current helper wrapper loss from the contradicted handoff.
+
 Read AI_WORK_STATE.md first, canonical PSCV0_LANGUAGE_REFERENCE_v7.2.md,
 ARCHITECTURE.md, the native roadmap and six-exit ledger. Continue implementation,
 not a status-only response. Fetch fresh main/preparation refs and exact-SHA CI

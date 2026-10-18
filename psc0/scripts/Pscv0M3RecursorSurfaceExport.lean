@@ -54,6 +54,62 @@ private def checkCorrespondenceControls (native : Lean.Environment) : IO Unit :=
   expectRefusal native "unrelated-type" nat (Lean.mkConst ``Bool)
   IO.println "PSCV0_M3_RECURSOR_CORRESPONDENCE: PASS five exact positive controls and eight structural/identity refusals; independent selected kernel replay follows"
 
+private def expectKernelSignature (native : Lean.Environment) (label : String)
+    (retained candidate generated : Lean.Expr) (expected : Bool) : IO Unit := do
+  let actual := PsV7Native.RecursorSource.kernelSignatureMatches
+    native.toKernelEnv retained candidate generated
+  unless actual == expected do
+    throw (IO.userError (label ++ ": frozen recursor/generated signature comparison changed"))
+
+private def checkKernelSignatureControls (native : Lean.Environment) : IO Unit := do
+  let nat := Lean.mkConst ``Nat
+  let optional := Lean.mkApp2 (Lean.mkConst ``optParam [.succ .zero]) nat (Lean.mkNatLit 7)
+  let otherDefault := Lean.mkApp2 (Lean.mkConst ``optParam [.succ .zero]) nat (Lean.mkNatLit 8)
+  let otherLevel := Lean.mkApp2 (Lean.mkConst ``optParam [.zero]) nat (Lean.mkNatLit 7)
+  let retained := Lean.Expr.forallE `old optional nat .default
+  let candidate := Lean.Expr.forallE `value optional nat .implicit
+  let generated := Lean.Expr.forallE `value nat nat .implicit
+  expectKernelSignature native "kernel-optional-domain-keeps-selected-type"
+    retained candidate generated true
+  expectKernelSignature native "kernel-nested-minor-domain-view"
+    (.forallE `old retained nat .default)
+    (.forallE `step candidate nat .implicit)
+    (.forallE `step generated nat .implicit) true
+  expectKernelSignature native "kernel-retained-annotations-compared"
+    retained candidate candidate true
+  expectKernelSignature native "kernel-refuse-stripped-selected-wrapper"
+    retained generated generated false
+  expectKernelSignature native "kernel-refuse-changed-selected-default"
+    retained (.forallE `value otherDefault nat .implicit) generated false
+  expectKernelSignature native "kernel-refuse-changed-selected-wrapper-level"
+    retained (.forallE `value otherLevel nat .implicit) generated false
+  expectKernelSignature native "kernel-refuse-changed-generated-default"
+    retained candidate (.forallE `value otherDefault nat .implicit) false
+  expectKernelSignature native "kernel-refuse-unrelated-generated-type"
+    retained candidate (.forallE `value (Lean.mkConst ``Bool) nat .implicit) false
+  expectKernelSignature native "kernel-refuse-changed-generated-universe"
+    (.const ``List [.zero]) (.const ``List [.zero]) (.const ``List [.succ .zero]) false
+  expectKernelSignature native "kernel-refuse-changed-generated-index"
+    (.forallE `old nat (.bvar 0) .default)
+    (.forallE `value nat (.bvar 0) .implicit)
+    (.forallE `value nat (.bvar 1) .implicit) false
+  expectKernelSignature native "kernel-refuse-changed-generated-projection-owner"
+    (.proj ``Prod 0 (.bvar 0)) (.proj ``Prod 0 (.bvar 0))
+    (.proj ``PProd 0 (.bvar 0)) false
+  expectKernelSignature native "kernel-refuse-changed-generated-projection-index"
+    (.proj ``PProd 0 (.bvar 0)) (.proj ``PProd 0 (.bvar 0))
+    (.proj ``PProd 1 (.bvar 0)) false
+  expectKernelSignature native "kernel-refuse-general-projection-defeq"
+    (Lean.mkConst ``Nat.lt) (Lean.mkConst ``Nat.lt)
+    (Lean.mkApp2 (Lean.mkConst ``LT.lt [.zero]) nat (Lean.mkConst ``instLTNat)) false
+  expectKernelSignature native "kernel-refuse-optional-result-erasure"
+    optional optional nat false
+  expectKernelSignature native "kernel-refuse-optional-lambda-domain-erasure"
+    (.lam `old optional (.bvar 0) .default)
+    (.lam `value optional (.bvar 0) .implicit)
+    (.lam `value nat (.bvar 0) .implicit) false
+  IO.println "PSCV0_M3_RECURSOR_KERNEL_SIGNATURE: PASS three positives and twelve preservation/structural refusals; independent complete replay and iota checks follow"
+
 -- Raw structural inventory is diagnostic only. The authorer separately checks
 -- correspondence through pinned projections/optional-annotation views. Neither
 -- inventory nor those views may select an asset or weaken official replay.
@@ -93,6 +149,7 @@ private def inspectShapeDifferences : IO Unit := do
   let native ← Lean.importModules #[{ module := `Lean },
     { module := `Init.Internal.Order.Basic }] {}
   checkCorrespondenceControls native
+  checkKernelSignatureControls native
   let mut compared := 0
   let mut differences := 0
   for declaration in psSelfHostProdPreRecursorSurfacePreludeEnvironment.declarations.reverse do

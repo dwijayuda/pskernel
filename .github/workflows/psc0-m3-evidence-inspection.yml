@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Authenticate d0146eaf archive and inspect inert evidence
+      - name: Authenticate a8151133 archive and inspect inert evidence
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -29,10 +29,13 @@ jobs:
           import hashlib, io, json, os, pathlib, urllib.request, urllib.parse, zipfile
 
           repository = 'dwijayuda/pskernel'
-          run_id = 39121411720
-          artifact_id = 12134487916
-          source_sha = 'd0146eaf1758b27cd7c8c29a75524f5021f8145d'
-          digest = '6e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff'
+          run_id = 39130764541
+          job_id = 117685265070
+          run_attempt = 1
+          artifact_id = 12138202529
+          expected_size = 2756552
+          source_sha = 'a8151133504f382096acc2720945635d583b8d96'
+          digest = 'a3f17ab1d5ec43e465b3f79c5b7a54659b0ef6c06db822ffc22e3a8a1cd31333'
           artifact_name = 'pscv0-m3-foundation-preparation-' + source_sha
           api = 'https://api.github.com/repos/' + repository
 
@@ -59,17 +62,26 @@ jobs:
               return content
 
           run = json.loads(get('/actions/runs/' + str(run_id)))
+          job = json.loads(get('/actions/jobs/' + str(job_id)))
           artifact = json.loads(get('/actions/artifacts/' + str(artifact_id)))
           if run['id'] != run_id or run['head_sha'] != source_sha or run['repository']['full_name'] != repository:
               raise RuntimeError('run identity mismatch')
           if run['status'] != 'completed' or run['head_branch'] != 'psc0/m3-fixedpoint-foundation-20261018':
               raise RuntimeError('run is incomplete or on another branch')
+          if (run.get('run_attempt') != run_attempt or
+              run['path'] != '.github/workflows/psc0-m3-foundation-preparation.yml'):
+              raise RuntimeError('run attempt or workflow mismatch')
+          if (job['id'] != job_id or job['run_id'] != run_id or
+              job['head_sha'] != source_sha or job.get('run_attempt') != run_attempt or
+              job['name'] != 'foundation' or job['status'] != 'completed'):
+              raise RuntimeError('source job identity or completion mismatch')
           if (artifact['id'] != artifact_id or artifact['name'] != artifact_name or artifact['expired'] or
               artifact['workflow_run']['id'] != run_id or artifact['workflow_run']['head_sha'] != source_sha or
+              artifact['size_in_bytes'] != expected_size or
               artifact.get('digest') != 'sha256:' + digest):
               raise RuntimeError('artifact identity or metadata digest mismatch')
           archive_bytes = get('/actions/artifacts/' + str(artifact_id) + '/zip')
-          if len(archive_bytes) != artifact['size_in_bytes'] or hashlib.sha256(archive_bytes).hexdigest() != digest:
+          if len(archive_bytes) != expected_size or hashlib.sha256(archive_bytes).hexdigest() != digest:
               raise RuntimeError('archive bytes do not match independent expected digest/size')
           archive = zipfile.ZipFile(io.BytesIO(archive_bytes))
           entries = archive.infolist()
@@ -91,14 +103,19 @@ jobs:
               'schema': 'pscv0-m3-authenticated-evidence/1',
               'inspectionCommit': os.environ['GITHUB_SHA'],
               'inspectionRun': os.environ['GITHUB_RUN_ID'],
-              'sourceRun': run_id, 'sourceSha': source_sha,
+              'sourceRun': run_id, 'sourceJob': job_id,
+              'sourceRunAttempt': run_attempt, 'sourceSha': source_sha,
               'artifactId': artifact_id, 'archiveSHA256': digest,
               'archiveBytes': len(archive_bytes), 'runConclusion': run['conclusion'],
+              'jobConclusion': job['conclusion'],
+              'jobSteps': [{key: step[key] for key in ('number', 'name', 'status', 'conclusion')}
+                           for step in job['steps']],
               'archiveMembers': [{'path': e.filename, 'bytes': e.file_size} for e in entries],
               'evidence': [], 'qualification': 'identity verified; evidence requires semantic review; no promotion'}
           print('PSCV0_M3_EVIDENCE_IDENTITY ' + json.dumps({k: v for k, v in report.items() if k not in ('archiveMembers', 'evidence')}))
           print('PSCV0_M3_EVIDENCE_MEMBERS ' + json.dumps(report['archiveMembers']))
-          required = ['foundation-inventory.log', 'recursor-surface-export.log', 'where/check.log', 'mutual-structural/check.log']
+          required = ['source-sha.txt', 'toolchain.txt', 'foundation-inventory.log',
+                      'recursor-surface-export.log', 'where/check.log', 'mutual-structural/check.log']
           required += [prefix + '/' + log for prefix in ('where/input-parity/lean', 'where/input-parity/ps', 'mutual-structural') for log in ('js.log', 'ts.log', 'rust.log', 'wasm.log')]
           for name in required:
               if name not in names:
@@ -106,7 +123,11 @@ jobs:
               data = archive.read(name)
               text = data.decode('utf-8')
               lines = text.splitlines()
-              if name.endswith(('js.log', 'ts.log', 'rust.log', 'wasm.log')):
+              if name in ('source-sha.txt', 'toolchain.txt', 'recursor-surface-export.log'):
+                  if len(data) > 512_000 or len(lines) > 8192:
+                      raise RuntimeError('complete diagnostic evidence exceeds inspection bound: ' + name)
+                  excerpt = lines
+              elif name.endswith(('js.log', 'ts.log', 'rust.log', 'wasm.log')):
                   excerpt = lines[-40:]
               else:
                   excerpt = [line for line in lines if 'PSCV0_' in line or 'exception' in line or 'error' in line.lower() or line.startswith('{')]

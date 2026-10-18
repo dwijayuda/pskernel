@@ -134,4 +134,67 @@ def copy (native : Lean.Environment) (selected reference : Lean.Expr) :
       ": recursor source annotations altered the selected logical structure")
   return annotated
 
+-- The pinned kernel's inductive.cpp mk_local_decl_for consumes head type
+-- annotations. This separate comparison view validates only optParam's actual
+-- safe identity in the fresh replay environment; it never calls transfer/copy.
+private def kernelOptionalDomain? (checked : Lean.Kernel.Environment)
+    (expression : Lean.Expr) : Option Lean.Expr := do
+  let .app (.app (.const name levels) type) _ := expression | none
+  if name != ``optParam then none else do
+    let info ← checked.find? name
+    if info.isUnsafe || info.isPartial then none else do
+      let .defnInfo definition := info | none
+      if definition.levelParams.length != levels.length then none else
+        let exposed :=
+          (definition.value.instantiateLevelParams definition.levelParams levels).beta
+            expression.getAppArgs
+        if Lean.Expr.equal exposed type then some type else none
+
+-- Erase only selected head optional annotations absent from the generated
+-- domain. When both domains carry one, compare its default and levels as-is.
+private partial def kernelSignatureDomain (checked : Lean.Kernel.Environment)
+    (selected generated : Lean.Expr) : Lean.Expr :=
+  if generated.consumeMData.isOptParam then selected else
+    match selected with
+    | .mdata data value => .mdata data (kernelSignatureDomain checked value generated)
+    | _ =>
+      match kernelOptionalDomain? checked selected with
+      | some type => kernelSignatureDomain checked type generated
+      | none => selected
+
+-- All other nodes, universe levels and binder metadata remain selected.
+-- In particular, this does not unfold dictionary projections or general defeq,
+-- or remove optional wrappers from result expressions or lambda domains.
+private partial def kernelSignatureView (checked : Lean.Kernel.Environment)
+    (selected generated : Lean.Expr) : Lean.Expr :=
+  let generated := generated.consumeMData
+  match selected, generated with
+  | .mdata data value, _ =>
+    .mdata data (kernelSignatureView checked value generated)
+  | .forallE name domain body binder, .forallE _ nativeDomain nativeBody _ =>
+    .forallE name
+      (kernelSignatureView checked
+        (kernelSignatureDomain checked domain nativeDomain) nativeDomain)
+      (kernelSignatureView checked body nativeBody) binder
+  | .lam name domain body binder, .lam _ nativeDomain nativeBody _ =>
+    .lam name (kernelSignatureView checked domain nativeDomain)
+      (kernelSignatureView checked body nativeBody) binder
+  | .app fn arg, .app nativeFn nativeArg =>
+    .app (kernelSignatureView checked fn nativeFn)
+      (kernelSignatureView checked arg nativeArg)
+  | .letE name type value body nondep, .letE _ nativeType nativeValue nativeBody _ =>
+    .letE name (kernelSignatureView checked type nativeType)
+      (kernelSignatureView checked value nativeValue)
+      (kernelSignatureView checked body nativeBody) nondep
+  | .proj owner index value, .proj _ _ nativeValue =>
+    .proj owner index (kernelSignatureView checked value nativeValue)
+  | _, _ => selected
+
+-- Preserve the frozen selected type even when a stripped candidate would
+-- already equal the generated type. The view is private comparison data only;
+-- the exported candidate retains every selected wrapper, default and level.
+def kernelSignatureMatches (checked : Lean.Kernel.Environment)
+    (retained candidate generated : Lean.Expr) : Bool :=
+  candidate == retained && kernelSignatureView checked retained generated == generated
+
 end PsV7Native.RecursorSource

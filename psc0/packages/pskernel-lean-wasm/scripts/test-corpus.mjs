@@ -28,6 +28,10 @@ test('shared canonical admissions corpus eagerly constructs and decodes',()=>{
       assert.throws(()=>JSON.parse(fixture.input),SyntaxError);
     }
     if(!fixture.accept)assert.equal(typeof fixture.errorKind,'string');
+    if(!fixture.accept){
+      assert.equal(typeof fixture.errorReason,'string');
+      assert.ok(fixture.errorReason.length>0);
+    }
   }
 });
 test('valid and invalid declaration fixtures are semantically distinct',()=>{
@@ -44,4 +48,13 @@ test('negative validation cases require distinct failure classes',()=>{
   assert.ok(invalid.some(c=>c.errorKind==='malformed-request'));
   assert.ok(invalid.some(c=>c.errorKind==='protocol-version'));
   assert.equal(corpus.find(c=>c.id==='duplicate-defined-name').declarationIndex,1);
+});
+
+test('semantic failure reasons are pinned, never satisfied by timeout',()=>{
+  const reasons=corpus.filter(c=>!c.accept).map(c=>c.errorReason);
+  assert.ok(!reasons.some(x=>x.includes('timeout')));
+  assert.equal(corpus.find(c=>c.id==='ill-typed-definition').errorReason,'declaration-type-mismatch');
+  assert.equal(corpus.find(c=>c.id==='duplicate-defined-name').errorReason,'already-declared:');
+  assert.equal(corpus.find(c=>c.id==='missing-constant-type').errorReason,'unknown-constant:');
+  assert.equal(corpus.find(c=>c.id==='theorem-type-not-proposition').errorReason,'theorem-type-not-prop:');
 });

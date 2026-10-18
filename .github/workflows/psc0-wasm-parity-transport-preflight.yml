@@ -1,0 +1,25 @@
+name: PSC0 Wasm parity transport preflight
+on:
+  push:
+    branches:
+      - feature/psc0-v72-pskernel-lean-wasm-parity-prep
+    paths:
+      - 'psc0/packages/pskernel-lean-wasm/scripts/**'
+      - '.github/workflows/psc0-wasm-parity-transport-preflight.yml'
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Validate transport source and run regression tests
+        run: |
+          set -euo pipefail
+          node --check psc0/packages/pskernel-lean-wasm/scripts/run-provider.mjs
+          node --check psc0/packages/pskernel-lean-wasm/scripts/check-differential.mjs
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-provider-transport.mjs

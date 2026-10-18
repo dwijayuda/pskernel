@@ -22,6 +22,12 @@ end
 
 namespace M3InductiveMatchOracle
 
+-- Native K computation uses the unique proof constructor even when the
+-- supplied proof is a variable. It does not unfold or inspect that proof.
+example (h : (0 : Nat) = 0) :
+    Eq.rec (motive := fun _ _ => Nat) 7 h = 7 := rfl
+example (h : True) : True.rec (motive := fun _ => Nat) 7 h = 7 := rfl
+
 def leftTag (A : Type u) (a : A) (x : M3MatchLeft A a) : Nat :=
   match x with
   | .leaf _ => 3
@@ -340,6 +346,52 @@ private def checkPortableReduction (environment : PsEnvironment) : IO Unit := do
     ensure (psExprAlphaEq (psWhnf environment psMetaEmpty psLocalEmpty probe) (number expected))
       "portable group cases reduction differs from the independent native equation"
 
+private def checkKReduction (environment : PsEnvironment) :
+    IO (List PsDeclaration) := do
+  let nat := PsExpr.constE psNatName []
+  let zero := PsExpr.lit (.natural 0)
+  let seven := PsExpr.lit (.natural 7)
+  let level := PsLevel.succ .zero
+  let eqType := psLogicEq level nat zero zero
+  let eqMotive := psLogicLam 1 "n" nat
+    (psLogicLam 2 "h" (psLogicEq level nat zero (.fvar 1)) nat)
+  let eqValue := psExprApplyMany (.constE (psNameAppendStr psEqName "rec") [level, level])
+    [nat, zero, eqMotive, seven, zero, .fvar 0]
+  let trueType := PsExpr.constE (psRootName "True") []
+  let trueMotive := psLogicLam 1 "h" trueType nat
+  let trueValue := psExprApplyMany (.constE (psNameAppendStr (psRootName "True") "rec") [level])
+    [trueMotive, seven, .fvar 0]
+  let mut equations := []
+  for (name, proofType, value) in
+      [("m3KEq", eqType, eqValue), ("m3KTrue", trueType, trueValue)] do
+    let proof := psLocalPushBinding psLocalEmpty (psRootName "h") proofType .explicit
+    ensure (proof.id == 0) "K probe has unexpected initial local identity"
+    let _ ← fromExcept ((psInferType environment psMetaEmpty proof.context value).mapError
+      (fun _ => "K probe is not a well-typed recursor application"))
+    ensure (psExprAlphaEq (psWhnf environment psMetaEmpty proof.context value) seven)
+      "nullary predicate recursor did not compute through a proof variable"
+    equations := equations ++ [PsDeclaration.theoremDecl (psRootName name) []
+      (psLogicPi 0 "h" proofType (psLogicEq level nat value seven))
+      (psLogicLam 0 "h" proofType (psLogicRefl level nat seven))]
+  let one := PsExpr.lit (.natural 1)
+  let unequal := psLocalPushBinding psLocalEmpty (psRootName "h")
+    (psLogicEq level nat zero one) .explicit
+  let stuck := psExprApplyMany (.constE (psNameAppendStr psEqName "rec") [level, level])
+    [nat, zero, eqMotive, seven, one, .fvar unequal.id]
+  let _ ← fromExcept ((psInferType environment psMetaEmpty unequal.context stuck).mapError
+    (fun _ => "unequal-index K refusal probe is not well typed"))
+  ensure (!psExprAlphaEq (psWhnf environment psMetaEmpty unequal.context stuck) seven)
+    "K reduction identified different equality endpoints"
+  let fresh := psMetaFresh psMetaEmpty psLocalEmpty nat .natural
+  let unresolved := psLocalPushBinding psLocalEmpty (psRootName "h")
+    (psLogicEq level nat zero fresh.expr) .explicit
+  let stuck := psExprApplyMany (.constE (psNameAppendStr psEqName "rec") [level, level])
+    [nat, zero, eqMotive, seven, fresh.expr, .fvar unresolved.id]
+  ensure (!psExprAlphaEq (psWhnf environment fresh.context unresolved.context stuck) seven)
+    "K reduction solved an unresolved index"
+  IO.println "PSCV0_M3_K_REDUCTION: PASS Eq/True proof-variable computation, unequal and unresolved index refusals; exact equations follow through the official kernel"
+  return equations
+
 private def emit (ir : PsVerifiedIrModule) : Except String (List PsEmissionArtifact) := do
   let context : PsEmissionContext := {
     sourceName := "m3-group-match.ps", sourceText := runtimeSource, outputStem := "groupmatch" }
@@ -370,7 +422,8 @@ def main (args : List String) : IO Unit := do
   let runtime ← sourceDeclarations environment runtimeSource
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
-  let _ ← checked prelude (groups ++ logical)
+  let kEquations ← checkKReduction environment
+  let _ ← checked prelude (groups ++ logical ++ kEquations)
   checkRefusals environment
   let declarations := group.declarations ++ runtime
   let environment ← fromExcept

@@ -46,7 +46,7 @@ The official kernel checks each axiom's well-formed type and subsequent declarat
 | P1-4 ordinary implementation | Explicit P1 logical/body ownership and validated runtime view | Complete-layout adapter, adversarial refusals and five-target emission passed at abe1adc2; all five target lanes passed | Original logical graph preserved; exact recursive body selected for ordinary execution; type/telescope/identity checks |
 | SRC-1 plain section dictionary | Existing typed predefinition route for unregistered ordinary section definitions | Capture/header/private-equation source checks qualified at a53b3651 / 39073278997 | True no-Where/no-hint native/portable controls, two actual dictionaries, complete capture headers/equations, preserved registration/privacy/theorem policies |
 
-The P1 source consumer is implemented and independently kernel checked, including exact equations and complete-layout executable ownership. The standalone library probe remains authoring evidence only. Native imports, parsed suffixes and unused-hint warnings do not substitute for source/body qualification. The extended runtime matrix still awaits its exact main integration receipt.
+The P1 source consumer is implemented and independently kernel checked, including exact equations and complete-layout executable ownership. The standalone library probe remains authoring evidence only. Native imports, parsed suffixes and unused-hint warnings do not substitute for source/body qualification. The extended runtime matrix passed exact main integration at abe1adc2; its receipt is linked below.
 
 ## M3+B exit ledger
 
@@ -89,6 +89,14 @@ checking the final telescope types and reused base, following pinned Subst.
 The unchanged fixture validates this inference invariant. Completed checked
 unary packing now also covers dependent headers, final user PSigma values and
 returned functions in the existing consolidated probe. Qualification is pending.
+
+Latest preparation: fad13e51/run39083140470 completed with the retained
+riFixedIndexEq rfl failure and a new probe's incorrect implicit PSigma call.
+The root reduction gap is [generic K computation](PSCV0_M3_K_REDUCTION_2026-10-18.md);
+the next child follows the pinned predicate/constructor/index conditions.
+Completed-type transport elision by itself did not close the regression.
+The fixture invocation is corrected without altering its arity/dependency
+requirements. All new corrections remain pending; accepted main is abe1.
 
 M3+B remains open. Remaining total-recursion work includes compatible mutual WF
 through the actual typed PSum/PSigma domain, common fixed parameters and measure,

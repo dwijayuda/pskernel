@@ -17,17 +17,17 @@ invent measured aggregate counts from workflow requirements.
 PR109 remains draft/open/unmerged; attach it in a new chat. Fresh refs and
 expected-head non-force updates only. Never supersede a healthy Native run.
 
-Prep psc0/m3-fixedpoint-foundation-20261018:
-32af8e2/run39080826738 passed fixed-parameter analysis. At593a1bf/run39082224478,
-multi-callee/capture and heterogeneous match probes passed, as did production
-and retained WF/P1/noncomputable. One retained omitted-result rfl equation failed:
-riFixedIndexEq. The current child compares completed telescope types after
-branch inference, following pinned Subst.tryToSkip, and checks the reused base.
-The original assertion remains unchanged. It also completes checked unary
-uncurry/curry with exact source arity; the existing packing fixture covers a
-dependent header, user PSigma final slot and returned function.
-These additions await qualification. Both handoffs and the ledger describe the
-completed/pending boundary; no full M3 acceptance is claimed.
+Prep psc0/m3-fixedpoint-foundation-20261018 is advancing from fad13e51.
+Run39083140470 completed with two failures: unchanged riFixedIndexEq, and
+new packingDependent source application before packing execution.
+The next child implements native generic K computation for a singleton
+inductive predicate with one fieldless constructor and matching actual indices.
+This explains opaque equality transports that must compute after result-family
+inference completes. It also corrects the implicit PSigma domain argument in
+the new unary probe. See PSCV0_M3_K_REDUCTION_2026-10-18.md and work state.
+Existing fixed-parameter, typed callback, dependent-match and WF/P1/noncomputable
+evidence remains recorded; these latest corrections are pending qualification.
+No current prep child has full-main acceptance.
 
 Continue the complete mutual-WF path using shared typed PSum/PSigma packing,
 fixed permutations and original capture/header ownership, actual branch decrease

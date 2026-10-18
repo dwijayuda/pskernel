@@ -99,6 +99,14 @@ The retained standalone PSum asset remains unselected.
 See [mutual WF design](PSCV0_M3_MUTUAL_WF_2026-10-18.md) and
 [dependent match design](PSCV0_M3_HETEROGENEOUS_MATCH_2026-10-18.md).
 
+Latest preparation: fad13e51/run39083140470 completed with the retained
+riFixedIndexEq rfl failure and a new probe's incorrect implicit PSigma call.
+The root reduction gap is [generic K computation](PSCV0_M3_K_REDUCTION_2026-10-18.md);
+the next child follows the pinned predicate/constructor/index conditions.
+Completed-type transport elision by itself did not close the regression.
+The fixture invocation is corrected without altering its arity/dependency
+requirements. All new corrections remain pending; accepted main is abe1.
+
 The authoritative six exits above are unchanged. Native default mutual/nested
 induction refusals are intentional; major-dependent fixed-index matching is a
 separate positive capability. M3+B is open; do not reopen M2+A or start M4/C5.

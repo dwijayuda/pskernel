@@ -47,23 +47,23 @@ Prep32af8e2af9e7ed188532fe8e0ae0cf3ebfbd77d3 adds the finite fixed-parameter
 graph and singleton integration. Run39080826738/job117538048531 completed
 SUCCESS, including the pinned native graph differential and all retained checks.
 
-Prep593a1bf957e45cf3790d7a6bff006855a25fb1dc/run39082224478:
-production build, multi-callee scope/capture probe, heterogeneous match fixture,
-retained WF/P1/noncomputable checks passed. One retained source step failed:
-riFixedIndexEq in omitted result-type inference no longer reduced by rfl.
-No assertion or acceptance criterion was relaxed.
+Preparation fad13e51/run39083140470/job117544083906 completed FAILURE.
+Production, retained WF/P1/noncomputable and new dependent match checks passed.
+The original riFixedIndexEq rfl requirement still failed: completed-type
+transport elision alone was insufficient because result-family assignments can
+remain pending until command finalization. The shared reducer lacks native K
+computation through opaque/variable equality proofs. The current child adds
+the pinned general singleton-predicate/fieldless-constructor rule, with actual
+instantiated index agreement and unresolved-index refusal, before proof
+unfolding. Eq/True native controls and portable exact kernel equations validate
+the rule; unequal and metavariable indices stay blocked. No new axiom or
+metadata flag is introduced, and no existing assertion is weakened.
 
-The current child completes transport elision after branch metavariables are
-solved: compare the final complete telescopes by existing read-only conversion,
-then check the reused base against the original target. Pinned Subst.tryToSkip
-and tests2552/substWithoutExpectedType are the reference. This is a general
-scope/inference invariant, not a literal or fixture-specific reduction rule.
-
-The child also completes ordinary unary PSigma uncurry-type/uncurry/curry helpers
-using exact source arity and checked dependent cases. The consolidated packing
-probe adds a three-slot dependent header, a final user PSigma, a returned function
-and an independently checked exact round-trip equation. This and the transport
-correction await preparation; source mutual WF is still refused.
+The unary packing probe failed before helper execution: PSigma's domain
+parameter is implicit, so the new source incorrectly supplied it positionally.
+The child corrects that invocation while retaining the same dependent three-slot
+header, final user PSigma, returned function and exact equation.
+Both corrections await preparation. Main remains the all-five accepted abe1.
 
 Multi-callee lexical authority records exact callees, resolves current hygienic
 captures, honors local shadows, restores saved scopes and prevents bare callback
@@ -88,7 +88,7 @@ passed; activation requires reviewed strict manifest identities.
 
 ## Remaining work, in dependency order
 
-1. Finish preparation of completed-type transport elision and complete unary
+1. Finish preparation of generic K computation and complete unary
    packing. Preserve riFixedIndexEq unchanged. Promote only a qualified candidate,
    then run Native/M3/F1/F2/F3 at its exact SHA, including the new match observer.
 2. Complete mutual WF using arity-owned PSum/PSigma packing, common fixed

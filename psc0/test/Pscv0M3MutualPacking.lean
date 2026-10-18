@@ -159,7 +159,7 @@ private def build : Except String (List PsDeclaration) := do
     "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
     "function packingSecond(b: Bool): Bool := b\n" ++
     "function packingThird(s: PSum(Nat, Bool)): PSum(Nat, Bool) := s\n" ++
-    "function packingDependent(n: Nat, x: Fin(n + 1), s: PSigma(Nat, fun (k: Nat) => Fin(k + 1))): Nat -> Fin(n + 1) := fun (ignored: Nat) => x\n"
+    "function packingDependent(n: Nat, x: Fin(n + 1), s: PSigma(fun (k: Nat) => Fin(k + 1))): Nat -> Fin(n + 1) := fun (ignored: Nat) => x\n"
   let parsed ← psPscv0ParseProgram source
   let elaborated ← (psElabProgramWithOrigins environment parsed).mapError psCompilerPscv0ElabError
   let environment := elaborated.result.environment

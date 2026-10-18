@@ -3,6 +3,7 @@ import Ps.Core.Builtin
 import Ps.Core.InductiveGroup
 import Ps.Core.Subst
 import Ps.Core.LevelSubst
+import Ps.Meta.Context
 
 structure PsReduceAppView where
   head : PsExpr
@@ -104,6 +105,46 @@ def psReduceEliminationHypothesis (reduce : PsExpr → PsExpr) (fuel : Nat)
         plan slot familyLevels (fixedArgs.take plan.parameters.length) result
       return psReduceApply (.constE slot.recursorName recursorLevels) (fixedArgs ++ indices ++ [field])
 
+-- Kernel K reduction is available exactly for a singleton inductive
+-- predicate with one fieldless constructor (pinned inductive.cpp/init_K_target).
+-- The registered recursor application supplies the expected major type, as
+-- ordinary iota already assumes a typed application. Reconstruct the unique
+-- constructor only when its actual instantiated result indices agree without
+-- assigning metavariables. No proof body or arbitrary runtime value is erased.
+def psReduceKConstructor (reduce : PsExpr → PsExpr)
+    (plan : PsInductiveEliminationPlan) (slot : PsInductiveEliminationSlot)
+    (familyLevels : List PsLevel) (parameters indices : List PsExpr) :
+    Option PsReduceAppView := do
+  if plan.group.members.length != 1 || plan.slots.length != 1 ||
+      !slot.publicMember || parameters.length != slot.family.numParams ||
+      indices.length != slot.family.numIndices ||
+      indices.any psExprHasUnresolvedMeta then none else do
+    let [selected] := slot.constructors | none
+    let ctor := selected.info
+    if ctor.numFields != 0 || !ctor.recursiveFields.isEmpty ||
+        ctor.numParams != slot.family.numParams then none else do
+      let familyType := psExprInstantiateLevelParams slot.family.levelParams
+        familyLevels slot.family.type
+      let resultSort ← psReduceApplyType reduce familyType (parameters ++ indices)
+      let .sortE level := reduce resultSort | none
+      if !psLevelEquivalent level .zero then none else do
+        let constructor ← psInductiveEliminationInstantiate plan familyLevels
+          parameters selected.head
+        let view := psReduceAppView constructor
+        let .constE name levels := view.head | none
+        if !psNameEq name ctor.name || levels.length != ctor.levelParams.length ||
+            view.args.length != ctor.numParams then none else do
+          let constructorType ← psReduceApplyType reduce
+            (psExprInstantiateLevelParams ctor.levelParams levels ctor.type) view.args
+          let actual := psReduceAppView (reduce constructorType)
+          let expected := psReduceAppView
+            (psReduceApply (.constE slot.family.name familyLevels) (parameters ++ indices))
+          if !psReduceEliminationEqual reduce actual.head expected.head ||
+              actual.args.length != expected.args.length ||
+              !(actual.args.zip expected.args).all
+                (fun (left, right) => psReduceEliminationEqual reduce left right) then none
+          else some view
+
 -- One reduction owner handles direct and nested slots. Slot identity comes
 -- from the called registered recursor; a base constructor name alone cannot
 -- select between different specializations of List/Option/Array/Prod.
@@ -123,7 +164,14 @@ def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
     let prefixSize := recursor.numParams + recursor.numMotives + recursor.numMinors
     let majorPosition := prefixSize + slot.family.numIndices
     let major ← view.args[majorPosition]?
-    let constructor := psReduceConstructorView (reduce major)
+    -- Try the generic proof-irrelevant constructor before unfolding a proof.
+    -- Native kernel/inductive.h uses the same order; opaque equality proofs
+    -- must not obstruct computation when their endpoints already agree.
+    let constructor ← match psReduceKConstructor reduce plan slot familyLevels
+        (view.args.take recursor.numParams)
+        ((view.args.drop prefixSize).take slot.family.numIndices) with
+      | some constructor => pure constructor
+      | none => pure (psReduceConstructorView (reduce major))
     let .constE ctorName ctorLevels := constructor.head | none
     let ctor ← psEnvironmentFindConstructor environment ctorName
     let selected ← slot.constructors[ctor.constructorIndex]?

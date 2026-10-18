@@ -266,3 +266,13 @@ src/Lean/Elab/PreDefinition/WF/Fix.lean at the same pin.
 Copyright (c) 2021 Microsoft Corporation. Author: Leonardo de Moura.
 Apache-2.0. The portable implementation re-elaborates retained source under
 typed local callbacks; it does not copy host temporary-axiom admission.
+
+### Nullary predicate recursor computation
+
+Ps.Meta.Iota adapts init_K_target/to_cnstr_when_K from pinned Lean4.35.0
+src/kernel/inductive.cpp and inductive.h, and Meta/WHNF.lean.
+Copyright (c) 2018 Microsoft Corporation. Author: Leonardo de Moura.
+Apache-2.0; retain LEAN-APACHE-2.0.txt. Modifications: derive eligibility
+from existing registered portable elimination metadata; use the typed recursor
+spine and read-only index comparison; refuse unresolved indices; retain ordinary
+iota validation. No new axiom or unchecked proof-cast rule is introduced.

@@ -60,3 +60,10 @@ final metavariable assignments and the existing read-only conversion, followed
 by checking the reused term against the original target. Tests2552.lean and
 substWithoutExpectedType.lean in the pinned source reinforce the reduction and
 inference requirement. No Eq.rec rule or kernel equality is weakened.
+
+Preparation fad13e51/39083140470 shows completed-type transport elision alone is
+insufficient when result-family inference remains delayed beyond the branch.
+The missing shared reducer capability is native K computation through a proof
+whose type already agrees with the unique nullary constructor. See the
+[K design](PSCV0_M3_K_REDUCTION_2026-10-18.md). The existing riFixedIndexEq
+assertion remains unchanged; these changes have not yet qualified integration.

@@ -1,0 +1,11 @@
+# M2 comparison notation and exhaustive operator manifest
+
+Lean 4.35.0, eb6cafb7290e8bd5f2937522d8d804f58f02bafc is the reference. Init/Notation.lean registers LT.lt, LE.le, GT.gt and GE.ge at precedence50; Init/Prelude.lean defines GT/GE by reversing LT/LE. Ne is propositional negated equality, distinct from Boolean inequality. Lean/Elab/Extra.lean and tests/elab/{binrel,binrelmacros,binrel_binop,infixprio}.lean were studied. Their unrelated admitted example proofs are not imported. Algorithm reference: Lean project, Apache-2.0; independently authored portable registry.
+
+The platform profile corpus exposed a missing syntax family: source '<' was refused even though checked order classes, dictionaries and decision procedures were already selected. This change adds all six selected order spellings and propositional inequality through ordinary typed constant applications. Existing precedence, non-associative-chain refusal and adjacent-call ownership apply to the whole family. It does not implement a new order evaluator or change propositions into Bool.
+
+The parser now consumes an enumerated closed registry. The native manifest keeps its independent pinned ledger, verifies every entry, and checks that the live registry has exactly the inventoried spellings. This closes the old one-direction audit gap, where an unlisted parser addition could escape the manifest. Three shared result vectors cover strict/non-strict/equal/reversed cases and all seven spellings; source proof scope and malformed-chain/gapped-token refusals exercise the same path.
+
+This does not claim Lean's complete binrel operator-tree coercion protocol. Existing shared expected-type/application/coercion mechanisms remain authoritative; mixed rigid operand types require a separate M2 review. Shift/power notation and their class-instance selection are also still open in the canonical operator table.
+
+Qualification pending: strict declaration/surface hashes must be independently measured after adding Array.filter. Platform run38799414716 admitted all3556 prior declarations/302 instances and passed native semantic/module/solver checks, then failed at the missing source comparison in its runtime fixture. It is not a runtime success receipt.

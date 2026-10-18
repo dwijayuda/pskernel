@@ -131,7 +131,9 @@
     "iterate:sh1": "node scripts/sh1-iterate.mjs",
     "check:typescript-profile": "node scripts/check-typescript-profile.mjs --out dist/typescript-profile",
     "npm:release": "node scripts/npm-distribution.mjs",
-    "npm:inspect": "node scripts/npm-distribution.mjs --inspect"
+    "npm:inspect": "node scripts/npm-distribution.mjs --inspect",
+    "dev:v7": "cd v7-native && lake build pscv0_native",
+    "check:v7:native": "node scripts/pscv0-native-profile.mjs && cd v7-native && lake build pscv0_native pscv0_native_checks && .lake/build/bin/pscv0_native_checks"
   },
   "devDependencies": {
     "typescript": "7.0.2"

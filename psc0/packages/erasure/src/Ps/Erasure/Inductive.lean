@@ -4,6 +4,7 @@ structure PsPreparedInductiveParameters where
   scope : PsErasureScope
   values : List PsExpr
   typeParameters : List PsVerifiedIrTypeParameter
+  sourceTypeIndices : List Nat
 
 def psPrepareInductiveParametersWithFuel
     (environment : PsEnvironment) (fuel : Nat) :
@@ -17,7 +18,7 @@ def psPrepareInductiveParametersWithFuel
         let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsExpr -> List PsVerifiedIrTypeParameter -> Except PsErasureError PsPreparedInductiveParameters :=
           psPrepareInductiveParametersWithFuel environment remainingFuel;
         match count with
-        | Nat.zero => Except.ok (PsPreparedInductiveParameters.mk scope (psListReverse valuesRev) (psListReverse parametersRev))
+        | Nat.zero => Except.ok (PsPreparedInductiveParameters.mk scope (psListReverse valuesRev) (psListReverse parametersRev) [])
         | Nat.succ remaining =>
           match
               psWhnf
@@ -27,7 +28,7 @@ def psPrepareInductiveParametersWithFuel
                 cursor with
           | .forallE name domain body binder =>
               match
-                  psErasureClassifyBinder
+                  psErasureClassifyFamilyParameter
                     environment
                     scope.localContext
                     domain with
@@ -40,7 +41,7 @@ def psPrepareInductiveParametersWithFuel
                       binder;
                   let parameterName := String.Internal.append "T" (psNatToString index);
                   let value := PsExpr.fvar pushed.id;
-                  let nextScope : PsErasureScope := {
+                  let nextScope : PsErasureScope := { scope with
                     localContext := pushed.context
                     runtimeLocals := scope.runtimeLocals
                     typeLocals :=
@@ -63,6 +64,16 @@ def psPrepareInductiveParametersWithFuel
                     (List.cons
                       (PsVerifiedIrTypeParameter.mk parameterName)
                       parametersRev)
+              | .index =>
+                  -- Preserve the Core parameter for dependent constructor
+                  -- substitution; it does not create an IR type argument.
+                  let pushed := psLocalPushBinding scope.localContext name domain binder
+                  let value := PsExpr.fvar pushed.id
+                  let nextScope := { scope with
+                    localContext := pushed.context
+                    erasedLocals := pushed.id :: scope.erasedLocals }
+                  smaller nextScope (psExprInstantiate1 body value)
+                    remaining (index + 1) (value :: valuesRev) parametersRev
               | _ =>
                   Except.error PsErasureError.unsupportedRuntimeTerm
           | _ =>
@@ -72,16 +83,13 @@ def psPrepareInductiveParameters
     (environment : PsEnvironment)
     (scope : PsErasureScope)
     (info : PsInductiveInfo) :
-    Except PsErasureError PsPreparedInductiveParameters :=
-  psPrepareInductiveParametersWithFuel
-    environment
-    4096
-    scope
-    info.type
-    info.numParams
-    0
-    []
-    []
+    Except PsErasureError PsPreparedInductiveParameters := do
+  let result ← psPrepareInductiveParametersWithFuel
+    environment 4096 scope info.type info.numParams 0 [] []
+  let sourceTypeIndices ← psErasureInductiveSourceTypeIndices environment scope info
+  if sourceTypeIndices.length != result.typeParameters.length then
+    throw .binderMismatch
+  return { result with sourceTypeIndices }
 
 def psApplyConstructorParameters
     (environment : PsEnvironment) (scope : PsErasureScope) (values : List PsExpr) :
@@ -105,87 +113,52 @@ def psApplyConstructorParameters
 structure PsPreparedConstructorFields where
   fields : List PsRuntimeConstructorField
 
+-- Type/proof fields have no storage. A runtime field may not depend on an
+-- existential type field: that needs an explicit existential IR representation.
+-- Uniform type parameters remain ordinary target generics.
 def psPrepareConstructorFieldsWithFuel
-    (environment : PsEnvironment) (fuel : Nat) :
-    PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=
+    (environment : PsEnvironment) (fuel : Nat)
+    (scope : PsErasureScope) (cursor : PsExpr) (count index : Nat)
+    (erasedTypeFields : List Nat) (fieldsRev : List PsRuntimeConstructorField) :
+    Except PsErasureError PsPreparedConstructorFields := do
   match fuel with
-  | Nat.zero =>
-      fun (_scope : PsErasureScope) (_cursor : PsExpr) (_count : Nat) (_index : Nat) (_fields : List PsRuntimeConstructorField) =>
-        Except.error PsErasureError.fuelExhausted
-  | Nat.succ remainingFuel =>
-      fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (fieldsRev : List PsRuntimeConstructorField) =>
-        let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=
-          psPrepareConstructorFieldsWithFuel environment remainingFuel;
-        match count with
-        | Nat.zero => Except.ok (PsPreparedConstructorFields.mk (psListReverse fieldsRev))
-        | Nat.succ remaining =>
-          match
-              psWhnf
-                environment
-                psMetaEmpty
-                scope.localContext
-                cursor with
-          | .forallE name domain body binder =>
-              match
-                  psErasureClassifyBinder
-                    environment
-                    scope.localContext
-                    domain with
-              | .runtime =>
-                  match psEraseRuntimeType environment scope domain with
-                  | Except.error error => Except.error error
-                  | Except.ok fieldType =>
-                      let fieldName :=
-                        psErasureSafeIdentifier
-                          (psNameToString name)
-                          (String.Internal.append "field" (psNatToString index));
-                      let pushed :=
-                        psLocalPushBinding
-                          scope.localContext
-                          name
-                          domain
-                          binder;
-                      let nextScope : PsErasureScope := {
-                        localContext := pushed.context
-                        runtimeLocals :=
-                          List.cons (Prod.mk pushed.id fieldName) scope.runtimeLocals
-                        typeLocals := scope.typeLocals
-                        erasedLocals := scope.erasedLocals
-                        declarationNames := scope.declarationNames
-                        runtimeConstructors := scope.runtimeConstructors
-                        runtimeRecursors := scope.runtimeRecursors
-                        runtimeStructures := scope.runtimeStructures
-                        runtimeStructureConstructors := scope.runtimeStructureConstructors
-                        runtimeExpressions := scope.runtimeExpressions
-                        currentDefinition := scope.currentDefinition
-                      };
-                      smaller
-                        nextScope
-                        (psExprInstantiate1
-                          body
-                          (PsExpr.fvar pushed.id))
-                        remaining
-                        (Nat.add index 1)
-                        (List.cons (PsRuntimeConstructorField.mk index fieldName fieldType false) fieldsRev)
-              | _ =>
-                  Except.error PsErasureError.unsupportedRuntimeTerm
-          | _ =>
-              Except.error PsErasureError.binderMismatch
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match count with
+    | 0 => return ⟨fieldsRev.reverse⟩
+    | count + 1 =>
+      let .forallE name domain body binder :=
+        psWhnf environment psMetaEmpty scope.localContext cursor | throw .binderMismatch
+      let pushed := psLocalPushBinding scope.localContext name domain binder
+      let cursor := psExprInstantiate1 body (.fvar pushed.id)
+      match psErasureClassifyBinder environment scope.localContext domain with
+      | .runtime =>
+        if (psExprFVarIds (psWhnf environment psMetaEmpty scope.localContext domain)).any
+            erasedTypeFields.contains then
+          throw .unsupportedRuntimeTerm
+        let fieldType ← psEraseRuntimeType environment scope domain
+        let fieldName := psErasureSafeIdentifier (psNameToString name)
+          ("field" ++ psNatToString index)
+        let scope := { scope with
+          localContext := pushed.context
+          runtimeLocals := (pushed.id, fieldName) :: scope.runtimeLocals }
+        psPrepareConstructorFieldsWithFuel environment fuel scope cursor count (index + 1)
+          erasedTypeFields (⟨index, fieldName, fieldType, false, none⟩ :: fieldsRev)
+      | kind =>
+        let scope := { scope with
+          localContext := pushed.context
+          erasedLocals := pushed.id :: scope.erasedLocals }
+        let erasedTypeFields := match kind with
+          | .type | .index => pushed.id :: erasedTypeFields
+          | _ => erasedTypeFields
+        psPrepareConstructorFieldsWithFuel environment fuel scope cursor count (index + 1)
+          erasedTypeFields fieldsRev
 
 def psPrepareConstructorFields
-    (environment : PsEnvironment)
-    (scope : PsErasureScope)
-    (cursor : PsExpr)
-    (fieldCount : Nat) :
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (cursor : PsExpr) (fieldCount : Nat) :
     Except PsErasureError PsPreparedConstructorFields :=
-  psPrepareConstructorFieldsWithFuel
-    environment
-    4096
-    scope
-    cursor
-    fieldCount
-    0
-    []
+  psPrepareConstructorFieldsWithFuel environment 4096 scope cursor fieldCount 0 [] []
 
 def psFindConstructorDeclaration (declarations : List PsDeclaration) : PsName -> Option PsConstructorInfo :=
   match declarations with
@@ -246,7 +219,7 @@ def psPrepareRuntimeConstructors
                       PsRuntimeConstructorField.mk
                         (Nat.add ctorInfo.numParams field.sourceIndex)
                         field.name field.type
-                        (psErasureNatInList ctorInfo.recursiveFields field.sourceIndex);
+                        (psErasureNatInList ctorInfo.recursiveFields field.sourceIndex) none;
                   let fields := psListMap adjustField preparedFields.fields;
                   let runtimeInfo : PsRuntimeConstructorInfo := {
                     inductiveName := inductiveName
@@ -257,6 +230,7 @@ def psPrepareRuntimeConstructors
                     coreName := coreName
                     numParams := ctorInfo.numParams
                     fields := fields
+                    numFields := ctorInfo.numFields
                   };
                   smaller
                     (List.cons runtimeInfo constructorsRev)
@@ -269,100 +243,122 @@ def psErasureAppendConstructorEntries (entries : List (PsName × PsRuntimeConstr
     (tail : PsErasureNameIndex PsRuntimeConstructorInfo) : PsErasureNameIndex PsRuntimeConstructorInfo :=
   psErasureIndexPrepend PsRuntimeConstructorInfo entries tail
 
+def psFindInductiveDeclaration (declarations : List PsDeclaration) (name : PsName) :
+    Option PsInductiveInfo :=
+  declarations.findSome? fun declaration =>
+    match declaration with
+    | .inductiveDecl info => if psNameEq info.name name then some info else none
+    | _ => none
+
 def psPrepareRuntimeInductive
     (environment : PsEnvironment)
     (declarations : List PsDeclaration)
     (scope : PsErasureScope)
     (info : PsInductiveInfo) :
-    Except PsErasureError PsPreparedInductiveResult :=
-  if psErasureNatNotEqual info.numIndices 0 then
-    Except.error PsErasureError.unsupportedRuntimeTerm
-  else
-    let outputName : String :=
-      match psErasureLookupName scope.declarationNames info.name with
-      | Option.some known => known
-      | Option.none =>
-          psErasureSafeIdentifier
-            (psNameToString info.name)
-            "Inductive";
-    match
-        psPrepareInductiveParameters
-          environment
-          scope
-          info with
-    | Except.error error => Except.error error
-    | Except.ok parameters =>
-        match
-            psPrepareRuntimeConstructors
-              environment
-              declarations
-              parameters.scope
-              parameters.values
-              outputName
-              info.constructors
-              [] with
-        | Except.error error => Except.error error
-        | Except.ok constructors =>
-            let recursorName :=
-              psNameAppendStr info.name "rec";
-            match psFindRecursorDeclaration declarations recursorName with
-            | Option.none =>
-                Except.error
-                  (PsErasureError.unknownConstant recursorName)
-            | Option.some recInfo =>
-                if
-                    if psErasureNatNotEqual recInfo.numParams info.numParams then true
-                    else if psErasureNatNotEqual recInfo.numIndices 0 then true
-                    else if psErasureNatNotEqual recInfo.numMotives 1 then true
-                    else psErasureNatNotEqual recInfo.numMinors (psListLength constructors) then
-                  Except.error PsErasureError.unsupportedRuntimeTerm
-                else
-                  let runtimeInfo : PsRuntimeInductiveInfo := {
-                    name := outputName
-                    coreName := info.name
-                    recursorName := recursorName
-                    numParams := info.numParams
-                    typeParameters := parameters.typeParameters
-                    constructors := constructors
-                  };
-                  let makeEntry :=
-                    fun (ctorInfo : PsRuntimeConstructorInfo) => Prod.mk ctorInfo.coreName ctorInfo;
-                  let constructorEntries := psListMap makeEntry constructors;
-                  let nextScope : PsErasureScope := {
-                    localContext := scope.localContext
-                    runtimeLocals := scope.runtimeLocals
-                    typeLocals := scope.typeLocals
-                    erasedLocals := scope.erasedLocals
-                    declarationNames := scope.declarationNames
-                    runtimeConstructors :=
-                      psErasureAppendConstructorEntries constructorEntries scope.runtimeConstructors
-                    runtimeRecursors :=
-                      psErasureIndexInsert PsRuntimeInductiveInfo scope.runtimeRecursors recursorName runtimeInfo
-                    runtimeStructures := scope.runtimeStructures
-                    runtimeStructureConstructors :=
-                      scope.runtimeStructureConstructors
-                    runtimeExpressions := []
-                    currentDefinition := Option.none
-                  };
-                  let makeField :=
-                    fun (field : PsRuntimeConstructorField) =>
-                      PsVerifiedIrConstructorField.mk field.name field.type;
-                  let makeConstructor :=
-                    fun (ctorInfo : PsRuntimeConstructorInfo) =>
-                      PsVerifiedIrConstructor.mk ctorInfo.name (psListMap makeField ctorInfo.fields);
-                  let irConstructors := psListMap makeConstructor constructors;
-                  Except.ok {
-                    scope := nextScope
-                    ir := {
-                      name := outputName
-                      typeParameters := parameters.typeParameters
-                      constructors := irConstructors
-                    }
-                  }
+    Except PsErasureError PsPreparedInductiveResult := do
+  let outputName := (psErasureLookupName scope.declarationNames info.name).getD
+    (psErasureSafeIdentifier (psNameToString info.name) "Inductive")
+  let recursorName := psNameAppendStr info.name "rec"
+  let some recInfo := psFindRecursorDeclaration declarations recursorName
+    | throw (.unknownConstant recursorName)
+  let some plan := psInductiveEliminationPlanFor
+      (psWhnf environment psMetaEmpty psLocalEmpty)
+      (psEnvironmentFindInductive environment) (psEnvironmentFindConstructor environment)
+      (psEnvironmentFindRecursor environment) info
+    | throw .unsupportedRuntimeTerm
+  let some (slotIndex, slot) := psInductiveEliminationSlotFor plan recursorName
+    | throw .unsupportedRuntimeTerm
+  if !psInductiveEliminationRecursorShapeValid plan slot recInfo then throw .unsupportedRuntimeTerm
+  for (name, index) in info.constructors.zipIdx do
+    let some ctor := psFindConstructorDeclaration declarations name | throw (.unknownConstant name)
+    if !psNameEq ctor.inductiveName info.name || ctor.constructorIndex != index ||
+        ctor.numParams != info.numParams ||
+        !psInductiveGroupNamesEqual ctor.levelParams info.levelParams then
+      throw .unsupportedRuntimeTerm
+  let parameters ← psPrepareInductiveParameters environment scope info
+  let constructors ← psPrepareRuntimeConstructors environment declarations parameters.scope
+    parameters.values outputName info.constructors []
+  let runtimeInfo : PsRuntimeInductiveInfo := {
+    name := outputName, coreName := info.name, recursorName
+    numParams := info.numParams, numIndices := info.numIndices
+    typeParameters := parameters.typeParameters
+    sourceTypeIndices := parameters.sourceTypeIndices, constructors
+    group := if plan.group.members.length > 1 then some plan.group else none
+    elimination := if plan.slots.length > 1 then some (plan, slotIndex) else none }
+  let constructorEntries := constructors.map fun ctor => (ctor.coreName, ctor)
+  let nextScope := { scope with
+    runtimeConstructors := psErasureAppendConstructorEntries constructorEntries scope.runtimeConstructors
+    runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo scope.runtimeRecursors recursorName runtimeInfo
+    runtimeExpressions := [], currentDefinition := none }
+  return {
+    scope := nextScope
+    ir := {
+      name := outputName
+      typeParameters := parameters.typeParameters
+      constructors := constructors.map fun ctor =>
+        { name := ctor.name, fields := ctor.fields.map fun field =>
+          { name := field.name, type := field.type } } } }
 
 structure PsPreparedInductivesResult where
   scope : PsErasureScope
   ir : List PsVerifiedIrInductive
+
+-- Auxiliary recursors reuse the actual container's runtime representation.
+-- Only their parameter prefix and recursive-field targets are specialized;
+-- no duplicate List/Option/Prod datatype is emitted for a virtual slot.
+def psPrepareRuntimeEliminationSlot (environment : PsEnvironment)
+    (scope : PsErasureScope) (plan : PsInductiveEliminationPlan)
+    (slot : PsInductiveEliminationSlot) (index : Nat) :
+    Except PsErasureError PsErasureScope := do
+  let outputName := (psErasureLookupName scope.declarationNames slot.family.name).getD
+    (psErasureSafeIdentifier (psNameToString slot.family.name) "Inductive")
+  let parameters ← psPrepareInductiveParameters environment scope slot.family
+  let constructors ← psPrepareRuntimeConstructors environment environment.declarations parameters.scope
+    parameters.values outputName slot.family.constructors []
+  let constructors ← constructors.mapM fun constructor => do
+    let some source := slot.constructors.find?
+        (fun source => psNameEq source.info.name constructor.coreName)
+      | throw PsErasureError.unsupportedRuntimeTerm
+    let fields ← constructor.fields.mapM fun field => do
+      if field.sourceIndex < constructor.numParams then throw PsErasureError.binderMismatch
+      let edge := source.recursiveFields.find?
+        (fun edge => edge.1 == field.sourceIndex - constructor.numParams)
+      let target ← match edge with
+        | none => pure none
+        | some (_, target) =>
+          let some target := plan.slots[target]? | throw PsErasureError.unsupportedRuntimeTerm
+          pure (some target.recursorName)
+      return { field with recursive := edge.isSome, recursiveTarget := target }
+    return { constructor with fields }
+  let runtimeInfo : PsRuntimeInductiveInfo := {
+    name := outputName, coreName := slot.family.name, recursorName := slot.recursorName
+    numParams := plan.parameters.length, numIndices := slot.family.numIndices
+    typeParameters := parameters.typeParameters, sourceTypeIndices := parameters.sourceTypeIndices
+    constructors
+    group := if plan.group.members.length > 1 then some plan.group else none
+    elimination := some (plan, index) }
+  let runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo
+    scope.runtimeRecursors slot.recursorName runtimeInfo
+  return { scope with runtimeRecursors }
+
+def psPrepareRuntimeEliminationRecursors (environment : PsEnvironment)
+    (declarations : List PsDeclaration) (scope : PsErasureScope) :
+    Except PsErasureError PsErasureScope :=
+  declarations.foldlM (fun scope declaration => do
+    let .inductiveDecl family := declaration | pure scope
+    let some recursor := psEnvironmentFindRecursor environment (psNameAppendStr family.name "rec")
+      | pure scope
+    if recursor.numMotives <= 1 ||
+        !(recursor.inductiveNames.head?.any (psNameEq family.name)) then return scope
+    let proof ← (psInductiveIsProp environment family).mapError
+      (fun _ => PsErasureError.unsupportedRuntimeTerm)
+    if proof then return scope
+    let some plan := psInductiveEliminationPlanFor
+        (psWhnf environment psMetaEmpty psLocalEmpty)
+        (psEnvironmentFindInductive environment) (psEnvironmentFindConstructor environment)
+        (psEnvironmentFindRecursor environment) family | throw .unsupportedRuntimeTerm
+    plan.slots.zipIdx.foldlM (fun scope (slot, index) =>
+      psPrepareRuntimeEliminationSlot environment scope plan slot index) scope) scope
 
 def psPrepareRuntimeInductives
     (environment : PsEnvironment)
@@ -372,12 +368,14 @@ def psPrepareRuntimeInductives
     (irRev : List PsVerifiedIrInductive) :
     Except PsErasureError PsPreparedInductivesResult :=
   match inputs with
-  | List.nil =>
-      Except.ok (PsPreparedInductivesResult.mk scope (psListReverse irRev))
+  | List.nil => do
+      let scope ← psPrepareRuntimeEliminationRecursors environment declarations scope
+      return PsPreparedInductivesResult.mk scope (psListReverse irRev)
   | List.cons declaration rest =>
       match declaration with
-      | .inductiveDecl info =>
-          if info.isStructure then
+      | .inductiveDecl info => do
+          let proofFamily ← (psInductiveIsProp environment info).mapError (fun _ => PsErasureError.unsupportedRuntimeTerm)
+          if info.isStructure || proofFamily then
             psPrepareRuntimeInductives
               environment
               declarations
@@ -391,7 +389,7 @@ def psPrepareRuntimeInductives
                   declarations
                   scope
                   info with
-            | Except.error error => Except.error error
+            | Except.error error => Except.error (.inDeclaration info.name error)
             | Except.ok prepared =>
                 psPrepareRuntimeInductives
                   environment
@@ -406,3 +404,4 @@ def psPrepareRuntimeInductives
             rest
             scope
             irRev
+

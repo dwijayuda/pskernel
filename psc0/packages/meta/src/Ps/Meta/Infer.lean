@@ -55,59 +55,6 @@ def psInferLevelListLength
   | _ :: rest =>
       Nat.succ (psInferLevelListLength rest)
 
--- Canonicalize only closed universe arithmetic produced by inference.
--- Any parameter or metavariable preserves the original whole level.
-def psInferClosedLevelValue
-    (level : PsLevel) : Option Nat :=
-  match level with
-  | PsLevel.zero =>
-      Option.some 0
-  | PsLevel.succ inner =>
-      match psInferClosedLevelValue inner with
-      | Option.none => Option.none
-      | Option.some value => Option.some (Nat.succ value)
-  | PsLevel.max left right =>
-      match psInferClosedLevelValue left with
-      | Option.none => Option.none
-      | Option.some leftValue =>
-          match psInferClosedLevelValue right with
-          | Option.none => Option.none
-          | Option.some rightValue =>
-              if Nat.ble leftValue rightValue then
-                Option.some rightValue
-              else
-                Option.some leftValue
-  | PsLevel.imax left right =>
-      match psInferClosedLevelValue left with
-      | Option.none => Option.none
-      | Option.some leftValue =>
-          match psInferClosedLevelValue right with
-          | Option.none => Option.none
-          | Option.some rightValue =>
-              if Nat.beq rightValue 0 then
-                Option.some 0
-              else if Nat.ble leftValue rightValue then
-                Option.some rightValue
-              else
-                Option.some leftValue
-  | PsLevel.param _ =>
-      Option.none
-  | PsLevel.mvar _ =>
-      Option.none
-
-def psInferLevelFromNat
-    (value : Nat) : PsLevel :=
-  match value with
-  | Nat.zero => PsLevel.zero
-  | Nat.succ remaining =>
-      PsLevel.succ (psInferLevelFromNat remaining)
-
-def psInferNormalizeClosedLevel
-    (level : PsLevel) : PsLevel :=
-  match psInferClosedLevelValue level with
-  | Option.none => level
-  | Option.some value => psInferLevelFromNat value
-
 def psInferEnsureSort
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -311,7 +258,7 @@ def psInferProjectionType
         localContext
         targetType);
   match view.head with
-  | .constE actualName _ =>
+  | .constE actualName levels =>
       if psInferBoolNot (psNameEq actualName typeName) then
         Except.error PsInferError.projectionUnsupported
       else
@@ -341,7 +288,9 @@ def psInferProjectionType
                       | some constructorInfo =>
                           if
                               psInferBoolOr
-                                (psInferNatNe constructorInfo.numParams info.numParams)
+                                (psInferBoolOr
+                                  (psInferNatNe constructorInfo.levelParams.length levels.length)
+                                  (psInferNatNe constructorInfo.numParams info.numParams))
                                 (Nat.ble constructorInfo.numFields index) then
                             Except.error PsInferError.projectionUnsupported
                           else
@@ -350,7 +299,7 @@ def psInferProjectionType
                                   environment
                                   metaContext
                                   localContext
-                                  constructorInfo.type
+                                  (psExprInstantiateLevelParams constructorInfo.levelParams levels constructorInfo.type)
                                   view.args with
                             | Except.error error => Except.error error
                             | Except.ok fieldCursor =>
@@ -367,6 +316,36 @@ def psInferProjectionType
                   | List.cons _ _ =>
                       Except.error PsInferError.projectionUnsupported
   | _ => Except.error PsInferError.projectionUnsupported
+
+-- Shared by application inference, let checking and unification. Only closed
+-- terms with convertible inferred propositions may use proof irrelevance.
+-- The inference callback is fuel-decreasing at recursive inference call sites;
+-- this rule never assigns a metavariable or treats runtime data as proof.
+def psInferGroundProofIrrelevanceAt (transparency : PsTransparency)
+    (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
+    (environment : PsEnvironment) (context : PsMetaContext)
+    (locals : PsLocalContext) (left right : PsExpr) : Bool :=
+  if psExprHasUnresolvedMeta left || psExprHasUnresolvedMeta right then false else
+  match infer locals left, infer locals right with
+  | .ok leftType, .ok rightType =>
+    if psExprHasUnresolvedMeta leftType || psExprHasUnresolvedMeta rightType ||
+        !psDefEqReadOnlyWithTransparency transparency environment context locals leftType rightType then false else
+    match infer locals leftType with
+    | .ok sort =>
+      match psWhnfWithTransparency transparency environment context locals sort with
+      | .sortE level => psLevelEquivalent level .zero
+      | _ => false
+    | .error _ => false
+  | _, _ => false
+
+def psInferGroundProofIrrelevance := psInferGroundProofIrrelevanceAt .all
+
+def psInferDefEq
+    (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
+    (environment : PsEnvironment) (context : PsMetaContext)
+    (locals : PsLocalContext) (left right : PsExpr) : Bool :=
+  psDefEqReadOnlyWithProofs environment context
+    (psInferGroundProofIrrelevance infer environment context) 256 locals left right
 
 def psInferTypeWithFuelWorker
     (remainingFuel : Nat) :
@@ -410,7 +389,7 @@ def psInferTypeWithFuelWorker
               | .sortE level =>
                   Except.ok
                     (PsExpr.sortE
-                      (psInferNormalizeClosedLevel (PsLevel.succ level)))
+                      (psLevelNormalize (PsLevel.succ level)))
               | .constE name levels =>
                   match psEnvironmentFind environment name with
                   | none => Except.error (PsInferError.unknownConstant name)
@@ -441,7 +420,7 @@ def psInferTypeWithFuelWorker
                           match smaller environment metaContext localContext arg with
                           | Except.error error => Except.error error
                           | Except.ok argType =>
-                              if psDefEqReadOnlyWithEnv
+                              if psInferDefEq (smaller environment metaContext)
                                   environment
                                   metaContext
                                   localContext
@@ -499,7 +478,7 @@ def psInferTypeWithFuelWorker
                               | Except.ok bodyLevel =>
                                   Except.ok
                                     (PsExpr.sortE
-                                      (psInferNormalizeClosedLevel
+                                      (psLevelNormalize
                                         (PsLevel.imax domainLevel bodyLevel)))
               | .letE _ type value body =>
                   match smaller environment metaContext localContext type with
@@ -511,7 +490,7 @@ def psInferTypeWithFuelWorker
                           match smaller environment metaContext localContext value with
                           | Except.error error => Except.error error
                           | Except.ok valueType =>
-                              if psDefEqReadOnlyWithEnv
+                              if psInferDefEq (smaller environment metaContext)
                                   environment
                                   metaContext
                                   localContext

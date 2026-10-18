@@ -1,0 +1,13 @@
+# M2: selected profile and actual module-interface provenance
+
+Implementation checkpoint; cloud qualification pending. This closes descriptive profile ownership, not global semantics preservation or verified effects.
+
+Pinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc references: src/Lean/Environment.lean (EffectiveImport, exported/private scope and imported module visibility), src/Lean/Util/CollectAxioms.lean (transitive cached axiom closure, opaque bodies and recursive-family termination), and the parser/deriving/tactic extension registries recorded in PSCV0_M2_LIVE_SURFACE_2026-10-16.md. Upstream Apache-2.0 attribution remains in THIRD_PARTY_NOTICES.md.
+
+The existing project source graph is retained. Version2 includes each public/private import edge in both JSON and its reproducible digest; source hashes already bound the original spelling. It remains a source-only audit.
+
+The portable module builder now retains its actual module interfaces, private identities, exposed own bodies, ordered class/instance/default registrations and imports at the point of construction. Successful native project compilation publishes a separate checked-project-profile receipt. Its digest binds the selected Standard surface, explicit target width, source identities/hashes, import visibility, exact interface declarations/types/bodies, class parameter metadata, instance order/defaults and reducibility. It reuses the existing preparation and kernel check; no extra elaboration, alternate export computation or authority token is introduced. Full executable body identity stays in the prepared admitted program and source hashes; public interface receipts are not a runtime-preservation proof.
+
+The selected surface v3 additionally binds the approved logical assumptions, actual availability of Std.WP.Triple/Gadget.assertGadget, authoring source pin, visibility/body-exposure policy, pure typed-IR effect scope, target-word and Wasm ABI policy. The existing strict declaration digest already binds every selected declaration/axiom and instance/default value. An explicit whole-selected-environment scan includes opaque inhabitants, refuses partial definitions and sorryAx dependencies, and complements kernel closure; it does not expand trusted assumptions. JSON lists actual registered axioms separately from the two approved logical foundations.
+
+The current selected Id/Option/Except, tactic and deriving dispatch tables are audited exhaustively. Unavailable WP/Gadget, external effects and C5 reconstruction remain explicit later-phase work. Both strict declaration hashes and the new surface digest must be independently measured before selection; existing module privacy/reexport/refusal, native kernel and performance gates remain required.

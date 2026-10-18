@@ -1,7 +1,11 @@
 import Ps.Foundation.Name
+import Ps.Foundation.Index
 import Ps.Core.Declaration
+import Ps.Core.Subst
+import Ps.Environment.Instances
 
 def psDeclarationName : PsDeclaration -> PsName
+  | .quotientDecl name _ _ _ => name
   | .axiomDecl name _ _ => name
   | .definitionDecl name _ _ _ => name
   | .theoremDecl name _ _ _ => name
@@ -12,6 +16,7 @@ def psDeclarationName : PsDeclaration -> PsName
   | .recursorDecl info => info.name
 
 def psDeclarationLevelParams : PsDeclaration -> List PsName
+  | .quotientDecl _ levelParams _ _ => levelParams
   | .axiomDecl _ levelParams _ => levelParams
   | .definitionDecl _ levelParams _ _ => levelParams
   | .theoremDecl _ levelParams _ _ => levelParams
@@ -22,6 +27,7 @@ def psDeclarationLevelParams : PsDeclaration -> List PsName
   | .recursorDecl info => info.levelParams
 
 def psDeclarationType : PsDeclaration -> PsExpr
+  | .quotientDecl _ _ type _ => type
   | .axiomDecl _ _ type => type
   | .definitionDecl _ _ type _ => type
   | .theoremDecl _ _ type _ => type
@@ -34,6 +40,28 @@ def psDeclarationType : PsDeclaration -> PsExpr
 def psDeclarationValue : PsDeclaration -> Option PsExpr
   | .definitionDecl _ _ _ value => Option.some value
   | _ => Option.none
+
+-- Reify precisely the target's raw lambda entry prefix. Following the pinned
+-- LCNF etaExpandN/etaIfUnderApplied discipline, never expand a computed function
+-- result: the point at which the target starts evaluating must stay unchanged.
+-- This is checked Core authoring, not a backend-specific alias exception.
+def psDeclarationAliasEntry : PsExpr → PsExpr → PsExpr → PsExpr
+  | .forallE name domain codomain binder, .lam _ _ body _, reference =>
+      .lam name domain
+        (psDeclarationAliasEntry codomain body
+          (.app (psExprLiftBVars 1 0 reference) (.bvar 0))) binder
+  | _, _, reference => reference
+
+-- Universe telescope, type and executable entry prefix travel together.
+-- The final body references its target; no implementation is copied.
+def psDeclarationAlias (name : PsName) (target : PsDeclaration) : PsDeclaration :=
+  let levels := psDeclarationLevelParams target
+  let type := psDeclarationType target
+  let reference := PsExpr.constE (psDeclarationName target) (levels.map PsLevel.param)
+  let value := match psDeclarationValue target with
+    | some body => psDeclarationAliasEntry type body reference
+    | none => reference
+  .definitionDecl name levels type value
 
 def psDeclarationInductiveInfo : PsDeclaration -> Option PsInductiveInfo
   | .inductiveDecl info => Option.some info
@@ -107,12 +135,75 @@ def psEnvironmentIndexSetWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> List
           PsEnvironmentIndex.branch (smaller left (Nat.div hash 2) declarations) right
         else PsEnvironmentIndex.branch left (smaller right (Nat.div hash 2) declarations)
 
+structure PsClassParameters where
+  outputs : List Nat := []
+  outputLevels : List Nat := []
+
+-- Search transparency is metadata, never part of checked Core identity.
+inductive PsReducibility where
+  | reducible | instanceReducible | implicitReducible | semireducible | irreducible
+
+def psReducibilityName : PsReducibility → String
+  | .reducible => "[reducible]"
+  | .instanceReducible => "[instance_reducible]"
+  | .implicitReducible => "[implicit_reducible]"
+  | .semireducible => "[semireducible]"
+  | .irreducible => "[irreducible]"
+
+inductive PsTransparency where
+  | reducible | instances | «implicit» | «default» | all
+
+def psTransparencyAllows (mode : PsTransparency) (status : PsReducibility) : Bool :=
+  match mode, status with
+  | .all, _ | _, .reducible => true
+  | .instances, .instanceReducible => true
+  | .«implicit», .instanceReducible | .«implicit», .implicitReducible => true
+  | .«default», .instanceReducible | .«default», .implicitReducible
+  | .«default», .semireducible => true
+  | _, _ => false
+
 structure PsEnvironment where
   declarations : List PsDeclaration
   index : PsEnvironmentIndex
+  classes : List PsName := []
+  classParameters : List (PsName × PsClassParameters) := []
+  instances : PsInstanceIndex := psInstanceIndexEmpty
+  -- Pure source-name routing analogous to Lean's 'export' command.
+  -- Aliases never create kernel declarations or new proof authority.
+  exportedAliases : List (PsName × PsName) := []
+  reducibility : PsBucketIndex (PsName × PsReducibility) := .empty
+  -- Lean NoncomputableAttr-style execution policy; invisible to kernel typing.
+  noncomputableIndex : PsBucketIndex PsName := .empty
+
+def psEnvironmentIsNoncomputable (environment : PsEnvironment) (name : PsName) : Bool :=
+  (psBucketFind 16 environment.noncomputableIndex (psEnvironmentNameHash name)).any (psNameEq name)
+
+def psEnvironmentMarkNoncomputable (environment : PsEnvironment) (name : PsName) : PsEnvironment :=
+  if psEnvironmentIsNoncomputable environment name then environment else
+    { environment with
+      noncomputableIndex := psBucketInsert 16 environment.noncomputableIndex (psEnvironmentNameHash name) name }
+
+def psEnvironmentReducibility? (environment : PsEnvironment) (name : PsName) :
+    Option PsReducibility :=
+  ((psBucketFind 16 environment.reducibility (psEnvironmentNameHash name)).find?
+    (fun entry => psNameEq entry.fst name)).map (·.snd)
+
+def psEnvironmentReducibility (environment : PsEnvironment) (name : PsName) : PsReducibility :=
+  (psEnvironmentReducibility? environment name).getD .semireducible
+
+def psEnvironmentCanUnfold (environment : PsEnvironment) (mode : PsTransparency)
+    (name : PsName) : Bool :=
+  match mode with
+  | .all => true
+  | _ => psTransparencyAllows mode (psEnvironmentReducibility environment name)
+
+def psEnvironmentSetReducibility (environment : PsEnvironment) (name : PsName)
+    (status : PsReducibility) : PsEnvironment :=
+  { environment with
+    reducibility := psBucketInsert 16 environment.reducibility (psEnvironmentNameHash name) (name, status) }
 
 def psEnvironmentEmpty : PsEnvironment :=
-  PsEnvironment.mk List.nil PsEnvironmentIndex.empty
+  { declarations := [], index := .empty }
 
 def psEnvironmentFindInListWorker
     (declarations : List PsDeclaration) :
@@ -191,33 +282,22 @@ def psEnvironmentIndexInsert (index : PsEnvironmentIndex) (declaration : PsDecla
   let bucket := psEnvironmentIndexFindWorker 16 index hash;
   psEnvironmentIndexSetWorker 16 index hash (List.cons declaration (psEnvironmentRemoveName name bucket))
 
+-- Persistent updates retain semantic registries alongside the declaration index.
+def psEnvironmentInsert (environment : PsEnvironment) (declaration : PsDeclaration) :
+    PsEnvironment :=
+  { environment with
+    declarations := declaration :: psEnvironmentRemoveName (psDeclarationName declaration) environment.declarations
+    index := psEnvironmentIndexInsert environment.index declaration }
+
 def psEnvironmentAddReplacingAxiom
-    (environment : PsEnvironment)
-    (declaration : PsDeclaration) : Option PsEnvironment :=
-  let name := psDeclarationName declaration;
-  match psEnvironmentFind environment name with
-  | none =>
-      Option.some
-        (PsEnvironment.mk
-          (List.cons declaration environment.declarations)
-          (psEnvironmentIndexInsert environment.index declaration))
-  | some existing =>
-      match existing with
-      | .axiomDecl _ _ _ =>
-          Option.some
-            (PsEnvironment.mk
-              (List.cons
-                declaration
-                (psEnvironmentRemoveName
-                  name
-                  environment.declarations))
-              (psEnvironmentIndexInsert environment.index declaration))
-      | _ =>
-          Option.none
+    (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=
+  match psEnvironmentFind environment (psDeclarationName declaration) with
+  | none => some (psEnvironmentInsert environment declaration)
+  | some (.axiomDecl _ _ _) => some (psEnvironmentInsert environment declaration)
+  | _ => none
 
 def psEnvironmentAdd (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=
-  if psEnvironmentContains environment (psDeclarationName declaration) then
-    Option.none
-  else
-    Option.some (PsEnvironment.mk (List.cons declaration environment.declarations)
-      (psEnvironmentIndexInsert environment.index declaration))
+  if psEnvironmentContains environment (psDeclarationName declaration) then none
+  else some { environment with
+    declarations := declaration :: environment.declarations
+    index := psEnvironmentIndexInsert environment.index declaration }

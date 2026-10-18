@@ -143,8 +143,40 @@ def psPrintProofScriptTermWithFuel
           PsSyntaxTerm -> Except PsSourcePrintError String :=
         psPrintProofScriptTermWithFuel remaining;
       match term with
+      | .hole _ => Except.ok "_"
+      | .omittedType _ => Except.error (.unsupportedSourceForm "omitted result annotation outside a declaration")
+      | .optionalType type value _ => do
+          let type ← smaller type
+          let value ← smaller value
+          return type ++ " := " ++ value
+      | .ascription value type _ => do
+          let value ← smaller value
+          let type ← smaller type
+          return "(" ++ value ++ " : " ++ type ++ ")"
+      | .operatorE kind _ spelling arguments _ => do
+          psPrintSyntaxOperator kind spelling (← arguments.mapM smaller)
+      | .call fn args _ => do
+          let head ← smaller fn
+          let arguments ← args.mapM fun (label, value) => do
+            let value ← smaller value
+            match label with
+            | none => pure value
+            | some name =>
+              let name ← psPrintSyntaxName name
+              pure (name ++ " := " ++ value)
+          let head := if psSyntaxTermSimpleForApplication fn then head else "(" ++ head ++ ")"
+          return head ++ "(" ++ psPrintJoin ", " arguments ++ ")"
+      | .doE items _ => do
+          let body ← psPrintDoItems true smaller 4096 items
+          return "do {\n  " ++ body.replace "\n" "\n  " ++ "\n}"
+      | .byE tactics _ _ => do
+          let body ← psPrintTactics smaller 4096 tactics
+          return "by {\n  " ++ body.replace "\n" "\n  " ++ "\n}"
+      | .sortE isType level _ => .ok (psPrintSyntaxSort isType level)
       | .reference name =>
           psPrintSyntaxName name
+      | .scientific text _ =>
+          Except.ok text
       | .natural text _ =>
           Except.ok text
       | .string text _ =>
@@ -179,6 +211,13 @@ def psPrintProofScriptTermWithFuel
           | Except.ok printedFields =>
               Except.ok
                 (psPrintProofScriptConcat3 "{ " (psPrintJoin ", " printedFields) " }")
+      | .recordUpdate source fields _ => do
+          let source ← smaller source
+          let fields ← fields.mapM fun (name, value) => do
+            let name ← psPrintSyntaxName name
+            let value ← smaller value
+            pure (name ++ " := " ++ value)
+          return "{ " ++ source ++ " with " ++ psPrintJoin ", " fields ++ " }"
       | .app fn args _ =>
           -- An empty argument list stays empty; Unit remains an explicit () argument.
           match smaller fn with
@@ -207,25 +246,9 @@ def psPrintProofScriptTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match
-                          smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintProofScriptConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintProofScriptMapBinders printBinder binders;
@@ -246,25 +269,9 @@ def psPrintProofScriptTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match
-                          smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintProofScriptConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintProofScriptMapBinders printBinder binders;
@@ -276,8 +283,8 @@ def psPrintProofScriptTermWithFuel
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
-                    (psPrintArrowChain printedBinders printedBody)
-      | .letE name type value body _ =>
+                    (psPrintProofScriptConcat4 "forall " (psPrintJoin " " printedBinders) ", " printedBody)
+      | .letE name type value body _ | .haveE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
           | Except.ok printedName =>
@@ -304,13 +311,13 @@ def psPrintProofScriptTermWithFuel
                       | Except.ok printedBody =>
                           Except.ok
                             (psPrintProofScriptConcat6
-                              "let "
+                              (match term with | .haveE .. => "have " | _ => "let ")
                               printedName
                               printedType
                               " := "
                               (psPrintProofScriptGroupedTerm value printedValue)
                               (psPrintProofScriptConcat2 "\n" printedBody))
-      | .ifE condition thenBranch elseBranch _ =>
+      | .ifE proofName condition thenBranch elseBranch _ =>
           match
               smaller condition with
           | Except.error error => Except.error error
@@ -326,52 +333,22 @@ def psPrintProofScriptTermWithFuel
                       Except.ok
                         (psPrintProofScriptConcat6
                           "if ("
-                          printedCondition
+                          ((match proofName with
+                            | none => ""
+                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
                           ") { "
                           printedThen
                           " } else { "
                           (psPrintProofScriptConcat2 printedElse " }"))
-      | .matchE scrutinee alternatives _ =>
-          match
-              smaller scrutinee with
-          | Except.error error => Except.error error
-          | Except.ok printedScrutinee =>
-              let printAlternative :
-                  Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
-                    Except PsSourcePrintError String :=
-                fun (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) =>
-                  match alternative with
-                  | Prod.mk pattern bodyAndSpan =>
-                      match bodyAndSpan with
-                      | Prod.mk body _ =>
-                          match psPrintPattern pattern with
-                          | Except.error error => Except.error error
-                          | Except.ok printedPattern =>
-                              match
-                                  smaller body with
-                              | Except.error error => Except.error error
-                              | Except.ok printedBody =>
-                                  Except.ok
-                                    (psPrintProofScriptConcat4
-                                      "  | "
-                                      printedPattern
-                                      " => "
-                                      printedBody);
-              let printedAlternativesResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintProofScriptMapAlternatives
-                  printAlternative
-                  alternatives;
-              match printedAlternativesResult with
-              | Except.error error => Except.error error
-              | Except.ok printedAlternatives =>
-                  Except.ok
-                    (psPrintProofScriptConcat5
-                      "match "
-                      (psPrintProofScriptGroupedTerm scrutinee printedScrutinee)
-                      " with {\n"
-                      (psPrintJoin "\n" printedAlternatives)
-                      "\n}")
+      | .matchMany scrutinees alternatives _ => do
+          let scrutinees ← scrutinees.mapM smaller
+          let discriminants := String.intercalate ", " scrutinees
+          let alternatives ← alternatives.mapM fun (patterns, body, _) => do
+            let patterns ← patterns.mapM psPrintPattern
+            let body ← smaller body
+            return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
+          if alternatives.isEmpty then return "nomatch " ++ discriminants
+          return "match " ++ discriminants ++ " with {\n" ++ String.intercalate "\n" alternatives ++ "\n}"
 
 def psPrintProofScriptTerm
     (term : PsSyntaxTerm) :
@@ -380,31 +357,19 @@ def psPrintProofScriptTerm
 
 def psPrintProofScriptBinder
     (binder : PsSyntaxBinderHead × PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  match binder with
-  | Prod.mk head type =>
-      match psPrintSyntaxName head.name with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          match psPrintProofScriptTerm type with
-          | Except.error error => Except.error error
-          | Except.ok printedType =>
-              let delimiters := psPrintBinderDelimiters head.kind;
-              Except.ok
-                (psPrintProofScriptConcat5
-                  delimiters.fst
-                  name
-                  " : "
-                  printedType
-                  delimiters.snd)
+    Except PsSourcePrintError String := do
+  let type ← psPrintProofScriptTerm binder.snd
+  psPrintTypedBinder binder.fst type
 
 -- Declaration and constructor headers share one explicit comma group.
 -- Non-explicit binders remain in their original prefix; never reorder a
 -- telescope to make an unsupported header printable.
 def psPrintProofScriptExplicitEntry
     (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  let head := Prod.fst binder;
+    Except PsSourcePrintError String := do
+  let head := Prod.fst binder
+  if !head.moreNames.isEmpty then
+    throw (.unsupportedSourceForm "native explicit group needs scope-preserving declaration lowering")
   match psPrintSyntaxName head.name with
   | Except.error error => Except.error error
   | Except.ok name =>
@@ -559,60 +524,73 @@ def psPrintProofScriptConstructor
       match psPrintProofScriptDeclarationBinders constructor.fields with
       | Except.error error => Except.error error
       | Except.ok suffix =>
-          Except.ok (psPrintProofScriptConcat3 "  | " name suffix)
+          match constructor.resultType with
+          | none => Except.ok (psPrintProofScriptConcat3 "  | " name suffix)
+          | some type =>
+            match psPrintProofScriptTerm type with
+            | .error error => .error error
+            | .ok type => .ok ("  | " ++ name ++ suffix ++ " : " ++ type)
+
+def psPrintProofScriptTermination (termination : PsSyntaxTermination) :
+    Except PsSourcePrintError String := do
+  let measure ← psPrintProofScriptTerm termination.measure
+  let proof ← match termination.decreasing with
+    | none => pure ""
+    | some (.byE tactics scope span) => do
+      let body ← psPrintProofScriptTerm (.byE tactics scope span)
+      pure ("\ndecreasing_by " ++ body)
+    | some _ => throw (.unsupportedSourceForm "decreasing_by requires a proof sequence")
+  return "\ntermination_by " ++ measure ++ proof
+
+def psPrintProofScriptLocalDefinition (declaration : PsSyntaxLocalDefinition) :
+    Except PsSourcePrintError String := do
+  let name ← psPrintSyntaxName declaration.name
+  let binders ← psPrintProofScriptDeclarationBinders declaration.binders
+  let annotation ← match declaration.type with
+    | none => pure ""
+    | some type => do
+      let printed ← psPrintProofScriptTerm type
+      pure (" : " ++ printed)
+  let value ← psPrintProofScriptTerm declaration.value
+  let suffix ← match declaration.recursion with
+    | none => pure ""
+    | some (.fixedpoint _) => pure "\npartial_fixpoint"
+    | some (.total termination) => psPrintProofScriptTermination termination
+  return "def " ++ name ++ binders ++ annotation ++ " := " ++ value ++ suffix
 
 def psPrintProofScriptDeclaration
     (declaration : PsSyntaxDeclaration) :
     Except PsSourcePrintError String :=
   match declaration with
-  | .definition name binders type value _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError String :=
-            psPrintProofScriptDeclarationBinders binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintProofScriptTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintProofScriptTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      Except.ok
-                        (psPrintProofScriptConcat6
-                          "def "
-                          printedName
-                          printedBinders
-                          " : "
-                          printedType
-                          (psPrintProofScriptConcat2 " := " printedValue))
-  | .partialDefinition name binders type value _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :
-              Except PsSourcePrintError String :=
-            psPrintProofScriptDeclarationBinders binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match psPrintProofScriptTerm type with
-              | Except.error error => Except.error error
-              | Except.ok printedType =>
-                  match psPrintProofScriptTerm value with
-                  | Except.error error => Except.error error
-                  | Except.ok printedValue =>
-                      Except.ok
-                        (psPrintProofScriptConcat6
-                          "partial def "
-                          printedName
-                          printedBinders
-                          " : "
-                          printedType
-                          (psPrintProofScriptConcat2 " := " printedValue))
+  | .whereDeclaration parent locals _ => do
+      let parent ← psPrintProofScriptDeclaration parent
+      let locals ← locals.mapM psPrintProofScriptLocalDefinition
+      if locals.isEmpty then throw (.unsupportedSourceForm "where requires local definitions")
+      return parent ++ "\nwhere {\n  " ++ (String.intercalate "\n" locals).replace "\n" "\n  " ++ "\n}"
+  | .definition name binders type value _
+  | .noncomputableDefinition name binders type value _
+  | .fixedpointDefinition name binders type value _
+  | .wellFoundedDefinition name binders type value _ _ => do
+      let suffix ← match declaration with
+        | .fixedpointDefinition .. => pure "\npartial_fixpoint"
+        | .wellFoundedDefinition _ _ _ _ termination _ => psPrintProofScriptTermination termination
+        | _ => pure ""
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintProofScriptDeclarationBinders binders
+      let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
+      let printedValue ← psPrintProofScriptTerm value
+      let declarationPrefix := match declaration with
+        | .noncomputableDefinition .. => "noncomputable def "
+        | _ => "def "
+      return declarationPrefix ++ printedName ++ printedBinders ++
+        annotation ++ " := " ++ printedValue ++ suffix
+  | .partialDefinition name binders type value _ => do
+      let printedName ← psPrintSyntaxName name
+      let printedBinders ← psPrintProofScriptDeclarationBinders binders
+      let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
+      let printedValue ← psPrintProofScriptTerm value
+      return "partial def " ++ printedName ++ printedBinders ++
+        annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
       match psPrintSyntaxName name with
       | Except.error error => Except.error error
@@ -677,32 +655,17 @@ def psPrintProofScriptDeclaration
                           (psPrintProofScriptConcat2
                             (psPrintJoin "\n" printedConstructors)
                             "\n}"))
-  | .structureDecl name params fields _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedParamsResult :
-              Except PsSourcePrintError String :=
-            psPrintProofScriptDeclarationBinders params;
-          match printedParamsResult with
-          | Except.error error => Except.error error
-          | Except.ok printedParams =>
-              let printedFieldsResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintProofScriptMapBinders
-                  psPrintProofScriptStructureField
-                  fields;
-              match printedFieldsResult with
-              | Except.error error => Except.error error
-              | Except.ok printedFields =>
-                  Except.ok
-                    (psPrintProofScriptConcat6
-                      "structure "
-                      printedName
-                      printedParams
-                      " where {\n"
-                      (psPrintJoin "\n" printedFields)
-                      "\n}")
+  | .structureDecl name params result fields _ => do
+      let name ← psPrintSyntaxName name
+      let params ← psPrintProofScriptDeclarationBinders params
+      let result ← match result with
+        | none => pure ""
+        | some type => do
+          let type ← psPrintProofScriptTerm type
+          pure (" : " ++ type)
+      let fields ← psPrintProofScriptMapBinders psPrintProofScriptStructureField fields
+      return "structure " ++ name ++ params ++ result ++
+        " where {\n" ++ psPrintJoin "\n" fields ++ "\n}"
 
 def psPrintProofScriptImport
     (sourceImport : PsSyntaxImport) :
@@ -778,3 +741,4 @@ def psPrintProofScriptModule
   match module with
   | PsSyntaxModule.mk sourceImports sourceDeclarations =>
       psPrintProofScriptModuleParts sourceImports sourceDeclarations
+

@@ -1,3 +1,17 @@
+## Current integration candidate — exact choice foundation and P0 Nonempty fallback
+
+The implementation now adds the exact pinned Lean 4.35.0 Classical.choice axiom and checked Classical.ofNonempty definition, and registers the existing Nonempty class. Nonempty/intro/rec are audited prerequisites, not duplicate new declarations. P0 first searches constructively for Inhabited, then uses independent Nonempty evidence only when required. The actual recursive source body remains separate from the opaque logical inhabitant.
+
+The selected foundation is exactly propext, Quot.sound and Classical.choice. No further axiom, source axiom, proof hole or runtime choice intrinsic is added. Standard is 3635 declarations, 42 classes, 359 ordinary instances and 13 defaults, with explicitly reviewed pins observed in preparation runs 39064740499 and 39065744204.
+
+This compiler/test revision is a candidate awaiting all five same-SHA gates. The new P0 source/body/native controls passed preparatory construction, official-kernel ordinary emission and exact verified refusals; its ten runtime comparisons must still execute in the focused gate. Last full acceptance remains e6b7f11750fdde6e1feacab86cfb32f2a82be8a5 and 960 comparisons. Do not claim 970 or new acceptance before completed logs.
+
+The separate preparation branch now contains commit 5dd8ed9701b215bf808ea1e058e382b3f639710a and cloud run 39067140365: repaired generated-equation privacy, larger WF state, indexed BEq, checked P1 runtime ownership, the retained Order audit and portable monotonicity proof probes. Those changes are not included in this foundation-only integration and remain independently under qualification. Continue them while allowing the healthy Native gate to finish.
+
+See [the current integration receipt](PSCV0_M3_CLASSICAL_P0_INTEGRATION_2026-10-18.md) and the existing six-exit M3+B ledger. M3+B remains open. Keep v7.2, pinned Lean, GitHub/cloud Linux only, fresh expected-HEAD/non-force updates and PR109 draft/open/unmerged on its original base. Historical sections below describe their original compiler identities and are superseded only where this current checkpoint says so.
+
+---
+
 # PSC0 — PSCV0 v7 adoption and source/self-host migration matrix
 
 > **Measured v7 M1 checkpoint:** Full generated first `.ps` module bridge run [38120695522](https://github.com/dwijayuda/pskernel/actions/runs/38120695522) at source `8603f7dcf6af6295335c4e11912a10aac86c85a4` passed Linux/Windows 38 bridge + 12 authoring/arrow tests per platform, independent RC4 correspondence proof and ten checked/runtime fixture functions. This replaces the earlier 900-second-timeout status *for that exact source only*. The later v7-only parser-policy changes require their own generated CI before they inherit any qualification; full PSCV0 v7 and full compiler fixed point remain unproved.

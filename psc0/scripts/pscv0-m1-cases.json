@@ -136,6 +136,12 @@
       "locals": [
         "app(List;Char)"
       ]
+    },
+    {
+      "name": "named call syntax retained",
+      "source": "const sample: Nat := f(x := seed)\n",
+      "result": "Nat",
+      "locals": []
     }
   ],
   "bad": [
@@ -175,19 +181,14 @@
       "error": "PSCV0-APP-02"
     },
     {
-      "name": "named call not selected",
-      "source": "const sample: Nat := f(x := seed)\n",
-      "error": "PSCV0-PARSE"
-    },
-    {
       "name": "mismatched annotation group",
       "source": "const sample: (List Char] := seed\n",
       "error": "PSCV0-PARSE"
     },
     {
-      "name": "retired grammar",
-      "source": "partial def sample: Nat := 0\n",
-      "error": "PSCV0-PARTIAL-EXCLUDED"
+      "name": "v7.2 partial const head is forbidden",
+      "source": "partial const sample: Nat := 0\n",
+      "error": "PSCV0-TERM-02-HEAD"
     }
   ]
 }

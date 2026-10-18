@@ -10,6 +10,11 @@ inductive PsWasmEncodeError where
   | unknownFunction (name : String)
   | unknownFunctionType (name : String)
   | unknownStructure (name : String)
+  deriving Repr
+
+def psWasmEncodeMany {α : Type} (encode : α → Except PsWasmEncodeError (List UInt8))
+    (values : List α) : Except PsWasmEncodeError (List UInt8) := do
+  return (← values.mapM encode).flatten
 
 def psWasmByte (value : Nat) : UInt8 :=
   UInt8.ofNat value
@@ -260,7 +265,7 @@ def psWasmEncodeValueTypes
     (arrays : List PsWasmArrayType)
     (types : List PsWasmValueType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeValueType structures arrays)
     types
 
@@ -331,7 +336,7 @@ def psWasmEncodeNamedFunctionTypes
     (arrays : List PsWasmArrayType)
     (functionTypesToEncode : List PsWasmFunctionType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeNamedFunctionType structures arrays)
     functionTypesToEncode
 
@@ -354,7 +359,7 @@ def psWasmEncodeFunctionTypes
     (arrays : List PsWasmArrayType)
     (functionsToEncode : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeFunctionType structures arrays)
     functionsToEncode
 
@@ -393,6 +398,10 @@ def psWasmEncodeInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
   match instruction with
+  | .memory operation => pure (psWasmMemoryInstruction operation).bytes
+  | .globalGet index => pure ([0x23] ++ psWasmEncodeUleb index)
+  | .globalSet index => pure ([0x24] ++ psWasmEncodeUleb index)
+  | .word operation => pure (psWasmWordInstruction operation).bytes
   | .localGet index =>
       Except.ok
         (List.cons
@@ -668,57 +677,33 @@ def psWasmEncodeInstructions
     (functions : List PsWasmFunction)
     (instructions : List PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeInstruction structures arrays functionTypes functions)
     instructions
 
-def psWasmEncodeLocalDeclaration
-    (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType)
-    (type : PsWasmValueType) :
-    Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueType structures arrays type with
-  | Except.error error => Except.error error
-  | Except.ok encoded => Except.ok (List.cons (psWasmByte 1) encoded)
+-- Adjacent equal local types form one declaration run. Indices and names keep
+-- their original order, while the binary uses the compact canonical grouping.
+def psWasmEncodeLocalDeclarations (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) (types : List PsWasmValueType) :
+    Except PsWasmEncodeError (List UInt8) := do
+  let encoded ← types.mapM (psWasmEncodeValueType structures arrays)
+  let reversed := encoded.foldl (fun (groups : List (Nat × List UInt8)) type =>
+    match groups with
+    | (count, previous) :: rest =>
+      if previous == type then (count + 1, previous) :: rest else (1, type) :: groups
+    | [] => [(1, type)]) []
+  let groups := reversed.reverse
+  return psWasmEncodeUleb groups.length ++
+    groups.flatMap (fun (count, type) => psWasmEncodeUleb count ++ type)
 
-def psWasmEncodeLocalDeclarations
-    (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType)
-    (types : List PsWasmValueType) :
-    Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept (psWasmEncodeLocalDeclaration structures arrays) types
-
-def psWasmEncodeFunctionBody
-    (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType)
-    (functionTypes : List PsWasmFunctionType)
-    (functions : List PsWasmFunction)
-    (function : PsWasmFunction) :
-    Except PsWasmEncodeError (List UInt8) :=
-  match
-      psWasmEncodeLocalDeclarations
-        structures
-        arrays
-        function.locals with
-  | Except.error error => Except.error error
-  | Except.ok encodedLocals =>
-      match psWasmEncodeInstructions
-          structures
-          arrays
-          functionTypes
-          functions
-          function.body with
-      | Except.error error => Except.error error
-      | Except.ok instructions =>
-          let body :=
-            psListAppend
-              (psWasmEncodeUleb (psListLength function.locals))
-              (psListAppend
-                encodedLocals
-                (psListAppend
-                  instructions
-                  [psWasmByte 11]));
-          Except.ok (psListAppend (psWasmEncodeUleb (psListLength body)) body)
+def psWasmEncodeFunctionBody (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) (functionTypes : List PsWasmFunctionType)
+    (functions : List PsWasmFunction) (function : PsWasmFunction) :
+    Except PsWasmEncodeError (List UInt8) := do
+  let locals ← psWasmEncodeLocalDeclarations structures arrays function.locals
+  let instructions ← psWasmEncodeInstructions structures arrays functionTypes functions function.body
+  let body := locals ++ instructions ++ [11]
+  return psWasmEncodeUleb body.length ++ body
 
 def psWasmEncodeFunctionBodies
     (structures : List PsWasmStructType)
@@ -727,7 +712,7 @@ def psWasmEncodeFunctionBodies
     (functions : List PsWasmFunction)
     (functionsToEncode : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeFunctionBody structures arrays functionTypes functions)
     functionsToEncode
 
@@ -757,7 +742,7 @@ def psWasmEncodeStructFields
     (arrays : List PsWasmArrayType)
     (fields : List PsWasmStructField) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeStructField structures arrays)
     fields
 
@@ -805,7 +790,7 @@ def psWasmEncodeStructTypes
     (arrays : List PsWasmArrayType)
     (structTypes : List PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeStructType structures arrays)
     structTypes
 
@@ -832,7 +817,7 @@ def psWasmEncodeArrayTypes
     (arrays : List PsWasmArrayType)
     (arrayTypes : List PsWasmArrayType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeArrayType structures arrays)
     arrayTypes
 
@@ -930,7 +915,7 @@ def psWasmEncodeFunctionRefIndices
     (functions : List PsWasmFunction)
     (names : List String) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept (psWasmEncodeFunctionRefIndex functions) names
+  psWasmEncodeMany (psWasmEncodeFunctionRefIndex functions) names
 
 def psWasmEncodeDeclarativeFunctionRefs
     (functions : List PsWasmFunction)
@@ -971,7 +956,7 @@ def psWasmEncodeExports
     (functions : List PsWasmFunction)
     (exports : List (String × String)) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept (psWasmEncodeExport functions) exports
+  psWasmEncodeMany (psWasmEncodeExport functions) exports
 
 def psWasmEncodeSection
     (sectionId : Nat)
@@ -982,125 +967,43 @@ def psWasmEncodeSection
       (psWasmEncodeUleb (psListLength payload))
       payload)
 
-def psWasmEncodeTypeSectionPayload
-    (encodedTypes : List UInt8)
-    (typeCount : Nat) : List UInt8 :=
-  if Nat.beq typeCount 0 then
-    psWasmEncodeVector List.nil 0
-  else
-    let recursiveGroup : List UInt8 :=
-      psListAppend
-        [psWasmByte 78]
-        (psWasmEncodeVector encodedTypes typeCount);
-    psWasmEncodeVector recursiveGroup 1
+-- Aggregate types may refer forward to each other. Function signatures only
+-- refer to those preceding aggregates and are independent singleton groups.
+-- Recursive-group identity is semantic: grouping unrelated scalar signatures
+-- with GC types prevents Canonical ABI lifts from matching their function type.
+def psWasmEncodeTypeSectionPayload (aggregateBytes : List UInt8)
+    (aggregateCount : Nat) (signatureBytes : List UInt8) (signatureCount : Nat) : List UInt8 :=
+  let aggregates := if aggregateCount == 0 then [] else
+    [psWasmByte 78] ++ psWasmEncodeVector aggregateBytes aggregateCount
+  psWasmEncodeVector (aggregates ++ signatureBytes)
+    (signatureCount + if aggregateCount == 0 then 0 else 1)
 
-def psWasmEncodeModule
-    (module : PsWasmModule) :
-    Except PsWasmEncodeError (List UInt8) :=
-  match
-      psWasmEncodeStructTypes
-        module.structures
-        module.arrays
-        module.structures with
-  | Except.error error => Except.error error
-  | Except.ok encodedStructTypes =>
-      match
-          psWasmEncodeArrayTypes
-            module.structures
-            module.arrays
-            module.arrays with
-      | Except.error error => Except.error error
-      | Except.ok encodedArrayTypes =>
-          match
-              psWasmEncodeNamedFunctionTypes
-                module.structures
-                module.arrays
-                module.functionTypes with
-          | Except.error error => Except.error error
-          | Except.ok encodedNamedFunctionTypes =>
-              match
-                  psWasmEncodeFunctionTypes
-                    module.structures
-                    module.arrays
-                    module.functions with
-              | Except.error error => Except.error error
-              | Except.ok encodedFunctionTypes =>
-                  match
-                      psWasmEncodeFunctionTypeIndices
-                        module.structures
-                        module.arrays
-                        module.functionTypes
-                        module.functions with
-                  | Except.error error => Except.error error
-                  | Except.ok encodedFunctionTypeIndices =>
-                      match
-                          psWasmEncodeExports
-                            module.functions
-                            module.exports with
-                      | Except.error error => Except.error error
-                      | Except.ok encodedExports =>
-                          match
-                              psWasmEncodeDeclarativeFunctionRefs
-                                module.functions
-                                module.functionRefs with
-                          | Except.error error => Except.error error
-                          | Except.ok encodedFunctionRefs =>
-                              match
-                                  psWasmEncodeFunctionBodies
-                                    module.structures
-                                    module.arrays
-                                    module.functionTypes
-                                    module.functions
-                                    module.functions with
-                              | Except.error error => Except.error error
-                              | Except.ok encodedBodies =>
-                                  let typeCount : Nat :=
-                                    Nat.add
-                                      (Nat.add
-                                        (Nat.add
-                                          (psListLength module.structures)
-                                          (psListLength module.arrays))
-                                        (psListLength module.functionTypes))
-                                      (psListLength module.functions);
-                                  let encodedTypes : List UInt8 :=
-                                    psListAppend
-                                      encodedStructTypes
-                                      (psListAppend
-                                        encodedArrayTypes
-                                        (psListAppend
-                                          encodedNamedFunctionTypes
-                                          encodedFunctionTypes));
-                                  let typePayload : List UInt8 :=
-                                    psWasmEncodeTypeSectionPayload
-                                      encodedTypes
-                                      typeCount;
-                                  let functionPayload :=
-                                    psWasmEncodeVector
-                                      encodedFunctionTypeIndices
-                                      (psListLength module.functions);
-                                  let exportPayload :=
-                                    psWasmEncodeVector
-                                      encodedExports
-                                      (psListLength module.exports);
-                                  let elementSection : List UInt8 :=
-                                    match module.functionRefs with
-                                    | [] => []
-                                    | _ =>
-                                        psWasmEncodeSection
-                                          9
-                                          encodedFunctionRefs;
-                                  let codePayload :=
-                                    psWasmEncodeVector
-                                      encodedBodies
-                                      (psListLength module.functions);
-                                  Except.ok
-                                    (psListAppend [
-                                      psWasmByte 0,
-                                      psWasmByte 97,
-                                      psWasmByte 115,
-                                      psWasmByte 109,
-                                      psWasmByte 1,
-                                      psWasmByte 0,
-                                      psWasmByte 0,
-                                      psWasmByte 0
-                                    ] (psListAppend (psWasmEncodeSection 1 typePayload) (psListAppend (psWasmEncodeSection 3 functionPayload) (psListAppend (psWasmEncodeSection 7 exportPayload) (psListAppend elementSection (psWasmEncodeSection 10 codePayload))))))
+def psWasmEncodeModule (module : PsWasmModule) :
+    Except PsWasmEncodeError (List UInt8) := do
+  let structures ← psWasmEncodeStructTypes module.structures module.arrays module.structures
+  let arrays ← psWasmEncodeArrayTypes module.structures module.arrays module.arrays
+  let named ← psWasmEncodeNamedFunctionTypes module.structures module.arrays module.functionTypes
+  let signatures ← psWasmEncodeFunctionTypes module.structures module.arrays module.functions
+  let indices ← psWasmEncodeFunctionTypeIndices module.structures module.arrays
+    module.functionTypes module.functions
+  let functionExports ← psWasmEncodeExports module.functions module.exports
+  let exports := functionExports ++ (if module.abiMemory then psWasmEncodeName "memory" ++ [2, 0] else [])
+  let memorySection := if module.abiMemory then psWasmEncodeSection 5
+    ([1, 1, 1] ++ psWasmEncodeUleb 32768) else []
+  let globals := module.abiGlobals.flatMap fun (_, value) =>
+    [0x7f, 1, 0x41] ++ psWasmEncodeI32Constant value ++ [0x0b]
+  let globalSection := if module.abiGlobals.isEmpty then [] else
+    psWasmEncodeSection 6 (psWasmEncodeVector globals module.abiGlobals.length)
+  let refs ← psWasmEncodeDeclarativeFunctionRefs module.functions module.functionRefs
+  let bodies ← psWasmEncodeFunctionBodies module.structures module.arrays
+    module.functionTypes module.functions module.functions
+  let types := psWasmEncodeTypeSectionPayload (structures ++ arrays)
+    (module.structures.length + module.arrays.length) (named ++ signatures)
+    (module.functionTypes.length + module.functions.length)
+  let elementSection := if module.functionRefs.isEmpty then [] else psWasmEncodeSection 9 refs
+  return [0, 97, 115, 109, 1, 0, 0, 0] ++
+    psWasmEncodeSection 1 types ++
+    psWasmEncodeSection 3 (psWasmEncodeVector indices module.functions.length) ++
+    memorySection ++ globalSection ++
+    psWasmEncodeSection 7 (psWasmEncodeVector exports (module.exports.length + if module.abiMemory then 1 else 0)) ++ elementSection ++
+    psWasmEncodeSection 10 (psWasmEncodeVector bodies module.functions.length)

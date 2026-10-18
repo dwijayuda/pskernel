@@ -1,0 +1,375 @@
+# Lean-derived selected Standard definitions
+
+Lean 4 is licensed under the Apache License 2.0; a copy is included in
+[licenses/LEAN-APACHE-2.0.txt](licenses/LEAN-APACHE-2.0.txt).
+
+The selected character/string quoting algorithms in
+packages/environment/src/Ps/Environment/StandardString.lean adapt
+src/Init/Data/Repr.lean at the project pin:
+Copyright (c) 2016 Microsoft Corporation. All rights reserved.
+Author: Leonardo de Moura.
+
+Modifications: represent the algorithms as portable PsExpr declarations;
+replace native String.Internal.foldl with a total Nat.rec worker whose traversal
+bound is derived from the input UTF-8 byte size; retain exact quoting behavior.
+This is an adaptation, not unmodified upstream source.
+
+The Int.toNat logical model in
+packages/environment/src/Ps/Environment/StandardInt.lean follows
+src/Init/Data/Int/Basic.lean:
+Copyright (c) 2016 Jeremy Avigad. All rights reserved.
+Authors: Jeremy Avigad, Leonardo de Moura.
+Modifications: construct the inductive, constructors, recursor and definition
+as portable Core terms; keep the checked logical model separate from typed
+backend runtime implementations.
+
+The Std.Format algebra and pure layout implementation in StandardFormat*.lean
+adapt src/Init/Data/Format/Basic.lean at the same pinned version:
+Copyright (c) 2018 Microsoft Corporation. All rights reserved.
+Author: Leonardo de Moura.
+Modifications: checked Core declaration builders, explicit Unicode prefix scan,
+pure work-state records, and total input-weight-bounded transitions in place of
+private partial worklists. Pure rendering ignores tags as upstream does; this
+does not implement or substitute for effectful MonadPrettyFormat callbacks.
+
+ToFormat/Repr classes, combinators and formatting rules in StandardFormatClass,
+StandardToFormat, StandardRepr and Elab/DerivingRepr adapt Lean 4.35.0
+Init/Data/Format/{Basic,Instances}.lean, Init/Data/Repr.lean,
+Init/Data/Int/Repr.lean and Lean/Elab/Deriving/Repr.lean.
+Copyright (c) Microsoft Corporation; author Leonardo de Moura. Apache-2.0.
+Modifications: portable checked Core definitions, shared dictionary registration,
+parameter/universe-aware deriving without host elaboration, and direct projections
+for structures. Recursive/indexed deriving remains in M3+B.
+List declarations and recursor-based algorithms follow Init/Prelude.lean and
+Init/Data/List/Basic.lean, with explicit independent element/result universes.
+
+StandardFormatString and StandardReprCollections adapt the same Format/Repr
+sources and Init/Data/Array/Basic.lean. Modifications: single total UTF-8 scan,
+checked collection projections and existing Array conversion adapters.
+
+The host-only StandardClosure dependency audit follows the traversal invariant
+of Lean/Util/CollectAxioms.lean (Copyright (c) 2020 Microsoft Corporation;
+author Leonardo de Moura; Apache-2.0). Modifications: explicit native worklist,
+recursor-rule/mutual-family closure and portable-name collision reporting.
+It exports no declarations and changes no compiler trust boundary.
+
+The Nat.add/sub/mul/beq logical models in StandardNatOrder follow the constructor
+equations in Lean 4.35.0 Init/Prelude.lean (Copyright (c) Microsoft Corporation,
+Apache-2.0). Modifications: compact portable Core recursor construction using
+existing logical builders, while retaining separate native runtime intrinsics.
+
+The checked `ite` Core model in `Ps.Environment.Decision` adapts the
+nondependent conditional wrapper from Lean 4.35.0 `src/Init/Prelude.lean`
+(commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`), copyright 2020 Microsoft
+Corporation, authors Leonardo de Moura and Mario Carneiro, Apache-2.0.
+
+`Ps.Environment.StandardScalarArithmeticData` contains modified, converted
+closed declaration data from Lean 4.35.0 `src/Init/Prelude.lean` at the same
+commit. Copyright (c) 2020 Microsoft Corporation; authors Leonardo de Moura and
+Mario Carneiro; Apache-2.0. `Ps.Host.StandardExport` removes expression metadata,
+records the dependency cut and converts the checked declarations to portable
+Core; proof bodies and universe/binder semantics are retained. The existing
+Apache-2.0 license and attribution apply to this asset.
+
+### Checked unsigned Standard Core data
+
+StandardUnsignedFoundationData.lean is generated from Lean 4.35.0 commit
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Init/Prelude.lean and
+Init/Data/UInt/BasicAux.lean. Copyright (c) 2018, 2020 Microsoft Corporation;
+authors Leonardo de Moura and Mario Carneiro; Apache-2.0. Conversion removes
+expression metadata and records the dependency boundary; kernel checking
+retains the original definitions, proof bodies and universe/binder semantics.
+
+### Hashable and runtime hashing
+
+StandardHashFoundationData is converted closed Core from Lean 4.35.0
+Init/Prelude.lean (2020 Microsoft Corporation; Leonardo de Moura and Mario
+Carneiro; Apache-2.0), preserving opaque values as opaque. StandardHashable
+adapts Init/Data/Hashable.lean (2016 Microsoft; Leonardo de Moura).
+DerivingHashable adapts Lean/Elab/Deriving/Hashable.lean (2021 Microsoft;
+Dany Fabian), using the shared Core telescope/eliminator infrastructure.
+
+BackendEcma/Hash, BackendWasm/Hash and the Rust runtime hashing routines adapt
+src/runtime/hash.h and hash.cpp (2013 Microsoft; Leonardo de Moura;
+Apache-2.0), whose string algorithm credits MurmurHash2 by Austin Appleby.
+Modifications: explicit fixed-width arithmetic and little-endian UTF-8 byte
+decoding, GC byte arrays in Wasm and target-native loops. The original
+runtime's host-endian memcpy is deliberately replaced with canonical little
+endian; conformance is qualified against the pinned little-endian Linux host.
+
+### Logical recursion and quotient foundation
+
+Meta/Iota's recursive-field telescope and quotient reduction adapt the
+algorithms in Lean 4.35.0 `src/kernel/inductive.cpp`, `src/kernel/quot.cpp`
+and `src/Lean/Meta/WHNF.lean` at commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Copyright (c) 2018, 2019 Microsoft Corporation; author Leonardo de Moura;
+Apache-2.0. Modifications: portable Core, capture-avoiding bound-variable
+construction, explicit registered quotient descriptors and bounded reduction.
+The official Lean provider regenerates quotient metadata and checks signatures.
+
+### Product, collection, scalar-display and source-sharing updates
+
+StandardProduct follows the two-universe Prod foundation in Init/Prelude.lean
+(2020 Microsoft Corporation; Leonardo de Moura, Mario Carneiro). StandardList
+follows the native foldl telescope and reverseAux/reverse equations from
+Init/Prelude.lean and Init/Data/List/Basic.lean (2020 and 2016 Microsoft
+Corporation respectively; Leonardo de Moura, with Mario Carneiro for Prelude). StandardEquality preserves the Prelude
+Bool.beq reduction orientation. Modified: portable Core declarations, checked
+recursors and explicit dictionary construction.
+
+Unsigned Inhabited/ToString/Repr/ReprAtom dictionaries adapt Init/Prelude.lean,
+Init/Data/ToString/Basic.lean and Init/Data/Repr.lean; copyright Microsoft
+Corporation, authors Leonardo de Moura and Mario Carneiro, Apache-2.0.
+Modified: explicit portable dictionary registration over the checked model.
+
+The host-only StandardSource design follows the interning architecture of
+Lean/Util/ShareCommon.lean and Init/ShareCommon.lean (2020 Microsoft Corporation;
+Leonardo de Moura, Mario Carneiro). Its safe exact structural-key implementation
+does not copy the unsafe object/pointer primitives. It emits shared ordinary
+Lean constants without changing portable declaration semantics.
+
+### Checked unsigned operation proof closure
+
+StandardUnsignedOperationsData is converted from pinned Lean 4.35.0 commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Sources include Init/Prelude
+(2020), Init/Core (2014), Init/Data/UInt/Basic and BasicAux (2018),
+Init/Data/Nat/Div/Basic (2016), Init/Data/Nat/Bitwise/Basic (2019),
+Init/Data/Nat/Internal/Linear (2022), and Init/Data/List/Basic (2016):
+Microsoft Corporation; Leonardo de Moura, with Mario Carneiro for Prelude.
+Init/Data/BitVec/Basic and BasicAux: 2024 Lean FRO, LLC; Joe Hendrix,
+Wojciech Nawrocki, Leonardo de Moura, Mario Carneiro, Alex Keizer, Harun Khan,
+Abdalrhman M. Mohamed, and (Basic) Siddharth Bhat. Apache-2.0 applies throughout.
+The existing LEAN-APACHE-2.0.txt supplies the license.
+Modifications: remove expression metadata, preserve exact closed proof bodies,
+record the dependency cut, and emit structurally shared portable Core constants.
+The explicitly approved propext and Quot.sound remain audited assumptions;
+quotient descriptors are regenerated by the official kernel.
+
+### F0 native Float/Float32 identity candidate
+
+Native-only logical identity export of the Float/Float32 wrapper and model closure follows pinned Lean 4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, especially `src/Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean`, `src/Init/Data/Float/Model/Format/{Basic,Valid}.lean`, `src/Lean/Expr.lean`, and `src/Lean/Elab/Structure.lean`. Copyright (c) Microsoft Corporation and Lean FRO, LLC; Apache-2.0. Relevant Format model upstream author: Julia M. Himmel (2026). Modifications: a selected dependency cut, metadata removal and standard Core conversion with exact checked proof/constructor/recursor contents, plus fully-applied elaborator `autoParam` normalization with original-kernel definitional-equality certificates. The exported candidate is **not** a runtime implementation and is **not** yet a selected Standard asset.
+
+### Signed machine-integer logical identities — reviewed candidate
+
+StandardSignedIdentityData is generated from the pinned Lean 4.35.0
+`src/Init/Data/SInt/Basic.lean`, copyright (c) Lean FRO, LLC;
+author Henrik Böving; Apache-2.0. The native-only checked exporter preserves
+complete constructor/recursor metadata for `Int8/Int16/Int32/Int64/ISize`,
+replaces exactly five prior type axioms without inventing assumptions,
+and compares each iota rule to the kernel-generated reference. It is a
+logical Standard asset, NOT an executable signed runtime or ABI guarantee.
+
+### Signed arithmetic and Float bit-read checked Core assets
+
+`StandardSignedOperationsData.lean` reifies the 62 kernel-checked
+closed BitVec/signed operations from pinned Lean 4.35.0
+`Init/Data/SInt/Basic.lean`, Henrik Böving, and
+`Init/Data/BitVec/Basic.lean`, Lean FRO, LLC, Apache-2.0.
+`StandardFloatToBitsData.lean` reifies six checked Float/Float32
+bit projections from pinned `Init/Data/Float/{Float,Float32,Model/Float,Model/Float32}.lean`,
+copyright Microsoft Corporation and Lean FRO, LLC, Apache-2.0.
+The exports retain original checked definition/proof bodies, exact
+reducibility and immutable dependency cuts; each is independently
+admitted through official kernel replay. Neither confers runtime IR/ABI
+capabilities or semantic-preservation proof.
+
+### Fixed-width signed class dictionaries
+
+The selected `StandardSignedScalar.lean` module creates generic
+OfNat/Neg/HAdd/HSub/HMul/HDiv/HMod/BEq/Inhabited dictionaries using
+pinned Lean 4.35.0 `Init/Prelude.lean` and `Init/Data/SInt/Basic.lean`
+(Henrik Böving), copyright Lean FRO, LLC, Apache-2.0. Implemented as
+portable checked Core over previously admitted signed methods; no
+upstream proof text is replaced and no new foundation axiom is added.
+
+### Signed-to-Int constructive conversion
+
+`StandardSignedToInt.lean` uses pinned Lean 4.35.0
+`Init/Data/SInt/Basic.lean` and `Init/Data/BitVec/Basic.lean`
+(copyright Lean FRO, LLC; Apache-2.0). Four independent native Lean
+`rfl` certificates establish exact model equivalence. The new
+source module reifies the same constructive formula in checked Core.
+No proprietary code, axiom, unknown term or unverified semantic
+assumption is introduced.
+
+
+## Selected partial fixpoints and monotonicity (Lean 4.35.0)
+
+The portable proof-producing algorithms in `Ps.Elab.PartialFixpoint` and
+`Ps.Elab.Monotonicity` adapt Lean's
+`src/Lean/Elab/PreDefinition/PartialFixpoint/{Main,Eqns}.lean` and
+`src/Lean/Elab/Tactic/Monotonicity.lean` at commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Copyright (c) 2024 Lean FRO, LLC. All rights reserved. Author: Joachim Breitner.
+Released under Apache License 2.0, subject to the upstream notice above.
+The retained `StandardPartialFixpointData.lean` asset carries the pinned
+`Init.Internal.Order.Basic` declaration bodies and its own attribution.
+
+
+### N-ary dependent argument packing
+
+The portable arity-directed packing, currying and dependent elimination algorithms
+in Ps.Meta.WellFounded adapt src/Lean/Meta/ArgsPacker.lean at pinned Lean4.35.0
+commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2024 Lean FRO, LLC. All rights reserved. Author: Joachim Breitner.
+Released under Apache License2.0; see the retained LEAN-APACHE-2.0.txt.
+Modifications: explicit portable Core/local-context operations, structural list
+recursion, checked construction and source-entry validation, selected nonempty
+WF telescopes, and explicit kernel-checked callback extensionality.
+
+### Shared WF application ownership
+
+The application/recursive-argument design follows pinned Lean4.35.0
+src/Lean/Elab/App.lean and src/Lean/Elab/PreDefinition/WF/PackMutual.lean
+at eb6cafb7290e8bd5f2937522d8d804f58f02bafc, under Apache-2.0.
+The portable implementation adds bounded typed argument capture to its existing
+application owner; it does not copy Lean's host elaborator or temporary axiom path.
+Retain the upstream notices and LEAN-APACHE-2.0.txt above.
+
+### Arity-owned component packing and retained PSum foundation
+
+Ps.Meta.MutualPacking adapts the Mutual algorithms of
+src/Lean/Meta/ArgsPacker.lean at Lean4.35.0
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2024 Lean FRO, LLC. Author: Joachim Breitner. Apache-2.0.
+Modifications: portable Core and explicit contexts, total structural traversal,
+checked universe compatibility, manifest constructor/arity validation.
+
+StandardPSumData.lean retains exact kernel-checked declarations generated
+from pinned Init/Core.lean. Copyright (c) 2014 Microsoft Corporation.
+Author: Leonardo de Moura. Apache-2.0; see LEAN-APACHE-2.0.txt.
+The standalone five-declaration asset has no assumptions; its retention
+does not select it into the Standard environment or authorize source mutual WF.
+
+### Fixed-parameter correspondence
+
+Ps.Elab.FixedParameters adapts src/Lean/Elab/PreDefinition/FixedParams.lean
+at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2025 Lean FRO, LLC. Author: Joachim Breitner. Apache-2.0.
+Modifications: explicit validated list indices, finite monotone closure with
+a derived structural bound, and portable checked-source observations.
+Native Info is imported only by the independent test oracle.
+
+### Heterogeneous indexed elimination and branch-scoped WF callbacks
+
+Ps.Elab.Match/Equality adapt the constraint and substitution design of
+src/Lean/Meta/Tactic/Cases.lean, UnifyEq.lean and Subst.lean at pinned Lean4.35.0
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2020-2022 Microsoft Corporation. Author: Leonardo de Moura.
+Apache-2.0; retain LEAN-APACHE-2.0.txt and upstream notices.
+Modifications: explicit portable Core, structural constraint traversal,
+existing dependent-context reversion, and checked Eq/HEq proof construction.
+
+Ps.Elab.WellFounded/Context use the branch-local callback invariant of
+src/Lean/Elab/PreDefinition/WF/Fix.lean at the same pin.
+Copyright (c) 2021 Microsoft Corporation. Author: Leonardo de Moura.
+Apache-2.0. The portable implementation re-elaborates retained source under
+typed local callbacks; it does not copy host temporary-axiom admission.
+
+### Nullary predicate recursor computation
+
+Ps.Meta.Iota adapts init_K_target/to_cnstr_when_K from pinned Lean4.35.0
+src/kernel/inductive.cpp and inductive.h, and Meta/WHNF.lean.
+Copyright (c) 2018 Microsoft Corporation. Author: Leonardo de Moura.
+Apache-2.0; retain LEAN-APACHE-2.0.txt. Modifications: derive eligibility
+from existing registered portable elimination metadata; use the typed recursor
+spine and read-only index comparison; refuse unresolved indices; retain ordinary
+iota validation. No new axiom or unchecked proof-cast rule is introduced.
+
+### Typed mutual fixedpoint construction
+
+Ps.Meta.MutualWellFounded and the nondependent measure/type projection helpers
+adapt ArgsPacker.Mutual (Copyright2024 Lean FRO, LLC; Joachim Breitner) and
+PreDefinition/WF/{PackMutual,Rel,Fix} (Copyright2021 Microsoft Corporation;
+Leonardo de Moura), at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Apache-2.0, with retained LEAN-APACHE-2.0.txt and upstream notices. Modifications:
+portable explicit contexts, structural traversal, complete per-member validation,
+and functional signature inference from the selected checked fixpoint.
+
+### Fixed-parameter telescope specialization
+
+Ps.Elab.RecursionParameters adapts FixedParamPerm.forallTelescope,
+instantiateForall and buildArgs in src/Lean/Elab/PreDefinition/FixedParams.lean
+at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2025 Lean FRO, LLC. Author: Joachim Breitner. Apache-2.0.
+Modifications: explicit portable local contexts, checked complete permutations,
+fresh common identities, actual dependent-domain checks and structural traversal.
+The native implementation and tests remain the reference; no host MetaM enters
+the portable compiler. Retain LEAN-APACHE-2.0.txt and upstream notices.
+
+### Retained typed call observations
+
+Ps.Elab.RecursionParameters and PreDefinition adapt getFixedParamsInfo in
+src/Lean/Elab/PreDefinition/FixedParams.lean at Lean4.35.0
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Copyright (c)2025 Lean FRO, LLC.
+Author: Joachim Breitner. Apache-2.0. Modifications: explicit portable local
+contexts, source-arity-owned application observations, structural bounded traversal
+and rechecking retained Core without host temporary axioms or IO references.
+Retain LEAN-APACHE-2.0.txt and upstream notices.
+
+### Native v7.2 program input adapter
+
+Ps.Syntax.Lean.Program follows the architecture and selected grammar in
+Lean4.35.0 Parser/{Command,Module,Term}.lean and Elab/Frontend.lean at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Copyright (c) 2019 Microsoft
+Corporation; upstream authors include Leonardo de Moura. Apache-2.0.
+Modifications: owned portable command AST, shared source-language scope and
+binder readers, bounded native grammar, explicit source-kind routing and no
+host parser/elaborator dependency. Retain licenses/LEAN-APACHE-2.0.txt.
+
+### Ordered binder views and native term grammar
+
+Ps.Elab.Scope/Binders and Ps.Syntax.Lean.Term adapt the selected architecture
+of Lean4.35.0 Elab/Binders.lean (toBinderViews, elabBinderViews,
+elabFunBinderViews), Parser/Term.lean (argument, matchAlts) and
+Parser/Term/Basic.lean (binders, tacticSeq), at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Copyright (c) 2019 Microsoft
+Corporation; upstream authors include Leonardo de Moura, Sebastian Ullrich and
+Mario Carneiro. Apache-2.0. Modifications: portable explicit contexts, structural
+bounded readers, selected common AST/primitives and separate source provenance.
+Retain licenses/LEAN-APACHE-2.0.txt and upstream notices.
+
+### Native data and dictionary input adapter (2026-10-18)
+
+The native layout and field/header adaptation follows Lean 4.35.0
+`src/Lean/Parser/Command.lean`, `Extra.lean`, and `Term/Basic.lean`,
+commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Lean is Copyright (c) Microsoft Corporation and Lean FRO, LLC under Apache-2.0.
+PSC0 shares its own selected AST/elaborators; these source references and the
+corresponding upstream instanceWhere/derivingRepr/defaultInstanceWithPrio tests
+guide semantics and conformance. Existing upstream license/notice material remains.
+
+### Native where and termination input grammar (2026-10-18)
+
+Design references are Lean4.35.0 at
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`:
+`Parser/Term.lean`, `Parser/Extra.lean`, `Elab/Binders.lean`,
+`Elab/MutualDef.lean` and `Elab/LetRec.lean`.
+Copyright (c) Microsoft Corporation / Lean FRO, LLC, Apache-2.0;
+existing upstream license material is retained. Upstream tests are semantic
+references only; their illustrative axioms are not PSC0 foundation declarations.
+
+Native v7.2 control adapter design references Lean4.35.0 commit
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+src/Lean/Parser/{Do,Term,Extra}.lean, src/Lean/Elab/Do/Basic.lean and
+src/Init/Notation.lean. Lean4 is Copyright Microsoft Corporation and respective
+contributors, Apache-2.0. PSC0 reuses its own typed control elaboration; the small
+native grammar adapter follows the selected upstream layout and scope invariants.
+
+Source-owned mutual WF measure preparation follows Lean4.35.0
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+src/Lean/Elab/PreDefinition/{FixedParams,WF/PackMutual,WF/Rel,WF/Fix}.lean
+and src/Lean/Meta/ArgsPacker.lean. Copyright Microsoft Corporation and Lean FRO,
+LLC; authors Leonardo de Moura and Joachim Breitner; Apache-2.0. The source
+adapter reuses PSC0's typed header, scope and packing owners, without importing
+upstream temporary axioms or unselected source capabilities.
+
+Total mutual WF execution design references Lean4.35.0 commit
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+src/Lean/Elab/PreDefinition/WF/Main.lean, Basic.lean and
+src/Lean/Meta/ArgsPacker.lean; Copyright (c) Microsoft Corporation and respective
+contributors, Apache-2.0 (authors Leonardo de Moura and Joachim Breitner).
+PSC0 derives ordinary checked bodies from the logical functional and independently
+validates them after recursor preparation; it does not import unsafe compilation
+or temporary source axioms. See licenses and existing attribution above.

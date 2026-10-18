@@ -1,4 +1,5 @@
 import Ps.Syntax.Cursor
+import Ps.Syntax.Lexer
 
 def psCharCodeEq (char : Char) (code : Nat) : Bool :=
   Nat.beq (Char.toNat char) code
@@ -47,9 +48,6 @@ def psParseNaturalChars
           | Option.some digit =>
               smaller (Nat.add (Nat.mul value 10) digit)
 
-def psParseNaturalText (text : String) : Option Nat :=
-  psParseNaturalChars (psLexStringToList text) 0
-
 def psHexDigitValue (char : Char) : Option Nat :=
   if psCharCodeEq char 48 then
     Option.some 0
@@ -97,6 +95,39 @@ def psHexDigitValue (char : Char) : Option Nat :=
     Option.some 15
   else
     Option.none
+
+-- Numeral values are parsed independently of source spelling. This is
+-- also the single validity gate for grouped decimal and radix literals.
+def psParseRadixChars (base : Nat) (chars : List Char) (value digits : Nat)
+    (trailingSeparator : Bool) : Option Nat :=
+  match chars with
+  | [] =>
+    if digits == 0 || trailingSeparator then none else some value
+  | char :: rest =>
+    if psCharCodeEq char 95 then
+      psParseRadixChars base rest value digits true
+    else
+      match psHexDigitValue char with
+      | none => none
+      | some digit =>
+        if digit >= base then none
+        else psParseRadixChars base rest (value * base + digit) (digits + 1) false
+
+def psParseNaturalText (text : String) : Option Nat :=
+  let chars := psLexStringToList text
+  match chars with
+  | first :: radix :: rest =>
+    if psCharCodeEq first 48 then
+      let base :=
+        if psCharCodeEq radix 98 || psCharCodeEq radix 66 then some 2
+        else if psCharCodeEq radix 111 || psCharCodeEq radix 79 then some 8
+        else if psCharCodeEq radix 120 || psCharCodeEq radix 88 then some 16
+        else none
+      match base with
+      | some selected => psParseRadixChars selected rest 0 0 false
+      | none => psParseRadixChars 10 chars 0 0 false
+    else psParseRadixChars 10 chars 0 0 false
+  | _ => psParseRadixChars 10 chars 0 0 false
 
 def psReadFixedHex
     (count : Nat) :
@@ -240,6 +271,24 @@ def psCharListLength (chars : List Char) : Nat :=
   | _ :: rest =>
       Nat.succ (psCharListLength rest)
 
+-- Raw strings preserve all ordinary characters, including literal
+-- backslashes and quotes, except for RC4's source newline normalization.
+def psRawNormalizeNewlines : List Char → List Char
+  | '\r' :: '\n' :: rest => '\n' :: psRawNormalizeNewlines rest
+  | char :: rest => char :: psRawNormalizeNewlines rest
+  | [] => []
+
+def psDecodeRawStringLiteral (text : String) : Option String := do
+  let 'r' :: remaining := psLexStringToList text | none
+  let (hashes, body) ← psLexRawOpening (remaining.length + 1) remaining
+  let close := '"' :: List.replicate hashes '#'
+  if body.length < close.length then none
+  else
+    let contentLength := body.length - close.length
+    if body.drop contentLength != close then none
+    else some (psStringFromReversedChars
+      (psRawNormalizeNewlines (body.take contentLength)).reverse)
+
 def psDecodeStringLiteral (text : String) : Option String :=
   match psLexStringToList text with
   | [] =>
@@ -250,6 +299,8 @@ def psDecodeStringLiteral (text : String) : Option String :=
           (Nat.succ (psCharListLength rest))
           rest
           []
+      else if psCharCodeEq first 114 then
+        psDecodeRawStringLiteral text
       else
         Option.none
 
@@ -339,3 +390,52 @@ def psDecodeCharacterLiteral (text : String) : Option Char :=
                       Option.none
       else
         Option.none
+
+-- Exact decimal decoding, following Lean 4.35.0 Init/Meta/Defs.
+-- Raw Nat mantissa/exponent are part of OfScientific semantics, including
+-- the observable sign of exponent zero. No binary floating intermediate.
+-- Apache-2.0, Microsoft Corporation, Leonardo de Moura.
+def psParseScientificDigitsAux : List Char → Nat → Nat → Bool → Option (Nat × Nat)
+  | [], value, digits, separated =>
+      if separated then none else some (value, digits)
+  | char :: rest, value, digits, _ =>
+      if char == '_' then psParseScientificDigitsAux rest value digits true
+      else do
+        let digit ← psDecimalDigitValue char
+        psParseScientificDigitsAux rest (value * 10 + digit) (digits + 1) false
+
+def psParseScientificDigits (text : String) (emptyAllowed : Bool := false) :
+    Option (Nat × Nat) := do
+  match psLexStringToList text with
+  | [] => if emptyAllowed then some (0, 0) else none
+  | first :: rest =>
+      let digit ← psDecimalDigitValue first
+      psParseScientificDigitsAux rest digit 1 false
+
+def psParseScientificText (text : String) : Option (Nat × Bool × Nat) := do
+  let parts := (text.replace "E" "e").splitOn "e"
+  let (mantissa, exponent) ← match parts with
+    | [mantissa] => some (mantissa, none)
+    | [mantissa, exponent] => some (mantissa, some exponent)
+    | _ => none
+  let (value, decimalPlaces) ← match mantissa.splitOn "." with
+    | [integer] =>
+        if exponent.isNone then none else do
+          let (value, _) ← psParseScientificDigits integer
+          some (value, 0)
+    | [integer, fraction] => do
+        let (whole, _) ← psParseScientificDigits integer
+        let (part, places) ← psParseScientificDigits fraction true
+        some (whole * 10 ^ places + part, places)
+    | _ => none
+  match exponent with
+  | none => some (value, true, decimalPlaces)
+  | some text => do
+      let (negative, digits) := match psLexStringToList text with
+        | '-' :: rest => (true, String.ofList rest)
+        | '+' :: rest => (false, String.ofList rest)
+        | _ => (false, text)
+      let (power, _) ← psParseScientificDigits digits
+      if negative then some (value, true, power + decimalPlaces)
+      else if power >= decimalPlaces then some (value, false, power - decimalPlaces)
+      else some (value, true, decimalPlaces - power)

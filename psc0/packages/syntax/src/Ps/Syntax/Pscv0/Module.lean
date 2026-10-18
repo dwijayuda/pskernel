@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.Commands
+import Ps.Syntax.Pscv0.ProgramRead
 import Ps.Syntax.Pscv0.TypePrint
 
 -- Full original input is retained. Printing unanchored comments declines.
@@ -41,6 +41,8 @@ def psPscv0BodyBlock (blocks : List PsPscv0DoBlock) (value : PsSyntaxTerm) : Opt
 
 def psPscv0ExceptType (type : PsSyntaxTerm) : Bool :=
   match type with
+  | .call (.reference name) args _ =>
+      psStringEq (psPscv0NameText name) "Except" && args.length == 2 && args.all (fun a => a.fst.isNone)
   | .app fn args _ =>
       match fn with
       | .reference name =>
@@ -49,23 +51,37 @@ def psPscv0ExceptType (type : PsSyntaxTerm) : Bool :=
   | _ => false
 
 def psPscv0BinderShadowsExcept (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : Bool :=
-  psStringEq (psPscv0NameText binder.fst.name) "Except"
+  (psSyntaxBinderNames binder.fst).any (fun name => psStringEq (psPscv0NameText name) "Except")
 def psPscv0BinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0ConstructorTerms (constructor : PsSyntaxInductiveConstructor) : List PsSyntaxTerm :=
-  psListMap psPscv0BinderType constructor.fields
+  psListMap psPscv0BinderType constructor.fields ++ constructor.resultType.toList
 
 def psPscv0JoinTermLists (values : List (List PsSyntaxTerm)) : List PsSyntaxTerm :=
   match values with
   | [] => []
   | first :: rest => psListAppend first (psPscv0JoinTermLists rest)
 
+def psPscv0LocalDefinitionTerms (declaration : PsSyntaxLocalDefinition) : List PsSyntaxTerm :=
+  declaration.type.toList ++ [declaration.value] ++ declaration.binders.map Prod.snd ++
+    match declaration.recursion with
+    | some (.total termination) => termination.measure :: termination.decreasing.toList
+    | _ => []
+
 def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxTerm :=
   match declaration with
-  | .definition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .whereDeclaration parent locals _ =>
+      psPscv0DeclarationTerms parent ++ locals.flatMap psPscv0LocalDefinitionTerms
+  | .definition _ binders type value _
+  | .noncomputableDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .partialDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .fixedpointDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .wellFoundedDefinition _ binders type value termination _ =>
+      [type, value, termination.measure] ++ termination.decreasing.toList ++
+        psListMap psPscv0BinderType binders
   | .theoremDecl _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
-  | .structureDecl _ params fields _ => psListMap psPscv0BinderType (psListAppend params fields)
+  | .structureDecl _ params result fields _ =>
+      result.toList ++ psListMap psPscv0BinderType (psListAppend params fields)
   | .inductiveDecl _ params result constructors _ =>
       let terms := psListAppend (psListMap psPscv0BinderType params)
         (psPscv0JoinTermLists (psListMap psPscv0ConstructorTerms constructors));
@@ -87,7 +103,34 @@ def psPscv0AttachDeclaration (proofScript : Bool) (tokens : List PsToken)
   | Except.error error => Except.error error
   | Except.ok _ =>
       match declaration with
-      | .partialDefinition _ _ _ _ _ => Except.error "PSCV0-PARTIAL-EXCLUDED"
+      | .whereDeclaration parent locals _ => do
+          let attached ← psPscv0AttachDeclaration proofScript tokens blocks errorName discardName parent
+          if attached.doBody.isSome || locals.any (fun localDefinition =>
+              (psPscv0BodyBlock blocks localDefinition.value).isSome) then
+            throw "PSCV0-D-WHERE-01: flat do adapter cannot own local definition bodies"
+          return PsPscv0SurfaceDeclaration.mk attached.keyword declaration none
+      | .noncomputableDefinition _ _ _ value span =>
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: noncomputable do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
+      | .partialDefinition _ _ _ value span =>
+          -- Preserve source strategy. The flat translator does not silently
+          -- route partial typed-do through its older Except-only adapter.
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: partial do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
+      | .fixedpointDefinition _ _ _ value span =>
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: fixedpoint do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
+      | .wellFoundedDefinition _ _ _ value _ span =>
+          if (psPscv0BodyBlock blocks value).isSome then
+            Except.error "PSCV0-FEATURE-UNAVAILABLE: well-founded do source translation"
+          else Except.ok (PsPscv0SurfaceDeclaration.mk
+            (psPscv0TokenTextAt tokens span.start.byteOffset) declaration none)
       | .definition _ binders type value span =>
           let keyword := psPscv0TokenTextAt tokens span.start.byteOffset;
           let block := psPscv0BodyBlock blocks value;
@@ -112,47 +155,56 @@ def psPscv0CountDoBodies (declarations : List PsPscv0SurfaceDeclaration) : Nat :
       | none => tail
       | some _ => Nat.succ tail
 
-def psPscv0ParseSource (proofScript : Bool) (source : String) : Except String PsPscv0SurfaceModule :=
-  if Nat.ble (String.utf8ByteSize source) 1048576 then
-    let lexed : Except PsLexError (List PsToken) :=
-      if proofScript then psLexProofScript source else psLex source;
-    match lexed with
-    | Except.error _ => Except.error "PSCV0-LEXICAL-SOURCE-ERROR"
-    | Except.ok tokens =>
-        if Nat.ble (psListLength tokens) 65536 then
-          match psPscv0RewriteTokens proofScript 65537 (PsTokenCursor.mk tokens) "" 0 [] [] with
-          | Except.error error => Except.error error
-          | Except.ok rewritten =>
-              let parsed : Except String PsSyntaxModule :=
-                if proofScript then psPscv0ParseTokens rewritten.tokens
-                else
-                  match psParseLeanTokens rewritten.tokens with
-                  | Except.error error => Except.error (psPscv0ParseError error)
-                  | Except.ok sourceModule => Except.ok sourceModule;
-              match parsed with
-              | Except.error error => Except.error error
-              | Except.ok sourceModule =>
-                  let pos := PsSourcePos.mk 0 1 1;
-                  let span := PsSourceSpan.mk pos pos;
-                  match psPscv0FreshName tokens "pscv0InternalError" span with
-                  | Except.error error => Except.error error
-                  | Except.ok errorName =>
-                      match psPscv0FreshName tokens "pscv0InternalDiscard" span with
-                      | Except.error error => Except.error error
-                      | Except.ok discardName =>
-                          let attach : PsSyntaxDeclaration -> Except String PsPscv0SurfaceDeclaration :=
-                            psPscv0AttachDeclaration proofScript tokens rewritten.blocks errorName discardName;
-                          match psListMapExcept attach sourceModule.declarations with
-                          | Except.error error => Except.error error
-                          | Except.ok declarations =>
-                              if Nat.beq (psPscv0CountDoBodies declarations) (psListLength rewritten.blocks) then
-                                let cursor := psLexCursorFromString source;
-                                Except.ok (PsPscv0SurfaceModule.mk source proofScript
-                                  (psPscv0CommentTriviaWorker cursor.remaining cursor.position tokens)
-                                  sourceModule.imports declarations errorName discardName)
-                              else Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
-        else Except.error "PSCV0-SOURCE-TOKEN-BUDGET"
-  else Except.error "PSCV0-SOURCE-BYTE-BUDGET"
+structure PsPscv0SourceInput where
+  tokens : List PsToken
+  rewritten : PsPscv0Rewritten
+  errorName : PsSyntaxName
+  discardName : PsSyntaxName
+  commentTrivia : Bool
+
+-- Both declaration-only translation and ordered-program compilation use the
+-- same lexical budgets, do-block reader, hygiene and source validation.
+def psPscv0PrepareSource (proofScript : Bool) (source : String) (legacyDo : Bool := true) :
+    Except String PsPscv0SourceInput := do
+  if source.utf8ByteSize > 1048576 then throw "PSCV0-SOURCE-BYTE-BUDGET"
+  let tokens ← (if proofScript then psLexProofScript source else psLex source).mapError
+    (fun _ => "PSCV0-LEXICAL-SOURCE-ERROR")
+  if tokens.length > 65536 then throw "PSCV0-SOURCE-TOKEN-BUDGET"
+  let rewritten ← if legacyDo then
+      psPscv0RewriteTokens proofScript 65537 (PsTokenCursor.mk tokens) "" 0 [] []
+    else pure (PsPscv0Rewritten.mk tokens [])
+  let pos := PsSourcePos.mk 0 1 1
+  let span := PsSourceSpan.mk pos pos
+  let errorName ← psPscv0FreshName tokens "pscv0InternalError" span
+  let discardName ← psPscv0FreshName tokens "pscv0InternalDiscard" span
+  let cursor := psLexCursorFromString source
+  return {
+    tokens := tokens
+    rewritten := rewritten
+    errorName := errorName
+    discardName := discardName
+    commentTrivia := psPscv0CommentTriviaWorker cursor.remaining cursor.position tokens }
+
+def psPscv0ParseSource (proofScript : Bool) (source : String) :
+    Except String PsPscv0SurfaceModule := do
+  let input ← psPscv0PrepareSource proofScript source
+  -- This translation API deliberately remains flat. Scope commands are never
+  -- discarded to manufacture a printable declaration-only module.
+  let parsed ← if proofScript then psPscv0ParseTokens input.rewritten.tokens
+    else (psParseLeanTokens input.rewritten.tokens).mapError psPscv0ParseError
+  let declarations ← parsed.declarations.mapM
+    (psPscv0AttachDeclaration proofScript input.tokens input.rewritten.blocks
+      input.errorName input.discardName)
+  if psPscv0CountDoBodies declarations != input.rewritten.blocks.length then
+    throw "PSCV0-DO-DECLARATION-BODY-ONLY"
+  return {
+    originalSource := source
+    proofScript := proofScript
+    commentTrivia := input.commentTrivia
+    imports := parsed.imports
+    declarations := declarations
+    errorName := input.errorName
+    discardName := input.discardName }
 
 def psPscv0LowerDeclaration (errorName discardName : PsSyntaxName)
     (surface : PsPscv0SurfaceDeclaration) : Except String PsSyntaxDeclaration :=
@@ -165,6 +217,29 @@ def psPscv0LowerDeclaration (errorName discardName : PsSyntaxName)
           | Except.error error => Except.error error
           | Except.ok body => Except.ok (PsSyntaxDeclaration.definition name binders type body span)
       | _ => Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
+
+-- The native program API retains typed do syntax. Legacy source translation
+-- keeps its explicitly bounded Except-only contract and never serves compilation.
+def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
+  let input ← psPscv0PrepareSource true source false
+  let parsed ← psPscv0ParseProgramTokens input.tokens
+  for command in parsed.commands do
+    match command with
+    | .declaration declaration | .registeredDeclaration declaration _
+    | .privateDeclaration declaration | .privateRegisteredDeclaration declaration _
+    | .derivingDeclaration declaration _ _ =>
+      -- Partial strategy is retained by the AST; executable admission belongs
+      -- to elaboration/model preparation, not a historical blanket parse ban.
+      for term in psPscv0DeclarationTerms declaration do
+        psPscv0ValidateTermWithFuel input.tokens 4096 term
+    | .variableCmd binders _ =>
+      for (_, type) in binders do psPscv0ValidateTermWithFuel input.tokens 4096 type
+    | .mutualDeclarations members _ =>
+      for member in members do
+        for term in psPscv0DeclarationTerms member.declaration do
+          psPscv0ValidateTermWithFuel input.tokens 4096 term
+    | _ => pure ()
+  return parsed
 
 def psPscv0LowerModule (surface : PsPscv0SurfaceModule) : Except String PsSyntaxModule :=
   let lower : PsPscv0SurfaceDeclaration -> Except String PsSyntaxDeclaration :=
@@ -180,16 +255,21 @@ def psPscv0PrintBinders (proofScript : Bool)
     | Except.error _ => Except.error "PSCV0-BINDER-PRINT-UNSUPPORTED"
     | Except.ok text => Except.ok text
   else
-    match psListMapExcept psPscv0PrintLeanBinder binders with
+    match psListMapExcept psPrintLeanBinder binders with
     | Except.error _ => Except.error "PSCV0-BINDER-PRINT-UNSUPPORTED"
     | Except.ok texts => Except.ok (psPrintLeanSpaceJoinedSuffix texts)
 
 def psPscv0PrintResultType (proofScript : Bool) (type : PsSyntaxTerm) : Except String String :=
-  if proofScript then psPscv0PrintTerm true type
+  if proofScript then psPscv0PrintTerm proofScript type
   else
     match psPscv0PrintLeanType type with
     | Except.error _ => Except.error "PSCV0-RESULT-TYPE-PRINT-UNSUPPORTED"
     | Except.ok text => Except.ok text
+
+def psPscv0PrintResultAnnotation (proofScript : Bool) (type : PsSyntaxTerm) : Except String String := do
+  match type with
+  | .omittedType _ => return ""
+  | _ => return " : " ++ (← psPscv0PrintResultType proofScript type)
 
 def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
     (surface : PsPscv0SurfaceDeclaration) : Except String String :=
@@ -198,7 +278,7 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
       match psPscv0PrintBinders proofScript binders with
       | Except.error error => Except.error error
       | Except.ok parameters =>
-          match psPscv0PrintResultType proofScript type with
+          match psPscv0PrintResultAnnotation proofScript type with
           | Except.error error => Except.error error
           | Except.ok resultType =>
               let body : Except String String :=
@@ -210,7 +290,7 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
               | Except.ok expression =>
                   let keyword := if proofScript then surface.keyword else "def";
                   Except.ok (psPscv0Cat [keyword, " ", psPscv0NameText name,
-                    parameters, " : ", resultType, " := ", expression])
+                    parameters, resultType, " := ", expression])
   | _ =>
       let printed : Except PsSourcePrintError String :=
         if proofScript then psPrintProofScriptDeclaration surface.declaration
@@ -220,7 +300,8 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
       | Except.ok text => Except.ok text
 
 def psPscv0PrintImport (sourceImport : PsSyntaxImport) : String :=
-  psPscv0Cat ["import ", psPscv0NameText sourceImport.moduleName]
+  psPscv0Cat [(if sourceImport.isPublic then "public import " else "import "),
+    psPscv0NameText sourceImport.moduleName]
 
 def psPscv0PrintSurfaceModule (proofScript : Bool) (surface : PsPscv0SurfaceModule) : Except String String :=
   if surface.commentTrivia then Except.error "PSCV0-TRIVIA-PRINT-PENDING"
@@ -253,3 +334,4 @@ def psPscv0TranslateReadable (sourceIsPs targetIsPs : Bool) (source : String) : 
   | Except.ok surface => psPscv0PrintSurfaceModule targetIsPs surface
 
 def psPscv0ReplayOriginal (surface : PsPscv0SurfaceModule) : String := surface.originalSource
+

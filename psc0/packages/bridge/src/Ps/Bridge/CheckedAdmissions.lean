@@ -1,10 +1,13 @@
 import Ps.Bridge.Json
 import Ps.Core.Declaration
+import Ps.Core.InductiveGroup
+import Ps.Core.Nested
 import Ps.Core.Abstract
 import Ps.Core.Subst
 import Ps.Core.Equality
 import Ps.Foundation.List
 import Ps.Environment.Basic
+import Ps.Meta.Reduce
 
 inductive PsCheckedAdmissionCodecError where
   | universeMetavariable
@@ -327,7 +330,8 @@ def psEncodeCodecConstructor
       Except.error
         (PsCheckedAdmissionCodecError.missingConstructor constructorName)
   | some info =>
-      if psCheckedAdmissionBoolNot (psNameEq info.inductiveName inductiveName) then
+      if psCheckedAdmissionBoolNot (psNameEq info.inductiveName inductiveName) ||
+          psCheckedAdmissionBoolNot (psConstructorRecursiveFieldsOrdered info) then
         Except.error
           (PsCheckedAdmissionCodecError.mismatchedConstructor constructorName)
       else
@@ -367,32 +371,80 @@ def psEncodeCodecConstructors
           | Except.ok encodedTail =>
               Except.ok (List.cons encodedHead encodedTail)
 
-def psEncodeCodecInductive
-    (allDeclarations : List PsDeclaration)
-    (info : PsInductiveInfo) :
-    Except PsCheckedAdmissionCodecError String :=
-  match
-      psEncodeCodecConstructors
-        allDeclarations
-        info.name
-        info.constructors with
-  | Except.error error => Except.error error
-  | Except.ok encodedConstructors =>
-      match psEncodeCodecExpr info.type with
-      | Except.error error => Except.error error
-      | Except.ok encodedType =>
-          let encodedTypeEntry :=
-            psJsonObject [
-              psCheckedAdmissionJsonField "cs" (psJsonArray encodedConstructors),
-              psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
-              psCheckedAdmissionJsonField "t" (encodedType)
-            ];
-          Except.ok
-            (psJsonObject [
-              psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList info.levelParams),
-              psCheckedAdmissionJsonField "np" (psCheckedAdmissionNatToString info.numParams),
-              psCheckedAdmissionJsonField "ts" (psJsonArray [encodedTypeEntry])
-            ])
+-- Core owns group identity and motive/minor order; transport only resolves
+-- the retained declarations and serializes a single official inductive batch.
+def psBridgeInductiveGroupPlanIn (environment : PsEnvironment)
+    (all : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError PsInductiveGroupPlan := do
+  let findInductive := psEnvironmentFindInductive environment
+  let findRecursor := psEnvironmentFindRecursor environment
+  let some plan := psInductiveGroupIdentityFor findInductive findRecursor info
+    | throw .unsupportedDeclaration
+  -- Emitting a group once must never turn a repeated/conflicting retained
+  -- descriptor into an ignored record. Resolve every owned name uniquely
+  -- before any member can be marked emitted; missing constructors retain
+  -- their existing precise codec error below.
+  for member in plan.members do
+    if (all.filter (fun declaration =>
+        psNameEq (psDeclarationName declaration) member.name)).length != 1 then
+      throw .unsupportedDeclaration
+    let names := member.name :: (psNameAppendStr member.name "rec" :: member.constructors)
+    for name in names do
+      if (all.filter (fun declaration => psNameEq (psDeclarationName declaration) name)).length > 1 then
+        throw .unsupportedDeclaration
+  -- Constructor-only standalone batches retain no recursor/group claim.
+  -- Every retained recursor otherwise requires the complete canonical closure
+  -- built from actual container declarations in the supplied environment.
+  if (findRecursor (psNameAppendStr info.name "rec")).isSome then
+    let some elimination := psBuildInductiveEliminationPlan
+        (psWhnf environment psMetaEmpty psLocalEmpty) findInductive
+        (psEnvironmentFindConstructor environment) plan | throw .unsupportedDeclaration
+    for slot in elimination.slots do
+      for constructor in slot.constructors do
+        if !psInductiveEliminationConstructorMetadataValid slot constructor then
+          throw (.mismatchedConstructor constructor.info.name)
+      if (all.filter (fun declaration =>
+          psNameEq (psDeclarationName declaration) slot.recursorName)).length != 1 then
+        throw .unsupportedDeclaration
+    if !psInductiveEliminationRegistered (psWhnf environment psMetaEmpty psLocalEmpty)
+        findRecursor elimination then throw .unsupportedDeclaration
+    for declaration in all do
+      if let .recursorDecl recursor := declaration then
+        if recursor.inductiveNames.any (fun name => (psInductiveGroupNames plan).any (psNameEq name)) &&
+            (psInductiveEliminationSlotFor elimination recursor.name).isNone then
+          throw .unsupportedDeclaration
+  return plan
+
+def psBridgeAdmissionEnvironment (environment : PsEnvironment)
+    (declarations : List PsDeclaration) : PsEnvironment :=
+  declarations.foldr (fun declaration current => psEnvironmentInsert current declaration) environment
+
+def psBridgeInductiveGroupPlan (all : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError PsInductiveGroupPlan :=
+  psBridgeInductiveGroupPlanIn (psBridgeAdmissionEnvironment psEnvironmentEmpty all) all info
+
+def psEncodeCodecInductiveType (all : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError String := do
+  let constructors ← psEncodeCodecConstructors all info.name info.constructors
+  let type ← psEncodeCodecExpr info.type
+  return psJsonObject [
+    psCheckedAdmissionJsonField "cs" (psJsonArray constructors),
+    psCheckedAdmissionJsonField "n" (psEncodeCodecName info.name),
+    psCheckedAdmissionJsonField "t" type ]
+
+def psEncodeCodecInductiveGroup (all : List PsDeclaration) (plan : PsInductiveGroupPlan) :
+    Except PsCheckedAdmissionCodecError String := do
+  let first :: _ := plan.members | throw .unsupportedDeclaration
+  let entries ← plan.members.mapM (psEncodeCodecInductiveType all)
+  return psJsonObject [
+    psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList first.levelParams),
+    psCheckedAdmissionJsonField "np" (psCheckedAdmissionNatToString first.numParams),
+    psCheckedAdmissionJsonField "ts" (psJsonArray entries) ]
+
+def psEncodeCodecInductive (allDeclarations : List PsDeclaration) (info : PsInductiveInfo) :
+    Except PsCheckedAdmissionCodecError String := do
+  let plan ← psBridgeInductiveGroupPlan allDeclarations info
+  psEncodeCodecInductiveGroup allDeclarations plan
 
 def psBridgeFindRegularHeightInBucket
     (entries : List (PsName × Nat)) :
@@ -547,6 +599,18 @@ def psEncodeCodecTheorem
               psCheckedAdmissionJsonField "v" (encodedValue)
             ])
 
+-- Opaque bodies are checked by the official kernel, without a reducibility hint.
+def psEncodeCodecOpaque (name : PsName) (levelParams : List PsName)
+    (type value : PsExpr) : Except PsCheckedAdmissionCodecError String := do
+  let encodedType ← psEncodeCodecExpr type
+  let encodedValue ← psEncodeCodecExpr value
+  return psJsonObject [
+    psCheckedAdmissionJsonField "k" (psJsonQuote "opaque"),
+    psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList levelParams),
+    psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+    psCheckedAdmissionJsonField "t" encodedType,
+    psCheckedAdmissionJsonField "v" encodedValue ]
+
 def psEncodeConstantAdmission (declaration : String) : String :=
   psJsonObject [
     psCheckedAdmissionJsonField "declaration" (declaration),
@@ -562,8 +626,10 @@ def psEncodeInductiveAdmission (declaration : String) : String :=
 structure PsCheckedAdmissionEncodeState where
   heights : PsBridgeHeightIndex
   admissionsRev : List String
+  inductiveNames : List PsName := []
 
-def psEncodeCheckedAdmissionsLoop
+def psEncodeCheckedAdmissionsLoopIn
+    (environment : PsEnvironment)
     (allDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
@@ -573,7 +639,7 @@ def psEncodeCheckedAdmissionsLoop
         Except.ok state
   | List.cons declaration rest =>
       let smaller : PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
-        psEncodeCheckedAdmissionsLoop allDeclarations rest;
+        psEncodeCheckedAdmissionsLoopIn environment allDeclarations rest;
       fun (state : PsCheckedAdmissionEncodeState) =>
         match declaration with
         | .definitionDecl name levelParams type value =>
@@ -592,7 +658,7 @@ def psEncodeCheckedAdmissionsLoop
             | Except.error error =>
                 Except.error error
             | Except.ok encoded =>
-                smaller {
+                smaller { state with
                   heights := psBridgeHeightInsert state.heights name height
                   admissionsRev :=
                     List.cons
@@ -604,35 +670,38 @@ def psEncodeCheckedAdmissionsLoop
             | Except.error error =>
                 Except.error error
             | Except.ok encoded =>
-                smaller {
+                smaller { state with
                   heights := state.heights
                   admissionsRev :=
                     List.cons
                       (psEncodeConstantAdmission encoded)
                       state.admissionsRev
                 }
-        | .inductiveDecl info =>
-            match psEncodeCodecInductive allDeclarations info with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeInductiveAdmission encoded)
-                      state.admissionsRev
-                }
+        | .inductiveDecl info => do
+            if state.inductiveNames.any (psNameEq info.name) then smaller state
+            else do
+              let plan ← psBridgeInductiveGroupPlanIn environment allDeclarations info
+              let names := psInductiveGroupNames plan
+              if names.any (fun name => state.inductiveNames.any (psNameEq name)) then
+                throw .unsupportedDeclaration
+              let encoded ← psEncodeCodecInductiveGroup allDeclarations plan
+              smaller { state with
+                inductiveNames := names ++ state.inductiveNames
+                admissionsRev := psEncodeInductiveAdmission encoded :: state.admissionsRev }
         | .constructorDecl _ =>
             smaller state
         | .recursorDecl _ =>
             smaller state
-        | .axiomDecl _ _ _ =>
+        | .quotientDecl .. | .axiomDecl _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration
-        | .opaqueDecl _ _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
+        | .opaqueDecl name levelParams type value =>
+            match psEncodeCodecOpaque name levelParams type value with
+            | .error error => .error error
+            | .ok encoded =>
+              smaller { state with
+                admissionsRev := List.cons (psEncodeConstantAdmission encoded)
+                  state.admissionsRev }
         | .partialDecl _ _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration
@@ -654,346 +723,12 @@ def psCheckedAdmissionReverseStrings
     (values : List String) : List String :=
   psCheckedAdmissionReverseStringsAcc values List.nil
 
--- Lean generates additional motives and minors for nested recursive containers.
--- PSC's shallow recursor is implemented by an ordinary checked definition: its
--- auxiliary motives return a private unit in the same universe as the motive.
--- This changes only the admission representation, never the portable IR.
-structure PsCheckedNestedBinder where
-  id : Nat
-  name : PsName
-  type : PsExpr
-
-def psCheckedNestedName (text : String) : PsName :=
-  PsName.str PsName.anonymous text
-
-def psCheckedNestedUnitName : PsName := psCheckedNestedName "_pscCheckedNestedUnit"
-
-def psCheckedNestedLevelName : PsName := psCheckedNestedName "_pscCheckedMotive"
-
-def psCheckedNestedLevel : PsLevel := PsLevel.param psCheckedNestedLevelName
-
-def psCheckedNestedUnit : PsExpr :=
-  PsExpr.constE psCheckedNestedUnitName [psCheckedNestedLevel]
-
-def psCheckedNestedUnitValue : PsExpr :=
-  PsExpr.constE (PsName.str psCheckedNestedUnitName "unit") [psCheckedNestedLevel]
-
-def psCheckedNestedBind (lambda : Bool) (binders : List PsCheckedNestedBinder) : PsExpr -> PsExpr :=
-  match binders with
-  | List.nil => fun (body : PsExpr) => body
-  | List.cons binder rest =>
-      let smaller : PsExpr -> PsExpr := psCheckedNestedBind lambda rest;
-      fun (body : PsExpr) =>
-        let bound := psExprAbstractFVar binder.id (smaller body);
-        if lambda then PsExpr.lam binder.name binder.type bound PsBinderInfo.explicit
-        else PsExpr.forallE binder.name binder.type bound PsBinderInfo.explicit
-
-def psCheckedNestedSize (expr : PsExpr) : Nat :=
-  match expr with
-  | PsExpr.app fn arg => Nat.succ (Nat.add (psCheckedNestedSize fn) (psCheckedNestedSize arg))
-  | PsExpr.lam _ type body _ => Nat.succ (Nat.add (psCheckedNestedSize type) (psCheckedNestedSize body))
-  | PsExpr.forallE _ type body _ => Nat.succ (Nat.add (psCheckedNestedSize type) (psCheckedNestedSize body))
-  | PsExpr.letE _ type value body => Nat.succ (Nat.add (psCheckedNestedSize type) (Nat.add (psCheckedNestedSize value) (psCheckedNestedSize body)))
-  | PsExpr.proj _ _ value => Nat.succ (psCheckedNestedSize value)
-  | _ => 1
-
-def psCheckedNestedOpenWorker (fuel : Nat) : Nat -> PsExpr -> List PsCheckedNestedBinder :=
-  match fuel with
-  | Nat.zero => fun (_id : Nat) (_type : PsExpr) => List.nil
-  | Nat.succ remaining =>
-      fun (id : Nat) (type : PsExpr) =>
-        let smaller : Nat -> PsExpr -> List PsCheckedNestedBinder := psCheckedNestedOpenWorker remaining;
-        match type with
-        | PsExpr.forallE name domain body _ =>
-            List.cons (PsCheckedNestedBinder.mk id name domain)
-              (smaller (Nat.succ id) (psExprInstantiate1 body (PsExpr.fvar id)))
-        | _ => List.nil
-
-def psCheckedNestedOpen (id : Nat) (type : PsExpr) : List PsCheckedNestedBinder :=
-  psCheckedNestedOpenWorker (psCheckedNestedSize type) id type
-
-def psCheckedNestedContains (name : PsName) (expr : PsExpr) : Bool :=
-  match expr with
-  | PsExpr.constE other _ => psNameEq name other
-  | PsExpr.app fn arg => if psCheckedNestedContains name fn then true else psCheckedNestedContains name arg
-  | PsExpr.lam _ type body _ => if psCheckedNestedContains name type then true else psCheckedNestedContains name body
-  | PsExpr.forallE _ type body _ => if psCheckedNestedContains name type then true else psCheckedNestedContains name body
-  | PsExpr.letE _ type value body =>
-      if psCheckedNestedContains name type then true
-      else if psCheckedNestedContains name value then true
-      else psCheckedNestedContains name body
-  | PsExpr.proj _ _ value => psCheckedNestedContains name value
-  | _ => false
-
--- A recursive family applied to its parameters/indices is still a direct
--- recursive field. Self occurrences inside an argument remain nested.
-def psCheckedNestedDirect (name : PsName) (type : PsExpr) : Bool :=
-  match type with
-  | PsExpr.constE other _ => psNameEq name other
-  | PsExpr.app fn arg =>
-      if psCheckedNestedContains name arg then false else psCheckedNestedDirect name fn
-  | _ => false
-
-def psCheckedNestedAdd (name : PsName) (type : PsExpr) (shapes : List PsExpr) : List PsExpr :=
-  if psCheckedNestedContains name type then
-    if psCheckedNestedDirect name type then shapes
-    else if psListAny (psExprAlphaEq type) shapes then shapes
-    else psListAppend shapes [type]
-  else shapes
-
-def psCheckedNestedAddTypes (name : PsName) (types : List PsExpr) : List PsExpr -> List PsExpr :=
-  match types with
-  | List.nil => fun (shapes : List PsExpr) => shapes
-  | List.cons type rest =>
-      let smaller : List PsExpr -> List PsExpr := psCheckedNestedAddTypes name rest;
-      fun (shapes : List PsExpr) => smaller (psCheckedNestedAdd name type shapes)
-
-def psCheckedNestedBinderType (binder : PsCheckedNestedBinder) : PsExpr := binder.type
-
-def psCheckedNestedBinderExpr (binder : PsCheckedNestedBinder) : PsExpr := PsExpr.fvar binder.id
-
-def psCheckedNestedRoots (all : List PsDeclaration) (name : PsName) (constructors : List PsName) :
-    List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) :=
-  match constructors with
-  | List.nil => fun (shapes : List PsExpr) => Except.ok shapes
-  | List.cons constructor rest =>
-      let smaller : List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) := psCheckedNestedRoots all name rest;
-      fun (shapes : List PsExpr) =>
-        match psBridgeFindConstructor all constructor with
-        | Option.none => Except.error (PsCheckedAdmissionCodecError.missingConstructor constructor)
-        | Option.some info =>
-            smaller (psCheckedNestedAddTypes name (psListMap psCheckedNestedBinderType (psCheckedNestedOpen 0 info.type)) shapes)
-
-def psCheckedNestedContainerFields (type : PsExpr) : Except PsCheckedAdmissionCodecError (List (List PsExpr)) :=
-  match type with
-  | PsExpr.app fn arg =>
-      match fn with
-      | PsExpr.constE name _ =>
-          if psNameEq name (psCheckedNestedName "List") then
-            Except.ok (List.cons List.nil (List.cons (List.cons arg (List.cons type List.nil)) List.nil))
-          else if psNameEq name (psCheckedNestedName "Option") then
-            Except.ok (List.cons List.nil (List.cons (List.cons arg List.nil) List.nil))
-          else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-      | PsExpr.app head left =>
-          match head with
-          | PsExpr.constE name _ =>
-              if psNameEq name (psCheckedNestedName "Prod") then Except.ok (List.cons (List.cons left (List.cons arg List.nil)) List.nil)
-              else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-          | _ => Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-      | _ => Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-  | _ => Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-
-def psCheckedNestedConcat {alpha : Type} (lists : List (List alpha)) : List alpha :=
-  match lists with
-  | List.nil => List.nil
-  | List.cons values rest => psListAppend values (psCheckedNestedConcat rest)
-
-def psCheckedNestedExpand (name : PsName) (fuel : Nat) : List PsExpr -> List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) :=
-  match fuel with
-  | Nat.zero => fun (pending : List PsExpr) (done : List PsExpr) =>
-      if psListIsEmpty pending then Except.ok done else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-  | Nat.succ remaining =>
-      fun (pending : List PsExpr) (done : List PsExpr) =>
-        let smaller : List PsExpr -> List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) := psCheckedNestedExpand name remaining;
-        match pending with
-        | List.nil => Except.ok done
-        | List.cons type rest =>
-            match psCheckedNestedContainerFields type with
-            | Except.error error => Except.error error
-            | Except.ok fields =>
-                let known := psListAppend done pending;
-                let added := psCheckedNestedAddTypes name (psCheckedNestedConcat fields) known;
-                let fresh := psListReverse (psListTake (Nat.sub (psListLength added) (psListLength known)) (psListReverse added));
-                smaller (psListAppend rest fresh) (psListAppend done [type])
-
-def psCheckedNestedSizes (types : List PsExpr) : Nat :=
-  match types with
-  | List.nil => 0
-  | List.cons type rest => Nat.add (psCheckedNestedSize type) (psCheckedNestedSizes rest)
-
-def psCheckedNestedApply (args : List PsExpr) : PsExpr -> PsExpr :=
-  match args with
-  | List.nil => fun (fn : PsExpr) => fn
-  | List.cons arg rest =>
-      let smaller : PsExpr -> PsExpr := psCheckedNestedApply rest;
-      fun (fn : PsExpr) => smaller (PsExpr.app fn arg)
-
-def psCheckedNestedHypotheses (name : PsName) (fields : List PsCheckedNestedBinder) : Nat -> List PsCheckedNestedBinder :=
-  match fields with
-  | List.nil => fun (_id : Nat) => List.nil
-  | List.cons field rest =>
-      let smaller : Nat -> List PsCheckedNestedBinder := psCheckedNestedHypotheses name rest;
-      fun (id : Nat) =>
-        if psCheckedNestedContains name field.type then
-          let type := if psExprAlphaEq field.type (PsExpr.constE name List.nil)
-            then PsExpr.app (PsExpr.fvar 0) (PsExpr.fvar field.id) else psCheckedNestedUnit;
-          List.cons (PsCheckedNestedBinder.mk id (psCheckedNestedName "ih") type) (smaller (Nat.succ id))
-        else smaller id
-
-def psCheckedNestedDirectHypotheses (hypotheses : List PsCheckedNestedBinder) : List PsCheckedNestedBinder :=
-  match hypotheses with
-  | List.nil => List.nil
-  | List.cons hypothesis rest =>
-      let tail := psCheckedNestedDirectHypotheses rest;
-      if psExprAlphaEq hypothesis.type psCheckedNestedUnit then tail else List.cons hypothesis tail
-
-structure PsCheckedNestedMinor where
-  binder : PsCheckedNestedBinder
-  adapter : PsExpr
-
-def psCheckedNestedMinors (all : List PsDeclaration) (name : PsName) (start : Nat) (constructors : List PsName) :
-    Nat -> Except PsCheckedAdmissionCodecError (List PsCheckedNestedMinor) :=
-  match constructors with
-  | List.nil => fun (_id : Nat) => Except.ok List.nil
-  | List.cons constructor rest =>
-      let smaller : Nat -> Except PsCheckedAdmissionCodecError (List PsCheckedNestedMinor) := psCheckedNestedMinors all name start rest;
-      fun (id : Nat) =>
-        match psBridgeFindConstructor all constructor with
-        | Option.none => Except.error (PsCheckedAdmissionCodecError.missingConstructor constructor)
-        | Option.some info =>
-            let fields := psCheckedNestedOpen start info.type;
-            let hypotheses := psCheckedNestedHypotheses name fields (Nat.add start (psListLength fields));
-            let direct := psCheckedNestedDirectHypotheses hypotheses;
-            let value := psCheckedNestedApply (psListMap psCheckedNestedBinderExpr fields) (PsExpr.constE constructor List.nil);
-            let type := psCheckedNestedBind false (psListAppend fields direct) (PsExpr.app (PsExpr.fvar 0) value);
-            let body := psCheckedNestedApply (psListMap psCheckedNestedBinderExpr (psListAppend fields direct)) (PsExpr.fvar id);
-            let adapter := psCheckedNestedBind true (psListAppend fields hypotheses) body;
-            match smaller (Nat.succ id) with
-            | Except.error error => Except.error error
-            | Except.ok tail => Except.ok (List.cons (PsCheckedNestedMinor.mk (PsCheckedNestedBinder.mk id (psCheckedNestedName "minor") type) adapter) tail)
-
-def psCheckedNestedMinorBinder (minor : PsCheckedNestedMinor) : PsCheckedNestedBinder := minor.binder
-
-def psCheckedNestedMinorAdapter (minor : PsCheckedNestedMinor) : PsExpr := minor.adapter
-
-def psCheckedNestedFields (types : List PsExpr) : Nat -> List PsCheckedNestedBinder :=
-  match types with
-  | List.nil => fun (_id : Nat) => List.nil
-  | List.cons type rest =>
-      let smaller : Nat -> List PsCheckedNestedBinder := psCheckedNestedFields rest;
-      fun (id : Nat) => List.cons (PsCheckedNestedBinder.mk id (psCheckedNestedName "field") type) (smaller (Nat.succ id))
-
-def psCheckedNestedAuxiliaryMinor (name : PsName) (start : Nat) (types : List PsExpr) : PsExpr :=
-  let fields := psCheckedNestedFields types start;
-  let hypotheses := psCheckedNestedHypotheses name fields (Nat.add start (psListLength fields));
-  psCheckedNestedBind true (psListAppend fields hypotheses) psCheckedNestedUnitValue
-
-def psCheckedNestedAuxiliaryMinors (name : PsName) (start : Nat) (shapes : List PsExpr) : Except PsCheckedAdmissionCodecError (List PsExpr) :=
-  match shapes with
-  | List.nil => Except.ok List.nil
-  | List.cons shape rest =>
-      match psCheckedNestedContainerFields shape with
-      | Except.error error => Except.error error
-      | Except.ok fields =>
-          match psCheckedNestedAuxiliaryMinors name start rest with
-          | Except.error error => Except.error error
-          | Except.ok tail => Except.ok (psListAppend (psListMap (psCheckedNestedAuxiliaryMinor name start) fields) tail)
-
-def psCheckedNestedMotive (type : PsExpr) : PsExpr :=
-  PsExpr.lam (psCheckedNestedName "nested") type psCheckedNestedUnit PsBinderInfo.explicit
-
-def psCheckedNestedWrapper (all : List PsDeclaration) (info : PsInductiveInfo) (shapes : List PsExpr) : Except PsCheckedAdmissionCodecError PsDeclaration :=
-  if psListIsEmpty info.levelParams then
-    if Nat.beq info.numParams 0 then
-      if Nat.beq info.numIndices 0 then
-        let majorId := Nat.succ (psListLength info.constructors);
-        let start := Nat.succ majorId;
-        let self := PsExpr.constE info.name List.nil;
-        let major := PsCheckedNestedBinder.mk majorId (psCheckedNestedName "major") self;
-        let motive := PsCheckedNestedBinder.mk 0 (psCheckedNestedName "motive")
-          (PsExpr.forallE major.name self (PsExpr.sortE psCheckedNestedLevel) PsBinderInfo.explicit);
-        match psCheckedNestedMinors all info.name start info.constructors 1 with
-        | Except.error error => Except.error error
-        | Except.ok minors =>
-            match psCheckedNestedAuxiliaryMinors info.name start shapes with
-            | Except.error error => Except.error error
-            | Except.ok auxiliaries =>
-                let binders := List.cons motive (psListAppend (psListMap psCheckedNestedMinorBinder minors) [major]);
-                let args := List.cons (PsExpr.fvar 0) (psListAppend (psListMap psCheckedNestedMotive shapes)
-                  (psListAppend (psListMap psCheckedNestedMinorAdapter minors) (psListAppend auxiliaries [PsExpr.fvar majorId])));
-                let recursor := PsExpr.constE (PsName.str info.name "rec") [psCheckedNestedLevel];
-                Except.ok (PsDeclaration.definitionDecl (PsName.str info.name "_pscShallowRec") [psCheckedNestedLevelName]
-                  (psCheckedNestedBind false binders (PsExpr.app (PsExpr.fvar 0) (PsExpr.fvar majorId)))
-                  (psCheckedNestedBind true binders (psCheckedNestedApply args recursor)))
-      else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-    else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-  else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
-
-def psCheckedNestedCollect (all : List PsDeclaration) (declarations : List PsDeclaration) : Except PsCheckedAdmissionCodecError (List (Prod PsName PsDeclaration)) :=
-  match declarations with
-  | List.nil => Except.ok List.nil
-  | List.cons declaration rest =>
-      match psCheckedNestedCollect all rest with
-      | Except.error error => Except.error error
-      | Except.ok tail =>
-          match declaration with
-          | PsDeclaration.inductiveDecl info =>
-              match psCheckedNestedRoots all info.name info.constructors List.nil with
-              | Except.error error => Except.error error
-              | Except.ok roots =>
-                  if psListIsEmpty roots then Except.ok tail
-                  else
-                    match psCheckedNestedExpand info.name (Nat.succ (psCheckedNestedSizes roots)) roots List.nil with
-                    | Except.error error => Except.error error
-                    | Except.ok shapes =>
-                        match psCheckedNestedWrapper all info shapes with
-                        | Except.error error => Except.error error
-                        | Except.ok wrapper => Except.ok (List.cons (Prod.mk info.name wrapper) tail)
-          | _ => Except.ok tail
-
-def psCheckedNestedFind (wrappers : List (Prod PsName PsDeclaration)) : PsName -> Option PsDeclaration :=
-  match wrappers with
-  | List.nil => fun (_name : PsName) => Option.none
-  | List.cons entry rest =>
-      let smaller : PsName -> Option PsDeclaration := psCheckedNestedFind rest;
-      fun (name : PsName) => if psNameEq name (Prod.fst entry) then Option.some (Prod.snd entry) else smaller name
-
-def psCheckedNestedRewrite (wrappers : List (Prod PsName PsDeclaration)) (expr : PsExpr) : PsExpr :=
-  match expr with
-  | PsExpr.constE name levels =>
-      match name with
-      | PsName.str parent component =>
-          if psStringEq component "rec" then
-            match psCheckedNestedFind wrappers parent with
-            | Option.some _ => PsExpr.constE (PsName.str parent "_pscShallowRec") levels
-            | Option.none => expr
-          else expr
-      | _ => expr
-  | PsExpr.app fn arg => PsExpr.app (psCheckedNestedRewrite wrappers fn) (psCheckedNestedRewrite wrappers arg)
-  | PsExpr.lam name type body binder => PsExpr.lam name (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers body) binder
-  | PsExpr.forallE name type body binder => PsExpr.forallE name (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers body) binder
-  | PsExpr.letE name type value body => PsExpr.letE name (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value) (psCheckedNestedRewrite wrappers body)
-  | PsExpr.proj name index value => PsExpr.proj name index (psCheckedNestedRewrite wrappers value)
-  | _ => expr
-
-def psCheckedNestedNormalize (wrappers : List (Prod PsName PsDeclaration)) (declarations : List PsDeclaration) : List PsDeclaration :=
-  match declarations with
-  | List.nil => List.nil
-  | List.cons declaration rest =>
-      let tail := psCheckedNestedNormalize wrappers rest;
-      match declaration with
-      | PsDeclaration.definitionDecl name levels type value =>
-          List.cons (PsDeclaration.definitionDecl name levels (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) tail
-      | PsDeclaration.theoremDecl name levels type value =>
-          List.cons (PsDeclaration.theoremDecl name levels (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) tail
-      | PsDeclaration.inductiveDecl info =>
-          match psCheckedNestedFind wrappers info.name with
-          | Option.none => List.cons declaration tail
-          | Option.some wrapper => List.cons declaration (List.cons wrapper tail)
-      | _ => List.cons declaration tail
-
-def psCheckedNestedUnitDeclarations : List PsDeclaration :=
-  let constructor := PsName.str psCheckedNestedUnitName "unit";
-  List.cons (PsDeclaration.inductiveDecl
-    (PsInductiveInfo.mk psCheckedNestedUnitName [psCheckedNestedLevelName]
-      (PsExpr.sortE psCheckedNestedLevel) 0 0 [constructor] false))
-    [PsDeclaration.constructorDecl (PsConstructorInfo.mk constructor [psCheckedNestedLevelName]
-      psCheckedNestedUnit psCheckedNestedUnitName 0 0 0 List.nil)]
-
-def psEncodeCheckedAdmissionsNormalized
+def psEncodeCheckedAdmissionsNormalizedIn
+    (environment : PsEnvironment)
     (declarations : List PsDeclaration) :
     Except PsCheckedAdmissionCodecError String :=
-  match psEncodeCheckedAdmissionsLoop
+  match psEncodeCheckedAdmissionsLoopIn
+      (psBridgeAdmissionEnvironment environment declarations)
       declarations
       declarations
       {
@@ -1009,14 +744,19 @@ def psEncodeCheckedAdmissionsNormalized
           psCheckedAdmissionJsonField "version" ("2")
         ])
 
+-- Nested declarations use their actual public and auxiliary recursors. There
+-- is no shallow wrapper or unit substitution in the admission representation.
+def psEncodeCheckedAdmissionsCanonicalIn (environment : PsEnvironment)
+    (declarations : List PsDeclaration) : Except PsCheckedAdmissionCodecError String :=
+  psEncodeCheckedAdmissionsNormalizedIn environment declarations
+
+def psEncodeCheckedAdmissionsNormalized
+    (declarations : List PsDeclaration) : Except PsCheckedAdmissionCodecError String :=
+  psEncodeCheckedAdmissionsNormalizedIn psEnvironmentEmpty declarations
+
 def psEncodeCheckedAdmissionsCanonical
     (declarations : List PsDeclaration) : Except PsCheckedAdmissionCodecError String :=
-  match psCheckedNestedCollect declarations declarations with
-  | Except.error error => Except.error error
-  | Except.ok wrappers =>
-      if psListIsEmpty wrappers then psEncodeCheckedAdmissionsNormalized declarations
-      else psEncodeCheckedAdmissionsNormalized
-        (psListAppend psCheckedNestedUnitDeclarations (psCheckedNestedNormalize wrappers declarations))
+  psEncodeCheckedAdmissionsCanonicalIn psEnvironmentEmpty declarations
 
 def psEncodeCheckedAdmissionsText
     (declarations : List PsDeclaration) :
@@ -1024,3 +764,4 @@ def psEncodeCheckedAdmissionsText
   match psEncodeCheckedAdmissionsCanonical declarations with
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (String.Internal.append encoded "\n")
+

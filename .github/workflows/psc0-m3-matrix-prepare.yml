@@ -1,0 +1,307 @@
+name: PSCV0 M3 fixed-discriminant recursion preparation
+on:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1]
+    paths: ['.github/workflows/psc0-m3-matrix-prepare.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pscv0-m3-matrix-prepare-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/test/
+            /psc0/scripts/
+            /psc0/v7-native/
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Prepare exact native Lean candidate without moving a repository ref
+        id: prepare
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test ! -d psc0/packages/pskernel-core
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          expected = {
+              'psc0/packages/elab/src/Ps/Elab/Recursion.lean': '1d6ddf7b2d9fa53ed0a5196410bb98d1c4d7adea',
+              'psc0/packages/elab/src/Ps/Elab/Declaration.lean': '2f6948d63d516167eaf3c498a530def3efc8865f',
+              'psc0/test/Pscv0M3RecursiveDeriving.lean': '40a4e4496319d0361bc43693294382ac87c80615',
+              'psc0/scripts/pscv0-m3-recursive-deriving.mjs': '82d6e318326031d0af80399fc904aab85f7a540d',
+          }
+          def blob(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          texts = {}
+          for path, sha in expected.items():
+              data = Path(path).read_bytes()
+              assert blob(data) == sha, ('changed baseline', path, blob(data))
+              texts[path] = data.decode()
+          def replace(text, old, new):
+              assert text.count(old) == 1, ('nonunique replacement', old, text.count(old))
+              return text.replace(old, new)
+          recursion = 'psc0/packages/elab/src/Ps/Elab/Recursion.lean'
+          text = texts[recursion]
+          helpers = '''-- The major and its indices vary together. Share this classification between
+          -- structural-call admission and the changing-argument normalization planner.
+          def psElabRecursionIndexIds (context : PsElabContext) (majorId : Nat) : List Nat :=
+            match psLocalFindById context.localContext majorId with
+            | none => []
+            | some major =>
+              let view := psExprAppView (psWhnf context.environment context.metaContext
+                context.localContext (psLocalDeclType major))
+              match view.head with
+              | .constE family _ =>
+                match psEnvironmentFindInductive context.environment family with
+                | none => []
+                | some info => (psElabMatchIndexMap (view.args.take info.numParams)
+                    (view.args.drop info.numParams)).map Prod.fst
+              | _ => []
+
+          -- Pattern inputs are evaluated before the matrix is split. Only fixed
+          -- parameter references may accompany the selected structural major here:
+          -- freezing a computed or varying input would change recursive behavior.
+          -- The existing child-telescope checks still validate dependent types.
+          def psElabRecursionMatrixFixedIds (context : PsElabContext)
+              (parameterIds varyingIds : List Nat) (sources : List PsSyntaxTerm) :
+              Option (List Nat) :=
+            sources.mapM fun source => do
+              let id ← psElabRecursionLocalId context.localContext source
+              if !parameterIds.contains id || varyingIds.contains id then none
+              else some id
+
+          '''
+          text = replace(text, 'def psElabRecursionIsSelf\n', helpers + 'def psElabRecursionIsSelf\n')
+          text = replace(text,
+              '| PsSyntaxTerm.matchMany [major] alternatives matchSpan =>',
+              '| PsSyntaxTerm.matchMany (major :: discriminants) alternatives matchSpan =>')
+          text = replace(text,
+              'PsSyntaxTerm.matchMany [major]\n                            (psElabRecursionWrapAlternatives',
+              'PsSyntaxTerm.matchMany (major :: discriminants)\n                            (psElabRecursionWrapAlternatives')
+          start = text.index('def psElabPlanStructuralNormalizationWithOrigin\n')
+          stop = text.index('-- Existing callers receive the same plan result and errors by projection.', start)
+          text = text[:start] + '''def psElabPlanStructuralNormalizationWithOrigin
+              (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
+              (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+              (typeSyntax valueSyntax : PsSyntaxTerm) (span : PsSourceSpan)
+              (levelNames : List PsName := []) :
+              Except PsElabError (Option PsElabStructuralNormalizationWithOrigin) := do
+            let .matchMany (scrutinee :: discriminants) _ _ := valueSyntax | return none
+            let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+            let binderResult ← psElabTypedBinders psElabRecursionTermCallback
+              (psElabContextEmpty environment levelNames) binders
+            let some majorId := psElabRecursionLocalId binderResult.context.localContext scrutinee
+              | return none
+            let typed := psElabTypedBinderListReverse binderResult.bindersRev
+            let explicitIds := psElabRecursionExplicitIds typed
+            if !explicitIds.contains majorId then return none
+            let typeResult ← psElabTerm binderResult.context typeSyntax none >>= psElabEnsureType
+            let _ ← (psInferEnsureSort typeResult.context.environment typeResult.context.metaContext
+              typeResult.context.localContext typeResult.type).mapError PsElabError.infer
+            let indexIds := psElabRecursionIndexIds typeResult.context majorId
+            let plan := PsElabRecursionPlan.mk name (psElabRecursionParameterIds typed)
+              explicitIds majorId [] indexIds
+            let scanned ← psElabRecursionWalkWithFuel 4096 plan environment
+              typeResult.context.localContext valueSyntax
+            if scanned.changedIds.isEmpty then return none
+            -- A changing accumulator can move into the worker result telescope;
+            -- an input already inspected by this matrix cannot be frozen outside it.
+            let some _ := psElabRecursionMatrixFixedIds typeResult.context plan.parameterIds
+              (majorId :: (indexIds ++ scanned.changedIds)) discriminants
+              | throw .structuralRecursionInvariantArgument
+            let generalized := { plan with generalizedIds := scanned.changedIds }
+            let normalized ← psElabRecursionBuildNormalizationWithOrigin generalized
+              binders typeSyntax valueSyntax span binderResult typeResult
+            return some normalized
+
+          ''' + text[stop:]
+          texts[recursion] = text
+          declaration = 'psc0/packages/elab/src/Ps/Elab/Declaration.lean'
+          text = texts[declaration]
+          start = text.index('def psElabStructuralRecursionFromSource\n')
+          stop = text.index('def psElabDeclarationTermCallback\n', start)
+          text = text[:start] + '''-- Select the first matrix input as the structural major. Additional inputs
+          -- remain fixed parameters; no source reordering or duplicated evaluation.
+          -- Unsupported recursive matrices retain the self-call refusal path, while
+          -- ordinary nonrecursive matrices still use the unchanged general elaborator.
+          def psElabStructuralRecursionFromSource
+              (functionName : PsName) (bindersRev : List PsElabTypedBinder)
+              (body : PsSyntaxTerm) (context : PsElabContext) (resultType : PsExpr) :
+              Option PsElabStructuralRecursion := do
+            let .matchMany (scrutinee :: discriminants) _ _ := body | none
+            let majorId ← psElabRecursionLocalId context.localContext scrutinee
+            let typed := psElabTypedBinderListReverse bindersRev
+            let parameterIds := psElabRecursionParameterIds typed
+            let explicitParameterIds := psElabExplicitParameterIds typed
+            let recursiveParameterIndex ← psElabFindNatIndex majorId explicitParameterIds 0
+            let fixedInputs := psElabRecursionMatrixFixedIds context parameterIds
+              (majorId :: psElabRecursionIndexIds context majorId) discriminants
+            return PsElabStructuralRecursion.mk functionName parameterIds explicitParameterIds
+              recursiveParameterIndex [] resultType fixedInputs.isSome [] false
+
+          ''' + text[stop:]
+          texts[declaration] = text
+          fixture = 'psc0/test/Pscv0M3RecursiveDeriving.lean'
+          text = texts[fixture]
+          oracle = '''
+          -- Independent native structural recursion, including a changing accumulator.
+          def matrixCount (n : Nat) (flag : Bool) : Nat :=
+            match n, flag with
+            | 0, _ => 3
+            | k + 1, true => matrixCount k flag + 2
+            | k + 1, false => matrixCount k flag + 1
+          termination_by structural n
+
+          def matrixAcc (n : Nat) (flag : Bool) (acc : Nat) : Nat :=
+            match n, flag with
+            | 0, _ => acc
+            | k + 1, true => matrixAcc k flag (acc + 2)
+            | k + 1, false => matrixAcc k flag (acc + 1)
+          termination_by structural n
+
+          example (n : Nat) : matrixCount (Nat.succ n) true = matrixCount n true + 2 := by rfl
+          example (n acc : Nat) : matrixAcc (Nat.succ n) false acc = matrixAcc n false (acc + 1) := by rfl
+          '''
+          text = replace(text, 'end M3RecursiveHashOracle', oracle + 'end M3RecursiveHashOracle')
+          source = '''function m3matrixfold(n: Nat, flag: Bool): Nat := match n, flag with {
+           | 0, _ => 3
+           | k+1, true => m3matrixfold(k, flag) + 2
+           | k+1, false => m3matrixfold(k, flag) + 1
+          }
+          function m3matrixworker(n: Nat, flag: Bool, acc: Nat): Nat := match n, flag with {
+           | 0, _ => acc
+           | k+1, true => m3matrixworker(k, flag, acc + 2)
+           | k+1, false => m3matrixworker(k, flag, acc + 1)
+          }
+          theorem m3matrixstep(n: Nat): m3matrixfold(Nat.succ(n), true) = m3matrixfold(n, true) + 2 := by { rfl }
+          theorem m3matrixaccstep(n: Nat, acc: Nat): m3matrixworker(Nat.succ(n), false, acc) = m3matrixworker(n, false, acc + 1) := by { rfl }
+          function m3matrixcount(flag: Bool): UInt64 := UInt64.ofNat(m3matrixfold(if (flag) { 17 } else { 9 }, flag))
+          function m3matrixacc(flag: Bool): UInt64 := UInt64.ofNat(m3matrixworker(if (flag) { 17 } else { 9 }, flag, 7))
+          function m3matrixcomputed(n: Nat): Nat := match n, Nat.beq(n, 0) with {
+           | 0, _ => 7
+           | k+1, true => 13
+           | k+1, false => 19
+          }
+          theorem m3matrixcomputedlaw: m3matrixcomputed(1) = 19 := by { rfl }
+          '''
+          rendered = '  ' + ' ++\n  '.join(json.dumps(line + '\n') for line in source.splitlines())
+          text = replace(text, '\n\nprivate def refusals', ' ++\n' + rendered + '\n\nprivate def refusals')
+          negative = [
+            ('matrix-nondecreasing', 'function badMatrix(n: Nat, flag: Bool): Nat := match n, flag with { | 0, _ => 0 | k+1, true => badMatrix(n, flag) | k+1, false => 0 }\n', 'recursive major must be a direct recursive field'),
+            ('matrix-computed-input', 'function frozenMatrix(n: Nat): Nat := match n, Nat.beq(n, 0) with { | 0, _ => 0 | k+1, true => frozenMatrix(k) | k+1, false => frozenMatrix(k) }\n', 'recursive major must be a direct recursive field'),
+            ('matrix-changing-input', 'function changedMatrix(n: Nat, flag: Bool): Nat := match n, flag with { | 0, _ => 0 | k+1, true => changedMatrix(k, Bool.not(flag)) | k+1, false => changedMatrix(k, Bool.not(flag)) }\n', 'argument must equal its child index or invariant value'),
+          ]
+          rendered = ''.join('  (' + ', '.join(json.dumps(value) for value in row) + '),\n' for row in negative)
+          text = replace(text, 'private def refusals : List (String × String × String) := [\n',
+              'private def refusals : List (String × String × String) := [\n' + rendered)
+          text = replace(text, '"m3decideproof"] }', '"m3decideproof", "m3matrixcount", "m3matrixacc"] }')
+          text = replace(text, '    ("reprNatText",',
+              '    ("m3matrixcount", Lean.toJson (toString (M3RecursiveHashOracle.matrixCount (if flag then 17 else 9) flag))),\n' +
+              '    ("m3matrixacc", Lean.toJson (toString (M3RecursiveHashOracle.matrixAcc (if flag then 17 else 9) flag 7))),\n' +
+              '    ("reprNatText",')
+          text += '\n  IO.println "PSCV0_M3_MATRIX_RECURSION: PASS fixed-discriminant structural recursion, changing accumulator, checked equations, preserved nonrecursive computed input and three phase-correct refusals; runtime checks follow"\n'
+          texts[fixture] = text
+          driver = 'psc0/scripts/pscv0-m3-recursive-deriving.mjs'
+          texts[driver] = replace(texts[driver], "'m3decideproof'];", "'m3decideproof', 'm3matrixcount', 'm3matrixacc'];")
+          output = Path('psc0/dist/m3-matrix-prepare')
+          output.mkdir(parents=True, exist_ok=True)
+          manifest = []
+          for path, content in texts.items():
+              Path(path).write_text(content)
+              manifest.append({'path': path, 'original': expected[path], 'sha': blob(content.encode())})
+          (output / 'candidate.json').write_text(json.dumps({'baseline': '7638fc3da827efd001e22337c0afcd520aea56e5', 'files': manifest}, indent=2))
+          print('PSC0_MATRIX_PREPARED ' + json.dumps(manifest))
+          PY
+          cd psc0/v7-native
+          node ../scripts/pscv0-native-profile.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-matrix-preflight-${{ github.sha }}
+          restore-keys: |
+            pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Build and check the candidate on cloud Linux
+        id: checked
+        working-directory: psc0/v7-native
+        run: |
+          set -euo pipefail
+          lean --version | grep -F 'eb6cafb'
+          lake build pscv0_native pscv0_m3_recursive_deriving 2>&1 | tee ../dist/m3-matrix-prepare/build.log
+          .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-matrix-prepare | tee ../dist/m3-matrix-prepare/check.log
+          node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-matrix-prepare | tee ../dist/m3-matrix-prepare/js.log
+      - name: Publish candidate blobs only, never commits or refs
+        if: always() && steps.prepare.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CHECK_OUTCOME: ${{ steps.checked.outcome }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, urllib.request
+          from pathlib import Path
+          path = Path('psc0/dist/m3-matrix-prepare/candidate.json')
+          manifest = json.loads(path.read_text())
+          for item in manifest['files']:
+              content = Path(item['path']).read_text()
+              request = urllib.request.Request('https://api.github.com/repos/dwijayuda/pskernel/git/blobs',
+                  data=json.dumps({'content': content, 'encoding': 'utf-8'}).encode(),
+                  headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'}, method='POST')
+              with urllib.request.urlopen(request) as response:
+                  result = json.load(response)
+              assert result['sha'] == item['sha'], item['path']
+          manifest['preflight'] = os.environ['CHECK_OUTCOME']
+          path.write_text(json.dumps(manifest, indent=2))
+          print('PSC0_MATRIX_BLOBS ' + json.dumps(manifest))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-m3-matrix-preparation-${{ github.sha }}
+          path: psc0/dist/m3-matrix-prepare/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,8 +1,10 @@
 import Ps.BackendWasm.Model
 import Ps.Foundation.List
+import Ps.Foundation.Name
 
 inductive PsWasmIrValidationError where
   | duplicateTypeName (name : String)
+  | duplicateFieldName (owner : String)
   | duplicateFunctionName (name : String)
   | duplicateExportName (name : String)
   | duplicateFunctionRef (name : String)
@@ -18,6 +20,7 @@ inductive PsWasmIrValidationError where
   | invalidValueType
   | invalidTypeDeclaration (name : String)
   | invalidFunctionBody (name : String)
+  deriving Repr
 
 def psWasmIrStringIn
     (target : String)
@@ -287,7 +290,9 @@ def psWasmIrValidateStructures
   | List.nil =>
       Except.ok Unit.unit
   | List.cons value rest =>
-      match value.superType with
+      if !psWasmIrUnique (value.fields.map (·.name)) then
+        Except.error (.duplicateFieldName value.name)
+      else match value.superType with
       | Option.some parent =>
           match psWasmIrFindStructure module.structures parent with
           | Option.none =>
@@ -343,6 +348,10 @@ def psWasmIrValidateInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmIrValidationError Unit :=
   match instruction with
+  | .memory _ =>
+      if module.abiMemory && functionName.startsWith "__ps_abi_" then pure () else throw (.invalidFunctionBody functionName)
+  | .globalGet index | .globalSet index =>
+      if functionName.startsWith "__ps_abi_" && index < module.abiGlobals.length then pure () else throw (.invalidLocalIndex functionName index)
   | PsWasmInstruction.localGet index =>
       if Nat.blt index localCount then
         Except.ok Unit.unit
@@ -741,7 +750,10 @@ def psWasmIrValidateModuleStructure
     psWasmIrFunctionNames module.functions;
   let exportNames : List String :=
     psWasmIrExportNames module.exports;
-  if psWasmIrUnique typeNames then
+  if (!module.abiMemory && !module.abiGlobals.isEmpty) ||
+      (module.abiMemory && exportNames.contains "memory") then
+    Except.error (.invalidTypeDeclaration "ABI memory/global policy")
+  else if psWasmIrUnique typeNames then
     if psWasmIrUnique functionNames then
       if psWasmIrUnique exportNames then
         if psWasmIrUnique module.functionRefs then

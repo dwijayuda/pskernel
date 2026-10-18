@@ -1,0 +1,223 @@
+name: PSCV0 M3 foundation preparation (Linux)
+
+on:
+  push:
+    branches: [psc0/m3-fixedpoint-foundation-20261018]
+    paths:
+      - 'psc0/packages/**/src/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/host/src/**'
+      - 'psc0/v7-native/**'
+      - 'psc0/test/Pscv0M3*.lean'
+      - 'psc0/scripts/Pscv0M3*.lean'
+      - '.github/workflows/psc0-m3-foundation-preparation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pscv0-m3-foundation-preparation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/test/
+            /psc0/scripts/
+            /psc0/v7-native/
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Guard native-only closure and v7.2 identity
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test ! -d ../packages/pskernel-core
+          node ../scripts/pscv0-native-profile.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-m3-foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-m3-foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+            pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Inspect exact pinned native classical signatures
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation
+          lake env lean ../scripts/Pscv0M3ClassicalSignatures.lean 2>&1 | tee ../dist/m3-foundation-preparation/native-classical-signatures.log
+      - name: Build native foundation authoring and source checks
+        id: build
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/where ../dist/m3-foundation-preparation/partial/p0-generic ../dist/m3-foundation-preparation/partial/p0-nonempty
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-foundation-preparation/source-sha.txt
+          lean --version | tee ../dist/m3-foundation-preparation/toolchain.txt
+          grep -F '4.35.0' ../dist/m3-foundation-preparation/toolchain.txt
+          grep -F 'eb6cafb' ../dist/m3-foundation-preparation/toolchain.txt
+          lake build pscv0_native pscv0_m3_partial_fixpoint_export pscv0_m3_mutual_well_founded_export pscv0_m3_mutual_packing pscv0_m3_where pscv0_m3_mutual_partial pscv0_m3_well_founded 2>&1 | tee ../dist/m3-foundation-preparation/build.log
+      - name: Check exact primitive signatures and logical closure
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake env lean --run ../scripts/Pscv0M3FoundationInventory.lean 2>&1 | tee ../dist/m3-foundation-preparation/foundation-inventory.log
+          .lake/build/bin/pscv0_native --audit-primitives > ../dist/m3-foundation-preparation/primitive-audit.json
+          .lake/build/bin/pscv0_native --audit-standard-closure > ../dist/m3-foundation-preparation/standard-closure.json
+          printf '%s\n' 'PSCV0_M3_AUDITS: PASS exact primitive and full logical closure audits; complete JSON retained in artifacts'
+      - name: Strict selected manifest audit and independent candidate digests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --audit-standard-surface 2>&1 | tee ../dist/m3-foundation-preparation/standard-surface.log
+      - name: Export and replay the pinned fixedpoint foundation
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_export ../dist/m3-foundation-preparation/StandardPartialFixpointCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
+      - name: Export standalone pinned PSum foundation
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_mutual_well_founded_export ../dist/m3-foundation-preparation/StandardPSumCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/psum-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
+      - name: Check retained PSum bytes and dependent component packing
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          cmp ../dist/m3-foundation-preparation/StandardPSumCandidate.lean ../packages/environment/src/Ps/Environment/StandardPSumData.lean
+          .lake/build/bin/pscv0_m3_mutual_packing 2>&1 | tee ../dist/m3-foundation-preparation/packing.log
+      - name: Compile retained order data and inspect native instance metadata
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake build Ps.Environment.StandardPartialFixpointData 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-data-build.log
+          lake env lean --run ../scripts/Pscv0M3PartialFixpointMetadata.lean 2>&1 | tee ../dist/m3-foundation-preparation/fixedpoint-metadata.log
+      - name: Check selected partial and ordinary section source behavior
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          m3_foundation_fixture_status=0
+          m3_foundation_check() {
+            local m3_foundation_log="$1"
+            shift
+            if "$@" 2>&1 | tee "$m3_foundation_log"; then
+              return 0
+            else
+              m3_foundation_fixture_status=1
+            fi
+          }
+          m3_foundation_check ../dist/m3-foundation-preparation/partial-fixpoint-assumptions.log lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean
+          m3_foundation_check ../dist/m3-foundation-preparation/where/check.log .lake/build/bin/pscv0_m3_where ../dist/m3-foundation-preparation/where
+          m3_foundation_check ../dist/m3-foundation-preparation/partial/check.log .lake/build/bin/pscv0_m3_mutual_partial ../dist/m3-foundation-preparation/partial
+          mkdir -p ../dist/m3-foundation-preparation/well-founded
+          m3_foundation_check ../dist/m3-foundation-preparation/well-founded/check.log .lake/build/bin/pscv0_m3_well_founded ../dist/m3-foundation-preparation/well-founded
+          test "$m3_foundation_fixture_status" -eq 0
+      - name: Check indexed cases and heterogeneous major/context transport
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/inductive-match
+          lake build pscv0_m3_inductive_match 2>&1 | tee ../dist/m3-foundation-preparation/inductive-match/build.log
+          .lake/build/bin/pscv0_m3_inductive_match ../dist/m3-foundation-preparation/inductive-match 2>&1 | tee ../dist/m3-foundation-preparation/inductive-match/check.log
+      - name: Compile the checked monotonicity proof producer
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake build Ps.Elab.Monotonicity Ps.Elab.PartialFixpoint 2>&1 | tee ../dist/m3-foundation-preparation/monotonicity-build.log
+      - name: Compile proposed Order audit and monotonicity proofs
+        id: order_probe_build
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake build pscv0_m3_partial_fixpoint_probe 2>&1 | tee ../dist/m3-foundation-preparation/order-probe-build.log
+      - name: Audit retained Order declarations and selected metadata
+        if: ${{ !cancelled() && steps.order_probe_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_probe foundation 2>&1 | tee ../dist/m3-foundation-preparation/order-probe-audit.log
+      - name: Construct portable monotonicity proofs and replay in fresh kernel
+        if: ${{ !cancelled() && steps.order_probe_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_probe monotonicity 2>&1 | tee ../dist/m3-foundation-preparation/monotonicity-proof.log
+      - name: Check indexed BEq source, native laws and kernel equations
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/inductive-deriving ../dist/m3-foundation-preparation/recursive-deriving
+          lake build pscv0_m3_inductive_deriving pscv0_m3_recursive_deriving 2>&1 | tee ../dist/m3-foundation-preparation/deriving-build.log
+          .lake/build/bin/pscv0_m3_inductive_deriving ../dist/m3-foundation-preparation/inductive-deriving 2>&1 | tee ../dist/m3-foundation-preparation/inductive-deriving/check.log
+          .lake/build/bin/pscv0_m3_recursive_deriving ../dist/m3-foundation-preparation/recursive-deriving 2>&1 | tee ../dist/m3-foundation-preparation/recursive-deriving/check.log
+      - name: Check selected P1 construction, exact equations and runtime emission
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/partial-fixpoint
+          lake build pscv0_m3_partial_fixpoint 2>&1 | tee ../dist/m3-foundation-preparation/partial-fixpoint/build.log
+          .lake/build/bin/pscv0_m3_partial_fixpoint ../dist/m3-foundation-preparation/partial-fixpoint 2>&1 | tee ../dist/m3-foundation-preparation/partial-fixpoint/check.log
+      - name: Check noncomputable logical ownership and executable dependency boundary
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../dist/m3-foundation-preparation/noncomputable
+          lake build pscv0_m3_noncomputable 2>&1 | tee ../dist/m3-foundation-preparation/noncomputable/build.log
+          .lake/build/bin/pscv0_m3_noncomputable ../dist/m3-foundation-preparation/noncomputable 2>&1 | tee ../dist/m3-foundation-preparation/noncomputable/check.log
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: always() && !cancelled() && steps.build.outcome != 'skipped'
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-m3-foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-${{ github.sha }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-m3-foundation-preparation-${{ github.sha }}
+          path: psc0/dist/m3-foundation-preparation/
+          if-no-files-found: warn
+          retention-days: 30

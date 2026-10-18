@@ -1,0 +1,80 @@
+name: PSC0 v7.2 complete reference comparison
+on:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1]
+    paths: ['.github/workflows/psc0-v72-reference-audit.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read complete immutable references and retain exact differences
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import base64, difflib, hashlib, html, json, os, pathlib, re, urllib.request
+          ref = 'cb000664841d3f1ee4738bdf0bd68f390e3fd9e8'
+          root = 'https://api.github.com/repos/' + os.environ['REPOSITORY']
+          headers = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'}
+          out = pathlib.Path('reference-audit'); out.mkdir()
+          identities, texts = [], []
+          paths = ['psc0/PSCV0_LANGUAGE_REFERENCE.md','psc0/PSCV0_LANGUAGE_REFERENCE_v7.1.md','psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md']
+          for path in paths:
+              with urllib.request.urlopen(urllib.request.Request(root + '/contents/' + path + '?ref=' + ref, headers=headers), timeout=30) as response:
+                  item = json.load(response)
+              data = base64.b64decode(item['content']); text = data.decode('utf-8'); lines = text.splitlines()
+              blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+              if blob != item['sha']: raise ValueError('Git blob mismatch: ' + path)
+              fnv = 14695981039346656037
+              for byte in data: fnv = ((fnv ^ byte) * 1099511628211) & ((1 << 64)-1)
+              identity = {'path':path,'sourceCommit':ref,'bytes':len(data),'physicalLines':len(lines),'gitBlobSha1':blob,'sha256':hashlib.sha256(data).hexdigest(),'fnv1a64':str(fnv)}
+              identities.append(identity); texts.append(text)
+              (out / pathlib.Path(path).name).write_bytes(data)
+              print('IDENTITY',json.dumps(identity))
+              headings = [(i+1,line) for i,line in enumerate(lines) if re.match(r'^#{1,3} ',line)]
+              (out / (pathlib.Path(path).name + '.headings.json')).write_text(json.dumps(headings,ensure_ascii=False))
+              if path == paths[-1]:
+                  for number,line in headings: print('V72_SECTION',number,line)
+                  locations = [(i+1,line) for i,line in enumerate(lines) if re.search(r'PSCV0-(?:TERM-02|FIXPOINT-01|REC-STRATEGY-01|UNSAFE-01|LOOP-01|ASSURANCE-01)',line)]
+                  (out / 'v72-policy-locations.json').write_text(json.dumps(locations,ensure_ascii=False,indent=2))
+                  for number,line in locations:
+                      print('V72_RULE',number,line[:1800])
+          (out / 'identities.json').write_text(json.dumps(identities,indent=2))
+          def normalized_lines(text):
+              # Diagnostic normalization only. Never use it as a language parser or authority.
+              text = re.sub(r'<(?:br\s*/?|/?(?:table|thead|tbody|tr|td|th|pre|p)[^>]*)>', '\n', text, flags=re.I)
+              text = re.sub(r'</?code[^>]*>', '', text, flags=re.I)
+              text = html.unescape(text)
+              result = []
+              for line in text.splitlines():
+                  if re.match(r'^\s*```',line): continue
+                  line = line.replace('**','').replace('`','').replace('\\|','|')
+                  line = ' '.join(line.split())
+                  if line: result.append(line)
+              return result
+          for index in [0,1]:
+              left,right = paths[index:index+2]
+              raw = ''.join(difflib.unified_diff(texts[index].splitlines(True),texts[index+1].splitlines(True),fromfile=left,tofile=right,n=2))
+              (out / ('raw-' + str(index) + '.diff')).write_text(raw)
+              a,b = normalized_lines(texts[index]),normalized_lines(texts[index+1])
+              diff = list(difflib.unified_diff(a,b,fromfile=left,tofile=right,n=1,lineterm=''))
+              (out / ('normalized-' + str(index) + '.diff')).write_text('\n'.join(diff)+'\n')
+              print('COMPARISON',left,right,'normalizedLines',len(a),len(b),'diffLines',len(diff))
+              # Log all changed prose carrying the migration policies. Full raw and normalized
+              # comparisons are in the artifact; a formatting edit is not a semantic change.
+              for line in diff:
+                  if line[:1] in ['+','-'] and re.search(r'partial|unsafe|noncomputable|psRecursion|psConstVal|psModifiers|assurance|divergen|termination|14\.10',line,re.I):
+                      print('POLICY_DIFF',index,line[:2400])
+          print('REFERENCE_AUDIT: complete byte identities and differences recorded; not executed language conformance')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-v72-reference-audit-${{ github.sha }}
+          path: reference-audit/
+          if-no-files-found: error
+          retention-days: 30

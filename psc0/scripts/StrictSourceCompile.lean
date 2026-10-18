@@ -138,6 +138,7 @@ def psStrictNativeOriginRole (role : PsElabOriginRole) : String :=
   | .structureType => "structureType"
   | .constructor => "constructor"
   | .recursor => "recursor"
+  | .derivedInstance => "derivedInstance"
   | .normalizedWorker => "normalizedWorker"
   | .publicWrapper => "publicWrapper"
 

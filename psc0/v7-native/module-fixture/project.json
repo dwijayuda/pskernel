@@ -1,0 +1,17 @@
+{
+  "entry": "App",
+  "modules": [
+    {
+      "name": "App",
+      "path": "App.ps"
+    },
+    {
+      "name": "Facade",
+      "path": "Facade.ps"
+    },
+    {
+      "name": "Vault",
+      "path": "Vault.ps"
+    }
+  ]
+}

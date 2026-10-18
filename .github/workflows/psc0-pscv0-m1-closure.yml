@@ -1,11 +1,6 @@
 name: PSC0 v7 M1 combined source closure (Linux only)
 on:
-  push:
-    branches: [psc0/pscv0-v7-m1-parser-ownership-v1]
-    paths:
-      - 'psc0/tools/abi/m1-source-closure.mjs'
-      - 'psc0/tools/abi/m1-compare-products.mjs'
-      - '.github/workflows/psc0-pscv0-m1-closure.yml'
+  # Historical compiler regeneration is an explicit migration/qualification action.
   workflow_dispatch:
 permissions:
   contents: read

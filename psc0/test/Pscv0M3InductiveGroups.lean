@@ -1,0 +1,358 @@
+import Ps.Host.NativeV7
+import Ps.Core.InductiveGroup
+import Ps.Meta.Recursor
+import PsKernelLean.Admission
+
+-- Independent ordinary Lean declarations. The native group API below parses
+-- the member ASTs separately and admits its own Core group into a fresh checked
+-- prelude. v7.2's .ps mutual syntax remains definition/function-only.
+-- Pinned Lean syntax requires matching parameter spellings; these ordinary
+-- declarations use A/a while the native member AST inputs exercise B/b aliases.
+universe u
+mutual
+  inductive M3GroupLeft (A : Type u) : Type u where
+    | nil
+    | link (value : A) (next : M3GroupRight A)
+  inductive M3GroupRight (A : Type u) : Type u where
+    | join (previous : M3GroupLeft A)
+end
+
+-- These are logical recursor oracles checked by rfl, not native runtime
+-- functions: Lean's code generator also refuses direct mutual recursors.
+noncomputable def m3GroupOracle : M3GroupLeft Nat → Nat :=
+  @M3GroupLeft.rec Nat (fun _ => Nat) (fun _ => Nat)
+    0 (fun _ _ ih => Nat.succ ih) (fun _ ih => Nat.succ ih)
+
+example : m3GroupOracle (.link 7 (.join .nil)) = 2 := rfl
+
+mutual
+  inductive M3IndexedLeft (A : Type) : Nat → Type where
+    | zero : M3IndexedLeft A 0
+    | step (n : Nat) (next : M3IndexedRight A n) : M3IndexedLeft A (Nat.succ n)
+  inductive M3IndexedRight (A : Type) : Nat → Type where
+    | wrap (n : Nat) (previous : M3IndexedLeft A n) : M3IndexedRight A n
+end
+
+mutual
+  inductive M3PropLeft : Prop where
+    | fromRight (right : M3PropRight)
+  inductive M3PropRight : Prop where
+    | intro
+end
+
+-- Parameters are dependent and index counts differ between members. The
+-- native AST variant below also checks alias rebinding of these parameters.
+mutual
+  inductive M3DependentLeft (A : Type) (a : A) : Type where
+    | stop
+    | next (right : M3DependentRight A a 0)
+  inductive M3DependentRight (A : Type) (a : A) : Nat → Type where
+    | wrap (n : Nat) (left : M3DependentLeft A a) : M3DependentRight A a n
+end
+
+noncomputable def m3DependentOracle : M3DependentRight Nat 7 5 → Nat :=
+  @M3DependentRight.rec Nat 7 (fun _ => Nat) (fun _ _ => Nat)
+    0 (fun _ ih => Nat.succ ih) (fun n _ ih => Nat.add n ih) 5
+
+example : m3DependentOracle (.wrap 5 (.next (.wrap 0 .stop))) = 6 := rfl
+
+namespace M3InductiveGroups
+
+private def ensure (condition : Bool) (message : String) : IO Unit :=
+  unless condition do throw (IO.userError message)
+
+private def elabMessage : PsElabError → String
+  | .data message | .scope message => message
+  | .unknownName name => "unknown name: " ++ psNameToString name
+  | .atDeclaration name error => psNameToString name ++ ": " ++ elabMessage error
+  | .typeMismatch => "type mismatch"
+  | .infer _ => "Core type inference failed"
+  | .matchRecursorUnsupported => "group match consumer remains unsupported"
+  | _ => "unexpected elaboration error"
+
+private def sources (text : String) : Except String (List PsElabInductiveSource) := do
+  let program ← psPscv0ParseProgram text
+  let parts ← program.commands.mapM fun command =>
+    match command with
+    | .universeCmd _ _ => pure []
+    | .declaration (.inductiveDecl name params resultType constructors _) =>
+      pure [{ name, params, resultType, constructors : PsElabInductiveSource }]
+    | _ => throw "native group fixture must contain only inductive members and universe names"
+  return parts.flatten
+
+private def elaborate (text : String) (levels : List PsName := []) :
+    Except String PsElabDeclarationBatchResult := do
+  let members ← sources text
+  (psElabInductiveGroup psSelfHostProdPreludeEnvironment members levels).mapError elabMessage
+
+private def fromExcept (result : Except String α) : IO α :=
+  match result with
+  | .ok value => pure value
+  | .error error => throw (IO.userError error)
+
+private def groupSource : String :=
+  "universe u\n" ++
+  "inductive M3GroupLeft(A: Type u): Type u where { | nil | link(value: A, next: M3GroupRight(A)) }\n" ++
+  "inductive M3GroupRight(B: Type u): Type u where { | join(previous: M3GroupLeft(B)) }\n"
+
+private def indexedSource : String :=
+  "inductive M3IndexedLeft(A: Type): Nat -> Type where { | zero: M3IndexedLeft(A, 0) | step(n: Nat, next: M3IndexedRight(A, n)): M3IndexedLeft(A, Nat.succ(n)) }\n" ++
+  "inductive M3IndexedRight(B: Type): Nat -> Type where { | wrap(n: Nat, previous: M3IndexedLeft(B, n)): M3IndexedRight(B, n) }\n"
+
+private def propSource : String :=
+  "inductive M3PropLeft: Prop where { | fromRight(right: M3PropRight) }\n" ++
+  "inductive M3PropRight: Prop where { | intro }\n"
+
+private def dependentSource : String :=
+  "inductive M3DependentLeft(A: Type, a: A): Type where { | stop | next(right: M3DependentRight(A, a, 0)) }\n" ++
+  "inductive M3DependentRight(B: Type, b: B): Nat -> Type where { | wrap(n: Nat, left: M3DependentLeft(B, b)): M3DependentRight(B, b, n) }\n"
+
+-- Checking an identity at the retained recursor type compares the entire
+-- telescope against the recursor actually regenerated by official Lean.
+-- Merely checking counts or comparing two local copies would not do this.
+private def signatureWitnesses (declarations : List PsDeclaration) : List PsDeclaration :=
+  declarations.filterMap fun declaration =>
+    match declaration with
+    | .recursorDecl info => some (.definitionDecl
+      (psNameAppendStr info.name "_signature") info.levelParams info.type
+      (.constE info.name (info.levelParams.map PsLevel.param)))
+    | _ => none
+
+private def encode (declarations : List PsDeclaration) : Except String String :=
+  (psEncodeCheckedAdmissionsCanonical declarations).mapError
+    (fun _ => "canonical group admission refused")
+
+private def check (prelude : Lean.Kernel.Environment) (declarations : List PsDeclaration) :
+    IO Lean.Kernel.Environment := do
+  let encoded ← fromExcept (encode declarations)
+  let converted ← fromExcept ((PsKernelLean.decodeCanonicalAdmissions encoded).mapError
+    (fun error => error.kind.code ++ ": " ++ error.message))
+  let checked ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.admitDeclarations prelude converted
+  fromExcept (checked.mapError (fun error => error.kind.code ++ ": " ++ error.message))
+
+private def oneAdmission (declarations : List PsDeclaration) (members : Nat) : IO Unit := do
+  let encoded ← fromExcept (encode declarations)
+  let decoded ← fromExcept ((PsKernelLean.decodeCanonicalAdmissions encoded).mapError (fun error => error.message))
+  match decoded.toList with
+  | [.inductDecl _ _ types false] => ensure (types.length == members) "canonical group member count changed"
+  | _ => throw (IO.userError "a native inductive group must be one atomic checked admission")
+
+private def kernelShape (environment : Lean.Kernel.Environment) (name : PsName)
+    (motives minors indices : Nat) : IO Unit := do
+  let some (.recInfo info) := environment.find? (PsKernelLean.toLeanName name)
+    | throw (IO.userError "official kernel did not regenerate group recursor")
+  ensure (info.numMotives == motives && info.numMinors == minors && info.numIndices == indices)
+    "official group motive/minor/index metadata differs"
+
+private def call (name : PsName) (levels : List PsLevel) (arguments : List PsExpr) : PsExpr :=
+  psExprApplyMany (.constE name levels) arguments
+
+private def groupProbe : PsExpr :=
+  let nat := PsExpr.constE psNatName []
+  let left := psRootName "M3GroupLeft"
+  let right := psRootName "M3GroupRight"
+  let leftType := call left [.zero] [nat]
+  let rightType := call right [.zero] [nat]
+  let motiveLeft := PsExpr.lam (psRootName "x") leftType nat .explicit
+  let motiveRight := PsExpr.lam (psRootName "x") rightType nat .explicit
+  let step := call psNatSuccName [] [.bvar 0]
+  let minorLeft := PsExpr.lam (psRootName "value") nat
+    (.lam (psRootName "next") rightType
+      (.lam (psRootName "ih") nat step .explicit) .explicit) .explicit
+  let minorRight := PsExpr.lam (psRootName "previous") leftType
+    (.lam (psRootName "ih") nat step .explicit) .explicit
+  let empty := call (psNameAppendStr left "nil") [.zero] [nat]
+  let middle := call (psNameAppendStr right "join") [.zero] [nat, empty]
+  let value := call (psNameAppendStr left "link") [.zero] [nat, .lit (.natural 7), middle]
+  call (psNameAppendStr left "rec") [.succ .zero, .zero]
+    [nat, motiveLeft, motiveRight, .lit (.natural 0), minorLeft, minorRight, value]
+
+-- Start from the second family, whose minor segment is not at zero. Recursion
+-- crosses from one index to no indices and back while retaining both shared
+-- dependent parameters. The two nontrivial minors have different equations.
+private def dependentProbe : PsExpr :=
+  let nat := PsExpr.constE psNatName []
+  let seven := PsExpr.lit (.natural 7)
+  let zero := PsExpr.lit (.natural 0)
+  let five := PsExpr.lit (.natural 5)
+  let left := psRootName "M3DependentLeft"
+  let right := psRootName "M3DependentRight"
+  let leftType := call left [] [nat, seven]
+  let rightType := fun n => call right [] [nat, seven, n]
+  let motiveLeft := PsExpr.lam (psRootName "x") leftType nat .explicit
+  let motiveRight := PsExpr.lam (psRootName "n") nat
+    (.lam (psRootName "x") (rightType (.bvar 0)) nat .explicit) .explicit
+  let minorLeft := PsExpr.lam (psRootName "right") (rightType zero)
+    (.lam (psRootName "ih") nat (call psNatSuccName [] [.bvar 0]) .explicit) .explicit
+  let minorRight := PsExpr.lam (psRootName "n") nat
+    (.lam (psRootName "left") leftType
+      (.lam (psRootName "ih") nat (call psNatAddName [] [.bvar 2, .bvar 0]) .explicit)
+      .explicit) .explicit
+  let empty := call (psNameAppendStr left "stop") [] [nat, seven]
+  let inner := call (psNameAppendStr right "wrap") [] [nat, seven, zero, empty]
+  let middle := call (psNameAppendStr left "next") [] [nat, seven, inner]
+  let value := call (psNameAppendStr right "wrap") [] [nat, seven, five, middle]
+  call (psNameAppendStr right "rec") [.succ .zero]
+    [nat, seven, motiveLeft, motiveRight, zero, minorLeft, minorRight, five, value]
+
+private def reductionWitness (name : String) (probe : PsExpr) (result : Nat) : PsDeclaration :=
+  let nat := PsExpr.constE psNatName []
+  let expected := PsExpr.lit (.natural result)
+  let proposition := call psEqName [.succ .zero] [nat, probe, expected]
+  let proof := call (psNameAppendStr psEqName "refl") [.succ .zero] [nat, expected]
+  .theoremDecl (psRootName name) [] proposition proof
+
+private def portableEnvironment (declarations : List PsDeclaration) : IO PsEnvironment :=
+  fromExcept ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations).mapError elabMessage)
+
+private def portableReduction (environment : PsEnvironment) (probe : PsExpr) (result : Nat) : IO Unit :=
+  ensure (psExprAlphaEq (psWhnf environment psMetaEmpty psLocalEmpty probe) (.lit (.natural result)))
+    "portable group reduction differs from the independent checked Lean equation"
+
+private def expectIotaRefusal (declarations : List PsDeclaration) (probe : PsExpr) : IO Unit := do
+  let environment ← portableEnvironment declarations
+  ensure (psReduceIota (fun value => value) environment probe).isNone
+    "malformed group metadata or a wrong-family major acquired an iota rule"
+
+private def expectDataRefusal (text expected : String) : IO Unit := do
+  match elaborate text with
+  | .ok _ => throw (IO.userError ("unexpected group acceptance: " ++ expected))
+  | .error message => ensure (message.contains expected) ("wrong group refusal: " ++ message)
+
+private def expectCodecRefusal (declarations : List PsDeclaration) : IO Unit := do
+  match psEncodeCheckedAdmissionsCanonical declarations with
+  | .error .unsupportedDeclaration => pure ()
+  | _ => throw (IO.userError "malformed group was dropped or serialized")
+
+private def inductionRefused : PsElabError → Bool
+  | .proof message => message == "group induction requires a complete motive family"
+  | .atDeclaration _ error => inductionRefused error
+  | _ => false
+
+end M3InductiveGroups
+
+open M3InductiveGroups in
+def main : IO Unit := do
+  ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
+    "inductive group qualification requires the pinned Lean"
+  let group ← fromExcept (elaborate groupSource [psRootName "u"])
+  let indexed ← fromExcept (elaborate indexedSource)
+  let prop ← fromExcept (elaborate propSource)
+  let dependent ← fromExcept (elaborate dependentSource)
+  oneAdmission group.declarations 2
+  oneAdmission indexed.declarations 2
+  oneAdmission prop.declarations 2
+  oneAdmission dependent.declarations 2
+  let initial ← PsKernelLean.buildLeanPreludeEnvironment
+  let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  let checked ← check prelude
+    (group.declarations ++ signatureWitnesses group.declarations ++
+      [reductionWitness "M3GroupReductionWitness" groupProbe 2])
+  kernelShape checked (psNameAppendStr (psRootName "M3GroupLeft") "rec") 2 3 0
+  kernelShape checked (psNameAppendStr (psRootName "M3GroupRight") "rec") 2 3 0
+  let checkedIndexed ← check prelude (indexed.declarations ++ signatureWitnesses indexed.declarations)
+  kernelShape checkedIndexed (psNameAppendStr (psRootName "M3IndexedLeft") "rec") 2 3 1
+  kernelShape checkedIndexed (psNameAppendStr (psRootName "M3IndexedRight") "rec") 2 3 1
+  let checkedProp ← check prelude (prop.declarations ++ signatureWitnesses prop.declarations)
+  kernelShape checkedProp (psNameAppendStr (psRootName "M3PropLeft") "rec") 2 2 0
+  for declaration in prop.declarations do
+    if let .recursorDecl info := declaration then
+      ensure info.levelParams.isEmpty "mutual Prop incorrectly acquired large elimination"
+  let checkedDependent ← check prelude
+    (dependent.declarations ++ signatureWitnesses dependent.declarations ++
+      [reductionWitness "M3DependentReductionWitness" dependentProbe 6])
+  kernelShape checkedDependent (psNameAppendStr (psRootName "M3DependentLeft") "rec") 2 3 0
+  kernelShape checkedDependent (psNameAppendStr (psRootName "M3DependentRight") "rec") 2 3 1
+
+  -- Refusals occur before constructor elaboration/admission changes state.
+  expectDataRefusal
+    "inductive P(A: Type) where { | intro }\ninductive Q where { | intro }\n"
+    "incompatible inductive group headers"
+  expectDataRefusal
+    "inductive P(n: Nat) where { | intro }\ninductive Q(b: Bool) where { | intro }\n"
+    "compatible binder types and kinds"
+  expectDataRefusal
+    "inductive P: Type where { | intro }\ninductive Q: Prop where { | intro }\n"
+    "same resulting universe"
+  expectDataRefusal
+    "inductive P where { | intro }\ninductive P where { | other }\n"
+    "incompatible inductive group headers"
+  expectDataRefusal
+    "inductive P(A: Type) where { | bad(next: Q(Nat)) }\ninductive Q(B: Type) where { | good }\n"
+    "constructor parameters must remain uniform"
+  expectDataRefusal
+    "inductive P where { | bad(next: Q -> Nat) }\ninductive Q where { | good }\n"
+    "unsupported recursive field"
+  expectDataRefusal
+    "inductive P where { | nested(next: List(Q -> Nat)) }\ninductive Q where { | good }\n"
+    "unsupported recursive field"
+
+  let some first := group.declarations.head? | throw (IO.userError "missing group head")
+  expectCodecRefusal (group.declarations ++ [first])
+  let conflicting := group.declarations.map fun declaration =>
+    match declaration with
+    | .recursorDecl info =>
+      if psNameEq info.name (psNameAppendStr (psRootName "M3GroupRight") "rec") then
+        .recursorDecl { info with inductiveNames := info.inductiveNames.reverse }
+      else declaration
+    | _ => declaration
+  expectCodecRefusal conflicting
+  let missing := group.declarations.filter fun declaration =>
+    match declaration with
+    | .recursorDecl info => !psNameEq info.name (psNameAppendStr (psRootName "M3GroupRight") "rec")
+    | _ => true
+  expectCodecRefusal missing
+
+  let wrongLevels := group.declarations.map fun declaration =>
+    match declaration with
+    | .recursorDecl info =>
+      if psNameEq info.name (psNameAppendStr (psRootName "M3GroupRight") "rec") then
+        .recursorDecl { info with levelParams := info.levelParams.reverse }
+      else declaration
+    | _ => declaration
+  expectCodecRefusal wrongLevels
+  expectIotaRefusal conflicting groupProbe
+  expectIotaRefusal missing groupProbe
+  expectIotaRefusal wrongLevels groupProbe
+  let wrongOrdinal := group.declarations.map fun declaration =>
+    match declaration with
+    | .constructorDecl info =>
+      if psNameEq info.name (psNameAppendStr (psRootName "M3GroupLeft") "link") then
+        .constructorDecl { info with constructorIndex := 0 }
+      else declaration
+    | _ => declaration
+  expectIotaRefusal wrongOrdinal groupProbe
+  let nat := PsExpr.constE psNatName []
+  let nil := call (psNameAppendStr (psRootName "M3GroupLeft") "nil") [.zero] [nat]
+  let wrongMajor := call (psNameAppendStr (psRootName "M3GroupRight") "join") [.zero] [nat, nil]
+  let probeView := psReduceAppView groupProbe
+  expectIotaRefusal group.declarations (psReduceApply probeView.head (probeView.args.take 6 ++ [wrongMajor]))
+
+  -- The same closed Core expressions have checked kernel equations above.
+  -- Portable conversion agrees. The legacy singleton runtime view continues
+  -- to refuse groups; the group view and companion tests own that consumer.
+  let environment ← portableEnvironment group.declarations
+  portableReduction environment groupProbe 2
+  let dependentEnvironment ← portableEnvironment dependent.declarations
+  portableReduction dependentEnvironment dependentProbe 6
+  ensure (psRecursorApplication environment groupProbe).isNone
+    "single-family runtime view accepted a mutual recursor"
+  ensure (psRecursorApplication dependentEnvironment dependentProbe).isNone
+    "single-family runtime view accepted an indexed mutual recursor"
+  let program ← fromExcept (psPscv0ParseProgram
+    "function m3GroupMatch(x: M3GroupLeft(Nat)): Nat := match x with { | M3GroupLeft.nil => 0 | M3GroupLeft.link value next => 1 }\n")
+  let matched ← fromExcept ((psElabProgramWithOrigins environment program).mapError elabMessage)
+  let matchProbe := PsExpr.app (.constE (psRootName "m3GroupMatch") [])
+    (psExprApplyMany (.constE (psNameAppendStr (psRootName "M3GroupLeft") "nil") [.zero])
+      [.constE psNatName []])
+  let _ ← check checked
+    (matched.result.declarations ++ [reductionWitness "M3SourceMatchWitness" matchProbe 0])
+  portableReduction matched.result.environment matchProbe 0
+  let induction ← fromExcept (psPscv0ParseProgram
+    "theorem m3GroupInduction(x: M3GroupLeft(Nat)): x = x := by { induction x }\n")
+  match psElabProgramWithOrigins environment induction with
+  | .error error => ensure (inductionRefused error) ("wrong group induction refusal: " ++ elabMessage error)
+  | .ok _ => throw (IO.userError "group induction silently acquired a motive family")
+  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures, portable group reduction and checked source Match; malformed groups, unfinished group induction and legacy singleton runtime view refused"
+

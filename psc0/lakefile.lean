@@ -7,6 +7,7 @@ lean_lib PsFoundation where
   srcDir := "packages/foundation/src"
   roots := #[
     `Ps.Foundation.List,
+    `Ps.Foundation.Index,
     `Ps.Foundation.Name,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic
@@ -22,20 +23,46 @@ lean_lib PsSyntax where
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
     `Ps.Syntax.ParseLean,
+    `Ps.Syntax.Lean.Control,
+    `Ps.Syntax.Lean.Term,
+    `Ps.Syntax.Lean.Binders,
+    `Ps.Syntax.Lean.Data,
+    `Ps.Syntax.Lean.Declarations,
+    `Ps.Syntax.Lean.Program,
     `Ps.Syntax.ParseProofScript,
     `Ps.Syntax.PrintCommon,
     `Ps.Syntax.PrintLean,
     `Ps.Syntax.PrintProofScript,
-    `Ps.Syntax.Translate
+    `Ps.Syntax.Translate,
+    `Ps.Syntax.Pscv0.Universe,
+    `Ps.Syntax.Pscv0.Interpolation,
+    `Ps.Syntax.Pscv0.TermParts,
+    `Ps.Syntax.Pscv0.ProofRead,
+    `Ps.Syntax.Pscv0.DoRead,
+    `Ps.Syntax.Pscv0.TermRead,
+    `Ps.Syntax.Pscv0.PatternRead,
+    `Ps.Syntax.Pscv0.LocalRead, `Ps.Syntax.Pscv0.QuantifierRead, `Ps.Syntax.Pscv0.Operators,
+    `Ps.Syntax.Pscv0.Surface,
+    `Ps.Syntax.Pscv0.Read,
+    `Ps.Syntax.Pscv0.Binders,
+    `Ps.Syntax.Pscv0.Data,
+    `Ps.Syntax.Pscv0.Commands,
+    `Ps.Syntax.Pscv0.Instances,
+    `Ps.Syntax.Pscv0.ProgramRead,
+    `Ps.Syntax.Pscv0.TypePrint,
+    `Ps.Syntax.Pscv0.Module
   ]
 
 lean_lib PsCore where
   srcDir := "packages/core/src"
   roots := #[
     `Ps.Core.Level,
+    `Ps.Core.LevelNormalize,
     `Ps.Core.Expr,
     `Ps.Core.Abstract,
     `Ps.Core.Builtin,
+    `Ps.Core.Nested,
+    `Ps.Core.InductiveGroup,
     `Ps.Core.LevelSubst,
     `Ps.Core.Equality,
     `Ps.Core.Subst,
@@ -49,9 +76,60 @@ lean_lib PsEnvironment where
     `Ps.Environment.LocalContext,
     `Ps.Environment.Instances,
     `Ps.Environment.Resolve,
+    `Ps.Environment.Logic,
+    `Ps.Environment.Connectives,
+    `Ps.Environment.Decision,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
-    `Ps.Environment.SelfHostProd
+    `Ps.Environment.StandardArithmetic,
+    `Ps.Environment.StandardIntArithmeticData, `Ps.Environment.StandardIntArithmetic,
+    `Ps.Environment.StandardFloatOperationsData, `Ps.Environment.StandardFloatOperations,
+    `Ps.Environment.StandardOperatorDefaults,
+    `Ps.Environment.StandardFloatConversionsData, `Ps.Environment.StandardFloatDisplayData, `Ps.Environment.StandardFloatDisplay,
+    `Ps.Environment.StandardScientific,
+    `Ps.Environment.StandardPlatformWordsData, `Ps.Environment.StandardPlatformWords,
+    `Ps.Environment.StandardFloatConstructorsData, `Ps.Environment.StandardFloatConstructors,
+    `Ps.Environment.StandardEquality,
+    `Ps.Environment.StandardCollectionEquality,
+    `Ps.Environment.StandardToString,
+    `Ps.Environment.StandardOption,
+    `Ps.Environment.StandardList,
+    `Ps.Environment.StandardInhabited,
+    `Ps.Environment.StandardProduct,
+    `Ps.Environment.StandardExcept,
+    `Ps.Environment.StandardGetElem,
+    `Ps.Environment.StandardNatOrder,
+    `Ps.Environment.StandardHashable, `Ps.Environment.StandardHashFoundationData, `Ps.Environment.StandardUnsignedFoundationData, `Ps.Environment.StandardUnsigned,
+    `Ps.Environment.StandardUnsignedOperationsData, `Ps.Environment.StandardUnsignedOperations,
+    `Ps.Environment.StandardFloatIdentityData, `Ps.Environment.StandardFloatIdentity,
+    `Ps.Environment.StandardSignedIdentityData, `Ps.Environment.StandardSignedIdentity,
+    `Ps.Environment.StandardSignedOperationsData, `Ps.Environment.StandardSignedOperations,
+    `Ps.Environment.StandardFloatToBitsData, `Ps.Environment.StandardFloatToBits, `Ps.Environment.StandardFloatCanonical,
+    `Ps.Environment.StandardSignedScalar, `Ps.Environment.StandardSignedToInt, `Ps.Environment.StandardSignedOfInt, `Ps.Environment.StandardSignedShift, `Ps.Environment.StandardSignedClamp, `Ps.Environment.StandardSignedAbs, `Ps.Environment.StandardSignedOrder, `Ps.Environment.StandardSignedNumeric, `Ps.Environment.StandardBoolWord, `Ps.Environment.StandardUnsignedOrder, `Ps.Environment.StandardUnsignedPower, `Ps.Environment.StandardUnsignedOfInt, `Ps.Environment.StandardUnsignedClamp, `Ps.Environment.StandardSum, `Ps.Environment.StandardByteArray, `Ps.Environment.StandardByteArrayCollection,
+    `Ps.Environment.StandardScalarArithmeticData, `Ps.Environment.StandardScalarArithmetic,
+    `Ps.Environment.StandardFin,
+    `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
+    `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
+    `Ps.Environment.StandardArray, `Ps.Environment.StandardArrayFilter, `Ps.Environment.StandardUtf8, `Ps.Environment.StandardListIndex,
+    `Ps.Environment.StandardData,
+    `Ps.Environment.StandardFormatData,
+    `Ps.Environment.StandardFormatBasic,
+    `Ps.Environment.StandardFormatSupport,
+    `Ps.Environment.StandardFormatMeasure,
+    `Ps.Environment.StandardFormatWork,
+    `Ps.Environment.StandardFormatRender,
+    `Ps.Environment.StandardFormat,
+    `Ps.Environment.StandardClass, `Ps.Environment.StandardLogicInstances,
+    `Ps.Environment.StandardOperatorProtocol, `Ps.Environment.StandardFormatClass,
+    `Ps.Environment.StandardToFormat,
+    `Ps.Environment.StandardRepr,
+    `Ps.Environment.StandardFormatString,
+    `Ps.Environment.StandardReprCollections,
+    `Ps.Environment.StandardWellFoundedData, `Ps.Environment.StandardWellFounded,
+    `Ps.Environment.StandardClassical, `Ps.Environment.StandardPartialFixpointData,
+    `Ps.Environment.StandardPartialFixpoint, `Ps.Environment.StandardPSumData, `Ps.Environment.StandardPSum,
+    `Ps.Environment.SelfHostProd,
+    `Ps.Environment.StandardSnapshot
   ]
 
 lean_lib PsBridge where
@@ -71,6 +149,7 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.CheckTypes,
     `Ps.CompilerIr.CheckSize,
     `Ps.CompilerIr.Check,
+    `Ps.CompilerIr.Checked,
     `Ps.CompilerIr.Specialize
   ]
 
@@ -81,6 +160,10 @@ lean_lib PsErasure where
     `Ps.Erasure.Inductive,
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
+    `Ps.Erasure.Recursion,
+    `Ps.Erasure.Entry,
+    `Ps.Erasure.WellFounded,
+    `Ps.Erasure.Array, `Ps.Erasure.Unsigned, `Ps.Erasure.Platform, `Ps.Erasure.Utf8, `Ps.Erasure.FloatRuntime, `Ps.Erasure.Float,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]
@@ -90,20 +173,60 @@ lean_lib PsCompiler where
   roots := #[
     `Ps.Compiler,
     `Ps.Compiler.Api,
-    `Ps.Compiler.Sh1
+    `Ps.Compiler.RecursorLift,
+    `Ps.Compiler.RuntimeOwnership,
+    `Ps.Compiler.WellFoundedRuntime,
+    `Ps.Compiler.Sh1,
+    `Ps.Compiler.Pscv0,
+    `Ps.Compiler.Pscv0Modules
   ]
+
+lean_lib PsCodegen where
+  srcDir := "packages/codegen/src"
+  roots := #[`Ps.Codegen.Captures, `Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact, `Ps.Codegen.Provenance, `Ps.Codegen.Api, `Ps.Codegen.SourceMap]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[
     `Ps.BackendTs.Type,
+    `Ps.BackendTs.Analysis,
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
+    `Ps.BackendTs.Readable,
     `Ps.BackendTs.Checked,
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler
   ]
+
+lean_lib PsBackendEcma where
+  srcDir := "packages/backend-ecma/src"
+  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Hash, `Ps.BackendEcma.Runtime, `Ps.BackendEcma.Utf8,
+    `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Sync, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
+
+lean_lib PsBackendRust where
+  srcDir := "packages/backend-rust/src"
+  roots := #[
+    `Ps.BackendRust.Identifier, `Ps.BackendRust.Type,
+    `Ps.BackendRust.Intrinsic, `Ps.BackendRust.Captures,
+    `Ps.BackendRust.TailAlias, `Ps.BackendRust.Layout,
+    `Ps.BackendRust.Expr, `Ps.BackendRust.Tail,
+    `Ps.BackendRust.Runtime, `Ps.BackendRust.Module]
+
+lean_lib PsBackendWasm where
+  srcDir := "packages/backend-wasm/src"
+  roots := #[`Ps.BackendWasm.Model, `Ps.BackendWasm.IntUtil,
+    `Ps.BackendWasm.Binary, `Ps.BackendWasm.ValidateStructure,
+    `Ps.BackendWasm.ValidateTyping, `Ps.BackendWasm.ValidateIr,
+    `Ps.BackendWasm.Wat, `Ps.BackendWasm.Names,
+    `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
+    `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
+    `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
+    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Hash, `Ps.BackendWasm.Utf8, `Ps.BackendWasm.Intrinsic,
+    `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.LowerFloat, `Ps.BackendWasm.Word, `Ps.BackendWasm.Float, `Ps.BackendWasm.Type,
+    `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
+    `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,
+    `Ps.BackendWasm.AbiMarshal, `Ps.BackendWasm.AbiComponent]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
@@ -126,22 +249,72 @@ lean_lib PsProject where
 lean_lib PsMeta where
   srcDir := "packages/meta/src"
   roots := #[
+    `Ps.Meta.LevelNormalize,
     `Ps.Meta.LevelContext,
-    `Ps.Meta.Context,
-    `Ps.Meta.Reduce,
+    `Ps.Meta.Context, `Ps.Meta.Abstract,
+    `Ps.Meta.Iota,
+    `Ps.Meta.Recursor,
+    `Ps.Meta.NatReduce, `Ps.Meta.Reduce,
     `Ps.Meta.Unify,
-    `Ps.Meta.SynthInstance,
-    `Ps.Meta.Infer
+    `Ps.Meta.InstanceTarget,
+    `Ps.Meta.InstanceCandidate,
+    `Ps.Meta.InstanceKey, `Ps.Meta.InstanceSearch,
+    `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
+    `Ps.Meta.Infer, `Ps.Meta.WellFounded, `Ps.Meta.MutualPacking,
+    `Ps.Meta.MutualWellFounded,
+    `Ps.Meta.Inductive, `Ps.Meta.TypeView
   ]
 
 lean_lib PsElab where
   srcDir := "packages/elab/src"
   roots := #[
-    `Ps.Elab.Context,
+    `Ps.Elab.Info, `Ps.Elab.Context,
     `Ps.Elab.Literal,
+    `Ps.Elab.Basic,
+    `Ps.Elab.Postponed,
+    `Ps.Elab.Universe,
+    `Ps.Elab.Abstraction,
+    `Ps.Elab.Binders,
+    `Ps.Elab.Goals,
+    `Ps.Elab.GoalSource,
+    `Ps.Elab.Elimination,
+    `Ps.Elab.Proof,
+    `Ps.Elab.WellFounded,
+    `Ps.Elab.FixedParameters, `Ps.Elab.RecursionParameters,
+    `Ps.Elab.Application, `Ps.Elab.Operator,
+    `Ps.Elab.Record,
+    `Ps.Elab.Refinement,
+    `Ps.Elab.GroupElimination,
+    `Ps.Elab.Equality,
+    `Ps.Elab.Match,
+    `Ps.Elab.PatternMatrix,
+    `Ps.Elab.Conditional,
+    `Ps.Elab.Do,
     `Ps.Elab.Term,
+    `Ps.Elab.Monotonicity, `Ps.Elab.PartialFixpoint,
     `Ps.Elab.Recursion,
-    `Ps.Elab.Declaration
+    `Ps.Elab.Data,
+    `Ps.Elab.Declaration,
+    `Ps.Elab.Class,
+    `Ps.Elab.DerivingContext,
+    `Ps.Elab.DerivingInhabited,
+    `Ps.Elab.DerivingHashable, `Ps.Elab.DerivingBEq,
+    `Ps.Elab.DerivingDecEq,
+    `Ps.Elab.DerivingRepr,
+    `Ps.Elab.Deriving,
+    `Ps.Elab.Scope,
+    `Ps.Elab.Mutual,
+    `Ps.Elab.MutualStructural,
+    `Ps.Elab.PreDefinition.Basic,
+    `Ps.Elab.PreDefinition.Header,
+    `Ps.Elab.PreDefinition,
+    `Ps.Elab.RecursorEquation,
+    `Ps.Elab.WhereScope,
+    `Ps.Elab.Where,
+    `Ps.Elab.WhereWellFounded,
+    `Ps.Elab.WhereMutualWellFounded,
+    `Ps.Elab.WellFoundedRuntime,
+    `Ps.Elab.Command
   ]
 
 @[default_target]
@@ -198,3 +371,4 @@ lean_exe psc2_selfhost_replay_audit where
 lean_exe psc1_sh1_compile where
   srcDir := "scripts"
   root := `StrictSourceCompile
+

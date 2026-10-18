@@ -80,3 +80,17 @@ The host must fail closed for all missing, altered or mismatched binaries.
 This package uses WebAssembly **linear memory**, not Wasm GC. The VSIX
 integration and the unrelated active PSC0 compiler development lane are
 deliberately out of scope.
+
+## Additional 2026-10-18 CI findings
+
+### Native source admission: timeouts are not semantic rejections
+
+Run [#39136164227](https://github.com/dwijayuda/pskernel/actions/runs/39136164227) built the official native checker (259/259 jobs) and collected all 11 response categories. A `Nat := 1` definition, an invalid definition, a missing-constant definition, and invalid theorem/opaque cases all returned `kernel-rejection: deterministic-timeout` at declaration index zero. The empty batch was accepted; malformed JSON, incorrect protocol, and axiom injection were rejected as expected. Hence the failing positive case is **not proof of a Lean kernel semantic incompatibility**, nor may `deterministic-timeout` be credited as correctly rejecting a malformed proof.
+
+The existing PSC0 official-kernel provider's `withFreshKernelHeartbeatScope` evaluates its computation using `IO.lazyPure` on a task worker to obtain a genuinely fresh C++ kernel heartbeat boundary. The new Wasm entry point initially used `IO.asTask do return admitDeclarations...` without `IO.lazyPure`, potentially evaluating the checked term on a worker that had accumulated heartbeat ticks from the Standard replay. The narrow fix (integration branch `7cfa6c33612624e290972fec638551c40978b588`) restores the same lazy task evaluation while leaving the 2,000,000-heartbeat and 20,000-recursion finite limits unchanged. CI must show a good definition is accepted and a bad definition rejected for its own semantic reason before this diagnosis is considered closed.
+
+### Standalone C++ archives are not a complete checker
+
+Focused run [#39129247395](https://github.com/dwijayuda/pskernel/actions/runs/39129247395) independently built real wasm32 Lean 4.35 runtime and C++ kernel static archives. A follow-up [#39136835041](https://github.com/dwijayuda/pskernel/actions/runs/39136835041) compiled the same archives but deliberately tried to link them without generated Lean Init/Std/Lean modules. The linker correctly reported unresolved Lean-generated FFI symbols including `lean_name_mk_string`, `lean_level_mk_zero`, `lean_expr_mk_sort`, and `lean_io_eprintln`.
+
+Those symbols demonstrate why a **standalone C++-archive-only executable is insufficient**; they do not indicate that the official C++ kernel cannot compile to wasm32. The old successful pipeline builds target-compatible Lean-generated Init/Std/Lean libraries and links those with `libleancpp_1.a` and `libleanrt.a`. Do **not** invent unchecked stubs for missing Lean FFI symbols or call such a diagnostic executable a complete proof kernel. Keep the staged 32-bit bootstrap and complete linked standard-library closure.

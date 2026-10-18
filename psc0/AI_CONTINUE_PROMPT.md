@@ -1,5 +1,54 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Checked source owners and dependent data candidate
+
+[Preparation 39171716053](https://github.com/dwijayuda/pskernel/actions/runs/39171716053)
+at 65b510dc18ee9fa47cac7b28b6d672de73ea3f44 completed with failures in the
+remaining input-parity equality conversion and a stale successor-index refusal.
+The full selected manifest, original and additive foundation audits, all eleven
+monotonicity proofs, both strict monotonicity refusals, P0/WF/structural source
+construction, and noncomputable ownership remained qualified. Both indexed
+group dictionaries and all twelve portable equations passed. The final actual
+BEq comparison now preserves the unchanged native rfl law.
+
+The same run passed the complete paired Option bind P1 source, original
+unfolding equations, fresh official-kernel replay, checked runtime-body ownership
+and all five target emissions. Its 50 backend observations were not executed by
+this preparation workflow. The native P1-head probe accepted the abbrev and
+opaque declarations, their actual kinds/reducibility and nonmonotone refusals.
+That separate job failed solely because the expected opaque unfolding-name
+diagnostic differed from the observed Unknown constant error; its main runtime
+observations did not execute. This candidate records the exact observed guard.
+
+This child adds checked source-main/local-helper ownership for registered heads,
+source-only abbreviation metadata, inferred abbreviation headers, and actual
+Prop helper kinds. Required WF/P1 equations keep their producer ownership.
+It extends the registered abbreviation P1 route with paired source/kernel/body
+controls. The general runtime roster is extended to fifteen exports and P1 to
+six exports. A separate four-export Data/unary bundle covers hash, complete
+native Repr documents, dependent patterns and Fin equality. Its forty backend
+observations are added to the same five-target workflow. No new execution parity
+is claimed before completed Linux evidence.
+
+Dependent data work follows the pinned native constructor/index-promotion and
+result-universe inference owners. Resolved constructor parameters are checked
+as terms in their real dependent branch contexts; native dot-head identity,
+field order, binder metadata, source spans, captures and rigid-variable checks
+are preserved. Fin Repr and BEq are appended after the named Option bind boundary.
+All frozen stages remain unchanged. Final selected hashes must come from an
+independent completed Linux audit; the strict drift gate is retained until then.
+
+Nested equality conversion now compares the actual constructor arguments after
+the existing fieldless singleton-Prop elimination guards. An arbitrary-proof
+positive and a genuinely unequal-endpoint negative exercise this independently
+of deriving; the original indexedDecEqMajor source theorem remains unchanged.
+Imported exposure of a registered P1 body still requires the module privacy
+owner to retain its checked generated dependency; the local interface controls
+do not claim imported-module acceptance. Opaque P1 has a separate pending
+equation-publication/runtime-classification owner. All six M3+B exits remain
+OPEN. No main promotion or five-gate completion is claimed; Native/M3/F1/F2/F3
+must ultimately pass at one complete exact SHA.
+
 ## Selected Option bind audit passed; remaining source corrections
 
 [Preparation 39170162742](https://github.com/dwijayuda/pskernel/actions/runs/39170162742)

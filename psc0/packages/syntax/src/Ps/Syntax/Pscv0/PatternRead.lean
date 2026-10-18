@@ -46,7 +46,7 @@ def psPscv0PatternAtom (fuel : Nat) (cursor : PsTokenCursor) :
     if token.text == "." then
       let dot ← psTokenCursorExpectText cursor "."
       let name ← psParseSyntaxNameWith true dot.cursor
-      return { value := .ctor name.value [] (psSyntaxSpanJoin token.span name.value.span)
+      return { value := .dotCtor name.value [] (psSyntaxSpanJoin token.span name.value.span)
                cursor := name.cursor }
     let name ← psParseSyntaxNameWith true cursor
     return { value := if name.value.segments.length == 1 then .variable name.value
@@ -83,13 +83,16 @@ def psPscv0Pattern (fuel : Nat) (cursor : PsTokenCursor) :
       throw (psProofScriptExpectedError "native pattern arguments; expression calls are not patterns" head.cursor)
     let fields ← psPscv0PatternArguments fuel (psSyntaxPatternSpan head.value) head.cursor []
     if fields.value.isEmpty then return head
-    let name ← match head.value with
-      | .variable name => pure name
-      | .ctor name [] _ => pure name
+    let (name, dotted) ← match head.value with
+      | .variable name => pure (name, false)
+      | .ctor name [] _ => pure (name, false)
+      | .dotCtor name [] _ => pure (name, true)
       | _ => throw (psProofScriptExpectedError "constructor pattern head" cursor)
     let some last := fields.value.getLast? | throw (.unexpectedEnd "pattern argument")
     let span := psSyntaxSpanJoin (psSyntaxPatternSpan head.value) (psSyntaxPatternSpan last)
-    return { value := .ctor name fields.value span, cursor := fields.cursor }
+    return {
+      value := if dotted then .dotCtor name fields.value span else .ctor name fields.value span
+      cursor := fields.cursor }
 
 def psPscv0Patterns (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List PsSyntaxPattern)) := do

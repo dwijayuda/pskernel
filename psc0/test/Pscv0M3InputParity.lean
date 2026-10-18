@@ -1465,6 +1465,130 @@ run_cmd do
     unless (Lean.getReducibilityStatusCore environment name) == .reducible do
       throwError "native registered source lost abbreviation reducibility"
 
+abbrev RegisteredOwnerAlias := Nat
+
+abbrev registeredAbbrevWfWhere (n : Nat) : Nat :=
+  match n with
+  | 0 => 37
+  | k + 1 => registeredAbbrevWfWhere (step k) + 3
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+where
+  step (k : Nat) : Nat := k - 1
+
+abbrev registeredAbbrevGroup (n : Nat) : Nat :=
+  match n with
+  | 0 => 5
+  | k + 1 => loop k
+where
+  loop (m : Nat) : Nat :=
+    match m with
+    | 0 => 7
+    | k + 1 => registeredAbbrevGroup k
+
+inductive RegisteredOwnerPredicate : Prop where
+  | base
+  | step (children : Nat → RegisteredOwnerPredicate)
+
+abbrev registeredAbbrevProofWhere (proof : RegisteredOwnerPredicate) : True :=
+  match proof with
+  | .base => True.intro
+  | .step children =>
+    match children 1 with
+    | .base => True.intro
+    | .step grandchildren => helper (grandchildren 1)
+where
+  helper (proof : RegisteredOwnerPredicate) : True :=
+    match proof with
+    | .base => True.intro
+    | .step children =>
+      match children 1 with
+      | .base => True.intro
+      | .step grandchildren => registeredAbbrevProofWhere (grandchildren 1)
+
+def m3registeredowners (flag : Bool) : UInt64 :=
+  let n := if flag then 3 else 2
+  let bias : RegisteredOwnerAlias := registeredAbbrevGroup n
+  UInt64.ofNat (registeredAbbrevWf n +
+    100 * registeredOpaqueWhere n +
+    10000 * registeredAbbrevWhere bias n +
+    1000000 * registeredAbbrevWfWhere n)
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for name in [``RegisteredOwnerAlias, ``registeredAbbrevWfWhere,
+      ``registeredAbbrevGroup, ``registeredAbbrevProofWhere] do
+    match environment.find? name with
+    | some (.defnInfo _) => pure ()
+    | _ => throwError "native registered owner lost its abbreviation definition: {name}"
+    unless (Lean.getReducibilityStatusCore environment name) == .reducible do
+      throwError "native registered owner lost abbreviation reducibility: {name}"
+  for name in [``registeredOpaqueWhere.loop, ``registeredAbbrevWhere.loop,
+      ``registeredAbbrevWfWhere.step, ``registeredAbbrevGroup.loop] do
+    match environment.find? name with
+    | some (.defnInfo _) => pure ()
+    | _ => throwError "native local helper inherited its registered main's kind: {name}"
+    if (Lean.getReducibilityStatusCore environment name) == .reducible do
+      throwError "native local helper inherited its main's abbreviation attribute: {name}"
+  match environment.find? ``registeredAbbrevProofWhere.helper with
+  | some (.thmInfo _) => pure ()
+  | _ => throwError "native recursive local proof helper lost theorem kind"
+
+private def expectNativeRegisteredOwnerRefusal (label : String) (command : Lean.Syntax) :
+    Lean.Elab.Command.CommandElabM Unit := do
+  let saved ← get
+  let failed ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    pure (messages.toList.any fun message => message.severity == .error)
+  finally set saved
+  unless failed do
+    throwError "native registered owner unexpectedly accepted {label}"
+
+run_cmd do
+  expectNativeRegisteredOwnerRefusal "opaque computational WF" (← `(command|
+    opaque registeredOpaqueWfRefusal (n : Nat) : Nat :=
+      match n with
+      | 0 => 31
+      | k + 1 => registeredOpaqueWfRefusal (k - 1) + 2
+    termination_by n
+    decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)))
+  expectNativeRegisteredOwnerRefusal "increasing abbrev WF" (← `(command|
+    abbrev registeredAbbrevNoDecrease (n : Nat) : Nat :=
+      registeredAbbrevNoDecrease (Nat.succ n)
+    termination_by n
+    decreasing_by exact Nat.lt_succ_self n))
+  expectNativeRegisteredOwnerRefusal "reconstructed local parent" (← `(command|
+    abbrev registeredWhereNoDecrease (n : Nat) : Nat := loop n
+    where
+      loop (m : Nat) : Nat :=
+        match m with
+        | 0 => 0
+        | k + 1 => loop (Nat.succ k)))
+
+opaque registeredOpaqueProofWf (n : Nat) : True :=
+  match n with
+  | 0 => True.intro
+  | k + 1 => registeredOpaqueProofWf (k - 1)
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+
+theorem registeredOpaqueProofWfUse : True := registeredOpaqueProofWf 4
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``registeredOpaqueProofWf with
+  | some (.opaqueInfo _) => pure ()
+  | _ => throwError "native proof-valued opaque WF lost its source kind"
+  expectNativeRegisteredOwnerRefusal "all-Prop WF unfolding name"
+    (← `(command| #check registeredOpaqueProofWf.eq_def))
+  expectNativeRegisteredOwnerRefusal "increasing proof-valued opaque WF" (← `(command|
+    opaque registeredOpaqueProofWfNoDecrease (n : Nat) : True :=
+      registeredOpaqueProofWfNoDecrease (Nat.succ n)
+    termination_by n
+    decreasing_by exact Nat.lt_succ_self n))
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -1752,6 +1876,18 @@ private def wfBoundaryLeanSource : String :=
 private def wfBoundaryPsSource : String :=
   "structure WfBoundaryBox(n: Nat) where {\n  value: Nat\n}\n\nfunction wfBoundaryMeasure(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  WfBoundaryBox.value(p)\n\nfunction wfBoundaryPair(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n, p with {\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ(wfBoundaryPair(k, WfBoundaryBox.mk(v)))\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryGeneralized(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n with {\n  | 0 => 0\n  | Nat.succ k =>\n    match p with {\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ(wfBoundaryGeneralized(k, WfBoundaryBox.mk(v)))\n    }\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryComputed(n: Nat): Nat :=\n  match h: Nat.succ(n) with {\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ(wfBoundaryComputed(k))\n  }\ntermination_by Nat.succ(n)\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(Nat.succ(k), t), h),\n    Nat.lt_succ_self(Nat.succ(k)))\n}\n\nfunction wfBoundaryUserRecursor(n: Nat, impossible: n = n -> False): Nat :=\n  Nat.rec(0,\n    fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursor(k,\n      fun (_: k = k) => impossible(Eq.refl(n))),\n    n, motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction wfBoundaryCatchAll(n: Nat, impossible: n = n -> False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAll(Nat.succ(x),\n      fun (_: Nat.succ(x) = Nat.succ(x)) => impossible(Eq.refl(n)))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(Nat.succ(n), n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction m3wfboundaries(flag: Bool): UInt64 :=\n  let n: Nat := if (flag) { 4 } else { 2 }\n  UInt64.ofNat(wfBoundaryPair(n, WfBoundaryBox.mk(5)) +\n    10 * wfBoundaryGeneralized(n, WfBoundaryBox.mk(3)) +\n    100 * wfBoundaryComputed(n))\n"
 
+private def opaqueProofWfLeanSource : String :=
+  "opaque registeredOpaqueProofWf (n : Nat) : True :=\n  match n with\n  | 0 => True.intro\n  | k + 1 => registeredOpaqueProofWf (k - 1)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)\n\ntheorem registeredOpaqueProofWfUse : True := registeredOpaqueProofWf 4\n"
+
+private def opaqueProofWfPsSource : String :=
+  "opaque registeredOpaqueProofWf(n: Nat): True := match n with {\n  | 0 => True.intro\n  | k + 1 => registeredOpaqueProofWf(k - 1)\n}\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n\ntheorem registeredOpaqueProofWfUse: True := registeredOpaqueProofWf(4)\n"
+
+private def registeredOwnerLeanSource : String :=
+  "abbrev registeredAbbrevWf (n : Nat) : Nat :=\n  match n with\n  | 0 => 31\n  | k + 1 => registeredAbbrevWf (k - 1) + 2\ntermination_by n\ndecreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)\n\ntheorem registeredAbbrevWfStep (k : Nat) :\n    registeredAbbrevWf (Nat.succ k) = registeredAbbrevWf (k - 1) + 2 :=\n  registeredAbbrevWf.eq_def (Nat.succ k)\n\nopaque registeredOpaqueWhere (n : Nat) : Nat := loop n\nwhere\n  loop (m : Nat) : Nat :=\n    match m with\n    | 0 => 41\n    | k + 1 => loop k + 1\n\nabbrev registeredAbbrevWhere (bias n : Nat) : Nat := loop n\nwhere\n  loop (m : Nat) : Nat :=\n    match m with\n    | 0 => bias\n    | k + 1 => loop k + 1\n\ntheorem registeredAbbrevWhereValue : registeredAbbrevWhere 7 2 = 9 := by rfl\n\nabbrev RegisteredOwnerAlias := Nat\n\nabbrev registeredAbbrevWfWhere (n : Nat) : Nat :=\n  match n with\n  | 0 => 37\n  | k + 1 => registeredAbbrevWfWhere (step k) + 3\ntermination_by n\ndecreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)\nwhere\n  step (k : Nat) : Nat := k - 1\n\nabbrev registeredAbbrevGroup (n : Nat) : Nat :=\n  match n with\n  | 0 => 5\n  | k + 1 => loop k\nwhere\n  loop (m : Nat) : Nat :=\n    match m with\n    | 0 => 7\n    | k + 1 => registeredAbbrevGroup k\n\ninductive RegisteredOwnerPredicate : Prop where\n  | base\n  | step (children : Nat → RegisteredOwnerPredicate)\n\nabbrev registeredAbbrevProofWhere (proof : RegisteredOwnerPredicate) : True :=\n  match proof with\n  | .base => True.intro\n  | .step children =>\n    match children 1 with\n    | .base => True.intro\n    | .step grandchildren => helper (grandchildren 1)\nwhere\n  helper (proof : RegisteredOwnerPredicate) : True :=\n    match proof with\n    | .base => True.intro\n    | .step children =>\n      match children 1 with\n      | .base => True.intro\n      | .step grandchildren => registeredAbbrevProofWhere (grandchildren 1)\n\ndef m3registeredowners (flag : Bool) : UInt64 :=\n  let n := if flag then 3 else 2\n  let bias : RegisteredOwnerAlias := registeredAbbrevGroup n\n  UInt64.ofNat (registeredAbbrevWf n +\n    100 * registeredOpaqueWhere n +\n    10000 * registeredAbbrevWhere bias n +\n    1000000 * registeredAbbrevWfWhere n)\n\n"
+
+private def registeredOwnerPsSource : String :=
+  "abbrev registeredAbbrevWf(n: Nat): Nat :=\n  match n with {\n  | 0 => 31\n  | k + 1 => registeredAbbrevWf(k - 1) + 2\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n\ntheorem registeredAbbrevWfStep(k: Nat):\n    registeredAbbrevWf(Nat.succ(k)) = registeredAbbrevWf(k - 1) + 2 :=\n  registeredAbbrevWf.eq_def(Nat.succ(k))\n\nopaque registeredOpaqueWhere(n: Nat): Nat := loop(n)\nwhere {\n  def loop(m: Nat): Nat := match m with {\n    | 0 => 41\n    | k + 1 => loop(k) + 1\n  }\n}\n\nabbrev registeredAbbrevWhere(bias: Nat, n: Nat): Nat := loop(n)\nwhere {\n  def loop(m: Nat): Nat := match m with {\n    | 0 => bias\n    | k + 1 => loop(k) + 1\n  }\n}\n\ntheorem registeredAbbrevWhereValue: registeredAbbrevWhere(7, 2) = 9 := by { rfl }\n\nabbrev RegisteredOwnerAlias := Nat\n\nabbrev registeredAbbrevWfWhere(n: Nat): Nat :=\n  match n with {\n  | 0 => 37\n  | k + 1 => registeredAbbrevWfWhere(step(k)) + 3\n  }\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\nwhere {\n  def step(k: Nat): Nat := k - 1\n}\n\nabbrev registeredAbbrevGroup(n: Nat): Nat :=\n  match n with {\n  | 0 => 5\n  | k + 1 => loop(k)\n  }\nwhere {\n  def loop(m: Nat): Nat := match m with {\n    | 0 => 7\n    | k + 1 => registeredAbbrevGroup(k)\n  }\n}\n\ninductive RegisteredOwnerPredicate: Prop where {\n  | base\n  | step(children: Nat -> RegisteredOwnerPredicate)\n}\n\nabbrev registeredAbbrevProofWhere(proof: RegisteredOwnerPredicate): True :=\n  match proof with {\n  | .base => True.intro\n  | .step children => match children(1) with {\n    | .base => True.intro\n    | .step grandchildren => helper(grandchildren(1))\n  }\n  }\nwhere {\n  def helper(proof: RegisteredOwnerPredicate): True :=\n    match proof with {\n    | .base => True.intro\n    | .step children => match children(1) with {\n      | .base => True.intro\n      | .step grandchildren => registeredAbbrevProofWhere(grandchildren(1))\n    }\n    }\n}\n\nfunction m3registeredowners(flag: Bool): UInt64 :=\n  let n := if (flag) { 3 } else { 2 }\n  let bias: RegisteredOwnerAlias := registeredAbbrevGroup(n)\n  UInt64.ofNat(registeredAbbrevWf(n) +\n    100 * registeredOpaqueWhere(n) +\n    10000 * registeredAbbrevWhere(bias, n) +\n    1000000 * registeredAbbrevWfWhere(n))\n"
+
 private def constWfLeanSource : String :=
   "def wfConstReturned (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstReturned k (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\ndef wfConstClosed : (n : Nat) → (proof : n = n → False) → Nat :=\n  fun (n : Nat) (proof : n = n → False) =>\n    wfConstClosed (Nat.succ n)\n      (fun (_ : Nat.succ n = Nat.succ n) => proof (Eq.refl n))\ntermination_by 0\ndecreasing_by\n  have original : Nat.lt 0 0 := False.elim (proof (Eq.refl n))\n  exact original\n\ntheorem wfConstReturnedSource (n : Nat) :\n    wfConstReturned n = (fun (bias : Nat) => match h : n with\n      | 0 => bias\n      | Nat.succ k => Nat.succ (wfConstReturned k (Nat.succ bias))) :=\n  wfConstReturned.eq_def n\n\ntheorem wfConstClosedSource :\n    wfConstClosed = (fun (n : Nat) (proof : n = n → False) =>\n      wfConstClosed (Nat.succ n)\n        (fun (_ : Nat.succ n = Nat.succ n) => proof (Eq.refl n))) :=\n  wfConstClosed.eq_def\n\ndef wfConstRetained (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k =>\n      let step := wfConstRetained k\n      Nat.succ (step (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\nmutual\ndef wfConstMutualLeft (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstMutualRight k (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\ndef wfConstMutualRight (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k =>\n      let step := wfConstMutualLeft k\n      Nat.succ (step (Nat.succ bias))\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\nend\n\ntheorem wfConstMutualSource (n : Nat) :\n    wfConstMutualLeft n = (fun (bias : Nat) => match h : n with\n      | 0 => bias\n      | Nat.succ k => Nat.succ (wfConstMutualRight k (Nat.succ bias))) :=\n  wfConstMutualLeft.eq_def n\n\nmutual\ndef wfConstFixedLeft (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstFixedRight k bias)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\n\ndef wfConstFixedRight (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) =>\n    match h : n with\n    | 0 => bias\n    | Nat.succ k => Nat.succ (wfConstFixedLeft k bias)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self k\nend\n\ndef m3constwf (flag : Bool) : UInt64 :=\n  let n := if flag then 4 else 2\n  let direct := wfConstReturned n 3\n  let retained := wfConstRetained n 3\n  let mutualResult := wfConstMutualLeft n 3\n  let fixedResult := wfConstFixedLeft (n + n) 3\n  UInt64.ofNat (if direct == retained && direct == mutualResult && direct == fixedResult\n    then direct else 0)\n"
 
@@ -1884,10 +2020,203 @@ private def checkRegisteredPredicateMetadata (kind : PsCompilerSourceKind)
         entry.priority == priority && entry.className.any (psNameEq className)))
         ("registered predicate default-instance metadata changed: " ++ name)
 
+private def registeredOpaqueWfFailure : PsElabError → Bool
+  | .atDeclaration _ cause => registeredOpaqueWfFailure cause
+  | .atContext _ cause => registeredOpaqueWfFailure cause
+  | .data message =>
+    message == "PSCV0-PREDEFINITION-REGISTRATION: opaque source cannot publish its generated unfolding equation"
+  | _ => false
+
+private def checkRegisteredOwnerMetadata (kind : PsCompilerSourceKind)
+    (source : String) : IO Unit := do
+  let program ← fromExcept (psCompilerParsePscv0 source kind)
+  let compiled ← fromExcept ((psElabProgramWithOrigins
+    psSelfHostProdPreludeEnvironment program).mapError psCompilerPscv0ElabError)
+  let declarations := compiled.result.declarations
+  let environment := compiled.result.environment
+  for (shortName, isOpaque, needsEquation, localKind) in [
+      ("RegisteredOwnerAlias", false, false, ""),
+      ("registeredAbbrevWf", false, true, ""),
+      ("registeredOpaqueWhere", true, false, "definition"),
+      ("registeredAbbrevWhere", false, false, "definition"),
+      ("registeredAbbrevWfWhere", false, true, "definition"),
+      ("registeredAbbrevGroup", false, false, "definition"),
+      ("registeredAbbrevProofWhere", false, false, "proof")] do
+    let name := psRootName shortName
+    let [owner] := compiled.origins.filter (fun origin =>
+        origin.members.any (fun member => psNameEq member.name name))
+      | throw (IO.userError ("registered original main lost its unique origin: " ++ shortName))
+    let owned := declarations.filter (fun declaration =>
+      owner.members.any (fun member => psNameEq member.name (psDeclarationName declaration)))
+    ensure (owned.length == owner.members.length && owner.members.all (fun member =>
+      (owned.filter (fun declaration => psNameEq member.name (psDeclarationName declaration))).length == 1))
+      ("registered source changed its exact emitted ownership: " ++ shortName)
+    let [declaration] := owned.filter (fun declaration => psNameEq (psDeclarationName declaration) name)
+      | throw (IO.userError ("registered source main is not unique: " ++ shortName))
+    ensure (match declaration with
+      | .opaqueDecl _ _ type value =>
+        isOpaque && !psExprHasUnresolvedMeta type && !psExprHasUnresolvedMeta value &&
+          (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty
+      | .definitionDecl _ _ type value =>
+        !isOpaque && !psExprHasUnresolvedMeta type && !psExprHasUnresolvedMeta value &&
+          (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty
+      | _ => false) ("registered main changed its kind or closed body: " ++ shortName)
+    let equation := psEnvironmentFind environment (psNameAppendStr name "eq_def")
+    let hasEquation := match equation with
+      | some (.theoremDecl ..) => true
+      | _ => false
+    ensure (if needsEquation then hasEquation else equation.isNone)
+      ("registered main changed its strategy equation owner: " ++ shortName)
+    if !isOpaque then
+      ensure (match psEnvironmentReducibility environment name with
+        | .reducible => true | _ => false)
+        ("registered abbreviation lost reducibility: " ++ shortName)
+      ensure (compiled.exposedNames.any (psNameEq name))
+        ("registered abbreviation lost source exposure: " ++ shortName)
+    else
+      ensure (!(compiled.exposedNames.any (psNameEq name)))
+        "registered opaque acquired abbreviation exposure"
+    ensure (owner.localDefinitions.length == (if localKind == "" then 0 else 1))
+      ("registered source changed its actual local-helper roster: " ++ shortName)
+    for localDefinition in owner.localDefinitions do
+      ensure (localDefinition.span.start.byteOffset >= owner.span.start.byteOffset &&
+        localDefinition.span.stop.byteOffset <= owner.span.stop.byteOffset &&
+        !localDefinition.declarations.isEmpty &&
+        localDefinition.declarations.all (fun emitted =>
+          owner.members.any (fun member => psNameEq member.name emitted)))
+        ("registered local helper escaped its actual source span or owner: " ++ shortName)
+      let some helper := psEnvironmentFind environment localDefinition.name
+        | throw (IO.userError ("registered local helper has no declaration: " ++ shortName))
+      ensure (match helper with
+        | .definitionDecl _ _ type value =>
+          localKind == "definition" && !psExprHasUnresolvedMeta type &&
+            !psExprHasUnresolvedMeta value &&
+            (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty
+        | .theoremDecl _ _ type value =>
+          localKind == "proof" && !psExprHasUnresolvedMeta type &&
+            !psExprHasUnresolvedMeta value &&
+            (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty
+        | _ => false) ("registered local helper inherited the main kind: " ++ shortName)
+      let equationName := psNameAppendStr localDefinition.name "eq_def"
+      ensure (match psEnvironmentFind environment equationName with
+        | some (.theoremDecl ..) => localDefinition.declarations.any (psNameEq equationName)
+        | _ => false) ("registered local helper lost its owned equation: " ++ shortName)
+      ensure (!(compiled.exposedNames.any (psNameEq localDefinition.name)) &&
+        (match psEnvironmentReducibility environment localDefinition.name with
+          | .reducible => false | _ => true))
+        ("registered local helper inherited main-only abbreviation metadata: " ++ shortName)
+    if localKind == "proof" then
+      let families := owned.filterMap fun declaration =>
+        match declaration with | .inductiveDecl family => some family | _ => none
+      ensure (!families.isEmpty)
+        "registered main/local Prop SCC lost its checked below-helper ownership"
+      for family in families do
+        let level ← fromExcept ((psInductiveResultLevel environment family).mapError
+          (fun error => psCompilerPscv0ElabError (.infer error)))
+        ensure (psLevelEquivalent level .zero)
+          "registered main/local Prop SCC helper left its native predicate sort"
+
+private def opaqueProofWfEquationFailure : PsElabError → Bool
+  | .atDeclaration _ cause => opaqueProofWfEquationFailure cause
+  | .atContext _ cause => opaqueProofWfEquationFailure cause
+  | .unknownName name =>
+    psNameEq name (psNameAppendStr (psRootName "registeredOpaqueProofWf") "eq_def")
+  | _ => false
+
+private def checkOpaqueProofWfMetadata (kind : PsCompilerSourceKind)
+    (source : String) : IO Unit := do
+  let program ← fromExcept (psCompilerParsePscv0 source kind)
+  let compiled ← fromExcept ((psElabProgramWithOrigins
+    psSelfHostProdPreludeEnvironment program).mapError psCompilerPscv0ElabError)
+  let environment := compiled.result.environment
+  let name := psRootName "registeredOpaqueProofWf"
+  let some (.opaqueDecl _ levels type value) := psEnvironmentFind environment name
+    | throw (IO.userError "proof-valued opaque WF changed its actual logical kind")
+  let level ← fromExcept ((psElabExpressionSort (psElabContextEmpty environment levels) type).mapError
+    psCompilerPscv0ElabError)
+  ensure (psLevelEquivalent level .zero && !psExprHasUnresolvedMeta type &&
+    !psExprHasUnresolvedMeta value &&
+    (psExprFVarIds type).isEmpty && (psExprFVarIds value).isEmpty)
+    "proof-valued opaque WF lost its checked Prop type or closed construction"
+  let [owner] := compiled.origins.filter (fun origin =>
+      origin.members.any (fun member => psNameEq member.name name))
+    | throw (IO.userError "proof-valued opaque WF lost its unique source owner")
+  ensure (owner.localDefinitions.isEmpty &&
+    owner.members.all (fun member =>
+      (compiled.result.declarations.filter (fun declaration =>
+        psNameEq member.name (psDeclarationName declaration))).length == 1))
+    "proof-valued opaque WF changed source/declaration ownership"
+  let equationName := psNameAppendStr name "eq_def"
+  ensure ((psEnvironmentFind environment equationName).isNone &&
+    !(owner.members.any (fun member => psNameEq member.name equationName)) &&
+    !(compiled.exposedNames.any (psNameEq name)))
+    "proof-valued opaque WF acquired an unfolding equation or abbreviation exposure"
+
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
   checkCoreBoundaryControls
+  checkIndependentSourcePair "proof-valued opaque WF"
+    opaqueProofWfLeanSource opaqueProofWfPsSource
+  for (kind, source) in [(PsCompilerSourceKind.lean, opaqueProofWfLeanSource),
+      (.proofScript, opaqueProofWfPsSource)] do
+    checkOpaqueProofWfMetadata kind source
+    let useEquation := match kind with
+      | .lean => "theorem opaqueProofEquationUse : True := registeredOpaqueProofWf.eq_def 0\n"
+      | .proofScript => "theorem opaqueProofEquationUse: True := registeredOpaqueProofWf.eq_def(0)\n"
+    let program ← fromExcept (psCompilerParsePscv0 (source ++ useEquation) kind)
+    match psCompilerElaboratePscv0 program with
+    | .error (.elaboration cause) =>
+      ensure (opaqueProofWfEquationFailure cause)
+        ("opaque proof WF equation refused at the wrong owner: " ++ psCompilerPscv0ElabError cause)
+    | .error error => throw (IO.userError (psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError "opaque proof WF exposed a native-absent unfolding equation")
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean,
+        "opaque registeredOpaqueProofWfNoDecrease (n : Nat) : True :=\n  registeredOpaqueProofWfNoDecrease (Nat.succ n)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self n\n"),
+      (.proofScript,
+        "opaque registeredOpaqueProofWfNoDecrease(n: Nat): True :=\n  registeredOpaqueProofWfNoDecrease(Nat.succ(n))\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(n) }\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerElaboratePscv0 program with
+    | .error (.elaboration cause) =>
+      ensure (wfBoundaryDecreaseFailure cause)
+        ("opaque proof WF skipped its decrease gate: " ++ psCompilerPscv0ElabError cause)
+    | .error error => throw (IO.userError (psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError "opaque proof WF published an increasing recursion")
+
+  ensure ((M3InputParityOracle.m3registeredowners false).toNat == 40074333 &&
+      (M3InputParityOracle.m3registeredowners true).toNat == 43104435)
+    "native registered original-main/helper observations changed"
+  checkIndependentSourcePair "registered original mains and local owners"
+    registeredOwnerLeanSource registeredOwnerPsSource
+  for (kind, source) in [(PsCompilerSourceKind.lean, registeredOwnerLeanSource),
+      (.proofScript, registeredOwnerPsSource)] do
+    checkRegisteredOwnerMetadata kind source
+  for (label, phase, leanText, psText) in [
+      ("opaque computational WF",
+        "registration",
+        "opaque registeredOpaqueWfRefusal (n : Nat) : Nat :=\n  match n with\n  | 0 => 31\n  | k + 1 => registeredOpaqueWfRefusal (k - 1) + 2\ntermination_by n\ndecreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)\n",
+        "opaque registeredOpaqueWfRefusal(n: Nat): Nat := match n with {\n  | 0 => 31\n  | k + 1 => registeredOpaqueWfRefusal(k - 1) + 2\n}\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_of_le(Nat.sub_le(k, 1)) }\n"),
+      ("increasing abbrev WF",
+        "decrease",
+        "abbrev registeredAbbrevNoDecrease (n : Nat) : Nat :=\n  registeredAbbrevNoDecrease (Nat.succ n)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_self n\n",
+        "abbrev registeredAbbrevNoDecrease(n: Nat): Nat :=\n  registeredAbbrevNoDecrease(Nat.succ(n))\ntermination_by n\ndecreasing_by by { exact Nat.lt_succ_self(n) }\n"),
+      ("reconstructed local parent",
+        "structural",
+        "abbrev registeredWhereNoDecrease (n : Nat) : Nat := loop n\nwhere\n  loop (m : Nat) : Nat :=\n    match m with\n    | 0 => 0\n    | k + 1 => loop (Nat.succ k)\n",
+        "abbrev registeredWhereNoDecrease(n: Nat): Nat := loop(n)\nwhere {\n  def loop(m: Nat): Nat := match m with {\n    | 0 => 0\n    | k + 1 => loop(Nat.succ(k))\n  }\n}\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        let correct := if phase == "registration" then registeredOpaqueWfFailure cause
+          else if phase == "decrease" then wfBoundaryDecreaseFailure cause
+          else structuralRuleFailure "DECREASE" cause
+        ensure correct
+          (label ++ " refused at the wrong source owner: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " escaped elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " published an invalid registered source"))
   checkIndependentSourcePair "scoped parenthesis and named-value layout"
     parserLayoutLeanSource parserLayoutPsSource
   for (label, source) in M3InputParityOracle.parserLayoutRefusals do
@@ -2382,10 +2711,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches", "m3structural", "m3inline", "m3registered", "m3const", "m3wfboundaries", "m3constwf"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches", "m3structural", "m3inline", "m3registered", "m3const", "m3wfboundaries", "m3constwf", "m3registeredowners"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (constWfLeanSource ++ wfBoundaryLeanSource ++ predicatePlainLeanSource ++ predicateNamedLeanSource ++ predicateIndexLeanSource ++ inlineLeanSource ++ registeredLeanSource ++ structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (constWfPsSource ++ wfBoundaryPsSource ++ predicatePlainPsSource ++ predicateNamedPsSource ++ predicateIndexPsSource ++ inlinePsSource ++ registeredPsSource ++ structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (opaqueProofWfLeanSource ++ registeredOwnerLeanSource ++ constWfLeanSource ++ wfBoundaryLeanSource ++ predicatePlainLeanSource ++ predicateNamedLeanSource ++ predicateIndexLeanSource ++ inlineLeanSource ++ registeredLeanSource ++ structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (opaqueProofWfPsSource ++ registeredOwnerPsSource ++ constWfPsSource ++ wfBoundaryPsSource ++ predicatePlainPsSource ++ predicateNamedPsSource ++ predicateIndexPsSource ++ inlinePsSource ++ registeredPsSource ++ structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -2425,6 +2754,7 @@ def check (root : System.FilePath) : IO Unit := do
           ("m3const", Lean.toJson (toString (M3InputParityOracle.m3const flag).toNat)),
           ("m3wfboundaries", Lean.toJson (toString (M3InputParityOracle.m3wfboundaries flag).toNat)),
           ("m3constwf", Lean.toJson (toString (M3InputParityOracle.m3constwf flag).toNat)),
+          ("m3registeredowners", Lean.toJson (toString (M3InputParityOracle.m3registeredowners flag).toNat)),
           ("m3structural", Lean.toJson (toString (M3InputParityOracle.m3structural flag).toNat)),
           ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat)),
           ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat)),

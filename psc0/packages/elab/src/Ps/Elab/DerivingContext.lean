@@ -201,11 +201,12 @@ def psElabDeriveDirectRecursiveFields (context : PsElabContext)
 
 -- Recursion is an explicit handler capability, not permission to bypass the
 -- family/field checks. Direct recursive fields must agree with both metadata
--- and an instantiated member of the complete group. Only those field types
--- may depend on constructor indices; ordinary dictionary planning remains in
--- the shared parameter telescope. Nested/function-valued recursion is separate.
+-- and an instantiated member of the complete group. A handler may explicitly
+-- defer ordinary dependent dictionaries to the actual checked field scope.
+-- Nested/function-valued recursion remains a separate capability.
 def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
-    (allowDirectRecursion : Bool) : Except PsElabError PsElabDeriveFields := do
+    (allowDirectRecursion : Bool) (allowDependentFields : Bool := false) :
+    Except PsElabError PsElabDeriveFields := do
   let some constructor := psEnvironmentFindConstructor plan.context.environment name
     | throw (.data "deriving constructor missing")
   if !allowDirectRecursion && !constructor.recursiveFields.isEmpty then
@@ -227,7 +228,7 @@ def psElabDeriveFieldsWithRecursion (plan : PsElabDeriveContext) (name : PsName)
       throw (.data "deriving direct field is absent from recursive metadata")
     let level ← psElabExpressionSort opened.context field.type
     if psLevelEquivalent level .zero then return true
-    if (!recursive || !telescope.bindersRev.isEmpty) &&
+    if !allowDependentFields && (!recursive || !telescope.bindersRev.isEmpty) &&
         !psExprFVarsInContext plan.context.localContext field.type then
       throw (.data "deriving requires independent runtime field types")
     if plan.group.members.any (fun member => psExprHasConst member.name field.type) &&
@@ -272,8 +273,8 @@ def psElabDeriveSlotConstructor (plan : PsElabDeriveContext)
   return (head, cursor)
 
 def psElabDeriveSlotFields (plan : PsElabDeriveContext)
-    (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor) :
-    Except PsElabError PsElabDeriveFields := do
+    (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor)
+    (allowDependentFields : Bool := false) : Except PsElabError PsElabDeriveFields := do
   if !psConstructorRecursiveFieldsOrdered constructor.info then
     throw (.data "deriving recursive field metadata is invalid")
   if slot.publicMember then
@@ -296,7 +297,8 @@ def psElabDeriveSlotFields (plan : PsElabDeriveContext)
       pure ()
     let level ← psElabExpressionSort opened.context field.type
     if psLevelEquivalent level .zero then return true
-    if !directRecursiveFields.contains index && !psExprFVarsInContext plan.context.localContext field.type then
+    if !allowDependentFields && !directRecursiveFields.contains index &&
+        !psExprFVarsInContext plan.context.localContext field.type then
       throw (.data "deriving requires independent runtime field types")
     if edge.isNone && plan.group.members.any (fun member => psExprHasConst member.name field.type) then
       throw (.data "deriving recursive field is not a supported elimination slot")

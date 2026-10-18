@@ -1,5 +1,23 @@
 # M3 Option bind — independently audited selection candidate
 
+## Paired source, kernel and emission subsequently passed
+
+[Preparation 39171716053](https://github.com/dwijayuda/pskernel/actions/runs/39171716053)
+at 65b510dc18ee9fa47cac7b28b6d672de73ea3f44 again passed the exact selected
+manifest and retained additive audit. All 36 declarations remain active at the
+named and final boundaries with unchanged Core, metadata and registrations.
+The qualified Option constructor source now passes both selected grammars,
+the original generic-bind equation, fresh official-kernel replay, exact owned
+runtime substitution and five-target emission. The unboxed projection path is
+therefore exercised by checked source emission. This preparation workflow did
+not execute the 50 emitted P1 observations; backend parity remains pending.
+
+The separate native eligible-head probe failed only on its expected diagnostic:
+the opaque eq_def query reports an Unknown constant. Both declarations and
+metadata were accepted, but the job's main runtime observations did not run.
+The child corrects that exact guard and adds registered-abbreviation controls;
+this does not retrospectively qualify the failed authoring job.
+
 ## Selection audit subsequently passed
 
 [Preparation 39170162742](https://github.com/dwijayuda/pskernel/actions/runs/39170162742)

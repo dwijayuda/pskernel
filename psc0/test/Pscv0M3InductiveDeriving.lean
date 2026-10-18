@@ -12,6 +12,10 @@ example : True := by
         @instBEqOfDecidableEq Nat instDecidableEqNat := rfl
   exact True.intro
 
+example (h : Option.some (Nat.succ 0) = Option.some 1) :
+    @Eq.rec (Option Nat) (Option.some (Nat.succ 0))
+      (fun _ _ => Nat) 7 (Option.some 1) h = 7 := rfl
+
 -- Independent pinned Lean deriving. These ordinary native declarations are
 -- never substituted for the portable group AST or its generated instances.
 -- Names are identical so Repr parity compares the complete printed document.
@@ -104,6 +108,228 @@ inductive M3DeriveAtom where
 instance : BEq M3DeriveAtom where
   beq _ _ := false
 
+universe dataU dataV
+
+inductive M3DataBox (A : Sort dataU) where
+  | pack (value : A)
+inductive M3DataEnum where
+  | zero
+  | one
+structure M3DataProof (p : Prop) where
+  witness : p
+inductive M3DataUnused (A : Type dataU) where
+  | pack (value : A)
+inductive M3DataCtorUniverse where
+  | pack (A : Type dataU) (value : A)
+inductive M3DataPoly (A : Type _) where
+  | pack (value : A)
+inductive M3DataFieldSort : Type 1 where
+  | pack (A : Type _) (value : A)
+inductive M3DataUnitField : Type where
+  | pack (value : PUnit)
+
+inductive M3DataPromoted : Nat → Type where
+  | intro (n : Nat) (value : Fin n) : M3DataPromoted n
+  deriving Hashable, Repr, BEq
+inductive M3DataDependent : Nat → Type where
+  | stop : M3DataDependent 0
+  | intro (n : Nat) (value : Fin n) : M3DataDependent n
+  deriving Hashable, Repr
+structure M3DataRecord where
+  n : Nat
+  value : Fin n
+  deriving Hashable, Repr
+inductive M3DataFixed : Nat → Type where
+  | leaf (n : Nat) : M3DataFixed n
+  | step (n : Nat) (tail : M3DataFixed n) : M3DataFixed n
+  deriving Hashable, Repr
+inductive M3DataChanging : Nat → Type where
+  | start (n : Nat) : M3DataChanging n
+  | next (n : Nat) (tail : M3DataChanging n) : M3DataChanging (Nat.succ n)
+  deriving Hashable, Repr
+inductive M3DataSecond : Bool → Nat → Type where
+  | flag (n : Nat) : M3DataSecond true n
+
+def m3DataParameter (n : Nat) (value : M3DataPromoted n) : Nat :=
+  match value with
+  | M3DataPromoted.intro n payload => payload.val
+
+def m3DataNested (n : Nat) (value : M3DataPromoted n) : Nat :=
+  match value with
+  | .intro _ (.mk 0 _) => 0
+  | .intro _ (.mk (Nat.succ k) _) => Nat.succ k
+
+def m3DataDepth (n : Nat) (value : M3DataFixed n) : Nat :=
+  match value with
+  | .leaf _ => 0
+  | .step _ tail => Nat.succ (m3DataDepth n tail)
+
+section
+variable (seed : Nat)
+def m3DataPatternCapture : Nat :=
+  match M3DataFixed.leaf _ with
+  | M3DataFixed.leaf seed => 7
+  | M3DataFixed.step seed _ => 9
+end
+
+theorem m3DataHashPromoted (n : Nat) (value : Fin n) :
+    hash (M3DataPromoted.intro n value) = mixHash (UInt64.ofNat 0) (hash value) := by rfl
+theorem m3DataHashDependent (n : Nat) (value : Fin n) :
+    hash (M3DataDependent.intro n value) =
+      mixHash (mixHash (UInt64.ofNat 1) (hash n)) (hash value) := by rfl
+theorem m3DataHashRecord (n : Nat) (value : Fin n) :
+    hash (M3DataRecord.mk n value) =
+      mixHash (mixHash (UInt64.ofNat 0) (hash n)) (hash value) := by rfl
+theorem m3DataPromotedBEq (n : Nat) (left right : Fin n) :
+    (M3DataPromoted.intro n left == M3DataPromoted.intro n right) =
+      (left == right) := by rfl
+theorem m3DataParameterLaw (n : Nat) (value : Fin n) :
+    m3DataParameter n (M3DataPromoted.intro n value) = value.val := by rfl
+theorem m3DataPatternCaptureLaw (n : Nat) : m3DataPatternCapture n = 7 := by rfl
+
+-- A real index remains because stop fixes zero. This cannot pass by promotion.
+inductive M3BEqLast : Nat → Type where
+  | stop : M3BEqLast 0
+  | wrap (n : Nat) (value : Nat) : M3BEqLast n
+  deriving BEq
+theorem m3BEqLastLaw (n left right : Nat) :
+    (M3BEqLast.wrap n left == M3BEqLast.wrap n right) = (left == right) := by rfl
+
+example (A : Sort dataU) : Sort (max 1 dataU) := M3DataBox A
+example : Type := M3DataEnum
+example (p : Prop) : Prop := M3DataProof p
+example (A : Type dataU) : Type dataU := M3DataUnused A
+example : Type (dataU + 1) := M3DataCtorUniverse.{dataU}
+example (A : Type) (value : A) : M3DataFieldSort := .pack A value
+
+example (n : Nat) (left right : Fin n) :
+    (left == right) = Nat.beq left.val right.val := rfl
+example (n : Nat) :
+    (inferInstance : BEq (Fin n)) =
+      ⟨fun left right => Nat.beq left.val right.val⟩ := rfl
+example (n : Nat) (value : Fin n) (prec : Nat) :
+    reprPrec value prec = reprPrec value.val 0 := rfl
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for (name, parameters, indices) in [
+      (``M3DataBox, 1, 0), (``M3DataEnum, 0, 0), (``M3DataProof, 1, 0),
+      (``M3DataUnused, 1, 0), (``M3DataCtorUniverse, 0, 0),
+      (``M3DataPoly, 1, 0), (``M3DataFieldSort, 0, 0), (``M3DataUnitField, 0, 0),
+      (``M3DataPromoted, 1, 0), (``M3DataDependent, 0, 1),
+      (``M3DataRecord, 0, 0), (``M3DataFixed, 1, 0),
+      (``M3DataChanging, 0, 1), (``M3DataSecond, 0, 2), (``M3BEqLast, 0, 1)] do
+    let some (.inductInfo info) := environment.find? name
+      | throwError "native Data family missing: {name}"
+    unless info.numParams == parameters && info.numIndices == indices do
+      throwError "native Data promotion metadata differs: {name}"
+  for (name, parameters, fields) in [
+      (``M3DataPromoted.intro, 1, 1), (``M3DataDependent.intro, 0, 2),
+      (``M3DataFixed.leaf, 1, 0), (``M3DataFixed.step, 1, 1),
+      (``M3DataChanging.start, 0, 1), (``M3DataChanging.next, 0, 2),
+      (``M3DataSecond.flag, 0, 1)] do
+    let some (.ctorInfo info) := environment.find? name
+      | throwError "native Data constructor missing: {name}"
+    unless info.numParams == parameters && info.numFields == fields do
+      throwError "native Data constructor metadata differs: {name}"
+  for name in [``M3DataBox, ``M3DataUnused, ``M3DataCtorUniverse] do
+    let some info := environment.find? name | throwError "native universe control missing"
+    unless info.levelParams == [`dataU] do
+      throwError "native unused universe was retained: {name}"
+  let some info := environment.find? ``M3DataPoly
+    | throwError "native implicit universe control missing"
+  unless info.levelParams.length == 1 do
+    throwError "native implicit header universe was not generalized once"
+
+inductive IndexedSucc : Nat → Type where
+  | intro (n : Nat) : IndexedSucc (Nat.succ n)
+  deriving BEq
+example (n : Nat) : (IndexedSucc.intro n == IndexedSucc.intro n) = true := rfl
+inductive IndexedPayload : Nat → Type where
+  | intro (n : Nat) (value : Fin n) : IndexedPayload n
+  deriving BEq
+example (n : Nat) (left right : Fin n) :
+    (IndexedPayload.intro n left == IndexedPayload.intro n right) =
+      (left == right) := rfl
+
+/-- error: Failed to infer universe levels in type of binder -/
+#guard_msgs (error, drop warning, substring := true) in
+inductive M3DataAmbiguous : Type 1 where
+  | pack (value : PUnit)
+
+/-- error: Invalid universe polymorphic resulting type -/
+#guard_msgs (error, drop warning, substring := true) in
+inductive M3DataPropRisk (A : Sort dataU) : Sort dataU where
+  | pack (value : A)
+
+/-- error: Invalid universe level for field -/
+#guard_msgs (error, drop warning, substring := true) in
+structure M3DataTooSmall : Type where
+  A : Type
+
+/-- error: failed to synthesize -/
+#guard_msgs (error, drop warning, substring := true) in
+inductive M3DataMissingHash where
+  | pack (value : Nat → Nat)
+  deriving Hashable
+
+/-- error: failed to synthesize -/
+#guard_msgs (error, drop warning, substring := true) in
+inductive M3DataMissingRepr where
+  | pack (value : Nat → Nat)
+  deriving Repr
+
+namespace M3DataUnaryOracle
+
+def payload (flag : Bool) : Nat := if flag then 71 else 13
+def precedence (flag : Bool) : Nat := if flag then 1024 else 0
+def fin (n : Nat) : Fin (Nat.succ n) := ⟨n, Nat.lt_succ_self n⟩
+def zero (n : Nat) : Fin (Nat.succ n) := ⟨0, Nat.succ_le_succ (Nat.zero_le n)⟩
+def fixed (n : Nat) : M3DataFixed n :=
+  .step n (.step n (.leaf n))
+def changing (n : Nat) : M3DataChanging (Nat.succ (Nat.succ n)) :=
+  .next (Nat.succ n) (.next n (.start n))
+
+def hashOutput (flag : Bool) : UInt64 :=
+  let n := payload flag
+  let bound := Nat.succ n
+  mixHash (hash (M3DataPromoted.intro bound (fin n)))
+    (mixHash (hash (M3DataDependent.intro bound (fin n)))
+      (mixHash (hash (M3DataRecord.mk bound (fin n)))
+        (mixHash (hash (fixed bound)) (hash (changing n)))))
+
+def promotedText (flag : Bool) : String :=
+  Std.Format.pretty (reprPrec (M3DataPromoted.intro (Nat.succ (payload flag))
+    (fin (payload flag))) (precedence flag)) 40
+def dependentText (flag : Bool) : String :=
+  Std.Format.pretty (reprPrec (M3DataDependent.intro (Nat.succ (payload flag))
+    (fin (payload flag))) (precedence flag)) 40
+def recordText (flag : Bool) : String :=
+  Std.Format.pretty (reprPrec (M3DataRecord.mk (Nat.succ (payload flag))
+    (fin (payload flag))) (precedence flag)) 40
+def fixedText (flag : Bool) : String :=
+  Std.Format.pretty (reprPrec (fixed (Nat.succ (payload flag))) (precedence flag)) 40
+def changingText (flag : Bool) : String :=
+  Std.Format.pretty (reprPrec (changing (payload flag)) (precedence flag)) 40
+
+def reprOutput (_flag : Bool) : UInt64 := 31
+
+def patternOutput (flag : Bool) : UInt64 :=
+  let n := payload flag
+  let bound := Nat.succ n
+  let value := M3DataPromoted.intro bound (fin n)
+  UInt64.ofNat (m3DataParameter bound value + m3DataNested bound value +
+    m3DataDepth bound (fixed bound) + m3DataPatternCapture bound)
+
+def beqOutput (flag : Bool) : UInt64 :=
+  let n := payload flag
+  let x := M3DataPromoted.intro (Nat.succ n) (fin n)
+  let y := M3DataPromoted.intro (Nat.succ n) (zero n)
+  UInt64.ofNat ((if x == x then 1 else 0) + (if x == y then 2 else 0) +
+    (if y == x then 4 else 0) + (if y == y then 8 else 0))
+
+end M3DataUnaryOracle
+
 namespace M3InductiveDerivingOracle
 
 def forest (n m : Nat) : M3DeriveForest Nat 0 :=
@@ -176,6 +402,27 @@ inductive M3DeriveIndexedBEq (I A : Type) : I → Type where
   | second (index : I) (value : A) : M3DeriveIndexedBEq I A index
   deriving BEq
 
+run_cmd do
+  let environment ← Lean.getEnv
+  let some (.inductInfo family) := environment.find? ``M3DeriveIndexedBEq
+    | throwError "native promoted BEq family missing"
+  unless family.numParams == 3 && family.numIndices == 0 do
+    throwError "native common value index was not promoted"
+  let some info := environment.find? ``instBEqM3DeriveIndexedBEq
+    | throwError "native promoted BEq instance missing"
+  let .forallE _ iType
+      (.forallE _ aType
+        (.forallE _ indexType
+          (.forallE _ iDictionary
+            (.forallE _ aDictionary result .instImplicit) .instImplicit)
+          .implicit) .implicit) .implicit := info.type
+    | throwError "native promoted BEq instance does not have exactly five expected binders"
+  unless !result.isForall && iType.isSort && aType.isSort &&
+      indexType == Lean.Expr.bvar 1 &&
+      iDictionary == Lean.mkApp (Lean.mkConst ``BEq [Lean.Level.zero]) (.bvar 2) &&
+      aDictionary == Lean.mkApp (Lean.mkConst ``BEq [Lean.Level.zero]) (.bvar 2) do
+    throwError "native promoted BEq instance changed its actual type/value requirements"
+
 example (n : Nat) : (IndexedBEq.intro n == IndexedBEq.intro n) = true := rfl
 
 example (index : M3DeriveAtom) (left right : Nat) :
@@ -225,6 +472,203 @@ private def fromExcept (result : Except String α) : IO α :=
   | .ok value => pure value
   | .error error => throw (IO.userError error)
 
+private def dataTypesLeanSource : String :=
+  "universe dataU dataV\n\ninductive M3DataBox (A : Sort dataU) where\n  | pack (value : A)\n\ninductive M3DataEnum where\n  | zero\n  | one\n\nstructure M3DataProof (p : Prop) where\n  witness : p\n\ninductive M3DataUnused (A : Type dataU) where\n  | pack (value : A)\n\ninductive M3DataCtorUniverse where\n  | pack (A : Type dataU) (value : A)\n\ninductive M3DataPoly (A : Type _) where\n  | pack (value : A)\n\ninductive M3DataFieldSort : Type 1 where\n  | pack (A : Type _) (value : A)\n\ninductive M3DataUnitField : Type where\n  | pack (value : PUnit)\n"
+
+private def dataTypesPsSource : String :=
+  "universe dataU dataV\n\ninductive M3DataBox(A: Sort dataU) where {\n  | pack(value: A)\n}\ninductive M3DataEnum where {\n  | zero\n  | one\n}\nstructure M3DataProof(p: Prop) where {\n  witness: p\n}\ninductive M3DataUnused(A: Type dataU) where {\n  | pack(value: A)\n}\ninductive M3DataCtorUniverse where {\n  | pack(A: Type dataU, value: A)\n}\ninductive M3DataPoly(A: Type _) where {\n  | pack(value: A)\n}\ninductive M3DataFieldSort: Type 1 where {\n  | pack(A: Type _, value: A)\n}\ninductive M3DataUnitField: Type where {\n  | pack(value: PUnit)\n}\n"
+
+private def dataFinLeanSource : String :=
+  "theorem m3DataFinBool (n : Nat) (left right : Fin n) :\n  (left == right) = Nat.beq left.val right.val := by rfl\n" ++
+  "theorem m3DataFinRepr (n : Nat) (value : Fin n) (prec : Nat) :\n  Repr.reprPrec value prec = Repr.reprPrec value.val 0 := by rfl\n"
+
+private def dataFinPsSource : String :=
+  "theorem m3DataFinBool(n: Nat, left: Fin(n), right: Fin(n)):\n  (left == right) = Nat.beq(left.val, right.val) := by { rfl }\n" ++
+  "theorem m3DataFinRepr(n: Nat, value: Fin(n), prec: Nat):\n  Repr.reprPrec(value, prec) = Repr.reprPrec(value.val, 0) := by { rfl }\n"
+
+private def dataUnaryLeanSource : String :=
+  "inductive M3DataPromoted : Nat → Type where\n  | intro (n : Nat) (value : Fin n) : M3DataPromoted n\n  deriving Hashable, Repr, BEq\n\ninductive M3DataDependent : Nat → Type where\n  | stop : M3DataDependent 0\n  | intro (n : Nat) (value : Fin n) : M3DataDependent n\n  deriving Hashable, Repr\n\nstructure M3DataRecord where\n  n : Nat\n  value : Fin n\n  deriving Hashable, Repr\n\ninductive M3DataFixed : Nat → Type where\n  | leaf (n : Nat) : M3DataFixed n\n  | step (n : Nat) (tail : M3DataFixed n) : M3DataFixed n\n  deriving Hashable, Repr\n\ninductive M3DataChanging : Nat → Type where\n  | start (n : Nat) : M3DataChanging n\n  | next (n : Nat) (tail : M3DataChanging n) : M3DataChanging (Nat.succ n)\n  deriving Hashable, Repr\n\ninductive M3DataSecond : Bool → Nat → Type where\n  | flag (n : Nat) : M3DataSecond true n\n\ndef m3DataParameter (n : Nat) (value : M3DataPromoted n) : Nat :=\n  match value with\n  | M3DataPromoted.intro n payload => payload.val\n\ndef m3DataNested (n : Nat) (value : M3DataPromoted n) : Nat :=\n  match value with\n  | .intro _ (.mk 0 _) => 0\n  | .intro _ (.mk (Nat.succ k) _) => Nat.succ k\n\ndef m3DataDepth (n : Nat) (value : M3DataFixed n) : Nat :=\n  match value with\n  | .leaf _ => 0\n  | .step _ tail => Nat.succ (m3DataDepth n tail)\n\nsection\nvariable (seed : Nat)\ndef m3DataPatternCapture : Nat :=\n  match M3DataFixed.leaf _ with\n  | M3DataFixed.leaf seed => 7\n  | M3DataFixed.step seed _ => 9\nend\n\ntheorem m3DataHashPromoted (n : Nat) (value : Fin n) :\n    Hashable.hash (M3DataPromoted.intro n value) = mixHash (UInt64.ofNat 0) (Hashable.hash value) := by rfl\ntheorem m3DataHashDependent (n : Nat) (value : Fin n) :\n    Hashable.hash (M3DataDependent.intro n value) =\n      mixHash (mixHash (UInt64.ofNat 1) (Hashable.hash n)) (Hashable.hash value) := by rfl\ntheorem m3DataHashRecord (n : Nat) (value : Fin n) :\n    Hashable.hash (M3DataRecord.mk n value) =\n      mixHash (mixHash (UInt64.ofNat 0) (Hashable.hash n)) (Hashable.hash value) := by rfl\ntheorem m3DataPromotedBEq (n : Nat) (left right : Fin n) :\n    (M3DataPromoted.intro n left == M3DataPromoted.intro n right) =\n      (left == right) := by rfl\ntheorem m3DataParameterLaw (n : Nat) (value : Fin n) :\n    m3DataParameter n (M3DataPromoted.intro n value) = value.val := by rfl\ntheorem m3DataPatternCaptureLaw (n : Nat) : m3DataPatternCapture n = 7 := by rfl\n\ninductive M3BEqLast : Nat → Type where\n  | stop : M3BEqLast 0\n  | wrap (n : Nat) (value : Nat) : M3BEqLast n\n  deriving BEq\ntheorem m3BEqLastLaw (n left right : Nat) :\n    (M3BEqLast.wrap n left == M3BEqLast.wrap n right) = (left == right) := by rfl\n"
+
+private def dataUnaryPsSource : String :=
+  "inductive M3DataPromoted: Nat -> Type where {\n  | intro(n: Nat, value: Fin(n)): M3DataPromoted(n)\n} deriving Hashable, Repr, BEq\n\ninductive M3DataDependent: Nat -> Type where {\n  | stop: M3DataDependent(0)\n  | intro(n: Nat, value: Fin(n)): M3DataDependent(n)\n} deriving Hashable, Repr\n\nstructure M3DataRecord where {\n  n: Nat\n  value: Fin(n)\n} deriving Hashable, Repr\n\ninductive M3DataFixed: Nat -> Type where {\n  | leaf(n: Nat): M3DataFixed(n)\n  | step(n: Nat, tail: M3DataFixed(n)): M3DataFixed(n)\n} deriving Hashable, Repr\n\ninductive M3DataChanging: Nat -> Type where {\n  | start(n: Nat): M3DataChanging(n)\n  | next(n: Nat, tail: M3DataChanging(n)): M3DataChanging(Nat.succ(n))\n} deriving Hashable, Repr\n\ninductive M3DataSecond: Bool -> Nat -> Type where {\n  | flag(n: Nat): M3DataSecond(true, n)\n}\n\nfunction m3DataParameter(n: Nat, value: M3DataPromoted(n)): Nat :=\n  match value with {\n  | M3DataPromoted.intro n payload => payload.val\n  }\n\nfunction m3DataNested(n: Nat, value: M3DataPromoted(n)): Nat :=\n  match value with {\n  | .intro _ (.mk 0 _) => 0\n  | .intro _ (.mk (Nat.succ k) _) => Nat.succ(k)\n  }\n\nfunction m3DataDepth(n: Nat, value: M3DataFixed(n)): Nat :=\n  match value with {\n  | .leaf _ => 0\n  | .step _ tail => Nat.succ(m3DataDepth(n, tail))\n  }\n\nsection\nvariable (seed: Nat)\nconst m3DataPatternCapture: Nat :=\n  match M3DataFixed.leaf(_) with {\n  | M3DataFixed.leaf seed => 7\n  | M3DataFixed.step seed _ => 9\n  }\nend\n\ntheorem m3DataHashPromoted(n: Nat, value: Fin(n)):\n  Hashable.hash(M3DataPromoted.intro(n, value)) =\n    mixHash(UInt64.ofNat(0), Hashable.hash(value)) := by { rfl }\ntheorem m3DataHashDependent(n: Nat, value: Fin(n)):\n  Hashable.hash(M3DataDependent.intro(n, value)) =\n    mixHash(mixHash(UInt64.ofNat(1), Hashable.hash(n)), Hashable.hash(value)) := by { rfl }\ntheorem m3DataHashRecord(n: Nat, value: Fin(n)):\n  Hashable.hash(M3DataRecord.mk(n, value)) =\n    mixHash(mixHash(UInt64.ofNat(0), Hashable.hash(n)), Hashable.hash(value)) := by { rfl }\ntheorem m3DataPromotedBEq(n: Nat, left: Fin(n), right: Fin(n)):\n  (M3DataPromoted.intro(n, left) == M3DataPromoted.intro(n, right)) =\n    (left == right) := by { rfl }\ntheorem m3DataParameterLaw(n: Nat, value: Fin(n)):\n  m3DataParameter(n, M3DataPromoted.intro(n, value)) = value.val := by { rfl }\ntheorem m3DataPatternCaptureLaw(n: Nat): m3DataPatternCapture(n) = 7 := by { rfl }\n\ninductive M3BEqLast: Nat -> Type where {\n  | stop: M3BEqLast(0)\n  | wrap(n: Nat, value: Nat): M3BEqLast(n)\n} deriving BEq\ntheorem m3BEqLastLaw(n: Nat, left: Nat, right: Nat):\n  (M3BEqLast.wrap(n, left) == M3BEqLast.wrap(n, right)) = (left == right) := by { rfl }\n"
+
+private def indexedBEqAcceptedSource : String :=
+  "inductive IndexedSucc: Nat -> Type where { | intro(n: Nat): IndexedSucc(Nat.succ(n)) } deriving BEq\n" ++
+  "theorem indexedSuccAccepted(n: Nat): (IndexedSucc.intro(n) == IndexedSucc.intro(n)) = true := by { rfl }\n" ++
+  "inductive IndexedPayload: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedPayload(n) } deriving BEq\n" ++
+  "theorem indexedPayloadAccepted(n: Nat, left: Fin(n), right: Fin(n)): (IndexedPayload.intro(n, left) == IndexedPayload.intro(n, right)) = (left == right) := by { rfl }\n"
+
+private def dataElaborated (kind : PsCompilerSourceKind) (source : String) :
+    IO (PsEnvironment × List PsDeclaration) := do
+  let program ← fromExcept (psCompilerParsePscv0 source kind)
+  let elaborated ← fromExcept ((psCompilerElaboratePscv0 program).mapError psCompilerPscv0Error)
+  return (elaborated.environment, elaborated.declarations)
+
+private def compareDataDeclarations (left right : List PsDeclaration) : IO Unit := do
+  ensure (left.length == right.length) "Data source adapters changed the declaration count"
+  for (left, right) in left.zip right do
+    match left, right with
+    | .definitionDecl ln ll lt lv, .definitionDecl rn rl rt rv
+    | .theoremDecl ln ll lt lv, .theoremDecl rn rl rt rv
+    | .opaqueDecl ln ll lt lv, .opaqueDecl rn rl rt rv
+    | .partialDecl ln ll lt lv, .partialDecl rn rl rt rv =>
+      ensure (psNameEq ln rn && psElabMutualLevelNamesEqual ll rl &&
+        psExprAlphaEq lt rt && psExprAlphaEq lv rv)
+        ("Data source adapters changed checked value " ++ psNameToString ln)
+    | .inductiveDecl l, .inductiveDecl r =>
+      ensure (psNameEq l.name r.name && psElabMutualLevelNamesEqual l.levelParams r.levelParams &&
+        psExprAlphaEq l.type r.type && l.numParams == r.numParams && l.numIndices == r.numIndices &&
+        psElabMutualLevelNamesEqual l.constructors r.constructors && l.isStructure == r.isStructure)
+        "Data source adapters changed an inductive family"
+    | .constructorDecl l, .constructorDecl r =>
+      ensure (psNameEq l.name r.name && psElabMutualLevelNamesEqual l.levelParams r.levelParams &&
+        psExprAlphaEq l.type r.type && psNameEq l.inductiveName r.inductiveName &&
+        l.constructorIndex == r.constructorIndex && l.numParams == r.numParams &&
+        l.numFields == r.numFields && l.recursiveFields == r.recursiveFields)
+        "Data source adapters changed constructor field metadata"
+    | .recursorDecl l, .recursorDecl r =>
+      ensure (psNameEq l.name r.name && psElabMutualLevelNamesEqual l.levelParams r.levelParams &&
+        psExprAlphaEq l.type r.type && psElabMutualLevelNamesEqual l.inductiveNames r.inductiveNames &&
+        l.numParams == r.numParams && l.numIndices == r.numIndices &&
+        l.numMotives == r.numMotives && l.numMinors == r.numMinors)
+        "Data source adapters changed a recursor telescope"
+    | _, _ => throw (IO.userError "Data source adapters changed a checked declaration kind")
+
+private def checkDataMetadata (environment : PsEnvironment) (unary : Bool) : IO Unit := do
+  let families := if unary then
+      [("M3DataPromoted", 1, 0), ("M3DataDependent", 0, 1), ("M3DataRecord", 0, 0),
+       ("M3DataFixed", 1, 0), ("M3DataChanging", 0, 1), ("M3DataSecond", 0, 2),
+       ("M3BEqLast", 0, 1)]
+    else
+      [("M3DataBox", 1, 0), ("M3DataEnum", 0, 0), ("M3DataProof", 1, 0),
+       ("M3DataUnused", 1, 0), ("M3DataCtorUniverse", 0, 0),
+       ("M3DataPoly", 1, 0), ("M3DataFieldSort", 0, 0), ("M3DataUnitField", 0, 0)]
+  for (name, parameters, indices) in families do
+    let some info := psEnvironmentFindInductive environment (psRootName name)
+      | throw (IO.userError ("portable Data family missing: " ++ name))
+    ensure (info.numParams == parameters && info.numIndices == indices)
+      ("portable Data parameter/index metadata differs: " ++ name)
+    ensure (!psExprHasUnresolvedMeta info.type && psExprFVarsInContext psLocalEmpty info.type)
+      ("portable Data type retained a metavariable or local: " ++ name)
+  if unary then
+    for (name, parameters, fields, recursiveFields) in [
+        ("M3DataPromoted.intro", 1, 1, []), ("M3DataDependent.intro", 0, 2, []),
+        ("M3DataFixed.leaf", 1, 0, []), ("M3DataFixed.step", 1, 1, [0]),
+        ("M3DataChanging.start", 0, 1, []), ("M3DataChanging.next", 0, 2, [1]),
+        ("M3DataSecond.flag", 0, 1, [])] do
+      let fullName := (name.splitOn ".").foldl psNameAppendStr .anonymous
+      let some info := psEnvironmentFindConstructor environment fullName
+        | throw (IO.userError ("portable Data constructor missing: " ++ name))
+      ensure (info.numParams == parameters && info.numFields == fields &&
+        info.recursiveFields == recursiveFields)
+        ("portable Data field/recursive ordinal differs: " ++ name)
+    let some promoted := psEnvironmentFindConstructor environment
+        (psNameAppendStr (psRootName "M3DataPromoted") "intro")
+      | throw (IO.userError "promoted constructor is absent")
+    let .forallE _ _ _ binder := promoted.type
+      | throw (IO.userError "promoted constructor lost its explicit source parameter")
+    ensure (psBinderInfoEq binder .explicit)
+      "promotion changed the original constructor binder metadata"
+  else
+    for name in ["M3DataBox", "M3DataUnused", "M3DataCtorUniverse"] do
+      let some info := psEnvironmentFindInductive environment (psRootName name)
+        | throw (IO.userError "portable Data universe control missing")
+      ensure (psElabMutualLevelNamesEqual info.levelParams [psRootName "dataU"])
+        ("portable Data retained an unused or temporary universe: " ++ name)
+    let some poly := psEnvironmentFindInductive environment (psRootName "M3DataPoly")
+      | throw (IO.userError "portable implicit universe control missing")
+    ensure (poly.levelParams.length == 1)
+      "portable implicit header universe was not generalized once"
+    let u := PsLevel.param (psRootName "dataU")
+    for (name, resultLevel) in [
+        ("M3DataBox", PsLevel.max (.succ .zero) u),
+        ("M3DataEnum", .succ .zero), ("M3DataProof", .zero),
+        ("M3DataUnused", .succ u), ("M3DataCtorUniverse", .succ (.succ u)),
+        ("M3DataFieldSort", .succ (.succ .zero)), ("M3DataUnitField", .succ .zero)] do
+      let some info := psEnvironmentFindInductive environment (psRootName name)
+        | throw (IO.userError "portable Data result universe control missing")
+      let opened ← fromExcept ((psElabOpenCoreTelescope 4096
+        (psElabContextEmpty environment info.levelParams) info.type none).mapError
+          psCompilerPscv0ElabError)
+      let .sortE actual := opened.body
+        | throw (IO.userError "portable Data family did not end in a sort")
+      ensure (psLevelEquivalent actual resultLevel)
+        ("portable Data inferred a different result universe: " ++ name)
+    let some fieldSort := psEnvironmentFindConstructor environment
+        (psNameAppendStr (psRootName "M3DataFieldSort") "pack")
+      | throw (IO.userError "portable constructor universe control missing")
+    let .forallE _ (.sortE level) _ _ := fieldSort.type
+      | throw (IO.userError "portable inferred constructor domain is not a sort")
+    ensure (psLevelEquivalent level (.succ .zero))
+      "portable constructor-only universe was not uniquely solved"
+
+private def dataFailure (expected : String) : PsElabError → Bool
+  | .atDeclaration _ cause => dataFailure expected cause
+  | .atContext _ cause => dataFailure expected cause
+  | .unresolvedMetavariable => expected == "unresolved constructor universe"
+  | .data message => message == expected
+  | _ => false
+
+private def checkDataRefusals : IO Unit := do
+  for (label, leanSource, psSource, expected) in [
+      ("ambiguous constructor universe",
+        "inductive M3DataAmbiguous : Type 1 where\n  | pack (value : PUnit)\n",
+        "inductive M3DataAmbiguous: Type 1 where { | pack(value: PUnit) }\n",
+        "unresolved constructor universe"),
+      ("possibly Prop result",
+        "universe dataU\ninductive M3DataPropRisk (A : Sort dataU) : Sort dataU where\n  | pack (value : A)\n",
+        "universe dataU\ninductive M3DataPropRisk(A: Sort dataU): Sort dataU where { | pack(value: A) }\n",
+        "inductive resulting universe may be Prop under a level assignment"),
+      ("field above result universe",
+        "structure M3DataTooSmall : Type where\n  A : Type\n",
+        "structure M3DataTooSmall: Type where {\n A: Type\n}\n",
+        "constructor field universe exceeds the inductive resulting universe"),
+      ("missing function Hashable",
+        "inductive M3DataMissingHash where\n  | pack (value : Nat → Nat)\n  deriving Hashable\n",
+        "inductive M3DataMissingHash where { | pack(value: Nat -> Nat) } deriving Hashable\n",
+        "deriving field has no checked instance"),
+      ("missing function Repr",
+        "inductive M3DataMissingRepr where\n  | pack (value : Nat → Nat)\n  deriving Repr\n",
+        "inductive M3DataMissingRepr where { | pack(value: Nat -> Nat) } deriving Repr\n",
+        "deriving field has no checked instance")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanSource), (.proofScript, psSource)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        ensure (dataFailure expected cause)
+          (label ++ " refused at the wrong owner: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " escaped elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " was unexpectedly accepted"))
+
+private def checkNestedK (environment : PsEnvironment) : IO Unit := do
+  let nat := PsExpr.constE psNatName []
+  let family := PsExpr.app (.constE (psRootName "Option") [.zero]) nat
+  let someNat := fun value => psExprApplyMany
+    (.constE (psNameAppendStr (psRootName "Option") "some") [.zero]) [nat, value]
+  let left := someNat (.app (.constE psNatSuccName []) (.lit (.natural 0)))
+  let make := fun (right : PsExpr) =>
+    let proposition := psLogicEq (.succ .zero) family left right
+    let proof := psLocalPushBinding psLocalEmpty (psRootName "arbitraryProof")
+      proposition .explicit
+    let motive := psLogicLam 1 "value" family
+      (psLogicLam 2 "proof"
+        (psLogicEq (.succ .zero) family left (.fvar 1)) nat)
+    let term := psExprApplyMany (.constE (psNameAppendStr psEqName "rec")
+      [.succ .zero, .succ .zero])
+      [family, left, motive, .lit (.natural 7), right, .fvar proof.id]
+    (proof.context, term)
+  for (right, expected) in [(someNat (.lit (.natural 1)), true),
+      (someNat (.lit (.natural 2)), false)] do
+    let (locals, term) := make right
+    let type ← fromExcept ((psInferType environment psMetaEmpty locals term).mapError
+      (fun error => psCompilerPscv0ElabError (.infer error)))
+    ensure (psDefEqReadOnlyWithEnv environment psMetaEmpty locals type nat)
+      "nested K control has an invalid actual type"
+    ensure (psDefEqReadOnlyWithEnv environment psMetaEmpty locals term
+        (.lit (.natural 7)) == expected)
+      "nested K conversion lost a constructor argument or failed valid nested conversion"
+
 private def checkTypedFunctionEta (environment : PsEnvironment) : IO Unit := do
   let nat : PsExpr := .constE psNatName []
   let bool : PsExpr := .constE psBoolName []
@@ -273,6 +717,53 @@ private def checkTypedFunctionEta (environment : PsEnvironment) : IO Unit := do
   IO.println "PSCV0_M3_TYPED_FUNCTION_ETA: PASS native eta/dictionary equations; typed two-way eta, changed method/domain/order refusal and unchanged Nat lawful proof identity"
 
 private def literal (value : String) : String := (Lean.toJson value).compress
+
+private def dataRuntimeSource : String :=
+  "function m3DataFin(n: Nat): Fin(Nat.succ(n)) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
+  "function m3DataZero(n: Nat): Fin(Nat.succ(n)) := Fin.mk(0, Nat.succ_le_succ(Nat.zero_le(n)))\n" ++
+  "function m3DataFixedValue(n: Nat): M3DataFixed(n) := M3DataFixed.step(n, M3DataFixed.step(n, M3DataFixed.leaf(n)))\n" ++
+  "function m3DataChangingValue(n: Nat): M3DataChanging(Nat.succ(Nat.succ(n))) := M3DataChanging.next(Nat.succ(n), M3DataChanging.next(n, M3DataChanging.start(n)))\n" ++
+  "function m3datahash(flag: Bool): UInt64 := {\n" ++
+  " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
+  " let bound: Nat := Nat.succ(n)\n" ++
+  " mixHash(Hashable.hash(M3DataPromoted.intro(bound, m3DataFin(n))), mixHash(Hashable.hash(M3DataDependent.intro(bound, m3DataFin(n))), mixHash(Hashable.hash(M3DataRecord.mk(bound, m3DataFin(n))), mixHash(Hashable.hash(m3DataFixedValue(bound)), Hashable.hash(m3DataChangingValue(n))))))\n}\n" ++
+  "function m3datarepr(flag: Bool): UInt64 := {\n" ++
+  " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
+  " let bound: Nat := Nat.succ(n)\n" ++
+  " let prec: Nat := if (flag) { 1024 } else { 0 }\n" ++
+  " let promotedExpected: String := if (flag) { " ++ literal (M3DataUnaryOracle.promotedText true) ++
+    " } else { " ++ literal (M3DataUnaryOracle.promotedText false) ++ " }\n" ++
+  " let dependentExpected: String := if (flag) { " ++ literal (M3DataUnaryOracle.dependentText true) ++
+    " } else { " ++ literal (M3DataUnaryOracle.dependentText false) ++ " }\n" ++
+  " let recordExpected: String := if (flag) { " ++ literal (M3DataUnaryOracle.recordText true) ++
+    " } else { " ++ literal (M3DataUnaryOracle.recordText false) ++ " }\n" ++
+  " let fixedExpected: String := if (flag) { " ++ literal (M3DataUnaryOracle.fixedText true) ++
+    " } else { " ++ literal (M3DataUnaryOracle.fixedText false) ++ " }\n" ++
+  " let changingExpected: String := if (flag) { " ++ literal (M3DataUnaryOracle.changingText true) ++
+    " } else { " ++ literal (M3DataUnaryOracle.changingText false) ++ " }\n" ++
+  " let promotedActual: String := Std.Format.pretty(Repr.reprPrec(M3DataPromoted.intro(bound, m3DataFin(n)), prec), 40, 0, 0)\n" ++
+  " let dependentActual: String := Std.Format.pretty(Repr.reprPrec(M3DataDependent.intro(bound, m3DataFin(n)), prec), 40, 0, 0)\n" ++
+  " let recordActual: String := Std.Format.pretty(Repr.reprPrec(M3DataRecord.mk(bound, m3DataFin(n)), prec), 40, 0, 0)\n" ++
+  " let fixedActual: String := Std.Format.pretty(Repr.reprPrec(m3DataFixedValue(bound), prec), 40, 0, 0)\n" ++
+  " let changingActual: String := Std.Format.pretty(Repr.reprPrec(m3DataChangingValue(n), prec), 40, 0, 0)\n" ++
+  " UInt64.ofNat((if (promotedActual == promotedExpected) { 1 } else { 0 }) + (if (dependentActual == dependentExpected) { 2 } else { 0 }) + (if (recordActual == recordExpected) { 4 } else { 0 }) + (if (fixedActual == fixedExpected) { 8 } else { 0 }) + (if (changingActual == changingExpected) { 16 } else { 0 }))\n}\n" ++
+  "function m3datapattern(flag: Bool): UInt64 := {\n" ++
+  " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
+  " let bound: Nat := Nat.succ(n)\n" ++
+  " let value: M3DataPromoted(bound) := M3DataPromoted.intro(bound, m3DataFin(n))\n" ++
+  " UInt64.ofNat(m3DataParameter(bound, value) + m3DataNested(bound, value) + m3DataDepth(bound, m3DataFixedValue(bound)) + m3DataPatternCapture(bound))\n}\n" ++
+  "function m3databeq(flag: Bool): UInt64 := {\n" ++
+  " let n: Nat := if (flag) { 71 } else { 13 }\n" ++
+  " let x: M3DataPromoted(Nat.succ(n)) := M3DataPromoted.intro(Nat.succ(n), m3DataFin(n))\n" ++
+  " let y: M3DataPromoted(Nat.succ(n)) := M3DataPromoted.intro(Nat.succ(n), m3DataZero(n))\n" ++
+  " UInt64.ofNat((if (x == x) { 1 } else { 0 }) + (if (x == y) { 2 } else { 0 }) + (if (y == x) { 4 } else { 0 }) + (if (y == y) { 8 } else { 0 }))\n}\n"
+
+private def dataOutputCases : List (String × (Bool → UInt64)) :=
+  [("m3datahash", M3DataUnaryOracle.hashOutput),
+   ("m3datarepr", M3DataUnaryOracle.reprOutput),
+   ("m3datapattern", M3DataUnaryOracle.patternOutput),
+   ("m3databeq", M3DataUnaryOracle.beqOutput)]
+
 
 -- The parser supplies existing single-declaration ASTs; the native group API
 -- supplies their shared scope. This does not add mutual inductive source syntax.
@@ -668,13 +1159,15 @@ private def checkIndexedBEq (directory : System.FilePath)
     psDefEqReadOnlyWithEnv environment psMetaEmpty opened.context.localContext
       payloadDictionary.type payloadClass)
     "indexed BEq inferred a dictionary for the value index or changed a parameter requirement"
+  let accepted ← sourceResult psSelfHostProdPreludeEnvironment indexedBEqAcceptedSource
+  let _ ← checked prelude accepted.result.declarations
+  for (family, parameters, indices) in [("IndexedSucc", 0, 1), ("IndexedPayload", 1, 0)] do
+    let some info := psEnvironmentFindInductive accepted.result.environment (psRootName family)
+      | throw (IO.userError "accepted indexed BEq family is absent")
+    ensure (info.numParams == parameters && info.numIndices == indices)
+      ("accepted indexed BEq family changed its native index policy: " ++ family)
+  IO.FS.writeFile (directory / "accepted.ps") indexedBEqAcceptedSource
   for (label, text, expected) in [
-      ("non-pattern index",
-        "inductive IndexedSucc: Nat -> Type where { | intro(n: Nat): IndexedSucc(Nat.succ(n)) } deriving BEq\n",
-        "indexed BEq deriving requires direct constructor index fields"),
-      ("dependent payload",
-        "inductive IndexedPayload: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedPayload(n) } deriving BEq\n",
-        "deriving requires independent runtime field types"),
       ("missing payload dictionary",
         "inductive IndexedMissing: Nat -> Type where { | intro(n: Nat, value: Nat -> Nat): IndexedMissing(n) } deriving BEq\n",
         "deriving field has no checked instance")] do
@@ -699,11 +1192,70 @@ private def checkIndexedBEq (directory : System.FilePath)
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       indexedBEqOutputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INDEXED_BEQ: PASS direct index fields, checked Nat/Bool defining laws and four closed native-oracle equations, ordinary recursor instances and parameter dictionaries, retained dependent/non-pattern/missing-dictionary refusals; five-target runtime parity follows"
+  IO.println "PSCV0_M3_INDEXED_BEQ: PASS checked Nat/Bool defining laws, constructor-directed successor indices, native fixed-prefix Fin payloads, ordinary recursor instances and parameter dictionaries, retained missing-function-dictionary refusal; five-target runtime parity follows"
 
 end M3InductiveDeriving
 
 open M3InductiveDeriving in
+private def checkDataUnary (directory : System.FilePath)
+    (prelude : Lean.Kernel.Environment) : IO Unit := do
+  IO.FS.createDirAll directory
+  IO.println "PSCV0_M3_DATA_PHASE: omitted universe pair"
+  let typesLean ← dataElaborated .lean dataTypesLeanSource
+  let typesPs ← dataElaborated .proofScript dataTypesPsSource
+  compareDataDeclarations typesLean.2 typesPs.2
+  checkDataMetadata typesLean.1 false
+  checkDataMetadata typesPs.1 false
+  let _ ← checked prelude typesLean.2
+  let _ ← checked prelude typesPs.2
+  IO.FS.writeFile (directory / "types.lean") dataTypesLeanSource
+  IO.FS.writeFile (directory / "types.ps") dataTypesPsSource
+  IO.println "PSCV0_M3_DATA_PHASE: exact selected Fin method pair"
+  let finLean ← dataElaborated .lean dataFinLeanSource
+  let finPs ← dataElaborated .proofScript dataFinPsSource
+  compareDataDeclarations finLean.2 finPs.2
+  let _ ← checked prelude finLean.2
+  let _ ← checked prelude finPs.2
+  IO.println "PSCV0_M3_DATA_PHASE: promotion and dependent unary pair"
+  let unaryLean ← dataElaborated .lean dataUnaryLeanSource
+  let unaryPs ← dataElaborated .proofScript dataUnaryPsSource
+  compareDataDeclarations unaryLean.2 unaryPs.2
+  checkDataMetadata unaryLean.1 true
+  checkDataMetadata unaryPs.1 true
+  let _ ← checked prelude unaryLean.2
+  let _ ← checked prelude unaryPs.2
+  IO.FS.writeFile (directory / "logical.lean") dataUnaryLeanSource
+  IO.FS.writeFile (directory / "logical.ps") dataUnaryPsSource
+  checkDataRefusals
+  IO.println "PSCV0_M3_DATA_PHASE: runtime construction"
+  let runtime ← sourceResult unaryPs.1 dataRuntimeSource
+  let source := dataUnaryPsSource ++ "\n" ++ dataRuntimeSource
+  let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
+    { environment := runtime.result.environment,
+      declarations := unaryPs.2 ++ runtime.result.declarations }).mapError psCompilerPscv0Error)
+  let admitted ← checked prelude prepared.prepared.declarations
+  -- Opaque mixHash and partial pretty-printing are observed by native execution.
+  -- Pattern selection and Fin comparison also have closed kernel equations.
+  let equations := [false, true].flatMap fun flag =>
+    [witness "m3datapattern" flag (M3DataUnaryOracle.patternOutput flag),
+     witness "m3databeq" flag (M3DataUnaryOracle.beqOutput flag)]
+  let _ ← checked admitted equations
+  let ir ← fromExcept ((psCompilerVerifiedIrFromPrepared prepared.prepared).mapError psCompilerPscv0Error)
+  let artifacts ← fromExcept (emit ir source "dataunary"
+    (dataOutputCases.map Prod.fst) "m3-data-unary.ps")
+  ensure (artifacts.length == 5) "Data/unary did not emit all five targets"
+  IO.FS.writeFile (directory / "deriving.ps") source
+  for artifact in artifacts do
+    for file in artifact.files do
+      match file.payload with
+      | .text value => IO.FS.writeFile (directory / file.path) value
+      | .binary value => IO.FS.writeBinFile (directory / file.path) value
+  let rows := [false, true].map fun flag =>
+    Lean.Json.mkObj (("flag", Lean.toJson flag) ::
+      dataOutputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
+  IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
+  IO.println "PSCV0_M3_DATA_UNARY: PASS paired checked omitted universes and fixed-prefix metadata, ordinary constructor parameters and dependent nested fields, shifted real recursive ordinals, exact Fin dictionaries and nonempty indexed BEq law, native Hashable/Repr observations, retained ambiguous-universe and function-dictionary refusals, four exports and five-target emission; runtime parity follows"
+
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -713,6 +1265,7 @@ def main (args : List String) : IO Unit := do
   let groups := group.declarations ++ indexed.declarations
   let input ← add psSelfHostProdPreludeEnvironment groups
   checkTypedFunctionEta input
+  checkNestedK input
   checkPlans input origin indexedOrigin
   checkRefusals input origin indexedOrigin
   -- Every handler sees the same input. None of the generated group instances
@@ -769,3 +1322,4 @@ def main (args : List String) : IO Unit := do
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_INDUCTIVE_DERIVING: PASS native deriving oracles, fresh checked group instances/workers and constructor laws, ordered real child IHs, indexed Hashable/Repr, nonreflexive BEq and five-target emission; runtime parity follows"
   checkIndexedBEq (directory / "indexed-beq") prelude
+  checkDataUnary (directory / "data-unary") prelude

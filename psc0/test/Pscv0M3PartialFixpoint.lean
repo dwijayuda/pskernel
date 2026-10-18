@@ -97,6 +97,37 @@ def bindOutput (flag : Bool) : UInt64 :=
     | Option.none => 997
     | Option.some value => value)
 
+abbrev auditP1Abbrev (n : Nat) : Nat :=
+  match n with
+  | 0 => 29
+  | k + 1 => auditP1Abbrev k
+partial_fixpoint
+
+theorem auditP1AbbrevEquation (n : Nat) :
+    auditP1Abbrev n = (match n with | 0 => 29 | k + 1 => auditP1Abbrev k) :=
+  auditP1Abbrev.eq_def n
+
+example : auditP1Abbrev 2 = 29 := by
+  fail_if_success rfl
+  simp only [auditP1Abbrev.eq_def]
+
+run_meta do
+  match ← Lean.getConstInfo ``auditP1Abbrev with
+  | .defnInfo _ => pure ()
+  | _ => throwError "native P1 abbrev lost its definition kind"
+  unless (← Lean.getReducibilityStatus ``auditP1Abbrev) == .reducible do
+    throwError "native P1 abbrev lost its reducible status"
+
+/-- error: Could not prove -/
+#guard_msgs (error, drop warning, substring := true) in
+abbrev auditP1AbbrevInspection (n : Nat) : Nat :=
+  auditP1AbbrevInspection n + 1
+partial_fixpoint
+
+def abbrevOutput (flag : Bool) : UInt64 :=
+  let n := if flag then 4 else 3
+  UInt64.ofNat (10 * auditP1Abbrev n + n)
+
 universe u
 
 def generic {A : Type u} (seed : A) (n : Nat) : A :=
@@ -191,7 +222,8 @@ run_cmd do
       ``countdownEquation, ``optionEquation, ``leftEquation, ``rightEquation,
       ``generic, ``sectionValue, ``dependent, ``genericEquation, ``dependentEquation,
       ``first, ``bad, ``riBad, ``fixed, ``auditOptionBind,
-      ``auditOptionBind.eq_def, ``auditOptionBindEquation] do
+      ``auditOptionBind.eq_def, ``auditOptionBindEquation,
+      ``auditP1Abbrev, ``auditP1Abbrev.eq_def, ``auditP1AbbrevEquation] do
     let axioms ← Lean.collectAxioms name
     unless axioms.contains ``Classical.choice &&
         axioms.all (fun axiomName => axiomName == ``propext ||
@@ -253,8 +285,24 @@ private def optionBindRuntimeSource : String :=
   optionBindPsSource ++
   "function m3p1bind(flag: Bool): UInt64 := UInt64.ofNat(match auditOptionBind(if (flag) { 4 } else { 3 }) with { | Option.none => 997 | Option.some value => value })\n"
 
+private def registeredAbbrevLeanSource : String :=
+  "abbrev auditP1Abbrev (n : Nat) : Nat :=\n  match n with\n  | 0 => 29\n  | k + 1 => auditP1Abbrev k\npartial_fixpoint\n\ntheorem auditP1AbbrevEquation (n : Nat) :\n    auditP1Abbrev n = (match n with | 0 => 29 | k + 1 => auditP1Abbrev k) :=\n  auditP1Abbrev.eq_def n\n\n"
+
+private def registeredAbbrevPsSource : String :=
+  "abbrev auditP1Abbrev(n: Nat): Nat :=\n  match n with { | 0 => 29 | k + 1 => auditP1Abbrev(k) }\npartial_fixpoint\ntheorem auditP1AbbrevEquation(n: Nat):\n  Eq(auditP1Abbrev(n), match n with { | 0 => 29 | k + 1 => auditP1Abbrev(k) }) :=\n  by { exact auditP1Abbrev.eq_def(n) }\n"
+
+private def registeredAbbrevLeanRefusal : String :=
+  "abbrev auditP1AbbrevInspection (n : Nat) : Nat :=\n  auditP1AbbrevInspection n + 1\npartial_fixpoint\n"
+
+private def registeredAbbrevPsRefusal : String :=
+  "abbrev auditP1AbbrevInspection(n: Nat): Nat :=\n  auditP1AbbrevInspection(n) + 1\npartial_fixpoint\n"
+
+private def registeredAbbrevRuntimeSource : String :=
+  registeredAbbrevPsSource ++
+  "function m3p1abbrev(flag: Bool): UInt64 := {\n  let n: Nat := if (flag) { 4 } else { 3 }\n  UInt64.ofNat(10 * auditP1Abbrev(n) + n)\n}\n"
+
 private def source : String :=
-  definitionsSource ++ extendedSource ++ optionBindRuntimeSource ++
+  definitionsSource ++ extendedSource ++ optionBindRuntimeSource ++ registeredAbbrevRuntimeSource ++
   "function m3p1generic(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 4 } else { 3 }\n let bound: Nat := if (flag) { 7 } else { 5 }\n UInt64.ofNat(p1Generic(if (flag) { 11 } else { 13 }, n) + 100 * p1Scoped(if (flag) { 17 } else { 19 }, n) + 10000 * Fin.val(p1Dependent(bound, n, Fin.mk(bound, Nat.lt_succ_self(bound))))) }\n" ++
   "function m3p1countdown(flag: Bool): UInt64 := UInt64.ofNat(p1Countdown(if (flag) { 17 } else { 29 }, if (flag) { 4 } else { 3 }))\n" ++
   "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some value => value + 5 })\n" ++
@@ -279,7 +327,8 @@ private def exports : List (String × (Bool → UInt64)) :=
    ("m3p1option", M3PartialFixpointOracle.optionOutput),
    ("m3p1mutual", M3PartialFixpointOracle.mutualOutput),
    ("m3p1generic", M3PartialFixpointOracle.genericOutput),
-   ("m3p1bind", M3PartialFixpointOracle.bindOutput)]
+   ("m3p1bind", M3PartialFixpointOracle.bindOutput),
+   ("m3p1abbrev", M3PartialFixpointOracle.abbrevOutput)]
 
 private def binderNames : PsExpr → List String
   | .forallE name _ body _ => psNameToString name :: binderNames body
@@ -620,6 +669,103 @@ private def checkOptionBind (prelude : Lean.Kernel.Environment) : IO Unit := do
     | .ok _ => throw (IO.userError ("unsupported Option " ++ label ++ " was accepted"))
   IO.println "PSCV0_M3_P1_OPTION_BIND: PASS both source grammars, checked generic bind law and original equation, fresh official kernel, retained runtime body and exact direct-method/inspection refusals"
 
+private def checkRegisteredAbbrev (prelude : Lean.Kernel.Environment) : IO Unit := do
+  for (kind, text) in [(PsCompilerSourceKind.lean, registeredAbbrevLeanSource),
+      (.proofScript, registeredAbbrevPsSource)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    let compiled ← fromExcept ((psElabProgramWithOrigins
+      psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)
+    let environment := compiled.result.environment
+    let name := psRootName "auditP1Abbrev"
+    let auxiliary := PsName.num name 1
+    let implementationName := PsName.num name 0
+    let wholeName := PsName.num name 2
+    let sourceEquationName := psNameAppendStr name "eq_def"
+    let some (.definitionDecl _ levels type value) := psEnvironmentFind environment name
+      | throw (IO.userError "registered P1 abbrev did not retain its checked definition")
+    ensure (levels.isEmpty && binderNames type == ["n"] &&
+      psExprAlphaEq value (.constE auxiliary []))
+      "registered P1 abbrev changed its original header or checked fixedpoint projection"
+    ensure (match psEnvironmentReducibility environment name with
+      | .reducible => true | _ => false)
+      "registered P1 abbrev did not retain native reducibility"
+    ensure (compiled.exposedNames.length == 1 &&
+      compiled.exposedNames.any (psNameEq name) &&
+      !compiled.privateNames.any (psNameEq name) &&
+      [auxiliary, implementationName, wholeName, sourceEquationName].all
+        (fun hidden => compiled.privateNames.any (psNameEq hidden)))
+      "registered P1 exposed a companion or hid its actual source head"
+    let interface := psPscv0OwnInterface environment compiled.result.declarations
+      (compiled.privateNames ++ psPscv0GeneratedPrivateNames compiled.origins) compiled.exposedNames
+    let some (.definitionDecl _ exposedLevels exposedType exposedValue) :=
+        interface.declarations.find? (fun declaration =>
+          psNameEq (psDeclarationName declaration) name)
+      | throw (IO.userError "registered P1 abbrev lost its exposed definition in the module interface")
+    ensure (psElabMutualLevelNamesEqual levels exposedLevels &&
+      psExprAlphaEq type exposedType && psExprAlphaEq value exposedValue)
+      "registered P1 abbrev interface changed its checked body"
+    let some (.partialDecl _ bodyLevels bodyType body) :=
+        psEnvironmentFind environment implementationName
+      | throw (IO.userError "registered P1 abbrev lost its actual recursive source body")
+    ensure (psElabMutualLevelNamesEqual levels bodyLevels && psExprAlphaEq type bodyType &&
+      !psExprHasUnresolvedMeta body && (psExprFVarIds body).isEmpty)
+      "registered P1 abbrev source body changed its closed type or owner"
+    let some (.theoremDecl _ wholeLevels wholeType wholeProof) :=
+        psEnvironmentFind environment wholeName
+      | throw (IO.userError "registered P1 abbrev lost its checked whole-function equation")
+    let whole := psReduceAppView wholeType
+    let [wholeDomain, wholeLeft, wholeRight] := whole.args
+      | throw (IO.userError "registered P1 whole-function equation changed arity")
+    ensure (psElabMutualLevelNamesEqual levels wholeLevels &&
+      psExprAlphaEq wholeDomain type && psExprAlphaEq wholeLeft (.constE name []) &&
+      psExprAlphaEq wholeRight body && !psExprHasUnresolvedMeta wholeProof &&
+      (psExprFVarIds wholeProof).isEmpty)
+      "registered P1 whole equation changed the actual source body"
+    let some (.theoremDecl _ equationLevels equationType equationProof) :=
+        psEnvironmentFind environment sourceEquationName
+      | throw (IO.userError "registered P1 abbrev lost its original eq_def")
+    ensure (psElabMutualLevelNamesEqual levels equationLevels &&
+      binderNames equationType == ["n"])
+      "registered P1 source equation changed its original header"
+    let opened ← fromExcept ((psElabPreDefinitionOpen 1
+      (psElabContextEmpty environment levels) equationType equationProof).mapError
+      psCompilerPscv0ElabError)
+    let equation := psReduceAppView opened.type
+    let [_domain, left, right] := equation.args
+      | throw (IO.userError "registered P1 opened source equation changed arity")
+    let arguments := psElabBinderArguments opened.bindersRev
+    let some originalBody := psRecursorLiftBetaApply body arguments
+      | throw (IO.userError "registered P1 source body lost its original binder")
+    ensure (psExprAlphaEq left (psExprApplyMany (.constE name []) arguments) &&
+      psExprAlphaEq right originalBody)
+      "registered P1 eq_def does not retain its exact original source RHS"
+    ensure (!psDefEqReadOnlyWithEnv environment psMetaEmpty psLocalEmpty
+      (.app (.constE name []) (.lit (.natural 2))) (.lit (.natural 29)))
+      "registered P1 reducibility became an unproved defining equation"
+    let output ← fromExcept ((psCompilerPrepareElaboratedWithOutput compiled.result).mapError
+      psCompilerPscv0Error)
+    checkOfficial prelude output.prepared "registered-abbrev-fixedpoint"
+    let runtime ← fromExcept ((psCompilerOrdinaryPartialRuntimeDeclarations
+      output.prepared.declarations).mapError psCompilerPscv0Error)
+    let some (.definitionDecl _ runtimeLevels runtimeType runtimeBody) :=
+        runtime.find? (fun declaration => psNameEq (psDeclarationName declaration) name)
+      | throw (IO.userError "registered P1 runtime lost its actual source entry")
+    ensure (psElabMutualLevelNamesEqual bodyLevels runtimeLevels &&
+      psExprAlphaEq bodyType runtimeType && psExprAlphaEq body runtimeBody &&
+      !(runtime.any (fun declaration => psNameEq (psDeclarationName declaration) auxiliary)))
+      "registered P1 runtime changed its source body or retained the logical auxiliary"
+  for (kind, text) in [(PsCompilerSourceKind.lean, registeredAbbrevLeanRefusal),
+      (.proofScript, registeredAbbrevPsRefusal)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
+    | .error error =>
+      let message := psCompilerPscv0ElabError error
+      ensure (!psElabErrorIsResource error &&
+        message.startsWith "PSCV0-DATA: PSCV0-FIXPOINT-MONOTONICITY:")
+        ("registered P1 inspection failed at the wrong boundary: " ++ message)
+    | .ok _ => throw (IO.userError "registered P1 abbrev bypassed checked monotonicity")
+  IO.println "PSCV0_M3_P1_ABBREV: PASS paired sources, native kind/reducibility, exact checked equations, closed actual body, private companions, exposed source interface, official kernel and strict monotonicity refusal"
+
 private def checkNonmonotoneRefusal : IO Unit := do
   let parsed ← fromExcept (psPscv0ParseProgram
     "function nonMonotone(n: Nat): Nat := nonMonotone(n) + 1\npartial_fixpoint\n")
@@ -643,6 +789,8 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
   IO.FS.writeFile (directory / "p1fixedpoint.ps") source
   IO.FS.writeFile (directory / "p1-option-bind.ps") optionBindPsSource
   IO.FS.writeFile (directory / "p1-option-bind.lean") optionBindLeanSource
+  IO.FS.writeFile (directory / "p1-abbrev.ps") registeredAbbrevPsSource
+  IO.FS.writeFile (directory / "p1-abbrev.lean") registeredAbbrevLeanSource
   ensure (M3PartialFixpointOracle.countdownOutput false == 29 &&
     M3PartialFixpointOracle.countdownOutput true == 17 &&
     M3PartialFixpointOracle.optionOutput false == 48 &&
@@ -653,6 +801,9 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
   ensure (M3PartialFixpointOracle.bindOutput false == 3 &&
     M3PartialFixpointOracle.bindOutput true == 4)
     "independent native P1 recursive bind observations changed"
+  ensure (M3PartialFixpointOracle.abbrevOutput false == 293 &&
+    M3PartialFixpointOracle.abbrevOutput true == 294)
+    "independent native P1 registered abbrev observations changed"
   let ordinary : PsV7Native.Request := {
     source, sourceName := "p1fixedpoint.ps", outputStem := "p1fixedpoint"
     assurance := .ordinaryChecked
@@ -715,7 +866,7 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       exports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 50 terminating runtime comparisons follow"
+  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 60 terminating runtime comparisons follow"
 
 def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -732,5 +883,6 @@ def main (args : List String) : IO Unit := do
   checkLogicalOnly prelude
   checkNonmonotoneRefusal
   checkOptionBind prelude
+  checkRegisteredAbbrev prelude
   emitRuntime (System.FilePath.mk directory)
   IO.println "PSCV0_M3_P1: PASS native logical/runtime separation, checked packed fixpoint ownership, exact unfolding equations, adversarial adapter refusal and retained nonmonotone/verified boundaries"

@@ -111,6 +111,30 @@ def psReduceEliminationHypothesis (reduce : PsExpr → PsExpr) (fuel : Nat)
 -- ordinary iota already assumes a typed application. Reconstruct the unique
 -- constructor only when its actual instantiated result indices agree without
 -- assigning metavariables. No proof body or arbitrary runtime value is erased.
+def psReduceKConversion (reduce : PsExpr → PsExpr) (fuel : Nat)
+    (left right : PsExpr) : Bool :=
+  if psExprAlphaEq left right then true else
+  match fuel with
+  | 0 => false
+  | fuel + 1 =>
+    let left := reduce left
+    let right := reduce right
+    if psExprAlphaEq left right then true else
+    let same := psReduceKConversion reduce fuel
+    match left, right with
+    | .sortE left, .sortE right => psLevelEquivalent left right
+    | .constE leftName leftLevels, .constE rightName rightLevels =>
+      psNameEq leftName rightName && leftLevels.length == rightLevels.length &&
+        (leftLevels.zip rightLevels).all (fun pair => psLevelEquivalent pair.1 pair.2)
+    | .app leftFn leftArg, .app rightFn rightArg =>
+      same leftFn rightFn && same leftArg rightArg
+    | .lam _ leftDomain leftBody leftBinder, .lam _ rightDomain rightBody rightBinder
+    | .forallE _ leftDomain leftBody leftBinder, .forallE _ rightDomain rightBody rightBinder =>
+      psBinderInfoEq leftBinder rightBinder && same leftDomain rightDomain && same leftBody rightBody
+    | .proj leftName leftIndex leftValue, .proj rightName rightIndex rightValue =>
+      psNameEq leftName rightName && leftIndex == rightIndex && same leftValue rightValue
+    | _, _ => false
+
 def psReduceKConstructor (reduce : PsExpr → PsExpr)
     (plan : PsInductiveEliminationPlan) (slot : PsInductiveEliminationSlot)
     (familyLevels : List PsLevel) (parameters indices : List PsExpr) :
@@ -142,7 +166,7 @@ def psReduceKConstructor (reduce : PsExpr → PsExpr)
           if !psReduceEliminationEqual reduce actual.head expected.head ||
               actual.args.length != expected.args.length ||
               !(actual.args.zip expected.args).all
-                (fun (left, right) => psReduceEliminationEqual reduce left right) then none
+                (fun (left, right) => psReduceKConversion reduce 256 left right) then none
           else some view
 
 -- One reduction owner handles direct and nested slots. Slot identity comes

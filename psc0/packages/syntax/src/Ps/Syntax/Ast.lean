@@ -55,6 +55,11 @@ inductive PsSyntaxPattern where
   | wildcard (span : PsSourceSpan)
   | variable (name : PsSyntaxName)
   | ctor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+  -- Preserve native dot-head preprocessing; it cannot be recovered from a name.
+  | dotCtor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+  -- Internal scope metadata for an ordinary term in a constructor parameter
+  -- position. The selected parser does not add a new surface pattern form.
+  | inaccessible (pattern : PsSyntaxPattern)
 
 -- Construction helper for existing flat parser clients; the stored tree is
 -- uniformly recursive.
@@ -68,7 +73,7 @@ def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSynta
   | 0 => []
   | fuel + 1 => match pattern with
     | .variable name => [name]
-    | .ctor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
+    | .ctor _ fields _ | .dotCtor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
     | _ => []
 
 -- Universe syntax has its own category; its names are never term variables.
@@ -268,7 +273,8 @@ def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
   | .natural _ span => span
   | .bool _ span => span
   | .wildcard span => span
-  | .ctor _ _ span => span
+  | .ctor _ _ span | .dotCtor _ _ span => span
+  | .inaccessible pattern => psSyntaxPatternSpan pattern
   | .variable name => name.span
 
 structure PsSyntaxInductiveConstructor where

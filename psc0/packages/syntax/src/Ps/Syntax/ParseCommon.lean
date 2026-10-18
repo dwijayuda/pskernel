@@ -638,9 +638,12 @@ def psParseBasicPattern
                     stop := constructorName.value.span.stop
                   }
                 };
-                psParseConstructorPatternTail
+                (psParseConstructorPatternTail
                   shorthandName
-                  constructorName.cursor
+                  constructorName.cursor).map fun read =>
+                    { read with value := match read.value with
+                      | .ctor name fields span => .dotCtor name fields span
+                      | value => value }
       else
         match psParseSyntaxName cursor with
         | Except.error error => Except.error error

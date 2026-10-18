@@ -194,3 +194,37 @@ def psStandardReprExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardRegisterInstances environment "ReprAtom" psReprAtomInstances
   { environment with exportedAliases :=
       (psRootName "reprPrec", psDecisionName "Repr.reprPrec") :: environment.exportedAliases }
+
+-- The pinned Fin printer ignores precedence and prints the actual Nat value.
+-- Keep this additive selection outside every frozen earlier authoring base.
+def psStandardFinReprDeclarations : List PsDeclaration :=
+  let fin := PsExpr.app (.constE (psRootName "Fin") []) (.fvar 0)
+  let method := psLogicLam 1 "value" fin
+    (psLogicLam 2 "prec" psOrderNat
+      (psReprPrec psOrderNat (.constE (psDecisionName "PsStandard.instReprNat") [])
+        (.proj (psRootName "Fin") 0 (.fvar 1)) (psFormatNat 0)))
+  [ .definitionDecl (psDecisionName "PsStandard.instReprFin") []
+      (psLogicPi 0 "n" psOrderNat (psFormatClassType "Repr" fin))
+      (psLogicLam 0 "n" psOrderNat (psFormatClassValue "Repr" fin method)) ]
+
+def psStandardFinReprExtend (environment : PsEnvironment) : PsEnvironment :=
+  let environment := psStandardFinReprDeclarations.foldl psPreludeAdd environment
+  psStandardRegisterInstances environment "Repr" psStandardFinReprDeclarations
+
+-- Pinned Prelude derives Fin equality from the exact Nat-value comparison;
+-- reflected proof fields do not participate in the Boolean method.
+def psStandardFinBEqDeclarations : List PsDeclaration :=
+  let fin := PsExpr.app (.constE (psRootName "Fin") []) (.fvar 0)
+  let method := psLogicLam 1 "left" fin
+    (psLogicLam 2 "right" fin
+      (psOrderCall "Nat.beq"
+        [.proj (psRootName "Fin") 0 (.fvar 1),
+         .proj (psRootName "Fin") 0 (.fvar 2)]))
+  [ .definitionDecl (psDecisionName "PsStandard.instBEqFin") []
+      (psLogicPi 0 "n" psOrderNat (psFormatClassType "BEq" fin))
+      (psLogicLam 0 "n" psOrderNat (psFormatClassValue "BEq" fin method)) ]
+
+def psStandardFinDerivingExtend (environment : PsEnvironment) : PsEnvironment :=
+  let environment := psStandardFinReprExtend environment
+  let environment := psStandardFinBEqDeclarations.foldl psPreludeAdd environment
+  psStandardRegisterInstances environment "BEq" psStandardFinBEqDeclarations

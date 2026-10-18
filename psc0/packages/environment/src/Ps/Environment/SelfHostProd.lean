@@ -176,8 +176,11 @@ def psSelfHostProdPreOptionBindPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdOptionBindPreludeEnvironment : PsEnvironment :=
   psStandardOptionBindExtend psSelfHostProdPreOptionBindPreludeEnvironment
 
+def psSelfHostProdFinDerivingPreludeEnvironment : PsEnvironment :=
+  psStandardFinDerivingExtend psSelfHostProdOptionBindPreludeEnvironment
+
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psSelfHostProdOptionBindPreludeEnvironment
+  psSelfHostProdFinDerivingPreludeEnvironment
 
 -- Structural mutual recursion bundles retained results in the checked
 -- Sort-polymorphic product. Logical inclusion alone does not register its
@@ -214,4 +217,5 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardOperatorDefaultsRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     prior.filter (fun declaration =>
       !psStandardHomogeneousReplacedNames.any (psNameEq (psDeclarationName declaration))) ++
-    psStandardOptionBindRuntimeDeclarations psSelfHostProdPreludeEnvironment
+    psStandardOptionBindRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
+    psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations

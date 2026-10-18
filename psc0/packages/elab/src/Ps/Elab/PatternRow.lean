@@ -1,4 +1,5 @@
 import Ps.Elab.Match
+import Ps.Elab.PatternSyntax
 
 -- A source row is checked before the decision tree selects any constructor
 -- that the row did not itself specify. Paths identify actual source columns
@@ -23,12 +24,20 @@ structure PsElabCheckedPatternRow where
   equationBinders : List Nat
   aliases : List (PsName × Nat)
   metadata : PsElabCoreRow
+  compilerPatterns : List PsSyntaxPattern
 
 structure PsElabPatternLhs where
   context : PsElabContext
   values : List PsExpr
   occurrences : List PsElabPatternRowOccurrence
+  compilerPatterns : List PsSyntaxPattern
   target : PsExpr
+
+structure PsElabPatternRowChecked where
+  context : PsElabContext
+  value : PsExpr
+  occurrences : List PsElabPatternRowOccurrence
+  compilerPattern : PsSyntaxPattern
 
 def psElabPatternRowReplace (replacements : List (PsExpr × PsExpr))
     (expression : PsExpr) : PsExpr :=
@@ -92,7 +101,7 @@ def psElabPatternRowConstructorName (family : PsName) (pattern : PsSyntaxPattern
     if !psNameEq family psNatName then throw .matchPatternUnsupported
     if value == 0 then return (psNameAppendStr psNatName "zero", [])
     return (psNameAppendStr psNatName "succ", [.natural (value - 1) span])
-  | .ctor source fields _ =>
+  | .ctor source fields _ | .dotCtor source fields _ =>
     let name ← match source.segments with
       | [] => throw .matchPatternUnsupported
       | [segment] => pure (psNameAppendStr family segment)
@@ -103,12 +112,36 @@ def psElabPatternRowConstructorName (family : PsName) (pattern : PsSyntaxPattern
     return (name, fields)
   | _ => throw .matchPatternUnsupported
 
+-- Explicit constructor parameters are ordinary terms; implicit parameters
+-- are supplied by the selected family application. All comparisons retain the
+-- checked argument's actual context and resource failures.
+def psElabPatternRowParameters (branch : PsElaborator) (fuel : Nat)
+    (context : PsElabContext) (name : PsName) (parameters : List PsExpr)
+    (cursor : PsExpr) (patterns : List PsSyntaxPattern) :
+    Except PsElabError (PsElabContext × PsExpr × List PsSyntaxPattern) := do
+  match parameters with
+  | [] => return (context, cursor, patterns)
+  | parameter :: parameters =>
+    let pi ← (psInferEnsureForall context.environment context.metaContext
+      context.localContext cursor).mapError PsElabError.infer
+    let (context, patterns) ← if psBinderAcceptsExplicitArgument pi.binder then do
+        let pattern :: patterns := patterns | throw (.matchConstructorArity name)
+        let checked ← psElabPatternParameter branch fuel context pattern (some pi.domain)
+        let (context, same) ← psElabPatternRowUnify checked.context parameter checked.term
+        unless same do throw .typeMismatch
+        pure (context, patterns)
+      else pure (context, patterns)
+    psElabPatternRowParameters branch fuel context name parameters
+      (psExprInstantiate1 pi.body parameter) patterns
+
 -- Explicit variables are rigid locals. Wildcards are private pattern
 -- metavariables until every constructor field and index has been checked.
-def psElabPatternRowElaborate (fuel : Nat) (context : PsElabContext)
-    (variables : List PsElabTypedBinder) (pattern : PsSyntaxPattern)
-    (expected : PsExpr) (path : List Nat) :
-    Except PsElabError (PsElabContext × PsExpr × List PsElabPatternRowOccurrence) := do
+-- Resolve nested short constructors only after their preceding fields have
+-- constrained the real dependent domain.
+def psElabPatternRowElaborate (branch : PsElaborator) (fuel : Nat)
+    (context : PsElabContext) (variables : List PsElabTypedBinder)
+    (pattern : PsSyntaxPattern) (expected : PsExpr) (path : List Nat) :
+    Except PsElabError PsElabPatternRowChecked := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
@@ -116,16 +149,20 @@ def psElabPatternRowElaborate (fuel : Nat) (context : PsElabContext)
     | .variable source =>
       if psSyntaxNameIsWildcardBinder source then
         let value := psElabHole context (some expected)
-        return (value.context, value.term, [{ value := value.term, path }])
+        return { context := value.context, value := value.term
+          occurrences := [{ value := value.term, path }], compilerPattern := pattern }
       let some name := psSyntaxNameToName source | throw .emptyName
       let some patternVar := variables.find? (fun patternVar => psNameEq patternVar.name name)
         | throw (.refinement "pattern variable declaration unavailable")
       let (context, success) ← psElabPatternRowUnify context patternVar.type expected
       if !success then throw .typeMismatch
-      return (context, .fvar patternVar.id, [{ value := .fvar patternVar.id, path }])
+      return { context, value := .fvar patternVar.id
+        occurrences := [{ value := .fvar patternVar.id, path }], compilerPattern := pattern }
     | .wildcard _ =>
       let value := psElabHole context (some expected)
-      return (value.context, value.term, [{ value := value.term, path }])
+      return { context := value.context, value := value.term
+        occurrences := [{ value := value.term, path }], compilerPattern := pattern }
+    | .inaccessible _ => throw .matchPatternUnsupported
     | _ =>
       let view := psExprAppView
         (psWhnf context.environment context.metaContext context.localContext expected)
@@ -137,26 +174,38 @@ def psElabPatternRowElaborate (fuel : Nat) (context : PsElabContext)
       if !(info.constructors.any (psNameEq name)) then throw (.matchConstructorUnknown name)
       let some ctor := psEnvironmentFindConstructor context.environment name
         | throw (.matchConstructorUnknown name)
-      if patterns.length != ctor.numFields then throw (.matchConstructorArity name)
+      unless ctor.numParams == info.numParams do throw .matchParameterArity
       let parameters := view.args.take info.numParams
       let type ← (psInferType context.environment context.metaContext context.localContext
         (.constE name levels)).mapError PsElabError.infer
-      let cursor ← psElabMatchApplyParameters context parameters type
-      let (context, cursor, values, occurrences) ← patterns.zipIdx.foldlM
-        (fun (state : PsElabContext × PsExpr × List PsExpr × List PsElabPatternRowOccurrence)
-            (pattern, index) => do
-          let (context, cursor, values, occurrences) := state
-          let pi ← (psInferEnsureForall context.environment context.metaContext
-            context.localContext cursor).mapError PsElabError.infer
-          let (context, value, added) ←
-            psElabPatternRowElaborate fuel context variables pattern pi.domain (path ++ [index])
-          return (context, psExprInstantiate1 pi.body value, values ++ [value], occurrences ++ added))
-        (context, cursor, [], [])
+      let (context, cursor, patterns) ←
+        psElabPatternRowParameters branch fuel context name parameters type patterns
+      let (context, cursor, remaining, values, occurrences, fields) ←
+        (List.range ctor.numFields).foldlM
+          (fun (state : PsElabContext × PsExpr × List PsSyntaxPattern ×
+              List PsExpr × List PsElabPatternRowOccurrence × List PsSyntaxPattern) index => do
+            let (context, cursor, remaining, values, occurrences, fields) := state
+            let pi ← (psInferEnsureForall context.environment context.metaContext
+              context.localContext cursor).mapError PsElabError.infer
+            let (field, remaining) ← if psBinderAcceptsExplicitArgument pi.binder then do
+                let field :: remaining := remaining | throw (.matchConstructorArity name)
+                pure (field, remaining)
+              else pure (.wildcard (psSyntaxPatternSpan pattern), remaining)
+            let checked ← psElabPatternRowElaborate branch fuel context variables field
+              pi.domain (path ++ [index])
+            return (checked.context, psExprInstantiate1 pi.body checked.value, remaining,
+              values ++ [checked.value], occurrences ++ checked.occurrences,
+              fields ++ [checked.compilerPattern]))
+          (context, cursor, patterns, [], [], [])
+      unless remaining.isEmpty do throw (.matchConstructorArity name)
       let (context, success) ← psElabPatternRowUnify context cursor expected
       if !success then throw .typeMismatch
       let value := psExprApplyMany (.constE name levels) (parameters ++ values)
       let checked ← psElabResolvedTerm context value (some expected)
-      return (checked.context, checked.term, occurrences)
+      let compilerPattern := match pattern with
+        | .ctor source _ span | .dotCtor source _ span => PsSyntaxPattern.ctor source fields span
+        | _ => pattern
+      return { context := checked.context, value := checked.term, occurrences, compilerPattern }
 
 -- Pinned Lean retries only a constructor pattern that checks after recursively
 -- erasing inductive indices. The later visitor must find the first mismatch
@@ -233,11 +282,12 @@ def psElabPatternRowIndexAt (context : PsElabContext) (type : PsExpr) :
     let argument ← view.args[index]?
     psElabPatternRowIndexAt context argument path
 
-def psElabPatternRowAtSource (context : PsElabContext) (variables : List PsElabTypedBinder)
+def psElabPatternRowAtSource (branch : PsElaborator)
+    (context : PsElabContext) (variables : List PsElabTypedBinder)
     (source : PsElabPatternRowSource) (pattern : PsSyntaxPattern)
     (expected : PsExpr) (path : List Nat) :
-    Except PsElabError (PsElabContext × PsExpr × List PsElabPatternRowOccurrence) := do
-  match psElabPatternRowElaborate 4096 context variables pattern expected path with
+    Except PsElabError PsElabPatternRowChecked := do
+  match psElabPatternRowElaborate branch 4096 context variables pattern expected path with
   | .ok result => return result
   | .error cause =>
     if psElabErrorIsResource cause then throw cause
@@ -245,31 +295,34 @@ def psElabPatternRowAtSource (context : PsElabContext) (variables : List PsElabT
       | .ok erased => pure erased
       | .error error => if psElabErrorIsResource error then throw error else throw cause
     let alternative ← match
-        psElabPatternRowElaborate 4096 erased.fst variables pattern erased.snd path with
+        psElabPatternRowElaborate branch 4096 erased.fst variables pattern erased.snd path with
       | .ok alternative => pure alternative
       | .error error => if psElabErrorIsResource error then throw error else throw cause
-    let (alternativeContext, value, _) := alternative
-    let type ← (psInferType alternativeContext.environment alternativeContext.metaContext
-      alternativeContext.localContext value).mapError PsElabError.infer
-    let some path ← psElabPatternRowRefinementPath 4096 alternativeContext type expected
+    let type ← (psInferType alternative.context.environment alternative.context.metaContext
+      alternative.context.localContext alternative.value).mapError PsElabError.infer
+    let some path ← psElabPatternRowRefinementPath 4096 alternative.context type expected
       | throw cause
     let some index := psElabPatternRowIndexAt context source.type path | throw cause
     throw (.sourceMatchIndexRefinement [index] source.equationName?.isSome cause)
 
-def psElabPatternRowLhs (context : PsElabContext) (variables : List PsElabTypedBinder)
+def psElabPatternRowLhs (branch : PsElaborator)
+    (context : PsElabContext) (variables : List PsElabTypedBinder)
     (sources : List PsElabPatternRowSource) (patterns : List PsSyntaxPattern)
     (matchType : PsExpr) (index : Nat := 0) :
     Except PsElabError PsElabPatternLhs := do
   match sources, patterns with
-  | [], [] => return { context, values := [], occurrences := [], target := matchType }
+  | [], [] => return {
+      context, values := [], occurrences := [], compilerPatterns := [], target := matchType }
   | source :: sources, pattern :: patterns =>
     let pi ← (psInferEnsureForall context.environment context.metaContext
       context.localContext matchType).mapError PsElabError.infer
-    let (context, value, occurrences) ←
-      psElabPatternRowAtSource context variables source pattern pi.domain [index]
-    let tail ← psElabPatternRowLhs context variables sources patterns
-      (psExprInstantiate1 pi.body value) (index + 1)
-    return { tail with values := value :: tail.values, occurrences := occurrences ++ tail.occurrences }
+    let checked ← psElabPatternRowAtSource branch context variables source pattern pi.domain [index]
+    let tail ← psElabPatternRowLhs branch checked.context variables sources patterns
+      (psExprInstantiate1 pi.body checked.value) (index + 1)
+    return { tail with
+      values := checked.value :: tail.values
+      occurrences := checked.occurrences ++ tail.occurrences
+      compilerPatterns := checked.compilerPattern :: tail.compilerPatterns }
   | _, _ => throw (.refinement "pattern row/discriminant arity mismatch")
 
 -- An assigned wildcard is inaccessible. An unresolved wildcard is a genuine
@@ -395,10 +448,11 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
     (sources : List PsElabPatternRowSource) (patterns : List PsSyntaxPattern)
     (body : PsSyntaxTerm) (matchType : PsExpr) :
     Except PsElabError (PsElabContext × PsElabCheckedPatternRow) := do
+  let patterns ← patterns.mapM (psElabPatternPrepare 4096 outer.environment)
   let names := patterns.flatMap (psSyntaxPatternNames 4096)
   if psSyntaxNameListHasDuplicate names then throw (.refinement "duplicate pattern variable")
   let (context, variables) ← psElabPatternRowVariables outer names
-  let lhs ← psElabPatternRowLhs context variables sources patterns matchType
+  let lhs ← psElabPatternRowLhs branch context variables sources patterns matchType
   let occurrences := psElabPatternRowOccurrences lhs.context (variables.map (·.id)) lhs.occurrences
   for patternVar in variables do
     if !(occurrences.any (fun occurrence => psExprAlphaEq occurrence.value (.fvar patternVar.id))) then
@@ -447,7 +501,7 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
     binders := opened.bindersRev.reverse.map (·.id)
     slots, numEquations := equationsRev.length
     equationBinders := equationsRev.reverse.map (·.id)
-    aliases, metadata })
+    aliases, metadata, compilerPatterns := lhs.compilerPatterns })
 
 -- Compiler application checks the real field values and then the exact named
 -- proof domains. It neither reopens source syntax nor assumes a branch proof.

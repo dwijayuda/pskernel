@@ -25,6 +25,12 @@ noncomputable def m3GroupOracle : M3GroupLeft Nat → Nat :=
 
 example : m3GroupOracle (.link 7 (.join .nil)) = 2 := rfl
 
+-- Pinned getElimNameInfo rejects bare induction on a mutual family.
+-- Explicit complete recursor applications above have separate positive evidence.
+example (x : M3GroupLeft Nat) : x = x := by
+  fail_if_success induction x
+  rfl
+
 mutual
   inductive M3IndexedLeft (A : Type) : Nat → Type where
     | zero : M3IndexedLeft A 0
@@ -381,6 +387,6 @@ def main : IO Unit := do
     "theorem m3GroupInduction(x: M3GroupLeft(Nat)): x = x := by { induction x }\n")
   match psElabProgramWithOrigins environment induction with
   | .error error => ensure (inductionRefused error) ("wrong group induction refusal: " ++ elabMessage error)
-  | .ok _ => throw (IO.userError "group induction silently acquired a motive family")
-  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures, portable group reduction and checked source Match; malformed groups, unfinished group induction and legacy singleton runtime view refused"
+  | .ok _ => throw (IO.userError "default mutual induction bypassed the pinned applicability rule")
+  IO.println "PSCV0_M3_INDUCTIVE_GROUPS: PASS atomic parametric/indexed/Prop groups, alpha-renamed shared parameters, exact kernel recursor signatures, portable group reduction and checked source Match; malformed groups, pinned default mutual induction and legacy singleton runtime view refused"
 

@@ -22,6 +22,11 @@ end
 
 namespace M3InductiveMatchOracle
 
+-- Keep the pinned bare-induction refusal independent of portable tactics.
+example (x : M3MatchLeft Nat 0) : x = x := by
+  fail_if_success induction x
+  rfl
+
 -- Native K computation uses the unique proof constructor even when the
 -- supplied proof is a variable. It does not unfold or inspect that proof.
 example (h : (0 : Nat) = 0) :
@@ -314,7 +319,7 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   expectRefused environment "singleton Prop large elimination"
     "function bad(h: Or True True): Nat := match h with { | .inl proof => 0 | .inr proof => 1 }\n"
     "infer:application"
-  expectRefused environment "group induction"
+  expectRefused environment "default mutual induction"
     "theorem bad(x: M3MatchLeft(Nat, 0)): x = x := by { induction x }\n"
     "proof:group induction requires a complete motive family"
   expectRefused environment "group recursion reconstructs parent"
@@ -344,7 +349,7 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   let wrongUnit := psEnvironmentInsert environment
     (.constructorDecl { constructor with type := .constE psNatName [] })
   expectRefused wrongUnit "wrong PUnit inhabitant type" simpleMatch "group"
-  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination, strict recursive subterms, the explicit group induction limit and actual HEq foundation"
+  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination, strict recursive subterms, the pinned default mutual induction refusal and actual HEq foundation"
 
 private def outputCases : List (String × (Bool → UInt64)) :=
   [("m3matchleft", M3InductiveMatchOracle.leftOutput),

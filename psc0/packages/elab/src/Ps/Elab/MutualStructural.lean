@@ -2132,11 +2132,13 @@ def psElabMutualStructuralEquation (environment : PsEnvironment)
 
 def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List PsName)
     (captured : PsElabTypedBindersResult) (inputs : List PsElabMutualStructuralInput)
-    (retainBlockLevels : Bool) (emitEquations : Bool := true) :
+    (retainBlockLevels : Bool) (emitEquations : Bool := true)
+    (equationExclusions : List PsName := []) :
     Except PsElabError PsElabMutualBatchResult := do
   let headers := inputs.map (·.header)
   let ownedNames := headers.flatMap fun header =>
-    if emitEquations then [header.name, psNameAppendStr header.name "eq_def"] else [header.name]
+    if emitEquations && !equationExclusions.any (psNameEq header.name) then
+      [header.name, psNameAppendStr header.name "eq_def"] else [header.name]
   for name in ownedNames do
     if (psEnvironmentFind environment name).isSome ||
         (ownedNames.filter (psNameEq name)).length != 1 then
@@ -2182,11 +2184,15 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
   let equations ← (List.range headers.length).mapM fun index => do
     let some header := headers[index]?
       | throw (psElabMutualStructuralError "OWNERSHIP" "equation has no header")
-    (psElabMutualStructuralEquation staged levels plan index).mapError (.atDeclaration header.name)
-  let _ ← psAddDeclarationList staged equations
+    if equationExclusions.any (psNameEq header.name) then return none
+    let equation ← (psElabMutualStructuralEquation staged levels plan index).mapError
+      (.atDeclaration header.name)
+    return some equation
+  let equationDeclarations := equations.filterMap id
+  let _ ← psAddDeclarationList staged equationDeclarations
   let owned := ((declarations.zip equations).zip inputs).map fun ((declaration, equation), input) =>
     ({
-      declarations := [declaration, equation]
+      declarations := declaration :: equation.toList
       sourceInfo := [input.sourceInfo] } : PsElabDeclarationBatchResult)
   let owned := match owned with
     | [] => []
@@ -2196,7 +2202,7 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
         structuralHelpers := helperOwnership ++ first.structuralHelpers } :: rest
   return {
     batch := {
-      declarations := helperDeclarations ++ declarations ++ equations
+      declarations := helperDeclarations ++ declarations ++ equationDeclarations
       sourceInfo := inputs.map (·.sourceInfo)
       structuralHelpers := helperOwnership }
     members := owned }
@@ -2206,9 +2212,10 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
 -- definitions and their exact source equations use this same fixed layout.
 def psElabStructuralMutualFromChecked (environment : PsEnvironment)
     (levelNames : List PsName) (captured : PsElabTypedBindersResult)
-    (inputs : List PsElabMutualStructuralInput) (emitEquations : Bool := true) :
+    (inputs : List PsElabMutualStructuralInput) (emitEquations : Bool := true)
+    (equationExclusions : List PsName := []) :
     Except PsElabError PsElabMutualBatchResult :=
-  psElabMutualStructuralClose environment levelNames captured inputs true emitEquations
+  psElabMutualStructuralClose environment levelNames captured inputs true emitEquations equationExclusions
 
 def psElabStructuralMutualBatch (environment : PsEnvironment) (levelNames : List PsName)
     (capturedSyntax : List PsScopeBinder) (members : List PsScopedMutualMember) :

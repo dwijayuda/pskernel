@@ -14,9 +14,9 @@ def psElabMatchPatternConstructorName
           Except.ok psBoolFalseName
       else
         Except.error PsElabError.matchPatternUnsupported
-  | .wildcard _ | .variable _ | .natural _ _ =>
+  | .wildcard _ | .variable _ | .natural _ _ | .inaccessible _ =>
       Except.error PsElabError.matchPatternUnsupported
-  | .ctor syntaxName _ _ =>
+  | .ctor syntaxName _ _ | .dotCtor syntaxName _ _ =>
       match syntaxName.segments with
       | [] => Except.error PsElabError.matchPatternUnsupported
       | segment :: rest =>
@@ -432,7 +432,8 @@ def psElabPatternRunPlan (branch : PsElaborator) (inputs : PsElabPatternInputs)
     (fun (state : PsElabContext × List PsElabPatternRow) row => do
       let (context, checked) ← psElabCheckPatternRow branch state.fst sources
         row.patterns row.body plan.matchType
-      return (context, state.snd ++ [{ row with checked? := some checked }]))
+      return (context, state.snd ++ [{
+        row with patterns := checked.compilerPatterns, checked? := some checked }]))
     (plan.context, [])
   let plan := { plan with context }
   let arguments := inputs.columns.map (·.value) ++ selected.map (fun entry => PsExpr.fvar entry.fst)
@@ -578,8 +579,6 @@ def psElabMatchMatrixFullSourceWith (elaborate branch : PsElaborator) (context :
   let rows ← alternatives.mapM fun (patterns, body, span) => do
     if patterns.length != sources.length then
       throw (.refinement "pattern row/discriminant arity mismatch")
-    let names := patterns.flatMap (psSyntaxPatternNames 4096)
-    if psSyntaxNameListHasDuplicate names then throw (.refinement "duplicate pattern variable")
     return { patterns, body, span : PsElabPatternRow }
   let inputs ← psElabPatternInputs elaborate target.context sources
   -- Optional ys can repair an initially ill-typed raw base. Validate the

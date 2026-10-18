@@ -89,7 +89,7 @@ def psElabDeriveHashable (environment : PsEnvironment)
   -- Validate the complete family before generating any branch.
   for slot in plan.elimination.slots do
     for constructor in slot.constructors do
-      let _ ← psElabDeriveSlotFields plan slot constructor
+      let _ ← psElabDeriveSlotFields plan slot constructor true
       pure ()
   let type ← psElabDeriveClassType plan.context className plan.family
   let .app (.constE _ levels) _ := type | throw .typeMismatch

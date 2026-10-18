@@ -1,6 +1,7 @@
 import Ps.Environment.StandardPlatformWords
 import Ps.Environment.StandardWellFounded
 import Ps.Environment.StandardClassical
+import Ps.Environment.StandardPSum
 import Ps.Environment.StandardPartialFixpoint
 import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardLogicInstances
@@ -156,7 +157,7 @@ def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardPartialFixpointExtend psSelfHostProdPrePartialFixpointPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psSelfHostProdPreMutualWellFoundedPreludeEnvironment
+  psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

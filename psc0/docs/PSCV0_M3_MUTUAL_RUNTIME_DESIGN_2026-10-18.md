@@ -97,3 +97,19 @@ RecursionOpenFixedScope invariant; do not globally change substitution semantics
 The existing three-member dependent/reordered fixture covers this family.
 The PSum exporter now measures the exact extended candidate against a frozen
 pre-mutual boundary, without changing selected manifests or selecting the asset.
+
+## Qualified ownership and source activation child
+
+Runtime ownership passed full preparation at9b5cc7c7; see its exact receipt.
+The next child activates both source grammars through a common construction
+result consumed by PreDefinition's independent exact-equation validator. Raw
+header opening moves to PreDefinition/Header to keep imports acyclic. The owner
+then derives ordinary checked private bodies and attributes the shared auxiliary
+to the first member, preserving visibility/origin propagation. The producer cannot
+assert executable authority. Both general total-only IR and combined P0/P1 host
+paths use the independent compiler runtime validator.
+
+Strict PSum selection uses all three independently measured9b5digests. No foundation
+assumption or runtime primitive changes. Existing paired input/backend observers
+are extended with mutual WF and P0/P1, avoiding a new test executable or lane.
+Source activation and backend observations remain pending until exact-SHA CI passes.

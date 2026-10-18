@@ -7,7 +7,7 @@ import Ps.Environment.StandardPSum
 def main (args : List String) : IO Unit := do
   let [output] := args | throw (IO.userError "usage: Pscv0M3MutualWellFoundedExport OUTPUT")
   PsV7Native.exportMutualWellFoundedCandidate (System.FilePath.mk output)
-  IO.println "PSCV0_M3_PSUM_EXPORT: PASS pinned standalone closure and recursor comparison; selection pending"
+  IO.println "PSCV0_M3_PSUM_EXPORT: PASS pinned standalone closure and exact recursor comparison; independent candidate digests follow"
   let before := psSelfHostProdPreMutualWellFoundedPreludeEnvironment
   let candidate := psStandardPSumExtend before
   if candidate.declarations.length != before.declarations.length + 5 ||

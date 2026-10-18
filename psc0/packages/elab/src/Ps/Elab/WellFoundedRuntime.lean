@@ -1,4 +1,5 @@
-import Ps.Elab.PreDefinition
+import Ps.Elab.PreDefinition.Header
+import Ps.Elab.RecursionParameters
 import Ps.Meta.MutualPacking
 import Ps.Meta.MutualWellFounded
 

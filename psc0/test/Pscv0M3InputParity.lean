@@ -72,6 +72,41 @@ example : m3control false = 6 := rfl
 example : m3control true = 8 := rfl
 def doArgument : Option Nat := (fun (value : Option Nat) => value) do return 1
 example : doArgument = Option.some 1 := rfl
+mutual
+def parityFirst {A : Type} (a : A) (n : Nat) : Nat → A :=
+  fun (k : Nat) => match n with
+    | 0 => a
+    | Nat.succ m => let kept := a; paritySecond m A kept k
+termination_by n
+def paritySecond (n : Nat) (B : Type) (b : B) : Nat → B :=
+  fun (k : Nat) => match n with
+    | 0 => b
+    | Nat.succ m => parityThird m b k
+termination_by n
+def parityThird {C : Type} (n : Nat) (c : C) : Nat → C :=
+  fun (k : Nat) => match n with
+    | 0 => c
+    | Nat.succ m => parityFirst c m k
+termination_by n
+end
+def m3mutual (flag : Bool) : UInt64 :=
+  UInt64.ofNat (parityFirst (if flag then 7 else 11) (if flag then 6 else 4) 2)
+
+example : m3mutual true = 7 := by simp [m3mutual, parityFirst, paritySecond, parityThird]
+example : m3mutual false = 11 := by simp [m3mutual, parityFirst, paritySecond, parityThird]
+partial def parityPartial (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | Nat.succ k => Nat.succ (parityPartial k)
+def parityFixed (seed : Nat) (n : Nat) : Nat :=
+  match n with
+  | 0 => seed
+  | Nat.succ k => parityFixed seed k
+partial_fixpoint
+def m3strategies (flag : Bool) : UInt64 :=
+  UInt64.ofNat (parityPartial (if flag then 4 else 3) +
+    100 * parityFixed (if flag then 7 else 9) (if flag then 3 else 4))
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -107,6 +142,18 @@ private def controlLeanSource : String :=
 private def controlPsSource : String :=
   "function m3control(flag: Bool): UInt64 :=\n  let (left, right): Nat × Nat := (2, 3)\n  let amount: Option Nat := do {\n    let (x, y): Nat × Nat ← Option.some((left, right))\n    if (!flag) {\n      if let .some n := Option.some(x + y) {\n        return n\n      }\n    } else {\n      if (flag) {\n        return 7\n      }\n    }\n    return 11\n  }\n  let extra: Id Nat := do {\n    let n := 1\n    return n\n  }\n  let extraValue: Nat := extra\n  let extraApplied: Nat := (fun (f: Nat -> Nat) => f(extraValue))(fun (n: Nat) => n)\n  UInt64.ofNat(if let .some n := amount { n + extraApplied } else { 0 })\n"
 
+private def mutualLeanSource : String :=
+  "mutual\ndef parityFirst {A : Type} (a : A) (n : Nat) : Nat → A :=\n  fun (k : Nat) => match n with\n    | 0 => a\n    | Nat.succ m => let kept := a; paritySecond m A kept k\ntermination_by n\ndef paritySecond (n : Nat) (B : Type) (b : B) : Nat → B :=\n  fun (k : Nat) => match n with\n    | 0 => b\n    | Nat.succ m => parityThird m b k\ntermination_by n\ndef parityThird {C : Type} (n : Nat) (c : C) : Nat → C :=\n  fun (k : Nat) => match n with\n    | 0 => c\n    | Nat.succ m => parityFirst c m k\ntermination_by n\nend\ndef m3mutual (flag : Bool) : UInt64 :=\n  UInt64.ofNat (parityFirst (if flag then 7 else 11) (if flag then 6 else 4) 2)\n"
+
+private def mutualPsSource : String :=
+  "mutual\ndef parityFirst {A : Type} (a : A, n : Nat) : Nat -> A := fun (k : Nat) => match n with { | 0 => a | Nat.succ m => let kept := a\nparitySecond(m, A, kept)(k) } termination_by n\ndef paritySecond (n : Nat, B : Type, b : B) : Nat -> B := fun (k : Nat) => match n with { | 0 => b | Nat.succ m => parityThird(m, b)(k) } termination_by n\ndef parityThird {C : Type} (n : Nat, c : C) : Nat -> C := fun (k : Nat) => match n with { | 0 => c | Nat.succ m => parityFirst(c, m)(k) } termination_by n\nend\nfunction m3mutual(flag: Bool): UInt64 := UInt64.ofNat(parityFirst(if (flag) { 7 } else { 11 }, if (flag) { 6 } else { 4 })(2))\n"
+
+private def strategyLeanSource : String :=
+  "partial def parityPartial (n : Nat) : Nat :=\n  match n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (parityPartial k)\ndef parityFixed (seed : Nat) (n : Nat) : Nat :=\n  match n with\n  | 0 => seed\n  | Nat.succ k => parityFixed seed k\npartial_fixpoint\ndef m3strategies (flag : Bool) : UInt64 :=\n  UInt64.ofNat (parityPartial (if flag then 4 else 3) +\n    100 * parityFixed (if flag then 7 else 9) (if flag then 3 else 4))\n"
+
+private def strategyPsSource : String :=
+  "partial def parityPartial(n: Nat): Nat := match n with { | 0 => 0 | Nat.succ k => Nat.succ(parityPartial(k)) }\ndef parityFixed(seed: Nat, n: Nat): Nat := match n with { | 0 => seed | Nat.succ k => parityFixed(seed, k) }\npartial_fixpoint\nfunction m3strategies(flag: Bool): UInt64 := UInt64.ofNat(parityPartial(if (flag) { 4 } else { 3 }) + 100 * parityFixed(if (flag) { 7 } else { 9 }, if (flag) { 3 } else { 4 }))\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -118,11 +165,13 @@ private def compareCheckedValues (left right : List PsDeclaration) : IO Unit := 
   for (left, right) in left.zip right do
     match left, right with
     | .definitionDecl ln ll lt lv, .definitionDecl rn rl rt rv
-    | .theoremDecl ln ll lt lv, .theoremDecl rn rl rt rv =>
+    | .theoremDecl ln ll lt lv, .theoremDecl rn rl rt rv
+    | .opaqueDecl ln ll lt lv, .opaqueDecl rn rl rt rv
+    | .partialDecl ln ll lt lv, .partialDecl rn rl rt rv =>
       ensure (psNameEq ln rn && psElabMutualLevelNamesEqual ll rl &&
         psExprAlphaEq lt rt && psExprAlphaEq lv rv)
         ("source adapters changed checked value " ++ psNameToString ln)
-    | _, _ => throw (IO.userError "parity fixture expected matching definitions or generated equation theorems")
+    | _, _ => throw (IO.userError "parity fixture expected matching checked definition, theorem, opaque or partial identities")
 
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -132,6 +181,16 @@ def check (root : System.FilePath) : IO Unit := do
   compareCheckedValues native proofscript
   compareCheckedValues (← fromExcept (checkedDeclarations .lean controlLeanSource))
     (← fromExcept (checkedDeclarations .proofScript controlPsSource))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean mutualLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript mutualPsSource))
+  -- Exercise total-only runtime admission independently of the combined
+  -- ordinary P0/P1 host path used by the emitted paired module below.
+  let totalProgram ← fromExcept (psCompilerParsePscv0 mutualLeanSource .lean)
+  let totalElaborated ← fromExcept ((psCompilerElaboratePscv0 totalProgram).mapError psCompilerPscv0Error)
+  let totalIr ← fromExcept ((psCompilerVerifiedIrFromElaborated totalElaborated).mapError psCompilerPscv0Error)
+  let _ ← fromExcept (psWithCheckedIr psIrCheckDefaultOptions totalIr fun _ => pure ())
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean strategyLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript strategyPsSource))
   let grouped := "def grouped {T : Type} {first value : T} := value\n"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean grouped))
     (← fromExcept (checkedDeclarations .proofScript grouped))
@@ -185,10 +244,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (dataLeanSource ++ controlLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (dataPsSource ++ controlPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -225,7 +284,9 @@ def check (root : System.FilePath) : IO Unit := do
           ("flag", Lean.toJson flag),
           ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat)),
           ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat)),
-          ("m3control", Lean.toJson (toString (M3InputParityOracle.m3control flag).toNat))]
+          ("m3control", Lean.toJson (toString (M3InputParityOracle.m3control flag).toNat)),
+          ("m3mutual", Lean.toJson (toString (M3InputParityOracle.m3mutual flag).toNat)),
+          ("m3strategies", Lean.toJson (toString (M3InputParityOracle.m3strategies flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, where/WF, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

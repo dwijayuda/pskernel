@@ -1,4 +1,6 @@
 import Ps.Elab.PreDefinition.Basic
+import Ps.Elab.PreDefinition.Header
+import Ps.Elab.WellFoundedRuntime
 import Ps.Elab.RecursionParameters
 import Ps.Elab.MutualStructural
 import Ps.Elab.PartialFixpoint
@@ -12,9 +14,13 @@ def psElabPreDefinitionError (rule message : String) : PsElabError :=
 
 abbrev PsElabPreDefinitionBatchResult := PsElabMutualBatchResult
 
+structure PsElabPreDefinitionWellFoundedConstruction where
+  auxiliaries : List PsDeclaration := []
+  results : List PsElabWellFoundedResult
+
 abbrev PsElabPreDefinitionWellFoundedConsumer :=
-  PsEnvironment → List PsName → PsElabPreDefinition →
-    Except PsElabError PsElabWellFoundedResult
+  PsEnvironment → List PsName → List PsElabPreDefinition →
+    Except PsElabError PsElabPreDefinitionWellFoundedConstruction
 
 def psElabPreDefinitionDeclarationHead : PsSyntaxDeclaration → PsSyntaxDeclaration
   | .whereDeclaration parent _ _ => psElabPreDefinitionDeclarationHead parent
@@ -64,34 +70,6 @@ def psElabPreDefinitionSourceStrategy (members : List PsElabPreDefinition)
     if member.sourceIndex != owner.sourceIndex then
       throw (psElabPreDefinitionError "SOURCE" "helper and parent source indices disagree")
     psElabPreDefinitionLocalStrategy (members.map (·.source)) source
-
-structure PsElabPreDefinitionOpened where
-  context : PsElabContext
-  bindersRev : List PsElabTypedBinder
-  type : PsExpr
-  value : PsExpr
-
--- Consume only the retained raw header lambdas. Normalizing the value here
--- would conflate source parameters with a returned function's own lambdas.
-def psElabPreDefinitionOpen (count : Nat) (context : PsElabContext)
-    (type value : PsExpr) (bindersRev : List PsElabTypedBinder := []) :
-    Except PsElabError PsElabPreDefinitionOpened := do
-  match count with
-  | 0 => return { context, bindersRev, type, value }
-  | count + 1 =>
-    let pi ← (psInferEnsureForall context.environment context.metaContext
-      context.localContext type).mapError PsElabError.infer
-    let .lam _ domain body binder := value
-      | throw (psElabPreDefinitionError "HEADER" "retained source header exceeds the actual raw lambda prefix")
-    if !psBinderInfoEq binder pi.binder ||
-        !psExprFVarsInContext context.localContext domain ||
-        !psElabMutualStructuralEqual context domain pi.domain then
-      throw (psElabPreDefinitionError "HEADER" "raw lambda binder differs from its checked header domain or kind")
-    let pushed := psLocalPushBinding context.localContext pi.name pi.domain pi.binder
-    psElabPreDefinitionOpen count (psElabContextWithLocal context pushed.context)
-      (psExprInstantiate1 pi.body (.fvar pushed.id))
-      (psExprInstantiate1 body (.fvar pushed.id))
-      (PsElabTypedBinder.mk pushed.id pi.name pi.domain pi.binder :: bindersRev)
 
 -- Rebuild the peer-only context from the caller's actual environment. No
 -- saved metavariable assignment, instance cache, pending job or recursion
@@ -545,12 +523,39 @@ def psElabPreDefinitionWellFoundedResults (environment : PsEnvironment)
     batch := { declarations := definitions ++ equations, sourceInfo := members.map (·.sourceInfo) }
     members := batches }
 
+-- Construction returns no publication authority. The shared source owner
+-- checks actual definitions/equations before deriving ordinary runtime bodies.
+def psElabPreDefinitionWellFoundedConstruction (environment : PsEnvironment)
+    (levels : List PsName) (members : List PsElabPreDefinition)
+    (construction : PsElabPreDefinitionWellFoundedConstruction) :
+    Except PsElabError PsElabPreDefinitionBatchResult := do
+  let staged ← psAddDeclarationList environment construction.auxiliaries
+  let result ← psElabPreDefinitionWellFoundedResults staged levels members construction.results
+  if members.length == 1 then
+    if !construction.auxiliaries.isEmpty then
+      throw (psElabPreDefinitionError "WF-IDENTITY" "singleton construction added an unowned auxiliary")
+    return result
+  let [auxiliary] := construction.auxiliaries
+    | throw (psElabPreDefinitionError "WF-IDENTITY" "component requires exactly one actual fixedpoint")
+  let logical ← psAddDeclarationList staged result.batch.declarations
+  let implementations ← psElabWellFoundedRuntimeBodies logical (psDeclarationName auxiliary)
+    (members.map (·.name))
+  let _ ← psAddDeclarationList logical implementations
+  let checkedMembers := (result.members.zip implementations).map fun (member, implementation) =>
+    { member with declarations := member.declarations ++ [implementation] }
+  let first :: rest := checkedMembers
+    | throw (psElabPreDefinitionError "WF-IDENTITY" "component has no original first owner")
+  return { result with
+    batch := { result.batch with
+      declarations := auxiliary :: (result.batch.declarations ++ implementations) }
+    members := { first with declarations := auxiliary :: first.declarations } :: rest }
+
 def psElabPreDefinitionWellFounded (environment : PsEnvironment)
-    (levels : List PsName) (member : PsElabPreDefinition)
+    (levels : List PsName) (members : List PsElabPreDefinition)
     (consumer : PsElabPreDefinitionWellFoundedConsumer) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
-  let result ← consumer environment levels member
-  psElabPreDefinitionWellFoundedResults environment levels [member] [result]
+  let construction ← consumer environment levels members
+  psElabPreDefinitionWellFoundedConstruction environment levels members construction
 
 def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsName)
     (nextId : Nat) (members : List PsElabPreDefinition) (nonrecursive : Bool)
@@ -567,13 +572,11 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .fixedpoint) then
     return ← psElabFixedpointFromChecked environment levels nextId members
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
-    let [member] := members
-      | throw (.data "PSCV0-MUTUAL-WF: a recursive component with a well-founded suffix requires one independently checked measured member; mixed partial or multiple-member well-founded cliques are unavailable")
-    if !psElabPreDefinitionStrategyEq member.strategy .wellFounded then
+    if !members.all (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
       throw (.data "PSCV0-MUTUAL-WF: well-founded strategy does not own the complete component")
     let some consumer := wellFounded
       | throw (psElabPreDefinitionError "WF" "checked local well-founded bodies require the separate measure-and-proof consumer; this SCC is not structural evidence")
-    return ← psElabPreDefinitionWellFounded environment levels member consumer
+    return ← psElabPreDefinitionWellFounded environment levels members consumer
   -- Original main modifiers have already passed the native whole-block
   -- compatibility gate. Pinned Main then chooses partial for this recursive
   -- component, including inherited local helpers. Every resulting member has

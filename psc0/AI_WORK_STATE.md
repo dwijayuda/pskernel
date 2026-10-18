@@ -41,102 +41,74 @@ Latest fully qualified five-gate compiler/test SHA and current main:
 Native39095176453, M339095176451, F139095176460, F239095176458 and
 F339095176455 all completed SUCCESS. Receipt:
 docs/PSCV0_M3_INTEGRATION_6CDB9A6E_2026-10-18.md.
-Historical5785ada4 also completed all five gates and retains its receipt.
-Native lambda arguments and existing paired source runtime observations remain
-qualified. Never cancel/supersede a healthy main Native.
+Never cancel or supersede a healthy main Native run.
 
 Latest fully successful preparation compiler/test SHA:
-**6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
-Run39093766354/job117576869290 completed SUCCESS; artifact12124171379,
-SHA25624765801ed8ccffd426e1190ed85dd35303be3e4917fdbdc7464779f424b67d2.
-Receipt: docs/PSCV0_M3_EXACT_COMPONENT_6CDB9A6E_2026-10-18.md.
-The full log confirms real three-member recursive bodies, fixed measures,
-refined callbacks, decrease proofs, a shared closed auxiliary, three public
-projections and exact retained-source equations checked by the official kernel.
-Singleton WF uses the same independent equation validator; all retained checks
-and input-parity preparation pass.
-
-Historical3f7e0491 qualified internal bodies/fix_eq before public equations.
-Failed09bcae transported an unreduced dictionary application and counted unused
-varying arguments as dependencies. That design was removed: pinned WF/Rel first
-establishes one fixed codomain, then synthesizes a single dictionary in the fixed
-scope. WF/Main31-35 explicitly rejects zero-varying members, matching PSC0.
-
-The public source dispatcher still refuses multi-member WF. Executable recovery
-and strict selected PSum activation remain pending. Passing internal constructor
-proofs does not establish runtime behavior. M3+B and full selected native grammar
-parity remain OPEN. Fresh refs, complete logs and exact-SHA CI override this file.
+**9b5cc7c7f64bf18e2b1908cbb63fa4db0e60404f**.
+Run39095995956/job117582435491 completed SUCCESS; artifact12124459802,
+SHA256146bbd763d4b3046e3a803546deae79c08c6d98af4bfb939a1cc604f37395154.
+Receipt: docs/PSCV0_M3_RUNTIME_OWNERSHIP_9B5CC7C7_2026-10-18.md.
+Actual-functional executable ownership, original headers/returned functions,
+prepared helper restoration, complete coverage and forged-body refusals passed.
+All original logical and private runtime definitions were checked by the official
+kernel. This receipt does not establish mutual WF source/backend execution.
 
 ## Current implementation and next work
 
-Both input kinds have separate surface grammars and share the same v7.2 semantic
-pipeline. The qualified paired fixture covers scopes, ordered binder annotations,
-defaults, rich terms/proofs, data/classes/instances/deriving, both mixed-module
-directions, local where/WF, pattern lets/if-let and typed do. The native lambda
-argument child follows Parser.Term.fun maxPrec and argument argPrec; its paired
-m3control observations remain6/8. All selected assurance refusals remain.
+This child activates source mutual WF through the shared PreDefinition owner.
+Both surface grammars produce the same scoped typed blocks; the producer returns
+actual auxiliaries/results, while PreDefinition independently reconstructs exact
+source equations and derives ordinary checked private implementations. The first
+source member owns the shared auxiliary; each member owns its private body.
+Compiler recovery independently validates those bodies before typed erasure.
+Original admissions and assurance graphs remain intact. Header opening is a
+shared dependency leaf, avoiding a producer/runtime import cycle.
 
-Mutual WF construction now owns retained source-call analysis, fixed permutations,
-original measure scopes, dependent packing, per-callee refined callbacks, decrease
-proofs, one shared auxiliary and exact public source equations. PreDefinition
-independently reconstructs each RHS from retained Core, shared with singleton WF.
-No Eq f=f, sidecar or name alone authorizes runtime. Pinned WF/Main, Basic,
-WF/{PackMutual,Rel,Fix,Eqns,Unfold}, ArgsPacker and upstream fixedParams tests were
-studied; notices retained.
+The child selects the independently measured five-declaration PSum extension and
+strict identities below. Existing paired input/backend fixtures now cover a
+three-member polymorphic WF component with reordered dependent parameters and
+a returned function, plus ordinary partial P0 and selected fixedpoint P1.
+General total-only IR admission and combined ordinary runtime admission are both
+exercised. **This activation child is not yet qualified.**
 
 Next:
-1. Main6cdb9a6e completed all five integration gates; latest receipt and both
-   handoffs are updated. Runtime ownership candidate9b5cc7c7 is preparing;
-   inspect its full CI before promotion or source activation.
-2. Implement total mutual WF executable ownership after auditing the whole
-   preparation/RecursorLift/erasure/assurance path. The provisional design is
-   docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md. Derive actual bodies from the
-   checked functional, retain/check ordinary private definitions, and independently
-   validate executable ownership. Do not use partialDecl for total WF.
-3. Activate source dispatch and strict PSum selection only when logical equations,
-   executable ownership and paired .ps/.lean source behavior are coherent. Extend
-   existing meaningful fixtures/backend observers; no extra bootstrap/self-hosting
-   or test proliferation.
-4. Finish the selected native input audit and reconcile all six written M3 exits.
-   Data/elimination, owned strategies, total recursion, P0, P1 and cross-stage cells
-   require actual source/kernel/runtime or intended-refusal evidence. Do not infer
-   full completion from isolated examples or old bounded M2 acceptance.
-5. Qualify the completed compiler/test SHA across Native, M3, F1/F2/F3 with fresh
-   manifests and receipts. M4+C/D and M5+E/C5 remain later roadmap phases.
+1. Inspect the complete activation preparation run. Resolve actual invariant
+   failures coherently; preserve all existing controls, timeouts and budgets.
+2. After preparation passes, integrate its exact compiler/test SHA when main
+   Native is idle; qualify Native, M3 and F1/F2/F3. Both input kinds must actually
+   execute the new exports in existing JS/TS/Rust/GC/component lanes.
+3. Reconcile all six M3 exits against source rules and pinned Lean source/tests.
+   Data/elimination, owned strategies, total recursion, P0, P1 and cross-stage
+   integration need scoped source/kernel/runtime or intended-refusal evidence.
+   M3+B and full selected input parity remain OPEN.
+4. Update both handoffs, roadmap and exit ledger at each completed milestone.
+   M4+C/D and M5+E/C5 remain later phases; bounded M2 acceptance is historical.
 
-## Foundation identity
+## Foundation identity for the activation child
 
-Selected Standard:3752 declarations,44 classes,371 ordinary instances,13 defaults.
-FNV7907908279927868945; snapshot SHA
-855c1945851fc7983481cb271120ab12ceb78537ce6faef61e0b36f87ff99eec;
-surface SHA24e975d8e8d8b61df05bcc78a488a7e9f7465f99972577110876f5f4e39d08d5.
-The new candidate changes no foundation identity. Retain the frozen pre-Order
-authoring boundary. Classical.propDecidable is not an automatic runtime instance.
-Standalone PSum has5 declarations,2 rules,0 assumptions,6779 UTF8 bytes and is
-still UNSELECTED. Activation requires reviewed strict manifest/surface identities.
+Selected Standard:3757declarations,44classes,371ordinary instances,13defaults.
+FNV3071911941504503432; snapshot SHA
+364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1;
+surface SHA9b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214.
+These exact candidate identities were independently measured by successful9b5
+preparation before selection. Main6cdb and preparation9b5 retain the old selected
+3752-declaration identity; do not relabel their evidence. PSum adds5declarations,
+2rules,0assumptions and one reducibility registration, no runtime primitive.
+Keep frozen pre-Order/pre-mutual authoring boundaries. Classical.propDecidable
+is not an automatic runtime instance; approved assumptions remain exactly three.
 
-Update both handoffs, roadmap and exit ledger at every completed milestone slice.
+## Scope and design invariants
 
-## Runtime ownership candidate (qualification pending)
+Canonical v7.2 lines1872–1890 selects function-like mutual blocks (def/function),
+not arbitrary native mutual commands. Native mutual inductive syntax is outside
+that selected source grammar; internal mutual/nested data APIs retain separately
+scoped evidence. Do not expand to unrestricted host Lean.
 
-The new candidate adds ordinary checked private WF bodies derived from the actual
-logical functional, shared helper restoration with P1, and independent executable
-ownership checks. Existing packing validation now covers prepared helper recovery,
-complete projection coverage and same-typed private-body forgery refusal. Source
-mutual WF dispatch and strict PSum selection remain disabled; this is not backend
-execution evidence. Next inspect preparation CI, then activate both source kinds
-and qualify the existing backend lanes. Current main and latest fully qualified five-gate checkpoint are6cdb9a6e. See runtime design note.
-
-Candidate3e226c69 built successfully; preparation39095552319 failed its new
-runtime packing check with expected-type failure. Root cause was overlapping
-common/original header local IDs during ordered substitution. The current child
-uses disjoint fresh fixed IDs above all original headers; validation pending.
-All other retained preparation checks passed. PSum candidate digests are now
-measured independently from a frozen pre-mutual boundary; selected Standard is
-unchanged. Source activation drafts are not published yet.
-
-Scope audit: canonical v7.2 lines1872-1890 selects function-like mutual blocks
-(def/function), not arbitrary native mutual commands. Native mutual inductive
-syntax is intentionally outside that selected source grammar; existing internal
-mutual/nested data and deriving APIs retain their separately scoped evidence.
-Do not expand the language merely to match unrestricted host Lean.
+Pinned WF/Main31–35 rejects zero-varying members. WF/Rel first establishes one
+fixed measure codomain and one dictionary in the fixed scope. Runtime recovery
+uses disjoint fresh common fixed IDs above original raw headers because local
+substitution is ordered. Do not globally change substitution semantics, erase
+original source arity or flatten a returned function into the header.
+Pinned WF/{Main,PackMutual,Rel,Fix,Eqns,Unfold}, Basic, ArgsPacker and fixedParams
+tests are the reference; notices retained. See the runtime design note and
+existing exact-component receipt for the independent equation/runtime boundaries.

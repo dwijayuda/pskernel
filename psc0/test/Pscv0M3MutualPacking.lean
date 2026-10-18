@@ -232,8 +232,10 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
     (psElabWhereWellFoundedComponentBody measured index).mapError psCompilerPscv0ElabError
   let built ← (psMutualWellFoundedBuild environment psMetaEmpty measured.context.localContext
     measured.plan (bodies.map (·.branch))).mapError (fun _ => "source component functional failed")
-  let sourceResult ← (psElabWhereFinishWellFoundedComponent measured bodies built).mapError
+  let construction ← (psElabWhereFinishWellFoundedComponent measured bodies built).mapError
     psCompilerPscv0ElabError
+  let sourceResult ← (psElabPreDefinitionWellFoundedConstruction environment
+    prepared.block.levelNames prepared.block.members construction).mapError psCompilerPscv0ElabError
   if sourceResult.members.length != 3 || sourceResult.batch.declarations.length != 10 then
     throw "source component lost checked public definitions, exact equations or ordinary runtime bodies"
   let logical ← (psAddDeclarationList environment sourceResult.batch.declarations).mapError
@@ -439,10 +441,7 @@ private def checkComponentConstruction (environment : PsEnvironment)
   return declaration :: equations
 
 private def build : Except String (List PsDeclaration) := do
-  let environment := psStandardPSumDeclarations.foldl psEnvironmentInsert
-    psSelfHostProdPreludeEnvironment
-  let environment := psStandardPSumReducibility.foldl
-    (fun env (name, status) => psEnvironmentSetReducibility env name status) environment
+  let environment := psSelfHostProdPreludeEnvironment
   checkCallbackScopes environment
   let sourceComponentDeclarations ← checkRetainedOwners environment
   let fixedScopeDeclarations ← checkFixedScopes environment
@@ -552,7 +551,7 @@ private def build : Except String (List PsDeclaration) := do
   let _ ← (psElabResolvedTerm (psElabContextEmpty environment [u, v])
     sortValue (some sortType)).mapError psCompilerPscv0ElabError
   let sorts := PsDeclaration.definitionDecl (psRootName "packingSorts") [u, v] sortType sortValue
-  return psStandardPSumDeclarations ++ sourceComponentDeclarations ++ fixedScopeDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
+  return sourceComponentDeclarations ++ fixedScopeDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
 
 def main : IO Unit := do
   ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"

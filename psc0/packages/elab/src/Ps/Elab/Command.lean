@@ -2,7 +2,7 @@ import Ps.Elab.Scope
 import Ps.Elab.Deriving
 import Ps.Elab.Mutual
 import Ps.Elab.MutualStructural
-import Ps.Elab.WhereWellFounded
+import Ps.Elab.WhereMutualWellFounded
 import Ps.Elab.PreDefinition
 
 structure PsCommandState where
@@ -198,7 +198,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     (state.scope.levelNames.map psRootName) sectionContext scopedMembers span
   let block := prepared.block
   let result ← psElabPreDefinitionBatch state.environment block
-    (some (psElabWhereWellFounded prepared))
+    (some (psElabWhereWellFoundedComponent prepared))
   if result.members.length != block.members.length then
     throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
   let environment ← psAddDeclarationList state.environment result.batch.declarations

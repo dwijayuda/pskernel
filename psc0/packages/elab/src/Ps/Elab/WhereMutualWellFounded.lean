@@ -1,5 +1,5 @@
 import Ps.Elab.WhereWellFounded
-import Ps.Elab.WellFoundedRuntime
+import Ps.Elab.PreDefinition
 import Ps.Meta.MutualWellFounded
 
 /-!
@@ -279,7 +279,7 @@ def psElabWhereFinishWellFoundedComponent
     (component : PsElabWhereWellFoundedComponent)
     (bodies : List PsElabWhereWellFoundedComponentBody)
     (built : PsMutualWellFoundedValue) :
-    Except PsElabError PsElabPreDefinitionBatchResult := do
+    Except PsElabError PsElabPreDefinitionWellFoundedConstruction := do
   if bodies.length != component.members.length then
     throw (psElabWhereError "WF-COMPONENT" "body construction changed component arity")
   let levels := component.context.levelNames
@@ -339,17 +339,21 @@ def psElabWhereFinishWellFoundedComponent
         (psCloseElabLambdaBinders psMetaEmpty binders checked.term)
       return ({ declaration, equation, metaContext := psMetaEmpty
                 sourceInfo := body.sourceInfo } : PsElabWellFoundedResult)
-  -- The producer cannot authorize its own retained source RHS. The same
-  -- identity/closure/exact-equation owner used by singleton WF checks every
-  -- member, with all genuine public definitions available to kernel inference.
-  let result ← psElabPreDefinitionWellFoundedResults environment levels
-    (component.members.map (·.source)) results
-  let logical ← psAddDeclarationList environment result.batch.declarations
-  let implementations ← psElabWellFoundedRuntimeBodies logical auxiliaryName
-    (component.members.map fun member => member.source.name)
-  let _ ← psAddDeclarationList logical implementations
-  return { result with
-    batch := { result.batch with
-      declarations := auxiliary :: (result.batch.declarations ++ implementations) }
-    members := (result.members.zip implementations).map fun (member, implementation) =>
-      { member with declarations := member.declarations ++ [implementation] } }
+  return { auxiliaries := [auxiliary], results }
+
+-- Both surface grammars arrive here through the same scoped typed block.
+-- Original measure scopes and independent source-equation checks are shared
+-- with singleton WF; component construction changes only the packing owner.
+def psElabWhereWellFoundedComponent (prepared : PsElabWherePrepared)
+    (environment : PsEnvironment) (levels : List PsName)
+    (members : List PsElabPreDefinition) :
+    Except PsElabError PsElabPreDefinitionWellFoundedConstruction := do
+  if let [member] := members then
+    let result ← psElabWhereWellFounded prepared environment levels member
+    return { results := [result] }
+  let component ← psElabWherePrepareWellFoundedComponent prepared environment levels members
+  let bodies ← (List.range members.length).mapM
+    (psElabWhereWellFoundedComponentBody component)
+  let built ← (psMutualWellFoundedBuild environment psMetaEmpty component.context.localContext
+    component.plan (bodies.map (·.branch))).mapError PsElabError.infer
+  psElabWhereFinishWellFoundedComponent component bodies built

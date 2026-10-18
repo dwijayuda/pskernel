@@ -229,8 +229,10 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- run 39069995046, commit 0093a0ae; frozen pre-Order export boundary retained.
 -- Nonempty bridge native priority/signature and strict digest observed at
 -- abfc20d3 / preparation39079996655; exact original guards retained.
+-- Exact PSum selected candidate independently measured in successful
+-- preparation39095995956 at9b5cc7c7, with all original strict guards intact.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:24e975d8e8d8b61df05bcc78a488a7e9f7465f99972577110876f5f4e39d08d5"
+  "sha256:9b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

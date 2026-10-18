@@ -306,6 +306,7 @@ lean_lib PsElab where
     `Ps.Elab.Mutual,
     `Ps.Elab.MutualStructural,
     `Ps.Elab.PreDefinition.Basic,
+    `Ps.Elab.PreDefinition.Header,
     `Ps.Elab.PreDefinition,
     `Ps.Elab.RecursorEquation,
     `Ps.Elab.WhereScope,

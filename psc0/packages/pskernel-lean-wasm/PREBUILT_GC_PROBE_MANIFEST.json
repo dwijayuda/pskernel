@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "packageName": "@proofscript/pskernel-lean-wasm",
+  "status": "gc-backend-probe-only",
+  "isProofKernel": false,
+  "acceptsCanonicalAdmissions": false,
+  "sourceLanguage": "pscv0-v7.2",
+  "leanVersion": "4.35.0",
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "gcMemoryModel": "wasm-gc; no linear-memory import or export",
+  "sourceSha256": "f9772ae265d7851cb91fc115996d491b6211ec2816eb964d13a4c64af4cb806a",
+  "compilerEvidence": "PSC0 checked Core through the official Lean kernel, ordinary-checked",
+  "assets": {
+    "gc-probe.core.wasm": {
+      "path": "wasm/gc-probe.core.wasm",
+      "bytes": 3789,
+      "sha256": "d8fa866323415c019db88090d8ce71e195a436be9c2aa5c091c3a8429133ddbe"
+    },
+    "gc-probe.core.wat": {
+      "path": "wasm/gc-probe.core.wat",
+      "bytes": 11007,
+      "sha256": "5f1f223e2c3d852fe6adc6313c19c8622c3bcaaf0faa3e6cd018091e0269da4c"
+    },
+    "gc-probe.origins.json": {
+      "path": "wasm/gc-probe.origins.json",
+      "bytes": 2567,
+      "sha256": "9645fe47ef34efe4ea05d94f40f014cb90ba66203afbda24b33fc4b469941421"
+    }
+  }
+}

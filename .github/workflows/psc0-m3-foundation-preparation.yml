@@ -4,6 +4,7 @@ on:
   push:
     branches: [psc0/m3-fixedpoint-foundation-20261018]
     paths:
+      - 'psc0/lakefile.lean'
       - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
       - 'psc0/host/src/**'

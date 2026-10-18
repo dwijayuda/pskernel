@@ -1,0 +1,45 @@
+name: PSKernel-C0 computed MVar field native Lean 4.35 source qualification
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-pointer-structural-hash-bucket-20261018]
+    paths:
+      - '.github/workflows/pskernel-c0-arena193-computed-mvar-native.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Level.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Expr.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ComputedMVarFlagRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Compile exact pinned native C0 source and dependent MVar field proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0ComputedMVarFlagRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0InferenceCacheDAGEligibilityRegression.lean
+          lake env lean --run test/C0NativeHashBucketHintRegression.lean
+          echo 'C0_COMPUTED_MVAR_NATIVE source_theorem=Lean_proved original_metadata_safety=preserved native_checker_build=pass'
+      - name: Audit source-only computed-field boundary and no permission changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          rg -n 'psKernelC0MVarFlag_source|psKernelC0NodeFlagAdmission_source|computed_field|psKernelExprHasMVar' psc0/packages/pskernel-c0/src/Ps/KernelCore/{Core,Admission}/ | head -n 60
+          echo 'C0_COMPUTED_MVAR_TRUST_SCOPE native_compiler_computed_field_is_extra_assumption=true no_axioms_or_fuel_added=true pure_equation_checked=true'

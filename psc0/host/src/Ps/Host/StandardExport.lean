@@ -1260,6 +1260,8 @@ def exportPartialFixpointCandidate (output : System.FilePath) : IO Unit := do
     `Lean.Order.FlatOrder, `Lean.Order.FlatOrder.instOrder,
     `Lean.Order.FlatOrder.instCCPO, `Lean.Order.instCCPOUnit,
     `Lean.Order.instPartialOrderOption, `Lean.Order.instCCPOOption,
+    `Lean.Order.MonoBind, `Lean.Order.monotone_bind,
+    `Lean.Order.instMonoBindOption,
     `Lean.Order.instCCPOPProd,
     `Lean.Order.monotone_const, `Lean.Order.monotone_id,
     `Lean.Order.monotone_compose, `Lean.Order.monotone_of_monotone_apply,

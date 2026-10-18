@@ -988,20 +988,22 @@ decreasing_by
   exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt (Nat.succ k) t) h)
     (Nat.lt_succ_self (Nat.succ k))
 
-def wfBoundaryUserRecursor (n : Nat) (impossible : False) : Nat :=
+def wfBoundaryUserRecursor (n : Nat) (impossible : n = n → False) : Nat :=
   Nat.rec (motive := fun (_ : Nat) => Nat) 0
-    (fun (k : Nat) (ih : Nat) => wfBoundaryUserRecursor k impossible) n
+    (fun (k : Nat) (ih : Nat) =>
+      wfBoundaryUserRecursor k (fun (_ : k = k) => impossible (Eq.refl n))) n
 termination_by n
 decreasing_by
-  have original : Nat.lt k n := False.elim impossible
+  have original : Nat.lt k n := False.elim (impossible (Eq.refl n))
   exact original
 
-def wfBoundaryCatchAll (n : Nat) (impossible : False) : Nat :=
+def wfBoundaryCatchAll (n : Nat) (impossible : n = n → False) : Nat :=
   match n with
-  | x => wfBoundaryCatchAll x impossible
+  | x => wfBoundaryCatchAll (Nat.succ x)
+      (fun (_ : Nat.succ x = Nat.succ x) => impossible (Eq.refl n))
 termination_by n
 decreasing_by
-  have original : Nat.lt n n := False.elim impossible
+  have original : Nat.lt (Nat.succ n) n := False.elim (impossible (Eq.refl n))
   exact original
 
 def m3wfboundaries (flag : Bool) : UInt64 :=
@@ -1054,6 +1056,28 @@ run_cmd do
     termination_by n
     decreasing_by
       exact Nat.lt_succ_self _)
+  expectNativeWfBoundaryRefusal command
+
+run_cmd do
+  let command ← `(command|
+    def wfBoundaryUserRecursorCleanupRefusal (n : Nat) (impossible : False) : Nat :=
+      Nat.rec (motive := fun (_ : Nat) => Nat) 0
+        (fun (k : Nat) (ih : Nat) => wfBoundaryUserRecursorCleanupRefusal k impossible) n
+    termination_by n
+    decreasing_by
+      have original : Nat.lt k n := False.elim impossible
+      exact original)
+  expectNativeWfBoundaryRefusal command
+
+run_cmd do
+  let command ← `(command|
+    def wfBoundaryCatchAllFixedRefusal (n : Nat) (impossible : False) : Nat :=
+      match n with
+      | x => wfBoundaryCatchAllFixedRefusal x impossible
+    termination_by n
+    decreasing_by
+      have original : Nat.lt n n := False.elim impossible
+      exact original)
   expectNativeWfBoundaryRefusal command
 
 
@@ -1134,8 +1158,7 @@ run_cmd do
   match environment.find? ``registeredProofAbbrev with
   | some (.defnInfo _) => pure ()
   | _ => throwError "registered predicate abbrev changed its native kind"
-  unless (Lean.getReducibilityStatusCore environment ``registeredProofAbbrev).toAttrString ==
-      "reducible" do
+  unless (Lean.getReducibilityStatusCore environment ``registeredProofAbbrev) == .reducible do
     throwError "registered predicate abbrev lost native reducibility"
   for name in [``registeredProofInstance, ``registeredProofDefault] do
     match environment.find? name with
@@ -1152,6 +1175,96 @@ run_cmd do
   unless defaults.filter (fun entry => entry.1 == ``registeredProofDefault) ==
       [(``registeredProofDefault, 200)] do
     throwError "registered proof default-instance metadata changed"
+
+universe indexedU
+
+inductive IndexedPayload (A : Type indexedU) : Nat → Type indexedU where
+  | left (index : Nat) (value : A) : IndexedPayload A index
+  | right (index : Nat) (value : A) : IndexedPayload A index
+  | next (index : Nat) (value : A) (child : IndexedPayload A index) :
+      IndexedPayload A (Nat.succ index)
+  deriving BEq, DecidableEq
+
+def indexedOriginal : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 true (IndexedPayload.left 0 false)
+def indexedFieldChanged : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 false (IndexedPayload.left 0 false)
+def indexedChildChanged : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 true (IndexedPayload.left 0 true)
+def indexedCtorChanged : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 true (IndexedPayload.right 0 false)
+def indexedMajorChanged : IndexedPayload Bool 1 := IndexedPayload.right 1 true
+
+theorem indexedBEqSame : (indexedOriginal == indexedOriginal) = true := by rfl
+theorem indexedBEqField : (indexedOriginal == indexedFieldChanged) = false := by rfl
+theorem indexedBEqChild : (indexedOriginal == indexedChildChanged) = false := by rfl
+theorem indexedBEqCtor : (indexedOriginal == indexedCtorChanged) = false := by rfl
+theorem indexedBEqMajor : (indexedOriginal == indexedMajorChanged) = false := by rfl
+theorem indexedDecEqSame :
+    Decidable.decide (self := decEq indexedOriginal indexedOriginal) = true := by rfl
+theorem indexedDecEqField :
+    Decidable.decide (self := decEq indexedOriginal indexedFieldChanged) = false := by rfl
+theorem indexedDecEqChild :
+    Decidable.decide (self := decEq indexedOriginal indexedChildChanged) = false := by rfl
+theorem indexedDecEqCtor :
+    Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) = false := by rfl
+theorem indexedDecEqMajor :
+    Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) = false := by rfl
+
+inductive IndexedAtom where
+  | atom (value : Bool)
+instance indexedAtomBEq : BEq IndexedAtom where
+  beq (_left : IndexedAtom) (_right : IndexedAtom) : Bool := false
+theorem indexedBEqUsesActualDictionary :
+    (IndexedPayload.left 0 (IndexedAtom.atom true) ==
+      IndexedPayload.left 0 (IndexedAtom.atom true)) = false := by rfl
+
+inductive IndexedErasedDependency : Nat → Type where
+  | intro (value : Nat) :
+      IndexedErasedDependency ((fun (_ : Nat) => 0) value)
+  deriving BEq, DecidableEq
+theorem indexedBetaFieldBEq :
+    (IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2) = false := by rfl
+theorem indexedBetaFieldDecEq :
+    Decidable.decide (self := decEq (IndexedErasedDependency.intro 1)
+      (IndexedErasedDependency.intro 2)) = false := by rfl
+
+inductive IndexedDependent : Nat → Type where
+  | wrap (index : Nat) (child : IndexedPayload Bool index) : IndexedDependent 0
+  deriving DecidableEq
+theorem indexedDependentSame :
+    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)
+      (IndexedDependent.wrap 1 indexedOriginal)) = true := by rfl
+theorem indexedDependentChild :
+    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)
+      (IndexedDependent.wrap 1 indexedChildChanged)) = false := by rfl
+theorem indexedDependentIndex :
+    Decidable.decide (self := decEq
+      (IndexedDependent.wrap 0 (IndexedPayload.left 0 true))
+      (IndexedDependent.wrap 1 indexedOriginal)) = false := by rfl
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for (name, parameters, indices) in [
+      (``M3InputParityOracle.IndexedPayload, 1, 1),
+      (``M3InputParityOracle.IndexedErasedDependency, 0, 1),
+      (``M3InputParityOracle.IndexedDependent, 0, 1)] do
+    let some (.inductInfo info) := environment.find? name
+      | throwError "indexed deriving witness is not an inductive: {name}"
+    unless info.numParams == parameters && info.numIndices == indices do
+      throwError "indexed deriving witness changed its parameter/index telescope: {name}"
+
+/-- error: failed to synthesize -/
+#guard_msgs (error, drop warning, substring := true) in
+inductive IndexedMissingBEq : Nat → Type where
+  | intro (index : Nat) (value : Nat → Nat) : IndexedMissingBEq index
+  deriving BEq
+
+/-- error: failed to synthesize -/
+#guard_msgs (error, drop warning, substring := true) in
+inductive IndexedMissingDecEq : Nat → Type where
+  | intro (index : Nat) (value : Nat → Nat) : IndexedMissingDecEq index
+  deriving DecidableEq
 
 end M3InputParityOracle
 
@@ -1380,6 +1493,12 @@ private def registeredProofDefaultLeanSource : String :=
 private def registeredProofDefaultPsSource : String :=
   "inductive DefaultPredicate: Prop where {\n  | base\n  | step(children: Nat -> DefaultPredicate)\n}\nclass DefaultPredicateWitness(proof: DefaultPredicate): Prop where {\n  value: True\n}\n@[default_instance 200]\ninstance registeredProofDefault(proof: DefaultPredicate): DefaultPredicateWitness(proof) where {\n  value := match hp: proof with {\n    | .base => True.intro\n    | .step children => match hc: children(1) with {\n      | .base => True.intro\n      | .step grandchildren => @DefaultPredicateWitness.value(grandchildren(1), registeredProofDefault(grandchildren(1)))\n    }\n  }\n}\n"
 
+private def indexedDerivingLeanSource : String :=
+  "universe indexedU\n\ninductive IndexedPayload (A : Type indexedU) : Nat → Type indexedU where\n  | left (index : Nat) (value : A) : IndexedPayload A index\n  | right (index : Nat) (value : A) : IndexedPayload A index\n  | next (index : Nat) (value : A) (child : IndexedPayload A index) :\n      IndexedPayload A (Nat.succ index)\n  deriving BEq, DecidableEq\n\ndef indexedOriginal : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.left 0 false)\ndef indexedFieldChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 false (IndexedPayload.left 0 false)\ndef indexedChildChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.left 0 true)\ndef indexedCtorChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.right 0 false)\ndef indexedMajorChanged : IndexedPayload Bool 1 := IndexedPayload.right 1 true\n\ntheorem indexedBEqSame : (indexedOriginal == indexedOriginal) = true := by rfl\ntheorem indexedBEqField : (indexedOriginal == indexedFieldChanged) = false := by rfl\ntheorem indexedBEqChild : (indexedOriginal == indexedChildChanged) = false := by rfl\ntheorem indexedBEqCtor : (indexedOriginal == indexedCtorChanged) = false := by rfl\ntheorem indexedBEqMajor : (indexedOriginal == indexedMajorChanged) = false := by rfl\ntheorem indexedDecEqSame :\n    Decidable.decide (self := decEq indexedOriginal indexedOriginal) = true := by rfl\ntheorem indexedDecEqField :\n    Decidable.decide (self := decEq indexedOriginal indexedFieldChanged) = false := by rfl\ntheorem indexedDecEqChild :\n    Decidable.decide (self := decEq indexedOriginal indexedChildChanged) = false := by rfl\ntheorem indexedDecEqCtor :\n    Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) = false := by rfl\ntheorem indexedDecEqMajor :\n    Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) = false := by rfl\n\ninductive IndexedAtom where\n  | atom (value : Bool)\ninstance indexedAtomBEq : BEq IndexedAtom where\n  beq (_left : IndexedAtom) (_right : IndexedAtom) : Bool := false\ntheorem indexedBEqUsesActualDictionary :\n    (IndexedPayload.left 0 (IndexedAtom.atom true) ==\n      IndexedPayload.left 0 (IndexedAtom.atom true)) = false := by rfl\n\ninductive IndexedErasedDependency : Nat → Type where\n  | intro (value : Nat) :\n      IndexedErasedDependency ((fun (_ : Nat) => 0) value)\n  deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq :\n    (IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2) = false := by rfl\ntheorem indexedBetaFieldDecEq :\n    Decidable.decide (self := decEq (IndexedErasedDependency.intro 1)\n      (IndexedErasedDependency.intro 2)) = false := by rfl\n\ninductive IndexedDependent : Nat → Type where\n  | wrap (index : Nat) (child : IndexedPayload Bool index) : IndexedDependent 0\n  deriving DecidableEq\ntheorem indexedDependentSame :\n    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)\n      (IndexedDependent.wrap 1 indexedOriginal)) = true := by rfl\ntheorem indexedDependentChild :\n    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)\n      (IndexedDependent.wrap 1 indexedChildChanged)) = false := by rfl\ntheorem indexedDependentIndex :\n    Decidable.decide (self := decEq\n      (IndexedDependent.wrap 0 (IndexedPayload.left 0 true))\n      (IndexedDependent.wrap 1 indexedOriginal)) = false := by rfl\n"
+
+private def indexedDerivingPsSource : String :=
+  "universe indexedU\n\ninductive IndexedPayload(A: Type indexedU): Nat -> Type indexedU where {\n  | left(index: Nat, value: A): IndexedPayload(A, index)\n  | right(index: Nat, value: A): IndexedPayload(A, index)\n  | next(index: Nat, value: A, child: IndexedPayload(A, index)):\n      IndexedPayload(A, Nat.succ(index))\n} deriving BEq, DecidableEq\n\nconst indexedOriginal: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, false))\nconst indexedFieldChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, false, IndexedPayload.left(0, false))\nconst indexedChildChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, true))\nconst indexedCtorChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.right(0, false))\nconst indexedMajorChanged: IndexedPayload(Bool, 1) := IndexedPayload.right(1, true)\n\ntheorem indexedBEqSame: (indexedOriginal == indexedOriginal) = true := by { rfl }\ntheorem indexedBEqField: (indexedOriginal == indexedFieldChanged) = false := by { rfl }\ntheorem indexedBEqChild: (indexedOriginal == indexedChildChanged) = false := by { rfl }\ntheorem indexedBEqCtor: (indexedOriginal == indexedCtorChanged) = false := by { rfl }\ntheorem indexedBEqMajor: (indexedOriginal == indexedMajorChanged) = false := by { rfl }\ntheorem indexedDecEqSame:\n  Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) = true := by { rfl }\ntheorem indexedDecEqField:\n  Decidable.decide(self := decEq(indexedOriginal, indexedFieldChanged)) = false := by { rfl }\ntheorem indexedDecEqChild:\n  Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) = false := by { rfl }\ntheorem indexedDecEqCtor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) = false := by { rfl }\ntheorem indexedDecEqMajor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) = false := by { rfl }\n\ninductive IndexedAtom where { | atom(value: Bool) }\ninstance indexedAtomBEq: BEq IndexedAtom where {\n  beq(_left: IndexedAtom, _right: IndexedAtom): Bool := false\n}\ntheorem indexedBEqUsesActualDictionary:\n  (IndexedPayload.left(0, IndexedAtom.atom(true)) ==\n    IndexedPayload.left(0, IndexedAtom.atom(true))) = false := by { rfl }\n\ninductive IndexedErasedDependency: Nat -> Type where {\n  | intro(value: Nat): IndexedErasedDependency((fun (_: Nat) => 0)(value))\n} deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq:\n  (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) = false := by { rfl }\ntheorem indexedBetaFieldDecEq:\n  Decidable.decide(self := decEq(IndexedErasedDependency.intro(1),\n    IndexedErasedDependency.intro(2))) = false := by { rfl }\n\ninductive IndexedDependent: Nat -> Type where {\n  | wrap(index: Nat, child: IndexedPayload(Bool, index)): IndexedDependent(0)\n} deriving DecidableEq\ntheorem indexedDependentSame:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedOriginal))) = true := by { rfl }\ntheorem indexedDependentChild:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedChildChanged))) = false := by { rfl }\ntheorem indexedDependentIndex:\n  Decidable.decide(self := decEq(\n    IndexedDependent.wrap(0, IndexedPayload.left(0, true)),\n    IndexedDependent.wrap(1, indexedOriginal))) = false := by { rfl }\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -1423,10 +1542,10 @@ private def recursorMotiveTypeFailure : PsElabError → Bool
   | _ => false
 
 private def wfBoundaryLeanSource : String :=
-  "structure WfBoundaryBox (n : Nat) where\n  value : Nat\n\ndef wfBoundaryMeasure (n : Nat) (p : WfBoundaryBox n) : Nat :=\n  WfBoundaryBox.value p\n\ndef wfBoundaryPair (n : Nat) (p : WfBoundaryBox n) : Nat :=\n  match n, p with\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ (wfBoundaryPair k (WfBoundaryBox.mk v))\ntermination_by wfBoundaryMeasure n p\ndecreasing_by\n  exact Nat.lt_succ_self v\n\ndef wfBoundaryGeneralized (n : Nat) (p : WfBoundaryBox n) : Nat :=\n  match n with\n  | 0 => 0\n  | Nat.succ k =>\n    match p with\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ (wfBoundaryGeneralized k (WfBoundaryBox.mk v))\ntermination_by wfBoundaryMeasure n p\ndecreasing_by\n  exact Nat.lt_succ_self v\n\ndef wfBoundaryComputed (n : Nat) : Nat :=\n  match h : Nat.succ n with\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ (wfBoundaryComputed k)\ntermination_by Nat.succ n\ndecreasing_by\n  exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt (Nat.succ k) t) h)\n    (Nat.lt_succ_self (Nat.succ k))\n\ndef wfBoundaryUserRecursor (n : Nat) (impossible : False) : Nat :=\n  Nat.rec (motive := fun (_ : Nat) => Nat) 0\n    (fun (k : Nat) (ih : Nat) => wfBoundaryUserRecursor k impossible) n\ntermination_by n\ndecreasing_by\n  have original : Nat.lt k n := False.elim impossible\n  exact original\n\ndef wfBoundaryCatchAll (n : Nat) (impossible : False) : Nat :=\n  match n with\n  | x => wfBoundaryCatchAll x impossible\ntermination_by n\ndecreasing_by\n  have original : Nat.lt n n := False.elim impossible\n  exact original\n\ndef m3wfboundaries (flag : Bool) : UInt64 :=\n  let n : Nat := if flag then 4 else 2\n  UInt64.ofNat (wfBoundaryPair n (WfBoundaryBox.mk 5) +\n    10 * wfBoundaryGeneralized n (WfBoundaryBox.mk 3) +\n    100 * wfBoundaryComputed n)\n"
+  "structure WfBoundaryBox (n : Nat) where\n  value : Nat\n\ndef wfBoundaryMeasure (n : Nat) (p : WfBoundaryBox n) : Nat :=\n  WfBoundaryBox.value p\n\ndef wfBoundaryPair (n : Nat) (p : WfBoundaryBox n) : Nat :=\n  match n, p with\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ (wfBoundaryPair k (WfBoundaryBox.mk v))\ntermination_by wfBoundaryMeasure n p\ndecreasing_by\n  exact Nat.lt_succ_self v\n\ndef wfBoundaryGeneralized (n : Nat) (p : WfBoundaryBox n) : Nat :=\n  match n with\n  | 0 => 0\n  | Nat.succ k =>\n    match p with\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ (wfBoundaryGeneralized k (WfBoundaryBox.mk v))\ntermination_by wfBoundaryMeasure n p\ndecreasing_by\n  exact Nat.lt_succ_self v\n\ndef wfBoundaryComputed (n : Nat) : Nat :=\n  match h : Nat.succ n with\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ (wfBoundaryComputed k)\ntermination_by Nat.succ n\ndecreasing_by\n  exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt (Nat.succ k) t) h)\n    (Nat.lt_succ_self (Nat.succ k))\n\ndef wfBoundaryUserRecursor (n : Nat) (impossible : n = n → False) : Nat :=\n  Nat.rec (motive := fun (_ : Nat) => Nat) 0\n    (fun (k : Nat) (ih : Nat) =>\n      wfBoundaryUserRecursor k (fun (_ : k = k) => impossible (Eq.refl n))) n\ntermination_by n\ndecreasing_by\n  have original : Nat.lt k n := False.elim (impossible (Eq.refl n))\n  exact original\n\ndef wfBoundaryCatchAll (n : Nat) (impossible : n = n → False) : Nat :=\n  match n with\n  | x => wfBoundaryCatchAll (Nat.succ x)\n      (fun (_ : Nat.succ x = Nat.succ x) => impossible (Eq.refl n))\ntermination_by n\ndecreasing_by\n  have original : Nat.lt (Nat.succ n) n := False.elim (impossible (Eq.refl n))\n  exact original\n\ndef m3wfboundaries (flag : Bool) : UInt64 :=\n  let n : Nat := if flag then 4 else 2\n  UInt64.ofNat (wfBoundaryPair n (WfBoundaryBox.mk 5) +\n    10 * wfBoundaryGeneralized n (WfBoundaryBox.mk 3) +\n    100 * wfBoundaryComputed n)\n"
 
 private def wfBoundaryPsSource : String :=
-  "structure WfBoundaryBox(n: Nat) where {\n  value: Nat\n}\n\nfunction wfBoundaryMeasure(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  WfBoundaryBox.value(p)\n\nfunction wfBoundaryPair(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n, p with {\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ(wfBoundaryPair(k, WfBoundaryBox.mk(v)))\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryGeneralized(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n with {\n  | 0 => 0\n  | Nat.succ k =>\n    match p with {\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ(wfBoundaryGeneralized(k, WfBoundaryBox.mk(v)))\n    }\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryComputed(n: Nat): Nat :=\n  match h: Nat.succ(n) with {\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ(wfBoundaryComputed(k))\n  }\ntermination_by Nat.succ(n)\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(Nat.succ(k), t), h),\n    Nat.lt_succ_self(Nat.succ(k)))\n}\n\nfunction wfBoundaryUserRecursor(n: Nat, impossible: False): Nat :=\n  Nat.rec(0, fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursor(k, impossible), n,\n    motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible)\n  exact original\n}\n\nfunction wfBoundaryCatchAll(n: Nat, impossible: False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAll(x, impossible)\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(n, n) := False.elim(impossible)\n  exact original\n}\n\nfunction m3wfboundaries(flag: Bool): UInt64 :=\n  let n: Nat := if (flag) { 4 } else { 2 }\n  UInt64.ofNat(wfBoundaryPair(n, WfBoundaryBox.mk(5)) +\n    10 * wfBoundaryGeneralized(n, WfBoundaryBox.mk(3)) +\n    100 * wfBoundaryComputed(n))\n"
+  "structure WfBoundaryBox(n: Nat) where {\n  value: Nat\n}\n\nfunction wfBoundaryMeasure(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  WfBoundaryBox.value(p)\n\nfunction wfBoundaryPair(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n, p with {\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ(wfBoundaryPair(k, WfBoundaryBox.mk(v)))\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryGeneralized(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n with {\n  | 0 => 0\n  | Nat.succ k =>\n    match p with {\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ(wfBoundaryGeneralized(k, WfBoundaryBox.mk(v)))\n    }\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryComputed(n: Nat): Nat :=\n  match h: Nat.succ(n) with {\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ(wfBoundaryComputed(k))\n  }\ntermination_by Nat.succ(n)\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(Nat.succ(k), t), h),\n    Nat.lt_succ_self(Nat.succ(k)))\n}\n\nfunction wfBoundaryUserRecursor(n: Nat, impossible: n = n -> False): Nat :=\n  Nat.rec(0,\n    fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursor(k,\n      fun (_: k = k) => impossible(Eq.refl(n))),\n    n, motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction wfBoundaryCatchAll(n: Nat, impossible: n = n -> False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAll(Nat.succ(x),\n      fun (_: Nat.succ(x) = Nat.succ(x)) => impossible(Eq.refl(n)))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(Nat.succ(n), n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction m3wfboundaries(flag: Bool): UInt64 :=\n  let n: Nat := if (flag) { 4 } else { 2 }\n  UInt64.ofNat(wfBoundaryPair(n, WfBoundaryBox.mk(5)) +\n    10 * wfBoundaryGeneralized(n, WfBoundaryBox.mk(3)) +\n    100 * wfBoundaryComputed(n))\n"
 
 private def wfBoundaryDecreaseFailure : PsElabError → Bool
   | .atDeclaration _ cause => wfBoundaryDecreaseFailure cause
@@ -1453,6 +1572,12 @@ private def impossibleInstanceFailure : PsElabError → Bool
   | .atContext _ cause => impossibleInstanceFailure cause
   | .data message =>
     message == "instance has an argument that cannot be inferred from its result or instance premises"
+  | _ => false
+
+private def indexedDerivingDictionaryFailure : PsElabError → Bool
+  | .atDeclaration _ cause => indexedDerivingDictionaryFailure cause
+  | .atContext _ cause => indexedDerivingDictionaryFailure cause
+  | .data message => message == "deriving field has no checked instance"
   | _ => false
 
 private def checkIndependentSourcePair (label leanText psText : String) : IO Unit := do
@@ -1545,6 +1670,24 @@ def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
   checkCoreBoundaryControls
+  checkIndependentSourcePair "indexed binary deriving"
+    indexedDerivingLeanSource indexedDerivingPsSource
+  for (label, leanText, psText) in [
+      ("indexed BEq dictionary",
+        "inductive IndexedMissingBEq : Nat → Type where\n  | intro (index : Nat) (value : Nat → Nat) : IndexedMissingBEq index\n  deriving BEq\n",
+        "inductive IndexedMissingBEq: Nat -> Type where { | intro(index: Nat, value: Nat -> Nat): IndexedMissingBEq(index) } deriving BEq\n"),
+      ("indexed DecidableEq dictionary",
+        "inductive IndexedMissingDecEq : Nat → Type where\n  | intro (index : Nat) (value : Nat → Nat) : IndexedMissingDecEq index\n  deriving DecidableEq\n",
+        "inductive IndexedMissingDecEq: Nat -> Type where { | intro(index: Nat, value: Nat -> Nat): IndexedMissingDecEq(index) } deriving DecidableEq\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerElaboratePscv0 program with
+      | .error (.elaboration cause) =>
+        ensure (indexedDerivingDictionaryFailure cause)
+          (label ++ " refused at the wrong owner: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " escaped elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " fabricated a field dictionary"))
   checkIndependentSourcePair "impossible instance family prefix"
     "class UnindexedRegistration where\n  value : Nat\n" "class UnindexedRegistration where {\n  value: Nat\n}\n"
   for (label, leanText, psText) in [

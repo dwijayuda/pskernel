@@ -519,18 +519,16 @@ def psElabWellFoundedCoreHasCalls (calls : List PsElabWellFoundedCoreCall)
     (term : PsExpr) : Bool :=
   calls.any fun call => (psExprFVarIds term).contains call.sourceId
 
--- Reduce the checked row-closure applications without discarding real lexical
--- lets. The latter retain source pattern/equation names for decreasing_by.
-def psElabWellFoundedCoreBeta (fuel : Nat) (term : PsExpr) : PsExpr :=
-  match fuel with
-  | 0 => term
-  | fuel + 1 =>
-    let view := psExprAppView term
-    match view.head, view.args with
-    | .lam _ _ body _, argument :: rest =>
-      psElabWellFoundedCoreBeta fuel
-        (psExprApplyMany (psExprInstantiate1 body argument) rest)
-    | _, _ => term
+-- Instantiate only the actual arguments of an authenticated Core owner.
+-- Stop at the owned prefix: a user lambda application in the resulting RHS
+-- retains its lexical scope during fixed analysis and decrease-goal creation.
+def psElabWellFoundedCoreApplyOwnedPrefix (value : PsExpr) : List PsExpr → PsExpr
+  | [] => value
+  | argument :: rest =>
+    let next := match value with
+      | .lam _ _ body _ => psExprInstantiate1 body argument
+      | _ => PsExpr.app value argument
+    psElabWellFoundedCoreApplyOwnedPrefix next rest
 
 def psElabWellFoundedCoreClose (outer inner : PsElabContext)
     (bindersRev : List PsElabTypedBinder) (body type : PsExpr) :
@@ -649,8 +647,7 @@ def psElabWellFoundedCorePrepareSource (context : PsElabContext)
   let callbacks := psElabBinderArguments callbackBinders
   let proofs ← psElabOpenCoreTelescope 4096 callbackContext majors.body (some proofCount)
   let proofArguments := psElabBinderArguments proofs.bindersRev
-  let body := psElabWellFoundedCoreBeta 4096
-    (psExprApplyMany value (majorArguments ++ proofArguments))
+  let body := psElabWellFoundedCoreApplyOwnedPrefix value (majorArguments ++ proofArguments)
   let body ← psElabResolvedTerm proofs.context body (some proofs.body)
   let bindersRev := proofs.bindersRev ++ callbackBinders ++ majors.bindersRev
   let domain := psCloseElabForallBinders body.context.metaContext bindersRev body.type
@@ -766,8 +763,8 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
       auxiliaryLocalIds := callbackIds ++ opened.context.auxiliaryLocalIds }
     let some minor := view.fixedArgs[view.info.numParams + view.info.numMotives + index]?
       | throw .matchRecursorUnsupported
-    let body := psElabWellFoundedCoreBeta 4096
-      (psExprApplyMany minor (arguments.take (count + resultCount)))
+    let body := psElabWellFoundedCoreApplyOwnedPrefix minor
+      (arguments.take (count + resultCount))
     let checked ← psElabResolvedTerm inner body (some opened.body)
     for (call, callback) in calls.zip callbacks do
       let originalType ← (psInferType checked.context.environment checked.context.metaContext
@@ -925,7 +922,7 @@ def psElabWellFoundedCoreRewriteRow (rewrite : PsElabWellFoundedCoreRewriter)
     let some locals := psLocalAddNameAlias current.localContext name id
       | throw (.data "PSCV0-WF-ROW: source alias target is absent")
     current := { current with localContext := locals }
-  let generic := psElabWellFoundedCoreBeta 4096 (psExprApplyMany value rowArguments)
+  let generic := psElabWellFoundedCoreApplyOwnedPrefix value rowArguments
   let generic ← psElabResolvedTerm current generic (some opened.body)
   let bindersRev := callbacksRev ++ opened.bindersRev
   let domain := psCloseElabForallBinders generic.context.metaContext bindersRev generic.type
@@ -1051,8 +1048,7 @@ def psElabWellFoundedCoreRewrite (fuel : Nat) (preparing : Bool)
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    let term := psElabWellFoundedCoreBeta 4096
-      (psMetaInstantiate context.metaContext source)
+    let term := psMetaInstantiate context.metaContext source
     if !psElabWellFoundedCoreHasCalls calls term then
       return (← psElabResolvedTerm context term none, false)
     let rewrite := psElabWellFoundedCoreRewrite fuel
@@ -1071,7 +1067,7 @@ def psElabWellFoundedCoreRewrite (fuel : Nat) (preparing : Bool)
         let arguments ← psElabWellFoundedCoreBoundaryArguments context body
         let (argumentContext, arguments, _) ←
           psElabWellFoundedCoreRewriteArguments rewrite preparing context calls none arguments
-        let original := psExprApplyMany value arguments
+        let original := psElabWellFoundedCoreApplyOwnedPrefix value arguments
         match boundary.kind with
         | .source flags proofCount =>
           if let some (plan, prepared) ← psElabWellFoundedCoreTrySource rewrite

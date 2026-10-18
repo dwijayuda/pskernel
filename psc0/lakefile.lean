@@ -302,6 +302,7 @@ lean_lib PsElab where
     `Ps.Elab.Declaration,
     `Ps.Elab.Class,
     `Ps.Elab.DerivingContext,
+    `Ps.Elab.DerivingIndexed,
     `Ps.Elab.DerivingInhabited,
     `Ps.Elab.DerivingHashable, `Ps.Elab.DerivingBEq,
     `Ps.Elab.DerivingDecEq,

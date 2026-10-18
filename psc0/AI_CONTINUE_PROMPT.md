@@ -1,5 +1,42 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Indexed binary deriving and Option bind authoring — qualification pending
+
+Preparation [39160731894](https://github.com/dwijayuda/pskernel/actions/runs/39160731894)
+at 018f1f9694805d28f83b96405c84cff17cca9ac8 compiled the shared elaborator
+changes, and recursor-authoring job 117773289366 passed. Foundation job
+117773289179 stopped on three native fixture errors. The two WF positives now
+use genuinely dependent contradictory hypotheses; the catch-all argument
+actually varies. Both old sources remain native refusal controls. The abbrev
+metadata guard compares the native reducibility enum directly. No portable
+source, kernel, IR or runtime result is claimed for this candidate.
+
+WF instantiates only authenticated owner prefixes. Ordinary user lambda
+applications keep their lexical scope. Generic checked row metadata, source
+callback scope, fixed-argument checks and all existing decrease refusals remain.
+
+Indexed BEq and DecidableEq now use checked constructor/minor construction,
+actual index determination and dependent equality transport. Fresh native and
+paired source controls include recursive families, constructor and field
+differences, erased index dependencies, dependent payloads, actual BEq
+dictionaries, descriptor parameter/index counts, and missing-dictionary refusals.
+Exactly two former blanket indexed deriving refusals become positive controls;
+all other deriving refusals remain mandatory.
+
+The separate Option bind authoring job checks native selected source behavior
+and metadata at the exact pinned Lean revision, then exports and replays the
+complete candidate closure. MonoBind, monotone_bind and instMonoBindOption are
+candidate roots only. The retained selected asset, declarations, registrations,
+digests and resource limits remain unchanged until the exact Linux CI output
+has been inspected and qualified. The authoring source is retained verbatim in
+the connected job logs as well as its artifact.
+
+All thirteen existing runtime exports, both grammars, every retained backend
+lane and all six M3+B exits remain mandatory and OPEN. Main is still
+33676076bcda7b0de5ec1f9803f49b8b1d28a058. The last fully qualified preparation
+remains 39138442923 at 1b7513339f22a5db24750485148603622e5ff018; final
+Native/M3/F1/F2/F3 must pass on one complete compiler/test SHA.
+
 ## WF metadata record layout — qualification pending
 
 Preparation [39160080905](https://github.com/dwijayuda/pskernel/actions/runs/39160080905)

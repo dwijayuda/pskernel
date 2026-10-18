@@ -284,6 +284,92 @@ jobs:
 
   # Independent mandatory job, not continue-on-error or a replacement oracle.
   # Its completed logs are inspectable while longer source/runtime checks run.
+  option-bind-authoring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
+            /psc0/packages/backend-rust/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/backend-ecma/src/
+            /psc0/packages/backend-wasm/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/test/
+            /psc0/scripts/
+            /psc0/v7-native/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-m3-foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-m3-foundation-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+            pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Check pinned native Option bind boundary
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test ! -d ../packages/pskernel-core
+          mkdir -p ../dist/m3-option-bind-authoring
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-option-bind-authoring/source-sha.txt
+          lean --version | tee ../dist/m3-option-bind-authoring/toolchain.txt
+          grep -F '4.35.0' ../dist/m3-option-bind-authoring/toolchain.txt
+          grep -F 'eb6cafb' ../dist/m3-option-bind-authoring/toolchain.txt
+          lake env lean --run ../scripts/Pscv0M3OptionBindNative.lean 2>&1 | tee ../dist/m3-option-bind-authoring/native-source.log
+          lake env lean --run ../scripts/Pscv0M3PartialFixpointMetadata.lean 2>&1 | tee ../dist/m3-option-bind-authoring/native-metadata.log
+      - name: Build exact pinned fixedpoint authorer
+        run: |
+          set -euo pipefail
+          lake build pscv0_m3_partial_fixpoint_export 2>&1 | tee ../dist/m3-option-bind-authoring/build.log
+      - name: Export and replay the complete Option bind candidate
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_export ../dist/m3-option-bind-authoring/StandardPartialFixpointCandidate.lean 2>&1 | tee ../dist/m3-option-bind-authoring/fixedpoint-export.log
+          sha256sum ../dist/m3-option-bind-authoring/StandardPartialFixpointCandidate.lean > ../dist/m3-option-bind-authoring/candidate-source-sha256.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-m3-option-bind-authoring-${{ github.sha }}
+          path: psc0/dist/m3-option-bind-authoring/
+          if-no-files-found: error
+          retention-days: 30
+
   recursor-authoring:
     runs-on: ubuntu-latest
     timeout-minutes: 30

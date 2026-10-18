@@ -8,7 +8,7 @@ def main : IO Unit := do
   let native ← Lean.importModules #[{ module := `Init.Internal.Order.Basic }] {} (loadExts := true)
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "P1 metadata requires pinned Lean 4.35.0")
-  for name in [`Lean.Order.PartialOrder, `Lean.Order.CCPO] do
+  for name in [`Lean.Order.PartialOrder, `Lean.Order.CCPO, `Lean.Order.MonoBind] do
     unless Lean.isClass native name do
       throw (IO.userError ("missing native P1 class: " ++ toString name))
     IO.println (Lean.Json.mkObj [
@@ -24,6 +24,7 @@ def main : IO Unit := do
     (`Lean.Order.instCCPOPProd, `Lean.Order.CCPO),
     (`Lean.Order.instPartialOrderOption, `Lean.Order.PartialOrder),
     (`Lean.Order.instCCPOOption, `Lean.Order.CCPO),
+    (`Lean.Order.instMonoBindOption, `Lean.Order.MonoBind),
     (`Lean.Order.instPartialOrderUnit, `Lean.Order.PartialOrder),
     (`Lean.Order.instCCPOUnit, `Lean.Order.CCPO),
     (`Lean.Order.FlatOrder.instOrder, `Lean.Order.PartialOrder),

@@ -371,7 +371,8 @@ private def source : String :=
   "function m3partialcountoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCount(if (flag) { 7 } else { 3 }))\n" ++
   "function m3applyPartialCapture(step: Nat -> Nat, n: Nat): Nat := step(n)\n" ++
   "partial function m3partialCapture(bias: Nat, n: Nat): Nat := match n with { | 0 => bias | k + 1 => m3applyPartialCapture((fun (rest: Nat) => m3partialCapture(bias + 1, rest)), k) }\n" ++
-  "function m3partialcaptureoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCapture(if (flag) { 7 } else { 11 }, if (flag) { 3 } else { 5 }))\n"
+  "function m3partialcaptureoutput(flag: Bool): UInt64 := UInt64.ofNat(m3partialCapture(if (flag) { 7 } else { 11 }, if (flag) { 3 } else { 5 }))\n" ++
+  "inductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\ntheorem indexedBEqFormerRequest: (IndexedBEq.next(0, IndexedBEq.stop) == IndexedBEq.next(0, IndexedBEq.stop)) = true := by { rfl }\ninductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\ntheorem indexedDecEqFormerRequest(n: Nat): Decidable.decide(self := decEq(IndexedDecEq.intro(n), IndexedDecEq.intro(n))) = true := by { rfl }\n"
 
 -- Parser/source identity is tested independently from the P1 elaboration gate.
 -- A valid suffix must not disappear, become a prefix, or use P0 opacity.
@@ -447,14 +448,10 @@ private def refusals : List (String × String × String) := [
     "deriving field has no checked instance"),
   ("beq-nested-function-field", "inductive NestedBEq where { | node(children: List(Nat -> NestedBEq)) } deriving BEq\n",
     "deriving field has no checked instance"),
-  ("beq-indexed-recursive", "inductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\n",
-    "deriving indexed families is not yet implemented"),
   ("beq-missing-field-dictionary", "inductive FunctionBEq where { | leaf(value: Nat -> Nat) | node(next: FunctionBEq) } deriving BEq\n",
     "deriving field has no checked instance"),
   ("deceq-nested", "inductive NestedDecEq where { | node(children: List NestedDecEq) } deriving DecidableEq\n",
     "recursive deriving requires the M3 data machinery"),
-  ("deceq-indexed", "inductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\n",
-    "deriving indexed families is not yet implemented"),
   ("deceq-missing-field-dictionary", "inductive FunctionDecEq where { | leaf(value: Nat -> Nat) | node(next: FunctionDecEq) } deriving DecidableEq\n",
     "deriving field has no checked instance"),
   ("nondecreasing-major", "function badMajor(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => badMajor(Nat.succ(k)) }\n",

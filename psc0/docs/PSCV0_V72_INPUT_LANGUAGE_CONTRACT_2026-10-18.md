@@ -64,3 +64,20 @@ refusals, compare their checked meaning with pinned Lean, then exercise relevant
 existing target observers. Keep tests minimal and focused. Record implemented,
 qualified and missing cells separately; ordinary output never gains a verified
 identity from a successful parse, oracle result or narrower backend test.
+
+## Pinned frontend architecture reference
+
+Inspected Lean4.35.0 Frontend.lean:19-82, Parser/Module.lean:119-179 and
+Parser/Command.lean:114-162. The native frontend keeps input/source positions,
+parser state and command elaboration state distinct, passing scoped environment
+and namespace/open information into command parsing. Top-level parsing owns
+indentation and advances on errors; elaboration owns the command's meaning.
+Modifier and contract syntax is selected structurally, not by renaming files.
+
+Adapt those boundaries to the smaller portable compiler: explicit input kind on
+requests and named modules, owned source-kind parsers into the shared program AST,
+one selected semantic pipeline and accurate source provenance. Reuse existing
+Lean token/layout parsing where correct, extending command/program ownership
+rather than converting text through the .ps printer. Qualification must exercise
+PSC0's actual .lean path; source reconstruction/C5 and host Lean oracles remain
+separate. No frontend implementation change is claimed by this design note.

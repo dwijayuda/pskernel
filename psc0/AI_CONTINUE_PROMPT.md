@@ -29,25 +29,23 @@ psc0/m3-fixedpoint-foundation-20261018. PR109 draft/open/unmerged on its origina
 base; attach in a new chat. Fresh refs and expected-head non-force writes only.
 Never supersede/cancel a healthy main Native; at most one active/one pending prep.
 
-Main is now 037fda4914ba30b5b8f2074e82ffbf9b0efeef0c after complete successful
-preparation39083926961/job117546418053. The unchanged riFixedIndexEq rfl
-assertion passes through native-style nullary-predicate K computation.
-Typed callback scopes, fixed-major Eq/HEq refinement, impossible cases,
-complete unary packing and retained WF/P1/noncomputable checks also passed.
-At this checkpoint main Native39084512384 is running. FocusedM3 39084512415,
-F1 39084512357, F2 39084512390 and F3 39084512422 have succeeded.
-Do not claim new five-gate acceptance until Native finishes.
-The last complete five-gate receipt remains abe1adc2.
+Main037fda4914ba30b5b8f2074e82ffbf9b0efeef0c is now the last complete
+five-gate acceptance: Native39084512384, M3 39084512415, F1 39084512357,
+F2 39084512390 and F3 39084512422 all SUCCESS. Exact artifacts and scope:
+docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md. Both attempts to retrieve the
+whole focused log failed; no measured aggregate runtime count is claimed.
 
-Preparation3386891ffa1852e3c2596bc44f60a986bc7bc095/run39084134295/
-job117547901808 completed SUCCESS, including checked mutual functional
-construction and all retained checks. Source mutual WF remains refused.
+Preparation3386891/run39084134295/job117547901808 completed SUCCESS for
+component-functional construction. Preparationade87651/run39084942848/
+job117549579617 completed SUCCESS for fixed scopes and shared source preparation.
+These later constructions are not in main037's accepted compiler/test identity.
 
-Candidateade87651 adds checked fixed-scope/per-member header specialization
-and shared Where source preparation. Read PSCV0_M3_FIXED_SCOPES_2026-10-18.md.
-The existing packing executable validates dependent fixed values, three reordered
-generic headers, returned functions, exact kernel equations and intended refusals.
-It is pending qualification; no source mutual WF or runtime capability is claimed.
+Retained-call candidatea5287a1b50110d348303e67255ab888711931ff7,
+run39085518962/job117551185828, is still running but its existing packing step
+failed. The remaining retained checks continue. Full failure diagnostics have
+not yet been retrieved; do not promote or claim this candidate qualified.
+Diagnose the concrete cause before any correction; preserve the original
+acceptance assertions.
 
 Continue complete mutual-WF source/proof/runtime integration using the shared
 PSum/PSigma and fixed-scope owners. Preserve original capture identities, actual
@@ -59,27 +57,6 @@ asset. Source multi-member WF stays refused until the whole path is ready.
 Reconcile six M3 exits and qualify Native/M3/F1/F2/F3 at one exact SHA.
 Update both handoffs, roadmap and exit ledger each meaningful slice.
 Do not stop merely to report a passed slice, weaken assertions or invent counts.
-
-## Latest qualification and current child
-
-Preparation3386891/run39084134295/job117547901808 completed SUCCESS.
-The whole component-construction probe and all retained foundation/source/WF/P1/
-noncomputable checks passed. Its branches remain nonrecursive; this is not source
-mutual-WF admission or executable adaptation.
-
-Scope candidateade87651f3365853702d3f1c733df5e05a1aafae/run39084942848/
-job117549579617 is running. Its packing step passed; whole acceptance is pending.
-Main037fda49 now has focusedM3 39084512415 and F1/F2/F3 successful; Native
-39084512384 is still running. Preserve it. Last complete five-gate acceptance
-remains abe1adc2 until that exact run succeeds.
-
-The current child analyzes fixed parameters from the independently rechecked
-retained Core source bodies, following pinned FixedParams.getFixedParamsInfo.
-It opens real binder/let contexts, observes complete application spines once,
-keeps returned-function arguments outside the original header and treats missing
-underapplication arguments conservatively as varying. This analysis grants no
-recursive-call permission. The existing packing executable adds three source-owned
-reordered generic members and independent native controls. Qualification pending.
 
 ## Input parity within the existing roadmap
 

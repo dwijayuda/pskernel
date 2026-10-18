@@ -36,49 +36,33 @@ Prep cancel-in-progress:false; keep at most one active and one pending run.
 
 ## Current evidence
 
-Main is now 037fda4914ba30b5b8f2074e82ffbf9b0efeef0c after complete successful
-preparation39083926961/job117546418053. The unchanged riFixedIndexEq rfl
-assertion passes through native-style nullary-predicate K computation.
-Typed callback scopes, fixed-major Eq/HEq refinement, impossible cases,
-complete unary packing and retained WF/P1/noncomputable checks also passed.
-At this checkpoint main Native39084512384 is running. FocusedM3 39084512415,
-F1 39084512357, F2 39084512390 and F3 39084512422 have succeeded.
-Do not claim new five-gate acceptance until Native finishes.
-The last complete five-gate receipt remains abe1adc2.
+Main037fda4914ba30b5b8f2074e82ffbf9b0efeef0c is now the last complete
+five-gate acceptance: Native39084512384, M3 39084512415, F1 39084512357,
+F2 39084512390 and F3 39084512422 all SUCCESS. Exact artifacts and scope:
+docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md. Both attempts to retrieve the
+whole focused log failed; no measured aggregate runtime count is claimed.
 
-Preparation3386891ffa1852e3c2596bc44f60a986bc7bc095/run39084134295/
-job117547901808 completed SUCCESS, including checked mutual functional
-construction and all retained checks. Source mutual WF remains refused.
+Preparation3386891/run39084134295/job117547901808 completed SUCCESS for
+component-functional construction. Preparationade87651/run39084942848/
+job117549579617 completed SUCCESS for fixed scopes and shared source preparation.
+These later constructions are not in main037's accepted compiler/test identity.
 
-The exact abe1adc2 acceptance is in
-docs/PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md:
-Native39081215932, M3 39081215919, F1 39081215915, F2 39081215934 and
-F3 39081216307 all successful at abe1adc2ff96c632dd9ed82b8ae6357832545a32.
-It qualifies the constructive Nonempty bridge, n-ary dependent WF/ordinary
-applications, extended P1 and noncomputable execution across all five lanes.
-No measured aggregate runtime count is claimed from required workflow counts.
+Retained-call candidatea5287a1b50110d348303e67255ab888711931ff7,
+run39085518962/job117551185828, is still running but its existing packing step
+failed. The remaining retained checks continue. Full failure diagnostics have
+not yet been retrieved; do not promote or claim this candidate qualified.
+Diagnose the concrete cause before any correction; preserve the original
+acceptance assertions.
 
-The previous fad13e51 preparation failed unchanged riFixedIndexEq and an
-incorrect PSigma implicit-domain call in the new unary fixture. Generic K
-computation—not completed-type transport elision alone—closed the omitted-result
-computation gap. The source invocation was corrected with its arity, dependency,
-user-PSigma and returned-function requirements unchanged. Exact history remains
-in the K/unary design docs and Git; no failed checkpoint is current acceptance.
+## Current construction work
 
-## Current candidate and next dependency
-
-Candidateade87651 adds fixed-parameter scope creation and per-member checked
-specialization, including reordered dependent fixed parameters and returned
-functions. It factors existing Where WF preparation into a shared typed record.
-See docs/PSCV0_M3_FIXED_SCOPES_2026-10-18.md. Qualification is pending.
-The existing packing executable checks three generic reordered headers, exact
-kernel equations and malformed-permutation/dependency/value refusals.
-
-The3386891 component construction separates dependent result motives from a
-common nondependent measure codomain, validates original member domains, and
-infers functional/callback types from the actual checked fixpoint signature.
-Its three-member branches are nonrecursive; do not claim source decreases or
-runtime adaptation from that construction probe.
+The fixed-scope and shared source-preparation slices passed complete preparation.
+The retained-call candidate independently rechecks the original Core, visits
+whole applications under actual lambda/Pi/let scopes and reuses the native-style
+correspondence graph. Its added source probe is not qualified. Read
+docs/PSCV0_M3_RETAINED_CALL_ANALYSIS_2026-10-18.md. No source mutual-WF admission
+or executable adaptation is claimed. The component construction probe's branches
+are nonrecursive; its exact fix_eq checks do not establish actual source decreases.
 
 ## Foundation identity
 
@@ -93,8 +77,8 @@ still UNSELECTED. Activation requires reviewed strict manifest/surface identitie
 
 ## Remaining work
 
-1. Finish current preparation and main037 five-gate integration. Preserve the
-   healthy Native run. Record actual status and exact artifacts before promotion.
+1. Diagnose and complete retained-call preparation; main037 is already fully
+   qualified. Preserve that baseline and promote only a qualified compiler child.
 2. Complete source mutual WF using shared arity-owned PSigma/PSum packing,
    common fixed permutations, original capture owner/id identity, actual measures
    and relation, branch-scoped decrease proofs and public projections.
@@ -132,27 +116,6 @@ Never import upstream test_sorry as proof authority.
 
 Update both AI handoffs, roadmap and exit ledger at every meaningful slice.
 Stop only at complete M3+B or a genuine user-dependent blocker.
-
-## Latest qualification and current child
-
-Preparation3386891/run39084134295/job117547901808 completed SUCCESS.
-The whole component-construction probe and all retained foundation/source/WF/P1/
-noncomputable checks passed. Its branches remain nonrecursive; this is not source
-mutual-WF admission or executable adaptation.
-
-Scope candidateade87651f3365853702d3f1c733df5e05a1aafae/run39084942848/
-job117549579617 is running. Its packing step passed; whole acceptance is pending.
-Main037fda49 now has focusedM3 39084512415 and F1/F2/F3 successful; Native
-39084512384 is still running. Preserve it. Last complete five-gate acceptance
-remains abe1adc2 until that exact run succeeds.
-
-The current child analyzes fixed parameters from the independently rechecked
-retained Core source bodies, following pinned FixedParams.getFixedParamsInfo.
-It opens real binder/let contexts, observes complete application spines once,
-keeps returned-function arguments outside the original header and treats missing
-underapplication arguments conservatively as varying. This analysis grants no
-recursive-call permission. The existing packing executable adds three source-owned
-reordered generic members and independent native controls. Qualification pending.
 
 ## Input parity within the existing roadmap
 

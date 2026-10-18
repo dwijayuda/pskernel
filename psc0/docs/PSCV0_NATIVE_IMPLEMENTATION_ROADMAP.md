@@ -70,7 +70,7 @@ Produce kernel-checked proof terms for selected rewriting/simp/omega/grind and a
 
 Distinguish type correctness, partial correctness, total correctness, finite-prefix safety and separately promised liveness/progress/fairness. Opaque partial/unsafe behavior requires a safe checked operational model and a proved relation to the executable body for verified use. A normal-return postcondition alone does not prove safety of a never-returning service.
 
-One `.ps` language has explicit ordinary checked, closed verified and boundary-qualified verified artifact identities. Every emitted artifact must truthfully identify its assurance. **No verified executable while any applicable specification, effect, assumption, dependency, termination/trace, erasure, executable-refinement or target obligation remains open. Never automatically downgrade a verified request to ordinary.** Boundary assumptions must be precise, immutable, disclosed and permitted; strict closed policy rejects unsupported external assumptions.
+Both v7.2 input languages have explicit ordinary checked, closed verified and boundary-qualified verified artifact identities. Every emitted artifact must truthfully identify its assurance. **No verified executable while any applicable specification, effect, assumption, dependency, termination/trace, erasure, executable-refinement or target obligation remains open. Never automatically downgrade a verified request to ordinary.** Boundary assumptions must be precise, immutable, disclosed and permitted; strict closed policy rejects unsupported external assumptions.
 
 ## M5+E full selected v7.2 conformance
 
@@ -87,56 +87,28 @@ Next measured work is actual-IR closure/dictionary specialization and safe recur
 
 ## Current M3 checkpoint and remaining dependencies
 
-Main is now 037fda4914ba30b5b8f2074e82ffbf9b0efeef0c after complete successful
-preparation39083926961/job117546418053. The unchanged riFixedIndexEq rfl
-assertion passes through native-style nullary-predicate K computation.
-Typed callback scopes, fixed-major Eq/HEq refinement, impossible cases,
-complete unary packing and retained WF/P1/noncomputable checks also passed.
-At this checkpoint main Native39084512384 is running. FocusedM3 39084512415,
-F1 39084512357, F2 39084512390 and F3 39084512422 have succeeded.
-Do not claim new five-gate acceptance until Native finishes.
-The last complete five-gate receipt remains abe1adc2.
+Main037fda4914ba30b5b8f2074e82ffbf9b0efeef0c is now the last complete
+five-gate acceptance: Native39084512384, M3 39084512415, F1 39084512357,
+F2 39084512390 and F3 39084512422 all SUCCESS. Exact artifacts and scope:
+docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md. Both attempts to retrieve the
+whole focused log failed; no measured aggregate runtime count is claimed.
 
-Preparation3386891ffa1852e3c2596bc44f60a986bc7bc095/run39084134295/
-job117547901808 completed SUCCESS, including checked mutual functional
-construction and all retained checks. Source mutual WF remains refused.
+Preparation3386891/run39084134295/job117547901808 completed SUCCESS for
+component-functional construction. Preparationade87651/run39084942848/
+job117549579617 completed SUCCESS for fixed scopes and shared source preparation.
+These later constructions are not in main037's accepted compiler/test identity.
 
-The current [fixed-scope candidate](PSCV0_M3_FIXED_SCOPES_2026-10-18.md)
-adds common fixed telescopes, actual per-member dependent specialization and shared
-Where source preparation. Qualification pending. These extend the existing
-M3+B total-recursion exit; they are not a new milestone or source mutual admission.
+Retained-call candidatea5287a1b50110d348303e67255ab888711931ff7,
+run39085518962/job117551185828, is still running but its existing packing step
+failed. The remaining retained checks continue. Full failure diagnostics have
+not yet been retrieved; do not promote or claim this candidate qualified.
+Diagnose the concrete cause before any correction; preserve the original
+acceptance assertions.
 
-Complete source mutual WF with actual measures, owner-aware captures, branch decrease
-proofs, public projections, exact retained-body equations and whole-functional
-runtime validation. Recover typed public members before erasure. The standalone
-PSum asset remains unselected. See the [mutual WF design](PSCV0_M3_MUTUAL_WF_2026-10-18.md)
-and [component construction](PSCV0_M3_COMPONENT_FIX_2026-10-18.md).
-
-The six written exits remain authoritative; M3+B is OPEN. Intentional native
-default mutual/nested induction refusals remain separate from required positive
-match capability. Do not reopen M2+A or start M4/C5. Older checkpoint narratives
-remain in Git history; current handoffs record actual pending work.
-
-## Latest qualification and current child
-
-Preparation3386891/run39084134295/job117547901808 completed SUCCESS.
-The whole component-construction probe and all retained foundation/source/WF/P1/
-noncomputable checks passed. Its branches remain nonrecursive; this is not source
-mutual-WF admission or executable adaptation.
-
-Scope candidateade87651f3365853702d3f1c733df5e05a1aafae/run39084942848/
-job117549579617 is running. Its packing step passed; whole acceptance is pending.
-Main037fda49 now has focusedM3 39084512415 and F1/F2/F3 successful; Native
-39084512384 is still running. Preserve it. Last complete five-gate acceptance
-remains abe1adc2 until that exact run succeeds.
-
-The current child analyzes fixed parameters from the independently rechecked
-retained Core source bodies, following pinned FixedParams.getFixedParamsInfo.
-It opens real binder/let contexts, observes complete application spines once,
-keeps returned-function arguments outside the original header and treats missing
-underapplication arguments conservatively as varying. This analysis grants no
-recursive-call permission. The existing packing executable adds three source-owned
-reordered generic members and independent native controls. Qualification pending.
+Complete mutual WF source construction, checked decrease evidence, exact retained-body
+equations and whole-functional runtime adaptation using the shared PSigma/PSum,
+fixed-scope, source-preparation and checked-functional owners. The current call
+analysis still needs qualification. No failed slice closes an exit.
 
 ## Input parity within the existing roadmap
 

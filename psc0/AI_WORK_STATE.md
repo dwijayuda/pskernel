@@ -1,5 +1,30 @@
 # PSC0 v7.2 work state — M3+B
 
+## Inline descendant candidate — qualification pending
+
+Preparation [39147096179](https://github.com/dwijayuda/pskernel/actions/runs/39147096179)
+at a0d19e0b67a272f407eea34bfbbab0d2a5f698cf stopped during compilation: three
+PatternRow local binders used the reserved spelling variable. Context, Refinement,
+Match and Elimination compiled. No source or runtime gate was reached.
+
+This candidate corrects those local spellings and adds the complete typed inline
+data-descendant owner. It tracks actual canonical constructor-field paths,
+checks the descendant dictionary with the selected recursors, and preserves
+direct-call ownership, fixed arguments, indices and returned-function suffixes.
+The dictionary is requested only by an observed strict deeper recursive call.
+New local names are also checked against reserved Lean spellings.
+
+Source rows remain checked before decision specialization. Real source aliases
+are reified as checked Core lets only after row application, for the later WF
+proof phase. The WF callback transport and parameterless function-valued const
+adapter are still being integrated; this candidate does not claim they pass.
+Inline inductive-predicate recursion requires its separate checked logical owner
+and is not closed by the data descendant construction.
+
+All six M3+B exits remain OPEN. Existing tests, budgets, foundation pins and
+expected values remain unchanged; Native/M3/F1/F2/F3 must pass on one final SHA.
+Main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058.
+
 ## Source-row and structural candidate — qualification pending
 
 The next source candidate checks every match row in its own typed pattern

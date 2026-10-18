@@ -20,6 +20,8 @@ structure PsElabCheckedPatternRow where
   binders : List Nat
   slots : List (Nat × List Nat)
   numEquations : Nat
+  equationBinders : List Nat
+  aliases : List (PsName × Nat)
 
 structure PsElabPatternLhs where
   context : PsElabContext
@@ -115,11 +117,11 @@ def psElabPatternRowElaborate (fuel : Nat) (context : PsElabContext)
         let value := psElabHole context (some expected)
         return (value.context, value.term, [{ value := value.term, path }])
       let some name := psSyntaxNameToName source | throw .emptyName
-      let some variable := variables.find? (fun variable => psNameEq variable.name name)
+      let some patternVar := variables.find? (fun patternVar => psNameEq patternVar.name name)
         | throw (.refinement "pattern variable declaration unavailable")
-      let (context, success) ← psElabPatternRowUnify context variable.type expected
+      let (context, success) ← psElabPatternRowUnify context patternVar.type expected
       if !success then throw .typeMismatch
-      return (context, .fvar variable.id, [{ value := .fvar variable.id, path }])
+      return (context, .fvar patternVar.id, [{ value := .fvar patternVar.id, path }])
     | .wildcard _ =>
       let value := psElabHole context (some expected)
       return (value.context, value.term, [{ value := value.term, path }])
@@ -349,11 +351,11 @@ def psElabPatternRowAliases (context : PsElabContext) (sources : List PsElabPatt
     if !actualPatternLocal then return context
     source.names.foldlM (fun context name => psElabPatternRowAlias context name value) context)
     context
-  explicitVariables.foldlM (fun context variable => do
+  explicitVariables.foldlM (fun context patternVar => do
     let some entry := replacements.find?
-        (fun entry => psExprAlphaEq entry.fst (.fvar variable.id))
+        (fun entry => psExprAlphaEq entry.fst (.fvar patternVar.id))
       | throw (.refinement "explicit pattern variable occurs only in inaccessible positions")
-    psElabPatternRowAlias context variable.name entry.snd) context
+    psElabPatternRowAlias context patternVar.name entry.snd) context
 
 def psElabPatternRowEquations (context : PsElabContext)
     (sources : List PsElabPatternRowSource) (values : List PsExpr)
@@ -377,6 +379,17 @@ def psElabPatternRowEquations (context : PsElabContext)
     psElabPatternRowEquations context sources values bindersRev
   | _, _ => throw (.refinement "pattern equation/discriminant arity mismatch")
 
+def psElabPatternRowCoreAliases (context : PsElabContext) (ids : List Nat) :
+    List (PsName × Nat) :=
+  context.localContext.nameAliases.foldl (fun (result : List (PsName × Nat)) alias =>
+    let visible := match psLocalFindUser context.localContext alias.userName with
+      | some declaration => psLocalDeclId declaration == alias.id
+      | none => false
+    if ids.contains alias.id && visible &&
+        !(result.any (fun entry => psNameEq entry.fst alias.userName)) then
+      (alias.userName, alias.id) :: result
+    else result) []
+
 def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
     (sources : List PsElabPatternRowSource) (patterns : List PsSyntaxPattern)
     (body : PsSyntaxTerm) (matchType : PsExpr) :
@@ -386,8 +399,8 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
   let (context, variables) ← psElabPatternRowVariables outer names
   let lhs ← psElabPatternRowLhs context variables sources patterns matchType
   let occurrences := psElabPatternRowOccurrences lhs.context (variables.map (·.id)) lhs.occurrences
-  for variable in variables do
-    if !(occurrences.any (fun occurrence => psExprAlphaEq occurrence.value (.fvar variable.id))) then
+  for patternVar in variables do
+    if !(occurrences.any (fun occurrence => psExprAlphaEq occurrence.value (.fvar patternVar.id))) then
       throw (.refinement "explicit pattern variable occurs only in inaccessible positions")
   let ordered ← psElabPatternRowOrder 4096 lhs.context occurrences
     (occurrences.map (·.value)) [] []
@@ -400,6 +413,8 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
   let _ ← psElabExpressionSort opened.context target
   let context ← psElabPatternRowAliases opened.context sources values variables opened.replacements
   let (context, equationsRev) ← psElabPatternRowEquations context sources values
+  let aliases := psElabPatternRowCoreAliases context
+    ((opened.bindersRev ++ equationsRev).map (·.id))
   let result ← branch context body (some target)
   let bindersRev := equationsRev ++ opened.bindersRev
   let closedType ← psElabAbstractType outer result.context
@@ -416,24 +431,48 @@ def psElabCheckPatternRow (branch : PsElaborator) (outer : PsElabContext)
   return (closed.context, {
     term := closed.term, type := closed.type
     binders := opened.bindersRev.reverse.map (·.id)
-    slots, numEquations := equationsRev.length })
+    slots, numEquations := equationsRev.length
+    equationBinders := equationsRev.reverse.map (·.id)
+    aliases })
 
 -- Compiler application checks the real field values and then the exact named
 -- proof domains. It neither reopens source syntax nor assumes a branch proof.
+-- Source aliases are reified only after the generic row has been checked.
+-- Later Core owners can open these checked lets when producing branch-local
+-- obligations; ordinary RHS checking never sees a new alias declaration.
+def psElabPatternRowReifyAliases (context : PsElabContext)
+    (aliases : List (PsName × Nat)) (values : List (Nat × PsExpr))
+    (term expected : PsExpr) : Except PsElabError PsElabTermResult := do
+  match aliases with
+  | [] => psElabResolvedTerm context term (some expected)
+  | (name, id) :: rest =>
+    let some (_, value) := values.find? (fun entry => entry.fst == id)
+      | throw (.refinement "checked pattern row alias argument unavailable")
+    let value ← psElabResolvedTerm context value none
+    let pushed := psLocalPushLet value.context.localContext name value.type value.term
+    let inner := psElabContextWithLocal value.context pushed.context
+    let result ← psElabPatternRowReifyAliases inner rest values term expected
+    psElabCloseLetScope value.context result pushed.id name value.type value.term (some expected)
+
 def psElabApplyPatternRow (context : PsElabContext) (row : PsElabCheckedPatternRow)
     (arguments : List (Nat × PsExpr)) (equations : List PsElabSourceMatchEquation)
     (expected : PsExpr) : Except PsElabError PsElabTermResult := do
-  let arguments ← row.binders.mapM fun id =>
+  let argumentValues ← row.binders.mapM fun id =>
     match arguments.find? (fun entry => entry.fst == id) with
     | none => throw (.refinement "checked pattern row argument unavailable")
     | some entry => pure entry.snd
   let checked ← psElabResolvedTerm context row.term (some row.type)
-  let applied ← psElabApplyCore checked.context checked.term arguments
-  if equations.length != row.numEquations then
+  let applied ← psElabApplyCore checked.context checked.term argumentValues
+  if equations.length != row.numEquations || row.equationBinders.length != row.numEquations then
     throw (.refinement "checked pattern row equation arity mismatch")
-  let applied ← equations.foldlM (fun applied equation => do
-    let pi ← (psInferEnsureForall applied.context.environment applied.context.metaContext
-      applied.context.localContext applied.type).mapError PsElabError.infer
-    let proof ← psElabSourceMatchEquationConvert applied.context equation.type equation.proof pi.domain
-    psElabApplyCore proof.context applied.term [proof.term]) applied
-  psElabResolvedTerm applied.context applied.term (some expected)
+  let (applied, values) ← (row.equationBinders.zip equations).foldlM
+    (fun (state : PsElabTermResult × List (Nat × PsExpr)) (id, equation) => do
+      let applied := state.fst
+      let pi ← (psInferEnsureForall applied.context.environment applied.context.metaContext
+        applied.context.localContext applied.type).mapError PsElabError.infer
+      let proof ← psElabSourceMatchEquationConvert applied.context equation.type equation.proof pi.domain
+      let applied ← psElabApplyCore proof.context applied.term [proof.term]
+      return (applied, state.snd ++ [(id, proof.term)]))
+    (applied, row.binders.zip argumentValues)
+  let checked ← psElabResolvedTerm applied.context applied.term (some expected)
+  psElabPatternRowReifyAliases checked.context row.aliases values checked.term expected

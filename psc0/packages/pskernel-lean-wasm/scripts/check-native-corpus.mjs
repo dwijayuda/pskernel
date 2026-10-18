@@ -36,6 +36,19 @@ for(const fixture of corpus){
   ];
   if(!fixture.accept){
     expected.push(['errorKind',fixture.errorKind]);
+    if(typeof fixture.errorReason!=='string'||fixture.errorReason.length===0)
+      throw new Error('negative fixture missing a semantic reason: '+fixture.id);
+    if(typeof result.message!=='string'||!result.message.includes(fixture.errorReason)){
+      failures++;
+      console.error('PSC0_LEAN435_NATIVE_CORPUS_FAIL '+fixture.id+
+        ' semantic reason expected='+JSON.stringify(fixture.errorReason)+
+        ' got='+JSON.stringify(result.message));
+    }
+    if(result.message?.includes('deterministic-timeout')){
+      failures++;
+      console.error('PSC0_LEAN435_NATIVE_CORPUS_FAIL '+fixture.id+
+        ' timeout cannot satisfy a negative proof test');
+    }
     if(typeof result.message!=='string'||result.message.length===0){
       failures++;
       console.error('PSC0_LEAN435_NATIVE_CORPUS_FAIL '+fixture.id+': rejection reason absent');

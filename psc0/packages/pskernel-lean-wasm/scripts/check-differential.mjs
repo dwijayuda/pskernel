@@ -20,6 +20,14 @@ for(const fixture of corpus){
   assert.equal(wasmResult.accepted,fixture.accept,fixture.id+' Wasm');
   assert.deepEqual(wasmResult,nativeResult,fixture.id+' native/Wasm parity');
   if(fixture.errorKind)assert.equal(wasmResult.errorKind,fixture.errorKind,fixture.id);
+  if(!fixture.accept){
+    assert.ok(typeof fixture.errorReason==='string'&&fixture.errorReason.length,
+      fixture.id+' must pin a semantic reason');
+    assert.ok(typeof wasmResult.message==='string'&&
+      wasmResult.message.includes(fixture.errorReason),fixture.id+' specific kernel rejection');
+    assert.ok(!wasmResult.message.includes('deterministic-timeout'),
+      fixture.id+' rejects false-positive timeout');
+  }
   if(fixture.declarationIndex!==undefined)
     assert.equal(wasmResult.declarationIndex,fixture.declarationIndex,fixture.id+' failed index');
   console.log('PSC0_WASM_PARITY PASS '+fixture.id);

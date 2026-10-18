@@ -41,3 +41,19 @@ def main : IO Unit := do
       ("class", Lean.toJson (toString className)),
       ("priority", Lean.toJson entry.priority)]).compress
   IO.println "PSCV0_M3_P1_NATIVE_METADATA: PASS selected native classes and ordinary instance registrations"
+  unless Lean.isClass native `LawfulBEq do
+    throw (IO.userError "missing native LawfulBEq class")
+  unless Lean.getOutParamPositions? native `LawfulBEq == some #[] &&
+      Lean.getOutLevelParamPositions? native `LawfulBEq == some #[] do
+    throw (IO.userError "LawfulBEq native output metadata differs")
+  let some lawful := (Lean.Meta.instanceExtension.getState native).instanceNames.find? `Nat.instLawfulBEq
+    | throw (IO.userError "missing native Nat.instLawfulBEq registration")
+  unless lawful.priority == 1000 do
+    throw (IO.userError "native Nat.instLawfulBEq priority differs")
+  IO.println (Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-lawful-beq-native-metadata/1" : String)),
+    ("class", Lean.toJson ("LawfulBEq" : String)),
+    ("instance", Lean.toJson ("Nat.instLawfulBEq" : String)),
+    ("outputs", Lean.toJson ([] : List Nat)),
+    ("outputLevels", Lean.toJson ([] : List Nat)),
+    ("priority", Lean.toJson lawful.priority)]).compress

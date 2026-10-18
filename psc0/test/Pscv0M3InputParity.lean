@@ -1379,6 +1379,52 @@ run_cmd do
     decreasing_by exact Nat.lt_succ_self 0)
   expectNativeWfBoundaryRefusal command
 
+def layoutCombine (left right : Nat) : Nat := Nat.add left right
+def layoutAccept (value : Nat) : Nat := value
+
+def layoutNamed : Nat := layoutAccept (value := layoutCombine 1
+2)
+def layoutParen : Nat := (layoutCombine 4
+5)
+def layoutAscribed : Nat := (layoutCombine 6
+7 : Nat)
+def layoutTuple : Nat × Nat := (layoutCombine 6
+7, layoutCombine 8
+9)
+def layoutNested : Nat := layoutAccept (value := layoutAccept (value := layoutCombine 10
+11))
+def layoutLambda : Nat := ((fun (n : Nat) => layoutCombine n
+12) 13)
+def layoutLet : Nat := (let saved := layoutCombine 1 2
+saved)
+def layoutDo : Option Nat := (do
+  let saved := layoutCombine 1 2
+  return saved)
+
+theorem layoutNamedObserved : layoutNamed = 3 := by rfl
+theorem layoutParenObserved : layoutParen = 9 := by rfl
+theorem layoutAscribedObserved : layoutAscribed = 13 := by rfl
+theorem layoutTupleObserved : layoutTuple = (13, 17) := by rfl
+theorem layoutNestedObserved : layoutNested = 21 := by rfl
+theorem layoutLambdaObserved : layoutLambda = 25 := by rfl
+theorem layoutLetObserved : layoutLet = 3 := by rfl
+theorem layoutDoObserved : layoutDo = Option.some 3 := by rfl
+
+def parserLayoutRefusals : List (String × String) := [
+  ("unparenthesized indentation", "def layoutUnparenthesized : Nat :=\n  Nat.add 1\n2\n"),
+  ("parenthesized whitespace", "def layoutAdjacent : Nat := (Nat.succ(3))\n"),
+  ("named-value whitespace", "def layoutNamedAdjacent : Nat := Nat.succ (n := Nat.succ(3))\n"),
+  ("parenthesis restores position", "def layoutParenEscaped : Nat :=\n  Nat.add (Nat.add 1\n0)\n2\n"),
+  ("named value restores position", "def layoutNamedEscaped : Nat :=\n  Nat.add (n := Nat.add 1\n0)\n2\n"),
+  ("missing closing delimiter", "def layoutMissingClose : Nat := (Nat.add 1\n2\n")]
+
+run_cmd do
+  let environment ← Lean.getEnv
+  for (label, source) in parserLayoutRefusals do
+    match Lean.Parser.runParserCategory environment `command source with
+    | .error _ => pure ()
+    | .ok _ => throwError "native layout parser accepted {label}"
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -1612,6 +1658,12 @@ private def indexedDerivingLeanSource : String :=
 private def indexedDerivingPsSource : String :=
   "universe indexedU\n\ninductive IndexedPayload(A: Type indexedU): Nat -> Type indexedU where {\n  | left(index: Nat, value: A): IndexedPayload(A, index)\n  | right(index: Nat, value: A): IndexedPayload(A, index)\n  | next(index: Nat, value: A, child: IndexedPayload(A, index)):\n      IndexedPayload(A, Nat.succ(index))\n} deriving BEq, DecidableEq\n\nconst indexedOriginal: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, false))\nconst indexedFieldChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, false, IndexedPayload.left(0, false))\nconst indexedChildChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, true))\nconst indexedCtorChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.right(0, false))\nconst indexedMajorChanged: IndexedPayload(Bool, 1) := IndexedPayload.right(1, true)\n\ntheorem indexedBEqSame: (indexedOriginal == indexedOriginal) = true := by { rfl }\ntheorem indexedBEqField: (indexedOriginal == indexedFieldChanged) = false := by { rfl }\ntheorem indexedBEqChild: (indexedOriginal == indexedChildChanged) = false := by { rfl }\ntheorem indexedBEqCtor: (indexedOriginal == indexedCtorChanged) = false := by { rfl }\ntheorem indexedBEqMajor: (indexedOriginal == indexedMajorChanged) = false := by { rfl }\ntheorem indexedDecEqSame:\n  Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) = true := by { rfl }\ntheorem indexedDecEqField:\n  Decidable.decide(self := decEq(indexedOriginal, indexedFieldChanged)) = false := by { rfl }\ntheorem indexedDecEqChild:\n  Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) = false := by { rfl }\ntheorem indexedDecEqCtor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) = false := by { rfl }\ntheorem indexedDecEqMajor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) = false := by { rfl }\n\ninductive IndexedAtom where { | atom(value: Bool) }\ninstance indexedAtomBEq: BEq IndexedAtom where {\n  beq(_left: IndexedAtom, _right: IndexedAtom): Bool := false\n}\ntheorem indexedBEqUsesActualDictionary:\n  (IndexedPayload.left(0, IndexedAtom.atom(true)) ==\n    IndexedPayload.left(0, IndexedAtom.atom(true))) = false := by { rfl }\n\ninductive IndexedErasedDependency: Nat -> Type where {\n  | intro(value: Nat): IndexedErasedDependency((fun (_: Nat) => 0)(value))\n} deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq:\n  (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) = false := by { rfl }\ntheorem indexedBetaFieldDecEq:\n  Decidable.decide(self := decEq(IndexedErasedDependency.intro(1),\n    IndexedErasedDependency.intro(2))) = false := by { rfl }\n\ninductive IndexedDependent: Nat -> Type where {\n  | wrap(index: Nat, child: IndexedPayload(Bool, index)): IndexedDependent(0)\n} deriving DecidableEq\ntheorem indexedDependentSame:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedOriginal))) = true := by { rfl }\ntheorem indexedDependentChild:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedChildChanged))) = false := by { rfl }\ntheorem indexedDependentIndex:\n  Decidable.decide(self := decEq(\n    IndexedDependent.wrap(0, IndexedPayload.left(0, true)),\n    IndexedDependent.wrap(1, indexedOriginal))) = false := by { rfl }\n"
 
+private def parserLayoutLeanSource : String :=
+  "def layoutCombine (left right : Nat) : Nat := Nat.add left right\ndef layoutAccept (value : Nat) : Nat := value\n\ndef layoutNamed : Nat := layoutAccept (value := layoutCombine 1\n2)\ndef layoutParen : Nat := (layoutCombine 4\n5)\ndef layoutAscribed : Nat := (layoutCombine 6\n7 : Nat)\ndef layoutTuple : Nat × Nat := (layoutCombine 6\n7, layoutCombine 8\n9)\ndef layoutNested : Nat := layoutAccept (value := layoutAccept (value := layoutCombine 10\n11))\ndef layoutLambda : Nat := ((fun (n : Nat) => layoutCombine n\n12) 13)\ndef layoutLet : Nat := (let saved := layoutCombine 1 2\nsaved)\ndef layoutDo : Option Nat := (do\n  let saved := layoutCombine 1 2\n  return saved)\n\ntheorem layoutNamedObserved : layoutNamed = 3 := by rfl\ntheorem layoutParenObserved : layoutParen = 9 := by rfl\ntheorem layoutAscribedObserved : layoutAscribed = 13 := by rfl\ntheorem layoutTupleObserved : layoutTuple = (13, 17) := by rfl\ntheorem layoutNestedObserved : layoutNested = 21 := by rfl\ntheorem layoutLambdaObserved : layoutLambda = 25 := by rfl\ntheorem layoutLetObserved : layoutLet = 3 := by rfl\ntheorem layoutDoObserved : layoutDo = Option.some 3 := by rfl\n"
+
+private def parserLayoutPsSource : String :=
+  "function layoutCombine(left: Nat, right: Nat): Nat := Nat.add(left, right)\nfunction layoutAccept(value: Nat): Nat := value\n\nconst layoutNamed: Nat := layoutAccept(value := layoutCombine(1, 2))\nconst layoutParen: Nat := (layoutCombine(4, 5))\nconst layoutAscribed: Nat := (layoutCombine(6, 7): Nat)\nconst layoutTuple: Nat × Nat := (layoutCombine(6, 7), layoutCombine(8, 9))\nconst layoutNested: Nat := layoutAccept(value := layoutAccept(value := layoutCombine(10, 11)))\nconst layoutLambda: Nat := (fun (n: Nat) => layoutCombine(n, 12))(13)\nconst layoutLet: Nat := let saved := layoutCombine(1, 2)\nsaved\nconst layoutDo: Option Nat := do {\n  let saved := layoutCombine(1, 2)\n  return saved\n}\n\ntheorem layoutNamedObserved: layoutNamed = 3 := by { rfl }\ntheorem layoutParenObserved: layoutParen = 9 := by { rfl }\ntheorem layoutAscribedObserved: layoutAscribed = 13 := by { rfl }\ntheorem layoutTupleObserved: layoutTuple = (13, 17) := by { rfl }\ntheorem layoutNestedObserved: layoutNested = 21 := by { rfl }\ntheorem layoutLambdaObserved: layoutLambda = 25 := by { rfl }\ntheorem layoutLetObserved: layoutLet = 3 := by { rfl }\ntheorem layoutDoObserved: layoutDo = Option.some(3) := by { rfl }\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -1796,6 +1848,14 @@ def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
   checkCoreBoundaryControls
+  checkIndependentSourcePair "scoped parenthesis and named-value layout"
+    parserLayoutLeanSource parserLayoutPsSource
+  for (label, source) in M3InputParityOracle.parserLayoutRefusals do
+    match psCompilerParsePscv0 source .lean with
+    | .error error =>
+      ensure (error.startsWith "PSCV0-PARSE:")
+        (label ++ " refused outside the selected parser: " ++ error)
+    | .ok _ => throw (IO.userError (label ++ " escaped its parser boundary"))
   checkIndependentSourcePair "indexed binary deriving"
     indexedDerivingLeanSource indexedDerivingPsSource
   for (label, leanText, psText) in [

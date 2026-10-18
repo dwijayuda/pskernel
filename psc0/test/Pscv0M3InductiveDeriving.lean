@@ -28,6 +28,41 @@ mutual
     deriving Hashable, Repr
 end
 
+deriving instance BEq for M3DeriveIndexedLeft
+deriving instance BEq for M3DeriveIndexedRight
+deriving instance DecidableEq for M3DeriveIndexedLeft
+deriving instance DecidableEq for M3DeriveIndexedRight
+
+def m3GroupIndexedZero : M3DeriveIndexedLeft Nat 0 :=
+  M3DeriveIndexedLeft.node 0 M3DeriveIndexedRight.stop
+def m3GroupIndexedRight : M3DeriveIndexedRight Nat 0 1 :=
+  M3DeriveIndexedRight.step 0 (M3DeriveIndexedLeft.leaf 5) M3DeriveIndexedRight.stop
+def m3GroupIndexedRightChanged : M3DeriveIndexedRight Nat 0 1 :=
+  M3DeriveIndexedRight.step 0 (M3DeriveIndexedLeft.leaf 6) M3DeriveIndexedRight.stop
+def m3GroupIndexedOne : M3DeriveIndexedLeft Nat 0 :=
+  M3DeriveIndexedLeft.node 1 m3GroupIndexedRight
+def m3GroupIndexedChanged : M3DeriveIndexedLeft Nat 0 :=
+  M3DeriveIndexedLeft.node 1 m3GroupIndexedRightChanged
+def m3GroupIndexedLeaf : M3DeriveIndexedLeft Nat 0 := M3DeriveIndexedLeft.leaf 5
+
+theorem m3GroupIndexedBEqSame : (m3GroupIndexedOne == m3GroupIndexedOne) = true := by rfl
+theorem m3GroupIndexedDecEqSame : Decidable.decide (self := decEq m3GroupIndexedOne m3GroupIndexedOne) = true := by rfl
+
+theorem m3GroupIndexedBEqIndex : (m3GroupIndexedZero == m3GroupIndexedOne) = false := by rfl
+theorem m3GroupIndexedDecEqIndex : Decidable.decide (self := decEq m3GroupIndexedZero m3GroupIndexedOne) = false := by rfl
+
+theorem m3GroupIndexedBEqField : (m3GroupIndexedOne == m3GroupIndexedChanged) = false := by rfl
+theorem m3GroupIndexedDecEqField : Decidable.decide (self := decEq m3GroupIndexedOne m3GroupIndexedChanged) = false := by rfl
+
+theorem m3GroupIndexedBEqCtor : (m3GroupIndexedOne == m3GroupIndexedLeaf) = false := by rfl
+theorem m3GroupIndexedDecEqCtor : Decidable.decide (self := decEq m3GroupIndexedOne m3GroupIndexedLeaf) = false := by rfl
+
+theorem m3GroupIndexedBEqRightSame : (m3GroupIndexedRight == m3GroupIndexedRight) = true := by rfl
+theorem m3GroupIndexedDecEqRightSame : Decidable.decide (self := decEq m3GroupIndexedRight m3GroupIndexedRight) = true := by rfl
+
+theorem m3GroupIndexedBEqRightField : (m3GroupIndexedRight == m3GroupIndexedRightChanged) = false := by rfl
+theorem m3GroupIndexedDecEqRightField : Decidable.decide (self := decEq m3GroupIndexedRight m3GroupIndexedRightChanged) = false := by rfl
+
 -- The nonindexed member has an inhabited leaf. The indexed member has only
 -- zero/successor results, so native constructor-directed defaults cannot
 -- produce a value uniformly at an arbitrary rigid index.
@@ -313,6 +348,9 @@ private def sourceResult (environment : PsEnvironment) (text : String) :
   let parsed ← fromExcept (psPscv0ParseProgram text)
   fromExcept ((psElabProgramWithOrigins environment parsed).mapError psCompilerPscv0ElabError)
 
+private def indexedGroupBinarySource : String :=
+  "const m3GroupIndexedZero: M3DeriveIndexedLeft(Nat, 0) :=\n  M3DeriveIndexedLeft.node(0, M3DeriveIndexedRight.stop)\nconst m3GroupIndexedRight: M3DeriveIndexedRight(Nat, 0, 1) :=\n  M3DeriveIndexedRight.step(0, M3DeriveIndexedLeft.leaf(5), M3DeriveIndexedRight.stop)\nconst m3GroupIndexedRightChanged: M3DeriveIndexedRight(Nat, 0, 1) :=\n  M3DeriveIndexedRight.step(0, M3DeriveIndexedLeft.leaf(6), M3DeriveIndexedRight.stop)\nconst m3GroupIndexedOne: M3DeriveIndexedLeft(Nat, 0) :=\n  M3DeriveIndexedLeft.node(1, m3GroupIndexedRight)\nconst m3GroupIndexedChanged: M3DeriveIndexedLeft(Nat, 0) :=\n  M3DeriveIndexedLeft.node(1, m3GroupIndexedRightChanged)\nconst m3GroupIndexedLeaf: M3DeriveIndexedLeft(Nat, 0) := M3DeriveIndexedLeft.leaf(5)\n\ntheorem m3GroupIndexedBEqSame: (m3GroupIndexedOne == m3GroupIndexedOne) = true := by { rfl }\ntheorem m3GroupIndexedDecEqSame: Decidable.decide(self := decEq(m3GroupIndexedOne, m3GroupIndexedOne)) = true := by { rfl }\n\ntheorem m3GroupIndexedBEqIndex: (m3GroupIndexedZero == m3GroupIndexedOne) = false := by { rfl }\ntheorem m3GroupIndexedDecEqIndex: Decidable.decide(self := decEq(m3GroupIndexedZero, m3GroupIndexedOne)) = false := by { rfl }\n\ntheorem m3GroupIndexedBEqField: (m3GroupIndexedOne == m3GroupIndexedChanged) = false := by { rfl }\ntheorem m3GroupIndexedDecEqField: Decidable.decide(self := decEq(m3GroupIndexedOne, m3GroupIndexedChanged)) = false := by { rfl }\n\ntheorem m3GroupIndexedBEqCtor: (m3GroupIndexedOne == m3GroupIndexedLeaf) = false := by { rfl }\ntheorem m3GroupIndexedDecEqCtor: Decidable.decide(self := decEq(m3GroupIndexedOne, m3GroupIndexedLeaf)) = false := by { rfl }\n\ntheorem m3GroupIndexedBEqRightSame: (m3GroupIndexedRight == m3GroupIndexedRight) = true := by { rfl }\ntheorem m3GroupIndexedDecEqRightSame: Decidable.decide(self := decEq(m3GroupIndexedRight, m3GroupIndexedRight)) = true := by { rfl }\n\ntheorem m3GroupIndexedBEqRightField: (m3GroupIndexedRight == m3GroupIndexedRightChanged) = false := by { rfl }\ntheorem m3GroupIndexedDecEqRightField: Decidable.decide(self := decEq(m3GroupIndexedRight, m3GroupIndexedRightChanged)) = false := by { rfl }\n"
+
 private def checked (prelude : Lean.Kernel.Environment) (declarations : List PsDeclaration) :
     IO Lean.Kernel.Environment := do
   let encoded ← fromExcept ((psEncodeCheckedAdmissionsCanonical declarations).mapError
@@ -322,6 +360,39 @@ private def checked (prelude : Lean.Kernel.Environment) (declarations : List PsD
   let result ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
     PsKernelLean.admitDeclarations prelude decoded
   fromExcept (result.mapError (fun error => error.kind.code ++ ": " ++ error.message))
+
+private def checkIndexedLawfulRegistration (environment : PsEnvironment) : IO Unit := do
+  let className := psRootName "LawfulBEq"
+  ensure (environment.classes.any (psNameEq className))
+    "indexed deriving lost the selected LawfulBEq class"
+  let context := psElabContextEmpty environment []
+  let nat : PsExpr := .constE psNatName []
+  let dictionary : PsExpr := .constE (psDecisionName "PsStandard.instBEqNat") []
+  let target := psExprApplyMany (.constE className [.zero]) [nat, dictionary]
+  let evidence ← fromExcept ((psElabDeriveInstance context target).mapError psCompilerPscv0ElabError)
+  let _ ← fromExcept ((psElabResolvedTerm context evidence (some target)).mapError
+    psCompilerPscv0ElabError)
+  let falseDictionary := psExprApplyMany
+    (.constE (psNameAppendStr (psRootName "BEq") "mk") [.zero])
+    [nat, .lam (psRootName "left") nat
+      (.lam (psRootName "right") nat (.constE psBoolFalseName []) .explicit) .explicit]
+  let rejectedTarget := psExprApplyMany (.constE className [.zero]) [nat, falseDictionary]
+  let rejected := psSynthInstance environment context.localContext context.instances
+    context.metaContext rejectedTarget
+  ensure rejected.value.isNone
+    "indexed deriving granted lawfulness to an unrelated nonreflexive dictionary"
+
+private def checkIndexedGroupBinary (prelude : Lean.Kernel.Environment)
+    (environment : PsEnvironment) (groups : List PsDeclaration)
+    (origin : PsElabBatchOrigin) : IO Unit := do
+  checkIndexedLawfulRegistration environment
+  let instances ← derive environment origin ["BEq", "DecidableEq"]
+  ensure (instances.length == 4)
+    "indexed binary deriving omitted one class/member pair"
+  let registered ← register environment instances
+  let laws ← sourceResult registered indexedGroupBinarySource
+  let _ ← checked prelude (groups ++ instances ++ laws.result.declarations)
+  IO.println "PSCV0_M3_INDEXED_GROUP_BINARY: PASS fresh kernel-checked BEq/DecidableEq for both members, actual lawful Nat dictionary, nonreflexive dictionary refusal and twelve native constructor/index/field equations"
 
 private def refusal : PsElabError → String
   | .atDeclaration _ error => refusal error
@@ -336,17 +407,10 @@ private def expectRefused (label expected : String) (result : Except PsElabError
 
 private def checkRefusals (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do
-  expectRefused "indexed member through an unindexed selected family"
-    "deriving indexed families is not yet implemented"
-    (psElabDeriveGroupHandler environment indexedOrigin
-      { segments := ["BEq"], span := indexedOrigin.span })
   expectRefused "indexed group Inhabited cannot cover arbitrary rigid indices"
     "Inhabited deriving requires a constructor with inhabitable fields"
     (psElabDeriveGroupHandler environment indexedOrigin
       { segments := ["Inhabited"], span := indexedOrigin.span })
-  expectRefused "indexed group DecidableEq" "deriving indexed families is not yet implemented"
-    (psElabDeriveHandler environment indexedOrigin
-      { segments := ["DecidableEq"], span := indexedOrigin.span })
   expectRefused "reordered retained group origin"
     "deriving origin does not retain the complete ordered group"
     (psElabDeriveGroupHandler environment { origin with members := origin.members.reverse }
@@ -365,7 +429,7 @@ private def checkRefusals (environment : PsEnvironment)
     (.constructorDecl { constructor with recursiveFields := [1] })
   expectRefused "omitted direct child metadata" "deriving direct field is absent from recursive metadata"
     (psElabDeriveGroupHandler omitted origin { segments := ["Hashable"], span := origin.span })
-  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association, indexed BEq/DecidableEq boundaries and constructor-directed indexed Inhabited refusal"
+  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association and constructor-directed indexed Inhabited refusal"
 
 private def checkPlans (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do
@@ -594,6 +658,7 @@ def main (args : List String) : IO Unit := do
     "group deriving lost common A/a/dictionary captures or generated workers for right-only BEq inspection"
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  checkIndexedGroupBinary prelude input groups indexedOrigin
   let admitted ← checked prelude prepared.prepared.declarations
   let _ ← checked admitted logical.result.declarations
   -- mixHash is opaque in pinned Lean. Generic hash equations above are checked;

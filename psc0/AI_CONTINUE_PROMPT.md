@@ -1,5 +1,39 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Scoped Lean layout and checked indexed equality law — qualification pending
+
+Preparation [39164763898](https://github.com/dwijayuda/pskernel/actions/runs/39164763898)
+at 440e740e4f1c11a3bde953f1a6035637f0a9456e compiled all native sources,
+including the function-valued WF positives and refusals. Retained PSum bytes,
+the original source-call packing assertions, and the new operational packing
+assertions passed. Inductive groups and the extended existing P1 source/kernel/
+runtime-emission step also passed. Recursor authoring and independent generic
+Bind.bind native behavior, metadata and the complete 153-declaration closure
+replay passed. No new fixedpoint asset is selected in this child.
+
+The selected Lean parser now scopes native withoutPosition behavior to actual
+parenthesized contents and named values. It preserves source spans, application
+whitespace and caller indentation after closing delimiters; layout blocks retain
+their own boundaries. Eight fresh native and paired source equations and six
+native/portable parser refusals cover these exact owners. The previously failing
+multiline indexed source is unchanged.
+
+The final prelude registers the already checked LawfulBEq class and actual
+Nat.instLawfulBEq instance. No logical declaration payload or frozen authoring
+base changes. Native metadata is checked explicitly. Indexed group BEq and
+DecidableEq replace their two former blanket refusals with four checked instance
+constructions and twelve native/portable equations; unrelated nonreflexive
+dictionaries retain a strict lawfulness refusal. Existing ten runtime workers
+and provenance, real-IH and indexed Inhabited controls remain mandatory.
+
+Final manifest pins are unchanged until this exact candidate independently
+reports the changed registration digests. Expected manifest drift remains a
+hard failure. Remaining actual failures at 440e include WF unknown local20,
+structural unknown local36 and compound-major match type mismatch. The complete
+fourteen-export paired runtime matrix remains unqualified behind these source
+checks. All six exits and M3+B remain OPEN; main and the last fully qualified
+preparation remain unchanged.
+
 ## Function-valued WF and dependency ownership — qualification pending
 
 Preparation [39162423016](https://github.com/dwijayuda/pskernel/actions/runs/39162423016)

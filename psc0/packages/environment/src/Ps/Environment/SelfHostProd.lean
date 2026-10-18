@@ -165,8 +165,9 @@ def psSelfHostProdPreRecursorSurfacePreludeEnvironment : PsEnvironment :=
 -- Reviewed metadata-only replacements are selected only at the final stage.
 -- Preserve every earlier authoring base, including the pre-recursor snapshot.
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psStandardRecursorSurfaceDeclarations.foldl psEnvironmentInsert
-    psSelfHostProdPreRecursorSurfacePreludeEnvironment
+  psStandardLawfulBEqExtend <|
+    psStandardRecursorSurfaceDeclarations.foldl psEnvironmentInsert
+      psSelfHostProdPreRecursorSurfacePreludeEnvironment
 
 -- Structural mutual recursion bundles retained results in the checked
 -- Sort-polymorphic product. Logical inclusion alone does not register its

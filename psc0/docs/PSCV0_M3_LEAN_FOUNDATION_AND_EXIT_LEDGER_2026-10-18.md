@@ -218,3 +218,13 @@ scope, command and retained semantic modules compiled. AST construction is now
 bound before the parse-result record throughout the affected term reader;
 no semantic or acceptance change. Qualification of the complete native term
 and ordered-binder slice remains pending. Main is still037fda49.
+
+## Native keyword ownership — qualification pending
+
+Preparation8f0950c0 / run39088579549 / job117560230257 built the native compiler
+and is continuing retained foundation checks. Do not cancel it. The next child
+also applies the existing native keyword table at application boundaries:
+native then/deriving/mutual/monotonicity cannot become ordinary arguments.
+The common ProofScript table alone does not own these native delimiters.
+This follows pinned Parser.Term.ite/argument and Parser.Command; source grammars
+remain separate and share semantic AST/elaboration. Full qualification is pending.

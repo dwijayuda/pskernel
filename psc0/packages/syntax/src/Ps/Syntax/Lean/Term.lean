@@ -1,3 +1,4 @@
+import Ps.Syntax.ParseLean
 import Ps.Syntax.Pscv0.TermRead
 
 -- Lean 4.35.0 Parser.Term.argument requires whitespace and indentation.
@@ -9,7 +10,8 @@ def psLeanTermArgumentStart (annotation : Bool) (head : PsSyntaxTerm)
   | none => false
   | some token =>
     let span := psSyntaxTermSpan head
-    !psPscv0ReservedArgument token.text && (psPscv0InfixToken cursor).isNone &&
+    !psLeanReservedApplicationToken token && !psPscv0ReservedArgument token.text &&
+      (psPscv0InfixToken cursor).isNone &&
       (annotation || !psTokenCursorStartsNamedAssignment cursor) &&
       token.span.start.byteOffset > span.stop.byteOffset &&
       (token.span.start.line == span.stop.line || token.span.start.column > span.start.column) &&

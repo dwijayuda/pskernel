@@ -101,7 +101,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build
-          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh') }}
+          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh', 'psc0/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
       - name: Fetch exact Emscripten 6.0.9 and cross-build Lean kernel into Wasm
         shell: bash
         run: |
@@ -131,7 +131,7 @@ jobs:
         continue-on-error: true
         with:
           path: psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build
-          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh') }}
+          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh', 'psc0/packages/pskernel-lean-wasm/scripts/stage1-cache.mjs') }}
       # A build-only diagnostic artifact is NOT a qualified checker and is
       # not committed or packed. It preserves exact checked binaries when
       # later native/Wasm parity or distribution qualification fails.

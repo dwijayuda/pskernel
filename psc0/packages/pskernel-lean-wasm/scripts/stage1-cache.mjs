@@ -15,6 +15,7 @@ const stampName='.psc0-stage1-cache-manifest.json';
 const inputFiles=[
   'LEAN_SOURCE_PIN.json','EMSCRIPTEN_PIN.json',
   'scripts/build-wasm.sh','scripts/apply-lean435-compat.mjs',
+  'scripts/stage1-cache.mjs',
   'scripts/verify-lean435-runtime.mjs',
 ];
 const required=[

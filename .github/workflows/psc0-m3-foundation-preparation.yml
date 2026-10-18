@@ -107,6 +107,7 @@ jobs:
         run: |
           set -euo pipefail
           lake env lean --run ../scripts/Pscv0M3FoundationInventory.lean 2>&1 | tee ../dist/m3-foundation-preparation/foundation-inventory.log
+          lake env lean --run ../scripts/Pscv0M3RecursorSurfaceExport.lean ../dist/m3-foundation-preparation/StandardRecursorSurfaceCandidate.lean 2>&1 | tee ../dist/m3-foundation-preparation/recursor-surface-export.log
           .lake/build/bin/pscv0_native --audit-primitives > ../dist/m3-foundation-preparation/primitive-audit.json
           .lake/build/bin/pscv0_native --audit-standard-closure > ../dist/m3-foundation-preparation/standard-closure.json
           printf '%s\n' 'PSCV0_M3_AUDITS: PASS exact primitive and full logical closure audits; complete JSON retained in artifacts'

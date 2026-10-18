@@ -156,8 +156,13 @@ def psSelfHostProdPrePartialFixpointPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardPartialFixpointExtend psSelfHostProdPrePartialFixpointPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+-- Frozen source for retained public recursor metadata authoring. A later
+-- final-stage correction must not alter any earlier closed asset replay base.
+def psSelfHostProdPreRecursorSurfacePreludeEnvironment : PsEnvironment :=
   psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psSelfHostProdPreRecursorSurfacePreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

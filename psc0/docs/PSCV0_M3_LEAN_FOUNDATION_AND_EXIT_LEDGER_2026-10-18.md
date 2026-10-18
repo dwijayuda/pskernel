@@ -264,3 +264,33 @@ names (Eq.rec/Nat.le.rec) require the pinned source name-resolution policy,
 not string-only renaming. The child7eba96e adds the strict generated-public
 signature group check and explicit Order inventory import; its preparation is
 still running. This follow-up is queued, unqualified, and does not move main.
+
+## Next bounded preparation: complete recursor source metadata candidate
+
+The generated-recursion/function-field correction is at e5f3b75050c1c07af10167cb8bd2c8ce732d98ec,
+preparation39104907133/job117611012961, still running. Its parent7eba96e
+(run39104089771/job117608270376) passed the new exact public signature group
+checks and all other preparation checks except the known proofObserved
+term-rfl versus tactic-rfl comparison. E5 aligns both observation proof forms
+without relaxing Core equality. Main remains fully qualified33676076.
+
+This child adds an UNSELECTED native recursor-source authoring probe and
+freezes the existing PSum-final environment as
+psSelfHostProdPreRecursorSurfacePreludeEnvironment. The active Standard is
+definitionally unchanged, with3757 declarations and the same three pins.
+The probe uses existing StandardExport replay/rendering/rule machinery,
+compares complete native types using Expr.equal, preserves logical layouts and
+universe parameter positions, and reports independent candidate digests.
+The observed public inventory is109 native recursors with24 top-level
+differences; six exact $psc0Format helper recursors have no upstream library
+identity and retain their existing checked bytes. The full-type replacement
+roster is measured separately, not assumed to equal24.
+
+Design: docs/PSCV0_M3_RECURSOR_FOUNDATION_SOURCE_2026-10-18.md.
+Do not select candidate bytes or copy candidate hashes into guards before
+successful independent evidence and review. Do not mix candidate evidence with
+the function-field slice, promote an unqualified candidate, supersede healthy
+main Native, or create a second pending preparation. Continue named/generalizing
+match work from its retained design after the existing source-metadata gap.
+No changed assumptions, runtime primitive, admission budget, PSKernel-Core or
+self-hosting. M3+B and full selected input parity remain OPEN.

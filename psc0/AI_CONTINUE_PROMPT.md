@@ -1,5 +1,21 @@
 # Continue PSC0 v7.2 — finish M3+B
 
+## Native Option bind form and indexed record layout — qualification pending
+
+Preparation [39162103571](https://github.com/dwijayuda/pskernel/actions/runs/39162103571)
+at 83fdb33d22fc04c9e683b8a17bdc9c4e836fb1eb stopped both compiler build jobs
+on one multiline record layout in DerivingIndexed.lean. The WF owner-prefix
+change compiled. This child corrects that record layout without changing the
+derived construction.
+
+The independent native Option bind check rejected direct Option.bind syntax:
+the pinned monotonicity discrimination tree selects its registered law for
+generic Bind.bind. The positive now uses Bind.bind and the exact direct form
+is retained as a native refusal, alongside nonmonotone result inspection.
+The authoring job did not reach export or replay. No candidate asset has been
+selected and no new source/kernel/IR/runtime qualification is claimed.
+All existing gates and resource limits remain mandatory. M3+B stays OPEN.
+
 ## Indexed binary deriving and Option bind authoring — qualification pending
 
 Preparation [39160731894](https://github.com/dwijayuda/pskernel/actions/runs/39160731894)

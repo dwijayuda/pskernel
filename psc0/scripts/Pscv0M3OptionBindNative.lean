@@ -9,17 +9,27 @@ def auditOptionBind (n : Nat) : Option Nat :=
   match n with
   | 0 => some 0
   | k + 1 =>
-    Option.bind (auditOptionBind k) (fun value =>
-      Option.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))
+    Bind.bind (auditOptionBind k) (fun value =>
+      Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))
 partial_fixpoint
 
 theorem auditOptionBindEquation (n : Nat) :
     auditOptionBind n = (match n with
       | 0 => some 0
       | k + 1 =>
-        Option.bind (auditOptionBind k) (fun value =>
-          Option.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=
+        Bind.bind (auditOptionBind k) (fun value =>
+          Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=
   auditOptionBind.eq_def n
+
+/-- error: Cannot eliminate recursive call -/
+#guard_msgs (error, drop warning, substring := true) in
+def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=
+  match n with
+  | 0 => some 0
+  | k + 1 =>
+    Option.bind (auditOptionDirectBindRefusal k) (fun value =>
+      Option.bind (auditOptionDirectBindRefusal value) (fun previous => some (Nat.succ previous)))
+partial_fixpoint
 
 /-- error: Could not prove -/
 #guard_msgs (error, drop warning, substring := true) in
@@ -37,4 +47,4 @@ def main : IO Unit := do
   for (argument, expected) in [(0, 0), (3, 3), (4, 4)] do
     unless M3OptionBindNative.auditOptionBind argument == some expected do
       throw (IO.userError ("native Option bind observation differs at " ++ toString argument))
-  IO.println "PSCV0_M3_P1_OPTION_BIND_NATIVE: PASS checked recursive action and continuation, original equation, nonmonotone inspection refusal and exact 0/3/4 observations"
+  IO.println "PSCV0_M3_P1_OPTION_BIND_NATIVE: PASS checked generic Bind action and continuation, original equation, direct Option.bind and nonmonotone inspection refusals and exact 0/3/4 observations"

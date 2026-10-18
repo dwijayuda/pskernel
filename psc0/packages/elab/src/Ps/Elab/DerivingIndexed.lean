@@ -249,7 +249,11 @@ def psElabDeriveIndexedBEqEquality (context : PsElabContext)
   let level ← psElabExpressionSort checked.context field.leftType
   let expected := psLogicEq level field.leftType field.left field.right
   let checked ← psElabUnifyExpected checked (some expected)
-  return { level, type := field.leftType, left := field.left, right := field.right,
+  return {
+    level := level
+    type := field.leftType
+    left := field.left
+    right := field.right
     proof := psMetaInstantiate checked.context.metaContext checked.term }
 
 def psElabDeriveIndexedBEqFields (fuel : Nat) (plan : PsElabDeriveContext)

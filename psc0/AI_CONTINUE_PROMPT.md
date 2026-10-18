@@ -144,3 +144,9 @@ second argument elaborator. Reference: pinned Lean4.35.0
 Elab/PreDefinition/WF/Fix.lean72–95 and Elab/App.lean's ordered argument engine.
 Existing paired fixture/strict checked-Core comparison remains unchanged.
 Qualification pending; newest expected-HEAD preparation child is authoritative.
+
+Continuation e9eb8f73 failed compilation only: clearing both generic suffix
+lists left the prefix finisher's argument-kind parameter unconstrained. The
+child explicitly pins that existing source argument kind to PsSyntaxTerm;
+no algorithm, source fixture or acceptance condition changed. Inspect the
+child's complete preparation before promotion.

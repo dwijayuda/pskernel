@@ -346,7 +346,7 @@ def psElabRecursionCaptureArguments (elaborate : PsElaborator)
   -- exact declared result type belong to the recursive consumer.
   -- Finish only the captured prefix. The caller retains the untouched
   -- suffix below and resumes it on the actual checked recursive result.
-  let resolved ← psElabFinishApplication
+  let resolved ← psElabFinishApplication (α := PsSyntaxTerm)
     { application with remainingPositions := [], remainingNames := [] } none
   let values := capture.valuesRev.reverse
   let expressions := resolved.type :: values ++ capture.abstractionsRev.flatMap

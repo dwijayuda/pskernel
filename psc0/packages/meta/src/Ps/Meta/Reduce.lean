@@ -177,9 +177,10 @@ def psWhnf
 -- inference capability may supply typed proof irrelevance as an additional
 -- closed rule; plain reduction callers use the same walker without that rule.
 -- Bodies are opened in a real local context before invoking the typed rule.
-def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
+def psDefEqReadOnlyWithTransparencyTyped (transparency : PsTransparency)
     (environment : PsEnvironment) (metaContext : PsMetaContext)
     (proofEq : PsLocalContext → PsExpr → PsExpr → Bool)
+    (functionType : PsLocalContext → PsExpr → Option PsExpr)
     (fuel : Nat) (localContext : PsLocalContext) (left right : PsExpr) : Bool :=
   -- Reflexivity needs no evaluation. In particular dictionary targets may
   -- contain identical expensive runtime computations beneath dependent types.
@@ -193,7 +194,8 @@ def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
   match fuel with
   | 0 => false
   | fuel + 1 =>
-    let smaller := psDefEqReadOnlyWithTransparencyProofs transparency environment metaContext proofEq fuel
+    let smaller := psDefEqReadOnlyWithTransparencyTyped transparency environment metaContext
+      proofEq functionType fuel
     let structural := match left, right with
       | .sortE a, .sortE b => psLevelEquivalent a b
       | .constE a levels, .constE b other =>
@@ -207,10 +209,27 @@ def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
           let pushed := psLocalPushBinding localContext name domain binder
           smaller pushed.context (psExprInstantiate1 body (.fvar pushed.id))
             (psExprInstantiate1 otherBody (.fvar pushed.id))
+      | lambda@(.lam _ _ _ _), other
+      | other, lambda@(.lam _ _ _ _) =>
+        match functionType localContext other with
+        | some (.forallE name domain _ binder) =>
+          let expanded := PsExpr.lam name domain
+            (.app (psExprLiftBVars 1 0 other) (.bvar 0)) binder
+          smaller localContext lambda expanded
+        | _ => false
       | .proj owner index value, .proj otherOwner otherIndex otherValue =>
         psNameEq owner otherOwner && index == otherIndex && smaller localContext value otherValue
       | _, _ => false
     structural || proofEq localContext left right
+
+-- Reduction-only callers keep their old interface. Typed inference consumers
+-- provide the function-type callback above to authorize function eta.
+def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (proofEq : PsLocalContext → PsExpr → PsExpr → Bool)
+    (fuel : Nat) (localContext : PsLocalContext) (left right : PsExpr) : Bool :=
+  psDefEqReadOnlyWithTransparencyTyped transparency environment metaContext
+    proofEq (fun _ _ => none) fuel localContext left right
 
 def psDefEqReadOnlyWithProofs := psDefEqReadOnlyWithTransparencyProofs .all
 

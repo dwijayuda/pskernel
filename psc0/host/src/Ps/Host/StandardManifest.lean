@@ -236,9 +236,13 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- Twenty-four public replacements retain logical types and selected universes;
 -- classes, instances, defaults and approved assumptions are unchanged.
 -- Exact final-only LawfulBEq registration digest observed independently in
--- preparation39166058244 at a39eb959. No selected Option bind asset yet.
+-- preparation39166058244 at a39eb959; that frozen base remains intact.
+-- Additive Option bind: 36 exact native declarations, three classes and three
+-- ordinary dictionaries; 3757 prior declarations/registrations unchanged.
+-- Independent fresh-kernel, dictionary-synthesis and 109-to-118 recursor audit
+-- measured these final digests at f203df3a / preparation39167823787.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:ed998f3648387f10e82f537d694dcc0f158caeb10c084e74bd7541f9d3c090bd"
+  "sha256:dd0d54ecb485d4201c8ee5c4f78d1e27e00a21537d042e6b03b8df5dba5f1b4a"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

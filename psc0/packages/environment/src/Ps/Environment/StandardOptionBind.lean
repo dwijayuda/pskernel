@@ -29,15 +29,11 @@ def psStandardOptionBindExtend (environment : PsEnvironment) : PsEnvironment :=
       (psStandardOptionBindCandidateDeclarations.filter (fun declaration =>
         psNameEq (psDeclarationName declaration) (psDecisionName name))) 1000) environment
 
--- Runtime class evidence follows the same checked declaration owner. The
--- logical MonoBind proof family is erased; only the eight data families,
--- executable method projections and actual Option dictionaries are retained.
+-- The selected method is specialized through its checked dictionary before
+-- runtime erasure. Retain only the Bind family and projection metadata needed
+-- to authenticate its unboxed field; Option.bind already has a runtime owner.
 def psStandardOptionBindRuntimeNames : List PsName :=
-  ["Applicative", "Bind", "Functor", "Monad", "Pure", "Seq", "SeqLeft", "SeqRight",
-    "instFunctorOption", "instMonadOption", "Applicative.mk", "Applicative.rec",
-    "Bind.bind", "Bind.mk", "Bind.rec", "Functor.map", "Functor.mk", "Functor.rec",
-    "Monad.mk", "Monad.rec", "Monad.toBind", "Pure.mk", "Pure.rec", "Seq.mk",
-    "Seq.rec", "SeqLeft.mk", "SeqLeft.rec", "SeqRight.mk", "SeqRight.rec"].map psDecisionName
+  ["Bind", "Bind.mk", "Bind.rec", "Bind.bind"].map psDecisionName
 
 def psStandardOptionBindRuntimeDeclarations (environment : PsEnvironment) :
     List PsDeclaration :=

@@ -2288,7 +2288,8 @@ def psEraseRuntimeExprWithFuelWorker
         | .constE name _ => if psEnvironmentIsNoncomputable environment name then some name else none
         | _ => none
       if let some name := forbidden then throw (.noncomputableDependency name)
-      match psErasureExpandUnboxedProjection environment scope expr with
+      let expanded ← psErasureExpandUnboxedProjection environment scope expr
+      match expanded with
       | some expanded => smaller scope expanded
       | none => match expr with
         | .lit literal =>

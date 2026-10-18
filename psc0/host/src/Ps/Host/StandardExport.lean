@@ -1686,7 +1686,7 @@ def checkOptionBindFoundation (assetPath : System.FilePath) : IO Unit := do
     throw (IO.userError "Option bind asset recorded a different frozen boundary")
   if names.any (psEnvironmentContains base) then
     throw (IO.userError "Option bind additive asset would replace a prior declaration")
-  let activeNames := names.filter (psEnvironmentContains psSelfHostProdPreludeEnvironment)
+  let activeNames := names.filter (psEnvironmentContains psSelfHostProdOptionBindPreludeEnvironment)
   unless activeNames.isEmpty || activeNames.length == 36 do
     throw (IO.userError "Option bind library is only partially selected")
   let proposed := psStandardOptionBindExtend base
@@ -1826,13 +1826,46 @@ def checkOptionBindFoundation (assetPath : System.FilePath) : IO Unit := do
   let oldPublic ← checkOptionBindRecursorSurface native base 109
   let newPublic ← checkOptionBindRecursorSurface native proposed 118
   unless activeNames.isEmpty ||
-      psStandardSnapshotFingerprint psSelfHostProdPreludeEnvironment ==
+      psStandardSnapshotFingerprint psSelfHostProdOptionBindPreludeEnvironment ==
         psStandardSnapshotFingerprint proposed &&
-      psStandardSnapshotSHA256Fingerprint psSelfHostProdPreludeEnvironment ==
+      psStandardSnapshotSHA256Fingerprint psSelfHostProdOptionBindPreludeEnvironment ==
         psStandardSnapshotSHA256Fingerprint proposed &&
-      standardSurfaceManifestSHA256 psSelfHostProdPreludeEnvironment ==
+      standardSurfaceManifestSHA256 psSelfHostProdOptionBindPreludeEnvironment ==
         standardSurfaceManifestSHA256 proposed do
     throw (IO.userError "Option bind selected extension differs from the independently audited proposal")
+  let finalEnvironment := psSelfHostProdPreludeEnvironment
+  let finalNames := names.filter (psEnvironmentContains finalEnvironment)
+  unless finalNames.map psNameToString == activeNames.map psNameToString do
+    throw (IO.userError "final Standard bypassed the selected Option bind stage")
+  if !activeNames.isEmpty then
+    for declaration in candidates do
+      let name := psDeclarationName declaration
+      let some retained := psEnvironmentFind finalEnvironment name
+        | throw (IO.userError ("final Standard lost Option bind Core: " ++ psNameToString name))
+      unless psStandardSnapshotDeclaration retained == psStandardSnapshotDeclaration declaration &&
+          (psEnvironmentReducibility? finalEnvironment name).map psReducibilityName ==
+            (psEnvironmentReducibility? proposed name).map psReducibilityName &&
+          psEnvironmentIsNoncomputable finalEnvironment name ==
+            psEnvironmentIsNoncomputable proposed name do
+        throw (IO.userError ("final Standard changed Option bind Core or policy: " ++ psNameToString name))
+    let owns := fun name => names.any (psNameEq name)
+    unless (finalEnvironment.classes.filter owns).map psNameToString ==
+        (proposed.classes.filter owns).map psNameToString &&
+        psStandardSnapshotList psStandardSnapshotClassParameters
+          (finalEnvironment.classParameters.filter (fun pair => owns pair.1)) ==
+          psStandardSnapshotList psStandardSnapshotClassParameters
+            (proposed.classParameters.filter (fun pair => owns pair.1)) do
+      throw (IO.userError "final Standard changed Option bind class metadata")
+    let ownsEntry := fun entry => names.any (fun name => isNamed name entry)
+    unless psStandardSnapshotList psStandardSnapshotInstance
+        (finalEnvironment.instances.entries.filter ownsEntry) ==
+        psStandardSnapshotList psStandardSnapshotInstance
+          (proposed.instances.entries.filter ownsEntry) &&
+        psStandardSnapshotList psStandardSnapshotInstance
+          (finalEnvironment.instances.defaults.filter ownsEntry) ==
+          psStandardSnapshotList psStandardSnapshotInstance
+            (proposed.instances.defaults.filter ownsEntry) do
+      throw (IO.userError "final Standard changed Option bind ordinary/default registrations")
   IO.println (Lean.Json.mkObj [
     ("schema", Lean.toJson ("pscv0-option-bind-foundation-audit/1" : String)),
     ("leanCommit", Lean.toJson Lean.githash),
@@ -1859,6 +1892,7 @@ def checkOptionBindFoundation (assetPath : System.FilePath) : IO Unit := do
     ("proposedClasses", Lean.toJson proposed.classes.length),
     ("proposedInstances", Lean.toJson proposed.instances.entries.length),
     ("activeOptionBindDeclarations", Lean.toJson activeNames.length),
+    ("activeFinalOptionBindDeclarations", Lean.toJson finalNames.length),
     ("runtimeQualified", Lean.toJson false)]).compress
 
 end PsV7Native

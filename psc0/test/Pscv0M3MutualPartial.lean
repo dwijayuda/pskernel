@@ -92,6 +92,22 @@ mutual
 end
 example : Nat → Nat := universeRight.{u}
 
+-- Singleton syntax must retain a universe used only by the actual recursive body.
+partial def universeSingleton (n : Nat) : Nat :=
+  match n with
+  | 0 => 17
+  | k + 1 => eraseType (PUnit : Type u) (universeSingleton k + 1)
+
+example : Nat → Nat := universeSingleton.{u}
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``universeSingleton with
+  | some (.opaqueInfo info) =>
+    unless info.levelParams == [`u] do
+      throwError "native singleton P0 lost its body-only universe"
+  | _ => throwError "native recursive singleton P0 is not opaque"
+
 def output (flag : Bool) : UInt64 :=
   UInt64.ofNat (left (if flag then 7 else 11) (if flag then 3 else 4))
 def captureOutput (flag : Bool) : UInt64 :=
@@ -239,6 +255,21 @@ private def universeSource : String :=
   "  partial function universeRight(n: Nat): Nat := n\n" ++
   "end\n"
 
+private def singletonUniverseLeanSource : String :=
+  "universe u v\n" ++
+  "def eraseType (A : Type u) (n : Nat) : Nat := n\n" ++
+  "partial def universeSingleton (n : Nat) : Nat :=\n" ++
+  "  match n with\n" ++
+  "  | 0 => 17\n" ++
+  "  | k + 1 => eraseType (PUnit : Type u) (universeSingleton k + 1)\n"
+
+private def singletonUniverseSource : String :=
+  "universe u v\n" ++
+  "function eraseType(A: Type u, n: Nat): Nat := n\n" ++
+  "partial function universeSingleton(n: Nat): Nat := match n with {\n" ++
+  "  | 0 => 17\n" ++
+  "  | k + 1 => eraseType((PUnit : Type u), universeSingleton(k) + 1) }\n"
+
 private def mixedSource : String :=
   "mutual\n" ++
   "partial function first(n: Nat): Nat := second(n)\n" ++
@@ -356,6 +387,35 @@ private def checkConstruction : IO (List PsElabBatchOrigin) := do
       | throw (IO.userError "missing body-universe mutual identity")
     ensure (psElabMutualLevelNamesEqual levels [psRootName "u"])
       "body-only universe did not enter every final mutual signature"
+  let mut singletonPair : Option (PsExpr × PsExpr × PsExpr) := none
+  for (kind, text) in [(PsCompilerSourceKind.lean, singletonUniverseLeanSource),
+      (.proofScript, singletonUniverseSource)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    let singleton ← fromExcept
+      ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed "").mapError
+        psCompilerPscv0ElabError)
+    let name := psRootName "universeSingleton"
+    let some (.opaqueDecl logical levels type witness) :=
+        psEnvironmentFind singleton.result.environment name
+      | throw (IO.userError "singleton P0 lost its independently inhabited opaque")
+    let some (.partialDecl implementation bodyLevels bodyType body) :=
+        psEnvironmentFind singleton.result.environment (PsName.num name 0)
+      | throw (IO.userError "singleton P0 lost its actual private body")
+    ensure (psNameEq logical name && psNameEq implementation (PsName.num name 0) &&
+      psElabMutualLevelNamesEqual levels [psRootName "u"] &&
+      psElabMutualLevelNamesEqual bodyLevels levels && psExprAlphaEq type bodyType &&
+      !psExprAlphaEq witness body && !psExprHasConst name witness &&
+      psExprHasConst name body &&
+      [type, witness, body].all (fun term =>
+        (psExprFVarIds term).isEmpty && !psExprHasUnresolvedMeta term) &&
+      (psEnvironmentFind singleton.result.environment (psNameAppendStr name "eq_def")).isNone)
+      "singleton P0 changed body-universe closure, opacity or exact body ownership"
+    match singletonPair with
+    | none => singletonPair := some (type, witness, body)
+    | some (originalType, originalWitness, originalBody) =>
+      ensure (psExprAlphaEq type originalType && psExprAlphaEq witness originalWitness &&
+        psExprAlphaEq body originalBody)
+        "paired singleton P0 source kinds produced different checked identities"
   for text in [mixedSource,
       "mutual\npartial function first(n: Nat): Nat := n\nfunction second(n: Nat): Nat := n\nend\n",
       "mutual\npartial function first(n: Nat): Nat := second(n)\nfunction second(n: Nat): Nat := true\nend\n"] do
@@ -463,6 +523,19 @@ private def checks : Array Check :=
         source := source ++ wrappers, sourceName := "single-mutual.ps" } },
     { label := "implicit-instance-and-proof-aliases", request := { source := genericSource } },
     { label := "body-universe-closure", request := { source := universeSource } },
+    { label := "singleton-body-universe-native-input", request := {
+        sourceKind := .lean, source := singletonUniverseLeanSource } },
+    { label := "singleton-body-universe-proofscript-input", request := {
+        source := singletonUniverseSource } },
+    { label := "singleton-no-defining-equation-native-input", request := {
+        sourceKind := .lean
+        source := singletonUniverseLeanSource ++
+          "theorem singletonNotDefinition : universeSingleton 0 = 17 := by rfl\n" }
+      failure := some ("elaborate", "PSCV0-PROOF:") },
+    { label := "singleton-no-defining-equation-proofscript-input", request := {
+        source := singletonUniverseSource ++
+          "theorem singletonNotDefinition: universeSingleton(0) = 17 := by { rfl }\n" }
+      failure := some ("elaborate", "PSCV0-PROOF:") },
     -- Compile/check divergence; no runtime runner invokes this pair.
     { label := "opaque-reflexivity", request := {
         source := cycle ++ "theorem reflexive(n: Nat): first(n) = first(n) := by { rfl }\n" } },

@@ -102,6 +102,39 @@ def nested (n : Nat) : Nat :=
     | .leaf value => Nat.add value (nested k)
     | .link index _ => Nat.add index (nested k)
 
+-- This exact recursive shape was an old portable refusal. Both recursive calls
+-- consume a strict child exposed by the companion family's checked recursor.
+def bad (x : M3MatchLeft Nat 0) : Nat :=
+  match x with
+  | .leaf value => 0
+  | .link n next =>
+    match next with
+    | .zero previous => bad previous
+    | .step k previous => bad previous
+
+example : bad (.link 0 (.zero (.leaf 8))) = 0 := rfl
+example : bad (.link 3 (.step 2 (.link 0 (.zero (.leaf 8))))) = 0 := rfl
+
+run_cmd do
+  let command ← `(command|
+    def groupStructuralParent (x : M3MatchLeft Nat 0) : Nat :=
+      match x with
+      | .leaf value => 0
+      | .link n next =>
+        match next with
+        | .zero previous => groupStructuralParent (M3MatchLeft.link n next)
+        | .step k previous => groupStructuralParent (M3MatchLeft.link n next))
+  let saved ← get
+  let failed ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    pure (messages.toList.any fun message => message.severity == .error)
+  finally
+    set saved
+  unless failed do
+    throwError "native group recursion accepted a reconstructed parent"
+
 def leftOutput (flag : Bool) : UInt64 :=
   let x : M3MatchLeft Nat 0 :=
     if flag then .link 5 (.step 4 (.leaf 17)) else .leaf 13
@@ -153,8 +186,17 @@ private def propSource : String :=
   "inductive M3MatchPropLeft: Prop where { | fromRight(right: M3MatchPropRight) }\n" ++
   "inductive M3MatchPropRight: Prop where { | intro }\n"
 
+private def groupStructuralSource : String :=
+  "function bad(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => " ++
+    "match next with { | .zero previous => bad(previous) | .step k previous => bad(previous) } }\n"
+
+private def groupStructuralEquations : String :=
+  "theorem m3MatchGroupStructuralZero: bad(M3MatchLeft.link(0, M3MatchRight.zero(M3MatchLeft.leaf(8)))) = 0 := by { rfl }\n" ++
+  "theorem m3MatchGroupStructuralStep: bad(M3MatchLeft.link(3, M3MatchRight.step(2, M3MatchLeft.link(0, M3MatchRight.zero(M3MatchLeft.leaf(8)))))) = 0 := by { rfl }\n"
+
 private def logicalSource : String :=
   "universe u v\n" ++
+  groupStructuralSource ++ groupStructuralEquations ++
   "function m3MatchChoose(A: Type u, a: A, R: Sort v, fallback: R, x: M3MatchLeft(A, a)): R := match x with { | .leaf value => fallback | .link n next => fallback }\n" ++
   "theorem m3MatchFixedMajor(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n" ++
   "theorem m3MatchFixedContext(x: M3MatchRight(Nat, 0, 0), h: x = x): x = x := match x with { | .zero previous => h }\n" ++
@@ -271,9 +313,9 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   expectRefused environment "group induction"
     "theorem bad(x: M3MatchLeft(Nat, 0)): x = x := by { induction x }\n"
     "proof:group induction requires a complete motive family"
-  expectRefused environment "group structural recursion"
+  expectRefused environment "group recursion reconstructs parent"
     ("function bad(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => " ++
-      "match next with { | .zero previous => bad(previous) | .step k previous => bad(previous) } }\n")
+      "match next with { | .zero previous => bad(M3MatchLeft.link(n, next)) | .step k previous => bad(M3MatchLeft.link(n, next)) } }\n")
     "structural"
   expectRefused (remove environment (psRootName "HEq")) "missing heterogeneous equality"
     "theorem bad(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n"
@@ -298,7 +340,7 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   let wrongUnit := psEnvironmentInsert environment
     (.constructorDecl { constructor with type := .constE psNatName [] })
   expectRefused wrongUnit "wrong PUnit inhabitant type" simpleMatch "group"
-  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination and explicit induction/recursion limits and actual HEq foundation"
+  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination, strict recursive subterms, the explicit group induction limit and actual HEq foundation"
 
 private def outputCases : List (String × (Bool → UInt64)) :=
   [("m3matchleft", M3InductiveMatchOracle.leftOutput),
@@ -424,6 +466,7 @@ def main (args : List String) : IO Unit := do
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
   let kEquations ← checkKReduction environment
   let _ ← checked prelude (groups ++ logical ++ kEquations)
+  IO.println "PSCV0_M3_GROUP_STRUCTURAL_SOURCE: PASS native and fresh-kernel strict-child source recursion through both companion constructors"
   checkRefusals environment
   let declarations := group.declarations ++ runtime
   let environment ← fromExcept

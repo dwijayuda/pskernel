@@ -1114,7 +1114,7 @@ private def checks : List (String × String × Option String) := [
     some "duplicate named argument"),
   ("same-size",
     "function bad(n: Nat): Nat := bad(n)\ntermination_by n\n",
-    some "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-PARAMETERS: well-founded recursion requires a changing recursive argument"),
   ("false-measure",
     "function bad(n: Nat): Nat := match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by 0\n",
     some "PSCV0-WF-DECREASE"),
@@ -1127,13 +1127,13 @@ private def checks : List (String × String × Option String) := [
   ("ordinary-unused-hints", unusedHintSource, none),
   ("nondecreasing-Bool-domain",
     "function bad(n: Bool): Nat := bad(n)\ntermination_by 0\n",
-    some "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-PARAMETERS: well-founded recursion requires a changing recursive argument"),
   ("nondecreasing-Bool-result",
     "function bad(n: Nat): Bool := bad(n)\ntermination_by n\n",
-    some "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-PARAMETERS: well-founded recursion requires a changing recursive argument"),
   ("unchanged-parameters",
     "function bad(n: Nat, k: Nat): Nat := bad(n, k)\ntermination_by n\n",
-    some "PSCV0-WF-DECREASE"),
+    some "PSCV0-WF-PARAMETERS: well-founded recursion requires a changing recursive argument"),
   ("independent-sum-measure-does-not-decrease",
     "function bad(n: Nat, acc: Nat): Nat := match n with { | 0 => acc | k + 1 => bad(k, acc + 1) }\ntermination_by n + acc\n",
     some "PSCV0-WF-DECREASE"),
@@ -1148,7 +1148,7 @@ private def checks : List (String × String × Option String) := [
     some "unknown name seed"),
   ("body-lambda-is-not-a-header-parameter",
     "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by 0\n",
-    some "PSCV0-WF-TELESCOPE"),
+    some "PSCV0-WF-DECREASE"),
   ("body-lambda-measure-scope",
     "const bad: Nat -> Nat := fun (n: Nat) => match n with { | 0 => 0 | k + 1 => bad(k) }\ntermination_by n\n",
     some "unknown name n"),
@@ -1181,7 +1181,7 @@ private def checks : List (String × String × Option String) := [
     some "PSCV0-WF-MEASURE-TYPE"),
   ("generic relation does not justify a same-argument call",
     "function bad(n: Nat): Nat := bad(n)\ntermination_by Prod.mk(n, 0)\n",
-    some "PSCV0-WF-DECREASE")]
+    some "PSCV0-WF-PARAMETERS: well-founded recursion requires a changing recursive argument")]
 
 def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")

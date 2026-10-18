@@ -1429,6 +1429,42 @@ run_cmd do
     if state.allErrors.isEmpty && inputContext.atEnd state.pos then
       throwError "native top-level layout parser accepted {label}"
 
+abbrev registeredAbbrevWf (n : Nat) : Nat :=
+  match n with
+  | 0 => 31
+  | k + 1 => registeredAbbrevWf (k - 1) + 2
+termination_by n
+decreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)
+
+theorem registeredAbbrevWfStep (k : Nat) :
+    registeredAbbrevWf (Nat.succ k) = registeredAbbrevWf (k - 1) + 2 :=
+  registeredAbbrevWf.eq_def (Nat.succ k)
+
+opaque registeredOpaqueWhere (n : Nat) : Nat := loop n
+where
+  loop (m : Nat) : Nat :=
+    match m with
+    | 0 => 41
+    | k + 1 => loop k + 1
+
+abbrev registeredAbbrevWhere (bias n : Nat) : Nat := loop n
+where
+  loop (m : Nat) : Nat :=
+    match m with
+    | 0 => bias
+    | k + 1 => loop k + 1
+
+example : registeredAbbrevWhere 7 2 = 9 := rfl
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``registeredOpaqueWhere with
+  | some (.opaqueInfo _) => pure ()
+  | _ => throwError "native registered where source lost opacity"
+  for name in [``registeredAbbrevWf, ``registeredAbbrevWhere] do
+    unless (Lean.getReducibilityStatusCore environment name) == .reducible do
+      throwError "native registered source lost abbreviation reducibility"
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -1857,7 +1893,12 @@ def check (root : System.FilePath) : IO Unit := do
   for (label, source) in M3InputParityOracle.parserLayoutRefusals do
     match psCompilerParsePscv0 source .lean with
     | .error error =>
-      ensure (error.startsWith "PSCV0-PARSE:")
+      let restoredIndentation :=
+        ["unparenthesized indentation", "parenthesis restores position",
+          "named value restores position"].contains label
+      ensure (error.startsWith "PSCV0-PARSE:" ||
+        (restoredIndentation &&
+          error == "PSCV0-LEAN-DECLARATION: selected value declaration required"))
         (label ++ " refused outside the selected parser: " ++ error)
     | .ok _ => throw (IO.userError (label ++ " escaped its parser boundary"))
   checkIndependentSourcePair "indexed binary deriving"

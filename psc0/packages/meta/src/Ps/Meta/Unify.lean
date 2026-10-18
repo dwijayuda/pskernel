@@ -275,6 +275,30 @@ def psUnifyResultFamily
   | some (declaration, arguments) =>
     some (psUnifyResultFamilyAttempt unify environment locals context declaration arguments left)
 
+-- Function eta follows pinned Lean Meta/ExprDefEq.lean:224–234.
+-- Expand only from the non-lambda's inferred Pi, preserving every binder
+-- domain, level, application and local identity. Failed attempts roll back.
+def psUnifyFunctionEta
+    (unify : PsLocalContext → PsMetaContext → PsExpr → PsExpr → PsUnifyResult)
+    (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (left right : PsExpr) : Option PsUnifyResult :=
+  let attempt := fun lambda other =>
+    match psInferType environment context locals other with
+    | .error error => some (psUnifyInferFailure context error)
+    | .ok type =>
+      match psWhnfWithTransparency .«default» environment context locals type with
+      | .forallE name domain _ binder =>
+        let expanded := PsExpr.lam name domain
+          (.app (psExprLiftBVars 1 0 other) (.bvar 0)) binder
+        let result := unify locals context lambda expanded
+        some (if result.success then result else { result with context })
+      | _ => none
+  match left, right with
+  | .lam _ _ _ _, .lam _ _ _ _ => none
+  | lambda@(.lam _ _ _ _), other => attempt lambda other
+  | other, lambda@(.lam _ _ _ _) => attempt lambda other
+  | _, _ => none
+
 -- Recovery is supplied by a higher layer to resolve a checked reduction blocker.
 -- The default public worker uses no recovery, so Meta does not depend on
 -- typeclass search or elaborator work queues.
@@ -340,6 +364,8 @@ def psUnifyWithFuelRecoverWorker
                 (psUnifyFlexible assign context leftValue rightValue).orElse (fun _ =>
                   psUnifyResultFamily (smaller environment) environment localContext
                     context leftValue rightValue) then result
+            else if let some result := psUnifyFunctionEta (smaller environment)
+                environment localContext context leftValue rightValue then result
             else
               match leftValue with
               | .mvar leftId =>

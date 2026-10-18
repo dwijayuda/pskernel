@@ -321,6 +321,19 @@ def psInferProjectionType
 -- terms with convertible inferred propositions may use proof irrelevance.
 -- The inference callback is fuel-decreasing at recursive inference call sites;
 -- this rule never assigns a metavariable or treats runtime data as proof.
+-- Pinned ExprDefEq.isDefEqEta obtains the non-lambda operand's real
+-- function type at default transparency. Failed inference authorizes no eta.
+def psInferFunctionType
+    (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
+    (environment : PsEnvironment) (context : PsMetaContext)
+    (locals : PsLocalContext) (expression : PsExpr) : Option PsExpr :=
+  match infer locals expression with
+  | .error _ => none
+  | .ok type =>
+    match psWhnfWithTransparency .«default» environment context locals type with
+    | type@(.forallE _ _ _ _) => some type
+    | _ => none
+
 def psInferGroundProofIrrelevanceAt (transparency : PsTransparency)
     (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
     (environment : PsEnvironment) (context : PsMetaContext)
@@ -329,7 +342,9 @@ def psInferGroundProofIrrelevanceAt (transparency : PsTransparency)
   match infer locals left, infer locals right with
   | .ok leftType, .ok rightType =>
     if psExprHasUnresolvedMeta leftType || psExprHasUnresolvedMeta rightType ||
-        !psDefEqReadOnlyWithTransparency transparency environment context locals leftType rightType then false else
+        !psDefEqReadOnlyWithTransparencyTyped transparency environment context
+          (fun _ _ _ => false) (psInferFunctionType infer environment context)
+          256 locals leftType rightType then false else
     match infer locals leftType with
     | .ok sort =>
       match psWhnfWithTransparency transparency environment context locals sort with
@@ -344,8 +359,9 @@ def psInferDefEq
     (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
     (environment : PsEnvironment) (context : PsMetaContext)
     (locals : PsLocalContext) (left right : PsExpr) : Bool :=
-  psDefEqReadOnlyWithProofs environment context
-    (psInferGroundProofIrrelevance infer environment context) 256 locals left right
+  psDefEqReadOnlyWithTransparencyTyped .all environment context
+    (psInferGroundProofIrrelevance infer environment context)
+    (psInferFunctionType infer environment context) 256 locals left right
 
 def psInferTypeWithFuelWorker
     (remainingFuel : Nat) :

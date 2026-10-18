@@ -424,9 +424,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   -- The typed dependency owner decides whether a retained recursion hint is
   -- used. A genuine nonrecursive definition never invokes WF or P1 admission.
   let usePreDefinitions := match source with
-    | .whereDeclaration .. | .noncomputableDefinition .. => true
+    | .whereDeclaration .. | .noncomputableDefinition .. | .partialDefinition .. => true
     | .definition _ _ (.omittedType _) _ _
-    | .partialDefinition _ _ (.omittedType _) _ _
     | .wellFoundedDefinition _ _ (.omittedType _) _ _ _
     | .fixedpointDefinition _ _ (.omittedType _) _ _ => true
     -- Ordinary explicit definitions share the typed dependency/strategy owner.

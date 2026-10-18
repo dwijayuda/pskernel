@@ -303,8 +303,12 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- 40 symbolic iota rules and full trust-zero replay passed independently at
 -- 73690ab2 / preparation39135290050. The final-stage candidate measured this
 -- digest without changing any earlier frozen authoring boundary or assumption.
+-- Additive Option bind: 36 exact native declarations, three classes and three
+-- ordinary dictionaries; 3757 prior declarations/registrations unchanged.
+-- Independent fresh-kernel, dictionary-synthesis and 109-to-118 recursor audit
+-- measured these final digests at f203df3a / preparation39167823787.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:5539629570459325264"
+  "fnv1a64:1182496242517987711"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -480,8 +484,12 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- LawfulBEq/Nat.instLawfulBEq final-only registration independently measured
 -- by native authoring and strict selected audit at a39eb959, preparation
 -- 39166058244. All3757 logical declarations and earlier frozen bases remain.
+-- Additive Option bind: 36 exact native declarations, three classes and three
+-- ordinary dictionaries; 3757 prior declarations/registrations unchanged.
+-- Independent fresh-kernel, dictionary-synthesis and 109-to-118 recursor audit
+-- measured these final digests at f203df3a / preparation39167823787.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:73ca5d80a65101c85d16ff55e7a81fc8c7b9fade62296c56270cdd7e9c6dfcbc"
+  "sha256:92adc424afc3127f718baa76fe52bf075bbaa9b8cfa96b46a5203c36db33b5a7"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

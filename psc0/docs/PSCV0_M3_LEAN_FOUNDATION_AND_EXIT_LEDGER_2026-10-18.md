@@ -1,5 +1,54 @@
 # M3+B — approved Lean foundation and completion ledger
 
+## Audited Option bind selection and checked conversion candidate
+
+Preparation [39167823787](https://github.com/dwijayuda/pskernel/actions/runs/39167823787)
+at f203df3a3e5f9173b7765578b3226390571a7c7d passed both authoring jobs and
+the complete additive 36-declaration Option bind audit. The original 117-declaration
+audit, strict manifest, all retained/new recursor metadata and iota checks,
+eleven monotonicity proofs and two refusals also passed. Source/checked construction
+passed for operational WF packing, structural mutual recursion, P0, the retained
+extended P1 fixture, and noncomputable ownership. This was a failed preparation
+overall: selected-parser refusal diagnostics, fixed-parameter refusal diagnostics,
+an obsolete blanket structural-group refusal, and an unlocalized deriving
+dictionary failure remained. The complete fourteen-export runtime matrix did not run.
+
+This candidate selects exactly that audited additive closure after the frozen
+3,757-declaration/LawfulBEq stage. A named Option bind boundary preserves its
+independent audit when later stages are appended. Selected totals are 3,793
+declarations, 48 classes, 375 ordinary instances, 13 unchanged default instances,
+and 118 public recursors. Source SHA256 is
+86bbb4d5735a2ddeb8dc161cc9478789fca26f25cef9d5b43a0cf5af71aa8a29;
+selected FNV is 1182496242517987711, logical SHA256 is
+92adc424afc3127f718baa76fe52bf075bbaa9b8cfa96b46a5203c36db33b5a7,
+and surface SHA256 is
+dd0d54ecb485d4201c8ee5c4f78d1e27e00a21537d042e6b03b8df5dba5f1b4a.
+
+Runtime qualification adds checked polymorphic unboxed dictionary projection and
+the actual paired Bind.bind P1 source, equation/body ownership and fifth P1
+runtime export. Dictionary construction must be a checked value before a
+projection discards fields; runtime suffix operands retain their order.
+The original P1 exports and all fourteen general input-parity exports remain.
+
+Explicit singleton partial definitions now use the shared predefinition owner,
+including universes occurring only in the checked body. Native and fresh-kernel
+controls require opaque publication, exact body identity, no extra equation,
+and rejection of rfl unfolding. Typed function eta is added at shared conversion
+owners with actual inferred Pi domains; native dictionary/function equations and
+changed method/domain/order refusals independently constrain it. Deriving phases
+are labeled so a failure cannot be attributed to a later probe without evidence.
+
+The original six parser-refusal programs and WF-refusal programs are unchanged;
+their assertions follow the actual selected parser/fixed-parameter/decrease
+owners. The formerly refused strict-child structural group source is preserved
+as a native and fresh-kernel positive, with reconstructed-parent recursion kept
+as a genuine native/portable refusal.
+
+These changes are candidates until their own Linux CI passes. The complete Data
+and registered-main ownership work remains in progress. All six M3+B exits stay
+OPEN. Main has not been promoted; Native/M3/F1/F2/F3 must qualify one complete
+compiler/test SHA. See the Option bind selection receipt for independent evidence.
+
 ## Selected recursor source qualified in preparation
 
 [Preparation 39138442923](https://github.com/dwijayuda/pskernel/actions/runs/39138442923)

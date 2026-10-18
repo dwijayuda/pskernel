@@ -908,16 +908,189 @@ def psErasureUnboxedProjection (environment : PsEnvironment) (scope : PsErasureS
       | .ok type => (psExprFVarIds type).any indices.contains
     | _ => false
 
-def psErasureExpandUnboxedProjection (environment : PsEnvironment)
-    (scope : PsErasureScope) (value : PsExpr) : Option PsExpr := do
+-- A polymorphic unboxed method may be specialized only through a checked
+-- dictionary value. Inference failures retain their resource classification.
+def psErasureInferUnboxedProjection (environment : PsEnvironment)
+    (scope : PsErasureScope) (value : PsExpr) : Except PsErasureError PsExpr :=
+  match psInferType environment psMetaEmpty scope.localContext value with
+  | .ok type => .ok type
+  | .error .fuelExhausted => .error .fuelExhausted
+  | .error _ => .error .unsupportedApplication
+
+-- A declaration is an inert function value only before its checked runtime
+-- entry is saturated. A Pi result alone may be a computed returned function.
+def psErasureUnboxedFunctionValue (environment : PsEnvironment)
+    (value : PsExpr) : Except PsErasureError Bool := do
   let view := psInferAppView value
-  let .constE name levels := view.head | none
-  let declaration ← psEnvironmentFind environment name
-  let body ← psDeclarationValue declaration
-  if !psErasureUnboxedProjection environment scope 4096 psLocalEmpty [] body then none else
-    return psWhnfCore psMetaEmpty scope.localContext
-      (psExprApplyMany (psExprInstantiateLevelParams
-        (psDeclarationLevelParams declaration) levels body) view.args)
+  let .constE name levels := view.head | return false
+  let some declaration := psEnvironmentFind environment name | return false
+  let some (parameters, type, body) := (match declaration with
+    | .definitionDecl _ parameters type body
+    | .partialDecl _ parameters type body
+    | .opaqueDecl _ parameters type body => some (parameters, type, body)
+    | _ => none) | return false
+  if parameters.length != levels.length then throw .binderMismatch
+  let entry ← psErasureEntryInfoWithFuel environment 256 psLocalEmpty
+    (psExprInstantiateLevelParams parameters levels type)
+    (psExprInstantiateLevelParams parameters levels body)
+  if view.args.length > entry.binders.length then return false
+  let supplied := (entry.binders.take view.args.length).foldl (fun count kind =>
+    match kind with
+    | .runtime | .proof => count + 1
+    | _ => count) 0
+  return Nat.blt supplied entry.runtimeArity
+
+-- Validate the original dictionary construction before any projection can
+-- discard its other fields. Runtime arguments must already be values; erased
+-- arguments retain their exact checked Core expressions. Inspect beneath erased
+-- lambdas because they do not delay execution; runtime/proof lambdas do.
+def psErasureUnboxedDictionaryValue (environment : PsEnvironment)
+    (scope : PsErasureScope) (fuel : Nat) : PsExpr → Except PsErasureError PsExpr :=
+  match fuel with
+  | 0 => fun _ => .error .fuelExhausted
+  | fuel + 1 => fun value => do
+    let smaller := psErasureUnboxedDictionaryValue environment scope fuel
+    match value with
+    | .lit _ | .sortE _ | .forallE _ _ _ _ => return value
+    | .lam name domain body binder =>
+      match psErasureClassifyBinder environment scope.localContext domain with
+      | .type | .index =>
+        let pushed := psLocalPushBinding scope.localContext name domain binder
+        let nextScope := { scope with localContext := pushed.context }
+        let _ ← psErasureUnboxedDictionaryValue environment nextScope fuel
+          (psExprInstantiate1 body (.fvar pushed.id))
+        return value
+      | _ => return value
+    | .fvar id =>
+      match psLocalFindById scope.localContext id with
+      | some (.letDecl _ _ _ body) => smaller body
+      | some _ => return value
+      | none => throw (.unknownLocal id)
+    | .letE _ domain argument body =>
+      let argument ← match psErasureClassifyBinder environment scope.localContext domain with
+        | .runtime => smaller argument
+        | _ => pure argument
+      smaller (psExprInstantiate1 body argument)
+    | .constE name levels =>
+      if psEnvironmentIsNoncomputable environment name then
+        throw (.noncomputableDependency name)
+      let some declaration := psEnvironmentFind environment name |
+        throw (.unknownConstant name)
+      if (psDeclarationLevelParams declaration).length != levels.length then
+        throw .binderMismatch
+      let retainFunction : Unit → Except PsErasureError PsExpr := fun _ => do
+        if ← psErasureUnboxedFunctionValue environment value then return value
+        else throw .unsupportedApplication
+      match declaration with
+      | .constructorDecl _ => return value
+      | .definitionDecl _ parameters _ body =>
+        if psEnvironmentCanUnfold environment .instances name then
+          smaller (psExprInstantiateLevelParams parameters levels body)
+        else retainFunction ()
+      | _ => retainFunction ()
+    | .app fn argument =>
+      let functionType ← psErasureInferUnboxedProjection environment scope fn
+      let .forallE _ domain _ _ := psWhnfWithTransparency .instances environment
+        psMetaEmpty scope.localContext functionType | throw .unsupportedApplication
+      let fn ← smaller fn
+      let argument ← match psErasureClassifyBinder environment scope.localContext domain with
+        | .runtime => smaller argument
+        | _ => pure argument
+      match fn with
+      | .lam _ _ body _ => smaller (psExprInstantiate1 body argument)
+      | _ =>
+        let view := psInferAppView fn
+        let .constE name _ := view.head | throw .unsupportedApplication
+        let applied := PsExpr.app fn argument
+        if (psEnvironmentFindConstructor environment name).isSome then return applied
+        else if ← psErasureUnboxedFunctionValue environment applied then return applied
+        else throw .unsupportedApplication
+    | .proj owner index major =>
+      let major ← smaller major
+      let some field := psReduceProjectionIota (fun term => term)
+        environment owner index major | throw .unsupportedApplication
+      smaller field
+    | .bvar _ => throw .looseBoundVariable
+    | .mvar _ => throw .unresolvedMetavariable
+
+def psErasureUnboxedMethodArguments (environment : PsEnvironment)
+    (scope : PsErasureScope) (fuel : Nat) (type : PsExpr)
+    (arguments : List PsExpr) : Except PsErasureError Unit := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match psWhnfWithTransparency .instances environment psMetaEmpty scope.localContext type with
+    | .forallE _ domain body _ =>
+      match psErasureClassifyBinder environment scope.localContext domain with
+      | .type | .index =>
+        let argument :: rest := arguments | throw .binderMismatch
+        psErasureUnboxedMethodArguments environment scope fuel
+          (psExprInstantiate1 body argument) rest
+      | _ => pure ()
+    | _ => pure ()
+
+def psErasureSpecializeUnboxedProjection (environment : PsEnvironment)
+    (scope : PsErasureScope) (name : PsName) (original expanded : PsExpr) :
+    Except PsErasureError PsExpr := do
+  let some (owner, index, major, arguments) :=
+    psReduceClassProjectionView environment name expanded | return expanded
+  let projection := PsExpr.proj owner index major
+  let projectionType ← psErasureInferUnboxedProjection environment scope projection
+  let needsConcreteMethod := match psWhnfWithTransparency .instances environment
+      psMetaEmpty scope.localContext projectionType with
+    | .forallE _ domain _ _ =>
+      match psErasureClassifyBinder environment scope.localContext domain with
+      | .type | .index => true
+      | _ => false
+    | _ => false
+  if !needsConcreteMethod then return expanded
+  let originalType ← psErasureInferUnboxedProjection environment scope original
+  psErasureUnboxedMethodArguments environment scope 256 projectionType arguments
+  let majorType ← psErasureInferUnboxedProjection environment scope major
+  let checkedMajor ← psErasureUnboxedDictionaryValue environment scope 256 major
+  let normalizedMajor := psWhnfWithTransparency .instances environment
+    psMetaEmpty scope.localContext checkedMajor
+  let normalizedMajorType ← psErasureInferUnboxedProjection environment scope normalizedMajor
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext
+      majorType normalizedMajorType then throw .unsupportedApplication
+  let majorTypeView := psInferAppView (psWhnfWithTransparency .instances environment
+    psMetaEmpty scope.localContext majorType)
+  let .constE typeOwner typeLevels := majorTypeView.head | throw .unsupportedApplication
+  let constructorView := psInferAppView normalizedMajor
+  let .constE _ constructorLevels := constructorView.head | throw .unsupportedApplication
+  if !psNameEq typeOwner owner || typeLevels.length != constructorLevels.length ||
+      !(typeLevels.zip constructorLevels).all
+        (fun pair => psLevelEquivalent pair.fst pair.snd) then throw .binderMismatch
+  -- Iota authenticates the single constructor, family, ordinal, levels and
+  -- saturated parameter/field telescope before exposing the actual method.
+  let some field := psReduceProjectionIota (fun term => term)
+    environment owner index normalizedMajor | throw .unsupportedApplication
+  let fieldType ← psErasureInferUnboxedProjection environment scope field
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext
+      projectionType fieldType then throw .unsupportedApplication
+  -- Keep every suffix operand and its order. Existing erased-lambda application
+  -- erasure instantiates only the leading type/index binders; runtime operands
+  -- remain ordinary calls even when the stored method ignores an argument.
+  let replacement := psExprApplyMany field arguments
+  let replacementType ← psErasureInferUnboxedProjection environment scope replacement
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty scope.localContext
+      originalType replacementType then throw .unsupportedApplication
+  return replacement
+
+def psErasureExpandUnboxedProjection (environment : PsEnvironment)
+    (scope : PsErasureScope) (value : PsExpr) : Except PsErasureError (Option PsExpr) := do
+  let view := psInferAppView value
+  let .constE name levels := view.head | return none
+  let some declaration := psEnvironmentFind environment name | return none
+  let some body := psDeclarationValue declaration | return none
+  if !psErasureUnboxedProjection environment scope 4096 psLocalEmpty [] body then
+    return none
+  if (psDeclarationLevelParams declaration).length != levels.length then
+    throw .binderMismatch
+  let expanded := psWhnfCore psMetaEmpty scope.localContext
+    (psExprApplyMany (psExprInstantiateLevelParams
+      (psDeclarationLevelParams declaration) levels body) view.args)
+  return some (← psErasureSpecializeUnboxedProjection environment scope name value expanded)
 
 def psEraseRuntimeTypeWithFuelWorker
     (environment : PsEnvironment)

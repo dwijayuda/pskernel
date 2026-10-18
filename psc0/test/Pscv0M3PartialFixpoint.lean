@@ -58,6 +58,45 @@ def mutualOutput (flag : Bool) : UInt64 :=
   let n := if flag then 2 else 3
   UInt64.ofNat (100 * left n + right n)
 
+def auditOptionBind (n : Nat) : Option Nat :=
+  match n with
+  | 0 => some 0
+  | k + 1 =>
+    Bind.bind (auditOptionBind k) (fun value =>
+      Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))
+partial_fixpoint
+
+theorem auditOptionBindEquation (n : Nat) :
+    auditOptionBind n = (match n with
+      | 0 => some 0
+      | k + 1 =>
+        Bind.bind (auditOptionBind k) (fun value =>
+          Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=
+  auditOptionBind.eq_def n
+
+/-- error: Could not prove -/
+#guard_msgs (error, drop warning, substring := true) in
+def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=
+  match n with
+  | 0 => some 0
+  | k + 1 =>
+    Option.bind (auditOptionDirectBindRefusal k) (fun value =>
+      Option.bind (auditOptionDirectBindRefusal value) (fun previous => some (Nat.succ previous)))
+partial_fixpoint
+
+/-- error: Could not prove -/
+#guard_msgs (error, drop warning, substring := true) in
+def auditOptionInspection (n : Nat) : Option Nat :=
+  match auditOptionInspection n with
+  | none => some 0
+  | some _ => none
+partial_fixpoint
+
+def bindOutput (flag : Bool) : UInt64 :=
+  UInt64.ofNat (match auditOptionBind (if flag then 4 else 3) with
+    | none => 997
+    | some value => value)
+
 universe u
 
 def generic {A : Type u} (seed : A) (n : Nat) : A :=
@@ -151,7 +190,8 @@ run_cmd do
   for name in [``countdown, ``optionCountdown, ``left, ``right,
       ``countdownEquation, ``optionEquation, ``leftEquation, ``rightEquation,
       ``generic, ``sectionValue, ``dependent, ``genericEquation, ``dependentEquation,
-      ``first, ``bad, ``riBad, ``fixed] do
+      ``first, ``bad, ``riBad, ``fixed, ``auditOptionBind,
+      ``auditOptionBind.eq_def, ``auditOptionBindEquation] do
     let axioms ← Lean.collectAxioms name
     unless axioms.contains ``Classical.choice &&
         axioms.all (fun axiomName => axiomName == ``propext ||
@@ -191,8 +231,30 @@ private def extendedSource : String :=
   "function p1Dependent(bound: Nat, n: Nat, seed: Fin(bound + 1)): Fin(bound + 1) := match n with { | 0 => seed | k + 1 => p1Dependent(bound, k, seed) }\npartial_fixpoint\n" ++
   "theorem p1DependentEquation(bound: Nat, n: Nat, seed: Fin(bound + 1)): Eq(p1Dependent(bound, n, seed), match n with { | 0 => seed | k + 1 => p1Dependent(bound, k, seed) }) := by { exact p1Dependent.eq_def(bound, n, seed) }\n"
 
+private def optionBindLeanSource : String :=
+  "def auditOptionBind (n : Nat) : Option Nat :=\n  match n with\n  | 0 => some 0\n  | k + 1 =>\n    Bind.bind (auditOptionBind k) (fun value =>\n      Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))\npartial_fixpoint\n\ntheorem auditOptionBindEquation (n : Nat) :\n    auditOptionBind n = (match n with\n      | 0 => some 0\n      | k + 1 =>\n        Bind.bind (auditOptionBind k) (fun value =>\n          Bind.bind (auditOptionBind value) (fun previous => some (Nat.succ previous)))) :=\n  auditOptionBind.eq_def n\n\n"
+
+private def optionBindPsSource : String :=
+  "function auditOptionBind(n: Nat): Option(Nat) := match n with {\n  | 0 => Option.some(0)\n  | k + 1 => Bind.bind(auditOptionBind(k), fun value =>\n    Bind.bind(auditOptionBind(value), fun previous => Option.some(Nat.succ(previous))))\n}\npartial_fixpoint\ntheorem auditOptionBindEquation(n: Nat):\n  Eq(auditOptionBind(n), match n with {\n    | 0 => Option.some(0)\n    | k + 1 => Bind.bind(auditOptionBind(k), fun value =>\n      Bind.bind(auditOptionBind(value), fun previous => Option.some(Nat.succ(previous))))\n  }) := by { exact auditOptionBind.eq_def(n) }\n"
+
+private def optionBindDirectLeanRefusal : String :=
+  "def auditOptionDirectBindRefusal (n : Nat) : Option Nat :=\n  match n with\n  | 0 => some 0\n  | k + 1 =>\n    Option.bind (auditOptionDirectBindRefusal k) (fun value =>\n      Option.bind (auditOptionDirectBindRefusal value) (fun previous => some (Nat.succ previous)))\npartial_fixpoint\n\n"
+
+private def optionBindDirectPsRefusal : String :=
+  "function auditOptionDirectBindRefusal(n: Nat): Option(Nat) := match n with {\n  | 0 => Option.some(0)\n  | k + 1 => Option.bind(auditOptionDirectBindRefusal(k), fun value =>\n    Option.bind(auditOptionDirectBindRefusal(value), fun previous => Option.some(Nat.succ(previous))))\n}\npartial_fixpoint\n"
+
+private def optionBindInspectionLeanRefusal : String :=
+  "def auditOptionInspection (n : Nat) : Option Nat :=\n  match auditOptionInspection n with\n  | none => some 0\n  | some _ => none\npartial_fixpoint\n"
+
+private def optionBindInspectionPsRefusal : String :=
+  "function auditOptionInspection(n: Nat): Option(Nat) :=\n  match auditOptionInspection(n) with {\n    | .none => Option.some(0)\n    | .some _ => Option.none\n  }\npartial_fixpoint\n"
+
+private def optionBindRuntimeSource : String :=
+  optionBindPsSource ++
+  "function m3p1bind(flag: Bool): UInt64 := UInt64.ofNat(match auditOptionBind(if (flag) { 4 } else { 3 }) with { | .none => 997 | .some value => value })\n"
+
 private def source : String :=
-  definitionsSource ++ extendedSource ++
+  definitionsSource ++ extendedSource ++ optionBindRuntimeSource ++
   "function m3p1generic(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 4 } else { 3 }\n let bound: Nat := if (flag) { 7 } else { 5 }\n UInt64.ofNat(p1Generic(if (flag) { 11 } else { 13 }, n) + 100 * p1Scoped(if (flag) { 17 } else { 19 }, n) + 10000 * Fin.val(p1Dependent(bound, n, Fin.mk(bound, Nat.lt_succ_self(bound))))) }\n" ++
   "function m3p1countdown(flag: Bool): UInt64 := UInt64.ofNat(p1Countdown(if (flag) { 17 } else { 29 }, if (flag) { 4 } else { 3 }))\n" ++
   "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some value => value + 5 })\n" ++
@@ -216,7 +278,8 @@ private def exports : List (String × (Bool → UInt64)) :=
   [("m3p1countdown", M3PartialFixpointOracle.countdownOutput),
    ("m3p1option", M3PartialFixpointOracle.optionOutput),
    ("m3p1mutual", M3PartialFixpointOracle.mutualOutput),
-   ("m3p1generic", M3PartialFixpointOracle.genericOutput)]
+   ("m3p1generic", M3PartialFixpointOracle.genericOutput),
+   ("m3p1bind", M3PartialFixpointOracle.bindOutput)]
 
 private def binderNames : PsExpr → List String
   | .forallE name _ body _ => psNameToString name :: binderNames body
@@ -485,6 +548,78 @@ private def checkLogicalOnly (prelude : Lean.Kernel.Environment) : IO Unit := do
     checkOfficial prelude output.prepared label
   IO.println "PSCV0_M3_P1_LOGICAL_ONLY: PASS all five exact former policy-refusal programs are kernel-checked logical definitions; none was emitted or executed"
 
+private def checkOptionBind (prelude : Lean.Kernel.Environment) : IO Unit := do
+  for (kind, text) in [(PsCompilerSourceKind.lean, optionBindLeanSource),
+      (.proofScript, optionBindPsSource)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    let compiled ← fromExcept ((psElabProgramWithOrigins
+      psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)
+    let environment := compiled.result.environment
+    let name := psRootName "auditOptionBind"
+    let some (.definitionDecl _ levels type value) := psEnvironmentFind environment name
+      | throw (IO.userError "Option bind P1 source is not a checked definition")
+    let [marker] := compiled.result.declarations.filter (fun declaration =>
+        match declaration with | .partialDecl .. => true | _ => false)
+      | throw (IO.userError "Option bind P1 did not retain one actual source body")
+    let .partialDecl _ bodyLevels bodyType body := marker
+      | throw (IO.userError "Option bind P1 source marker changed its kind")
+    ensure (levels.isEmpty && bodyLevels.isEmpty && binderNames type == ["n"] &&
+      psExprAlphaEq type bodyType && !psExprHasUnresolvedMeta body &&
+      (psExprFVarIds body).isEmpty)
+      "Option bind P1 changed its source header or retained an open body"
+    let .constE auxiliary _ := value
+      | throw (IO.userError "Option bind P1 lost its actual checked singleton auxiliary")
+    let some (.definitionDecl _ _ _ construction) := psEnvironmentFind environment auxiliary
+      | throw (IO.userError "Option bind P1 auxiliary is absent")
+    let fixed := psReduceAppView construction
+    let .constE fixedName _ := fixed.head
+      | throw (IO.userError "Option bind P1 auxiliary lost its actual fix head")
+    let [_, _, _, monotonicity] := fixed.args
+      | throw (IO.userError "Option bind P1 auxiliary changed its checked fix telescope")
+    ensure (psNameEq fixedName (orderName "fix") &&
+      psExprHasConst (orderName "monotone_bind") monotonicity)
+      "Option bind P1 did not use the selected checked generic bind law"
+    let some (.theoremDecl _ equationLevels equationType equationProof) :=
+        psEnvironmentFind environment (psNameAppendStr name "eq_def")
+      | throw (IO.userError "Option bind P1 lost its original source equation")
+    ensure (equationLevels.isEmpty)
+      "Option bind P1 source equation acquired an unrelated universe"
+    let opened ← fromExcept ((psElabPreDefinitionOpen 1
+      (psElabContextEmpty environment levels) equationType equationProof).mapError
+      psCompilerPscv0ElabError)
+    let [_, left, right] := (psReduceAppView opened.type).args
+      | throw (IO.userError "Option bind P1 source equation is not a binary equality")
+    let arguments := psElabBinderArguments opened.bindersRev
+    let some sourceBody := psRecursorLiftBetaApply body arguments
+      | throw (IO.userError "Option bind P1 retained body lost its actual header")
+    ensure (psExprAlphaEq left (psExprApplyMany (.constE name []) arguments) &&
+      psExprAlphaEq right sourceBody)
+      "Option bind P1 equation does not retain the exact recursive RHS"
+    let output ← fromExcept ((psCompilerPrepareElaboratedWithOutput compiled.result).mapError
+      psCompilerPscv0Error)
+    checkOfficial prelude output.prepared "recursive-generic-Option-bind"
+    let runtime ← fromExcept ((psCompilerOrdinaryPartialRuntimeDeclarations
+      output.prepared.declarations).mapError psCompilerPscv0Error)
+    let some (.definitionDecl _ _ runtimeType runtimeBody) := runtime.find? (fun declaration =>
+        psNameEq (psDeclarationName declaration) name)
+      | throw (IO.userError "Option bind P1 runtime lost its public source entry")
+    ensure (psExprAlphaEq runtimeType bodyType && psExprAlphaEq runtimeBody body)
+      "Option bind P1 runtime did not retain the actual recursive bind body"
+  for (label, kind, text) in [
+      ("direct method", PsCompilerSourceKind.lean, optionBindDirectLeanRefusal),
+      ("direct method", .proofScript, optionBindDirectPsRefusal),
+      ("result inspection", .lean, optionBindInspectionLeanRefusal),
+      ("result inspection", .proofScript, optionBindInspectionPsRefusal)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
+    | .error error =>
+      let message := psCompilerPscv0ElabError error
+      ensure (!psElabErrorIsResource error &&
+        message.startsWith "PSCV0-DATA: PSCV0-FIXPOINT-MONOTONICITY:")
+        ("Option " ++ label ++ " failed at the wrong boundary: " ++ message)
+    | .ok _ => throw (IO.userError ("unsupported Option " ++ label ++ " was accepted"))
+  IO.println "PSCV0_M3_P1_OPTION_BIND: PASS both source grammars, checked generic bind law and original equation, fresh official kernel, retained runtime body and exact direct-method/inspection refusals"
+
 private def checkNonmonotoneRefusal : IO Unit := do
   let parsed ← fromExcept (psPscv0ParseProgram
     "function nonMonotone(n: Nat): Nat := nonMonotone(n) + 1\npartial_fixpoint\n")
@@ -506,6 +641,8 @@ private def moduleProvider : String :=
 private def emitRuntime (directory : System.FilePath) : IO Unit := do
   IO.FS.createDirAll directory
   IO.FS.writeFile (directory / "p1fixedpoint.ps") source
+  IO.FS.writeFile (directory / "p1-option-bind.ps") optionBindPsSource
+  IO.FS.writeFile (directory / "p1-option-bind.lean") optionBindLeanSource
   ensure (M3PartialFixpointOracle.countdownOutput false == 29 &&
     M3PartialFixpointOracle.countdownOutput true == 17 &&
     M3PartialFixpointOracle.optionOutput false == 48 &&
@@ -513,6 +650,9 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     M3PartialFixpointOracle.mutualOutput false == 4123 &&
     M3PartialFixpointOracle.mutualOutput true == 2341)
     "independent native P1 terminating observations changed"
+  ensure (M3PartialFixpointOracle.bindOutput false == 3 &&
+    M3PartialFixpointOracle.bindOutput true == 4)
+    "independent native P1 recursive bind observations changed"
   let ordinary : PsV7Native.Request := {
     source, sourceName := "p1fixedpoint.ps", outputStem := "p1fixedpoint"
     assurance := .ordinaryChecked
@@ -575,7 +715,7 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       exports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 40 terminating runtime comparisons follow"
+  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 50 terminating runtime comparisons follow"
 
 def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -591,5 +731,6 @@ def main (args : List String) : IO Unit := do
   checkAdapterNegatives prelude prepared
   checkLogicalOnly prelude
   checkNonmonotoneRefusal
+  checkOptionBind prelude
   emitRuntime (System.FilePath.mk directory)
   IO.println "PSCV0_M3_P1: PASS native logical/runtime separation, checked packed fixpoint ownership, exact unfolding equations, adversarial adapter refusal and retained nonmonotone/verified boundaries"

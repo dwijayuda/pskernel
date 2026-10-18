@@ -1,6 +1,17 @@
 import Ps.Host.NativeV7
 import PsKernelLean.Admission
 
+-- Native function eta and the exact Nat dictionary conversion are checked
+-- independently of the portable synthesizer.
+example (f : Nat → Nat) : (fun n => f n) = f := rfl
+example : (show BEq Nat from ⟨Nat.beq⟩) =
+    @instBEqOfDecidableEq Nat instDecidableEqNat := rfl
+example : True := by
+  fail_if_success
+    have : (show BEq Nat from ⟨fun _ _ => false⟩) =
+        @instBEqOfDecidableEq Nat instDecidableEqNat := rfl
+  exact True.intro
+
 -- Independent pinned Lean deriving. These ordinary native declarations are
 -- never substituted for the portable group AST or its generated instances.
 -- Names are identical so Repr parity compares the complete printed document.
@@ -214,6 +225,53 @@ private def fromExcept (result : Except String α) : IO α :=
   | .ok value => pure value
   | .error error => throw (IO.userError error)
 
+private def checkTypedFunctionEta (environment : PsEnvironment) : IO Unit := do
+  let nat : PsExpr := .constE psNatName []
+  let bool : PsExpr := .constE psBoolName []
+  let method : PsExpr := .constE psNatBeqName []
+  let expanded := PsExpr.lam (psRootName "left") nat
+    (.lam (psRootName "right") nat
+      (psExprApplyMany method [.bvar 1, .bvar 0]) .explicit) .explicit
+  let changed := PsExpr.lam (psRootName "left") nat
+    (.lam (psRootName "right") nat (.constE psBoolFalseName []) .explicit) .explicit
+  let reversed := PsExpr.lam (psRootName "left") nat
+    (.lam (psRootName "right") nat
+      (psExprApplyMany method [.bvar 0, .bvar 1]) .explicit) .explicit
+  let wrongDomain := PsExpr.lam (psRootName "left") bool
+    (.lam (psRootName "right") nat (.constE psBoolFalseName []) .explicit) .explicit
+  let infer := psInferType environment psMetaEmpty
+  let compare := psDefEqReadOnlyWithTransparencyTyped .instances environment psMetaEmpty
+    (fun _ _ _ => false) (psInferFunctionType infer environment psMetaEmpty) 256 psLocalEmpty
+  for (label, left, right, expected) in [
+      ("eta forward", method, expanded, true),
+      ("eta reverse", expanded, method, true),
+      ("changed method", method, changed, false),
+      ("argument permutation", method, reversed, false),
+      ("domain mismatch", method, wrongDomain, false)] do
+    let _ ← fromExcept ((infer psLocalEmpty left).mapError
+      (fun _ => "eta control left is not typed: " ++ label))
+    let _ ← fromExcept ((infer psLocalEmpty right).mapError
+      (fun _ => "eta control right is not typed: " ++ label))
+    let unified := psUnifyWithTransparency .instances environment psLocalEmpty psMetaEmpty left right
+    ensure (!unified.resourceExceeded && unified.success == expected)
+      ("typed eta unification disagrees: " ++ label)
+    ensure (compare left right == expected)
+      ("typed eta read-only conversion disagrees: " ++ label)
+  let source : PsExpr := .constE (psDecisionName "Nat.instLawfulBEq") []
+  let sourceType ← fromExcept ((infer psLocalEmpty source).mapError
+    (fun _ => "selected native Nat law has no checked type"))
+  let selected : PsExpr := .constE (psDecisionName "PsStandard.instBEqNat") []
+  let target := psExprApplyMany (.constE (psRootName "LawfulBEq") [.zero]) [nat, selected]
+  let unified := psUnifyWithTransparency .instances environment psLocalEmpty psMetaEmpty
+    sourceType target
+  ensure (!unified.resourceExceeded && unified.success && compare sourceType target)
+    "selected/native Nat law targets differ after typed function eta"
+  let probe ← fromExcept ((psElabResolvedTerm (psElabContextEmpty environment [])
+    source (some target)).mapError psCompilerPscv0ElabError)
+  ensure (psExprAlphaEq probe.term source)
+    "Nat lawful conversion substituted another proof identity"
+  IO.println "PSCV0_M3_TYPED_FUNCTION_ETA: PASS native eta/dictionary equations; typed two-way eta, changed method/domain/order refusal and unchanged Nat lawful proof identity"
+
 private def literal (value : String) : String := (Lean.toJson value).compress
 
 -- The parser supplies existing single-declaration ASTs; the native group API
@@ -334,8 +392,14 @@ private def add (environment : PsEnvironment) (declarations : List PsDeclaration
 
 private def derive (environment : PsEnvironment) (origin : PsElabBatchOrigin)
     (handlers : List String) : IO (List PsDeclaration) := do
+  let families := origin.members.filterMap fun member =>
+    match member.role with
+    | .inductiveType | .structureType => some (psNameToString member.name)
+    | _ => none
   let declarations ← fromExcept ((handlers.mapM fun handler =>
-    psElabDeriveGroupHandler environment origin { segments := [handler], span := origin.span }).mapError
+    (psElabDeriveGroupHandler environment origin
+      { segments := [handler], span := origin.span }).mapError
+      (.atContext ("deriving " ++ handler ++ " for " ++ String.intercalate ", " families))).mapError
       psCompilerPscv0ElabError)
   return declarations.flatten
 
@@ -371,7 +435,8 @@ private def checkIndexedLawfulRegistration (environment : PsEnvironment) : IO Un
   let nat : PsExpr := .constE psNatName []
   let dictionary : PsExpr := .constE (psDecisionName "PsStandard.instBEqNat") []
   let target := psExprApplyMany (.constE className [.zero]) [nat, dictionary]
-  let evidence ← fromExcept ((psElabDeriveInstance context target).mapError psCompilerPscv0ElabError)
+  let evidence ← fromExcept (((psElabDeriveInstance context target).mapError
+    (.atContext "indexed group selected Nat lawful probe")).mapError psCompilerPscv0ElabError)
   let _ ← fromExcept ((psElabResolvedTerm context evidence (some target)).mapError
     psCompilerPscv0ElabError)
   let falseDictionary := psExprApplyMany
@@ -647,18 +712,24 @@ def main (args : List String) : IO Unit := do
   let (indexed, indexedOrigin) ← fromExcept (elaborateGroup indexedSource)
   let groups := group.declarations ++ indexed.declarations
   let input ← add psSelfHostProdPreludeEnvironment groups
+  checkTypedFunctionEta input
   checkPlans input origin indexedOrigin
   checkRefusals input origin indexedOrigin
   -- Every handler sees the same input. None of the generated group instances
   -- can be searched as an assumed recursive dictionary while deriving another.
   let ordinary ← derive input origin ["Hashable", "Repr", "BEq"]
+  IO.println "PSCV0_M3_DERIVING_PHASE: ordinary handlers"
   let dependent ← derive input indexedOrigin ["Hashable", "Repr"]
+  IO.println "PSCV0_M3_DERIVING_PHASE: dependent handlers"
   let instances := ordinary ++ dependent
   ensure (instances.length == 10) "deriving did not generate one instance per requested group member"
   checkMetadataConsumers input groups instances
+  IO.println "PSCV0_M3_DERIVING_PHASE: metadata"
   let registered ← register input instances
   let logical ← sourceResult registered logicalSource
+  IO.println "PSCV0_M3_DERIVING_PHASE: logical source"
   let runtime ← sourceResult registered runtimeSource
+  IO.println "PSCV0_M3_DERIVING_PHASE: runtime source"
   checkPortableReduction runtime.result.environment
   let declarations := groups ++ instances ++ runtime.result.declarations
   let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
@@ -669,6 +740,7 @@ def main (args : List String) : IO Unit := do
     "group deriving lost common A/a/dictionary captures or generated workers for right-only BEq inspection"
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  IO.println "PSCV0_M3_DERIVING_PHASE: indexed binary entry"
   checkIndexedGroupBinary prelude input groups indexedOrigin
   let admitted ← checked prelude prepared.prepared.declarations
   let _ ← checked admitted logical.result.declarations

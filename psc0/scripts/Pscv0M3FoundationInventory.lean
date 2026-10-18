@@ -66,10 +66,10 @@ private def inspectRecursorSurface : IO Unit := do
   IO.println (Lean.Json.mkObj [("unavailableNativeRecursors", Lean.toJson unavailable.reverse)]).compress
   let privateHelpers := ["TextPrefix", "SpaceResult", "WorkItem", "WorkGroup", "State", "Machine"].map
     (fun suffix => (Lean.Name.str (.str (.str .anonymous "$psc0Format") suffix) "rec").toString)
-  unless compared == 109 && differences == 0 && unavailable.length == privateHelpers.length &&
+  unless compared == 118 && differences == 0 && unavailable.length == privateHelpers.length &&
       privateHelpers.all unavailable.contains do
     throw (IO.userError "selected public recursor source metadata or private helper inventory differs")
-  IO.println "PSCV0_M3_RECURSOR_SELECTED_SURFACE: PASS 109 pinned public telescopes and six unchanged compiler-owned helpers"
+  IO.println "PSCV0_M3_RECURSOR_SELECTED_SURFACE: PASS 118 pinned public telescopes and six unchanged compiler-owned helpers"
 
 def main : IO Unit := do
   inspectPProdRuntimeData

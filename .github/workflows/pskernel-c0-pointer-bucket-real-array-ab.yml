@@ -1,0 +1,136 @@
+name: PSKernel-C0 real Array source hash memo pointer-hint A/B
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-infer-dag-eligibility-20261018]
+    paths:
+      - '.github/workflows/pskernel-c0-pointer-bucket-real-array-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+      - 'psc0/packages/pskernel-c0/test/C0NativeHashBucketHintRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-array-checkers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Produce exact real Array.extract_append_extract official-positive closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- Array.extract_append_extract \
+              > "$RUNNER_TEMP/c0-array-extract.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-array-extract.ndjson" \
+              > "$RUNNER_TEMP/c0-array-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/c0-array-official.txt"
+          wc -lc "$RUNNER_TEMP/c0-array-extract.ndjson"
+          sha256sum "$RUNNER_TEMP/c0-array-extract.ndjson"
+          echo "C0_LEAF_AB_REFERENCE official=accepted pinned=Lean_4.35.0 target=Array.extract_append_extract"
+      - name: Pin identical 152660-record official-positive source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, pathlib, os
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'c0-array-extract.ndjson'
+          raw=p.read_bytes(); digest=hashlib.sha256(raw).hexdigest()
+          assert digest == 'ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a', digest
+          assert len(raw.splitlines()) == 152660, len(raw.splitlines())
+          print(f'C0_ARRAY_INFER_AB_INPUT official=accepted pin=4.35.0 records=152660 sha256={digest}')
+          PY
+      - name: Rebuild exact PR138 hash memo original native checker
+        shell: bash
+        run: |
+          set -euo pipefail
+          path=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          git fetch -q --no-tags --depth=1 origin 2974bd9f0e37468e9f7c1c12ba8da9ee800af009
+          test "$(git rev-parse FETCH_HEAD)" = 2974bd9f0e37468e9f7c1c12ba8da9ee800af009
+          git show "FETCH_HEAD:$path" > "$path"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/pr138-resources.txt" \
+              timeout 540s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-extract.ndjson" 4096
+          ) > "$RUNNER_TEMP/pr138-c0.txt" 2>&1
+          rc=$?
+          set -e
+          if [[ "$rc" == 0 ]]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=152660 fuel=4096' "$RUNNER_TEMP/pr138-c0.txt"
+            verdict=accepted
+          elif [[ "$rc" == 124 ]]; then
+            verdict=unqualified_timeout
+          elif [[ "$rc" == 1 ]] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/pr138-c0.txt"; then
+            verdict=unqualified_resource
+          else
+            tail -n 35 "$RUNNER_TEMP/pr138-c0.txt"
+            exit 1
+          fi
+          echo "C0_ARRAY_POINTER_AB_RESULT variant=original_PR138 verdict=$verdict exit=$rc records=152660 fuel=4096"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/pr138-c0.txt" | tail -n 6 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/pr138-c0.txt" | tail -n 6 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/pr138-resources.txt" || true
+      - name: Native child-index-only source-proved Array candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          path=psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean
+          git show "HEAD:$path" > "$path"
+          (cd psc0/packages/pskernel-c0 &&
+            lake build c0OfficialReplay &&
+            lake env lean --run test/C0NativeHashBucketHintRegression.lean &&
+            lake env lean --run test/C0CertifiedHashMemoRegression.lean
+          )
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$RUNNER_TEMP/candidate-resources.txt" \
+              timeout 660s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-extract.ndjson" 4096
+          ) > "$RUNNER_TEMP/candidate-c0.txt" 2>&1
+          rc=$?
+          set -e
+          if [[ "$rc" == 0 ]]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=152660 fuel=4096' "$RUNNER_TEMP/candidate-c0.txt"
+            verdict=accepted
+          elif [[ "$rc" == 124 ]]; then
+            verdict=unqualified_timeout
+          elif [[ "$rc" == 1 ]] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/candidate-c0.txt"; then
+            verdict=unqualified_resource
+          else
+            tail -n 45 "$RUNNER_TEMP/candidate-c0.txt"
+            exit 1
+          fi
+          echo "C0_ARRAY_POINTER_AB_RESULT variant=pointer_child_index verdict=$verdict exit=$rc records=152660 fuel=4096"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/candidate-c0.txt" | tail -n 6 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/candidate-c0.txt" | tail -n 6 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/candidate-resources.txt" || true
+          echo 'C0_ARRAY_POINTER_AB_SCOPE identical_sha256=ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a native_source_lean_435=true fuel_4096=true source_theorem_preserved=true pointer_never_trusted=true'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-exact-435-array-pointer-hash-ab
+          path: |
+            ${{ runner.temp }}/pr138-c0.txt
+            ${{ runner.temp }}/pr138-resources.txt
+            ${{ runner.temp }}/candidate-c0.txt
+            ${{ runner.temp }}/candidate-resources.txt
+            ${{ runner.temp }}/c0-array-official.txt
+          if-no-files-found: warn
+          retention-days: 21

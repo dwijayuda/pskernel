@@ -145,6 +145,30 @@ private def kernelShape (environment : Lean.Kernel.Environment) (name : PsName)
   ensure (info.numMotives == motives && info.numMinors == minors && info.numIndices == indices)
     "official group motive/minor/index metadata differs"
 
+-- Definitional equality ignores binder names/kinds, but source calls do not.
+-- Compare the public telescope against the independently regenerated kernel
+-- recursor as well as retaining the full signature witnesses above.
+private def samePublicTelescope (portable : PsExpr) (native : Lean.Expr) : Bool :=
+  match portable, native with
+  | .forallE name _ body binder, .forallE nativeName _ nativeBody nativeBinder =>
+    let sameBinder := match binder, nativeBinder with
+      | .explicit, .default | .implicit, .implicit |
+        .strictImplicit, .strictImplicit | .instanceImplicit, .instImplicit => true
+      | _, _ => false
+    PsKernelLean.toLeanName name == nativeName && sameBinder &&
+      samePublicTelescope body nativeBody
+  | .forallE .., _ | _, .forallE .. => false
+  | _, _ => true
+
+private def kernelSurface (environment : Lean.Kernel.Environment)
+    (declarations : List PsDeclaration) : IO Unit := do
+  for declaration in declarations do
+    if let .recursorDecl info := declaration then
+      let some (.recInfo native) := environment.find? (PsKernelLean.toLeanName info.name)
+        | throw (IO.userError "official kernel did not regenerate source recursor")
+      ensure (samePublicTelescope info.type native.type)
+        ("source recursor names/implicitness differ from pinned Lean: " ++ psNameToString info.name)
+
 private def call (name : PsName) (levels : List PsLevel) (arguments : List PsExpr) : PsExpr :=
   psExprApplyMany (.constE name levels) arguments
 
@@ -249,12 +273,15 @@ def main : IO Unit := do
   let checked ← check prelude
     (group.declarations ++ signatureWitnesses group.declarations ++
       [reductionWitness "M3GroupReductionWitness" groupProbe 2])
+  kernelSurface checked group.declarations
   kernelShape checked (psNameAppendStr (psRootName "M3GroupLeft") "rec") 2 3 0
   kernelShape checked (psNameAppendStr (psRootName "M3GroupRight") "rec") 2 3 0
   let checkedIndexed ← check prelude (indexed.declarations ++ signatureWitnesses indexed.declarations)
+  kernelSurface checkedIndexed indexed.declarations
   kernelShape checkedIndexed (psNameAppendStr (psRootName "M3IndexedLeft") "rec") 2 3 1
   kernelShape checkedIndexed (psNameAppendStr (psRootName "M3IndexedRight") "rec") 2 3 1
   let checkedProp ← check prelude (prop.declarations ++ signatureWitnesses prop.declarations)
+  kernelSurface checkedProp prop.declarations
   kernelShape checkedProp (psNameAppendStr (psRootName "M3PropLeft") "rec") 2 2 0
   for declaration in prop.declarations do
     if let .recursorDecl info := declaration then
@@ -262,6 +289,7 @@ def main : IO Unit := do
   let checkedDependent ← check prelude
     (dependent.declarations ++ signatureWitnesses dependent.declarations ++
       [reductionWitness "M3DependentReductionWitness" dependentProbe 6])
+  kernelSurface checkedDependent dependent.declarations
   kernelShape checkedDependent (psNameAppendStr (psRootName "M3DependentLeft") "rec") 2 3 0
   kernelShape checkedDependent (psNameAppendStr (psRootName "M3DependentRight") "rec") 2 3 1
 
@@ -283,10 +311,10 @@ def main : IO Unit := do
     "constructor parameters must remain uniform"
   expectDataRefusal
     "inductive P where { | bad(next: Q -> Nat) }\ninductive Q where { | good }\n"
-    "unsupported recursive field"
+    "recursive family occurs in a function-field domain"
   expectDataRefusal
     "inductive P where { | nested(next: List(Q -> Nat)) }\ninductive Q where { | good }\n"
-    "unsupported recursive field"
+    "recursive family occurs in a function-field domain"
 
   let some first := group.declarations.head? | throw (IO.userError "missing group head")
   expectCodecRefusal (group.declarations ++ [first])

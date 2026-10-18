@@ -525,7 +525,7 @@ def psInductiveEliminationMotiveType (reduce : PsExpr → PsExpr) (plan : PsIndu
   let major := psExprApplyMany (psExprLiftBVars indices.length 0 family)
     (psInductiveEliminationParameterArguments indices.length 0)
   return psInductiveEliminationBind false indices
-    (.forallE (psRootName "_major") major (.sortE level) .explicit)
+    (.forallE (psRootName "t") major (.sortE level) .explicit)
 
 def psInductiveEliminationMotiveApplication (reduce : PsExpr → PsExpr)
     (plan : PsInductiveEliminationPlan) (target : Nat) (parameters : List PsExpr)
@@ -570,8 +570,10 @@ def psInductiveEliminationMinorType (reduce : PsExpr → PsExpr)
     let value ← fieldValues[index]?
     let type := psExprLiftBVars (fields.length - index) 0 field.type
     psInductiveEliminationHypothesisType reduce 4096 plan target parameters (motive target) value type
-  let binders := hypotheses.zipIdx.map fun (type, index) =>
-    PsInductiveEliminationBinder.mk (psNameAppendNum (psRootName "_ih") index)
+  let binders ← hypotheses.zipIdx.mapM fun (type, index) => do
+    let (fieldIndex, _) ← constructor.recursiveFields[index]?
+    let field ← fields[fieldIndex]?
+    return PsInductiveEliminationBinder.mk (psNameAppendAfter field.name "_ih")
       (psExprLiftBVars index 0 type) .explicit
   return psInductiveEliminationBind false fields
     (psInductiveEliminationBind false binders (psExprLiftBVars hypotheses.length 0 conclusion))
@@ -581,14 +583,15 @@ def psInductiveEliminationRecursorType (reduce : PsExpr → PsExpr)
   let slot ← plan.slots[target]?
   let motives ← plan.slots.zipIdx.mapM fun (slot, index) => do
     let type ← psInductiveEliminationMotiveType reduce plan slot index level
-    let name := if plan.slots.length == 1 then psRootName "_motive"
-      else psNameAppendNum (psRootName "_motive") index
+    let name := psRootName (if plan.slots.length == 1 then "motive"
+      else "motive_" ++ psNatToString (index + 1))
     return PsInductiveEliminationBinder.mk name type .explicit
   let constructors := plan.slots.zipIdx.flatMap fun (slot, index) =>
     slot.constructors.map (fun constructor => (index, constructor))
   let minors ← constructors.zipIdx.mapM fun ((owner, constructor), index) => do
     let type ← psInductiveEliminationMinorType reduce plan owner index constructor
-    return PsInductiveEliminationBinder.mk (psNameAppendNum (psRootName "_minor") index) type .explicit
+    let name := psNameReplacePrefix constructor.info.name constructor.info.inductiveName .anonymous
+    return PsInductiveEliminationBinder.mk name type .explicit
   let offset := motives.length + minors.length
   let parameters := psInductiveEliminationParameterArguments plan.parameters.length offset
   let type ← psInductiveEliminationApplyParameters slot.type parameters
@@ -598,12 +601,12 @@ def psInductiveEliminationRecursorType (reduce : PsExpr → PsExpr)
   let majorType := psExprApplyMany (psExprLiftBVars indices.length 0 family) indexValues
   let motive := PsExpr.bvar (indices.length + offset - target)
   let result := psExprApplyMany motive (indexValues.map (psExprLiftBVars 1 0) ++ [.bvar 0])
-  let body := psInductiveEliminationBind false
-    (indices.map (fun index => { index with binder := .implicit }))
-    (.forallE (psRootName "_major") majorType result .explicit)
-  return psInductiveEliminationBind false
-    (plan.parameters.map (fun parameter => { parameter with binder := .implicit }))
-    (psInductiveEliminationBind false motives (psInductiveEliminationBind false minors body))
+  let body := psInductiveEliminationBind false indices
+    (.forallE (psRootName "t") majorType result .explicit)
+  -- Infer the actual public telescope after every dependency is present.
+  -- Empty-family motives remain explicit, exactly as in the pinned kernel.
+  return psExprInferImplicit (psInductiveEliminationBind false plan.parameters
+    (psInductiveEliminationBind false motives (psInductiveEliminationBind false minors body)))
 
 def psInductiveEliminationRecursorShapeValid (plan : PsInductiveEliminationPlan)
     (slot : PsInductiveEliminationSlot) (recursor : PsRecursorInfo) : Bool :=

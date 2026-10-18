@@ -75,37 +75,55 @@ Non-value beta arguments retain real lets; a result let preserves original
 returned-function header arity. Independent private-body identity, forged-body
 and incomplete-coverage controls remain. No target primitive or budget increase.
 
-## Active preparation — positive dependent recursive fields
+## Active preparation — function fields and public source telescopes
 
-Current compiler/test preparation parent is
-**f3798882c2b4bc66cf134a53ea90cd75ad1bfe87**; run **39100665889** is pending/running.
-This documentation child does not qualify that code. Check fresh refs and jobs.
-Keep main33676076 stable until preparation is fully green. Preserve at most one
-active and one pending prep run, cancel-in-progress:false, and expected-HEAD
-non-force updates. Do not cancel/supersede healthy main Native.
+Unqualified preparation follows fully qualified main33676076. Fresh refs are
+authoritative. At this checkpoint parent69e73ede6ab1d982a1aa4bdb40f55b21188d1ca6
+(run39102651449) is still running; this child completes the public recursor
+telescope repair. Keep at most one active and one pending preparation run.
+Do not promote until preparation is green, or supersede a healthy main Native.
 
-Implemented, not qualified: Data opens positive Pi codomains under fresh locals,
-rejects recursive families in domains and retains uniformity. StructuralField
-shares actual child-argument lookup; singleton and mutual owners apply those
-arguments to the real IH before source component selection. Native predicate
-recursion restrictions stay intact. Erasure builds typed Core recursive calls
-using original header identities and actual child indices, closes a single
-shared field telescope, checks the real minor IH domain and uses ordinary
-lambda/call erasure across targets and auxiliary structure slots.
+Implemented:
+- Positive dependent function fields across Data, singleton/mutual structural
+  elaboration, deriving and shared typed recursor erasure. Actual applied child
+  indices/arguments and full IH types are checked; negative domains reject.
+  Deriving distinguishes direct recursive method IHs from function fields,
+  which require ordinary dictionaries. No fabricated function dictionary.
+- Native namedPriority versus PS positionalPrefix is explicit syntax intent,
+  preserved through shared application, WF argument capture and suffix calls.
+  Both grammars keep duplicate/unknown name and PS overlap/placement refusals.
+- Prop structural components use checked And/True; other components PProd with
+  exact inferred sort validation, singleton identity and actual projections.
+  No implicit universe lift or assertion of arbitrary Sort-u support.
+- Generated public recursors now use pinned motive/motive_1..., constructor
+  minor names, t, field_ih and strict implicit inference over the full telescope.
+  Existing Core producers keep complete argument layout. Source Vector/V calls
+  use named motives. Group tests compare names/kinds against official Lean in
+  addition to existing kernel signature witnesses.
 
-The existing paired fixture adds a field forall(i:Nat), i=i -> ParityBranch,
-singleton/mutual state recursion, explicit primitive recursion, and a theorem
-consuming its actual IH. Declaration metadata and values compare across actual
-inputs. Parsed negative domains must fail positivity. m3fields true=192013,
-false=232417 is added to existing backend observers; no new lane/executable.
+Existing paired input module adds m3fields true192013/false232417, explicit
+dependent recursor and induction, singleton/mutual function-field recursion,
+Hashable via a real function dictionary, dependent proof-valued mutual
+functions and positive-function predicate recursion. Internal mutual-data
+fixture covers one/zero owned Prop components. Five-target observers retain
+all earlier exports. Native explicit recursor is noncomputable with a checked
+agreement theorem to an executable structural oracle; PSC0 inputs must execute
+the actual primitive recursor. Symbolic node-hash proof keeps default limits.
 
-Preparation28e6b4fd stopped on a missing direct Refinement import, corrected at
-5f494f22. That run compiled compiler changes but native code generation refused
-the explicit primitive recursor oracle. f3798882 retains its noncomputable
-checked definition and proves equality with a separately executable structural
-native oracle. PSC0 still must compile and execute the explicit recursor in both
-inputs. No positive requirement or negative check was removed.
-Design: docs/PSCV0_M3_POSITIVE_FUNCTION_FIELDS_2026-10-18.md.
+Qualification history (no assertions removed):
+28e6 missing direct import; 5f49 native generator refused primitive recursor
+oracle; f379 source PS argument placement and direct-versus-pointwise deriving
+classification; f3e9 concrete hash-oracle proof reduction depth; 64ce actual
+native argument placement; a25cadb9/run39102542931 built and passed all other
+substantive checks but branchByRec still type-mismatched. Source inspection
+located generated _motive explicit instead of native public motive inference.
+This child fixes that shared owner; do not label it green before CI.
+
+Designs:
+docs/PSCV0_M3_POSITIVE_FUNCTION_FIELDS_2026-10-18.md
+docs/PSCV0_M3_NAMED_APPLICATION_PLACEMENT_2026-10-18.md
+docs/PSCV0_M3_STRUCTURAL_COMPONENT_PACKING_2026-10-18.md
+docs/PSCV0_M3_RECURSOR_SOURCE_TELESCOPES_2026-10-18.md
 
 ## Selected foundation
 
@@ -119,97 +137,36 @@ pre-Order/pre-mutual authoring boundaries. Historical 6cdb/9b5 used3752.
 
 ## Next work within M3+B
 
-1. Complete the positive-field preparation. Inspect full failed-step context if
-   necessary; address shared invariants, not fixture-specific patches. Retain
-   forged ownership, missing metadata, child family/index, nondecreasing-call,
-   predicate elimination and strict negative-positivity controls.
-2. Only after preparation is fully green and main idle, advance the exact
-   qualified code for Native/M3/F1/F2/F3 integration. Confirm actual execution of
-   m3fields on both input paths and all targets. Update these two handoffs,
-   roadmap and exit ledger at each completed milestone.
-3. Continue the six-exit source-rule/native-owner/evidence audit: data/elimination,
-   owned strategies, total recursion, P0, P1, cross-stage integration. M3+B and
-   full selected parity remain OPEN. Continue M3+B -> M4+C/D -> M5+E.
+1. Qualify current preparation, inspect actual failure causes, and only after
+   green preparation plus idle main advance exact code for all five integration
+   gates. Keep both handoffs, roadmap and exit ledger synchronized each milestone.
+2. Audit/reconcile retained Nat.rec's legacy explicit _motive signature against
+   native source behavior in an explicit foundation-metadata slice. Its audited
+   bytes/fingerprints are unchanged in this generated-recursor slice. Preserve
+   frozen authoring boundaries and independently measure any later update.
+3. Implement v7.2 selected named/generalizing matches using existing Match,
+   PatternMatrix and dependent refinement. AST currently has no metadata.
+   Pinned Elab/Match.generalize defaults true, can disable, and ignores let
+   declarations; Meta/Match/Match.withEqs binds Eq/HEq original-to-pattern and
+   supplies reflexivity at actual application. Named equations must not enter
+   the automatically discharged index-constraint queue. Study branch scopes,
+   shadowing, irrefutable/computed/multiple discriminants and indexed transport
+   before implementation; no copied host elaborator or fresh matcher.
+4. Finish the six-exit source-rule/native-owner/evidence audit. M3+B and full
+   selected .lean/.ps input parity remain OPEN. Continue M3+B -> M4+C/D -> M5+E.
 
-Canonical v7.2 retains structural-subterm restrictions (1870/1874/1929), pending
-equation-style acceptance (1819), and function-like source mutual blocks
-(1872–1890). Internal mutual data APIs have separately scoped evidence. Both
-input kinds share selected semantics, never arbitrary host Lean acceptance.
-Pinned Tactic/Induction817–838 intentionally rejects default mutual/nested
-induction; Structural/BRecOn requires common motive universes. Do not turn those
-intended refusals into missing positives. Current source structural packing's
-Type-only restriction is narrower than native general Sort/Prop handling; audit
-against selected requirements before changing it. Acc.rec explicit large
-elimination does not imply automatic Type-valued predicate recursion.
+Canonical v7.2 retains structural-subterm restrictions and pending equation-style
+acceptance. Source mutual blocks select definitions/functions, not mutual data
+syntax. Native default mutual/nested induction refusal is intentional; explicit
+recursors have separate support. Acc.rec large elimination does not authorize
+automatic Type-valued predicate recursion.
 
-Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc references studied:
-Elab/App; PreDefinition/WF/{Main,PackMutual,Rel,Fix,Eqns,Unfold};
-Compiler/LCNF/ToLCNF and Simp/Main; kernel/inductive.cpp;
-Structural/{BRecOn,IndPred,Main,FindRecArg}; Meta/PProdN;
-Meta/Constructions/BRecOn; tests/elab/structuralOverNested.lean.
-Retain upstream notices. Native portable .lean, official kernel, GitHub/Linux
-only; no local checkout/build/test, pskernel-core, self-hosting or immediate C5.
-
-## Function-field qualification follow-up
-
-f3798882 / run39100665889 failed only the source and deriving steps; build,
-selected manifest, packing/ownership, indexed cases, Order/P1 and noncomputable
-checks passed. Full log retained by its GitHub artifact; no runtime failure was
-reported. Causes: the new .ps fixture placed positional arguments after a named
-motive (unselected syntax), and old deriving code confused pointwise recursive
-fields with direct class-method IHs.
-
-The PS fixture now keeps named motives last. Shared DerivingContext validates
-positive field codomains and full actual IH telescopes, but marks only direct
-fields for recursive class methods. Pointwise function IHs remain checked and
-bound, while ordinary dictionaries handle functions, matching pinned native
-Hashable/Repr/BEq/DecEq. Existing negative function-field fixtures now require the
-missing-dictionary error instead of the obsolete positive-data refusal. The
-paired positive fixture supplies a real function Hashable dictionary, derives
-Hashable for ParityBranch and observes the native-equivalent hash as part of
-m3fields (expected192013/232417 unchanged). No assertion is dropped.
-
-This child remains unqualified until preparation passes. Main remains fully
-qualified33676076. Both handoffs, roadmap and exit receipt were updated at that
-completed integration milestone; continue qualification before promoting code.
-
-## Native hash-oracle proof structure
-
-Preparation f3e96a33 / run39101522330 built compiler changes but stopped in the
-native oracle's two concrete m3fields proofs at the default reduction depth.
-The proofs now establish the derived node hash symbolically and use pinned
-Init/Core.lean BEq.rfl before reducing the small arithmetic result. The same
-192013/232417 equalities, actual source/backend hash observations and unchanged
-limits remain required. No native_decide, axiom or weakened check is introduced.
-Preparation qualification is still pending; main33676076 remains qualified.
-
-## Actual native named-application follow-up
-
-Compiler64ce8571 / run39101822044 built successfully; the source step rejected
-branchByRec's native named motive before positional arguments. Deriving and all
-other substantive preparation checks passed. This is a source-policy ownership
-gap, not a recursor typing failure. The same typed application engine now uses
-explicit positionalPrefix/namedPriority intent retained in the call AST. Native
-application binds named parameters first, as pinned Elab/App.main does; PS
-placement/overlap checks stay intact. WF captures and suffixes preserve policy.
-See docs/PSCV0_M3_NAMED_APPLICATION_PLACEMENT_2026-10-18.md. This preparation is
-not yet qualified. Main remains fully qualified33676076. The Prop packing draft
-is researched but not published; finish this slice before advancing it.
-
-## Next coherent slice — proof-valued structural components
-
-Preparation now includes native And/PProd component packing, described in
-docs/PSCV0_M3_STRUCTURAL_COMPONENT_PACKING_2026-10-18.md. The existing shared
-owner checks actual result universes instead of requiring a syntactic successor.
-Proof components use And, empty proof slots True, and singleton packing identity;
-other components use selected PProd with exact inferred-universe validation.
-Projections follow the actual checked owner. No implicit lift or new foundation.
-
-The same paired fixture adds three dependent proof-valued functions and mutual
-recursion over positive function-valued inductive predicates; the existing
-internal mutual-data fixture covers one/zero owned Prop components. Existing
-Type-valued runtime observations and all negative controls remain required.
-This is unqualified preparation, not a completed M3 exit. The parent named-call
-slice a25cadb99002144caff151d99f359ae4914c6ef9 is independently under preparation
-qualification. Main33676076 remains fully qualified; do not cancel any healthy
-main Native run or promote unqualified code. Both handoffs track this boundary.
+Pinned references studied include kernel/{inductive,expr}.cpp, util/name.cpp;
+Elab/App, Elab/Match, Parser/Term, Meta/Match/{Basic,Match},
+Meta/Match/MatcherApp/Basic; PreDefinition/WF/{Main,PackMutual,Rel,Fix,Eqns,Unfold},
+Structural/{BRecOn,IndPred,Main,FindRecArg}; Meta/PProdN,
+Meta/Constructions/BRecOn; Elab/{Structure,MutualInductive,Inductive};
+Compiler/LCNF/ToLCNF, Simp/Main; Deriving/{Hashable,Repr,BEq,DecEq};
+tests/elab/{match1,match2,match3,matchGenIssue,matchGenBug,discrRefinement,
+discrRefinement2,structuralOverNested,mutualDefThms,indPredRecursion}.lean.
+Preserve upstream notices, official kernel, native .lean, GitHub Linux only.

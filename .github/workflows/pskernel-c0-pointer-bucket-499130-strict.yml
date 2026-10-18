@@ -39,8 +39,8 @@ jobs:
           grep -Fq 'Lean default kernel accepts the solution' "$RUNNER_TEMP/official.txt"
           test "$(wc -l < "$RUNNER_TEMP/c0-dependency-499130.ndjson")" -eq 499130
           test "$(stat -c%s "$RUNNER_TEMP/c0-dependency-499130.ndjson")" -eq 25031309
-          echo "7448c45db0a440983a587432a2bbd2dfb4d77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/c0-dependency-499130.ndjson" | sha256sum -c -
-          echo "C0_499130_SOURCE official=accepted source_records=499130 bytes=25031309 pinned_SHA256=7448c45db0a440983a587432a2bbd2dfb4d77e7d788b6c5f0ce66fe876fff286 lean=4.35.0"
+          echo "7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/c0-dependency-499130.ndjson" | sha256sum -c -
+          echo "C0_499130_SOURCE official=accepted source_records=499130 bytes=25031309 pinned_SHA256=7448c45db0a440983a587432a2bbd2dfb4b77e7d788b6c5f0ce66fe876fff286 lean=4.35.0"
       - name: Native source-certified C0 strict full dependency acceptance
         shell: bash
         run: |

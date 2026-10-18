@@ -51,8 +51,8 @@ where
   termination_by n
   decreasing_by exact Nat.lt_succ_self k
 
-example : m3data true = 6 := by simp [m3data, m3data.keep]
-example : m3data false = 9 := by simp [m3data, m3data.keep]
+example : m3data true = 6 := by simp only [m3data, m3data.keep]; rfl
+example : m3data false = 9 := by simp only [m3data, m3data.keep]; rfl
 end M3InputParityOracle
 
 namespace M3InputParity

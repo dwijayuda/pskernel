@@ -59,12 +59,13 @@ deriving, both mixed-module directions, official kernel, five-target emission,
 and assurance/noncomputable refusals. Backend runtime observations are PENDING.
 Receipt: docs/PSCV0_M3_NATIVE_INPUT_B95C6293_2026-10-18.md.
 
-Preparation code child3b95a506a46c164a63d01017490fe0949d178908 /
-run39090023014 / job117565128449 is RUNNING. It adds native where helpers and
-explicit decreasing_by tactic syntax using shared recursion/proof owners.
-The same paired data export exercises a local well-founded identity helper.
-The current documentation-only descendant changes no compiler/test inputs;
-the qualification identity for this native-where code is3b95a506.
+Preparation code child3b95a506 / run39090023014 / job117565128449
+completed FAILURE: production compiler and all independent preparation steps
+passed, but the paired fixture's two native reference proofs left reducible
+class/BEq applications after unfolding the well-founded helper. This child
+finishes those exact goals by kernel reflexivity after simp only; no compiler
+semantics, expected values, checks or proof assumptions change. The native where
+and decreasing_by path still requires successful preparation and integration.
 Fresh refs and complete logs override these checkpoints.
 
 **Historical P1 Rust gap:** the previous focused workflow overwrote its P1

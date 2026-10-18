@@ -20,3 +20,7 @@ P4 VSIX integration is OPEN and MUST NOT bundle probe as checker.
 
 Avoid touching ongoing M3+B work or original PR109. Use GitHub Linux CI
 for all builds/tests. No Desktop Commander, local builds or force pushes.
+
+Binary distribution (pending CI): stage and hash a real PSC0-emitted
+`wasm/gc-probe.core.wasm` into Git via a successful, same-SHA cloud CI
+job only. The binary must remain explicitly named PROBE, not KERNEL.

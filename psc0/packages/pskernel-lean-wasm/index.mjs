@@ -7,6 +7,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { createHash } from 'node:crypto';
 
 export const leanKernelProviderProtocol = 'pskernel-lean-wasm-gc/0';
 export const leanKernelProviderVersion = '4.35.0';
@@ -48,9 +49,22 @@ export async function checkCanonicalAdmissions(source) {
 // Does not initialize or return a kernel provider.
 export async function loadGcProbe({ binaryPath } = {}) {
   const file = binaryPath === undefined
-    ? fileURLToPath(new URL('./dist/gc-probe.core.wasm', import.meta.url))
+    ? fileURLToPath(new URL('./wasm/gc-probe.core.wasm', import.meta.url))
     : resolve(binaryPath);
   const bytes = await readFile(file);
+  if (binaryPath === undefined) {
+    const manifest = JSON.parse(await readFile(
+      fileURLToPath(new URL('./PREBUILT_GC_PROBE_MANIFEST.json', import.meta.url)), 'utf8'));
+    if (manifest.isProofKernel !== false || manifest.acceptsCanonicalAdmissions !== false ||
+        manifest.leanCommit !== leanKernelProviderCommit) {
+      throw new Error('PSC0-WASM-GC-PROBE: wrong package or kernel identity');
+    }
+    const expected = manifest.assets['gc-probe.core.wasm'];
+    if (!expected || expected.bytes !== bytes.length ||
+        expected.sha256 !== createHash('sha256').update(bytes).digest('hex')) {
+      throw new Error('PSC0-WASM-GC-PROBE: prebuilt digest/size mismatch');
+    }
+  }
   const module = await WebAssembly.compile(bytes);
   if (WebAssembly.Module.imports(module).length !== 0 ||
       WebAssembly.Module.exports(module).some(entry => entry.kind === 'memory')) {

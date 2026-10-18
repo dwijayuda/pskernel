@@ -27,10 +27,16 @@ assert.match(source, /structure PsKernelGcPair/);
 assert.match(source, /def pskernelWasmGcProbe/);
 const obsolete = [
   'source', 'kernel', 'patches', 'provider-test', 'provider',
-  'host', 'wasm', 'EMSCRIPTEN_PIN.json', 'PREBUILT_WASM_MANIFEST.json',
+  'host', 'EMSCRIPTEN_PIN.json', 'PREBUILT_WASM_MANIFEST.json',
   'KERNEL_SOURCE_MANIFEST.json', 'PROOFSCRIPT_SOURCE_MANIFEST.json', 'LEAN_LICENSE',
   'BUILDING.md'
 ];
 const present = await readdir(root);
 for (const name of obsolete) assert.ok(!present.includes(name), 'obsolete PSC2 asset: ' + name);
+if (present.includes('wasm')) {
+  const builtFiles=await readdir(resolve(root,'wasm'));
+  for(const oldName of ['pskernel-lean.cjs','pskernel-lean.wasm']){
+    assert.ok(!builtFiles.includes(oldName),'obsolete Emscripten Wasm: '+oldName);
+  }
+}
 console.log('PSC0_WASM_GC_SOURCE: PASS (Lean 4.35.0 / v7.2; no legacy sources; NOT a checker)');

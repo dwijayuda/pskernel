@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: psc0-v72-wasm-gc-kernel-source-${{ github.ref }}
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
-          persist-credentials: false
+          persist-credentials: true
           sparse-checkout: |
             psc0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -80,9 +80,34 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean-wasm/scripts/test-probe.mjs
+      - name: Stage and verify byte-identical checked GC probe
+        working-directory: psc0
+        shell: bash
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean-wasm/scripts/stage-prebuilt.mjs
+          node packages/pskernel-lean-wasm/scripts/verify-prebuilt.mjs
       - name: Retain probe binaries for provenance, NOT VSIX publishing
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: psc0-wasm-gc-probe-NOT-a-kernel
           path: psc0/packages/pskernel-lean-wasm/dist/
           if-no-files-found: error
+      - name: Commit exact compiled Wasm GC probe to this feature branch (not checker)
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch='feature/psc0-v72-pskernel-lean-wasm-gc-v1'
+          test "$GITHUB_REF_NAME" = "$branch"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          remote_sha="$(git ls-remote origin "refs/heads/$branch" | cut -f1)"
+          test "$remote_sha" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- psc0/packages/pskernel-lean-wasm/wasm/ psc0/packages/pskernel-lean-wasm/PREBUILT_GC_PROBE_MANIFEST.json
+          if git diff --cached --quiet; then
+            echo 'PSC0_WASM_GC_PROBE_COMMIT: already byte-identical'
+          else
+            git commit -m 'build(psc0): store CI-checked compiled Wasm-GC probe [skip ci]'
+            git push origin "HEAD:refs/heads/$branch"
+          fi

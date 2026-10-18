@@ -66,3 +66,18 @@ consider releasing an npm package.
 
 **No unqualified proof checking and no fallback that silently accepts proofs.**
 See [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Compiled Wasm-GC probe artifact
+
+The GitHub Linux workflow builds and runs `dist/gc-probe.core.wasm` from
+the **current PSC0 compiler**, then copies its byte-identical checked
+result into the tracked `wasm/gc-probe.core.wasm` bundle with its WAT and
+origins metadata. The `PREBUILT_GC_PROBE_MANIFEST.json` pins exact
+source and generated file SHA-256 hashes. Both staging and verification
+are compulsory before a binary commit. A GitHub workflow may push this
+binary-only result **only** if the branch still points to the run's
+checked input SHA (no force or overwrite of new code).
+
+This is a real Wasm GC compiled output, not an independent Lean kernel
+and **cannot** verify proof admissions. `createKernel` and
+`checkCanonicalAdmissions` continue to refuse every request.

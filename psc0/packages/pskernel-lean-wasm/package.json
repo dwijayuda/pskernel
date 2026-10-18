@@ -17,7 +17,9 @@
   "scripts": {
     "check:source": "node scripts/verify-source.mjs",
     "test": "node scripts/test.mjs",
-    "test:gc": "node scripts/test-probe.mjs"
+    "test:gc": "node scripts/test-probe.mjs",
+    "stage:gc": "node scripts/stage-prebuilt.mjs",
+    "verify:gc": "node scripts/verify-prebuilt.mjs"
   },
   "files": [
     "index.mjs",
@@ -25,7 +27,9 @@
     "scripts/",
     "README.md",
     "ARCHITECTURE.md",
-    "LEAN_SOURCE_PIN.json"
+    "LEAN_SOURCE_PIN.json",
+    "wasm/",
+    "PREBUILT_GC_PROBE_MANIFEST.json"
   ],
   "proofscript": {
     "toolchain": "leanprover/lean4:v4.35.0",

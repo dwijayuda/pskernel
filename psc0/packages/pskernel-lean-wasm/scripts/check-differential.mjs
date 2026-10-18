@@ -7,12 +7,8 @@ import {fileURLToPath} from 'node:url';
 import {corpus} from './corpus.mjs';
 const [native,launcher]=process.argv.slice(2);
 if(!native||!launcher)throw new Error('usage: node check-differential.mjs <native-exe> <wasm-launcher>');
-function run(cmd,args,input) {
-  const result=spawnSync(cmd,args,{input,encoding:'utf8',maxBuffer:32*1024*1024,timeout:180000});
-  if(result.error||result.status!==0)throw new Error('provider process failed: '+cmd+' '+result.stderr);
-  try{return JSON.parse(result.stdout.trim());}
-  catch{throw new Error('provider returned non-JSON: '+result.stdout.slice(0,500));}
-}
+import {runJsonProvider} from './run-provider.mjs';
+const run=runJsonProvider;
 const nativeHealth=run(native,['--health']);
 const wasmHealth=run(process.execPath,[launcher,'--health']);
 assert.equal(nativeHealth.status,'ok');

@@ -1,15 +1,24 @@
 // Build-time only. Resolve the *live*, version-controlled PSC0 Lean source
 // import DAG; never rely on copied PSC2 provider source or a fixed module list.
 import {existsSync} from 'node:fs';
-import {readFile,mkdir,copyFile,writeFile} from 'node:fs/promises';
+import {readFile,mkdir,copyFile,writeFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
 const [psc0,output,manifest]=process.argv.slice(2);
 if(!psc0||!output||!manifest) throw new Error('usage: node plan-closure.mjs <psc0> <overlay-src> <manifest>');
-const roots=[
-  'packages/foundation/src','packages/core/src','packages/environment/src',
-  'packages/bridge/src','packages/pskernel-lean/provider',
-  'packages/pskernel-lean-wasm/src',
-];
+// Discover the *direct*, live PSC0 package roots rather than assuming that
+// the current compiler's transitive imports fit a handwritten subset.
+// Exclude symlinks/archives; never search legacy snapshots or synthesize a
+// missing module. Ambiguous names remain a hard build failure.
+const packageEntries=await readdir(path.join(psc0,'packages'),{withFileTypes:true});
+const roots=packageEntries
+  .filter(entry=>entry.isDirectory() &&
+    existsSync(path.join(psc0,'packages',entry.name,'src')))
+  .map(entry=>'packages/'+entry.name+'/src')
+  .sort();
+roots.push('packages/pskernel-lean/provider');
+// A package might have both src and provider; only the explicit official
+// Lean adapter path is authoritative for PsKernelLean.*.
+
 const completed=new Set(),active=new Set(),ordered=[];
 async function visit(name) {
   if(completed.has(name)) return;
@@ -36,5 +45,5 @@ async function visit(name) {
 }
 await visit('PsKernelLeanWasm.Main');
 await mkdir(path.dirname(manifest),{recursive:true});
-await writeFile(manifest,JSON.stringify({schemaVersion:1,source:'live-psc0',modules:ordered},null,2)+'\n');
+await writeFile(manifest,JSON.stringify({schemaVersion:1,source:'live-psc0',sourceRoots:roots,modules:ordered},null,2)+'\n');
 console.log('PSC0_WASM_SOURCE_CLOSURE: '+ordered.length+' live Lean modules');

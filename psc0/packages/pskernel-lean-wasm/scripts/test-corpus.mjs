@@ -5,8 +5,13 @@ import assert from 'node:assert/strict';
 import {corpus} from './corpus.mjs';
 
 test('shared canonical admissions corpus eagerly constructs and decodes',()=>{
-  assert.equal(corpus.length,4);
+  assert.equal(corpus.length,11);
   assert.equal(new Set(corpus.map(c=>c.id)).size,corpus.length);
+  assert.deepEqual(corpus.map(c=>c.id),[
+    'good-nat-definition','ill-typed-definition','malformed-json','wrong-version',
+    'empty-batch','duplicate-defined-name','missing-constant-type',
+    'theorem-type-not-proposition','opaque-ill-typed-body',
+    'axiom-injection-not-admitted','unknown-admission-kind']);
   assert.ok(corpus.some(c=>c.accept));
   assert.ok(corpus.some(c=>!c.accept));
   for(const fixture of corpus){
@@ -31,4 +36,12 @@ test('valid and invalid declaration fixtures are semantically distinct',()=>{
   assert.equal(valid.admissions[0].declaration.v.k,'nat');
   assert.equal(valid.admissions[0].declaration.v.v,'1');
   assert.equal(invalid.admissions[0].declaration.v.k,'sort');
+});
+
+test('negative validation cases require distinct failure classes',()=>{
+  const invalid=corpus.filter(c=>!c.accept);
+  assert.ok(invalid.some(c=>c.errorKind==='kernel-rejection'));
+  assert.ok(invalid.some(c=>c.errorKind==='malformed-request'));
+  assert.ok(invalid.some(c=>c.errorKind==='protocol-version'));
+  assert.equal(corpus.find(c=>c.id==='duplicate-defined-name').declarationIndex,1);
 });

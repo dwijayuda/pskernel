@@ -178,7 +178,7 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
 -- Inspect source-owned Core before any recursive declaration is published.
 -- Native controls above and the existing graph differential cover the same
 -- parameter correspondence. This probe does not admit source mutual WF.
-private def checkRetainedOwners (environment : PsEnvironment) : Except String Unit := do
+private def checkRetainedOwners (environment : PsEnvironment) : Except String (List PsDeclaration) := do
   let source :=
     "mutual\n" ++
     "def callFirst {A : Type} (a : A, n : Nat) : Nat -> A := fun (k : Nat) => match n with { | 0 => a | m + 1 => let kept := a\ncallSecond(m, A, kept)(k) } termination_by n\n" ++
@@ -228,6 +228,31 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String Un
         (fun _ => "source component lost its genuine dependent callback signature")
     let _ ← (psElabExpressionSort measured.context branch).mapError psCompilerPscv0ElabError
     pure ()
+  let bodies ← (List.range measured.members.length).mapM fun index =>
+    (psElabWhereWellFoundedComponentBody measured index).mapError psCompilerPscv0ElabError
+  let built ← (psMutualWellFoundedBuild environment psMetaEmpty measured.context.localContext
+    measured.plan (bodies.map (·.branch))).mapError (fun _ => "source component functional failed")
+  let packedName := psRootName "packingSourceComponent"
+  let packedType := psCloseElabForallBinders psMetaEmpty measured.fixedBindersRev measured.plan.type
+  let packedValue := psCloseElabLambdaBinders psMetaEmpty measured.fixedBindersRev built.value
+  let declaration := PsDeclaration.definitionDecl packedName prepared.block.levelNames packedType packedValue
+  let parameter ← (psInferEnsureForall environment psMetaEmpty measured.context.localContext
+    measured.plan.type).mapError (fun _ => "source component lost packed telescope")
+  let major := psLocalPushBinding measured.context.localContext parameter.name parameter.domain .explicit
+  let equationContext := { measured.context with localContext := major.context }
+  let result := psExprInstantiate1 parameter.body (.fvar major.id)
+  let domainLevel ← (psElabExpressionSort equationContext parameter.domain).mapError psCompilerPscv0ElabError
+  let resultLevel ← (psElabExpressionSort equationContext result).mapError psCompilerPscv0ElabError
+  let motive := PsExpr.lam parameter.name parameter.domain parameter.body .explicit
+  let proof := psWellFoundedEquation measured.plan.relation [domainLevel, resultLevel]
+    motive built.functional (.fvar major.id)
+  let checked ← (psElabResolvedTerm equationContext proof none).mapError psCompilerPscv0ElabError
+  let equationBinders := PsElabTypedBinder.mk major.id parameter.name parameter.domain .explicit ::
+    measured.fixedBindersRev
+  let equation := PsDeclaration.theoremDecl (psNameAppendStr packedName "fix_eq")
+    prepared.block.levelNames
+    (psCloseElabForallBinders psMetaEmpty equationBinders checked.type)
+    (psCloseElabLambdaBinders psMetaEmpty equationBinders checked.term)
   -- Underapplication is conservative analysis, not permission to escape a
   -- proof-restricted callback. The omitted source slots must become varying.
   let some owner := owners.head? | throw "missing retained source owner"
@@ -247,6 +272,7 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String Un
       context.localContext.nextId [malformed] with
   | .error _ => pure ()
   | .ok _ => throw "retained-call analysis accepted an unowned Core value"
+  return [declaration, equation]
 
 private def checkFixedScopes (environment : PsEnvironment) :
     Except String (List PsDeclaration) := do
@@ -404,7 +430,7 @@ private def build : Except String (List PsDeclaration) := do
   let environment := psStandardPSumReducibility.foldl
     (fun env (name, status) => psEnvironmentSetReducibility env name status) environment
   checkCallbackScopes environment
-  checkRetainedOwners environment
+  let sourceComponentDeclarations ← checkRetainedOwners environment
   let fixedScopeDeclarations ← checkFixedScopes environment
   let source :=
     "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
@@ -512,7 +538,7 @@ private def build : Except String (List PsDeclaration) := do
   let _ ← (psElabResolvedTerm (psElabContextEmpty environment [u, v])
     sortValue (some sortType)).mapError psCompilerPscv0ElabError
   let sorts := PsDeclaration.definitionDecl (psRootName "packingSorts") [u, v] sortType sortValue
-  return psStandardPSumDeclarations ++ fixedScopeDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
+  return psStandardPSumDeclarations ++ sourceComponentDeclarations ++ fixedScopeDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
 
 def main : IO Unit := do
   ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"
@@ -536,6 +562,7 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
+  IO.println "PSCV0_M3_SOURCE_COMPONENT: PASS original three-member source bodies, shared fixed measure codomain, refined per-callee callbacks, real decrease goals, closed dependent functional and official-kernel fix_eq; public mutual WF source acceptance remains separate"
   IO.println "PSCV0_M3_RETAINED_CALLS: PASS source-owned reordered dependent headers, actual branch and let scopes, full application spines, returned-function arity and conservative underapplication; source mutual WF remains separate"
   IO.println "PSCV0_M3_FIXED_SCOPES: PASS three reordered polymorphic headers, dependent fixed values, implicit binder preservation, returned-function ownership, exact kernel equations and malformed/dependent mapping refusals"
   IO.println "PSCV0_M3_COMPONENT_FIX: PASS heterogeneous dependent result family, common Nat measure, three typed decreasing callbacks, actual checked fix_eq member equations and incomplete/dependent-measure refusals; source mutual WF is separate"

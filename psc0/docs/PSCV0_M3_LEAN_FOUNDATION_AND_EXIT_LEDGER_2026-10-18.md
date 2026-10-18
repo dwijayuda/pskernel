@@ -96,17 +96,27 @@ lets, conditional patterns and typed do control, plus all retained checks.
 This includes official native reference proofs, paired checked value/equation
 comparison and both inputs' five-target emission. Runtime integration is pending.
 
-Main has been promoted non-force to18fe0b3e. All five integration gates are
-RUNNING: Native39092425439, M339092425489, F139092425401,
+Main has been promoted non-force to18fe0b3e. Native remains RUNNING; M3, F1, F2 and F3 completed SUCCESS:
+ Native39092425439, M339092425489, F139092425401,
 F239092425419, F339092425556. Do not supersede/cancel healthy main Native.
 The last fully qualified five-gate SHA remainsb95c6293.
 Receipt: docs/PSCV0_M3_NATIVE_CONTROL_18FE0B3E_2026-10-18.md.
 
-This preparation child adds source-owned mutual component measure preparation.
-It connects original source headers/measures to retained-call fixed permutations
-and typed PSigma/PSum planning, but does not publish recursive source members.
-Its code/qualification is separate from main18fe0b3e. Fresh refs and exact-SHA
-complete logs override these checkpoints.
+Preparation09bcae7989e1394c07cfad57e40b783c1b165b44 failed its component
+measure check (run39092554668/job117572173163). The source stage applied a
+closed dictionary without beta reduction, then counted unused varying arguments
+as free dependencies. The replacement follows pinned WF/Rel directly: establish
+one fixed measure codomain, then synthesize one dictionary in the common fixed
+scope. Per-member dictionary transport is removed.
+
+This preparation child also constructs actual internal source component bodies:
+per-callee proof-restricted callbacks, dependent branch refinement, final fixed
+argument validation, real decrease goals and closed typed component branches.
+The existing three-member packing fixture now independently checks the resulting
+recursive functional and its genuine fix_eq with the official kernel. These new
+checks are PENDING; no public mutual-WF acceptance or runtime authority is claimed.
+The source dispatcher remains fail-closed pending public projections, exact
+retained-body equations, executable ownership and selected PSum activation.
 
 ## Current implementation and next work
 
@@ -130,7 +140,7 @@ complete logs override these checkpoints.
   the third and local WF helper are prep-qualified at18fe; runtime gates are pending.
 
 Next actions:
-1. Qualify the source component measure preparation candidate while main18fe
+1. Qualify the source component measure/body candidate while main18fe
    integration runs. This reuses the existing retained-source packing fixture;
    no new executable or workflow is added. Build that existing fixture before
    long audits to catch authoring errors early. Exporter source bytes remain
@@ -162,7 +172,7 @@ docs/PSCV0_M3_RETAINED_CALL_ANALYSIS_2026-10-18.md.
 WF study: FixedParams, ArgsPacker, WF/{Main,PackMutual,Rel,Fix,Unfold};
 Fix.processSumCasesOn/processPSigmaCasesOn refines callbacks before recursive
 replacement. PSC0's existing singleton source re-elaboration preserves the same
-branch invariant. No new component source algorithm is implemented yet.
+branch invariant. The internal source-body component candidate is implemented but not yet qualified.
 
 ## Input parity within the existing roadmap
 

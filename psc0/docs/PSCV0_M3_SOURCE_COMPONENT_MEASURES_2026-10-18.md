@@ -1,35 +1,41 @@
-# Source-owned mutual well-founded measures — preparation
+# Source-owned mutual well-founded components — preparation
 
-Reference: Lean4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
-PreDefinition/FixedParams, WF/{PackMutual,Rel,Fix}, Meta/ArgsPacker.
-Rel.checkCodomains requires one codomain independent of varying parameters.
-PackMutual closes a common fixed prefix before packing varying arguments.
-Fix refines dependent callbacks through PSum/PSigma/matcher branches before
-introducing decrease goals. These are invariants, not optional shape checks.
+Reference: Lean4.35.0 commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Study: PreDefinition/FixedParams, WF/{PackMutual,Rel,Fix}, Meta/ArgsPacker;
+tests/elab/fixedParamsReorder.lean and fixedParamsDep.lean. Upstream test axioms
+are not imported or treated as admissible source evidence.
 
-Ps.Elab.WhereMutualWellFounded now connects existing source preparation to
-the typed component plan. Each original measure/dictionary is elaborated in
-its owned header, normalized and closed before moving contexts. Retained Core
-calls determine cross-member fixed permutations. Each closed member is
-specialized into a fresh shared fixed scope; only original varying parameters
-are packed. Returned-function binders remain results. Codomains/dictionaries
-must be fixed, resolved and shared; actual domain/type inference validates the
-aggregate plan. Original captures, block universes and member identity remain
-checked by WhereWellFounded and PreDefinition.
+Rel.checkCodomains requires one codomain independent of varying parameters;
+Rel.elabWFRel then synthesizes one dictionary in the common fixed scope.
+The first candidate incorrectly transported a closed dictionary application
+without beta reduction and mistook its unused arguments for dependencies.
+Run39092554668/job117572173163 failed exactly that check. The replacement removes
+per-member dictionary transport and follows the upstream ownership boundary.
 
-The existing three-member retained-source fixture checks reordered dependent
-fixed parameters, one Nat varying parameter each, original returned-function
-arity, source measures and actual inferred component callback signatures.
-Existing malformed-owner and dependent-codomain refusals remain. This is an
-internal construction stage, not source acceptance of mutual WF. It is not yet
-qualified and is not in main18fe0b3e.
+Ps.Elab.WhereMutualWellFounded connects retained source headers and measures to
+typed fixed permutations and PSigma/PSum planning. Measures close over their
+original headers before specialization. Only original varying arguments are
+packed; a returned function remains the result. Types, source identity, captures
+and whole-block universes remain independently checked.
 
-Next, construct proof-restricted per-callee callbacks in original source scopes,
-re-elaborate each body under refined branch contexts, solve genuine decrease
-goals, close the functional and public projections, derive exact source
-equations from fix_eq/cases/funext and independently recover the retained body
-authority for typed runtime members. Keep the source refusal until all stages
-are coherent. The current packing stage requires a nonempty varying telescope;
-zero-varying/PUnit handling is still an explicit capability question, never
-silently inferred from a returned lambda. Standalone PSum stays unselected until
-the complete source consumer and strict selected-manifest update are ready.
+The body stage keeps each original lexical header and predecessor aliases.
+It instantiates the common fixed prefix by the owned permutation, then derives
+each callback signature from the actual fix constructor. Per-callee callbacks
+use real sum injections and dependent tuple currying. Source elaboration receives
+only these proof-restricted callbacks; ordinary dependent matching refines their
+current argument before fresh decrease goals are created. Every final call must
+preserve its common fixed arguments in the call's real branch context. Proof
+elaboration disables recursive authority. Closed bodies are checked, specialized
+back into the common fixed scope and packed through typed dependent elimination.
+
+The existing packing fixture has the native three-member oracle and original
+reordered dependent headers, local argument lets and returned-function calls.
+It now builds the source recursive functional and a genuine fixedpoint equation;
+both enter the official Lean kernel. This candidate is not yet qualified.
+No executable, workflow, budget increase or new trusted assumption is added.
+
+The public dispatcher still refuses source mutual WF. Complete public projections,
+exact equations against retained original bodies, typed executable ownership and
+strict PSum foundation selection before activating it. The current plan requires
+nonempty varying telescopes; zero-varying/PUnit handling cannot be inferred from a
+returned function. Standalone PSum remains unselected.

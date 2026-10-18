@@ -47,11 +47,18 @@ def check (source : String) : IO String := do
       | .error error =>
           return rejected error.kind.code error.message error.declarationIndex
       | .ok prelude =>
-          -- A fresh task resets the *C++* kernel heartbeat counter. The
-          -- legacy admission helper logs failures to stdout; never call it
-          -- directly here because the wire transport requires one JSON line.
+          -- The C++ kernel heartbeat counter is fresh on a task worker,
+          -- but only when this pure checked computation is actually forced
+          -- *inside* the worker. Plain IO.pure/return may evaluate eagerly on
+          -- the caller thread after the expensive Standard replay, causing
+          -- deterministic-timeout even for Nat := 1. Follow the established
+          -- PSC0 provider's IO.lazyPure boundary without its stdout audit:
+          -- this wire endpoint must produce exactly ONE JSON response.
+          -- Admission retains the same finite 2m/20k kernel budgets.
           let task ← IO.asTask do
-            return PsKernelLean.admitDeclarations prelude declarations
+            let result ← IO.lazyPure (fun _ =>
+              PsKernelLean.admitDeclarations prelude declarations)
+            return result
           match ← IO.ofExcept (← IO.wait task) with
           | .ok _ => return "{" ++ identity ++ ",\"accepted\":true}"
           | .error error =>

@@ -27,6 +27,7 @@ jobs:
           for f in psc0/packages/pskernel-lean-wasm/index.mjs psc0/packages/pskernel-lean-wasm/scripts/*.mjs; do
             node --check "$f"
           done
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-fresh-kernel-task.mjs
           node --test \
             psc0/packages/pskernel-lean-wasm/scripts/test-corpus.mjs \
             psc0/packages/pskernel-lean-wasm/scripts/test-provider-transport.mjs \

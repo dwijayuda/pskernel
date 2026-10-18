@@ -37,5 +37,5 @@ const receipt={schemaVersion:1,sourceCommit,cases:corpus.map(c=>c.id),
   launcherSha256:sha256(launcher),nativeSha256:sha256(native),passed:true};
 mkdirSync(path.join(root,'.wasm-build'),{recursive:true});
 writeFileSync(path.join(root,'.wasm-build/parity-receipt.json'),
-  JSON.stringify(receipt,null,2)+'\\n');
+  JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC0_WASM_NATIVE_PARITY_QUALIFIED '+receipt.cases.length);

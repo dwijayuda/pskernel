@@ -1,10 +1,11 @@
+import PsKernelLean.Admission
+
 /-!
 Lean 4.35.0 official-kernel admission endpoint for the PSC0 v7.2
 linear-memory WebAssembly build. This is *not* a second kernel implementation.
 The imported PsKernelLean decoder/prelude are the live PSC0 modules;
 environment.addDeclCore is Lean's checked C++ kernel operation.
 -/
-import PsKernelLean.Admission
 
 namespace PsKernelLeanWasm
 

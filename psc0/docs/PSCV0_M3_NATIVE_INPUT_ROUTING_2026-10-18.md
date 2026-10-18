@@ -119,3 +119,27 @@ lexer's explicit EOF token, and native command separation permits EOF without a
 final newline. These are shared syntax/scope invariants, not weakened assertions.
 The exact native/portable shadowing rejections and prior positive observations
 remain required. Main stays 037fda49; the new preparation child must qualify first.
+
+## Native data and dictionary syntax — design and qualification plan
+
+Pinned Lean4.35.0 sources studied before this slice:
+Parser/Command.lean:188-242,270-311; Parser/Extra.lean:196-215;
+Parser/Term/Basic.lean:39-92; tests/elab/instanceWhere.lean,
+tests/elab/derivingRepr.lean, tests/elab/defaultInstanceWithPrio.lean.
+All references use eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+The v7.2 data/class/instance/deriving selection remains authoritative.
+
+Shared field-header construction accepts caller-owned term/binder readers.
+Shared registration parsing accepts a caller-owned command reader. This removes
+duplicate semantic lowering: structures, constructors, classes, priorities,
+default-instance attributes, field lambda/ascription ordering and deriving
+requests reach their existing checked owners. The .ps sequence wrappers keep
+braces/comma headers/newline-only fields; native wrappers own indentation and
+native instance semicolons/inferred field parameters. Native data declarations
+stop using the older limited ParseLean data path.
+
+The existing paired fixture gains one data/class/instance/BEq export with two
+pinned-native observations per source kind, reused by the five backend observers.
+No extra workflow, foundation axiom or runtime intrinsic is introduced.
+Full native where/do/termination syntax and mutual WF remain separate open work.
+Qualification is pending; source emission is not runtime observation.

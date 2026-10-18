@@ -1,25 +1,11 @@
 import Ps.Syntax.ParseLean
-import Ps.Syntax.Lean.Term
+import Ps.Syntax.Lean.Data
 import Ps.Syntax.Pscv0.ProgramRead
 
 -- Owned native surface adapter, following Lean 4.35.0 Parser.Command and
 -- Parser.Module.topLevelCommandParserFn. This produces the same v7.2 program
 -- AST as ProofScript; it never invokes Lean's host parser/elaborator or rewrites
 -- source text. Unsupported native forms fail before the shared semantic owner.
-def psLeanProgramBinders (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))) :=
-  psPscv0ParameterGroups (psLeanReadTerm true) (psLeanReadTerm false) 4096 false false false cursor []
-
--- Groups retain syntax ownership; shared scope/elaboration processes their
--- binder views in native order, including annotation/default shadowing.
-def psLeanProgramResult (required : Bool) (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) := do
-  if !required && psTokenCursorAtText cursor ":=" then
-    let some token := psTokenCursorPeek cursor | throw (.unexpectedEnd "result")
-    return { value := .omittedType { start := token.span.start, stop := token.span.start }, cursor }
-  let colon ← psTokenCursorExpectText cursor ":"
-  psLeanReadTerm true colon.cursor
-
 def psLeanProgramValue (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) := do
   let some first := psTokenCursorAdvance cursor | throw "PSCV0-LEAN-DECLARATION"
@@ -76,7 +62,14 @@ def psLeanProgramValue (cursor : PsTokenCursor) :
     return { value := declaration, cursor := measure.cursor }
   return { value := declaration, cursor := body.cursor }
 
-def psLeanProgramOrdinaryCommand (cursor : PsTokenCursor) (mutualMember : Bool := false) :
+def psLeanFinishCommand (command : PsSyntaxCommand) (stop : PsSourcePos)
+    (cursor : PsTokenCursor) : Except String (PsParseResult PsSyntaxCommand) := do
+  if let some next := psTokenCursorPeek cursor then
+    if !psTokenCursorDone cursor && next.span.start.line <= stop.line then
+      throw "PSCV0-LEAN-COMMAND-SEPARATOR: expected a new command line"
+  return { value := command, cursor }
+
+def psLeanProgramUnattributedCommand (cursor : PsTokenCursor) (mutualMember : Bool) :
     Except String (PsParseResult PsSyntaxCommand) := do
   if !mutualMember then
     if let some scopeCommand ← psPscv0ReadScopeCommand psLeanProgramBinders cursor then
@@ -87,23 +80,40 @@ def psLeanProgramOrdinaryCommand (cursor : PsTokenCursor) (mutualMember : Bool :
   let some token := psTokenCursorPeek cursor | throw "PSCV0-LEAN-DECLARATION"
   if mutualMember && !["def", "partial", "noncomputable"].contains token.text then
     throw "PSCV0-MUTUAL-HEAD: selected function-like native declaration required"
-  let parsed ← if ["inductive", "structure"].contains token.text then
-    (psParseLeanDeclaration cursor).mapError psPscv0ParseError
-  else psLeanProgramValue cursor
-  let registration := if token.text == "abbrev" then some PsSyntaxRegistration.abbrevDecl
-    else if token.text == "opaque" then some .opaqueDecl else none
-  let command := match registration with
-    | some registration => if isPrivate then
-        PsSyntaxCommand.privateRegisteredDeclaration parsed.value registration
-      else .registeredDeclaration parsed.value registration
-    | none => if isPrivate then .privateDeclaration parsed.value else .declaration parsed.value
-  -- Native commands must end before the next line. The term reader retains
-  -- exact token spans, including multiline bodies; no semicolon/braces adapter.
-  if let some next := psTokenCursorPeek parsed.cursor then
-    if !psTokenCursorDone parsed.cursor &&
-        next.span.start.line <= (psProofScriptDeclarationStop parsed.value).line then
-      throw "PSCV0-LEAN-COMMAND-SEPARATOR: expected a new command line"
-  return { value := command, cursor := parsed.cursor }
+  let parsed ← if token.text == "instance" then do
+    let parsed ← (psLeanReadInstance cursor).mapError psPscv0ParseError
+    let command := PsSyntaxCommand.registeredDeclaration parsed.value.1 (.instanceDecl parsed.value.2)
+    psLeanFinishCommand command (psProofScriptDeclarationStop parsed.value.1) parsed.cursor
+  else if ["inductive", "structure", "class"].contains token.text then do
+    let parsed ← (psLeanReadData cursor).mapError psPscv0ParseError
+    if token.text != "class" && psTokenCursorAtText parsed.cursor "deriving" then
+      let marker ← psPscv0Expect parsed.cursor "deriving"
+      let handlers ← psPscv0DerivingHandlers 128 marker.cursor []
+      let some last := handlers.value.getLast? | throw "PSCV0-DERIVE-HANDLER-REQUIRED"
+      psLeanFinishCommand (.derivingDeclaration parsed.value handlers.value false) last.span.stop handlers.cursor
+    else
+      let command := if token.text == "class" then
+        PsSyntaxCommand.registeredDeclaration parsed.value .classDecl
+      else .declaration parsed.value
+      psLeanFinishCommand command (psProofScriptDeclarationStop parsed.value) parsed.cursor
+  else do
+    let parsed ← psLeanProgramValue cursor
+    let command := if token.text == "abbrev" then
+      PsSyntaxCommand.registeredDeclaration parsed.value .abbrevDecl
+    else if token.text == "opaque" then .registeredDeclaration parsed.value .opaqueDecl
+    else .declaration parsed.value
+    psLeanFinishCommand command (psProofScriptDeclarationStop parsed.value) parsed.cursor
+  let command := if !isPrivate then parsed.value else match parsed.value with
+    | .declaration source => .privateDeclaration source
+    | .registeredDeclaration source registration => .privateRegisteredDeclaration source registration
+    | .derivingDeclaration source handlers _ => .derivingDeclaration source handlers true
+    | command => command
+  return { parsed with value := command }
+
+def psLeanProgramOrdinaryCommand (cursor : PsTokenCursor) (mutualMember : Bool := false) :
+    Except String (PsParseResult PsSyntaxCommand) :=
+  psPscv0ReadAttributedCommand (fun cursor =>
+    psLeanProgramUnattributedCommand cursor mutualMember) cursor
 
 def psLeanProgramMutual (fuel : Nat) (cursor : PsTokenCursor)
     (membersRev : List PsSyntaxMutualMember) :

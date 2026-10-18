@@ -24,6 +24,8 @@ lean_lib PsSyntax where
     `Ps.Syntax.ParseCommon,
     `Ps.Syntax.ParseLean,
     `Ps.Syntax.Lean.Term,
+    `Ps.Syntax.Lean.Binders,
+    `Ps.Syntax.Lean.Data,
     `Ps.Syntax.Lean.Program,
     `Ps.Syntax.ParseProofScript,
     `Ps.Syntax.PrintCommon,

@@ -31,6 +31,29 @@ def psPscv0InstancePriority (cursor : PsTokenCursor) :
 
 -- Field headers are declarations, not calls. Lower their result annotation
 -- inside the lambda so it sees every preceding field parameter.
+def psPscv0InstanceField
+    (readBinders : PsTokenCursor → Except PsParseError
+      (PsParseResult (List (PsSyntaxBinderHead × PsSyntaxTerm))))
+    (readType readBody : PsPscv0TermReader) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (PsSyntaxName × PsSyntaxTerm)) := do
+  let name ← psTokenCursorExpectKind cursor .identifier
+  let fieldName := PsSyntaxName.mk [name.token.text] name.token.span
+  let binders ← readBinders name.cursor
+  let annotation ←
+    if psTokenCursorAtText binders.cursor ":" then do
+      let colon ← psTokenCursorExpectText binders.cursor ":"
+      let type ← readType colon.cursor
+      pure (PsParseResult.mk (some type.value) type.cursor)
+    else pure (PsParseResult.mk none binders.cursor)
+  let assign ← psTokenCursorExpectText annotation.cursor ":="
+  let body ← readBody assign.cursor
+  let span := psSyntaxSpanJoin name.token.span (psSyntaxTermSpan body.value)
+  let value := match annotation.value with
+    | none => body.value
+    | some type => .ascription body.value type span
+  let value := if binders.value.isEmpty then value else .lambda binders.value value span
+  return { value := (fieldName, value), cursor := body.cursor }
+
 def psPscv0InstanceFields (fuel : Nat) (cursor : PsTokenCursor)
     (acc : List (PsSyntaxName × PsSyntaxTerm)) :
     Except PsParseError (PsParseResult (List (PsSyntaxName × PsSyntaxTerm))) := do
@@ -38,29 +61,15 @@ def psPscv0InstanceFields (fuel : Nat) (cursor : PsTokenCursor)
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
     if psTokenCursorAtText cursor "}" then return { value := acc.reverse, cursor }
-    let name ← psTokenCursorExpectKind cursor .identifier
-    let fieldName := PsSyntaxName.mk [name.token.text] name.token.span
-    if acc.any (fun entry => entry.fst.segments == fieldName.segments) then
+    let field ← psPscv0InstanceField (psPscv0DataParameters (fuel + 1))
+      (psPscv0ParseTerm true) psPscv0ParseDefinitionBody cursor
+    if acc.any (fun entry => entry.fst.segments == field.value.1.segments) then
       throw (psProofScriptExpectedError "unique instance field" cursor)
-    let binders ← psPscv0DataParameters (fuel + 1) name.cursor
-    let annotation ←
-      if psTokenCursorAtText binders.cursor ":" then do
-        let colon ← psTokenCursorExpectText binders.cursor ":"
-        let type ← psPscv0ParseTerm true colon.cursor
-        pure (PsParseResult.mk (some type.value) type.cursor)
-      else pure (PsParseResult.mk none binders.cursor)
-    let assign ← psTokenCursorExpectText annotation.cursor ":="
-    let body ← psPscv0ParseDefinitionBody assign.cursor
-    let span := psSyntaxSpanJoin name.token.span (psSyntaxTermSpan body.value)
-    let value := match annotation.value with
-      | none => body.value
-      | some type => .ascription body.value type span
-    let value := if binders.value.isEmpty then value else .lambda binders.value value span
-    if !psTokenCursorAtText body.cursor "}" then
-      if psTokenCursorAtText body.cursor "," || psTokenCursorAtText body.cursor ";" ||
-          !psProofScriptLaterLine span.stop body.cursor then
-        throw (psProofScriptExpectedError "newline-separated instance field" body.cursor)
-    psPscv0InstanceFields fuel body.cursor ((fieldName, value) :: acc)
+    if !psTokenCursorAtText field.cursor "}" then
+      if psTokenCursorAtText field.cursor "," || psTokenCursorAtText field.cursor ";" ||
+          !psProofScriptLaterLine (psSyntaxTermSpan field.value.2).stop field.cursor then
+        throw (psProofScriptExpectedError "newline-separated instance field" field.cursor)
+    psPscv0InstanceFields fuel field.cursor (field.value :: acc)
 
 def psPscv0ReadInstance (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxCommand) := do

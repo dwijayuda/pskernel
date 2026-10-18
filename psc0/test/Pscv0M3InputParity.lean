@@ -24,6 +24,26 @@ def lambdaShadow : (T : Type) → T → T → T := fun (T : Type) (T value : T) 
 def globalShadow : Nat → Nat → Nat := fun (Nat value : Nat) => value
 example : m3parity false = 4 := rfl
 example : m3parity true = 13 := rfl
+structure ParityBox where
+  value : Nat
+  deriving Inhabited, BEq
+inductive ParityMaybe where
+  | none
+  | some (value : Nat)
+  deriving Inhabited, BEq
+class Sized (A : Type) where
+  size : A → Nat
+@[default_instance 200]
+instance (priority := high) sizedNat : Sized Nat where
+  size n := n
+def m3data (flag : Bool) : UInt64 :=
+  let b := ParityBox.mk (if flag then 6 else 9)
+  let packed := ParityMaybe.some (Sized.size b.value)
+  UInt64.ofNat (match packed with
+    | ParityMaybe.none => 0
+    | ParityMaybe.some value => if b == b then value else 0)
+example : m3data true = 6 := rfl
+example : m3data false = 9 := rfl
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -46,6 +66,12 @@ private def psSource : String :=
   "function addSeed(n: Nat): Nat := Nat.add(seed, n)\nend\n" ++
   "function withDefault(n: Nat := 3): Nat := Nat.succ(n)\nend Shared\nopen Shared\n" ++
   "function m3parity(flag: Bool): UInt64 := UInt64.ofNat(if (flag) { addSeed(8, 5) } else { withDefault(3) })\n"
+
+private def dataLeanSource : String :=
+  "structure ParityBox where\n  value : Nat\n  deriving Inhabited, BEq\ninductive ParityMaybe where\n  | none\n  | some (value : Nat)\n  deriving Inhabited, BEq\nclass Sized (A : Type) where\n  size : A → Nat\n@[default_instance 200]\ninstance (priority := high) sizedNat : Sized Nat where\n  size n := n\ndef m3data (flag : Bool) : UInt64 :=\n  let b := ParityBox.mk (if flag then 6 else 9)\n  let packed := ParityMaybe.some (Sized.size b.value)\n  UInt64.ofNat (match packed with\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if b == b then value else 0)\n"
+
+private def dataPsSource : String :=
+  "structure ParityBox where {\n  value: Nat\n} deriving Inhabited, BEq\ninductive ParityMaybe where {\n  | none\n  | some(value: Nat)\n} deriving Inhabited, BEq\nclass Sized(A: Type) where {\n  size: A -> Nat\n}\n@[default_instance 200]\ninstance (priority := high) sizedNat: Sized Nat where {\n  size(n: Nat): Nat := n\n}\nfunction m3data(flag: Bool): UInt64 :=\n  let b := ParityBox.mk(if (flag) { 6 } else { 9 })\n  let packed := ParityMaybe.some(Sized.size(b.value))\n  UInt64.ofNat(match packed with {\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if (b == b) { value } else { 0 }\n  })\n"
 
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
@@ -114,10 +140,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (dataLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (dataPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -152,7 +178,8 @@ def check (root : System.FilePath) : IO Unit := do
             | .binary value => IO.FS.writeBinFile (directory / file.path) value
         let rows := [false, true].map fun flag => Lean.Json.mkObj [
           ("flag", Lean.toJson flag),
-          ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat))]
+          ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat)),
+          ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

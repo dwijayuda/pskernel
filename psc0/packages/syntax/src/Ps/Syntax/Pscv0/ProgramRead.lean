@@ -144,10 +144,11 @@ def psPscv0SelectedAttributes : List String := ["default_instance"]
 
 -- Selected declaration attributeName only; unsupported attributes are refused.
 -- The default priority is independent of an instance declaration's priority.
-def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
-    (mutualMember : Bool := false) :
+def psPscv0ReadAttributedCommand
+    (readCommand : PsTokenCursor → Except String (PsParseResult PsSyntaxCommand))
+    (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxCommand) := do
-  if !psTokenCursorAtText cursor "@" then psPscv0ReadUnattributedCommand cursor mutualMember
+  if !psTokenCursorAtText cursor "@" then readCommand cursor
   else
     let marker ← psPscv0Expect cursor "@"
     let opening ← psPscv0Expect marker.cursor "["
@@ -161,7 +162,7 @@ def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
         let value ← (psPscv0PriorityValue atom.token.text attributeName.cursor).mapError psPscv0ParseError
         pure (PsParseResult.mk value atom.cursor)
     let close ← psPscv0Expect priority.cursor "]"
-    let parsed ← psPscv0ReadUnattributedCommand close.cursor mutualMember
+    let parsed ← readCommand close.cursor
     let command ← match parsed.value with
       | .declaration source => pure (.registeredDeclaration source
           (.defaultInstanceDecl priority.value none))
@@ -173,6 +174,12 @@ def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
         pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
       | _ => throw "PSCV0-DEFAULT-INSTANCE-DECLARATION"
     return { parsed with value := command }
+
+def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
+    (mutualMember : Bool := false) :
+    Except String (PsParseResult PsSyntaxCommand) :=
+  psPscv0ReadAttributedCommand (fun cursor =>
+    psPscv0ReadUnattributedCommand cursor mutualMember) cursor
 
 -- Pinned Lean Parser.Command.mutual owns the complete ordered block before
 -- elaboration partitions recursive cliques. The v7.2 source selection keeps

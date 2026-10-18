@@ -329,3 +329,13 @@ Corporation; upstream authors include Leonardo de Moura, Sebastian Ullrich and
 Mario Carneiro. Apache-2.0. Modifications: portable explicit contexts, structural
 bounded readers, selected common AST/primitives and separate source provenance.
 Retain licenses/LEAN-APACHE-2.0.txt and upstream notices.
+
+### Native data and dictionary input adapter (2026-10-18)
+
+The native layout and field/header adaptation follows Lean 4.35.0
+`src/Lean/Parser/Command.lean`, `Extra.lean`, and `Term/Basic.lean`,
+commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Lean is Copyright (c) Microsoft Corporation and Lean FRO, LLC under Apache-2.0.
+PSC0 shares its own selected AST/elaborators; these source references and the
+corresponding upstream instanceWhere/derivingRepr/defaultInstanceWithPrio tests
+guide semantics and conformance. Existing upstream license/notice material remains.

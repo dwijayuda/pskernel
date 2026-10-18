@@ -229,3 +229,19 @@ native then/deriving/mutual/monotonicity cannot become ordinary arguments.
 The common ProofScript table alone does not own these native delimiters.
 This follows pinned Parser.Term.ite/argument and Parser.Command; source grammars
 remain separate and share semantic AST/elaboration. Full qualification is pending.
+
+## Retained-call checkpoint and native data adapter — 2026-10-18
+
+Preparation8f0950c0/run39088579549/job117560230257 completed with one failure:
+native then was consumed as an application argument. The correction is already
+in af9a0e31/run39088772197 (in progress). No run was canceled. All retained
+call-analysis/PSigma/PSum construction, fixed-scope, primitive/manifest/order,
+heterogeneous context, P0/WF, P1 and noncomputable steps apart from the combined
+native-input/Where step passed at8f0950c0. Source mutual WF is still refused.
+
+The current child adds the selected native data/class/instance/deriving adapter,
+shared field-header construction and attribute registration, plus one data export
+in the existing paired five-target fixture. Both handoffs are consolidated.
+Qualification is pending; main037fda49 remains unchanged. Historical focused P1
+Rust observations were not executed before the harness-order fix and must be
+requalified. Full native syntax parity, source mutual WF and M3+B remain OPEN.

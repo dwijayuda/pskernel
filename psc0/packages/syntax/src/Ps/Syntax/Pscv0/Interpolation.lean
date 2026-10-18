@@ -16,7 +16,7 @@ def psPscv0InterpolationPart (read : PsPscv0TermReader)
     let parsed ← read (PsTokenCursor.mk tokens)
     if !psTokenCursorDone parsed.cursor then
       throw (psProofScriptExpectedError "end of interpolated expression" parsed.cursor)
-    return .call
+    return .call .positionalPrefix
       (.reference (PsSyntaxName.mk ["_root_", "ToString", "toString"] token.span))
       [(none, parsed.value)] token.span
 
@@ -28,7 +28,7 @@ def psPscv0Interpolate (read : PsPscv0TermReader)
       "well-formed s! interpolation" value.token.text value.token.span)
   let terms ← parts.mapM (psPscv0InterpolationPart read value.token)
   let append := fun (left right : PsSyntaxTerm) =>
-    PsSyntaxTerm.call
+    PsSyntaxTerm.call .positionalPrefix
       (.reference (PsSyntaxName.mk ["_root_", "HAppend", "hAppend"] value.token.span))
       [(none, left), (none, right)] value.token.span
   let result := match terms with

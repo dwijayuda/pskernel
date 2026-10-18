@@ -143,7 +143,7 @@ def psProofScriptTermWithSpan
   | .omittedType _ => .omittedType span
   | .optionalType type value _ => .optionalType type value span
   | .ascription value type _ => .ascription value type span
-  | .call fn args _ => .call fn args span
+  | .call placement fn args _ => .call placement fn args span
   | .operatorE kind name spelling args _ => .operatorE kind name spelling args span
   | .reference name =>
       PsSyntaxTerm.reference { segments := name.segments, span := span }

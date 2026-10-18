@@ -186,3 +186,16 @@ Init/Core.lean BEq.rfl before reducing the small arithmetic result. The same
 192013/232417 equalities, actual source/backend hash observations and unchanged
 limits remain required. No native_decide, axiom or weakened check is introduced.
 Preparation qualification is still pending; main33676076 remains qualified.
+
+## Actual native named-application follow-up
+
+Compiler64ce8571 / run39101822044 built successfully; the source step rejected
+branchByRec's native named motive before positional arguments. Deriving and all
+other substantive preparation checks passed. This is a source-policy ownership
+gap, not a recursor typing failure. The same typed application engine now uses
+explicit positionalPrefix/namedPriority intent retained in the call AST. Native
+application binds named parameters first, as pinned Elab/App.main does; PS
+placement/overlap checks stay intact. WF captures and suffixes preserve policy.
+See docs/PSCV0_M3_NAMED_APPLICATION_PLACEMENT_2026-10-18.md. This preparation is
+not yet qualified. Main remains fully qualified33676076. The Prop packing draft
+is researched but not published; finish this slice before advancing it.

@@ -99,6 +99,14 @@ inductive PsSyntaxOperatorKind where
   | unary | binary | rightAction | relation | booleanRelation
   deriving BEq
 
+-- Argument placement is a source-form property, not a second elaborator.
+-- Prefix calls reserve explicit positional slots. Named-priority applications
+-- bind named parameters first, then use positional arguments for unnamed slots.
+inductive PsSyntaxArgumentPlacement where
+  | positionalPrefix
+  | namedPriority
+  deriving BEq
+
 mutual
 inductive PsSyntaxTerm where
   | doE (items : List PsSyntaxDoItem) (span : PsSourceSpan)
@@ -113,7 +121,7 @@ inductive PsSyntaxTerm where
   | optionalType (type value : PsSyntaxTerm) (span : PsSourceSpan)
   | ascription (value type : PsSyntaxTerm) (span : PsSourceSpan)
   -- Adjacent calls retain labels and the empty-invocation request until elaboration.
-  | call (fn : PsSyntaxTerm)
+  | call (placement : PsSyntaxArgumentPlacement) (fn : PsSyntaxTerm)
       (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm)) (span : PsSourceSpan)
   | operatorE (kind : PsSyntaxOperatorKind) (name : PsSyntaxName)
       (spelling : String) (arguments : List PsSyntaxTerm) (span : PsSourceSpan)
@@ -226,7 +234,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .omittedType span => span
   | .optionalType _ _ span => span
   | .ascription _ _ span => span
-  | .call _ _ span => span
+  | .call _ _ _ span => span
   | .operatorE _ _ _ _ span => span
   | .reference name => name.span
   | .natural _ span => span

@@ -242,8 +242,8 @@ def psElabTermWithFuel
             | .omittedType _ => Except.error (.data "PSCV0-RESULT-ANNOTATION: omitted result syntax is declaration-only")
             | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected
-            | .call fn args span =>
-                match psTryElabWellFoundedCall smaller context fn args expected with
+            | .call placement fn args span =>
+                match psTryElabWellFoundedCall smaller context fn args expected placement with
                 | .error error => .error error
                 | .ok (some result) => .ok result
                 | .ok none =>
@@ -252,7 +252,7 @@ def psElabTermWithFuel
                   else
                     match readHead context fn none with
                     | .error error => .error error
-                    | .ok head => psElabCall smaller head args expected
+                    | .ok head => psElabCall smaller head args expected placement
             | .reference name =>
                 if psElabWellFoundedReferenceEscapes context name then
                   Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must complete its source header")

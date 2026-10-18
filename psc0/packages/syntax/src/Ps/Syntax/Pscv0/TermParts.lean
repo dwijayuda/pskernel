@@ -43,7 +43,7 @@ def psPscv0TupleConstruct (span : PsSourceSpan) :
   | first :: second :: rest => do
     let right ← if rest.isEmpty then pure second
       else psPscv0TupleConstruct span (second :: rest)
-    return .call (.reference (PsSyntaxName.mk ["_root_", "Prod", "mk"] span))
+    return .call .positionalPrefix (.reference (PsSyntaxName.mk ["_root_", "Prod", "mk"] span))
       [(none, first), (none, right)] span
   | _ => throw (.unexpectedEnd "tuple requires at least two elements")
 
@@ -79,10 +79,10 @@ def psPscv0ReadArrayLiteral (read : PsPscv0TermReader)
   let span := psSyntaxSpanJoin marker.token.span close.token.span
   let name := fun (text : String) =>
     PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "Array", text] span)
-  let empty := PsSyntaxTerm.call (name "emptyWithCapacity")
+  let empty := PsSyntaxTerm.call .positionalPrefix (name "emptyWithCapacity")
     [(none, .natural "0" span)] span
   let result := values.value.foldl (fun current element =>
-    PsSyntaxTerm.call (name "push") [(none, current), (none, element)] span) empty
+    PsSyntaxTerm.call .positionalPrefix (name "push") [(none, current), (none, element)] span) empty
   return { value := result, cursor := close.cursor }
 
 -- Ordinary lists retain the existing inductive semantics. The empty
@@ -97,7 +97,7 @@ def psPscv0ReadListLiteral (read : PsPscv0TermReader)
   let name := fun (field : String) =>
     PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "List", field] span)
   let result := values.value.foldr (fun element tail =>
-    PsSyntaxTerm.call (name "cons") [(none, element), (none, tail)] span) (name "nil")
+    PsSyntaxTerm.call .positionalPrefix (name "cons") [(none, element), (none, tail)] span) (name "nil")
   return { value := result, cursor := close.cursor }
 
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
@@ -171,7 +171,7 @@ def psPscv0CallArguments (read : PsPscv0TermReader) (fuel : Nat)
 -- conformance obligations, never assumed away.
 def psPscv0IndexMethod (name : String) (args : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .call (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
+  .call .positionalPrefix (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
     (args.map fun arg => (none, arg)) span
 
 def psPscv0PostfixFor (commaCalls : Bool) (read : PsPscv0TermReader) (fuel : Nat)
@@ -237,7 +237,7 @@ def psPscv0PostfixFor (commaCalls : Bool) (read : PsPscv0TermReader) (fuel : Nat
     let args ← psPscv0CallArguments read (fuel + 1) opening.cursor false []
     let close ← psTokenCursorExpectText args.cursor ")"
     psPscv0PostfixFor commaCalls read fuel
-      (.call current args.value (psSyntaxSpanJoin (psSyntaxTermSpan current) close.token.span))
+      (.call .positionalPrefix current args.value (psSyntaxSpanJoin (psSyntaxTermSpan current) close.token.span))
       close.cursor
 
 

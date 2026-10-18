@@ -50,20 +50,21 @@ def psElabTakeNamed {α : Type} (name : PsName) (args : List (PsName × α)) :
       let found := psElabTakeNamed name rest
       (found.fst, (key, value) :: found.snd)
 
-def psElabCallArguments
+def psElabCallArguments (placement : PsSyntaxArgumentPlacement)
     (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm))
     (positionsRev : List PsSyntaxTerm) (namesRev : PsElabNamedArguments) :
     Except PsElabError (Prod (List PsSyntaxTerm) PsElabNamedArguments) := do
   match args with
   | [] => return (positionsRev.reverse, namesRev.reverse)
   | (none, value) :: rest =>
-    if !namesRev.isEmpty then throw (.invalidArgument "positional argument after named argument")
-    psElabCallArguments rest (value :: positionsRev) namesRev
+    if placement == .positionalPrefix && !namesRev.isEmpty then
+      throw (.invalidArgument "positional argument after named argument")
+    psElabCallArguments placement rest (value :: positionsRev) namesRev
   | (some label, value) :: rest =>
     let some name := psSyntaxNameToName label | throw .emptyName
     if (psElabTakeNamed name namesRev).fst.isSome then
       throw (.invalidArgument "duplicate named argument")
-    psElabCallArguments rest positionsRev ((name, value) :: namesRev)
+    psElabCallArguments placement rest positionsRev ((name, value) :: namesRev)
 
 def psElabApplyValue (current argument : PsElabTermResult) (body : PsExpr) :
     PsElabTermResult :=
@@ -180,7 +181,8 @@ def psElabApplyOrderedWith {α : Type}
     (current : PsElabTermResult) (positions : List α)
     (names : List (PsName × α)) (pending : List PsSyntheticConstraint)
     (complete : Bool := true) (expected : Option PsExpr := none)
-    (capture : Option PsElabApplicationCapture := none) :
+    (capture : Option PsElabApplicationCapture := none)
+    (placement : PsSyntaxArgumentPlacement := .positionalPrefix) :
     Except PsElabError (PsElabApplicationResult α) := do
   if capture.any (fun capture => capture.remaining == 0) then
     -- The owner transforms only its original header. The returned function
@@ -220,7 +222,7 @@ def psElabApplyOrderedWith {α : Type}
       let explicit := psBinderAcceptsExplicitArgument binder
       let selected ← match named.fst, positions with
         | some value, _ =>
-          if explicit && !positions.isEmpty then
+          if placement == .positionalPrefix && explicit && !positions.isEmpty then
             throw (.invalidArgument "argument supplied both positionally and by name")
           pure (some value, positions, named.snd)
         | none, value :: rest =>
@@ -237,7 +239,7 @@ def psElabApplyOrderedWith {α : Type}
           (some (psMetaInstantiate current.context.metaContext domain))
         let (next, capture) := psElabApplyCapturedValue current argument body capture
         psElabApplyOrderedWith elaborate fuel next
-          selected.2.1 selected.2.2 pending complete expected capture
+          selected.2.1 selected.2.2 pending complete expected capture placement
       | none =>
         if explicit && (complete || !names.isEmpty) then
           match psElabDefaultValue current.context domain with
@@ -254,7 +256,7 @@ def psElabApplyOrderedWith {α : Type}
               term := fresh.expr, type := domain }
             let (next, capture) := psElabApplyCapturedValue current argument body capture
             return ← psElabApplyOrderedWith elaborate fuel next positions names
-              (.defaultValue id value :: pending) complete expected capture
+              (.defaultValue id value :: pending) complete expected capture placement
           | none => pure ()
         if (explicit || (psBinderIsStrictImplicit binder && !complete)) &&
             positions.isEmpty && names.isEmpty then
@@ -276,13 +278,13 @@ def psElabApplyOrderedWith {α : Type}
         let pending := if psBinderIsInstanceImplicit binder then
           match fresh.expr with | .mvar id => .instanceGoal id :: pending | _ => pending
           else pending
-        psElabApplyOrderedWith elaborate fuel next positions names pending complete expected capture
+        psElabApplyOrderedWith elaborate fuel next positions names pending complete expected capture placement
     | _ =>
       if !positions.isEmpty || !names.isEmpty then
         let callable ← (psElabEnsureFunction current).mapError fun error =>
           if psElabErrorIsResource error then error
           else if positions.isEmpty then .invalidArgument "unknown named argument" else error
-        psElabApplyOrderedWith elaborate fuel callable positions names pending complete expected capture
+        psElabApplyOrderedWith elaborate fuel callable positions names pending complete expected capture placement
       else return { result := current, constraintsRev := pending, capture }
 
 -- Ordinary calls and records share the same telescope walk. A record update
@@ -290,9 +292,10 @@ def psElabApplyOrderedWith {α : Type}
 def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
     (current : PsElabTermResult) (positions : List PsSyntaxTerm)
     (names : PsElabNamedArguments) (pending : List PsSyntheticConstraint)
-    (complete : Bool := true) (expected : Option PsExpr := none) :
+    (complete : Bool := true) (expected : Option PsExpr := none)
+    (placement : PsSyntaxArgumentPlacement := .positionalPrefix) :
     Except PsElabError PsElabApplicationResult :=
-  psElabApplyOrderedWith elaborate fuel current positions names pending complete expected
+  psElabApplyOrderedWith elaborate fuel current positions names pending complete expected none placement
 
 def psElabApplyArgsWithFuelWorker (elaborate : PsElaborator) (fuel : Nat)
     (current : PsElabTermResult) (arguments : List PsSyntaxTerm) (pending : List PsSyntheticConstraint) :
@@ -373,10 +376,11 @@ def psElabCompleteEmpty (elaborate : PsElaborator) (application : PsElabApplicat
 
 def psElabCall (elaborate : PsElaborator) (head : PsElabTermResult)
     (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm))
-    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+    (expected : Option PsExpr)
+    (placement : PsSyntaxArgumentPlacement := .positionalPrefix) : Except PsElabError PsElabTermResult := do
   let head ← if args.isEmpty then psElabEnsureFunction head else pure head
-  let arguments ← psElabCallArguments args [] []
+  let arguments ← psElabCallArguments placement args [] []
   let application ← psElabApplyOrdered elaborate 4096 head arguments.fst arguments.snd [] true
-    (if args.isEmpty then none else expected)
+    (if args.isEmpty then none else expected) placement
   let application ← if args.isEmpty then psElabCompleteEmpty elaborate application else pure application
   psElabFinishApplication application expected

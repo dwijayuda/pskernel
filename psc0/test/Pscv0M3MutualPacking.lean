@@ -117,7 +117,7 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
         parameterIds := [200, 201], sourceType := some complete
         capturedNames := [hidden], collectCalls := true }] }
   for (name, callback) in [("peerF", f.id), ("peerG", g.id)] do
-    let source := PsSyntaxTerm.call (.reference (sourceName name))
+    let source := PsSyntaxTerm.call .positionalPrefix (.reference (sourceName name))
       [(none, .natural "2" span)] span
     let checked ← (psElabTerm context source (some nat)).mapError psCompilerPscv0ElabError
     let expected := psExprApplyMany (.fvar callback)
@@ -133,7 +133,7 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
   let shadow := psLocalPushLet context.localContext (psRootName "peerG") unary identity
   let shadowed := { context with localContext := shadow.context }
   let checked ← (psElabTerm shadowed
-    (.call (.reference (sourceName "peerG")) [(none, .natural "2" span)] span)
+    (.call .positionalPrefix (.reference (sourceName "peerG")) [(none, .natural "2" span)] span)
     (some nat)).mapError psCompilerPscv0ElabError
   if !checked.context.wellFoundedCallsRev.isEmpty ||
       !psDefEqReadOnlyWithEnv environment checked.context.metaContext

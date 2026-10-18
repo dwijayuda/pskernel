@@ -86,7 +86,7 @@ termination_by n
 def parityThird {C : Type} (n : Nat) (c : C) : Nat → C :=
   fun (k : Nat) => match n with
     | 0 => c
-    | Nat.succ m => parityFirst c m k
+    | Nat.succ m => parityFirst (n := m) c k
 termination_by n
 end
 def m3mutual (flag : Bool) : UInt64 :=
@@ -165,6 +165,10 @@ example : m3fields true = 192013 := by
 example : m3fields false = 232417 := by
   simp only [m3fields, branchNodeHash, BEq.rfl, ite_true]
   rfl
+
+def argumentOrder (x y z : Nat) : Nat := 100 * x + 10 * y + z
+example : argumentOrder (y := 2) 1 3 = 123 := rfl
+example : argumentOrder 1 (x := 2) 3 = 213 := rfl
 
 end M3InputParityOracle
 
@@ -291,14 +295,32 @@ def check (root : System.FilePath) : IO Unit := do
     "def choose (x y : Nat) (flag : Bool) : Nat := if flag then x + y else x\n" ++
     "def chosen : Nat := choose (flag := true) (y := 4) (x := 3)\n" ++
     "def scalar : Float := 1.25\n" ++
-    "def doArgument : Option Nat := (fun (value : Option Nat) => value) do return 1\n"
+    "def doArgument : Option Nat := (fun (value : Option Nat) => value) do return 1\n" ++
+    "def argumentOrder (x y z : Nat) : Nat := 100 * x + 10 * y + z\n" ++
+    "def orderFirst : Nat := argumentOrder (y := 2) 1 3\n" ++
+    "def orderSecond : Nat := argumentOrder 1 (x := 2) 3\n"
   let richPs := "universe u\nfunction identity{A: Type u}(a: A): A := a\n" ++
     "function choose(x: Nat, y: Nat, flag: Bool): Nat := if (flag) { x + y } else { x }\n" ++
     "const chosen: Nat := choose(flag := true, y := 4, x := 3)\n" ++
     "const scalar: Float := 1.25\n" ++
-    "const doArgument: Option Nat := (fun (value: Option Nat) => value)(do { return 1 })\n"
+    "const doArgument: Option Nat := (fun (value: Option Nat) => value)(do { return 1 })\n" ++
+    "function argumentOrder(x: Nat, y: Nat, z: Nat): Nat := 100 * x + 10 * y + z\n" ++
+    "const orderFirst: Nat := argumentOrder(1, 2, 3)\n" ++
+    "const orderSecond: Nat := argumentOrder(2, 1, 3)\n"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean richLean))
     (← fromExcept (checkedDeclarations .proofScript richPs))
+  for source in [
+      "function order(x: Nat, y: Nat): Nat := x + y\nconst bad: Nat := order(y := 2, 1)\n",
+      "function order(x: Nat, y: Nat): Nat := x + y\nconst bad: Nat := order(1, x := 2)\n"] do
+    let program ← fromExcept (psCompilerParsePscv0 source .proofScript)
+    ensure (!(psCompilerElaboratePscv0 program).isOk)
+      "ProofScript lost its positional-prefix argument contract"
+  for source in [
+      "def order (x y : Nat) : Nat := x + y\ndef bad : Nat := order (x := 1) (x := 2)\n",
+      "def order (x y : Nat) : Nat := x + y\ndef bad : Nat := order (missing := 1) 2\n"] do
+    let program ← fromExcept (psCompilerParsePscv0 source .lean)
+    ensure (!(psCompilerElaboratePscv0 program).isOk)
+      "native named-priority placement admitted duplicate or unknown names"
   ensure (!(psCompilerParsePscv0 "def bad : Nat := Nat.succ(3)\n" .lean).isOk)
     "native application lost Lean's whitespace requirement"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean "section\nvariable (x y : Nat)\ndef selected := y\nend\n"))

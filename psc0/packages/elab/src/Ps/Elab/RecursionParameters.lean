@@ -329,14 +329,15 @@ structure PsElabRecursionArguments where
 def psElabRecursionCaptureArguments (elaborate : PsElaborator)
     (context : PsElabContext)
     (arguments : List (Option PsSyntaxName × PsSyntaxTerm))
-    (sourceType : PsExpr) (parameterCount : Nat) (expected : Option PsExpr) :
+    (sourceType : PsExpr) (parameterCount : Nat) (expected : Option PsExpr)
+    (placement : PsSyntaxArgumentPlacement := .positionalPrefix) :
     Except PsElabError PsElabRecursionArguments := do
   let head := psLocalPushBinding context.localContext .anonymous sourceType .explicit
   let inner := psElabContextWithLocal context head.context
-  let grouped ← psElabCallArguments arguments [] []
+  let grouped ← psElabCallArguments placement arguments [] []
   let application ← psElabApplyOrderedWith elaborate 4096
     { context := inner, term := .fvar head.id, type := sourceType }
-    grouped.fst grouped.snd [] true expected (some { remaining := parameterCount })
+    grouped.fst grouped.snd [] true expected (some { remaining := parameterCount }) placement
   let some capture := application.capture
     | throw (.data "PSCV0-WF-INTERNAL: ordinary application lost its argument capture")
   if capture.remaining != 0 || capture.valuesRev.length != parameterCount then

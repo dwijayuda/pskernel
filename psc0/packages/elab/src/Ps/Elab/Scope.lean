@@ -335,14 +335,14 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return {
         term := .operatorE kind fn.fst spelling (args.map (·.term)) span
         used := args.foldl (fun acc arg => psScopeUnion acc arg.used) fn.snd }
-    | .call fn args span =>
+    | .call placement fn args span =>
       let fn ← visit bound fn
       let fixed ← psScopeSelfArguments resolver bound fn.term
       let args ← args.mapM fun (label, value) => do
         let value ← visit bound value
         return (label, value)
       return {
-        term := .call fn.term (fixed.map (fun arg => (none, arg)) ++
+        term := .call placement fn.term (fixed.map (fun arg => (none, arg)) ++
           args.map fun (label, value) => (label, value.term)) span
         used := args.foldl (fun acc arg => psScopeUnion acc arg.snd.used) fn.used }
     | .app fn args span =>

@@ -108,7 +108,8 @@ def psElabWellFoundedReferenceEscapes
 def psTryElabWellFoundedCall (elaborate : PsElaborator)
     (context : PsElabContext) (fn : PsSyntaxTerm)
     (arguments : List (Option PsSyntaxName × PsSyntaxTerm))
-    (expected : Option PsExpr) : Except PsElabError (Option PsElabTermResult) := do
+    (expected : Option PsExpr)
+    (placement : PsSyntaxArgumentPlacement := .positionalPrefix) : Except PsElabError (Option PsElabTermResult) := do
   let .reference sourceName := fn | return none
   let some recursion := psElabWellFoundedRecursionForName context sourceName | return none
   let some completeType := recursion.sourceType
@@ -126,7 +127,7 @@ def psTryElabWellFoundedCall (elaborate : PsElaborator)
   if captures.length > recursion.parameterIds.length then
     throw (.data "PSCV0-WF-CAPTURE: captures exceed the original header")
   let captured ← psElabRecursionCaptureArguments elaborate scope arguments sourceType
-    (recursion.parameterIds.length - captures.length) expected
+    (recursion.parameterIds.length - captures.length) expected placement
   let values := captures ++ captured.values
   let some callback := psLocalFindUser captured.context.localContext recursion.callbackName
     | throw (.data "PSCV0-WF-INTERNAL: missing refined recursive callback")
@@ -184,7 +185,7 @@ def psTryElabWellFoundedCall (elaborate : PsElaborator)
   -- recursive call and its decrease proof. Resume the shared ordinary engine
   -- outside the captured header scope, exactly like chained source calls.
   let application ← psElabApplyOrdered elaborate 4096 closed
-    captured.remainingPositions captured.remainingNames [] true expected
+    captured.remainingPositions captured.remainingNames [] true expected placement
   return some (← psElabFinishApplication application expected)
 
 -- Defaults prove only the existing checked natural-order rules. There is no

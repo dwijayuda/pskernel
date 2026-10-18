@@ -155,7 +155,9 @@ def psPrintProofScriptTermWithFuel
           return "(" ++ value ++ " : " ++ type ++ ")"
       | .operatorE kind _ spelling arguments _ => do
           psPrintSyntaxOperator kind spelling (← arguments.mapM smaller)
-      | .call fn args _ => do
+      | .call placement fn args _ => do
+          if placement == .namedPriority && args.any (·.fst.isSome) && args.any (·.fst.isNone) then
+            throw (.unsupportedSourceForm "mixed native named application requires typed source reconstruction")
           let head ← smaller fn
           let arguments ← args.mapM fun (label, value) => do
             let value ← smaller value

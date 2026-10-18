@@ -34,7 +34,7 @@ def psLeanTermApplicationTail (read : PsPscv0TermReader) (annotation : Bool)
       let arguments := argumentsRev.reverse
       let value := if arguments.isEmpty then head
         else if arguments.any (fun item => item.fst.isSome) then
-          PsSyntaxTerm.call head arguments span
+          PsSyntaxTerm.call .namedPriority head arguments span
         else .app head (arguments.map Prod.snd) span
       return { value, cursor }
     let named := match cursor.remaining with

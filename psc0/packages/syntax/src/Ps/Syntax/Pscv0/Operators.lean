@@ -96,7 +96,7 @@ def psPscv0OperatorTerm (kind : PsSyntaxOperatorKind) (name spelling : String)
 
 def psPscv0NotationCall (name : String) (arguments : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .call (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
+  .call .positionalPrefix (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
     (arguments.map fun argument => (none, argument)) span
 
 def psPscv0OperatorTail (read : Nat → PsPscv0TermReader) (minimum fuel : Nat)

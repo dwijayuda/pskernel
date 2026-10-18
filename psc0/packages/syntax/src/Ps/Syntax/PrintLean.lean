@@ -225,7 +225,7 @@ def psPrintLeanTermWithFuel
           return "(" ++ value ++ " : " ++ type ++ ")"
       | .operatorE kind _ spelling arguments _ => do
           psPrintSyntaxOperator kind spelling (← arguments.mapM smaller)
-      | .call fn args _ => do
+      | .call _ fn args _ => do
           if args.isEmpty then
             throw (.unsupportedSourceForm "empty invocation requires typed completion")
           let head ← smaller fn

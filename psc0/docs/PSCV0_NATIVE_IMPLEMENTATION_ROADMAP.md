@@ -87,7 +87,7 @@ Next measured work is actual-IR closure/dictionary specialization and safe recur
 
 ## Current state and evidence
 
-Latest fully qualified compiler/test SHA and current main:
+Latest fully qualified compiler/test SHA:
 **18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290**.
 All five exact-SHA gates completed SUCCESS: Native39092425439,
 M339092425489, F139092425401, F239092425419, F339092425556.
@@ -111,8 +111,14 @@ The complete log records SOURCE_COMPONENT PASS, including actual source bodies,
 refined callbacks, decrease goals and official-kernel fixedpoint equation.
 Receipt: docs/PSCV0_M3_SOURCE_COMPONENT_3F7E0491_2026-10-18.md.
 This qualifies internal construction only. Main18fe0b3e remains the latest
-five-gate runtime checkpoint. Native lambda argument candidate5785ada4 has
-preparation39093434191/job117575381994 RUNNING.
+five-gate runtime checkpoint. Native lambda argument5785ada4 has completed
+preparation39093434191/job117575381994 SUCCESS; artifact12123543616,
+SHA2564377f8e5e35b4e12291e128dda719285da7951aefe6ee2ffcb2c2d10073863ee.
+Receipt: docs/PSCV0_M3_NATIVE_LAMBDA_5785ADA4_2026-10-18.md.
+Current main is5785ada4d0521eaa910a57adc8569dbe95d4c5fe, promoted non-force
+after all18fe gates finished. Its five new gates are RUNNING:
+Native39094184382, M339094184399, F139094184384, F239094184401,
+F339094184409. Never supersede/cancel the healthy main Native.
 
 The current preparation child builds one shared checked auxiliary, reconstructs
 public members in their original parameter order, and derives genuine fix_eq
@@ -203,13 +209,13 @@ Pinned Parser.Term.fun has max precedence; Parser.Term.argument accepts it after
 native whitespace/indentation. The native adapter now reads fun/lambda bodies in
 argument position, sharing ordinary expected-type elaboration. The existing
 m3control paired fixture/native oracle includes the call with unchanged outputs;
-it remains on the existing five-target execution path. This child is unqualified
-until its own preparation and integration complete. Leading-precedence terms
+it remains on the existing five-target execution path. Preparation passed
+at5785ada4; runtime integration is running. Leading-precedence terms
 (match/if/let/by) still require grouping in argument position. No grammar change
 to .ps, source rewriting or host elaboration is introduced.
 
 Pinned WF/Main.lean31-35 explicitly rejects members with no varying arguments.
 The existing check is the correct invariant, not a pending PUnit feature.
 Exact-public-equation candidate6cdb9a6ee36b3262b366d80f36c238b50fd9676d has
-preparation39093766354 pending behind native lambda argument39093434191.
-Do not supersede the healthy preparation run or its one pending child.
+preparation39093766354/job117576869290 RUNNING. The native lambda
+argument preparation39093434191 completed SUCCESS.

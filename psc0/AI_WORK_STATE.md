@@ -1,195 +1,145 @@
-# PSC0 v7.2 AI work state — M3+B
+# PSC0 v7.2 work state — M3+B
 
-Updated 2026-10-18. Fresh GitHub refs and exact-SHA CI override this checkpoint.
-M3+B and full selected `.lean`/`.ps` input parity remain OPEN.
-
-## Latest observation — d0146eaf; log provenance unresolved
-
-Implementation/CI head: `d0146eaf1758b27cd7c8c29a75524f5021f8145d`, child of
-`d1d8fa4293ddff18ee5e85bd27ab468191deca61`. This handoff-only child does not
-change compiler code or qualify a new executable. Main was not promoted.
-
-Preparation run `39121411720`, job `117657617771`, reports completion with
-conclusion `failure`. The latest direct jobs-API response associates this job
-with d0146eaf and reports PASS for native build, primitive/closure audits,
-selected manifest, fixedpoint/PSum exports and packing, selected source checks,
-structural mutual source, JS/strict TypeScript execution, Rust execution,
-Wasm GC/component execution, and the remaining matching/deriving/P1 checks.
-Its unselected recursor-source authoring step reports FAILURE.
-Reference: https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39121411720/jobs
-
-These are API-reported step outcomes, NOT independently authenticated runtime
-values. Earlier responses conflicted about runtime-step conclusions. More
-importantly, a request to fetch job117657617771's decoded log returned content
-whose checkout, source SHA, artifact and run URL identify OLD run39107031856,
-SHA01424b88cc4f32b1a2682ee35c8432ea5c898a88 and artifact12129350284.
-That log is excluded entirely as evidence about d0146eaf. Other retrieved
-execution traces did not agree with the exact committed observer script or
-Rust backend. Do not turn those traces into alleged PProd projection bugs,
-formatter recursor defects, output-count claims, patches or qualified results.
-Do not repeatedly poll the same misattributed log endpoint.
-
-The artifacts API lists one d0146eaf archive for run39121411720:
-- id12134487916; name `pscv0-m3-foundation-preparation-d0146eaf1758b27cd7c8c29a75524f5021f8145d`;
-- size2756338; metadata digest
-  `sha256:6e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff`.
-Reference: https://api.github.com/repos/dwijayuda/pskernel/actions/runs/39121411720/artifacts
-The archive bytes/internal source-sha and observations have NOT been read or
-verified. Metadata alone does not resolve the conflicting log provenance.
-
-Next evidence step is authenticated exact-run artifact inspection in GitHub
-Linux CI, or another successful exact-log retrieval with checked checkout/SHA.
-The existing `psc0-evidence-inspect.yml` is hard-coded to an unrelated historical
-SH1 artifact; do not dispatch it as though it inspected this run. Any adapted
-inspection must check the requested run/SHA/artifact/digest and must not execute
-untrusted archive scripts, mutate main, select new assets or relax checks.
-
-The independent Fin source distinction remains worth investigating: selected
-`StandardFin.lean` uses `Nat.lt` whereas pinned Lean's Fin field uses `LT.lt`.
-Do not infer the current candidate's complete failure roster from the excluded
-logs. Preserve strict authoring until actual expression-level evidence supports
-a semantics-preserving correction. No new recursor asset or pin was selected.
-M3+B, exact runtime evidence review and all five same-SHA integration gates
-remain OPEN. Sections below retain the preceding implementation checkpoint.
+Updated 2026-10-18. Fresh exact-SHA GitHub evidence overrides this checkpoint.
+M3+B, full selected input parity and all-five-gate preparation integration remain OPEN.
 
 ## Work contract
 
-Complete all six M3+B exits autonomously through GitHub connectors and GitHub
-Linux CI only. No local checkout/files/build/test/compiler or Desktop Commander.
-Compiler implementation is native portable `.lean`, pinned to official Lean
-4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Study pinned source
-and tests before substantial design; preserve upstream Apache-2.0 notices.
-Minimal coherent validation; no PSKernel-Core/C0, self-hosting, C5 or VSIX work.
-Approved logical assumptions exactly `propext`, `Quot.sound`, `Classical.choice`.
-Wasm GC internally; linear memory only at explicit ABI boundaries in this
-compiler lane. Never weaken acceptance, fabricate evidence or enlarge budgets.
+Repository dwijayuda/pskernel; main psc0/pscv0-v7-native-lean-v1; preparation
+psc0/m3-fixedpoint-foundation-20261018. Use connected GitHub and GitHub Linux CI
+only: no local files/checkouts/builds/compiler, no Desktop Commander. Native
+portable `.lean` compiler, official Lean4.35.0 at
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Preserve Apache-2.0 notices.
+No PSKernel-Core/C0, self-hosting, C5 or VSIX work. Approved logical assumptions
+exactly propext, Quot.sound, Classical.choice; no choice runtime primitive.
+Wasm GC inside this compiler lane, linear memory only at explicit ABI boundaries.
+No broadened checker/elaborator budgets, weakened tests or assurance bypasses.
 
-Both `.ps` and `.lean` compiler INPUTS follow the selected v7.2 features,
-semantics and assurance rules for every supported output. Keep distinct surface
-grammars: native Lean layout/application in `.lean`, owned ProofScript spelling
-in `.ps`. Both converge on shared resolution/elaboration, checked Core, typed
-erasure, validated IR and backends. Do not parse `.lean` as `.ps`, accept arbitrary
-host Lean, or use its extension to bypass unsupported-feature, dependency,
-assumption, recursion or verification rules. Native oracle tests are not input
-parity evidence. Preserve unresolved-proof and verified-assurance refusals.
+Both `.ps` and `.lean` compiler INPUTS obey selected v7.2 features, semantics,
+assumptions and assurance across all outputs. Keep each surface grammar and
+converge on shared resolution/elaboration, checked Core, erasure, validated IR
+and backends. Do not accept arbitrary host Lean or infer input parity from
+native oracles. Missing verification continues to refuse verified artifacts.
 
-Repository: `dwijayuda/pskernel`.
-Main: `psc0/pscv0-v7-native-lean-v1`.
-Preparation: `psc0/m3-fixedpoint-foundation-20261018`.
-PR109 remains an unmerged draft unless a fresh authorized operation says otherwise.
-Use expected-HEAD, non-force ref updates and preserve concurrent history.
-Never supersede/cancel a healthy main Native run. Preparation keeps
-`cancel-in-progress: false`, at most one active and one pending run.
+Use fresh refs, expected-HEAD and non-force updates; preserve concurrent history.
+PR109 is open/draft/unmerged on its original base (freshly checked this turn).
+Never cancel/supersede healthy main Native; preparation cancel-in-progress:false,
+at most one active and one pending compiler preparation run.
 
-## Qualified baseline and unchanged foundation
+## Baseline and immutable selected foundation
 
-Fresh main ref read in this continuation: `33676076bcda7b0de5ec1f9803f49b8b1d28a058`.
-No main promotion was performed. The prior exact-SHA integration receipt is
-[PSCV0_M3_INTEGRATION_33676076_2026-10-18.md](docs/PSCV0_M3_INTEGRATION_33676076_2026-10-18.md).
-It records Native 39099546592, M3 39099546513, F1 39099546493,
-F2 39099546574 and F3 39099546446 as successful for that SHA.
-Do not apply those results to later preparation code.
+Fresh main remains `33676076bcda7b0de5ec1f9803f49b8b1d28a058`; no promotion.
+Five-gate receipt: docs/PSCV0_M3_INTEGRATION_33676076_2026-10-18.md.
+Native39099546592, M339099546513, F139099546493, F239099546574,
+F339099546446 qualify that historical SHA only.
 
-Selected foundation remains 3757 declarations, 44 classes, 371 ordinary instances,
-13 defaults. FNV `3071911941504503432`; declaration SHA256
-`364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1`;
-surface SHA256 `9b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214`.
-Preserve all frozen asset-authoring stages and historical receipt identities.
-`Classical.propDecidable` is not an automatic runtime instance.
+Selected Standard remains3757 declarations,44 classes,371 ordinary instances,
+13 defaults, FNV3071911941504503432, declaration SHA256
+364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1,
+surface SHA2569b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214.
+No frozen authoring boundary, selected asset or pin is changed by this candidate.
 
-## Current PProd correction
+## Evidence provenance reconciled
 
-Initial fresh preparation ref was `2cc98ec70d1e7ee216e81b43a513128588d148f7`,
-not the previously reported `01424b88`. That commit already registered selected
-`PProd`, `PProd.mk`, `PProd.rec` in `SelfHostProd.lean`'s shared runtime catalogue,
-but also accidentally made the frozen F4 scientific stage refer to itself.
-Run 39116402919 failed native build; subsequent substantive checks were skipped.
-Do not describe that run as testing PProd runtime behavior.
+Initial fresh head was e937461dcaca3634354d1849eaf0bc1a3677dc30, a docs-only
+child of d0146eaf1758b27cd7c8c29a75524f5021f8145d. It correctly excluded
+misattributed decoded logs and required authentication before further claims.
+Those old logs remain excluded; do not reuse them as compiler defects.
 
-Pushed `d1d8fa4293ddff18ee5e85bd27ab468191deca61` as a non-force child:
-- Restored `psSelfHostProdPreFloatDisplayPreludeEnvironment` to extend
-  `psSelfHostProdPreFloatConversionsPreludeEnvironment`.
-- Kept the shared selected-data registration, with no backend-specific primitive,
-  new logical declaration, axiom, runtime Order library or fingerprint change.
-- Extended the existing foundation inventory with the F4 boundary equation and
-  hard checks that the PProd roster is complete, selected and uniquely registered.
+Pushed62df292d2cfc095b94446985e2542687eb021bff to add read-only exact-archive
+inspection. Run39128091380/job117677354368 SUCCEEDED. Its returned execution
+log identifies that inspection SHA/run, not a different checkout. The code:
+- checked original run39121411720/SHA d0146eaf and artifact12134487916 metadata;
+- downloaded and rehashed all2756338 archive bytes, matching expected SHA256
+  6e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff;
+- checked internal source-sha identities, read inert contents without extracting
+  or executing archived programs, and emitted per-file digests and labelled excerpts.
+Inspection artifact12136474799, size7337, uploaded ZIP digest
+473cf7b1fbb65acf7e8090eed22f81cd06f8ebea9f84cfd0a31c1e8a67376d93.
 
-Run 39120696559 / job117655533765 is the exact d1d8fa42 preparation run.
-Last inspected while in progress: native build, selected manifest, fixedpoint
-and PSum exports, retained PSum/packing, native Order metadata, selected source
-behavior and indexed matching PASSED. The combined primitive-audit/recursor
-candidate step FAILED; fetch completed logs for its exact reason. Source-step
-success is not yet backend execution or full integration qualification.
+The authenticated source archive contains complete PASS logs for shared PProd
+registration, paired source/structural construction, direct JS and strict TS,
+Wasm GC/components, and Rust execution tails. The exact committed observer
+psc0/scripts/pscv0-m3-runtime.mjs was read and agrees: PASS is emitted after
+all requested outputs/flags equal the native expected.json oracle. This
+qualifies the focused d0146eaf fixture results, NOT all M3 or five main gates.
+No numerical observation count beyond the actual fixture scope is inferred.
 
-## This child: independent failure attribution and actual runtime checks
+The authenticated recursor log has4 complete lines, SHA256
+6c33a6d881858d4604ba28911014d19736fea63c14b811ffc0a5a701cec3d4ed:
+109 raw-shape comparisons, two differences. Fin.rec selected Nat.lt corresponds
+to native LT.lt Nat instLTNat. Std.Format.rec retains an optParam wrapper/default
+where native has Std.Format.FlattenBehavior directly. The strict old authorer
+stops at Fin.rec. The separate runtime fixtures are not that failure's cause.
 
-The existing preparation workflow now separates ordinary primitive/closure audits
-from the UNSELECTED recursor authoring step. Both remain required and fail the
-job on error. No `continue-on-error`, skipped case or changed expected result.
+## Implemented candidate — pending its own exact-SHA CI
 
-The existing recursor executable first reports the earliest structural mismatch
-per native recursor, including an exact expression path and both raw subexpressions.
-It then calls the unchanged strict candidate authorer. This diagnostic does not
-normalize types, modify assets, replace native references, approve mismatches,
-select fingerprints or change the original error status. It is intended to expose
-the actual Fin.rec mismatch and any related cases together, rather than guessing
-or weakening correspondence from a single failing example.
+Native-only Ps.Host.RecursorSource now owns annotation correspondence:
+- Directly corresponding binders get pinned native names/kinds at every depth.
+- A native projection view uses only actual safe definition bodies and matching,
+  fully saturated constructor fields, with a bounded exposure depth; no name map,
+  axiom/opaque unfolding, arbitrary defeq success or logical evaluator change.
+- Pinned optParam identity reduction exposes its type for correspondence while
+  retaining the selected wrapper/default. Selected constants, levels, bound
+  indices, literal values, projection identities and logical tree remain unchanged.
+- Output must remain BEq-identical to the original selected logical expression.
 
-Preparation additionally builds/runs the existing structural-mutual source fixture
-and executes its outputs plus both existing input-parity fixtures through direct
-JavaScript, strict TypeScript, Rust, Wasm GC and components. Reuse the existing
-`pscv0-m3-runtime.mjs` observers and every listed expected export, including
-`m3fields`; no new backend implementation or alternate oracle.
-Runtime steps require successful source fixtures. Independent backend failures
-remain visible even if another backend or the authoring candidate failed.
-This is focused preparation coverage, not all five integration gates.
+StandardExport delegates its previous private helper and both existing call
+sites to this native owner. All independent layout, complete-type, trust-zero
+kernel replay, symbolic iota, proof-closure, roster and digest checks are retained.
+The existing recursor executable adds two native rfl witnesses, five precise
+positive helper controls and eight wrong-relation/index/projection/default/axiom
+or unrelated-type refusals before the whole-library authoring check. The raw
+shape inventory remains visible but is diagnostic rather than an identity-only
+comparison pretending all source sugar has identical syntax.
 
-This child is UNQUALIFIED until its actual build, logs and runtime observations
-are inspected. Do not promote it on the basis of d1d8fa42 or main33676076.
+The large StandardExport source was spliced in GitHub Linux by bounded
+run39128693295/job117679165867 on3a05e6550a77321fd6fa8856ae6e578801b99f1c.
+Original blobf5167fc08ec880d531fa30836b4efeb009dab2eb was verified; result
+blob934fe45e5889a7f1bf3fee542ea000d149fee0f9, SHA256
+ec5df86b5a86e4dd1f307d9fbe53e0bc0bb532f19c2da78d6db7c8d950bd225c,
+95494 bytes. The job created an unattached blob only, not a ref or commit.
+This connector commit integrates that result with the helper and tests and
+retires the one-off write-capable workflow. Ordinary foundation preparation
+now tests committed code at its own SHA; the blob job proves no compilation.
+
+This candidate is UNQUALIFIED until actual build and all required preparation
+steps are inspected. The source asset remains UNSELECTED even if authoring passes.
+Do not copy candidate hashes into strict guards or call M3+B complete.
 
 ## Remaining critical path
 
-1. Read exact-SHA preparation logs. Close any genuine PProd/runtime regressions,
-   retaining proof-valued components, heterogeneous data and `.ps`/`.lean` cases.
-2. Correct the independent selected recursor source-metadata authoring mismatch
-   from actual structural evidence. `StandardFin.lean` uses `Nat.lt` in its proof
-   field; do not assume the native raw term has identical syntax. Earlier strict
-   authoring failed at Fin.rec. Selected Except intentionally specializes Type-0
-   universes, so whole-native-type substitution is not a metadata-only fix.
-   Preserve all logical layouts and earlier frozen bases. Require official
-   trust-zero replay, complete binder metadata, symbolic iota checks and independent
-   digests before selecting any new asset. Keep the six exact `$psc0Format` helper
-   recursors separate from the 109 native-library identities.
-3. Implement selected named/generalizing matches using the existing Match,
-   PatternMatrix and dependent refinement owners. Retained design:
-   `docs/PSCV0_M3_MATCH_METADATA_DESIGN_2026-10-18.md`. Keep named branch equations
+1. Inspect this candidate's exact-SHA preparation. Correct actual compiler or
+   native authoring failures without weakening any independent check. Maintain
+   authenticated focused runtime evidence separately from full integration.
+2. When native correspondence/replay/iota/closure/digests pass, review the entire
+   generated recursor asset before selecting exact bytes at the final frozen
+   stage. Preserve Except's Type-0 universe profile and six compiler-owned
+   $psc0Format helper recursors. Qualify native/PS Nat/Except recursor calls,
+   Empty/False explicit motives and all intended named/positional refusals.
+3. Complete selected named/generalizing matches through existing Match,
+   PatternMatrix and refinement owners. Design:
+   docs/PSCV0_M3_MATCH_METADATA_DESIGN_2026-10-18.md. Keep named branch equations
    separate from structural IH motives and automatic index-constraint discharge.
-   No copied host elaborator, ad hoc retry or fresh parallel matcher.
-4. Finish the six-exit source-rule/native-owner/evidence audit, then green
-   preparation and all five same-SHA integration gates before main promotion.
-   Continue M3+B -> M4+C/D -> M5+E, without starting self-hosting or C5 now.
+4. Close every cell of the six M3+B exits with source-rule/native-owner/fixture
+   evidence, then all five integration gates at one compiler/test SHA. Main
+   promotion requires the appropriate complete qualification; no mixed-SHA receipt.
 
-Canonical v7.2 retains structural-subterm restrictions and pending equation-style
-acceptance. Source mutual blocks select definitions/functions, not mutual data
-syntax. Native default mutual/nested induction refusal is intentional; explicit
-recursors have separate support. Acc.rec large elimination does not authorize
-automatic Type-valued predicate recursion.
+Selected structural-subterm restrictions, pending equation-style acceptance,
+source mutual definitions (not mutual data syntax), intended default mutual/
+nested induction refusals and Acc.rec large-elimination limits remain.
+M3+B -> M4+C/D -> M5+E; do not start self-hosting or C5 now.
 
-## Retained detailed history and designs
+## Retained designs and history
 
-The prior work state and continuation prompt were copied verbatim by their Git
-blob identities, not reconstructed or discarded:
-[earlier work state](docs/AI_WORK_STATE_PRE_PPROD_2cc98ec7.md) and
-[earlier continuation prompt](docs/AI_CONTINUE_PROMPT_PRE_PPROD_2cc98ec7.md).
-They retain detailed source construction, function-field, named application,
-proof-form and parser/elaborator negative-control history, exact run/artifact
-identities, existing designs and upstream reference rosters. Read them when
-continuing those slices; their old 'running' statements are historical.
-
-Authoritative remaining references include `ARCHITECTURE.md`,
-`PSCV0_LANGUAGE_REFERENCE_v7.2.md`, the native implementation roadmap,
-`docs/PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md`,
-`docs/PSCV0_M3_RECURSOR_FOUNDATION_SOURCE_2026-10-18.md`, and the prior detailed
-checkpoint. This continuation also directly inspected pinned Lean
-`src/Lean/Meta/PProdN.lean`: PProd/And packing and shared projections support the
-chosen runtime-catalogue owner, not target-specific special cases.
+Canonical reference PSCV0_LANGUAGE_REFERENCE_v7.2.md; ARCHITECTURE.md;
+docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md;
+docs/PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md;
+docs/PSCV0_M3_RECURSOR_FOUNDATION_SOURCE_2026-10-18.md (original design);
+docs/PSCV0_M3_RECURSOR_CORRESPONDENCE_REPAIR_2026-10-18.md (verified refinement);
+docs/PSCV0_M3_EVIDENCE_RECONCILIATION_2026-10-18.md.
+Prior handoffs are preserved by exact blobs under
+ docs/AI_WORK_STATE_EVIDENCE_HOLD_e937461d.md,
+ docs/AI_CONTINUE_PROMPT_EVIDENCE_HOLD_e937461d.md,
+and the earlier PRE_PPROD_2cc98ec7 archives. Their historical running/unresolved
+statements do not override the current authenticated evidence or fresh CI.

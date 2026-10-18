@@ -6,6 +6,7 @@ Generated upstream bodies retain their Apache-2.0 attribution.
 This tool is not imported by the portable compiler.
 -/
 import Ps.Host.StandardClosure
+import Ps.Host.RecursorSource
 import Ps.Meta.Reduce
 import Ps.Host.StandardSource
 import Ps.Host.StandardManifest
@@ -1093,41 +1094,12 @@ private def samePublicRecursorTelescope (left right : Lean.Expr) : Bool :=
   | .forallE .., _ | _, .forallE .. => false
   | _, _ => true
 
--- Copy source binder metadata only. The selected profile may specialize a
--- native universe-polymorphic family (Except is Type-0); preserve all selected
--- sorts, levels, constants, bound indices and expression structure. A mismatch
--- is refused, never repaired by substituting a different logical signature.
-private def recursorSourceAnnotations (selected reference : Lean.Expr) :
-    Except String Lean.Expr := do
-  match selected, reference.consumeMData with
-  | .forallE _ domain body _, .forallE name nativeDomain nativeBody binder =>
-    return .forallE name (← recursorSourceAnnotations domain nativeDomain)
-      (← recursorSourceAnnotations body nativeBody) binder
-  | .lam _ domain body _, .lam name nativeDomain nativeBody binder =>
-    return .lam name (← recursorSourceAnnotations domain nativeDomain)
-      (← recursorSourceAnnotations body nativeBody) binder
-  | .app fn arg, .app nativeFn nativeArg =>
-    return .app (← recursorSourceAnnotations fn nativeFn)
-      (← recursorSourceAnnotations arg nativeArg)
-  | .letE _ type value body nondep, .letE name nativeType nativeValue nativeBody _ =>
-    return .letE name (← recursorSourceAnnotations type nativeType)
-      (← recursorSourceAnnotations value nativeValue)
-      (← recursorSourceAnnotations body nativeBody) nondep
-  | .proj owner index value, .proj nativeOwner nativeIndex nativeValue =>
-    unless owner == nativeOwner && index == nativeIndex do
-      throw "projection identity differs"
-    return .proj owner index (← recursorSourceAnnotations value nativeValue)
-  | .const name _, .const nativeName _ =>
-    unless name == nativeName do throw "constant identity differs"
-    return selected
-  | .sort _, .sort _ => return selected
-  | .bvar index, .bvar nativeIndex =>
-    unless index == nativeIndex do throw "bound index differs"
-    return selected
-  | .lit _, .lit _ =>
-    unless selected == reference.consumeMData do throw "literal differs"
-    return selected
-  | _, _ => throw "source annotation correspondence requires the same closed Core shape"
+-- Copy complete source binder metadata through checked reference views.
+-- Preserve the selected logical syntax, universes and optional defaults;
+-- native dictionary projections use their actual pinned safe bodies.
+private def recursorSourceAnnotations (native : Lean.Environment)
+    (selected reference : Lean.Expr) : Except String Lean.Expr :=
+  RecursorSource.copy native selected reference
 
 def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
   Lean.initSearchPath (← Lean.findSysroot)
@@ -1167,7 +1139,7 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
         info.numParams == original.numParams && info.numIndices == original.numIndices &&
         info.numMotives == original.numMotives && info.numMinors == original.numMinors do
       throw (IO.userError ("recursor source correction changed its logical layout: " ++ toString name))
-    let annotated ← match recursorSourceAnnotations actual original.type with
+    let annotated ← match recursorSourceAnnotations native actual original.type with
       | .ok value => pure value
       | .error error => throw (IO.userError (toString name ++ ": " ++ error))
     -- BEq checks preserved logical structure; equal checks every binder
@@ -1203,7 +1175,7 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
     let type ← match PsKernelLean.toLeanExpr info.type with
       | .ok value => pure value
       | .error error => throw (IO.userError error.message)
-    let reference ← match recursorSourceAnnotations type original.type with
+    let reference ← match recursorSourceAnnotations native type original.type with
       | .ok value => pure value
       | .error error => throw (IO.userError (psNameToString info.name ++ ": " ++ error))
     unless Lean.Expr.equal type reference do

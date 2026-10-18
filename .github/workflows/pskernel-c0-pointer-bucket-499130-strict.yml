@@ -1,0 +1,86 @@
+name: PSKernel-C0 strict 499130 genuine Lean 4.35 dependency
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-infer-dag-eligibility-20261018]
+    paths:
+      - '.github/workflows/pskernel-c0-pointer-bucket-499130-strict.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  accepted-499130-dependency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 36
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Export full authentic pinned 499130 record Init dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone -q https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout -q 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep > "$RUNNER_TEMP/c0-dependency-499130.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-dependency-499130.ndjson" > "$RUNNER_TEMP/official.txt" 2>&1
+          )
+          grep -Fq 'Lean default kernel accepts the solution' "$RUNNER_TEMP/official.txt"
+          test "$(wc -l < "$RUNNER_TEMP/c0-dependency-499130.ndjson")" -eq 499130
+          test "$(stat -c%s "$RUNNER_TEMP/c0-dependency-499130.ndjson")" -eq 25031309
+          echo "7448c45db0a440983a587432a2bbd2dfb4d77e7d788b6c5f0ce66fe876fff286  $RUNNER_TEMP/c0-dependency-499130.ndjson" | sha256sum -c -
+          echo "C0_499130_SOURCE official=accepted source_records=499130 bytes=25031309 pinned_SHA256=7448c45db0a440983a587432a2bbd2dfb4d77e7d788b6c5f0ce66fe876fff286 lean=4.35.0"
+      - name: Native source-certified C0 strict full dependency acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 &&
+            lake build c0OfficialReplay &&
+            lake env lean --run test/C0NativeHashBucketHintRegression.lean)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/dependency-resources.txt" \
+              timeout 1500s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-dependency-499130.ndjson" 4096
+          ) > "$RUNNER_TEMP/dependency-c0.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_499130_PROCESS_EXIT=$rc"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/dependency-c0.txt" | tail -n 8 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/dependency-c0.txt" | tail -n 8 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/dependency-resources.txt" || true
+          if [ "$rc" -eq 0 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=499130 fuel=4096' "$RUNNER_TEMP/dependency-c0.txt"; then
+            echo "C0_499130_VERDICT=accepted source_records=499130 fuel=4096 official=accepted"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_499130_VERDICT=UNQUALIFIED_HOST_TIMEOUT no_false_rejection=true"
+            exit 1
+          elif [ "$rc" -eq 1 ] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/dependency-c0.txt"; then
+            echo "C0_499130_VERDICT=UNQUALIFIED_SOURCE_RESOURCE no_false_rejection=true"
+            exit 1
+          else
+            echo "C0_499130_VERDICT=NOT_ACCEPTED unexpected_exit=$rc"
+            tail -n 55 "$RUNNER_TEMP/dependency-c0.txt"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-exact-lean435-499130-strict
+          path: |
+            ${{ runner.temp }}/dependency-c0.txt
+            ${{ runner.temp }}/dependency-resources.txt
+            ${{ runner.temp }}/official.txt
+          if-no-files-found: warn
+          retention-days: 21

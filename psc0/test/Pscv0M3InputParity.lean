@@ -113,6 +113,8 @@ inductive ParityBranch where
   | leaf (value : Nat)
   | node (children : forall (i : Nat), i = i → ParityBranch)
   deriving Hashable
+theorem branchNodeHash (children : forall (i : Nat), i = i → ParityBranch) :
+    Hashable.hash (ParityBranch.node children) = mixHash (UInt64.ofNat 1) (UInt64.ofNat 17) := rfl
 def branchFold (tree : ParityBranch) : Nat :=
   match tree with
   | ParityBranch.leaf value => value
@@ -157,8 +159,12 @@ def m3fields (flag : Bool) : UInt64 :=
   let mark : Nat := if Hashable.hash tree == mixHash (UInt64.ofNat 1) (UInt64.ofNat 17) then 0 else 1
   UInt64.ofNat (branchFold tree + 100 * branchFirst 3 tree + 10000 * branchByRecExec tree + mark)
 
-example : m3fields true = 192013 := rfl
-example : m3fields false = 232417 := rfl
+example : m3fields true = 192013 := by
+  simp only [m3fields, branchNodeHash, BEq.rfl, ite_true]
+  rfl
+example : m3fields false = 232417 := by
+  simp only [m3fields, branchNodeHash, BEq.rfl, ite_true]
+  rfl
 
 end M3InputParityOracle
 

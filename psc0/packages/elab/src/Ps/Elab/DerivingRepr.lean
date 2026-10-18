@@ -194,7 +194,7 @@ def psElabDeriveReprPublicBranch (plan : PsElabDeriveContext) (atomic : List Boo
 
 def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List Bool)
     (context : PsElabContext) (slotIndex : Nat) (slot : PsInductiveEliminationSlot)
-    (entry : PsElabDeriveReprSlotConstructor) (constructor : PsInductiveEliminationConstructor)
+    (entry : PsElabDeriveReprSlotConstructor)
     (fields : List PsElabTypedBinder) (hypotheses : List PsElabDeriveHypothesis) :
     Except PsElabError PsExpr := do
   if psElabDeriveReprIsListSlot slot then
@@ -262,7 +262,7 @@ def psElabDeriveReprInductive (plan : PsElabDeriveContext)
       if slot.publicMember then
         psElabDeriveReprPublicBranch plan atomic context entry constructor fields hypotheses
       else
-        psElabDeriveReprContainerBranch plan atomic context slotIndex slot entry constructor fields hypotheses)
+        psElabDeriveReprContainerBranch plan atomic context slotIndex slot entry fields hypotheses)
     diagnose
 
 def psElabDeriveRepr (environment : PsEnvironment)

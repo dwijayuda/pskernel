@@ -172,3 +172,13 @@ m3fields (expected192013/232417 unchanged). No assertion is dropped.
 This child remains unqualified until preparation passes. Main remains fully
 qualified33676076. Both handoffs, roadmap and exit receipt were updated at that
 completed integration milestone; continue qualification before promoting code.
+
+## Native hash-oracle proof structure
+
+Preparation f3e96a33 / run39101522330 built compiler changes but stopped in the
+native oracle's two concrete m3fields proofs at the default reduction depth.
+The proofs now establish the derived node hash symbolically and use pinned
+Init/Core.lean BEq.rfl before reducing the small arithmetic result. The same
+192013/232417 equalities, actual source/backend hash observations and unchanged
+limits remain required. No native_decide, axiom or weakened check is introduced.
+Preparation qualification is still pending; main33676076 remains qualified.

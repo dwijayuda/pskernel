@@ -118,3 +118,9 @@ Preparation9223dd76/run39086928911 failed at the native authoring build because
 `scoped` was used as a local name; it is a Lean keyword. The child renames those
 locals and the analogous `syntax` local in the paired fixture. No parser rule,
 semantic assertion, foundation or budget changes. Execution remains pending.
+
+
+Preparationee267b56/run39087064923 failed at native parsing of a multiline
+constructor argument inside the new program record. The child names the
+constructed declarations before returning their parse records, keeping the same
+syntax and semantics. Paired execution is still pending; do not promote.

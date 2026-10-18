@@ -44,8 +44,9 @@ def psLeanProgramValue (cursor : PsTokenCursor) :
     if ["partial_fixpoint", "termination_by", "decreasing_by", "monotonicity"].any
         (psTokenCursorAtText suffix.cursor) then
       throw "PSCV0-FIXPOINT-01: duplicate, incompatible or unselected fixedpoint suffix"
-    return { value := .fixedpointDefinition name.value binders.value type.value body.value
-      { span with stop := suffix.token.span.stop }, cursor := suffix.cursor }
+    let declaration := PsSyntaxDeclaration.fixedpointDefinition
+      name.value binders.value type.value body.value { span with stop := suffix.token.span.stop }
+    return { value := declaration, cursor := suffix.cursor }
   -- Explicit decreasing proofs are owned by the future native tactic adapter;
   -- a native by block must never be reinterpreted as a ProofScript brace block.
   if psTokenCursorAtText body.cursor "termination_by" then
@@ -59,9 +60,11 @@ def psLeanProgramValue (cursor : PsTokenCursor) :
         (psTokenCursorAtText measure.cursor) then
       throw "PSCV0-LEAN-TERMINATION: duplicate suffix or unsupported native decreasing proof"
     let stop := psLeanTermStop measure.value
-    return { value := .wellFoundedDefinition name.value binders.value type.value body.value
-      { measure := measure.value, span := { start := suffix.token.span.start, stop } }
-      { span with stop }, cursor := measure.cursor }
+    let termination : PsSyntaxTermination := {
+      measure := measure.value, span := { start := suffix.token.span.start, stop } }
+    let declaration := PsSyntaxDeclaration.wellFoundedDefinition
+      name.value binders.value type.value body.value termination { span with stop }
+    return { value := declaration, cursor := measure.cursor }
   return { value := declaration, cursor := body.cursor }
 
 def psLeanProgramOrdinaryCommand (cursor : PsTokenCursor) (mutualMember : Bool := false) :

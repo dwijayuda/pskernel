@@ -1,0 +1,127 @@
+name: PSKernel-C0 Arena193 combined MVar and undefined-universe all-input A/B
+on:
+  pull_request:
+    branches:
+      - perf/pskernel-c0-pointer-structural-hash-bucket-20261018
+    paths:
+      - '.github/workflows/pskernel-c0-arena193-mvar-undef-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedMVarMemoRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedUndefMemoRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certified-mvar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Compile pinned native checker and full Lean source theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0CertifiedMVarMemoRegression.lean
+          lake env lean --run test/C0CertifiedUndefMemoRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          echo "C0_MVAR_UNDEF_DAG_CERT exact_source_refinement=true first_offender_semantics=preserved negative_admission_regressions=pass"
+      - name: Prepare immutable official-positive Arena app-lam DAG source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/arena-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-2026-09.tar.gz" | sha256sum -c -
+          python3 - <<'PY'
+          import sys,json,hashlib,os
+          from pathlib import Path
+          sys.path.insert(0,"psc0/packages/pskernel-c0/test")
+          from arena_conformance import check_archive
+          from arena_lean435_compat import adapt_legacy_envelope,official_reference
+          tests=check_archive(Path(os.environ["RUNNER_TEMP"])/"arena-2026-09.tar.gz")
+          x=[(t,raw) for t,n,raw in tests if n=="perf/app-lam.ndjson"]
+          assert len(x)==1 and x[0][0]=="good"
+          compatible,identity=adapt_legacy_envelope(x[0][1])
+          assert identity["body_bytes_identical"]
+          assert identity["original_sha256"]=="3f7b7a595dc29b0e289c9031c4edaef42d0e12b8aee3cbb48cf15cb715adc09a"
+          path=Path(os.environ["RUNNER_TEMP"])/"arena435-app-lam.ndjson"
+          path.write_bytes(compatible)
+          official=official_reference(Path("psc0/packages/pskernel-c0"),path.resolve(),120)
+          assert official["verdict"]=="accepted",official
+          print("C0_MVAR_DAG_SOURCE original=sha256_verified body_unchanged=true official_435=accepted")
+          PY
+      - name: Measure pinned original baseline on same runner and fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_file=psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean
+          cp "$source_file" "$RUNNER_TEMP/candidate-validation.lean"
+          git fetch --quiet --no-tags --depth=1 origin 4cf7c24c08101d52cf3628dbe86a64ac70d8c79a
+          git show FETCH_HEAD:"$source_file" > "$source_file"
+          test -s "$source_file"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/mvar-baseline-resources.txt" \
+            timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/arena435-app-lam.ndjson" 4096) \
+            > "$RUNNER_TEMP/mvar-baseline.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_ARENA193_APP_LAM variant=qualified_PR140 rc=$rc"
+          grep -F "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/mvar-baseline.txt" | tail -n 1 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' \
+            "$RUNNER_TEMP/mvar-baseline-resources.txt" || true
+          printf '%s\n' "$rc" > "$RUNNER_TEMP/mvar-baseline-rc.txt"
+      - name: Compare source-certified optimized candidate against same export
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_file=psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean
+          cp "$RUNNER_TEMP/candidate-validation.lean" "$source_file"
+          grep -Fq 'psKernelC0AdaptiveHasMVar_source' "$source_file"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          (cd psc0/packages/pskernel-c0 &&
+            lake env lean --run test/C0CertifiedMVarMemoRegression.lean
+          lake env lean --run test/C0CertifiedUndefMemoRegression.lean)
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$RUNNER_TEMP/mvar-candidate-resources.txt" \
+            timeout 90s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$RUNNER_TEMP/arena435-app-lam.ndjson" 4096) \
+            > "$RUNNER_TEMP/mvar-candidate.txt" 2>&1
+          rc=$?
+          set -e
+          echo "C0_ARENA193_APP_LAM variant=source_certified_preflight rc=$rc"
+          grep -F "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/mvar-candidate.txt" | tail -n 1 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' \
+            "$RUNNER_TEMP/mvar-candidate-resources.txt" || true
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted" "$RUNNER_TEMP/mvar-candidate.txt"
+            echo "C0_ARENA193_APP_LAM verdict=ACCEPTED_BY_CHECKED_C0 source_4096=true"
+          elif [ "$rc" -eq 124 ]; then
+            echo "C0_ARENA193_APP_LAM verdict=UNQUALIFIED_HOST_TIMEOUT no_accepted_claim=true"
+          else
+            tail -n 35 "$RUNNER_TEMP/mvar-candidate.txt"
+            echo "C0_ARENA193_APP_LAM verdict=UNQUALIFIED_NONACCEPTED exit=$rc"
+          fi
+          echo "C0_MVAR_DAG_AB both_execute_original_checker_fuel_4096=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-certified-mvar-dag-ab
+          path: |
+            ${{ runner.temp }}/mvar-*-resources.txt
+            ${{ runner.temp }}/mvar-*.txt
+          if-no-files-found: warn
+          retention-days: 21

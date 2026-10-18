@@ -1,0 +1,151 @@
+name: PSKernel-C0 Array equality memo regression A/B
+on:
+  pull_request:
+    branches: [perf/pskernel-c0-infer-dag-eligibility-20261018]
+    paths:
+      - '.github/workflows/pskernel-c0-array-equality-ablation.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/ExprDecidableEq.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/Knot.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/DefEq/Quick.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-array-paired-source-ab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 29
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Produce exact real Array.extract_append_extract official-positive closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          pkg=psc0/packages/pskernel-c0
+          test "$(cd "$pkg" && lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (
+            cd "$RUNNER_TEMP/lean4export"
+            lake build lean4export
+            lake env .lake/build/bin/lean4export Init -- Array.extract_append_extract \
+              > "$RUNNER_TEMP/c0-array-extract.ndjson"
+            lake env leanchecker --from-export "$RUNNER_TEMP/c0-array-extract.ndjson" \
+              > "$RUNNER_TEMP/c0-array-official.txt" 2>&1
+          )
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/c0-array-official.txt"
+          wc -lc "$RUNNER_TEMP/c0-array-extract.ndjson"
+          sha256sum "$RUNNER_TEMP/c0-array-extract.ndjson"
+          echo "C0_LEAF_AB_REFERENCE official=accepted pinned=Lean_4.35.0 target=Array.extract_append_extract"
+      - name: Pin identical 152660-record official-positive source SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, pathlib, os
+          p=pathlib.Path(os.environ['RUNNER_TEMP'])/'c0-array-extract.ndjson'
+          raw=p.read_bytes(); digest=hashlib.sha256(raw).hexdigest()
+          assert digest == 'ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a', digest
+          assert len(raw.splitlines()) == 152660, len(raw.splitlines())
+          print(f'C0_ARRAY_INFER_AB_INPUT official=accepted pin=4.35.0 records=152660 sha256={digest}')
+          PY
+      - name: Full PR138 C0 proof replay with certified DAG equality enabled
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-eq-original-resources.txt" \
+              timeout 480s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-extract.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-eq-original-c0.txt" 2>&1
+          rc=$?
+          set -e
+          if [[ "$rc" -eq 0 ]]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=152660 fuel=4096' "$RUNNER_TEMP/array-eq-original-c0.txt"
+            verdict=accepted
+          elif [[ "$rc" -eq 124 ]]; then
+            verdict=unqualified_host_timeout
+          elif [[ "$rc" -eq 1 ]] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/array-eq-original-c0.txt"; then
+            verdict=unqualified_resource
+          else
+            tail -n 55 "$RUNNER_TEMP/array-eq-original-c0.txt"
+            exit 1
+          fi
+          echo "C0_ARRAY_EQ_AB_RESULT variant=PR138_full_memo verdict=$verdict exit=$rc source_fuel=4096 source_sha256=ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/array-eq-original-c0.txt" | tail -n 7 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/array-eq-original-c0.txt" | tail -n 6 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/array-eq-original-resources.txt" || true
+      - name: A/B revert ONLY semantic equality compiler and direct call sites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          pkg=Path("psc0/packages/pskernel-c0/src/Ps/KernelCore")
+          for name,expected in [
+            ("Checker/Knot.lean",8),
+            ("Checker/DefEq/Quick.lean",1),
+          ]:
+              path=pkg/name
+              source=path.read_text()
+              assert source.count("psKernelC0MemoizedExprEq")==expected,(name,source.count("psKernelC0MemoizedExprEq"))
+              updated=source.replace("psKernelC0MemoizedExprEq","psKernelExprEq")
+              path.write_text(updated)
+              print(f"C0_ARRAY_EQ_AB_SOURCE file={name} count={expected} source_exact=true")
+          eq=pkg/"Core/ExprDecidableEq.lean"
+          source=eq.read_text()
+          original="@[csimp] theorem psKernelExprEqLegacy_compiler_eq_certifiedMemo"
+          assert source.count(original)==1
+          eq.write_text(source.replace(original,"theorem psKernelExprEqLegacy_compiler_eq_certifiedMemo"))
+          print("C0_ARRAY_EQ_AB_SOURCE compiler_rewrite_for_legacy_eq=disabled all_original_Lean_source_lemmas_remain=true")
+          PY
+          (
+            cd psc0/packages/pskernel-c0
+            lake build c0OfficialReplay
+            lake env lean --run test/C0LegacySemanticDAGRegression.lean
+            lake env lean --run test/C0InferenceCacheDAGEligibilityRegression.lean
+          )
+          set +e
+          (
+            cd psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$RUNNER_TEMP/array-eq-source-resources.txt" \
+              timeout 660s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations "$RUNNER_TEMP/c0-array-extract.ndjson" 4096
+          ) > "$RUNNER_TEMP/array-eq-source-c0.txt" 2>&1
+          rc=$?
+          set -e
+          if [[ "$rc" -eq 0 ]]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=152660 fuel=4096' "$RUNNER_TEMP/array-eq-source-c0.txt"
+            verdict=accepted
+          elif [[ "$rc" -eq 124 ]]; then
+            verdict=unqualified_host_timeout
+          elif [[ "$rc" -eq 1 ]] && grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/array-eq-source-c0.txt"; then
+            verdict=unqualified_resource
+          else
+            tail -n 55 "$RUNNER_TEMP/array-eq-source-c0.txt"
+            exit 1
+          fi
+          echo "C0_ARRAY_EQ_AB_RESULT variant=original_semantic_eq_only verdict=$verdict exit=$rc source_fuel=4096 source_sha256=ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a"
+          grep -F 'C0_REAL_EXPORT_PROGRESS' "$RUNNER_TEMP/array-eq-source-c0.txt" | tail -n 7 || true
+          grep -F 'C0_REAL_EXPORT_SLOW_DECL' "$RUNNER_TEMP/array-eq-source-c0.txt" | tail -n 6 || true
+          grep -E 'Elapsed \(wall clock\)|Maximum resident set size' "$RUNNER_TEMP/array-eq-source-resources.txt" || true
+          echo "C0_ARRAY_EQ_AB_SCOPE genuine_official_Lean_435=true same_export=true same_runner=true fuel_4096=true no_accepted_from_timeout=true original_semantic_equivalence_proved=true no_axiom_changes=true"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-array-semantic-eq-ablation
+          path: |
+            ${{ runner.temp }}/array-eq-*.txt
+            ${{ runner.temp }}/c0-array-official.txt
+          if-no-files-found: warn
+          retention-days: 21

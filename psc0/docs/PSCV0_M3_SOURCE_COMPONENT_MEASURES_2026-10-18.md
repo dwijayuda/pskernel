@@ -39,3 +39,26 @@ exact equations against retained original bodies, typed executable ownership and
 strict PSum foundation selection before activating it. The current plan requires
 nonempty varying telescopes; zero-varying/PUnit handling cannot be inferred from a
 returned function. Standalone PSum remains unselected.
+
+## Qualified construction and exact-equation candidate
+
+Internal source bodies and actual fix_eq are now prep-qualified at3f7e0491;
+see PSCV0_M3_SOURCE_COMPONENT_3F7E0491_2026-10-18.md. Native lambda argument
+candidate5785ada4 is being qualified separately on the same preparation branch.
+
+The next child closes one shared packed auxiliary over the common fixed prefix.
+Public definitions are typed projections/currying in their exact original header
+order, including captures, implicit parameters and returned functions. This
+shares the functional once rather than embedding it in every member.
+The actual fix_eq proof supplies each original-header equation. The independent
+PreDefinition equation owner stages all checked public definitions, replaces
+all retained peers with those constants, and reconstructs the exact RHS from
+retained Core. Existing checked constructor-case transport handles dependent
+matcher motive differences. Singleton WF uses the same validator. No invented
+eta conversion, unchecked functional rewrite or temporary axiom is introduced.
+
+The existing three-member/native oracle fixture now submits the shared auxiliary,
+three public definitions and their three exact source equations to the official
+kernel. These checks are pending. Source mutual WF remains refused until typed
+executable ownership, strict PSum selection and end-to-end source qualification
+are also complete. M3+B remains open.

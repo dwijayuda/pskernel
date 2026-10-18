@@ -58,10 +58,24 @@ JavaScript, TypeScript, Rust, GC core and component observers. Actual P1 Rust
 execution is included. No aggregate runtime count is inferred from job metadata.
 Full native syntax parity and source mutual WF remain OPEN.
 
-Preparation candidate3f7e0491341599cce3e259de640ae09a1b16f526:
-run39093165102/job117574003095, RUNNING at this checkpoint. It adds internal
-source-owned mutual measures and actual recursive component functionals, using
-the existing packing fixture/native oracle. This code is NOT yet qualified.
+Preparation3f7e0491341599cce3e259de640ae09a1b16f526 completed SUCCESS:
+run39093165102/job117574003095; artifact12123597417; SHA256
+1e5791d310d082d311dd782219cabe61f9b76c7313f695edcb87b69a9a39d97a.
+The complete log records SOURCE_COMPONENT PASS, including actual source bodies,
+refined callbacks, decrease goals and official-kernel fixedpoint equation.
+Receipt: docs/PSCV0_M3_SOURCE_COMPONENT_3F7E0491_2026-10-18.md.
+This qualifies internal construction only. Main18fe0b3e remains the latest
+five-gate runtime checkpoint. Native lambda argument candidate5785ada4 has
+preparation39093434191/job117575381994 RUNNING.
+
+The current preparation child builds one shared checked auxiliary, reconstructs
+public members in their original parameter order, and derives genuine fix_eq
+equations. PreDefinition now shares one exact retained-source equation validator
+between singleton and component WF; it stages all genuine definitions before
+replacing every retained peer. No reflexive f=f equation or source sidecar alone
+grants runtime authority. The existing kernel fixture now checks the three public
+members and exact retained-source equations. This child is UNQUALIFIED; source
+dispatch, executable recovery and strict PSum activation remain disabled.
 The preceding09bcae preparation failed because an unreduced closed dictionary
 application falsely retained unused varying arguments. The replacement follows
 pinned WF/Rel: establish one fixed codomain and synthesize a single relation

@@ -268,3 +268,80 @@ def psElabWhereWellFoundedComponentBody
     member.varyingNames expected source).mapError PsElabError.infer
   let _ ← psElabResolvedTerm component.context branch (some expected)
   return { branch, sourceInfo := psElabFinishSourceInfo solved member.source.name }
+
+
+-- Reconstruct public source telescopes from the checked packed fixedpoint.
+-- This does not flatten a returned function or confuse a source PSigma/PSum
+-- with compiler-owned packing. The independent PreDefinition owner below
+-- reconstructs exact RHS equations from retained source Core.
+def psElabWhereFinishWellFoundedComponent
+    (component : PsElabWhereWellFoundedComponent)
+    (bodies : List PsElabWhereWellFoundedComponentBody)
+    (built : PsMutualWellFoundedValue) :
+    Except PsElabError PsElabPreDefinitionBatchResult := do
+  if bodies.length != component.members.length then
+    throw (psElabWhereError "WF-COMPONENT" "body construction changed component arity")
+  let levels := component.context.levelNames
+  let some first := component.members.head?
+    | throw (psElabWhereError "WF-COMPONENT" "empty component has no auxiliary owner")
+  let auxiliaryName := psNameAppendStr first.source.name "_mutual"
+  let auxiliary := PsDeclaration.definitionDecl auxiliaryName levels
+    (psCloseElabForallBinders psMetaEmpty component.fixedBindersRev component.plan.type)
+    (psCloseElabLambdaBinders psMetaEmpty component.fixedBindersRev built.value)
+  let environment ← psAddDeclarationList component.context.environment [auxiliary]
+  let definitions ← (component.members.zipIdx).mapM fun (member, index) => do
+    let header := member.input.header
+    let fixed ← psElabWhereComponentFixedArguments member component.parameters.count
+    let replacements := (component.fixedBindersRev.reverse.map (·.id)).zip fixed
+    let instantiate := psElabSubstituteLocals replacements
+    let projected ← (psMutualPackingProjection environment psMetaEmpty
+      header.context.localContext component.members.length index
+      (psExprApplyMany (.constE auxiliaryName (levels.map PsLevel.param)) fixed)).mapError
+        PsElabError.infer
+    let curried ← (psWellFoundedTupleCurry environment psMetaEmpty header.context.localContext
+      member.varyingNames (instantiate member.specialized.type) projected).mapError PsElabError.infer
+    let parameters := header.capturesRev.reverse ++ header.parametersRev.reverse
+    let arguments := (parameters.zip member.permutation).filterMap fun (parameter, position) =>
+      if position.isNone then some (PsExpr.fvar parameter.id) else none
+    let value := psCloseElabLambdaBinders psMetaEmpty (header.parametersRev ++ header.capturesRev)
+      (psReduceApply curried arguments)
+    let _ ← psElabWellFoundedChecked "closed component projection"
+      (psElabContextEmpty environment levels) value member.source.type
+    return PsDeclaration.definitionDecl member.source.name levels member.source.type value
+  let staged ← psAddDeclarationList environment definitions
+  let results ← ((component.members.zip bodies).zip definitions).zipIdx.mapM
+    fun (((member, body), declaration), index) => do
+      let header := member.input.header
+      let context := { header.context with environment := staged, metaContext := psMetaEmpty }
+      let fixed ← psElabWhereComponentFixedArguments member component.parameters.count
+      let replacements := (component.fixedBindersRev.reverse.map (·.id)).zip fixed
+      let instantiate := psElabSubstituteLocals replacements
+      let parameter ← (psInferEnsureForall staged psMetaEmpty context.localContext
+        (instantiate component.plan.type)).mapError PsElabError.infer
+      let unary ← (psInferEnsureForall staged psMetaEmpty context.localContext
+        (instantiate member.unaryType)).mapError PsElabError.infer
+      let parameters := header.capturesRev.reverse ++ header.parametersRev.reverse
+      let varying := (parameters.zip member.permutation).filterMap fun (parameter, position) =>
+        if position.isNone then some (PsExpr.fvar parameter.id) else none
+      let tuple ← (psWellFoundedTuplePack unary.domain varying).mapError PsElabError.infer
+      let current ← (psMutualPackingPack component.members.length parameter.domain index tuple).mapError
+        PsElabError.infer
+      let domainLevel ← psElabExpressionSort context parameter.domain
+      let resultLevel ← psElabExpressionSort context header.resultType
+      let motive := PsExpr.lam parameter.name parameter.domain parameter.body parameter.binder
+      let proof := psWellFoundedEquation (psWellFoundedPlanMap instantiate component.plan.relation)
+        [domainLevel, resultLevel] motive (instantiate built.functional) current
+      let checked ← psElabResolvedTerm context proof none
+      let binders := header.parametersRev ++ header.capturesRev
+      let equation := PsDeclaration.theoremDecl (psNameAppendStr member.source.name "eq_def") levels
+        (psCloseElabForallBinders psMetaEmpty binders checked.type)
+        (psCloseElabLambdaBinders psMetaEmpty binders checked.term)
+      return ({ declaration, equation, metaContext := psMetaEmpty
+                sourceInfo := body.sourceInfo } : PsElabWellFoundedResult)
+  -- The producer cannot authorize its own retained source RHS. The same
+  -- identity/closure/exact-equation owner used by singleton WF checks every
+  -- member, with all genuine public definitions available to kernel inference.
+  let result ← psElabPreDefinitionWellFoundedResults environment levels
+    (component.members.map (·.source)) results
+  return { result with batch := { result.batch with
+    declarations := auxiliary :: result.batch.declarations } }

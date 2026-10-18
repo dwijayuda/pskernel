@@ -438,11 +438,9 @@ def psElabPreDefinitionEquationMajor (fuel : Nat) (context : PsElabContext)
 -- term, but its result must still implement this exact retained Core member.
 -- Rebuild the source equation independently after staging the real public
 -- definition; callback metadata never authorizes another body or telescope.
-def psElabPreDefinitionWellFounded (environment : PsEnvironment)
+def psElabPreDefinitionCheckWellFoundedResult (environment : PsEnvironment)
     (levels : List PsName) (member : PsElabPreDefinition)
-    (consumer : PsElabPreDefinitionWellFoundedConsumer) :
-    Except PsElabError PsElabPreDefinitionBatchResult := do
-  let result ← consumer environment levels member
+    (result : PsElabWellFoundedResult) : Except PsElabError Unit := do
   let .definitionDecl name declarationLevels type value := result.declaration
     | throw (psElabPreDefinitionError "WF-IDENTITY" "well-founded consumer did not return an ordinary checked definition")
   let .theoremDecl equationName equationLevels equationType equationValue := result.equation
@@ -462,10 +460,22 @@ def psElabPreDefinitionWellFounded (environment : PsEnvironment)
   for ownedName in [name, equationName] do
     if (psEnvironmentFind environment ownedName).isSome then
       throw (.duplicateDeclaration ownedName)
-  let staged ← psAddDeclarationList environment [result.declaration]
+  return ()
+
+-- All actual public definitions are staged before any component equation.
+-- Reconstruct each right side from the retained original Core with every peer
+-- replaced by its checked public constant; a callback sidecar is not authority.
+def psElabPreDefinitionWellFoundedEquation (staged : PsEnvironment)
+    (levels : List PsName) (members : List PsElabPreDefinition)
+    (member : PsElabPreDefinition) (result : PsElabWellFoundedResult) :
+    Except PsElabError PsDeclaration := do
+  let .theoremDecl equationName _ equationType equationValue := result.equation
+    | throw (psElabPreDefinitionError "WF-IDENTITY" "missing actual well-founded equation")
   let stagedContext := psElabContextEmpty staged levels
   let self := PsExpr.constE member.name (levels.map PsLevel.param)
-  let sourceValue := psElabSubstituteLocals [(member.peerId, self)] member.value
+  let peerValues := members.map fun peer =>
+    (peer.peerId, PsExpr.constE peer.name (levels.map PsLevel.param))
+  let sourceValue := psElabSubstituteLocals peerValues member.value
   if psExprHasUnresolvedMeta sourceValue || !psExprFVarsInContext psLocalEmpty sourceValue then
     throw (psElabPreDefinitionError "WF-CLOSURE" "retained source body still refers to an unclosed component peer")
   let _ ← psElabResolvedTerm stagedContext sourceValue (some member.type)
@@ -513,11 +523,34 @@ def psElabPreDefinitionWellFounded (environment : PsEnvironment)
     throw (psElabPreDefinitionError "WF-CLOSURE" "exact source-equation proof retained a provisional local or metavariable")
   let checkedProof ← psElabResolvedTerm stagedContext exactProof (some expectedType)
   let equation := PsDeclaration.theoremDecl equationName levels expectedType checkedProof.term
-  let _ ← psAddDeclarationList staged [equation]
-  let batch : PsElabDeclarationBatchResult := {
-    declarations := [result.declaration, equation]
-    sourceInfo := [member.sourceInfo] }
-  return { batch, members := [batch] }
+  return equation
+
+def psElabPreDefinitionWellFoundedResults (environment : PsEnvironment)
+    (levels : List PsName) (members : List PsElabPreDefinition)
+    (results : List PsElabWellFoundedResult) :
+    Except PsElabError PsElabPreDefinitionBatchResult := do
+  if members.isEmpty || members.length != results.length then
+    throw (psElabPreDefinitionError "WF-IDENTITY" "well-founded results changed component arity")
+  for (member, result) in members.zip results do
+    psElabPreDefinitionCheckWellFoundedResult environment levels member result
+  let definitions := results.map (·.declaration)
+  let staged ← psAddDeclarationList environment definitions
+  let equations ← (members.zip results).mapM fun (member, result) =>
+    psElabPreDefinitionWellFoundedEquation staged levels members member result
+  let _ ← psAddDeclarationList staged equations
+  let batches := ((members.zip results).zip equations).map fun ((member, result), equation) =>
+    ({ declarations := [result.declaration, equation]
+       sourceInfo := [member.sourceInfo] } : PsElabDeclarationBatchResult)
+  return {
+    batch := { declarations := definitions ++ equations, sourceInfo := members.map (·.sourceInfo) }
+    members := batches }
+
+def psElabPreDefinitionWellFounded (environment : PsEnvironment)
+    (levels : List PsName) (member : PsElabPreDefinition)
+    (consumer : PsElabPreDefinitionWellFoundedConsumer) :
+    Except PsElabError PsElabPreDefinitionBatchResult := do
+  let result ← consumer environment levels member
+  psElabPreDefinitionWellFoundedResults environment levels [member] [result]
 
 def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsName)
     (nextId : Nat) (members : List PsElabPreDefinition) (nonrecursive : Bool)

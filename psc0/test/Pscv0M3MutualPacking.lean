@@ -232,27 +232,10 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
     (psElabWhereWellFoundedComponentBody measured index).mapError psCompilerPscv0ElabError
   let built ← (psMutualWellFoundedBuild environment psMetaEmpty measured.context.localContext
     measured.plan (bodies.map (·.branch))).mapError (fun _ => "source component functional failed")
-  let packedName := psRootName "packingSourceComponent"
-  let packedType := psCloseElabForallBinders psMetaEmpty measured.fixedBindersRev measured.plan.type
-  let packedValue := psCloseElabLambdaBinders psMetaEmpty measured.fixedBindersRev built.value
-  let declaration := PsDeclaration.definitionDecl packedName prepared.block.levelNames packedType packedValue
-  let parameter ← (psInferEnsureForall environment psMetaEmpty measured.context.localContext
-    measured.plan.type).mapError (fun _ => "source component lost packed telescope")
-  let major := psLocalPushBinding measured.context.localContext parameter.name parameter.domain .explicit
-  let equationContext := { measured.context with localContext := major.context }
-  let result := psExprInstantiate1 parameter.body (.fvar major.id)
-  let domainLevel ← (psElabExpressionSort equationContext parameter.domain).mapError psCompilerPscv0ElabError
-  let resultLevel ← (psElabExpressionSort equationContext result).mapError psCompilerPscv0ElabError
-  let motive := PsExpr.lam parameter.name parameter.domain parameter.body .explicit
-  let proof := psWellFoundedEquation measured.plan.relation [domainLevel, resultLevel]
-    motive built.functional (.fvar major.id)
-  let checked ← (psElabResolvedTerm equationContext proof none).mapError psCompilerPscv0ElabError
-  let equationBinders := PsElabTypedBinder.mk major.id parameter.name parameter.domain .explicit ::
-    measured.fixedBindersRev
-  let equation := PsDeclaration.theoremDecl (psNameAppendStr packedName "fix_eq")
-    prepared.block.levelNames
-    (psCloseElabForallBinders psMetaEmpty equationBinders checked.type)
-    (psCloseElabLambdaBinders psMetaEmpty equationBinders checked.term)
+  let sourceResult ← (psElabWhereFinishWellFoundedComponent measured bodies built).mapError
+    psCompilerPscv0ElabError
+  if sourceResult.members.length != 3 || sourceResult.batch.declarations.length != 7 then
+    throw "source component lost checked public definitions or exact retained-source equations"
   -- Underapplication is conservative analysis, not permission to escape a
   -- proof-restricted callback. The omitted source slots must become varying.
   let some owner := owners.head? | throw "missing retained source owner"
@@ -272,7 +255,7 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String (L
       context.localContext.nextId [malformed] with
   | .error _ => pure ()
   | .ok _ => throw "retained-call analysis accepted an unowned Core value"
-  return [declaration, equation]
+  return sourceResult.batch.declarations
 
 private def checkFixedScopes (environment : PsEnvironment) :
     Except String (List PsDeclaration) := do
@@ -562,7 +545,7 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
-  IO.println "PSCV0_M3_SOURCE_COMPONENT: PASS original three-member source bodies, shared fixed measure codomain, refined per-callee callbacks, real decrease goals, closed dependent functional and official-kernel fix_eq; public mutual WF source acceptance remains separate"
+  IO.println "PSCV0_M3_SOURCE_COMPONENT: PASS original three-member source bodies, shared fixed measure codomain, refined per-callee callbacks, real decrease goals, closed dependent public projections and exact retained-source equations checked by the official kernel; source dispatch and executable ownership remain separate"
   IO.println "PSCV0_M3_RETAINED_CALLS: PASS source-owned reordered dependent headers, actual branch and let scopes, full application spines, returned-function arity and conservative underapplication; source mutual WF remains separate"
   IO.println "PSCV0_M3_FIXED_SCOPES: PASS three reordered polymorphic headers, dependent fixed values, implicit binder preservation, returned-function ownership, exact kernel equations and malformed/dependent mapping refusals"
   IO.println "PSCV0_M3_COMPONENT_FIX: PASS heterogeneous dependent result family, common Nat measure, three typed decreasing callbacks, actual checked fix_eq member equations and incomplete/dependent-measure refusals; source mutual WF is separate"

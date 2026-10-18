@@ -1,0 +1,130 @@
+name: PSCV0 M3 exact-run evidence inspection (Linux)
+
+on:
+  push:
+    branches: [psc0/m3-fixedpoint-foundation-20261018]
+    paths: ['.github/workflows/psc0-m3-evidence-inspection.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: pscv0-m3-evidence-inspection-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Authenticate d0146eaf archive and inspect inert evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, io, json, os, pathlib, urllib.request, urllib.parse, zipfile
+
+          repository = 'dwijayuda/pskernel'
+          run_id = 39121411720
+          artifact_id = 12134487916
+          source_sha = 'd0146eaf1758b27cd7c8c29a75524f5021f8145d'
+          digest = '6e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff'
+          artifact_name = 'pscv0-m3-foundation-preparation-' + source_sha
+          api = 'https://api.github.com/repos/' + repository
+
+          class SafeRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  target = urllib.parse.urlsplit(newurl)
+                  if target.scheme != 'https' or target.username or target.password:
+                      raise RuntimeError('refused non-HTTPS or credentialed redirect')
+                  result = super().redirect_request(req, fp, code, msg, headers, newurl)
+                  if result is not None and urllib.parse.urlsplit(req.full_url).netloc != target.netloc:
+                      result.remove_header('Authorization')
+                  return result
+
+          opener = urllib.request.build_opener(SafeRedirect())
+          def get(path, limit=8_000_000):
+              request = urllib.request.Request(api + path, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28'})
+              with opener.open(request, timeout=60) as response:
+                  content = response.read(limit + 1)
+              if len(content) > limit:
+                  raise RuntimeError('response exceeds inspection bound')
+              return content
+
+          run = json.loads(get('/actions/runs/' + str(run_id)))
+          artifact = json.loads(get('/actions/artifacts/' + str(artifact_id)))
+          if run['id'] != run_id or run['head_sha'] != source_sha or run['repository']['full_name'] != repository:
+              raise RuntimeError('run identity mismatch')
+          if run['status'] != 'completed' or run['head_branch'] != 'psc0/m3-fixedpoint-foundation-20261018':
+              raise RuntimeError('run is incomplete or on another branch')
+          if (artifact['id'] != artifact_id or artifact['name'] != artifact_name or artifact['expired'] or
+              artifact['workflow_run']['id'] != run_id or artifact['workflow_run']['head_sha'] != source_sha or
+              artifact.get('digest') != 'sha256:' + digest):
+              raise RuntimeError('artifact identity or metadata digest mismatch')
+          archive_bytes = get('/actions/artifacts/' + str(artifact_id) + '/zip')
+          if len(archive_bytes) != artifact['size_in_bytes'] or hashlib.sha256(archive_bytes).hexdigest() != digest:
+              raise RuntimeError('archive bytes do not match independent expected digest/size')
+          archive = zipfile.ZipFile(io.BytesIO(archive_bytes))
+          entries = archive.infolist()
+          if len(entries) > 2000 or sum(entry.file_size for entry in entries) > 128_000_000:
+              raise RuntimeError('archive exceeds inert inspection bound')
+          names = [entry.filename for entry in entries]
+          if len(set(names)) != len(names):
+              raise RuntimeError('duplicate archive paths')
+          for entry in entries:
+              path = pathlib.PurePosixPath(entry.filename)
+              if path.is_absolute() or '..' in path.parts or '\\' in entry.filename or entry.flag_bits & 1:
+                  raise RuntimeError('noncanonical or encrypted archive member')
+          if 'source-sha.txt' not in names or archive.read('source-sha.txt').decode('utf-8').strip() != source_sha:
+              raise RuntimeError('internal root source SHA mismatch')
+          for name in names:
+              if name.endswith('/source-sha.txt') and archive.read(name).decode('utf-8').strip() != source_sha:
+                  raise RuntimeError('internal fixture source SHA mismatch: ' + name)
+          report = {
+              'schema': 'pscv0-m3-authenticated-evidence/1',
+              'inspectionCommit': os.environ['GITHUB_SHA'],
+              'inspectionRun': os.environ['GITHUB_RUN_ID'],
+              'sourceRun': run_id, 'sourceSha': source_sha,
+              'artifactId': artifact_id, 'archiveSHA256': digest,
+              'archiveBytes': len(archive_bytes), 'runConclusion': run['conclusion'],
+              'archiveMembers': [{'path': e.filename, 'bytes': e.file_size} for e in entries],
+              'evidence': [], 'qualification': 'identity verified; evidence requires semantic review; no promotion'}
+          print('PSCV0_M3_EVIDENCE_IDENTITY ' + json.dumps({k: v for k, v in report.items() if k not in ('archiveMembers', 'evidence')}))
+          print('PSCV0_M3_EVIDENCE_MEMBERS ' + json.dumps(report['archiveMembers']))
+          required = ['foundation-inventory.log', 'recursor-surface-export.log', 'where/check.log', 'mutual-structural/check.log']
+          required += [prefix + '/' + log for prefix in ('where/input-parity/lean', 'where/input-parity/ps', 'mutual-structural') for log in ('js.log', 'ts.log', 'rust.log', 'wasm.log')]
+          for name in required:
+              if name not in names:
+                  raise RuntimeError('required evidence member absent: ' + name)
+              data = archive.read(name)
+              text = data.decode('utf-8')
+              lines = text.splitlines()
+              if name.endswith(('js.log', 'ts.log', 'rust.log', 'wasm.log')):
+                  excerpt = lines[-40:]
+              else:
+                  excerpt = [line for line in lines if 'PSCV0_' in line or 'exception' in line or 'error' in line.lower() or line.startswith('{')]
+              item = {'path': name, 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data),
+                      'totalLines': len(lines), 'excerpt': excerpt, 'excerptComplete': excerpt == lines}
+              report['evidence'].append(item)
+              print('PSCV0_M3_EVIDENCE_FILE ' + json.dumps(item))
+          pathlib.Path('m3-evidence').mkdir()
+          pathlib.Path('m3-evidence/inspection.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
+          pathlib.Path(os.environ['GITHUB_STEP_SUMMARY']).write_text(
+              'Authenticated M3 archive `' + str(artifact_id) + '` for `' + source_sha + '`.\n\n'
+              'SHA-256 `' + digest + '` verified against archive bytes. No archived code was executed. '
+              'This is evidence inspection, not compiler qualification or main promotion.\n', encoding='utf-8')
+          print('PSCV0_M3_EVIDENCE: PASS exact run, SHA, metadata, archive digest and internal identities; no archived code executed')
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-m3-authenticated-evidence-${{ github.sha }}
+          path: m3-evidence/inspection.json
+          if-no-files-found: error
+          retention-days: 30

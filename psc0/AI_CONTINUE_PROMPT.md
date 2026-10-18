@@ -150,3 +150,28 @@ lists left the prefix finisher's argument-kind parameter unconstrained. The
 child explicitly pins that existing source argument kind to PsSyntaxTerm;
 no algorithm, source fixture or acceptance condition changed. Inspect the
 child's complete preparation before promotion.
+
+## Checked packing specialization before runtime erasure
+
+Preparation feac89b1 / run39097887649 built and passed all groups except the
+paired source/runtime check. Source elaboration and strict checked-Core parity
+advanced past the earlier header-spine failure; total-only IR admission failed:
+`PSCV0-ERASURE: unknown constant PSum.casesOn (in parityFirst)`.
+The exact source assertions remain unchanged.
+
+Runtime recovery now specializes its actual checked packing functional before
+constructing the ordinary private implementation. It unfolds only the actual
+selected PSum/PSigma casesOn definitions and uses shared registered recursor/
+projection iota. Public definitions and logical fixedpoints never delta-reduce.
+Non-value beta arguments retain real lets, preserving source evaluation order
+and sharing. A result let below the original header preserves returned-function
+entry arity. Both the specialized body and its closed private definition are
+type checked; the independent prepared-body reconstruction and forged-body/
+incomplete-coverage refusals remain active.
+
+Pinned references: Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+Compiler/LCNF/ToLCNF.lean visitCases, Compiler/LCNF/Simp/Main.lean
+simpCasesOnCtor?, plus WF/Main and Basic.addAndCompilePartialRec. This is
+Core construction using the existing reducer, with upstream notices retained;
+no target primitive, runtime PSum dependency, new axiom or budget change.
+Qualification is pending the newest preparation; main6cdb remains fully qualified.

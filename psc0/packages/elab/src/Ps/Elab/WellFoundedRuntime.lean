@@ -81,6 +81,90 @@ def psElabWellFoundedRuntimePublic (environment : PsEnvironment)
   return { name, type, opened, fixedArguments, permutation
            varyingNames := varying.map (·.name), index, major }
 
+-- A beta argument is substituted only when it is already a value. Keep
+-- other arguments in real lets so recovery does not duplicate source work.
+-- Constructors/type applications are values only when their fields are values.
+private def psElabWellFoundedRuntimeValue (environment : PsEnvironment) : PsExpr → Bool
+  | .fvar _ | .bvar _ | .lit _ | .lam .. | .sortE _ | .forallE .. => true
+  | .constE name _ =>
+    (psEnvironmentFindConstructor environment name).isSome ||
+      (psEnvironmentFindInductive environment name).isSome
+  | .app fn argument =>
+    let .constE name _ := (psReduceAppView fn).head | false
+    ((psEnvironmentFindConstructor environment name).isSome ||
+      (psEnvironmentFindInductive environment name).isSome) &&
+      psElabWellFoundedRuntimeValue environment fn &&
+      psElabWellFoundedRuntimeValue environment argument
+  | _ => false
+
+-- Specialize the checked packing program, never the public recursive functions.
+-- Only the two actual checked packing wrappers may delta-reduce; their
+-- registered recursors/projections use the shared metadata-checked iota rule.
+-- Pinned LCNF.ToLCNF.visitCases and Simp.Main.simpCasesOnCtor? likewise
+-- eliminate known constructor cases. Here this happens before typed erasure.
+private def psElabWellFoundedRuntimeSpecialize (fuel : Nat)
+    (environment : PsEnvironment) (expression : PsExpr) : Except PsElabError PsExpr := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let visit := psElabWellFoundedRuntimeSpecialize fuel environment
+    match expression with
+    | .letE name type value body =>
+      let value ← visit value
+      if psElabWellFoundedRuntimeValue environment value then
+        visit (psExprInstantiate1 body value)
+      else
+        return .letE name type value (← visit body)
+    | .lam name type body binder =>
+      return .lam name type (← visit body) binder
+    | .app .. =>
+      let view := psReduceAppView expression
+      -- Expand the frozen wrapper's actual body, not a name-based target
+      -- primitive. No other definition, public peer or fixedpoint unfolds.
+      if let .constE name levels := view.head then
+        if psNameEq name (psNameAppendStr (psRootName "PSum") "casesOn") ||
+            psNameEq name (psNameAppendStr psWellFoundedPairName "casesOn") then
+          let some (.definitionDecl _ parameters _ body) := psEnvironmentFind environment name
+            | throw (psElabWellFoundedRuntimeError "packing wrapper is not an actual checked definition")
+          if parameters.length != levels.length then
+            throw (psElabWellFoundedRuntimeError "packing wrapper universe arity changed")
+          return ← visit (psReduceApply
+            (psExprInstantiateLevelParams parameters levels body) view.args)
+      let head ← visit view.head
+      match head, view.args with
+      | .lam name domain body _, argument :: rest =>
+        if psElabWellFoundedRuntimeValue environment argument then
+          visit (psReduceApply (psExprInstantiate1 body argument) rest)
+        else
+          -- Move later applications inside the let, preserving evaluation
+          -- order and shifting them beneath its real de Bruijn binder.
+          visit (.letE name domain argument
+            (psReduceApply body (rest.map (psExprLiftBVars 1 0))))
+      | .letE name type value body, arguments =>
+        visit (.letE name type value
+          (psReduceApply body (arguments.map (psExprLiftBVars 1 0))))
+      | _, _ =>
+        let arguments ← view.args.mapM visit
+        let rebuilt := psReduceApply head arguments
+        let packing := match head with
+          | .constE name _ =>
+            psNameEq name (psNameAppendStr (psRootName "PSum") "rec") ||
+              psNameEq name (psNameAppendStr psWellFoundedPairName "rec")
+          | _ => false
+        if packing then
+          if let some reduced := psReduceIota
+              (psWhnfCore psMetaEmpty psLocalEmpty) environment rebuilt then
+            return ← visit reduced
+        return rebuilt
+    | .proj owner index value =>
+      let value ← visit value
+      if psNameEq owner psWellFoundedPairName then
+        if let some field := psReduceProjectionIota (fun term => term)
+            environment owner index value then
+          return ← visit field
+      return .proj owner index value
+    | _ => return expression
+
 -- Produce ordinary checked implementation definitions from the actual logical
 -- auxiliary/public projections. Callers must supply the real checked environment;
 -- post-lifting validators first restore only owned ordinary recursor helpers.
@@ -172,6 +256,11 @@ def psElabWellFoundedRuntimeBodies (environment : PsEnvironment)
     let checked ← psElabResolvedTerm context replacement (some callback.domain)
     let body := PsExpr.app branch checked.term
     let _ ← psElabResolvedTerm context body (some member.opened.type)
+    let specialized ← psElabWellFoundedRuntimeSpecialize 4096 environment body
+    let _ ← psElabResolvedTerm context specialized (some member.opened.type)
+    -- The original header owns entry arity. Specializing a returned lambda
+    -- must not silently turn it into another flat declaration parameter.
+    let body := PsExpr.letE (psRootName "_psc0WFBody") member.opened.type specialized (.bvar 0)
     let closed := psCloseElabLambdaBinders psMetaEmpty member.opened.bindersRev body
     if psExprHasUnresolvedMeta closed || !psExprFVarsInContext psLocalEmpty closed then
       throw (psElabWellFoundedRuntimeError "recovered body retained a local or proof hole")

@@ -23,4 +23,17 @@ const after=source.slice(source.indexOf(fallback)+fallback.length);
 if(!after.slice(0,280).includes('lean_always_assert(') ||
    !after.slice(0,280).includes('Please build a version of Lean4 with libuv'))
   throw Error('unsupported no-libuv fallback behavior was unexpectedly changed');
+const tasks=await read('src/runtime/object.cpp');
+const schedulerBoundary='extern "C" LEAN_EXPORT obj_res lean_task_spawn_core(obj_arg c, unsigned prio, bool keep_alive)';
+const patchedInline='if (!g_task_manager) {\n#if defined(LEAN_EMSCRIPTEN)\n        // Match task_manager::run_task: reset only the C++ kernel counter.\n        reset_heartbeat();\n#endif\n        return lean_task_pure(apply_1(c, box(0)));';
+if(occurrences(tasks,schedulerBoundary)!==1 || occurrences(tasks,patchedInline)!==1)
+  throw Error('Lean 4.35.0 wasm32 inline task heartbeat boundary differs');
+// The native task manager already resets this kernel counter on task entry.
+// Keep the Emscripten-only change localized: no unchecked addDecl API,
+// no absolute 0/0 admission budget and no fabricated proof verdicts.
+if(!tasks.includes('void run_task(unique_lock<mutex> & lock, lean_task_object * t) {') ||
+   !tasks.includes('        reset_heartbeat();\n        object * v = nullptr;'))
+  throw Error('Lean 4.35.0 native task reset contract differs');
+console.log('PSC0_LEAN435_WASM_TASK_HEARTBEAT: verified native-equivalent inline reset');
+
 console.log('PSC0_LEAN435_RUNTIME_ABI: verified exact no-libuv fallback');

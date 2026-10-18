@@ -44,6 +44,7 @@ jobs:
             node --check "$f"
           done
           node --test psc0/packages/pskernel-lean-wasm/scripts/test-host.mjs
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-corpus.mjs
       - name: Qualify live PSC0 source closure before expensive kernel build
         shell: bash
         run: |
@@ -103,6 +104,18 @@ jobs:
           source ./emsdk_env.sh
           cd "$GITHUB_WORKSPACE"
           bash psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh
+      # A build-only diagnostic artifact is NOT a qualified checker and is
+      # not committed or packed. It preserves exact checked binaries when
+      # later native/Wasm parity or distribution qualification fails.
+      - name: Upload build-only kernel candidate (UNQUALIFIED)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lean435-linear-wasm-build-only-UNQUALIFIED
+          path: |
+            psc0/packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs
+            psc0/packages/pskernel-lean-wasm/wasm/pskernel-lean.wasm
+          if-no-files-found: error
+          retention-days: 7
       - name: Exact Lean 4.35.0 identity and same-source native reference
         working-directory: psc0/v7-native
         shell: bash

@@ -76,14 +76,18 @@ cmake -S "$lean_source" -B "$lean_build" -G 'Unix Makefiles' \
   -DUSE_LAKE=OFF -DMMAP=OFF -DLLVM=OFF -DCCACHE=OFF -DWFAIL=OFF \
   -DLEAN_INSTALL_SUFFIX=-linux_wasm32
 
+echo "PSC0_WASM_CROSS_BUILD_STAGE0_BEGIN: native i386 Lean bootstrap"
 cmake --build "$lean_build" --target stage1-configure -j2
+echo "PSC0_WASM_CROSS_BUILD_STAGE0_CONFIGURED"
 test -x "$stage0_lean" || { echo 'native i386 stage0 missing' >&2; exit 1; }
 mkdir -p "$target_sysroot/Init" "$target_sysroot/Std" "$target_sysroot/Lean"
 LEAN_PATH="$target_sysroot" "$stage0_lean" --deps "$lean_source/src/Lean.lean"
 for helper in "$stage1/bin/leanmake" "$stage1_leanc"; do
   if [[ -f "$helper" ]]; then chmod +x "$helper"; fi
 done
+echo "PSC0_WASM_CROSS_BUILD_STAGE1_BEGIN: target compatible Init/Std/Lean and official C++ kernel"
 cmake --build "$stage1" --target make_stdlib leanrt leancpp_1 -j2
+echo "PSC0_WASM_CROSS_BUILD_STAGE1_LIBRARIES_COMPILED"
 test -f "$target_sysroot/Lean.olean"
 test -f "$stage1/lib/temp/libleancpp_1.a"
 test -f "$stage1/lib/lean/libleanrt.a"
@@ -93,6 +97,7 @@ test -f "$stage1/lib/lean/libLean.a"
 chmod +x "$stage1_leanc"
 
 node "$script_dir/plan-closure.mjs" "$psc0" "$src" "$closure"
+echo "PSC0_WASM_PROVIDER_SOURCE_CLOSURE_COMPLETE"
 mapfile -t modules < <(node -e 'for(const m of require(process.argv[1]).modules)console.log(m.module)' "$closure")
 test "${#modules[@]}" -gt 5 || { echo 'incomplete PSC0 import closure' >&2; exit 1; }
 (
@@ -108,6 +113,7 @@ test "${#modules[@]}" -gt 5 || { echo 'incomplete PSC0 import closure' >&2; exit
     mv "$generated/$file.c.tmp" "$generated/$file.c"
   done
 )
+echo "PSC0_WASM_PROVIDER_LEAN_C_EMISSION_COMPLETE"
 mapfile -d '' cfiles < <(find "$generated" -type f -name '*.c' -print0 | sort -z)
 test "${#cfiles[@]}" -eq "${#modules[@]}" || {
   echo 'missing emitted C for provider import closure' >&2; exit 1;
@@ -121,6 +127,7 @@ for f in "${cfiles[@]}"; do
   count=$((count+1))
 done
 
+echo "PSC0_WASM_PROVIDER_TARGET_OBJECTS_COMPILED count=${#object_files[@]}"
 # Kernel-only static link; no Lean shell/main global initializer, host-native
 # .olean, or previous PSC2 runtime artifacts enter the Wasm binary.
 LEAN_CC="$(command -v em++)" "$stage1_leanc" \
@@ -128,6 +135,7 @@ LEAN_CC="$(command -v em++)" "$stage1_leanc" \
   -lInit -lStd -lLean -lnodefs.js -lleanrt -lstdc++ -O3 \
   -sENVIRONMENT=node -sEXIT_RUNTIME=1 \
   -o "$output/pskernel-lean.cjs"
+echo "PSC0_WASM_KERNEL_LINK_COMPLETE: checking wasm32 binary"
 test -s "$output/pskernel-lean.wasm"
 test -s "$output/pskernel-lean.cjs"
 node -e '
@@ -145,4 +153,5 @@ if(p.status!=="ok" || p.leanVersion!=="4.35.0" ||
  p.leanCommit!=="eb6cafb7290e8bd5f2937522d8d804f58f02bafc" ||
  p.profile!=="pscv0-v7.2")process.exit(1);
 ' "$output/pskernel-lean.cjs"
+echo "PSC0_WASM_KERNEL_EXECUTION_HEALTH_PASS"
 echo "PSC0_LEAN435_LINEAR_WASM_BUILD_PASS bytes=$(stat -c %s "$output/pskernel-lean.wasm")"

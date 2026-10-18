@@ -47,3 +47,11 @@ PREBUILT_WASM_MANIFEST.json
 
 No VSIX integration or browser worker is part of this branch. Executable
 conformance and integrity qualification are required before claiming readiness.
+
+## Qualification levels
+
+A cryptographically matched `admission-smoke` manifest may enable a **development** checker after the exact 11-case native-vs-Wasm parity suite passes. `kernelStatus().productionReady` remains `false`; this does **not** establish complete Lean 4.35 kernel parity, PSC0 v7.2 backend equivalence, or general production readiness. Treat `KernelNotReadyError` as transport/build unavailability, never as a semantic rejection. The larger current Standard and Lean Arena suites remain required for production promotion.
+
+## Upstream source licensing
+
+The official Lean C++ kernel/runtime incorporated into the Wasm executable derives from `leanprover/lean4` at the pinned 4.35.0 commit and is licensed Apache-2.0. `LEAN_LICENSE` retains the upstream license text. The top-level package's `UNLICENSED` designation does not override the license of the Lean-derived portions of the binary. See `MIGRATION_EVIDENCE_4_34_TO_4_35.md` for source and CI provenance.

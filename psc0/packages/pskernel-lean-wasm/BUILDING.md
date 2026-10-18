@@ -22,8 +22,8 @@ From the repository checkout with the exact 4.35 Lean toolchain on PATH:
 sudo dpkg --add-architecture i386
 sudo apt-get update
 sudo apt-get install -y build-essential cmake git clang pkg-config \
-  gcc-multilib g++-multilib libc6-dev-i386 libstdc++-dev:i386 \
-  libuv1-dev:i386 libssl-dev:i386
+  gcc-multilib g++-multilib libc6-dev-i386 \
+  libuv1-dev:i386 libssl-dev:i386 pkgconf:i386
 git clone --depth 1 https://github.com/emscripten-core/emsdk.git /tmp/emsdk
 cd /tmp/emsdk
 ./emsdk install 6.0.9
@@ -31,6 +31,7 @@ cd /tmp/emsdk
 source ./emsdk_env.sh
 cd "$GITHUB_WORKSPACE"
 cd psc0/v7-native
+export ELAN_TOOLCHAIN=leanprover/lean4:v4.35.0
 lake build pskernel_lean_wasm_native_ref
 cd ..
 node packages/pskernel-lean-wasm/scripts/test-host.mjs
@@ -80,3 +81,11 @@ on the feature branch.
 The Linux run [#39122290519](https://github.com/dwijayuda/pskernel/actions/runs/39122290519) reached stage1 `leanrt` compilation and exposed a mismatched C++ fallback: `src/runtime/uv/system.h` declares `lean_uv_os_get_group(uint64_t gid)`, while the no-libuv implementation of `src/runtime/uv/system.cpp` previously defined it without the required argument. The patched C++ implementation retains the original unsupported-without-libuv behavior; only its parameter signature changes. This is **not** a kernel soundness or admission bypass.
 
 The exact source patch applies only to the ignored pinned upstream checkout. The CI preflight now fetches the exact Lean commit, checks the complete set of guarded rewrites and their idempotence, and calls `scripts/verify-lean435-runtime.mjs` before the costly stage0/stage1 cross-build. The build repeats these checks after resetting and repatching the source checkout.
+
+## Development versus production qualification
+
+After `scripts/check-differential.mjs` verifies all 11 current canonical cases against the native 4.35 official-kernel oracle, a development binary can be staged as `qualificationTier: "admission-smoke"` and `productionReady: false`. Its manifest includes the matching corpus digest and both artifact SHA-256 hashes. This is not permission to publish or to claim parity over the full Lean Arena corpus or all PSC0 v7.2 compilation features.
+
+The [linear-memory workflow](../../../../.github/workflows/psc0-pskernel-lean-wasm-linear.yml) separately uploads the generated Wasm and Node launcher as an explicitly `UNQUALIFIED` build-only Actions artifact after successful link/startup, before admission parity. Such bytes must never be committed as the qualified package output. Only the later checked binary, bound to same-run native/Wasm acceptance and rejection results, can be staged with `PREBUILT_WASM_MANIFEST.json`.
+
+The upstream Lean C++ library/runtime is licensed Apache-2.0. Distributions must preserve its license, included as `LEAN_LICENSE`; this requirement is distinct from the ProofScript project's own package license.

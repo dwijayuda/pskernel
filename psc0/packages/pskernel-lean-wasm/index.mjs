@@ -23,8 +23,9 @@ export class KernelNotReadyError extends Error {
 }
 export function kernelStatus() {
   let manifest;
-  try { manifest=readManifest(); } catch { return Object.freeze({checkerReady:false,assurance:'unavailable'}); }
-  return Object.freeze({checkerReady:manifest.qualified===true,assurance:manifest.qualified?'native-wasm-parity-qualified':'unavailable'});
+  try { manifest=readManifest(); } catch { return Object.freeze({checkerReady:false,productionReady:false,assurance:'unavailable'}); }
+  return Object.freeze({checkerReady:manifest.qualified===true,productionReady:false,
+    assurance:'native-wasm-admission-smoke-only'});
 }
 function sha256(file) {return createHash('sha256').update(readFileSync(file)).digest('hex');}
 function readManifest(){
@@ -38,7 +39,9 @@ function readManifest(){
      manifest.protocol!==leanKernelProviderProtocol ||
      manifest.provider!==leanKernelProviderName ||
      manifest.memoryModel!=='linear' ||
-     manifest.qualified!==true){
+     manifest.qualified!==true || manifest.qualificationTier!=='admission-smoke' ||
+     manifest.productionReady!==false || !Number.isSafeInteger(manifest.parityCases?.length) ||
+     manifest.parityCases.length<11 || typeof manifest.corpusSha256!=='string'){
     throw new KernelNotReadyError('prebuilt is not qualified for the exact pinned kernel');
   }
   for(const key of expectedFiles){

@@ -1,0 +1,60 @@
+// Import the shared fixtures before any expensive Lean compilation.
+// "node --check" cannot detect unbound values hidden in top-level code.
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {corpus} from './corpus.mjs';
+
+test('shared canonical admissions corpus eagerly constructs and decodes',()=>{
+  assert.equal(corpus.length,11);
+  assert.equal(new Set(corpus.map(c=>c.id)).size,corpus.length);
+  assert.deepEqual(corpus.map(c=>c.id),[
+    'good-nat-definition','ill-typed-definition','malformed-json','wrong-version',
+    'empty-batch','duplicate-defined-name','missing-constant-type',
+    'theorem-type-not-proposition','opaque-ill-typed-body',
+    'axiom-injection-not-admitted','unknown-admission-kind']);
+  assert.ok(corpus.some(c=>c.accept));
+  assert.ok(corpus.some(c=>!c.accept));
+  for(const fixture of corpus){
+    assert.equal(typeof fixture.id,'string');
+    assert.equal(typeof fixture.input,'string');
+    assert.equal(typeof fixture.accept,'boolean');
+    assert.ok(fixture.input.length>0);
+    if(fixture.id!=='malformed-json'){
+      const payload=JSON.parse(fixture.input);
+      assert.equal(payload.format,'proofscript-checked-admissions');
+      assert.ok(Array.isArray(payload.admissions));
+      if(fixture.id!=='wrong-version')assert.equal(payload.version,2);
+    }else{
+      assert.throws(()=>JSON.parse(fixture.input),SyntaxError);
+    }
+    if(!fixture.accept)assert.equal(typeof fixture.errorKind,'string');
+    if(!fixture.accept){
+      assert.equal(typeof fixture.errorReason,'string');
+      assert.ok(fixture.errorReason.length>0);
+    }
+  }
+});
+test('valid and invalid declaration fixtures are semantically distinct',()=>{
+  const valid=JSON.parse(corpus.find(x=>x.id==='good-nat-definition').input);
+  const invalid=JSON.parse(corpus.find(x=>x.id==='ill-typed-definition').input);
+  assert.equal(valid.admissions[0].declaration.v.k,'nat');
+  assert.equal(valid.admissions[0].declaration.v.v,'1');
+  assert.equal(invalid.admissions[0].declaration.v.k,'sort');
+});
+
+test('negative validation cases require distinct failure classes',()=>{
+  const invalid=corpus.filter(c=>!c.accept);
+  assert.ok(invalid.some(c=>c.errorKind==='kernel-rejection'));
+  assert.ok(invalid.some(c=>c.errorKind==='malformed-request'));
+  assert.ok(invalid.some(c=>c.errorKind==='protocol-version'));
+  assert.equal(corpus.find(c=>c.id==='duplicate-defined-name').declarationIndex,1);
+});
+
+test('semantic failure reasons are pinned, never satisfied by timeout',()=>{
+  const reasons=corpus.filter(c=>!c.accept).map(c=>c.errorReason);
+  assert.ok(!reasons.some(x=>x.includes('timeout')));
+  assert.equal(corpus.find(c=>c.id==='ill-typed-definition').errorReason,'declaration-type-mismatch');
+  assert.equal(corpus.find(c=>c.id==='duplicate-defined-name').errorReason,'already-declared:');
+  assert.equal(corpus.find(c=>c.id==='missing-constant-type').errorReason,'unknown-constant:');
+  assert.equal(corpus.find(c=>c.id==='theorem-type-not-proposition').errorReason,'theorem-type-not-prop:');
+});

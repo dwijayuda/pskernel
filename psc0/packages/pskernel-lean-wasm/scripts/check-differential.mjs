@@ -20,6 +20,16 @@ for(const fixture of corpus){
   assert.equal(wasmResult.accepted,fixture.accept,fixture.id+' Wasm');
   assert.deepEqual(wasmResult,nativeResult,fixture.id+' native/Wasm parity');
   if(fixture.errorKind)assert.equal(wasmResult.errorKind,fixture.errorKind,fixture.id);
+  if(!fixture.accept){
+    assert.ok(typeof fixture.errorReason==='string'&&fixture.errorReason.length,
+      fixture.id+' must pin a semantic reason');
+    assert.ok(typeof wasmResult.message==='string'&&
+      wasmResult.message.includes(fixture.errorReason),fixture.id+' specific kernel rejection');
+    assert.ok(!wasmResult.message.includes('deterministic-timeout'),
+      fixture.id+' rejects false-positive timeout');
+  }
+  if(fixture.declarationIndex!==undefined)
+    assert.equal(wasmResult.declarationIndex,fixture.declarationIndex,fixture.id+' failed index');
   console.log('PSC0_WASM_PARITY PASS '+fixture.id);
 }
 
@@ -28,7 +38,8 @@ const sha256=f=>createHash('sha256').update(readFileSync(f)).digest('hex');
 const sourceCommit=process.env.GITHUB_SHA??process.env.PSC_LEAN_WASM_SOURCE_COMMIT;
 if(!sourceCommit||!/^[a-f0-9]{40}$/.test(sourceCommit))
   throw new Error('a concrete checked source commit is required');
-const receipt={schemaVersion:1,sourceCommit,cases:corpus.map(c=>c.id),
+const receipt={schemaVersion:2,sourceCommit,cases:corpus.map(c=>c.id),
+  corpusSha256:createHash('sha256').update(JSON.stringify(corpus)).digest('hex'),
   wasmSha256:sha256(path.join(root,'wasm/pskernel-lean.wasm')),
   launcherSha256:sha256(launcher),nativeSha256:sha256(native),passed:true};
 mkdirSync(path.join(root,'.wasm-build'),{recursive:true});

@@ -92,4 +92,16 @@ for(const relative of ['src/stdlib.make.in','stage0/src/stdlib.make.in']){
   ]]);
 }
 
+// A wasm32 single-threaded runtime has no task manager, so a spawned task
+// runs inline in lean_task_spawn_core. Native task_manager::run_task resets
+// the *C++ kernel* heartbeat on task entry, whereas the inline fallback
+// otherwise inherits the completed Standard replay's counter and can reject
+// even Nat := 1 as deterministic-timeout. Preserve that native resource
+// boundary only under Emscripten; do NOT disable kernel finite budgets.
+await modify('src/runtime/object.cpp',[
+  ['single-threaded wasm32 fresh task kernel heartbeat',
+   'extern "C" LEAN_EXPORT obj_res lean_task_spawn_core(obj_arg c, unsigned prio, bool keep_alive) {\n    if (!g_task_manager) {\n        return lean_task_pure(apply_1(c, box(0)));',
+   'extern "C" LEAN_EXPORT obj_res lean_task_spawn_core(obj_arg c, unsigned prio, bool keep_alive) {\n    if (!g_task_manager) {\n#if defined(LEAN_EMSCRIPTEN)\n        // Match task_manager::run_task: reset only the C++ kernel counter.\n        reset_heartbeat();\n#endif\n        return lean_task_pure(apply_1(c, box(0)));'],
+]);
+
 console.log('PSC0_LEAN435_EMSCRIPTEN_COMPAT: exact source rewrites applied');

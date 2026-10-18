@@ -157,7 +157,8 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
         | throw (.refinement "dependent local definition lost its telescope")
       let pushed := psLocalPushLet state.context.localContext name type value
       psElabOpenDependents rest { state with
-        context := { state.context with localContext := pushed.context
+        context := { state.context with
+          localContext := pushed.context
           auxiliaryLocalIds := if state.context.auxiliaryLocalIds.contains original.id then
             pushed.id :: state.context.auxiliaryLocalIds else state.context.auxiliaryLocalIds }
         body := psExprInstantiate1 body (.fvar pushed.id)
@@ -168,7 +169,8 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
         state.context.localContext state.body).mapError PsElabError.infer
       let pushed := psLocalPushBinding state.context.localContext name pi.domain original.binder
       psElabOpenDependents rest { state with
-        context := { state.context with localContext := pushed.context
+        context := { state.context with
+          localContext := pushed.context
           auxiliaryLocalIds := if state.context.auxiliaryLocalIds.contains original.id then
             pushed.id :: state.context.auxiliaryLocalIds else state.context.auxiliaryLocalIds }
         body := psExprInstantiate1 pi.body (.fvar pushed.id)

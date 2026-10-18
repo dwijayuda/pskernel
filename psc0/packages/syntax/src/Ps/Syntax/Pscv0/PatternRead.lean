@@ -188,13 +188,13 @@ def psPscv0ReadMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
     return { value := .matchMany (inputs.value.map fun term => { term }) [] none
                (psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan last))
              cursor := inputs.cursor }
-  let generalizing ← psPscv0MatchGeneralizing keyword.cursor
-  let inputs ← psPscv0MatchDiscriminants read fuel generalizing.cursor
+  let generalization ← psPscv0MatchGeneralizing keyword.cursor
+  let inputs ← psPscv0MatchDiscriminants read fuel generalization.cursor
   let withToken ← psTokenCursorExpectText inputs.cursor "with"
   let opening ← psTokenCursorExpectText withToken.cursor "{"
   let rows ← psPscv0MatchRows read fuel opening.cursor
   let close ← psTokenCursorExpectText rows.cursor "}"
-  return { value := .matchMany inputs.value rows.value generalizing.value
+  return { value := .matchMany inputs.value rows.value generalization.value
              (psSyntaxSpanJoin keyword.token.span close.token.span)
            cursor := close.cursor }
 

@@ -65,7 +65,8 @@ def psElabMutualStructuralPeers (context : PsElabContext) (captures : List PsExp
         throw (psElabMutualStructuralError "OWNERSHIP" "local peer alias is shadowed")
       let type ← psElabMutualStructuralApplyType state.fst entry.fst.fst.type captures
       let pushed := psLocalPushBinding state.fst.localContext alias type .explicit
-      let context := { state.fst with localContext := pushed.context
+      let context := { state.fst with
+        localContext := pushed.context
         auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
       return (context, state.snd ++ [(pushed.id, entry.snd)])) (context, [])
 

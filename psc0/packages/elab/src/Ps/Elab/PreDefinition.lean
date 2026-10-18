@@ -292,7 +292,8 @@ def psElabPreDefinitionStructural (environment : PsEnvironment)
         let _ ← psElabExpressionSort state.fst type
         let name := PsName.num (psRootName "$psc0PreDefinitionPeer") index
         let pushed := psLocalPushBinding state.fst.localContext name type .explicit
-        let context := { state.fst with localContext := pushed.context
+        let context := { state.fst with
+          localContext := pushed.context
           auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
         return (context,
           state.snd ++ [{ fullId := target.peerId, specializedId := pushed.id, memberIndex := index }]))

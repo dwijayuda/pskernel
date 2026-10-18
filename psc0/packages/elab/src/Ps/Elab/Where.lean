@@ -171,7 +171,8 @@ def psElabWherePeers (context : PsElabContext) (headers : List PsElabWhereHeader
     let _ ← (psInferType state.fst.environment state.fst.metaContext state.fst.localContext type).mapError
       PsElabError.infer
     let pushed := psLocalPushBinding state.fst.localContext header.alias type .explicit
-    let context := { state.fst with localContext := pushed.context
+    let context := { state.fst with
+      localContext := pushed.context
       auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
     return (context, state.snd ++ [{ header with peerId := pushed.id }] )) (context, [])
 
@@ -326,7 +327,8 @@ def psElabWhereLift (shared : PsElabContext) (availableLevels : List PsName)
       let sort ← (psInferType state.fst.environment psMetaEmpty psLocalEmpty type).mapError PsElabError.infer
       let _ ← (psInferEnsureSort state.fst.environment psMetaEmpty psLocalEmpty sort).mapError PsElabError.infer
       let pushed := psLocalPushBinding state.fst.localContext input.header.alias type .explicit
-      let context := { state.fst with localContext := pushed.context
+      let context := { state.fst with
+        localContext := pushed.context
         auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
       return (context, state.snd ++ [pushed.id]))
     (initial, ([] : List Nat))

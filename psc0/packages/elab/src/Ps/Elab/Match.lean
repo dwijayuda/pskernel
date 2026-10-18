@@ -328,7 +328,8 @@ def psElabMatchHypotheses (fields : List PsElabTypedBinder) (recursiveFields : L
       context.localContext cursor).mapError PsElabError.infer
     let name := psNameAppendNum (psRootName "_ih") index
     let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
-    let next := { context with localContext := pushed.context
+    let next := { context with
+      localContext := pushed.context
       auxiliaryLocalIds := pushed.id :: context.auxiliaryLocalIds }
     let next := match context.structuralRecursion with
       | some recursion => if recursion.collectCalls && visibleFields.contains index then

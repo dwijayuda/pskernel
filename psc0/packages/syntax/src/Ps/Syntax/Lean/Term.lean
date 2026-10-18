@@ -97,14 +97,14 @@ def psLeanTermMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
       value := .matchMany (inputs.value.map fun term => { term }) [] none
         (psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan last))
       cursor := inputs.cursor }
-  let generalizing ← psPscv0MatchGeneralizing keyword.cursor
-  let inputs ← psPscv0MatchDiscriminants read fuel generalizing.cursor
+  let generalization ← psPscv0MatchGeneralizing keyword.cursor
+  let inputs ← psPscv0MatchDiscriminants read fuel generalization.cursor
   let withToken ← psTokenCursorExpectText inputs.cursor "with"
   let some first := psTokenCursorPeek withToken.cursor | throw (.unexpectedEnd "native match alternatives")
   let rows ← psLeanTermMatchRows read fuel first.span.start withToken.cursor
   let some (_, _, lastSpan) := rows.value.getLast? | throw (.unexpectedEnd "native match alternatives")
   let span := psSyntaxSpanJoin keyword.token.span lastSpan
-  let value := PsSyntaxTerm.matchMany inputs.value rows.value generalizing.value span
+  let value := PsSyntaxTerm.matchMany inputs.value rows.value generalization.value span
   return { value, cursor := rows.cursor }
 
 def psLeanTermTactics (read readType : PsPscv0TermReader) (fuel : Nat)

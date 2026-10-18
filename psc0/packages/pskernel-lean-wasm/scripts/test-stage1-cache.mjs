@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,rmSync,readFileSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {sealStage1,verifyStage1} from './stage1-cache.mjs';
@@ -13,7 +13,7 @@ const required=[
 ];
 const fingerprint={emcc:'Emscripten 6.0.9 test',clang:'clang version 18 test',
   platform:'linux',arch:'x64'};
-function mockBuild(fn){
+async function mockBuild(fn){
   const root=mkdtempSync(path.join(tmpdir(),'psc0-stage1-cache-test-'));
   try{
     for(const relative of required){
@@ -26,7 +26,7 @@ function mockBuild(fn){
       mkdirSync(path.dirname(file),{recursive:true});
       writeFileSync(file,'pinned-olean:'+i);
     }
-    return fn(root);
+    return await fn(root);
   }finally{rmSync(root,{recursive:true,force:true});}
 }
 test('cache seal/reuse requires every exact hashed artifact',async()=>{

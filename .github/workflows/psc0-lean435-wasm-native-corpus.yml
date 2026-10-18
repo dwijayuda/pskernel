@@ -22,6 +22,8 @@ jobs:
           set -euo pipefail
           node --check psc0/packages/pskernel-lean-wasm/scripts/check-native-corpus.mjs
           node --check psc0/packages/pskernel-lean-wasm/scripts/run-provider.mjs
+          node --check psc0/packages/pskernel-lean-wasm/scripts/corpus.mjs
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-corpus.mjs
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0/v7-native

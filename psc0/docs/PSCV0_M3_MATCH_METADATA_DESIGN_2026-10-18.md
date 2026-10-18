@@ -101,3 +101,26 @@ verified assurance boundaries remain unchanged. No host frontend in the
 portable closure, new axiom, PSKernel-Core, self-hosting or budget increase.
 
 Original design guided by upstream algorithms; preserve Apache-2.0 attribution.
+
+## Pattern alias and source-owner follow-up
+
+Pinned Elab/Match.withEqs creates the named equation after elaborating the LHS,
+using the original discriminant and the actual pattern expression. The optional
+local generalizer adds dependent ordinary variables as discriminants; it does
+not rename the original discriminant into the pattern. PSC0 currently uses a
+lexical original-to-constructor alias in MatchMinor and stores row bindings as
+syntax. Named matches need an explicit typed branch-discriminant identity for
+PatternMatrix so a variable pattern denotes the selected constructor while an
+unshadowed original source name retains its original type/value. Do not solve
+this by globally substituting source text or changing outer hypothesis types.
+Computed discriminants must still be evaluated once.
+
+Command's plain-definition consolidation also needs a capability inventory:
+PreDefinitionNonrecursive currently publishes an exact eq_def for every source
+member, while the legacy declaration path does not. MutualStructural currently
+requires a registered root group recursor, a real explicit header major, and
+distinct header-variable indices; nested auxiliary elimination slots and
+arbitrary retained result lambdas need explicit coverage before replacing a
+working owner. Declaration counts, generated names, registration/privacy,
+proof-kind behavior and normalization obligations must remain deliberate.
+These findings are design constraints, not implemented changes or completion.

@@ -254,3 +254,28 @@ plain-definition routing into the older direct-IH mechanism; the shared typed
 PreDefinition/MutualStructural owner already separates source cases from
 checked recursion construction. Avoid a form-specific retry or fake child
 equality. This work is researched, not implemented or qualified.
+
+## Exact proof-form qualification follow-up
+
+Preparation a23a0fd440cebfd2cb5395066ad877adf8e47122,
+run39103818085/job117605350253 completed with one failed source-check step.
+Native build, fixedpoint/PSum export and replay, all strict foundation audits,
+indexed elimination, deriving, WF, P0/P1 and noncomputable checks passed in
+preparation scope. The paired field source passed elaboration through the new
+explicit dependent recursors and Prop components, then failed exact checked-Core
+comparison at proofObserved: the native input used term rfl, while ProofScript
+used tactic by { rfl }. These have different proof construction paths. Both
+paired native observations now use by rfl as well; the exact Core comparison,
+expected propositions and all negative/runtime obligations remain unchanged.
+Do not infer complete paired emission/execution or integration success yet.
+
+The diagnostic selected-foundation inventory compared109 native recursors and
+found24 public binder-name/kind differences, including Nat/Except explicit
+private motives, Empty/False implicit motives (native explicit), and retained
+major/minor names. This is a family of source metadata gaps. Selection and all
+three fingerprints are unchanged; correction requires the explicit independent
+foundation-metadata slice, preserving frozen authoring bases. Native hygienic
+names (Eq.rec/Nat.le.rec) require the pinned source name-resolution policy,
+not string-only renaming. The child7eba96e adds the strict generated-public
+signature group check and explicit Order inventory import; its preparation is
+still running. This follow-up is queued, unqualified, and does not move main.

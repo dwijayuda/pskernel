@@ -32,8 +32,9 @@ measured aggregate count was claimed.
 Main has now fast-forwarded to abe1adc2ff96c632dd9ed82b8ae6357832545a32.
 Its prep run39080406371/job117536629068 completed SUCCESS.
 Main integration is running at that exact SHA:
-Native39081215932, focusedM3 39081215919, F1 39081215915,
-F2 39081215934, F3 39081216307. Fetch final results before promotion/claims.
+Native39081215932 and focusedM3 39081215919 are still running.
+F1 39081215915, F2 39081215934 and F3 39081216307 completed SUCCESS.
+Fetch final Native/M3 results before promotion/claims.
 
 Verified preparation at abe1 includes:
 - Exact native instNonemptyOfInhabited signature, no axioms, priority1000;
@@ -47,12 +48,11 @@ Verified preparation at abe1 includes:
 - Standalone exact PSum bytes and kernel-checked typed component packing.
 These are construction/emission receipts; target execution awaits main M3.
 
-Prep parent32af8e2af9e7ed188532fe8e0ae0cf3ebfbd77d3 adds the finite fixed-parameter
-graph and singleton integration. Run39080826738/job117538048531 is in progress;
-build, strict audits and the packing/native graph differential steps passed.
-Full retained source checks are still running.
+Prep32af8e2af9e7ed188532fe8e0ae0cf3ebfbd77d3 adds the finite fixed-parameter
+graph and singleton integration. Run39080826738/job117538048531 completed
+SUCCESS, including the pinned native graph differential and all retained checks.
 
-The current child candidate extends saved lexical WF authority to multiple
+Candidate03ab1dce70d34c869e226942bba5a9a904029a82 extends saved lexical WF authority to multiple
 hygienic callees and records the exact callee on each typed observation.
 Lifted captures resolve their current refined lexical binding before ordinary
 application completes the original target telescope. Local shadows and bare
@@ -60,8 +60,21 @@ recursive-value refusal remain. Decreasing proofs clear all callback authority.
 Typed owner analysis now uses actual per-owner headers and branch-scoped calls;
 singleton WF uses the same mechanism. Consolidated packing probe adds two
 callees, refined captures, shadowing, saved scope, cross-owner reordered headers
-and outside-component refusal. Candidate compilation/qualification is pending.
+and outside-component refusal. Run39081538098/job117539508499 compiled production
+and passed retained WF/P1/noncomputable source checks. Only the new packing fixture
+failed to parse a nested record at line133. The current candidate fixes its field
+layout without changing assertions; the new callback probe remains unqualified.
 No source mutual WF acceptance or runtime claim follows from these mechanisms.
+
+The same candidate implements major-dependent constrained matching using ordered
+Eq/HEq index and major constraints, existing eq_of_heq after type alignment, and
+the shared dependent-context Eq.rec transport. No new foundation declaration.
+It substitutes actual free variables before proof-irrelevant equality, following
+pinned UnifyEq. The existing match fixture gains fixed-major/context, compound
+and repeated-index positives plus a computational dependent callback; missing HEq
+still refuses. Group-match observations increase40 to50 across all five lanes.
+Preparation adds this existing fixture's kernel/emission check. Qualification is
+pending; see docs/PSCV0_M3_HETEROGENEOUS_MATCH_2026-10-18.md.
 
 ## Selected foundation
 
@@ -89,8 +102,8 @@ passed; activation requires reviewed strict manifest identities.
    adaptation must validate the complete actual functional and all typed
    callbacks. A kernel-valid f=f cannot authorize replacing an executable body.
    Current multi-member WF refusal stays until this full path is complete.
-4. Assess/complete major-dependent constrained matching through the pinned
-   Eq/HEq generalization design. Default mutual/nested induction refusals are
+4. Qualify the current major-dependent constrained matching implementation
+   against the pinned Eq/HEq generalization design. Default mutual/nested induction refusals are
    intentional in Lean and remain separate from this real transport question.
 5. Reconcile all six exits: data/elimination/deriving, strategies,
    structural/WF, P0, P1, and exact-SHA five-gate integration. M3+B is OPEN.
@@ -115,6 +128,10 @@ funind_mutual_dep, wfrecUnary, mutual_termination_by_errors, termination_by_wher
 partial_fixpoint*, usesOfNoncomputable, noncomputableUnused, optParam,
 invalidNamedArgs, inductionMutual and errorOnInductionForNested.
 Never copy upstream test_sorry into proof authority.
+
+Roadmap and exit ledger are now consolidated around current architecture and
+six exits; obsolete checkpoint narratives remain in Git history at03ab1dce.
+The canonical roadmap now correctly records all three approved axioms.
 
 Update this file, AI_CONTINUE_PROMPT.md, roadmap and exit ledger at every
 meaningful slice. Stop only at complete M3+B or a genuine user-dependent blocker.

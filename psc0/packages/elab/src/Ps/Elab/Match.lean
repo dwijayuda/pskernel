@@ -170,24 +170,18 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
   let roots := indexMap.map Prod.fst ++ majorId.toList
   let dependents := psElabDependentLocals context roots []
   let generalized := if constrained then [] else dependents
-  if constrained then
-    match majorId with
-    | some id =>
-      -- The constrained motive retains the original major. An unknown result
-      -- may become constant while its checked branches elaborate.
-      if (!psElabExpectedTypeIsUnconstrained context expected &&
-          psElabExprContainsLocal id expected) ||
-          dependents.any (fun entry => psElabExprContainsLocal id entry.binder.type) then
-        throw (.refinement "fixed-index matching with major-dependent result/context requires heterogeneous transport")
-    | none => pure ()
   let body := psElabCloseDependentType generalized expected
   let body := if constrained then body else
     psElabSubstituteLocals (substitutions ++ majorId.toList.map (fun id => (id, .fvar pushed.id))) body
-  let equations ← if !constrained then pure [] else
-    (indices.zip freshIndices).mapM fun entry => do
-      let type ← (psInferType context.environment context.metaContext context.localContext entry.fst).mapError PsElabError.infer
-      let level ← psElabExpressionSort context type
-      return (psLogicEq level type entry.snd entry.fst, psLogicRefl level type entry.fst)
+  -- Keep the original major and its dependent context in the target. After
+  -- the index constraints align its type, the final major equation transports
+  -- both together through the shared dependent equality eliminator.
+  let equations ← if !constrained then pure [] else do
+    let equalityContext := psElabContextWithLocal opened.context pushed.context
+    let indexEquations ← (freshIndices.zip indices).mapM fun (fresh, original) =>
+      psElabIndexEquation equalityContext fresh original
+    let majorEquation ← psElabIndexEquation equalityContext (.fvar pushed.id) major
+    pure (indexEquations ++ [majorEquation])
   let body := (equations.zipIdx).foldr (fun entry body =>
     psLogicPi (pushed.id + 1 + entry.snd) "_indexEq" entry.fst.fst body) body
   let motive := psCloseElabLambdaBinders context.metaContext opened.bindersRev
@@ -309,7 +303,8 @@ def psElabMatchMinorWithHypotheses (context : PsElabContext)
       hypotheses := visibleHypotheses
       clearedIds }
     psElabCloseDependents context generalized body target
-  let flexible := fields.bindersRev.map (fun binder => binder.id) ++ plan.constraintVariables
+  let flexible := fields.bindersRev.map (fun binder => binder.id) ++
+    plan.constraintVariables ++ (if plan.constraints.isEmpty then [] else plan.majorId.toList)
   let body ← psElabSolveIndexConstraints 256 plan.constraints.length flexible (hypotheses.bindersRev.map (fun binder => binder.id))
     finish hypotheses.context hypotheses.body
   let closed ← psElabAbstract context body.context

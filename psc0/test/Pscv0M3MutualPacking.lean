@@ -130,11 +130,17 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
   let second := { psElabContextEmpty environment [] with localContext := a'.context }
   let owners : List PsElabRecursionParameterOwner := [
     { name := psRootName "first", context := first, parameterIds := [a.id, b.id]
-      calls := [{ callee := psRootName "second", localContext := b.context
-        arguments := [.fvar b.id, .fvar a.id], span }] },
+      calls := [{
+        callee := psRootName "second"
+        localContext := b.context
+        arguments := [.fvar b.id, .fvar a.id]
+        span := span }] },
     { name := psRootName "second", context := second, parameterIds := [b'.id, a'.id]
-      calls := [{ callee := psRootName "first", localContext := a'.context
-        arguments := [.fvar a'.id, .fvar b'.id], span }] }]
+      calls := [{
+        callee := psRootName "first"
+        localContext := a'.context
+        arguments := [.fvar a'.id, .fvar b'.id]
+        span := span }] }]
   let plan ← (psElabRecursionComponentFixedParameterPlan owners).mapError psCompilerPscv0ElabError
   if plan != { count := 2, permutations := [[some 0, some 1], [some 1, some 0]] } then
     throw "typed member analysis confused cross-owner local identities"

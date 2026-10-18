@@ -7,6 +7,28 @@ structure PsElabEquation where
   right : PsExpr
   proof : PsExpr
 
+-- Pinned Lean4.35.0 Cases.generalizeIndices' uses telescopic Eq/HEq
+-- constraints. Dependent index types need HEq until earlier index equations
+-- have transported them into the same type; the major needs the same bridge.
+def psElabIndexEquation (context : PsElabContext) (left right : PsExpr) :
+    Except PsElabError (PsExpr × PsExpr) := do
+  let leftType ← (psInferType context.environment context.metaContext
+    context.localContext left).mapError PsElabError.infer
+  let rightType ← (psInferType context.environment context.metaContext
+    context.localContext right).mapError PsElabError.infer
+  let level ← psElabExpressionSort context rightType
+  if psDefEqReadOnlyWithEnv context.environment context.metaContext
+      context.localContext leftType rightType then
+    return (psLogicEq level rightType left right, psLogicRefl level rightType right)
+  let leftLevel ← psElabExpressionSort context leftType
+  if !psLevelEquivalent leftLevel level then
+    throw (.refinement "index equality relates incompatible universes")
+  let heq := psExprApplyMany (.constE (psRootName "HEq") [level])
+    [leftType, left, rightType, right]
+  let refl := psExprApplyMany (.constE (psNameAppendStr (psRootName "HEq") "refl") [level])
+    [rightType, right]
+  return (heq, refl)
+
 def psElabEquationView (context : PsElabContext) (type proof : PsExpr) :
     Except PsElabError PsElabEquation := do
   let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext type)
@@ -14,7 +36,20 @@ def psElabEquationView (context : PsElabContext) (type proof : PsExpr) :
   | .constE name [level], [type, left, right] =>
     if psNameEq name psEqName then return { level, type, left, right, proof }
     throw (.refinement "expected a homogeneous index equation")
-  | _, _ => throw (.refinement "expected a homogeneous index equation")
+  | .constE name [level], [leftType, left, rightType, right] =>
+    if !psNameEq name (psRootName "HEq") then
+      throw (.refinement "expected an index equality")
+    -- Like pinned UnifyEq.heqToEq', conversion is allowed only after the
+    -- preceding constraints have made both actual types definitionally equal.
+    if !psDefEqReadOnlyWithEnv context.environment context.metaContext
+        context.localContext leftType rightType then
+      throw (.refinement "preceding index constraints did not align heterogeneous types")
+    let converted := psExprApplyMany (.constE (psRootName "eq_of_heq") [level])
+      [leftType, left, right, proof]
+    let checked ← psElabResolvedTerm context converted
+      (some (psLogicEq level leftType left right))
+    return { level, type := leftType, left, right, proof := checked.term }
+  | _, _ => throw (.refinement "expected an index equality")
 
 def psElabEquationRec (context : PsElabContext) (equation : PsElabEquation)
     (result : PsExpr -> PsExpr) (base : PsExpr) : Except PsElabError PsExpr := do
@@ -148,6 +183,14 @@ def psElabSubstituteEquation
     aliasesRev := aliases.valuesRev, replacements := substitutions }
   let body ← finish opened.context opened.body
   let base ← psElabCloseDependents context opened body specialized
+  -- Native substCore's tryToSkip avoids Eq.rec when the completed dependent
+  -- target did not change. Alias refinement still happened in the body;
+  -- the checked base already has the original telescope in this case.
+  if psExprAlphaEq telescope specialized then
+    return {
+      context := base.context
+      type := target
+      term := psExprApplyMany base.term (psElabDependentArguments dependents) }
   let transported ← psElabEquationRec base.context equation
     (fun value => psElabSubstituteLocals [(id, value)] telescope) base.term
   return {
@@ -185,8 +228,9 @@ def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
     let reduce := psWhnf context.environment context.metaContext context.localContext
     let left := reduce equation.left
     let right := reduce equation.right
-    if psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext left right then
-      return ← finish context target
+    -- Preserve proof-dependent substitutions before conversion can identify
+    -- distinct proofs by proof irrelevance (pinned UnifyEq.unifyEq?).
+    if psExprAlphaEq left right then return ← finish context target
     -- Prefer eliminating an auxiliary index, then a constructor field. A cyclic
     -- equation is left unsolved; an occurs check is not a contradiction proof.
     match right with
@@ -198,6 +242,8 @@ def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
         let symmetric ← psElabEquationSymm context { equation with left, right }
         return ← psElabSubstituteEquation finish context symmetric id ignored target
     | _ => pure ()
+    if psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext left right then
+      return ← finish context target
     match psElabIndexConstructor context left, psElabIndexConstructor context right with
     | some (leftCtor, leftFields), some (rightCtor, rightFields) =>
       if !psNameEq leftCtor.inductiveName rightCtor.inductiveName then

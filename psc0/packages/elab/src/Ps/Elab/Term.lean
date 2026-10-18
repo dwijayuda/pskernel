@@ -271,7 +271,7 @@ def psElabTermWithFuel
                     | .ok head => psElabCall smaller head args expected
             | .reference name =>
                 if psElabWellFoundedReferenceEscapes context name then
-                  Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must be a full positional call")
+                  Except.error (.data "PSCV0-WF-ESCAPE: a recursive reference must complete its source header")
                 else if psElabStructuralReferenceEscapes context name then
                   Except.error PsElabError.structuralRecursionEscapingReference
                 else

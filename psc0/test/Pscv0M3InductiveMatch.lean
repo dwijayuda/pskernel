@@ -56,6 +56,30 @@ theorem major (A : Type u) (a : A) (n : Nat) (x : M3MatchRight A a n) : x = x :=
 theorem fixedMajor (x : M3MatchRight Nat 0 0) : x = x := by
   cases x <;> rfl
 
+
+theorem fixedContextProof (x : M3MatchRight Nat 0 0) (h : x = x) : x = x := by
+  cases x
+  exact h
+
+theorem compoundMajor (n : Nat) (x : M3MatchRight Nat 0 (Nat.succ n)) : x = x := by
+  cases x <;> rfl
+
+inductive RepeatedMajor : Nat → Nat → Type where
+  | diagonal (n : Nat) : RepeatedMajor n n
+
+theorem repeatedMajor (n : Nat) (x : RepeatedMajor n n) : x = x := by
+  cases x <;> rfl
+
+def fixedContext (x : M3MatchRight Nat 0 0) (k : x = x → Nat) : Nat := by
+  cases x
+  exact k rfl
+
+def fixedContextOutput (flag : Bool) : UInt64 :=
+  let x : M3MatchRight Nat 0 0 := .zero (.leaf 0)
+  UInt64.ofNat (fixedContext x (fun _ => if flag then 17 else 13))
+
+example : fixedContextOutput false = 13 := rfl
+example : fixedContextOutput true = 17 := rfl
 theorem prop (h : M3MatchPropLeft) : h = h := by
   cases h <;> rfl
 
@@ -126,6 +150,11 @@ private def propSource : String :=
 private def logicalSource : String :=
   "universe u v\n" ++
   "function m3MatchChoose(A: Type u, a: A, R: Sort v, fallback: R, x: M3MatchLeft(A, a)): R := match x with { | .leaf value => fallback | .link n next => fallback }\n" ++
+  "theorem m3MatchFixedMajor(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n" ++
+  "theorem m3MatchFixedContext(x: M3MatchRight(Nat, 0, 0), h: x = x): x = x := match x with { | .zero previous => h }\n" ++
+  "theorem m3MatchCompoundMajor(n: Nat, x: M3MatchRight(Nat, 0, Nat.succ(n))): x = x := match x with { | .step k previous => by { rfl } }\n" ++
+  "inductive M3RepeatedMajor: Nat -> Nat -> Type where { | diagonal(n: Nat): M3RepeatedMajor(n, n) }\n" ++
+  "theorem m3MatchRepeatedMajor(n: Nat, x: M3RepeatedMajor(n, n)): x = x := match x with { | .diagonal k => by { rfl } }\n" ++
   "theorem m3MatchMajor(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n)): x = x := match x with { | .zero previous => by { rfl } | .step k previous => by { rfl } }\n" ++
   "theorem m3MatchDependent(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n), h: n = n): n = n := match x with { | .zero previous => h | .step k previous => h }\n" ++
   "theorem m3MatchCases(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n), h: n = n): n = n := by {\n" ++
@@ -135,6 +164,8 @@ private def logicalSource : String :=
 
 private def runtimeSource : String :=
   "universe u\n" ++
+  "function m3MatchFixedContext(x: M3MatchRight(Nat, 0, 0), k: (p: x = x) -> Nat): Nat := match x with { | .zero previous => k(by { rfl }) }\n" ++
+  "function m3matchfixedcontext(flag: Bool): UInt64 := {\n  let x: M3MatchRight(Nat, 0, 0) := M3MatchRight.zero(M3MatchLeft.leaf(0))\n  UInt64.ofNat(m3MatchFixedContext(x, fun (p: x = x) => if (flag) { 17 } else { 13 }))\n}\n" ++
   "function m3MatchLeftTag(A: Type u, a: A, x: M3MatchLeft(A, a)): Nat := match x with { | .leaf value => 3 | .link n next => Nat.add(n, 7) }\n" ++
   "function m3MatchRightTag(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n)): Nat := match x with { | .zero previous => Nat.add(11, m3MatchLeftTag(A, a, previous)) | .step k previous => Nat.add(Nat.add(k, 19), m3MatchLeftTag(A, a, previous)) }\n" ++
   "function m3MatchCopy(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n), other: M3MatchRight(A, a, n)): M3MatchRight(A, a, n) := match x with { | .zero previous => other | .step k previous => other }\n" ++
@@ -238,9 +269,9 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
     ("function bad(x: M3MatchLeft(Nat, 0)): Nat := match x with { | .leaf value => 0 | .link n next => " ++
       "match next with { | .zero previous => bad(previous) | .step k previous => bad(previous) } }\n")
     "structural"
-  expectRefused environment "fixed-index major transport"
+  expectRefused (remove environment (psRootName "HEq")) "missing heterogeneous equality"
     "theorem bad(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n"
-    "refinement:fixed-index matching with major-dependent result/context requires heterogeneous transport"
+    "missing:HEq"
   let rightRec := psNameAppendStr (psRootName "M3MatchRight") "rec"
   expectRefused (remove environment rightRec) "missing group member recursor" simpleMatch "group"
   let some recursor := psEnvironmentFindRecursor environment rightRec
@@ -261,13 +292,14 @@ private def checkRefusals (environment : PsEnvironment) : IO Unit := do
   let wrongUnit := psEnvironmentInsert environment
     (.constructorDecl { constructor with type := .constE psNatName [] })
   expectRefused wrongUnit "wrong PUnit inhabitant type" simpleMatch "group"
-  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination and explicit induction/recursion/transport limits"
+  IO.println "PSCV0_M3_INDUCTIVE_MATCH_REFUSALS: PASS source coverage, group ownership, actual PUnit typing, Prop elimination and explicit induction/recursion limits and actual HEq foundation"
 
 private def outputCases : List (String × (Bool → UInt64)) :=
   [("m3matchleft", M3InductiveMatchOracle.leftOutput),
    ("m3matchright", M3InductiveMatchOracle.rightOutput),
    ("m3matchnested", M3InductiveMatchOracle.nestedOutput),
-   ("m3matchzero", M3InductiveMatchOracle.zeroOutput)]
+   ("m3matchzero", M3InductiveMatchOracle.zeroOutput),
+   ("m3matchfixedcontext", M3InductiveMatchOracle.fixedContextOutput)]
 
 private def witness (name : String) (flag : Bool) (expected : UInt64) : PsDeclaration :=
   let uint64 := PsExpr.constE (psRootName "UInt64") []
@@ -367,4 +399,4 @@ def main (args : List String) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       outputCases.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag)))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INDUCTIVE_MATCH: PASS native and fresh-kernel source cases, dependent shared parameters, indexed motive/context refinement, polymorphic PUnit, Prop proofs, preserved outer recursion and five-target emission; runtime parity follows"
+  IO.println "PSCV0_M3_INDUCTIVE_MATCH: PASS native and fresh-kernel source cases, dependent shared parameters, indexed motive/context and heterogeneous major transport, polymorphic PUnit, Prop proofs, preserved outer recursion and five-target emission; runtime parity follows"

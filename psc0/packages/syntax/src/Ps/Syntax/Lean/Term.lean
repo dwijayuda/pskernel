@@ -9,7 +9,8 @@ def psLeanTermArgumentStart (annotation : Bool) (head : PsSyntaxTerm)
   | none => false
   | some token =>
     let span := psSyntaxTermSpan head
-    !psLeanReservedApplicationToken token && !psPscv0ReservedArgument token.text &&
+    (token.text == "do" ||
+      (!psLeanReservedApplicationToken token && !psPscv0ReservedArgument token.text)) &&
       (psPscv0InfixToken cursor).isNone &&
       (annotation || !psTokenCursorStartsNamedAssignment cursor) &&
       token.span.start.byteOffset > span.stop.byteOffset &&
@@ -47,6 +48,11 @@ def psLeanTermApplicationTail (read : PsPscv0TermReader) (annotation : Bool)
       let value ← read assign.cursor
       let close ← psTokenCursorExpectText value.cursor ")"
       pure (some name.value, value.value, close.cursor, close.token.span.stop)
+    else if psTokenCursorAtText cursor "do" then do
+      -- Pinned Parser.Do gives do argument precedence; retain native
+      -- whitespace/indentation and let the block own its complete body.
+      let value ← read cursor
+      pure (none, value.value, value.cursor, (psSyntaxTermSpan value.value).stop)
     else do
       let primary ← psPscv0Primary read cursor
       let value ← psPscv0PostfixFor false read fuel primary.value primary.cursor

@@ -195,3 +195,18 @@ This candidate also corrects the where reference proof to use full simplificatio
 before reflexivity: simp only did not reduce the input Boolean before the WF
 helper's equations applied. Expected outputs and compiler invariants are unchanged.
 Qualification remains pending; this is no claim of complete input parity or M3.
+
+Native control qualification fbcade224 / run39091396954 / job117568742248
+failed only the native reference fixture build: Lean4.35.0's implicit-reducible
+Id type is not unfolded by HAdd instance search. Init/Control/Id.lean confirms
+the boundary. The fixture now explicitly checks the same Id value at Nat before
+addition, preserving both observations and identity-do coverage. Production and
+all independent preparation checks passed. The candidate also admits native do
+at argument precedence, following Parser.Term.argument and Parser.Do.do; the
+paired Core check covers that grammar without adding a separate executable.
+Native where/control source and backend qualification remains pending.
+Focused M3 integration39090324683 atb95c6293 succeeded, as did F1/F2/F3;
+main Native39090324651 is still running and must not be superseded. M3 artifact
+12122607390 SHA256d2c8ab4fa67959f0392979af88f2042a2fdfc06b2f3791e7bb3d3054717cc251.
+The complete focused log endpoint returned Transport closed; no aggregate
+observation count is claimed. Job steps include actual JS/TS, Rust and GC lanes.

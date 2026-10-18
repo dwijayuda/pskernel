@@ -53,7 +53,11 @@ def psElabWherePrepareWellFounded (prepared : PsElabWherePrepared)
   let ids := (parametersRev ++ capturesRev).map (·.id)
   let nextId := max prepared.context.localContext.nextId prepared.block.context.localContext.nextId
   let context := { psElabContextEmpty environment levelNames with
-    localContext := { nextId, declarations := (parametersRev ++ capturesRev).map psElabWhereBinderDeclaration }
+    localContext := {
+      nextId
+      declarations := (parametersRev ++ capturesRev).map psElabWhereBinderDeclaration
+      nameAliases := input.header.context.localContext.nameAliases.filter fun alias =>
+        ids.contains alias.id }
     -- Keep the original globally fresh meta/level counters. Generalized
     -- header levels must not collide with fresh measure/proof universes.
     metaContext := prepared.context.metaContext

@@ -77,7 +77,8 @@ def psElabMatchAlias (state : PsElabMatchAliases) (entry : Nat × PsExpr) :
     state.context.localContext entry.snd).mapError PsElabError.infer
   let pushed := psLocalPushLet state.context.localContext name type entry.snd
   return {
-    context := psElabContextWithLocal state.context pushed.context
+    context := psElabContextWithLocal state.context
+      (psLocalRedirectNameAliases pushed.context entry.fst pushed.id)
     valuesRev := (pushed.id, entry.snd) :: state.valuesRev
     sourcesRev := (entry.fst, pushed.id) :: state.sourcesRev }
 
@@ -158,7 +159,7 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
       let pushed := psLocalPushLet state.context.localContext name type value
       psElabOpenDependents rest { state with
         context := { state.context with
-          localContext := pushed.context
+          localContext := psLocalRedirectNameAliases pushed.context original.id pushed.id
           auxiliaryLocalIds := if state.context.auxiliaryLocalIds.contains original.id then
             pushed.id :: state.context.auxiliaryLocalIds else state.context.auxiliaryLocalIds }
         body := psExprInstantiate1 body (.fvar pushed.id)
@@ -170,7 +171,7 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
       let pushed := psLocalPushBinding state.context.localContext name pi.domain original.binder
       psElabOpenDependents rest { state with
         context := { state.context with
-          localContext := pushed.context
+          localContext := psLocalRedirectNameAliases pushed.context original.id pushed.id
           auxiliaryLocalIds := if state.context.auxiliaryLocalIds.contains original.id then
             pushed.id :: state.context.auxiliaryLocalIds else state.context.auxiliaryLocalIds }
         body := psExprInstantiate1 pi.body (.fvar pushed.id)

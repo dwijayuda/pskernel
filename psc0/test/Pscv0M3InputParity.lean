@@ -327,7 +327,32 @@ def matchAux (n : Nat) : Nat :=
   | Nat.succ k => Nat.succ (matchAux k)
 termination_by n
 decreasing_by
-  exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)
+  have original : Nat.lt k n :=
+    Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)
+  exact Nat.lt_succ_self k
+
+def matchAuxFalse (n : Nat) : Nat :=
+  match (generalizing := false) h : n with
+  | 0 => 0
+  | Nat.succ k => Nat.succ (matchAuxFalse k)
+termination_by n
+decreasing_by
+  have original : Nat.lt k n :=
+    Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)
+  exact Nat.lt_succ_self k
+
+def matchAuxPrev (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | Nat.succ k => k
+
+def matchAuxCatchAll (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | x => Nat.succ (matchAuxCatchAll (matchAuxPrev x))
+termination_by n
+decreasing_by
+  exact Nat.lt_succ_self _
 
 example (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : True := by
   fail_if_success
@@ -377,6 +402,202 @@ example (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : True := by
       | false, true => h2 (Eq.refl false)
       | _, _ => 0
   exact True.intro
+
+def matchSwap (a b : Nat) : Nat :=
+  match a, b with
+  | b, a => 10 * a + b
+
+theorem matchSwapObserved : matchSwap 2 7 = 72 := Eq.refl 72
+
+def matchNamedOriginalB (b : Bool) : Nat :=
+  match hb : b with
+  | true => (fun (_ : b = true) => 37) hb
+  | false => (fun (_ : b = false) => 41) hb
+
+theorem matchNamedOriginalBTrue : matchNamedOriginalB true = 37 := Eq.refl 37
+theorem matchNamedOriginalBFalse : matchNamedOriginalB false = 41 := Eq.refl 41
+
+def matchEqRight {left right : Nat} (_ : left = right) : Nat := right
+
+def matchEquationShadow (n : Nat) : Nat :=
+  match h : n with
+  | 0 => matchEqRight h
+  | Nat.succ h => matchEqRight h
+
+theorem matchEquationShadowZero : matchEquationShadow 0 = 0 := Eq.refl 0
+theorem matchEquationShadowSucc : matchEquationShadow 4 = 4 := Eq.refl 4
+
+def matchNestedBindings (a : Bool) (handle : a = a → Nat) : Nat :=
+  match a with
+  | x =>
+    match x with
+    | true => handle (Eq.refl true)
+    | false => handle (Eq.refl false)
+
+theorem matchNestedBindingsTrue :
+    matchNestedBindings true (fun (_ : true = true) => 31) = 31 := Eq.refl 31
+theorem matchNestedBindingsFalse :
+    matchNestedBindings false (fun (_ : false = false) => 43) = 43 := Eq.refl 43
+
+inductive MatchIndexed : Bool → Type where
+  | yes (value : Nat) : MatchIndexed true
+  | no (value : Nat) : MatchIndexed false
+
+def matchIndexMake (a : Bool) : MatchIndexed a :=
+  match a with
+  | true => MatchIndexed.yes 53
+  | false => MatchIndexed.no 59
+
+def matchIndexBoolEqMark (a b : Bool) (_ : a = b) : Nat := 0
+
+def matchIndexEqMark (a : Bool) (original current : MatchIndexed a)
+    (_ : original = current) : Nat := 0
+
+def matchIndexHEqMark (a : Bool) (original : MatchIndexed a)
+    (b : Bool) (current : MatchIndexed b) (_ : HEq original current) : Nat := 0
+
+def matchComputedLaterFalse (a : Bool) : Nat :=
+  match (generalizing := false) ha : a, hv : matchIndexMake a with
+  | true, MatchIndexed.yes n =>
+    n + matchIndexBoolEqMark a true ha +
+      matchIndexHEqMark a (matchIndexMake a) true (MatchIndexed.yes n) hv
+  | false, MatchIndexed.no n =>
+    n + matchIndexBoolEqMark a false ha +
+      matchIndexHEqMark a (matchIndexMake a) false (MatchIndexed.no n) hv
+
+theorem matchComputedLaterFalseTrue : matchComputedLaterFalse true = 53 := Eq.refl 53
+theorem matchComputedLaterFalseFalse : matchComputedLaterFalse false = 59 := Eq.refl 59
+
+def matchIndexedNamed (a : Bool) (value : MatchIndexed a) : Nat :=
+  match (generalizing := false) h : value with
+  | MatchIndexed.yes n =>
+    n + matchIndexHEqMark a value true (MatchIndexed.yes n) h
+  | MatchIndexed.no n =>
+    n + matchIndexHEqMark a value false (MatchIndexed.no n) h
+
+theorem matchIndexedNamedTrue :
+    matchIndexedNamed true (MatchIndexed.yes 61) = 61 := Eq.refl 61
+theorem matchIndexedNamedFalse :
+    matchIndexedNamed false (MatchIndexed.no 67) = 67 := Eq.refl 67
+
+def matchIndexedNamedEq (value : MatchIndexed true) : Nat :=
+  match h : value with
+  | MatchIndexed.yes n => n + matchIndexEqMark true value (MatchIndexed.yes n) h
+
+theorem matchIndexedNamedEqObserved :
+    matchIndexedNamedEq (MatchIndexed.yes 71) = 71 := Eq.refl 71
+
+def matchNestedIndexed (a : Bool) (value : MatchIndexed a)
+    (handle : value = value → Nat) : Nat :=
+  match a with
+  | true =>
+    match value with
+    | MatchIndexed.yes n => handle (Eq.refl (MatchIndexed.yes n))
+  | false =>
+    match value with
+    | MatchIndexed.no n => handle (Eq.refl (MatchIndexed.no n))
+
+theorem matchNestedIndexedTrue :
+    matchNestedIndexed true (MatchIndexed.yes 2)
+      (fun (_ : MatchIndexed.yes 2 = MatchIndexed.yes 2) => 73) = 73 := Eq.refl 73
+theorem matchNestedIndexedFalse :
+    matchNestedIndexed false (MatchIndexed.no 3)
+      (fun (_ : MatchIndexed.no 3 = MatchIndexed.no 3) => 79) = 79 := Eq.refl 79
+
+example (b : Bool) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match b with
+      | true => (fun (_ : b = true) => 37) (Eq.refl true)
+      | false => 41
+  exact True.intro
+
+example (n : Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match h : n with
+      | 0 => 0
+      | Nat.succ h => Nat.succ h
+  exact True.intro
+
+example (a : Bool) (handle : a = a → Nat) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match a with
+      | x =>
+        match (generalizing := false) x with
+        | true => handle (Eq.refl true)
+        | false => handle (Eq.refl false)
+  exact True.intro
+
+example (b : Bool) : True := by
+  fail_if_success
+    have rejected : Nat :=
+      match b with
+      | true => 0
+      | x =>
+        let h : x = false := Eq.refl false
+        1
+  exact True.intro
+
+def namedCount (n : Nat) : Nat :=
+  match h : n with
+  | 0 => let witness : n = 0 := h; 0
+  | Nat.succ k => let witness : n = Nat.succ k := h; Nat.succ (namedCount k)
+def namedResult (n : Nat) : Nat → Nat :=
+  fun (bias : Nat) => match (generalizing := false) h : n with
+    | 0 => bias
+    | Nat.succ k => namedResult k (Nat.succ bias)
+def namedRows (A : Type) (rows : List (List A)) : Nat :=
+  match h : rows with
+  | .nil => 0
+  | .cons row rest => Nat.succ (namedRows A rest)
+def namedComputed (F : Nat → Type) (i : Nat) (values : List (F i)) : Nat :=
+  match (generalizing := true) h : values with
+  | .nil => 0
+  | .cons value rest => Nat.succ (namedComputed F i rest)
+inductive NamedNest (A : Type) where
+  | leaf (value : A)
+  | direct (child : NamedNest A)
+  | many (children : List (NamedNest A))
+  | deep (children : List (List (NamedNest A)))
+mutual
+def namedTree (A : Type) (tree : NamedNest A) : Nat :=
+  match h : tree with
+  | .leaf value => 1
+  | .direct child => Nat.succ (namedTree A child)
+  | .many children => Nat.succ (namedForest A children)
+  | .deep children => Nat.succ (namedDeep A children)
+def namedForest (A : Type) (children : List (NamedNest A)) : Nat :=
+  match h : children with
+  | .nil => 0
+  | .cons child rest => namedTree A child + namedForest A rest
+def namedDeep (A : Type) (children : List (List (NamedNest A))) : Nat :=
+  match h : children with
+  | .nil => 0
+  | .cons row rest => namedForest A row + namedDeep A rest
+end
+def m3structural (flag : Bool) : UInt64 :=
+  let amount := if flag then 3 else 5
+  let rows := List.cons (List.cons amount List.nil) (List.cons List.nil List.nil)
+  let leaf := NamedNest.leaf amount
+  let trees := List.cons leaf (List.cons (NamedNest.direct leaf) List.nil)
+  let tree := if flag then
+    NamedNest.deep (List.cons trees (List.cons (List.cons (NamedNest.direct leaf) List.nil) List.nil))
+    else NamedNest.many (List.cons (NamedNest.deep (List.cons trees List.nil)) (List.cons (NamedNest.direct leaf) List.nil))
+  UInt64.ofNat (namedCount amount + 10 * namedResult amount 4 +
+    100 * namedRows Nat rows +
+    1000 * namedComputed (fun (_ : Nat) => Nat) amount (List.cons amount List.nil) +
+    10000 * namedTree Nat tree)
+theorem namedResultObserved : namedResult 3 5 = 8 := by rfl
+theorem namedResultSource (n : Nat) :
+    namedResult n = (fun (bias : Nat) => match (generalizing := false) h : n with
+      | 0 => bias
+      | Nat.succ k => namedResult k (Nat.succ bias)) :=
+  by exact namedResult.eq_def n
+
+example : m3structural true = 61273 := rfl
+example : m3structural false = 71295 := rfl
 
 end M3InputParityOracle
 
@@ -444,10 +665,24 @@ private def matchPsSource : String :=
   "function matchDefault(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match a with {\n  | true => h1(Eq.refl(true))\n  | false => h2(Eq.refl(false))\n  }\n\nfunction matchTrue(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := true) a with {\n  | true => h1(Eq.refl(true))\n  | false => h2(Eq.refl(false))\n  }\n\nfunction matchFalse(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := false) h: a with {\n  | true => h1(h)\n  | false => h2(h)\n  }\n\nfunction matchLets(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  let first: a = true -> Nat := h1\n  let second: a = false -> Nat := h2\n  match h: a with {\n  | true => first(h)\n  | false => second(h)\n  }\n\nfunction matchComputed(a: Bool, h1: Bool.not(a) = true -> Nat, h2: Bool.not(a) = false -> Nat): Nat :=\n  match h: Bool.not(a) with {\n  | true => h1(h)\n  | false => h2(h)\n  }\n\nfunction matchMixed(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match a, Bool.not(a) with {\n  | true, false => h1(Eq.refl(true))\n  | false, true => h2(Eq.refl(false))\n  | _, _ => 0\n  }\n\nfunction matchOriginalValue(a: Bool, b: Bool, h: a = b): Nat := if (b) { 13 } else { 17 }\n\nfunction matchOriginal(a: Bool): Nat :=\n  match h: a with {\n  | true => matchOriginalValue(a, true, h)\n  | false => matchOriginalValue(a, false, h)\n  }\n\ntheorem matchDependentTarget(a: Bool, h: a = a): h = h :=\n  match a with {\n  | true => Eq.refl(h)\n  | false => Eq.refl(h)\n  }\n\nfunction m3matches(flag: Bool): UInt64 :=\n  let first: flag = true -> Nat := fun (_: flag = true) => 3\n  let second: flag = false -> Nat := fun (_: flag = false) => 5\n  let computedFirst: Bool.not(flag) = true -> Nat := fun (_: Bool.not(flag) = true) => 7\n  let computedSecond: Bool.not(flag) = false -> Nat := fun (_: Bool.not(flag) = false) => 11\n  UInt64.ofNat(matchDefault(flag, first, second) +\n    10 * matchTrue(flag, first, second) +\n    100 * matchFalse(flag, first, second) +\n    1000 * matchLets(flag, first, second) +\n    10000 * matchComputed(flag, computedFirst, computedSecond) +\n    100000 * matchMixed(flag, first, second) +\n    1000000 * matchOriginal(flag))\n"
 
 private def matchPolicyLeanSource : String :=
-  "class MatchPolicyWitness (a : Bool) where\n  mark : Nat\n\ndef matchInstanceOriginal (a : Bool) (w : MatchPolicyWitness a)\n    (b : Bool) (h : a = b) : True := True.intro\n\ntheorem matchInstance (a : Bool) [w : MatchPolicyWitness a] : True :=\n  match h : a with\n  | true => matchInstanceOriginal a w true h\n  | false => matchInstanceOriginal a w false h\n\ndef matchAux (n : Nat) : Nat :=\n  match h : n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (matchAux k)\ntermination_by n\ndecreasing_by\n  exact Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)\n"
+  "class MatchPolicyWitness (a : Bool) where\n  mark : Nat\n\ndef matchInstanceOriginal (a : Bool) (w : MatchPolicyWitness a)\n    (b : Bool) (h : a = b) : True := True.intro\n\ntheorem matchInstance (a : Bool) [w : MatchPolicyWitness a] : True :=\n  match h : a with\n  | true => matchInstanceOriginal a w true h\n  | false => matchInstanceOriginal a w false h\n\ndef matchAux (n : Nat) : Nat :=\n  match h : n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (matchAux k)\ntermination_by n\ndecreasing_by\n  have original : Nat.lt k n :=\n    Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)\n  exact Nat.lt_succ_self k\n\ndef matchAuxFalse (n : Nat) : Nat :=\n  match (generalizing := false) h : n with\n  | 0 => 0\n  | Nat.succ k => Nat.succ (matchAuxFalse k)\ntermination_by n\ndecreasing_by\n  have original : Nat.lt k n :=\n    Eq.mpr (congrArg (fun (t : Nat) => Nat.lt k t) h) (Nat.lt_succ_self k)\n  exact Nat.lt_succ_self k\n\ndef matchAuxPrev (n : Nat) : Nat :=\n  match n with\n  | 0 => 0\n  | Nat.succ k => k\n\ndef matchAuxCatchAll (n : Nat) : Nat :=\n  match n with\n  | 0 => 0\n  | x => Nat.succ (matchAuxCatchAll (matchAuxPrev x))\ntermination_by n\ndecreasing_by\n  exact Nat.lt_succ_self _\n"
 
 private def matchPolicyPsSource : String :=
-  "class MatchPolicyWitness(a: Bool) where {\n  mark: Nat\n}\n\nfunction matchInstanceOriginal(a: Bool, w: MatchPolicyWitness a, b: Bool, h: a = b): True := True.intro\n\ntheorem matchInstance(a: Bool)[w: MatchPolicyWitness a]: True :=\n  match h: a with {\n  | true => matchInstanceOriginal(a, w, true, h)\n  | false => matchInstanceOriginal(a, w, false, h)\n  }\n\nfunction matchAux(n: Nat): Nat :=\n  match h: n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(matchAux(k))\n  }\ntermination_by n\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(k, t), h), Nat.lt_succ_self(k))\n}\n"
+  "class MatchPolicyWitness(a: Bool) where {\n  mark: Nat\n}\n\nfunction matchInstanceOriginal(a: Bool, w: MatchPolicyWitness a, b: Bool, h: a = b): True := True.intro\n\ntheorem matchInstance(a: Bool)[w: MatchPolicyWitness a]: True :=\n  match h: a with {\n  | true => matchInstanceOriginal(a, w, true, h)\n  | false => matchInstanceOriginal(a, w, false, h)\n  }\n\nfunction matchAux(n: Nat): Nat :=\n  match h: n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(matchAux(k))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(k, t), h), Nat.lt_succ_self(k))\n  exact Nat.lt_succ_self(k)\n}\n\nfunction matchAuxFalse(n: Nat): Nat :=\n  match (generalizing := false) h: n with {\n  | 0 => 0\n  | Nat.succ k => Nat.succ(matchAuxFalse(k))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(k, t), h), Nat.lt_succ_self(k))\n  exact Nat.lt_succ_self(k)\n}\n\nfunction matchAuxPrev(n: Nat): Nat := match n with {\n  | 0 => 0\n  | Nat.succ k => k\n}\n\nfunction matchAuxCatchAll(n: Nat): Nat := match n with {\n  | 0 => 0\n  | x => Nat.succ(matchAuxCatchAll(matchAuxPrev(x)))\n}\ntermination_by n\ndecreasing_by by {\n  exact Nat.lt_succ_self(_)\n}\n"
+
+private def matchLexicalLeanSource : String :=  "def matchSwap (a b : Nat) : Nat :=\n  match a, b with\n  | b, a => 10 * a + b\n\ntheorem matchSwapObserved : matchSwap 2 7 = 72 := Eq.refl 72\n\ndef matchNamedOriginalB (b : Bool) : Nat :=\n  match hb : b with\n  | true => (fun (_ : b = true) => 37) hb\n  | false => (fun (_ : b = false) => 41) hb\n\ntheorem matchNamedOriginalBTrue : matchNamedOriginalB true = 37 := Eq.refl 37\ntheorem matchNamedOriginalBFalse : matchNamedOriginalB false = 41 := Eq.refl 41\n\ndef matchEqRight {left right : Nat} (_ : left = right) : Nat := right\n\ndef matchEquationShadow (n : Nat) : Nat :=\n  match h : n with\n  | 0 => matchEqRight h\n  | Nat.succ h => matchEqRight h\n\ntheorem matchEquationShadowZero : matchEquationShadow 0 = 0 := Eq.refl 0\ntheorem matchEquationShadowSucc : matchEquationShadow 4 = 4 := Eq.refl 4\n\ndef matchNestedBindings (a : Bool) (handle : a = a → Nat) : Nat :=\n  match a with\n  | x =>\n    match x with\n    | true => handle (Eq.refl true)\n    | false => handle (Eq.refl false)\n\ntheorem matchNestedBindingsTrue :\n    matchNestedBindings true (fun (_ : true = true) => 31) = 31 := Eq.refl 31\ntheorem matchNestedBindingsFalse :\n    matchNestedBindings false (fun (_ : false = false) => 43) = 43 := Eq.refl 43\n"
+
+private def matchLexicalPsSource : String :=  "function matchSwap(a: Nat, b: Nat): Nat :=\n  match a, b with {\n  | b, a => 10 * a + b\n  }\n\ntheorem matchSwapObserved: matchSwap(2, 7) = 72 := Eq.refl(72)\n\nfunction matchNamedOriginalB(b: Bool): Nat :=\n  match hb: b with {\n  | true => (fun (_: b = true) => 37)(hb)\n  | false => (fun (_: b = false) => 41)(hb)\n  }\n\ntheorem matchNamedOriginalBTrue: matchNamedOriginalB(true) = 37 := Eq.refl(37)\ntheorem matchNamedOriginalBFalse: matchNamedOriginalB(false) = 41 := Eq.refl(41)\n\nfunction matchEqRight {left right: Nat}(proof: left = right): Nat := right\n\nfunction matchEquationShadow(n: Nat): Nat :=\n  match h: n with {\n  | 0 => matchEqRight(h)\n  | Nat.succ h => matchEqRight(h)\n  }\n\ntheorem matchEquationShadowZero: matchEquationShadow(0) = 0 := Eq.refl(0)\ntheorem matchEquationShadowSucc: matchEquationShadow(4) = 4 := Eq.refl(4)\n\nfunction matchNestedBindings(a: Bool, handle: a = a -> Nat): Nat :=\n  match a with {\n  | x =>\n    match x with {\n    | true => handle(Eq.refl(true))\n    | false => handle(Eq.refl(false))\n    }\n  }\n\ntheorem matchNestedBindingsTrue:\n  matchNestedBindings(true, fun (_: true = true) => 31) = 31 := Eq.refl(31)\ntheorem matchNestedBindingsFalse:\n  matchNestedBindings(false, fun (_: false = false) => 43) = 43 := Eq.refl(43)\n"
+
+private def matchIndexedLeanSource : String :=  "inductive MatchIndexed : Bool → Type where\n  | yes (value : Nat) : MatchIndexed true\n  | no (value : Nat) : MatchIndexed false\n\ndef matchIndexMake (a : Bool) : MatchIndexed a :=\n  match a with\n  | true => MatchIndexed.yes 53\n  | false => MatchIndexed.no 59\n\ndef matchIndexBoolEqMark (a b : Bool) (_ : a = b) : Nat := 0\n\ndef matchIndexEqMark (a : Bool) (original current : MatchIndexed a)\n    (_ : original = current) : Nat := 0\n\ndef matchIndexHEqMark (a : Bool) (original : MatchIndexed a)\n    (b : Bool) (current : MatchIndexed b) (_ : HEq original current) : Nat := 0\n\ndef matchComputedLaterFalse (a : Bool) : Nat :=\n  match (generalizing := false) ha : a, hv : matchIndexMake a with\n  | true, MatchIndexed.yes n =>\n    n + matchIndexBoolEqMark a true ha +\n      matchIndexHEqMark a (matchIndexMake a) true (MatchIndexed.yes n) hv\n  | false, MatchIndexed.no n =>\n    n + matchIndexBoolEqMark a false ha +\n      matchIndexHEqMark a (matchIndexMake a) false (MatchIndexed.no n) hv\n\ntheorem matchComputedLaterFalseTrue : matchComputedLaterFalse true = 53 := Eq.refl 53\ntheorem matchComputedLaterFalseFalse : matchComputedLaterFalse false = 59 := Eq.refl 59\n\ndef matchIndexedNamed (a : Bool) (value : MatchIndexed a) : Nat :=\n  match (generalizing := false) h : value with\n  | MatchIndexed.yes n =>\n    n + matchIndexHEqMark a value true (MatchIndexed.yes n) h\n  | MatchIndexed.no n =>\n    n + matchIndexHEqMark a value false (MatchIndexed.no n) h\n\ntheorem matchIndexedNamedTrue :\n    matchIndexedNamed true (MatchIndexed.yes 61) = 61 := Eq.refl 61\ntheorem matchIndexedNamedFalse :\n    matchIndexedNamed false (MatchIndexed.no 67) = 67 := Eq.refl 67\n\ndef matchIndexedNamedEq (value : MatchIndexed true) : Nat :=\n  match h : value with\n  | MatchIndexed.yes n => n + matchIndexEqMark true value (MatchIndexed.yes n) h\n\ntheorem matchIndexedNamedEqObserved :\n    matchIndexedNamedEq (MatchIndexed.yes 71) = 71 := Eq.refl 71\n\ndef matchNestedIndexed (a : Bool) (value : MatchIndexed a)\n    (handle : value = value → Nat) : Nat :=\n  match a with\n  | true =>\n    match value with\n    | MatchIndexed.yes n => handle (Eq.refl (MatchIndexed.yes n))\n  | false =>\n    match value with\n    | MatchIndexed.no n => handle (Eq.refl (MatchIndexed.no n))\n\ntheorem matchNestedIndexedTrue :\n    matchNestedIndexed true (MatchIndexed.yes 2)\n      (fun (_ : MatchIndexed.yes 2 = MatchIndexed.yes 2) => 73) = 73 := Eq.refl 73\ntheorem matchNestedIndexedFalse :\n    matchNestedIndexed false (MatchIndexed.no 3)\n      (fun (_ : MatchIndexed.no 3 = MatchIndexed.no 3) => 79) = 79 := Eq.refl 79\n"
+
+private def matchIndexedPsSource : String :=  "inductive MatchIndexed: Bool -> Type where {\n  | yes(value: Nat): MatchIndexed(true)\n  | no(value: Nat): MatchIndexed(false)\n}\n\nfunction matchIndexMake(a: Bool): MatchIndexed(a) :=\n  match a with {\n  | true => MatchIndexed.yes(53)\n  | false => MatchIndexed.no(59)\n  }\n\nfunction matchIndexBoolEqMark(a: Bool, b: Bool, proof: a = b): Nat := 0\n\nfunction matchIndexEqMark(a: Bool, original: MatchIndexed(a), current: MatchIndexed(a), proof: original = current): Nat := 0\n\nfunction matchIndexHEqMark(a: Bool, original: MatchIndexed(a), b: Bool, current: MatchIndexed(b), proof: HEq(original, current)): Nat := 0\n\nfunction matchComputedLaterFalse(a: Bool): Nat :=\n  match (generalizing := false) ha: a, hv: matchIndexMake(a) with {\n  | true, MatchIndexed.yes n =>\n    n + matchIndexBoolEqMark(a, true, ha) +\n      matchIndexHEqMark(a, matchIndexMake(a), true, MatchIndexed.yes(n), hv)\n  | false, MatchIndexed.no n =>\n    n + matchIndexBoolEqMark(a, false, ha) +\n      matchIndexHEqMark(a, matchIndexMake(a), false, MatchIndexed.no(n), hv)\n  }\n\ntheorem matchComputedLaterFalseTrue: matchComputedLaterFalse(true) = 53 := Eq.refl(53)\ntheorem matchComputedLaterFalseFalse: matchComputedLaterFalse(false) = 59 := Eq.refl(59)\n\nfunction matchIndexedNamed(a: Bool, value: MatchIndexed(a)): Nat :=\n  match (generalizing := false) h: value with {\n  | MatchIndexed.yes n =>\n    n + matchIndexHEqMark(a, value, true, MatchIndexed.yes(n), h)\n  | MatchIndexed.no n =>\n    n + matchIndexHEqMark(a, value, false, MatchIndexed.no(n), h)\n  }\n\ntheorem matchIndexedNamedTrue:\n  matchIndexedNamed(true, MatchIndexed.yes(61)) = 61 := Eq.refl(61)\ntheorem matchIndexedNamedFalse:\n  matchIndexedNamed(false, MatchIndexed.no(67)) = 67 := Eq.refl(67)\n\nfunction matchIndexedNamedEq(value: MatchIndexed(true)): Nat :=\n  match h: value with {\n  | MatchIndexed.yes n => n + matchIndexEqMark(true, value, MatchIndexed.yes(n), h)\n  }\n\ntheorem matchIndexedNamedEqObserved:\n  matchIndexedNamedEq(MatchIndexed.yes(71)) = 71 := Eq.refl(71)\n\nfunction matchNestedIndexed(a: Bool, value: MatchIndexed(a), handle: value = value -> Nat): Nat :=\n  match a with {\n  | true =>\n    match value with {\n    | MatchIndexed.yes n => handle(Eq.refl(MatchIndexed.yes(n)))\n    }\n  | false =>\n    match value with {\n    | MatchIndexed.no n => handle(Eq.refl(MatchIndexed.no(n)))\n    }\n  }\n\ntheorem matchNestedIndexedTrue:\n  matchNestedIndexed(true, MatchIndexed.yes(2),\n    fun (_: MatchIndexed.yes(2) = MatchIndexed.yes(2)) => 73) = 73 := Eq.refl(73)\ntheorem matchNestedIndexedFalse:\n  matchNestedIndexed(false, MatchIndexed.no(3),\n    fun (_: MatchIndexed.no(3) = MatchIndexed.no(3)) => 79) = 79 := Eq.refl(79)\n"
+
+private def structuralLeanSource : String :=
+  "def namedCount (n : Nat) : Nat :=\n  match h : n with\n  | 0 => let witness : n = 0 := h; 0\n  | Nat.succ k => let witness : n = Nat.succ k := h; Nat.succ (namedCount k)\ndef namedResult (n : Nat) : Nat → Nat :=\n  fun (bias : Nat) => match (generalizing := false) h : n with\n    | 0 => bias\n    | Nat.succ k => namedResult k (Nat.succ bias)\ndef namedRows (A : Type) (rows : List (List A)) : Nat :=\n  match h : rows with\n  | .nil => 0\n  | .cons row rest => Nat.succ (namedRows A rest)\ndef namedComputed (F : Nat → Type) (i : Nat) (values : List (F i)) : Nat :=\n  match (generalizing := true) h : values with\n  | .nil => 0\n  | .cons value rest => Nat.succ (namedComputed F i rest)\ninductive NamedNest (A : Type) where\n  | leaf (value : A)\n  | direct (child : NamedNest A)\n  | many (children : List (NamedNest A))\n  | deep (children : List (List (NamedNest A)))\nmutual\ndef namedTree (A : Type) (tree : NamedNest A) : Nat :=\n  match h : tree with\n  | .leaf value => 1\n  | .direct child => Nat.succ (namedTree A child)\n  | .many children => Nat.succ (namedForest A children)\n  | .deep children => Nat.succ (namedDeep A children)\ndef namedForest (A : Type) (children : List (NamedNest A)) : Nat :=\n  match h : children with\n  | .nil => 0\n  | .cons child rest => namedTree A child + namedForest A rest\ndef namedDeep (A : Type) (children : List (List (NamedNest A))) : Nat :=\n  match h : children with\n  | .nil => 0\n  | .cons row rest => namedForest A row + namedDeep A rest\nend\ndef m3structural (flag : Bool) : UInt64 :=\n  let amount := if flag then 3 else 5\n  let rows := List.cons (List.cons amount List.nil) (List.cons List.nil List.nil)\n  let leaf := NamedNest.leaf amount\n  let trees := List.cons leaf (List.cons (NamedNest.direct leaf) List.nil)\n  let tree := if flag then\n    NamedNest.deep (List.cons trees (List.cons (List.cons (NamedNest.direct leaf) List.nil) List.nil))\n    else NamedNest.many (List.cons (NamedNest.deep (List.cons trees List.nil)) (List.cons (NamedNest.direct leaf) List.nil))\n  UInt64.ofNat (namedCount amount + 10 * namedResult amount 4 +\n    100 * namedRows Nat rows +\n    1000 * namedComputed (fun (_ : Nat) => Nat) amount (List.cons amount List.nil) +\n    10000 * namedTree Nat tree)\ntheorem namedResultObserved : namedResult 3 5 = 8 := by rfl\ntheorem namedResultSource (n : Nat) :\n    namedResult n = (fun (bias : Nat) => match (generalizing := false) h : n with\n      | 0 => bias\n      | Nat.succ k => namedResult k (Nat.succ bias)) :=\n  by exact namedResult.eq_def n\n"
+
+private def structuralPsSource : String :=
+  "function namedCount(n: Nat): Nat := match h : n with {\n  | 0 => let witness: n = 0 := h\n    0\n  | Nat.succ k => let witness: n = Nat.succ(k) := h\n    Nat.succ(namedCount(k))\n}\nfunction namedResult(n: Nat): Nat -> Nat := fun (bias: Nat) => match (generalizing := false) h : n with {\n  | 0 => bias\n  | Nat.succ k => namedResult(k, Nat.succ(bias))\n}\nfunction namedRows(A: Type, rows: List(List(A))): Nat := match h : rows with {\n  | .nil => 0\n  | .cons row rest => Nat.succ(namedRows(A, rest))\n}\nfunction namedComputed(F: Nat -> Type, i: Nat, values: List(F(i))): Nat := match (generalizing := true) h : values with {\n  | .nil => 0\n  | .cons value rest => Nat.succ(namedComputed(F, i, rest))\n}\ninductive NamedNest(A: Type) where {\n  | leaf(value: A)\n  | direct(child: NamedNest(A))\n  | many(children: List(NamedNest(A)))\n  | deep(children: List(List(NamedNest(A))))\n}\nmutual\nfunction namedTree(A: Type, tree: NamedNest(A)): Nat := match h : tree with {\n  | .leaf value => 1\n  | .direct child => Nat.succ(namedTree(A, child))\n  | .many children => Nat.succ(namedForest(A, children))\n  | .deep children => Nat.succ(namedDeep(A, children))\n}\nfunction namedForest(A: Type, children: List(NamedNest(A))): Nat := match h : children with {\n  | .nil => 0\n  | .cons child rest => namedTree(A, child) + namedForest(A, rest)\n}\nfunction namedDeep(A: Type, children: List(List(NamedNest(A)))): Nat := match h : children with {\n  | .nil => 0\n  | .cons row rest => namedForest(A, row) + namedDeep(A, rest)\n}\nend\nfunction m3structural(flag: Bool): UInt64 :=\n  let amount := if (flag) { 3 } else { 5 }\n  let rows := List.cons(List.cons(amount, List.nil), List.cons(List.nil, List.nil))\n  let leaf := NamedNest.leaf(amount)\n  let trees := List.cons(leaf, List.cons(NamedNest.direct(leaf), List.nil))\n  let tree := if (flag) {\n    NamedNest.deep(List.cons(trees, List.cons(List.cons(NamedNest.direct(leaf), List.nil), List.nil)))\n  } else {\n    NamedNest.many(List.cons(NamedNest.deep(List.cons(trees, List.nil)), List.cons(NamedNest.direct(leaf), List.nil)))\n  }\n  UInt64.ofNat(namedCount(amount) + 10 * namedResult(amount, 4) +\n    100 * namedRows(Nat, rows) +\n    1000 * namedComputed(fun (_: Nat) => Nat, amount, List.cons(amount, List.nil)) +\n    10000 * namedTree(Nat, tree))\ntheorem namedResultObserved: namedResult(3, 5) = 8 := by { rfl }\ntheorem namedResultSource(n: Nat):\n    namedResult(n) = (fun (bias: Nat) => match (generalizing := false) h : n with {\n      | 0 => bias\n      | Nat.succ k => namedResult(k, Nat.succ(bias))\n    }) := by { exact namedResult.eq_def(n) }\n"
 
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
@@ -523,6 +758,45 @@ def check (root : System.FilePath) : IO Unit := do
     (← fromExcept (checkedDeclarations .proofScript matchPsSource))
   compareCheckedValues (← fromExcept (checkedDeclarations .lean matchPolicyLeanSource))
     (← fromExcept (checkedDeclarations .proofScript matchPolicyPsSource))
+  compareCheckedValues
+    (← fromExcept (checkedDeclarations .lean matchLexicalLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript matchLexicalPsSource))
+  compareCheckedValues
+    (← fromExcept (checkedDeclarations .lean matchIndexedLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript matchIndexedPsSource))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean structuralLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript structuralPsSource))
+  let structuralProgram ← fromExcept (psCompilerParsePscv0 structuralLeanSource .lean)
+  let structuralElaborated ← fromExcept ((psCompilerElaboratePscv0 structuralProgram).mapError psCompilerPscv0Error)
+  let structuralIr ← fromExcept ((psCompilerVerifiedIrFromElaborated structuralElaborated).mapError psCompilerPscv0Error)
+  let _ ← fromExcept (psWithCheckedIr psIrCheckDefaultOptions structuralIr fun _ => pure ())
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean, "def plain (n : Nat) : Nat := n\n"),
+      (.proofScript, "function plain(n: Nat): Nat := n\n"),
+      (.lean, "abbrev plain (n : Nat) : Nat := n\n"),
+      (.proofScript, "abbrev plain (n: Nat): Nat := n\n")] do
+    let declarations ← fromExcept (checkedDeclarations kind source)
+    ensure (declarations.length == 1 &&
+      declarations.all (fun declaration => psNameEq (psDeclarationName declaration) (psRootName "plain")))
+      "plain nonrecursive or registered ownership changed its one-declaration contract"
+  for (kind, rule, source) in [
+      (PsCompilerSourceKind.lean, "DECREASE", "def bad (n : Nat) : Nat := match h : n with\n  | 0 => 0\n  | Nat.succ k => bad n\n"),
+      (.proofScript, "DECREASE", "function bad(n: Nat): Nat := match h : n with { | 0 => 0 | Nat.succ k => bad(n) }\n"),
+      (.lean, "DECREASE", "def bad (n : Nat) : Nat → Nat := fun (bias : Nat) => match h : n with\n  | 0 => bias\n  | Nat.succ k => bad (Nat.succ k) bias\n"),
+      (.proofScript, "DECREASE", "function bad(n: Nat): Nat -> Nat := fun (bias: Nat) => match h : n with { | 0 => bias | Nat.succ k => bad(Nat.succ(k), bias) }\n"),
+      (.lean, "FIXED-CALL", "def bad (A : Type) (rows : List (List A)) : Nat := match h : rows with\n  | .nil => 0\n  | .cons row rest => bad Bool List.nil\n"),
+      (.proofScript, "FIXED-CALL", "function bad(A: Type, rows: List(List(A))): Nat := match h : rows with { | .nil => 0 | .cons row rest => bad(Bool, List.nil) }\n"),
+      (.lean, "DECREASE", "inductive NestedRefusal where\n  | leaf\n  | node (children : List NestedRefusal)\nmutual\ndef bad (tree : NestedRefusal) : Nat := match h : tree with\n  | .leaf => 0\n  | .node children => badForest children\ndef badForest (children : List NestedRefusal) : Nat := match h : children with\n  | .nil => 0\n  | .cons child rest => bad (NestedRefusal.node (List.cons child List.nil)) + badForest rest\nend\n"),
+      (.proofScript, "DECREASE", "inductive NestedRefusal where { | leaf | node(children: List(NestedRefusal)) }\nmutual\nfunction bad(tree: NestedRefusal): Nat := match h : tree with { | .leaf => 0 | .node children => badForest(children) }\nfunction badForest(children: List(NestedRefusal)): Nat := match h : children with { | .nil => 0 | .cons child rest => bad(NestedRefusal.node(List.cons(child, List.nil))) + badForest(rest) }\nend\n"),
+      (.lean, "DECREASE", "inductive NestedRefusal where\n  | leaf\n  | node (children : List NestedRefusal)\nmutual\ndef bad (tree : NestedRefusal) : Nat := match h : tree with\n  | .leaf => 0\n  | .node children => badForest children\ndef badForest (children : List NestedRefusal) : Nat := match h : children with\n  | .nil => 0\n  | .cons child rest => bad child + badForest (List.cons child rest)\nend\n"),
+      (.proofScript, "DECREASE", "inductive NestedRefusal where { | leaf | node(children: List(NestedRefusal)) }\nmutual\nfunction bad(tree: NestedRefusal): Nat := match h : tree with { | .leaf => 0 | .node children => badForest(children) }\nfunction badForest(children: List(NestedRefusal)): Nat := match h : children with { | .nil => 0 | .cons child rest => bad(child) + badForest(List.cons(child, rest)) }\nend\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerElaboratePscv0 program with
+    | .error (.elaboration cause) =>
+      ensure ((psCompilerPscv0ElabError cause).startsWith ("PSCV0-MUTUAL-TOTAL: " ++ rule ++ ":"))
+        ("named structural refusal changed phase or ownership: " ++ psCompilerPscv0ElabError cause)
+    | .error error => throw (IO.userError ("named structural refusal escaped elaboration: " ++ psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError "named structural recursion accepted a nonchild or varying uniform dependency")
   for (label, leanText, psText) in [
       ("false keeps handlers at the original major",
         "def bad (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := false) a with\n  | true => h1 (Eq.refl true)\n  | false => h2 (Eq.refl false)\n",
@@ -541,7 +815,19 @@ def check (root : System.FilePath) : IO Unit := do
         "theorem bad(a: Bool, h: a = a): h = h :=\n  match (generalizing := false) a with {\n  | true => Eq.refl(h)\n  | false => Eq.refl(h)\n  }\n"),
       ("false remains false for mixed majors",
         "def bad (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=\n  match (generalizing := false) a, Bool.not a with\n  | true, false => h1 (Eq.refl true)\n  | false, true => h2 (Eq.refl false)\n  | _, _ => 0\n",
-        "function bad(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := false) a, Bool.not(a) with {\n  | true, false => h1(Eq.refl(true))\n  | false, true => h2(Eq.refl(false))\n  | _, _ => 0\n  }\n")] do
+        "function bad(a: Bool, h1: a = true -> Nat, h2: a = false -> Nat): Nat :=\n  match (generalizing := false) a, Bool.not(a) with {\n  | true, false => h1(Eq.refl(true))\n  | false, true => h2(Eq.refl(false))\n  | _, _ => 0\n  }\n"),
+      ("unnamed discriminator preserves original b",
+        "def bad (b : Bool) : Nat :=\n  match b with\n  | true => (fun (_ : b = true) => 37) (Eq.refl true)\n  | false => 41\n",
+        "function bad(b: Bool): Nat :=\n  match b with {\n  | true => (fun (_: b = true) => 37)(Eq.refl(true))\n  | false => 41\n  }\n"),
+      ("named equation shadows the same-name pattern",
+        "def bad (n : Nat) : Nat :=\n  match h : n with\n  | 0 => 0\n  | Nat.succ h => Nat.succ h\n",
+        "function bad(n: Nat): Nat :=\n  match h: n with {\n  | 0 => 0\n  | Nat.succ h => Nat.succ(h)\n  }\n"),
+      ("nested false preserves the generalized outer binding",
+        "def bad (a : Bool) (handle : a = a → Nat) : Nat :=\n  match a with\n  | x =>\n    match (generalizing := false) x with\n    | true => handle (Eq.refl true)\n    | false => handle (Eq.refl false)\n",
+        "function bad(a: Bool, handle: a = a -> Nat): Nat :=\n  match a with {\n  | x =>\n    match (generalizing := false) x with {\n    | true => handle(Eq.refl(true))\n    | false => handle(Eq.refl(false))\n    }\n  }\n"),
+      ("catch-all RHS keeps its pre-specialization pattern variable",
+        "def bad (b : Bool) : Nat :=\n  match b with\n  | true => 0\n  | x =>\n    let h : x = false := Eq.refl false\n    1\n",
+        "function bad(b: Bool): Nat :=\n  match b with {\n  | true => 0\n  | x =>\n    let h: x = false := Eq.refl(false)\n    1\n  }\n")] do
     for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
       let program ← fromExcept (psCompilerParsePscv0 source kind)
       match psCompilerElaboratePscv0 program with
@@ -673,10 +959,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors", "m3matches", "m3structural"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (structuralLeanSource ++ matchIndexedLeanSource ++ matchLexicalLeanSource ++ matchPolicyLeanSource ++ matchLeanSource ++ recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (structuralPsSource ++ matchIndexedPsSource ++ matchLexicalPsSource ++ matchPolicyPsSource ++ matchPsSource ++ recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -711,6 +997,7 @@ def check (root : System.FilePath) : IO Unit := do
             | .binary value => IO.FS.writeBinFile (directory / file.path) value
         let rows := [false, true].map fun flag => Lean.Json.mkObj [
           ("flag", Lean.toJson flag),
+          ("m3structural", Lean.toJson (toString (M3InputParityOracle.m3structural flag).toNat)),
           ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat)),
           ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat)),
           ("m3control", Lean.toJson (toString (M3InputParityOracle.m3control flag).toNat)),

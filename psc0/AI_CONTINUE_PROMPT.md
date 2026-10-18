@@ -1,27 +1,43 @@
 # Continue PSC0 v7.2 — finish M3+B
 
-## Source-match implementation candidate — qualification pending
+## Source-row and structural candidate — qualification pending
 
-The source-match candidate adds the shared named/generalizing AST metadata,
-grammar-specific parsers/printers, the checked complete discriminant/dependent
-local telescope, real Eq/HEq proof slots, and saved-scope typed index retry.
-Optional source policy keeps let/instance/auxiliary recursion exclusions separate
-from mandatory refinement transport. Both source adapters enter the same typed
-matrix and selected kernel relation.
+The next source candidate checks every match row in its own typed pattern
+telescope before decision-tree specialization. It retains the checked RHS Core,
+actual field paths, original lexical identities, real Eq/HEq slots, and the
+pinned typed-index retry boundary. The matrix applies checked rows without
+re-elaborating their source bodies. Both grammars enter the same checked owner.
 
-The paired input fixture now includes native acceptance/refusal controls,
-matching actual .lean/.ps input strings, declaration/Core comparison, and the
-eighth runtime export m3matches (true13413333; false17575555). All seven existing
-exports, refusal checks, selected recursor pins, workflow commands and resource
-budgets are retained. This is an implementation candidate, not successful CI
-evidence; inspect the exact commit's preparation jobs before recording results.
+The structural owner now covers checked returned-function bodies, computed
+uniform arguments, and canonical nested elimination slots. Ordinary explicit
+definitions use the shared typed predefinition path. The outer singleton owner
+retains supported registrations and applies them only after checking; registered
+declarations do not reserve or emit an unintended eq_def. Lexical alias metadata
+is preserved across local-context and tactic scope transformations.
 
-Review and completion continue on nested source-binding visibility and the
-shared structural owner for computed uniform parameters, returned-function
-binders, and complete nested elimination slots. No direct-field-only probe is
-evidence for recursive calls beneath a nested container. All six written exits
-remain the denominator, with Native/M3/F1/F2/F3 still required on one final SHA.
-Main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058.
+The paired fixture retains all seven qualified exports and adds m3matches
+(true 13413333; false 17575555) and m3structural (true 61273; false 71295).
+It includes actual .lean/.ps source comparison, native controls, ordinary-row
+catch-all refusal, indexed/named scope cases, structural ownership refusals, and
+WF phase controls. New native/source assertions remain candidates until their
+own exact-head CI succeeds. No budget, expected old value, refusal, selected
+recursor pin, or existing workflow command is weakened.
+
+The prior candidate a79c09f221e4fcda34267dc2f36da3fd69f24fe4 failed during
+compilation in [preparation 39144806053](https://github.com/dwijayuda/pskernel/actions/runs/39144806053):
+reserved parser-local spelling and record layout. Correction
+91e3860ed7e2271be3bbc31a70b702dd34ffbe36 built the syntax and complete-telescope
+generalization module, then failed on Match continuation layout in
+[preparation 39145089914](https://github.com/dwijayuda/pskernel/actions/runs/39145089914).
+That layout is corrected in this candidate. Neither failed run reached source
+or runtime qualification, and neither is cited as a pass.
+
+Remaining implementation work includes typed inline descendant traversal and
+native WF callback/proof-goal transport after compiled-match specialization.
+The current WF source controls deliberately distinguish ordinary prechecked
+rows from the later recursive-call proof phase. All six written M3+B exits
+remain the denominator. Native, M3, F1, F2 and F3 must pass on one final SHA.
+M3+B remains OPEN; main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058.
 
 Read AI_WORK_STATE.md, the canonical PSCV0_LANGUAGE_REFERENCE_v7.2.md,
 ARCHITECTURE.md, native roadmap and six-exit ledger. Continue implementation,

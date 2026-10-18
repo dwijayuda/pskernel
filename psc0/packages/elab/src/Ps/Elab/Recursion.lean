@@ -550,8 +550,9 @@ def psElabRecursionRenameGroup (kind : PsSyntaxBinderKind) (span : PsSourceSpan)
   | [] => return { binders := [], remaining := typed, context }
   | name :: names =>
     let binder :: typed := typed | throw .structuralRecursionInternal
-    let next := PsLocalContext.mk context.nextId
-      (PsLocalDecl.binding binder.id binder.name binder.type binder.binder :: context.declarations)
+    let next := { context with
+      declarations := PsLocalDecl.binding binder.id binder.name binder.type binder.binder ::
+        context.declarations }
     let rest ← psElabRecursionRenameGroup kind span type names typed next
     let head := PsSyntaxBinderHead.mk (psElabRecursionParameterName binder.id name.span) kind span
     return { rest with binders := (head, type) :: rest.binders }
@@ -634,7 +635,7 @@ def psElabRecursionBuildNormalizationWithOrigin
     | Except.ok _ =>
         match psElabRecursionRenameParameters
             plan typeResult.context.environment typed binders
-            (PsLocalContext.mk binderResult.context.localContext.nextId List.nil) with
+            ({ psLocalEmpty with nextId := binderResult.context.localContext.nextId }) with
         | Except.error error => Except.error error
         | Except.ok renamedBinders =>
             match psElabRecursionWalkWithFuel

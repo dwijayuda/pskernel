@@ -155,10 +155,27 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
 -- Scope one original source block, elaborate its typed local captures, then
 -- let the checked dependency owner partition it. Helpers retain their own
 -- source information while their declarations belong to the parent's origin.
+def psElabCommandPreDefinitionRegistration
+    (members : List PsSyntaxMutualMember) (isMutual : Bool) :
+    Option PsSyntaxRegistration :=
+  if isMutual then none else
+    match members with
+    | [member] =>
+      match member.declaration, member.registration with
+      | .definition _ _ (.omittedType _) _ _, _ => none
+      | .definition .., some .abbrevDecl => some .abbrevDecl
+      | .definition .., some .opaqueDecl => some .opaqueDecl
+      | .definition .., some (.instanceDecl priority) => some (.instanceDecl priority)
+      | .definition .., some (.defaultInstanceDecl priority ordinaryPriority) =>
+        some (.defaultInstanceDecl priority ordinaryPriority)
+      | _, _ => none
+    | _ => none
+
 def psElabCommandPreDefinitions (state : PsCommandState)
-    (members : List PsSyntaxMutualMember) (span : PsSourceSpan) (isMutual : Bool) :
-    Except PsElabError PsCommandState := do
+    (members : List PsSyntaxMutualMember) (span : PsSourceSpan) (isMutual : Bool)
+    (nonrecursiveEquations : Bool := true) : Except PsElabError PsCommandState := do
   if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
+  let registration := psElabCommandPreDefinitionRegistration members isMutual
   let qualified := members.map fun member =>
     psScopeQualified state.scope (psElabOriginSource member.declaration).fst
   let names := qualified.map (·.segments)
@@ -197,16 +214,52 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let prepared ← psElabPreparePreDefinitionsWithSource state.environment
     (state.scope.levelNames.map psRootName) sectionContext scopedMembers span
   let block := prepared.block
-  let result ← psElabPreDefinitionBatch state.environment block
+  if registration.isSome && block.members.length != 1 then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source must retain one checked owner")
+  let checkedBlock := if registration.isSome then
+    { block with members := block.members.map fun member => { member with registration := none } }
+    else block
+  let result ← psElabPreDefinitionBatch state.environment checkedBlock
     (some (psElabWhereWellFoundedComponent prepared))
+    (if registration.isSome then false else nonrecursiveEquations)
+    registration.isNone
   if result.members.length != block.members.length then
     throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
+  let result ← match registration with
+    | some .opaqueDecl =>
+      match block.members, result.members, result.batch.declarations with
+      | [member], [owned], [.definitionDecl name levels type value] => do
+        if !psNameEq name member.name || owned.declarations.length != 1 then
+          throw (.data "PSCV0-PREDEFINITION-REGISTRATION: opaque source lost its checked declaration owner")
+        let declaration := PsDeclaration.opaqueDecl name levels type value
+        pure { result with
+          batch := { result.batch with declarations := [declaration] }
+          members := [{ owned with declarations := [declaration] }] }
+      | _, _, _ =>
+        throw (.data "opaque requires one checked definition; normalized workers pending")
+    | _ => pure result
   let environment ← psAddDeclarationList state.environment result.batch.declarations
   let environment := if members.any (fun member =>
       psElabPreDefinitionDeclarationNoncomputable member.declaration) then
     result.batch.declarations.foldl (fun env declaration =>
       psEnvironmentMarkNoncomputable env (psDeclarationName declaration)) environment
   else environment
+  let environment ← match registration, block.members with
+    | none, _ => pure environment
+    | some registration, [member] =>
+      (match registration with
+        | .abbrevDecl => pure (psEnvironmentSetReducibility environment member.name .reducible)
+        | .opaqueDecl => pure environment
+        | .classDecl => psElabRegisterClass environment member.name
+        | .instanceDecl priority => psElabRegisterInstance environment member.name priority
+        | .defaultInstanceDecl priority ordinaryPriority => do
+          let environment ← match ordinaryPriority with
+            | some ordinary => psElabRegisterInstance environment member.name ordinary
+            | none => pure environment
+          psElabRegisterDefaultInstance environment member.name priority).mapError
+            (.atDeclaration member.name)
+    | _, _ =>
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registration lost its single source owner")
   let outputs := block.members.zip result.members
   let origins := scopedMembers.zipIdx.map fun (member, index) =>
     let owned := outputs.filter (fun output => output.fst.sourceIndex == index)
@@ -228,9 +281,9 @@ def psElabCommandPreDefinitions (state : PsCommandState)
         memberIndex := index
         memberCount := scopedMembers.length
         span } else none }
-  -- Typed predefinitions have no exposed-body registration. Only their
-  -- actual source identity is public; generated equations, packed auxiliaries
-  -- and implementation markers remain local, as in pinned mkEqLikeNameFor.
+  -- The outer source owner applies registration only after the checked batch
+  -- is complete. Unregistered generated members retain their owned private
+  -- visibility, as in pinned mkEqLikeNameFor.
   -- Use ownership rather than declaration kind or a generated-name suffix:
   -- an internal whole-function equation can also mention private callees.
   -- Explicit source theorem members keep their own source visibility.
@@ -245,6 +298,9 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     environment, namespaces
     originsRev := origins.reverse ++ state.originsRev
     declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
+    exposedNames := match registration with
+      | some .abbrevDecl => result.batch.declarations.map psDeclarationName ++ state.exposedNames
+      | _ => state.exposedNames
     privateNames := privateNames ++ state.privateNames
     privateAliases := aliases }
 
@@ -259,15 +315,23 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     | .partialDefinition _ _ (.omittedType _) _ _
     | .wellFoundedDefinition _ _ (.omittedType _) _ _ _
     | .fixedpointDefinition _ _ (.omittedType _) _ _ => true
-    -- Ordinary bodies must also see section instances whose dependency keys
-    -- occur only in a candidate dictionary type. Typed closure prunes captures.
-    -- Explicit registrations and theorem include/omit keep their existing owner.
-    | .definition .. => registration.isNone && !state.scope.variables.isEmpty
+    -- Ordinary explicit definitions share the typed dependency/strategy owner.
+    -- Section closure still retains only actual type and body dependencies.
+    -- The outer singleton owner retains supported explicit registrations.
+    -- Theorem include/omit keeps its existing source owner.
+    | .definition .. => registration.isNone ||
+      (psElabCommandPreDefinitionRegistration
+        [PsSyntaxMutualMember.mk source isPrivate registration] false).isSome
     | .wellFoundedDefinition .. | .fixedpointDefinition .. => registration.isNone
     | _ => false
   if usePreDefinitions then
+    let nonrecursiveEquations := match source with
+      | .definition _ _ (.omittedType _) _ _ => true
+      | .definition .. => !state.scope.variables.isEmpty
+      | _ => true
     return ← psElabCommandPreDefinitions state
       [PsSyntaxMutualMember.mk source isPrivate registration] (psElabOriginSource source).snd false
+      nonrecursiveEquations
   let qualified := psScopeQualified state.scope (psElabOriginSource source).fst
   -- Only explicit project modules mangle private identities. Single-file
   -- elaboration retains its existing standalone naming contract.

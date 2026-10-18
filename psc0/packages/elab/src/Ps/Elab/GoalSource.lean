@@ -3,8 +3,8 @@ import Ps.Elab.Scope
 
 def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
     (source : PsSyntaxTerm) : Except PsElabError PsSyntaxTerm := do
-  let bound := context.localContext.declarations.map fun entry =>
-    psNameLastComponent (psLocalDeclUserName entry)
+  let bound := (context.localContext.declarations.flatMap fun entry =>
+    psLocalVisibleNames context.localContext (psLocalDeclId entry)).map psNameLastComponent
   let resolved ← psScopeTerm 4096 {
     environment := context.environment
     scope := { namePrefix := scope.namePrefix, opened := scope.opened }

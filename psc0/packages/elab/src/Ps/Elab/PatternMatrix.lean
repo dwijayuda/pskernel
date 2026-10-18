@@ -1,4 +1,4 @@
-import Ps.Elab.Match
+import Ps.Elab.PatternRow
 import Ps.Elab.MatchGeneralization
 
 def psElabMatchPatternConstructorName
@@ -40,8 +40,9 @@ structure PsElabPatternColumn where
   retainOriginal : Bool := false
   sourceEquation? : Option PsElabSourceMatchEquation := none
   sourceIndices : List PsExpr := []
-  generalizedName? : Option PsName := none
+  generalizedNames : List PsName := []
   onlyLocal : Bool := false
+  path : List Nat := []
 
 structure PsElabPatternBinding where
   name : PsName
@@ -60,25 +61,21 @@ structure PsElabPatternRow where
   generalized : List PsElabPatternBinding := []
   bindings : List PsElabPatternBinding := []
   equations : List PsElabPatternEquationBinding := []
+  checked? : Option PsElabCheckedPatternRow := none
+  arguments : List (Nat × PsExpr) := []
 
 def psElabPatternIrrefutable : PsSyntaxPattern -> Bool
   | .variable _ | .wildcard _ => true
   | _ => false
 
 def psElabPatternBind (column : PsElabPatternColumn)
-    (pattern : PsSyntaxPattern) (row : PsElabPatternRow) :
+    (_pattern : PsSyntaxPattern) (row : PsElabPatternRow) :
     Except PsElabError PsElabPatternRow := do
-  let row := match column.generalizedName? with
-    | none => row
-    | some name => { row with generalized := row.generalized ++
-        [{ name, value := column.value, type := column.type, onlyLocal := column.onlyLocal }] }
-  match pattern with
-  | .variable sourceName =>
-    if psSyntaxNameIsWildcardBinder sourceName then return row
-    let some name := psSyntaxNameToName sourceName | throw .emptyName
-    return { row with bindings := row.bindings ++
-      [{ name, value := column.value, type := column.type }] }
-  | _ => return row
+  let some checked := row.checked?
+    | throw (.refinement "pattern row was not checked before compilation")
+  let arguments := checked.slots.foldl (fun arguments (id, path) =>
+    if path == column.path then arguments ++ [(id, column.value)] else arguments) row.arguments
+  return { row with arguments }
 
 def psElabPatternRefineEquation (refinements : PsElabRefinements)
     (equation : PsElabSourceMatchEquation) : PsElabSourceMatchEquation :=
@@ -107,8 +104,14 @@ def psElabPatternRefineRow (refinements : PsElabRefinements)
   { row with
     generalized := row.generalized.map (psElabPatternRefineBinding refinements)
     bindings := row.bindings.map (psElabPatternRefineBinding refinements)
-    equations := row.equations.map fun binding =>
-      { binding with equation := psElabPatternRefineEquation refinements binding.equation } }
+    equations := row.equations.map (fun binding =>
+      { binding with equation := psElabPatternRefineEquation refinements binding.equation })
+    arguments := row.arguments.map (fun (id, value) =>
+      (id, psElabSubstituteLocals refinements value))
+    checked? := row.checked?.map fun checked =>
+      { checked with
+        term := psElabSubstituteLocals refinements checked.term
+        type := psElabSubstituteLocals refinements checked.type } }
 
 -- A hidden index hint names only a surviving pattern local. A solved index
 -- never becomes an unconditional source let binding.
@@ -120,38 +123,15 @@ def psElabPatternBindingVisible (context : PsElabContext)
         (psLocalFindById context.localContext id).isSome
     | _ => false
 
--- Source equations enter after all explicit pattern names. Retained HEq
--- proofs are normalized here again: later columns may have aligned their types.
-def psElabPatternBody (branch : PsElaborator) (context : PsElabContext)
-    (row : PsElabPatternRow) (expected : PsExpr) (protectedIds : List Nat) :
+-- Source names and RHS syntax were resolved in the checked row telescope.
+-- This terminal compiler step applies only its actual retained Core arguments.
+def psElabPatternBody (_branch : PsElaborator) (context : PsElabContext)
+    (row : PsElabPatternRow) (expected : PsExpr) (_protectedIds : List Nat) :
     Except PsElabError PsElabTermResult := do
-  let rec equations (context : PsElabContext)
-      (bindings : List PsElabPatternEquationBinding) :
-      Except PsElabError PsElabTermResult := do
-    match bindings with
-    | [] => branch context row.body (some expected)
-    | binding :: rest =>
-      let (context, equation) ← psElabSourceMatchEquationNormalize context binding.equation
-      let checked ← psElabResolvedTerm context equation.proof (some equation.type)
-      let pushed := psLocalPushLet checked.context.localContext
-        binding.name checked.type checked.term
-      let result ← equations (psElabContextWithLocal checked.context pushed.context) rest
-      psElabCloseLetScope checked.context result pushed.id binding.name
-        checked.type checked.term (some expected)
-  let rec bind (context : PsElabContext) (bindings : List PsElabPatternBinding) :
-      Except PsElabError PsElabTermResult := do
-    match bindings with
-    | [] => equations context row.equations
-    | binding :: rest =>
-      if !psElabPatternBindingVisible context protectedIds binding then
-        return ← bind context rest
-      let checked ← psElabResolvedTerm context binding.value (some binding.type)
-      let pushed := psLocalPushLet checked.context.localContext
-        binding.name checked.type checked.term
-      let result ← bind (psElabContextWithLocal checked.context pushed.context) rest
-      psElabCloseLetScope checked.context result pushed.id binding.name
-        checked.type checked.term (some expected)
-  bind context (row.generalized ++ row.bindings)
+  let some checked := row.checked?
+    | throw (.refinement "pattern row was not checked before compilation")
+  psElabApplyPatternRow context checked row.arguments
+    (row.equations.map (·.equation)) expected
 
 def psElabPatternEquation (context : PsElabContext)
     (name? : Option PsSyntaxName) (equation? : Option PsElabSourceMatchEquation) :
@@ -163,7 +143,6 @@ def psElabPatternEquation (context : PsElabContext)
       | throw (.refinement "named match branch equation unavailable")
     let (context, equation) ← psElabSourceMatchEquationNormalize context equation
     let checked ← psElabResolvedTerm context equation.proof (some equation.type)
-    if psSyntaxNameIsWildcardBinder sourceName then return (checked.context, none)
     let some name := psSyntaxNameToName sourceName | throw .emptyName
     return (checked.context, some {
       name, equation := { equation with proof := checked.term, type := checked.type } })
@@ -184,7 +163,9 @@ def psElabPatternRequiredIds (context : PsElabContext)
       column.sourceEquation?.toList.flatMap (fun equation => [equation.proof, equation.type])
   let values := values ++ rows.flatMap fun row =>
     (row.generalized ++ row.bindings).flatMap (fun binding => [binding.value, binding.type]) ++
-      row.equations.flatMap (fun binding => [binding.equation.proof, binding.equation.type])
+      row.equations.flatMap (fun binding => [binding.equation.proof, binding.equation.type]) ++
+      row.arguments.map Prod.snd ++
+      row.checked?.toList.flatMap (fun checked => [checked.term, checked.type])
   let values := values.map (psMetaInstantiate context.metaContext)
   context.localContext.declarations.reverse.filterMap fun declaration =>
     let id := psLocalDeclId declaration
@@ -268,13 +249,14 @@ def psElabPatternMatrix (fuel : Nat) (branch : PsElaborator)
             fieldNames := fields
             elaborate := fun child => do
               if child.fields.length != fields.length then throw .matchRecursorUnsupported
-              let fieldColumns := (fields.zip child.fields).map fun (name, binder) =>
+              let fieldColumns := (fields.zip child.fields).zipIdx.map fun ((name, binder), index) =>
                 psElabPatternRefineColumn child.refinements {
                   source := { term := .reference name }
                   original := .fvar binder.id
                   major := .fvar binder.id
                   value := .fvar binder.id
-                  type := binder.type }
+                  type := binder.type
+                  path := column.path ++ [index] }
               let rest := rest.map (psElabPatternRefineColumn child.refinements)
               let selected := selected.map (psElabPatternRefineRow child.refinements)
               -- This proof is already in the final child context. Only retained
@@ -314,7 +296,7 @@ def psElabPatternSourceIndices (context : PsElabContext) (type : PsExpr) : List 
 -- opened below are independent ordinary binders.
 def psElabPatternFreeze (context : PsElabContext)
     (source : PsSyntaxMatchDiscriminant PsSyntaxTerm) (value type : PsExpr)
-    (generalizedName? : Option PsName := none) (onlyLocal : Bool := false) :
+    (generalizedNames : List PsName := []) (onlyLocal : Bool := false) :
     Except PsElabError
       (PsElabContext × PsElabPatternColumn × List (PsElabTypedBinder × PsExpr)) := do
   let checked ← psElabResolvedTerm context value (some type)
@@ -322,7 +304,7 @@ def psElabPatternFreeze (context : PsElabContext)
     source, original := checked.term, major := checked.term, value := checked.term
     type := checked.type, retainOriginal := true
     sourceIndices := psElabPatternSourceIndices checked.context checked.type
-    generalizedName?, onlyLocal }
+    generalizedNames, onlyLocal }
   match checked.term with
   | .fvar _ => return (checked.context, column, [])
   | _ =>
@@ -425,9 +407,28 @@ def psElabPatternRunPlan (branch : PsElaborator) (inputs : PsElabPatternInputs)
   if inputs.columns.length != plan.rawMajors.length then
     throw (.refinement "source match telescope arity mismatch")
   let selected ← plan.selectedIds.mapM fun id => do
+    let some _ := psLocalFindById plan.context.localContext id
+      | throw (.refinement "source match generalized local unavailable")
+    return (id, psLocalVisibleNames plan.context.localContext id)
+  let generalizedSources ← selected.mapM fun (id, names) => do
     let some declaration := psLocalFindById plan.context.localContext id
       | throw (.refinement "source match generalized local unavailable")
-    return (id, psLocalDeclUserName declaration)
+    return { original := PsExpr.fvar id, type := psLocalDeclType declaration,
+      names : PsElabPatternRowSource }
+  let sources := inputs.columns.map (fun column =>
+    { original := column.original, type := column.type
+      equationName? := column.source.equationName?
+      names := column.generalizedNames, onlyLocal := column.onlyLocal : PsElabPatternRowSource }) ++
+      generalizedSources
+  let rows := rows.map fun row => { row with patterns := row.patterns ++
+    selected.map (fun _ => PsSyntaxPattern.wildcard row.span) }
+  let (context, rows) ← rows.foldlM
+    (fun (state : PsElabContext × List PsElabPatternRow) row => do
+      let (context, checked) ← psElabCheckPatternRow branch state.fst sources
+        row.patterns row.body plan.matchType
+      return (context, state.snd ++ [{ row with checked? := some checked }]))
+    (plan.context, [])
+  let plan := { plan with context }
   let arguments := inputs.columns.map (·.value) ++ selected.map (fun entry => PsExpr.fvar entry.fst)
   let (opened, replacements) ← psElabSourceMatchOpenMajors
     (plan.rawMajors ++ selected.map (fun entry => PsExpr.fvar entry.fst))
@@ -435,20 +436,21 @@ def psElabPatternRunPlan (branch : PsElaborator) (inputs : PsElabPatternInputs)
   let binders := opened.bindersRev.reverse
   if binders.length != inputs.columns.length + selected.length then
     throw (.refinement "source match telescope arity mismatch")
-  let columns := (inputs.columns.zip (binders.take inputs.columns.length)).map fun (column, binder) =>
-    { column with major := .fvar binder.id, value := .fvar binder.id, type := binder.type }
+  let columns := (inputs.columns.zip (binders.take inputs.columns.length)).zipIdx.map
+    fun ((column, binder), index) =>
+      { column with major := .fvar binder.id, value := .fvar binder.id,
+        type := binder.type, path := [index] }
   let some first := columns.head? | throw .matchScrutineeUnsupported
   let span := psSyntaxTermSpan first.source.term
-  let generalized := (selected.zip (binders.drop inputs.columns.length)).map fun ((id, name), binder) =>
+  let generalized := (selected.zip (binders.drop inputs.columns.length)).zipIdx.map fun (((id, names), binder), index) =>
     { source := { term := PsSyntaxTerm.hole span }
       original := PsExpr.fvar id
       major := PsExpr.fvar binder.id
       value := PsExpr.fvar binder.id
       type := binder.type
       retainOriginal := true
-      generalizedName? := some name : PsElabPatternColumn }
-  let rows := rows.map fun row => { row with patterns := row.patterns ++
-    selected.map (fun _ => PsSyntaxPattern.wildcard row.span) }
+      generalizedNames := names
+      path := [inputs.columns.length + index] : PsElabPatternColumn }
   let (context, columns, equationBindersRev) ←
     psElabPatternOpenEquations opened.context (columns ++ generalized)
   let context := psElabPatternStructuralContext context replacements
@@ -477,8 +479,8 @@ def psElabPatternIndexInputs (context : PsElabContext)
     let type ← (psInferType context.environment context.metaContext
       context.localContext index).mapError PsElabError.infer
     let hint := match index with
-      | .fvar id => (psLocalFindById context.localContext id).map psLocalDeclUserName
-      | _ => none
+      | .fvar id => psLocalVisibleNames context.localContext id
+      | _ => []
     let source : PsSyntaxMatchDiscriminant PsSyntaxTerm := {
       term := .hole span
       equationName? := if named then some (PsSyntaxName.mk ["_"] span) else none }

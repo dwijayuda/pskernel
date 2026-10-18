@@ -246,7 +246,7 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
   let majorType := psExprApplyMany (.constE info.name levels) (parameters ++ freshIndices)
   let pushed := psLocalPushBinding opened.context.localContext (psRootName "_match") majorType .explicit
   let majorId := match major with
-    | .fvar id => if parameters.any (psElabExprContainsLocal id) ||
+    | .fvar id => if protectedIds.contains id || parameters.any (psElabExprContainsLocal id) ||
         indices.any (psElabExprContainsLocal id) then none else some id
     | _ => none
   -- Outer source indices remain rigid. A source-only typed retry may add a
@@ -430,7 +430,8 @@ def psElabMatchMinorWithHypotheses (context : PsElabContext)
     let body ← psElabCloseDependents equationContext generalized body branchTarget
     match equationBinder? with
     | none => pure body
-    | some binder => psElabAbstract context body.context
+    | some binder =>
+      psElabAbstract context body.context
         [.lambdaE binder.id binder.name binder.type binder.binder] body.term target
   let flexible := fields.bindersRev.map (fun binder => binder.id) ++
     plan.constraintVariables ++ (if plan.constraints.isEmpty then [] else plan.majorId.toList)

@@ -144,9 +144,8 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
 -- local identity still mentioned by the shared metavariable context.
 def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
   { outer with
-    localContext := {
-      nextId := max outer.localContext.nextId inner.localContext.nextId
-      declarations := outer.localContext.declarations }
+    localContext := { outer.localContext with
+      nextId := max outer.localContext.nextId inner.localContext.nextId }
     metaContext := inner.metaContext
     pending := inner.pending
     infoRev := inner.infoRev

@@ -20,8 +20,11 @@ def psProofEliminationGoal (tag : String) (induction : Bool) (branch : PsElabMat
     match entry with
     | .binding id _ type binder => some (.binding id name type binder)
     | .letDecl id _ type value => some (.letDecl id name type value)
-  let context := psElabContextWithLocal branch.context
-    { branch.context.localContext with declarations }
+  let context := psElabContextWithLocal branch.context {
+    branch.context.localContext with
+    declarations
+    nameAliases := branch.context.localContext.nameAliases.filter fun alias =>
+      !hidden.contains alias.id && !introduced.contains alias.id }
   let _ ← psElabExpressionSort context branch.target
   let fresh := psMetaFresh context.metaContext context.localContext branch.target .syntheticOpaque { tag, binders := introduced }
   return {
@@ -95,7 +98,18 @@ def psProofRenameCase (state : PsProofState) (goal : PsProofGoal)
       match entry with
       | .binding id _ type binder => .binding id name type binder
       | .letDecl id _ type value => .letDecl id name type value
-  let declaration := { declaration with localContext := { declaration.localContext with declarations := locals } }
+  let visibleRenames := renamed.filter fun entry =>
+    !psNameEq entry.snd (psRootName "_")
+  let localContext := {
+    declaration.localContext with
+    declarations := locals
+    nameAliases := declaration.localContext.nameAliases.filter fun alias =>
+      !(visibleRenames.any fun entry => entry.fst == alias.id) }
+  let localContext ← visibleRenames.foldlM (fun current entry => do
+    match psLocalAddNameAlias current entry.snd entry.fst with
+    | some next => pure next
+    | none => throw (.proof "renamed case binder is absent from its saved goal context")) localContext
+  let declaration := { declaration with localContext }
   let declarations := state.context.metaContext.declarations.map fun entry =>
     if entry.id == goal.id then declaration else entry
   let constraints := { state.context.metaContext with declarations }

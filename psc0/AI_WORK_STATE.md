@@ -195,3 +195,21 @@ placement/overlap checks stay intact. WF captures and suffixes preserve policy.
 See docs/PSCV0_M3_NAMED_APPLICATION_PLACEMENT_2026-10-18.md. This preparation is
 not yet qualified. Main remains fully qualified33676076. The Prop packing draft
 is researched but not published; finish this slice before advancing it.
+
+## Next coherent slice — proof-valued structural components
+
+Preparation now includes native And/PProd component packing, described in
+docs/PSCV0_M3_STRUCTURAL_COMPONENT_PACKING_2026-10-18.md. The existing shared
+owner checks actual result universes instead of requiring a syntactic successor.
+Proof components use And, empty proof slots True, and singleton packing identity;
+other components use selected PProd with exact inferred-universe validation.
+Projections follow the actual checked owner. No implicit lift or new foundation.
+
+The same paired fixture adds three dependent proof-valued functions and mutual
+recursion over positive function-valued inductive predicates; the existing
+internal mutual-data fixture covers one/zero owned Prop components. Existing
+Type-valued runtime observations and all negative controls remain required.
+This is unqualified preparation, not a completed M3 exit. The parent named-call
+slice a25cadb99002144caff151d99f359ae4914c6ef9 is independently under preparation
+qualification. Main33676076 remains fully qualified; do not cancel any healthy
+main Native run or promote unqualified code. Both handoffs track this boundary.

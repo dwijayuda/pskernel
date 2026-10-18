@@ -274,18 +274,30 @@ def psElabMutualStructuralComponentLevel (plan : PsElabMutualStructuralPlan)
   let pushed := psLocalPushBinding indices.context.localContext (psRootName "_mutualMajor") majorType .explicit
   let context := psElabContextWithLocal indices.context pushed.context
   let type ← psElabMutualStructuralComponentType context fn args (.fvar pushed.id)
-  let level ← psElabExpressionSort context type
-  match psLevelNormalize level with
-  | .succ _ => return level
-  | _ => throw (psElabMutualStructuralError "SORT" "selected packed motives must be Type-valued at a resolved successor universe")
+  psElabExpressionSort context type
 
--- The level comes from the actual registered motive domain. Prod's argument
--- universes are its predecessor; PUnit receives the complete Sort level.
--- Both applications are then inferred against that exact domain.
+-- Pinned Meta.PProdN uses And for known propositions and PProd otherwise,
+-- preserving source positions and identity for a singleton. Infer the actual
+-- packed sort: do not guess a predecessor universe or silently lift a motive.
+def psElabMutualStructuralProduct (level : PsLevel) : PsName :=
+  psRootName (if psLevelEquivalent level .zero then "And" else "PProd")
+
+def psElabMutualStructuralProductLevels (level : PsLevel) : List PsLevel :=
+  if psLevelEquivalent level .zero then [] else [level, level]
+
+def psElabMutualStructuralPackUnit (context : PsElabContext) (level : PsLevel) :
+    Except PsElabError (PsExpr × PsExpr) := do
+  if !psLevelEquivalent level .zero then return ← psElabMatchUnit context level
+  let type := PsExpr.constE (psRootName "True") []
+  let value := PsExpr.constE (psNameAppendStr (psRootName "True") "intro") []
+  let _ ← psElabResolvedTerm context type (some (.sortE level))
+  let _ ← psElabResolvedTerm context value (some type)
+  return (type, value)
+
 def psElabMutualStructuralPackType (context : PsElabContext) (level : PsLevel)
     (types : List PsExpr) : Except PsElabError PsExpr := do
   match types with
-  | [] => return (← psElabMatchUnit context level).fst
+  | [] => return (← psElabMutualStructuralPackUnit context level).fst
   | [type] =>
     let actual ← psElabExpressionSort context type
     if !psLevelEquivalent actual level then
@@ -296,16 +308,19 @@ def psElabMutualStructuralPackType (context : PsElabContext) (level : PsLevel)
     let actual ← psElabExpressionSort context left
     if !psLevelEquivalent actual level then
       throw (psElabMutualStructuralError "SORT" "packed components require equivalent motive universes")
-    let .succ argumentLevel := psLevelNormalize level
-      | throw (psElabMutualStructuralError "SORT" "Prod packing requires a Type-valued motive")
-    let packed ← psElabApplyCore context (.constE psProdName [argumentLevel, argumentLevel]) [left, right]
+    let packed ← psElabApplyCore context
+      (.constE (psElabMutualStructuralProduct level) (psElabMutualStructuralProductLevels level))
+      [left, right]
+    let actual ← psElabExpressionSort packed.context packed.term
+    if !psLevelEquivalent actual level then
+      throw (psElabMutualStructuralError "SORT" "actual packed product changes the common motive universe")
     let checked ← psElabResolvedTerm packed.context packed.term (some (.sortE level))
     return psMetaInstantiate checked.context.metaContext checked.term
 
 def psElabMutualStructuralPackValue (context : PsElabContext) (level : PsLevel)
     (values : List PsExpr) : Except PsElabError PsExpr := do
   match values with
-  | [] => return (← psElabMatchUnit context level).snd
+  | [] => return (← psElabMutualStructuralPackUnit context level).snd
   | [value] => return value
   | left :: rest =>
     let right ← psElabMutualStructuralPackValue context level rest
@@ -314,26 +329,34 @@ def psElabMutualStructuralPackValue (context : PsElabContext) (level : PsLevel)
     let rightType ← (psInferType context.environment context.metaContext
       context.localContext right).mapError PsElabError.infer
     let expected ← psElabMutualStructuralPackType context level [leftType, rightType]
-    let .succ argumentLevel := psLevelNormalize level
-      | throw (psElabMutualStructuralError "SORT" "Prod values require a Type-valued motive")
+    let constructor := psNameAppendStr (psElabMutualStructuralProduct level)
+      (if psLevelEquivalent level .zero then "intro" else "mk")
     let packed ← psElabApplyCore context
-      (.constE (psNameAppendStr psProdName "mk") [argumentLevel, argumentLevel])
+      (.constE constructor (psElabMutualStructuralProductLevels level))
       [leftType, rightType, left, right]
     let checked ← psElabResolvedTerm packed.context packed.term (some expected)
     return psMetaInstantiate checked.context.metaContext checked.term
 
 def psElabMutualStructuralProject (context : PsElabContext)
     (count position : Nat) (value : PsExpr) : Except PsElabError PsExpr := do
+  if position >= count then
+    throw (psElabMutualStructuralError "OWNERSHIP" "component position exceeds its family")
   match count with
   | 0 => throw (psElabMutualStructuralError "OWNERSHIP" "an empty family has no function component")
-  | 1 =>
-    if position == 0 then return value
-    throw (psElabMutualStructuralError "OWNERSHIP" "component position exceeds its family")
+  | 1 => return value
   | count + 2 =>
+    let type ← (psInferType context.environment context.metaContext
+      context.localContext value).mapError PsElabError.infer
+    let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext type)
+    let .constE owner _ := view.head
+      | throw (psElabMutualStructuralError "OWNERSHIP" "packed component has no actual product owner")
+    if view.args.length != 2 ||
+        !(psNameEq owner (psRootName "PProd") || psNameEq owner (psRootName "And")) then
+      throw (psElabMutualStructuralError "OWNERSHIP" "packed component is not an actual PProd or And")
     let index := if position == 0 then 0 else 1
-    let projected ← psElabResolvedTerm context (.proj psProdName index value) none
+    let projected ← psElabResolvedTerm context (.proj owner index value) none
     if position == 0 then return projected.term
-    psElabMutualStructuralProject context (count + 1) (position - 1) projected.term
+    psElabMutualStructuralProject projected.context (count + 1) (position - 1) projected.term
 
 structure PsElabMutualStructuralFamily where
   info : PsInductiveInfo

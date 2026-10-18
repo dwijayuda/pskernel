@@ -67,6 +67,12 @@ def keep (A : Type u) (a : A) (x : M3StructuralLeft A a) : A :=
   | .self previous => keep A a previous
   | .link _ _ => a
 
+def proofKeep (A : Type u) (a : A) (x : M3StructuralLeft A a) : True :=
+  match x with
+  | .leaf _ => True.intro
+  | .self previous => proofKeep A a previous
+  | .link _ _ => True.intro
+
 section
 variable {A : Type u} [dictionary : Inhabited A] (fallback : A) (h : True)
 mutual
@@ -151,7 +157,10 @@ private def source : String :=
   "mutual\n" ++
   "  function msPick(n: Nat): A := match n with { | 0 => Inhabited.default | k + 1 => let witness: True := h\n msPickOther(k) }\n" ++
   "  function msPickOther(n: Nat): A := match n with { | 0 => fallback | k + 1 => msPick(k) }\n" ++
-  "end\nend\n"
+  "end\nend\n" ++
+  "mutual\n" ++
+  "  function msProofKeep(A: Type u, a: A, x: M3StructuralLeft(A, a)): True := match x with { | .leaf value => True.intro | .self previous => msProofKeep(A, a, previous) | .link n next => True.intro }\n" ++
+  "end\n"
 
 private def equationSource : String :=
   "universe u\n" ++
@@ -215,9 +224,9 @@ private def checkConstruction (compiled : PsElabModuleWithOriginsResult) : IO Un
   let parsed ← fromExcept (psPscv0ParseProgram source)
   let groups := parsed.commands.filterMap fun command =>
     match command with | .mutualDeclarations members span => some (members, span) | _ => none
-  ensure (groups.map (fun entry => entry.fst.length) == [2, 3, 1, 2])
+  ensure (groups.map (fun entry => entry.fst.length) == [2, 3, 1, 2, 1])
     "structural source lost atomic function membership"
-  let names := ["msFirst", "msSecond", "msLeftFirst", "msLeftSecond", "msRight", "msKeep", "msPick", "msPickOther"]
+  let names := ["msFirst", "msSecond", "msLeftFirst", "msLeftSecond", "msRight", "msKeep", "msPick", "msPickOther", "msProofKeep"]
   ensure (compiled.origins.length == names.length &&
     compiled.result.declarations.length == 2 * names.length)
     "structural batch must publish one real definition and one exact equation per source member"

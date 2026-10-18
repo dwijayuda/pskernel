@@ -72,19 +72,15 @@ Prepare the foundation/library probe early while closing independent source/data
 
 ## Current state and evidence
 
-Latest fully qualified five-gate compiler/test SHA:
-**18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290**.
-Native39092425439, M339092425489, F139092425401, F239092425419,
-F339092425556 all completed SUCCESS. Receipt:
-docs/PSCV0_M3_INTEGRATION_18FE0B3E_2026-10-18.md.
-
-Current main: **5785ada4d0521eaa910a57adc8569dbe95d4c5fe**.
-Preparation39093434191/job117575381994 completed SUCCESS; receipt
-docs/PSCV0_M3_NATIVE_LAMBDA_5785ADA4_2026-10-18.md.
-Native39094184382 and M339094184399 are RUNNING;
-F139094184384, F239094184401 and F339094184409 completed SUCCESS.
-Never supersede/cancel a healthy main Native. Main was promoted only after
-all18fe gates finished. Native lambda argument runtime integration is pending.
+Latest fully qualified five-gate compiler/test SHA and current main:
+**5785ada4d0521eaa910a57adc8569dbe95d4c5fe**.
+Native39094184382, M339094184399, F139094184384, F239094184401 and
+F339094184409 all completed SUCCESS. Receipt:
+docs/PSCV0_M3_INTEGRATION_5785ADA4_2026-10-18.md.
+Preparation39093434191/job117575381994 also completed SUCCESS.
+Native lambda arguments and paired source runtime observations are qualified.
+Previous fully qualified18fe0b3e retains its historical receipt. Never cancel or
+supersede a healthy main Native; this checkpoint finished before any promotion.
 
 Latest fully successful preparation compiler/test SHA:
 **6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
@@ -126,9 +122,9 @@ WF/{PackMutual,Rel,Fix,Eqns,Unfold}, ArgsPacker and upstream fixedParams tests w
 studied; notices retained.
 
 Next:
-1. Finish main5785ada4 integration without canceling healthy jobs. Record exact
-   jobs/artifact digests and update both handoffs. The exact-equation preparation
-   is green at6cdb9a6e; do not rerun it without new changes or unresolved concerns.
+1. Main5785ada4 integration completed all five gates; receipt and both handoffs
+   are updated. Exact-equation preparation is green at6cdb9a6e. Promote that
+   qualified child with fresh refs; do not rerun unchanged preparation.
 2. Implement total mutual WF executable ownership after auditing the whole
    preparation/RecursorLift/erasure/assurance path. The provisional design is
    docs/PSCV0_M3_MUTUAL_RUNTIME_DESIGN_2026-10-18.md. Derive actual bodies from the

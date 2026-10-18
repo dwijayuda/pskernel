@@ -23,10 +23,12 @@ structure PsElabApplicationCapture where
   valuesRev : List PsExpr := []
   abstractionsRev : List PsMetaAbstraction := []
 
-structure PsElabApplicationResult where
+structure PsElabApplicationResult (α : Type := PsSyntaxTerm) where
   result : PsElabTermResult
   constraintsRev : List PsSyntheticConstraint
   capture : Option PsElabApplicationCapture := none
+  remainingPositions : List α := []
+  remainingNames : List (PsName × α) := []
 
 def psSyntaxTermListIsEmpty
     (values : List PsSyntaxTerm) : Bool :=
@@ -153,8 +155,8 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
 
 -- Drain scoped constraints before a dependent argument. Individually checked
 -- progress is retained even when another item still needs a later argument.
-def psElabResolveSyntheticChecked (current : PsElabTermResult)
-    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabApplicationResult := do
+def psElabResolveSyntheticChecked {α : Type} (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : Except PsElabError (PsElabApplicationResult α) := do
   let solved := psSyntheticSolve current.context.environment current.context.instances
     current.context.metaContext pending.reverse (!current.context.postponing)
   if solved.resourceExceeded then throw .fuelExhausted
@@ -179,12 +181,13 @@ def psElabApplyOrderedWith {α : Type}
     (names : List (PsName × α)) (pending : List PsSyntheticConstraint)
     (complete : Bool := true) (expected : Option PsExpr := none)
     (capture : Option PsElabApplicationCapture := none) :
-    Except PsElabError PsElabApplicationResult := do
+    Except PsElabError (PsElabApplicationResult α) := do
   if capture.any (fun capture => capture.remaining == 0) then
-    if !positions.isEmpty then
-      throw (.invalidArgument "arguments exceed the owned source telescope")
-    if !names.isEmpty then throw (.invalidArgument "unknown named argument")
-    return { result := current, constraintsRev := pending, capture }
+    -- The owner transforms only its original header. The returned function
+    -- keeps the remaining ordinary arguments, including their names/order.
+    -- They are elaborated after that owner supplies the real checked head.
+    return { result := current, constraintsRev := pending, capture
+             remainingPositions := positions, remainingNames := names }
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
@@ -227,7 +230,7 @@ def psElabApplyOrderedWith {α : Type}
       match selected.1 with
       | some source =>
         let current ← psElabPropagateExpected current positions names expected
-        let resolved ← psElabResolveSyntheticChecked current pending
+        let resolved ← psElabResolveSyntheticChecked (α := α) current pending
         let current := resolved.result
         let pending := resolved.constraintsRev
         let argument ← elaborate current.context source
@@ -305,9 +308,11 @@ def psElabApplyArgs (elaborate : PsElaborator) (current : PsElabTermResult)
   psElabApplyOrdered elaborate 4096 current arguments [] pending
     (!arguments.isEmpty || expected.isSome) expected
 
-def psElabFinishApplication (application : PsElabApplicationResult)
+def psElabFinishApplication {α : Type} (application : PsElabApplicationResult α)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
   do
+    if !application.remainingPositions.isEmpty || !application.remainingNames.isEmpty then
+      throw (.invalidArgument "unconsumed arguments after an owned source telescope")
     -- Propagate convertible result information before dictionary/default work.
     -- A failed attempt is speculative; adaptation is retried after the queue.
     let current ← match psElabUnifyExpected application.result expected with

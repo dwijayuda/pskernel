@@ -123,3 +123,24 @@ Activation preparation began at c15c2bc054555ea0a301f7eba6a7ec937f6a3623
 fixtures to the shared component result interface; their exact forged-source
 and returned-function rejection assertions are unchanged. Inspect the newest
 preparation SHA before promotion; no source/backend qualification is claimed.
+
+## Shared application continuation correction
+
+Activation preparation c15c2bc0 (run39096826484/job117584917200) built and passed
+strict manifests, component kernel/runtime ownership and all other retained
+preparation groups. Its paired native source check failed with
+PSCV0-WF-ARITY: the recursive call exceeds its source header telescope.
+The flat native application supplied returned-function arguments in the same
+spine; the old owned-prefix capture incorrectly rejected that suffix, while
+chained .ps calls already separated it.
+
+The child returns the unconsumed positional/named suffix from the same generic
+ordered application engine. The WF owner constructs/closes exactly the original
+header call and genuine decrease proof, then resumes ordinary application on
+that actual checked result. It preserves once-only header capture, result
+arity, argument order, constraints and expected types. Ordinary completion
+explicitly rejects an accidentally unconsumed suffix. No parser rewrite or
+second argument elaborator. Reference: pinned Lean4.35.0
+Elab/PreDefinition/WF/Fix.lean72–95 and Elab/App.lean's ordered argument engine.
+Existing paired fixture/strict checked-Core comparison remains unchanged.
+Qualification pending; newest expected-HEAD preparation child is authoritative.

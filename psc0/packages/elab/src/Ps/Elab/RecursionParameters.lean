@@ -319,6 +319,8 @@ structure PsElabRecursionArguments where
   values : List PsExpr
   abstractions : List PsMetaAbstraction
   resultType : PsExpr
+  remainingPositions : List PsSyntaxTerm := []
+  remainingNames : PsElabNamedArguments := []
 
 -- The ordinary application owner supplies every written, implicit, instance
 -- and default argument. Its capture mode retains each once before a recursive
@@ -332,13 +334,9 @@ def psElabRecursionCaptureArguments (elaborate : PsElaborator)
   let head := psLocalPushBinding context.localContext .anonymous sourceType .explicit
   let inner := psElabContextWithLocal context head.context
   let grouped ← psElabCallArguments arguments [] []
-  let application ← (psElabApplyOrderedWith elaborate 4096
+  let application ← psElabApplyOrderedWith elaborate 4096
     { context := inner, term := .fvar head.id, type := sourceType }
-    grouped.fst grouped.snd [] true expected (some { remaining := parameterCount })).mapError
-      (fun error => match error with
-        | .invalidArgument "arguments exceed the owned source telescope" =>
-          .data "PSCV0-WF-ARITY: the recursive call exceeds its source header telescope"
-        | _ => error)
+    grouped.fst grouped.snd [] true expected (some { remaining := parameterCount })
   let some capture := application.capture
     | throw (.data "PSCV0-WF-INTERNAL: ordinary application lost its argument capture")
   if capture.remaining != 0 || capture.valuesRev.length != parameterCount then
@@ -346,7 +344,10 @@ def psElabRecursionCaptureArguments (elaborate : PsElaborator)
   -- Expected information has already flowed through the shared worker.
   -- Do not coerce the entire temporary application: only its arguments and
   -- exact declared result type belong to the recursive consumer.
-  let resolved ← psElabFinishApplication application none
+  -- Finish only the captured prefix. The caller retains the untouched
+  -- suffix below and resumes it on the actual checked recursive result.
+  let resolved ← psElabFinishApplication
+    { application with remainingPositions := [], remainingNames := [] } none
   let values := capture.valuesRev.reverse
   let expressions := resolved.type :: values ++ capture.abstractionsRev.flatMap
     (fun abstraction => match abstraction with
@@ -360,4 +361,6 @@ def psElabRecursionCaptureArguments (elaborate : PsElaborator)
       (fun declaration => psLocalDeclId declaration != head.id) }
   return {
     context := { resolved.context with localContext := locals }
-    values, abstractions := capture.abstractionsRev, resultType := resolved.type }
+    values, abstractions := capture.abstractionsRev, resultType := resolved.type
+    remainingPositions := application.remainingPositions
+    remainingNames := application.remainingNames }

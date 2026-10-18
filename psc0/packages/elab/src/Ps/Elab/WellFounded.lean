@@ -178,7 +178,14 @@ def psTryElabWellFoundedCall (elaborate : PsElaborator)
   else psElabAbstractType context resolved.context captured.abstractions resultType
   let inner := psElabContextWithMeta resolved.context closedType.context.metaContext
   let closed ← psElabAbstract context inner captured.abstractions resolved.term closedType.term
-  return some (← psElabFinalizeExpected closed expected)
+  if captured.remainingPositions.isEmpty && captured.remainingNames.isEmpty then
+    return some (← psElabFinalizeExpected closed expected)
+  -- Pinned WF/Fix.replaceRecApps applies residual arguments AFTER the checked
+  -- recursive call and its decrease proof. Resume the shared ordinary engine
+  -- outside the captured header scope, exactly like chained source calls.
+  let application ← psElabApplyOrdered elaborate 4096 closed
+    captured.remainingPositions captured.remainingNames [] true expected
+  return some (← psElabFinishApplication application expected)
 
 -- Defaults prove only the existing checked natural-order rules. There is no
 -- Boolean termination oracle and no implicit omega or arithmetic fallback.

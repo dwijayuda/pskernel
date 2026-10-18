@@ -124,3 +124,26 @@ arbitrary retained result lambdas need explicit coverage before replacing a
 working owner. Declaration counts, generated names, registration/privacy,
 proof-kind behavior and normalization obligations must remain deliberate.
 These findings are design constraints, not implemented changes or completion.
+
+## Optional generalization is not equality transport
+
+Additional pinned source: Lean/Meta/GeneralizeVars.lean (getFVarsToGeneralize,
+mkGeneralizationForbiddenSet, getFVarSetToGeneralize), Meta/CollectFVars.lean.
+Native optional source-match generalization excludes target dependencies,
+instance implicit locals, auxiliary recursion locals and (for match) let
+declarations, then checks the proposed match type. Current PSC0
+psElabDependentLocals intentionally includes let values and instances for
+mandatory dependent equality transport. Do not change that shared helper's
+semantics globally to implement the source option. Give Match's optional
+generalization selection the pinned forbidden/eligibility policy while keeping
+Equality's required typed reversion and let reconstruction intact. Check
+multi-discriminant dependencies, instance visibility and pattern shadowing.
+
+Plain-definition owner consolidation also has a concrete capability issue:
+MutualStructuralFixedSeed/FixedMap require noncaptured uniform datatype
+arguments to be direct header fvars, whereas a computed parameter can depend
+on header variables (for example List A). A uniform-parameter dependency
+closure and checked correspondence are needed before claiming the shared
+owner subsumes that case. Inspect the native fixed-parameter/structural owner
+and existing source acceptance; do not replace this with a guessed inverse of
+an arbitrary type expression or a retry based on a failed test.

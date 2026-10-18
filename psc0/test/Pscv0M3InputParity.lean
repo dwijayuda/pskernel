@@ -340,12 +340,23 @@ def check (root : System.FilePath) : IO Unit := do
     "const orderSecond: Nat := argumentOrder(2, 1, 3)\n"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean richLean))
     (← fromExcept (checkedDeclarations .proofScript richPs))
-  for source in [
-      "function order(x: Nat, y: Nat): Nat := x + y\nconst bad: Nat := order(y := 2, 1)\n",
-      "function order(x: Nat, y: Nat): Nat := x + y\nconst bad: Nat := order(1, x := 2)\n"] do
-    let program ← fromExcept (psCompilerParsePscv0 source .proofScript)
-    ensure (!(psCompilerElaboratePscv0 program).isOk)
-      "ProofScript lost its positional-prefix argument contract"
+  -- Positional-prefix placement is grammar-owned; overlap is telescope-owned.
+  -- Keep both refusals and check their actual phase, not a weakened isError.
+  match psCompilerParsePscv0
+      "function order(x: Nat, y: Nat): Nat := x + y\nconst bad: Nat := order(y := 2, 1)\n"
+      .proofScript with
+  | .error error =>
+    ensure (error.startsWith "PSCV0-PARSE: named argument after named argument")
+      ("ProofScript placement lost its parser diagnosis: " ++ error)
+  | .ok _ => throw (IO.userError "ProofScript parsed a positional argument after a named argument")
+  let overlap ← fromExcept (psCompilerParsePscv0
+    "function order(x: Nat, y: Nat): Nat := x + y\nconst bad: Nat := order(1, x := 2)\n" .proofScript)
+  match psCompilerElaboratePscv0 overlap with
+  | .error error =>
+    ensure ((psCompilerPscv0Error error).startsWith
+      "PSCV0-ARGUMENT: argument supplied both positionally and by name")
+      ("ProofScript overlap lost its telescope diagnosis: " ++ psCompilerPscv0Error error)
+  | .ok _ => throw (IO.userError "ProofScript accepted positional/name overlap")
   for source in [
       "def order (x y : Nat) : Nat := x + y\ndef bad : Nat := order (x := 1) (x := 2)\n",
       "def order (x y : Nat) : Nat := x + y\ndef bad : Nat := order (missing := 1) 2\n"] do

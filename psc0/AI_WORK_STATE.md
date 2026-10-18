@@ -259,3 +259,25 @@ main Native, or create a second pending preparation. Continue named/generalizing
 match work from its retained design after the existing source-metadata gap.
 No changed assumptions, runtime primitive, admission budget, PSKernel-Core or
 self-hosting. M3+B and full selected input parity remain OPEN.
+
+## Source-negative phase qualification follow-up
+
+E5f3b750/preparation39104907133/job117611012961 passed native build, all
+foundation audits and exports, group public signatures, indexed elimination,
+deriving, WF/P0/P1 and noncomputable checks. Its paired source declarations
+passed exact Core comparisons, including the two corrected proof forms and
+the rich native named-argument examples. It then stopped in an existing
+negative-control setup: order(y := 2, 1) was correctly rejected by the
+ProofScript parser at2:33, while the fixture incorrectly required parsing to
+succeed before expecting elaboration failure.
+
+This child preserves both negative cases and makes their obligations precise:
+named-then-positional syntax requires the existing parser diagnosis;
+positional/name overlap parses and requires the existing telescope diagnosis.
+No compiler acceptance, expected value, proof, budget or foundation pin changed.
+Paired backend emission/execution and complete integration are still pending.
+
+Fa3bbea/preparation39105883977/job117612424848 is running the independent,
+UNSELECTED full recursor-source authoring candidate. Read its actual replay,
+rule, complete-type and digest evidence before selection. The phase correction
+is queued behind it, with main still33676076; M3+B remains OPEN.

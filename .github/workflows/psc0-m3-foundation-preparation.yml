@@ -162,7 +162,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ../dist/m3-foundation-preparation/inductive-match
-          lake build pscv0_m3_inductive_match 2>&1 | tee ../dist/m3-foundation-preparation/inductive-match/build.log
+          lake build pscv0_m3_inductive_match pscv0_m3_inductive_groups 2>&1 | tee ../dist/m3-foundation-preparation/inductive-match/build.log
+          .lake/build/bin/pscv0_m3_inductive_groups 2>&1 | tee ../dist/m3-foundation-preparation/inductive-match/groups.log
           .lake/build/bin/pscv0_m3_inductive_match ../dist/m3-foundation-preparation/inductive-match 2>&1 | tee ../dist/m3-foundation-preparation/inductive-match/check.log
       - name: Compile the checked monotonicity proof producer
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}

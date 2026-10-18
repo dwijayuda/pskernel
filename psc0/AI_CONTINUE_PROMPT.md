@@ -82,9 +82,9 @@ and incomplete-coverage controls remain. No target primitive or budget increase.
 ## Active preparation — function fields and public source telescopes
 
 Unqualified preparation follows fully qualified main33676076. Fresh refs are
-authoritative. At this checkpoint parent69e73ede6ab1d982a1aa4bdb40f55b21188d1ca6
-(run39102651449) is still running; this child completes the public recursor
-telescope repair. Keep at most one active and one pending preparation run.
+authoritative. At this checkpoint parenta23a0fd440cebfd2cb5395066ad877adf8e47122
+(run39103818085) is running. This child adds the existing public-signature group
+check to preparation and records the complete remaining match design. Keep at most one active and one pending preparation run.
 Do not promote until preparation is green, or supersede a healthy main Native.
 
 Implemented:
@@ -192,3 +192,19 @@ unqualified pending complete preparation.
 Preparation4a2b2ff4/run39103687263 stopped on comment delimiters in the new
 Core binder-analysis helpers. Corrected to Lean comments; the full feature and
 strict qualification obligations remain unchanged. No semantic result yet.
+
+## Current qualification and next design
+
+Public recursor signature comparison now runs in the existing preparation
+indexed-elimination step, using the existing group executable. The selected
+foundation inventory also reports unavailable native names and imports the
+pinned Order module explicitly; differences are diagnostic, never automatic
+asset selection. Strict declaration/surface pins remain unchanged.
+
+Named/generalizing match design is retained in
+docs/PSCV0_M3_MATCH_METADATA_DESIGN_2026-10-18.md. A crucial invariant is to
+separate named branch equations from structural IH motives. Study remaining
+plain-definition routing into the older direct-IH mechanism; the shared typed
+PreDefinition/MutualStructural owner already separates source cases from
+checked recursion construction. Avoid a form-specific retry or fake child
+equality. This work is researched, not implemented or qualified.

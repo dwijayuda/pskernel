@@ -16,18 +16,22 @@ private def nativeRecursorBinders : Lean.Expr → List String
 
 private def inspectRecursorSurface : IO Unit := do
   Lean.initSearchPath (← Lean.findSysroot)
-  let native ← Lean.importModules #[{ module := `Lean }] {}
+  let native ← Lean.importModules #[{ module := `Lean }, { module := `Init.Internal.Order.Basic }] {}
   let mut compared := 0
   let mut differences := 0
+  let mut unavailable : List String := []
   for declaration in psSelfHostProdPreludeEnvironment.declarations.reverse do
     let .recursorDecl info := declaration | continue
     let name := PsKernelLean.toLeanName info.name
-    let some (.recInfo original) := native.find? name | continue
+    let expected := match native.find? name with
+      | some (.recInfo original) => some (nativeRecursorBinders original.type)
+      | _ => none
+    if expected.isNone then unavailable := name.toString :: unavailable
+    let some expected := expected | continue
     let portable ← match PsKernelLean.toLeanExpr info.type with
       | .ok value => pure value
       | .error error => throw (IO.userError error.message)
     let actual := nativeRecursorBinders portable
-    let expected := nativeRecursorBinders original.type
     compared := compared + 1
     if actual != expected then
       differences := differences + 1
@@ -37,6 +41,7 @@ private def inspectRecursorSurface : IO Unit := do
         ("nativeBinders", Lean.toJson expected)]).compress
   IO.println ("PSCV0_M3_RECURSOR_SURFACE_INVENTORY compared=" ++ toString compared ++
     " differences=" ++ toString differences ++ "; diagnostic only; selected bytes unchanged")
+  IO.println (Lean.Json.mkObj [("unavailableNativeRecursors", Lean.toJson unavailable.reverse)]).compress
 
 def main : IO Unit := do
   inspectRecursorSurface

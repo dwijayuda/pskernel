@@ -39,6 +39,13 @@ def psExprApplyMany
   psExprApplyManyWorker arguments fn
 
 
+/-
+Implicit-dependency algorithm adapted from Lean 4.35.0 kernel/expr.cpp.
+Copyright (c) 2013-2014 Microsoft Corporation. All rights reserved.
+Released under Apache 2.0; upstream authors Leonardo de Moura and Soonho Kong.
+Pinned reference: eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+The PsExpr traversal and portable implementation below are PSC0 code.
+-/
 -- Syntactic binder inference used by generated recursors. Lean 4.35.0
 -- kernel/expr.cpp infer_implicit(strict=true) follows dependencies through
 -- already implicit parameters, but never infers a binder from the result alone.

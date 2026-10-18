@@ -132,7 +132,7 @@ def psSelfHostProdPreFloatConversionsPreludeEnvironment : PsEnvironment :=
 
 -- Frozen F4 input, prior to native display and opaque cross-width selection.
 def psSelfHostProdPreFloatDisplayPreludeEnvironment : PsEnvironment :=
-  psStandardScientificExtend psSelfHostProdPreFloatDisplayPreludeEnvironment
+  psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment
 
 -- Frozen logical boundary for explicit target-word profile authoring.
 def psSelfHostProdPrePlatformWordsPreludeEnvironment : PsEnvironment :=

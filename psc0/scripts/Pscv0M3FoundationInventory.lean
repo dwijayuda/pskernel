@@ -2,6 +2,28 @@ import Ps.Environment.SelfHostProd
 import PsKernelLean.Convert
 import Lean
 
+-- A runtime-catalogue edit must not change the frozen scientific/F4 boundary.
+example : psSelfHostProdPreFloatDisplayPreludeEnvironment =
+    psStandardScientificExtend psSelfHostProdPreFloatConversionsPreludeEnvironment := rfl
+
+-- PProd's logical presence does not register its runtime datatype. Check the
+-- actual shared catalogue, not a parallel test-only declaration list. Missing
+-- lookups or duplicate registrations fail before source/backend qualification.
+private def inspectPProdRuntimeData : IO Unit := do
+  let names := ["PProd", "PProd.mk", "PProd.rec"]
+  if psSelfHostPProdRuntimeDataDeclarations.length != names.length then
+    throw (IO.userError "PSCV0_M3_PPROD_RUNTIME_DATA: incomplete checked data catalogue")
+  for text in names do
+    let name := psDecisionName text
+    if (psEnvironmentFind psSelfHostProdPreludeEnvironment name).isNone then
+      throw (IO.userError ("PSCV0_M3_PPROD_RUNTIME_DATA: missing selected " ++ text))
+    let occurrences := psSelfHostRuntimePreludeDeclarationsWithProd.filter
+      (fun declaration => psNameEq (psDeclarationName declaration) name)
+    if occurrences.length != 1 then
+      throw (IO.userError ("PSCV0_M3_PPROD_RUNTIME_DATA: expected one runtime " ++
+        text ++ ", found " ++ toString occurrences.length))
+  IO.println "PSCV0_M3_PPROD_RUNTIME_DATA: PASS complete selected data and unique shared runtime registrations; source emission and execution checked separately"
+
 -- Source calling conventions are observable even when kernel type equality
 -- ignores binder annotations. Inventory every selected public recursor against
 -- pinned Lean before choosing a metadata change; this is diagnostic evidence,
@@ -44,6 +66,7 @@ private def inspectRecursorSurface : IO Unit := do
   IO.println (Lean.Json.mkObj [("unavailableNativeRecursors", Lean.toJson unavailable.reverse)]).compress
 
 def main : IO Unit := do
+  inspectPProdRuntimeData
   inspectRecursorSurface
   let before := psSelfHostProdPreClassicalPreludeEnvironment
   let after := psSelfHostProdPreludeEnvironment

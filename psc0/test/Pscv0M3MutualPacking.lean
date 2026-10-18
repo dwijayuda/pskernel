@@ -150,6 +150,80 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
   | .error _ => pure ()
   | .ok _ => throw "typed member analysis accepted a callee outside the component"
 
+private def checkFixedScopes (environment : PsEnvironment) :
+    Except String (List PsDeclaration) := do
+  let u := psRootName "u"
+  let nat := PsExpr.constE psNatName []
+  let sort := PsExpr.sortE (.succ (.param u))
+  let a := PsExpr.fvar 0
+  let value := PsExpr.fvar 1
+  let result := psLogicPi 3 "ignored" nat a
+  let resultValue := psLogicLam 3 "ignored" nat value
+  let firstType := psLogicPi 0 "A" sort
+    (psLogicPi 1 "a" a (psLogicPi 2 "n" nat result)) .implicit
+  let firstValue := psLogicLam 0 "A" sort
+    (psLogicLam 1 "a" a (psLogicLam 2 "n" nat resultValue)) .implicit
+  let secondType := psLogicPi 2 "n" nat
+    (psLogicPi 0 "B" sort (psLogicPi 1 "b" a result) .implicit)
+  let secondValue := psLogicLam 2 "n" nat
+    (psLogicLam 0 "B" sort (psLogicLam 1 "b" a resultValue) .implicit)
+  let thirdType := psLogicPi 0 "C" sort
+    (psLogicPi 2 "n" nat (psLogicPi 1 "c" a result)) .implicit
+  let thirdValue := psLogicLam 0 "C" sort
+    (psLogicLam 2 "n" nat (psLogicLam 1 "c" a resultValue)) .implicit
+  let entries : List (PsName × PsExpr × PsExpr × List (Option Nat)) := [
+    (psRootName "packingFixedFirst", firstType, firstValue, [some 0, some 1, none]),
+    (psRootName "packingFixedSecond", secondType, secondValue, [none, some 0, some 1]),
+    (psRootName "packingFixedThird", thirdType, thirdValue, [some 0, none, some 1])]
+  let declarations := entries.map fun (name, type, value, _) =>
+    PsDeclaration.definitionDecl name [u] type value
+  let environment ← (psAddDeclarationList environment declarations).mapError psCompilerPscv0ElabError
+  let context := psElabContextEmpty environment [u]
+  let fixed ← (psElabRecursionOpenFixedScope context firstType
+    [some 0, some 1, none] 2).mapError psCompilerPscv0ElabError
+  let fixedValues := psElabBinderArguments fixed.bindersRev
+  let [fixedType, fixedValue] := fixedValues | throw "common fixed scope changed its order"
+  let [valueBinder, typeBinder] := fixed.bindersRev | throw "fixed scope lost dependent binders"
+  if !psBinderInfoEq typeBinder.binder .implicit ||
+      !psBinderInfoEq valueBinder.binder .explicit ||
+      !psExprAlphaEq valueBinder.type fixedType then
+    throw "fixed scope changed binder kind or actual dependent domain"
+  let mut equations := []
+  for (name, type, _, permutation) in entries do
+    let header ← (psElabRecursionSpecializeHeader fixed.context type permutation fixedValues).mapError
+      psCompilerPscv0ElabError
+    if header.bindersRev.length != 1 || header.arguments.length != 3 then
+      throw "fixed specialization consumed a returned function or lost a source slot"
+    let expectedType := psLogicPi header.context.localContext.nextId "ignored" nat fixedType
+    if !psDefEqReadOnlyWithEnv environment psMetaEmpty header.context.localContext
+        header.resultType expectedType then
+      throw "fixed specialization changed the actual result family"
+    let applied := psExprApplyMany (.constE name [.param u]) header.arguments
+    let expected := psLogicLam header.context.localContext.nextId "ignored" nat fixedValue
+    let proof ← (psElabWellFoundedExtensionalEquality 1 header.context header.resultType
+      applied expected).mapError psCompilerPscv0ElabError
+    let level ← (psElabExpressionSort header.context header.resultType).mapError psCompilerPscv0ElabError
+    let bindersRev := header.bindersRev ++ fixed.bindersRev
+    let proposition := psLogicEq level header.resultType applied expected
+    equations := equations ++ [.theoremDecl (psNameAppendStr name "equation") [u]
+      (psCloseElabForallBinders psMetaEmpty bindersRev proposition)
+      (psCloseElabLambdaBinders psMetaEmpty bindersRev proof)]
+  match psElabRecursionSpecializeHeader fixed.context firstType
+      [some 0, some 0, none] fixedValues with
+  | .error _ => pure ()
+  | .ok _ => throw "fixed scope accepted a nonbijective permutation"
+  match psElabRecursionSpecializeHeader fixed.context firstType
+      [some 0, some 1, none] [fixedType, nat] with
+  | .error _ => pure ()
+  | .ok _ => throw "fixed scope accepted a value of the wrong dependent type"
+  let indexed := PsExpr.app (.constE (psRootName "Fin") [])
+    (.app (.constE psNatSuccName []) (.fvar 0))
+  let changingType := psLogicPi 0 "n" nat (psLogicPi 1 "x" indexed nat)
+  match psElabRecursionOpenFixedScope context changingType [none, some 0] 1 with
+  | .error _ => pure ()
+  | .ok _ => throw "fixed scope captured an unowned varying dependency"
+  return declarations ++ equations
+
 -- The result family may depend on the sum tag, but every measure must
 -- land in one fixed codomain. Build the actual generic component fixpoint
 -- and prove its three member equations independently through the kernel.
@@ -232,6 +306,7 @@ private def build : Except String (List PsDeclaration) := do
   let environment := psStandardPSumReducibility.foldl
     (fun env (name, status) => psEnvironmentSetReducibility env name status) environment
   checkCallbackScopes environment
+  let fixedScopeDeclarations ← checkFixedScopes environment
   let source :=
     "function packingFirst(n: Nat): Fin(n + 1) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
     "function packingSecond(b: Bool): Bool := b\n" ++
@@ -338,7 +413,7 @@ private def build : Except String (List PsDeclaration) := do
   let _ ← (psElabResolvedTerm (psElabContextEmpty environment [u, v])
     sortValue (some sortType)).mapError psCompilerPscv0ElabError
   let sorts := PsDeclaration.definitionDecl (psRootName "packingSorts") [u, v] sortType sortValue
-  return psStandardPSumDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
+  return psStandardPSumDeclarations ++ fixedScopeDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
 
 def main : IO Unit := do
   ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"
@@ -362,6 +437,7 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
+  IO.println "PSCV0_M3_FIXED_SCOPES: PASS three reordered polymorphic headers, dependent fixed values, implicit binder preservation, returned-function ownership, exact kernel equations and malformed/dependent mapping refusals"
   IO.println "PSCV0_M3_COMPONENT_FIX: PASS heterogeneous dependent result family, common Nat measure, three typed decreasing callbacks, actual checked fix_eq member equations and incomplete/dependent-measure refusals; source mutual WF is separate"
   IO.println "PSCV0_M3_CALLBACK_SCOPES: PASS two typed callees, current refined capture, ordinary local shadow, saved scope, escape refusal and cross-owner parameter correspondence"
   IO.println "PSCV0_M3_MUTUAL_PACKING: PASS three heterogeneous dependent components, complete unary currying with dependent header and returned function, exact checked projection equations, user PSum ownership and malformed index/constructor refusals; source mutual WF is separate"

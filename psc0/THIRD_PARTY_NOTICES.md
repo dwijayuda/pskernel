@@ -286,3 +286,14 @@ Leonardo de Moura), at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
 Apache-2.0, with retained LEAN-APACHE-2.0.txt and upstream notices. Modifications:
 portable explicit contexts, structural traversal, complete per-member validation,
 and functional signature inference from the selected checked fixpoint.
+
+### Fixed-parameter telescope specialization
+
+Ps.Elab.RecursionParameters adapts FixedParamPerm.forallTelescope,
+instantiateForall and buildArgs in src/Lean/Elab/PreDefinition/FixedParams.lean
+at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Copyright (c) 2025 Lean FRO, LLC. Author: Joachim Breitner. Apache-2.0.
+Modifications: explicit portable local contexts, checked complete permutations,
+fresh common identities, actual dependent-domain checks and structural traversal.
+The native implementation and tests remain the reference; no host MetaM enters
+the portable compiler. Retain LEAN-APACHE-2.0.txt and upstream notices.

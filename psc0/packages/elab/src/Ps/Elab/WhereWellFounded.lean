@@ -23,9 +23,17 @@ def psElabWhereParentName (header : PsElabWhereHeader) : PsName :=
   | .declaration _ => header.name
   | .localDefinition parent _ => parent
 
-def psElabWhereWellFounded (prepared : PsElabWherePrepared)
+-- Source preparation is shared by singleton and component WF consumers.
+-- It owns original captures, lexical aliases and delayed termination scope;
+-- it neither constructs a fixpoint nor grants recursive-call authority.
+structure PsElabWhereWellFoundedInput where
+  header : PsElabWellFoundedTypedHeader
+  body : PsSyntaxTerm
+  termination : PsSyntaxTermination
+
+def psElabWherePrepareWellFounded (prepared : PsElabWherePrepared)
     (environment : PsEnvironment) (levelNames : List PsName)
-    (member : PsElabPreDefinition) : Except PsElabError PsElabWellFoundedResult := do
+    (member : PsElabPreDefinition) : Except PsElabError PsElabWhereWellFoundedInput := do
   let some original := prepared.block.members.find? (fun original =>
       psNameEq original.name member.name && original.peerId == member.peerId)
     | throw (psElabWhereError "WF-IDENTITY" "the measured component is not owned by this typed source block")
@@ -123,11 +131,21 @@ def psElabWhereWellFounded (prepared : PsElabWherePrepared)
         { scope with localAliases := proofAliases ++ scope.localAliases } span
     | source => source
   let termination := { termination with decreasing }
-  psElabWellFoundedTypedParts psElabTerm member.name {
-    context
-    parametersRev
-    capturesRev
-    resultType := input.openType
-    functionName := input.header.alias
-    bodyLocalContext := some bodyLocalContext
-    preserveLevels := true } input.header.sourceBody termination
+  return {
+    header := {
+      context
+      parametersRev
+      capturesRev
+      resultType := input.openType
+      functionName := input.header.alias
+      bodyLocalContext := some bodyLocalContext
+      preserveLevels := true }
+    body := input.header.sourceBody
+    termination }
+
+def psElabWhereWellFounded (prepared : PsElabWherePrepared)
+    (environment : PsEnvironment) (levelNames : List PsName)
+    (member : PsElabPreDefinition) : Except PsElabError PsElabWellFoundedResult := do
+  let input ← psElabWherePrepareWellFounded prepared environment levelNames member
+  psElabWellFoundedTypedParts psElabTerm member.name input.header
+    input.body input.termination

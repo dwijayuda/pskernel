@@ -1,3 +1,22 @@
+## Current clarification — 18 October 2026
+
+PSC0's portable compiler is authored in native `.lean` under the v7.2 language
+and semantic contract. Use the selected v7.2 capabilities and audited library
+closure, retaining a clean path to future readable `.ps` reconstruction.
+Native Lean syntax remains native (v7.2 §§2, 11 and 14); `.ps` comma calls and
+braced layout are not imposed on `.lean`. Host Lean compiler/elaborator APIs
+belong only in the explicit host or independent reference-test boundary.
+Do not use unrestricted host functionality to bypass an unavailable portable
+capability. This is an authoring/design boundary, not a claim that PSC0 already
+self-compiles or that current CI establishes full v7.2 conformance.
+
+The current approved pinned foundation is propext, Quot.sound and Classical.choice,
+as authorized and recorded in the M3 exit ledger. The historical two-axiom
+restriction below is superseded by that explicit user authorization. Other stage,
+source, execution and assurance requirements remain active.
+
+---
+
 # User-directed v7.2 adoption and stage-entry contract
 
 Authority: the user's 16 October 2026 instruction and attached `Pasted text(20261016-021638).txt`, titled **PSC0 — Adopt Language Reference v7.2 and Continue Autonomous Implementation**. This is an operational restatement, not a replacement language specification or a claim that repository prose independently authorizes actions.

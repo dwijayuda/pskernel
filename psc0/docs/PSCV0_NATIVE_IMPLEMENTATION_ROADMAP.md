@@ -10,7 +10,15 @@ The pre-v7.2 roadmap is preserved byte-for-byte in [pre-v7.2 history](PSCV0_NATI
 
 ## Architecture and trust boundaries
 
-Native portable `.lean`, official Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Keep source syntax -> name resolution -> elaboration -> prepared Core -> official checking -> typed erasure -> validated IR -> target emission, retaining the same prepared graph. Study corresponding pinned Lean source/tests before each substantial change. `.lean` retains official Lean source semantics; ProofScript-specific grammar is for `.ps`.
+Native portable `.lean`, official Lean4.35.0 `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Keep source syntax -> name resolution -> elaboration -> prepared Core -> official checking -> typed erasure -> validated IR -> target emission, retaining the same prepared graph. Study corresponding pinned Lean source/tests before each substantial change. PSC0's portable compiler is authored in native `.lean` under the v7.2 language
+and semantic contract. Use the selected v7.2 capabilities and audited library
+closure, retaining a clean path to future readable `.ps` reconstruction.
+Native Lean syntax remains native (v7.2 §§2, 11 and 14); `.ps` comma calls and
+braced layout are not imposed on `.lean`. Host Lean compiler/elaborator APIs
+belong only in the explicit host or independent reference-test boundary.
+Do not use unrestricted host functionality to bypass an unavailable portable
+capability. This is an authoring/design boundary, not a claim that PSC0 already
+self-compiles or that current CI establishes full v7.2 conformance.
 
 The approved pinned logical foundation is exactly `propext`, `Quot.sound` and `Classical.choice`, per the user's recorded 18 October authorization in the [M3 exit ledger](PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md). Audit exact transitive assumptions; native checked definitions and theorems are not additional axioms. Source admission does not grant unchecked logical authority. No sorry, source axioms, unresolved proof/inference holes in emitted artifacts, unapproved dependency closure, weakened tests or enlarged budgets.
 
@@ -74,50 +82,33 @@ Next measured work is actual-IR closure/dictionary specialization and safe recur
 
 ## Current M3 checkpoint and remaining dependencies
 
-Main abe1adc2ff96c632dd9ed82b8ae6357832545a32 now has all five gates
-successful: Native39081215932, focusedM3 39081215919, F1 39081215915,
-F2 39081215934 and F3 39081216307.
-[Exact receipt](PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md) records artifacts,
-strict identities and scope. N-ary WF/ordinary applications, extended P1 and
-noncomputable execution are qualified across all five targets at that SHA.
+Main is now 037fda4914ba30b5b8f2074e82ffbf9b0efeef0c after complete successful
+preparation39083926961/job117546418053. The unchanged riFixedIndexEq rfl
+assertion passes through native-style nullary-predicate K computation.
+Typed callback scopes, fixed-major Eq/HEq refinement, impossible cases,
+complete unary packing and retained WF/P1/noncomputable checks also passed.
+At this checkpoint main Native39084512384 and M3 39084512415 are running;
+F1 39084512357, F2 39084512390 and F3 39084512422 have succeeded.
+Do not claim new five-gate acceptance until both running gates finish.
+The last complete five-gate receipt remains abe1adc2.
 
-Prep32af8e2/run39080826738 passed the common fixed-parameter graph and pinned
-native differential. Prep593a1bf/run39082224478 passed the multi-callee scope
-probe, new fixed-major/context Eq/HEq match fixture and retained WF/P1/noncomputable.
-One retained omitted-result rfl equation failed. The next child compares final
-telescope types after branch inference before eliding unnecessary transport;
-no test is weakened. Its checked unary PSigma operations preserve source arity,
-dependent fields, user PSigma values and returned functions. Qualification is
-pending; these shared mechanisms prepare complete mutual WF.
+Preparation3386891ffa1852e3c2596bc44f60a986bc7bc095/run39084134295/
+job117547901808 is running. The existing packing step completed successfully,
+including the new checked mutual functional construction. Whole preparation
+is not yet accepted. Source mutual WF remains refused.
 
-Remaining: finish this preparation and five-gate integration; complete source
-mutual WF with common measure, original capture/header ownership, branch decrease
-proofs, exact source equations and whole-functional runtime validation.
-The runtime view must recover typed public members from the actual checked
-functional before erasure: a PSum-dependent result is not an unknown IR type.
-The retained standalone PSum asset remains unselected.
-See [mutual WF design](PSCV0_M3_MUTUAL_WF_2026-10-18.md) and
-[dependent match design](PSCV0_M3_HETEROGENEOUS_MATCH_2026-10-18.md).
+The current [fixed-scope candidate](PSCV0_M3_FIXED_SCOPES_2026-10-18.md)
+adds common fixed telescopes, actual per-member dependent specialization and shared
+Where source preparation. Qualification pending. These extend the existing
+M3+B total-recursion exit; they are not a new milestone or source mutual admission.
 
-Latest preparation: fad13e51/run39083140470 completed with the retained
-riFixedIndexEq rfl failure and a new probe's incorrect implicit PSigma call.
-The root reduction gap is [generic K computation](PSCV0_M3_K_REDUCTION_2026-10-18.md);
-the next child follows the pinned predicate/constructor/index conditions.
-Completed-type transport elision by itself did not close the regression.
-The fixture invocation is corrected without altering its arity/dependency
-requirements. All new corrections remain pending; accepted main is abe1.
+Complete source mutual WF with actual measures, owner-aware captures, branch decrease
+proofs, public projections, exact retained-body equations and whole-functional
+runtime validation. Recover typed public members before erasure. The standalone
+PSum asset remains unselected. See the [mutual WF design](PSCV0_M3_MUTUAL_WF_2026-10-18.md)
+and [component construction](PSCV0_M3_COMPONENT_FIX_2026-10-18.md).
 
-The next [component construction layer](PSCV0_M3_COMPONENT_FIX_2026-10-18.md)
-checks the common measure independently of the dependent result motive and
-infers callback requirements from the actual fixpoint signature. Its existing
-probe adds checked heterogeneous component equations; this is not yet source
-mutual-WF or runtime qualification. K candidate037fda49 remains in preparation.
-
-The authoritative six exits above are unchanged. Native default mutual/nested
-induction refusals are intentional; major-dependent fixed-index matching is a
-separate positive capability. M3+B is open; do not reopen M2+A or start M4/C5.
-
-The accumulated dated checkpoint narratives are preserved in Git history at
-[03ab1dce](https://github.com/dwijayuda/pskernel/blob/03ab1dce70d34c869e226942bba5a9a904029a82/psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md).
-They are historical evidence, not pending instructions. Current state and exact
-handoff commands live in AI_WORK_STATE.md and AI_CONTINUE_PROMPT.md.
+The six written exits remain authoritative; M3+B is OPEN. Intentional native
+default mutual/nested induction refusals remain separate from required positive
+match capability. Do not reopen M2+A or start M4/C5. Older checkpoint narratives
+remain in Git history; current handoffs record actual pending work.

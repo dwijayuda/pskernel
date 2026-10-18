@@ -72,44 +72,38 @@ Prepare the foundation/library probe early while closing independent source/data
 
 ## Current evidence
 
-The current branch/CI state and strict identities are consolidated in
-[AI_WORK_STATE.md](../AI_WORK_STATE.md); the current dependency order is in the
-[roadmap](PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md#current-m3-checkpoint-and-remaining-dependencies).
-Mainabe1adc2 now has all five gates successful: Native39081215932,
-M3 39081215919, F1 39081215915, F2 39081215934 and F3 39081216307.
-The [integration receipt](PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md)
-records exact artifact digests, strict pins and qualified scope. This includes
-target execution for extended P1, n-ary WF/ordinary calls and noncomputable policy.
+Main is now 037fda4914ba30b5b8f2074e82ffbf9b0efeef0c after complete successful
+preparation39083926961/job117546418053. The unchanged riFixedIndexEq rfl
+assertion passes through native-style nullary-predicate K computation.
+Typed callback scopes, fixed-major Eq/HEq refinement, impossible cases,
+complete unary packing and retained WF/P1/noncomputable checks also passed.
+At this checkpoint main Native39084512384 and M3 39084512415 are running;
+F1 39084512357, F2 39084512390 and F3 39084512422 have succeeded.
+Do not claim new five-gate acceptance until both running gates finish.
+The last complete five-gate receipt remains abe1adc2.
 
-Prep32af8e2/39080826738 passed fixed-parameter correspondence.
-Prep593a1bf/39082224478 passed typed multi-callee scope, fixed-major Eq/HEq
-matching and retained WF/P1/noncomputable checks, but the omitted-result
-riFixedIndexEq rfl assertion failed. The next child elides transport only after
-checking the final telescope types and reused base, following pinned Subst.
-The unchanged fixture validates this inference invariant. Completed checked
-unary packing now also covers dependent headers, final user PSigma values and
-returned functions in the existing consolidated probe. Qualification is pending.
+Preparation3386891ffa1852e3c2596bc44f60a986bc7bc095/run39084134295/
+job117547901808 is running. The existing packing step completed successfully,
+including the new checked mutual functional construction. Whole preparation
+is not yet accepted. Source mutual WF remains refused.
 
-Latest preparation: fad13e51/run39083140470 completed with the retained
-riFixedIndexEq rfl failure and a new probe's incorrect implicit PSigma call.
-The root reduction gap is [generic K computation](PSCV0_M3_K_REDUCTION_2026-10-18.md);
-the next child follows the pinned predicate/constructor/index conditions.
-Completed-type transport elision by itself did not close the regression.
-The fixture invocation is corrected without altering its arity/dependency
-requirements. All new corrections remain pending; accepted main is abe1.
+The [abe1 integration receipt](PSCV0_M3_INTEGRATION_ABE1ADC2_2026-10-18.md)
+retains exact artifacts and strict identities. The [fixed-scope candidate](PSCV0_M3_FIXED_SCOPES_2026-10-18.md)
+adds checked dependent common parameters and original-arity specialization,
+plus shared source preparation. It remains pending. No exit is closed merely
+by these construction probes; source mutual decrease/equation/runtime ownership
+and final combined acceptance remain required.
 
-The next [component construction layer](PSCV0_M3_COMPONENT_FIX_2026-10-18.md)
-checks the common measure independently of the dependent result motive and
-infers callback requirements from the actual fixpoint signature. Its existing
-probe adds checked heterogeneous component equations; this is not yet source
-mutual-WF or runtime qualification. K candidate037fda49 remains in preparation.
+## Portable authoring clarification — 18 October 2026
 
-M3+B remains open. Remaining total-recursion work includes compatible mutual WF
-through the actual typed PSum/PSigma domain, common fixed parameters and measure,
-branch-owned decreases, exact source equations and complete runtime functional
-validation. PSum is still unselected. The six exit criteria above are unchanged.
+The user clarified that .lean in psc0 follows v7.2.
 
-Older dated receipts and checkpoint narratives are preserved at
-[03ab1dce](https://github.com/dwijayuda/pskernel/blob/03ab1dce70d34c869e226942bba5a9a904029a82/psc0/docs/PSCV0_M3_LEAN_FOUNDATION_AND_EXIT_LEDGER_2026-10-18.md)
-and in their linked dated files. This consolidation removes obsolete pending
-instructions; it does not relabel historical evidence or change authorization.
+PSC0's portable compiler is authored in native `.lean` under the v7.2 language
+and semantic contract. Use the selected v7.2 capabilities and audited library
+closure, retaining a clean path to future readable `.ps` reconstruction.
+Native Lean syntax remains native (v7.2 §§2, 11 and 14); `.ps` comma calls and
+braced layout are not imposed on `.lean`. Host Lean compiler/elaborator APIs
+belong only in the explicit host or independent reference-test boundary.
+Do not use unrestricted host functionality to bypass an unavailable portable
+capability. This is an authoring/design boundary, not a claim that PSC0 already
+self-compiles or that current CI establishes full v7.2 conformance.

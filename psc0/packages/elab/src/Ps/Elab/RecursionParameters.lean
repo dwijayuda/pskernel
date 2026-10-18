@@ -1,4 +1,5 @@
 import Ps.Elab.Binders
+import Ps.Elab.Refinement
 import Ps.Elab.Application
 import Ps.Elab.FixedParameters
 
@@ -93,6 +94,102 @@ def psElabRecursionComponentFixedParameterPlan
       observations := observations ++ [{ caller, callee, arguments }]
   let graph ← (psFixedParameterAnalyze dependencies observations).mapError PsElabError.data
   (psFixedParameterPermutation graph).mapError PsElabError.data
+
+-- Fixed correspondence is a complete permutation, never a partial map
+-- inferred from source spellings. This contract is shared by scope creation
+-- and member specialization.
+def psElabRecursionValidatePermutation (permutation : List (Option Nat)) (count : Nat) :
+    Except PsElabError Unit := do
+  let indices := permutation.filterMap id
+  if indices.length != count || indices.eraseDups.length != count ||
+      indices.any (fun index => index >= count) then
+    throw (.data "PSCV0-WF-PARAMETERS: fixed permutation is not a complete bijection")
+
+structure PsElabRecursionFixedScope where
+  context : PsElabContext
+  bindersRev : List PsElabTypedBinder
+
+-- The first owned closed header supplies common fixed types in graph order.
+-- Its temporary varying locals never enter the resulting scope. Reopening
+-- allocates fresh identities after the entire original telescope, so later
+-- substitution cannot capture a local from another owner.
+def psElabRecursionOpenFixedScope (context : PsElabContext)
+    (sourceType : PsExpr) (permutation : List (Option Nat)) (count : Nat) :
+    Except PsElabError PsElabRecursionFixedScope := do
+  psElabRecursionValidatePermutation permutation count
+  let opened ← psElabOpenCoreTelescope 4096 context sourceType (some permutation.length)
+  let original := opened.bindersRev.reverse.zip permutation
+  let mut current := { context with localContext :=
+    { context.localContext with nextId := opened.context.localContext.nextId } }
+  let mut replacements : List (Nat × PsExpr) := []
+  let mut bindersRev := []
+  for index in List.range count do
+    let some (binder, _) := original.find? (fun (_, position) => position == some index)
+      | throw (.data "PSCV0-WF-PARAMETERS: common fixed parameter has no original owner")
+    let type := psElabSubstituteLocals replacements binder.type
+    if !psExprFVarsInContext current.localContext type then
+      throw (.data "PSCV0-WF-PARAMETERS: fixed parameter type depends on a varying slot")
+    let _ ← psElabExpressionSort current type
+    let pushed := psLocalPushBinding current.localContext binder.name type binder.binder
+    current := psElabContextWithLocal current pushed.context
+    replacements := replacements ++ [(binder.id, .fvar pushed.id)]
+    bindersRev := PsElabTypedBinder.mk pushed.id binder.name type binder.binder :: bindersRev
+  return { context := current, bindersRev }
+
+structure PsElabRecursionSpecializedHeader where
+  context : PsElabContext
+  -- Only the varying original source parameters, newest first.
+  bindersRev : List PsElabTypedBinder
+  -- Complete original header order, including common fixed parameters.
+  arguments : List PsExpr
+  resultType : PsExpr
+  type : PsExpr
+
+private def psElabRecursionSpecializeHeaderWorker
+    (fixed : List PsExpr) (permutation : List (Option Nat))
+    (context : PsElabContext) (cursor : PsExpr)
+    (bindersRev : List PsElabTypedBinder) (arguments : List PsExpr) :
+    Except PsElabError PsElabRecursionSpecializedHeader := do
+  match permutation with
+  | [] =>
+    return {
+      context, bindersRev, arguments, resultType := cursor
+      type := psCloseElabForallBinders context.metaContext bindersRev cursor }
+  | position :: rest =>
+    let parameter ← (psInferEnsureForall context.environment context.metaContext
+      context.localContext cursor).mapError PsElabError.infer
+    match position with
+    | some index =>
+      let some value := fixed[index]?
+        | throw (.data "PSCV0-WF-PARAMETERS: common fixed argument is missing")
+      let checked ← psElabResolvedTerm context value (some parameter.domain)
+      psElabRecursionSpecializeHeaderWorker fixed rest checked.context
+        (psExprInstantiate1 parameter.body checked.term) bindersRev (arguments ++ [checked.term])
+    | none =>
+      let pushed := psLocalPushBinding context.localContext parameter.name
+        parameter.domain parameter.binder
+      let value := PsExpr.fvar pushed.id
+      psElabRecursionSpecializeHeaderWorker fixed rest
+        (psElabContextWithLocal context pushed.context)
+        (psExprInstantiate1 parameter.body value)
+        (PsElabTypedBinder.mk pushed.id parameter.name parameter.domain parameter.binder :: bindersRev)
+        (arguments ++ [value])
+
+-- Like pinned FixedParamPerm.instantiateForall/buildArgs, stop at the
+-- original source arity. A returned function stays in the result. Every
+-- selected fixed value is checked against that member's actual domain;
+-- reordered parameters do not bypass type or binder ownership.
+def psElabRecursionSpecializeHeader (context : PsElabContext)
+    (sourceType : PsExpr) (permutation : List (Option Nat)) (fixed : List PsExpr) :
+    Except PsElabError PsElabRecursionSpecializedHeader := do
+  psElabRecursionValidatePermutation permutation fixed.length
+  if !psExprFVarsInContext context.localContext sourceType ||
+      fixed.any (fun value => !psExprFVarsInContext context.localContext value) then
+    throw (.data "PSCV0-WF-PARAMETERS: fixed specialization contains a foreign local")
+  let result ← psElabRecursionSpecializeHeaderWorker fixed permutation context sourceType [] []
+  let outer := psElabLeaveScope context result.context
+  let _ ← psElabExpressionSort outer result.type
+  return result
 
 def psElabRecursionFixedParameterPlan (context : PsElabContext)
     (name : PsName) (ids : List Nat) (calls : List PsElabRecursionCall) :

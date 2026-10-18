@@ -1,5 +1,35 @@
 # PSKernel-C0 experimental performance measurements
 
+## 18 October 2026 — source-exact cache policy causal experiments (Lean 4.35.0)
+
+Same runner **genuine source-exported `shared-subterm`** theorem with Lean 4.35 official oracle = accepted, exact source fuel 4096, source-compiled Lean proofs and exact checker's accepted verdict; timings measure the *whole C0 replay process*, not isolated cache helpers.
+
+**PR #137**: original production `41322875539de66acf9eb9b01ddf73df82a61bf2` versus two certified cache fixes [CI 39083779212](https://github.com/dwijayuda/pskernel/actions/runs/39083779212), exact checker head `f0f118b85ed0038517558509f9ae1625b3358f8b`.
+
+| Depth | Production source | Two-fix candidate | Acceptance |
+| --- | ---: | ---: | --- |
+| 24 | 12.60 s | 0.28 s | both accepted |
+| 28 | timeout at 90s | 3.18 s | candidate accepted |
+| 30 | timeout at 90s | 9.16 s | candidate accepted |
+| 32 | timeout at 90s | 41.03 s | candidate accepted |
+
+**Causal four-source-state ablation** [CI 39084370862](https://github.com/dwijayuda/pskernel/actions/runs/39084370862), exact head `704a411aa567f51f8dafffd97b8c05cc4a6c9349`. Each row is one whole checker built on the SAME PR #136 code except the two independent toggled files, same runner *per depth*; timeouts are unqualified, not rejection.
+
+| Depth | Neither | Exact-hash memo equality only | Semantic eligibility only | Both |
+| --- | ---: | ---: | ---: | ---: |
+| 24 | 7.04 s accepted | 5.01 s accepted | 2.39 s accepted | **0.22 s accepted** |
+| 28 | 90s timeout | 90s timeout | 62.85 s accepted | **3.19 s accepted** |
+
+**Inference cache whole-call compiler substitution follow-up** [draft PR #138](https://github.com/dwijayuda/pskernel/pull/138), source `psKernelC0DAGInferCacheEligible`, all-input Lean proof `psKernelC0DAGInferCacheEligible_source`, and fixed FVar-scope checked/infer regression. [Exact official-positive same-runner CI 39085245266](https://github.com/dwijayuda/pskernel/actions/runs/39085245266) at `505446de1e4216f92c3f74db2b201730628c79ad` passed all native proof and checking jobs.
+
+| Depth | PR #137 prior implementation | New exact complete infer policy | Outcome |
+| --- | ---: | ---: | --- |
+| 24 | 0.37 s | 0.14 s | both accepted |
+| 28 | 3.17 s | 0.18 s | both accepted |
+| 32 | 30.05 s | **0.15 s** | both accepted, ~200× on same runner |
+
+**No extrapolation to whole libraries:** The 152,660-record official Lean 4.35 `Array.extract_append_extract` export SHA-256 `ba0fcc693d7aeee2301d7cc38712a7055a1559552d52ad70c8f2e2c1d627292a` was accepted by older native C0 branches (e.g. [38994447524](https://github.com/dwijayuda/pskernel/actions/runs/38994447524), 4:19.23 versus 4:15.53 in an older controlled A/B) but both compared variants of [39074157294](https://github.com/dwijayuda/pskernel/actions/runs/39074157294) timed out at 600 seconds on the same source bytes under different code/source configurations. The latter is not a false rejection and the workflows' successful conclusions do not imply checker acceptance. PR #138 genuine Array A/B and 193 adapted Arena requalification are separately required; source equality does not establish overall kernel soundness.
+
 ## Online official-export and atomic bound-root checkpoint — CI 38332583934
 
 Full [native CI 38332583934](https://github.com/dwijayuda/pskernel/actions/runs/38332583934) **SUCCESS** at `7035d682` with 22 original-byte official Lean 4.35 fixtures, online/batch outcome cross-check, negative resource tests, atomic canonical store transfer and matched unchanged original checker.

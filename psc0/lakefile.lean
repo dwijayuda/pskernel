@@ -309,6 +309,7 @@ lean_lib PsElab where
     `Ps.Elab.WhereScope,
     `Ps.Elab.Where,
     `Ps.Elab.WhereWellFounded,
+    `Ps.Elab.WhereMutualWellFounded,
     `Ps.Elab.Command
   ]
 

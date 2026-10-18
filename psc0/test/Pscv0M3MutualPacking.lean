@@ -1,3 +1,4 @@
+import Ps.Elab.WhereMutualWellFounded
 import Ps.Host.NativeV7
 import Ps.Environment.StandardPSumData
 import Ps.Meta.MutualPacking
@@ -210,6 +211,23 @@ private def checkRetainedOwners (environment : PsEnvironment) : Except String Un
   if plan != { count := 2, permutations :=
       [[some 0, some 1, none], [none, some 0, some 1], [some 0, none, some 1]] } then
     throw "retained source call analysis lost reordered dependent fixed parameters"
+  let measured ← (psElabWherePrepareWellFoundedComponent prepared environment
+    prepared.block.levelNames prepared.block.members).mapError psCompilerPscv0ElabError
+  if measured.parameters != plan || measured.members.length != 3 ||
+      measured.fixedBindersRev.length != 2 ||
+      measured.members.any (fun member => member.varyingNames.length != 1 ||
+        member.specialized.arguments.length != 3) then
+    throw "source component measures changed fixed correspondence or original arity"
+  for member in measured.members do
+    let expected := PsExpr.lam (psRootName "n") (.constE psNatName []) (.bvar 0) .explicit
+    if !psWellFoundedDefEq environment psMetaEmpty measured.context.localContext
+        member.measure expected then
+      throw "source component measure captured a returned function or another member header"
+    let branch ← (psMutualWellFoundedBranchType environment psMetaEmpty
+      measured.context.localContext measured.plan member.source.sourceIndex).mapError
+        (fun _ => "source component lost its genuine dependent callback signature")
+    let _ ← (psElabExpressionSort measured.context branch).mapError psCompilerPscv0ElabError
+    pure ()
   -- Underapplication is conservative analysis, not permission to escape a
   -- proof-restricted callback. The omitted source slots must become varying.
   let some owner := owners.head? | throw "missing retained source owner"

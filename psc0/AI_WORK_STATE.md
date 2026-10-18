@@ -36,7 +36,7 @@ Prep cancel-in-progress:false; keep at most one active and one pending run.
 
 ## Current state and evidence
 
-Qualified compiler/test HEAD: **b95c629380ba03638a14c708c5c584ef1b8eaf16**.
+Latest fully qualified compiler/test SHA: **b95c629380ba03638a14c708c5c584ef1b8eaf16**.
 All five exact-SHA integration gates completed SUCCESS:
 Native39090324651, M339090324683, F139090324667, F239090324693,
 F339090324659. Complete receipt:
@@ -52,13 +52,25 @@ step passed. The full focused log endpoint failed; no aggregate runtime count
 is claimed. Old037fda49 is historical evidence, not the latest checkpoint.
 Source mutual WF and full selected native grammar parity are still OPEN.
 
-Preparation code HEAD18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290:
-run39091873814/job117570152485 is IN PROGRESS. Native where helpers,
-termination_by/decreasing_by, pattern lets, if-let, Boolean ! and native typed do
-are implemented in that candidate, not yet qualified. It includes native do
-as a whitespace/indent-sensitive function argument. Do not promote until the
-whole preparation passes. Documentation-only descendants do not change the code
-qualification identity. Always refresh refs and complete jobs before writes.
+Preparation18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290 completed SUCCESS:
+run39091873814/job117570152485; artifact12123620366; SHA256
+d9070df90395b4c96c96dbdc0c6eb21501ebb9b601582b1446b0d82d85895045.
+Its complete log records INPUT_PARITY PASS including native where/WF, pattern
+lets, conditional patterns and typed do control, plus all retained checks.
+This includes official native reference proofs, paired checked value/equation
+comparison and both inputs' five-target emission. Runtime integration is pending.
+
+Main has been promoted non-force to18fe0b3e. All five integration gates are
+RUNNING: Native39092425439, M339092425489, F139092425401,
+F239092425419, F339092425556. Do not supersede/cancel healthy main Native.
+The last fully qualified five-gate SHA remainsb95c6293.
+Receipt: docs/PSCV0_M3_NATIVE_CONTROL_18FE0B3E_2026-10-18.md.
+
+This preparation child adds source-owned mutual component measure preparation.
+It connects original source headers/measures to retained-call fixed permutations
+and typed PSigma/PSum planning, but does not publish recursive source members.
+Its code/qualification is separate from main18fe0b3e. Fresh refs and exact-SHA
+complete logs override these checkpoints.
 
 ## Current implementation and next work
 
@@ -72,22 +84,22 @@ qualification identity. Always refresh refs and complete jobs before writes.
   with unchanged observations.
 - Native data/class/instance/deriving syntax reuses shared field and declaration
   owners. Inferred native method parameters use expected class fields.
-- Candidate Lean/Declarations owns native local where helpers and raw
+- Lean/Declarations owns native local where helpers and raw
   decreasing_by tactic sequences, reusing shared Where/PreDefinition/WF.
-- Candidate Lean/Control owns native do layout, optional/trailing semicolons,
+- Lean/Control owns native do layout, optional/trailing semicolons,
   dangling else and else-if. Selected bindings/returns/actions, pattern matrices,
   expected effects and continuations stay shared. No new effect family is added.
 - One paired fixture now has three exports (m3parity, m3data, m3control) and
   existing five-target observers. The qualifiedb95 version has the first two;
-  the third and local WF helper belong to the pending candidate.
+  the third and local WF helper are prep-qualified at18fe; runtime gates are pending.
 
 Next actions:
-1. Complete39091873814. Inspect actual diagnostics rather than guessing; retain
-   its native proof and source/Core/backend requirements. The previous candidate
-   fbcade224 built production but its native fixture attempted HAdd Nat (Id Nat).
-   Pinned Init/Control/Id marks Id implicit-reducible; the candidate explicitly
-   checks its value at Nat before addition. The earlier where proof now uses
-   full simp then rfl and compiled successfully in fbcade224.
+1. Qualify the source component measure preparation candidate while main18fe
+   integration runs. This reuses the existing retained-source packing fixture;
+   no new executable or workflow is added. Build that existing fixture before
+   long audits to catch authoring errors early. Exporter source bytes remain
+   in complete artifact logs/files; redundant console source dumps are filtered.
+   Acceptance checks, runtime lanes and budgets are unchanged.
 2. Finish the selected native source adapter audit. Source input parity is broader
    than implementation .lean or oracle .lean coverage. Keep both grammars and all
    assurance boundaries. Once prep passes, promote non-force and retain five gates.

@@ -356,3 +356,11 @@ src/Lean/Parser/{Do,Term,Extra}.lean, src/Lean/Elab/Do/Basic.lean and
 src/Init/Notation.lean. Lean4 is Copyright Microsoft Corporation and respective
 contributors, Apache-2.0. PSC0 reuses its own typed control elaboration; the small
 native grammar adapter follows the selected upstream layout and scope invariants.
+
+Source-owned mutual WF measure preparation follows Lean4.35.0
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+src/Lean/Elab/PreDefinition/{FixedParams,WF/PackMutual,WF/Rel,WF/Fix}.lean
+and src/Lean/Meta/ArgsPacker.lean. Copyright Microsoft Corporation and Lean FRO,
+LLC; authors Leonardo de Moura and Joachim Breitner; Apache-2.0. The source
+adapter reuses PSC0's typed header, scope and packing owners, without importing
+upstream temporary axioms or unselected source capabilities.

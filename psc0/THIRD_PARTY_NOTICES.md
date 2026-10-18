@@ -276,3 +276,13 @@ Apache-2.0; retain LEAN-APACHE-2.0.txt. Modifications: derive eligibility
 from existing registered portable elimination metadata; use the typed recursor
 spine and read-only index comparison; refuse unresolved indices; retain ordinary
 iota validation. No new axiom or unchecked proof-cast rule is introduced.
+
+### Typed mutual fixedpoint construction
+
+Ps.Meta.MutualWellFounded and the nondependent measure/type projection helpers
+adapt ArgsPacker.Mutual (Copyright2024 Lean FRO, LLC; Joachim Breitner) and
+PreDefinition/WF/{PackMutual,Rel,Fix} (Copyright2021 Microsoft Corporation;
+Leonardo de Moura), at Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
+Apache-2.0, with retained LEAN-APACHE-2.0.txt and upstream notices. Modifications:
+portable explicit contexts, structural traversal, complete per-member validation,
+and functional signature inference from the selected checked fixpoint.

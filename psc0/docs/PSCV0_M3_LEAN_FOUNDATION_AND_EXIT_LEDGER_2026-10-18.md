@@ -98,6 +98,12 @@ Completed-type transport elision by itself did not close the regression.
 The fixture invocation is corrected without altering its arity/dependency
 requirements. All new corrections remain pending; accepted main is abe1.
 
+The next [component construction layer](PSCV0_M3_COMPONENT_FIX_2026-10-18.md)
+checks the common measure independently of the dependent result motive and
+infers callback requirements from the actual fixpoint signature. Its existing
+probe adds checked heterogeneous component equations; this is not yet source
+mutual-WF or runtime qualification. K candidate037fda49 remains in preparation.
+
 M3+B remains open. Remaining total-recursion work includes compatible mutual WF
 through the actual typed PSum/PSigma domain, common fixed parameters and measure,
 branch-owned decreases, exact source equations and complete runtime functional

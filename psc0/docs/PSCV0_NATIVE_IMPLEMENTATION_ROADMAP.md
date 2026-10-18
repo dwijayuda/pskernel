@@ -107,6 +107,12 @@ Completed-type transport elision by itself did not close the regression.
 The fixture invocation is corrected without altering its arity/dependency
 requirements. All new corrections remain pending; accepted main is abe1.
 
+The next [component construction layer](PSCV0_M3_COMPONENT_FIX_2026-10-18.md)
+checks the common measure independently of the dependent result motive and
+infers callback requirements from the actual fixpoint signature. Its existing
+probe adds checked heterogeneous component equations; this is not yet source
+mutual-WF or runtime qualification. K candidate037fda49 remains in preparation.
+
 The authoritative six exits above are unchanged. Native default mutual/nested
 induction refusals are intentional; major-dependent fixed-index matching is a
 separate positive capability. M3+B is open; do not reopen M2+A or start M4/C5.

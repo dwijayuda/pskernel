@@ -2,8 +2,9 @@
 
 Status: standalone export independently passed; exact6779-byte five-declaration
 asset retained. Portable typed component packing and its consolidated kernel
-probe passed preparation at abe1adc2, run39080406371. Full main integration
-is running; the next callback/correspondence extension is a candidate. Standard selection, source mutual
+probe passed preparation at abe1adc2, run39080406371. All five main gates passed at abe1adc2. Callback/correspondence probes subsequently
+passed at593a1bf; current K/unary and component-construction corrections remain
+candidates. Standard selection, source mutual
 WF admission, exact unfolding equations and runtime ownership remain separate.
 
 Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc is the reference.
@@ -146,3 +147,8 @@ equations and whole-component executable adaptation remain necessary.
 
 References: pinned tests/elab/fixedParamsReorder.lean and
 funind_mutual_dep.lean; native test_sorry is not copied or admitted.
+
+The [typed component construction](PSCV0_M3_COMPONENT_FIX_2026-10-18.md)
+now separates common measure codomains from dependent result motives, checks
+all positional domains and infers the actual functional signature. It composes
+the previously retained packers; source ownership and runtime gates remain.

@@ -253,6 +253,7 @@ lean_lib PsMeta where
     `Ps.Meta.InstanceKey, `Ps.Meta.InstanceSearch,
     `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer, `Ps.Meta.WellFounded, `Ps.Meta.MutualPacking,
+    `Ps.Meta.MutualWellFounded,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView
   ]
 

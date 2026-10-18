@@ -152,6 +152,49 @@ def psMutualPackingUncurryType (environment : PsEnvironment) (metaContext : PsMe
   let _ ← psInferEnsureSort environment metaContext locals sort
   return type
 
+-- Termination measures share one actual codomain, independently of the
+-- component tag. Keep this separate from the dependent result motive, as
+-- pinned ArgsPacker.Mutual.uncurryTypeND does.
+def psMutualPackingUncurryTypeND (environment : PsEnvironment)
+    (metaContext : PsMetaContext) (locals : PsLocalContext)
+    (types : List PsExpr) : Except PsInferError PsExpr := do
+  let first :: rest := types | throw .expectedFunction
+  let resultOf := fun type => do
+    let parameter ← psInferEnsureForall environment metaContext locals type
+    let major := psLocalPushBinding locals parameter.name parameter.domain parameter.binder
+    let result := psExprInstantiate1 parameter.body (.fvar major.id)
+    if !psExprFVarsInContext locals result then throw PsInferError.applicationTypeMismatch
+    return (parameter.domain, result)
+  let (firstDomain, result) ← resultOf first
+  let mut domains := [firstDomain]
+  for type in rest do
+    let (domain, actual) ← resultOf type
+    if !psDefEqReadOnlyWithEnv environment metaContext locals actual result then
+      throw .applicationTypeMismatch
+    domains := domains ++ [domain]
+  let domain ← psMutualPackingDomain environment metaContext locals domains
+  let type := PsExpr.forallE (psRootName "_component") domain result .explicit
+  let sort ← psInferType environment metaContext locals type
+  let _ ← psInferEnsureSort environment metaContext locals sort
+  return type
+
+-- Project the type using the same owned injection used by value projection.
+-- This also describes a member branch of a combined dependent functional.
+def psMutualPackingProjectionType (environment : PsEnvironment)
+    (metaContext : PsMetaContext) (locals : PsLocalContext)
+    (arity index : Nat) (type : PsExpr) : Except PsInferError PsExpr := do
+  let parameter ← psInferEnsureForall environment metaContext locals type
+  let domains ← psMutualPackingDomains arity parameter.domain
+  let some domain := domains[index]? | throw .applicationTypeMismatch
+  let argument := psLocalPushBinding locals parameter.name domain .explicit
+  let packed ← psMutualPackingPack arity parameter.domain index (.fvar argument.id)
+  let result := psExprInstantiate1 parameter.body packed
+  let type := PsExpr.forallE parameter.name domain
+    (psExprAbstractFVar argument.id result) .explicit
+  let sort ← psInferType environment metaContext locals type
+  let _ ← psInferEnsureSort environment metaContext locals sort
+  return type
+
 def psMutualPackingUncurry (environment : PsEnvironment) (metaContext : PsMetaContext)
     (locals : PsLocalContext) (type : PsExpr) (values : List PsExpr) :
     Except PsInferError PsExpr := do

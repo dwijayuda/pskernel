@@ -74,6 +74,18 @@ compound/repeated indices and impossible cases, with no foundation extension.
 The new group-match runtime observer requires50 comparisons across five lanes;
 main runtime qualification of this later transport remains pending.
 
+K candidate037fda49/run39083926961 is still running; never infer success
+from its publication. Main remains accepted abe1adc2.
+
+The current child adds the checked component construction layer:
+separate dependent result and common nondependent measure packing; per-member
+domain validation; actual dictionary/inverse-image relation; callback/functional
+types inferred from the real fixpoint signature; checked branches and whole fix.
+The existing packing executable adds three heterogeneous members and exact
+fix_eq equations plus incomplete/dependent-measure refusals. Its branches are
+nonrecursive: source mutual WF, decrease goals and runtime adaptation are still
+separate and remain closed. See PSCV0_M3_COMPONENT_FIX_2026-10-18.md.
+
 ## Selected foundation
 
 At abe1 strict pins are FNV7907908279927868945,

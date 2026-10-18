@@ -29,6 +29,18 @@ Existing fixed-parameter, typed callback, dependent-match and WF/P1/noncomputabl
 evidence remains recorded; these latest corrections are pending qualification.
 No current prep child has full-main acceptance.
 
+K candidate037fda49/run39083926961 is still running; never infer success
+from its publication. Main remains accepted abe1adc2.
+
+The current child adds the checked component construction layer:
+separate dependent result and common nondependent measure packing; per-member
+domain validation; actual dictionary/inverse-image relation; callback/functional
+types inferred from the real fixpoint signature; checked branches and whole fix.
+The existing packing executable adds three heterogeneous members and exact
+fix_eq equations plus incomplete/dependent-measure refusals. Its branches are
+nonrecursive: source mutual WF, decrease goals and runtime adaptation are still
+separate and remain closed. See PSCV0_M3_COMPONENT_FIX_2026-10-18.md.
+
 Continue the complete mutual-WF path using shared typed PSum/PSigma packing,
 fixed permutations and original capture/header ownership, actual branch decrease
 proofs, exact original-body equations and whole-functional runtime validation.

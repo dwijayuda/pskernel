@@ -1,6 +1,7 @@
 import Ps.Host.NativeV7
 import Ps.Environment.StandardPSumData
 import Ps.Meta.MutualPacking
+import Ps.Meta.MutualWellFounded
 import PsKernelLean.Admission
 import Ps.Elab.FixedParameters
 import Lean.Elab.PreDefinition.FixedParams
@@ -149,6 +150,82 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
   | .error _ => pure ()
   | .ok _ => throw "typed member analysis accepted a callee outside the component"
 
+-- The result family may depend on the sum tag, but every measure must
+-- land in one fixed codomain. Build the actual generic component fixpoint
+-- and prove its three member equations independently through the kernel.
+private def checkComponentConstruction (environment : PsEnvironment)
+    (types values : List PsExpr) : Except String (List PsDeclaration) := do
+  let measures ← (types.zipIdx).mapM fun (type, index) => do
+    let parameter ← (psInferEnsureForall environment psMetaEmpty psLocalEmpty type).mapError
+      (fun _ => "component source type is not unary")
+    let body := if index == 0 then PsExpr.bvar 0 else .lit (.natural 0)
+    return PsExpr.lam parameter.name parameter.domain body .explicit
+  let plan ← (psMutualWellFoundedPlanFor environment psMetaEmpty psLocalEmpty
+    types measures (.constE (psNameAppendStr psNatName "lt_wfRel") [])).mapError
+      (fun _ => "common typed component measure construction failed")
+  let mut branches := []
+  for (source, index) in values.zipIdx do
+    let branchType ← (psMutualWellFoundedBranchType environment psMetaEmpty psLocalEmpty
+      plan index).mapError (fun _ => "component branch type failed")
+    let parameter ← (psInferEnsureForall environment psMetaEmpty psLocalEmpty branchType).mapError
+      (fun _ => "component branch lost original domain")
+    let major := psLocalPushBinding psLocalEmpty parameter.name parameter.domain .explicit
+    let result := psExprInstantiate1 parameter.body (.fvar major.id)
+    let callback ← (psInferEnsureForall environment psMetaEmpty major.context result).mapError
+      (fun _ => "component branch lost decreasing callback")
+    let localCallback := psLocalPushBinding major.context callback.name callback.domain .explicit
+    for target in List.range types.length do
+      let _ ← (psMutualPackingProjection environment psMetaEmpty localCallback.context
+        types.length target (.fvar localCallback.id)).mapError
+          (fun _ => "typed heterogeneous callee callback projection failed")
+      pure ()
+    let body := PsExpr.app source (.fvar major.id)
+    let branch := psLogicLam major.id "x" parameter.domain
+      (psLogicLam localCallback.id "_rec" callback.domain body)
+    let _ ← (psElabResolvedTerm (psElabContextEmpty environment []) branch
+      (some branchType)).mapError psCompilerPscv0ElabError
+    branches := branches ++ [branch]
+  let built ← (psMutualWellFoundedBuild environment psMetaEmpty psLocalEmpty plan branches).mapError
+    (fun _ => "checked component functional or fixpoint failed")
+  let name := psRootName "packingWellFounded"
+  let declaration := PsDeclaration.definitionDecl name [] plan.type built.value
+  let environment := psEnvironmentInsert environment declaration
+  let parameter ← (psInferEnsureForall environment psMetaEmpty psLocalEmpty plan.type).mapError
+    (fun _ => "component fixedpoint lost unary type")
+  let motive := PsExpr.lam parameter.name parameter.domain parameter.body .explicit
+  let mut equations := []
+  for ((type, source), index) in (types.zip values).zipIdx do
+    let original ← (psInferEnsureForall environment psMetaEmpty psLocalEmpty type).mapError
+      (fun _ => "component equation lost original header")
+    let major := psLocalPushBinding psLocalEmpty original.name original.domain .explicit
+    let result := psExprInstantiate1 original.body (.fvar major.id)
+    let packed ← (psMutualPackingPack types.length parameter.domain index (.fvar major.id)).mapError
+      (fun _ => "component equation injection failed")
+    let context := { psElabContextEmpty environment [] with localContext := major.context }
+    let domainLevel ← (psElabExpressionSort context parameter.domain).mapError psCompilerPscv0ElabError
+    let resultLevel ← (psElabExpressionSort context result).mapError psCompilerPscv0ElabError
+    let left := PsExpr.app (.constE name []) packed
+    let right := PsExpr.app source (.fvar major.id)
+    let expected := psLogicEq resultLevel result left right
+    let proof := psWellFoundedEquation plan.relation [domainLevel, resultLevel]
+      motive built.functional packed
+    let checked ← (psElabResolvedTerm context proof (some expected)).mapError psCompilerPscv0ElabError
+    equations := equations ++ [.theoremDecl
+      (psNameAppendNum (psRootName "packingWellFoundedEquation") index) []
+      (psLogicPi major.id "x" original.domain expected)
+      (psLogicLam major.id "x" original.domain checked.term)]
+  -- Fin(n+1) is a genuine dependent measure codomain, not a common relation
+  -- domain. A missing member measure also cannot silently alter component arity.
+  let some firstType := types.head? | throw "component probe lost its first member"
+  match psMutualPackingUncurryTypeND environment psMetaEmpty psLocalEmpty [firstType] with
+  | .error _ => pure ()
+  | .ok _ => throw "component measure accepted a varying codomain"
+  match psMutualWellFoundedPlanFor environment psMetaEmpty psLocalEmpty
+      types (measures.drop 1) (.constE (psNameAppendStr psNatName "lt_wfRel") []) with
+  | .error _ => pure ()
+  | .ok _ => throw "component measure accepted an incomplete member list"
+  return declaration :: equations
+
 private def build : Except String (List PsDeclaration) := do
   let environment := psStandardPSumDeclarations.foldl psEnvironmentInsert
     psSelfHostProdPreludeEnvironment
@@ -170,6 +247,7 @@ private def build : Except String (List PsDeclaration) := do
     | none => throw "packing source declaration is missing"
   let types := declarations.map psDeclarationType
   let values := names.map fun name => PsExpr.constE name []
+  let componentDeclarations ← checkComponentConstruction environment types values
   let type ← (psMutualPackingUncurryType environment psMetaEmpty psLocalEmpty types).mapError
     (fun _ => "packing dependent type construction failed")
   let body ← (psMutualPackingUncurry environment psMetaEmpty psLocalEmpty type values).mapError
@@ -260,7 +338,7 @@ private def build : Except String (List PsDeclaration) := do
   let _ ← (psElabResolvedTerm (psElabContextEmpty environment [u, v])
     sortValue (some sortType)).mapError psCompilerPscv0ElabError
   let sorts := PsDeclaration.definitionDecl (psRootName "packingSorts") [u, v] sortType sortValue
-  return psStandardPSumDeclarations ++ elaborated.result.declarations ++ [packed, sorts, unary] ++ proofs
+  return psStandardPSumDeclarations ++ elaborated.result.declarations ++ componentDeclarations ++ [packed, sorts, unary] ++ proofs
 
 def main : IO Unit := do
   ensure (Lean.githash == PsV7Native.leanCommit) "packing requires pinned Lean4.35.0"
@@ -284,5 +362,6 @@ def main : IO Unit := do
             PsKernelLean.kernelExceptionSummary error ++ PsKernelLean.kernelExceptionContext error)
       pure () : Except String Unit)
   fromExcept checked
+  IO.println "PSCV0_M3_COMPONENT_FIX: PASS heterogeneous dependent result family, common Nat measure, three typed decreasing callbacks, actual checked fix_eq member equations and incomplete/dependent-measure refusals; source mutual WF is separate"
   IO.println "PSCV0_M3_CALLBACK_SCOPES: PASS two typed callees, current refined capture, ordinary local shadow, saved scope, escape refusal and cross-owner parameter correspondence"
   IO.println "PSCV0_M3_MUTUAL_PACKING: PASS three heterogeneous dependent components, complete unary currying with dependent header and returned function, exact checked projection equations, user PSum ownership and malformed index/constructor refusals; source mutual WF is separate"

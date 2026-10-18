@@ -1,3 +1,21 @@
+## Checked declaration-batch comparison — qualification pending
+
+af9a0e31/run39088772197/job117561623591 completed FAILURE only in the
+combined source/Where step: "parity fixture expected ordinary definitions".
+The native then boundary is corrected. PreDefinitionNonrecursive deliberately
+publishes both each definition and its checked eq_def theorem. The paired fixture
+now compares both matching kinds, all names, universe lists, alpha-equal types and
+actual value/proof bodies. It does not filter out equations or accept a kind/count
+mismatch. This repairs the fixture's incomplete model of the existing compiler
+batch contract, without weakening comparison or changing logical declarations.
+
+b8b9bea7/run39089323375/job117562902854 has built the new native data adapter and
+is running retained qualification; it still contains the older comparison and
+must finish normally. This child also preserves selected registrations in native
+mutual members, matching the shared attributed-command owner. No run canceled,
+foundation or budget changed. The child still needs full qualification before
+main promotion; M3+B and full native syntax parity are OPEN.
+
 # Continue PSC0 v7.2 — Complete M3+B
 
 Continue implementation autonomously using repository truth. First read

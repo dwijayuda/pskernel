@@ -129,6 +129,10 @@ def psLeanProgramMutual (fuel : Nat) (cursor : PsTokenCursor)
     let member ← match parsed.value with
       | .declaration declaration => pure (PsSyntaxMutualMember.mk declaration false none)
       | .privateDeclaration declaration => pure (PsSyntaxMutualMember.mk declaration true none)
+      | .registeredDeclaration declaration registration =>
+        pure (PsSyntaxMutualMember.mk declaration false (some registration))
+      | .privateRegisteredDeclaration declaration registration =>
+        pure (PsSyntaxMutualMember.mk declaration true (some registration))
       | _ => throw "PSCV0-MUTUAL-HEAD"
     psLeanProgramMutual fuel parsed.cursor (member :: membersRev)
 

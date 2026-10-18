@@ -79,24 +79,25 @@ private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) 
   let elaborated ← (psCompilerElaboratePscv0 program).mapError psCompilerPscv0Error
   return elaborated.declarations
 
-private def compareDefinitions (left right : List PsDeclaration) : IO Unit := do
+private def compareCheckedValues (left right : List PsDeclaration) : IO Unit := do
   ensure (left.length == right.length) "source adapters changed the declaration count"
   for (left, right) in left.zip right do
     match left, right with
-    | .definitionDecl ln ll lt lv, .definitionDecl rn rl rt rv =>
+    | .definitionDecl ln ll lt lv, .definitionDecl rn rl rt rv
+    | .theoremDecl ln ll lt lv, .theoremDecl rn rl rt rv =>
       ensure (psNameEq ln rn && psElabMutualLevelNamesEqual ll rl &&
         psExprAlphaEq lt rt && psExprAlphaEq lv rv)
-        ("source adapters changed checked definition " ++ psNameToString ln)
-    | _, _ => throw (IO.userError "parity fixture expected ordinary definitions")
+        ("source adapters changed checked value " ++ psNameToString ln)
+    | _, _ => throw (IO.userError "parity fixture expected matching definitions or generated equation theorems")
 
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
   let native ← fromExcept (checkedDeclarations .lean leanSource)
   let proofscript ← fromExcept (checkedDeclarations .proofScript psSource)
-  compareDefinitions native proofscript
+  compareCheckedValues native proofscript
   let grouped := "def grouped {T : Type} {first value : T} := value\n"
-  compareDefinitions (← fromExcept (checkedDeclarations .lean grouped))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean grouped))
     (← fromExcept (checkedDeclarations .proofScript grouped))
   let richLean := "universe u\ndef identity {A : Type u} (a : A) : A := a\n" ++
     "def choose (x y : Nat) (flag : Bool) : Nat := if flag then x + y else x\n" ++
@@ -106,11 +107,11 @@ def check (root : System.FilePath) : IO Unit := do
     "function choose(x: Nat, y: Nat, flag: Bool): Nat := if (flag) { x + y } else { x }\n" ++
     "const chosen: Nat := choose(flag := true, y := 4, x := 3)\n" ++
     "const scalar: Float := 1.25\n"
-  compareDefinitions (← fromExcept (checkedDeclarations .lean richLean))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean richLean))
     (← fromExcept (checkedDeclarations .proofScript richPs))
   ensure (!(psCompilerParsePscv0 "def bad : Nat := Nat.succ(3)\n" .lean).isOk)
     "native application lost Lean's whitespace requirement"
-  compareDefinitions (← fromExcept (checkedDeclarations .lean "section\nvariable (x y : Nat)\ndef selected := y\nend\n"))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean "section\nvariable (x y : Nat)\ndef selected := y\nend\n"))
     (← fromExcept (checkedDeclarations .proofScript "section\nvariable (x y: Nat)\nconst selected: Nat := y\nend\n"))
   -- Real input routing, not a host oracle or source-printer round trip.
   for (kind, wrong) in [(PsCompilerSourceKind.lean, psSource),

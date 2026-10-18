@@ -1,75 +1,84 @@
 # Continue PSC0 v7.2 — finish M3+B
 
-## Latest correction to inspect first
-
-Fresh a8151133 run 39130764541/job 117685265070 currently reports all five/eight
-copy controls PASS, then a generated Std.Format.rec signature mismatch. Current
-run-artifact API and upload agree on archive 12138202529, 2756552 bytes, digest
-a3f17ab1d5ec43e465b3f79c5b7a54659b0ef6c06db822ffc22e3a8a1cd31333.
-These supersede the attached handoff's third-helper failure and archive identity.
-Read docs/PSCV0_M3_RECURSOR_KERNEL_SIGNATURE_2026-10-18.md and inspect the current
-read-only authentication run before claiming independent archive rehashing.
-
-The current correction requires candidate == frozen selected type plus an
-independent narrowly checked optional forall-domain view matching fresh kernel
-generation. Original copy/default guards and every independent replay/iota/
-closure/metadata/roster/digest check stay intact. Other exporters keep literal
-signature equality. Both mandatory preparation jobs from retained workflow
-commit 5b9a2ecb must pass at the correction SHA. Three added positives/twelve
-refusals supplement the original five/eight. No selected bytes/pins changed.
-
-Continue through reviewed recursor selection, actual paired public source calls,
-then named/generalizing matches and complete six-exit/all-five-gate integration.
-Do not diagnose a current helper wrapper loss from the contradicted handoff.
-
-Read AI_WORK_STATE.md first, canonical PSCV0_LANGUAGE_REFERENCE_v7.2.md,
-ARCHITECTURE.md, the native roadmap and six-exit ledger. Continue implementation,
+Read AI_WORK_STATE.md first, the canonical PSCV0_LANGUAGE_REFERENCE_v7.2.md,
+ARCHITECTURE.md, native roadmap and six-exit ledger. Continue implementation,
 not a status-only response. Fetch fresh main/preparation refs and exact-SHA CI
-before expected-HEAD, non-force changes; preserve concurrent history.
+before expected-HEAD, non-force writes; preserve concurrent history.
+
+## Immediate checkpoint
+
+The correction 73690ab21c1d98714005e72b9e1531d9d68440b5 is qualified:
+preparation 39135290050 SUCCESS, strict authoring job 117698454043 SUCCESS,
+foundation job 117698454243 SUCCESS. Workflow split 5b9a2ecb remains in ancestry.
+The whole 67451-byte generated asset was reviewed against the exact native
+inventory:109 recursors,24 replacements,40 symbolic iota rules, unchanged
+logical nodes/defaults/universe profile,3757 declarations and six private helpers.
+Source SHA256 e097d47d163b7bf9119fec6906be39fdf82b012775ad7d1bc0f95a0486d6d56c.
+
+The commit containing this prompt selects those exact bytes at the FINAL
+Standard stage and extends actual paired recursor-source qualification.
+ITS OWN CI IS PENDING. Inspect both preparation jobs and source/runtime results;
+do not relabel the earlier correction's success as testing the later selection.
+Read docs/PSCV0_M3_RECURSOR_SELECTION_2026-10-18.md for exact receipts and pins.
+Frozen pre-recursor/older authoring boundaries retain all original identities.
+Only selected final FNV/snapshot/surface guards adopt independently measured
+7835333229599106138 /112d57c2fe9257223762b8b47cac0283d96dbfd79b1cb276d80ef6c897cf34cf /
+46e3eb3dd3c51058fe0d7985e835ebac351f35af0b553e02086c1f34f24f7efe.
+
+## Evidence correction already resolved
+
+Read-only inspection 39135290048/job 117698453977 authenticated a8151133
+run 39130764541/job 117685265070, artifact 12138202529, all 2756552 bytes and
+SHA256 a3f17ab1d5ec43e465b3f79c5b7a54659b0ef6c06db822ffc22e3a8a1cd31333.
+Its complete five-line recursor log proves original copy controls PASS and
+the later generated Std.Format.rec signature mismatch. Do not resurrect the
+attached handoff's third-helper failure, artifact 12138497681 or do-notation bug.
+
+The correction preserves candidate == frozen selected type and independently
+compares a narrowly checked optional-forall-domain view to fresh kernel generation.
+Original transfer/default guards and all replay/layout/iota/closure/metadata/
+roster/digest checks remain. Other exporters keep literal signature equality.
+All original two native witnesses/five positives/eight refusals and three new
+positives/twelve refusals passed at 73690ab2.
+
+Earlier d0146eaf archive authentication was already completed by 39128091380.
+Focused paired-source/structural JS, TS, Rust, Wasm GC/components passed there.
+Old misattributed logs stay excluded. These bounded results never close all M3.
+
+## Authorized work and boundaries
 
 Repository dwijayuda/pskernel; preparation psc0/m3-fixedpoint-foundation-20261018;
-main psc0/pscv0-v7-native-lean-v1 remains qualified33676076 at the last inspection.
+main psc0/pscv0-v7-native-lean-v1 remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058
+at the last fresh check. Its five gates qualify that SHA only; no promotion.
 PR109 is open/draft/unmerged on its original base. No healthy main Native
-cancellation; at most one active and one pending compiler preparation run.
-GitHub connectors/GitHub Linux CI ONLY, no local checkout/files/build/compiler,
-Desktop Commander, PSKernel-Core/C0, self-hosting, C5 or VSIX work. Native portable
-`.lean`; official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc;
+cancellation; preparation cancel-in-progress:false with at most one active and
+one pending compiler run. Ordinary GitHub development/Linux CI is already authorized.
+
+Connected GitHub/GitHub Linux CI ONLY, no local checkout/files/build/compiler,
+Desktop Commander, PSKernel-Core/C0, self-hosting, C5 or VSIX. Native portable
+.lean; official Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc;
 Apache-2.0 notices retained. Approved logical assumptions exactly propext,
-Quot.sound, Classical.choice. No arbitrary axioms or choice runtime primitive.
+Quot.sound and Classical.choice. No arbitrary axioms or choice runtime primitive.
 Compiler-internal Wasm GC; linear memory only at explicit ABI boundaries.
-Preserve all original checker budgets, tests, expected values and refusals.
+Preserve all original budgets, tests, expected runtime values and refusals.
 
-Both `.ps` and `.lean` compiler INPUTS obey selected v7.2 features/assurance.
-Keep each grammar and share elaboration, checking, erasure and backends.
-Native oracles are not full input-language parity. Missing verification must
-still reject verified output without an ordinary fallback.
+Both .ps and .lean compiler INPUTS obey selected v7.2 features/assurance.
+Keep each grammar and share resolution/elaboration, checked Core, erasure and
+backends. Native oracles are not full input-language parity. Missing verification
+still rejects verified output without an ordinary fallback.
 
-The e937461d evidence hold has been resolved for original d0146eaf archive
-12134487916: read-only inspection39128091380/job117677354368 verified exact
-run/SHA, all2756338 bytes, pinned SHA2566e6613f98717963782b73883b5e1f9a5be792c7af26405395fab38fb7e4985ff
-and internal source-sha files. Inert logs agree with the exact committed observer.
-Focused paired input/structural JS, TS, Rust, Wasm GC/components passed. Old
-misattributed decoded logs remain excluded. Full M3 integration remains OPEN.
+## Continue after the selection is qualified
 
-The authenticated raw-shape failures are Fin.rec's native LT.lt Nat instLTNat
-versus selected Nat.lt, and Std.Format.rec's selected optParam wrapper/default.
-A new native-only RecursorSource owner handles actual pinned safe projections
-and checked optional-annotation views while preserving every selected logical
-node, level and default. StandardExport's independent replay/layout/signature/
-iota/closure/roster/digest gates remain. The existing executable adds native rfl
-witnesses, five positives and eight structural refusals. This candidate must
-pass its OWN exact-SHA preparation before any selection or qualification claim.
+Implement named/generalizing matches through the existing typed owners and
+docs/PSCV0_M3_MATCH_METADATA_DESIGN_2026-10-18.md. Preserve typed original/current
+discriminants, real Eq/HEq branch proofs and mandatory indexed transport;
+optional source generalization has a separate policy. Named source equations
+must not enter structural IH motives or automatic index-constraint discharge.
+Audit shared PreDefinition/MutualStructural capabilities before consolidating
+plain definitions, including computed uniform arguments, nested slots, retained
+suffixes, captures, exact equations, registration and privacy.
 
-Immediate work: inspect current preparation, fix actual failures, review the
-whole generated recursor asset and independently measured hashes before selecting
-it at the final frozen stage. Do not expand Except's universe profile or alter
-earlier frozen stages. Qualify Nat/Except and Empty/False source-call conventions
-under both grammars. Then implement named/generalizing matches via the retained
-shared-owner design, close all six exit cells, and run Native/M3/F1/F2/F3 at one
-exact compiler/test SHA. Do not promote a partial pass or combine old gate results.
-M3+B -> M4+C/D -> M5+E; self-hosting/C5 stay out of scope here.
-
-Keep AI_WORK_STATE.md and this prompt synchronized. Exact prior handoff blobs
-are retained under docs/*EVIDENCE_HOLD_e937461d.md and the PRE_PPROD archives.
-The one-off GitHub source-blob editing workflow is retired after integration;
-its historical success is source transport, not compiler-test evidence.
+Close every required cell of all six M3+B exits, then run Native/M3/F1/F2/F3
+at one exact compiler/test SHA. Do not promote a partial pass or mix historical
+gates. Keep this prompt, work state and receipts synchronized with observed
+results. M3+B -> M4+C/D -> M5+E; self-hosting/C5 remain out of scope.

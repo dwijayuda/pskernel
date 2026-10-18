@@ -1,7 +1,10 @@
 # M3 recursor kernel signature correspondence — retained source annotations
 
-Updated 2026-10-18. This is an unselected authoring correction awaiting its own
-GitHub Linux evidence. M3+B and five-gate integration remain open.
+Updated 2026-10-18. The authoring correction passed both mandatory preparation
+jobs at 73690ab21c1d98714005e72b9e1531d9d68440b5 / run 39135290050.
+The exact generated source is reviewed and selected by the later commit containing
+[the selection receipt](PSCV0_M3_RECURSOR_SELECTION_2026-10-18.md); that later
+selection requires its own CI. M3+B and five-gate integration remain open.
 
 ## Fresh evidence supersedes the attached handoff
 
@@ -20,10 +23,10 @@ The upload log matches these records and exact source SHA.
 Those current records contradict the attached handoff's third-helper failure
 and artifact 12138497681. Do not assert that the current helper drops a wrapper,
 or invent a compiler/do-notation defect. The original helper's reconstruction
-and its failure-only preservation guard are unchanged. A read-only Linux
-inspection now authenticates the current archive bytes, exact job/attempt and
-complete bounded recursor log; until observed, its independent hash check is
-pending. The resolved earlier d0146eaf archive investigation remains historical
+and its failure-only preservation guard are unchanged. Read-only Linux
+inspection 39135290048/job 117698453977 succeeded: it authenticated all current
+archive bytes, exact job/attempt and complete bounded recursor log. The five-line
+member is1227 bytes, SHA256 e0bbafeebc4fb3152e82087c5c1b803d7bcbab8943a978e671fe18ef3771ffe4. The resolved earlier d0146eaf archive investigation remains historical
 evidence and is not repeated.
 
 ## Pinned cause and correction
@@ -80,17 +83,18 @@ iota rules, proof/assumption closure, complete source metadata, 109-recursors/
 digests all remain mandatory. A failure-only generated-signature JSON retains
 the exact compared trees. No selected asset or fingerprint is changed.
 
-The reviewed pending commit `5b9a2ecb292926d6503f51372632dd5cab559541` is
-retained as the parent of this correction. Both its preparation jobs must pass
-at the correction SHA. The archive-inspection workflow separately checks inert
+The reviewed workflow commit `5b9a2ecb292926d6503f51372632dd5cab559541` is
+retained as the parent of this correction. Both preparation jobs passed
+at 73690ab2; strict authoring job 117698454043 and foundation job 117698454243. The archive-inspection workflow separately checks inert
 evidence and grants no compiler qualification.
 
 ## Continuation
 
-After both preparation jobs pass, review the entire emitted candidate and its
-independently measured identities. Select only reviewed exact bytes at the final
-frozen stage, preserving earlier authoring boundaries, Except's Type-0 profile
-and the six compiler-owned helpers. Qualify real Nat/Except/Empty/False calls
+The entire emitted candidate and independently measured identities have now
+been reviewed. The later selection uses those exact bytes at the final frozen
+stage, preserving earlier authoring boundaries, Except's Type-0 profile and
+the six compiler-owned helpers. See the selection receipt for exact source/hash
+and the distinction between completed authoring and pending selection CI. Qualify real Nat/Except/Empty/False calls
 through both input grammars and applicable runtime lanes. Then continue the
 retained named/generalizing match design and the six M3+B exits. Main promotion
 requires its own complete exact-SHA integration evidence.

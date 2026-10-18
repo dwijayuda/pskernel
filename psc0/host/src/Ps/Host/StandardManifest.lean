@@ -231,8 +231,12 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- abfc20d3 / preparation39079996655; exact original guards retained.
 -- Exact PSum selected candidate independently measured in successful
 -- preparation39095995956 at9b5cc7c7, with all original strict guards intact.
+-- Reviewed recursor metadata surface measured independently after complete
+-- replay/layout/iota/closure checks at73690ab2 / preparation39135290050.
+-- Twenty-four public replacements retain logical types and selected universes;
+-- classes, instances, defaults and approved assumptions are unchanged.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:9b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214"
+  "sha256:46e3eb3dd3c51058fe0d7985e835ebac351f35af0b553e02086c1f34f24f7efe"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

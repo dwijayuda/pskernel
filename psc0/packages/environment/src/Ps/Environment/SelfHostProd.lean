@@ -2,6 +2,7 @@ import Ps.Environment.StandardPlatformWords
 import Ps.Environment.StandardWellFounded
 import Ps.Environment.StandardClassical
 import Ps.Environment.StandardPSum
+import Ps.Environment.StandardRecursorSurfaceData
 import Ps.Environment.StandardPartialFixpoint
 import Ps.Environment.StandardArrayFilter
 import Ps.Environment.StandardLogicInstances
@@ -161,8 +162,11 @@ def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreRecursorSurfacePreludeEnvironment : PsEnvironment :=
   psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
 
+-- Reviewed metadata-only replacements are selected only at the final stage.
+-- Preserve every earlier authoring base, including the pre-recursor snapshot.
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psSelfHostProdPreRecursorSurfacePreludeEnvironment
+  psStandardRecursorSurfaceDeclarations.foldl psEnvironmentInsert
+    psSelfHostProdPreRecursorSurfacePreludeEnvironment
 
 -- Structural mutual recursion bundles retained results in the checked
 -- Sort-polymorphic product. Logical inclusion alone does not register its

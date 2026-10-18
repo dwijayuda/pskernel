@@ -175,8 +175,8 @@ jobs:
           for kind in lean ps; do
             parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
             "$TSC" --ignoreConfig "$parity_dir/inputparity.ts" --outDir "$parity_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields | tee "$parity_dir/js.log"
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors | tee "$parity_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
           done
           structural_dir=../dist/m3-foundation-preparation/mutual-structural
           "$TSC" --ignoreConfig "$structural_dir/mutualstructural.ts" --outDir "$structural_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
@@ -189,7 +189,7 @@ jobs:
           rustup toolchain install 1.98.1 --profile minimal
           for kind in lean ps; do
             parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
-            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields
+            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors
             rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$parity_dir/rust.log"
           done
           structural_dir=../dist/m3-foundation-preparation/mutual-structural
@@ -211,7 +211,7 @@ jobs:
           cd "$GITHUB_WORKSPACE/psc0/v7-native"
           for kind in lean ps; do
             parity_dir=../dist/m3-foundation-preparation/where/input-parity/"$kind"
-            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields | tee "$parity_dir/wasm.log"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data,m3control,m3mutual,m3strategies,m3fields,m3recursors | tee "$parity_dir/wasm.log"
           done
           structural_dir=../dist/m3-foundation-preparation/mutual-structural
           node ../scripts/pscv0-m3-runtime.mjs wasm "$structural_dir" mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee "$structural_dir/wasm.log"
@@ -351,10 +351,13 @@ jobs:
           grep -F '4.35.0' ../dist/m3-recursor-authoring/toolchain.txt
           grep -F 'eb6cafb' ../dist/m3-recursor-authoring/toolchain.txt
           lake build pscv0_m3_recursor_surface_export 2>&1 | tee ../dist/m3-recursor-authoring/build.log
-      - name: Author and strictly check the unselected recursor source candidate
+      - name: Regenerate and strictly compare the selected recursor source
         run: |
           set -euo pipefail
           .lake/build/bin/pscv0_m3_recursor_surface_export ../dist/m3-recursor-authoring/StandardRecursorSurfaceCandidate.lean 2>&1 | tee ../dist/m3-recursor-authoring/recursor-surface-export.log
+          cmp ../dist/m3-recursor-authoring/StandardRecursorSurfaceCandidate.lean ../packages/environment/src/Ps/Environment/StandardRecursorSurfaceData.lean
+          printf '%s  %s\n' 'e097d47d163b7bf9119fec6906be39fdf82b012775ad7d1bc0f95a0486d6d56c' '../packages/environment/src/Ps/Environment/StandardRecursorSurfaceData.lean' | sha256sum --check
+          sha256sum ../packages/environment/src/Ps/Environment/StandardRecursorSurfaceData.lean > ../dist/m3-recursor-authoring/selected-source-sha256.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

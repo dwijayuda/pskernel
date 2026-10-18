@@ -1,18 +1,19 @@
 # PSCV0 native implementation roadmap — v7.2 sole target
 
-## Latest bounded recursor correction — qualification pending
+## Recursor authoring qualified; selected source qualification pending
 
-Fresh a8151133 evidence currently places the failure after all copy helper controls,
-in Std.Format.rec generated-signature comparison. The pinned kernel consumes head
-optional type annotations from recursor binder domains. This correction preserves
-the frozen selected candidate exactly and compares its independently checked
-optional-domain view with the fresh generated signature. Other authorers retain
-literal equality. All replay/iota/closure/metadata/roster/digest checks remain.
-See [the exact diagnosis and controls](PSCV0_M3_RECURSOR_KERNEL_SIGNATURE_2026-10-18.md).
-The source/runtime and recursor-authoring preparation jobs must both pass at the
-new SHA. Archive authentication is separate evidence. No recursor asset selection,
-acceptance-cell closure, main promotion or M3+B completion is claimed yet.
+The correction passed both mandatory preparation jobs at 73690ab2 /
+[run 39135290050](https://github.com/dwijayuda/pskernel/actions/runs/39135290050).
+The complete candidate is reviewed:109 native recursors,24 preserving public
+metadata replacements,40 symbolic iota rules,3757 declarations and no changed
+assumptions. [The selection receipt](PSCV0_M3_RECURSOR_SELECTION_2026-10-18.md)
+records exact source bytes, independent identities and archive authentication.
 
+The commit containing this update selects the exact generated asset only at the
+final Standard stage, preserves every frozen authoring base, and adds actual
+paired recursor source qualification. Its own CI is pending. Main remains
+33676076; no full exit closure or five-gate integration is inferred. Continue
+named/generalizing matches and every remaining cell of the six written exits.
 
 Updated 18 October 2026. **The forward feature/semantic contract for both `.ps` and `.lean` inputs is [v7.2](../PSCV0_LANGUAGE_REFERENCE_v7.2.md), with their respective source syntax.** No v7/v7.1 compatibility mode, legacy grammar fallback or architectural restart. Apply the user's [stage directive](PSCV0_V72_STAGE_DIRECTIVE_2026-10-16.md) before every new slice. The [migration matrix](PSCV0_V7_TO_V72_MIGRATION_IMPACT_2026-10-16.md) separates actual semantic changes from formatting and specified behavior from implemented/qualified capability.
 

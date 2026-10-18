@@ -201,6 +201,53 @@ def predicateSecond (tree : ParityProof) : True :=
 end
 theorem predicateObserved : predicateFirst ParityProof.done = True.intro := rfl
 
+-- The selected Standard recursors have native public source telescopes.
+-- Keep these primitive calls as independent kernel controls; executable host
+-- observations use separately checked structural oracles, as above.
+noncomputable def recursorNat (n : Nat) : Nat :=
+  Nat.rec (succ := fun (k : Nat) (ih : Nat) => ih + k + 2)
+    (motive := fun (_ : Nat) => Nat) 3 n
+
+noncomputable def recursorExcept (value : Except Nat Nat) : Nat :=
+  Except.rec (ok := fun (n : Nat) => n + 20)
+    (motive := fun (_ : Except Nat Nat) => Nat)
+    (fun (n : Nat) => n + 10) value
+
+theorem recursorEmpty (value : Empty) : value = value :=
+  Empty.rec (fun (t : Empty) => t = t) value
+
+theorem recursorFalse (h : False) : h = h :=
+  False.rec (fun (t : False) => t = t) h
+
+def recursorNatExec (n : Nat) : Nat :=
+  match n with
+  | 0 => 3
+  | Nat.succ k => recursorNatExec k + k + 2
+
+def recursorExceptExec (value : Except Nat Nat) : Nat :=
+  match value with
+  | Except.error n => n + 10
+  | Except.ok n => n + 20
+
+theorem recursorNat_agrees (n : Nat) : recursorNat n = recursorNatExec n := by
+  induction n with
+  | zero => rfl
+  | succ k ih => exact congrArg (fun (value : Nat) => value + k + 2) ih
+
+theorem recursorExcept_agrees (value : Except Nat Nat) :
+    recursorExcept value = recursorExceptExec value := by
+  cases value <;> rfl
+
+def m3recursors (flag : Bool) : UInt64 :=
+  let n := if flag then 4 else 3
+  let error : Except Nat Nat := Except.error n
+  let ok : Except Nat Nat := Except.ok (n + 1)
+  UInt64.ofNat (recursorNatExec n +
+    100 * recursorExceptExec error + 10000 * recursorExceptExec ok)
+
+example : m3recursors true = 251417 := rfl
+example : m3recursors false = 241312 := rfl
+
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -254,6 +301,12 @@ private def fieldsLeanSource : String :=
 private def fieldsPsSource : String :=
   "instance parityFunctionHash {A: Type}: Hashable(forall (i: Nat), i = i -> A) where {\n  hash(value: forall (i: Nat), i = i -> A): UInt64 := UInt64.ofNat(17)\n}\ninductive ParityBranch where {\n  | leaf(value: Nat)\n  | node(children: forall (i: Nat), i = i -> ParityBranch)\n} deriving Hashable\nfunction branchFold(tree: ParityBranch): Nat := match tree with {\n  | ParityBranch.leaf value => value\n  | ParityBranch.node children => Nat.succ(branchFold(children(2, Eq.refl(2))))\n}\nmutual\nfunction branchFirst(bias: Nat, tree: ParityBranch): Nat := match tree with {\n  | ParityBranch.leaf value => bias + value\n  | ParityBranch.node children => branchSecond(children(3, Eq.refl(3)), bias + 1)\n}\nfunction branchSecond(tree: ParityBranch, bias: Nat): Nat := match tree with {\n  | ParityBranch.leaf value => bias + value\n  | ParityBranch.node children => branchFirst(bias + 2, children(4, Eq.refl(4)))\n}\nend\nfunction branchByRec(tree: ParityBranch): Nat :=\n  ParityBranch.rec(fun (value: Nat) => value,\n    fun (children: forall (i: Nat), i = i -> ParityBranch) (ih: forall (i: Nat), i = i -> Nat) =>\n      Nat.succ(ih(5, Eq.refl(5))), tree, motive := fun (_: ParityBranch) => Nat)\ntheorem branchRefl(tree: ParityBranch): branchFold(tree) = branchFold(tree) :=\n  ParityBranch.rec(fun (value: Nat) => Eq.refl(value),\n    fun (children: forall (i: Nat), i = i -> ParityBranch)\n      (ih: forall (i: Nat) (h: i = i), branchFold(children(i, h)) = branchFold(children(i, h))) =>\n      congrArg(Nat.succ, ih(2, Eq.refl(2))), tree, motive := fun (t: ParityBranch) => branchFold(t) = branchFold(t))\nfunction m3fields(flag: Bool): UInt64 :=\n  let seed := if (flag) { 7 } else { 11 }\n  let tree := ParityBranch.node(fun (i: Nat) (h: i = i) =>\n    ParityBranch.node(fun (j: Nat) (g: j = j) => ParityBranch.leaf(seed + i + j)))\n  let mark: Nat := if (Hashable.hash(tree) == mixHash(UInt64.ofNat(1), UInt64.ofNat(17))) { 0 } else { 1 }\n  UInt64.ofNat(branchFold(tree) + 100 * branchFirst(3, tree) + 10000 * branchByRec(tree) + mark)\nmutual\nfunction proofFirst(n: Nat): n = n := match n with {\n  | 0 => Eq.refl(0)\n  | Nat.succ k => congrArg(Nat.succ, proofSecond(k))\n}\nfunction proofSecond(n: Nat): n = n := match n with {\n  | 0 => Eq.refl(0)\n  | Nat.succ k => congrArg(Nat.succ, proofThird(k))\n}\nfunction proofThird(n: Nat): n = n := match n with {\n  | 0 => Eq.refl(0)\n  | Nat.succ k => congrArg(Nat.succ, proofFirst(k))\n}\nend\ntheorem proofObserved: proofFirst(5) = Eq.refl(5) := by { rfl }\ninductive ParityProof: Prop where {\n  | done\n  | next(children: Nat -> ParityProof)\n}\nmutual\nfunction predicateFirst(tree: ParityProof): True := match tree with {\n  | ParityProof.done => True.intro\n  | ParityProof.next children => predicateSecond(children(2))\n}\nfunction predicateSecond(tree: ParityProof): True := match tree with {\n  | ParityProof.done => True.intro\n  | ParityProof.next children => predicateFirst(children(3))\n}\nend\ntheorem predicateObserved: predicateFirst(ParityProof.done) = True.intro := by { rfl }\n"
 
+private def recursorLeanSource : String :=
+  "def recursorNat (n : Nat) : Nat :=\n  Nat.rec (succ := fun (k : Nat) (ih : Nat) => ih + k + 2)\n    (motive := fun (_ : Nat) => Nat) 3 n\ndef recursorExcept (value : Except Nat Nat) : Nat :=\n  Except.rec (ok := fun (n : Nat) => n + 20)\n    (motive := fun (_ : Except Nat Nat) => Nat)\n    (fun (n : Nat) => n + 10) value\ntheorem recursorEmpty (value : Empty) : value = value :=\n  Empty.rec (fun (t : Empty) => t = t) value\ntheorem recursorFalse (h : False) : h = h :=\n  False.rec (fun (t : False) => t = t) h\ntheorem recursorNatZero : recursorNat 0 = 3 := by rfl\ntheorem recursorExceptError (n : Nat) : recursorExcept (Except.error n) = n + 10 := by rfl\ntheorem recursorExceptOk (n : Nat) : recursorExcept (Except.ok n) = n + 20 := by rfl\ndef m3recursors (flag : Bool) : UInt64 :=\n  let n := if flag then 4 else 3\n  let error : Except Nat Nat := Except.error n\n  let ok : Except Nat Nat := Except.ok (n + 1)\n  UInt64.ofNat (recursorNat n + 100 * recursorExcept error + 10000 * recursorExcept ok)\n"
+
+private def recursorPsSource : String :=
+  "function recursorNat(n: Nat): Nat :=\n  Nat.rec(3, succ := fun (k: Nat) (ih: Nat) => ih + k + 2,\n    t := n, motive := fun (_: Nat) => Nat)\nfunction recursorExcept(value: Except(Nat, Nat)): Nat :=\n  Except.rec(fun (n: Nat) => n + 10, ok := fun (n: Nat) => n + 20,\n    t := value, motive := fun (_: Except(Nat, Nat)) => Nat)\ntheorem recursorEmpty(value: Empty): value = value :=\n  Empty.rec(fun (t: Empty) => t = t, value)\ntheorem recursorFalse(h: False): h = h :=\n  False.rec(fun (t: False) => t = t, h)\ntheorem recursorNatZero: recursorNat(0) = 3 := by { rfl }\ntheorem recursorExceptError(n: Nat): recursorExcept(Except.error(n)) = n + 10 := by { rfl }\ntheorem recursorExceptOk(n: Nat): recursorExcept(Except.ok(n)) = n + 20 := by { rfl }\nfunction m3recursors(flag: Bool): UInt64 :=\n  let n := if (flag) { 4 } else { 3 }\n  let error: Except(Nat, Nat) := Except.error(n)\n  let ok: Except(Nat, Nat) := Except.ok(n + 1)\n  UInt64.ofNat(recursorNat(n) + 100 * recursorExcept(error) + 10000 * recursorExcept(ok))\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -290,6 +343,12 @@ private def compareCheckedValues (left right : List PsDeclaration) : IO Unit := 
         "source adapters changed a recursor telescope"
     | _, _ => throw (IO.userError "source adapters changed a checked declaration kind")
 
+private def recursorMotiveTypeFailure : PsElabError → Bool
+  | .atDeclaration _ cause => recursorMotiveTypeFailure cause
+  | .atContext _ cause => recursorMotiveTypeFailure cause
+  | .typeMismatch => true
+  | _ => false
+
 def check (root : System.FilePath) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "input parity requires pinned Lean4.35.0"
@@ -310,6 +369,8 @@ def check (root : System.FilePath) : IO Unit := do
     (← fromExcept (checkedDeclarations .proofScript strategyPsSource))
   compareCheckedValues (← fromExcept (checkedDeclarations .lean fieldsLeanSource))
     (← fromExcept (checkedDeclarations .proofScript fieldsPsSource))
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean recursorLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript recursorPsSource))
   for (kind, source) in [
       (PsCompilerSourceKind.lean, "inductive Negative where\n  | wrap (f : Negative → Nat)\n"),
       (.proofScript, "inductive Negative where { | wrap(f: Negative -> Nat) }\n")] do
@@ -363,6 +424,37 @@ def check (root : System.FilePath) : IO Unit := do
     let program ← fromExcept (psCompilerParsePscv0 source .lean)
     ensure (!(psCompilerElaboratePscv0 program).isOk)
       "native named-priority placement admitted duplicate or unknown names"
+  -- The corrected public source surface has no private-motive alias.
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean, "def bad (n : Nat) : Nat :=\n  Nat.rec (motive := fun (_ : Nat) => Nat) 3\n    (fun (k : Nat) (ih : Nat) => ih + k + 2) n\n    (_motive := fun (_ : Nat) => Nat)\n"),
+      (.proofScript, "function bad(n: Nat): Nat :=\n  Nat.rec(3, fun (k: Nat) (ih: Nat) => ih + k + 2, n,\n    motive := fun (_: Nat) => Nat, _motive := fun (_: Nat) => Nat)\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerElaboratePscv0 program with
+    | .error error =>
+      ensure ((psCompilerPscv0Error error).startsWith "PSCV0-ARGUMENT: unknown named argument")
+        ("recursor legacy motive lost its telescope diagnosis: " ++ psCompilerPscv0Error error)
+    | .ok _ => throw (IO.userError "recursor accepted a legacy private-motive source alias")
+  for (label, kind, source) in [
+      ("Empty native omitted motive", PsCompilerSourceKind.lean,
+        "theorem bad (value : Empty) : value = value := Empty.rec value\n"),
+      ("Empty ProofScript omitted motive", .proofScript,
+        "theorem bad(value: Empty): value = value := Empty.rec(value)\n"),
+      ("False native omitted motive", .lean,
+        "theorem bad (h : False) : h = h := False.rec h\n"),
+      ("False ProofScript omitted motive", .proofScript,
+        "theorem bad(h: False): h = h := False.rec(h)\n"),
+      ("Nat native non-function motive", .lean,
+        "def bad (n : Nat) : Nat := Nat.rec (motive := Nat) 3 (fun (k : Nat) (ih : Nat) => ih + k + 2) n\n"),
+      ("Nat ProofScript non-function motive", .proofScript,
+        "function bad(n: Nat): Nat := Nat.rec(3, fun (k: Nat) (ih: Nat) => ih + k + 2, n, motive := Nat)\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerElaboratePscv0 program with
+    | .error (.elaboration cause) =>
+      ensure (recursorMotiveTypeFailure cause)
+        (label ++ " lost its motive type-checking refusal: " ++ psCompilerPscv0ElabError cause)
+    | .error error =>
+      throw (IO.userError (label ++ " failed outside elaboration: " ++ psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError (label ++ " was accepted"))
   ensure (!(psCompilerParsePscv0 "def bad : Nat := Nat.succ(3)\n" .lean).isOk)
     "native application lost Lean's whitespace requirement"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean "section\nvariable (x y : Nat)\ndef selected := y\nend\n"))
@@ -401,10 +493,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control", "m3mutual", "m3strategies", "m3fields", "m3recursors"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (recursorLeanSource ++ fieldsLeanSource ++ dataLeanSource ++ controlLeanSource ++ mutualLeanSource ++ strategyLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (recursorPsSource ++ fieldsPsSource ++ dataPsSource ++ controlPsSource ++ mutualPsSource ++ strategyPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -444,7 +536,8 @@ def check (root : System.FilePath) : IO Unit := do
           ("m3control", Lean.toJson (toString (M3InputParityOracle.m3control flag).toNat)),
           ("m3mutual", Lean.toJson (toString (M3InputParityOracle.m3mutual flag).toNat)),
           ("m3strategies", Lean.toJson (toString (M3InputParityOracle.m3strategies flag).toNat)),
-          ("m3fields", Lean.toJson (toString (M3InputParityOracle.m3fields flag).toNat))]
+          ("m3fields", Lean.toJson (toString (M3InputParityOracle.m3fields flag).toNat)),
+          ("m3recursors", Lean.toJson (toString (M3InputParityOracle.m3recursors flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, positive dependent function fields with singleton/mutual recursion and explicit induction, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, positive dependent function fields with singleton/mutual recursion and explicit induction, native public Nat/Except recursors and Empty/False motives, where, singleton/mutual WF, ordinary partial P0 and selected fixedpoint P1, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

@@ -26,8 +26,8 @@ private def inspectPProdRuntimeData : IO Unit := do
 
 -- Source calling conventions are observable even when kernel type equality
 -- ignores binder annotations. Inventory every selected public recursor against
--- pinned Lean before choosing a metadata change; this is diagnostic evidence,
--- never publication or a substitute for the existing signature/closure audit.
+-- pinned Lean. The reviewed selected stage now requires zero public differences;
+-- this remains separate from complete type/metadata, kernel and closure checks.
 private def nativeRecursorBinders : Lean.Expr → List String
   | .forallE name _ body binder =>
     let kind := match binder with
@@ -62,8 +62,14 @@ private def inspectRecursorSurface : IO Unit := do
         ("portableBinders", Lean.toJson actual),
         ("nativeBinders", Lean.toJson expected)]).compress
   IO.println ("PSCV0_M3_RECURSOR_SURFACE_INVENTORY compared=" ++ toString compared ++
-    " differences=" ++ toString differences ++ "; diagnostic only; selected bytes unchanged")
+    " differences=" ++ toString differences ++ "; current selected source metadata")
   IO.println (Lean.Json.mkObj [("unavailableNativeRecursors", Lean.toJson unavailable.reverse)]).compress
+  let privateHelpers := ["TextPrefix", "SpaceResult", "WorkItem", "WorkGroup", "State", "Machine"].map
+    (fun suffix => (Lean.Name.str (.str (.str .anonymous "$psc0Format") suffix) "rec").toString)
+  unless compared == 109 && differences == 0 && unavailable.length == privateHelpers.length &&
+      privateHelpers.all unavailable.contains do
+    throw (IO.userError "selected public recursor source metadata or private helper inventory differs")
+  IO.println "PSCV0_M3_RECURSOR_SELECTED_SURFACE: PASS 109 pinned public telescopes and six unchanged compiler-owned helpers"
 
 def main : IO Unit := do
   inspectPProdRuntimeData

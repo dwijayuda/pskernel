@@ -1121,11 +1121,11 @@ private def application : String :=
   "  | Vector.cons k head tail => Vector.cons(k, head, replace(k, tail, tail))\n" ++
   "}\n" ++
   "function captured(n: Nat, values: Vector(Nat, n)): Nat := Vector.rec(n, fun k head tail ih => ih, values, motive := fun k value => Nat)\n" ++
-  "function computedFold(seed: Nat, n: Nat): Nat := Nat.rec(fun k => Nat, seed, fun k ih => Nat.succ(ih), Nat.succ(n))\n" ++
+  "function computedFold(seed: Nat, n: Nat): Nat := Nat.rec(seed, fun k ih => Nat.succ(ih), Nat.succ(n), motive := fun k => Nat)\n" ++
   "function localFold(seed: Nat, n: Nat): Nat :=\n" ++
-  "  let run: Nat -> Nat := fun m => Nat.rec(fun k => Nat, seed, fun k ih => Nat.succ(ih), m)\n" ++
+  "  let run: Nat -> Nat := fun m => Nat.rec(seed, fun k ih => Nat.succ(ih), m, motive := fun k => Nat)\n" ++
   "  run(n)\n" ++
-  "function nestedFold(n: Nat): Nat := Nat.rec(fun k => Nat, 0, fun k ih => Nat.rec(fun j => Nat, ih, fun j inner => Nat.succ(inner), k), n)\n" ++
+  "function nestedFold(n: Nat): Nat := Nat.rec(0, fun k ih => Nat.rec(ih, fun j inner => Nat.succ(inner), k, motive := fun j => Nat), n, motive := fun k => Nat)\n" ++
   "function capturedMap{A: Type}(n: Nat, values: Vector(A, n)): Vector(A, n) := Vector.rec(Vector.nil, fun k head tail ih => Vector.cons(k, head, ih), values, motive := fun k value => Vector(A, k))\n" ++
   "function twoTail{A: Type}(n: Nat, values: Vector(A, Nat.succ(Nat.succ(n)))): Vector(A, n) := match values with { | .cons _ _ (.cons k _ tail) => tail }\n" ++
   "function multiIndexed(n: Nat, values: Vector(Nat, n)): Nat := match n, values with { | 0, .nil => 0 | k + 1, .cons m head tail => head }\n" ++

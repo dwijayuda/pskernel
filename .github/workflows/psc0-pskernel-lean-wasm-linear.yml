@@ -1,0 +1,125 @@
+name: PSC0 v7.2 — Lean 4.35 C++ kernel linear Wasm (Linux)
+
+on:
+  push:
+    branches: [feature/psc0-v72-pskernel-lean-wasm-linear-v1]
+    paths:
+      - '.github/workflows/psc0-pskernel-lean-wasm-linear.yml'
+      - 'psc0/packages/pskernel-lean-wasm/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/packages/bridge/src/**'
+      - 'psc0/packages/environment/src/**'
+      - 'psc0/packages/core/src/**'
+      - 'psc0/packages/foundation/src/**'
+      - 'psc0/v7-native/lakefile.lean'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: psc0-lean435-linear-wasm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  full-cpp-kernel-wasm:
+    name: Official C++ kernel / linear memory / native-Wasm parity
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: true
+          sparse-checkout: |
+            psc0
+            .github/workflows/psc0-pskernel-lean-wasm-linear.yml
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Source identity and fail-closed host tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in psc0/packages/pskernel-lean-wasm/index.mjs psc0/packages/pskernel-lean-wasm/scripts/*.mjs; do
+            node --check "$f"
+          done
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-host.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Exact Lean 4.35.0 identity and same-source native reference
+        working-directory: psc0/v7-native
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build pskernel_lean_wasm_native_ref
+          .lake/build/bin/pskernel_lean_wasm_native_ref --health
+      - name: Install Linux native i386 prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential cmake git make clang gcc-multilib g++-multilib \
+            libc6-dev-i386 libuv1-dev:i386 libssl-dev:i386 pkgconf:i386
+          test -x /usr/bin/i386-linux-gnu-pkg-config
+      - name: Fetch exact Emscripten 6.0.9 and cross-build Lean kernel into Wasm
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$RUNNER_TEMP/emsdk"
+          cd "$RUNNER_TEMP/emsdk"
+          ./emsdk install 6.0.9
+          ./emsdk activate 6.0.9
+          source ./emsdk_env.sh
+          cd "$GITHUB_WORKSPACE"
+          bash psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh
+      - name: Kernel positive/negative parity (required, no bypass)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0
+          node packages/pskernel-lean-wasm/scripts/check-differential.mjs \
+            v7-native/.lake/build/bin/pskernel_lean_wasm_native_ref \
+            packages/pskernel-lean-wasm/wasm/pskernel-lean.cjs
+      - name: Stage hashes from checked same-run kernel binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node psc0/packages/pskernel-lean-wasm/scripts/stage-prebuilt.mjs
+          node psc0/packages/pskernel-lean-wasm/scripts/verify-prebuilt.mjs
+          node --test psc0/packages/pskernel-lean-wasm/scripts/test-host.mjs
+      - name: Upload real Lean C++ kernel artifacts (NOT GC probe)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: psc0-lean435-linear-wasm-kernel-qualified
+          path: |
+            psc0/packages/pskernel-lean-wasm/wasm/
+            psc0/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
+          if-no-files-found: error
+      - name: Commit same-SHA checked linear-memory kernel binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch='feature/psc0-v72-pskernel-lean-wasm-linear-v1'
+          test "$GITHUB_REF_NAME" = "$branch"
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          remote_sha="$(git ls-remote origin "refs/heads/$branch" | cut -f1)"
+          test "$remote_sha" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- psc0/packages/pskernel-lean-wasm/wasm/ \
+            psc0/packages/pskernel-lean-wasm/PREBUILT_WASM_MANIFEST.json
+          if git diff --cached --quiet; then
+            echo 'PSC0_WASM_PREBUILT: byte-identical; no new commit'
+          else
+            git commit -m 'build(psc0): stage qualified Lean 4.35 C++ linear Wasm [skip ci]'
+            git push origin "HEAD:refs/heads/$branch"
+          fi

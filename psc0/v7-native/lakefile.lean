@@ -157,3 +157,9 @@ lean_exe pscv0_m3_mutual_well_founded_export where
 lean_exe pscv0_m3_mutual_packing where
   srcDir := "../test"
   root := `Pscv0M3MutualPacking
+
+-- Isolated, same-source native oracle for the 4.35.0 C++ linear-memory Wasm
+-- provider. Reuses current PSC0 bridge/Standard and Lean's official kernel.
+lean_exe pskernel_lean_wasm_native_ref where
+  srcDir := "../packages/pskernel-lean-wasm/src"
+  root := `PsKernelLeanWasm.Main

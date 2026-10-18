@@ -36,51 +36,38 @@ Prep cancel-in-progress:false; keep at most one active and one pending run.
 
 ## Current state and evidence
 
-Latest fully qualified compiler/test SHA: **b95c629380ba03638a14c708c5c584ef1b8eaf16**.
-All five exact-SHA integration gates completed SUCCESS:
-Native39090324651, M339090324683, F139090324667, F239090324693,
-F339090324659. Complete receipt:
-docs/PSCV0_M3_INTEGRATION_B95C6293_2026-10-18.md.
-Preparation39089622847/job117564131092 also passed at that exact SHA.
+Latest fully qualified compiler/test SHA and current main:
+**18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290**.
+All five exact-SHA gates completed SUCCESS: Native39092425439,
+M339092425489, F139092425401, F239092425419, F339092425556.
+Full run/job/artifact digest receipt:
+docs/PSCV0_M3_INTEGRATION_18FE0B3E_2026-10-18.md.
+Preparation39091873814/job117570152485 also passed at that exact SHA.
+Historicalb95c6293 remains qualified, but is no longer the latest checkpoint.
 
-This qualifies source-kind routing; shared ordered binder/section annotation
-scope; native rich terms, proofs, data/classes/instances/deriving; both mixed-module
-directions; exact paired definition/equation Core comparison; official kernel;
-five-target emission and execution; and assurance/noncomputable refusals.
-The corrected P1 Rust producer/run ordering is included and the actual Rust
-step passed. The full focused log endpoint failed; no aggregate runtime count
-is claimed. Old037fda49 is historical evidence, not the latest checkpoint.
-Source mutual WF and full selected native grammar parity are still OPEN.
+This qualifies both input routes, ordered binder/section scope, native rich
+terms/proofs/data/classes/instances/deriving, mixed modules, local where/WF,
+pattern lets, if-let and typed do control. The paired m3parity/m3data/m3control
+fixtures share checked Core and equations and execute through the existing
+JavaScript, TypeScript, Rust, GC core and component observers. Actual P1 Rust
+execution is included. No aggregate runtime count is inferred from job metadata.
+Full native syntax parity and source mutual WF remain OPEN.
 
-Preparation18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290 completed SUCCESS:
-run39091873814/job117570152485; artifact12123620366; SHA256
-d9070df90395b4c96c96dbdc0c6eb21501ebb9b601582b1446b0d82d85895045.
-Its complete log records INPUT_PARITY PASS including native where/WF, pattern
-lets, conditional patterns and typed do control, plus all retained checks.
-This includes official native reference proofs, paired checked value/equation
-comparison and both inputs' five-target emission. Runtime integration is pending.
+Preparation candidate3f7e0491341599cce3e259de640ae09a1b16f526:
+run39093165102/job117574003095, RUNNING at this checkpoint. It adds internal
+source-owned mutual measures and actual recursive component functionals, using
+the existing packing fixture/native oracle. This code is NOT yet qualified.
+The preceding09bcae preparation failed because an unreduced closed dictionary
+application falsely retained unused varying arguments. The replacement follows
+pinned WF/Rel: establish one fixed codomain and synthesize a single relation
+dictionary in the common fixed scope. Per-member dictionary transport is removed.
 
-Main has been promoted non-force to18fe0b3e. Native remains RUNNING; M3, F1, F2 and F3 completed SUCCESS:
- Native39092425439, M339092425489, F139092425401,
-F239092425419, F339092425556. Do not supersede/cancel healthy main Native.
-The last fully qualified five-gate SHA remainsb95c6293.
-Receipt: docs/PSCV0_M3_NATIVE_CONTROL_18FE0B3E_2026-10-18.md.
-
-Preparation09bcae7989e1394c07cfad57e40b783c1b165b44 failed its component
-measure check (run39092554668/job117572173163). The source stage applied a
-closed dictionary without beta reduction, then counted unused varying arguments
-as free dependencies. The replacement follows pinned WF/Rel directly: establish
-one fixed measure codomain, then synthesize one dictionary in the common fixed
-scope. Per-member dictionary transport is removed.
-
-This preparation child also constructs actual internal source component bodies:
-per-callee proof-restricted callbacks, dependent branch refinement, final fixed
-argument validation, real decrease goals and closed typed component branches.
-The existing three-member packing fixture now independently checks the resulting
-recursive functional and its genuine fix_eq with the official kernel. These new
-checks are PENDING; no public mutual-WF acceptance or runtime authority is claimed.
-The source dispatcher remains fail-closed pending public projections, exact
-retained-body equations, executable ownership and selected PSum activation.
+The body candidate uses actual per-callee dependent callbacks, checks final fixed
+arguments in their branch scopes, solves genuine decrease goals, closes and checks
+the recursive functional and its fix_eq. It does not activate the public source
+dispatcher. Public projections, exact retained-body equations, typed executable
+ownership and strict PSum selection are still required.
+Fresh refs, complete logs and exact-SHA CI override this checkpoint.
 
 ## Current implementation and next work
 
@@ -100,12 +87,11 @@ retained-body equations, executable ownership and selected PSum activation.
   dangling else and else-if. Selected bindings/returns/actions, pattern matrices,
   expected effects and continuations stay shared. No new effect family is added.
 - One paired fixture now has three exports (m3parity, m3data, m3control) and
-  existing five-target observers. The qualifiedb95 version has the first two;
-  the third and local WF helper are prep-qualified at18fe; runtime gates are pending.
+  existing five-target observers; all three and the local WF helper are qualified
+  across all five integration gates at18fe.
 
 Next actions:
-1. Qualify the source component measure/body candidate while main18fe
-   integration runs. This reuses the existing retained-source packing fixture;
+1. Qualify the source component measure/body candidate. Main18fe integration is complete. This reuses the existing retained-source packing fixture;
    no new executable or workflow is added. Build that existing fixture before
    long audits to catch authoring errors early. Exporter source bytes remain
    in complete artifact logs/files; redundant console source dumps are filtered.

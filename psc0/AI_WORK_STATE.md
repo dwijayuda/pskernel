@@ -1,5 +1,43 @@
 # PSC0 v7.2 work state — M3+B
 
+## Paired recursion and row controls — qualification pending
+
+Preparation [39150007070](https://github.com/dwijayuda/pskernel/actions/runs/39150007070)
+at d85611cf1aea031a700cf8f41bfa6dedc3009f60 failed during compilation:
+PatternMatrix record layout at 444, the reserved WF identifier prefix, and
+a mutable-context shadow. This candidate corrects those build errors.
+
+The paired fixture now keeps all nine existing runtime exports and adds
+m3inline (true 11110611; false 102201400), m3registered (true 8765; false 10987),
+and m3const (true 43; false 65). All twelve are requested and observed in both
+input grammars across the retained JavaScript, strict TypeScript, Rust, Wasm GC
+and component lanes. These are expected observations, not successful receipts.
+
+New checks cover typed dependent wildcard rows, a nested pre-specialization
+RHS refusal, inline data descent through function-valued/nested/indexed/mutual
+fields, unchanged-major and unrelated-major refusals, literal function-valued
+const types and checked original source equations. Registered declarations
+check their actual kinds, unique class/instance/default registration, priorities,
+abbrev reducibility and nonreservation of an existing eq_def name.
+
+Instance fixtures use the selected where-field grammar in both sources.
+ProofScript instance value bodies remain a parser refusal. A checked source
+case beneath applications/projections now retains its complete surrounding
+Core context and exact case path; branch construction reduces the actual
+constructor case at that path and checks the resulting value. Existing
+direct-case behavior, fixed mappings and exact child ownership stay checked.
+
+Structural refusal checks inspect the precise underlying elaboration data rule
+through declaration/context wrappers; display formatting is not the phase
+oracle. No original refusal, runtime value, budget or selected foundation pin
+is relaxed. Whole-match WF transport, the separate predicate-below owner and
+selected function-valued WF measure scope remain in progress. No grammar
+expansion follows from native termination hint binders.
+
+All six M3+B exits remain OPEN. No source/kernel/runtime success is claimed
+from the failed builds. Main remains 33676076bcda7b0de5ec1f9803f49b8b1d28a058;
+final Native/M3/F1/F2/F3 must pass on one complete compiler/test SHA.
+
 ## WF Core phase and function-valued const candidate — qualification pending
 
 Preparation [39149397847](https://github.com/dwijayuda/pskernel/actions/runs/39149397847)

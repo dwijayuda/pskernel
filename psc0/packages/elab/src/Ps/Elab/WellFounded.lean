@@ -488,7 +488,7 @@ structure PsElabWellFoundedCoreMinor where
 
 structure PsElabWellFoundedCoreRecursor where
   context : PsElabContext
-  prefix : PsExpr
+  recursorBase : PsExpr
   minors : List PsElabWellFoundedCoreMinor
   indices : List PsExpr
   major : PsExpr
@@ -626,12 +626,12 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
     | throw .matchRecursorLevels
   let some anchor := view.plan.group.members.head? | throw .matchRecursorUnsupported
   let levels ← psElabRecursorLevels anchor view.info familyLevels motiveLevel
-  let prefix ← psElabApplyCore context (.constE view.info.name levels)
+  let recursorBase ← psElabApplyCore context (.constE view.info.name levels)
     (view.fixedArgs.take view.info.numParams ++ motives)
   let constructors := view.plan.slots.flatMap (·.constructors)
   if constructors.length != view.info.numMinors then throw .matchRecursorUnsupported
-  let mut current := prefix.context
-  let mut cursor := prefix.type
+  let mut current := recursorBase.context
+  let mut cursor := recursorBase.type
   let mut minors : List PsElabWellFoundedCoreMinor := []
   let mut values : List PsExpr := []
   let mut refined := false
@@ -677,12 +677,12 @@ def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
   if !refined then return none
   let originalType ← (psInferType current.environment current.metaContext
     current.localContext original).mapError PsElabError.infer
-  let extended := psExprApplyMany prefix.term
+  let extended := psExprApplyMany recursorBase.term
     (values ++ view.indices ++ [view.major] ++ calls.map (·.callback) ++ view.suffix)
   let checked ← psElabResolvedTerm current extended (some originalType)
   return some {
     context := checked.context
-    prefix := prefix.term
+    recursorBase := recursorBase.term
     minors, indices := view.indices, major := view.major, suffix := view.suffix }
 
 -- The optional compiler transport has the native addArg? fallback. No failed
@@ -712,16 +712,16 @@ def psElabWellFoundedCoreFinishRecursor (rewrite : PsElabWellFoundedCoreRewriter
       minor.bindersRev body.term minor.domain
     current := closed.context
     minors := minors ++ [closed.term]
-  let (current, varying) ← (plan.indices ++ [plan.major]).foldlM
+  let (varyingContext, varying) ← (plan.indices ++ [plan.major]).foldlM
     (fun (state : PsElabContext × List PsExpr) term => do
       let value ← rewrite state.fst calls term
       return (value.context, state.snd ++ [value.term])) (current, [])
-  let (current, suffix) ← plan.suffix.foldlM
+  let (suffixContext, suffix) ← plan.suffix.foldlM
     (fun (state : PsElabContext × List PsExpr) term => do
       let value ← rewrite state.fst calls term
-      return (value.context, state.snd ++ [value.term])) (current, [])
-  psElabResolvedTerm current
-    (psExprApplyMany plan.prefix (minors ++ varying ++ calls.map (·.callback) ++ suffix)) none
+      return (value.context, state.snd ++ [value.term])) (varyingContext, [])
+  psElabResolvedTerm suffixContext
+    (psExprApplyMany plan.recursorBase (minors ++ varying ++ calls.map (·.callback) ++ suffix)) none
 
 def psElabWellFoundedCoreRewrite (fuel : Nat) (context : PsElabContext)
     (calls : List PsElabWellFoundedCoreCall) (source : PsExpr) :

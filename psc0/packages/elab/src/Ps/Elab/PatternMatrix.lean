@@ -441,8 +441,11 @@ def psElabPatternRunPlan (branch : PsElaborator) (inputs : PsElabPatternInputs)
     throw (.refinement "source match telescope arity mismatch")
   let columns := (inputs.columns.zip (binders.take inputs.columns.length)).zipIdx.map
     fun ((column, binder), index) =>
-      { column with major := .fvar binder.id, value := .fvar binder.id,
-        type := binder.type, path := [index] }
+      { column with
+        major := .fvar binder.id
+        value := .fvar binder.id
+        type := binder.type
+        path := [index] }
   let some first := columns.head? | throw .matchScrutineeUnsupported
   let span := psSyntaxTermSpan first.source.term
   let generalized := (selected.zip (binders.drop inputs.columns.length)).zipIdx.map fun (((id, names), binder), index) =>

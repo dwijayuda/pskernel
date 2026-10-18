@@ -37,12 +37,51 @@ structure PsElabMutualStructuralLocated where
   application : PsEliminationRecursorApplication
   body : PsExpr
   resultBinders : Nat
+  casePath : List Nat := []
+
+-- A selected field body can place a checked match under constructor
+-- applications or projections. Retain every surrounding node and record the
+-- actual Core path (0 function, 1 argument, 2 projection value). No source
+-- syntax or lexical name supplies structural descent evidence.
+def psElabMutualStructuralApplicationCase (fuel : Nat) (context : PsElabContext)
+    (peerIds : List Nat) (body : PsExpr) :
+    Except PsElabError (Option PsElabMutualStructuralLocated) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if !(psExprFVarIds body).any peerIds.contains then return none
+    let normalized := psWhnf context.environment context.metaContext context.localContext body
+    if let some application := psEliminationRecursorApplication context.environment normalized then
+      return some {
+        context := context
+        application := application
+        body := normalized
+        resultBinders := 0 }
+    match normalized with
+    | .app fn argument =>
+      if let some located ← psElabMutualStructuralApplicationCase fuel context peerIds fn then
+        return some { located with
+          body := .app located.body argument
+          casePath := 0 :: located.casePath }
+      if let some located ← psElabMutualStructuralApplicationCase fuel context peerIds argument then
+        return some { located with
+          body := .app fn located.body
+          casePath := 1 :: located.casePath }
+      return none
+    | .proj name index value =>
+      if let some located ← psElabMutualStructuralApplicationCase fuel context peerIds value then
+        return some { located with
+          body := .proj name index located.body
+          casePath := 2 :: located.casePath }
+      return none
+    | _ => return none
 
 -- Locate through actual returned-function binders without extending the
 -- retained source header. The normalized case template is independently
 -- checked against the original body; the original remains equation authority.
 def psElabMutualStructuralLocate (fuel : Nat) (context : PsElabContext)
-    (type body : PsExpr) : Except PsElabError PsElabMutualStructuralLocated := do
+    (peerIds : List Nat) (type body : PsExpr) :
+    Except PsElabError PsElabMutualStructuralLocated := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
@@ -58,7 +97,7 @@ def psElabMutualStructuralLocate (fuel : Nat) (context : PsElabContext)
       let pushed := psLocalPushBinding context.localContext name domain binder
       let argument := PsExpr.fvar pushed.id
       let inner := psElabContextWithLocal context pushed.context
-      let located ← psElabMutualStructuralLocate fuel inner
+      let located ← psElabMutualStructuralLocate fuel inner peerIds
         (psExprInstantiate1 pi.body argument) (psExprInstantiate1 value argument)
       let body := PsExpr.lam name domain (psExprAbstractFVar pushed.id located.body) binder
       let checked ← psElabResolvedTerm context body (some type)
@@ -66,10 +105,15 @@ def psElabMutualStructuralLocate (fuel : Nat) (context : PsElabContext)
         throw (psElabMutualStructuralError "RESULT" "returned-lambda location changed the original checked function")
       return { located with body := checked.term, resultBinders := located.resultBinders + 1 }
     | _ =>
-      let some application := psEliminationRecursorApplication context.environment normalized
-        | throw (psElabMutualStructuralError "ROOT" "checked root match has no complete registered recursor view")
-      let checked ← psElabResolvedTerm context normalized (some type)
-      return { context := checked.context, application, body := checked.term, resultBinders := 0 }
+      if let some application := psEliminationRecursorApplication context.environment normalized then
+        let checked ← psElabResolvedTerm context normalized (some type)
+        return { context := checked.context, application, body := checked.term, resultBinders := 0 }
+      let some located ← psElabMutualStructuralApplicationCase fuel context peerIds normalized
+        | throw (psElabMutualStructuralError "ROOT" "checked body has no complete registered recursive case view")
+      let checked ← psElabResolvedTerm context located.body (some type)
+      if !psElabMutualStructuralEqual checked.context checked.term normalized then
+        throw (psElabMutualStructuralError "ROOT" "case location changed its checked application context")
+      return { located with context := checked.context, body := checked.term }
 
 structure PsElabMutualStructuralInput where
   header : PsElabPartialHeader
@@ -84,6 +128,7 @@ structure PsElabMutualStructuralInput where
   application : PsEliminationRecursorApplication
   caseBody : PsExpr
   resultBinders : Nat
+  casePath : List Nat := []
   familyLevels : List PsLevel
   majorId : Nat
   indexIds : List Nat
@@ -190,7 +235,7 @@ def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
   let ownBinders := (header.bindersRev.reverse.drop captured.bindersRev.length).map fun binder =>
     { binder with type := psMetaInstantiate opened.context.metaContext binder.type }
   let body := psMetaInstantiate opened.context.metaContext opened.body
-  let located ← psElabMutualStructuralLocate 4096 opened.context header.openType body
+  let located ← psElabMutualStructuralLocate 4096 opened.context (peers.map Prod.fst) header.openType body
   let application := located.application
   if psEliminationRecursorUsesHypotheses application then
     throw (psElabMutualStructuralError "CASE-IH" "source case hypotheses require a separate induction consumer")
@@ -230,7 +275,8 @@ def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
     header, sourceHeader, sourceBody, bodyBindersRev, span, ownBinders, context
     body, peers, application, familyLevels, majorId, indexIds, sourceInfo
     caseBody := caseBody.term
-    resultBinders := located.resultBinders }
+    resultBinders := located.resultBinders
+    casePath := located.casePath }
 
 def psElabMutualStructuralInputFor (captured : PsElabTypedBindersResult)
     (headers : List PsElabPartialHeader) (members : List PsScopedMutualMember)
@@ -1204,10 +1250,11 @@ def psElabMutualStructuralRewrite (fuel : Nat) (plan : PsElabMutualStructuralPla
   match fuel with
   | 0 => throw (psElabMutualStructuralError "BUDGET" "structural branch traversal exhausted")
   | fuel + 1 =>
-    if plan.descendants?.isSome &&
+    let normalizeCases := plan.descendants?.isSome || !caller.casePath.isEmpty
+    if normalizeCases &&
         !(psExprFVarIds term).any (fun id => caller.peers.any (fun peer => peer.fst == id)) then
       return term
-    let term := if plan.descendants?.isSome then
+    let term := if normalizeCases then
         psWhnf context.environment context.metaContext context.localContext term
       else term
     let view := psExprAppView term
@@ -1256,16 +1303,39 @@ def psElabMutualStructuralRewrite (fuel : Nat) (plan : PsElabMutualStructuralPla
 -- The locator counted actual returned-function lambdas in the checked body.
 -- Reopen exactly those binders here; they remain result arguments rather than
 -- becoming source-header or fixed-parameter positions.
+-- Reduce the selected real constructor case at its retained path, then
+-- independently check the result at that node's original type. The surrounding
+-- source application/projection context is rebuilt literally.
+def psElabMutualStructuralIotaAt (context : PsElabContext) (path : List Nat)
+    (source : PsExpr) : Except PsElabError PsExpr := do
+  match path with
+  | [] =>
+    let originalType ← (psInferType context.environment context.metaContext
+      context.localContext source).mapError PsElabError.infer
+    let some reduced := psReduceIota
+        (psWhnf context.environment context.metaContext context.localContext)
+        context.environment source
+      | throw (psElabMutualStructuralError "IOTA" "the checked source case did not select this real constructor")
+    let checked ← psElabResolvedTerm context reduced (some originalType)
+    return checked.term
+  | step :: rest =>
+    match step, source with
+    | 0, .app fn argument =>
+      return .app (← psElabMutualStructuralIotaAt context rest fn) argument
+    | 1, .app fn argument =>
+      return .app fn (← psElabMutualStructuralIotaAt context rest argument)
+    | 2, .proj name index value =>
+      return .proj name index (← psElabMutualStructuralIotaAt context rest value)
+    | _, _ =>
+      throw (psElabMutualStructuralError "IOTA" "checked source case lost its recorded application context")
+
 def psElabMutualStructuralBranchValue (resultBinders : Nat)
     (plan : PsElabMutualStructuralPlan) (caller : PsElabMutualStructuralInput)
     (context : PsElabContext) (children : List PsElabMutualStructuralChild)
     (source expected : PsExpr) : Except PsElabError PsExpr := do
   match resultBinders with
   | 0 =>
-    let some reduced := psReduceIota
-        (psWhnf context.environment context.metaContext context.localContext)
-        context.environment source
-      | throw (psElabMutualStructuralError "IOTA" "the checked source case did not select this real constructor")
+    let reduced ← psElabMutualStructuralIotaAt context caller.casePath source
     let branch := psWhnf context.environment context.metaContext context.localContext reduced
     let value ← psElabMutualStructuralRewrite 4096 plan caller context children branch
     let checked ← psElabResolvedTerm context value (some expected)

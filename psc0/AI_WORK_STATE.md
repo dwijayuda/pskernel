@@ -170,3 +170,17 @@ Compiler/LCNF/ToLCNF, Simp/Main; Deriving/{Hashable,Repr,BEq,DecEq};
 tests/elab/{match1,match2,match3,matchGenIssue,matchGenBug,discrRefinement,
 discrRefinement2,structuralOverNested,mutualDefThms,indPredRecursion}.lean.
 Preserve upstream notices, official kernel, native .lean, GitHub Linux only.
+
+## Recursor surface audit queued
+
+The existing foundation inventory now compares public recursor binder names and
+kinds with the pinned Lean environment, without selecting or changing any asset.
+This checks whether the retained Nat mismatch is isolated before a foundation
+redesign. Actual mutualLeanSource now explicitly uses the named-interleaved WF
+call (n := m), in addition to the native oracle, through source header capture
+and returned-function application. No new lane, runtime primitive or budget.
+
+Preparation bba4f8b5/run39103375064 stopped before compiler build because the
+new Name helper used Lean's reserved keyword prefix as a binder. Renamed to
+originalPrefix; no algorithm or acceptance change. This child remains
+unqualified pending complete preparation.

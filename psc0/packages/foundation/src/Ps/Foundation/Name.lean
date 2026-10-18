@@ -111,12 +111,12 @@ def psNameLastComponent (name : PsName) : String :=
   | PsName.num _ value => psNatToString value
 
 -- Preserve complete suffix components when naming generated declarations.
-def psNameReplacePrefix (name prefix replacement : PsName) : PsName :=
-  if psNameEq name prefix then replacement else
+def psNameReplacePrefix (name originalPrefix replacement : PsName) : PsName :=
+  if psNameEq name originalPrefix then replacement else
     match name with
     | .anonymous => name
-    | .str parent value => .str (psNameReplacePrefix parent prefix replacement) value
-    | .num parent value => .num (psNameReplacePrefix parent prefix replacement) value
+    | .str parent value => .str (psNameReplacePrefix parent originalPrefix replacement) value
+    | .num parent value => .num (psNameReplacePrefix parent originalPrefix replacement) value
 
 def psNameAppendAfter (name : PsName) (suffix : String) : PsName :=
   match name with

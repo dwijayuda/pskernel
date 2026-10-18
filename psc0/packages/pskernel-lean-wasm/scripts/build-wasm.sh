@@ -2,7 +2,7 @@
 set -euo pipefail
 # The repository root may pin an older Lean toolchain. Never inherit it for
 # the 4.35.0 cross-build, even when called from the checkout root.
-export LEAN_TOOLCHAIN='leanprover/lean4:v4.35.0'
+export ELAN_TOOLCHAIN='leanprover/lean4:v4.35.0'
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 package_root="$(cd "$script_dir/.." && pwd)"
 psc0="$(cd "$package_root/../.." && pwd)"
@@ -24,6 +24,7 @@ lean_commit="eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
 for tool in git cmake make clang clang++ emcc em++ emar lean node; do
   command -v "$tool" >/dev/null || { echo "missing tool: $tool" >&2; exit 1; }
 done
+echo "PSC0_WASM_TOOLCHAIN: ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN lean=$(lean --version | head -1)"
 test "$(lean --githash | tr -d '\r\n')" = "$lean_commit" || {
   echo "wrong Lean toolchain (expected 4.35.0 at $lean_commit)" >&2; exit 1;
 }

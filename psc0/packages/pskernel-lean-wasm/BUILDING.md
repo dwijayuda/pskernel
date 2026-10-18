@@ -44,6 +44,8 @@ PSC_LEAN_WASM_SOURCE_COMMIT="$(git rev-parse HEAD)" \
 node packages/pskernel-lean-wasm/scripts/verify-prebuilt.mjs
 ```
 
+The build script explicitly sets `ELAN_TOOLCHAIN=leanprover/lean4:v4.35.0` so the repository-root 4.34 toolchain cannot leak into cross-compilation.
+
 The script downloads only the pinned official Lean commit into
 `psc0/packages/pskernel-lean-wasm/.wasm-build` (ignored); no archived
 `study/lean4-4.34.0`, vendored PSC2 source, or host-architecture .olean may

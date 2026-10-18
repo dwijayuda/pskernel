@@ -52,14 +52,6 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
-      - name: Exact Lean 4.35.0 identity and same-source native reference
-        working-directory: psc0/v7-native
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
-          lake build pskernel_lean_wasm_native_ref
-          .lake/build/bin/pskernel_lean_wasm_native_ref --health
       - name: Install Linux native i386 prerequisites
         shell: bash
         run: |
@@ -81,6 +73,14 @@ jobs:
           source ./emsdk_env.sh
           cd "$GITHUB_WORKSPACE"
           bash psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh
+      - name: Exact Lean 4.35.0 identity and same-source native reference
+        working-directory: psc0/v7-native
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build pskernel_lean_wasm_native_ref
+          .lake/build/bin/pskernel_lean_wasm_native_ref --health
       - name: Kernel positive/negative parity (required, no bypass)
         shell: bash
         run: |

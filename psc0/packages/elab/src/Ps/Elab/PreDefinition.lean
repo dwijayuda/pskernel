@@ -305,7 +305,8 @@ def psElabPreDefinitionStructural (environment : PsEnvironment)
     let checked ← psElabResolvedTerm context body (some opened.type)
     (psElabMutualStructuralInputFromChecked captured header checked.context checked.term
       (peers.map fun peer => (peer.specializedId, peer.memberIndex))
-      (psElabPreDefinitionSourceSpan member) member.sourceInfo).mapError (.atDeclaration member.name)
+      (psElabPreDefinitionSourceSpan member) member.sourceInfo
+      (member.sourceHeaderCount == 0)).mapError (.atDeclaration member.name)
   psElabStructuralMutualFromChecked environment levels captured inputs structuralEquations
 
 -- Called only after the selected definition/body construction succeeds.

@@ -170,10 +170,9 @@ structure PsElabWhereWellFoundedComponentBody where
   branch : PsExpr
   sourceInfo : PsElabSourceInfo
 
--- Keep source elaboration inside its original typed header. As in pinned
--- WF/Fix.processSumCasesOn/processPSigmaCasesOn, the callback types contain the
--- actual current injection; ordinary dependent matching refines them before
--- psTryElabWellFoundedCall creates its proof-restricted application.
+-- Check each source body against its original typed peer telescope. The Core
+-- phase specializes actual compiled alternatives and only then introduces
+-- decrease goals for the proof-restricted callbacks at the current injection.
 def psElabWhereWellFoundedComponentBody
     (component : PsElabWhereWellFoundedComponent) (index : Nat) :
     Except PsElabError PsElabWhereWellFoundedComponentBody := do
@@ -208,6 +207,7 @@ def psElabWhereWellFoundedComponentBody
     structuralRecursion := none, wellFoundedRecursions := []
     wellFoundedGoalsRev := [], wellFoundedCallsRev := [] }
   let mut adapters : List (Nat × PsName × PsExpr × PsExpr) := []
+  let mut coreCalls : List PsElabWellFoundedCoreCall := []
   for (target, targetIndex) in component.members.zipIdx do
     let projectedType ← (psMutualPackingProjectionType environment headerContext.metaContext
       bodyContext.localContext component.members.length targetIndex callbackType).mapError PsElabError.infer
@@ -223,6 +223,9 @@ def psElabWhereWellFoundedComponentBody
     let callbackName := psNameAppendNum (psRootName "_psc0ComponentTarget")
       bodyContext.localContext.nextId
     let callback := psLocalPushBinding bodyContext.localContext callbackName sourceType .explicit
+    let sourceName := psNameAppendNum (psRootName "_psc0ComponentSource")
+      callback.context.nextId
+    let source := psLocalPushBinding callback.context sourceName target.source.type .explicit
     let targetParameters := target.input.header.capturesRev.reverse ++
       target.input.header.parametersRev.reverse
     let capturedNames ← target.input.header.capturesRev.reverse.mapM fun capture => do
@@ -234,17 +237,33 @@ def psElabWhereWellFoundedComponentBody
       fun (parameter, position) => if position.isNone then some parameter.id else none
     let some majorId := packedIds.head?
       | throw (psElabWhereError "WF-TELESCOPE" "component target has no varying source parameter")
+    let fixedArguments ← (targetParameters.zip target.permutation).foldlM
+      (fun (values : List (Nat × PsExpr)) (parameter, position) => do
+        match position with
+        | none => pure values
+        | some index =>
+          let some expected := fixed[index]?
+            | throw (psElabWhereError "WF-FIXED" "target lost its actual caller fixed slot")
+          return values ++ [(parameter.id, expected)]) []
+    let recursion : PsElabWellFoundedRecursion := {
+      functionName := target.input.header.functionName, callbackName
+      parameterIds := targetParameters.map (·.id), majorId, packedIds
+      fixedIds := fixedArguments.map Prod.fst
+      sourceType := some target.source.type, capturedNames }
     bodyContext := { bodyContext with
-      localContext := callback.context
-      auxiliaryLocalIds := callback.id :: bodyContext.auxiliaryLocalIds
-      wellFoundedRecursions := bodyContext.wellFoundedRecursions ++ [{
-        functionName := target.input.header.functionName, callbackName
-        parameterIds := targetParameters.map (·.id), majorId, packedIds
-        sourceType := some target.source.type, capturedNames }] }
+      localContext := source.context
+      auxiliaryLocalIds := source.id :: callback.id :: bodyContext.auxiliaryLocalIds
+      wellFoundedRecursions := bodyContext.wellFoundedRecursions ++ [
+        { recursion with callbackName := sourceName, collectCalls := true }] }
+    coreCalls := coreCalls ++ [{
+      sourceId := source.id, callback := .fvar callback.id, recursion, fixedArguments
+      span := psSyntaxTermSpan member.input.body }]
     adapters := adapters ++ [(callback.id, callbackName, sourceType, adapter)]
   let value ← psElabWellFoundedAt "component source body"
     (psElabTerm bodyContext member.input.body (some header.resultType))
   psElabWhereComponentValidateCalls component fixed value.context
+  let value ← psElabWellFoundedAt "compiled component recursive calls"
+    (psElabWellFoundedCoreCalls value.context coreCalls value.term header.resultType)
   let solved ← psElabWellFoundedAt "component decrease goals"
     (psElabWellFoundedSolveGoals psElabTerm value.context member.input.termination.decreasing)
   let normalize := fun term =>

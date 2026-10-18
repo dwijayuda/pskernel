@@ -2,6 +2,7 @@ import Ps.Elab.Proof
 import Ps.Elab.RecursionParameters
 import Ps.Elab.Universe
 import Ps.Meta.WellFounded
+import Ps.Meta.Recursor
 
 /-
 Selected well-founded recursion, grounded in Lean 4.35.0
@@ -468,6 +469,343 @@ def psElabWellFoundedTupleCallbackEquality (context : PsElabContext)
 -- the typed measure. Its codomain and the measured argument's domain depend
 -- only on fixed captures; changing state and the result form a dependent motive.
 -- No body lambda enters the header or the termination clause's lexical scope.
+-- Source recursive calls stay ordinary typed peer applications until the
+-- compiled match has specialized its alternatives. Decrease goals are created
+-- only by this Core pass; the unrestricted peers are absent from their scopes.
+structure PsElabWellFoundedCoreCall where
+  sourceId : Nat
+  callback : PsExpr
+  recursion : PsElabWellFoundedRecursion
+  fixedArguments : List (Nat × PsExpr) := []
+  span : PsSourceSpan
+
+structure PsElabWellFoundedCoreMinor where
+  scope : PsElabSavedScope
+  bindersRev : List PsElabTypedBinder
+  body : PsExpr
+  domain : PsExpr
+  callbacks : List PsExpr
+
+structure PsElabWellFoundedCoreRecursor where
+  context : PsElabContext
+  prefix : PsExpr
+  minors : List PsElabWellFoundedCoreMinor
+  indices : List PsExpr
+  major : PsExpr
+  suffix : List PsExpr
+
+def psElabWellFoundedCoreHasCalls (calls : List PsElabWellFoundedCoreCall)
+    (term : PsExpr) : Bool :=
+  calls.any fun call => (psExprFVarIds term).contains call.sourceId
+
+-- Reduce the checked row-closure applications without discarding real lexical
+-- lets. The latter retain source pattern/equation names for decreasing_by.
+def psElabWellFoundedCoreBeta (fuel : Nat) (term : PsExpr) : PsExpr :=
+  match fuel with
+  | 0 => term
+  | fuel + 1 =>
+    let view := psExprAppView term
+    match view.head, view.args with
+    | .lam _ _ body _, argument :: rest =>
+      psElabWellFoundedCoreBeta fuel
+        (psExprApplyMany (psExprInstantiate1 body argument) rest)
+    | _, _ => term
+
+def psElabWellFoundedCoreClose (outer inner : PsElabContext)
+    (bindersRev : List PsElabTypedBinder) (body type : PsExpr) :
+    Except PsElabError PsElabTermResult :=
+  psElabAbstract outer inner (psElabLambdaAbstractions bindersRev) body type
+
+def psElabWellFoundedCoreGoalScope (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) : Except PsElabError PsLocalContext := do
+  let ids := calls.map (·.sourceId)
+  let declarations := context.localContext.declarations.filter fun declaration =>
+    !ids.contains (psLocalDeclId declaration)
+  for declaration in declarations do
+    let terms := match declaration with
+      | .binding _ _ type _ => [type]
+      | .letDecl _ _ type value => [type, value]
+    if terms.any (fun term => psElabWellFoundedCoreHasCalls calls
+        (psMetaInstantiate context.metaContext term)) then
+      throw (.data "PSCV0-WF-CLOSURE: a decrease scope retains an unrestricted source peer")
+  return { context.localContext with
+    declarations
+    nameAliases := context.localContext.nameAliases.filter fun alias =>
+      !ids.contains alias.id }
+
+def psElabWellFoundedCoreApply (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (call : PsElabWellFoundedCoreCall)
+    (arguments : List PsExpr) : Except PsElabError PsElabTermResult := do
+  let recursion := call.recursion
+  if arguments.length < recursion.parameterIds.length then
+    throw (.data "PSCV0-WF-ARITY: the recursive call must complete its source header telescope")
+  let values := arguments.take recursion.parameterIds.length
+  for (id, expected) in call.fixedArguments do
+    let some actual := psElabRecursionParameterArgument recursion.parameterIds values id
+      | throw (.data "PSCV0-WF-INTERNAL: missing fixed recursive argument")
+    if psExprHasUnresolvedMeta (psMetaInstantiate context.metaContext actual) ||
+        !psDefEqReadOnlyWithTransparency .reducible context.environment context.metaContext
+          context.localContext expected actual then
+      throw (.data "PSCV0-WF-FIXED: a compiled recursive call changes a captured fixed parameter")
+  let recursiveIds := if recursion.packedIds.isEmpty then
+    [recursion.majorId] else recursion.packedIds
+  let recursiveArguments ← recursiveIds.mapM fun id =>
+    match psElabRecursionParameterArgument recursion.parameterIds values id with
+    | some value => pure value
+    | none => throw (.data "PSCV0-WF-INTERNAL: missing measured recursive argument")
+  let states ← recursion.stateIds.mapM fun id =>
+    match psElabRecursionParameterArgument recursion.parameterIds values id with
+    | some value => pure value
+    | none => throw (.data "PSCV0-WF-INTERNAL: missing recursive state argument")
+  let applied ← psElabApplyCore context call.callback recursiveArguments
+  let proof ← (psInferEnsureForall applied.context.environment applied.context.metaContext
+    applied.context.localContext applied.type).mapError PsElabError.infer
+  let locals ← psElabWellFoundedCoreGoalScope applied.context calls
+  if psElabWellFoundedCoreHasCalls calls proof.domain ||
+      !psMetaExprScopeSafe applied.context.metaContext locals proof.domain then
+    throw (.data "PSCV0-WF-CLOSURE: decrease target retains an unrestricted source peer")
+  let fresh := psMetaFresh applied.context.metaContext locals
+    proof.domain .syntheticOpaque { tag := "decrease" }
+  let .mvar goal := fresh.expr
+    | throw (.data "PSCV0-WF-INTERNAL: invalid decrease goal")
+  let context := { applied.context with
+    metaContext := fresh.context
+    wellFoundedGoalsRev := (goal, call.span) :: applied.context.wellFoundedGoalsRev }
+  let result ← psElabApplyCore context applied.term
+    (fresh.expr :: states ++ arguments.drop recursion.parameterIds.length)
+  return result
+
+-- All canonical motive slots acquire the same callback arrows. Only the
+-- selected slot substitutes its actual direct-fvar indices/major. This keeps
+-- the complete mutual/nested recursor well typed without inventing an IH.
+def psElabWellFoundedCoreMotive (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (view : PsEliminationRecursorApplication)
+    (slot : PsInductiveEliminationSlot) (index : Nat) :
+    Except PsElabError PsElabTermResult := do
+  let some motive := view.fixedArgs[view.info.numParams + index]?
+    | throw .matchRecursorUnsupported
+  let motiveType ← (psInferType context.environment context.metaContext
+    context.localContext motive).mapError PsElabError.infer
+  let opened ← psElabOpenCoreTelescope 4096 context motiveType
+    (some (slot.family.numIndices + 1))
+  let arguments := psElabBinderArguments opened.bindersRev
+  let value ← psElabApplyCore opened.context motive arguments
+  let discriminants := view.indices ++ [view.major]
+  let replacements := if index == view.slotIndex then
+    (discriminants.zip arguments).reverse.filterMap fun (original, current) =>
+      match original with
+      | .fvar id => some (id, current)
+      | _ => none
+    else []
+  let domains ← calls.mapM fun call => do
+    let type ← (psInferType value.context.environment value.context.metaContext
+      value.context.localContext call.callback).mapError PsElabError.infer
+    let type := psElabSubstituteLocals replacements
+      (psMetaInstantiate value.context.metaContext type)
+    let _ ← psElabExpressionSort value.context type
+    return (call.recursion.callbackName, type)
+  let body := domains.foldr (fun (name, type) body =>
+    PsExpr.forallE name type (psExprLiftBVars 1 0 body) .explicit) value.term
+  let term := psCloseElabLambdaBinders value.context.metaContext opened.bindersRev body
+  psElabResolvedTerm (psElabLeaveScope context value.context) term none
+
+def psElabWellFoundedCorePrepareRecursor (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (view : PsEliminationRecursorApplication)
+    (original : PsExpr) : Except PsElabError (Option PsElabWellFoundedCoreRecursor) := do
+  if calls.isEmpty || psEliminationRecursorUsesHypotheses view then return none
+  if (view.fixedArgs.take (view.info.numParams + view.info.numMotives)).any
+      (psElabWellFoundedCoreHasCalls calls) then return none
+  let (context, motives) ← view.plan.slots.zipIdx.foldlM
+    (fun (state : PsElabContext × List PsExpr) (slot, index) => do
+      let motive ← psElabWellFoundedCoreMotive state.fst calls view slot index
+      return (motive.context, state.snd ++ [motive.term])) (context, [])
+  let some motive := motives[view.slotIndex]? | throw .matchRecursorUnsupported
+  let motiveLevel ← psElabMatchMotiveLevel context motive
+  let .constE _ oldLevels := view.head | throw .matchRecursorUnsupported
+  let some familyLevels := psInductiveEliminationFamilyLevels view.plan view.info oldLevels
+    | throw .matchRecursorLevels
+  let some anchor := view.plan.group.members.head? | throw .matchRecursorUnsupported
+  let levels ← psElabRecursorLevels anchor view.info familyLevels motiveLevel
+  let prefix ← psElabApplyCore context (.constE view.info.name levels)
+    (view.fixedArgs.take view.info.numParams ++ motives)
+  let constructors := view.plan.slots.flatMap (·.constructors)
+  if constructors.length != view.info.numMinors then throw .matchRecursorUnsupported
+  let mut current := prefix.context
+  let mut cursor := prefix.type
+  let mut minors : List PsElabWellFoundedCoreMinor := []
+  let mut values : List PsExpr := []
+  let mut refined := false
+  for (constructor, index) in constructors.zipIdx do
+    let pi ← (psInferEnsureForall current.environment current.metaContext
+      current.localContext cursor).mapError PsElabError.infer
+    let count := constructor.info.numFields + constructor.recursiveFields.length
+    let opened ← psElabOpenCoreTelescope 4096 current pi.domain
+      (some (count + calls.length))
+    let arguments := psElabBinderArguments opened.bindersRev
+    let callbacks := arguments.drop count
+    if callbacks.length != calls.length then throw .matchRecursorUnsupported
+    let callbackIds := callbacks.filterMap fun value =>
+      match value with | .fvar id => some id | _ => none
+    let inner := { opened.context with
+      auxiliaryLocalIds := callbackIds ++ opened.context.auxiliaryLocalIds }
+    let some minor := view.fixedArgs[view.info.numParams + view.info.numMotives + index]?
+      | throw .matchRecursorUnsupported
+    let body := psElabWellFoundedCoreBeta 4096
+      (psExprApplyMany minor (arguments.take count))
+    let checked ← psElabResolvedTerm inner body (some opened.body)
+    for (call, callback) in calls.zip callbacks do
+      let originalType ← (psInferType checked.context.environment checked.context.metaContext
+        checked.context.localContext call.callback).mapError PsElabError.infer
+      let currentType ← (psInferType checked.context.environment checked.context.metaContext
+        checked.context.localContext callback).mapError PsElabError.infer
+      if !psDefEqReadOnlyWithEnv checked.context.environment checked.context.metaContext
+          checked.context.localContext originalType currentType then
+        refined := true
+    let closed := psCloseElabLambdaBinders checked.context.metaContext
+      opened.bindersRev checked.term
+    let result ← psElabResolvedTerm (psElabLeaveScope current checked.context)
+      closed (some pi.domain)
+    minors := minors ++ [{
+      scope := psElabSaveScope checked.context
+      bindersRev := opened.bindersRev
+      body := checked.term
+      domain := pi.domain
+      callbacks }]
+    values := values ++ [result.term]
+    current := result.context
+    cursor := psExprInstantiate1 pi.body result.term
+  if !refined then return none
+  let originalType ← (psInferType current.environment current.metaContext
+    current.localContext original).mapError PsElabError.infer
+  let extended := psExprApplyMany prefix.term
+    (values ++ view.indices ++ [view.major] ++ calls.map (·.callback) ++ view.suffix)
+  let checked ← psElabResolvedTerm current extended (some originalType)
+  return some {
+    context := checked.context
+    prefix := prefix.term
+    minors, indices := view.indices, major := view.major, suffix := view.suffix }
+
+-- The optional compiler transport has the native addArg? fallback. No failed
+-- preparation state or proof goal escapes; resource failures remain visible.
+def psElabWellFoundedCoreTryRecursor (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (view : PsEliminationRecursorApplication)
+    (original : PsExpr) : Except PsElabError (Option PsElabWellFoundedCoreRecursor) :=
+  match psElabWellFoundedCorePrepareRecursor context calls view original with
+  | .ok result => .ok result
+  | .error error => if psElabErrorIsResource error then .error error else .ok none
+
+abbrev PsElabWellFoundedCoreRewriter :=
+  PsElabContext → List PsElabWellFoundedCoreCall → PsExpr →
+    Except PsElabError PsElabTermResult
+
+def psElabWellFoundedCoreFinishRecursor (rewrite : PsElabWellFoundedCoreRewriter)
+    (calls : List PsElabWellFoundedCoreCall) (plan : PsElabWellFoundedCoreRecursor) :
+    Except PsElabError PsElabTermResult := do
+  let mut current := plan.context
+  let mut minors : List PsExpr := []
+  for minor in plan.minors do
+    let inner := psElabRestoreScope current minor.scope
+    let branchCalls := (calls.zip minor.callbacks).map fun (call, callback) =>
+      { call with callback }
+    let body ← rewrite inner branchCalls minor.body
+    let closed ← psElabWellFoundedCoreClose current body.context
+      minor.bindersRev body.term minor.domain
+    current := closed.context
+    minors := minors ++ [closed.term]
+  let (current, varying) ← (plan.indices ++ [plan.major]).foldlM
+    (fun (state : PsElabContext × List PsExpr) term => do
+      let value ← rewrite state.fst calls term
+      return (value.context, state.snd ++ [value.term])) (current, [])
+  let (current, suffix) ← plan.suffix.foldlM
+    (fun (state : PsElabContext × List PsExpr) term => do
+      let value ← rewrite state.fst calls term
+      return (value.context, state.snd ++ [value.term])) (current, [])
+  psElabResolvedTerm current
+    (psExprApplyMany plan.prefix (minors ++ varying ++ calls.map (·.callback) ++ suffix)) none
+
+def psElabWellFoundedCoreRewrite (fuel : Nat) (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (source : PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let term := psElabWellFoundedCoreBeta 4096
+      (psMetaInstantiate context.metaContext source)
+    if !psElabWellFoundedCoreHasCalls calls term then
+      return ← psElabResolvedTerm context term none
+    let rewrite := psElabWellFoundedCoreRewrite fuel
+    let view := psExprAppView term
+    if let .fvar id := view.head then
+      if let some call := calls.find? (fun call => call.sourceId == id) then
+        let (context, arguments) ← view.args.foldlM
+          (fun (state : PsElabContext × List PsExpr) argument => do
+            let value ← rewrite state.fst calls argument
+            return (value.context, state.snd ++ [value.term])) (context, [])
+        return ← psElabWellFoundedCoreApply context calls call arguments
+    if let some recursor := psEliminationRecursorApplication context.environment term then
+      if let some plan ← psElabWellFoundedCoreTryRecursor context calls recursor term then
+        return ← psElabWellFoundedCoreFinishRecursor rewrite calls plan
+    match term with
+    | .app fn argument =>
+      let fn ← rewrite context calls fn
+      let argument ← rewrite fn.context calls argument
+      psElabApplyCore argument.context fn.term [argument.term]
+    | .lam name domain body binder =>
+      let domain ← rewrite context calls domain
+      let _ ← psElabExpressionSort domain.context domain.term
+      let pushed := psLocalPushBinding domain.context.localContext name domain.term binder
+      let inner := psElabContextWithLocal domain.context pushed.context
+      let body ← rewrite inner calls (psExprInstantiate1 body (.fvar pushed.id))
+      let binders := [PsElabTypedBinder.mk pushed.id name domain.term binder]
+      let type ← psElabAbstractType domain.context body.context
+        [.forallE pushed.id name domain.term binder] body.type
+      let inner := psElabContextWithMeta body.context type.context.metaContext
+      psElabWellFoundedCoreClose domain.context inner binders body.term type.term
+    | .forallE name domain body binder =>
+      let domain ← rewrite context calls domain
+      let _ ← psElabExpressionSort domain.context domain.term
+      let pushed := psLocalPushBinding domain.context.localContext name domain.term binder
+      let inner := psElabContextWithLocal domain.context pushed.context
+      let body ← rewrite inner calls (psExprInstantiate1 body (.fvar pushed.id))
+      psElabAbstractType domain.context body.context
+        [.forallE pushed.id name domain.term binder] body.term
+    | .letE name type value body =>
+      let type ← rewrite context calls type
+      let value ← rewrite type.context calls value
+      let value ← psElabResolvedTerm value.context value.term (some type.term)
+      let pushed := psLocalPushLet value.context.localContext name type.term value.term
+      let inner := psElabContextWithLocal value.context pushed.context
+      let body ← rewrite inner calls (psExprInstantiate1 body (.fvar pushed.id))
+      psElabCloseLetScope value.context body pushed.id name type.term value.term none
+    | .proj name index value =>
+      let value ← rewrite context calls value
+      psElabResolvedTerm value.context (.proj name index value.term) none
+    | _ => psElabResolvedTerm context term none
+
+def psElabWellFoundedCoreCalls (context : PsElabContext)
+    (calls : List PsElabWellFoundedCoreCall) (body expected : PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let body := psMetaInstantiate context.metaContext body
+  if psExprHasTermMeta body then
+    throw (.data "PSCV0-WF-CLOSURE: source body is unresolved before Core call replacement")
+  let ids := calls.map (·.sourceId)
+  if ids.eraseDups.length != ids.length then
+    throw (.data "PSCV0-WF-INTERNAL: source call peers are not distinct")
+  for call in calls do
+    if call.fixedArguments.map Prod.fst != call.recursion.fixedIds then
+      throw (.data "PSCV0-WF-INTERNAL: fixed argument mapping changed its source slots")
+    let some source := psLocalFindById context.localContext call.sourceId
+      | throw (.data "PSCV0-WF-INTERNAL: source call peer is absent")
+    let some sourceType := call.recursion.sourceType
+      | throw (.data "PSCV0-WF-INTERNAL: recursive source telescope is absent")
+    if !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext
+        (psLocalDeclType source) sourceType then
+      throw (.data "PSCV0-WF-INTERNAL: source call peer changed its checked telescope")
+    let _ ← psElabResolvedTerm context call.callback none
+  let context := { context with wellFoundedRecursions := [] }
+  let result ← psElabWellFoundedCoreRewrite 4096 context calls body
+  psElabResolvedTerm result.context result.term (some expected)
+
 def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
     (name : PsName) (header : PsElabWellFoundedTypedHeader)
     (valueSyntax : PsSyntaxTerm) (termination : PsSyntaxTermination) :
@@ -585,20 +923,28 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let sourceCallbackType ← psElabWellFoundedAt "source callback type"
     (psElabWellFoundedSourceCallbackType bodyHeader argument callbackType)
   let callback := psLocalPushBinding bodyHeader.localContext callbackName sourceCallbackType .explicit
+  let sourceName := psNameAppendNum (psRootName "_psc0WellFoundedSource")
+    callback.context.nextId
+  let source := psLocalPushBinding callback.context sourceName declaredType .explicit
+  let recursion : PsElabWellFoundedRecursion := {
+    functionName := header.functionName, callbackName
+    parameterIds, majorId := plan.majorId, packedIds := plan.packedIds
+    stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }
   let bodyContext := { bodyHeader with
-    localContext := callback.context
-    auxiliaryLocalIds := callback.id :: bodyHeader.auxiliaryLocalIds
+    localContext := source.context
+    auxiliaryLocalIds := source.id :: callback.id :: bodyHeader.auxiliaryLocalIds
     structuralRecursion := none
-    wellFoundedRecursions := [{
-      functionName := header.functionName, callbackName := callbackName
-      parameterIds := parameterIds, majorId := plan.majorId
-      packedIds := plan.packedIds
-      stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }]
+    wellFoundedRecursions := [{ recursion with callbackName := sourceName, collectCalls := true }]
     wellFoundedGoalsRev := []
     wellFoundedCallsRev := [] }
   let value ← psElabWellFoundedAt "source body"
     (elaborate bodyContext valueSyntax (some declaredResult))
   psElabRecursionValidateFixedParameters value.context plan value.context.wellFoundedCallsRev
+  let value ← psElabWellFoundedAt "compiled recursive calls"
+    (psElabWellFoundedCoreCalls value.context [{
+      sourceId := source.id, callback := .fvar callback.id, recursion
+      fixedArguments := plan.fixedIds.map (fun id => (id, PsExpr.fvar id))
+      span := psSyntaxTermSpan valueSyntax }] value.term declaredResult)
   let solved ← psElabWellFoundedAt "decrease goals"
     (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing)
   -- Generalize only at this actual declaration boundary, as ordinary checked

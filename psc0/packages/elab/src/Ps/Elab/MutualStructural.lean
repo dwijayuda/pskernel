@@ -73,6 +73,9 @@ def psElabMutualStructuralLocate (fuel : Nat) (context : PsElabContext)
 
 structure PsElabMutualStructuralInput where
   header : PsElabPartialHeader
+  sourceHeader : PsElabPartialHeader
+  sourceBody : PsExpr
+  bodyBindersRev : List PsElabTypedBinder
   span : PsSourceSpan
   ownBinders : List PsElabTypedBinder
   context : PsElabContext
@@ -112,20 +115,82 @@ def psElabMutualStructuralPeers (context : PsElabContext) (captures : List PsExp
         auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
       return (context, state.snd ++ [(pushed.id, entry.snd)])) (context, [])
 
+structure PsElabMutualStructuralBodyParameters where
+  context : PsElabContext
+  bindersRev : List PsElabTypedBinder
+  type : PsExpr
+  body : PsExpr
+
+-- Only a member with no explicit source header opts into these actual body
+-- lambdas. The declared Pi supplies every domain and binder annotation;
+-- the original source header and body remain separate equation authority.
+def psElabMutualStructuralOpenBodyParameters (fuel : Nat) (context : PsElabContext)
+    (type body : PsExpr) : Except PsElabError PsElabMutualStructuralBodyParameters := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let normalized := psWhnf context.environment context.metaContext context.localContext body
+    match normalized with
+    | .lam name domain value binder =>
+      let pi ← (psInferEnsureForall context.environment context.metaContext
+        context.localContext type).mapError PsElabError.infer
+      if !psBinderInfoEq binder pi.binder ||
+          !psExprFVarsInContext context.localContext domain ||
+          !psElabMutualStructuralEqual context domain pi.domain then
+        throw (psElabMutualStructuralError "BODY-PARAMETER" "body lambda differs from its actual declared Pi")
+      let pushed := psLocalPushBinding context.localContext name pi.domain pi.binder
+      let argument := PsExpr.fvar pushed.id
+      let inner := psElabContextWithLocal context pushed.context
+      let opened ← psElabMutualStructuralOpenBodyParameters fuel inner
+        (psExprInstantiate1 pi.body argument) (psExprInstantiate1 value argument)
+      return { opened with bindersRev := opened.bindersRev ++
+        [PsElabTypedBinder.mk pushed.id name pi.domain pi.binder] }
+    | _ => return { context, bindersRev := [], type, body }
+
 -- This boundary consumes a checked Core body, not lifted or reconstructed
 -- source syntax. Full peers have already been specialized at the validated
 -- common capture prefix. All original member-specific header slots remain.
 def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
     (header : PsElabPartialHeader) (checkedContext : PsElabContext)
     (body : PsExpr) (peers : List (Nat × Nat)) (span : PsSourceSpan)
-    (sourceInfo : PsElabSourceInfo) :
+    (sourceInfo : PsElabSourceInfo) (bodyParameters : Bool := false) :
     Except PsElabError PsElabMutualStructuralInput := do
   let checked ← psElabResolvedTerm checkedContext body (some header.openType)
+  let sourceHeader := header
+  let sourceBody := psMetaInstantiate checked.context.metaContext checked.term
+  if psExprHasUnresolvedMeta sourceBody then throw .unresolvedMetavariable
+  let opened ← if bodyParameters then
+      psElabMutualStructuralOpenBodyParameters 4096 checked.context header.openType sourceBody
+    else pure ({ context := checked.context, bindersRev := [], type := header.openType,
+      body := sourceBody } : PsElabMutualStructuralBodyParameters)
+  let bodyBindersRev := opened.bindersRev
+  let header ← if bodyBindersRev.isEmpty then pure sourceHeader else do
+    let closedBody := psCloseElabLambdaBinders opened.context.metaContext bodyBindersRev opened.body
+    let closedType := psCloseElabForallBinders opened.context.metaContext bodyBindersRev opened.type
+    if !psElabMutualStructuralEqual checked.context closedBody sourceBody ||
+        !psElabMutualStructuralEqual checked.context closedType sourceHeader.openType then
+      throw (psElabMutualStructuralError "BODY-PARAMETER" "body parameter opening changed the original checked function telescope")
+    let headerContext := psElabContextWithLocal sourceHeader.context {
+      sourceHeader.context.localContext with
+      nextId := max sourceHeader.context.localContext.nextId opened.context.localContext.nextId
+      declarations := bodyBindersRev.map (fun binder =>
+        .binding binder.id binder.name binder.type binder.binder) ++
+        sourceHeader.context.localContext.declarations }
+    let header : PsElabPartialHeader := {
+      sourceHeader with
+      context := headerContext
+      bindersRev := bodyBindersRev ++ sourceHeader.bindersRev
+      openType := opened.type }
+    if !psElabMutualStructuralEqual header.context
+        (psCloseElabForallBinders header.context.metaContext header.bindersRev header.openType)
+        sourceHeader.type then
+      throw (psElabMutualStructuralError "BODY-PARAMETER" "operational header does not close to the retained declared type")
+    let _ ← psElabExpressionSort header.context header.openType
+    pure header
   let ownBinders := (header.bindersRev.reverse.drop captured.bindersRev.length).map fun binder =>
-    { binder with type := psMetaInstantiate checked.context.metaContext binder.type }
-  let body := psMetaInstantiate checked.context.metaContext checked.term
-  if psExprHasUnresolvedMeta body then throw .unresolvedMetavariable
-  let located ← psElabMutualStructuralLocate 4096 checked.context header.openType body
+    { binder with type := psMetaInstantiate opened.context.metaContext binder.type }
+  let body := psMetaInstantiate opened.context.metaContext opened.body
+  let located ← psElabMutualStructuralLocate 4096 opened.context header.openType body
   let application := located.application
   if psEliminationRecursorUsesHypotheses application then
     throw (psElabMutualStructuralError "CASE-IH" "source case hypotheses require a separate induction consumer")
@@ -143,8 +208,8 @@ def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
     | _ => throw (psElabMutualStructuralError "INDICES" "fixed, compound or repeated indices require a separate structural construction")
   if (majorId :: indexIds).eraseDups.length != indexIds.length + 1 then
     throw (psElabMutualStructuralError "INDICES" "major and family indices must be distinct header locals")
-  let majorType := psExprAppView (psWhnf checked.context.environment checked.context.metaContext
-    checked.context.localContext major.type)
+  let majorType := psExprAppView (psWhnf opened.context.environment opened.context.metaContext
+    opened.context.localContext major.type)
   let .constE owner _ := majorType.head
     | throw (psElabMutualStructuralError "MAJOR" "major type is not an instantiated group family")
   let .constE _ recursorLevels := application.head
@@ -155,14 +220,14 @@ def psElabMutualStructuralInputFromChecked (captured : PsElabTypedBindersResult)
   if !psNameEq owner application.slot.family.name ||
       majorType.args.length != application.slot.family.numParams + application.slot.family.numIndices then
     throw (psElabMutualStructuralError "MAJOR" "major family telescope does not match its recursor")
-  let caseBody ← psElabResolvedTerm checked.context located.body (some header.openType)
+  let caseBody ← psElabResolvedTerm opened.context located.body (some header.openType)
   if !psElabMutualStructuralEqual caseBody.context body caseBody.term then
     throw (psElabMutualStructuralError "RESULT" "located case template differs from the retained source body")
   let context := { caseBody.context with localContext :=
     { caseBody.context.localContext with nextId :=
       max caseBody.context.localContext.nextId located.context.localContext.nextId } }
   return {
-    header, span, ownBinders, context
+    header, sourceHeader, sourceBody, bodyBindersRev, span, ownBinders, context
     body, peers, application, familyLevels, majorId, indexIds, sourceInfo
     caseBody := caseBody.term
     resultBinders := located.resultBinders }
@@ -179,6 +244,7 @@ def psElabMutualStructuralInputFor (captured : PsElabTypedBindersResult)
   let checked ← psElabTerm context sourceBody (some header.openType)
   psElabMutualStructuralInputFromChecked captured header checked.context checked.term peers
     span (psElabFinishSourceInfo checked.context header.name)
+    (header.bindersRev.length == captured.bindersRev.length)
 
 structure PsElabMutualStructuralFunction where
   input : PsElabMutualStructuralInput
@@ -1364,8 +1430,12 @@ def psElabMutualStructuralValue (recursor : PsElabMutualStructuralRecursor)
   let checked ← psElabResolvedTerm applied.context applied.term (some header.openType)
   let closed := psCloseElabTypedBinders checked.context.metaContext header.bindersRev
     checked.term header.openType
+  let typeMatches := if fn.input.bodyBindersRev.isEmpty then
+      psExprAlphaEq closed.snd header.type
+    else psElabMutualStructuralEqual
+      (psElabContextEmpty context.environment context.levelNames) closed.snd fn.input.sourceHeader.type
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd ||
-      !psExprFVarsInContext psLocalEmpty closed.fst || !psExprAlphaEq closed.snd header.type then
+      !psExprFVarsInContext psLocalEmpty closed.fst || !typeMatches then
     throw (psElabMutualStructuralError "CLOSURE" "definition does not close against its exact checked header")
   let _ ← psElabResolvedTerm (psElabContextEmpty context.environment context.levelNames)
     closed.fst (some header.type)
@@ -1384,12 +1454,44 @@ def psElabMutualStructuralEquationProof (context : PsElabContext)
       | .data message => psElabMutualStructuralError "EQUATION" message
       | error => error)
 
+-- Keep the original function-valued source equation. Each promoted body
+-- parameter gets an actual checked funext layer; portable conversion is not
+-- extended with function eta, and the final theorem gains no source parameter.
+def psElabMutualStructuralSourceEquationProof (context : PsElabContext)
+    (fn : PsElabMutualStructuralFunction) (binders : List PsElabTypedBinder)
+    (type left right : PsExpr) : Except PsElabError PsExpr := do
+  let level ← psElabExpressionSort context type
+  let expected := psLogicEq level type left right
+  match binders with
+  | [] => psElabMutualStructuralEquationProof context fn expected
+  | binder :: rest =>
+    let pi ← (psInferEnsureForall context.environment context.metaContext
+      context.localContext type).mapError PsElabError.infer
+    if !psBinderInfoEq pi.binder binder.binder ||
+        !psElabMutualStructuralEqual context pi.domain binder.type then
+      throw (psElabMutualStructuralError "EQUATION" "body parameter differs from the original function equation telescope")
+    let argument := PsExpr.fvar binder.id
+    let leftValue ← psElabApplyCore context left [argument]
+    let rightValue ← psElabApplyCore leftValue.context right [argument]
+    let resultType := psExprInstantiate1 pi.body argument
+    let proof ← psElabMutualStructuralSourceEquationProof rightValue.context fn rest
+      resultType leftValue.term rightValue.term
+    let domainLevel ← psElabExpressionSort rightValue.context pi.domain
+    let resultLevel ← psElabExpressionSort rightValue.context resultType
+    let motive := PsExpr.lam pi.name pi.domain pi.body pi.binder
+    let pointwise := PsExpr.lam binder.name pi.domain
+      (psExprAbstractFVar binder.id proof) pi.binder
+    let proof := psExprApplyMany (.constE (psRootName "funext") [domainLevel, resultLevel])
+      [pi.domain, motive, left, right, pointwise]
+    let checked ← psElabResolvedTerm rightValue.context proof (some expected)
+    return checked.term
+
 def psElabMutualStructuralEquation (environment : PsEnvironment)
     (levels : List PsName) (plan : PsElabMutualStructuralPlan)
     (sourceIndex : Nat) : Except PsElabError PsDeclaration := do
   let some fn := plan.functions[sourceIndex]?
     | throw (psElabMutualStructuralError "OWNERSHIP" "equation has no source component")
-  let header := fn.input.header
+  let header := fn.input.sourceHeader
   let context := psElabContextWithEnvironment header.context environment
   let captures := psElabBinderArguments plan.capturesRev
   let replacements ← fn.input.peers.mapM fun (id, targetIndex) => do
@@ -1398,7 +1500,7 @@ def psElabMutualStructuralEquation (environment : PsEnvironment)
     let actual ← psElabApplyCore context
       (.constE target.input.header.name (levels.map PsLevel.param)) captures
     return (id, actual.term)
-  let source := psElabSubstituteLocals replacements fn.input.body
+  let source := psElabSubstituteLocals replacements fn.input.sourceBody
   if !psExprFVarsInContext context.localContext source || psExprHasUnresolvedMeta source then
     throw (psElabMutualStructuralError "EQUATION" "original source body retains a provisional peer")
   let right ← psElabResolvedTerm context source (some header.openType)
@@ -1406,8 +1508,12 @@ def psElabMutualStructuralEquation (environment : PsEnvironment)
     (psElabBinderArguments header.bindersRev)
   let level ← psElabExpressionSort left.context header.openType
   let equation := psLogicEq level header.openType left.term right.term
-  let proof ← psElabMutualStructuralEquationProof left.context fn equation
-  let closed := psCloseElabTypedBinders left.context.metaContext header.bindersRev proof equation
+  let proofContext := psElabContextWithMeta
+    (psElabContextWithEnvironment fn.input.header.context environment) left.context.metaContext
+  let proof ← psElabMutualStructuralSourceEquationProof proofContext fn
+    fn.input.bodyBindersRev.reverse header.openType left.term right.term
+  let checked ← psElabResolvedTerm left.context proof (some equation)
+  let closed := psCloseElabTypedBinders checked.context.metaContext header.bindersRev checked.term equation
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd ||
       !psExprFVarsInContext psLocalEmpty closed.fst || !psExprFVarsInContext psLocalEmpty closed.snd then
     throw (psElabMutualStructuralError "EQUATION" "equation did not close against its original header")
@@ -1434,7 +1540,7 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
   -- Include retained source bodies in the common universe union: eq_def
   -- publishes that exact body even if its case specialization erased a type.
   let usedLevels := psElabDeclarationLevels levelNames
-    (headers.map (·.type) ++ values ++ inputs.map (·.body))
+    (headers.map (·.type) ++ values ++ inputs.map (·.sourceBody))
   if retainBlockLevels && usedLevels.any (fun name => !levelNames.any (psNameEq name)) then
     throw (psElabMutualStructuralError "UNIVERSES" "checked component introduced a level outside its closed source block")
   let levels := if retainBlockLevels then levelNames else usedLevels

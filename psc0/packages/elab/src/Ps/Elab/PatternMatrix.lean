@@ -413,15 +413,18 @@ def psElabPatternRunPlan (branch : PsElaborator) (inputs : PsElabPatternInputs)
   let generalizedSources ← selected.mapM fun (id, names) => do
     let some declaration := psLocalFindById plan.context.localContext id
       | throw (.refinement "source match generalized local unavailable")
-    return { original := PsExpr.fvar id, type := psLocalDeclType declaration,
-      names : PsElabPatternRowSource }
+    return ({
+      original := PsExpr.fvar id
+      type := psLocalDeclType declaration
+      names := names } : PsElabPatternRowSource)
   let sources := inputs.columns.map (fun column =>
     { original := column.original, type := column.type
       equationName? := column.source.equationName?
       names := column.generalizedNames, onlyLocal := column.onlyLocal : PsElabPatternRowSource }) ++
       generalizedSources
-  let rows := rows.map fun row => { row with patterns := row.patterns ++
-    selected.map (fun _ => PsSyntaxPattern.wildcard row.span) }
+  let rows := rows.map fun row => {
+    row with
+    patterns := row.patterns ++ selected.map (fun _ => PsSyntaxPattern.wildcard row.span) }
   let (context, rows) ← rows.foldlM
     (fun (state : PsElabContext × List PsElabPatternRow) row => do
       let (context, checked) ← psElabCheckPatternRow branch state.fst sources
@@ -543,8 +546,9 @@ def psElabPatternSourceLoop (fuel : Nat) (branch : PsElaborator)
         columns := added.columns ++ inputs.columns
         locals := inputs.locals ++ added.locals
         generalizationMajors := added.generalizationMajors ++ inputs.generalizationMajors }
-      let rows := rows.map fun row => { row with patterns :=
-        indices.map (fun _ => PsSyntaxPattern.wildcard row.span) ++ row.patterns }
+      let rows := rows.map fun row => {
+        row with
+        patterns := indices.map (fun _ => PsSyntaxPattern.wildcard row.span) ++ row.patterns }
       psElabPatternSourceLoop fuel branch inputs rows baseMatchType expected generalizing? (some cause)
     | .error error => throw error
 

@@ -1,5 +1,33 @@
 # PSC0 v7.2 work state — M3+B
 
+## WF Core phase and function-valued const candidate — qualification pending
+
+Preparation [39149397847](https://github.com/dwijayuda/pskernel/actions/runs/39149397847)
+at b0a209d2333874a66132c39770d6f195962a7fa8 compiled PatternRow, including
+post-check alias handling, then failed on PatternMatrix record layout at
+416 and 547. Both mandatory jobs report the same build boundary. The record
+layouts are corrected here; this is not source/runtime qualification.
+
+The WF owner now retains ordinary checked source peer calls until the compiled
+Core phase. It specializes checked canonical recursor alternatives before
+creating decrease goals, excludes unrestricted source peers from proof scopes,
+and validates exact fixed-argument mappings again at call replacement. The
+singleton and mutual owners both enter that phase. Optional transport preserves
+its first checked fallback and propagates resource errors. Whole-match dependent
+callback transport remains a separate implementation obligation.
+
+The structural owner can open actual checked body lambdas for a member with
+zero source-header parameters. It retains the literal source type/header/body,
+checks the operational telescope by ordinary conversion, and proves the original
+function equation through checked funext layers. Explicit source headers retain
+their previous returned-function treatment. This structural change does not
+grant WF measure syntax access to body-local names.
+
+New inline/registered/const controls are being integrated. All old controls,
+budgets, selected recursor pins and runtime observations remain. No failed build
+is qualified, no main promotion occurred, and all six M3+B exits remain OPEN.
+Final Native/M3/F1/F2/F3 must pass on the same complete compiler/test SHA.
+
 ## Inline descendant candidate — qualification pending
 
 Preparation [39147096179](https://github.com/dwijayuda/pskernel/actions/runs/39147096179)

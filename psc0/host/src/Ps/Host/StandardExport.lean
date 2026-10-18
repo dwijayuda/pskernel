@@ -135,7 +135,8 @@ private def sourceStatus (native : Lean.Environment) (name : Lean.Name) : String
 
 -- Always check the converted portable candidate, not just the original native
 -- entries. No axiom replacement for failed proofs, no unchecked addDecl path.
-private def checkCandidate (declarations candidates : List PsDeclaration) : IO Unit := do
+private def checkCandidate (declarations candidates : List PsDeclaration) :
+    IO Lean.Kernel.Environment := do
   let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   -- Authoring diagnostics collect independent root failures in one pass.
   -- Each independent admission owns the unchanged kernel budget, as source
@@ -173,26 +174,37 @@ private def checkCandidate (declarations candidates : List PsDeclaration) : IO U
         | throw (IO.userError ("missing regenerated metadata: " ++ toString name))
       let .ok type := PsKernelLean.toLeanExpr (psDeclarationType declaration)
         | throw (IO.userError "metadata type conversion failed")
-      unless info.type == type do
+      let levels := psDeclarationLevelParams declaration
+      unless info.levelParams.length == levels.length do
+        throw (IO.userError ("regenerated metadata universe arity differs: " ++ toString name))
+      -- Universe names are scoped by their declaration, not global identities.
+      let expected := info.type.instantiateLevelParams info.levelParams
+        (levels.map (fun level => Lean.Level.param (PsKernelLean.toLeanName level)))
+      unless expected == type do
         throw (IO.userError ("regenerated metadata signature differs: " ++ toString name))
     | _ => pure ()
+  return checked
 
 -- Differentially compare each exported one-step iota rule against the actual
 -- pinned kernel-generated rule. Symbolic typed locals keep this independent of
 -- concrete examples and cover every recursive field telescope in the asset.
-private def checkRecursorRules (native : Lean.Environment)
+private def checkRecursorRules (findReference : Lean.Name → Option Lean.ConstantInfo)
     (declarations candidates : List PsDeclaration)
     (eraseAutoParams : Bool := false) : IO Nat := do
   let environment := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
   let mut count := 0
   for declaration in candidates do
     let .recursorDecl info := declaration | continue
-    let some (.recInfo original) := native.find? (PsKernelLean.toLeanName info.name)
+    let some (.recInfo original) := findReference (PsKernelLean.toLeanName info.name)
       | throw (IO.userError "missing native recursor rule reference")
+    unless original.levelParams.length == info.levelParams.length do
+      throw (IO.userError "recursor rule universe arity differs")
     for rule in original.rules do
       let some constructor := psEnvironmentFindConstructor environment (exportName rule.ctor)
         | throw (IO.userError "missing exported rule constructor")
-      let mut expected ← match exportCoreExpr eraseAutoParams rule.rhs with
+      let rhs := rule.rhs.instantiateLevelParams original.levelParams
+        (info.levelParams.map (fun level => Lean.Level.param (PsKernelLean.toLeanName level)))
+      let mut expected ← match exportCoreExpr eraseAutoParams rhs with
         | .ok expr => pure expr
         | .error error => throw (IO.userError error)
       let fixedCount := info.numParams + info.numMotives + info.numMinors
@@ -237,7 +249,7 @@ def checkQuotientFoundation : IO Unit := do
     | .error reason => throw (IO.userError reason)
   let base := psSelfHostProdHashPreludeEnvironment.declarations
   let declarations := candidates ++ base
-  checkCandidate declarations candidates
+  let _ ← checkCandidate declarations candidates
   let environment := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
   let level := PsLevel.succ .zero
   let nat := PsExpr.constE psNatName []
@@ -270,7 +282,7 @@ def checkQuotientFoundation : IO Unit := do
       (eq nat lift (.lit (.natural 7))) (refl nat (.lit (.natural 7))),
     PsDeclaration.theoremDecl (psRootName "_psQuotientIndProbe") [] prop ind]
   -- The official kernel independently validates both computations.
-  checkCandidate (probes ++ declarations) probes
+  let _ ← checkCandidate (probes ++ declarations) probes
   unless (psReduceQuotientIota (fun value => value)
       psSelfHostProdHashPreludeEnvironment lift).isNone do
     throw (IO.userError "unregistered quotient spelling activated reduction")
@@ -513,8 +525,8 @@ private def exportStandardCore (spec : StandardExportSpec)
   -- out of the frozen cut so earlier assets still regenerate byte-for-byte.
   let replayBase := spec.baseDeclarations.filter
     (fun d => !seen.contains (PsKernelLean.toLeanName (psDeclarationName d)))
-  checkCandidate (declarations ++ replayBase) declarations
-  let recursorRules ← checkRecursorRules native (declarations ++ replayBase) declarations spec.eraseAutoParams
+  let _ ← checkCandidate (declarations ++ replayBase) declarations
+  let recursorRules ← checkRecursorRules native.find? (declarations ++ replayBase) declarations spec.eraseAutoParams
   let boundaryNames := (base.map psDeclarationName).mergeSort
     (fun a b => Lean.Name.lt (PsKernelLean.toLeanName a) (PsKernelLean.toLeanName b))
   let mut pool : StandardSource.Pool := {
@@ -1081,6 +1093,42 @@ private def samePublicRecursorTelescope (left right : Lean.Expr) : Bool :=
   | .forallE .., _ | _, .forallE .. => false
   | _, _ => true
 
+-- Copy source binder metadata only. The selected profile may specialize a
+-- native universe-polymorphic family (Except is Type-0); preserve all selected
+-- sorts, levels, constants, bound indices and expression structure. A mismatch
+-- is refused, never repaired by substituting a different logical signature.
+private def recursorSourceAnnotations (selected reference : Lean.Expr) :
+    Except String Lean.Expr := do
+  match selected, reference.consumeMData with
+  | .forallE _ domain body _, .forallE name nativeDomain nativeBody binder =>
+    return .forallE name (← recursorSourceAnnotations domain nativeDomain)
+      (← recursorSourceAnnotations body nativeBody) binder
+  | .lam _ domain body _, .lam name nativeDomain nativeBody binder =>
+    return .lam name (← recursorSourceAnnotations domain nativeDomain)
+      (← recursorSourceAnnotations body nativeBody) binder
+  | .app fn arg, .app nativeFn nativeArg =>
+    return .app (← recursorSourceAnnotations fn nativeFn)
+      (← recursorSourceAnnotations arg nativeArg)
+  | .letE _ type value body nondep, .letE name nativeType nativeValue nativeBody _ =>
+    return .letE name (← recursorSourceAnnotations type nativeType)
+      (← recursorSourceAnnotations value nativeValue)
+      (← recursorSourceAnnotations body nativeBody) nondep
+  | .proj owner index value, .proj nativeOwner nativeIndex nativeValue =>
+    unless owner == nativeOwner && index == nativeIndex do
+      throw "projection identity differs"
+    return .proj owner index (← recursorSourceAnnotations value nativeValue)
+  | .const name _, .const nativeName _ =>
+    unless name == nativeName do throw "constant identity differs"
+    return selected
+  | .sort _, .sort _ => return selected
+  | .bvar index, .bvar nativeIndex =>
+    unless index == nativeIndex do throw "bound index differs"
+    return selected
+  | .lit _, .lit _ =>
+    unless selected == reference.consumeMData do throw "literal differs"
+    return selected
+  | _, _ => throw "source annotation correspondence requires the same closed Core shape"
+
 def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
   Lean.initSearchPath (← Lean.findSysroot)
   let native ← Lean.importModules #[{ module := `Lean },
@@ -1115,19 +1163,19 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
     compared := compared + 1
     if !samePublicRecursorTelescope actual original.type then
       publicDifferences := publicDifferences + 1
-    let reference := original.type.instantiateLevelParams original.levelParams
-      (info.levelParams.map (fun name => Lean.Level.param (PsKernelLean.toLeanName name)))
-    -- Expr's BEq is alpha equivalence. Expr.equal also compares binder names
-    -- and annotations recursively, including the actual minor/IH telescopes.
-    if Lean.Expr.equal actual reference then continue
-    unless info.levelParams.length == original.levelParams.length &&
-        info.inductiveNames.map PsKernelLean.toLeanName == original.all &&
+    unless info.inductiveNames.map PsKernelLean.toLeanName == original.all &&
         info.numParams == original.numParams && info.numIndices == original.numIndices &&
         info.numMotives == original.numMotives && info.numMinors == original.numMinors do
       throw (IO.userError ("recursor source correction changed its logical layout: " ++ toString name))
-    -- Universe parameters are positional in applications. Retain the selected
-    -- declaration's parameter identities while copying the complete native type.
-    let type ← match exportExpr reference with
+    let annotated ← match recursorSourceAnnotations actual original.type with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    -- BEq checks preserved logical structure; equal checks every binder
+    -- annotation, including the real minor/IH telescopes.
+    unless annotated == actual do
+      throw (IO.userError ("source metadata altered the selected logical type: " ++ toString name))
+    if Lean.Expr.equal actual annotated then continue
+    let type ← match exportExpr annotated with
       | .ok value => pure value
       | .error error => throw (IO.userError error)
     candidates := .recursorDecl { info with type } :: candidates
@@ -1142,8 +1190,11 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
   let proposed := candidates.foldl psEnvironmentInsert base
   unless proposed.declarations.length == base.declarations.length do
     throw (IO.userError "recursor source correction expanded the selected foundation")
-  checkCandidate proposed.declarations candidates
-  let rules ← checkRecursorRules native proposed.declarations candidates
+  let checked ← checkCandidate proposed.declarations candidates
+  -- Compare computation with the official kernel's actual selected-profile
+  -- recursors, including specialized universes. The source annotations still
+  -- come independently from the pinned native library declarations.
+  let rules ← checkRecursorRules checked.find? proposed.declarations candidates
   for declaration in proposed.declarations do
     let .recursorDecl info := declaration | continue
     if privateHelpers.contains (PsKernelLean.toLeanName info.name) then continue
@@ -1152,10 +1203,11 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
     let type ← match PsKernelLean.toLeanExpr info.type with
       | .ok value => pure value
       | .error error => throw (IO.userError error.message)
-    let reference := original.type.instantiateLevelParams original.levelParams
-      (info.levelParams.map (fun name => Lean.Level.param (PsKernelLean.toLeanName name)))
+    let reference ← match recursorSourceAnnotations type original.type with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (psNameToString info.name ++ ": " ++ error))
     unless Lean.Expr.equal type reference do
-      throw (IO.userError ("corrected complete recursor telescope differs: " ++ psNameToString info.name))
+      throw (IO.userError ("corrected complete recursor source annotations differ: " ++ psNameToString info.name))
   match selectedProofClosureAudit proposed with
   | .ok () => pure ()
   | .error error => throw (IO.userError error)
@@ -1169,7 +1221,7 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
     definitions := ("-- " ++ psNameToString (psDeclarationName declaration) ++
       "\nprivate def " ++ identifier ++ " : PsDeclaration :=\n  " ++ body ++ "\n") :: definitions
     identifiers := identifier :: identifiers
-  let source := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nKernel-generated recursor types from the selected Init/Lean foundation.\nGenerated by Ps.Host.StandardExport; native types retain public binder metadata.\nExisting declaration identities, parameter layout and computation rules remain.\nFrozen base SHA256: 364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1.\n-/\nimport Ps.Environment.Basic\n\n" ++
+  let source := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC contributors.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nPinned recursor binder metadata on the existing selected Init/Lean types.\nGenerated by Ps.Host.StandardExport; selected logical types retain native binder metadata.\nExisting declaration identities, parameter layout and computation rules remain.\nFrozen base SHA256: 364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1.\n-/\nimport Ps.Environment.Basic\n\n" ++
     String.join pool.definitions.toList ++ "\n" ++ String.intercalate "\n" definitions.reverse ++
     "\ndef psStandardRecursorSurfaceDeclarations : List PsDeclaration :=\n  " ++
     sourceList identifiers.reverse ++ "\n"
@@ -1185,7 +1237,10 @@ def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do
     ("fnv", Lean.toJson (psStandardSnapshotFingerprint proposed)),
     ("snapshot", Lean.toJson (psStandardSnapshotSHA256Fingerprint proposed)),
     ("surface", Lean.toJson (standardSurfaceManifestSHA256 proposed)),
-    ("kernelChecked", Lean.toJson true), ("selected", Lean.toJson false)]).compress
+    ("kernelChecked", Lean.toJson true), ("metadataOnly", Lean.toJson true),
+    ("selectedUniverseProfilePreserved", Lean.toJson true),
+    ("ruleReference", Lean.toJson ("fresh pinned kernel over selected declarations" : String)),
+    ("selected", Lean.toJson false)]).compress
   let mut chunk := ""
   let mut count := 0
   for char in source.toList do
@@ -1344,8 +1399,8 @@ def checkWellFoundedFoundation : IO Unit := do
       | throw (IO.userError ("WF foundation synthesis has no dictionary head: " ++ label))
     unless psNameEq actual expected && !found.table.resourceExceeded do
       throw (IO.userError ("WF foundation selected the wrong dictionary: " ++ label))
-  checkCandidate (candidates ++ base.declarations) candidates
-  let compared ← checkRecursorRules native (candidates ++ base.declarations) candidates
+  let _ ← checkCandidate (candidates ++ base.declarations) candidates
+  let compared ← checkRecursorRules native.find? (candidates ++ base.declarations) candidates
   unless compared == 3 do
     throw (IO.userError "WF foundation recursor-rule inventory differs")
   IO.println (Lean.Json.mkObj [
@@ -1500,9 +1555,9 @@ def checkPartialFixpointFoundation : IO Unit := do
       throw (IO.userError ("P1 foundation selected the wrong or open dictionary: " ++ label))
     witnessDeclarations := .definitionDecl
       (.num (psRootName "$psc0P1FoundationWitness") index) [] target value :: witnessDeclarations
-  checkCandidate (witnessDeclarations ++ candidates ++ base.declarations)
+  let _ ← checkCandidate (witnessDeclarations ++ candidates ++ base.declarations)
     (witnessDeclarations ++ candidates)
-  let compared ← checkRecursorRules native (candidates ++ base.declarations) candidates
+  let compared ← checkRecursorRules native.find? (candidates ++ base.declarations) candidates
   unless compared == 6 do
     throw (IO.userError "P1 foundation recursor-rule inventory differs")
   IO.println (Lean.Json.mkObj [

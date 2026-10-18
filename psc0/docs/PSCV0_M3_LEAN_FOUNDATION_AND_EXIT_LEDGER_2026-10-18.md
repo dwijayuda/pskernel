@@ -316,3 +316,29 @@ Fa3bbea/preparation39105883977/job117612424848 is running the independent,
 UNSELECTED full recursor-source authoring candidate. Read its actual replay,
 rule, complete-type and digest evidence before selection. The phase correction
 is queued behind it, with main still33676076; M3+B remains OPEN.
+
+## Recursor authoring design correction and native packaging
+
+Fa3bbea/preparation39105883977/job117612424848 failed the authoring step
+BEFORE its new probe ran: standalone lean --run searched for
+Ps/Host/StandardExport.olean in the portable package. Use the existing native
+Lake executable pattern and explicit host module ownership. Its other failure
+was the known parser-versus-elaborator negative-control setup; fcf08c56's
+preparation39106336019 now tests that correction.
+
+Source review also found that selected Except is deliberately Type-0, with one
+recursor universe versus upstream's three. The revised candidate transfers
+binder names/kinds recursively while preserving the exact selected logical
+type. Expr BEq guards unchanged semantics; Expr.equal detects complete binder
+metadata changes. Strict shape/identity/arity checks remain. Official replay
+returns its actual kernel environment for symbolic iota comparison over the
+selected profile. Both signature and rule comparisons alpha-rename scoped
+universe parameters by position with equal arity.
+
+See the rewritten
+docs/PSCV0_M3_RECURSOR_FOUNDATION_SOURCE_2026-10-18.md.
+No candidate bytes or hashes have been qualified or selected. Main remains
+33676076; the foundation has3757 declarations and its unchanged three pins.
+The next preparation includes native packaging and this coherent metadata-only
+authoring design. Both source emission and all five integration gates remain
+required; M3+B remains OPEN.

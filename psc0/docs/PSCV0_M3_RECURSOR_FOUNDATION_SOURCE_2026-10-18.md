@@ -1,65 +1,98 @@
 # M3+B selected recursor source metadata reconciliation
 
-Status: native authoring design and unselected probe. This closes an existing
-source-parity gap; it is not another roadmap milestone or a trusted assumption.
+Status: unselected native authoring probe; no foundation activation or completed
+source-parity claim. This closes an existing M3+B obligation, not a new milestone.
 
-Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc primary references:
+## Pinned references and observed gap
+
+Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc:
 src/kernel/{inductive,expr}.cpp; src/Lean/Expr.lean (eqv versus equal,
-BinderInfo, inferImplicit); src/Lean/Elab/App.lean (findNamedArg?, main and
-macro-scoped parameter names); selected Init recursor declarations.
-Existing generated-family tests compare actual regenerated public signatures;
-the native foundation inventory independently observed109 selected recursors
-and24 top-level name/kind differences at a23a0fd/run39103818085.
+BinderInfo, inferImplicit, instantiateLevelParams); src/Lean/Elab/App.lean
+(findNamedArg?, main, macro-scoped names); src/Init/Meta/Defs.lean
+(Name.modifyBase/appendAfter). Source type conversion and symbolic recursor-rule
+comparison reuse PSC0 StandardExport/StandardSource and the official kernel.
 
-## Cause and chosen owner
+At a23a0fd/run39103818085 and7eba96e/run39104089771, the independent inventory
+compared109 native-library recursors and found24 top-level name/kind differences.
+Nat/Except have explicit private motives; Empty/False have implicit motives
+although native motives are explicit; others have different major/minor names.
+Kernel conversion and Expr's BEq ignore binder annotations, so successful logical
+signature checking did not establish the source calling convention.
+Generated family recursors have a separate corrected construction owner.
 
-Manual early prelude recursors retain private source names and, for Nat/Except,
-an explicit motive. Empty/False have implicit motives although the pinned
-kernel keeps them explicit. Many others retain non-native major/minor names.
-Kernel conversion and Lean Expr's BEq intentionally ignore binder metadata:
-passing a signature witness never established the source calling convention.
-The generated-recursion owner is now corrected separately.
+Six exact compiler-owned recursors have no upstream library identity:
+$psc0Format.{TextPrefix,SpaceResult,WorkItem,WorkGroup,State,Machine}.rec.
+Preserve those checked declarations and bytes. Reject an unreviewed missing
+native identity instead of pretending every helper is a native library feature.
 
-Preserve frozen earlier asset-authoring bases. Freeze the existing final PSum
-stage as psSelfHostProdPreRecursorSurfacePreludeEnvironment. Re-author complete
-differing recursor types from the pinned native environment with the existing
-host-only StandardExport and StandardSource machinery, sharing Core nodes.
-Do not add a runtime metadata overlay, alias compatibility rules, host
-elaboration, duplicate matcher, or hand-maintained binder renaming table.
-The small selected asset replaces recursor declarations at the final stage;
-earlier closed assets regenerate against their original unchanged bases.
+## Preserve selected semantics, correct complete binder metadata
 
-Retain every identity, universe parameter position, family list, parameter,
-index, motive and minor count. Align native universe parameter identities by
-position. Compare complete expression structure using Lean.Expr.equal, not
-BEq: this also captures the actual nested minor/IH binder metadata. Six compiler-owned formatter helper recursors (TextPrefix, SpaceResult,
-WorkItem, WorkGroup, State, Machine under $psc0Format) have no upstream library
-identity. The complete inventory at7eba96e/run39104089771 confirms this exact
-roster; preserve those bytes and their existing kernel checks. Reject any
-unreviewed missing native identity. The first probe separately retains the observed24 public differences and measures the
-complete-type replacement roster. Native macro-scoped names remain exact;
-App.findNamedArg? does not erase those scopes to accept a different source name.
+The existing StandardExcept profile intentionally has Type-0 exception/result
+parameters. Its recursor has one universe parameter, while the upstream generic
+Except recursor has three. Full native-type substitution would expand or break
+that selected profile. This was found by inspecting SelfHostPrelude and
+StandardExcept, not by accepting a failed type change.
 
-## Qualification before selection
+Freeze the old final PSum stage as
+psSelfHostProdPreRecursorSurfacePreludeEnvironment. Preserve all earlier closed
+asset-authoring bases. The host-only authoring owner structurally aligns each
+selected closed recursor type with its pinned reference and transfers only
+binder names/kinds. It retains selected sorts, constant levels/identities,
+bound indices, literal values, projection identities and expression structure.
+A structural mismatch fails. Native hygienic names remain exact; named argument
+lookup does not erase macro scopes.
 
-The authoring probe does not alter the selected environment or its pins.
-It reuses existing trust-zero official-kernel replay and symbolic one-step
-recursor-rule comparison for each replacement, checks all109 completed
-recursor types against pinned native types with Expr.equal, and runs the
-unchanged proof-closure audit. It reports the proposed FNV, declaration SHA256
-and selected-surface SHA256 independently, plus the precise replacement names,
-computation-rule count and generated bytes. No declaration or axiom is added.
+Check the result with Expr's BEq against the ORIGINAL selected type, then use
+Expr.equal to detect metadata differences recursively, including minor/IH
+telescopes. Retain every declaration identity, universe parameter position,
+family list, parameter/index/motive/minor count. No new universe-polymorphic
+library profile is silently selected. The resulting shared Core asset contains
+ordinary replacement recursor declarations; no runtime metadata overlay,
+compatibility alias table, copied host frontend or new primitive is needed.
 
-Only after review of successful independent probe evidence, select the exact
-generated bytes and measured fingerprints. Preserve the previous fingerprints
-in historical receipts. The existing foundation inventory becomes a strict
-conformance check for the selected complete recursor types. Extend the existing
-paired input fixture with actual Nat/Except recursors and Empty/False motives;
-migrate old explicit positional-motive fixture spellings to the selected
-source conventions. Native/PS argument-placement policies remain distinct,
-with shared typed semantics and real expected-type checking.
+## Independent checking and native authoring
 
-Use the existing preparation lane, then all five exact-SHA integration gates.
-Do not supersede a healthy main Native run. Keep both handoffs current.
-No PSKernel-Core, self-hosting, new assumptions, budget increases or weakened
-acceptance criteria. Preserve Apache-2.0 source attribution and notices.
+Reuse the existing official trust-zero candidate replay and return its actual
+checked environment. Recursor computation compares symbolic one-step iota
+rules against recursors regenerated by that kernel from the SELECTED data
+declarations, which accounts for intentional universe specialization.
+Independently require complete binder metadata agreement with the PINNED
+library reference for all109 native identities.
+
+Kernel-generated universe parameter names are declaration-local. Signature
+and rule comparisons first alpha-rename the reference's universe parameters
+by position to the candidate's existing parameter names, with strict equal
+arity. This changes no term, level assignment, acceptance budget or equality
+criterion; scoped parameter spelling is not a semantic discrepancy.
+Existing asset exports still retain byte-for-byte regeneration gates.
+
+The probe also runs the unchanged proof-closure audit and reports the complete
+replacement roster, rule count, generated bytes, proposed FNV, declaration
+SHA256 and selected-surface SHA256. It does not update a selected pin.
+The full replacement count is measured independently; it need not equal the
+24 top-level discrepancies.
+
+Run the probe as a native Lake executable with the same explicit PsV7Host
+module ownership as the existing fixedpoint and PSum exporters. Standalone
+lean --run incorrectly resolves the shared Ps namespace to the portable
+package; do not add an ad hoc LEAN_PATH overlay or copy host modules.
+
+## Qualification boundary
+
+Preparation fa3bbea/run39105883977/job117612424848 failed before the authoring
+probe executed because StandardExport.olean was resolved in the wrong package.
+Its other source failure was the already-understood negative-control phase
+setup; fcf08c56 corrects that check without altering compiler acceptance.
+Neither run is evidence that a recursor candidate was replayed or emitted.
+
+Only after successful independent authoring evidence and review may exact
+generated bytes and measured fingerprints be selected. Historical receipts
+keep their old fingerprints. Extend the existing paired input fixture with
+actual Nat/Except recursors and Empty/False motives; migrate old positional
+explicit-motive examples to the selected public source convention. Keep PS
+positional-prefix and native named-priority policies and all negative controls.
+
+Use existing preparation and all five exact-SHA integration gates; do not
+supersede a healthy main Native run. Keep both handoffs current. No new
+assumptions, increased budgets, PSKernel-Core, self-hosting or weakened checks.
+Preserve Apache-2.0 attribution and notices.

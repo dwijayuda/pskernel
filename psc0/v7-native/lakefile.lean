@@ -82,6 +82,12 @@ lean_exe pscv0_m3_partial_fixpoint_export where
   root := `Pscv0M3PartialFixpointExport
   supportInterpreter := true
 
+-- Pinned recursor metadata authoring uses the same native host owner.
+lean_exe pscv0_m3_recursor_surface_export where
+  srcDir := "../scripts"
+  root := `Pscv0M3RecursorSurfaceExport
+  supportInterpreter := true
+
 lean_exe pscv0_m3_partial_fixpoint_probe where
   srcDir := "../scripts"
   root := `Pscv0M3PartialFixpointProbe

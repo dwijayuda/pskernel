@@ -16,22 +16,42 @@ assert.deepEqual(health,{
   profile:'pscv0-v7.2',status:'ok',
 },'native oracle must be pinned official Lean 4.35.0 and current v7.2');
 
+// Collect all of a costly native build's results before failing the gate.
+// Transport failures remain transport failures: they are never accepted as
+// an expected semantic rejection. Print the official kernel's exact reason.
+let failures=0;
 for(const fixture of corpus){
-  const result=runJsonProvider(native,['--check'],fixture.input);
-  assert.equal(result.protocol,health.protocol,fixture.id+' protocol');
-  assert.equal(result.provider,health.provider,fixture.id+' provider');
-  assert.equal(result.leanVersion,health.leanVersion,fixture.id+' version');
-  assert.equal(result.leanCommit,health.leanCommit,fixture.id+' commit');
-  assert.equal(result.profile,health.profile,fixture.id+' profile');
-  assert.equal(result.accepted,fixture.accept,fixture.id+' admission');
+  let result;
+  try{result=runJsonProvider(native,['--check'],fixture.input);}
+  catch(error){
+    failures++;
+    console.error('PSC0_LEAN435_NATIVE_CORPUS_TRANSPORT '+fixture.id+': '+String(error));
+    continue;
+  }
+  console.log('PSC0_LEAN435_NATIVE_CORPUS_RESPONSE '+fixture.id+': '+JSON.stringify(result));
+  const expected=[
+    ['protocol',health.protocol],['provider',health.provider],
+    ['leanVersion',health.leanVersion],['leanCommit',health.leanCommit],
+    ['profile',health.profile],['accepted',fixture.accept],
+  ];
   if(!fixture.accept){
-    assert.equal(result.errorKind,fixture.errorKind,fixture.id+' rejection kind');
-    assert.equal(typeof result.message,'string',fixture.id+' rejection message');
-    assert.ok(result.message.length>0,fixture.id+' informative rejection');
+    expected.push(['errorKind',fixture.errorKind]);
+    if(typeof result.message!=='string'||result.message.length===0){
+      failures++;
+      console.error('PSC0_LEAN435_NATIVE_CORPUS_FAIL '+fixture.id+': rejection reason absent');
+    }
   }
   if(fixture.declarationIndex!==undefined)
-    assert.equal(result.declarationIndex,fixture.declarationIndex,
-      fixture.id+' exact failed admission index');
-  console.log('PSC0_LEAN435_NATIVE_CORPUS: PASS '+fixture.id);
+    expected.push(['declarationIndex',fixture.declarationIndex]);
+  let caseOk=true;
+  for(const [key,value] of expected){
+    if(result[key]!==value){
+      caseOk=false;failures++;
+      console.error('PSC0_LEAN435_NATIVE_CORPUS_FAIL '+fixture.id+' '+key+
+        ' expected='+JSON.stringify(value)+' got='+JSON.stringify(result[key]));
+    }
+  }
+  if(caseOk)console.log('PSC0_LEAN435_NATIVE_CORPUS: PASS '+fixture.id);
 }
+assert.equal(failures,0,'native official Lean 4.35.0 admission corpus failures');
 console.log('PSC0_LEAN435_NATIVE_CORPUS_PASSED '+corpus.length);

@@ -240,6 +240,11 @@ jobs:
         run: |
           set -euo pipefail
           .lake/build/bin/pscv0_m3_partial_fixpoint_probe foundation 2>&1 | tee ../dist/m3-foundation-preparation/order-probe-audit.log
+      - name: Audit additive Option bind Core, registrations and preserved recursor surface
+        if: ${{ !cancelled() && steps.order_probe_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m3_partial_fixpoint_probe option-bind 2>&1 | tee ../dist/m3-foundation-preparation/option-bind-audit.log
       - name: Construct portable monotonicity proofs and replay in fresh kernel
         if: ${{ !cancelled() && steps.order_probe_build.outcome == 'success' }}
         run: |
@@ -362,6 +367,7 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_m3_partial_fixpoint_export --option-bind ../dist/m3-option-bind-authoring/StandardOptionBindCandidate.lean 2>&1 | tee ../dist/m3-option-bind-authoring/fixedpoint-export.log
           sha256sum ../dist/m3-option-bind-authoring/StandardOptionBindCandidate.lean | tee ../dist/m3-option-bind-authoring/candidate-source-sha256.txt
+          cmp ../dist/m3-option-bind-authoring/StandardOptionBindCandidate.lean ../packages/environment/src/Ps/Environment/StandardOptionBindData.lean
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

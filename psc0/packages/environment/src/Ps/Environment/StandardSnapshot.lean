@@ -304,7 +304,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- 73690ab2 / preparation39135290050. The final-stage candidate measured this
 -- digest without changing any earlier frozen authoring boundary or assumption.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:7835333229599106138"
+  "fnv1a64:5539629570459325264"
 
 
 -- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
@@ -477,8 +477,11 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- Same independently measured recursor metadata candidate at73690ab2,
 -- preparation39135290050; exact source SHA256 e097d47d163b7bf9119fec6906be39fdf82b012775ad7d1bc0f95a0486d6d56c.
 -- Source-call and integration qualification remain separate mandatory gates.
+-- LawfulBEq/Nat.instLawfulBEq final-only registration independently measured
+-- by native authoring and strict selected audit at a39eb959, preparation
+-- 39166058244. All3757 logical declarations and earlier frozen bases remain.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:112d57c2fe9257223762b8b47cac0283d96dbfd79b1cb276d80ef6c897cf34cf"
+  "sha256:73ca5d80a65101c85d16ff55e7a81fc8c7b9fade62296c56270cdd7e9c6dfcbc"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

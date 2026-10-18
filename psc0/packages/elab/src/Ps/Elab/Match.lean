@@ -203,6 +203,7 @@ structure PsElabMatchPlan where
   indexArguments : List PsExpr := []
   sourceIndices : List PsExpr := []
   argumentMetaContext? : Option PsMetaContext := none
+  protectedIds : List Nat := []
 
 def psElabMatchIndexMap (parameters indices : List PsExpr) : List (Nat × Nat) :=
   (indices.zipIdx).filterMap fun entry =>
@@ -300,7 +301,7 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
     motive, indices := indexMap, majorId, constraintVariables, generalized
     constraints := equations.map Prod.fst
     arguments := equations.map Prod.snd ++ sourceArguments ++ psElabDependentArguments generalized
-    sourceEquation?, indexArguments := indices, sourceIndices, argumentMetaContext? }
+    sourceEquation?, indexArguments := indices, sourceIndices, argumentMetaContext?, protectedIds }
 
 def psElabMatchFields (names : List PsSyntaxName) (context : PsElabContext)
     (cursor : PsExpr) (bindersRev : List PsElabTypedBinder := []) :
@@ -441,7 +442,7 @@ def psElabMatchMinorWithHypotheses (context : PsElabContext)
       ({ original, left, right, named := plan.sourceEquation?.isSome } : PsElabIndexRefinementCandidate)
   let body ← psElabSolveIndexConstraintsWithRefinements 256 plan.constraints.length flexible
     (hypotheses.bindersRev.map (fun binder => binder.id) ++ psElabSourceMatchProofIds plan.sourceEquation?)
-    finish [] hypotheses.context hypotheses.body requests
+    finish [] hypotheses.context hypotheses.body requests plan.protectedIds
   let closed ← psElabAbstract context body.context
     (psElabAliasAbstractions aliases.valuesRev ++
       psElabLambdaAbstractions hypotheses.bindersRev ++ psElabLambdaAbstractions fields.bindersRev)

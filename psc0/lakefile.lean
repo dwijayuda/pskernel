@@ -128,6 +128,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardWellFoundedData, `Ps.Environment.StandardWellFounded,
     `Ps.Environment.StandardClassical, `Ps.Environment.StandardPartialFixpointData,
     `Ps.Environment.StandardPartialFixpoint, `Ps.Environment.StandardPSumData, `Ps.Environment.StandardPSum,
+    `Ps.Environment.StandardOptionBindData, `Ps.Environment.StandardOptionBind,
     `Ps.Environment.StandardRecursorSurfaceData,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot

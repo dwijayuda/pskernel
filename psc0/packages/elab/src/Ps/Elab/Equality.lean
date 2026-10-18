@@ -228,10 +228,16 @@ mutual
 def psElabSolveIndexConstraintsWithRefinements (fuel count : Nat) (flexible ignored : List Nat)
     (finish : PsElabRefinements -> PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
     (refinements : PsElabRefinements) (context : PsElabContext) (target : PsExpr)
-    (requests : List PsElabIndexRefinementCandidate := []) : Except PsElabError PsElabTermResult := do
+    (requests : List PsElabIndexRefinementCandidate := []) (protectedIds : List Nat := [])
+    (protectedReady : Bool := false) :
+    Except PsElabError PsElabTermResult := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    let protectedIds := if protectedReady then protectedIds else
+      (protectedIds ++ context.localContext.declarations.filterMap (fun declaration =>
+        let id := psLocalDeclId declaration
+        if flexible.contains id then none else some id)).eraseDups
     match count with
     | 0 => finish refinements context target
     | count + 1 =>
@@ -244,20 +250,35 @@ def psElabSolveIndexConstraintsWithRefinements (fuel count : Nat) (flexible igno
       let equation ← psElabEquationViewWithIndexRequest inner pi.domain (.fvar pushed.id) currentRequests
       let next := fun refinements context target =>
         psElabSolveIndexConstraintsWithRefinements fuel count flexible (pushed.id :: ignored)
-          finish refinements context target requests
+          finish refinements context target requests protectedIds true
       let body ← psElabSolveIndexEquationWithRefinements fuel flexible (pushed.id :: ignored)
-        next refinements inner (psExprInstantiate1 pi.body (.fvar pushed.id)) equation requests
+        next refinements inner (psExprInstantiate1 pi.body (.fvar pushed.id)) equation requests protectedIds true
       psElabAbstract context body.context
         [.lambdaE pushed.id pi.name pi.domain pi.binder] body.term target
 
 def psElabSolveIndexEquationWithRefinements (fuel : Nat) (flexible ignored : List Nat)
     (finish : PsElabRefinements -> PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
     (refinements : PsElabRefinements) (context : PsElabContext) (target : PsExpr) (equation : PsElabEquation)
-    (requests : List PsElabIndexRefinementCandidate := []) :
+    (requests : List PsElabIndexRefinementCandidate := []) (protectedIds : List Nat := [])
+    (protectedReady : Bool := false) :
     Except PsElabError PsElabTermResult := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    let protectedIds := if protectedReady then protectedIds else
+      (protectedIds ++ context.localContext.declarations.filterMap (fun declaration =>
+        let id := psLocalDeclId declaration
+        if flexible.contains id then none else some id)).eraseDups
+    -- Earlier equations can reopen a dependent flexible local at a fresh ID.
+    -- Follow only the recorded typed substitutions, retaining the caller's
+    -- protected source identities even when a field is equated with one.
+    let flexible := (flexible.filterMap fun id =>
+      match psMetaInstantiate context.metaContext
+          (psElabSubstituteLocals refinements (.fvar id)) with
+      | .fvar current =>
+        if !protectedIds.contains current &&
+            (psLocalFindById context.localContext current).isSome then some current else none
+      | _ => none).eraseDups
     let reduce := psWhnf context.environment context.metaContext context.localContext
     let left := reduce equation.left
     let right := reduce equation.right
@@ -296,7 +317,8 @@ def psElabSolveIndexEquationWithRefinements (fuel : Nat) (flexible ignored : Lis
       let telescope := (equations.zipIdx).foldr (fun entry body =>
         psLogicPi (offset + entry.snd) "_indexEq"
           (psLogicEq entry.fst.level entry.fst.type entry.fst.left entry.fst.right) body) target
-      let body ← psElabSolveIndexConstraintsWithRefinements fuel equations.length flexible ignored finish refinements context telescope requests
+      let body ← psElabSolveIndexConstraintsWithRefinements fuel equations.length flexible ignored
+        finish refinements context telescope requests protectedIds true
       return { body with type := target, term := psExprApplyMany body.term (equations.map (fun entry => entry.proof)) }
     | _, _ => finish refinements context target
 end

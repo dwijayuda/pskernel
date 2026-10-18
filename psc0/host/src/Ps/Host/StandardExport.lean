@@ -12,6 +12,7 @@ import Ps.Host.StandardSource
 import Ps.Host.StandardManifest
 import Ps.Environment.StandardWellFounded
 import Ps.Environment.StandardPartialFixpoint
+import Ps.Environment.StandardOptionBind
 import Ps.Host.FloatConstructive
 import Ps.Host.FloatCanonicalContracts
 
@@ -1602,6 +1603,262 @@ def checkPartialFixpointFoundation : IO Unit := do
     ("proposedClasses", Lean.toJson proposed.classes.length),
     ("proposedInstances", Lean.toJson proposed.instances.entries.length),
     ("activeFoundationDeclarations", Lean.toJson activeNames.length),
+    ("runtimeQualified", Lean.toJson false)]).compress
+
+-- The additive inventory is fixed by the independently checked authoring job.
+-- It is not collected from the current final environment or from a source call.
+private def optionBindFoundationNames : List String := [
+  "Applicative", "Bind", "Functor", "Monad", "Pure", "Seq", "SeqLeft", "SeqRight",
+  "instFunctorOption", "instMonadOption", "Applicative.mk", "Applicative.rec",
+  "Bind.bind", "Bind.mk", "Bind.rec", "Functor.map", "Functor.mk", "Functor.rec",
+  "Monad.mk", "Monad.rec", "Monad.toBind", "Pure.mk", "Pure.rec", "Seq.mk",
+  "Seq.rec", "SeqLeft.mk", "SeqLeft.rec", "SeqRight.mk", "SeqRight.rec",
+  "Lean.Order.MonoBind", "Lean.Order.instMonoBindOption", "Lean.Order.monotone_bind",
+  "Lean.Order.MonoBind.bind_mono_left", "Lean.Order.MonoBind.bind_mono_right",
+  "Lean.Order.MonoBind.mk", "Lean.Order.MonoBind.rec"]
+
+private def checkOptionBindRecursorSurface (native : Lean.Environment)
+    (environment : PsEnvironment) (expected : Nat) : IO Nat := do
+  let privateHelpers := ["TextPrefix", "SpaceResult", "WorkItem", "WorkGroup", "State", "Machine"].map
+    (fun suffix => Lean.Name.str (.str (.str .anonymous "$psc0Format") suffix) "rec")
+  let mut skipped : List Lean.Name := []
+  let mut compared := 0
+  for declaration in environment.declarations do
+    let .recursorDecl info := declaration | continue
+    let name := PsKernelLean.toLeanName info.name
+    let original := match native.find? name with
+      | some (.recInfo value) => some value
+      | _ => none
+    if original.isNone then
+      unless privateHelpers.contains name do
+        throw (IO.userError ("Option bind audit has an unreviewed non-native recursor: " ++ toString name))
+      skipped := name :: skipped
+    let some original := original | continue
+    unless info.inductiveNames.map PsKernelLean.toLeanName == original.all &&
+        info.numParams == original.numParams && info.numIndices == original.numIndices &&
+        info.numMotives == original.numMotives && info.numMinors == original.numMinors do
+      throw (IO.userError ("Option bind recursor layout differs: " ++ toString name))
+    let type ← match PsKernelLean.toLeanExpr info.type with
+      | .ok value => pure value
+      | .error error => throw (IO.userError error.message)
+    let reference ← match recursorSourceAnnotations native type original.type with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    unless Lean.Expr.equal type reference do
+      throw (IO.userError ("Option bind complete recursor source annotations differ: " ++ toString name))
+    compared := compared + 1
+  unless compared == expected && skipped.length == privateHelpers.length &&
+      privateHelpers.all skipped.contains do
+    throw (IO.userError ("Option bind public/private recursor inventory differs: " ++ toString compared))
+  return compared
+
+-- Replay a proposed final-stage extension without changing the selected pins.
+-- The source digest, prior metadata, native registrations, actual dictionary
+-- search and fresh-kernel replay are independent obligations.
+def checkOptionBindFoundation (assetPath : System.FilePath) : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Lean },
+    { module := `Init.Internal.Order.Basic }] {} (loadExts := true)
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Option bind audit requires the pinned Lean commit")
+  let asset ← IO.FS.readFile assetPath
+  unless asset.utf8ByteSize == 414722 && psStandardSnapshotSHA256 asset ==
+      "86bbb4d5735a2ddeb8dc161cc9478789fca26f25cef9d5b43a0cf5af71aa8a29" do
+    throw (IO.userError "Option bind independently authored source asset differs")
+  let base := psSelfHostProdPreOptionBindPreludeEnvironment
+  unless base.declarations.length == 3757 &&
+      psStandardSnapshotFingerprint base == "fnv1a64:5539629570459325264" &&
+      psStandardSnapshotSHA256Fingerprint base ==
+        "sha256:73ca5d80a65101c85d16ff55e7a81fc8c7b9fade62296c56270cdd7e9c6dfcbc" &&
+      standardSurfaceManifestSHA256 base ==
+        "sha256:ed998f3648387f10e82f537d694dcc0f158caeb10c084e74bd7541f9d3c090bd" do
+    throw (IO.userError "Option bind frozen final authoring boundary differs")
+  let candidates := psStandardOptionBindCandidateDeclarations
+  let names := candidates.map psDeclarationName
+  unless names.map psNameToString == optionBindFoundationNames &&
+      (names.map psNameToString).eraseDups.length == 36 do
+    throw (IO.userError "Option bind exact declaration inventory differs")
+  let boundary := psStandardOptionBindCandidateBoundary
+  unless boundary.length == base.declarations.length &&
+      (boundary.map psNameToString).eraseDups.length == boundary.length &&
+      boundary.all (psEnvironmentContains base) do
+    throw (IO.userError "Option bind asset recorded a different frozen boundary")
+  if names.any (psEnvironmentContains base) then
+    throw (IO.userError "Option bind additive asset would replace a prior declaration")
+  let activeNames := names.filter (psEnvironmentContains psSelfHostProdPreludeEnvironment)
+  unless activeNames.isEmpty || activeNames.length == 36 do
+    throw (IO.userError "Option bind library is only partially selected")
+  let proposed := psStandardOptionBindExtend base
+  unless proposed.declarations.length == 3793 &&
+      (proposed.declarations.drop 36).map psStandardSnapshotDeclaration ==
+        base.declarations.map psStandardSnapshotDeclaration do
+    throw (IO.userError "Option bind changed prior declaration identities or ordering")
+  for declaration in base.declarations do
+    let name := psDeclarationName declaration
+    let some retained := psEnvironmentFind proposed name
+      | throw (IO.userError ("Option bind lost a prior declaration: " ++ psNameToString name))
+    unless psStandardSnapshotDeclaration retained == psStandardSnapshotDeclaration declaration &&
+        (psEnvironmentReducibility? proposed name).map psReducibilityName ==
+          (psEnvironmentReducibility? base name).map psReducibilityName &&
+        psEnvironmentIsNoncomputable proposed name == psEnvironmentIsNoncomputable base name do
+      throw (IO.userError ("Option bind changed a prior declaration or policy: " ++ psNameToString name))
+  unless psStandardSnapshotList psStandardSnapshotAlias proposed.exportedAliases ==
+      psStandardSnapshotList psStandardSnapshotAlias base.exportedAliases do
+    throw (IO.userError "Option bind altered source aliases")
+  for declaration in candidates do
+    let name := psDeclarationName declaration
+    match declaration with
+    | .axiomDecl .. | .quotientDecl .. | .partialDecl .. =>
+      throw (IO.userError ("Option bind contains a prohibited declaration: " ++ psNameToString name))
+    | _ => pure ()
+    let some upstream := native.find? (PsKernelLean.toLeanName name)
+      | throw (IO.userError ("Option bind native reference missing: " ++ psNameToString name))
+    let reference ← match exportDeclaration native [] upstream with
+      | .ok value => pure value
+      | .error error => throw (IO.userError error)
+    unless psStandardSnapshotDeclaration declaration == psStandardSnapshotDeclaration reference do
+      throw (IO.userError ("Option bind stored Core differs from native: " ++ psNameToString name))
+    let some selected := psEnvironmentFind proposed name
+      | throw (IO.userError ("Option bind declaration not selected: " ++ psNameToString name))
+    unless psStandardSnapshotDeclaration selected == psStandardSnapshotDeclaration declaration do
+      throw (IO.userError ("Option bind extension altered its checked Core: " ++ psNameToString name))
+    if (psDeclarationValue declaration).isSome then
+      unless psReducibilityName (psEnvironmentReducibility proposed name) ==
+          (Lean.getReducibilityStatusCore native (PsKernelLean.toLeanName name)).toAttrString do
+        throw (IO.userError ("Option bind native reducibility differs: " ++ psNameToString name))
+  let classes : List Lean.Name := [`Bind, `Monad, `Lean.Order.MonoBind]
+  unless proposed.classes.map psNameToString ==
+      classes.reverse.map toString ++ base.classes.map psNameToString &&
+      proposed.classParameters.length == base.classParameters.length + 3 &&
+      psStandardSnapshotList psStandardSnapshotClassParameters (proposed.classParameters.drop 3) ==
+        psStandardSnapshotList psStandardSnapshotClassParameters base.classParameters do
+    throw (IO.userError "Option bind changed prior class metadata or its exact class roster")
+  for name in classes do
+    let portable := exportName name
+    let [(_, parameters)] := proposed.classParameters.filter (fun entry => psNameEq entry.1 portable)
+      | throw (IO.userError ("Option bind class metadata missing or duplicated: " ++ toString name))
+    unless Lean.isClass native name && parameters.outputs.isEmpty && parameters.outputLevels.isEmpty &&
+        (Lean.getOutParamPositions? native name).map Array.toList == some parameters.outputs &&
+        (Lean.getOutLevelParamPositions? native name).map Array.toList == some parameters.outputLevels do
+      throw (IO.userError ("Option bind native class metadata differs: " ++ toString name))
+  let isNamed := fun (name : PsName) (entry : PsInstanceEntry) =>
+    match entry.value with
+    | .constE actual _ => psNameEq actual name
+    | _ => false
+  let registrations : List (Lean.Name × Lean.Name) := [
+    (`Monad.toBind, `Bind),
+    (`instMonadOption, `Monad),
+    (`Lean.Order.instMonoBindOption, `Lean.Order.MonoBind)]
+  let isNew := fun entry => registrations.any (fun pair => isNamed (exportName pair.1) entry)
+  unless proposed.instances.entries.length == base.instances.entries.length + 3 &&
+      psStandardSnapshotList psStandardSnapshotInstance
+        (proposed.instances.entries.filter (fun entry => !isNew entry)) ==
+        psStandardSnapshotList psStandardSnapshotInstance base.instances.entries &&
+      psStandardSnapshotList psStandardSnapshotInstance proposed.instances.defaults ==
+        psStandardSnapshotList psStandardSnapshotInstance base.instances.defaults do
+    throw (IO.userError "Option bind changed prior instance ordering or the ordinary/default roster")
+  let addedOrder := (proposed.instances.entries.filter isNew).map (fun entry =>
+    match entry.value with | .constE name _ => psNameToString name | _ => "")
+  unless addedOrder == registrations.reverse.map (fun pair => toString pair.1) do
+    throw (IO.userError "Option bind changed the native equal-priority registration order")
+  for (name, className) in registrations do
+    let some upstream := (Lean.Meta.instanceExtension.getState native).instanceNames.find? name
+      | throw (IO.userError ("Option bind native instance missing: " ++ toString name))
+    let [selected] := proposed.instances.entries.filter (isNamed (exportName name))
+      | throw (IO.userError ("Option bind instance missing or duplicated: " ++ toString name))
+    unless upstream.priority == 1000 && selected.priority == upstream.priority &&
+        selected.className.any (psNameEq (exportName className)) do
+      throw (IO.userError ("Option bind instance priority/class differs: " ++ toString name))
+    if proposed.instances.defaults.any (isNamed (exportName name)) then
+      throw (IO.userError ("Option bind ordinary instance entered default_instance: " ++ toString name))
+  for name in names do
+    if !(registrations.any (fun pair => psNameEq name (exportName pair.1))) &&
+        (proposed.instances.entries ++ proposed.instances.defaults).any (isNamed name) then
+      throw (IO.userError ("Option bind imported an unselected dictionary: " ++ psNameToString name))
+  match selectedProofClosureAudit proposed with
+  | .ok () => pure ()
+  | .error error => throw (IO.userError error)
+  match standardInstanceIndexAudit proposed with
+  | .ok () => pure ()
+  | .error error => throw (IO.userError error)
+  -- Native source independently elaborates the same two superclass goals.
+  let _ : Monad Option := inferInstance
+  let _ : Bind Option := inferInstance
+  let option := PsExpr.constE (psRootName "Option") [.zero]
+  let dictionary ← match psElabResolvedTerm (psElabContextEmpty proposed)
+      (.constE (psDecisionName "Lean.Order.instMonoBindOption") [.zero]) none with
+    | .ok value => pure value
+    | .error error => throw (IO.userError (psCompilerPscv0ElabError error))
+  let dictionaryView := psInferAppView dictionary.type
+  let .constE owner _ := dictionaryView.head
+    | throw (IO.userError "Option bind law dictionary has no class head")
+  let [monad, _, _] := dictionaryView.args
+    | throw (IO.userError "Option bind law dictionary changed its checked telescope")
+  unless psNameEq owner (psDecisionName "Lean.Order.MonoBind") &&
+      psExprAlphaEq monad option do
+    throw (IO.userError "Option bind law dictionary belongs to a different monad")
+  let goals : List (String × PsExpr × PsName) := [
+    ("Monad Option", .app (.constE (psRootName "Monad") [.zero, .zero]) option,
+      psRootName "instMonadOption"),
+    ("Bind Option", .app (.constE (psRootName "Bind") [.zero, .zero]) option,
+      psDecisionName "Monad.toBind"),
+    ("MonoBind Option", dictionary.type, psDecisionName "Lean.Order.instMonoBindOption")]
+  let mut witnesses : List PsDeclaration := []
+  for ((label, target, expected), index) in goals.zipIdx do
+    let found := psSynthInstanceWithTable proposed psLocalEmpty proposed.instances psMetaEmpty 64 target
+    let some value := found.result.value
+      | throw (IO.userError ("Option bind actual dictionary synthesis failed: " ++ label))
+    let value := psMetaInstantiate found.result.context value
+    let .constE actual _ := (psInferAppView value).head
+      | throw (IO.userError ("Option bind synthesis has no dictionary head: " ++ label))
+    unless psNameEq actual expected && !found.table.resourceExceeded &&
+        !psExprHasUnresolvedMeta value && psExprFVarsInContext psLocalEmpty value do
+      throw (IO.userError ("Option bind synthesis selected the wrong or open dictionary: " ++ label))
+    if label == "Bind Option" && !psExprHasConst (psRootName "instMonadOption") value then
+      throw (IO.userError "Option bind synthesis bypassed the actual Monad Option parent")
+    witnesses := .definitionDecl
+      (.num (psRootName "$psc0OptionBindWitness") index) [] target value :: witnesses
+  let _ ← checkCandidate (witnesses ++ candidates ++ base.declarations) (witnesses ++ candidates)
+  let rules ← checkRecursorRules native.find? (candidates ++ base.declarations) candidates
+  unless rules == 9 do
+    throw (IO.userError "Option bind new recursor-rule inventory differs")
+  let oldPublic ← checkOptionBindRecursorSurface native base 109
+  let newPublic ← checkOptionBindRecursorSurface native proposed 118
+  unless activeNames.isEmpty ||
+      psStandardSnapshotFingerprint psSelfHostProdPreludeEnvironment ==
+        psStandardSnapshotFingerprint proposed &&
+      psStandardSnapshotSHA256Fingerprint psSelfHostProdPreludeEnvironment ==
+        psStandardSnapshotSHA256Fingerprint proposed &&
+      standardSurfaceManifestSHA256 psSelfHostProdPreludeEnvironment ==
+        standardSurfaceManifestSHA256 proposed do
+    throw (IO.userError "Option bind selected extension differs from the independently audited proposal")
+  IO.println (Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-option-bind-foundation-audit/1" : String)),
+    ("leanCommit", Lean.toJson Lean.githash),
+    ("candidateSourceBytes", Lean.toJson asset.utf8ByteSize),
+    ("candidateSourceSHA256", Lean.toJson ("sha256:" ++ psStandardSnapshotSHA256 asset)),
+    ("candidateDeclarations", Lean.toJson candidates.length),
+    ("candidateNames", Lean.toJson optionBindFoundationNames),
+    ("candidateAxioms", Lean.toJson ([] : List String)),
+    ("newClasses", Lean.toJson (classes.map toString)),
+    ("newOrdinaryInstances", Lean.toJson (registrations.map (fun pair => toString pair.1))),
+    ("newDefaultInstances", Lean.toJson ([] : List String)),
+    ("synthesizedDictionaries", Lean.toJson witnesses.length),
+    ("synthesisGoals", Lean.toJson (goals.map (fun entry => entry.1))),
+    ("kernelChecked", Lean.toJson true),
+    ("newRecursorRulesCompared", Lean.toJson rules),
+    ("retainedPublicRecursors", Lean.toJson oldPublic),
+    ("proposedPublicRecursors", Lean.toJson newPublic),
+    ("retainedDeclarations", Lean.toJson base.declarations.length),
+    ("priorDeclarationsAndRegistrationsUnchanged", Lean.toJson true),
+    ("proposedStandardFNV", Lean.toJson (psStandardSnapshotFingerprint proposed)),
+    ("proposedStandardSHA256", Lean.toJson (psStandardSnapshotSHA256Fingerprint proposed)),
+    ("proposedSurfaceSHA256", Lean.toJson (standardSurfaceManifestSHA256 proposed)),
+    ("proposedDeclarations", Lean.toJson proposed.declarations.length),
+    ("proposedClasses", Lean.toJson proposed.classes.length),
+    ("proposedInstances", Lean.toJson proposed.instances.entries.length),
+    ("activeOptionBindDeclarations", Lean.toJson activeNames.length),
     ("runtimeQualified", Lean.toJson false)]).compress
 
 end PsV7Native

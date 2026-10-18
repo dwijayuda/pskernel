@@ -8,7 +8,8 @@ def main : IO Unit := do
   let native ← Lean.importModules #[{ module := `Init.Internal.Order.Basic }] {} (loadExts := true)
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "P1 metadata requires pinned Lean 4.35.0")
-  for name in [`Lean.Order.PartialOrder, `Lean.Order.CCPO, `Lean.Order.MonoBind] do
+  for name in [`Lean.Order.PartialOrder, `Lean.Order.CCPO, `Bind, `Monad,
+      `Lean.Order.MonoBind] do
     unless Lean.isClass native name do
       throw (IO.userError ("missing native P1 class: " ++ toString name))
     IO.println (Lean.Json.mkObj [
@@ -17,6 +18,8 @@ def main : IO Unit := do
       ("outputs", Lean.toJson ((Lean.getOutParamPositions? native name).map Array.toList)),
       ("outputLevels", Lean.toJson ((Lean.getOutLevelParamPositions? native name).map Array.toList))]).compress
   let registrations : List (Lean.Name × Lean.Name) := [
+    (`Monad.toBind, `Bind),
+    (`instMonadOption, `Monad),
     (`Lean.Order.CCPO.toPartialOrder, `Lean.Order.PartialOrder),
     (`Lean.Order.instOrderPi, `Lean.Order.PartialOrder),
     (`Lean.Order.instCCPOPi, `Lean.Order.CCPO),

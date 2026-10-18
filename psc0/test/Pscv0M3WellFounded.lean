@@ -625,9 +625,9 @@ private def checkSource : IO Unit := do
   | _ => throw (IO.userError "WF flat source lowering discarded its strategy")
   IO.println "PSCV0_M3_WF_SOURCE: PASS measure/proof/span and following-command ownership, selected heads, strategy refusals and both printers"
 
--- Exercise a real function result already applied to a further typed entry
--- argument. The validator must retain the actual two-lambda header and apply
--- seed afterwards; reclassifying seed as recursive state changes this call.
+-- Check the actual operational lambda prefix independently of the original
+-- two-parameter source equation. A separately checked two-lambda wrapper keeps
+-- the residual-result application control over the same WF function.
 private def checkResultApplication (environment : PsEnvironment) : IO Unit := do
   let name := psRootName "m3wfiterate"
   let some declaration := psEnvironmentFind environment name
@@ -665,12 +665,76 @@ private def checkResultApplication (environment : PsEnvironment) : IO Unit := do
   let entry ← match psErasureValidateRootEntry environment scope with
     | .ok value => pure value
     | .error _ => throw (IO.userError "typed WF result application was rejected")
-  let some opened := psErasureWellFoundedOpenValue (arguments.take 2) declaredValue
-    | throw (IO.userError "WF function result changed the raw declaration lambda prefix")
-  if entry.headerArguments.length != 2 || entry.applicationArguments.length != 1 ||
-      !psExprAlphaEq entry.value (psExprApplyMany opened (arguments.drop 2)) ||
-      !psExprAlphaEq entry.type cursor then
-    throw (IO.userError "WF result binder was promoted into the source header or beta/eta-assumed")
+  let some opened := psErasureWellFoundedOpenValue arguments declaredValue
+    | throw (IO.userError "WF entry lost an actual checked operational lambda")
+  if entry.headerArguments.length != 3 || !entry.applicationArguments.isEmpty ||
+      !psExprAlphaEq entry.value opened || !psExprAlphaEq entry.type cursor then
+    throw (IO.userError "WF entry did not retain the complete checked operational prefix")
+  -- Operational entry arity does not change the original two-parameter
+  -- source equation. Its equality still relates functions before seed is applied.
+  let some (.theoremDecl _ equationLevels equationType _) :=
+      psEnvironmentFind environment (psNameAppendStr name "eq_def")
+    | throw (IO.userError "function-valued WF source equation is missing")
+  if !equationLevels.isEmpty then
+    throw (IO.userError "function-valued WF source equation changed universe closure")
+  let mut equationCursor := equationType
+  let mut sourceResult := declaredType
+  for argument in arguments.take 2 do
+    let equationParameter ← match psInferEnsureForall environment psMetaEmpty
+        localContext equationCursor with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "WF source equation lost an original header parameter")
+    let sourceParameter ← match psInferEnsureForall environment psMetaEmpty
+        localContext sourceResult with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError "WF source type lost an original header parameter")
+    if !psBinderInfoEq equationParameter.binder sourceParameter.binder ||
+        !psDefEqReadOnlyWithEnv environment psMetaEmpty localContext
+          equationParameter.domain sourceParameter.domain then
+      throw (IO.userError "WF source equation changed the original header telescope")
+    equationCursor := psExprInstantiate1 equationParameter.body argument
+    sourceResult := psExprInstantiate1 sourceParameter.body argument
+  let equationView := psExprAppView equationCursor
+  let .constE equationHead [_] := equationView.head
+    | throw (IO.userError "WF source equation promoted seed into its header")
+  let [equationResult, equationLeft, _] := equationView.args
+    | throw (IO.userError "WF source equation lost its function equality")
+  if !psNameEq equationHead psEqName ||
+      !psDefEqReadOnlyWithEnv environment psMetaEmpty localContext equationResult sourceResult ||
+      !psExprAlphaEq equationLeft
+        (psExprApplyMany (.constE name []) (arguments.take 2)) then
+    throw (IO.userError "WF source equation changed its original function-valued contract")
+  -- Keep the independent residual-result application cell: this checked
+  -- wrapper has two raw lambdas and returns the actual WF function at seed.
+  let .forallE stepName stepDomain (.forallE nName nDomain _ nBinder) stepBinder := declaredType
+    | throw (IO.userError "WF result wrapper lost the original source telescope")
+  let wrapperName := psRootName "m3wfiterateResultApplication"
+  let wrapperValue := PsExpr.lam stepName stepDomain
+    (.lam nName nDomain
+      (psExprApplyMany (.constE name []) [.bvar 1, .bvar 0]) nBinder) stepBinder
+  let wrapper := PsDeclaration.definitionDecl wrapperName [] declaredType wrapperValue
+  let resultEnvironment ← match psAddDeclarationList environment [wrapper] with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "WF result wrapper failed independent Core checking")
+  let resultBase ← match psErasurePrepareDeclarationEntries resultEnvironment [wrapper]
+      (psErasureScopeEmpty [(wrapperName, "m3wfiterateResultApplication")]) with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "WF result wrapper lost its actual entry metadata")
+  let resultScope := { resultBase with
+    localContext
+    runtimeLocals
+    currentDefinition := some { current with
+      name := "m3wfiterateResultApplication"
+      coreName := some wrapperName } }
+  let resultEntry ← match psErasureValidateRootEntry resultEnvironment resultScope with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "typed WF residual result application was rejected")
+  let some resultOpened := psErasureWellFoundedOpenValue (arguments.take 2) wrapperValue
+    | throw (IO.userError "WF result wrapper changed its raw lambda prefix")
+  if resultEntry.headerArguments.length != 2 || resultEntry.applicationArguments.length != 1 ||
+      !psExprAlphaEq resultEntry.value (psExprApplyMany resultOpened (arguments.drop 2)) ||
+      !psExprAlphaEq resultEntry.type cursor then
+    throw (IO.userError "WF residual result argument was promoted or beta/eta-assumed")
   let swapped := { scope with
     currentDefinition := some { current with runtimeParameters := runtimeParameters.reverse } }
   match psErasureValidateRootEntry environment swapped with
@@ -984,7 +1048,7 @@ private def checkConstruction : IO Unit := do
   | _ => throw (IO.userError "WF private declaration batch changed shape")
   for (text, hasState) in [("m3wfaccumulate", true), ("m3wfoffset", true),
       ("m3wfstates", true), ("m3wffixed", false), ("m3wfreverse", true),
-      ("m3wfiterate", false), ("m3wfdependent", true), ("m3wfbounded", false),
+      ("m3wfiterate", true), ("m3wfdependent", true), ("m3wfbounded", false),
       ("wfGenericArgs", true), ("wfDefaultReset", true), ("wfImplicitMajor", true)] do
     let name := psRootName text
     match psEnvironmentFind result.result.environment name with
@@ -1004,7 +1068,7 @@ private def checkConstruction : IO Unit := do
     | _ => throw (IO.userError (text ++ " has no checked equation"))
   let expectedEntries : List (String × List String × List PsErasedBinderKind × Nat × Nat) := [
     ("m3wfreverse", ["u"], [.type, .runtime, .runtime], 2, 1),
-    ("m3wfiterate", [], [.runtime, .runtime], 2, 0),
+    ("m3wfiterate", [], [.runtime, .runtime, .runtime], 3, 0),
     ("m3wfdependent", ["u"], [.index, .proof, .proof, .runtime, .runtime], 4, 0),
     ("m3wfbounded", [], [.runtime], 1, 0),
     ("m3wfpacked", ["u"], [.index, .proof, .proof, .runtime, .runtime, .runtime], 5, 0),

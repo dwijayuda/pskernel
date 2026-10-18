@@ -45,22 +45,24 @@ def m3GroupIndexedChanged : M3DeriveIndexedLeft Nat 0 :=
   M3DeriveIndexedLeft.node 1 m3GroupIndexedRightChanged
 def m3GroupIndexedLeaf : M3DeriveIndexedLeft Nat 0 := M3DeriveIndexedLeft.leaf 5
 
-theorem m3GroupIndexedBEqSame : (m3GroupIndexedOne == m3GroupIndexedOne) = true := by rfl
+-- Pinned native BEq uses partial auxiliary methods for a mutual family.
+-- Observe these methods by execution; the portable equations remain kernel checked.
+def m3GroupIndexedBEqSame : Bool := m3GroupIndexedOne == m3GroupIndexedOne
 theorem m3GroupIndexedDecEqSame : Decidable.decide (self := decEq m3GroupIndexedOne m3GroupIndexedOne) = true := by rfl
 
-theorem m3GroupIndexedBEqIndex : (m3GroupIndexedZero == m3GroupIndexedOne) = false := by rfl
+def m3GroupIndexedBEqIndex : Bool := m3GroupIndexedZero == m3GroupIndexedOne
 theorem m3GroupIndexedDecEqIndex : Decidable.decide (self := decEq m3GroupIndexedZero m3GroupIndexedOne) = false := by rfl
 
-theorem m3GroupIndexedBEqField : (m3GroupIndexedOne == m3GroupIndexedChanged) = false := by rfl
+def m3GroupIndexedBEqField : Bool := m3GroupIndexedOne == m3GroupIndexedChanged
 theorem m3GroupIndexedDecEqField : Decidable.decide (self := decEq m3GroupIndexedOne m3GroupIndexedChanged) = false := by rfl
 
-theorem m3GroupIndexedBEqCtor : (m3GroupIndexedOne == m3GroupIndexedLeaf) = false := by rfl
+def m3GroupIndexedBEqCtor : Bool := m3GroupIndexedOne == m3GroupIndexedLeaf
 theorem m3GroupIndexedDecEqCtor : Decidable.decide (self := decEq m3GroupIndexedOne m3GroupIndexedLeaf) = false := by rfl
 
-theorem m3GroupIndexedBEqRightSame : (m3GroupIndexedRight == m3GroupIndexedRight) = true := by rfl
+def m3GroupIndexedBEqRightSame : Bool := m3GroupIndexedRight == m3GroupIndexedRight
 theorem m3GroupIndexedDecEqRightSame : Decidable.decide (self := decEq m3GroupIndexedRight m3GroupIndexedRight) = true := by rfl
 
-theorem m3GroupIndexedBEqRightField : (m3GroupIndexedRight == m3GroupIndexedRightChanged) = false := by rfl
+def m3GroupIndexedBEqRightField : Bool := m3GroupIndexedRight == m3GroupIndexedRightChanged
 theorem m3GroupIndexedDecEqRightField : Decidable.decide (self := decEq m3GroupIndexedRight m3GroupIndexedRightChanged) = false := by rfl
 
 -- The nonindexed member has an inhabited leaf. The indexed member has only
@@ -386,13 +388,22 @@ private def checkIndexedGroupBinary (prelude : Lean.Kernel.Environment)
     (environment : PsEnvironment) (groups : List PsDeclaration)
     (origin : PsElabBatchOrigin) : IO Unit := do
   checkIndexedLawfulRegistration environment
+  for (label, actual, expected) in [
+      ("same", m3GroupIndexedBEqSame, true),
+      ("index", m3GroupIndexedBEqIndex, false),
+      ("field", m3GroupIndexedBEqField, false),
+      ("constructor", m3GroupIndexedBEqCtor, false),
+      ("right same", m3GroupIndexedBEqRightSame, true),
+      ("right field", m3GroupIndexedBEqRightField, false)] do
+    ensure (actual == expected)
+      ("native indexed mutual BEq execution disagrees at " ++ label)
   let instances ← derive environment origin ["BEq", "DecidableEq"]
   ensure (instances.length == 4)
     "indexed binary deriving omitted one class/member pair"
   let registered ← register environment instances
   let laws ← sourceResult registered indexedGroupBinarySource
   let _ ← checked prelude (groups ++ instances ++ laws.result.declarations)
-  IO.println "PSCV0_M3_INDEXED_GROUP_BINARY: PASS fresh kernel-checked BEq/DecidableEq for both members, actual lawful Nat dictionary, nonreflexive dictionary refusal and twelve native constructor/index/field equations"
+  IO.println "PSCV0_M3_INDEXED_GROUP_BINARY: PASS fresh kernel-checked BEq/DecidableEq for both members, actual lawful Nat dictionary, nonreflexive dictionary refusal, six native BEq executions, six native DecidableEq equations and twelve portable constructor/index/field equations"
 
 private def refusal : PsElabError → String
   | .atDeclaration _ error => refusal error

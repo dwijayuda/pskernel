@@ -1,5 +1,45 @@
 # PSC0 v7.2 work state — M3+B
 
+## Checked scope fixes and independent additive Option bind audit
+
+Preparation [39166058244](https://github.com/dwijayuda/pskernel/actions/runs/39166058244)
+at a39eb9592c123e88fa13f131a4e837aa0a75472e cleared both unknown-local
+failures and passed the eight native layout positives plus all six native file-parser
+refusals. Both authoring jobs passed. Foundation remains incomplete: the run
+identified the expected LawfulBEq registry drift, operational WF fixture roles,
+native mutual BEq opacity, and the remaining compound-major match boundary.
+
+The selected LawfulBEq class and actual Nat dictionary leave all 3,757 logical
+declarations intact. The independent authoring job and strict manifest audit
+measured FNV 5539629570459325264, logical SHA256
+73ca5d80a65101c85d16ff55e7a81fc8c7b9fade62296c56270cdd7e9c6dfcbc,
+and surface SHA256 ed998f3648387f10e82f537d694dcc0f158caeb10c084e74bd7541f9d3c090bd.
+The final pins now record this reviewed registration change.
+
+The compound-major solver carries only previously authorized flexible IDs through
+checked refinements; protected source IDs and initially rigid locals stay rigid.
+WF fixture roles now distinguish the complete checked operational lambda prefix
+from the original source equation telescope, and retain an independently checked
+residual-result wrapper control. The wrong-function-body mutation still requires
+the exact WF-EQUATION refusal. Pinned native mutual BEq methods are partial, so
+their six expected Boolean results are independently executed; all six native
+DecidableEq equations and all twelve portable equations remain required.
+
+The new Option bind asset is the independently exported 36-declaration closure:
+414,722 bytes, SHA256
+86bbb4d5735a2ddeb8dc161cc9478789fca26f25cef9d5b43a0cf5af71aa8a29,
+nine recursor rules and 1,349 shared nodes. It is stored but not selected.
+A separate mandatory audit checks exact native Core and reducibility, the actual
+Bind/Monad/MonoBind metadata and three ordinary dictionaries, fresh kernel replay,
+all retained declarations and registration order, and the 109-to-118 public
+recursor surface. Linux also regenerates and byte-compares the source asset.
+The original 117-declaration Order audit and every frozen earlier base remain intact.
+The extended monotonicity probe runs against this proposed extension before selection.
+
+No final Option bind digests, runtime qualification, or six-exit completion are
+claimed until the corresponding mandatory CI evidence passes. All six M3+B exits
+remain OPEN; Native/M3/F1/F2/F3 must ultimately agree at one exact SHA.
+
 ## Actual file-parser controls, structural peer scope and additive bind authoring
 
 Preparation [39165573234](https://github.com/dwijayuda/pskernel/actions/runs/39165573234)

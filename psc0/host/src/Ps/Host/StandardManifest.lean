@@ -235,8 +235,10 @@ def standardSurfaceManifestSHA256 (env : PsEnvironment) : String :=
 -- replay/layout/iota/closure checks at73690ab2 / preparation39135290050.
 -- Twenty-four public replacements retain logical types and selected universes;
 -- classes, instances, defaults and approved assumptions are unchanged.
+-- Exact final-only LawfulBEq registration digest observed independently in
+-- preparation39166058244 at a39eb959. No selected Option bind asset yet.
 def standardSurfaceManifestExpectedSHA256 : String :=
-  "sha256:46e3eb3dd3c51058fe0d7985e835ebac351f35af0b553e02086c1f34f24f7efe"
+  "sha256:ed998f3648387f10e82f537d694dcc0f158caeb10c084e74bd7541f9d3c090bd"
 
 private def manifestInstanceJson (entry : PsInstanceEntry) (rank : Nat) :
     Lean.Json :=

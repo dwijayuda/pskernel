@@ -1,0 +1,38 @@
+name: PSC0 Lean 4.35 UV ABI preflight
+on:
+  push:
+    branches:
+      - feature/psc0-v72-lean435-wasm-abi-audit-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-abi:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: psc0/packages/pskernel-lean-wasm
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Check scripts
+        run: |
+          set -euo pipefail
+          node --check psc0/packages/pskernel-lean-wasm/scripts/audit-lean435-uv-abi.mjs
+          node --check psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs
+      - name: Check official C++ source ABIs at the exact Lean 4.35 pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/lean4-4.35.0"
+          git init -q "$root"
+          git -C "$root" remote add origin https://github.com/leanprover/lean4.git
+          git -C "$root" fetch --depth 1 origin eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git -C "$root" checkout -q --detach FETCH_HEAD
+          test "$(git -C "$root" rev-parse HEAD)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          node psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs "$root"
+          node psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs "$root"
+          node psc0/packages/pskernel-lean-wasm/scripts/audit-lean435-uv-abi.mjs "$root"
+          git -C "$root" diff --check

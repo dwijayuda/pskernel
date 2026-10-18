@@ -122,7 +122,16 @@ def copy (native : Lean.Environment) (selected reference : Lean.Expr) :
     Except String Lean.Expr := do
   let annotated ← transfer native 16 selected reference
   unless annotated == selected do
-    throw "recursor source annotations altered the selected logical structure"
+    -- Failure-only native authoring evidence. Do not replace the independent
+    -- alpha-equivalence guard with definitional equality to hide a changed tree.
+    throw ((Lean.Json.mkObj [
+      ("schema", Lean.toJson ("pscv0-recursor-annotation-preservation-failure/1" : String)),
+      ("selected", Lean.toJson (reprStr selected)),
+      ("reference", Lean.toJson (reprStr reference)),
+      ("annotated", Lean.toJson (reprStr annotated)),
+      ("selectedHash", Lean.toJson selected.hash),
+      ("annotatedHash", Lean.toJson annotated.hash)]).compress ++
+      ": recursor source annotations altered the selected logical structure")
   return annotated
 
 end PsV7Native.RecursorSource

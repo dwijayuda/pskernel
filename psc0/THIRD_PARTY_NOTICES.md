@@ -349,3 +349,10 @@ Design references are Lean4.35.0 at
 Copyright (c) Microsoft Corporation / Lean FRO, LLC, Apache-2.0;
 existing upstream license material is retained. Upstream tests are semantic
 references only; their illustrative axioms are not PSC0 foundation declarations.
+
+Native v7.2 control adapter design references Lean4.35.0 commit
+ eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+src/Lean/Parser/{Do,Term,Extra}.lean, src/Lean/Elab/Do/Basic.lean and
+src/Init/Notation.lean. Lean4 is Copyright Microsoft Corporation and respective
+contributors, Apache-2.0. PSC0 reuses its own typed control elaboration; the small
+native grammar adapter follows the selected upstream layout and scope invariants.

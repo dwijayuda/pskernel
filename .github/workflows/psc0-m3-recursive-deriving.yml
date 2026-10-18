@@ -212,8 +212,8 @@ jobs:
           for kind in lean ps; do
             parity_dir=../dist/m3-where/input-parity/"$kind"
             "$TSC" --ignoreConfig "$parity_dir/inputparity.ts" --outDir "$parity_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data | tee "$parity_dir/js.log"
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control | tee "$parity_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity,m3data,m3control "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
           done
           "$TSC" --ignoreConfig ../dist/m3-where/wherefixture.ts --outDir ../dist/m3-where/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf | tee ../dist/m3-where/js.log
@@ -262,7 +262,7 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-nested-inductive/rust.log
           for kind in lean ps; do
             parity_dir=../dist/m3-where/input-parity/"$kind"
-            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data
+            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity,m3data,m3control
             rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$parity_dir/rust.log"
           done
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf
@@ -303,7 +303,7 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/wasm.log
           for kind in lean ps; do
             parity_dir=../dist/m3-where/input-parity/"$kind"
-            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data | tee "$parity_dir/wasm.log"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity,m3data,m3control | tee "$parity_dir/wasm.log"
           done
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf | tee ../dist/m3-where/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq | tee ../dist/m3-nested-deriving/wasm.log

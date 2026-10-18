@@ -319,3 +319,31 @@ harness before Cargo ran. Preparation includes the producer/run ordering fix;
 the new focused integration must confirm actual P1 Rust observations. Prior
 workflow success alone is not that evidence. Source mutual WF is still refused.
 M3+B and full selected native grammar parity remain OPEN.
+
+### Native selected control syntax (preparation candidate)
+
+Pinned Lean4.35.0 Parser/Do.lean:25-37 (many1Indent/braced sequence),
+:144-184 (conditional layout and else-if), Parser/Term.lean:458-487,551-561
+(pattern lets), Init/Notation.lean (Boolean ! with operand precedence40),
+and Elab/Do/Basic.lean:190-236,720-768 (typed continuations and shared joins)
+are the reference. Tests studied: doIfLet, doTrailingAtEOI,
+doLetArrowPatExpectedType. Their broader mutation/effect forms are not imported.
+
+Lean/Control owns native do layout/optional semicolons, dangling-else indentation,
+else-if alignment and term/do conditional categories. Binding/return/action readers
+are the existing selected Ps.Syntax.Pscv0.DoRead with native term readers. Pattern
+let uses the existing matrix lowering with a caller-owned separator. Term/do
+if-let remains := only. No second effect elaborator or backend runtime is added;
+Ps.Elab.Do continues to own expected effects, early returns, joins and pattern
+scope. Ordinary native ! uses the existing shared v7 conditional lowering.
+
+The existing paired fixture adds one Boolean-input export, m3control, exercising
+pattern lets, typed monadic tuple binds, nested conditional returns, else-if,
+braced do with trailing semicolon and pattern conditionals. It compares checked
+value/equation batches and emits both source kinds to the same five targets.
+Retained runtime observers include the export; native reference observations
+remain kernel proofs. Mutation, if-let <- and missing term else remain refusals.
+This candidate also corrects the where reference proof to use full simplification
+before reflexivity: simp only did not reduce the input Boolean before the WF
+helper's equations applied. Expected outputs and compiler invariants are unchanged.
+Qualification remains pending; this is no claim of complete input parity or M3.

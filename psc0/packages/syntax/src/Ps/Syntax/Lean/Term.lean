@@ -1,5 +1,4 @@
-import Ps.Syntax.ParseLean
-import Ps.Syntax.Pscv0.TermRead
+import Ps.Syntax.Lean.Control
 
 -- Lean 4.35.0 Parser.Term.argument requires whitespace and indentation.
 -- The complete primary span includes closing delimiters; adjacent comma calls
@@ -63,26 +62,6 @@ def psLeanTermApplication (read : PsPscv0TermReader) (annotation : Bool)
   psLeanTermApplicationTail read annotation fuel head.value []
     (psSyntaxTermSpan head.value).stop head.cursor
 
-def psLeanTermConditional (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) := do
-  let keyword ← psTokenCursorExpectText cursor "if"
-  let (proofName, cursor) ← match keyword.cursor.remaining with
-    | name :: colon :: _ =>
-      if psTokenKindEq name.kind .identifier && colon.text == ":" then do
-        let name ← psParseSyntaxName keyword.cursor
-        let colon ← psTokenCursorExpectText name.cursor ":"
-        pure (some name.value, colon.cursor)
-      else pure (none, keyword.cursor)
-    | _ => pure (none, keyword.cursor)
-  let condition ← read cursor
-  let thenToken ← psTokenCursorExpectText condition.cursor "then"
-  let yes ← read thenToken.cursor
-  let elseToken ← psTokenCursorExpectText yes.cursor "else"
-  let no ← read elseToken.cursor
-  let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan no.value)
-  let value := PsSyntaxTerm.ifE proofName condition.value yes.value no.value span
-  return { value, cursor := no.cursor }
-
 def psLeanTermMatchRows (read : PsPscv0TermReader) (fuel : Nat) (anchor : PsSourcePos)
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))) := do
@@ -144,9 +123,7 @@ def psLeanTermLocal (read readType continuation : PsPscv0TermReader)
     (isHave : Bool) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   let fact ← psPscv0ReadLocal read readType cursor
-  let next ← if psTokenCursorAtText fact.cursor ";" then
-    pure (← psTokenCursorExpectText fact.cursor ";").cursor
-  else psParseProofScriptBodySeparator fact.value.span.stop fact.cursor
+  let next ← psLeanBodySeparator fact.value.span.stop fact.cursor
   let body ← continuation next
   let span := psSyntaxSpanJoin fact.value.span (psSyntaxTermSpan body.value)
   let value := if isHave then
@@ -163,12 +140,15 @@ def psLeanTermAtPrecedence (annotation : Bool) (minimum fuel : Nat) :
     let readType := psLeanTermAtPrecedence true 0 fuel
     let continuation := psLeanTermAtPrecedence annotation 0 fuel
     let primary ←
-      if psTokenCursorAtText cursor "if" then psLeanTermConditional read cursor
+      if psTokenCursorAtText cursor "if" then psLeanTermConditional read fuel cursor
+      else if psTokenCursorAtText cursor "do" then psLeanReadDo read readType fuel cursor
       else if psTokenCursorAtText cursor "match" then psLeanTermMatch read fuel false cursor
       else if psTokenCursorAtText cursor "nomatch" then psLeanTermMatch read fuel true cursor
       else if psTokenCursorAtText cursor "by" then psLeanTermProof read readType fuel cursor
       else if psTokenCursorAtText cursor "let" then
-        psLeanTermLocal read readType continuation false cursor
+        if (cursor.remaining.drop 1).head?.any (fun token => [":", ":="].contains token.text) then
+          psLeanTermLocal read readType continuation false cursor
+        else psPscv0ReadLetWithSeparator read readType continuation psLeanBodySeparator fuel cursor
       else if psTokenCursorAtText cursor "have" then
         psLeanTermLocal read readType continuation true cursor
       else if psTokenCursorAtText cursor "show" then psPscv0ReadShow read readType cursor
@@ -183,6 +163,12 @@ def psLeanTermAtPrecedence (annotation : Bool) (minimum fuel : Nat) :
         let value ← psLeanTermAtPrecedence annotation 75 fuel sign.cursor
         let span := psSyntaxSpanJoin sign.token.span (psSyntaxTermSpan value.value)
         let term := psPscv0OperatorTerm .unary "Neg.neg" "-" [value.value] span
+        pure { value := term, cursor := value.cursor }
+      else if psTokenCursorAtText cursor "!" then do
+        let sign ← psTokenCursorExpectText cursor "!"
+        let value ← psLeanTermAtPrecedence annotation 40 fuel sign.cursor
+        let span := psSyntaxSpanJoin sign.token.span (psSyntaxTermSpan value.value)
+        let term := PsSyntaxTerm.ifE none value.value (.bool false span) (.bool true span) span
         pure { value := term, cursor := value.cursor }
       else if psTokenCursorAtText cursor "¬" then do
         let sign ← psTokenCursorExpectText cursor "¬"

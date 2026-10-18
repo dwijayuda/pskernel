@@ -51,8 +51,23 @@ where
   termination_by n
   decreasing_by exact Nat.lt_succ_self k
 
-example : m3data true = 6 := by simp only [m3data, m3data.keep]; rfl
-example : m3data false = 9 := by simp only [m3data, m3data.keep]; rfl
+example : m3data true = 6 := by simp [m3data, m3data.keep]; rfl
+example : m3data false = 9 := by simp [m3data, m3data.keep]; rfl
+def m3control (flag : Bool) : UInt64 :=
+  let (left, right) : Nat × Nat := (2, 3)
+  let amount : Option Nat := do
+    let (x, y) : Nat × Nat ← Option.some (left, right)
+    if !flag then
+      if let .some n := Option.some (x + y) then
+        return n
+    else if flag then
+      return 7
+    return 11
+  let extra : Id Nat := do { let n := 1; return n; }
+  UInt64.ofNat (if let .some n := amount then n + extra else 0)
+
+example : m3control false = 6 := rfl
+example : m3control true = 8 := rfl
 end M3InputParityOracle
 
 namespace M3InputParity
@@ -82,6 +97,12 @@ private def dataLeanSource : String :=
 private def dataPsSource : String :=
   "structure ParityBox where {\n  value: Nat\n} deriving Inhabited, BEq\ninductive ParityMaybe where {\n  | none\n  | some(value: Nat)\n} deriving Inhabited, BEq\nclass Sized(A: Type) where {\n  size: A -> Nat\n}\n@[default_instance 200]\ninstance (priority := high) sizedNat: Sized Nat where {\n  size(n: Nat): Nat := n\n}\nfunction m3data(flag: Bool): UInt64 :=\n  let b := ParityBox.mk(keep(if (flag) { 6 } else { 9 }))\n  let packed := ParityMaybe.some(Sized.size(b.value))\n  UInt64.ofNat(match packed with {\n    | ParityMaybe.none => 0\n    | ParityMaybe.some value => if (b == b) { value } else { 0 }\n  })\nwhere {\n  def keep(n: Nat): Nat := match n with {\n    | 0 => 0\n    | Nat.succ k => Nat.succ(keep(k))\n  }\n  termination_by n\n  decreasing_by by { exact Nat.lt_succ_self(k) }\n}\n"
 
+private def controlLeanSource : String :=
+  "def m3control (flag : Bool) : UInt64 :=\n  let (left, right) : Nat × Nat := (2, 3)\n  let amount : Option Nat := do\n    let (x, y) : Nat × Nat ← Option.some (left, right)\n    if !flag then\n      if let .some n := Option.some (x + y) then\n        return n\n    else if flag then\n      return 7\n    return 11\n  let extra : Id Nat := do { let n := 1; return n; }\n  UInt64.ofNat (if let .some n := amount then n + extra else 0)\n"
+
+private def controlPsSource : String :=
+  "function m3control(flag: Bool): UInt64 :=\n  let (left, right): Nat × Nat := (2, 3)\n  let amount: Option Nat := do {\n    let (x, y): Nat × Nat ← Option.some((left, right))\n    if (!flag) {\n      if let .some n := Option.some(x + y) {\n        return n\n      }\n    } else {\n      if (flag) {\n        return 7\n      }\n    }\n    return 11\n  }\n  let extra: Id Nat := do {\n    let n := 1\n    return n\n  }\n  UInt64.ofNat(if let .some n := amount { n + extra } else { 0 })\n"
+
 private def checkedDeclarations (kind : PsCompilerSourceKind) (source : String) :
     Except String (List PsDeclaration) := do
   let program ← psCompilerParsePscv0 source kind
@@ -105,6 +126,8 @@ def check (root : System.FilePath) : IO Unit := do
   let native ← fromExcept (checkedDeclarations .lean leanSource)
   let proofscript ← fromExcept (checkedDeclarations .proofScript psSource)
   compareCheckedValues native proofscript
+  compareCheckedValues (← fromExcept (checkedDeclarations .lean controlLeanSource))
+    (← fromExcept (checkedDeclarations .proofScript controlPsSource))
   let grouped := "def grouped {T : Type} {first value : T} := value\n"
   compareCheckedValues (← fromExcept (checkedDeclarations .lean grouped))
     (← fromExcept (checkedDeclarations .proofScript grouped))
@@ -141,6 +164,12 @@ def check (root : System.FilePath) : IO Unit := do
       (.proofScript, "const bad: forall (T: Type), T -> T -> T := fun (T: Type) (T value: T) => value\n")] do
     ensure (!(checkedDeclarations kind text).isOk)
       "binder annotation ignored native prefix shadowing"
+  for source in [
+      "def bad : Option Nat := do\n  let mut n := 0\n  return n\n",
+      "def bad : Option Nat := do\n  if let .some n ← Option.some 1 then\n    return n\n  return 0\n",
+      "def bad : Nat := if let .some n := Option.some 1 then n\n"] do
+    ensure (!(psCompilerParsePscv0 source .lean).isOk)
+      "native control admitted unselected mutation, monadic if-let or incomplete term if"
   let provider : PsPscv0ModuleSource := {
     name := "Library", sourceKind := .lean
     source := "def library (n : Nat) : Nat := Nat.succ n\n" }
@@ -150,10 +179,10 @@ def check (root : System.FilePath) : IO Unit := do
     "mixed input module planning lost source-kind provenance"
   let request := fun kind source stem => ({
     sourceKind := kind, source, sourceName := stem ++ psCompilerSourceKindExtension kind
-    outputStem := "inputparity", exports := .selected ["m3parity", "m3data"]
+    outputStem := "inputparity", exports := .selected ["m3parity", "m3data", "m3control"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let requests := #[
-    request .lean (dataLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (dataPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
+    request .lean (dataLeanSource ++ controlLeanSource ++ leanSource ++ "theorem observed : m3parity true = 13 := by rfl\n") "native-input", request .proofScript (dataPsSource ++ controlPsSource ++ psSource ++ "theorem observed: m3parity(true) = 13 := by { rfl }\n") "proofscript-input",
     { sourceKind := .lean, source := "import Library\ndef answer : Nat := library 3\n"
       modules := [{ name := "Library", source := "function library(n: Nat): Nat := Nat.succ(n)\n" }] },
     { source := "import Library\nconst answer: Nat := library(3)\n", modules := [provider] },
@@ -189,7 +218,8 @@ def check (root : System.FilePath) : IO Unit := do
         let rows := [false, true].map fun flag => Lean.Json.mkObj [
           ("flag", Lean.toJson flag),
           ("m3parity", Lean.toJson (toString (M3InputParityOracle.m3parity flag).toNat)),
-          ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat))]
+          ("m3data", Lean.toJson (toString (M3InputParityOracle.m3data flag).toNat)),
+          ("m3control", Lean.toJson (toString (M3InputParityOracle.m3control flag).toNat))]
         IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
+  IO.println "PSCV0_M3_INPUT_PARITY: PASS native source routing, shared checked Core, universe/named/operator/scientific terms, native proofs, data/classes/instances/deriving, where/WF, pattern lets, conditional patterns and typed do control, ordered binder scope/default ownership, both mixed-module directions, official kernel, five-target emission and assurance refusals; full native term/command parity remains open"
 end M3InputParity

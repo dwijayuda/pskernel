@@ -176,7 +176,8 @@ def psPscv0ReadIfLet (read : PsPscv0TermReader) (fuel : Nat)
        (.wildcard noOpen.token.span, no.value, psSyntaxTermSpan no.value)] span
     cursor := close.cursor }
 
-def psPscv0ReadLet (read readAnnotation continuation : PsPscv0TermReader)
+def psPscv0ReadLetWithSeparator (read readAnnotation continuation : PsPscv0TermReader)
+    (separator : PsSourcePos → PsTokenCursor → Except PsParseError PsTokenCursor)
     (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   let keyword ← psTokenCursorExpectText cursor "let"
@@ -188,8 +189,8 @@ def psPscv0ReadLet (read readAnnotation continuation : PsPscv0TermReader)
     else pure (PsParseResult.mk none pattern.cursor)
   let assign ← psTokenCursorExpectText annotation.cursor ":="
   let value ← read assign.cursor
-  let separator ← psParseProofScriptBodySeparator (psSyntaxTermSpan value.value).stop value.cursor
-  let body ← continuation separator
+  let next ← separator (psSyntaxTermSpan value.value).stop value.cursor
+  let body ← continuation next
   let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan body.value)
   let term := match pattern.value with
     | .variable name => PsSyntaxTerm.letE name annotation.value value.value body.value span
@@ -199,6 +200,13 @@ def psPscv0ReadLet (read readAnnotation continuation : PsPscv0TermReader)
         | some type => .ascription value.value type (psSyntaxTermSpan value.value)
       .matchE value [(pattern, body.value, psSyntaxTermSpan body.value)] span
   return { value := term, cursor := body.cursor }
+
+-- Surface readers own separators; pattern scope and annotation ownership are shared.
+def psPscv0ReadLet (read readAnnotation continuation : PsPscv0TermReader)
+    (fuel : Nat) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  psPscv0ReadLetWithSeparator read readAnnotation continuation
+    psParseProofScriptBodySeparator fuel cursor
 
 def psPscv0MatchesTail (value : PsParseResult PsSyntaxTerm) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do

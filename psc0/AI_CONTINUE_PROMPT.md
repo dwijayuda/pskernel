@@ -59,14 +59,12 @@ deriving, both mixed-module directions, official kernel, five-target emission,
 and assurance/noncomputable refusals. Backend runtime observations are PENDING.
 Receipt: docs/PSCV0_M3_NATIVE_INPUT_B95C6293_2026-10-18.md.
 
-Preparation code child3b95a506 / run39090023014 / job117565128449
-completed FAILURE: production compiler and all independent preparation steps
-passed, but the paired fixture's two native reference proofs left reducible
-class/BEq applications after unfolding the well-founded helper. This child
-finishes those exact goals by kernel reflexivity after simp only; no compiler
-semantics, expected values, checks or proof assumptions change. The native where
-and decreasing_by path still requires successful preparation and integration.
-Fresh refs and complete logs override these checkpoints.
+Preparation where candidates3b95a506 ande31ad069 failed only the paired
+fixture's native oracle build; production compiler and independent checks passed.
+The latest candidate includes native control syntax below and corrects the
+oracle to simplify Boolean inputs before the WF equations and finish by rfl.
+All selected control and native where qualification is PENDING. Fresh refs,
+full logs and exact-SHA receipts supersede this checkpoint.
 
 **Historical P1 Rust gap:** the previous focused workflow overwrote its P1
 harness before Cargo ran. Preparation includes the producer/run ordering fix;
@@ -149,3 +147,31 @@ parallel roadmap and do not confuse C5 source reconstruction with accepted input
 Update this prompt and AI_WORK_STATE.md at every meaningful completed slice,
 including exact passed/pending evidence and next concrete work. Continue until
 M3+B exits are genuinely satisfied or a user-dependent blocker requires input.
+
+### Native selected control syntax (preparation candidate)
+
+Pinned Lean4.35.0 Parser/Do.lean:25-37 (many1Indent/braced sequence),
+:144-184 (conditional layout and else-if), Parser/Term.lean:458-487,551-561
+(pattern lets), Init/Notation.lean (Boolean ! with operand precedence40),
+and Elab/Do/Basic.lean:190-236,720-768 (typed continuations and shared joins)
+are the reference. Tests studied: doIfLet, doTrailingAtEOI,
+doLetArrowPatExpectedType. Their broader mutation/effect forms are not imported.
+
+Lean/Control owns native do layout/optional semicolons, dangling-else indentation,
+else-if alignment and term/do conditional categories. Binding/return/action readers
+are the existing selected Ps.Syntax.Pscv0.DoRead with native term readers. Pattern
+let uses the existing matrix lowering with a caller-owned separator. Term/do
+if-let remains := only. No second effect elaborator or backend runtime is added;
+Ps.Elab.Do continues to own expected effects, early returns, joins and pattern
+scope. Ordinary native ! uses the existing shared v7 conditional lowering.
+
+The existing paired fixture adds one Boolean-input export, m3control, exercising
+pattern lets, typed monadic tuple binds, nested conditional returns, else-if,
+braced do with trailing semicolon and pattern conditionals. It compares checked
+value/equation batches and emits both source kinds to the same five targets.
+Retained runtime observers include the export; native reference observations
+remain kernel proofs. Mutation, if-let <- and missing term else remain refusals.
+This candidate also corrects the where reference proof to use full simplification
+before reflexivity: simp only did not reduce the input Boolean before the WF
+helper's equations applied. Expected outputs and compiler invariants are unchanged.
+Qualification remains pending; this is no claim of complete input parity or M3.

@@ -85,265 +85,92 @@ The [M3 runtime receipt](PSCV0_M3_RUNTIME_QUALIFICATION_AND_PAIRED_PERFORMANCE_2
 Next measured work is actual-IR closure/dictionary specialization and safe recursive/direct-call lowering, preserving generic instantiation, scope, evaluation order, failure behavior, persistent representations and stack safety. No source-name special cases or unchecked Number substitution. Keep original benchmarks and add representative workload evidence rather than hiding a regression with changed iterations or budgets.
 
 
-## Current M3 checkpoint and remaining dependencies
+## Current state and evidence
 
-Main037fda4914ba30b5b8f2074e82ffbf9b0efeef0c is now the last complete
-five-gate acceptance: Native39084512384, M3 39084512415, F1 39084512357,
-F2 39084512390 and F3 39084512422 all SUCCESS. Exact artifacts and scope:
-docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md. Both attempts to retrieve the
-whole focused log failed; no measured aggregate runtime count is claimed.
+Qualified compiler/test HEAD: **b95c629380ba03638a14c708c5c584ef1b8eaf16**.
+All five exact-SHA integration gates completed SUCCESS:
+Native39090324651, M339090324683, F139090324667, F239090324693,
+F339090324659. Complete receipt:
+docs/PSCV0_M3_INTEGRATION_B95C6293_2026-10-18.md.
+Preparation39089622847/job117564131092 also passed at that exact SHA.
 
-Preparation3386891/run39084134295/job117547901808 completed SUCCESS for
-component-functional construction. Preparationade87651/run39084942848/
-job117549579617 completed SUCCESS for fixed scopes and shared source preparation.
-These later constructions are not in main037's accepted compiler/test identity.
+This qualifies source-kind routing; shared ordered binder/section annotation
+scope; native rich terms, proofs, data/classes/instances/deriving; both mixed-module
+directions; exact paired definition/equation Core comparison; official kernel;
+five-target emission and execution; and assurance/noncomputable refusals.
+The corrected P1 Rust producer/run ordering is included and the actual Rust
+step passed. The full focused log endpoint failed; no aggregate runtime count
+is claimed. Old037fda49 is historical evidence, not the latest checkpoint.
+Source mutual WF and full selected native grammar parity are still OPEN.
 
-Retained-call candidatea5287a1b50110d348303e67255ab888711931ff7,
-run39085518962/job117551185828, completed FAILURE only in the packing build.
-The new native reference theorem used decide on an opaque well-founded mutual
-definition; reduction stopped at (callFirst 7 6 2).beq 7. Production and all other
-retained foundation/WF/P1/noncomputable checks passed. The portable new probe
-did not execute. The current child proves the identical expected equality using
-simp with Lean's checked generated unfolding equations. No compiler algorithm,
-expected result, acceptance condition, assumption or budget changes. Qualification
-of this correction and the new portable probe remains pending; do not promote
-until the entire preparation passes.
+Preparation code HEAD18fe0b3e3efd6f63ee0a6d1b0d851e40882fe290:
+run39091873814/job117570152485 is IN PROGRESS. Native where helpers,
+termination_by/decreasing_by, pattern lets, if-let, Boolean ! and native typed do
+are implemented in that candidate, not yet qualified. It includes native do
+as a whitespace/indent-sensitive function argument. Do not promote until the
+whole preparation passes. Documentation-only descendants do not change the code
+qualification identity. Always refresh refs and complete jobs before writes.
 
-Complete mutual WF source construction, checked decrease evidence, exact retained-body
-equations and whole-functional runtime adaptation using the shared PSigma/PSum,
-fixed-scope, source-preparation and checked-functional owners. The current call
-analysis still needs qualification. No failed slice closes an exit.
+## Current implementation and next work
+
+- SourceKind routes .lean and .ps to their own PsSyntaxProgram parsers, then
+  shared scopes, elaboration, official checking, typed erasure, IR and targets.
+  Source text is never rewritten and no arbitrary host elaborator is invoked.
+- Scope/Binders/section variables elaborate each annotation at the preceding-name
+  prefix, following pinned Elab/Binders.lean. Group origin metadata preserves
+  receipts and selected captures. Three Lean shadowing refusals and paired Core
+  comparisons are qualified. The old invalid shadowing positives were corrected
+  with unchanged observations.
+- Native data/class/instance/deriving syntax reuses shared field and declaration
+  owners. Inferred native method parameters use expected class fields.
+- Candidate Lean/Declarations owns native local where helpers and raw
+  decreasing_by tactic sequences, reusing shared Where/PreDefinition/WF.
+- Candidate Lean/Control owns native do layout, optional/trailing semicolons,
+  dangling else and else-if. Selected bindings/returns/actions, pattern matrices,
+  expected effects and continuations stay shared. No new effect family is added.
+- One paired fixture now has three exports (m3parity, m3data, m3control) and
+  existing five-target observers. The qualifiedb95 version has the first two;
+  the third and local WF helper belong to the pending candidate.
+
+Next actions:
+1. Complete39091873814. Inspect actual diagnostics rather than guessing; retain
+   its native proof and source/Core/backend requirements. The previous candidate
+   fbcade224 built production but its native fixture attempted HAdd Nat (Id Nat).
+   Pinned Init/Control/Id marks Id implicit-reducible; the candidate explicitly
+   checks its value at Nat before addition. The earlier where proof now uses
+   full simp then rfl and compiled successfully in fbcade224.
+2. Finish the selected native source adapter audit. Source input parity is broader
+   than implementation .lean or oracle .lean coverage. Keep both grammars and all
+   assurance boundaries. Once prep passes, promote non-force and retain five gates.
+3. Complete source mutual WF with the existing retained-call, fixed-permutation,
+   typed PSigma/PSum packing and source-owned measure preparation. Current
+   PreDefinitionDispatch deliberately refuses multi-member WF components.
+4. Re-elaborate bodies under actual typed dependent callbacks in each branch.
+   Infer callback signatures from actual fix; build genuine per-callee injections
+   and decrease goals, respecting original captures/arity/returned functions.
+   Close public projections and derive exact equations from fix_eq plus checked
+   cases/funext. Independently compare retained original bodies; f=f is no runtime
+   authority. No temporary global axiom or partialDecl shortcut for total WF.
+5. Recover typed public-member execution before erasure. Inspect the complete
+   Erasure/WellFounded and Compiler/Api P1 ownership mechanisms before designing
+   this boundary; heterogeneous packed result motives cannot simply be assumed
+   to have one runtime type. Do not copy a shape-only body rewrite.
+6. Reconcile all six M3 exits and qualify one final compiler/test SHA across
+   Native, M3, F1, F2 and F3. M3+B remains OPEN. Do not start M4/C5 or relabel
+   the historical bounded M2 acceptance as full v7.2 completion.
+
+Pinned source/design references:
+docs/PSCV0_M3_NATIVE_INPUT_ROUTING_2026-10-18.md,
+docs/PSCV0_M3_RETAINED_CALL_ANALYSIS_2026-10-18.md.
+WF study: FixedParams, ArgsPacker, WF/{Main,PackMutual,Rel,Fix,Unfold};
+Fix.processSumCasesOn/processPSigmaCasesOn refines callbacks before recursive
+replacement. PSC0's existing singleton source re-elaboration preserves the same
+branch invariant. No new component source algorithm is implemented yet.
 
 ## Input parity within the existing roadmap
 
-Read docs/PSCV0_V72_INPUT_LANGUAGE_CONTRACT_2026-10-18.md. Atade87651,
-Compiler/Api.lean routes .lean through ParseLean into PsSyntaxModule, while
-Host/NativeV7.lean uses the Pscv0 PsSyntaxProgram frontend with no explicit source
-kind. ParseLean's declaration dispatch is the older def/partial-def/theorem/
-inductive/structure selection. Existing .ps qualification therefore does not
-establish .lean parity for newer scopes, strategies or mutual declarations.
-
-Close the selected M3+B input-routing/feature gap as part of its existing source
-strategy and cross-stage exits. Carry the same two-input obligation through
-M4+C/D and M5+E; do not create another roadmap or reopen the historical bounded
-M2 acceptance. Use common syntax/semantic owners and paired source fixtures,
-not a second elaborator or a text/filename workaround. Do not claim parity before
-actual .lean input traverses PSC0's checked pipeline and required backend lanes.
-
-## Current native input routing slice — qualification pending
-
-The current preparation child implements explicit v7.2 source-kind ownership
-for isolated requests and named module sources. The CLI accepts .ps and .lean
-and records the selected kind before reading source. The native adapter emits
-PsSyntaxProgram and shares scope commands, binder groups, elaboration, kernel
-checking, typed erasure, IR validation and all target emitters with .ps.
-No source printing/conversion or host Lean fallback is involved.
-
-A single paired fixture is integrated into the existing Where qualification:
-exact checked definition comparison, shadowing multi-name annotations, mixed
-module imports in both directions, official-kernel checking, five target
-emissions and common assurance/noncomputable refusals. Existing backend observers
-receive both source kinds (two native oracle values each); their execution is
-pending. Source reconstruction and broad native syntax parity remain open.
-
-Run39086069241/job117552793316 at1b1cb7fe completed FAILURE. The identical native
-mutual equation now builds using checked equations, but the portable retained-call
-fixture used non-selected braced mutual/native split explicit headers. This
-child uses v7.2 mutual/end and comma groups; the second peer's type parameter is
-explicit in both source and native control. It retains three reordered slots,
-dependent fixed values, nested lambda/let call scope, original source arity,
-returned-function exclusion and conservative underapplication assertions.
-No acceptance condition or compiler call-analysis algorithm is relaxed.
-
-Inspection also found the focused M3 Rust step wrote the noncomputable harness
-before executing the P1 harness. This child executes each harness immediately
-after generating it. Prior workflow success remains historical job evidence;
-it does not establish the overwritten P1 Rust observations. Requalification
-of that runtime lane is required. Main037fda49 remains unchanged.
-
-See PSCV0_M3_NATIVE_INPUT_ROUTING_2026-10-18.md for pinned references,
-architecture and remaining native syntax work. M3+B is OPEN.
-
-## Native term and binder-prefix correction — qualification pending
-
-Preparation2f82244c/run39087221158/job117556210481 completed FAILURE. The native
-compiler built; packing found a .ps fixture semicolon (the selected separator is
-newline), and the new native control rejected the shadowing group {T value : T}.
-The fixture also used unavailable Except.isError; the child uses !isOk.
-
-This is a real semantic finding, not just a fixture repair. Pinned Lean
-Elab/Binders.lean:136-168,208-235,423-456 expands names into binder views and
-elaborates each annotation in the preceding names' context. PSC0's earlier
-group-wide annotation cache incorrectly ignored shadowing. Shared Scope and
-Binders now process names in order. Group-origin metadata preserves the existing
-multi-name source receipt and actual ordered local IDs after scope expansion.
-Old successful outputs keep their values using valid non-shadowing names; the
-exact rejected shadowing forms remain explicit native/portable negative controls.
-The canonical v7.2 ordered telescope rule is unchanged. Earlier bounded M2 job
-success does not establish correctness of the contradicted binder interpretation.
-
-The native program now uses an owned rich term reader, sharing v7 literals,
-sort/universe nodes, operators, named-call AST, binder groups, projections/indexing
-and tactic nodes. Native application checks actual whitespace and indentation
-per Parser.Term.argument:885-897. Native conditional, match-row and tactic layout
-remain grammar-owned. ProofScript keeps comma calls, braced blocks and newline
-term separators. This is not conversion through .ps or a host compiler fallback.
-
-Shared Core comparisons now cover grouped parameters, universe inference,
-operators, named arguments and a scientific Float literal; actual native input
-proofs reach the official kernel. Five target emissions and two mixed-module
-directions remain in the existing paired fixture. Native data/class/instance/
-deriving/where/do/full-termination syntax and complete mutual WF remain open.
-No foundation, assumption, budget or runtime acceptance is relaxed. Do not
-promote until complete preparation and exact-SHA integration qualify the child.
-
-## Binder-view construction and complete prefix ownership — qualification pending
-
-43a91de8 / run39088233267 / job117559220561 failed production compilation:
-the new optional source-origin field is an explicit constructor argument in Lean.
-Both constructor sites now supply it. No semantic qualification ran on that SHA.
-
-Subsystem review also applies ordered annotation resolution to section-variable
-groups, not just declaration/lambda binders. Selected section captures retain only
-their selected origin names and IDs. Native tactic termination recognizes the
-lexer's explicit EOF token, and native command separation permits EOF without a
-final newline. These are shared syntax/scope invariants, not weakened assertions.
-The exact native/portable shadowing rejections and prior positive observations
-remain required. Main stays 037fda49; the new preparation child must qualify first.
-
-## Native term construction layout — qualification pending
-
-Preparation3897a2e2 / run39088402975 / job117559717894 failed compilation in
-the new Lean.Term module at five multiline record expressions. Shared binder,
-scope, command and retained semantic modules compiled. AST construction is now
-bound before the parse-result record throughout the affected term reader;
-no semantic or acceptance change. Qualification of the complete native term
-and ordered-binder slice remains pending. Main is still037fda49.
-
-## Native keyword ownership — qualification pending
-
-Preparation8f0950c0 / run39088579549 / job117560230257 built the native compiler
-and is continuing retained foundation checks. Do not cancel it. The next child
-also applies the existing native keyword table at application boundaries:
-native then/deriving/mutual/monotonicity cannot become ordinary arguments.
-The common ProofScript table alone does not own these native delimiters.
-This follows pinned Parser.Term.ite/argument and Parser.Command; source grammars
-remain separate and share semantic AST/elaboration. Full qualification is pending.
-
-## Retained-call checkpoint and native data adapter — 2026-10-18
-
-Preparation8f0950c0/run39088579549/job117560230257 completed with one failure:
-native then was consumed as an application argument. The correction is already
-in af9a0e31/run39088772197 (in progress). No run was canceled. All retained
-call-analysis/PSigma/PSum construction, fixed-scope, primitive/manifest/order,
-heterogeneous context, P0/WF, P1 and noncomputable steps apart from the combined
-native-input/Where step passed at8f0950c0. Source mutual WF is still refused.
-
-The current child adds the selected native data/class/instance/deriving adapter,
-shared field-header construction and attribute registration, plus one data export
-in the existing paired five-target fixture. Both handoffs are consolidated.
-Qualification is pending; main037fda49 remains unchanged. Historical focused P1
-Rust observations were not executed before the harness-order fix and must be
-requalified. Full native syntax parity, source mutual WF and M3+B remain OPEN.
-
-## Checked declaration-batch comparison — qualification pending
-
-af9a0e31/run39088772197/job117561623591 completed FAILURE only in the
-combined source/Where step: "parity fixture expected ordinary definitions".
-The native then boundary is corrected. PreDefinitionNonrecursive deliberately
-publishes both each definition and its checked eq_def theorem. The paired fixture
-now compares both matching kinds, all names, universe lists, alpha-equal types and
-actual value/proof bodies. It does not filter out equations or accept a kind/count
-mismatch. This repairs the fixture's incomplete model of the existing compiler
-batch contract, without weakening comparison or changing logical declarations.
-
-b8b9bea7/run39089323375/job117562902854 has built the new native data adapter and
-is running retained qualification; it still contains the older comparison and
-must finish normally. This child also preserves selected registrations in native
-mutual members, matching the shared attributed-command owner. No run canceled,
-foundation or budget changed. The child still needs full qualification before
-main promotion; M3+B and full native syntax parity are OPEN.
-
-## Native where and explicit decrease proofs — qualification pending
-
-b8b9bea7/run39089323375/job117562902854 completed FAILURE only at the known
-definition-only fixture comparison; production and native data oracles compiled.
-b95c6293/run39089622847/job117564131092 is running with complete definition/
-equation comparison. Do not cancel it. The current child adds native where local
-definitions, per-helper suffixes and native decreasing_by tactic sequences using
-the existing shared scope/capture/recursion/proof/runtime owners. Native by terms
-and decrease proofs share one tactic-sequence reader.
-
-The same two-source data fixture now executes a local well-founded identity
-helper with explicit Nat.lt_succ_self evidence, retaining native6/9 outputs and
-the existing backend matrix. No added workflow or foundation assumption.
-Pinned Parser.Term/Extra, Elab.Binders/MutualDef/LetRec and termination_by_where
-were studied; upstream illustrative axioms were not imported. Nested local where
-and unselected structural/monotonicity forms remain refused.
-
-This is an implemented but unqualified adapter slice, not source mutual-WF
-completion. Main037fda49 stays unchanged. Finish preparation and exact-SHA five
-gate integration, including the repaired P1 Rust lane, before any completion
-claim. Native do and other selected grammar gaps require reconciliation.
-
-## Current state and evidence
-
-Main is now b95c629380ba03638a14c708c5c584ef1b8eaf16, promoted non-force from
-037fda49 only after complete preparation succeeded. All five integration gates
-are RUNNING, not accepted yet:
-Native39090324651; M339090324683; F139090324667; F239090324693; F339090324659.
-Do not supersede or cancel healthy runs. The last five-gate accepted ancestor
-remains037fda49; see docs/PSCV0_M3_INTEGRATION_037FDA49_2026-10-18.md.
-
-Preparation b95c6293 / run39089622847 / job117564131092 is SUCCESS.
-Artifact12122063924, SHA256
-8924921c8e5c1c8df51be7e57424b2bc6bc8bdb44e89482c7ec7ddd56bac2ab7.
-The full log records PSCV0_M3_INPUT_PARITY PASS, retained-call analysis PASS,
-dependent component packing PASS, and all retained preparation steps successful.
-This covers exact definition/equation comparison, grouped binder shadow refusals,
-universe/named/operator/scientific terms, native proofs, data/classes/instances/
-deriving, both mixed-module directions, official kernel, five-target emission,
-and assurance/noncomputable refusals. Backend runtime observations are PENDING.
-Receipt: docs/PSCV0_M3_NATIVE_INPUT_B95C6293_2026-10-18.md.
-
-Preparation code child3b95a506a46c164a63d01017490fe0949d178908 /
-run39090023014 / job117565128449 is RUNNING. It adds native where helpers and
-explicit decreasing_by tactic syntax using shared recursion/proof owners.
-The same paired data export exercises a local well-founded identity helper.
-The current documentation-only descendant changes no compiler/test inputs;
-the qualification identity for this native-where code is3b95a506.
-Fresh refs and complete logs override these checkpoints.
-
-**Historical P1 Rust gap:** the previous focused workflow overwrote its P1
-harness before Cargo ran. Preparation includes the producer/run ordering fix;
-the new focused integration must confirm actual P1 Rust observations. Prior
-workflow success alone is not that evidence. Source mutual WF is still refused.
-M3+B and full selected native grammar parity remain OPEN.
-
-### Native selected control syntax (preparation candidate)
-
-Pinned Lean4.35.0 Parser/Do.lean:25-37 (many1Indent/braced sequence),
-:144-184 (conditional layout and else-if), Parser/Term.lean:458-487,551-561
-(pattern lets), Init/Notation.lean (Boolean ! with operand precedence40),
-and Elab/Do/Basic.lean:190-236,720-768 (typed continuations and shared joins)
-are the reference. Tests studied: doIfLet, doTrailingAtEOI,
-doLetArrowPatExpectedType. Their broader mutation/effect forms are not imported.
-
-Lean/Control owns native do layout/optional semicolons, dangling-else indentation,
-else-if alignment and term/do conditional categories. Binding/return/action readers
-are the existing selected Ps.Syntax.Pscv0.DoRead with native term readers. Pattern
-let uses the existing matrix lowering with a caller-owned separator. Term/do
-if-let remains := only. No second effect elaborator or backend runtime is added;
-Ps.Elab.Do continues to own expected effects, early returns, joins and pattern
-scope. Ordinary native ! uses the existing shared v7 conditional lowering.
-
-The existing paired fixture adds one Boolean-input export, m3control, exercising
-pattern lets, typed monadic tuple binds, nested conditional returns, else-if,
-braced do with trailing semicolon and pattern conditionals. It compares checked
-value/equation batches and emits both source kinds to the same five targets.
-Retained runtime observers include the export; native reference observations
-remain kernel proofs. Mutation, if-let <- and missing term else remain refusals.
-This candidate also corrects the where reference proof to use full simplification
-before reflexivity: simp only did not reduce the input Boolean before the WF
-helper's equations applied. Expected outputs and compiler invariants are unchanged.
-Qualification remains pending; this is no claim of complete input parity or M3.
+.ps/.lean inputs share selected v7.2 semantics and assurance with their respective
+grammars. M3 closes its data/recursion/source capabilities through both inputs;
+M4+C/D adds effects/contracts through both; M5+E closes full selected conformance,
+readable output and C5. There is no duplicate input-parity roadmap. The source
+adapter and historical receipts document implemented and pending distinctions.

@@ -1616,20 +1616,29 @@ theorem eliminationComputedPredEquation (n : Nat) :
 
 inductive EliminationDiagonal : Nat → Nat → Type where
   | point (n : Nat) : EliminationDiagonal n n
+  | origin : EliminationDiagonal 0 0
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``EliminationDiagonal with
+  | some (.inductInfo info) =>
+    unless info.numParams == 0 && info.numIndices == 2 do
+      throwError "native elimination fixture promoted an intended index"
+  | _ => throwError "native elimination fixture lost its inductive declaration"
 
 theorem eliminationVariableIndices (n m : Nat)
     (x : EliminationDiagonal n m) : True := by
   induction x
-  exact True.intro
+  all_goals exact True.intro
 
 theorem eliminationFixedCases (x : EliminationDiagonal 0 0) : True := by
   cases x
-  exact True.intro
+  all_goals exact True.intro
 
 theorem eliminationRepeatedCases (n : Nat)
     (x : EliminationDiagonal n n) : True := by
   cases x
-  exact True.intro
+  all_goals exact True.intro
 
 run_cmd do
   expectNativeRegisteredOwnerRefusal "fixed induction index" (← `(command|
@@ -1935,10 +1944,10 @@ private def wfBoundaryPsSource : String :=
   "structure WfBoundaryBox(n: Nat) where {\n  value: Nat\n}\n\nfunction wfBoundaryMeasure(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  WfBoundaryBox.value(p)\n\nfunction wfBoundaryPair(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n, p with {\n  | 0, _ => 0\n  | Nat.succ k, WfBoundaryBox.mk 0 => 0\n  | Nat.succ k, WfBoundaryBox.mk (Nat.succ v) =>\n    Nat.succ(wfBoundaryPair(k, WfBoundaryBox.mk(v)))\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryGeneralized(n: Nat, p: WfBoundaryBox(n)): Nat :=\n  match n with {\n  | 0 => 0\n  | Nat.succ k =>\n    match p with {\n    | WfBoundaryBox.mk 0 => 0\n    | WfBoundaryBox.mk (Nat.succ v) =>\n      Nat.succ(wfBoundaryGeneralized(k, WfBoundaryBox.mk(v)))\n    }\n  }\ntermination_by wfBoundaryMeasure(n, p)\ndecreasing_by by {\n  exact Nat.lt_succ_self(v)\n}\n\nfunction wfBoundaryComputed(n: Nat): Nat :=\n  match h: Nat.succ(n) with {\n  | 0 => 0\n  | Nat.succ 0 => 0\n  | Nat.succ (Nat.succ k) => Nat.succ(wfBoundaryComputed(k))\n  }\ntermination_by Nat.succ(n)\ndecreasing_by by {\n  exact Eq.mpr(congrArg(fun (t: Nat) => Nat.lt(Nat.succ(k), t), h),\n    Nat.lt_succ_self(Nat.succ(k)))\n}\n\nfunction wfBoundaryUserRecursor(n: Nat, impossible: n = n -> False): Nat :=\n  Nat.rec(0,\n    fun (k: Nat) (ih: Nat) => wfBoundaryUserRecursor(k,\n      fun (_: k = k) => impossible(Eq.refl(n))),\n    n, motive := fun (_: Nat) => Nat)\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(k, n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction wfBoundaryCatchAll(n: Nat, impossible: n = n -> False): Nat :=\n  match n with {\n  | x => wfBoundaryCatchAll(Nat.succ(x),\n      fun (_: Nat.succ(x) = Nat.succ(x)) => impossible(Eq.refl(n)))\n  }\ntermination_by n\ndecreasing_by by {\n  have original: Nat.lt(Nat.succ(n), n) := False.elim(impossible(Eq.refl(n)))\n  exact original\n}\n\nfunction m3wfboundaries(flag: Bool): UInt64 :=\n  let n: Nat := if (flag) { 4 } else { 2 }\n  UInt64.ofNat(wfBoundaryPair(n, WfBoundaryBox.mk(5)) +\n    10 * wfBoundaryGeneralized(n, WfBoundaryBox.mk(3)) +\n    100 * wfBoundaryComputed(n))\n"
 
 private def eliminationTargetLeanSource : String :=
-  "theorem eliminationComputedCases (n : Nat) :\n    Nat.succ n = Nat.succ n := by\n  cases (Nat.succ n)\n  all_goals rfl\n\ntheorem eliminationComputedInduction (n : Nat) :\n    Nat.succ n = Nat.succ n := by\n  induction (Nat.succ n)\n  all_goals rfl\n\ntheorem eliminationLetInduction (n : Nat) : True := by\n  let saved : Nat := n\n  induction saved\n  all_goals\n    have keep : saved = n := by rfl\n    exact True.intro\n\ndef eliminationComputedPred (n : Nat) : Nat := by\n  cases (Nat.succ n)\n  case zero => exact 0\n  case succ k => exact k\n\ntheorem eliminationComputedPredEquation (n : Nat) :\n    eliminationComputedPred n = n := by rfl\n\ninductive EliminationDiagonal : Nat → Nat → Type where\n  | point (n : Nat) : EliminationDiagonal n n\n\ntheorem eliminationVariableIndices (n m : Nat)\n    (x : EliminationDiagonal n m) : True := by\n  induction x\n  exact True.intro\n\ntheorem eliminationFixedCases (x : EliminationDiagonal 0 0) : True := by\n  cases x\n  exact True.intro\n\ntheorem eliminationRepeatedCases (n : Nat)\n    (x : EliminationDiagonal n n) : True := by\n  cases x\n  exact True.intro\n\n"
+  "theorem eliminationComputedCases (n : Nat) :\n    Nat.succ n = Nat.succ n := by\n  cases (Nat.succ n)\n  all_goals rfl\n\ntheorem eliminationComputedInduction (n : Nat) :\n    Nat.succ n = Nat.succ n := by\n  induction (Nat.succ n)\n  all_goals rfl\n\ntheorem eliminationLetInduction (n : Nat) : True := by\n  let saved : Nat := n\n  induction saved\n  all_goals\n    have keep : saved = n := by rfl\n    exact True.intro\n\ndef eliminationComputedPred (n : Nat) : Nat := by\n  cases (Nat.succ n)\n  case zero => exact 0\n  case succ k => exact k\n\ntheorem eliminationComputedPredEquation (n : Nat) :\n    eliminationComputedPred n = n := by rfl\n\ninductive EliminationDiagonal : Nat → Nat → Type where\n  | point (n : Nat) : EliminationDiagonal n n\n  | origin : EliminationDiagonal 0 0\n\ntheorem eliminationVariableIndices (n m : Nat)\n    (x : EliminationDiagonal n m) : True := by\n  induction x\n  all_goals exact True.intro\n\ntheorem eliminationFixedCases (x : EliminationDiagonal 0 0) : True := by\n  cases x\n  all_goals exact True.intro\n\ntheorem eliminationRepeatedCases (n : Nat)\n    (x : EliminationDiagonal n n) : True := by\n  cases x\n  all_goals exact True.intro\n\n"
 
 private def eliminationTargetPsSource : String :=
-  "theorem eliminationComputedCases(n: Nat):\n    Nat.succ(n) = Nat.succ(n) := by {\n  cases Nat.succ(n)\n  all_goals { rfl }\n}\n\ntheorem eliminationComputedInduction(n: Nat):\n    Nat.succ(n) = Nat.succ(n) := by {\n  induction Nat.succ(n)\n  all_goals { rfl }\n}\n\ntheorem eliminationLetInduction(n: Nat): True := by {\n  let saved: Nat := n\n  induction saved\n  all_goals {\n    have keep: saved = n := by { rfl }\n    exact True.intro\n  }\n}\n\nfunction eliminationComputedPred(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact 0\n  case succ k => exact k\n}\n\ntheorem eliminationComputedPredEquation(n: Nat):\n    eliminationComputedPred(n) = n := by { rfl }\n\ninductive EliminationDiagonal: Nat -> Nat -> Type where {\n  | point(n: Nat): EliminationDiagonal(n, n)\n}\n\ntheorem eliminationVariableIndices(n: Nat, m: Nat,\n    x: EliminationDiagonal(n, m)): True := by {\n  induction x\n  exact True.intro\n}\n\ntheorem eliminationFixedCases(x: EliminationDiagonal(0, 0)): True := by {\n  cases x\n  exact True.intro\n}\n\ntheorem eliminationRepeatedCases(n: Nat,\n    x: EliminationDiagonal(n, n)): True := by {\n  cases x\n  exact True.intro\n}\n\n"
+  "theorem eliminationComputedCases(n: Nat):\n    Nat.succ(n) = Nat.succ(n) := by {\n  cases Nat.succ(n)\n  all_goals { rfl }\n}\n\ntheorem eliminationComputedInduction(n: Nat):\n    Nat.succ(n) = Nat.succ(n) := by {\n  induction Nat.succ(n)\n  all_goals { rfl }\n}\n\ntheorem eliminationLetInduction(n: Nat): True := by {\n  let saved: Nat := n\n  induction saved\n  all_goals {\n    have keep: saved = n := by { rfl }\n    exact True.intro\n  }\n}\n\nfunction eliminationComputedPred(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact 0\n  case succ k => exact k\n}\n\ntheorem eliminationComputedPredEquation(n: Nat):\n    eliminationComputedPred(n) = n := by { rfl }\n\ninductive EliminationDiagonal: Nat -> Nat -> Type where {\n  | point(n: Nat): EliminationDiagonal(n, n)\n  | origin: EliminationDiagonal(0, 0)\n}\n\ntheorem eliminationVariableIndices(n: Nat, m: Nat,\n    x: EliminationDiagonal(n, m)): True := by {\n  induction x\n  all_goals { exact True.intro }\n}\n\ntheorem eliminationFixedCases(x: EliminationDiagonal(0, 0)): True := by {\n  cases x\n  all_goals { exact True.intro }\n}\n\ntheorem eliminationRepeatedCases(n: Nat,\n    x: EliminationDiagonal(n, n)): True := by {\n  cases x\n  all_goals { exact True.intro }\n}\n\n"
 
 private def opaqueProofWfLeanSource : String :=
   "opaque registeredOpaqueProofWf (n : Nat) : True :=\n  match n with\n  | 0 => True.intro\n  | k + 1 => registeredOpaqueProofWf (k - 1)\ntermination_by n\ndecreasing_by exact Nat.lt_succ_of_le (Nat.sub_le _ _)\n\ntheorem registeredOpaqueProofWfUse : True := registeredOpaqueProofWf 4\n"
@@ -2228,6 +2237,16 @@ def check (root : System.FilePath) : IO Unit := do
   checkCoreBoundaryControls
   checkIndependentSourcePair "tactic target generalization and induction index policy"
     eliminationTargetLeanSource eliminationTargetPsSource
+  for (kind, source) in [(PsCompilerSourceKind.lean, eliminationTargetLeanSource),
+      (.proofScript, eliminationTargetPsSource)] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    let elaborated ← fromExcept ((psElabProgramWithOrigins
+      psSelfHostProdPreludeEnvironment program).mapError psCompilerPscv0ElabError)
+    let some info := psEnvironmentFindInductive elaborated.result.environment
+        (psRootName "EliminationDiagonal")
+      | throw (IO.userError "elimination fixture lost its checked inductive metadata")
+    ensure (info.numParams == 0 && info.numIndices == 2)
+      "elimination fixture promoted an intended index"
   for (label, rule, leanText, psText) in [
       ("fixed induction index", "induction target indices must be variables",
         "theorem eliminationFixedInduction (x : EliminationDiagonal 0 0) : True := by\n  induction x\n  exact True.intro\n",

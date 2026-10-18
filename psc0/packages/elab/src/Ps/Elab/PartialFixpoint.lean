@@ -155,8 +155,13 @@ def psElabFixedpointSourceEquation (environment : PsEnvironment)
   let checked ← psElabResolvedTerm context closed.fst (some closed.snd)
   return .theoremDecl (psNameAppendStr member.name "eq_def") levels closed.snd checked.term
 
+-- An opaque source still requires the complete checked fixedpoint model.
+-- Its private model equation never asserts an unfolding equality for the
+-- opaque public constant. The outer checked source owner publishes opacity
+-- only after all model, helper and retained-body declarations have checked.
 def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsName)
-    (nextId : Nat) (members : List PsElabPreDefinition) :
+    (nextId : Nat) (members : List PsElabPreDefinition)
+    (opaqueSourceNames : List PsName := []) :
     Except PsElabError PsElabMutualBatchResult := do
   let first :: _ := members
     | throw (psElabFixedpointError "EMPTY" "fixedpoint component has no members")
@@ -165,6 +170,16 @@ def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsN
     | .fixedpoint => pure ()
     | _ => throw (psElabFixedpointError "STRATEGY"
         "every member of a recursive fixedpoint component must have the selected fixedpoint strategy")
+  let opaqueMembers := members.filter fun member =>
+    opaqueSourceNames.any (psNameEq member.name)
+  if opaqueMembers.length > 1 then
+    throw (psElabFixedpointError "PUBLICATION" "opaque fixedpoint publication requires one original main")
+  for member in opaqueMembers do
+    match member.source with
+    | .declaration _ => pure ()
+    | .localDefinition .. =>
+      throw (psElabFixedpointError "PUBLICATION" "a local helper cannot acquire an opaque main head")
+  let modelEquations := !opaqueMembers.isEmpty
   let auxiliaryName := PsName.num first.name 1
   let allNames := auxiliaryName :: members.flatMap fun member =>
     [member.name, PsName.num member.name 0, PsName.num member.name 2,
@@ -222,15 +237,22 @@ def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsN
   let publicReplacements := members.map fun member =>
     (member.peerId, PsExpr.constE member.name (levels.map PsLevel.param))
   let sourceValues := members.map fun member => psElabSubstituteLocals publicReplacements member.value
-  let wholeEquations ← (members.zip sourceValues).zipIdx.mapM fun ((member, sourceValue), index) => do
+  let modelReplacements := members.zipIdx.map fun (member, index) =>
+    (member.peerId, psElabFixedpointProjection members.length index fixedValue)
+  let equationValues := if modelEquations then
+      members.map fun member => psElabSubstituteLocals modelReplacements member.value
+    else sourceValues
+  let wholeEquations ← (members.zip equationValues).zipIdx.mapM fun ((member, sourceValue), index) => do
     let projection := PsExpr.lam (psRootName "$psc0Fix") packedType
       (psElabFixedpointProjection members.length index (.bvar 0)) .explicit
     let fixedApplication ← psElabApplyCore equation.context functional [fixedValue]
     let proof ← psElabFixedpointGlobal fixedApplication.context (psRootName "congrArg")
       [packedType, member.type, fixedValue, fixedApplication.term, projection, equation.term]
     let level ← psElabExpressionSort proof.context member.type
-    let expected := psLogicEq level member.type
-      (.constE member.name (levels.map PsLevel.param)) sourceValue
+    let left := if modelEquations then
+        psElabFixedpointProjection members.length index fixedValue
+      else .constE member.name (levels.map PsLevel.param)
+    let expected := psLogicEq level member.type left sourceValue
     let checked ← (psElabResolvedTerm proof.context proof.term (some expected)).mapError
       (.atContext ("partial_fixpoint equation " ++ psNameToString member.name))
     let value := psMetaInstantiate checked.context.metaContext checked.term
@@ -238,8 +260,12 @@ def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsN
       throw (psElabFixedpointError "EQUATION" "whole-function unfolding proof is not closed")
     return PsDeclaration.theoremDecl (PsName.num member.name 2) levels expected value
   let withWholeEquations ← psAddDeclarationList withPublic wholeEquations
-  let sourceEquations ← (members.zip sourceValues).mapM fun (member, sourceValue) =>
-    psElabFixedpointSourceEquation withWholeEquations levels member sourceValue
+  -- In the native opaque/main clique, the main has no equation getter and
+  -- a computational local helper's original equation cannot unfold that main.
+  -- Keep checked private model equations; do not invent a public bridge.
+  let sourceEquations ← if modelEquations then pure [] else
+    (members.zip sourceValues).mapM fun (member, sourceValue) =>
+      psElabFixedpointSourceEquation withWholeEquations levels member sourceValue
   let withEquations ← psAddDeclarationList withWholeEquations sourceEquations
   let implementations ← (members.zip sourceValues).mapM fun (member, sourceValue) => do
     let checked ← psElabResolvedTerm (psElabContextEmpty withEquations levels)
@@ -248,12 +274,16 @@ def psElabFixedpointFromChecked (environment : PsEnvironment) (levels : List PsN
       throw (psElabFixedpointError "BODY" "retained executable body contains an unowned peer")
     return PsDeclaration.partialDecl (PsName.num member.name 0) levels member.type checked.term
   let _ ← psAddDeclarationList withEquations implementations
-  let results := (((members.zip publicDeclarations).zip wholeEquations).zip
-    (sourceEquations.zip implementations)).zipIdx.map
-      fun ((((member, publicDeclaration), wholeEquation), (sourceEquation, implementation)), index) =>
-        ({
+  let results ← (((members.zip publicDeclarations).zip wholeEquations).zip
+    implementations).zipIdx.mapM
+      fun ((((member, publicDeclaration), wholeEquation), implementation), index) => do
+        let sourceEquation ← if modelEquations then pure [] else
+          match sourceEquations[index]? with
+          | some equation => pure [equation]
+          | none => throw (psElabFixedpointError "OWNERSHIP" "source equation roster changed")
+        return ({
           declarations := (if index == 0 then [auxiliary] else []) ++
-            [publicDeclaration, wholeEquation, sourceEquation, implementation]
+            [publicDeclaration, wholeEquation] ++ sourceEquation ++ [implementation]
           sourceInfo := [{ member.sourceInfo with owner := PsName.num member.name 0 }]
         } : PsElabDeclarationBatchResult)
   return {

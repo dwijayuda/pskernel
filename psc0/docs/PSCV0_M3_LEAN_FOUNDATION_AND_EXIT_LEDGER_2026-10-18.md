@@ -1,5 +1,63 @@
 # M3+B — approved Lean foundation and completion ledger
 
+## Core-first transition authorized on 19 October 2026 (Asia/Jakarta)
+
+The user supplied a Core-first/compiler-self-hosting execution prompt and
+authorized adapting its sequence to current evidence. This supersedes the
+earlier hold on Core/compiler-self-hosting work. Preserve the original Full
+v7.2 roadmap and all six Full M3+B exits; do not silently relabel their results.
+Begin the measured compiler capability/dependency audit now. Core completion
+must cover the actual compiler workload and independently authored Core packages,
+without waiting for unrelated advanced Full extensions.
+
+Fresh GitHub reads at 2026-10-18 23:24 UTC confirm the qualified Stage 0 line
+`psc0/pscv0-v7-native-lean-v1` remains
+`33676076bcda7b0de5ec1f9803f49b8b1d28a058`, with draft PR109 open/unmerged.
+Exact-SHA qualification is green:
+[Native39099546592](https://github.com/dwijayuda/pskernel/actions/runs/39099546592),
+[M339099546513](https://github.com/dwijayuda/pskernel/actions/runs/39099546513),
+[F139099546493](https://github.com/dwijayuda/pskernel/actions/runs/39099546493),
+[F239099546574](https://github.com/dwijayuda/pskernel/actions/runs/39099546574),
+[F339099546446](https://github.com/dwijayuda/pskernel/actions/runs/39099546446).
+The repository default `main` is an older SH/1 line; it is not this baseline.
+Core environment work will use an isolated branch from this qualified Stage 0.
+PSKernel-Core/C0 and concurrent Lean-Wasm/research branches remain separate.
+
+This preparation checkpoint preserves the in-progress Full M3 implementation.
+[Preparation39175898787](https://github.com/dwijayuda/pskernel/actions/runs/39175898787)
+at d0d6be6a5b40711e6cdc32d0e41d55e9fd31d65f compiled the shared data,
+universe/promotion, pattern and deriving owners, then stopped on two local
+`return` expressions in opaque Proof/WF command selection. This child corrects
+their local monadic ownership, retaining the exact typed Prop/WF policy.
+No new Data behavior or final Fin digest has yet been measured; final pins
+are intentionally unchanged.
+
+The preserved opaque P1 candidate checks private fixedpoint models/equations,
+publishes only the original main as opaque, preserves ordinary local helpers,
+and admits the complete original graph before substituting actual source bodies
+for ordinary execution. Any retained model representation forces complete P1
+runtime validation. Native31/37/39 controls, actual paired sources, independent
+kernel checks, absent opaque/public equations, retained abbrev equations,
+malformed-graph refusals and a seventh export are included. The focused Full
+P1 runtime matrix is now70 observations; execution remains pending CI.
+The general15-export and Data4-export matrices retain all previous values.
+
+The elimination fixture now prevents index promotion explicitly and checks
+zero parameters/two indices in native and portable metadata before testing
+repeated/fixed-index induction refusals. Separate native P0 instance/default
+instance probes preserve applicability evidence; they do not enable a portable
+attribute or registration route. New advanced Full feature work is paused
+unless the Core compiler capability inventory establishes its need.
+
+Required Core-first deliverables are the measured source capability inventory,
+Bootstrap/Core/Full dependency and metadata inclusion audit, explicit M1–M5/A–E
+mapping, genuine opt-in module/package plan, v7.2 compiler selfhost stage plan,
+and qualification/risk ledger. Profile/default changes must preserve exact
+kernel admission, approved assumptions, typed erasure/IR, module provenance
+and ordinary/verified distinctions. No profile may inherit unchecked Full
+authority. The first implementation must be an independently testable slice.
+All Full evidence remains available and accurately scoped.
+
 ## Checked source owners and dependent data candidate
 
 ### Checked elimination target candidate and build progression

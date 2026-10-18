@@ -403,7 +403,8 @@ def psElabCommandPreDefinitionRegistration
         | _ => none
       | .wellFoundedDefinition .., some .abbrevDecl
       | .fixedpointDefinition .., some .abbrevDecl => some .abbrevDecl
-      | .wellFoundedDefinition .., some .opaqueDecl => some .opaqueDecl
+      | .wellFoundedDefinition .., some .opaqueDecl
+      | .fixedpointDefinition .., some .opaqueDecl => some .opaqueDecl
       | _, _ => none
     | _ => none
 
@@ -458,15 +459,21 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     else block
   let equationExclusions := registeredMain?.toList.map (·.name)
   let opaqueProofEquationOmissions ← match registration, registeredMain? with
-    | some .opaqueDecl, some main => do
-      if !psElabPreDefinitionStrategyEq main.strategy .wellFounded then return []
-      let level ← psElabExpressionSort
-        (psElabContextEmpty state.environment block.levelNames) main.type
-      return if psLevelEquivalent level .zero then [main.name] else []
+    | some .opaqueDecl, some main =>
+      if psElabPreDefinitionStrategyEq main.strategy .wellFounded then do
+        let level ← psElabExpressionSort
+          (psElabContextEmpty state.environment block.levelNames) main.type
+        pure (if psLevelEquivalent level .zero then [main.name] else [])
+      else pure []
     | _, _ => pure []
+  let opaqueFixedpointSources := match registration, registeredMain? with
+    | some .opaqueDecl, some main =>
+      if psElabPreDefinitionStrategyEq main.strategy .fixedpoint then [main.name] else []
+    | _, _ => []
   let result ← psElabPreDefinitionBatch state.environment checkedBlock
     (some (psElabWhereWellFoundedComponent prepared))
     nonrecursiveEquations true equationExclusions opaqueProofEquationOmissions
+    opaqueFixedpointSources
   if result.members.length != block.members.length then
     throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
   let result ← match registration, registeredMain? with
@@ -491,7 +498,15 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     | some registration, some member =>
       (match registration with
         | .abbrevDecl => pure (psEnvironmentSetReducibility environment member.name .reducible)
-        | .opaqueDecl => pure environment
+        | .opaqueDecl =>
+          let recursiveFixedpoint := psElabPreDefinitionStrategyEq member.strategy .fixedpoint &&
+            (block.members.zip result.members).any fun (source, owned) =>
+              source.peerId == member.peerId && owned.declarations.any (fun declaration =>
+                match declaration with
+                | .partialDecl name .. => psNameEq name (PsName.num member.name 0)
+                | _ => false)
+          pure (if recursiveFixedpoint then
+            psEnvironmentSetReducibility environment member.name .irreducible else environment)
         | .classDecl => psElabRegisterClass environment member.name
         | .instanceDecl priority => psElabRegisterInstance environment member.name priority
         | .defaultInstanceDecl priority ordinaryPriority => do

@@ -335,6 +335,7 @@ private structure PsCompilerFixedpointRuntimeMember where
   body : PsExpr
   auxiliary : PsName
   path : List Nat
+  isOpaque : Bool := false
 
 private def psCompilerFixedpointProjectionView (levels : List PsName) :
     PsExpr → Option (PsName × List Nat)
@@ -359,30 +360,35 @@ private def psCompilerFixedpointPath (count index : Nat) : List Nat :=
 private def psCompilerFixedpointProject (path : List Nat) (value : PsExpr) : PsExpr :=
   path.foldl (fun value index => .proj (psRootName "PProd") index value) value
 
-private def psCompilerFixedpointReplacePeers
-    (members : List PsCompilerFixedpointRuntimeMember) (expression : PsExpr) : PsExpr :=
+private def psCompilerFixedpointReplacePeersWith
+    (members : List PsCompilerFixedpointRuntimeMember)
+    (replacement expression : PsExpr) : PsExpr :=
   match expression with
   | .constE name levels =>
     match members.find? (fun member =>
         psExprAlphaEq (.constE name levels) (.constE member.name (member.levels.map PsLevel.param))) with
-    | some member => psCompilerFixedpointProject member.path (.fvar 0)
+    | some member => psCompilerFixedpointProject member.path replacement
     | none => expression
   | .app fn argument =>
-    .app (psCompilerFixedpointReplacePeers members fn)
-      (psCompilerFixedpointReplacePeers members argument)
+    .app (psCompilerFixedpointReplacePeersWith members replacement fn)
+      (psCompilerFixedpointReplacePeersWith members replacement argument)
   | .lam name type body binder =>
-    .lam name (psCompilerFixedpointReplacePeers members type)
-      (psCompilerFixedpointReplacePeers members body) binder
+    .lam name (psCompilerFixedpointReplacePeersWith members replacement type)
+      (psCompilerFixedpointReplacePeersWith members replacement body) binder
   | .forallE name type body binder =>
-    .forallE name (psCompilerFixedpointReplacePeers members type)
-      (psCompilerFixedpointReplacePeers members body) binder
+    .forallE name (psCompilerFixedpointReplacePeersWith members replacement type)
+      (psCompilerFixedpointReplacePeersWith members replacement body) binder
   | .letE name type value body =>
-    .letE name (psCompilerFixedpointReplacePeers members type)
-      (psCompilerFixedpointReplacePeers members value)
-      (psCompilerFixedpointReplacePeers members body)
+    .letE name (psCompilerFixedpointReplacePeersWith members replacement type)
+      (psCompilerFixedpointReplacePeersWith members replacement value)
+      (psCompilerFixedpointReplacePeersWith members replacement body)
   | .proj typeName index value =>
-    .proj typeName index (psCompilerFixedpointReplacePeers members value)
+    .proj typeName index (psCompilerFixedpointReplacePeersWith members replacement value)
   | _ => expression
+
+private def psCompilerFixedpointReplacePeers
+    (members : List PsCompilerFixedpointRuntimeMember) (expression : PsExpr) : PsExpr :=
+  psCompilerFixedpointReplacePeersWith members (.fvar 0) expression
 
 -- Member projection paths determine the leaves. Do not flatten a member
 -- merely because its own function/result type contains a PProd.
@@ -418,6 +424,9 @@ private def psCompilerFixedpointCheckComponent
     | [member] => pure member
     | _ => throw "missing or duplicate packed member projection"
   let first :: _ := ordered | throw "empty fixedpoint component"
+  let modelEquations := ordered.any (·.isOpaque)
+  if (ordered.filter (·.isOpaque)).length > 1 then
+    throw "opaque fixedpoint component has multiple public opaque mains"
   if !psNameEq auxiliary (PsName.num first.name 1) then
     throw "fixedpoint auxiliary does not belong to the first packed member"
   let some (.definitionDecl _ levels packedType fixedValue) :=
@@ -448,8 +457,23 @@ private def psCompilerFixedpointCheckComponent
     let .constE equationName [_] := equation.head | throw "whole-function equation is not Eq"
     if !psNameEq equationName (psRootName "Eq") then throw "whole-function equation is not Eq"
     let [type, left, right] := equation.args | throw "whole-function equation arity mismatch"
-    if !psExprAlphaEq type member.type ||
-        !psExprAlphaEq left (.constE member.name (levels.map PsLevel.param)) ||
+    if !psExprAlphaEq type member.type then
+      throw "whole-function equation does not state the exact retained body"
+    if modelEquations then
+      -- The checked model equation contains the actual closed Order.fix,
+      -- never an equality justified by unfolding an opaque public constant.
+      let expectedLeft := psCompilerFixedpointProject member.path fixedValue
+      let expectedRight := psCompilerFixedpointReplacePeersWith ordered fixedValue member.body
+      let expectedLeft ← psCompilerRuntimeRestore 4096 declarations auxiliary expectedLeft
+      let expectedRight ← psCompilerRuntimeRestore 4096 declarations auxiliary expectedRight
+      let actualLeft ← psCompilerRuntimeRestore 4096 declarations auxiliary left
+      let actualRight ← psCompilerRuntimeRestore 4096 declarations auxiliary right
+      if !psExprAlphaEq actualLeft expectedLeft || !psExprAlphaEq actualRight expectedRight then
+        throw "private model equation does not state the exact retained functional"
+      if declarations.any (fun declaration =>
+          psNameEq (psDeclarationName declaration) (psNameAppendStr member.name "eq_def")) then
+        throw "opaque fixedpoint component published a source unfolding equation"
+    else if !psExprAlphaEq left (.constE member.name (levels.map PsLevel.param)) ||
         !psExprAlphaEq right member.body then
       throw "whole-function equation does not state the exact retained body"
   let entries ← ordered.mapM fun member => do
@@ -486,11 +510,20 @@ private def psCompilerOrdinaryPartialRuntimeView
       | _ => false
     match owners with
     | [owner] =>
-      let (name, publicLevels, publicType, value, fixedpoint) :=
+      let (name, publicLevels, publicType, value, isOpaque) :=
         match owner with
-        | .opaqueDecl name levels type value => (name, levels, type, value, false)
-        | .definitionDecl name levels type value => (name, levels, type, value, true)
+        | .opaqueDecl name levels type value => (name, levels, type, value, true)
+        | .definitionDecl name levels type value => (name, levels, type, value, false)
         | _ => (.anonymous, [], .sortE .zero, .sortE .zero, false)
+      let projection := psCompilerFixedpointProjectionView levels value
+      let hasWholeEquation := declarations.any fun declaration =>
+        psNameEq (psDeclarationName declaration) (PsName.num name 2)
+      let hasModelAuxiliary := declarations.any fun declaration =>
+        psNameEq (psDeclarationName declaration) (PsName.num name 1)
+      -- Any retained part of the owned P1 representation forces the full
+      -- model check. Its failure never retries the inhabited-body P0 path.
+      let fixedpoint := !isOpaque || projection.isSome || hasWholeEquation ||
+        hasModelAuxiliary
       if !psCompilerRuntimeLevelsEq levels publicLevels ||
           !psExprAlphaEq type publicType then
         throw (.normalization "PSCV0-PARTIAL: private implementation/type mismatch")
@@ -500,9 +533,15 @@ private def psCompilerOrdinaryPartialRuntimeView
       if fixedpoint then
         if !psCompilerRuntimeClosed type || !psCompilerRuntimeClosed body then
           throw (.normalization "PSCV0-FIXPOINT-RUNTIME: retained source body is not closed")
-        let some (auxiliary, path) := psCompilerFixedpointProjectionView levels value
+        let some (auxiliary, path) := projection
           | throw (.normalization "PSCV0-FIXPOINT-RUNTIME: public value is not an exact packed projection")
-        members := members ++ [{ name, levels, type, body, auxiliary, path }]
+        members := members ++ [{ name, levels, type, body, auxiliary, path, isOpaque }]
+      else
+        -- Both P0 source producers close the independently inhabited result
+        -- over the actual nonempty function telescope.
+        match value with
+        | .lam .. => pure ()
+        | _ => throw (.normalization "PSCV0-PARTIAL: opaque logical owner lost its inhabited function closure")
     | _ => throw (.normalization "PSCV0-PARTIAL: missing unique opaque logical owner")
   let auxiliaries := members.foldl (fun names member =>
     if names.any (fun name => psNameEq name member.auxiliary) then names

@@ -667,7 +667,8 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
     (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer)
     (nonrecursiveEquations : Bool := true) (structuralEquations : Bool := true)
     (equationExclusions : List PsName := [])
-    (opaqueProofEquationOmissions : List PsName := []) :
+    (opaqueProofEquationOmissions : List PsName := [])
+    (opaqueFixedpointSources : List PsName := []) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   if nonrecursive then
     let [member] := members
@@ -679,7 +680,7 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
       return ← psElabPreDefinitionNonrecursive environment levels member
         (nonrecursiveEquations && !equationExclusions.any (psNameEq member.name))
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .fixedpoint) then
-    return ← psElabFixedpointFromChecked environment levels nextId members
+    return ← psElabFixedpointFromChecked environment levels nextId members opaqueFixedpointSources
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
     if !members.all (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
       throw (.data "PSCV0-MUTUAL-WF: well-founded strategy does not own the complete component")
@@ -723,7 +724,8 @@ def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : 
     (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer)
     (nonrecursiveEquations : Bool := true) (structuralEquations : Bool := true)
     (equationExclusions : List PsName := [])
-    (opaqueProofEquationOmissions : List PsName := []) :
+    (opaqueProofEquationOmissions : List PsName := [])
+    (opaqueFixedpointSources : List PsName := []) :
     Except PsElabError PsElabPreDefinitionStaging := do
   if remaining.isEmpty then return state
   match fuel with
@@ -747,6 +749,7 @@ def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : 
       !((graph.find? (fun edge => edge.fst == seed.peerId)).map (·.snd) |>.getD []).contains seed.peerId
     let result ← psElabPreDefinitionDispatch state.environment levels nextId members nonrecursive wellFounded
       nonrecursiveEquations structuralEquations equationExclusions opaqueProofEquationOmissions
+      opaqueFixedpointSources
     if result.members.length != members.length then
       throw (psElabPreDefinitionError "OWNERSHIP" "consumer changed component member ownership")
     let environment ← psAddDeclarationList state.environment result.batch.declarations
@@ -758,15 +761,25 @@ def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : 
     psElabPreDefinitionComponents fuel levels nextId allMembers graph
       (remaining.filter (fun member => !ids.contains member.peerId)) next wellFounded
       nonrecursiveEquations structuralEquations equationExclusions opaqueProofEquationOmissions
+      opaqueFixedpointSources
 
 def psElabPreDefinitionBatch (environment : PsEnvironment)
     (block : PsElabPreDefinitionBlock)
     (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer := none)
     (nonrecursiveEquations : Bool := true) (structuralEquations : Bool := true)
     (equationExclusions : List PsName := [])
-    (opaqueProofEquationOmissions : List PsName := []) :
+    (opaqueProofEquationOmissions : List PsName := [])
+    (opaqueFixedpointSources : List PsName := []) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   let context ← psElabPreDefinitionValidate environment block
+  if opaqueFixedpointSources.length > 1 then
+    throw (psElabPreDefinitionError "PUBLICATION" "opaque fixedpoint publication requires one original main")
+  for name in opaqueFixedpointSources do
+    let [member] := block.members.filter (fun member => psNameEq member.name name)
+      | throw (psElabPreDefinitionError "PUBLICATION" "opaque fixedpoint request has no unique source member")
+    match member.source, member.strategy with
+    | .declaration _, .fixedpoint => pure ()
+    | _, _ => throw (psElabPreDefinitionError "PUBLICATION" "opaque fixedpoint request changed its source strategy")
   let graph := psElabPreDefinitionGraphFor block.members
   let staged ← psElabPreDefinitionComponents block.members.length block.levelNames
     context.localContext.nextId block.members graph block.members {
@@ -774,7 +787,7 @@ def psElabPreDefinitionBatch (environment : PsEnvironment)
       declarations := []
       completed := []
       members := [] } wellFounded nonrecursiveEquations structuralEquations equationExclusions
-      opaqueProofEquationOmissions
+      opaqueProofEquationOmissions opaqueFixedpointSources
   let members ← block.members.mapM fun member => do
     let some result := staged.members.find? (fun result => result.fst == member.peerId)
       | throw (psElabPreDefinitionError "OWNERSHIP" "final batch lost a source member")

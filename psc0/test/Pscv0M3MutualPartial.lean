@@ -195,6 +195,54 @@ run_cmd do
       throwError "Nonempty-only P0 oracle lost its exact approved choice closure: {name}: {axioms}"
   Lean.logInfo "PSCV0_M3_P0_NONEMPTY_NATIVE: PASS opaque producer entry and approved Classical.choice closure"
 
+class P0Registered (n : Nat) where
+  value : Nat
+
+instance p0RegisteredInhabited (n : Nat) : Inhabited (P0Registered n) where
+  default := P0Registered.mk 0
+
+@[instance] partial def p0Registered (n : Nat) : P0Registered n :=
+  match n with
+  | 0 => P0Registered.mk 31
+  | k + 1 => P0Registered.mk (Nat.succ (P0Registered.value (p0Registered k)))
+
+def p0RegisteredUse : P0Registered 3 := inferInstance
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``p0Registered with
+  | some (.opaqueInfo _) => pure ()
+  | _ => throwError "native registered P0 lost its logical opacity"
+  unless (environment.find? ``p0RegisteredUse).isSome do
+    throwError "native registered P0 did not synthesize its selected class"
+
+@[default_instance 200] partial def p0RegisteredDefault (n : Nat) : P0Registered n :=
+  match n with
+  | 0 => P0Registered.mk 41
+  | k + 1 => P0Registered.mk (Nat.succ (P0Registered.value (p0RegisteredDefault k)))
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``p0RegisteredDefault with
+  | some (.opaqueInfo _) => pure ()
+  | _ => throwError "native default-instance P0 lost its logical opacity"
+  let defaults ← Lean.Meta.getDefaultInstances ``P0Registered
+  unless defaults.any (fun entry =>
+      entry.1 == ``p0RegisteredDefault && entry.2 == 200) do
+    throwError "native default-instance P0 lost its actual registration"
+
+class P0RegisteredProof : Prop where
+  proof : True
+
+@[default_instance 210] def p0RegisteredProofDefault : P0RegisteredProof :=
+  P0RegisteredProof.mk True.intro
+
+run_cmd do
+  let environment ← Lean.getEnv
+  match environment.find? ``p0RegisteredProofDefault with
+  | some (.defnInfo _) => pure ()
+  | _ => throwError "a default-instance attribute changed the native def declaration kind"
+
 end M3MutualPartialOracle
 
 namespace M3MutualPartial
@@ -872,6 +920,12 @@ def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "mutual qualification requires the pinned Lean"
   checkClassicalFoundation
+  ensure (M3MutualPartialOracle.P0Registered.value
+      M3MutualPartialOracle.p0RegisteredUse == 34)
+    "native registered P0 did not execute its actual recursive body"
+  ensure (M3MutualPartialOracle.P0Registered.value
+      (M3MutualPartialOracle.p0RegisteredDefault 3) == 44)
+    "native default-instance P0 did not execute its actual recursive body"
   checkParserRefusals
   let expectedOrigins ← checkConstruction
   let selected := checks

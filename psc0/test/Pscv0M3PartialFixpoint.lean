@@ -128,6 +128,82 @@ def abbrevOutput (flag : Bool) : UInt64 :=
   let n := if flag then 4 else 3
   UInt64.ofNat (10 * auditP1Abbrev n + n)
 
+opaque auditP1Opaque (n : Nat) : Nat :=
+  match n with
+  | 0 => 31
+  | k + 1 => auditP1Opaque k
+partial_fixpoint
+
+abbrev auditP1AbbrevWhere (n : Nat) : Nat := loop n
+partial_fixpoint
+where
+  loop (n : Nat) : Nat :=
+    match n with
+    | 0 => 37
+    | k + 1 => auditP1AbbrevWhere k
+  partial_fixpoint
+
+opaque auditP1OpaqueWhere (n : Nat) : Nat := loop n
+partial_fixpoint
+where
+  loop (n : Nat) : Nat :=
+    match n with
+    | 0 => 39
+    | k + 1 => auditP1OpaqueWhere k
+  partial_fixpoint
+
+theorem auditP1AbbrevWhereEquation (n : Nat) :
+    auditP1AbbrevWhere n = auditP1AbbrevWhere.loop n :=
+  auditP1AbbrevWhere.eq_def n
+
+theorem auditP1AbbrevWhereLoopEquation (n : Nat) :
+    auditP1AbbrevWhere.loop n =
+      (match n with | 0 => 37 | k + 1 => auditP1AbbrevWhere k) :=
+  auditP1AbbrevWhere.loop.eq_def n
+
+run_meta do
+  for name in [``auditP1Opaque, ``auditP1OpaqueWhere] do
+    match ← Lean.getConstInfo name with
+    | .opaqueInfo _ => pure ()
+    | _ => throwError "native P1 main lost its opaque declaration kind: {name}"
+    unless (← Lean.getReducibilityStatus name) == .irreducible do
+      throwError "native P1 opaque main changed its reducibility metadata: {name}"
+    unless (← Lean.Meta.getUnfoldEqnFor? name).isNone do
+      throwError "native P1 opaque main acquired an unfolding equation: {name}"
+  for name in [``auditP1AbbrevWhere, ``auditP1AbbrevWhere.loop,
+      ``auditP1OpaqueWhere.loop] do
+    match ← Lean.getConstInfo name with
+    | .defnInfo _ => pure ()
+    | _ => throwError "native P1 local helper or abbrev changed its declaration kind: {name}"
+  unless (← Lean.getReducibilityStatus ``auditP1AbbrevWhere) == .reducible do
+    throwError "native P1 where abbrev lost its reducible status"
+  let refused ← Lean.withoutModifyingEnv do
+    try
+      let _ ← Lean.Meta.getUnfoldEqnFor? ``auditP1OpaqueWhere.loop
+      pure false
+    catch error =>
+      let message ← error.toMessageData.toString
+      unless message.startsWith "failed to generate unfold theorem for" do
+        throwError "native opaque P1 helper failed at a different boundary: {message}"
+      pure true
+  unless refused do
+    throwError "native opaque P1 helper acquired an original-source unfolding equation"
+
+/-- error: Unknown constant `M3PartialFixpointOracle.auditP1Opaque.eq_def` -/
+#guard_msgs (error, drop warning, substring := true) in
+#check auditP1Opaque.eq_def
+
+/-- error: Could not prove -/
+#guard_msgs (error, drop warning, substring := true) in
+opaque auditP1OpaqueInspection (n : Nat) : Nat :=
+  auditP1OpaqueInspection n + 1
+partial_fixpoint
+
+def opaqueOutput (flag : Bool) : UInt64 :=
+  let n := if flag then 4 else 3
+  UInt64.ofNat (10 * (10000 * auditP1Opaque n +
+    100 * auditP1AbbrevWhere n + auditP1OpaqueWhere n) + n)
+
 universe u
 
 def generic {A : Type u} (seed : A) (n : Nat) : A :=
@@ -223,7 +299,10 @@ run_cmd do
       ``generic, ``sectionValue, ``dependent, ``genericEquation, ``dependentEquation,
       ``first, ``bad, ``riBad, ``fixed, ``auditOptionBind,
       ``auditOptionBind.eq_def, ``auditOptionBindEquation,
-      ``auditP1Abbrev, ``auditP1Abbrev.eq_def, ``auditP1AbbrevEquation] do
+      ``auditP1Abbrev, ``auditP1Abbrev.eq_def, ``auditP1AbbrevEquation,
+      ``auditP1Opaque, ``auditP1AbbrevWhere, ``auditP1AbbrevWhere.loop,
+      ``auditP1OpaqueWhere, ``auditP1OpaqueWhere.loop,
+      ``auditP1AbbrevWhereEquation, ``auditP1AbbrevWhereLoopEquation] do
     let axioms ← Lean.collectAxioms name
     unless axioms.contains ``Classical.choice &&
         axioms.all (fun axiomName => axiomName == ``propext ||
@@ -301,8 +380,25 @@ private def registeredAbbrevRuntimeSource : String :=
   registeredAbbrevPsSource ++
   "function m3p1abbrev(flag: Bool): UInt64 := {\n  let n: Nat := if (flag) { 4 } else { 3 }\n  UInt64.ofNat(10 * auditP1Abbrev(n) + n)\n}\n"
 
+private def registeredOpaqueLeanSource : String :=
+  "opaque auditP1Opaque (n : Nat) : Nat :=\n  match n with\n  | 0 => 31\n  | k + 1 => auditP1Opaque k\npartial_fixpoint\n\nabbrev auditP1AbbrevWhere (n : Nat) : Nat := loop n\npartial_fixpoint\nwhere\n  loop (n : Nat) : Nat :=\n    match n with\n    | 0 => 37\n    | k + 1 => auditP1AbbrevWhere k\n  partial_fixpoint\n\nopaque auditP1OpaqueWhere (n : Nat) : Nat := loop n\npartial_fixpoint\nwhere\n  loop (n : Nat) : Nat :=\n    match n with\n    | 0 => 39\n    | k + 1 => auditP1OpaqueWhere k\n  partial_fixpoint\n\ntheorem auditP1AbbrevWhereEquation (n : Nat) :\n    auditP1AbbrevWhere n = auditP1AbbrevWhere.loop n :=\n  auditP1AbbrevWhere.eq_def n\n\ntheorem auditP1AbbrevWhereLoopEquation (n : Nat) :\n    auditP1AbbrevWhere.loop n =\n      (match n with | 0 => 37 | k + 1 => auditP1AbbrevWhere k) :=\n  auditP1AbbrevWhere.loop.eq_def n\n\n"
+
+private def registeredOpaquePsSource : String :=
+  "opaque auditP1Opaque(n: Nat): Nat :=\n  match n with { | 0 => 31 | k + 1 => auditP1Opaque(k) }\npartial_fixpoint\n\nabbrev auditP1AbbrevWhere(n: Nat): Nat := loop(n)\npartial_fixpoint\nwhere {\n  def loop(n: Nat): Nat :=\n    match n with { | 0 => 37 | k + 1 => auditP1AbbrevWhere(k) }\n  partial_fixpoint\n}\n\nopaque auditP1OpaqueWhere(n: Nat): Nat := loop(n)\npartial_fixpoint\nwhere {\n  def loop(n: Nat): Nat :=\n    match n with { | 0 => 39 | k + 1 => auditP1OpaqueWhere(k) }\n  partial_fixpoint\n}\n\ntheorem auditP1AbbrevWhereEquation(n: Nat):\n  Eq(auditP1AbbrevWhere(n), auditP1AbbrevWhere.loop(n)) :=\n  by { exact auditP1AbbrevWhere.eq_def(n) }\n\ntheorem auditP1AbbrevWhereLoopEquation(n: Nat):\n  Eq(auditP1AbbrevWhere.loop(n),\n    match n with { | 0 => 37 | k + 1 => auditP1AbbrevWhere(k) }) :=\n  by { exact auditP1AbbrevWhere.loop.eq_def(n) }\n"
+
+private def registeredOpaqueLeanRefusal : String :=
+  "opaque auditP1OpaqueInspection (n : Nat) : Nat :=\n  auditP1OpaqueInspection n + 1\npartial_fixpoint\n"
+
+private def registeredOpaquePsRefusal : String :=
+  "opaque auditP1OpaqueInspection(n: Nat): Nat :=\n  auditP1OpaqueInspection(n) + 1\npartial_fixpoint\n"
+
+private def registeredOpaqueRuntimeSource : String :=
+  registeredOpaquePsSource ++
+  "function m3p1opaque(flag: Bool): UInt64 := {\n  let n: Nat := if (flag) { 4 } else { 3 }\n  UInt64.ofNat(10 * (10000 * auditP1Opaque(n) +\n    100 * auditP1AbbrevWhere(n) + auditP1OpaqueWhere(n)) + n)\n}\n"
+
 private def source : String :=
   definitionsSource ++ extendedSource ++ optionBindRuntimeSource ++ registeredAbbrevRuntimeSource ++
+  registeredOpaqueRuntimeSource ++
   "function m3p1generic(flag: Bool): UInt64 := {\n let n: Nat := if (flag) { 4 } else { 3 }\n let bound: Nat := if (flag) { 7 } else { 5 }\n UInt64.ofNat(p1Generic(if (flag) { 11 } else { 13 }, n) + 100 * p1Scoped(if (flag) { 17 } else { 19 }, n) + 10000 * Fin.val(p1Dependent(bound, n, Fin.mk(bound, Nat.lt_succ_self(bound))))) }\n" ++
   "function m3p1countdown(flag: Bool): UInt64 := UInt64.ofNat(p1Countdown(if (flag) { 17 } else { 29 }, if (flag) { 4 } else { 3 }))\n" ++
   "function m3p1option(flag: Bool): UInt64 := UInt64.ofNat(match p1Option(if (flag) { 37 } else { 43 }, if (flag) { 3 } else { 4 }) with { | Option.none => 997 | Option.some value => value + 5 })\n" ++
@@ -328,7 +424,8 @@ private def exports : List (String × (Bool → UInt64)) :=
    ("m3p1mutual", M3PartialFixpointOracle.mutualOutput),
    ("m3p1generic", M3PartialFixpointOracle.genericOutput),
    ("m3p1bind", M3PartialFixpointOracle.bindOutput),
-   ("m3p1abbrev", M3PartialFixpointOracle.abbrevOutput)]
+   ("m3p1abbrev", M3PartialFixpointOracle.abbrevOutput),
+   ("m3p1opaque", M3PartialFixpointOracle.opaqueOutput)]
 
 private def binderNames : PsExpr → List String
   | .forallE name _ body _ => psNameToString name :: binderNames body
@@ -766,6 +863,268 @@ private def checkRegisteredAbbrev (prelude : Lean.Kernel.Environment) : IO Unit 
     | .ok _ => throw (IO.userError "registered P1 abbrev bypassed checked monotonicity")
   IO.println "PSCV0_M3_P1_ABBREV: PASS paired sources, native kind/reducibility, exact checked equations, closed actual body, private companions, exposed source interface, official kernel and strict monotonicity refusal"
 
+private def isMissingRegisteredEquation (name : PsName) : PsElabError → Bool
+  | .atDeclaration _ cause | .atContext _ cause =>
+      isMissingRegisteredEquation name cause
+  | .unknownName actual => psNameEq actual name
+  | .scope message => message == ("unknown name " ++ psNameToString name)
+  | _ => false
+
+private def checkRegisteredOpaqueNegatives (prelude : Lean.Kernel.Environment)
+    (prepared : PsCompilerAdmissionReadyModule) : IO Unit := do
+  let name := psRootName "auditP1Opaque"
+  let auxiliary := PsName.num name 1
+  let implementationName := PsName.num name 0
+  let wholeName := PsName.num name 2
+  let some (.opaqueDecl _ levels type _) := prepared.declarations.find? (fun declaration =>
+      psNameEq (psDeclarationName declaration) name)
+    | throw (IO.userError "opaque P1 negative lost its genuine opaque source owner")
+  let some (.definitionDecl _ auxiliaryLevels auxiliaryType fixedValue) :=
+      prepared.declarations.find? (fun declaration =>
+        psNameEq (psDeclarationName declaration) auxiliary)
+    | throw (IO.userError "opaque P1 negative lost its genuine checked model")
+  let some (.theoremDecl _ _ wholeType _) := prepared.declarations.find? (fun declaration =>
+      psNameEq (psDeclarationName declaration) wholeName)
+    | throw (IO.userError "opaque P1 negative lost its private model equation")
+  let .constE _ [sort] := (psReduceAppView wholeType).head
+    | throw (IO.userError "opaque P1 negative lost the equality universe")
+  ensure (psElabMutualLevelNamesEqual levels auxiliaryLevels &&
+    psExprAlphaEq type auxiliaryType)
+    "opaque singleton model changed its original header"
+  let .forallE binder domain _ mode := type
+    | throw (IO.userError "opaque singleton lost its genuine function telescope")
+  let independentValue := PsExpr.lam binder domain (.lit (.natural 0)) mode
+  let malformedProjection := prepared.declarations.map fun declaration =>
+    match declaration with
+    | .opaqueDecl actual declarationLevels declarationType _ =>
+      if psNameEq actual name then
+        .opaqueDecl actual declarationLevels declarationType independentValue
+      else declaration
+    | _ => declaration
+  checkOfficial prelude { prepared with declarations := malformedProjection }
+    "opaque-fixedpoint-malformed-projection"
+  expectRuntimeRefusal malformedProjection
+    "PSCV0-FIXPOINT-RUNTIME: public value is not an exact packed projection"
+  expectRuntimeRefusal (prepared.declarations.filter (fun declaration =>
+    !psNameEq (psDeclarationName declaration) wholeName))
+    "PSCV0-FIXPOINT-RUNTIME: missing unique checked whole-function equation"
+  -- Keep the actual model auxiliary while damaging both public locator and
+  -- equation. Its remaining evidence must force P1 validation, never P0.
+  expectRuntimeRefusal (malformedProjection.filter (fun declaration =>
+    !psNameEq (psDeclarationName declaration) wholeName))
+    "PSCV0-FIXPOINT-RUNTIME: public value is not an exact packed projection"
+  let changedKind := prepared.declarations.map fun declaration =>
+    match declaration with
+    | .opaqueDecl actual declarationLevels declarationType value =>
+      if psNameEq actual name then
+        .definitionDecl actual declarationLevels declarationType value
+      else declaration
+    | _ => declaration
+  checkOfficial prelude { prepared with declarations := changedKind }
+    "opaque-fixedpoint-changed-public-kind"
+  expectRuntimeRefusal changedKind
+    "PSCV0-FIXPOINT-RUNTIME: whole-function equation does not state the exact retained body"
+  let self := PsExpr.constE name (levels.map PsLevel.param)
+  let modelEquality := psLogicEq sort type fixedValue fixedValue
+  let modelProof := psExprApplyMany
+    (.constE (psNameAppendStr (psRootName "Eq") "refl") [sort]) [type, fixedValue]
+  let changedFunctional := prepared.declarations.map fun declaration =>
+    match declaration with
+    | .partialDecl actual .. =>
+      if psNameEq actual implementationName then
+        .partialDecl actual levels type self
+      else declaration
+    | .theoremDecl actual .. =>
+      if psNameEq actual wholeName then
+        .theoremDecl actual levels modelEquality modelProof
+      else declaration
+    | _ => declaration
+  checkOfficial prelude { prepared with declarations := changedFunctional }
+    "opaque-fixedpoint-true-model-equation-mismatched-functional"
+  expectRuntimeRefusal changedFunctional
+    "PSCV0-FIXPOINT-RUNTIME: retained source bodies do not reconstruct the checked fixedpoint functional"
+  let helper := psNameAppendStr (psRootName "auditP1OpaqueWhere") "loop"
+  expectRuntimeRefusal (prepared.declarations.filter (fun declaration =>
+    !psNameEq (psDeclarationName declaration) (PsName.num helper 0)))
+    "PSCV0-FIXPOINT-RUNTIME: missing or duplicate packed member projection"
+  IO.println "PSCV0_M3_P1_OPAQUE_ADAPTER: PASS kernel-valid malformed projection, changed public kind and true-model equation mismatch; missing model equation, combined locator/equation damage and incomplete source-helper roster refused"
+
+private def checkRegisteredOpaque (prelude : Lean.Kernel.Environment) : IO Unit := do
+  let singletonName := psRootName "auditP1Opaque"
+  let abbrevName := psRootName "auditP1AbbrevWhere"
+  let opaqueName := psRootName "auditP1OpaqueWhere"
+  let members : List (PsName × PsName × List Nat × Bool × Bool) :=
+    [(singletonName, singletonName, [], true, true),
+     (abbrevName, abbrevName, [0], false, false),
+     (psNameAppendStr abbrevName "loop", abbrevName, [1], false, false),
+     (opaqueName, opaqueName, [0], true, true),
+     (psNameAppendStr opaqueName "loop", opaqueName, [1], false, true)]
+  let auxiliaries := [singletonName, abbrevName, opaqueName].map fun name => PsName.num name 1
+  for (kind, text) in [(PsCompilerSourceKind.lean, registeredOpaqueLeanSource),
+      (.proofScript, registeredOpaquePsSource)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    let compiled ← fromExcept ((psElabProgramWithOrigins
+      psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)
+    let environment := compiled.result.environment
+    ensure ((compiled.result.declarations.filter (fun declaration =>
+        match declaration with | .partialDecl .. => true | _ => false)).length == 5)
+      "registered P1 singleton or where component lost an actual executable member"
+    ensure (compiled.exposedNames.length == 1 &&
+      compiled.exposedNames.any (psNameEq abbrevName))
+      "registered P1 publication exposed more than the written abbrev main"
+    ensure (match psEnvironmentReducibility environment abbrevName with
+      | .reducible => true | _ => false)
+      "registered P1 where abbrev lost its native reducibility"
+    for (name, owner, path, isOpaque, modelEquations) in members do
+      let auxiliary := PsName.num owner 1
+      let implementationName := PsName.num name 0
+      let wholeName := PsName.num name 2
+      let sourceEquationName := psNameAppendStr name "eq_def"
+      let some declaration := psEnvironmentFind environment name
+        | throw (IO.userError "registered P1 source declaration is missing")
+      let (levels, type, value) ← match declaration with
+        | .opaqueDecl _ levels type value => do
+          ensure isOpaque "registered P1 helper inherited the main's opaque kind"
+          pure (levels, type, value)
+        | .definitionDecl _ levels type value => do
+          ensure (!isOpaque) "registered P1 opaque main lost its original kind"
+          pure (levels, type, value)
+        | _ => throw (IO.userError "registered P1 source changed its declaration kind")
+      ensure (levels.isEmpty && binderNames type == ["n"] &&
+        psExprAlphaEq value (project path (.constE auxiliary [])))
+        "registered P1 changed its source header or canonical checked component projection"
+      if isOpaque then
+        ensure (match psEnvironmentReducibility environment name with
+          | .irreducible => true | _ => false)
+          "registered P1 opaque main lost native irreducibility"
+        ensure (!psDefEqReadOnlyWithEnv environment psMetaEmpty psLocalEmpty
+          (.app (.constE name []) (.lit (.natural 2)))
+          (.lit (.natural (if psNameEq name singletonName then 31 else 39))))
+          "registered P1 opacity became a defining source equation"
+      let some (.partialDecl _ bodyLevels bodyType body) :=
+          psEnvironmentFind environment implementationName
+        | throw (IO.userError "registered P1 lost its original recursive source body")
+      let called := if psNameEq name singletonName then singletonName else
+        if psNameEq name owner then psNameAppendStr owner "loop" else owner
+      ensure (psElabMutualLevelNamesEqual levels bodyLevels &&
+        psExprAlphaEq type bodyType && !psExprHasUnresolvedMeta body &&
+        (psExprFVarIds body).isEmpty && psExprHasConst called body)
+        "registered P1 body lost its exact type, closure or original main/helper call"
+      let some (.definitionDecl _ auxiliaryLevels packedType fixedValue) :=
+          psEnvironmentFind environment auxiliary
+        | throw (IO.userError "registered P1 lost its checked ordinary model auxiliary")
+      let fixed := psReduceAppView fixedValue
+      let .constE fixedName [_] := fixed.head
+        | throw (IO.userError "registered P1 model lost its exact Order.fix head")
+      let [carrier, _order, functional, _monotonicity] := fixed.args
+        | throw (IO.userError "registered P1 model lost its four checked arguments")
+      let componentNames := (members.filter fun (_, actualOwner, _, _, _) =>
+        psNameEq actualOwner owner).map fun (actual, _, _, _, _) => actual
+      ensure (psNameEq fixedName (orderName "fix") &&
+        psElabMutualLevelNamesEqual levels auxiliaryLevels &&
+        psExprAlphaEq carrier packedType && !psExprHasUnresolvedMeta fixedValue &&
+        (psExprFVarIds fixedValue).isEmpty &&
+        !(componentNames.any fun actual => psExprHasConst actual functional))
+        "registered P1 model retained an unowned public peer or unresolved construction"
+      let some (.theoremDecl _ wholeLevels wholeType wholeProof) :=
+          psEnvironmentFind environment wholeName
+        | throw (IO.userError "registered P1 lost its checked whole-model equation")
+      let equation := psReduceAppView wholeType
+      let .constE equalityName [_] := equation.head
+        | throw (IO.userError "registered P1 equation lost its equality head")
+      let [wholeDomain, wholeLeft, wholeRight] := equation.args
+        | throw (IO.userError "registered P1 equation changed arity")
+      ensure (psNameEq equalityName (psRootName "Eq") &&
+        psElabMutualLevelNamesEqual levels wholeLevels &&
+        psExprAlphaEq wholeDomain type && !psExprHasUnresolvedMeta wholeProof &&
+        (psExprFVarIds wholeProof).isEmpty)
+        "registered P1 equation changed its exact type or checked closed proof"
+      if modelEquations then
+        ensure (psExprAlphaEq wholeLeft (project path fixedValue) &&
+          !(componentNames.any fun actual =>
+            psExprHasConst actual wholeType || psExprHasConst actual wholeProof) &&
+          psExprHasConst (orderName "fix_eq") wholeProof &&
+          (psEnvironmentFind environment sourceEquationName).isNone)
+          "opaque P1 invented a public unfolding bridge or lost its checked private model proof"
+      else
+        ensure (psExprAlphaEq wholeLeft (.constE name []) &&
+          psExprAlphaEq wholeRight body)
+          "registered P1 abbrev whole equation changed its exact source RHS"
+        let some (.theoremDecl _ equationLevels sourceType sourceProof) :=
+            psEnvironmentFind environment sourceEquationName
+          | throw (IO.userError "registered P1 abbrev where member lost its actual eq_def")
+        ensure (psElabMutualLevelNamesEqual levels equationLevels &&
+          binderNames sourceType == ["n"] && !psExprHasUnresolvedMeta sourceProof &&
+          (psExprFVarIds sourceProof).isEmpty)
+          "registered P1 abbrev where equation changed its source telescope"
+      let required := [name, wholeName, implementationName] ++
+        (if modelEquations then [] else [sourceEquationName])
+      let owners := compiled.origins.filter (fun origin =>
+        origin.members.any (fun member => psNameEq member.name implementationName))
+      ensure (owners.length == 1 && owners.all (fun origin =>
+        required.all (fun actual => origin.members.any (fun member =>
+          psNameEq member.name actual))) &&
+        !compiled.privateNames.any (psNameEq name) &&
+        [auxiliary, wholeName, implementationName].all (fun hidden =>
+          compiled.privateNames.any (psNameEq hidden)) &&
+        (modelEquations || compiled.privateNames.any (psNameEq sourceEquationName)))
+        "registered P1 changed source-member provenance or private companion visibility"
+    let localDefinitions := compiled.origins.flatMap (·.localDefinitions)
+    for name in [psNameAppendStr abbrevName "loop", psNameAppendStr opaqueName "loop"] do
+      let some localDefinition := localDefinitions.find? (fun localDefinition =>
+          psNameEq localDefinition.name name)
+        | throw (IO.userError "registered P1 where lost its actual local-source origin")
+      ensure ([name, PsName.num name 0, PsName.num name 2].all (fun actual =>
+        localDefinition.declarations.any (psNameEq actual)))
+        "registered P1 helper declarations lost their source-local owner"
+    for name in [singletonName, opaqueName, psNameAppendStr opaqueName "loop"] do
+      let equationName := psNameAppendStr name "eq_def"
+      let probe := match kind with
+        | .lean => "def rejectedOpaqueEquation (n : Nat) := " ++
+            psNameToString equationName ++ " n\n"
+        | .proofScript => "function rejectedOpaqueEquation(n: Nat) := " ++
+            psNameToString equationName ++ "(n)\n"
+      let parsed ← fromExcept (psCompilerParsePscv0 probe kind)
+      match psElabProgramWithOrigins environment parsed with
+      | .error error =>
+        ensure (isMissingRegisteredEquation equationName error && !psElabErrorIsResource error)
+          ("opaque P1 equation access failed at the wrong boundary: " ++
+            psCompilerPscv0ElabError error)
+      | .ok _ => throw (IO.userError "opaque P1 exposed an original-source unfolding equation")
+    let output ← fromExcept ((psCompilerPrepareElaboratedWithOutput compiled.result).mapError
+      psCompilerPscv0Error)
+    checkOfficial prelude output.prepared "registered-opaque-and-where-fixedpoints"
+    let runtime ← fromExcept ((psCompilerOrdinaryPartialRuntimeDeclarations
+      output.prepared.declarations).mapError psCompilerPscv0Error)
+    ensure (!(runtime.any fun declaration =>
+        match declaration with | .partialDecl .. => true | _ => false) &&
+      !(runtime.any fun declaration =>
+        auxiliaries.any (psNameEq (psDeclarationName declaration))))
+      "registered P1 runtime retained a logical model or body marker"
+    for (name, _, _, _, _) in members do
+      let some (.partialDecl _ levels type body) :=
+          output.prepared.declarations.find? (fun declaration =>
+            psNameEq (psDeclarationName declaration) (PsName.num name 0))
+        | throw (IO.userError "prepared registered P1 body is missing")
+      let some (.definitionDecl _ runtimeLevels runtimeType runtimeBody) :=
+          runtime.find? (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | throw (IO.userError "registered P1 runtime omitted an actual source entry")
+      ensure (psElabMutualLevelNamesEqual levels runtimeLevels &&
+        psExprAlphaEq type runtimeType && psExprAlphaEq body runtimeBody)
+        "registered P1 runtime substituted something other than its actual checked source body"
+    checkRegisteredOpaqueNegatives prelude output.prepared
+  for (kind, text) in [(PsCompilerSourceKind.lean, registeredOpaqueLeanRefusal),
+      (.proofScript, registeredOpaquePsRefusal)] do
+    let parsed ← fromExcept (psCompilerParsePscv0 text kind)
+    match psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed with
+    | .error error =>
+      ensure (!psElabErrorIsResource error &&
+        (psCompilerPscv0ElabError error).startsWith
+          "PSCV0-DATA: PSCV0-FIXPOINT-MONOTONICITY:")
+        ("opaque P1 inspection failed at the wrong boundary: " ++ psCompilerPscv0ElabError error)
+    | .ok _ => throw (IO.userError "opaque P1 acquired an unchecked monotonicity fallback")
+  IO.println "PSCV0_M3_P1_OPAQUE: PASS both actual source grammars, native opaque31/abbrev37/opaque39 bodies, exact main/local kinds and reducibility, private checked models, absent opaque equations, retained abbrev equations, full source ownership and original runtime bodies"
+
 private def checkNonmonotoneRefusal : IO Unit := do
   let parsed ← fromExcept (psPscv0ParseProgram
     "function nonMonotone(n: Nat): Nat := nonMonotone(n) + 1\npartial_fixpoint\n")
@@ -791,6 +1150,10 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
   IO.FS.writeFile (directory / "p1-option-bind.lean") optionBindLeanSource
   IO.FS.writeFile (directory / "p1-abbrev.ps") registeredAbbrevPsSource
   IO.FS.writeFile (directory / "p1-abbrev.lean") registeredAbbrevLeanSource
+  IO.FS.writeFile (directory / "p1-opaque.ps") registeredOpaquePsSource
+  IO.FS.writeFile (directory / "p1-opaque.lean") registeredOpaqueLeanSource
+  IO.FS.writeFile (directory / "p1-opaque-refusal.ps") registeredOpaquePsRefusal
+  IO.FS.writeFile (directory / "p1-opaque-refusal.lean") registeredOpaqueLeanRefusal
   ensure (M3PartialFixpointOracle.countdownOutput false == 29 &&
     M3PartialFixpointOracle.countdownOutput true == 17 &&
     M3PartialFixpointOracle.optionOutput false == 48 &&
@@ -804,6 +1167,14 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
   ensure (M3PartialFixpointOracle.abbrevOutput false == 293 &&
     M3PartialFixpointOracle.abbrevOutput true == 294)
     "independent native P1 registered abbrev observations changed"
+  for argument in ([0, 3, 4] : List Nat) do
+    ensure (M3PartialFixpointOracle.auditP1Opaque argument == 31 &&
+      M3PartialFixpointOracle.auditP1AbbrevWhere argument == 37 &&
+      M3PartialFixpointOracle.auditP1OpaqueWhere argument == 39)
+      ("independent native P1 opaque/where observation changed at " ++ toString argument)
+  ensure (M3PartialFixpointOracle.opaqueOutput false == 3137393 &&
+    M3PartialFixpointOracle.opaqueOutput true == 3137394)
+    "independent native P1 opaque/where combined observations changed"
   let ordinary : PsV7Native.Request := {
     source, sourceName := "p1fixedpoint.ps", outputStem := "p1fixedpoint"
     assurance := .ordinaryChecked
@@ -866,7 +1237,7 @@ private def emitRuntime (directory : System.FilePath) : IO Unit := do
     Lean.Json.mkObj (("flag", Lean.toJson flag) ::
       exports.map (fun (name, oracle) => (name, Lean.toJson (toString (oracle flag).toNat))))
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 60 terminating runtime comparisons follow"
+  IO.println "PSCV0_M3_P1_EMISSION: PASS fresh official-kernel ordinary five-target emission and both exact verified-assurance refusals; 70 terminating runtime comparisons follow"
 
 def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
@@ -884,5 +1255,6 @@ def main (args : List String) : IO Unit := do
   checkNonmonotoneRefusal
   checkOptionBind prelude
   checkRegisteredAbbrev prelude
+  checkRegisteredOpaque prelude
   emitRuntime (System.FilePath.mk directory)
   IO.println "PSCV0_M3_P1: PASS native logical/runtime separation, checked packed fixpoint ownership, exact unfolding equations, adversarial adapter refusal and retained nonmonotone/verified boundaries"

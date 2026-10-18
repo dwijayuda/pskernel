@@ -307,3 +307,13 @@ Author: Joachim Breitner. Apache-2.0. Modifications: explicit portable local
 contexts, source-arity-owned application observations, structural bounded traversal
 and rechecking retained Core without host temporary axioms or IO references.
 Retain LEAN-APACHE-2.0.txt and upstream notices.
+
+### Native v7.2 program input adapter
+
+Ps.Syntax.Lean.Program follows the architecture and selected grammar in
+Lean4.35.0 Parser/{Command,Module,Term}.lean and Elab/Frontend.lean at
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Copyright (c) 2019 Microsoft
+Corporation; upstream authors include Leonardo de Moura. Apache-2.0.
+Modifications: owned portable command AST, shared source-language scope and
+binder readers, bounded native grammar, explicit source-kind routing and no
+host parser/elaborator dependency. Retain licenses/LEAN-APACHE-2.0.txt.

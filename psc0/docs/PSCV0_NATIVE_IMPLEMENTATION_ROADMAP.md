@@ -129,3 +129,37 @@ M4+C/D and M5+E; do not create another roadmap or reopen the historical bounded
 M2 acceptance. Use common syntax/semantic owners and paired source fixtures,
 not a second elaborator or a text/filename workaround. Do not claim parity before
 actual .lean input traverses PSC0's checked pipeline and required backend lanes.
+
+## Current native input routing slice — qualification pending
+
+The current preparation child implements explicit v7.2 source-kind ownership
+for isolated requests and named module sources. The CLI accepts .ps and .lean
+and records the selected kind before reading source. The native adapter emits
+PsSyntaxProgram and shares scope commands, binder groups, elaboration, kernel
+checking, typed erasure, IR validation and all target emitters with .ps.
+No source printing/conversion or host Lean fallback is involved.
+
+A single paired fixture is integrated into the existing Where qualification:
+exact checked definition comparison, shadowing multi-name annotations, mixed
+module imports in both directions, official-kernel checking, five target
+emissions and common assurance/noncomputable refusals. Existing backend observers
+receive both source kinds (two native oracle values each); their execution is
+pending. Source reconstruction and broad native syntax parity remain open.
+
+Run39086069241/job117552793316 at1b1cb7fe completed FAILURE. The identical native
+mutual equation now builds using checked equations, but the portable retained-call
+fixture used non-selected braced mutual/native split explicit headers. This
+child uses v7.2 mutual/end and comma groups; the second peer's type parameter is
+explicit in both source and native control. It retains three reordered slots,
+dependent fixed values, nested lambda/let call scope, original source arity,
+returned-function exclusion and conservative underapplication assertions.
+No acceptance condition or compiler call-analysis algorithm is relaxed.
+
+Inspection also found the focused M3 Rust step wrote the noncomputable harness
+before executing the P1 harness. This child executes each harness immediately
+after generating it. Prior workflow success remains historical job evidence;
+it does not establish the overwritten P1 Rust observations. Requalification
+of that runtime lane is required. Main037fda49 remains unchanged.
+
+See PSCV0_M3_NATIVE_INPUT_ROUTING_2026-10-18.md for pinned references,
+architecture and remaining native syntax work. M3+B is OPEN.

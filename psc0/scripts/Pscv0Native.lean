@@ -59,12 +59,14 @@ private def writeFiles (files : List (System.FilePath × PsArtifactPayload)) : I
 
 private def run (options : CliOptions) (paths : List String) (outputs : List (PsEmissionTarget × String)) (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
   let requests ← paths.toArray.mapM fun (path : String) => do
-    if !path.endsWith ".ps" then
-      throw (IO.userError "PSCV0-NATIVE-INPUT: expected .ps application input")
+    let sourceKind ← match psCompilerSourceKindOfPath path with
+      | .ok kind => pure kind
+      | .error message => throw (IO.userError message)
     let outputStem := match outputs.head? with
       | none => "module"
       | some (_, output) => ((System.FilePath.mk output).fileStem).getD "module"
     return {
+      sourceKind
       source := ← IO.FS.readFile (System.FilePath.mk path)
       sourceName := (System.FilePath.mk path).fileName.getD path
       outputStem := outputStem
@@ -101,7 +103,7 @@ private def projectField (object : Lean.Json) (key : String) : IO String :=
   | .error _ => throw (IO.userError ("PSCV0-PROJECT-MANIFEST: expected string " ++ key))
 
 private def projectPathValid (path : String) : Bool :=
-  !path.isEmpty && path.endsWith ".ps" &&
+  !path.isEmpty && (psCompilerSourceKindOfPath path).isOk &&
   !path.startsWith "/" && !path.startsWith "\\" &&
   !path.toList.contains '\\' && !path.toList.contains ':' &&
   (path.splitOn "/").all (fun component =>
@@ -124,8 +126,11 @@ private def readProjectManifest (manifest : String) :
     let relativePath ← projectField row "path"
     if !projectPathValid relativePath then
       throw (IO.userError ("PSCV0-PROJECT-MANIFEST: unsafe source path " ++ relativePath))
+    let sourceKind ← match psCompilerSourceKindOfPath relativePath with
+      | .ok kind => pure kind
+      | .error message => throw (IO.userError message)
     let source ← IO.FS.readFile (root / relativePath)
-    return ({ name, source, sourceName := relativePath } : PsPscv0ModuleSource)
+    return ({ name, source, sourceKind, sourceName := relativePath } : PsPscv0ModuleSource)
   let some selected := sources.find? (fun item => item.name == entry)
     | throw (IO.userError ("PSCV0-PROJECT-MANIFEST: missing entry " ++ entry))
   return (entry, selected, sources.filter (fun item => item.name != entry))
@@ -187,6 +192,7 @@ private def runProject (options : CliOptions) (manifest : String)
   let request : Request := {
     source := selected.source
     sourceName := selected.sourceName
+    sourceKind := selected.sourceKind
     moduleName := entry
     modules := dependencies
     outputStem
@@ -348,7 +354,7 @@ def main (args : List String) : IO UInt32 := do
     | ["--emit-both", input, stem] =>
         run options [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native [--word-size 32|64] [--assurance ordinary-checked|closed-verified|boundary-qualified-verified] --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --audit-project-graph <manifest.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --audit-standard-surface | --check-well-founded-foundation | --export-well-founded-candidate <output.lean> | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-constructors-candidate <output.lean> | --export-float-canonical-model-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
+        IO.eprintln "usage: pscv0_native [--word-size 32|64] [--assurance ordinary-checked|closed-verified|boundary-qualified-verified] --check <application.ps|application.lean>... | --emit <application.ps|application.lean> <output.ts|output.js|output.rs> | --emit-both <application.ps|application.lean> <output-stem> | --emit-all <application.ps|application.lean> <output-stem> | --emit-wasm-core <application.ps|application.lean> <output-stem> | --emit-wasm <application.ps|application.lean> <output-stem> <exports.json> | --audit-project-graph <manifest.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --audit-standard-closure | --audit-standard-surface | --check-well-founded-foundation | --export-well-founded-candidate <output.lean> | --export-scalar-arithmetic <output.lean> | --export-unsigned-foundation <output.lean> | --export-hash-foundation <output.lean> | --export-unsigned-operations-candidate <output.lean> | --export-float-identity-candidate <output.lean> | --export-float-constructive-pow-candidate <output.lean> | --export-float-constructors-candidate <output.lean> | --export-float-canonical-model-candidate <output.lean> | --export-float-bits-constructive-candidate <output.lean> | --export-float-bits-candidate <output.lean> | --export-signed-identity-candidate <output.lean> | --export-float-tobits-candidate <output.lean> | --export-signed-operations-candidate <output.lean> | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

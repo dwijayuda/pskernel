@@ -1,6 +1,7 @@
 import Ps.Host.NativeV7
 import Lean.Util.CollectAxioms
 import Pscv0M3ResultInference
+import Pscv0M3InputParity
 
 -- Independent pinned Lean where declarations. The portable compiler consumes
 -- separate ProofScript below, including its owned local `def` introducers.
@@ -1362,6 +1363,7 @@ def main (args : List String) : IO Unit := do
   let [directory] := args | throw (IO.userError "expected output directory")
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "where qualification requires pinned Lean"
+  M3InputParity.check (System.FilePath.mk directory / "input-parity")
   M3ResultInference.check
   checkUnusedHints
   checkSectionInstances

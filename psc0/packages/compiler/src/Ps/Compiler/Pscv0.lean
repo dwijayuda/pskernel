@@ -1,4 +1,5 @@
 import Ps.Compiler.Api
+import Ps.Syntax.Lean.Program
 import Ps.Syntax.Pscv0.Module
 import Ps.Elab.Command
 import Ps.Environment.StandardSnapshot
@@ -6,8 +7,15 @@ import Ps.Environment.StandardSnapshot
 -- Source-owned v7 entry point. No generated frontend or host elaborator fallback.
 -- Project import/exposure semantics are a later language milestone; never silently
 -- flatten or ignore imports in this bounded single-module development entry point.
-def psCompilerParsePscv0 (source : String) : Except String PsSyntaxProgram := do
-  let parsed ← psPscv0ParseProgram source
+def psCompilerParsePscv0Program (sourceKind : PsCompilerSourceKind)
+    (source : String) : Except String PsSyntaxProgram :=
+  match sourceKind with
+  | .lean => psLeanParseProgram source
+  | .proofScript => psPscv0ParseProgram source
+
+def psCompilerParsePscv0 (source : String)
+    (sourceKind : PsCompilerSourceKind := .proofScript) : Except String PsSyntaxProgram := do
+  let parsed ← psCompilerParsePscv0Program sourceKind source
   if parsed.imports.isEmpty then
     pure parsed
   else

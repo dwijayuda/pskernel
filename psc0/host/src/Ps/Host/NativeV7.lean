@@ -80,6 +80,7 @@ def parseCliOptions (arguments : List String) : Except String CliOptions :=
 
 structure Request where
   source : String
+  sourceKind : PsCompilerSourceKind := .proofScript
   assurance : Assurance := .ordinaryChecked
   sourceName : String := "application.ps"
   outputStem : String := "module"
@@ -228,10 +229,10 @@ private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     pure none
   else
     (fromResult "module" (psCompilerPreparePscv0Project request.moduleName
-      (request.modules ++ [{ name := request.moduleName, source := request.source, sourceName := request.sourceName }]))).map some
+      (request.modules ++ [{ name := request.moduleName, source := request.source, sourceName := request.sourceName, sourceKind := request.sourceKind }]))).map some
   let parsed ← match project with
     | some _ => pure none
-    | none => (fromResult "parse" (psCompilerParsePscv0 request.source)).map some
+    | none => (fromResult "parse" (psCompilerParsePscv0 request.source request.sourceKind)).map some
   let t1 ← IO.monoMsNow
   let elaborated ← match parsed with
     | none => pure none

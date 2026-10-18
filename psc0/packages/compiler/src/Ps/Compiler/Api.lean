@@ -9,6 +9,21 @@ inductive PsCompilerSourceKind where
   | lean
   | proofScript
 
+def psCompilerSourceKindLabel : PsCompilerSourceKind → String
+  | .lean => "lean"
+  | .proofScript => "proofscript"
+
+def psCompilerSourceKindExtension : PsCompilerSourceKind → String
+  | .lean => ".lean"
+  | .proofScript => ".ps"
+
+-- Filename interpretation is a host boundary, not a semantic fallback. The
+-- portable API receives an explicit source kind independently of provenance.
+def psCompilerSourceKindOfPath (path : String) : Except String PsCompilerSourceKind :=
+  if path.endsWith ".lean" then .ok .lean
+  else if path.endsWith ".ps" then .ok .proofScript
+  else .error "PSCV0-NATIVE-INPUT: expected .ps or .lean v7.2 input"
+
 inductive PsCompilerError where
   | normalization (message : String)
   | translation (error : PsTranslationError)

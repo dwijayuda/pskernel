@@ -1,17 +1,19 @@
 import Ps.Compiler.Pscv0
 
--- A project consists of named, in-memory .ps sources. The graph is
+-- A project consists of named, in-memory v7.2 sources. The graph is
 -- discovered before elaboration: imports are never ignored or converted into
 -- concatenation. This portable layer performs no filesystem/host IO.
 structure PsPscv0ModuleSource where
   name : String
   source : String
+  sourceKind : PsCompilerSourceKind := .proofScript
   -- Optional real source path (normalized, project-relative). The native
   -- compiler never reads it; the host uses it for provenance and source maps.
   sourceName : String := ""
 
 structure PsPscv0ParsedModule where
   name : String
+  sourceKind : PsCompilerSourceKind
   source : String
   sourceName : String
   program : PsSyntaxProgram
@@ -29,14 +31,14 @@ def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
     throw "PSCV0-MODULE: duplicate module identity"
   let names := sources.map (·.name)
   let fileNames := sources.map fun item =>
-    if item.sourceName.isEmpty then item.name ++ ".ps" else item.sourceName
+    if item.sourceName.isEmpty then item.name ++ psCompilerSourceKindExtension item.sourceKind else item.sourceName
   if fileNames.eraseDups.length != sources.length then
     throw "PSCV0-MODULE: duplicate source path identity"
   for entry in sources do
     if !psPscv0ValidModuleKey entry.name then
       throw ("PSCV0-MODULE: invalid module identity " ++ entry.name)
   sources.mapM fun input => do
-    let program ← psPscv0ParseProgram input.source
+    let program ← psCompilerParsePscv0Program input.sourceKind input.source
     let dependencies := program.imports.map psPscv0ImportKey
     if dependencies.length != dependencies.eraseDups.length then
       throw ("PSCV0-MODULE: duplicate import in " ++ input.name)
@@ -44,8 +46,8 @@ def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
       if !names.contains dep then
         throw ("PSCV0-MODULE: missing module " ++ dep ++ " imported by " ++ input.name)
     return {
-      name := input.name, source := input.source
-      sourceName := if input.sourceName.isEmpty then input.name ++ ".ps" else input.sourceName
+      name := input.name, source := input.source, sourceKind := input.sourceKind
+      sourceName := if input.sourceName.isEmpty then input.name ++ psCompilerSourceKindExtension input.sourceKind else input.sourceName
       program }
 
 -- Topological planning over the complete explicit graph. A cycle is an error,

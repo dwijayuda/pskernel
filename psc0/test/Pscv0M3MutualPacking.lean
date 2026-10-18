@@ -30,9 +30,9 @@ mutual
 def callFirst {A : Type} (a : A) (n : Nat) : Nat → A :=
   fun k => match n with
     | 0 => a
-    | m + 1 => let kept := a; callSecond m kept k
+    | m + 1 => let kept := a; callSecond m A kept k
 termination_by n
-def callSecond (n : Nat) {B : Type} (b : B) : Nat → B :=
+def callSecond (n : Nat) (B : Type) (b : B) : Nat → B :=
   fun k => match n with
     | 0 => b
     | m + 1 => callThird m b k
@@ -179,11 +179,11 @@ private def checkCallbackScopes (environment : PsEnvironment) : Except String Un
 -- parameter correspondence. This probe does not admit source mutual WF.
 private def checkRetainedOwners (environment : PsEnvironment) : Except String Unit := do
   let source :=
-    "mutual {\n" ++
-    "def callFirst {A : Type} (a : A) (n : Nat) : Nat -> A := fun (k : Nat) => match n with { | 0 => a | m + 1 => let kept := a; callSecond(m, kept)(k) } termination_by n\n" ++
-    "def callSecond (n : Nat) {B : Type} (b : B) : Nat -> B := fun (k : Nat) => match n with { | 0 => b | m + 1 => callThird(m, b)(k) } termination_by n\n" ++
-    "def callThird {C : Type} (n : Nat) (c : C) : Nat -> C := fun (k : Nat) => match n with { | 0 => c | m + 1 => callFirst(c, m)(k) } termination_by n\n" ++
-    "}\n"
+    "mutual\n" ++
+    "def callFirst {A : Type} (a : A, n : Nat) : Nat -> A := fun (k : Nat) => match n with { | 0 => a | m + 1 => let kept := a; callSecond(m, A, kept)(k) } termination_by n\n" ++
+    "def callSecond (n : Nat, B : Type, b : B) : Nat -> B := fun (k : Nat) => match n with { | 0 => b | m + 1 => callThird(m, b)(k) } termination_by n\n" ++
+    "def callThird {C : Type} (n : Nat, c : C) : Nat -> C := fun (k : Nat) => match n with { | 0 => c | m + 1 => callFirst(c, m)(k) } termination_by n\n" ++
+    "end\n"
   let parsed ← psPscv0ParseProgram source
   let [.mutualDeclarations members span] := parsed.commands
     | throw "retained-call source lost its owned mutual block"

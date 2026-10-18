@@ -44,7 +44,11 @@ def psParseLeanImport
           }
 
 def psLeanReservedApplicationToken (token : PsToken) : Bool :=
-  if psStringEq token.text "def" then
+  if ["namespace", "section", "end", "open", "include", "omit", "universe",
+      "variable", "private", "abbrev", "opaque", "class", "instance", "mutual",
+      "noncomputable", "unsafe", "deriving", "termination_by", "decreasing_by",
+      "partial_fixpoint", "monotonicity"].contains token.text then true
+  else if psStringEq token.text "def" then
     true
   else if psStringEq token.text "partial" then
     true
@@ -1868,7 +1872,10 @@ def psParseLeanInductiveConstructorsWithFuel
           }
 
 def psLeanTopLevelDeclarationToken (token : PsToken) : Bool :=
-  if psStringEq token.text "def" then
+  if ["namespace", "section", "end", "open", "include", "omit", "universe",
+      "variable", "private", "abbrev", "opaque", "class", "instance", "mutual",
+      "noncomputable", "unsafe", "deriving"].contains token.text then true
+  else if psStringEq token.text "def" then
     true
   else if psStringEq token.text "partial" then
     true

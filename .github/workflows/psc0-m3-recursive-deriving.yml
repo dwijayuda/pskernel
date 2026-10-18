@@ -209,6 +209,12 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-nested-inductive/nestedfold.ts --outDir ../dist/m3-nested-inductive/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect ../dist/m3-nested-inductive/ts/nestedfold.js | tee ../dist/m3-nested-inductive/ts.log
+          for kind in lean ps; do
+            parity_dir=../dist/m3-where/input-parity/"$kind"
+            "$TSC" --ignoreConfig "$parity_dir/inputparity.ts" --outDir "$parity_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity | tee "$parity_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$parity_dir" inputparity m3parity "$parity_dir/ts/inputparity.js" | tee "$parity_dir/ts.log"
+          done
           "$TSC" --ignoreConfig ../dist/m3-where/wherefixture.ts --outDir ../dist/m3-where/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf | tee ../dist/m3-where/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf ../dist/m3-where/ts/wherefixture.js | tee ../dist/m3-where/ts.log
@@ -243,8 +249,8 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-partial/p0-nonempty p0nonempty m3p0nonempty
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-partial/p0-nonempty/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-partial-fixpoint p1fixedpoint m3p1countdown,m3p1option,m3p1mutual,m3p1generic
-          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-noncomputable noncomputable m3noncomp
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-partial-fixpoint/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-noncomputable noncomputable m3noncomp
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-noncomputable/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-deriving/rust.log
@@ -254,6 +260,11 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-structural/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-nested-inductive/rust.log
+          for kind in lean ps; do
+            parity_dir=../dist/m3-where/input-parity/"$kind"
+            node ../scripts/pscv0-m3-runtime.mjs rust "$parity_dir" inputparity m3parity
+            rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$parity_dir/rust.log"
+          done
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-where/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq
@@ -290,6 +301,10 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving/indexed-beq indexedbeq m3indexedbeqnat,m3indexedbeqbool | tee ../dist/m3-inductive-deriving/indexed-beq/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee ../dist/m3-mutual-structural/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/wasm.log
+          for kind in lean ps; do
+            parity_dir=../dist/m3-where/input-parity/"$kind"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$parity_dir" inputparity m3parity | tee "$parity_dir/wasm.log"
+          done
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-where wherefixture m3wherecapture,m3wheregeneric,m3whereshadow,m3wherecycle,m3wherepartial,m3wherewf | tee ../dist/m3-where/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-deriving nestedderive m3nestedrepr,m3nestedtuplerepr,m3nestedindexedrepr,m3nestedbeq,m3nestedarraybeq,m3nestedatombeq | tee ../dist/m3-nested-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-group-proof-deriving groupproof m3groupdecide,m3groupdecideatom,m3groupdefault,m3grouprequired | tee ../dist/m3-group-proof-deriving/wasm.log

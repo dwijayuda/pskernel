@@ -46,7 +46,7 @@ lean_lib PsV7M3IndexedInhabitedChecks where
 -- Source-only omitted-result evidence invoked by the existing where fixture.
 lean_lib PsV7M3ResultInferenceChecks where
   srcDir := "../test"
-  roots := #[`Pscv0M3ResultInference]
+  roots := #[`Pscv0M3ResultInference, `Pscv0M3InputParity]
 
 -- Independently checked native Float F1 constructive dependency oracle.
 -- This remains outside the selected Standard and executable compiler.

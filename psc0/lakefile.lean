@@ -23,6 +23,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,
     `Ps.Syntax.ParseLean,
+    `Ps.Syntax.Lean.Program,
     `Ps.Syntax.ParseProofScript,
     `Ps.Syntax.PrintCommon,
     `Ps.Syntax.PrintLean,

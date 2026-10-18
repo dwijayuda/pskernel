@@ -1,0 +1,84 @@
+name: PSCV0 M3 reviewed source blob (Linux)
+
+on:
+  push:
+    branches: [psc0/m3-fixedpoint-foundation-20261018]
+    paths: ['.github/workflows/psc0-m3-source-blob.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Apply exact reviewed source splice as an unattached Git blob
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, hashlib, json, os, urllib.request
+          api = 'https://api.github.com/repos/dwijayuda/pskernel'
+          original_sha = 'f5167fc08ec880d531fa30836b4efeb009dab2eb'
+          def call(path, payload=None):
+              data = None if payload is None else json.dumps(payload).encode('utf-8')
+              request = urllib.request.Request(api + path, data=data, headers={
+                  'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                  'Accept': 'application/vnd.github+json',
+                  'Content-Type': 'application/json',
+                  'X-GitHub-Api-Version': '2022-11-28'})
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  return json.load(response)
+          def blob_sha(data):
+              return hashlib.sha1(b'blob ' + str(len(data)).encode('ascii') + b'\0' + data).hexdigest()
+          blob = call('/git/blobs/' + original_sha)
+          original = base64.b64decode(blob['content'])
+          if blob['sha'] != original_sha or blob_sha(original) != original_sha:
+              raise RuntimeError('source blob identity mismatch')
+          source = original.decode('utf-8')
+          old_import = 'import Ps.Host.StandardClosure\n'
+          if source.count(old_import) != 1:
+              raise RuntimeError('unexpected import owner')
+          source = source.replace(old_import, old_import + 'import Ps.Host.RecursorSource\n')
+          start = '-- Copy source binder metadata only.'
+          end = 'def exportRecursorSurfaceCandidate (output : System.FilePath) : IO Unit := do'
+          if source.count(start) != 1 or source.count(end) != 1:
+              raise RuntimeError('unexpected annotation owner boundary')
+          before, rest = source.split(start, 1)
+          old, after = rest.split(end, 1)
+          if old.count('private def recursorSourceAnnotations') != 1 or old.count('\nprivate def ') != 1:
+              raise RuntimeError('splice would replace more than the reviewed helper')
+          replacement = '''-- Copy complete source binder metadata through checked reference views.
+          -- Preserve the selected logical syntax, universes and optional defaults;
+          -- native dictionary projections use their actual pinned safe bodies.
+          private def recursorSourceAnnotations (native : Lean.Environment)
+              (selected reference : Lean.Expr) : Except String Lean.Expr :=
+            RecursorSource.copy native selected reference
+
+          '''
+          source = before + replacement + end + after
+          for old_call, new_call in [
+              ('recursorSourceAnnotations actual original.type', 'recursorSourceAnnotations native actual original.type'),
+              ('recursorSourceAnnotations type original.type', 'recursorSourceAnnotations native type original.type')]:
+              if source.count(old_call) != 1:
+                  raise RuntimeError('unexpected annotation call site')
+              source = source.replace(old_call, new_call)
+          if source.count('recursorSourceAnnotations ') != 3:
+              raise RuntimeError('unexpected annotation call inventory')
+          encoded = source.encode('utf-8')
+          candidate = call('/git/blobs', {'content': source, 'encoding': 'utf-8'})
+          if candidate['sha'] != blob_sha(encoded):
+              raise RuntimeError('candidate blob identity mismatch')
+          print('PSCV0_M3_SOURCE_BLOB ' + json.dumps({
+              'inspectionCommit': os.environ['GITHUB_SHA'],
+              'run': os.environ['GITHUB_RUN_ID'],
+              'path': 'psc0/host/src/Ps/Host/StandardExport.lean',
+              'baseBlob': original_sha, 'candidateBlob': candidate['sha'],
+              'candidateSHA256': hashlib.sha256(encoded).hexdigest(),
+              'bytes': len(encoded), 'refsChanged': False, 'compiled': False,
+              'status': 'unattached reviewed source; connector commit and exact-SHA CI required'}))
+          PY

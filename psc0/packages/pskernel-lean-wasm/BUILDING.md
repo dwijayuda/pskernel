@@ -89,3 +89,9 @@ After `scripts/check-differential.mjs` verifies all 11 current canonical cases a
 The [linear-memory workflow](../../../../.github/workflows/psc0-pskernel-lean-wasm-linear.yml) separately uploads the generated Wasm and Node launcher as an explicitly `UNQUALIFIED` build-only Actions artifact after successful link/startup, before admission parity. Such bytes must never be committed as the qualified package output. Only the later checked binary, bound to same-run native/Wasm acceptance and rejection results, can be staged with `PREBUILT_WASM_MANIFEST.json`.
 
 The upstream Lean C++ library/runtime is licensed Apache-2.0. Distributions must preserve its license, included as `LEAN_LICENSE`; this requirement is distinct from the ProofScript project's own package license.
+
+## Immutable-stage Lean i386/wasm32 build cache
+
+The full GitHub Linux workflow may restore a complete `lean4-build` tree from a cache keyed by the exact Lean commit, Emscripten version, host ABI/runner class, and digests of the pinned toolchain, patches and build scripts. The stage1 build may be reused **only** if `scripts/stage1-cache.mjs verify` re-hashes every cached wasm32 `.olean` and static `.a` library, the i386 stage0 compiler, and the stage1 `leanc.sh`, and confirms the same input/toolchain identity. A missing or modified artifact fails closed rather than silently replaying. The cache is populated only after a complete stage1 build and may be saved even when a later *provider* step fails.
+
+This is a performance optimization, not a kernel checker or independent proof of binary correctness. The exact-source native oracle, current PSC0 admissions, runtime health, native/Wasm semantic parity, artifact SHA-256, and publication safety gates run again on every qualifying CI run. Cached artifacts are never committed or included in the npm distribution by themselves.

@@ -93,6 +93,15 @@ jobs:
             build-essential cmake git make clang gcc-multilib g++-multilib \
             libc6-dev-i386 libuv1-dev:i386 libssl-dev:i386 pkgconf:i386
           test -x /usr/bin/i386-linux-gnu-pkg-config
+      # Restore a build *cache*, not a qualified proof checker. The build
+      # validates the complete SHA-256 manifest before using any cached .olean
+      # or C++/Lean library; current admissions and parity always run afresh.
+      - name: Restore pinned i386 + wasm32 Lean 4.35 stage1
+        id: restore-stage1
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build
+          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh') }}
       - name: Fetch exact Emscripten 6.0.9 and cross-build Lean kernel into Wasm
         shell: bash
         run: |
@@ -104,6 +113,25 @@ jobs:
           source ./emsdk_env.sh
           cd "$GITHUB_WORKSPACE"
           bash psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh
+      - name: Check whether stage1 has a sealed reproducible cache
+        id: stage1-cache-state
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          record=psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build/.psc0-stage1-cache-manifest.json
+          if [[ -s "$record" ]]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Save pinned stage1 for next exact-toolchain build
+        if: always() && steps.stage1-cache-state.outputs.ready == 'true' && steps.restore-stage1.outputs.cache-hit != 'true'
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        continue-on-error: true
+        with:
+          path: psc0/packages/pskernel-lean-wasm/.wasm-build/lean4-build
+          key: psc0-lean435-eb6caf-emsdk609-ubuntu2404-i386-wasm32-${{ hashFiles('psc0/packages/pskernel-lean-wasm/LEAN_SOURCE_PIN.json', 'psc0/packages/pskernel-lean-wasm/EMSCRIPTEN_PIN.json', 'psc0/packages/pskernel-lean-wasm/scripts/apply-lean435-compat.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/verify-lean435-runtime.mjs', 'psc0/packages/pskernel-lean-wasm/scripts/build-wasm.sh') }}
       # A build-only diagnostic artifact is NOT a qualified checker and is
       # not committed or packed. It preserves exact checked binaries when
       # later native/Wasm parity or distribution qualification fails.

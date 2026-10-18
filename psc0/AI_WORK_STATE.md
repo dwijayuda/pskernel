@@ -179,3 +179,8 @@ metadata and checked values; a parsed negative field domain must fail positivity
 The existing five-target observers add m3fields; no new test executable or lane.
 See docs/PSCV0_M3_POSITIVE_FUNCTION_FIELDS_2026-10-18.md. Next: complete preparation,
 inspect existing controls, then integrate this exact code only when main is idle.
+
+Preparation 28e6b4fd / run39100352434 stopped at compilation: StructuralField
+needed the existing Refinement dependency that owns psExprAppView. The direct
+import is corrected here; no semantic check or acceptance criterion changed.
+Full positive-field qualification remains pending.

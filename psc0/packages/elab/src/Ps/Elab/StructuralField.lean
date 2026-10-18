@@ -1,4 +1,4 @@
-import Ps.Elab.Binders
+import Ps.Elab.Refinement
 import Ps.Meta.Inductive
 
 /-

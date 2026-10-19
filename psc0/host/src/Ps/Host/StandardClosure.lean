@@ -229,6 +229,18 @@ def coreNativeCompilerImports : Array Lean.Import :=
     { module := `Ps.Codegen.Api },
     { module := `Ps.Codegen.Provenance }]
 
+/-- Actual selected Core project engine is a distinct source root from the
+    Full-default compatibility wrapper Pscv0Modules. This does NOT authorize
+    dropping any independently advertised backend roots from self-host. -/
+def coreSelectedNativeCompilerImports : Array Lean.Import :=
+  #[{ module := `Ps.Compiler.Pscv0ModuleEngine },
+    { module := `Ps.BackendTs.Readable },
+    { module := `Ps.BackendRust.Module },
+    { module := `Ps.BackendWasm.Module },
+    { module := `Ps.CompilerIr.Checked },
+    { module := `Ps.Codegen.Api },
+    { module := `Ps.Codegen.Provenance }]
+
 private def coreNativeNameParts : Lean.Name → List Lean.Json
   | .anonymous => []
   | .str parent value =>
@@ -276,13 +288,13 @@ structure CoreNativeClosure where
 -- actual constants referenced by those checked types, values and rule bodies.
 -- The report records the raw graph: it does not erase annotations or admit
 -- declarations, and it does not select a portable Standard environment.
-def collectCoreNativeClosure : IO CoreNativeClosure := do
+def collectCoreNativeClosureWithImports (imports : Array Lean.Import) : IO CoreNativeClosure := do
   Lean.initSearchPath (← Lean.findSysroot)
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "Core ownership audit requires pinned Lean 4.35.0")
-  let native ← Lean.importModules coreNativeCompilerImports {}
+  let native ← Lean.importModules imports {}
   let sourceModules := native.header.moduleNames.filter coreNativeSourceModule
-  for imported in coreNativeCompilerImports do
+  for imported in imports do
     unless sourceModules.contains imported.module do
       throw (IO.userError
         ("missing native source-module owner: " ++ toString imported.module))
@@ -360,7 +372,7 @@ def collectCoreNativeClosure : IO CoreNativeClosure := do
   let report := Lean.Json.mkObj [
     ("schema", Lean.toJson ("pscv0-core-native-closure/1" : String)),
     ("leanCommit", Lean.toJson Lean.githash),
-    ("importRoots", .arr (coreNativeCompilerImports.map fun item =>
+    ("importRoots", .arr (imports.map fun item =>
       coreNativeNameJson item.module)),
     ("sourceModules", .arr (sourceModules.map coreNativeNameJson)),
     ("sourceDeclarations", Lean.toJson sourceEntries.size),
@@ -382,5 +394,16 @@ def collectCoreNativeClosure : IO CoreNativeClosure := do
     entries
     report
   }
+
+
+/-- Preserve the exact existing Full-compatibility audit semantics. -/
+def collectCoreNativeClosure : IO CoreNativeClosure :=
+  collectCoreNativeClosureWithImports coreNativeCompilerImports
+
+/-- Measure the genuinely isolated selected project/module engine, not the
+    Full-default compatibility wrapper. This is still native-source inventory,
+    not a selected/checked Core Standard profile or kernel replay. -/
+def collectCoreSelectedNativeClosure : IO CoreNativeClosure :=
+  collectCoreNativeClosureWithImports coreSelectedNativeCompilerImports
 
 end PsV7Native

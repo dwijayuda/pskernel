@@ -1,0 +1,125 @@
+name: PSC0 Core-first engine and backend optionality native dependency tiers
+on:
+  push:
+    branches: [research/psc0-c0-selected-native-closure-20261019]
+    paths:
+      - '.github/workflows/psc0-c0-core-import-tiers.yml'
+      - 'psc0/scripts/Pscv0CoreTiersNativeClosure.lean'
+      - 'psc0/v7-native/lakefile.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-tier-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build native Lean 4.35 selected Core tier inventory
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          mkdir -p ../dist/c0-core-tiers
+          /usr/bin/time -v -o ../dist/c0-core-tiers/build-resources.txt \
+            lake build pscv0_core_tiers_native_closure
+      - name: Measure engine-only, engine+TS and all-seven imported Core variants
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/c0-core-tiers/measure-resources.txt \
+            lake env .lake/build/bin/pscv0_core_tiers_native_closure \
+              ../dist/c0-core-tiers/tiers.json | tee ../dist/c0-core-tiers/summary.json
+      - name: Verify complete nested source imports without any admission
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          doc=json.loads(Path('../dist/c0-core-tiers/tiers.json').read_text())
+          assert doc['schema']=='psc0-core-native-tier-comparison/1'
+          assert doc['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          for key in ('candidateKernelAdmitted','selectedProfileInstalled','coreCompilerSelfHost'):
+              assert doc[key] is False
+          roots={
+            'engineOnly':['Ps.Compiler.Pscv0ModuleEngine'],
+            'engineTs':['Ps.Compiler.Pscv0ModuleEngine','Ps.BackendTs.Readable',
+                        'Ps.CompilerIr.Checked','Ps.Codegen.Api','Ps.Codegen.Provenance'],
+            'selectedAll':['Ps.Compiler.Pscv0ModuleEngine','Ps.BackendTs.Readable',
+                           'Ps.BackendRust.Module','Ps.BackendWasm.Module',
+                           'Ps.CompilerIr.Checked','Ps.Codegen.Api','Ps.Codegen.Provenance']}
+          data={}
+          for key,expected in roots.items():
+              graph=doc[key]
+              assert graph['schema']=='pscv0-core-native-closure/1'
+              assert graph['leanCommit']==doc['leanCommit']
+              assert [x['display'] for x in graph['importRoots']]==expected
+              assert graph['unsafe']==graph['partial']==[]
+              assert graph['emptyBoundary'] is True
+              assert graph['candidateKernelAdmitted'] is False
+              assert graph['annotationsErased'] is False
+              axioms={v['name']['display'] for v in graph['axioms']}
+              assert axioms <= {'propext','Quot.sound','Classical.choice'}
+              names={v['display'] for v in graph['sourceModules']}
+              assert not {'Ps.Compiler.Pscv0Modules','Ps.Compiler.Pscv0'}.intersection(names)
+              assert len(graph['closureDeclarations'])==graph['closureDeclarationCount']
+              assert len(graph['externalRoots'])==graph['externalRootCount']
+              assert graph['sourceDeclarations']>0 and graph['externalRootCount']>0
+              data[key]={
+                'sourceModules':len(names),
+                'sourceDeclarations':graph['sourceDeclarations'],
+                'externalRoots':graph['externalRootCount'],
+                'externalClosure':graph['closureDeclarationCount'],
+                'axioms':sorted(axioms),
+                'rustImportedTransitively':'Ps.BackendRust.Module' in names,
+                'wasmImportedTransitively':'Ps.BackendWasm.Module' in names}
+              data[key]['_sources']=names
+          assert data['engineOnly']['_sources']<=data['engineTs']['_sources']
+          assert data['engineTs']['_sources']<=data['selectedAll']['_sources']
+          assert data['engineOnly']['sourceDeclarations']<=data['engineTs']['sourceDeclarations']
+          assert data['engineTs']['sourceDeclarations']<=data['selectedAll']['sourceDeclarations']
+          assert data['selectedAll']['sourceModules']==224
+          assert data['selectedAll']['sourceDeclarations']==21513
+          assert data['selectedAll']['externalRoots']==418
+          assert data['selectedAll']['externalClosure']==5619
+          for entry in data.values():
+              del entry['_sources']
+          summary={
+            'schema':'psc0-core-native-import-tiers-qualification/1',
+            'sourceCommit':os.environ['GITHUB_SHA'],
+            'leanCommit':doc['leanCommit'],
+            'tiers':data,
+            'selectedProfileInstalled':False,
+            'c0KernelAdmitted':False,
+            'stage1SelfHosted':False,
+            'limitation':'Import-source size comparison only; no target backend or checker admission qualified'}
+          Path('../dist/c0-core-tiers/comparison.json').write_text(
+              json.dumps(summary,indent=2,sort_keys=True)+'\n')
+          print('PSC0_CORE_IMPORT_TIERS=SOURCE_ONLY_PASS_NOT_SELFHOST')
+          print(json.dumps(data,sort_keys=True))
+          PY
+          sha256sum ../dist/c0-core-tiers/*.json > ../dist/c0-core-tiers/SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: psc0-core-native-import-tiers
+          path: psc0/dist/c0-core-tiers/
+          retention-days: 30
+          if-no-files-found: warn

@@ -1,51 +1,108 @@
-import Ps.KernelCore.SelfHost
+import Lake
+open Lake DSL
 
-/-
-PSC1/C0 single-substitution benchmark.  Both paths operate in the same native
-process on source expressions, with parity checked before timing.
-The original bounded generic substitution is retained as the oracle.
-Measurements are informational, not acceptance proof or blanket speedup.
--/
-private def inst1Prior (e r : PsKernelExpr) : PsKernelExpr :=
-  if psKernelExprHasLooseBVar e then
-    psKernelExprInstantiate e (List.cons r List.nil)
-  else e
+package proofscriptSelfhost
 
-private def inst1AppSpine (depth : Nat) : PsKernelExpr :=
-  match depth with
-  | Nat.zero => PsKernelExpr.bvar 0
-  | Nat.succ n =>
-      PsKernelExpr.app (inst1AppSpine n) (PsKernelExpr.bvar 2)
+-- Isolated kernel qualifier: explicitly enumerate native dependencies so
+-- Lake compiles this portable source tree independently of compiler targets.
+lean_lib PsKernelCore where
+  srcDir := "packages/pskernel-core/src"
+  roots := #[
+    `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.API.KernelContractV1,
+    `Ps.KernelCore.API.Outcome,
+    `Ps.KernelCore.API.Provider,
+    `Ps.KernelCore.API.Session,
+    `Ps.KernelCore.Admission.Declaration.Admission,
+    `Ps.KernelCore.Admission.Declaration.Validation,
+    `Ps.KernelCore.Admission.Inductive.Common.Elimination,
+    `Ps.KernelCore.Admission.Inductive.Common.Occurrence,
+    `Ps.KernelCore.Admission.Inductive.Common.Parameters,
+    `Ps.KernelCore.Admission.Inductive.Common.RecursorValidation,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Admission,
+    `Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Analysis,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Header,
+    `Ps.KernelCore.Admission.Inductive.Mutual.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Nested.Admission,
+    `Ps.KernelCore.Admission.Inductive.Nested.Commit,
+    `Ps.KernelCore.Admission.Inductive.Nested.Discover,
+    `Ps.KernelCore.Admission.Inductive.Nested.Flatten,
+    `Ps.KernelCore.Admission.Inductive.Nested.Rebase,
+    `Ps.KernelCore.Admission.Inductive.Nested.ReservedNames,
+    `Ps.KernelCore.Admission.Inductive.Nested.Restore,
+    `Ps.KernelCore.Admission.Inductive.Nested.RestoreExpr,
+    `Ps.KernelCore.Admission.Inductive.Nested.Types,
+    `Ps.KernelCore.Admission.Inductive.Nested.Validation,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Admission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Constructor,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.ConstructorAdmission,
+    `Ps.KernelCore.Admission.Inductive.Ordinary.Recursor,
+    `Ps.KernelCore.Admission.Inductive.Types,
+    `Ps.KernelCore.Admission.Quot.Admission,
+    `Ps.KernelCore.Admission.Quot.Bootstrap,
+    `Ps.KernelCore.Checker.Context,
+    `Ps.KernelCore.Checker.DefEq.BinderSpines,
+    `Ps.KernelCore.Checker.DefEq.DeltaStep,
+    `Ps.KernelCore.Checker.DefEq.FinalRules,
+    `Ps.KernelCore.Checker.DefEq.FullShape,
+    `Ps.KernelCore.Checker.DefEq.LazyDelta,
+    `Ps.KernelCore.Checker.DefEq.Quick,
+    `Ps.KernelCore.Checker.DefEq.Shortcuts,
+    `Ps.KernelCore.Checker.DefEq.Support,
+    `Ps.KernelCore.Checker.Inference,
+    `Ps.KernelCore.Checker.Inference.Core,
+    `Ps.KernelCore.Checker.Inference.Helpers,
+    `Ps.KernelCore.Checker.Knot,
+    `Ps.KernelCore.Checker.Ops,
+    `Ps.KernelCore.Checker.Projection,
+    `Ps.KernelCore.Checker.Recursor.Analysis,
+    `Ps.KernelCore.Checker.Recursor.Reduction,
+    `Ps.KernelCore.Checker.Reduction.KernelReductions,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveData,
+    `Ps.KernelCore.Checker.Reduction.PrimitiveNat,
+    `Ps.KernelCore.Checker.Reduction.Primitives,
+    `Ps.KernelCore.Checker.Reduction.Whnf,
+    `Ps.KernelCore.Checker.Reduction.WhnfCore,
+    `Ps.KernelCore.Checker.ResourcePolicy,
+    `Ps.KernelCore.Checker.Session,
+    `Ps.KernelCore.Checker.State,
+    `Ps.KernelCore.Core.Declaration,
+    `Ps.KernelCore.Core.Expr,
+    `Ps.KernelCore.Core.Level,
+    `Ps.KernelCore.Core.LocalContext,
+    `Ps.KernelCore.Core.Name,
+    `Ps.KernelCore.Core.Substitution.Abstract,
+    `Ps.KernelCore.Core.Substitution.Beta,
+    `Ps.KernelCore.Core.Substitution.Instantiate,
+    `Ps.KernelCore.Core.Substitution.Lift,
+    `Ps.KernelCore.Core.Substitution.ListOps,
+    `Ps.KernelCore.Environment.Environment,
+    `Ps.KernelCore.Environment.Lookup,
+    `Ps.KernelCore.Environment.Operations,
+    `Ps.KernelCore.Environment.Semantic,
+    `Ps.KernelCore.Runtime.Acceleration.Cache,
+    `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
+    `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
+    `Ps.KernelCore.Runtime.Capability.Types,
+    `Ps.KernelCore.SelfHost
+  ]
 
-private def inst1Repeat (optimized : Bool)
-    (times : Nat) (e : PsKernelExpr) : IO Nat := do
-  let mut checksum := 0
-  for index in [:times] do
-    let replacement := PsKernelExpr.bvar index
-    let actual := if optimized
-      then psKernelExprInstantiate1 e replacement
-      else inst1Prior e replacement
-    checksum := checksum + psKernelExprNodeCount actual
-  pure checksum
+lean_exe psc1_kernel_regression where
+  srcDir := "test"
+  root := `PsKernelCoreRegression
 
-private def inst1Benchmark
-    (depth times : Nat) : IO Unit := do
-  let term := inst1AppSpine depth
-  let rep := PsKernelExpr.bvar 3
-  unless psKernelExprEq (inst1Prior term rep)
-      (psKernelExprInstantiate1 term rep) do
-    throw (IO.userError "PSC1_C0_INST1_BENCH_PARITY_FAILED")
-  let beforeStart ← IO.monoMsNow
-  let baselineSum ← inst1Repeat false times term
-  let beforeEnd ← IO.monoMsNow
-  let afterStart ← IO.monoMsNow
-  let candidateSum ← inst1Repeat true times term
-  let afterEnd ← IO.monoMsNow
-  unless baselineSum == candidateSum do
-    throw (IO.userError "PSC1_C0_INST1_BENCH_CHECKSUM_FAILED")
-  IO.println s!"PSC1_C0_INST1_BENCH depth={depth} calls={times} prior_ms={beforeEnd-beforeStart} c0_ms={afterEnd-afterStart} checksum={candidateSum}"
+-- Optional same-run performance comparison; assertions check semantics,
+-- timings are observations and do not override correctness qualification.
+lean_exe psc1_kernel_perf where
+  srcDir := "test"
+  root := `PsKernelCorePerformance
 
-def main : IO Unit := do
-  inst1Benchmark 12 25000
-  inst1Benchmark 32 25000
-  IO.println "PSC1_C0_INST1_BENCH: COMPLETE"
+lean_exe psc1_kernel_instantiate_perf where
+  srcDir := "test"
+  root := `PsKernelInstantiatePerformance
+
+lean_exe psc1_kernel_multi_perf where
+  srcDir := "test"
+  root := `PsKernelMultiInstantiatePerformance

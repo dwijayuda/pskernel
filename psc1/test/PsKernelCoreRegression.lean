@@ -48,6 +48,20 @@ private def requireInst1Parity (caseName : String)
       (inst1BeforeC0 term replacement)
       (psKernelExprInstantiate1 term replacement))
 
+
+-- Source-equivalent multi-substitution differential oracle with the original
+-- bounded walker.  Compare both the term and the changed flag.
+private def requireMultiParity
+    (caseName : String) (term : PsKernelExpr)
+    (start : Nat) (substitutions : List PsKernelExpr) (offset : Nat) :
+    IO Unit := do
+  let old := psKernelExprInstantiateAtChangedWithFuel
+    (Nat.succ (psKernelExprNodeCount term)) term start substitutions offset
+  let newv := psKernelExprInstantiateAtChanged term start substitutions offset
+  requireKernel caseName
+    (psKernelExprEq (Prod.fst old) (Prod.fst newv) &&
+      Prod.snd old == Prod.snd newv)
+
 def main : IO Unit := do
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
   let localExpr := PsKernelExpr.fvar fName
@@ -144,6 +158,38 @@ def main : IO Unit := do
   requireInst1Parity "C0 inst1 closed binder fast path" constantLam sort0
   requireInst1Parity "C0 inst1 replacement lifts correctly"
     subLam (PsKernelExpr.app (PsKernelExpr.bvar 0) (PsKernelExpr.bvar 1))
+
+  let multiReplacements :=
+    [PsKernelExpr.bvar 0, PsKernelExpr.app sort0 (PsKernelExpr.bvar 1)]
+  requireMultiParity "C0 multi zero-index substitution"
+    (PsKernelExpr.bvar 0) 0 multiReplacements 0
+  requireMultiParity "C0 multi second-index substitution"
+    (PsKernelExpr.bvar 1) 0 multiReplacements 0
+  requireMultiParity "C0 multi outer-index decrement"
+    (PsKernelExpr.bvar 4) 0 multiReplacements 0
+  requireMultiParity "C0 multi nonzero start"
+    (PsKernelExpr.app (PsKernelExpr.bvar 0) (PsKernelExpr.bvar 3))
+    1 multiReplacements 0
+  requireMultiParity "C0 multi nonzero binder offset"
+    (PsKernelExpr.bvar 3) 0 multiReplacements 1
+  requireMultiParity "C0 multi application"
+    subOpen 0 multiReplacements 0
+  requireMultiParity "C0 multi lambda capture avoidance"
+    subLam 0 multiReplacements 0
+  requireMultiParity "C0 multi forall capture avoidance"
+    subForall 0 multiReplacements 0
+  requireMultiParity "C0 multi let binder"
+    subLet 0 multiReplacements 0
+  requireMultiParity "C0 multi metadata"
+    subMeta 0 multiReplacements 0
+  requireMultiParity "C0 multi projection"
+    subProj 0 multiReplacements 0
+  requireMultiParity "C0 multi nested binders"
+    twoLams 0 multiReplacements 0
+  requireMultiParity "C0 multi closed term unchanged"
+    subClosed 0 multiReplacements 0
+  requireMultiParity "C0 multi empty replacement list"
+    subOpen 0 [] 0
   let sample := "héllo"
   let p := String.Pos.Raw.mk 0
   requireKernel "Lean 4.34 string atEnd alias parity"

@@ -105,7 +105,7 @@ namespace CoreM3Patterns
 
 private def expectNativePatternElaborationRefusal (source : String) :
     Lean.Elab.Command.CommandElabM Unit := do
-  let command ← match Lean.Parser.runParserCategory (← getEnv) "command" source with
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv) (Lean.Name.mkSimple "command") source with
     | .ok command => pure command
     | .error message => throwError "native arithmetic pattern changed parse phase: {message}"
   let saved ← get

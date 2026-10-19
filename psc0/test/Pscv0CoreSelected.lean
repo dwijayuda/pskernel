@@ -2,6 +2,20 @@ import Ps.Compiler.Pscv0Engine
 import PsKernelLean.Replay
 import PsKernelLean.Protocol
 
+-- v7.2 §6 explicitly leaves syntax absent from pinned Standard to a
+-- named extension. These are actual native parser controls, independently
+-- of the portable selected-head table and its refusal diagnostics.
+run_cmd do
+  let environment ← Lean.getEnv
+  for source in ["exfalso", "decide", "by_cases h : True", "ext x"] do
+    match Lean.Parser.runParserCategory environment (Lean.Name.mkSimple "tactic") source with
+    | .ok _ => pure ()
+    | .error message => throwError "selected native proof head failed to parse: {source}: {message}"
+  for source in ["use 0", "by_contra h"] do
+    match Lean.Parser.runParserCategory environment (Lean.Name.mkSimple "tactic") source with
+    | .error _ => pure ()
+    | .ok _ => throwError "extension-only proof head is present in pinned Standard: {source}"
+
 private def requireSelected (condition : Bool) (message : String) : IO Unit :=
   if condition then pure () else throw (IO.userError message)
 
@@ -78,6 +92,15 @@ private def admitSelected (environment : Lean.Kernel.Environment)
   | .error message => throw (IO.userError ("CORE-SELECTED: kernel rejection: " ++ message))
 
 def main : IO Unit := do
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean, "theorem extensionOnly : True := by use 0\n"),
+      (.lean, "theorem extensionOnly : True := by by_contra h\n"),
+      (.proofScript, "theorem extensionOnly: True := by { use 0 }\n"),
+      (.proofScript, "theorem extensionOnly: True := by { by_contra h }\n")] do
+    match psCompilerParsePscv0Program kind source with
+    | .error _ => pure ()
+    | .ok _ => throw (IO.userError "CORE-SELECTED: extension-only tactic entered the closed grammar")
+  IO.println "PSCV0_CORE_PROOF_HEAD_BOUNDARY: PASS four native selected heads and paired native/portable use/by_contra grammar boundaries"
   -- The exact base roster is checked from empty, at trust zero and finite budgets.
   let checked ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDeclaration]
   let kernel ← match checked with

@@ -777,16 +777,18 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
   let next ← psElabCommandDeclaration state source none isPrivate
   let origin :: previous := next.originsRev
     | throw (.data "deriving lost source provenance")
-  -- Preserve handler source order. Generated definitions are inserted through
-  -- the same checked environment and registered like explicit instances.
-  let (environment, declarationsRev, members, privateNames) ← handlers.foldlM
+  -- Pinned MutualInductive.applyDerivingHandlers preserves the first source
+  -- occurrence of each resolved class identity in a trailing deriving clause.
+  let (environment, declarationsRev, members, privateNames, _) ← handlers.foldlM
     (fun (acc : PsEnvironment × List PsDeclaration ×
-        List PsElabMemberOrigin × List PsName) handler => do
-      let (env, declarations, derivedMembers, privateNames) := acc
+        List PsElabMemberOrigin × List PsName × List String) handler => do
+      let (env, declarations, derivedMembers, privateNames, processed) := acc
       let sourceName := (psSyntaxNameToName origin.sourceName).getD .anonymous
-      let generated ← (show Except PsElabError PsDeclaration from do
-        -- Deriving class names use global command scope, independently of
-        -- section term variables, before selecting the registered handler.
+      let atHandler := PsElabError.atDeclaration
+        (psNameAppendStr sourceName ("deriving " ++ String.intercalate "." handler.segments))
+      let selected ← (show Except PsElabError String from do
+        -- Class lookup uses global command scope, independently of section
+        -- term variables. Aliases and rooted names retain their real identity.
         let resolver : PsScopeResolver := {
           environment := env
           scope := { next.scope with variables := [] }
@@ -796,9 +798,10 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
         let some selected := psElabSelectedDerivingHandlers.find?
             (fun selected => psNameEq name (psRootName selected))
           | throw (.data "deriving handler is not registered in the selected profile")
-        psElabDeriveHandler env origin
-          { handler with segments := [selected], resolvedName := none }).mapError
-        (.atDeclaration (psNameAppendStr sourceName ("deriving " ++ String.intercalate "." handler.segments)))
+        return selected).mapError atHandler
+      if processed.contains selected then return acc
+      let generated ← (psElabDeriveHandler env origin
+        { handler with segments := [selected], resolvedName := none }).mapError atHandler
       let name := psDeclarationName generated
       let some added := psEnvironmentAdd env generated
         | throw (.duplicateDeclaration name)
@@ -809,15 +812,15 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
         role := .derivedInstance }
       return (updated, generated :: declarations,
         derivedMembers ++ [member],
-        if isPrivate then name :: privateNames else privateNames))
+        (if isPrivate then name :: privateNames else privateNames),
+        selected :: processed))
     (next.environment, next.declarationsRev,
-      ([] : List PsElabMemberOrigin), next.privateNames)
+      ([] : List PsElabMemberOrigin), next.privateNames, ([] : List String))
   return { next with
     environment
     declarationsRev
     originsRev := { origin with members := origin.members ++ members } :: previous
     privateNames }
-
 
 -- Apply attributes only after the complete checked source batch exists.
 -- Canonical source identities are resolved through the same final alias map

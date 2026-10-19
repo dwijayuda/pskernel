@@ -254,7 +254,9 @@ private def checkQualifiedStructural (prelude : Lean.Kernel.Environment) : IO Un
   let secondName := nameOf ["M3QualifiedStructural", "Right", "second"]
   for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
     let sourceText := String.join (qualifiedStructuralPieces.map fun entry =>
-      if kind == .lean then entry.fst else entry.snd)
+      match kind with
+      | .lean => entry.fst
+      | .proofScript => entry.snd)
     let parsed ← fromExcept (psCompilerParsePscv0Program kind sourceText)
     let groups := parsed.commands.filterMap fun command =>
       match command with

@@ -1482,13 +1482,27 @@ private def checkRegisteredValues : IO Unit := do
       | .constE name _ => psNameEq name defaultName
       | _ => false))
       "inferred default lost its exact name or priority"
+    -- Registered main declarations exclude eager equation publication. The
+    -- actual where helper retains its checked private equation; no nonexistent
+    -- lazy native equation is added to the source-private inventory.
     for text in ["coreRegisteredIdentity.eq_def", "coreRegisteredWhere.eq_def",
-        "coreRegisteredWhere.helper.eq_def", "coreRegisteredDefault.eq_def"] do
+        "coreRegisteredDefault.eq_def"] do
       let name := psSyntaxNameAppendSegments (text.splitOn ".") .anonymous
-      ensure (receipt.privateNames.any (psNameEq name) &&
+      ensure (!receipt.privateNames.any (psNameEq name) &&
+          !output.prepared.declarations.any (fun declaration =>
+            psNameEq (psDeclarationName declaration) name) &&
           !receipt.interface.declarations.any (fun declaration =>
             psNameEq (psDeclarationName declaration) name))
-        ("registered value equation escaped source ownership: " ++ text)
+        ("registered main unexpectedly published an equation: " ++ text)
+    let helperEquation := psSyntaxNameAppendSegments
+      ["coreRegisteredWhere", "helper", "eq_def"] .anonymous
+    ensure (receipt.privateNames.any (psNameEq helperEquation) &&
+        output.prepared.declarations.any (fun declaration => match declaration with
+          | .theoremDecl name .. => psNameEq name helperEquation
+          | _ => false) &&
+        !receipt.interface.declarations.any (fun declaration =>
+          psNameEq (psDeclarationName declaration) helperEquation))
+      "registered where helper lost its checked private equation"
     let privateValue := importVisibilityInput kind "Library" "" [
   ("private def coreRegisteredHidden (A : Type) (x : A) : A := x\n",
    "private function coreRegisteredHidden(A: Type, x: A): A := x\n"),

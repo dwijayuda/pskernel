@@ -765,8 +765,12 @@ run_cmd do
     throwError "native data universe fixture lost index promotion"
   Lean.logInfo "CORE-DATA-UNIVERSES: native exact result-sort/level-roster assertions passed"
 
-private def expectNativeDataUniverseRefusal (command : Lean.Syntax) :
+private def expectNativeDataUniverseRefusal (source : String) :
     Lean.Elab.Command.CommandElabM Unit := do
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv)
+      (Lean.Name.mkSimple "command") source with
+    | .ok command => pure command
+    | .error message => throwError "native universe refusal changed parse phase: {message}"
   let saved ← get
   let failed ← try
     modify fun (state : Lean.Elab.Command.State) =>
@@ -775,9 +779,10 @@ private def expectNativeDataUniverseRefusal (command : Lean.Syntax) :
     let errors := messages.toList.filter fun message => message.severity == .error
     for message in errors do
       let content ← message.data.toString
-      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout",
+          "invalid `Name.append`", "Unknown identifier", "unknown identifier"].any
           (fun marker => (content.splitOn marker).length > 1) then
-        throwError "native universe refusal exhausted resources: {content}"
+        throwError "native universe refusal did not reach its semantic bound: {content}"
     pure (!errors.isEmpty)
   finally
     set saved
@@ -785,17 +790,11 @@ private def expectNativeDataUniverseRefusal (command : Lean.Syntax) :
     throwError "native data universe unexpectedly accepted an invalid bound"
 
 run_cmd do
-  let command ← `(command| inductive BadTypeBox : Type where
-    | mk (A : Type))
-  expectNativeDataUniverseRefusal command
-run_cmd do
-  let command ← `(command| inductive BadMax : Sort (max _ _) where
-    | mk (n : Nat))
-  expectNativeDataUniverseRefusal command
-run_cmd do
-  let command ← `(command| inductive BadSort : Sort coreUniverseU where
-    | mk (n : Nat))
-  expectNativeDataUniverseRefusal command
+  for source in [
+      "inductive BadTypeBox : Type where\n  | mk (A : Type)\n",
+      "inductive BadMax : Sort (max _ _) where\n  | mk (n : Nat)\n",
+      "inductive BadSort : Sort coreUniverseU where\n  | mk (n : Nat)\n"] do
+    expectNativeDataUniverseRefusal source
 
 universe indexedU
 
@@ -974,9 +973,21 @@ theorem coreFinProofDecEq :
     Decidable.decide (self := decEq coreFinProof coreFinProof) = true := by rfl
 theorem coreIndependentUsesActualBEq : (coreIndependent == coreIndependent) = false := by rfl
 theorem coreFinDefaultUsesDictionary : Fin.val (CoreFinDefault.value coreFinDefault) = 1 := by rfl
-theorem coreFinRepr : reprStr coreFinOne = "1" := by rfl
-theorem coreDependentRepr : reprStr coreDependentLeft = "{ n := 2, value := 1 }" := by rfl
-theorem coreNatProofRepr : reprStr coreNatProof = "{ value := 7, proof := _ }" := by rfl
+theorem coreFinRepr : repr coreFinOne = repr (1 : Nat) := by rfl
+theorem coreDependentRepr : repr coreDependentLeft =
+    Std.Format.bracket "{ "
+      (Std.Format.nil ++ Std.Format.text "n" ++ Std.Format.text " := " ++
+        Std.Format.group (Std.Format.nest 5 (repr (2 : Nat))) ++
+        Std.Format.text "," ++ Std.Format.line ++
+        Std.Format.text "value" ++ Std.Format.text " := " ++
+        Std.Format.group (Std.Format.nest 9 (repr (1 : Nat)))) " }" := by rfl
+theorem coreNatProofRepr : repr coreNatProof =
+    Std.Format.bracket "{ "
+      (Std.Format.nil ++ Std.Format.text "value" ++ Std.Format.text " := " ++
+        Std.Format.group (Std.Format.nest 9 (repr (7 : Nat))) ++
+        Std.Format.text "," ++ Std.Format.line ++
+        Std.Format.text "proof" ++ Std.Format.text " := " ++
+        Std.Format.text "_") " }" := by rfl
 theorem coreDependentHash :
     hash coreDependentLeft = mixHash (mixHash 0 (hash (2 : Nat))) (hash coreFinOne) := by rfl
 theorem coreNatProofHash :
@@ -1059,7 +1070,7 @@ run_cmd do
   for source in [
       "structure CoreUnknownStructure where\n  value : Nat\n  deriving CoreUnregisteredClass\n",
       "inductive CoreUnknownInductive where\n  | item (value : Nat)\n  deriving CoreUnregisteredClass\n"] do
-    let command ← match Lean.Parser.runParserCategory (← getEnv) "command" source with
+    let command ← match Lean.Parser.runParserCategory (← Lean.getEnv) (Lean.Name.mkSimple "command") source with
       | .ok command => pure command
       | .error message => throwError "native deriving suffix did not parse: {message}"
     expectNativeDerivingRequirementRefusal
@@ -1096,7 +1107,7 @@ theorem rootedChoiceDifferent :
     _root_.BEq.beq (RootedChoice.item 3) RootedChoice.empty = false := by rfl
 run_cmd do
   let source := "structure Shadowed where\n  value : Nat\n  deriving BEq\n"
-  let command ← match Lean.Parser.runParserCategory (← getEnv) "command" source with
+  let command ← match Lean.Parser.runParserCategory (← Lean.getEnv) (Lean.Name.mkSimple "command") source with
     | .ok command => pure command
     | .error message => throwError "native shadowed deriving suffix did not parse: {message}"
   expectNativeDerivingRequirementRefusal
@@ -1109,9 +1120,9 @@ inductive CoreRepeatedDefault where
   | leaf
   deriving Inhabited, Inhabited
 
-theorem repeatedDefaultUsesEarlierInstance :
+theorem repeatedDefaultDeduplicatesHandler :
     (Inhabited.default : CoreRepeatedDefault) =
-      CoreRepeatedDefault.recursive CoreRepeatedDefault.leaf := by rfl
+      CoreRepeatedDefault.leaf := by rfl
 
 structure CoreRepeatedHandlers where
   value : Nat
@@ -1125,7 +1136,10 @@ theorem repeatedHandlersDecEq :
     Decidable.decide (self := decEq (CoreRepeatedHandlers.mk 3) (CoreRepeatedHandlers.mk 4)) =
       false := by rfl
 theorem repeatedHandlersRepr :
-    reprStr (CoreRepeatedHandlers.mk 3) = "{ value := 3 }" := by rfl
+    repr (CoreRepeatedHandlers.mk 3) =
+      Std.Format.bracket "{ "
+        (Std.Format.nil ++ Std.Format.text "value" ++ Std.Format.text " := " ++
+          Std.Format.group (Std.Format.nest 9 (repr (3 : Nat)))) " }" := by rfl
 theorem repeatedHandlersHash :
     hash (CoreRepeatedHandlers.mk 3) = mixHash 0 (hash (3 : Nat)) := by rfl
 
@@ -1431,26 +1445,21 @@ private def checkHandlerScopeInstances (environment : PsEnvironment) : IO Unit :
   for (family, handlers) in [
       (psNameAppendStr (psRootName "CoreHandlerScope") "RootedBox", ["BEq"]),
       (psNameAppendStr (psRootName "CoreHandlerScope") "RootedChoice", ["BEq"]),
-      (psRootName "CoreRepeatedDefault", ["Inhabited", "Inhabited"]),
-      (psRootName "CoreRepeatedHandlers",
-        ["Inhabited", "Inhabited", "BEq", "BEq", "DecidableEq", "DecidableEq",
-          "Repr", "Repr", "Hashable", "Hashable"]),
-      (psRootName "CoreRootedDuplicate", ["BEq", "BEq"])] do
-    let _ ← handlers.foldlM (fun (earlier : List String) handler => do
-      let ordinal := (earlier.filter (· == handler)).length
-      let component := "inst" ++ handler ++
-        (if ordinal == 0 then "" else "_" ++ toString ordinal)
-      let name := psNameAppendStr family component
+      (psRootName "CoreRepeatedDefault", ["Inhabited"]),
+      (psRootName "CoreRepeatedHandlers", ["Inhabited", "BEq", "DecidableEq", "Repr", "Hashable"]),
+      (psRootName "CoreRootedDuplicate", ["BEq"])] do
+    for handler in handlers do
+      let name := psNameAppendStr family ("inst" ++ handler)
       let some declaration := psEnvironmentFind environment name
-        | throw (IO.userError ("CORE-MATCHES: repeated deriving omitted " ++ psNameToString name))
+        | throw (IO.userError ("CORE-MATCHES: deriving omitted " ++ psNameToString name))
       let some _ := psDeclarationValue declaration
-        | throw (IO.userError "CORE-MATCHES: repeated deriving has no real checked value")
+        | throw (IO.userError "CORE-MATCHES: deriving has no real checked value")
       ensure (environment.instances.entries.any fun entry =>
         match entry.value with
         | .constE actual _ => psNameEq actual name
-        | _ => false) "CORE-MATCHES: repeated deriving did not register each generated dictionary"
-      return handler :: earlier) []
-    pure ()
+        | _ => false) "CORE-MATCHES: deriving did not register its generated dictionary"
+      ensure (!(psEnvironmentContains environment (psNameAppendStr family ("inst" ++ handler ++ "_1"))))
+        "CORE-MATCHES: trailing deriving repeated a resolved class handler"
 
 private def checkPair (label leanText psText : String) :
     IO (List PsCompilerEnginePreparationOutput) := do
@@ -1712,10 +1721,10 @@ private def checkDerivingResourcePropagation : IO Unit := do
   IO.println "CORE-MATCHES: real deriving search exhaustion remains a resource; healthy fallbacks freshly kernel checked"
 
 private def handlerScopeLeanSource : String :=
-  "namespace CoreHandlerScope\nclass BEq (A : Type) where\n  token : Nat\n\nstructure RootedBox where\n  value : Nat\n  deriving _root_.BEq\n\ninductive RootedChoice where\n  | empty\n  | item (value : Nat)\n  deriving _root_.BEq\n\ntheorem rootedBoxSame :\n    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 3) = true := by rfl\ntheorem rootedBoxDifferent :\n    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 4) = false := by rfl\ntheorem rootedChoiceSame :\n    _root_.BEq.beq (RootedChoice.item 3) (RootedChoice.item 3) = true := by rfl\ntheorem rootedChoiceDifferent :\n    _root_.BEq.beq (RootedChoice.item 3) RootedChoice.empty = false := by rfl\nend CoreHandlerScope\n\ninductive CoreRepeatedDefault where\n  | recursive (child : CoreRepeatedDefault)\n  | leaf\n  deriving Inhabited, Inhabited\n\ntheorem repeatedDefaultUsesEarlierInstance :\n    (Inhabited.default : CoreRepeatedDefault) =\n      CoreRepeatedDefault.recursive CoreRepeatedDefault.leaf := by rfl\n\nstructure CoreRepeatedHandlers where\n  value : Nat\n  deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable\n\ntheorem repeatedHandlersDefault :\n    CoreRepeatedHandlers.value (Inhabited.default : CoreRepeatedHandlers) = 0 := by rfl\ntheorem repeatedHandlersBEq :\n    (CoreRepeatedHandlers.mk 3 == CoreRepeatedHandlers.mk 3) = true := by rfl\ntheorem repeatedHandlersDecEq :\n    Decidable.decide (self := decEq (CoreRepeatedHandlers.mk 3) (CoreRepeatedHandlers.mk 4)) =\n      false := by rfl\ntheorem repeatedHandlersRepr :\n    reprStr (CoreRepeatedHandlers.mk 3) = \"{ value := 3 }\" := by rfl\ntheorem repeatedHandlersHash :\n    hash (CoreRepeatedHandlers.mk 3) = mixHash 0 (hash (3 : Nat)) := by rfl\n\nstructure CoreRootedDuplicate where\n  value : Nat\n  deriving BEq, _root_.BEq\n\ntheorem rootedDuplicateSame :\n    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 3) = true := by rfl\ntheorem rootedDuplicateDifferent :\n    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 4) = false := by rfl\n"
+  "namespace CoreHandlerScope\nclass BEq (A : Type) where\n  token : Nat\n\nstructure RootedBox where\n  value : Nat\n  deriving _root_.BEq\n\ninductive RootedChoice where\n  | empty\n  | item (value : Nat)\n  deriving _root_.BEq\n\ntheorem rootedBoxSame :\n    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 3) = true := by rfl\ntheorem rootedBoxDifferent :\n    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 4) = false := by rfl\ntheorem rootedChoiceSame :\n    _root_.BEq.beq (RootedChoice.item 3) (RootedChoice.item 3) = true := by rfl\ntheorem rootedChoiceDifferent :\n    _root_.BEq.beq (RootedChoice.item 3) RootedChoice.empty = false := by rfl\nend CoreHandlerScope\n\ninductive CoreRepeatedDefault where\n  | recursive (child : CoreRepeatedDefault)\n  | leaf\n  deriving Inhabited, Inhabited\n\ntheorem repeatedDefaultDeduplicatesHandler :\n    (Inhabited.default : CoreRepeatedDefault) =\n      CoreRepeatedDefault.leaf := by rfl\n\nstructure CoreRepeatedHandlers where\n  value : Nat\n  deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable\n\ntheorem repeatedHandlersDefault :\n    CoreRepeatedHandlers.value (Inhabited.default : CoreRepeatedHandlers) = 0 := by rfl\ntheorem repeatedHandlersBEq :\n    (CoreRepeatedHandlers.mk 3 == CoreRepeatedHandlers.mk 3) = true := by rfl\ntheorem repeatedHandlersDecEq :\n    Decidable.decide (self := decEq (CoreRepeatedHandlers.mk 3) (CoreRepeatedHandlers.mk 4)) =\n      false := by rfl\ntheorem repeatedHandlersRepr :\n    reprStr (CoreRepeatedHandlers.mk 3) = \"{ value := 3 }\" := by rfl\ntheorem repeatedHandlersHash :\n    hash (CoreRepeatedHandlers.mk 3) = mixHash 0 (hash (3 : Nat)) := by rfl\n\nstructure CoreRootedDuplicate where\n  value : Nat\n  deriving BEq, _root_.BEq\n\ntheorem rootedDuplicateSame :\n    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 3) = true := by rfl\ntheorem rootedDuplicateDifferent :\n    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 4) = false := by rfl\n"
 
 private def handlerScopePsSource : String :=
-  "namespace CoreHandlerScope\nclass BEq(A: Type) where {\n  token: Nat\n}\n\nstructure RootedBox where {\n  value: Nat\n} deriving _root_.BEq\n\ninductive RootedChoice where {\n  | empty\n  | item(value: Nat)\n} deriving _root_.BEq\n\ntheorem rootedBoxSame:\n    _root_.BEq.beq(RootedBox.mk(3), RootedBox.mk(3)) = true := by { rfl }\ntheorem rootedBoxDifferent:\n    _root_.BEq.beq(RootedBox.mk(3), RootedBox.mk(4)) = false := by { rfl }\ntheorem rootedChoiceSame:\n    _root_.BEq.beq(RootedChoice.item(3), RootedChoice.item(3)) = true := by { rfl }\ntheorem rootedChoiceDifferent:\n    _root_.BEq.beq(RootedChoice.item(3), RootedChoice.empty) = false := by { rfl }\nend CoreHandlerScope\n\ninductive CoreRepeatedDefault where {\n  | recursive(child: CoreRepeatedDefault)\n  | leaf\n} deriving Inhabited, Inhabited\n\ntheorem repeatedDefaultUsesEarlierInstance:\n    (Inhabited.default: CoreRepeatedDefault) =\n      CoreRepeatedDefault.recursive(CoreRepeatedDefault.leaf) := by { rfl }\n\nstructure CoreRepeatedHandlers where {\n  value: Nat\n} deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable\n\ntheorem repeatedHandlersDefault:\n    CoreRepeatedHandlers.value((Inhabited.default: CoreRepeatedHandlers)) = 0 := by { rfl }\ntheorem repeatedHandlersBEq:\n    (CoreRepeatedHandlers.mk(3) == CoreRepeatedHandlers.mk(3)) = true := by { rfl }\ntheorem repeatedHandlersDecEq:\n    Decidable.decide(self := decEq(CoreRepeatedHandlers.mk(3), CoreRepeatedHandlers.mk(4))) =\n      false := by { rfl }\ntheorem repeatedHandlersRepr:\n    reprStr(CoreRepeatedHandlers.mk(3)) = \"{ value := 3 }\" := by { rfl }\ntheorem repeatedHandlersHash:\n    hash(CoreRepeatedHandlers.mk(3)) = mixHash(0, hash((3: Nat))) := by { rfl }\n\nstructure CoreRootedDuplicate where {\n  value: Nat\n} deriving BEq, _root_.BEq\n\ntheorem rootedDuplicateSame:\n    (CoreRootedDuplicate.mk(3) == CoreRootedDuplicate.mk(3)) = true := by { rfl }\ntheorem rootedDuplicateDifferent:\n    (CoreRootedDuplicate.mk(3) == CoreRootedDuplicate.mk(4)) = false := by { rfl }\n"
+  "namespace CoreHandlerScope\nclass BEq(A: Type) where {\n  token: Nat\n}\n\nstructure RootedBox where {\n  value: Nat\n} deriving _root_.BEq\n\ninductive RootedChoice where {\n  | empty\n  | item(value: Nat)\n} deriving _root_.BEq\n\ntheorem rootedBoxSame:\n    _root_.BEq.beq(RootedBox.mk(3), RootedBox.mk(3)) = true := by { rfl }\ntheorem rootedBoxDifferent:\n    _root_.BEq.beq(RootedBox.mk(3), RootedBox.mk(4)) = false := by { rfl }\ntheorem rootedChoiceSame:\n    _root_.BEq.beq(RootedChoice.item(3), RootedChoice.item(3)) = true := by { rfl }\ntheorem rootedChoiceDifferent:\n    _root_.BEq.beq(RootedChoice.item(3), RootedChoice.empty) = false := by { rfl }\nend CoreHandlerScope\n\ninductive CoreRepeatedDefault where {\n  | recursive(child: CoreRepeatedDefault)\n  | leaf\n} deriving Inhabited, Inhabited\n\ntheorem repeatedDefaultDeduplicatesHandler:\n    (Inhabited.default: CoreRepeatedDefault) =\n      CoreRepeatedDefault.leaf := by { rfl }\n\nstructure CoreRepeatedHandlers where {\n  value: Nat\n} deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable\n\ntheorem repeatedHandlersDefault:\n    CoreRepeatedHandlers.value((Inhabited.default: CoreRepeatedHandlers)) = 0 := by { rfl }\ntheorem repeatedHandlersBEq:\n    (CoreRepeatedHandlers.mk(3) == CoreRepeatedHandlers.mk(3)) = true := by { rfl }\ntheorem repeatedHandlersDecEq:\n    Decidable.decide(self := decEq(CoreRepeatedHandlers.mk(3), CoreRepeatedHandlers.mk(4))) =\n      false := by { rfl }\ntheorem repeatedHandlersRepr:\n    reprStr(CoreRepeatedHandlers.mk(3)) = \"{ value := 3 }\" := by { rfl }\ntheorem repeatedHandlersHash:\n    hash(CoreRepeatedHandlers.mk(3)) = mixHash(0, hash((3: Nat))) := by { rfl }\n\nstructure CoreRootedDuplicate where {\n  value: Nat\n} deriving BEq, _root_.BEq\n\ntheorem rootedDuplicateSame:\n    (CoreRootedDuplicate.mk(3) == CoreRootedDuplicate.mk(3)) = true := by { rfl }\ntheorem rootedDuplicateDifferent:\n    (CoreRootedDuplicate.mk(3) == CoreRootedDuplicate.mk(4)) = false := by { rfl }\n"
 
 private def selectedHandlerFailure : PsElabError → Bool
   | .atDeclaration _ cause => selectedHandlerFailure cause
@@ -1817,6 +1826,13 @@ def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "CORE-MATCHES: expected pinned Lean 4.35.0"
   checkFinEvidenceFinite
+  -- Native Format.pretty calls a partial worker. Check actual rendering by
+  -- execution while the native theorems above check the generated Format tree.
+  ensure (reprStr CoreM3MatchOracle.coreFinOne == "1" &&
+    reprStr CoreM3MatchOracle.coreDependentLeft == "{ n := 2, value := 1 }" &&
+    reprStr CoreM3MatchOracle.coreNatProof == "{ value := 7, proof := _ }" &&
+    reprStr (CoreM3MatchOracle.CoreRepeatedHandlers.mk 3) == "{ value := 3 }")
+    "CORE-MATCHES: native Repr rendering observation changed"
   ensure (CoreM3MatchOracle.m3dependentFin false == UInt64.ofNat 64576 &&
     CoreM3MatchOracle.m3dependentFin true == UInt64.ofNat 64975)
     "CORE-MATCHES: native dependent Fin observation changed"

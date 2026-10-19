@@ -2,6 +2,17 @@
 
 ## Verified 19–20 October correction: selected Core is smaller in *source*, not in kernel dependencies
 
+### Terminal K1 diagnosis and next target
+
+- **All 418 roots, exact official source:** [CI39294895812](https://github.com/dwijayuda/pskernel/actions/runs/39294895812) exported the entire measured selected graph, independently passed official Lean4.35, then **C0 timed out after 600 seconds** with original `fuel=4096` (exit124). K1 is **NOT QUALIFIED**.
+- **High-coverage three-root diagnostic:** [CI39295729394](https://github.com/dwijayuda/pskernel/actions/runs/39295729394) independently checked exactly three source-witnessed roots (`_private.Init.Data.UInt.Package.0.instLinearOrderPackageUInt8`, `Int.instLinearOrderPackage`, `String.Slice.Pattern.ForwardSliceSearcher.instIteratorIdSearchStep`). These roots reach 4,679 of 5,619 selected external declarations. C0 exceeded the 180s host limit at immutable export record **286549**, active theorem `_private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_1`; official Lean accepted exactly the same source. This is also the **Full** diagnostic hotspot.
+- **Same-theorem staged probe:** [CI39296586766](https://github.com/dwijayuda/pskernel/actions/runs/39296586766) independently authenticated the exact saved export, successfully entered the target theorem and passed header, proposition, closed-expression and universe stages. It then **timed out during `proof_full_check`** at original 4096 source fuel, no acceptance. The problem is therefore inside the proof body's typing/conversion/reduction/substitution work, not parsing or theorem-header validation. The probe is non-admitting and intentionally reports `inconclusive`.
+- **Focused unchanged-native worker stacks:** workflow `pskernel-c0-selected-core-array-hot-stack.yml` samples only the exact active record286549 worker, using the previously qualified signal profiler and same SHA-verified corpus. Never infer correctness or speed improvement from a profiler alone.
+- **Separate architecture-option measurement:** [compiler source audit PR #156](https://github.com/dwijayuda/pskernel/pull/156) now measures Core engine-only and Core engine+TS alongside the seven-root Core selection. Rust/Wasm roots are not assumed removable: import/target completeness and real Stage1 self-host coverage require separate evidence. This is read-only dependency measurement, not changing compiled packages or kernel trust.
+
+**P0 next:** use exact Array proof worker-stack evidence to pick **one generic source-correct critical-path execution change**, prove relevant Lean 4.35 inference/DefEq/substitution semantics, and measure the whole authentic selected Core corpus at original 4096 with bounded RSS; stop speculative hash-only PR proliferation. Maintain current official Lean Stage0, and do not merge a partial checker or issue a Core release based on diagnostics.
+
+
 Exact [native comparison CI 39193886098](https://github.com/dwijayuda/pskernel/actions/runs/39193886098) **SUCCESS** at compiler-audit commit `4e7ecea126c1f18977c86ce66e4fddb7df144aab` (Lean 4.35.0 stable). The selected `Ps.Compiler.Pscv0ModuleEngine` graph and Full `Ps.Compiler.Pscv0Modules` graph retain the same six advertised backend/IR/codegen roots:
 
 | Measured scope | Core selected | Full compatibility |

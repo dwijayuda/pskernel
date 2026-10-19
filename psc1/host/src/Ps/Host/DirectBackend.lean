@@ -1,4 +1,5 @@
 import Ps.Host.CompilerDriver
+import Ps.Host.LeanChecked
 import Ps.Host.DirectSourceMap
 import Ps.CompilerIr.Validate
 import Ps.BackendJs.Print
@@ -9,11 +10,20 @@ import Ps.BackendTs.Type
 import Ps.Bridge.Json
 
 -- Host-only adapter; not part of the portable bootstrap compiler closure.
--- This selected source pipeline is admission-ready and IR validated. It does not
--- misrepresent the bootstrap codec as independent kernel admission.
+-- Encode and independently admit the exact immutable prepared declaration graph
+-- with the pinned official Lean kernel before erasure and bounded IR validation.
+-- No fallback, unchecked mode, or typechecking-as-proof substitution.
 def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
   let elaborated ← psHostCompilerElaborateProject inputPath
-  let raw ← match psCompilerVerifiedIrFromElaborated elaborated with
+  let prepared ← match psCompilerPrepareElaborated elaborated with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_DIRECT_PREPARATION_FAILED")
+  match ← psHostLeanCheckPrepared prepared with
+  | .error reason =>
+      throw (IO.userError ("PSC1_DIRECT_KERNEL_ADMISSION_FAILED: " ++ reason))
+  | .ok _ => pure ()
+  -- 'prepared' is immutable; erasure consumes the exact checked graph.
+  let raw ← match psCompilerVerifiedIrFromPrepared prepared with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_DIRECT_ERASURE_FAILED")
   match psValidateErasedIrModule { raw := raw } with

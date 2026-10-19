@@ -154,6 +154,13 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Binary
   ]
 
+-- Host-only independent admission provider. This library is deliberately
+-- outside the portable compiler bootstrap/import closure.
+lean_lib PsKernelLean where
+  srcDir := "packages/pskernel-lean/provider"
+  roots := #[`PsKernelLean.Error, `PsKernelLean.Convert, `PsKernelLean.Protocol,
+    `PsKernelLean.Prelude, `PsKernelLean.Admission, `PsKernelLean.Main]
+
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
   roots := #[`Ps.Bootstrap.SelfHost]
@@ -164,6 +171,7 @@ lean_lib PsHost where
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
     `Ps.Host.CompilerDriver,
+    `Ps.Host.LeanChecked,
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
     `Ps.Host.WasmComponent
@@ -228,6 +236,10 @@ lean_exe psc1_ir_specialize_tests where
 lean_exe psc1_direct_map_tests where
   srcDir := "test"
   root := `DirectSourceMapTests
+
+lean_exe psc1_lean_kernel_provider_tests where
+  srcDir := "packages/pskernel-lean/provider-test"
+  root := `PsKernelLeanTests
 
 lean_exe psc1_erasure_tests where
   srcDir := "test"

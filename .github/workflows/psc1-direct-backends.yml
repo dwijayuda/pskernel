@@ -67,7 +67,8 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
-          lake build PsCompilerIr PsBackendJs PsBackendRust PsBackendWasm psc1_ir_specialize_tests psc1_ir_check_tests
+          lake build PsKernelLean PsCompilerIr PsBackendJs PsBackendRust PsBackendWasm psc1_ir_specialize_tests psc1_ir_check_tests psc1_lean_kernel_provider_tests
+          lake exe psc1_lean_kernel_provider_tests
           lake exe psc1_ir_specialize_tests
           lake exe psc1_ir_check_tests
       - name: Build existing PSC1 CLI

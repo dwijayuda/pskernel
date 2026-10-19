@@ -1,0 +1,37 @@
+name: C0 universe parameter computed-field source proof
+on:
+  push:
+    branches: [research/pskernel-c0-arena193-levelparam-field-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-arena193-levelparam-native.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Level.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Expr.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
+      - 'psc0/packages/pskernel-c0/test/C0LevelParamFlagRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-and-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Build exact native Lean 4.35 with both source-checked flags
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd psc0/packages/pskernel-c0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0ComputedMVarFlagRegression.lean
+          lake env lean --run test/C0LevelParamFlagRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          echo 'C0_LEVEL_PARAM_PURE_SOURCE_AND_NATIVE=PASS not_yet_routed_into_admission=true'

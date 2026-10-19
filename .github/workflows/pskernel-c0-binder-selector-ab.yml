@@ -9,6 +9,7 @@ on:
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
       - 'psc0/packages/pskernel-c0/test/C0LevelParamFlagRegression.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean'
+      - 'psc0/packages/pskernel-c0/test/C0AdaptiveInstantiationRegression.lean'
   pull_request:
     branches: [perf/pskernel-c0-pointer-structural-hash-bucket-20261018]
     paths:

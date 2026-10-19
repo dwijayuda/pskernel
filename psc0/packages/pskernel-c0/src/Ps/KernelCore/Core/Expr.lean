@@ -103,8 +103,9 @@ with
     | .lam _ ty body _ => ty.psKernelC0FVarFlag || body.psKernelC0FVarFlag
     | .forallE _ ty body _ => ty.psKernelC0FVarFlag || body.psKernelC0FVarFlag
     | .letE _ ty value body _ =>
-        ty.psKernelC0FVarFlag ||
-          value.psKernelC0FVarFlag || body.psKernelC0FVarFlag
+        if ty.psKernelC0FVarFlag then true
+        else if value.psKernelC0FVarFlag then true
+        else body.psKernelC0FVarFlag
     | .mdata _ body => body.psKernelC0FVarFlag
     | .proj _ _ body => body.psKernelC0FVarFlag
     | _ => false

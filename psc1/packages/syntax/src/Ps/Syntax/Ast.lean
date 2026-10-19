@@ -34,6 +34,16 @@ inductive PsSyntaxTerm where
       (fields : List (Prod PsSyntaxName PsSyntaxTerm))
       (span : PsSourceSpan)
   | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
+  | unary (operator : String) (operand : PsSyntaxTerm) (span : PsSourceSpan)
+  | binary (operator : String) (left right : PsSyntaxTerm) (span : PsSourceSpan)
+  | doE (body : PsSyntaxTerm) (span : PsSourceSpan)
+  | doBindE
+      (name : PsSyntaxName)
+      (type : Option PsSyntaxTerm)
+      (action body : PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | doThenE (action body : PsSyntaxTerm) (span : PsSourceSpan)
+  | doReturnE (value : PsSyntaxTerm) (span : PsSourceSpan)
   | lambda
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (body : PsSyntaxTerm)

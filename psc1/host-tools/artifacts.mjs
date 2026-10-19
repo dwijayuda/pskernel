@@ -313,6 +313,17 @@ export function publish(stage, output, kind) {
   if (info.leanVersion !== nativePin.version || info.leanCommit !== nativePin.commit) {
     fail('PSC1_BUNDLE_NATIVE_PIN_MISMATCH');
   }
+  const assurance = info.assurance ?? 'checked-logical';
+  const partialDeclarations = info.partialDeclarations ?? [];
+  if (!['checked-logical', 'ordinary-checked'].includes(assurance) ||
+      (info.behaviorallyVerified !== undefined && info.behaviorallyVerified !== false) ||
+      !Array.isArray(partialDeclarations) ||
+      !partialDeclarations.every(name => typeof name === 'string' && name.length > 0) ||
+      new Set(partialDeclarations).size !== partialDeclarations.length ||
+      (assurance === 'checked-logical' && partialDeclarations.length !== 0)) {
+    fail('PSC1_BUNDLE_ASSURANCE_INVALID');
+  }
+
   const admissions = fs.readFileSync(path.join(stage, 'admissions.json'));
   if (!admissions.length) fail('PSC1_BUNDLE_ADMISSIONS_MISSING');
   const root = path.dirname(info.entryPath);
@@ -350,6 +361,7 @@ export function publish(stage, output, kind) {
     schema: 'psc1-artifact-bundle/1', target: kind,
     profile: info.profile, logicalChecker: 'lean4:' + info.leanVersion,
     logicalCheckerCommit: info.leanCommit,
+    assurance, behaviorallyVerified: false, partialDeclarations,
     kernelAdmissionSha256: sha256(admissions),
     sourceClosureSha256: sha256(json(sourceRecords.map(({ path, sha256, bytes }) => ({ path, sha256, bytes })))),
     compiler: info.compiler ?? 'PSC1 native', publicNames: info.publicNames,

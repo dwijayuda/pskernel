@@ -321,6 +321,59 @@ def psElabRecursionWalkWithFuel
                       Except.ok (PsElabRecursionWalkResult.mk
                         (PsSyntaxTerm.app fnResult.term (Prod.fst args) span)
                         (psListAppend fnResult.changedIds (Prod.snd args)))
+        | PsSyntaxTerm.unary operator operand span =>
+            match smaller context operand with
+            | Except.error error => Except.error error
+            | Except.ok walked =>
+                Except.ok (PsElabRecursionWalkResult.mk
+                  (PsSyntaxTerm.unary operator walked.term span) walked.changedIds)
+        | PsSyntaxTerm.doE operand span =>
+            match smaller context operand with
+            | Except.error error => Except.error error
+            | Except.ok walked =>
+                Except.ok (PsElabRecursionWalkResult.mk
+                  (PsSyntaxTerm.doE walked.term span) walked.changedIds)
+        | PsSyntaxTerm.doReturnE operand span =>
+            match smaller context operand with
+            | Except.error error => Except.error error
+            | Except.ok walked =>
+                Except.ok (PsElabRecursionWalkResult.mk
+                  (PsSyntaxTerm.doReturnE walked.term span) walked.changedIds)
+        | PsSyntaxTerm.binary operator left right span =>
+            match smaller context left with
+            | Except.error error => Except.error error
+            | Except.ok leftResult =>
+                match smaller context right with
+                | Except.error error => Except.error error
+                | Except.ok rightResult =>
+                    Except.ok (PsElabRecursionWalkResult.mk
+                      (PsSyntaxTerm.binary operator leftResult.term rightResult.term span)
+                      (psListAppend leftResult.changedIds rightResult.changedIds))
+        | PsSyntaxTerm.doThenE left right span =>
+            match smaller context left with
+            | Except.error error => Except.error error
+            | Except.ok leftResult =>
+                match smaller context right with
+                | Except.error error => Except.error error
+                | Except.ok rightResult =>
+                    Except.ok (PsElabRecursionWalkResult.mk
+                      (PsSyntaxTerm.doThenE leftResult.term rightResult.term span)
+                      (psListAppend leftResult.changedIds rightResult.changedIds))
+        | PsSyntaxTerm.doBindE name type value body span =>
+            match psElabRecursionWalkOptionalType smaller context type with
+            | Except.error error => Except.error error
+            | Except.ok typeResult =>
+                match smaller context value with
+                | Except.error error => Except.error error
+                | Except.ok valueResult =>
+                    match smaller (psElabRecursionPushName context name) body with
+                    | Except.error error => Except.error error
+                    | Except.ok bodyResult =>
+                        Except.ok (PsElabRecursionWalkResult.mk
+                          (PsSyntaxTerm.doBindE name (Prod.fst typeResult)
+                            valueResult.term bodyResult.term span)
+                          (psListAppend (Prod.snd typeResult)
+                            (psListAppend valueResult.changedIds bodyResult.changedIds)))
         | PsSyntaxTerm.record fields span =>
             match psElabRecursionWalkFields smaller fields context with
             | Except.error error => Except.error error

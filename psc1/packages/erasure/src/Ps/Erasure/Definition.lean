@@ -486,13 +486,81 @@ def psErasureAppendDeclarations (declarations : List PsDeclaration) : List PsDec
       let smaller : List PsDeclaration -> List PsDeclaration := psErasureAppendDeclarations rest;
       fun (tail : List PsDeclaration) => List.cons declaration (smaller tail)
 
+-- Data metadata remains available unconditionally. Checked runtime prelude
+-- definitions are emitted only when referenced, including transitive calls.
+-- This is closure selection over Core identities, not an intrinsic name rule.
+def psErasureExprReferences (target : PsName) (expr : PsExpr) : Bool :=
+  match expr with
+  | PsExpr.constE name _ => psNameEq name target
+  | PsExpr.app fn argument =>
+      if psErasureExprReferences target fn then true
+      else psErasureExprReferences target argument
+  | PsExpr.lam _ type body _ =>
+      if psErasureExprReferences target type then true
+      else psErasureExprReferences target body
+  | PsExpr.forallE _ type body _ =>
+      if psErasureExprReferences target type then true
+      else psErasureExprReferences target body
+  | PsExpr.letE _ type value body =>
+      if psErasureExprReferences target type then true
+      else if psErasureExprReferences target value then true
+      else psErasureExprReferences target body
+  | PsExpr.proj name _ value =>
+      if psNameEq name target then true else psErasureExprReferences target value
+  | _ => false
+
+def psErasureDeclarationReferences (target : PsName) (declaration : PsDeclaration) : Bool :=
+  if psErasureExprReferences target (psDeclarationType declaration) then true
+  else
+    match declaration with
+    | PsDeclaration.definitionDecl _ _ _ value => psErasureExprReferences target value
+    | PsDeclaration.theoremDecl _ _ _ value => psErasureExprReferences target value
+    | PsDeclaration.partialDecl _ _ _ value => psErasureExprReferences target value
+    | PsDeclaration.opaqueDecl _ _ _ value => psErasureExprReferences target value
+    | _ => false
+
+def psErasureDeclarationsReference
+    (target : PsName) (declarations : List PsDeclaration) : Bool :=
+  match declarations with
+  | List.nil => false
+  | List.cons declaration rest =>
+      if psErasureDeclarationReferences target declaration then true
+      else psErasureDeclarationsReference target rest
+
+def psErasureSelectRuntimePrelude
+    (roots : List PsDeclaration) (candidates : List PsDeclaration) : List PsDeclaration :=
+  match candidates with
+  | List.nil => List.nil
+  | List.cons declaration rest =>
+      let tail := psErasureSelectRuntimePrelude roots rest;
+      match declaration with
+      | PsDeclaration.definitionDecl name _ _ _ =>
+          if psErasureDeclarationsReference name roots then List.cons declaration tail
+          else tail
+      | _ => List.cons declaration tail
+
+def psErasureRuntimePreludeClosure
+    (roots candidates : List PsDeclaration) (fuel : Nat) :
+    List PsDeclaration -> List PsDeclaration :=
+  match fuel with
+  | Nat.zero => fun (selected : List PsDeclaration) => selected
+  | Nat.succ remaining =>
+      fun (selected : List PsDeclaration) =>
+        let next := psErasureSelectRuntimePrelude
+          (psErasureAppendDeclarations roots selected) candidates;
+        if Nat.beq (psListLength next) (psListLength selected) then next
+        else psErasureRuntimePreludeClosure roots candidates remaining next
+
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     Except PsErasureError PsVerifiedIrModule :=
+  let selectedRuntimePrelude :=
+    psErasureRuntimePreludeClosure declarations runtimePreludeDeclarations
+      (Nat.succ (psListLength runtimePreludeDeclarations)) [];
   let runtimeDeclarations :=
-    psErasureAppendDeclarations runtimePreludeDeclarations declarations;
+    psErasureAppendDeclarations selectedRuntimePrelude declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
   let baseScope := psErasureScopeEmpty names;
   match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with
@@ -520,7 +588,7 @@ def psEraseCoreModuleWithRuntimePrelude
                   psEraseDefinitionsLoop
                     environment
                     preparedInductives.scope
-                    declarations
+                    runtimeDeclarations
                     [] with
               | Except.error error => Except.error error
               | Except.ok lowered =>

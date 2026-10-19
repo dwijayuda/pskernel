@@ -5,6 +5,7 @@ import Ps.Host.WasmComponent
 def psCliUsage : String :=
   "ProofScript PSC1 checked native compiler (Lean 4.35.0)\n" ++
   "usage:\n" ++
+  "  Add --assurance ordinary for checked partial execution; --assurance verified is unavailable and rejects.\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
   "  psc1 build <input.lean|input.ps> --target <js|ts|rust|wasm-core> --out <output>\n" ++
@@ -22,9 +23,55 @@ private def buildDefault (inputPath outputPath : String) : IO Unit := do
   else if outputPath.endsWith ".ts" then psHostDirectTypeScript inputPath outputPath
   else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust or Wasm")
 
-def main (args : List String) : IO Unit := do
-  if Lean.versionString != PsKernelLean.providerVersion || Lean.githash != PsKernelLean.providerCommit then
-    throw (IO.userError "PSC1_NATIVE_LEAN_PIN_MISMATCH: compiler runtime does not match the native source pin")
+/-- Parse the one explicit assurance option without changing command ordering.
+Duplicate, incomplete and unknown requests fail before any output is staged. -/
+private def psCliAssuranceArgs :
+    List String → Option PsHostAssurance → List String →
+    Except String (PsHostAssurance × List String)
+  | [], assurance, reversed => .ok (assurance.getD .checked, reversed.reverse)
+  | "--assurance" :: value :: rest, none, reversed =>
+      if value == "ordinary" then psCliAssuranceArgs rest (some .ordinary) reversed
+      else if value == "checked" then psCliAssuranceArgs rest (some .checked) reversed
+      else if value == "verified" then psCliAssuranceArgs rest (some .verified) reversed
+      else .error ("PSC1_ASSURANCE_UNKNOWN: " ++ value)
+  | "--assurance" :: _, some _, _ => .error "PSC1_ASSURANCE_DUPLICATE"
+  | ["--assurance"], none, _ => .error "PSC1_ASSURANCE_VALUE_REQUIRED"
+  | argument :: rest, assurance, reversed =>
+      psCliAssuranceArgs rest assurance (argument :: reversed)
+
+private def buildFor
+    (inputPath outputPath target : String) (assurance : PsHostAssurance) : IO Unit := do
+  let session ← psHostDirectPrepareFor inputPath assurance
+  if target == "js" then psHostDirectEmitJavaScript session outputPath
+  else if target == "ts" then psHostDirectEmitTypeScript session outputPath
+  else if target == "rust" then psHostDirectEmitRust session outputPath
+  else if target == "wasm-core" then psHostDirectEmitWasmCore session outputPath
+  else throw (IO.userError ("PSC1_TARGET_UNKNOWN: " ++ target))
+
+private def buildDefaultFor
+    (inputPath outputPath : String) (assurance : PsHostAssurance) : IO Unit := do
+  if outputPath.endsWith ".js" then buildFor inputPath outputPath "js" assurance
+  else if outputPath.endsWith ".ts" then buildFor inputPath outputPath "ts" assurance
+  else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust or Wasm")
+
+private def psCliExecution
+    (assurance : PsHostAssurance) (args : List String) : IO Unit := do
+  if assurance == .verified then
+    throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE: no behavioral certificate; no ordinary fallback")
+  match args with
+  | ["check", inputPath] => psHostDirectCheckFor inputPath assurance
+  | ["admissions", inputPath] => psHostDirectAdmissionsFor inputPath assurance
+  | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSourceFor inputPath assurance)
+  | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>
+      psHostDirectEmitWasmComponent (← psHostDirectPrepareFor inputPath assurance) exportName outputPath
+  | ["build", inputPath, "--target", target, "--out", outputPath] =>
+      buildFor inputPath outputPath target assurance
+  | ["build", inputPath, "--out", outputPath] | ["compile", inputPath, "--out", outputPath] =>
+      buildDefaultFor inputPath outputPath assurance
+  | _ => throw (IO.userError "PSC1_ASSURANCE_REQUIRES_EXECUTION_COMMAND: check, admissions, typescript, build or compile")
+
+
+private def psCliCheckedExecution (args : List String) : IO Unit := do
   match args with
   | [] | ["--help"] | ["-h"] => IO.println psCliUsage
   | ["--version"] => IO.println ("PSC1 0.1.0-psc1.1 (checked native; Lean " ++ Lean.versionString ++ ")")
@@ -50,3 +97,12 @@ def main (args : List String) : IO Unit := do
       buildDefault inputPath outputPath
   | ["wat", binaryPath, "--out", watPath] => psHostWasmBinaryToWat binaryPath watPath
   | _ => throw (IO.userError psCliUsage)
+
+def main (args : List String) : IO Unit := do
+  if Lean.versionString != PsKernelLean.providerVersion || Lean.githash != PsKernelLean.providerCommit then
+    throw (IO.userError "PSC1_NATIVE_LEAN_PIN_MISMATCH: compiler runtime does not match the native source pin")
+  let (assurance, command) ← match psCliAssuranceArgs args none [] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  if assurance == .checked then psCliCheckedExecution command
+  else psCliExecution assurance command

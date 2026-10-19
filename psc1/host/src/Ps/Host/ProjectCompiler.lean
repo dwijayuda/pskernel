@@ -252,6 +252,9 @@ def psHostInferErrorText : PsInferError -> String
 
 def psHostElabErrorText : PsElabError -> String
   | .fuelExhausted => "fuelExhausted"
+  | .doExpectedType => "doExpectedType: do requires an expected effect type"
+  | .doUnsupportedEffect => "doUnsupportedEffect: expected Id, Except, or checked CompilerM"
+  | .doStatementOutsideBlock => "doStatementOutsideBlock: statement requires an enclosing do block"
   | .emptyName => "emptyName"
   | .unknownName name =>
       "unknownName:" ++ psNameToString name

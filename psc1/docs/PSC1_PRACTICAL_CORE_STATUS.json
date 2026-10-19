@@ -14,7 +14,7 @@
   "implementationLean": {
     "version": "4.35.0",
     "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
-    "status": "migration-candidate-pending-isolated-CI"
+    "status": "isolated-native-migration-qualified"
   },
   "baselineEvidence": {
     "implementationCommit": "f933691a1d6fa578c59623636afbb02119909837",
@@ -24,8 +24,14 @@
   "currentMilestones": [
     {
       "id": "lean-4.35-native-migration",
+      "status": "qualified",
+      "commit": "1bd0854f735cf8d0c8f3d07f705195c131acbd61",
+      "runId": 39344155280
+    },
+    {
+      "id": "practical-core-slice-1",
       "status": "implementation-candidate",
-      "qualification": "pending isolated Linux run; no feature evidence implied"
+      "qualification": "pending focused Linux compile, independent admission and actual target execution"
     }
   ],
   "stages": [
@@ -39,7 +45,7 @@
     {
       "id": "operators",
       "priority": "P0",
-      "status": "missing",
+      "status": "implementation-candidate",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
@@ -47,7 +53,7 @@
         "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
         "psc1/packages/environment/src/Ps/Environment/Prelude.lean"
       ],
-      "notes": "Named exact primitives exist; no precedence parser; proposition comparisons need admitted decision path.",
+      "notes": "Candidate fixed-precedence Nat +,-,*,/,% and Int +,-,*,unary -, Bool !/&&/|| and selected equality. Prop-valued ordering (<, <=, >, >=) remains unsupported; family incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -60,14 +66,14 @@
     {
       "id": "local-inference",
       "priority": "P0",
-      "status": "partial",
+      "status": "implementation-candidate",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/elab/src/Ps/Elab/Term.lean",
         "psc1/test/BootstrapTests.lean"
       ],
-      "notes": "psElabLet infers omitted local types; new focused cross-target evidence pending.",
+      "notes": "Existing typed/inferred locals retained; new contextual-call interaction fixtures and actual target matrix pending.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -80,7 +86,7 @@
     {
       "id": "do",
       "priority": "P0",
-      "status": "partial",
+      "status": "implementation-candidate",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
@@ -88,7 +94,7 @@
         "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
         "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean"
       ],
-      "notes": "Native parser hardcodes CompilerM sugar; PS do explicitly rejected; no general typed procedural family.",
+      "notes": "Candidate shared typed sequencing, immutable lets/binds, Unit actions and terminal return for monomorphic Type0 Id, Except and actual checked CompilerM. No identity fallback; higher-universe Id/early exits/mutation/loops remain incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -158,13 +164,13 @@
     {
       "id": "return",
       "priority": "P0",
-      "status": "partial",
+      "status": "implementation-candidate",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean"
       ],
-      "notes": "Terminal native compilerPure sugar; early return through branches/loops/handlers absent.",
+      "notes": "Candidate terminal return in selected typed do families. Branch/loop/handler early return remains unimplemented.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -177,7 +183,7 @@
     {
       "id": "partial-def",
       "priority": "P0",
-      "status": "blocked",
+      "status": "implementation-candidate",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
@@ -185,7 +191,7 @@
         "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
         "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean"
       ],
-      "notes": "Partial syntax/elaboration/erasure exists; canonical admission rejects every partial/opaque.",
+      "notes": "Candidate explicit --assurance ordinary: public safe opaque witness plus independently checked exact body, immutable graph binding, original-body erasure, explicit unavailability of verified execution. Focused CI pending; total recursive/loop family scope remains incomplete.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -258,14 +264,14 @@
     {
       "id": "call-inference",
       "priority": "P1",
-      "status": "partial",
+      "status": "implementation-candidate",
       "specified": true,
       "complete": false,
       "sourceEvidence": [
         "psc1/packages/elab/src/Ps/Elab/Term.lean",
         "psc1/packages/meta/src/Ps/Meta/Unify.lean"
       ],
-      "notes": "Implicit argument unification exists; contextual numeric literals default before expected result is applied.",
+      "notes": "Candidate transactional expected-result constraints before nondependent explicit call arguments. Dependent/intervening-implicit telescopes retain sequential checking. Positive/negative tests and target execution pending.",
       "targets": {
         "js": "not-qualified-for-complete-family",
         "ts": "not-qualified-for-complete-family",
@@ -319,9 +325,9 @@
   ],
   "assurance": {
     "currentArtifact": "psc1-checked-direct/1",
-    "endToEndVerifiedMode": "unavailable",
-    "partialExecution": "blocked",
-    "effects": "not-enabled",
+    "endToEndVerifiedMode": "explicit --assurance verified rejects; no ordinary fallback",
+    "partialExecution": "candidate ordinary-checked path; exact new CI qualification pending",
+    "effects": "candidate Type0 Id/Except/checked CompilerM sequencing; no general IO",
     "directAdmissionProvider": "independent official Lean",
     "ownedKernel": "source integrated; separately native-tested"
   },

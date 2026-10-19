@@ -3,12 +3,26 @@ import Ps.Host.LeanChecked
 import Ps.Host.SourceSnapshot
 import Ps.Host.ArtifactBundle
 import Ps.Host.DirectSourceMap
+import Ps.Compiler.Ordinary
 import Ps.CompilerIr.Validate
 import Ps.BackendJs.Print
 import Ps.BackendRust.Module
 import Ps.BackendWasm.Binary
 import Ps.BackendWasm.Lower
 import Ps.BackendTs.Module
+
+/-- Requested execution assurance. The current direct pipeline proves admission
+of the logical declarations; it has no behavioral verification certificate. -/
+inductive PsHostAssurance where
+  | checked
+  | ordinary
+  | verified
+  deriving BEq
+
+def psHostAssuranceName : PsHostAssurance → String
+  | .checked => "checked-logical"
+  | .ordinary => "ordinary-checked"
+  | .verified => "verified"
 
 /-- Host-owned immutable accepted input. Source admission does not impose the
 scalar ECMAScript ABI on Rust or core Wasm. The constructor is module-private. -/
@@ -20,6 +34,8 @@ structure PsHostDirectPrepared where
   declarationNames : List (PsName × String)
   publicNames : List String
   authoredTypeNames : List String
+  assurance : PsHostAssurance
+  partialNames : List PsName
 
 private def checkedInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerAdmissionReadyModule × String) := do
@@ -32,6 +48,21 @@ private def checkedInput (inputPath : String) :
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_PREPARATION_FAILED: phase=canonical-core")
   let admissions ← match ← psHostLeanCheckPrepared prepared with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError ("PSC1_KERNEL_ADMISSION_FAILED: " ++ reason))
+  return (captured, prepared, admissions)
+
+private def ordinaryInput (inputPath : String) :
+    IO (PsHostCapturedProject × PsCompilerOrdinaryModule × String) := do
+  let captured ← psHostCaptureProject psSelfHostProdPreludeEnvironment inputPath
+  let elaborated : PsElabModuleResult := {
+    environment := captured.environment
+    declarations := captured.declarations
+  }
+  let prepared ← match psCompilerPrepareOrdinary elaborated with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  let admissions ← match ← psHostLeanCheckPrepared prepared.logical with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_KERNEL_ADMISSION_FAILED: " ++ reason))
   return (captured, prepared, admissions)
@@ -72,20 +103,32 @@ private def runtimeName
   let entry ← names.find? (fun entry => psNameEq entry.1 coreName)
   return entry.2
 
-def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared := do
-  let (captured, prepared, admissions) ← checkedInput inputPath
-  let raw ← match psCompilerVerifiedIrFromPrepared prepared with
-    | .ok value => pure value
-    | .error _ => throw (IO.userError "PSC1_ERASURE_FAILED: phase=runtime-erasure")
+def psHostDirectPrepareFor (inputPath : String) (assurance : PsHostAssurance) :
+    IO PsHostDirectPrepared := do
+  let (captured, declarations, admissions, raw, partialNames) ← match assurance with
+    | .verified =>
+        throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE: no behavioral certificate; no ordinary fallback")
+    | .checked => do
+        let (captured, prepared, admissions) ← checkedInput inputPath
+        let raw ← match psCompilerVerifiedIrFromPrepared prepared with
+          | .ok value => pure value
+          | .error _ => throw (IO.userError "PSC1_ERASURE_FAILED: phase=runtime-erasure")
+        pure (captured, prepared.declarations, admissions, raw, [])
+    | .ordinary => do
+        let (captured, prepared, admissions) ← ordinaryInput inputPath
+        let raw ← match psCompilerOrdinaryIr prepared with
+          | .ok value => pure value
+          | .error reason => throw (IO.userError reason)
+        pure (captured, prepared.source.declarations, admissions, raw, prepared.partialNames)
   let validated ← match psStrictValidateModule raw with
     | .ok value => pure value
     | .error _ => throw (IO.userError ("PSC1_IR_VALIDATION_FAILED: " ++ irFailureText raw))
   let some entry := captured.sources.find? (fun source => source.path == captured.entryPath)
     | throw (IO.userError "PSC1_ENTRY_SNAPSHOT_MISSING")
-  -- Exactly erasure's collision-aware Core-name mapping, including its runtime
-  -- prelude. Source spellings are not guessed to be target symbol identities.
+  -- Names come from the original runtime graph, never from inhabitant witnesses
+  -- or the logical body-marker declarations used for independent admission.
   let names := psErasureDeclarationNames
-    (psSelfHostRuntimePreludeDeclarationsWithProd ++ prepared.declarations)
+    (psSelfHostRuntimePreludeDeclarationsWithProd ++ declarations)
   let authoredNames := entry.parsed.declarations.filterMap (runtimeName names)
   let publicNames := (raw.declarations.filter (fun d => authoredNames.contains d.name)).map (fun d => d.name)
   let authoredTypeNames := (raw.structures.map (fun s => s.name) ++ raw.inductives.map (fun i => i.name)).filter authoredNames.contains
@@ -96,7 +139,12 @@ def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared := do
     declarationNames := names
     publicNames := publicNames
     authoredTypeNames := authoredTypeNames
+    assurance := assurance
+    partialNames := partialNames
   }
+
+def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared :=
+  psHostDirectPrepareFor inputPath .checked
 
 def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
   return (← psHostDirectPrepare inputPath).validated
@@ -108,6 +156,25 @@ def psHostDirectCheck (inputPath : String) : IO Unit := do
 def psHostDirectAdmissions (inputPath : String) : IO Unit := do
   let (_, _, admissions) ← checkedInput inputPath
   IO.print admissions
+
+def psHostDirectCheckFor (inputPath : String) (assurance : PsHostAssurance) : IO Unit := do
+  match assurance with
+  | .verified =>
+      throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE: no behavioral certificate; no ordinary fallback")
+  | .checked => psHostDirectCheck inputPath
+  | .ordinary =>
+      let (_, prepared, _) ← ordinaryInput inputPath
+      IO.println ("PSC1_KERNEL_CHECK: PASS (" ++ toString prepared.logical.declarations.length ++
+        " logical declarations; ordinary-checked; behavioral verification unavailable)")
+
+def psHostDirectAdmissionsFor (inputPath : String) (assurance : PsHostAssurance) : IO Unit := do
+  match assurance with
+  | .verified =>
+      throw (IO.userError "PSC1_VERIFIED_EXECUTION_UNAVAILABLE: no behavioral certificate; no ordinary fallback")
+  | .checked => psHostDirectAdmissions inputPath
+  | .ordinary =>
+      let (_, _, admissions) ← ordinaryInput inputPath
+      IO.print admissions
 
 def psHostDirectType (value : PsVerifiedIrType) : Except String String :=
   match value with
@@ -171,6 +238,9 @@ def psHostDirectWriteSelectedProvenance
   let metadata := "{\"profile\":\"psc1-checked-direct/1\",\"compiler\":\"PSC1 native / Lean 4.35.0\"," ++
     "\"leanVersion\":" ++ psJsonQuote Lean.versionString ++
     ",\"leanCommit\":" ++ psJsonQuote Lean.githash ++
+    ",\"assurance\":" ++ psJsonQuote (psHostAssuranceName session.assurance) ++
+    ",\"behaviorallyVerified\":false" ++
+    ",\"partialDeclarations\":" ++ psJsonArray (session.partialNames.map (fun name => psJsonQuote (psNameToString name))) ++
     ",\"entryPath\":" ++ psJsonQuote session.captured.entryPath ++
     ",\"publicNames\":" ++ psJsonArray (selected.map psJsonQuote) ++
     ",\"sources\":" ++ psJsonArray (session.captured.sources.map (sourceJson session)) ++ "}\n"
@@ -229,6 +299,11 @@ private def tsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModul
 
 def psHostDirectTypeScriptSource (inputPath : String) : IO String := do
   let session ← psHostDirectPrepare inputPath
+  tsSource session (← ecmaPlan session)
+
+def psHostDirectTypeScriptSourceFor
+    (inputPath : String) (assurance : PsHostAssurance) : IO String := do
+  let session ← psHostDirectPrepareFor inputPath assurance
   tsSource session (← ecmaPlan session)
 
 private def emitEcma (session : PsHostDirectPrepared) (outputPath kind : String) : IO Unit := do

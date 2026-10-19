@@ -54,13 +54,15 @@
     "version": "4.35.0",
     "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
   },
-  "pinMigration": "active source migrated to stable 4.35.0; isolated Linux qualification pending",
+  "pinMigration": "qualified exact native compiler/provider/owned-kernel/backend migration at 1bd0854f735cf8d0c8f3d07f705195c131acbd61, Linux run 39344155280",
   "assurance": {
-    "ordinary": "checked-direct artifact; no behavioral certification",
-    "verified": "unavailable; must reject explicit verified requests until evidence path exists",
-    "partial": "not yet independently admitted for direct execution"
+    "ordinary": "candidate ordinary-checked logical admission plus exact separately typed runtime body; no behavioral certification",
+    "verified": "unavailable; explicit request fails without fallback",
+    "partial": "selected first-order and local-inhabitant functions; independent exact body admission and target qualification pending"
   },
   "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
   "activeNativeSourcePin": "NATIVE_SOURCE_PIN.json",
-  "archivedArtifacts": "Prebuilt 4.34 artifacts retain their original pin and are not the active native provider"
+  "archivedArtifacts": "Prebuilt 4.34 artifacts retain their original pin and are not the active native provider",
+  "practicalCoreSlice": "docs/PSC1_PRACTICAL_CORE_SLICE_1.md",
+  "doValueUniverse": "Type 0 only for the newly selected Id/Except/CompilerM surface"
 }

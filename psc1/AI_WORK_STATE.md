@@ -19,25 +19,35 @@ is preserved in `docs/history/AI_WORK_STATE_BEFORE_PRACTICAL_CORE_2026-10-20.md`
 
 ## Current implementation/evidence boundary
 
-Native source pin migration implemented; isolated Linux qualification is pending.
-No new language implementation has been qualified.
-The governing reference blob is `694115223777599ba28ee175e14bb642b7b6aa4b`
-from PSC0 commit `33676076bcda7b0de5ec1f9803f49b8b1d28a058`; PSC0 is read-only
-for this workstream.
+**Lean 4.35 migration qualified separately** at
+`1bd0854f735cf8d0c8f3d07f705195c131acbd61`, Linux run
+[39344155280](https://github.com/dwijayuda/pskernel/actions/runs/39344155280).
+Actual compiler/provider commit is `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Native identity and bundle provenance verify that commit. Historical 4.34 assets
+retain their original pins. The preserved focused suite passed (14 host tests,
+IR/map/provider/host-boundary tests, native owned-kernel regressions, 24 backend
+groups, four source-edge groups). Earlier migration attempts found and fixed the
+removed String.dropRight API and CLI layout; their failed runs are retained.
 
-Normative Lean target is stable 4.35.0 at
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The active source now pins that exact compiler and provider commit, verifies both
-native launcher identity and bundle provenance, and refuses the removed native
-reduction capability. The separate migration run must qualify these changes before
-language implementation is included. Historical 4.34 assets keep their original pins. Do not label this transitional state
-completed v7.2 conformance.
+**Slice 1 implementation is now a candidate, with qualification pending.**
+See `docs/PSC1_PRACTICAL_CORE_SLICE_1.md`. It adds transactional contextual call
+inference; selected operator precedence/lowering; typed Type0 Id/Except/checked
+CompilerM sequencing; and explicit ordinary partial execution with opaque
+constructive witnesses and independently checked exact body declarations.
+The new test executables and actual JS/TS/Rust/core/component runtime suites
+must pass at the implementation commit before any feature is marked qualified.
 
-Source audit found reusable inferred lets, implicit unification, products and typed
-Array operations. It also found expected result constraints reach call arguments
-too late; native do only expands to old CompilerM helpers while PS do rejects;
-namespace scopes/literal collection syntax/control loops are absent; partial
-declarations are rejected by canonical independent admission. Parsing partial
-bodies is not useful ordinary checked execution.
+The ordinary witness constructor has a shared total attempt budget across
+product children and failed Except alternatives. This limits compilation work;
+it does not impose runtime fuel or alter divergence behavior. The divergence
+test uses an external child-process timeout.
+
+The governing v7.2 reference blob remains
+`694115223777599ba28ee175e14bb642b7b6aa4b`, PSC0 commit
+`33676076bcda7b0de5ec1f9803f49b8b1d28a058`. PSC0 remains read-only.
+Every approved family remains explicitly incomplete. In particular ordering
+`a < b`, early branch returns, mutation, for/while, collection/pattern syntax,
+typed error syntax, namespace declarations and source IO remain later work.
 
 ## Next dependency-coherent slices
 

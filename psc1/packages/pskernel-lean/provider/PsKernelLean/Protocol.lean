@@ -116,6 +116,23 @@ def decodeTheorem (value : PsJsonValue) :
     value := body
   }
 
+def decodeOpaque (value : PsJsonValue) :
+    Except PsKernelLeanError Lean.Declaration := do
+  let levelParams ← decodeLevelParamList (← jsonField value "lp")
+  let name ← decodeLeanName (← jsonField value "n")
+  let safety ← jsonString "opaque safety must be a string" (← jsonField value "s")
+  if safety != "safe" then
+    throw (malformedRequest "unsafe opaque declarations are forbidden")
+  let type ← decodeLeanExpr (← jsonField value "t")
+  let body ← decodeLeanExpr (← jsonField value "v")
+  pure <| .opaqueDecl {
+    name := name
+    levelParams := levelParams
+    type := type
+    value := body
+    isUnsafe := false
+  }
+
 def decodeConstructor (value : PsJsonValue) :
     Except PsKernelLeanError Lean.Constructor := do
   let name ← decodeLeanName (← jsonField value "n")
@@ -149,6 +166,8 @@ def decodeConstantAdmission (value : PsJsonValue) :
     decodeDefinition value
   else if declarationKind == "theorem" then
     decodeTheorem value
+  else if declarationKind == "opaque" then
+    decodeOpaque value
   else
     throw (malformedRequest "unsupported constant declaration kind")
 

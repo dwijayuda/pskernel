@@ -116,3 +116,97 @@ def psPrintArrowChain
         binder
         " -> "
         (psPrintArrowChain rest body)
+
+-- Print statement spines through the same term callback as their enclosing
+-- frontend. Native Lean uses semicolons inside braces; ProofScript uses LF.
+def psPrintDoBinding
+    (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (name : PsSyntaxName) (annotation : Option PsSyntaxTerm)
+    (separator : String) (value : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match psPrintSyntaxName name with
+  | Except.error error => Except.error error
+  | Except.ok printedName =>
+      let printedType :=
+        match annotation with
+        | Option.none => Except.ok ""
+        | Option.some type =>
+            match printTerm type with
+            | Except.error error => Except.error error
+            | Except.ok printed => Except.ok (psPrintCommonConcat2 " : " printed);
+      match printedType with
+      | Except.error error => Except.error error
+      | Except.ok printedType =>
+          match printTerm value with
+          | Except.error error => Except.error error
+          | Except.ok printedValue =>
+              let groupedValue :=
+                if psSyntaxTermSimpleForApplication value then printedValue
+                else psPrintCommonConcat3 "(" printedValue ")";
+              Except.ok (psPrintJoin ""
+                ["let ", printedName, printedType, separator, groupedValue])
+
+def psPrintDoBody
+    (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (separator : String) (fuel : Nat) :
+    PsSyntaxTerm -> Except PsSourcePrintError String :=
+  match fuel with
+  | Nat.zero =>
+      fun (_body : PsSyntaxTerm) => Except.error PsSourcePrintError.fuelExhausted
+  | Nat.succ remaining =>
+      fun (body : PsSyntaxTerm) =>
+        let smaller : PsSyntaxTerm -> Except PsSourcePrintError String :=
+          psPrintDoBody printTerm separator remaining;
+        let withTail :
+            Except PsSourcePrintError String -> PsSyntaxTerm ->
+            Except PsSourcePrintError String :=
+          fun (head : Except PsSourcePrintError String) (tail : PsSyntaxTerm) =>
+            match head with
+            | Except.error error => Except.error error
+            | Except.ok printedHead =>
+                match smaller tail with
+                | Except.error error => Except.error error
+                | Except.ok printedTail =>
+                    Except.ok (psPrintCommonConcat3 printedHead separator printedTail);
+        match body with
+        | PsSyntaxTerm.letE name annotation value tail _ =>
+            withTail (psPrintDoBinding printTerm name annotation " := " value) tail
+        | PsSyntaxTerm.doBindE name annotation value tail _ =>
+            withTail (psPrintDoBinding printTerm name annotation " <- " value) tail
+        | PsSyntaxTerm.doThenE action tail _ =>
+            let printedAction :=
+              match printTerm action with
+              | Except.error error => Except.error error
+              | Except.ok printed =>
+                  if psSyntaxTermSimpleForApplication action then Except.ok printed
+                  else Except.ok (psPrintCommonConcat3 "(" printed ")");
+            withTail printedAction tail
+        | PsSyntaxTerm.doReturnE value _ =>
+            match printTerm value with
+            | Except.error error => Except.error error
+            | Except.ok printed =>
+                let groupedValue :=
+                  if psSyntaxTermSimpleForApplication value then printed
+                  else psPrintCommonConcat3 "(" printed ")";
+                Except.ok (psPrintCommonConcat2 "return " groupedValue)
+        | _ => printTerm body
+
+def psPrintUnaryOperator
+    (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (operator : String) (operand : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match printTerm operand with
+  | Except.error error => Except.error error
+  | Except.ok printed => Except.ok (psPrintJoin "" ["(", operator, printed, ")"])
+
+def psPrintBinaryOperator
+    (printTerm : PsSyntaxTerm -> Except PsSourcePrintError String)
+    (operator : String) (left right : PsSyntaxTerm) :
+    Except PsSourcePrintError String :=
+  match printTerm left with
+  | Except.error error => Except.error error
+  | Except.ok printedLeft =>
+      match printTerm right with
+      | Except.error error => Except.error error
+      | Except.ok printedRight =>
+          Except.ok (psPrintJoin "" ["(", printedLeft, " ", operator, " ", printedRight, ")"])

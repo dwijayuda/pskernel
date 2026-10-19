@@ -106,6 +106,25 @@ jobs:
           export PSC1_NATIVE="$PWD/.lake/build/bin/psc1"
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-source-edge-tests.mjs
+      - name: Compile Practical Core focused regressions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build contextual_inference_tests psc1_do_tests psc1_operator_tests psc1_ordinary_tests
+      - name: Execute Practical Core admission and IR regressions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          .lake/build/bin/contextual_inference_tests
+          .lake/build/bin/psc1_do_tests
+          .lake/build/bin/psc1_operator_tests
+          .lake/build/bin/psc1_ordinary_tests
+      - name: Execute selected Practical Core forms on real targets
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node scripts/practical-forms-backend-tests.mjs
+          node scripts/practical-ordinary-tests.mjs
       - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4

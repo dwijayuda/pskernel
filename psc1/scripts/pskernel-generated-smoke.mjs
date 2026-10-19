@@ -47,4 +47,16 @@ if (!names || !expr || !levels || typeof expr.fvar !== "function") {
 expect("closed sort eligible", cacheEligible(expr.sort(levels.zero)) === true);
 expect("free variable never cached", cacheEligible(expr.fvar(names.anonymous)) === false);
 
+const inst1 = requireExport("psKernelExprInstantiate1");
+const eq = requireExport("psKernelExprEq");
+const sort0 = expr.sort(levels.zero);
+expect("C0 one-variable beta substitution", eq(inst1(expr.bvar(0n), sort0), sort0));
+expect("C0 outer de Bruijn decrement", eq(inst1(expr.bvar(2n), sort0), expr.bvar(1n)));
+const openApp = expr.app(expr.bvar(0n), expr.bvar(2n));
+const expectedApp = expr.app(sort0, expr.bvar(1n));
+expect("C0 app substitution in generated JS",
+  eq(inst1(openApp, sort0), expectedApp));
+expect("C0 closed app retained",
+  eq(inst1(expr.app(sort0, sort0), sort0), expr.app(sort0, sort0)));
+
 console.log("PSKERNEL_GENERATED_SMOKE: PASS");

@@ -7,6 +7,8 @@ on:
     paths:
       - psc1/packages/pskernel-core/**
       - psc1/test/PsKernelCoreRegression.lean
+      - psc1/test/PsKernelInstantiatePerformance.lean
+      - psc1/test/PsKernelCorePerformance.lean
       - psc1/kernel-lakefile.lean
       - psc1/check-psc1-source.mjs
       - psc1/scripts/pskernel-generated-smoke.mjs
@@ -33,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
-          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf
       - name: Run native safety and semantics regression
         shell: bash
         working-directory: psc1
@@ -46,6 +48,12 @@ jobs:
         run: |
           set -euo pipefail
           lake -f kernel-lakefile.lean exe psc1_kernel_perf
+      - name: Run native C0 single-substitution parity and performance comparison
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_instantiate_perf
 
   psc1-portability:
     runs-on: ubuntu-latest

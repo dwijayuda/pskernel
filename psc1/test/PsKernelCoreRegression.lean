@@ -33,6 +33,21 @@ private def checkBetaPort (caseName : String) (fn : PsKernelExpr)
   requireKernel caseName
     (psKernelExprEq (betaReferencePlan fn args) (betaOptimizedPlan fn args))
 
+
+-- Exact prior PSC1 implementation retained only as a differential oracle.
+private def inst1BeforeC0 (term replacement : PsKernelExpr) : PsKernelExpr :=
+  if psKernelExprHasLooseBVar term then
+    psKernelExprInstantiate term (List.cons replacement List.nil)
+  else
+    term
+
+private def requireInst1Parity (caseName : String)
+    (term replacement : PsKernelExpr) : IO Unit := do
+  requireKernel caseName
+    (psKernelExprEq
+      (inst1BeforeC0 term replacement)
+      (psKernelExprInstantiate1 term replacement))
+
 def main : IO Unit := do
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
   let localExpr := PsKernelExpr.fvar fName
@@ -102,6 +117,33 @@ def main : IO Unit := do
      let newer := psKernelExprConsumeLambdaSpine twoLams twoArgs 0
      Prod.snd old == Prod.snd newer &&
        psKernelExprEq (Prod.fst old) (Prod.fst newer))
+
+  let subOpen := PsKernelExpr.app
+    (PsKernelExpr.bvar 0) (PsKernelExpr.bvar 2)
+  let subClosed := PsKernelExpr.app sort0 sort0
+  let subLam := PsKernelExpr.lam betaName sort0
+    (PsKernelExpr.app (PsKernelExpr.bvar 1) (PsKernelExpr.bvar 0))
+    PsKernelBinderInfo.default
+  let subForall := PsKernelExpr.forallE betaName sort0
+    (PsKernelExpr.app (PsKernelExpr.bvar 1) (PsKernelExpr.bvar 0))
+    PsKernelBinderInfo.default
+  let subLet := PsKernelExpr.letE betaName sort0
+    (PsKernelExpr.bvar 0) (PsKernelExpr.bvar 1) false
+  let subMeta := PsKernelExpr.mdata 0 subOpen
+  let subProj := PsKernelExpr.proj betaName 0 subOpen
+  requireInst1Parity "C0 inst1 bound variable zero" (PsKernelExpr.bvar 0) sort0
+  requireInst1Parity "C0 inst1 shifts outer variable" (PsKernelExpr.bvar 2) sort0
+  requireInst1Parity "C0 inst1 open application" subOpen sort0
+  requireInst1Parity "C0 inst1 unchanged closed application" subClosed sort0
+  requireInst1Parity "C0 inst1 open lambda capture avoidance" subLam (PsKernelExpr.bvar 0)
+  requireInst1Parity "C0 inst1 open dependent forall" subForall (PsKernelExpr.bvar 0)
+  requireInst1Parity "C0 inst1 let binder" subLet (PsKernelExpr.bvar 2)
+  requireInst1Parity "C0 inst1 metadata" subMeta (PsKernelExpr.bvar 0)
+  requireInst1Parity "C0 inst1 projection" subProj (PsKernelExpr.bvar 0)
+  requireInst1Parity "C0 inst1 nested binders" twoLams (PsKernelExpr.bvar 2)
+  requireInst1Parity "C0 inst1 closed binder fast path" constantLam sort0
+  requireInst1Parity "C0 inst1 replacement lifts correctly"
+    subLam (PsKernelExpr.app (PsKernelExpr.bvar 0) (PsKernelExpr.bvar 1))
   let sample := "héllo"
   let p := String.Pos.Raw.mk 0
   requireKernel "Lean 4.34 string atEnd alias parity"

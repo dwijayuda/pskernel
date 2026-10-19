@@ -215,15 +215,162 @@ def psKernelExprInstantiate
     subst
     0
 
+/-
+C0's structurally recursive single-variable substitution.  The fuel-based
+general substitution above remains unchanged; it is also an independent
+reference for native differential checks.  Structural recursion terminates
+on immediate subexpressions and preserves the same de Bruijn capture avoidance.
+-/
+def psKernelC0ExprInstantiateOneChanged
+    (expr : PsKernelExpr)
+    (replacement : PsKernelExpr)
+    (offset : Nat) :
+    Prod PsKernelExpr Bool :=
+        match expr with
+        | PsKernelExpr.bvar index =>
+            if psKernelNatLt index offset then
+              Prod.mk expr false
+            else if Nat.beq index offset then
+              Prod.mk (psKernelExprLiftLooseBVars replacement 0 offset) true
+            else
+              Prod.mk (PsKernelExpr.bvar (Nat.sub index 1)) true
+        | PsKernelExpr.app fn arg =>
+            let fnResult := psKernelC0ExprInstantiateOneChanged fn replacement offset;
+            let argResult := psKernelC0ExprInstantiateOneChanged arg replacement offset;
+            if (Prod.snd fnResult) then
+              Prod.mk
+                (PsKernelExpr.app
+                  (Prod.fst fnResult)
+                  (Prod.fst argResult))
+                true
+            else if (Prod.snd argResult) then
+              Prod.mk
+                (PsKernelExpr.app
+                  (Prod.fst fnResult)
+                  (Prod.fst argResult))
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.lam name type body binderInfo =>
+            let typeResult := psKernelC0ExprInstantiateOneChanged type replacement offset;
+            let bodyResult := psKernelC0ExprInstantiateOneChanged body replacement (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.lam
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.lam
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.forallE name type body binderInfo =>
+            let typeResult := psKernelC0ExprInstantiateOneChanged type replacement offset;
+            let bodyResult := psKernelC0ExprInstantiateOneChanged body replacement (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.forallE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.forallE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst bodyResult)
+                  binderInfo)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.letE name type value body nondep =>
+            let typeResult := psKernelC0ExprInstantiateOneChanged type replacement offset;
+            let valueResult := psKernelC0ExprInstantiateOneChanged value replacement offset;
+            let bodyResult := psKernelC0ExprInstantiateOneChanged body replacement (Nat.succ offset);
+            if (Prod.snd typeResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else if (Prod.snd valueResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.letE
+                  name
+                  (Prod.fst typeResult)
+                  (Prod.fst valueResult)
+                  (Prod.fst bodyResult)
+                  nondep)
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.mdata metadata body =>
+            let bodyResult := psKernelC0ExprInstantiateOneChanged body replacement offset;
+            if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.mdata
+                  metadata
+                  (Prod.fst bodyResult))
+                true
+            else
+              Prod.mk expr false
+        | PsKernelExpr.proj typeName index body =>
+            let bodyResult := psKernelC0ExprInstantiateOneChanged body replacement offset;
+            if (Prod.snd bodyResult) then
+              Prod.mk
+                (PsKernelExpr.proj
+                  typeName
+                  index
+                  (Prod.fst bodyResult))
+                true
+            else
+              Prod.mk expr false
+        | _ =>
+            Prod.mk expr false
+
 def psKernelExprInstantiate1
     (expr : PsKernelExpr)
     (replacement : PsKernelExpr) : PsKernelExpr :=
-  if psKernelExprHasLooseBVar expr then
-    psKernelExprInstantiate
-      expr
-      (List.cons replacement List.nil)
-  else
-    expr
+  match expr with
+  | PsKernelExpr.lam _ _ _ _ =>
+      if psKernelExprHasLooseBVar expr then
+        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
+      else
+        expr
+  | PsKernelExpr.forallE _ _ _ _ =>
+      if psKernelExprHasLooseBVar expr then
+        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
+      else
+        expr
+  | PsKernelExpr.letE _ _ _ _ _ =>
+      if psKernelExprHasLooseBVar expr then
+        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
+      else
+        expr
+  | _ =>
+      Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
 
 def psKernelExprInstantiateRev
     (expr : PsKernelExpr)

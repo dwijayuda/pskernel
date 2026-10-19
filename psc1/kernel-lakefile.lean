@@ -98,3 +98,7 @@ lean_exe psc1_kernel_regression where
 lean_exe psc1_kernel_perf where
   srcDir := "test"
   root := `PsKernelCorePerformance
+
+lean_exe psc1_kernel_instantiate_perf where
+  srcDir := "test"
+  root := `PsKernelInstantiatePerformance

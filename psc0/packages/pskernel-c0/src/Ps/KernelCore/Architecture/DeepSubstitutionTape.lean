@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.DeepBinderFrames
+import Ps.KernelCore.Architecture.DeepInferenceFrames
 
 /-!
 Non-admitting lazy capture-avoiding substitution tape.

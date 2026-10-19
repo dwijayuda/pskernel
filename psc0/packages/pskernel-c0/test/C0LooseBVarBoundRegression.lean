@@ -48,6 +48,13 @@ private theorem c0_bound_blt_pred (o a : Nat) :
   apply c0_bool_eq_of_true_iff
   simpa only [Nat.blt_eq] using c0_bound_lt_pred o a
 
+private theorem c0_bound_blt_zero (n : Nat) : Nat.blt n 0 = false := by
+  cases h : Nat.blt n 0 with
+  | false => rfl
+  | true =>
+      have impossible : n < 0 := (Nat.blt_eq).mp h
+      omega
+
 /-- All-input complete equivalence to the original recursive source
     algorithm, including every binding-depth and let-domain case.
     This proof is checked by Lean 4.35.0, not runtime metadata. -/
@@ -97,7 +104,7 @@ theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
   | _ =>
       simp [psKernelC0HasLooseBVarFast,
         PsKernelExpr.psKernelC0LooseBVarBound,
-        psKernelExprHasLooseAt, c0_bound_lt_succ, c0_bound_blt_ble]
+        psKernelExprHasLooseAt, c0_bound_blt_ble, c0_bound_blt_zero]
 
 
 /-!

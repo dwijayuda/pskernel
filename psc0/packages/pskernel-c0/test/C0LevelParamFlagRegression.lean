@@ -43,6 +43,12 @@ def main : IO Unit := do
         psKernelC0FindUndefWithNodeFlag_source expr allowed
       unless c0LevelFlagOptionEq current old do
         throw (IO.userError "computed param flag changed first-offender result")
+  for expr in xs do
+    let _fvarWitness : expr.psKernelC0FVarFlag =
+        psKernelExprHasFVar expr :=
+      psKernelC0FVarFlag_source expr
+    if expr.psKernelC0FVarFlag != psKernelExprHasFVar expr then
+      throw (IO.userError "native FVar flag changed source semantics")
   let pureDag := c0LevelFlagMakeShared 4000 bare
   let paramDag := c0LevelFlagMakeShared 4000 uA
   let _closedWitness : pureDag.psKernelC0LevelParamFlag =

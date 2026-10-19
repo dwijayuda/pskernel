@@ -9,6 +9,7 @@ on:
       - psc1/test/PsKernelCoreRegression.lean
       - psc1/test/PsKernelInstantiatePerformance.lean
       - psc1/test/PsKernelMultiInstantiatePerformance.lean
+      - psc1/test/PsKernelLiftPerformance.lean
       - psc1/test/PsKernelCorePerformance.lean
       - psc1/kernel-lakefile.lean
       - psc1/check-psc1-source.mjs
@@ -36,7 +37,7 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
-          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf psc1_kernel_multi_perf
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf psc1_kernel_multi_perf psc1_kernel_lift_perf
       - name: Run native safety and semantics regression
         shell: bash
         working-directory: psc1
@@ -61,6 +62,12 @@ jobs:
         run: |
           set -euo pipefail
           lake -f kernel-lakefile.lean exe psc1_kernel_multi_perf
+      - name: Measure same-run C0 binder-aware lifting and require parity
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_lift_perf
 
   psc1-portability:
     runs-on: ubuntu-latest

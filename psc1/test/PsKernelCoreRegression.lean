@@ -62,6 +62,17 @@ private def requireMultiParity
     (psKernelExprEq (Prod.fst old) (Prod.fst newv) &&
       Prod.snd old == Prod.snd newv)
 
+
+-- Preserve the exact old fuel-based worker as an executable oracle.
+private def requireLiftParity (caseName : String) (term : PsKernelExpr)
+    (start amount : Nat) : IO Unit := do
+  let before := psKernelExprLiftLooseBVarsChangedWithFuel
+    (Nat.succ (psKernelExprNodeCount term)) term start amount
+  let after := psKernelExprLiftLooseBVarsChanged term start amount
+  requireKernel caseName
+    (psKernelExprEq (Prod.fst before) (Prod.fst after) &&
+      Prod.snd before == Prod.snd after)
+
 def main : IO Unit := do
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
   let localExpr := PsKernelExpr.fvar fName
@@ -190,6 +201,20 @@ def main : IO Unit := do
     subClosed 0 multiReplacements 0
   requireMultiParity "C0 multi empty replacement list"
     subOpen 0 [] 0
+
+  requireLiftParity "C0 lift zero amount" subOpen 0 0
+  requireLiftParity "C0 lift bound var at cutoff" (PsKernelExpr.bvar 0) 0 3
+  requireLiftParity "C0 lift preserves index below cutoff" (PsKernelExpr.bvar 0) 1 3
+  requireLiftParity "C0 lift nonzero cutoff" (PsKernelExpr.bvar 3) 2 4
+  requireLiftParity "C0 lift open application" subOpen 0 2
+  requireLiftParity "C0 lift closed application" subClosed 0 2
+  requireLiftParity "C0 lift lambda cutoff capture avoidance" subLam 0 3
+  requireLiftParity "C0 lift forall cutoff capture avoidance" subForall 0 3
+  requireLiftParity "C0 lift let binder cutoff" subLet 0 1
+  requireLiftParity "C0 lift metadata" subMeta 0 2
+  requireLiftParity "C0 lift projection" subProj 0 2
+  requireLiftParity "C0 lift nested binders" twoLams 0 3
+  requireLiftParity "C0 lift nested binders high cutoff" twoLams 4 3
   let sample := "héllo"
   let p := String.Pos.Raw.mk 0
   requireKernel "Lean 4.34 string atEnd alias parity"

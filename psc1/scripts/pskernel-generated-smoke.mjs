@@ -66,4 +66,14 @@ const subs = psList.cons(expr.bvar(3n), psList.cons(sort0, nil));
 const multiResult = multi(expr.app(expr.bvar(0n), expr.bvar(2n)), 0n, subs, 0n);
 expect("C0 multi substitution generated JS",
   eq(multiResult.fst, expr.app(expr.bvar(3n), expr.bvar(0n))));
+const lift = requireExport("psKernelExprLiftLooseBVarsChanged");
+const lifted = lift(expr.app(expr.bvar(0n), expr.bvar(2n)), 0n, 3n);
+expect("C0 binder-aware lifting in generated JS",
+  eq(lifted.fst, expr.app(expr.bvar(3n), expr.bvar(5n))));
+const unchanged = lift(expr.bvar(0n), 1n, 2n);
+expect("C0 lifting preserves bound variable below cutoff",
+  eq(unchanged.fst, expr.bvar(0n)));
+const zeroLift = lift(openApp, 0n, 0n);
+expect("C0 lifting zero amount remains identity", eq(zeroLift.fst, openApp));
+
 console.log("PSKERNEL_GENERATED_SMOKE: PASS");

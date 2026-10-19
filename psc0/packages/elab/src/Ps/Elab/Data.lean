@@ -71,6 +71,13 @@ def psElabValidateNestedRecursiveFieldWithFuel
     let fieldType := psWhnf context.environment context.metaContext
       context.localContext fieldType
     if !plan.members.any (fun info => psExprHasConst info.name fieldType) then return ()
+    if let .forallE name domain body binder := fieldType then
+      if plan.members.any (fun info => psExprHasConst info.name domain) then
+        throw (.data "recursive family occurs in a function-field domain")
+      let pushed := psLocalPushBinding context.localContext name domain binder
+      return ← psElabValidateNestedRecursiveFieldWithFuel remaining
+        (psElabContextWithLocal context pushed.context) plan parameters
+        (psExprInstantiate1 body (.fvar pushed.id))
     let view := psExprAppView fieldType
     let .constE head _ := view.head
       | throw (.data "unsupported recursive field; expected a positive direct family occurrence")

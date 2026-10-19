@@ -115,7 +115,8 @@ private def checkRefusals : IO Unit := do
     ("def bad (xs : List Nat) : Nat := match xs with\n  | k + 1 :: rest => k\n  | _ => 0\n", "function bad(xs: List(Nat)): Nat := match xs with { | k + 1 :: rest => k | _ => 0 }\n"),
     ("def bad (n : Nat) : Nat := match n with\n  | 1 + k => k\n  | _ => 0\n", "function bad(n: Nat): Nat := match n with { | 1 + k => k | _ => 0 }\n"),
     ("def bad (x : Option (Nat × Nat)) : Nat := match x with\n  | .some(x,y) => x\n  | _ => 0\n", "function bad(x: Option(Nat × Nat)): Nat := match x with { | .some(x,y) => x | _ => 0 }\n"),
-    ("def bad (x : Option (List Nat)) : Nat := match x with\n  | .some[x] => x\n  | _ => 0\n", "function bad(x: Option(List(Nat))): Nat := match x with { | .some[x] => x | _ => 0 }\n")]
+    ("def bad (x : Option (List Nat)) : Nat := match x with\n  | .some[x] => x\n  | _ => 0\n", "function bad(x: Option(List(Nat))): Nat := match x with { | .some[x] => x | _ => 0 }\n"),
+    ("def bad (pair : Nat × Nat) : Nat := match pair with\n  | Prod.mk (x)(y) => x\n", "function bad(pair: Nat × Nat): Nat := match pair with { | Prod.mk (x)(y) => x }\n")]
   for (lean, ps) in parseCases do
     ensure (!(psCompilerParsePscv0 lean .lean).isOk) "CORE-PATTERNS: invalid native pattern parsed"
     ensure (!(psCompilerParsePscv0 ps .proofScript).isOk) "CORE-PATTERNS: invalid ProofScript pattern parsed"
@@ -164,4 +165,4 @@ def main (args : List String) : IO Unit := do
       ("flag", Lean.toJson flag),
       ("m3patterns", Lean.toJson (toString (CoreM3PatternOracle.m3patterns flag).toNat))]
     IO.FS.writeFile (root / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_CORE_PATTERNS: PASS 2 paired programs, 13 equations per program, 12 owned elaboration refusals, 8 parser refusals, canonical equality, independent trust-zero admission, native oracle and TS/JS/Rust emission; runtime execution follows"
+  IO.println "PSCV0_CORE_PATTERNS: PASS 2 paired programs, 13 equations per program, 12 owned elaboration refusals, 10 parser refusals, canonical equality, independent trust-zero admission, native oracle and TS/JS/Rust emission; runtime execution follows"

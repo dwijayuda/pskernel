@@ -128,6 +128,28 @@ example (n : Nat) (h : Nat.succ (coreElimVisible n) = Nat.succ (coreElimVisible 
 #guard coreElimInductionLet 0 == 1
 #guard coreElimInductionLet 8 == 9
 
+inductive CoreElimFunction : Type where
+  | leaf (value : Nat) : CoreElimFunction
+  | node (children : Nat -> CoreElimFunction) : CoreElimFunction
+def coreElimFunctionFold (x : CoreElimFunction) : Nat := by
+  induction x
+  case leaf value => exact value
+  case node children ih => exact ih 0
+theorem coreElimFunctionLeaf : coreElimFunctionFold (CoreElimFunction.leaf 13) = 13 := by rfl
+theorem coreElimFunctionNode : coreElimFunctionFold (CoreElimFunction.node (fun _ : Nat => CoreElimFunction.leaf 17)) = 17 := by rfl
+
+inductive CoreElimFunctionIndexed : Nat -> Type where
+  | leaf (n : Nat) : CoreElimFunctionIndexed n
+  | node (children : (n : Nat) -> CoreElimFunctionIndexed n) : CoreElimFunctionIndexed 0
+def coreElimDependentFold (n : Nat) (x : CoreElimFunctionIndexed n) : Nat := by
+  induction x
+  case leaf k => exact k
+  case node children ih => exact ih 19
+theorem coreElimDependentFunctionNode : coreElimDependentFold 0 (CoreElimFunctionIndexed.node (fun n : Nat => CoreElimFunctionIndexed.leaf n)) = 19 := by rfl
+
+#guard coreElimFunctionFold (CoreElimFunction.leaf 13) == 13
+#guard coreElimFunctionFold (CoreElimFunction.node (fun _ => CoreElimFunction.leaf 17)) == 17
+#guard coreElimDependentFold 0 (CoreElimFunctionIndexed.node (fun n => CoreElimFunctionIndexed.leaf n)) == 19
 end CoreEliminationOracle
 
 private def requireElimination (condition : Bool) (message : String) : IO Unit :=
@@ -205,7 +227,11 @@ private def fixtures : List EliminationFixture := [
   { label := "cases fixed and computed indices; induction variable index", leanSource := "inductive CoreElimIndexed : Nat -> Type where\n  | intro (n : Nat) : CoreElimIndexed n\ntheorem coreElimCasesFixed (x : CoreElimIndexed 0) : x = x := by\n  cases x\n  case intro => rfl\ntheorem coreElimCasesCompound (n : Nat) (x : CoreElimIndexed (Nat.succ n)) : x = x := by\n  cases x\n  case intro => rfl\ntheorem coreElimInductionIndex (n : Nat) (x : CoreElimIndexed n) : x = x := by\n  induction x\n  case intro k => rfl\n"
     psSource := "inductive CoreElimIndexed: Nat -> Type where { | intro(n: Nat): CoreElimIndexed(n) }\ntheorem coreElimCasesFixed(x: CoreElimIndexed(0)): x = x := by {\n  cases x\n  case intro => rfl\n}\ntheorem coreElimCasesCompound(n: Nat, x: CoreElimIndexed(Nat.succ(n))): x = x := by {\n  cases x\n  case intro => rfl\n}\ntheorem coreElimInductionIndex(n: Nat, x: CoreElimIndexed(n)): x = x := by {\n  induction x\n  case intro k => rfl\n}\n", names := ["CoreElimIndexed", "coreElimCasesFixed", "coreElimCasesCompound", "coreElimInductionIndex"] },
   { label := "cases repeated indices", leanSource := "inductive CoreElimRepeated : Nat -> Nat -> Type where\n  | intro (n : Nat) : CoreElimRepeated n n\ntheorem coreElimCasesRepeated (n : Nat) (x : CoreElimRepeated n n) : x = x := by\n  cases x\n  case intro => rfl\n"
-    psSource := "inductive CoreElimRepeated: Nat -> Nat -> Type where { | intro(n: Nat): CoreElimRepeated(n, n) }\ntheorem coreElimCasesRepeated(n: Nat, x: CoreElimRepeated(n, n)): x = x := by {\n  cases x\n  case intro => rfl\n}\n", names := ["CoreElimRepeated", "coreElimCasesRepeated"] } ]
+    psSource := "inductive CoreElimRepeated: Nat -> Nat -> Type where { | intro(n: Nat): CoreElimRepeated(n, n) }\ntheorem coreElimCasesRepeated(n: Nat, x: CoreElimRepeated(n, n)): x = x := by {\n  cases x\n  case intro => rfl\n}\n", names := ["CoreElimRepeated", "coreElimCasesRepeated"] },
+  { label := "positive recursive function field and computed induction hypothesis", leanSource := "inductive CoreElimFunction : Type where\n  | leaf (value : Nat) : CoreElimFunction\n  | node (children : Nat -> CoreElimFunction) : CoreElimFunction\ndef coreElimFunctionFold (x : CoreElimFunction) : Nat := by\n  induction x\n  case leaf value => exact value\n  case node children ih => exact ih 0\ntheorem coreElimFunctionLeaf : coreElimFunctionFold (CoreElimFunction.leaf 13) = 13 := by rfl\ntheorem coreElimFunctionNode : coreElimFunctionFold (CoreElimFunction.node (fun _ : Nat => CoreElimFunction.leaf 17)) = 17 := by rfl\n"
+    psSource := "inductive CoreElimFunction: Type where {\n  | leaf(value: Nat): CoreElimFunction\n  | node(children: Nat -> CoreElimFunction): CoreElimFunction\n}\nfunction coreElimFunctionFold(x: CoreElimFunction): Nat := by {\n  induction x\n  case leaf value => exact value\n  case node children ih => exact ih(0)\n}\ntheorem coreElimFunctionLeaf: coreElimFunctionFold(CoreElimFunction.leaf(13)) = 13 := by { rfl }\ntheorem coreElimFunctionNode: coreElimFunctionFold(CoreElimFunction.node(fun (_: Nat) => CoreElimFunction.leaf(17))) = 17 := by { rfl }\n", names := ["CoreElimFunction", "coreElimFunctionFold", "coreElimFunctionLeaf", "coreElimFunctionNode"] },
+  { label := "dependent recursive function field telescope and indexed induction", leanSource := "inductive CoreElimFunctionIndexed : Nat -> Type where\n  | leaf (n : Nat) : CoreElimFunctionIndexed n\n  | node (children : (n : Nat) -> CoreElimFunctionIndexed n) : CoreElimFunctionIndexed 0\ndef coreElimDependentFold (n : Nat) (x : CoreElimFunctionIndexed n) : Nat := by\n  induction x\n  case leaf k => exact k\n  case node children ih => exact ih 19\ntheorem coreElimDependentFunctionNode : coreElimDependentFold 0 (CoreElimFunctionIndexed.node (fun n : Nat => CoreElimFunctionIndexed.leaf n)) = 19 := by rfl\n"
+    psSource := "inductive CoreElimFunctionIndexed: Nat -> Type where {\n  | leaf(n: Nat): CoreElimFunctionIndexed(n)\n  | node(children: (n: Nat) -> CoreElimFunctionIndexed(n)): CoreElimFunctionIndexed(0)\n}\nfunction coreElimDependentFold(n: Nat, x: CoreElimFunctionIndexed(n)): Nat := by {\n  induction x\n  case leaf k => exact k\n  case node children ih => exact ih(19)\n}\ntheorem coreElimDependentFunctionNode: coreElimDependentFold(0, CoreElimFunctionIndexed.node(fun (n: Nat) => CoreElimFunctionIndexed.leaf(n))) = 19 := by { rfl }\n", names := ["CoreElimFunctionIndexed", "coreElimDependentFold", "coreElimDependentFunctionNode"] } ]
 
 private def refusals : List EliminationRefusal := [
   { label := "induction fixed index", leanSource := "inductive CoreElimIndexed : Nat -> Type where\n  | intro (n : Nat) : CoreElimIndexed n\ntheorem bad (x : CoreElimIndexed 0) : x = x := by\n  induction x\n"
@@ -223,13 +249,20 @@ private def refusals : List EliminationRefusal := [
   { label := "computed branch value must have checked type", leanSource := "def bad (n : Nat) : Nat := by\n  cases Nat.succ n\n  case zero => exact True.intro\n  case succ k => exact k\n"
     psSource := "function bad(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact True.intro\n  case succ k => exact k\n}\n", expected := "type" },
   { label := "cases cannot expose an induction hypothesis", leanSource := "def bad (n : Nat) : Nat := by\n  cases Nat.succ n\n  case zero => exact 0\n  case succ k ih => exact ih\n"
-    psSource := "function bad(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact 0\n  case succ k ih => exact ih\n}\n", expected := "proof:too many case binder names" } ]
+    psSource := "function bad(n: Nat): Nat := by {\n  cases Nat.succ(n)\n  case zero => exact 0\n  case succ k ih => exact ih\n}\n", expected := "proof:too many case binder names" },
+  { label := "negative recursive function-field domain", leanSource := "inductive CoreElimNegativeFunction : Type where\n  | node (children : CoreElimNegativeFunction -> Nat) : CoreElimNegativeFunction\n"
+    psSource := "inductive CoreElimNegativeFunction: Type where { | node(children: CoreElimNegativeFunction -> Nat): CoreElimNegativeFunction }\n", expected := "data:recursive family occurs in a function-field domain" },
+  { label := "negative recursive domain below function telescope", leanSource := "inductive CoreElimNegativeNestedFunction : Type where\n  | node (children : Nat -> CoreElimNegativeNestedFunction -> Nat) : CoreElimNegativeNestedFunction\n"
+    psSource := "inductive CoreElimNegativeNestedFunction: Type where { | node(children: Nat -> CoreElimNegativeNestedFunction -> Nat): CoreElimNegativeNestedFunction }\n", expected := "data:recursive family occurs in a function-field domain" },
+  { label := "nonuniform recursive function-field parameters", leanSource := "inductive CoreElimNonuniformFunction (A : Type) : Type where\n  | node (children : Nat -> CoreElimNonuniformFunction Nat) : CoreElimNonuniformFunction A\n"
+    psSource := "inductive CoreElimNonuniformFunction(A: Type): Type where { | node(children: Nat -> CoreElimNonuniformFunction(Nat)): CoreElimNonuniformFunction(A) }\n", expected := "data:constructor parameters must remain uniform" } ]
 
 private def refusalKind : PsElabError → String
   | .atDeclaration _ error | .atContext _ error => refusalKind error
   | .typeMismatch => "type"
   | .infer .applicationTypeMismatch => "infer:application"
   | .proof message => "proof:" ++ message
+  | .data message => "data:" ++ message
   | error => psCompilerPscv0ElabError error
 
 private def prepareElimination (profile : PsCompilerProfileContext)
@@ -321,10 +354,10 @@ def main : IO Unit := do
     ("maxRecDepthPerDeclaration", Lean.toJson (20000 : Nat)),
     ("positiveSourceProjects", Lean.toJson (2 * fixtures.length)),
     ("ownedRefusals", Lean.toJson (2 * refusals.length)),
-    ("nativeValueObservations", Lean.toJson (8 : Nat)),
+    ("nativeValueObservations", Lean.toJson (11 : Nat)),
     ("nativeRefusalControls", Lean.toJson (5 : Nat)),
     ("cases", Lean.Json.arr records.toArray),
     ("completeCoreProfileQualified", Lean.toJson false),
     ("backendExecutionQualified", Lean.toJson false),
     ("compilerSelfhostQualified", Lean.toJson false)]).compress
-  IO.println "PSCV0_CORE_ELIMINATION: PASS 16 paired source projects and independent canonical admissions; 16 owned refusals; pinned native sources, eight value observations and five target-rule refusals"
+  IO.println "PSCV0_CORE_ELIMINATION: PASS 20 paired source projects and independent canonical admissions; 22 owned refusals; pinned native sources, eleven value observations and five target-rule refusals"

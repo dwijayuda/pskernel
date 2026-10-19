@@ -39,7 +39,14 @@ def psPscv0PatternAtom (fuel : Nat) (cursor : PsTokenCursor) :
       let fields ← psPscv0Patterns fuel opening.cursor
       let close ← psTokenCursorExpectText fields.cursor ")"
       let span := psSyntaxSpanJoin opening.token.span close.token.span
-      return { value := ← psPscv0PatternTuple fields.value span, cursor := close.cursor }
+      let value ← psPscv0PatternTuple fields.value span
+      let value : PsSyntaxPattern := match value with
+        | .natural n _ => .natural n span
+        | .bool b _ => .bool b span
+        | .wildcard _ => .wildcard span
+        | .variable name => .variable { name with span }
+        | .ctor name fields _ => .ctor name fields span
+      return { value, cursor := close.cursor }
     if token.text == "[" then
       let opening ← psTokenCursorExpectText cursor "["
       let fields ← psPscv0ListPatterns fuel opening.cursor
@@ -125,7 +132,9 @@ def psPscv0PatternAtPrecedence (minimum fuel : Nat) (cursor : PsTokenCursor) :
 
 def psPscv0Pattern (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxPattern) :=
-  psPscv0PatternAtPrecedence 0 fuel cursor
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 => psPscv0PatternAtPrecedence 0 fuel cursor
 
 def psPscv0ListPatterns (fuel : Nat) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (List PsSyntaxPattern)) := do

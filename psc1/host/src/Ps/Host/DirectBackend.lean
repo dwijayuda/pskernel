@@ -79,20 +79,20 @@ def psHostPublishPreparedFilesWithFailureAfter
       if ← file.destination.isDir then
         throw (IO.userError "PSC1_OUTPUT_DESTINATION_IS_DIRECTORY")
     planned := (file, existed) :: planned
-  let planned := planned.reverse
+  let scheduled := planned.reverse
   try
-    for (file, existed) in planned do
+    for (file, existed) in scheduled do
       if existed then
         IO.FS.rename file.destination file.backup
     let mut installed : Nat := 0
-    for (file, _) in planned do
+    for (file, _) in scheduled do
       if failureAfter == some installed then
         throw (IO.userError "PSC1_OUTPUT_TEST_INJECTED_PUBLICATION_FAILURE")
       IO.FS.rename file.staged file.destination
       installed := installed + 1
   catch originalError =>
     try
-      for (file, existed) in planned.reverse do
+      for (file, existed) in scheduled.reverse do
         if ← file.backup.pathExists then
           if ← file.destination.pathExists then
             IO.FS.removeFile file.destination

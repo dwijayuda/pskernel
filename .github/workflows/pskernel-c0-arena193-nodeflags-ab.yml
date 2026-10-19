@@ -1,5 +1,13 @@
 name: PSKernel-C0 immutable node property fields authentic Arena app-lam A/B
 on:
+  push:
+    branches: [research/pskernel-c0-arena193-levelparam-field-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-arena193-nodeflags-ab.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Level.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Expr.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
+      - 'psc0/packages/pskernel-c0/test/C0LevelParamFlagRegression.lean'
   pull_request:
     branches: [perf/pskernel-c0-pointer-structural-hash-bucket-20261018]
     paths:

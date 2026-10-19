@@ -216,10 +216,14 @@ def psKernelC0BetaSpineApply
   -- retain the existing simultaneous instantiation order.
   let opened :=
     match selectedRev with
-    | List.cons replacement List.nil =>
-        psKernelExprInstantiate1 body replacement
-    | _ =>
-        psKernelExprInstantiate body selectedRev;
+    | List.nil =>
+        psKernelExprInstantiate body selectedRev
+    | List.cons replacement rest =>
+        match rest with
+        | List.nil =>
+            psKernelExprInstantiate1 body replacement
+        | List.cons _ _ =>
+            psKernelExprInstantiate body selectedRev;
   psKernelExprApplyArgsCheap
     opened
     remaining

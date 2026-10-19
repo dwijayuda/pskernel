@@ -15,7 +15,8 @@ def psCliUsage : String :=
   "  psc1 build <input.lean|input.ps> --target js --out <output.js>\n" ++
   "  psc1 build <input.lean|input.ps> --target rust --out <output.rs>\n" ++
   "  psc1 build <input.lean|input.ps> --target wasm-core --out <output.wasm>\n" ++
-  "  psc1 wat <input.wasm> --out <output.wat> (requires wasm-tools)\n" ++\n  "  psc1 build <input.ps|input.lean> --target wasm-component --export <name> --out <component.wasm>"
+  "  psc1 wat <input.wasm> --out <output.wat> (requires wasm-tools)\n" ++
+  "  psc1 build <input.ps|input.lean> --target wasm-component --export <name> --out <component.wasm>"
 
 def main (args : List String) : IO Unit := do
   match args with

@@ -29,3 +29,14 @@ def psStandardRegisterClass (environment : PsEnvironment) (name : String) : PsEn
     classes := name :: environment.classes
     classParameters := (name, { outputs := [], outputLevels := [] }) :: environment.classParameters }
 
+
+-- Register the already checked Nat law after the frozen authoring bases.
+def psStandardLawfulBEqExtend (environment : PsEnvironment) : PsEnvironment :=
+  let className := psRootName "LawfulBEq"
+  match psEnvironmentFindInductive environment className,
+      psEnvironmentFind environment (psDecisionName "Nat.instLawfulBEq") with
+  | some _, some dictionary =>
+    let environment := if environment.classes.any (psNameEq className) then environment
+      else psStandardRegisterClass environment "LawfulBEq"
+    psStandardRegisterInstances environment "LawfulBEq" [dictionary] 1000
+  | _, _ => environment

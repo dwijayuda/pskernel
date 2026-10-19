@@ -126,7 +126,7 @@ def psElabRegisterSimp (environment : PsEnvironment) (name : PsName) :
 
 def psElabApplySourceAttributes (environment : PsEnvironment) (name : PsName)
     (attributes : List PsSyntaxAttribute) : Except PsElabError PsEnvironment :=
-  attributes.foldlM (fun environment attribute => match attribute with
+  attributes.foldlM (fun environment entry => match entry with
     | .simpAttribute => psElabRegisterSimp environment name
     | .instanceAttribute => psElabRegisterInstance environment name 1000
     | .defaultInstanceAttribute priority =>

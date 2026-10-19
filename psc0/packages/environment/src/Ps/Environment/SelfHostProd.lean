@@ -157,7 +157,8 @@ def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardPartialFixpointExtend psSelfHostProdPrePartialFixpointPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
+  psStandardLawfulBEqExtend <|
+    psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
 
 def psSelfHostPProdRuntimeDataDeclarations : List PsDeclaration :=
   ["PProd", "PProd.mk", "PProd.rec"].filterMap

@@ -750,6 +750,93 @@ run_cmd do
     | mk (n : Nat))
   expectNativeDataUniverseRefusal command
 
+universe indexedU
+
+inductive IndexedPayload (A : Type indexedU) : Nat → Type indexedU where
+  | left (index : Nat) (value : A) : IndexedPayload A index
+  | right (index : Nat) (value : A) : IndexedPayload A index
+  | next (index : Nat) (value : A) (child : IndexedPayload A index) :
+      IndexedPayload A (Nat.succ index)
+  deriving BEq, DecidableEq
+
+def indexedOriginal : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 true (IndexedPayload.left 0 false)
+def indexedFieldChanged : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 false (IndexedPayload.left 0 false)
+def indexedChildChanged : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 true (IndexedPayload.left 0 true)
+def indexedCtorChanged : IndexedPayload Bool 1 :=
+  IndexedPayload.next 0 true (IndexedPayload.right 0 false)
+def indexedMajorChanged : IndexedPayload Bool 1 := IndexedPayload.right 1 true
+
+theorem indexedBEqSame : (indexedOriginal == indexedOriginal) = true := by rfl
+theorem indexedBEqField : (indexedOriginal == indexedFieldChanged) = false := by rfl
+theorem indexedBEqChild : (indexedOriginal == indexedChildChanged) = false := by rfl
+theorem indexedBEqCtor : (indexedOriginal == indexedCtorChanged) = false := by rfl
+theorem indexedBEqMajor : (indexedOriginal == indexedMajorChanged) = false := by rfl
+theorem indexedDecEqSame :
+    Decidable.decide (self := decEq indexedOriginal indexedOriginal) = true := by rfl
+theorem indexedDecEqField :
+    Decidable.decide (self := decEq indexedOriginal indexedFieldChanged) = false := by rfl
+theorem indexedDecEqChild :
+    Decidable.decide (self := decEq indexedOriginal indexedChildChanged) = false := by rfl
+theorem indexedDecEqCtor :
+    Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) = false := by rfl
+theorem indexedDecEqMajor :
+    Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) = false := by rfl
+
+inductive IndexedAtom where
+  | atom (value : Bool)
+instance indexedAtomBEq : BEq IndexedAtom where
+  beq (_left : IndexedAtom) (_right : IndexedAtom) : Bool := false
+theorem indexedBEqUsesActualDictionary :
+    (IndexedPayload.left 0 (IndexedAtom.atom true) ==
+      IndexedPayload.left 0 (IndexedAtom.atom true)) = false := by rfl
+
+inductive IndexedErasedDependency : Nat → Type where
+  | intro (value : Nat) :
+      IndexedErasedDependency ((fun (_ : Nat) => 0) value)
+  deriving BEq, DecidableEq
+theorem indexedBetaFieldBEq :
+    (IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2) = false := by rfl
+theorem indexedBetaFieldDecEq :
+    Decidable.decide (self := decEq (IndexedErasedDependency.intro 1)
+      (IndexedErasedDependency.intro 2)) = false := by rfl
+
+inductive IndexedDependent : Nat → Type where
+  | wrap (index : Nat) (child : IndexedPayload Bool index) : IndexedDependent 0
+  deriving DecidableEq
+theorem indexedDependentSame :
+    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)
+      (IndexedDependent.wrap 1 indexedOriginal)) = true := by rfl
+theorem indexedDependentChild :
+    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)
+      (IndexedDependent.wrap 1 indexedChildChanged)) = false := by rfl
+theorem indexedDependentIndex :
+    Decidable.decide (self := decEq
+      (IndexedDependent.wrap 0 (IndexedPayload.left 0 true))
+      (IndexedDependent.wrap 1 indexedOriginal)) = false := by rfl
+
+def m3indexedDeriving (flag : Bool) : UInt64 :=
+  let chosen := if flag then indexedOriginal else indexedFieldChanged
+  UInt64.ofNat (
+    (if indexedOriginal == chosen then 1 else 0) +
+    (if Decidable.decide (self := decEq indexedOriginal chosen) then 2 else 0) +
+    (if indexedOriginal == indexedChildChanged then 4 else 0) +
+    (if indexedOriginal == indexedCtorChanged then 8 else 0) +
+    (if indexedOriginal == indexedMajorChanged then 16 else 0) +
+    (if Decidable.decide (self := decEq indexedOriginal indexedChildChanged) then 32 else 0) +
+    (if Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) then 64 else 0) +
+    (if Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) then 128 else 0) +
+    (if IndexedPayload.left 0 (IndexedAtom.atom true) == IndexedPayload.left 0 (IndexedAtom.atom true) then 256 else 0) +
+    (if IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2 then 512 else 0) +
+    (if Decidable.decide (self := decEq (IndexedErasedDependency.intro 1) (IndexedErasedDependency.intro 2)) then 1024 else 0) +
+    (if Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal) (IndexedDependent.wrap 1 indexedOriginal)) then 2048 else 0) +
+    (if Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal) (IndexedDependent.wrap 1 indexedChildChanged)) then 4096 else 0) +
+    (if Decidable.decide (self := decEq (IndexedDependent.wrap 0 (IndexedPayload.left 0 true)) (IndexedDependent.wrap 1 indexedOriginal)) then 8192 else 0) +
+    (if indexedOriginal == indexedOriginal then 16384 else 0) +
+    (if Decidable.decide (self := decEq indexedOriginal indexedOriginal) then 32768 else 0))
+
 end CoreM3MatchOracle
 
 namespace CoreM3Matches
@@ -1147,6 +1234,11 @@ private def checkRefusals : IO Unit := do
       | .ok _ => throw (IO.userError (label ++ " accepted an unrefined decrease proof"))
 
 
+private def indexedDerivingLeanSource : String :=
+  "universe indexedU\n\ninductive IndexedPayload (A : Type indexedU) : Nat → Type indexedU where\n  | left (index : Nat) (value : A) : IndexedPayload A index\n  | right (index : Nat) (value : A) : IndexedPayload A index\n  | next (index : Nat) (value : A) (child : IndexedPayload A index) :\n      IndexedPayload A (Nat.succ index)\n  deriving BEq, DecidableEq\n\ndef indexedOriginal : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.left 0 false)\ndef indexedFieldChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 false (IndexedPayload.left 0 false)\ndef indexedChildChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.left 0 true)\ndef indexedCtorChanged : IndexedPayload Bool 1 :=\n  IndexedPayload.next 0 true (IndexedPayload.right 0 false)\ndef indexedMajorChanged : IndexedPayload Bool 1 := IndexedPayload.right 1 true\n\ntheorem indexedBEqSame : (indexedOriginal == indexedOriginal) = true := by rfl\ntheorem indexedBEqField : (indexedOriginal == indexedFieldChanged) = false := by rfl\ntheorem indexedBEqChild : (indexedOriginal == indexedChildChanged) = false := by rfl\ntheorem indexedBEqCtor : (indexedOriginal == indexedCtorChanged) = false := by rfl\ntheorem indexedBEqMajor : (indexedOriginal == indexedMajorChanged) = false := by rfl\ntheorem indexedDecEqSame :\n    Decidable.decide (self := decEq indexedOriginal indexedOriginal) = true := by rfl\ntheorem indexedDecEqField :\n    Decidable.decide (self := decEq indexedOriginal indexedFieldChanged) = false := by rfl\ntheorem indexedDecEqChild :\n    Decidable.decide (self := decEq indexedOriginal indexedChildChanged) = false := by rfl\ntheorem indexedDecEqCtor :\n    Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) = false := by rfl\ntheorem indexedDecEqMajor :\n    Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) = false := by rfl\n\ninductive IndexedAtom where\n  | atom (value : Bool)\ninstance indexedAtomBEq : BEq IndexedAtom where\n  beq (_left : IndexedAtom) (_right : IndexedAtom) : Bool := false\ntheorem indexedBEqUsesActualDictionary :\n    (IndexedPayload.left 0 (IndexedAtom.atom true) ==\n      IndexedPayload.left 0 (IndexedAtom.atom true)) = false := by rfl\n\ninductive IndexedErasedDependency : Nat → Type where\n  | intro (value : Nat) :\n      IndexedErasedDependency ((fun (_ : Nat) => 0) value)\n  deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq :\n    (IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2) = false := by rfl\ntheorem indexedBetaFieldDecEq :\n    Decidable.decide (self := decEq (IndexedErasedDependency.intro 1)\n      (IndexedErasedDependency.intro 2)) = false := by rfl\n\ninductive IndexedDependent : Nat → Type where\n  | wrap (index : Nat) (child : IndexedPayload Bool index) : IndexedDependent 0\n  deriving DecidableEq\ntheorem indexedDependentSame :\n    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)\n      (IndexedDependent.wrap 1 indexedOriginal)) = true := by rfl\ntheorem indexedDependentChild :\n    Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal)\n      (IndexedDependent.wrap 1 indexedChildChanged)) = false := by rfl\ntheorem indexedDependentIndex :\n    Decidable.decide (self := decEq\n      (IndexedDependent.wrap 0 (IndexedPayload.left 0 true))\n      (IndexedDependent.wrap 1 indexedOriginal)) = false := by rfl\n\ndef m3indexedDeriving (flag : Bool) : UInt64 :=\n  let chosen := if flag then indexedOriginal else indexedFieldChanged\n  UInt64.ofNat (\n    (if indexedOriginal == chosen then 1 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal chosen) then 2 else 0) +\n    (if indexedOriginal == indexedChildChanged then 4 else 0) +\n    (if indexedOriginal == indexedCtorChanged then 8 else 0) +\n    (if indexedOriginal == indexedMajorChanged then 16 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedChildChanged) then 32 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedCtorChanged) then 64 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedMajorChanged) then 128 else 0) +\n    (if IndexedPayload.left 0 (IndexedAtom.atom true) == IndexedPayload.left 0 (IndexedAtom.atom true) then 256 else 0) +\n    (if IndexedErasedDependency.intro 1 == IndexedErasedDependency.intro 2 then 512 else 0) +\n    (if Decidable.decide (self := decEq (IndexedErasedDependency.intro 1) (IndexedErasedDependency.intro 2)) then 1024 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal) (IndexedDependent.wrap 1 indexedOriginal)) then 2048 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDependent.wrap 1 indexedOriginal) (IndexedDependent.wrap 1 indexedChildChanged)) then 4096 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDependent.wrap 0 (IndexedPayload.left 0 true)) (IndexedDependent.wrap 1 indexedOriginal)) then 8192 else 0) +\n    (if indexedOriginal == indexedOriginal then 16384 else 0) +\n    (if Decidable.decide (self := decEq indexedOriginal indexedOriginal) then 32768 else 0))\n"
+private def indexedDerivingPsSource : String :=
+  "universe indexedU\n\ninductive IndexedPayload(A: Type indexedU): Nat -> Type indexedU where {\n  | left(index: Nat, value: A): IndexedPayload(A, index)\n  | right(index: Nat, value: A): IndexedPayload(A, index)\n  | next(index: Nat, value: A, child: IndexedPayload(A, index)):\n      IndexedPayload(A, Nat.succ(index))\n} deriving BEq, DecidableEq\n\nconst indexedOriginal: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, false))\nconst indexedFieldChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, false, IndexedPayload.left(0, false))\nconst indexedChildChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, true))\nconst indexedCtorChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.right(0, false))\nconst indexedMajorChanged: IndexedPayload(Bool, 1) := IndexedPayload.right(1, true)\n\ntheorem indexedBEqSame: (indexedOriginal == indexedOriginal) = true := by { rfl }\ntheorem indexedBEqField: (indexedOriginal == indexedFieldChanged) = false := by { rfl }\ntheorem indexedBEqChild: (indexedOriginal == indexedChildChanged) = false := by { rfl }\ntheorem indexedBEqCtor: (indexedOriginal == indexedCtorChanged) = false := by { rfl }\ntheorem indexedBEqMajor: (indexedOriginal == indexedMajorChanged) = false := by { rfl }\ntheorem indexedDecEqSame:\n  Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) = true := by { rfl }\ntheorem indexedDecEqField:\n  Decidable.decide(self := decEq(indexedOriginal, indexedFieldChanged)) = false := by { rfl }\ntheorem indexedDecEqChild:\n  Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) = false := by { rfl }\ntheorem indexedDecEqCtor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) = false := by { rfl }\ntheorem indexedDecEqMajor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) = false := by { rfl }\n\ninductive IndexedAtom where { | atom(value: Bool) }\ninstance indexedAtomBEq: BEq IndexedAtom where {\n  beq(_left: IndexedAtom, _right: IndexedAtom): Bool := false\n}\ntheorem indexedBEqUsesActualDictionary:\n  (IndexedPayload.left(0, IndexedAtom.atom(true)) ==\n    IndexedPayload.left(0, IndexedAtom.atom(true))) = false := by { rfl }\n\ninductive IndexedErasedDependency: Nat -> Type where {\n  | intro(value: Nat): IndexedErasedDependency((fun (_: Nat) => 0)(value))\n} deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq:\n  (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) = false := by { rfl }\ntheorem indexedBetaFieldDecEq:\n  Decidable.decide(self := decEq(IndexedErasedDependency.intro(1),\n    IndexedErasedDependency.intro(2))) = false := by { rfl }\n\ninductive IndexedDependent: Nat -> Type where {\n  | wrap(index: Nat, child: IndexedPayload(Bool, index)): IndexedDependent(0)\n} deriving DecidableEq\ntheorem indexedDependentSame:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedOriginal))) = true := by { rfl }\ntheorem indexedDependentChild:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedChildChanged))) = false := by { rfl }\ntheorem indexedDependentIndex:\n  Decidable.decide(self := decEq(\n    IndexedDependent.wrap(0, IndexedPayload.left(0, true)),\n    IndexedDependent.wrap(1, indexedOriginal))) = false := by { rfl }\n\nfunction m3indexedDeriving(flag: Bool): UInt64 := {\n  let chosen := if flag then { indexedOriginal } else { indexedFieldChanged }\n  UInt64.ofNat(\n    (if indexedOriginal == chosen then { 1 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, chosen)) then { 2 } else { 0 }) +\n    (if indexedOriginal == indexedChildChanged then { 4 } else { 0 }) +\n    (if indexedOriginal == indexedCtorChanged then { 8 } else { 0 }) +\n    (if indexedOriginal == indexedMajorChanged then { 16 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) then { 32 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) then { 64 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) then { 128 } else { 0 }) +\n    (if IndexedPayload.left(0, IndexedAtom.atom(true)) == IndexedPayload.left(0, IndexedAtom.atom(true)) then { 256 } else { 0 }) +\n    (if IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2) then { 512 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedErasedDependency.intro(1), IndexedErasedDependency.intro(2))) then { 1024 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedOriginal))) then { 2048 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedChildChanged))) then { 4096 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(0, IndexedPayload.left(0, true)), IndexedDependent.wrap(1, indexedOriginal))) then { 8192 } else { 0 }) +\n    (if indexedOriginal == indexedOriginal then { 16384 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) then { 32768 } else { 0 }))\n}\n"
+
 private def sourcePairs : List (String × String × String) := [
   ("match", matchLeanSource, matchPsSource),
   ("matchPolicy", matchPolicyLeanSource, matchPolicyPsSource),
@@ -1156,7 +1248,8 @@ private def sourcePairs : List (String × String × String) := [
   ("inline", inlineLeanSource, inlinePsSource),
   ("wfBoundary", wfBoundaryLeanSource, wfBoundaryPsSource),
   ("promotion", promotionLeanSource, promotionPsSource),
-  ("universes", universeLeanSource, universePsSource)]
+  ("universes", universeLeanSource, universePsSource),
+  ("indexedDeriving", indexedDerivingLeanSource, indexedDerivingPsSource)]
 
 private def checkRuntime (root : System.FilePath) : IO Unit := do
   let native := sourcePairs.foldl (fun acc (_, leanText, _) => acc ++ leanText ++ "\n") ""
@@ -1166,7 +1259,7 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
   let requests := sources.map fun (kind, source, stem) => ({
     sourceKind := kind, source, sourceName := "corematches" ++ psCompilerSourceKindExtension kind
     outputStem := "corematches"
-    exports := .selected ["m3matches", "m3structural", "m3const", "m3inline", "m3wfboundaries"]
+    exports := .selected ["m3matches", "m3structural", "m3const", "m3inline", "m3wfboundaries", "m3indexedDeriving"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let batch ← match ← PsV7Native.runBatch requests.toArray with
     | .ok result => pure result
@@ -1192,7 +1285,8 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
       ("m3structural", Lean.toJson (toString (CoreM3MatchOracle.m3structural flag).toNat)),
       ("m3const", Lean.toJson (toString (CoreM3MatchOracle.m3const flag).toNat)),
       ("m3inline", Lean.toJson (toString (CoreM3MatchOracle.m3inline flag).toNat)),
-      ("m3wfboundaries", Lean.toJson (toString (CoreM3MatchOracle.m3wfboundaries flag).toNat))]
+      ("m3wfboundaries", Lean.toJson (toString (CoreM3MatchOracle.m3wfboundaries flag).toNat)),
+      ("m3indexedDeriving", Lean.toJson (toString (CoreM3MatchOracle.m3indexedDeriving flag).toNat))]
     IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
     IO.println ("CORE-MATCHES native observations " ++ stem ++ ": " ++
       (Lean.Json.arr rows.toArray).compress)
@@ -1205,6 +1299,12 @@ def main (args : List String) : IO Unit := do
   ensure (Lean.versionString == PsV7Native.leanVersion && Lean.githash == PsV7Native.leanCommit)
     "CORE-MATCHES: expected pinned Lean 4.35.0"
   let _ ← fromExcept psCompilerValidatePscv0Standard
+  ensure (psCompilerFullProfileContext.baseEnvironment.classes.any
+      (psNameEq (psRootName "LawfulBEq")) &&
+    psCompilerFullProfileContext.baseEnvironment.instances.entries.any (fun entry =>
+      match entry.value with
+      | .constE name _ => psNameEq name (psNameAppendStr (psRootName "Nat") "instLawfulBEq")
+      | _ => false)) "CORE-MATCHES: missing checked Nat LawfulBEq registration"
   checkCoreBoundaryControls
   for (label, leanText, psText) in sourcePairs do
     let outputs ← checkPair label leanText psText
@@ -1216,4 +1316,4 @@ def main (args : List String) : IO Unit := do
   checkRefusals
   checkUniverseRefusals
   checkRuntime root
-  IO.println "PSCV0_CORE_MATCHES: PASS 9 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 46 owned portable refusals; five-target paired emission; native runtime comparison follows"
+  IO.println "PSCV0_CORE_MATCHES: PASS 10 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 46 owned portable refusals; five-target paired emission; native runtime comparison follows"

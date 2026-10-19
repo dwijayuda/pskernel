@@ -7,6 +7,7 @@ equality transport and constructor discrimination. Nested deriving retains the
 pinned handler's refusal. No assumed recursive instance or BEq axiom.
 -/
 import Ps.Elab.DerivingContext
+import Ps.Elab.DerivingIndexed
 import Ps.Elab.Equality
 import Ps.Environment.Decision
 
@@ -24,7 +25,7 @@ def psElabDeriveDecEqPlan (plan : PsElabDeriveContext) (name : PsName) :
   let fields ← psElabDeriveFieldsWithRecursion plan name true
   let decisions ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof then return PsElabDeriveDecEqDecision.erased
-    if fields.constructor.recursiveFields.contains index then
+    if fields.directRecursiveFields.contains index then
       return PsElabDeriveDecEqDecision.recursive
     let target ← psElabDeriveClassType plan.context (psRootName "DecidableEq") field.type
     return PsElabDeriveDecEqDecision.independent (← psElabDeriveInstance plan.context target)
@@ -192,9 +193,12 @@ def psElabDeriveDecEqRightCases (plan : PsElabDeriveContext)
 
 def psElabDeriveDecEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
-  let initial ← psElabDerivePrepare environment origin { groups := true }
+  let initial ← psElabDerivePrepare environment origin { groups := true, indices := true }
   let plan := psElabDeriveRequirements initial (psRootName "DecidableEq")
   let type ← psElabDeriveClassType plan.context (psRootName "DecidableEq") plan.family
+  if ← psElabDeriveNeedsOrderedComparison plan then
+    let method ← psElabDeriveIndexedDecEqMethod plan
+    return ← psElabDeriveFinish plan "instDecidableEq" type method
   let constructors ← (psElabDeriveConstructorNames plan).mapM (psElabDeriveDecEqPlan plan)
   let level ← psElabExpressionSort plan.context plan.family
   -- The kernel requires a common result universe for direct mutual families.

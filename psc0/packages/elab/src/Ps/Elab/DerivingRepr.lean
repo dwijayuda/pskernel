@@ -2,36 +2,65 @@
 Repr deriving adapted from Lean 4.35.0 Lean/Elab/Deriving/Repr.lean.
 Copyright (c) 2020 Microsoft Corporation. All rights reserved.
 Author: Leonardo de Moura. Apache-2.0; see THIRD_PARTY_NOTICES.md.
-Modified: checked Core construction for independent fields and complete uniform
+Modified: checked Core construction for ordinary/dependent fields and complete uniform
 visible/nested groups, including each member's own index telescope. Selected
 containers preserve native formatting through heterogeneous checked motives.
 -/
 import Ps.Elab.DerivingContext
-import Ps.Environment.ReprExpr
+import Ps.Environment.StandardRepr
+
+inductive PsElabDeriveReprPrinter where
+  | omitted
+  | ready (value : PsExpr)
+  | deferred
 
 structure PsElabDeriveReprConstructor where
   fields : PsElabDeriveFields
-  printers : List (Option PsExpr)
+  printers : List PsElabDeriveReprPrinter
 
--- Plan independent dictionaries once in the parameter telescope. A direct
--- recursive field obtains its printer from the checked recursor minor, never
--- from an assumed self instance. Types/proofs and hidden inductive fields
--- retain the existing underscore/omission behavior.
+def psElabDeriveReprDictionary (context : PsElabContext) (type : PsExpr)
+    (tuple : Bool := false) : Except PsElabError PsExpr := do
+  let className := psRootName (if tuple then "ReprTuple" else "Repr")
+  let target ← psElabDeriveClassType context className type
+  let dictionary ← psElabDeriveInstance context target
+  let .app (.constE _ levels) _ := target | throw .typeMismatch
+  let method := if tuple then "reprTuple" else "reprPrec"
+  return psExprApplyMany (.constE (psNameAppendStr className method) levels)
+    [type, dictionary]
+
+-- Parameter-only dictionaries retain their existing checked terms. A dependent
+-- field stores only a lookup obligation; its actual branch/projection type is
+-- the authority when that obligation is discharged.
+def psElabDeriveReprPrinterAt (context : PsElabContext)
+    (printer : PsElabDeriveReprPrinter) (type : PsExpr) (tuple : Bool := false) :
+    Except PsElabError (Option PsExpr) := do
+  match printer with
+  | .omitted => return none
+  | .ready value => return some value
+  | .deferred =>
+    if !tuple then
+      let level ← psElabExpressionSort context type
+      if psLevelEquivalent level .zero then return none
+      match psWhnf context.environment context.metaContext context.localContext type with
+      | .sortE _ => return none
+      | _ => pure ()
+    return some (← psElabDeriveReprDictionary context type tuple)
+
+-- Direct recursive fields use actual induction printers. Types/proofs and
+-- hidden inductive fields retain the existing underscore/omission behavior.
 def psElabDeriveReprPlan (plan : PsElabDeriveContext) (name : PsName) :
     Except PsElabError PsElabDeriveReprConstructor := do
-  let fields ← psElabDeriveFieldsWithRecursion plan name (!plan.info.isStructure)
+  let fields ← psElabDeriveFieldsWithRecursion plan name (!plan.info.isStructure) true
   let printers ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
-    if proof || (!plan.info.isStructure && !psBinderInfoEq field.binder .explicit) then return none
-    if fields.constructor.recursiveFields.contains index then return none
+    if proof || (!plan.info.isStructure && !psBinderInfoEq field.binder .explicit) then
+      return PsElabDeriveReprPrinter.omitted
+    if fields.directRecursiveFields.contains index then return .omitted
+    if !psExprFVarsInContext plan.context.localContext field.type then return .deferred
     match psWhnf plan.context.environment plan.context.metaContext
         plan.context.localContext field.type with
-    | .sortE _ => return none
+    | .sortE _ => return .omitted
     | _ => pure ()
-    let target ← psElabDeriveClassType plan.context (psRootName "Repr") field.type
-    let dictionary ← psElabDeriveInstance plan.context target
-    let .app (.constE _ levels) _ := target | throw .typeMismatch
-    return some (psExprApplyMany (.constE (psDecisionName "Repr.reprPrec") levels)
-      [field.type, dictionary])
+    return .ready (← psElabDeriveReprDictionary plan.context field.type)
   return { fields, printers }
 
 def psElabDeriveReprField (printer : Option PsExpr) (value : PsExpr)
@@ -42,27 +71,33 @@ def psElabDeriveReprField (printer : Option PsExpr) (value : PsExpr)
 
 def psElabDeriveReprStructure (plan : PsElabDeriveContext)
     (constructor : PsElabDeriveReprConstructor) : Except PsElabError PsExpr := do
-  let id := plan.context.localContext.nextId
+  let pushed := psLocalPushBinding plan.context.localContext (psRootName "value")
+    plan.family .explicit
+  let context := psElabContextWithLocal plan.context pushed.context
   let append := fun a b => psFormatCall "append" [a, b]
   let fields := (constructor.fields.fields.zip constructor.printers).zipIdx
-  let body := fields.foldl (fun acc ((field, printer), index) =>
+  let body ← fields.foldlM (fun acc ((field, printer), index) => do
     let label := psNameLastComponent field.name
-    let value := psElabDeriveReprField printer (.proj plan.info.name index (.fvar id)) 0
+    let projection ← psElabResolvedTerm context (.proj plan.info.name index (.fvar pushed.id)) none
+    let printer ← psElabDeriveReprPrinterAt projection.context printer projection.type
+    let value := psElabDeriveReprField printer projection.term 0
     let value := match printer with
       | none => value
       | some _ => psFormatCall "group"
           [psFormatCall "nest" [psFormatInt (psFormatNat (label.length + 4)), value],
            psFormatBehavior]
     let acc := if index == 0 then acc else append (append acc (psReprText ",")) (psFormatCall "line")
-    append (append (append acc (psReprText label)) (psReprText " := ")) value) (psFormatCall "nil")
-  return psLogicLam id "value" plan.family (psLogicLam (id + 1) "prec" psOrderNat
-    (psFormatCall "bracket" [.lit (.string "{ "), body, .lit (.string " }")]))
+    return append (append (append acc (psReprText label)) (psReprText " := ")) value)
+    (psFormatCall "nil")
+  return psLogicLam pushed.id "value" plan.family
+    (psLogicLam context.localContext.nextId "prec" psOrderNat
+      (psFormatCall "bracket" [.lit (.string "{ "), body, .lit (.string " }")]))
 
 structure PsElabDeriveReprSlotConstructor where
   slotIndex : Nat
   fields : PsElabDeriveFields
-  printers : List (Option PsExpr)
-  tuples : List (Option PsExpr)
+  printers : List PsElabDeriveReprPrinter
+  tuples : List PsElabDeriveReprPrinter
 
 def psElabDeriveReprIsListSlot (slot : PsInductiveEliminationSlot) : Bool :=
   !slot.publicMember && psNameEq slot.family.name psListName
@@ -98,27 +133,22 @@ def psElabDeriveReprAtomicList (plan : PsElabDeriveContext)
 def psElabDeriveReprPlanSlot (plan : PsElabDeriveContext) (slotIndex : Nat)
     (slot : PsInductiveEliminationSlot) (constructor : PsInductiveEliminationConstructor) :
     Except PsElabError PsElabDeriveReprSlotConstructor := do
-  let fields ← psElabDeriveSlotFields plan slot constructor
-  let recursive := fun (index : Nat) => constructor.recursiveFields.any (fun edge => edge.1 == index)
+  let fields ← psElabDeriveSlotFields plan slot constructor true
+  let recursive := fun (index : Nat) => fields.directRecursiveFields.contains index
   let tupleField := fun (index : Nat) => psElabDeriveReprIsProdSlot slot && index == 1
   let printers ← (fields.fields.zip fields.proofs).zipIdx.mapM fun ((field, proof), index) => do
     if proof || recursive index || tupleField index ||
-        (slot.publicMember && !psBinderInfoEq field.binder .explicit) then return none
+        (slot.publicMember && !psBinderInfoEq field.binder .explicit) then
+      return PsElabDeriveReprPrinter.omitted
+    if !psExprFVarsInContext plan.context.localContext field.type then return .deferred
     match psWhnf plan.context.environment plan.context.metaContext plan.context.localContext field.type with
-    | .sortE _ => return none
+    | .sortE _ => return .omitted
     | _ => pure ()
-    let target ← psElabDeriveClassType plan.context (psRootName "Repr") field.type
-    let dictionary ← psElabDeriveInstance plan.context target
-    let .app (.constE _ levels) _ := target | throw .typeMismatch
-    return some (psExprApplyMany (.constE (psDecisionName "Repr.reprPrec") levels)
-      [field.type, dictionary])
+    return .ready (← psElabDeriveReprDictionary plan.context field.type)
   let tuples ← fields.fields.zipIdx.mapM fun (field, index) => do
-    if recursive index || !tupleField index then return none
-    let target ← psElabDeriveClassType plan.context (psRootName "ReprTuple") field.type
-    let dictionary ← psElabDeriveInstance plan.context target
-    let .app (.constE _ levels) _ := target | throw .typeMismatch
-    return some (psExprApplyMany (.constE (psDecisionName "ReprTuple.reprTuple") levels)
-      [field.type, dictionary])
+    if recursive index || !tupleField index then return PsElabDeriveReprPrinter.omitted
+    if !psExprFVarsInContext plan.context.localContext field.type then return .deferred
+    return .ready (← psElabDeriveReprDictionary plan.context field.type true)
   return { slotIndex, fields, printers, tuples }
 
 def psElabDeriveReprJoin (documents : PsExpr) : PsExpr :=
@@ -161,18 +191,45 @@ def psElabDeriveReprHypothesis (plan : PsElabDeriveContext) (atomic : List Bool)
   else return .app hypothesis.value (psFormatNat precedence)
 
 def psElabDeriveReprSlotField (plan : PsElabDeriveContext) (atomic : List Bool)
-    (entry : PsElabDeriveReprSlotConstructor) (constructor : PsInductiveEliminationConstructor)
+    (context : PsElabContext)
+    (entry : PsElabDeriveReprSlotConstructor)
     (fields : List PsElabTypedBinder) (hypotheses : List PsElabDeriveHypothesis)
     (index precedence : Nat) : Except PsElabError PsExpr := do
   let some field := fields[index]? | throw (.data "Repr deriving field alignment mismatch")
-  if constructor.recursiveFields.any (fun edge => edge.1 == index) then
+  if entry.fields.directRecursiveFields.contains index then
     let some hypothesis := hypotheses.find? (fun hypothesis => hypothesis.fieldId == field.id)
       | throw (.data "Repr deriving recursive field has no checked induction printer")
     psElabDeriveReprHypothesis plan atomic hypothesis precedence
   else
     let some printer := entry.printers[index]?
       | throw (.data "Repr deriving field alignment mismatch")
+    let printer ← psElabDeriveReprPrinterAt context printer field.type
     return psElabDeriveReprField printer (.fvar field.id) precedence
+
+-- Native Repr prints explicit promoted parameters too. Read binder metadata
+-- from this actual constructor type, not from the instance's implicit header.
+def psElabDeriveReprParameters (plan : PsElabDeriveContext)
+    (context : PsElabContext) (constructor : PsInductiveEliminationConstructor) :
+    Except PsElabError (List PsExpr) := do
+  let parameters := psElabBinderArguments plan.parametersRev
+  unless constructor.info.numParams == parameters.length do
+    throw (.data "Repr deriving constructor parameter alignment mismatch")
+  let type := psExprInstantiateLevelParams constructor.info.levelParams
+    (plan.info.levelParams.map PsLevel.param) constructor.info.type
+  let (_, documents) ← parameters.foldlM
+    (fun (state : PsExpr × List PsExpr) parameter => do
+      let pi ← (psInferEnsureForall context.environment context.metaContext
+        context.localContext state.fst).mapError PsElabError.infer
+      let documents ← if psBinderInfoEq pi.binder .explicit then do
+          let level ← psElabExpressionSort context pi.domain
+          let printer ← if psLevelEquivalent level .zero then pure none else do
+            match psWhnf context.environment context.metaContext context.localContext pi.domain with
+            | .sortE _ => pure none
+            | _ => pure (some (← psElabDeriveReprDictionary context pi.domain))
+          pure (state.snd ++ [psElabDeriveReprField printer parameter 1024])
+        else pure state.snd
+      return (psExprInstantiate1 pi.body parameter, documents)) (type, [])
+  return documents
 
 def psElabDeriveReprPublicBranch (plan : PsElabDeriveContext) (atomic : List Bool)
     (context : PsElabContext) (entry : PsElabDeriveReprSlotConstructor)
@@ -180,11 +237,15 @@ def psElabDeriveReprPublicBranch (plan : PsElabDeriveContext) (atomic : List Boo
     (hypotheses : List PsElabDeriveHypothesis) : Except PsElabError PsExpr := do
   if entry.printers.length != fields.length then throw (.data "Repr deriving field alignment mismatch")
   let append := fun a b => psFormatCall "append" [a, b]
+  let parameters ← psElabDeriveReprParameters plan context constructor
+  let initial := parameters.foldl
+    (fun document parameter => append (append document (psFormatCall "line")) parameter)
+    (psReprText (psNameToString constructor.info.name))
   let body ← fields.zipIdx.foldlM (fun acc (field, index) => do
     if !psBinderInfoEq field.binder .explicit then return acc
-    let rendered ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses index 1024
+    let rendered ← psElabDeriveReprSlotField plan atomic context entry fields hypotheses index 1024
     return append (append acc (psFormatCall "line")) rendered)
-    (psReprText (psNameToString constructor.info.name))
+    initial
   let id := context.localContext.nextId
   let indent := psFormatIf psOrderNat
     (psOrderCall "Nat.ble" [psFormatNat 1024, .fvar id]) (psFormatNat 1) (psFormatNat 2)
@@ -194,14 +255,14 @@ def psElabDeriveReprPublicBranch (plan : PsElabDeriveContext) (atomic : List Boo
 
 def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List Bool)
     (context : PsElabContext) (slotIndex : Nat) (slot : PsInductiveEliminationSlot)
-    (entry : PsElabDeriveReprSlotConstructor) (constructor : PsInductiveEliminationConstructor)
+    (entry : PsElabDeriveReprSlotConstructor)
     (fields : List PsElabTypedBinder) (hypotheses : List PsElabDeriveHypothesis) :
     Except PsElabError PsExpr := do
   if psElabDeriveReprIsListSlot slot then
     match fields with
     | [] => return psSelfHostListNilOf psFormatType
     | [_, tail] =>
-      let head ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 0
+      let head ← psElabDeriveReprSlotField plan atomic context entry fields hypotheses 0 0
       let some rest := hypotheses.find? (fun hypothesis => hypothesis.fieldId == tail.id)
         | throw (.data "Repr List tail has no checked document hypothesis")
       if rest.target != slotIndex then throw (.data "Repr List tail targets another specialization")
@@ -209,7 +270,7 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
     | _ => throw (.data "Repr List constructor telescope mismatch")
   else if psElabDeriveReprIsProdSlot slot then
     let [_, right] := fields | throw (.data "Repr Prod constructor telescope mismatch")
-    let first ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 0
+    let first ← psElabDeriveReprSlotField plan atomic context entry fields hypotheses 0 0
     let id := context.localContext.nextId
     let initial := psSelfHostListConsOf psFormatType first (.fvar id)
     -- This bound do-if shares the enclosing return continuation. Yield its
@@ -223,7 +284,9 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
           let rendered ← psElabDeriveReprHypothesis plan atomic child 0
           pure (psSelfHostListConsOf psFormatType rendered initial)
       else do
-        let some (some tuple) := entry.tuples[1]?
+        let some printer := entry.tuples[1]?
+          | throw (.data "Repr Prod right field has no checked tuple dictionary")
+        let some tuple ← psElabDeriveReprPrinterAt context printer right.type true
           | throw (.data "Repr Prod right field has no checked tuple dictionary")
         pure (psExprApplyMany tuple [.fvar right.id, initial])
     return psLogicLam id "tail" psElabDeriveReprDocuments body
@@ -242,7 +305,7 @@ def psElabDeriveReprContainerBranch (plan : PsElabDeriveContext) (atomic : List 
     match fields with
     | [] => return psLogicLam id "prec" psOrderNat (psReprText "none")
     | [_] =>
-      let rendered ← psElabDeriveReprSlotField plan atomic entry constructor fields hypotheses 0 1024
+      let rendered ← psElabDeriveReprSlotField plan atomic context entry fields hypotheses 0 1024
       let body := psReprAddAppParen
         (psFormatCall "append" [psReprText "some ", rendered]) (.fvar id)
       return psLogicLam id "prec" psOrderNat body
@@ -262,7 +325,7 @@ def psElabDeriveReprInductive (plan : PsElabDeriveContext)
       if slot.publicMember then
         psElabDeriveReprPublicBranch plan atomic context entry constructor fields hypotheses
       else
-        psElabDeriveReprContainerBranch plan atomic context slotIndex slot entry constructor fields hypotheses)
+        psElabDeriveReprContainerBranch plan atomic context slotIndex slot entry fields hypotheses)
     diagnose
 
 def psElabDeriveRepr (environment : PsEnvironment)

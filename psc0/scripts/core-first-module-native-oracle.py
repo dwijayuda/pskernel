@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases()
 
 
 def visibility_cases():
@@ -436,6 +436,15 @@ def attribute_cases():
         ("AttributeOpaqueImport", "module\npublic import AttributeProvider\npublic theorem coreAttrOpaqueBad (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n", ("Tactic `rfl` failed",)),
     ]
 
+
+def connective_attribute_cases():
+    return [
+        ("AttributeConnectiveProvider", "module\npublic def coreAttrLogicalIdentity (A : Type) (x : A) : A := x\n@[simp] public theorem coreAttrGoodIff (P Q : Prop) (h : Iff P Q) : Iff P Q := h\n@[simp] public theorem coreAttrGoodAnd (P Q : Prop) (hp : P) (hq : Q) : And P Q := And.intro hp hq\n@[simp] public theorem coreAttrGoodAndEq (A : Type) (x y : A) : And (coreAttrLogicalIdentity A x = x) (coreAttrLogicalIdentity A y = y) := And.intro (Eq.refl x) (Eq.refl y)\n", ()),
+        ("AttributeIffReflexive", "module\n@[simp] public theorem coreAttrBadIff (P : Prop) : Iff P P := Iff.intro (fun (h : P) => h) (fun (h : P) => h)\n", ("Invalid simp theorem:",)),
+        ("AttributeAndLeftReflexive", "module\n@[simp] public theorem coreAttrBadAndLeft (A : Type) (x : A) (P : Prop) (hp : P) : And (x = x) P := And.intro (Eq.refl x) hp\n", ("Invalid simp theorem:",)),
+        ("AttributeAndRightReflexive", "module\n@[simp] public theorem coreAttrBadAndRight (A : Type) (x : A) (P : Prop) (hp : P) : And P (x = x) := And.intro hp (Eq.refl x)\n", ("Invalid simp theorem:",)),
+        ("AttributeAndNestedReflexive", "module\n@[simp] public theorem coreAttrBadAndNested (A : Type) (x : A) (P Q : Prop) (hp : P) (hq : Q) : And P (And Q (x = x)) := And.intro hp (And.intro hq (Eq.refl x))\n", ("Invalid simp theorem:",)),
+    ]
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)

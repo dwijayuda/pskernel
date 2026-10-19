@@ -1,6 +1,7 @@
 import Ps.Compiler.Pscv0ModuleEngine
 import Ps.CompilerIr.Checked
 import Ps.Environment.Logic
+import Ps.Environment.Connectives
 import PsKernelLean.Replay
 import PsKernelLean.Protocol
 
@@ -1504,6 +1505,74 @@ private def checkRegisteredValues : IO Unit := do
   ensure (leanAdmissions == psAdmissions) "registered value paired admissions differ"
   IO.println "PSCV0_CORE_REGISTERED_VALUES: two paired admitted projects, four owned refusals, inferred abbrev/default registration, public where helpers, data-instance and projection reduction, ordinary default opacity and private computational dependency controls passed"
 
+private def connectiveAttributePieces : List (String × String) := [
+  ("public def coreAttrLogicalIdentity (A : Type) (x : A) : A := x\n",
+   "def coreAttrLogicalIdentity(A: Type, x: A): A := x\n"),
+  ("@[simp] public theorem coreAttrGoodIff (P Q : Prop) (h : Iff P Q) : Iff P Q := h\n",
+   "@[simp] theorem coreAttrGoodIff(P: Prop, Q: Prop, h: Iff(P, Q)): Iff(P, Q) := h\n"),
+  ("@[simp] public theorem coreAttrGoodAnd (P Q : Prop) (hp : P) (hq : Q) : And P Q := And.intro hp hq\n",
+   "@[simp] theorem coreAttrGoodAnd(P: Prop, Q: Prop, hp: P, hq: Q): And(P, Q) := And.intro(hp, hq)\n"),
+  ("@[simp] public theorem coreAttrGoodAndEq (A : Type) (x y : A) : And (coreAttrLogicalIdentity A x = x) (coreAttrLogicalIdentity A y = y) := And.intro (Eq.refl x) (Eq.refl y)\n",
+   "@[simp] theorem coreAttrGoodAndEq(A: Type, x: A, y: A): And(coreAttrLogicalIdentity(A, x) = x, coreAttrLogicalIdentity(A, y) = y) := And.intro(Eq.refl(x), Eq.refl(y))\n")]
+
+private def connectiveAttributeRefusals : List (String × String × String) := [
+  ("IffReflexive",
+   "@[simp] public theorem coreAttrBadIff (P : Prop) : Iff P P := Iff.intro (fun (h : P) => h) (fun (h : P) => h)\n",
+   "@[simp] theorem coreAttrBadIff(P: Prop): Iff(P, P) := Iff.intro(fun (h: P) => h, fun (h: P) => h)\n"),
+  ("AndLeftReflexive",
+   "@[simp] public theorem coreAttrBadAndLeft (A : Type) (x : A) (P : Prop) (hp : P) : And (x = x) P := And.intro (Eq.refl x) hp\n",
+   "@[simp] theorem coreAttrBadAndLeft(A: Type, x: A, P: Prop, hp: P): And(x = x, P) := And.intro(Eq.refl(x), hp)\n"),
+  ("AndRightReflexive",
+   "@[simp] public theorem coreAttrBadAndRight (A : Type) (x : A) (P : Prop) (hp : P) : And P (x = x) := And.intro hp (Eq.refl x)\n",
+   "@[simp] theorem coreAttrBadAndRight(A: Type, x: A, P: Prop, hp: P): And(P, x = x) := And.intro(hp, Eq.refl(x))\n"),
+  ("AndNestedReflexive",
+   "@[simp] public theorem coreAttrBadAndNested (A : Type) (x : A) (P Q : Prop) (hp : P) (hq : Q) : And P (And Q (x = x)) := And.intro hp (And.intro hq (Eq.refl x))\n",
+   "@[simp] theorem coreAttrBadAndNested(A: Type, x: A, P: Prop, Q: Prop, hp: P, hq: Q): And(P, And(Q, x = x)) := And.intro(hp, And.intro(hq, Eq.refl(x)))\n")]
+
+private def checkConnectiveAttributes : IO Unit := do
+  let (_, scopeProfile) ← scopeContext
+  let connectives := psLogicBinaryStructure "And" false ++ psLogicBinaryStructure "Iff" true
+  ensure (connectives.length == 10 && connectives.all (fun declaration =>
+    match declaration with
+    | .inductiveDecl _ | .constructorDecl _ | .recursorDecl _ | .definitionDecl .. => true
+    | _ => false)) "connective attribute seed introduced another declaration kind"
+  let declarations := scopeProfile.baseEnvironment.declarations.reverse ++ connectives
+  let checked ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations declarations
+  let seed ← match checked with
+    | .ok value => pure value
+    | .error error => fail ("connective attribute seed: " ++ error.message)
+  let environment ← connectives.foldlM (fun environment declaration => do
+    let some next := psEnvironmentAdd environment declaration
+      | fail "duplicate connective attribute seed declaration"
+    pure next) scopeProfile.baseEnvironment
+  ensure (environment.declarations.length == 14 &&
+      !(psEnvironmentContains environment (psRootName "Nat")) &&
+      (seed.find? `Nat).isNone)
+    "connective attribute seed roster changed"
+  let profile := { scopeProfile with baseEnvironment := environment }
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let source := importVisibilityInput kind "Library" "" connectiveAttributePieces
+    let output ← prepare profile "Library" [source]
+    let _ ← admit seed output.admissions
+    paired := paired ++ [output.admissions]
+    let some receipt := output.moduleProfiles.find? (fun item => item.name == "Library")
+      | fail "connective attribute module receipt missing"
+    let expected := ["coreAttrGoodAndEq", "coreAttrGoodAnd", "coreAttrGoodIff"]
+    ensure (receipt.interface.simpEntries.length == expected.length &&
+      (receipt.interface.simpEntries.zip expected).all (fun (entry, text) =>
+        psNameEq entry.name (psRootName text) && entry.kind == .proof && entry.priority == 1000))
+      "connective simp registrations lost source identity, proof kind or deterministic order"
+    for (label, leanText, psText) in connectiveAttributeRefusals do
+      let source := importVisibilityInput kind "Entry" "" [(leanText, psText)]
+      refuse profile "Entry" [source] true
+        "PSCV0-DATA: PSCV0-SIMP-ATTRIBUTE: equation is equivalent to variable reflexivity"
+      IO.println ("CORE-CONNECTIVE-ATTRIBUTES: refused " ++ label ++
+        psCompilerSourceKindExtension kind)
+  let [left, right] := paired | fail "missing connective attribute source pair"
+  ensure (left == right) "connective attribute canonical declarations differ between readers"
+  IO.println "PSCV0_CORE_CONNECTIVE_ATTRIBUTES: paired program; 14 checked seed declarations without axioms; three logical simp registrations; eight owned portable refusals; exact canonical reader parity passed"
+
 private def attributeLibraryPieces : List (String × String) := [
   ("public class CoreAttrEcho (A : Type) where\n  run : A -> A\n",
    "class CoreAttrEcho(A: Type) where { run: A -> A }\n"),
@@ -1928,5 +1997,6 @@ def main : IO Unit := do
   checkLegacyWhere
   checkRegisteredValues
   checkSourceAttributes
+  checkConnectiveAttributes
   checkExposedProofs
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

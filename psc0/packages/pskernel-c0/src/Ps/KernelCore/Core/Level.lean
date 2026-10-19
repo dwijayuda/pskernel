@@ -1008,3 +1008,20 @@ def psKernelLevelsHaveMVar
       else
         psKernelLevelsHaveMVar tail
 
+
+
+/-- Pure structural presence of *any* named universe parameter; unlike a
+    first-undefined-name query this predicate does not depend on an allowed
+    list. A false result witnesses the absence of all universe parameters. -/
+def psKernelLevelHasParam (level : PsKernelLevel) : Bool :=
+  match level with
+  | .param _ => true
+  | .succ inner => psKernelLevelHasParam inner
+  | .max left right => psKernelLevelHasParam left || psKernelLevelHasParam right
+  | .imax left right => psKernelLevelHasParam left || psKernelLevelHasParam right
+  | _ => false
+
+def psKernelLevelsHaveParam (levels : List PsKernelLevel) : Bool :=
+  match levels with
+  | [] => false
+  | head :: tail => psKernelLevelHasParam head || psKernelLevelsHaveParam tail

@@ -40,6 +40,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.DeepInferenceFrames,
     `Ps.KernelCore.Architecture.DeepSubstitutionTape,
     `Ps.KernelCore.Architecture.DeepBinderFrames,
+    `Ps.KernelCore.Architecture.DeepMixedWorklist,
     `Ps.KernelCore.Architecture.QualifiedLetInference,
     `Ps.KernelCore.Architecture.QualifiedProjectionInference,
     `Ps.KernelCore.Architecture.QualifiedRecursiveInference,

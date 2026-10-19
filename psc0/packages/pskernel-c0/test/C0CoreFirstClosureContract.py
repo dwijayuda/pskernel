@@ -109,7 +109,8 @@ def verify_closure(report):
     require(report.get("schema") == "pscv0-core-native-closure/1", "closure schema mismatch")
     require(report.get("leanCommit") == LEAN_SHA, "closure Lean pin mismatch")
     for key, expected in EXPECTED.items():
-        require(report.get(key) == expected, f"{key}: expected {expected}, got {report.get(key)}")
+        actual = len(report["sourceModules"]) if key == "sourceModules" else report.get(key)
+        require(actual == expected, f"{key}: expected {expected}, got {actual}")
     require(report.get("emptyBoundary") is True, "closure must have an empty boundary")
     require(report.get("annotationsErased") is False, "raw closure annotations changed")
     require(report.get("candidateKernelAdmitted") is False,

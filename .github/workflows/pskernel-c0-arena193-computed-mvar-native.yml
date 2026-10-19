@@ -41,5 +41,5 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rg -n 'psKernelC0MVarFlag_source|psKernelC0NodeFlagAdmission_source|computed_field|psKernelExprHasMVar' psc0/packages/pskernel-c0/src/Ps/KernelCore/{Core,Admission}/ | head -n 60
+          grep -R -n -E 'psKernelC0MVarFlag_source|psKernelC0NodeFlagAdmission_source|computed_field|psKernelExprHasMVar' psc0/packages/pskernel-c0/src/Ps/KernelCore/Core psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission | sed -n '1,60p'
           echo 'C0_COMPUTED_MVAR_TRUST_SCOPE native_compiler_computed_field_is_extra_assumption=true no_axioms_or_fuel_added=true pure_equation_checked=true'

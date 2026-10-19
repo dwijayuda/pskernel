@@ -1,4 +1,4 @@
-import Ps.CompilerIr.Model
+import Ps.CompilerIr.Check
 
 inductive PsIrSpecializeKind where
   | structure
@@ -17,6 +17,9 @@ inductive PsIrSpecializeError where
   | typeArgumentArity (name : String)
   | unknownTarget (name : String)
   | unsupportedGenericCall
+  | inputValidationFailed
+  | outputValidationFailed
+  | validationBudgetExhausted
 
 structure PsIrSpecializeTypeResult where
   type : PsVerifiedIrType
@@ -1713,17 +1716,33 @@ def psIrSpecializeModule
                         declarations := final.declarations
                       }
 
--- The validated entry points are deliberate wrappers around this source's
--- existing specialization algorithm. No target is allowed to treat the wrapper
--- as an independent proof of runtime equivalence.
+-- A public raw wrapper is not itself an authority token. Validate the exact
+-- input AND the transformed output, including traversal-budget completion.
+-- This establishes bounded typing, not semantic equivalence of specialization.
+def psIrSpecializeRecheck
+    (raw : PsVerifiedIrModule) (isInput : Bool) :
+    Except PsIrSpecializeError Unit :=
+  let report := psCheckVerifiedIrModule psIrCheckDefaultOptions raw
+  if !report.traversalComplete then
+    .error .validationBudgetExhausted
+  else if !report.accepted then
+    if isInput then .error .inputValidationFailed
+    else .error .outputValidationFailed
+  else
+    .ok ()
+
 def psIrSpecializeValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsSpecializedIrModule := do
+  psIrSpecializeRecheck validated.raw true
   let raw ← psIrSpecializeModule validated.raw
+  psIrSpecializeRecheck raw false
   pure { raw := raw }
 
 def psIrSpecializeUniformValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsUniformSpecializedIrModule := do
+  psIrSpecializeRecheck validated.raw true
   let raw ← psIrSpecializeModule validated.raw
+  psIrSpecializeRecheck raw false
   pure { raw := raw }

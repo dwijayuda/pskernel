@@ -101,8 +101,16 @@ def psHostDirectWasmComponent
     let _ ← psHostWasmTool #["validate", stagedComponent.toString] "VALIDATE"
     psHostWasmBinaryToWat stagedComponent.toString stagedComponentWat.toString
     let observedWit ← psHostWasmTool #["component", "wit", stagedComponent.toString] "WIT_CHECK"
-    if (observedWit.splitOn exportName).length <= 1 then
-      throw (IO.userError "PSC1_COMPONENT_WIT_EXPORT_MISMATCH")
+    -- A name substring is not an ABI check. Compare the full declared export
+    -- signature (argument names/types and result type) with the WIT recovered
+    -- from the actual final component binary.
+    let some expectedLine := (wit.splitOn "\n").find? (fun line =>
+      line.startsWith ("  export " ++ exportName ++ ": func("))
+      | throw (IO.userError "PSC1_COMPONENT_WIT_EXPECTED_SIGNATURE_MISSING")
+    let expectedSignature := String.ofList (expectedLine.toList.drop 2)
+    if (observedWit.splitOn expectedSignature).length <= 1 then
+      throw (IO.userError ("PSC1_COMPONENT_WIT_EXPORT_SIGNATURE_MISMATCH: " ++
+        expectedSignature))
     let stem := outputPath.dropRight 5
     IO.FS.rename stagedCore (System.FilePath.mk (stem ++ ".core.wasm"))
     IO.FS.rename stagedCoreWat (System.FilePath.mk (stem ++ ".core.wat"))

@@ -164,8 +164,8 @@ def psProofScriptTermWithSpan
   | .haveE name type value body _ =>
       PsSyntaxTerm.haveE name type value body span
   | .ifE name condition yes no _ => PsSyntaxTerm.ifE name condition yes no span
-  | .matchMany scrutinees alternatives _ =>
-      PsSyntaxTerm.matchMany scrutinees alternatives span
+  | .matchMany discriminants alternatives generalizing? _ =>
+      PsSyntaxTerm.matchMany discriminants alternatives generalizing? span
 
 def psProofScriptLaterLine
     (previous : PsSourcePos)

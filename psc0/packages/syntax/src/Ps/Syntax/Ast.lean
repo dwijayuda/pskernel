@@ -55,6 +55,11 @@ inductive PsSyntaxPattern where
   | wildcard (span : PsSourceSpan)
   | variable (name : PsSyntaxName)
   | ctor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+  -- Preserve native dot-head preprocessing; it cannot be recovered from a name.
+  | dotCtor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+  -- Internal scope metadata for an ordinary term in a constructor parameter
+  -- position. The selected parser does not add a new surface pattern form.
+  | inaccessible (pattern : PsSyntaxPattern)
 
 -- Construction helper for existing flat parser clients; the stored tree is
 -- uniformly recursive.
@@ -68,7 +73,7 @@ def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSynta
   | 0 => []
   | fuel + 1 => match pattern with
     | .variable name => [name]
-    | .ctor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
+    | .ctor _ fields _ | .dotCtor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
     | _ => []
 
 -- Universe syntax has its own category; its names are never term variables.
@@ -100,6 +105,15 @@ structure PsSyntaxProofScope where
 inductive PsSyntaxOperatorKind where
   | unary | binary | rightAction | relation | booleanRelation
   deriving BEq
+
+structure PsSyntaxMatchDiscriminant (α : Type) where
+  term : α
+  equationName? : Option PsSyntaxName := none
+
+def psSyntaxMatchEquationNames {α : Type}
+    (discriminants : List (PsSyntaxMatchDiscriminant α)) : List PsSyntaxName :=
+  discriminants.filterMap fun discriminant =>
+    discriminant.equationName?.filter fun name => name.segments != ["_"]
 
 mutual
 inductive PsSyntaxTerm where
@@ -154,8 +168,9 @@ inductive PsSyntaxTerm where
       (elseBranch : PsSyntaxTerm)
       (span : PsSourceSpan)
   | matchMany
-      (scrutinees : List PsSyntaxTerm)
+      (discriminants : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
       (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+      (generalizing? : Option Bool)
       (span : PsSourceSpan)
 
 -- Do is source control syntax. Effect selection belongs to typed elaboration.
@@ -215,7 +230,8 @@ def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTe
 def PsSyntaxTerm.matchE (scrutinee : PsSyntaxTerm)
     (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .matchMany [scrutinee] (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) span
+  .matchMany [{ term := scrutinee }]
+    (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) none span
 
 def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan :=
   { start := start.start, stop := stop.stop }
@@ -243,13 +259,14 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .forallE _ _ span => span
   | .letE _ _ _ _ span | .haveE _ _ _ _ span => span
   | .ifE _ _ _ _ span => span
-  | .matchMany _ _ span => span
+  | .matchMany _ _ _ span => span
 
 def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
   | .natural _ span => span
   | .bool _ span => span
   | .wildcard span => span
-  | .ctor _ _ span => span
+  | .ctor _ _ span | .dotCtor _ _ span => span
+  | .inaccessible pattern => psSyntaxPatternSpan pattern
   | .variable name => name.span
 
 structure PsSyntaxInductiveConstructor where
@@ -364,12 +381,19 @@ inductive PsSyntaxRegistration where
   | instanceDecl (priority : Nat)
   | defaultInstanceDecl (priority : Nat) (ordinaryPriority : Option Nat)
 
+-- Only this fixed source attribute roster may mutate declaration registries.
+inductive PsSyntaxAttribute where
+  | simpAttribute
+  | instanceAttribute
+  | defaultInstanceAttribute (priority : Nat)
+
 -- A source mutual block keeps ordered declaration and modifier ownership.
 -- It is not flattened into sequential commands or a mutual-inductive group.
 structure PsSyntaxMutualMember where
   declaration : PsSyntaxDeclaration
   isPrivate : Bool := false
   registration : Option PsSyntaxRegistration := none
+  attributes : List PsSyntaxAttribute := []
 
 inductive PsSyntaxCommand where
   | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
@@ -378,6 +402,10 @@ inductive PsSyntaxCommand where
   -- Modifier ownership stays in command syntax; data/term ASTs are unchanged.
   | privateDeclaration (value : PsSyntaxDeclaration)
   | privateRegisteredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
+  | attributedDeclaration (value : PsSyntaxDeclaration) (registration : Option PsSyntaxRegistration)
+      (isPrivate : Bool) (attributes : List PsSyntaxAttribute)
+  | attributedDerivingDeclaration (value : PsSyntaxDeclaration) (handlers : List PsSyntaxName)
+      (isPrivate : Bool) (attributes : List PsSyntaxAttribute)
   -- A trailing allowlisted deriving clause belongs to its defining data
   -- command, not to a second unconstrained source macro or derived type AST.
   | derivingDeclaration (value : PsSyntaxDeclaration) (handlers : List PsSyntaxName)

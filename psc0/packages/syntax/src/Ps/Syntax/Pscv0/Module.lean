@@ -227,6 +227,8 @@ def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
     match command with
     | .declaration declaration | .registeredDeclaration declaration _
     | .privateDeclaration declaration | .privateRegisteredDeclaration declaration _
+    | .attributedDeclaration declaration _ _ _
+    | .attributedDerivingDeclaration declaration _ _ _
     | .derivingDeclaration declaration _ _ =>
       -- Partial strategy is retained by the AST; executable admission belongs
       -- to elaboration/model preparation, not a historical blanket parse ban.

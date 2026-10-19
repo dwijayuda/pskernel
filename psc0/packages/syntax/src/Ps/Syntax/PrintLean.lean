@@ -411,15 +411,26 @@ def psPrintLeanTermWithFuel
                           printedThen
                           " else "
                           printedElse)
-      | .matchMany scrutinees alternatives _ => do
-          let scrutinees ← scrutinees.mapM smaller
-          let discriminants := String.intercalate ", " scrutinees
+      | .matchMany discriminants alternatives generalizing? _ => do
+          let plain := generalizing?.isNone &&
+            discriminants.all (fun discriminant => discriminant.equationName?.isNone)
+          let printed ← discriminants.mapM fun discriminant => do
+            let term ← smaller discriminant.term
+            match discriminant.equationName? with
+            | none => return term
+            | some name => return (← psPrintSyntaxName name) ++ " : " ++ term
+          let discriminants := String.intercalate ", " printed
+          let configuration := match generalizing? with
+            | none => ""
+            | some flag => "(generalizing := " ++ (if flag then "true" else "false") ++ ") "
           let alternatives ← alternatives.mapM fun (patterns, body, _) => do
             let patterns ← patterns.mapM psPrintPattern
             let body ← smaller body
             return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
-          if alternatives.isEmpty then return "nomatch " ++ discriminants
-          return "match " ++ discriminants ++ " with\n" ++ String.intercalate "\n" alternatives
+          if alternatives.isEmpty && plain then return "nomatch " ++ discriminants
+          if alternatives.isEmpty then
+            throw (.unsupportedSourceForm "native named or configured match requires an alternative")
+          return "match " ++ configuration ++ discriminants ++ " with\n" ++ String.intercalate "\n" alternatives
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :

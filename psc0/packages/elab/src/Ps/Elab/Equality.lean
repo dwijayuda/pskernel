@@ -29,7 +29,16 @@ def psElabIndexEquation (context : PsElabContext) (left right : PsExpr) :
     [rightType, right]
   return (heq, refl)
 
-def psElabEquationView (context : PsElabContext) (type proof : PsExpr) :
+-- A retry candidate retains its raw source index separately from both current
+-- sides. Only the current sides consume actual equality-refinement logs.
+structure PsElabIndexRefinementCandidate where
+  original : PsExpr
+  left : PsExpr
+  right : PsExpr
+  named : Bool := false
+
+def psElabEquationViewWithIndexRequest (context : PsElabContext) (type proof : PsExpr)
+    (requests : List PsElabIndexRefinementCandidate) :
     Except PsElabError PsElabEquation := do
   let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext type)
   match view.head, view.args with
@@ -43,13 +52,24 @@ def psElabEquationView (context : PsElabContext) (type proof : PsExpr) :
     -- preceding constraints have made both actual types definitionally equal.
     if !psDefEqReadOnlyWithEnv context.environment context.metaContext
         context.localContext leftType rightType then
-      throw (.refinement "preceding index constraints did not align heterogeneous types")
+      let cause := PsElabError.refinement "preceding index constraints did not align heterogeneous types"
+      let request := requests.find? fun candidate =>
+        !psDefEqReadOnlyWithEnv context.environment context.metaContext
+          context.localContext candidate.left candidate.right
+      match request with
+      | some candidate => throw (.sourceMatchIndexRefinement [candidate.original] candidate.named cause)
+      | none => throw cause
     let converted := psExprApplyMany (.constE (psRootName "eq_of_heq") [level])
       [leftType, left, right, proof]
     let checked ← psElabResolvedTerm context converted
       (some (psLogicEq level leftType left right))
     return { level, type := leftType, left, right, proof := checked.term }
   | _, _ => throw (.refinement "expected an index equality")
+
+-- Existing elimination and tactic callers retain the exact failure contract.
+def psElabEquationView (context : PsElabContext) (type proof : PsExpr) :
+    Except PsElabError PsElabEquation :=
+  psElabEquationViewWithIndexRequest context type proof []
 
 def psElabEquationRec (context : PsElabContext) (equation : PsElabEquation)
     (result : PsExpr -> PsExpr) (base : PsExpr) : Except PsElabError PsExpr := do
@@ -169,9 +189,15 @@ def psElabFalseElimination (context : PsElabContext) (target proof : PsExpr) :
 -- Equality elimination reverts the dependency closure, specializes it in the
 -- base case, and applies the original locals after transport. Types and values
 -- are never mutated in place.
-def psElabSubstituteEquation
-    (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
-    (context : PsElabContext) (equation : PsElabEquation) (id : Nat)
+-- Continuations receive the ordered substitutions actually performed by
+-- equality transport, including fresh dependent bindings and let declarations.
+-- Typed match consumers apply this log to retained expressions; source names
+-- are not an identity map and must not be used to recover these substitutions.
+abbrev PsElabRefinements := List (Nat × PsExpr)
+
+def psElabSubstituteEquationWithRefinements
+    (finish : PsElabRefinements -> PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
+    (refinements : PsElabRefinements) (context : PsElabContext) (equation : PsElabEquation) (id : Nat)
     (ignored : List Nat) (target : PsExpr) : Except PsElabError PsElabTermResult := do
   let dependents := psElabDependentLocals context [id] ignored
   let telescope := psElabCloseDependentType dependents target
@@ -181,7 +207,7 @@ def psElabSubstituteEquation
   let opened ← psElabOpenDependents dependents {
     context := aliases.context, body := specialized, bindersRev := []
     aliasesRev := aliases.valuesRev, replacements := substitutions }
-  let body ← finish opened.context opened.body
+  let body ← finish (refinements ++ opened.replacements) opened.context opened.body
   let base ← psElabCloseDependents context opened body specialized
   -- Native substCore's tryToSkip avoids Eq.rec when the completed dependent
   -- target did not change. Branch elaboration can solve an omitted result
@@ -199,51 +225,79 @@ def psElabSubstituteEquation
     term := psExprApplyMany transported (psElabDependentArguments dependents) }
 
 mutual
-def psElabSolveIndexConstraints (fuel count : Nat) (flexible ignored : List Nat)
-    (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
-    (context : PsElabContext) (target : PsExpr) : Except PsElabError PsElabTermResult := do
-  match fuel with
-  | 0 => throw .fuelExhausted
-  | fuel + 1 =>
-    match count with
-    | 0 => finish context target
-    | count + 1 =>
-      let pi ← (psInferEnsureForall context.environment context.metaContext context.localContext target).mapError PsElabError.infer
-      let pushed := psLocalPushBinding context.localContext pi.name pi.domain pi.binder
-      let inner := psElabContextWithLocal context pushed.context
-      let equation ← psElabEquationView inner pi.domain (.fvar pushed.id)
-      let body ← psElabSolveIndexEquation fuel flexible (pushed.id :: ignored)
-        (psElabSolveIndexConstraints fuel count flexible (pushed.id :: ignored) finish)
-        inner (psExprInstantiate1 pi.body (.fvar pushed.id)) equation
-      psElabAbstract context body.context
-        [.lambdaE pushed.id pi.name pi.domain pi.binder] body.term target
-
-def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
-    (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
-    (context : PsElabContext) (target : PsExpr) (equation : PsElabEquation) :
+def psElabSolveIndexConstraintsWithRefinements (fuel count : Nat) (flexible ignored : List Nat)
+    (finish : PsElabRefinements -> PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
+    (refinements : PsElabRefinements) (context : PsElabContext) (target : PsExpr)
+    (requests : List PsElabIndexRefinementCandidate := []) (protectedIds : List Nat := [])
+    (protectedReady : Bool := false) :
     Except PsElabError PsElabTermResult := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    let protectedIds := if protectedReady then protectedIds else
+      (protectedIds ++ context.localContext.declarations.filterMap (fun declaration =>
+        let id := psLocalDeclId declaration
+        if flexible.contains id then none else some id)).eraseDups
+    match count with
+    | 0 => finish refinements context target
+    | count + 1 =>
+      let pi ← (psInferEnsureForall context.environment context.metaContext context.localContext target).mapError PsElabError.infer
+      let pushed := psLocalPushBinding context.localContext pi.name pi.domain pi.binder
+      let inner := psElabContextWithLocal context pushed.context
+      let currentRequests := requests.map fun candidate => { candidate with
+        left := psElabSubstituteLocals refinements candidate.left
+        right := psElabSubstituteLocals refinements candidate.right }
+      let equation ← psElabEquationViewWithIndexRequest inner pi.domain (.fvar pushed.id) currentRequests
+      let next := fun refinements context target =>
+        psElabSolveIndexConstraintsWithRefinements fuel count flexible (pushed.id :: ignored)
+          finish refinements context target requests protectedIds true
+      let body ← psElabSolveIndexEquationWithRefinements fuel flexible (pushed.id :: ignored)
+        next refinements inner (psExprInstantiate1 pi.body (.fvar pushed.id)) equation requests protectedIds true
+      psElabAbstract context body.context
+        [.lambdaE pushed.id pi.name pi.domain pi.binder] body.term target
+
+def psElabSolveIndexEquationWithRefinements (fuel : Nat) (flexible ignored : List Nat)
+    (finish : PsElabRefinements -> PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
+    (refinements : PsElabRefinements) (context : PsElabContext) (target : PsExpr) (equation : PsElabEquation)
+    (requests : List PsElabIndexRefinementCandidate := []) (protectedIds : List Nat := [])
+    (protectedReady : Bool := false) :
+    Except PsElabError PsElabTermResult := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let protectedIds := if protectedReady then protectedIds else
+      (protectedIds ++ context.localContext.declarations.filterMap (fun declaration =>
+        let id := psLocalDeclId declaration
+        if flexible.contains id then none else some id)).eraseDups
+    -- Earlier equations can reopen a dependent flexible local at a fresh ID.
+    -- Follow only the recorded typed substitutions, retaining the caller's
+    -- protected source identities even when a field is equated with one.
+    let flexible := (flexible.filterMap fun id =>
+      match psMetaInstantiate context.metaContext
+          (psElabSubstituteLocals refinements (.fvar id)) with
+      | .fvar current =>
+        if !protectedIds.contains current &&
+            (psLocalFindById context.localContext current).isSome then some current else none
+      | _ => none).eraseDups
     let reduce := psWhnf context.environment context.metaContext context.localContext
     let left := reduce equation.left
     let right := reduce equation.right
     -- Preserve proof-dependent substitutions before conversion can identify
     -- distinct proofs by proof irrelevance (pinned UnifyEq.unifyEq?).
-    if psExprAlphaEq left right then return ← finish context target
+    if psExprAlphaEq left right then return ← finish refinements context target
     -- Prefer eliminating an auxiliary index, then a constructor field. A cyclic
     -- equation is left unsolved; an occurs check is not a contradiction proof.
     match right with
     | .fvar id => if flexible.contains id && !psElabExprContainsLocal id left then
-        return ← psElabSubstituteEquation finish context { equation with left, right } id ignored target
+        return ← psElabSubstituteEquationWithRefinements finish refinements context { equation with left, right } id ignored target
     | _ => pure ()
     match left with
     | .fvar id => if flexible.contains id && !psElabExprContainsLocal id right then
         let symmetric ← psElabEquationSymm context { equation with left, right }
-        return ← psElabSubstituteEquation finish context symmetric id ignored target
+        return ← psElabSubstituteEquationWithRefinements finish refinements context symmetric id ignored target
     | _ => pure ()
     if psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext left right then
-      return ← finish context target
+      return ← finish refinements context target
     match psElabIndexConstructor context left, psElabIndexConstructor context right with
     | some (leftCtor, leftFields), some (rightCtor, rightFields) =>
       if !psNameEq leftCtor.inductiveName rightCtor.inductiveName then
@@ -263,8 +317,31 @@ def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
       let telescope := (equations.zipIdx).foldr (fun entry body =>
         psLogicPi (offset + entry.snd) "_indexEq"
           (psLogicEq entry.fst.level entry.fst.type entry.fst.left entry.fst.right) body) target
-      let body ← psElabSolveIndexConstraints fuel equations.length flexible ignored finish context telescope
+      let body ← psElabSolveIndexConstraintsWithRefinements fuel equations.length flexible ignored
+        finish refinements context telescope requests protectedIds true
       return { body with type := target, term := psExprApplyMany body.term (equations.map (fun entry => entry.proof)) }
-    | _, _ => finish context target
+    | _, _ => finish refinements context target
 end
 
+
+-- Existing tactic and elimination callers retain the same interface and use
+-- the same implementation. Only typed consumers request the refinement log.
+def psElabSubstituteEquation
+    (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
+    (context : PsElabContext) (equation : PsElabEquation) (id : Nat)
+    (ignored : List Nat) (target : PsExpr) : Except PsElabError PsElabTermResult :=
+  psElabSubstituteEquationWithRefinements (fun _ => finish) []
+    context equation id ignored target
+
+def psElabSolveIndexConstraints (fuel count : Nat) (flexible ignored : List Nat)
+    (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
+    (context : PsElabContext) (target : PsExpr) : Except PsElabError PsElabTermResult :=
+  psElabSolveIndexConstraintsWithRefinements fuel count flexible ignored
+    (fun _ => finish) [] context target
+
+def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
+    (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)
+    (context : PsElabContext) (target : PsExpr) (equation : PsElabEquation) :
+    Except PsElabError PsElabTermResult :=
+  psElabSolveIndexEquationWithRefinements fuel flexible ignored
+    (fun _ => finish) [] context target equation

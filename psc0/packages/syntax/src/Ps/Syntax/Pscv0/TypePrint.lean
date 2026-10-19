@@ -12,7 +12,7 @@ def psPscv0ArrowDomain
   | .lambda _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .letE _ _ _ _ _ | .haveE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .ifE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
-  | .matchMany _ _ _ => psPrintLeanConcat3 "(" printed ")"
+  | .matchMany _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | _ => printed
 
 def psPscv0PrintLeanTypeWithFuel (fuel : Nat) :

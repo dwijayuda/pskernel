@@ -110,6 +110,7 @@ structure PsPscv0ModuleInterface where
   classParameters : List (PsName × PsClassParameters) := []
   instances : List PsInstanceEntry := []
   defaults : List PsInstanceEntry := []
+  simpEntries : List PsSimpEntry := []
   reducibility : List (PsName × PsReducibility) := []
   noncomputableNames : List PsName := []
 
@@ -140,12 +141,13 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
     left.classParameters
   let instances := psPscv0MergeInstanceEntries left.instances right.instances
   let defaults := psPscv0MergeInstanceEntries left.defaults right.defaults
+  let simpEntries := psSimpEntriesMerge left.simpEntries right.simpEntries
   let reducibility := right.reducibility.foldl (fun acc item =>
     if acc.any (fun prior => psNameEq prior.fst item.fst) then acc else acc ++ [item])
     left.reducibility
   let noncomputableNames := right.noncomputableNames.foldl (fun names name =>
     if names.any (psNameEq name) then names else names ++ [name]) left.noncomputableNames
-  { declarations, classes, classParameters, instances, defaults, reducibility, noncomputableNames }
+  { declarations, classes, classParameters, instances, defaults, simpEntries, reducibility, noncomputableNames }
 
 -- Metadata follows the selected original elaboration declarations, before
 -- preparation or runtime lowering. This shared constructor preserves their
@@ -162,7 +164,8 @@ def psPscv0DeclarationInterface (environment : PsEnvironment)
     | _ => false
   let instances := environment.instances.entries.filter visible
   let defaults := environment.instances.defaults.filter visible
-  { declarations, classes, classParameters, instances, defaults,
+  let simpEntries := environment.simpEntries.filter (fun entry => owned entry.name)
+  { declarations, classes, classParameters, instances, defaults, simpEntries,
     reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name))
     noncomputableNames := names.filter (psEnvironmentIsNoncomputable environment) }
 
@@ -204,7 +207,10 @@ def psPscv0InstallInterface (environment : PsEnvironment)
   let environment := view.reducibility.foldl (fun env (name, status) =>
     psEnvironmentSetReducibility env name status) environment
   let environment := view.noncomputableNames.foldl psEnvironmentMarkNoncomputable environment
-  return { environment with classes, classParameters, instances }
+  let simpEntries := view.simpEntries.reverse.foldl (fun entries entry =>
+    if entries.any (fun prior => psNameEq prior.name entry.name) then entries
+    else psSimpEntriesAdd entries entry) environment.simpEntries
+  return { environment with classes, classParameters, instances, simpEntries }
 
 def psPscv0ExprConstants : PsExpr → List PsName
   | .constE name _ => [name]

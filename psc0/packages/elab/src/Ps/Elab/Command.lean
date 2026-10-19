@@ -1,4 +1,5 @@
 import Ps.Elab.ExposedProofs
+import Ps.Elab.Attributes
 import Ps.Elab.Scope
 import Ps.Elab.Deriving
 import Ps.Elab.Mutual
@@ -200,10 +201,207 @@ def psElabCommandExposesDefinition (environment : PsEnvironment)
 -- Scope one original source block, elaborate its typed local captures, then
 -- let the checked dependency owner partition it. Helpers retain their own
 -- source information while their declarations belong to the parent's origin.
+def psElabCommandStructuralHelperEqual (left right : PsDeclaration) : Bool :=
+  match left, right with
+  | .inductiveDecl left, .inductiveDecl right =>
+    psNameEq left.name right.name &&
+      psInductiveGroupNamesEqual left.levelParams right.levelParams &&
+      psExprAlphaEq left.type right.type &&
+      left.numParams == right.numParams && left.numIndices == right.numIndices &&
+      psInductiveGroupNamesEqual left.constructors right.constructors &&
+      left.isStructure == right.isStructure
+  | .constructorDecl left, .constructorDecl right =>
+    psNameEq left.name right.name &&
+      psInductiveGroupNamesEqual left.levelParams right.levelParams &&
+      psExprAlphaEq left.type right.type &&
+      psNameEq left.inductiveName right.inductiveName &&
+      left.constructorIndex == right.constructorIndex &&
+      left.numParams == right.numParams && left.numFields == right.numFields &&
+      left.recursiveFields == right.recursiveFields
+  | .recursorDecl left, .recursorDecl right =>
+    psNameEq left.name right.name &&
+      psInductiveGroupNamesEqual left.levelParams right.levelParams &&
+      psExprAlphaEq left.type right.type &&
+      psInductiveGroupNamesEqual left.inductiveNames right.inductiveNames &&
+      left.numParams == right.numParams && left.numIndices == right.numIndices &&
+      left.numMotives == right.numMotives && left.numMinors == right.numMinors
+  | _, _ => false
+
+def psElabCommandStructuralHelpers (environment : PsEnvironment)
+    (owner : PsName) (groups : List PsElabStructuralHelperOwnership) :
+    Except PsElabError PsEnvironment := do
+  if groups.length > 1 then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: singleton source has multiple structural helper owners")
+  groups.foldlM (fun environment group => do
+    if !psNameEq group.owner owner then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helpers belong to another source")
+    let first :: _ := group.families
+      | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper group has no family")
+    let names := group.families.flatMap fun family =>
+      family.name :: psNameAppendStr family.name "rec" :: family.constructors
+    if names.length != group.declarations.length ||
+        (names.any (psNameEq owner)) ||
+        !(group.declarations.all fun declaration =>
+          names.any (psNameEq (psDeclarationName declaration)) &&
+            psElabCommandStructuralHelperEqual declaration declaration) then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural provenance includes an unowned declaration")
+    let staged ← psAddDeclarationList environment group.declarations
+    for family in group.families do
+      let some actual := psEnvironmentFindInductive staged family.name
+        | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper family is absent")
+      if !psElabCommandStructuralHelperEqual (.inductiveDecl actual) (.inductiveDecl family) ||
+          !psLevelEquivalent (← (psInductiveResultLevel staged actual).mapError PsElabError.infer) .zero then
+        throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper family changed its checked Prop header")
+    let initial := psElabContextEmpty staged first.levelParams
+    let parameters ← psElabOpenCoreTelescope 4096 initial first.type (some first.numParams)
+    let checked ← psElabEliminationRecursorPlanFor parameters.context first
+      (first.levelParams.map PsLevel.param) (psElabBinderArguments parameters.bindersRev) .zero
+    if checked.plan.slots.length != group.families.length ||
+        !(checked.plan.slots.zip group.families).all (fun pair =>
+          psNameEq pair.fst.family.name pair.snd.name) then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper group changed its canonical slots")
+    let _ ← psElabEliminationConstructors checked.context checked.plan
+    return staged) environment
+
+def psElabCommandRegisteredMain (members : List PsElabPreDefinition) :
+    Except PsElabError PsElabPreDefinition := do
+  let mains := members.filter fun member => match member.source with
+    | .declaration _ => true
+    | .localDefinition .. => false
+  let [main] := mains
+    | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source lost its original main")
+  if main.registration.isNone || main.sourceIndex != 0 then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registration lost its original source index")
+  for member in members do
+    match member.source with
+    | .declaration _ =>
+      if member.peerId != main.peerId || !psNameEq member.name main.name then
+        throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered source contains another main")
+    | .localDefinition parent _ =>
+      if !psNameEq parent main.name || member.sourceIndex != main.sourceIndex ||
+          member.registration.isSome then
+        throw (.data "PSCV0-PREDEFINITION-REGISTRATION: local helper changed its source owner or registration")
+  return main
+
+def psElabCommandOwnedDeclarationEqual (left right : PsDeclaration) : Bool :=
+  match left, right with
+  | .definitionDecl name levels type value, .definitionDecl other otherLevels otherType otherValue
+  | .theoremDecl name levels type value, .theoremDecl other otherLevels otherType otherValue
+  | .opaqueDecl name levels type value, .opaqueDecl other otherLevels otherType otherValue
+  | .partialDecl name levels type value, .partialDecl other otherLevels otherType otherValue =>
+    psNameEq name other && psInductiveGroupNamesEqual levels otherLevels &&
+      psExprAlphaEq type otherType && psExprAlphaEq value otherValue
+  | _, _ => psElabCommandStructuralHelperEqual left right
+
+def psElabCommandStructuralOwnershipEqual
+    (left right : PsElabStructuralHelperOwnership) : Bool :=
+  psNameEq left.owner right.owner &&
+    left.families.length == right.families.length &&
+    (left.families.zip right.families).all (fun pair =>
+      psElabCommandStructuralHelperEqual (.inductiveDecl pair.fst) (.inductiveDecl pair.snd)) &&
+    left.declarations.length == right.declarations.length &&
+    (left.declarations.zip right.declarations).all (fun pair =>
+      psElabCommandStructuralHelperEqual pair.fst pair.snd)
+
+-- All checked component outputs survive this boundary. Only the actual
+-- main declaration changes kind; helpers keep their own proof/body owners.
+
+def psElabCommandRegisteredMainResult (environment : PsEnvironment)
+    (levels : List PsName) (members : List PsElabPreDefinition)
+    (main : PsElabPreDefinition) (result : PsElabPreDefinitionBatchResult)
+    (asOpaque : Bool) (asInstance : Bool := false) :
+    Except PsElabError PsElabPreDefinitionBatchResult := do
+  if result.members.length != members.length then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: checked source member roster changed")
+  let outputs := members.zip result.members
+  let ownedDeclarations := result.members.flatMap (·.declarations)
+  if ownedDeclarations.length != result.batch.declarations.length then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: checked declaration ownership is incomplete")
+  for declaration in ownedDeclarations do
+    let name := psDeclarationName declaration
+    let [actual] := result.batch.declarations.filter (fun actual =>
+        psNameEq (psDeclarationName actual) name)
+      | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: owned declaration has no unique batch entry")
+    if (ownedDeclarations.filter (fun actual =>
+          psNameEq (psDeclarationName actual) name)).length != 1 ||
+        !psElabCommandOwnedDeclarationEqual declaration actual then
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: member and batch declarations differ")
+  let helperOwnership := result.members.flatMap (·.structuralHelpers)
+  if helperOwnership.length != result.batch.structuralHelpers.length ||
+      !(helperOwnership.zip result.batch.structuralHelpers).all (fun pair =>
+        psElabCommandStructuralOwnershipEqual pair.fst pair.snd) then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helper provenance differs")
+  for (member, owned) in outputs do
+    for group in owned.structuralHelpers do
+      if !psNameEq group.owner member.name || group.declarations.isEmpty ||
+          !(group.declarations.all fun declaration =>
+            owned.declarations.any (psElabCommandStructuralHelperEqual declaration)) then
+        throw (.data "PSCV0-PREDEFINITION-REGISTRATION: structural helpers changed their checked source owner")
+  let [(_, ownedMain)] := outputs.filter (fun output => output.fst.peerId == main.peerId)
+    | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered main has no unique checked member")
+  let [.definitionDecl name declarationLevels type value] :=
+      ownedMain.declarations.filter (fun declaration => psNameEq (psDeclarationName declaration) main.name)
+    | throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered main lost its checked ordinary definition")
+  if !psNameEq name main.name || !psInductiveGroupNamesEqual declarationLevels levels ||
+      !psExprAlphaEq type main.type then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registered main changed its closed source header")
+  -- Native computational opaque WF cannot delta-reduce its main while
+  -- producing the mandatory unfolding equation. Do not remove that proof.
+  if asOpaque && ownedMain.declarations.any (fun declaration => match declaration with
+      | .theoremDecl equationName .. => psNameEq equationName (psNameAppendStr main.name "eq_def")
+      | _ => false) then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: opaque source cannot publish its generated unfolding equation")
+  -- Validate each helper group in its actual preceding environment, then
+  -- retain the complete already ordered source/component declaration stream.
+  let staged ← result.batch.declarations.foldlM (fun staged declaration => do
+    for group in helperOwnership do
+      if group.declarations.head?.any (fun first =>
+          psNameEq (psDeclarationName first) (psDeclarationName declaration)) then
+        let _ ← psElabCommandStructuralHelpers staged group.owner [group]
+        pure ()
+    psAddDeclarationList staged [declaration]) environment
+  let checked ← psElabResolvedTerm (psElabContextEmpty staged levels) value (some type)
+  let proofInstance ← if asInstance then do
+      let level ← psElabExpressionSort checked.context type
+      pure (psLevelEquivalent level .zero)
+    else pure false
+  let declaration := if asOpaque then PsDeclaration.opaqueDecl name levels type checked.term
+    else if proofInstance then PsDeclaration.theoremDecl name levels type checked.term
+    else PsDeclaration.definitionDecl name levels type checked.term
+  let replaceMain := fun original =>
+    if psNameEq (psDeclarationName original) main.name then declaration else original
+  let declarations := result.batch.declarations.map replaceMain
+  -- Opacity is checked against every retained helper equation and worker.
+  -- A failed conversion returns no declaration batch or registration state.
+  let _ ← psAddDeclarationList environment declarations
+  return {
+    result with
+    batch := { result.batch with declarations }
+    members := result.members.map fun owned =>
+      { owned with declarations := owned.declarations.map replaceMain } }
+
+def psElabCommandPreDefinitionRegistration
+    (members : List PsSyntaxMutualMember) (isMutual : Bool) :
+    Option PsSyntaxRegistration :=
+  if isMutual then none else
+    match members with
+    | [member] =>
+      match psElabPreDefinitionDeclarationHead member.declaration, member.registration with
+      | .definition .., some registration =>
+        match registration with
+        | .abbrevDecl | .opaqueDecl | .instanceDecl _ | .defaultInstanceDecl _ _ =>
+          some registration
+        | _ => none
+      | .wellFoundedDefinition .., some .abbrevDecl
+      | .fixedpointDefinition .., some .abbrevDecl => some .abbrevDecl
+      | _, _ => none
+    | _ => none
 def psElabCommandPreDefinitions (state : PsCommandState)
-    (members : List PsSyntaxMutualMember) (span : PsSourceSpan) (isMutual : Bool) :
+    (members : List PsSyntaxMutualMember) (span : PsSourceSpan) (isMutual : Bool)
+    (nonrecursiveEquations : Bool := true) :
     Except PsElabError PsCommandState := do
   if members.isEmpty then throw (.data "PSCV0-MUTUAL-EMPTY: mutual requires def/function members")
+  let registration := psElabCommandPreDefinitionRegistration members isMutual
   let qualified := members.map fun member =>
     psScopeQualified state.scope (psElabOriginSource member.declaration).fst
   let names := qualified.map (·.segments)
@@ -247,10 +445,29 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let prepared ← psElabPreparePreDefinitionsWithSource state.environment
     (state.scope.levelNames.map psRootName) sectionContext scopedMembers span
   let block := prepared.block
-  let result ← psElabPreDefinitionBatch state.environment block
+  let registeredMain? ← if registration.isSome then
+    (psElabCommandRegisteredMain block.members).map some
+    else pure none
+  let checkedBlock := if registration.isSome then
+    { block with members := block.members.map fun member => { member with registration := none } }
+    else block
+  let equationExclusions := registeredMain?.toList.map (·.name)
+  let result ← psElabPreDefinitionBatch state.environment checkedBlock
     (some (psElabWhereWellFoundedComponent prepared))
+    nonrecursiveEquations true equationExclusions
   if result.members.length != block.members.length then
     throw (.data "PSCV0-PREDEFINITION-OWNERSHIP: checked member provenance mismatch")
+  let result ← match registration, registeredMain? with
+    | none, _ => pure result
+    | some .opaqueDecl, some main =>
+      psElabCommandRegisteredMainResult state.environment block.levelNames block.members main result true
+    | some (.instanceDecl _), some main
+    | some (.defaultInstanceDecl _ (some _)), some main =>
+      psElabCommandRegisteredMainResult state.environment block.levelNames block.members main result false true
+    | some _, some main =>
+      psElabCommandRegisteredMainResult state.environment block.levelNames block.members main result false
+    | _, _ =>
+      throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registration lost its checked original main")
   let environment ← psAddDeclarationList state.environment result.batch.declarations
   let environment := if members.any (fun member =>
       psElabPreDefinitionDeclarationNoncomputable member.declaration) then
@@ -332,15 +549,21 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     | .partialDefinition _ _ (.omittedType _) _ _
     | .wellFoundedDefinition _ _ (.omittedType _) _ _ _
     | .fixedpointDefinition _ _ (.omittedType _) _ _ => true
-    -- Ordinary bodies must also see section instances whose dependency keys
-    -- occur only in a candidate dictionary type. Typed closure prunes captures.
-    -- Explicit registrations and theorem include/omit keep their existing owner.
-    | .definition .. => registration.isNone && !state.scope.variables.isEmpty
-    | .wellFoundedDefinition .. | .fixedpointDefinition .. => registration.isNone
+    -- Typed peers let source rows check their RHS before constructor refinement.
+    -- Registration still belongs to the original checked source declaration.
+    | .definition .. | .wellFoundedDefinition .. | .fixedpointDefinition .. =>
+      registration.isNone ||
+        (psElabCommandPreDefinitionRegistration
+          [PsSyntaxMutualMember.mk source isPrivate registration] false).isSome
     | _ => false
   if usePreDefinitions then
+    let nonrecursiveEquations := match source with
+      | .definition _ _ (.omittedType _) _ _ => true
+      | .definition .. => !state.scope.variables.isEmpty
+      | _ => true
     return ← psElabCommandPreDefinitions state
       [PsSyntaxMutualMember.mk source isPrivate registration] (psElabOriginSource source).snd false
+      nonrecursiveEquations
   let qualified := psScopeQualified state.scope (psElabOriginSource source).fst
   -- Only explicit project modules mangle private identities. Single-file
   -- elaboration retains its existing standalone naming contract.
@@ -563,6 +786,30 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
     privateNames }
 
 
+-- Apply attributes only after the complete checked source batch exists.
+-- Canonical source identities are resolved through the same final alias map
+-- used by following provider commands, including private and inferred mains.
+def psElabCommandAttributes (state : PsCommandState)
+    (members : List PsSyntaxMutualMember) : Except PsElabError PsCommandState := do
+  let resolver : PsScopeResolver := {
+    environment := state.environment
+    scope := state.scope
+    privateAliases := state.privateAliases }
+  let environment ← members.foldlM (fun environment member => do
+    if member.attributes.isEmpty then return environment
+    if psElabPreDefinitionDeclarationExplicitPartial member.declaration &&
+        member.attributes.any (fun attribute => match attribute with
+          | .instanceAttribute | .defaultInstanceAttribute _ => true
+          | _ => false) then
+      throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
+    let qualified := psScopeQualified state.scope (psElabOriginSource member.declaration).fst
+    let segments := (psScopePrivateRewrite resolver qualified.segments).getD qualified.segments
+    let some name := psSyntaxNameToName (psScopeCanonicalNameSyntax { qualified with segments })
+      | throw .emptyName
+    (psElabApplySourceAttributes environment name member.attributes).mapError
+      (.atDeclaration name)) state.environment
+  return { state with environment }
+
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
   match command with
@@ -621,7 +868,22 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     psElabCommandDeclaration state source (some registration) true
   | .derivingDeclaration source handlers isPrivate =>
     psElabCommandDeriving state source handlers isPrivate
-  | .mutualDeclarations members span => psElabCommandMutual state members span
+  | .attributedDeclaration source registration isPrivate attributes => do
+    let next ← psElabCommandDeclaration state source registration isPrivate
+    psElabCommandAttributes next [{
+      declaration := source
+      registration := registration
+      isPrivate := isPrivate
+      attributes := attributes }]
+  | .attributedDerivingDeclaration source handlers isPrivate attributes => do
+    let next ← psElabCommandDeriving state source handlers isPrivate
+    psElabCommandAttributes next [{
+      declaration := source
+      isPrivate := isPrivate
+      attributes := attributes }]
+  | .mutualDeclarations members span => do
+    let next ← psElabCommandMutual state members span
+    psElabCommandAttributes next members
 
 def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram)
     (moduleIdentity : String := "") :

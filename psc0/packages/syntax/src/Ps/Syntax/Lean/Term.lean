@@ -88,19 +88,24 @@ def psLeanTermMatchRows (read : PsPscv0TermReader) (fuel : Nat) (anchor : PsSour
     return { value := rows ++ rest.value, cursor := rest.cursor }
 
 def psLeanTermMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
-    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
+    (cursor : PsTokenCursor) (readRow : PsPscv0TermReader := read) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
   let some keyword := psTokenCursorAdvance cursor | throw (.unexpectedEnd "match")
-  let inputs ← psPscv0Discriminants read fuel keyword.cursor
-  let some last := inputs.value.getLast? | throw (.unexpectedEnd "match discriminant")
-  if impossible then return {
-    value := .matchMany inputs.value [] (psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan last))
-    cursor := inputs.cursor }
+  if impossible then
+    let inputs ← psPscv0Discriminants read fuel keyword.cursor
+    let some last := inputs.value.getLast? | throw (.unexpectedEnd "nomatch discriminant")
+    return {
+      value := .matchMany (inputs.value.map fun term => { term }) [] none
+        (psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan last))
+      cursor := inputs.cursor }
+  let generalization ← psPscv0MatchGeneralizing keyword.cursor
+  let inputs ← psPscv0MatchDiscriminants read fuel generalization.cursor
   let withToken ← psTokenCursorExpectText inputs.cursor "with"
   let some first := psTokenCursorPeek withToken.cursor | throw (.unexpectedEnd "native match alternatives")
-  let rows ← psLeanTermMatchRows read fuel first.span.start withToken.cursor
+  let rows ← psLeanTermMatchRows readRow fuel first.span.start withToken.cursor
   let some (_, _, lastSpan) := rows.value.getLast? | throw (.unexpectedEnd "native match alternatives")
   let span := psSyntaxSpanJoin keyword.token.span lastSpan
-  let value := PsSyntaxTerm.matchMany inputs.value rows.value span
+  let value := PsSyntaxTerm.matchMany inputs.value rows.value generalization.value span
   return { value, cursor := rows.cursor }
 
 def psLeanTermTactics (read readType : PsPscv0TermReader) (fuel : Nat)

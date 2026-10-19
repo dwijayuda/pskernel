@@ -80,6 +80,10 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
   let exposesBody := match member.registration with
     | some .abbrevDecl => true
     | _ => false
+  let mayExposeBodyProofs := match member.registration with
+    | some .abbrevDecl | some (.instanceDecl _)
+    | some (.defaultInstanceDecl _ (some _)) => true
+    | _ => false
   let privateHelpers := !privateAuxiliaryPrefix.isEmpty && !exposesBody
   let helperParentName :=
     if privateHelpers && name.segments.head? != some "$psc0Private" then
@@ -101,7 +105,7 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
   let qualifiedFrame := (locals.zip helperAliases).map fun (localDefinition, localAlias) =>
     (name.segments ++ localDefinition.name.segments, localAlias.segments)
   let bodyResolver := { resolver with
-    abstractProofs := resolver.abstractProofs && exposesBody
+    abstractProofs := resolver.abstractProofs && mayExposeBodyProofs
     localAliases := localFrame ++ resolver.localAliases
     mutualAliases := qualifiedFrame ++ resolver.mutualAliases }
   let parentBound := binders.bound.filter (fun key => !helperNames.contains key)

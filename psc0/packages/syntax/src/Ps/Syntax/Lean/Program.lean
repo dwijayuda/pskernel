@@ -83,6 +83,8 @@ def psLeanProgramMutual (fuel : Nat) (cursor : PsTokenCursor)
         pure (PsSyntaxMutualMember.mk declaration false (some registration))
       | .privateRegisteredDeclaration declaration registration =>
         pure (PsSyntaxMutualMember.mk declaration true (some registration))
+      | .attributedDeclaration declaration registration isPrivate attributes =>
+        pure { declaration, registration, isPrivate, attributes }
       | _ => throw "PSCV0-MUTUAL-HEAD"
     psLeanProgramMutual fuel parsed.cursor (member :: membersRev) defaultPrivate
 

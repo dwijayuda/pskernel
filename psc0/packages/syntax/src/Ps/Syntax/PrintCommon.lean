@@ -84,12 +84,16 @@ def psPrintPatternWithFuel (fuel : Nat) (pattern : PsSyntaxPattern) :
     | .bool value _ => return if value then "true" else "false"
     | .wildcard _ => return "_"
     | .variable name => psPrintSyntaxName name
-    | .ctor name fields _ =>
+    | .inaccessible value => psPrintPatternWithFuel fuel value
+    | .ctor name fields _ | .dotCtor name fields _ =>
       let name ← psPrintSyntaxName name
+      let name := match pattern with | .dotCtor .. => "." ++ name | _ => name
       let fields ← fields.mapM fun field => do
         let text ← psPrintPatternWithFuel fuel field
         return match field with
-          | .ctor _ (_ :: _) _ => "(" ++ text ++ ")"
+          | .ctor _ (_ :: _) _ | .dotCtor _ (_ :: _) _ => "(" ++ text ++ ")"
+          | .inaccessible (.ctor _ (_ :: _) _) =>
+            "(" ++ text ++ ")"
           | _ => text
       return String.intercalate " " (name :: fields)
 

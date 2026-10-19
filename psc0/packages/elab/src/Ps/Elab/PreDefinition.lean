@@ -153,7 +153,8 @@ def psElabPreDefinitionParameterOwners (environment : PsEnvironment)
   let declarations := members.map fun member =>
     PsLocalDecl.binding member.peerId member.name member.type .explicit
   let context := { psElabContextEmpty environment levels with
-    localContext := { nextId, declarations } }
+    localContext := { nextId, declarations }
+    auxiliaryLocalIds := ids }
   let targets := members.map fun member =>
     ({ peerId := member.peerId, name := member.name
        arity := psElabPreDefinitionHeaderCount member } : PsElabRecursionCallTarget)
@@ -265,7 +266,8 @@ def psElabPreDefinitionSpecialize (fuel : Nat) (captures : List PsExpr)
 -- header slots. This is checked against the actual domains and binder kinds
 -- before any full peer is replaced by its specialized local parameter.
 def psElabPreDefinitionStructural (environment : PsEnvironment)
-    (levels : List PsName) (nextId : Nat) (members : List PsElabPreDefinition) :
+    (levels : List PsName) (nextId : Nat) (members : List PsElabPreDefinition)
+    (structuralEquations : Bool := true) (equationExclusions : List PsName := []) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   let first :: _ := members
     | throw (psElabPreDefinitionError "OWNERSHIP" "empty structural component")
@@ -298,7 +300,10 @@ def psElabPreDefinitionStructural (environment : PsEnvironment)
         let _ ← psElabExpressionSort state.fst type
         let name := PsName.num (psRootName "$psc0PreDefinitionPeer") index
         let pushed := psLocalPushBinding state.fst.localContext name type .explicit
-        return (psElabContextWithLocal state.fst pushed.context,
+        let context := { state.fst with
+          localContext := pushed.context
+          auxiliaryLocalIds := pushed.id :: state.fst.auxiliaryLocalIds }
+        return (context,
           state.snd ++ [{ fullId := target.peerId, specializedId := pushed.id, memberIndex := index }]))
       (opened.context, [])
     let body ← psElabPreDefinitionSpecialize 4096 captures peers opened.value
@@ -307,8 +312,32 @@ def psElabPreDefinitionStructural (environment : PsEnvironment)
     let checked ← psElabResolvedTerm context body (some opened.type)
     (psElabMutualStructuralInputFromChecked captured header checked.context checked.term
       (peers.map fun peer => (peer.specializedId, peer.memberIndex))
-      (psElabPreDefinitionSourceSpan member) member.sourceInfo).mapError (.atDeclaration member.name)
-  psElabStructuralMutualFromChecked environment levels captured inputs
+      (psElabPreDefinitionSourceSpan member) member.sourceInfo
+      (member.sourceHeaderCount == 0)).mapError (.atDeclaration member.name)
+  let result ← psElabStructuralMutualFromChecked environment levels captured inputs
+    structuralEquations equationExclusions
+  let proofLocals ← members.filterMapM fun member => do
+    match member.source with
+    | .declaration _ => return none
+    | .localDefinition .. =>
+      let level ← psElabExpressionSort (psElabContextEmpty environment levels) member.type
+      return if psLevelEquivalent level .zero then some member.name else none
+  if proofLocals.isEmpty then return result
+  let promote := fun declaration => match declaration with
+    | .definitionDecl name declarationLevels type value =>
+      if proofLocals.any (psNameEq name) then
+        PsDeclaration.theoremDecl name declarationLevels type value
+      else declaration
+    | _ => declaration
+  let declarations := result.batch.declarations.map promote
+  -- Native lifted Prop helpers retain theorem kind even in a recursive SCC.
+  -- Recheck their actual component equations after that kind conversion.
+  let _ ← psAddDeclarationList environment declarations
+  return {
+    result with
+    batch := { result.batch with declarations }
+    members := result.members.map fun owned =>
+      { owned with declarations := owned.declarations.map promote } }
 
 -- Called only after the selected definition/body construction succeeds.
 -- These diagnostics describe unused source; they supply no proof or captures.
@@ -342,10 +371,12 @@ def psElabPreDefinitionUnusedHints (source : PsElabPreDefinitionSource)
 -- checked ordinary values. The exact equation is proved after the actual
 -- declaration is staged; no body witness or provisional global is introduced.
 def psElabPreDefinitionNonrecursive (environment : PsEnvironment)
-    (levels : List PsName) (member : PsElabPreDefinition) :
+    (levels : List PsName) (member : PsElabPreDefinition)
+    (emitEquation : Bool := true) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   let equationName := psNameAppendStr member.name "eq_def"
-  for name in [member.name, equationName] do
+  let ownedNames := if emitEquation then [member.name, equationName] else [member.name]
+  for name in ownedNames do
     if (psEnvironmentFind environment name).isSome then throw (.duplicateDeclaration name)
   if !psExprFVarsInContext psLocalEmpty member.value || psExprHasUnresolvedMeta member.value then
     throw (psElabPreDefinitionError "CLOSURE" "nonrecursive value retains a peer after dependency substitution")
@@ -363,6 +394,12 @@ def psElabPreDefinitionNonrecursive (environment : PsEnvironment)
     PsDeclaration.theoremDecl member.name levels member.type checked.term
     else PsDeclaration.definitionDecl member.name levels member.type checked.term
   let staged ← psAddDeclarationList environment [declaration]
+  if !emitEquation then
+    let batch : PsElabDeclarationBatchResult := {
+      declarations := [declaration]
+      sourceInfo := [member.sourceInfo]
+      diagnostics := psElabPreDefinitionUnusedHints member.source "not recursive" }
+    return { batch, members := [batch] }
   let opened ← psElabPreDefinitionOpen (psElabPreDefinitionHeaderCount member)
     (psElabContextEmpty staged levels) member.type member.value
   let left ← psElabApplyCore opened.context (.constE member.name (levels.map PsLevel.param))
@@ -450,6 +487,37 @@ def psElabPreDefinitionCheckWellFoundedResult (environment : PsEnvironment)
 -- All actual public definitions are staged before any component equation.
 -- Reconstruct each right side from the retained original Core with every peer
 -- replaced by its checked public constant; a callback sidecar is not authority.
+def psElabPreDefinitionWellFoundedRhsProof (fuel : Nat) (context : PsElabContext)
+    (headerIds : List Nat) (type left right : PsExpr) (span : PsSourceSpan) :
+    Except PsElabError PsExpr := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let level ← psElabExpressionSort context type
+    let expected := psLogicEq level type left right
+    if psElabMutualStructuralEqual context left right then
+      let checked ← psElabResolvedTerm context (psLogicRefl level type left) (some expected)
+      return checked.term
+    match psWhnf context.environment context.metaContext context.localContext type with
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding context.localContext name domain binder
+      let inner := psElabContextWithLocal context pushed.context
+      let argument := PsExpr.fvar pushed.id
+      let resultType := psExprInstantiate1 body argument
+      let proof ← psElabPreDefinitionWellFoundedRhsProof fuel inner
+        (headerIds ++ [pushed.id]) resultType (.app left argument) (.app right argument) span
+      let domainLevel ← psElabExpressionSort context domain
+      let resultLevel ← psElabExpressionSort inner resultType
+      let motive := PsExpr.lam name domain (psExprAbstractFVar pushed.id resultType) binder
+      let pointwise := PsExpr.lam name domain (psExprAbstractFVar pushed.id proof) binder
+      let proof := psExprApplyMany (.constE (psRootName "funext") [domainLevel, resultLevel])
+        [domain, motive, left, right, pointwise]
+      let checked ← psElabResolvedTerm context proof (some expected)
+      return checked.term
+    | _ =>
+      let major ← psElabPreDefinitionEquationMajor 4096 context headerIds right
+      psElabRecursorEquationProof context major expected span
+
 def psElabPreDefinitionWellFoundedEquation (staged : PsEnvironment)
     (levels : List PsName) (members : List PsElabPreDefinition)
     (member : PsElabPreDefinition) (result : PsElabWellFoundedResult) :
@@ -489,12 +557,11 @@ def psElabPreDefinitionWellFoundedEquation (staged : PsEnvironment)
         !psElabMutualStructuralEqual actual.context actualEquation.type opened.type ||
         !psElabMutualStructuralEqual actual.context actualEquation.left left.term then
       throw (psElabPreDefinitionError "WF-EQUATION" "returned theorem changed the source result type or actual public left side")
-    let major ← psElabPreDefinitionEquationMajor 4096 actual.context
-      (opened.bindersRev.map (·.id)) opened.value
-    let transportType := psLogicEq resultLevel opened.type actualEquation.right opened.value
-    let transport ← (psElabRecursorEquationProof actual.context major
-      transportType (psElabPreDefinitionSourceSpan member)).mapError (fun _ =>
-        psElabPreDefinitionError "WF-EQUATION" "checked constructor cases do not prove the actual RHS equals the retained source RHS")
+    let transport ← (psElabPreDefinitionWellFoundedRhsProof 4096 actual.context
+      (opened.bindersRev.map (·.id)) opened.type actualEquation.right opened.value
+      (psElabPreDefinitionSourceSpan member)).mapError (fun error =>
+        if psElabErrorIsResource error then error else
+          psElabPreDefinitionError "WF-EQUATION" "checked extensionality and constructor cases do not prove the actual RHS equals the retained source RHS")
     let proof := psExprApplyMany (.constE (psNameAppendStr psEqName "trans") [resultLevel])
       [opened.type, left.term, actualEquation.right, opened.value, actual.term, transport]
     let checked ← (psElabResolvedTerm actual.context proof (some expectedEquation)).mapError (fun _ =>
@@ -566,7 +633,9 @@ def psElabPreDefinitionWellFounded (environment : PsEnvironment)
 
 def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsName)
     (nextId : Nat) (members : List PsElabPreDefinition) (nonrecursive : Bool)
-    (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer) :
+    (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer)
+    (nonrecursiveEquations : Bool := true) (structuralEquations : Bool := true)
+    (equationExclusions : List PsName := []) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   if nonrecursive then
     let [member] := members
@@ -576,6 +645,7 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
     -- are considered; those hints do not invoke a WF or P1 construction.
     if !psElabPreDefinitionExplicitPartial member then
       return ← psElabPreDefinitionNonrecursive environment levels member
+        (nonrecursiveEquations && !equationExclusions.any (psNameEq member.name))
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .fixedpoint) then
     return ← psElabFixedpointFromChecked environment levels nextId members
   if members.any (fun member => psElabPreDefinitionStrategyEq member.strategy .wellFounded) then
@@ -601,6 +671,7 @@ def psElabPreDefinitionDispatch (environment : PsEnvironment) (levels : List PsN
     }
   if members.all (fun member => psElabPreDefinitionStrategyEq member.strategy .total) then
     return ← psElabPreDefinitionStructural environment levels nextId members
+      structuralEquations equationExclusions
   throw (psElabPreDefinitionError "STRATEGY" "recursive component mixes incompatible checked logical strategies")
 
 structure PsElabPreDefinitionStaging where
@@ -616,7 +687,9 @@ structure PsElabPreDefinitionStaging where
 def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : Nat)
     (allMembers : List PsElabPreDefinition) (graph : PsElabPreDefinitionGraph)
     (remaining : List PsElabPreDefinition) (state : PsElabPreDefinitionStaging)
-    (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer) :
+    (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer)
+    (nonrecursiveEquations : Bool := true) (structuralEquations : Bool := true)
+    (equationExclusions : List PsName := []) :
     Except PsElabError PsElabPreDefinitionStaging := do
   if remaining.isEmpty then return state
   match fuel with
@@ -639,6 +712,7 @@ def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : 
     let nonrecursive := ids.length == 1 &&
       !((graph.find? (fun edge => edge.fst == seed.peerId)).map (·.snd) |>.getD []).contains seed.peerId
     let result ← psElabPreDefinitionDispatch state.environment levels nextId members nonrecursive wellFounded
+      nonrecursiveEquations structuralEquations equationExclusions
     if result.members.length != members.length then
       throw (psElabPreDefinitionError "OWNERSHIP" "consumer changed component member ownership")
     let environment ← psAddDeclarationList state.environment result.batch.declarations
@@ -649,10 +723,13 @@ def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : 
       members := state.members ++ (owned.zip result.members).map (fun (member, result) => (member.peerId, result)) }
     psElabPreDefinitionComponents fuel levels nextId allMembers graph
       (remaining.filter (fun member => !ids.contains member.peerId)) next wellFounded
+      nonrecursiveEquations structuralEquations equationExclusions
 
 def psElabPreDefinitionBatch (environment : PsEnvironment)
     (block : PsElabPreDefinitionBlock)
-    (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer := none) :
+    (wellFounded : Option PsElabPreDefinitionWellFoundedConsumer := none)
+    (nonrecursiveEquations : Bool := true) (structuralEquations : Bool := true)
+    (equationExclusions : List PsName := []) :
     Except PsElabError PsElabPreDefinitionBatchResult := do
   let context ← psElabPreDefinitionValidate environment block
   let graph := psElabPreDefinitionGraphFor block.members
@@ -661,7 +738,7 @@ def psElabPreDefinitionBatch (environment : PsEnvironment)
       environment
       declarations := []
       completed := []
-      members := [] } wellFounded
+      members := [] } wellFounded nonrecursiveEquations structuralEquations equationExclusions
   let members ← block.members.mapM fun member => do
     let some result := staged.members.find? (fun result => result.fst == member.peerId)
       | throw (psElabPreDefinitionError "OWNERSHIP" "final batch lost a source member")
@@ -670,6 +747,7 @@ def psElabPreDefinitionBatch (environment : PsEnvironment)
     batch := {
       declarations := staged.declarations
       sourceInfo := members.flatMap (·.sourceInfo)
-      diagnostics := members.flatMap (·.diagnostics) }
+      diagnostics := members.flatMap (·.diagnostics)
+      structuralHelpers := members.flatMap (·.structuralHelpers) }
     members }
 

@@ -140,10 +140,65 @@ def psPscv0ReadUnattributedCommand (cursor : PsTokenCursor)
   return { value := if isPrivate then .privateDeclaration declaration.value
                     else .declaration declaration.value, cursor := next }
 
-def psPscv0SelectedAttributes : List String := ["default_instance"]
+def psPscv0SelectedAttributes : List String := ["simp", "instance", "default_instance"]
 
--- Selected declaration attributeName only; unsupported attributes are refused.
--- The default priority is independent of an instance declaration's priority.
+-- The selected list uses native comma ownership. Only the already-selected
+-- default-instance priority spelling has an argument; simp/instance are bare.
+def psPscv0ReadAttributes (fuel : Nat) (cursor : PsTokenCursor)
+    (attributesRev : List PsSyntaxAttribute) :
+    Except String (PsParseResult (List PsSyntaxAttribute)) := do
+  match fuel with
+  | 0 => throw "PSCV0-ATTRIBUTE-COUNT-BUDGET"
+  | fuel + 1 =>
+    let some name := psTokenCursorAdvance cursor
+      | throw "PSCV0-ATTRIBUTE-NAME: expected selected attribute"
+    if !psPscv0SelectedAttributes.contains name.token.text then
+      throw ("PSCV0-ATTRIBUTE-NAME: unselected attribute " ++ name.token.text)
+    let parsed ← if name.token.text == "default_instance" then do
+      let priority ←
+        if psTokenCursorAtText name.cursor "]" || psTokenCursorAtText name.cursor "," then
+          pure (PsParseResult.mk 1000 name.cursor)
+        else do
+          let some atom := psTokenCursorAdvance name.cursor
+            | throw "PSCV0-DEFAULT-INSTANCE-PRIORITY"
+          let value ← (psPscv0PriorityValue atom.token.text name.cursor).mapError psPscv0ParseError
+          pure (PsParseResult.mk value atom.cursor)
+      pure (PsParseResult.mk (.defaultInstanceAttribute priority.value) priority.cursor)
+    else
+      pure (PsParseResult.mk
+        (if name.token.text == "simp" then PsSyntaxAttribute.simpAttribute else .instanceAttribute)
+        name.cursor)
+    let attributesRev := parsed.value :: attributesRev
+    if psTokenCursorAtText parsed.cursor "]" then
+      let close ← psPscv0Expect parsed.cursor "]"
+      return { value := attributesRev.reverse, cursor := close.cursor }
+    let comma ← psPscv0Expect parsed.cursor ","
+    psPscv0ReadAttributes fuel comma.cursor attributesRev
+
+-- Preserve the established single-default AST contract. General lists keep
+-- the declaration's source kind separate from its post-check registrations.
+def psPscv0AttachAttributes : List PsSyntaxAttribute → PsSyntaxCommand →
+    Except String PsSyntaxCommand
+  | [.defaultInstanceAttribute priority], .declaration source =>
+    pure (.registeredDeclaration source (.defaultInstanceDecl priority none))
+  | [.defaultInstanceAttribute priority], .privateDeclaration source =>
+    pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority none))
+  | [.defaultInstanceAttribute priority], .registeredDeclaration source (.instanceDecl ordinary) =>
+    pure (.registeredDeclaration source (.defaultInstanceDecl priority (some ordinary)))
+  | [.defaultInstanceAttribute priority], .privateRegisteredDeclaration source (.instanceDecl ordinary) =>
+    pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority (some ordinary)))
+  | attributes, .declaration source =>
+    pure (.attributedDeclaration source none false attributes)
+  | attributes, .privateDeclaration source =>
+    pure (.attributedDeclaration source none true attributes)
+  | attributes, .registeredDeclaration source registration =>
+    pure (.attributedDeclaration source (some registration) false attributes)
+  | attributes, .privateRegisteredDeclaration source registration =>
+    pure (.attributedDeclaration source (some registration) true attributes)
+  | attributes, .derivingDeclaration source handlers isPrivate =>
+    pure (.attributedDerivingDeclaration source handlers isPrivate attributes)
+  | _, _ => throw "PSCV0-ATTRIBUTE-DECLARATION: selected declaration required"
+
 def psPscv0ReadAttributedCommand
     (readCommand : PsTokenCursor → Except String (PsParseResult PsSyntaxCommand))
     (cursor : PsTokenCursor) :
@@ -152,27 +207,9 @@ def psPscv0ReadAttributedCommand
   else
     let marker ← psPscv0Expect cursor "@"
     let opening ← psPscv0Expect marker.cursor "["
-    let attributeName ← psPscv0Expect opening.cursor "default_instance"
-    let priority ←
-      if psTokenCursorAtText attributeName.cursor "]" then
-        pure (PsParseResult.mk 1000 attributeName.cursor)
-      else do
-        let some atom := psTokenCursorAdvance attributeName.cursor
-          | throw "PSCV0-DEFAULT-INSTANCE-PRIORITY"
-        let value ← (psPscv0PriorityValue atom.token.text attributeName.cursor).mapError psPscv0ParseError
-        pure (PsParseResult.mk value atom.cursor)
-    let close ← psPscv0Expect priority.cursor "]"
-    let parsed ← readCommand close.cursor
-    let command ← match parsed.value with
-      | .declaration source => pure (.registeredDeclaration source
-          (.defaultInstanceDecl priority.value none))
-      | .privateDeclaration source => pure (.privateRegisteredDeclaration source
-          (.defaultInstanceDecl priority.value none))
-      | .registeredDeclaration source (.instanceDecl ordinary) =>
-        pure (.registeredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
-      | .privateRegisteredDeclaration source (.instanceDecl ordinary) =>
-        pure (.privateRegisteredDeclaration source (.defaultInstanceDecl priority.value (some ordinary)))
-      | _ => throw "PSCV0-DEFAULT-INSTANCE-DECLARATION"
+    let attributes ← psPscv0ReadAttributes 4096 opening.cursor []
+    let parsed ← readCommand attributes.cursor
+    let command ← psPscv0AttachAttributes attributes.value parsed.value
     return { parsed with value := command }
 
 def psPscv0ReadOrdinaryCommand (cursor : PsTokenCursor)
@@ -204,6 +241,8 @@ def psPscv0ReadMutualMembers (fuel : Nat) (cursor : PsTokenCursor)
         pure (PsSyntaxMutualMember.mk declaration false (some registration))
       | .privateRegisteredDeclaration declaration registration =>
         pure (PsSyntaxMutualMember.mk declaration true (some registration))
+      | .attributedDeclaration declaration registration isPrivate attributes =>
+        pure { declaration, registration, isPrivate, attributes }
       | _ => throw "PSCV0-MUTUAL-HEAD: only selected function-like declarations belong to mutual"
     psPscv0ReadMutualMembers fuel parsed.cursor (member :: membersRev)
 

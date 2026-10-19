@@ -78,7 +78,8 @@ def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermRead
     let some token := psTokenCursorPeek cursor
       | if nativeLayout then return { value := [], cursor }
         else throw (.unexpectedEnd "tactic block")
-    if token.text == "}" || boundary.any (fun pos =>
+    if token.text == "}" ||
+        (nativeLayout && [")", "]", ","].contains token.text) || boundary.any (fun pos =>
         token.span.start.line > pos.line && token.span.start.column <= pos.column) then
       return { value := [], cursor }
     let head ← psTokenCursorExpectText cursor token.text
@@ -133,7 +134,8 @@ def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermRead
     let semicolon := nativeLayout && psTokenCursorAtText next ";"
     let next ← if semicolon then
       pure (← psTokenCursorExpectText next ";").cursor else pure next
-    if !psTokenCursorDone next && !psTokenCursorAtText next "}" &&
+    let termBoundary := nativeLayout && [")", "]", ","].any (psTokenCursorAtText next)
+    if !psTokenCursorDone next && !psTokenCursorAtText next "}" && !termBoundary &&
         !psProofScriptLaterLine stop next && !semicolon then
       throw (psProofScriptExpectedError "newline-separated tactic" next)
     let rest ← psPscv0ReadTacticsFor nativeLayout read readType fuel boundary next

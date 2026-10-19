@@ -1,4 +1,4 @@
-import Ps.Elab.Basic
+import Ps.Elab.PatternSyntax
 
 abbrev PsScopeBinder := Prod PsSyntaxBinderHead PsSyntaxTerm
 
@@ -212,8 +212,66 @@ def psScopePattern (fuel : Nat) (resolver : PsScopeResolver)
           if name.segments.length == 1 && message.startsWith "unknown name" then pure name
           else throw (.scope message)
         | .error error => throw error
+      let fields ← psElabPatternMarkParameters resolver.environment resolved fields
       return .ctor resolved (← fields.mapM (psScopePattern fuel resolver)) span
+    | .dotCtor name fields span =>
+      return .dotCtor name (← fields.mapM (psScopePattern fuel resolver)) span
     | _ => return pattern
+
+-- Only resolved constructor parameter positions are ordinary term scopes.
+-- Keep dot-heads in those terms until their actual expected type is available.
+def psScopePatternParameterValues (fuel : Nat) (resolver : PsScopeResolver)
+    (visit : PsScopeVisitor) (bound : List String) (pattern : PsSyntaxPattern) :
+    Except PsElabError (PsSyntaxPattern × List String) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .variable name =>
+      if name.segments == ["_"] then return (pattern, [])
+      let result ← visit bound (.reference name)
+      return (← psElabPatternFromTerm fuel result.term, result.used)
+    | .ctor name arguments span =>
+      let head ← visit bound (.reference name)
+      let fixed ← psScopeSelfArguments resolver bound head.term
+      let headUsed := head.used
+      let head ← psElabPatternFromTerm fuel head.term
+      let fixed ← fixed.mapM (psElabPatternFromTerm fuel)
+      let arguments ← arguments.mapM
+        (psScopePatternParameterValues fuel resolver visit bound)
+      let (name, earlier) ← match head with
+        | .variable name => pure (name, [])
+        | .ctor name earlier _ => pure (name, earlier)
+        | _ => throw .matchPatternUnsupported
+      let used := arguments.foldl (fun acc argument => psScopeUnion acc argument.snd) headUsed
+      return (.ctor name (earlier ++ fixed ++ arguments.map (·.fst)) span, used)
+    | .dotCtor name arguments span =>
+      let arguments ← arguments.mapM
+        (psScopePatternParameterValues fuel resolver visit bound)
+      return (.dotCtor name (arguments.map (·.fst)) span,
+        arguments.foldl (fun acc argument => psScopeUnion acc argument.snd) [])
+    | .inaccessible value =>
+      let (value, used) ← psScopePatternParameterValues fuel resolver visit bound value
+      return (.inaccessible value, used)
+    | _ => return (pattern, [])
+
+def psScopePatternValues (fuel : Nat) (resolver : PsScopeResolver)
+    (visit : PsScopeVisitor) (bound : List String) (pattern : PsSyntaxPattern) :
+    Except PsElabError (PsSyntaxPattern × List String) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .inaccessible value =>
+      let (value, used) ← psScopePatternParameterValues fuel resolver visit bound value
+      return (.inaccessible value, used)
+    | .ctor name arguments span | .dotCtor name arguments span =>
+      let arguments ← arguments.mapM (psScopePatternValues fuel resolver visit bound)
+      let pattern := match pattern with
+        | .dotCtor .. => PsSyntaxPattern.dotCtor name (arguments.map (·.fst)) span
+        | _ => PsSyntaxPattern.ctor name (arguments.map (·.fst)) span
+      return (pattern, arguments.foldl (fun acc argument => psScopeUnion acc argument.snd) [])
+    | _ => return (pattern, [])
 
 -- Static section capture follows explicit tactic binders. Actual proof-name
 -- resolution is delayed until the goal's complete local context is available.
@@ -266,10 +324,13 @@ def psScopeDo (fuel : Nat) (resolver : PsScopeResolver) (visit : PsScopeVisitor)
         | .binding pattern type value monadic span => do
           let pattern ← psScopePattern fuel resolver pattern
           let keys ← psScopePatternKeys [pattern]
+          let (pattern, patternUsed) ←
+            psScopePatternValues fuel resolver visit (keys ++ bound) pattern
           let type ← type.mapM (visit bound)
           let value ← visit bound value
           pure (.binding pattern (type.map (·.term)) value.term monadic span,
-            psScopeUnion (type.map (·.used) |>.getD []) value.used, keys ++ bound)
+            psScopeUnion patternUsed (psScopeUnion (type.map (·.used) |>.getD []) value.used),
+            keys ++ bound)
         | .action value span | .returnValue value span => do
           let value ← visit bound value
           let item := match item with
@@ -286,11 +347,14 @@ def psScopeDo (fuel : Nat) (resolver : PsScopeResolver) (visit : PsScopeVisitor)
         | .conditionalPattern pattern value yes no span => do
           let pattern ← psScopePattern fuel resolver pattern
           let keys ← psScopePatternKeys [pattern]
+          let (pattern, patternUsed) ←
+            psScopePatternValues fuel resolver visit (keys ++ bound) pattern
           let value ← visit bound value
           let yes ← psScopeDo fuel resolver visit (keys ++ bound) yes
           let no ← psScopeDo fuel resolver visit bound no
           pure (.conditionalPattern pattern value.term yes.items no.items span,
-            psScopeUnion value.used (psScopeUnion yes.used no.used), bound)
+            psScopeUnion patternUsed (psScopeUnion value.used (psScopeUnion yes.used no.used)),
+            bound)
       let rest ← psScopeDo fuel resolver visit nextBound rest
       return { items := item :: rest.items, used := psScopeUnion used rest.used }
 
@@ -394,21 +458,31 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return {
         term := .ifE name condition.term yes.term no.term span
         used := psScopeUnion condition.used (psScopeUnion yes.used no.used) }
-    | .matchMany scrutinees alternatives span =>
-      let scrutinees ← scrutinees.mapM (visit bound)
+    | .matchMany discriminants alternatives generalizing? span =>
+      let equationKeys := (psSyntaxMatchEquationNames discriminants).map psScopeKey
+      let discriminants ← discriminants.mapM fun discriminant => do
+        let term ← visit bound discriminant.term
+        return (discriminant, term)
       let alternatives ← alternatives.mapM fun (patterns, body, bodySpan) => do
         let patterns ← patterns.mapM (psScopePattern fuel resolver)
         let names := patterns.flatMap (psSyntaxPatternNames 4096)
         let keys := names.map psScopeKey
         if keys.any (fun key => (keys.filter (· == key)).length > 1) then
           throw (.scope "duplicate pattern variable")
-        let body ← visit (keys ++ bound) body
-        return (patterns, body, bodySpan)
+        let patterns ← patterns.mapM
+          (psScopePatternValues fuel resolver visit (keys ++ bound))
+        let patternUsed := patterns.foldl
+          (fun acc pattern => psScopeUnion acc pattern.snd) []
+        -- Native withEqs extends the RHS scope after every pattern binder.
+        let body ← visit (equationKeys ++ keys ++ bound) body
+        return (patterns.map (·.fst), { body with used := psScopeUnion patternUsed body.used }, bodySpan)
       return {
-        term := .matchMany (scrutinees.map (·.term))
-          (alternatives.map fun (patterns, body, bodySpan) => (patterns, body.term, bodySpan)) span
+        term := .matchMany
+          (discriminants.map fun (discriminant, term) => { discriminant with term := term.term })
+          (alternatives.map fun (patterns, body, bodySpan) => (patterns, body.term, bodySpan))
+          generalizing? span
         used := alternatives.foldl (fun acc alt => psScopeUnion acc alt.snd.fst.used)
-          (scrutinees.foldl (fun acc item => psScopeUnion acc item.used) []) }
+          (discriminants.foldl (fun acc item => psScopeUnion acc item.snd.used) []) }
     | _ => return { term := source }
 
 def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxName :=

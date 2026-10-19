@@ -159,9 +159,14 @@ def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
   psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
 
+def psSelfHostPProdRuntimeDataDeclarations : List PsDeclaration :=
+  ["PProd", "PProd.mk", "PProd.rec"].filterMap
+    (fun name => psEnvironmentFind psSelfHostProdPreludeEnvironment (psDecisionName name))
+
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  let prodDeclarations := psStandardProductDataDeclarations
+  let prodDeclarations := psStandardProductDataDeclarations ++
+    psSelfHostPProdRuntimeDataDeclarations
   -- Preserve dependency-first order for eager nullary runtime values.
   -- The checked ByteArray.empty value must initialize before the checked
   -- Inhabited ByteArray dictionary captures it in the shared executable IR.

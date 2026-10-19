@@ -5,10 +5,16 @@ import Ps.Core.Nested
 import Ps.Core.InductiveGroup
 import Ps.Foundation.Diagnostic
 
+structure PsElabStructuralHelperOwnership where
+  owner : PsName
+  families : List PsInductiveInfo
+  declarations : List PsDeclaration
+
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
   sourceInfo : List PsElabSourceInfo := []
   diagnostics : List PsDiagnostic := []
+  structuralHelpers : List PsElabStructuralHelperOwnership := []
 
 def psSyntaxConstructorCoreName (inductiveName : PsName)
     (sourceName : PsSyntaxName) : Option PsName :=

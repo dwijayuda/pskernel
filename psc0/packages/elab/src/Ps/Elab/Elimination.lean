@@ -23,6 +23,11 @@ def psProofEliminationGoal (tag : String) (induction : Bool) (branch : PsElabMat
     | .letDecl id _ type value => some (.letDecl id name type value)
   let context := psElabContextWithLocal branch.context
     { branch.context.localContext with declarations }
+  -- A user-visible proof IH is an ordinary local in later source matches.
+  let context := if induction then
+    { context with auxiliaryLocalIds := context.auxiliaryLocalIds.filter
+      (fun id => !(branch.hypotheses.any (fun binder => binder.id == id))) }
+    else context
   let _ ← psElabExpressionSort context branch.target
   let fresh := psMetaFresh context.metaContext context.localContext branch.target .syntheticOpaque { tag, binders := introduced }
   return {

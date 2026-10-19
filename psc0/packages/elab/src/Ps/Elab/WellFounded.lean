@@ -1,3 +1,4 @@
+import Ps.Elab.WellFoundedCore
 import Ps.Elab.Proof
 import Ps.Elab.RecursionParameters
 import Ps.Elab.Universe
@@ -178,6 +179,12 @@ def psTryElabWellFoundedCall (elaborate : PsElaborator)
   else psElabAbstractType context resolved.context captured.abstractions resultType
   let inner := psElabContextWithMeta resolved.context closedType.context.metaContext
   let closed ← psElabAbstract context inner captured.abstractions resolved.term closedType.term
+  let closed ← if recursion.collectCalls then do
+    let opened ← psElabCoreBoundaryOpen closed.context
+      (.recursiveCall captured.abstractions.length values.length) closed.term closed.type
+    let retained ← psElabResolvedTerm opened.context (.fvar opened.id) (some opened.type)
+    psElabCoreBoundaryClose opened retained (some closed.type)
+    else pure closed
   if captured.remainingPositions.isEmpty && captured.remainingNames.isEmpty then
     return some (← psElabFinalizeExpected closed expected)
   -- Pinned WF/Fix.replaceRecApps applies residual arguments AFTER the checked
@@ -513,6 +520,7 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let probe := psLocalPushBinding bodyHeader.localContext probeName declaredType .explicit
   let probeContext := { bodyHeader with
     localContext := probe.context
+    auxiliaryLocalIds := probe.id :: bodyHeader.auxiliaryLocalIds
     structuralRecursion := none
     wellFoundedRecursions := [{
       functionName := header.functionName, callbackName := probeName
@@ -583,19 +591,26 @@ def psElabWellFoundedTypedPartsCore (elaborate : PsElaborator)
   let sourceCallbackType ← psElabWellFoundedAt "source callback type"
     (psElabWellFoundedSourceCallbackType bodyHeader argument callbackType)
   let callback := psLocalPushBinding bodyHeader.localContext callbackName sourceCallbackType .explicit
+  let sourceName := psNameAppendNum (psRootName "_psc0WellFoundedSource") callback.context.nextId
+  let source := psLocalPushBinding callback.context sourceName declaredType .explicit
+  let recursion : PsElabWellFoundedRecursion := {
+    functionName := header.functionName, callbackName
+    parameterIds, majorId := plan.majorId, packedIds := plan.packedIds
+    stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }
   let bodyContext := { bodyHeader with
-    localContext := callback.context
+    localContext := source.context
+    auxiliaryLocalIds := source.id :: callback.id :: bodyHeader.auxiliaryLocalIds
     structuralRecursion := none
-    wellFoundedRecursions := [{
-      functionName := header.functionName, callbackName := callbackName
-      parameterIds := parameterIds, majorId := plan.majorId
-      packedIds := plan.packedIds
-      stateIds := plan.stateIds, fixedIds := plan.fixedIds, sourceType := some declaredType }]
-    wellFoundedGoalsRev := []
-    wellFoundedCallsRev := [] }
+    wellFoundedRecursions := [{ recursion with callbackName := sourceName, collectCalls := true }]
+    wellFoundedGoalsRev := [], wellFoundedCallsRev := [] }
   let value ← psElabWellFoundedAt "source body"
     (elaborate bodyContext valueSyntax (some declaredResult))
   psElabRecursionValidateFixedParameters value.context plan value.context.wellFoundedCallsRev
+  let value ← psElabWellFoundedAt "compiled recursive calls"
+    (psElabWellFoundedCoreCalls value.context [{
+      sourceId := source.id, callback := .fvar callback.id, recursion
+      fixedArguments := plan.fixedIds.map (fun id => (id, PsExpr.fvar id))
+      span := psSyntaxTermSpan valueSyntax }] value.term declaredResult)
   let solved ← psElabWellFoundedAt "decrease goals"
     (psElabWellFoundedSolveGoals elaborate value.context termination.decreasing)
   -- Generalize only at this actual declaration boundary, as ordinary checked

@@ -13,9 +13,15 @@ inductive PsLocalDecl where
       (type : PsExpr)
       (value : PsExpr)
 
+structure PsLocalNameAlias where
+  userName : PsName
+  id : Nat
+  beforeId : Nat
+
 structure PsLocalContext where
   nextId : Nat
   declarations : List PsLocalDecl
+  nameAliases : List PsLocalNameAlias := []
 
 structure PsLocalPushResult where
   context : PsLocalContext
@@ -68,7 +74,38 @@ def psLocalFindUserInList
         psLocalFindUserInList userName rest
 
 def psLocalFindUser (context : PsLocalContext) (userName : PsName) : Option PsLocalDecl :=
-  psLocalFindUserInList userName context.declarations
+  let declaration := psLocalFindUserInList userName context.declarations
+  let alias := context.nameAliases.find? fun alias =>
+    psNameEq alias.userName userName && psLocalContainsId context alias.id
+  match alias with
+  | none => declaration
+  | some alias =>
+    match declaration with
+    | some declaration =>
+      if psLocalDeclId declaration >= alias.beforeId then some declaration
+      else psLocalFindById context alias.id
+    | none => psLocalFindById context alias.id
+
+def psLocalAddNameAlias (context : PsLocalContext) (userName : PsName) (id : Nat) :
+    Option PsLocalContext :=
+  if !psLocalContainsId context id then none
+  else some { context with nameAliases :=
+    { userName, id, beforeId := context.nextId } :: context.nameAliases }
+
+def psLocalRedirectNameAliases (context : PsLocalContext) (original current : Nat) : PsLocalContext :=
+  { context with nameAliases := context.nameAliases.map fun alias =>
+    if alias.id == original then { alias with id := current } else alias }
+
+-- Preserve every source-visible name for a selected identity. Canonical names
+-- remain available when they have not been shadowed by a newer local or alias.
+def psLocalVisibleNames (context : PsLocalContext) (id : Nat) : List PsName :=
+  let names := context.nameAliases.map (·.userName) ++
+    (psLocalFindById context id).toList.map psLocalDeclUserName
+  names.foldl (fun result name =>
+    let visible := match psLocalFindUser context name with
+      | some declaration => psLocalDeclId declaration == id
+      | none => false
+    if visible && !(result.any (psNameEq name)) then result ++ [name] else result) []
 
 def psLocalPushBinding
     (context : PsLocalContext)
@@ -78,7 +115,7 @@ def psLocalPushBinding
   let id := context.nextId;
   let declaration := PsLocalDecl.binding id userName type binder;
   {
-    context := {
+    context := { context with
       nextId := Nat.succ id
       declarations := List.cons declaration context.declarations
     }
@@ -93,7 +130,7 @@ def psLocalPushLet
   let id := context.nextId;
   let declaration := PsLocalDecl.letDecl id userName type value;
   {
-    context := {
+    context := { context with
       nextId := Nat.succ id
       declarations := List.cons declaration context.declarations
     }

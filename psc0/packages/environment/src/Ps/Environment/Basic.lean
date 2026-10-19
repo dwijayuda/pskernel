@@ -3,6 +3,7 @@ import Ps.Foundation.Index
 import Ps.Core.Declaration
 import Ps.Core.Subst
 import Ps.Environment.Instances
+import Ps.Environment.Attributes
 
 def psDeclarationName : PsDeclaration -> PsName
   | .quotientDecl name _ _ _ => name
@@ -168,6 +169,7 @@ structure PsEnvironment where
   classes : List PsName := []
   classParameters : List (PsName × PsClassParameters) := []
   instances : PsInstanceIndex := psInstanceIndexEmpty
+  simpEntries : List PsSimpEntry := []
   -- Pure source-name routing analogous to Lean's 'export' command.
   -- Aliases never create kernel declarations or new proof authority.
   exportedAliases : List (PsName × PsName) := []

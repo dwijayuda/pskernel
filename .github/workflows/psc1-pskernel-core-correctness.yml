@@ -1,0 +1,40 @@
+name: PSC1 PSKernel-Core correctness
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - fix/psc1-pskernel-core-cross-branch-20261020
+    paths:
+      - psc1/packages/pskernel-core/**
+      - psc1/test/PsKernelCoreRegression.lean
+      - psc1/kernel-lakefile.lean
+      - .github/workflows/psc1-pskernel-core-correctness.yml
+
+permissions:
+  contents: read
+
+jobs:
+  native-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean via elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify toolchain and compile the independent kernel
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lean --version
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression
+      - name: Run native safety and semantics regression
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_regression

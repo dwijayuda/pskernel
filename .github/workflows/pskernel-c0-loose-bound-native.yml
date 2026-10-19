@@ -1,0 +1,43 @@
+name: C0 source-proved loose BVar bound native qualification
+on:
+  push:
+    branches: [research/pskernel-c0-loose-bvar-bound-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-loose-bound-native.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/Expr.lean'
+      - 'psc0/packages/pskernel-c0/test/C0LooseBVarBoundRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-native-proof-and-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Qualify original Lean 4.35 source theorem and checker
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0LooseBVarBoundRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ComputedMVarFlagRegression.lean
+          lake env lean --run test/C0LevelParamFlagRegression.lean
+          echo 'C0_LOOSE_BOUND_NATIVE=SOURCE_PROVED_NO_ADMISSION_PROMOTION'

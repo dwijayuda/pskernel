@@ -24,6 +24,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.VerifiedQualifiedIndexedBatch,
     `Ps.KernelCore.Architecture.VerifiedIndexedCacheState,
     `Ps.KernelCore.Architecture.VerifiedIndexedCacheTrace,
+    `Ps.KernelCore.Architecture.CertifiedLooseBVarBound,
     `Ps.KernelCore.Architecture.CertifiedInstantiateMemo,
     `Ps.KernelCore.Architecture.CertifiedDefEqPairHash,
     `Ps.KernelCore.Architecture.CertifiedCheckedDAGTrace,

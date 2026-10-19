@@ -71,6 +71,34 @@ jobs:
           num-traits = "=0.2.19"
           TOML
           cargo build --manifest-path /tmp/psc1-direct-cargo/Cargo.toml --release
+          mkdir -p /tmp/psc1-direct-cargo/tests
+          cat >/tmp/psc1-direct-cargo/tests/id.rs <<'RUST'
+          use num_bigint::BigUint;
+
+          #[test]
+          fn generated_id_nat_executes() {
+              let input = BigUint::from(42u32);
+              assert_eq!(psc1_direct_smoke::idNat(input.clone()), input);
+          }
+          RUST
+          cargo test --manifest-path /tmp/psc1-direct-cargo/Cargo.toml --release
           lake exe psc1 build /tmp/psc1-direct.lean --target wasm-core --out /tmp/psc1-direct.wasm
           test -s /tmp/psc1-direct.wasm
-          node -e 'const fs=require("fs");const b=fs.readFileSync("/tmp/psc1-direct.wasm"); if(!WebAssembly.validate(b)) process.exit(1)'
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const bytes = readFileSync('/tmp/psc1-direct.wasm');
+          if (!WebAssembly.validate(bytes)) throw new Error('PSC1_WASM_BINARY_INVALID');
+          const { instance } = await WebAssembly.instantiate(bytes);
+          if (typeof instance.exports.idNat !== 'function') {
+            throw new Error('PSC1_WASM_EXPECTED_EXPORT_MISSING');
+          }
+          console.log('PSC1_WASM_INSTANTIATE: PASS');
+          NODE
+          cat >/tmp/psc1-direct-invalid.lean <<'EOF'
+          def ill : Nat := true
+          EOF
+          if lake exe psc1 build /tmp/psc1-direct-invalid.lean --target js --out /tmp/psc1-should-not-emit.js; then
+            echo "Ill-typed source unexpectedly emitted DirectJS" >&2
+            exit 1
+          fi
+          test ! -e /tmp/psc1-should-not-emit.js

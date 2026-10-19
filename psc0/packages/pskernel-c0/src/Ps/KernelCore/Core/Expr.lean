@@ -69,6 +69,30 @@ with
     | .mdata _ body => body.psKernelC0MVarFlag
     | .proj _ _ body => body.psKernelC0MVarFlag
 
+
+  /-- Constant-time absence certificate for named universe parameters on a
+      native immutable expression DAG. Positive results still require the
+      original ordered first-undefined-name scan with the actual allowed
+      parameter list. This never authorizes an inferred type or theorem. -/
+  @[computed_field] psKernelC0LevelParamFlag : PsKernelExpr → Bool
+    | .bvar _ => false
+    | .fvar _ => false
+    | .mvar _ => false
+    | .sort level => psKernelLevelHasParam level
+    | .const _ levels => psKernelLevelsHaveParam levels
+    | .app fn arg =>
+        fn.psKernelC0LevelParamFlag || arg.psKernelC0LevelParamFlag
+    | .lam _ ty body _ =>
+        ty.psKernelC0LevelParamFlag || body.psKernelC0LevelParamFlag
+    | .forallE _ ty body _ =>
+        ty.psKernelC0LevelParamFlag || body.psKernelC0LevelParamFlag
+    | .letE _ ty value body _ =>
+        ty.psKernelC0LevelParamFlag ||
+          value.psKernelC0LevelParamFlag || body.psKernelC0LevelParamFlag
+    | .lit _ => false
+    | .mdata _ body => body.psKernelC0LevelParamFlag
+    | .proj _ _ body => body.psKernelC0LevelParamFlag
+
 def psKernelBoolEq
     (left : Bool)
     (right : Bool) : Bool :=

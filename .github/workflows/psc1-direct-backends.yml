@@ -117,7 +117,7 @@ jobs:
 
           # Both source grammars must reach the same DirectJS runtime.
           cat >/tmp/psc1-direct.ps <<'EOF'
-          def idNat(x : Nat) : Nat := x;
+          def idNat(x : Nat) : Nat := x
           EOF
           lake exe psc1 build /tmp/psc1-direct.ps --target js --out /tmp/psc1-direct-ps.js
           test -s /tmp/psc1-direct-ps.js.map

@@ -1,5 +1,9 @@
 # Core environment closure audit and manifest contract
 
+## Current qualification order
+
+Core language/compiler M1–M5 precede whole-compiler selfhost. Core Standard must be qualified against the selected Core language/application contract. Compiler-sufficient Bootstrap retains its complete compiler-source target in the final selfhost phase. This ordering revision does not change any measured seed, payload, assumption, receipt or existing Full identity. [The completion register](PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) owns current priorities.
+
 ## Current evidence
 
 The [machine-readable ledger](PSC0_CORE_STANDARD_MANIFEST.json) records measured source evidence and deliberately unqualified candidate profiles. It is not a loadable or authenticated environment manifest. The [retained source/blob inventory](PSC0_CORE_SOURCE_AUDIT.json) records both exact Stage0 and the refactored candidate, including every module in the seven-root closure. The complete source report is reproducible with [core-first-source-audit.py](../scripts/core-first-source-audit.py) and retained in the [current Linux source inventory artifact](https://github.com/dwijayuda/pskernel/actions/runs/39191534560).
@@ -27,8 +31,8 @@ UInt32/UInt64 operations are actual compiler hash/byte dependencies. Their proof
 
 | Profile | Required content | Current status |
 | --- | --- | --- |
-| Bootstrap | The smallest measured dependency-complete environment capable of compiling the entire authoritative compiler workload | The 76-declaration root is an independently checked seed component; compiler sufficiency and complete profile identity remain open |
-| Core | Bootstrap plus the frozen essential general-purpose application contract, complete metadata, runtime and applicable targets | Native dependency reachability is measured; no compiler-complete or application-default Core identity is selected |
+| Bootstrap | The smallest measured dependency-complete environment capable of compiling the entire authoritative compiler workload, established during final selfhost preparation | The 76-declaration root is an independently checked seed component; compiler sufficiency and complete profile identity remain open |
+| Core | Dependency-complete selected Core language/application contract, complete metadata, runtime and applicable targets; compiler-source conversion is a later gate | Components and native reachability are measured; no complete application-default Core identity is selected |
 | Full | Core plus explicitly selected checked optional library/capability compositions | Existing qualified Full identity is preserved; compatibility/inclusion with new native candidates is not assumed |
 
 The target Bootstrap ⊆ Core ⊆ Full requires exact per-name kind/type/value/family/rule/reducibility/registration compatibility. Root-list inclusion is insufficient. If a new native candidate collides with an older Full primitive or handwritten declaration, report and review that migration before selecting the profile; preserve the old Full identity until its own qualification succeeds.
@@ -115,11 +119,13 @@ At `1995a478af7aeb83032749fbdb9a2cfa96d28a88`, [run 39191534560](https://github.
 
 Both complete syntax outputs yield 25 prepared declarations and exactly 53,310 canonical bytes, SHA-256 `6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1`. Each decoded output is independently admitted from the same freshly checked base at trust level zero with 2,000,000 heartbeats / 20,000 recursion depth per declaration. The original 76 declarations and their effective reducibility are compared explicitly. The current authoring job reproduces the committed candidate byte for byte and reproduces the native metadata observation unchanged.
 
-| Current source composition at the qualified code SHA | Modules | Source bytes |
+Current source observations are from `ddf0fc171e80d847b9e867c7b7f8045cc712b36c`, [run 39195343005](https://github.com/dwijayuda/pskernel/actions/runs/39195343005). Its module/project and existing Full-baseline target execution results have their [own bounded receipt](core-first-evidence/core-language-module-runtime-qualification.json).
+
+| Source composition at this qualified code SHA | Modules | Source bytes |
 | --- | ---: | ---: |
-| Existing Full portable route | 322 | 26,400,284 |
-| Generic fresh selected project owner | 160 | 2,229,231 |
-| Project plus existing IR/codegen/backend roots | 224 | 2,783,218 |
+| Existing Full portable route | 322 | 26,402,995 |
+| Generic fresh selected project owner | 160 | 2,231,942 |
+| Project plus existing IR/codegen/backend roots | 224 | 2,785,929 |
 | Compiler-source candidate environment | 11 | 211,778 |
 
 These current graph measurements complement the dated earlier tables; they are not installed package or runtime measurements. The [source/blob inventory](PSC0_CORE_SOURCE_AUDIT.json) records exact current owners.

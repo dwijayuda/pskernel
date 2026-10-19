@@ -1,7 +1,7 @@
 {
   "schema": "psc0-core-first-environment-ledger/1",
   "purpose": "Design and evidence ledger only; not a loadable or authenticated profile",
-  "status": "core-first-fresh-project-and-complete-foundation-source-slice-qualified; whole profiles remain unqualified",
+  "status": "core-language-module-visibility-slice-and-development-baseline-runtime-qualified; whole Core milestones/profiles remain open; selfhost is final",
   "authority": {
     "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
     "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
@@ -147,19 +147,20 @@
         ],
         "installedClassNames": []
       },
-      "assumptionPolicyStatus": "Whole-compiler policy and actual closure remain unqualified within the global approved maximum; the checked seed uses an empty allowlist and no axioms."
+      "assumptionPolicyStatus": "Whole-compiler policy and actual closure remain unqualified within the global approved maximum; the checked seed uses an empty allowlist and no axioms.",
+      "qualificationPhase": "final-selfhost-after-Core-M1-M5"
     },
     "Core": {
-      "status": "native-workload-measured; complete Foundation source subset qualified; whole Standard/source/runtime profile remains open",
+      "status": "checked components and bounded source/project evidence; complete Core language/source/runtime profile remains open",
       "selected": false,
-      "rootOwner": "native declaration/module ownership plus explicit reviewed bootstrap seeds",
+      "rootOwner": "Actual Core conformance dependency closure, measured native ownership and reviewed checked seed components",
       "emptyBoundaryRequired": true,
       "actualDeclarationManifest": null,
       "actualAssumptions": null,
       "logicalIdentity": null,
       "surfaceIdentity": null,
       "runtimeIdentity": null,
-      "target": "Bootstrap plus the explicit essential general-purpose application contract"
+      "target": "Dependency-complete declarations, source registrations and runtime contracts for the selected Core language/application capability manifest"
     },
     "Full": {
       "status": "existing-qualified-identity-preserved",
@@ -268,10 +269,13 @@
     "completeFoundationCompilerSourceAdmission": true,
     "foundationCandidateNativeReproductionAndMetadata": true,
     "originalSeedLiteralAndEffectiveReducibilityInFoundationCandidate": true,
-    "seedFullDifferenceSourceClassification": true
+    "seedFullDifferenceSourceClassification": true,
+    "selectedModuleHeaderVisibilityAndPublicImports": true,
+    "developmentBaselineTypescriptJavascriptRustExecution": true
   },
   "notYetQualified": [
-    "dependency-complete selected Core Standard and whole compiler-sufficient Bootstrap",
+    "dependency-complete selected Core Standard and complete Core language/source/runtime profile",
+    "whole compiler-sufficient Bootstrap, retained for final selfhost preparation",
     "literal Bootstrap/Core/Full inclusion",
     "entire authoritative compiler selected source conversion and admission",
     "independently authorized host/profile and persisted-artifact binding",
@@ -440,29 +444,29 @@
     "baseBranch": "psc0/pscv0-v7-native-lean-v1",
     "baseHead": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
     "promotionApproved": false,
-    "lastQualifiedCodeHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
-    "lastQualifiedCodeRun": 39191534560,
-    "checkedAtUTC": "2026-10-19 02:59:38",
-    "headAtCheck": "1995a478af7aeb83032749fbdb9a2cfa96d28a88"
+    "lastQualifiedCodeHead": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "lastQualifiedCodeRun": 39195343005,
+    "checkedAtUTC": "2026-10-19 03:55:17 UTC",
+    "headAtCheck": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c"
   },
   "sourceInventory": {
     "file": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
     "stage0Head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
-    "candidateHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "candidateHead": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
     "candidateFullModules": 322,
-    "candidateFullSourceBytes": 26400284,
+    "candidateFullSourceBytes": 26402995,
     "independentSelectedCandidateModules": 223,
-    "independentSelectedCandidateSourceBytes": 2765743,
+    "independentSelectedCandidateSourceBytes": 2768454,
     "independentSelectedEngineIncludesProjectPreparation": false,
     "independentProjectModules": 224,
-    "independentProjectSourceBytes": 2783218,
+    "independentProjectSourceBytes": 2785929,
     "independentProjectIncludesFreshPreparation": true,
     "compilerSourceEnvironmentModules": 11,
     "compilerSourceEnvironmentBytes": 211778,
     "sourceParityQualified": false,
     "installedSizeMeasured": false,
-    "latestReproducedHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
-    "latestSourceJob": 117865812405
+    "latestReproducedHead": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "latestSourceJob": 117877847785
   },
   "initialEnvironmentSliceQualification": {
     "head": "93107eab14b7347f9605b1396c7a79f2b628ba61",
@@ -519,48 +523,49 @@
     "sameNativeGraphAsPriorQualification": true
   },
   "nextCriticalPath": [
-    "Preserve the complete Source/List gate, then independently measure an additive String-root candidate for the complete Syntax.Token module",
-    "Qualify every Token source declaration and its Source import through both selected routes; inspect exact String.Internal boundaries before Cursor/Name",
-    "Qualify actual compiler mutual-data representations, fuel recursion, deriving and bounded while conversion",
-    "Qualify measured word/string proof dependencies, noncomputable runtime replacements and actual backend execution",
-    "Establish compiler-sufficient Bootstrap and Core policy/identity, then separately reviewed compatible Full composition",
-    "Implement and qualify any real external artifact consumer against independently authorized inputs; no selected cache currently exists",
-    "Complete the entire frozen compiler Stage1–3, reconstruction and independent package payload measurements"
+    "Complete the Core capability-to-rule/fixture/owner/phase mapping while preserving original accepted M1 and bounded M2+A evidence",
+    "Close selected module/source/elaboration boundary gaps through complete paired application fixtures and independent admission",
+    "Preserve the qualified Full-compatibility TS/JS/Rust application execution as an existing regression; complete the remaining Core profile and applicable target obligations without relabeling that baseline as Core qualification.",
+    "Complete Core data/matching/recursion/deriving with reviewed shared corrections, including checked computed/let elimination targets",
+    "Complete required Core Standard logical/runtime closure, control flow, primitives and assurance boundaries",
+    "Qualify M5 real artifact consumers, applicable targets, cold/warm/incremental correspondence, reconstruction and tooling",
+    "After M1-M5 acceptance, complete authoritative compiler-source conversions and compiler-sufficient Bootstrap, then Stage1-3 under the retained full manifest",
+    "Preserve separately gated package installation, compatible Full composition and release selection"
   ],
   "documentationIsLoadableAuthority": false,
   "latestCodeQualification": {
-    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
-    "tree": "cfe1b484dc6d879e3fea20693d09c2c821b88652",
-    "run": 39191534560,
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "tree": "5b0f3b4aaccb5b2b878a53df144e9348b4489707",
+    "run": 39195343005,
     "conclusion": "success",
     "jobs": [
       {
-        "id": 117865812255,
-        "name": "bootstrap-closure",
+        "id": 117877847664,
+        "name": "native-seams",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 117865812405,
+        "id": 117877847785,
         "name": "source-inventory",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 117865812512,
+        "id": 117877847879,
         "name": "candidate-authoring",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 117865812678,
-        "name": "native-seams",
+        "id": 117877847994,
+        "name": "bootstrap-closure",
         "status": "completed",
         "conclusion": "success"
       }
     ],
-    "evidence": "psc0/docs/core-first-evidence/1995-qualification.json",
-    "scope": "Fresh selected project context plus complete Foundation.Source/List paired source and independent admission; unchanged Bootstrap and Full regressions retained"
+    "evidence": "psc0/docs/core-first-evidence/core-language-module-runtime-qualification.json",
+    "scope": "Selected Lean leading-module/import/declaration-visibility slice and paired project admission; independent existing development-baseline application execution on TypeScript, direct JavaScript and Rust. The runtime baseline uses the Full compatibility context. No whole Core milestone, complete Core profile or selfhost stage is qualified by this receipt."
   },
   "components": {
     "compilerSourceFoundationCandidate": {
@@ -749,18 +754,153 @@
   },
   "nextCompilerSourceInspection": "psc0/docs/core-first-evidence/next-compiler-source-workload.json",
   "currentSourceInventory": {
-    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
-    "run": 39191534560,
-    "job": 117865812405,
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "run": 39195343005,
+    "job": 117877847785,
     "path": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
     "fullModules": 322,
-    "fullSourceBytes": 26400284,
+    "fullSourceBytes": 26402995,
     "independentProjectModules": 224,
-    "independentProjectSourceBytes": 2783218,
+    "independentProjectSourceBytes": 2785929,
     "compilerSourceCandidateModules": 11,
     "compilerSourceCandidateSourceBytes": 211778
   },
   "currentNativeWorkloadObservation": {
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "run": 39195343005,
+    "job": 117877847879,
+    "summary": {
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "closureDeclarations": 5690,
+      "externalRoots": 458,
+      "partial": [],
+      "schema": "pscv0-core-native-closure-summary/1",
+      "sourceDeclarations": 191637,
+      "sourceModules": 322,
+      "unsafe": []
+    },
+    "roster": {
+      "candidateKernelAdmitted": false,
+      "nativeClosureDeclarations": 5690,
+      "nativeClosureSHA256": "0f410e4594255da8295cccdfdab7efbe16d50f4601c5fa5d61be17587c4836f3",
+      "sourceHead": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+      "sourceModules": 322,
+      "sourceParityClaim": false
+    },
+    "assumptionPaths": "psc0/docs/core-first-evidence/core-language-native-assumption-paths.json",
+    "candidateKernelAdmitted": false,
+    "sourceParityQualified": false
+  },
+  "historicalSourceInventory": {
+    "file": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
+    "stage0Head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
+    "candidateHead": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
+    "candidateFullModules": 321,
+    "candidateFullSourceBytes": 26398392,
+    "independentSelectedCandidateModules": 223,
+    "independentSelectedCandidateSourceBytes": 2765757,
+    "independentCandidateIncludesExistingProjectLoader": false,
+    "sourceParityQualified": false,
+    "installedSizeMeasured": false,
+    "latestReproducedHead": "e059098683d3388fc9f893ec12027b4998eafd52",
+    "latestSourceJob": 117840891994
+  },
+  "executionPlan": {
+    "revision": 2,
+    "userDirectiveAt": "2026-10-19T10:21:03+07:00",
+    "priority": "core-language-M1-M5-then-selfhost",
+    "coreCompletionDenominator": "Selected-v7.2 Core capability and conformance manifest; existing Full deferrals retained",
+    "conformanceRegister": "psc0/docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md",
+    "completeFixtureMappingQualified": false,
+    "selfhostIsCoreMilestonePrerequisite": false,
+    "selfhostStartGate": "M1-M5 accepted on exact code, profile, runtime and checking identities",
+    "historicalStage0Preserved": true,
+    "stage1ExecutorRequiresSeparateExactQualification": true,
+    "completedCoreMilestones": [],
+    "completedSelfhostStages": [],
+    "scopeChangeIsQualification": false,
+    "sameCheckingAndRuntimeRequirements": true,
+    "completedBoundedSlices": [
+      "leading-module-declaration-visibility-and-public-import-project-slice",
+      "existing-Full-compatibility-application-TS-JS-Rust-runtime-baseline"
+    ],
+    "historicalAcceptance": "Original M1 and bounded M2+A remain accepted for their original workload; completedCoreMilestones refers only to the complete Core exits in the revised roadmap."
+  },
+  "nextCompilerSourceInspectionPhase": "retained-selfhost-preparation-backlog",
+  "foundationSourceCodeQualification": {
+    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "tree": "cfe1b484dc6d879e3fea20693d09c2c821b88652",
+    "run": 39191534560,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117865812255,
+        "name": "bootstrap-closure",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117865812405,
+        "name": "source-inventory",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117865812512,
+        "name": "candidate-authoring",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 117865812678,
+        "name": "native-seams",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "evidence": "psc0/docs/core-first-evidence/1995-qualification.json",
+    "scope": "Fresh selected project context plus complete Foundation.Source/List paired source and independent admission; unchanged Bootstrap and Full regressions retained"
+  },
+  "languageModuleRuntimeQualification": {
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "run": 39195343005,
+    "evidence": "psc0/docs/core-first-evidence/core-language-module-runtime-qualification.json",
+    "moduleHeaderAndDeclarationVisibilitySlice": true,
+    "pairedCanonicalAdmission": true,
+    "parserRefusalControls": 8,
+    "developmentBaselineTargets": [
+      {
+        "target": "typescript",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T03:45:49.7381928Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (typescript)"
+      },
+      {
+        "target": "directjs",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T03:45:50.0110117Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (directjs)"
+      },
+      {
+        "target": "rust",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T03:46:18.9528596Z",
+        "logMarker": "PSCV0_NATIVE_RUST_RUNTIME: PASS 1069 shared runtime observations"
+      }
+    ],
+    "developmentBaselineContext": "Existing Full compatibility context and shared checked application corpus, including optional capabilities present in that corpus",
+    "completeNativeModuleParityQualified": false,
+    "completeCoreRuntimeProfileQualified": false,
+    "wholeCompilerSelfhostQualified": false
+  },
+  "previousNativeFoundationWorkloadObservation": {
     "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
     "run": 39191534560,
     "job": 117865812512,
@@ -789,19 +929,5 @@
     "assumptionPaths": "psc0/docs/core-first-evidence/native-project-assumption-paths.json",
     "candidateKernelAdmitted": false,
     "sourceParityQualified": false
-  },
-  "historicalSourceInventory": {
-    "file": "psc0/docs/PSC0_CORE_SOURCE_AUDIT.json",
-    "stage0Head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
-    "candidateHead": "9f06af4cad58fd10c4224a52cd89e38a2a753b51",
-    "candidateFullModules": 321,
-    "candidateFullSourceBytes": 26398392,
-    "independentSelectedCandidateModules": 223,
-    "independentSelectedCandidateSourceBytes": 2765757,
-    "independentCandidateIncludesExistingProjectLoader": false,
-    "sourceParityQualified": false,
-    "installedSizeMeasured": false,
-    "latestReproducedHead": "e059098683d3388fc9f893ec12027b4998eafd52",
-    "latestSourceJob": 117840891994
   }
 }

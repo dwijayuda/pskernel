@@ -2,17 +2,20 @@
 
 ## Decision and current scope
 
+Current priority, authorized 19 October 2026 at 10:21 Asia/Jakarta: **complete Core language/compiler M1–M5 first; selfhost follows their acceptance**. This supersedes the earlier compiler-source-first execution priority. Preserve its measured source manifest, completed components and final Stage1–3 obligations. [The completion register](PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) owns the immediate queue.
+
 Begin the Core compiler critical path now, beside the preserved Full work. The user authorized this change on 18 October 2026 UTC (19 October in Asia/Jakarta). Completing every advanced Full M3 exit is no longer a prerequisite for an independently qualified Core slice. No milestone is completed by changing its denominator.
 
 The working branch is `psc0/core-first-environments-20261019`, created from qualified Stage0 `33676076bcda7b0de5ec1f9803f49b8b1d28a058`. The active qualified PSC0 branch, its draft PR #109, the unfinished Full preparation branch, PSKernel-Core/C0 and unrelated research lines retain their histories. All repository changes use GitHub expected-HEAD non-force updates and Linux CI.
 
-The language authority is the unchanged [selected v7.2 reference](../PSCV0_LANGUAGE_REFERENCE_v7.2.md). The [original roadmap](PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md) and its historical acceptance are unchanged. The new [Core roadmap](PSC0_CORE_FIRST_ROADMAP.md) explicitly maps the narrower compiler workload and deferred Full obligations.
+The language authority is the unchanged [selected v7.2 reference](../PSCV0_LANGUAGE_REFERENCE_v7.2.md). The [original roadmap](PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md) and its historical acceptance are unchanged. The revised [Core roadmap](PSC0_CORE_FIRST_ROADMAP.md) maps Core language/compiler acceptance, retained Full obligations and the separate final selfhost phase.
 
 ## Initial deliverables
 
 | Deliverable | Recorded contract |
 | --- | --- |
-| [Capability inventory](PSC0_CORE_CAPABILITY_INVENTORY.md) | Actual compiler roots, implementation features and selected-source conversion blockers |
+| [Language completion register](PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) | Core feature/conformance mapping, immediate shared owners and M1–M5 execution order |
+| [Implementation inventory](PSC0_CORE_CAPABILITY_INVENTORY.md) | Retained actual compiler roots and final selfhost conversion blockers |
 | [Environment audit](PSC0_CORE_STANDARD_MANIFEST.md) and [machine-readable ledger](PSC0_CORE_STANDARD_MANIFEST.json) | Measured import/assets evidence, candidate declaration closure, profile identity and inclusion gates |
 | [Core roadmap](PSC0_CORE_FIRST_ROADMAP.md) | M1–M5 and A–E exits, historical acceptance and explicit Full deferrals |
 | [Optional module/package plan](PSC0_OPTIONAL_MODULES_PLAN.md) | Concrete owners, real installation boundaries and migration order |
@@ -23,7 +26,7 @@ The language authority is the unchanged [selected v7.2 reference](../PSCV0_LANGU
 
 Preserve the existing sequence: owned source reader, resolution, elaboration, prepared declarations, independent checking, typed erasure, validated IR, target emission. Both selected `.lean` and `.ps` inputs converge on shared checked semantics. Compiling implementation files with native Lean is a separate observation.
 
-The intended profiles are Bootstrap, Core and Full. Bootstrap must be the smallest measured dependency-complete environment that compiles the entire authoritative compiler workload. Core adds the explicitly selected general-purpose programming contract and becomes the application default only after qualification. Full adds checked optional compositions. The 76-declaration Bootstrap root implemented here is a seed component toward that target, not a compiler-sufficient Bootstrap profile. Their required inclusion is a statement about compatible checked declarations, types, bodies, family/rule metadata, instances and runtime contracts. A set of seed names, a runtime-filtered Full environment, or a function with “Core” in its name is insufficient. The current independently authored candidates have not established Bootstrap ⊆ Core ⊆ the existing Full environment.
+Core is the dependency-complete checked declaration, source-registration and runtime composition required by the selected Core language/application contract. Its M1–M5 qualification does not depend on converting compiler implementation sources. Bootstrap retains its target of the smallest measured composition sufficient for the complete authoritative compiler, to be established during final selfhost preparation. Full retains separately checked optional composition. The existing 76-declaration seed and 92-declaration Foundation component are qualified only at their recorded scopes. Compatible Bootstrap/Core/Full nesting remains an explicit, unproved goal; the current seed/Full mismatch is unchanged. Inclusion requires compatible checked types, values, family/rule metadata, instances and runtime contracts. Neither root-list inclusion nor filtering a Full runtime establishes a qualified composition. Core becomes an application default only after the applicable language/profile/runtime/package gates pass.
 
 The implemented boundaries and remaining composition work are:
 
@@ -31,7 +34,7 @@ The implemented boundaries and remaining composition work are:
 2. `PsKernelLean.Replay` owns generic host replay; the existing Full `Prelude` wrapper retains its reviewed import policy. Generic replay begins at `Lean.mkEmptyEnvironment 0` and uses existing finite admission defaults.
 3. `Ps.Compiler.Engine` owns shared compilation with explicit actual environment and runtime inputs. Existing `Compiler.Api` signatures remain the Full compatibility composition.
 4. Preserve the completed deriving-helper separation and explicit-context selected single-source and fresh project owners. Carry the same actual environment/runtime inputs through consuming host, admission and emission boundaries, and qualify each workload and runtime contract.
-5. Admit actual Bootstrap/Core assets from measured native declaration closure, establish inclusion/registration/runtime identities, and expose independently buildable compositions. Only then change a release default or distribute a Core package.
+5. Admit actual Core assets and qualify their complete declaration/registration/runtime identities for M1–M5. Measure compiler-sufficient Bootstrap during final selfhost preparation. Independently buildable packages, compatible Full composition and release-default selection retain their own gates.
 
 The compiled profile context selects actual inputs; it is not an admission token. An external loader must authenticate the authorized canonical environment and runtime contract, check their actual closure, and bind consumed artifacts to that identity. Fresh project interfaces and receipts are descriptive in-process results. No selected persistent-cache loader currently exists. A future artifact consumer must obtain its expected binding from independently authorized inputs or recompute it from those inputs; comparing two claimant-supplied digests cannot authenticate reuse.
 
@@ -44,6 +47,12 @@ Pinned Lean 4.35.0 commit: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The maxim
 Ordinary checked, partial, unsafe, verified, model and refinement identities stay distinct. Core describes language/library workload; it is not a new assurance grade. Wasm uses GC internally and linear memory only at the explicit ABI.
 
 The independent kernel is allowed to remain external to compiler selfhost. Native authoring tools may inspect the pinned library and generate candidate data, but neither that host dependency nor a successful native build can be hidden inside the portable compiler or counted as Stage1.
+
+## Current language implementation
+
+At `ddf0fc171e80d847b9e867c7b7f8045cc712b36c`, [run 39195343005](https://github.com/dwijayuda/pskernel/actions/runs/39195343005) passes all four Core jobs. The selected reader implements a leading module header, module-mode default privacy, explicit public/private declarations and public imports. Both readers still use the shared project owner and independently checked canonical outputs. Complete paired re-export/default-privacy controls and owned header/import refusals pass. Visibility scopes and full native module correspondence remain open.
+
+The same executable runs the existing checked application corpus on TypeScript, direct JavaScript and Rust, with 1,069 observations per target. This Full compatibility context supplies a development regression; it does not select Core Standard or qualify formal target refinement. [The exact receipt](core-first-evidence/core-language-module-runtime-qualification.json) distinguishes these claims.
 
 ## First independently tested slice
 

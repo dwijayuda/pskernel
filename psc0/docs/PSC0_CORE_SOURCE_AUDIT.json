@@ -1,11 +1,11 @@
 {
   "schema": "psc0-core-source-inventory-observation/1",
   "repository": "dwijayuda/pskernel",
-  "workflowRun": 39191534560,
-  "workflowJob": 117865812405,
+  "workflowRun": 39195343005,
+  "workflowJob": 117877847785,
   "sourceParityQualified": false,
   "compilerSelfhostQualified": false,
-  "scope": "Exact explicit source import graphs at the qualified code commit. The independent project composition includes fresh project preparation and existing IR/backend roots. The full compiler source/runtime profile and native declaration dependencies remain separate obligations.",
+  "scope": "Exact explicit source import graphs at ddf0fc171e80d847b9e867c7b7f8045cc712b36c. Module/header visibility changes are inventoried here. Separate module/project and application runtime receipts have bounded scopes; inclusion does not qualify whole-language native parity, a complete Core profile or selfhost.",
   "stage0": {
     "head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
     "roots": [
@@ -3514,7 +3514,7 @@
     ]
   },
   "candidate": {
-    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
     "roots": [
       "Ps.Compiler.Pscv0Modules",
       "Ps.BackendTs.Readable",
@@ -6761,8 +6761,8 @@
         "sha256": "47dc4f16305b01a60a8eb38e6e97dd9f7b789fbba3d48f9fe7e311764f0fed01"
       },
       {
-        "bytes": 6200,
-        "gitBlobSHA1": "a014dfba68086f44f75609d5e5799b9247160603",
+        "bytes": 8871,
+        "gitBlobSHA1": "d9913930e3a5ced99271babd81b406a9912958d7",
         "imports": [
           "Ps.Syntax.ParseLean",
           "Ps.Syntax.Lean.Declarations",
@@ -6770,7 +6770,7 @@
         ],
         "module": "Ps.Syntax.Lean.Program",
         "path": "psc0/packages/syntax/src/Ps/Syntax/Lean/Program.lean",
-        "sha256": "9388ae22e8a5759c3b13e7a11791e6c23ec28d1bdd4d9b11e5e3990c490244cc"
+        "sha256": "e5c08b9728afe02440d51d1f6fd0014f13db7982b09741aa1701c58624d0a83e"
       },
       {
         "bytes": 11671,
@@ -6805,15 +6805,15 @@
         "sha256": "2d5f5f7426b604eb37179d9890c7385d91f5d6ec465b2c4832f117477245e8d6"
       },
       {
-        "bytes": 108759,
-        "gitBlobSHA1": "6b22ec0dac74bf2df85c2c1f85fc28a2abf9aadd",
+        "bytes": 108799,
+        "gitBlobSHA1": "299512d76fe1e9db62bd615d379db179148710d9",
         "imports": [
           "Ps.Syntax.Lexer",
           "Ps.Syntax.ParseCommon"
         ],
         "module": "Ps.Syntax.ParseLean",
         "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
-        "sha256": "b9eec6c3d36cea109b49df8ac742ed9eb38fbfa91cd5c3b4722fe2c5d7ecf6a3"
+        "sha256": "b543ce2042333f892fe663d8579a95c401ef699004e7ab1cd5172ba6054d026c"
       },
       {
         "bytes": 78262,
@@ -7093,7 +7093,7 @@
     ]
   },
   "independentCandidate": {
-    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
     "roots": [
       "Ps.Compiler.Pscv0Engine",
       "Ps.BackendTs.Readable",
@@ -7329,11 +7329,11 @@
       "Ps.Syntax.Translate"
     ],
     "moduleCount": 223,
-    "sourceBytes": 2765743,
+    "sourceBytes": 2768454,
     "scope": "Selected single-source engine plus existing IR/backend roots; historical graph contract retained"
   },
   "independentProjectCandidate": {
-    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
     "roots": [
       "Ps.Compiler.Pscv0ModuleEngine",
       "Ps.BackendTs.Readable",
@@ -7570,7 +7570,7 @@
       "Ps.Syntax.Translate"
     ],
     "moduleCount": 224,
-    "sourceBytes": 2783218,
+    "sourceBytes": 2785929,
     "environmentBytes": 49489,
     "fullCompositionImports": [],
     "externalImports": [],
@@ -7579,7 +7579,7 @@
     "compilerSelfhostQualified": false
   },
   "compilerSourceFoundationCandidate": {
-    "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
     "root": "Ps.Environment.CompilerSourceCandidate",
     "modules": [
       {
@@ -7701,7 +7701,14 @@
     "fullCompositionImports": [],
     "externalImports": [],
     "unresolvedProjectImports": [],
-    "sourceGateReport": "core-first-evidence/compiler-source-qualification.json"
+    "sourceGateReport": "core-first-evidence/compiler-source-qualification.json",
+    "moduleIdentityBasis": {
+      "previousQualifiedHead": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+      "previousRun": 39191534560,
+      "sourceModuleBlobsUnchangedInGitComparison": true,
+      "currentGraphCountAndBytesReobserved": true,
+      "comparisonURL": "https://github.com/dwijayuda/pskernel/compare/1995a478af7aeb83032749fbdb9a2cfa96d28a88...ddf0fc171e80d847b9e867c7b7f8045cc712b36c"
+    }
   },
   "measurements": [
     {
@@ -7978,10 +7985,10 @@
           "Ps.Environment.SelfHostProd",
           "Ps.Environment.StandardSnapshot"
         ],
-        "head": "1995a478af7aeb83032749fbdb9a2cfa96d28a88",
+        "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
         "label": "candidate",
         "moduleCount": 322,
-        "sourceBytes": 26400284,
+        "sourceBytes": 26402995,
         "unresolvedProjectImports": []
       }
     },
@@ -8043,7 +8050,7 @@
         "label": "candidate",
         "moduleCount": 113,
         "root": "Ps.Compiler.Engine",
-        "sourceBytes": 1705386,
+        "sourceBytes": 1705426,
         "unresolvedProjectImports": []
       }
     },
@@ -8055,7 +8062,7 @@
         "label": "candidate",
         "moduleCount": 159,
         "root": "Ps.Compiler.Pscv0Engine",
-        "sourceBytes": 2211756,
+        "sourceBytes": 2214467,
         "unresolvedProjectImports": []
       }
     },
@@ -8067,7 +8074,7 @@
         "label": "candidate",
         "moduleCount": 160,
         "root": "Ps.Compiler.Pscv0ModuleEngine",
-        "sourceBytes": 2229231,
+        "sourceBytes": 2231942,
         "unresolvedProjectImports": []
       }
     },
@@ -8103,7 +8110,7 @@
         "fullCompositionImports": [],
         "label": "candidate",
         "moduleCount": 223,
-        "sourceBytes": 2765743,
+        "sourceBytes": 2768454,
         "unresolvedProjectImports": []
       }
     },
@@ -8124,7 +8131,7 @@
           "Ps.Codegen.Api",
           "Ps.Codegen.Provenance"
         ],
-        "sourceBytes": 2783218,
+        "sourceBytes": 2785929,
         "unresolvedProjectImports": []
       }
     },
@@ -8136,7 +8143,7 @@
           "axiom_declarations": 0,
           "class_declarations": 0,
           "deriving_clauses": 12,
-          "do_tokens": 1501,
+          "do_tokens": 1502,
           "fixedpoint_suffixes": 0,
           "for_tokens": 188,
           "inductive_declarations": 118,

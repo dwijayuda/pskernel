@@ -1,5 +1,34 @@
 # Core qualification and risk ledger
 
+## Current acceptance order
+
+The user directed Core language/compiler M1–M5 first and selfhost last on 19 October 2026 at 10:21 Asia/Jakarta. [The revised roadmap](PSC0_CORE_FIRST_ROADMAP.md) and [completion register](PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) define the current order. Previous receipts below retain their original code, denominator and meaning. No milestone is completed by this revision.
+
+Core language/compiler delivery requires its conformance, profile, runtime, artifact and package gates. A selfhost claim additionally requires the complete compiler-source Stage1–3 route. Every promised native/paired-source, independent checking, runtime and assurance requirement remains mandatory. There is no selected persistent-cache loader; M5 must qualify a real consuming implementation.
+
+Compiler-sufficient Bootstrap and implementation-source conversion are final selfhost preparation. The checked 76- and 92-declaration components and complete Source/List gate remain retained regressions.
+
+## Latest module and runtime qualification
+
+At `ddf0fc171e80d847b9e867c7b7f8045cc712b36c` (tree `5b0f3b4aaccb5b2b878a53df144e9348b4489707`), [run 39195343005](https://github.com/dwijayuda/pskernel/actions/runs/39195343005) completed successfully at 03:47 UTC on 19 October 2026. The [machine receipt](core-first-evidence/core-language-module-runtime-qualification.json) records all four jobs, changed executable blobs, target observations, archive digests and retained regression evidence.
+
+| Gate | Observation | Qualification boundary |
+| --- | --- | --- |
+| Source inventory, job [117877847785](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847785) | 322-module Full route: 26,402,995 source bytes; independent project/backend route: 224 modules / 2,785,929 bytes | Explicit imports/source identities; installed size and complete logical/runtime closure remain unqualified |
+| Native seams, job [117877847664](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847664) | Leading module/default privacy/public declarations; complete module-mode public re-export chain; strict paired canonical admission; eight owned parser refusals and private leakage refusal | Visibility scopes, complete imported-module-kind/non-exposed-body contracts and native elaboration parity remain open |
+| Bootstrap, job [117877847994](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847994) | Exact original 76-declaration manifest and empty trust-zero replay reproduced | Compiler-sufficient Bootstrap and a complete Core profile remain unqualified |
+| Candidate authoring and runtime, job [117877847879](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847879) | Full identities/native checks retained; exact Foundation asset and metadata reproduced; TypeScript/direct JS/Rust execute 1,069 shared observations each | Existing Full compatibility application corpus; not separate runtime evidence for the new module fixtures or the smaller Core profile |
+
+The preceding [run 39195122996](https://github.com/dwijayuda/pskernel/actions/runs/39195122996) at `bdd6941e79abc292a8e734671dec4715eb8018b5` also passed all four jobs. Read-only review then gave the re-export provider and client their own module headers and added exact workflow trigger paths for consumed CLI/test inputs. Production parser code did not change in the reviewed successor. Healthy runs were retained.
+
+The final source audit observes 160 modules / 2,231,942 bytes for the shared selected project owner. The Foundation candidate graph remains 11 modules / 211,778 bytes. Source/List canonical admissions and native Foundation metadata match the retained files exactly; native authoring reports the same logical values and source assets. Full retains 3,757 declarations, 44 classes and 371 instances, fingerprint `fnv1a64:3071911941504503432` and SHA-256 `364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1`.
+
+The native ownership audit observes 191,637 owned declarations, 458 external roots and a 5,690-declaration raw dependency closure, SHA-256 `0f410e4594255da8295cccdfdab7efbe16d50f4601c5fa5d61be17587c4836f3`. [Current assumption paths](core-first-evidence/core-language-native-assumption-paths.json) reach the same three approved maximum logical assumptions and no unsafe/partial entries. This roster is not an independently admitted Core profile or source-parity receipt.
+
+The established Lake cache restores in the seam job without another cache writer. Its five measured build commands totaled 15.88 s, compared with approximately 111 s in the earlier uncached observation. These differently conditioned observations are not a controlled speedup. Required builds, authoring, source checks, finite admission budgets and refusals remain. The target gate uses TypeScript 7.0.2 and Rust 1.98.1 with the existing runners. Its artifact includes source SHA, emitted products, application hashes and runtime logs. The archive digest was retrieved; individual saved application hashes were not separately downloaded.
+
+The next active register item is remaining module/source boundary work, followed by checked elimination-target preparation and induction index restrictions. CL05/CL12, complete Core milestone exits, complete profile identity, formal refinement, real artifact/incremental consumers and final selfhost remain open.
+
 ## Qualified baseline and preserved candidate
 
 Stage0 is `33676076bcda7b0de5ec1f9803f49b8b1d28a058` on `psc0/pscv0-v7-native-lean-v1`, tree `87b8b0af6c72f5e8b28af97f9f990e28f73ac56e`. Fresh ref and PR checks at 2026-10-19 02:59 UTC found PR #109 open, draft and unmerged, with this same head.
@@ -107,14 +136,14 @@ The full native compiler audit reaches 5,690 external declarations from 458 real
 
 | Gate | Required next evidence | Current blocker / safeguard |
 | --- | --- | --- |
-| Bootstrap closure | Checked 76-declaration seed and 92-declaration Foundation source candidate are complete at their recorded scopes; next measure the compiler-sufficient closure | Seed qualification is not whole-compiler sufficiency |
+| Bootstrap closure | Checked 76-declaration seed and 92-declaration Foundation source candidate retain their scopes; compiler-sufficient closure is final selfhost preparation | Seed qualification is not whole-compiler sufficiency |
 | Core Standard | Typed graph is measured; next qualify selected declarations, all proof/type dependencies, inclusion and registration/runtime identity | Byte/word source is 16.1 MB; 34 seed/Full cells are classified; compatible migration and native assumption/opaque implementation review remain open |
-| Core frontend/elaboration | Selected single-source and fresh project context owners are qualified at their recorded scopes; extend complete compiler-source admission | Complete compiler metadata/runtime qualification and two native mutual-data representations remain open |
+| Core frontend/elaboration | Selected readers and fresh project context owners retain their scoped evidence; close the complete Core language/source conformance cells | Complete Core language metadata/runtime qualification remains open; implementation mutual-data conversion is final selfhost work |
 | Core execution/backend | Compiler control/closure/error observations, exact primitive and typed erasure/IR, applicable target execution | Word/UTF8/ABI details and runtime selector identity remain explicit |
 | External interfaces/cache | Qualify a real consuming host or persisted-artifact loader against independently authorized source/profile/runtime inputs | Fresh interfaces are descriptive; no selected persistent-cache integration exists, and claimant-supplied hashes cannot authenticate reuse |
 | Selfhost | Entire authoritative Stage1–3 source manifest and deterministic/runtime comparison | Historical selfhost or native builds cannot substitute |
 | Optional Full modules | Exact optional closure/inclusion, Full regression and installation absence/presence tests | Heavy data remain preserved; no runtime filtering or dependency metadata shortcut |
-| Release integration | Applicable Core gates on the exact reviewed candidate and preserved Full regression receipts | No default/release promotion while profile or stage obligations remain open |
+| Release integration | Applicable Core gates on the exact reviewed candidate and preserved Full regression receipts | Core delivery requires its language/profile/runtime/package gates; a selfhost claim additionally requires Stage1–3; publication remains separately gated |
 
 Full non-workload P0/P1, general WF/Prop recursion and extended deriving stay in their separate ledger. Core cannot omit a dependency merely because its source token is absent. Ordinary checked output retains its ordinary identity; unavailable verified/model/refinement claims fail.
 

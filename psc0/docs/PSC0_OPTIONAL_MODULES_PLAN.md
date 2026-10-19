@@ -1,5 +1,7 @@
 # Optional module and npm package plan
 
+Current priority is Core language/compiler M1–M5, then final selfhost. Package isolation supports the Core profile/delivery gates; whole-compiler source conversion and fixed-point qualification retain their separate final phase. This change does not authorize publication, select a new release default or change any package identity.
+
 ## Existing package boundary
 
 The current [compiler manifest](../packages/compiler/package.json) declares `psc0-monolithic-runtime-with-scoped-source-packages/1`. The [environment package](../packages/environment/package.json) depends on `@proofscript/compiler`, and its files roster includes all src and dist content. Scoped source/runtime facades therefore do not establish independent compiler or Standard loading.
@@ -40,7 +42,7 @@ Generate each tarball from a reviewed file/closure manifest. Repository source p
 ## Migration sequence and acceptance
 
 1. Preserve compatibility APIs; isolate generic helpers, replay and Engine.
-2. Establish real Bootstrap/Core declaration and runtime identities, exact profile threading and checked optional composition.
+2. Establish the actual Core language declaration/runtime identities, exact profile threading and checked optional composition. Compiler-sufficient Bootstrap is measured in final selfhost preparation.
 3. Generate independent executable Core and backend modules using the existing checked IR/codegen contract.
 4. Stage new packages from exact manifests, retain notices/source authority and reject undeclared Full files.
 5. Use Linux to measure npm pack archive bytes, unpacked bytes and a clean installed dependency tree. Record pinned Node/npm/platform, lockfile, install flags and content lists; measure defaults and each explicit optional addition.

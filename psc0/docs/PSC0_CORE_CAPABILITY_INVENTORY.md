@@ -1,4 +1,8 @@
-# Core compiler capability inventory
+# Compiler implementation inventory and retained selfhost backlog
+
+## Current use of this inventory
+
+The user's 19 October 2026 directive makes Core language/compiler M1–M5 the immediate priority, with selfhost last. The [language completion register](PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) owns the current conformance denominator. This file retains the complete compiler implementation source graph and conversion requirements for final selfhost. Its lexical signals remain useful evidence for shared features; source-file counts and compiler conversion are no longer M1–M5 exit conditions.
 
 ## Authority and measured source denominator
 
@@ -24,7 +28,7 @@ Its additional `PsKernelLean.Protocol` and `PsKernelLean.Prelude` imports are ho
 
 ## Actual workload and conversion obligations
 
-| Source owner | Implementation requirement | Core acceptance obligation |
+| Source owner | Implementation requirement | Retained implementation/selfhost obligation |
 | --- | --- | --- |
 | Foundation, Core, Meta | Polymorphic functions; Nat/List/tree recursion; callbacks and returned closures; records/local state | Preserve binders, captures, errors and actual recursive arguments through selected source and checked lowering |
 | Syntax readers | Recursive patterns, records/default fields, token traversal, positions and both selected grammars | Preserve scope, UTF8 byte offsets, source identity and first errors without a native parser fallback |
@@ -49,7 +53,9 @@ Fresh selected project preparation now runs through Pscv0ModuleEngine with the a
 
 The first Linux-guarded leaves are Fingerprint (10 modules, 46,242 bytes) and native Replay (12 repository modules, 50,030 bytes plus the explicit Lean toolchain import). These figures describe their exact `851faf84` source closures. They do not describe a complete Core compiler, seed or package.
 
-## Qualification sequence
+## Retained source qualification sequence
+
+Resume the compiler-source expansion after M1–M5 acceptance. Earlier expansion is useful only when it directly closes a selected Core language/runtime requirement. Preserve the complete source denominator and existing evidence; do not select the next compiler file merely to increase a conversion count.
 
 The earlier native ownership audit matched the full 321-module route to its source inventory, including 191,611 owned private/generated declarations and 458 external roots. Its 5,690-declaration raw external closure has no unsafe/partial entries and reaches the three approved logical assumptions. These dated observations are not a selected Core declaration manifest. Review assumption paths and the current source owner graph, resolve selected representation blockers, and expand independently checked candidate/source coverage only from observed failing obligations, retaining the complete compiler denominator.
 
@@ -64,4 +70,4 @@ At `1995a478af7aeb83032749fbdb9a2cfa96d28a88`, [run 39191534560](https://github.
 
 The List denominator contains psListLength, psListIsEmpty, psListAny, psListReverseAcc, psListReverse, psListAppend, psListMap, psListMapExcept, psListTake and psListZip. The gate imports both files through a separate entry, checks exact files/paths/hashes, and records all 25 prepared names. Generated helpers for ReverseAcc, Take and Zip are retained. The [raw receipt](core-first-evidence/compiler-source-qualification.json) distinguishes original headers from generated and prepared declarations.
 
-The measured candidate environment source graph is 11 modules / 211,778 bytes, including its 174,266-byte data asset; it has no Full or external explicit import. The complete compiler denominator remains the broader inventory. [Next inspected modules](core-first-evidence/next-compiler-source-workload.json) are Token, then Cursor/Name with measured String/Char and actual extern/runtime obligations. They have no selected-source acceptance yet.
+The measured candidate environment source graph is 11 modules / 211,778 bytes, including its 174,266-byte data asset; it has no Full or external explicit import. The complete final selfhost denominator remains the broader inventory. [Retained inspected modules](core-first-evidence/next-compiler-source-workload.json) are Token, then Cursor/Name with measured String/Char and actual extern/runtime obligations. They have no selected-source acceptance yet and no longer define the immediate M1–M5 queue.

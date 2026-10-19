@@ -1,5 +1,6 @@
 import Ps.KernelCore.Runtime.Acceleration.CertifiedHashMemo
 import Ps.KernelCore.Core.Substitution.Instantiate
+import Ps.KernelCore.Architecture.CertifiedLooseBVarBound
 
 /-!
 Source-exact, immutable operation-local memoization of single-variable

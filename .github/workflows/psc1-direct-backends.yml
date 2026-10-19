@@ -75,7 +75,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          lake build psc1
+          lake build psc1 psc1_direct_map_tests
+          lake exe psc1_direct_map_tests
 
       - name: Smoke PSC1 direct JS, Rust and core Wasm outputs
         working-directory: psc1
@@ -95,32 +96,22 @@ jobs:
           node --input-type=module -e 'import("/tmp/psc1-direct.mjs").then(m=>{if(m.idNat(42n)!==42n)process.exit(1)})'
           lake exe psc1 build /tmp/psc1-direct.lean --target rust --out /tmp/psc1-direct.rs
           test -s /tmp/psc1-direct.rs
-          mkdir -p /tmp/psc1-direct-cargo/src
-          cp /tmp/psc1-direct.rs /tmp/psc1-direct-cargo/src/lib.rs
-          cat > /tmp/psc1-direct-cargo/Cargo.toml <<'TOML'
-          [package]
-          name = "psc1-direct-smoke"
-          version = "0.0.0"
-          edition = "2021"
-          publish = false
-          [lib]
-          path = "src/lib.rs"
-          [dependencies]
-          num-bigint = "=0.4.6"
-          num-traits = "=0.2.19"
-          TOML
-          cargo build --manifest-path /tmp/psc1-direct-cargo/Cargo.toml --release
-          mkdir -p /tmp/psc1-direct-cargo/tests
-          cat >/tmp/psc1-direct-cargo/tests/id.rs <<'RUST'
+          test -s /tmp/psc1-direct.cargo/Cargo.toml
+          test -s /tmp/psc1-direct.cargo/src/lib.rs
+          grep -q 'num-bigint = "=0.4.6"' /tmp/psc1-direct.cargo/Cargo.toml
+          grep -q 'num-traits = "=0.2.19"' /tmp/psc1-direct.cargo/Cargo.toml
+          cargo build --manifest-path /tmp/psc1-direct.cargo/Cargo.toml --release
+          mkdir -p /tmp/psc1-direct.cargo/tests
+          cat >/tmp/psc1-direct.cargo/tests/id.rs <<'RUST'
           use num_bigint::BigUint;
 
           #[test]
           fn generated_id_nat_executes() {
               let input = BigUint::from(42u32);
-              assert_eq!(psc1_direct_smoke::idNat(input.clone()), input);
+              assert_eq!(psc1_generated::idNat(input.clone()), input);
           }
           RUST
-          cargo test --manifest-path /tmp/psc1-direct-cargo/Cargo.toml --release
+          cargo test --manifest-path /tmp/psc1-direct.cargo/Cargo.toml --release
           lake exe psc1 build /tmp/psc1-direct.lean --target wasm-core --out /tmp/psc1-direct.wasm
           test -s /tmp/psc1-direct.wasm
           lake exe psc1 wat /tmp/psc1-direct.wasm --out /tmp/psc1-direct.wat

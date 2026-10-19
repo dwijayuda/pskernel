@@ -138,6 +138,20 @@ def psElabDeriveConstructor (plan : PsElabDeriveContext) (constructor : PsConstr
   let cursor ← psElabProjectionApplyParameters plan.context arguments type
   return (psExprApplyMany (.constE constructor.name levels) arguments, cursor)
 
+-- A repeated handler is another real derivation in source order. Preserve
+-- the first canonical member name and choose an unused name for later values.
+def psElabDeriveFreshName (environment : PsEnvironment) (family : PsName)
+    (suffix : String) (fuel : Nat := 4096) (index : Nat := 0) :
+    Except PsElabError PsName := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let component := if index == 0 then suffix else suffix ++ "_" ++ toString index
+    let name := psNameAppendStr family component
+    if psEnvironmentContains environment name then
+      psElabDeriveFreshName environment family suffix fuel (index + 1)
+    else return name
+
 def psElabDeriveFinish (plan : PsElabDeriveContext) (suffix : String)
     (type value : PsExpr) (pruneRequirements : Bool := false) :
     Except PsElabError PsDeclaration := do
@@ -154,7 +168,8 @@ def psElabDeriveFinish (plan : PsElabDeriveContext) (suffix : String)
     throw .unresolvedMetavariable
   if !psExprFVarsInContext psLocalEmpty value || !psExprFVarsInContext psLocalEmpty type then
     throw (.data "derived declaration contains an unbound local")
-  return .definitionDecl (psNameAppendStr plan.info.name suffix) plan.info.levelParams type value
+  let name ← psElabDeriveFreshName plan.context.environment plan.info.name suffix
+  return .definitionDecl name plan.info.levelParams type value
 
 -- Runtime fields must have homogeneous types in the parameter telescope.
 -- Proof fields may depend on earlier values: they carry no comparison payload,

@@ -13,8 +13,8 @@ def psPscv0CommandNames (line fuel : Nat) (cursor : PsTokenCursor)
       psPscv0CommandNames line fuel name.cursor (name.value :: acc)
 
 -- A deriving clause is parsed after the data body's closing brace,
--- before the command separator. The syntax layer selects a fixed handler
--- vocabulary; the elaborator supplies the checked generated instance.
+-- before the command separator. Retain handler names and source order here;
+-- elaboration resolves each name and checks the selected handler registry.
 def psPscv0SelectedDerivingNames : List String :=
   ["Inhabited", "BEq", "DecidableEq", "Repr", "Hashable"]
 
@@ -24,11 +24,6 @@ def psPscv0DerivingHandlers (fuel : Nat) (cursor : PsTokenCursor)
   | 0 => throw "PSCV0-DERIVE-HANDLER-BUDGET"
   | fuel + 1 =>
     let name ← (psParseSyntaxName cursor).mapError psPscv0ParseError
-    let selected := name.value.segments
-    if !(psPscv0SelectedDerivingNames.map fun name => [name]).contains selected then
-      throw "PSCV0-DERIVE-HANDLER-UNKNOWN"
-    if (acc.any (fun previous => previous.segments == selected)) then
-      throw "PSCV0-DERIVE-HANDLER-DUPLICATE"
     let accumulated := name.value :: acc
     if psTokenCursorAtText name.cursor "," then
       let comma ← (psTokenCursorExpectText name.cursor ",").mapError psPscv0ParseError

@@ -2573,6 +2573,142 @@ private def checkDeclarationUniverses : IO Unit := do
   ensure (left == right) "mutual universe paired admissions differ"
   IO.println "PSCV0_CORE_DECLARATION_UNIVERSES: four paired admitted projects, exact inherited/explicit order, private/where/instance ownership, structural universe names, 18 owned semantic refusals, 16 parse refusals, printers and source AST boundary controls passed"
 
+private def qualifiedHeadProvider : List (String × String) := [
+  ("namespace QualifiedHeads\n", "namespace QualifiedHeads\n"),
+  ("public abbrev T.{u} (A : Type u) : Type u := A\n",
+   "abbrev T.{u}(A: Type u): Type u := A\n"),
+  ("public def choose.{u} (A : Type u) (x y : A) : A := x\n",
+   "function choose.{u}(A: Type u, x: A, y: A): A := x\n"),
+  ("private def hidden.{u} (A : Type u) (x y : A) : A := x\n",
+   "private function hidden.{u}(A: Type u, x: A, y: A): A := x\n"),
+  ("namespace Inner\n", "namespace Inner\n"),
+  ("public abbrev Only.{u} (A : Type u) : Type u := A\n",
+   "abbrev Only.{u}(A: Type u): Type u := A\n"),
+  ("end Inner\nnamespace Left\n", "end Inner\nnamespace Left\n"),
+  ("public def choose.{u} (A : Type u) (x y : A) : A := y\n",
+   "function choose.{u}(A: Type u, x: A, y: A): A := y\n"),
+  ("namespace Deep\n", "namespace Deep\n"),
+  ("public def only.{u} (A : Type u) (x : A) : A := x\n",
+   "function only.{u}(A: Type u, x: A): A := x\n"),
+  ("end Deep\nend Left\nnamespace Right\n", "end Deep\nend Left\nnamespace Right\n"),
+  ("public def choose.{u} (A : Type u) (x y : A) : A := y\n",
+   "function choose.{u}(A: Type u, x: A, y: A): A := y\n"),
+  ("end Right\nend QualifiedHeads\n", "end Right\nend QualifiedHeads\n"),
+  ("public def QualifiedHeads.copy.{u} (A : Type u) (x y : T A) : T A := choose A x y\n",
+   "function QualifiedHeads.copy.{u}(A: Type u, x: T A, y: T A): T A := choose(A, x, y)\n"),
+  ("public def QualifiedHeads.withHelper.{u} (A : Type u) (x y : T A) : T A := helper x y\nwhere\n  helper (left right : T A) : T A := choose A left right\n",
+   "function QualifiedHeads.withHelper.{u}(A: Type u, x: T A, y: T A): T A := helper(x, y)\nwhere {\n  def helper(left: T A, right: T A): T A := choose(A, left, right)\n}\n"),
+  ("public theorem QualifiedHeads.law.{u} (A : Type u) (x y : T A) : choose A x y = x := by rfl\n",
+   "theorem QualifiedHeads.law.{u}(A: Type u, x: T A, y: T A): choose(A, x, y) = x := by { rfl }\n"),
+  ("public structure QualifiedHeads.Box.{u} (A : Type u) where\n  value : T A\n",
+   "structure QualifiedHeads.Box.{u}(A: Type u) where { value: T A }\n"),
+  ("public class QualifiedHeads.Echo.{u} (A : Type u) where\n  run : T A -> T A\n",
+   "class QualifiedHeads.Echo.{u}(A: Type u) where { run: T A -> T A }\n"),
+  ("public instance QualifiedHeads.echo.{u} {A : Type u} : Echo A where\n  run := fun (x : T A) => x\n",
+   "instance QualifiedHeads.echo.{u}{A: Type u}: Echo A where { run := fun (x: T A) => x }\n"),
+  ("private def QualifiedHeads.secret.{u} (A : Type u) (x y : T A) : T A := hidden A x y\n",
+   "private function QualifiedHeads.secret.{u}(A: Type u, x: T A, y: T A): T A := hidden(A, x, y)\n"),
+  ("public def QualifiedHeads.fromSecret.{u} (A : Type u) (x y : T A) : T A := secret A x y\n",
+   "function QualifiedHeads.fromSecret.{u}(A: Type u, x: T A, y: T A): T A := secret(A, x, y)\n"),
+  ("mutual\npublic def QualifiedHeads.Left.common.{u} (A : Type u) (x y : T A) : T A := choose A x y\npublic def QualifiedHeads.Right.common.{u} (A : Type u) (x y : T A) : T A := choose A x y\nend\n",
+   "mutual {\nfunction QualifiedHeads.Left.common.{u}(A: Type u, x: T A, y: T A): T A := choose(A, x, y)\nfunction QualifiedHeads.Right.common.{u}(A: Type u, x: T A, y: T A): T A := choose(A, x, y)\n}\n"),
+  ("public theorem QualifiedHeads.commonLeftRfl.{u} (A : Type u) (x y : A) : Left.common A x y = x := by rfl\n",
+   "theorem QualifiedHeads.commonLeftRfl.{u}(A: Type u, x: A, y: A): Left.common(A, x, y) = x := by { rfl }\n"),
+  ("public theorem QualifiedHeads.commonRightRfl.{u} (A : Type u) (x y : A) : Right.common A x y = x := by rfl\n",
+   "theorem QualifiedHeads.commonRightRfl.{u}(A: Type u, x: A, y: A): Right.common(A, x, y) = x := by { rfl }\n"),
+  ("namespace OuterQualified\n", "namespace OuterQualified\n"),
+  ("public abbrev T.{u} (A : Type u) : Type u := A\n",
+   "abbrev T.{u}(A: Type u): Type u := A\n"),
+  ("public def outerOnly.{u} (A : Type u) (x : A) : A := x\n",
+   "function outerOnly.{u}(A: Type u, x: A): A := x\n"),
+  ("public def _root_.QualifiedHeads.rooted.{u} (A : Type u) (x : T A) : T A := outerOnly A x\n",
+   "function _root_.QualifiedHeads.rooted.{u}(A: Type u, x: T A): T A := outerOnly(A, x)\n"),
+  ("end OuterQualified\n", "end OuterQualified\n"),
+  ("public def qualifiedFollowing.{u} (A : Type u) (x y : A) : A := QualifiedHeads.copy A x y\n",
+   "function qualifiedFollowing.{u}(A: Type u, x: A, y: A): A := QualifiedHeads.copy(A, x, y)\n")]
+
+private def qualifiedHeadClient : List (String × String) := [
+  ("public def qualifiedClient.{u} (A : Type u) (x y : A) : A := QualifiedHeads.withHelper A (QualifiedHeads.fromSecret A x y) y\n",
+   "function qualifiedClient.{u}(A: Type u, x: A, y: A): A := QualifiedHeads.withHelper(A, QualifiedHeads.fromSecret(A, x, y), y)\n"),
+  ("public theorem qualifiedClientProof.{u} (A : Type u) (x y : A) : QualifiedHeads.Left.common A x y = x := QualifiedHeads.commonLeftRfl A x y\n",
+   "theorem qualifiedClientProof.{u}(A: Type u, x: A, y: A): QualifiedHeads.Left.common(A, x, y) = x := QualifiedHeads.commonLeftRfl(A, x, y)\n"),
+  ("public theorem qualifiedClientInstance.{u} (A : Type u) (x : A) : QualifiedHeads.Echo.run x (A := A) = x := by rfl\n",
+   "theorem qualifiedClientInstance.{u}(A: Type u, x: A): QualifiedHeads.Echo.run(x, A := A) = x := by { rfl }\n")]
+
+private def qualifiedHeadRefusals : List (String × String × String × String) := [
+  ("Rooted", "public def _root_.QualifiedHeads.bad (A : Type) (x : Inner.Only A) : A := x\n",
+   "function _root_.QualifiedHeads.bad(A: Type, x: Inner.Only A): A := x\n",
+   "PSCV0-SCOPE: unknown name Inner.Only"),
+  ("MutualChildren", "mutual\npublic def QualifiedHeads.Left.bad (A : Type) (x : A) : A := Deep.only A x\npublic def QualifiedHeads.Right.bad (A : Type) (x : A) : A := x\nend\n",
+   "mutual {\nfunction QualifiedHeads.Left.bad(A: Type, x: A): A := Deep.only(A, x)\nfunction QualifiedHeads.Right.bad(A: Type, x: A): A := x\n}\n",
+   "PSCV0-SCOPE: unknown name Deep.only"),
+  ("MutualPlain", "mutual\npublic def QualifiedHeads.Left.bad (A : Type) (x : A) : A := Deep.only A x\npublic def qualifiedPlain (A : Type) (x : A) : A := x\nend\n",
+   "mutual {\nfunction QualifiedHeads.Left.bad(A: Type, x: A): A := Deep.only(A, x)\nfunction qualifiedPlain(A: Type, x: A): A := x\n}\n",
+   "PSCV0-SCOPE: unknown name Deep.only"),
+  ("MutualRooted", "mutual\npublic def QualifiedHeads.Left.bad (A : Type) (x : A) : A := Deep.only A x\npublic def _root_.QualifiedHeads.Right.bad (A : Type) (x : A) : A := x\nend\n",
+   "mutual {\nfunction QualifiedHeads.Left.bad(A: Type, x: A): A := Deep.only(A, x)\nfunction _root_.QualifiedHeads.Right.bad(A: Type, x: A): A := x\n}\n",
+   "PSCV0-SCOPE: unknown name Deep.only")]
+
+private def checkQualifiedDeclarationHeads : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let provider := importVisibilityInput kind "QualifiedProvider" "" qualifiedHeadProvider
+    let client := importVisibilityInput kind "QualifiedClient"
+      "public import QualifiedProvider\n" qualifiedHeadClient
+    let output ← prepare profile "QualifiedClient" [client, provider]
+    let _ ← admit seed output.admissions
+    paired := paired ++ [output.admissions]
+    let nameOf := fun (text : String) => psSyntaxNameAppendSegments (text.splitOn ".") .anonymous
+    let findDeclaration : String → IO PsDeclaration := fun text => do
+      let name := nameOf text
+      let some declaration := output.prepared.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail ("qualified declaration owner missing: " ++ text)
+      pure declaration
+    for text in ["QualifiedHeads.copy", "QualifiedHeads.withHelper", "QualifiedHeads.law",
+        "QualifiedHeads.Box", "QualifiedHeads.Echo", "QualifiedHeads.echo",
+        "QualifiedHeads.fromSecret", "QualifiedHeads.Left.common",
+        "QualifiedHeads.Right.common", "QualifiedHeads.rooted", "qualifiedFollowing"] do
+      let declaration ← findDeclaration text
+      ensure (sameNames (psDeclarationLevelParams declaration) [psRootName "u"])
+        ("qualified declaration lost its single universe suffix: " ++ text)
+    let copy ← findDeclaration "QualifiedHeads.copy"
+    ensure ((psPscv0ExprConstants (psDeclarationType copy)).any
+        (psNameEq (nameOf "QualifiedHeads.T")))
+      "qualified declaration header did not use its temporary namespace"
+    let rooted ← findDeclaration "QualifiedHeads.rooted"
+    ensure ((psPscv0ExprConstants (psDeclarationType rooted)).any
+        (psNameEq (nameOf "OuterQualified.T")))
+      "rooted declaration incorrectly entered its declaration's parent namespace"
+    for text in ["QualifiedHeads.copy", "QualifiedHeads.Left.common",
+        "QualifiedHeads.Right.common"] do
+      let declaration ← findDeclaration text
+      let some body := psDeclarationValue declaration
+        | fail "qualified definition body missing"
+      ensure ((psPscv0ExprConstants body).any
+          (psNameEq (nameOf "QualifiedHeads.choose")) &&
+          !(psPscv0ExprConstants body).any
+            (psNameEq (nameOf "QualifiedHeads.Left.choose")) &&
+          !(psPscv0ExprConstants body).any
+            (psNameEq (nameOf "QualifiedHeads.Right.choose")))
+        "qualified/mutual body lookup selected a child namespace instead of the native common scope"
+    let hidden := psElabPrivateName ["QualifiedProvider", "QualifiedHeads", "secret"]
+    let some secret := output.prepared.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) hidden)
+      | fail "qualified private declaration lost its canonical identity"
+    ensure (sameNames (psDeclarationLevelParams secret) [psRootName "u"] &&
+        (psPscv0ExprConstants (psDeclarationType secret)).any
+          (psNameEq (nameOf "QualifiedHeads.T")))
+      "qualified private header used its internal identity as a source namespace"
+    for (label, lean, ps, expected) in qualifiedHeadRefusals do
+      let refused := importVisibilityInput kind ("Qualified" ++ label)
+        "public import QualifiedProvider\n" [(lean, ps)]
+      refuse profile refused.name [refused, provider] true expected
+  let [left, right] := paired | fail "qualified declaration source pair missing"
+  ensure (left == right) "qualified declaration paired admissions differ"
+  IO.println "PSCV0_CORE_QUALIFIED_DECLARATIONS: two paired admitted projects, ordinary/where/theorem/data/instance/private heads, exact rooted and common-mutual namespace behavior, preserved universe suffixes and following scope, eight owned refusals passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -2644,4 +2780,5 @@ def main : IO Unit := do
   checkExposedProofs
   checkEscapedIdentifiers
   checkDeclarationUniverses
+  checkQualifiedDeclarationHeads
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

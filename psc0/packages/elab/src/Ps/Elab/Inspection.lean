@@ -33,6 +33,24 @@ def psInspectionElaborate (context : PsElabContext) (source : PsSyntaxTerm)
   let context := { solved.context with pending := [] }
   psElabResolvedTerm context (psMetaInstantiate context.metaContext result.term) none
 
+def psInspectionCheckTerm (context : PsElabContext) (source : PsSyntaxTerm) :
+    Except PsElabError String := do
+  if let .reference name := source then
+    if let some (.global actual, []) :=
+        psElabResolveReferenceBase context.localContext context.environment name then
+      let some declaration := psEnvironmentFind context.environment actual | throw (.unknownName actual)
+      let levels := psDeclarationLevelParams declaration
+      let checked ← psElabResolvedTerm
+        { context with levelNames := context.levelNames ++ levels }
+        (.constE actual (levels.map PsLevel.param)) none
+      let suffix := if levels.isEmpty then "" else
+        ".{" ++ String.intercalate ", " (levels.map psInspectionName) ++ "}"
+      return psInspectionName actual ++ suffix ++ " : " ++
+        (← psInspectionExpr 4096 checked.context.localContext [] checked.type)
+  let result ← psInspectionElaborate context source true
+  return (← psInspectionExpr 4096 result.context.localContext [] result.term) ++ " : " ++
+    (← psInspectionExpr 4096 result.context.localContext [] result.type)
+
 def psElabInspection (environment : PsEnvironment) (scope : PsCommandScope)
     (privateAliases : List (List String × PsName))
     (command : PsSyntaxInspection) (span : PsSourceSpan) :
@@ -53,21 +71,7 @@ def psElabInspection (environment : PsEnvironment) (scope : PsCommandScope)
       else psInspectionPrintDeclaration environment declaration
     | .checkTerm source => do
       let scoped ← psScopeTerm 4096 resolver scopedBinders.bound source
-      if let .reference name := scoped.term then
-        if let some (.global actual, []) :=
-            psElabResolveReferenceBase context.localContext environment name then
-          let some declaration := psEnvironmentFind environment actual | throw (.unknownName actual)
-          let levels := psDeclarationLevelParams declaration
-          let checked ← psElabResolvedTerm
-            { context with levelNames := context.levelNames ++ levels }
-            (.constE actual (levels.map PsLevel.param)) none
-          let suffix := if levels.isEmpty then "" else
-            ".{" ++ String.intercalate ", " (levels.map psInspectionName) ++ "}"
-          return psInspectionName actual ++ suffix ++ " : " ++
-            (← psInspectionExpr 4096 checked.context.localContext [] checked.type)
-      let result ← psInspectionElaborate context scoped.term true
-      return (← psInspectionExpr 4096 result.context.localContext [] result.term) ++ " : " ++
-        (← psInspectionExpr 4096 result.context.localContext [] result.type)
+      psInspectionCheckTerm context scoped.term
     | .reduceTerm source => do
       let scoped ← psScopeTerm 4096 resolver scopedBinders.bound source
       let result ← psInspectionElaborate context scoped.term false

@@ -87,7 +87,12 @@ private def fixtures : List Fixture := [
     leanSource := "inductive CoreInspectionPreferred where\n  | item (value : Nat)\n  deriving Repr\ninstance coreInspectionPreferredToString : ToString CoreInspectionPreferred where\n  toString := fun _ => \"must not select this fallback\"\n#eval CoreInspectionPreferred.item 9\n"
     psSource := "inductive CoreInspectionPreferred where { | item(value: Nat) } deriving Repr\ninstance coreInspectionPreferredToString: ToString(CoreInspectionPreferred) where {\n  toString := fun _ => \"must not select this fallback\"\n}\n#eval CoreInspectionPreferred.item(9)\n"
     expected := [{ exactText := some "CoreInspectionPreferred.item 9" }]
-    nativeExpected := [{ exactText := some "CoreInspectionPreferred.item 9" }] }
+    nativeExpected := [{ exactText := some "CoreInspectionPreferred.item 9" }] },
+  { label := "command-scope-and-call-interactions"
+    leanSource := "namespace CoreInspectionMath\ndef twice (n : Nat) : Nat := n + n\ndef now (_ : Unit) : Nat := 23\nend CoreInspectionMath\n#check Nat.succ\n#check (CoreInspectionMath.twice 7)\n#eval CoreInspectionMath.now ()\n#reduce Nat.succ 2\n#print Nat.add\nopen CoreInspectionMath\nsection CoreInspectionCapture\nvariable (n : Nat)\ndef coreInspectionCaptured : Nat := twice n\n#check n\nend CoreInspectionCapture\n#check coreInspectionCaptured\n#eval coreInspectionCaptured 7\ndef «axioms» : Nat := 31\ndef «commands» : Nat := 37\n#print «axioms»\n#print «commands»\n#print axioms «commands»\n"
+    psSource := "namespace CoreInspectionMath\nfunction twice(n: Nat): Nat := n + n\nfunction now(): Nat := 23\nend CoreInspectionMath\n#check Nat.succ\n#check (CoreInspectionMath.twice 7)\n#eval CoreInspectionMath.now()\n#reduce Nat.succ(2)\n#print Nat.add\nopen CoreInspectionMath\nsection CoreInspectionCapture\nvariable (n: Nat)\ndef coreInspectionCaptured: Nat := twice(n)\n#check n\nend CoreInspectionCapture\n#check coreInspectionCaptured\n#eval coreInspectionCaptured(7)\nconst «axioms»: Nat := 31\nconst «commands»: Nat := 37\n#print «axioms»\n#print «commands»\n#print axioms «commands»\n"
+    expected := [{ fragments := ["Nat.succ", "Nat"] }, { fragments := ["CoreInspectionMath.twice", "Nat"] }, { exactText := some "23" }, { exactText := some "3" }, { fragments := ["Nat.add", "Nat"] }, { exactText := some "n : Nat" }, { fragments := ["coreInspectionCaptured", "Nat"] }, { exactText := some "14" }, { fragments := ["axioms", "Nat", ":="] }, { fragments := ["commands", "Nat", ":="] }, { exactText := some "'commands' does not depend on any axioms" }]
+    nativeExpected := [{ fragments := ["Nat.succ", "Nat"] }, { fragments := ["CoreInspectionMath.twice", "Nat"] }, { exactText := some "23" }, { exactText := some "3" }, { fragments := ["Nat.add", "Nat"] }, { exactText := some "n : Nat" }, { fragments := ["coreInspectionCaptured", "Nat"] }, { exactText := some "14" }, { fragments := ["axioms", "Nat", ":="] }, { fragments := ["commands", "Nat", ":="] }, { exactText := some "'commands' does not depend on any axioms" }] }
 ]
 
 private def checkMessages (label source : String) (expected : List Expected)
@@ -190,14 +195,30 @@ private def checkRefusals : IO Unit := do
           (label ++ ": wrong elaboration owner: " ++ psCompilerPscv0ElabError error)
       | .error error => throw (IO.userError (label ++ ": wrong phase: " ++ psCompilerPscv0Error error))
       | .ok _ => throw (IO.userError (label ++ ": incorrectly accepted"))
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean, "#eval IO.println \"hi\"\n"),
+      (.proofScript, "#eval IO.println(\"hi\")\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerEngineElaboratePscv0 psCompilerFullProfileContext program with
+    | .error (.elaboration error) =>
+      let message := psCompilerPscv0ElabError error
+      ensure (containsText "unknown name IO" message ||
+          containsText "requires a pure total value" message)
+        ("closed-effect command lost its selected source/profile owner: " ++ message)
+    | .error error => throw (IO.userError ("closed-effect command failed outside elaboration: " ++ psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError "closed-effect command was accepted")
   for source in ["#eval! 1\n", "#print commands\n", "#check_failure Nat\n",
-      "#synth Inhabited Nat\n", "#guard true\n"] do
+      "#synth Inhabited Nat\n", "#guard true\n", "#eval_msgs 1\n"] do
     for kind in [PsCompilerSourceKind.lean, .proofScript] do
       match psCompilerParsePscv0 source kind with
       | .error message =>
         ensure (containsText "PSCV0-INSPECTION-COMMAND" message)
           ("excluded command had wrong grammar owner: " ++ message)
       | .ok _ => throw (IO.userError "excluded inspection command parsed")
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    match psCompilerParsePscv0 "set_option pp.universes true\n" kind with
+    | .error _ => pure ()
+    | .ok _ => throw (IO.userError "inspection accepted source-affecting set_option")
   for source in [
       "function f(n: Nat): Nat := n\n#check f (1)\n",
       "function f(n: Nat): Nat := n\n#eval f (1)\n",
@@ -424,10 +445,12 @@ def run (directory : String) : IO Unit := do
     ("schema", Lean.toJson ("psc0-core-inspection-qualification/1" : String)),
     ("status", Lean.toJson ("PASS" : String)),
     ("pairedGroups", Lean.toJson fixtures.length),
-    ("pairedCommandDiagnostics", Lean.toJson (60 : Nat)),
+    ("pairedCommandDiagnostics", Lean.toJson (82 : Nat)),
     ("pairedProjectGraphs", Lean.toJson (2 : Nat)),
-    ("semanticRefusals", Lean.toJson (18 : Nat)),
-    ("grammarRefusals", Lean.toJson (13 : Nat)),
+    ("semanticRefusals", Lean.toJson (20 : Nat)),
+    ("grammarRefusals", Lean.toJson (17 : Nat)),
+    ("closedEffectRefusals", Lean.toJson (2 : Nat)),
+    ("closedEffectMayFailAtUnavailableProfile", Lean.toJson true),
     ("privateReferenceRefusals", Lean.toJson (2 : Nat)),
     ("metadataConflictRefusals", Lean.toJson (5 : Nat)),
     ("resourceRefusals", Lean.toJson (2 : Nat)),

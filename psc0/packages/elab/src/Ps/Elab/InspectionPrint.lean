@@ -56,7 +56,7 @@ def psInspectionExpr (fuel : Nat) (locals : PsLocalContext) (bound : List String
     | .constE name levels =>
       let suffix ← if levels.isEmpty then pure "" else do
         let levels ← levels.mapM (psInspectionLevel fuel)
-        return ".{" ++ String.intercalate ", " levels ++ "}"
+        pure (".{" ++ String.intercalate ", " levels ++ "}")
       return psInspectionName name ++ suffix
     | .app fn argument => return "(" ++ (← visit fn) ++ " " ++ (← visit argument) ++ ")"
     | .lam name type body binder =>

@@ -28,7 +28,8 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   let sourceName := (psElabOriginSource source).fst
   let qualified := psScopeDeclarationName resolver sourceName
   let name := psScopeCanonicalNameSyntax qualified
-  let resolver := { resolver with selfName := some qualified.segments }
+  let resolver := psScopeDeclarationBodyResolver
+    { resolver with selfName := some qualified.segments } sourceName
   let visit := psScopeTerm 4096 resolver
   let bodyResolver := { resolver with
     abstractProofs := resolver.abstractProofs && exposedBody }
@@ -435,11 +436,13 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     if state.isModule && !state.moduleIdentity.isEmpty then
       [state.moduleIdentity]
     else []
+  let bodyNamespace := psScopeDeclarationBodyNamespace state.scope
+    (members.map (fun member => (psElabOriginSource member.declaration).fst))
   let scopedMembers ← (members.zip peerAliases).mapM fun (member, alias) =>
     psScopePreDefinition
       { resolver with abstractProofs := state.isModule && !member.isPrivate } member
       (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)
-      inheritedPartial privateAuxiliaryPrefix
+      inheritedPartial privateAuxiliaryPrefix (some bodyNamespace)
   -- Pinned definition bodies see the complete checked section telescope.
   -- Hints cannot enable a local dictionary by contributing source-name keys.
   -- Where's typed capture closure retains only actual type/body dependencies.
@@ -705,10 +708,12 @@ def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntax
   let localAliases := (names.zipIdx).map fun entry =>
     (entry.fst, ["$psc0Mutual", psNatToString entry.snd])
   let resolver := { resolver with mutualNames := names, mutualAliases := localAliases }
+  let bodyNamespace := psScopeDeclarationBodyNamespace state.scope sourceNames
   let scopedMembers ← (members.zip localAliases).mapM fun entry =>
     psScopeMutualMember
       { resolver with abstractProofs := state.isModule && !entry.fst.isPrivate } entry.fst
       (PsSyntaxName.mk entry.snd.snd (psElabOriginSource entry.fst.declaration).snd)
+      (some bodyNamespace)
   -- Pinned MutualDef.collectUsed/removeUnusedVars closes section variables
   -- over every main header/body before SCC partition, including disconnected
   -- members. Keep this explicit result instead of guessing from AST arities.
@@ -779,7 +784,20 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
         List PsElabMemberOrigin × List PsName) handler => do
       let (env, declarations, derivedMembers, privateNames) := acc
       let sourceName := (psSyntaxNameToName origin.sourceName).getD .anonymous
-      let generated ← (psElabDeriveHandler env origin handler).mapError
+      let generated ← (do
+        -- Deriving class names use global command scope, independently of
+        -- section term variables, before selecting the registered handler.
+        let resolver : PsScopeResolver := {
+          environment := env
+          scope := { next.scope with variables := [] }
+          privateAliases := next.privateAliases }
+        let (resolved, _) ← psScopeResolve resolver [] handler
+        let some name := psSyntaxNameToName resolved | throw .emptyName
+        let some selected := psElabSelectedDerivingHandlers.find?
+            (fun selected => psNameEq name (psRootName selected))
+          | throw (.data "deriving handler is not registered in the selected profile")
+        psElabDeriveHandler env origin
+          { handler with segments := [selected], resolvedName := none }).mapError
         (.atDeclaration (psNameAppendStr sourceName ("deriving " ++ String.intercalate "." handler.segments)))
       let name := psDeclarationName generated
       let some added := psEnvironmentAdd env generated

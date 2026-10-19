@@ -511,6 +511,34 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
           (discriminants.foldl (fun acc item => psScopeUnion acc item.snd.used) []) }
     | _ => return { term := source }
 
+def psScopeDeclarationCommonPrefix : List String → List String → List String
+  | left :: leftRest, right :: rightRest =>
+    if left == right then left :: psScopeDeclarationCommonPrefix leftRest rightRest
+    else []
+  | _, _ => []
+
+-- Native expands one qualified head to its parent namespace. A mutual block
+-- expands only the common parent of all original non-rooted qualified heads.
+-- Rooted and unqualified members therefore prevent a mutual namespace move.
+def psScopeDeclarationBodyNamespace (scope : PsCommandScope)
+    (names : List PsSyntaxName) : List String :=
+  let parents := names.map fun name =>
+    if name.segments.head? == some "_root_" then []
+    else name.segments.take (name.segments.length - 1)
+  match parents with
+  | [] => scope.namePrefix
+  | first :: rest =>
+    scope.namePrefix ++ rest.foldl psScopeDeclarationCommonPrefix first
+
+-- Declaration identity is qualified before this temporary body/header view.
+-- The command's actual namespace, universes and variables remain unchanged.
+def psScopeDeclarationBodyResolver (resolver : PsScopeResolver)
+    (sourceName : PsSyntaxName) (bodyNamespace : Option (List String) := none) :
+    PsScopeResolver :=
+  { resolver with scope := { resolver.scope with
+    namePrefix := bodyNamespace.getD
+      (psScopeDeclarationBodyNamespace resolver.scope [sourceName]) } }
+
 def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxName :=
   { name with
     segments := if name.segments.head? == some "_root_" then

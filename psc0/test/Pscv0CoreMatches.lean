@@ -1052,6 +1052,92 @@ run_cmd do
     deriving Inhabited)
   expectNativeDerivingRequirementRefusal "Inhabited" command
 
+class CoreUnregisteredClass (A : Type) where
+  token : Nat
+
+run_cmd do
+  for source in [
+      "structure CoreUnknownStructure where\n  value : Nat\n  deriving CoreUnregisteredClass\n",
+      "inductive CoreUnknownInductive where\n  | item (value : Nat)\n  deriving CoreUnregisteredClass\n"] do
+    let command ← match Lean.Parser.runParserCategory (← getEnv) "command" source with
+      | .ok command => pure command
+      | .error message => throwError "native deriving suffix did not parse: {message}"
+    expectNativeDerivingRequirementRefusal
+      "No deriving handlers have been implemented" command
+
+-- Standalone deriving is native syntax; the selected portable command grammar
+-- rejects this form independently of trailing-handler applicability.
+inductive CoreStandaloneDeriving where
+  | item (value : Nat)
+deriving instance Inhabited for CoreStandaloneDeriving
+example : (Inhabited.default : CoreStandaloneDeriving) =
+    CoreStandaloneDeriving.item 0 := by rfl
+
+namespace CoreHandlerScope
+class BEq (A : Type) where
+  token : Nat
+
+structure RootedBox where
+  value : Nat
+  deriving _root_.BEq
+
+inductive RootedChoice where
+  | empty
+  | item (value : Nat)
+  deriving _root_.BEq
+
+theorem rootedBoxSame :
+    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 3) = true := by rfl
+theorem rootedBoxDifferent :
+    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 4) = false := by rfl
+theorem rootedChoiceSame :
+    _root_.BEq.beq (RootedChoice.item 3) (RootedChoice.item 3) = true := by rfl
+theorem rootedChoiceDifferent :
+    _root_.BEq.beq (RootedChoice.item 3) RootedChoice.empty = false := by rfl
+run_cmd do
+  let source := "structure Shadowed where\n  value : Nat\n  deriving BEq\n"
+  let command ← match Lean.Parser.runParserCategory (← getEnv) "command" source with
+    | .ok command => pure command
+    | .error message => throwError "native shadowed deriving suffix did not parse: {message}"
+  expectNativeDerivingRequirementRefusal
+    "No deriving handlers have been implemented" command
+
+end CoreHandlerScope
+
+inductive CoreRepeatedDefault where
+  | recursive (child : CoreRepeatedDefault)
+  | leaf
+  deriving Inhabited, Inhabited
+
+theorem repeatedDefaultUsesEarlierInstance :
+    (Inhabited.default : CoreRepeatedDefault) =
+      CoreRepeatedDefault.recursive CoreRepeatedDefault.leaf := by rfl
+
+structure CoreRepeatedHandlers where
+  value : Nat
+  deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable
+
+theorem repeatedHandlersDefault :
+    CoreRepeatedHandlers.value (Inhabited.default : CoreRepeatedHandlers) = 0 := by rfl
+theorem repeatedHandlersBEq :
+    (CoreRepeatedHandlers.mk 3 == CoreRepeatedHandlers.mk 3) = true := by rfl
+theorem repeatedHandlersDecEq :
+    Decidable.decide (self := decEq (CoreRepeatedHandlers.mk 3) (CoreRepeatedHandlers.mk 4)) =
+      false := by rfl
+theorem repeatedHandlersRepr :
+    reprStr (CoreRepeatedHandlers.mk 3) = "{ value := 3 }" := by rfl
+theorem repeatedHandlersHash :
+    hash (CoreRepeatedHandlers.mk 3) = mixHash 0 (hash (3 : Nat)) := by rfl
+
+structure CoreRootedDuplicate where
+  value : Nat
+  deriving BEq, _root_.BEq
+
+theorem rootedDuplicateSame :
+    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 3) = true := by rfl
+theorem rootedDuplicateDifferent :
+    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 4) = false := by rfl
+
 end CoreM3MatchOracle
 
 namespace CoreM3Matches
@@ -1341,6 +1427,31 @@ private def checkUniverseRefusals : IO Unit := do
           label ++ ": " ++ psCompilerPscv0Error error))
       | .ok _ => throw (IO.userError ("invalid data universe accepted: " ++ label))
 
+private def checkHandlerScopeInstances (environment : PsEnvironment) : IO Unit := do
+  for (family, handlers) in [
+      (psNameAppendStr (psRootName "CoreHandlerScope") "RootedBox", ["BEq"]),
+      (psNameAppendStr (psRootName "CoreHandlerScope") "RootedChoice", ["BEq"]),
+      (psRootName "CoreRepeatedDefault", ["Inhabited", "Inhabited"]),
+      (psRootName "CoreRepeatedHandlers",
+        ["Inhabited", "Inhabited", "BEq", "BEq", "DecidableEq", "DecidableEq",
+          "Repr", "Repr", "Hashable", "Hashable"]),
+      (psRootName "CoreRootedDuplicate", ["BEq", "BEq"])] do
+    let _ ← handlers.foldlM (fun (earlier : List String) handler => do
+      let ordinal := (earlier.filter (· == handler)).length
+      let component := "inst" ++ handler ++
+        (if ordinal == 0 then "" else "_" ++ toString ordinal)
+      let name := psNameAppendStr family component
+      let some declaration := psEnvironmentFind environment name
+        | throw (IO.userError ("CORE-MATCHES: repeated deriving omitted " ++ psNameToString name))
+      let some _ := psDeclarationValue declaration
+        | throw (IO.userError "CORE-MATCHES: repeated deriving has no real checked value")
+      ensure (environment.instances.entries.any fun entry =>
+        match entry.value with
+        | .constE actual _ => psNameEq actual name
+        | _ => false) "CORE-MATCHES: repeated deriving did not register each generated dictionary"
+      return handler :: earlier) []
+    pure ()
+
 private def checkPair (label leanText psText : String) :
     IO (List PsCompilerEnginePreparationOutput) := do
   let inputs := [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)]
@@ -1350,6 +1461,9 @@ private def checkPair (label leanText psText : String) :
       (fun error => label ++ ": " ++ psCompilerPscv0Error error))
   let [left, right] := elaborated | throw (IO.userError "missing paired elaboration")
   compareCheckedValues left.declarations right.declarations
+  if label == "handlerScope" then
+    checkHandlerScopeInstances left.environment
+    checkHandlerScopeInstances right.environment
   if label == "promotion" then
     checkPromotionMetadata left.environment
     checkPromotionMetadata right.environment
@@ -1597,6 +1711,47 @@ private def checkDerivingResourcePropagation : IO Unit := do
     (psElabDeriveInhabited crowded paramOrigin)
   IO.println "CORE-MATCHES: real deriving search exhaustion remains a resource; healthy fallbacks freshly kernel checked"
 
+private def handlerScopeLeanSource : String :=
+  "namespace CoreHandlerScope\nclass BEq (A : Type) where\n  token : Nat\n\nstructure RootedBox where\n  value : Nat\n  deriving _root_.BEq\n\ninductive RootedChoice where\n  | empty\n  | item (value : Nat)\n  deriving _root_.BEq\n\ntheorem rootedBoxSame :\n    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 3) = true := by rfl\ntheorem rootedBoxDifferent :\n    _root_.BEq.beq (RootedBox.mk 3) (RootedBox.mk 4) = false := by rfl\ntheorem rootedChoiceSame :\n    _root_.BEq.beq (RootedChoice.item 3) (RootedChoice.item 3) = true := by rfl\ntheorem rootedChoiceDifferent :\n    _root_.BEq.beq (RootedChoice.item 3) RootedChoice.empty = false := by rfl\nend CoreHandlerScope\n\ninductive CoreRepeatedDefault where\n  | recursive (child : CoreRepeatedDefault)\n  | leaf\n  deriving Inhabited, Inhabited\n\ntheorem repeatedDefaultUsesEarlierInstance :\n    (Inhabited.default : CoreRepeatedDefault) =\n      CoreRepeatedDefault.recursive CoreRepeatedDefault.leaf := by rfl\n\nstructure CoreRepeatedHandlers where\n  value : Nat\n  deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable\n\ntheorem repeatedHandlersDefault :\n    CoreRepeatedHandlers.value (Inhabited.default : CoreRepeatedHandlers) = 0 := by rfl\ntheorem repeatedHandlersBEq :\n    (CoreRepeatedHandlers.mk 3 == CoreRepeatedHandlers.mk 3) = true := by rfl\ntheorem repeatedHandlersDecEq :\n    Decidable.decide (self := decEq (CoreRepeatedHandlers.mk 3) (CoreRepeatedHandlers.mk 4)) =\n      false := by rfl\ntheorem repeatedHandlersRepr :\n    reprStr (CoreRepeatedHandlers.mk 3) = \"{ value := 3 }\" := by rfl\ntheorem repeatedHandlersHash :\n    hash (CoreRepeatedHandlers.mk 3) = mixHash 0 (hash (3 : Nat)) := by rfl\n\nstructure CoreRootedDuplicate where\n  value : Nat\n  deriving BEq, _root_.BEq\n\ntheorem rootedDuplicateSame :\n    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 3) = true := by rfl\ntheorem rootedDuplicateDifferent :\n    (CoreRootedDuplicate.mk 3 == CoreRootedDuplicate.mk 4) = false := by rfl\n"
+
+private def handlerScopePsSource : String :=
+  "namespace CoreHandlerScope\nclass BEq(A: Type) where {\n  token: Nat\n}\n\nstructure RootedBox where {\n  value: Nat\n} deriving _root_.BEq\n\ninductive RootedChoice where {\n  | empty\n  | item(value: Nat)\n} deriving _root_.BEq\n\ntheorem rootedBoxSame:\n    _root_.BEq.beq(RootedBox.mk(3), RootedBox.mk(3)) = true := by { rfl }\ntheorem rootedBoxDifferent:\n    _root_.BEq.beq(RootedBox.mk(3), RootedBox.mk(4)) = false := by { rfl }\ntheorem rootedChoiceSame:\n    _root_.BEq.beq(RootedChoice.item(3), RootedChoice.item(3)) = true := by { rfl }\ntheorem rootedChoiceDifferent:\n    _root_.BEq.beq(RootedChoice.item(3), RootedChoice.empty) = false := by { rfl }\nend CoreHandlerScope\n\ninductive CoreRepeatedDefault where {\n  | recursive(child: CoreRepeatedDefault)\n  | leaf\n} deriving Inhabited, Inhabited\n\ntheorem repeatedDefaultUsesEarlierInstance:\n    (Inhabited.default: CoreRepeatedDefault) =\n      CoreRepeatedDefault.recursive(CoreRepeatedDefault.leaf) := by { rfl }\n\nstructure CoreRepeatedHandlers where {\n  value: Nat\n} deriving Inhabited, Inhabited, BEq, BEq, DecidableEq, DecidableEq, Repr, Repr, Hashable, Hashable\n\ntheorem repeatedHandlersDefault:\n    CoreRepeatedHandlers.value((Inhabited.default: CoreRepeatedHandlers)) = 0 := by { rfl }\ntheorem repeatedHandlersBEq:\n    (CoreRepeatedHandlers.mk(3) == CoreRepeatedHandlers.mk(3)) = true := by { rfl }\ntheorem repeatedHandlersDecEq:\n    Decidable.decide(self := decEq(CoreRepeatedHandlers.mk(3), CoreRepeatedHandlers.mk(4))) =\n      false := by { rfl }\ntheorem repeatedHandlersRepr:\n    reprStr(CoreRepeatedHandlers.mk(3)) = \"{ value := 3 }\" := by { rfl }\ntheorem repeatedHandlersHash:\n    hash(CoreRepeatedHandlers.mk(3)) = mixHash(0, hash((3: Nat))) := by { rfl }\n\nstructure CoreRootedDuplicate where {\n  value: Nat\n} deriving BEq, _root_.BEq\n\ntheorem rootedDuplicateSame:\n    (CoreRootedDuplicate.mk(3) == CoreRootedDuplicate.mk(3)) = true := by { rfl }\ntheorem rootedDuplicateDifferent:\n    (CoreRootedDuplicate.mk(3) == CoreRootedDuplicate.mk(4)) = false := by { rfl }\n"
+
+private def selectedHandlerFailure : PsElabError → Bool
+  | .atDeclaration _ cause => selectedHandlerFailure cause
+  | .atContext _ cause => selectedHandlerFailure cause
+  | .data message => message == "deriving handler is not registered in the selected profile"
+  | _ => false
+
+private def checkDerivingSuffixBoundaries : IO Unit := do
+  let selected := ["Inhabited", "BEq", "DecidableEq", "Repr", "Hashable"]
+  ensure (psPscv0SelectedDerivingNames == selected &&
+    psElabSelectedDerivingHandlers == selected)
+    "CORE-MATCHES: selected deriving registry changed"
+  for (label, leanText, psText) in [
+      ("unregistered structure handler", "class CoreUnregisteredClass (A : Type) where\n  token : Nat\nstructure CoreUnknownStructure where\n  value : Nat\n  deriving CoreUnregisteredClass\n", "class CoreUnregisteredClass(A: Type) where { token: Nat }\nstructure CoreUnknownStructure where { value: Nat } deriving CoreUnregisteredClass\n"),
+      ("unregistered inductive handler", "class CoreUnregisteredClass (A : Type) where\n  token : Nat\ninductive CoreUnknownInductive where\n  | item (value : Nat)\n  deriving CoreUnregisteredClass\n", "class CoreUnregisteredClass(A: Type) where { token: Nat }\ninductive CoreUnknownInductive where { | item(value: Nat) } deriving CoreUnregisteredClass\n"),
+      ("resolved namespace-local class has no registered handler", "namespace CoreHandlerScope\nclass BEq (A : Type) where\n  token : Nat\nstructure Shadowed where\n  value : Nat\n  deriving BEq\nend CoreHandlerScope\n", "namespace CoreHandlerScope\nclass BEq(A: Type) where { token: Nat }\nstructure Shadowed where { value: Nat } deriving BEq\nend CoreHandlerScope\n")] do
+    for (kind, source) in [(PsCompilerSourceKind.lean, leanText), (.proofScript, psText)] do
+      -- A genuine unknown handler is a successfully parsed trailing clause.
+      let program ← fromExcept (psCompilerParsePscv0 source kind)
+      match psCompilerEngineElaboratePscv0 psCompilerFullProfileContext program with
+      | .error (.elaboration cause) =>
+        ensure (!psElabErrorIsResource cause && selectedHandlerFailure cause)
+          (label ++ " lost its handler/environment refusal: " ++ psCompilerPscv0ElabError cause)
+      | .error error =>
+        throw (IO.userError (label ++ " failed outside elaboration: " ++ psCompilerPscv0Error error))
+      | .ok _ => throw (IO.userError (label ++ " selected an unregistered handler"))
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    match psCompilerParsePscv0
+        "deriving instance Inhabited for CoreStandaloneDeriving\n" kind with
+    | .error message =>
+      ensure (!["BUDGET", "heartbeat", "recursion depth", "timeout"].any
+        (fun marker => (message.splitOn marker).length > 1))
+        ("standalone deriving exhausted parser resources: " ++ message)
+    | .ok _ => throw (IO.userError "standalone deriving escaped the selected command grammar")
+  IO.println "CORE-MATCHES: six handler/environment refusals; two standalone command-grammar refusals; native standalone acceptance is independent"
+
 private def sourcePairs : List (String × String × String) := [
   ("match", matchLeanSource, matchPsSource),
   ("matchPolicy", matchPolicyLeanSource, matchPolicyPsSource),
@@ -1609,7 +1764,8 @@ private def sourcePairs : List (String × String × String) := [
   ("universes", universeLeanSource, universePsSource),
   ("indexedDeriving", indexedDerivingLeanSource, indexedDerivingPsSource),
   ("promotionDeriving", promotionDerivingLeanSource, promotionDerivingPsSource),
-  ("dependentFin", dependentFinLeanSource, dependentFinPsSource)]
+  ("dependentFin", dependentFinLeanSource, dependentFinPsSource),
+  ("handlerScope", handlerScopeLeanSource, handlerScopePsSource)]
 
 private def checkRuntime (root : System.FilePath) : IO Unit := do
   let native := sourcePairs.foldl (fun acc (_, leanText, _) => acc ++ leanText ++ "\n") ""
@@ -1683,5 +1839,6 @@ def main (args : List String) : IO Unit := do
   checkRefusals
   checkUniverseRefusals
   checkDependentDerivingRefusals
+  checkDerivingSuffixBoundaries
   checkRuntime root
-  IO.println "PSCV0_CORE_MATCHES: PASS 12 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 52 owned portable refusals; five-target paired emission; native runtime comparison follows"
+  IO.println "PSCV0_CORE_MATCHES: PASS 13 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 60 owned portable refusals; five-target paired emission; native runtime comparison follows"

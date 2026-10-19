@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases() + qualified_declaration_cases()
 
 
 def visibility_cases():
@@ -483,6 +483,17 @@ def declaration_universe_cases():
     ]
 
 
+def qualified_declaration_cases():
+    return [
+        ("QualifiedProvider", "module\nnamespace QualifiedHeads\npublic abbrev T.{u} (A : Type u) : Type u := A\npublic def choose.{u} (A : Type u) (x y : A) : A := x\nprivate def hidden.{u} (A : Type u) (x y : A) : A := x\nnamespace Inner\npublic abbrev Only.{u} (A : Type u) : Type u := A\nend Inner\nnamespace Left\npublic def choose.{u} (A : Type u) (x y : A) : A := y\nnamespace Deep\npublic def only.{u} (A : Type u) (x : A) : A := x\nend Deep\nend Left\nnamespace Right\npublic def choose.{u} (A : Type u) (x y : A) : A := y\nend Right\nend QualifiedHeads\npublic def QualifiedHeads.copy.{u} (A : Type u) (x y : T A) : T A := choose A x y\npublic def QualifiedHeads.withHelper.{u} (A : Type u) (x y : T A) : T A := helper x y\nwhere\n  helper (left right : T A) : T A := choose A left right\npublic theorem QualifiedHeads.law.{u} (A : Type u) (x y : T A) : choose A x y = x := by rfl\npublic structure QualifiedHeads.Box.{u} (A : Type u) where\n  value : T A\npublic class QualifiedHeads.Echo.{u} (A : Type u) where\n  run : T A -> T A\npublic instance QualifiedHeads.echo.{u} {A : Type u} : Echo A where\n  run := fun (x : T A) => x\nprivate def QualifiedHeads.secret.{u} (A : Type u) (x y : T A) : T A := hidden A x y\npublic def QualifiedHeads.fromSecret.{u} (A : Type u) (x y : T A) : T A := secret A x y\nmutual\npublic def QualifiedHeads.Left.common.{u} (A : Type u) (x y : T A) : T A := choose A x y\npublic def QualifiedHeads.Right.common.{u} (A : Type u) (x y : T A) : T A := choose A x y\nend\npublic theorem QualifiedHeads.commonLeftRfl.{u} (A : Type u) (x y : A) : Left.common A x y = x := by rfl\npublic theorem QualifiedHeads.commonRightRfl.{u} (A : Type u) (x y : A) : Right.common A x y = x := by rfl\nnamespace OuterQualified\npublic abbrev T.{u} (A : Type u) : Type u := A\npublic def outerOnly.{u} (A : Type u) (x : A) : A := x\npublic def _root_.QualifiedHeads.rooted.{u} (A : Type u) (x : T A) : T A := outerOnly A x\nend OuterQualified\npublic def qualifiedFollowing.{u} (A : Type u) (x y : A) : A := QualifiedHeads.copy A x y\n", ()),
+        ("QualifiedClient", "module\npublic import QualifiedProvider\npublic def qualifiedClient.{u} (A : Type u) (x y : A) : A := QualifiedHeads.withHelper A (QualifiedHeads.fromSecret A x y) y\npublic theorem qualifiedClientProof.{u} (A : Type u) (x y : A) : QualifiedHeads.Left.common A x y = x := QualifiedHeads.commonLeftRfl A x y\npublic theorem qualifiedClientInstance.{u} (A : Type u) (x : A) : QualifiedHeads.Echo.run x (A := A) = x := by rfl\n", ()),
+        ("QualifiedRooted", "module\npublic import QualifiedProvider\npublic def _root_.QualifiedHeads.bad (A : Type) (x : Inner.Only A) : A := x\n", ("Unknown", "Inner.Only",)),
+        ("QualifiedMutualChildren", "module\npublic import QualifiedProvider\nmutual\npublic def QualifiedHeads.Left.bad (A : Type) (x : A) : A := Deep.only A x\npublic def QualifiedHeads.Right.bad (A : Type) (x : A) : A := x\nend\n", ("Unknown", "Deep.only",)),
+        ("QualifiedMutualPlain", "module\npublic import QualifiedProvider\nmutual\npublic def QualifiedHeads.Left.bad (A : Type) (x : A) : A := Deep.only A x\npublic def qualifiedPlain (A : Type) (x : A) : A := x\nend\n", ("Unknown", "Deep.only",)),
+        ("QualifiedMutualRooted", "module\npublic import QualifiedProvider\nmutual\npublic def QualifiedHeads.Left.bad (A : Type) (x : A) : A := Deep.only A x\npublic def _root_.QualifiedHeads.Right.bad (A : Type) (x : A) : A := x\nend\n", ("Unknown", "Deep.only",)),
+    ]
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=OUTPUT))
@@ -573,9 +584,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 109, "oracle must contain 109 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 53,
-                "oracle must contain 53 expected successful compilations")
+        require(len(fixtures) == 115, "oracle must contain 115 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 55,
+                "oracle must contain 55 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -641,8 +652,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 53
-        report["expected_refusals"] = 56
+        report["successful_compilations"] = 55
+        report["expected_refusals"] = 60
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -671,8 +682,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 109 cases passed "
-          "(53 successful compilations, 56 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 115 cases passed "
+          "(55 successful compilations, 60 expected refusals)", flush=True)
     return 0
 
 

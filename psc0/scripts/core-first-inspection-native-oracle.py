@@ -36,7 +36,7 @@ def main():
             and manifest.get("nativeCommit") == PIN_GITHASH,
             "fixture values were not produced by the official pin")
     fixtures = manifest["cases"]
-    require(len(fixtures) == 17, "expected 17 native command fixtures")
+    require(len(fixtures) == 18, "expected 18 native command fixtures")
     require(len({case["name"] for case in fixtures}) == len(fixtures),
             "duplicate native fixture identity")
     output = manifest_path.parent / "native"

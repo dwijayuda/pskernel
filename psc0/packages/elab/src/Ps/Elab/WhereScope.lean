@@ -69,12 +69,14 @@ def psScopeWhereTermination (resolver : PsScopeResolver) (bound : List String)
 -- enter. Bodies see the local helper frame; own/nested binders shadow it.
 def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMember)
     (alias : PsSyntaxName) (inheritedPartial : Bool := false)
-    (privateAuxiliaryPrefix : List String := []) :
+    (privateAuxiliaryPrefix : List String := [])
+    (bodyNamespace : Option (List String) := none) :
     Except PsElabError PsScopedPreDefinition := do
   let (base, locals, whereSpan) ← psWhereSourceParts member.declaration
   let (sourceName, sourceBinders, sourceType, sourceValue) ← psWhereValueParts base
   let name := psScopeDeclarationName resolver sourceName
   let some coreName := psSyntaxNameToName (psScopeCanonicalNameSyntax name) | throw .emptyName
+  let resolver := psScopeDeclarationBodyResolver resolver sourceName bodyNamespace
   let exposesBody := match member.registration with
     | some .abbrevDecl => true
     | _ => false

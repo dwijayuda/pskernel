@@ -32,16 +32,24 @@ def psInspectionAxioms (fuel : Nat) (environment : PsEnvironment)
         return ← psInspectionAxioms fuel environment rest visited axioms
       let some declaration := psEnvironmentFind environment name
         | throw (psInspectionError ("missing actual axiom dependency " ++ psNameToString name))
-      let (dependencies, axioms) ← do
+      let result : List PsName × List PsName ←
         match declaration with
         | .quotientDecl .. => pure ([], axioms)
-        | .axiomDecl _ _ type => return ((← psInspectionConstants 4096 type), name :: axioms)
+        | .axiomDecl _ _ type => do
+          let dependencies ← psInspectionConstants 4096 type
+          pure (dependencies, name :: axioms)
         | .definitionDecl _ _ type body | .theoremDecl _ _ type body
-        | .opaqueDecl _ _ type body | .partialDecl _ _ type body =>
-          return ((← psInspectionConstants 4096 type) ++ (← psInspectionConstants 4096 body), axioms)
-        | .inductiveDecl info =>
-          return ((← psInspectionConstants 4096 info.type) ++ info.constructors, axioms)
-        | _ => return ((← psInspectionConstants 4096 (psDeclarationType declaration)), axioms)
+        | .opaqueDecl _ _ type body | .partialDecl _ _ type body => do
+          let typeDependencies ← psInspectionConstants 4096 type
+          let bodyDependencies ← psInspectionConstants 4096 body
+          pure (typeDependencies ++ bodyDependencies, axioms)
+        | .inductiveDecl info => do
+          let dependencies ← psInspectionConstants 4096 info.type
+          pure (dependencies ++ info.constructors, axioms)
+        | _ => do
+          let dependencies ← psInspectionConstants 4096 (psDeclarationType declaration)
+          pure (dependencies, axioms)
+      let (dependencies, axioms) := result
       psInspectionAxioms fuel environment (dependencies ++ rest) (name :: visited) axioms
 
 def psInspectionRuntimeErased (context : PsElabContext) (expression : PsExpr) :

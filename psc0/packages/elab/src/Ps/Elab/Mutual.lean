@@ -105,7 +105,8 @@ structure PsScopedMutualMember where
   isPrivate : Bool
 
 def psScopeMutualMember (resolver : PsScopeResolver)
-    (member : PsSyntaxMutualMember) (alias : PsSyntaxName) :
+    (member : PsSyntaxMutualMember) (alias : PsSyntaxName)
+    (bodyNamespace : Option (List String) := none) :
     Except PsElabError PsScopedMutualMember := do
   let (sourceName, binders, type, value, span, isPartial) ← match member.declaration with
     | .partialDefinition name binders type value span =>
@@ -114,6 +115,7 @@ def psScopeMutualMember (resolver : PsScopeResolver)
       pure (name, binders, type, value, span, false)
     | _ => throw (.data "PSCV0-MUTUAL-STRATEGY: selected mutual batch requires partial def/function members")
   let name := psScopeDeclarationName resolver sourceName
+  let resolver := psScopeDeclarationBodyResolver resolver sourceName bodyNamespace
   -- Headers may resolve peer identities for diagnostics but cannot borrow a
   -- value or inhabitant from a peer whose checked header does not yet exist.
   let headerResolver := { resolver with mutualAliases := [] }

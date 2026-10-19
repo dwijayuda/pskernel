@@ -110,15 +110,48 @@ lean_lib PsBackendTs where
 -- self-host bootstrap root. Loading one must not add an unchecked proof path.
 lean_lib PsBackendJs where
   srcDir := "packages/backend-js/src"
-  roots := #[`Ps.BackendJs.Print]
+  roots := #[
+    `Ps.BackendJs.Model,
+    `Ps.BackendJs.TailAlias,
+    `Ps.BackendJs.Encode,
+    `Ps.BackendJs.Lower,
+    `Ps.BackendJs.Validate,
+    `Ps.BackendJs.Print
+  ]
 
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"
-  roots := #[`Ps.BackendRust.Module]
+  roots := #[
+    `Ps.BackendRust.Identifier,
+    `Ps.BackendRust.Type,
+    `Ps.BackendRust.ValueRefs,
+    `Ps.BackendRust.Captures,
+    `Ps.BackendRust.Expr,
+    `Ps.BackendRust.TailAlias,
+    `Ps.BackendRust.Tail,
+    `Ps.BackendRust.Runtime,
+    `Ps.BackendRust.Module
+  ]
 
+-- Build the internal core backend without the historical component adapter
+-- until its missing InterfaceIr dependency is ported and independently gated.
 lean_lib PsBackendWasm where
   srcDir := "packages/backend-wasm/src"
-  roots := #[`Ps.BackendWasm.Binary, `Ps.BackendWasm.Lower]
+  roots := #[
+    `Ps.BackendWasm.Model,
+    `Ps.BackendWasm.IntUtil,
+    `Ps.BackendWasm.Type,
+    `Ps.BackendWasm.RuntimeNat,
+    `Ps.BackendWasm.RuntimeInt,
+    `Ps.BackendWasm.RuntimeString,
+    `Ps.BackendWasm.RuntimeIntRepr,
+    `Ps.BackendWasm.LowerInt,
+    `Ps.BackendWasm.LowerFloat,
+    `Ps.BackendWasm.TailCalls,
+    `Ps.BackendWasm.Lower,
+    `Ps.BackendWasm.Encode,
+    `Ps.BackendWasm.Binary
+  ]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"

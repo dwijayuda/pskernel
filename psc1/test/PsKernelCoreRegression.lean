@@ -11,24 +11,24 @@ private def requireKernel
 
 def main : IO Unit := do
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
-  let local := PsKernelExpr.fvar fName
+  let localExpr := PsKernelExpr.fvar fName
   let closed := PsKernelExpr.sort PsKernelLevel.zero
-  let wrapped := PsKernelExpr.mdata 0 (PsKernelExpr.app closed local)
+  let wrapped := PsKernelExpr.mdata 0 (PsKernelExpr.app closed localExpr)
   requireKernel "closed semantic cache is eligible"
     (psKernelSemanticCacheEligible closed)
-  requireKernel "raw local semantic cache is ineligible"
-    (!psKernelSemanticCacheEligible local)
-  requireKernel "wrapped local semantic cache is ineligible"
+  requireKernel "raw localExpr semantic cache is ineligible"
+    (!psKernelSemanticCacheEligible localExpr)
+  requireKernel "wrapped localExpr semantic cache is ineligible"
     (!psKernelSemanticCacheEligible wrapped)
-  requireKernel "local defeq pair semantic cache is ineligible"
-    (!psKernelSemanticPairCacheEligible local closed)
+  requireKernel "localExpr defeq pair semantic cache is ineligible"
+    (!psKernelSemanticPairCacheEligible localExpr closed)
   requireKernel "closed defeq pair semantic cache is eligible"
     (psKernelSemanticPairCacheEligible closed closed)
 
   let parent := psKernelCheckerStateEmpty
   let allocated := psKernelCheckerStateFreshName parent fName
-  let childMap := psKernelExprMapInsert psKernelExprMapEmpty local closed
-  let childPairs := psKernelExprPairSetInsert psKernelExprPairSetEmpty local closed
+  let childMap := psKernelExprMapInsert psKernelExprMapEmpty localExpr closed
+  let childPairs := psKernelExprPairSetInsert psKernelExprPairSetEmpty localExpr closed
   let child := psKernelCheckerStateWithFailure
     (psKernelCheckerStateWithSuccess
       (psKernelCheckerStateWithWhnf
@@ -41,17 +41,17 @@ def main : IO Unit := do
   requireKernel "scope retains monotone fresh identifier"
     (restored.nextFresh == 1)
   requireKernel "scope drops child whnf cache"
-    (match psKernelExprMapGet restored.whnf local with
+    (match psKernelExprMapGet restored.whnf localExpr with
       | Option.none => true
       | Option.some _ => false)
   requireKernel "scope drops child checked-inference cache"
-    (match psKernelExprMapGet restored.checkedInfer local with
+    (match psKernelExprMapGet restored.checkedInfer localExpr with
       | Option.none => true
       | Option.some _ => false)
   requireKernel "scope drops child positive defeq cache"
-    (!psKernelExprPairSetContains restored.success local closed)
+    (!psKernelExprPairSetContains restored.success localExpr closed)
   requireKernel "scope drops child negative defeq cache"
-    (!psKernelExprPairSetContains restored.failure local closed)
+    (!psKernelExprPairSetContains restored.failure localExpr closed)
   let u := PsKernelLevel.param (PsKernelName.str PsKernelName.anonymous "u")
   let v := PsKernelLevel.param (PsKernelName.str PsKernelName.anonymous "v")
   let shiftedMax := PsKernelLevel.succ (PsKernelLevel.max u v)

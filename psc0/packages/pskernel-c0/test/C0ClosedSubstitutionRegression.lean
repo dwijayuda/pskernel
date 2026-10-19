@@ -103,7 +103,8 @@ def c0NoSubstShared : Nat → PsKernelExpr → PsKernelExpr
 def main : IO Unit := do
   let a : PsKernelName := .str .anonymous "closed"
   let closed := c0NoSubstShared 4000 (.const a [])
-  let _witness := c0NoSubstitutionFromBound closed (.bvar 0) 0 (by decide)
+  if closed.psKernelC0LooseBVarBound != 0 then
+    throw (IO.userError "closed shared DAG has unexpected free BVar bound")
   let xs : List PsKernelExpr := [
     .bvar 0, .bvar 1, .app (.bvar 0) (.sort .zero),
     .lam a (.sort .zero) (.bvar 0) .default,

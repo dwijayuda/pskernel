@@ -6,6 +6,7 @@ Generated upstream bodies retain their Apache-2.0 attribution.
 This tool is not imported by the portable compiler.
 -/
 import Ps.Host.StandardClosure
+import Lean.Meta.Tactic.Simp.Attr
 import Ps.Meta.Reduce
 import Ps.Host.StandardSource
 import Ps.Host.StandardManifest
@@ -2028,6 +2029,177 @@ def auditCalcMetadata (output : System.FilePath) : IO Unit := do
     ("missingFullInstanceDependencies", Lean.toJson missing),
     ("metadataReadOnly", Lean.toJson true),
     ("calcQualified", Lean.toJson false)]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println report.compress
+
+private def coreSimpTrieRows :
+    Nat → Nat → Array Lean.Meta.DiscrTree.Key →
+      Lean.Meta.DiscrTree.Trie Lean.Meta.SimpTheorem →
+      Except String (Nat × Array (Array Lean.Meta.DiscrTree.Key × Nat × Lean.Meta.SimpTheorem))
+  | 0, _, _, _ => throw "simp metadata trie depth exhausted"
+  | _ + 1, 0, _, _ => throw "simp metadata trie node budget exhausted"
+  | depth + 1, nodes + 1, path, .node values children => do
+    let mut remaining := nodes
+    let mut rows := values.mapIdx fun index value => (path, index, value)
+    for (key, child) in children do
+      let (next, found) ← coreSimpTrieRows depth remaining (path.push key) child
+      remaining := next
+      rows := rows ++ found
+    return (remaining, rows)
+
+private def coreSimpTreeRows (tree : Lean.Meta.DiscrTree Lean.Meta.SimpTheorem) :
+    Except String (Array (Array Lean.Meta.DiscrTree.Key × Nat × Lean.Meta.SimpTheorem)) := do
+  let roots : Array (Lean.Meta.DiscrTree.Key ×
+      Lean.Meta.DiscrTree.Trie Lean.Meta.SimpTheorem) :=
+    tree.root.foldl (fun entries key child => entries.push (key, child)) #[]
+  let mut remaining := 2000000
+  let mut rows : Array (Array Lean.Meta.DiscrTree.Key × Nat × Lean.Meta.SimpTheorem) := #[]
+  for (key, child) in roots do
+    let (next, found) ← coreSimpTrieRows 4096 remaining #[key] child
+    remaining := next
+    rows := rows ++ found
+  return rows
+
+private def coreSimpDeclarationComparison (native : Lean.Environment)
+    (installed : PsEnvironment) (name : Lean.Name) : Lean.Json := Id.run do
+  let selected? := psEnvironmentFind installed (exportName name)
+  let original? := native.find? name
+  let reference? := original?.bind fun info =>
+    match exportDeclaration native [] info with
+    | .ok declaration => some declaration
+    | .error _ => none
+  let compared := match selected?, reference? with
+    | some selected, some reference => Lean.Json.mkObj [
+        ("kind", Lean.toJson (coreCandidateKind selected == coreCandidateKind reference)),
+        ("levels", Lean.toJson
+          (psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams selected) ==
+           psStandardSnapshotList psStandardSnapshotName (psDeclarationLevelParams reference))),
+        ("type", Lean.toJson
+          (psStandardSnapshotExpr (psDeclarationType selected) ==
+           psStandardSnapshotExpr (psDeclarationType reference))),
+        ("body", Lean.toJson (coreCandidateBody selected == coreCandidateBody reference)),
+        ("completeDeclaration", Lean.toJson
+          (psStandardSnapshotDeclaration selected == psStandardSnapshotDeclaration reference))]
+    | _, _ => .null
+  return Lean.Json.mkObj [
+    ("name", Lean.toJson (toString name)),
+    ("installed", Lean.toJson selected?.isSome),
+    ("nativePresent", Lean.toJson original?.isSome),
+    ("nativeExportableWithoutNewAssumptions", Lean.toJson reference?.isSome),
+    ("comparison", compared)]
+
+def auditCoreSimpMetadata (declarations : List PsDeclaration)
+    (output : System.FilePath) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core simp metadata requires the pinned Lean commit")
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
+  let installed := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
+  let simp := Lean.Meta.simpExtension.getState native
+  let pre ← match coreSimpTreeRows simp.pre with
+    | .ok rows => pure rows
+    | .error error => throw (IO.userError error)
+  let post ← match coreSimpTreeRows simp.post with
+    | .ok rows => pure rows
+    | .error error => throw (IO.userError error)
+  let mut rows : Array Lean.Json := #[]
+  let mut missingProofRoots : List Lean.Name := []
+  let mut activeNativeRules := 0
+  let mut skippedOrigins : List Lean.Name := []
+  for (treePost, entries) in [(false, pre), (true, post)] do
+    for (path, bucketIndex, rule) in entries do
+      if simp.erased.contains rule.origin ||
+          !simp.lemmaNames.contains rule.origin then continue
+      activeNativeRules := activeNativeRules + 1
+      let .decl origin originPost inverse := rule.origin
+        | throw (IO.userError "imported native simp metadata has a non-declaration origin")
+      if (psEnvironmentFind installed (exportName origin)).isNone then
+        unless skippedOrigins.contains origin do
+          skippedOrigins := origin :: skippedOrigins
+        continue
+      let proofName? := match rule.proof with
+        | .const name _ => some name
+        | _ => none
+      if let some name := proofName? then
+        if (psEnvironmentFind installed (exportName name)).isNone &&
+            !missingProofRoots.contains name then
+          missingProofRoots := name :: missingProofRoots
+      let proofTemplate ← match exportExpr rule.proof with
+        | .ok expression => pure (psStandardSnapshotExpr expression)
+        | .error error => throw (IO.userError
+            ("native simp proof template cannot be exported: " ++ toString origin ++ ": " ++ error))
+      rows := rows.push (Lean.Json.mkObj [
+        ("origin", coreSimpDeclarationComparison native installed origin),
+        ("originPost", Lean.toJson originPost),
+        ("inverse", Lean.toJson inverse),
+        ("priority", Lean.toJson rule.priority),
+        ("post", Lean.toJson rule.post),
+        ("treePost", Lean.toJson treePost),
+        ("permutative", Lean.toJson rule.perm),
+        ("rfl", Lean.toJson rule.rfl),
+        ("backwardRfl", Lean.toJson rule.backwardRfl),
+        ("keys", Lean.toJson (rule.keys.map reprStr)),
+        ("bucketPath", Lean.toJson (path.map reprStr)),
+        ("bucketIndex", Lean.toJson bucketIndex),
+        ("proofLevelParameters", Lean.toJson (rule.levelParams.map toString)),
+        ("proofTemplate", Lean.toJson proofTemplate),
+        ("proofDeclaration", match proofName? with
+          | some name => coreSimpDeclarationComparison native installed name
+          | none => .null)])
+  let mut unfoldRows : Array Lean.Json := #[]
+  for declaration in declarations do
+    let name := PsKernelLean.toLeanName (psDeclarationName declaration)
+    let delta := simp.toUnfold.contains name
+    let equations? := simp.toUnfoldThms.find? name
+    if delta || equations?.isSome then
+      unfoldRows := unfoldRows.push (Lean.Json.mkObj [
+        ("origin", coreSimpDeclarationComparison native installed name),
+        ("delta", Lean.toJson delta),
+        ("equations", match equations? with
+          | some equations => Lean.toJson (equations.map toString)
+          | none => .null),
+        ("equationDeclarations", match equations? with
+          | some equations => .arr (equations.map (coreSimpDeclarationComparison native installed))
+          | none => .null)])
+  let subsingletonName := Lean.Name.mkSimple "Subsingleton"
+  let decidableName := Lean.Name.mkSimple "Decidable"
+  let subsingletonInstances :=
+    ((Lean.Meta.instanceExtension.getState native).instanceNames.toArray.filter
+      (fun (name, _) => (native.find? name).any fun info =>
+        let conclusion := info.type.getForallBody
+        conclusion.getAppFn.isConstOf subsingletonName &&
+          conclusion.getAppArgs.any (fun argument =>
+            argument.getAppFn.isConstOf decidableName))).qsort
+      (fun left right => Lean.Name.lt left.1 right.1)
+  let subsingletonRows := subsingletonInstances.map fun (name, entry) =>
+    Lean.Json.mkObj [
+      ("declaration", coreSimpDeclarationComparison native installed name),
+      ("priority", Lean.toJson entry.priority),
+      ("globalName", Lean.toJson (entry.globalName?.map toString))]
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-native-simp-metadata/1" : String)),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("nativeModules", Lean.toJson (["Init"] : List String)),
+    ("nativeMetadataExtensionsLoaded", Lean.toJson true),
+    ("selectedDeclarations", Lean.toJson declarations.length),
+    ("activeNativeRules", Lean.toJson activeNativeRules),
+    ("selectedNativeRules", Lean.toJson rows.size),
+    ("rules", .arr rows),
+    ("unfolding", .arr unfoldRows),
+    ("uninstalledOrigins", Lean.toJson (skippedOrigins.toArray.qsort Lean.Name.lt |>.map toString)),
+    ("missingNormalizedProofRoots", Lean.toJson
+      (missingProofRoots.toArray.qsort Lean.Name.lt |>.map toString)),
+    ("simpOnlyBuiltins", .arr (([`eq_self, `iff_self] : List Lean.Name).toArray.map
+      (coreSimpDeclarationComparison native installed))),
+    ("dependentDecisionCongruence", .arr
+      ((["Subsingleton", "Subsingleton.elim", "Decidable.eq"] : List String).toArray.map
+        (fun name => coreSimpDeclarationComparison native installed
+          ((name.splitOn ".").foldl Lean.Name.str .anonymous)))),
+    ("nativeSubsingletonDecidableInstances", .arr subsingletonRows),
+    ("portableMetadataInstalled", Lean.toJson false),
+    ("freshKernelReplayPerformedByThisAudit", Lean.toJson false),
+    ("sourceAcceptanceQualified", Lean.toJson false)]
   IO.FS.writeFile output (report.compress ++ "\n")
   IO.println report.compress
 

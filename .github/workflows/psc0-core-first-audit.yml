@@ -416,11 +416,11 @@ jobs:
           restore-keys: |
             pscv0-core-first-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
-      - name: Check the selected proof parser and elaborator before native linking
+      - name: Check the selected language parser and elaborator before native linking
         id: proof_frontend
         run: |
           set -euo pipefail
-          lake build Ps.Syntax.Pscv0.TermRead Ps.Syntax.Lean.Term Ps.Elab.Term
+          lake build Ps.Syntax.Pscv0.TermRead Ps.Syntax.Lean.Term Ps.Compiler.Pscv0ModuleEngine
       - name: Build the native proof-closure authorer
         id: ext_build
         run: |
@@ -439,6 +439,11 @@ jobs:
         run: |
           set -euo pipefail
           lake env .lake/build/bin/pscv0_core_environment_export calc-metadata ../dist/core-first/authoring/calc-native-metadata.json 2>&1 | tee ../dist/core-first/authoring/calc-native-metadata.log
+      - name: Measure pinned default simplifier metadata independently
+        if: ${{ !cancelled() && steps.ext_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake env .lake/build/bin/pscv0_core_environment_export simp-metadata ../dist/core-first/authoring/simp-native-metadata.json 2>&1 | tee ../dist/core-first/authoring/simp-native-metadata.log
       - name: Build unchanged Full composition and empty-boundary authorer
         id: build
         if: ${{ !cancelled() && steps.ext_build.outcome == 'success' }}

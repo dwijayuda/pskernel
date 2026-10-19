@@ -597,7 +597,8 @@ def psElabPreDefinitionWellFoundedResults (environment : PsEnvironment)
        sourceEquations := [psSourceEquationsSingle member.name (psDeclarationName equation)]
        sourceInfo := [member.sourceInfo] } : PsElabDeclarationBatchResult)
   return {
-    batch := { declarations := definitions ++ equations
+    batch := {
+      declarations := definitions ++ equations
       sourceEquations := batches.flatMap (·.sourceEquations)
       sourceInfo := members.map (·.sourceInfo) }
     members := batches }

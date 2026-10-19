@@ -7,6 +7,7 @@ on:
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedLooseBVarBound.lean'
       - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean'
       - 'psc0/packages/pskernel-c0/test/C0LooseBVarBoundRegression.lean'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
   workflow_dispatch:
 permissions:
   contents: read

@@ -1,5 +1,15 @@
 # AI_WORK_STATE — PSKernel-C0 live checkpoint
 
+## 19 October 2026 — source-guarded deferred close and mixed-worklist differential
+
+- Continued isolated [PR #161](https://github.com/dwijayuda/pskernel/pull/161); no change to production C0, its default `fuel=4096`, kernel declaration admission or logical assumptions.
+- The earlier exact-head native checker built the experimental C0 library, but the **all-context `c0DeepLambdaSplit_source` proof failed** (e.g. [39286890569](https://github.com/dwijayuda/pskernel/actions/runs/39286890569)); error cases left `Except.bind` normalization goals, and successful binder-case goals also remained. The research proof now performs explicit original domain, sort and binder-range case splits and `Except.bind` normalization; **no qualified success is claimed** until newest CI.
+- Implemented `psKernelC0DeepLambdaCloseDeferred` and its complete source equality theorem `psKernelC0DeepLambdaCloseDeferred_source`. Resuming a checked lambda body in `DeepMixedWorklist` now closes directly from the deferred frame **without forcing the already-checked substituted body a second time**. This removes one redundant potential full-subtree materialization per successful lambda continuation; it is not proof that deeper repeated substitution is eliminated.
+- Added `test/C0DeepSubstDifferential.lean` for ordered source substitutions, varying offsets, and arbitrary binder-range cases. Rearranged pinned GitHub source CI to complete native smoke/regression and print an explicit result **before** the separate mandatory all-context lambda source proof. The proof gate remains required and intentionally fails if outstanding goals are unresolved.
+- The worklist is still an **untrusted diagnostic evaluator**; its checking-depth source fuel is still decremented at every syntactic app/lambda node. Since the authentic `dag_app_binder` exceeds that old recursive path and has shared lambdas, this implementation has **not** established positive acceptance at fuel4096 or all-input soundness. Avoid claims of 193/193, a fast production checker, or a Core self-host provider.
+- Next P0: prove lambda split/defer all-context source equivalence in pinned Lean; establish each mixed transition's source typing semantics independently of the exhausted recursive fuel; implement capture-avoiding lazy app/lambda constructor *views* over pending substitutions rather than immediately forcing the entire body; then require full independent official-vs-C0 authentic source acceptance, strict negatives and RSS.
+
+
 ## 19 October 2026 — Mixed checked application/lambda machine: source proof gate still OPEN
 
 - Genuine archived `dag_app_binder` at unchanged native source fuel **4096**: [strict CI 39271500620](https://github.com/dwijayuda/pskernel/actions/runs/39271500620) independently authenticated official Lean 4.35 acceptance, but native C0 **timed out at 180 seconds (exit124)**. Do not count this as source acceptance, semantic rejection, or kernel unsoundness evidence.

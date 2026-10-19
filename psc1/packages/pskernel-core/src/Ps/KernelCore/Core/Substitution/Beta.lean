@@ -87,7 +87,7 @@ def psKernelExprConsumeLambdaSpine
     Prod PsKernelExpr Nat :=
   psKernelC0ConsumeLambdaSpineLinear
     fn
-    (List.drop count args)
+    (psKernelExprListDrop count args)
     count
 
 def psKernelExprCheapBetaReduce

@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-20 (Asia/Jakarta)
 **Branch:** `fix/psc1-pskernel-core-cross-branch-20261020`
-**Qualified source commit:** `893527ec9d082bddbe0c20db4b71e0eadefb0c26`
+**First qualified beta-spine source commit:** `893527ec9d082bddbe0c20db4b71e0eadefb0c26`
 **GitHub Actions:** [run 39327565414](https://github.com/dwijayuda/pskernel/actions/runs/39327565414) — both jobs succeeded
 **Upstream research source:** `perf/pskernel-c0-v7-rust-20261012`, `41322875539de66acf9eb9b01ddf73df82a61bf2`
 **Target toolchain:** PSC1 / Lean 4.34.0, TypeScript 7.0.2, Linux GitHub Actions
@@ -46,3 +46,43 @@ Timings come from the native job log of [run 39327565414](https://github.com/dwi
 - Benchmark end-to-end checked WHNF/DefEq/inference, ordinary/mutual/nested admission, malformed rejection paths, and memory on the same runners before any further promotion.
 - Treat C0's indexed representation and memoized substitution as independent research until they have independent semantic, provenance, resource and PSC1 portable-source evidence.
 - Re-run source, generated `.ps`, JavaScript, native, and differential regressions for any subsequent changes. Do not substitute an old fixed-point receipt for evidence at a new source SHA.
+
+
+## Second qualified C0 optimization: one-pass single-variable instantiation
+
+**Qualified source commit:** `a048c5d32431a85f21f5381b7525349d4a90aada`
+**Workflow:** [GitHub Actions 39331733291](https://github.com/dwijayuda/pskernel/actions/runs/39331733291) — **both native-kernel and psc1-portability passed**.
+
+### Specific change
+
+`Core/Substitution/Instantiate.lean` adopts C0's structurally recursive `psKernelC0ExprInstantiateOneChanged` for `psKernelExprInstantiate1`. It skips the old full loose-bound-variable probe plus expression-node-count prepass on application-shaped/open operands. The existing `psKernelExprHasLooseBVar` check stays for binder-rooted `lam`, `forallE`, and `letE` terms so closed binder expressions are returned unchanged. The general multi-variable instantiation and historical fuel-driven worker remain unmodified and provide a differential oracle.
+
+This is capture-avoiding de Bruijn substitution only. It does **not** change declaration acceptance, kernel axioms, fuel/recursion checking rules, the context-sensitive cache policy, or the default provider. The source is portable in PSC1 and compiled using the pinned Lean 4.34.0.
+
+### Performance evidence
+
+`test/PsKernelInstantiatePerformance.lean` compares the exact previous implementation against the new one in the same native CI process, with equivalent results and checksums required before reporting timing:
+
+| Workload | Previous | One-pass C0 | Same-run speedup |
+| --- | ---: | ---: | ---: |
+| 25,000 open application substitutions, depth 12 | 15 ms | 9 ms | 1.67x |
+| 25,000 open application substitutions, depth 32 | 39 ms | 25 ms | 1.56x |
+
+These measurements are *specific microbenchmarks*. No evidence here establishes an overall WHNF, DefEq, inference, complete-library, JavaScript, memory, or Arena speedup. The earlier qualified beta-spine benchmarks remain a separate optimization and were re-run successfully.
+
+### Correctness and self-hosting evidence
+
+At the exact source SHA above:
+
+- Native Lean build: **169/169 build jobs** passed.
+- **34 focused regression cases** passed, including **12 new original-vs-C0 instantiate1 comparisons** spanning free/bound de Bruijn indices, capture avoidance, dependent binders, let, metadata and projections.
+- PSC1 all-portable source profile passed across **94 modules**, including the **79 kernel modules**.
+- PSC1 elaborated and checked the complete original `.lean` kernel: **986 declarations**.
+- Canonical kernel `.ps` closure was generated with **all 79 source files** and validated manifest; PSC1 rechecked **986 declarations** from the generated closure.
+- Generated JavaScript and declarations compiled using TypeScript **7.0.2**; runtime smoke passed, including checks for bound-variable substitution, index shifting, open application instantiation and closed application retention.
+
+The complete [CI run](https://github.com/dwijayuda/pskernel/actions/runs/39331733291) is green. These are finite correctness and source-generation qualifications, **not** a full self-host fixed point, independent metatheory proof, or all-case backend semantic proof. Leave this optimization on the isolated fix branch until integration against the current PSC1 development head is reviewed.
+
+### Next measured candidates
+
+Investigate C0's source-substitution/lifting traversal once whole-operation native and JS costs are profiled, especially closed-application regressions and deep binder workloads. Avoid importing experimental indexed DAG interners, session-wide caches or reductions without independent context/fuel/resource evidence and complete portability checks. Always compare against the exact previous native and generated-JS kernel under the same fixture and runner before calling something a net speedup.

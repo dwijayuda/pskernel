@@ -1,0 +1,105 @@
+name: PSKernel-C0 post-loose-bound authentic app-lam worker profile
+on:
+  push:
+    branches: [research/pskernel-c0-loose-bvar-native-csimp-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-loose-bound-stacks.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Core/**'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/Declaration/Validation.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedLooseBVarBound.lean'
+  pull_request:
+    branches: [perf/pskernel-c0-pointer-structural-hash-bucket-20261018]
+    paths:
+      - '.github/workflows/pskernel-c0-loose-bound-stacks.yml'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py'
+      - 'psc0/packages/pskernel-c0/test/C0NativeProofSampler.c'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-app-lam-native-root:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Compile unchanged authoritative native checker and bounded sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd psc0/packages/pskernel-c0
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+            lake build c0OfficialReplay
+          )
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py
+          cc -O2 -fPIC -shared -o "$RUNNER_TEMP/c0-arena-app-lam-sampler.so" \
+            psc0/packages/pskernel-c0/test/C0NativeProofSampler.c
+          test -s "$RUNNER_TEMP/c0-arena-app-lam-sampler.so"
+      - name: Pin authentic old Arena app-lam body and independent official 4.35 verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fLsS --retry 3 --retry-delay 2 -o "$RUNNER_TEMP/arena-2026-09.tar.gz" \
+            https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena-2026-09.tar.gz" | sha256sum -c -
+          python3 - <<'PY'
+          import hashlib, sys, os
+          from pathlib import Path
+          sys.path.insert(0,"psc0/packages/pskernel-c0/test")
+          from arena_conformance import check_archive
+          from arena_lean435_compat import adapt_legacy_envelope, official_reference
+          cases=check_archive(Path(os.environ["RUNNER_TEMP"])/"arena-2026-09.tar.gz")
+          found=[(label,raw) for label,name,raw in cases if name=="perf/app-lam.ndjson"]
+          assert len(found)==1 and found[0][0]=="good"
+          raw=found[0][1]
+          assert hashlib.sha256(raw).hexdigest()=="3f7b7a595dc29b0e289c9031c4edaef42d0e12b8aee3cbb48cf15cb715adc09a"
+          adapted,proof=adapt_legacy_envelope(raw)
+          assert proof["body_bytes_identical"]
+          target=Path(os.environ["RUNNER_TEMP"])/"arena-app-lam-435.ndjson"
+          target.write_bytes(adapted)
+          verdict=official_reference(Path("psc0/packages/pskernel-c0"),target.resolve(),120)
+          assert verdict["verdict"]=="accepted",verdict
+          print(f"C0_ARENA193_APP_LAM_PIN official=accepted body_sha256={proof['original_body_sha256']} records={len(adapted.splitlines())} input_modified_only_header=true")
+          PY
+      - name: Observe actual C0 worker after entering complete dag_app_binder body
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$RUNNER_TEMP/arena-app-lam-435.ndjson" \
+            "$RUNNER_TEMP/c0-arena-app-lam-sampler.so" \
+            "$RUNNER_TEMP/app-lam-worker-stacks.txt" \
+            "$RUNNER_TEMP/app-lam-worker-summary.json" \
+            --samples 20 --interval 2 --max-wait 300 --wait-for "name=dag_app_binder"
+          python3 - <<'PY'
+          import json,os,pathlib
+          root=pathlib.Path(os.environ["RUNNER_TEMP"])
+          data=json.loads((root/"app-lam-worker-summary.json").read_text())
+          raw=(root/"app-lam-worker-stacks.txt").read_text(errors="replace")
+          assert "name=dag_app_binder" in raw
+          assert data["native_stack_samples"] > 0
+          assert data["diagnostic_only"] and data["no_trusted_code_modified"]
+          assert data["successful_source_acceptance"] is False
+          print(f"C0_ARENA193_POST_LOOSEBOUND_PROFILE exact_4000_layer_source=true samples={data['native_stack_samples']} no_accepted_verdict_from_profile=true")
+          for symbol,n in data["top_inclusive_functions"][:25]:
+              print(f"C0_ARENA193_APP_LAM_INCLUSIVE count={n} native_symbol={symbol}")
+          for symbol,n in data["top_active_functions"][:15]:
+              print(f"C0_ARENA193_APP_LAM_ACTIVE count={n} native_symbol={symbol}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-arena193-post-loosebound-worker-root
+          path: |
+            ${{ runner.temp }}/app-lam-worker-stacks.txt
+            ${{ runner.temp }}/app-lam-worker-summary.json
+          if-no-files-found: warn
+          retention-days: 21

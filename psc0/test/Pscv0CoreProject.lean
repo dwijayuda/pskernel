@@ -225,7 +225,18 @@ private def visibility (seed : Lean.Kernel.Environment)
   let facade := input kind "Facade" (match kind with
     | .lean => "module\npublic import Library\npublic " ++ identitySource kind "coreProjectFacade"
     | .proofScript => "public import Library\n" ++ identitySource kind "coreProjectFacade")
-  let exported ← prepare profile "Entry" [client, facade, library]
+  let reexportLibrary := match kind with
+    | .lean => input .lean "Library"
+        ("module\nnamespace ProjectLib\n" ++
+          "public def copy (A : Type) (x : A) : A := CoreSelectedIdentity A x\nend ProjectLib\n")
+    | .proofScript => library
+  let reexportClient := match kind with
+    | .lean => input .lean "Entry"
+        ("module\nimport Facade\nnamespace ProjectEntry\n" ++
+          "public def twice (A : Type) (f : A -> A) (x : A) : A := ProjectLib.copy A (f (f x))\n" ++
+          "end ProjectEntry\n")
+    | .proofScript => client
+  let exported ← prepare profile "Entry" [reexportClient, facade, reexportLibrary]
   let _ ← admit seed exported.admissions
   ensure (sameNames exported.mainNames [mainName] &&
       exported.libraryNames.any (psNameEq libName))

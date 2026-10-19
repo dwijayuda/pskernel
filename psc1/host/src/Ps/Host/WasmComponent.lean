@@ -58,6 +58,12 @@ def psHostDirectWasmComponent
   if !outputPath.endsWith ".wasm" then
     throw (IO.userError "PSC1_COMPONENT_OUTPUT_EXTENSION: expected .wasm")
   let validated ← psHostDirectValidatedIr inputPath
+  -- The initial component API exposes only a declaration authored in the
+  -- requested entry module, never a transitive prelude or private helper.
+  let source ← IO.FS.readFile inputPath
+  let parsed ← psHostParseSource inputPath source
+  if !parsed.declarations.any (fun d => psHostSyntaxDeclarationName d == exportName) then
+    throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_IN_ENTRY_SOURCE")
   let wit ← match psHostWitSelectedExport validated exportName with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)

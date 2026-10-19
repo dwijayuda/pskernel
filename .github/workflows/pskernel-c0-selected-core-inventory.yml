@@ -1,0 +1,80 @@
+name: PSKernel-C0 exact selected Core external inventory
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-selected-core-inventory.yml'
+      - 'psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  strict-selected-roots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout the independent kernel-core qualification branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py
+      - name: Download exact previously qualified PSC0 Core selected native closure
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 39193886098
+          name: psc0-c0-selected-native-closure
+          path: input
+          github-token: ${{ github.token }}
+      - name: Check complete typed graph, approved assumptions and real selected roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          test -s input/selected-engine.json
+          test -s input/comparison.json
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py
+          python3 psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py \
+            --selected input/selected-engine.json \
+            --comparison input/comparison.json \
+            --roots output/selected-roots.txt \
+            --manifest output/selected-manifest.json
+          test "$(wc -l < output/selected-roots.txt)" -eq 418
+          python3 - <<'PY'
+          import importlib.util, json, pathlib
+          script=pathlib.Path('psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py')
+          spec=importlib.util.spec_from_file_location('selected_core_roots',script)
+          module=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          selected=json.loads(pathlib.Path('input/selected-engine.json').read_text())
+          comparison=json.loads(pathlib.Path('input/comparison.json').read_text())
+          good=module.verify(selected,comparison,'test-sha')
+          assert good['rootCount']==418 and good['selected']['externalClosure']==5619
+          cases=[
+              (dict(selected,externalRoots=selected['externalRoots'][:-1]),comparison),
+              (dict(selected,emptyBoundary=False),comparison),
+              (dict(selected,candidateKernelAdmitted=True),comparison),
+              (dict(selected,axioms=[]),comparison),
+              (selected,dict(comparison,sourceCommit='unverified')),
+          ]
+          for candidate,receipt in cases:
+              try:
+                  module.verify(candidate,receipt,'test-sha')
+              except (ValueError,KeyError,TypeError):
+                  continue
+              raise AssertionError('tampered selected Core graph was not refused')
+          print('C0_SELECTED_CORE_NEGATIVE_CONTRACT=5/5 TAMPERS_REFUSED')
+          PY
+          sha256sum input/selected-engine.json input/comparison.json \
+            output/selected-roots.txt output/selected-manifest.json \
+            > output/SHA256SUMS
+          echo 'C0_SELECTED_CORE=SOURCE_CLOSURE_AUTHENTICATED_NOT_C0_CHECKED'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pskernel-c0-selected-core-inventory
+          path: output/
+          retention-days: 30
+          if-no-files-found: warn

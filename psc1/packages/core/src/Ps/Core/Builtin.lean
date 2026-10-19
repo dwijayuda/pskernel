@@ -207,6 +207,12 @@ def psStringPosRawMkName : PsName :=
 def psStringPosRawByteIdxName : PsName :=
   psNameAppendStr psStringPosRawName "byteIdx"
 
+def psStringPosRawNextName : PsName :=
+  psNameAppendStr psStringPosRawName "next"
+
+def psStringPosRawAtEndName : PsName :=
+  psNameAppendStr psStringPosRawName "atEnd"
+
 def psStringLengthName : PsName :=
   psNameAppendStr psStringInternalName "length"
 

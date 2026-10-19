@@ -52,6 +52,13 @@ def main : IO Unit := do
     (!psKernelExprPairSetContains restored.success localExpr closed)
   requireKernel "scope drops child negative defeq cache"
     (!psKernelExprPairSetContains restored.failure localExpr closed)
+  let sample := "héllo"
+  let p := String.Pos.Raw.mk 0
+  requireKernel "Lean 4.34 string atEnd alias parity"
+    (String.Pos.Raw.atEnd sample p == String.Internal.atEnd sample p)
+  requireKernel "Lean 4.34 UTF-8 next alias parity"
+    (String.Pos.Raw.byteIdx (String.Pos.Raw.next sample p) ==
+      String.Pos.Raw.byteIdx (String.Internal.next sample p))
   let u := PsKernelLevel.param (PsKernelName.str PsKernelName.anonymous "u")
   let v := PsKernelLevel.param (PsKernelName.str PsKernelName.anonymous "v")
   let shiftedMax := PsKernelLevel.succ (PsKernelLevel.max u v)

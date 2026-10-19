@@ -895,11 +895,13 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if psStringEq text "String.Internal.next" then
+      else if psStringEq text "String.Internal.next" ||
+              psStringEq text "String.Pos.Raw.next" then
         binary PsVerifiedIrIntrinsic.stringNext
       else if psStringEq text "String.Internal.get" then
         binary PsVerifiedIrIntrinsic.stringGet
-      else if psStringEq text "String.Internal.atEnd" then
+      else if psStringEq text "String.Internal.atEnd" ||
+              psStringEq text "String.Pos.Raw.atEnd" then
         binary PsVerifiedIrIntrinsic.stringAtEnd
       else if psStringEq text "String.Internal.extract" then
         if Nat.beq (psListLength view.args) 3 then
@@ -2016,7 +2018,8 @@ def psErasureSpecialEntry
       ["Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
         "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
         "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
-        "String.Internal.get", "String.Internal.atEnd", "Array.emptyWithCapacity",
+        "String.Pos.Raw.next", "String.Internal.get", "String.Internal.atEnd",
+        "String.Pos.Raw.atEnd", "Array.emptyWithCapacity",
         "Array.size"] then
     Option.some (PsErasureSpecialEntry.mk 2 true)
   else if psListAny named

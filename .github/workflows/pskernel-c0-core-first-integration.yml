@@ -1,0 +1,145 @@
+name: PSKernel-C0 Core-first independent boundary
+on:
+  push:
+    branches:
+      - feature/pskernel-c0-core-qualification-20261019
+    paths:
+      - '.github/workflows/pskernel-c0-core-first-integration.yml'
+      - 'psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py'
+      - 'psc0/packages/pskernel-c0/src/**'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: c0-core-first-boundary
+  cancel-in-progress: false
+
+jobs:
+  exact-compiler-native-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout the isolated C0 qualification test
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          path: c0
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py
+      - name: Checkout immutable PSC0 compiler candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 53c28cfe3abd9e8fae93e7935357dbc4402c4b09
+          path: psc0-source
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+      - name: Verify exact v7.2 authority and committed checked seed
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0-source/psc0/v7-native/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          python3 -m py_compile c0/psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py
+          python3 c0/psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py --psc0 psc0-source
+      - name: Configure stable Lean 4.35 for exact source closure
+        uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0-source/psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Generate the complete actual external native compiler closure
+        shell: bash
+        working-directory: psc0-source/psc0/v7-native
+        run: |
+          set -euo pipefail
+          mkdir -p "$GITHUB_WORKSPACE/integrity"
+          lean --version | tee "$GITHUB_WORKSPACE/integrity/toolchain.txt"
+          grep -F '4.35.0' "$GITHUB_WORKSPACE/integrity/toolchain.txt"
+          grep -F 'eb6cafb' "$GITHUB_WORKSPACE/integrity/toolchain.txt"
+          /usr/bin/time -v -o "$GITHUB_WORKSPACE/integrity/build-resources.txt" \
+            lake build pscv0_core_native_closure
+          /usr/bin/time -v -o "$GITHUB_WORKSPACE/integrity/closure-resources.txt" \
+            lake env .lake/build/bin/pscv0_core_native_closure "$GITHUB_WORKSPACE/integrity/native-closure.json" \
+            | tee "$GITHUB_WORKSPACE/integrity/native-closure-summary.json"
+      - name: Require a closed, exact, assumption-audited dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 c0/psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py \
+            --psc0 psc0-source --closure integrity/native-closure.json \
+            --output integrity/closure-integrity.json
+          # An intentionally truncated graph MUST be rejected; no partial
+          # inventory may be classified as a valid Core dependency closure.
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          graph = json.loads(Path("integrity/native-closure.json").read_text())
+          graph["closureDeclarations"].pop()
+          Path("integrity/truncated.json").write_text(json.dumps(graph))
+          PY
+          if python3 c0/psc0/packages/pskernel-c0/test/C0CoreFirstClosureContract.py \
+            --psc0 psc0-source --closure integrity/truncated.json; then
+            echo 'C0_CORE_FAIL_CLOSED_BROKEN: truncated inventory accepted' >&2
+            exit 1
+          fi
+          rm integrity/truncated.json
+          sha256sum integrity/native-closure.json integrity/closure-integrity.json > integrity/SHA256SUMS
+          echo 'C0_CORE_DEPENDENCY_EVIDENCE=PASS admission=false selfhost=false'
+      - name: Retain complete declaration graph and bounded resource evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: c0-core-first-native-dependency-closure
+          path: integrity/
+          if-no-files-found: warn
+          retention-days: 30
+
+  c0-strict-reference-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout independent C0 (not the PSC0 source compiler)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Verify strict C0 CLI refuses invalid and exhausted declarations
+        shell: bash
+        working-directory: psc0/packages/pskernel-c0
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          lake build c0OfficialReplay
+          lake env lean --run test/C0OfficialReferenceRegression.lean
+          .lake/build/bin/c0OfficialReplay --require-accepted test/C0OfficialAccept.ndjson 4096 \
+            | tee "$RUNNER_TEMP/c0-good.txt"
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=6 fuel=4096' "$RUNNER_TEMP/c0-good.txt"
+          if .lake/build/bin/c0OfficialReplay --require-accepted test/C0OfficialChainReject.ndjson 4096 \
+              > "$RUNNER_TEMP/c0-invalid.txt" 2>&1; then
+            echo 'C0_CORE_BAD: invalid proof accepted' >&2
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT_STRICT_FAILURE verdict=C0ExportVerdict.rejected' "$RUNNER_TEMP/c0-invalid.txt"
+          if .lake/build/bin/c0OfficialReplay --require-accepted test/C0OfficialAccept.ndjson 0 \
+              > "$RUNNER_TEMP/c0-exhausted.txt" 2>&1; then
+            echo 'C0_CORE_BAD: exhausted proof accepted' >&2
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT_STRICT_FAILURE verdict=C0ExportVerdict.resourceExhausted' "$RUNNER_TEMP/c0-exhausted.txt"
+          echo 'C0_CORE_STRICT_CHECKER=PASS_SMALL_SMOKE_NOT_COMPILER_REPLAY'

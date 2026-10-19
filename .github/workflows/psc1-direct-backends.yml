@@ -296,3 +296,32 @@ jobs:
           lean --version
           lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression
           lake -f kernel-lakefile.lean exe psc1_kernel_regression
+      - name: Validate native DirectJS declarations with pinned TypeScript 7
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          tsc_root="$RUNNER_TEMP/psc1-ts7-consumer"
+          mkdir -p "$tsc_root"
+          npm install --prefix "$tsc_root" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          tsc="$tsc_root/node_modules/typescript/bin/tsc"
+          test -f "$tsc"
+          node "$tsc" --version | grep -F 'Version 7.0.2'
+          cat > /tmp/psc1-direct-consumer.ts <<'TS'
+          import { idNat } from './psc1-direct.js';
+          const result: bigint = idNat(42n);
+          void result;
+          TS
+          node "$tsc" --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext /tmp/psc1-direct-consumer.ts
+          cat > /tmp/psc1-direct-rejected-consumer.ts <<'TS'
+          import { idNat } from './psc1-direct.js';
+          const incorrect: string = idNat(42n);
+          void incorrect;
+          TS
+          if node "$tsc" --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext /tmp/psc1-direct-rejected-consumer.ts > /tmp/psc1-ts7-negative.log 2>&1; then
+            echo 'Wrong DirectJS declaration use unexpectedly typechecked' >&2
+            exit 1
+          fi
+          grep -q 'TS2322' /tmp/psc1-ts7-negative.log
+          echo "PSC1_DIRECT_DTS_TYPESCRIPT7_CONSUMER: PASS"
+

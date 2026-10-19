@@ -33,7 +33,21 @@ def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared := do
     | .error _ => throw (IO.userError "PSC1_DIRECT_ERASURE_FAILED")
   let validated ← match psValidateErasedIrModule { raw := raw } with
     | .ok value => pure value
-    | .error _ => throw (IO.userError "PSC1_DIRECT_IR_VALIDATION_FAILED")
+    | .error reason =>
+        -- Preserve ownership/path for the first typed finding on failure.
+        -- A successful validated IR is still obtained only from the same
+        -- bounded checker; this text is not an independent proof receipt.
+        let report := psCheckVerifiedIrModule psIrCheckDefaultOptions raw
+        let reasonText := match reason with
+          | .illTypedOrUnresolved => "ill-typed-or-unresolved"
+          | .budgetExhausted => "budget-exhausted"
+        let findingText := match report.findings.head? with
+          | some finding =>
+              " code=" ++ finding.code ++ " owner=" ++ finding.owner ++
+              " path=" ++ finding.path
+          | none => " findings=" ++ toString report.findingCount
+        throw (IO.userError ("PSC1_DIRECT_IR_VALIDATION_FAILED: " ++
+          reasonText ++ findingText))
   pure { validated := validated, sourceText := sourceText, sourceModule := sourceModule }
 
 def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do

@@ -19,7 +19,7 @@ def psDirectSourceOrigins (module : PsSyntaxModule) : List PsDirectSourceOrigin 
 -- preserving surrogate-pair width instead of suppressing every Unicode map.
 def psDirectSourceUtf16Column
     (source : String) (position : PsSourcePos) : Option Nat := do
-  let line ← (source.splitOn "\n").get? (position.line - 1)
+  let line ← (source.splitOn "\n")[position.line - 1]?
   let prefixSize := position.column - 1
   if prefixSize > line.toList.length then
     none
@@ -76,7 +76,7 @@ def psDirectMapSegments
           sourceLine := sourceLine
           sourceColumn := sourceColumn
           hasSegmentOnLine := true }
-        semicolons ++ comma ++ entry ++ psDirectMapSegments origins rest updated
+        semicolons ++ comma ++ entry ++ psDirectMapSegments sourceText origins rest updated
 
 def psDirectSourceMap
     (sourcePath sourceText outputName : String)

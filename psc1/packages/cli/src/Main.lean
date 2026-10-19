@@ -1,4 +1,4 @@
-import Ps.Host.DirectBackend
+import Ps.Host.WasmComponent
 
 def psCliUsage : String :=
   "ProofScript PSC2 Lean bootstrap (implemented in the PSC1 subset)\n" ++
@@ -15,7 +15,7 @@ def psCliUsage : String :=
   "  psc1 build <input.lean|input.ps> --target js --out <output.js>\n" ++
   "  psc1 build <input.lean|input.ps> --target rust --out <output.rs>\n" ++
   "  psc1 build <input.lean|input.ps> --target wasm-core --out <output.wasm>\n" ++
-  "  psc1 wat <input.wasm> --out <output.wat> (requires wasm2wat)"
+  "  psc1 wat <input.wasm> --out <output.wat> (requires wasm-tools)\n" ++\n  "  psc1 build <input.ps|input.lean> --target wasm-component --export <name> --out <component.wasm>"
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -45,6 +45,8 @@ def main (args : List String) : IO Unit := do
       psHostDirectRust inputPath outputPath
   | ["build", inputPath, "--target", "wasm-core", "--out", outputPath] =>
       psHostDirectWasmCore inputPath outputPath
+  | ["build", inputPath, "--target", "wasm-component", "--export", exportName, "--out", outputPath] =>
+      psHostDirectWasmComponent inputPath exportName outputPath
   | ["wat", binaryPath, "--out", watPath] =>
       psHostWasmBinaryToWat binaryPath watPath
   | ["build", inputPath, "--out", outputPath] =>

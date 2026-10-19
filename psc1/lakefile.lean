@@ -165,7 +165,8 @@ lean_lib PsHost where
     `Ps.Host.ProjectCompiler,
     `Ps.Host.CompilerDriver,
     `Ps.Host.DirectSourceMap,
-    `Ps.Host.DirectBackend
+    `Ps.Host.DirectBackend,
+    `Ps.Host.WasmComponent
   ]
 
 -- Regression-only extension; compiler fixed-point closure never imports Ps.Project.

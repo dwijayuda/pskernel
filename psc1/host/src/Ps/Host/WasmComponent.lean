@@ -21,8 +21,8 @@ def psHostWitIdent (name : String) : Bool :=
   match name.toList with
   | [] => false
   | first :: rest =>
-      let lower := fun c => c.toNat >= 97 && c.toNat <= 122
-      let digit := fun c => c.toNat >= 48 && c.toNat <= 57
+      let lower := fun c => Nat.ble 97 c.toNat && Nat.ble c.toNat 122
+      let digit := fun c => Nat.ble 48 c.toNat && Nat.ble c.toNat 57
       lower first && rest.all (fun c => lower c || digit c || c == '-')
 
 def psHostWitArgument (parameter : PsVerifiedIrParameter) : Except String String := do
@@ -95,7 +95,7 @@ def psHostDirectWasmComponent
     let _ ← psHostWasmTool #["validate", stagedComponent.toString] "VALIDATE"
     psHostWasmBinaryToWat stagedComponent.toString stagedComponentWat.toString
     let observedWit ← psHostWasmTool #["component", "wit", stagedComponent.toString] "WIT_CHECK"
-    if !(observedWit.splitOn exportName).length > 1 then
+    if (observedWit.splitOn exportName).length <= 1 then
       throw (IO.userError "PSC1_COMPONENT_WIT_EXPORT_MISMATCH")
     let stem := outputPath.dropRight 5
     IO.FS.rename stagedCore (System.FilePath.mk (stem ++ ".core.wasm"))

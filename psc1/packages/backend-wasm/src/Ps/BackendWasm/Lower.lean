@@ -4434,44 +4434,13 @@ def psWasmLowerCallWith
                     state := lowered.state
                   }
   | _ =>
-      match
-          psStrictInferExprWithFuel
-            module List.nil 4096 (psWasmBindingTypes bindings) fn with
-      | Except.error _ =>
-          Except.error
-            (PsWasmLowerError.unsupportedExpressionContext
-              state.currentDefinition "call-target-type")
-      | Except.ok functionType =>
-          match functionType with
-          | .function parameterTypes resultType =>
-              match psWasmLowerParameterType profile functionType with
-              | Except.error error => Except.error error
-              | Except.ok valueType =>
-                  match lower (Option.some valueType) state fn with
-                  | Except.error error => Except.error error
-                  | Except.ok loweredFunction =>
-                      let allocated : Nat × PsWasmLowerState :=
-                        psWasmAddLocal loweredFunction.state valueType;
-                      let index : Nat := Prod.fst allocated;
-                      let binding : PsWasmBinding :=
-                        PsWasmBinding.mk "" index functionType;
-                      match
-                          psWasmLowerFunctionValueCall
-                            profile lower (Prod.snd allocated) binding
-                            parameterTypes resultType arguments with
-                      | Except.error error => Except.error error
-                      | Except.ok loweredCall =>
-                          Except.ok {
-                            instructions :=
-                              psListAppend loweredFunction.instructions
-                                (List.cons (PsWasmInstruction.localSet index)
-                                  loweredCall.instructions)
-                            state := loweredCall.state
-                          }
-          | _ =>
-              Except.error
-                (PsWasmLowerError.unsupportedExpressionContext
-                  state.currentDefinition "call-target-not-function")
+      -- The copied PSC1 snapshot lacks the old strict expression inference
+      -- engine. Until a checked type derivation is restored, reject computed
+      -- call targets rather than assuming their ABI or dropping type checks.
+      Except.error
+        (PsWasmLowerError.unsupportedExpressionContext
+          state.currentDefinition "computed-call-target-unqualified")
+
 
 def psWasmLowerIfWith
     (lower :

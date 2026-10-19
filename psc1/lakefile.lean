@@ -9,7 +9,8 @@ lean_lib PsFoundation where
     `Ps.Foundation.List,
     `Ps.Foundation.Name,
     `Ps.Foundation.Source,
-    `Ps.Foundation.Diagnostic
+    `Ps.Foundation.Diagnostic,
+    `Ps.Foundation.Text
   ]
 
 lean_lib PsSyntax where

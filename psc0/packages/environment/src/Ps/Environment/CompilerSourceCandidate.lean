@@ -85,9 +85,9 @@ private def psCompilerSourceCandidateEnvironmentWithNoncomputable
     classParameters := [(className, { outputs := [], outputLevels := [] })]
     instances := instances }
 
-// Exact native Init metadata measured at the pinned Lean commit by
-// auditCoreFoundationCandidateMetadata. Bool.not is reached by Bool.decEq;
-// retaining its native tag does not establish portable runtime correspondence.
+-- Exact native Init metadata measured at the pinned Lean commit by
+-- auditCoreFoundationCandidateMetadata. Bool.not is reached by Bool.decEq;
+-- retaining its native tag does not establish portable runtime correspondence.
 def psCompilerSourceCandidateNoncomputableNames : List PsName :=
   [psNameAppendStr (psRootName "Bool") "not"]
 

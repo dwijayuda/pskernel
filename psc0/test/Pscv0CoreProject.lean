@@ -1504,6 +1504,196 @@ private def checkRegisteredValues : IO Unit := do
   ensure (leanAdmissions == psAdmissions) "registered value paired admissions differ"
   IO.println "PSCV0_CORE_REGISTERED_VALUES: two paired admitted projects, four owned refusals, inferred abbrev/default registration, public where helpers, data-instance and projection reduction, ordinary default opacity and private computational dependency controls passed"
 
+private def exposedProofSecret : String × String :=
+  ("private theorem coreSecretEq (A : Type) (x : A) : x = x := by rfl\n",
+   "private theorem coreSecretEq(A: Type, x: A): x = x := by { rfl }\n")
+
+private def exposedProofPieces : List (String × String) := [
+  exposedProofSecret,
+  ("public abbrev coreProofKeep (A : Type) (unused x : A) : A := (fun (_h : x = x) => x) (by exact coreSecretEq A x)\n",
+   "abbrev coreProofKeep(A: Type, unused x: A): A := (fun (_h: x = x) => x)(by { exact coreSecretEq(A, x) })\n"),
+  ("public abbrev coreProofLet (A : Type) (unused x : A) : A :=\n  let witness : A := x\n  (fun (_h : witness = witness) => x) (by exact coreSecretEq A witness)\n",
+   "abbrev coreProofLet(A: Type, unused x: A): A := {\n  let witness: A := x\n  (fun (_h: witness = witness) => x)(by { exact coreSecretEq(A, witness) })\n}\n"),
+  ("public def coreProofSignature (A : Type) (x : A) : (fun (_h : x = x) => A) (by exact coreSecretEq A x) := x\n",
+   "function coreProofSignature(A: Type, x: A): (fun (_h: x = x) => A)(by { exact coreSecretEq(A, x) }) := x\n")]
+
+private def exposedProofClient : List (String × String) := [
+  ("public theorem coreProofKeepRfl (A : Type) (unused x : A) : coreProofKeep A unused x = x := by rfl\n",
+   "theorem coreProofKeepRfl(A: Type, unused x: A): coreProofKeep(A, unused, x) = x := by { rfl }\n"),
+  ("public theorem coreProofLetRfl (A : Type) (unused x : A) : coreProofLet A unused x = x := by rfl\n",
+   "theorem coreProofLetRfl(A: Type, unused x: A): coreProofLet(A, unused, x) = x := by { rfl }\n"),
+  ("public def coreProofSignatureUse (A : Type) (x : A) : A := coreProofSignature A x\n",
+   "function coreProofSignatureUse(A: Type, x: A): A := coreProofSignature(A, x)\n")]
+
+private def exposedProofImportProvider : List (String × String) := [
+  ("public theorem coreImportedSecretEq (A : Type) (x : A) : x = x := by rfl\n",
+   "theorem coreImportedSecretEq(A: Type, x: A): x = x := by { rfl }\n")]
+
+private def exposedProofImportLibrary : List (String × String) := [
+  ("public abbrev coreImportedProofKeep (A : Type) (x : A) : A := (fun (_h : x = x) => x) (by exact coreImportedSecretEq A x)\n",
+   "abbrev coreImportedProofKeep(A: Type, x: A): A := (fun (_h: x = x) => x)(by { exact coreImportedSecretEq(A, x) })\n")]
+
+private def exposedProofImportClient : List (String × String) := [
+  ("public theorem coreImportedProofRfl (A : Type) (x : A) : coreImportedProofKeep A x = x := by rfl\n",
+   "theorem coreImportedProofRfl(A: Type, x: A): coreImportedProofKeep(A, x) = x := by { rfl }\n")]
+
+private def exposedProofBinderCount : PsExpr → Nat
+  | .forallE _ _ body _ => 1 + exposedProofBinderCount body
+  | _ => 0
+
+private def checkExposedProofMissing (seed : Lean.Kernel.Environment)
+    (admissions : String) (missing : PsName) : IO Unit := do
+  let declarations ← match PsKernelLean.decodeCanonicalAdmissions admissions with
+    | .ok declarations => pure declarations
+    | .error error => fail error.message
+  let target := PsKernelLean.toLeanName missing
+  let remaining := declarations.toList.filter fun declaration => match declaration with
+    | .thmDecl info => info.name != target
+    | _ => true
+  ensure (remaining.length + 1 == declarations.size)
+    "missing-proof replay did not remove exactly one actual theorem"
+  let mut current := seed
+  let mut refused := false
+  for declaration in remaining do
+    if !refused then
+      let checked ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+        current.addDeclCore 2000000 20000
+          (PsKernelLean.psKernelWithDefinitionHeight current declaration) none
+      match checked with
+      | .ok next => current := next
+      | .error (.unknownConstant _ actual) =>
+          ensure (actual == target) "missing-proof replay failed for another dependency"
+          refused := true
+      | .error error => fail ("missing-proof replay: " ++ PsKernelLean.kernelExceptionSummary error)
+  ensure refused "private proof dependency was not required by kernel admission"
+
+private def checkExposedProofArtifacts (output : PsCompilerEngineProjectOutput)
+    (library : String) (owner dependency : PsName) : IO PsName := do
+  let parent := psNameAppendStr owner "$proof"
+  let proofs := output.prepared.declarations.filter fun declaration =>
+    match psDeclarationName declaration with
+    | .num name _ => psNameEq name parent
+    | _ => false
+  let [.theoremDecl proofName _ type value] := proofs
+    | fail "exporting proof did not produce one actual checked theorem"
+  ensure (exposedProofBinderCount type == 2 &&
+      !psExprHasUnresolvedMeta type && !psExprHasUnresolvedMeta value &&
+      psExprFVarsInContext psLocalEmpty type && psExprFVarsInContext psLocalEmpty value)
+    "proof closure captured an unused/let binding or left an open dependency"
+  ensure ((psPscv0ExprConstants value).any (psNameEq dependency) &&
+      !(psPscv0ExprConstants type).any (psNameEq dependency))
+    "checked proof body or public expected type lost its dependency boundary"
+  let some receipt := output.moduleProfiles.find? (fun item => item.name == library)
+    | fail "proof abstraction module receipt missing"
+  ensure (receipt.interface.declarations.any (fun declaration =>
+        psNameEq (psDeclarationName declaration) proofName) &&
+      !receipt.interface.declarations.any (fun declaration =>
+        psNameEq (psDeclarationName declaration) dependency))
+    "proof abstraction exposed its private dependency or lost the public theorem type"
+  let some declaration := output.prepared.declarations.find?
+      (fun declaration => psNameEq (psDeclarationName declaration) owner)
+    | fail "proof abstraction source owner missing"
+  let expressions := psDeclarationType declaration ::
+    (psDeclarationValue declaration).toList
+  ensure (expressions.any (fun expression =>
+        (psPscv0ExprConstants expression).any (psNameEq proofName)) &&
+      !expressions.any (fun expression =>
+        (psPscv0ExprConstants expression).any (psNameEq dependency)))
+    "exposed source did not replace the private proof with its checked public type"
+  let some origin := output.origins.find? (fun item => item.moduleName == library)
+    | fail "proof abstraction project origin missing"
+  ensure (origin.batches.any (fun batch =>
+      batch.members.any (fun member => psNameEq member.name owner) &&
+      batch.members.any (fun member => psNameEq member.name proofName) &&
+      batch.sourceInfo.any (fun info =>
+        info.proofBoundaries.any psElabExposedProofIsBoundaryName)))
+    "proof abstraction lost its actual source batch or tactic provenance"
+  return proofName
+
+private def checkExposedProofs : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let privateProof :=
+    psNameAppendStr (psNameAppendStr (psRootName "$psc0Private") "Library") "coreSecretEq"
+  let mut localPairs : List String := []
+  let mut importedPairs : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := importVisibilityInput kind "Library" "" exposedProofPieces
+    let client := importVisibilityInput kind "Entry" "public import Library\n" exposedProofClient
+    let output ← prepare profile "Entry" [client, library]
+    let _ ← admit seed output.admissions
+    localPairs := localPairs ++ [output.admissions]
+    ensure (!output.prepared.declarations.any psElabExposedProofDeclarationHasBoundary)
+      "typed proof marker survived final admission preparation"
+    let keepProof ← checkExposedProofArtifacts output "Library"
+      (psRootName "coreProofKeep") privateProof
+    let _ ← checkExposedProofArtifacts output "Library"
+      (psRootName "coreProofLet") privateProof
+    let _ ← checkExposedProofArtifacts output "Library"
+      (psRootName "coreProofSignature") privateProof
+    checkExposedProofMissing seed output.admissions privateProof
+    checkExposedProofMissing seed output.admissions keepProof
+    let direct := importVisibilityInput kind "Library" "" [
+      exposedProofSecret,
+      ("public abbrev coreProofDirect (A : Type) (x : A) : A := (fun (_h : x = x) => x) (coreSecretEq A x)\n",
+       "abbrev coreProofDirect(A: Type, x: A): A := (fun (_h: x = x) => x)(coreSecretEq(A, x))\n")]
+    refuse profile "Library" [direct] true
+      "PSCV0-MODULE: exposed body references private name"
+    let dataProof := importVisibilityInput kind "Library" "" [
+      ("private def coreSecretValue (A : Type) (x : A) : A := x\n",
+       "private function coreSecretValue(A: Type, x: A): A := x\n"),
+      ("public abbrev coreProofData (A : Type) (x : A) : A := by exact coreSecretValue A x\n",
+       "abbrev coreProofData(A: Type, x: A): A := by { exact coreSecretValue(A, x) }\n")]
+    refuse profile "Library" [dataProof] true
+      "PSCV0-MODULE: exposed body references private name"
+    let hiddenType := importVisibilityInput kind "Library" "" [
+      ("private def CoreHiddenProp (A : Type) (x : A) : Prop := x = x\n",
+       "private function CoreHiddenProp(A: Type, x: A): Prop := x = x\n"),
+      ("private theorem coreHiddenProof (A : Type) (x : A) : CoreHiddenProp A x := by rfl\n",
+       "private theorem coreHiddenProof(A: Type, x: A): CoreHiddenProp(A, x) := by { rfl }\n"),
+      ("public abbrev coreProofHiddenType (A : Type) (x : A) : A := (fun (_h : CoreHiddenProp A x) => x) (by exact coreHiddenProof A x)\n",
+       "abbrev coreProofHiddenType(A: Type, x: A): A := (fun (_h: CoreHiddenProp(A, x)) => x)(by { exact coreHiddenProof(A, x) })\n")]
+    refuse profile "Library" [hiddenType] true
+      "PSCV0-MODULE: public signature references private name"
+    let privateClient := importVisibilityInput kind "Entry" "public import Library\n" [
+      ("public theorem coreProofPrivateAlias (A : Type) (x : A) : x = x := coreSecretEq A x\n",
+       "theorem coreProofPrivateAlias(A: Type, x: A): x = x := coreSecretEq(A, x)\n")]
+    refuse profile "Entry" [privateClient, library] true
+      "PSCV0-SCOPE: unknown name coreSecretEq"
+    let provider := importVisibilityInput kind "ProofProvider" "" exposedProofImportProvider
+    let bridge := importVisibilityInput kind "Library" "import ProofProvider\n"
+      exposedProofImportLibrary
+    let consumer := importVisibilityInput kind "Entry" "public import Library\n"
+      exposedProofImportClient
+    let imported ← prepare profile "Entry" [consumer, bridge, provider]
+    let _ ← admit seed imported.admissions
+    importedPairs := importedPairs ++ [imported.admissions]
+    let importedName := psRootName "coreImportedSecretEq"
+    let _ ← checkExposedProofArtifacts imported "Library"
+      (psRootName "coreImportedProofKeep") importedName
+    checkExposedProofMissing seed imported.admissions importedName
+    let importClient := importVisibilityInput kind "Entry" "public import Library\n" [
+      ("public theorem coreProofImportAlias (A : Type) (x : A) : x = x := coreImportedSecretEq A x\n",
+       "theorem coreProofImportAlias(A: Type, x: A): x = x := coreImportedSecretEq(A, x)\n")]
+    refuse profile "Entry" [importClient, bridge, provider] true
+      "PSCV0-SCOPE: unknown name coreImportedSecretEq"
+  let [leanLocal, psLocal] := localPairs | fail "local proof pair missing"
+  let [leanImported, psImported] := importedPairs | fail "imported proof pair missing"
+  ensure (leanLocal == psLocal && leanImported == psImported)
+    "proof abstraction differs between the two selected readers"
+  let sourceName := psSyntaxNameAppendSegments ["$psc0ProofBoundary", "0"] .anonymous
+  ensure (!psElabExposedProofIsBoundaryName sourceName)
+    "source string segments forged a numeric proof identity"
+  let counterfeit := PsExpr.letE (.num psElabExposedProofBoundaryName 0)
+    (.sortE .zero) (.sortE .zero) (.bvar 0)
+  match psElabExposedProofVisit 32 true (psRootName "counterfeit") []
+      psLocalEmpty { environment := profile.baseEnvironment } counterfeit with
+  | .error (.data message) =>
+      ensure (message.startsWith "PSCV0-PROOF-ABSTRACTION-ORIGIN:")
+        "counterfeit proof boundary reached a different refusal"
+  | .error _ => fail "counterfeit proof boundary returned an unrelated elaboration refusal"
+  | .ok _ => fail "counterfeit proof marker was accepted without checked source provenance"
+  IO.println "PSCV0_CORE_EXPOSED_PROOFS: four paired admitted projects, ten source refusals, closed checked private proofs, typed let expansion, exact dependencies, public header proofs, private import closure, source provenance and independent missing-proof kernel refusals passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -1570,4 +1760,5 @@ def main : IO Unit := do
   checkLegacyMetadata
   checkLegacyWhere
   checkRegisteredValues
+  checkExposedProofs
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

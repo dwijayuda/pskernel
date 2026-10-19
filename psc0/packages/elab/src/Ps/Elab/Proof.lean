@@ -341,4 +341,16 @@ def psElabProof (elaborate : PsElaborator) (context : PsElabContext)
   if !state.goals.isEmpty then throw (.proof "unsolved goals")
   let value := psMetaInstantiate state.context.metaContext fresh.expr
   if psExprHasTermMeta value then throw (.proof "unresolved proof")
-  psElabResolvedTerm (psElabLeaveScope context state.context) value expected
+  let checked ← psElabResolvedTerm (psElabLeaveScope context state.context) value expected
+  if !scope.abstractProofs then return checked
+  let target := psMetaInstantiate checked.context.metaContext target
+  let level ← psElabExpressionSort checked.context target
+  if !psLevelEquivalent level .zero then return checked
+  if let .fvar _ := checked.term then return checked
+  -- Source names contain only string components; this numeric identity is
+  -- allocated by the actual checked proof and retained in its source batch.
+  let boundary := PsName.num psElabExposedProofBoundaryName root
+  let context := { checked.context with
+    proofBoundariesRev := boundary :: checked.context.proofBoundariesRev }
+  psElabResolvedTerm context
+    (.letE boundary target checked.term (.bvar 0)) (some target)

@@ -121,7 +121,7 @@ def psScopeMutualMember (resolver : PsScopeResolver)
   let headerResolver := { resolver with mutualAliases := [] }
   let binders ← psScopeBinders (psScopeTerm 4096 headerResolver) [] binders
   let type ← psScopeTerm 4096 headerResolver binders.bound type
-  let value ← psScopeTerm 4096 resolver binders.bound value
+  let value ← psScopeTerm 4096 { resolver with abstractProofs := false } binders.bound value
   return {
     source := if isPartial then
         .partialDefinition (psScopeCanonicalNameSyntax name) binders.binders type.term value.term span

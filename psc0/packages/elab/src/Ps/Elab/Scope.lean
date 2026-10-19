@@ -18,6 +18,7 @@ structure PsScopeFrame where
   saved : PsCommandScope
 
 structure PsScopeResolver where
+  abstractProofs : Bool := false
   environment : PsEnvironment
   scope : PsCommandScope
   selfName : Option (List String) := none
@@ -310,6 +311,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       let used ← psScopeTacticDependencies fuel
         (psScopeTerm fuel { resolver with deferProofNames := true }) bound tactics
       return { term := .byE tactics {
+        abstractProofs := resolver.abstractProofs
         namePrefix := resolver.scope.namePrefix, opened := resolver.scope.opened,
         privateAliases := resolver.privateAliases
         mutualAliases := resolver.mutualAliases

@@ -33,6 +33,7 @@ structure PsElabSourceInfo where
   owner : PsName
   metaContext : PsMetaContext
   entries : List PsElabInfoEntry
+  proofBoundaries : List PsName := []
 
 def psElabInfoExpressions : PsElabInfo → List PsExpr
   | .reference _ _ _ term type => [term, type]

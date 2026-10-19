@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases()
 
 
 def visibility_cases():
@@ -399,8 +399,23 @@ def registered_value_cases():
     return [
         ("RegisteredProvider", "module\npublic abbrev coreRegisteredIdentity (A : Type) (x : A) := x\npublic abbrev coreRegisteredWhere (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := y\npublic class CoreRegisteredEcho (A : Type) where\n  run : A -> A\npublic instance coreRegisteredEcho {A : Type} : CoreRegisteredEcho A where\n  run := fun (x : A) => x\npublic class CoreRegisteredLaw (A : Type) (x : A) : Prop where\n  selfEq : x = x\npublic instance coreRegisteredLaw {A : Type} (x : A) : CoreRegisteredLaw A x where\n  selfEq := by rfl\n@[default_instance 700] public def coreRegisteredDefault {A : Type} := ({ run := fun (x : A) => x } : CoreRegisteredEcho A)\n", ()),
         ("RegisteredClient", "module\npublic import RegisteredProvider\npublic theorem coreRegisteredIdentityRfl (A : Type) (x : A) : coreRegisteredIdentity A x = x := by rfl\npublic theorem coreRegisteredWhereRfl (A : Type) (x : A) : coreRegisteredWhere A x = x := by rfl\npublic theorem coreRegisteredHelperRfl (A : Type) (x : A) : coreRegisteredWhere.helper A x = x := by rfl\npublic theorem coreRegisteredEchoRfl (A : Type) (x : A) : CoreRegisteredEcho.run x (A := A) = x := by rfl\npublic theorem coreRegisteredProofValue (A : Type) (x : A) : CoreRegisteredLaw A x := coreRegisteredLaw x\npublic theorem coreRegisteredProofField (A : Type) (x : A) : x = x := CoreRegisteredLaw.selfEq (A := A) (x := x)\n", ()),
-        ("RegisteredPrivateHelperLeak", "module\nprivate def coreRegisteredHidden (A : Type) (x : A) : A := x\npublic abbrev coreRegisteredLeak (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := coreRegisteredHidden A y\n", ("coreRegisteredHidden",)),
-        ("RegisteredNonClassDefault", "module\n@[default_instance] public def coreRegisteredBad (A : Type) (x : A) := x\n", ("class",)),
+        ("RegisteredPrivateHelperLeak", "module\nprivate def coreRegisteredHidden (A : Type) (x : A) : A := x\npublic abbrev coreRegisteredLeak (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := coreRegisteredHidden A y\n", ("Unknown identifier `coreRegisteredHidden`", "private declaration",)),
+        ("RegisteredNonClassDefault", "module\n@[default_instance] public def coreRegisteredBad (A : Type) (x : A) := x\n", ("invalid default instance `coreRegisteredBad`", "type must be of the form",)),
+    ]
+
+
+def exposed_proof_cases():
+    return [
+        ("ProofBoundaryProvider", "module\nprivate theorem coreSecretEq (A : Type) (x : A) : x = x := by rfl\npublic abbrev coreProofKeep (A : Type) (unused x : A) : A := (fun (_h : x = x) => x) (by exact coreSecretEq A x)\npublic abbrev coreProofLet (A : Type) (unused x : A) : A :=\n  let witness : A := x\n  (fun (_h : witness = witness) => x) (by exact coreSecretEq A witness)\npublic def coreProofSignature (A : Type) (x : A) : (fun (_h : x = x) => A) (by exact coreSecretEq A x) := x\n", ()),
+        ("ProofBoundaryClient", "module\npublic import ProofBoundaryProvider\npublic theorem coreProofKeepRfl (A : Type) (unused x : A) : coreProofKeep A unused x = x := by rfl\npublic theorem coreProofLetRfl (A : Type) (unused x : A) : coreProofLet A unused x = x := by rfl\npublic def coreProofSignatureUse (A : Type) (x : A) : A := coreProofSignature A x\n", ()),
+        ("ProofBoundaryDirectPrivate", "module\nprivate theorem coreSecretEq (A : Type) (x : A) : x = x := by rfl\npublic abbrev coreProofDirect (A : Type) (x : A) : A := (fun (_h : x = x) => x) (coreSecretEq A x)\n", ("coreSecretEq",)),
+        ("ProofBoundaryData", "module\nprivate def coreSecretValue (A : Type) (x : A) : A := x\npublic abbrev coreProofData (A : Type) (x : A) : A := by exact coreSecretValue A x\n", ("coreSecretValue",)),
+        ("ProofBoundaryHiddenType", "module\nprivate def CoreHiddenProp (A : Type) (x : A) : Prop := x = x\nprivate theorem coreHiddenProof (A : Type) (x : A) : CoreHiddenProp A x := by rfl\npublic abbrev coreProofHiddenType (A : Type) (x : A) : A := (fun (_h : CoreHiddenProp A x) => x) (by exact coreHiddenProof A x)\n", ("CoreHiddenProp",)),
+        ("ProofBoundaryPrivateAlias", "module\npublic import ProofBoundaryProvider\npublic theorem coreProofPrivateAlias (A : Type) (x : A) : x = x := coreSecretEq A x\n", ("coreSecretEq",)),
+        ("ProofBoundaryImportProvider", "module\npublic theorem coreImportedSecretEq (A : Type) (x : A) : x = x := by rfl\n", ()),
+        ("ProofBoundaryImportLibrary", "module\nimport ProofBoundaryImportProvider\npublic abbrev coreImportedProofKeep (A : Type) (x : A) : A := (fun (_h : x = x) => x) (by exact coreImportedSecretEq A x)\n", ()),
+        ("ProofBoundaryImportClient", "module\npublic import ProofBoundaryImportLibrary\npublic theorem coreImportedProofRfl (A : Type) (x : A) : coreImportedProofKeep A x = x := by rfl\n", ()),
+        ("ProofBoundaryImportAlias", "module\npublic import ProofBoundaryImportLibrary\npublic theorem coreProofImportAlias (A : Type) (x : A) : x = x := coreImportedSecretEq A x\n", ("coreImportedSecretEq",)),
     ]
 
 
@@ -494,9 +509,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 54, "oracle must contain 54 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 30,
-                "oracle must contain 30 expected successful compilations")
+        require(len(fixtures) == 64, "oracle must contain 64 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 35,
+                "oracle must contain 35 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -560,8 +575,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 30
-        report["expected_refusals"] = 24
+        report["successful_compilations"] = 35
+        report["expected_refusals"] = 29
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -590,8 +605,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 54 cases passed "
-          "(30 successful compilations, 24 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 64 cases passed "
+          "(35 successful compilations, 29 expected refusals)", flush=True)
     return 0
 
 

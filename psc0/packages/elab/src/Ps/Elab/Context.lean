@@ -86,6 +86,8 @@ structure PsElabContext where
   -- Each metavariable owns its original complete branch context.
   wellFoundedGoalsRev : List (Nat × PsSourceSpan) := []
   wellFoundedCallsRev : List PsElabRecursionCall := []
+  -- Actual tactic boundaries, retained with source info across typed closure.
+  proofBoundariesRev : List PsName := []
 
 def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
@@ -145,7 +147,8 @@ def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
     pending := inner.pending
     infoRev := inner.infoRev
     wellFoundedGoalsRev := inner.wellFoundedGoalsRev
-    wellFoundedCallsRev := inner.wellFoundedCallsRev }
+    wellFoundedCallsRev := inner.wellFoundedCallsRev
+    proofBoundariesRev := inner.proofBoundariesRev }
 
 def psElabContextWithEnvironment (context : PsElabContext)
     (environment : PsEnvironment) : PsElabContext :=
@@ -159,5 +162,6 @@ def psElabRecordInfo (context : PsElabContext) (info : PsElabInfo) : PsElabConte
   else context
 
 def psElabFinishSourceInfo (context : PsElabContext) (owner : PsName) : PsElabSourceInfo :=
-  { owner, metaContext := context.metaContext, entries := context.infoRev.reverse }
+  { owner, metaContext := context.metaContext, entries := context.infoRev.reverse
+    proofBoundaries := context.proofBoundariesRev.reverse }
 

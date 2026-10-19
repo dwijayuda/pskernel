@@ -81,6 +81,8 @@ inductive PsSyntaxLevel where
   | imax (left right : PsSyntaxLevel)
 
 structure PsSyntaxProofScope where
+  -- Internal exporting scope, supplied by the command owner; not source syntax.
+  abstractProofs : Bool := false
   namePrefix : List String := []
   opened : List (List String) := []
   -- Module-owned private names are resolved within tactic terms, never

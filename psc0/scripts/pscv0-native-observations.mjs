@@ -2,6 +2,9 @@
 // The signed vectors are also computed independently by pinned native Lean
 // in Pscv0NativeTests.signedNativeOracle; all three emitted runtimes agree.
 export const observations = [
+  { name: "coreElimRecursiveLeafAnswer", args: null, expected: 13n },
+  { name: "coreElimRecursiveZeroAnswer", args: null, expected: 2n },
+  { name: "coreElimRecursiveSevenAnswer", args: null, expected: 9n },
   { name: "coreElimFunctionLeafAnswer", args: null, expected: 13n },
   { name: "coreElimFunctionNodeAnswer", args: null, expected: 17n },
   { name: "coreElimDependentFunctionAnswer", args: null, expected: 19n },

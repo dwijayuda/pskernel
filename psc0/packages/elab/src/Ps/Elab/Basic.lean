@@ -831,3 +831,9 @@ def psElabExpressionSort (context : PsElabContext) (type : PsExpr) :
   let sort ← (psInferType context.environment context.metaContext context.localContext type).mapError PsElabError.infer
   (psInferEnsureSort context.environment context.metaContext context.localContext sort).mapError PsElabError.infer
 
+
+def psElabExposedProofBoundaryName : PsName := psRootName "$psc0ProofBoundary"
+
+def psElabExposedProofIsBoundaryName : PsName → Bool
+  | .num parent _ => psNameEq parent psElabExposedProofBoundaryName
+  | _ => false

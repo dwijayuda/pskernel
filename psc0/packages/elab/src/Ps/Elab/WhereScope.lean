@@ -101,6 +101,7 @@ def psScopePreDefinition (resolver : PsScopeResolver) (member : PsSyntaxMutualMe
   let qualifiedFrame := (locals.zip helperAliases).map fun (localDefinition, localAlias) =>
     (name.segments ++ localDefinition.name.segments, localAlias.segments)
   let bodyResolver := { resolver with
+    abstractProofs := resolver.abstractProofs && exposesBody
     localAliases := localFrame ++ resolver.localAliases
     mutualAliases := qualifiedFrame ++ resolver.mutualAliases }
   let parentBound := binders.bound.filter (fun key => !helperNames.contains key)

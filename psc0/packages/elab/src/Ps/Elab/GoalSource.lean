@@ -6,6 +6,7 @@ def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
   let bound := context.localContext.declarations.map fun entry =>
     psNameLastComponent (psLocalDeclUserName entry)
   let resolved ← psScopeTerm 4096 {
+    abstractProofs := scope.abstractProofs
     environment := context.environment
     scope := { namePrefix := scope.namePrefix, opened := scope.opened }
     privateAliases := scope.privateAliases

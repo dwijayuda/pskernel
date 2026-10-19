@@ -1,3 +1,4 @@
+import Ps.Elab.ExposedProofs
 import Ps.Elab.Scope
 import Ps.Elab.Deriving
 import Ps.Elab.Mutual
@@ -18,7 +19,8 @@ structure PsCommandState where
   isModule : Bool := false
   privateAliases : List (List String × List String) := []
 
-def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration) :
+def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration)
+    (exposedBody : Bool := false) :
     Except PsElabError PsSyntaxDeclaration := do
   let sourceName := (psElabOriginSource source).fst
   let sourceQualified := psScopeQualified resolver.scope sourceName
@@ -26,6 +28,9 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   let name := psScopeCanonicalNameSyntax { sourceQualified with segments := resolved }
   let resolver := { resolver with selfName := some resolved }
   let visit := psScopeTerm 4096 resolver
+  let bodyResolver := { resolver with
+    abstractProofs := resolver.abstractProofs && exposedBody }
+  let bodyVisit := psScopeTerm 4096 bodyResolver
   match source with
   | .noncomputableDefinition .. =>
     throw (.data "PSCV0-NONCOMPUTABLE-BATCH: noncomputable policy requires typed command-batch elaboration")
@@ -41,11 +46,11 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let isFixedpoint := match source with | .fixedpointDefinition _ _ _ _ _ => true | _ => false
     let binders ← psScopeBinders visit [] binders
     let type ← visit binders.bound type
-    let value ← visit binders.bound value
+    let value ← bodyVisit binders.bound value
     let termination ← match source with
       | .wellFoundedDefinition _ _ _ _ suffix _ => do
-        let measure ← visit binders.bound suffix.measure
-        let proof ← suffix.decreasing.mapM (visit binders.bound)
+        let measure ← bodyVisit binders.bound suffix.measure
+        let proof ← suffix.decreasing.mapM (bodyVisit binders.bound)
         let retained := { suffix with measure := measure.term, decreasing := proof.map (·.term) }
         let used := psScopeUnion measure.used (proof.map (·.used) |>.getD [])
         pure (some (retained, used))
@@ -65,7 +70,7 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
         (fun binder => (psSyntaxBinderNames binder.fst).map PsSyntaxTerm.reference)
     let value ←
       if selfArguments.isEmpty then pure value
-      else psScopeTerm 4096 { resolver with selfArguments } binders.bound value.term
+      else psScopeTerm 4096 { bodyResolver with selfArguments } binders.bound value.term
     if isPartial then
       return .partialDefinition name (captured ++ binders.binders) type.term value.term span
     if isFixedpoint then
@@ -155,6 +160,11 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
 
 -- Registration is applied to the complete checked declaration batch. The
 -- inferred and explicit-header routes use this same metadata owner.
+def psElabCommandMayExposeProofs : Option PsSyntaxRegistration → Bool
+  | some .abbrevDecl | some (.instanceDecl _)
+  | some (.defaultInstanceDecl _ (some _)) => true
+  | _ => false
+
 def psElabCommandRegisterDeclaration (environment : PsEnvironment)
     (name : PsName) (registration : Option PsSyntaxRegistration) :
     Except PsElabError PsEnvironment :=
@@ -226,7 +236,8 @@ def psElabCommandPreDefinitions (state : PsCommandState)
       ["$psc0Private"] ++ state.moduleIdentity.splitOn "."
     else []
   let scopedMembers ← (members.zip peerAliases).mapM fun (member, alias) =>
-    psScopePreDefinition resolver member
+    psScopePreDefinition
+      { resolver with abstractProofs := state.isModule && !member.isPrivate } member
       (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)
       inheritedPartial privateAuxiliaryPrefix
   -- Pinned definition bodies see the complete checked section telescope.
@@ -340,7 +351,9 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     else state.privateAliases
   let source ← psScopeDeclaration {
     environment := state.environment, scope := state.scope,
-    privateAliases := aliases } source
+    privateAliases := aliases
+    abstractProofs := state.isModule && !isPrivate } source
+      (psElabCommandMayExposeProofs registration)
   let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
   let originBatch ← match source with
     | .partialDefinition sourceName binders type value _ => do
@@ -461,7 +474,8 @@ def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntax
     (entry.fst, ["$psc0Mutual", psNatToString entry.snd])
   let resolver := { resolver with mutualNames := names, mutualAliases := localAliases }
   let scopedMembers ← (members.zip localAliases).mapM fun entry =>
-    psScopeMutualMember resolver entry.fst
+    psScopeMutualMember
+      { resolver with abstractProofs := state.isModule && !entry.fst.isPrivate } entry.fst
       (PsSyntaxName.mk entry.snd.snd (psElabOriginSource entry.fst.declaration).snd)
   -- Pinned MutualDef.collectUsed/removeUnusedVars closes section variables
   -- over every main header/body before SCC partition, including disconnected
@@ -620,11 +634,13 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   -- Pinned Lean closes remaining namespace/section scopes at end of file.
   -- Only declarations and their metadata leave this program owner; scope frames
   -- and local resolution settings cannot escape into the next module.
-  return {
+  let result : PsElabModuleWithOriginsResult := {
     result := { environment := state.environment, declarations := state.declarationsRev.reverse }
     origins := state.originsRev.reverse
     privateNames := state.privateNames
     exposedNames := state.exposedNames }
+  if program.isModule then psElabAbstractExposedProofs environment result
+  else pure result
 
 def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
     Except PsElabError PsElabModuleResult :=

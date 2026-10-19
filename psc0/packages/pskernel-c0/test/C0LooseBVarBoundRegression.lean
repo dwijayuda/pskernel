@@ -1,4 +1,37 @@
 import Ps.KernelCore.Core.Expr
+import Lean
+
+private theorem c0_bound_lt_max (o a b : Nat) :
+    (o < Nat.max a b) ↔ (o < a ∨ o < b) := by omega
+
+private theorem c0_bound_lt_pred (o a : Nat) :
+    (o < a - 1) ↔ (o + 1 < a) := by omega
+
+private theorem c0_bound_lt_succ (o a : Nat) :
+    (o < a + 1) ↔ (o ≤ a) := by omega
+
+private theorem c0_bound_decide_max (o a b : Nat) :
+    decide (o < Nat.max a b) =
+      (decide (o < a) || decide (o < b)) := by
+  by_cases h : o < a <;> by_cases k : o < b <;>
+    simp_all [c0_bound_lt_max]
+
+private theorem c0_bound_decide_pred (o a : Nat) :
+    decide (o < a - 1) = decide (o + 1 < a) := by
+  by_cases h : o < a - 1 <;> simp_all [c0_bound_lt_pred]
+
+/-- All-input complete equivalence to the original recursive source
+    algorithm, including every binding-depth and let-domain case.
+    This proof is checked by Lean 4.35.0, not runtime metadata. -/
+theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
+    psKernelC0HasLooseBVarFast expr offset =
+      psKernelExprHasLooseAt expr offset := by
+  induction expr generalizing offset <;>
+    simp_all [psKernelC0HasLooseBVarFast,
+      PsKernelExpr.psKernelC0LooseBVarBound,
+      psKernelExprHasLooseAt, c0_bound_decide_max, c0_bound_decide_pred,
+      c0_bound_lt_succ]
+
 
 /-!
 The old recursive oracle deliberately runs only on small expressions. The
@@ -29,7 +62,7 @@ def main : IO Unit := do
       let original := psKernelExprHasLooseAt expr offset
       let fast := psKernelC0HasLooseBVarFast expr offset
       let _theorem : fast = original :=
-        psKernelC0HasLooseBVarFast_source expr offset
+        c0LooseBVarBound_source expr offset
       if fast != original then
         throw (IO.userError "native loose-bound metadata differs from source oracle")
   let closed := c0LooseBoundShared 4000 (.const a [])
@@ -37,10 +70,10 @@ def main : IO Unit := do
   let deep := c0LooseBoundShared 4000 (.bvar 128)
   let _closed : psKernelC0HasLooseBVarFast closed 0 =
     psKernelExprHasLooseAt closed 0 :=
-    psKernelC0HasLooseBVarFast_source closed 0
+    c0LooseBVarBound_source closed 0
   let _free : psKernelC0HasLooseBVarFast free 0 =
     psKernelExprHasLooseAt free 0 :=
-    psKernelC0HasLooseBVarFast_source free 0
+    c0LooseBVarBound_source free 0
   let start ← IO.monoNanosNow
   if psKernelC0HasLooseBVarFast closed 0 then
     throw (IO.userError "closed immutable DAG misclassified")

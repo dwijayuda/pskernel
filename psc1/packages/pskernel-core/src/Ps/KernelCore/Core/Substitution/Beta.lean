@@ -68,15 +68,26 @@ def psKernelExprConsumeLambdaSpineWithFuel
         | _ =>
             Prod.mk fn count
 
+def psKernelC0ConsumeLambdaSpineLinear
+    (fn : PsKernelExpr)
+    (args : List PsKernelExpr)
+    (count : Nat) : Prod PsKernelExpr Nat :=
+  match args with
+  | List.nil => Prod.mk fn count
+  | List.cons _ rest =>
+      match fn with
+      | PsKernelExpr.lam _ _ body _ =>
+          psKernelC0ConsumeLambdaSpineLinear body rest (Nat.succ count)
+      | _ => Prod.mk fn count
+
 def psKernelExprConsumeLambdaSpine
     (fn : PsKernelExpr)
     (args : List PsKernelExpr)
     (count : Nat) :
     Prod PsKernelExpr Nat :=
-  psKernelExprConsumeLambdaSpineWithFuel
-    (Nat.succ (psKernelExprNodeCount fn))
+  psKernelC0ConsumeLambdaSpineLinear
     fn
-    args
+    (List.drop count args)
     count
 
 def psKernelExprCheapBetaReduce
@@ -122,3 +133,93 @@ def psKernelExprCheapBetaReduce
           (psKernelExprListDrop consumed args)
   | _ =>
       expr
+
+
+/-
+C0 performance port: one-pass beta spine selection without counting the
+entire lambda term or repeatedly taking and reversing argument prefixes.
+The exact same source expression semantics, WHNF fuel and error paths remain.
+No indexed DAG engine, new axiom, or native-only implementation is imported.
+-/
+def psKernelC0BetaSpineWorker
+    (args : List PsKernelExpr) :
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Option
+      (Prod
+        PsKernelExpr
+        (Prod
+          (List PsKernelExpr)
+          (List PsKernelExpr))) :=
+  match args with
+  | List.nil =>
+      fun
+        (_fn : PsKernelExpr)
+        (_reversed : List PsKernelExpr) =>
+        Option.none
+  | List.cons arg rest =>
+      let smaller :
+          PsKernelExpr ->
+          List PsKernelExpr ->
+          Option
+            (Prod
+              PsKernelExpr
+              (Prod
+                (List PsKernelExpr)
+                (List PsKernelExpr))) :=
+        psKernelC0BetaSpineWorker rest;
+      fun
+        (fn : PsKernelExpr)
+        (reversed : List PsKernelExpr) =>
+        match fn with
+        | PsKernelExpr.lam _ _ body _ =>
+            let selected := List.cons arg reversed;
+            match rest with
+            | List.nil =>
+                Option.some
+                  (Prod.mk body
+                    (Prod.mk selected List.nil))
+            | List.cons _ _ =>
+                match body with
+                | PsKernelExpr.lam _ _ _ _ =>
+                    smaller body selected
+                | _ =>
+                    Option.some
+                      (Prod.mk body
+                        (Prod.mk selected rest))
+        | _ =>
+            Option.none
+
+def psKernelC0BetaSpinePlan
+    (fn : PsKernelExpr)
+    (args : List PsKernelExpr) :
+    Option
+      (Prod
+        PsKernelExpr
+        (Prod
+          (List PsKernelExpr)
+          (List PsKernelExpr))) :=
+  psKernelC0BetaSpineWorker args fn List.nil
+
+def psKernelC0BetaSpineApply
+    (plan :
+      Prod PsKernelExpr
+        (Prod
+          (List PsKernelExpr)
+          (List PsKernelExpr))) :
+    PsKernelExpr :=
+  let body := Prod.fst plan;
+  let selectedRev := Prod.fst (Prod.snd plan);
+  let remaining := Prod.snd (Prod.snd plan);
+  -- C0 single-binder specialization. The common one-argument beta case
+  -- avoids the generic list-substitution interpreter; multi-binder spines
+  -- retain the existing simultaneous instantiation order.
+  let opened :=
+    match selectedRev with
+    | List.cons replacement List.nil =>
+        psKernelExprInstantiate1 body replacement
+    | _ =>
+        psKernelExprInstantiate body selectedRev;
+  psKernelExprApplyArgsCheap
+    opened
+    remaining

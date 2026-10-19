@@ -9,6 +9,30 @@ private def requireKernel
   else
     throw (IO.userError s!"PSC1_KERNEL_REGRESSION FAIL: {caseName}")
 
+
+-- Exact reference behavior, retained only in tests to compare C0's source
+-- rewrite with the previously accepted beta-spine algorithm.
+private def betaReferencePlan (fn : PsKernelExpr) (args : List PsKernelExpr) :
+    PsKernelExpr :=
+  let result := psKernelWhnfCountLambdas fn args.length
+  match Prod.fst result with
+  | PsKernelExpr.lam _ _ body _ =>
+      psKernelExprApplyArgsCheap
+        (psKernelExprInstantiateRev body (args.take (Prod.snd result)))
+        (args.drop (Prod.snd result))
+  | _ => psKernelExprApplyArgsCheap fn args
+
+private def betaOptimizedPlan (fn : PsKernelExpr) (args : List PsKernelExpr) :
+    PsKernelExpr :=
+  match psKernelC0BetaSpinePlan fn args with
+  | Option.none => psKernelExprApplyArgsCheap fn args
+  | Option.some plan => psKernelC0BetaSpineApply plan
+
+private def checkBetaPort (caseName : String) (fn : PsKernelExpr)
+    (args : List PsKernelExpr) : IO Unit := do
+  requireKernel caseName
+    (psKernelExprEq (betaReferencePlan fn args) (betaOptimizedPlan fn args))
+
 def main : IO Unit := do
   let fName := PsKernelName.str PsKernelName.anonymous "bound"
   let localExpr := PsKernelExpr.fvar fName
@@ -52,6 +76,32 @@ def main : IO Unit := do
     (!psKernelExprPairSetContains restored.success localExpr closed)
   requireKernel "scope drops child negative defeq cache"
     (!psKernelExprPairSetContains restored.failure localExpr closed)
+
+  let sort0 := PsKernelExpr.sort PsKernelLevel.zero
+  let betaName := PsKernelName.str PsKernelName.anonymous "beta"
+  let idLam := PsKernelExpr.lam betaName sort0
+      (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let constantLam := PsKernelExpr.lam betaName sort0 sort0
+      PsKernelBinderInfo.default
+  let twoLams := PsKernelExpr.lam betaName sort0
+      (PsKernelExpr.lam betaName sort0 (PsKernelExpr.bvar 1)
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default
+  let oneArg := [sort0]
+  let twoArgs := [sort0, PsKernelExpr.bvar 0]
+  let threeArgs := [sort0, PsKernelExpr.bvar 0, sort0]
+  checkBetaPort "C0 beta identity" idLam oneArg
+  checkBetaPort "C0 beta nondependent body" constantLam oneArg
+  checkBetaPort "C0 beta two binders" twoLams twoArgs
+  checkBetaPort "C0 beta argument excess" twoLams threeArgs
+  checkBetaPort "C0 beta argument shortfall" twoLams oneArg
+  checkBetaPort "C0 beta unchanged nonlambda" sort0 oneArg
+  requireKernel "C0 linear consumed lambda spine matches old fuel walker"
+    (let old := psKernelExprConsumeLambdaSpineWithFuel
+        (Nat.succ (psKernelExprNodeCount twoLams)) twoLams twoArgs 0
+     let newer := psKernelExprConsumeLambdaSpine twoLams twoArgs 0
+     Prod.snd old == Prod.snd newer &&
+       psKernelExprEq (Prod.fst old) (Prod.fst newer))
   let sample := "héllo"
   let p := String.Pos.Raw.mk 0
   requireKernel "Lean 4.34 string atEnd alias parity"

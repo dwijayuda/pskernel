@@ -72,3 +72,47 @@ jobs:
         run: |
           set -euo pipefail
           lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+
+      - name: Reconstruct all kernel sources in canonical .ps
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/bootstrap-project.mjs \
+            packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean \
+            dist/pskernel-selfhost/workspace
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import { assertBootstrapWorkspaceManifest } from './scripts/bootstrap-manifest.mjs';
+          const workspace='dist/pskernel-selfhost/workspace';
+          const manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));
+          if(manifest.sourceCount!==79 || manifest.generated.length!==79)
+            throw Error('PSKERNEL_PORTABLE_FULL_CLOSURE_REQUIRED_79');
+          if(!manifest.generated.every(p=>p.startsWith('packages/pskernel-core/src/Ps/KernelCore/')))
+            throw Error('PSKERNEL_CLOSURE_HAS_UNEXPECTED_MODULES');
+          await assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');
+          console.log('PSKERNEL_CANONICAL_79_PS_SOURCES: PASS');
+          NODE
+      - name: PSC1 checks generated ProofScript kernel
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1 check dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps
+      - name: Install pinned TypeScript 7 for generated portable kernel
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate independent JS kernel from the .ps closure
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          lake exe psc1 build \
+            dist/pskernel-selfhost/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps \
+            --out dist/pskernel-selfhost/pskernel-core.js
+          test -s dist/pskernel-selfhost/pskernel-core.js
+          test -s dist/pskernel-selfhost/pskernel-core.d.ts
+          node --check dist/pskernel-selfhost/pskernel-core.js
+          echo 'PSC1_GENERATED_JS_KERNEL: PASS'

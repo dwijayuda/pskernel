@@ -55,6 +55,7 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import json
+          import os
           from pathlib import Path
           root=Path("../dist/c0-selected-audit")
           full=json.loads((root/"full-wrapper.json").read_text())
@@ -83,7 +84,7 @@ jobs:
               assert len(graph["closureDeclarations"])==graph["closureDeclarationCount"]
               assert len(graph["externalRoots"])==graph["externalRootCount"]
           payload={"schema":"psc0-selected-core-native-separation/1",
-                   "sourceCommit":"${GITHUB_SHA}",
+                   "sourceCommit":os.environ["GITHUB_SHA"],
                    "full":{"sourceModules":len(f(full,"sourceModules")),
                            "sourceDeclarations":full["sourceDeclarations"],
                            "externalRoots":full["externalRootCount"],

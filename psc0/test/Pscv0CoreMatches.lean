@@ -1,6 +1,20 @@
 import Ps.Host.NativeV7
 import PsKernelLean.Admission
 
+inductive IndexedHash : Nat → Type where
+  | intro (n : Nat) (value : Fin n) : IndexedHash n
+  deriving Hashable
+inductive IndexedRepr : Nat → Type where
+  | intro (n : Nat) (value : Fin n) : IndexedRepr n
+  deriving Repr
+inductive IndexedBEq : Nat → Type where
+  | stop : IndexedBEq 0
+  | next (n : Nat) (child : IndexedBEq n) : IndexedBEq (Nat.succ n)
+  deriving BEq
+inductive IndexedDecEq : Nat → Type where
+  | intro (n : Nat) : IndexedDecEq n
+  deriving DecidableEq
+
 namespace CoreM3MatchOracle
 def matchDefault (a : Bool) (h1 : a = true → Nat) (h2 : a = false → Nat) : Nat :=
   match a with
@@ -837,6 +851,28 @@ def m3indexedDeriving (flag : Bool) : UInt64 :=
     (if indexedOriginal == indexedOriginal then 16384 else 0) +
     (if Decidable.decide (self := decEq indexedOriginal indexedOriginal) then 32768 else 0))
 
+theorem corePromotedHashEquation (n : Nat) (value : Fin n) :
+    Hashable.hash (IndexedHash.intro n value) =
+      mixHash (UInt64.ofNat 0) (Hashable.hash value) := by rfl
+
+def m3promotionData (flag : Bool) : UInt64 :=
+  let text := if flag then reprStr (IndexedRepr.intro 3 (Fin.mk 2 (Nat.lt_succ_self 2)))
+    else reprStr (IndexedRepr.intro 1 (Fin.mk 0 (Nat.lt_succ_self 0)))
+  let expected := if flag then "IndexedRepr.intro 3 2" else "IndexedRepr.intro 1 0"
+  let index := if flag then 7 else 2
+  let hashValue := Hashable.hash (IndexedHash.intro (Nat.succ index)
+    (Fin.mk index (Nat.lt_succ_self index)))
+  let expectedHash := mixHash (UInt64.ofNat 0) (Hashable.hash
+    (Fin.mk index (Nat.lt_succ_self index)))
+  UInt64.ofNat ((if text == expected then 1 else 0) +
+    (if IndexedBEq.next 0 IndexedBEq.stop == IndexedBEq.next 0 IndexedBEq.stop then 2 else 0) +
+    (if Decidable.decide (self := decEq (IndexedDecEq.intro index)
+      (IndexedDecEq.intro index)) then 4 else 0) +
+    (if hashValue == expectedHash then 8 else 0))
+
+#guard m3promotionData false == 15
+#guard m3promotionData true == 15
+
 end CoreM3MatchOracle
 
 namespace CoreM3Matches
@@ -1239,6 +1275,11 @@ private def indexedDerivingLeanSource : String :=
 private def indexedDerivingPsSource : String :=
   "universe indexedU\n\ninductive IndexedPayload(A: Type indexedU): Nat -> Type indexedU where {\n  | left(index: Nat, value: A): IndexedPayload(A, index)\n  | right(index: Nat, value: A): IndexedPayload(A, index)\n  | next(index: Nat, value: A, child: IndexedPayload(A, index)):\n      IndexedPayload(A, Nat.succ(index))\n} deriving BEq, DecidableEq\n\nconst indexedOriginal: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, false))\nconst indexedFieldChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, false, IndexedPayload.left(0, false))\nconst indexedChildChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.left(0, true))\nconst indexedCtorChanged: IndexedPayload(Bool, 1) :=\n  IndexedPayload.next(0, true, IndexedPayload.right(0, false))\nconst indexedMajorChanged: IndexedPayload(Bool, 1) := IndexedPayload.right(1, true)\n\ntheorem indexedBEqSame: (indexedOriginal == indexedOriginal) = true := by { rfl }\ntheorem indexedBEqField: (indexedOriginal == indexedFieldChanged) = false := by { rfl }\ntheorem indexedBEqChild: (indexedOriginal == indexedChildChanged) = false := by { rfl }\ntheorem indexedBEqCtor: (indexedOriginal == indexedCtorChanged) = false := by { rfl }\ntheorem indexedBEqMajor: (indexedOriginal == indexedMajorChanged) = false := by { rfl }\ntheorem indexedDecEqSame:\n  Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) = true := by { rfl }\ntheorem indexedDecEqField:\n  Decidable.decide(self := decEq(indexedOriginal, indexedFieldChanged)) = false := by { rfl }\ntheorem indexedDecEqChild:\n  Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) = false := by { rfl }\ntheorem indexedDecEqCtor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) = false := by { rfl }\ntheorem indexedDecEqMajor:\n  Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) = false := by { rfl }\n\ninductive IndexedAtom where { | atom(value: Bool) }\ninstance indexedAtomBEq: BEq IndexedAtom where {\n  beq(_left: IndexedAtom, _right: IndexedAtom): Bool := false\n}\ntheorem indexedBEqUsesActualDictionary:\n  (IndexedPayload.left(0, IndexedAtom.atom(true)) ==\n    IndexedPayload.left(0, IndexedAtom.atom(true))) = false := by { rfl }\n\ninductive IndexedErasedDependency: Nat -> Type where {\n  | intro(value: Nat): IndexedErasedDependency((fun (_: Nat) => 0)(value))\n} deriving BEq, DecidableEq\ntheorem indexedBetaFieldBEq:\n  (IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2)) = false := by { rfl }\ntheorem indexedBetaFieldDecEq:\n  Decidable.decide(self := decEq(IndexedErasedDependency.intro(1),\n    IndexedErasedDependency.intro(2))) = false := by { rfl }\n\ninductive IndexedDependent: Nat -> Type where {\n  | wrap(index: Nat, child: IndexedPayload(Bool, index)): IndexedDependent(0)\n} deriving DecidableEq\ntheorem indexedDependentSame:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedOriginal))) = true := by { rfl }\ntheorem indexedDependentChild:\n  Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal),\n    IndexedDependent.wrap(1, indexedChildChanged))) = false := by { rfl }\ntheorem indexedDependentIndex:\n  Decidable.decide(self := decEq(\n    IndexedDependent.wrap(0, IndexedPayload.left(0, true)),\n    IndexedDependent.wrap(1, indexedOriginal))) = false := by { rfl }\n\nfunction m3indexedDeriving(flag: Bool): UInt64 := {\n  let chosen := if flag then { indexedOriginal } else { indexedFieldChanged }\n  UInt64.ofNat(\n    (if indexedOriginal == chosen then { 1 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, chosen)) then { 2 } else { 0 }) +\n    (if indexedOriginal == indexedChildChanged then { 4 } else { 0 }) +\n    (if indexedOriginal == indexedCtorChanged then { 8 } else { 0 }) +\n    (if indexedOriginal == indexedMajorChanged then { 16 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedChildChanged)) then { 32 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedCtorChanged)) then { 64 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedMajorChanged)) then { 128 } else { 0 }) +\n    (if IndexedPayload.left(0, IndexedAtom.atom(true)) == IndexedPayload.left(0, IndexedAtom.atom(true)) then { 256 } else { 0 }) +\n    (if IndexedErasedDependency.intro(1) == IndexedErasedDependency.intro(2) then { 512 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedErasedDependency.intro(1), IndexedErasedDependency.intro(2))) then { 1024 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedOriginal))) then { 2048 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(1, indexedOriginal), IndexedDependent.wrap(1, indexedChildChanged))) then { 4096 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDependent.wrap(0, IndexedPayload.left(0, true)), IndexedDependent.wrap(1, indexedOriginal))) then { 8192 } else { 0 }) +\n    (if indexedOriginal == indexedOriginal then { 16384 } else { 0 }) +\n    (if Decidable.decide(self := decEq(indexedOriginal, indexedOriginal)) then { 32768 } else { 0 }))\n}\n"
 
+private def promotionDerivingLeanSource : String :=
+  "inductive IndexedHash : Nat → Type where\n  | intro (n : Nat) (value : Fin n) : IndexedHash n\n  deriving Hashable\ninductive IndexedRepr : Nat → Type where\n  | intro (n : Nat) (value : Fin n) : IndexedRepr n\n  deriving Repr\ninductive IndexedBEq : Nat → Type where\n  | stop : IndexedBEq 0\n  | next (n : Nat) (child : IndexedBEq n) : IndexedBEq (Nat.succ n)\n  deriving BEq\ninductive IndexedDecEq : Nat → Type where\n  | intro (n : Nat) : IndexedDecEq n\n  deriving DecidableEq\ntheorem corePromotedHashEquation (n : Nat) (value : Fin n) :\n    Hashable.hash (IndexedHash.intro n value) =\n      mixHash (UInt64.ofNat 0) (Hashable.hash value) := by rfl\n\ndef m3promotionData (flag : Bool) : UInt64 :=\n  let text := if flag then reprStr (IndexedRepr.intro 3 (Fin.mk 2 (Nat.lt_succ_self 2)))\n    else reprStr (IndexedRepr.intro 1 (Fin.mk 0 (Nat.lt_succ_self 0)))\n  let expected := if flag then \"IndexedRepr.intro 3 2\" else \"IndexedRepr.intro 1 0\"\n  let index := if flag then 7 else 2\n  let hashValue := Hashable.hash (IndexedHash.intro (Nat.succ index)\n    (Fin.mk index (Nat.lt_succ_self index)))\n  let expectedHash := mixHash (UInt64.ofNat 0) (Hashable.hash\n    (Fin.mk index (Nat.lt_succ_self index)))\n  UInt64.ofNat ((if text == expected then 1 else 0) +\n    (if IndexedBEq.next 0 IndexedBEq.stop == IndexedBEq.next 0 IndexedBEq.stop then 2 else 0) +\n    (if Decidable.decide (self := decEq (IndexedDecEq.intro index)\n      (IndexedDecEq.intro index)) then 4 else 0) +\n    (if hashValue == expectedHash then 8 else 0))\n"
+private def promotionDerivingPsSource : String :=
+  "inductive IndexedHash: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedHash(n) } deriving Hashable\ninductive IndexedRepr: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedRepr(n) } deriving Repr\ninductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\ninductive IndexedDecEq: Nat -> Type where { | intro(n: Nat): IndexedDecEq n } deriving DecidableEq\ntheorem corePromotedHashEquation(n: Nat, value: Fin(n)):\n    Hashable.hash(IndexedHash.intro(n, value)) =\n      mixHash(UInt64.ofNat(0), Hashable.hash(value)) := by { rfl }\n\nfunction m3promotionData(flag: Bool): UInt64 := {\n  let text := if flag then { reprStr(IndexedRepr.intro(3, Fin.mk(2, Nat.lt_succ_self(2)))) }\n    else { reprStr(IndexedRepr.intro(1, Fin.mk(0, Nat.lt_succ_self(0)))) }\n  let expected := if flag then { \"IndexedRepr.intro 3 2\" } else { \"IndexedRepr.intro 1 0\" }\n  let index := if flag then { 7 } else { 2 }\n  let hashValue := Hashable.hash(IndexedHash.intro(Nat.succ(index),\n    Fin.mk(index, Nat.lt_succ_self(index))))\n  let expectedHash := mixHash(UInt64.ofNat(0),\n    Hashable.hash(Fin.mk(index, Nat.lt_succ_self(index))))\n  UInt64.ofNat((if text == expected then { 1 } else { 0 }) +\n    (if IndexedBEq.next(0, IndexedBEq.stop) == IndexedBEq.next(0, IndexedBEq.stop) then { 2 } else { 0 }) +\n    (if Decidable.decide(self := decEq(IndexedDecEq.intro(index),\n      IndexedDecEq.intro(index))) then { 4 } else { 0 }) +\n    (if hashValue == expectedHash then { 8 } else { 0 }))\n}\n"
+
 private def sourcePairs : List (String × String × String) := [
   ("match", matchLeanSource, matchPsSource),
   ("matchPolicy", matchPolicyLeanSource, matchPolicyPsSource),
@@ -1249,7 +1290,8 @@ private def sourcePairs : List (String × String × String) := [
   ("wfBoundary", wfBoundaryLeanSource, wfBoundaryPsSource),
   ("promotion", promotionLeanSource, promotionPsSource),
   ("universes", universeLeanSource, universePsSource),
-  ("indexedDeriving", indexedDerivingLeanSource, indexedDerivingPsSource)]
+  ("indexedDeriving", indexedDerivingLeanSource, indexedDerivingPsSource),
+  ("promotionDeriving", promotionDerivingLeanSource, promotionDerivingPsSource)]
 
 private def checkRuntime (root : System.FilePath) : IO Unit := do
   let native := sourcePairs.foldl (fun acc (_, leanText, _) => acc ++ leanText ++ "\n") ""
@@ -1259,7 +1301,7 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
   let requests := sources.map fun (kind, source, stem) => ({
     sourceKind := kind, source, sourceName := "corematches" ++ psCompilerSourceKindExtension kind
     outputStem := "corematches"
-    exports := .selected ["m3matches", "m3structural", "m3const", "m3inline", "m3wfboundaries", "m3indexedDeriving"]
+    exports := .selected ["m3matches", "m3structural", "m3const", "m3inline", "m3wfboundaries", "m3indexedDeriving", "m3promotionData"]
     targets := [.javascript, .typescript, .rust, .wasmCore, .wasmComponent] } : PsV7Native.Request)
   let batch ← match ← PsV7Native.runBatch requests.toArray with
     | .ok result => pure result
@@ -1286,7 +1328,8 @@ private def checkRuntime (root : System.FilePath) : IO Unit := do
       ("m3const", Lean.toJson (toString (CoreM3MatchOracle.m3const flag).toNat)),
       ("m3inline", Lean.toJson (toString (CoreM3MatchOracle.m3inline flag).toNat)),
       ("m3wfboundaries", Lean.toJson (toString (CoreM3MatchOracle.m3wfboundaries flag).toNat)),
-      ("m3indexedDeriving", Lean.toJson (toString (CoreM3MatchOracle.m3indexedDeriving flag).toNat))]
+      ("m3indexedDeriving", Lean.toJson (toString (CoreM3MatchOracle.m3indexedDeriving flag).toNat)),
+      ("m3promotionData", Lean.toJson (toString (CoreM3MatchOracle.m3promotionData flag).toNat))]
     IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
     IO.println ("CORE-MATCHES native observations " ++ stem ++ ": " ++
       (Lean.Json.arr rows.toArray).compress)
@@ -1316,4 +1359,4 @@ def main (args : List String) : IO Unit := do
   checkRefusals
   checkUniverseRefusals
   checkRuntime root
-  IO.println "PSCV0_CORE_MATCHES: PASS 10 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 46 owned portable refusals; five-target paired emission; native runtime comparison follows"
+  IO.println "PSCV0_CORE_MATCHES: PASS 11 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 46 owned portable refusals; five-target paired emission; native runtime comparison follows"

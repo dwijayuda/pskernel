@@ -41,6 +41,7 @@ import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
 import Ps.Environment.StandardReprCollections
+import Ps.Environment.StandardFinEvidence
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -157,8 +158,10 @@ def psSelfHostProdPreMutualWellFoundedPreludeEnvironment : PsEnvironment :=
   psStandardPartialFixpointExtend psSelfHostProdPrePartialFixpointPreludeEnvironment
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
-  psStandardLawfulBEqExtend <|
-    psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
+  psStandardFinEvidenceExtend <|
+    psStandardFinDerivingExtend <|
+    psStandardLawfulBEqExtend <|
+      psStandardPSumExtend psSelfHostProdPreMutualWellFoundedPreludeEnvironment
 
 def psSelfHostPProdRuntimeDataDeclarations : List PsDeclaration :=
   ["PProd", "PProd.mk", "PProd.rec"].filterMap
@@ -182,7 +185,9 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     [psStandardOutOfBoundsDeclaration, psStandardGetElemBangDefaultDeclaration] ++
     psStandardGetElemOptionalDefaultDeclarations ++ psStandardNatOrderDeclarations ++
     psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
-    psStandardArrayRuntimeDeclarations
+    psStandardArrayRuntimeDeclarations ++
+    psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
+    psStandardFinDecEqDeclarations
 
   psStandardOperatorProtocolRuntimeDeclarations psSelfHostProdPreludeEnvironment ++
     psStandardLogicRuntimeDeclarations psSelfHostProdPreludeEnvironment ++

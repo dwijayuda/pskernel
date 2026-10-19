@@ -127,6 +127,7 @@ jobs:
           mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive ../dist/m3-where ../dist/m3-nested-deriving ../dist/m3-group-proof-deriving ../dist/m3-group-proof-deriving/indexed-inhabited ../dist/m3-empty-dictionaries
           mkdir -p ../dist/m3-mutual-partial/p0-generic
           mkdir -p ../dist/m3-inductive-deriving/indexed-beq
+          mkdir -p ../dist/m3-inductive-deriving/indexed-binary
           mkdir -p ../dist/m3-mutual-partial/p0-nonempty
           mkdir -p ../dist/m3-partial-fixpoint
           mkdir -p ../dist/m3-noncomputable ../dist/m3-core-patterns ../dist/m3-core-matches
@@ -169,6 +170,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-partial/p0-nonempty/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-deriving/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-deriving/indexed-beq/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > ../dist/m3-inductive-deriving/indexed-binary/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-mutual-structural/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-nested-inductive/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-where/source-sha.txt
@@ -200,8 +202,8 @@ jobs:
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
             "$TSC" --ignoreConfig "$matches_dir/corematches.ts" --outDir "$matches_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving | tee "$matches_dir/js.log"
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving "$matches_dir/ts/corematches.js" | tee "$matches_dir/ts.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData | tee "$matches_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData "$matches_dir/ts/corematches.js" | tee "$matches_dir/ts.log"
           done
           "$TSC" --ignoreConfig ../dist/m3-recursive-deriving/hashing.ts --outDir ../dist/m3-recursive-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/js.log
@@ -236,6 +238,9 @@ jobs:
           "$TSC" --ignoreConfig ../dist/m3-inductive-deriving/indexed-beq/indexedbeq.ts --outDir ../dist/m3-inductive-deriving/indexed-beq/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving/indexed-beq indexedbeq m3indexedbeqnat,m3indexedbeqbool | tee ../dist/m3-inductive-deriving/indexed-beq/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving/indexed-beq indexedbeq m3indexedbeqnat,m3indexedbeqbool ../dist/m3-inductive-deriving/indexed-beq/ts/indexedbeq.js | tee ../dist/m3-inductive-deriving/indexed-beq/ts.log
+          "$TSC" --ignoreConfig ../dist/m3-inductive-deriving/indexed-binary/indexedbinary.ts --outDir ../dist/m3-inductive-deriving/indexed-binary/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving/indexed-binary indexedbinary m3indexedbinary | tee ../dist/m3-inductive-deriving/indexed-binary/js.log
+          node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-inductive-deriving/indexed-binary indexedbinary m3indexedbinary ../dist/m3-inductive-deriving/indexed-binary/ts/indexedbinary.js | tee ../dist/m3-inductive-deriving/indexed-binary/ts.log
           "$TSC" --ignoreConfig ../dist/m3-mutual-structural/mutualstructural.ts --outDir ../dist/m3-mutual-structural/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee ../dist/m3-mutual-structural/js.log
           node ../scripts/pscv0-m3-runtime.mjs ecma ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric ../dist/m3-mutual-structural/ts/mutualstructural.js | tee ../dist/m3-mutual-structural/ts.log
@@ -274,7 +279,7 @@ jobs:
           done
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
-            node ../scripts/pscv0-m3-runtime.mjs rust "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving
+            node ../scripts/pscv0-m3-runtime.mjs rust "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData
             rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$matches_dir/rust.log"
           done
           node ../scripts/pscv0-m3-recursive-deriving.mjs rust ../dist/m3-recursive-deriving
@@ -299,6 +304,8 @@ jobs:
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-deriving/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-deriving/indexed-beq indexedbeq m3indexedbeqnat,m3indexedbeqbool
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-deriving/indexed-beq/rust.log
+          node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-deriving/indexed-binary indexedbinary m3indexedbinary
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-inductive-deriving/indexed-binary/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-mutual-structural/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect
@@ -333,7 +340,7 @@ jobs:
           cd "$GITHUB_WORKSPACE/psc0/v7-native"
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
-            node ../scripts/pscv0-m3-runtime.mjs wasm "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving | tee "$matches_dir/wasm.log"
+            node ../scripts/pscv0-m3-runtime.mjs wasm "$matches_dir" corematches m3matches,m3structural,m3const,m3inline,m3wfboundaries,m3indexedDeriving,m3promotionData | tee "$matches_dir/wasm.log"
           done
           node ../scripts/pscv0-m3-recursive-deriving.mjs wasm ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright | tee ../dist/m3-inductive-runtime/wasm.log
@@ -346,6 +353,7 @@ jobs:
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-noncomputable noncomputable m3noncomp | tee ../dist/m3-noncomputable/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving groupderive m3derivehash,m3deriverepr,m3derivebeq,m3deriveatom,m3deriveindexedhash,m3deriveindexedrepr | tee ../dist/m3-inductive-deriving/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving/indexed-beq indexedbeq m3indexedbeqnat,m3indexedbeqbool | tee ../dist/m3-inductive-deriving/indexed-beq/wasm.log
+          node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-inductive-deriving/indexed-binary indexedbinary m3indexedbinary | tee ../dist/m3-inductive-deriving/indexed-binary/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-mutual-structural mutualstructural m3structfirst,m3structsecond,m3structleftfirst,m3structleftsecond,m3structkeep,m3structgeneric | tee ../dist/m3-mutual-structural/wasm.log
           node ../scripts/pscv0-m3-runtime.mjs wasm ../dist/m3-nested-inductive nestedfold m3nestedfold,m3nestedhash,m3nestedmutualfold,m3nestedmutualhash,m3nestedindexedfold,m3nestedindexedhash,m3nesteddirect | tee ../dist/m3-nested-inductive/wasm.log
           for kind in lean ps; do

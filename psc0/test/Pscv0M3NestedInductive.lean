@@ -6,6 +6,55 @@ import PsKernelLean.Admission
 -- declarations as Core metadata or recursive instance assumptions.
 universe u
 
+-- Preserve the formerly refused constructor-local program under native
+-- automatic promotion. Its n becomes a common parameter before nesting.
+inductive Captured : Nat → Type where
+  | branch (n : Nat) (children : List (Captured n)) : Captured n
+
+def capturedTag (value : Captured 2) : Nat :=
+  match value with
+  | .branch _ => 0
+
+example : capturedTag (Captured.branch 2 []) = 0 := rfl
+
+run_cmd do
+  let family ← Lean.getConstInfoInduct ``Captured
+  let some (.recInfo recursor) := (← Lean.getEnv).find? ``Captured.rec
+    | throwError "native promoted nested recursor missing"
+  unless family.numParams == 1 && family.numIndices == 0 &&
+      recursor.numParams == 1 && recursor.numIndices == 0 &&
+      recursor.numMotives == 2 && recursor.numMinors == 3 do
+    throwError "native promoted nested parameter/recursor telescope changed"
+
+private def expectNativeNestedLocalRefusal (command : Lean.Syntax) :
+    Lean.Elab.Command.CommandElabM Unit := do
+  let saved ← get
+  let failed ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    let errors := messages.toList.filter fun message => message.severity == .error
+    let mut owned := false
+    for message in errors do
+      let content ← message.data.toString
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun marker => (content.splitOn marker).length > 1) then
+        throwError "native nested refusal exhausted resources: {content}"
+      if (content.splitOn "nested inductive datatypes parameters cannot contain local variables").length > 1 then
+        owned := true
+    pure owned
+  finally
+    set saved
+  unless failed do
+    throwError "native nested family did not refuse its constructor-local specialization"
+
+run_cmd do
+  let command ← `(command|
+    inductive CapturedLocal : Nat → Type where
+      | zero : CapturedLocal 0
+      | branch (n : Nat) (children : List (CapturedLocal n)) : CapturedLocal n)
+  expectNativeNestedLocalRefusal command
+
 inductive M3FunctionNested where
   | node (children : List (Nat → M3FunctionNested))
 example : M3FunctionNested := .node [fun _ => .node []]
@@ -502,10 +551,13 @@ private def remove (environment : PsEnvironment) (name : PsName) : PsEnvironment
     index := psEnvironmentIndexSetWorker 16 environment.index hash
       (psEnvironmentRemoveName name bucket) }
 
+private def capturedSource : String :=
+  "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\nfunction capturedTag(value: Captured(2)): Nat := match value with { | Captured.branch _ => 0 }\ntheorem capturedTagEquation: capturedTag(Captured.branch(2, List.nil)) = 0 := by { rfl }\n"
+
 private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarationBatchResult)
     (origin : PsElabBatchOrigin) (probe : PsExpr) : IO Unit := do
   expectSourceRefused environment "constructor-local specialization"
-    "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\n"
+    "inductive CapturedLocal: Nat -> Type where { | zero: CapturedLocal(0) | branch(n: Nat, children: List(CapturedLocal(n))): CapturedLocal(n) }\n"
     "nested specialization requires selected containers and common parameters only"
   expectSourceRefused environment "negative function domain inside List"
     "inductive NegativeFunctionNested where { | node(children: List(NegativeFunctionNested -> Nat)) }\n"
@@ -698,6 +750,20 @@ def main (args : List String) : IO Unit := do
     { environment := runtime.result.environment, declarations }).mapError psCompilerPscv0Error)
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  let captured ← sourceResult psSelfHostProdPreludeEnvironment capturedSource
+  let some capturedInfo := psEnvironmentFindInductive captured.result.environment (psRootName "Captured")
+    | throw (IO.userError "promoted nested family missing")
+  let some capturedRec := psEnvironmentFindRecursor captured.result.environment
+      (psNameAppendStr (psRootName "Captured") "rec")
+    | throw (IO.userError "promoted nested recursor missing")
+  ensure (capturedInfo.numParams == 1 && capturedInfo.numIndices == 0 &&
+    capturedRec.numParams == 1 && capturedRec.numIndices == 0 &&
+    capturedRec.numMotives == 2 && capturedRec.numMinors == 3)
+    "promoted nested family lost the independently checked native telescope"
+  let capturedAdmitted ← checked captured.result.environment prelude
+    (captured.result.declarations ++ signatureWitnesses captured.result.declarations)
+  kernelShapes capturedAdmitted captured.result.declarations
+  IO.println "PSCV0_M3_PROMOTED_NESTED: PASS native promotion, actual parameter/nesting metadata, checked reduction and genuine constructor-local refusal"
   checkKeyKernelOracle input prelude keyGroup.declarations
   let keyAdmitted ← checked input prelude
     (keyGroup.declarations ++ signatureWitnesses keyGroup.declarations)

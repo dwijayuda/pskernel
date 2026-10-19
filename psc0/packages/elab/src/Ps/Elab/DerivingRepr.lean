@@ -7,7 +7,7 @@ visible/nested groups, including each member's own index telescope. Selected
 containers preserve native formatting through heterogeneous checked motives.
 -/
 import Ps.Elab.DerivingContext
-import Ps.Environment.StandardRepr
+import Ps.Environment.ReprExpr
 
 inductive PsElabDeriveReprPrinter where
   | omitted
@@ -174,7 +174,8 @@ def psElabDeriveReprListDocument (documents : PsExpr) (atomic : Bool)
 
 def psElabDeriveReprTupleDocument (tuple : PsExpr) : PsExpr :=
   let gathered := PsExpr.app tuple (psSelfHostListNilOf psFormatType)
-  let documents := psStandardListCall "reverse" [psFormatType, gathered]
+  let documents := psExprApplyMany
+    (.constE (psNameAppendStr psListName "reverse") [.zero]) [psFormatType, gathered]
   psFormatCall "bracket"
     [.lit (.string "("), psElabDeriveReprJoin documents, .lit (.string ")")]
 

@@ -798,7 +798,7 @@ def psElabCommandAttributes (state : PsCommandState)
   let environment ← members.foldlM (fun environment member => do
     if member.attributes.isEmpty then return environment
     if psElabPreDefinitionDeclarationExplicitPartial member.declaration &&
-        member.attributes.any (fun attribute => match attribute with
+        member.attributes.any (fun entry => match entry with
           | .instanceAttribute | .defaultInstanceAttribute _ => true
           | _ => false) then
       throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")

@@ -20,12 +20,12 @@ mutual
   inductive M3DeriveIndexedLeft (A : Type u) (a : A) : Type u where
     | leaf (value : A)
     | node (n : Nat) (next : M3DeriveIndexedRight A a n)
-    deriving Hashable, Repr
+    deriving Hashable, Repr, BEq, DecidableEq
   inductive M3DeriveIndexedRight (A : Type u) (a : A) : Nat → Type u where
     | stop : M3DeriveIndexedRight A a 0
     | step (n : Nat) (head : M3DeriveIndexedLeft A a)
         (tail : M3DeriveIndexedRight A a n) : M3DeriveIndexedRight A a (Nat.succ n)
-    deriving Hashable, Repr
+    deriving Hashable, Repr, BEq, DecidableEq
 end
 
 -- The nonindexed member has an inhabited leaf. The indexed member has only
@@ -115,6 +115,19 @@ def indexedLeftText (flag : Bool) : String :=
 def indexedRightText (flag : Bool) : String :=
   (reprPrec (indexedRight (payload flag)) (precedence flag)).pretty 40
 
+def indexedBinaryOutput (flag : Bool) : UInt64 :=
+  let n := payload flag
+  let m := if flag then n else n + 1
+  let left := indexedLeft n
+  let changed := indexedLeft m
+  let zero : M3DeriveIndexedLeft Nat 0 := .node 0 .stop
+  let other : M3DeriveIndexedLeft Nat 0 := .leaf n
+  eqBits (left == left) (left == changed) (left == zero)
+    (indexedRight n == indexedRight m)
+    (Decidable.decide (self := decEq left left))
+    (Decidable.decide (self := decEq left changed))
+    (Decidable.decide (self := decEq left other))
+
 end M3InductiveDerivingOracle
 
 -- The index dictionary is deliberately nonreflexive. Derived comparison must
@@ -137,6 +150,20 @@ example (index : M3DeriveAtom) (left right : Nat) :
 example (index : M3DeriveAtom) (left right : Bool) :
     ((M3DeriveIndexedBEq.second index left : M3DeriveIndexedBEq M3DeriveAtom Bool index) ==
       M3DeriveIndexedBEq.second index right) = (left == right) := rfl
+
+inductive IndexedSucc : Nat → Type where
+  | intro (n : Nat) : IndexedSucc (Nat.succ n)
+  deriving BEq
+
+inductive IndexedPayload : Nat → Type where
+  | intro (n : Nat) (value : Fin n) : IndexedPayload n
+  deriving BEq
+
+example (n : Nat) : (IndexedSucc.intro n == IndexedSucc.intro n) = true := rfl
+example : (IndexedPayload.intro 2 (Fin.mk 1 Nat.le.refl) ==
+    IndexedPayload.intro 2 (Fin.mk 1 Nat.le.refl)) = true := rfl
+example : (IndexedPayload.intro 2 (Fin.mk 0 (Nat.le.step Nat.le.refl)) ==
+    IndexedPayload.intro 2 (Fin.mk 1 Nat.le.refl)) = false := rfl
 
 namespace M3IndexedBEqOracle
 
@@ -336,17 +363,10 @@ private def expectRefused (label expected : String) (result : Except PsElabError
 
 private def checkRefusals (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do
-  expectRefused "indexed member through an unindexed selected family"
-    "deriving indexed families is not yet implemented"
-    (psElabDeriveGroupHandler environment indexedOrigin
-      { segments := ["BEq"], span := indexedOrigin.span })
   expectRefused "indexed group Inhabited cannot cover arbitrary rigid indices"
     "Inhabited deriving requires a constructor with inhabitable fields"
     (psElabDeriveGroupHandler environment indexedOrigin
       { segments := ["Inhabited"], span := indexedOrigin.span })
-  expectRefused "indexed group DecidableEq" "deriving indexed families is not yet implemented"
-    (psElabDeriveHandler environment indexedOrigin
-      { segments := ["DecidableEq"], span := indexedOrigin.span })
   expectRefused "reordered retained group origin"
     "deriving origin does not retain the complete ordered group"
     (psElabDeriveGroupHandler environment { origin with members := origin.members.reverse }
@@ -365,7 +385,7 @@ private def checkRefusals (environment : PsEnvironment)
     (.constructorDecl { constructor with recursiveFields := [1] })
   expectRefused "omitted direct child metadata" "deriving direct field is absent from recursive metadata"
     (psElabDeriveGroupHandler omitted origin { segments := ["Hashable"], span := origin.span })
-  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association, indexed BEq/DecidableEq boundaries and constructor-directed indexed Inhabited refusal"
+  IO.println "PSCV0_M3_INDUCTIVE_DERIVING_REFUSALS: PASS exact group provenance, ordered real IH association, constructor-directed indexed Inhabited refusal"
 
 private def checkPlans (environment : PsEnvironment)
     (origin indexedOrigin : PsElabBatchOrigin) : IO Unit := do
@@ -491,6 +511,41 @@ private def emit (ir : PsVerifiedIrModule) (sourceText : String := runtimeSource
     return [js, ts, rust, core, component]
   return artifacts
 
+private def indexedBinarySource : String :=
+  "function m3BinaryIndexedRight(n: Nat): M3DeriveIndexedRight(Nat, 0, 2) :=\n  M3DeriveIndexedRight.step(1, M3DeriveIndexedLeft.leaf(n),\n    M3DeriveIndexedRight.step(0, M3DeriveIndexedLeft.node(0, M3DeriveIndexedRight.stop),\n      M3DeriveIndexedRight.stop))\nfunction m3BinaryIndexedLeft(n: Nat): M3DeriveIndexedLeft(Nat, 0) :=\n  M3DeriveIndexedLeft.node(2, m3BinaryIndexedRight(n))\nfunction m3indexedbinary(flag: Bool): UInt64 := {\n  let n: Nat := if (flag) { 71 } else { 13 }\n  let m: Nat := if (flag) { n } else { n + 1 }\n  let left: M3DeriveIndexedLeft(Nat, 0) := m3BinaryIndexedLeft(n)\n  let changed: M3DeriveIndexedLeft(Nat, 0) := m3BinaryIndexedLeft(m)\n  let zero: M3DeriveIndexedLeft(Nat, 0) := M3DeriveIndexedLeft.node(0, M3DeriveIndexedRight.stop)\n  let other: M3DeriveIndexedLeft(Nat, 0) := M3DeriveIndexedLeft.leaf(n)\n  UInt64.ofNat((if (left == left) { 1 } else { 0 }) +\n    (if (left == changed) { 2 } else { 0 }) +\n    (if (left == zero) { 4 } else { 0 }) +\n    (if (m3BinaryIndexedRight(n) == m3BinaryIndexedRight(m)) { 8 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(left, left))) { 16 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(left, changed))) { 32 } else { 0 }) +\n    (if (Decidable.decide(self := decEq(left, other))) { 64 } else { 0 }))\n}\n"
+
+private def checkIndexedBinary (directory : System.FilePath) (input : PsEnvironment)
+    (origin : PsElabBatchOrigin) (groups : List PsDeclaration)
+    (prelude : Lean.Kernel.Environment) : IO Unit := do
+  IO.FS.createDirAll directory
+  let instances ← derive input origin ["BEq", "DecidableEq"]
+  ensure (instances.length == 4) "indexed group did not derive both checked binary dictionaries"
+  let registered ← register input instances
+  let result ← sourceResult registered indexedBinarySource
+  let declarations := groups ++ instances ++ result.result.declarations
+  let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
+    { environment := result.result.environment, declarations }).mapError psCompilerPscv0Error)
+  let admitted ← checked prelude prepared.prepared.declarations
+  let equations := [false, true].map fun flag =>
+    witness "m3indexedbinary" flag (M3InductiveDerivingOracle.indexedBinaryOutput flag)
+  let _ ← checked admitted equations
+  let ir ← fromExcept ((psCompilerVerifiedIrFromPrepared prepared.prepared).mapError psCompilerPscv0Error)
+  let artifacts ← fromExcept (emit ir indexedBinarySource "indexedbinary"
+    ["m3indexedbinary"] "m3-indexed-binary.ps")
+  ensure (artifacts.length == 5) "indexed binary dictionaries did not emit every target"
+  for artifact in artifacts do
+    for file in artifact.files do
+      match file.payload with
+      | .text value => IO.FS.writeFile (directory / file.path) value
+      | .binary value => IO.FS.writeBinFile (directory / file.path) value
+  let rows := [false, true].map fun flag => Lean.Json.mkObj [
+    ("flag", Lean.toJson flag),
+    ("m3indexedbinary", Lean.toJson
+      (toString (M3InductiveDerivingOracle.indexedBinaryOutput flag).toNat))]
+  IO.FS.writeFile (directory / "deriving.ps") indexedBinarySource
+  IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
+  IO.println "PSCV0_M3_INDEXED_BINARY: PASS native mixed-group dictionaries, actual index/field/constructor observations, fresh checked closure and five-target emission"
+
 private def checkIndexedBEq (directory : System.FilePath)
     (prelude : Lean.Kernel.Environment) : IO Unit := do
   IO.FS.createDirAll directory
@@ -528,13 +583,17 @@ private def checkIndexedBEq (directory : System.FilePath)
     psDefEqReadOnlyWithEnv environment psMetaEmpty opened.context.localContext
       payloadDictionary.type payloadClass)
     "indexed BEq inferred a dictionary for the value index or changed a parameter requirement"
+  for (label, text) in [
+      ("successor index", "inductive IndexedSucc: Nat -> Type where {\n  | intro(n: Nat): IndexedSucc(Nat.succ(n))\n} deriving BEq\ntheorem m3IndexedSuccessorComparison(n: Nat):\n  (IndexedSucc.intro(n) == IndexedSucc.intro(n)) = true := by { rfl }\n"),
+      ("dependent Fin payload", "inductive IndexedPayload: Nat -> Type where {\n  | intro(n: Nat, value: Fin(n)): IndexedPayload(n)\n} deriving BEq\ntheorem m3IndexedPayloadSame:\n  (IndexedPayload.intro(2, Fin.mk(1, Nat.le.refl)) ==\n    IndexedPayload.intro(2, Fin.mk(1, Nat.le.refl))) = true := by { rfl }\ntheorem m3IndexedPayloadDifferent:\n  (IndexedPayload.intro(2, Fin.mk(0, Nat.le.step(Nat.le.refl))) ==\n    IndexedPayload.intro(2, Fin.mk(1, Nat.le.refl))) = false := by { rfl }\n")] do
+    let positive ← sourceResult psSelfHostProdPreludeEnvironment text
+    let prepared ← fromExcept ((psCompilerPrepareElaboratedWithOutput
+      { environment := positive.result.environment,
+        declarations := positive.result.declarations }).mapError psCompilerPscv0Error)
+    let _ ← checked prelude prepared.prepared.declarations
+    let _ ← fromExcept ((psCompilerVerifiedIrFromPrepared prepared.prepared).mapError psCompilerPscv0Error)
+    IO.println ("PSCV0_M3_INDEXED_BEQ_POSITIVE: " ++ label)
   for (label, text, expected) in [
-      ("non-pattern index",
-        "inductive IndexedSucc: Nat -> Type where { | intro(n: Nat): IndexedSucc(Nat.succ(n)) } deriving BEq\n",
-        "indexed BEq deriving requires direct constructor index fields"),
-      ("dependent payload",
-        "inductive IndexedPayload: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedPayload(n) } deriving BEq\n",
-        "deriving requires independent runtime field types"),
       ("missing payload dictionary",
         "inductive IndexedMissing: Nat -> Type where { | intro(n: Nat, value: Nat -> Nat): IndexedMissing(n) } deriving BEq\n",
         "deriving field has no checked instance")] do
@@ -621,3 +680,4 @@ def main (args : List String) : IO Unit := do
   IO.FS.writeFile (directory / "expected.json") (Lean.Json.arr rows.toArray).pretty
   IO.println "PSCV0_M3_INDUCTIVE_DERIVING: PASS native deriving oracles, fresh checked group instances/workers and constructor laws, ordered real child IHs, indexed Hashable/Repr, nonreflexive BEq and five-target emission; runtime parity follows"
   checkIndexedBEq (directory / "indexed-beq") prelude
+  checkIndexedBinary (directory / "indexed-binary") input indexedOrigin groups prelude

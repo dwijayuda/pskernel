@@ -115,6 +115,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardSignedScalar, `Ps.Environment.StandardSignedToInt, `Ps.Environment.StandardSignedOfInt, `Ps.Environment.StandardSignedShift, `Ps.Environment.StandardSignedClamp, `Ps.Environment.StandardSignedAbs, `Ps.Environment.StandardSignedOrder, `Ps.Environment.StandardSignedNumeric, `Ps.Environment.StandardBoolWord, `Ps.Environment.StandardUnsignedOrder, `Ps.Environment.StandardUnsignedPower, `Ps.Environment.StandardUnsignedOfInt, `Ps.Environment.StandardUnsignedClamp, `Ps.Environment.StandardSum, `Ps.Environment.StandardByteArray, `Ps.Environment.StandardByteArrayCollection,
     `Ps.Environment.StandardScalarArithmeticData, `Ps.Environment.StandardScalarArithmetic,
     `Ps.Environment.StandardFin,
+    `Ps.Environment.StandardFinEvidence,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
     `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
     `Ps.Environment.StandardArray, `Ps.Environment.StandardArrayFilter, `Ps.Environment.StandardUtf8, `Ps.Environment.StandardListIndex,

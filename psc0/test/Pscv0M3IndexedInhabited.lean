@@ -7,16 +7,17 @@ universe u
 
 section NativeIndexedDefaults
 
--- Keep the same declared index telescope as the portable fixture. Native
--- promotion would turn fixed constructor indices into uniform parameters.
-set_option inductive.autoPromoteIndices false
+-- An uninhabitable successor-result constructor keeps each selected index
+-- genuine under the same default promotion policy used by both readers.
 
 mutual
   inductive M3IndexedDefaultFirst (A : Type u) (a : A) : Nat → Type u where
     | mk (n : Nat) (value : A) : M3IndexedDefaultFirst A a n
+    | blocked (n : Nat) (impossible : False) : M3IndexedDefaultFirst A a (Nat.succ n)
   inductive M3IndexedDefaultSecond (A : Type u) (a : A) : Nat → Type u where
     | mk (n : Nat) (parent : M3IndexedDefaultFirst A a n) :
         M3IndexedDefaultSecond A a n
+    | blocked (n : Nat) (impossible : False) : M3IndexedDefaultSecond A a (Nat.succ n)
 end
 
 /-- error: failed to generate `Inhabited` instance for `M3IndexedDefaultSecond` -/
@@ -29,11 +30,14 @@ inductive M3IndexedDefaultDependent (A : Type u) (a : A) :
     (n : Nat) → Fin (Nat.succ n) → Type u where
   | mk (n : Nat) (point : Fin (Nat.succ n)) (value : A) :
       M3IndexedDefaultDependent A a n point
+  | blocked (n : Nat) (point : Fin (Nat.succ (Nat.succ n))) (impossible : False) :
+      M3IndexedDefaultDependent A a (Nat.succ n) point
   deriving Inhabited
 
 inductive M3IndexedDefaultChoice (A : Type u) (a : A) : Nat → Type u where
   | needs (n : Nat) (value : A) : M3IndexedDefaultChoice A a n
   | empty (n : Nat) : M3IndexedDefaultChoice A a n
+  | blocked (n : Nat) (impossible : False) : M3IndexedDefaultChoice A a (Nat.succ n)
   deriving Inhabited
 
 inductive M3IndexedDefaultOnlyZero : Nat → Type where
@@ -45,14 +49,24 @@ deriving instance Inhabited for M3IndexedDefaultOnlyZero
 
 inductive M3IndexedDefaultLoop (A : Type u) (a : A) : Nat → Type u where
   | loop (n : Nat) (next : M3IndexedDefaultLoop A a n) : M3IndexedDefaultLoop A a n
+  | blocked (n : Nat) (impossible : False) : M3IndexedDefaultLoop A a (Nat.succ n)
 
 /-- error: failed to generate `Inhabited` instance for `M3IndexedDefaultLoop` -/
 #guard_msgs (error, drop warning, substring := true) in
 deriving instance Inhabited for M3IndexedDefaultLoop
 
--- B is an index, so deriving may not invent an Inhabited B requirement.
+-- Preserve the original fixed type-index program as its native positive.
+inductive M3PromotedTypeDefault : Type u → Type (u + 1) where
+  | mk (B : Type u) (value : B) : M3PromotedTypeDefault B
+  deriving Inhabited
+
+example {B : Type u} [Inhabited B] :
+    (default : M3PromotedTypeDefault B) = M3PromotedTypeDefault.mk B default := rfl
+
+-- B remains an index, so deriving may not invent an Inhabited B requirement.
 inductive M3IndexedDefaultNoIndexInstance : Type u → Type (u + 1) where
   | mk (B : Type u) (value : B) : M3IndexedDefaultNoIndexInstance B
+  | blocked (B : Type u) (impossible : False) : M3IndexedDefaultNoIndexInstance (B → B)
 
 /-- error: failed to generate `Inhabited` instance for `M3IndexedDefaultNoIndexInstance` -/
 #guard_msgs (error, drop warning, substring := true) in
@@ -63,7 +77,7 @@ run_cmd do
       (``M3IndexedDefaultFirst, 2, 1), (``M3IndexedDefaultSecond, 2, 1),
       (``M3IndexedDefaultDependent, 2, 2), (``M3IndexedDefaultChoice, 2, 1),
       (``M3IndexedDefaultOnlyZero, 0, 1), (``M3IndexedDefaultLoop, 2, 1),
-      (``M3IndexedDefaultNoIndexInstance, 0, 1)] do
+      (``M3IndexedDefaultNoIndexInstance, 0, 1), (``M3PromotedTypeDefault, 1, 0)] do
     let info ← Lean.getConstInfoInduct name
     unless info.numParams == parameters && info.numIndices == indices do
       throwError "native indexed oracle changed its parameter/index telescope: {name}: {info.numParams}/{info.numIndices}"
@@ -90,21 +104,26 @@ example {A : Type u} (a : A) (n : Nat) :
 -- fields of the native derived value before choosing the scalar observation.
 private def firstScore : (n : Nat) → M3IndexedDefaultFirst Nat 0 n → Nat
   | _, .mk k item => 3 * k + item
+  | _, .blocked _ impossible => False.elim impossible
 
 private def parentScore : (n : Nat) → M3IndexedDefaultFirst Nat 0 n → Nat
   | _, .mk m item => 2 * m + item
+  | _, .blocked _ impossible => False.elim impossible
 
 private def secondScore : (n : Nat) → M3IndexedDefaultSecond Nat 0 n → Nat
   | _, .mk k parent => k + parentScore k parent
+  | _, .blocked _ impossible => False.elim impossible
 
 private def dependentScore :
     (n : Nat) → (point : Fin (Nat.succ n)) →
       M3IndexedDefaultDependent Nat 0 n point → Nat
   | _, _, .mk k selected item => k + 2 * selected.val + item
+  | _, _, .blocked _ _ impossible => False.elim impossible
 
 private def choiceScore : (n : Nat) → M3IndexedDefaultChoice Nat 0 n → Nat
   | _, .needs k item => 1000 + k + item
   | _, .empty k => k + 5
+  | _, .blocked _ impossible => False.elim impossible
 
 def firstOutput (flag : Bool) : UInt64 :=
   let n := if flag then 43 else 17
@@ -147,16 +166,19 @@ private def fromExcept (result : Except String α) : IO α :=
 
 private def groupSource : String :=
   "universe u\n" ++
-  "inductive M3IndexedDefaultFirst(A: Type u, a: A): Nat -> Type u where { | mk(n: Nat, value: A): M3IndexedDefaultFirst(A, a, n) }\n" ++
-  "inductive M3IndexedDefaultSecond(B: Type u, b: B): Nat -> Type u where { | mk(n: Nat, parent: M3IndexedDefaultFirst(B, b, n)): M3IndexedDefaultSecond(B, b, n) }\n"
+  "inductive M3IndexedDefaultFirst(A: Type u, a: A): Nat -> Type u where { | mk(n: Nat, value: A): M3IndexedDefaultFirst(A, a, n) | blocked(n: Nat, impossible: False): M3IndexedDefaultFirst(A, a, Nat.succ(n)) }\n" ++
+  "inductive M3IndexedDefaultSecond(B: Type u, b: B): Nat -> Type u where { | mk(n: Nat, parent: M3IndexedDefaultFirst(B, b, n)): M3IndexedDefaultSecond(B, b, n) | blocked(n: Nat, impossible: False): M3IndexedDefaultSecond(B, b, Nat.succ(n)) }\n"
 
 private def dependentSource : String :=
   "universe u\n" ++
-  "inductive M3IndexedDefaultDependent(A: Type u, a: A): (n: Nat) -> Fin(Nat.succ(n)) -> Type u where { | mk(n: Nat, point: Fin(Nat.succ(n)), value: A): M3IndexedDefaultDependent(A, a, n, point) }\n"
+  "inductive M3IndexedDefaultDependent(A: Type u, a: A): (n: Nat) -> Fin(Nat.succ(n)) -> Type u where { | mk(n: Nat, point: Fin(Nat.succ(n)), value: A): M3IndexedDefaultDependent(A, a, n, point) | blocked(n: Nat, point: Fin(Nat.succ(Nat.succ(n))), impossible: False): M3IndexedDefaultDependent(A, a, Nat.succ(n), point) }\n"
 
 private def choiceSource : String :=
   "universe u\n" ++
-  "inductive M3IndexedDefaultChoice(A: Type u, a: A): Nat -> Type u where { | needs(n: Nat, value: A): M3IndexedDefaultChoice(A, a, n) | empty(n: Nat): M3IndexedDefaultChoice(A, a, n) }\n"
+  "inductive M3IndexedDefaultChoice(A: Type u, a: A): Nat -> Type u where { | needs(n: Nat, value: A): M3IndexedDefaultChoice(A, a, n) | empty(n: Nat): M3IndexedDefaultChoice(A, a, n) | blocked(n: Nat, impossible: False): M3IndexedDefaultChoice(A, a, Nat.succ(n)) }\n"
+
+private def promotedSource : String :=
+  "universe u\ninductive M3PromotedTypeDefault: Type u -> Type (u + 1) where {\n  | mk(B: Type u, value: B): M3PromotedTypeDefault(B)\n} deriving Inhabited\nsection\nvariable {B: Type u} [dictionary: Inhabited B]\ntheorem m3PromotedTypeDefaultEquation:\n  (Inhabited.default: M3PromotedTypeDefault(B)) =\n    M3PromotedTypeDefault.mk(B, Inhabited.default) := by { rfl }\nend\n"
 
 private def logicalSource : String :=
   "universe u\n" ++
@@ -175,23 +197,23 @@ private def runtimeSource : String :=
   "function m3indexedfirst(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 43 } else { 17 }\n" ++
   " let value: M3IndexedDefaultFirst(Nat, 0, n) := m3IndexedFirstWith(n, n + 7)\n" ++
-  " let score: Nat := match value with { | M3IndexedDefaultFirst.mk k item => 3 * k + item }\n" ++
+  " let score: Nat := match value with { | M3IndexedDefaultFirst.mk k item => 3 * k + item | M3IndexedDefaultFirst.blocked _ impossible => False.elim(impossible) }\n" ++
   " UInt64.ofNat(score)\n}\n" ++
   "function m3indexedsecond(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 43 } else { 17 }\n" ++
   " let value: M3IndexedDefaultSecond(Nat, 0, n) := m3IndexedSecondWith(n, n + 11)\n" ++
-  " let score: Nat := match value with { | M3IndexedDefaultSecond.mk k parent => match parent with { | M3IndexedDefaultFirst.mk m item => k + 2 * m + item } }\n" ++
+  " let score: Nat := match value with { | M3IndexedDefaultSecond.mk k parent => match parent with { | M3IndexedDefaultFirst.mk m item => k + 2 * m + item | M3IndexedDefaultFirst.blocked _ impossible => False.elim(impossible) } | M3IndexedDefaultSecond.blocked _ impossible => False.elim(impossible) }\n" ++
   " UInt64.ofNat(score)\n}\n" ++
   "function m3indexeddependent(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 43 } else { 17 }\n" ++
   " let point: Fin(Nat.succ(n)) := Fin.mk(n, Nat.lt_succ_self(n))\n" ++
   " let value: M3IndexedDefaultDependent(Nat, 0, n, point) := m3IndexedDependentWith(n, point, n + 13)\n" ++
-  " let score: Nat := match value with { | M3IndexedDefaultDependent.mk k selected item => k + 2 * selected.val + item }\n" ++
+  " let score: Nat := match value with { | M3IndexedDefaultDependent.mk k selected item => k + 2 * selected.val + item | M3IndexedDefaultDependent.blocked _ _ impossible => False.elim(impossible) }\n" ++
   " UInt64.ofNat(score)\n}\n" ++
   "function m3indexedchoice(flag: Bool): UInt64 := {\n" ++
   " let n: Nat := if (flag) { 43 } else { 17 }\n" ++
   " let value: M3IndexedDefaultChoice(Nat, 0, n) := Inhabited.default\n" ++
-  " let score: Nat := match value with { | M3IndexedDefaultChoice.needs k item => 1000 + k + item | M3IndexedDefaultChoice.empty k => k + 5 }\n" ++
+  " let score: Nat := match value with { | M3IndexedDefaultChoice.needs k item => 1000 + k + item | M3IndexedDefaultChoice.empty k => k + 5 | M3IndexedDefaultChoice.blocked _ impossible => False.elim(impossible) }\n" ++
   " UInt64.ofNat(score)\n}\n"
 
 private def elaborateGroup (text : String) (levelNames : List PsName := [psRootName "u"]) :
@@ -278,9 +300,9 @@ private def checkRefusals (environment : PsEnvironment) (origin : PsElabBatchOri
       ("zero-only constructor cannot supply all rigid indices",
         "inductive M3IndexedDefaultOnlyZero: Nat -> Type where { | zero: M3IndexedDefaultOnlyZero(0) }\n", []),
       ("unseeded indexed recursion",
-        "universe u\ninductive M3IndexedDefaultLoop(A: Type u, a: A): Nat -> Type u where { | loop(n: Nat, next: M3IndexedDefaultLoop(A, a, n)): M3IndexedDefaultLoop(A, a, n) }\n", [psRootName "u"]),
+        "universe u\ninductive M3IndexedDefaultLoop(A: Type u, a: A): Nat -> Type u where { | loop(n: Nat, next: M3IndexedDefaultLoop(A, a, n)): M3IndexedDefaultLoop(A, a, n) | blocked(n: Nat, impossible: False): M3IndexedDefaultLoop(A, a, Nat.succ(n)) }\n", [psRootName "u"]),
       ("a type index does not acquire an Inhabited requirement",
-        "universe u\ninductive M3IndexedDefaultNoIndexInstance: Type u -> Type (u + 1) where { | mk(B: Type u, value: B): M3IndexedDefaultNoIndexInstance(B) }\n", [psRootName "u"])] do
+        "universe u\ninductive M3IndexedDefaultNoIndexInstance: Type u -> Type (u + 1) where { | mk(B: Type u, value: B): M3IndexedDefaultNoIndexInstance(B) | blocked(B: Type u, impossible: False): M3IndexedDefaultNoIndexInstance(B -> B) }\n", [psRootName "u"])] do
     let (group, refusedOrigin) ← fromExcept (elaborateGroup text levels)
     let input ← add environment group.declarations
     expectRefused label (psElabDeriveGroupHandler input refusedOrigin
@@ -380,6 +402,12 @@ def check (directory : String) : IO Unit := do
   let (choice, choiceOrigin) ← fromExcept (elaborateGroup choiceSource)
   let groups := group.declarations ++ dependent.declarations ++ choice.declarations
   let input ← add psSelfHostProdPreludeEnvironment groups
+  for (family, indices) in [("M3IndexedDefaultFirst", 1), ("M3IndexedDefaultSecond", 1),
+      ("M3IndexedDefaultDependent", 2), ("M3IndexedDefaultChoice", 1)] do
+    let some info := psEnvironmentFindInductive input (psRootName family)
+      | throw (IO.userError ("indexed default family missing: " ++ family))
+    ensure (info.numParams == 2 && info.numIndices == indices)
+      ("indexed default fixture lost its actual index telescope: " ++ family)
   checkRefusals input origin
   let groupInstances ← derive input origin
   let dependentInstances ← derive input dependentOrigin
@@ -402,6 +430,13 @@ def check (directory : String) : IO Unit := do
     "constructor defaults or ordinary case inspection introduced recursive workers"
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  let promoted ← sourceResult psSelfHostProdPreludeEnvironment promotedSource
+  let some promotedInfo := psEnvironmentFindInductive promoted.result.environment
+      (psRootName "M3PromotedTypeDefault")
+    | throw (IO.userError "promoted type default family missing")
+  ensure (promotedInfo.numParams == 1 && promotedInfo.numIndices == 0)
+    "fixed type index did not promote before deriving its real Inhabited requirement"
+  let _ ← checked promoted.result.environment prelude promoted.result.declarations
   let admitted ← checked runtime.result.environment prelude prepared.prepared.declarations
   let signatures := signatureWitnesses groups
   ensure (signatures.length == 4) "indexed defaults lost a complete public group recursor signature"

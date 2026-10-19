@@ -197,6 +197,7 @@ def psStandardSnapshotValidate (environment : PsEnvironment)
   psStandardLogicAudit environment
   psStandardOperatorProtocolAudit environment
   psStandardScientificAudit environment
+  psStandardFinEvidenceAudit environment
   let payload := psStandardSnapshotPayload environment
   let observedFNV := "fnv1a64:" ++ toString (psStandardSnapshotFNV64 payload)
   let observedSHA := "sha256:" ++ psStandardSnapshotSHA256 payload

@@ -24,16 +24,21 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Install SHA-256-pinned WABT 1.0.42 (Wasm GC)
+      - name: Install SHA-256-pinned wasm-tools 1.254.0 (Wasm GC + Components)
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --retry 3             https://github.com/WebAssembly/wabt/releases/download/1.0.42/wabt-1.0.42-linux-x64.tar.gz             --output "$RUNNER_TEMP/wabt-1.0.42-linux-x64.tar.gz"
-          echo "84895407a6bbb80e918f33b16b2fb2206021c150b6bc9ff6f761263a745ab131  $RUNNER_TEMP/wabt-1.0.42-linux-x64.tar.gz" | sha256sum -c -
-          tar xzf "$RUNNER_TEMP/wabt-1.0.42-linux-x64.tar.gz" -C "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/wabt-1.0.42/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/wabt-1.0.42/bin/wasm2wat" --version
-          "$RUNNER_TEMP/wabt-1.0.42/bin/wat2wasm" --version
+          url="https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz"
+          archive="$RUNNER_TEMP/wasm-tools-1.254.0-x86_64-linux.tar.gz"
+          curl --fail --location --retry 3 "$url" --output "$archive"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $archive" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/psc1-wasm-tools-unpack" "$RUNNER_TEMP/psc1-bin"
+          tar xzf "$archive" -C "$RUNNER_TEMP/psc1-wasm-tools-unpack"
+          binary="$(find "$RUNNER_TEMP/psc1-wasm-tools-unpack" -type f -name wasm-tools -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/psc1-bin/wasm-tools" --version
       - name: Build PSC1 independent backend libraries
         working-directory: psc1
         shell: bash
@@ -96,7 +101,9 @@ jobs:
           test -s /tmp/psc1-direct.wasm
           lake exe psc1 wat /tmp/psc1-direct.wasm --out /tmp/psc1-direct.wat
           test -s /tmp/psc1-direct.wat
-          wat2wasm --enable-gc /tmp/psc1-direct.wat -o /tmp/psc1-direct-roundtrip.wasm
+          wasm-tools validate /tmp/psc1-direct.wasm
+          wasm-tools parse /tmp/psc1-direct.wat -o /tmp/psc1-direct-roundtrip.wasm
+          wasm-tools validate /tmp/psc1-direct-roundtrip.wasm
           node -e 'const fs=require("fs");const b=fs.readFileSync("/tmp/psc1-direct-roundtrip.wasm");if(!WebAssembly.validate(b))process.exit(1)'
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';

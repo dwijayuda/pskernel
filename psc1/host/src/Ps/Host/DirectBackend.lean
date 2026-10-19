@@ -113,14 +113,15 @@ def psHostDirectWasmCore
   IO.FS.writeBinFile outputPath (ByteArray.mk encoded.toArray)
   IO.println ("PSC1_DIRECT_WASM_CORE: " ++ outputPath)
 
--- WAT is produced from the *actual final binary*. The independent wabt
--- disassembler is required explicitly; missing or rejected tooling fails closed.
+-- WAT is produced from the *actual final binary*. The pinned wasm-tools
+-- printer supports Wasm GC recursive groups, which older WABT decoders reject.
+-- Missing or rejected tooling fails closed; never synthesize fake WAT.
 def psHostWasmBinaryToWat (binaryPath watPath : String) : IO Unit := do
   if !binaryPath.endsWith ".wasm" || !watPath.endsWith ".wat" then
     throw (IO.userError "PSC1_WAT_OUTPUT_EXTENSION")
   let output ← IO.Process.output {
-    cmd := "wasm2wat"
-    args := #[binaryPath, "--enable-gc"]
+    cmd := "wasm-tools"
+    args := #["print", binaryPath]
   }
   if output.exitCode != 0 || output.stdout.isEmpty then
     throw (IO.userError ("PSC1_WAT_DECODE_FAILED: " ++ output.stderr))

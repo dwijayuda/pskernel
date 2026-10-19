@@ -20,9 +20,21 @@ theorem c0DeepLambdaSplit_source
       ctx state name domain body info ranges =
     psKernelInferLambdaHead smaller whnf defeq
       ctx state name domain body info false ranges := by
-  simp [psKernelC0DeepLambdaSplit,
-    psKernelC0DeepLambdaPrepare, psKernelC0DeepLambdaClose,
-    psKernelInferLambdaHead]
+  unfold psKernelC0DeepLambdaSplit psKernelC0DeepLambdaPrepare
+  unfold psKernelInferLambdaHead
+  cases hdom : smaller [] [] whnf defeq ctx state domain false with
+  | error reason =>
+      simp [hdom]
+  | ok domainResult =>
+      cases domainResult with
+      | mk domainType domainState =>
+          cases hsort : psKernelEnsureSortWith whnf ctx domainState domainType with
+          | error reason =>
+              simp [hdom, hsort]
+          | ok sortResult =>
+              cases sortResult with
+              | mk sortLevel sortState =>
+                  simp [hdom, hsort, psKernelC0DeepLambdaClose]
 
 example
     (smaller : PsKernelC0BinderSmaller)

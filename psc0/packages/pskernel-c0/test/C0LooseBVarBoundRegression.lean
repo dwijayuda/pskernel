@@ -3,7 +3,7 @@ import Lean
 
 private theorem c0_bound_lt_max (o a b : Nat) :
     (o < Nat.max a b) ↔ (o < a ∨ o < b) := by
-  rcases le_total a b with hab | hba
+  rcases Nat.le_total a b with hab | hba
   · rw [max_eq_right hab]
     constructor
     · intro h; exact Or.inr h
@@ -25,6 +25,17 @@ private theorem c0_bound_lt_pred (o a : Nat) :
 private theorem c0_bound_lt_succ (o a : Nat) :
     (o < a + 1) ↔ (o ≤ a) := by omega
 
+private theorem c0_bound_decide_ble (o a : Nat) :
+    decide (o ≤ a) = Nat.ble o a := by
+  by_cases h : o ≤ a
+  · have p : Nat.ble o a = true := Nat.ble_eq_true_of_le h
+    simp [h, p]
+  · have p : Nat.ble o a = false := by
+      cases k : Nat.ble o a with
+      | false => rfl
+      | true => exact False.elim (h (Nat.le_of_ble_eq_true k))
+    simp [h, p]
+
 private theorem c0_bound_decide_max (o a b : Nat) :
     decide (o < Nat.max a b) =
       (decide (o < a) || decide (o < b)) := by
@@ -45,7 +56,7 @@ theorem c0LooseBVarBound_source (expr : PsKernelExpr) (offset : Nat) :
     simp_all [psKernelC0HasLooseBVarFast,
       PsKernelExpr.psKernelC0LooseBVarBound,
       psKernelExprHasLooseAt, c0_bound_decide_max, c0_bound_decide_pred,
-      c0_bound_lt_succ]
+      c0_bound_lt_succ, c0_bound_decide_ble]
 
 
 /-!

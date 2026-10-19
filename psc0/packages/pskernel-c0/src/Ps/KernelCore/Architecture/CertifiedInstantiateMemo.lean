@@ -121,6 +121,51 @@ structure PsKernelC0InstOneMemoEntry (replacement : PsKernelExpr) where
 abbrev PsKernelC0InstOneMemo (replacement : PsKernelExpr) :=
   PsKernelC0HashTrie (PsKernelC0InstOneMemoEntry replacement)
 
+/-!
+Native-only non-authoritative index hint for the *operation-local*
+proof-carrying substitution cache. The old source hash remains unchanged
+below. Original immutable child addresses survive dependent root matching,
+unlike a reconstructed parent object's address. Collisions and false misses
+affect only performance: a cache HIT must still pass the existing
+withPtrEqDecEq proof and exact binder-offset equality before reuse.
+
+This is a compiler/runtime trust and portability obligation separate from
+the pure source theorem; no hash/pointer alone can accept a declaration.
+-/
+private unsafe def psKernelC0InstOneMemoHashNative
+    (expr : PsKernelExpr) (offset : Nat) : Nat :=
+  let childHint (child : PsKernelExpr) : Nat :=
+    (ptrAddrUnsafe child).toNat / 16
+  let shape :=
+    match expr with
+    | .app fn arg =>
+        psKernelCacheMix
+          (psKernelCacheMix 26 (childHint fn)) (childHint arg)
+    | .lam _ ty body _ =>
+        psKernelCacheMix
+          (psKernelCacheMix 27 (childHint ty)) (childHint body)
+    | .forallE _ ty body _ =>
+        psKernelCacheMix
+          (psKernelCacheMix 28 (childHint ty)) (childHint body)
+    | .letE _ ty value body nondep =>
+        psKernelCacheMix
+          (psKernelCacheMix
+            (psKernelCacheMix
+              (psKernelCacheMix 29 (childHint ty))
+              (childHint value))
+            (childHint body))
+          (if nondep then 1 else 0)
+    | .mdata md body =>
+        psKernelCacheMix (psKernelCacheMix 31 md) (childHint body)
+    | .proj _ index body =>
+        psKernelCacheMix (psKernelCacheMix 32 index) (childHint body)
+    | other =>
+        psKernelC0MemoShapeHash 1 other
+  psKernelCacheMix shape offset
+
+/-- Pure source remains the original three-layer shape hash;
+    native code uses only a shallow, operation-local index hint. -/
+@[implemented_by psKernelC0InstOneMemoHashNative]
 private def psKernelC0InstOneMemoHash
     (expr : PsKernelExpr) (offset : Nat) : Nat :=
   psKernelCacheMix (psKernelC0MemoShapeHash 3 expr) offset

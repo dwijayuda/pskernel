@@ -214,16 +214,15 @@ def psKernelC0BetaSpineApply
   -- C0 single-binder specialization. The common one-argument beta case
   -- avoids the generic list-substitution interpreter; multi-binder spines
   -- retain the existing simultaneous instantiation order.
-  let opened :=
+  let opened : PsKernelExpr :=
     match selectedRev with
     | List.nil =>
         psKernelExprInstantiate body selectedRev
     | List.cons replacement rest =>
-        match rest with
-        | List.nil =>
-            psKernelExprInstantiate1 body replacement
-        | List.cons _ _ =>
-            psKernelExprInstantiate body selectedRev;
+        if psKernelExprListIsEmpty rest then
+          psKernelExprInstantiate1 body replacement
+        else
+          psKernelExprInstantiate body selectedRev;
   psKernelExprApplyArgsCheap
     opened
     remaining

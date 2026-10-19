@@ -188,6 +188,12 @@ lean_exe pscv0_core_selected_native_closure where
   root := `Pscv0CoreSelectedNativeClosure
   supportInterpreter := true
 
+-- Read-only nested Core compiler/import-target dependency size comparison.
+lean_exe pscv0_core_tiers_native_closure where
+  srcDir := "../scripts"
+  root := `Pscv0CoreTiersNativeClosure
+  supportInterpreter := true
+
 lean_exe pscv0_core_native_seed_checks where
   srcDir := "../scripts"
   root := `Pscv0CoreNativeSeedChecks

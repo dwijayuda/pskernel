@@ -271,3 +271,37 @@ def psKernelC0DeepLambdaDeferredChecked
     whnf defeq frame.scopedContext frame.sourceFreshState
     frame.openedBody false
   pure (psKernelC0DeepLambdaClose frame bodyType bodyState)
+
+/-- Complete source lambda closing directly from the deferred frame.
+
+    The checked body type and resulting checker state are already supplied
+    by an independently checked body judgment. The opening expression is
+    deliberately NOT forced again: closing only needs original binder
+    metadata, fresh name and source scope state. -/
+def psKernelC0DeepLambdaCloseDeferred
+    (frame : PsKernelC0DeepDeferredLambdaFrame)
+    (bodyType : PsKernelExpr)
+    (bodyState : PsKernelCheckerState) :
+    PsKernelExpr × PsKernelCheckerState :=
+  let normalized := psKernelExprCheapBetaReduce bodyType
+  let closed := psKernelExprAbstractFVars normalized [frame.fresh]
+  let type := PsKernelExpr.forallE
+    frame.name frame.domain closed frame.binderInfo
+  (type,
+    psKernelCacheInferResult
+      (psKernelCheckerStateExitLocalScope frame.sourceFreshState bodyState)
+      false
+      (.lam frame.name frame.domain frame.originalBody frame.binderInfo)
+      type)
+
+/-- Closing never inspects the opened lambda body. The separate
+    source-certified deferred forcing equality remains required at the
+    preceding body-inference stage. -/
+theorem psKernelC0DeepLambdaCloseDeferred_source
+    (frame : PsKernelC0DeepDeferredLambdaFrame)
+    (bodyType : PsKernelExpr)
+    (bodyState : PsKernelCheckerState) :
+    psKernelC0DeepLambdaCloseDeferred frame bodyType bodyState =
+      psKernelC0DeepLambdaClose
+        (psKernelC0DeepLambdaForceFrame frame) bodyType bodyState := by
+  rfl

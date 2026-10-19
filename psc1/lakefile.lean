@@ -71,7 +71,8 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.CheckTypes,
     `Ps.CompilerIr.CheckSize,
     `Ps.CompilerIr.Check,
-    `Ps.CompilerIr.Specialize
+    `Ps.CompilerIr.Specialize,
+    `Ps.CompilerIr.Validate
   ]
 
 lean_lib PsErasure where
@@ -104,6 +105,20 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler
   ]
+
+-- Optional backend libraries are built independently of the 55-module
+-- self-host bootstrap root. Loading one must not add an unchecked proof path.
+lean_lib PsBackendJs where
+  srcDir := "packages/backend-js/src"
+  roots := #[`Ps.BackendJs.Print]
+
+lean_lib PsBackendRust where
+  srcDir := "packages/backend-rust/src"
+  roots := #[`Ps.BackendRust.Module]
+
+lean_lib PsBackendWasm where
+  srcDir := "packages/backend-wasm/src"
+  roots := #[`Ps.BackendWasm.Binary, `Ps.BackendWasm.Lower]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"

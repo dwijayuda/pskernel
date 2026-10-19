@@ -1645,6 +1645,32 @@ def psJsPrintStackSafePrelude (module : PsJsIrModule) : String :=
     psJsStackRuntimeSupport
   ]
 
+-- Preserve linked/private functions for internal calls while exporting
+-- ONLY selected entry-module declarations. The original printer always
+-- emits an ASCII "export " prefix; strip precisely that prefix, never alter
+-- user string literals or downstream source-map offsets by textual rewrites.
+def psJsPrintDeclarationStackSafeSelected
+    (publicNames : List String)
+    (declaration : PsJsIrDeclaration) :
+    Except PsJsEmitError String := do
+  let printed ← psJsPrintDeclarationStackSafe declaration
+  if publicNames.any (fun name => name == declaration.name) then
+    pure printed
+  else if printed.startsWith "export " then
+    pure (String.ofList (printed.toList.drop 7))
+  else
+    .error .malformedIr
+
+def psJsPrintModuleStackSafeSelectedWithPositions
+    (publicNames : List String)
+    (module : PsJsIrModule) : Except PsJsEmitError PsJsPrintedModule := do
+  let prelude := psJsPrintStackSafePrelude module
+  let position ← psJsAdvanceGeneratedText psJsGeneratedPositionZero prelude
+  psJsPrintDeclarationsObservedWith
+    (psJsPrintDeclarationStackSafeSelected publicNames)
+    module.declarations true
+    (psTextBuilderAppend psTextBuilderEmpty prelude) position List.nil
+
 def psJsPrintModuleStackSafeWithPositions
     (module : PsJsIrModule) : Except PsJsEmitError PsJsPrintedModule :=
   let prelude : String := psJsPrintStackSafePrelude module;
@@ -1756,3 +1782,13 @@ def psJsEmitValidatedModuleStackSafeWithPositions
   let ir ← (psJsLowerValidatedModule module).mapError PsJsEmitError.lower
   let _ ← (psJsValidateModule ir).mapError PsJsEmitError.targetValidation
   psJsPrintModuleStackSafeWithPositions ir
+
+-- Public-entry selection is purely a target API policy, not a language
+-- feature. All internal dependencies are still linked in the same module.
+def psJsEmitValidatedModuleStackSafeSelectedWithPositions
+    (publicNames : List String)
+    (module : PsValidatedIrModule) :
+    Except PsJsEmitError PsJsPrintedModule := do
+  let ir ← (psJsLowerValidatedModule module).mapError PsJsEmitError.lower
+  let _ ← (psJsValidateModule ir).mapError PsJsEmitError.targetValidation
+  psJsPrintModuleStackSafeSelectedWithPositions publicNames ir

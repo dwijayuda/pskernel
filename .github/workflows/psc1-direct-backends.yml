@@ -152,6 +152,30 @@ jobs:
           fi
           test ! -e /tmp/psc1-should-not-emit.js
 
+          # Imported declarations must link but must NOT appear in the entry
+          # JavaScript public namespace or its TypeScript declaration file.
+          cat >/tmp/Psc1Library.lean <<'EOF'
+          def privateHelper (x : Nat) : Nat := x
+          EOF
+          cat >/tmp/psc1-export-entry.lean <<'EOF'
+          import Psc1Library
+          def publicValue (x : Nat) : Nat := privateHelper x
+          EOF
+          lake exe psc1 build /tmp/psc1-export-entry.lean --target js --out /tmp/psc1-exports.js
+          grep -q 'export function publicValue' /tmp/psc1-exports.js
+          if grep -q 'export function privateHelper' /tmp/psc1-exports.js; then
+            echo "Imported library helper was exported" >&2
+            exit 1
+          fi
+          grep -q 'export declare function publicValue' /tmp/psc1-exports.d.ts
+          if grep -q 'privateHelper' /tmp/psc1-exports.d.ts; then
+            echo "Imported library helper appeared in public .d.ts" >&2
+            exit 1
+          fi
+          cp /tmp/psc1-exports.js /tmp/psc1-exports.mjs
+          node --input-type=module -e 'import("/tmp/psc1-exports.mjs").then(m=>{if(m.publicValue(41n)!==41n||Object.hasOwn(m,"privateHelper"))process.exit(1)})'
+          echo "PSC1_ENTRY_PUBLIC_EXPORT_SURFACE: PASS"
+
           # Both source grammars must reach the same DirectJS runtime.
           cat >/tmp/psc1-direct.ps <<'EOF'
           def idNat(x : Nat) : Nat := x

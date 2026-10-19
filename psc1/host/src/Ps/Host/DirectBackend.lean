@@ -71,10 +71,17 @@ def psHostDirectDeclaration (value : PsVerifiedIrDeclaration) : Except String St
     pure ("export declare function " ++ value.name ++ "(" ++
       String.intercalate ", " args ++ "): " ++ outputType ++ ";")
 
-def psHostDirectDeclarationSource (module : PsValidatedIrModule) :
-    Except String String := do
-  let declarations ← psListMapExcept psHostDirectDeclaration module.raw.declarations
-  pure ("// PSC1 direct JS declarations from checked typed IR\n" ++
+def psHostDirectDeclarationSource
+    (module : PsValidatedIrModule)
+    (publicNames : List String)
+    (emitted : PsJsPrintedModule) : Except String String := do
+  let declarations ← psListMapExcept (fun name => do
+    let some original := module.raw.declarations.find? (fun decl => decl.name == name)
+      | throw "PSC1_DIRECT_ENTRY_DECLARATION_MISSING"
+    if !emitted.spans.any (fun span => span.name == name) then
+      throw "PSC1_DIRECT_PUBLIC_SIGNATURE_NOT_EMITTED"
+    psHostDirectDeclaration original) publicNames
+  pure ("// PSC1 direct JS declarations from accepted entry-module typed IR\n" ++
     String.intercalate "\n" declarations ++ "\n")
 
 def psHostDirectJavaScript
@@ -83,14 +90,20 @@ def psHostDirectJavaScript
     throw (IO.userError "PSC1_DIRECT_JS_OUTPUT_EXTENSION: expected .js")
   let loaded ← psHostDirectValidatedIrWithEntry inputPath
   let validated := loaded.1
-  let declaration ← match psHostDirectDeclarationSource validated with
-    | .ok text => pure text
-    | .error reason => throw (IO.userError reason)
-  let emitted ← match psJsEmitValidatedModuleStackSafeWithPositions validated with
-    | .ok text => pure text
-    | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
   let sourceText := loaded.2.1
   let parsed := loaded.2.2
+  -- Only values authored in the entry source are public. Imported and
+  -- specialized helper declarations remain internal to the linked artifact.
+  let authoredNames := parsed.declarations.map psHostSyntaxDeclarationName
+  let publicNames := authoredNames.filter (fun name =>
+    validated.raw.declarations.any (fun declaration => declaration.name == name))
+  let emitted ← match psJsEmitValidatedModuleStackSafeSelectedWithPositions
+      publicNames validated with
+    | .ok text => pure text
+    | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
+  let declaration ← match psHostDirectDeclarationSource validated publicNames emitted with
+    | .ok text => pure text
+    | .error reason => throw (IO.userError reason)
   let name := ((System.FilePath.mk outputPath).fileName).getD "module.js"
   let stem := outputPath.dropRight 3
   -- Source positions are owned by the actual parser; generated columns are

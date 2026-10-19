@@ -1,4 +1,5 @@
 import Ps.Elab.DataIndexPromotion
+import Ps.Elab.DataUniverseInference
 import Ps.Elab.Term
 import Ps.Meta.Inductive
 import Ps.Core.Nested
@@ -115,11 +116,36 @@ def psElabDataRecursiveFields (context : PsElabContext) (plan : PsInductiveGroup
     return (state.fst + 1, state.snd)) (0, [])
   return result.reverse
 
-def psElabDataConstructor (context : PsElabContext)
+def psElabDataAlignGroupLevels (context : PsElabContext)
+    (group : PsInductiveGroupPlan) (expression : PsExpr) : Except PsElabError PsElabContext := do
+  match expression with
+  | .constE name levels =>
+    match group.members.find? (fun info => psNameEq info.name name) with
+    | none => return context
+    | some info =>
+      if levels.length != info.levelParams.length then
+        throw (.data "temporary inductive group universe arity mismatch")
+      (levels.zip info.levelParams).foldlM (fun context (actual, name) => do
+        let unified := psLevelUnify context.metaContext.levels actual (.param name)
+        if !unified.success then
+          throw (.data "recursive family universe parameters must remain uniform")
+        return psElabContextWithMeta context { context.metaContext with levels := unified.context })
+        context
+  | .app fn arg | .lam _ fn arg _ | .forallE _ fn arg _ =>
+    let context ← psElabDataAlignGroupLevels context group fn
+    psElabDataAlignGroupLevels context group arg
+  | .letE _ type value body =>
+    let context ← psElabDataAlignGroupLevels context group type
+    let context ← psElabDataAlignGroupLevels context group value
+    psElabDataAlignGroupLevels context group body
+  | .proj _ _ value => psElabDataAlignGroupLevels context group value
+  | _ => return context
+
+def psElabDataConstructorWithContext (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder) (plan : PsInductiveGroupPlan)
     (info : PsInductiveInfo)
     (index : Nat) (source : PsSyntaxInductiveConstructor) :
-    Except PsElabError (PsDeclaration × PsElabSourceInfo) := do
+    Except PsElabError (PsDeclaration × PsElabSourceInfo × PsElabContext) := do
   let some name := psSyntaxConstructorCoreName info.name source.name | throw .emptyName
   let fields ← psElabTypedBinders psElabTerm context source.fields
   let parameters := psElabBinderArguments parameterBindersRev
@@ -128,21 +154,35 @@ def psElabDataConstructor (context : PsElabContext)
     | none =>
       if info.numIndices != 0 then throw (.data "indexed constructor requires a result type")
       pure (PsElabTypeResult.mk fields.context (psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters))
+  let context ← ((fields.bindersRev.map (·.type)) ++ [result.type]).foldlM
+    (fun context type => psElabDataAlignGroupLevels context plan type) result.context
+  let result := { result with context }
   let familyHead := (psExprAppView (psWhnf result.context.environment
     result.context.metaContext result.context.localContext result.type)).head
   let unified := psUnify result.context.environment result.context.localContext
     result.context.metaContext familyHead (.constE info.name (info.levelParams.map PsLevel.param))
+  if unified.resourceExceeded then throw .fuelExhausted
   if !unified.success then throw (.data "constructor result must be its declared family")
   let result := { result with context := psElabContextWithMeta result.context unified.context }
   let _ ← psElabDataIndices result.context info parameters result.type
   let recursiveFields ← psElabDataRecursiveFields result.context plan parameters fields.bindersRev.reverse
   let type := psCloseElabImplicitBinders result.context.metaContext parameterBindersRev
     (psCloseElabForallBinders result.context.metaContext fields.bindersRev result.type)
-  if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
+  if !(psExprMetaIds type).isEmpty then throw .unresolvedMetavariable
   let declaration := PsDeclaration.constructorDecl {
     name, levelParams := info.levelParams, type, inductiveName := info.name, constructorIndex := index
     numParams := info.numParams, numFields := fields.bindersRev.length, recursiveFields }
-  return (declaration, psElabFinishSourceInfo result.context name)
+  return (declaration, psElabFinishSourceInfo result.context name, result.context)
+
+-- Existing callers retain their fully resolved declaration contract.
+def psElabDataConstructor (context : PsElabContext)
+    (parameterBindersRev : List PsElabTypedBinder) (plan : PsInductiveGroupPlan)
+    (info : PsInductiveInfo) (index : Nat) (source : PsSyntaxInductiveConstructor) :
+    Except PsElabError (PsDeclaration × PsElabSourceInfo) := do
+  let (declaration, receipt, _) ← psElabDataConstructorWithContext context
+    parameterBindersRev plan info index source
+  if psExprHasUnresolvedMeta (psDeclarationType declaration) then throw .unresolvedMetavariable
+  return (declaration, receipt)
 
 -- Pinned Lean uses one elimination universe, all visible AND nested motives,
 -- and every slot's constructor minors in each recursor. The templates already
@@ -219,21 +259,18 @@ structure PsElabInductiveHeader where
 -- complete parameter/index telescopes agree do any family names enter the
 -- constructor environment; these entries remain unadmitted Core plans.
 def psElabInductiveHeader (environment : PsEnvironment) (source : PsElabInductiveSource)
-    (levelNames : List PsName) : Except PsElabError PsElabInductiveHeader := do
+    (levelNames : List PsName) (metaContext : PsMetaContext := psMetaEmpty)
+    (nextLocalId : Nat := 0) :
+    Except PsElabError PsElabInductiveHeader := do
   let some name := psSyntaxNameToName source.name | throw .emptyName
-  let parameters ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) source.params
+  let initial := psElabContextWithMeta (psElabContextEmpty environment levelNames) metaContext
+  let initial := psElabContextWithLocal initial { initial.localContext with nextId := nextLocalId }
+  let parameters ← psElabTypedBinders psElabTerm initial source.params
   let result ← match source.resultType with
-    | none => do
-      let mut context := parameters.context
-      let mut level := PsLevel.succ .zero
-      if source.isStructure then
-        for constructor in source.constructors do
-          let fields ← psElabTypedBinders psElabTerm { context with collectInfo := false } constructor.fields
-          for field in fields.bindersRev do
-            let fieldLevel ← psElabExpressionSort fields.context field.type
-            level := psLevelMax level fieldLevel
-          context := psElabLeaveScope context fields.context
-      pure (PsElabTypeResult.mk context (.sortE (psLevelNormalize level)))
+    | none =>
+      let fresh := psMetaFreshLevel parameters.context.metaContext
+      pure (PsElabTypeResult.mk
+        (psElabContextWithMeta parameters.context fresh.context) (.sortE fresh.level))
     | some term => psElabType psElabTerm parameters.context term
   let indices ← psElabOpenCoreTelescope 4096 result.context result.type none
   match indices.body with
@@ -242,7 +279,7 @@ def psElabInductiveHeader (environment : PsEnvironment) (source : PsElabInductiv
   if source.isStructure && !indices.bindersRev.isEmpty then
     throw (.data "structure result must be a sort, not an indexed family")
   let type := psCloseElabForallBinders result.context.metaContext parameters.bindersRev result.type
-  if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
+  if !(psExprMetaIds type).isEmpty then throw .unresolvedMetavariable
   let names ← source.constructors.mapM fun constructor =>
     match psSyntaxConstructorCoreName name constructor.name with
     | some name => pure name
@@ -253,18 +290,27 @@ def psElabInductiveHeader (environment : PsEnvironment) (source : PsElabInductiv
     numIndices := indices.bindersRev.length, constructors := names, isStructure := source.isStructure }
   return { source, info, context := result.context, bindersRev := parameters.bindersRev }
 
-def psElabInductiveGroupParameters (context : PsElabContext) (parameters : List PsExpr)
-    (left right : PsExpr) : Except PsElabError Unit := do
+def psElabInductiveGroupParametersWithContext (context : PsElabContext)
+    (parameters : List PsExpr) (left right : PsExpr) : Except PsElabError PsElabContext := do
   match parameters with
-  | [] => return ()
+  | [] => return context
   | parameter :: rest =>
     let left ← (psInferEnsureForall context.environment context.metaContext context.localContext left).mapError PsElabError.infer
     let right ← (psInferEnsureForall context.environment context.metaContext context.localContext right).mapError PsElabError.infer
-    if !psBinderInfoEq left.binder right.binder ||
-        !psDefEqReadOnlyWithEnv context.environment context.metaContext context.localContext left.domain right.domain then
+    if !psBinderInfoEq left.binder right.binder then
       throw (.data "inductive group parameters must have compatible binder types and kinds")
-    psElabInductiveGroupParameters context rest
+    let unified := psUnify context.environment context.localContext context.metaContext left.domain right.domain
+    if unified.resourceExceeded then throw .fuelExhausted
+    if !unified.success then
+      throw (.data "inductive group parameters must have compatible binder types and kinds")
+    let context := psElabContextWithMeta context unified.context
+    psElabInductiveGroupParametersWithContext context rest
       (psExprInstantiate1 left.body parameter) (psExprInstantiate1 right.body parameter)
+
+def psElabInductiveGroupParameters (context : PsElabContext) (parameters : List PsExpr)
+    (left right : PsExpr) : Except PsElabError Unit := do
+  let _ ← psElabInductiveGroupParametersWithContext context parameters left right
+  pure ()
 
 -- Constructors use one common parameter identity. Each member retains its
 -- source binder names as aliases for that common context, so alpha-renamed
@@ -277,9 +323,173 @@ def psElabInductiveGroupContext (first header : PsElabInductiveHeader)
     match bindersRev.find? (fun binder => binder.id == psLocalDeclId declaration), declaration with
     | some binder, .binding id _ type kind => .binding id binder.name type kind
     | _, _ => declaration
-  let localContext := { first.context.localContext with declarations := declarations }
+  let commonIds := first.bindersRev.map (·.id)
+  let aliases := (first.bindersRev.zip header.bindersRev).flatMap fun (common, source) =>
+    (psLocalVisibleNames header.context.localContext source.id).map fun name =>
+      ({
+        userName := name
+        id := common.id
+        beforeId := first.context.localContext.nextId } : PsLocalNameAlias)
+  let localContext := {
+    first.context.localContext with
+    declarations
+    nameAliases := aliases ++ first.context.localContext.nameAliases.filter
+      (fun alias => !commonIds.contains alias.id) }
   let context := { first.context with environment := environment, infoRev := [], localContext := localContext }
   { bindersRev := bindersRev, context := context }
+
+-- Temporary group constants are checked with the complete source roster.
+-- Their argument vectors are rewritten only after exact old arity validation.
+def psElabDataGroupLevelArityValid (members : List PsInductiveInfo) : PsExpr → Bool
+  | .constE name levels =>
+    match members.find? (fun info => psNameEq info.name name) with
+    | some info => levels.length == info.levelParams.length
+    | none => true
+  | .app a b | .lam _ a b _ | .forallE _ a b _ =>
+    psElabDataGroupLevelArityValid members a && psElabDataGroupLevelArityValid members b
+  | .letE _ type value body =>
+    psElabDataGroupLevelArityValid members type &&
+      psElabDataGroupLevelArityValid members value &&
+      psElabDataGroupLevelArityValid members body
+  | .proj _ _ value => psElabDataGroupLevelArityValid members value
+  | _ => true
+
+-- Native elaboration still has local family heads here, without an explicit
+-- universe argument vector. Do not count our temporary complete vector as
+-- independent evidence that an otherwise unused source level is needed.
+def psElabDataUsedExprLevels (members : List PsInductiveInfo) : PsExpr → List PsLevel
+  | .sortE level => [level]
+  | .constE name levels =>
+    if members.any (fun info => psNameEq info.name name) then [] else levels
+  | .app a b | .lam _ a b _ | .forallE _ a b _ =>
+    psElabDataUsedExprLevels members a ++ psElabDataUsedExprLevels members b
+  | .letE _ type value body =>
+    psElabDataUsedExprLevels members type ++ psElabDataUsedExprLevels members value ++
+      psElabDataUsedExprLevels members body
+  | .proj _ _ value => psElabDataUsedExprLevels members value
+  | _ => []
+
+def psElabDataLocalExpressions (locals : PsLocalContext) : List PsExpr :=
+  locals.declarations.flatMap fun declaration =>
+    match declaration with
+    | .binding _ _ type _ => [type]
+    | .letDecl _ _ type value => [type, value]
+
+def psElabDataMetaExpressions (context : PsMetaContext) : List PsExpr :=
+  context.declarations.flatMap (fun declaration =>
+    declaration.type :: psElabDataLocalExpressions declaration.localContext) ++
+  context.assignments.map (·.value) ++
+  context.delayed.flatMap (fun delayed =>
+    delayed.body :: delayed.abstractions.flatMap fun abstraction =>
+      match abstraction with
+      | .lambdaE _ _ type _ | .forallE _ _ type _ => [type]
+      | .letE _ _ type value => [type, value]
+      | .substitute _ value => [value])
+
+-- Closed templates originally mention the temporary complete universe roster.
+-- Prune unused source levels and append only genuinely generalized header levels
+-- to every occurrence of these same group constants.
+def psElabDataFinalizeExpr (members : List PsInductiveInfo)
+    (oldLevels newLevels : List PsName) (expression : PsExpr) : PsExpr :=
+  match expression with
+  | .constE name levels =>
+    if members.any (fun info => psNameEq info.name name) then
+      let mapped := newLevels.map fun name =>
+        match (oldLevels.zip levels).find? (fun entry => psNameEq entry.fst name) with
+        | some (_, value) => value
+        | none => PsLevel.param name
+      .constE name mapped
+    else expression
+  | .app fn arg =>
+    .app (psElabDataFinalizeExpr members oldLevels newLevels fn)
+      (psElabDataFinalizeExpr members oldLevels newLevels arg)
+  | .lam name type body binder =>
+    .lam name (psElabDataFinalizeExpr members oldLevels newLevels type)
+      (psElabDataFinalizeExpr members oldLevels newLevels body) binder
+  | .forallE name type body binder =>
+    .forallE name (psElabDataFinalizeExpr members oldLevels newLevels type)
+      (psElabDataFinalizeExpr members oldLevels newLevels body) binder
+  | .letE name type value body =>
+    .letE name (psElabDataFinalizeExpr members oldLevels newLevels type)
+      (psElabDataFinalizeExpr members oldLevels newLevels value)
+      (psElabDataFinalizeExpr members oldLevels newLevels body)
+  | .proj name index value => .proj name index (psElabDataFinalizeExpr members oldLevels newLevels value)
+  | expression => expression
+
+def psElabDataMapLocalContext (map : PsExpr → PsExpr) (locals : PsLocalContext) : PsLocalContext :=
+  { locals with declarations := locals.declarations.map fun declaration =>
+      match declaration with
+      | .binding id name type binder => .binding id name (map type) binder
+      | .letDecl id name type value => .letDecl id name (map type) (map value) }
+
+def psElabDataMapInfo (map : PsExpr → PsExpr) : PsElabInfo → PsElabInfo
+  | .reference source resolved projection term type =>
+    .reference source resolved projection (map term) (map type)
+  | .instanceSelection span goal evidence => .instanceSelection span (map goal) (map evidence)
+  | .binderGroup head annotation ids => .binderGroup head annotation ids
+  | .insertedArgument span kind name fn value type =>
+    .insertedArgument span kind name (map fn) (map value) (map type)
+
+def psElabDataMapMeta (map : PsExpr → PsExpr) (context : PsMetaContext) : PsMetaContext :=
+  { context with
+    declarations := context.declarations.map fun declaration => {
+      declaration with
+      type := map declaration.type
+      localContext := psElabDataMapLocalContext map declaration.localContext }
+    assignments := context.assignments.map fun assignment => {
+      assignment with value := map assignment.value }
+    delayed := context.delayed.map fun delayed => {
+      delayed with
+      body := map delayed.body
+      abstractions := delayed.abstractions.map fun abstraction =>
+        match abstraction with
+        | .lambdaE id name type binder => .lambdaE id name (map type) binder
+        | .forallE id name type binder => .forallE id name (map type) binder
+        | .letE id name type value => .letE id name (map type) (map value)
+        | .substitute id value => .substitute id (map value) } }
+
+def psElabDataFinalize (context : PsElabContext) (available : List PsName)
+    (group : PsInductiveGroupPlan) (constructors : List PsDeclaration)
+    (sourceInfo : List PsElabSourceInfo) :
+    Except PsElabError (PsElabContext × PsInductiveGroupPlan ×
+      List PsDeclaration × List PsElabSourceInfo) := do
+  let first :: _ := group.members | throw (.data "empty inductive group")
+  let instantiate := psMetaInstantiate context.metaContext
+  let types := group.members.map (fun info => instantiate info.type) ++
+    constructors.map (fun declaration => instantiate (psDeclarationType declaration))
+  if types.any psExprHasUnresolvedMeta then throw .unresolvedMetavariable
+  let retained := psElabDataLocalExpressions context.localContext ++
+    psElabDataMetaExpressions context.metaContext ++
+    (context.infoRev ++ sourceInfo.flatMap (·.entries)).flatMap (fun entry =>
+      psElabDataLocalExpressions entry.localContext ++ psElabInfoExpressions entry.info)
+  if !(types ++ retained.map instantiate).all (psElabDataGroupLevelArityValid group.members) then
+    throw (.data "temporary inductive group universe arity mismatch")
+  let used := types.flatMap (psElabDataUsedExprLevels group.members)
+  let levels := psElabDeclarationLevels available (used.map PsExpr.sortE)
+  let map := fun expression =>
+    psElabDataFinalizeExpr group.members first.levelParams levels (instantiate expression)
+  let metaContext := psElabDataMapMeta map context.metaContext
+  let context := {
+    context with
+    metaContext
+    localContext := psElabDataMapLocalContext map context.localContext
+    infoRev := context.infoRev.map fun entry => {
+      localContext := psElabDataMapLocalContext map entry.localContext
+      info := psElabDataMapInfo map entry.info }
+    levelNames := levels }
+  let members := group.members.map fun info => {
+    info with levelParams := levels, type := map info.type }
+  let constructors ← constructors.mapM fun declaration => do
+    let .constructorDecl info := declaration
+      | throw (.data "constructor plan contains another declaration")
+    return PsDeclaration.constructorDecl { info with levelParams := levels, type := map info.type }
+  let sourceInfo := sourceInfo.map fun receipt => {
+    receipt with
+    metaContext
+    entries := receipt.entries.map fun entry => {
+      localContext := psElabDataMapLocalContext map entry.localContext
+      info := psElabDataMapInfo map entry.info } }
+  return (context, { members }, constructors, sourceInfo)
 
 -- Native group entry point. The existing .ps singleton/structure entry point
 -- below uses this same pipeline. This does not expand v7.2's source mutual
@@ -289,11 +499,24 @@ def psElabInductiveGroup (environment : PsEnvironment)
     Except PsElabError PsElabDeclarationBatchResult := do
   if sources.length > 1 && sources.any (·.isStructure) then
     throw (.data "mutual structures require the group projection plan")
-  let headers ← sources.mapM (psElabInductiveHeader environment · levelNames)
-  let groupLevels := psElabDeclarationLevels levelNames (headers.map (·.info.type))
-  let headers := headers.map fun header =>
-    { header with info := { header.info with levelParams := groupLevels } }
+  let (metaContext, nextLocalId, headers) ← sources.foldlM
+    (fun (state : PsMetaContext × Nat × List PsElabInductiveHeader) source => do
+      let (metaContext, nextLocalId, headers) := state
+      let header ← psElabInductiveHeader environment source levelNames metaContext nextLocalId
+      return (header.context.metaContext, header.context.localContext.nextId,
+        headers ++ [header])) (psMetaEmpty, 0, [])
+  -- Constructors can mention a source universe not used in a header. Retain
+  -- the complete temporary roster; finalization computes and rewrites its use.
+  let headerLevels := psElabDeclarationLevels levelNames (headers.map (·.info.type))
+  let groupLevels := headerLevels.foldl (fun names name =>
+    if names.any (psNameEq name) then names else names ++ [name]) levelNames
+  let headers := headers.map fun header => {
+    header with
+    info := { header.info with levelParams := groupLevels }
+    context := psElabContextWithLocal (psElabContextWithMeta header.context metaContext)
+      { header.context.localContext with nextId := nextLocalId } }
   let first :: _ := headers | throw (.data "empty inductive group")
+  let sourceSpan := first.source.name.span
   let plan : PsInductiveGroupPlan := { members := headers.map (·.info) }
   if !psInductiveGroupHeaderShapeValid plan then throw (.data "incompatible inductive group headers")
   let names := plan.members.flatMap fun info =>
@@ -301,39 +524,51 @@ def psElabInductiveGroup (environment : PsEnvironment)
   if names.any (fun name => (names.filter (psNameEq name)).length != 1) then
     throw (.data "duplicate inductive group member")
   let parameters := psElabBinderArguments first.bindersRev
-  if headers.length > 1 then
-    let level ← (psInductiveResultLevel environment first.info).mapError PsElabError.infer
-    for header in headers.drop 1 do
-      psElabInductiveGroupParameters first.context parameters first.info.type header.info.type
-      let otherLevel ← (psInductiveResultLevel environment header.info).mapError PsElabError.infer
-      if !psLevelEquivalent level otherLevel then
-        throw (.data "inductive group members must have the same resulting universe")
+  let context ← (headers.drop 1).foldlM (fun context header => do
+    let context ← psElabInductiveGroupParametersWithContext context parameters first.info.type header.info.type
+    let level ← psElabDataResultLevel context first.info.type
+    let other ← psElabDataResultLevel context header.info.type
+    let unified := psLevelUnify context.metaContext.levels level other
+    if !unified.success then throw (.data "inductive group members must have the same resulting universe")
+    return psElabContextWithMeta context { context.metaContext with levels := unified.context }) first.context
   let declarations := plan.members.map PsDeclaration.inductiveDecl
   let withHeaders ← psAddDeclarationList environment declarations
-  let (constructors, sourceInfo) ← headers.foldlM
-    (fun (state : List PsDeclaration × List PsElabSourceInfo) header => do
-      let common := psElabInductiveGroupContext first header withHeaders
-      let (_, constructorsRev, receiptsRev) ← header.source.constructors.foldlM
-        (fun (state : Nat × List PsDeclaration × List PsElabSourceInfo) source => do
-          let (index, constructors, receipts) := state
-          let (declaration, receipt) ← psElabDataConstructor common.context common.bindersRev
+  let (context, constructors, sourceInfo) ← headers.foldlM
+    (fun (state : PsElabContext × List PsDeclaration × List PsElabSourceInfo) header => do
+      let (context, constructors, receipts) := state
+      let common := psElabInductiveGroupContext { first with context } header withHeaders
+      let (context, _, constructorsRev, receiptsRev) ← header.source.constructors.foldlM
+        (fun (state : PsElabContext × Nat × List PsDeclaration × List PsElabSourceInfo) source => do
+          let (context, index, constructors, receipts) := state
+          let (declaration, receipt, inner) ← psElabDataConstructorWithContext context common.bindersRev
             plan header.info index source
-          return (index + 1, declaration :: constructors, receipt :: receipts)) (0, [], [])
-      return (state.fst ++ constructorsRev.reverse,
-        state.snd ++ (psElabFinishSourceInfo header.context header.info.name :: receiptsRev.reverse))) ([], [])
+          return (psElabLeaveScope context inner, index + 1,
+            declaration :: constructors, receipt :: receipts)) (common.context, 0, [], [])
+      return (psElabLeaveScope state.1 context, constructors ++ constructorsRev.reverse,
+        receipts ++ (psElabFinishSourceInfo header.context header.info.name :: receiptsRev.reverse)))
+    (context, [], [])
   let withConstructors ← psAddDeclarationList withHeaders constructors
   let (context, plan, constructors) ← psElabDataPromoteIndices
-    { first.context with environment := withConstructors } plan constructors
+    { context with environment := withConstructors } plan constructors
+  let (context, highUniverse) ← psElabDataInferUniverses context plan constructors
+  let (context, plan, constructors, sourceInfo) ←
+    psElabDataFinalize context levelNames plan constructors sourceInfo
   let declarations := plan.members.map PsDeclaration.inductiveDecl
   let withHeaders ← psAddDeclarationList environment declarations
   let withConstructors ← psAddDeclarationList withHeaders constructors
-  let firstInfo :: _ := plan.members | throw (.data "empty inductive group")
+  let first :: _ := plan.members | throw (.data "empty inductive group")
   let parameters ← psElabOpenCoreTelescope 4096
     { context with environment := withConstructors, localContext := psLocalEmpty }
-    firstInfo.type (some firstInfo.numParams)
+    first.type (some first.numParams)
   let recursors ← psBuildInductiveGroupRecursors parameters.context
     parameters.bindersRev plan constructors
-  return { declarations := declarations ++ constructors ++ recursors, sourceInfo }
+  let diagnostics := if highUniverse then
+      [{
+        severity := .warning
+        message := "inferred universe level may be unnecessarily high; provide an explicit resulting sort to select a smaller valid universe"
+        span := sourceSpan }]
+    else []
+  return { declarations := declarations ++ constructors ++ recursors, sourceInfo, diagnostics }
 
 def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)

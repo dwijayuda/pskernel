@@ -119,6 +119,21 @@ def psElabSourceMatchLocals (context : PsElabContext) (roots forbidden : List Na
     (roots, [])
   return selected.snd.reverse
 
+-- Test this exact de Bruijn binder, including its shifted position under
+-- nested binders. Other surrounding locals do not keep an unused let alive.
+def psElabSourceMatchUsesBinder (term : PsExpr) (index : Nat := 0) : Bool :=
+  match term with
+  | .bvar actual => actual == index
+  | .app fn arg =>
+    psElabSourceMatchUsesBinder fn index || psElabSourceMatchUsesBinder arg index
+  | .lam _ type body _ | .forallE _ type body _ =>
+    psElabSourceMatchUsesBinder type index || psElabSourceMatchUsesBinder body (index + 1)
+  | .letE _ type value body =>
+    psElabSourceMatchUsesBinder type index || psElabSourceMatchUsesBinder value index ||
+      psElabSourceMatchUsesBinder body (index + 1)
+  | .proj _ _ value => psElabSourceMatchUsesBinder value index
+  | _ => false
+
 -- The native match-type builder removes unused lets from major domains.
 def psElabSourceMatchPruneLets (term : PsExpr) : PsExpr :=
   match term with
@@ -129,7 +144,7 @@ def psElabSourceMatchPruneLets (term : PsExpr) : PsExpr :=
     .forallE name (psElabSourceMatchPruneLets type) (psElabSourceMatchPruneLets body) binder
   | .letE name type value body =>
     let body := psElabSourceMatchPruneLets body
-    if psExprHasLooseBVar body 0 then
+    if psElabSourceMatchUsesBinder body 0 then
       .letE name (psElabSourceMatchPruneLets type) (psElabSourceMatchPruneLets value) body
     else psExprInstantiate1 body value
   | .proj name index value => .proj name index (psElabSourceMatchPruneLets value)

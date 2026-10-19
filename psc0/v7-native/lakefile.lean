@@ -217,3 +217,8 @@ lean_exe pscv0_core_elimination where
 lean_exe pscv0_core_patterns where
   srcDir := "../test"
   root := `Pscv0CorePatterns
+
+-- Checked source-match rows, dependent refinement and total recursion parity.
+lean_exe pscv0_core_matches where
+  srcDir := "../test"
+  root := `Pscv0CoreMatches

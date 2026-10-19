@@ -2309,6 +2309,7 @@ def psLeanPatternHeadEq
             leftName.segments
             rightName.segments
       | _ => false
+  | .dotCtor .. | .inaccessible .. => false
 
 def psLeanPatternListContainsHead
     (patterns : List PsSyntaxPattern)

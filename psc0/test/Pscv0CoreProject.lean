@@ -1504,6 +1504,173 @@ private def checkRegisteredValues : IO Unit := do
   ensure (leanAdmissions == psAdmissions) "registered value paired admissions differ"
   IO.println "PSCV0_CORE_REGISTERED_VALUES: two paired admitted projects, four owned refusals, inferred abbrev/default registration, public where helpers, data-instance and projection reduction, ordinary default opacity and private computational dependency controls passed"
 
+private def attributeLibraryPieces : List (String × String) := [
+  ("public class CoreAttrEcho (A : Type) where\n  run : A -> A\n",
+   "class CoreAttrEcho(A: Type) where { run: A -> A }\n"),
+  ("@[simp] public def coreAttrIdentity (A : Type) (x : A) : A := x\n",
+   "@[simp] def coreAttrIdentity(A: Type, x: A): A := x\n"),
+  ("@[simp] public theorem coreAttrIdentityEq (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n",
+   "@[simp] theorem coreAttrIdentityEq(A: Type, x: A): coreAttrIdentity(A, x) = x := by { rfl }\n"),
+  ("@[simp] private theorem coreAttrPrivateEq (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n",
+   "@[simp] private theorem coreAttrPrivateEq(A: Type, x: A): coreAttrIdentity(A, x) = x := by { rfl }\n"),
+  ("@[instance] public def coreAttrInstance {A : Type} := ({ run := fun (x : A) => x } : CoreAttrEcho A)\n",
+   "@[instance] def coreAttrInstance{A: Type} := ({ run := fun (x: A) => x }: CoreAttrEcho(A))\n"),
+  ("@[simp, instance, default_instance 700] public def coreAttrCombined {A : Type} : CoreAttrEcho A := helper\nwhere\n  helper : CoreAttrEcho A := { run := fun (x : A) => x }\n",
+   "@[simp, instance, default_instance 700] def coreAttrCombined{A: Type}: CoreAttrEcho(A) := helper\nwhere {\n  def helper: CoreAttrEcho(A) := { run := fun (x: A) => x }\n}\n"),
+  ("@[default_instance] public abbrev coreAttrAbbrev {A : Type} : CoreAttrEcho A := { run := fun (x : A) => x }\n",
+   "@[default_instance] abbrev coreAttrAbbrev{A: Type}: CoreAttrEcho(A) := { run := fun (x: A) => x }\n"),
+  ("mutual\n  @[simp] public def coreAttrFirst (A : Type) (x : A) : A := coreAttrSecond A x\n  @[simp] public def coreAttrSecond (A : Type) (x : A) : A := x\nend\n",
+   "mutual\n  @[simp] def coreAttrFirst(A: Type, x: A): A := coreAttrSecond(A, x)\n  @[simp] def coreAttrSecond(A: Type, x: A): A := x\nend\n"),
+  ("@[simp] public theorem coreAttrProposition (P : Prop) (h : P) : P := h\n",
+   "@[simp] theorem coreAttrProposition(P: Prop, h: P): P := h\n")]
+
+private def attributeClientPieces : List (String × String) := [
+  ("public theorem coreAttrViaSpec (A : Type) (x : A) : coreAttrIdentity A x = x := coreAttrIdentityEq A x\n",
+   "theorem coreAttrViaSpec(A: Type, x: A): coreAttrIdentity(A, x) = x := coreAttrIdentityEq(A, x)\n"),
+  ("public def coreAttrCall (A : Type) (x : A) : A := CoreAttrEcho.run x (A := A)\n",
+   "def coreAttrCall(A: Type, x: A): A := CoreAttrEcho.run(x, A := A)\n")]
+
+private def attributeRefusals : List ((String × String) × String) := [
+  (("@[simp] public theorem coreAttrBad (A : Type) (x : A) : x = x := by rfl\n",
+    "@[simp] theorem coreAttrBad(A: Type, x: A): x = x := by { rfl }\n"),
+   "PSCV0-DATA: PSCV0-SIMP-ATTRIBUTE: equation is equivalent to variable reflexivity"),
+  (("@[simp] public theorem coreAttrBad (A B : Type) (f : A -> B) : (fun (x : A) => f x) = f := by rfl\n",
+    "@[simp] theorem coreAttrBad(A: Type, B: Type, f: A -> B): (fun (x: A) => f(x)) = f := by { rfl }\n"),
+   "PSCV0-DATA: PSCV0-SIMP-ATTRIBUTE: equation is equivalent to variable reflexivity"),
+  (("public abbrev coreAttrAlias (A : Type) (x : A) : A := x\n@[simp] public theorem coreAttrBad (A : Type) (x : A) : coreAttrAlias A x = x := by rfl\n",
+    "abbrev coreAttrAlias(A: Type, x: A): A := x\n@[simp] theorem coreAttrBad(A: Type, x: A): coreAttrAlias(A, x) = x := by { rfl }\n"),
+   "PSCV0-DATA: PSCV0-SIMP-ATTRIBUTE: equation is equivalent to variable reflexivity"),
+  (("@[simp] public opaque coreAttrBad (A : Type) (x : A) : A := x\n",
+    "@[simp] opaque coreAttrBad(A: Type, x: A): A := x\n"),
+   "PSCV0-DATA: PSCV0-SIMP-ATTRIBUTE: expected proposition or definition"),
+  (("@[instance] public def coreAttrBad (A : Type) (x : A) := x\n",
+    "@[instance] def coreAttrBad(A: Type, x: A) := x\n"),
+   "PSCV0-DATA: instance result must be a registered class"),
+  (("@[simp, instance] public def coreAttrBad (A : Type) (x : A) : A := x\n",
+    "@[simp, instance] def coreAttrBad(A: Type, x: A): A := x\n"),
+   "PSCV0-DATA: instance result must be a registered class")]
+
+private def attributeSimpRoster : List (String × PsSimpEntryKind) :=
+  [("coreAttrProposition", .proof),
+   ("coreAttrSecond", .unfoldDefinition), ("coreAttrFirst", .unfoldDefinition),
+   ("coreAttrCombined", .unfoldDefinition), ("coreAttrIdentityEq", .proof),
+   ("coreAttrIdentity", .unfoldDefinition)]
+
+private def checkAttributeSimpRoster (entries : List PsSimpEntry) : IO Unit := do
+  ensure (entries.length == attributeSimpRoster.length &&
+      (entries.zip attributeSimpRoster).all (fun (entry, expected) =>
+        psNameEq entry.name (psRootName expected.fst) &&
+        entry.kind == expected.snd && entry.priority == 1000))
+    "selected simp source identity, kind, priority or order changed"
+
+private def checkSourceAttributes : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := importVisibilityInput kind "Library" "" attributeLibraryPieces
+    let client := importVisibilityInput kind "Entry" "public import Library\n" attributeClientPieces
+    let output ← prepare profile "Entry" [client, library]
+    let _ ← admit seed output.admissions
+    paired := paired ++ [output.admissions]
+    let some receipt := output.moduleProfiles.find? (fun item => item.name == "Library")
+      | fail "attribute library receipt missing"
+    checkAttributeSimpRoster receipt.interface.simpEntries
+    let hidden := psNameAppendStr
+      (psNameAppendStr (psRootName "$psc0Private") "Library") "coreAttrPrivateEq"
+    ensure (receipt.privateNames.any (psNameEq hidden) &&
+        !receipt.interface.simpEntries.any (fun entry => psNameEq entry.name hidden) &&
+        output.prepared.declarations.any (fun declaration =>
+          psNameEq (psDeclarationName declaration) hidden))
+      "private simp theorem was lost or entered public metadata"
+    for text in ["coreAttrIdentity", "coreAttrInstance", "coreAttrCombined",
+        "coreAttrFirst", "coreAttrSecond"] do
+      let name := psRootName text
+      let some (.opaqueDecl ..) := receipt.interface.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail ("source attribute exposed an ordinary definition: " ++ text)
+      ensure (!receipt.exposedNames.any (psNameEq name))
+        ("source attribute changed body exposure: " ++ text)
+    let abbrevName := psRootName "coreAttrAbbrev"
+    let some (.definitionDecl ..) := receipt.interface.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) abbrevName)
+      | fail "default attribute lost the abbreviation's source kind"
+    ensure (receipt.exposedNames.any (psNameEq abbrevName))
+      "default attribute lost abbreviation exposure"
+    ensure (receipt.interface.instances.length == 2 &&
+        (receipt.interface.instances.zip ["coreAttrCombined", "coreAttrInstance"]).all
+          (fun (entry, name) => entry.priority == 1000 && match entry.value with
+            | .constE actual _ => psNameEq actual (psRootName name)
+            | _ => false))
+      "instance attribute lost class validation, tie order or identity"
+    ensure (receipt.interface.defaults.length == 2 &&
+        (receipt.interface.defaults.zip [("coreAttrAbbrev", 1000), ("coreAttrCombined", 700)]).all
+          (fun (entry, expected) => entry.priority == expected.snd && match entry.value with
+            | .constE actual _ => psNameEq actual (psRootName expected.fst)
+            | _ => false))
+      "attribute list lost separate default identity or priority"
+    let some (.definitionDecl _ _ _ call) := output.prepared.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) (psRootName "coreAttrCall"))
+      | fail "imported attribute synthesis client missing"
+    ensure ((psPscv0ExprConstants call).any (psNameEq (psRootName "coreAttrCombined")) &&
+        !(psPscv0ExprConstants call).any (psNameEq (psRootName "coreAttrInstance")))
+      "imported ordinary instance tie order did not select the latest checked declaration"
+    let left := importVisibilityInput kind "Left" "public import Library\n" []
+    let right := importVisibilityInput kind "Right" "public import Library\n" []
+    let diamondClient := importVisibilityInput kind "Entry"
+      "public import Left\npublic import Right\n" attributeClientPieces
+    let diamond ← prepare profile "Entry" [diamondClient, right, library, left]
+    ensure (diamond.admissions == output.admissions)
+      "public attribute diamond changed checked declaration admissions"
+    let diamondInterface ← importVisibilityInterface diamond
+    checkAttributeSimpRoster diamondInterface.simpEntries
+    ensure (diamondInterface.instances.length == 2 && diamondInterface.defaults.length == 2)
+      "public attribute diamond duplicated ordinary/default registrations"
+    let parsed ← match psCompilerParsePscv0Program kind library.source with
+      | .ok parsed => pure parsed
+      | .error message => fail message
+    let elaborated ← match psElabProgramWithOrigins profile.baseEnvironment parsed "Library" with
+      | .ok result => pure result
+      | .error error => fail (psCompilerPscv0ElabError error)
+    let fullView := psPscv0DeclarationInterface
+      elaborated.result.environment elaborated.result.declarations
+    ensure (fullView.simpEntries.length == 7 &&
+        fullView.simpEntries.any (fun entry =>
+          psNameEq entry.name hidden && entry.kind == .proof))
+      "checked private source simp registration was discarded"
+    let merged := psPscv0InterfaceMerge fullView fullView
+    let installed ← match psPscv0InstallInterface profile.baseEnvironment merged with
+      | .ok result => pure result
+      | .error message => fail message
+    let installed ← match psPscv0InstallInterface installed merged with
+      | .ok result => pure result
+      | .error message => fail message
+    ensure (sameNames (installed.simpEntries.map (·.name)) (fullView.simpEntries.map (·.name)) &&
+        installed.instances.entries.length == 2 && installed.instances.defaults.length == 2)
+      "legacy attribute installation lost private registration, stable order or deduplication"
+    for negative in attributeRefusals do
+      refuse profile "Library"
+        [importVisibilityInput kind "Library" "" [negative.fst]] true negative.snd
+    refuse profile "Entry" [library,
+      importVisibilityInput kind "Entry" "public import Library\n" [
+        ("public theorem coreAttrLeak (A : Type) (x : A) : coreAttrIdentity A x = x := coreAttrPrivateEq A x\n",
+         "theorem coreAttrLeak(A: Type, x: A): coreAttrIdentity(A, x) = x := coreAttrPrivateEq(A, x)\n")]]
+      true "PSCV0-SCOPE: unknown name coreAttrPrivateEq"
+    refuse profile "Entry" [library,
+      importVisibilityInput kind "Entry" "public import Library\n" [
+        ("public theorem coreAttrOpaqueBad (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n",
+         "theorem coreAttrOpaqueBad(A: Type, x: A): coreAttrIdentity(A, x) = x := by { rfl }\n")]]
+      true "PSCV0-PROOF: rfl requires definitionally equal sides"
+    for attributes in ["@[]", "@[unknown]", "@[simp,]", "@[simp 700]", "@[instance 700]"] do
+      let source := importVisibilityInput kind "Library" "" [
+        (attributes ++ " public def coreAttrSyntax (A : Type) (x : A) : A := x\n",
+         attributes ++ " def coreAttrSyntax(A: Type, x: A): A := x\n")]
+      match psCompilerParsePscv0Program kind source.source with
+      | .error _ => pure ()
+      | .ok _ => fail ("unselected attribute syntax accepted: " ++ attributes)
+  let [leanAdmissions, psAdmissions] := paired | fail "attribute reader pair missing"
+  ensure (leanAdmissions == psAdmissions) "source attribute paired admissions differ"
+  IO.println "PSCV0_CORE_SOURCE_ATTRIBUTES: paired kernel admissions, selected lists and mutual/where/inferred owners, checked simp identity, public/private and diamond metadata, ordinary/default ordering, source-kind preservation and sixteen owned semantic refusals passed"
+
 private def exposedProofSecret : String × String :=
   ("private theorem coreSecretEq (A : Type) (x : A) : x = x := by rfl\n",
    "private theorem coreSecretEq(A: Type, x: A): x = x := by { rfl }\n")
@@ -1760,5 +1927,6 @@ def main : IO Unit := do
   checkLegacyMetadata
   checkLegacyWhere
   checkRegisteredValues
+  checkSourceAttributes
   checkExposedProofs
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

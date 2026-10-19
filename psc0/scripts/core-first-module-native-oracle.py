@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases()
 
 
 def visibility_cases():
@@ -419,6 +419,24 @@ def exposed_proof_cases():
     ]
 
 
+def attribute_cases():
+    return [
+        ("AttributeProvider", "module\npublic class CoreAttrEcho (A : Type) where\n  run : A -> A\n@[simp] public def coreAttrIdentity (A : Type) (x : A) : A := x\n@[simp] public theorem coreAttrIdentityEq (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n@[simp] private theorem coreAttrPrivateEq (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n@[instance] public def coreAttrInstance {A : Type} := ({ run := fun (x : A) => x } : CoreAttrEcho A)\n@[simp, instance, default_instance 700] public def coreAttrCombined {A : Type} : CoreAttrEcho A := helper\nwhere\n  helper : CoreAttrEcho A := { run := fun (x : A) => x }\n@[default_instance] public abbrev coreAttrAbbrev {A : Type} : CoreAttrEcho A := { run := fun (x : A) => x }\nmutual\n  @[simp] public def coreAttrFirst (A : Type) (x : A) : A := coreAttrSecond A x\n  @[simp] public def coreAttrSecond (A : Type) (x : A) : A := x\nend\n@[simp] public theorem coreAttrProposition (P : Prop) (h : P) : P := h\n", ()),
+        ("AttributeClient", "module\npublic import AttributeProvider\npublic theorem coreAttrViaSpec (A : Type) (x : A) : coreAttrIdentity A x = x := coreAttrIdentityEq A x\npublic def coreAttrCall (A : Type) (x : A) : A := CoreAttrEcho.run x (A := A)\n", ()),
+        ("AttributeLeft", "module\npublic import AttributeProvider\n", ()),
+        ("AttributeRight", "module\npublic import AttributeProvider\n", ()),
+        ("AttributeDiamond", "module\npublic import AttributeLeft\npublic import AttributeRight\npublic theorem coreAttrViaSpec (A : Type) (x : A) : coreAttrIdentity A x = x := coreAttrIdentityEq A x\npublic def coreAttrCall (A : Type) (x : A) : A := CoreAttrEcho.run x (A := A)\n", ()),
+        ("AttributeReflexivity", "module\n@[simp] public theorem coreAttrBad (A : Type) (x : A) : x = x := by rfl\n", ("Invalid simp theorem:",)),
+        ("AttributeEtaReflexivity", "module\n@[simp] public theorem coreAttrBad (A B : Type) (f : A -> B) : (fun (x : A) => f x) = f := by rfl\n", ("Invalid simp theorem:",)),
+        ("AttributeAbbrevReflexivity", "module\npublic abbrev coreAttrAlias (A : Type) (x : A) : A := x\n@[simp] public theorem coreAttrBad (A : Type) (x : A) : coreAttrAlias A x = x := by rfl\n", ("Invalid simp theorem:",)),
+        ("AttributeOpaqueValue", "module\n@[simp] public opaque coreAttrBad (A : Type) (x : A) : A := x\n", ("Cannot add `simp` attribute", "not a proposition nor a definition",)),
+        ("AttributeNonClass", "module\n@[instance] public def coreAttrBad (A : Type) (x : A) := x\n", ("should not be an instance", "is not a type class",)),
+        ("AttributeCombinedNonClass", "module\n@[simp, instance] public def coreAttrBad (A : Type) (x : A) : A := x\n", ("should not be an instance", "is not a type class",)),
+        ("AttributePrivateAlias", "module\npublic import AttributeProvider\npublic theorem coreAttrLeak (A : Type) (x : A) : coreAttrIdentity A x = x := coreAttrPrivateEq A x\n", ("Unknown identifier `coreAttrPrivateEq`",)),
+        ("AttributeOpaqueImport", "module\npublic import AttributeProvider\npublic theorem coreAttrOpaqueBad (A : Type) (x : A) : coreAttrIdentity A x = x := by rfl\n", ("Tactic `rfl` failed",)),
+    ]
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=OUTPUT))
@@ -509,9 +527,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 64, "oracle must contain 64 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 35,
-                "oracle must contain 35 expected successful compilations")
+        require(len(fixtures) == 77, "oracle must contain 77 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 40,
+                "oracle must contain 40 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -575,8 +593,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 35
-        report["expected_refusals"] = 29
+        report["successful_compilations"] = 40
+        report["expected_refusals"] = 37
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -605,8 +623,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 64 cases passed "
-          "(35 successful compilations, 29 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 77 cases passed "
+          "(40 successful compilations, 37 expected refusals)", flush=True)
     return 0
 
 

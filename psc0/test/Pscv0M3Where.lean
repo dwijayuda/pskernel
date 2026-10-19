@@ -723,9 +723,9 @@ private def unusedHintSource : String :=
   "}\n" ++
   "end\n" ++
   "theorem uhOrdinaryEq: Eq(ordinary(7), 7) := by { rfl }\n" ++
-  "theorem uhOrdinaryHelperEq: Eq(ordinary.loop(7), 7) := by { rfl }\n" ++
+  "private theorem uhOrdinaryHelperEq: Eq(ordinary.loop(7), 7) := by { rfl }\n" ++
   "theorem uhShadowEq: Eq(uhShadow(8), 8) := by { rfl }\n" ++
-  "theorem uhShadowHelperEq: Eq(uhShadow.shadow(8), 8) := by { rfl }\n" ++
+  "private theorem uhShadowHelperEq: Eq(uhShadow.shadow(8), 8) := by { rfl }\n" ++
   "theorem uhMainEq: Eq(uhMain(9), 9) := by { rfl }\n" ++
   "theorem uhDictPlainEq: Eq(hintDictPlain(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++
   "theorem uhDictIgnoredEq: Eq(hintDictIgnored(tag := 7, d := Inhabited.mk(41), n := 3), 44) := by { rfl }\n" ++

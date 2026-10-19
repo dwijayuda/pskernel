@@ -166,7 +166,7 @@ def psTransparencyAllows (mode : PsTransparency) (status : PsReducibility) : Boo
 -- Produced by the checked project owner for inspection only.
 structure PsInspectionDeclaration where
   declaration : PsDeclaration
-  noncomputable : Bool := false
+  isNoncomputable : Bool := false
 
 structure PsEnvironment where
   declarations : List PsDeclaration

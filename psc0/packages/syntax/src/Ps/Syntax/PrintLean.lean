@@ -395,10 +395,10 @@ def psPrintLeanTermWithFuel
           let printedCondition ← smaller condition
           let printedThen ← smaller thenBranch
           let printedElse ← smaller elseBranch
-          let prefix ← match proofName with
+          let proofPrefix ← match proofName with
             | none => pure ""
             | some name => return (← psPrintSyntaxName name) ++ " : "
-          return "if " ++ prefix ++ printedCondition ++ " then " ++ printedThen ++ " else " ++ printedElse
+          return "if " ++ proofPrefix ++ printedCondition ++ " then " ++ printedThen ++ " else " ++ printedElse
       | .matchMany discriminants alternatives generalizing? _ => do
           let plain := generalizing?.isNone &&
             discriminants.all (fun discriminant => discriminant.equationName?.isNone)

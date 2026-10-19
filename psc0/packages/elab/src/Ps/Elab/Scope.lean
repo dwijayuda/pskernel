@@ -62,13 +62,13 @@ def psScopeHasGlobal (resolver : PsScopeResolver) (segments : List String) : Boo
 
 def psScopeExportedRewrite (resolver : PsScopeResolver)
     (segments : List String) : Option PsName := do
-  let prefix ← (psScopePrefixes segments).find? fun candidate =>
+  let matchedPrefix ← (psScopePrefixes segments).find? fun candidate =>
     !psScopeHasGlobal resolver candidate &&
       resolver.environment.exportedAliases.any (fun entry =>
         psNameEq entry.fst (psSyntaxNameAppendSegments candidate .anonymous))
   let alias ← resolver.environment.exportedAliases.find? (fun entry =>
-    psNameEq entry.fst (psSyntaxNameAppendSegments prefix .anonymous))
-  return psSyntaxNameAppendSegments (segments.drop prefix.length) alias.snd
+    psNameEq entry.fst (psSyntaxNameAppendSegments matchedPrefix .anonymous))
+  return psSyntaxNameAppendSegments (segments.drop matchedPrefix.length) alias.snd
 
 -- A qualified global may be followed by projections. Match the longest namePrefix
 -- through the environment index, using the same rule as term elaboration.

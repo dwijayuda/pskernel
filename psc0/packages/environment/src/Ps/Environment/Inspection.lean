@@ -52,7 +52,7 @@ def psInspectionVisibleDeclarationEqual (actual visible : PsDeclaration) : Bool 
   | _, _ => psInspectionDeclarationEqual actual visible
 
 def psInspectionEntryEqual (left right : PsInspectionDeclaration) : Bool :=
-  left.noncomputable == right.noncomputable &&
+  left.isNoncomputable == right.isNoncomputable &&
     psInspectionDeclarationEqual left.declaration right.declaration
 
 def psInspectionAttach (environment : PsEnvironment)
@@ -61,7 +61,7 @@ def psInspectionAttach (environment : PsEnvironment)
     let name := psDeclarationName entry.declaration
     if let some visible := psEnvironmentFind environment name then
       if !psInspectionVisibleDeclarationEqual entry.declaration visible ||
-          entry.noncomputable != psEnvironmentIsNoncomputable environment name then
+          entry.isNoncomputable != psEnvironmentIsNoncomputable environment name then
         throw ("PSCV0-INSPECTION: conflicting visible implementation or policy for " ++
           psNameToString name)
     match current.find? (fun old => psNameEq (psDeclarationName old.declaration) name) with
@@ -76,7 +76,7 @@ def psInspectionCapture (environment : PsEnvironment) (declarations : List PsDec
     Except String (List PsInspectionDeclaration) := do
   let entries := declarations.map fun declaration => {
     declaration
-    noncomputable := psEnvironmentIsNoncomputable environment (psDeclarationName declaration) }
+    isNoncomputable := psEnvironmentIsNoncomputable environment (psDeclarationName declaration) }
   return (← psInspectionAttach environment entries).inspectionDeclarations
 
 -- Only callers that already resolved and checked the public expression may use
@@ -91,4 +91,4 @@ def psInspectionExecutionEnvironment (environment : PsEnvironment) :
     if psEnvironmentContains current name then return current
     let some next := psEnvironmentAdd current entry.declaration
       | throw ("PSCV0-INSPECTION: cannot install actual implementation " ++ psNameToString name)
-    return if entry.noncomputable then psEnvironmentMarkNoncomputable next name else next) environment
+    return if entry.isNoncomputable then psEnvironmentMarkNoncomputable next name else next) environment

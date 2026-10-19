@@ -49,6 +49,7 @@ inductive PsKernelC0DeepMixedFocus where
       (context : PsKernelCheckerContext)
       (state : PsKernelCheckerState)
       (expr : PsKernelExpr)
+      (binderRanges : List Nat)
   | returned
       (type : PsKernelExpr)
       (state : PsKernelCheckerState)
@@ -65,7 +66,7 @@ def psKernelC0DeepMixedStart
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr) : PsKernelC0DeepMixedMachine :=
-  ⟨.check fuel context state expr, []⟩
+  ⟨.check fuel context state expr [], []⟩
 
 /-- One small-step transition. Context-sensitive checked results cannot be
     shared across frames. In particular a cached checked judgment is still
@@ -78,7 +79,7 @@ def psKernelC0DeepMixedStep
   match machine.focus with
   | .finished ty state =>
       pure ⟨.finished ty state, machine.pending⟩
-  | .check fuel ctx state expr =>
+  | .check fuel ctx state expr binderRanges =>
       match fuel with
       | 0 => .error "kernel inference budget exhausted"
       | remaining + 1 =>
@@ -97,11 +98,13 @@ def psKernelC0DeepMixedStep
               let child ← psKernelCheckerContextEnterRecDepth ctx
               match expr with
               | .app fn arg =>
-                  pure ⟨.check remaining child state fn,
+                  pure ⟨.check remaining child state fn [],
                     .appFunction expr arg child remaining :: machine.pending⟩
               | .lam name domain body info =>
-                  pure ⟨.check remaining child state domain,
-                    .lambdaDomain name domain body info [] child remaining ::
+                  let currentRanges :=
+                    psKernelInferCurrentBinderRanges expr (some ()) binderRanges
+                  pure ⟨.check remaining child state domain [],
+                    .lambdaDomain name domain body info currentRanges child remaining ::
                       machine.pending⟩
               | _ =>
                   -- All other constructors remain checked by original C0.
@@ -118,7 +121,7 @@ def psKernelC0DeepMixedStep
           | .appFunction original arg child remaining =>
               let (view, state1) ←
                 psKernelEnsureForallWith whnf child state ty
-              pure ⟨.check remaining child state1 arg,
+              pure ⟨.check remaining child state1 arg [],
                 .appArgument original arg view child :: rest⟩
           | .appArgument original arg view child =>
               let state1 ←
@@ -143,7 +146,8 @@ def psKernelC0DeepMixedStep
                 (ty, state) name domain body info ranges
               pure ⟨.check remaining frame.scopedContext
                   frame.sourceFreshState
-                  (psKernelC0DeepSubstForce frame.delayedOpening),
+                  (psKernelC0DeepSubstForce frame.delayedOpening)
+                  frame.remainingRanges,
                 .lambdaBody frame :: rest⟩
           | .lambdaBody frame =>
               let sourceFrame := psKernelC0DeepLambdaForceFrame frame

@@ -628,7 +628,7 @@ def psKernelExprHasLooseAt
     proof/regression module before any checker integration. -/
 def psKernelC0HasLooseBVarFast
     (expr : PsKernelExpr) (offset : Nat) : Bool :=
-  decide (offset < expr.psKernelC0LooseBVarBound)
+  Nat.blt offset expr.psKernelC0LooseBVarBound
 
 def psKernelExprHasLooseBVar
     (expr : PsKernelExpr) : Bool :=

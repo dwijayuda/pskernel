@@ -1,0 +1,326 @@
+{
+  "schema": "psc1-practical-core-status/1",
+  "name": "PSC1 Practical Core — v7.2 subset",
+  "baselineCommit": "a2778be648850a1f6a2381e28babcd4a6e783e31",
+  "reference": {
+    "path": "psc1/PSC1_LANGUAGE_REFERENCE_v7.2.md",
+    "upstreamCommit": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
+    "upstreamBlob": "694115223777599ba28ee175e14bb642b7b6aa4b"
+  },
+  "semanticLean": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "implementationLean": {
+    "version": "4.34.0",
+    "status": "transitional-qualified-baseline"
+  },
+  "baselineEvidence": {
+    "implementationCommit": "f933691a1d6fa578c59623636afbb02119909837",
+    "runId": 39332460452,
+    "repairPrRunId": 39333660822
+  },
+  "currentMilestones": [],
+  "stages": [
+    "specified",
+    "parsed",
+    "elaborated",
+    "independently-checked",
+    "executed-on-target"
+  ],
+  "features": [
+    {
+      "id": "operators",
+      "priority": "P0",
+      "status": "missing",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "psc1/packages/environment/src/Ps/Environment/Prelude.lean"
+      ],
+      "notes": "Named exact primitives exist; no precedence parser; proposition comparisons need admitted decision path.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "local-inference",
+      "priority": "P0",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/elab/src/Ps/Elab/Term.lean",
+        "psc1/test/BootstrapTests.lean"
+      ],
+      "notes": "psElabLet infers omitted local types; new focused cross-target evidence pending.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "do",
+      "priority": "P0",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.lean"
+      ],
+      "notes": "Native parser hardcodes CompilerM sugar; PS do explicitly rejected; no general typed procedural family.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "for",
+      "priority": "P0",
+      "status": "missing",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
+      ],
+      "notes": "No iteration/control AST or parser.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "while",
+      "priority": "P0",
+      "status": "missing",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
+      ],
+      "notes": "No arbitrary-loop runtime or assurance path.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "mutation",
+      "priority": "P0",
+      "status": "missing",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/syntax/src/Ps/Syntax/Ast.lean"
+      ],
+      "notes": "No lexical assignment/control lowering.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "return",
+      "priority": "P0",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/syntax/src/Ps/Syntax/ParseLean.lean"
+      ],
+      "notes": "Terminal native compilerPure sugar; early return through branches/loops/handlers absent.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "partial-def",
+      "priority": "P0",
+      "status": "blocked",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/core/src/Ps/Core/Declaration.lean",
+        "psc1/packages/elab/src/Ps/Elab/Declaration.lean",
+        "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean"
+      ],
+      "notes": "Partial syntax/elaboration/erasure exists; canonical admission rejects every partial/opaque.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "tuples",
+      "priority": "P1",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean"
+      ],
+      "notes": "Checked Prod machinery exists; tuple expression/pattern sugar missing.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "arrays",
+      "priority": "P1",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/environment/src/Ps/Environment/Prelude.lean",
+        "psc1/packages/erasure/src/Ps/Erasure/Expr.lean"
+      ],
+      "notes": "Typed named Array operations exist; literal and optional/proof indexing syntax missing.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "typed-errors",
+      "priority": "P1",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/stdlib/ProofScript/Data/Result.lean",
+        "psc1/stdlib/ProofScript/Compiler/Effect.lean"
+      ],
+      "notes": "Pure library effects exist; selected try/catch/throw syntax and interactions missing.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "call-inference",
+      "priority": "P1",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/elab/src/Ps/Elab/Term.lean",
+        "psc1/packages/meta/src/Ps/Meta/Unify.lean"
+      ],
+      "notes": "Implicit argument unification exists; contextual numeric literals default before expected result is applied.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "namespaces",
+      "priority": "P1",
+      "status": "partial",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/packages/environment/src/Ps/Environment/Resolve.lean",
+        "psc1/packages/elab/src/Ps/Elab/Context.lean",
+        "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.lean"
+      ],
+      "notes": "Qualified references exist; namespace scope/declaration/lookup support missing.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    },
+    {
+      "id": "typed-io",
+      "priority": "P1",
+      "status": "missing",
+      "specified": true,
+      "complete": false,
+      "sourceEvidence": [
+        "psc1/host/src/Ps/Host/DirectBackend.lean",
+        "psc1/packages/compiler-ir/src/Ps/CompilerIr/Model.lean"
+      ],
+      "notes": "No admitted source IO or explicit bounded host adapter contract.",
+      "targets": {
+        "js": "not-qualified-for-complete-family",
+        "ts": "not-qualified-for-complete-family",
+        "rust": "not-qualified-for-complete-family",
+        "wasm-core": "not-qualified-for-complete-family",
+        "wasm-component": "not-qualified-for-complete-family"
+      },
+      "evidence": []
+    }
+  ],
+  "assurance": {
+    "currentArtifact": "psc1-checked-direct/1",
+    "endToEndVerifiedMode": "unavailable",
+    "partialExecution": "blocked",
+    "effects": "not-enabled",
+    "directAdmissionProvider": "independent official Lean",
+    "ownedKernel": "source integrated; separately native-tested"
+  },
+  "componentPublicScalars": [
+    "Bool"
+  ],
+  "fullSelfHostTests": false,
+  "deferred": "All unimplemented v7.2 features outside the fourteen approved families; public unsafe, partial_fixpoint, break/continue/finally, macros, broad automation, networking/FFI, optional scalar families, full standard and full self-host qualification."
+}

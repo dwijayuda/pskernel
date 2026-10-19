@@ -1,106 +1,69 @@
-# PSC1 current work state — scoped repair qualified
+# PSC1 current work state — Practical Core v7.2 continuation
 
-Updated 2026-10-20. Branch: `fix/psc1-scoped-correctness-20261020`.
+Updated 2026-10-20. Branch: `feature/psc1-v7.2-practical-core-v1`.
 
-## Exact completed checkpoint
+## Authorized work and preserved lineage
 
-**Implementation `f933691a1d6fa578c59623636afbb02119909837` is GREEN** in GitHub
-Linux Actions **run39332460452**, job118333724117. All workflow steps completed
-successfully. The evidence is exact-commit, not borrowed from a prior baseline.
+Continue the repaired PSC1 implementation with **PSC1 Practical Core — v7.2 subset**:
+retained supported functionality plus exactly fourteen approved feature families.
+The selected reference is `PSC1_LANGUAGE_REFERENCE_v7.2.md`; the acceptance
+matrix is `docs/PSC1_PRACTICAL_CORE_STATUS.json`.
 
-Observed results:
+PR #162 is still open at `a2778be648850a1f6a2381e28babcd4a6e783e31`, targeting
+`psc1/direct-multibackend-v1`. Its scoped run 39333660822 is successful.
+This continuation branches from that actual repaired head. Its parent implementation
+`f933691a1d6fa578c59623636afbb02119909837` was qualified by run 39332460452.
+Comparison confirms the following parent commit changed only three documentation
+files. Historical repair documents/evidence remain unchanged; the prior work state
+is preserved in `docs/history/AI_WORK_STATE_BEFORE_PRACTICAL_CORE_2026-10-20.md`.
 
-- Native compiler/focused executables: 233 Lake build jobs, success.
-- Corrected PSKernel-Core: 163 native build jobs and 15 regressions, success.
-- Host formatting/maps/WIT/transaction tests: 14 passed.
-- Scoped native assertions: 23 passed.
-- Existing IR specialization, native map and independent Lean provider suites pass.
-- Source-to-backend integration groups: 24 passed, including 10 unqualified scalar
-  refusals. Additional source edge groups: 4 passed.
-- The edge suite actually executes imported generic specialization, distinct
-  mangled symbol identities, empty public modules, and non-tail Nat recursion at
-  depth 100,000 in emitted JavaScript.
+## Current implementation/evidence boundary
 
-Archive12224164905 contains 35 readable example/evidence files; SHA-256:
-`981902c3e3bbba31043e895042806b09e56ea92545bac883f5f8926837851b48`.
-See `docs/PSC1_SCOPED_QUALIFICATION_2026-10-20.json` and
-`docs/PSC1_SCOPED_CORRECTNESS_2026-10-20.md` for durable details and links.
-A later documentation-only commit preserves these implementation bytes; do not
-mistake a later pending documentation/PR workflow for this tested implementation.
+Initial source inventory completed, with no new language implementation qualified.
+The governing reference blob is `694115223777599ba28ee175e14bb642b7b6aa4b`
+from PSC0 commit `33676076bcda7b0de5ec1f9803f49b8b1d28a058`; PSC0 is read-only
+for this workstream.
 
-## User goal and boundaries
+Normative Lean target is stable 4.35.0 at
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The passing PSC1 implementation
+remains 4.34.0 until a separate migration changes and qualifies the actual compiler,
+provider, environment and provenance paths. Do not label this transitional state
+completed v7.2 conformance.
 
-Repair existing compiler/kernel integration and output correctness while keeping
-readable JS, TS, Rust, WIT and WAT. Do not add substantial language features,
-upgrade Lean, weaken kernel/IR checks, increase fuel, run full self-host suites,
-publish npm packages, force-push or mutate unrelated PSC0/main work.
-Use GitHub + Linux cloud CI. Fetch actual HEAD before writes. No local checkout,
-compiler/kernel build or test execution is authorized in this workstream.
+Source audit found reusable inferred lets, implicit unification, products and typed
+Array operations. It also found expected result constraints reach call arguments
+too late; native do only expands to old CompilerM helpers while PS do rejects;
+namespace scopes/literal collection syntax/control loops are absent; partial
+declarations are rejected by canonical independent admission. Parsing partial
+bodies is not useful ordinary checked execution.
 
-## Current architecture
+## Next dependency-coherent slices
 
-- Captured dependency-ordered source bytes/ASTs, canonical paths and cycle checks.
-  No source reread after admission for target emission or provenance.
-- The same immutable canonical declaration graph is independently admitted by
-  official Lean before erasure; raw typed IR and specialization input/output are
-  checked. Normal host emission goes through a private-constructor session.
-- Entry public identities and origins reuse erasure's collision-aware Core-name
-  map. Imported helpers remain linked but private. JS declarations and code use
-  the same closed checked target plan; internal generic helpers specialize.
-- Rust retains its checked generic IR and required public named-type closure;
-  the JS scalar public ABI does not accidentally narrow Rust/core Wasm.
-- Readable JS/TS use committed locked formatting dependencies and parsed-tree
-  stability checks. Maps observe final formatted layout, all captured sources,
-  UTF-16 columns, unmapped boundaries and correct negative VLQ encoding.
-- DirectJS uses the stack-safe printer. Rust uses rustfmt and ships a usable
-  exact-direct-pin, locked Cargo library. WAT is printed from actual final bytes.
-- WIT complete bounded signatures are compared structurally to the component.
-  WIT capability selection uses the unchanged IR capability contract.
-- Each complete target bundle publishes via one atomic current-pointer switch
-  to a checksummed immutable generation. Failure retains previous accepted bytes.
-- Both npm launcher paths route to the same identity-checked native executable,
-  without archived PSC0 compiler/kernel fallback. Duplicate stdlib workspace
-  identity is fixed. Formatter dependencies have a committed actual cloud lock.
+1. Separately migrate active pins to stable 4.35.0 and run the preserved focused
+   compiler/provider/owned-kernel/backend suite.
+2. Complete contextual call inference; qualify existing inferred locals; add
+   bounded operators and product/collection syntax through existing checked paths.
+3. Implement shared typed do/state/return control lowering; finite iteration and
+   partial/while runtime paths only with sound logical/runtime assurance separation.
+4. Finish admitted tuple/array/pattern/indexing, typed-error, namespace and bounded
+   IO paths; qualify real target execution and negative interactions.
 
-## Important capability and authority distinctions
+All fourteen families remain explicitly incomplete until specified, parsed,
+elaborated, independently checked where applicable and executed on each claimed
+target with fresh exact commit/run evidence. A green subset is not all-scope
+completion. Full v7.2 and unrestricted .lean support are not claimed.
 
-The **official Lean 4.34.0 kernel** is the independent current direct-output
-admission provider. **Corrected PSKernel-Core source** is integrated and separately
-native-regression-tested, not claimed to be that default provider.
-Source admission and IR/runtime tests do not prove backend semantic preservation.
+## Architecture invariants and execution rules
 
-Current WIT component scalar is **Bool only**. Previous copied code advertised
-integer/float WIT representations that the active IR checker intentionally refuses.
-The repair keeps that guard and now refuses those exports explicitly in both
-policy and tests. This is not a scalar-feature activation or hidden gate relaxation.
+Preserve captured immutable source closure, exact admitted graph/runtime identity,
+specialization rechecks, source ownership, collision-aware symbols, implementation/
+.d.ts agreement, useful maps with unmapped generated regions, and transactional
+target publication. Direct admission uses official Lean; the owned kernel remains
+separately native-tested. Component public ABI remains Bool-only. No hidden TS
+compiler in DirectJS or compiler logic in JS host helpers.
 
-## Remaining work — not blockers silently renamed complete
-
-Separate/incremental module compilation, runtime extraction/tree-shaking, source
-expression-level maps, fully structured target diagnostics, formal preservation,
-full-language conformance, native platform/npm distribution, making owned Core the
-default direct-output provider, optional scalar activation and full self-hosting
-remain separate work. Do not expand into these without an explicit workstream.
-
-Publication is per-target and Linux-qualified. A consistent multi-file reader
-pins an immutable generation once. Existing ordinary/foreign output paths are
-refused; use fresh paths for legacy output migration. JS and TS with the same
-stem need separate directories because both own a `.d.ts` path. Old generations
-remain available; automatic collection and power-failure proof are not implemented.
-
-`build --target ts` is the qualified formatted TS path. The `typescript` stdout
-convenience path still uses the native printer directly. No statement that every
-printer path is normalized by Prettier is justified.
-
-The work is prepared for integration review against `psc1/direct-multibackend-v1`.
-Do not merge/promote on an uninspected moving HEAD. Preserve the exact tested
-checkpoint and distinguish actual PR/integration CI from branch-push qualification.
-
-## History
-
-Baseline0fd7b9aa8bc2f51b21e0cd9477edde35063de0e4 already contained the corrected
-kernel source from0a53836489c4e88f46df8f5b8b0c19cc41bafbbb, specialization
-rechecks and Lean admission. Repair runs exposed and corrected duplicate npm
-workspace identity, Lean record layout and false scalar advertisement before the
-complete green checkpoint above. The historical full state remains byte-for-byte
-in `docs/history/AI_WORK_STATE_BEFORE_SCOPED_2026-10-20.md`.
+Use connected GitHub and focused Linux cloud CI only. No local checkout/build/test,
+full self-host generation/census/fixed-point tests, package publication, releases,
+merge into main, force updates, kernel fuel increases or new assumption allowlist.
+Read actual HEAD before writes and use non-force expected-HEAD updates.
+Keep the repair PR separate and open/update a continuation draft PR.

@@ -3,19 +3,61 @@
   "implementation": "Lean-native PSC1",
   "version": "0.1.0-psc1.1",
   "leanToolchain": "leanprover/lean4:v4.34.0",
-  "sourceProfile": "existing PSC1 bounded source subset; no v7.2 expansion",
+  "sourceProfile": "PSC1 Practical Core — v7.2 subset",
   "admissionProvider": "independent official Lean 4.34.0 kernel",
   "ownedKernel": "corrected PSKernel-Core source integrated and separately regression-tested; not the current default direct-output provider",
-  "targets": ["js", "ts", "rust", "wasm-core", "wasm-component"],
-  "activeIrScalars": ["Nat", "Int", "Bool", "Char", "String", "Unit"],
-  "activeComponentScalars": ["Bool"],
-  "unqualifiedScalars": ["UInt8", "UInt16", "UInt32", "UInt64", "USize", "Int8", "Int16", "Int32", "Int64", "ISize", "Float32", "Float"],
+  "targets": [
+    "js",
+    "ts",
+    "rust",
+    "wasm-core",
+    "wasm-component"
+  ],
+  "activeIrScalars": [
+    "Nat",
+    "Int",
+    "Bool",
+    "Char",
+    "String",
+    "Unit"
+  ],
+  "activeComponentScalars": [
+    "Bool"
+  ],
+  "unqualifiedScalars": [
+    "UInt8",
+    "UInt16",
+    "UInt32",
+    "UInt64",
+    "USize",
+    "Int8",
+    "Int16",
+    "Int32",
+    "Int64",
+    "ISize",
+    "Float32",
+    "Float"
+  ],
   "componentPolicy": "WIT representability and active IR capability must both hold; no gate bypass",
   "artifactProfile": "psc1-checked-direct/1",
-  "publicationPlatforms": ["linux"],
+  "publicationPlatforms": [
+    "linux"
+  ],
   "publicApi": "runtime declarations authored in the entry module; dependencies linked privately",
   "targetPlanning": "JS/TS share a revalidated closed plan; Rust retains checked generic IR; Wasm specializes through its checked target boundary",
   "readability": "format before final source-map observation; no minification",
   "npmDistribution": "private workspace launcher; native binary packaging/publication not qualified",
-  "selfHosting": "not part of this qualification"
+  "selfHosting": "not part of this qualification",
+  "languageReference": "PSC1_LANGUAGE_REFERENCE_v7.2.md",
+  "featureStatus": "docs/PSC1_PRACTICAL_CORE_STATUS.json",
+  "normativeLean": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "pinMigration": "4.34.0 transitional baseline; stable 4.35.0 qualification pending",
+  "assurance": {
+    "ordinary": "checked-direct artifact; no behavioral certification",
+    "verified": "unavailable; must reject explicit verified requests until evidence path exists",
+    "partial": "not yet independently admitted for direct execution"
+  }
 }

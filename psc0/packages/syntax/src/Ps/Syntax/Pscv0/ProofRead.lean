@@ -1,5 +1,7 @@
 import Ps.Syntax.Pscv0.LocalRead
+import Ps.Syntax.Pscv0.CalcRead
 import Ps.Syntax.Pscv0.RCasesRead
+import Ps.Syntax.Pscv0.RewriteRead
 
 -- Closed live dispatch, shared with the independent selected-surface ledger.
 -- Lean 4.35.0 Parser/Extension and Elab/Tactic/Basic use scoped keyed tables;
@@ -7,6 +9,7 @@ import Ps.Syntax.Pscv0.RCasesRead
 inductive PsPscv0TacticParser where
   | exactE (refine : Bool)
   | applyE
+  | rewriteE (close : Bool)
   | eliminate (induction : Bool)
   | rcasesE
   | rintroE
@@ -22,6 +25,7 @@ inductive PsPscv0TacticParser where
   | intros
   | suffices
   | classicalE
+  | calcE
   | group
   | bracedGroup
   | assumption
@@ -34,12 +38,13 @@ inductive PsPscv0TacticParser where
 def psPscv0TacticRegistry : List (String × PsPscv0TacticParser) := [
   ("exact", .exactE false), ("refine", .exactE true), ("apply", .applyE),
   ("cases", .eliminate false), ("induction", .eliminate true),
+  ("rw", .rewriteE true), ("rewrite", .rewriteE false),
   ("rcases", .rcasesE), ("rintro", .rintroE), ("obtain", .obtainE),
   ("by_cases", .byCases), ("exfalso", .exfalso), ("decide", .decide), ("ext", .extE),
   ("case", .caseE true), ("next", .caseE false),
   ("have", .localE false), ("let", .localE true),
   ("change", .change false), ("show", .change true), ("intro", .intro),
-  ("intros", .intros), ("suffices", .suffices), ("classical", .classicalE), ("(", .group), ("{", .bracedGroup),
+  ("intros", .intros), ("suffices", .suffices), ("classical", .classicalE), ("calc", .calcE), ("(", .group), ("{", .bracedGroup),
   ("assumption", .assumption), ("rfl", .reflexivity), ("constructor", .constructor),
   ("constructor!", .constructorFirst),
   ("·", .focus true), ("focus", .focus false), ("all_goals", .each false),
@@ -48,6 +53,7 @@ def psPscv0TacticRegistry : List (String × PsPscv0TacticParser) := [
 def psPscv0TacticParserName : PsPscv0TacticParser → String
   | .exactE refine => if refine then "refine" else "exact"
   | .applyE => "apply"
+  | .rewriteE close => if close then "rw" else "rewrite"
   | .eliminate induction => if induction then "induction" else "cases"
   | .rcasesE => "rcases"
   | .rintroE => "rintro"
@@ -63,6 +69,7 @@ def psPscv0TacticParserName : PsPscv0TacticParser → String
   | .intros => "intros"
   | .suffices => "suffices"
   | .classicalE => "classical"
+  | .calcE => "calc"
   | .group => "("
   | .bracedGroup => "{"
   | .assumption => "assumption"
@@ -163,6 +170,9 @@ def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermRead
         let value ← read head.cursor
         pure (PsSyntaxTactic.applyE value.value
           (psSyntaxSpanJoin token.span (psSyntaxTermSpan value.value)), value.cursor)
+      | .rewriteE close =>
+        let result ← psPscv0ReadRewrite read fuel head close
+        pure (result.value, result.cursor)
       | .rcasesE =>
         let result ← psPscv0ReadRCases read readType fuel head
         pure (result.value, result.cursor)
@@ -228,6 +238,11 @@ def psPscv0ReadTacticsFor (nativeLayout : Bool) (read readType : PsPscv0TermRead
         let fact ← psPscv0ReadSuffices read readType cursor
         let some type := fact.value.type | throw (.unexpectedEnd "suffices type")
         pure (.suffices fact.value.name type fact.value.value fact.value.span, fact.cursor)
+      | .calcE => do
+        let value ← psPscv0ReadCalc read readType fuel cursor
+        let .calcE steps span := value.value
+          | throw (psProofScriptExpectedError "calc steps" cursor)
+        pure (.calcE steps span, value.cursor)
       | .classicalE => do
         let body ← if psTokenCursorAtText head.cursor "{" then
             psPscv0ReadTacticsFor nativeLayout read readType fuel boundary head.cursor true closing

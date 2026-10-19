@@ -139,6 +139,7 @@ def psProofScriptTermWithSpan
   match term with
   | .doE items _ => .doE items span
   | .byE tactics scope _ => .byE tactics scope span
+  | .calcE steps _ => .calcE steps span
   | .hole _ => .hole span
   | .omittedType _ => .omittedType span
   | .optionalType type value _ => .optionalType type value span

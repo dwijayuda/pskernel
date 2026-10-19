@@ -169,6 +169,7 @@ def psPrintProofScriptTermWithFuel
       | .doE items _ => do
           let body ← psPrintDoItems true smaller 4096 items
           return "do {\n  " ++ body.replace "\n" "\n  " ++ "\n}"
+      | .calcE steps _ => psPrintCalc smaller remaining steps
       | .byE tactics _ _ => do
           let body ← psPrintTactics smaller 4096 tactics
           return "by {\n  " ++ body.replace "\n" "\n  " ++ "\n}"

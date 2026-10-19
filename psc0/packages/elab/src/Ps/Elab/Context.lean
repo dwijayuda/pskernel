@@ -65,6 +65,7 @@ structure PsElabSavedScope where
   wellFoundedRecursions : List PsElabWellFoundedRecursion := []
   -- Explicit lexical ownership for compiler-created recursion locals.
   auxiliaryLocalIds : List Nat := []
+  termHoleHints : List (PsSourceSpan × PsExpr) := []
 
 inductive PsElabPendingWork where
   | core (scope : PsElabSavedScope) (constraint : PsSyntheticConstraint)
@@ -117,6 +118,8 @@ structure PsElabContext where
   coreBoundaries : List PsElabCoreBoundary := []
   -- Actual tactic boundaries, retained with source info across typed closure.
   proofBoundariesRev : List PsName := []
+  -- Lexical typed syntax hints are not emitted into checked declarations.
+  termHoleHints : List (PsSourceSpan × PsExpr) := []
 
 def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
@@ -145,7 +148,8 @@ def psElabSaveScope (context : PsElabContext) : PsElabSavedScope :=
     instances := context.instances, structuralRecursion := context.structuralRecursion,
     levelNames := context.levelNames, sourceSpan := context.sourceSpan
     wellFoundedRecursions := context.wellFoundedRecursions
-    auxiliaryLocalIds := context.auxiliaryLocalIds }
+    auxiliaryLocalIds := context.auxiliaryLocalIds
+    termHoleHints := context.termHoleHints }
 
 def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : PsElabContext :=
   { context with
@@ -156,6 +160,7 @@ def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : Ps
     structuralRecursion := scope.structuralRecursion
     wellFoundedRecursions := scope.wellFoundedRecursions
     auxiliaryLocalIds := scope.auxiliaryLocalIds
+    termHoleHints := scope.termHoleHints
     levelNames := scope.levelNames, sourceSpan := scope.sourceSpan }
 
 -- Root fields keep their established call map in every nested body. Only the

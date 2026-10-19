@@ -404,6 +404,12 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
             (rootIsLocal && psScopeRCasesSimple pattern)
           pure (psScopeUnion used result.1, result.2)
         | .intro names _ | .intros names _ => pure ([], names.map psScopeKey ++ bound)
+        | .calcE steps _ => do
+          let used ← steps.foldlM (fun used (type, value) => do
+            let type ← visit bound type
+            let value ← visit bound value
+            pure (psScopeUnion used (psScopeUnion type.used value.used))) []
+          pure (used, bound)
         | .suffices name type value _ => do
           let annotation ← visit bound type
           let value ← visit (psScopeKey name :: bound) value
@@ -411,6 +417,10 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
         | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ => do
           let result ← visit bound value
           pure (result.used, bound)
+        | .rewriteE rules location _ _ => do
+          let sources := rules.map Prod.fst ++ psSyntaxProofLocationTerms location
+          let results ← sources.mapM (visit bound)
+          pure (results.foldl (fun used result => psScopeUnion used result.used) [], bound)
         | .localE name type value _ _ => do
           let annotation ← type.mapM (visit bound)
           let value ← visit bound value
@@ -494,6 +504,15 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
     | .doE items span =>
       let resolved ← psScopeDo fuel resolver visit bound items
       return { term := .doE resolved.items span, used := resolved.used }
+    | .calcE steps span =>
+      let steps ← steps.mapM fun (type, value) => do
+        let type ← visit bound type
+        let value ← visit bound value
+        pure (type, value)
+      return {
+        term := .calcE (steps.map fun (type, value) => (type.term, value.term)) span
+        used := steps.foldl (fun used (type, value) =>
+          psScopeUnion used (psScopeUnion type.used value.used)) [] }
     | .byE tactics _ span =>
       let used ← psScopeTacticDependencies fuel
         (psScopeTerm fuel { resolver with deferProofNames := true }) bound tactics

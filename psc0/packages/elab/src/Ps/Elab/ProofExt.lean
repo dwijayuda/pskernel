@@ -56,11 +56,8 @@ def psProofExtVisit (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     match depth with
     | 0 => pure state
     | depth + 1 =>
-      match psProofExtOne state span with
-      | .error error =>
-        if failIfUnchanged || psElabErrorIsResource error then throw error
-        pure state
-      | .ok next =>
+      let attempt := do
+        let next ← psProofExtOne state span
         let mut current := next
         let mut goals := []
         for goal in next.goals do
@@ -70,6 +67,13 @@ def psProofExtVisit (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
           current := result
           goals := goals ++ result.goals
         psProofNormalize { current with goals }
+      match attempt with
+      | .ok next => pure next
+      | .error error =>
+        if failIfUnchanged || psElabErrorIsResource error then throw error
+        -- Native withExtN catches the whole later ext/introduction attempt.
+        -- Its immutable failed branch contributes no assignment or goal.
+        pure state
 
 def psProofExtIntros (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (fuel depth : Nat) (state : PsProofState)

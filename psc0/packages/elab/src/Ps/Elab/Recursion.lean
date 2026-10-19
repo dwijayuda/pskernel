@@ -408,6 +408,13 @@ def psElabRecursionWalkWithFuel
                             thenResult.term elseResult.term span)
                           (psListAppend conditionResult.changedIds
                             (psListAppend thenResult.changedIds elseResult.changedIds)))
+        | .calcE steps span => do
+            let steps ← steps.mapM fun (type, value) => do
+              let type ← smaller context type
+              let value ← smaller context value
+              pure (type, value)
+            return .mk (.calcE (steps.map fun (type, value) => (type.term, value.term)) span)
+              (steps.flatMap fun (type, value) => type.changedIds ++ value.changedIds)
         | PsSyntaxTerm.matchMany discriminants alternatives generalizing? span => do
             let equationNames := psSyntaxMatchEquationNames discriminants
             let discriminants ← discriminants.mapM fun discriminant => do

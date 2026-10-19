@@ -102,7 +102,8 @@ def psProofRCasesFinish (frame : PsProofRCasesFrame) :
   let _ ← psElabExpressionSort context frame.target
   let fresh := psMetaFresh context.metaContext context.localContext frame.target
     .syntheticOpaque { tag := frame.tag }
-  return { context := psElabContextWithMeta context fresh.context
+  return {
+    context := psElabContextWithMeta context fresh.context
     term := fresh.expr, type := frame.target }
 
 def psProofRCasesType (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
@@ -185,7 +186,9 @@ def psProofRCasesSubstituteEq (finish : PsProofRCasesContinuation)
     replacements := substitutions }
   let removed := roots ++ dependents.map (·.binder.id)
   let inner := psProofRCasesRemoveLocals opened.context removed
-  let body ← finish { frame with context := inner, target := opened.body
+  let body ← finish { frame with
+    context := inner
+    target := opened.body
     refinements := frame.refinements ++ opened.replacements }
   let base ← psElabCloseDependents context opened body specialized
   let context := base.context

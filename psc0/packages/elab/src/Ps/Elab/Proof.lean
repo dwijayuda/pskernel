@@ -3,11 +3,13 @@ import Ps.Elab.ProofApply
 import Ps.Elab.Equality
 import Ps.Elab.Postponed
 import Ps.Elab.ProofTerm
+import Ps.Elab.Calc
 import Ps.Elab.RCases
 import Ps.Elab.ProofIntermediate
 import Ps.Elab.ProofClassical
 import Ps.Elab.ProofLogical
 import Ps.Elab.ProofExt
+import Ps.Elab.ProofRewrite
 
 def psProofExact (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (state : PsProofState) (source : PsSyntaxTerm) (refine : Bool) :
@@ -233,6 +235,7 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
       let next ← match tactic with
         | .exactE source refine _ => psProofExact elaborate scope state source refine
         | .applyE source _ => psProofApply elaborate scope state source
+        | .rewriteE rules location close _ => psProofRewrite elaborate scope state rules location close
         | .exfalso _ => psProofExfalso state
         | .decide _ => psProofDecide state
         | .byCases name proposition _ => psProofByCases elaborate scope state name proposition
@@ -252,6 +255,7 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
           if !finished.goals.isEmpty then throw (.proof "case left unsolved goals")
           pure { finished with goals := saved }
         | .suffices name type value _ => psProofSuffices elaborate scope state name type value
+        | .calcE steps span => psProofCalc elaborate scope state steps span
         | .classicalE body _ => do
           let context ← psElabClassicalContext state.context
           let finished ← psProofRun elaborate scope fuel { state with context } body

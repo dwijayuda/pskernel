@@ -3,12 +3,13 @@ import Ps.Elab.Basic
 -- The ordinary proof reducer follows the existing checked reduction rules
 -- at default transparency. Exhaustion is reported, never a residual answer.
 -- Native reference: Lean4.35.0 Meta/WHNF and Elab/Tactic/Decide.doElab.
-def psProofWhnfWithFuel (fuel : Nat) (context : PsElabContext)
+def psProofWhnfWithTransparency (transparency : PsTransparency) (fuel : Nat)
+    (context : PsElabContext)
     (expression : PsExpr) : Except PsElabError PsExpr := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    let step := psProofWhnfWithFuel fuel context
+    let step := psProofWhnfWithTransparency transparency fuel context
     let view := psReduceAppView (psMetaInstantiate context.metaContext expression)
     let applied := psExprApplyMany view.head view.args
     match view.head with
@@ -46,7 +47,8 @@ def psProofWhnfWithFuel (fuel : Nat) (context : PsElabContext)
           | some major => do
             let major ← step major
             let args := arguments.take position ++ [major] ++ arguments.drop (position + 1)
-            let metadataReduce := psWhnf context.environment context.metaContext context.localContext
+            let metadataReduce := psWhnfWithTransparency transparency context.environment
+              context.metaContext context.localContext
             pure (psReduceIota metadataReduce context.environment
               (psExprApplyMany view.head args))
         | none =>
@@ -70,7 +72,7 @@ def psProofWhnfWithFuel (fuel : Nat) (context : PsElabContext)
       if let some value := candidate then return ← step value
       let some declaration := psEnvironmentFind context.environment name
         | throw (.unknownName name)
-      if !psEnvironmentCanUnfold context.environment .«default» name then
+      if !psEnvironmentCanUnfold context.environment transparency name then
         return application
       match psDeclarationValue declaration with
       | none => pure application
@@ -79,3 +81,8 @@ def psProofWhnfWithFuel (fuel : Nat) (context : PsElabContext)
         if parameters.length != levels.length then throw .typeMismatch
         step (psExprApplyMany (psExprInstantiateLevelParams parameters levels body) arguments)
     | _ => pure applied
+
+-- Preserve the existing default-transparency interface for decide/ext callers.
+def psProofWhnfWithFuel (fuel : Nat) (context : PsElabContext)
+    (expression : PsExpr) : Except PsElabError PsExpr :=
+  psProofWhnfWithTransparency .«default» fuel context expression

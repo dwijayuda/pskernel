@@ -827,6 +827,20 @@ def psElabHole (context : PsElabContext) (expected : Option PsExpr) : PsElabTerm
     term := fresh.expr
     type := target.type }
 
+-- The calc owner supplies only an actual checked type for one raw source
+-- hole. Saved resumptions retain that lexical hint; no name or constant is
+-- manufactured, and expected-type conversion remains the ordinary checker.
+def psElabSourceHole (context : PsElabContext) (span : PsSourceSpan)
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+  let hint := context.termHoleHints.find? fun (source, _) =>
+    source.start.byteOffset == span.start.byteOffset &&
+    source.stop.byteOffset == span.stop.byteOffset &&
+    source.start.line == span.start.line && source.start.column == span.start.column &&
+    source.stop.line == span.stop.line && source.stop.column == span.stop.column
+  match hint with
+  | none => return psElabHole context expected
+  | some (_, type) => psElabFinalizeExpected (psElabHole context (some type)) expected
+
 def psElabOptionalType (elaborate : PsElaborator) (context : PsElabContext)
     (type value : PsSyntaxTerm) : Except PsElabError PsElabTypeResult := do
   let annotation ← elaborate context type none >>= psElabEnsureType

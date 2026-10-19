@@ -52,7 +52,7 @@ def kind_client(provider, module, public_import=False):
 
 def cases():
     identity = "def coreKindValue (A : Type) (x : A) : A := x\n"
-    return [
+    return equation_visibility_cases() + [
         ("LegacyProvider", identity, ()),
         ("ModuleProvider", "module\n\npublic " + identity, ()),
         ("ModuleToModule", kind_client("ModuleProvider", True), ()),
@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases() + qualified_declaration_cases() + equation_visibility_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases() + qualified_declaration_cases()
 
 
 def equation_visibility_cases():
@@ -702,7 +702,7 @@ def main():
             if expected_errors:
                 require(completed.returncode == 1, f"{name}: refusal must exit exactly 1")
                 require(len(errors) == 1,
-                        f"{name}: expected one native error, received {len(errors)}")
+                        f"{name}: expected one native error, received {len(errors)}; diagnostics={json.dumps(diagnostics, ensure_ascii=False)}")
                 error = errors[0]
                 filename = error.get("fileName")
                 require(isinstance(filename, str) and Path(filename).name == input_path.name,

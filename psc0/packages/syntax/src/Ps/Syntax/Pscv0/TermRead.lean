@@ -203,6 +203,8 @@ def psPscv0ParseTermAtPrecedence
               value := psPscv0OperatorTerm .unary "Neg.neg" "-" [argument.value]
                 (psSyntaxSpanJoin sign.token.span (psSyntaxTermSpan argument.value))
               cursor := argument.cursor }
+          else if psTokenCursorAtText cursor "calc" then
+            psPscv0ReadCalc smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "by" then
             psPscv0ReadProof smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "do" then

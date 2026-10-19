@@ -119,6 +119,11 @@ jobs:
             pscv0-core-first-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Check the selected proof parser and elaborator before native linking
+        id: proof_frontend
+        run: |
+          set -euo pipefail
+          lake build Ps.Syntax.Pscv0.TermRead Ps.Syntax.Lean.Term Ps.Elab.Term
       - name: Build native compiler and check recursive derivation
         id: checked
         run: |
@@ -183,6 +188,7 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > ../dist/m3-group-proof-deriving/indexed-inhabited/source-sha.txt
           test "$m3_fixture_status" -eq 0
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: ${{ !cancelled() }}
         with:
           path: |
             psc0/.lake

@@ -138,10 +138,21 @@ def psSyntaxMatchEquationNames {α : Type}
   discriminants.filterMap fun discriminant =>
     discriminant.equationName?.filter fun name => !psSyntaxNameIsAnonymous name
 
+-- Proof locations retain their checked term spelling until the goal supplies
+-- its actual local scope. A target marker is independent of written hypotheses.
+inductive PsSyntaxProofLocation (α : Type) where
+  | targets (hypotheses : List α) (target : Bool)
+  | all
+
+def psSyntaxProofLocationTerms {α : Type} : PsSyntaxProofLocation α → List α
+  | .targets hypotheses _ => hypotheses
+  | .all => []
+
 mutual
 inductive PsSyntaxTerm where
   | doE (items : List PsSyntaxDoItem) (span : PsSourceSpan)
   | byE (tactics : List PsSyntaxTactic) (scope : PsSyntaxProofScope) (span : PsSourceSpan)
+  | calcE (steps : List (PsSyntaxTerm × PsSyntaxTerm)) (span : PsSourceSpan)
   | sortE (isType : Bool) (level : PsSyntaxLevel) (span : PsSourceSpan)
   | reference (name : PsSyntaxName)
   | hole (span : PsSourceSpan)
@@ -225,6 +236,8 @@ inductive PsSyntaxRIntroPattern where
 inductive PsSyntaxTactic where
   | exactE (value : PsSyntaxTerm) (refine : Bool) (span : PsSourceSpan)
   | applyE (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | rewriteE (rules : List (PsSyntaxTerm × Bool))
+      (location : PsSyntaxProofLocation PsSyntaxTerm) (close : Bool) (span : PsSourceSpan)
   | localE (name : PsSyntaxName) (type : Option PsSyntaxTerm) (value : PsSyntaxTerm)
       (reducible : Bool) (span : PsSourceSpan)
   | change (type : PsSyntaxTerm) (select : Bool) (span : PsSourceSpan)
@@ -245,6 +258,7 @@ inductive PsSyntaxTactic where
   | intros (names : List PsSyntaxName) (span : PsSourceSpan)
   | suffices (name : PsSyntaxName) (type value : PsSyntaxTerm) (span : PsSourceSpan)
   | classicalE (body : List PsSyntaxTactic) (span : PsSourceSpan)
+  | calcE (steps : List (PsSyntaxTerm × PsSyntaxTerm)) (span : PsSourceSpan)
   | assumption (span : PsSourceSpan)
   -- Compiler-generated index side-condition solver. It never introduces
   -- axioms, guesses inequalities or leaves unsolved proof metavariables.
@@ -327,9 +341,11 @@ def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTe
     | .obtainE pattern type values _ => type.toList ++ values.toList.flatten ++
       pattern.toList.flatMap (psSyntaxRCasesPatternTerms fuel)
     | .byCases _ proposition _ => [proposition]
+    | .rewriteE rules location _ _ => rules.map Prod.fst ++ psSyntaxProofLocationTerms location
     | .extE patterns _ _ => patterns.flatMap (psSyntaxRIntroPatternTerms fuel)
     | .localE _ type value _ _ => type.toList ++ [value]
     | .suffices _ type value _ => [type, value]
+    | .calcE steps _ => steps.flatMap (fun (type, value) => [type, value])
     | .focus body _ _ | .each body _ _ | .caseE _ _ body _ | .classicalE body _ =>
       body.flatMap (psSyntaxTacticTerms fuel)
     | _ => []
@@ -347,6 +363,7 @@ def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan
 def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .doE _ span => span
   | .byE _ _ span => span
+  | .calcE _ span => span
   | .sortE _ _ span => span
   | .hole span => span
   | .omittedType span => span

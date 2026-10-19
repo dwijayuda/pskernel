@@ -156,6 +156,7 @@ def psLeanTermAtPrecedence (annotation : Bool) (minimum fuel : Nat) :
       else if psTokenCursorAtText cursor "do" then psLeanReadDo read readType fuel cursor
       else if psTokenCursorAtText cursor "match" then psLeanTermMatch read fuel false cursor
       else if psTokenCursorAtText cursor "nomatch" then psLeanTermMatch read fuel true cursor
+      else if psTokenCursorAtText cursor "calc" then psPscv0ReadCalc read readType fuel cursor
       else if psTokenCursorAtText cursor "by" then psLeanTermProof read readType fuel cursor
       else if psTokenCursorAtText cursor "let" then
         if (cursor.remaining.drop 1).head?.any (fun token => [":", ":="].contains token.text) then

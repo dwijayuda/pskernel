@@ -69,10 +69,16 @@ def psElabSourceTacticNames (visit : PsSyntaxTerm → Except PsElabError Unit)
       match tactic with
       | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ =>
         visit value
+      | .rewriteE rules location _ _ =>
+        for source in rules.map Prod.fst ++ psSyntaxProofLocationTerms location do visit source
       | .localE name type value _ _ =>
         psElabSourceName name
         for type in type.toList do visit type
         visit value
+      | .calcE steps _ =>
+        for (type, value) in steps do
+          visit type
+          visit value
       | .suffices name type value _ =>
         psElabSourceName name
         visit type
@@ -180,6 +186,10 @@ def psElabSourceTermNames (fuel : Nat) (term : PsSyntaxTerm) :
         for pattern in patterns do psElabSourcePatternNames fuel pattern
         visit body
     | .doE items _ => psElabSourceDoNames visit fuel items
+    | .calcE steps _ =>
+      for (type, value) in steps do
+        visit type
+        visit value
     | .byE tactics scope _ =>
       if scope.abstractProofs || !scope.namePrefix.isEmpty || !scope.opened.isEmpty ||
           !scope.privateAliases.isEmpty || !scope.mutualAliases.isEmpty ||

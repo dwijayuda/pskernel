@@ -416,6 +416,11 @@ jobs:
           restore-keys: |
             pscv0-core-first-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
+      - name: Check the selected proof parser and elaborator before native linking
+        id: proof_frontend
+        run: |
+          set -euo pipefail
+          lake build Ps.Syntax.Pscv0.TermRead Ps.Syntax.Lean.Term Ps.Elab.Term
       - name: Build the native proof-closure authorer
         id: ext_build
         run: |
@@ -429,6 +434,11 @@ jobs:
           set -euo pipefail
           /usr/bin/time -v -o ../dist/core-first/authoring/ext-resource.txt lake env .lake/build/bin/pscv0_core_environment_export ext ../dist/core-first/authoring/CoreExtCandidate.lean 2>&1 | tee ../dist/core-first/authoring/ext-export.log
           sha256sum ../dist/core-first/authoring/CoreExtCandidate.lean > ../dist/core-first/authoring/ext.sha256
+      - name: Measure pinned calc class and instance metadata independently
+        if: ${{ !cancelled() && steps.ext_build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake env .lake/build/bin/pscv0_core_environment_export calc-metadata ../dist/core-first/authoring/calc-native-metadata.json 2>&1 | tee ../dist/core-first/authoring/calc-native-metadata.log
       - name: Build unchanged Full composition and empty-boundary authorer
         id: build
         if: ${{ !cancelled() && steps.ext_build.outcome == 'success' }}
@@ -544,7 +554,7 @@ jobs:
         run: |
           python3 ../scripts/core-first-ci-evidence.py resources ../dist/core-first/authoring
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
-        if: always() && !cancelled() && steps.build.outcome != 'skipped'
+        if: always() && !cancelled() && (steps.proof_frontend.outcome != 'skipped' || steps.ext_build.outcome != 'skipped' || steps.build.outcome != 'skipped')
         with:
           path: |
             psc0/.lake

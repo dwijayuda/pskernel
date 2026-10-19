@@ -8,7 +8,7 @@ def psPscv0ReservedArgument (text : String) : Bool :=
     -- Total suffixes are already reserved by the shared reader. Keep the P1
     -- suffix out of ordinary application arguments as well, regardless of
     -- its line or indentation, so the declaration reader retains ownership.
-    ["partial_fixpoint", "by", "have", "show", "suffices", "exists", "∃", "from", "return", "do", "←", "<-"].contains text
+    ["partial_fixpoint", "by", "have", "show", "suffices", "exists", "∃", "from", "return", "do", "←", "<-", "at"].contains text
 
 -- All binder contexts use the caller's v7 annotation reader. Grammar policy
 -- stays here: declarations own comma groups/defaults; terms own native binders.

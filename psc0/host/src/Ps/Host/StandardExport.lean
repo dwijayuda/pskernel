@@ -1927,4 +1927,108 @@ def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit :=
   IO.FS.writeFile output (report.compress ++ "\n")
   IO.println report.compress
 
+-- Read-only measurement of the actual pinned instance extension and selected
+-- Full declarations. It neither installs a dictionary nor qualifies calc.
+def auditCalcMetadata (output : System.FilePath) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "calc metadata requires the pinned Lean commit")
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := Lean.Name.mkSimple "Init" }] {} (loadExts := true)
+  let nativeName := fun (text : String) => (text.splitOn ".").foldl Lean.Name.str .anonymous
+  let transName := nativeName "Trans"
+  let environment := psSelfHostProdPreludeEnvironment
+  let outputs := (Lean.getOutParamPositions? native transName).map Array.toList
+  let outputLevels := (Lean.getOutLevelParamPositions? native transName).map Array.toList
+  unless Lean.isClass native transName && outputs == some [5] && outputLevels == some [2] do
+    throw (IO.userError "pinned Trans class/output metadata differs from calc's actual application")
+  let entries := ((Lean.Meta.instanceExtension.getState native).instanceNames.toArray.filter
+    (fun (name, _) => (native.find? name).any fun info =>
+      info.type.getForallBody.getAppFn.isConstOf transName)).qsort
+        (fun a b => Lean.Name.lt a.1 b.1)
+  let mut instanceRows : Array Lean.Json := #[]
+  let mut dependencyNames : Lean.NameSet := {}
+  let mut dependencies : Array Lean.ConstantInfo := #[]
+  for (name, entry) in entries do
+    let some info := native.find? name
+      | throw (IO.userError ("registered native calc instance has no declaration: " ++ toString name))
+    let declaration ← match exportDeclaration native [] info with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    let sourceName := exportName name
+    let selected := psEnvironmentFind environment sourceName
+    let registered := environment.instances.entries.filter fun item =>
+      match item.value with
+      | .constE actual _ => psNameEq actual sourceName
+      | _ => false
+    let attrKind := match entry.attrKind with
+      | .global => "global"
+      | .local => "local"
+      | .scoped => "scoped"
+    instanceRows := instanceRows.push (Lean.Json.mkObj [
+      ("name", Lean.toJson (toString name)),
+      ("priority", Lean.toJson entry.priority),
+      ("attrKind", Lean.toJson attrKind),
+      ("nativeGlobalName", Lean.toJson (entry.globalName?.map toString)),
+      ("levelParameters", Lean.toJson (info.levelParams.map toString)),
+      ("nativeDeclaration", Lean.toJson (psStandardSnapshotDeclaration declaration)),
+      ("nativeReducibility", Lean.toJson (sourceStatus native name)),
+      ("fullPresent", Lean.toJson selected.isSome),
+      ("fullKind", Lean.toJson (selected.map coreCandidateKind)),
+      ("fullExactNativeDeclaration", Lean.toJson (selected.any fun actual =>
+        psStandardSnapshotDeclaration actual == psStandardSnapshotDeclaration declaration)),
+      ("fullRegisteredPriorities", Lean.toJson (registered.map (·.priority)))])
+    for dependency in ← standardDependencyClosure native name {} false do
+      if !dependencyNames.contains dependency.name then
+        dependencyNames := dependencyNames.insert dependency.name
+        dependencies := dependencies.push dependency
+  let required := ["eq_self", "iff_self", "Trans", "Trans.mk", "Trans.trans", "Trans.rec",
+    "instTransEq", "instTransEq_1", "Iff.trans",
+    "Nat.le_trans", "Nat.lt_trans", "Nat.lt_of_le_of_lt", "Nat.lt_of_lt_of_le",
+    "Int.le_trans", "Int.lt_trans", "Int.lt_of_le_of_lt", "Int.lt_of_lt_of_le"].map nativeName
+  let requiredRows ← required.mapM fun name => do
+    let some info := native.find? name
+      | throw (IO.userError ("native calc dependency is missing: " ++ toString name))
+    let type ← match exportExpr info.type with
+      | .ok value => pure value
+      | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+    let selected := psEnvironmentFind environment (exportName name)
+    pure (Lean.Json.mkObj [
+      ("name", Lean.toJson (toString name)),
+      ("nativeLevelParameters", Lean.toJson (info.levelParams.map toString)),
+      ("nativeType", Lean.toJson (psStandardSnapshotExpr type)),
+      ("fullPresent", Lean.toJson selected.isSome),
+      ("fullKind", Lean.toJson (selected.map coreCandidateKind)),
+      ("fullLevelParameters", Lean.toJson
+        (selected.map (fun declaration => (psDeclarationLevelParams declaration).map psNameToString))),
+      ("fullType", Lean.toJson (selected.map (fun declaration =>
+        psStandardSnapshotExpr (psDeclarationType declaration))))])
+  let missing := (dependencies.filter fun info =>
+    (psEnvironmentFind environment (exportName info.name)).isNone).map (fun info => toString info.name)
+  let fullParameters := environment.classParameters.find? (fun (name, _) =>
+    psNameEq name (psRootName "Trans"))
+  let defaults := ((Lean.Meta.defaultInstanceExtension.getState native).defaultInstances.find?
+    transName).getD []
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-calc-native-metadata/1" : String)),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("nativeModules", Lean.toJson (["Init"] : List String)),
+    ("nativeClassExtensionsLoaded", Lean.toJson true),
+    ("nativeOutputParameters", Lean.toJson outputs),
+    ("nativeOutputLevels", Lean.toJson outputLevels),
+    ("nativeOrdinaryInstances", .arr instanceRows),
+    ("nativeDefaultInstances", .arr (defaults.map (fun (name, priority) =>
+      Lean.Json.mkObj [("name", Lean.toJson (toString name)),
+        ("priority", Lean.toJson priority)])).toArray),
+    ("fullClassRegistered", Lean.toJson (environment.classes.any (psNameEq (psRootName "Trans")))),
+    ("fullOutputParameters", Lean.toJson (fullParameters.map (fun item => item.2.outputs))),
+    ("fullOutputLevels", Lean.toJson (fullParameters.map (fun item => item.2.outputLevels))),
+    ("requiredDependencies", .arr requiredRows.toArray),
+    ("nativeInstanceDependencyCount", Lean.toJson dependencies.size),
+    ("missingFullInstanceDependencies", Lean.toJson missing),
+    ("metadataReadOnly", Lean.toJson true),
+    ("calcQualified", Lean.toJson false)]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println report.compress
+
 end PsV7Native

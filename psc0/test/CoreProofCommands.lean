@@ -115,7 +115,7 @@ theorem coreProofClassicalOrdinary : coreProofDecision True = true := by
   classical
   exact Eq.refl true
 
-private def checkNativeRefusal (label : String) (parseOnly : Bool) (source : String) :
+def checkNativeRefusal (label : String) (parseOnly : Bool) (source : String) :
     Lean.Elab.Command.CommandElabM Unit := do
   let saved ← get
   try
@@ -198,7 +198,7 @@ private def admit (seed : Lean.Kernel.Environment) (admissions : String) :
         PsKernelLean.kernelExceptionSummary
     fromExcept checked) seed
 
-private def seedContext : IO (Lean.Kernel.Environment × PsCompilerProfileContext) := do
+def seedContext : IO (Lean.Kernel.Environment × PsCompilerProfileContext) := do
   let names := [psEqName, psNameAppendStr psEqName "refl", psNameAppendStr psEqName "rec"]
   let declarations := psLogicDeclarations.filter fun declaration =>
     names.any (psNameEq (psDeclarationName declaration))
@@ -273,7 +273,7 @@ private def printOpposite (kind : PsCompilerSourceKind) (program : PsSyntaxProgr
       (fun _ => "Lean printer rejected a selected proof command"))
     return (.lean, source)
 
-private def checkPair (profile : PsCompilerProfileContext) (seed : Option Lean.Kernel.Environment)
+def checkPair (profile : PsCompilerProfileContext) (seed : Option Lean.Kernel.Environment)
     (leanSource psSource : String) : IO (List PsCompilerEngineElaborated) := do
   let inputs := [(PsCompilerSourceKind.lean, leanSource), (.proofScript, psSource)]
   let results ← inputs.mapM fun (kind, source) => do
@@ -305,7 +305,7 @@ private def ownedRefusal (owner : String) : PsElabError → Bool
   | .data message => owner == "profile" && message.startsWith "PSCV0-PROOF-PROFILE:"
   | _ => false
 
-private def refuse (profile : PsCompilerProfileContext) (owner label leanSource psSource : String) :
+def refuse (profile : PsCompilerProfileContext) (owner label leanSource psSource : String) :
     IO Unit := do
   for (kind, source) in [(PsCompilerSourceKind.lean, leanSource), (.proofScript, psSource)] do
     let program ← fromExcept (psCompilerParsePscv0 source kind)

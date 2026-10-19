@@ -370,7 +370,7 @@ def psLexReservedIdentifier (text : String) : Bool :=
     "builtin_initialize", "termination_by", "decreasing_by", "partial_fixpoint",
     "monotonicity_by", "exact", "refine", "apply", "change", "cases",
     "induction", "case", "intro", "intros", "constructor", "constructor!",
-    "suffices", "classical", "calc", "rfl", "assumption",
+    "suffices", "classical", "calc", "rfl", "assumption", "rw", "rewrite", "at",
     "rcases", "rintro", "obtain", "by_cases", "exfalso", "decide", "ext",
     "all_goals", "any_goals", "axioms", "commands", "true", "false"] : List String).contains text
 

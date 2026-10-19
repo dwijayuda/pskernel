@@ -37,13 +37,15 @@ def psPscv0RCasesPatternAtom (readType : PsPscv0TermReader) (fuel : Nat)
       let next ← psTokenCursorExpectText cursor "⟨"
       let patterns ← psPscv0RCasesTuple readType fuel next.cursor
       let close ← psTokenCursorExpectText patterns.cursor "⟩"
-      return { value := .tuple patterns.value (psSyntaxSpanJoin token.span close.token.span)
+      return {
+        value := .tuple patterns.value (psSyntaxSpanJoin token.span close.token.span)
         cursor := close.cursor }
     if token.text == "(" then
       let next ← psTokenCursorExpectText cursor "("
       let pattern ← psPscv0RCasesPatternLow readType fuel next.cursor
       let close ← psTokenCursorExpectText pattern.cursor ")"
-      return { value := .paren pattern.value (psSyntaxSpanJoin token.span close.token.span)
+      return {
+        value := .paren pattern.value (psSyntaxSpanJoin token.span close.token.span)
         cursor := close.cursor }
     let name ← psParseSyntaxNameWith true cursor
     return { value := .one name.value, cursor := name.cursor }
@@ -113,7 +115,7 @@ def psPscv0RIntroPattern (readType : PsPscv0TermReader) (fuel : Nat)
   | fuel + 1 =>
     if psTokenCursorAtText cursor "(" then
       let opening ← psTokenCursorExpectText cursor "("
-      let attempt := do
+      let attempt : Except PsParseError (PsParseResult PsSyntaxRIntroPattern) := do
         let patterns ← psPscv0RIntroPatterns readType fuel none opening.cursor
         if patterns.value.isEmpty then
           throw (psProofScriptExpectedError "rintro binder pattern" opening.cursor)

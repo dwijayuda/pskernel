@@ -5,6 +5,14 @@ Status: **UNQUALIFIED / execution plan**, not a declaration that C0-Core is done
 ## Purpose
 Deliver the smallest **independently checked kernel closure actually required** by PSC0 Core Standard / Stage1–Stage3 self-host, while preserving the separately qualified Lean 4.35 full-checker research. Do not use an arbitrary handpicked mini-language or 76-declaration Bootstrap seed as evidence that a real compiler is covered.
 
+## Measured refinement (19 October 2026): do not confuse Full-wrapper closure with Core
+
+- The original 321-module / 191,611-source-declaration / 458-external-root / 5,690-native-external-declaration roster samples `Ps.Compiler.Pscv0Modules` as its first imported module. That compatibility API imports the Full `Pscv0` default and is NOT the isolated selected Core project route.
+- The Core-first PSC0 branch now also contains `Ps.Compiler.Pscv0ModuleEngine`, which imports selected `Pscv0Engine` with an explicit environment. The exact real Core denominator must measure this selected project engine plus the still-advertised TS, Rust, Wasm, IR and codegen roots; it must not simply delete modules because C0 is slow.
+- [Isolated draft PR #156](https://github.com/dwijayuda/pskernel/pull/156) adds a **native host-only** closure comparison that keeps the original Full report invariant and extracts the selected project report separately. No kernel/checker admission, profile installation or Stage1–3 claim until CI qualifies it.
+- The original 458 Full-wrapper native external roots were independently exported to 575,682 records / 29,197,196 bytes, and official Lean 4.35 accepted exactly those bytes. However [C0 full replay 39192039290](https://github.com/dwijayuda/pskernel/actions/runs/39192039290) timed out at 900 seconds, unchanged source fuel 4096. [Eight independently checked 57/58-root shards 39193023883](https://github.com/dwijayuda/pskernel/actions/runs/39193023883) all timed out at 600 seconds despite official acceptance. These outcomes are genuine *performance failures* of Full-wrapper dependencies, not false rejections and not evidence that the isolated Core project has the same dependency closure.
+- Prioritize qualification of the actual **selected** Core closure once PR156 reports its exact counts; preserve the Full-wrapper evidence as a regression/performance oracle. Use official Lean as the trusted external self-host checker until C0 obtains full positive/negative and throughput qualifications. Do not block Core Stage1 compiler source conversion on independent C0 performance.
+
 ## Source of truth and baseline
 - Production base: `perf/pskernel-c0-v7-rust-20261012` at `41322875539de66acf9eb9b01ddf73df82a61bf2`.
 - Target pinned Lean: official 4.35.0, `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.

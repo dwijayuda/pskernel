@@ -19,6 +19,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.Token,
     `Ps.Syntax.Cursor,
     `Ps.Syntax.Lexer,
+    `Ps.Syntax.NaturalLiteral,
     `Ps.Syntax.Ast,
     `Ps.Syntax.ParserState,
     `Ps.Syntax.ParseCommon,

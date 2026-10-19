@@ -14,7 +14,7 @@ def psProofExtOne (state : PsProofState) (span : PsSourceSpan) :
     if !psNameEq name psEqName then throw (.proof "ext requires an equality target")
   | _, _ => throw (.proof "ext requires an equality target")
   for name in context.environment.extTheorems.reverse do
-    let attempt := do
+    let attempt : Except PsElabError PsProofState := do
       let source : PsSyntaxName := {
         segments := psNameToSegments name, span, resolvedName := some name }
       let candidate ← psElabReference context source none
@@ -56,7 +56,7 @@ def psProofExtVisit (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     match depth with
     | 0 => pure state
     | depth + 1 =>
-      let attempt := do
+      let attempt : Except PsElabError PsProofState := do
         let next ← psProofExtOne state span
         let mut current := next
         let mut goals := []

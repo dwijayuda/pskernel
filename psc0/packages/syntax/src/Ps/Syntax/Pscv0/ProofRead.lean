@@ -1,4 +1,5 @@
 import Ps.Syntax.Pscv0.LocalRead
+import Ps.Syntax.NaturalLiteral
 import Ps.Syntax.Pscv0.CalcRead
 import Ps.Syntax.Pscv0.RCasesRead
 import Ps.Syntax.Pscv0.RewriteRead

@@ -147,6 +147,8 @@ def equation_visibility_cases():
           let unfoldExposed ← equationVisibilityProbe "public-unfold-exposed"
             "public theorem equationProbeExposedUnfold (n : Nat) : coreEquationExposed n = Nat.succ n := by unfold coreEquationExposed; rfl"
           unless rwExposed && unfoldExposed do throwError "exposed equation positive controls failed"
+          if rwOpaque || unfoldOpaque || namedOpaque then
+            throwError "ordinary module imports exposed private equation authority"
           logInfo m!"CORE-EQUATION-VISIBILITY-VECTOR opaque-rw={rwOpaque} opaque-unfold={unfoldOpaque} generated-name={namedOpaque}"
         """)
     legacy = source("""

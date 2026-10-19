@@ -1818,14 +1818,14 @@ def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit :=
         reachedNames := reachedNames.insert info.name
         reached := reached.push info
   reached := reached.qsort (fun a b => Lean.Name.lt a.name b.name)
-  let noncomputableEntries := reached.filter fun info =>
+  let noncomputableEntries : Array Lean.ConstantInfo := reached.filter fun info =>
     Lean.isNoncomputable native info.name
-  let noncomputableRows := noncomputableEntries.map fun info => Lean.Json.mkObj [
-    ("name", Lean.toJson (toString info.name)),
-    ("nativeNoncomputable", Lean.toJson true),
-    ("dependencyPath", Lean.toJson
-      ((standardDependencyPath native coreFoundationCandidateRoots info.name {} false)
-        .map toString))]
+  let noncomputableRows : Array Lean.Json := noncomputableEntries.map fun info =>
+    let path := standardDependencyPath native coreFoundationCandidateRoots info.name {} false
+    Lean.Json.mkObj [
+      ("name", Lean.toJson (toString info.name)),
+      ("nativeNoncomputable", Lean.toJson true),
+      ("dependencyPath", Lean.toJson (path.map toString))]
   let outputs := (Lean.getOutParamPositions? native `OfNat).map Array.toList
   let outputLevels := (Lean.getOutLevelParamPositions? native `OfNat).map Array.toList
   unless Lean.isClass native `OfNat &&
@@ -1842,9 +1842,9 @@ def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit :=
       ordinary.globalName? == some `instOfNatNat && ordinaryGlobal &&
       ordinary.val == Lean.Expr.const `instOfNatNat [] do
     throw (IO.userError "native ordinary instOfNatNat metadata differs")
-  let defaults :=
-    (((Lean.Meta.defaultInstanceExtension.getState native).defaultInstances.find? `OfNat)
-      .getD []).filter (fun entry => entry.1 == `instOfNatNat)
+  let defaultState := Lean.Meta.defaultInstanceExtension.getState native
+  let defaultCandidates := (defaultState.defaultInstances.find? `OfNat).getD []
+  let defaults := defaultCandidates.filter (fun entry => entry.1 == `instOfNatNat)
   let [(_, defaultPriority)] := defaults
     | throw (IO.userError "native default instOfNatNat is absent or duplicated")
   unless defaultPriority == 100 do
@@ -1854,8 +1854,8 @@ def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit :=
   unless instanceInfo.levelParams.isEmpty &&
       instanceInfo.type.getForallBody.getAppFn.isConstOf `OfNat do
     throw (IO.userError "native instOfNatNat telescope/class differs")
-  unless Lean.getReducibilityStatusCore native `instOfNatNat == .instanceReducible &&
-      Lean.getReducibilityStatusCore native `Bool.decEq == .implicitReducible do
+  unless sourceStatus native `instOfNatNat == ".instanceReducible" &&
+      sourceStatus native `Bool.decEq == ".implicitReducible" do
     throw (IO.userError "native foundation search transparency differs")
   let instanceType ← match exportExpr instanceInfo.type with
     | .ok value => pure value

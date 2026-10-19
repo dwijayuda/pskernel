@@ -3,21 +3,22 @@ import Lean
 
 private theorem c0_bound_lt_max (o a b : Nat) :
     (o < Nat.max a b) ↔ (o < a ∨ o < b) := by
-  rcases Nat.le_total a b with hab | hba
-  · rw [max_eq_right hab]
+  by_cases hab : a ≤ b
+  · rw [Nat.max_def, if_pos hab]
     constructor
     · intro h; exact Or.inr h
     · intro h
       rcases h with ha | hb
-      · exact lt_of_lt_of_le ha hab
+      · exact Nat.lt_of_lt_of_le ha hab
       · exact hb
-  · rw [max_eq_left hba]
+  · have hba : b ≤ a := Nat.le_of_not_ge hab
+    rw [Nat.max_def, if_neg hab]
     constructor
     · intro h; exact Or.inl h
     · intro h
       rcases h with ha | hb
       · exact ha
-      · exact lt_of_lt_of_le hb hba
+      · exact Nat.lt_of_lt_of_le hb hba
 
 private theorem c0_bound_lt_pred (o a : Nat) :
     (o < a - 1) ↔ (o + 1 < a) := by omega

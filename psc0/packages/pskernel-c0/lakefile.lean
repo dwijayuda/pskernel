@@ -37,6 +37,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.QualifiedBinderInference,
     `Ps.KernelCore.Architecture.QualifiedBinderInferOnly,
     `Ps.KernelCore.Architecture.QualifiedApplicationInference,
+    `Ps.KernelCore.Architecture.DeepInferenceFrames,
     `Ps.KernelCore.Architecture.QualifiedLetInference,
     `Ps.KernelCore.Architecture.QualifiedProjectionInference,
     `Ps.KernelCore.Architecture.QualifiedRecursiveInference,

@@ -124,3 +124,40 @@ theorem psKernelC0DeepZeroFuel
     psKernelC0CollectCheckedAppPath (.app fn arg) 0 context [] =
       .error "kernel inference budget exhausted" := by
   rfl
+
+/-!
+A source-certified single-frame receipt. This narrow interface is
+**not** a source-equality proof for the entire new machine. Its successful
+result carries a genuine Lean proof of the corresponding old C0 source
+operation, with the original frame argument, context, WHNF/DefEq and state.
+The failure result is exactly the original source failure, not a successful
+proof. This permits subsequent verified worklist development without a
+new unchecked accepting primitive.
+-/
+structure PsKernelC0DeepSourceReceipt
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (context : PsKernelCheckerContext)
+    (frame : PsKernelC0CheckedAppFrame)
+    (current : PsKernelExpr)
+    (state : PsKernelCheckerState) where
+  result : PsKernelExpr × PsKernelCheckerState
+  source : psKernelC0CheckAppFrames whnf defeq context
+    [frame] [] current state = .ok result
+
+/-- Certificate-producing adapter for exactly one checked source frame.
+    No pointer equality, caching hint or untrusted computation establishes
+    the witness. The source algorithm itself is the sole producer. -/
+def psKernelC0DeepSourceCheckOne
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (context : PsKernelCheckerContext)
+    (frame : PsKernelC0CheckedAppFrame)
+    (current : PsKernelExpr)
+    (state : PsKernelCheckerState) :
+    Except String
+      (PsKernelC0DeepSourceReceipt whnf defeq context frame current state) :=
+  match h : psKernelC0CheckAppFrames whnf defeq context
+      [frame] [] current state with
+  | .error reason => .error reason
+  | .ok result => .ok ⟨result, h⟩

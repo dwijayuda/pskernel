@@ -115,7 +115,7 @@ private def prepareCommands (state : PsCommandState) : List PsSyntaxCommand →
     let used := scopedMembers.foldl (fun used member => psScopeUnion used member.used) []
     let captures := psScopeSelect state.scope used
     let block ← psElabPreparePreDefinitions state.environment
-      (state.scope.levelNames.map psRootName) captures scopedMembers span
+      state.scope.levelNames captures scopedMembers span
     return { environment := state.environment, block }
   | command :: rest => do
     let state ← psElabCommand state command

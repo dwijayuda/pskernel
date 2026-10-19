@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases() + exposed_proof_cases() + attribute_cases() + connective_attribute_cases() + escaped_identifier_cases() + declaration_universe_cases()
 
 
 def visibility_cases():
@@ -465,6 +465,24 @@ def escaped_identifier_cases():
     ]
 
 
+def declaration_universe_cases():
+    return [
+        ("UniverseProvider", "module\nnamespace CoreUniverses\npublic def identity.{a} (A : Type a) (x : A) : A := x\npublic def ordered.{v, u} (A : Type u) (B : Type v) (x : A) : A := x\nuniverse u\npublic def inherited.{v} (A : Type u) (B : Type v) (x : A) : A := x\npublic def scopeDrop.{w} (A : Type w) (x : A) : A := x\npublic def repeatA.{r} (A : Type r) (x : A) : A := x\npublic def repeatB.{r} (A : Type r) (x : A) : A := x\npublic def constant.{q} : (A : Type q) -> A -> A := fun (A : Type q) => fun (x : A) => x\npublic abbrev alias.{b} (A : Type b) (x : A) : A := x\npublic opaque sealed.{o} (A : Type o) (x : A) : A := x\npublic theorem reflexive.{p} (A : Sort p) (x : A) : x = x := by rfl\nprivate def hidden.{h} (A : Type h) (x : A) : A := x\npublic def fromHidden.{h} (A : Type h) (x : A) : A := hidden A x\npublic def withHelper.{k} (A : Type k) (x : A) : A := helper x\nwhere\n  helper (value : A) : A := value\npublic structure Box.{s} (A : Type s) where\n  value : A\npublic inductive Tag.{t} (A : Type t) where\n  | mk (value : A)\npublic class Picker.{c} (A : Type c) where\n  run : A -> A\npublic instance picker.{i} {A : Type i} : Picker A where\n  run := fun (x : A) => x\npublic def quoted.{first.level, «first.level»} (A : Sort first.level) (B : Sort «first.level») (x : A) : A := x\nuniverse command.level «command.level»\npublic def globalIdentity (A : Sort command.level) (B : Sort «command.level») (x : A) : A := x\nend CoreUniverses\n", ()),
+        ("UniverseClient", "module\npublic import UniverseProvider\npublic def coreUniverseClient.{u} (A : Type u) (x : A) : A := CoreUniverses.identity A (CoreUniverses.fromHidden A x)\npublic theorem coreUniverseAlias.{u} (A : Type u) (x : A) : CoreUniverses.alias A x = x := by rfl\npublic theorem coreUniverseInstance.{u} (A : Type u) (x : A) : CoreUniverses.Picker.run x (A := A) = x := by rfl\npublic theorem coreUniverseProof.{u} (A : Sort u) (x : A) : x = x := CoreUniverses.reflexive A x\n", ()),
+        ("UniverseMutual", "module\nmutual\npublic def universeLeft.{u} (A : Type u) (x : A) : A := universeRight A x\npublic def universeRight.{u} (A : Type u) (x : A) : A := x\nend\n", ()),
+        ("UniverseMetadata", "module\npublic import UniverseProvider\npublic import UniverseMutual\nimport Lean\n\nrun_meta do\n  let checks : List (Lean.Name × List Lean.Name) := [\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"identity\", [Lean.Name.str (Lean.Name.anonymous) \"a\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"ordered\", [Lean.Name.str (Lean.Name.anonymous) \"v\", Lean.Name.str (Lean.Name.anonymous) \"u\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"inherited\", [Lean.Name.str (Lean.Name.anonymous) \"u\", Lean.Name.str (Lean.Name.anonymous) \"v\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"scopeDrop\", [Lean.Name.str (Lean.Name.anonymous) \"w\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"repeatA\", [Lean.Name.str (Lean.Name.anonymous) \"r\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"repeatB\", [Lean.Name.str (Lean.Name.anonymous) \"r\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"constant\", [Lean.Name.str (Lean.Name.anonymous) \"q\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"alias\", [Lean.Name.str (Lean.Name.anonymous) \"b\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"sealed\", [Lean.Name.str (Lean.Name.anonymous) \"o\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"reflexive\", [Lean.Name.str (Lean.Name.anonymous) \"p\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"fromHidden\", [Lean.Name.str (Lean.Name.anonymous) \"h\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"withHelper\", [Lean.Name.str (Lean.Name.anonymous) \"k\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"Box\", [Lean.Name.str (Lean.Name.anonymous) \"s\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"Tag\", [Lean.Name.str (Lean.Name.anonymous) \"t\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"Picker\", [Lean.Name.str (Lean.Name.anonymous) \"c\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"picker\", [Lean.Name.str (Lean.Name.anonymous) \"i\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"quoted\", [Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"first\") \"level\", Lean.Name.str (Lean.Name.anonymous) \"first.level\"]),\n    (Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"CoreUniverses\") \"globalIdentity\", [Lean.Name.str (Lean.Name.str (Lean.Name.anonymous) \"command\") \"level\", Lean.Name.str (Lean.Name.anonymous) \"command.level\"]),\n    (Lean.Name.str (Lean.Name.anonymous) \"universeLeft\", [Lean.Name.str (Lean.Name.anonymous) \"u\"]),\n    (Lean.Name.str (Lean.Name.anonymous) \"universeRight\", [Lean.Name.str (Lean.Name.anonymous) \"u\"])]\n  for (declName, expected) in checks do\n    let info ← Lean.getConstInfo declName\n    unless info.levelParams == expected do\n      throwError \"declaration universe order mismatch in {declName}: {info.levelParams}\"\n", ()),
+        ("UniverseDuplicate", "module\npublic def bad.{u, u} (A : Type u) (x : A) : A := x\n", ("universe", "already", "u",)),
+        ("UniverseScopeDuplicate", "module\nuniverse u\npublic def bad.{u} (A : Type u) (x : A) : A := x\n", ("universe", "already", "u",)),
+        ("UniverseUnused", "module\npublic def bad.{u} (A : Type) (x : A) : A := x\n", ("unused universe parameter", "u",)),
+        ("UniverseTheoremUnused", "module\npublic theorem bad.{u} (A : Type) (x : A) : x = x := by rfl\n", ("unused universe parameter", "u",)),
+        ("UniverseDataUnused", "module\npublic structure Bad.{u} (A : Type) where\n  value : A\n", ("unused universe parameter", "u",)),
+        ("UniverseInstanceUnused", "module\npublic class C (A : Type) where\n  run : A -> A\npublic instance bad.{u} {A : Type} : C A where\n  run := fun (x : A) => x\n", ("unused universe parameter", "u",)),
+        ("UniverseMutualMismatch", "module\nmutual\npublic def left.{u} (A : Type u) (x : A) : A := x\npublic def right.{v} (A : Type v) (x : A) : A := x\nend\n", ("universe parameters mismatch",)),
+        ("UniverseMutualOrder", "module\nmutual\npublic def left.{u, v} (A : Type u) (B : Type v) (x : A) : A := x\npublic def right.{v, u} (A : Type u) (B : Type v) (x : A) : A := x\nend\n", ("universe parameters mismatch",)),
+        ("UniverseScopeLeak", "module\npublic def localOnly.{Private.level} (A : Sort Private.level) (x : A) : A := x\npublic def bad (A : Sort Private.level) (x : A) : A := x\n", ("unknown universe level", "Private.level",)),
+    ]
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=OUTPUT))
@@ -555,9 +573,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 96, "oracle must contain 96 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 49,
-                "oracle must contain 49 expected successful compilations")
+        require(len(fixtures) == 109, "oracle must contain 109 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 53,
+                "oracle must contain 53 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -623,8 +641,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 49
-        report["expected_refusals"] = 47
+        report["successful_compilations"] = 53
+        report["expected_refusals"] = 56
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -653,8 +671,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 96 cases passed "
-          "(49 successful compilations, 47 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 109 cases passed "
+          "(53 successful compilations, 56 expected refusals)", flush=True)
     return 0
 
 

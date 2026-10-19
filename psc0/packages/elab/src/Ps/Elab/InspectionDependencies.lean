@@ -32,7 +32,8 @@ def psInspectionAxioms (fuel : Nat) (environment : PsEnvironment)
         return ← psInspectionAxioms fuel environment rest visited axioms
       let some declaration := psEnvironmentFind environment name
         | throw (psInspectionError ("missing actual axiom dependency " ++ psNameToString name))
-      let (dependencies, axioms) ← match declaration with
+      let (dependencies, axioms) ← do
+        match declaration with
         | .quotientDecl .. => pure ([], axioms)
         | .axiomDecl _ _ type => return ((← psInspectionConstants 4096 type), name :: axioms)
         | .definitionDecl _ _ type body | .theoremDecl _ _ type body

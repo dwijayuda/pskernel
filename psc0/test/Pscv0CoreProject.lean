@@ -1,5 +1,7 @@
 import Ps.Compiler.Pscv0ModuleEngine
 import Ps.CompilerIr.Checked
+import Ps.Syntax.PrintLean
+import Ps.Syntax.PrintProofScript
 import Ps.Environment.Logic
 import Ps.Environment.Connectives
 import PsKernelLean.Replay
@@ -2330,6 +2332,247 @@ private def checkEscapedIdentifiers : IO Unit := do
     ensure (left == right) "escaped names changed canonical admissions between readers"
   IO.println "PSCV0_CORE_ESCAPED_IDENTIFIERS: paired checked modules, quoted keywords and underscores, structural dots and fields, Unicode and empty identifiers, private numeric identities, public marker names, module-key collisions, source AST provenance, exported aliases and owned visibility/graph refusals passed"
 
+private def declarationUniverseProvider : List (String × String) := [
+  ("namespace CoreUniverses\n", "namespace CoreUniverses\n"),
+  ("public def identity.{a} (A : Type a) (x : A) : A := x\n",
+   "function identity.{a}(A: Type a, x: A): A := x\n"),
+  ("public def ordered.{v, u} (A : Type u) (B : Type v) (x : A) : A := x\n",
+   "function ordered.{v, u}(A: Type u, B: Type v, x: A): A := x\n"),
+  ("universe u\n", "universe u\n"),
+  ("public def inherited.{v} (A : Type u) (B : Type v) (x : A) : A := x\n",
+   "function inherited.{v}(A: Type u, B: Type v, x: A): A := x\n"),
+  ("public def scopeDrop.{w} (A : Type w) (x : A) : A := x\n",
+   "function scopeDrop.{w}(A: Type w, x: A): A := x\n"),
+  ("public def repeatA.{r} (A : Type r) (x : A) : A := x\n",
+   "function repeatA.{r}(A: Type r, x: A): A := x\n"),
+  ("public def repeatB.{r} (A : Type r) (x : A) : A := x\n",
+   "function repeatB.{r}(A: Type r, x: A): A := x\n"),
+  ("public def constant.{q} : (A : Type q) -> A -> A := fun (A : Type q) => fun (x : A) => x\n",
+   "const constant.{q}: (A: Type q) -> A -> A := fun (A: Type q) => fun (x: A) => x\n"),
+  ("public abbrev alias.{b} (A : Type b) (x : A) : A := x\n",
+   "abbrev alias.{b}(A: Type b, x: A): A := x\n"),
+  ("public opaque sealed.{o} (A : Type o) (x : A) : A := x\n",
+   "opaque sealed.{o}(A: Type o, x: A): A := x\n"),
+  ("public theorem reflexive.{p} (A : Sort p) (x : A) : x = x := by rfl\n",
+   "theorem reflexive.{p}(A: Sort p, x: A): x = x := by { rfl }\n"),
+  ("private def hidden.{h} (A : Type h) (x : A) : A := x\n",
+   "private function hidden.{h}(A: Type h, x: A): A := x\n"),
+  ("public def fromHidden.{h} (A : Type h) (x : A) : A := hidden A x\n",
+   "function fromHidden.{h}(A: Type h, x: A): A := hidden(A, x)\n"),
+  ("public def withHelper.{k} (A : Type k) (x : A) : A := helper x\nwhere\n  helper (value : A) : A := value\n",
+   "function withHelper.{k}(A: Type k, x: A): A := helper(x)\nwhere {\n  def helper(value: A): A := value\n}\n"),
+  ("public structure Box.{s} (A : Type s) where\n  value : A\n",
+   "structure Box.{s}(A: Type s) where { value: A }\n"),
+  ("public inductive Tag.{t} (A : Type t) where\n  | mk (value : A)\n",
+   "inductive Tag.{t}(A: Type t) where { | mk(value: A) }\n"),
+  ("public class Picker.{c} (A : Type c) where\n  run : A -> A\n",
+   "class Picker.{c}(A: Type c) where { run: A -> A }\n"),
+  ("public instance picker.{i} {A : Type i} : Picker A where\n  run := fun (x : A) => x\n",
+   "instance picker.{i}{A: Type i}: Picker A where { run := fun (x: A) => x }\n"),
+  ("public def quoted.{first.level, «first.level»} (A : Sort first.level) (B : Sort «first.level») (x : A) : A := x\n",
+   "function quoted.{first.level, «first.level»}(A: Sort first.level, B: Sort «first.level», x: A): A := x\n"),
+  ("universe command.level «command.level»\n", "universe command.level «command.level»\n"),
+  ("public def globalIdentity (A : Sort command.level) (B : Sort «command.level») (x : A) : A := x\n",
+   "function globalIdentity(A: Sort command.level, B: Sort «command.level», x: A): A := x\n"),
+  ("end CoreUniverses\n", "end CoreUniverses\n")]
+
+private def declarationUniverseClient : List (String × String) := [
+  ("public def coreUniverseClient.{u} (A : Type u) (x : A) : A := CoreUniverses.identity A (CoreUniverses.fromHidden A x)\n",
+   "function coreUniverseClient.{u}(A: Type u, x: A): A := CoreUniverses.identity(A, CoreUniverses.fromHidden(A, x))\n"),
+  ("public theorem coreUniverseAlias.{u} (A : Type u) (x : A) : CoreUniverses.alias A x = x := by rfl\n",
+   "theorem coreUniverseAlias.{u}(A: Type u, x: A): CoreUniverses.alias(A, x) = x := by { rfl }\n"),
+  ("public theorem coreUniverseInstance.{u} (A : Type u) (x : A) : CoreUniverses.Picker.run x (A := A) = x := by rfl\n",
+   "theorem coreUniverseInstance.{u}(A: Type u, x: A): CoreUniverses.Picker.run(x, A := A) = x := by { rfl }\n"),
+  ("public theorem coreUniverseProof.{u} (A : Sort u) (x : A) : x = x := CoreUniverses.reflexive A x\n",
+   "theorem coreUniverseProof.{u}(A: Sort u, x: A): x = x := CoreUniverses.reflexive(A, x)\n")]
+
+private def declarationUniverseMutual : List (String × String) := [
+  ("mutual\npublic def universeLeft.{u} (A : Type u) (x : A) : A := universeRight A x\npublic def universeRight.{u} (A : Type u) (x : A) : A := x\nend\n",
+   "mutual {\nfunction universeLeft.{u}(A: Type u, x: A): A := universeRight(A, x)\nfunction universeRight.{u}(A: Type u, x: A): A := x\n}\n")]
+
+private def declarationUniverseRefusals : List (String × String × String × String) := [
+  ("Duplicate", "public def bad.{u, u} (A : Type u) (x : A) : A := x\n",
+   "function bad.{u, u}(A: Type u, x: A): A := x\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-DUPLICATE:"),
+  ("ScopeDuplicate", "universe u\npublic def bad.{u} (A : Type u) (x : A) : A := x\n",
+   "universe u\nfunction bad.{u}(A: Type u, x: A): A := x\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-DUPLICATE:"),
+  ("Unused", "public def bad.{u} (A : Type) (x : A) : A := x\n",
+   "function bad.{u}(A: Type, x: A): A := x\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-UNUSED:"),
+  ("TheoremUnused", "public theorem bad.{u} (A : Type) (x : A) : x = x := by rfl\n",
+   "theorem bad.{u}(A: Type, x: A): x = x := by { rfl }\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-UNUSED:"),
+  ("DataUnused", "public structure Bad.{u} (A : Type) where\n  value : A\n",
+   "structure Bad.{u}(A: Type) where { value: A }\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-UNUSED:"),
+  ("InstanceUnused", "public class C (A : Type) where\n  run : A -> A\npublic instance bad.{u} {A : Type} : C A where\n  run := fun (x : A) => x\n",
+   "class C(A: Type) where { run: A -> A }\ninstance bad.{u}{A: Type}: C A where { run := fun (x: A) => x }\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-UNUSED:"),
+  ("MutualMismatch", "mutual\npublic def left.{u} (A : Type u) (x : A) : A := x\npublic def right.{v} (A : Type v) (x : A) : A := x\nend\n",
+   "mutual {\nfunction left.{u}(A: Type u, x: A): A := x\nfunction right.{v}(A: Type v, x: A): A := x\n}\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-MUTUAL:"),
+  ("MutualOrder", "mutual\npublic def left.{u, v} (A : Type u) (B : Type v) (x : A) : A := x\npublic def right.{v, u} (A : Type u) (B : Type v) (x : A) : A := x\nend\n",
+   "mutual {\nfunction left.{u, v}(A: Type u, B: Type v, x: A): A := x\nfunction right.{v, u}(A: Type u, B: Type v, x: A): A := x\n}\n",
+   "PSCV0-SCOPE: PSCV0-DECL-UNIVERSE-MUTUAL:"),
+  ("ScopeLeak", "public def localOnly.{Private.level} (A : Sort Private.level) (x : A) : A := x\npublic def bad (A : Sort Private.level) (x : A) : A := x\n",
+   "function localOnly.{Private.level}(A: Sort Private.level, x: A): A := x\nfunction bad(A: Sort Private.level, x: A): A := x\n",
+   "PSCV0-SCOPE: unknown universe Private.level")]
+
+private def declarationUniverseLevels : List (String × List String) := [
+  ("identity", ["a"]), ("ordered", ["v", "u"]), ("inherited", ["u", "v"]),
+  ("scopeDrop", ["w"]), ("repeatA", ["r"]), ("repeatB", ["r"]),
+  ("constant", ["q"]), ("alias", ["b"]), ("sealed", ["o"]),
+  ("reflexive", ["p"]), ("fromHidden", ["h"]), ("withHelper", ["k"]),
+  ("Box", ["s"]), ("Tag", ["t"]), ("Picker", ["c"]), ("picker", ["i"])]
+
+private def checkDeclarationUniverseSyntax (environment : PsEnvironment) : IO Unit := do
+  let source := "def coreUniverseSyntax.{u.v, «u.v»} (A : Sort u.v) (B : Sort «u.v») (x : A) : A := x\n"
+  let program ← match psCompilerParsePscv0Program .lean source with
+    | .ok program => pure program
+    | .error message => fail ("universe syntax control: " ++ message)
+  let [.declaration original] := program.commands
+    | fail "universe syntax command shape changed"
+  let .definition name binders type value span := original
+    | fail "universe syntax declaration shape changed"
+  ensure (name.universeBinders.map (·.segments) == [["u", "v"], ["u.v"]] &&
+      name.resolvedName.isNone &&
+      name.span.stop.byteOffset == ("def coreUniverseSyntax.{u.v, «u.v»}").utf8ByteSize)
+    "declaration universe components or complete source span changed"
+  match psElabProgramWithOrigins environment program with
+  | .ok _ => pure ()
+  | .error _ => fail "parsed declaration universe source failed its positive AST control"
+  for (kind, printer) in
+      [(PsCompilerSourceKind.lean, psPrintLeanDeclaration),
+       (PsCompilerSourceKind.proofScript, psPrintProofScriptDeclaration)] do
+    let printed ← match printer original with
+      | .ok printed => pure printed
+      | .error _ => fail "declaration-only printer refused an owned universe suffix"
+    let reparsed ← match psCompilerParsePscv0Program kind printed with
+      | .ok parsed => pure parsed
+      | .error message => fail ("printed universe declaration: " ++ message)
+    let [.declaration declaration] := reparsed.commands
+      | fail "printed declaration changed command kind"
+    let head := (psElabOriginSource declaration).fst
+    ensure (head.segments == name.segments &&
+        head.universeBinders.map (·.segments) == name.universeBinders.map (·.segments) &&
+        head.resolvedName.isNone)
+      "declaration-only printer lost structural universe metadata"
+  let misplaced := { name with segments := ["x"] }
+  let badTerm := PsSyntaxTerm.reference misplaced
+  let badBinder : PsSyntaxBinderHead := .mk misplaced .explicit span
+  let sources : List PsSyntaxDeclaration := [
+    .definition name binders type badTerm span,
+    .definition name [(badBinder, type)] type value span,
+    .whereDeclaration original [{
+      name := misplaced, binders := [], type := some type, value := value,
+      recursion := none, span := span }] span,
+    .inductiveDecl { name with universeBinders := [] } [] none [{
+      name := misplaced, fields := [], span := span }] span]
+  for bad in sources do
+    escapedScopeRefusal
+      (psElabProgramWithOrigins environment { program with commands := [.declaration bad] })
+      "misplaced universe source"
+      "declaration universe binders occur outside a declaration head"
+    escapedScopeRefusal (psElabDeclarations environment [bad] [])
+      "misplaced legacy universe source"
+      "declaration universe binders occur outside a declaration head"
+  let commands : List PsSyntaxCommand := [
+    .universeCmd [misplaced] span,
+    .namespaceCmd misplaced span,
+    .inspectionCmd (.printDeclaration misplaced false) span,
+    .derivingDeclaration original [misplaced] false]
+  for command in commands do
+    escapedScopeRefusal (psElabCommand { environment := environment } command)
+      "misplaced universe command target"
+      "declaration universe binders occur outside a declaration head"
+  let badImport : PsSyntaxImport := { moduleName := misplaced, span := span }
+  escapedScopeRefusal
+    (psElabProgramWithOrigins environment { program with imports := [badImport] })
+    "misplaced universe import"
+    "declaration universe binders occur outside a declaration head"
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    for head in ["bad.{}", "bad.{u,}", "bad.{u v}", "bad.{0}",
+        "bad.{_}", "bad .{u}", "bad. {u}", "bad.{u"] do
+      let malformed := match kind with
+        | .lean => "def " ++ head ++ " (A : Type u) (x : A) : A := x\n"
+        | .proofScript => "function " ++ head ++ "(A: Type u, x: A): A := x\n"
+      match psCompilerParsePscv0Program kind malformed with
+      | .error message =>
+          ensure (message.startsWith "PSCV0-PARSE:")
+            ("declaration universe grammar refusal phase: " ++ message)
+      | .ok _ => fail ("malformed declaration universe suffix accepted: " ++ head)
+
+private def checkDeclarationUniverses : IO Unit := do
+  let (seed, profile) ← scopeContext
+  checkDeclarationUniverseSyntax profile.baseEnvironment
+  let mut paired : List String := []
+  let mut mutualPairs : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let provider := importVisibilityInput kind "UniverseProvider" "" declarationUniverseProvider
+    let client := importVisibilityInput kind "UniverseClient"
+      "public import UniverseProvider\n" declarationUniverseClient
+    let output ← prepare profile "UniverseClient" [client, provider]
+    let _ ← admit seed output.admissions
+    paired := paired ++ [output.admissions]
+    let some receipt := output.moduleProfiles.find? (fun item => item.name == "UniverseProvider")
+      | fail "declaration universe provider receipt missing"
+    for (shortName, levelNames) in declarationUniverseLevels do
+      let name := psNameAppendStr (psRootName "CoreUniverses") shortName
+      let some declaration := output.prepared.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail ("declaration universe owner missing: " ++ shortName)
+      ensure (sameNames (psDeclarationLevelParams declaration) (levelNames.map psRootName))
+        ("declaration universe order changed: " ++ shortName)
+      let some exposed := receipt.interface.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail ("declaration universe interface owner missing: " ++ shortName)
+      ensure (sameNames (psDeclarationLevelParams exposed) (levelNames.map psRootName))
+        ("declaration universe interface order changed: " ++ shortName)
+    for (shortName, structural, quoted) in
+        [("quoted", ["first", "level"], "first.level"),
+         ("globalIdentity", ["command", "level"], "command.level")] do
+      let name := psNameAppendStr (psRootName "CoreUniverses") shortName
+      let some declaration := output.prepared.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail ("structural universe owner missing: " ++ shortName)
+      ensure (sameNames (psDeclarationLevelParams declaration)
+          [psSyntaxNameAppendSegments structural .anonymous, psRootName quoted])
+        "qualified and quoted universe names collided or changed order"
+    for (parts, levels) in
+        [(["UniverseProvider", "CoreUniverses", "hidden"], ["h"]),
+         (["UniverseProvider", "CoreUniverses", "withHelper", "helper"], ["k"])] do
+      let name := psElabPrivateName parts
+      let some declaration := output.prepared.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail "private universe owner disappeared from checked declarations"
+      ensure (sameNames (psDeclarationLevelParams declaration) (levels.map psRootName) &&
+          receipt.privateNames.any (psNameEq name) &&
+          !receipt.interface.declarations.any
+            (fun declaration => psNameEq (psDeclarationName declaration) name))
+        "private universe identity, levels or visibility changed"
+    ensure (receipt.interface.instances.any (fun entry =>
+      sameNames entry.levelParams [psRootName "i"] && match entry.value with
+        | .constE name _ => psNameEq name (psNameAppendStr (psRootName "CoreUniverses") "picker")
+        | _ => false))
+      "polymorphic instance import metadata lost declaration-owned universes"
+    let mutualSource := importVisibilityInput kind "UniverseMutual" "" declarationUniverseMutual
+    let mutualOutput ← prepare profile "UniverseMutual" [mutualSource]
+    let _ ← admit seed mutualOutput.admissions
+    mutualPairs := mutualPairs ++ [mutualOutput.admissions]
+    for name in ["universeLeft", "universeRight"] do
+      let declaration ← importVisibilityDeclaration mutualOutput name
+      ensure (sameNames (psDeclarationLevelParams declaration) [psRootName "u"])
+        "mutual declaration universe suffix expanded twice or lost order"
+    for (label, lean, ps, expected) in declarationUniverseRefusals do
+      let refused := importVisibilityInput kind ("Universe" ++ label) "" [(lean, ps)]
+      refuse profile refused.name [refused] true expected
+  let [left, right] := paired | fail "declaration universe source pair missing"
+  ensure (left == right) "declaration universe paired admissions differ"
+  let [left, right] := mutualPairs | fail "mutual universe source pair missing"
+  ensure (left == right) "mutual universe paired admissions differ"
+  IO.println "PSCV0_CORE_DECLARATION_UNIVERSES: four paired admitted projects, exact inherited/explicit order, private/where/instance ownership, structural universe names, 18 owned semantic refusals, 16 parse refusals, printers and source AST boundary controls passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -2400,4 +2643,5 @@ def main : IO Unit := do
   checkConnectiveAttributes
   checkExposedProofs
   checkEscapedIdentifiers
+  checkDeclarationUniverses
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

@@ -2707,24 +2707,78 @@ private def projectBoundaries : IO Unit := do
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
   IO.println "PSCV0_NATIVE_MODULES: PASS module boundaries, RC4 raw/radix, checked ToString dictionaries, abbreviation exposure and entry exports"
 
+namespace Pscv0DerivingBoundaryOracle
+
+universe u
+structure DependentBEq where
+  n : Nat
+  value : Fin n
+  deriving BEq
+structure DependentDecEq where
+  n : Nat
+  value : Fin n
+  deriving DecidableEq
+inductive Promoted : Nat → Type where
+  | intro (n : Nat) : Promoted n
+  deriving DecidableEq
+inductive Chain (A : Type u) : Nat → Type u where
+  | nil : Chain A 0
+  | cons (head : A) (tail : List (Chain A 0)) : Chain A (Nat.succ 0)
+  deriving BEq
+inductive NestedFin where
+  | loop (n : Nat) (value : Fin n) (tails : List NestedFin)
+  deriving Repr
+
+run_cmd do
+  let promoted ← Lean.getConstInfoInduct ``Promoted
+  unless promoted.numParams == 1 && promoted.numIndices == 0 do
+    throwError "native deriving boundary lost index promotion"
+  let chain ← Lean.getConstInfoInduct ``Chain
+  unless chain.numParams == 1 && chain.numIndices == 1 && chain.isNested do
+    throwError "native deriving boundary lost genuine indexed nested BEq"
+  let nested ← Lean.getConstInfoInduct ``NestedFin
+  unless nested.numParams == 0 && nested.numIndices == 0 && nested.isNested do
+    throwError "native deriving boundary lost nested Fin payload"
+
+def finOne : Fin 2 := Fin.mk 1 Nat.le.refl
+def finZero : Fin 2 := Fin.mk 0 (Nat.le.step Nat.le.refl)
+def chain (n : Nat) : Chain Nat 1 := Chain.cons n [Chain.nil]
+def observations : List Bool := [
+  DependentBEq.mk 2 finOne == DependentBEq.mk 2 finOne,
+  !(DependentBEq.mk 2 finOne == DependentBEq.mk 2 finZero),
+  Decidable.decide (self := decEq (DependentDecEq.mk 2 finOne) (DependentDecEq.mk 2 finOne)),
+  !(Decidable.decide (self := decEq (DependentDecEq.mk 2 finOne) (DependentDecEq.mk 2 finZero))),
+  Decidable.decide (self := decEq (Promoted.intro 7) (Promoted.intro 7)),
+  chain 3 == chain 3,
+  !(chain 3 == chain 4),
+  reprStr (NestedFin.loop 2 finOne []) ==
+    "Pscv0DerivingBoundaryOracle.NestedFin.loop 2 1 []"]
+
+end Pscv0DerivingBoundaryOracle
+
 private def derivingBoundaries : IO Unit := do
+  let native := Pscv0DerivingBoundaryOracle.observations
+  unless native.length == 8 && native.all id do
+    throw (IO.userError "native dependent/nested deriving observations changed")
   -- Type-valued fields exercise kernel projection inference only; their runtime
   -- representation is outside the selected backend subset.
   let projection : PsV7Native.Request := {
     source := "universe u\nstructure TypeField: Type (u + 1) where { value: Type u }\nconst record: TypeField := TypeField.mk(Nat)\nconst projected: Type := record.value\ntheorem correct: projected = Nat := by { rfl }\nfunction emptyList{A: Type u}(unit: Unit): List A := Inhabited.default\nfunction equalLists{A: Type u}[BEq A](xs: List A, ys: List A): Bool := List.beq(xs, ys)\ntheorem emptyTypes: emptyList(A := Type, unit := Unit.unit) = List.nil := by { rfl }\nfunction listProof{A: Type u}(xs: List A, i: Nat, h: Nat.lt(i, List.length(xs))): A := xs[i]'h\nfunction listOptional{A: Type u}(xs: List A, i: Nat): Option A := xs[i]?\nfunction listBang{A: Type u}[Inhabited A](xs: List A, i: Nat): A := xs[i]!\nfunction listPublicBang{A: Type u}[Inhabited A](xs: List A, i: Nat): A := List.get!(xs, i)\nfunction requireListLaw{A: Type u}[LawfulGetElem(List A, Nat, A, fun xs => fun i => Nat.lt(i, List.length(xs)))](xs: List A): Nat := List.length(xs)\nfunction listLaw{A: Type u}(xs: List A): Nat := requireListLaw(xs)\ntheorem typeIndex: listOptional([Nat], 0) = Option.some(Nat) := by { rfl }\n" }
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
-    { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
-    { source := "universe u\ninductive Chain(A: Type u): Nat -> Type u where { | nil: Chain(A, 0) | cons(head: A, tail: List(Chain(A, 0))): Chain(A, Nat.succ(0)) } deriving BEq\n" },
+    { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\ntheorem boundaryDependentBEqSame:\n  (Dependent.mk(2, Fin.mk(1, Nat.le.refl)) ==\n    Dependent.mk(2, Fin.mk(1, Nat.le.refl))) = true := by { rfl }\ntheorem boundaryDependentBEqDifferent:\n  (Dependent.mk(2, Fin.mk(1, Nat.le.refl)) ==\n    Dependent.mk(2, Fin.mk(0, Nat.le.step(Nat.le.refl)))) = false := by { rfl }\n" },
+    { source := "universe u\ninductive Chain(A: Type u): Nat -> Type u where { | nil: Chain(A, 0) | cons(head: A, tail: List(Chain(A, 0))): Chain(A, Nat.succ(0)) } deriving BEq\ntheorem boundaryIndexedNestedBEqSame:\n  ((Chain.cons(3, [Chain.nil]): Chain(Nat, 1)) ==\n    Chain.cons(3, [Chain.nil])) = true := by { rfl }\ntheorem boundaryIndexedNestedBEqDifferent:\n  ((Chain.cons(3, [Chain.nil]): Chain(Nat, 1)) ==\n    Chain.cons(4, [Chain.nil])) = false := by { rfl }\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving DecidableEq\n" },
-    { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\n" },
+    { source := "structure Bad where {\n n: Nat\n value: Fin n\n} deriving DecidableEq\ntheorem boundaryDependentDecEqSame:\n  Decidable.decide(self := decEq(Bad.mk(2, Fin.mk(1, Nat.le.refl)),\n    Bad.mk(2, Fin.mk(1, Nat.le.refl)))) = true := by { rfl }\ntheorem boundaryDependentDecEqDifferent:\n  Decidable.decide(self := decEq(Bad.mk(2, Fin.mk(1, Nat.le.refl)),\n    Bad.mk(2, Fin.mk(0, Nat.le.step(Nat.le.refl))))) = false := by { rfl }\n" },
     { source := "inductive Bad where { | nil | cons(next: List Bad) } deriving DecidableEq\n" },
-    { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\n" },
+    { source := "inductive Bad: Nat -> Type where { | intro(n: Nat): Bad n } deriving DecidableEq\ntheorem boundaryPromotedDecEq:\n  Decidable.decide(self := decEq(Bad.intro(7), Bad.intro(7))) = true := by { rfl }\n" },
     { source := "structure Bad where { value: Nat := true } deriving Inhabited\n" },
     { source := "structure Bad where { f: Nat -> Nat } deriving Repr\n" },
-    { source := "inductive Bad where { | loop(n: Nat, value: Fin n, tails: List Bad) } deriving Repr\n" },
+    { source := "inductive Bad where { | loop(n: Nat, value: Fin n, tails: List Bad) } deriving Repr\ntheorem boundaryNestedFinRepr:\n  reprStr(Bad.loop(2, Fin.mk(1, Nat.le.refl), [])) =\n    \"Bad.loop 2 1 []\" := by { rfl }\n" },
     { source := "structure Required where { value: Nat }\nconst bad: Required := {}\n" }
   ]
+  let accepted : Array Bool := #[false, true, true, false, true, false, true, false, false, true, false]
+  let labels : Array String := #["missing generic BEq dictionary", "dependent Fin BEq", "genuine indexed nested BEq", "missing function DecidableEq", "dependent Fin DecidableEq", "native nested DecidableEq refusal", "promoted parameter DecidableEq", "ill-typed declared default", "missing function Repr", "nested Fin Repr", "missing required record field"]
   let batch ← match ← PsV7Native.runBatch (#[projection] ++ requests) with
     | .ok batch => pure batch
     | .error error => throw (IO.userError ("deriving host prelude: " ++ error.message))
@@ -2733,13 +2787,27 @@ private def derivingBoundaries : IO Unit := do
   match projectionResult with
   | .ok _ => pure ()
   | .error error => throw (IO.userError ("projection universe inference: " ++ error.message))
-  for result in batch.results.toList.drop 1 do
-    match result with
-    | .error error =>
+  unless batch.results.size == requests.size + 1 && accepted.size == requests.size &&
+      labels.size == requests.size do
+    throw (IO.userError "deriving boundary observation roster changed")
+  for i in [:requests.size] do
+    let some result := batch.results[i + 1]?
+      | throw (IO.userError "deriving boundary result missing")
+    let label := labels[i]!
+    match accepted[i]!, result with
+    | true, .ok value =>
+      unless value.artifacts.length == 3 do
+        throw (IO.userError (label ++ " lost a checked target"))
+    | true, .error error =>
+      throw (IO.userError (label ++ " refused at " ++ error.phase ++ ": " ++ error.message))
+    | false, .error error =>
       unless error.phase == "elaborate" do
-        throw (IO.userError ("deriving refusal escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
-    | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
-  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS missing dictionaries, dependent runtime fields, indexed BEq, nested/indexed DecidableEq, ill-typed defaults and missing required fields"
+        throw (IO.userError (label ++ " escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
+      if ["fuel", "heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun word => (error.message.splitOn word).length > 1) then
+        throw (IO.userError (label ++ " exhausted resources instead of refusing: " ++ error.message))
+    | false, .ok _ => throw (IO.userError (label ++ " unexpectedly succeeded"))
+  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS five native-applicable dependent/promoted/nested derivations, eight independent native observations and checked source equations, six elaboration refusals for real missing dictionaries, native-unsupported nested DecidableEq, ill-typed defaults and required fields"
 
 private def sourceInfoBoundaries : IO Unit := do
   let source :=

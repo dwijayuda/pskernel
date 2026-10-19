@@ -163,7 +163,8 @@ lean_lib PsHost where
   roots := #[
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
-    `Ps.Host.CompilerDriver
+    `Ps.Host.CompilerDriver,
+    `Ps.Host.DirectBackend
   ]
 
 -- Regression-only extension; compiler fixed-point closure never imports Ps.Project.

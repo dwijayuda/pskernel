@@ -37,3 +37,26 @@ jobs:
         run: |
           set -euo pipefail
           lake build psc1
+
+      - name: Smoke PSC1 direct JS, Rust and core Wasm outputs
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat >/tmp/psc1-direct.lean <<'EOF'
+          def idNat (x : Nat) : Nat := x
+          EOF
+          lake exe psc1 build /tmp/psc1-direct.lean --target js --out /tmp/psc1-direct.js
+          test -s /tmp/psc1-direct.js
+          test -s /tmp/psc1-direct.d.ts
+          test -s /tmp/psc1-direct.js.map
+          node --check /tmp/psc1-direct.js
+          node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("/tmp/psc1-direct.js.map","utf8")); if(m.version!==3||m.mappings!=="")process.exit(1)'
+          cp /tmp/psc1-direct.js /tmp/psc1-direct.mjs
+          node --input-type=module -e 'import("/tmp/psc1-direct.mjs").then(m=>{if(m.idNat(42n)!==42n)process.exit(1)})'
+          lake exe psc1 build /tmp/psc1-direct.lean --target rust --out /tmp/psc1-direct.rs
+          test -s /tmp/psc1-direct.rs
+          rustc --edition 2021 --crate-name psc1_direct --crate-type lib /tmp/psc1-direct.rs -o /tmp/libpsc1_direct.rlib
+          lake exe psc1 build /tmp/psc1-direct.lean --target wasm-core --out /tmp/psc1-direct.wasm
+          test -s /tmp/psc1-direct.wasm
+          node -e 'const fs=require("fs");const b=fs.readFileSync("/tmp/psc1-direct.wasm"); if(!WebAssembly.validate(b)) process.exit(1)'

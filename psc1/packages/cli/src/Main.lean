@@ -1,4 +1,4 @@
-import Ps.Host.CompilerDriver
+import Ps.Host.DirectBackend
 
 def psCliUsage : String :=
   "ProofScript PSC2 Lean bootstrap (implemented in the PSC1 subset)\n" ++
@@ -11,7 +11,10 @@ def psCliUsage : String :=
   "  psc1 emit-ps <input.lean|input.ps> [--out <output.ps>]\n" ++
   "  psc1 admissions <input.lean|input.ps>\n" ++
   "  psc1 typescript <input.lean|input.ps>\n" ++
-  "  psc1 compile <input.lean|input.ps> --out <output.js|output.ts>"
+  "  psc1 compile <input.lean|input.ps> --out <output.js|output.ts>\n" ++
+  "  psc1 build <input.lean|input.ps> --target js --out <output.js>\n" ++
+  "  psc1 build <input.lean|input.ps> --target rust --out <output.rs>\n" ++
+  "  psc1 build <input.lean|input.ps> --target wasm-core --out <output.wasm>"
 
 def main (args : List String) : IO Unit := do
   match args with
@@ -35,6 +38,12 @@ def main (args : List String) : IO Unit := do
       psHostCompilerAdmissions inputPath
   | ["typescript", inputPath] =>
       psHostCompilerTypeScript inputPath
+  | ["build", inputPath, "--target", "js", "--out", outputPath] =>
+      psHostDirectJavaScript inputPath outputPath
+  | ["build", inputPath, "--target", "rust", "--out", outputPath] =>
+      psHostDirectRust inputPath outputPath
+  | ["build", inputPath, "--target", "wasm-core", "--out", outputPath] =>
+      psHostDirectWasmCore inputPath outputPath
   | ["build", inputPath, "--out", outputPath] =>
       psHostCompilerBuild inputPath outputPath
   | ["compile", inputPath, "--out", outputPath] =>

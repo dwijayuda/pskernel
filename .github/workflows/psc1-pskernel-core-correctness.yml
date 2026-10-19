@@ -8,6 +8,7 @@ on:
       - psc1/packages/pskernel-core/**
       - psc1/test/PsKernelCoreRegression.lean
       - psc1/kernel-lakefile.lean
+      - psc1/check-psc1-source.mjs
       - .github/workflows/psc1-pskernel-core-correctness.yml
 
 permissions:
@@ -38,3 +39,36 @@ jobs:
         run: |
           set -euo pipefail
           lake -f kernel-lakefile.lean exe psc1_kernel_regression
+
+  psc1-portability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean via elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check all 79 kernel modules are in portable source profile
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          node check-psc1-source.mjs --all-portable
+      - name: Build real PSC1 compiler
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake build psc1
+      - name: Translate first kernel source through PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 translate packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean --to ps --out /tmp/psc1-pskernel-name.ps
+          test -s /tmp/psc1-pskernel-name.ps
+      - name: Check complete 79-module kernel using PSC1
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean

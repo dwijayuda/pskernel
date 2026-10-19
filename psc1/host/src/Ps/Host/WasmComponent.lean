@@ -1,19 +1,30 @@
 import Ps.Host.DirectBackend
 
--- Existing scalar component ABI; no implicit aggregate or unbounded adapter.
-def psHostWitScalarType : PsVerifiedIrType → Except String String
-  | .primitive .bool => .ok "bool"
-  | .primitive .uint8 => .ok "u8"
-  | .primitive .uint16 => .ok "u16"
-  | .primitive .uint32 => .ok "u32"
-  | .primitive .uint64 => .ok "u64"
-  | .primitive .int8 => .ok "s8"
-  | .primitive .int16 => .ok "s16"
-  | .primitive .int32 => .ok "s32"
-  | .primitive .int64 => .ok "s64"
-  | .primitive .float => .ok "f64"
-  | .primitive .float32 => .ok "f32"
-  | _ => .error "PSC1_COMPONENT_WIT_TYPE_UNSUPPORTED"
+-- A physical WIT representation is not permission to export a capability. First
+-- enforce the same active scalar contract as the independent typed-IR checker.
+-- Today only Bool intersects that contract and the bounded scalar WIT ABI.
+-- Integer/float representations are retained for explicit future qualification,
+-- not advertised as usable current source-language features.
+def psHostWitScalarType (type : PsVerifiedIrType) : Except String String := do
+  let .primitive primitive := type
+    | throw "PSC1_COMPONENT_WIT_TYPE_UNSUPPORTED"
+  match psIrCheckPrimitive primitive with
+  | .error issue =>
+      throw ("PSC1_COMPONENT_SCALAR_PROFILE_UNQUALIFIED: " ++ issue.detail)
+  | .ok _ => pure ()
+  match primitive with
+  | .bool => return "bool"
+  | .uint8 => return "u8"
+  | .uint16 => return "u16"
+  | .uint32 => return "u32"
+  | .uint64 => return "u64"
+  | .int8 => return "s8"
+  | .int16 => return "s16"
+  | .int32 => return "s32"
+  | .int64 => return "s64"
+  | .float => return "f64"
+  | .float32 => return "f32"
+  | _ => throw "PSC1_COMPONENT_WIT_TYPE_UNSUPPORTED"
 
 def psHostWitIdent (name : String) : Bool :=
   let lower := fun (c : Char) => Nat.ble 97 c.toNat && Nat.ble c.toNat 122

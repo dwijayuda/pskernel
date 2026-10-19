@@ -15,6 +15,15 @@ def main : IO Unit := do
   require "WIT rejects consecutive hyphens" (!psHostWitIdent "read--value")
   require "WIT rejects reserved world" (!psHostWitIdent "world")
   require "WIT rejects uppercase" (!psHostWitIdent "Value")
+  require "WIT accepts the active Bool scalar"
+    (match psHostWitScalarType (.primitive .bool) with | .ok "bool" => true | _ => false)
+  let unqualified : List PsVerifiedIrPrimitiveType :=
+    [.uint8, .uint16, .uint32, .uint64, .int8, .int16, .int32, .int64, .float32, .float]
+  for primitive in unqualified do
+    require ("WIT cannot advertise unqualified " ++ psIrCheckPrimitiveName primitive)
+      (match psHostWitScalarType (.primitive primitive) with
+        | .error reason => reason.startsWith "PSC1_COMPONENT_SCALAR_PROFILE_UNQUALIFIED:"
+        | .ok _ => false)
   let declaration : PsVerifiedIrDeclaration := {
     name := "forged"
     typeParameters := []

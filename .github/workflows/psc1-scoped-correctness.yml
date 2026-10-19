@@ -35,17 +35,12 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Install and record exact host formatting dependencies
+      - name: Install locked host formatting dependencies and run host regressions
         working-directory: psc1/host-tools
         run: |
           set -euo pipefail
-          if [ ! -f package-lock.json ]; then
-            npm --prefix "$PWD" --workspaces=false install --package-lock-only --ignore-scripts --no-audit --no-fund
-          fi
+          test -s package-lock.json
           npm --prefix "$PWD" --workspaces=false ci --ignore-scripts --no-audit --no-fund
-          echo 'PSC1_HOST_TOOLS_LOCK_BEGIN'
-          cat package-lock.json
-          echo 'PSC1_HOST_TOOLS_LOCK_END'
           node test-artifacts.mjs
       - name: Install pinned Rust target tools
         run: |
@@ -102,7 +97,14 @@ jobs:
           export PSC1_NATIVE="$PWD/.lake/build/bin/psc1"
           export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
           node scripts/scoped-backend-tests.mjs
-      - name: Retain exact lockfile, evidence and readable example bundles
+      - name: Execute small generic, symbol-identity and recursion source regressions
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          export PSC1_NATIVE="$PWD/.lake/build/bin/psc1"
+          export PSC1_HOST_TOOLS="$PWD/host-tools/artifacts.mjs"
+          node scripts/scoped-source-edge-tests.mjs
+      - name: Retain lockfile, evidence and readable example bundles
         if: always()
         uses: actions/upload-artifact@v4
         with:

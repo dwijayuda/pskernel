@@ -1,5 +1,5 @@
-// Focused native compiler/backend regression only: no compiler or kernel
-// bootstrap generations, no whole self-host source checks, no fixed-point run.
+// Focused native/compiler regression: no self-host source census, compiler or
+// kernel regeneration, or bootstrap fixed-point run is part of this suite.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -74,7 +74,8 @@ async function test(name, action) {
 }
 function traceDeclaration(jsFile, name) {
   const lines = text(jsFile).split('\n');
-  const index = lines.findIndex(line => line.startsWith(`export function ${name}(`) || line.startsWith(`function ${name}(`) || line.startsWith(`export const ${name} `));
+  const index = lines.findIndex(line => line.startsWith(`export function ${name}(`) ||
+    line.startsWith(`function ${name}(`) || line.startsWith(`export const ${name} `));
   assert.ok(index >= 0, `missing printed declaration ${name}`);
   return originalPositionFor(new TraceMap(json(jsFile + '.map')), { line: index + 1, column: 0 });
 }
@@ -89,11 +90,13 @@ try {
   const nat = source('identity.lean', 'def idNat (x : Nat) : Nat := x\n');
   const psNat = source('identity.ps', 'def idNat(x : Nat) : Nat := x\n');
   const bool = source('boolean.lean', 'def answer : Bool := true\n');
-  await test('native identity and npm launcher agree', () => {
-    const a = command(native, ['--identity']);
-    const b = command(process.execPath, [path.join(root, 'npm-cli/psc.js'), '--identity'], { env: { ...env, PSC1_NATIVE: native } });
-    assert.equal(a, b);
-    assert.equal(JSON.parse(a).protocol, 'psc1-native/1');
+  await test('native identity and both npm launchers agree', () => {
+    const expected = command(native, ['--identity']);
+    for (const launcher of ['npm-cli/psc.js', 'packages/cli/bin/psc.mjs']) {
+      const actual = command(process.execPath, [path.join(root, launcher), '--identity'], { env: { ...env, PSC1_NATIVE: native } });
+      assert.equal(actual, expected);
+    }
+    assert.equal(JSON.parse(expected).protocol, 'psc1-native/1');
     const error = reject(process.execPath, [path.join(root, 'npm-cli/psc.js'), '--version'], {
       env: { ...env, PSC1_NATIVE: path.join(work, 'missing-native') }
     });
@@ -124,9 +127,8 @@ try {
   await test('source maps use final formatted layout and UTF-16 source columns', async () => {
     const unicode = source('unicode.lean', '/- 🌍 -/ def answer : Bool := true\n');
     const file = build(unicode, 'js', 'unicode/module.js');
-    const origin = traceDeclaration(file, 'answer');
-    assert.equal(origin.column, 9);
-    assert.equal(origin.line, 1);
+    assert.equal(traceDeclaration(file, 'answer').column, 9);
+    assert.equal(traceDeclaration(file, 'answer').line, 1);
     assert.equal((await load(file)).answer, true);
     assert.ok(json(file + '.map').sourcesContent[0].includes('🌍'));
     assert.equal(originalPositionFor(new TraceMap(json(file + '.map')), { line: 1, column: 0 }).source, null);
@@ -177,13 +179,12 @@ try {
     assert.match(json(ts + '.map').sourcesContent[0], /true/);
     assert.doesNotMatch(json(js + '.map').sourcesContent[0], /false/);
   });
-  await test('Rust crate contains formatted source, exact direct pins and a usable locked dependency graph', () => {
+  await test('Rust crate contains formatted source, exact pins and a usable locked dependency graph', () => {
     rustNat = build(nat, 'rust', 'rust/module.rs');
     const crate = rustNat.slice(0, -3) + '.cargo';
     assert.equal(text(rustNat), text(path.join(crate, 'src/lib.rs')));
     assert.match(text(path.join(crate, 'Cargo.toml')), /num-bigint = "=0\.4\.6"/);
     assert.match(text(path.join(crate, 'Cargo.lock')), /name = "num-bigint"/);
-    // Never mutate a published immutable generation when adding a test harness.
     const harness = output('rust-harness');
     fs.cpSync(fs.realpathSync(crate), harness, { recursive: true });
     fs.mkdirSync(path.join(harness, 'tests'));
@@ -195,8 +196,7 @@ try {
     coreBool = build(bool, 'wasm-core', 'wasm/module.wasm');
     const bytes = fs.readFileSync(coreBool);
     assert.equal(WebAssembly.validate(bytes), true);
-    const { instance } = await WebAssembly.instantiate(bytes);
-    assert.equal(instance.exports.answer(), 1);
+    assert.equal((await WebAssembly.instantiate(bytes)).instance.exports.answer(), 1);
     const wat = coreBool.slice(0, -5) + '.wat';
     assert.match(text(wat), /\(module/);
     const roundtrip = output('roundtrip.wasm');
@@ -210,8 +210,7 @@ try {
   await test('components contain exact WIT ABI, readable WAT and executable Bool parameters', () => {
     componentBool = build(bool, 'wasm-component', 'component/module.wasm', ['--export', 'answer']);
     assert.match(command('wasmtime', ['run', '--invoke', 'answer()', componentBool]), /true/);
-    const wit = text(componentBool.slice(0, -5) + '.wit');
-    assert.match(wit, /\n  export answer: func\(\) -> bool;/);
+    assert.match(text(componentBool.slice(0, -5) + '.wit'), /\n  export answer: func\(\) -> bool;/);
     const identity = source('idbool.ps', 'def idbool(b : Bool) : Bool := b\n');
     const component = build(identity, 'wasm-component', 'component-identity/module.wasm', ['--export', 'idbool']);
     assert.match(command('wasmtime', ['run', '--invoke', 'idbool(true)', component]), /true/);
@@ -228,22 +227,29 @@ try {
     reject(native, ['build', unbounded, '--target', 'wasm-component', '--export', 'count', '--out', refused]);
     assert.equal(fs.existsSync(refused), false);
   });
-  const scalarCases = [
-    ['UInt8', 'u8', ['0', '255']], ['UInt16', 'u16', ['0', '65535']],
-    ['UInt32', 'u32', ['0', '4294967295']], ['UInt64', 'u64', ['0', '18446744073709551615']],
-    ['Int8', 's8', ['-128', '127']], ['Int16', 's16', ['-32768', '32767']],
-    ['Int32', 's32', ['-2147483648', '2147483647']],
-    ['Int64', 's64', ['-9223372036854775808', '9223372036854775807']],
-    ['Float32', 'f32', ['-1.25', '1.25']], ['Float', 'f64', ['-1.25', '1.25']]
-  ];
-  for (const [type, witType, values] of scalarCases) {
-    await test(`advertised scalar component ABI ${witType} executes boundary identities`, () => {
-      const input = source(`scalar-${witType}.lean`, `def identity (x : ${type}) : ${type} := x\n`);
-      const file = build(input, 'wasm-component', `scalar-${witType}/module.wasm`, ['--export', 'identity']);
-      assert.match(text(file.slice(0, -5) + '.wit'), new RegExp(`x: ${witType}\\) -> ${witType}`));
-      for (const value of values) {
-        const observed = command('wasmtime', ['run', '--invoke', `identity(${value})`, file]).trim();
-        assert.ok(observed.includes(value), `${witType}: ${value} -> ${observed}`);
+  await test('component argument ordering and multiple Bool arguments execute correctly', () => {
+    const input = source('second.lean', 'def second (x : Bool) (y : Bool) : Bool := y\n');
+    const component = build(input, 'wasm-component', 'component-second/module.wasm', ['--export', 'second']);
+    assert.match(text(component.slice(0, -5) + '.wit'), /x: bool, y: bool/);
+    assert.match(command('wasmtime', ['run', '--invoke', 'second(true, false)', component]), /false/);
+    assert.match(command('wasmtime', ['run', '--invoke', 'second(false, true)', component]), /true/);
+  });
+  // The copied WIT table previously advertised ten capabilities that the active
+  // IR checker explicitly excludes. Do not weaken that gate or silently expand
+  // the language to make a positive identity test pass. The public WIT API now
+  // observes that same capability policy, and every unqualified source refuses.
+  const unqualifiedScalars = ['UInt8', 'UInt16', 'UInt32', 'UInt64',
+    'Int8', 'Int16', 'Int32', 'Int64', 'Float32', 'Float'];
+  assert.deepEqual(json(path.join(root, 'profile.json')).activeComponentScalars, ['Bool']);
+  for (const type of unqualifiedScalars) {
+    await test(`unqualified scalar ${type} cannot publish a component`, () => {
+      const input = source(`unqualified-${type}.lean`, `def identity (x : ${type}) : ${type} := x\n`);
+      const file = output(`unqualified-${type}/module.wasm`);
+      const message = reject(native, ['build', input, '--target', 'wasm-component', '--export', 'identity', '--out', file]);
+      assert.match(message, /scalar-capability-unqualified/);
+      for (const suffix of ['', '.bundle.json']) assert.equal(fs.existsSync(file + suffix), false);
+      for (const extension of ['.wit', '.wat', '.core.wasm', '.core.wat']) {
+        assert.equal(fs.existsSync(file.slice(0, -5) + extension), false);
       }
     });
   }
@@ -254,12 +260,10 @@ try {
       env: { ...env, PSC1_NATIVE: native }
     });
     for (const [left, right] of [[jsNat, repeated], [jsNat, npmOutput], [jsNat + '.map', repeated + '.map'],
-      [jsNat.replace(/\.js$/, '.d.ts'), repeated.replace(/\.js$/, '.d.ts')]]) {
-      assert.equal(text(left), text(right));
-    }
+      [jsNat.replace(/\.js$/, '.d.ts'), repeated.replace(/\.js$/, '.d.ts')]]) assert.equal(text(left), text(right));
     assert.equal(json(jsNat + '.bundle.json').sourceClosureSha256, json(repeated + '.bundle.json').sourceClosureSha256);
   });
-  await test('failure before publication retains all existing checked artifacts', async () => {
+  await test('failure before publication retains every prior checked artifact', async () => {
     const input = source('replacement.lean', 'def answer : Bool := true\n');
     const file = build(input, 'js', 'replacement/module.js');
     const before = fs.realpathSync(file);
@@ -276,11 +280,16 @@ try {
     command(native, ['build', input, '--target', 'js', '--out', file]);
     assert.equal((await load(file)).answer, false);
   });
-  for (const [name, file] of [['javascript', jsNat], ['typescript', tsNat], ['rust', rustNat], ['wasm-core', coreBool], ['component', componentBool]]) {
-    const bundle = path.dirname(fs.realpathSync(file + '.bundle.json'));
-    fs.cpSync(bundle, path.join(evidence, name), { recursive: true });
-  }
   console.log(`PSC1_SCOPED_BACKENDS: ${records.length} passed; full self-host tests not run`);
 } finally {
+  // Retain real successful examples even when a later independent regression
+  // fails. This never changes the test result or fabricates an accepted bundle.
+  for (const [name, file] of [['javascript', jsNat], ['typescript', tsNat], ['rust', rustNat],
+    ['wasm-core', coreBool], ['component', componentBool]]) {
+    if (file && fs.existsSync(file + '.bundle.json')) {
+      const bundle = path.dirname(fs.realpathSync(file + '.bundle.json'));
+      fs.cpSync(bundle, path.join(evidence, name), { recursive: true });
+    }
+  }
   console.log(`PSC1_SCOPED_EVIDENCE: ${evidence}`);
 }

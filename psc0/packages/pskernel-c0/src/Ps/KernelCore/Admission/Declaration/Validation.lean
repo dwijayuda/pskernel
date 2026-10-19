@@ -198,6 +198,81 @@ theorem psKernelC0NodeFlagAdmission_source (expr : PsKernelExpr) :
        else Except.ok ()) := by
   simp only [psKernelCheckNoMVarNoFVar, psKernelC0MVarFlag_source]
 
+
+/-- Original recursive syntactic oracle; deliberately independent of the
+    native computed-field getter. -/
+def psKernelExprHasLevelParam (expr : PsKernelExpr) : Bool :=
+  match expr with
+  | .sort level => psKernelLevelHasParam level
+  | .const _ levels => psKernelLevelsHaveParam levels
+  | .app fn arg => psKernelExprHasLevelParam fn || psKernelExprHasLevelParam arg
+  | .lam _ ty body _ =>
+      psKernelExprHasLevelParam ty || psKernelExprHasLevelParam body
+  | .forallE _ ty body _ =>
+      psKernelExprHasLevelParam ty || psKernelExprHasLevelParam body
+  | .letE _ ty value body _ =>
+      psKernelExprHasLevelParam ty ||
+        psKernelExprHasLevelParam value || psKernelExprHasLevelParam body
+  | .mdata _ body => psKernelExprHasLevelParam body
+  | .proj _ _ body => psKernelExprHasLevelParam body
+  | _ => false
+
+/-- Pure-source equality for every expression, independent of DAG identity,
+    pointer hints, hash functions, allowed levels or source resource budgets. -/
+theorem psKernelC0LevelParamFlag_source (expr : PsKernelExpr) :
+    expr.psKernelC0LevelParamFlag = psKernelExprHasLevelParam expr := by
+  induction expr <;>
+    simp [PsKernelExpr.psKernelC0LevelParamFlag, psKernelExprHasLevelParam, *]
+
+/-- No parameter anywhere in a level implies the first-undefined-level
+    search has no possible offender, for every allowed list. -/
+theorem psKernelLevelNoParamUndef (level : PsKernelLevel)
+    (allowed : List PsKernelName)
+    (h : psKernelLevelHasParam level = false) :
+    psKernelFindUndefLevelParam level allowed = none := by
+  induction level <;>
+    simp_all [psKernelLevelHasParam, psKernelFindUndefLevelParam]
+
+theorem psKernelLevelsNoParamUndef (levels : List PsKernelLevel)
+    (allowed : List PsKernelName)
+    (h : psKernelLevelsHaveParam levels = false) :
+    psKernelFindUndefInLevels levels allowed = none := by
+  induction levels <;>
+    simp_all [psKernelLevelsHaveParam, psKernelFindUndefInLevels,
+      psKernelLevelNoParamUndef]
+
+/-- This is the only permitted skipping criterion: absent universe parameters
+    make an undefined-parameter error impossible. If one is present, the
+    existing left-to-right diagnostic search still runs unchanged. -/
+theorem psKernelExprNoParamUndef (expr : PsKernelExpr)
+    (allowed : List PsKernelName)
+    (h : psKernelExprHasLevelParam expr = false) :
+    psKernelFindUndefExprLevelParam expr allowed = none := by
+  induction expr <;>
+    simp_all [psKernelExprHasLevelParam, psKernelFindUndefExprLevelParam,
+      psKernelLevelNoParamUndef, psKernelLevelsNoParamUndef]
+
+def psKernelC0FindUndefWithNodeFlag
+    (expr : PsKernelExpr)
+    (allowed : List PsKernelName) : Option PsKernelName :=
+  if expr.psKernelC0LevelParamFlag then
+    psKernelFindUndefExprLevelParam expr allowed
+  else
+    none
+
+theorem psKernelC0FindUndefWithNodeFlag_source
+    (expr : PsKernelExpr) (allowed : List PsKernelName) :
+    psKernelC0FindUndefWithNodeFlag expr allowed =
+      psKernelFindUndefExprLevelParam expr allowed := by
+  unfold psKernelC0FindUndefWithNodeFlag
+  by_cases h : expr.psKernelC0LevelParamFlag = true
+  · simp [h]
+  · have hf : expr.psKernelC0LevelParamFlag = false := by
+      cases hv : expr.psKernelC0LevelParamFlag <;> simp_all
+    have hn : psKernelExprHasLevelParam expr = false := by
+      simpa [psKernelC0LevelParamFlag_source] using hf
+    simp [hf, psKernelExprNoParamUndef expr allowed hn]
+
 def psKernelCheckLevelParams
     (expr : PsKernelExpr)
     (allowed : List PsKernelName) :

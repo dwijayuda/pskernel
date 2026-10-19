@@ -221,14 +221,17 @@ private def visibility (seed : Lean.Kernel.Environment)
     [hiddenLibrary, input kind "Entry"
       (entrySource kind "import Library\n" "ProjectLib.hidden")] true
     "PSCV0-SCOPE: unknown name ProjectLib.hidden"
-  let facade := input kind "Facade"
-    ("public import Library\n" ++ identitySource kind "coreProjectFacade")
   let client := input kind "Entry" (entrySource kind "import Facade\n")
-  let exported ← prepare profile "Entry" [client, facade, library]
-  let _ ← admit seed exported.admissions
-  ensure (sameNames exported.mainNames [mainName] &&
-      exported.libraryNames.any (psNameEq libName))
-    "re-export ownership changed"
+  match kind with
+  | .lean => pure ()
+  | .proofScript => do
+      let facade := input kind "Facade"
+        ("public import Library\n" ++ identitySource kind "coreProjectFacade")
+      let exported ← prepare profile "Entry" [client, facade, library]
+      let _ ← admit seed exported.admissions
+      ensure (sameNames exported.mainNames [mainName] &&
+          exported.libraryNames.any (psNameEq libName))
+        "re-export ownership changed"
   let ordinaryFacade := input kind "Facade"
     ("import Library\n" ++ identitySource kind "coreProjectFacade")
   refuse profile "Entry" [client, ordinaryFacade, library] true

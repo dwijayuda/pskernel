@@ -375,6 +375,7 @@ jobs:
           wc -c ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps | tee ../dist/core-first/authoring/foundation-workload-bytes.txt
           /usr/bin/time -v -o ../dist/core-first/authoring/foundation-resource.txt .lake/build/bin/pscv0_core_environment_export foundation ../dist/core-first/authoring/CoreFoundationCandidate.lean 2>&1 | tee ../dist/core-first/authoring/foundation-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
           sha256sum ../dist/core-first/authoring/CoreFoundationCandidate.lean > ../dist/core-first/authoring/foundation.sha256
+          python3 ../scripts/core-first-ci-evidence.py foundation-source ../dist/core-first/authoring/CoreFoundationCandidate.lean
       - name: Author and check the standalone compiler byte-word candidate
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

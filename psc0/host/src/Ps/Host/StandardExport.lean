@@ -1818,9 +1818,9 @@ def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit :=
         reachedNames := reachedNames.insert info.name
         reached := reached.push info
   reached := reached.qsort (fun a b => Lean.Name.lt a.name b.name)
-  let noncomputable := reached.filter fun info =>
+  let noncomputableEntries := reached.filter fun info =>
     Lean.isNoncomputable native info.name
-  let noncomputableRows := noncomputable.map fun info => Lean.Json.mkObj [
+  let noncomputableRows := noncomputableEntries.map fun info => Lean.Json.mkObj [
     ("name", Lean.toJson (toString info.name)),
     ("nativeNoncomputable", Lean.toJson true),
     ("dependencyPath", Lean.toJson
@@ -1893,7 +1893,7 @@ def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit :=
     ("nativeClosureDeclarations", Lean.toJson reached.size),
     ("nativeClosureNames", Lean.toJson (reached.map (fun info => toString info.name))),
     ("nativeNoncomputableNames", Lean.toJson
-      (noncomputable.map (fun info => toString info.name))),
+      (noncomputableEntries.map (fun info => toString info.name))),
     ("nativeNoncomputableDeclarations", .arr noncomputableRows),
     ("portableNoncomputableMetadataInstalled", Lean.toJson false),
     ("runtimePolicyQualified", Lean.toJson false),

@@ -23,6 +23,18 @@ def main():
         # Larger raw audit/candidate files remain complete Actions artifacts.
         for start in range(0, len(text), 2048):
             print("PSC0_CORE_BOOTSTRAP_SOURCE " + json.dumps(text[start:start + 2048]))
+    elif mode == "foundation-source":
+        raw = path.read_bytes()
+        if path.name != "CoreFoundationCandidate.lean" or len(raw) > 2000000:
+            raise ValueError("unexpected source-foundation review transport scope")
+        text = raw.decode("utf-8")
+        print("PSC0_CORE_FOUNDATION_ASSET " + json.dumps({
+            "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest(),
+            "gitBlobSHA1": hashlib.sha1(
+                b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+        }, sort_keys=True))
+        for start in range(0, len(text), 2048):
+            print("PSC0_CORE_FOUNDATION_SOURCE " + json.dumps(text[start:start + 2048]))
     elif mode == "native-closure":
         report = json.loads(path.read_text(encoding="utf-8"))
         script = pathlib.Path(__file__).with_name("core-first-source-audit.py")

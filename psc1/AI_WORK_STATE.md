@@ -1,3 +1,12 @@
+# PSC1 work-state update — 2026-10-20
+
+**Current development:** `psc1/direct-multibackend-v1`. See [native multi-backend qualification](docs/PSC1_DIRECT_BACKENDS_QUALIFICATION_2026-10-20.md).
+The scoped executable baseline is commit `0fe083959474b231450b379a5ca4cff9063e80d3`, [Linux run 39313057156](https://github.com/dwijayuda/pskernel/actions/runs/39313057156) **success**. DirectJS, source maps (including Unicode UTF-16 origins), Rust, core Wasm, WIT/WAT/component and executed Boolean component exports are qualified for their exact tested subset only. Independent kernel admission and broad semantic/backend preservation remain open.
+
+**Historical snapshot follows unchanged:** the older PSC0 strict SH/1 handoff below is archived context, not an instruction to replace this independent PSC1 multi-backend lane.
+
+---
+
 # PSC0 AI work state — completed strict SH/1 qualification and final disposition
 
 Updated: 2026-10-10T06:04:46Z. Evidence times are UTC. This handoff supersedes every earlier active instruction. The historical M6/TypeScript tail below is retained byte-for-byte.

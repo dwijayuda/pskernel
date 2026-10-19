@@ -1,0 +1,100 @@
+name: PSKernel-C0 exact failed-shard declaration worker trace
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-shard0-declaration-trace.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-worker-trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 39193023883
+          name: c0-external-roots-shard-0
+          path: saved-shard0
+          github-token: ${{ github.token }}
+      - name: Verify immutable authenticated input and official same-source acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p trace
+          test "$(tr -d '\\r\\n' < saved-shard0/shard.txt)" = 0
+          test "$(wc -l < saved-shard0/shard-roots.txt)" -eq 58
+          test -s saved-shard0/all-roots.ndjson
+          grep -Fq 'Lean default kernel accepts the solution' saved-shard0/official-verdict.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("saved-shard0")
+          report=json.loads((root/"root-manifest.json").read_text())
+          assert report["sourceClosureSHA256"]=="4fbd45b30ffbbb1c98f0da415d09d7b32abeea65ac37d62e2bea181096aeb02c"
+          assert report["selectedExternalRoots"]==458 and report["excludedRoots"]==0
+          recorded=(root/"real-export-SHA256SUMS").read_text().split()[0]
+          actual=hashlib.sha256((root/"all-roots.ndjson").read_bytes()).hexdigest()
+          assert recorded==actual
+          print(f'C0_EXACT_SHARD0_INPUT sha256={actual} roots=58 official=accepted')
+          PY
+          sha256sum saved-shard0/all-roots.ndjson > trace/NDJSON-SHA256SUMS
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build immutable native C0 and trace checked-declaration beginnings
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = leanprover/lean4:v4.35.0
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/trace/resources.txt" \
+              timeout 180s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+                --require-accepted --trace-declarations \
+                "$GITHUB_WORKSPACE/saved-shard0/all-roots.ndjson" 4096) \
+                > trace/checked-declaration-beginnings.txt 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > trace/exit.txt
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          root=Path("trace")
+          lines=(root/"checked-declaration-beginnings.txt").read_text(errors="replace").splitlines()
+          decls=[line for line in lines if "C0_REAL_EXPORT_DECL_BEGIN record=" in line]
+          verdicts=[line for line in lines if "C0_REAL_EXPORT replay_outcome=" in line]
+          print(f"C0_SHARD0_TRACE start_count={len(decls)} final_verdicts={len(verdicts)} diagnostic_only=true")
+          for line in decls[-20:]:
+              print(f"C0_SHARD0_LAST_DECL {line[:850]}")
+          for line in verdicts[-2:]:
+              print(f"C0_SHARD0_CHECKER_VERDICT {line[:850]}")
+          if not decls:
+              raise SystemExit("no declaration trace; investigate process startup")
+          (root/"last-20-declarations.txt").write_text("\n".join(decls[-20:])+"\n")
+          PY
+          echo "C0_SHARD0_DIAGNOSTIC_EXIT=$rc no_accepted_claim_from_trace=true"
+          if [ "$rc" -eq 0 ]; then
+            grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' trace/checked-declaration-beginnings.txt || exit 1
+          fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: c0-shard0-declaration-worker-trace
+          path: trace/
+          retention-days: 21
+          if-no-files-found: warn

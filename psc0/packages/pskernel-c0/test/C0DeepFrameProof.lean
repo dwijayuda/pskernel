@@ -54,4 +54,4 @@ theorem c0DeepFrameStepIsSource
           { current := ty, checker := state, bodyRanges := ranges } frame
         psKernelC0CheckAppFrames whnf defeq context rest
           next.bodyRanges next.current next.checker) := by
-  simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep]
+  simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep, Except.bind, Except.map] <;> grind

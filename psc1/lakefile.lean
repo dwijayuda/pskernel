@@ -164,6 +164,7 @@ lean_lib PsHost where
     `Ps.Host.TypeScriptCompiler,
     `Ps.Host.ProjectCompiler,
     `Ps.Host.CompilerDriver,
+    `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend
   ]
 

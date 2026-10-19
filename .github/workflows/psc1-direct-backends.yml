@@ -51,7 +51,7 @@ jobs:
           test -s /tmp/psc1-direct.d.ts
           test -s /tmp/psc1-direct.js.map
           node --check /tmp/psc1-direct.js
-          node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("/tmp/psc1-direct.js.map","utf8")); if(m.version!==3||m.mappings!=="")process.exit(1)'
+          node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("/tmp/psc1-direct.js.map","utf8")); if(m.version!==3||m.sources[0]!=="psc1-direct.lean"||!m.mappings||!m.sourcesContent[0].includes("def idNat"))process.exit(1)'
           cp /tmp/psc1-direct.js /tmp/psc1-direct.mjs
           node --input-type=module -e 'import("/tmp/psc1-direct.mjs").then(m=>{if(m.idNat(42n)!==42n)process.exit(1)})'
           lake exe psc1 build /tmp/psc1-direct.lean --target rust --out /tmp/psc1-direct.rs

@@ -1,4 +1,5 @@
 import Ps.Host.CompilerDriver
+import Ps.Host.DirectSourceMap
 import Ps.CompilerIr.Validate
 import Ps.BackendJs.Print
 import Ps.BackendRust.Module
@@ -63,22 +64,26 @@ def psHostDirectJavaScript
   let declaration ← match psHostDirectDeclarationSource validated with
     | .ok text => pure text
     | .error reason => throw (IO.userError reason)
-  let emitted ← match psJsEmitValidatedModule validated with
+  let emitted ← match psJsEmitValidatedModuleWithPositions validated with
     | .ok text => pure text
     | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
+  let sourceText ← IO.FS.readFile inputPath
+  let parsed ← psHostParseSource inputPath sourceText
   let name := ((System.FilePath.mk outputPath).fileName).getD "module.js"
   let stem := outputPath.dropRight 3
-  -- A standards-valid, deliberately *unmapped* map is emitted for now.
-  -- We do not invent original source coordinates from declaration names.
-  let mapping := "{\"version\":3,\"file\":" ++ psJsonQuote name ++
-    ",\"sources\":[],\"names\":[],\"mappings\":\"\"}\n"
+  -- Source positions are owned by the actual parser; generated columns are
+  -- measured from the final JS layout. Imported/generated declarations remain
+  -- unmapped when their original source file was not identified.
+  let mapping := psDirectSourceMap
+    (((System.FilePath.mk inputPath).fileName).getD inputPath)
+    sourceText name parsed emitted
   psHostDirectEnsureParent outputPath
-  IO.FS.writeFile outputPath (emitted ++ "\n//# sourceMappingURL=" ++ name ++ ".map\n")
+  IO.FS.writeFile outputPath (emitted.text ++ "\n//# sourceMappingURL=" ++ name ++ ".map\n")
   IO.FS.writeFile (stem ++ ".d.ts") declaration
   IO.FS.writeFile (outputPath ++ ".map") mapping
   IO.println ("PSC1_DIRECT_JS: " ++ outputPath)
   IO.println ("PSC1_DIRECT_DECLARATION: " ++ stem ++ ".d.ts")
-  IO.println ("PSC1_DIRECT_SOURCE_MAP_UNMAPPED: " ++ outputPath ++ ".map")
+  IO.println ("PSC1_DIRECT_SOURCE_MAP: " ++ outputPath ++ ".map")
 
 def psHostDirectRust
     (inputPath outputPath : String) : IO Unit := do

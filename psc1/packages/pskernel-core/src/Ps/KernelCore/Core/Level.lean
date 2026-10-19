@@ -584,6 +584,17 @@ def psKernelLevelNormalizeListWith
           normalize
           tail)
 
+def psKernelLevelAddOffsetList
+    (values : List PsKernelLevel)
+    (amount : Nat) : List PsKernelLevel :=
+  match values with
+  | List.nil =>
+      List.nil
+  | List.cons head tail =>
+      List.cons
+        (psKernelLevelAddOffset head amount)
+        (psKernelLevelAddOffsetList tail amount)
+
 def psKernelLevelNormalizeWithFuel
     (fuel : Nat) :
     PsKernelLevel -> PsKernelLevel :=
@@ -624,9 +635,11 @@ def psKernelLevelNormalizeWithFuel
               psKernelLevelTrimExplicit sorted;
             let unique :=
               psKernelLevelDedupOffsets trimmed;
-            psKernelLevelAddOffset
-              (psKernelLevelMkMaxList unique)
-              amount
+            let shifted :=
+              psKernelLevelAddOffsetList
+                unique
+                amount;
+            psKernelLevelMkMaxList shifted
 
 def psKernelLevelNormalize
     (level : PsKernelLevel) : PsKernelLevel :=

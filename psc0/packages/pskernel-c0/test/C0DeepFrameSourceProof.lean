@@ -26,19 +26,19 @@ theorem c0DeepStep_source
     { context with recDepth := frame.recDepth }
   cases hview : psKernelEnsureForallWith whnf ctx state ty with
   | error message =>
-      simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep, ctx, hview]
+      simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep, ctx, hview] <;> rfl
   | ok pair =>
       obtain ⟨view, state1⟩ := pair
       cases harg : psKernelInferCoreWithFuel frame.fuel whnf defeq
           ctx state1 frame.argument false with
       | error message =>
           simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep,
-            ctx, hview, harg]
+            ctx, hview, harg] <;> rfl
       | ok pair =>
           obtain ⟨argType, state2⟩ := pair
           by_cases heq : psKernelExprEq argType view.domain = true
           · simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep,
-              ctx, hview, harg, heq]
+              ctx, hview, harg, heq] <;> rfl
           · let eqCtx : PsKernelCheckerContext :=
               if psKernelExprIsEagerReduce frame.argument then
                 psKernelCheckerContextWithEagerReduce ctx true
@@ -46,13 +46,13 @@ theorem c0DeepStep_source
             cases hdefeq : defeq eqCtx state2 argType view.domain with
             | error message =>
                 simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep,
-                  ctx, eqCtx, hview, harg, heq, hdefeq]
+                  ctx, eqCtx, hview, harg, heq, hdefeq] <;> rfl
             | ok pair =>
                 obtain ⟨answer, state3⟩ := pair
                 cases answer with
                 | true =>
                     simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep,
-                      ctx, eqCtx, hview, harg, heq, hdefeq]
+                      ctx, eqCtx, hview, harg, heq, hdefeq] <;> rfl
                 | false =>
                     simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep,
-                      ctx, eqCtx, hview, harg, heq, hdefeq]
+                      ctx, eqCtx, hview, harg, heq, hdefeq] <;> rfl

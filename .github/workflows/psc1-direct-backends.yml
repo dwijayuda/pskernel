@@ -288,6 +288,25 @@ jobs:
             exit 1
           fi
           test ! -e /tmp/psc1-invalid-component.wasm
+          # Exercise pre-existing advertised fixed-width scalar WIT ABI, not
+          # a new language feature. Compare component metadata and execution.
+          cat >/tmp/psc1-wit-scalars.lean <<'EOF'
+          def idu8 (x : UInt8) : UInt8 := x
+          def idi32 (x : Int32) : Int32 := x
+          EOF
+          lake exe psc1 build /tmp/psc1-wit-scalars.lean --target wasm-component --export idu8 --out /tmp/psc1-wit-u8.wasm
+          wasm-tools validate /tmp/psc1-wit-u8.wasm
+          grep -q 'idu8: func(x: u8) -> u8;' /tmp/psc1-wit-u8.wit
+          wasmtime run --invoke 'idu8(0)' /tmp/psc1-wit-u8.wasm | tee /tmp/psc1-wit-u8-zero.txt
+          grep -q '0' /tmp/psc1-wit-u8-zero.txt
+          wasmtime run --invoke 'idu8(255)' /tmp/psc1-wit-u8.wasm | tee /tmp/psc1-wit-u8-max.txt
+          grep -q '255' /tmp/psc1-wit-u8-max.txt
+          lake exe psc1 build /tmp/psc1-wit-scalars.lean --target wasm-component --export idi32 --out /tmp/psc1-wit-i32.wasm
+          wasm-tools validate /tmp/psc1-wit-i32.wasm
+          grep -q 'idi32: func(x: s32) -> s32;' /tmp/psc1-wit-i32.wit
+          wasmtime run --invoke 'idi32(-2147483648)' /tmp/psc1-wit-i32.wasm | tee /tmp/psc1-wit-i32-min.txt
+          grep -q -- '-2147483648' /tmp/psc1-wit-i32-min.txt
+          echo "PSC1_COMPONENT_SCALAR_ABI_BOUNDARIES: PASS"
 
   kernel-regression:
     runs-on: ubuntu-latest

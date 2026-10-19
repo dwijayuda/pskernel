@@ -92,3 +92,9 @@ lean_lib PsKernelCore where
 lean_exe psc1_kernel_regression where
   srcDir := "test"
   root := `PsKernelCoreRegression
+
+-- Optional same-run performance comparison; assertions check semantics,
+-- timings are observations and do not override correctness qualification.
+lean_exe psc1_kernel_perf where
+  srcDir := "test"
+  root := `PsKernelCorePerformance

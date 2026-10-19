@@ -33,13 +33,19 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
-          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf
       - name: Run native safety and semantics regression
         shell: bash
         working-directory: psc1
         run: |
           set -euo pipefail
           lake -f kernel-lakefile.lean exe psc1_kernel_regression
+      - name: Run same-process old-versus-C0 beta-spine performance comparison
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lake -f kernel-lakefile.lean exe psc1_kernel_perf
 
   psc1-portability:
     runs-on: ubuntu-latest

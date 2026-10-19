@@ -47,16 +47,39 @@ structure PsDirectMapState where
   sourceColumn : Nat := 0
   hasSegmentOnLine : Bool := false
 
+-- A one-field segment ends source attribution for generated-only code.
+def psDirectGeneratedOnlySegment
+    (span : PsJsGeneratedDeclarationSpan)
+    (state : PsDirectMapState) : String × PsDirectMapState :=
+  let generatedLine := span.start.line
+  let nextLine := generatedLine > state.generatedLine
+  let semicolons :=
+    String.join (List.replicate (generatedLine - state.generatedLine) ";")
+  let columnBase := if nextLine then 0 else state.generatedColumn
+  let comma := if !nextLine && state.hasSegmentOnLine then "," else ""
+  let entry := psDirectVLQ (Int.ofNat span.start.column - Int.ofNat columnBase)
+  let updated : PsDirectMapState := {
+    generatedLine := generatedLine
+    generatedColumn := span.start.column
+    sourceLine := state.sourceLine
+    sourceColumn := state.sourceColumn
+    hasSegmentOnLine := true }
+  (semicolons ++ comma ++ entry, updated)
+
 def psDirectMapSegments
     (sourceText : String) (origins : List PsDirectSourceOrigin) :
     List PsJsGeneratedDeclarationSpan → PsDirectMapState → String
   | [], _ => ""
   | span :: rest, state =>
     match origins.find? (fun origin => origin.name == span.name) with
-    | none => psDirectMapSegments sourceText origins rest state
+    | none =>
+        let gap := psDirectGeneratedOnlySegment span state
+        gap.1 ++ psDirectMapSegments sourceText origins rest gap.2
     | some origin =>
       match psDirectSourceUtf16Column sourceText origin.position with
-      | none => psDirectMapSegments sourceText origins rest state
+      | none =>
+          let gap := psDirectGeneratedOnlySegment span state
+          gap.1 ++ psDirectMapSegments sourceText origins rest gap.2
       | some sourceColumn =>
         let sourceLine := origin.position.line - 1
         let generatedLine := span.start.line

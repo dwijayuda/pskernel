@@ -2,9 +2,13 @@ name: PSC1 direct backend qualification
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches:
+      - psc1/direct-multibackend-v1
   push:
     branches:
       - psc1/direct-multibackend-v1
+      - fix/psc1-native-correctness-hardening-20261020
     paths:
       - psc1/**
       - .github/workflows/psc1-direct-backends.yml
@@ -66,6 +70,13 @@ jobs:
         run: |
           set -euo pipefail
           lake build psc1
+      - name: Focused IR specialization and source-map regressions
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          lake exe psc1_ir_specialize_tests
+          lake exe psc1_direct_source_map_regression
 
       - name: Smoke PSC1 direct JS, Rust and core Wasm outputs
         working-directory: psc1

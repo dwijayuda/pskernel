@@ -1,4 +1,4 @@
-import Ps.CompilerIr.Model
+import Ps.CompilerIr.Check
 
 inductive PsIrSpecializeKind where
   | structure
@@ -17,6 +17,8 @@ inductive PsIrSpecializeError where
   | typeArgumentArity (name : String)
   | unknownTarget (name : String)
   | unsupportedGenericCall
+  | specializedIrRejected
+  | specializedIrBudgetExhausted
 
 structure PsIrSpecializeTypeResult where
   type : PsVerifiedIrType
@@ -1720,10 +1722,20 @@ def psIrSpecializeValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsSpecializedIrModule := do
   let raw ← psIrSpecializeModule validated.raw
+  let report := psCheckVerifiedIrModule psIrCheckDefaultOptions raw
+  if !report.traversalComplete then
+    throw PsIrSpecializeError.specializedIrBudgetExhausted
+  if !report.accepted then
+    throw PsIrSpecializeError.specializedIrRejected
   pure { raw := raw }
 
 def psIrSpecializeUniformValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsUniformSpecializedIrModule := do
   let raw ← psIrSpecializeModule validated.raw
+  let report := psCheckVerifiedIrModule psIrCheckDefaultOptions raw
+  if !report.traversalComplete then
+    throw PsIrSpecializeError.specializedIrBudgetExhausted
+  if !report.accepted then
+    throw PsIrSpecializeError.specializedIrRejected
   pure { raw := raw }

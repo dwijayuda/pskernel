@@ -225,6 +225,10 @@ lean_exe psc1_ir_specialize_tests where
   srcDir := "test"
   root := `IrSpecializeTests
 
+lean_exe psc1_direct_source_map_regression where
+  srcDir := "test"
+  root := `DirectSourceMapRegression
+
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests

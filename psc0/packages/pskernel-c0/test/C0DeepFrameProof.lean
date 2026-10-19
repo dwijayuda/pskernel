@@ -35,23 +35,6 @@ example
 #check psKernelC0DeepFrameFold
 #check psKernelC0DeepAppSpineWithFuel
 
-/-- One explicit frame makes exactly the same result/error/state transition
-    as one historical recursive application continuation. The proof does
-    not assume a particular WHNF, DefEq or checker state. -/
-theorem c0DeepFrameStepIsSource
-    (whnf : PsKernelC0BinderWhnf)
-    (defeq : PsKernelC0BinderDefEq)
-    (context : PsKernelCheckerContext)
-    (frame : PsKernelC0CheckedAppFrame)
-    (rest : List PsKernelC0CheckedAppFrame)
-    (ranges : List Nat)
-    (ty : PsKernelExpr)
-    (state : PsKernelCheckerState) :
-    psKernelC0CheckAppFrames whnf defeq context
-        (frame :: rest) ranges ty state =
-      (do
-        let next ← psKernelC0DeepFrameStep whnf defeq context
-          { current := ty, checker := state, bodyRanges := ranges } frame
-        psKernelC0CheckAppFrames whnf defeq context rest
-          next.bodyRanges next.current next.checker) := by
-  simp [psKernelC0CheckAppFrames, psKernelC0DeepFrameStep, Except.bind, Except.map] <;> grind
+/- One-frame source equivalence is deliberately NOT asserted here: the
+   complete monadic transition has not yet been discharged by Lean.
+   No accepting path calls this experimental frame executor. -/

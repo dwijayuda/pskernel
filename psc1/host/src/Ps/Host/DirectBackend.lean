@@ -10,15 +10,17 @@ import Ps.BackendWasm.Binary
 import Ps.BackendWasm.Lower
 import Ps.BackendTs.Module
 
-/-- Host-owned immutable session. Its private constructor prevents callers from
-substituting a different raw IR after source admission. This is source checking
-and bounded runtime typing, not a theorem of backend semantic preservation. -/
+/-- Host-owned immutable accepted input. Target restrictions are deliberately not
+part of source admission: the scalar JS declaration ABI must not restrict Rust or
+core Wasm's existing capabilities. The constructor is private to this module. -/
 structure PsHostDirectPrepared where
   private mk ::
   captured : PsHostCapturedProject
   admissions : String
   validated : PsValidatedIrModule
+  declarationNames : List (PsName × String)
   publicNames : List String
+  authoredTypeNames : List String
 
 private def checkedInput (inputPath : String) :
     IO (PsHostCapturedProject × PsCompilerAdmissionReadyModule × String) := do
@@ -51,9 +53,51 @@ private def specializeFailureText : PsIrSpecializeError → String
   | .inputValidationFailed => "specialization input validation failed"
   | .outputValidationFailed => "specialization output validation failed"
 
+private def syntaxCoreName : PsSyntaxDeclaration → Option PsName
+  | .definition name _ _ _ _ => psSyntaxNameToName name
+  | .partialDefinition name _ _ _ _ => psSyntaxNameToName name
+  | .theoremDecl name _ _ _ _ => psSyntaxNameToName name
+  | .inductiveDecl name _ _ _ _ => psSyntaxNameToName name
+  | .structureDecl name _ _ _ => psSyntaxNameToName name
+
+private def runtimeName
+    (names : List (PsName × String)) (declaration : PsSyntaxDeclaration) : Option String := do
+  let coreName ← syntaxCoreName declaration
+  let entry ← names.find? (fun entry => psNameEq entry.1 coreName)
+  return entry.2
+
+def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared := do
+  let (captured, prepared, admissions) ← checkedInput inputPath
+  let raw ← match psCompilerVerifiedIrFromPrepared prepared with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_ERASURE_FAILED: phase=runtime-erasure")
+  let validated ← match psStrictValidateModule raw with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError ("PSC1_IR_VALIDATION_FAILED: " ++ irFailureText raw))
+  let some entry := captured.sources.find? (fun source => source.path == captured.entryPath)
+    | throw (IO.userError "PSC1_ENTRY_SNAPSHOT_MISSING")
+  -- Reuse exactly erasure's collision-aware Core-name mapping, including its
+  -- runtime prelude. Never guess a target identity from a source spelling.
+  let names := psErasureDeclarationNames
+    (psSelfHostRuntimePreludeDeclarationsWithProd ++ prepared.declarations)
+  let authoredNames := entry.parsed.declarations.filterMap (runtimeName names)
+  let publicNames := (raw.declarations.filter (fun declaration => authoredNames.contains declaration.name)).map (fun d => d.name)
+  let authoredTypeNames := (raw.structures.map (fun s => s.name) ++ raw.inductives.map (fun i => i.name)).filter authoredNames.contains
+  return { captured := captured, admissions := admissions, validated := validated,
+    declarationNames := names, publicNames := publicNames, authoredTypeNames := authoredTypeNames }
+
+def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
+  return (← psHostDirectPrepare inputPath).validated
+
+def psHostDirectCheck (inputPath : String) : IO Unit := do
+  let (_, prepared, _) ← checkedInput inputPath
+  IO.println ("PSC1_KERNEL_CHECK: PASS (" ++ toString prepared.declarations.length ++ " declarations; Lean 4.34.0)")
+
+def psHostDirectAdmissions (inputPath : String) : IO Unit := do
+  let (_, _, admissions) ← checkedInput inputPath
+  IO.print admissions
+
 def psHostDirectType (value : PsVerifiedIrType) : Except String String :=
-  -- Preserve the existing scalar public ABI. Internal generic data can still
-  -- specialize; this repair does not invent an unqualified aggregate JS ABI.
   match value with
   | .primitive _ =>
     match psTsEmitType value with
@@ -75,69 +119,55 @@ def psHostDirectDeclaration (value : PsVerifiedIrDeclaration) : Except String St
     return "export declare function " ++ value.name ++ "(" ++
       String.intercalate ", " args ++ "): " ++ outputType ++ ";"
 
-def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared := do
-  let (captured, prepared, admissions) ← checkedInput inputPath
-  -- Erase exactly the immutable declaration graph accepted above.
-  let raw ← match psCompilerVerifiedIrFromPrepared prepared with
-    | .ok value => pure value
-    | .error _ => throw (IO.userError "PSC1_ERASURE_FAILED: phase=runtime-erasure")
-  let validated ← match psStrictValidateModule raw with
-    | .ok value => pure value
-    | .error _ => throw (IO.userError ("PSC1_IR_VALIDATION_FAILED: " ++ irFailureText raw))
-  let some entry := captured.sources.find? (fun source => source.path == captured.entryPath)
-    | throw (IO.userError "PSC1_ENTRY_SNAPSHOT_MISSING")
-  let authoredNames := entry.parsed.declarations.map psHostSyntaxDeclarationName
-  let publicDeclarations := raw.declarations.filter (fun declaration => authoredNames.contains declaration.name)
-  for declaration in publicDeclarations do
-    if !psJsIdentifierSupported declaration.name then
-      throw (IO.userError ("PSC1_PUBLIC_IDENTIFIER_UNSUPPORTED: " ++ declaration.name))
-    match psHostDirectDeclaration declaration with
-    | .ok _ => pure ()
-    | .error reason => throw (IO.userError (reason ++ ": declaration=" ++ declaration.name))
-  let specialized ← match psIrSpecializeValidatedModule validated with
+/-- JS/TS implementation and declarations consume this same revalidated closed
+plan. Internal generic dependencies may specialize; unsupported public signatures
+remain explicit refusals, without imposing that policy on Rust or core Wasm. -/
+private def ecmaPlan (session : PsHostDirectPrepared) : IO PsValidatedIrModule := do
+  for declaration in session.validated.raw.declarations do
+    if session.publicNames.contains declaration.name then
+      if !psJsIdentifierSupported declaration.name then
+        throw (IO.userError ("PSC1_PUBLIC_IDENTIFIER_UNSUPPORTED: " ++ declaration.name))
+      match psHostDirectDeclaration declaration with
+      | .ok _ => pure ()
+      | .error reason => throw (IO.userError (reason ++ ": declaration=" ++ declaration.name))
+  let specialized ← match psIrSpecializeValidatedModule session.validated with
     | .ok value => pure value
     | .error reason => throw (IO.userError ("PSC1_SPECIALIZATION_FAILED: " ++ specializeFailureText reason))
-  let finalIr ← match psStrictValidateModule specialized.raw with
+  let plan ← match psStrictValidateModule specialized.raw with
     | .ok value => pure value
     | .error _ => throw (IO.userError ("PSC1_POST_SPECIALIZATION_INVALID: " ++ irFailureText specialized.raw))
-  let publicNames := publicDeclarations.map (fun declaration => declaration.name)
-  for name in publicNames do
-    if !finalIr.raw.declarations.any (fun declaration => declaration.name == name) then
+  for name in session.publicNames do
+    if !plan.raw.declarations.any (fun declaration => declaration.name == name) then
       throw (IO.userError ("PSC1_PUBLIC_DECLARATION_LOST: " ++ name))
-  return { captured := captured, admissions := admissions, validated := finalIr, publicNames := publicNames }
+  return plan
 
-def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
-  return (← psHostDirectPrepare inputPath).validated
-
-def psHostDirectCheck (inputPath : String) : IO Unit := do
-  let (_, prepared, _) ← checkedInput inputPath
-  IO.println ("PSC1_KERNEL_CHECK: PASS (" ++ toString prepared.declarations.length ++ " declarations; Lean 4.34.0)")
-
-def psHostDirectAdmissions (inputPath : String) : IO Unit := do
-  let (_, _, admissions) ← checkedInput inputPath
-  IO.print admissions
-
-private def sourceJson (source : PsHostCapturedSource) : String :=
-  let origins := source.parsed.declarations.filterMap fun declaration =>
+private def sourceJson (session : PsHostDirectPrepared) (source : PsHostCapturedSource) : String :=
+  let origins := source.parsed.declarations.filterMap fun declaration => do
+    let name ← runtimeName session.declarationNames declaration
     let position := (psElabOriginSource declaration).2.start
-    match psDirectSourceUtf16Column source.text position with
-    | none => none
-    | some column => some ("{\"name\":" ++ psJsonQuote (psHostSyntaxDeclarationName declaration) ++
-      ",\"line\":" ++ toString (position.line - 1) ++ ",\"column\":" ++ toString column ++ "}")
+    let column ← psDirectSourceUtf16Column source.text position
+    return "{\"name\":" ++ psJsonQuote name ++
+      ",\"sourceName\":" ++ psJsonQuote (psHostSyntaxDeclarationName declaration) ++
+      ",\"line\":" ++ toString (position.line - 1) ++ ",\"column\":" ++ toString column ++ "}"
   "{\"path\":" ++ psJsonQuote source.path ++ ",\"text\":" ++ psJsonQuote source.text ++
     ",\"origins\":" ++ psJsonArray origins ++ "}"
 
-def psHostDirectWriteProvenance
-    (session : PsHostDirectPrepared) (stage : System.FilePath) : IO Unit := do
+def psHostDirectWriteSelectedProvenance
+    (session : PsHostDirectPrepared) (stage : System.FilePath) (selected : List String) : IO Unit := do
+  if !selected.all session.publicNames.contains then
+    throw (IO.userError "PSC1_PROVENANCE_PUBLIC_API_NOT_CHECKED")
   let metadata := "{\"profile\":\"psc1-checked-direct/1\",\"compiler\":\"PSC1 native / Lean 4.34.0\"," ++
     "\"entryPath\":" ++ psJsonQuote session.captured.entryPath ++
-    ",\"publicNames\":" ++ psJsonArray (session.publicNames.map psJsonQuote) ++
-    ",\"sources\":" ++ psJsonArray (session.captured.sources.map sourceJson) ++ "}\n"
+    ",\"publicNames\":" ++ psJsonArray (selected.map psJsonQuote) ++
+    ",\"sources\":" ++ psJsonArray (session.captured.sources.map (sourceJson session)) ++ "}\n"
   IO.FS.writeFile (stage / "psc1-input.json") metadata
   IO.FS.writeFile (stage / "admissions.json") session.admissions
 
-private def declarationSource (session : PsHostDirectPrepared) : IO String := do
-  let selected := session.validated.raw.declarations.filter (fun declaration => session.publicNames.contains declaration.name)
+def psHostDirectWriteProvenance (session : PsHostDirectPrepared) (stage : System.FilePath) : IO Unit :=
+  psHostDirectWriteSelectedProvenance session stage session.publicNames
+
+private def declarationSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO String := do
+  let selected := plan.raw.declarations.filter (fun declaration => session.publicNames.contains declaration.name)
   match selected.mapM psHostDirectDeclaration with
   | .error reason => throw (IO.userError reason)
   | .ok declarations => return "// Public API from the same revalidated specialized IR as the implementation.\n" ++
@@ -146,8 +176,8 @@ private def declarationSource (session : PsHostDirectPrepared) : IO String := do
 private def withoutExport (text : String) : String :=
   if text.startsWith "export " then String.ofList (text.toList.drop 7) else text
 
-private def jsSource (session : PsHostDirectPrepared) : IO String := do
-  let lowered ← match psJsLowerValidatedModule session.validated with
+private def jsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO String := do
+  let lowered ← match psJsLowerValidatedModule plan with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_JS_LOWER_FAILED: phase=jsir; source-profile=checked-direct/1")
   match psJsValidateModule lowered with
@@ -160,8 +190,8 @@ private def jsSource (session : PsHostDirectPrepared) : IO String := do
     return if session.publicNames.contains declaration.name then text else withoutExport text
   return psJsPrintStackSafePrelude lowered ++ String.intercalate "\n" printed
 
-private def tsSource (session : PsHostDirectPrepared) : IO String := do
-  let raw := session.validated.raw
+private def tsSource (session : PsHostDirectPrepared) (plan : PsValidatedIrModule) : IO String := do
+  let raw := plan.raw
   let brands := psTsBuildBrandMap raw
   let tags := psTsBuildTagMap raw
   let structures ← match raw.structures.mapM (psTsEmitStructure brands) with
@@ -181,15 +211,16 @@ private def tsSource (session : PsHostDirectPrepared) : IO String := do
     raw.imports.map psTsEmitImport ++ internalTypes ++ declarations) ++ "\n"
 
 def psHostDirectTypeScriptSource (inputPath : String) : IO String := do
-  tsSource (← psHostDirectPrepare inputPath)
+  let session ← psHostDirectPrepare inputPath
+  tsSource session (← ecmaPlan session)
 
-private def emitEcma
-    (session : PsHostDirectPrepared) (outputPath kind : String) : IO Unit := do
+private def emitEcma (session : PsHostDirectPrepared) (outputPath kind : String) : IO Unit := do
   if !outputPath.endsWith ("." ++ kind) then
     throw (IO.userError ("PSC1_OUTPUT_EXTENSION: expected ." ++ kind))
+  let plan ← ecmaPlan session
   let name := psHostArtifactFileName outputPath ("module." ++ kind)
-  let declarations ← declarationSource session
-  let emitted ← if kind == "js" then jsSource session else tsSource session
+  let declarations ← declarationSource session plan
+  let emitted ← if kind == "js" then jsSource session plan else tsSource session plan
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteProvenance session stage
     IO.FS.writeFile (stage / name) emitted
@@ -210,25 +241,54 @@ def psHostDirectJavaScript (inputPath outputPath : String) : IO Unit := do
 def psHostDirectTypeScript (inputPath outputPath : String) : IO Unit := do
   psHostDirectEmitTypeScript (← psHostDirectPrepare inputPath) outputPath
 
-private def rustVisibility (publicNames : List String) (source : String) : String :=
-  -- The owned Rust printer emits each top-level item at column zero and escapes
-  -- newlines in user string literals. Change only that item's leading visibility;
-  -- retain every declaration, body, field and symbol needed by linked dependencies.
-  let keep := fun (line : String) => publicNames.any fun name =>
-    line.startsWith ("pub fn " ++ name ++ "(") || line.startsWith ("pub fn " ++ name ++ "<") ||
-    line.startsWith ("pub const " ++ name ++ ":")
+private partial def namedTypes : PsVerifiedIrType → List String
+  | .named name arguments => name :: arguments.flatMap namedTypes
+  | .function parameters result => parameters.flatMap namedTypes ++ namedTypes result
+  | _ => []
+
+private def publicTypeClosure
+    (raw : PsVerifiedIrModule) (fuel : Nat) (pending seen : List String) : Except String (List String) := do
+  match pending with
+  | [] => return seen
+  | name :: rest =>
+    match fuel with
+    | 0 => throw "PSC1_PUBLIC_TYPE_CLOSURE_BUDGET_EXHAUSTED"
+    | remaining + 1 =>
+      if seen.contains name then publicTypeClosure raw remaining rest seen
+      else
+        let fields := match raw.structures.find? (fun value => value.name == name) with
+          | some value => value.fields.flatMap (fun field => namedTypes field.type)
+          | none => match raw.inductives.find? (fun value => value.name == name) with
+            | some value => value.constructors.flatMap (fun ctor => ctor.fields.flatMap (fun field => namedTypes field.type))
+            | none => []
+        publicTypeClosure raw remaining (fields ++ rest) (name :: seen)
+
+private def rustVisibility (valueNames typeNames : List String) (source : String) : String :=
+  let keep := fun (line : String) =>
+    valueNames.any (fun name => line.startsWith ("pub fn " ++ name ++ "(") ||
+      line.startsWith ("pub fn " ++ name ++ "<") || line.startsWith ("pub const " ++ name ++ ":")) ||
+    typeNames.any (fun name => ["struct ", "enum ", "type "].any (fun kind =>
+      line.startsWith ("pub " ++ kind ++ name ++ " ") || line.startsWith ("pub " ++ kind ++ name ++ "<") ||
+      line.startsWith ("pub " ++ kind ++ name ++ "(") || line == "pub " ++ kind ++ name ++ ";"))
   String.intercalate "\n" ((source.splitOn "\n").map fun line =>
     if line.startsWith "pub " && !keep line then String.ofList (line.toList.drop 4) else line)
 
 def psHostDirectEmitRust (session : PsHostDirectPrepared) (outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".rs" then throw (IO.userError "PSC1_OUTPUT_EXTENSION: expected .rs")
+  -- Rust consumes its existing checked generic IR, not the JS-only closed plan.
   let emitted ← match psRustEmitValidatedModule session.validated with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering")
+  let signatures := session.validated.raw.declarations.filter (fun declaration => session.publicNames.contains declaration.name)
+  let seeds := session.authoredTypeNames ++ signatures.flatMap (fun declaration =>
+    namedTypes declaration.resultType ++ declaration.parameters.flatMap (fun parameter => namedTypes parameter.type))
+  let types ← match publicTypeClosure session.validated.raw 4096 seeds [] with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
   let name := psHostArtifactFileName outputPath "module.rs"
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteProvenance session stage
-    IO.FS.writeFile (stage / name) (rustVisibility session.publicNames emitted)
+    IO.FS.writeFile (stage / name) (rustVisibility session.publicNames types emitted)
     let _ ← psHostArtifactTool #["rust", stage.toString, name]
     psHostPublishArtifactStage stage outputPath "rust"
   IO.println ("PSC1_DIRECT_RUST: " ++ outputPath)
@@ -252,7 +312,10 @@ def psHostDirectEmitWasmCore (session : PsHostDirectPrepared) (outputPath : Stri
   let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_WASM_LOWER_UNSUPPORTED")
-  let selected := { lowered with exports := lowered.exports.filter (fun export => session.publicNames.contains export.1) }
+  for name in session.publicNames do
+    if !lowered.exports.any (fun item => item.1 == name) then
+      throw (IO.userError ("PSC1_WASM_PUBLIC_DECLARATION_NOT_LOWERED: " ++ name))
+  let selected := { lowered with exports := lowered.exports.filter (fun item => session.publicNames.contains item.1) }
   let encoded ← match psWasmEncodeModule selected with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_WASM_BINARY_UNSUPPORTED")
@@ -268,8 +331,8 @@ def psHostDirectEmitWasmCore (session : PsHostDirectPrepared) (outputPath : Stri
 def psHostDirectWasmCore (inputPath outputPath : String) : IO Unit := do
   psHostDirectEmitWasmCore (← psHostDirectPrepare inputPath) outputPath
 
-/-- A binary-to-text conversion is not a source-admission claim. Write its single
-output through an adjacent temporary file, and never overwrite managed bundles. -/
+-- Single-file conversion is separate from source admission. Refuse managed output
+-- aliases and publish the actual binary's printed WAT through one adjacent rename.
 def psHostWasmBinaryToWat (binaryPath watPath : String) : IO Unit := do
   if !binaryPath.endsWith ".wasm" || !watPath.endsWith ".wat" then
     throw (IO.userError "PSC1_WAT_OUTPUT_EXTENSION")

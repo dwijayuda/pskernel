@@ -1,7 +1,6 @@
 import Ps.Host.DirectBackend
 
--- The component boundary remains the existing fixed-width scalar profile.
--- No implicit unbounded-Nat, string, aggregate, generic or recursive ABI is added.
+-- Existing scalar component ABI; no implicit aggregate or unbounded adapter.
 def psHostWitScalarType : PsVerifiedIrType → Except String String
   | .primitive .bool => .ok "bool"
   | .primitive .uint8 => .ok "u8"
@@ -17,8 +16,8 @@ def psHostWitScalarType : PsVerifiedIrType → Except String String
   | _ => .error "PSC1_COMPONENT_WIT_TYPE_UNSUPPORTED"
 
 def psHostWitIdent (name : String) : Bool :=
-  let lower := fun (c : Char) => 97 <= c.toNat && c.toNat <= 122
-  let digit := fun (c : Char) => 48 <= c.toNat && c.toNat <= 57
+  let lower := fun (c : Char) => Nat.ble 97 c.toNat && Nat.ble c.toNat 122
+  let digit := fun (c : Char) => Nat.ble 48 c.toNat && Nat.ble c.toNat 57
   let validPart := fun (part : String) => match part.toList with
     | [] => false
     | first :: rest => lower first && rest.all (fun c => lower c || digit c)
@@ -53,16 +52,16 @@ def psHostDirectEmitWasmComponent
   let lowered ← match psWasmLowerValidatedModule { wordSize := PsWasmWordSize.wasm32 } session.validated with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_LOWER_UNSUPPORTED")
-  if !lowered.exports.any (fun export => export.1 == exportName) then
+  if !lowered.exports.any (fun item => item.1 == exportName) then
     throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_LOWERED")
-  let selected := { lowered with exports := lowered.exports.filter (fun export => export.1 == exportName) }
+  let selected := { lowered with exports := lowered.exports.filter (fun item => item.1 == exportName) }
   let bytes ← match psWasmEncodeModule selected with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_BINARY_UNSUPPORTED")
   let name := psHostArtifactFileName outputPath "module.wasm"
   let stem := name.dropRight 5
   psHostWithArtifactStage outputPath fun stage => do
-    psHostDirectWriteProvenance session stage
+    psHostDirectWriteSelectedProvenance session stage [exportName]
     let core := stage / (stem ++ ".core.wasm")
     let witPath := stage / (stem ++ ".wit")
     let embedded := stage / "temporary.embedded.wasm"

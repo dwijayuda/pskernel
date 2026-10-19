@@ -277,9 +277,13 @@ def psKernelC0InstMemoBinderPrefix : Nat → PsKernelExpr → Bool
 
 /-- Read-only, bounded shape selector. It never establishes equality, typing,
 capture safety, or an admission outcome. -/
+/-- Research-only alternative: keep exact DAG memo for complex-app
+    evidence, but do not infer that a long *linear binder prefix alone*
+    benefits from proof-carrying per-node hash-trie insertion. Both resulting
+    workers are independently Lean-proved equal to source instantiation.
+    Never promote without genuine full-checker source/negative/perf gates. -/
 def psKernelC0InstMemoWorthwhile (expr : PsKernelExpr) : Bool :=
-  psKernelC0InstMemoComplexApp 8 expr ||
-    psKernelC0InstMemoBinderPrefix 12 expr
+  psKernelC0InstMemoComplexApp 8 expr
 
 /-- Complete original specialized source algorithm, maintained as an
 independent executable oracle and the cheap path for ordinary terms. -/

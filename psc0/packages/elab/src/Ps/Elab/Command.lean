@@ -143,7 +143,7 @@ def psScopeVariables (state : PsCommandState) (entries : List PsScopeBinder) :
       let head := { entry.fst with name, moreNames := [], origin := some { names, index } }
       let scopedEntry := PsScopeVariable.mk (head, resolved.term) resolved.used
       pure { scope with variables := scope.variables ++ [scopedEntry] }) scope) state.scope
-  let checked ← psElabTypedBinders psElabTerm (psElabContextEmpty state.environment (scope.levelNames.map psRootName))
+  let checked ← psElabTypedBinders psElabTerm (psElabContextEmpty state.environment scope.levelNames)
     (scope.variables.map (·.binder))
   if checked.bindersRev.any (fun b =>
       psExprHasUnresolvedMeta (psMetaInstantiate checked.context.metaContext b.type)) then
@@ -445,7 +445,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   -- Where's typed capture closure retains only actual type/body dependencies.
   let sectionContext := state.scope.variables.map (·.binder)
   let prepared ← psElabPreparePreDefinitionsWithSource state.environment
-    (state.scope.levelNames.map psRootName) sectionContext scopedMembers span
+    state.scope.levelNames sectionContext scopedMembers span
   let block := prepared.block
   let registeredMain? ← if registration.isSome then
     (psElabCommandRegisteredMain block.members).map some
@@ -584,15 +584,20 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     | .partialDefinition sourceName binders type value _ => do
       if registration.isSome then
         throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
+      let available ← (psElabDeclarationUniverseNames state.scope.levelNames [sourceName]).mapError
+        (.atDeclaration name)
       let result ← (psElabPartialCommandBatch state.environment sourceName binders type value
-        (state.scope.levelNames.map psRootName)).mapError (.atDeclaration name)
+        available).mapError (.atDeclaration name)
+      (psElabCheckDeclarationUniverseUsage [sourceName]
+        (psElabDeclarationUniverseExpressions source result.declarations)).mapError
+          (.atDeclaration name)
       let origin := psElabBatchOriginAt state.originsRev.length source
         (psElabStableMemberOrigins result.declarations 0) none
       pure ({ result, origin := { origin with sourceInfo := result.sourceInfo } } :
         PsElabDeclarationBatchWithOriginsResult)
     | _ =>
       (psElabDeclarationBatchWithOrigins state.environment
-        state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
+        state.originsRev.length source state.scope.levelNames).mapError
           (fun error => PsElabError.atDeclaration name error.error)
   let batch ← match registration with
     | some .opaqueDecl =>
@@ -679,6 +684,8 @@ def psElabMutualStrategy (members : List PsSyntaxMutualMember) : Except PsElabEr
 def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntaxMutualMember)
     (span : PsSourceSpan) : Except PsElabError PsCommandState := do
   psElabMutualStrategy members
+  let sourceNames := members.map fun member => (psElabOriginSource member.declaration).fst
+  let available ← psElabDeclarationUniverseNames state.scope.levelNames sourceNames
   let qualified := members.map fun member =>
     psScopeQualified state.scope (psElabOriginSource member.declaration).fst
   let names := qualified.map (·.segments)
@@ -710,12 +717,18 @@ def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntax
   let result ← if members.all (fun member => match member.declaration with
       | .definition .. => true | _ => false) then
     psElabStructuralMutualBatch state.environment
-      (state.scope.levelNames.map psRootName) captured scopedMembers
+      available captured scopedMembers
   else
     psElabPartialMutualBatch state.environment
-      (state.scope.levelNames.map psRootName) captured scopedMembers
+      available captured scopedMembers
   if result.members.length != scopedMembers.length then
     throw (.data "PSCV0-MUTUAL-INTERNAL: checked member provenance mismatch")
+  psElabCheckDeclarationUniverseUsage sourceNames
+    (result.batch.declarations.flatMap fun declaration =>
+      psDeclarationType declaration :: (match declaration with
+        | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
+        | .opaqueDecl _ _ _ value | .partialDecl _ _ _ value => [value]
+        | _ => []))
   let environment ← psAddDeclarationList state.environment result.batch.declarations
   let origins := (scopedMembers.zip result.members).zipIdx.map fun entry =>
     let origin := psElabBatchOriginAt (state.originsRev.length + entry.snd)
@@ -820,9 +833,11 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     return { state with commandDiagnosticsRev := diagnostic :: state.commandDiagnosticsRev }
   | .universeCmd names _ =>
     let levelNames ← names.foldlM (fun levels name => do
-      let [key] := name.segments | throw (.scope "universe requires an unqualified name")
-      if psSyntaxNameIsAnonymous name || levels.contains key then
-        throw (.scope ("duplicate or invalid universe " ++ key))
+      if name.segments.isEmpty || psSyntaxNameIsAnonymous name then
+        throw (.scope "duplicate or invalid universe name")
+      let key := psSyntaxNameAppendSegments name.segments .anonymous
+      if levels.any (psNameEq key) then
+        throw (.scope ("duplicate or invalid universe " ++ psNameToString key))
       return levels ++ [key]) state.scope.levelNames
     return { state with scope := { state.scope with levelNames } }
   | .namespaceCmd name _ =>

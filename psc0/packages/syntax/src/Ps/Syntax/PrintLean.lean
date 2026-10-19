@@ -520,7 +520,7 @@ def psPrintLeanDeclaration
         | .fixedpointDefinition .. => pure "\npartial_fixpoint"
         | .wellFoundedDefinition _ _ _ _ termination _ => psPrintLeanTermination termination
         | _ => pure ""
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
       let annotation ← psPrintDeclarationResult psPrintLeanTerm type
       let printedValue ← psPrintLeanTerm value
@@ -530,14 +530,14 @@ def psPrintLeanDeclaration
       return declarationPrefix ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintLeanMapBinders psPrintLeanBinder binders
       let annotation ← psPrintDeclarationResult psPrintLeanTerm type
       let printedValue ← psPrintLeanTerm value
       return "partial def " ++ printedName ++ psPrintLeanSpaceJoinedSuffix printedBinders ++
         annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedBindersResult :
@@ -563,7 +563,7 @@ def psPrintLeanDeclaration
                           printedType
                           (psPrintLeanConcat2 " := " printedValue))
   | .inductiveDecl name params resultType constructors _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedParamsResult :
@@ -603,7 +603,7 @@ def psPrintLeanDeclaration
                           " where\n"
                           (psPrintJoin "\n" printedConstructors))
   | .structureDecl name params result fields _ => do
-      let name ← psPrintSyntaxName name
+      let name ← psPrintDeclarationName name
       let params ← psPrintLeanMapBinders psPrintLeanBinder params
       let result ← match result with
         | none => pure ""

@@ -129,7 +129,7 @@ def psInspectionIsErased (context : PsElabContext) (expression : PsExpr)
     let sort ← (if execution then psExprTypeView context.environment context.localContext type
       else psInferType context.environment context.metaContext context.localContext type).mapError PsElabError.infer
     match psWhnf context.environment context.metaContext context.localContext sort with
-    | .sortE level => return psLevelNormalizesToZero level
+    | .sortE level => return psLevelEquivalent level .zero
     | .mvar _ => return false
     | _ => throw .typeMismatch
 

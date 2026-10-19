@@ -34,11 +34,22 @@ def psPrintSyntaxName (name : PsSyntaxName) :
     Except PsSourcePrintError String := do
   if name.resolvedName.isSome then
     throw (.unsupportedSourceForm "an internal resolved name has no source spelling")
+  if !name.universeBinders.isEmpty then
+    throw (.unsupportedSourceForm "universe binders require a declaration head")
   if name.segments.isEmpty then throw .emptyName
   if name.segments.any (fun part => part.toList.contains '»') then
     throw (.unsupportedSourceForm "identifier contains a closing guillemet")
   return psPrintJoin "." (name.segments.map fun part =>
     psLexIdentifierSpelling part name.escaped)
+
+def psPrintDeclarationName (name : PsSyntaxName) :
+    Except PsSourcePrintError String := do
+  let head ← psPrintSyntaxName { name with universeBinders := [] }
+  if name.universeBinders.isEmpty then return head
+  let levels ← name.universeBinders.mapM fun binder =>
+    psPrintSyntaxName {
+      segments := binder.segments, span := binder.span, escaped := binder.escaped }
+  return head ++ ".{" ++ psPrintJoin ", " levels ++ "}"
 
 def psPrintSyntaxNames
     (names : List PsSyntaxName) :
@@ -130,6 +141,9 @@ def psPrintSyntaxLevel : PsSyntaxLevel → String
   | .number n => toString n
   | .name name => psLexIdentifierSpelling name
       (psLexReservedIdentifier name || (["max", "imax"] : List String).contains name)
+  | .qualifiedName segments => String.intercalate "." (segments.map fun part =>
+      psLexIdentifierSpelling part
+        (psLexReservedIdentifier part || (["max", "imax"] : List String).contains part))
   | .hole => "_"
   | .offset base n => "(" ++ psPrintSyntaxLevel base ++ " + " ++ toString n ++ ")"
   | .max left right => "(max " ++ psPrintSyntaxLevel left ++ " " ++ psPrintSyntaxLevel right ++ ")"

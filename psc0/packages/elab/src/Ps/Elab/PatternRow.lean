@@ -145,6 +145,22 @@ def psElabPatternRowElaborate (branch : PsElaborator) (fuel : Nat)
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    -- Pinned Nat.add is a match-pattern declaration. Reduce only its literal
+    -- right argument after checking Nat; zero must not erase that type check.
+    -- Each successor consumes the existing row fuel and becomes a real
+    -- constructor pattern before coverage or structural-call analysis.
+    if let .ctor source [left, .natural offset offsetSpan] span := pattern then
+      if let some name := psSyntaxNameToName source then
+        if psNameEq name (psNameAppendStr psNatName "add") then
+          let (context, isNat) ← psElabPatternRowUnify context expected (.constE psNatName [])
+          unless isNat do throw .matchPatternUnsupported
+          match offset with
+          | 0 => return ← psElabPatternRowElaborate branch fuel context variables left expected path
+          | offset + 1 =>
+            let rest := PsSyntaxPattern.ctor source [left, .natural offset offsetSpan] span
+            let expanded := PsSyntaxPattern.ctor
+              (PsSyntaxName.mk ["_root_", "Nat", "succ"] span) [rest] span
+            return ← psElabPatternRowElaborate branch fuel context variables expanded expected path
     match pattern with
     | .variable source =>
       if psSyntaxNameIsWildcardBinder source then

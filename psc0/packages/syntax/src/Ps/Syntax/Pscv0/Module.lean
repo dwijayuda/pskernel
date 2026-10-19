@@ -276,7 +276,9 @@ def psPscv0PrintResultAnnotation (proofScript : Bool) (type : PsSyntaxTerm) : Ex
 def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
     (surface : PsPscv0SurfaceDeclaration) : Except String String :=
   match surface.declaration with
-  | .definition name binders type value _ =>
+  | .definition name binders type value _ => do
+      let name ← (psPrintDeclarationName name).mapError
+        (fun _ => "PSCV0-DECLARATION-NAME-PRINT-UNSUPPORTED")
       match psPscv0PrintBinders proofScript binders with
       | Except.error error => Except.error error
       | Except.ok parameters =>
@@ -291,7 +293,7 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
               | Except.error error => Except.error error
               | Except.ok expression =>
                   let keyword := if proofScript then surface.keyword else "def";
-                  Except.ok (psPscv0Cat [keyword, " ", psPscv0NameText name,
+                  Except.ok (psPscv0Cat [keyword, " ", name,
                     parameters, resultType, " := ", expression])
   | _ =>
       let printed : Except PsSourcePrintError String :=

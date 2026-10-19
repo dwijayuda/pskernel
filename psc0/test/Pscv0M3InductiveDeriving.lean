@@ -393,7 +393,8 @@ private def checkPlans (environment : PsEnvironment)
     for handler in ["Hashable", "Repr"] do
       let prepared ← fromExcept ((psElabDerivePrepare environment source
         { groups := true, indices := true }).mapError psCompilerPscv0ElabError)
-      let prepared := psElabDeriveRequirements prepared (psRootName handler)
+      let prepared ← fromExcept ((psElabDeriveRequirements prepared (psRootName handler)).mapError
+        psCompilerPscv0ElabError)
       ensure (prepared.parametersRev.length == 2 && prepared.requirementsRev.length == 1)
         "dependent value parameter acquired a fabricated class dictionary"
   let selected := indexedOrigin.members.filter fun member =>

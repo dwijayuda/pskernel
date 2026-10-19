@@ -19,7 +19,7 @@ def psPscv0ReadValueDeclarationBody (cursor : PsTokenCursor) :
   match psTokenCursorAdvance cursor with
   | none => Except.error "PSCV0-DECLARATION-MISSING"
   | some keyword =>
-      match psParseProofScriptDeclaredName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error (psPscv0ParseError error)
       | Except.ok name =>
           let bindersResult : Except PsParseError

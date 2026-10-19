@@ -504,7 +504,8 @@ private def checkPlans (environment : PsEnvironment)
   ensure (plan.parametersRev.length == 2 && plan.elimination.slots.length == 9 &&
     psInductiveEliminationNumMinors plan.elimination == 18)
     "nested deriving did not retain the complete dependent-parameter nine-slot group"
-  let marked := psElabDeriveRequirements plan (psRootName "Repr")
+  let marked ← fromExcept ((psElabDeriveRequirements plan (psRootName "Repr")).mapError
+    psCompilerPscv0ElabError)
   ensure (marked.requirementsRev.length == 1)
     "Repr generated a dictionary for the value parameter or a recursive family"
   let atomic ← fromExcept (plan.elimination.slots.mapM fun slot =>

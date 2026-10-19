@@ -1,6 +1,13 @@
 import Ps.Foundation.Source
 import Ps.Foundation.Name
 
+-- Declaration-local universe binders retain source components and spans only.
+-- They cannot carry an already-resolved internal Core identity.
+structure PsSyntaxUniverseBinder where
+  segments : List String
+  span : PsSourceSpan
+  escaped : Bool := false
+
 structure PsSyntaxName where
   name ::
   segments : List String
@@ -10,9 +17,11 @@ structure PsSyntaxName where
   -- Only the scope owner supplies an actual checked internal alias identity.
   -- Source readers never construct this field.
   resolvedName : Option PsName := none
+  -- Only a declaration head owns the optional nonempty .{u, v} suffix.
+  universeBinders : List PsSyntaxUniverseBinder := []
 
 def PsSyntaxName.mk (segments : List String) (span : PsSourceSpan) : PsSyntaxName :=
-  .name segments span false none
+  .name segments span false none []
 
 def psSyntaxNameIsAnonymous (name : PsSyntaxName) : Bool :=
   !name.escaped && name.segments == ["_"]
@@ -93,6 +102,7 @@ def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSynta
 inductive PsSyntaxLevel where
   | number (value : Nat)
   | name (value : String)
+  | qualifiedName (segments : List String)
   | hole
   | offset (base : PsSyntaxLevel) (amount : Nat)
   | max (left right : PsSyntaxLevel)

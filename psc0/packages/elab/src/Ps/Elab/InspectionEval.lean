@@ -99,7 +99,7 @@ def psInspectionEval (result : PsElabTermResult) : Except PsElabError String := 
     throw (psInspectionError "#eval requires a pure total value; effects are outside the selected command")
   let result ← match psWhnf context.environment context.metaContext context.localContext result.type with
     | .sortE level =>
-      if psLevelNormalizesToZero level then psElabDecideProposition result
+      if psLevelEquivalent level .zero then psElabDecideProposition result
       else throw (psInspectionError "#eval cannot evaluate a type")
     | _ =>
       if ← psInspectionIsErased context result.term then

@@ -6,6 +6,14 @@ import Ps.Elab.Basic
 def psElabSourceName (name : PsSyntaxName) : Except PsElabError Unit := do
   if name.resolvedName.isSome then
     throw (.scope "source syntax contains an internal resolved name")
+  if !name.universeBinders.isEmpty then
+    throw (.scope "declaration universe binders occur outside a declaration head")
+
+def psElabSourceDeclarationName (name : PsSyntaxName) : Except PsElabError Unit := do
+  psElabSourceName { name with universeBinders := [] }
+  for binder in name.universeBinders do
+    if binder.segments.isEmpty || (!binder.escaped && binder.segments == ["_"]) then
+      throw (.scope "invalid declaration universe binder")
 
 def psElabSourceBinderNames (head : PsSyntaxBinderHead) : Except PsElabError Unit := do
   for name in psSyntaxBinderNames head do psElabSourceName name
@@ -167,23 +175,23 @@ def psElabSourceDeclarationNames (fuel : Nat) (source : PsSyntaxDeclaration) :
     | .noncomputableDefinition name binders type value _
     | .fixedpointDefinition name binders type value _
     | .theoremDecl name binders type value _ =>
-      psElabSourceName name
+      psElabSourceDeclarationName name
       psElabSourceBinders binders
       psElabSourceTermNames 4096 type
       psElabSourceTermNames 4096 value
     | .wellFoundedDefinition name binders type value suffix _ =>
-      psElabSourceName name
+      psElabSourceDeclarationName name
       psElabSourceBinders binders
       psElabSourceTermNames 4096 type
       psElabSourceTermNames 4096 value
       psElabSourceTerminationNames suffix
     | .structureDecl name parameters result fields _ =>
-      psElabSourceName name
+      psElabSourceDeclarationName name
       psElabSourceBinders parameters
       for result in result.toList do psElabSourceTermNames 4096 result
       psElabSourceBinders fields
     | .inductiveDecl name parameters result constructors _ =>
-      psElabSourceName name
+      psElabSourceDeclarationName name
       psElabSourceBinders parameters
       for result in result.toList do psElabSourceTermNames 4096 result
       for constructor in constructors do

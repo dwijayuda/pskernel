@@ -78,7 +78,7 @@ def psPscv0ReadInstance (cursor : PsTokenCursor) :
   let name ← match psTokenCursorPeek priority.cursor with
     | some token =>
       if psTokenKindEq token.kind .identifier && !psProofScriptReservedArgument token.text then
-        psParseProofScriptDeclaredName priority.cursor
+        psParseDeclarationName priority.cursor
       else pure (PsParseResult.mk
         (PsSyntaxName.mk ["$psc0Instance" ++ psNatToString keyword.token.span.start.byteOffset]
           keyword.token.span) priority.cursor)

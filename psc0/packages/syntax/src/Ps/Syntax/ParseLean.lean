@@ -2001,7 +2001,7 @@ def psParseLeanStructureDeclaration
   match psTokenCursorExpectText cursor "structure" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      match psParseSyntaxName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
@@ -2046,7 +2046,7 @@ def psParseLeanInductiveDeclaration
   match psTokenCursorExpectText cursor "inductive" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      match psParseSyntaxName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseLeanBindersWithFuel
@@ -2716,7 +2716,7 @@ def psParseLeanDeclaration
           match afterKind with
           | Except.error error => Except.error error
           | Except.ok afterKeyword =>
-              match psParseSyntaxName afterKeyword with
+              match psParseDeclarationName afterKeyword with
               | Except.error error => Except.error error
               | Except.ok name =>
                   match psParseLeanBindersWithFuel

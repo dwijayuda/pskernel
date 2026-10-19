@@ -63,12 +63,80 @@ theorem corePatternChoiceFallbackEquation : corePatternChoice false false = 2 :=
 theorem corePatternFalseEquation : m3patterns false = 45 := by rfl
 theorem corePatternTrueEquation : m3patterns true = 49 := by rfl
 
+def corePatternOffset (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | 1 => 1
+  | k + 2 => k
+def corePatternOffsetZero (n : Nat) : Nat :=
+  match n with
+  | k + 0 => k
+def corePatternOffsetNested (xs : List Nat) : Nat :=
+  match xs with
+  | [(k + 2)] => k
+  | _ => 19
+def corePatternOffsetNamed (n : Nat) : Nat :=
+  match n with
+  | Nat.add k 2 => k
+  | _ => 17
+def corePatternRecByTwo (n : Nat) : Nat :=
+  match n with
+  | 0 => 0
+  | 1 => 1
+  | k + 2 => Nat.succ (corePatternRecByTwo k)
+def m3offsetpatterns (flag : Bool) : UInt64 :=
+  UInt64.ofNat (
+    corePatternOffset (if flag then 5 else 2) +
+    10 * corePatternOffsetZero (if flag then 11 else 7) +
+    100 * corePatternOffsetNested [if flag then 7 else 4] +
+    1000 * corePatternRecByTwo (if flag then 6 else 3) +
+    10000 * corePatternOffsetNamed (if flag then 4 else 3))
+theorem corePatternOffsetEquation : corePatternOffset 5 = 3 := by rfl
+theorem corePatternOffsetZeroEquation : corePatternOffsetZero 29 = 29 := by rfl
+theorem corePatternOffsetNestedEquation : corePatternOffsetNested [7] = 5 := by rfl
+theorem corePatternOffsetNamedEquation : corePatternOffsetNamed 5 = 3 := by rfl
+theorem corePatternRecByTwoEquation : corePatternRecByTwo 6 = 3 := by rfl
+theorem corePatternOffsetFalseEquation : m3offsetpatterns false = 12270 := by rfl
+theorem corePatternOffsetTrueEquation : m3offsetpatterns true = 23613 := by rfl
+
 end CoreM3PatternOracle
 
 namespace CoreM3Patterns
 
-private def leanSource : String := "inductive CorePatternTag where\n  | off\n  | on\nopen CorePatternTag\ndef corePatternLength (xs : List Nat) : Nat :=\n  match xs with\n  | [] => 0\n  | _ :: tail => Nat.succ (corePatternLength tail)\ndef corePatternShape (xs : List Nat) : Nat :=\n  match xs with\n  | [] => 7\n  | [x,] => x + 10\n  | x :: y :: rest => x + y + corePatternLength rest\ndef corePatternPair (left right : List Nat) : Nat :=\n  match left, right with\n  | [], [x] | [x], [] => x\n  | _, _ => 99\ndef corePatternNested (xs : List (Option (Nat × Nat))) : Nat :=\n  match xs with\n  | [Option.some (x, y)] => x + y\n  | _ => 0\ndef corePatternSuccessor (xs : List Nat) : Nat :=\n  match xs with\n  | (k + 1) :: _ => k\n  | _ => 17\ndef corePatternOpened (tag : CorePatternTag) : Nat :=\n  match tag with\n  | off => 11\n  | on => 13\ndef corePatternQualified (tag : CorePatternTag) : Nat :=\n  match tag with\n  | CorePatternTag.off => 11\n  | CorePatternTag.on => 13\ndef corePatternCatch (n : Nat) : Nat := match n with\n  | number => number\ndef corePatternChoice (left right : Bool) : Nat :=\n  match left, right with\n  | true, _ | _, true => 1\n  | _, _ => 2\ndef m3patterns (flag : Bool) : UInt64 :=\n  let xs := if flag then [1, 2, 3] else [5]\n  UInt64.ofNat (corePatternLength xs + corePatternShape xs +\n    corePatternPair (if flag then [] else [8]) (if flag then [7] else []) +\n    corePatternNested (if flag then [Option.some (4, 5)] else []) +\n    corePatternSuccessor [if flag then 3 else 4] +\n    corePatternOpened (if flag then CorePatternTag.on else CorePatternTag.off) +\n    corePatternCatch (if flag then 11 else 7))\ntheorem corePatternLengthEquation : corePatternLength [1, 2, 3] = 3 := by rfl\ntheorem corePatternShapeEquation : corePatternShape [1, 2, 3] = 4 := by rfl\ntheorem corePatternPairLeftEquation : corePatternPair [] [7] = 7 := by rfl\ntheorem corePatternPairRightEquation : corePatternPair [8] [] = 8 := by rfl\ntheorem corePatternPairFallbackEquation : corePatternPair [8] [9] = 99 := by rfl\ntheorem corePatternNestedEquation : corePatternNested [Option.some (4, 5)] = 9 := by rfl\ntheorem corePatternOpenedEquation : corePatternOpened CorePatternTag.on = 13 := by rfl\ntheorem corePatternQualifiedEquation : corePatternQualified CorePatternTag.off = 11 := by rfl\ntheorem corePatternCatchEquation : corePatternCatch 29 = 29 := by rfl\ntheorem corePatternChoiceEquation : corePatternChoice false true = 1 := by rfl\ntheorem corePatternChoiceFallbackEquation : corePatternChoice false false = 2 := by rfl\ntheorem corePatternFalseEquation : m3patterns false = 45 := by rfl\ntheorem corePatternTrueEquation : m3patterns true = 49 := by rfl\n"
-private def psSource : String := "inductive CorePatternTag where {\n  | off\n  | on\n}\nopen CorePatternTag\nfunction corePatternLength(xs: List(Nat)): Nat :=\n  match xs with {\n  | [] => 0\n  | _ :: tail => Nat.succ(corePatternLength(tail))\n  }\nfunction corePatternShape(xs: List(Nat)): Nat :=\n  match xs with {\n  | [] => 7\n  | [x,] => x + 10\n  | x :: y :: rest => x + y + corePatternLength(rest)\n  }\nfunction corePatternPair(left: List(Nat), right: List(Nat)): Nat :=\n  match left, right with {\n  | [], [x] | [x], [] => x\n  | _, _ => 99\n  }\nfunction corePatternNested(xs: List(Option(Nat × Nat))): Nat :=\n  match xs with {\n  | [Option.some (x, y)] => x + y\n  | _ => 0\n  }\nfunction corePatternSuccessor(xs: List(Nat)): Nat :=\n  match xs with {\n  | (k + 1) :: _ => k\n  | _ => 17\n  }\nfunction corePatternOpened(tag: CorePatternTag): Nat :=\n  match tag with {\n  | off => 11\n  | on => 13\n  }\nfunction corePatternQualified(tag: CorePatternTag): Nat :=\n  match tag with {\n  | CorePatternTag.off => 11\n  | CorePatternTag.on => 13\n  }\nfunction corePatternCatch(n: Nat): Nat := match n with {\n  | number => number\n}\nfunction corePatternChoice(left: Bool, right: Bool): Nat :=\n  match left, right with {\n  | true, _ | _, true => 1\n  | _, _ => 2\n  }\nfunction m3patterns(flag: Bool): UInt64 :=\n  let xs := if (flag) { [1, 2, 3] } else { [5] }\n  UInt64.ofNat(corePatternLength(xs) + corePatternShape(xs) +\n    corePatternPair(if (flag) { [] } else { [8] }, if (flag) { [7] } else { [] }) +\n    corePatternNested(if (flag) { [Option.some((4, 5))] } else { [] }) +\n    corePatternSuccessor([if (flag) { 3 } else { 4 }]) +\n    corePatternOpened(if (flag) { CorePatternTag.on } else { CorePatternTag.off }) +\n    corePatternCatch(if (flag) { 11 } else { 7 }))\ntheorem corePatternLengthEquation: corePatternLength([1, 2, 3]) = 3 := by { rfl }\ntheorem corePatternShapeEquation: corePatternShape([1, 2, 3]) = 4 := by { rfl }\ntheorem corePatternPairLeftEquation: corePatternPair([], [7]) = 7 := by { rfl }\ntheorem corePatternPairRightEquation: corePatternPair([8], []) = 8 := by { rfl }\ntheorem corePatternPairFallbackEquation: corePatternPair([8], [9]) = 99 := by { rfl }\ntheorem corePatternNestedEquation: corePatternNested([Option.some((4, 5))]) = 9 := by { rfl }\ntheorem corePatternOpenedEquation: corePatternOpened(CorePatternTag.on) = 13 := by { rfl }\ntheorem corePatternQualifiedEquation: corePatternQualified(CorePatternTag.off) = 11 := by { rfl }\ntheorem corePatternCatchEquation: corePatternCatch(29) = 29 := by { rfl }\ntheorem corePatternChoiceEquation: corePatternChoice(false, true) = 1 := by { rfl }\ntheorem corePatternChoiceFallbackEquation: corePatternChoice(false, false) = 2 := by { rfl }\ntheorem corePatternFalseEquation: m3patterns(false) = 45 := by { rfl }\ntheorem corePatternTrueEquation: m3patterns(true) = 49 := by { rfl }\n"
+private def expectNativePatternElaborationRefusal (source : String) :
+    Lean.Elab.Command.CommandElabM Unit := do
+  let command ← match Lean.Parser.runParserCategory (← getEnv) "command" source with
+    | .ok command => pure command
+    | .error message => throwError "native arithmetic pattern changed parse phase: {message}"
+  let saved ← get
+  let refused ← try
+    modify fun (state : Lean.Elab.Command.State) =>
+      { state with messages := Lean.MessageLog.empty, snapshotTasks := #[] }
+    let messages ← Lean.Elab.Tactic.GuardMsgs.runAndCollectMessages command
+    let errors := messages.toList.filter fun message => message.severity == .error
+    for message in errors do
+      let content ← message.data.toString
+      if ["heartbeat", "recursion depth", "maximum recursion", "timeout"].any
+          (fun word => (content.splitOn word).length > 1) then
+        throwError "native arithmetic pattern check exhausted resources: {content}"
+    pure (!errors.isEmpty)
+  finally
+    set saved
+  unless refused do
+    throwError "native arithmetic pattern unexpectedly elaborated"
+
+run_cmd do
+  let sources : List String := [
+    "def coreNativeBad (n : Nat) : Nat := match n with\n  | 1 + k => k\n  | _ => 0\n",
+    "def coreNativeBad (n : Nat) : Nat := match n with\n  | k + m => k\n  | _ => 0\n",
+    "def coreNativeBad (xs : List Nat) : Nat := match xs with\n  | k + 1 :: rest => k\n  | _ => 0\n",
+    "def coreNativeBad (flag : Bool) : Bool := match flag with\n  | k + 0 => k\n"]
+  for source in sources do
+    expectNativePatternElaborationRefusal source
+
+
+private def leanSource : String := "inductive CorePatternTag where\n  | off\n  | on\nopen CorePatternTag\ndef corePatternLength (xs : List Nat) : Nat :=\n  match xs with\n  | [] => 0\n  | _ :: tail => Nat.succ (corePatternLength tail)\ndef corePatternShape (xs : List Nat) : Nat :=\n  match xs with\n  | [] => 7\n  | [x,] => x + 10\n  | x :: y :: rest => x + y + corePatternLength rest\ndef corePatternPair (left right : List Nat) : Nat :=\n  match left, right with\n  | [], [x] | [x], [] => x\n  | _, _ => 99\ndef corePatternNested (xs : List (Option (Nat × Nat))) : Nat :=\n  match xs with\n  | [Option.some (x, y)] => x + y\n  | _ => 0\ndef corePatternSuccessor (xs : List Nat) : Nat :=\n  match xs with\n  | (k + 1) :: _ => k\n  | _ => 17\ndef corePatternOpened (tag : CorePatternTag) : Nat :=\n  match tag with\n  | off => 11\n  | on => 13\ndef corePatternQualified (tag : CorePatternTag) : Nat :=\n  match tag with\n  | CorePatternTag.off => 11\n  | CorePatternTag.on => 13\ndef corePatternCatch (n : Nat) : Nat := match n with\n  | number => number\ndef corePatternChoice (left right : Bool) : Nat :=\n  match left, right with\n  | true, _ | _, true => 1\n  | _, _ => 2\ndef m3patterns (flag : Bool) : UInt64 :=\n  let xs := if flag then [1, 2, 3] else [5]\n  UInt64.ofNat (corePatternLength xs + corePatternShape xs +\n    corePatternPair (if flag then [] else [8]) (if flag then [7] else []) +\n    corePatternNested (if flag then [Option.some (4, 5)] else []) +\n    corePatternSuccessor [if flag then 3 else 4] +\n    corePatternOpened (if flag then CorePatternTag.on else CorePatternTag.off) +\n    corePatternCatch (if flag then 11 else 7))\ntheorem corePatternLengthEquation : corePatternLength [1, 2, 3] = 3 := by rfl\ntheorem corePatternShapeEquation : corePatternShape [1, 2, 3] = 4 := by rfl\ntheorem corePatternPairLeftEquation : corePatternPair [] [7] = 7 := by rfl\ntheorem corePatternPairRightEquation : corePatternPair [8] [] = 8 := by rfl\ntheorem corePatternPairFallbackEquation : corePatternPair [8] [9] = 99 := by rfl\ntheorem corePatternNestedEquation : corePatternNested [Option.some (4, 5)] = 9 := by rfl\ntheorem corePatternOpenedEquation : corePatternOpened CorePatternTag.on = 13 := by rfl\ntheorem corePatternQualifiedEquation : corePatternQualified CorePatternTag.off = 11 := by rfl\ntheorem corePatternCatchEquation : corePatternCatch 29 = 29 := by rfl\ntheorem corePatternChoiceEquation : corePatternChoice false true = 1 := by rfl\ntheorem corePatternChoiceFallbackEquation : corePatternChoice false false = 2 := by rfl\ntheorem corePatternFalseEquation : m3patterns false = 45 := by rfl\ntheorem corePatternTrueEquation : m3patterns true = 49 := by rfl\ndef corePatternOffset (n : Nat) : Nat :=\n  match n with\n  | 0 => 0\n  | 1 => 1\n  | k + 2 => k\ndef corePatternOffsetZero (n : Nat) : Nat :=\n  match n with\n  | k + 0 => k\ndef corePatternOffsetNested (xs : List Nat) : Nat :=\n  match xs with\n  | [(k + 2)] => k\n  | _ => 19\ndef corePatternOffsetNamed (n : Nat) : Nat :=\n  match n with\n  | Nat.add k 2 => k\n  | _ => 17\ndef corePatternRecByTwo (n : Nat) : Nat :=\n  match n with\n  | 0 => 0\n  | 1 => 1\n  | k + 2 => Nat.succ (corePatternRecByTwo k)\ndef m3offsetpatterns (flag : Bool) : UInt64 :=\n  UInt64.ofNat (\n    corePatternOffset (if flag then 5 else 2) +\n    10 * corePatternOffsetZero (if flag then 11 else 7) +\n    100 * corePatternOffsetNested [if flag then 7 else 4] +\n    1000 * corePatternRecByTwo (if flag then 6 else 3) +\n    10000 * corePatternOffsetNamed (if flag then 4 else 3))\ntheorem corePatternOffsetEquation : corePatternOffset 5 = 3 := by rfl\ntheorem corePatternOffsetZeroEquation : corePatternOffsetZero 29 = 29 := by rfl\ntheorem corePatternOffsetNestedEquation : corePatternOffsetNested [7] = 5 := by rfl\ntheorem corePatternOffsetNamedEquation : corePatternOffsetNamed 5 = 3 := by rfl\ntheorem corePatternRecByTwoEquation : corePatternRecByTwo 6 = 3 := by rfl\ntheorem corePatternOffsetFalseEquation : m3offsetpatterns false = 12270 := by rfl\ntheorem corePatternOffsetTrueEquation : m3offsetpatterns true = 23613 := by rfl\n"
+private def psSource : String := "inductive CorePatternTag where {\n  | off\n  | on\n}\nopen CorePatternTag\nfunction corePatternLength(xs: List(Nat)): Nat :=\n  match xs with {\n  | [] => 0\n  | _ :: tail => Nat.succ(corePatternLength(tail))\n  }\nfunction corePatternShape(xs: List(Nat)): Nat :=\n  match xs with {\n  | [] => 7\n  | [x,] => x + 10\n  | x :: y :: rest => x + y + corePatternLength(rest)\n  }\nfunction corePatternPair(left: List(Nat), right: List(Nat)): Nat :=\n  match left, right with {\n  | [], [x] | [x], [] => x\n  | _, _ => 99\n  }\nfunction corePatternNested(xs: List(Option(Nat × Nat))): Nat :=\n  match xs with {\n  | [Option.some (x, y)] => x + y\n  | _ => 0\n  }\nfunction corePatternSuccessor(xs: List(Nat)): Nat :=\n  match xs with {\n  | (k + 1) :: _ => k\n  | _ => 17\n  }\nfunction corePatternOpened(tag: CorePatternTag): Nat :=\n  match tag with {\n  | off => 11\n  | on => 13\n  }\nfunction corePatternQualified(tag: CorePatternTag): Nat :=\n  match tag with {\n  | CorePatternTag.off => 11\n  | CorePatternTag.on => 13\n  }\nfunction corePatternCatch(n: Nat): Nat := match n with {\n  | number => number\n}\nfunction corePatternChoice(left: Bool, right: Bool): Nat :=\n  match left, right with {\n  | true, _ | _, true => 1\n  | _, _ => 2\n  }\nfunction m3patterns(flag: Bool): UInt64 :=\n  let xs := if (flag) { [1, 2, 3] } else { [5] }\n  UInt64.ofNat(corePatternLength(xs) + corePatternShape(xs) +\n    corePatternPair(if (flag) { [] } else { [8] }, if (flag) { [7] } else { [] }) +\n    corePatternNested(if (flag) { [Option.some((4, 5))] } else { [] }) +\n    corePatternSuccessor([if (flag) { 3 } else { 4 }]) +\n    corePatternOpened(if (flag) { CorePatternTag.on } else { CorePatternTag.off }) +\n    corePatternCatch(if (flag) { 11 } else { 7 }))\ntheorem corePatternLengthEquation: corePatternLength([1, 2, 3]) = 3 := by { rfl }\ntheorem corePatternShapeEquation: corePatternShape([1, 2, 3]) = 4 := by { rfl }\ntheorem corePatternPairLeftEquation: corePatternPair([], [7]) = 7 := by { rfl }\ntheorem corePatternPairRightEquation: corePatternPair([8], []) = 8 := by { rfl }\ntheorem corePatternPairFallbackEquation: corePatternPair([8], [9]) = 99 := by { rfl }\ntheorem corePatternNestedEquation: corePatternNested([Option.some((4, 5))]) = 9 := by { rfl }\ntheorem corePatternOpenedEquation: corePatternOpened(CorePatternTag.on) = 13 := by { rfl }\ntheorem corePatternQualifiedEquation: corePatternQualified(CorePatternTag.off) = 11 := by { rfl }\ntheorem corePatternCatchEquation: corePatternCatch(29) = 29 := by { rfl }\ntheorem corePatternChoiceEquation: corePatternChoice(false, true) = 1 := by { rfl }\ntheorem corePatternChoiceFallbackEquation: corePatternChoice(false, false) = 2 := by { rfl }\ntheorem corePatternFalseEquation: m3patterns(false) = 45 := by { rfl }\ntheorem corePatternTrueEquation: m3patterns(true) = 49 := by { rfl }\nfunction corePatternOffset(n: Nat): Nat :=\n  match n with {\n  | 0 => 0\n  | 1 => 1\n  | k + 2 => k\n  }\nfunction corePatternOffsetZero(n: Nat): Nat :=\n  match n with {\n  | k + 0 => k\n  }\nfunction corePatternOffsetNested(xs: List(Nat)): Nat :=\n  match xs with {\n  | [(k + 2)] => k\n  | _ => 19\n  }\nfunction corePatternOffsetNamed(n: Nat): Nat :=\n  match n with {\n  | Nat.add k 2 => k\n  | _ => 17\n  }\nfunction corePatternRecByTwo(n: Nat): Nat :=\n  match n with {\n  | 0 => 0\n  | 1 => 1\n  | k + 2 => Nat.succ(corePatternRecByTwo(k))\n  }\nfunction m3offsetpatterns(flag: Bool): UInt64 :=\n  UInt64.ofNat(\n    corePatternOffset(if (flag) { 5 } else { 2 }) +\n    10 * corePatternOffsetZero(if (flag) { 11 } else { 7 }) +\n    100 * corePatternOffsetNested([if (flag) { 7 } else { 4 }]) +\n    1000 * corePatternRecByTwo(if (flag) { 6 } else { 3 }) +\n    10000 * corePatternOffsetNamed(if (flag) { 4 } else { 3 }))\ntheorem corePatternOffsetEquation: corePatternOffset(5) = 3 := by { rfl }\ntheorem corePatternOffsetZeroEquation: corePatternOffsetZero(29) = 29 := by { rfl }\ntheorem corePatternOffsetNestedEquation: corePatternOffsetNested([7]) = 5 := by { rfl }\ntheorem corePatternOffsetNamedEquation: corePatternOffsetNamed(5) = 3 := by { rfl }\ntheorem corePatternRecByTwoEquation: corePatternRecByTwo(6) = 3 := by { rfl }\ntheorem corePatternOffsetFalseEquation: m3offsetpatterns(false) = 12270 := by { rfl }\ntheorem corePatternOffsetTrueEquation: m3offsetpatterns(true) = 23613 := by { rfl }\n"
 
 private def ensure (condition : Bool) (message : String) : IO Unit :=
   if condition then pure () else throw (IO.userError message)
@@ -81,6 +149,7 @@ private def fromExcept {α : Type} (value : Except String α) : IO α :=
 private def causeTag : PsElabError → String
   | .atDeclaration _ cause | .atContext _ cause => causeTag cause
   | .matchNonExhaustive => "coverage"
+  | .matchPatternUnsupported => "unsupported-pattern"
   | .scope message =>
     if message.startsWith "duplicate pattern variable" then "duplicate"
     else if message.startsWith "unknown name x" then "missing-alternative-binder"
@@ -107,16 +176,19 @@ private def checkRefusals : IO Unit := do
     ("missing-alternative-binder", "def bad (left right : List Nat) : Nat := match left, right with\n  | [], [x] | [], [] => x\n  | _, _ => 0\n", "function bad(left: List(Nat), right: List(Nat)): Nat := match left, right with { | [], [x] | [], [] => x | _, _ => 0 }\n"),
     ("row-arity", "def bad (left right : List Nat) : Nat := match left, right with\n  | [] | [], [] => 0\n  | _, _ => 1\n", "function bad(left: List(Nat), right: List(Nat)): Nat := match left, right with { | [] | [], [] => 0 | _, _ => 1 }\n"),
     ("constructor:List.nil", "def bad (flag : Bool) : Nat := match flag with\n  | [] => 0\n  | _ => 1\n", "function bad(flag: Bool): Nat := match flag with { | [] => 0 | _ => 1 }\n"),
-    ("constructor:Nat.succ", "def bad (xs : List Nat) : Nat := match xs with\n  | x :: k + 1 => x\n  | _ => 0\n", "function bad(xs: List(Nat)): Nat := match xs with { | x :: k + 1 => x | _ => 0 }\n")]
+    ("unsupported-pattern", "def bad (xs : List Nat) : Nat := match xs with\n  | x :: k + 1 => x\n  | _ => 0\n", "function bad(xs: List(Nat)): Nat := match xs with { | x :: k + 1 => x | _ => 0 }\n"),
+    ("constructor:Nat.add", "def bad (xs : List Nat) : Nat := match xs with\n  | k + 1 :: rest => k\n  | _ => 0\n", "function bad(xs: List(Nat)): Nat := match xs with { | k + 1 :: rest => k | _ => 0 }\n"),
+    ("constructor:Nat.add", "def bad (n : Nat) : Nat := match n with\n  | 1 + k => k\n  | _ => 0\n", "function bad(n: Nat): Nat := match n with { | 1 + k => k | _ => 0 }\n"),
+    ("constructor:Nat.add", "def bad (n : Nat) : Nat := match n with\n  | k + m => k\n  | _ => 0\n", "function bad(n: Nat): Nat := match n with { | k + m => k | _ => 0 }\n"),
+    ("unsupported-pattern", "def bad (flag : Bool) : Bool := match flag with\n  | k + 0 => k\n", "function bad(flag: Bool): Bool := match flag with { | k + 0 => k }\n")]
   for (tag, lean, ps) in cases do
     requireElaborationRefusal tag .lean lean
     requireElaborationRefusal tag .proofScript ps
   let parseCases : List (String × String) := [
-    ("def bad (xs : List Nat) : Nat := match xs with\n  | k + 1 :: rest => k\n  | _ => 0\n", "function bad(xs: List(Nat)): Nat := match xs with { | k + 1 :: rest => k | _ => 0 }\n"),
-    ("def bad (n : Nat) : Nat := match n with\n  | 1 + k => k\n  | _ => 0\n", "function bad(n: Nat): Nat := match n with { | 1 + k => k | _ => 0 }\n"),
     ("def bad (x : Option (Nat × Nat)) : Nat := match x with\n  | .some(x,y) => x\n  | _ => 0\n", "function bad(x: Option(Nat × Nat)): Nat := match x with { | .some(x,y) => x | _ => 0 }\n"),
     ("def bad (x : Option (List Nat)) : Nat := match x with\n  | .some[x] => x\n  | _ => 0\n", "function bad(x: Option(List(Nat))): Nat := match x with { | .some[x] => x | _ => 0 }\n"),
-    ("def bad (pair : Nat × Nat) : Nat := match pair with\n  | Prod.mk (x)(y) => x\n", "function bad(pair: Nat × Nat): Nat := match pair with { | Prod.mk (x)(y) => x }\n")]
+    ("def bad (pair : Nat × Nat) : Nat := match pair with\n  | Prod.mk (x)(y) => x\n", "function bad(pair: Nat × Nat): Nat := match pair with { | Prod.mk (x)(y) => x }\n"),
+    ("def bad (n : Nat) : Nat := match n with\n  | k - 1 => k\n  | _ => 0\n", "function bad(n: Nat): Nat := match n with { | k - 1 => k | _ => 0 }\n")]
   for (lean, ps) in parseCases do
     ensure (!(psCompilerParsePscv0 lean .lean).isOk) "CORE-PATTERNS: invalid native pattern parsed"
     ensure (!(psCompilerParsePscv0 ps .proofScript).isOk) "CORE-PATTERNS: invalid ProofScript pattern parsed"
@@ -163,6 +235,7 @@ def main (args : List String) : IO Unit := do
         | .binary value => IO.FS.writeBinFile (root / file.path) value
     let rows := [false, true].map fun flag => Lean.Json.mkObj [
       ("flag", Lean.toJson flag),
-      ("m3patterns", Lean.toJson (toString (CoreM3PatternOracle.m3patterns flag).toNat))]
+      ("m3patterns", Lean.toJson (toString (CoreM3PatternOracle.m3patterns flag).toNat)),
+      ("m3offsetpatterns", Lean.toJson (toString (CoreM3PatternOracle.m3offsetpatterns flag).toNat))]
     IO.FS.writeFile (root / "expected.json") (Lean.Json.arr rows.toArray).pretty
-  IO.println "PSCV0_CORE_PATTERNS: PASS 2 paired programs, 13 equations per program, 12 owned elaboration refusals, 10 parser refusals, canonical equality, independent trust-zero admission, native oracle and TS/JS/Rust emission; runtime execution follows"
+  IO.println "PSCV0_CORE_PATTERNS: PASS 2 paired programs, 20 equations per program, 20 owned elaboration refusals, 8 parser refusals, 4 independent native arithmetic refusal phase checks, canonical equality, independent trust-zero admission, native oracle and TS/JS/Rust emission; runtime execution follows"

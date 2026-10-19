@@ -569,7 +569,7 @@ def psPrintProofScriptDeclaration
         | .fixedpointDefinition .. => pure "\npartial_fixpoint"
         | .wellFoundedDefinition _ _ _ _ termination _ => psPrintProofScriptTermination termination
         | _ => pure ""
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintProofScriptDeclarationBinders binders
       let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
       let printedValue ← psPrintProofScriptTerm value
@@ -579,14 +579,14 @@ def psPrintProofScriptDeclaration
       return declarationPrefix ++ printedName ++ printedBinders ++
         annotation ++ " := " ++ printedValue ++ suffix
   | .partialDefinition name binders type value _ => do
-      let printedName ← psPrintSyntaxName name
+      let printedName ← psPrintDeclarationName name
       let printedBinders ← psPrintProofScriptDeclarationBinders binders
       let annotation ← psPrintDeclarationResult psPrintProofScriptTerm type
       let printedValue ← psPrintProofScriptTerm value
       return "partial def " ++ printedName ++ printedBinders ++
         annotation ++ " := " ++ printedValue
   | .theoremDecl name binders type value _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedBindersResult :
@@ -610,7 +610,7 @@ def psPrintProofScriptDeclaration
                           printedType
                           (psPrintProofScriptConcat2 " := " printedValue))
   | .inductiveDecl name params resultType constructors _ =>
-      match psPrintSyntaxName name with
+      match psPrintDeclarationName name with
       | Except.error error => Except.error error
       | Except.ok printedName =>
           let printedParamsResult :
@@ -650,7 +650,7 @@ def psPrintProofScriptDeclaration
                             (psPrintJoin "\n" printedConstructors)
                             "\n}"))
   | .structureDecl name params result fields _ => do
-      let name ← psPrintSyntaxName name
+      let name ← psPrintDeclarationName name
       let params ← psPrintProofScriptDeclarationBinders params
       let result ← match result with
         | none => pure ""

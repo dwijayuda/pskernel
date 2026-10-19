@@ -108,10 +108,11 @@ def psPscv0PatternTail (minimum fuel : Nat) (head : PsSyntaxPattern)
     if minimum <= 65 && psTokenCursorAtText cursor "+" then
       let plus ← psTokenCursorExpectText cursor "+"
       let right ← psPscv0PatternAtPrecedence 66 fuel plus.cursor
-      let .natural 1 _ := right.value |
-        throw (psProofScriptExpectedError "selected Nat successor pattern with literal 1" plus.cursor)
       let span := psSyntaxSpanJoin (psSyntaxPatternSpan head) (psSyntaxPatternSpan right.value)
-      let value := PsSyntaxPattern.ctor (PsSyntaxName.mk ["_root_", "Nat", "succ"] span) [head] span
+      -- Pattern reduction is typed: a literal offset belongs to Nat, including
+      -- zero; a nonliteral arithmetic pattern reaches the elaboration gate.
+      let value := PsSyntaxPattern.ctor (PsSyntaxName.mk ["_root_", "Nat", "add"] span)
+        [head, right.value] span
       return ← psPscv0PatternTail minimum fuel value right.cursor
     return { value := head, cursor }
 

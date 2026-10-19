@@ -41,7 +41,7 @@ def psElabInspection (environment : PsEnvironment) (scope : PsCommandScope)
   let scopedBinders ← psScopeBinders (psScopeTerm 4096 resolver) []
     (scope.variables.map (·.binder))
   let prepared ← psElabTypedBinders psElabTerm
-    (psElabContextEmpty environment (scope.levelNames.map psRootName)) scopedBinders.binders
+    (psElabContextEmpty environment scope.levelNames) scopedBinders.binders
   let context := { prepared.context with sourceSpan := some span }
   let message ← match command with
     | .printDeclaration sourceName axioms => do

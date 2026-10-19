@@ -1413,7 +1413,7 @@ def psParseProofScriptStructureDeclaration
   match psTokenCursorExpectText cursor "structure" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      match psParseProofScriptDeclaredName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseProofScriptDeclarationBindersWithFuel
@@ -1461,7 +1461,7 @@ def psParseProofScriptInductiveDeclaration
   match psTokenCursorExpectText cursor "inductive" with
   | Except.error error => Except.error error
   | Except.ok keyword =>
-      match psParseProofScriptDeclaredName keyword.cursor with
+      match psParseDeclarationName keyword.cursor with
       | Except.error error => Except.error error
       | Except.ok name =>
           match psParseProofScriptDeclarationBindersWithFuel
@@ -1594,7 +1594,7 @@ def psParseProofScriptDeclaration
           match afterKind with
           | Except.error error => Except.error error
           | Except.ok afterKeyword =>
-              match psParseProofScriptDeclaredName afterKeyword with
+              match psParseDeclarationName afterKeyword with
               | Except.error error => Except.error error
               | Except.ok name =>
                   let bindersResult :

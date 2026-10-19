@@ -253,6 +253,9 @@ def psElabDeclarationParts
     binderResult.bindersRev annotation.type
   if psExprHasTermMeta (psMetaInstantiate annotation.context.metaContext header) then
     throw (.data "PSCV0-DECLARATION-HEADER: an explicit header must resolve parameter and result types before the body")
+  if isTheorem then
+    psElabCheckDeclarationUniverseUsage [nameSyntax]
+      [psMetaInstantiate annotation.context.metaContext header]
   let valueContext := if isTheorem then annotation.context else
     psElabContextWithStructuralRecursion annotation.context
       (psElabStructuralRecursionFromSource name binderResult.bindersRev
@@ -275,17 +278,18 @@ def psElabDeclarationParts
 def psElabPartialDeclaration (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax valueSyntax : PsSyntaxTerm) :
+    (typeSyntax valueSyntax : PsSyntaxTerm) (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let binderResult ← psElabTypedBinders psElabDeclarationTermCallback
-    (psElabContextEmpty environment) binders
+    (psElabContextEmpty environment levelNames) binders
   let annotation ← psElabType psElabDeclarationTermCallback binderResult.context typeSyntax
   let openType := psMetaInstantiate annotation.context.metaContext annotation.type
   let closedType := psCloseElabForallBinders annotation.context.metaContext
     binderResult.bindersRev openType
   if psExprHasUnresolvedMeta closedType then throw .unresolvedMetavariable
-  let header := PsDeclaration.axiomDecl name [] closedType
+  let header := PsDeclaration.axiomDecl name
+    (psElabDeclarationLevels levelNames [closedType]) closedType
   let some withSelf := psEnvironmentAdd environment header
     | throw (.duplicateDeclaration name)
   let value ← psElabTerm (psElabContextWithEnvironment annotation.context withSelf)
@@ -296,7 +300,8 @@ def psElabPartialDeclaration (environment : PsEnvironment)
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
     throw .unresolvedMetavariable
   return {
-    declaration := .partialDecl name [] closed.snd closed.fst
+    declaration := .partialDecl name
+      (psElabDeclarationLevels levelNames [closed.snd, closed.fst]) closed.snd closed.fst
     metaContext
     sourceInfo := psElabFinishSourceInfo value.context name }
 
@@ -319,7 +324,7 @@ def psElabDeclaration
         name
         binders
         type
-        value
+        value levelNames
   | .noncomputableDefinition .. =>
       Except.error (.data "PSCV0-NONCOMPUTABLE-BATCH: noncomputable policy requires typed command-batch elaboration")
   | .fixedpointDefinition _ _ _ _ _ =>
@@ -468,7 +473,7 @@ def psElabDeclarationBatchStable
 -- Historical callers can request the unchanged stable elaborator explicitly.
 -- The ordinary path keeps its one typed normalization attempt for the same
 -- capability refusal. Origins are recorded from that execution, not a replay.
-def psElabDeclarationBatchWithOrigins
+def psElabDeclarationBatchWithOriginsCore
     (environment : PsEnvironment) (sourceIndex : Nat)
     (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
     Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult :=
@@ -528,6 +533,38 @@ def psElabDeclarationBatchWithOrigins
           Except.error
             (psElabOriginErrorAt sourceIndex source
               PsElabOriginPhase.stableDeclaration error)
+
+def psElabDeclarationUniverseTypeOnly : PsSyntaxDeclaration → Bool
+  | .whereDeclaration parent _ _ => psElabDeclarationUniverseTypeOnly parent
+  | .theoremDecl .. => true
+  | _ => false
+
+def psElabDeclarationUniverseExpressions (source : PsSyntaxDeclaration)
+    (declarations : List PsDeclaration) : List PsExpr :=
+  declarations.flatMap fun declaration =>
+    let type := psDeclarationType declaration
+    if psElabDeclarationUniverseTypeOnly source then [type]
+    else
+      match declaration with
+      | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
+      | .opaqueDecl _ _ _ value | .partialDecl _ _ _ value => [type, value]
+      | _ => [type]
+
+-- The incoming universe list belongs to the surrounding command scope.
+-- Expand/check the retained declId suffix once, before source elaboration;
+-- explicit usage is checked on the actual complete closed output batch.
+def psElabDeclarationBatchWithOrigins
+    (environment : PsEnvironment) (sourceIndex : Nat)
+    (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
+    Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult := do
+  let sourceName := (psElabOriginSource source).fst
+  let available ← (psElabDeclarationUniverseNames levelNames [sourceName]).mapError
+    (psElabOriginErrorAt sourceIndex source .stableDeclaration)
+  let result ← psElabDeclarationBatchWithOriginsCore environment sourceIndex source available
+  (psElabCheckDeclarationUniverseUsage [sourceName]
+    (psElabDeclarationUniverseExpressions source result.result.declarations)).mapError
+      (psElabOriginErrorAt sourceIndex source .stableDeclaration)
+  return result
 
 def psElabDeclarationBatch
     (environment : PsEnvironment) (source : PsSyntaxDeclaration)

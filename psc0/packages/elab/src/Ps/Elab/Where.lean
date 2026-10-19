@@ -388,6 +388,11 @@ def psElabPreparePreDefinitionsWithSource (environment : PsEnvironment) (levelNa
     (span : PsSourceSpan) : Except PsElabError PsElabWherePrepared := do
   if members.isEmpty then throw (psElabWhereError "EMPTY" "a typed source block must contain a declaration")
   psElabPreDefinitionCheckMainModifiers (members.map (fun member => .declaration member.source))
+  let sourceNames ← members.mapM fun member => do
+    let (base, _, _) ← psWhereSourceParts member.source
+    let (name, _, _, _) ← psWhereValueParts base
+    return name
+  let levelNames ← psElabDeclarationUniverseNames levelNames sourceNames
   let captured ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) capturedSyntax
   let ambient := captured.bindersRev.reverse.map fun binder =>
     ({ origin := { owner := none, id := binder.id }, binder } : PsElabWhereCapture)
@@ -415,6 +420,8 @@ def psElabPreparePreDefinitionsWithSource (environment : PsEnvironment) (levelNa
   let inputs ← psElabWhereCloseCaptures
     (1 + inputs.length * (1 + (inputs.flatMap (·.header.ambient)).length)) sectionIds inputs
   let block ← psElabWhereLift solved.context levelNames inputs span
+  psElabCheckDeclarationUniverseUsage sourceNames
+    (block.members.flatMap fun member => [member.type, member.value])
   return { block, inputs, context := solved.context }
 
 def psElabPreparePreDefinitions (environment : PsEnvironment) (levelNames : List PsName)

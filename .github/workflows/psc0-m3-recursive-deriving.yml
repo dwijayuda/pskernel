@@ -196,8 +196,8 @@ jobs:
           for pattern_kind in lean ps; do
             pattern_dir=../dist/m3-core-patterns/"$pattern_kind"
             "$TSC" --ignoreConfig "$pattern_dir/corepatterns.ts" --outDir "$pattern_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$pattern_dir" corepatterns m3patterns | tee "$pattern_dir/js.log"
-            node ../scripts/pscv0-m3-runtime.mjs ecma "$pattern_dir" corepatterns m3patterns "$pattern_dir/ts/corepatterns.js" | tee "$pattern_dir/ts.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$pattern_dir" corepatterns m3patterns,m3offsetpatterns | tee "$pattern_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$pattern_dir" corepatterns m3patterns,m3offsetpatterns "$pattern_dir/ts/corepatterns.js" | tee "$pattern_dir/ts.log"
           done
           for matches_kind in lean ps; do
             matches_dir=../dist/m3-core-matches/"$matches_kind"
@@ -274,7 +274,7 @@ jobs:
           rustup toolchain install 1.98.1 --profile minimal
           for pattern_kind in lean ps; do
             pattern_dir=../dist/m3-core-patterns/"$pattern_kind"
-            node ../scripts/pscv0-m3-runtime.mjs rust "$pattern_dir" corepatterns m3patterns
+            node ../scripts/pscv0-m3-runtime.mjs rust "$pattern_dir" corepatterns m3patterns,m3offsetpatterns
             rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$pattern_dir/rust.log"
           done
           for matches_kind in lean ps; do

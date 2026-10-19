@@ -34,7 +34,7 @@ def psLeanProgramValueWithoutWhere (cursor : PsTokenCursor) :
   else pure first
   if !["def", "theorem", "abbrev", "opaque"].contains head.token.text then
     throw "PSCV0-LEAN-DECLARATION: selected value declaration required"
-  let name ← (psParseSyntaxName head.cursor).mapError psPscv0ParseError
+  let name ← (psParseDeclarationName head.cursor).mapError psPscv0ParseError
   let binders ← (psLeanProgramBinders name.cursor).mapError psPscv0ParseError
   let type ← (psLeanProgramResult (!["def", "abbrev"].contains head.token.text) binders.cursor).mapError
     psPscv0ParseError

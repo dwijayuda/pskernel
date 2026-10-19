@@ -1,0 +1,95 @@
+name: PSKernel-C0 selected Core exact Array proof native worker stacks
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-selected-core-array-hot-stack.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-authenticated-hot-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 39295729394
+          name: pskernel-c0-selected-heavy-root-diagnostic
+          path: input
+          github-token: ${{ github.token }}
+      - name: Verify the immutable three-root original native corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s input/heavy-roots.ndjson
+          sed 's#output/heavy-roots.ndjson#input/heavy-roots.ndjson#' \
+            input/export-SHA256SUMS | sha256sum -c -
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('input/selected-frontier.json').read_text())
+          assert x['selectedGraphSHA256']=='352d9d469dc2ffebf26d0bcf411dd6c5d582d0628cdf2e1600ca92071fd1c1c9'
+          assert x['shards'][1]['rootCount']==3
+          assert x['shards'][1]['externalClosureDeclarations']==4679
+          assert not x['fullCoreQualified']
+          print('C0_CORE_ARRAY_STACK_SOURCE=UNCHANGED_VERIFIED_FUEL4096')
+          PY
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build the existing original C0 checker and independent signal sampler
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && \
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc && \
+            lake build c0OfficialReplay)
+          python3 -m py_compile psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py
+          cc -O2 -fPIC -shared \
+            -o "$RUNNER_TEMP/c0-array-sampler.so" \
+            psc0/packages/pskernel-c0/test/C0NativeProofSampler.c
+      - name: Sample EXACT native proof-body checker worker, not startup
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          python3 psc0/packages/pskernel-c0/test/C0NativeProofStackProfile.py \
+            "$PWD/psc0/packages/pskernel-c0/.lake/build/bin/c0OfficialReplay" \
+            "$PWD/input/heavy-roots.ndjson" \
+            "$RUNNER_TEMP/c0-array-sampler.so" \
+            "$PWD/output/stacks.txt" "$PWD/output/summary.json" \
+            --samples 16 --interval 2 --max-wait 180 \
+            --wait-for "C0_REAL_EXPORT_DECL_BEGIN record=286549"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('output/summary.json').read_text())
+          assert report['diagnostic_only'] is True
+          assert report['no_trusted_code_modified'] is True
+          assert report['native_stack_samples'] > 0
+          assert report['successful_source_acceptance'] is False
+          print('C0_CORE_ARRAY_NATIVE_FRAMES diagnostic_only=true samples='+str(report['native_stack_samples']))
+          for name,count in report['top_inclusive_functions'][:18]:
+              print(f'C0_CORE_ARRAY_HOT_FUNCTION count={count} symbol={name}')
+          PY
+          echo 'C0_CORE_ARRAY_HOT_STACKS=NOT_ADMISSION_NOT_SEMANTIC_REJECTION'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pskernel-c0-selected-exact-array-hot-stacks
+          path: output/
+          retention-days: 30
+          if-no-files-found: warn

@@ -1,0 +1,101 @@
+name: PSKernel-C0 PR140 certified hash-memo exact Core shard0
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-pr140-real-shard0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  pr140-real-compiler-shard0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    steps:
+      - name: Checkout exact immutable independently researched PR140 candidate
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 4cf7c24c08101d52cf3628dbe86a64ac70d8c79a
+          path: candidate
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - name: Reuse exact officially accepted compiler shard 0 from unsuccessful original
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 39193023883
+          name: c0-external-roots-shard-0
+          path: original-shard
+          github-token: ${{ github.token }}
+      - name: Reauthenticate unchanged native-source export and official verdict
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          test "$(git -C candidate rev-parse HEAD)" = 4cf7c24c08101d52cf3628dbe86a64ac70d8c79a
+          test "$(cat original-shard/shard.txt)" = 0
+          test "$(wc -l < original-shard/shard-roots.txt)" = 58
+          grep -Fq 'Lean default kernel accepts the solution' original-shard/official-verdict.txt
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path("original-shard")
+          report=json.loads((root/"root-manifest.json").read_text())
+          assert report["sourceClosureSHA256"]=="4fbd45b30ffbbb1c98f0da415d09d7b32abeea65ac37d62e2bea181096aeb02c"
+          assert report["selectedExternalRoots"]==458 and report["excludedRoots"]==0
+          verified=(root/"real-export-SHA256SUMS").read_text().split()[0]
+          digest=hashlib.sha256((root/"all-roots.ndjson").read_bytes()).hexdigest()
+          assert verified==digest
+          print(f"C0_PR140_INPUT_ROOTS=58 export_sha256={digest} independent_lean435=accepted")
+          PY
+          sha256sum original-shard/all-roots.ndjson > audit/EXPORT_SHA256
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: candidate/psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Compile PR140 exact Lean kernel and source-negative tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat candidate/psc0/packages/pskernel-c0/lean-toolchain)" = leanprover/lean4:v4.35.0
+          (cd candidate/psc0/packages/pskernel-c0 &&
+            lake build c0OfficialReplay &&
+            lake env lean --run test/C0OfficialNdjsonReplay.lean)
+          echo 'C0_PR140_NATIVE_EXACT_SOURCE=BUILT_AND_REGRESSION_CHECKED'
+      - name: Demand strict whole-shard positive checking at unchanged fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (
+            cd candidate/psc0/packages/pskernel-c0
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/audit/PR140-resources.txt" \
+              timeout 600s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --require-accepted --trace-declarations \
+              "$GITHUB_WORKSPACE/original-shard/all-roots.ndjson" 4096 \
+              > "$GITHUB_WORKSPACE/audit/PR140-verdict.txt" 2>&1
+          )
+          rc=$?
+          set -e
+          echo "$rc" > audit/exit-code.txt
+          grep -F 'C0_REAL_EXPORT replay_outcome=' audit/PR140-verdict.txt | tail -n 1 || true
+          grep -F 'C0_REAL_EXPORT_DECL_BEGIN record=' audit/PR140-verdict.txt | tail -n 6 || true
+          if [ "$rc" -ne 0 ]; then
+            echo "C0_PR140_CORE_SHARD0=NOT_QUALIFIED exit=$rc no_false_acceptance=true" >&2
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' audit/PR140-verdict.txt
+          echo 'C0_PR140_CORE_SHARD0=FULL_SHARD_ACCEPTED fuel=4096'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: c0-pr140-core-shard0-real-proof-qualification
+          path: audit/
+          retention-days: 21
+          if-no-files-found: warn

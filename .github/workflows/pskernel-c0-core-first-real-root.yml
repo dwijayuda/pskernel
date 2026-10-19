@@ -1,0 +1,106 @@
+name: PSKernel-C0 real PSC0 compiler dependency replay
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-core-first-real-root.yml'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  official-same-export-c0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact independently implemented C0 checker
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - name: Checkout measured PSC0 dependency witness at immutable commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 53c28cfe3abd9e8fae93e7935357dbc4402c4b09
+          path: compiler-witness
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/docs/core-first-evidence/native-assumption-paths.json
+      - name: Verify ByteArray.foldl is a real compiler-owned external root
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("compiler-witness/psc0/docs/core-first-evidence/native-assumption-paths.json")
+          j=json.loads(p.read_text())
+          paths=[x["sourceWitness"] for a in j["assumptions"] for x in a["samples"]]
+          matching=[w for w in paths if w["root"]["display"]=="ByteArray.foldl"]
+          assert matching and all(w["sourceModule"]["display"].startswith("Ps.") for w in matching)
+          print("C0_ACTUAL_COMPILER_EXTERNAL_ROOT=ByteArray.foldl witnessed=true")
+          PY
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build exact native C0 and independent pinned official exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Independently check the exact official-source dependency closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p core-real-root
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env .lake/build/bin/lean4export Init -- ByteArray.foldl) \
+            > core-real-root/ByteArray.foldl.ndjson
+          sha256sum core-real-root/ByteArray.foldl.ndjson > core-real-root/SHA256SUMS
+          wc -lc core-real-root/ByteArray.foldl.ndjson
+          (cd "$RUNNER_TEMP/lean4export" &&
+            lake env leanchecker --from-export "$GITHUB_WORKSPACE/core-real-root/ByteArray.foldl.ndjson") \
+            > core-real-root/official.txt 2>&1
+          grep -Fq 'Lean default kernel accepts the solution' core-real-root/official.txt
+          echo 'C0_CORE_REAL_ROOT_OFFICIAL_435=accepted'
+      - name: Demand C0 full checked verdict for the same immutable exported bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 &&
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/core-real-root/c0-resources.txt" \
+              timeout 240s .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$GITHUB_WORKSPACE/core-real-root/ByteArray.foldl.ndjson" 4096) \
+              > core-real-root/c0-verdict.txt 2>&1
+          rc=$?
+          set -e
+          echo "C0_CORE_REAL_ROOT_EXIT=$rc"
+          grep -F 'C0_REAL_EXPORT replay_outcome=' core-real-root/c0-verdict.txt | tail -n 1 || true
+          if [ "$rc" -ne 0 ]; then
+            tail -n 45 core-real-root/c0-verdict.txt
+            echo 'C0_CORE_REAL_ROOT_NOT_QUALIFIED (no timeout/unsupported as acceptance)' >&2
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' core-real-root/c0-verdict.txt
+          echo 'C0_CORE_REAL_ROOT=ACCEPTED_ON_ONE_REAL_COMPILER_DEPENDENCY_ONLY'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: c0-core-real-bytearray-foldl-source
+          path: core-real-root/
+          if-no-files-found: warn
+          retention-days: 21

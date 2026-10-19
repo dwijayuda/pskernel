@@ -258,6 +258,24 @@ def psElabDataPropagateFieldLevels (context : PsElabContext)
     if offset != Int.ofNat target then return context
     psElabDataAssignLevel context id (psElabLevelOffset base target)) context
 
+-- Native LevelDefEq postpones max/imax versus successor constraints while
+-- the inductive result universe is still provisional. Every retained equation
+-- must be ground and equal after inference; no deferred equality enters Core.
+def psElabDataFinishLevelConstraints (context : PsElabContext) :
+    Except PsElabError PsElabContext := do
+  let pending := context.metaContext.levels.pending
+  let levels := { context.metaContext.levels with deferUnsolved := false, pending := [] }
+  let levels ← pending.foldlM (fun levels (left, right) => do
+    let left := psLevelNormalize (psLevelInstantiate levels left)
+    let right := psLevelNormalize (psLevelInstantiate levels right)
+    if psLevelHasMVar left || psLevelHasMVar right then throw .unresolvedMetavariable
+    let checked := psLevelUnify levels left right
+    if checked.resourceExceeded then throw .fuelExhausted
+    if !checked.success then
+      throw (.data "constructor sort constraint disagrees with the inferred resulting universe")
+    return checked.context) levels
+  return psElabContextWithMeta context { context.metaContext with levels }
+
 def psElabDataInferUniverses (context : PsElabContext)
     (group : PsInductiveGroupPlan) (constructors : List PsDeclaration) :
     Except PsElabError (PsElabContext × Bool) := do
@@ -294,6 +312,7 @@ def psElabDataInferUniverses (context : PsElabContext)
   let context ← match result.assignment? with
     | none => pure context
     | some (id, value) => psElabDataAssignLevel context id value
+  let context ← psElabDataFinishLevelConstraints context
   let level := psLevelNormalize (psLevelInstantiate context.metaContext.levels result.level)
   if !psLevelEquivalent level .zero && !psLevelAlwaysPositive level then
     throw (.data "inductive resulting universe may be Prop under a level assignment")

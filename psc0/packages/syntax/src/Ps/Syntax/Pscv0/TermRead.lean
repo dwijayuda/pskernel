@@ -217,6 +217,9 @@ def psPscv0ParseTermAtPrecedence
             psPscv0ReadConditional smaller cursor
           else if psTokenCursorAtText cursor "have" then
             psPscv0ReadHave smaller readAnnotation continuation cursor
+          else if psTokenCursorAtText cursor "suffices" then
+            psPscv0ReadSufficesTerm smaller readAnnotation continuation
+              psParseProofScriptBodySeparator cursor
           else if psTokenCursorAtText cursor "show" then
             psPscv0ReadShow smaller readAnnotation cursor
           else if psTokenCursorAtText cursor "exists" || psTokenCursorAtText cursor "∃" then

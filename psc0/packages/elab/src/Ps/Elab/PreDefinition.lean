@@ -418,6 +418,7 @@ def psElabPreDefinitionNonrecursive (environment : PsEnvironment)
   let _ ← psAddDeclarationList staged [equation]
   let batch : PsElabDeclarationBatchResult := {
     declarations := [declaration, equation]
+    sourceEquations := [psSourceEquationsSingle member.name (psDeclarationName equation)]
     sourceInfo := [member.sourceInfo]
     diagnostics := psElabPreDefinitionUnusedHints member.source "not recursive" }
   return { batch, members := [batch] }
@@ -593,9 +594,12 @@ def psElabPreDefinitionWellFoundedResults (environment : PsEnvironment)
   let _ ← psAddDeclarationList staged equations
   let batches := ((members.zip results).zip equations).map fun ((member, result), equation) =>
     ({ declarations := [result.declaration, equation]
+       sourceEquations := [psSourceEquationsSingle member.name (psDeclarationName equation)]
        sourceInfo := [member.sourceInfo] } : PsElabDeclarationBatchResult)
   return {
-    batch := { declarations := definitions ++ equations, sourceInfo := members.map (·.sourceInfo) }
+    batch := { declarations := definitions ++ equations
+      sourceEquations := batches.flatMap (·.sourceEquations)
+      sourceInfo := members.map (·.sourceInfo) }
     members := batches }
 
 -- Construction returns no publication authority. The shared source owner
@@ -716,7 +720,7 @@ def psElabPreDefinitionComponents (fuel : Nat) (levels : List PsName) (nextId : 
       nonrecursiveEquations structuralEquations equationExclusions
     if result.members.length != members.length then
       throw (psElabPreDefinitionError "OWNERSHIP" "consumer changed component member ownership")
-    let environment ← psAddDeclarationList state.environment result.batch.declarations
+    let environment ← psAddDeclarationBatch state.environment result.batch
     let next : PsElabPreDefinitionStaging := {
       environment
       declarations := state.declarations ++ result.batch.declarations
@@ -749,6 +753,7 @@ def psElabPreDefinitionBatch (environment : PsEnvironment)
       declarations := staged.declarations
       sourceInfo := members.flatMap (·.sourceInfo)
       diagnostics := members.flatMap (·.diagnostics)
-      structuralHelpers := members.flatMap (·.structuralHelpers) }
+      structuralHelpers := members.flatMap (·.structuralHelpers)
+      sourceEquations := members.flatMap (·.sourceEquations) }
     members }
 

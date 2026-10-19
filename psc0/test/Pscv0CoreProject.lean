@@ -1664,7 +1664,7 @@ private def functionEtaPieces : List (String × String) := [
   ("public theorem coreEtaNested (A B : Type) (f : A -> A -> B) : (fun (x : A) => fun (y : A) => f x y) = f := by rfl\n",
    "theorem coreEtaNested(A: Type, B: Type, f: A -> A -> B): (fun (x: A) => fun (y: A) => f(x, y)) = f := by { rfl }\n"),
   ("public theorem coreEtaLet (A B : Type) (f : A -> B) : (fun (x : A) => let y := x; f y) = f := by rfl\n",
-   "theorem coreEtaLet(A: Type, B: Type, f: A -> B): (fun (x: A) => let y := x; f(y)) = f := by { rfl }\n")]
+   "theorem coreEtaLet(A: Type, B: Type, f: A -> B): (fun (x: A) => let y := x\n  f(y)) = f := by { rfl }\n")]
 
 private def checkSourceAttributes : IO Unit := do
   let (seed, profile) ← scopeContext

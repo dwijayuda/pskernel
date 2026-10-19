@@ -255,7 +255,7 @@ private def checkCore : IO Unit := do
       "inferred partial acquired an unapproved logical equation"
 
 private def refusals : List (String × String × String) := [
-  ("explicit-main-hole", "const riBad: _ := 12\n", "PSCV0-DECLARATION-HEADER"),
+  ("explicit-main-hole", "const riBad: _ := 12\n", "PSCV0-WHERE-HEADER: an explicit result annotation contains unresolved terms"),
   ("explicit-mutual-main-hole",
     "mutual\nfunction riBad(n: Nat): _ := n\nend\n", "PSCV0-WHERE-HEADER"),
   ("unresolved-omitted-result", "const riBad := _\n", "PSCV0-WHERE-INFER-TYPE"),

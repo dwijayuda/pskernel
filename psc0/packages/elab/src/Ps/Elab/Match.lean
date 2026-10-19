@@ -83,6 +83,7 @@ structure PsElabMatchAlternative where
   fieldNames : List PsSyntaxName
   elaborate : PsElabMatchBranch -> Except PsElabError PsElabTermResult
   span : PsSourceSpan
+  allowDuplicateFieldNames : Bool := false
 
 def psElabMatchAlternativeFind
     (name : PsName)
@@ -370,7 +371,8 @@ def psElabMatchMinorWithHypotheses (context : PsElabContext)
   let fields ← match names with
     | none => psElabMatchAnonymousFields context minorType ctor.numFields
     | some names =>
-      if names.length != ctor.numFields || psSyntaxNameListHasDuplicate names then
+      if names.length != ctor.numFields ||
+          (!alternative.any (·.allowDuplicateFieldNames) && psSyntaxNameListHasDuplicate names) then
         throw (.matchConstructorArity ctor.name)
       psElabMatchFields names context minorType
   let values := psElabBinderArguments fields.bindersRev

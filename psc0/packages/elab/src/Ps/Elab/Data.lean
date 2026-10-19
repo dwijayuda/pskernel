@@ -16,6 +16,7 @@ structure PsElabDeclarationBatchResult where
   sourceInfo : List PsElabSourceInfo := []
   diagnostics : List PsDiagnostic := []
   structuralHelpers : List PsElabStructuralHelperOwnership := []
+  sourceEquations : List PsSourceEquations := []
 
 def psSyntaxConstructorCoreName (inductiveName : PsName)
     (sourceName : PsSyntaxName) : Option PsName :=
@@ -36,6 +37,11 @@ def psAddDeclarationList (environment : PsEnvironment) (declarations : List PsDe
     match psEnvironmentAddOwnedBootstrapDeclaration environment declaration with
     | some environment => pure environment
     | none => throw (.duplicateDeclaration (psDeclarationName declaration))) environment
+
+def psAddDeclarationBatch (environment : PsEnvironment)
+    (batch : PsElabDeclarationBatchResult) : Except PsElabError PsEnvironment := do
+  let environment ← psAddDeclarationList environment batch.declarations
+  (psEnvironmentAddSourceEquations environment batch.sourceEquations).mapError PsElabError.data
 
 def psElabReverseDeclarations (declarations : List PsDeclaration) : List PsDeclaration :=
   declarations.reverse
@@ -529,8 +535,11 @@ def psElabInductiveGroup (environment : PsEnvironment)
     let level ← psElabDataResultLevel context first.info.type
     let other ← psElabDataResultLevel context header.info.type
     let unified := psLevelUnify context.metaContext.levels level other
+    if unified.resourceExceeded then throw .fuelExhausted
     if !unified.success then throw (.data "inductive group members must have the same resulting universe")
     return psElabContextWithMeta context { context.metaContext with levels := unified.context }) first.context
+  let context := psElabContextWithMeta context { context.metaContext with
+    levels := { context.metaContext.levels with deferUnsolved := true } }
   let declarations := plan.members.map PsDeclaration.inductiveDecl
   let withHeaders ← psAddDeclarationList environment declarations
   let (context, constructors, sourceInfo) ← headers.foldlM

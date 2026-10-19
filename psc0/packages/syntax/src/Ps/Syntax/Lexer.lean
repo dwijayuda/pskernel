@@ -369,7 +369,9 @@ def psLexReservedIdentifier (text : String) : Bool :=
     "infix", "infixl", "infixr", "prefix", "postfix", "initialize",
     "builtin_initialize", "termination_by", "decreasing_by", "partial_fixpoint",
     "monotonicity_by", "exact", "refine", "apply", "change", "cases",
-    "induction", "case", "intro", "constructor", "rfl", "assumption",
+    "induction", "case", "intro", "intros", "constructor", "constructor!",
+    "suffices", "classical", "calc", "rfl", "assumption",
+    "rcases", "rintro", "obtain", "by_cases", "exfalso", "decide", "ext",
     "all_goals", "any_goals", "axioms", "commands", "true", "false"] : List String).contains text
 
 def psLexIdentifierSpelling (text : String) (forceEscape : Bool := false) : String :=
@@ -991,6 +993,13 @@ def psLexReadToken
                   read.cursor)
             else if psLexDigit first then
               psLexNumericToken first (List.cons second tail) start
+            else if psLexPairEq first second '<' ';' &&
+                tail.head?.any (fun char => psLexCharEq char '>') then
+              let stop := psLexAdvanceChar (psLexAdvanceTwo start first second) '>'
+              let read : PsLexRead := {
+                cursor := { remaining := tail.drop 1, position := stop }
+                charsRev := ['>', second, first] }
+              Except.ok (psLexTokenFromRead .symbol start read, read.cursor)
             else if psLexIsTwoCharSymbol first second then
               let stop := psLexAdvanceTwo start first second;
               let read : PsLexRead := {

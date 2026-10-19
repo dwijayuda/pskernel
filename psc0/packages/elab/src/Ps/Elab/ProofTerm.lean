@@ -8,12 +8,21 @@ import Ps.Elab.Postponed
 -- a local fact. Outer pending work retains its original owner and schedule.
 -- Natural proof holes are not synthesized here: exact/local/refine retain
 -- their existing separate refusal or goal-collection policies.
+def psProofWithTermSynthesisAnd {α : Type} (elaborate : PsElaborator)
+    (context : PsElabContext)
+    (action : PsElabContext → Except PsElabError (PsElabTermResult × α)) :
+    Except PsElabError (PsElabTermResult × α) := do
+  let (value, extra) ← action { context with pending := [], postponing := true }
+  let value ← psElabDrainPending elaborate value
+  return ({ value with context := { value.context with
+    pending := context.pending, postponing := context.postponing } }, extra)
+
 def psProofWithTermSynthesis (elaborate : PsElaborator)
     (context : PsElabContext)
     (action : PsElabContext → Except PsElabError PsElabTermResult) :
     Except PsElabError PsElabTermResult := do
-  let value ← action { context with pending := [], postponing := true }
-  let value ← psElabDrainPending elaborate value
-  return { value with context := { value.context with
-    pending := context.pending, postponing := context.postponing } }
+  let (value, _) ← psProofWithTermSynthesisAnd elaborate context fun current => do
+    let value ← action current
+    return (value, ())
+  return value
 

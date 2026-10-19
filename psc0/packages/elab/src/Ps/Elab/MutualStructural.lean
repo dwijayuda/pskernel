@@ -2197,6 +2197,8 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
   let owned := ((declarations.zip equations).zip inputs).map fun ((declaration, equation), input) =>
     ({
       declarations := declaration :: equation.toList
+      sourceEquations := equation.toList.map fun equation =>
+        psSourceEquationsSingle (psDeclarationName declaration) (psDeclarationName equation)
       sourceInfo := [input.sourceInfo] } : PsElabDeclarationBatchResult)
   let owned := match owned with
     | [] => []
@@ -2207,6 +2209,7 @@ def psElabMutualStructuralClose (environment : PsEnvironment) (levelNames : List
   return {
     batch := {
       declarations := helperDeclarations ++ declarations ++ equationDeclarations
+      sourceEquations := owned.flatMap (·.sourceEquations)
       sourceInfo := inputs.map (·.sourceInfo)
       structuralHelpers := helperOwnership }
     members := owned }

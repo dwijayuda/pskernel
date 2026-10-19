@@ -163,6 +163,8 @@ def psLeanTermAtPrecedence (annotation : Bool) (minimum fuel : Nat) :
         else psPscv0ReadLetWithSeparator read readType continuation psLeanBodySeparator fuel cursor
       else if psTokenCursorAtText cursor "have" then
         psLeanTermLocal read readType continuation true cursor
+      else if psTokenCursorAtText cursor "suffices" then
+        psPscv0ReadSufficesTerm read readType continuation psLeanBodySeparator cursor
       else if psTokenCursorAtText cursor "show" then psPscv0ReadShow read readType cursor
       else if ["fun", "λ"].any (psTokenCursorAtText cursor) then
         psPscv0BoundTerm readType continuation false fuel cursor

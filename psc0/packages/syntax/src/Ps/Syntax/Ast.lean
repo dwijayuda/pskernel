@@ -207,6 +207,21 @@ inductive PsSyntaxDoItem where
   | conditionalPattern (pattern : PsSyntaxPattern) (value : PsSyntaxTerm)
       (yes no : List PsSyntaxDoItem) (span : PsSourceSpan)
 
+-- Recursive-elimination grouping is independent of expression patterns.
+inductive PsSyntaxRCasesPattern where
+  | one (name : PsSyntaxName)
+  | clear (span : PsSourceSpan)
+  | explicit (pattern : PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | typed (pattern : PsSyntaxRCasesPattern) (type : PsSyntaxTerm) (span : PsSourceSpan)
+  | tuple (patterns : List PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | alternatives (patterns : List PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | paren (pattern : PsSyntaxRCasesPattern) (span : PsSourceSpan)
+
+inductive PsSyntaxRIntroPattern where
+  | pattern (value : PsSyntaxRCasesPattern)
+  | group (patterns : List PsSyntaxRIntroPattern) (type : Option PsSyntaxTerm)
+      (span : PsSourceSpan)
+
 inductive PsSyntaxTactic where
   | exactE (value : PsSyntaxTerm) (refine : Bool) (span : PsSourceSpan)
   | applyE (value : PsSyntaxTerm) (span : PsSourceSpan)
@@ -214,15 +229,29 @@ inductive PsSyntaxTactic where
       (reducible : Bool) (span : PsSourceSpan)
   | change (type : PsSyntaxTerm) (select : Bool) (span : PsSourceSpan)
   | eliminate (value : PsSyntaxTerm) (induction : Bool) (span : PsSourceSpan)
+  | rcasesE (targets : List (PsSyntaxMatchDiscriminant PsSyntaxTerm))
+      (pattern : Option PsSyntaxRCasesPattern) (span : PsSourceSpan)
+  | rintroE (patterns : List PsSyntaxRIntroPattern) (type : Option PsSyntaxTerm)
+      (span : PsSourceSpan)
+  | obtainE (pattern : Option PsSyntaxRCasesPattern) (type : Option PsSyntaxTerm)
+      (values : Option (List PsSyntaxTerm)) (span : PsSourceSpan)
+  | byCases (name : Option PsSyntaxName) (proposition : PsSyntaxTerm) (span : PsSourceSpan)
+  | exfalso (span : PsSourceSpan)
+  | decide (span : PsSourceSpan)
+  | extE (patterns : List PsSyntaxRIntroPattern) (depth : Nat) (span : PsSourceSpan)
   | caseE (tag : Option PsSyntaxName) (names : List PsSyntaxName)
       (body : List PsSyntaxTactic) (span : PsSourceSpan)
   | intro (names : List PsSyntaxName) (span : PsSourceSpan)
+  | intros (names : List PsSyntaxName) (span : PsSourceSpan)
+  | suffices (name : PsSyntaxName) (type value : PsSyntaxTerm) (span : PsSourceSpan)
+  | classicalE (body : List PsSyntaxTactic) (span : PsSourceSpan)
   | assumption (span : PsSourceSpan)
   -- Compiler-generated index side-condition solver. It never introduces
   -- axioms, guesses inequalities or leaves unsolved proof metavariables.
   | indexValidity (span : PsSourceSpan)
   | reflexivity (span : PsSourceSpan)
   | constructor (span : PsSourceSpan)
+  | constructorFirst (span : PsSourceSpan)
   | focus (body : List PsSyntaxTactic) (mustClose : Bool) (span : PsSourceSpan)
   | each (body : List PsSyntaxTactic) (any : Bool) (span : PsSourceSpan)
 end
@@ -240,13 +269,69 @@ def psSyntaxDoSpan : PsSyntaxDoItem → PsSourceSpan
   | .binding _ _ _ _ span | .action _ span | .returnValue _ span
   | .conditional _ _ _ _ span | .conditionalPattern _ _ _ _ span => span
 
+def psSyntaxRCasesPatternSpan : PsSyntaxRCasesPattern → PsSourceSpan
+  | .one name => name.span
+  | .clear span | .explicit _ span | .typed _ _ span | .tuple _ span
+  | .alternatives _ span | .paren _ span => span
+
+def psSyntaxRCasesPatternNames (fuel : Nat) (pattern : PsSyntaxRCasesPattern) :
+    List PsSyntaxName :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .one name =>
+      if name.segments == ["_"] || name.segments == ["rfl"] then [] else [name]
+    | .explicit value _ | .typed value _ _ | .paren value _ =>
+      psSyntaxRCasesPatternNames fuel value
+    | .tuple values _ | .alternatives values _ =>
+      values.flatMap (psSyntaxRCasesPatternNames fuel)
+    | .clear _ => []
+
+def psSyntaxRCasesPatternTerms (fuel : Nat) (pattern : PsSyntaxRCasesPattern) :
+    List PsSyntaxTerm :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .typed value type _ => type :: psSyntaxRCasesPatternTerms fuel value
+    | .explicit value _ | .paren value _ => psSyntaxRCasesPatternTerms fuel value
+    | .tuple values _ | .alternatives values _ =>
+      values.flatMap (psSyntaxRCasesPatternTerms fuel)
+    | _ => []
+
+def psSyntaxRIntroPatternNames (fuel : Nat) (pattern : PsSyntaxRIntroPattern) :
+    List PsSyntaxName :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .pattern value => psSyntaxRCasesPatternNames fuel value
+    | .group values _ _ => values.flatMap (psSyntaxRIntroPatternNames fuel)
+
+def psSyntaxRIntroPatternTerms (fuel : Nat) (pattern : PsSyntaxRIntroPattern) :
+    List PsSyntaxTerm :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .pattern value => psSyntaxRCasesPatternTerms fuel value
+    | .group values type _ => type.toList ++
+      values.flatMap (psSyntaxRIntroPatternTerms fuel)
+
 def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTerm :=
   match fuel with
   | 0 => []
   | fuel + 1 => match tactic with
     | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ => [value]
+    | .rcasesE targets pattern _ => targets.map (·.term) ++
+      pattern.toList.flatMap (psSyntaxRCasesPatternTerms fuel)
+    | .rintroE patterns type _ => type.toList ++
+      patterns.flatMap (psSyntaxRIntroPatternTerms fuel)
+    | .obtainE pattern type values _ => type.toList ++ values.toList.flatten ++
+      pattern.toList.flatMap (psSyntaxRCasesPatternTerms fuel)
+    | .byCases _ proposition _ => [proposition]
+    | .extE patterns _ _ => patterns.flatMap (psSyntaxRIntroPatternTerms fuel)
     | .localE _ type value _ _ => type.toList ++ [value]
-    | .focus body _ _ | .each body _ _ | .caseE _ _ body _ => body.flatMap (psSyntaxTacticTerms fuel)
+    | .suffices _ type value _ => [type, value]
+    | .focus body _ _ | .each body _ _ | .caseE _ _ body _ | .classicalE body _ =>
+      body.flatMap (psSyntaxTacticTerms fuel)
     | _ => []
 
 -- Single-scrutinee clients construct the same matrix representation.

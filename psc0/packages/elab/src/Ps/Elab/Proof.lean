@@ -1,8 +1,13 @@
 import Ps.Elab.Elimination
-import Ps.Elab.Application
+import Ps.Elab.ProofApply
 import Ps.Elab.Equality
 import Ps.Elab.Postponed
 import Ps.Elab.ProofTerm
+import Ps.Elab.RCases
+import Ps.Elab.ProofIntermediate
+import Ps.Elab.ProofClassical
+import Ps.Elab.ProofLogical
+import Ps.Elab.ProofExt
 
 def psProofExact (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (state : PsProofState) (source : PsSyntaxTerm) (refine : Bool) :
@@ -17,61 +22,12 @@ def psProofExact (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
   let state ← psProofAssign (psProofUpdate state value.context) goal.id value.term
   psProofNormalize { state with goals := pending ++ state.goals.drop 1 }
 
--- Application creates typed goals over the current telescope. Failed target
--- unification is discarded before opening the next binder.
-def psProofApplyTerm (fuel : Nat) (current : PsElabTermResult) (target : PsExpr) :
-    Except PsElabError PsElabTermResult := do
-  match fuel with
-  | 0 => throw .fuelExhausted
-  | fuel + 1 =>
-    let unified := psUnify current.context.environment current.context.localContext
-      current.context.metaContext current.type target
-    if unified.resourceExceeded then throw .fuelExhausted
-    if unified.success then
-      return { current with context := psElabContextWithMeta current.context unified.context }
-    let pi ← (psInferEnsureForall current.context.environment current.context.metaContext
-      current.context.localContext current.type).mapError PsElabError.infer
-    let fresh := psMetaFresh current.context.metaContext current.context.localContext pi.domain
-      (if psBinderIsInstanceImplicit pi.binder then .synthetic else .natural)
-      { tag := psNameLastComponent pi.name }
-    let context := psElabContextWithMeta current.context fresh.context
-    psProofApplyTerm fuel {
-      context, term := .app current.term fresh.expr
-      type := psExprInstantiate1 pi.body fresh.expr } target
-
-def psProofApplied (state : PsProofState) (goal : PsProofGoal) (before : Nat)
-    (value : PsElabTermResult) : Except PsElabError PsProofState := do
-  let pending := value.context.metaContext.declarations.filterMap fun entry =>
-    match entry.kind with
-    | .synthetic => if entry.id >= before then some entry.id else none
-    | _ => none
-  let value ← psElabSolveSynthetic value (pending.map PsSyntheticConstraint.instanceGoal)
-  let goals := (psProofFreshGoals before value.context).map fun child =>
-    { child with tag := psProofTag goal.tag child.tag }
-  let dependent := fun goal => goals.any fun other =>
-    match psMetaFindDecl value.context.metaContext other.id with
-    | none => false
-    | some other => psExprContainsMVar goal.id (psMetaInstantiate value.context.metaContext other.type)
-  let ordered := goals.filter (fun goal => !dependent goal) ++ goals.filter dependent
-  let state ← psProofAssign (psProofUpdate state value.context) goal.id value.term
-  psProofNormalize { state with goals := ordered ++ state.goals.drop 1 }
-
-def psProofApply (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
-    (state : PsProofState) (source : PsSyntaxTerm) : Except PsElabError PsProofState := do
-  let (goal, context, target) ← psProofMain state
-  let source ← psProofSource scope context source
-  let value ← match source with
-    | .reference name => psElabReference context name none
-    | _ => elaborate context source none
-  let value ← psProofApplyTerm 4096 value target
-  psProofApplied state goal context.metaContext.nextId value
-
 def psProofAssumption (state : PsProofState) : Except PsElabError PsProofState := do
   let (goal, context, _) ← psProofMain state
   for declaration in context.localContext.declarations do
     match psProofAssign state goal.id (.fvar (psLocalDeclId declaration)) with
     | .ok next => return ← psProofNormalize next
-    | .error _ => pure ()
+    | .error error => if psElabErrorIsResource error then throw error else pure ()
   throw (.proof "assumption did not match a local declaration")
 
 def psProofReflexivity (state : PsProofState) : Except PsElabError PsProofState := do
@@ -79,6 +35,7 @@ def psProofReflexivity (state : PsProofState) : Except PsElabError PsProofState 
   let equation ← psElabEquationView context target (.mvar goal.id)
   let unified := psUnify context.environment context.localContext context.metaContext
     equation.left equation.right
+  if unified.resourceExceeded then throw .fuelExhausted
   if !unified.success then throw (.proof "rfl requires definitionally equal sides")
   let context := psElabContextWithMeta context unified.context
   let value := psLogicRefl equation.level equation.type equation.left
@@ -99,7 +56,7 @@ def psProofConstructor (state : PsProofState) : Except PsElabError PsProofState 
       psProofApplied state goal state.context.metaContext.nextId value
     match attempt with
     | .ok next => return next
-    | .error _ => pure ()
+    | .error error => if psElabErrorIsResource error then throw error else pure ()
   throw (.proof "no constructor applies to the target")
 
 def psProofLocalValue (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
@@ -120,6 +77,7 @@ def psProofChange (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
   let annotation ← psElabType elaborate context source
   let unified := psUnify annotation.context.environment annotation.context.localContext
     annotation.context.metaContext target annotation.type
+  if unified.resourceExceeded then throw .fuelExhausted
   if !unified.success then throw (.proof "change requires a definitionally equal target")
   let context := psElabContextWithMeta annotation.context unified.context
   let fresh := psMetaFresh context.metaContext context.localContext
@@ -137,7 +95,7 @@ def psProofShow (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     let selected := { state with goals := goal :: state.goals.filter (fun other => other.id != goal.id) }
     match psProofChange elaborate scope selected source with
     | .ok next => return next
-    | .error _ => pure ()
+    | .error error => if psElabErrorIsResource error then throw error else pure ()
   throw (.proof "show did not match any goal")
 
 -- A closed, fuel-bounded analogue of Lean RC4's introductory
@@ -241,7 +199,7 @@ def psProofIndexValiditySolve (fuel : Nat) (state : PsProofState) :
       if solved.isNone then
         match candidate state with
         | .ok progressed => solved := some progressed
-        | .error _ => pure ()
+        | .error error => if psElabErrorIsResource error then throw error else pure ()
     match solved with
     | some progressed => psProofIndexValiditySolve remaining progressed
     | none =>
@@ -249,7 +207,8 @@ def psProofIndexValiditySolve (fuel : Nat) (state : PsProofState) :
       -- admitted until this same checked search closes the whole branch.
       match psProofConstructor state with
       | .ok progressed => psProofIndexValiditySolve remaining progressed
-      | .error _ =>
+      | .error error =>
+        if psElabErrorIsResource error then throw error
         throw (.proof "get_elem_tactic could not establish index validity; supply xs[i]'h or use xs[i]?")
 
 def psProofIndexValidity (state : PsProofState) : Except PsElabError PsProofState := do
@@ -274,24 +233,38 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
       let next ← match tactic with
         | .exactE source refine _ => psProofExact elaborate scope state source refine
         | .applyE source _ => psProofApply elaborate scope state source
+        | .exfalso _ => psProofExfalso state
+        | .decide _ => psProofDecide state
+        | .byCases name proposition _ => psProofByCases elaborate scope state name proposition
+        | .extE patterns depth span => psProofExt elaborate scope state patterns depth span
         | .localE name type source reducible _ =>
           psProofLocalValue elaborate scope state name type source reducible
         | .change source select _ =>
           if select then psProofShow elaborate scope state source
           else psProofChange elaborate scope state source
         | .eliminate source induction _ => psProofEliminate elaborate scope state source induction
+        | .rcasesE targets pattern span => psProofRCases elaborate scope state targets pattern span
+        | .rintroE patterns type _ => psProofRIntro elaborate scope state patterns type
+        | .obtainE pattern type values span => psProofObtain elaborate scope state pattern type values span
         | .caseE tag names body _ => do
           let (selected, saved) ← psProofSelectCase state tag names
           let finished ← psProofRun elaborate scope fuel selected body
           if !finished.goals.isEmpty then throw (.proof "case left unsolved goals")
           pure { finished with goals := saved }
+        | .suffices name type value _ => psProofSuffices elaborate scope state name type value
+        | .classicalE body _ => do
+          let context ← psElabClassicalContext state.context
+          let finished ← psProofRun elaborate scope fuel { state with context } body
+          pure { finished with context :=
+            { finished.context with instances := state.context.instances } }
+        | .intros names _ => psProofIntros state names
         | .intro names _ =>
           if names.isEmpty then psProofIntro state none
           else names.foldlM (fun current name => psProofIntro current (some name)) state
         | .assumption _ => psProofAssumption state
         | .indexValidity _ => psProofIndexValidity state
         | .reflexivity _ => psProofReflexivity state
-        | .constructor _ => psProofConstructor state
+        | .constructor _ | .constructorFirst _ => psProofConstructor state
         | .each body any _ => do
           let mut current := state
           let mut goals := []
@@ -304,7 +277,7 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
               goals := goals ++ next.goals
               succeeded := true
             | .error error =>
-              if !any then throw error
+              if psElabErrorIsResource error || !any then throw error
               goals := goals ++ [goal]
           if any && !succeeded then throw (.proof "tactic failed on all goals")
           pure { current with goals }

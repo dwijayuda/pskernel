@@ -128,6 +128,8 @@ structure PsPscv0ModuleInterface where
   simpEntries : List PsSimpEntry := []
   reducibility : List (PsName × PsReducibility) := []
   noncomputableNames : List PsName := []
+  sourceEquations : List PsSourceEquations := []
+  extTheorems : List PsName := []
 
 def psPscv0ImportedDeclaration (exposed : List PsName) : PsDeclaration → PsDeclaration
   | .definitionDecl name levels type value =>
@@ -157,12 +159,16 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
   let instances := psPscv0MergeInstanceEntries left.instances right.instances
   let defaults := psPscv0MergeInstanceEntries left.defaults right.defaults
   let simpEntries := psSimpEntriesMerge left.simpEntries right.simpEntries
+  let sourceEquations := psSourceEquationsMerge left.sourceEquations right.sourceEquations
+  let extTheorems := right.extTheorems.foldl (fun names name =>
+    if names.any (psNameEq name) then names else names ++ [name]) left.extTheorems
   let reducibility := right.reducibility.foldl (fun acc item =>
     if acc.any (fun prior => psNameEq prior.fst item.fst) then acc else acc ++ [item])
     left.reducibility
   let noncomputableNames := right.noncomputableNames.foldl (fun names name =>
     if names.any (psNameEq name) then names else names ++ [name]) left.noncomputableNames
-  { declarations, classes, classParameters, instances, defaults, simpEntries, reducibility, noncomputableNames }
+  { declarations, classes, classParameters, instances, defaults, simpEntries,
+    reducibility, noncomputableNames, sourceEquations, extTheorems }
 
 -- Metadata follows the selected original elaboration declarations, before
 -- preparation or runtime lowering. This shared constructor preserves their
@@ -180,7 +186,12 @@ def psPscv0DeclarationInterface (environment : PsEnvironment)
   let instances := environment.instances.entries.filter visible
   let defaults := environment.instances.defaults.filter visible
   let simpEntries := environment.simpEntries.filter (fun entry => owned entry.name)
+  let sourceEquations := environment.sourceEquations.filter fun entry =>
+    owned entry.owner && entry.equations.all owned &&
+      entry.unfolding?.all owned
+  let extTheorems := environment.extTheorems.filter owned
   { declarations, classes, classParameters, instances, defaults, simpEntries,
+    sourceEquations, extTheorems,
     reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name))
     noncomputableNames := names.filter (psEnvironmentIsNoncomputable environment) }
 
@@ -225,7 +236,9 @@ def psPscv0InstallInterface (environment : PsEnvironment)
   let simpEntries := view.simpEntries.reverse.foldl (fun entries entry =>
     if entries.any (fun prior => psNameEq prior.name entry.name) then entries
     else psSimpEntriesAdd entries entry) environment.simpEntries
-  return { environment with classes, classParameters, instances, simpEntries }
+  let environment := { environment with classes, classParameters, instances, simpEntries }
+  let environment ← psEnvironmentAddSourceEquations environment view.sourceEquations
+  psEnvironmentAddExtTheorems environment view.extTheorems
 
 def psPscv0ExprConstants : PsExpr → List PsName
   | .constE name _ => [name]

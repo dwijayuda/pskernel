@@ -62,6 +62,7 @@ structure PsElabBatchOrigin where
   mutualGroup : Option PsElabMutualGroupOrigin := none
   localDefinitions : List PsElabLocalDefinitionOrigin := []
   diagnostics : List PsDiagnostic := []
+  sourceEquations : List PsSourceEquations := []
 
 structure PsElabOriginError where
   error : PsElabError
@@ -445,6 +446,8 @@ def psElabDeclarationBatchStable
       | .ok result =>
           .ok {
             declarations := [result.declaration, result.equation]
+            sourceEquations := [psSourceEquationsSingle
+              (psDeclarationName result.declaration) (psDeclarationName result.equation)]
             sourceInfo := [result.sourceInfo]
           }
   | .inductiveDecl name params resultType constructors _ =>
@@ -484,7 +487,8 @@ def psElabDeclarationBatchWithOriginsCore
       Except.ok
         (PsElabDeclarationBatchWithOriginsResult.mk result
           { (psElabBatchOriginAt sourceIndex source members Option.none) with
-            sourceInfo := result.sourceInfo })
+            sourceInfo := result.sourceInfo
+            sourceEquations := result.sourceEquations })
   | Except.error error =>
       match error with
       | PsElabError.structuralRecursionInvariantArgument
@@ -611,9 +615,9 @@ def psElabDeclarationsWithOriginsWorker
       | Except.error error => Except.error error
       | Except.ok batch =>
           match
-              psAddDeclarationList
+              psAddDeclarationBatch
                 environment
-                batch.result.declarations with
+                batch.result with
           | Except.error error =>
               Except.error
                 (PsElabOriginError.mk error batch.origin.sourceIndex

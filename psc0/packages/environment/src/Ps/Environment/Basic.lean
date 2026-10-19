@@ -4,6 +4,7 @@ import Ps.Core.Declaration
 import Ps.Core.Subst
 import Ps.Environment.Instances
 import Ps.Environment.Attributes
+import Ps.Environment.Equations
 
 def psDeclarationName : PsDeclaration -> PsName
   | .quotientDecl name _ _ _ => name
@@ -183,6 +184,8 @@ structure PsEnvironment where
   noncomputableIndex : PsBucketIndex PsName := .empty
   -- Actual internal implementations; never a source lookup or admission input.
   inspectionDeclarations : List PsInspectionDeclaration := []
+  sourceEquations : List PsSourceEquations := []
+  extTheorems : List PsName := []
 
 def psEnvironmentIsNoncomputable (environment : PsEnvironment) (name : PsName) : Bool :=
   (psBucketFind 16 environment.noncomputableIndex (psEnvironmentNameHash name)).any (psNameEq name)
@@ -237,6 +240,47 @@ def psEnvironmentFindInList
 
 def psEnvironmentFind (environment : PsEnvironment) (name : PsName) : Option PsDeclaration :=
   psEnvironmentFindInList name (psEnvironmentIndexFindWorker 16 environment.index (psEnvironmentNameHash name))
+
+def psEnvironmentFindSourceEquations (environment : PsEnvironment) (name : PsName) :
+    Option PsSourceEquations :=
+  environment.sourceEquations.find? (fun entry => psNameEq entry.owner name)
+
+-- Source producers establish provenance; imports validate actual declarations.
+def psEnvironmentAddSourceEquations (environment : PsEnvironment)
+    (entries : List PsSourceEquations) : Except String PsEnvironment :=
+  entries.foldlM (fun environment entry => do
+    match psEnvironmentFind environment entry.owner with
+    | some (.definitionDecl ..) | some (.theoremDecl ..) | some (.opaqueDecl ..) => pure ()
+    | _ => throw "PSCV0-EQUATIONS: source owner has no checked value declaration"
+    if entry.equations.isEmpty then
+      throw "PSCV0-EQUATIONS: source owner has an empty equation roster"
+    for name in entry.equations do
+      if (entry.equations.filter (psNameEq name)).length != 1 then
+        throw "PSCV0-EQUATIONS: source owner repeats an equation"
+      let some (.theoremDecl _ _ type _) := psEnvironmentFind environment name
+        | throw "PSCV0-EQUATIONS: registered equation is not a checked theorem"
+      let some owner := psSourceEquationLeftOwner? type
+        | throw "PSCV0-EQUATIONS: registered theorem has no source-headed equality"
+      if !psNameEq owner entry.owner then
+        throw "PSCV0-EQUATIONS: registered theorem belongs to another source"
+    if entry.unfolding?.any (fun name => !entry.equations.any (psNameEq name)) then
+      throw "PSCV0-EQUATIONS: unfolding theorem is outside its source roster"
+    match psEnvironmentFindSourceEquations environment entry.owner with
+    | some previous =>
+      if psSourceEquationsEqual previous entry then return environment
+      throw "PSCV0-EQUATIONS: conflicting equation metadata for one source"
+    | none =>
+      return { environment with sourceEquations := environment.sourceEquations ++ [entry] })
+    environment
+
+def psEnvironmentAddExtTheorems (environment : PsEnvironment) (names : List PsName) :
+    Except String PsEnvironment :=
+  names.foldlM (fun environment name => do
+    if !(psEnvironmentFind environment name).isSome then
+      throw "PSCV0-EXT: registered theorem declaration is absent"
+    if environment.extTheorems.any (psNameEq name) then return environment
+    return { environment with extTheorems := environment.extTheorems ++ [name] })
+    environment
 
 def psEnvironmentFindInductive
     (environment : PsEnvironment)
@@ -296,7 +340,11 @@ def psEnvironmentInsert (environment : PsEnvironment) (declaration : PsDeclarati
     PsEnvironment :=
   { environment with
     declarations := declaration :: psEnvironmentRemoveName (psDeclarationName declaration) environment.declarations
-    index := psEnvironmentIndexInsert environment.index declaration }
+    index := psEnvironmentIndexInsert environment.index declaration
+    sourceEquations := environment.sourceEquations.filter (fun entry =>
+      !psSourceEquationsUses entry (psDeclarationName declaration))
+    extTheorems := environment.extTheorems.filter (fun name =>
+      !psNameEq name (psDeclarationName declaration)) }
 
 def psEnvironmentAddReplacingAxiom
     (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=

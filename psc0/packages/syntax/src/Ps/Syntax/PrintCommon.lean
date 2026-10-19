@@ -164,6 +164,53 @@ def psPrintDeclarationResult (printTerm : PsSyntaxTerm → Except PsSourcePrintE
   | .omittedType _ => return ""
   | _ => return " : " ++ (← printTerm type)
 
+def psPrintRCasesAtom (pattern : PsSyntaxRCasesPattern) (text : String) : String :=
+  match pattern with
+  | .typed .. | .alternatives .. => "(" ++ text ++ ")"
+  | _ => text
+
+def psPrintRCasesPattern (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (pattern : PsSyntaxRCasesPattern) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .one name => psPrintSyntaxName name
+    | .clear _ => return "-"
+    | .explicit pattern _ =>
+      return "@" ++ psPrintRCasesAtom pattern (← psPrintRCasesPattern printTerm fuel pattern)
+    | .typed pattern type _ =>
+      let text ← psPrintRCasesPattern printTerm fuel pattern
+      let text := match pattern with | .typed .. => "(" ++ text ++ ")" | _ => text
+      return text ++ " : " ++ (← printTerm type)
+    | .tuple patterns _ =>
+      let patterns ← patterns.mapM (psPrintRCasesPattern printTerm fuel)
+      return "⟨" ++ psPrintJoin ", " patterns ++ "⟩"
+    | .alternatives patterns _ =>
+      if patterns.isEmpty then throw (.unsupportedSourceForm "empty rcases alternatives")
+      let patterns ← patterns.mapM fun pattern => do
+        let text ← psPrintRCasesPattern printTerm fuel pattern
+        pure (psPrintRCasesAtom pattern text)
+      return psPrintJoin " | " patterns
+    | .paren pattern _ =>
+      return "(" ++ (← psPrintRCasesPattern printTerm fuel pattern) ++ ")"
+
+def psPrintRIntroPattern (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (pattern : PsSyntaxRIntroPattern) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .pattern pattern =>
+      return psPrintRCasesAtom pattern (← psPrintRCasesPattern printTerm fuel pattern)
+    | .group patterns type _ =>
+      if patterns.isEmpty then throw (.unsupportedSourceForm "empty rintro group")
+      let patterns ← patterns.mapM (psPrintRIntroPattern printTerm fuel)
+      let annotation ← match type with
+        | none => pure ""
+        | some type => do pure (" : " ++ (← printTerm type))
+      return "(" ++ psPrintJoin " " patterns ++ annotation ++ ")"
+
 def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
     (fuel : Nat) (tactics : List PsSyntaxTactic) : Except PsSourcePrintError String := do
   match fuel with
@@ -194,6 +241,59 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
         let body ← psPrintTactics printTerm fuel body
         return header ++ (if names.isEmpty then "" else " " ++ psPrintJoin " " names) ++
           " =>\n  " ++ body.replace "\n" "\n  "
+      | .suffices name type value _ =>
+        return "suffices " ++ (← psPrintSyntaxName name) ++ " : " ++
+          (← printTerm type) ++ " from " ++ (← printTerm value)
+      | .classicalE body _ =>
+        let body ← psPrintTactics printTerm fuel body
+        return "classical\n  " ++ body.replace "\n" "\n  "
+      | .intros names _ =>
+        let rendered ← psPrintSyntaxNames names
+        return "intros" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)
+      | .rcasesE targets pattern _ =>
+        let targets ← targets.mapM fun target => do
+          let equation ← match target.equationName? with
+            | none => pure ""
+            | some name => do pure ((← psPrintSyntaxName name) ++ " : ")
+          pure (equation ++ (← printTerm target.term))
+        let pattern ← match pattern with
+          | none => pure ""
+          | some pattern => do pure (" with " ++ (← psPrintRCasesPattern printTerm fuel pattern))
+        return "rcases" ++ (if targets.isEmpty then "" else " " ++ psPrintJoin ", " targets) ++ pattern
+      | .rintroE patterns type _ =>
+        if patterns.isEmpty then throw (.unsupportedSourceForm "empty rintro")
+        let patterns ← patterns.mapM (psPrintRIntroPattern printTerm fuel)
+        let annotation ← match type with
+          | none => pure ""
+          | some type => do pure (" : " ++ (← printTerm type))
+        return "rintro " ++ psPrintJoin " " patterns ++ annotation
+      | .obtainE pattern type values _ =>
+        let pattern ← match pattern with
+          | none => pure ""
+          | some pattern => do
+            let text ← psPrintRCasesPattern printTerm fuel pattern
+            let text := match pattern with | .typed .. => "(" ++ text ++ ")" | _ => text
+            pure (" " ++ text)
+        let annotation ← match type with
+          | none => pure ""
+          | some type => do pure (" : " ++ (← printTerm type))
+        let values ← match values with
+          | none => pure ""
+          | some values => do
+            if values.isEmpty then throw (.unsupportedSourceForm "empty obtain values")
+            pure (" := " ++ psPrintJoin ", " (← values.mapM printTerm))
+        return "obtain" ++ pattern ++ annotation ++ values
+      | .byCases name proposition _ =>
+        let name ← match name with
+          | none => pure ""
+          | some name => do pure ((← psPrintSyntaxName name) ++ " : ")
+        return "by_cases " ++ name ++ (← printTerm proposition)
+      | .exfalso _ => return "exfalso"
+      | .decide _ => return "decide"
+      | .extE patterns depth _ =>
+        let patterns ← patterns.mapM (psPrintRIntroPattern printTerm fuel)
+        return "ext" ++ (if patterns.isEmpty then "" else " " ++ psPrintJoin " " patterns) ++
+          (if depth == 100 then "" else " : " ++ psNatToString depth)
       | .intro names _ =>
         let rendered ← psPrintSyntaxNames names
         return "intro" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)
@@ -201,6 +301,7 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
       | .indexValidity _ => return "get_elem_tactic"
       | .reflexivity _ => return "rfl"
       | .constructor _ => return "constructor"
+      | .constructorFirst _ => return "constructor!"
       | .focus body close _ =>
         let body ← psPrintTactics printTerm fuel body
         return (if close then "·" else "focus") ++ "\n  " ++ body.replace "\n" "\n  "

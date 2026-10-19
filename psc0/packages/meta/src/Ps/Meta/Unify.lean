@@ -97,7 +97,9 @@ def psUnifyLevelLists
         | List.nil => psUnifyFailure context
         | List.cons right rightRest =>
             let unified := psLevelUnify context.levels left right;
-            if unified.success then
+            if unified.resourceExceeded then
+              { context, success := false, resourceExceeded := true }
+            else if unified.success then
               smaller
                 (psMetaSetLevels context unified.context)
                 rightRest
@@ -404,7 +406,9 @@ def psUnifyWithFuelRecoverWorker
                       assign id leftValue
                   | .sortE rightLevel =>
                       let unified := psLevelUnify context.levels leftLevel rightLevel;
-                      if unified.success then
+                      if unified.resourceExceeded then
+                        { context, success := false, resourceExceeded := true }
+                      else if unified.success then
                         psUnifySuccess (psMetaSetLevels context unified.context)
                       else
                         psUnifyFailure context

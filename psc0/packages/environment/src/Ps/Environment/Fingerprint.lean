@@ -151,8 +151,22 @@ def psStandardSnapshotAlias (value : PsName × PsName) : String :=
   psStandardSnapshotNode "alias" [
     psStandardSnapshotName value.fst, psStandardSnapshotName value.snd]
 
+def psStandardSnapshotSimpEntry (entry : PsSimpEntry) : String :=
+  psStandardSnapshotNode "simp" [
+    psStandardSnapshotName entry.name,
+    (match entry.kind with | .proof => "proof" | .unfoldDefinition => "unfold"),
+    toString entry.priority]
+
+def psStandardSnapshotSourceEquations (entry : PsSourceEquations) : String :=
+  psStandardSnapshotNode "source-equations" [
+    psStandardSnapshotName entry.owner,
+    psStandardSnapshotList psStandardSnapshotName entry.equations,
+    (match entry.unfolding? with
+      | none => psStandardSnapshotNode "none" []
+      | some name => psStandardSnapshotNode "some" [psStandardSnapshotName name])]
+
 def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v3" [
+  let fields := [
     "Lean-4.35.0@eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
     psStandardSnapshotList psStandardSnapshotDeclaration environment.declarations,
     psStandardSnapshotList psStandardSnapshotName environment.classes,
@@ -166,6 +180,15 @@ def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
       psStandardSnapshotNode "reducibility" [psStandardSnapshotName name,
         psReducibilityName (psEnvironmentReducibility environment name)])
       environment.declarations]
+  -- Empty source registries preserve every byte of the frozen v3 payload.
+  if environment.simpEntries.isEmpty && environment.sourceEquations.isEmpty &&
+      environment.extTheorems.isEmpty then
+    psStandardSnapshotNode "PSCV0-STDENV-FNV64-v3" fields
+  else
+    psStandardSnapshotNode "PSCV0-STDENV-FNV64-v4" (fields ++ [
+      psStandardSnapshotList psStandardSnapshotSimpEntry environment.simpEntries,
+      psStandardSnapshotList psStandardSnapshotSourceEquations environment.sourceEquations,
+      psStandardSnapshotList psStandardSnapshotName environment.extTheorems])
 
 -- Fixed-width FNV-1a over the canonical UTF-8 bytes. Lean 4.35.0 UInt64
 -- arithmetic is exactly modulo 2^64 and uses native word operations. The

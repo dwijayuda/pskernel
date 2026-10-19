@@ -1,3 +1,4 @@
+import CoreProofCommands
 import Ps.Host.NativeV7
 import PsKernelLean.Admission
 
@@ -728,6 +729,9 @@ structure CoreUniverseBigStructure where
 inductive CoreUniverseConstructorOnly where
   | mk (A : Type coreUniverseU)
 
+inductive CoreUniverseNestedFunction where
+  | node (children : List (Nat → CoreUniverseNestedFunction))
+
 private def nativeDataResultSort : Lean.Expr → Option Lean.Level
   | .forallE _ _ body _ => nativeDataResultSort body
   | .sort level => some level
@@ -750,7 +754,8 @@ run_cmd do
     (``CoreUniversePromote, one, 1),
     (``CoreUniverseFixedSort, .succ u, 1),
     (``CoreUniverseBigStructure, two, 0),
-    (``CoreUniverseConstructorOnly, .succ (.succ u), 1)]
+    (``CoreUniverseConstructorOnly, .succ (.succ u), 1),
+    (``CoreUniverseNestedFunction, one, 0)]
   for (name, expected, levels) in cases do
     let info ← Lean.getConstInfoInduct name
     let some actual := nativeDataResultSort info.type
@@ -793,7 +798,8 @@ run_cmd do
   for source in [
       "inductive BadTypeBox : Type where\n  | mk (A : Type)\n",
       "inductive BadMax : Sort (max _ _) where\n  | mk (n : Nat)\n",
-      "inductive BadSort : Sort coreUniverseU where\n  | mk (n : Nat)\n"] do
+      "inductive BadSort : Sort coreUniverseU where\n  | mk (n : Nat)\n",
+      "inductive CoreUniverseNegativeNested where\n  | node (children : List (CoreUniverseNegativeNested → Nat))\n"] do
     expectNativeDataUniverseRefusal source
 
 universe indexedU
@@ -1378,9 +1384,9 @@ private def checkPromotionMetadata (environment : PsEnvironment) : IO Unit := do
       ("index promotion changed constructor/child positions: " ++ family ++ "." ++ name)
 
 private def universeLeanSource : String :=
-  "universe coreUniverseU coreUniverseUnused\ninductive CoreUniverseTypeBox where\n  | mk (A : Type)\ninductive CoreUniverseProofBox (P : Prop) where\n  | mk (proof : P)\nstructure CoreUniverseProofStructure (P : Prop) where\n  proof : P\ninductive CoreUniverseEmpty where\nstructure CoreUniverseEmptyStructure where\ninductive CoreUniverseTwoProofs (P Q : Prop) where\n  | left (proof : P)\n  | right (proof : Q)\ninductive CoreUniverseRecursiveProof (P : Prop) where\n  | wrap (child : CoreUniverseRecursiveProof P)\ninductive CoreUniverseLevel (A : Type coreUniverseU) where\n  | mk (value : A)\ninductive CoreUniverseSort (A : Sort coreUniverseU) where\n  | mk (value : A)\ninductive CoreUniversePromote : Type coreUniverseU → Sort _ where\n  | mk (A : Type coreUniverseU) : CoreUniversePromote A\ninductive CoreUniverseFixedSort (A : Type coreUniverseU) : Type _ where\n  | mk (value : A)\nstructure CoreUniverseBigStructure where\n  A : Type\n  value : A\ninductive CoreUniverseConstructorOnly where\n  | mk (A : Type coreUniverseU)\n"
+  "universe coreUniverseU coreUniverseUnused\ninductive CoreUniverseTypeBox where\n  | mk (A : Type)\ninductive CoreUniverseProofBox (P : Prop) where\n  | mk (proof : P)\nstructure CoreUniverseProofStructure (P : Prop) where\n  proof : P\ninductive CoreUniverseEmpty where\nstructure CoreUniverseEmptyStructure where\ninductive CoreUniverseTwoProofs (P Q : Prop) where\n  | left (proof : P)\n  | right (proof : Q)\ninductive CoreUniverseRecursiveProof (P : Prop) where\n  | wrap (child : CoreUniverseRecursiveProof P)\ninductive CoreUniverseLevel (A : Type coreUniverseU) where\n  | mk (value : A)\ninductive CoreUniverseSort (A : Sort coreUniverseU) where\n  | mk (value : A)\ninductive CoreUniversePromote : Type coreUniverseU → Sort _ where\n  | mk (A : Type coreUniverseU) : CoreUniversePromote A\ninductive CoreUniverseFixedSort (A : Type coreUniverseU) : Type _ where\n  | mk (value : A)\nstructure CoreUniverseBigStructure where\n  A : Type\n  value : A\ninductive CoreUniverseConstructorOnly where\n  | mk (A : Type coreUniverseU)\ninductive CoreUniverseNestedFunction where\n  | node (children : List (Nat → CoreUniverseNestedFunction))\n"
 private def universePsSource : String :=
-  "universe coreUniverseU coreUniverseUnused\ninductive CoreUniverseTypeBox where { | mk(A: Type) }\ninductive CoreUniverseProofBox(P: Prop) where { | mk(proof: P) }\nstructure CoreUniverseProofStructure(P: Prop) where { proof: P }\ninductive CoreUniverseEmpty where {}\nstructure CoreUniverseEmptyStructure where {}\ninductive CoreUniverseTwoProofs(P: Prop, Q: Prop) where {\n  | left(proof: P)\n  | right(proof: Q)\n}\ninductive CoreUniverseRecursiveProof(P: Prop) where {\n  | wrap(child: CoreUniverseRecursiveProof(P))\n}\ninductive CoreUniverseLevel(A: Type coreUniverseU) where { | mk(value: A) }\ninductive CoreUniverseSort(A: Sort coreUniverseU) where { | mk(value: A) }\ninductive CoreUniversePromote: Type coreUniverseU -> Sort _ where {\n  | mk(A: Type coreUniverseU): CoreUniversePromote(A)\n}\ninductive CoreUniverseFixedSort(A: Type coreUniverseU): Type _ where { | mk(value: A) }\nstructure CoreUniverseBigStructure where {\n  A: Type\n  value: A\n}\ninductive CoreUniverseConstructorOnly where { | mk(A: Type coreUniverseU) }\n"
+  "universe coreUniverseU coreUniverseUnused\ninductive CoreUniverseTypeBox where { | mk(A: Type) }\ninductive CoreUniverseProofBox(P: Prop) where { | mk(proof: P) }\nstructure CoreUniverseProofStructure(P: Prop) where { proof: P }\ninductive CoreUniverseEmpty where {}\nstructure CoreUniverseEmptyStructure where {}\ninductive CoreUniverseTwoProofs(P: Prop, Q: Prop) where {\n  | left(proof: P)\n  | right(proof: Q)\n}\ninductive CoreUniverseRecursiveProof(P: Prop) where {\n  | wrap(child: CoreUniverseRecursiveProof(P))\n}\ninductive CoreUniverseLevel(A: Type coreUniverseU) where { | mk(value: A) }\ninductive CoreUniverseSort(A: Sort coreUniverseU) where { | mk(value: A) }\ninductive CoreUniversePromote: Type coreUniverseU -> Sort _ where {\n  | mk(A: Type coreUniverseU): CoreUniversePromote(A)\n}\ninductive CoreUniverseFixedSort(A: Type coreUniverseU): Type _ where { | mk(value: A) }\nstructure CoreUniverseBigStructure where {\n  A: Type\n  value: A\n}\ninductive CoreUniverseConstructorOnly where { | mk(A: Type coreUniverseU) }\ninductive CoreUniverseNestedFunction where {\n  | node(children: List(Nat -> CoreUniverseNestedFunction))\n}\n"
 
 private def dataResultSort : PsExpr → Option PsLevel
   | .forallE _ _ body _ => dataResultSort body
@@ -1405,7 +1411,8 @@ private def checkUniverseMetadata (environment : PsEnvironment) : IO Unit := do
     ("CoreUniversePromote", one, 1),
     ("CoreUniverseFixedSort", .succ u, 1),
     ("CoreUniverseBigStructure", two, 0),
-    ("CoreUniverseConstructorOnly", .succ (.succ u), 1)]
+    ("CoreUniverseConstructorOnly", .succ (.succ u), 1),
+    ("CoreUniverseNestedFunction", one, 0)]
   for (name, expected, levels) in cases do
     let some family := psEnvironmentFindInductive environment (psRootName name)
       | throw (IO.userError ("missing inferred data family " ++ name))
@@ -1420,6 +1427,72 @@ private def checkUniverseMetadata (environment : PsEnvironment) : IO Unit := do
     | throw (IO.userError "missing promoted universe family")
   ensure (promoted.numParams == 1 && promoted.numIndices == 0)
     "data universe fixture lost index promotion"
+
+private def checkDeferredDataLevels : IO Unit := do
+  let initial : PsLevelMetaContext := { nextId := 2, declarations := [0, 1], assignments := [] }
+  let left := PsLevel.max (.mvar 0) (.succ .zero)
+  let right := PsLevel.succ (.mvar 1)
+  let strict := psLevelUnify initial left right
+  ensure (!strict.success && !strict.resourceExceeded && strict.context.pending.isEmpty)
+    "CORE-DATA-LEVELS: ordinary level unification silently deferred"
+  let pending := psLevelUnify { initial with deferUnsolved := true } left right
+  ensure (pending.success && !pending.resourceExceeded &&
+    pending.context.assignments.isEmpty && pending.context.pending.length == 1)
+    "CORE-DATA-LEVELS: deferred constraint forced a max component"
+  let repeated := psLevelUnify pending.context left right
+  ensure (repeated.success && repeated.context.pending.length == 1)
+    "CORE-DATA-LEVELS: deferred equation was duplicated"
+  let fresh := psLevelMetaFresh pending.context
+  ensure (fresh.context.deferUnsolved && fresh.context.pending.length == 1)
+    "CORE-DATA-LEVELS: fresh universe lost the pending constraint"
+  let exhausted := psLevelUnifyWithFuel pending.context 0 left right
+  ensure (!exhausted.success && exhausted.resourceExceeded)
+    "CORE-DATA-LEVELS: resource exhaustion became deferred success"
+  let context := psElabContextEmpty psCompilerFullProfileContext.baseEnvironment []
+  let wrap := fun levels => psElabContextWithMeta context { context.metaContext with levels }
+  match psElabDataFinishLevelConstraints (wrap pending.context) with
+  | .error .unresolvedMetavariable => pure ()
+  | _ => throw (IO.userError "CORE-DATA-LEVELS: unresolved equation escaped the Data boundary")
+  let some withResult := psLevelAssign pending.context 0 (.succ .zero)
+    | throw (IO.userError "CORE-DATA-LEVELS: missing result universe")
+  let some good := psLevelAssign withResult 1 .zero
+    | throw (IO.userError "CORE-DATA-LEVELS: missing container universe")
+  let checked ← fromExcept ((psElabDataFinishLevelConstraints (wrap good)).mapError
+    psCompilerPscv0ElabError)
+  ensure (!checked.metaContext.levels.deferUnsolved && checked.metaContext.levels.pending.isEmpty)
+    "CORE-DATA-LEVELS: deferred mode escaped successful inference"
+  let some wrongResult := psLevelAssign pending.context 0 (.succ (.succ .zero))
+    | throw (IO.userError "CORE-DATA-LEVELS: missing contradictory result universe")
+  let some wrong := psLevelAssign wrongResult 1 .zero
+    | throw (IO.userError "CORE-DATA-LEVELS: missing contradictory container universe")
+  match psElabDataFinishLevelConstraints (wrap wrong) with
+  | .error (.data message) =>
+    ensure (message == "constructor sort constraint disagrees with the inferred resulting universe")
+      ("CORE-DATA-LEVELS: wrong ground refusal owner: " ++ message)
+  | .error error => throw (IO.userError ("CORE-DATA-LEVELS: wrong ground refusal: " ++
+      psCompilerPscv0ElabError error))
+  | .ok _ => throw (IO.userError "CORE-DATA-LEVELS: inconsistent ground constraint was accepted")
+  IO.println "CORE-DATA-LEVELS: strict/default, postponed solution set, ground recheck and resource controls passed"
+
+private def deferredDataNegativeDomain : PsElabError → Bool
+  | .atDeclaration _ cause | .atContext _ cause => deferredDataNegativeDomain cause
+  | .data message => message == "recursive family occurs in a function-field domain"
+  | _ => false
+
+private def checkDeferredDataRefusals : IO Unit := do
+  for (kind, source) in [
+      (PsCompilerSourceKind.lean,
+        "inductive CoreUniverseNegativeNested where\n  | node (children : List (CoreUniverseNegativeNested → Nat))\n"),
+      (.proofScript,
+        "inductive CoreUniverseNegativeNested where { | node(children: List(CoreUniverseNegativeNested -> Nat)) }\n")] do
+    let program ← fromExcept (psCompilerParsePscv0 source kind)
+    match psCompilerEngineElaboratePscv0 psCompilerFullProfileContext program with
+    | .error (.elaboration cause) =>
+      ensure (!psElabErrorIsResource cause && deferredDataNegativeDomain cause)
+        ("CORE-DATA-LEVELS: negative nested domain lost its owner: " ++ psCompilerPscv0ElabError cause)
+    | .error error => throw (IO.userError ("CORE-DATA-LEVELS: negative nested domain changed phase: " ++
+        psCompilerPscv0Error error))
+    | .ok _ => throw (IO.userError "CORE-DATA-LEVELS: negative nested domain accepted")
 
 private def checkUniverseRefusals : IO Unit := do
   for (label, rule, leanText, psText) in [
@@ -1594,26 +1667,22 @@ private def checkFinEvidenceFinite : IO Unit := do
   let selected := psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
     psStandardFinEvidenceDeclarations
   ensure (selected.length == 6) "CORE-MATCHES: Fin evidence selection changed"
-  let lawful := psStandardNatLawfulBEqDeclaration
-  let some (.theoremDecl _ [] actualType actualValue) := psEnvironmentFind environment
-      (psDeclarationName lawful)
-    | throw (IO.userError "CORE-MATCHES: selected Nat LawfulBEq proof is absent")
-  let .theoremDecl _ [] expectedType expectedValue := lawful
-    | throw (IO.userError "CORE-MATCHES: selected Nat law is not a checked theorem")
-  ensure (psExprAlphaEq actualType expectedType && psExprAlphaEq actualValue expectedValue)
-    "CORE-MATCHES: selected Nat LawfulBEq proof drift"
-  let entries := environment.instances.entries.filter fun entry =>
-    match entry.value with
-    | .constE name _ => psNameEq name (psDeclarationName lawful)
-    | _ => false
-  let [entry] := entries
-    | throw (IO.userError "CORE-MATCHES: selected Nat law registration is not unique")
-  ensure (entry.priority == 1000 && psExprAlphaEq entry.type expectedType)
-    "CORE-MATCHES: selected Nat law registration changed its actual dictionary"
+  let expectedType := psExprApplyMany (.constE (psRootName "LawfulBEq") [.zero])
+    [.constE psNatName [], .constE (psDecisionName "PsStandard.instBEqNat") []]
+  let lawfulName := psNameAppendStr (psRootName "Nat") "instLawfulBEq"
+  let some (.theoremDecl _ [] _ actualValue) := psEnvironmentFind environment lawfulName
+    | throw (IO.userError "CORE-MATCHES: installed native Nat law is not a checked theorem")
+  ensure (!psExprHasUnresolvedMeta actualValue)
+    "CORE-MATCHES: installed native Nat law has unresolved evidence"
   let context := psElabContextEmpty environment []
-  let proof ← fromExcept ((psElabDeriveInstance context expectedType).mapError psCompilerPscv0ElabError)
-  let _ ← fromExcept ((psElabResolvedTerm context proof (some expectedType)).mapError psCompilerPscv0ElabError)
-  let selected := selected ++ [lawful]
+  let _ ← fromExcept ((psElabResolvedTerm context (.constE lawfulName [])
+    (some expectedType)).mapError psCompilerPscv0ElabError)
+  let proof ← fromExcept ((psElabDeriveInstance context expectedType).mapError
+    psCompilerPscv0ElabError)
+  let _ ← fromExcept ((psElabResolvedTerm context proof (some expectedType)).mapError
+    psCompilerPscv0ElabError)
+  ensure (psExprAlphaEq (psMetaInstantiate context.metaContext proof) (.constE lawfulName []))
+    "CORE-MATCHES: selected Nat law did not use the checked existing native dictionary"
   let _ ← fromExcept (psStandardFinEvidenceAudit environment)
   for declaration in psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
       psStandardFinDecEqDeclarations do
@@ -1654,7 +1723,7 @@ private def checkFinEvidenceFinite : IO Unit := do
   for declaration in selected do
     ensure ((checked.find? (PsKernelLean.toLeanName (psDeclarationName declaration))).isSome)
       "CORE-MATCHES: finite Fin evidence replay omitted a selected declaration"
-  IO.println "CORE-MATCHES: all six Fin declarations and the selected Nat LawfulBEq proof freshly kernel checked at trust0/2M/20k"
+  IO.println "CORE-MATCHES: all six Fin declarations freshly kernel checked at trust0/2M/20k; existing native Nat law checks against the selected BEq dictionary"
 
 private def lawfulRequirementFailure (owned : Bool) : PsElabError → Bool
   | .atDeclaration _ cause => lawfulRequirementFailure owned cause
@@ -1961,6 +2030,8 @@ def main (args : List String) : IO Unit := do
     "CORE-MATCHES: expected pinned Lean 4.35.0"
   inspectCoreExtDeclarations
   checkCoreExtensionalityClosure
+  CoreProofCommands.check
+  checkDeferredDataLevels
   checkFinEvidenceFinite
   -- Native Format.pretty calls a partial worker. Check actual rendering by
   -- execution while the native theorems above check the generated Format tree.
@@ -1990,7 +2061,8 @@ def main (args : List String) : IO Unit := do
     IO.println ("CORE-MATCHES: checked pair " ++ label)
   checkRefusals
   checkUniverseRefusals
+  checkDeferredDataRefusals
   checkDependentDerivingRefusals
   checkDerivingSuffixBoundaries
   checkRuntime root
-  IO.println "PSCV0_CORE_MATCHES: PASS 13 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 60 owned portable refusals; five-target paired emission; native runtime comparison follows"
+  IO.println "PSCV0_CORE_MATCHES: PASS 13 independent source pairs; native positive/refusal oracle; checked declaration parity; fresh trust-zero admission per reader; checked IR; 62 owned portable refusals; five-target paired emission; native runtime comparison follows"

@@ -67,9 +67,10 @@ def psProofPrepareEliminationTarget (state : PsProofState) (goal : PsProofGoal)
   let state := {
     state with
     goals := { id, tag := goal.tag } :: state.goals.drop 1 }
+  let introducedId := state.context.localContext.nextId
   let state ← psProofIntro state none
   let (_, context, _) ← psProofMain state
-  let some declaration := psLocalFindUser context.localContext name
+  let some declaration := psLocalFindById context.localContext introducedId
     | throw (.proof "generalized elimination binder lost its checked identity")
   let value ← psElabResolvedTerm context (.fvar (psLocalDeclId declaration)) none
   return (state, value)

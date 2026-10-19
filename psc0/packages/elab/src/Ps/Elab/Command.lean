@@ -329,6 +329,18 @@ def psElabCommandRegisteredMainResult (environment : PsEnvironment)
           psNameEq (psDeclarationName actual) name)).length != 1 ||
         !psElabCommandOwnedDeclarationEqual declaration actual then
       throw (.data "PSCV0-PREDEFINITION-REGISTRATION: member and batch declarations differ")
+  let equationOwnership := result.members.flatMap (·.sourceEquations)
+  if equationOwnership.length != result.batch.sourceEquations.length ||
+      !(equationOwnership.zip result.batch.sourceEquations).all (fun pair =>
+        psSourceEquationsEqual pair.fst pair.snd) then
+    throw (.data "PSCV0-PREDEFINITION-REGISTRATION: source equation provenance differs")
+  for (member, owned) in outputs do
+    for entry in owned.sourceEquations do
+      if !psNameEq entry.owner member.name ||
+          !entry.equations.all (fun name =>
+            owned.declarations.any (fun declaration =>
+              psNameEq name (psDeclarationName declaration))) then
+        throw (.data "PSCV0-PREDEFINITION-REGISTRATION: equation changed its checked source owner")
   let helperOwnership := result.members.flatMap (·.structuralHelpers)
   if helperOwnership.length != result.batch.structuralHelpers.length ||
       !(helperOwnership.zip result.batch.structuralHelpers).all (fun pair =>
@@ -473,7 +485,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
       psElabCommandRegisteredMainResult state.environment block.levelNames block.members main result false
     | _, _ =>
       throw (.data "PSCV0-PREDEFINITION-REGISTRATION: registration lost its checked original main")
-  let environment ← psAddDeclarationList state.environment result.batch.declarations
+  let environment ← psAddDeclarationBatch state.environment result.batch
   let environment := if members.any (fun member =>
       psElabPreDefinitionDeclarationNoncomputable member.declaration) then
     result.batch.declarations.foldl (fun env declaration =>
@@ -503,6 +515,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     { origin with
       sourceInfo := owned.flatMap (·.snd.sourceInfo)
       diagnostics := owned.flatMap (·.snd.diagnostics)
+      sourceEquations := owned.flatMap (·.snd.sourceEquations)
       localDefinitions := owned.filterMap fun (input, result) =>
         match input.source with
         | .localDefinition _ source => some {
@@ -560,6 +573,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
       registration.isNone ||
         (psElabCommandPreDefinitionRegistration
           [PsSyntaxMutualMember.mk source isPrivate registration []] false).isSome
+    | .partialDefinition .. => !state.scope.variables.isEmpty
     | _ => false
   if usePreDefinitions then
     let nonrecursiveEquations := match source with
@@ -596,7 +610,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
           (.atDeclaration name)
       let origin := psElabBatchOriginAt state.originsRev.length source
         (psElabStableMemberOrigins result.declarations 0) none
-      pure ({ result, origin := { origin with sourceInfo := result.sourceInfo } } :
+      pure ({ result, origin := { origin with sourceInfo := result.sourceInfo
+        sourceEquations := result.sourceEquations } } :
         PsElabDeclarationBatchWithOriginsResult)
     | _ =>
       (psElabDeclarationBatchWithOrigins state.environment
@@ -632,7 +647,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   let isClass := match registration with | some .classDecl => true | _ => false
   let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
     (.atDeclaration name)
-  let environment ← (psAddDeclarationList state.environment batch.declarations).mapError
+  let environment ← (psAddDeclarationBatch state.environment batch).mapError
     (.atDeclaration name)
   let environment ← (psElabCommandRegisterDeclaration environment name registration).mapError
     (.atDeclaration name)
@@ -734,12 +749,13 @@ def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntax
         | .definitionDecl _ _ _ value | .theoremDecl _ _ _ value
         | .opaqueDecl _ _ _ value | .partialDecl _ _ _ value => [value]
         | _ => []))
-  let environment ← psAddDeclarationList state.environment result.batch.declarations
+  let environment ← psAddDeclarationBatch state.environment result.batch
   let origins := (scopedMembers.zip result.members).zipIdx.map fun entry =>
     let origin := psElabBatchOriginAt (state.originsRev.length + entry.snd)
       entry.fst.fst.source (psElabStableMemberOrigins entry.fst.snd.declarations 0) none
     { origin with
       sourceInfo := entry.fst.snd.sourceInfo
+      sourceEquations := entry.fst.snd.sourceEquations
       mutualGroup := some {
         firstSourceIndex := state.originsRev.length
         memberIndex := entry.snd
@@ -763,7 +779,7 @@ def psElabCommandMutual (state : PsCommandState) (members : List PsSyntaxMutualM
     (span : PsSourceSpan) : Except PsElabError PsCommandState := do
   -- Preserve the established explicit-partial top-level route. The shared
   -- local preparation owns where blocks and total/mixed source components.
-  if !members.isEmpty && members.all (fun member => match member.declaration with
+  if state.scope.variables.isEmpty && !members.isEmpty && members.all (fun member => match member.declaration with
       | .partialDefinition _ _ (.omittedType _) _ _ => false
       | .partialDefinition .. => true | _ => false) then
     psElabCommandPartialMutual state members span

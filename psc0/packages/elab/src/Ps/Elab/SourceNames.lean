@@ -33,6 +33,33 @@ def psElabSourcePatternNames (fuel : Nat) (pattern : PsSyntaxPattern) :
     | .inaccessible value => psElabSourcePatternNames fuel value
     | _ => pure ()
 
+def psElabSourceRCasesPatternNames (visit : PsSyntaxTerm → Except PsElabError Unit)
+    (fuel : Nat) (pattern : PsSyntaxRCasesPattern) : Except PsElabError Unit := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .one name => psElabSourceName name
+    | .clear _ => pure ()
+    | .typed pattern type _ =>
+      psElabSourceRCasesPatternNames visit fuel pattern
+      visit type
+    | .explicit pattern _ | .paren pattern _ =>
+      psElabSourceRCasesPatternNames visit fuel pattern
+    | .tuple patterns _ | .alternatives patterns _ =>
+      for pattern in patterns do psElabSourceRCasesPatternNames visit fuel pattern
+
+def psElabSourceRIntroPatternNames (visit : PsSyntaxTerm → Except PsElabError Unit)
+    (fuel : Nat) (pattern : PsSyntaxRIntroPattern) : Except PsElabError Unit := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .pattern pattern => psElabSourceRCasesPatternNames visit fuel pattern
+    | .group patterns type _ =>
+      for pattern in patterns do psElabSourceRIntroPatternNames visit fuel pattern
+      for type in type.toList do visit type
+
 def psElabSourceTacticNames (visit : PsSyntaxTerm → Except PsElabError Unit)
     (fuel : Nat) (tactics : List PsSyntaxTactic) : Except PsElabError Unit := do
   match fuel with
@@ -46,12 +73,33 @@ def psElabSourceTacticNames (visit : PsSyntaxTerm → Except PsElabError Unit)
         psElabSourceName name
         for type in type.toList do visit type
         visit value
-      | .intro names _ =>
+      | .suffices name type value _ =>
+        psElabSourceName name
+        visit type
+        visit value
+      | .rcasesE targets pattern _ =>
+        for target in targets do
+          for name in target.equationName?.toList do psElabSourceName name
+          visit target.term
+        for pattern in pattern.toList do psElabSourceRCasesPatternNames visit fuel pattern
+      | .rintroE patterns type _ =>
+        for pattern in patterns do psElabSourceRIntroPatternNames visit fuel pattern
+        for type in type.toList do visit type
+      | .obtainE pattern type values _ =>
+        for pattern in pattern.toList do psElabSourceRCasesPatternNames visit fuel pattern
+        for type in type.toList do visit type
+        for value in values.toList.flatten do visit value
+      | .byCases name proposition _ =>
+        for name in name.toList do psElabSourceName name
+        visit proposition
+      | .extE patterns _ _ =>
+        for pattern in patterns do psElabSourceRIntroPatternNames visit fuel pattern
+      | .intro names _ | .intros names _ =>
         for name in names do psElabSourceName name
       | .caseE tag names body _ =>
         for name in tag.toList ++ names do psElabSourceName name
         psElabSourceTacticNames visit fuel body
-      | .focus body _ _ | .each body _ _ =>
+      | .focus body _ _ | .each body _ _ | .classicalE body _ =>
         psElabSourceTacticNames visit fuel body
       | _ => pure ()
 

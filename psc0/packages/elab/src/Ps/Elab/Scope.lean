@@ -294,6 +294,63 @@ def psScopePatternValues (fuel : Nat) (resolver : PsScopeResolver)
 
 -- Static section capture follows explicit tactic binders. Actual proof-name
 -- resolution is delayed until the goal's complete local context is available.
+-- Source-name collection is a lexical overlay. Definition section captures
+-- are selected later from the complete checked type/body dependency closure.
+def psScopeRCasesSimple (pattern : PsSyntaxRCasesPattern) : Bool :=
+  match pattern with
+  | .one _ | .clear _ => true
+  | .typed pattern _ _ | .paren pattern _ => psScopeRCasesSimple pattern
+  | .alternatives [pattern] _ => psScopeRCasesSimple pattern
+  | _ => false
+
+def psScopeRCasesDependencies (fuel : Nat) (visit : PsScopeVisitor)
+    (bound : List String) (pattern : PsSyntaxRCasesPattern)
+    (rootIsLocal : Bool := false) : Except PsElabError (List String × List String) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .one name =>
+      let names := if rootIsLocal then [] else
+        (psSyntaxRCasesPatternNames fuel (.one name)).map psScopeKey
+      return ([], names ++ bound)
+    | .clear _ => return ([], bound)
+    | .typed pattern type _ =>
+      let annotation ← visit bound type
+      let result ← psScopeRCasesDependencies fuel visit bound pattern rootIsLocal
+      return (psScopeUnion annotation.used result.1, result.2)
+    | .paren pattern _ | .explicit pattern _ =>
+      psScopeRCasesDependencies fuel visit bound pattern rootIsLocal
+    | .tuple patterns _ | .alternatives patterns _ =>
+      let names := patterns.flatMap (psSyntaxRCasesPatternNames fuel) |>.map psScopeKey
+      let inner := names ++ bound
+      let results ← patterns.mapM fun pattern =>
+        psScopeRCasesDependencies fuel visit inner pattern true
+      return (results.foldl (fun used result => psScopeUnion used result.1) [], inner)
+
+def psScopeRIntroDependencies (fuel : Nat) (visit : PsScopeVisitor)
+    (bound : List String) (patterns : List PsSyntaxRIntroPattern)
+    (annotation : Option PsSyntaxTerm) :
+    Except PsElabError (List String × List String) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match patterns with
+    | [] => return ([], bound)
+    | pattern :: rest =>
+      let current ← match pattern with
+        | .group patterns type _ =>
+          psScopeRIntroDependencies fuel visit bound patterns
+            (if type.isSome then type else annotation)
+        | .pattern pattern => do
+          let names := (psSyntaxRCasesPatternNames fuel pattern).map psScopeKey
+          let inner := names ++ bound
+          let annotation ← annotation.mapM (visit inner)
+          let result ← psScopeRCasesDependencies fuel visit inner pattern true
+          pure (psScopeUnion (annotation.map (·.used) |>.getD []) result.1, result.2)
+      let rest ← psScopeRIntroDependencies fuel visit current.2 rest annotation
+      return (psScopeUnion current.1 rest.1, rest.2)
+
 def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
     (bound : List String) (tactics : List PsSyntaxTactic) :
     Except PsElabError (List String) := do
@@ -304,7 +361,52 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
     | [] => return []
     | tactic :: rest =>
       let (used, next) ← match tactic with
-        | .intro names _ => pure ([], names.map psScopeKey ++ bound)
+        | .rcasesE targets pattern _ => do
+          let results ← targets.mapM fun target => visit bound target.term
+          let used := results.foldl (fun used result => psScopeUnion used result.used) []
+          let equations := targets.flatMap (fun target => target.equationName?.toList.map psScopeKey)
+          let rootIsLocal := match targets, results with
+            | [target], [result] => target.equationName?.isNone &&
+              match target.term with
+              | .reference name => name.segments.length == 1 &&
+                (bound.contains (psScopeKey name) || result.used.contains (psScopeKey name))
+              | _ => false
+            | _, _ => false
+          let result ← match pattern with
+            | none => pure ([], bound)
+            | some pattern => psScopeRCasesDependencies fuel visit bound pattern
+                (rootIsLocal && psScopeRCasesSimple pattern)
+          pure (psScopeUnion used result.1, equations ++ result.2)
+        | .rintroE patterns type _ =>
+          psScopeRIntroDependencies fuel visit bound patterns type
+        | .extE patterns _ _ =>
+          psScopeRIntroDependencies fuel visit bound patterns none
+        | .byCases name proposition _ => do
+          let result ← visit bound proposition
+          pure (result.used, name.toList.map psScopeKey ++ bound)
+        | .obtainE pattern type values span => do
+          let annotation ← type.mapM (visit bound)
+          let sources := values
+          let values ← values.mapM (fun values => values.mapM (visit bound))
+          let used := values.toList.flatten.foldl
+            (fun used result => psScopeUnion used result.used)
+            (annotation.map (·.used) |>.getD [])
+          let pattern := pattern.getD (.one (PsSyntaxName.mk
+            [if values.isSome then "_" else "this"] span))
+          let rootIsLocal := match sources, values with
+            | some [source], some [result] => match source with
+              | .reference name => name.segments.length == 1 &&
+                (bound.contains (psScopeKey name) || result.used.contains (psScopeKey name))
+              | _ => false
+            | _, _ => false
+          let result ← psScopeRCasesDependencies fuel visit bound pattern
+            (rootIsLocal && psScopeRCasesSimple pattern)
+          pure (psScopeUnion used result.1, result.2)
+        | .intro names _ | .intros names _ => pure ([], names.map psScopeKey ++ bound)
+        | .suffices name type value _ => do
+          let annotation ← visit bound type
+          let value ← visit (psScopeKey name :: bound) value
+          pure (psScopeUnion annotation.used value.used, bound)
         | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ => do
           let result ← visit bound value
           pure (result.used, bound)
@@ -316,7 +418,7 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
         | .caseE _ names body _ => do
           let used ← psScopeTacticDependencies fuel visit (names.map psScopeKey ++ bound) body
           pure (used, bound)
-        | .focus body _ _ | .each body _ _ => do
+        | .focus body _ _ | .each body _ _ | .classicalE body _ => do
           let used ← psScopeTacticDependencies fuel visit bound body
           pure (used, bound)
         | _ => pure ([], bound)

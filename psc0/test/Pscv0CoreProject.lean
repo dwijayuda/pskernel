@@ -1225,8 +1225,10 @@ private def rootedScopeSource (kind : PsCompilerSourceKind) : String :=
       "private function privateIdentity(A: Type, x: A): A := x\n" ++
       "function privateBridge(A: Type, x: A): A := privateIdentity(A, x)\n" ++
       "structure RootBox(A: Type) where { value: A }\n" ++
-      "function _root_.absoluteIdentity(A: Type, x: A): A := x\n" ++
+      -- ProofScript declaration heads are unqualified. Closing this scope
+      -- preserves the paired order; Lean above exercises the absolute head.
       "end _root_.Inner\n" ++
+      "function absoluteIdentity(A: Type, x: A): A := x\n" ++
       "function rootedClient(A: Type, x: A): A := _root_._root_.Inner.directIdentity(A, x)\n" ++
       "function nestedClient(A: Type, x: A): A := Outer._root_.Inner.nestedIdentity(A, x)\nend\n"
 

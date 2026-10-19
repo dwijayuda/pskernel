@@ -24,17 +24,26 @@ theorem c0DeepLambdaSplit_source
   unfold psKernelInferLambdaHead
   cases hdom : smaller [] [] whnf defeq ctx state domain false with
   | error reason =>
-      simp [hdom]
+      simp [hdom, Except.bind, Except.map]
   | ok domainResult =>
       cases domainResult with
       | mk domainType domainState =>
           cases hsort : psKernelEnsureSortWith whnf ctx domainState domainType with
           | error reason =>
-              simp [hdom, hsort]
+              simp [hdom, hsort, Except.bind, Except.map]
           | ok sortResult =>
               cases sortResult with
               | mk sortLevel sortState =>
-                  simp [hdom, hsort, psKernelC0DeepLambdaClose]
+                  cases ranges with
+                  | nil =>
+                      simp [hdom, hsort, psKernelC0DeepLambdaClose,
+                        Except.bind, Except.map]
+                  | cons range tail =>
+                      by_cases hr : range = 0
+                      · simp [hdom, hsort, hr, psKernelC0DeepLambdaClose,
+                          Except.bind, Except.map]
+                      · simp [hdom, hsort, hr, psKernelC0DeepLambdaClose,
+                          Except.bind, Except.map]
 
 example
     (smaller : PsKernelC0BinderSmaller)
@@ -79,13 +88,25 @@ theorem c0DeepDeferredLambdaPrepare_source
   unfold psKernelC0DeepLambdaPrepareDeferred psKernelC0DeepLambdaPrepare
   cases hdom : smaller [] [] whnf defeq ctx state domain false with
   | error reason =>
-      simp [hdom]
+      simp [hdom, Except.map, Except.bind]
   | ok dom =>
       cases hsort : psKernelEnsureSortWith whnf ctx dom.2 dom.1 with
       | error reason =>
-          simp [hdom, hsort]
+          simp [hdom, hsort, Except.map, Except.bind]
       | ok sortResult =>
-          simp [hdom, hsort,
-            psKernelC0DeepLambdaForceFrame,
-            psKernelC0DeepDeferBinderOpening_source,
-            psKernelC0DeepEagerBinderOpening]
+          cases ranges with
+          | nil =>
+              simp [hdom, hsort, Except.map, Except.bind,
+                psKernelC0DeepLambdaResumeCheckedDomain,
+                psKernelC0DeepLambdaForceFrame,
+                psKernelC0DeepSubstForceOneSource]
+          | cons range tail =>
+              by_cases hr : range = 0
+              · simp [hdom, hsort, hr, Except.map, Except.bind,
+                  psKernelC0DeepLambdaResumeCheckedDomain,
+                  psKernelC0DeepLambdaForceFrame,
+                  psKernelC0DeepSubstForcePure]
+              · simp [hdom, hsort, hr, Except.map, Except.bind,
+                  psKernelC0DeepLambdaResumeCheckedDomain,
+                  psKernelC0DeepLambdaForceFrame,
+                  psKernelC0DeepSubstForceOneSource]

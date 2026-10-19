@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Specialize
+import Ps.BackendRust.Module
 
 def psIrSpecU32 : PsVerifiedIrType :=
   PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.uint32
@@ -350,10 +351,20 @@ def psIrSpecAcceptsCheckedClosedInput : Bool :=
         && (psCheckVerifiedIrModule psIrCheckDefaultOptions uniform.raw).accepted
   | _, _ => false
 
+def psIrSpecRejectsForgedRustValidation : Bool :=
+  let invalid : PsVerifiedIrModule :=
+    PsVerifiedIrModule.mk [] [] []
+      [PsVerifiedIrDeclaration.mk "bad" [] []
+        (.primitive .nat) (.literal (.bool true))]
+  match psRustEmitValidatedModule { raw := invalid } with
+  | .error .invalidVerifiedIr => true
+  | _ => false
+
 def main : IO Unit := do
   if psTestGenericSpecialization
       && psIrSpecRejectsForgedValidation
-      && psIrSpecAcceptsCheckedClosedInput then
+      && psIrSpecAcceptsCheckedClosedInput
+      && psIrSpecRejectsForgedRustValidation then
     IO.println "PSC1_IR_SPECIALIZE_TESTS: PASS"
   else
     throw (IO.userError "PSC1_IR_SPECIALIZE_TESTS: FAIL")

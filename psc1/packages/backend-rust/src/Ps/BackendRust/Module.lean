@@ -2,6 +2,7 @@ import Ps.Foundation.List
 import Ps.BackendRust.Tail
 import Ps.BackendRust.ValueRefs
 import Ps.BackendRust.Runtime
+import Ps.CompilerIr.Validate
 
 def psRustTypeParameterNames
     (parameters : List PsVerifiedIrTypeParameter) : List String :=
@@ -1262,7 +1263,11 @@ def psRustEmitModule
                             inductives
                             declarations)
 
+-- A user-constructible wrapper is not proof of prior type validation.
+-- The public validated emitter therefore rechecks its exact input.
 def psRustEmitValidatedModule
     (module : PsValidatedIrModule) :
     Except PsRustEmitError String :=
-  psRustEmitModule module.raw
+  match psStrictValidateModule module.raw with
+  | Except.error _ => Except.error PsRustEmitError.invalidVerifiedIr
+  | Except.ok checked => psRustEmitModule checked.raw

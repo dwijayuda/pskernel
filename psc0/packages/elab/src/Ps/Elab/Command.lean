@@ -250,10 +250,10 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   -- Their source aliases remain usable by later commands in this provider only.
   let privateAliases := (qualified.zip scopedMembers).foldl
     (fun (aliases : List (List String × List String)) (sourceName, member) =>
-      member.locals.foldl (fun aliases local =>
-        if local.isPrivate then
-          (sourceName.segments ++ local.source.name.segments,
-            (psNameToString local.name).splitOn ".") :: aliases
+      member.locals.foldl (fun aliases localDefinition =>
+        if localDefinition.isPrivate then
+          (sourceName.segments ++ localDefinition.source.name.segments,
+            (psNameToString localDefinition.name).splitOn ".") :: aliases
         else aliases) aliases) aliases
   return { state with
     environment, namespaces

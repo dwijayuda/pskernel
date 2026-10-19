@@ -55,11 +55,13 @@ private def psKernelC0InstOneMemoFind
       else
         psKernelC0InstOneMemoFind expr offset rest
 
-/-- Unlike BVars, these atom forms cannot be substituted by the
-single-binder instantiator. Their original changed-flag result is exactly
-(expr, false); memo lookup/insertion is needless work, even for large
-name/level-bearing constants. -/
+/-- A bound variable is substituted by a direct offset comparison (and
+sometimes lifting the fixed replacement); storing proof-carrying trie
+entries for repeated atomic BVars costs more work than recalculation.
+All other atom forms are unchanged and have exact (expr,false) results.
+No lookup/store suppression changes the source result or binder offset. -/
 private def psKernelC0InstOneMemoCheapLeaf : PsKernelExpr → Bool
+  | .bvar _ => true
   | .fvar _ => true
   | .mvar _ => true
   | .sort _ => true
@@ -187,11 +189,11 @@ def psKernelC0InstOneMemoGo
                 rw [← b.source]
               psKernelC0InstOneMemoStore m1 ⟨result, equality⟩
           | .bvar n =>
-              -- Bound variables can select/lift the replacement; keep exact
-              -- per-offset memoization and dependent proof transport.
+              -- Exact source binder-offset computation is constant work
+              -- here; avoid allocating/trie-indexing per atomic leaf.
               let value := psKernelC0ExprInstantiateOneChanged (.bvar n)
                 replacement offset
-              psKernelC0InstOneMemoStore memo ⟨value, rfl⟩
+              (⟨value, rfl⟩, memo)
           | other =>
               -- The remaining atom constructors cannot be substituted.
               -- Return source's exact changed flag without touching memo.

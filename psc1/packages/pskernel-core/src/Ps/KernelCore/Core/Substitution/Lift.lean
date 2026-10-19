@@ -159,15 +159,12 @@ The original bounded version above remains available for differential
 verification; trusted semantics, binder cutoffs and zero-lift identity stay
 unchanged. No pointer equality, new axioms or indexed store.
 -/
-def psKernelC0LiftChanged
+def psKernelC0LiftNonzeroChanged
     (expr : PsKernelExpr)
     (start : Nat)
     (amount : Nat) :
     Prod PsKernelExpr Bool :=
-        if Nat.beq amount 0 then
-          Prod.mk expr false
-        else
-          match expr with
+  match expr with
           | PsKernelExpr.bvar index =>
               if psKernelNatGe index start then
                 Prod.mk
@@ -177,8 +174,8 @@ def psKernelC0LiftChanged
               else
                 Prod.mk expr false
           | PsKernelExpr.app fn arg =>
-              let fnResult := psKernelC0LiftChanged fn start amount;
-              let argResult := psKernelC0LiftChanged arg start amount;
+              let fnResult := psKernelC0LiftNonzeroChanged fn start amount;
+              let argResult := psKernelC0LiftNonzeroChanged arg start amount;
               if (Prod.snd fnResult) then
                 Prod.mk
                   (PsKernelExpr.app
@@ -194,8 +191,8 @@ def psKernelC0LiftChanged
               else
                 Prod.mk expr false
           | PsKernelExpr.lam name type body binderInfo =>
-              let typeResult := psKernelC0LiftChanged type start amount;
-              let bodyResult := psKernelC0LiftChanged body (Nat.succ start) amount;
+              let typeResult := psKernelC0LiftNonzeroChanged type start amount;
+              let bodyResult := psKernelC0LiftNonzeroChanged body (Nat.succ start) amount;
               if (Prod.snd typeResult) then
                 Prod.mk
                   (PsKernelExpr.lam
@@ -215,8 +212,8 @@ def psKernelC0LiftChanged
               else
                 Prod.mk expr false
           | PsKernelExpr.forallE name type body binderInfo =>
-              let typeResult := psKernelC0LiftChanged type start amount;
-              let bodyResult := psKernelC0LiftChanged body (Nat.succ start) amount;
+              let typeResult := psKernelC0LiftNonzeroChanged type start amount;
+              let bodyResult := psKernelC0LiftNonzeroChanged body (Nat.succ start) amount;
               if (Prod.snd typeResult) then
                 Prod.mk
                   (PsKernelExpr.forallE
@@ -236,9 +233,9 @@ def psKernelC0LiftChanged
               else
                 Prod.mk expr false
           | PsKernelExpr.letE name type value body nondep =>
-              let typeResult := psKernelC0LiftChanged type start amount;
-              let valueResult := psKernelC0LiftChanged value start amount;
-              let bodyResult := psKernelC0LiftChanged body (Nat.succ start) amount;
+              let typeResult := psKernelC0LiftNonzeroChanged type start amount;
+              let valueResult := psKernelC0LiftNonzeroChanged value start amount;
+              let bodyResult := psKernelC0LiftNonzeroChanged body (Nat.succ start) amount;
               if (Prod.snd typeResult) then
                 Prod.mk
                   (PsKernelExpr.letE
@@ -269,7 +266,7 @@ def psKernelC0LiftChanged
               else
                 Prod.mk expr false
           | PsKernelExpr.mdata metadata body =>
-              let bodyResult := psKernelC0LiftChanged body start amount;
+              let bodyResult := psKernelC0LiftNonzeroChanged body start amount;
               if (Prod.snd bodyResult) then
                 Prod.mk
                   (PsKernelExpr.mdata
@@ -279,7 +276,7 @@ def psKernelC0LiftChanged
               else
                 Prod.mk expr false
           | PsKernelExpr.proj typeName index body =>
-              let bodyResult := psKernelC0LiftChanged body start amount;
+              let bodyResult := psKernelC0LiftNonzeroChanged body start amount;
               if (Prod.snd bodyResult) then
                 Prod.mk
                   (PsKernelExpr.proj
@@ -291,6 +288,17 @@ def psKernelC0LiftChanged
                 Prod.mk expr false
           | _ =>
               Prod.mk expr false
+
+/-- Zero-lift returns the original syntax without a traversal. -/
+def psKernelC0LiftChanged
+    (expr : PsKernelExpr)
+    (start : Nat)
+    (amount : Nat) :
+    Prod PsKernelExpr Bool :=
+  if Nat.beq amount 0 then
+    Prod.mk expr false
+  else
+    psKernelC0LiftNonzeroChanged expr start amount
 
 def psKernelExprLiftLooseBVarsChanged
     (expr : PsKernelExpr)

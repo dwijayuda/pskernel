@@ -1,0 +1,43 @@
+name: C0 certified loose-BVar csimp native correctness
+on:
+  push:
+    branches: [research/pskernel-c0-loose-bvar-native-csimp-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-loose-bound-csimp-native.yml'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedLooseBVarBound.lean'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Architecture/CertifiedInstantiateMemo.lean'
+      - 'psc0/packages/pskernel-c0/test/C0LooseBVarBoundRegression.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certified-source-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Qualify actual compiled C0 and source-checked native rewrite
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build c0OfficialReplay
+          lake env lean --run test/C0LooseBVarBoundRegression.lean
+          lake env lean --run test/C0CertifiedInstantiateMemoRegression.lean
+          lake env lean --run test/C0AdaptiveInstantiationRegression.lean
+          lake env lean --run test/C0OfficialNdjsonReplay.lean
+          lake env lean --run test/C0ComputedMVarFlagRegression.lean
+          echo "C0_LOOSE_BOUND_CSIMP_NATIVE=SOURCE_CERTIFIED_REGRESSIONS_PASS"

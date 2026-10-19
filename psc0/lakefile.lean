@@ -304,6 +304,7 @@ lean_lib PsElab where
     `Ps.Elab.Term,
     `Ps.Elab.Monotonicity, `Ps.Elab.PartialFixpoint,
     `Ps.Elab.Recursion,
+    `Ps.Elab.DataIndexPromotion,
     `Ps.Elab.Data,
     `Ps.Elab.Declaration,
     `Ps.Elab.ExposedProofs,

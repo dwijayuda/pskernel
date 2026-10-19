@@ -283,10 +283,10 @@ def main : IO Unit := do
     "constructor parameters must remain uniform"
   expectDataRefusal
     "inductive P where { | bad(next: Q -> Nat) }\ninductive Q where { | good }\n"
-    "unsupported recursive field"
+    "recursive family occurs in a function-field domain"
   expectDataRefusal
     "inductive P where { | nested(next: List(Q -> Nat)) }\ninductive Q where { | good }\n"
-    "unsupported recursive field"
+    "recursive family occurs in a function-field domain"
 
   let some first := group.declarations.head? | throw (IO.userError "missing group head")
   expectCodecRefusal (group.declarations ++ [first])

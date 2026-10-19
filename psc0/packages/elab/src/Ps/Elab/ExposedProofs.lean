@@ -126,8 +126,9 @@ def psElabExposedProofVisit (fuel : Nat) (enabled : Bool)
         let checked ← psElabResolvedTerm
           (psElabContextWithLocal (psElabContextEmpty environment levels) locals)
           replacement (some type)
-        return (checked.term, {
-          state with environment, nextIndex
+        return (checked.term, { state with
+          environment := environment
+          nextIndex := nextIndex
           auxiliaries := state.auxiliaries ++ [declaration]
           owners := state.owners ++ [(name, owner)] })
       else

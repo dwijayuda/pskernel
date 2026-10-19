@@ -84,6 +84,12 @@ jobs:
           test "$RUNNER_OS" = Linux
           test ! -d ../packages/pskernel-core
           node ../scripts/pscv0-native-profile.mjs
+      - name: Restore the exact pinned Lean toolchain
+        id: lean-toolchain
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: ~/.elan/toolchains/leanprover--lean4---v4.35.0
+          key: pscv0-lean-eb6cafb7290e8bd5f2937522d8d804f58f02bafc-${{ runner.os }}-${{ runner.arch }}-v1
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0/v7-native
@@ -92,6 +98,17 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
+      - name: Verify and retain the exact Lean toolchain
+        run: |
+          set -euo pipefail
+          lean --version | tee "$RUNNER_TEMP/pscv0-toolchain-version.txt"
+          grep -F 'version 4.35.0' "$RUNNER_TEMP/pscv0-toolchain-version.txt"
+          grep -F 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc' "$RUNNER_TEMP/pscv0-toolchain-version.txt"
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        if: steps.lean-toolchain.outputs.cache-hit != 'true'
+        with:
+          path: ~/.elan/toolchains/leanprover--lean4---v4.35.0
+          key: pscv0-lean-eb6cafb7290e8bd5f2937522d8d804f58f02bafc-${{ runner.os }}-${{ runner.arch }}-v1
       - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
         with:
           path: |

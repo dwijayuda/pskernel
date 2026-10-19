@@ -6,6 +6,10 @@ import PsKernelLean.Admission
 -- declarations as Core metadata or recursive instance assumptions.
 universe u
 
+inductive M3FunctionNested where
+  | node (children : List (Nat → M3FunctionNested))
+example : M3FunctionNested := .node [fun _ => .node []]
+
 inductive M3NestedShape (A : Type u) (a : A) : Type u where
   | leaf (value : A)
   | direct (child : M3NestedShape A a)
@@ -503,9 +507,9 @@ private def checkRefusals (environment : PsEnvironment) (shape : PsElabDeclarati
   expectSourceRefused environment "constructor-local specialization"
     "inductive Captured: Nat -> Type where { | branch(n: Nat, children: List(Captured(n))): Captured(n) }\n"
     "nested specialization requires selected containers and common parameters only"
-  expectSourceRefused environment "function-valued nested field"
-    "inductive FunctionNested where { | node(children: List(Nat -> FunctionNested)) }\n"
-    "unsupported recursive field; expected a positive direct family occurrence"
+  expectSourceRefused environment "negative function domain inside List"
+    "inductive NegativeFunctionNested where { | node(children: List(NegativeFunctionNested -> Nat)) }\n"
+    "recursive family occurs in a function-field domain"
   expectSourceRefused environment "nonuniform occurrence erased by beta reduction"
     "inductive ErasedNonuniform(A: Type) where { | hide(value: (fun (T: Type) => Nat)(ErasedNonuniform(Nat))) }\n"
     "constructor parameters must remain uniform"
@@ -659,12 +663,15 @@ def main (args : List String) : IO Unit := do
   let (mutualGroup, mutualOrigin) ← fromExcept (elaborateGroup mutualSource)
   let (indexed, indexedOrigin) ← fromExcept (elaborateGroup indexedSource)
   let (keyGroup, _) ← fromExcept (elaborateGroup keySource)
-  let groups := shape.declarations ++ mutualGroup.declarations ++ indexed.declarations
+  let (functionGroup, _) ← fromExcept (elaborateGroup
+    "inductive M3FunctionNested where { | node(children: List(Nat -> M3FunctionNested)) }\n")
+  let groups := shape.declarations ++ mutualGroup.declarations ++ indexed.declarations ++ functionGroup.declarations
   let input ← add psSelfHostProdPreludeEnvironment (groups ++ keyGroup.declarations)
   oneAdmission input shape.declarations 1
   oneAdmission input mutualGroup.declarations 2
   oneAdmission input indexed.declarations 1
   oneAdmission input keyGroup.declarations 1
+  oneAdmission input functionGroup.declarations 1
   checkPlans input
   let origins := [shapeOrigin,
     selectedOrigin mutualOrigin (psRootName "M3NestedLeft"),

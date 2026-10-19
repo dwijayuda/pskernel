@@ -1,3 +1,4 @@
+import Ps.Elab.DataIndexPromotion
 import Ps.Elab.Term
 import Ps.Meta.Inductive
 import Ps.Core.Nested
@@ -315,8 +316,17 @@ def psElabInductiveGroup (environment : PsEnvironment)
       return (state.fst ++ constructorsRev.reverse,
         state.snd ++ (psElabFinishSourceInfo header.context header.info.name :: receiptsRev.reverse))) ([], [])
   let withConstructors ← psAddDeclarationList withHeaders constructors
-  let recursors ← psBuildInductiveGroupRecursors
-    { first.context with environment := withConstructors } first.bindersRev plan constructors
+  let (context, plan, constructors) ← psElabDataPromoteIndices
+    { first.context with environment := withConstructors } plan constructors
+  let declarations := plan.members.map PsDeclaration.inductiveDecl
+  let withHeaders ← psAddDeclarationList environment declarations
+  let withConstructors ← psAddDeclarationList withHeaders constructors
+  let firstInfo :: _ := plan.members | throw (.data "empty inductive group")
+  let parameters ← psElabOpenCoreTelescope 4096
+    { context with environment := withConstructors, localContext := psLocalEmpty }
+    firstInfo.type (some firstInfo.numParams)
+  let recursors ← psBuildInductiveGroupRecursors parameters.context
+    parameters.bindersRev plan constructors
   return { declarations := declarations ++ constructors ++ recursors, sourceInfo }
 
 def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyntaxName)

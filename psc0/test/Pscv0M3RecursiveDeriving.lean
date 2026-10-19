@@ -3,6 +3,14 @@ import Ps.Host.NativeV7
 -- Independent pinned Lean oracle. The portable source is parsed/elaborated
 -- separately. Use its exact family name so Repr compares text, not renamed text.
 universe u
+
+inductive M3FunctionNested where
+  | node (children : List (Nat → M3FunctionNested))
+example : True := by
+  fail_if_success let bad : Hashable (Nat → M3FunctionNested) := inferInstance
+  fail_if_success let bad : Repr (Nat → M3FunctionNested) := inferInstance
+  fail_if_success let bad : BEq (Nat → M3FunctionNested) := inferInstance
+  trivial
 inductive M3HashTree (A : Type u) where
   | leaf : A → M3HashTree A
   | fork : M3HashTree A → M3HashTree A → M3HashTree A
@@ -431,7 +439,7 @@ private def checkFixedpointSource : IO Unit := do
 -- kernel-checked logical-only positives in Pscv0M3PartialFixpoint.
 private def refusals : List (String × String × String) := [
   ("nested-function-field", "inductive NestedHash where { | node(children: List(Nat -> NestedHash)) } deriving Hashable\n",
-    "unsupported recursive field; expected a positive direct family occurrence"),
+    "deriving field has incompatible specialization parameters or indices"),
   ("nested-nonuniform-parameter",
     "inductive BadNested(A: Type) where { | branch(children: List(BadNested(Nat))) }\n",
     "constructor parameters must remain uniform"),
@@ -440,13 +448,13 @@ private def refusals : List (String × String × String) := [
   ("missing-field-dictionary", "inductive FunctionHash where { | leaf(value: Nat -> Nat) | node(next: FunctionHash) } deriving Hashable\n",
     "deriving field has no checked instance"),
   ("repr-nested-function-field", "inductive NestedRepr where { | node(children: List(Nat -> NestedRepr)) } deriving Repr\n",
-    "unsupported recursive field; expected a positive direct family occurrence"),
+    "deriving field has incompatible specialization parameters or indices"),
   ("repr-indexed-dependent-field", "inductive IndexedRepr: Nat -> Type where { | intro(n: Nat, value: Fin(n)): IndexedRepr(n) } deriving Repr\n",
     "deriving requires independent runtime field types"),
   ("repr-missing-field-dictionary", "inductive FunctionRepr where { | leaf(value: Nat -> Nat) | node(next: FunctionRepr) } deriving Repr\n",
     "deriving field has no checked instance"),
   ("beq-nested-function-field", "inductive NestedBEq where { | node(children: List(Nat -> NestedBEq)) } deriving BEq\n",
-    "unsupported recursive field; expected a positive direct family occurrence"),
+    "deriving field has incompatible specialization parameters or indices"),
   ("beq-indexed-recursive", "inductive IndexedBEq: Nat -> Type where { | stop: IndexedBEq(0) | next(n: Nat, child: IndexedBEq(n)): IndexedBEq(Nat.succ(n)) } deriving BEq\n",
     "deriving indexed families is not yet implemented"),
   ("beq-missing-field-dictionary", "inductive FunctionBEq where { | leaf(value: Nat -> Nat) | node(next: FunctionBEq) } deriving BEq\n",

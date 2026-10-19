@@ -95,6 +95,18 @@ jobs:
           node -e 'const fs=require("fs"); const m=JSON.parse(fs.readFileSync("/tmp/psc1-direct.js.map","utf8")); if(m.version!==3||m.sources[0]!=="psc1-direct.lean"||!m.mappings||!m.sourcesContent[0].includes("def idNat"))process.exit(1)'
           cp /tmp/psc1-direct.js /tmp/psc1-direct.mjs
           node --input-type=module -e 'import("/tmp/psc1-direct.mjs").then(m=>{if(m.idNat(42n)!==42n)process.exit(1)})'
+          # The direct emitter now selects the stack-safe recursion printer,
+          # while preserving source maps generated from its final positions.
+          grep -q 'direct JsIR v1 stack-safe' /tmp/psc1-direct.js
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const source=readFileSync('/tmp/psc1-direct.js','utf8');
+          if(!source.includes('export function idNat')) throw Error('PSC1_STACK_SAFE_PUBLIC_API_MISSING');
+          const map=JSON.parse(readFileSync('/tmp/psc1-direct.js.map','utf8'));
+          if(!map.mappings || map.sourcesContent[0].indexOf('idNat')<0)
+            throw Error('PSC1_STACK_SAFE_MAP_MISSING');
+          console.log('PSC1_STACK_SAFE_DIRECTJS: PASS');
+          NODE
           lake exe psc1 build /tmp/psc1-direct.lean --target rust --out /tmp/psc1-direct.rs
           test -s /tmp/psc1-direct.rs
           test -s /tmp/psc1-direct.cargo/Cargo.toml

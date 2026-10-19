@@ -1748,3 +1748,11 @@ def psJsEmitValidatedModuleWithPositions
   let ir ← (psJsLowerValidatedModule module).mapError PsJsEmitError.lower
   let _ ← (psJsValidateModule ir).mapError PsJsEmitError.targetValidation
   psJsPrintModuleWithPositions ir
+
+-- Native direct JS uses the existing stack-safe recursion printer while
+-- keeping generated-span observations tied to the same final bytes.
+def psJsEmitValidatedModuleStackSafeWithPositions
+    (module : PsValidatedIrModule) : Except PsJsEmitError PsJsPrintedModule := do
+  let ir ← (psJsLowerValidatedModule module).mapError PsJsEmitError.lower
+  let _ ← (psJsValidateModule ir).mapError PsJsEmitError.targetValidation
+  psJsPrintModuleStackSafeWithPositions ir

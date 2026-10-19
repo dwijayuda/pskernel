@@ -86,7 +86,7 @@ def psHostDirectJavaScript
   let declaration ← match psHostDirectDeclarationSource validated with
     | .ok text => pure text
     | .error reason => throw (IO.userError reason)
-  let emitted ← match psJsEmitValidatedModuleWithPositions validated with
+  let emitted ← match psJsEmitValidatedModuleStackSafeWithPositions validated with
     | .ok text => pure text
     | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
   let sourceText := loaded.2.1

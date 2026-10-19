@@ -19,15 +19,15 @@ private def sourceEntry (kind : PsCompilerSourceKind) : String :=
 private def compilerSourceInputs (kind : PsCompilerSourceKind)
     (position list : String) : List PsPscv0ModuleSource :=
   let extension := psCompilerSourceKindExtension kind
-  let prefix := match kind with
+  let sourcePrefix := match kind with
     | .lean => "packages/foundation/src/"
     | .proofScript => "selfhost/core-v7/"
   [{ name := "CompilerWorkload", sourceKind := kind
      sourceName := "selected/CompilerWorkload" ++ extension, source := sourceEntry kind },
    { name := "Ps.Foundation.Source", sourceKind := kind
-     sourceName := prefix ++ "Ps/Foundation/Source" ++ extension, source := position },
+     sourceName := sourcePrefix ++ "Ps/Foundation/Source" ++ extension, source := position },
    { name := "Ps.Foundation.List", sourceKind := kind
-     sourceName := prefix ++ "Ps/Foundation/List" ++ extension, source := list }]
+     sourceName := sourcePrefix ++ "Ps/Foundation/List" ++ extension, source := list }]
 
 private def sourceReplay (declarations : List PsDeclaration) :
     IO Lean.Kernel.Environment := do

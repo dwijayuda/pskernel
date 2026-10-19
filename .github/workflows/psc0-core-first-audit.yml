@@ -14,6 +14,7 @@ on:
       - 'psc0/scripts/core-first-*.py'
       - 'psc0/scripts/Pscv0Core*.lean'
       - 'psc0/test/Pscv0Core*.lean'
+      - 'psc0/selfhost/core-v7/**'
       - 'psc0/test/Pscv0Bootstrap*.lean'
       - 'psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md'
       - 'psc0/docs/PSCV0_REFERENCE_ADOPTION.json'
@@ -103,6 +104,7 @@ jobs:
             /psc0/packages/pskernel-lean/provider/
             /psc0/host/src/
             /psc0/test/
+            /psc0/selfhost/core-v7/
             /psc0/scripts/
             /psc0/v7-native/
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -204,6 +206,7 @@ jobs:
             /psc0/packages/pskernel-lean/provider/
             /psc0/host/src/
             /psc0/test/
+            /psc0/selfhost/core-v7/
             /psc0/scripts/
             /psc0/v7-native/
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -286,6 +289,7 @@ jobs:
             /psc0/packages/pskernel-lean/provider/
             /psc0/host/src/
             /psc0/test/
+            /psc0/selfhost/core-v7/
             /psc0/scripts/
             /psc0/v7-native/
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -357,6 +361,20 @@ jobs:
           cmp ../dist/core-first/authoring/CoreBootstrapCandidate.lean ../packages/environment/src/Ps/Environment/BootstrapData.lean
           sha256sum ../dist/core-first/authoring/CoreBootstrapCandidate.lean > ../dist/core-first/authoring/bootstrap.sha256
           python3 ../scripts/core-first-ci-evidence.py bootstrap-source ../dist/core-first/authoring/CoreBootstrapCandidate.lean
+      - name: Measure native compiler-source foundation metadata
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake env .lake/build/bin/pscv0_core_environment_export foundation-metadata ../dist/core-first/authoring/foundation-native-metadata.json 2>&1 | tee ../dist/core-first/authoring/foundation-native-metadata.log
+      - name: Author the complete compiler-source foundation candidate
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' '33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736  ../packages/foundation/src/Ps/Foundation/Source.lean' '0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680  ../packages/foundation/src/Ps/Foundation/List.lean' | sha256sum --check
+          sha256sum ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps | tee ../dist/core-first/authoring/foundation-workload.sha256
+          wc -c ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps | tee ../dist/core-first/authoring/foundation-workload-bytes.txt
+          /usr/bin/time -v -o ../dist/core-first/authoring/foundation-resource.txt .lake/build/bin/pscv0_core_environment_export foundation ../dist/core-first/authoring/CoreFoundationCandidate.lean 2>&1 | tee ../dist/core-first/authoring/foundation-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
+          sha256sum ../dist/core-first/authoring/CoreFoundationCandidate.lean > ../dist/core-first/authoring/foundation.sha256
       - name: Author and check the standalone compiler byte-word candidate
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |

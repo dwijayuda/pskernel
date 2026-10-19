@@ -1424,6 +1424,25 @@ def exportCoreBootstrapCandidate (output : System.FilePath) : IO Unit :=
     provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent Core-first bootstrap candidate from an empty kernel environment.\nActual native declarations; no Full boundary or legacy primitive assumptions.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+-- Complete native closure for the two unchanged compiler-source modules
+-- Ps.Foundation.Source and Ps.Foundation.List. This remains an unselected
+-- candidate; source registry metadata and source compilation are separate gates.
+def coreFoundationCandidateRoots : List Lean.Name :=
+  coreBootstrapCandidateRoots ++
+    [`OfNat, `OfNat.ofNat, `instOfNatNat, `Bool.decEq]
+
+def exportCoreFoundationCandidate (output : System.FilePath) : IO Unit :=
+  exportStandardCore {
+    roots := coreFoundationCandidateRoots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := []
+    shareSource := true
+    publicPrefix := "psCoreFoundationCandidate"
+    privatePrefix := "coreFoundationCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nIndependent native candidate for the complete Ps.Foundation.Source/List source workload.\nEmpty boundary; actual reached declarations; no Full fallback or added assumptions.\nSource registry metadata and source acceptance require separate qualification.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
 def exportCoreByteWordCandidate (output : System.FilePath) : IO Unit :=
   exportStandardCore {
     roots := coreBootstrapCandidateRoots ++ coreByteWordCandidateRoots
@@ -1781,5 +1800,114 @@ def auditCoreCandidateAgainstFull (label : String)
     ("exactDeclarationsAndEffectiveReducibility",
       Lean.toJson ((declarations.filter exactEffective).length)),
     ("fullDeclarations", Lean.toJson full.declarations.length)]).compress
+
+-- Search metadata is an independently measured part of the source profile.
+-- Reading this receipt does not qualify the generated declaration asset or
+-- claim that the complete compiler-source pair has elaborated successfully.
+def auditCoreFoundationCandidateMetadata (output : System.FilePath) : IO Unit := do
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core foundation metadata requires the pinned Lean commit")
+  Lean.initSearchPath (← Lean.findSysroot)
+  unsafe Lean.enableInitializersExecution
+  let native ← Lean.importModules #[{ module := `Init }] {} (loadExts := true)
+  let mut reachedNames : Lean.NameSet := {}
+  let mut reached : Array Lean.ConstantInfo := #[]
+  for root in coreFoundationCandidateRoots do
+    for info in ← standardDependencyClosure native root {} false do
+      if !reachedNames.contains info.name then
+        reachedNames := reachedNames.insert info.name
+        reached := reached.push info
+  reached := reached.qsort (fun a b => Lean.Name.lt a.name b.name)
+  let noncomputable := reached.filter fun info =>
+    Lean.isNoncomputable native info.name
+  let noncomputableRows := noncomputable.map fun info => Lean.Json.mkObj [
+    ("name", Lean.toJson (toString info.name)),
+    ("nativeNoncomputable", Lean.toJson true),
+    ("dependencyPath", Lean.toJson
+      ((standardDependencyPath native coreFoundationCandidateRoots info.name {} false)
+        .map toString))]
+  let outputs := (Lean.getOutParamPositions? native `OfNat).map Array.toList
+  let outputLevels := (Lean.getOutLevelParamPositions? native `OfNat).map Array.toList
+  unless Lean.isClass native `OfNat &&
+      outputs == some ([] : List Nat) &&
+      outputLevels == some ([] : List Nat) do
+    throw (IO.userError "native OfNat class/output metadata differs")
+  let some ordinary :=
+      (Lean.Meta.instanceExtension.getState native).instanceNames.find? `instOfNatNat
+    | throw (IO.userError "native ordinary instOfNatNat registration is absent")
+  let ordinaryGlobal := match ordinary.attrKind with
+    | .global => true
+    | _ => false
+  unless ordinary.priority == 1000 &&
+      ordinary.globalName? == some `instOfNatNat && ordinaryGlobal &&
+      ordinary.val == Lean.Expr.const `instOfNatNat [] do
+    throw (IO.userError "native ordinary instOfNatNat metadata differs")
+  let defaults :=
+    (((Lean.Meta.defaultInstanceExtension.getState native).defaultInstances.find? `OfNat)
+      .getD []).filter (fun entry => entry.1 == `instOfNatNat)
+  let [(_, defaultPriority)] := defaults
+    | throw (IO.userError "native default instOfNatNat is absent or duplicated")
+  unless defaultPriority == 100 do
+    throw (IO.userError "native default instOfNatNat priority differs")
+  let some instanceInfo := native.find? `instOfNatNat
+    | throw (IO.userError "native instOfNatNat declaration is absent")
+  unless instanceInfo.levelParams.isEmpty &&
+      instanceInfo.type.getForallBody.getAppFn.isConstOf `OfNat do
+    throw (IO.userError "native instOfNatNat telescope/class differs")
+  unless Lean.getReducibilityStatusCore native `instOfNatNat == .instanceReducible &&
+      Lean.getReducibilityStatusCore native `Bool.decEq == .implicitReducible do
+    throw (IO.userError "native foundation search transparency differs")
+  let instanceType ← match exportExpr instanceInfo.type with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  let declarationRows ←
+      ([`OfNat, `OfNat.ofNat, `instOfNatNat, `Bool.decEq] : List Lean.Name).mapM
+        fun name => do
+          let some info := native.find? name
+            | throw (IO.userError ("native foundation root is absent: " ++ toString name))
+          let declaration ← match exportDeclaration native [] info with
+            | .ok value => pure value
+            | .error error => throw (IO.userError (toString name ++ ": " ++ error))
+          let definition := match info with
+            | .defnInfo _ => true
+            | _ => false
+          pure (Lean.Json.mkObj [
+            ("name", Lean.toJson (toString name)),
+            ("levelParameters", Lean.toJson (info.levelParams.map toString)),
+            ("declaration", Lean.toJson (psStandardSnapshotDeclaration declaration)),
+            ("reducibility", Lean.toJson
+              (if definition then some (sourceStatus native name) else none))])
+  let instanceRow := fun (priority : Nat) => Lean.Json.mkObj [
+    ("name", Lean.toJson ("instOfNatNat" : String)),
+    ("valueDeclaration", Lean.toJson ("instOfNatNat" : String)),
+    ("className", Lean.toJson ("OfNat" : String)),
+    ("levelParameters", Lean.toJson (instanceInfo.levelParams.map toString)),
+    ("type", Lean.toJson (psStandardSnapshotExpr instanceType)),
+    ("priority", Lean.toJson priority)]
+  let report := Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-core-foundation-native-metadata/1" : String)),
+    ("nativeCommit", Lean.toJson Lean.githash),
+    ("nativeModules", Lean.toJson (["Init"] : List String)),
+    ("nativeClassMetadataExtensionsLoaded", Lean.toJson true),
+    ("roots", Lean.toJson (coreFoundationCandidateRoots.map toString)),
+    ("nativeClosureDeclarations", Lean.toJson reached.size),
+    ("nativeClosureNames", Lean.toJson (reached.map (fun info => toString info.name))),
+    ("nativeNoncomputableNames", Lean.toJson
+      (noncomputable.map (fun info => toString info.name))),
+    ("nativeNoncomputableDeclarations", .arr noncomputableRows),
+    ("portableNoncomputableMetadataInstalled", Lean.toJson false),
+    ("runtimePolicyQualified", Lean.toJson false),
+    ("selectedClasses", .arr #[Lean.Json.mkObj [
+      ("name", Lean.toJson ("OfNat" : String)),
+      ("outputParameters", Lean.toJson outputs),
+      ("outputLevels", Lean.toJson outputLevels)]]),
+    ("selectedOrdinaryInstances", .arr #[instanceRow ordinary.priority]),
+    ("selectedDefaultInstances", .arr #[instanceRow defaultPriority]),
+    ("selectedExportedAliases", Lean.toJson ([] : List String)),
+    ("nativeRootDeclarations", .arr declarationRows.toArray),
+    ("portableProfileInstalled", Lean.toJson false),
+    ("completeSourceAcceptanceQualified", Lean.toJson false)]
+  IO.FS.writeFile output (report.compress ++ "\n")
+  IO.println report.compress
 
 end PsV7Native

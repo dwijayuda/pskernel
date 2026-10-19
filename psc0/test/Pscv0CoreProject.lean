@@ -150,8 +150,8 @@ private def refuse (profile : PsCompilerProfileContext) (entry : String)
       ensure (!graphValid && message.startsWith expected)
         ("manifest phase: " ++ message)
   match psCompilerEnginePreparePscv0Project profile entry sources with
-  | .error message => ensure (message.startsWith expected)
-      ("refusal phase: " ++ message)
+  | .error message =>
+      ensure (message.startsWith expected) ("refusal phase: " ++ message)
   | .ok _ => fail ("refused source accepted: " ++ expected)
 
 private def checkProject (profile : PsCompilerProfileContext)

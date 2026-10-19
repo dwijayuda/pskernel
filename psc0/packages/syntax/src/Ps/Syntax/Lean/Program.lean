@@ -77,12 +77,12 @@ def psLeanProgramMutual (fuel : Nat) (cursor : PsTokenCursor)
       return { value := (membersRev.reverse, closing.token.span), cursor := closing.cursor }
     let parsed ← psLeanProgramOrdinaryCommand cursor true defaultPrivate
     let member ← match parsed.value with
-      | .declaration declaration => pure (PsSyntaxMutualMember.mk declaration false none)
-      | .privateDeclaration declaration => pure (PsSyntaxMutualMember.mk declaration true none)
+      | .declaration declaration => pure (PsSyntaxMutualMember.mk declaration false none [])
+      | .privateDeclaration declaration => pure (PsSyntaxMutualMember.mk declaration true none [])
       | .registeredDeclaration declaration registration =>
-        pure (PsSyntaxMutualMember.mk declaration false (some registration))
+        pure (PsSyntaxMutualMember.mk declaration false (some registration) [])
       | .privateRegisteredDeclaration declaration registration =>
-        pure (PsSyntaxMutualMember.mk declaration true (some registration))
+        pure (PsSyntaxMutualMember.mk declaration true (some registration) [])
       | .attributedDeclaration declaration registration isPrivate attributes =>
         pure { declaration, registration, isPrivate, attributes }
       | _ => throw "PSCV0-MUTUAL-HEAD"

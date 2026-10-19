@@ -554,7 +554,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     | .definition .. | .wellFoundedDefinition .. | .fixedpointDefinition .. =>
       registration.isNone ||
         (psElabCommandPreDefinitionRegistration
-          [PsSyntaxMutualMember.mk source isPrivate registration] false).isSome
+          [PsSyntaxMutualMember.mk source isPrivate registration []] false).isSome
     | _ => false
   if usePreDefinitions then
     let nonrecursiveEquations := match source with
@@ -562,7 +562,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
       | .definition .. => !state.scope.variables.isEmpty
       | _ => true
     return ← psElabCommandPreDefinitions state
-      [PsSyntaxMutualMember.mk source isPrivate registration] (psElabOriginSource source).snd false
+      [PsSyntaxMutualMember.mk source isPrivate registration []] (psElabOriginSource source).snd false
       nonrecursiveEquations
   let qualified := psScopeQualified state.scope (psElabOriginSource source).fst
   -- Only explicit project modules mangle private identities. Single-file

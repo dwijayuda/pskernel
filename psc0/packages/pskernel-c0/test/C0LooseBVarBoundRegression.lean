@@ -3,6 +3,7 @@ import Lean
 
 private theorem c0_bound_lt_max (o a b : Nat) :
     (o < Nat.max a b) ↔ (o < a ∨ o < b) := by
+  change (o < max a b) ↔ (o < a ∨ o < b)
   rcases Nat.le_total a b with hab | hba
   · rw [Nat.max_eq_right hab]
     constructor

@@ -1,16 +1,15 @@
 name: PSKernel-C0 genuine dag_app_binder fuel-4096 strict acceptance
+# Authentic whole-proof replay is expensive and guaranteed to fail until
+# source-certified checking is actually routed into the production checker.
+# Do not exhaust shared CI capacity on every non-admitting research module.
 on:
-  push:
-    branches: [research/pskernel-c0-explicit-inference-frames-20261019]
-    paths:
-      - '.github/workflows/pskernel-c0-dag-app-binder-strict.yml'
-      - 'psc0/packages/pskernel-c0/src/**'
-      - 'psc0/packages/pskernel-c0/test/C0DeepFrameSourceProof.lean'
   pull_request:
     branches: [perf/pskernel-c0-v7-rust-20261012]
     paths:
       - '.github/workflows/pskernel-c0-dag-app-binder-strict.yml'
-      - 'psc0/packages/pskernel-c0/src/**'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Checker/**'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/API/**'
+      - 'psc0/packages/pskernel-c0/src/Ps/KernelCore/Admission/**'
   workflow_dispatch:
 permissions:
   contents: read

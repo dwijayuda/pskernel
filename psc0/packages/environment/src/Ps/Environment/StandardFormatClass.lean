@@ -5,6 +5,7 @@ Modified: ordinary portable Core declarations and shared dictionary registration
 -/
 import Ps.Environment.StandardFormat
 import Ps.Environment.StandardClass
+import Ps.Environment.ReprExpr
 
 -- One-field Type-universe class. alpha is local 0, dictionary local 1;
 -- method builders own their remaining locals. No host elaborator is imported.
@@ -25,10 +26,6 @@ def psStandardMethodClass (name : PsName) (method : String)
 
 def psFormatClassType (name : String) (type : PsExpr) (level : PsLevel := .zero) : PsExpr :=
   .app (.constE (psDecisionName name) [level]) type
-
-def psFormatClassValue (name : String) (type method : PsExpr)
-    (level : PsLevel := .zero) : PsExpr :=
-  psLogicApply (.constE (psNameAppendStr (psDecisionName name) "mk") [level]) [type, method]
 
 def psFormatClassMethod (name method : String) (type dictionary : PsExpr)
     (level : PsLevel := .zero) : PsExpr :=

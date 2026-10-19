@@ -1,5 +1,5 @@
 import Ps.Elab.DerivingContext
-import Ps.Environment.StandardInhabited
+import Ps.Environment.InhabitedExpr
 
 /-
 Reference: Lean 4.35.0 Lean/Elab/Deriving/Inhabited.lean at eb6cafb.

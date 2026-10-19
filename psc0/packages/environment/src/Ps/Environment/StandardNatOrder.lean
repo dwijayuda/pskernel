@@ -1,15 +1,13 @@
 import Ps.Environment.StandardGetElem
+import Ps.Environment.ReprExpr
 
 -- Checked natural-order closure for M1. All proof-bearing definitions are
 -- ordinary Core terms. Nat.ble keeps its audited efficient runtime intrinsic,
 -- but its formerly opaque logical model is now a checked structural definition.
 -- Proof reflection is separate from the computational comparison and erased.
-def psOrderNat : PsExpr := .constE psNatName []
 def psOrderSucc (n : PsExpr) : PsExpr := .app (.constE psNatSuccName []) n
 def psOrderLe (n m : PsExpr) : PsExpr :=
   psLogicApply (.constE (psDecisionName "Nat.le") []) [n, m]
-def psOrderCall (name : String) (args : List PsExpr) : PsExpr :=
-  psLogicApply (.constE (psDecisionName name) []) args
 def psOrderRefl (n : PsExpr) : PsExpr := psOrderCall "Nat.le.refl" [n]
 def psOrderStep (n m h : PsExpr) : PsExpr := psOrderCall "Nat.le.step" [n, m, h]
 def psOrderNatRec (level : PsLevel) (motive zero step major : PsExpr) : PsExpr :=

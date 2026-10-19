@@ -7,7 +7,7 @@ visible/nested groups, including each member's own index telescope. Selected
 containers preserve native formatting through heterogeneous checked motives.
 -/
 import Ps.Elab.DerivingContext
-import Ps.Environment.StandardRepr
+import Ps.Environment.ReprExpr
 
 structure PsElabDeriveReprConstructor where
   fields : PsElabDeriveFields

@@ -1,4 +1,5 @@
 import Ps.Environment.StandardFormatBasic
+import Ps.Environment.ReprExpr
 
 -- Shared authoring vocabulary for the checked formatter. These helpers build
 -- Core terms; they neither interpret source syntax nor run a host formatter.
@@ -14,15 +15,11 @@ def psFormatField (suffix : String) (index : Nat) (value : PsExpr) : PsExpr :=
   .proj (psFormatPrivateName suffix) index value
 def psFormatLet (id : Nat) (name : String) (type value body : PsExpr) : PsExpr :=
   .letE (psRootName name) type value (psExprAbstractFVar id body)
-def psFormatNat (n : Nat) : PsExpr := .lit (.natural n)
 def psFormatBool (b : Bool) : PsExpr := .constE (if b then psBoolTrueName else psBoolFalseName) []
-def psFormatIf (type condition yes no : PsExpr) : PsExpr :=
-  psStandardStringIf type condition yes no
 def psFormatNot (b : PsExpr) : PsExpr :=
   psFormatIf (.constE psBoolName []) b (psFormatBool false) (psFormatBool true)
 def psFormatAnd (a b : PsExpr) : PsExpr :=
   psFormatIf (.constE psBoolName []) a b (psFormatBool false)
-def psFormatInt (n : PsExpr) : PsExpr := .app (.constE psIntOfNatName []) n
 def psFormatPositive (n : PsExpr) : PsExpr :=
   psOrderCall "Nat.blt" [psFormatNat 0, psOrderCall "Int.toNat" [n]]
 def psFormatStringAppend (a b : PsExpr) : PsExpr :=

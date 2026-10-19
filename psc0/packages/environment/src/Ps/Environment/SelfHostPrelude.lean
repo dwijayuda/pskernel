@@ -1,13 +1,5 @@
 import Ps.Environment.Prelude
-
-def psSelfHostListNilName : PsName :=
-  psNameAppendStr psListName "nil"
-
-def psSelfHostListConsName : PsName :=
-  psNameAppendStr psListName "cons"
-
-def psSelfHostListRecName : PsName :=
-  psNameAppendStr psListName "rec"
+import Ps.Environment.ReprExpr
 
 def psSelfHostOptionNoneName : PsName :=
   psNameAppendStr psOptionName "none"
@@ -29,26 +21,6 @@ def psSelfHostExceptOkName : PsName :=
 
 def psSelfHostExceptRecName : PsName :=
   psNameAppendStr psSelfHostExceptName "rec"
-
-def psSelfHostListOf (alpha : PsExpr) (level : PsLevel := .zero) : PsExpr :=
-  PsExpr.app
-    (PsExpr.constE psListName [level])
-    alpha
-
-def psSelfHostListNilOf (alpha : PsExpr) (level : PsLevel := .zero) : PsExpr :=
-  PsExpr.app
-    (PsExpr.constE psSelfHostListNilName [level])
-    alpha
-
-def psSelfHostListConsOf
-    (alpha head tail : PsExpr) (level : PsLevel := .zero) : PsExpr :=
-  PsExpr.app
-    (PsExpr.app
-      (PsExpr.app
-        (PsExpr.constE psSelfHostListConsName [level])
-        alpha)
-      head)
-    tail
 
 def psSelfHostOptionOf (alpha : PsExpr) (level : PsLevel := .zero) : PsExpr :=
   PsExpr.app

@@ -20,7 +20,13 @@ OTHER_ROOTS = [
     "Ps.Host.NativeV7", "PsKernelLean.Prelude", "Ps.Compiler.Engine",
     "Ps.Compiler.Core", "Ps.Environment.Bootstrap", "Ps.Environment.Core",
     "Ps.Environment.Full", "Ps.Environment.Fingerprint", "PsKernelLean.Replay",
+    "Ps.Compiler.Pscv0Engine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
 ]
+ISOLATED_ROOTS = [
+    "Ps.Environment.Fingerprint", "PsKernelLean.Replay", "Ps.Compiler.Engine",
+    "Ps.Compiler.Pscv0Engine", "Ps.Environment.InhabitedExpr", "Ps.Environment.ReprExpr",
+]
+INDEPENDENT_COMPILER_ROOTS = ["Ps.Compiler.Pscv0Engine"] + PORTABLE_ROOTS[1:]
 FEATURES = {
     "mutual_blocks": r"(?m)^\s*mutual\b",
     "inductive_declarations": r"(?m)^\s*(?:(?:private|protected)\s+)?inductive\b",
@@ -199,6 +205,7 @@ def audit(repository):
         "head": head, "moduleCount": len(modules),
         "sourceBytes": sum(item["bytes"] for item in modules.values()),
         "portableCompiler": portable,
+        "independentCompilerCandidate": closure(INDEPENDENT_COMPILER_ROOTS, modules),
         "portableFeatureSignals": dict(sorted(signals.items())),
         "rootClosures": {name: closure([name], modules) for name in OTHER_ROOTS},
         "heavyAssets": assets, "packages": packages, "modules": modules,
@@ -218,7 +225,7 @@ def main():
         if report["portableCompiler"]["unresolvedProjectImports"]:
             raise ValueError(label + " has unresolved portable compiler imports: " +
                              repr(report["portableCompiler"]["unresolvedProjectImports"]))
-    for name in ["Ps.Environment.Fingerprint", "PsKernelLean.Replay"]:
+    for name in ISOLATED_ROOTS:
         graph = candidate["rootClosures"][name]
         if graph["unresolvedProjectImports"]:
             raise ValueError("isolated seam has unresolved imports: " + name)
@@ -228,6 +235,14 @@ def main():
                      item.startswith(("Ps.Environment.Standard", "Ps.Host."))]
         if forbidden:
             raise ValueError("isolated seam imports selected environment: " + repr(forbidden))
+    independent = candidate["independentCompilerCandidate"]
+    if independent["unresolvedProjectImports"] or independent["externalImports"]:
+        raise ValueError("independent compiler root has an unresolved or host import")
+    if any(name in {"Ps.Environment.Prelude", "Ps.Environment.SelfHostPrelude",
+                     "Ps.Environment.SelfHostProd", "PsKernelLean.Prelude"} or
+           name.startswith(("Ps.Environment.Standard", "Ps.Host.", "PsKernelLean."))
+           for name in independent["modules"]):
+        raise ValueError("independent compiler imports a Full or host composition")
     report = {
         "schema": "psc0-core-first-source-audit/1",
         "claim": "source/import/package inventory only; not semantic closure, selfhost or verified qualification",
@@ -251,12 +266,26 @@ def main():
             "unresolvedProjectImports", "fullCompositionImports"]}
         print("PSC0_CORE_SOURCE_AUDIT " + json.dumps(
             {"label": label, "head": value["head"], **summary}, sort_keys=True))
-        for root_name in ["Ps.Environment.Fingerprint", "PsKernelLean.Replay"]:
+        for root_name in ISOLATED_ROOTS:
             graph = value["rootClosures"][root_name]
             print("PSC0_CORE_SEAM_IMPORTS " + json.dumps({
                 "label": label, "root": root_name,
                 **{key: graph[key] for key in ["moduleCount", "sourceBytes",
                     "externalImports", "unresolvedProjectImports", "fullCompositionImports"]}
+            }, sort_keys=True))
+        graph = value["independentCompilerCandidate"]
+        print("PSC0_CORE_INDEPENDENT_COMPILER_IMPORTS " + json.dumps({
+            "label": label,
+            **{key: graph[key] for key in ["moduleCount", "sourceBytes",
+                "environmentBytes", "externalImports", "unresolvedProjectImports",
+                "fullCompositionImports"]}
+        }, sort_keys=True))
+        for name in value["portableCompiler"]["modules"]:
+            record = value["modules"][name]
+            print("PSC0_CORE_PORTABLE_MODULE " + json.dumps({
+                "label": label, "module": name,
+                **{key: record[key] for key in ["path", "bytes", "sha256",
+                    "gitBlobSHA1", "imports"]}
             }, sort_keys=True))
         print("PSC0_CORE_FEATURE_SIGNALS " + json.dumps(
             {"label": label, "signals": value["portableFeatureSignals"]}, sort_keys=True))

@@ -5,17 +5,9 @@ Author: Leonardo de Moura. Apache-2.0; see psc0/THIRD_PARTY_NOTICES.md.
 Modified: checked portable Core declarations and fold authoring helpers.
 -/
 import Ps.Environment.StandardData
+import Ps.Environment.ReprExpr
 
-def psFormatName : PsName := psDecisionName "Std.Format"
-def psFormatType : PsExpr := .constE psFormatName []
-def psFormatBehaviorName : PsName := psNameAppendStr psFormatName "FlattenBehavior"
 def psFormatBehaviorType : PsExpr := .constE psFormatBehaviorName []
-
-def psFormatCall (suffix : String) (arguments : List PsExpr := []) : PsExpr :=
-  psLogicApply (.constE (psNameAppendStr psFormatName suffix) []) arguments
-
-def psFormatBehavior (fill : Bool := false) : PsExpr :=
-  .constE (psNameAppendStr psFormatBehaviorName (if fill then "fill" else "allOrNone")) []
 
 def psFormatConstructors : List PsStandardDataConstructor :=
   let format := psFormatType

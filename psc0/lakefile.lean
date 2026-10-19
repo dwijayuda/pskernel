@@ -79,6 +79,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.Logic,
     `Ps.Environment.Connectives,
     `Ps.Environment.Decision,
+    `Ps.Environment.ReprExpr,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.StandardArithmetic,
@@ -94,6 +95,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardToString,
     `Ps.Environment.StandardOption,
     `Ps.Environment.StandardList,
+    `Ps.Environment.InhabitedExpr,
     `Ps.Environment.StandardInhabited,
     `Ps.Environment.StandardProduct,
     `Ps.Environment.StandardExcept,
@@ -173,11 +175,13 @@ lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
   roots := #[
     `Ps.Compiler,
+    `Ps.Compiler.Engine,
     `Ps.Compiler.Api,
     `Ps.Compiler.RecursorLift,
     `Ps.Compiler.RuntimeOwnership,
     `Ps.Compiler.WellFoundedRuntime,
     `Ps.Compiler.Sh1,
+    `Ps.Compiler.Pscv0Engine,
     `Ps.Compiler.Pscv0,
     `Ps.Compiler.Pscv0Modules
   ]

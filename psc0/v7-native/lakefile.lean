@@ -167,3 +167,21 @@ lean_exe pscv0_core_environment_export where
   srcDir := "../scripts"
   root := `Pscv0CoreEnvironmentExport
   supportInterpreter := true
+
+lean_exe pscv0_core_engine_seams where
+  srcDir := "../test"
+  root := `Pscv0CoreEngineSeams
+
+lean_exe pscv0_core_selected where
+  srcDir := "../test"
+  root := `Pscv0CoreSelected
+
+lean_exe pscv0_core_native_closure where
+  srcDir := "../scripts"
+  root := `Pscv0CoreNativeClosure
+  supportInterpreter := true
+
+lean_exe pscv0_core_native_seed_checks where
+  srcDir := "../scripts"
+  root := `Pscv0CoreNativeSeedChecks
+  supportInterpreter := true

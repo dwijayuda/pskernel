@@ -1,0 +1,331 @@
+{
+  "schema": "psc0-core-first-environment-ledger/1",
+  "purpose": "Design and evidence ledger only; not a loadable or authenticated profile",
+  "status": "initial-audit-and-isolated-seams",
+  "authority": {
+    "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
+    "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "maximumApprovedLogicalAssumptions": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ]
+  },
+  "baseline": {
+    "branch": "psc0/pscv0-v7-native-lean-v1",
+    "head": "33676076bcda7b0de5ec1f9803f49b8b1d28a058",
+    "tree": "87b8b0af6c72f5e8b28af97f9f990e28f73ac56e",
+    "portableRoots": [
+      "Ps.Compiler.Pscv0Modules",
+      "Ps.BackendTs.Readable",
+      "Ps.BackendRust.Module",
+      "Ps.BackendWasm.Module",
+      "Ps.CompilerIr.Checked",
+      "Ps.Codegen.Api",
+      "Ps.Codegen.Provenance"
+    ],
+    "portableModules": 316,
+    "portableSourceBytes": 26384235,
+    "environmentModules": 101,
+    "environmentSourceBytes": 23654198,
+    "unresolvedProjectImports": [],
+    "explicitExternalImports": [],
+    "implicitInitAccountedBySourceScan": false,
+    "sourceAuditRun": 39178166346,
+    "sourceAuditJob": 117825066237,
+    "fullLogicalFNV64": "fnv1a64:3071911941504503432",
+    "fullLogicalSHA256": "sha256:364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1"
+  },
+  "preservedFullCandidate": {
+    "branch": "psc0/m3-fixedpoint-foundation-20261018",
+    "head": "bf496ce399d9ec39794d6e9f7c3be919dfcffa58",
+    "run": 39176676179,
+    "conclusion": "failure",
+    "fullM3ExitsComplete": false,
+    "selectedForCore": false
+  },
+  "sourceAssets": [
+    {
+      "bytes": 620103,
+      "gitBlobSHA1": "2b2a085e58158c3213fcc938a2a2008bda11c1f1",
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardFloatConversionsData.lean",
+      "sha256": "a7484caea16ce69829f79bf59e3c0142fbada37f1690c8ead801e589b5f25d27"
+    },
+    {
+      "bytes": 11179796,
+      "gitBlobSHA1": "9d0d6330875315aab2fc931dd37ac9f0785d676d",
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardFloatOperationsData.lean",
+      "sha256": "ad82f59b48460a3b306312c3e9d72537e8b48201e432271a3be0424a576909df"
+    },
+    {
+      "bytes": 1574504,
+      "gitBlobSHA1": "669948bc6fcbda80ae3ad34b64a737350e85f3e0",
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardPartialFixpointData.lean",
+      "sha256": "88839668bab7113e8c0feb5bc930b3816ad191f4fce37c3e09610813992c2173"
+    },
+    {
+      "bytes": 773868,
+      "gitBlobSHA1": "4d2a5adad206f2d3a643495e9c6b342d326ceb91",
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardPlatformWordsData.lean",
+      "sha256": "54fd05f822dd6e30b11a38ee06f16054eb2edbae9e759c82196c2e4229f3a89e"
+    },
+    {
+      "bytes": 6457592,
+      "gitBlobSHA1": "f18badbaa052e191efad830441fa67c7c4d7902d",
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardUnsignedOperationsData.lean",
+      "sha256": "b33dc2e256f17da29a3236a24c2d8267bf04de4338d73c568cafc44ee686f2de"
+    },
+    {
+      "bytes": 466947,
+      "gitBlobSHA1": "43ed069f2e2d58da49a2fed3ce0ff98ef1872733",
+      "path": "psc0/packages/environment/src/Ps/Environment/StandardWellFoundedData.lean",
+      "sha256": "b6bd56c4ab6378905d1d3ac2f0155eb5bc4742be3e19e684d64ac1a3007716f3"
+    }
+  ],
+  "isolatedSeams": {
+    "head": "a34686faa951f1b3ac8add59162d5dcb90d5c3ea",
+    "run": 39178265318,
+    "job": 117825360002,
+    "status": "success",
+    "sourceJob": 117825360006,
+    "scope": "isolated fingerprint and trust-zero replay; not selected Core profile or selfhost"
+  },
+  "profiles": {
+    "Bootstrap": {
+      "status": "independent-native-export-checked; composition-and-identity-pending",
+      "selected": false,
+      "rootOwner": "PsV7Native.coreBootstrapCandidateRoots",
+      "emptyBoundary": true,
+      "allowedLogicalAssumptions": [],
+      "actualDeclarationManifest": null,
+      "actualAssumptions": [],
+      "logicalIdentity": null,
+      "surfaceIdentity": null,
+      "runtimeIdentity": null,
+      "checkedDeclarations": 76,
+      "comparedRecursorRules": 24,
+      "generatedSourceBytes": 118573
+    },
+    "Core": {
+      "status": "typed-workload-audit-required",
+      "selected": false,
+      "rootOwner": "native declaration/module ownership plus explicit reviewed bootstrap seeds",
+      "emptyBoundaryRequired": true,
+      "actualDeclarationManifest": null,
+      "actualAssumptions": null,
+      "logicalIdentity": null,
+      "surfaceIdentity": null,
+      "runtimeIdentity": null
+    },
+    "Full": {
+      "status": "existing-qualified-identity-preserved",
+      "selectedOnQualifiedStage0": true,
+      "compositionOwner": "Ps.Environment.SelfHostProd",
+      "snapshotOwner": "Ps.Environment.StandardSnapshot",
+      "inclusionOfNewCandidates": "not-established"
+    }
+  },
+  "inclusion": {
+    "target": [
+      "Bootstrap subset of Core",
+      "Core subset of Full"
+    ],
+    "status": "unproven",
+    "requiredEquality": [
+      "declaration kind",
+      "universe parameters",
+      "type",
+      "body/proof",
+      "constructor/recursor metadata and rules",
+      "reducibility",
+      "aliases",
+      "class parameters",
+      "instance names and priorities",
+      "primitive/runtime contract"
+    ]
+  },
+  "identityBinding": {
+    "logicalSerializerOwner": "Ps.Environment.Fingerprint",
+    "kernelReplayOwner": "PsKernelLean.Replay",
+    "completeProfileIdentity": "not-yet-qualified",
+    "externalPreparedModuleCacheAuthentication": "open",
+    "profileLabelIsAuthority": false
+  },
+  "measured": {
+    "sourceImportsAndBlobBytes": true,
+    "seamNativeReplayAndRefusal": true,
+    "emptyBoundaryBootstrapAndByteWordReplay": true
+  },
+  "notYetQualified": [
+    "dependency-complete selected Core Standard",
+    "literal Bootstrap/Core/Full inclusion",
+    "actual selected compiler source conversion",
+    "same-profile project/module/cache authentication",
+    "Core runtime and backend correspondence",
+    "independent npm payloads and installed bytes",
+    "Stage1",
+    "Stage2",
+    "Stage3"
+  ],
+  "evidenceRecipe": ".github/workflows/psc0-core-first-audit.yml",
+  "firstSliceQualification": {
+    "head": "a34686faa951f1b3ac8add59162d5dcb90d5c3ea",
+    "run": 39178265318,
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 117825359808,
+        "name": "candidate-authoring",
+        "conclusion": "success"
+      },
+      {
+        "id": 117825360002,
+        "name": "native-seams",
+        "conclusion": "success"
+      },
+      {
+        "id": 117825360006,
+        "name": "source-inventory",
+        "conclusion": "success"
+      }
+    ],
+    "scope": "source inventory, isolated fingerprint/replay, Full native compatibility, empty-boundary bootstrap and byte-word authoring"
+  },
+  "authoringObservations": [
+    {
+      "axioms": [],
+      "declarations": 76,
+      "quotientPrimitives": [],
+      "replacedDefinitionAxioms": [],
+      "schema": "pscv0-standard-candidate-policy/1"
+    },
+    {
+      "declarations": 76,
+      "importedAssumptions": [],
+      "kernelChecked": true,
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "recursorRulesCompared": 24,
+      "roots": [
+        "Nat",
+        "Bool",
+        "PUnit",
+        "Unit",
+        "Empty",
+        "PEmpty",
+        "True",
+        "False",
+        "Eq",
+        "HEq",
+        "And",
+        "Or",
+        "Exists",
+        "Nonempty",
+        "Prod",
+        "PProd",
+        "Sum",
+        "Option",
+        "List",
+        "Except",
+        "Decidable",
+        "id",
+        "ite",
+        "dite",
+        "optParam",
+        "outParam"
+      ],
+      "schema": "pscv0-standard-core-export/1",
+      "sharedSourceNodes": 721,
+      "sourceBytes": 118573
+    },
+    {
+      "axioms": [
+        "propext",
+        "Quot.sound"
+      ],
+      "declarations": 1945,
+      "quotientPrimitives": [
+        "Quot",
+        "Quot.ind",
+        "Quot.lift",
+        "Quot.mk"
+      ],
+      "replacedDefinitionAxioms": [],
+      "schema": "pscv0-standard-candidate-policy/1"
+    },
+    {
+      "declarations": 1945,
+      "importedAssumptions": [
+        "propext",
+        "Quot.sound"
+      ],
+      "kernelChecked": true,
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "recursorRulesCompared": 113,
+      "roots": [
+        "Nat",
+        "Bool",
+        "PUnit",
+        "Unit",
+        "Empty",
+        "PEmpty",
+        "True",
+        "False",
+        "Eq",
+        "HEq",
+        "And",
+        "Or",
+        "Exists",
+        "Nonempty",
+        "Prod",
+        "PProd",
+        "Sum",
+        "Option",
+        "List",
+        "Except",
+        "Decidable",
+        "id",
+        "ite",
+        "dite",
+        "optParam",
+        "outParam",
+        "UInt8.ofNat",
+        "UInt8.toUInt32",
+        "UInt8.toUInt64",
+        "UInt32.ofNat",
+        "UInt32.toNat",
+        "UInt32.add",
+        "UInt32.sub",
+        "UInt32.land",
+        "UInt32.lor",
+        "UInt32.xor",
+        "UInt32.complement",
+        "UInt32.shiftLeft",
+        "UInt32.shiftRight",
+        "UInt64.ofNat",
+        "UInt64.toNat",
+        "UInt64.toUInt8",
+        "UInt64.mul",
+        "UInt64.xor",
+        "UInt64.shiftRight",
+        "ByteArray",
+        "ByteArray.mk",
+        "ByteArray.size",
+        "ByteArray.push",
+        "ByteArray.foldl",
+        "String.toUTF8"
+      ],
+      "schema": "pscv0-standard-core-export/1",
+      "sharedSourceNodes": 113683,
+      "sourceBytes": 16111994
+    }
+  ],
+  "nextCandidate": {
+    "status": "CI-pending",
+    "engine": "Ps.Compiler.Engine",
+    "selectedFrontend": "Ps.Compiler.Pscv0Engine",
+    "movedDerivingBuilders": 24,
+    "nativeOwnershipAudit": "raw checked types/bodies/family/rule dependencies; independent source-roster comparison"
+  }
+}

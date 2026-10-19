@@ -5,9 +5,7 @@ Apache-2.0; see THIRD_PARTY_NOTICES.md.
 Modified: checked Core construction, ordinary shared runtime erasure.
 -/
 import Ps.Environment.StandardToFormat
-
-def psReprText (text : String) : PsExpr :=
-  psFormatCall "text" [.lit (.string text)]
+import Ps.Environment.ReprExpr
 
 def psReprMethodType (type : PsExpr) : PsExpr :=
   psLogicPi 2 "value" type (psLogicPi 3 "prec" psOrderNat psFormatType)
@@ -47,9 +45,6 @@ def psReprApiDeclarations : List PsDeclaration :=
       [{ name := "f", type := psFormatType }, { name := "prec", type := psOrderNat }] psFormatType
       (psFormatIf psFormatType (psOrderCall "Nat.ble" [psFormatNat 1024, .fvar 1])
         (psFormatCall "paren" [.fvar 0]) (.fvar 0)) ]
-
-def psReprAddAppParen (document precedence : PsExpr) : PsExpr :=
-  psOrderCall "Repr.addAppParen" [document, precedence]
 
 -- Public scalar methods and their dictionaries share one checked body.
 def psReprScalarMethods : List PsDeclaration :=

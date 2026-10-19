@@ -1,176 +1,60 @@
-# PSC0 v7.2 AI work state — M3+B
+# PSC0 work state — Core-first execution
 
-Updated 2026-10-18. Fresh repository and exact-SHA CI override this checkpoint.
+Updated 19 October 2026 UTC. This handoff belongs to the isolated `psc0/core-first-environments-20261019` branch. Read its current GitHub ref before every write; never reset it to an earlier receipt.
 
-## Work contract
+## Active user direction
 
-Complete all six M3+B exits autonomously through GitHub connectors and GitHub
-Linux CI only. No local checkout/files/build/test/compiler or Desktop Commander.
-Native portable .lean, official Lean4.35.0
- eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Study pinned source/tests before
-substantial design; preserve upstream Apache-2.0 notices. Minimal coherent
-validation; no PSKernel-Core/C0, self-hosting or C5. Approved assumptions exactly
-propext, Quot.sound, Classical.choice. Wasm GC internally; linear memory only
-at explicit ABI boundaries. Never weaken acceptance or enlarge budgets.
+The user authorized adapting and beginning the Core-first prompt now. Preserve PSC0 architecture and selected v7.2, define explicit Core M1–M5/A–E exits from the actual compiler workload, keep Full milestones/history separately, and implement the first independently testable environment slice. Earlier prohibitions on starting Core/compiler selfhost are superseded by this direction. Existing checking, source/runtime and repository safeguards remain.
 
-**Input-language contract clarified by the user on18 October:** both `.ps`
-and `.lean` files supplied to PSC0 follow the selected v7.2 language features,
-semantics and assurance rules when compiling to JavaScript, TypeScript, Rust,
-Wasm, WAT and other supported artifacts. This concerns compiler INPUTS; it is
-not merely an instruction about the compiler implementation's .lean files.
-The two source kinds keep their respective surface grammars: native Lean layout
-and application in .lean, owned ProofScript spelling in .ps. Both must converge
-on shared resolution/elaboration, checked Core, typed erasure, validated IR and
-backends. A .lean extension cannot bypass unsupported-feature, dependency,
-assumption, recursion or verification rules. Do not silently parse .lean as .ps,
-treat arbitrary host Lean as accepted input, or infer input parity from native
-reference tests. Record actual support separately until paired qualification
-passes. Compiler implementation remains native portable .lean; self-hosting
-and immediate C5 stay out of scope.
+Start with [Core architecture](docs/PSC0_CORE_FIRST_ARCHITECTURE.md), [roadmap](docs/PSC0_CORE_FIRST_ROADMAP.md), [closure ledger](docs/PSC0_CORE_STANDARD_MANIFEST.md), [qualification](docs/PSC0_CORE_QUALIFICATION_LEDGER.md) and [selfhost plan](docs/PSC0_CORE_SELFHOST_PLAN.md). The original v7.2 reference and Full roadmap are unchanged.
 
-Repo dwijayuda/pskernel. Main psc0/pscv0-v7-native-lean-v1; preparation
-psc0/m3-fixedpoint-foundation-20261018. PR109 stays draft/open/unmerged on
-psc0/pscv0-v7-m1-parser-ownership-v1. Fresh refs, expected-HEAD non-force writes,
-preserve concurrent history. Never supersede/cancel a healthy main Native.
-Prep cancel-in-progress:false; keep at most one active and one pending run.
+## Exact preserved lines
 
-## Current state and evidence
+- Qualified Stage0: `psc0/pscv0-v7-native-lean-v1` at `33676076bcda7b0de5ec1f9803f49b8b1d28a058`, tree `87b8b0af6c72f5e8b28af97f9f990e28f73ac56e`. PR109 was open/draft/unmerged at the last fresh audit.
+- Its five same-SHA gates are successful: Native39099546592, M339099546513, F139099546493, F239099546574, F339099546446. Preserve their bounded scope.
+- Repository default main is a different historical SH/1 line. It is not Stage0.
+- Full M3 preparation remains `psc0/m3-fixedpoint-foundation-20261018` at `bf496ce399d9ec39794d6e9f7c3be919dfcffa58`, tree `f75ba7308134ab6be473347aafb5d2788c84b608`. Run39176676179 failed new fixture compilation; Option-bind and recursor authoring passed. Its six Full exits remain open and its unqualified work is not copied wholesale into Core.
+- PSKernel-Core/C0 and unrelated research branches remain untouched.
 
-Latest fully qualified five-gate compiler/test SHA and current main:
-**6cdb9a6ee36b3262b366d80f36c238b50fd9676d**.
-Native39095176453, M339095176451, F139095176460, F239095176458 and
-F339095176455 all completed SUCCESS. Receipt:
-docs/PSCV0_M3_INTEGRATION_6CDB9A6E_2026-10-18.md.
-Never cancel or supersede a healthy main Native run.
+## Completed Core evidence
 
-Latest fully successful preparation compiler/test SHA:
-**9b5cc7c7f64bf18e2b1908cbb63fa4db0e60404f**.
-Run39095995956/job117582435491 completed SUCCESS; artifact12124459802,
-SHA256146bbd763d4b3046e3a803546deae79c08c6d98af4bfb939a1cc604f37395154.
-Receipt: docs/PSCV0_M3_RUNTIME_OWNERSHIP_9B5CC7C7_2026-10-18.md.
-Actual-functional executable ownership, original headers/returned functions,
-prepared helper restoration, complete coverage and forged-body refusals passed.
-All original logical and private runtime definitions were checked by the official
-kernel. This receipt does not establish mutual WF source/backend execution.
+Core branch began at exact qualified Stage0. Source-only audit880facd5 first rejected current/legacy duplicate module owners. That defect was corrected. Source audit at851faf84 succeeded; native jobs stopped before build because the Linux runner lacked rg, corrected to its available grep tool.
 
-## Current implementation and next work
+Exact `a34686faa951f1b3ac8add59162d5dcb90d5c3ea`, run39178265318, passed all three jobs:
 
-This child activates source mutual WF through the shared PreDefinition owner.
-Both surface grammars produce the same scoped typed blocks; the producer returns
-actual auxiliaries/results, while PreDefinition independently reconstructs exact
-source equations and derives ordinary checked private implementations. The first
-source member owns the shared auxiliary; each member owns its private body.
-Compiler recovery independently validates those bodies before typed erasure.
-Original admissions and assurance graphs remain intact. Header opening is a
-shared dependency leaf, avoiding a producer/runtime import cycle.
+| Job | Result |
+| --- | --- |
+| source-inventory117825360006 | Complete explicit import/blob/package inventory; isolated fingerprint/replay imports |
+| native-seams117825360002 | SHA vectors, actual replay dependency deferral, no Nat seed leakage, ill-typed declaration refusal |
+| candidate-authoring117825359808 | Full native compatibility/identity checks; bootstrap and byte/word empty-boundary export/replay |
 
-The child selects the independently measured five-declaration PSum extension and
-strict identities below. Existing paired input/backend fixtures now cover a
-three-member polymorphic WF component with reordered dependent parameters and
-a returned function, plus ordinary partial P0 and selected fixedpoint P1.
-General total-only IR admission and combined ordinary runtime admission are both
-exercised. **This activation child is not yet qualified.**
+Stage0 source closure:316 modules /26,384,235 bytes, including101 Environment modules /23,654,198 bytes. Fingerprint leaf:10 modules /46,242 bytes. Replay leaf:12 repository modules /50,030 bytes plus explicit native Lean.
 
-Next:
-1. Inspect the complete activation preparation run. Resolve actual invariant
-   failures coherently; preserve all existing controls, timeouts and budgets.
-2. After preparation passes, integrate its exact compiler/test SHA when main
-   Native is idle; qualify Native, M3 and F1/F2/F3. Both input kinds must actually
-   execute the new exports in existing JS/TS/Rust/GC/component lanes.
-3. Reconcile all six M3 exits against source rules and pinned Lean source/tests.
-   Data/elimination, owned strategies, total recursion, P0, P1 and cross-stage
-   integration need scoped source/kernel/runtime or intended-refusal evidence.
-   M3+B and full selected input parity remain OPEN.
-4. Update both handoffs, roadmap and exit ledger at each completed milestone.
-   M4+C/D and M5+E/C5 remain later phases; bounded M2 acceptance is historical.
+Bootstrap export:76 declarations, no axioms,24 compared recursor rules,118,573 source bytes. Byte/word:1,945 declarations, actual propext/Quot.sound,113 compared rules,16,111,994 source bytes. These are checked native authoring candidates, not complete selected Core or package-size claims. New candidate-vs-Full declaration compatibility is unproven.
 
-## Foundation identity for the activation child
+## This candidate's additional work
 
-Selected Standard:3757declarations,44classes,371ordinary instances,13defaults.
-FNV3071911941504503432; snapshot SHA
-364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1;
-surface SHA9b07ab5dc1ce2e429fb5ebe4dba0e8da5db667d395521718e0a9a65f9e748214.
-These exact candidate identities were independently measured by successful9b5
-preparation before selection. Main6cdb and preparation9b5 retain the old selected
-3752-declaration identity; do not relabel their evidence. PSum adds5declarations,
-2rules,0assumptions and one reducibility registration, no runtime primitive.
-Keep frozen pre-Order/pre-mutual authoring boundaries. Classical.propDecidable
-is not an automatic runtime instance; approved assumptions remain exactly three.
+Generic Engine and Full API wrapper preserve all34 old public functions and the old Full runtime selection point. Corrected Engine transfer:31,778 characters/FNV32 eda4edd5. Wrapper:9,832/FNV32 2cedfdf9. FNV32 values here check text transfer, not semantic profile identity.
 
-## Scope and design invariants
+The selected Pscv0Engine uses actual selected readers and Command, retains the supplied context, and leaves Pscv0Modules/cache interfaces unchanged. Its Full wrapper still checks the existing Standard before elaboration. InhabitedExpr and ReprExpr move24 existing builder bodies unchanged, removing their Standard construction imports from the selected frontend.
 
-Canonical v7.2 lines1872–1890 selects function-like mutual blocks (def/function),
-not arbitrary native mutual commands. Native mutual inductive syntax is outside
-that selected source grammar; internal mutual/nested data APIs retain separately
-scoped evidence. Do not expand to unrestricted host Lean.
+New tests exercise generic and selected source preparation against closed independently checked small bases, canonical admissions, missing-base/refusal ownership and runtime selector forwarding. New native source-owner audit measures checked type/body/family/rule dependencies and compares module ownership with the exact source graph. All these additions require their new exact-SHA CI result; do not inherit a346's success.
 
-Pinned WF/Main31–35 rejects zero-varying members. WF/Rel first establishes one
-fixed measure codomain and one dictionary in the fixed scope. Runtime recovery
-uses disjoint fresh common fixed IDs above original raw headers because local
-substitution is ordered. Do not globally change substitution semantics, erase
-original source arity or flatten a returned function into the header.
-Pinned WF/{Main,PackMutual,Rel,Fix,Eqns,Unfold}, Basic, ArgsPacker and fixedParams
-tests are the reference; notices retained. See the runtime design note and
-existing exact-component receipt for the independent equation/runtime boundaries.
+The source audit prints bounded per-module records for durable connector review. CI transports only the small Bootstrap source; the16.1 MB candidate remains an artifact. Preserve Bootstrap bytes unchanged when creating BootstrapData, then qualify its exact composition/manifest and finite replay. Do not create Core/Full inclusion claims from seed names.
 
-Activation preparation began at c15c2bc054555ea0a301f7eba6a7ec937f6a3623
-(run39096826484). The child also updates both adversarial singleton producer
-fixtures to the shared component result interface; their exact forged-source
-and returned-function rejection assertions are unchanged. Inspect the newest
-preparation SHA before promotion; no source/backend qualification is claimed.
+## Concrete next steps
 
-## Shared application continuation correction
+1. Fetch this branch's actual head, workflow runs and jobs. Resolve new compilation or probe failures at their owned boundary; never weaken refusals or raise limits.
+2. Capture the native ownership report, compare source modules exactly and inspect real assumptions/unsafe/partial dependencies before attempting an entire compiler-derived export. The compiler authorer has a strict refusal policy; it must never trim roots.
+3. Retain the76-declaration Bootstrap source via the connected GitHub/CI transport, compose it from empty with exact reducibility, record actual empty class/instance registries and check compatibility differences against Full. Do not silently install native class flags absent from the portable manifest.
+4. Qualify Engine/selected source/import isolation and preserve Full native identity/source checks on the reviewed candidate. Save precise receipts and source/artifact hashes in the ledger.
+5. Continue actual compiler source conversion only after required Core declaration/runtime and module identity gates. Two native mutual-data groups and the bounded SHA padding loop need explicit handling. Old selfhost wrappers/native implementation builds are not Stage1.
+6. Keep complete Core Standard, project/module/cache identity, runtime/backend correspondence, real npm isolation and Stage1–3 open until their declared tests pass.
 
-Activation preparation c15c2bc0 (run39096826484/job117584917200) built and passed
-strict manifests, component kernel/runtime ownership and all other retained
-preparation groups. Its paired native source check failed with
-PSCV0-WF-ARITY: the recursive call exceeds its source header telescope.
-The flat native application supplied returned-function arguments in the same
-spine; the old owned-prefix capture incorrectly rejected that suffix, while
-chained .ps calls already separated it.
+## Invariants
 
-The child returns the unconsumed positional/named suffix from the same generic
-ordered application engine. The WF owner constructs/closes exactly the original
-header call and genuine decrease proof, then resumes ordinary application on
-that actual checked result. It preserves once-only header capture, result
-arity, argument order, constraints and expected types. Ordinary completion
-explicitly rejects an accidentally unconsumed suffix. No parser rewrite or
-second argument elaborator. Reference: pinned Lean4.35.0
-Elab/PreDefinition/WF/Fix.lean72–95 and Elab/App.lean's ordered argument engine.
-Existing paired fixture/strict checked-Core comparison remains unchanged.
-Qualification pending; newest expected-HEAD preparation child is authoritative.
+Use GitHub connectors and cloud Linux CI for all repository work; no local checkout, filesystem editing, compiler, shell or alternate desktop execution for this repository. The explicitly supplied local prompt was input only.
 
-Continuation e9eb8f73 failed compilation only: clearing both generic suffix
-lists left the prefix finisher's argument-kind parameter unconstrained. The
-child explicitly pins that existing source argument kind to PsSyntaxTerm;
-no algorithm, source fixture or acceptance condition changed. Inspect the
-child's complete preparation before promotion.
+Pinned Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Maximum logical assumptions propext/Quot.sound/Classical.choice; record actual reached closure. No unauthorized axioms, holes, runtime choice, kernel changes, broader budgets or relaxed negative gates. Ordinary checked does not become verified/model/refinement by choosing Core. WasmGC remains internal; linear memory only explicit ABI.
 
-## Checked packing specialization before runtime erasure
-
-Preparation feac89b1 / run39097887649 built and passed all groups except the
-paired source/runtime check. Source elaboration and strict checked-Core parity
-advanced past the earlier header-spine failure; total-only IR admission failed:
-`PSCV0-ERASURE: unknown constant PSum.casesOn (in parityFirst)`.
-The exact source assertions remain unchanged.
-
-Runtime recovery now specializes its actual checked packing functional before
-constructing the ordinary private implementation. It unfolds only the actual
-selected PSum/PSigma casesOn definitions and uses shared registered recursor/
-projection iota. Public definitions and logical fixedpoints never delta-reduce.
-Non-value beta arguments retain real lets, preserving source evaluation order
-and sharing. A result let below the original header preserves returned-function
-entry arity. Both the specialized body and its closed private definition are
-type checked; the independent prepared-body reconstruction and forged-body/
-incomplete-coverage refusals remain active.
-
-Pinned references: Lean4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
-Compiler/LCNF/ToLCNF.lean visitCases, Compiler/LCNF/Simp/Main.lean
-simpCasesOnCtor?, plus WF/Main and Basic.addAndCompilePartialRec. This is
-Core construction using the existing reducer, with upstream notices retained;
-no target primitive, runtime PSum dependency, new axiom or budget change.
-Qualification is pending the newest preparation; main6cdb remains fully qualified.
-
-Packing specialization f52b4147 failed at compile time only: its pure Boolean
-value classifier used a do-style let-else. The child uses an ordinary match;
-no algorithm, fixture or acceptance condition changed. Qualification pending.
+Refresh refs and use expected-HEAD non-force writes. Root coordinates writes; read-only agents can review independent areas. Preserve healthy qualified-line runs and concurrent branches. Do not require unrelated Full exits before a qualified Core slice, and do not relabel deferrals as completion.

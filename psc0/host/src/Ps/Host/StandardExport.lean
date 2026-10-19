@@ -1437,4 +1437,152 @@ def exportCoreByteWordCandidate (output : System.FilePath) : IO Unit :=
     provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nNative closure for the measured compiler byte/word workload.\nStandalone candidate; source compiler closure and runtime qualification remain separate.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
   } output
 
+def exportCoreCompilerCandidate (output : System.FilePath) : IO Unit := do
+  let measured ← collectCoreNativeClosure
+  IO.FS.writeFile (System.FilePath.mk (output.toString ++ ".native-closure.json"))
+    (measured.report.compress ++ "\n")
+  let allowed : List Lean.Name := [`propext, `Quot.sound]
+  let refused := measured.entries.filter fun info =>
+    info.isUnsafe || info.isPartial ||
+      (info.isAxiom && !allowed.contains info.name)
+  unless refused.isEmpty do
+    IO.println (Lean.Json.mkObj [
+      ("schema", Lean.toJson ("pscv0-core-candidate-refusal/1" : String)),
+      ("declarations", Lean.toJson (refused.map (fun info => toString info.name))),
+      ("policy", Lean.toJson
+        ("No source-root trimming, unsafe or partial declarations, or new assumptions." : String))]).compress
+    throw (IO.userError
+      "measured native Core closure exceeds the independently approved authoring policy")
+  exportStandardCore {
+    roots := coreBootstrapCandidateRoots ++ measured.roots
+    boundary := []
+    baseDeclarations := []
+    allowedAssumptions := allowed
+    eraseAutoParams := true
+    shareSource := true
+    nativeModules := coreNativeCompilerImports
+    publicPrefix := "psCoreCompilerCandidate"
+    privatePrefix := "coreCompilerCandidateDecl"
+    provenance := "/-\nCopyright (c) Microsoft Corporation and Lean FRO, LLC.\nApache-2.0; see THIRD_PARTY_NOTICES.md.\nPinned Lean 4.35.0 eb6cafb7290e8bd5f2937522d8d804f58f02bafc.\nEmpty-boundary native closure of measured compiler dependencies plus explicit bootstrap seeds.\nCandidate authoring only; no selected Core/Full inclusion or runtime qualification is asserted.\n-/\nimport Ps.Environment.Basic\n\nset_option maxRecDepth 20000\n\n"
+  } output
+
+private def coreProbeSubmission (declarations : List PsDeclaration)
+    (declaration : PsDeclaration) : IO Lean.Declaration := do
+  match PsKernelLean.toLeanPreludeDeclaration declarations declaration with
+  | .ok (some value) => pure value
+  | .ok none => throw (IO.userError "Core probe expected a kernel submission")
+  | .error error => throw (IO.userError error.message)
+
+-- The expected failure is precise. Resource failures, unrelated conversion
+-- failures and other IO errors never satisfy a negative authoring control.
+private def coreExpectAuthoringFailure (expected : String)
+    (action : IO Unit) : IO Unit := do
+  let failure ← try
+    action
+    pure none
+  catch error =>
+    pure (some error)
+  match failure with
+  | some (.userError reason) => do
+      unless reason == expected do
+        throw (IO.userError ("Core control failed at the wrong rule: " ++ reason))
+  | some error => throw error
+  | none => throw (IO.userError "Core control unexpectedly accepted the mutation")
+
+def checkCoreExportControls : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
+    throw (IO.userError "Core controls require pinned Lean 4.35.0")
+  let native ← Lean.importModules #[{ module := `Init }] {}
+  let mut seen : Lean.NameSet := {}
+  let mut entries : Array Lean.ConstantInfo := #[]
+  for root in [`Nat, `Bool, `Eq] do
+    for info in ← standardDependencyClosure native root do
+      unless seen.contains info.name do
+        seen := seen.insert info.name
+        entries := entries.push info
+  let declarations ← entries.toList.mapM fun info => do
+    match exportDeclaration native [] info with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  checkCandidate declarations declarations
+  let compared ← checkRecursorRules native declarations declarations
+  unless compared > 0 do
+    throw (IO.userError "Core controls did not exercise a native recursor rule")
+  let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
+  let replay ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    PsKernelLean.replayPreludeDeclarations declarations declarations.reverse empty
+  let checked ← match replay with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error.message)
+  let nat := PsExpr.constE (exportName `Nat) []
+  let zero := PsExpr.lit (.natural 0)
+  let one := PsExpr.lit (.natural 1)
+  let natural : PsDeclaration := .definitionDecl
+    (exportName `_pscv0CoreNaturalProbe) [] nat zero
+  let naturalSubmission ← coreProbeSubmission declarations natural
+  let absent ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    empty.addDeclCore 2000000 20000 naturalSubmission none
+  match absent with
+  | .error (.unknownConstant _ name) => do
+      unless name == `Nat do
+        throw (IO.userError "Core empty-environment control missed a different dependency")
+  | .error error =>
+      throw (IO.userError ("Core missing-dependency control failed at the wrong rule: " ++
+        PsKernelLean.kernelExceptionSummary error))
+  | .ok _ => throw (IO.userError "empty kernel unexpectedly supplied Nat")
+  let present ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    checked.addDeclCore 2000000 20000 naturalSubmission none
+  match present with
+  | .ok _ => pure ()
+  | .error error => throw (IO.userError (PsKernelLean.kernelExceptionSummary error))
+  let equality := fun (left right : PsExpr) =>
+    PsExpr.app (.app (.app (.constE (exportName `Eq) [.succ .zero]) nat) left) right
+  let reflexivity := PsExpr.app
+    (.app (.constE (exportName `Eq.refl) [.succ .zero]) nat) zero
+  let good : PsDeclaration := .theoremDecl
+    (exportName `_pscv0CoreTrueEquation) [] (equality zero zero) reflexivity
+  checkCandidate (good :: declarations) [good]
+  let bad : PsDeclaration := .theoremDecl
+    (exportName `_pscv0CoreFalseEquation) [] (equality zero one) reflexivity
+  let badSubmission ← coreProbeSubmission declarations bad
+  let falseProof ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
+    checked.addDeclCore 2000000 20000 badSubmission none
+  match falseProof with
+  | .error (.declTypeMismatch ..) => pure ()
+  | .error error =>
+      throw (IO.userError ("Core false-proof control failed at the wrong rule: " ++
+        PsKernelLean.kernelExceptionSummary error))
+  | .ok _ => throw (IO.userError "Core candidate kernel accepted false reflexivity")
+  let forged := declarations.map fun declaration =>
+    match declaration with
+    | .recursorDecl info =>
+        if psNameEq info.name (exportName `Nat.rec) then
+          PsDeclaration.recursorDecl { info with type := nat }
+        else declaration
+    | _ => declaration
+  coreExpectAuthoringFailure "regenerated metadata signature differs: Nat.rec"
+    (checkCandidate forged forged)
+  for name in [`propext, `Quot.sound, `Classical.choice] do
+    let some (.axiomInfo info) := native.checked.get.find? name
+      | throw (IO.userError ("missing native assumption control: " ++ toString name))
+    match exportDeclaration native [] (.axiomInfo info) with
+    | .error reason => do
+        unless reason == "unapproved imported assumption in Standard asset" do
+          throw (IO.userError ("assumption control failed at the wrong rule: " ++ reason))
+    | .ok _ => throw (IO.userError "empty Core assumption policy accepted an axiom")
+    if name != `Classical.choice then
+      match exportDeclaration native [`propext, `Quot.sound] (.axiomInfo info) with
+      | .ok (.axiomDecl ..) => pure ()
+      | .ok _ => throw (IO.userError "approved native axiom changed declaration kind")
+      | .error error => throw (IO.userError error)
+    else
+      match exportDeclaration native [`propext, `Quot.sound] (.axiomInfo info) with
+      | .error reason => do
+          unless reason == "unapproved imported assumption in Standard asset" do
+            throw (IO.userError ("Classical control failed at the wrong rule: " ++ reason))
+      | .ok _ => throw (IO.userError "byte-word assumption policy accepted Classical.choice")
+  IO.println
+    "PSCV0_CORE_EXPORT_CONTROLS: PASS empty kernel, checked positive proof, typed false-proof refusal, regenerated-signature refusal, exact assumption policy"
+
 end PsV7Native

@@ -4,7 +4,17 @@ on:
   push:
     branches: [psc0/core-first-environments-20261019]
     paths:
-      - 'psc0/**'
+      - 'psc0/packages/**/src/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/host/src/**'
+      - 'psc0/lakefile.lean'
+      - 'psc0/lake-manifest.json'
+      - 'psc0/lean-toolchain'
+      - 'psc0/v7-native/**'
+      - 'psc0/scripts/core-first-*.py'
+      - 'psc0/scripts/Pscv0Core*.lean'
+      - 'psc0/test/Pscv0Core*.lean'
+      - 'psc0/docs/PSC0_CORE_STANDARD_MANIFEST.json'
       - '.github/workflows/psc0-core-first-audit.yml'
   workflow_dispatch:
 
@@ -121,6 +131,22 @@ jobs:
           .lake/build/bin/pscv0_core_seams 2>&1 | tee ../dist/core-first/seams/check.log
           sha256sum .lake/build/bin/pscv0_core_seams > ../dist/core-first/seams/executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_seams > ../dist/core-first/seams/executable-bytes.txt
+      - name: Check explicit compiler context and runtime selection
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/seams/engine-build-resource.txt lake build pscv0_core_engine_seams 2>&1 | tee ../dist/core-first/seams/engine-build.log
+          .lake/build/bin/pscv0_core_engine_seams 2>&1 | tee ../dist/core-first/seams/engine-check.log
+      - name: Check selected source against the independently checked small base
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/seams/selected-build-resource.txt lake build pscv0_core_selected 2>&1 | tee ../dist/core-first/seams/selected-build.log
+          .lake/build/bin/pscv0_core_selected 2>&1 | tee ../dist/core-first/seams/selected-check.log
+          sha256sum .lake/build/bin/pscv0_core_selected > ../dist/core-first/seams/selected-executable.sha256
+          stat -c '%s' .lake/build/bin/pscv0_core_selected > ../dist/core-first/seams/selected-executable-bytes.txt
+      - name: Summarize actual seam build resource observations
+        if: always()
+        run: |
+          python3 ../scripts/core-first-ci-evidence.py resources ../dist/core-first/seams
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -203,7 +229,18 @@ jobs:
           lean --version | tee ../dist/core-first/authoring/toolchain.txt
           grep -F '4.35.0' ../dist/core-first/authoring/toolchain.txt
           grep -F 'eb6cafb' ../dist/core-first/authoring/toolchain.txt
-          /usr/bin/time -v -o ../dist/core-first/authoring/build-resource.txt lake build pscv0_native pscv0_native_checks pscv0_core_environment_export 2>&1 | tee ../dist/core-first/authoring/build.log
+          /usr/bin/time -v -o ../dist/core-first/authoring/build-resource.txt lake build pscv0_native pscv0_native_checks pscv0_core_environment_export pscv0_core_native_closure pscv0_core_native_seed_checks 2>&1 | tee ../dist/core-first/authoring/build.log
+      - name: Check native seed APIs and exact empty-boundary mutation controls
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          lake env .lake/build/bin/pscv0_core_native_seed_checks 2>&1 | tee ../dist/core-first/authoring/seed-controls.log
+      - name: Measure the compiler-owned native declaration closure
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/authoring/native-closure-resource.txt lake env .lake/build/bin/pscv0_core_native_closure ../dist/core-first/authoring/native-closure.json 2>&1 | tee ../dist/core-first/authoring/native-closure.log
+          python3 ../scripts/core-first-ci-evidence.py native-closure ../dist/core-first/authoring/native-closure.json
       - name: Preserve exact Full identities and independent checks
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
@@ -218,12 +255,17 @@ jobs:
           set -euo pipefail
           /usr/bin/time -v -o ../dist/core-first/authoring/bootstrap-resource.txt .lake/build/bin/pscv0_core_environment_export bootstrap ../dist/core-first/authoring/CoreBootstrapCandidate.lean 2>&1 | tee ../dist/core-first/authoring/bootstrap-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
           sha256sum ../dist/core-first/authoring/CoreBootstrapCandidate.lean > ../dist/core-first/authoring/bootstrap.sha256
+          python3 ../scripts/core-first-ci-evidence.py bootstrap-source ../dist/core-first/authoring/CoreBootstrapCandidate.lean
       - name: Author and check the standalone compiler byte-word candidate
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
           /usr/bin/time -v -o ../dist/core-first/authoring/byte-word-resource.txt .lake/build/bin/pscv0_core_environment_export byte-word ../dist/core-first/authoring/CoreByteWordCandidate.lean 2>&1 | tee ../dist/core-first/authoring/byte-word-export.log | sed '/^PSCV0_STANDARD_SOURCE /d'
           sha256sum ../dist/core-first/authoring/CoreByteWordCandidate.lean > ../dist/core-first/authoring/byte-word.sha256
+      - name: Summarize actual authoring build and source measurements
+        if: always()
+        run: |
+          python3 ../scripts/core-first-ci-evidence.py resources ../dist/core-first/authoring
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
         if: always() && !cancelled() && steps.build.outcome != 'skipped'
         with:

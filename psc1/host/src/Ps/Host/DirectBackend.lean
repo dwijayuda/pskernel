@@ -100,16 +100,16 @@ def psHostDirectRust
   let crateDirectory := System.FilePath.mk (outputPath.dropRight 3 ++ ".cargo")
   IO.FS.createDirAll (crateDirectory / "src")
   let manifest :=
-    "[package]\\n" ++
-    "name = \\"psc1_generated\\"\\n" ++
-    "version = \\"0.0.0\\"\\n" ++
-    "edition = \\"2021\\"\\n" ++
-    "publish = false\\n\\n" ++
-    "[lib]\\n" ++
-    "path = \\"src/lib.rs\\"\\n\\n" ++
-    "[dependencies]\\n" ++
-    "num-bigint = \\"=0.4.6\\"\\n" ++
-    "num-traits = \\"=0.2.19\\"\\n"
+    "[package]\n" ++
+    "name = \"psc1_generated\"\n" ++
+    "version = \"0.0.0\"\n" ++
+    "edition = \"2021\"\n" ++
+    "publish = false\n\n" ++
+    "[lib]\n" ++
+    "path = \"src/lib.rs\"\n\n" ++
+    "[dependencies]\n" ++
+    "num-bigint = \"=0.4.6\"\n" ++
+    "num-traits = \"=0.2.19\"\n"
   IO.FS.writeFile (crateDirectory / "Cargo.toml") manifest
   IO.FS.writeFile (crateDirectory / "src" / "lib.rs") emitted
   IO.FS.writeFile outputPath emitted

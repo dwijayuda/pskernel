@@ -150,9 +150,11 @@ def psKernelC0DeepMixedStep
                   frame.remainingRanges,
                 .lambdaBody frame :: rest⟩
           | .lambdaBody frame =>
-              let sourceFrame := psKernelC0DeepLambdaForceFrame frame
+              -- The body was already forced at its earlier checked-inference
+              -- observation boundary. Never materialize it a second time
+              -- just to close an independently checked lambda scope.
               let (resultType, resultState) :=
-                psKernelC0DeepLambdaClose sourceFrame ty state
+                psKernelC0DeepLambdaCloseDeferred frame ty state
               pure ⟨.returned resultType resultState, rest⟩
 
 /-- This diagnostic *step cap* is NOT the C0 source recursion fuel.

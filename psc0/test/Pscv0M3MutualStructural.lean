@@ -16,6 +16,30 @@ mutual
     | step (n : Nat) (previous : M3StructuralLeft A a) : M3StructuralRight A a (Nat.succ n)
 end
 
+namespace M3QualifiedStructural
+abbrev T := Nat
+def choose (x y : T) : T := x
+namespace Left
+def choose (x y : T) : T := y
+end Left
+namespace Right
+def choose (x y : T) : T := y
+end Right
+end M3QualifiedStructural
+mutual
+  def M3QualifiedStructural.Left.first (x y : T) (n : Nat) : T :=
+    match n with
+    | 0 => choose x y
+    | k + 1 => Right.second x y k
+  def M3QualifiedStructural.Right.second (x y : T) (n : Nat) : T :=
+    match n with
+    | 0 => choose x y
+    | k + 1 => Left.first x y k
+end
+theorem M3QualifiedStructural.firstZero : Left.first 11 29 0 = 11 := by rfl
+theorem M3QualifiedStructural.firstChild : Left.first 11 29 1 = 11 := by rfl
+theorem M3QualifiedStructural.secondChild : Right.second 11 29 1 = 11 := by rfl
+
 namespace M3MutualStructuralOracle
 
 -- The actual Acc.rec supports a Type-valued motive and a function-valued
@@ -153,6 +177,26 @@ private def source : String :=
   "  function msPickOther(n: Nat): A := match n with { | 0 => fallback | k + 1 => msPick(k) }\n" ++
   "end\nend\n"
 
+-- Exact native/portable pair; explicit Full qualification only.
+private def qualifiedStructuralPieces : List (String × String) := [
+  ("namespace M3QualifiedStructural\n", "namespace M3QualifiedStructural\n"),
+  ("abbrev T := Nat\n", "abbrev T := Nat\n"),
+  ("def choose (x y : T) : T := x\n", "function choose(x: T, y: T): T := x\n"),
+  ("namespace Left\n", "namespace Left\n"),
+  ("def choose (x y : T) : T := y\n", "function choose(x: T, y: T): T := y\n"),
+  ("end Left\n", "end Left\n"),
+  ("namespace Right\n", "namespace Right\n"),
+  ("def choose (x y : T) : T := y\n", "function choose(x: T, y: T): T := y\n"),
+  ("end Right\n", "end Right\n"),
+  ("end M3QualifiedStructural\n", "end M3QualifiedStructural\n"),
+  ("mutual\n", "mutual\n"),
+  ("  def M3QualifiedStructural.Left.first (x y : T) (n : Nat) : T :=\n    match n with\n    | 0 => choose x y\n    | k + 1 => Right.second x y k\n", "  function M3QualifiedStructural.Left.first(x: T, y: T, n: Nat): T := match n with { | 0 => choose(x, y) | k + 1 => Right.second(x, y, k) }\n"),
+  ("  def M3QualifiedStructural.Right.second (x y : T) (n : Nat) : T :=\n    match n with\n    | 0 => choose x y\n    | k + 1 => Left.first x y k\n", "  function M3QualifiedStructural.Right.second(x: T, y: T, n: Nat): T := match n with { | 0 => choose(x, y) | k + 1 => Left.first(x, y, k) }\n"),
+  ("end\n", "end\n"),
+  ("theorem M3QualifiedStructural.firstZero : Left.first 11 29 0 = 11 := by rfl\n", "theorem M3QualifiedStructural.firstZero: Left.first(11, 29, 0) = 11 := by { rfl }\n"),
+  ("theorem M3QualifiedStructural.firstChild : Left.first 11 29 1 = 11 := by rfl\n", "theorem M3QualifiedStructural.firstChild: Left.first(11, 29, 1) = 11 := by { rfl }\n"),
+  ("theorem M3QualifiedStructural.secondChild : Right.second 11 29 1 = 11 := by rfl\n", "theorem M3QualifiedStructural.secondChild: Right.second(11, 29, 1) = 11 := by { rfl }\n")]
+
 private def equationSource : String :=
   "universe u\n" ++
   "theorem msFirstExact(bias: Nat, n: Nat): msFirst(bias, n) = (match n with { | 0 => bias + 3 | k + 1 => msSecond(k, bias + 2, 5) }) := by { exact msFirst.eq_def(bias, n) }\n" ++
@@ -201,6 +245,60 @@ private def checked (prelude : Lean.Kernel.Environment) (declarations : List PsD
   let admitted ← PsKernelLean.withFreshKernelHeartbeatScope fun _ =>
     PsKernelLean.admitDeclarations prelude decoded
   fromExcept (admitted.mapError (fun error => error.kind.code ++ ": " ++ error.message))
+
+-- Exercise both ordinary PreDefinitions and the separately retained structural owner.
+private def checkQualifiedStructural (prelude : Lean.Kernel.Environment) : IO Unit := do
+  let nameOf (parts : List String) : PsName :=
+    parts.foldl psNameAppendStr .anonymous
+  let firstName := nameOf ["M3QualifiedStructural", "Left", "first"]
+  let secondName := nameOf ["M3QualifiedStructural", "Right", "second"]
+  for kind in [PsCompilerSourceKind.lean, PsCompilerSourceKind.proofScript] do
+    let sourceText := String.join (qualifiedStructuralPieces.map fun entry =>
+      if kind == .lean then entry.fst else entry.snd)
+    let parsed ← fromExcept (psCompilerParsePscv0Program kind sourceText)
+    let groups := parsed.commands.filterMap fun command =>
+      match command with
+      | .mutualDeclarations members span => some (members, span)
+      | _ => none
+    let [(members, _)] := groups
+      | throw (IO.userError "qualified structural fixture lost its source group")
+    ensure (members.length == 2)
+      "qualified structural fixture lost its two source members"
+    let ordinary ← fromExcept
+      ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed).mapError
+        psCompilerPscv0ElabError)
+    let direct ← fromExcept ((parsed.commands.foldlM
+      (fun (state : PsCommandState) command => do
+        psElabSourceCommandNames command
+        match command with
+        | .mutualDeclarations members span =>
+          psElabCommandPartialMutual state members span
+        | _ => psElabCommand state command)
+      { environment := psSelfHostProdPreludeEnvironment }).mapError psCompilerPscv0ElabError)
+    ensure (direct.scope.namePrefix.isEmpty && direct.frames.isEmpty)
+      "qualified structural member namespace escaped the group"
+    ensure ((direct.originsRev.filter (·.mutualGroup.isSome)).length == 2)
+      "direct structural qualification lost exact member provenance"
+    for (environment, declarations) in
+        [(ordinary.result.environment, ordinary.result.declarations),
+         (direct.environment, direct.declarationsRev.reverse)] do
+      for name in [firstName, secondName] do
+        let some (.definitionDecl _ _ _ value) := psEnvironmentFind environment name
+          | throw (IO.userError "qualified structural member is not an ordinary total definition")
+        ensure ((psExprFVarIds value).isEmpty &&
+            !(psExprHasConst firstName value) && !(psExprHasConst secondName value))
+          "qualified structural closure retained a provisional peer"
+        let some (.theoremDecl _ _ _ proof) :=
+            psEnvironmentFind environment (psNameAppendStr name "eq_def")
+          | throw (IO.userError "qualified structural member lost its checked source equation")
+        ensure ((psExprFVarIds proof).isEmpty)
+          "qualified structural equation retained a local hypothesis"
+      for suffix in ["firstZero", "firstChild", "secondChild"] do
+        let some (.theoremDecl ..) :=
+            psEnvironmentFind environment (nameOf ["M3QualifiedStructural", suffix])
+          | throw (IO.userError "qualified structural semantic equation is missing")
+      let _ ← checked prelude declarations
+  IO.println "PSCV0_M2_QUALIFIED_STRUCTURAL: PASS both readers, ordinary and direct structural owners, common-parent header/body lookup, source equations and independent checked native semantic controls"
 
 private def sameSpan (left right : PsSourceSpan) : Bool :=
   left.start.byteOffset == right.start.byteOffset && left.stop.byteOffset == right.stop.byteOffset &&
@@ -362,6 +460,7 @@ def main (args : List String) : IO Unit := do
     ((psAddDeclarationList psSelfHostProdPreludeEnvironment declarations).mapError psCompilerPscv0ElabError)
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let prelude ← fromExcept (initial.mapError (fun error => error.message))
+  checkQualifiedStructural prelude
   let _ ← checked prelude preDefinitions
   let _ ← checked prelude refusalFoundation
   let admitted ← checked prelude (declarations ++ equations.result.declarations)

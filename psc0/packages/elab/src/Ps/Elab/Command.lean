@@ -784,7 +784,7 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
         List PsElabMemberOrigin × List PsName) handler => do
       let (env, declarations, derivedMembers, privateNames) := acc
       let sourceName := (psSyntaxNameToName origin.sourceName).getD .anonymous
-      let generated ← (do
+      let generated ← (show Except PsElabError PsDeclaration from do
         -- Deriving class names use global command scope, independently of
         -- section term variables, before selecting the registered handler.
         let resolver : PsScopeResolver := {
@@ -936,7 +936,7 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   -- Only declarations and their metadata leave this program owner; scope frames
   -- and local resolution settings cannot escape into the next module.
   let result : PsElabModuleWithOriginsResult := {
-    result := { environment := state.environment, declarations := state.declarationsRev.reverse
+    result := { environment := state.environment, declarations := state.declarationsRev.reverse,
       commandDiagnostics := state.commandDiagnosticsRev.reverse }
     origins := state.originsRev.reverse
     privateNames := state.privateNames

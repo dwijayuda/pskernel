@@ -149,6 +149,19 @@ jobs:
           fi
           test ! -e /tmp/psc1-should-not-emit.js
 
+          # Until module/public identities survive target lowering, never
+          # flatten imported private source into a public direct artifact.
+          cat >/tmp/psc1-direct-import.lean <<'EOF'
+          import Missing
+          def answer : Bool := true
+          EOF
+          if lake exe psc1 build /tmp/psc1-direct-import.lean --target js --out /tmp/psc1-invalid-import.js > /tmp/psc1-import-refusal.log 2>&1; then
+            echo "Unqualified direct import unexpectedly emitted JS" >&2
+            exit 1
+          fi
+          grep -q 'PSC1_DIRECT_IMPORT_GRAPH_UNQUALIFIED' /tmp/psc1-import-refusal.log
+          test ! -e /tmp/psc1-invalid-import.js
+
           # Both source grammars must reach the same DirectJS runtime.
           cat >/tmp/psc1-direct.ps <<'EOF'
           def idNat(x : Nat) : Nat := x

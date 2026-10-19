@@ -31,6 +31,11 @@ def psHostWitArgument (parameter : PsVerifiedIrParameter) : Except String String
   let ty ← psHostWitScalarType parameter.type
   return parameter.name ++ ": " ++ ty
 
+-- Canonicalize only trivia; signature identity and scalar types remain exact.
+def psHostWitWithoutWhitespace (value : String) : String :=
+  String.ofList (value.toList.filter (fun c =>
+    c != ' ' && c != '\n' && c != '\r' && c != '\t'))
+
 def psHostWitSelectedExport (ir : PsValidatedIrModule) (name : String) :
     Except String String := do
   if !psHostWitIdent name then
@@ -57,12 +62,11 @@ def psHostDirectWasmComponent
     (inputPath exportName outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".wasm" then
     throw (IO.userError "PSC1_COMPONENT_OUTPUT_EXTENSION: expected .wasm")
-  let validated ← psHostDirectValidatedIr inputPath
-  -- The initial component API exposes only a declaration authored in the
-  -- requested entry module, never a transitive prelude or private helper.
-  let source ← IO.FS.readFile inputPath
-  let parsed ← psHostParseSource inputPath source
-  if !parsed.declarations.any (fun d => psHostSyntaxDeclarationName d == exportName) then
+  let prepared ← psHostDirectPrepare inputPath
+  let validated := prepared.validated
+  -- The selected export is explicitly authored in this entry source.
+  if !prepared.sourceModule.declarations.any
+      (fun d => psHostSyntaxDeclarationName d == exportName) then
     throw (IO.userError "PSC1_COMPONENT_EXPORT_NOT_IN_ENTRY_SOURCE")
   let wit ← match psHostWitSelectedExport validated exportName with
     | .ok value => pure value
@@ -101,8 +105,14 @@ def psHostDirectWasmComponent
     let _ ← psHostWasmTool #["validate", stagedComponent.toString] "VALIDATE"
     psHostWasmBinaryToWat stagedComponent.toString stagedComponentWat.toString
     let observedWit ← psHostWasmTool #["component", "wit", stagedComponent.toString] "WIT_CHECK"
-    if (observedWit.splitOn exportName).length <= 1 then
-      throw (IO.userError "PSC1_COMPONENT_WIT_EXPORT_MISMATCH")
+    let some exportRest := (wit.splitOn "export ")[1]? |
+      throw (IO.userError "PSC1_COMPONENT_WIT_EXPECTED_EXPORT_MISSING")
+    let some signature := (exportRest.splitOn ";")[0]? |
+      throw (IO.userError "PSC1_COMPONENT_WIT_EXPECTED_SIGNATURE_MISSING")
+    let exactExport := psHostWitWithoutWhitespace ("export " ++ signature ++ ";")
+    let canonicalObserved := psHostWitWithoutWhitespace observedWit
+    if (canonicalObserved.splitOn exactExport).length <= 1 then
+      throw (IO.userError "PSC1_COMPONENT_WIT_SIGNATURE_MISMATCH")
     let stem := outputPath.dropRight 5
     IO.FS.rename stagedCore (System.FilePath.mk (stem ++ ".core.wasm"))
     IO.FS.rename stagedCoreWat (System.FilePath.mk (stem ++ ".core.wat"))

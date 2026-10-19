@@ -11,14 +11,34 @@ import Ps.Bridge.Json
 -- Host-only adapter; not part of the portable bootstrap compiler closure.
 -- This selected source pipeline is admission-ready and IR validated. It does not
 -- misrepresent the bootstrap codec as independent kernel admission.
-def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
+-- All artifacts from a direct compilation use the same entry-source bytes.
+-- Imported source graph identities are not yet preserved in emitted public APIs,
+-- so refuse imports rather than accidentally exporting flattened dependencies.
+structure PsHostDirectPrepared where
+  validated : PsValidatedIrModule
+  sourceText : String
+  sourceModule : PsSyntaxModule
+
+def psHostDirectPrepare (inputPath : String) : IO PsHostDirectPrepared := do
+  let sourceText ← IO.FS.readFile inputPath
+  let sourceModule ← psHostParseSource inputPath sourceText
+  if !sourceModule.imports.isEmpty then
+    throw (IO.userError "PSC1_DIRECT_IMPORT_GRAPH_UNQUALIFIED")
   let elaborated ← psHostCompilerElaborateProject inputPath
+  let afterElaboration ← IO.FS.readFile inputPath
+  if afterElaboration != sourceText then
+    throw (IO.userError "PSC1_DIRECT_SOURCE_CHANGED_DURING_COMPILE")
   let raw ← match psCompilerVerifiedIrFromElaborated elaborated with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_DIRECT_ERASURE_FAILED")
-  match psValidateErasedIrModule { raw := raw } with
-  | .ok value => pure value
-  | .error _ => throw (IO.userError "PSC1_DIRECT_IR_VALIDATION_FAILED")
+  let validated ← match psValidateErasedIrModule { raw := raw } with
+    | .ok value => pure value
+    | .error _ => throw (IO.userError "PSC1_DIRECT_IR_VALIDATION_FAILED")
+  pure { validated := validated, sourceText := sourceText, sourceModule := sourceModule }
+
+def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
+  let prepared ← psHostDirectPrepare inputPath
+  pure prepared.validated
 
 def psHostDirectEnsureParent (path : String) : IO Unit := do
   if let some parent := (System.FilePath.mk path).parent then
@@ -60,15 +80,16 @@ def psHostDirectJavaScript
     (inputPath outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".js" then
     throw (IO.userError "PSC1_DIRECT_JS_OUTPUT_EXTENSION: expected .js")
-  let validated ← psHostDirectValidatedIr inputPath
+  let prepared ← psHostDirectPrepare inputPath
+  let validated := prepared.validated
   let declaration ← match psHostDirectDeclarationSource validated with
     | .ok text => pure text
     | .error reason => throw (IO.userError reason)
   let emitted ← match psJsEmitValidatedModuleWithPositions validated with
     | .ok text => pure text
     | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
-  let sourceText ← IO.FS.readFile inputPath
-  let parsed ← psHostParseSource inputPath sourceText
+  let sourceText := prepared.sourceText
+  let parsed := prepared.sourceModule
   let name := ((System.FilePath.mk outputPath).fileName).getD "module.js"
   let stem := outputPath.dropRight 3
   -- Source positions are owned by the actual parser; generated columns are

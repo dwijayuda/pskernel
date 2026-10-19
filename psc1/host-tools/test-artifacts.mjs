@@ -61,7 +61,7 @@ const root = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-publication-unit-'));
 function stageFor(output, literal) {
   const stage = createStage(output);
   const name = path.basename(output);
-  const info = { profile: 'psc1-checked-direct/1', entryPath: path.join(root, 'input.lean'),
+  const info = { profile: 'psc1-checked-direct/1', leanVersion: '4.35.0', leanCommit: 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc', entryPath: path.join(root, 'input.lean'),
     publicNames: ['answer'], sources: [{ path: path.join(root, 'input.lean'), text: `def answer : Bool := ${literal}\n`, origins: [] }] };
   fs.writeFileSync(path.join(stage, 'psc1-input.json'), JSON.stringify(info));
   fs.writeFileSync(path.join(stage, 'admissions.json'), '["artificial-I/O-test-metadata-not-a-proof"]\n');

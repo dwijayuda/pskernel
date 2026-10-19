@@ -1,5 +1,18 @@
 # `@proofscript/pskernel-lean`
 
+## Current native source target
+
+The PSC1 workspace now pins Lean 4.35.0 at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc` in
+[`NATIVE_SOURCE_PIN.json`](../../NATIVE_SOURCE_PIN.json). Current native compilation,
+provider identity, launchers and bundle provenance use this exact source pin.
+Fresh Linux qualification is required; archived receipts are not inherited.
+
+The package-local 4.34 binaries, source pin, manifests and vendored kernel files
+remain historical assets. The recipes below describe that historical package;
+use its matching revision when rebuilding those archived artifacts.
+
+## Historical Lean 4.34 package record
+
 Official Lean-backed kernel provider for ProofScript PSC2.
 
 Current package identity:

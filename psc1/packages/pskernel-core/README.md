@@ -1,5 +1,13 @@
 # PSKernel Core
 
+## Current source target
+
+The active PSC1 contract targets Lean 4.35.0, exact commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+The public provider/session boundary rejects the historical native evaluator,
+matching removal of Lean.reduceBool/Lean.reduceNat kernel reduction upstream.
+The M3/M4 and LEAN_4_34 records below remain historical evidence. This pin migration
+does not establish fresh full conformance or self-host qualification.
+
 This is the canonical portable PSKernel implementation, formerly
 `packages/pskernel-selfhost`. Its package identity is `@proofscript/pskernel-core`
 and its Lean modules use `Ps.KernelCore`. The former experimental core is

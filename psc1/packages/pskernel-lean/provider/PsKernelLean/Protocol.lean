@@ -7,9 +7,9 @@ namespace PsKernelLean
 
 def providerProtocol : String := "pskernel-lean/1"
 def providerName : String := "lean4-cpp"
-def providerVersion : String := "4.34.0"
-def providerCommit : String := "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
-def providerProfile : String := "lean4.34-core"
+def providerVersion : String := "4.35.0"
+def providerCommit : String := "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+def providerProfile : String := "lean4.35-core"
 
 def providerIdentityJsonFields : String :=
   "\"protocol\":" ++ psJsonQuote providerProtocol ++

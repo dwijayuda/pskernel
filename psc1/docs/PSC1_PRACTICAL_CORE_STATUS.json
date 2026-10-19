@@ -12,15 +12,22 @@
     "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
   },
   "implementationLean": {
-    "version": "4.34.0",
-    "status": "transitional-qualified-baseline"
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "status": "migration-candidate-pending-isolated-CI"
   },
   "baselineEvidence": {
     "implementationCommit": "f933691a1d6fa578c59623636afbb02119909837",
     "runId": 39332460452,
     "repairPrRunId": 39333660822
   },
-  "currentMilestones": [],
+  "currentMilestones": [
+    {
+      "id": "lean-4.35-native-migration",
+      "status": "implementation-candidate",
+      "qualification": "pending isolated Linux run; no feature evidence implied"
+    }
+  ],
   "stages": [
     "specified",
     "parsed",

@@ -3,7 +3,7 @@ import Ps.Host.WasmComponent
 -- Native and npm launchers use this one command model. There is no implicit
 -- fallback to the archived generated PSC0 compiler or its stale kernel artifact.
 def psCliUsage : String :=
-  "ProofScript PSC1 checked native compiler (Lean 4.34.0)\n" ++
+  "ProofScript PSC1 checked native compiler (Lean 4.35.0)\n" ++
   "usage:\n" ++
   "  psc1 check <input.lean|input.ps>\n" ++
   "  psc1 build <input.lean|input.ps> --out <output.js|output.ts>\n" ++
@@ -23,10 +23,14 @@ private def buildDefault (inputPath outputPath : String) : IO Unit := do
   else throw (IO.userError "PSC1_OUTPUT_EXTENSION: use --target for Rust or Wasm")
 
 def main (args : List String) : IO Unit := do
+  if Lean.versionString != PsKernelLean.providerVersion || Lean.githash != PsKernelLean.providerCommit then
+    throw (IO.userError "PSC1_NATIVE_LEAN_PIN_MISMATCH: compiler runtime does not match the native source pin")
   match args with
   | [] | ["--help"] | ["-h"] => IO.println psCliUsage
-  | ["--version"] => IO.println "PSC1 0.1.0-psc1.1 (checked native; Lean 4.34.0)"
-  | ["--identity"] => IO.println "{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"4.34.0\"}"
+  | ["--version"] => IO.println ("PSC1 0.1.0-psc1.1 (checked native; Lean " ++ Lean.versionString ++ ")")
+  | ["--identity"] => IO.println
+      ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++
+        Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\"}")
   | ["check", inputPath] => psHostDirectCheck inputPath
   | ["admissions", inputPath] => psHostDirectAdmissions inputPath
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSource inputPath)

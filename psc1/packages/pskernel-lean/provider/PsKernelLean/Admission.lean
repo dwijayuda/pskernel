@@ -9,7 +9,7 @@ def kernelRejection
   {
     kind := .kernelRejection
     message :=
-      "Lean 4.34 kernel rejected declaration " ++
+      "Lean 4.35 kernel rejected declaration " ++
       toString declarationIndex ++
       " (" ++ kernelExceptionSummary error ++ ")"
     declarationIndex := some declarationIndex

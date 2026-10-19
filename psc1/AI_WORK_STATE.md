@@ -19,15 +19,17 @@ is preserved in `docs/history/AI_WORK_STATE_BEFORE_PRACTICAL_CORE_2026-10-20.md`
 
 ## Current implementation/evidence boundary
 
-Initial source inventory completed, with no new language implementation qualified.
+Native source pin migration implemented; isolated Linux qualification is pending.
+No new language implementation has been qualified.
 The governing reference blob is `694115223777599ba28ee175e14bb642b7b6aa4b`
 from PSC0 commit `33676076bcda7b0de5ec1f9803f49b8b1d28a058`; PSC0 is read-only
 for this workstream.
 
 Normative Lean target is stable 4.35.0 at
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The passing PSC1 implementation
-remains 4.34.0 until a separate migration changes and qualifies the actual compiler,
-provider, environment and provenance paths. Do not label this transitional state
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. The active source now pins that exact compiler and provider commit, verifies both
+native launcher identity and bundle provenance, and refuses the removed native
+reduction capability. The separate migration run must qualify these changes before
+language implementation is included. Historical 4.34 assets keep their original pins. Do not label this transitional state
 completed v7.2 conformance.
 
 Source audit found reusable inferred lets, implicit unification, products and typed

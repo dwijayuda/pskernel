@@ -245,9 +245,11 @@ def testKernelAdmission : IO Unit := do
 def main : IO Unit := do
   expectEq "providerProtocol" PsKernelLean.providerProtocol "pskernel-lean/1"
   expectEq "providerName" PsKernelLean.providerName "lean4-cpp"
-  expectEq "providerVersion" PsKernelLean.providerVersion "4.34.0"
-  expectEq "providerProfile" PsKernelLean.providerProfile "lean4.34-core"
-  expectEq "leanVersion" Lean.versionString "4.34.0"
+  expectEq "providerVersion" PsKernelLean.providerVersion "4.35.0"
+  expectEq "providerProfile" PsKernelLean.providerProfile "lean4.35-core"
+  expectEq "leanVersion" Lean.versionString "4.35.0"
+  expectEq "providerCommit" PsKernelLean.providerCommit "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  expectEq "leanCommit" Lean.githash PsKernelLean.providerCommit
   testCoreConversion
   testPreludeReplay
   testCanonicalAdmissionsDecode

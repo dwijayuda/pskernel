@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - fix/psc1-scoped-correctness-20261020
+      - feature/psc1-v7.2-practical-core-v1
     paths:
       - psc1/**
       - .github/workflows/psc1-scoped-correctness.yml
@@ -75,6 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
+          node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1 psc1_ir_specialize_tests psc1_direct_map_tests psc1_lean_kernel_provider_tests psc1_scoped_tests psc1_snapshot_tests
       - name: Execute IR, map, independent provider and host-boundary regressions
         working-directory: psc1

@@ -9,7 +9,7 @@ def psKernelBridgeKernelFingerprint : String :=
   "lean-ts-kernel@0.1.0"
 
 def psKernelBridgeFoundationFingerprint : String :=
-  "lean4:v4.34.0@293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+  "lean4:v4.35.0@eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
 
 inductive PsKernelBridgeRequest where
   | ping

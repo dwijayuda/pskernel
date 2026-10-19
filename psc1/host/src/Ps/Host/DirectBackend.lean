@@ -103,7 +103,7 @@ def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
 
 def psHostDirectCheck (inputPath : String) : IO Unit := do
   let (_, prepared, _) ← checkedInput inputPath
-  IO.println ("PSC1_KERNEL_CHECK: PASS (" ++ toString prepared.declarations.length ++ " declarations; Lean 4.34.0)")
+  IO.println ("PSC1_KERNEL_CHECK: PASS (" ++ toString prepared.declarations.length ++ " declarations; Lean 4.35.0)")
 
 def psHostDirectAdmissions (inputPath : String) : IO Unit := do
   let (_, _, admissions) ← checkedInput inputPath
@@ -168,8 +168,10 @@ def psHostDirectWriteSelectedProvenance
     (session : PsHostDirectPrepared) (stage : System.FilePath) (selected : List String) : IO Unit := do
   if !selected.all session.publicNames.contains then
     throw (IO.userError "PSC1_PROVENANCE_PUBLIC_API_NOT_CHECKED")
-  let metadata := "{\"profile\":\"psc1-checked-direct/1\",\"compiler\":\"PSC1 native / Lean 4.34.0\"," ++
-    "\"entryPath\":" ++ psJsonQuote session.captured.entryPath ++
+  let metadata := "{\"profile\":\"psc1-checked-direct/1\",\"compiler\":\"PSC1 native / Lean 4.35.0\"," ++
+    "\"leanVersion\":" ++ psJsonQuote Lean.versionString ++
+    ",\"leanCommit\":" ++ psJsonQuote Lean.githash ++
+    ",\"entryPath\":" ++ psJsonQuote session.captured.entryPath ++
     ",\"publicNames\":" ++ psJsonArray (selected.map psJsonQuote) ++
     ",\"sources\":" ++ psJsonArray (session.captured.sources.map (sourceJson session)) ++ "}\n"
   IO.FS.writeFile (stage / "psc1-input.json") metadata

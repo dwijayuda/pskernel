@@ -133,7 +133,7 @@ def tryPreludeDeclaration
       | .error (.unknownConstant _ _) => pure .deferred
       | .error error =>
           throw (preludeMismatch
-            ("Lean 4.34 kernel rejected PSC2 provider prelude declaration " ++
+            ("Lean 4.35 kernel rejected PSC2 provider prelude declaration " ++
               psNameToString (psDeclarationName declaration) ++
               " (" ++ kernelExceptionSummary error ++ ")"))
 

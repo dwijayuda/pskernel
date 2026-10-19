@@ -66,16 +66,17 @@ theorem psKernelC0DeepSubstForcePush
   simp [psKernelC0DeepSubstForce, psKernelC0DeepSubstPush,
     List.reverse_cons, List.foldl_append]
 
-/-- Exactly one deferred operation is the source changed-flag instantiator
-    projection at its original offset; no new de Bruijn rule. -/
+/-- A single deferred operation forces to its original source
+    operation at the same offset. At offset zero, that operation includes
+    the public binder-headed loose-variable shortcut. -/
 theorem psKernelC0DeepSubstForceOne
     (expr replacement : PsKernelExpr) (offset : Nat) :
     psKernelC0DeepSubstForce
       (psKernelC0DeepSubstPush (psKernelC0DeepSubstPure expr)
         ⟨replacement, offset⟩) =
-      (psKernelC0ExprInstantiateOneChanged expr replacement offset).1 := by
+      psKernelC0DeepSubstApply expr ⟨replacement, offset⟩ := by
   simp [psKernelC0DeepSubstForcePush,
-    psKernelC0DeepSubstForcePure, psKernelC0DeepSubstApply]
+    psKernelC0DeepSubstForcePure]
 
 /-- Offset zero is exactly the public source capture-avoiding instantiator,
     including its binder-headed loose-variable shortcut. -/

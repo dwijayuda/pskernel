@@ -28,9 +28,8 @@ def main (args : List String) : IO Unit := do
   match args with
   | [] | ["--help"] | ["-h"] => IO.println psCliUsage
   | ["--version"] => IO.println ("PSC1 0.1.0-psc1.1 (checked native; Lean " ++ Lean.versionString ++ ")")
-  | ["--identity"] => IO.println
-      ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++
-        Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\"}")
+  | ["--identity"] =>
+      IO.println ("{\"protocol\":\"psc1-native/1\",\"profile\":\"psc1-checked-direct/1\",\"lean\":\"" ++ Lean.versionString ++ "\",\"leanCommit\":\"" ++ Lean.githash ++ "\"}")
   | ["check", inputPath] => psHostDirectCheck inputPath
   | ["admissions", inputPath] => psHostDirectAdmissions inputPath
   | ["typescript", inputPath] => IO.print (← psHostDirectTypeScriptSource inputPath)

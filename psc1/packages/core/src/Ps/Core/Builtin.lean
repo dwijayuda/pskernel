@@ -219,6 +219,9 @@ def psStringLengthName : PsName :=
 def psStringAppendName : PsName :=
   psNameAppendStr psStringInternalName "append"
 
+def psStringModernAppendName : PsName :=
+  psNameAppendStr psStringName "append"
+
 def psStringUtf8ByteSizeName : PsName :=
   psNameAppendStr psStringName "utf8ByteSize"
 

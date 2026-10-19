@@ -160,11 +160,15 @@ This is intentionally conservative.  PSKernel local fvar names are structural
 and forgeable at raw API boundaries, unlike Lean's opaque globally unique fvar
 identities, so scope-local cache knowledge must not escape its scope.
 -/
+def psKernelStateNatMax
+    (left right : Nat) : Nat :=
+  if Nat.ble left right then right else left
+
 def psKernelCheckerStateExitLocalScope
     (parent child : PsKernelCheckerState) :
     PsKernelCheckerState :=
   {
-    nextFresh := Nat.max parent.nextFresh child.nextFresh
+    nextFresh := psKernelStateNatMax parent.nextFresh child.nextFresh
     inferOnly := parent.inferOnly
     checkedInfer := parent.checkedInfer
     whnfCore := parent.whnfCore

@@ -59,6 +59,11 @@ def main : IO Unit := do
   requireKernel "Lean 4.34 UTF-8 next alias parity"
     (String.Pos.Raw.byteIdx (String.Pos.Raw.next sample p) ==
       String.Pos.Raw.byteIdx (String.Internal.next sample p))
+  requireKernel "Nat maximum shim matches pinned Lean"
+    (psKernelStateNatMax 19 7 == Nat.max 19 7 &&
+      psKernelStateNatMax 3 12 == Nat.max 3 12)
+  requireKernel "String append alias parity"
+    (String.append "é" "x" == String.Internal.append "é" "x")
   let u := PsKernelLevel.param (PsKernelName.str PsKernelName.anonymous "u")
   let v := PsKernelLevel.param (PsKernelName.str PsKernelName.anonymous "v")
   let shiftedMax := PsKernelLevel.succ (PsKernelLevel.max u v)

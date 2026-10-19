@@ -830,8 +830,13 @@ def psPreludeEnvText13 : PsEnvironment :=
     (PsDeclaration.axiomDecl
       psStringPosRawAtEndName [] psPreludeStringAtEndType)
 
-def psPreludeEnvList0 : PsEnvironment :=
+def psPreludeEnvText14 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText13
+    (PsDeclaration.axiomDecl
+      psStringModernAppendName [] psPreludeStringBinaryType)
+
+def psPreludeEnvList0 : PsEnvironment :=
+  psPreludeAdd psPreludeEnvText14
     (PsDeclaration.axiomDecl
       psListName [] psPreludeUnaryTypeConstructorType)
 

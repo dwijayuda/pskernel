@@ -882,7 +882,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if psStringEq text "String.Internal.append" then
+      else if psStringEq text "String.Internal.append" ||
+              psStringEq text "String.append" then
         binary PsVerifiedIrIntrinsic.stringAppend
       else if psStringEq text "String.utf8ByteSize" then
         if Nat.beq (psListLength view.args) 1 then
@@ -2017,7 +2018,8 @@ def psErasureSpecialEntry
   else if psListAny named
       ["Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
         "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
-        "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
+        "Bool.or", "String.push", "String.Internal.append", "String.append",
+        "String.Internal.next",
         "String.Pos.Raw.next", "String.Internal.get", "String.Internal.atEnd",
         "String.Pos.Raw.atEnd", "Array.emptyWithCapacity",
         "Array.size"] then

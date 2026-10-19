@@ -39,6 +39,20 @@ jobs:
           install -m 755 "$binary" "$RUNNER_TEMP/psc1-bin/wasm-tools"
           echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/psc1-bin/wasm-tools" --version
+      - name: Install SHA-256-pinned Wasmtime 49.0.4 (component runtime)
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz"
+          archive="$RUNNER_TEMP/wasmtime-v49.0.4-x86_64-linux.tar.xz"
+          curl --fail --location --retry 3 "$url" --output "$archive"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $archive" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/psc1-wasmtime-unpack"
+          tar xJf "$archive" -C "$RUNNER_TEMP/psc1-wasmtime-unpack"
+          binary="$(find "$RUNNER_TEMP/psc1-wasmtime-unpack" -type f -name wasmtime -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          "$RUNNER_TEMP/psc1-bin/wasmtime" --version
       - name: Build PSC1 independent backend libraries
         working-directory: psc1
         shell: bash
@@ -180,6 +194,9 @@ jobs:
           wasm-tools parse /tmp/psc1-bool-component.wat -o /tmp/psc1-bool-component-roundtrip.wasm
           wasm-tools validate /tmp/psc1-bool-component-roundtrip.wasm
           wasm-tools component wit /tmp/psc1-bool-component.wasm | grep -q 'answer'
+          wasmtime run --invoke 'answer()' /tmp/psc1-bool-component.wasm | tee /tmp/psc1-bool-component-runtime.txt
+          grep -q 'true' /tmp/psc1-bool-component-runtime.txt
+          echo "PSC1_COMPONENT_RUNTIME_TRUE: PASS"
           grep -q 'answer: func() -> bool;' /tmp/psc1-bool-component.wit
           cat >/tmp/psc1-wasm-invalid-abi.lean <<'EOF'
           def count : Nat := 42

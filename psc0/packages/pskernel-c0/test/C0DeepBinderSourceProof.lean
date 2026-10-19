@@ -41,3 +41,37 @@ example
 #check c0DeepLambdaSplit_source
 #check psKernelC0DeepLambdaPrepare
 #check psKernelC0DeepLambdaClose
+
+
+/-- Fully checked, scoped deferred preparation is observationally the
+    original eager checked preparation after forcing its body once.
+    This equality includes error strings, fresh-name state, local context,
+    captured binder information and remaining binder-range metadata. -/
+theorem c0DeepDeferredLambdaPrepare_source
+    (smaller : PsKernelC0BinderSmaller)
+    (whnf : PsKernelC0BinderWhnf)
+    (defeq : PsKernelC0BinderDefEq)
+    (ctx : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (name : PsKernelName)
+    (domain body : PsKernelExpr)
+    (info : PsKernelBinderInfo)
+    (ranges : List Nat) :
+    (psKernelC0DeepLambdaPrepareDeferred smaller whnf defeq
+      ctx state name domain body info ranges).map
+        psKernelC0DeepLambdaForceFrame =
+    psKernelC0DeepLambdaPrepare smaller whnf defeq
+      ctx state name domain body info ranges := by
+  unfold psKernelC0DeepLambdaPrepareDeferred psKernelC0DeepLambdaPrepare
+  cases hdom : smaller [] [] whnf defeq ctx state domain false with
+  | error reason =>
+      simp [hdom]
+  | ok dom =>
+      cases hsort : psKernelEnsureSortWith whnf ctx dom.2 dom.1 with
+      | error reason =>
+          simp [hdom, hsort]
+      | ok sortResult =>
+          simp [hdom, hsort,
+            psKernelC0DeepLambdaForceFrame,
+            psKernelC0DeepDeferBinderOpening_source,
+            psKernelC0DeepEagerBinderOpening]

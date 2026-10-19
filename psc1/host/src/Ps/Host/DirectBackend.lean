@@ -24,9 +24,13 @@ def psHostDirectEnsureParent (path : String) : IO Unit := do
     IO.FS.createDirAll parent
 
 def psHostDirectType (value : PsVerifiedIrType) : Except String String :=
-  match psTsEmitType value with
-  | .ok printed => .ok printed
-  | .error _ => .error "PSC1_DIRECT_DECLARATION_TYPE_UNSUPPORTED"
+  -- Only scalar public declarations have a qualified .d.ts representation yet.
+  match value with
+  | .primitive _ =>
+      match psTsEmitType value with
+      | .ok printed => .ok printed
+      | .error _ => .error "PSC1_DIRECT_DECLARATION_TYPE_UNSUPPORTED"
+  | _ => .error "PSC1_DIRECT_NONSCALAR_PUBLIC_SIGNATURE_UNQUALIFIED"
 
 def psHostDirectParameter (value : PsVerifiedIrParameter) : Except String String := do
   let type ← psHostDirectType value.type
@@ -47,8 +51,6 @@ def psHostDirectDeclaration (value : PsVerifiedIrDeclaration) : Except String St
 
 def psHostDirectDeclarationSource (module : PsValidatedIrModule) :
     Except String String := do
-  if !module.raw.structures.isEmpty || !module.raw.inductives.isEmpty then
-    throw "PSC1_DIRECT_COMPLEX_TYPE_DECLARATIONS_NOT_QUALIFIED"
   let declarations ← psListMapExcept psHostDirectDeclaration module.raw.declarations
   pure ("// PSC1 direct JS declarations from checked typed IR\n" ++
     String.intercalate "\n" declarations ++ "\n")

@@ -70,7 +70,7 @@ def psHostDirectEmitWasmComponent
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_COMPONENT_BINARY_UNSUPPORTED")
   let name := psHostArtifactFileName outputPath "module.wasm"
-  let stem := name.dropRight 5
+  let stem := (name.dropEnd 5).toString
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteSelectedProvenance session stage [exportName]
     let core := stage / (stem ++ ".core.wasm")

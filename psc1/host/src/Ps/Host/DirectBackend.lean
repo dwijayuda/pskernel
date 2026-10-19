@@ -241,7 +241,7 @@ private def emitEcma (session : PsHostDirectPrepared) (outputPath kind : String)
   psHostWithArtifactStage outputPath fun stage => do
     psHostDirectWriteProvenance session stage
     IO.FS.writeFile (stage / name) emitted
-    IO.FS.writeFile (stage / (name.dropRight 3 ++ ".d.ts")) declarations
+    IO.FS.writeFile (stage / ((name.dropEnd 3).toString ++ ".d.ts")) declarations
     let _ ← psHostArtifactTool #["format", stage.toString, kind, name]
     psHostPublishArtifactStage stage outputPath kind
   IO.println ("PSC1_DIRECT_" ++ (if kind == "js" then "JS" else "TS") ++ ": " ++ outputPath)
@@ -340,7 +340,7 @@ def psHostDirectEmitWasmCore (session : PsHostDirectPrepared) (outputPath : Stri
     psHostDirectWriteProvenance session stage
     IO.FS.writeBinFile (stage / name) (ByteArray.mk encoded.toArray)
     let _ ← psHostWasmTool #["validate", (stage / name).toString] "VALIDATE"
-    psHostWriteWat (stage / name) (stage / (name.dropRight 5 ++ ".wat"))
+    psHostWriteWat (stage / name) (stage / ((name.dropEnd 5).toString ++ ".wat"))
     psHostPublishArtifactStage stage outputPath "wasm-core"
   IO.println ("PSC1_DIRECT_WASM_CORE: " ++ outputPath)
 

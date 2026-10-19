@@ -1,5 +1,13 @@
 # AI_WORK_STATE — PSKernel-C0 live checkpoint
 
+## 19 October 2026 — Exact immutable loose-bound native source refinement (PR #157, unmerged)
+
+- The source-only `PsKernelExpr.psKernelC0LooseBVarBound` stores the maximum loose de Bruijn index plus one, decremented through binders, combined by `Nat.max`. `psKernelC0HasLooseBVarFast expr offset` uses an exact `Nat.blt` check. Its original independent recursive oracle `psKernelExprHasLooseAt` has not been altered.
+- [Complete native Lean 4.35 source theorem CI 39241848939](https://github.com/dwijayuda/pskernel/actions/runs/39241848939) **SUCCESS** at `86318438caac3b6a223542e6d6be31908a199108`: all-offset structural-induction proof, 15 positive/negative expression categories across seven offsets, and 4000-level shared source DAG native metadata tests; unchanged official replay, negative, MVar and universe-param regressions passed. This qualifies syntactic source equivalence only, not full-proof acceleration or platform ABI.
+- Native compiler-only follow-up branch `research/pskernel-c0-loose-bvar-native-csimp-20261019` moves the proof into a separate Lean source certificate and adds a `@[csimp]` constant-to-constant rewrite from existing `psKernelExprHasLooseBVar` to zero-offset cached-field query, imported only through the existing certified instantiation path. Exact native CI [39242646501](https://github.com/dwijayuda/pskernel/actions/runs/39242646501) and real SHA-authenticated 4,000-layer Arena `app-lam` A/B [39242646507](https://github.com/dwijayuda/pskernel/actions/runs/39242646507) must pass with unchanged fuel 4096 before possible promotion. Prior initial attempts failed on missing Lake module registration / nonconstant `csimp` target; both wiring defects were corrected, not waived.
+- **Trust/merge boundary:** native Lean `@[computed_field]` runtime implementation remains a separate trust/portability obligation; correctness of cached syntactic metadata does not authorize theorem/types/DefEq/axioms, and one microbenchmark alone cannot qualify a fast kernel. No production C0, PSC0 Core compiler, original PSKernel-Core or fuel/assumption changes. Earlier Arena remains 177/193 matched, 16 unqualified; full native compiler closure C0 900s timeout remains unresolved.
+
+
 ## 19 October 2026 — Three immutable source-proved node-presence fields (PR #153; research only)
 
 - **Branch:** `research/pskernel-c0-arena193-levelparam-field-20261019`, layered on unmerged computed-MVar candidate [PR #150](https://github.com/dwijayuda/pskernel/pull/150) at `574f4d787cd0c1541ece5278317395ca30ba7013`. Does not modify production C0.

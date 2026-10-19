@@ -1,0 +1,1817 @@
+{
+  "schema": "psc0-core-language-scope-module-qualification/1",
+  "repository": "dwijayuda/pskernel",
+  "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+  "tree": "15bccd57b7765a05485e27f5f65fc2aae96f6d10",
+  "workflow": ".github/workflows/psc0-core-first-audit.yml",
+  "workflowRun": 39236888998,
+  "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998",
+  "status": "completed",
+  "conclusion": "success",
+  "completedAt": "2026-10-19T10:35:04Z",
+  "scope": "Public-section inheritance and EOF scope closure are implemented through the existing syntax/elaboration owners. The selected readers preserve actual module kind and the shared project parser rejects module clients importing legacy Lean files. Paired independent checks and separate pinned-native oracles cover declaration visibility, import kinds, exposed abbreviations and exported specifications versus hidden ordinary bodies.",
+  "jobs": [
+    {
+      "id": 118010303744,
+      "name": "candidate-authoring",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303744"
+    },
+    {
+      "id": 118010303771,
+      "name": "source-inventory",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303771"
+    },
+    {
+      "id": 118010303809,
+      "name": "native-seams",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303809"
+    },
+    {
+      "id": 118010303816,
+      "name": "bootstrap-closure",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303816"
+    }
+  ],
+  "previousQualifiedCode": {
+    "head": "ddf0fc171e80d847b9e867c7b7f8045cc712b36c",
+    "run": 39195343005,
+    "evidence": "psc0/docs/core-first-evidence/core-language-module-runtime-qualification.json",
+    "scopePreserved": true
+  },
+  "changedInputsComparedWith": {
+    "head": "c1f4e44d1a15ed7fbe9332d7fcfd16dba9bdd647",
+    "comparisonURL": "https://github.com/dwijayuda/pskernel/compare/c1f4e44d1a15ed7fbe9332d7fcfd16dba9bdd647...36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+    "commits": 3
+  },
+  "changedExecutableInputs": [
+    {
+      "path": ".github/workflows/psc0-core-first-audit.yml",
+      "gitBlobSHA1": "ffc473fc62b32dcb0a3310c227567297f6e647de",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 0
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Pscv0ModuleEngine.lean",
+      "gitBlobSHA1": "b682ba6f93194d5c3cee2962e5d0dfb62981d767",
+      "status": "modified",
+      "additions": 14,
+      "deletions": 1
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Command.lean",
+      "gitBlobSHA1": "65e19c0bf315643301907837a94ee054b745ccf2",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 1
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+      "gitBlobSHA1": "b259593b68ac78076f7d9657c8bca051583d3d98",
+      "status": "modified",
+      "additions": 3,
+      "deletions": 0
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lean/Program.lean",
+      "gitBlobSHA1": "66023288e4daa07a7fa076f286c6df7dfa38b6a0",
+      "status": "modified",
+      "additions": 39,
+      "deletions": 10
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Pscv0/ProgramRead.lean",
+      "gitBlobSHA1": "64504753191f160a1dc1f413b1615bc0d6e79425",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1
+    },
+    {
+      "path": "psc0/scripts/core-first-module-native-oracle.py",
+      "gitBlobSHA1": "fe6605b81353b81a0c98491db08e027f84795287",
+      "status": "added",
+      "additions": 289,
+      "deletions": 0
+    },
+    {
+      "path": "psc0/test/Pscv0CoreProject.lean",
+      "gitBlobSHA1": "c4fcc5e26017b13c4f73abfd202c2fa2bda443ec",
+      "status": "modified",
+      "additions": 348,
+      "deletions": 2
+    },
+    {
+      "path": "psc0/test/Pscv0CoreVisibilityOracle.lean",
+      "gitBlobSHA1": "2733cc353a0ea75ae693fef5c293ad4314585e4a",
+      "status": "added",
+      "additions": 100,
+      "deletions": 0
+    },
+    {
+      "path": "psc0/test/Pscv0M3InputParity.lean",
+      "gitBlobSHA1": "553b005a60313265e9d6d8d4d71270fa7f9e8933",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 1
+    },
+    {
+      "path": "psc0/test/Pscv0NativeTests.lean",
+      "gitBlobSHA1": "2179bd13cf0e1477e1b65ecfe20f93f304bb4954",
+      "status": "modified",
+      "additions": 2,
+      "deletions": 2
+    }
+  ],
+  "languageAuthority": {
+    "reference": "psc0/PSCV0_LANGUAGE_REFERENCE_v7.2.md",
+    "referenceGitBlobSHA1": "694115223777599ba28ee175e14bb642b7b6aa4b",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "nativeSources": [
+      "src/Lean/Parser/Command.lean",
+      "src/Lean/Elab/BuiltinCommand.lean",
+      "src/Lean/Elab/Declaration.lean",
+      "src/Lean/Elab/DeclModifiers.lean",
+      "src/Lean/PrivateName.lean",
+      "src/Lean/Parser/Extension.lean",
+      "src/Lean/Environment.lean",
+      "src/Lean/Elab/MutualDef.lean"
+    ],
+    "authorityUse": "Pinned native source review informs this selected implementation; complete native module elaboration parity remains open."
+  },
+  "checkingPolicy": {
+    "fixtureBaseDeclarations": [
+      "CoreSelectedIdentity",
+      "Eq",
+      "Eq.refl",
+      "Eq.rec"
+    ],
+    "equalityOwner": "psc0/packages/environment/src/Ps/Environment/Logic.lean",
+    "equalityOwnerGitBlobSHA1": "9d04fb2dcedf7c0c39f1d07b371c0b82939df7f2",
+    "declarationKinds": [
+      "definition",
+      "inductive",
+      "constructor",
+      "recursor"
+    ],
+    "actualFixtureBaseAxioms": [],
+    "kernelTrustLevel": 0,
+    "maxHeartbeatsPerDeclaration": 2000000,
+    "maxRecDepthPerDeclaration": 20000,
+    "fixtureBaseSelectedAsCoreProfile": false,
+    "previousIdentityOnlyProjectAndRuntimeFixtureUnchanged": true,
+    "fullWrapperPolicyUnchanged": true,
+    "maximumApprovedLogicalAssumptions": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ]
+  },
+  "visibilityScopeSlice": {
+    "librarySourceDeclarations": 17,
+    "preparedLibraryDeclarations": 19,
+    "publicDeclarations": 11,
+    "sourcePrivateDeclarations": 6,
+    "generatedPrivateEquationTheorems": 2,
+    "privateImportRefusalsPerSourceKind": 8,
+    "parserRefusals": 10,
+    "sourceKinds": 2,
+    "scopeBaseDeclarations": 4,
+    "scopeBaseAxioms": [],
+    "pairedEOFAndExplicitEndAdmissions": true,
+    "accepted": [
+      "Lean module-mode and headerless named/anonymous public section",
+      "inherited visibility through nested ordinary section and namespace",
+      "explicit private override and default restoration at explicit end",
+      "mutual declaration visibility without popping an enclosing scope",
+      "EOF closure versus explicit-end canonical equality in both selected source kinds"
+    ],
+    "refused": [
+      "private source names through an importing module",
+      "both generated private equation theorem helpers through an importing module",
+      "extra end and mismatched named end",
+      "private section, public namespace and private namespace"
+    ],
+    "invalidScopeSyntaxDiagnostic": "PSCV0-LEAN-VISIBILITY-SCOPE-UNSUPPORTED",
+    "resolvedPublicPrefixPrivateHelperDiagnostic": "PSCV0-UNKNOWN-NAME: CoreVisibility.mutualPublic.eq_def",
+    "grammarNote": "public section is a selected Lean reader adapter; ProofScript retains its existing section syntax and uses explicit per-declaration visibility in the paired fixture.",
+    "eofImplementation": "Shared elaboration retains explicit end validation and accepts final lexical scope frames at EOF; those local frames are not returned."
+  },
+  "moduleKindSlice": {
+    "moduleKindParserFlags": 4,
+    "positiveProjects": 9,
+    "earlyProjectParseRefusals": 8,
+    "owner": "Ps.Compiler.Pscv0ModuleEngine.psPscv0ProjectParse",
+    "readerContract": {
+      "proofScript": "implicit module",
+      "lean": "actual leading module-header bit, otherwise legacy"
+    },
+    "covered": [
+      "native 2x2 import-kind matrix",
+      "mixed ProofScript/Lean imports in both directions",
+      "public imports",
+      "import-only and otherwise unused import edges"
+    ],
+    "refusalDiagnostic": "PSCV0-MODULE-KIND: module Entry cannot import non-module Library",
+    "missingAndDuplicateImportPrecedencePreserved": true,
+    "compatibilityFixtureAdjustment": {
+      "path": "psc0/test/Pscv0M3InputParity.lean",
+      "change": "The existing mixed-input positive now gives its Lean provider an actual module header and explicit public declaration.",
+      "wholeM3InputParityExecutableNewlyRun": false
+    }
+  },
+  "importedBodySlice": {
+    "sourceKinds": 2,
+    "positiveProofsPerKind": 2,
+    "refusalsPerKind": 1,
+    "pairedCanonicalEquality": true,
+    "independentKernelAdmission": true,
+    "clientUsesPublicImport": true,
+    "ordinaryDefinitionImportedAs": "opaqueDecl",
+    "exposedAbbreviationImportedAs": "definitionDecl",
+    "exposedNames": [
+      "coreBodyExposed"
+    ],
+    "ordinaryDefinition": "coreBodyOpaque",
+    "exportedSpecification": "coreBodySpec",
+    "directReflexivityRefusal": "PSCV0-PROOF: rfl requires definitionally equal sides",
+    "newBodyVisibilityImplementation": false,
+    "reducibilityPolicyChanged": false,
+    "remaining": "Ordinary/private-import names appearing in public signatures or exposed bodies, and legacy Lean body transparency, need their separate correspondence cases."
+  },
+  "seamMarkers": [
+    {
+      "observedAt": "2026-10-19T10:28:12.2603543Z",
+      "marker": "PSCV0_CORE_MODULE_HEADER: paired re-export, default privacy, explicit public and ten owned refusal controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:12.2605245Z",
+      "marker": "PSCV0_CORE_VISIBILITY_SCOPES: paired nested scopes, mutual privacy, overrides, restoration, EOF equality, exact interfaces, six source-private declarations, two private equation helpers and end controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:12.2606921Z",
+      "marker": "PSCV0_CORE_MODULE_KIND: native 2x2 matrix, mixed source directions, public imports and import-only refusals passed"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:12.2608710Z",
+      "marker": "PSCV0_CORE_IMPORTED_BODY: paired exposed abbreviation and exported theorem proofs, ordinary definition opacity and owned rfl refusal passed"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:12.2610312Z",
+      "marker": "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:13.0344880Z",
+      "marker": "PSCV0_CORE_VISIBILITY_NATIVE: 17 native declaration classifications and three unsupported scope syntax refusals passed"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:15.4534286Z",
+      "marker": "PSCV0_CORE_MODULE_NATIVE_ORACLE: 12 cases passed (8 successful compilations, 4 expected refusals)"
+    },
+    {
+      "observedAt": "2026-10-19T10:28:20.3741266Z",
+      "marker": "PSCV0_CORE_COMPILER_SOURCE: PASS complete two-file Lean/ProofScript source, exact seed inclusion and independent canonical admission"
+    }
+  ],
+  "pinnedNativeOracles": {
+    "visibility": {
+      "source": "psc0/test/Pscv0CoreVisibilityOracle.lean",
+      "nativeDeclarations": 17,
+      "public": 11,
+      "private": 6,
+      "invalidScopeSyntaxRefusals": 3,
+      "hostOnly": true,
+      "marker": {
+        "observedAt": "2026-10-19T10:28:13.0344880Z",
+        "marker": "PSCV0_CORE_VISIBILITY_NATIVE: 17 native declaration classifications and three unsupported scope syntax refusals passed"
+      }
+    },
+    "module": {
+      "driver": "psc0/scripts/core-first-module-native-oracle.py",
+      "hostOnly": true,
+      "actualCompilations": 12,
+      "acceptances": 8,
+      "semanticRefusals": 4,
+      "refusalChecks": [
+        "exit status 1",
+        "empty stderr",
+        "exactly one JSON error from the intended source and diagnostic substrings",
+        "no olean output"
+      ],
+      "acceptanceChecks": [
+        "exit status 0",
+        "no error or hole diagnostic",
+        "nonempty olean output"
+      ],
+      "nativeVersionAndCommitChecked": true,
+      "freshFixtureDirectory": true,
+      "perCommandTimeoutSeconds": 45,
+      "result": {
+        "observedAt": "2026-10-19T10:28:15.4514943Z",
+        "data": {
+          "cases": [
+            {
+              "command_tag": "LegacyProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyProvider",
+              "olean_artifacts": [
+                "LegacyProvider.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyProvider.lean",
+              "source_sha256": "da0068a378997d4976aaa0097c01ca18a1ac8d7a8c7e1836bac5b83fb9cb55ae",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ModuleProvider",
+              "olean_artifacts": [
+                "ModuleProvider.olean",
+                "ModuleProvider.olean.private",
+                "ModuleProvider.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ModuleProvider.lean",
+              "source_sha256": "9c3589a9d0904b3238f8c8ea2c1ad613932528587af1e1286a5374119ae4d85e",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleToModule",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "ModuleToModule",
+              "olean_artifacts": [
+                "ModuleToModule.olean",
+                "ModuleToModule.olean.private",
+                "ModuleToModule.olean.server"
+              ],
+              "returncode": 0,
+              "source": "ModuleToModule.lean",
+              "source_sha256": "3b48a0292d7fa1d642bb713f07122b8989651f35c7fd9d134db466104175c4ed",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleToLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "cannot import non-`module` LegacyProvider from `module`",
+                  "endPos": null,
+                  "fileName": "ModuleToLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 1
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "cannot import non-`module` LegacyProvider from `module`"
+              ],
+              "name": "ModuleToLegacy",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleToLegacy.lean",
+              "source_sha256": "e00667873c7f99f3028239c90bf7283e8828e79665da32c83d7214c534bce944",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyToModule",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyToModule",
+              "olean_artifacts": [
+                "LegacyToModule.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyToModule.lean",
+              "source_sha256": "6349629f92d80eb9ef6d3eb6852f68cb89ec7155f2c440e9fdf9c14c00bd37b5",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "LegacyToLegacy",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "LegacyToLegacy",
+              "olean_artifacts": [
+                "LegacyToLegacy.olean"
+              ],
+              "returncode": 0,
+              "source": "LegacyToLegacy.lean",
+              "source_sha256": "576795eb41efa09c4b02b3fd95eae1376870a99a314c2431316558efa29272c9",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "PublicModuleToModule",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "PublicModuleToModule",
+              "olean_artifacts": [
+                "PublicModuleToModule.olean",
+                "PublicModuleToModule.olean.private",
+                "PublicModuleToModule.olean.server"
+              ],
+              "returncode": 0,
+              "source": "PublicModuleToModule.lean",
+              "source_sha256": "424869655d046e340066aea111bdb6ca51c6a830fc669a3d610d743a768124a8",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "PublicModuleToLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "cannot import non-`module` LegacyProvider from `module`",
+                  "endPos": null,
+                  "fileName": "PublicModuleToLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 1
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "cannot import non-`module` LegacyProvider from `module`"
+              ],
+              "name": "PublicModuleToLegacy",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "PublicModuleToLegacy.lean",
+              "source_sha256": "501379df944986a448c4c7af50c8a0b0386b93fe621127142fae0bf626cc1b16",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "ModuleImportOnlyLegacy",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "cannot import non-`module` LegacyProvider from `module`",
+                  "endPos": null,
+                  "fileName": "ModuleImportOnlyLegacy.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 0,
+                    "line": 1
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "cannot import non-`module` LegacyProvider from `module`"
+              ],
+              "name": "ModuleImportOnlyLegacy",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "ModuleImportOnlyLegacy.lean",
+              "source_sha256": "384e6f6f60361bd7ad234d2a20cb83c58f852135c8f36d18d511a908858de84e",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "BodyProvider",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "BodyProvider",
+              "olean_artifacts": [
+                "BodyProvider.olean",
+                "BodyProvider.olean.private",
+                "BodyProvider.olean.server"
+              ],
+              "returncode": 0,
+              "source": "BodyProvider.lean",
+              "source_sha256": "8c3e42a035ce235332302c00f690065f356cf26899a2866b4dbf3951fb2aab4f",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "BodyClientGood",
+              "diagnostics": [],
+              "expectation": "acceptance",
+              "expected_error_substrings": [],
+              "name": "BodyClientGood",
+              "olean_artifacts": [
+                "BodyClientGood.olean",
+                "BodyClientGood.olean.private",
+                "BodyClientGood.olean.server"
+              ],
+              "returncode": 0,
+              "source": "BodyClientGood.lean",
+              "source_sha256": "9235625d5932bb99ce2636feb30e3d24108af5fbdcc4a4b1a183db92f886eb91",
+              "status": "PASS"
+            },
+            {
+              "command_tag": "BodyClientHiddenRfl",
+              "diagnostics": [
+                {
+                  "caption": "",
+                  "data": "Tactic `rfl` failed: The left-hand side\n  coreBodyOpaque A x\nis not definitionally equal to the right-hand side\n  x\n\nA : Type\nx : A\n⊢ coreBodyOpaque A x = x",
+                  "endPos": {
+                    "column": 5,
+                    "line": 6
+                  },
+                  "fileName": "BodyClientHiddenRfl.lean",
+                  "isSilent": false,
+                  "keepFullRange": false,
+                  "kind": "[anonymous]",
+                  "pos": {
+                    "column": 2,
+                    "line": 6
+                  },
+                  "severity": "error"
+                }
+              ],
+              "expectation": "refusal",
+              "expected_error_substrings": [
+                "Tactic `rfl` failed",
+                "not definitionally equal",
+                "coreBodyOpaque"
+              ],
+              "name": "BodyClientHiddenRfl",
+              "olean_artifacts": [],
+              "returncode": 1,
+              "source": "BodyClientHiddenRfl.lean",
+              "source_sha256": "dbb13ecfb9c7676a2cceba3a8d7dbd4dfcf4c7dcddf135a3520dea851e5343d2",
+              "status": "PASS"
+            }
+          ],
+          "expected_refusals": 4,
+          "githash": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "schema": "psc0-core-module-native-result/1",
+          "source_revision": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+          "status": "PASS",
+          "successful_compilations": 8,
+          "version": "4.35.0"
+        }
+      }
+    },
+    "completeNativeElaborationOrArchiveParityQualified": false,
+    "formalRefinementQualified": false
+  },
+  "developmentBaselineRuntime": {
+    "context": "Existing Full compatibility context and shared checked application corpus, including optional capabilities present in that corpus",
+    "compilerEntry": "pscv0_native --emit-all",
+    "profile": "pscv0-v7-native-bounded/73",
+    "compilerExecutionSHA": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+    "qualified": true,
+    "targets": [
+      {
+        "target": "typescript",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T10:33:51.7765054Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (typescript)"
+      },
+      {
+        "target": "directjs",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T10:33:52.0221778Z",
+        "logMarker": "PSCV0_NATIVE_RUNTIME: PASS 1069 shared runtime observations (directjs)"
+      },
+      {
+        "target": "rust",
+        "observations": 1069,
+        "conclusion": "success",
+        "observedAt": "2026-10-19T10:34:19.2042870Z",
+        "logMarker": "PSCV0_NATIVE_RUST_RUNTIME: PASS 1069 shared runtime observations"
+      }
+    ],
+    "typescriptVersion": "7.0.2",
+    "rustVersion": "1.98.1",
+    "harnesses": [
+      "psc0/scripts/pscv0-native-runtime.mjs",
+      "psc0/scripts/pscv0-native-rust.mjs"
+    ],
+    "artifactName": "psc0-core-language-baseline-36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+    "artifactManifest": "psc0/dist/core-first/language-baseline/application.sha256",
+    "perEmittedFileHashesReadByReviewer": false,
+    "artifactHashNote": "CI saved application hashes and emitted products in the named artifact. The archive digest was retrieved; individual saved application hashes were not separately downloaded.",
+    "wasmExecutionIncluded": false,
+    "completeCoreRuntimeProfileQualified": false,
+    "formalTargetRefinementQualified": false,
+    "versionMarkers": [
+      {
+        "observedAt": "2026-10-19T10:33:50.7540409Z",
+        "marker": "Version 7.0.2"
+      },
+      {
+        "observedAt": "2026-10-19T10:33:50.7560035Z",
+        "marker": "Version 7.0.2"
+      },
+      {
+        "observedAt": "2026-10-19T10:33:59.4393493Z",
+        "marker": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      }
+    ]
+  },
+  "retainedRegression": {
+    "bootstrapReplay": {
+      "observedAt": "2026-10-19T10:28:02.8182082Z",
+      "data": {
+        "axioms": [],
+        "canonicalPayloadBytes": 49889,
+        "canonicalPayloadFNV64": "15218654452277382292",
+        "canonicalPayloadSHA256": "8b89d77e562378015e70d95560735e5727994016615255c84842eab190dae041",
+        "compilerDefaultSelected": false,
+        "coreCompletenessClaimed": false,
+        "declarations": 76,
+        "emptyBoundary": true,
+        "kernelTrustLevel": 0,
+        "maxHeartbeatsPerDeclaration": 2000000,
+        "maxRecDepthPerDeclaration": 20000,
+        "names": [
+          "And",
+          "Bool",
+          "Decidable",
+          "Empty",
+          "Eq",
+          "Except",
+          "Exists",
+          "False",
+          "HEq",
+          "List",
+          "Nat",
+          "Nonempty",
+          "Not",
+          "Option",
+          "Or",
+          "PEmpty",
+          "PProd",
+          "PUnit",
+          "Prod",
+          "Sum",
+          "True",
+          "Unit",
+          "dite",
+          "id",
+          "ite",
+          "optParam",
+          "outParam",
+          "And.intro",
+          "And.rec",
+          "Bool.Reflects",
+          "Bool.casesOn",
+          "Bool.false",
+          "Bool.rec",
+          "Bool.true",
+          "Decidable.decide",
+          "Decidable.intro",
+          "Decidable.rec",
+          "Decidable.reflects_decide",
+          "Empty.rec",
+          "Eq.rec",
+          "Eq.refl",
+          "Except.error",
+          "Except.ok",
+          "Except.rec",
+          "Exists.intro",
+          "Exists.rec",
+          "False.rec",
+          "HEq.rec",
+          "HEq.refl",
+          "List.cons",
+          "List.nil",
+          "List.rec",
+          "Nat.rec",
+          "Nat.succ",
+          "Nat.zero",
+          "Nonempty.intro",
+          "Nonempty.rec",
+          "Option.none",
+          "Option.rec",
+          "Option.some",
+          "Or.inl",
+          "Or.inr",
+          "Or.rec",
+          "PEmpty.rec",
+          "PProd.mk",
+          "PProd.rec",
+          "PUnit.rec",
+          "PUnit.unit",
+          "Prod.mk",
+          "Prod.rec",
+          "Sum.inl",
+          "Sum.inr",
+          "Sum.rec",
+          "True.intro",
+          "True.rec",
+          "Bool.Reflects.match_1"
+        ],
+        "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "reducibilityEntries": 11,
+        "regeneratedRecursorRules": 24,
+        "schema": "pscv0-bootstrap-replay/1",
+        "sourceBytes": 118573,
+        "sourceRegistriesSelected": false,
+        "sourceSHA256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+      }
+    },
+    "completeFoundationSource": {
+      "observedAt": "2026-10-19T10:28:20.3731292Z",
+      "data": {
+        "backendExecutionQualified": false,
+        "candidateClasses": [
+          "OfNat"
+        ],
+        "candidateDeclarations": 92,
+        "candidateNoncomputableNames": [
+          "Bool.not"
+        ],
+        "candidatePayloadBytes": 74737,
+        "candidatePayloadFNV64Decimal": "15094505996536324673",
+        "candidatePayloadSHA256": "fe197609ef42c9940b646407fc1a35a8579c945896b4a677ed1219883cd07781",
+        "candidateSourceSHA256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9",
+        "canonicalAdmissionsBytes": 53310,
+        "canonicalAdmissionsSHA256": "6c7603e8cd49e830a61fca136153117630097052cd8e93bfd3f87f248d2b27a1",
+        "canonicalPairEqual": true,
+        "compilerSelfhostQualified": false,
+        "completePairedSourceAccepted": true,
+        "kernelTrustLevel": 0,
+        "maxHeartbeatsPerDeclaration": 2000000,
+        "maxRecDepthPerDeclaration": 20000,
+        "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "nativeElaborationParityQualified": false,
+        "preparedDeclarations": 25,
+        "preparedNames": [
+          "PsSourcePos",
+          "PsSourcePos.mk",
+          "PsSourcePos.rec",
+          "PsSourcePos.byteOffset",
+          "PsSourcePos.line",
+          "PsSourcePos.column",
+          "PsSourceSpan",
+          "PsSourceSpan.mk",
+          "PsSourceSpan.rec",
+          "PsSourceSpan.start",
+          "PsSourceSpan.stop",
+          "psListLength",
+          "psListIsEmpty",
+          "psListAny",
+          "psListReverseAcc.$psc0SH.0",
+          "psListReverseAcc",
+          "psListReverse",
+          "psListAppend",
+          "psListMap",
+          "psListMapExcept",
+          "psListTake.$psc0SH.0",
+          "psListTake",
+          "psListZip.$psc0SH.0",
+          "psListZip",
+          "psCompilerSourceMeasure"
+        ],
+        "recursorWorkerGroups": 0,
+        "retainedBootstrapDeclarations": 76,
+        "schema": "pscv0-core-compiler-source-qualification/1",
+        "scope": "complete Ps.Foundation.Source and Ps.Foundation.List plus an importing entry",
+        "sourceDeclarationsPerSyntax": 12,
+        "sourceFilesPerSyntax": 2,
+        "sourceNoncomputableNames": [],
+        "sourcePairs": [
+          [
+            {
+              "bytes": 153,
+              "module": "CompilerWorkload",
+              "path": "selected/CompilerWorkload.lean",
+              "sha256": "a3237b3e6e5a392f902c14d0ba7cd5f0f0165a1c6cd16adaf3adf2cdadbd45f7",
+              "sourceKind": "lean"
+            },
+            {
+              "bytes": 148,
+              "module": "Ps.Foundation.Source",
+              "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+              "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+              "sourceKind": "lean"
+            },
+            {
+              "bytes": 2386,
+              "module": "Ps.Foundation.List",
+              "path": "packages/foundation/src/Ps/Foundation/List.lean",
+              "sha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+              "sourceKind": "lean"
+            }
+          ],
+          [
+            {
+              "bytes": 155,
+              "module": "CompilerWorkload",
+              "path": "selected/CompilerWorkload.ps",
+              "sha256": "969987dbe6537e934a4331f52ea425b253f0076f25bf5a2eb57b822f1c7652a7",
+              "sourceKind": "proofScript"
+            },
+            {
+              "bytes": 151,
+              "module": "Ps.Foundation.Source",
+              "path": "selfhost/core-v7/Ps/Foundation/Source.ps",
+              "sha256": "fc810c943a3ef9d32a1e045ac499c70dcba92359e7ce747ecf54b7086af6f059",
+              "sourceKind": "proofScript"
+            },
+            {
+              "bytes": 2538,
+              "module": "Ps.Foundation.List",
+              "path": "selfhost/core-v7/Ps/Foundation/List.ps",
+              "sha256": "b7f4a010829295e169fe3803e50f4fe59d703465e51db75b1a3e72e0e475cec8",
+              "sourceKind": "proofScript"
+            }
+          ]
+        ]
+      }
+    },
+    "foundationAuthoring": {
+      "observedAt": "2026-10-19T10:34:39.9023864Z",
+      "data": {
+        "declarations": 92,
+        "importedAssumptions": [],
+        "kernelChecked": true,
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "recursorRulesCompared": 25,
+        "roots": [
+          "Nat",
+          "Bool",
+          "PUnit",
+          "Unit",
+          "Empty",
+          "PEmpty",
+          "True",
+          "False",
+          "Eq",
+          "HEq",
+          "And",
+          "Or",
+          "Exists",
+          "Nonempty",
+          "Prod",
+          "PProd",
+          "Sum",
+          "Option",
+          "List",
+          "Except",
+          "Decidable",
+          "id",
+          "ite",
+          "dite",
+          "optParam",
+          "outParam",
+          "OfNat",
+          "OfNat.ofNat",
+          "instOfNatNat",
+          "Bool.decEq"
+        ],
+        "schema": "pscv0-standard-core-export/1",
+        "sharedSourceNodes": 1071,
+        "sourceBytes": 174266
+      }
+    },
+    "foundationNativeMetadata": {
+      "observedAt": "2026-10-19T10:34:35.2847478Z",
+      "nativeClosureDeclarations": 92,
+      "ordinaryOfNatPriority": 1000,
+      "defaultOfNatPriority": 100,
+      "nativeNoncomputableNames": [
+        "Bool.not"
+      ],
+      "portableProfileSelectedByThisObservation": false
+    },
+    "nativeAuthoredSources": [
+      {
+        "bytes": 118573,
+        "file": "CoreBootstrapCandidate.lean",
+        "sha256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+      },
+      {
+        "bytes": 16111994,
+        "file": "CoreByteWordCandidate.lean",
+        "sha256": "7d61ebb72eb891ab7a39cee3e780411f26219b2fcfa57570effa7d4f127ed17a"
+      },
+      {
+        "bytes": 174266,
+        "file": "CoreFoundationCandidate.lean",
+        "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+      }
+    ],
+    "committedBootstrapAndFoundationSourcesReproducedByCIByteComparison": true,
+    "full": {
+      "declarations": 3757,
+      "classes": 44,
+      "instances": 371,
+      "fingerprint": "fnv1a64:3071911941504503432",
+      "payloadSHA256": "364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1",
+      "nativeChecksPassed": true,
+      "markers": [
+        {
+          "observedAt": "2026-10-19T10:32:27.0497774Z",
+          "marker": "PSCV0_NATIVE_STANDARD_SHA256_CANDIDATE: sha256:364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1"
+        },
+        {
+          "observedAt": "2026-10-19T10:32:27.0505687Z",
+          "marker": "PSCV0_NATIVE_STANDARD_SNAPSHOT: declarations=3757 classes=44 instances=371 fingerprint=fnv1a64:3071911941504503432"
+        },
+        {
+          "observedAt": "2026-10-19T10:33:20.1823091Z",
+          "marker": "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"
+        }
+      ]
+    },
+    "bootstrapFullComparison": {
+      "observedAt": "2026-10-19T10:34:25.6426980Z",
+      "exact": 42,
+      "different": 31,
+      "absent": 3,
+      "literalInclusionQualified": false
+    },
+    "sourceInventory": {
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "run": 39236888998,
+      "job": 118010303771,
+      "evidence": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
+      "fullModules": 322,
+      "fullSourceBytes": 26405676,
+      "independentProjectModules": 224,
+      "independentProjectSourceBytes": 2788610,
+      "compilerSourceCandidateModules": 11,
+      "compilerSourceCandidateSourceBytes": 211778,
+      "observations": [
+        {
+          "observedAt": "2026-10-19T10:28:11.5972280Z",
+          "prefix": "PSC0_CORE_SOURCE_AUDIT",
+          "data": {
+            "environmentBytes": 23654904,
+            "externalImports": [],
+            "fullCompositionImports": [
+              "Ps.Environment.SelfHostProd",
+              "Ps.Environment.StandardSnapshot"
+            ],
+            "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+            "label": "candidate",
+            "moduleCount": 322,
+            "sourceBytes": 26405676,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5974309Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 11,
+            "root": "Ps.Environment.Bootstrap",
+            "sourceBytes": 151539,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5975924Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 11,
+            "root": "Ps.Environment.CompilerSourceCandidate",
+            "sourceBytes": 211778,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5977486Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 10,
+            "root": "Ps.Environment.Fingerprint",
+            "sourceBytes": 46242,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5978785Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [
+              "Lean"
+            ],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 12,
+            "root": "PsKernelLean.Replay",
+            "sourceBytes": 50030,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5980061Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 113,
+            "root": "Ps.Compiler.Engine",
+            "sourceBytes": 1705605,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5981480Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 159,
+            "root": "Ps.Compiler.Pscv0Engine",
+            "sourceBytes": 2216360,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5982825Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 160,
+            "root": "Ps.Compiler.Pscv0ModuleEngine",
+            "sourceBytes": 2234623,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5984166Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 13,
+            "root": "Ps.Environment.InhabitedExpr",
+            "sourceBytes": 48768,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5985600Z",
+          "prefix": "PSC0_CORE_SEAM_IMPORTS",
+          "data": {
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 15,
+            "root": "Ps.Environment.ReprExpr",
+            "sourceBytes": 69467,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5986931Z",
+          "prefix": "PSC0_CORE_INDEPENDENT_COMPILER_IMPORTS",
+          "data": {
+            "environmentBytes": 49489,
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 223,
+            "sourceBytes": 2770347,
+            "unresolvedProjectImports": []
+          }
+        },
+        {
+          "observedAt": "2026-10-19T10:28:11.5988932Z",
+          "prefix": "PSC0_CORE_INDEPENDENT_PROJECT_IMPORTS",
+          "data": {
+            "environmentBytes": 49489,
+            "externalImports": [],
+            "fullCompositionImports": [],
+            "label": "candidate",
+            "moduleCount": 224,
+            "roots": [
+              "Ps.Compiler.Pscv0ModuleEngine",
+              "Ps.BackendTs.Readable",
+              "Ps.BackendRust.Module",
+              "Ps.BackendWasm.Module",
+              "Ps.CompilerIr.Checked",
+              "Ps.Codegen.Api",
+              "Ps.Codegen.Provenance"
+            ],
+            "sourceBytes": 2788610,
+            "unresolvedProjectImports": []
+          }
+        }
+      ]
+    },
+    "nativeWorkload": {
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "run": 39236888998,
+      "job": 118010303744,
+      "evidence": "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json",
+      "summary": {
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "closureDeclarations": 5690,
+        "externalRoots": 458,
+        "partial": [],
+        "schema": "pscv0-core-native-closure-summary/1",
+        "sourceDeclarations": 191647,
+        "sourceModules": 322,
+        "unsafe": []
+      },
+      "roster": {
+        "candidateKernelAdmitted": false,
+        "nativeClosureDeclarations": 5690,
+        "nativeClosureSHA256": "cf71be4386f6c5068e842b8e47f9a046c85494a651d52c97c840e6a1cc56450d",
+        "sourceHead": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+        "sourceModules": 322,
+        "sourceParityClaim": false
+      },
+      "assumptionPaths": {
+        "observedAt": "2026-10-19T10:28:41.5956613Z",
+        "sourceHead": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+        "nativeCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "nativeClosureSHA256": "cf71be4386f6c5068e842b8e47f9a046c85494a651d52c97c840e6a1cc56450d",
+        "sourceMarker": "PSC0_CORE_NATIVE_ASSUMPTION_PATHS",
+        "scope": "Raw type, value and family edges; bounded shortest path samples",
+        "assumptions": [
+          {
+            "name": "propext",
+            "affectedExternalRoots": 66,
+            "sampleLimit": 8,
+            "observedSamples": 8
+          },
+          {
+            "name": "Classical.choice",
+            "affectedExternalRoots": 24,
+            "sampleLimit": 8,
+            "observedSamples": 8
+          },
+          {
+            "name": "Quot.sound",
+            "affectedExternalRoots": 41,
+            "sampleLimit": 8,
+            "observedSamples": 8
+          }
+        ],
+        "rawStructuredNamesAndPaths": "candidate-authoring job log and the exact authoring archive recorded below",
+        "candidateKernelAdmitted": false,
+        "runtimeChoiceQualified": false
+      },
+      "candidateKernelAdmitted": false,
+      "sourceParityQualified": false
+    }
+  },
+  "resources": {
+    "native-seams": {
+      "observedAt": "2026-10-19T10:28:20.5262137Z",
+      "generatedSources": [],
+      "resources": [
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_seams\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:01.86",
+            "Exit status": "0",
+            "File system inputs": "8",
+            "File system outputs": "231904",
+            "Involuntary context switches": "173",
+            "Major (requiring I/O) page faults": "433",
+            "Maximum resident set size (kbytes)": "1619680",
+            "Minor (reclaiming a frame) page faults": "171043",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "128%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.70",
+            "User time (seconds)": "1.68",
+            "Voluntary context switches": "678"
+          }
+        },
+        {
+          "file": "compiler-source-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_compiler_source\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:04.63",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "261784",
+            "Involuntary context switches": "2064",
+            "Major (requiring I/O) page faults": "474",
+            "Maximum resident set size (kbytes)": "1717596",
+            "Minor (reclaiming a frame) page faults": "223275",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "160%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "1.17",
+            "User time (seconds)": "6.26",
+            "Voluntary context switches": "26780"
+          }
+        },
+        {
+          "file": "compiler-source-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_compiler_source ../packages/foundation/src/Ps/Foundation/Source.lean ../packages/foundation/src/Ps/Foundation/List.lean ../selfhost/core-v7/Ps/Foundation/Source.ps ../selfhost/core-v7/Ps/Foundation/List.ps ../packages/environment/src/Ps/Environment/CompilerSourceCandidateData.lean ../dist/core-first/seams/compiler-source-qualification.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.13",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "8",
+            "Involuntary context switches": "7",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "82288",
+            "Minor (reclaiming a frame) page faults": "1845",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "98%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.00",
+            "User time (seconds)": "0.12",
+            "Voluntary context switches": "387"
+          }
+        },
+        {
+          "file": "engine-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_engine_seams\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.24",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "241944",
+            "Involuntary context switches": "168",
+            "Major (requiring I/O) page faults": "437",
+            "Maximum resident set size (kbytes)": "1688740",
+            "Minor (reclaiming a frame) page faults": "178675",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "129%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.72",
+            "User time (seconds)": "2.16",
+            "Voluntary context switches": "1917"
+          }
+        },
+        {
+          "file": "project-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_project\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:04.34",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "252744",
+            "Involuntary context switches": "318",
+            "Major (requiring I/O) page faults": "463",
+            "Maximum resident set size (kbytes)": "1727160",
+            "Minor (reclaiming a frame) page faults": "184819",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "122%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.78",
+            "User time (seconds)": "4.53",
+            "Voluntary context switches": "3019"
+          }
+        },
+        {
+          "file": "selected-build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_core_selected\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:02.45",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "244312",
+            "Involuntary context switches": "194",
+            "Major (requiring I/O) page faults": "455",
+            "Maximum resident set size (kbytes)": "1700908",
+            "Minor (reclaiming a frame) page faults": "179377",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "127%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.77",
+            "User time (seconds)": "2.36",
+            "Voluntary context switches": "2146"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    },
+    "bootstrap-closure": {
+      "observedAt": "2026-10-19T10:28:03.0854736Z",
+      "generatedSources": [],
+      "resources": [
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_bootstrap_replay\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:10.73",
+            "Exit status": "0",
+            "File system inputs": "8",
+            "File system outputs": "480504",
+            "Involuntary context switches": "19420",
+            "Major (requiring I/O) page faults": "856",
+            "Maximum resident set size (kbytes)": "1643848",
+            "Minor (reclaiming a frame) page faults": "517859",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "212%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "4.52",
+            "User time (seconds)": "18.27",
+            "Voluntary context switches": "27461"
+          }
+        },
+        {
+          "file": "replay-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake env .lake/build/bin/pscv0_bootstrap_replay ../packages/environment/src/Ps/Environment/BootstrapData.lean ../dist/core-first/bootstrap/bootstrap-manifest.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.58",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "8",
+            "Involuntary context switches": "28",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "844060",
+            "Minor (reclaiming a frame) page faults": "30054",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.23",
+            "User time (seconds)": "0.35",
+            "Voluntary context switches": "212"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    },
+    "candidate-authoring": {
+      "observedAt": "2026-10-19T10:34:52.6294976Z",
+      "generatedSources": [
+        {
+          "bytes": 118573,
+          "file": "CoreBootstrapCandidate.lean",
+          "sha256": "05fd8f7917054c52b66d8d448bdeeb8e9071fcd6d21d0a6ded088a758628da54"
+        },
+        {
+          "bytes": 16111994,
+          "file": "CoreByteWordCandidate.lean",
+          "sha256": "7d61ebb72eb891ab7a39cee3e780411f26219b2fcfa57570effa7d4f127ed17a"
+        },
+        {
+          "bytes": 174266,
+          "file": "CoreFoundationCandidate.lean",
+          "sha256": "911e636ed19468f30d7bbba5d23988fca5433d00f4dc9060b15232dedc275de9"
+        }
+      ],
+      "resources": [
+        {
+          "file": "bootstrap-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export bootstrap ../dist/core-first/authoring/CoreBootstrapCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:04.51",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "232",
+            "Involuntary context switches": "54",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "624832",
+            "Minor (reclaiming a frame) page faults": "17919",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "100%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.13",
+            "User time (seconds)": "4.38",
+            "Voluntary context switches": "221"
+          }
+        },
+        {
+          "file": "build-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake build pscv0_native pscv0_native_checks pscv0_core_environment_export pscv0_core_native_closure pscv0_core_native_seed_checks pscv0_bootstrap_compatibility\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:00.71",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "0",
+            "Involuntary context switches": "496",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "888820",
+            "Minor (reclaiming a frame) page faults": "19891",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "113%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.25",
+            "User time (seconds)": "0.54",
+            "Voluntary context switches": "2893"
+          }
+        },
+        {
+          "file": "byte-word-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export byte-word ../dist/core-first/authoring/CoreByteWordCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:12.44",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "31472",
+            "Involuntary context switches": "80",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "935416",
+            "Minor (reclaiming a frame) page faults": "35957",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.29",
+            "User time (seconds)": "12.09",
+            "Voluntary context switches": "27276"
+          }
+        },
+        {
+          "file": "foundation-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\".lake/build/bin/pscv0_core_environment_export foundation ../dist/core-first/authoring/CoreFoundationCandidate.lean\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:04.53",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "344",
+            "Involuntary context switches": "48",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "627780",
+            "Minor (reclaiming a frame) page faults": "18109",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.13",
+            "User time (seconds)": "4.40",
+            "Voluntary context switches": "309"
+          }
+        },
+        {
+          "file": "native-closure-resource.txt",
+          "gnuTime": {
+            "Average resident set size (kbytes)": "0",
+            "Average shared text size (kbytes)": "0",
+            "Average stack size (kbytes)": "0",
+            "Average total size (kbytes)": "0",
+            "Average unshared data size (kbytes)": "0",
+            "Command being timed": "\"lake env .lake/build/bin/pscv0_core_native_closure ../dist/core-first/authoring/native-closure.json\"",
+            "Elapsed (wall clock) time (h:mm:ss or m:ss)": "0:14.50",
+            "Exit status": "0",
+            "File system inputs": "0",
+            "File system outputs": "40544",
+            "Involuntary context switches": "310",
+            "Major (requiring I/O) page faults": "0",
+            "Maximum resident set size (kbytes)": "855536",
+            "Minor (reclaiming a frame) page faults": "37050",
+            "Page size (bytes)": "4096",
+            "Percent of CPU this job got": "99%",
+            "Signals delivered": "0",
+            "Socket messages received": "0",
+            "Socket messages sent": "0",
+            "Swaps": "0",
+            "System time (seconds)": "0.28",
+            "User time (seconds)": "14.20",
+            "Voluntary context switches": "9"
+          }
+        }
+      ],
+      "schema": "psc0-core-ci-resource-observations/1",
+      "scope": "actual commands; not a complete Core release or performance claim"
+    }
+  },
+  "efficiency": {
+    "existingSharedOwnersReused": true,
+    "requiredIntegratedRegressionCompleted": true,
+    "atMostOneActiveAndOnePendingCoreRun": true,
+    "healthyRunsCancelled": false,
+    "existingLakeCacheRestored": true,
+    "seamBuildCommands": 5,
+    "seamBuildWallSecondsSum": 15.52,
+    "controlledSpeedupClaimed": false,
+    "performanceNote": "Actual cache-assisted command observations; the sum is not CI elapsed time or a controlled compiler speedup.",
+    "noAdditionalOptionalRunsNeededAfterSuccess": true
+  },
+  "artifacts": [
+    {
+      "id": 12179972426,
+      "name": "psc0-core-bootstrap-36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "bytes": 5335,
+      "archiveSHA256": "sha256:09abd3a1b43c35981f65c59020e8de7da9ace75c0e5cafa617fe85be4a0b560a",
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/artifacts/12179972426",
+      "createdAt": "2026-10-19T10:28:04Z",
+      "expiresAt": "2026-11-18T10:28:03Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12179614529,
+      "name": "psc0-core-language-baseline-36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "bytes": 729489,
+      "archiveSHA256": "sha256:d574d14643a63bb8f41a4e598956e4550a5baf6ff62f8de76d752ffe48bbb42e",
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/artifacts/12179614529",
+      "createdAt": "2026-10-19T10:34:19Z",
+      "expiresAt": "2026-11-18T10:34:19Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12179613663,
+      "name": "psc0-core-first-seams-36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "bytes": 66537,
+      "archiveSHA256": "sha256:f255bdb5b51367c100ceb9e5316af570eee7fd527269eaba7a23bf0f88fefdf4",
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/artifacts/12179613663",
+      "createdAt": "2026-10-19T10:28:21Z",
+      "expiresAt": "2026-11-18T10:28:20Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12179299809,
+      "name": "psc0-core-first-authoring-36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "bytes": 3152181,
+      "archiveSHA256": "sha256:ee2eee51c9bd7c54d0fee677a20001c5833a2b6bbdf31e641e18c491b2ef6854",
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/artifacts/12179299809",
+      "createdAt": "2026-10-19T10:35:01Z",
+      "expiresAt": "2026-11-18T10:35:00Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    },
+    {
+      "id": 12178714912,
+      "name": "psc0-core-first-source-audit-36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "bytes": 114407,
+      "archiveSHA256": "sha256:01c623ccd843c0c6c9ae85fc10423474781c65475ed174f53725c7b69262ecce",
+      "head": "36f30bc4e0887d1bb60ae67660046cc441ed0c39",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236888998/artifacts/12178714912",
+      "createdAt": "2026-10-19T10:28:12Z",
+      "expiresAt": "2026-11-18T10:28:11Z",
+      "archiveDigestRetrieved": true,
+      "binaryArchiveDownloaded": false
+    }
+  ],
+  "precedingAttempts": [
+    {
+      "head": "76e77146f00961284774d09d530e55ac2fe49076",
+      "tree": "690c45475a8e10cb85a0043b9f4f0b9f633e29da",
+      "workflowRun": 39233757256,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39233757256",
+      "conclusion": "failure",
+      "completedAt": "2026-10-19T10:04:32Z",
+      "jobs": [
+        {
+          "id": 117997731503,
+          "name": "source-inventory",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 117997731561,
+          "name": "native-seams",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 117997731698,
+          "name": "bootstrap-closure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 117997731767,
+          "name": "candidate-authoring",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "failure": "The new mutual fixture required Eq.refl, absent from its identity-only checking base.",
+      "logEvidence": [
+        "2026-10-19T09:57:10.3881717Z uncaught exception: CORE-PROJECT: PSCV0-ELABORATION: unknown constant Eq.refl"
+      ],
+      "correction": "Use a separate genuine four-declaration identity/Eq base for scope/mutual/body fixtures, independently replayed under unchanged finite limits; include both private equation helpers in the exact interface tests.",
+      "cancelled": false
+    },
+    {
+      "head": "783fc60b854c2692d937b888005b4ce0bc8deed6",
+      "tree": "413fc6dc51bd7f6f21751f74d94395ad477b6a17",
+      "workflowRun": 39236552839,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/39236552839",
+      "conclusion": "failure",
+      "completedAt": "2026-10-19T10:27:24Z",
+      "jobs": [
+        {
+          "id": 118006905868,
+          "name": "bootstrap-closure",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118006905976,
+          "name": "candidate-authoring",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 118006906118,
+          "name": "native-seams",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "id": 118006906263,
+          "name": "source-inventory",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "failure": "The private helper was correctly refused after resolving its public function prefix; one assertion expected the wholly-private-name scope diagnostic.",
+      "logEvidence": [
+        "2026-10-19T10:20:14.2111528Z uncaught exception: CORE-PROJECT: refusal phase: PSCV0-UNKNOWN-NAME: CoreVisibility.mutualPublic.eq_def (in coreVisibilityClient)"
+      ],
+      "correction": "Require PSCV0-UNKNOWN-NAME for CoreVisibility.mutualPublic.eq_def. Preserve PSCV0-SCOPE for wholly private names; production and all legitimate refusals remain unchanged.",
+      "cancelled": false
+    }
+  ],
+  "executionPlan": {
+    "priority": "core-language-M1-M5-then-selfhost",
+    "targetedMilestones": [
+      "M1",
+      "M2"
+    ],
+    "targetedConformanceRows": [
+      "CL04",
+      "CL05"
+    ],
+    "completedCoreMilestones": [],
+    "completedSelfhostStages": [],
+    "completeFixtureMappingQualified": false,
+    "originalM1AndBoundedM2AcceptancePreserved": true,
+    "next": "The next focused M2 correction is public-signature and exposed-body visibility through ordinary/private versus public imports. Existing named-end/dotted-scope and legacy-body correspondence differences remain explicit. Then continue the reviewed computed/let elimination-target adapter and induction's distinct-variable-index guard, using only the minimal shared correction."
+  },
+  "remaining": [
+    "Public signatures and exported bodies must respect ordinary/private versus public imported-name visibility.",
+    "Existing named-end and dotted namespace/section closure differences from pinned native Lean remain outside this checkpoint.",
+    "Legacy Lean import-body transparency and complete native elaboration/module correspondence remain unqualified.",
+    "Complete selected Core capability/fixture mapping and dependency-complete Core profile.",
+    "Reviewed computed/let elimination-target preparation and induction distinct-variable-index guard; then remaining selected M3 obligations.",
+    "M4 Core control flow, primitives, assurance and runtime/target correspondence.",
+    "M5 actual artifact consumers, cold/warm/incremental comparison, deterministic reconstruction and tooling.",
+    "After M1-M5 acceptance: compiler-source conversions, compiler-sufficient Bootstrap and exact Stage1-3."
+  ],
+  "boundaries": {
+    "selectedScopeOwner": "Ps.Elab.Command",
+    "sourceVisibilityAdapter": "Ps.Syntax.Lean.Program",
+    "moduleModeOwner": "PsSyntaxProgram.isModule, set by each selected reader",
+    "projectValidationOwner": "Ps.Compiler.Pscv0ModuleEngine.psPscv0ProjectParse",
+    "bodyVisibilityOwner": "Ps.Compiler.Pscv0ModuleEngine.psPscv0ImportedDeclaration",
+    "newBodyVisibilityImplementation": false,
+    "completeNativeModuleParityQualified": false,
+    "completeCoreProfileQualified": false,
+    "formalTargetRefinementQualified": false,
+    "persistentArtifactConsumerQualified": false,
+    "selfhostQualified": false
+  },
+  "completeCoreProfileQualified": false,
+  "completeCoreBackendExecutionQualified": false,
+  "nativeElaborationParityQualified": false,
+  "wholeCompilerSelfhostQualified": false,
+  "documentationIsLoadableAuthority": false,
+  "mergeOrPublicationAuthorized": false,
+  "documentationFollowup": {
+    "onlyPaths": [
+      "psc0/AI_WORK_STATE.md",
+      "psc0/AI_CONTINUE_PROMPT.md",
+      "psc0/docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md",
+      "psc0/docs/PSC0_CORE_QUALIFICATION_LEDGER.md",
+      "psc0/docs/PSC0_CORE_STANDARD_MANIFEST.json",
+      "psc0/docs/PSC0_CORE_FIRST_ARCHITECTURE.md",
+      "psc0/docs/core-first-evidence/core-language-scope-module-qualification.json"
+    ],
+    "qualificationRemainsThisExecutableHead": true,
+    "preserveEveryExecutableTestAssetAndWorkflowBlob": true,
+    "historicalRawReceiptsRetainTheirOwnCodeAndRunAttribution": true
+  }
+}

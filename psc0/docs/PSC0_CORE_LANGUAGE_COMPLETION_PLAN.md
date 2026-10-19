@@ -37,18 +37,24 @@ Existing explicit Full deferrals remain: optional Float/platform compositions, g
 
 Items 1 and 2 below are completed at their bounded scopes on `ddf0fc171e80d847b9e867c7b7f8045cc712b36c`, [run 39195343005](https://github.com/dwijayuda/pskernel/actions/runs/39195343005). [The receipt](core-first-evidence/core-language-module-runtime-qualification.json) records the complete paired module chain, eight owned parser refusals and 1,069 runtime observations each for TypeScript/direct JavaScript/Rust in the existing Full compatibility baseline. The next active item is 3. CL05/CL12 and whole-milestone exits remain open.
 
+The next bounded CL04/CL05 cells passed at `36f30bc4e0887d1bb60ae67660046cc441ed0c39`, [run 39236888998](https://github.com/dwijayuda/pskernel/actions/runs/39236888998), with all four jobs successful. [The scope/module receipt](core-first-evidence/core-language-scope-module-qualification.json) records public-section inheritance and restoration, EOF canonical equality, actual module kinds, imported-body controls and separate pinned-native oracles. These cells advance item 3; complete CL04/CL05 and M1–M5 exits remain open.
+
 | Priority | Concrete owner and work | Completion observation |
 | --- | --- | --- |
 | 1 | Selected native module headers/public imports and visibility in Syntax.Lean.Program; shared project owner remains Pscv0ModuleEngine | Complete paired module-mode provider/facade/client preparation and canonical independent admission, default-private and explicit-public behavior, owned header/import refusals |
 | 2 | Execute existing checked application products on the Core branch through the existing TS/JS/Rust runners | Exact compiler SHA and emitted products, unchanged shared observations and trap controls; explicitly report the Full compatibility development baseline |
-| 3 | Finish remaining Core module/source boundary cells and map inherited M1/M2 evidence | Public visibility scopes, native correspondence, imported module-kind/non-exposed-body contracts and relevant exact refusal coverage; no hidden fallback |
+| 3 | Finish public-signature/exposed-body import visibility and map inherited M1/M2 evidence | Preserve qualified public-section/EOF, module-kind and body cells; close ordinary/private versus public imported-name visibility, named/dotted-scope and legacy-body correspondence gaps, complete fixtures and profile obligations |
 | 4 | Checked computed/let-target cases and induction in Elab.Elimination | Reuse only reviewed expression-abstraction/target preparation and distinct-index guard; new paired proof/computational fixtures and independent admission |
 | 5 | Complete remaining Core data/matching/recursion/deriving and required control flow | Follow the actual first failing shared owner, retaining the entire selected capability/interaction roster |
 | 6 | Complete M4 assurance/runtime and M5 integration, targets, incremental artifacts and reconstruction | Exact end-to-end language/compiler acceptance; then start final selfhost |
 
 The preserved Full Elimination candidate is reusable source, not a passing receipt. Do not copy its unrelated name-alias/match/WF implementation. Review its smallest shared expression-abstraction dependency, check the complete generalized telescope and preserve induction-only index restrictions without imposing them on cases.
 
-The current selected Lean module work supports a leading header and per-declaration visibility. Visibility-prefixed section/namespace forms remain explicitly unavailable until their scope owner is implemented and qualified. Passing the header/re-export slice alone is not complete module-system or native-elaboration parity.
+The selected Lean reader now supports leading module headers, per-declaration visibility and named/anonymous `public section`. Ordinary nested sections and namespaces inherit the current default; explicit private declarations remain private and explicit ends restore the previous default. EOF closes the remaining namespace/section scopes in both selected source kinds. `private section`, `public namespace` and `private namespace` retain owned syntax refusals, matching the pinned native controls. ProofScript keeps its own selected section syntax.
+
+Actual module kind is retained by both readers. Module clients cannot import headerless Lean providers; legacy clients can import either kind. Nine positive project cases, eight module-kind refusals and four parser-bit checks pass. Paired public-import clients can unfold an exposed abbreviation and use an exported specification theorem; direct reflexivity cannot unfold an imported ordinary definition. Native oracles separately pass 17 declaration classifications, three invalid scope forms and 12 module compilations (eight successes/four semantic refusals).
+
+Remaining module work includes public signatures/exposed bodies referencing ordinary/private-import names, named-end and dotted-scope behavior, and legacy import-body transparency. The new body fixture intentionally uses a public import. The existing M3 mixed-input positive was adjusted to use a real module provider; the whole M3 input-parity executable was not newly qualified by this Core run. Complete module-system/native elaboration parity and the full fixture denominator remain open.
 
 ## How to finish efficiently
 

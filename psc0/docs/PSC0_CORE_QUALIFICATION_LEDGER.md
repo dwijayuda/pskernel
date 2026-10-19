@@ -8,7 +8,44 @@ Core language/compiler delivery requires its conformance, profile, runtime, arti
 
 Compiler-sufficient Bootstrap and implementation-source conversion are final selfhost preparation. The checked 76- and 92-declaration components and complete Source/List gate remain retained regressions.
 
-## Latest module and runtime qualification
+## Latest scope and module qualification
+
+At `36f30bc4e0887d1bb60ae67660046cc441ed0c39` (tree `15bccd57b7765a05485e27f5f65fc2aae96f6d10`), [run 39236888998](https://github.com/dwijayuda/pskernel/actions/runs/39236888998) completed successfully at 10:35:04 UTC on 19 October 2026. The [machine receipt](core-first-evidence/core-language-scope-module-qualification.json) records the eleven changed code/test/workflow inputs, all four jobs, exact semantic markers, native module results, five archive digests, retained identities and actual resource observations.
+
+| Job | Exact job ID | Result |
+| --- | --- | --- |
+| candidate-authoring | [118010303744](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303744) | Success |
+| source-inventory | [118010303771](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303771) | Success |
+| native-seams | [118010303809](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303809) | Success |
+| bootstrap-closure | [118010303816](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303816) | Success |
+
+| Qualified cell | Actual observation | Boundary |
+| --- | --- | --- |
+| Lean public sections and shared EOF closure | Paired 17-source-declaration library: 11 public names, six source-private names, two private equation helpers; independently admitted EOF and explicit-end outputs are identical | Preserves the separate ProofScript syntax; full named-end/dotted-scope correspondence remains open |
+| Visibility refusals | Eight private-name importer refusals per source kind, extra/mismatched-end controls, ten header/import/visibility parser controls | Public signatures and exposed bodies that depend on ordinary/private imports need their own correction |
+| Actual imported module kinds | Four reader-bit checks, nine independently admitted positive project cases, eight early project-parse refusals | Includes the 2x2 Lean kind matrix, mixed source directions, public imports and import-only edges |
+| Imported definition bodies | Paired abbreviation reflexivity and exported-specification proofs admit; direct reflexivity over an ordinary imported body refuses | Uses public imports and the existing imported-interface owner; no reducibility policy change |
+| Pinned native scope oracle | 17 name classifications: 11 public / six private; three invalid scope-syntax refusals | Host-only oracle; generated equation helpers and complete native elaboration are separate |
+| Pinned native module oracle | 12 actual compilations: eight successes and four intended semantic errors, with exit/diagnostic/output checks | Pinned Lean 4.35.0 and full commit checked; no complete native archive-format or elaboration parity claim |
+| Retained application runtime | TypeScript 7.0.2, direct JavaScript and Rust 1.98.1 each pass 1,069 shared observations | Existing `pscv0-v7-native-bounded/73` Full compatibility application, distinct from the new module fixtures |
+
+The scope/mutual and imported-body cases use a separate four-declaration base: `CoreSelectedIdentity`, `Eq`, `Eq.refl` and `Eq.rec`. The equality family comes from its genuine Logic owner; it adds no axioms or Nat/Bool/False/True fallback. The original identity-only project/runtime fixtures retain their original base. Independent replay still starts from an empty trust-zero kernel with 2,000,000 heartbeats and 20,000 recursion depth per declaration. The separate reviewed Full wrapper policy is unchanged.
+
+The source audit now measures 322 modules / 26,405,676 bytes for the Full route, 224 modules / 2,788,610 bytes for the independent project/backend route and 160 modules / 2,234,623 bytes for the shared project owner. The independent project/backend route has no Full, external or unresolved imports. The Foundation candidate graph remains 11 modules / 211,778 bytes. These are source measurements, not installed size or complete logical/runtime closure.
+
+The native ownership observation is 191,647 owned declarations, 458 external roots and a 5,690-declaration raw dependency closure, SHA-256 `cf71be4386f6c5068e842b8e47f9a046c85494a651d52c97c840e6a1cc56450d`. Bounded path observations reach `propext`, `Classical.choice` and `Quot.sound`, affecting 66, 24 and 41 external roots respectively; those sets may overlap. No unsafe/partial entries were observed. The record remains native dependency evidence, without candidate kernel admission, runtime choice or selected-source parity authority. Current observations are in the new receipt; older source-audit/assumption-path files retain their original head/run attribution.
+
+The 76-declaration Bootstrap replay, 92-declaration Foundation candidate and complete Source/List paired canonical admission retain their exact identities. Source/List still prepares 25 declarations with a 53,310-byte canonical result. Full retains 3,757 declarations, 44 classes, 371 ordinary instances, fingerprint `fnv1a64:3071911941504503432` and SHA-256 `364627b451f83a04064643d29f0fa3bb1bda85eab70d588d3e66755ddc67efe1`. The Bootstrap-versus-Full comparison remains 42 exact, 31 different and three absent; no profile nesting is promoted.
+
+Two preceding runs are retained accurately. [Run 39233757256](https://github.com/dwijayuda/pskernel/actions/runs/39233757256) at `76e77146f00961284774d09d530e55ac2fe49076` had three successful jobs and failed the new mutual fixture because its base lacked `Eq.refl`. The correction supplied the separate checked equality family and counted the two private equation helpers. [Run 39236552839](https://github.com/dwijayuda/pskernel/actions/runs/39236552839) at `783fc60b854c2692d937b888005b4ce0bc8deed6` again had three successful jobs; one assertion expected the scope diagnostic for `CoreVisibility.mutualPublic.eq_def`, whose public prefix resolves before the private suffix fails. The final test requires the actual `PSCV0-UNKNOWN-NAME` refusal. Production visibility and refusal checks were preserved. No healthy run was cancelled.
+
+The five cache-assisted seam build commands totaled 15.52 seconds; this is an actual command observation, not a controlled compiler speedup. The authoring build took 0.71 seconds after cache restore; Bootstrap replay took 0.58 seconds and complete Source/List admission took 0.13 seconds. Those commands have different scopes and conditioning; none is a complete build or end-to-end speedup claim. Required integrated checks ran at the accepted executable SHA.
+
+The next focused M2 correction is ordinary/private-import visibility in public signatures and exposed bodies, followed by remaining named/dotted-scope and legacy-body correspondence and the complete capability mapping. Then continue the reviewed computed/let elimination-target adapter and induction-only distinct-variable-index guard. Whole Core M1–M5, complete Core profile identity, formal backend refinement, real artifact/incremental consumers and final selfhost remain open.
+
+The records below are historical qualifications at their stated code/run. Their local wording about “current” scope or missing cells applies to that historical checkpoint.
+
+## Previous module and runtime qualification
 
 At `ddf0fc171e80d847b9e867c7b7f8045cc712b36c` (tree `5b0f3b4aaccb5b2b878a53df144e9348b4489707`), [run 39195343005](https://github.com/dwijayuda/pskernel/actions/runs/39195343005) completed successfully at 03:47 UTC on 19 October 2026. The [machine receipt](core-first-evidence/core-language-module-runtime-qualification.json) records all four jobs, changed executable blobs, target observations, archive digests and retained regression evidence.
 

@@ -10,22 +10,28 @@ The user's 19 October 2026 directive overrides earlier instructions to make comp
 
 ## Latest exact qualification
 
-Qualified executable commit: `ddf0fc171e80d847b9e867c7b7f8045cc712b36c`, tree `5b0f3b4aaccb5b2b878a53df144e9348b4489707`. [Core Linux run 39195343005](https://github.com/dwijayuda/pskernel/actions/runs/39195343005) completed successfully on 19 October 2026 at 03:47 UTC (10:47 Asia/Jakarta): all four jobs passed.
+Qualified executable commit: `36f30bc4e0887d1bb60ae67660046cc441ed0c39`, tree `15bccd57b7765a05485e27f5f65fc2aae96f6d10`. [Core Linux run 39236888998](https://github.com/dwijayuda/pskernel/actions/runs/39236888998) completed successfully at 19 October 2026 at 10:35:04 UTC: all four jobs passed.
 
 | Job | Exact job ID | Result |
 | --- | --- | --- |
-| native-seams | [117877847664](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847664) | Success |
-| source-inventory | [117877847785](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847785) | Success |
-| candidate-authoring | [117877847879](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847879) | Success |
-| bootstrap-closure | [117877847994](https://github.com/dwijayuda/pskernel/actions/runs/39195343005/job/117877847994) | Success |
+| candidate-authoring | [118010303744](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303744) | Success |
+| source-inventory | [118010303771](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303771) | Success |
+| native-seams | [118010303809](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303809) | Success |
+| bootstrap-closure | [118010303816](https://github.com/dwijayuda/pskernel/actions/runs/39236888998/job/118010303816) | Success |
 
-The selected Lean reader accepts a leading module header, applies module-mode default privacy, supports explicit public/private declarations and permits public imports after a leading header. A complete paired module-mode provider → facade → client chain passes strict canonical equality and independent admission. Eight owned header/import/visibility refusals and private-import leakage controls pass. Visibility scopes and full native module correspondence remain open.
+The selected Lean reader now supports named and anonymous `public section`, inherits visibility through ordinary sections and namespaces, preserves explicit private declarations and restores the previous default on an explicit end. Both source kinds allow namespace/section closure at EOF through the shared elaborator. The paired fixture has 17 source declarations, 11 public interface names, six private source names and two generated private equation helpers. EOF and explicit-end variants independently admit and have identical canonical output; all eight private-name importer refusals per source kind and the extra/mismatched-end controls pass.
 
-The checked development-baseline application executes 1,069 shared observations each on TypeScript 7.0.2, direct JavaScript and Rust 1.98.1. This uses the existing `pscv0-v7-native-bounded/73` Full compatibility context. The new module fixtures have paired preparation/admission evidence; the separate existing application corpus supplies these target observations. Neither result selects a small Core profile, proves formal target refinement or completes a selfhost stage. Wasm execution is not included in this added gate.
+The readers preserve actual module kind: ProofScript is implicitly module-mode, and Lean retains its leading-header bit. Shared project parsing rejects module clients importing headerless Lean providers, including public imports and import-only clients. The nine positive project cases, eight owned module-kind refusals and four reader-bit checks pass. Existing mixed-input positives use a real module provider.
 
-[The exact qualification](docs/core-first-evidence/core-language-module-runtime-qualification.json) records code/test/workflow blobs, jobs, runtime markers, archive digests, unchanged seed/Foundation receipts and remaining boundaries. Five cache-assisted seam build commands totaled 15.88 seconds; this is an observation, not a controlled compiler speedup.
+Imported-body fixtures independently admit matching Lean/PS output: an exposed abbreviation unfolds, an exported specification theorem proves a property of an ordinary definition, and direct reflexivity cannot unfold that imported ordinary definition. The existing body/interface owner supplies this behavior; reducibility and checking policy are unchanged.
 
-A documentation-only descendant can be newer than the qualified executable SHA. Verify the GitHub comparison and preserve every executable/test/asset/workflow blob. Do not call that documentation SHA a new CI run or reset history. Exact current evidence belongs in [the qualification ledger](docs/PSC0_CORE_QUALIFICATION_LEDGER.md) and machine manifest.
+Separate pinned-native oracles pass 17 declaration-name classifications, three invalid scope-syntax controls and 12 actual module compilations: eight successes and four exact semantic refusals. This is bounded native scope/import/body behavior, not complete native elaboration or archive-format parity. The visibility/mutual and body fixtures use a separately checked four-declaration identity/Eq base with no axioms; original identity-only project/runtime fixtures retain their original base.
+
+The existing `pscv0-v7-native-bounded/73` Full compatibility application still executes 1,069 shared observations on each of TypeScript 7.0.2, direct JavaScript and Rust 1.98.1. These are the existing application corpus's target observations; the new module fixtures have their separate preparation/admission/native-oracle evidence. Complete small Core runtime/profile and formal refinement remain open; this gate adds no Wasm execution or selfhost claim.
+
+[The exact qualification](docs/core-first-evidence/core-language-scope-module-qualification.json) retains the code/test/workflow blobs, jobs, semantic markers, native result, archive digests, resource observations and regression identities. The preceding failed attempts and their fixture corrections remain recorded. The five cache-assisted seam build commands totaled 15.52 seconds; this is an actual command observation, not a controlled compiler speedup.
+
+A documentation-only descendant can be newer than the qualified executable SHA. Verify its GitHub comparison and preserve every executable/test/asset/workflow blob. The ledger and machine manifest identify the exact qualified code; documentation is not a new CI run or loadable profile authority.
 
 ## Completed work to preserve
 
@@ -42,7 +48,7 @@ Preserved Stage0: `psc0/pscv0-v7-native-lean-v1` at `33676076bcda7b0de5ec1f9803f
 ## Continue at the next Core language boundary
 
 1. Preserve passing source/project/Bootstrap checks and exact assets. Use [the completion register](docs/PSC0_CORE_LANGUAGE_COMPLETION_PLAN.md) to map every selected Core rule and interaction to a shared owner, fixture, intended phase and checking/runtime observation.
-2. Complete the remaining module/source boundary cells: visibility scopes, native correspondence, imported module-kind and non-exposed-body behavior, then the remaining M1/M2 Core profile and conformance obligations. Retain the new complete module-mode public re-export and default-privacy controls.
+2. Preserve the qualified public-section/EOF, module-kind and imported-body cells. The next focused M2 correction is public-signature and exposed-body visibility through ordinary/private versus public imports. Retain explicit named-end/dotted-scope and legacy import-body correspondence gaps, then close remaining M1/M2 Core profile and conformance obligations. Use the existing shared owners and exact positive/refusal fixtures.
 3. Continue M3 through reviewed shared data/matching/recursion/deriving owners. The next concrete inspected correction is checked computed/let elimination-target preparation and induction's distinct-variable-index guard. Transfer only its minimal expression-abstraction/target adapter, not the unrelated Full file; qualify paired proof/computational examples and negative cases anew.
 4. Complete Core control flow, String/word/byte primitives and runtime/assurance correspondence. Existing development-baseline TS/JS/Rust behavior uses Full compatibility context and does not select a small Core profile or discharge formal target refinement.
 5. Complete M5 actual compiler/API/target integration, real artifact consumers, cold/warm/incremental comparison, deterministic reconstruction, diagnostics/provenance/tooling and applicable package gates. No selected persistent-cache loader exists today; receipts and claimant-supplied hashes cannot authenticate reuse.

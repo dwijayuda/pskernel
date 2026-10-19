@@ -4,6 +4,105 @@ import Ps.Bridge.Json
 import Ps.Foundation.List
 import Ps.Foundation.Name
 
+-- Borrowed PSCV0 machine-literal range helpers, unchanged for the PSC1 IR.
+def psVerifiedIrIntDecimalMagnitudeWithFuel
+    (remainingFuel : Nat) :
+    String -> Nat -> Nat -> Nat :=
+  match remainingFuel with
+  | 0 =>
+      fun (_text : String) (_position : Nat) (acc : Nat) =>
+        acc
+  | fuel + 1 =>
+      let smaller : String -> Nat -> Nat -> Nat :=
+        psVerifiedIrIntDecimalMagnitudeWithFuel fuel;
+      fun (text : String) (position : Nat) (acc : Nat) =>
+        if String.Internal.atEnd text (String.Pos.Raw.mk position) then
+          acc
+        else
+          let char : Char :=
+            String.Internal.get text (String.Pos.Raw.mk position);
+          let digit : Nat :=
+            Nat.sub (Char.toNat char) 48;
+          let nextPosition : Nat :=
+            String.Pos.Raw.byteIdx
+              (String.Internal.next
+                text
+                (String.Pos.Raw.mk position));
+          smaller
+            text
+            nextPosition
+            (Nat.add (Nat.mul acc 10) digit)
+
+def psVerifiedIrIntNegativeMagnitude
+    (value : Int) : Bool × Nat :=
+  let text : String := Int.repr value;
+  let fuel : Nat := Nat.succ (String.utf8ByteSize text);
+  if String.Internal.atEnd text (String.Pos.Raw.mk 0) then
+    Prod.mk false 0
+  else
+    let first : Char :=
+      String.Internal.get text (String.Pos.Raw.mk 0);
+    if Nat.beq (Char.toNat first) 45 then
+      let start : Nat :=
+        String.Pos.Raw.byteIdx
+          (String.Internal.next text (String.Pos.Raw.mk 0));
+      Prod.mk
+        true
+        (psVerifiedIrIntDecimalMagnitudeWithFuel
+          fuel text start 0)
+    else
+      Prod.mk
+        false
+        (psVerifiedIrIntDecimalMagnitudeWithFuel
+          fuel text 0 0)
+
+def psVerifiedIrMachineIntegerLiteralCanonical
+    (type : PsVerifiedIrMachineIntegerType)
+    (value : Int) : Bool :=
+  let parts : Bool × Nat :=
+    psVerifiedIrIntNegativeMagnitude value;
+  let negative : Bool := Prod.fst parts;
+  let magnitude : Nat := Prod.snd parts;
+  match type with
+  | PsVerifiedIrMachineIntegerType.uint8 =>
+      if negative then false else Nat.ble magnitude 255
+  | PsVerifiedIrMachineIntegerType.uint16 =>
+      if negative then false else Nat.ble magnitude 65535
+  | PsVerifiedIrMachineIntegerType.uint32 =>
+      if negative then false else Nat.ble magnitude 4294967295
+  | PsVerifiedIrMachineIntegerType.uint64 =>
+      if negative then false
+      else Nat.ble magnitude 18446744073709551615
+  | PsVerifiedIrMachineIntegerType.usize =>
+      if negative then false else true
+  | PsVerifiedIrMachineIntegerType.int8 =>
+      if negative then Nat.ble magnitude 128
+      else Nat.ble magnitude 127
+  | PsVerifiedIrMachineIntegerType.int16 =>
+      if negative then Nat.ble magnitude 32768
+      else Nat.ble magnitude 32767
+  | PsVerifiedIrMachineIntegerType.int32 =>
+      if negative then Nat.ble magnitude 2147483648
+      else Nat.ble magnitude 2147483647
+  | PsVerifiedIrMachineIntegerType.int64 =>
+      if negative then Nat.ble magnitude 9223372036854775808
+      else Nat.ble magnitude 9223372036854775807
+  | PsVerifiedIrMachineIntegerType.isize =>
+      true
+
+
+def psVerifiedIrListAll {Value : Type}
+    (check : Value -> Bool)
+    (values : List Value) : Bool :=
+  match values with
+  | List.nil => true
+  | List.cons value rest =>
+      if check value then
+        psVerifiedIrListAll check rest
+      else
+        false
+
+
 inductive PsJsLowerError where
   | fuelExhausted
   | importsUnsupported
@@ -913,9 +1012,6 @@ def psJsLowerExprWithPolicyAndFuel
                         (PsJsIrBinaryOp.machineIntCompare
                           (psJsLowerIntegerCompareOp integerOperation))
                         arguments
-              | PsVerifiedIrIntrinsic.uint8OfNat =>
-                  psJsLowerRuntimeUnaryWith
-                    smaller PsJsIrRuntimeOp.uint8OfNat arguments
               | PsVerifiedIrIntrinsic.floatBinary type floatOperation =>
                   psJsLowerBinaryWith
                     smaller

@@ -1137,7 +1137,7 @@ private def checkLegacyMetadata : IO Unit := do
   for kind in [PsCompilerSourceKind.lean, .proofScript] do
     let library := importVisibilityInput kind "Library" "" legacyMetadataPieces
     let client := input .lean "Entry"
-      "import Library\ntheorem coreLegacyEchoRfl (A : Type) (x : A) : CoreLegacyEcho.run (A := A) x = x := by rfl\n"
+      "import Library\ntheorem coreLegacyEchoRfl (A : Type) (x : A) : CoreLegacyEcho.run x (A := A) = x := by rfl\n"
     let output ← prepare profile "Entry" [client, library]
     let _ ← admit seed output.admissions
     paired := paired ++ [output.admissions]

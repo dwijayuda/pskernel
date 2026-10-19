@@ -277,7 +277,7 @@ def legacy_cases():
     metadata_client = source("""
         import LegacyLibrary
         theorem coreLegacyEchoRfl (A : Type) (x : A) :
-            CoreLegacyEcho.run (A := A) x = x := by
+            CoreLegacyEcho.run x (A := A) = x := by
           rfl
         """)
 

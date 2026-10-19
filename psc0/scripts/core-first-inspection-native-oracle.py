@@ -146,7 +146,7 @@ def main():
                         f"{name}: native command diagnostic count differs")
                 for item, wanted in zip(information, expected):
                     data = item["data"]
-                    exact = wanted.get("exact")
+                    exact = wanted.get("exactText")
                     require(exact is None or data == exact,
                             f"{name}: native exact message differs: {data!r}")
                     require(all(part in data for part in wanted.get("fragments", [])),

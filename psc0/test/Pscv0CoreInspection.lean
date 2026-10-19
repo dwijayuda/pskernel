@@ -18,12 +18,12 @@ private def containsText (needle value : String) : Bool :=
   (value.splitOn needle).length > 1
 
 private structure Expected where
-  exact : Option String := none
+  exactText : Option String := none
   fragments : List String := []
   absent : List String := []
   deriving Lean.ToJson
 
-private def exactMessage (value : String) : Expected := { exact := some value }
+private def exactMessage (value : String) : Expected := { exactText := some value }
 
 -- Actual values and formatter dictionaries from the pinned native toolchain.
 private def nativeScalarMessages : List Expected := [
@@ -56,13 +56,13 @@ private def fixtures : List Fixture := [
   { label := "core-statements"
     leanSource := "def coreInspectionStep (n : Nat) : Nat := n + 1\n#check coreInspectionStep\n#check (coreInspectionStep 41)\n#check (_ : Nat)\n#reduce coreInspectionStep 41\n#print coreInspectionStep\n#print axioms coreInspectionStep\n"
     psSource := "function coreInspectionStep(n: Nat): Nat := n + 1\n#check coreInspectionStep\n#check coreInspectionStep(41)\n#check (_ : Nat)\n#reduce coreInspectionStep(41)\n#print coreInspectionStep\n#print axioms coreInspectionStep\n"
-    expected := [{ fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["?m", "Nat"] }, { exact := some "42" }, { fragments := ["def coreInspectionStep", "Nat", ":="] }, { exact := some "'coreInspectionStep' does not depend on any axioms" }]
-    nativeExpected := [{ fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["Nat", "?"] }, { exact := some "42" }, { fragments := ["def coreInspectionStep", "Nat", ":="] }, { exact := some "'coreInspectionStep' does not depend on any axioms" }] },
+    expected := [{ fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["?m", "Nat"] }, { exactText := some "42" }, { fragments := ["def coreInspectionStep", "Nat", ":="] }, { exactText := some "'coreInspectionStep' does not depend on any axioms" }]
+    nativeExpected := [{ fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["coreInspectionStep", "Nat"] }, { fragments := ["Nat", "?"] }, { exactText := some "42" }, { fragments := ["def coreInspectionStep", "Nat", ":="] }, { exactText := some "'coreInspectionStep' does not depend on any axioms" }] },
   { label := "lexical-check"
     leanSource := "section InspectionScope\nvariable (A : Type) (x : A)\n#check x\n#check (fun (x : Nat) => x)\nend InspectionScope\ndef coreInspectionScopedStamp : Nat := 1\n"
     psSource := "section InspectionScope\nvariable (A: Type) (x: A)\n#check x\n#check (fun (x: Nat) => x)\nend InspectionScope\nconst coreInspectionScopedStamp: Nat := 1\n"
-    expected := [{ exact := some "x : A" }, { fragments := ["fun", "Nat"] }]
-    nativeExpected := [{ exact := some "x : A" }, { fragments := ["fun", "Nat"] }] },
+    expected := [{ exactText := some "x : A" }, { fragments := ["fun", "Nat"] }]
+    nativeExpected := [{ exactText := some "x : A" }, { fragments := ["fun", "Nat"] }] },
   { label := "pure-foundation-values"
     leanSource := "def coreInspectionScalarStamp : Nat := 1\n#eval (37 + 5 : Nat)\n#eval (-7 : Int)\n#eval true\n#eval \"λ\\n\"\n#eval 'λ'\n#eval ([1, 2, 3] : List Nat)\n#eval (#[1, 2, 3] : Array Nat)\n#eval (some 7 : Option Nat)\n#eval ((1, true) : Nat × Bool)\n#eval ((255 : UInt8) + 2)\n#eval ((18446744073709551615 : UInt64) + 2)\n#eval ((0.25 : Float) + 1.5)\n#eval ((0.25 : Float32) + 1.5)\n#eval System.Platform.numBits\n#eval String.length \"λ\"\n#eval (String.hash \"λ\").toNat\n#eval (mixHash 1 2).toNat\n"
     psSource := "const coreInspectionScalarStamp: Nat := 1\n#eval (37 + 5 : Nat)\n#eval (-7 : Int)\n#eval true\n#eval \"λ\\n\"\n#eval 'λ'\n#eval ([1, 2, 3] : List(Nat))\n#eval (#[1, 2, 3] : Array(Nat))\n#eval (some(7) : Option(Nat))\n#eval ((1, true) : Prod(Nat, Bool))\n#eval ((255 : UInt8) + 2)\n#eval ((18446744073709551615 : UInt64) + 2)\n#eval ((0.25 : Float) + 1.5)\n#eval ((0.25 : Float32) + 1.5)\n#eval System.Platform.numBits\n#eval String.length(\"λ\")\n#eval UInt64.toNat(String.hash(\"λ\"))\n#eval UInt64.toNat(mixHash(1, 2))\n"
@@ -71,23 +71,23 @@ private def fixtures : List Fixture := [
   { label := "proposition-and-proof-erasure"
     leanSource := "def coreInspectionProofStamp : Nat := 1\n#eval (1 = 1)\n#eval (let h : True := Classical.choice (Nonempty.intro True.intro); 7)\n"
     psSource := "const coreInspectionProofStamp: Nat := 1\n#eval (1 = 1)\n#eval (let h: True := Classical.choice(Nonempty.intro(True.intro)); 7)\n"
-    expected := [{ exact := some "true" }, { exact := some "7" }]
-    nativeExpected := [{ exact := some "true" }, { exact := some "7" }] },
+    expected := [{ exactText := some "true" }, { exactText := some "7" }]
+    nativeExpected := [{ exactText := some "true" }, { exactText := some "7" }] },
   { label := "automatic-repr"
     leanSource := "inductive CoreInspectionAuto where\n  | item (value : Nat)\n#eval CoreInspectionAuto.item 7\n"
     psSource := "inductive CoreInspectionAuto where { | item(value: Nat) }\n#eval CoreInspectionAuto.item(7)\n"
-    expected := [{ exact := some "CoreInspectionAuto.item 7" }]
-    nativeExpected := [{ exact := some "CoreInspectionAuto.item 7" }] },
+    expected := [{ exactText := some "CoreInspectionAuto.item 7" }]
+    nativeExpected := [{ exactText := some "CoreInspectionAuto.item 7" }] },
   { label := "checked-to-string"
     leanSource := "inductive CoreInspectionDisplay where\n  | item (value : Nat)\ninstance coreInspectionDisplayToString : ToString CoreInspectionDisplay where\n  toString := fun _ => \"selected custom display\"\n#eval CoreInspectionDisplay.item 8\n"
     psSource := "inductive CoreInspectionDisplay where { | item(value: Nat) }\ninstance coreInspectionDisplayToString: ToString(CoreInspectionDisplay) where {\n  toString := fun _ => \"selected custom display\"\n}\n#eval CoreInspectionDisplay.item(8)\n"
-    expected := [{ exact := some "selected custom display" }]
-    nativeExpected := [{ exact := some "selected custom display" }] },
+    expected := [{ exactText := some "selected custom display" }]
+    nativeExpected := [{ exactText := some "selected custom display" }] },
   { label := "repr-preference"
     leanSource := "inductive CoreInspectionPreferred where\n  | item (value : Nat)\n  deriving Repr\ninstance coreInspectionPreferredToString : ToString CoreInspectionPreferred where\n  toString := fun _ => \"must not select this fallback\"\n#eval CoreInspectionPreferred.item 9\n"
     psSource := "inductive CoreInspectionPreferred where { | item(value: Nat) } deriving Repr\ninstance coreInspectionPreferredToString: ToString(CoreInspectionPreferred) where {\n  toString := fun _ => \"must not select this fallback\"\n}\n#eval CoreInspectionPreferred.item(9)\n"
-    expected := [{ exact := some "CoreInspectionPreferred.item 9" }]
-    nativeExpected := [{ exact := some "CoreInspectionPreferred.item 9" }] }
+    expected := [{ exactText := some "CoreInspectionPreferred.item 9" }]
+    nativeExpected := [{ exactText := some "CoreInspectionPreferred.item 9" }] }
 ]
 
 private def checkMessages (label source : String) (expected : List Expected)
@@ -103,9 +103,9 @@ private def checkMessages (label source : String) (expected : List Expected)
         message.span.stop.byteOffset <= source.utf8ByteSize)
       (label ++ ": command diagnostic lost its actual ordered source span")
     previous := message.span.stop.byteOffset
-    if let some exact := wanted.exact then
-      ensure (message.message == exact)
-        (label ++ ": wanted " ++ exact ++ ", got " ++ message.message)
+    if let some value := wanted.exactText then
+      ensure (message.message == value)
+        (label ++ ": wanted " ++ value ++ ", got " ++ message.message)
     for fragment in wanted.fragments do
       ensure (containsText fragment message.message)
         (label ++ ": missing " ++ fragment ++ " in " ++ message.message)
@@ -160,7 +160,7 @@ private def checkFoundationSeam : IO Unit := do
   let output ← fromExcept
     ((psCompilerEnginePreparePscv0WithOutput profile .proofScript source).mapError psCompilerPscv0Error)
   checkMessages "caller Foundation context" source
-    [{ fragments := ["coreInspectionIdentity", "Nat"] }, { exact := some "7" }]
+    [{ fragments := ["coreInspectionIdentity", "Nat"] }, { exactText := some "7" }]
     output.commandDiagnostics
   let ordinary ← fromExcept
     ((psCompilerEngineElaboratePscv0 profile (withoutInspections program)).mapError psCompilerPscv0Error)
@@ -180,7 +180,7 @@ private def checkRefusals : IO Unit := do
     ("verified-declaration-hole", "PSCV0-UNSOLVED-INFERENCE", "def coreInspectionHole : Nat := _\n", "const coreInspectionHole: Nat := _\n"),
     ("no-functional-formatter", "no Repr or ToString", "#eval (fun (x : Nat) => x)\n", "#eval (fun (x: Nat) => x)\n"),
     ("partial-is-not-total", "partial", "partial def coreInspectionPartial (n : Nat) : Nat := n\n#eval coreInspectionPartial 1\n", "partial function coreInspectionPartial(n: Nat): Nat := n\n#eval coreInspectionPartial(1)\n"),
-    ("noncomputable-policy", "noncomputable", "noncomputable def coreInspectionChosen : Nat := Classical.choice (Nonempty.intro 7)\n#eval coreInspectionChosen\n", "noncomputable const coreInspectionChosen: Nat := Classical.choice(Nonempty.intro(7))\n#eval coreInspectionChosen\n")
+    ("noncomputable-policy", "noncomputable", "noncomputable def coreInspectionChosen : Nat := Classical.choice (Nonempty.intro 7)\n#eval coreInspectionChosen\n", "noncomputable def coreInspectionChosen: Nat := Classical.choice(Nonempty.intro(7))\n#eval coreInspectionChosen\n")
       ] do
     for (kind, source) in [(PsCompilerSourceKind.lean, leanSource), (.proofScript, psSource)] do
       let program ← fromExcept (psCompilerParsePscv0 source kind)
@@ -270,10 +270,10 @@ private def inspectionEntrySource (kind : PsCompilerSourceKind) : String :=
   | .proofScript => "import InspectionFacade\n#eval coreInspectionFacade(41)\n#reduce coreInspectionFacade(41)\n#print coreInspectionFacade\n#print axioms coreInspectionFacadeExt\n"
 
 private def projectExpected : List Expected := [
-  { exact := some "42" },
+  { exactText := some "42" },
   { fragments := ["coreInspectionFacade", "41"], absent := ["42"] },
   { fragments := ["coreInspectionFacade", "Nat"] },
-  { exact := some "'coreInspectionFacadeExt' depends on axioms: [propext]" }]
+  { exactText := some "'coreInspectionFacadeExt' depends on axioms: [propext]" }]
 
 private def moduleSource (kind : PsCompilerSourceKind) (name source : String) : PsPscv0ModuleSource :=
   { name, source, sourceKind := kind, sourceName := name ++ psCompilerSourceKindExtension kind }
@@ -314,7 +314,7 @@ private def checkHostDiagnostics : IO Unit := do
   let some first := fixtures.head? | throw (IO.userError "missing command fixture")
   let commandOnly := "#check Nat\n#reduce 1 + 1\n#eval false\n"
   let onlyExpected : List Expected :=
-    [{ exact := some "Nat : Type" }, { exact := some "2" }, { exact := some "false" }]
+    [{ exactText := some "Nat : Type" }, { exactText := some "2" }, { exactText := some "false" }]
   let inputs : List (PsV7Native.Request × List Expected) :=
     [({ source := first.leanSource, sourceKind := .lean, sourceName := "inspection.lean" }, first.expected),
      ({ source := first.psSource, sourceKind := .proofScript, sourceName := "inspection.ps" }, first.expected),
@@ -398,7 +398,7 @@ private def nativeManifest : Lean.Json :=
   -- its documented pure-total boundary, independently of native execution.
   let policyControl := nativeCase "InspectionNativePartialPolicy"
     "partial def coreInspectionPartial (n : Nat) : Nat := n\n#eval coreInspectionPartial 1\n"
-    [{ exact := some "1" }]
+    [{ exactText := some "1" }]
   Lean.Json.mkObj [
     ("schema", Lean.toJson ("psc0-core-inspection-native-fixtures/1" : String)),
     ("nativeVersion", Lean.toJson Lean.versionString),

@@ -567,7 +567,7 @@ def psElabDeclarationsWithOriginsWorker
         (PsElabModuleWithOriginsResult.mk
           (PsElabModuleResult.mk
             environment
-            (psElabReverseDeclarations declarationsRev))
+            (psElabReverseDeclarations declarationsRev) [])
           (psListReverse originsRev) [] [])
   | List.cons source rest =>
       match psElabSourceDeclarationBatchWithOrigins environment sourceIndex source with

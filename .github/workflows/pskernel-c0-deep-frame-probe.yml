@@ -7,6 +7,7 @@ on:
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/src/**'
       - 'psc0/packages/pskernel-c0/test/C0DeepFrameProof.lean'
+      - 'psc0/packages/pskernel-c0/test/C0DeepFrameSourceProof.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,5 +33,6 @@ jobs:
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
           lake build PsKernelC0
           lake env lean -R src test/C0DeepFrameProof.lean
+          lake env lean -R src test/C0DeepFrameSourceProof.lean
           lake build c0OfficialReplay
           echo 'C0_DEEP_FRAME=SOURCE_COMPILED_NONADMITTING fuel=4096'

@@ -13,8 +13,8 @@ import Ps.Bridge.Json
 -- Encode and independently admit the exact immutable prepared declaration graph
 -- with the pinned official Lean kernel before erasure and bounded IR validation.
 -- No fallback, unchecked mode, or typechecking-as-proof substitution.
-def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
-  let elaborated ← psHostCompilerElaborateProject inputPath
+def psHostDirectValidateElaborated
+    (elaborated : PsElabModuleResult) : IO PsValidatedIrModule := do
   let prepared ← match psCompilerPrepareElaborated elaborated with
     | .ok value => pure value
     | .error _ => throw (IO.userError "PSC1_DIRECT_PREPARATION_FAILED")
@@ -29,6 +29,17 @@ def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
   match psValidateErasedIrModule { raw := raw } with
   | .ok value => pure value
   | .error _ => throw (IO.userError "PSC1_DIRECT_IR_VALIDATION_FAILED")
+
+def psHostDirectValidatedIr (inputPath : String) : IO PsValidatedIrModule := do
+  let elaborated ← psHostCompilerElaborateProject inputPath
+  psHostDirectValidateElaborated elaborated
+
+def psHostDirectValidatedIrWithEntry
+    (inputPath : String) :
+    IO (PsValidatedIrModule × (String × PsSyntaxModule)) := do
+  let loaded ← psHostCompilerElaborateProjectWithEntry inputPath
+  let checked ← psHostDirectValidateElaborated loaded.1
+  pure (checked, loaded.2)
 
 def psHostDirectEnsureParent (path : String) : IO Unit := do
   if let some parent := (System.FilePath.mk path).parent then
@@ -70,15 +81,16 @@ def psHostDirectJavaScript
     (inputPath outputPath : String) : IO Unit := do
   if !outputPath.endsWith ".js" then
     throw (IO.userError "PSC1_DIRECT_JS_OUTPUT_EXTENSION: expected .js")
-  let validated ← psHostDirectValidatedIr inputPath
+  let loaded ← psHostDirectValidatedIrWithEntry inputPath
+  let validated := loaded.1
   let declaration ← match psHostDirectDeclarationSource validated with
     | .ok text => pure text
     | .error reason => throw (IO.userError reason)
   let emitted ← match psJsEmitValidatedModuleWithPositions validated with
     | .ok text => pure text
     | .error _ => throw (IO.userError "PSC1_DIRECT_JS_TARGET_UNSUPPORTED")
-  let sourceText ← IO.FS.readFile inputPath
-  let parsed ← psHostParseSource inputPath sourceText
+  let sourceText := loaded.2.1
+  let parsed := loaded.2.2
   let name := ((System.FilePath.mk outputPath).fileName).getD "module.js"
   let stem := outputPath.dropRight 3
   -- Source positions are owned by the actual parser; generated columns are

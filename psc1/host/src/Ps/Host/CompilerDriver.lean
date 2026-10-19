@@ -63,11 +63,17 @@ def psHostCompilerTranslateToFile
   IO.println
     ("PSC2_TRANSLATE: " ++ inputPath ++ " -> " ++ outputPath)
 
-def psHostCompilerElaborateProject
-    (inputPath : String) : IO PsElabModuleResult :=
-  psHostLoadProject
+def psHostCompilerElaborateProjectWithEntry
+    (inputPath : String) :
+    IO (PsElabModuleResult × (String × PsSyntaxModule)) :=
+  psHostLoadProjectWithEntry
     psSelfHostProdPreludeEnvironment
     inputPath
+
+def psHostCompilerElaborateProject
+    (inputPath : String) : IO PsElabModuleResult := do
+  let loaded ← psHostCompilerElaborateProjectWithEntry inputPath
+  pure loaded.1
 
 def psHostCompilerCheck
     (inputPath : String) : IO Unit := do

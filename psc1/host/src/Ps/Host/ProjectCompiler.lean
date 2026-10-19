@@ -7,6 +7,8 @@ structure PsHostProjectState where
   environment : PsEnvironment
   declarations : List PsDeclaration
   loadedPaths : List String
+  -- The entry parser result belongs to the same source read as elaboration.
+  entrySource : Option (String × PsSyntaxModule) := none
 
 def psHostPathSeparator : Char :=
   if System.Platform.isWindows then '\\' else '/'
@@ -417,6 +419,9 @@ mutual
             declarations :=
               withImports.declarations ++ elaborated.declarations
             loadedPaths := path :: withImports.loadedPaths
+            entrySource :=
+              if stack.isEmpty then some (source, sourceModule)
+              else withImports.entrySource
           }
 
   partial def psHostLoadImportsWithFuel
@@ -445,10 +450,12 @@ mutual
           next
 end
 
-def psHostLoadProject
+-- The exact entry source text and parsed declarations are returned from
+-- the initial IO read, never obtained by rereading an already-checked file.
+def psHostLoadProjectWithEntry
     (baseEnvironment : PsEnvironment)
     (entryPath : String) :
-    IO PsElabModuleResult := do
+    IO (PsElabModuleResult × (String × PsSyntaxModule)) := do
   let root := psHostDirectoryOfPath entryPath
   let state ←
     psHostLoadModuleWithFuel
@@ -461,7 +468,16 @@ def psHostLoadProject
         declarations := []
         loadedPaths := []
       }
-  pure {
+  let some entry := state.entrySource
+    | throw (IO.userError "PSC1_PROJECT_ENTRY_SNAPSHOT_MISSING")
+  pure ({
     environment := state.environment
     declarations := state.declarations
-  }
+  }, entry)
+
+def psHostLoadProject
+    (baseEnvironment : PsEnvironment)
+    (entryPath : String) :
+    IO PsElabModuleResult := do
+  let loaded ← psHostLoadProjectWithEntry baseEnvironment entryPath
+  pure loaded.1

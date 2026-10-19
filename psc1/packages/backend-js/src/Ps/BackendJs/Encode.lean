@@ -103,7 +103,7 @@ def psJsIrEncodeLiteral
   | PsJsIrLiteral.natural natural =>
       psJsIrEncodeNode
         "natural"
-        [psJsIrEncodeText (psNatToString natural)]
+        [psJsIrEncodeText (toString natural)]
   | PsJsIrLiteral.integer integer =>
       psJsIrEncodeNode
         "integer"

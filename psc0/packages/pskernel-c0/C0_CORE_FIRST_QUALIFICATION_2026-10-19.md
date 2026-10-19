@@ -1,5 +1,28 @@
 # PSKernel-C0 Core-first qualification contract (2026-10-19)
 
+## Verified 19–20 October correction: selected Core is smaller in *source*, not in kernel dependencies
+
+Exact [native comparison CI 39193886098](https://github.com/dwijayuda/pskernel/actions/runs/39193886098) **SUCCESS** at compiler-audit commit `4e7ecea126c1f18977c86ce66e4fddb7df144aab` (Lean 4.35.0 stable). The selected `Ps.Compiler.Pscv0ModuleEngine` graph and Full `Ps.Compiler.Pscv0Modules` graph retain the same six advertised backend/IR/codegen roots:
+
+| Measured scope | Core selected | Full compatibility |
+| --- | ---: | ---: |
+| Source modules | 224 | 322 |
+| Source-owned declarations | 21,513 | 191,633 |
+| External checked roots | 418 | 458 |
+| Reachable external Lean declarations | 5,619 | 5,690 |
+
+**Consequence:** Core reduces source-owned declarations by ~88.8%, but only 71 of 5,690 external dependencies disappear (~1.25%). Do NOT claim that a smaller source/compiler means the underlying C0 proof-checking performance problem is substantially solved. Also do not silently use the older Full graph as the selected Core denominator.
+
+**New executable Core qualification:**
+- [selected-roots inventory CI 39294571158](https://github.com/dwijayuda/pskernel/actions/runs/39294571158) **SUCCESS**. `C0CoreSelectedRoots.py` checks the immutable selected native graph, 418 unique canonically encoded roots and source-typed witnesses, closed 5,619-entry dependency graph, approved three logical axioms and no unsafe/partial/empty-boundary violations. Five fabricated alterations are rejected. Actual selected graph SHA-256: `352d9d469dc2ffebf26d0bcf411dd6c5d582d0628cdf2e1600ca92071fd1c1c9`. This is **inventory only**; no kernel checker acceptance.
+- [selected full C0-vs-official strict replay workflow](https://github.com/dwijayuda/pskernel/actions/workflows/pskernel-c0-selected-core-replay.yml) exports **all 418 exact roots as one real Lean 4.35 NDJSON corpus**, independently requires the official checker to accept those same bytes, then requires C0 `C0ExportVerdict.accepted` with unchanged source fuel **4096** and resource measurements. Exit codes 124/137 and resource exhaustion explicitly fail; no omitted roots. The first job [39294727262](https://github.com/dwijayuda/pskernel/actions/runs/39294727262) failed on a **CI setup-only Lean toolchain cwd bug**, before any export/checker verdict; corrected job [39294895812](https://github.com/dwijayuda/pskernel/actions/runs/39294895812) is the authoritative replay attempt.
+- The audit is pinned to **compiler source commit 4e7ecea...**, not the later Core-development HEAD. A fresh real dependency audit against the *eventual frozen Stage1 compiler* is mandatory before Core admission/selfhost.
+- Stage1 compiler-owned 21,513 declarations are **not** covered by merely checking the 5,619 external dependency declarations. Core release requires **both** the external graph and every source-owned declaration in dependency order, including all definitions/proofs, mutual/nested inductives, generated equations and approved assumptions.
+- The existing 76-declaration Bootstrap seed, four green individual external roots and 177/193 historical Arena results are auxiliary evidence, **never** sufficient proof of a Core kernel.
+
+**Revised milestones:** K0 freeze and audit selected compiler source + raw graph; K1 independently accept the entire 418-root external graph with C0 at 4096; K2 C0-check all compiler-owned declarations without missing/unsupported cases; K3 independent official same-byte negatives, peak RSS, real full-check time; K4 optional non-default C0 provider and Stage1/2/3 self-host checks. Full 193/193 Arena, unrestricted Init/Std/Mathlib and global Lean 4.35 compatibility stay a separate Full research lane. Use official Lean Stage0 and never let C0 delay active PSC0 compiler development.
+
+
 Status: **UNQUALIFIED / execution plan**, not a declaration that C0-Core is done.
 
 ## Purpose

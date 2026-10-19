@@ -2,6 +2,7 @@ import Ps.Foundation.List
 import Ps.BackendRust.Tail
 import Ps.BackendRust.ValueRefs
 import Ps.BackendRust.Runtime
+import Ps.CompilerIr.Check
 
 def psRustTypeParameterNames
     (parameters : List PsVerifiedIrTypeParameter) : List String :=
@@ -1264,5 +1265,12 @@ def psRustEmitModule
 
 def psRustEmitValidatedModule
     (module : PsValidatedIrModule) :
-    Except PsRustEmitError String :=
+    Except PsRustEmitError String := do
+  -- The wrapper is a public IR transport, not a trusted proof token.
+  -- Every validated Rust API boundary checks its *actual* current raw payload.
+  let report := psCheckVerifiedIrModule psIrCheckDefaultOptions module.raw
+  if !report.traversalComplete then
+    throw PsRustEmitError.sourceIrBudgetExhausted
+  if !report.accepted then
+    throw PsRustEmitError.sourceIrRejected
   psRustEmitModule module.raw

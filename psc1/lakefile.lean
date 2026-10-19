@@ -233,6 +233,10 @@ lean_exe psc1_artifact_publication_regression where
   srcDir := "test"
   root := `ArtifactPublicationRegression
 
+lean_exe psc1_backend_authority_regression where
+  srcDir := "test"
+  root := `BackendAuthorityRegression
+
 lean_exe psc1_erasure_tests where
   srcDir := "test"
   root := `ErasureTests

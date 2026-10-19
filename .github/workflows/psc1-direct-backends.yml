@@ -78,6 +78,7 @@ jobs:
           lake exe psc1_ir_specialize_tests
           lake exe psc1_direct_source_map_regression
           lake exe psc1_artifact_publication_regression
+          lake exe psc1_backend_authority_regression
 
       - name: Smoke PSC1 direct JS, Rust and core Wasm outputs
         working-directory: psc1

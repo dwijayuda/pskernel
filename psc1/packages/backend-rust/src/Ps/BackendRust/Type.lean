@@ -8,6 +8,8 @@ inductive PsRustEmitError where
   | fuelExhausted
   | intrinsicArity
   | externalImportUnsupported
+  | sourceIrRejected
+  | sourceIrBudgetExhausted
   | genericValueUnsupported (name : String)
   | functionResultUnsupported (name : String)
   | functionStorageUnsupported (name : String)

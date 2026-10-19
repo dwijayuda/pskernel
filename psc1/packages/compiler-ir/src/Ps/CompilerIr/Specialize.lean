@@ -17,6 +17,8 @@ inductive PsIrSpecializeError where
   | typeArgumentArity (name : String)
   | unknownTarget (name : String)
   | unsupportedGenericCall
+  | sourceIrRejected
+  | sourceIrBudgetExhausted
   | specializedIrRejected
   | specializedIrBudgetExhausted
 
@@ -1721,6 +1723,11 @@ def psIrSpecializeModule
 def psIrSpecializeValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsSpecializedIrModule := do
+  let sourceReport := psCheckVerifiedIrModule psIrCheckDefaultOptions validated.raw
+  if !sourceReport.traversalComplete then
+    throw PsIrSpecializeError.sourceIrBudgetExhausted
+  if !sourceReport.accepted then
+    throw PsIrSpecializeError.sourceIrRejected
   let raw ← psIrSpecializeModule validated.raw
   let report := psCheckVerifiedIrModule psIrCheckDefaultOptions raw
   if !report.traversalComplete then
@@ -1732,6 +1739,11 @@ def psIrSpecializeValidatedModule
 def psIrSpecializeUniformValidatedModule
     (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsUniformSpecializedIrModule := do
+  let sourceReport := psCheckVerifiedIrModule psIrCheckDefaultOptions validated.raw
+  if !sourceReport.traversalComplete then
+    throw PsIrSpecializeError.sourceIrBudgetExhausted
+  if !sourceReport.accepted then
+    throw PsIrSpecializeError.sourceIrRejected
   let raw ← psIrSpecializeModule validated.raw
   let report := psCheckVerifiedIrModule psIrCheckDefaultOptions raw
   if !report.traversalComplete then

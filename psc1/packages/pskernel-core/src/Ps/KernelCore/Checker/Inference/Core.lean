@@ -497,11 +497,15 @@ def psKernelInferCoreWithFuel
                                 domain
                                 closedBody
                                 binderInfo;
+                            let scopedState :=
+                              psKernelCheckerStateExitLocalScope
+                                state1
+                                (Prod.snd bodyResult);
                             Except.ok
                               (Prod.mk
                                 result
                                 (psKernelCacheInferResult
-                                  (Prod.snd bodyResult)
+                                  scopedState
                                   inferOnly
                                   expr
                                   result))
@@ -574,11 +578,15 @@ def psKernelInferCoreWithFuel
                                         (psKernelLevelMkIMax
                                           (Prod.fst domainSort)
                                           (Prod.fst bodySort));
+                                    let scopedState :=
+                                      psKernelCheckerStateExitLocalScope
+                                        state1
+                                        (Prod.snd bodySort);
                                     Except.ok
                                       (Prod.mk
                                         result
                                         (psKernelCacheInferResult
-                                          (Prod.snd bodySort)
+                                          scopedState
                                           inferOnly
                                           expr
                                           result))
@@ -698,11 +706,15 @@ def psKernelInferCoreWithFuel
                                   nondep
                               else
                                 bodyType;
+                            let scopedState :=
+                              psKernelCheckerStateExitLocalScope
+                                state1
+                                (Prod.snd bodyResult);
                             Except.ok
                               (Prod.mk
                                 result
                                 (psKernelCacheInferResult
-                                  (Prod.snd bodyResult)
+                                  scopedState
                                   inferOnly
                                   expr
                                   result))

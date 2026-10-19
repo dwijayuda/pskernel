@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.DefEq.BinderSpines
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Lean 4.34 quick definitional-equality rules.
@@ -37,10 +38,16 @@ def psKernelDefEqQuick
         (Option.some true)
         state)
   else if
-      psKernelExprPairSetContains
-        state.success
-        left
-        right then
+      if
+          psKernelSemanticPairCacheEligible
+            left
+            right then
+        psKernelExprPairSetContains
+          state.success
+          left
+          right
+      else
+        false then
     Except.ok
       (Prod.mk
         (Option.some true)

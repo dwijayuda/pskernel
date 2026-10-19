@@ -15,19 +15,38 @@ recursor-rule validation. Infer-only application, lambda and forall results
 remain memoized because whole-expression inference results are commonly reused.
 -/
 
+def psKernelSemanticCacheEligible
+    (expr : PsKernelExpr) :
+    Bool :=
+  if psKernelExprHasFVar expr then
+    false
+  else
+    true
+
+def psKernelSemanticPairCacheEligible
+    (left right : PsKernelExpr) :
+    Bool :=
+  if psKernelSemanticCacheEligible left then
+    psKernelSemanticCacheEligible right
+  else
+    false
+
 def psKernelInferCacheEligible
     (inferOnly : Bool)
     (expr : PsKernelExpr) :
     Bool :=
-  match expr with
-  | PsKernelExpr.lit _ =>
-      false
-  | PsKernelExpr.app _ _ =>
-      inferOnly
-  | PsKernelExpr.lam _ _ _ _ =>
-      inferOnly
-  | PsKernelExpr.forallE _ _ _ _ =>
-      inferOnly
-  | _ =>
-      true
+  if psKernelSemanticCacheEligible expr then
+    match expr with
+    | PsKernelExpr.lit _ =>
+        false
+    | PsKernelExpr.app _ _ =>
+        inferOnly
+    | PsKernelExpr.lam _ _ _ _ =>
+        inferOnly
+    | PsKernelExpr.forallE _ _ _ _ =>
+        inferOnly
+    | _ =>
+        true
+  else
+    false
 

@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.DeepInferenceFrames
+import Ps.KernelCore.Architecture.DeepSubstitutionTape
 
 /-!
 Non-admitting source-stage extraction for a CHECKED lambda binder.

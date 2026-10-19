@@ -66,6 +66,6 @@ private def psKernelPerfCase
   IO.println s!"PSC1_C0_BETA_BENCH depth={depth} calls={iterations} old_ms={oldMs} c0_ms={newMs} checksum={oldSum}"
 
 def main : IO Unit := do
-  psKernelPerfCase 24 400
-  psKernelPerfCase 96 400
+  psKernelPerfCase 24 120000
+  psKernelPerfCase 96 120000
   IO.println "PSC1_C0_BETA_BENCH: COMPLETE (matched native comparison)"

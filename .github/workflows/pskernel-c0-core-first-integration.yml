@@ -63,7 +63,7 @@ jobs:
           grep -F '4.35.0' "$GITHUB_WORKSPACE/integrity/toolchain.txt"
           grep -F 'eb6cafb' "$GITHUB_WORKSPACE/integrity/toolchain.txt"
           /usr/bin/time -v -o "$GITHUB_WORKSPACE/integrity/build-resources.txt" \
-            lake build pscv0_core_native_closure
+            lake build pscv0_native pscv0_core_native_closure
           /usr/bin/time -v -o "$GITHUB_WORKSPACE/integrity/closure-resources.txt" \
             lake env .lake/build/bin/pscv0_core_native_closure "$GITHUB_WORKSPACE/integrity/native-closure.json" \
             | tee "$GITHUB_WORKSPACE/integrity/native-closure-summary.json"

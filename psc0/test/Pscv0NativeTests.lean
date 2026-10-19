@@ -2179,7 +2179,7 @@ private def projectBoundaries : IO Unit := do
     name := "HiddenFacade"
     source := "import Library\nnamespace HiddenFacade\nconst local: Nat := Library.double(2)\nend HiddenFacade\n" }
   let hiddenClient := "import HiddenFacade\nconst leaked: Nat := Library.double(7)\n"
-  let opacityClient := "import Library\ntheorem cannotUnfold: Library.double(7) = 14 := by { rfl }\n"
+  let opacityClient := "public import Library\ntheorem cannotUnfold: Library.double(7) = 14 := by { rfl }\n"
   let vault : PsPscv0ModuleSource := {
     name := "Vault"
     source := "namespace Vault\nprivate const hidden: Nat := 4\nfunction addHidden(value: Nat): Nat := Nat.add(hidden, value)\nend Vault\n" }
@@ -2217,7 +2217,7 @@ private def projectBoundaries : IO Unit := do
     name := "RightExport", source := "public import Palette\nconst rightTag: Nat := 2\n" }
   let derivedClient : PsPscv0ModuleSource := {
     name := "DerivedClient"
-    source := "import LeftExport\nimport RightExport\nconst chosen: Palette.Shade := Inhabited.default\n" }
+    source := "public import LeftExport\npublic import RightExport\nconst chosen: Palette.Shade := Inhabited.default\n" }
   let derived ← get "public derived-instance diamond"
     (psCompilerPreparePscv0Project "DerivedClient"
       [derivedClient, leftExport, rightExport, palette])
@@ -2235,9 +2235,9 @@ private def projectBoundaries : IO Unit := do
     name := "Aliases"
     source := "namespace Aliases\nabbrev six: Nat := 6\nfunction twice(value: Nat): Nat := Nat.add(value, value)\nend Aliases\n" }
   let abbreviationClient :=
-    "import Aliases\ntheorem exposed: Aliases.six = 6 := by { rfl }\n"
+    "public import Aliases\ntheorem exposed: Aliases.six = 6 := by { rfl }\n"
   let abbreviationOpacity :=
-    "import Aliases\ntheorem cannotUnfold: Aliases.twice(3) = 6 := by { rfl }\n"
+    "public import Aliases\ntheorem cannotUnfold: Aliases.twice(3) = 6 := by { rfl }\n"
   let invalidExposed : PsPscv0ModuleSource := {
     name := "InvalidExposed"
     source := "namespace InvalidExposed\nprivate const seed: Nat := 9\nabbrev leaked: Nat := seed\nend InvalidExposed\n" }
@@ -3247,7 +3247,7 @@ private def transparencyBoundaries : IO Unit := do
     { source := "const Hidden: Type := Nat\nconst bad: Hidden := Inhabited.default\n" },
     { source := "const Hidden: Type := Nat\nconst bad: Hidden := 937\n" },
     { moduleName := "Client",
-      source := "import Types\nconst value: Clear := Inhabited.default\nconst numeral: Clear := 937\n",
+      source := "public import Types\nconst value: Clear := Inhabited.default\nconst numeral: Clear := 937\n",
       modules := [{ name := "Types", source := "abbrev Clear: Type := Nat\n" }] }
   ]
   let batch ← match ← PsV7Native.runBatch requests with

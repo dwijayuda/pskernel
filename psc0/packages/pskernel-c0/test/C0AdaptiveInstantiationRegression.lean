@@ -27,8 +27,8 @@ def main : IO Unit := do
     throw (IO.userError "adaptive substitution: expensive trie chosen for linear spine")
   if !(psKernelC0InstMemoWorthwhile shared) then
     throw (IO.userError "adaptive substitution: huge shared DAG failed memo selection")
-  if !(psKernelC0InstMemoWorthwhile deepBinder) then
-    throw (IO.userError "adaptive substitution: deep binders failed memo selection")
+  if psKernelC0InstMemoWorthwhile deepBinder then
+    throw (IO.userError "research ablation: binder depth alone must use exact direct substitution")
   if psKernelC0InstMemoWorthwhile shortBinder then
     throw (IO.userError "adaptive substitution: short binders needlessly memoized")
   let binder : PsKernelName := .str .anonymous "a"
@@ -59,4 +59,4 @@ def main : IO Unit := do
   let finish ← IO.monoNanosNow
   if psKernelExprGetAppNumArgs result != 26 then
     throw (IO.userError "adaptive substitution: incorrect shared root spine")
-  IO.println s!"C0_ADAPTIVE_INSTANTIATION source=Lean_proved linear=direct shared=memo long_binders=memo small_binders=direct shared_ms={(finish-begin)/1000000}"
+  IO.println s!"C0_ADAPTIVE_INSTANTIATION source=Lean_proved linear=direct shared=memo long_binders=direct small_binders=direct shared_ms={(finish-begin)/1000000}"

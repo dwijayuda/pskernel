@@ -36,7 +36,7 @@ def psWasmIrEncodeText
 def psWasmIrEncodeNat
     (value : Nat) :
     Except PsWasmIrEncodeError String :=
-  psWasmIrEncodeText (psNatToString value)
+  psWasmIrEncodeText (toString value)
 
 def psWasmIrEncodeInt
     (value : Int) :

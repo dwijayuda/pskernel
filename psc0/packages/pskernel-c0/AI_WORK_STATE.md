@@ -1,5 +1,13 @@
 # AI_WORK_STATE — PSKernel-C0 live checkpoint
 
+## 19 October 2026 — Loose-bound csimp full proof failed; memory/proof-trie bottleneck persists
+
+- Full source/native correctness [39242646501](https://github.com/dwijayuda/pskernel/actions/runs/39242646501) **SUCCESS** at exact `685683792d6e8f6ec8538c453b2f761fffb73bf4`: Lean 4.35 source theorem, valid constant-to-constant compiler rewrite, entire native regression and strict official example suites. Separate source-only proof [39241848939](https://github.com/dwijayuda/pskernel/actions/runs/39241848939) also passed.
+- Exact original SHA-verified 4000-layer Arena `app-lam` [same-runner A/B 39242646507](https://github.com/dwijayuda/pskernel/actions/runs/39242646507) **FAILED** complete-checker acceptance: both original and new source-correct loose-bound compiled versions timed out at **90s host cap**, Lean source fuel remains **4096**. No actual C0 accepted verdict; no production performance qualification or merge.
+- Independently authenticated [native worker stack profile 39243441520](https://github.com/dwijayuda/pskernel/actions/runs/39243441520) **SUCCESS as diagnosis**: 19 samples, `psKernelC0InstOneMemoGo` 11/19 inclusive, `lean_dec_ref_cold` 11/19, `psKernelC0MemoizedInstantiate1All` 8/19, memo insert 7/19 and trie set 6/19; active `lean_dec_ref_cold` 7/19. These are overlapping samples, not CPU percentages. The bottleneck is dependent proof-carrying operation-local substitution memo/trie and refcount traffic.
+- Compiler-only candidate [PR #158](https://github.com/dwijayuda/pskernel/pull/158) **CLOSED UNMERGED**. Source-only exact-bound [PR #157](https://github.com/dwijayuda/pskernel/pull/157) remains independent research; do not substitute this metadata for a kernel judgment. Next correct route requires a new sharing-preserving substitution/WHNF/DefEq *representation*, source-refined admission and actual end-to-end accepted proof/RSS, rather than more cheap selector/hash tweaks.
+- Complete PSC0 external kernel closure, all Arena 193 and full Init/Std/Mathlib remain unqualified; the official Lean 4.35 checker remains the external trusted Core source checker, not C0. Production C0 unmodified.
+
 ## 19 October 2026 — Exact immutable loose-bound native source refinement (PR #157, unmerged)
 
 - The source-only `PsKernelExpr.psKernelC0LooseBVarBound` stores the maximum loose de Bruijn index plus one, decremented through binders, combined by `Nat.max`. `psKernelC0HasLooseBVarFast expr offset` uses an exact `Nat.blt` check. Its original independent recursive oracle `psKernelExprHasLooseAt` has not been altered.

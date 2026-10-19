@@ -123,8 +123,9 @@ def psScopeMutualMember (resolver : PsScopeResolver)
   let type ← psScopeTerm 4096 headerResolver binders.bound type
   let value ← psScopeTerm 4096 resolver binders.bound value
   return {
-    source := if isPartial then .partialDefinition name binders.binders type.term value.term span
-      else .definition name binders.binders type.term value.term span
+    source := if isPartial then
+        .partialDefinition (psScopeCanonicalNameSyntax name) binders.binders type.term value.term span
+      else .definition (psScopeCanonicalNameSyntax name) binders.binders type.term value.term span
     alias
     used := psScopeUnion binders.used (psScopeUnion type.used value.used)
     isPrivate := member.isPrivate }

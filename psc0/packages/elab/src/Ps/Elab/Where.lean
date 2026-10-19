@@ -155,7 +155,7 @@ def psElabWhereHelperHeader (context : PsElabContext)
     source := .localDefinition parent.name source
     sourceIndex := parent.sourceIndex
     sourceSpan := source.span
-    isPrivate := parent.isPrivate
+    isPrivate := parent.isPrivate || localDefinition.isPrivate
     registration := none
     strategy := ← psElabWhereLocalStrategy mainSources source
     ambient := parent.ambient ++ ownCaptures

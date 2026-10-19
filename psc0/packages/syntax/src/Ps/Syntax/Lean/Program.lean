@@ -127,13 +127,20 @@ def psLeanProgramCommands (fuel : Nat) (cursor : PsTokenCursor)
           pure (PsParseResult.mk (.mutualDeclarations members.value.1
             { start := opening.token.span.start, stop := members.value.2.stop }) members.cursor)
         else psLeanProgramOrdinaryCommand cursor false defaultPrivate
+    let pushVisibility := fun (components : List String) (isPublic : Bool) =>
+      components.foldl (fun (state : Bool × List Bool) _ =>
+        (state.fst && !isPublic, state.fst :: state.snd))
+        (defaultPrivate, visibilityDefaults)
     let (nextPrivate, nextDefaults) := match parsed.value with
-      | .sectionCmd _ _ =>
-          (defaultPrivate && publicSection.isNone, defaultPrivate :: visibilityDefaults)
-      | .namespaceCmd _ _ => (defaultPrivate, defaultPrivate :: visibilityDefaults)
-      | .endCmd _ _ => match visibilityDefaults with
-        | saved :: rest => (saved, rest)
-        | [] => (defaultPrivate, [])
+      | .sectionCmd name _ =>
+          pushVisibility ((name.map (·.segments)).getD [""]) publicSection.isSome
+      | .namespaceCmd name _ => pushVisibility name.segments false
+      | .endCmd name _ =>
+          ((name.map (·.segments)).getD [""]).foldl
+            (fun (state : Bool × List Bool) _ => match state.snd with
+              | saved :: rest => (saved, rest)
+              | [] => (state.fst, []))
+            (defaultPrivate, visibilityDefaults)
       | _ => (defaultPrivate, visibilityDefaults)
     psLeanProgramCommands fuel parsed.cursor (parsed.value :: commandsRev)
       nextPrivate nextDefaults

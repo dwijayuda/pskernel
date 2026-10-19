@@ -413,6 +413,14 @@ def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxNa
   { name with segments := if name.segments.head? == some "_root_" then
       psSyntaxNameRootSegments name.segments else scope.namePrefix ++ name.segments }
 
+-- Canonical declaration names may begin with a literal _root_ namespace.
+-- Protect that component when returning to syntax, where one leading marker
+-- denotes an absolute name and is removed by psSyntaxNameToName.
+def psScopeCanonicalNameSyntax (name : PsSyntaxName) : PsSyntaxName :=
+  if name.segments.head? == some "_root_" then
+    { name with segments := "_root_" :: name.segments }
+  else name
+
 -- Variable annotations only reference earlier variables. One reverse pass
 -- closes dependencies; a forward pass then adds eligible instance variables.
 -- No whole-scope fixed-point iteration or generalization by proof body.

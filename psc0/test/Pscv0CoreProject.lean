@@ -247,9 +247,10 @@ private def visibility (seed : Lean.Kernel.Environment)
   ensure (facadeReceipt.source == facade.source &&
       facadeReceipt.imports == [("Library", true)])
     "public import receipt changed"
-  let ordinaryFacade := input kind "Facade"
-    ("import Library\n" ++ identitySource kind "coreProjectFacade")
-  refuse profile "Entry" [client, ordinaryFacade, library] true
+  let ordinaryFacade := input kind "Facade" (match kind with
+    | .lean => "module\nimport Library\npublic " ++ identitySource kind "coreProjectFacade"
+    | .proofScript => "import Library\n" ++ identitySource kind "coreProjectFacade")
+  refuse profile "Entry" [reexportClient, ordinaryFacade, reexportLibrary] true
     "PSCV0-SCOPE: unknown name ProjectLib.copy"
   pure exported.admissions
 
@@ -855,6 +856,553 @@ private def checkImportVisibility : IO Unit := do
     "legacy name-visibility exemption changed canonical declarations"
   IO.println "PSCV0_CORE_IMPORT_VISIBILITY: 13 positive projects, eight owned refusals, paired canonical admission, retained type/body/proof dependencies, public diamonds, opaque bridges and legacy exemption passed"
 
+
+private def componentScopeSources (kind : PsCompilerSourceKind) :
+    List (String × String × List String) :=
+  let header := match kind with | .lean => "module\n" | .proofScript => ""
+  let publicSection := match kind with | .lean => "public section\n" | .proofScript => "section\n"
+  let captured := fun name => match kind with
+    | .lean => "def " ++ name ++ " (x : A) : A := x\n"
+    | .proofScript => "function " ++ name ++ "(x: A): A := x\n"
+  let start := header ++ publicSection
+  let middle :=
+    "variable (A : Type)\n" ++ captured "inner" ++ "end Inner\n" ++
+    "variable (A : Type)\n" ++ captured "outer" ++ "end CoreDotted\n" ++
+    "variable (A : Type)\n" ++ captured "componentRoot" ++ "end\n"
+  let separate := "namespace CoreSeparate\nnamespace Inner\n" ++
+    "variable (A : Type)\n" ++ captured "value"
+  let afterSeparate := identitySource kind "componentAfterSeparate" ++ "end\n"
+  let mixed := "namespace CoreMixed\nsection Local\n" ++
+    "variable (A : Type)\n" ++ captured "value"
+  let afterMixed := identitySource kind "componentAfterMixed" ++ "end\n"
+  let sectionWord := match kind with | .lean => "public section " | .proofScript => "section "
+  let sectionBody :=
+    identitySource kind "componentSectionInner" ++ "end Inner\n" ++
+    identitySource kind "componentSectionOuter" ++ "end CoreSection\n" ++
+    (match kind with | .lean => "" | .proofScript => "private ") ++
+    identitySource kind "componentSectionAfter" ++
+    scopeIdentity kind (match kind with | .lean => "public " | .proofScript => "")
+      "componentSectionFinal" "componentSectionAfter"
+  [
+    (start ++ "namespace CoreDotted.Inner\n" ++ middle,
+     start ++ "namespace CoreDotted\nnamespace Inner\n" ++ middle,
+     ["CoreDotted.Inner.inner", "CoreDotted.outer", "componentRoot"]),
+    (start ++ separate ++ "end CoreSeparate.Inner\n" ++ afterSeparate,
+     start ++ separate ++ "end Inner\nend CoreSeparate\n" ++ afterSeparate,
+     ["CoreSeparate.Inner.value", "componentAfterSeparate"]),
+    (start ++ mixed ++ "end CoreMixed.Local\n" ++ afterMixed,
+     start ++ mixed ++ "end Local\nend CoreMixed\n" ++ afterMixed,
+     ["CoreMixed.value", "componentAfterMixed"]),
+    (header ++ sectionWord ++ "CoreSection.Inner\n" ++ sectionBody,
+     header ++ sectionWord ++ "CoreSection\n" ++ sectionWord ++ "Inner\n" ++ sectionBody,
+     ["componentSectionInner", "componentSectionOuter", "componentSectionFinal"])]
+
+private def checkComponentScopes : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let mut paired : List (List String) := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let mut admissions : List String := []
+    for (source, expanded, expectedNames) in componentScopeSources kind do
+      let output ← prepare profile "Entry" [input kind "Entry" source]
+      let reference ← prepare profile "Entry" [input kind "Entry" expanded]
+      let _ ← admit seed output.admissions
+      let _ ← admit seed reference.admissions
+      ensure (output.admissions == reference.admissions)
+        "component scopes differ from explicitly nested/closed scopes"
+      let names := expectedNames.map fun name =>
+        psSyntaxNameAppendSegments (name.splitOn ".") .anonymous
+      let interface ← importVisibilityInterface output
+      ensure (sameNames output.mainNames names &&
+          sameNames (interface.declarations.map psDeclarationName) names)
+        "component scope namespace or public visibility restoration changed"
+      for name in names do
+        let some declaration := output.prepared.declarations.find?
+            (fun declaration => psNameEq (psDeclarationName declaration) name)
+          | fail "component scope declaration missing"
+        ensure ((psDeclarationLevelParams declaration).isEmpty &&
+            psExprAlphaEq (psDeclarationType declaration) idType)
+          "component scope did not restore and recapture the variable telescope"
+      if expectedNames.contains "componentSectionFinal" then
+        let privateName := psNameAppendStr
+          (psNameAppendStr (psRootName "$psc0Private") "Entry") "componentSectionAfter"
+        let some receipt := output.moduleProfiles.find? (fun item => item.name == "Entry")
+          | fail "component public-section receipt missing"
+        ensure (sameNames receipt.privateNames [privateName])
+          "dotted public section did not restore its prior private default"
+      admissions := admissions ++ [output.admissions]
+    paired := paired ++ [admissions]
+    let header := match kind with | .lean => "module\n" | .proofScript => ""
+    let refusals : List (String × String) := [
+      ("namespace A\nend\n", "end requires the innermost scope name"),
+      ("section A\nend\n", "end requires the innermost scope name"),
+      ("namespace A\nnamespace B\nend A\n", "end name does not match the innermost scope"),
+      ("namespace A.B\nend B.A\n", "end name does not match the innermost scope"),
+      ("namespace A\nsection\nnamespace B\nend A.B\n", "end name does not match the innermost scope"),
+      ("section\nend A\n", "end name does not match the innermost scope"),
+      ("namespace A\nend X.A\n", "end name contains too many components"),
+      ("end\n", "end without an open scope")]
+    for (source, message) in refusals do
+      refuse profile "Entry" [input kind "Entry" (header ++ source)] true
+        ("PSCV0-SCOPE: " ++ message)
+  let [leanAdmissions, psAdmissions] := paired
+    | fail "component scope paired source count changed"
+  ensure (leanAdmissions.length == 4 && leanAdmissions == psAdmissions)
+    "Lean and PS component-scope canonical admissions differ"
+  IO.println "PSCV0_CORE_COMPONENT_SCOPES: 16 positive projects, 16 owned refusals, paired canonical admission, component namespace/section closure, variable restoration and sequential public defaults passed"
+
+
+private def legacyProviderPieces : List (String × String) := [
+  ("public def coreLegacyDirect (A : Type) (x : A) : A := x\n",
+   "function coreLegacyDirect(A: Type, x: A): A := x\n"),
+  ("private def coreLegacyHelper (A : Type) (x : A) : A := x\n",
+   "private function coreLegacyHelper(A: Type, x: A): A := x\n"),
+  ("public def coreLegacyViaPrivate (A : Type) (x : A) : A := coreLegacyHelper A x\n",
+   "function coreLegacyViaPrivate(A: Type, x: A): A := coreLegacyHelper(A, x)\n"),
+  ("public abbrev coreLegacyAlias (A : Type) (x : A) : A := coreLegacyDirect A x\n",
+   "abbrev coreLegacyAlias(A: Type, x: A): A := coreLegacyDirect(A, x)\n"),
+  ("public opaque coreLegacyOpaque (A : Type) (x : A) : A := x\n",
+   "opaque coreLegacyOpaque(A: Type, x: A): A := x\n"),
+  ("public theorem coreLegacySpec (A : Type) (x : A) : coreLegacyViaPrivate A x = x := by rfl\n",
+   "theorem coreLegacySpec(A: Type, x: A): coreLegacyViaPrivate(A, x) = x := by { rfl }\n")]
+
+private def legacyProvider (kind : PsCompilerSourceKind) (nativeModule : Bool) :
+    PsPscv0ModuleSource :=
+  let body := legacyProviderPieces.foldl (fun acc piece => acc ++
+    (match kind with | .lean => piece.fst | .proofScript => piece.snd)) ""
+  input kind "Library" ((match kind with
+    | .lean => if nativeModule then "module\n" else ""
+    | .proofScript => "") ++ body)
+
+private def legacyRfl (name callee : String) : String :=
+  "theorem " ++ name ++ " (A : Type) (x : A) : " ++ callee ++ " A x = x := by rfl\n"
+
+private def legacyClientBody : String :=
+  legacyRfl "coreLegacyDirectRfl" "coreLegacyDirect" ++
+  legacyRfl "coreLegacyPrivateRfl" "coreLegacyViaPrivate" ++
+  legacyRfl "coreLegacyAliasRfl" "coreLegacyAlias" ++
+  "theorem coreLegacyViaSpec (A : Type) (x : A) : coreLegacyViaPrivate A x = x := coreLegacySpec A x\n"
+
+private def checkLegacyImports : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let helperName := psNameAppendStr
+    (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyHelper"
+  let providerNames := [psRootName "coreLegacyDirect", helperName,
+    psRootName "coreLegacyViaPrivate", psRootName "coreLegacyAlias",
+    psRootName "coreLegacyOpaque", psRootName "coreLegacySpec"]
+  let entryNames := ["coreLegacyDirectRfl", "coreLegacyPrivateRfl",
+    "coreLegacyAliasRfl", "coreLegacyViaSpec"].map psRootName
+  let entry := input .lean "Entry" ("import Library\n" ++ legacyClientBody)
+  let legacy := legacyProvider .lean false
+  let reference ← prepare profile "Entry" [entry, legacy]
+  let check := fun (output : PsCompilerEngineProjectOutput) (modules : List String) => do
+    let _ ← admit seed output.admissions
+    ensure (output.admissions == reference.admissions &&
+        sameNames (output.prepared.declarations.map psDeclarationName)
+          (providerNames ++ entryNames) &&
+        sameNames output.libraryNames providerNames &&
+        sameNames output.mainNames entryNames)
+      "legacy import changed canonical closure or entry ownership"
+    ensure (output.moduleProfiles.length == modules.length &&
+        modules.all (fun name => output.moduleProfiles.any (fun item => item.name == name)))
+      "legacy import escaped its reachable module closure"
+    ensure (output.prepared.profile.baseEnvironment.declarations.length == 4 &&
+        !psEnvironmentContains output.prepared.profile.baseEnvironment (psRootName "coreLegacyDirect"))
+      "legacy imported declarations mutated the caller base"
+    let .definitionDecl _ _ _ body ← importVisibilityDeclaration output "coreLegacyViaPrivate"
+      | fail "legacy wrapper lost its checked definition"
+    ensure ((psPscv0ExprConstants body).any (psNameEq helperName))
+      "legacy wrapper lost its private implementation dependency"
+    let some (.definitionDecl ..) := output.prepared.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) helperName)
+      | fail "legacy private helper missing from checked closure"
+    let .opaqueDecl .. ← importVisibilityDeclaration output "coreLegacyOpaque"
+      | fail "legacy import made a genuine opaque transparent"
+    let .theoremDecl .. ← importVisibilityDeclaration output "coreLegacySpec"
+      | fail "legacy import changed theorem kind"
+    let some library := output.moduleProfiles.find? (fun item => item.name == "Library")
+      | fail "legacy library public receipt missing"
+    ensure (sameNames library.privateNames [helperName] &&
+        !library.interface.declarations.any (fun declaration =>
+          psNameEq (psDeclarationName declaration) helperName))
+      "legacy loading altered the public private-name boundary"
+    let some (.opaqueDecl ..) := library.interface.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) (psRootName "coreLegacyDirect"))
+      | fail "legacy loading weakened the module public body view"
+  check reference ["Library", "Entry"]
+  let rflRefusal := "PSCV0-PROOF: rfl requires definitionally equal sides"
+  for library in [legacy, legacyProvider .lean true, legacyProvider .proofScript true] do
+    refuse profile "Entry"
+      [input .lean "Entry" ("import Library\n" ++ legacyRfl "coreLegacyOpaqueRfl" "coreLegacyOpaque"), library]
+      true rflRefusal
+    refuse profile "Entry"
+      [input .lean "Entry" ("import Library\ndef coreLegacyLeak (A : Type) (x : A) : A := coreLegacyHelper A x\n"), library]
+      true "PSCV0-SCOPE: unknown name coreLegacyHelper"
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := legacyProvider kind true
+    check (← prepare profile "Entry" [entry, library]) ["Library", "Entry"]
+    let facade := importVisibilityInput kind "Facade" "import Library\n" []
+    let transitive := input .lean "Entry" ("import Facade\n" ++ legacyClientBody)
+    check (← prepare profile "Entry" [transitive, facade, library]) ["Library", "Facade", "Entry"]
+    let left := importVisibilityInput kind "Left" "import Library\n" []
+    let right := importVisibilityInput kind "Right" "import Library\n" []
+    for imports in ["import Left\nimport Right\n", "import Right\nimport Left\n"] do
+      check (← prepare profile "Entry"
+        [input .lean "Entry" (imports ++ legacyClientBody), right, left, library])
+        ["Library", "Left", "Right", "Entry"]
+    let unreachable := input .lean "Unreachable"
+      "module\npublic def coreLegacyUnused (A : Type) (x : A) : A := coreLegacyMissing A x\n"
+    check (← prepare profile "Entry" [entry, unreachable, library]) ["Library", "Entry"]
+    refuse profile "Entry"
+      [input .lean "Entry" ("module\npublic import Library\npublic " ++
+        legacyRfl "coreLegacyModuleRfl" "coreLegacyDirect"), library]
+      true rflRefusal
+    refuse profile "Entry"
+      [input .lean "Entry" "module\npublic import Facade\npublic def coreLegacyHiddenTransitive (A : Type) (x : A) : A := coreLegacyDirect A x\n",
+       facade, library]
+      true "PSCV0-SCOPE: unknown name coreLegacyDirect"
+  IO.println "PSCV0_CORE_LEGACY_IMPORT: 11 positive projects, 10 owned refusals, independent canonical admission, ordinary/private body closure, genuine opacity, transitive imports, diamond deduplication and reachable isolation passed"
+
+
+private def checkLegacyLocalPrivate : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let cases : List (List (String × String) × String × String × Bool) := [
+    ([("private def coreLegacyType (A : Type) : Type := A\n",
+       "private function coreLegacyType(A: Type): Type := A\n"),
+      ("public def coreLegacySignature (A : Type) (x : coreLegacyType A) (y : A) : A := y\n",
+       "function coreLegacySignature(A: Type, x: coreLegacyType(A), y: A): A := y\n")],
+     "coreLegacySignature", "coreLegacyType", false),
+    ([("private def coreLegacyHelper (A : Type) (x : A) : A := x\n",
+       "private function coreLegacyHelper(A: Type, x: A): A := x\n"),
+      ("public abbrev coreLegacyExposed (A : Type) (x : A) : A := coreLegacyHelper A x\n",
+       "abbrev coreLegacyExposed(A: Type, x: A): A := coreLegacyHelper(A, x)\n")],
+     "coreLegacyExposed", "coreLegacyHelper", true)]
+  for (pieces, name, hidden, exposed) in cases do
+    let body := pieces.foldl (fun acc piece => acc ++ piece.fst) ""
+    let output ← prepare profile "Entry" [input .lean "Entry" body]
+    let _ ← admit seed output.admissions
+    let hiddenName := psNameAppendStr
+      (psNameAppendStr (psRootName "$psc0Private") "Entry") hidden
+    let name := psRootName name
+    ensure (sameNames (output.prepared.declarations.map psDeclarationName) [hiddenName, name] &&
+        sameNames output.mainNames [name])
+      "legacy local-private checked ownership changed"
+    let some declaration := output.prepared.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) name)
+      | fail "legacy local-private declaration missing"
+    let dependencies ←
+      if exposed then
+        match declaration with
+        | .definitionDecl _ _ _ value => pure (psPscv0ExprConstants value)
+        | _ => fail "legacy private-dependent abbreviation changed kind"
+      else
+        pure (psPscv0ExprConstants (psDeclarationType declaration))
+    ensure (dependencies.any (psNameEq hiddenName))
+      "legacy local-private dependency was erased from the checked declaration"
+    let some receipt := output.moduleProfiles.head?
+      | fail "legacy local-private receipt missing"
+    ensure (sameNames receipt.privateNames [hiddenName] &&
+        sameNames (receipt.interface.declarations.map psDeclarationName) [name])
+      "legacy local-private public identity boundary changed"
+    if exposed then
+      ensure (sameNames receipt.exposedNames [name])
+        "legacy abbreviation exposure marker disappeared"
+    for kind in [PsCompilerSourceKind.lean, .proofScript] do
+      refuse profile "Entry" [importVisibilityInput kind "Entry" "" pieces] true
+        ((if exposed then "PSCV0-MODULE: exposed body references private name in "
+          else "PSCV0-MODULE: public signature references private name in ") ++ psNameToString name)
+  IO.println "PSCV0_CORE_LEGACY_PRIVATE: two admitted local-private type/body projects, four module-mode refusals and retained checked dependencies passed"
+
+private def legacyMetadataPieces : List (String × String) := [
+  ("public class CoreLegacyEcho (A : Type) where\n  run : A -> A\n",
+   "class CoreLegacyEcho(A: Type) where { run: A -> A }\n"),
+  ("@[default_instance 700] private instance coreLegacyEcho {A : Type} : CoreLegacyEcho A where\n  run := fun (x : A) => x\n",
+   "@[default_instance 700] private instance coreLegacyEcho{A: Type}: CoreLegacyEcho A where { run := fun (x: A) => x }\n"),
+  ("public abbrev coreLegacyEchoAlias (A : Type) : Type := A\n",
+   "abbrev coreLegacyEchoAlias(A: Type): Type := A\n")]
+
+private def legacyMetadataEntry (priority : Nat) (entry : PsInstanceEntry) : Bool :=
+  let hidden := psNameAppendStr
+    (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyEcho"
+  entry.priority == priority && entry.levelParams.isEmpty &&
+    (match entry.value with
+     | .constE name levels => psNameEq name hidden && levels.isEmpty
+     | _ => false) &&
+    (match entry.className with
+     | some name => psNameEq name (psRootName "CoreLegacyEcho")
+     | none => false)
+
+private def checkLegacyMetadata : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := importVisibilityInput kind "Library" "" legacyMetadataPieces
+    let client := input .lean "Entry"
+      "import Library\ntheorem coreLegacyEchoRfl (A : Type) (x : A) : CoreLegacyEcho.run (A := A) x = x := by rfl\n"
+    let output ← prepare profile "Entry" [client, library]
+    let _ ← admit seed output.admissions
+    paired := paired ++ [output.admissions]
+    let some receipt := output.moduleProfiles.find? (fun item => item.name == "Library")
+      | fail "legacy metadata public receipt missing"
+    ensure (receipt.interface.instances.isEmpty && receipt.interface.defaults.isEmpty)
+      "private legacy dictionary leaked into the module public metadata"
+    -- Inspect the same real source metadata, without adding anything to the checked seed.
+    let parsed ← match psCompilerParsePscv0Program kind library.source with
+      | .ok parsed => pure parsed
+      | .error message => fail message
+    let elaborated ← match psElabProgramWithOrigins profile.baseEnvironment parsed "Library" with
+      | .ok elaborated => pure elaborated
+      | .error error => fail (psCompilerPscv0ElabError error)
+    let view := psPscv0DeclarationInterface elaborated.result.environment elaborated.result.declarations
+    let diamond := psPscv0InterfaceMerge view view
+    let imported ← match psPscv0InstallInterface profile.baseEnvironment diamond with
+      | .ok imported => pure imported
+      | .error message => fail message
+    let imported ← match psPscv0InstallInterface imported diamond with
+      | .ok imported => pure imported
+      | .error message => fail message
+    ensure (sameNames imported.classes [psRootName "CoreLegacyEcho"] &&
+        imported.classParameters.length == 1 &&
+        imported.classParameters.all (fun item =>
+          psNameEq item.fst (psRootName "CoreLegacyEcho") &&
+          item.snd.outputs.isEmpty && item.snd.outputLevels.isEmpty))
+      "legacy class registration or parameter metadata changed"
+    ensure (imported.instances.entries.length == 1 &&
+        imported.instances.entries.all (legacyMetadataEntry 1000) &&
+        imported.instances.defaults.length == 1 &&
+        imported.instances.defaults.all (legacyMetadataEntry 700))
+      "legacy diamond changed ordinary/default instance identity, priority or multiplicity"
+    let hidden := psNameAppendStr
+      (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyEcho"
+    ensure ((match psEnvironmentReducibility imported hidden with
+        | .instanceReducible => true | _ => false) &&
+      (match psEnvironmentReducibility imported (psRootName "coreLegacyEchoAlias") with
+        | .reducible => true | _ => false) &&
+      imported.declarations.length == profile.baseEnvironment.declarations.length + view.declarations.length)
+      "legacy installation lost reducibility or duplicated checked declarations"
+    refuse profile "Entry"
+      [input .lean "Entry"
+        "import Library\ndef coreLegacyInstanceLeak (A : Type) : CoreLegacyEcho A := coreLegacyEcho\n",
+       library] true "PSCV0-SCOPE: unknown name coreLegacyEcho"
+  let [leanAdmissions, psAdmissions] := paired
+    | fail "legacy metadata source pair missing"
+  ensure (leanAdmissions == psAdmissions) "legacy metadata paired admissions differ"
+  IO.println "PSCV0_CORE_LEGACY_METADATA: two paired admitted projects, two private-instance name refusals, actual legacy synthesis, ordinary/default registry identity and priority, reducibility and diamond installation passed"
+
+
+private def rootedScopeSource (kind : PsCompilerSourceKind) : String :=
+  match kind with
+  | .lean =>
+      "module\npublic section\nnamespace Outer\nnamespace _root_.Inner\n" ++
+      "def nestedIdentity (A : Type) (x : A) : A := x\n" ++
+      "end _root_.Inner\nend Outer\nnamespace _root_.Inner\n" ++
+      "def directIdentity (A : Type) (x : A) : A := x\n" ++
+      "abbrev exposedIdentity (A : Type) (x : A) : A := directIdentity A x\n" ++
+      "def inferredIdentity (A : Type) (x : A) := x\n" ++
+      "def whereIdentity (A : Type) (x : A) : A := whereIdentity.helper x\n" ++
+      "where\n  helper (y : A) : A := y\n" ++
+      "mutual\n" ++
+      "  def mutualFirst (A : Type) (x : A) : A := mutualSecond A x\n" ++
+      "  def mutualSecond (A : Type) (x : A) : A := x\nend\n" ++
+      "private def privateIdentity (A : Type) (x : A) : A := x\n" ++
+      "def privateBridge (A : Type) (x : A) : A := privateIdentity A x\n" ++
+      "structure RootBox (A : Type) where\n  value : A\n" ++
+      "def _root_.absoluteIdentity (A : Type) (x : A) : A := x\n" ++
+      "end _root_.Inner\n" ++
+      "def rootedClient (A : Type) (x : A) : A := _root_._root_.Inner.directIdentity A x\n" ++
+      "def nestedClient (A : Type) (x : A) : A := Outer._root_.Inner.nestedIdentity A x\nend\n"
+  | .proofScript =>
+      "section\nnamespace Outer\nnamespace _root_.Inner\n" ++
+      "function nestedIdentity(A: Type, x: A): A := x\n" ++
+      "end _root_.Inner\nend Outer\nnamespace _root_.Inner\n" ++
+      "function directIdentity(A: Type, x: A): A := x\n" ++
+      "abbrev exposedIdentity(A: Type, x: A): A := directIdentity(A, x)\n" ++
+      "function inferredIdentity(A: Type, x: A) := x\n" ++
+      "function whereIdentity(A: Type, x: A): A := whereIdentity.helper(x)\n" ++
+      "where {\n  def helper(y: A): A := y\n}\n" ++
+      "mutual\n" ++
+      "  function mutualFirst(A: Type, x: A): A := mutualSecond(A, x)\n" ++
+      "  function mutualSecond(A: Type, x: A): A := x\nend\n" ++
+      "private function privateIdentity(A: Type, x: A): A := x\n" ++
+      "function privateBridge(A: Type, x: A): A := privateIdentity(A, x)\n" ++
+      "structure RootBox(A: Type) where { value: A }\n" ++
+      "function _root_.absoluteIdentity(A: Type, x: A): A := x\n" ++
+      "end _root_.Inner\n" ++
+      "function rootedClient(A: Type, x: A): A := _root_._root_.Inner.directIdentity(A, x)\n" ++
+      "function nestedClient(A: Type, x: A): A := Outer._root_.Inner.nestedIdentity(A, x)\nend\n"
+
+private def checkRootedScopes : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let literalRoot := psNameAppendStr (psRootName "_root_") "Inner"
+  let nestedRoot := psNameAppendStr (psNameAppendStr (psRootName "Outer") "_root_") "Inner"
+  let sourceNames := [psNameAppendStr nestedRoot "nestedIdentity"] ++
+    (["directIdentity", "exposedIdentity", "inferredIdentity", "whereIdentity",
+      "mutualFirst", "mutualSecond", "privateBridge", "RootBox"].map
+      (psNameAppendStr literalRoot)) ++
+    (["absoluteIdentity", "rootedClient", "nestedClient"].map psRootName)
+  let box := psNameAppendStr literalRoot "RootBox"
+  let hidden := psNameAppendStr
+    (psNameAppendStr (psNameAppendStr (psNameAppendStr
+      (psRootName "$psc0Private") "Entry") "_root_") "Inner") "privateIdentity"
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let output ← prepare profile "Entry" [input kind "Entry" (rootedScopeSource kind)]
+    let _ ← admit seed output.admissions
+    let interface ← importVisibilityInterface output
+    let publicNames := interface.declarations.map psDeclarationName
+    ensure (sourceNames.all (fun name =>
+        publicNames.any (psNameEq name) && output.mainNames.any (psNameEq name)))
+      "literal root namespace lost a public source declaration"
+    let find := fun name =>
+      output.prepared.declarations.find? (fun declaration => psNameEq (psDeclarationName declaration) name)
+    let some (.inductiveDecl info) := find box | fail "literal root structure missing"
+    ensure (info.isStructure && sameNames info.constructors [psNameAppendStr box "mk"])
+      "literal root structure constructor identity changed"
+    let some (.constructorDecl constructor) := find (psNameAppendStr box "mk")
+      | fail "literal root constructor missing"
+    let some (.recursorDecl recursor) := find (psNameAppendStr box "rec")
+      | fail "literal root recursor missing"
+    ensure (psNameEq constructor.inductiveName box &&
+        sameNames recursor.inductiveNames [box] &&
+        ["mk", "rec", "value"].all (fun suffix =>
+          publicNames.any (psNameEq (psNameAppendStr box suffix))))
+      "literal root family or projection owner changed"
+    let some (.definitionDecl _ _ projectionType _) := find (psNameAppendStr box "value")
+      | fail "literal root projection missing"
+    ensure ((psPscv0ExprConstants projectionType).any (psNameEq box))
+      "literal root projection lost its actual structure dependency"
+    let some (.definitionDecl ..) := find hidden | fail "literal root private helper missing"
+    let some receipt := output.moduleProfiles.head? | fail "literal root receipt missing"
+    ensure (receipt.privateNames.any (psNameEq hidden) &&
+        receipt.privateNames.all (fun name => !publicNames.any (psNameEq name)))
+      "literal root private implementation entered the public interface"
+    let whereName := psNameAppendStr literalRoot "whereIdentity"
+    let whereHelper := psNameAppendStr
+      (psSyntaxNameAppendSegments ["$psc0Private", "Entry", "_root_", "Inner", "whereIdentity"]
+        .anonymous) "helper"
+    let some (.definitionDecl ..) := find whereHelper
+      | fail "literal root where helper lost its private checked name"
+    let some (.definitionDecl _ _ _ whereBody) := find whereName
+      | fail "literal root where parent missing"
+    ensure (receipt.privateNames.any (psNameEq whereHelper) &&
+        !publicNames.any (psNameEq whereHelper) &&
+        (psPscv0ExprConstants whereBody).any (psNameEq whereHelper))
+      "literal root where helper privacy or dependency changed"
+    let some origin := output.origins.find? (fun item => item.moduleName == "Entry")
+      | fail "literal root module provenance missing"
+    let helpers := origin.batches.flatMap (·.localDefinitions)
+    let some helperOrigin := helpers.find? (fun item => psNameEq item.name whereHelper)
+      | fail "literal root where helper provenance missing"
+    ensure (helperOrigin.declarations.any (psNameEq whereHelper) &&
+        helperOrigin.declarations.all (fun name =>
+          receipt.privateNames.any (psNameEq name) &&
+          !publicNames.any (psNameEq name)))
+      "literal root where helper provenance lost private ownership"
+    let some (.definitionDecl _ _ _ bridge) := find (psNameAppendStr literalRoot "privateBridge")
+      | fail "literal root private bridge missing"
+    ensure ((psPscv0ExprConstants bridge).any (psNameEq hidden))
+      "literal root private alias resolved to another namespace"
+    let some (.definitionDecl _ _ _ client) := find (psRootName "rootedClient")
+      | fail "literal root client missing"
+    ensure ((psPscv0ExprConstants client).any
+        (psNameEq (psNameAppendStr literalRoot "directIdentity")) &&
+      !(output.prepared.declarations.any (fun declaration =>
+        psNameEq (psDeclarationName declaration)
+          (psNameAppendStr (psRootName "Inner") "directIdentity"))))
+      "absolute reference confused a literal root namespace with a root marker"
+    paired := paired ++ [output.admissions]
+  let [leanAdmissions, psAdmissions] := paired | fail "literal root source pair missing"
+  ensure (leanAdmissions == psAdmissions) "literal root paired canonical admissions differ"
+  IO.println "PSCV0_CORE_ROOTED_SCOPES: two paired admitted projects, literal root namespaces, absolute declarations/references, direct/registered/inferred/where/mutual names, family ownership, private helper provenance and private aliases passed"
+
+private def legacyWherePieces : List (String × String) := [
+  ("public def coreLegacyWhere (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := y\n",
+   "function coreLegacyWhere(A: Type, x: A): A := helper(x)\nwhere {\n  def helper(y: A): A := y\n}\n"),
+  ("public def coreLegacyWhereLocal (A : Type) (x : A) : A := coreLegacyWhere.helper A x\n",
+   "function coreLegacyWhereLocal(A: Type, x: A): A := coreLegacyWhere.helper(A, x)\n")]
+
+private def legacyWhereClientBody : String :=
+  legacyRfl "coreLegacyWhereRfl" "coreLegacyWhere" ++
+  legacyRfl "coreLegacyWhereLocalRfl" "coreLegacyWhereLocal"
+
+private def checkLegacyWhere : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let wrapperName := psRootName "coreLegacyWhere"
+  let localName := psRootName "coreLegacyWhereLocal"
+  let sourceHelper := psNameAppendStr wrapperName "helper"
+  let wrapperEq := psNameAppendStr wrapperName "eq_def"
+  let entryNames := [psRootName "coreLegacyWhereRfl", psRootName "coreLegacyWhereLocalRfl"]
+  let check := fun (output : PsCompilerEngineProjectOutput) (isModule : Bool) => do
+    let _ ← admit seed output.admissions
+    let helperName := if isModule then
+      psNameAppendStr (psNameAppendStr
+        (psNameAppendStr (psRootName "$psc0Private") "Library") "coreLegacyWhere") "helper"
+      else sourceHelper
+    let helperEq := psNameAppendStr helperName "eq_def"
+    let expectedEntries := entryNames ++
+      (if isModule then [] else [psRootName "coreLegacyWhereHelperRfl"])
+    let expectedProvider := [helperName, helperEq, wrapperName, wrapperEq, localName]
+    ensure (sameNames (output.prepared.declarations.map psDeclarationName)
+        (expectedProvider ++ expectedEntries) &&
+        sameNames output.libraryNames expectedProvider &&
+        sameNames output.mainNames expectedEntries)
+      "where helper checked closure or entry ownership changed"
+    let some library := output.moduleProfiles.find? (fun item => item.name == "Library")
+      | fail "where helper library receipt missing"
+    let hidden := if isModule then [wrapperEq, helperName, helperEq] else [wrapperEq, helperEq]
+    ensure (library.privateNames.length == hidden.length &&
+        hidden.all (fun name => library.privateNames.any (psNameEq name)))
+      "where helper private ownership roster changed"
+    let publicNames := (if isModule then [] else [sourceHelper]) ++ [wrapperName, localName]
+    ensure (sameNames (library.interface.declarations.map psDeclarationName) publicNames)
+      "where helper public interface changed"
+    let some (.definitionDecl ..) := output.prepared.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) helperName)
+      | fail "where helper lost its checked definition"
+    for name in [wrapperEq, helperEq] do
+      let some (.theoremDecl ..) := output.prepared.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail "where helper equation lost its checked theorem"
+    for name in ["coreLegacyWhere", "coreLegacyWhereLocal"] do
+      let .definitionDecl _ _ _ body ← importVisibilityDeclaration output name
+        | fail "where wrapper/local caller changed declaration kind"
+      ensure ((psPscv0ExprConstants body).any (psNameEq helperName))
+        "where wrapper/local caller lost the real helper dependency"
+    let some origin := output.origins.find? (fun item => item.moduleName == "Library")
+      | fail "where helper module provenance missing"
+    let some batch := origin.batches.head?
+      | fail "where helper source batch missing"
+    let [helperOrigin] := batch.localDefinitions
+      | fail "where helper source ownership count changed"
+    ensure (psNameEq helperOrigin.name helperName &&
+        sameNames helperOrigin.declarations [helperName, helperEq])
+      "where helper provenance differs from checked ownership"
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := importVisibilityInput kind "Library" "" legacyWherePieces
+    let output ← prepare profile "Entry"
+      [input .lean "Entry" ("import Library\n" ++ legacyWhereClientBody), library]
+    check output true
+    paired := paired ++ [output.admissions]
+    for imports in ["import Library\n", "module\npublic import Library\n"] do
+      refuse profile "Entry"
+        [input .lean "Entry" (imports ++
+          "public def coreLegacyWhereLeak (A : Type) (x : A) : A := coreLegacyWhere.helper A x\n"), library]
+        true "PSCV0-UNKNOWN-NAME: coreLegacyWhere.helper"
+    refuse profile "Entry"
+      [input .lean "Entry" ("module\npublic import Library\npublic " ++
+        legacyRfl "coreLegacyWhereModuleRfl" "coreLegacyWhere"), library]
+      true "PSCV0-PROOF: rfl requires definitionally equal sides"
+  let [leanAdmissions, psAdmissions] := paired
+    | fail "where helper paired source count changed"
+  ensure (leanAdmissions == psAdmissions) "where helper paired admissions differ"
+  let legacyBody := legacyWherePieces.foldl (fun acc piece => acc ++ piece.fst) ""
+  let legacy ← prepare profile "Entry"
+    [input .lean "Entry" ("import Library\n" ++ legacyWhereClientBody ++
+       legacyRfl "coreLegacyWhereHelperRfl" "coreLegacyWhere.helper"),
+     input .lean "Library" legacyBody]
+  check legacy false
+  IO.println "PSCV0_CORE_LEGACY_WHERE: three admitted projects, six owned refusals, paired canonical admission, private module helper closure, provider-local alias retention, legacy public helper and checked provenance passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -914,4 +1462,10 @@ def main : IO Unit := do
   checkModuleKinds seed profile
   checkImportedBodies
   checkImportVisibility
+  checkComponentScopes
+  checkRootedScopes
+  checkLegacyImports
+  checkLegacyLocalPrivate
+  checkLegacyMetadata
+  checkLegacyWhere
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

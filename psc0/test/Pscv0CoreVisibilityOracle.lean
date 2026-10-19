@@ -59,6 +59,96 @@ end
 
 def afterAnonymous (A : Type) (x : A) : A := afterNestedPublic A x
 
+
+namespace CoreScopeDotted.A.B
+
+variable (T : Type)
+public def beforeEnd (x : T) : T := x
+
+end B
+
+variable (T : Type)
+public def afterOne (x : T) : T := B.beforeEnd T x
+
+end CoreScopeDotted.A
+
+namespace CoreScopeSeparate
+namespace Inner
+
+public def value (T : Type) (x : T) : T := x
+
+end CoreScopeSeparate.Inner
+
+namespace CoreScopeMixed
+section Inner
+
+public def value (T : Type) (x : T) : T := x
+
+end CoreScopeMixed.Inner
+
+public section CoreScopeSection.A.B
+
+def coreScopeSectionBefore (T : Type) (x : T) : T := x
+
+end B
+
+def coreScopeSectionPartial (T : Type) (x : T) : T :=
+  coreScopeSectionBefore T x
+
+end CoreScopeSection.A
+
+def coreScopeSectionAfter (T : Type) (x : T) : T :=
+  coreScopeSectionPartial T x
+
+namespace CoreScopeRootMarker
+namespace _root_.Inner
+
+public def value (T : Type) (x : T) : T := x
+
+end _root_.Inner
+end CoreScopeRootMarker
+
+
+public section
+
+namespace Outer
+namespace _root_.Inner
+
+def nestedIdentity (A : Type) (x : A) : A := x
+
+end _root_.Inner
+end Outer
+
+namespace _root_.Inner
+
+def directIdentity (A : Type) (x : A) : A := x
+abbrev exposedIdentity (A : Type) (x : A) : A := directIdentity A x
+def inferredIdentity (A : Type) (x : A) := x
+
+def whereIdentity (A : Type) (x : A) : A := whereIdentity.helper x
+where
+  helper (y : A) : A := y
+
+mutual
+  def mutualFirst (A : Type) (x : A) : A := mutualSecond A x
+  def mutualSecond (A : Type) (x : A) : A := x
+end
+
+private def privateIdentity (A : Type) (x : A) : A := x
+def privateBridge (A : Type) (x : A) : A := privateIdentity A x
+
+structure RootBox (A : Type) where
+  value : A
+
+def _root_.absoluteIdentity (A : Type) (x : A) : A := x
+
+end _root_.Inner
+
+def rootedClient (A : Type) (x : A) : A := _root_._root_.Inner.directIdentity A x
+def nestedClient (A : Type) (x : A) : A := Outer._root_.Inner.nestedIdentity A x
+
+end
+
 -- Pinned native Lean closes this section and namespace at EOF.
 public section
 namespace AtEof
@@ -83,11 +173,46 @@ run_cmd do
      (``nestedPublic, false),
      (``afterNestedPublic, false),
      (``afterAnonymous, true),
-     (``AtEof.value, false)]
+     (``AtEof.value, false),
+     (``CoreScopeDotted.A.B.beforeEnd, false),
+     (``CoreScopeDotted.A.afterOne, false),
+     (``CoreScopeSeparate.Inner.value, false),
+     (``CoreScopeMixed.value, false),
+     (``coreScopeSectionBefore, false),
+     (``coreScopeSectionPartial, false),
+     (``coreScopeSectionAfter, true),
+     (``CoreScopeRootMarker._root_.Inner.value, false)]
   for (name, expectedPrivate) in observations do
     unless Lean.isPrivateName name == expectedPrivate do
       throwError
         "PSCV0-CORE-VISIBILITY-ORACLE: private classification mismatch for {name}"
+
+  let literalRoot : Lean.Name := .str (.str .anonymous "_root_") "Inner"
+  let nestedRoot : Lean.Name := .str (.str (.str .anonymous "Outer") "_root_") "Inner"
+  let rootBox : Lean.Name := .str literalRoot "RootBox"
+  let rootedObservations : List (Lean.Name × Lean.Name × Bool) :=
+    [(``_root_.Outer._root_.Inner.nestedIdentity, .str nestedRoot "nestedIdentity", false),
+     (``_root_._root_.Inner.directIdentity, .str literalRoot "directIdentity", false),
+     (``_root_._root_.Inner.exposedIdentity, .str literalRoot "exposedIdentity", false),
+     (``_root_._root_.Inner.inferredIdentity, .str literalRoot "inferredIdentity", false),
+     (``_root_._root_.Inner.whereIdentity, .str literalRoot "whereIdentity", false),
+     (``_root_._root_.Inner.mutualFirst, .str literalRoot "mutualFirst", false),
+     (``_root_._root_.Inner.mutualSecond, .str literalRoot "mutualSecond", false),
+     (``_root_._root_.Inner.privateIdentity, .str literalRoot "privateIdentity", true),
+     (``_root_._root_.Inner.privateBridge, .str literalRoot "privateBridge", false),
+     (``_root_._root_.Inner.RootBox, rootBox, false),
+     (``_root_._root_.Inner.RootBox.mk, .str rootBox "mk", false),
+     (``_root_._root_.Inner.RootBox.value, .str rootBox "value", false),
+     (``_root_.absoluteIdentity, .str .anonymous "absoluteIdentity", false),
+     (``_root_.rootedClient, .str .anonymous "rootedClient", false),
+     (``_root_.nestedClient, .str .anonymous "nestedClient", false)]
+  for (actual, expected, expectedPrivate) in rootedObservations do
+    unless Lean.privateToUserName actual == expected do
+      throwError
+        "PSCV0-CORE-VISIBILITY-ORACLE: rooted name mismatch: actual {actual}, expected {expected}"
+    unless Lean.isPrivateName actual == expectedPrivate do
+      throwError
+        "PSCV0-CORE-VISIBILITY-ORACLE: rooted private classification mismatch for {actual}"
   let env ← Lean.getEnv
   for text in
       ["private section", "public namespace Rejected", "private namespace Rejected"] do
@@ -97,4 +222,4 @@ run_cmd do
       throwError
         "PSCV0-CORE-VISIBILITY-ORACLE: unsupported native scope parsed: {text}"
   Lean.logInfo
-    "PSCV0_CORE_VISIBILITY_NATIVE: 17 native declaration classifications and three unsupported scope syntax refusals passed"
+    "PSCV0_CORE_VISIBILITY_NATIVE: 25 native declaration classifications, 15 rooted name/classification checks, and three unsupported scope syntax refusals passed"

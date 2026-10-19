@@ -15,6 +15,7 @@ structure PsCommandState where
   privateNames : List PsName := []
   exposedNames : List PsName := []
   moduleIdentity : String := ""
+  isModule : Bool := false
   privateAliases : List (List String × List String) := []
 
 def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration) :
@@ -22,8 +23,8 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   let sourceName := (psElabOriginSource source).fst
   let sourceQualified := psScopeQualified resolver.scope sourceName
   let resolved := (psScopePrivateRewrite resolver sourceQualified.segments).getD sourceQualified.segments
-  let name := { sourceQualified with segments := resolved }
-  let resolver := { resolver with selfName := some name.segments }
+  let name := psScopeCanonicalNameSyntax { sourceQualified with segments := resolved }
+  let resolver := { resolver with selfName := some resolved }
   let visit := psScopeTerm 4096 resolver
   match source with
   | .noncomputableDefinition .. =>
@@ -164,7 +165,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let names := qualified.map (·.segments)
   for sourceName in qualified do
     if (names.filter (· == sourceName.segments)).length != 1 then
-      let some name := psSyntaxNameToName sourceName | throw .emptyName
+      let some name := psSyntaxNameToName (psScopeCanonicalNameSyntax sourceName) | throw .emptyName
       throw (.duplicateDeclaration name)
   let aliases := (members.zip qualified).foldl (fun aliases entry =>
     if entry.fst.isPrivate && !state.moduleIdentity.isEmpty then
@@ -186,10 +187,14 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let mainSources := members.map (fun member => PsElabPreDefinitionSource.declaration member.declaration)
   psElabPreDefinitionCheckMainModifiers mainSources
   let inheritedPartial := psElabPreDefinitionHasPartialMain mainSources
+  let privateAuxiliaryPrefix :=
+    if state.isModule && !state.moduleIdentity.isEmpty then
+      ["$psc0Private"] ++ state.moduleIdentity.splitOn "."
+    else []
   let scopedMembers ← (members.zip peerAliases).mapM fun (member, alias) =>
     psScopePreDefinition resolver member
       (PsSyntaxName.mk alias.snd (psElabOriginSource member.declaration).snd)
-      inheritedPartial
+      inheritedPartial privateAuxiliaryPrefix
   -- Pinned definition bodies see the complete checked section telescope.
   -- Hints cannot enable a local dictionary by contributing source-name keys.
   -- Where's typed capture closure retains only actual type/body dependencies.
@@ -241,12 +246,21 @@ def psElabCommandPreDefinitions (state : PsCommandState)
   let namespaces := result.batch.declarations.foldl (fun acc declaration =>
     ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc)
     state.namespaces
+  -- Helpers of an ordinary module definition have private checked identities.
+  -- Their source aliases remain usable by later commands in this provider only.
+  let privateAliases := (qualified.zip scopedMembers).foldl
+    (fun (aliases : List (List String × List String)) (sourceName, member) =>
+      member.locals.foldl (fun aliases local =>
+        if local.isPrivate then
+          (sourceName.segments ++ local.source.name.segments,
+            (psNameToString local.name).splitOn ".") :: aliases
+        else aliases) aliases) aliases
   return { state with
     environment, namespaces
     originsRev := origins.reverse ++ state.originsRev
     declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
     privateNames := privateNames ++ state.privateNames
-    privateAliases := aliases }
+    privateAliases }
 
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
     (registration : Option PsSyntaxRegistration) (isPrivate : Bool := false) :
@@ -373,7 +387,7 @@ def psElabCommandPartialMutual (state : PsCommandState) (members : List PsSyntax
   let names := qualified.map (·.segments)
   for sourceName in qualified do
     if (names.filter (· == sourceName.segments)).length != 1 then
-      let some name := psSyntaxNameToName sourceName | throw .emptyName
+      let some name := psSyntaxNameToName (psScopeCanonicalNameSyntax sourceName) | throw .emptyName
       throw (.duplicateDeclaration name)
   let aliases := (members.zip qualified).foldl (fun aliases entry =>
     if entry.fst.isPrivate && !state.moduleIdentity.isEmpty then
@@ -487,20 +501,39 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
       return levels ++ [key]) state.scope.levelNames
     return { state with scope := { state.scope with levelNames } }
   | .namespaceCmd name _ =>
-    let qualified := psScopeQualified state.scope name
-    if qualified.segments.isEmpty then throw .emptyName
-    return { state with
-      frames := { label := some name.segments, saved := state.scope } :: state.frames
-      scope := { state.scope with namePrefix := qualified.segments }
-      namespaces := psScopeRemember state.namespaces qualified.segments }
+    if name.segments.isEmpty then throw .emptyName
+    return name.segments.foldl (fun (state : PsCommandState) component =>
+      let namePrefix := state.scope.namePrefix ++ [component]
+      { state with
+        frames := { label := some [component], saved := state.scope } :: state.frames
+        scope := { state.scope with namePrefix }
+        namespaces := psScopeRemember state.namespaces namePrefix }) state
   | .sectionCmd name _ =>
-    return { state with
-      frames := { label := name.map (·.segments), saved := state.scope } :: state.frames }
+    match name with
+    | none =>
+      return { state with
+        frames := { label := none, saved := state.scope } :: state.frames }
+    | some name =>
+      if name.segments.isEmpty then throw .emptyName
+      return name.segments.foldl (fun (state : PsCommandState) component =>
+        { state with
+          frames := { label := some [component], saved := state.scope } :: state.frames }) state
   | .endCmd name _ =>
     let frame :: rest := state.frames | throw (.scope "end without an open scope")
-    if name.isSome && name.map (·.segments) != frame.label then
-      throw (.scope "end name does not match the innermost scope")
-    return { state with scope := frame.saved, frames := rest }
+    match name with
+    | none =>
+      if frame.label.isSome then
+        throw (.scope "end requires the innermost scope name")
+      return { state with scope := frame.saved, frames := rest }
+    | some name =>
+      if name.segments.isEmpty then throw .emptyName
+      if name.segments.length > state.frames.length then
+        throw (.scope "end name contains too many components")
+      name.segments.reverse.foldlM (fun (state : PsCommandState) component => do
+        let frame :: rest := state.frames | throw (.scope "end without an open scope")
+        if frame.label != some [component] then
+          throw (.scope "end name does not match the innermost scope")
+        return { state with scope := frame.saved, frames := rest }) state
   | .openCmd names _ =>
     let opened ← names.mapM (psScopeOpen state)
     return { state with scope := { state.scope with opened := opened ++ state.scope.opened } }
@@ -524,7 +557,7 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   let namespaces := environment.declarations.foldl (fun acc decl =>
     ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) []
   let state ← program.commands.foldlM psElabCommand {
-    environment, namespaces, moduleIdentity }
+    environment, namespaces, moduleIdentity, isModule := program.isModule }
   -- Pinned Lean closes remaining namespace/section scopes at end of file.
   -- Only declarations and their metadata leave this program owner; scope frames
   -- and local resolution settings cannot escape into the next module.

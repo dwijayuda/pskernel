@@ -100,9 +100,10 @@ def psPscv0ProjectReachable (fuel : Nat) (modules : List PsPscv0ParsedModule)
         let imports := selected.program.imports.map psPscv0ImportKey
         psPscv0ProjectReachable fuel modules (imports ++ rest) (current :: visited)
 
--- The imported view carries checked declaration identities and typeclass
--- registrations, but not definitional bodies. Ordinary public names are
--- externally opaque in Lean 4.35.0 module-style semantics by default.
+-- Import views carry declaration identities and elaboration metadata. Module
+-- clients receive the public view, where ordinary definitions are opaque.
+-- Legacy clients retain the original declaration kinds and implementation
+-- closure; this does not export the provider's source-level private aliases.
 structure PsPscv0ModuleInterface where
   declarations : List PsDeclaration := []
   classes : List PsName := []
@@ -146,14 +147,12 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
     if names.any (psNameEq name) then names else names ++ [name]) left.noncomputableNames
   { declarations, classes, classParameters, instances, defaults, reducibility, noncomputableNames }
 
--- Public identity is selected from source-command ownership, rather than from
--- the final runtime IR (which also contains private and generated workers).
-def psPscv0OwnInterface (environment : PsEnvironment)
-    (own : List PsDeclaration) (hidden exposed : List PsName) :
-    PsPscv0ModuleInterface :=
-  let publicDecls := own.filter (fun decl =>
-    !hidden.any (psNameEq (psDeclarationName decl)))
-  let names := publicDecls.map psDeclarationName
+-- Metadata follows the selected original elaboration declarations, before
+-- preparation or runtime lowering. This shared constructor preserves their
+-- kinds; the module-style public owner applies opacity separately.
+def psPscv0DeclarationInterface (environment : PsEnvironment)
+    (declarations : List PsDeclaration) : PsPscv0ModuleInterface :=
+  let names := declarations.map psDeclarationName
   let owned := fun name => names.any (psNameEq name)
   let classes := environment.classes.filter owned
   let classParameters := environment.classParameters.filter (fun item => owned item.fst)
@@ -163,12 +162,21 @@ def psPscv0OwnInterface (environment : PsEnvironment)
     | _ => false
   let instances := environment.instances.entries.filter visible
   let defaults := environment.instances.defaults.filter visible
-  { declarations := publicDecls.map (psPscv0ImportedDeclaration exposed),
-    classes, classParameters, instances, defaults,
+  { declarations, classes, classParameters, instances, defaults,
     reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name))
     noncomputableNames := names.filter (psEnvironmentIsNoncomputable environment) }
 
--- The same instance may reach a client through two public-import paths.
+-- Public identity is selected from source-command ownership, rather than from
+-- the final runtime IR (which also contains private and generated workers).
+def psPscv0OwnInterface (environment : PsEnvironment)
+    (own : List PsDeclaration) (hidden exposed : List PsName) :
+    PsPscv0ModuleInterface :=
+  let publicDecls := own.filter (fun decl =>
+    !hidden.any (psNameEq (psDeclarationName decl)))
+  psPscv0DeclarationInterface environment
+    (publicDecls.map (psPscv0ImportedDeclaration exposed))
+
+-- The same instance may reach a client through two import paths.
 -- Register it exactly once, without changing the relative instance priorities.
 def psPscv0InstallInterface (environment : PsEnvironment)
     (view : PsPscv0ModuleInterface) : Except String PsEnvironment := do
@@ -219,6 +227,7 @@ def psPscv0GeneratedPrivateNames (origins : List PsElabBatchOrigin) : List PsNam
 structure PsPscv0BuiltModule where
   name : String
   interface : PsPscv0ModuleInterface
+  legacyInterface : PsPscv0ModuleInterface
   ownNames : List PsName
 
 structure PsPscv0ProjectOrigin where
@@ -262,8 +271,9 @@ structure PsCompilerEngineProjectOutput where
   origins : List PsPscv0ProjectOrigin
   moduleProfiles : List PsPscv0ModuleProfile
 
--- The entry module sees only its declared imports. Public imports are added to
--- its exported interface, ordinary imports are deliberately not re-exported.
+-- Module clients see their declared imports through public interfaces. Legacy
+-- clients load each declared dependency's complete transitive elaboration view.
+-- Both routes retain the same explicit graph and final checked declaration set.
 def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
     (entryName : String) (sources : List PsPscv0ModuleSource) :
     Except String PsCompilerEngineProjectOutput := do
@@ -287,7 +297,9 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
       let some linked := built.find? (fun module =>
         module.name == psPscv0ImportKey imp)
         | throw "PSCV0-MODULE: unresolved topological dependency"
-      psPscv0InstallInterface env linked.interface) profile.baseEnvironment
+      psPscv0InstallInterface env
+        (if item.program.isModule then linked.interface else linked.legacyInterface))
+      profile.baseEnvironment
     let program := { item.program with imports := [] }
     let elaborated ← (psElabProgramWithOrigins importEnvironment program item.name).mapError
       psCompilerPscv0ElabError
@@ -311,11 +323,16 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
     let ownPublic := psPscv0OwnInterface elaborated.result.environment
       elaborated.result.declarations hidden elaborated.exposedNames
     let mut interface := ownPublic
+    let mut legacyInterface := psPscv0DeclarationInterface
+      elaborated.result.environment elaborated.result.declarations
     for imp in item.program.imports do
+      let some linked := built.find? (fun module =>
+        module.name == psPscv0ImportKey imp)
+        | throw "PSCV0-MODULE: missing interface dependency"
+      -- Private import edges and mangled implementation declarations belong to
+      -- the legacy closure too. Local source aliases never enter this view.
+      legacyInterface := psPscv0InterfaceMerge legacyInterface linked.legacyInterface
       if imp.isPublic then
-        let some linked := built.find? (fun module =>
-          module.name == psPscv0ImportKey imp)
-          | throw "PSCV0-MODULE: missing public dependency"
         interface := psPscv0InterfaceMerge interface linked.interface
     -- The exported view is also the availability boundary for public types
     -- and exposed definitions. A public-import path can make a declaration
@@ -326,7 +343,7 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
         publicNames.any (psNameEq name)
     for decl in ownPublic.declarations do
       let typeDependencies := psPscv0ExprConstants (psDeclarationType decl)
-      if typeDependencies.any
+      if item.program.isModule && typeDependencies.any
           (fun dependency => hidden.any (psNameEq dependency)) then
         throw ("PSCV0-MODULE: public signature references private name in " ++
           psNameToString (psDeclarationName decl))
@@ -340,7 +357,7 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
       -- dependencies are retained for checking, without becoming exposed bodies.
       if let some body := psDeclarationValue decl then
         let bodyDependencies := psPscv0ExprConstants body
-        if bodyDependencies.any
+        if item.program.isModule && bodyDependencies.any
             (fun dependency => hidden.any (psNameEq dependency)) then
           throw ("PSCV0-MODULE: exposed body references private name in " ++
             psNameToString (psDeclarationName decl))
@@ -352,7 +369,7 @@ def psCompilerEnginePreparePscv0Project (profile : PsCompilerProfileContext)
       name := item.name, sourceName := item.sourceName, source := item.source
       imports := item.program.imports.map (fun imp => (psPscv0ImportKey imp, imp.isPublic))
       ownNames, privateNames := hidden, exposedNames := elaborated.exposedNames, interface }]
-    built := built ++ [{ name := item.name, interface, ownNames }]
+    built := built ++ [{ name := item.name, interface, legacyInterface, ownNames }]
     declarations := declarations ++ own
     recursorWorkerGroups := recursorWorkerGroups ++ output.prepared.recursorWorkerGroups
     noncomputableNames := noncomputableNames ++ output.prepared.noncomputableNames

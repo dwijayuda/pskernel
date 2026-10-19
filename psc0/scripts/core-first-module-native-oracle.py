@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pinned native module-kind, import-visibility and exported-body oracle."""
+"""Pinned native module, scope, legacy import and exported-body oracle."""
 
 from datetime import datetime, timezone
 import hashlib
@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases()
 
 
 def visibility_cases():
@@ -190,6 +190,211 @@ def visibility_cases():
     ]
 
 
+
+def legacy_cases():
+    library = source("""
+        module
+
+        public def coreLegacyDirect (A : Type) (x : A) : A := x
+        private def coreLegacyHelper (A : Type) (x : A) : A := x
+        public def coreLegacyViaPrivate (A : Type) (x : A) : A :=
+          coreLegacyHelper A x
+        public abbrev coreLegacyAlias (A : Type) (x : A) : A :=
+          coreLegacyDirect A x
+        public theorem coreLegacySpec (A : Type) (x : A) :
+            coreLegacyViaPrivate A x = x := by
+          rfl
+        public opaque coreLegacyOpaque (A : Type) (x : A) : A := x
+
+        public class CoreLegacyEcho (A : Type) where
+          run : A -> A
+        @[default_instance 700]
+        private instance coreLegacyEcho {A : Type} : CoreLegacyEcho A where
+          run := fun x => x
+        public abbrev coreLegacyEchoAlias (A : Type) : Type := A
+        """)
+    direct_client = source("""
+        import LegacyLibrary
+        theorem coreLegacyDirectRfl (A : Type) (x : A) :
+            coreLegacyDirect A x = x := by
+          rfl
+        theorem coreLegacyAliasRfl (A : Type) (x : A) :
+            coreLegacyAlias A x = x := by
+          rfl
+        """)
+    private_body_client = source("""
+        import LegacyLibrary
+        theorem coreLegacyPrivateRfl (A : Type) (x : A) :
+            coreLegacyViaPrivate A x = x := by
+          rfl
+        """)
+    opaque_client = source("""
+        import LegacyLibrary
+        theorem coreLegacyOpaqueRfl (A : Type) (x : A) :
+            coreLegacyOpaque A x = x := by
+          rfl
+        """)
+    private_source_client = source("""
+        import LegacyLibrary
+        def coreLegacyForbidden (A : Type) (x : A) : A :=
+          coreLegacyHelper A x
+        """)
+    facade = source("""
+        module
+        import LegacyLibrary
+        public def coreLegacyFacade (A : Type) (x : A) : A :=
+          coreLegacyViaPrivate A x
+        """)
+    transitive_client = source("""
+        import LegacyFacade
+        theorem coreLegacyTransitiveRfl (A : Type) (x : A) :
+            coreLegacyViaPrivate A x = x := by
+          rfl
+        """)
+    local_legacy = source("""
+        private def coreLegacyType (A : Type) : Type := A
+        private def coreLegacyHelper (A : Type) (x : A) : A := x
+        def coreLegacySignature
+            (A : Type) (x : coreLegacyType A) (y : A) : A := y
+        abbrev coreLegacyExposed (A : Type) (x : A) : A :=
+          coreLegacyHelper A x
+        theorem coreLegacyLocalRfl (A : Type) (x : A) :
+            coreLegacyExposed A x = x := by
+          rfl
+        """)
+    module_local_signature = source("""
+        module
+        private def coreLegacyType (A : Type) : Type := A
+        public def coreLegacySignature
+            (A : Type) (x : coreLegacyType A) (y : A) : A := y
+        """)
+    module_local_exposed = source("""
+        module
+        private def coreLegacyHelper (A : Type) (x : A) : A := x
+        public abbrev coreLegacyExposed (A : Type) (x : A) : A :=
+          coreLegacyHelper A x
+        """)
+    metadata_client = source("""
+        import LegacyLibrary
+        theorem coreLegacyEchoRfl (A : Type) (x : A) :
+            CoreLegacyEcho.run (A := A) x = x := by
+          rfl
+        """)
+
+    def local_private_error(name):
+        return (
+            f"Unknown identifier `{name}`",
+            f"A private declaration `{name}` (from the current module)",
+            "would need to be public to access here",
+        )
+
+    return [
+        ("LegacyLibrary", library, ()),
+        ("LegacyDirectBody", direct_client, ()),
+        ("LegacyPrivateBody", private_body_client, ()),
+        ("LegacyOpaqueBody", opaque_client,
+         ("Tactic `rfl` failed", "not definitionally equal", "coreLegacyOpaque")),
+        ("LegacyPrivateSourceName", private_source_client,
+         ("Unknown identifier `coreLegacyHelper`",)),
+        ("LegacyFacade", facade, ()),
+        ("LegacyTransitiveBody", transitive_client, ()),
+        ("LegacyLocalPrivate", local_legacy, ()),
+        ("ModuleLocalPrivateSignature", module_local_signature,
+         local_private_error("coreLegacyType")),
+        ("ModuleLocalPrivateExposed", module_local_exposed,
+         local_private_error("coreLegacyHelper")),
+        ("LegacyPrivateInstanceMetadata", metadata_client, ()),
+    ]
+
+
+def where_helper_cases():
+    provider = source("""
+        public def coreLegacyWhere (A : Type) (x : A) : A :=
+          helper x
+        where
+          helper (y : A) : A := y
+
+        public def coreLegacyWhereLocal (A : Type) (x : A) : A :=
+          coreLegacyWhere.helper A x
+        """)
+
+    helper_error = ("Unknown constant `coreLegacyWhere.helper`",)
+
+    return [
+        ("ModuleWhereLibrary", "module\n\n" + provider, ()),
+        (
+            "ModuleWhereLegacyRfl",
+            source("""
+                import ModuleWhereLibrary
+
+                theorem coreLegacyWhereRfl (A : Type) (x : A) :
+                    coreLegacyWhere A x = x := by
+                  rfl
+
+                theorem coreLegacyWhereLocalRfl (A : Type) (x : A) :
+                    coreLegacyWhereLocal A x = x := by
+                  rfl
+                """),
+            (),
+        ),
+        (
+            "ModuleWhereLegacyName",
+            source("""
+                import ModuleWhereLibrary
+
+                def coreLegacyWhereForbidden (A : Type) (x : A) : A :=
+                  coreLegacyWhere.helper A x
+                """),
+            helper_error,
+        ),
+        ("LegacyWhereLibrary", provider, ()),
+        (
+            "LegacyWhereHelper",
+            source("""
+                import LegacyWhereLibrary
+
+                def coreLegacyWhereHelperUse (A : Type) (x : A) : A :=
+                  coreLegacyWhere.helper A x
+                """),
+            (),
+        ),
+        (
+            "ModuleWhereModuleName",
+            source("""
+                module
+                public import ModuleWhereLibrary
+
+                public def coreLegacyWhereForbidden
+                    (A : Type) (x : A) : A :=
+                  coreLegacyWhere.helper A x
+                """),
+            helper_error,
+        ),
+    ]
+
+
+def scope_refusal_cases():
+    return [
+        ("ScopeBareNamespaceEnd", "module\nnamespace A\nend\n",
+         ("Missing name after `end`", "Expected the current scope name `A`")),
+        ("ScopeBareSectionEnd", "module\nsection A\nend\n",
+         ("Missing name after `end`", "Expected the current scope name `A`")),
+        ("ScopeOuterNameWithoutInner", "module\nnamespace A\nnamespace B\nend A\n",
+         ("Invalid name after `end`", "Expected `B`, but found `A`")),
+        ("ScopeReversedDottedEnd", "module\nnamespace A.B\nend B.A\n",
+         ("Invalid name after `end`", "Expected `A.B`, but found `B.A`")),
+        ("ScopeAcrossUnnamedBarrier",
+         "module\nnamespace A\nsection\nnamespace B\nend A.B\n",
+         ("Invalid name after `end`", "Expected `B`, but found `A.B`")),
+        ("ScopeNamedEndOnUnnamed", "module\nsection\nend A\n",
+         ("Unexpected name `A` after `end`", "The current section is unnamed")),
+        ("ScopeTooManyEndComponents", "module\nnamespace A\nend X.A\n",
+         ("Invalid name after `end`", "`X.A` contains too many components")),
+        ("ScopeEndWithoutScope", "module\nend\n",
+         ("Invalid `end`", "There is no current scope to end")),
+    ]
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=OUTPUT))
@@ -280,9 +485,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 25, "oracle must contain 25 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 17,
-                "oracle must contain 17 expected successful compilations")
+        require(len(fixtures) == 50, "oracle must contain 50 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 28,
+                "oracle must contain 28 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -346,8 +551,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 17
-        report["expected_refusals"] = 8
+        report["successful_compilations"] = 28
+        report["expected_refusals"] = 22
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -376,8 +581,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 25 cases passed "
-          "(17 successful compilations, 8 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 50 cases passed "
+          "(28 successful compilations, 22 expected refusals)", flush=True)
     return 0
 
 

@@ -70,15 +70,15 @@ def psElabInspection (environment : PsEnvironment) (scope : PsCommandScope)
       if axioms then psInspectionPrintAxioms environment name
       else psInspectionPrintDeclaration environment declaration
     | .checkTerm source => do
-      let scoped ← psScopeTerm 4096 resolver scopedBinders.bound source
-      psInspectionCheckTerm context scoped.term
+      let scopedTerm ← psScopeTerm 4096 resolver scopedBinders.bound source
+      psInspectionCheckTerm context scopedTerm.term
     | .reduceTerm source => do
-      let scoped ← psScopeTerm 4096 resolver scopedBinders.bound source
-      let result ← psInspectionElaborate context scoped.term false
+      let scopedTerm ← psScopeTerm 4096 resolver scopedBinders.bound source
+      let result ← psInspectionElaborate context scopedTerm.term false
       let reduced ← psInspectionReduce result.context result.term
       psInspectionExpr 4096 result.context.localContext [] reduced
     | .evalTerm source => do
-      let scoped ← psScopeTerm 4096 resolver scopedBinders.bound source
-      let result ← psInspectionElaborate context scoped.term false
+      let scopedTerm ← psScopeTerm 4096 resolver scopedBinders.bound source
+      let result ← psInspectionElaborate context scopedTerm.term false
       psInspectionEval result
   return { severity := .info, message, span }

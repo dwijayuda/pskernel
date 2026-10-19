@@ -1,0 +1,93 @@
+name: PSKernel-C0 selected Core exact Array theorem stage diagnosis
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-selected-core-array-proof-stage.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  immutable-theorem-stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 39295729394
+          name: pskernel-c0-selected-heavy-root-diagnostic
+          path: input
+          github-token: ${{ github.token }}
+      - name: Authenticate exact unchanged three-root corpus (no re-export)
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s input/heavy-roots.ndjson
+          test -s input/export-SHA256SUMS
+          sed 's#output/heavy-roots.ndjson#input/heavy-roots.ndjson#' \
+            input/export-SHA256SUMS | sha256sum -c -
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('input/selected-frontier.json').read_text())
+          assert report['schema']=='pskernel-c0-selected-core-frontier/1'
+          assert report['selectedGraphSHA256']=='352d9d469dc2ffebf26d0bcf411dd6c5d582d0628cdf2e1600ca92071fd1c1c9'
+          assert report['shards'][1]['rootCount']==3
+          assert report['shards'][1]['externalClosureDeclarations']==4679
+          assert report['shards'][1]['roots']==Path('input/roots-1.txt').read_text().splitlines()
+          assert not report['fullCoreQualified']
+          print('C0_SELECTED_ARRAY_SOURCE=IMMUTABLE_AUTHENTIC_THREE_ROOT_DIAGNOSTIC')
+          PY
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Replay unchanged source and diagnose exact blocked theorem at original fuel
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd psc0/packages/pskernel-c0 && \
+            test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc && \
+            lake build c0OfficialReplay)
+          mkdir -p output
+          sha256sum input/heavy-roots.ndjson > output/checked-source-SHA256SUMS
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/c0-stage-resources.txt" \
+            timeout 240s stdbuf -oL -eL .lake/build/bin/c0OfficialReplay \
+              --diagnose-theorem \
+              '_private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_1' \
+              "$GITHUB_WORKSPACE/input/heavy-roots.ndjson" 4096) \
+            > output/c0-stage.txt 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > output/exit-code.txt
+          echo "C0_CORE_ARRAY_STAGE_DIAGNOSTIC_EXIT=$rc original_fuel=4096"
+          grep 'C0_THEOREM_PROBE' output/c0-stage.txt | tail -n 12 || true
+          grep 'C0_REAL_RESOURCE_DEF_STAGE' output/c0-stage.txt | tail -n 12 || true
+          grep 'C0_REAL_EXPORT_PROGRESS' output/c0-stage.txt | tail -n 6 || true
+          test "$rc" -eq 0
+          grep -Fq 'C0_THEOREM_PROBE target=_private.Init.Data.Array.Extract.0.Array.extract_append_extract._proof_1_1' output/c0-stage.txt
+          if grep -Fq 'target_not_found=true' output/c0-stage.txt; then
+            echo "C0_CORE_ARRAY_PROBE=TARGET_NOT_FOUND" >&2
+            exit 1
+          fi
+          echo 'C0_CORE_ARRAY_PROBE=DIAGNOSTIC_ONLY_NOT_ACCEPTED'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pskernel-c0-core-selected-array-theorem-stage
+          path: output/
+          retention-days: 30
+          if-no-files-found: warn

@@ -158,13 +158,13 @@ jobs:
 
           # Execute a scalar Wasm ABI export, separately from reference-valued Nat.
           cat >/tmp/psc1-wasm-scalar.lean <<'EOF'
-          def answer : UInt32 := 42
+          def answer : Bool := true
           EOF
           lake exe psc1 build /tmp/psc1-wasm-scalar.lean --target wasm-core --out /tmp/psc1-wasm-scalar.wasm
           node --input-type=module <<'NODE'
           import { readFileSync } from 'node:fs';
           const {instance} = await WebAssembly.instantiate(readFileSync('/tmp/psc1-wasm-scalar.wasm'));
-          if (instance.exports.answer() !== 42) throw new Error('PSC1_WASM_SCALAR_RUNTIME_MISMATCH');
+          if (instance.exports.answer() !== 1) throw new Error('PSC1_WASM_SCALAR_RUNTIME_MISMATCH');
           console.log('PSC1_WASM_SCALAR_RUNTIME: PASS');
           NODE
 

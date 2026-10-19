@@ -70,8 +70,8 @@ jobs:
           assert all(len(g) in (57, 58) for g in shards)
           shard = int(os.environ["SHARD"])
           assert 0 <= shard < 8
-          Path("output/shard-roots.txt").write_text("\\n".join(shards[shard]) + "\\n")
-          Path("output/shard.txt").write_text(str(shard) + "\\n")
+          Path("output/shard-roots.txt").write_text("\n".join(shards[shard]) + "\n")
+          Path("output/shard.txt").write_text(str(shard) + "\n")
           print(f"C0_ROOT_SHARD index={shard} count={len(shards[shard])} total=458 unique=true omissions=0")
           PY
           test "$(wc -l < output/shard-roots.txt)" -ge 57

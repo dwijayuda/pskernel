@@ -1,0 +1,117 @@
+name: PSKernel-C0 strict selected Core 418-root full replay
+on:
+  push:
+    branches: [feature/pskernel-c0-core-qualification-20261019]
+    paths:
+      - '.github/workflows/pskernel-c0-selected-core-replay.yml'
+      - 'psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py'
+      - 'psc0/packages/pskernel-c0/src/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  full-selected-core-external-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout independent C0 source, not current PSC0 compiler
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/packages/pskernel-c0/
+      - name: Load immutable selected Core native compiler dependency graph
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 39193886098
+          name: psc0-c0-selected-native-closure
+          path: input
+          github-token: ${{ github.token }}
+      - name: Authenticate and enumerate ALL selected external roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          python3 psc0/packages/pskernel-c0/test/C0CoreSelectedRoots.py \
+            --selected input/selected-engine.json \
+            --comparison input/comparison.json \
+            --roots output/selected-roots.txt \
+            --manifest output/selected-manifest.json
+          test "$(wc -l < output/selected-roots.txt)" -eq 418
+          sha256sum input/selected-engine.json input/comparison.json \
+            output/selected-roots.txt output/selected-manifest.json > output/input-SHA256SUMS
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build C0 original accepting replay and exact official exporter
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          (cd psc0/packages/pskernel-c0 && lake build c0OfficialReplay)
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = leanprover/lean4:v4.35.0
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Export ONE exact selected Core closure, never skip a root
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t ROOTS < output/selected-roots.txt
+          test "${#ROOTS[@]}" -eq 418
+          (cd "$RUNNER_TEMP/lean4export" && \
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/export-resources.txt" \
+            timeout 720s lake env .lake/build/bin/lean4export Init -- "${ROOTS[@]}") \
+            > output/selected-core.ndjson
+          test -s output/selected-core.ndjson
+          sha256sum output/selected-core.ndjson > output/real-export-SHA256SUMS
+          wc -lc output/selected-core.ndjson | tee output/size.txt
+          echo 'C0_SELECTED_CORE_EXPORT=418_EXACT_ROOTS_NO_OMISSION'
+      - name: Independently require official pinned Lean checking of EXACT corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/lean4export" && \
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/official-resources.txt" \
+            timeout 600s lake env leanchecker --from-export \
+              "$GITHUB_WORKSPACE/output/selected-core.ndjson") \
+            > output/official-verdict.txt 2>&1
+          grep -Fq 'Lean default kernel accepts the solution' output/official-verdict.txt
+          echo 'C0_SELECTED_CORE_OFFICIAL=COMPLETE_ACCEPTED_SAME_BYTES'
+      - name: Require original-fuel C0 acceptance of ALL selected Core externals
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd psc0/packages/pskernel-c0 && \
+            /usr/bin/time -v -o "$GITHUB_WORKSPACE/output/c0-resources.txt" \
+            timeout 600s .lake/build/bin/c0OfficialReplay \
+              --require-accepted "$GITHUB_WORKSPACE/output/selected-core.ndjson" 4096) \
+            > output/c0-verdict.txt 2>&1
+          rc=$?
+          set -e
+          printf '%s\n' "$rc" > output/c0-exit-code.txt
+          grep -F 'C0_REAL_EXPORT replay_outcome=' output/c0-verdict.txt | tail -n 1 || true
+          if [ "$rc" -ne 0 ]; then
+            tail -n 70 output/c0-verdict.txt
+            echo "C0_SELECTED_CORE=NOT_QUALIFIED exit=$rc NO_TIMEOUT_AS_PROOF" >&2
+            exit 1
+          fi
+          grep -Fq 'C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted' output/c0-verdict.txt
+          echo 'C0_SELECTED_CORE=ALL_EXTERNAL_DECLARATIONS_CHECKED_NOT_YET_COMPILER_SELFHOST'
+      - name: Preserve selected corpus, hashes and full resource/failure reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pskernel-c0-selected-core-strict-full-replay
+          path: output/
+          if-no-files-found: warn
+          retention-days: 30

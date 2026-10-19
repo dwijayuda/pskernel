@@ -167,6 +167,10 @@ structure PsKernelC0DeepDeferredLambdaFrame where
   scopedContext : PsKernelCheckerContext
   delayedOpening : PsKernelC0DeepSubstTape
   remainingRanges : List Nat
+  originalRanges : List Nat
+  openingSource :
+    (psKernelC0DeepSubstForce delayedOpening, remainingRanges) =
+      psKernelC0DeepEagerBinderOpening originalBody fresh originalRanges
 
 /-- A *real* deferred binder-opening operation. Unlike the eager source
     prepare, its successful path never traverses the original lambda body
@@ -196,7 +200,7 @@ def psKernelC0DeepLambdaPrepareDeferred
         psKernelLocalContextAddLocal nextContext.localContext
           fresh name domain binderInfo
       let child := psKernelCheckerContextWithLocalContext nextContext childLocal
-      let (opening, restRanges) :=
+      let openingPlan :=
         psKernelC0DeepDeferBinderOpening body fresh currentBinderRanges
       .ok {
         name := name
@@ -206,8 +210,11 @@ def psKernelC0DeepLambdaPrepareDeferred
         fresh := fresh
         sourceFreshState := state1
         scopedContext := child
-        delayedOpening := opening
-        remainingRanges := restRanges
+        delayedOpening := openingPlan.1
+        remainingRanges := openingPlan.2
+        originalRanges := currentBinderRanges
+        openingSource :=
+          psKernelC0DeepDeferBinderOpening_source body fresh currentBinderRanges
       }
 
 /-- Force only at a genuine source typing observation boundary, exactly

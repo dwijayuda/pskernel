@@ -1,0 +1,108 @@
+name: PSC0 selected Core native dependency closure vs Full compatibility
+on:
+  push:
+    branches: [research/psc0-c0-selected-native-closure-20261019]
+    paths:
+      - '.github/workflows/psc0-c0-selected-native-closure.yml'
+      - 'psc0/host/src/Ps/Host/StandardClosure.lean'
+      - 'psc0/scripts/Pscv0CoreSelectedNativeClosure.lean'
+      - 'psc0/v7-native/lakefile.lean'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify-selected-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+          use-mathlib-cache: false
+      - name: Build both exact native compiler closures under stable Lean
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          mkdir -p ../dist/c0-selected-audit
+          /usr/bin/time -v -o ../dist/c0-selected-audit/build-resources.txt \
+            lake build pscv0_native pscv0_core_native_closure pscv0_core_selected_native_closure
+      - name: Record complete native Full-wrapper and selected-engine graphs separately
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/c0-selected-audit/full-resources.txt \
+            lake env .lake/build/bin/pscv0_core_native_closure \
+            ../dist/c0-selected-audit/full-wrapper.json | tee ../dist/c0-selected-audit/full-summary.json
+          /usr/bin/time -v -o ../dist/c0-selected-audit/selected-resources.txt \
+            lake env .lake/build/bin/pscv0_core_selected_native_closure \
+            ../dist/c0-selected-audit/selected-engine.json | tee ../dist/c0-selected-audit/selected-summary.json
+      - name: Assert actual Core selected engine has no Full import and no invalid admissions
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("../dist/c0-selected-audit")
+          full=json.loads((root/"full-wrapper.json").read_text())
+          selected=json.loads((root/"selected-engine.json").read_text())
+          f=lambda doc,key: [v["display"] for v in doc[key]]
+          assert full["schema"]==selected["schema"]=="pscv0-core-native-closure/1"
+          assert full["leanCommit"]==selected["leanCommit"]=="eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          assert f(full,"importRoots")[0]=="Ps.Compiler.Pscv0Modules"
+          assert f(selected,"importRoots")[0]=="Ps.Compiler.Pscv0ModuleEngine"
+          assert f(full,"importRoots")[1:]==f(selected,"importRoots")[1:]
+          sources=f(selected,"sourceModules")
+          assert "Ps.Compiler.Pscv0ModuleEngine" in sources
+          forbidden={"Ps.Compiler.Pscv0Modules","Ps.Compiler.Pscv0","Ps.Compiler.Api",
+                     "Ps.Environment.StandardSnapshot","Ps.Environment.SelfHostProd"}
+          assert not forbidden.intersection(sources), sorted(forbidden.intersection(sources))
+          assert selected["sourceDeclarations"]>0
+          assert selected["externalRootCount"]>0
+          assert selected["sourceDeclarations"] < full["sourceDeclarations"]
+          assert len(sources)<len(f(full,"sourceModules"))
+          for graph in (full,selected):
+              assert graph["unsafe"]==graph["partial"]==[]
+              assert graph["emptyBoundary"] is True
+              assert graph["candidateKernelAdmitted"] is False
+              assert set(v["name"]["display"] for v in graph["axioms"]) <= {
+                  "propext","Quot.sound","Classical.choice"}
+              assert len(graph["closureDeclarations"])==graph["closureDeclarationCount"]
+              assert len(graph["externalRoots"])==graph["externalRootCount"]
+          payload={"schema":"psc0-selected-core-native-separation/1",
+                   "sourceCommit":"${GITHUB_SHA}",
+                   "full":{"sourceModules":len(f(full,"sourceModules")),
+                           "sourceDeclarations":full["sourceDeclarations"],
+                           "externalRoots":full["externalRootCount"],
+                           "externalClosure":full["closureDeclarationCount"]},
+                   "selected":{"sourceModules":len(sources),
+                               "sourceDeclarations":selected["sourceDeclarations"],
+                               "externalRoots":selected["externalRootCount"],
+                               "externalClosure":selected["closureDeclarationCount"]},
+                   "selectedProfileInstalled":False,"c0KernelAdmitted":False,
+                   "coreCompilerSelfHost":False}
+          (root/"comparison.json").write_text(json.dumps(payload,indent=2,sort_keys=True)+"\n")
+          print("PSC0_C0_CORE_SELECTED_INVENTORY=PASS_SOURCE_SEPARATION_NOT_CHECKER")
+          print(json.dumps(payload,sort_keys=True))
+          PY
+          sha256sum ../dist/c0-selected-audit/*.json > ../dist/c0-selected-audit/SHA256SUMS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: psc0-c0-selected-native-closure
+          path: psc0/dist/c0-selected-audit/
+          retention-days: 30
+          if-no-files-found: warn

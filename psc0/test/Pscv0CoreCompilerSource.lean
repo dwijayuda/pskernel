@@ -9,6 +9,8 @@ private def sourceRequire (condition : Bool) (message : String) : IO Unit :=
   if condition then pure () else throw (IO.userError ("CORE-COMPILER-SOURCE: " ++ message))
 
 private def sourceEntry (kind : PsCompilerSourceKind) : String :=
+  -- ProofScript exports this entry, including its imported PsSourceSpan type.
+  (match kind with | .lean => "" | .proofScript => "public ") ++
   "import Ps.Foundation.Source\nimport Ps.Foundation.List\n" ++
     (match kind with
     | .lean =>

@@ -203,7 +203,13 @@ def psStandardFinReprDeclarations : List PsDeclaration :=
 
 def psStandardFinReprExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardFinReprDeclarations.foldl psPreludeAdd environment
-  psStandardRegisterInstances environment "Repr" psStandardFinReprDeclarations
+  -- The frozen collection stage already registered this canonical identity.
+  -- Replacing its checked body does not add a second instance-search entry.
+  let missing := psStandardFinReprDeclarations.filter fun declaration =>
+    !environment.instances.entries.any (fun entry => match entry.value with
+      | .constE name _ => psNameEq name (psDeclarationName declaration)
+      | _ => false)
+  psStandardRegisterInstances environment "Repr" missing
 
 -- Pinned Prelude derives Fin equality from the exact Nat-value comparison;
 -- reflected proof fields do not participate in the Boolean method.

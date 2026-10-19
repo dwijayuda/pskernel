@@ -218,7 +218,7 @@ private def expectIotaRefusal (declarations : List PsDeclaration) (probe : PsExp
 private def expectDataRefusal (text expected : String) : IO Unit := do
   match elaborate text with
   | .ok _ => throw (IO.userError ("unexpected group acceptance: " ++ expected))
-  | .error message => ensure (message.contains expected) ("wrong group refusal: " ++ message)
+  | .error message => ensure (message.contains expected) ("wrong group refusal; expected " ++ expected ++ ": " ++ message ++ "\nsource:\n" ++ text)
 
 private def expectCodecRefusal (declarations : List PsDeclaration) : IO Unit := do
   match psEncodeCheckedAdmissionsCanonical declarations with

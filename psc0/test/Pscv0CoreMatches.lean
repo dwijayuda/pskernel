@@ -1595,6 +1595,31 @@ private def checkFinEvidenceFinite : IO Unit := do
     psStandardFinEvidenceDeclarations
   ensure (selected.length == 6) "CORE-MATCHES: Fin evidence selection changed"
   let _ ← fromExcept (psStandardFinEvidenceAudit environment)
+  for declaration in psStandardFinReprDeclarations ++ psStandardFinBEqDeclarations ++
+      psStandardFinDecEqDeclarations do
+    let name := psDeclarationName declaration
+    let entries := environment.instances.entries.filter fun entry =>
+      match entry.value with
+      | .constE actual _ => psNameEq actual name
+      | _ => false
+    let [entry] := entries
+      | throw (IO.userError ("CORE-MATCHES: Fin runtime dictionary has no unique registration: " ++
+          psNameToString name))
+    ensure (entry.priority == 1000 &&
+        psExprAlphaEq entry.type (psDeclarationType declaration))
+      "CORE-MATCHES: Fin runtime dictionary registration changed its actual type or priority"
+    let runtime := psSelfHostRuntimePreludeDeclarationsWithProd.filter fun actual =>
+      psNameEq (psDeclarationName actual) name
+    let [actual] := runtime
+      | throw (IO.userError ("CORE-MATCHES: Fin runtime dictionary has no unique checked body: " ++
+          psNameToString name))
+    let some expectedValue := psDeclarationValue declaration
+      | throw (IO.userError "CORE-MATCHES: selected Fin runtime dictionary lost its definition")
+    let some actualValue := psDeclarationValue actual
+      | throw (IO.userError "CORE-MATCHES: installed Fin runtime dictionary lost its definition")
+    ensure (psExprAlphaEq (psDeclarationType actual) (psDeclarationType declaration) &&
+        psExprAlphaEq actualValue expectedValue)
+      "CORE-MATCHES: Fin runtime catalogue differs from the final selected checked definition"
   let baseline := environment.declarations.filter fun declaration =>
     !selected.any (fun expected =>
       psNameEq (psDeclarationName declaration) (psDeclarationName expected))

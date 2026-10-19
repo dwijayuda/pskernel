@@ -3,8 +3,17 @@ import Ps.Elab.Scope
 
 def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
     (source : PsSyntaxTerm) : Except PsElabError PsSyntaxTerm := do
-  let bound := context.localContext.declarations.map fun entry =>
-    psNameLastComponent (psLocalDeclUserName entry)
+  let declared := context.localContext.declarations.filterMap fun entry =>
+    match psLocalDeclUserName entry with
+    | .num .. => none
+    | name => some (psNameLastComponent name)
+  let aliases := context.localContext.nameAliases.filterMap fun alias =>
+    match alias.userName, psLocalFindUser context.localContext alias.userName with
+    | .num .., _ => none
+    | name, some declaration =>
+      if psLocalDeclId declaration == alias.id then some (psNameLastComponent name) else none
+    | _, none => none
+  let bound := declared ++ aliases
   let resolved ← psScopeTerm 4096 {
     abstractProofs := scope.abstractProofs
     environment := context.environment

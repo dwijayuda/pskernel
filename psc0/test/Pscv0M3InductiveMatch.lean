@@ -72,9 +72,10 @@ theorem compoundMajor (n : Nat) (x : M3MatchRight Nat 0 (Nat.succ n)) : x = x :=
 
 inductive RepeatedMajor : Nat → Nat → Type where
   | diagonal (n : Nat) : RepeatedMajor n n
+  | offDiagonal : RepeatedMajor 0 1
 
-theorem repeatedMajor (n : Nat) (x : RepeatedMajor n n) : x = x := by
-  cases x <;> rfl
+theorem repeatedMajor (n : Nat) (x : RepeatedMajor n n) : x = x :=
+  match x with | .diagonal k => by rfl
 
 def fixedContext (x : M3MatchRight Nat 0 0) (k : x = x → Nat) : Nat := by
   cases x
@@ -159,7 +160,7 @@ private def logicalSource : String :=
   "theorem m3MatchFixedMajor(x: M3MatchRight(Nat, 0, 0)): x = x := match x with { | .zero previous => by { rfl } }\n" ++
   "theorem m3MatchFixedContext(x: M3MatchRight(Nat, 0, 0), h: x = x): x = x := match x with { | .zero previous => h }\n" ++
   "theorem m3MatchCompoundMajor(n: Nat, x: M3MatchRight(Nat, 0, Nat.succ(n))): x = x := match x with { | .step k previous => by { rfl } }\n" ++
-  "inductive M3RepeatedMajor: Nat -> Nat -> Type where { | diagonal(n: Nat): M3RepeatedMajor(n, n) }\n" ++
+  "inductive M3RepeatedMajor: Nat -> Nat -> Type where { | diagonal(n: Nat): M3RepeatedMajor(n, n) | offDiagonal: M3RepeatedMajor(0, 1) }\n" ++
   "theorem m3MatchRepeatedMajor(n: Nat, x: M3RepeatedMajor(n, n)): x = x := match x with { | .diagonal k => by { rfl } }\n" ++
   "theorem m3MatchMajor(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n)): x = x := match x with { | .zero previous => by { rfl } | .step k previous => by { rfl } }\n" ++
   "theorem m3MatchDependent(A: Type u, a: A, n: Nat, x: M3MatchRight(A, a, n), h: n = n): n = n := match x with { | .zero previous => h | .step k previous => h }\n" ++

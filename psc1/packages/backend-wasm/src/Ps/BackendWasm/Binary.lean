@@ -3,6 +3,15 @@ import Ps.BackendWasm.IntUtil
 import Ps.Foundation.Name
 import Ps.Foundation.List
 
+-- Ordered, fail-closed concatenation for encoded instruction lists.
+def psListFlatMapExcept {α β ε : Type}
+    (convert : α → Except ε (List β)) : List α → Except ε (List β)
+  | [] => .ok []
+  | value :: rest => do
+      let first ← convert value
+      let other ← psListFlatMapExcept convert rest
+      pure (psListAppend first other)
+
 inductive PsWasmEncodeError where
   | unsupportedValueType
   | unsupportedInstruction

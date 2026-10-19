@@ -20,7 +20,9 @@ theorem c0DeepLambdaSplit_source
       ctx state name domain body info ranges =
     psKernelInferLambdaHead smaller whnf defeq
       ctx state name domain body info false ranges := by
-  rfl
+  simp [psKernelC0DeepLambdaSplit,
+    psKernelC0DeepLambdaPrepare, psKernelC0DeepLambdaClose,
+    psKernelInferLambdaHead]
 
 example
     (smaller : PsKernelC0BinderSmaller)

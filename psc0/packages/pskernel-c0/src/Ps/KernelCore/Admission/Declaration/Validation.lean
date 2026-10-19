@@ -180,7 +180,7 @@ def psKernelCheckNoMVarNoFVar
   if expr.psKernelC0MVarFlag then
     Except.error
       "declaration has metavariables"
-  else if psKernelExprHasFVar expr then
+  else if expr.psKernelC0FVarFlag then
     Except.error
       "declaration has free variables"
   else
@@ -196,7 +196,8 @@ theorem psKernelC0NodeFlagAdmission_source (expr : PsKernelExpr) :
        else if psKernelExprHasFVar expr then
          Except.error "declaration has free variables"
        else Except.ok ()) := by
-  simp only [psKernelCheckNoMVarNoFVar, psKernelC0MVarFlag_source]
+  simp only [psKernelCheckNoMVarNoFVar, psKernelC0MVarFlag_source,
+    psKernelC0FVarFlag_source]
 
 
 /-- Original recursive syntactic oracle; deliberately independent of the
@@ -278,7 +279,7 @@ def psKernelCheckLevelParams
     (allowed : List PsKernelName) :
     Except String Unit :=
   match
-      psKernelFindUndefExprLevelParam
+      psKernelC0FindUndefWithNodeFlag
         expr
         allowed with
   | Option.some _ =>

@@ -222,8 +222,7 @@ private def checkRepresentation : IO Unit := do
     let printed ← fromExcept (psPscv0PrintSurfaceModule proofScript surface)
     ensure ((printed.splitOn " : _").length == 1 && (printed.splitOn " := ").length > 1)
       "the surface printer changed declaration-result inference into an explicit hole"
-  for text in ["theorem missing := True.intro\n", "opaque missing := 11\n",
-      "abbrev missing := Nat\n"] do
+  for text in ["theorem missing := True.intro\n", "opaque missing := 11\n"] do
     match psPscv0ParseProgram text with
     | .error _ => pure ()
     | .ok _ => throw (IO.userError "result inference escaped its selected value-declaration owner")

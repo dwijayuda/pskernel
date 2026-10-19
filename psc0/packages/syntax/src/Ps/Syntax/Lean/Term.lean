@@ -79,13 +79,13 @@ def psLeanTermMatchRows (read : PsPscv0TermReader) (fuel : Nat) (anchor : PsSour
     if token.text != "|" || (token.span.start.line > anchor.line && token.span.start.column != anchor.column) then
       return { value := [], cursor }
     let bar ← psTokenCursorExpectText cursor "|"
-    let patterns ← psPscv0Patterns fuel bar.cursor
+    let patterns ← psPscv0AlternativePatterns fuel bar.cursor
     let arrow ← psTokenCursorExpectText patterns.cursor "=>"
     let body ← read arrow.cursor
     let rest ← psLeanTermMatchRows read fuel anchor body.cursor
     let span := psSyntaxSpanJoin bar.token.span (psSyntaxTermSpan body.value)
-    let row := (patterns.value, body.value, span)
-    return { value := row :: rest.value, cursor := rest.cursor }
+    let rows := patterns.value.map fun row => (row, body.value, span)
+    return { value := rows ++ rest.value, cursor := rest.cursor }
 
 def psLeanTermMatch (read : PsPscv0TermReader) (fuel : Nat) (impossible : Bool)
     (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do

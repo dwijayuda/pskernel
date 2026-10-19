@@ -1405,6 +1405,105 @@ private def checkLegacyWhere : IO Unit := do
   check legacy false
   IO.println "PSCV0_CORE_LEGACY_WHERE: three admitted projects, six owned refusals, paired canonical admission, private module helper closure, provider-local alias retention, legacy public helper and checked provenance passed"
 
+private def registeredValuePieces : List (String × String) := [
+  ("public abbrev coreRegisteredIdentity (A : Type) (x : A) := x\n",
+   "abbrev coreRegisteredIdentity(A: Type, x: A) := x\n"),
+  ("public abbrev coreRegisteredWhere (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := y\n",
+   "abbrev coreRegisteredWhere(A: Type, x: A): A := helper(x)\nwhere {\n  def helper(y: A): A := y\n}\n"),
+  ("public class CoreRegisteredEcho (A : Type) where\n  run : A -> A\n",
+   "class CoreRegisteredEcho(A: Type) where { run: A -> A }\n"),
+  ("public instance coreRegisteredEcho {A : Type} : CoreRegisteredEcho A where\n  run := fun (x : A) => x\n",
+   "instance coreRegisteredEcho{A: Type}: CoreRegisteredEcho A where { run := fun (x: A) => x }\n"),
+  ("public class CoreRegisteredLaw (A : Type) (x : A) : Prop where\n  selfEq : x = x\n",
+   "class CoreRegisteredLaw(A: Type, x: A): Prop where { selfEq: x = x }\n"),
+  ("public instance coreRegisteredLaw {A : Type} (x : A) : CoreRegisteredLaw A x where\n  selfEq := by rfl\n",
+   "instance coreRegisteredLaw{A: Type}(x: A): CoreRegisteredLaw(A, x) where { selfEq := by { rfl } }\n"),
+  ("@[default_instance 700] public def coreRegisteredDefault {A : Type} := ({ run := fun (x : A) => x } : CoreRegisteredEcho A)\n",
+   "@[default_instance 700] def coreRegisteredDefault{A: Type} := ({ run := fun (x: A) => x }: CoreRegisteredEcho(A))\n")]
+
+private def registeredClientPieces : List (String × String) := [
+  ("public theorem coreRegisteredIdentityRfl (A : Type) (x : A) : coreRegisteredIdentity A x = x := by rfl\n",
+   "theorem coreRegisteredIdentityRfl(A: Type, x: A): coreRegisteredIdentity(A, x) = x := by { rfl }\n"),
+  ("public theorem coreRegisteredWhereRfl (A : Type) (x : A) : coreRegisteredWhere A x = x := by rfl\n",
+   "theorem coreRegisteredWhereRfl(A: Type, x: A): coreRegisteredWhere(A, x) = x := by { rfl }\n"),
+  ("public theorem coreRegisteredHelperRfl (A : Type) (x : A) : coreRegisteredWhere.helper A x = x := by rfl\n",
+   "theorem coreRegisteredHelperRfl(A: Type, x: A): coreRegisteredWhere.helper(A, x) = x := by { rfl }\n"),
+  ("public theorem coreRegisteredEchoRfl (A : Type) (x : A) : CoreRegisteredEcho.run x (A := A) = x := by rfl\n",
+   "theorem coreRegisteredEchoRfl(A: Type, x: A): CoreRegisteredEcho.run(x, A := A) = x := by { rfl }\n"),
+  ("public theorem coreRegisteredProofValue (A : Type) (x : A) : CoreRegisteredLaw A x := coreRegisteredLaw x\n",
+   "theorem coreRegisteredProofValue(A: Type, x: A): CoreRegisteredLaw(A, x) := coreRegisteredLaw(x)\n"),
+  ("public theorem coreRegisteredProofField (A : Type) (x : A) : x = x := CoreRegisteredLaw.selfEq (A := A) (x := x)\n",
+   "theorem coreRegisteredProofField(A: Type, x: A): x = x := CoreRegisteredLaw.selfEq(A := A, x := x)\n")]
+
+private def checkRegisteredValues : IO Unit := do
+  let (seed, profile) ← scopeContext
+  let mut paired : List String := []
+  for kind in [PsCompilerSourceKind.lean, .proofScript] do
+    let library := importVisibilityInput kind "Library" "" registeredValuePieces
+    let client := importVisibilityInput kind "Entry" "public import Library\n" registeredClientPieces
+    let output ← prepare profile "Entry" [client, library]
+    let _ ← admit seed output.admissions
+    paired := paired ++ [output.admissions]
+    let some receipt := output.moduleProfiles.find? (fun item => item.name == "Library")
+      | fail "registered value source receipt missing"
+    for text in ["coreRegisteredIdentity", "coreRegisteredWhere", "coreRegisteredWhere.helper",
+        "CoreRegisteredEcho.run", "coreRegisteredEcho"] do
+      let name := psSyntaxNameAppendSegments (text.splitOn ".") .anonymous
+      let some (.definitionDecl ..) := receipt.interface.declarations.find?
+          (fun declaration => psNameEq (psDeclarationName declaration) name)
+        | fail ("registered public body not exposed: " ++ text)
+      ensure (receipt.exposedNames.any (psNameEq name) &&
+          !receipt.privateNames.any (psNameEq name))
+        ("registered body visibility differs from retained interface: " ++ text)
+    let proofName := psRootName "coreRegisteredLaw"
+    let some (.theoremDecl ..) := receipt.interface.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) proofName)
+      | fail "proof-valued source instance lost theorem kind"
+    ensure (!receipt.exposedNames.any (psNameEq proofName))
+      "proof-valued source instance exposed its proof body"
+    let decoded ← match PsKernelLean.decodeCanonicalAdmissions output.admissions with
+      | .ok declarations => pure declarations
+      | .error error => fail error.message
+    ensure (decoded.toList.any fun declaration => match declaration with
+      | .thmDecl info => info.name == PsKernelLean.toLeanName proofName
+      | _ => false)
+      "actual proof-valued instance admission is not a theorem"
+    let defaultName := psRootName "coreRegisteredDefault"
+    let some (.opaqueDecl ..) := receipt.interface.declarations.find?
+        (fun declaration => psNameEq (psDeclarationName declaration) defaultName)
+      | fail "default attribute exposed an ordinary definition"
+    ensure (!receipt.exposedNames.any (psNameEq defaultName) &&
+        receipt.interface.instances.length == 2 && receipt.interface.defaults.length == 1)
+      "registered source kind or registry count changed"
+    ensure (receipt.interface.defaults.all (fun entry =>
+      entry.priority == 700 && match entry.value with
+      | .constE name _ => psNameEq name defaultName
+      | _ => false))
+      "inferred default lost its exact name or priority"
+    for text in ["coreRegisteredIdentity.eq_def", "coreRegisteredWhere.eq_def",
+        "coreRegisteredWhere.helper.eq_def", "coreRegisteredDefault.eq_def"] do
+      let name := psSyntaxNameAppendSegments (text.splitOn ".") .anonymous
+      ensure (receipt.privateNames.any (psNameEq name) &&
+          !receipt.interface.declarations.any (fun declaration =>
+            psNameEq (psDeclarationName declaration) name))
+        ("registered value equation escaped source ownership: " ++ text)
+    let privateValue := importVisibilityInput kind "Library" "" [
+  ("private def coreRegisteredHidden (A : Type) (x : A) : A := x\n",
+   "private function coreRegisteredHidden(A: Type, x: A): A := x\n"),
+  ("public abbrev coreRegisteredLeak (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := coreRegisteredHidden A y\n",
+   "abbrev coreRegisteredLeak(A: Type, x: A): A := helper(x)\nwhere {\n  def helper(y: A): A := coreRegisteredHidden(A, y)\n}\n")]
+    refuse profile "Library" [privateValue] true
+      "PSCV0-MODULE: exposed body references private name"
+    let nonClass := importVisibilityInput kind "Library" "" [
+  ("@[default_instance] public def coreRegisteredBad (A : Type) (x : A) := x\n",
+   "@[default_instance] def coreRegisteredBad(A: Type, x: A) := x\n")]
+    refuse profile "Library" [nonClass] true
+      "PSCV0-DATA: instance result must be a registered class"
+  let [leanAdmissions, psAdmissions] := paired
+    | fail "registered value reader pair missing"
+  ensure (leanAdmissions == psAdmissions) "registered value paired admissions differ"
+  IO.println "PSCV0_CORE_REGISTERED_VALUES: two paired admitted projects, four owned refusals, inferred abbrev/default registration, public where helpers, data-instance and projection reduction, ordinary default opacity and private computational dependency controls passed"
+
 def main : IO Unit := do
   let result ← PsKernelLean.buildLeanPreludeEnvironmentFromDeclarations [baseDecl]
   let seed ← match result with
@@ -1470,4 +1569,5 @@ def main : IO Unit := do
   checkLegacyLocalPrivate
   checkLegacyMetadata
   checkLegacyWhere
+  checkRegisteredValues
   IO.println "PSCV0_CORE_PROJECT: paired modules, profile, kernel, graph, visibility and typed runtime controls passed"

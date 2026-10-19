@@ -207,3 +207,13 @@ lean_exe pscv0_core_project where
 lean_exe pscv0_core_compiler_source where
   srcDir := "../test"
   root := `Pscv0CoreCompilerSource
+
+-- Paired Core language eliminations over the independently replayed Foundation.
+lean_exe pscv0_core_elimination where
+  srcDir := "../test"
+  root := `Pscv0CoreElimination
+
+-- Selected pattern syntax, kernel equations and native runtime oracle.
+lean_exe pscv0_core_patterns where
+  srcDir := "../test"
+  root := `Pscv0CorePatterns

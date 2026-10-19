@@ -102,8 +102,15 @@ def psElabPreDefinitionValidate (environment : PsEnvironment)
   let initial := psElabContextEmpty environment block.levelNames
   let context := psElabContextWithLocal initial block.context.localContext
   for member in block.members do
-    if member.registration.isSome then
-      throw (psElabPreDefinitionError "REGISTRATION" "selected checked local batches cannot register extra declaration kinds")
+    match member.registration, member.source with
+    | none, _ => pure ()
+    | some (.abbrevDecl), .declaration source
+    | some (.instanceDecl _), .declaration source
+    | some (.defaultInstanceDecl _ _), .declaration source =>
+      if psElabPreDefinitionDeclarationExplicitPartial source then
+        throw (.data "PSCV0-TERM-02-HEAD: partial cannot register a total declaration")
+    | _, _ =>
+      throw (psElabPreDefinitionError "REGISTRATION" "this registration has no checked value-batch owner")
     let strategy ← psElabPreDefinitionSourceStrategy block.members member
     if !psElabPreDefinitionStrategyEq strategy member.strategy then
       throw (psElabPreDefinitionError "STRATEGY" "retained strategy differs from its explicit source or parent owner")

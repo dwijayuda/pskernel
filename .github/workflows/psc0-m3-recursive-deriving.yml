@@ -26,6 +26,7 @@ on:
       - 'psc0/scripts/pscv0-m3-runtime.mjs'
       - '.github/workflows/psc0-m3-recursive-deriving.yml'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -98,19 +99,20 @@ jobs:
             psc0/v7-native/.lake
           key: pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-${{ github.sha }}
           restore-keys: |
+            pscv0-core-first-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-m3-hash-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
             pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/lean-toolchain') }}-
       - name: Build native compiler and check recursive derivation
         id: checked
         run: |
           set -euo pipefail
-          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving pscv0_m3_group_proof_deriving pscv0_m3_empty_dictionaries pscv0_m3_partial_fixpoint pscv0_m3_noncomputable pscv0_m3_mutual_packing
+          lake build pscv0_native pscv0_m3_recursive_deriving pscv0_m3_inductive_groups pscv0_m3_inductive_runtime pscv0_m3_well_founded pscv0_m3_inductive_match pscv0_m3_mutual_partial pscv0_m3_inductive_deriving pscv0_m3_mutual_structural pscv0_m3_nested_inductive pscv0_m3_where pscv0_m3_nested_deriving pscv0_m3_group_proof_deriving pscv0_m3_empty_dictionaries pscv0_m3_partial_fixpoint pscv0_m3_noncomputable pscv0_m3_mutual_packing pscv0_core_patterns
           mkdir -p ../dist/m3-recursive-deriving ../dist/m3-inductive-runtime ../dist/m3-well-founded ../dist/m3-inductive-match ../dist/m3-mutual-partial ../dist/m3-inductive-deriving ../dist/m3-mutual-structural ../dist/m3-nested-inductive ../dist/m3-where ../dist/m3-nested-deriving ../dist/m3-group-proof-deriving ../dist/m3-group-proof-deriving/indexed-inhabited ../dist/m3-empty-dictionaries
           mkdir -p ../dist/m3-mutual-partial/p0-generic
           mkdir -p ../dist/m3-inductive-deriving/indexed-beq
           mkdir -p ../dist/m3-mutual-partial/p0-nonempty
           mkdir -p ../dist/m3-partial-fixpoint
-          mkdir -p ../dist/m3-noncomputable
+          mkdir -p ../dist/m3-noncomputable ../dist/m3-core-patterns
           # Collect every independent source-check failure; all fixtures remain required.
           m3_fixture_status=0
           m3_check_fixture() {
@@ -122,6 +124,7 @@ jobs:
               m3_fixture_status=1
             fi
           }
+          m3_check_fixture ../dist/m3-core-patterns/check.log .lake/build/bin/pscv0_core_patterns ../dist/m3-core-patterns
           m3_check_fixture ../dist/m3-recursive-deriving/mutual-packing.log .lake/build/bin/pscv0_m3_mutual_packing
           m3_check_fixture ../dist/m3-recursive-deriving/inductive-groups.log .lake/build/bin/pscv0_m3_inductive_groups
           m3_check_fixture ../dist/m3-recursive-deriving/partial-fixpoint-assumptions.log lake env lean --run ../test/Pscv0M3PartialFixpointAssumptions.lean
@@ -170,6 +173,12 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/pscv0-m3-tools" --ignore-scripts --no-audit --no-fund --no-package-lock typescript@7.0.2
           TSC="$RUNNER_TEMP/pscv0-m3-tools/node_modules/.bin/tsc"
           "$TSC" --version | grep -Fx 'Version 7.0.2'
+          for pattern_kind in lean ps; do
+            pattern_dir=../dist/m3-core-patterns/"$pattern_kind"
+            "$TSC" --ignoreConfig "$pattern_dir/corepatterns.ts" --outDir "$pattern_dir/ts" --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$pattern_dir" corepatterns m3patterns | tee "$pattern_dir/js.log"
+            node ../scripts/pscv0-m3-runtime.mjs ecma "$pattern_dir" corepatterns m3patterns "$pattern_dir/ts/corepatterns.js" | tee "$pattern_dir/ts.log"
+          done
           "$TSC" --ignoreConfig ../dist/m3-recursive-deriving/hashing.ts --outDir ../dist/m3-recursive-deriving/ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-recursive-deriving | tee ../dist/m3-recursive-deriving/js.log
           node ../scripts/pscv0-m3-recursive-deriving.mjs ecma ../dist/m3-recursive-deriving ../dist/m3-recursive-deriving/ts/hashing.js | tee ../dist/m3-recursive-deriving/ts.log
@@ -234,6 +243,11 @@ jobs:
         run: |
           set -euo pipefail
           rustup toolchain install 1.98.1 --profile minimal
+          for pattern_kind in lean ps; do
+            pattern_dir=../dist/m3-core-patterns/"$pattern_kind"
+            node ../scripts/pscv0-m3-runtime.mjs rust "$pattern_dir" corepatterns m3patterns
+            rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee "$pattern_dir/rust.log"
+          done
           node ../scripts/pscv0-m3-recursive-deriving.mjs rust ../dist/m3-recursive-deriving
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-runtime-check 2>&1 | tee ../dist/m3-recursive-deriving/rust.log
           node ../scripts/pscv0-m3-runtime.mjs rust ../dist/m3-inductive-runtime groupfold m3groupleft,m3groupright
@@ -329,6 +343,7 @@ jobs:
             psc0/dist/m3-empty-dictionaries/
             psc0/dist/m3-partial-fixpoint/
             psc0/dist/m3-noncomputable/
+            psc0/dist/m3-core-patterns/
           if-no-files-found: warn
           retention-days: 30
 

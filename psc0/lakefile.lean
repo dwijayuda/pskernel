@@ -287,7 +287,7 @@ lean_lib PsElab where
     `Ps.Elab.Binders,
     `Ps.Elab.Goals,
     `Ps.Elab.GoalSource,
-    `Ps.Elab.Elimination,
+    `Ps.Elab.ExprAbstraction, `Ps.Elab.Elimination,
     `Ps.Elab.Proof,
     `Ps.Elab.WellFounded,
     `Ps.Elab.FixedParameters, `Ps.Elab.RecursionParameters,

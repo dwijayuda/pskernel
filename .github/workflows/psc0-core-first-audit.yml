@@ -14,6 +14,8 @@ on:
       - 'psc0/scripts/core-first-*.py'
       - 'psc0/scripts/Pscv0Core*.lean'
       - 'psc0/test/Pscv0Core*.lean'
+      - 'psc0/test/Pscv0M3*.lean'
+      - 'psc0/scripts/pscv0-m3-*.mjs'
       - 'psc0/test/Pscv0Native*.lean'
       - 'psc0/scripts/Pscv0Native.lean'
       - 'psc0/scripts/Pscv0M1Harness.lean'
@@ -29,6 +31,7 @@ on:
       - 'psc0/scripts/pscv0-reference-identity.mjs'
       # Core design/evidence ledgers are not loadable profile inputs.
       - '.github/workflows/psc0-core-first-audit.yml'
+      - '.github/workflows/psc0-m3-recursive-deriving.yml'
   workflow_dispatch:
 
 permissions:
@@ -175,6 +178,12 @@ jobs:
           lake env python3 ../scripts/core-first-module-native-oracle.py 2>&1 | tee ../dist/core-first/seams/module-native-oracle.log
           sha256sum .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable.sha256
           stat -c '%s' .lake/build/bin/pscv0_core_project > ../dist/core-first/seams/project-executable-bytes.txt
+      - name: Check computed and let elimination targets against pinned native rules
+        run: |
+          set -euo pipefail
+          /usr/bin/time -v -o ../dist/core-first/seams/elimination-build-resource.txt lake build pscv0_core_elimination 2>&1 | tee ../dist/core-first/seams/elimination-build.log
+          .lake/build/bin/pscv0_core_elimination 2>&1 | tee ../dist/core-first/seams/elimination-check.log
+          sha256sum .lake/build/bin/pscv0_core_elimination > ../dist/core-first/seams/elimination-executable.sha256
       - name: Retain the qualified complete Foundation source regression
         run: |
           set -euo pipefail
@@ -470,3 +479,6 @@ jobs:
           path: psc0/dist/core-first/authoring/
           if-no-files-found: error
           retention-days: 30
+
+  language-m3:
+    uses: ./.github/workflows/psc0-m3-recursive-deriving.yml

@@ -153,6 +153,40 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
   return { state with scope := { state.scope with included } }
 
 
+-- Registration is applied to the complete checked declaration batch. The
+-- inferred and explicit-header routes use this same metadata owner.
+def psElabCommandRegisterDeclaration (environment : PsEnvironment)
+    (name : PsName) (registration : Option PsSyntaxRegistration) :
+    Except PsElabError PsEnvironment :=
+  match registration with
+  | none | some .opaqueDecl => pure environment
+  | some .abbrevDecl => pure (psEnvironmentSetReducibility environment name .reducible)
+  | some .classDecl => psElabRegisterClass environment name
+  | some (.instanceDecl priority) => psElabRegisterInstance environment name priority
+  | some (.defaultInstanceDecl priority ordinaryPriority) => do
+    let environment ← match ordinaryPriority with
+      | some ordinary => psElabRegisterInstance environment name ordinary
+      | none => pure environment
+    psElabRegisterDefaultInstance environment name priority
+
+-- Pinned MutualDef.finishElab exposes abbreviation and data-instance bodies.
+-- A default attribute on an ordinary def does not change its declaration kind;
+-- proof-valued instances also keep the ordinary non-exposed body boundary.
+def psElabCommandExposesDefinition (environment : PsEnvironment)
+    (name : PsName) (registration : Option PsSyntaxRegistration) :
+    Except PsElabError Bool := do
+  if let some .abbrevDecl := registration then return true
+  let instanceDeclaration := match registration with
+    | some (.instanceDecl _) => true
+    | some (.defaultInstanceDecl _ (some _)) => true
+    | _ => false
+  if !instanceDeclaration then return false
+  let some declaration := psEnvironmentFind environment name
+    | throw (.data "registered declaration missing at body-exposure boundary")
+  let context := psElabContextEmpty environment (psDeclarationLevelParams declaration)
+  let level ← psElabExpressionSort context (psDeclarationType declaration)
+  return !psLevelEquivalent level .zero
+
 -- Scope one original source block, elaborate its typed local captures, then
 -- let the checked dependency owner partition it. Helpers retain their own
 -- source information while their declarations belong to the parent's origin.
@@ -213,6 +247,21 @@ def psElabCommandPreDefinitions (state : PsCommandState)
       psEnvironmentMarkNoncomputable env (psDeclarationName declaration)) environment
   else environment
   let outputs := block.members.zip result.members
+  let (environment, exposedOwners) ← outputs.foldlM
+    (fun (acc : PsEnvironment × List Nat) (member, _) => do
+      let registered ← (psElabCommandRegisterDeclaration acc.fst member.name
+        member.registration).mapError (.atDeclaration member.name)
+      let exposed ← (psElabCommandExposesDefinition registered member.name
+        member.registration).mapError (.atDeclaration member.name)
+      return (registered, if exposed then member.sourceIndex :: acc.snd else acc.snd))
+    (environment, [])
+  let exposedNames := outputs.flatMap fun (member, result) =>
+    if exposedOwners.contains member.sourceIndex then
+      result.declarations.filterMap fun declaration =>
+        match declaration with
+        | .definitionDecl name .. => some name
+        | _ => none
+    else []
   let origins := scopedMembers.zipIdx.map fun (member, index) =>
     let owned := outputs.filter (fun output => output.fst.sourceIndex == index)
     let declarations := owned.flatMap (·.snd.declarations)
@@ -233,16 +282,14 @@ def psElabCommandPreDefinitions (state : PsCommandState)
         memberIndex := index
         memberCount := scopedMembers.length
         span } else none }
-  -- Typed predefinitions have no exposed-body registration. Only their
-  -- actual source identity is public; generated equations, packed auxiliaries
-  -- and implementation markers remain local, as in pinned mkEqLikeNameFor.
-  -- Use ownership rather than declaration kind or a generated-name suffix:
-  -- an internal whole-function equation can also mention private callees.
-  -- Explicit source theorem members keep their own source visibility.
+  -- Exposed value owners retain their checked computational dependencies.
+  -- Source-private members remain private; generated equations and operational
+  -- markers retain their existing local ownership.
   let privateNames := outputs.flatMap fun (member, result) =>
     result.declarations.filterMap fun declaration =>
       let name := psDeclarationName declaration
-      if member.isPrivate || !psNameEq name member.name then some name else none
+      let exposed := exposedNames.any (psNameEq name)
+      if member.isPrivate || (!psNameEq name member.name && !exposed) then some name else none
   let namespaces := result.batch.declarations.foldl (fun acc declaration =>
     ((psScopeNamePrefixes (psDeclarationName declaration)).drop 1).foldl psScopeRemember acc)
     state.namespaces
@@ -260,6 +307,7 @@ def psElabCommandPreDefinitions (state : PsCommandState)
     originsRev := origins.reverse ++ state.originsRev
     declarationsRev := psPrependBatchReverse result.batch.declarations state.declarationsRev
     privateNames := privateNames ++ state.privateNames
+    exposedNames := exposedNames ++ state.exposedNames
     privateAliases }
 
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
@@ -317,24 +365,35 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
           declarations := [.opaqueDecl declarationName levels type value] }
       | _ => throw (.data "opaque requires one checked definition; normalized workers pending")
     | _ => pure originBatch.result
+  -- The source instance kind follows the actual checked result sort. A
+  -- default attribute on an ordinary definition does not make it a theorem.
+  let instanceDeclaration := match registration with
+    | some (.instanceDecl _) => true
+    | some (.defaultInstanceDecl _ (some _)) => true
+    | _ => false
+  let batch ← if instanceDeclaration then do
+    match batch.declarations with
+    | [.definitionDecl declarationName levels type value] =>
+      let level ← (psElabExpressionSort
+        (psElabContextEmpty state.environment levels) type).mapError
+          (.atDeclaration name)
+      if psLevelEquivalent level .zero then
+        pure { batch with declarations :=
+          [.theoremDecl declarationName levels type value] }
+      else pure batch
+    | _ => throw (.data "instance requires one checked value declaration")
+  else pure batch
   let isClass := match registration with | some .classDecl => true | _ => false
-  let isAbbrev := match registration with | some .abbrevDecl => true | _ => false
   let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
     (.atDeclaration name)
   let environment ← (psAddDeclarationList state.environment batch.declarations).mapError
     (.atDeclaration name)
-  let environment ← (match registration with
-    | none => pure environment
-    | some .abbrevDecl => pure (psEnvironmentSetReducibility environment name .reducible)
-    | some .opaqueDecl => pure environment
-    | some .classDecl => psElabRegisterClass environment name
-    | some (.instanceDecl priority) => psElabRegisterInstance environment name priority
-    | some (.defaultInstanceDecl priority ordinaryPriority) => do
-      let environment ← match ordinaryPriority with
-        | some ordinary => psElabRegisterInstance environment name ordinary
-        | none => pure environment
-      psElabRegisterDefaultInstance environment name priority).mapError
-      (.atDeclaration name)
+  let environment ← (psElabCommandRegisterDeclaration environment name registration).mapError
+    (.atDeclaration name)
+  let exposesValue ← (psElabCommandExposesDefinition environment name registration).mapError
+    (.atDeclaration name)
+  let projectionNames := (batch.declarations.drop originBatch.result.declarations.length).map
+    psDeclarationName
   let namespaces := batch.declarations.foldl (fun acc decl =>
     -- A declaration registers its parent namespaces. Constructors and
     -- projections also register their inductive/structure namespace.
@@ -352,9 +411,9 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     privateNames := if isPrivate then
       batch.declarations.map psDeclarationName ++ state.privateNames
     else implementationNames ++ state.privateNames
-    exposedNames := if isAbbrev then
-      batch.declarations.map psDeclarationName ++ state.exposedNames
-    else state.exposedNames
+    exposedNames := projectionNames ++
+      (if exposesValue then batch.declarations.map psDeclarationName else []) ++
+      state.exposedNames
     privateAliases := aliases }
 
 -- A joint batch has one checked strategy. Ordinary members use the selected

@@ -92,7 +92,7 @@ def cases():
                 coreBodyOpaque A x = x := by
               rfl
             """), BODY_ERROR),
-    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases()
+    ] + visibility_cases() + legacy_cases() + scope_refusal_cases() + where_helper_cases() + registered_value_cases()
 
 
 def visibility_cases():
@@ -395,6 +395,15 @@ def scope_refusal_cases():
     ]
 
 
+def registered_value_cases():
+    return [
+        ("RegisteredProvider", "module\npublic abbrev coreRegisteredIdentity (A : Type) (x : A) := x\npublic abbrev coreRegisteredWhere (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := y\npublic class CoreRegisteredEcho (A : Type) where\n  run : A -> A\npublic instance coreRegisteredEcho {A : Type} : CoreRegisteredEcho A where\n  run := fun (x : A) => x\npublic class CoreRegisteredLaw (A : Type) (x : A) : Prop where\n  selfEq : x = x\npublic instance coreRegisteredLaw {A : Type} (x : A) : CoreRegisteredLaw A x where\n  selfEq := by rfl\n@[default_instance 700] public def coreRegisteredDefault {A : Type} := ({ run := fun (x : A) => x } : CoreRegisteredEcho A)\n", ()),
+        ("RegisteredClient", "module\npublic import RegisteredProvider\npublic theorem coreRegisteredIdentityRfl (A : Type) (x : A) : coreRegisteredIdentity A x = x := by rfl\npublic theorem coreRegisteredWhereRfl (A : Type) (x : A) : coreRegisteredWhere A x = x := by rfl\npublic theorem coreRegisteredHelperRfl (A : Type) (x : A) : coreRegisteredWhere.helper A x = x := by rfl\npublic theorem coreRegisteredEchoRfl (A : Type) (x : A) : CoreRegisteredEcho.run x (A := A) = x := by rfl\npublic theorem coreRegisteredProofValue (A : Type) (x : A) : CoreRegisteredLaw A x := coreRegisteredLaw x\npublic theorem coreRegisteredProofField (A : Type) (x : A) : x = x := CoreRegisteredLaw.selfEq (A := A) (x := x)\n", ()),
+        ("RegisteredPrivateHelperLeak", "module\nprivate def coreRegisteredHidden (A : Type) (x : A) : A := x\npublic abbrev coreRegisteredLeak (A : Type) (x : A) : A := helper x\nwhere\n  helper (y : A) : A := coreRegisteredHidden A y\n", ("coreRegisteredHidden",)),
+        ("RegisteredNonClassDefault", "module\n@[default_instance] public def coreRegisteredBad (A : Type) (x : A) := x\n", ("class",)),
+    ]
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=OUTPUT))
@@ -485,9 +494,9 @@ def main():
         require(version == PIN_VERSION, f"wrong Lean version: {version!r}")
         require(githash == PIN_GITHASH, f"wrong Lean commit: {githash!r}")
         fixtures = cases()
-        require(len(fixtures) == 50, "oracle must contain 50 compile cases")
-        require(sum(not expected for _, _, expected in fixtures) == 28,
-                "oracle must contain 28 expected successful compilations")
+        require(len(fixtures) == 54, "oracle must contain 54 compile cases")
+        require(sum(not expected for _, _, expected in fixtures) == 30,
+                "oracle must contain 30 expected successful compilations")
 
         for name, contents, expected_errors in fixtures:
             input_path = run_dir / f"{name}.lean"
@@ -551,8 +560,8 @@ def main():
             print(f"PASS {name}: {case['expectation']}", flush=True)
 
         report["status"] = "PASS"
-        report["successful_compilations"] = 28
-        report["expected_refusals"] = 22
+        report["successful_compilations"] = 30
+        report["expected_refusals"] = 24
     except Exception as exc:
         report["status"] = "FAIL"
         report["failure"] = f"{type(exc).__name__}: {exc}"
@@ -581,8 +590,8 @@ def main():
         "expected_refusals": report["expected_refusals"],
         "cases": report["cases"],
     }, sort_keys=True), flush=True)
-    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 50 cases passed "
-          "(28 successful compilations, 22 expected refusals)", flush=True)
+    print("PSCV0_CORE_MODULE_NATIVE_ORACLE: 54 cases passed "
+          "(30 successful compilations, 24 expected refusals)", flush=True)
     return 0
 
 

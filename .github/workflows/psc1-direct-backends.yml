@@ -5,6 +5,14 @@ on:
   push:
     branches:
       - psc1/direct-multibackend-v1
+      - fix/psc1-bounded-hardening-20261020
+    paths:
+      - psc1/**
+      - .github/workflows/psc1-direct-backends.yml
+
+  pull_request:
+    branches:
+      - psc1/direct-multibackend-v1
     paths:
       - psc1/**
       - .github/workflows/psc1-direct-backends.yml
@@ -250,3 +258,23 @@ jobs:
             exit 1
           fi
           test ! -e /tmp/psc1-invalid-component.wasm
+
+  kernel-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install repository-pinned Lean
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build independent kernel and bounded regression (no self-host suite)
+        shell: bash
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          lean --version
+          lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression
+          lake -f kernel-lakefile.lean exe psc1_kernel_regression

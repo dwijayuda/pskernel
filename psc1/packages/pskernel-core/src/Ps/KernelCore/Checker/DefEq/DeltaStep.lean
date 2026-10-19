@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.DefEq.Support
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Lean 4.34 single-step lazy-delta selection and unfolding.
@@ -75,10 +76,16 @@ def psKernelDefEqUnfold
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr) :
     Prod (Option PsKernelExpr) PsKernelCheckerState :=
-  match
+  let eligible :=
+    psKernelSemanticCacheEligible expr;
+  let cached :=
+    if eligible then
       psKernelExprMapGet
         state.unfold
-        expr with
+        expr
+    else
+      Option.none;
+  match cached with
   | Option.some cached =>
       Prod.mk
         (Option.some cached)
@@ -91,16 +98,21 @@ def psKernelDefEqUnfold
       | Option.none =>
           Prod.mk Option.none state
       | Option.some value =>
-          let cache :=
-            psKernelExprMapInsert
-              state.unfold
-              expr
-              value;
-          Prod.mk
-            (Option.some value)
-            (psKernelCheckerStateWithUnfold
+          if eligible then
+            let cache :=
+              psKernelExprMapInsert
+                state.unfold
+                expr
+                value;
+            Prod.mk
+              (Option.some value)
+              (psKernelCheckerStateWithUnfold
+                state
+                cache)
+          else
+            Prod.mk
+              (Option.some value)
               state
-              cache)
 
 def psKernelDefEqDeltaOnce
     (coreWhnf :
@@ -433,12 +445,23 @@ def psKernelDefEqLazyStepBoth
           (Prod Bool PsKernelCheckerState) :=
       if sameShortcut then
         if
-            psKernelExprPairSetContains
-              state.failure
+            psKernelSemanticPairCacheEligible
               left
               right then
-          Except.ok
-            (Prod.mk false state)
+          if
+              psKernelExprPairSetContains
+                state.failure
+                left
+                right then
+            Except.ok
+              (Prod.mk false state)
+          else
+            psKernelDefEqArgs
+              defeq
+              context
+              state
+              left
+              right
         else
           psKernelDefEqArgs
             defeq
@@ -467,12 +490,18 @@ def psKernelDefEqLazyStepBoth
             Prod.snd compared;
           let afterFailure :=
             if sameShortcut then
-              psKernelCheckerStateWithFailure
+              if
+                  psKernelSemanticPairCacheEligible
+                    left
+                    right then
+                psKernelCheckerStateWithFailure
+                  comparedState
+                  (psKernelExprPairSetInsert
+                    comparedState.failure
+                    left
+                    right)
+              else
                 comparedState
-                (psKernelExprPairSetInsert
-                  comparedState.failure
-                  left
-                  right)
             else
               comparedState;
           match

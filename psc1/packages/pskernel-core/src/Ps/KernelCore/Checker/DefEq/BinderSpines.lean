@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Recursor.Reduction
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Lean 4.34 binder/application comparison support.
@@ -21,14 +22,20 @@ def psKernelDefEqFinish
     (value : Bool) :
     Prod Bool PsKernelCheckerState :=
   if value then
-    Prod.mk
-      true
-      (psKernelCheckerStateWithSuccess
-        state
-        (psKernelExprPairSetInsert
-          state.success
+    if
+        psKernelSemanticPairCacheEligible
           left
-          right))
+          right then
+      Prod.mk
+        true
+        (psKernelCheckerStateWithSuccess
+          state
+          (psKernelExprPairSetInsert
+            state.success
+            left
+            right))
+    else
+      Prod.mk true state
   else
     Prod.mk false state
 
@@ -161,17 +168,27 @@ def psKernelDefEqLambdaSpineWithFuel
                           Prod.fst (Prod.snd openedLocal);
                         let nextState :=
                           Prod.snd (Prod.snd openedLocal);
-                        smaller
-                          defeq
-                          child
-                          nextState
-                          leftBody
-                          rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.fvar fresh)
-                              List.nil))
+                        match
+                            smaller
+                              defeq
+                              child
+                              nextState
+                              leftBody
+                              rightBody
+                              (psKernelExprListAppend
+                                subst
+                                (List.cons
+                                  (PsKernelExpr.fvar fresh)
+                                  List.nil)) with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok childResult =>
+                            Except.ok
+                              (Prod.mk
+                                (Prod.fst childResult)
+                                (psKernelCheckerStateExitLocalScope
+                                  nextState
+                                  (Prod.snd childResult)))
                       else
                         smaller
                           defeq
@@ -324,17 +341,27 @@ def psKernelDefEqForallSpineWithFuel
                           Prod.fst (Prod.snd openedLocal);
                         let nextState :=
                           Prod.snd (Prod.snd openedLocal);
-                        smaller
-                          defeq
-                          child
-                          nextState
-                          leftBody
-                          rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.fvar fresh)
-                              List.nil))
+                        match
+                            smaller
+                              defeq
+                              child
+                              nextState
+                              leftBody
+                              rightBody
+                              (psKernelExprListAppend
+                                subst
+                                (List.cons
+                                  (PsKernelExpr.fvar fresh)
+                                  List.nil)) with
+                        | Except.error error =>
+                            Except.error error
+                        | Except.ok childResult =>
+                            Except.ok
+                              (Prod.mk
+                                (Prod.fst childResult)
+                                (psKernelCheckerStateExitLocalScope
+                                  nextState
+                                  (Prod.snd childResult)))
                       else
                         smaller
                           defeq

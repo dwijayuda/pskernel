@@ -93,6 +93,22 @@ with
     | .mdata _ body => body.psKernelC0LevelParamFlag
     | .proj _ _ body => body.psKernelC0LevelParamFlag
 
+
+  /-- Non-authoritative immutable free-variable presence summary. The
+      old recursive source predicate is still the independent oracle.
+      Error ordering remains MVar before FVar. -/
+  @[computed_field] psKernelC0FVarFlag : PsKernelExpr → Bool
+    | .fvar _ => true
+    | .app fn arg => fn.psKernelC0FVarFlag || arg.psKernelC0FVarFlag
+    | .lam _ ty body _ => ty.psKernelC0FVarFlag || body.psKernelC0FVarFlag
+    | .forallE _ ty body _ => ty.psKernelC0FVarFlag || body.psKernelC0FVarFlag
+    | .letE _ ty value body _ =>
+        ty.psKernelC0FVarFlag ||
+          value.psKernelC0FVarFlag || body.psKernelC0FVarFlag
+    | .mdata _ body => body.psKernelC0FVarFlag
+    | .proj _ _ body => body.psKernelC0FVarFlag
+    | _ => false
+
 def psKernelBoolEq
     (left : Bool)
     (right : Bool) : Bool :=
@@ -1128,6 +1144,12 @@ def psKernelInstantiateLevelList
             params
             values)
           (smaller params values)
+
+/-- All-input pure source equality of the computed FVar summary. -/
+theorem psKernelC0FVarFlag_source (expr : PsKernelExpr) :
+    expr.psKernelC0FVarFlag = psKernelExprHasFVar expr := by
+  induction expr <;>
+    simp [PsKernelExpr.psKernelC0FVarFlag, psKernelExprHasFVar, *]
 
 def psKernelExprInstantiateLevelParams
     (expr : PsKernelExpr) :
